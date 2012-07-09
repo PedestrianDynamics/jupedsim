@@ -1,0 +1,64 @@
+/**
+* @file main.h
+* @author   Ulrich Kemloh <kemlohulrich@gmail.com>
+* @version 0.1
+* Copyright (C) <2009-2010>
+*
+* @section LICENSE
+* This file is part of OpenPedSim.
+*
+* OpenPedSim is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* any later version.
+*
+* OpenPedSim is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+*
+* @section DESCRIPTION
+*
+* @brief This is what it does... :)
+*
+* Created on: 05.05.2009
+*
+*/
+
+
+
+/**
+* @mainpage
+*
+* \date 7.6.2010
+*
+* TraVisTo stands for Trajectories Visualisation Tool and is part of the OPS Project.
+*
+* @image html travisto.png " "
+*
+* Some useful links:
+*
+* 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
+* 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
+* 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
+* 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+*
+*/
+
+#include <QApplication>
+#include "travisto.h"
+
+int main(int argc, char *argv[])
+{
+	QApplication a(argc, argv);
+	// To ensure that decimal numbers use a "point" instead of "colon" on some systems
+	setlocale(LC_NUMERIC, "en_US" );
+
+	TraVisTo w;
+	w.show();
+
+	return a.exec();
+}
