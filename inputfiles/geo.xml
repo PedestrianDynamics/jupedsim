@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<geometry caption="second life" gridSizeX="20" gridSizeY="20" unit="m">
+	<rooms>
+		<room id="0" caption="hall" zpos="0.00">
+			<subroom id="0" closed="0" class="subroom">
+				<polygone caption="wall">
+					<Vertex px="10.0" py="4.0"/>
+					<Vertex px="10.0" py="0.0"/>
+					<Vertex px="0.0" py="0.0"/>
+					<Vertex px="0.0" py="10.0"/>
+					<Vertex px="10.0" py="10.0"/>
+					<Vertex px="10.0" py="6.0"/>
+				</polygone>
+			</subroom>
+			<subroom id="1" closed="0" class="corridor">
+				<polygone caption="wall">
+					<Vertex px="10.0" py="6.0"/>
+					<Vertex px="17.0" py="6.0"/>
+					<Vertex px="17.0" py="-5.0"/>
+				</polygone>
+				<polygone caption="wall">
+					<Vertex px="15.0" py="-5.0"/>
+					<Vertex px="15.0" py="4.0"/>
+					<Vertex px="10.0" py="4.0"/>
+				</polygone>
+
+				<obstacle id="0" caption="table" height="1.0" closed="1">
+					<polygone>
+						<Vertex px="12.0" py="6.0"/>
+						<Vertex px="13.0" py="6.0"/>
+						<Vertex px="13.0" py="5.5"/>
+						<Vertex px="12.0" py="5.5"/>
+					</polygone>
+				</obstacle>
+				<obstacle id="1" caption="table" height="1.0" closed="1">
+					<polygone>
+						<Vertex px="16.5" py="-2.0"/>
+						<Vertex px="17.0" py="-2.0"/>
+						<Vertex px="17.0" py="-3.0"/>
+						<Vertex px="16.5" py="-3.0"/>
+					</polygone>
+				</obstacle>
+			</subroom>
+
+			<crossings>
+				<!-- virtuals exits between subrooms -->
+				<crossing id="0" subroom1="0" subroom2="1">
+					<Vertex px="10.0" py="6.0"/>"Inputfiles/persons.xml"
+					<Vertex px="10.0" py="4.0"/>
+				</crossing>
+			</crossings>
+		</room>
+	</rooms>
+
+	<transitions>
+		<!-- exits like crossings but between rooms or to outside (room with index 
+			= -1) -->
+		<transition id="0" caption="main exit" type="emergency"
+			room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
+			<Vertex px="15.0" py="-5.0"/>
+			<Vertex px="17.0" py="-5.0"/>
+		</transition>
+	</transitions>
+</geometry>

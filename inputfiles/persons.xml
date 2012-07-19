@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persons>
+	<header>
+		<description>casern, 21.06.2008</description>
+		<number>10</number>
+	</header>
+
+	<!-- default distribution -->
+	<distribution>
+		<dist room_id="1" subroom_id="0" number="7"/>
+		<dist room_id="1" subroom_id="1" number="3"/>
+	</distribution>
+
+	<groups> <!-- sich kennende Leute -->
+		<group>1,2,3</group>
+	</groups>
+
+	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
+		direction="" goal="" age="18" gender="male"/> -->
+	<person id="1" height="180" wishVelo="1.3" age="18" gender="male" />
+	<person id="2" height="170" age="20" gender="male" />
+	<person id="3" height="182" age="25" gender="female" />
+</persons> 
