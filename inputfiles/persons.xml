@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<persons>
+<persons version="0.4">
 	<header>
 		<description>casern, 21.06.2008</description>
 		<number>10</number>

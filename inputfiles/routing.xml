@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<routing>
+
+<routing version="0.4">
 	<Hlines>
 		<Hline id="0" room_id="0" subroom_id="1">
 			<Vertex px="15.0" py="4.0"/>

@@ -7,10 +7,6 @@
 #include "Simulation.h"
 #include "mpi/MPIDispatcher.h"
 
-#ifdef MANUAL
-#include "vt_user.h"
-#endif
-
 
 /**
  * Main method to start the program.
@@ -19,9 +15,6 @@ OutputHandler* Log; // spaeter weg
 
 int main(int argc, char **argv) {
 
-#ifdef MANUAL
-	VT_TRACER("main");
-#endif
 
 	int ierr, myrank, numprocs;
 	double starttime,endtime;
@@ -31,9 +24,6 @@ int main(int argc, char **argv) {
 	ierr = MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
 	starttime=MPI_Wtime();
 
-	//create the lockfile
-	if(myrank==0)
-		system ("echo 1 > juelich.lock");
 
 	MPIDispatcher* mpi = new MPIDispatcher(myrank, numprocs);
 	// Ausgabe nach stdio oder in Datei
@@ -90,10 +80,6 @@ int main(int argc, char **argv) {
 		printf(">> I [ %d] am done !\n",mpi->GetMyRank());
 	}
 
-
-	//remove the lockfile
-	if(myrank==0)
-		system ("unlink juelich.lock");
 
 	//do the last cleaning
 	delete args;
