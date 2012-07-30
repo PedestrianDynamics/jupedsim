@@ -12,7 +12,7 @@ FileHandler::FileHandler(const char *fn) {
     pfp.open(fn);
     if (!fn) {
         char tmp[CLENGTH];
-        sprintf(tmp, "Error!!! Datei [%s] konnte nicht geoeffnet werden!", fn);
+        sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
         cerr << tmp << endl;
         exit(0);
     }

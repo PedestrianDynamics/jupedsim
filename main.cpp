@@ -11,7 +11,7 @@
 /**
  * Main method to start the program.
  */
-OutputHandler* Log; // spaeter weg
+OutputHandler* Log;
 
 int main(int argc, char **argv) {
 
@@ -33,11 +33,6 @@ int main(int argc, char **argv) {
 	ArgumentParser* args = new ArgumentParser();
 	args->ParseArgs(argc, argv);
 
-	//set the max number of threads
-	omp_set_num_threads(args->GetMaxOmpThreads());
-
-	cout<<"num threads: "<<args->GetMaxOmpThreads()<<endl;
-	cout<<"num procs: "<<omp_get_num_procs()<<endl;
 	// Argmente an Simulation übergeben und entsprechende Variablen setzten
 	Simulation sim = Simulation();
 	sim.SetMPIDispatcher(mpi);

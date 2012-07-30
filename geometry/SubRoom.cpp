@@ -469,7 +469,7 @@ string Stair::WriteSubRoom() const {
 		pos = pos + w.GetPoint1() + w.GetPoint2();
 		s.append(w.Write());
 	}
-	Line tmp = Line(GetUp(), GetDown());
+	//Line tmp = Line(GetUp(), GetDown());
 	// s.append(tmp.Write());
 	sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" radius=\"20\" color=\"100\" />\n"
 			, GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR);

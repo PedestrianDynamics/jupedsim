@@ -1,35 +1,47 @@
-#include "ArgumentParser.h"
-#include "../IO/OutputHandler.h"
+#include <getopt.h>
+#include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <sstream>
 
-// private-Funktionen
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+#include "../general/xmlParser.h"
+#include "../IO/OutputHandler.h"
+#include "ArgumentParser.h"
+
 
 void ArgumentParser::Usage() {
+
+	//TODO: randomize autodetect
 	fprintf(stderr,
 			"Usage: program options\n\n"
-			"with the following optional options (default values in parathesis):\n\n"
+			"with the following options (default values in parenthesis):\n\n"
 			"  [-n/--number <filepath>]         file with number of pedestrians in room (./Inputfiles/start.dat)\n"
 			"  [-t/--tmax <double>]             maximal simulation time (500)\n"
 			"  [-d/--dt <double>]               time step (0.001)\n"
 			"  [--fps <double>]               	framerate (1.0 fps)\n"
-			"  [-s/--solver <int>]              type of solver (euler)\n"
-			"                                       1: Euler\n"
-			"                                       2: Velocity Verlet\n"
-			"                                       3: Leapfrog\n"
+			"  [-s/--solver <int>]              type of solver, if needed (euler)\n"
+			"                                       1: euler\n"
+			"                                       2: verlet\n"
+			"                                       3: leapfrog\n"
 			"  [-g/--geometry <string>]         path to .jul-geometry file (./Inputfiles/Engstelle.jul)\n"
 			"  [-e/--exitstrategy <int>]        strategy how the direction to the exit is computed (3).\n"
 			"                                       1: Middlepoint of the exit line\n"
 			"                                       2: Shortest distance point of the exit line\n"
 			"                                       3: Shortest distance point of the exit line, but exit is 20 cm  shorter\n"
-			"  [-r/--randomize <int>]           distribute randomly peds in the start area (1):\n"
-			"                                       1: 2-D distribution per Subroom (3 columns in start.dat!!!)\n"
-			"                                       2: 2-D distribution per Room (2 columns in start.dat!!!)\n"
 			"  [-o/--online]                    online simulation (default offline)\n"
 			"  [-l/--linkedcells [<double>]]    use of linked-cells with optional cell size (default cellsize = 2.2m)\n"
-			"  [-R/--routing <int>]             routing strategy (1):\n"
-			"                                       1: Not longer available\n"
-			"                                       2: gloabal shortest path\n"
+			"  [-R/--routing <int> [<string>]]             routing strategy (1):\n"
+			"                                       1: local shortest path\n"
+			"                                       2: global shortest path\n"
 			"                                       3: quickest path\n"
-			"										4: circle router\n"
+			"                                       4: from file <filename.txt>\n"
+			"										5: circle router\n"
 			"  [-v/--v0mu <double>]             mu for normal distribution of v0, desired velocity (1.24)\n"
 			"  [-V/--v0sigma <double>]          sigma for normal distribution of v0, desired velocity (0.26)\n"
 			"  [-a/--ataumu <double>]           mu for normal distribution of a_tau, factor for velocity 1st axis (0.53)\n"
@@ -54,7 +66,7 @@ void ArgumentParser::Usage() {
 			"  [-L/--log <int>]                 log output (0):\n"
 			"                                       0: no output\n"
 			"                                       1: log output to stdout\n"
-			"                                       2: log output to file ./Logfile.dat\n"
+			"                                       2: log output to file ./outputfiles/log.txt\n"
 			"  [-T/--travisto <int>]            TraVisTo output (0):\n"
 			"                                       0: no output\n"
 			"                                       1: TraVisTo output to file ./Output.xml\n"
@@ -66,14 +78,14 @@ void ArgumentParser::Usage() {
 
 ArgumentParser::ArgumentParser() {
 	// Default parameter values
-	pNumberFilename = "Inputfiles/start.dat";
+	pNumberFilename = "inputfiles/person.xml";
 	pSolver = 1;
-	pGeometryFilename = "Inputfiles/Engstelle.jul";
+	pGeometryFilename = "inputfiles/geo.xml";
 	pTmax = 900;
 	pfps=1.0;
 	pdt = 0.01;
 	pExitStrategy = 2;
-	pRandomize = 2;
+	//pRandomize = 2;
 	pRouter = 1;
 	pLinkedCells = false;
 	pLinkedCellSize=2.2;
@@ -108,10 +120,14 @@ ArgumentParser::ArgumentParser() {
 	pEvacuationType="emergency";
 	pSeed=0;
 	pScenarioID=0;
-	pMaxOpenmpThreads=omp_get_max_threads();
+
+#ifdef _OPENMP
+	pMaxOpenmpThreads = omp_get_thread_num();
+#else
+	pMaxOpenmpThreads = 1;
+#endif
 }
 
-// Getter-Funktionen
 
 string ArgumentParser::GetNumberFilename() const {
 	return pNumberFilename;
@@ -141,9 +157,6 @@ int ArgumentParser::GetExitStrategy() const {
 	return pExitStrategy;
 }
 
-int ArgumentParser::GetRandomize() const {
-	return pRandomize;
-}
 
 bool ArgumentParser::GetLinkedCells() const {
 	return pLinkedCells;
@@ -284,7 +297,7 @@ string ArgumentParser::GetEvacuationType() const{
 int ArgumentParser::GetMaxOmpThreads() const{
 	return pMaxOpenmpThreads;
 }
-// Sonstige:
+
 
 void ArgumentParser::ParseArgs(int argc, char **argv) {
 	int c;
@@ -515,18 +528,6 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				}
 				break;
 			}
-			case 'r':
-			{
-				int r = atoi(optarg);
-				if (r == 1 || r==2)
-					pRandomize = r;
-				else {
-					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for randomize strategy!!!\n");
-					exit(0);
-				}
-				break;
-			}
 			case 'R':
 			{
 				int r = atoi(optarg);
@@ -550,16 +551,19 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 
 			case 'q':
 			{
-				string inifile="ini.txt";
+				string inifile="ini.xml";
 				if (optarg)
 					inifile=optarg;
-				cout<<"inifile: "<<inifile<<endl;
+				Log->write("INFO: \t Loading initialization file < "+inifile+" >");
 				ParseIniFile(inifile);
 			}
 			break;
 
 			case 'p':
 				pMaxOpenmpThreads = atof(optarg);
+#ifdef _OPENMP
+				omp_set_num_threads(pMaxOpenmpThreads);
+#endif
 				break;
 
 			case 'h':
@@ -578,134 +582,197 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 
 
 
-
 void ArgumentParser::ParseIniFile(string inifile){
-	ifstream infile;
-	string line;
-	string output;
-	int lineCount=0;
 
-	infile.open(inifile.c_str(), fstream::in);
-	if (infile.is_open()==false) {
-		Log->write("WARNING: \tCannot load ini.txt");
-		Log->write("WARNING: \tWorking with default values");
+	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSgcfm");
+
+	Log->write("WARNING: \tParsing the ini file");
+	//I just assume all parameter are present
+
+	//seed
+	if(!xMainNode.getChildNode("seed").isEmpty()){
+		const char* seed=xMainNode.getChildNode("seed").getText();
+		pSeed=atoi(seed);
+		srand(pSeed);
+		Log->write("INFO: \tseed <"+string(seed)+">");
+	}
+
+	//geometry
+	if(!xMainNode.getChildNode("geometry").isEmpty()){
+		pGeometryFilename=xMainNode.getChildNode("geometry").getText();
+		Log->write("INFO: \tgeometry <"+string(pGeometryFilename)+">");
+	}
+
+	//persons and distributions
+	if(!xMainNode.getChildNode("person").isEmpty()){
+		pNumberFilename=xMainNode.getChildNode("person").getText();
+		Log->write("INFO: \tperson <"+string(pNumberFilename)+">");
+	}
+
+	//routing
+	if(!xMainNode.getChildNode("routing").isEmpty()){
+		pRoutingFilename=xMainNode.getChildNode("routing").getText();
+		Log->write("INFO: \trouting <"+string(pRoutingFilename)+">");
+	}
+
+	//traffic
+	if(!xMainNode.getChildNode("traffic").isEmpty()){
+		pTrafficFilename=xMainNode.getChildNode("routing").getText();
+		Log->write("INFO: \ttraffic <"+string(pTrafficFilename)+">");
+	}
+
+	//logfile
+	if(!xMainNode.getChildNode("logfile").isEmpty()){
+
+		pErrorLogFile=xMainNode.getChildNode("logfile").getText();
+		pLog=2;
+		Log->write("INFO: \tlogfile <"+string(pErrorLogFile)+">");
+	}
+
+	//trajectories
+	if(!xMainNode.getChildNode("trajectories").isEmpty()){
+		pTrajOutputDir=xMainNode.getChildNode("trajectories").getText();
+		Log->write("INFO: \toutput directory  <"+string(pTrajOutputDir)+">");
+	}
+
+	//model parameters, only one node
+	XMLNode xPara=xMainNode.getChildNode("parameters");
+	if(xPara.isEmpty()){
+		Log->write("INFO: \tno gcfm parameter values found");
 		return;
 	}
 
-	//get the error log output file
-	if(NULL==getline(infile, line)) {
-		Log->write("ERROR: \t Could not get the error logs output directory");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pErrorLogFile;
-		lineCount++;
+	//tmax
+	if(!xPara.getChildNode("tmax").isEmpty()){
+		const char* tmax=xPara.getChildNode("tmax").getText();
+		const char* unit=xPara.getChildNode("tmax").getAttribute("unit");
+		pTmax=atof(tmax);
+		Log->write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
 	}
 
-	//get the  geometry file
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the input directory");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pGeometryFilename;
-		lineCount++;
+	//solver
+	if(!xPara.getChildNode("solver").isEmpty()){
+		string solver=string(xPara.getChildNode("solver").getText());
+		if(solver=="euler") pSolver=1;
+		else if(solver=="verlet") pSolver=2;
+		else if(solver=="leapfrogr") pSolver=3;
+		else {
+			Log->write("ERROR: \twrong value for solver type!!!\n");
+			exit(0);
+		}
+		Log->write("INFO: \tpSolver <"+string(solver)+">");
 	}
 
-	//get the person counting system file
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the initial distribution file");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pNumberFilename;
-		lineCount++;
+	//stepsize
+	if(!xPara.getChildNode("stepsize").isEmpty()){
+		const char* stepsize=xPara.getChildNode("stepsize").getText();
+		pdt=atoi(stepsize);
+		Log->write("INFO: \tstepsize <"+string(stepsize)+">");
 	}
 
-	//get the states of the rooms file
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the rooms states file");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pRoomsStateFile;
-		lineCount++;
-	}
+	//linked-cells
+	if(!xPara.getChildNode("linkedcells").isEmpty()){
+		string linkedcells=string(xPara.getChildNode("linkedcells").getAttribute("enabled"));
+		string cell_size=string(xPara.getChildNode("linkedcells").getAttribute("cell_size"));
+		if(linkedcells=="true"){
+			pLinkedCells=true;
+			pLinkedCellSize=atoi(cell_size.c_str());
+			Log->write("INFO: \tlinked cells enable with size  <"+cell_size+">");
+		}else{
 
-	//get the states of the doors
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the doors states file");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pDoorsStateFile;
-		lineCount++;
-	}
-
-	//get the outputdir
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the output dir (for the trajectories)");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pTrajOutputDir;
-		lineCount++;
-	}
-
-	//get the type of simulation ( emergency vs normal)
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get evacuation type");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pEvacuationType;
-		lineCount++;
-		if((pEvacuationType!="emergency") && (pEvacuationType!="normal")){
-			Log->write("ERROR: \t 'emergency' or 'normal' required");
-			Log->write("\tgot: " +pEvacuationType);
-			exit(EXIT_FAILURE);
+			Log->write("WARNING: \tinvalid parameters for linkedcells");
 		}
 	}
 
+	//route choice strategy
+	if(!xPara.getChildNode("routeChoiceStrategy").isEmpty()){
+		string strategy=string(xPara.getChildNode("routeChoiceStrategy").getText());
 
-	//get the seed
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the seed");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pSeed;
-		lineCount++;
-		srand(pSeed);
+		if(strategy=="local_shortest") pRouter=1;
+		else if(strategy=="global_shortest") pRouter=2;
+		else if(strategy=="quickest") pRouter=3;
+		else if(strategy=="from_file") pRouter=4;
+		else{
+			Log->write("ERROR: \twrong value for routing strategy!!!\n");
+			exit(0);
+		}
+		Log->write("INFO: \trouting  <"+string(strategy)+">");
 	}
 
-	//get the scenarion id
-	if(NULL==getline(infile, line)) {
-		Log->write("WARNING: \t Could not get the scenario id");
-		exit(EXIT_FAILURE);
-	}else{
-		istringstream iss(line, istringstream::in);
-		iss>>pScenarioID;
-		lineCount++;
+	//desired velocity
+	if(!xPara.getChildNode("v0").isEmpty()){
+		string mu=string(xPara.getChildNode("v0").getAttribute("mu"));
+		string sigma=string(xPara.getChildNode("v0").getAttribute("sigma"));
+		pV0Mu=atof(mu.c_str());
+		pV0Sigma=atof(sigma.c_str());
+		Log->write("INFO: \tdesired velocity mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 
-	if(lineCount!=9){
-		Log->write("ERROR: \t The ini.txt is missing some inputs lines");
-		exit(EXIT_FAILURE);
+	//bmax
+	if(!xPara.getChildNode("bmax").isEmpty()){
+		string mu=string(xPara.getChildNode("bmax").getAttribute("mu"));
+		string sigma=string(xPara.getChildNode("bmax").getAttribute("sigma"));
+		pBmaxMu=atof(mu.c_str());
+		pBmaxSigma=atof(sigma.c_str());
+		Log->write("INFO: \tBmax mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
-
-	std::stringstream ss;
-	Log->write("INFO:\t Parsing the ini file");
-	ss<<pScenarioID;
-	Log->write("     \t\t scenario id: "+ss.str());
-	ss<<pSeed;
-	Log->write("     \t\t Seed: "+ss.str());
-	Log->write("     \t\t evacuation type: "+pEvacuationType);
-	Log->write("     \t\t errorLogOutput: "+pErrorLogFile);
-	Log->write("     \t\t geometry: "+pGeometryFilename);
-	Log->write("     \t\t outputDir: "+pTrajOutputDir);
-	Log->write("     \t\t PZA file: "+pNumberFilename);
-	Log->write("     \t\t GMS file (doors): "+pDoorsStateFile);
-	Log->write("     \t\t GMS file (rooms): "+pRoomsStateFile);
-	Log->write("INFO:\t ini file parsed successfully!");
+	//bmin
+	if(!xPara.getChildNode("bmin").isEmpty()){
+		string mu=string(xPara.getChildNode("bmin").getAttribute("mu"));
+		string sigma=string(xPara.getChildNode("bmin").getAttribute("sigma"));
+		pBminMu=atof(mu.c_str());
+		pBminSigma=atof(sigma.c_str());
+		Log->write("INFO: \tBmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
+	}
+	//amin
+	if(!xPara.getChildNode("amin").isEmpty()){
+		string mu=string(xPara.getChildNode("amin").getAttribute("mu"));
+		string sigma=string(xPara.getChildNode("amin").getAttribute("sigma"));
+		pAminMu=atof(mu.c_str());
+		pAminSigma=atof(sigma.c_str());
+		Log->write("INFO: \tAmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
+	}
+	//tau
+	if(!xPara.getChildNode("tau").isEmpty()){
+		string mu=string(xPara.getChildNode("tau").getAttribute("mu"));
+		string sigma=string(xPara.getChildNode("tau").getAttribute("sigma"));
+		pTauMu=atof(mu.c_str());
+		pTauSigma=atof(sigma.c_str());
+		Log->write("INFO: \tTau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+	}
+	//atau
+	if(!xPara.getChildNode("atau").isEmpty()){
+		string mu=string(xPara.getChildNode("atau").getAttribute("mu"));
+		string sigma=string(xPara.getChildNode("atau").getAttribute("sigma"));
+		pAtauMu=atof(mu.c_str());
+		pAtauSigma=atof(sigma.c_str());
+		Log->write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+	}
+	//force_ped
+	if(!xPara.getChildNode("force_ped").isEmpty()){
+		string nu=string(xPara.getChildNode("force_ped").getAttribute("nu"));
+		string dist_max=string(xPara.getChildNode("force_ped").getAttribute("dist_max"));
+		string disteff_max=string(xPara.getChildNode("force_ped").getAttribute("disteff_max"));
+		string interpolation_width=string(xPara.getChildNode("force_ped").getAttribute("interpolation_width"));
+		pMaxFPed=atof(dist_max.c_str());
+		pNuPed=atof(nu.c_str());
+		pDistEffMaxPed=atof(disteff_max.c_str());
+		pIntPWidthPed=atof(interpolation_width.c_str());
+		Log->write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
+				+ disteff_max+ ", interpolation_width="+interpolation_width);
+	}
+	//force_wall
+	if(!xPara.getChildNode("force_wall").isEmpty()){
+		string nu=string(xPara.getChildNode("force_wall").getAttribute("nu"));
+		string dist_max=string(xPara.getChildNode("force_wall").getAttribute("dist_max"));
+		string disteff_max=string(xPara.getChildNode("force_wall").getAttribute("disteff_max"));
+		string interpolation_width=string(xPara.getChildNode("force_wall").getAttribute("interpolation_width"));
+		pMaxFWall=atof(dist_max.c_str());
+		pNuWall=atof(nu.c_str());
+		pDistEffMaxWall=atof(disteff_max.c_str());
+		pIntPWidthWall=atof(interpolation_width.c_str());
+		Log->write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
+				+ disteff_max+ ", interpolation_width="+interpolation_width);
+	}
+	Log->write("INFO: \tdone parsing ini");
 }

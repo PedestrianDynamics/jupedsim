@@ -4,18 +4,18 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfile/geo.xml</geometry>
+	<geometry>inputfiles/geo.xml</geometry>
 	<!--persons information and distribution -->
-	<person>inputfile/person.xml</person>
+	<person>inputfiles/persons.xml</person>
 	<!-- extra routing information -->
-	<routing>inputfile/routing.xml</routing>
+	<routing>inputfiles/routing.xml</routing>
 	<!-- traffic information: e.g closed doors -->
-	<traffic>inputfile/traffic.xml</traffic>
+	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" version="0.4">outputfile/trajectories.xml
 	</trajectories>
 	<!-- where to store the logs -->
-	<logfile>outputfile/log.txt</logfile>
+	<logfile>outputfiles/log.txt</logfile>
 
 
 	<!-- These parameters may be overwritten -->
@@ -23,7 +23,7 @@
 		<tmax unit="sec">900</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
-		<linkedcells>true</linkedcells>
+		<linkedcells enabled="true" cell_size="2.2"/>
 		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />

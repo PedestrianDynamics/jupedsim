@@ -186,24 +186,33 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	if (pLinkedCells)
 		s.append("\tusing Linked-Cells\n");
 
-	// Startverteilung der Fußgänger
-	int peddis = args->GetRandomize();
-	sprintf(tmp, "\tStartverteilung: %d\n", peddis);
-	s.append(tmp);
-	switch (peddis) {
-		case 1:
-			pDistribution = new Random2DSubroom(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
-					args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
-					args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
-					args->GetTauSigma());
-			break;
-		case 2:
-			pDistribution = new Random2DRoom(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
-					args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
-					args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
-					args->GetTauSigma());
-			break;
-	}
+//FIXME merge the methods and move all the methods to a sigle class PedDistributor
+
+// Startverteilung der Fußgänger
+//	int peddis = args->GetRandomize();
+//	sprintf(tmp, "\tStartverteilung: %d\n", peddis);
+//	s.append(tmp);
+//	switch (peddis) {
+//		case 1:
+//			pDistribution = new Random2DSubroom(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
+//					args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
+//					args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
+//					args->GetTauSigma());
+//			break;
+//		case 2:
+//			pDistribution = new Random2DRoom(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
+//					args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
+//					args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
+//					args->GetTauSigma());
+//			break;
+//	}
+//	s.append(pDistribution->writeParameter());
+//	pDistribution->InitDistributor(args->GetNumberFilename());
+
+	pDistribution = new PedDistributor(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
+			args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
+			args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
+			args->GetTauSigma());
 	s.append(pDistribution->writeParameter());
 	pDistribution->InitDistributor(args->GetNumberFilename());
 

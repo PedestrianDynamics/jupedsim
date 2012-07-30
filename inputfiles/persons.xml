@@ -2,13 +2,14 @@
 <persons version="0.4">
 	<header>
 		<description>casern, 21.06.2008</description>
-		<number>10</number>
+		<number>12</number>
 	</header>
 
 	<!-- default distribution -->
+	<!-- TODO: also distribute with room_id only -->
 	<distribution>
 		<dist room_id="1" subroom_id="0" number="7"/>
-		<dist room_id="1" subroom_id="1" number="3"/>
+		<dist room_id="1" subroom_id="1" number="5"/>
 	</distribution>
 
 	<groups> <!-- sich kennende Leute -->

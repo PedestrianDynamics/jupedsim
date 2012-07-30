@@ -66,7 +66,8 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
 	double tmp, tmp2;
 	double v_ij;
-	double K_ij, r1, r2;
+	double K_ij;
+	//double r1, r2;
 	double nom; //nominator of Frep
 	double px; // hermite Interpolation value
 	const Ellipse& E1 = ped1->GetEllipse();
@@ -84,14 +85,15 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 		F_rep = Point(0.0, 0.0);
 		return F_rep;
 	}
-	Point AP1inE1 = Point(E1.GetXp(), 0); // ActionPoint von E1 in Koordinaten von E1
-	Point AP2inE2 = Point(E2.GetXp(), 0); // ActionPoint von E2 in Koordinaten von E2
+	//Point AP1inE1 = Point(E1.GetXp(), 0); // ActionPoint von E1 in Koordinaten von E1
+	//Point AP2inE2 = Point(E2.GetXp(), 0); // ActionPoint von E2 in Koordinaten von E2
 	// ActionPoint von E1 in Koordinaten von E2 (transformieren)
-	Point AP1inE2 = AP1inE1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+	//Point AP1inE2 = AP1inE1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
 	// ActionPoint von E2 in Koordinaten von E1 (transformieren)
-	Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
-	r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
-	r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
+	//Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
+	//r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
+	//r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
+
 	//%------- Free parameter --------------
 	Point p1, p2; // "Normale" Koordinaten
 	double mindist;

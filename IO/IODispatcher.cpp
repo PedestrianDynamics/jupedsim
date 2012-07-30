@@ -124,7 +124,6 @@ void IODispatcher::WriteGeometry(Building* building) {
 
 		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
-			//if(k!=71) continue;
 			geometry.append(s->WriteSubRoom());
 		}
 	}
@@ -422,23 +421,6 @@ void HermesIODispatcher::WriteHeader(int nPeds, int fps, Building* building, int
 	pclose(stream);
 	data.erase(data.end()-1, data.end());
 	const char* date=data.c_str();
-
-
-	// Sample header
-	//	<?xml version="1.0" encoding="UTF-8"?>
-	//	<trajectoriesDataset>
-	//		<header version = "0.2">
-	//			<scenarioID>223DE</scenarioID>
-	//			<date>2010-11-22T16:14:23+1:00</date>
-	//			<areaCaption>promenade1</areaCaption>
-	//			<areaLevel>0</areaLevel>
-	//			<simCore>juelich</simCore>
-	//			<agents>1000</agents>
-	//			<seed>4356765</seed>
-	//			<frameRate>2</frameRate>
-	//			<simulationFrameStart>0</simulationFrameStart>
-	//			<simulationFrameStop>600</simulationFrameStop>
-	//		</header>
 
 
 	//create the files

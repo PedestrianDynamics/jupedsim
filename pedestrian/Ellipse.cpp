@@ -23,7 +23,6 @@
  * */
 
 double Ellipse::EffectiveDistanceToLine(const Line& linE) const {
-	double dist; //TODO: runtime wird benutzt?
 	double eff_dist;
 	// Koordinaten alle im System der Ellipse
 	Point APinE = Point(pXp, 0);
@@ -35,7 +34,7 @@ double Ellipse::EffectiveDistanceToLine(const Line& linE) const {
 				this->pSinPhi); // in "normalen" Koordinaten
 		Point R; //Schnittpunkt der geraden durch AP und P mit E
 
-		dist = (PinE - APinE).Norm(); // beide Punkte in E
+//		double dist = (PinE - APinE).Norm(); // beide Punkte in E
 		R = this->PointOnEllipse(PinE); // PointOnEllipe gibt "normale" Koordinaten zurück
 		eff_dist = (R - P).Norm(); // beide Punkte in "normalen" Koordinaten
 	}

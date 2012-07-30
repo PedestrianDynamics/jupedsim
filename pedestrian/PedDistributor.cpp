@@ -6,7 +6,7 @@
  */
 
 #include "PedDistributor.h"
-
+#include "../general/xmlParser.h"
 
 /************************************************************
  StartDistributionRoom
@@ -176,6 +176,45 @@ Distribution* PedDistributor::GetAmin() const {
 Distribution* PedDistributor::GetTau() const {
 	return pTau;
 }
+
+void PedDistributor::InitDistributor(string filename){
+
+	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"persons");
+	Log->write("INFO: \tLoading and parsing the persons file");
+
+	//get the distribution node
+	XMLNode xDist=xMainNode.getChildNode("distribution");
+	int nDist=xDist.nChildNode("dist");
+	for(int i=0;i<nDist;i++){
+		XMLNode path=xDist.getChildNode("dist",i);
+
+		int room_id=atoi(path.getAttribute("room_id"));
+		//FIXME: id oder caption
+		string room_caption=path.getAttribute("room_id");
+		int number=atoi(path.getAttribute("number"));
+
+		if(path.getAttribute("subroom_id")){
+			int subroom_id=atoi(path.getAttribute("subroom_id"));
+			StartDistributionSubroom dis = StartDistributionSubroom();
+			dis.SetRoomCaption(room_caption);
+			dis.SetSubroomID(subroom_id);
+			dis.SetAnz(number);
+			start_dis_sub.push_back(dis);
+		}else{
+			StartDistributionRoom dis = StartDistributionRoom();
+			dis.SetRoomCaption(room_caption);
+			dis.SetAnz(number);
+			start_dis.push_back(dis);
+		}
+	}
+	Log->write("INFO: \t done with loading and parsing the persons file");
+}
+
+int PedDistributor::Distribute(Building* building) const {
+
+	return -1;
+}
+
 
 vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double min_y, double max_y,
 		SubRoom* r, double bufx, double bufy, double dy, Routing* routing) const {
@@ -567,6 +606,7 @@ Random2DSubroom::~Random2DSubroom() {
 // konkrete Implementierung der virtuellen Funktion
 
 void Random2DSubroom::InitDistributor(string filename) {
+
 	ifstream infile;
 	string line;
 	string output;
@@ -589,6 +629,8 @@ void Random2DSubroom::InitDistributor(string filename) {
 	}
 	output.append("INFO: \tLoading start file successful!!!\n");
 	Log->write(output);
+
+
 }
 
 int Random2DSubroom::Distribute(Building * building) const {
@@ -613,14 +655,6 @@ int Random2DSubroom::Distribute(Building * building) const {
 			Log->write("ERROR: \t negative  (or null ) number of pedestrians!");
 			exit(0);
 		}
-
-		//TODO:
-		// only distribute in my working area
-		//MPI: only distribute on my working area
-		// if(building->GetMPIDispatcher()->IsMyWorkingArea(roomID)==false) {
-		// 			pid+=N;
-		// 			continue;
-		// }
 
 		SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
 		allpos = PossiblePositions(sr, building->GetRouting());

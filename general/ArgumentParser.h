@@ -1,33 +1,27 @@
 #ifndef ARGUMENTPARSER_H_
 #define ARGUMENTPARSER_H_
 
-#include <unistd.h>
-#include <getopt.h>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 #include <string>
-#include <sstream>
-#include <omp.h>
-
-#include "../IO/OutputHandler.h"
-
+#include <vector>
 using std::string;
 using std::vector;
 
+class OutputHandler;
 extern OutputHandler* Log;
 
 class ArgumentParser {
 private:
-	string pNumberFilename; // Datei mit Startverteilung
-	int pSolver; // Löser für DGL
-	string pGeometryFilename; // Datei mit Geometrie
+	string pRoutingFilename; /// routing information
+	string pTrafficFilename; /// traffic information (closed doors,...)
+	string pNumberFilename; /// initial distribution and person specifications
+	int pSolver; /// solver for the differential equation
+	string pGeometryFilename;
 	string pPathwayfile; // saving pedestrian path
 	double pTmax; // maximale Simulationszeit
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
 	int pExitStrategy; // Strategie zur Richtungswahl (v0)
-	int pRandomize; // Verteilung inerhalb des Raums
+	//int pRandomize; // Verteilung inerhalb des Raums
 	int pRouter; // Routing-Strategie
 	bool pLinkedCells; // use of linked-cells neighbourhood list
 	double pLinkedCellSize; // cell size of the linkedcell (default to 2.2m)
@@ -110,7 +104,7 @@ public:
 	int GetTrajektorien() const;
 	double Getfps() const;
 
-	//input from the ini.txt file
+	//TODO: check which methods are stil needed?
 	unsigned int GetSeed() const;
 	unsigned int GetScenarioID() const;
 	string GetTrajOutputDir() const;
@@ -119,9 +113,13 @@ public:
 	string GetDoorsStateFile() const;
 	string GetEvacuationType() const;
 
-	// Sonstige:
 	void ParseArgs(int argc, char **argv);
-	void ParseIniFile(string inifile);// parse the ini file found in the current dir
+
+	/**
+	 * parse the initialization file
+	 * @param inifile
+	 */
+	void ParseIniFile(string inifile);
 };
 
 #endif /*ARGPARSER_H_*/

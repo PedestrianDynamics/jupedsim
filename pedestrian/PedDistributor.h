@@ -74,6 +74,9 @@ private:
     Distribution* pAtau;
     Distribution* pAmin;
     Distribution* pTau;
+    vector<StartDistributionRoom> start_dis; // ID startraum, subroom und Anz
+    vector<StartDistributionSubroom> start_dis_sub; // ID startraum, subroom und Anz
+
 public:
     // Konstruktoren
     PedDistributor();
@@ -100,8 +103,8 @@ public:
     string writeParameter() const;
 
     // virtuelle Funktionen
-    virtual void InitDistributor(string start_file) = 0;
-    virtual int Distribute(Building* building) const = 0;
+    virtual void InitDistributor(string start_file);
+    virtual int Distribute(Building* building) const;
 };
 
 /************************************************************
