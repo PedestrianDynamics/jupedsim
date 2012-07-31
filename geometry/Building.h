@@ -22,7 +22,7 @@
 #include "../mpi/LCGrid.h"
 #include "../mpi/MPIDispatcher.h"
 
-using namespace std;
+
 
 class MPIDispatcher;
 

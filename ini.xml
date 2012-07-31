@@ -14,9 +14,9 @@
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" version="0.4">outputfile/trajectories.xml
 	</trajectories>
-	<!-- where to store the logs -->
+	<!-- where to store the logs 
 	<logfile>outputfiles/log.txt</logfile>
-
+ 	-->
 
 	<!-- These parameters may be overwritten -->
 	<parameters>

@@ -45,8 +45,8 @@
 
 			<crossings>
 				<!-- virtuals exits between subrooms -->
-				<crossing id="0" subroom1="0" subroom2="1">
-					<Vertex px="10.0" py="6.0"/>"Inputfiles/persons.xml"
+				<crossing id="0" subroom1_id="0" subroom2_id="1">
+					<Vertex px="10.0" py="6.0"/>
 					<Vertex px="10.0" py="4.0"/>
 				</crossing>
 			</crossings>

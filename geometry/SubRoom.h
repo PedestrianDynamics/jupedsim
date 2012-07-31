@@ -12,6 +12,8 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../general/Macros.h"
 
+class Obstacle;
+
 /************************************************************
  SubRoom
  ************************************************************/
@@ -21,8 +23,10 @@ private:
 	int pID; // gleich Index nur innerhalb des Rooms eindeutig
 	int pRoomID;
 	vector<Pedestrian*> pPeds; // Fussgänger
+	vector<Obstacle*> pObstacles; // obstacles
 	vector<int> pGoalIDs; // Indizes aller gaols (Crossings und Transitions)
 	double pArea; // Fläche des SubRooms
+	double pClosed;
 
 protected:
 	vector<Wall> pWalls; // Wände
@@ -42,6 +46,7 @@ public:
 	void SetAllPedestrians(const vector<Pedestrian*>& peds);
 	void SetPedestrian(Pedestrian* ped, int index);
 	void SetArea(double a);
+	void SetClosed(double c);
 
 	// Getter - Funktionen
 	int GetSubRoomID() const;
@@ -51,17 +56,20 @@ public:
 	const vector<Point>& GetPolygon() const;
 	int GetAnzPedestrians() const;
 	const vector<Pedestrian*>& GetAllPedestrians() const;
+	const vector<Obstacle*>& GetAllObstacles() const;
 	Pedestrian* GetPedestrian(int index) const;
 	int GetAnzGoalIDs() const;
 	const vector<int>& GetAllGoalIDs() const;
 	int GetGoalID(int index) const;
 	int GetRoomID() const;
 	int GetUID() const; // unique identifier for this subroom
+	double GetClosed() const ;
 	double GetArea() const;
 
 
 	// Sonstiges
 	void AddWall(const Wall& w);
+	void AddObstacle(Obstacle* obs);
 	void DeleteWall(int index);
 	void AddPedestrian(Pedestrian* ped);
 	void DeletePedestrian(int index);
@@ -80,9 +88,6 @@ public:
 	virtual bool IsInSubRoom(Pedestrian* ped) const; // prüft, ob Fußgänger noch im SubRoom
 	virtual bool IsInSubRoom(const Point& ped) const = 0;
 
-	//TODO: delete me after
-	//put all the pedestians in this subroom to a special location of the promenade
-	void putPedInSpecialLocation();
 
 	// MPI:
 	void ClearAllPedestrians();

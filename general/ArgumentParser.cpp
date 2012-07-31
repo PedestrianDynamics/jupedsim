@@ -117,7 +117,6 @@ ArgumentParser::ArgumentParser() {
 	pTrajOutputDir="";
 	pDoorsStateFile=""; //"doors_states.txt";
 	pRoomsStateFile=""; //"rooms_states.txt";
-	pEvacuationType="emergency";
 	pSeed=0;
 	pScenarioID=0;
 
@@ -288,10 +287,6 @@ string ArgumentParser::GetRoomsStateFile() const {
 
 string ArgumentParser::GetDoorsStateFile() const{
 	return pDoorsStateFile;
-}
-
-string ArgumentParser::GetEvacuationType() const{
-	return pEvacuationType;
 }
 
 int ArgumentParser::GetMaxOmpThreads() const{
@@ -586,7 +581,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSgcfm");
 
-	Log->write("WARNING: \tParsing the ini file");
+	Log->write("INFO: \tParsing the ini file");
 	//I just assume all parameter are present
 
 	//seed

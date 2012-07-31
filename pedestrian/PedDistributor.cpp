@@ -131,6 +131,8 @@ PedDistributor::PedDistributor(double v0mu, double v0sigma, double BmaxMu, doubl
 	pAtau = new Equal(AtauMu, AtauSigma);
 	pAmin = new Equal(AminMu, AminSigma);
 	pTau = new Equal(tauMu, tauSigma);
+	start_dis = vector<StartDistributionRoom > ();
+	start_dis_sub = vector<StartDistributionSubroom> ();
 }
 
 PedDistributor::PedDistributor(const PedDistributor& orig) {
@@ -212,7 +214,45 @@ void PedDistributor::InitDistributor(string filename){
 
 int PedDistributor::Distribute(Building* building) const {
 
-	return -1;
+	int nPeds = 0; //Gesamtanzahl
+		vector<Point> allpos = vector<Point > ();
+		char tmp[CLENGTH];
+
+		Log->write("INFO: \tInit Simulation");
+		// Alle Starträume durchgehen
+		int pid = 1; // Pedestrian ID (wird immer erhöht)
+		for (int i = 0; i < (int) start_dis_sub.size(); i++) {
+
+			string room_caption = start_dis_sub[i].GetRoomCaption();
+			Room* r = building->GetRoom(room_caption);
+			if(!r) continue;
+
+			int roomID = r->GetRoomID();
+
+			int subroomID = start_dis_sub[i].GetSubroomID();
+			int N = start_dis_sub[i].GetAnz();
+			if (N <= 0) {
+				Log->write("ERROR: \t negative  (or null ) number of pedestrians!");
+				exit(0);
+			}
+
+			SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
+			allpos = PossiblePositions(sr, building->GetRouting());
+			int max_pos = allpos.size();
+			if (max_pos < N) {
+				sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
+						N, roomID, allpos.size());
+				Log->write(tmp);
+				exit(0);
+			} else {
+				sprintf(tmp, "INFO: \tVerteilung von %d Fußgängern in [%d/%d]! Maximale Anzahl: %d", N, roomID, subroomID, max_pos);
+				Log->write(tmp);
+			}
+			// Befüllen
+			DistributeInSubRoom(sr, N, allpos, roomID, &pid, building->GetRouting());
+			nPeds += N;
+		}
+		return nPeds;
 }
 
 
@@ -435,242 +475,4 @@ string PedDistributor::writeParameter() const {
 	s.append(tmp);
 
 	return s;
-}
-
-/*************************************************************
- Random2D
- ************************************************************/
-
-Random2DRoom::Random2DRoom() : PedDistributor() {
-	start_dis = vector<StartDistributionRoom > ();
-}
-
-Random2DRoom::Random2DRoom(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
-		double BminMu, double BminSigma, double AtauMu, double AtauSigma, double AminMu,
-		double AminSigma, double tauMu, double tauSigma) : PedDistributor(v0mu, v0sigma, BmaxMu, BmaxSigma, BminMu,
-				BminSigma, AtauMu, AtauSigma, AminMu, AminSigma, tauMu, tauSigma) {
-	start_dis = vector<StartDistributionRoom > ();
-}
-
-Random2DRoom::Random2DRoom(const Random2DRoom& orig) : PedDistributor(orig) {
-	start_dis = orig.GetStartDis();
-}
-
-Random2DRoom::~Random2DRoom() {
-	if (start_dis.size() > 0) start_dis.clear();
-}
-
-vector<StartDistributionRoom> Random2DRoom::GetStartDis() const {
-	return start_dis;
-}
-
-// Einlesen der Startverteilung aus der Datei filename
-
-void Random2DRoom::InitDistributor(string filename) {
-	ifstream infile;
-	string line;
-	string output;
-
-	infile.open(filename.c_str(), fstream::in);
-	if (!infile) {
-		Log->write("ERROR: \tCannot load start file: " + filename);
-		exit(0);
-	} else {
-		output.append("INFO: \tLoading start file\n");
-		int i = 0;
-		while (getline(infile, line)) {
-			i++; // Zeilenindex zum debuggen, nach jedem getline() erhöhen
-			if (line.find("#") != 0) { // Kommentarzeile wird überlesen
-				StartDistributionRoom dis = StartDistributionRoom();
-				output.append(dis.ReadDistribution(line));
-				start_dis.push_back(dis);
-			}
-		}
-	}
-	output.append("INFO: \tLoading start file successful!!!\n");
-	Log->write(output);
-}
-
-
-int Random2DRoom::Distribute(Building* building) const {
-	int nPeds = 0; //Gesamtanzahl
-	char tmp[CLENGTH];
-
-	Log->write("INFO: \tInit Simulation");
-	// Alle Starträume durchgehen
-	int pid = 1; // Pedestrian ID (wird immer erhöht)
-	for (int i = 0; i < (int) start_dis.size(); i++) {
-
-		string room_caption = start_dis[i].GetRoomCaption();
-		Room* r = building->GetRoom(room_caption);
-		if(!r) continue;
-
-		int N = start_dis[i].GetAnz();
-		if (N <= 0) {
-			Log->write("ERROR: \t negative number of pedestrians! Ignoring");
-			continue;
-		}
-
-		//MPI: only distribute on my working area
-		int roomID=r->GetRoomID();
-		if(building->GetMPIDispatcher()->IsMyWorkingArea(roomID)==false) {
-			pid+=N; // required to get distinct ID over the processors
-			continue;
-		}
-
-		double sum_area = 0;
-		int max_pos = 0;
-		double ppm; // Fußgänger pro meter
-		int ges_anz = 0;
-		vector<int> max_anz = vector<int>();
-		vector<int> akt_anz = vector<int>();
-		vector< vector<Point> > allpos = vector< vector<Point > >();
-		for (int i = 0; i < r->GetAnzSubRooms(); i++) {
-			SubRoom* sr = r->GetSubRoom(i);
-			double area = sr->GetArea();
-			allpos.push_back(PossiblePositions(sr, building->GetRouting()));
-			sum_area += area;
-			int anz = allpos[i].size();
-			max_anz.push_back(anz);
-			max_pos += anz;
-		}
-
-		if (max_pos < N) {
-			sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
-					N, r->GetRoomID(), max_pos);
-			Log->write(tmp);
-			exit(0);
-		}
-		ppm = N / sum_area;
-		// Anzahl der Personen pro SubRoom bestimmen
-		for (int i = 0; i < r->GetAnzSubRooms(); i++) {
-			SubRoom* sr = r->GetSubRoom(i);
-			int anz = sr->GetArea() * ppm + 0.5; // wird absichtlich gerundet
-			while (anz > max_anz[i]) {
-				anz--;
-			}
-			akt_anz.push_back(anz);
-			ges_anz += anz;
-		}
-		// Falls N noch nicht ganz erreicht, von vorne jeweils eine Person dazu
-		int j = 0;
-		while (ges_anz < N) {
-			if (akt_anz[j] < max_anz[j]) {
-				akt_anz[j] = akt_anz[j] + 1;
-				ges_anz++;
-			}
-			j = (j + 1) % max_anz.size();
-		}
-
-		j = 0;
-		while (ges_anz > N) {
-			if (akt_anz[j] > 0) {
-				akt_anz[j] = akt_anz[j] - 1;
-				ges_anz--;
-			}
-			j = (j + 1) % max_anz.size();
-		}
-
-		// Befüllen
-		for (unsigned int i = 0; i < akt_anz.size(); i++) {
-			SubRoom* sr = r->GetSubRoom(i);
-			if (akt_anz[i] > 0)
-				DistributeInSubRoom(sr, akt_anz[i], allpos[i], r->GetRoomID(), &pid, building->GetRouting());
-		}
-		nPeds += N;
-	}
-	return nPeds;
-}
-
-
-Random2DSubroom::Random2DSubroom() : PedDistributor() {
-
-}
-
-Random2DSubroom::Random2DSubroom(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
-		double BminMu, double BminSigma, double AtauMu, double AtauSigma, double AminMu,
-		double AminSigma, double tauMu, double tauSigma) :
-		PedDistributor(v0mu, v0sigma, BmaxMu, BmaxSigma, BminMu, BminSigma, AtauMu, AtauSigma, AminMu, AminSigma,
-				tauMu, tauSigma) {
-
-}
-
-Random2DSubroom::Random2DSubroom(const Random2DSubroom & orig) : PedDistributor(orig) {
-
-}
-
-Random2DSubroom::~Random2DSubroom() {
-
-}
-
-// konkrete Implementierung der virtuellen Funktion
-
-void Random2DSubroom::InitDistributor(string filename) {
-
-	ifstream infile;
-	string line;
-	string output;
-
-	infile.open(filename.c_str(), fstream::in);
-	if (!infile) {
-		Log->write("ERROR: \tCannot load start file: " + filename);
-		exit(0);
-	} else {
-		output.append("INFO: \tLoading start file\n");
-		int i = 0;
-		while (getline(infile, line)) {
-			i++; // Zeilenindex zum debuggen, nach jedem getline() erhöhen
-			if (line.find("#") != 0) { // Kommentarzeile wird überlesen
-				StartDistributionSubroom dis = StartDistributionSubroom();
-				output.append(dis.ReadDistribution(line));
-				start_dis.push_back(dis);
-			}
-		}
-	}
-	output.append("INFO: \tLoading start file successful!!!\n");
-	Log->write(output);
-
-
-}
-
-int Random2DSubroom::Distribute(Building * building) const {
-	int nPeds = 0; //Gesamtanzahl
-	vector<Point> allpos = vector<Point > ();
-	char tmp[CLENGTH];
-
-	Log->write("INFO: \tInit Simulation");
-	// Alle Starträume durchgehen
-	int pid = 1; // Pedestrian ID (wird immer erhöht)
-	for (int i = 0; i < (int) start_dis.size(); i++) {
-
-		string room_caption = start_dis[i].GetRoomCaption();
-		Room* r = building->GetRoom(room_caption);
-		if(!r) continue;
-
-		int roomID = r->GetRoomID();
-
-		int subroomID = start_dis[i].GetSubroomID();
-		int N = start_dis[i].GetAnz();
-		if (N <= 0) {
-			Log->write("ERROR: \t negative  (or null ) number of pedestrians!");
-			exit(0);
-		}
-
-		SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
-		allpos = PossiblePositions(sr, building->GetRouting());
-		int max_pos = allpos.size();
-		if (max_pos < N) {
-			sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
-					N, roomID, allpos.size());
-			Log->write(tmp);
-			exit(0);
-		} else {
-			sprintf(tmp, "INFO: \tVerteilung von %d Fußgängern in [%d/%d]! Maximale Anzahl: %d", N, roomID, subroomID, max_pos);
-			Log->write(tmp);
-		}
-		// Befüllen
-		DistributeInSubRoom(sr, N, allpos, roomID, &pid, building->GetRouting());
-		nPeds += N;
-	}
-	return nPeds;
 }

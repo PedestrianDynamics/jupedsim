@@ -103,18 +103,19 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	char tmp[CLENGTH];
 	string s = "Parameter:\n";
 
-	if(Log) delete Log;
 	switch (args->GetLog()) {
 		case 0:
-			Log = new OutputHandler();
+			//Log = new OutputHandler();
 			break;
 		case 1:
+			if(Log) delete Log;
 			Log = new STDIOHandler();
 			break;
 		case 2:
 		{
 			char name[CLENGTH]="";
 			sprintf(name,"%s.P%d.dat",args->GetErrorLogFile().c_str(),pMPIDispatcher->GetMyRank());
+			if(Log) delete Log;
 			Log = new FileHandler(name);
 		}
 		break;
@@ -186,29 +187,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	if (pLinkedCells)
 		s.append("\tusing Linked-Cells\n");
 
-//FIXME merge the methods and move all the methods to a sigle class PedDistributor
-
-// Startverteilung der Fußgänger
-//	int peddis = args->GetRandomize();
-//	sprintf(tmp, "\tStartverteilung: %d\n", peddis);
-//	s.append(tmp);
-//	switch (peddis) {
-//		case 1:
-//			pDistribution = new Random2DSubroom(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
-//					args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
-//					args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
-//					args->GetTauSigma());
-//			break;
-//		case 2:
-//			pDistribution = new Random2DRoom(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
-//					args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
-//					args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
-//					args->GetTauSigma());
-//			break;
-//	}
-//	s.append(pDistribution->writeParameter());
-//	pDistribution->InitDistributor(args->GetNumberFilename());
-
 	pDistribution = new PedDistributor(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
 			args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
 			args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
@@ -274,8 +252,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	Routing* rout = NULL;
 	switch (router) {
 		case 1:
-			Log->write("Warning: The router 1 is not longer available");
-			exit(EXIT_FAILURE);
+			rout = new GlobalRouter();
 			break;
 		case 2:
 			rout = new GlobalRouter();
@@ -290,46 +267,21 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	// Building benötigt Routing
 	pBuilding = new Building();
+
+	//FIXME: why need routing here?
 	pBuilding->SetRouting(rout);
 	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
 	s.append(tmp);
 	Log->write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
-	pBuilding->AddSurroundingRoom();
 
+	//TODO:
+	pBuilding->AddSurroundingRoom();
 	pBuilding->LoadStatesOfDoors(args->GetDoorsStateFile());
 	pBuilding->LoadStatesOfRooms(args->GetRoomsStateFile());
 
 	pBuilding->InitGeometry(); // Polygone erzeugen
 
-	//	//close some doors by default to improve the dynamic
-	//	//room 060
-	//	pBuilding->GetTransition("AR09URO07")->Close();
-	//	pBuilding->GetTransition("AR09URO08")->Close();
-	//
-	//	//room 010
-	//	pBuilding->GetTransition("AR0700279")->Close();
-	//
-	//	//room070
-	//	pBuilding->GetTransition("AR09URS09")->Close();
-	//
-	//	//room080
-	//	pBuilding->GetTransition("AR09URS13")->Close();
-	//	pBuilding->GetTransition("AR09URS12")->Close();
-	//
-	//	//room090
-	//	//pBuilding->GetTransition("AR02URW01")->Close();
-	//
-	//	//room100
-	//	pBuilding->GetTransition("AR03URW02")->Close();
-	//
-	//
-	//	//room 140
-	//	pBuilding->GetTransition("AR03URW03")->Close();
-	//	pBuilding->GetTransition("AR0300058")->Close();
-
-	if(args->GetEvacuationType()=="normal")
-		InitRoutineClearing();
 
 	// initialise the routing engine before doing any other things
 	rout->Init(pBuilding);
@@ -344,16 +296,12 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	InitSimulation();
 
-	//set the final destinations only for the normal case
-	if(args->GetEvacuationType()=="normal")
-		DistributeDestinations();
-
 	//using linkedcells?
 	if (pLinkedCells){
 		pBuilding->InitGrid(args->GetLinkedCellSize());
 	}
 
-	//pBuilding->WriteToErrorLog();
+	pBuilding->WriteToErrorLog();
 }
 
 /* Setzt die Fußgänger in die einzelnen Räume
@@ -463,256 +411,4 @@ void Simulation::SetMPIDispatcher(MPIDispatcher *mpi){
 
 const MPIDispatcher* Simulation::GetMPIDispatcher() const {
 	return pMPIDispatcher;
-}
-
-
-void Simulation::InitRoutineClearing(){
-	//close some specific doors
-
-	//	//close some doors by default to improve the dynamic
-	//	//room 060
-	//	pBuilding->GetTransition("AR09URO07")->Close();
-	//	pBuilding->GetTransition("AR09URO08")->Close();
-	//
-	//	//room 010
-	//	pBuilding->GetTransition("AR0700279")->Close();
-	//
-	//	//room070
-	//	pBuilding->GetTransition("AR09URS09")->Close();
-	//
-	//	//room080
-	//	pBuilding->GetTransition("AR09URS13")->Close();
-	//	pBuilding->GetTransition("AR09URS12")->Close();
-	//
-	//	//room090
-	//	//pBuilding->GetTransition("AR02URW01")->Close();
-	//
-	//	//room100
-	//	pBuilding->GetTransition("AR03URW02")->Close();
-	//
-	//
-	//	//room 140
-	//	pBuilding->GetTransition("AR03URW03")->Close();
-	//	pBuilding->GetTransition("AR0300058")->Close();
-
-	//close all doors with NO_NAME als caption
-	for (unsigned int roomID=0; roomID< pBuilding->GetAllRooms().size(); roomID++){
-
-		Room* room = pBuilding->GetRoom(roomID);
-
-		//take all transitions in that room
-		const vector<int>& trans=room->GetAllTransitionsIDs();
-
-		for(unsigned int t=0;t<trans.size();t++){
-
-			//get the transition
-			int transID=trans[t];
-			//get the room at the other side of the transition
-			Transition* tr=((Transition*)pBuilding->GetRouting()->GetGoal(transID));
-			if(tr->GetCaption()=="No_Name"){
-				int ntr1= tr->GetSubRoom1()->GetAllGoalIDs().size();
-				int ntr2= tr->GetSubRoom2()->GetAllGoalIDs().size();
-
-				if ((ntr1!=1)&&(ntr2!=1)){
-					tr->Close();
-				}
-			}
-		}
-	}
-}
-
-/// assign pedestrians their final destinations
-void Simulation::DistributeDestinations(){
-	//percentage
-	const vector<int>& workingArea=pBuilding->GetMPIDispatcher()->GetMyWorkingArea();
-	for (unsigned int wa = 0; wa < workingArea.size(); wa++) {
-		Room* room = pBuilding->GetRoom(workingArea[wa]);
-		string caption=room->GetCaption();
-
-		if(caption=="060"){
-			// half of them to the parking
-			int to_parking_total=room->GetAnzPedestrians()/3;
-			int to_parking=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_parking<to_parking_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_PARKING_TOP);
-						to_parking++;
-					}else {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_010);
-					}
-				}
-			}
-		}
-
-		if(caption=="070"){
-
-			int to_room_020_total=room->GetAnzPedestrians()/5;
-			int to_room_020=0;
-
-			int to_room_010_total=room->GetAnzPedestrians()/5;
-			int to_room_010=0;
-
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_020<to_room_020_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_020);
-						to_room_020++;
-					}else if(to_room_010<to_room_010_total) {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_010);
-						to_room_010++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_OUT);
-					}
-				}
-			}
-		}
-
-		if(caption=="080"){
-			//
-			int to_room_010_total=room->GetAnzPedestrians()/10;
-			int to_room_010=0;
-
-			int to_room_030_total=room->GetAnzPedestrians()/10;
-			int to_room_030=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_010<to_room_010_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_010);
-						to_room_010++;
-					}else if(to_room_030<to_room_030_total) {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_030);
-						to_room_030++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_020);
-					}
-				}
-			}
-		}
-
-		if(caption=="-090"){
-			//
-			int to_room_020_total=room->GetAnzPedestrians()/5;
-			int to_room_020=0;
-
-			int to_room_040_total=room->GetAnzPedestrians()/5;
-			int to_room_040=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_040<to_room_040_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_040);
-						to_room_040++;
-					}else if(to_room_020<to_room_020_total) {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_020);
-						to_room_020++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_030);
-					}
-				}
-			}
-		}
-
-		if(caption=="100"){
-
-			int to_room_030_total=room->GetAnzPedestrians()/2;
-			int to_room_030=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_030<to_room_030_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_030);
-						to_room_030++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_040);
-					}
-				}
-			}
-		}
-
-		if(caption=="110"){
-			// the world is fine for the pedestrians in this room
-		}
-
-		if(caption=="120"){
-			//
-			int to_room_050_total=room->GetAnzPedestrians()/5;
-			int to_room_050=0;
-
-			int to_parking_bottom_total=room->GetAnzPedestrians()/5;
-			int to_parking_bottom=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_050<to_room_050_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_050);
-						to_room_050++;
-					}else if(to_parking_bottom<to_parking_bottom_total) {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_PARKING_BOTTOM);
-						to_parking_bottom++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_040);
-					}
-				}
-			}
-		}
-
-		if(caption=="130"){
-			//
-			int to_room_050_total=room->GetAnzPedestrians()/2;
-			int to_room_050=0;
-
-			int to_parking_bottom_total=room->GetAnzPedestrians()/4;
-			int to_parking_bottom=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_050<to_room_050_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_050);
-						to_room_050++;
-					}else if(to_parking_bottom<to_parking_bottom_total) {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_PARKING_BOTTOM);
-						to_parking_bottom++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_040);
-					}
-				}
-			}
-		}
-
-		if(caption=="140"){
-			//
-			int to_room_050_total=room->GetAnzPedestrians()/2;
-			int to_room_050=0;
-
-			int to_parking_bottom_total=room->GetAnzPedestrians()/4;
-			int to_parking_bottom=0;
-
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-					if(to_room_050<to_room_050_total){
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_ROOM_050);
-						to_room_050++;
-					}else if(to_parking_bottom<to_parking_bottom_total) {
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_PARKING_BOTTOM);
-						to_parking_bottom++;
-					}else{
-						sub->GetPedestrian(k)->SetFinalDestination(FINAL_DEST_OUT);
-					}
-				}
-			}
-		}
-
-	} // looping over the rooms
 }

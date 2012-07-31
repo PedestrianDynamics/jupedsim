@@ -2,12 +2,15 @@
  * File:   Building.cpp
  * Author: andrea
  *
- * Created on 1. Oktober 2010, 09:25
+ * Created on 1. October 2010, 09:25
  */
 
 #include "Building.h"
+#include "../general/xmlParser.h"
+#include "Obstacle.h"
 
-//bool Building::pSubroomConnectionMap[15][130][15][130]={{{{0}}}};
+
+using namespace std;
 
 /*************************************************************
  private Funktionen
@@ -586,6 +589,140 @@ void Building::InitGrid(double cellSize) {
  ************************************************************/
 
 void Building::LoadBuilding(string filename) {
+
+	Log->write("INFO: \tParsing the geometry file");
+
+	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"geometry");
+
+	double version=xmltof(xMainNode.getAttribute("version"),-1);
+	if(version<0.4){
+		Log->write("ERROR: \tOnly version > 0.4 supported");
+		Log->write("ERROR: \tparsing geometry file failed!");
+		exit(EXIT_FAILURE);
+	}
+	pCaption=xmltoa(xMainNode.getAttribute("caption"),"virtual building");
+
+	//The file has two main nodes
+	//<rooms> and <transitions>
+
+	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
+	int nRooms=xRoomsNode.nChildNode("room");
+
+	//processing the rooms node
+	for(int i=0;i<nRooms;i++){
+		XMLNode xRoom = xRoomsNode.getChildNode("room",i);
+		Room* room = new Room();
+
+		string room_id=xmltoa(xRoom.getAttribute("id"),"-1");
+		room->SetRoomID(xmltoi(room_id.c_str(),-1));
+
+		string caption="room " + room_id;
+		room->SetCaption(xmltoa(xRoom.getAttribute("caption"),caption.c_str() ));
+
+		room->SetZPos(xmltoi(xRoom.getAttribute("zpos"),0.0));
+
+		//parsing the subrooms
+		int nSubRooms=xRoom.nChildNode("subroom");
+
+		for(int s=0;s<nSubRooms;s++){
+			XMLNode xSubroomsNode = xRoom.getChildNode("subroom",s);
+
+			string subroom_id= xmltoa(xSubroomsNode.getAttribute("id"),"-1");
+			string closed= xmltoa(xSubroomsNode.getAttribute("closed"),"0");
+			string type= xmltoa(xSubroomsNode.getAttribute("class"),"subroom");
+
+			SubRoom* subroom=NULL;
+
+			if(type=="stair"){
+				subroom= new Stair();
+			}else{
+				//normal subroom or corridor
+				subroom= new NormalSubRoom();
+			}
+
+			subroom->SetRoomID(room->GetRoomID());
+			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(),-1));
+
+			//looking for polygones (walls)
+			int nPoly=xSubroomsNode.nChildNode("polygone");
+			for(int p=0;p<nPoly;p++){
+				XMLNode xPolyVertices=xSubroomsNode.getChildNode("polygone",p);
+				int nVertices=xSubroomsNode.getChildNode("polygone",p).nChildNode("vertex");
+
+
+				for(int v=0;v<nVertices-1;v++){
+					double x1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("px"));
+					double y1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("py"));
+
+					double x2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("px"));
+					double y2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("py"));
+					subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+				}
+
+			}
+
+			//looking for obstacles
+			int nObst=xSubroomsNode.nChildNode("obstacle");
+			for(int obst=0;obst<nObst;obst++){
+				XMLNode xObstacle=xSubroomsNode.getChildNode("obstacle",obst);
+				int nPoly=xObstacle.nChildNode("polygone");
+				int id= xmltof(xObstacle.getAttribute("id"),-1);
+				int height= xmltof(xObstacle.getAttribute("height"),0);
+				double closed= xmltof(xObstacle.getAttribute("closed"),0);
+				string caption= xmltoa(xObstacle.getAttribute("caption"),"-1");
+
+				Obstacle* obstacle= new Obstacle();
+				obstacle->SetId(id);
+				obstacle->SetCaption(caption);
+				obstacle->SetClosed(closed);
+				obstacle->SetHeight(height);
+
+				for(int p=0;p<nPoly;p++){
+					XMLNode xPolyVertices=xObstacle.getChildNode("polygone",p);
+					int nVertices=xObstacle.getChildNode("polygone",p).nChildNode("vertex");
+
+					for(int v=0;v<nVertices-1;v++){
+						double x1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("px"));
+						double y1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("py"));
+
+						double x2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("px"));
+						double y2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("py"));
+						obstacle->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+					}
+				}
+				subroom->AddObstacle(obstacle);
+			}
+			room->AddSubRoom(subroom);
+		}
+
+		//parsing the crossings
+		XMLNode xCrossingsNode = xRoomsNode.getChildNode("crossings");
+		int nCrossing =xCrossingsNode.nChildNode("crossing");
+
+
+		//processing the rooms node
+		for(int i=0;i<nCrossing;i++){
+			XMLNode xCrossing = xCrossingsNode.getChildNode("crossing",i);
+			Crossing* crossing = new crossing();
+
+			string room_id=xmltoa(xRoom.getAttribute("id"),"-1");
+			room->SetRoomID(xmltoi(room_id.c_str(),-1));
+
+
+
+		AddRoom(room);
+	}
+
+		exit(0);
+
+	if(!xMainNode.getChildNode("seed").isEmpty()){
+		const char* seed=xMainNode.getChildNode("seed").getText();
+		Log->write("INFO: \tseed <"+string(seed)+">");
+	}
+
+
+
+
 	ifstream buildingfile;
 	string line;
 
@@ -669,7 +806,7 @@ Transition* Building::GetTransition(string caption) const {
 
 	}
 	Log->write("WARNING: No Transition with Caption: " + caption);
-	return NULL;
+	//return NULL;
 	exit(EXIT_FAILURE);
 }
 
@@ -683,7 +820,7 @@ Crossing* Building::GetGoal(string caption) const {
 	}
 
 	Log->write("WARNING: No Transition with Caption: " + caption);
-	return NULL;
+	//return NULL;
 	exit(EXIT_FAILURE);
 }
 
@@ -801,11 +938,8 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 				//ignore crossings/hlines
 				if(trans!="")
 				PpathWayStream<<room <<" "<<trans<<endl;
-				//				results.append(room+" "+trans+"\n");
 			}
 
-			//			PpathWayStream<<results<<endl;
-			//			(*it)->WritePath(PpathWayStream, this);
 		}
 		cout << "deleting " << (*it)->GetPedIndex() << endl;
 		pAllPedestians.erase(it);

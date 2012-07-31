@@ -23,6 +23,7 @@ SubRoom::SubRoom() {
 	pPeds.reserve(200);
 	pGoalIDs = vector<int> ();
 	pArea = 0.0;
+	pClosed=false;
 }
 
 SubRoom::SubRoom(const SubRoom& orig) {
@@ -32,6 +33,7 @@ SubRoom::SubRoom(const SubRoom& orig) {
 	pPeds = orig.GetAllPedestrians();
 	pGoalIDs = orig.GetAllGoalIDs();
 	pArea = orig.GetArea();
+	pClosed=orig.GetClosed();
 }
 
 SubRoom::~SubRoom() {
@@ -47,6 +49,9 @@ SubRoom::~SubRoom() {
 
 void SubRoom::SetSubRoomID(int ID) {
 	pID = ID;
+}
+void SubRoom::SetClosed(double closed) {
+	pClosed = closed;
 }
 
 void SubRoom::SetRoomID(int ID) {
@@ -92,8 +97,11 @@ int SubRoom::GetSubRoomID() const {
 	return pID;
 }
 
-// unique identifier for this subroom
+double SubRoom::GetClosed() const {
+	return pClosed;
+}
 
+// unique identifier for this subroom
 int SubRoom::GetUID() const {
 	return pRoomID * 1000 + pID;
 }
@@ -135,6 +143,11 @@ int SubRoom::GetAnzPedestrians() const {
 const vector<Pedestrian*>& SubRoom::GetAllPedestrians() const {
 	return pPeds;
 }
+
+const vector<Obstacle*>& SubRoom::GetAllObstacles() const {
+	return pObstacles;
+}
+
 
 Pedestrian* SubRoom::GetPedestrian(int index) const {
 	if ((index >= 0) && (index < (int) GetAnzPedestrians()))
@@ -179,6 +192,10 @@ void SubRoom::DeleteWall(int index) {
 
 void SubRoom::AddPedestrian(Pedestrian* ped) {
 	pPeds.push_back(ped);
+}
+
+void SubRoom::AddObstacle(Obstacle* obs){
+	pObstacles.push_back(obs);
 }
 
 void SubRoom::DeletePedestrian(int index) {
@@ -235,21 +252,6 @@ bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
 		return IsInSubRoom(pos);
 }
 
-void SubRoom::putPedInSpecialLocation() {
-	double xMin = 46.21;
-	double xMax = xMin + 4.0;
-	double yMin = 60.77;
-	double yMax = 68.13;
-
-	//int pedID=-1;
-	for (int i = 0; i < (int) pPeds.size(); i++) {
-		//if(i!=pedID) continue;
-		double x = ((xMax - xMin)*((double) rand() / RAND_MAX)) + xMin;
-		double y = ((yMax - yMin)*((double) rand() / RAND_MAX)) + yMin;
-		Pedestrian* ped = pPeds[i];
-		ped->SetPos(Point(x, y));
-	}
-}
 
 // this is the case if they share a transition or crossing
 bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const{

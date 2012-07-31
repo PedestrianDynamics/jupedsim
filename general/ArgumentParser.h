@@ -52,7 +52,7 @@ private:
 	string pTrajOutputDir;
 	string pDoorsStateFile;
 	string pRoomsStateFile;
-	string pEvacuationType;
+	//string pEvacuationType;
 	//string pInputDir;
 	unsigned int pSeed;
 	unsigned int pScenarioID;

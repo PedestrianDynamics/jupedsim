@@ -1,9 +1,0 @@
-./25/error_juelich.log
-./Inputfiles/110525_arena.jul
-./Inputfiles/pza_block.dat
-./Inputfiles/gms_blocks_file.dat
-./Inputfiles/gms_doors_file.dat
-./25
-normal
-25
-25
