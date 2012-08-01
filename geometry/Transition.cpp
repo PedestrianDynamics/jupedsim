@@ -34,7 +34,9 @@ void Transition::Open() {
 	pIsOpen = true;
 }
 
-
+void Transition::SetType(string type){
+	pType=type;
+}
 
 void Transition::SetRoom2(Room* r) {
 	pRoom2 = r;
@@ -47,20 +49,12 @@ bool Transition::IsOpen() const {
 }
 
 
-
-//Room* Transition::GetRoom(int ID) const {
-//	if (GetRoom1()->GetRoomID() == ID)
-//		return GetRoom1();
-//	else if (pRoom2 != NULL && pRoom2->GetRoomID() == ID)
-//		return pRoom2;
-//	else {
-//		Log->write("ERROR: \tTransition::GetRoom() wrong ID");
-//		exit(0);
-//	}
-//}
-
 Room* Transition::GetRoom2() const {
 	return pRoom2;
+}
+
+string Transition::GetType() const {
+	return pType;
 }
 // Sonstiges
 

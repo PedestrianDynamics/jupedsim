@@ -4,45 +4,44 @@
 	<rooms>
 		<room id="0" caption="hall" zpos="0.00">
 			<subroom id="0" closed="0" class="subroom">
-				<polygone caption="wall">
+				<polygon caption="wall">
 					<Vertex px="10.0" py="4.0"/>
 					<Vertex px="10.0" py="0.0"/>
 					<Vertex px="0.0" py="0.0"/>
 					<Vertex px="0.0" py="10.0"/>
 					<Vertex px="10.0" py="10.0"/>
 					<Vertex px="10.0" py="6.0"/>
-				</polygone>
+				</polygon>
 			</subroom>
 			<subroom id="1" closed="0" class="corridor">
-				<polygone caption="wall">
+				<polygon caption="wall">
 					<Vertex px="10.0" py="6.0"/>
 					<Vertex px="17.0" py="6.0"/>
 					<Vertex px="17.0" py="-5.0"/>
-				</polygone>
-				<polygone caption="wall">
+				</polygon>
+				<polygon caption="wall">
 					<Vertex px="15.0" py="-5.0"/>
 					<Vertex px="15.0" py="4.0"/>
 					<Vertex px="10.0" py="4.0"/>
-				</polygone>
+				</polygon>
 
 				<obstacle id="0" caption="table" height="1.0" closed="1">
-					<polygone>
+					<polygon>
 						<Vertex px="12.0" py="6.0"/>
 						<Vertex px="13.0" py="6.0"/>
 						<Vertex px="13.0" py="5.5"/>
 						<Vertex px="12.0" py="5.5"/>
-					</polygone>
+					</polygon>
 				</obstacle>
 				<obstacle id="1" caption="table" height="1.0" closed="1">
-					<polygone>
+					<polygon>
 						<Vertex px="16.5" py="-2.0"/>
 						<Vertex px="17.0" py="-2.0"/>
 						<Vertex px="17.0" py="-3.0"/>
 						<Vertex px="16.5" py="-3.0"/>
-					</polygone>
+					</polygon>
 				</obstacle>
 			</subroom>
-
 			<crossings>
 				<!-- virtuals exits between subrooms -->
 				<crossing id="0" subroom1_id="0" subroom2_id="1">
@@ -56,8 +55,8 @@
 	<transitions>
 		<!-- exits like crossings but between rooms or to outside (room with index 
 			= -1) -->
-		<transition id="0" caption="main exit" type="emergency"
-			room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
+		<transition id="1" caption="main exit" type="emergency"
+			room1_id="0" subroom1_id="1" room2_id="-1" subroom2_id="-1">
 			<Vertex px="15.0" py="-5.0"/>
 			<Vertex px="17.0" py="-5.0"/>
 		</transition>

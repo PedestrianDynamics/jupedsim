@@ -50,104 +50,7 @@ void Building::LoadHeader(ifstream* buildingfile, int* i) {
 	}
 }
 
-void Building::LoadRooms(ifstream* buildingfile, int* i) {
-	string line;
-	getline(*buildingfile, line);
-	(*i)++;
-	int elements = 0;
-	while (line.find("</rooms>") == string::npos) {
-		istringstream iss(line, istringstream::in);
-		string tmp; // Schlüsselwort
-		if (line.find("elements") != string::npos) {
-			iss >> tmp >> elements;
-		} else if (line.find("<room>") != string::npos) {
-			LoadRoom(buildingfile, i);
-		} else {
-			char tmp[CLENGTH];
-			sprintf(tmp, "ERROR: \tBuilding::LoadRooms() "
-					"Wrong object in building file <rooms>: [%s] line %d ",
-					line.c_str(), *i);
-			Log->write(tmp);
-			exit(0);
-		}
-		getline(*buildingfile, line);
-		(*i)++;
-	}
-	if (elements != GetAnzRooms()) {
-		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tBuilding::LoadRooms() "
-				"Wrong number of rooms: %d != %d", elements, pRooms.size());
-		Log->write(tmp);
-		exit(0);
-	}
-}
 
-void Building::LoadRoom(ifstream* buildingfile, int* i) {
-	string line;
-	int NSubRooms = 0;
-	int NStairs = 0;
-	int anzNormal = 0;
-	int anzStairs = 0;
-	getline(*buildingfile, line);
-	(*i)++;
-	Room* room = new Room();
-	while (line.find("</room>") == string::npos) {
-		istringstream iss(line, istringstream::in);
-		string tmp; // Schlüsselwort, z.B.: "caption"
-		if (line.find("caption") != string::npos) {
-			string caption;
-			iss >> tmp >> caption;
-			room->SetCaption(caption);
-		} else if (line.find("index") != string::npos) {
-			int ID;
-			iss >> tmp >> ID;
-			room->SetRoomID(ID);
-		} else if (line.find("zpos") != string::npos) {
-			float zpos;
-			iss >> tmp >> zpos;
-			room->SetZPos(zpos);
-		} else if (line.find("nsubrooms") != string::npos) {
-			iss >> tmp >> NSubRooms;
-		} else if (line.find("nstairs") != string::npos) {
-			iss >> tmp >> NStairs;
-		} else if (line.find("<subroom>") != string::npos) {
-			room->LoadNormalSubRoom(buildingfile, i);
-			anzNormal++;
-		} else if (line.find("<stair>") != string::npos) {
-			room->LoadStair(buildingfile, i);
-			anzStairs++;
-		} else if (line.find("<crossings>") != string::npos) {
-			pRouting->LoadCrossings(buildingfile, i, room);
-		} else if (line.find("<Hlines>") != string::npos) {
-			pRouting->LoadOrientationLines(buildingfile, i, room);
-		} else {
-			char tmp[CLENGTH];
-			sprintf(tmp, "ERROR: \tBuilding::LoadRoom() "
-					"Wrong object in building file <room> :"
-					"[%s] line %d ", line.c_str(), *i);
-			Log->write(tmp);
-			exit(0);
-		}
-		getline(*buildingfile, line);
-		(*i)++;
-	}
-	if (NSubRooms != anzNormal) {
-		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tBuilding::LoadRoom() "
-				"Wrong number of subrooms: %d != %d", NSubRooms, anzNormal);
-		Log->write(tmp);
-		exit(0);
-	}
-
-	if (NStairs != anzStairs) {
-		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tBuilding::LoadRoom() "
-				"Wrong number of subrooms: %d != %d", NStairs, anzStairs);
-		Log->write(tmp);
-		exit(0);
-	}
-	AddRoom(room);
-}
 
 /************************************************************
  Konstruktoren
@@ -180,7 +83,7 @@ Building::~Building() {
 		PpathWayStream.close();
 }
 
-/*************************************************************
+/************************************************************
  Setter-Funktionen
  ************************************************************/
 void Building::SetCaption(string s) {
@@ -332,13 +235,14 @@ void Building::InitGeometry() {
 						goals.push_back(goal);
 					}
 			}
+			cout<<"converting: " <<endl;
 			// anschliessend ist pPoly initialisiert
 			s->ConvertLineToPoly(goals);
 			s->CalculateArea();
 			goals.clear();
 		}
 	}
-	Log->write("INFO: \tInit Geometry sucessfull!!!\n");
+	Log->write("INFO: \tInit Geometry successful!!!\n");
 }
 
 void Building::Update() {
@@ -634,6 +538,7 @@ void Building::LoadBuilding(string filename) {
 			SubRoom* subroom=NULL;
 
 			if(type=="stair"){
+				//TODO: stairs should be read differently, with setUp,...
 				subroom= new Stair();
 			}else{
 				//normal subroom or corridor
@@ -643,11 +548,11 @@ void Building::LoadBuilding(string filename) {
 			subroom->SetRoomID(room->GetRoomID());
 			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(),-1));
 
-			//looking for polygones (walls)
-			int nPoly=xSubroomsNode.nChildNode("polygone");
+			//looking for polygons (walls)
+			int nPoly=xSubroomsNode.nChildNode("polygon");
 			for(int p=0;p<nPoly;p++){
-				XMLNode xPolyVertices=xSubroomsNode.getChildNode("polygone",p);
-				int nVertices=xSubroomsNode.getChildNode("polygone",p).nChildNode("vertex");
+				XMLNode xPolyVertices=xSubroomsNode.getChildNode("polygon",p);
+				int nVertices=xSubroomsNode.getChildNode("polygon",p).nChildNode("vertex");
 
 
 				for(int v=0;v<nVertices-1;v++){
@@ -665,7 +570,7 @@ void Building::LoadBuilding(string filename) {
 			int nObst=xSubroomsNode.nChildNode("obstacle");
 			for(int obst=0;obst<nObst;obst++){
 				XMLNode xObstacle=xSubroomsNode.getChildNode("obstacle",obst);
-				int nPoly=xObstacle.nChildNode("polygone");
+				int nPoly=xObstacle.nChildNode("polygon");
 				int id= xmltof(xObstacle.getAttribute("id"),-1);
 				int height= xmltof(xObstacle.getAttribute("height"),0);
 				double closed= xmltof(xObstacle.getAttribute("closed"),0);
@@ -696,68 +601,92 @@ void Building::LoadBuilding(string filename) {
 		}
 
 		//parsing the crossings
-		XMLNode xCrossingsNode = xRoomsNode.getChildNode("crossings");
+		XMLNode xCrossingsNode = xRoom.getChildNode("crossings");
 		int nCrossing =xCrossingsNode.nChildNode("crossing");
-
 
 		//processing the rooms node
 		for(int i=0;i<nCrossing;i++){
 			XMLNode xCrossing = xCrossingsNode.getChildNode("crossing",i);
-			Crossing* crossing = new crossing();
 
-			string room_id=xmltoa(xRoom.getAttribute("id"),"-1");
-			room->SetRoomID(xmltoi(room_id.c_str(),-1));
+			int id=xmltoi(xCrossing.getAttribute("id"),-1);
+			int sub1_id=xmltoi(xCrossing.getAttribute("subroom1_id"),-1);
+			int sub2_id=xmltoi(xCrossing.getAttribute("subroom2_id"),-1);
+			double x1=xmltof(xCrossing.getChildNode("vertex",0).getAttribute("px"));
+			double y1=xmltof(xCrossing.getChildNode("vertex",0).getAttribute("py"));
+			double x2=xmltof(xCrossing.getChildNode("vertex",1).getAttribute("px"));
+			double y2=xmltof(xCrossing.getChildNode("vertex",1).getAttribute("py"));
 
+			Crossing* c = new Crossing();
+			c->SetIndex(id);
+			c->SetPoint1(Point(x1, y1));
+			c->SetPoint2(Point(x2, y2));
 
+			//TODO: only a sequential read is possible.
+			// only add the id instead, in that case the ordering of
+			//the subroom/crossings wont have any influences.
+
+			room->GetSubRoom(sub1_id)->AddGoalID(id);
+			room->GetSubRoom(sub2_id)->AddGoalID(id);
+			c->SetSubRoom1(room->GetSubRoom(sub1_id));
+			c->SetSubRoom2(room->GetSubRoom(sub2_id));
+			c->SetRoom1(room);
+
+			pRouting->AddGoal(c);
+		}
 
 		AddRoom(room);
 	}
 
-		exit(0);
 
-	if(!xMainNode.getChildNode("seed").isEmpty()){
-		const char* seed=xMainNode.getChildNode("seed").getText();
-		Log->write("INFO: \tseed <"+string(seed)+">");
-	}
+	// all rooms are read, now proceed with transitions
+	XMLNode xTransNode = xMainNode.getChildNode("transitions");
+	int nTrans=xTransNode.nChildNode("transition");
 
+	for(int i=0;i<nTrans;i++){
+		XMLNode xTrans = xTransNode.getChildNode("transition",i);
 
+		int id=xmltoi(xTrans.getAttribute("id"),-1);
+		string caption="door " + id;
+		caption= xmltoa(xTrans.getAttribute("caption"),caption.c_str());
+		int room1_id=xmltoi(xTrans.getAttribute("room1_id"),-1);
+		int room2_id=xmltoi(xTrans.getAttribute("room2_id"),-1);
+		int subroom1_id=xmltoi(xTrans.getAttribute("subroom1_id"),-1);
+		int subroom2_id=xmltoi(xTrans.getAttribute("subroom2_id"),-1);
+		double x1=xmltof(xTrans.getChildNode("vertex",0).getAttribute("px"));
+		double y1=xmltof(xTrans.getChildNode("vertex",0).getAttribute("py"));
+		double x2=xmltof(xTrans.getChildNode("vertex",1).getAttribute("px"));
+		double y2=xmltof(xTrans.getChildNode("vertex",1).getAttribute("py"));
+		string type =  xmltoa(xTrans.getAttribute("type"),"normal");
 
+		Transition* t = new Transition();
+		t->SetIndex(id);
+		t->SetCaption(caption);
+		t->SetPoint1(Point(x1, y1));
+		t->SetPoint2(Point(x2, y2));
+		t->SetType(type);
 
-	ifstream buildingfile;
-	string line;
-
-	// Datei oeffnen
-	buildingfile.open(filename.c_str(), fstream::in);
-	if (!buildingfile) {
-		Log->write("ERROR: \tCannot load building file: " + filename);
-		exit(0);
-	} else {
-		Log->write("INFO: \tLoading building file");
-		int i = 0;
-		while (getline(buildingfile, line)) {
-			i++; // Zeilenindex zum debuggen, nach jedem getline() erhöhen
-			if (line.find("<header>") != string::npos) {
-				LoadHeader(&buildingfile, &i);
-			} else if (line.find("<rooms>") != string::npos) {
-				LoadRooms(&buildingfile, &i);
-			} else if (line.find("<transitions>") != string::npos) {
-				pRouting->LoadTransitions(&buildingfile, &i, pRooms);
-			} else {
-				char tmp[CLENGTH];
-				sprintf(tmp, "ERROR: \tBuilding::LoadBuilding() "
-						"Wrong object in building file: [%s] line %d ",
-						line.c_str(), i);
-				Log->write(tmp);
-				exit(0);
-			}
+		if (room1_id != -1 && subroom1_id != -1) {
+			Room* room = pRooms[room1_id];
+			SubRoom* subroom = room->GetSubRoom(subroom1_id);
+			subroom->AddGoalID(t->GetIndex());
+			//MPI
+			room->AddTransitionID(t->GetIndex());
+			t->SetRoom1(room);
+			t->SetSubRoom1(subroom);
 		}
-
-		// load the manual transitions
-		//pRouting->LoadAdditionalCrossings();
-		buildingfile.close();
-		buildingfile.clear();
-		Log->write("INFO: \tLoading building file sucessfull!!!\n");
+		if (room2_id != -1 && subroom2_id != -1) {
+			Room* room = pRooms[room2_id];
+			SubRoom* subroom = room->GetSubRoom(subroom2_id);
+			subroom->AddGoalID(t->GetIndex());
+			//MPI
+			room->AddTransitionID(t->GetIndex());
+			t->SetRoom2(room);
+			t->SetSubRoom2(subroom);
+		}
+		pRouting->AddGoal(t);
 	}
+
+	Log->write("INFO: \tLoading building file successful!!!\n");
 }
 
 void Building::DumpSubRoomInRoom(int roomID, int subID) {
@@ -824,98 +753,112 @@ Crossing* Building::GetGoal(string caption) const {
 	exit(EXIT_FAILURE);
 }
 
-void Building::LoadStatesOfRooms(string filename) {
-	ifstream infile;
-	string line;
-	string output;
+void Building::LoadRoutingInfo(string filename) {
 
-	if (filename == "") {
-		Log->write("WARNING:\tempty rooms states file");
+	Log->write("INFO:\tLoading extra routing information");
+	if(filename==""){
+		Log->write("INFO:\t No file supplied !");
+		Log->write("INFO:\t done with loading extra routing information");
 		return;
 	}
-	Log->write("INFO:\tLoading rooms states file");
-	infile.open(filename.c_str(), fstream::in);
-	if (infile.is_open() == false) {
-		Log->write(
-				"ERROR: \tCannot load rooms initialisation files: " + filename);
-		exit(EXIT_FAILURE);
-	} else {
 
-		while (getline(infile, line)) {
-			if (line.find("#") != 0) { // Kommentarzeile wird überlesen
-				istringstream iss(line, istringstream::in);
-				string room_caption = "";
-				int state = -1;
-				iss >> room_caption >> state;
-				if ((room_caption != "") && (state != -1)) {
-					Room* r = GetRoom(room_caption);
-					if (!r)
-						continue;
-					r->SetRoomState(state);
-				} else {
-					Log->write("ERROR:\t Wrong entry in the room states file:");
-					Log->write(line);
-					exit(EXIT_FAILURE);
-				}
-			}
-		}
+	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"routing");
+
+	double version=xmltof(xMainNode.getAttribute("version"),-1);
+	if(version<0.4){
+		Log->write("ERROR: \tOnly version > 0.4 supported");
+		Log->write("ERROR: \tparsing routing file failed!");
+		exit(EXIT_FAILURE);
 	}
-	Log->write("INFO:\t done with loading rooms states file");
+
+	//actually only contains one Hline node
+	XMLNode xHlinesNode = xMainNode.getChildNode("Hlines");
+	int nHlines=xHlinesNode.nChildNode("Hline");
+
+	//processing the rooms node
+	for(int i=0;i<nHlines;i++){
+		XMLNode hline = xHlinesNode.getChildNode("hline",i);
+		double id=xmltof(hline.getAttribute("id"),-1);
+		int room_id=xmltoi(hline.getAttribute("room_id"),-1);
+		int subroom_id=xmltoi(hline.getAttribute("subroom_id"),-1);
+
+		double x1=xmltof(hline.getChildNode("vertex",0).getAttribute("px"));
+		double y1=xmltof(hline.getChildNode("vertex",0).getAttribute("py"));
+		double x2=xmltof(hline.getChildNode("vertex",1).getAttribute("px"));
+		double y2=xmltof(hline.getChildNode("vertex",1).getAttribute("py"));
+
+		Crossing* c = new Crossing();
+		c->SetIndex(id);
+		c->SetPoint1(Point(x1, y1));
+		c->SetPoint2(Point(x2, y2));
+
+		Room* room = pRooms[room_id];
+		SubRoom* subroom = room->GetSubRoom(subroom_id);
+		subroom->AddGoalID(c->GetIndex());
+		c->SetSubRoom1(subroom);
+		c->SetSubRoom2(subroom);
+		c->SetRoom1(room);
+		pRouting->AddGoal(c);
+	}
+
+	Log->write("INFO:\t done with loading extra routing information");
 }
 
-void Building::LoadStatesOfDoors(string filename) {
-	ifstream infile;
-	string line;
-	string output;
+void Building::LoadTrafficInfo(string filename) {
 
-	if (filename == "") {
-		Log->write("WARNING:\tempty doors states file");
+	Log->write("INFO:\tLoading  the traffic info file");
+
+	if(filename==""){
+		Log->write("INFO:\t No file supplied !");
+		Log->write("INFO:\t done with loading traffic info file");
 		return;
 	}
-	Log->write("INFO:\tLoading doors states file");
-	infile.open(filename.c_str(), fstream::in);
-	if (infile.is_open() == false) {
-		Log->write(
-				"ERROR: \tCannot load doors initialisation files: " + filename);
+
+	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"traffic");
+
+	double version=xmltof(xMainNode.getAttribute("version"),-1);
+	if(version<0.4){
+		Log->write("ERROR: \tOnly version > 0.4 supported");
+		Log->write("ERROR: \tparsing traffic file failed!");
 		exit(EXIT_FAILURE);
-	} else {
+	}
 
-		while (getline(infile, line)) {
-			if (line.find("#") != 0) { // Kommentarzeile wird überlesen
-				istringstream iss(line, istringstream::in);
-				string door_caption = "";
-				int state = -1;
-				iss >> door_caption >> state;
-				if ((door_caption != "") && (state != -1)) {
+	//The file has two main nodes
+	//<rooms> and <transitions>
 
-					if (GetTransition(door_caption) == NULL)
-						continue;
-					//look for that door
-					if (state == 0) {
-						GetTransition(door_caption)->Open();
-						Log->write("INFO: Opening door " + door_caption);
-					} else if (state == 1) {
-						GetTransition(door_caption)->Close();
-						Log->write("INFO: Closing door " + door_caption);
+	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
+	int nRooms=xRoomsNode.nChildNode("room");
 
-						//special case of doors AR0800315 and AR0800317
-						if ((door_caption == "AR0800315") || (door_caption
-								== "AR0800317")) {
-							door_caption = door_caption + "a";
-							GetTransition(door_caption)->Close();
-							Log->write("INFO: Closing door " + door_caption);
-						}
-					}
+	//processing the rooms node
+	for(int i=0;i<nRooms;i++){
+		XMLNode xRoom = xRoomsNode.getChildNode("room",i);
+		double id=xmltof(xRoom.getAttribute("room_id"),-1);
+		string state=xmltoa(xRoom.getAttribute("state"),"good");
+		int status=(state=="good")?0:1;
+		pRooms[id]->SetRoomState(status);
+	}
 
-				} else {
-					Log->write("ERROR:\t Wrong entry in the doors states file:");
-					Log->write(line);
-					exit(EXIT_FAILURE);
-				}
-			}
+	//processing the doors node
+	XMLNode xDoorsNode = xMainNode.getChildNode("doors");
+	int nDoors=xDoorsNode.nChildNode("door");
+
+	for(int i=0;i<nDoors;i++){
+		XMLNode xDoor = xDoorsNode.getChildNode("door",i);
+		double id=xmltof(xDoor.getAttribute("trans_id"),-1);
+		string state=xmltoa(xDoor.getAttribute("state"),"open");
+
+		if(state=="open"){
+			((Transition*)	pRouting->GetGoal(id) )->Open();
+		}else if(state=="close"){
+			((Transition*)	pRouting->GetGoal(id) )->Close();
+		}else{
+			char tmp[CLENGTH];
+			sprintf(tmp,"WARNING:\t Unknown door state: %s",state.c_str());
+			Log->write(tmp);
 		}
 	}
-	Log->write("INFO:\t done with loading doors states file");
+
+	Log->write("INFO:\t done with loading traffic info file");
 }
 
 void Building::DeletePedestrian(Pedestrian* ped) {

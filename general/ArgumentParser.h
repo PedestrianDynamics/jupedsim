@@ -47,15 +47,9 @@ private:
 	double pDistEffMaxWall;
 	int pLog;
 	int pTravisto;
-	int pTrajektorien;
 	string pErrorLogFile;
 	string pTrajOutputDir;
-	string pDoorsStateFile;
-	string pRoomsStateFile;
-	//string pEvacuationType;
-	//string pInputDir;
 	unsigned int pSeed;
-	unsigned int pScenarioID;
 	int pMaxOpenmpThreads;
 
 	// private Funktionen
@@ -106,12 +100,10 @@ public:
 
 	//TODO: check which methods are stil needed?
 	unsigned int GetSeed() const;
-	unsigned int GetScenarioID() const;
 	string GetTrajOutputDir() const;
 	string GetErrorLogFile() const;
-	string GetRoomsStateFile() const;
-	string GetDoorsStateFile() const;
-	string GetEvacuationType() const;
+	string GetTrafficFile() const;
+	string GetRoutingFile() const;
 
 	void ParseArgs(int argc, char **argv);
 

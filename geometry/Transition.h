@@ -16,6 +16,7 @@ class Transition : public Crossing {
 private:
     Room* pRoom2; // zweiter Room zusätzlich zu Crossing
     bool pIsOpen;
+    string pType;
 
 public:
     // Konstruktoren
@@ -23,16 +24,17 @@ public:
     Transition(const Transition& orig);
     virtual ~Transition();
 
-    // Setter -Funktionen
-    void Close(); // schliesst Tür
-    void Open(); // öffnet Tür
-    //void SetCaption(string s);
+
+    void Close(); /// schliesst Tür
+    void Open(); /// öffnet Tür
+    void SetType(string s);
     void SetRoom2(Room* ID);
 
-    // Getter - Funktionen
-    //Room* GetRoom(int ID) const;
+
+    string GetType() const;
     Room* GetRoom2() const;
-    // Sonstiges
+
+
     Room* GetOtherRoom(int room_id) const; // gibt anderen Room zurück
 
     // virtuelle Funktionen

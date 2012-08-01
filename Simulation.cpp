@@ -151,33 +151,21 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case 3: //hermes
 			delete iod; // delete the previously allocated memory
-			iod = new HermesIODispatcher(args->GetTrajOutputDir(),args->GetSeed(),args->GetScenarioID());
+			iod = new HermesIODispatcher(args->GetTrajOutputDir(),args->GetSeed(),args->GetSeed());
 			break;
+
+		case 4: //flat format
+		{
+			OutputHandler* file = new FileHandler("./Trajektorien.dat");
+			pTrajectories->AddIO(file);
+		}
+			break;
+
 		default:
 			printf("Wrong option for TraVisTo Output!\n\n");
 			exit(0);
 	}
 
-
-	switch (args->GetTrajektorien()) {
-		case 0:
-			break;
-		case 1:
-		{
-			OutputHandler* std = new STDIOHandler();
-			pTrajectories->AddIO(std);
-			break;
-		}
-		case 2:
-		{
-			OutputHandler* file = new FileHandler("./Trajektorien.dat");
-			pTrajectories->AddIO(file);
-			break;
-		}
-		default:
-			printf("Wrong option for Trajectories!\n\n");
-			exit(0);
-	}
 
 	if (pOnline)
 		s.append("\tonline\n");
@@ -274,13 +262,11 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	Log->write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
-
-	//TODO:
-	pBuilding->AddSurroundingRoom();
-	pBuilding->LoadStatesOfDoors(args->GetDoorsStateFile());
-	pBuilding->LoadStatesOfRooms(args->GetRoomsStateFile());
-
+	//pBuilding->AddSurroundingRoom();
 	pBuilding->InitGeometry(); // Polygone erzeugen
+
+	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
+	pBuilding->LoadRoutingInfo(args->GetRoutingFile());
 
 
 	// initialise the routing engine before doing any other things

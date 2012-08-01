@@ -20,7 +20,8 @@ endif
 SOURCES=main.cpp Simulation.cpp general/ArgumentParser.cpp general/xmlParser.cpp\
 geometry/SubRoom.cpp geometry/Wall.cpp geometry/Transition.cpp geometry/Line.cpp\
 geometry/Point.cpp geometry/Room.cpp geometry/Building.cpp geometry/Crossing.cpp\
-IO/IODispatcher.cpp IO/TraVisToClient.cpp IO/OutputHandler.cpp\
+geometry/Hline.cpp geometry/Obstacle.cpp IO/IODispatcher.cpp IO/TraVisToClient.cpp\
+IO/OutputHandler.cpp\
 math/Distribution.cpp math/Mathematics.cpp math/ODESolver.cpp math/ForceModel.cpp\
 routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp\
 routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\

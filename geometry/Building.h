@@ -46,8 +46,6 @@ private:
 
     // wird nur innerhalb von Building benötigt
     void LoadHeader(ifstream* buildingfile, int* i);
-    void LoadRooms(ifstream* buildingfile, int* i);
-    void LoadRoom(ifstream* buildingfile, int* i);
     void StringExplode(string str, string separator, vector<string>* results);
 
 public:
@@ -94,8 +92,8 @@ public:
 
     // Ein-Ausgabe
     void LoadBuilding(string filename); // Laedt Geometrie-Datei
-    void LoadStatesOfRooms(string filename);
-    void LoadStatesOfDoors(string filename);
+    void LoadTrafficInfo(string filename);
+    void LoadRoutingInfo(string filename);
     void WriteToErrorLog() const;
 
 	// MPI:

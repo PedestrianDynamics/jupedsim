@@ -111,14 +111,12 @@ ArgumentParser::ArgumentParser() {
 	pTauSigma = 0.001;
 	pLog = 0;
 	pTravisto = 0;
-	pTrajektorien = 0;
 	pErrorLogFile="./Logfile.dat";
 	pPathwayfile=""; // saving pedestrian path
 	pTrajOutputDir="";
-	pDoorsStateFile=""; //"doors_states.txt";
-	pRoomsStateFile=""; //"rooms_states.txt";
+	pRoutingFilename="";
+	pTrafficFilename="";
 	pSeed=0;
-	pScenarioID=0;
 
 #ifdef _OPENMP
 	pMaxOpenmpThreads = omp_get_thread_num();
@@ -253,10 +251,6 @@ int ArgumentParser::GetTravisto() const {
 	return pTravisto;
 }
 
-int ArgumentParser::GetTrajektorien() const {
-	return pTrajektorien;
-}
-
 double ArgumentParser::GetLinkedCellSize() const{
 	return pLinkedCellSize;
 }
@@ -264,9 +258,6 @@ unsigned int ArgumentParser::GetSeed() const {
 	return pSeed;
 }
 
-unsigned int ArgumentParser::GetScenarioID() const {
-	return pScenarioID;
-}
 
 string ArgumentParser::GetPathwayFile() const {
 	return pPathwayfile;
@@ -281,12 +272,12 @@ string ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
 }
 
-string ArgumentParser::GetRoomsStateFile() const {
-	return pRoomsStateFile;
+string ArgumentParser::GetTrafficFile() const {
+	return pTrafficFilename;
 }
 
-string ArgumentParser::GetDoorsStateFile() const{
-	return pDoorsStateFile;
+string ArgumentParser::GetRoutingFile() const{
+	return pRoutingFilename;
 }
 
 int ArgumentParser::GetMaxOmpThreads() const{
@@ -342,11 +333,6 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			"n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q",
 			long_options, &option_index)) != -1) {
 		switch (c) {
-			case 'O':
-			{
-				pTrajektorien = atoi(optarg);
-				break;
-			}
 			case 'T':
 			{
 				pTravisto = atoi(optarg);
@@ -612,7 +598,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 	//traffic
 	if(!xMainNode.getChildNode("traffic").isEmpty()){
-		pTrafficFilename=xMainNode.getChildNode("routing").getText();
+		pTrafficFilename=xMainNode.getChildNode("traffic").getText();
 		Log->write("INFO: \ttraffic <"+string(pTrafficFilename)+">");
 	}
 
@@ -627,6 +613,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	//trajectories
 	if(!xMainNode.getChildNode("trajectories").isEmpty()){
 		pTrajOutputDir=xMainNode.getChildNode("trajectories").getText();
+		pTravisto=1;
 		Log->write("INFO: \toutput directory  <"+string(pTrajOutputDir)+">");
 	}
 

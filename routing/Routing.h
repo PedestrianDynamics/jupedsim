@@ -10,6 +10,7 @@
 
 #include "../geometry/Crossing.h"
 #include "../geometry/Transition.h"
+#include "../geometry/Hline.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Room.h"
 
@@ -21,7 +22,11 @@ class Building;
 
 class Routing {
 private:
+	vector<Crossing*> pCrossings;
 	vector<Crossing*> goals;
+	vector<Transition*> pTransitions;
+	vector<Hline*> pHlines;
+
 public:
 	Routing();
 	Routing(const Routing& orig);
@@ -31,15 +36,15 @@ public:
 	const vector<Crossing*>& GetAllGoals() const;
 	Crossing* GetGoal(int index) const;
 	int GetAnzGoals() const;
-	// Sonstiges
-	void AddGoal(Crossing* line);
-	void LoadCrossings(ifstream* buildingfile, int* i, Room* room);
-	void LoadCrossing(ifstream* buildingfile, int* i, Room* room);
-	void LoadTransitions(ifstream* buildingfile, int* i, vector<Room*> rooms);
-	void LoadTransition(ifstream* buildingfile, int* i, vector<Room*> rooms);
 
-	void LoadOrientationLines(ifstream* buildingfile, int* i, Room* room);
-	void LoadOrientationLine(ifstream* buildingfile, int* i, Room* room);
+	// Sonstiges
+	void AddCrossing(Crossing* line);
+	void AddTransition(Transition* line);
+	void AddHline(Hline* line);
+
+	const vector<Crossing*>& GetAllCrossings() const;
+	const vector<Transition*>& GetAllTransitions() const;
+	const vector<Hline*>& GetAllHlines() const;
 
 	// Ausgabe
 	void WriteToErrorLog() const;
@@ -48,6 +53,9 @@ public:
 	virtual int FindExit(Pedestrian* p) = 0;
 	virtual void Init(Building* b) = 0;
 
+
+	//FIXME: to be deleted
+	void  AddGoal(Crossing* line);
 };
 
 #endif	/* _ROUTING_H */

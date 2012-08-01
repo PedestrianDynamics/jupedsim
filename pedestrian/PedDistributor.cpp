@@ -190,9 +190,9 @@ void PedDistributor::InitDistributor(string filename){
 	for(int i=0;i<nDist;i++){
 		XMLNode path=xDist.getChildNode("dist",i);
 
-		int room_id=atoi(path.getAttribute("room_id"));
 		//FIXME: id oder caption
-		string room_caption=path.getAttribute("room_id");
+		//int room_id=atoi(path.getAttribute("room_id"));
+		string room_caption=path.getAttribute("room_caption");
 		int number=atoi(path.getAttribute("number"));
 
 		if(path.getAttribute("subroom_id")){

@@ -89,31 +89,14 @@ void IODispatcher::WriteGeometry(Building* building) {
 	string geometry;
 	geometry.append("\t<geometry>\n");
 
-	bool plotHlines=false;
-	bool plotCrossings=false;
+	bool plotHlines=true;
+	bool plotCrossings=true;
 	bool plotTransitions=true;
-	bool plotPlayingField=true;
 	vector<string> rooms_to_plot;
 
 	//Promenade
 	//rooms_to_plot.push_back("outside");
-	rooms_to_plot.push_back("010");
-	rooms_to_plot.push_back("020");
-	rooms_to_plot.push_back("030");
-	rooms_to_plot.push_back("040");
-	rooms_to_plot.push_back("050");
-
-	//tribuene
-//	rooms_to_plot.push_back("060");
-//	rooms_to_plot.push_back("070");
-//	rooms_to_plot.push_back("080");
-//	rooms_to_plot.push_back("090");
-//	rooms_to_plot.push_back("100");
-//	rooms_to_plot.push_back("110");
-//	rooms_to_plot.push_back("120");
-//	rooms_to_plot.push_back("130");
-//	rooms_to_plot.push_back("140");
-	//rooms_to_plot.push_back("150");
+	//rooms_to_plot.push_back("010");
 
 	// first the rooms
 	for (int i = 0; i < building->GetAnzRooms(); i++) {
@@ -176,138 +159,11 @@ void IODispatcher::WriteGeometry(Building* building) {
 				}
 			}
 		}
-		//if(goal->Length()<1.4) continue;
-		//if(goal->Length()>3.4) continue;
-		//geometry.append(goal->WriteElement());
 	}
 
-	if(plotPlayingField){
-		//add the playing area
-		double width=3282;
-		double length=5668;
-		char tmp[100];
-		geometry.append("\t\t<wall>\n");
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",-length,width);
-		geometry.append(tmp);
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",-length,-width);
-		geometry.append(tmp);
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",length,-width);
-		geometry.append(tmp);
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",length,width);
-		geometry.append(tmp);
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",-length,width);
-		geometry.append(tmp);
-		geometry.append("\t\t</wall>\n");
-
-		geometry.append("\t\t<wall>\n");
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",0.0,width);
-		geometry.append(tmp);
-		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",0.0,-width);
-		geometry.append(tmp);
-		geometry.append("\t\t</wall>\n");
-	}
 
 	geometry.append("\t</geometry>\n");
 	Write(geometry);
-	//exit(0);
-
-	//	//extract some special rooms from the promenade
-	//		ofstream myfile ("geometry_pza.txt");
-	//		if (myfile.is_open())
-	//		{
-	//			myfile.precision(2);
-	//			for (int i = 0; i < building->GetAnzRooms(); i++) {
-	//				Room* r = building->GetRoom(i);
-	////				if(AreaLevel(r->GetCaption())==1) continue;
-	//				if(r->GetCaption()!="010") continue;
-	//				myfile<<"#room "<<r->GetCaption()<<endl;
-	//				for (int k = 0; k < r->GetAnzSubRooms(); k++) {
-	//					SubRoom* s = r->GetSubRoom(k);
-	//					myfile<<"## new subroom"<<endl;
-	//					const vector<Point> poly=s->GetPolygon();
-	//					for(int i=0;i<poly.size();i++){
-	//						myfile<<fixed<<poly[i].GetX()<<" "<<poly[i].GetY()<<endl;
-	//					}
-	//
-	//				}
-	//			}
-	//
-	//			myfile.close();exit(0);
-	//		}
-
-	//extract the transitions for the analysis
-	//			ofstream myfile ("geometry_pza_doors.txt");
-	//			if (myfile.is_open())
-	//			{
-	//				myfile.precision(2);
-	//				for (int i = 0; i < building->GetRouting()->GetAnzGoals(); i++) {
-	//					Crossing* goal = building->GetRouting()->GetGoal(i);
-	//					if(goal->GetCaption()=="") continue;
-	//					Room* r1= goal->GetRoom1();
-	//					Room* r2 = ((Transition*)goal)->GetRoom2();
-	//
-	//
-	//					if((r2)&&(AreaLevel(r1->GetCaption())==1) && (AreaLevel(r2->GetCaption())==1)) continue;
-	//					else if((!r2)&&(AreaLevel(r1->GetCaption())==1)) continue;
-	//
-	//					if(goal->GetRoom1()->GetCaption()=="150") continue;
-	//
-	//					myfile<<fixed<<"#camera "<<goal->GetCaption()<<endl;
-	//					myfile<<goal->GetPoint1().GetX()<<" "<<goal->GetPoint1().GetY()<<" "
-	//							<<goal->GetPoint2().GetX()<<" "<<goal->GetPoint2().GetY()<<endl;
-	//
-	//					//myfile<<goal->GetCentre().GetX() <<" "<<goal->GetCentre().GetY() <<endl;
-	//
-	//				}
-	//			}
-	//			exit(0);
-
-	//	//extract all transitions per room
-	//		ofstream myfile ("geometry_pza_trans.txt");
-	//		if (myfile.is_open())
-	//		{
-	//			myfile.precision(2);
-	//			for (int i = 0; i < building->GetAnzRooms(); i++) {
-	//				Room* r = building->GetRoom(i);
-	//				if(AreaLevel(r->GetCaption())==1) continue;
-	//				if(r->GetCaption()=="150") continue;
-	//				myfile<<"#room "<<r->GetCaption()<<endl;
-	//
-	//				vector<int>goals=r->GetAllTransitionsIDs();
-	//				for(int g=0;g<goals.size();g++){
-	//					Crossing* goal = building->GetRouting()->GetGoal(goals[g]);
-	//					myfile<<goal->GetCaption()<<endl;
-	//				}
-	//			}
-	//
-	//			myfile.close();
-	//		}
-
-//	//plot the mapping Room+Transition-->room
-//	ofstream myfile ("mapping_door_exit_room.txt");
-//	if (myfile.is_open())
-//	{
-//		myfile.precision(2);
-//		myfile<<"#room transition nextroom";
-//		for (int i = 0; i < building->GetRouting()->GetAnzGoals(); i++) {
-//			Crossing* goal = building->GetRouting()->GetGoal(i);
-//			if(goal->IsTransition()){
-//
-//				Room* r1= goal->GetRoom1();
-//				Room* r2 = ((Transition*)goal)->GetRoom2();
-//
-//				if(r2){
-//					myfile<<r1->GetCaption()<<" "<<goal->GetCaption()<<" "<<r2->GetCaption()<<endl;
-//					myfile<<r2->GetCaption()<<" "<<goal->GetCaption()<<" "<<r1->GetCaption()<<endl;
-//
-//				}else{
-//					myfile<<r1->GetCaption()<<" "<<goal->GetCaption()<<" outside "<<endl;
-//				}
-//
-//			}
-//		}
-//		exit(0);
-//	}
 }
 
 void IODispatcher::WriteFrame(int frameNr, Building* building) {
@@ -550,29 +406,6 @@ void HermesIODispatcher::WriteFooter() {
 }
 
 string HermesIODispatcher::WritePed(Pedestrian* ped) {
-	//	double v, a, b, phi;
-	//	double RAD2DEG = 180.0 / M_PI;
-	//	char tmp[CLENGTH] = "";
-	//
-	//	v = ped->GetV().Norm();
-	//	int color;
-	//	double v0 = ped->GetV0Norm();
-	//	if (v0 == 0) {
-	//		Log->write("ERROR: IODispatcher::WritePed()\t v0=0");
-	//		exit(0);
-	//	}
-	//	color = (int) (v / v0 * 255);
-	//	a = ped->GetLargerAxis();
-	//	b = ped->GetSmallerAxis();
-	//	phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-	//	sprintf(tmp, "<agent ID=\"%d\"\t"
-	//			"xPos=\"%.2f\"\tyPos=\"%.2f\""
-	//			"radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
-	//			"ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
-	//			ped->GetPedIndex(), (ped->GetPos().GetX()) * FAKTOR,
-	//			(ped->GetPos().GetY()) * FAKTOR,
-	//			a*FAKTOR, b*FAKTOR, phi * RAD2DEG, color);
-	//	return tmp;
 
 	char tmp[CLENGTH];
 	sprintf(tmp, "%hd\t%.0f\t%.0f\n",

@@ -8,8 +8,8 @@
 	<!-- default distribution -->
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
-		<dist room_id="1" subroom_id="0" number="7"/>
-		<dist room_id="1" subroom_id="1" number="5"/>
+		<dist room_caption="hall" subroom_id="0" number="7"/>
+		<dist room_caption="hall" subroom_id="1" number="5"/>
 	</distribution>
 
 	<groups> <!-- sich kennende Leute -->

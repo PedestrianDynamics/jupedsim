@@ -203,20 +203,3 @@ string Crossing::WriteElement() const {
     geometry.append("\t\t</door>\n");
     return geometry;
 }
-
-////ped hat den subroom gewechselt
-//if  (sub->IsInSubRoom(ped->GetPos())==true) {
-//	// neues Ziel setzten
-//	ped->SetExitIndex(goal_new->GetIndex());
-//	ped->SetExitLine(goal_new);
-//
-//}else
-//{
-//	// Lösche Fußgänger aus aktuellem SubRoom
-//	sub->DeletePedestrian(PedID);
-//	// neues Ziel setzten
-//	ped->SetExitIndex(goal_new->GetIndex());
-//	ped->SetExitLine(goal_new);
-//	// Setzte Fußgänger in neuen SubRoom
-//	other_sub->AddPedestrian(ped);
-//}

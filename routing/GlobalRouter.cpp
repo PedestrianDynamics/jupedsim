@@ -78,7 +78,7 @@ void GlobalRouter::Init(Building* building){
 
 	//Load additional goals if necessary
 	// performs basic initialization for Hermes
-	InitializeHermes();
+	//InitializeHermes();
 
 
 	// initialize the network for the floydwarshall algo
@@ -241,23 +241,6 @@ void GlobalRouter::Init(Building* building){
 					if(isVisible==false) continue;
 
 					double weight=1.0;
-					if(to_crossing->GetCaption()=="AR09URO07") weight=10;
-					if(to_crossing->GetCaption()=="AR09URO08") weight=10;
-					if(to_crossing->GetCaption()=="AR09URS09") weight=10;
-					if(to_crossing->GetCaption()=="AR02URW01") weight=10;
-					if(to_crossing->GetCaption()=="AR03URW02") weight=10;
-					if(to_crossing->GetCaption()=="AR03URW03") weight=10;
-
-					//extra weight if we are in the tribune
-					int label = atoi(to_crossing->GetRoom1()->GetCaption().c_str());
-					if( (label>60 )){
-						//tribune
-						weight=100;
-					} else {
-						// promenade
-
-					}
-
 
 					// now  the final check
 					// when a room is full with smoke pedes only go outside this room
@@ -322,12 +305,6 @@ void GlobalRouter::Init(Building* building){
 					pDistMatrix[from_door][to_door]=1.0;
 			}
 
-			// check if both are visible from each other
-			//const Point& pt1=from_AP->GetCentre();
-			//const Point& pt2=to_AP->GetCentre();
-			//if(CanSeeEachother(pt1,pt2)==true){
-			//	pDistMatrix[from_door][to_door]=(pt1-pt2).Norm();
-			//}
 		}
 	}
 	//exit(0);
@@ -444,101 +421,8 @@ void GlobalRouter::Init(Building* building){
 	}
 
 	//create a complete navigation graph
-	LoadNavigationGraph("./Inputfiles/120531_navigation_graph_arena.xml");
+	//LoadNavigationGraph("./Inputfiles/120531_navigation_graph_arena.xml");
 
-	/**
-	 * This method does compute the complete navigation graph but is too slow (too many nodes and  O(n^3))
-
-	//fist store the original distance matrices
-	double **ori_dist_Matrix = new double*[exitsCnt];
-	for(int i = 0; i < exitsCnt; ++i){
-		ori_dist_Matrix[i] = new double[exitsCnt];
-	}
-
-	for(int p = 0; p < exitsCnt; ++p)
-		for(int  r= 0; r < exitsCnt; ++r){
-			ori_dist_Matrix[p][r]=pDistMatrix[p][r];
-		}
-
-
-
-	for( map<int, int>::iterator it = pMapIdToFinalDestination.begin(); it != pMapIdToFinalDestination.end(); it++) {
-
-		int to_door=it->first;
-		int to_UID=it->second;
-
-		// was already set
-		if(to_UID==FINAL_DEST_OUT) continue;
-
-
-		for(unsigned int i=0;i<pAccessPoints.size();i++){
-
-			// set the distance
-			AccessPoint* from_AP=pAccessPoints[i];
-			int from_door=from_AP->GetID();
-			if(to_door==from_door) continue;
-
-
-			//restore the original matrix
-			for(int p = 0; p < exitsCnt; ++p)
-				for(int  r= 0; r < exitsCnt; ++r){
-					pDistMatrix[p][r] = ori_dist_Matrix[p][r];
-				}
-
-			bool done=false;
-
-			//Only in the promenade
-			int label=atoi(GetAllGoals()[from_door]->GetRoom1()->GetCaption().c_str());
-			if( (label>60 )){
-				done=true; //only one run
-			}
-			int run=0;
-
-			do{
-				//
-				//TODO: uncomment this if you want infinite as distance to unreachable destinations
-				double dist=pDistMatrix[from_door][to_door];
-				from_AP->AddFinalDestination(to_UID,dist);
-
-				//run floydwarshall on the new matrix
-				FloydWarshall();
-				cout<<" floyd run: "<<run++<<endl;
-
-				// set the intermediate path to global final destination
-				GetPath(from_door,to_door);
-				if (pTmpPedPath.size()>=2){
-					//from_AP->AddFinalDestination(to_UID,dist);
-					from_AP->AddIntermediateDest(to_UID,pTmpPedPath[1]);
-
-					//remove this path to get the second best option in the next run
-					if(pDistMatrix[from_door][to_door]==FLT_MAX){
-						done=true;
-					}else {
-						pDistMatrix[from_door][to_door]=FLT_MAX;
-					}
-
-				}else if((from_AP->isFinalDestination()==false) && (GetAllGoals()[from_door]->IsOpen())){
-
-					//we are still have some issues in the room 150
-					string room_caption=GetAllGoals()[from_door]->GetRoom1()->GetCaption();
-					if(room_caption=="150") continue;
-
-					char tmp[CLENGTH];
-					sprintf(tmp,"ERROR: GlobalRouter: hline/crossing/transition [ %d ] is out of visibility range 2\n",from_door);
-					Log->write(tmp);
-					sprintf(tmp,"ERROR: GlobalRouter: No path  from [ %d ] to [%d] in room [%s] \n",from_door,it->second,room_caption.c_str());
-					Log->write(tmp);
-					exit(EXIT_FAILURE);
-				}else{
-					done=true;
-				}
-				pTmpPedPath.clear();
-
-			}while(!done);
-
-		}
-	}
-	 */
 
 	//dumping the complete system
 	//DumpAccessPoints(825);
@@ -563,8 +447,6 @@ void GlobalRouter::AddFinalDestination(int UID, const Line& line){
 	c->SetPoint1(line.GetPoint1());
 	c->SetPoint2(line.GetPoint2());
 	c->SetIndex(id);
-	//c->SetSubRoom1(-1);
-	//c->SetSubRoom2(-1);
 	pMapIdToFinalDestination[id]=UID;
 
 }
