@@ -26,8 +26,8 @@ Line::Line(const Line& orig) {
 	pCentre = orig.GetCentre();
 }
 
-//Line::~Line() {
-//}
+Line::~Line() {
+}
 
 /*************************************************************
  Setter-Funktionen

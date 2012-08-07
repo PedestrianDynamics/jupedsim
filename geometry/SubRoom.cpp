@@ -5,6 +5,9 @@
  * Created on 8. Oktober 2010, 10:56
  */
 
+
+
+
 #include "SubRoom.h"
 
 /************************************************************
@@ -43,6 +46,8 @@ SubRoom::~SubRoom() {
 		delete pPeds[i];
 	}
 	if (pGoalIDs.size() > 0) pGoalIDs.clear();
+
+	//TODO: delete the obstacles
 }
 
 // Setter -Funktionen
@@ -304,6 +309,12 @@ string NormalSubRoom::WriteSubRoom() const {
 	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
 			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, GetSubRoomID());
 	s.append(tmp);
+
+	//write the obstacles
+	for( unsigned int j=0;j<GetAllObstacles().size(); j++) {
+		s.append(GetAllObstacles()[j]->Write());
+	}
+
 	return s;
 }
 
@@ -599,11 +610,6 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 			}
 		}
 	}
-	/*  printf("\n\nStair: %d\n", this->GetSubRoomID());
-      for(int i=0; i<4; i++) {
-          printf("alt: (%f, %f)\tneu: (%f, %f)\n", orgPoly[i].GetX(), orgPoly[i].GetY(), orgPoly[i].GetX(), neuPoly[i].GetY());
-      }
-      getc(stdin);*/
 	pPoly = neuPoly;
 }
 

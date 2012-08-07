@@ -9,10 +9,10 @@
 #define	_SUBROOM_H
 
 #include "Wall.h"
-#include "../pedestrian/Pedestrian.h"
 #include "../general/Macros.h"
+#include "../pedestrian/Pedestrian.h"
+#include "Obstacle.h"
 
-class Obstacle;
 
 /************************************************************
  SubRoom

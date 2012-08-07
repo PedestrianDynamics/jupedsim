@@ -48,35 +48,6 @@ public:
 
 };
 
-class HermesIODispatcher:public IODispatcher {
-
-private:
-	int pFileSectionFrame;
-	string pPath;
-	int pFPS;
-	int pSeed;
-	int pScenarioID;
-
-	// somehow no one knows where the origin is situated
-	double pTranslateX;
-	double pTranslateY;
-
-	string WritePed(Pedestrian* ped);
-
-public:
-	HermesIODispatcher(string path="./", int seed=0, int szenarioID=0, int fileSection=-1);
-	virtual ~HermesIODispatcher(){};
-
-	virtual void WriteHeader(int nPeds, int fps, Building* building, int seed=0, int szenarioID=0);
-	virtual void WriteGeometry(Building* building);
-	virtual void WriteFrame(int frameNr, Building* building);
-	virtual void WriteFooter();
-
-private:
-	string ExecuteSystemCommand(string cmd);
-
-};
-
 
 class Trajectories:public IODispatcher {
 

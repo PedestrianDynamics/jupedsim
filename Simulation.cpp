@@ -114,7 +114,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 2:
 		{
 			char name[CLENGTH]="";
-			sprintf(name,"%s.P%d.dat",args->GetErrorLogFile().c_str(),pMPIDispatcher->GetMyRank());
+			sprintf(name,"%s.P0.dat",args->GetErrorLogFile().c_str());
 			if(Log) delete Log;
 			Log = new FileHandler(name);
 		}
@@ -133,8 +133,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 1:
 		{
 			//iod = new IODispatcher();
-			char name[30]="";
-			sprintf(name,"./P%d_Output.xml",pMPIDispatcher->GetMyRank());
+			char name[30]="Output.xml";
 			OutputHandler* tofile = new FileHandler(name);
 			iod->AddIO(tofile);
 			break;
@@ -149,9 +148,10 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			pOnline = true;
 			break;
 		}
-		case 3: //hermes
+		case 3: //plain text
 			delete iod; // delete the previously allocated memory
-			iod = new HermesIODispatcher(args->GetTrajOutputDir(),args->GetSeed(),args->GetSeed());
+			Log->write("ERROR:\tdont use this writer, not implemetned");
+			exit(0);
 			break;
 
 		case 4: //flat format
@@ -241,6 +241,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	switch (router) {
 		case 1:
 			rout = new GlobalRouter();
+			//rout = new DummyRouter();
 			break;
 		case 2:
 			rout = new GlobalRouter();
@@ -266,17 +267,16 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	pBuilding->InitGeometry(); // Polygone erzeugen
 
 	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
-	pBuilding->LoadRoutingInfo(args->GetRoutingFile());
 
+	pBuilding->LoadRoutingInfo(args->GetRoutingFile());
 
 	// initialise the routing engine before doing any other things
 	rout->Init(pBuilding);
 
-
 	// init pathway
 	if(args->GetPathwayFile()!=""){
 		char name[30]="";
-		sprintf(name,"%s_p%d",args->GetPathwayFile().c_str(),pMPIDispatcher->GetMyRank());
+		sprintf(name,"%s_p0",args->GetPathwayFile().c_str());
 		pBuilding->InitSavePedPathway(name);
 	}
 
@@ -287,7 +287,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		pBuilding->InitGrid(args->GetLinkedCellSize());
 	}
 
-	pBuilding->WriteToErrorLog();
+	//pBuilding->WriteToErrorLog();
 }
 
 /* Setzt die Fußgänger in die einzelnen Räume
@@ -295,20 +295,12 @@ void Simulation::InitArgs(ArgumentParser* args) {
  * */
 
 int Simulation::InitSimulation() {
-	// MPI:
-	// initialize the mpi core
-	// This should be done before the pedestrian are distributed
-	pMPIDispatcher->Initialise(pBuilding);
-
 	int nPeds = pDistribution->Distribute(pBuilding);
 	pBuilding->InitPhiAllPeds();
 	SetNPeds(nPeds);
 
-	// MPI:
-	// work only on the working area
-	const vector<int>& workingArea=pBuilding->GetMPIDispatcher()->GetMyWorkingArea();
-	for (unsigned int wa = 0; wa < workingArea.size(); wa++) {
-		Room* room = pBuilding->GetRoom(workingArea[wa]);
+	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+		Room* room = pBuilding->GetRoom(i);
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
@@ -316,12 +308,6 @@ int Simulation::InitSimulation() {
 			}
 		}
 	}
-
-	pBuilding->InitRoomsAndSubroomsMap();
-
-
-	//MPI:
-	//pMPIDispatcher->Dump();
 
 	Log->write("INFO: \tInit Simulation successful!!!\n");
 	return 0;
@@ -351,7 +337,7 @@ int Simulation::RunSimulation() {
 	/*************     main simulation loop *********************/
 	/************************************************************/
 	// bis Tmax oder alle Fußgänger raus
-	for (t = 0; t < pTmax && !pMPIDispatcher->Shutdown() ; ++frameNr) {
+	for (t = 0; t < pTmax && GetNPeds() > 0; ++frameNr) {
 		t = 0 + (frameNr - 1) * pDt;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
 		pSolver->solveODE(t, t + pDt, pBuilding);
@@ -360,10 +346,6 @@ int Simulation::RunSimulation() {
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			iod->WriteFrame(frameNr / writeInterval, pBuilding);
-		}
-		int write = (int) ((1. / 16) / pDt + 0.5);
-		if (frameNr % write == 0) { // 16 frames pro Sekunde wie bei Experimenten
-			pTrajectories->WriteFrame(frameNr / write, pBuilding);
 		}
 	}
 	// Abschluss für TraVisTo
@@ -386,15 +368,6 @@ void Simulation::Update() {
 
 	//update the cells position
 	if (pLinkedCells){
-		//Grid::update(pBuilding);
-		pMPIDispatcher->Update();
+		pBuilding->UpdateGrid();
 	}
-}
-
-void Simulation::SetMPIDispatcher(MPIDispatcher *mpi){
-	pMPIDispatcher = mpi;
-}
-
-const MPIDispatcher* Simulation::GetMPIDispatcher() const {
-	return pMPIDispatcher;
 }

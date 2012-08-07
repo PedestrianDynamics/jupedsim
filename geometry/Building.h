@@ -20,7 +20,6 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Transition.h"
 #include "../mpi/LCGrid.h"
-#include "../mpi/MPIDispatcher.h"
 
 
 
@@ -39,10 +38,6 @@ private:
     // pedestrians pathway
     bool pSavePathway;
     ofstream PpathWayStream;
-
-    //MPI
-	MPIDispatcher* pMPIDispatcher;
-	vector<Pedestrian*> pPedtransfering;
 
     // wird nur innerhalb von Building benötigt
     void LoadHeader(ifstream* buildingfile, int* i);
@@ -88,6 +83,7 @@ public:
     void Update();
     void UpdateGrid();
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
+    void  DumpSubRoomInRoom(int roomID, int subID);
 
 
     // Ein-Ausgabe
@@ -96,14 +92,6 @@ public:
     void LoadRoutingInfo(string filename);
     void WriteToErrorLog() const;
 
-	// MPI:
-	void SetMPIDispatcher(MPIDispatcher *mpi);
-	MPIDispatcher* GetMPIDispatcher() const;
-	void AddPedestrianWaitingForTransfer(Pedestrian* ped);
-	void GetPedestriansTransferringToRoom(int roomID,vector<Pedestrian*>& transfer);
-	void ClearTranfer();// just for control should always be empty
-	void DumpSubRoomInRoom(int room, int sub);
-	//remove all pedestrians which has more less than 10 cm for the last 20 seconds
 	void CleanUpTheScene();
 
 

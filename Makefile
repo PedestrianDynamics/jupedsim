@@ -1,4 +1,5 @@
-MCC = mpicxx
+MCC = g++
+#MCC = mpicxx
 CC=g++
 VTT= vtcxx -vt:cxx mpicxx
 CFLAGS=-c -Wall -ansi
@@ -23,9 +24,9 @@ geometry/Point.cpp geometry/Room.cpp geometry/Building.cpp geometry/Crossing.cpp
 geometry/Hline.cpp geometry/Obstacle.cpp IO/IODispatcher.cpp IO/TraVisToClient.cpp\
 IO/OutputHandler.cpp\
 math/Distribution.cpp math/Mathematics.cpp math/ODESolver.cpp math/ForceModel.cpp\
-routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp\
+routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp routing/DummyRouter.cpp\
 routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\
-pedestrian/Ellipse.cpp mpi/MPIDispatcher.cpp mpi/LCGrid.cpp\
+pedestrian/Ellipse.cpp mpi/LCGrid.cpp\
 routing/QuickestPathRouter.cpp routing/CircleRouter.cpp\
 
 OBJECTS=$(SOURCES:.cpp=.o)

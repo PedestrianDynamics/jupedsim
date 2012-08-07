@@ -16,7 +16,6 @@ using namespace std;
 #include "../math/Distribution.h"
 #include "../routing/Routing.h"
 #include "../geometry/Building.h"
-#include "../mpi/MPIDispatcher.h"
 
 
 extern OutputHandler* Log;

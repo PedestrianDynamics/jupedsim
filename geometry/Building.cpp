@@ -62,8 +62,6 @@ Building::Building() {
 	pRouting = NULL;
 	pLinkedCellGrid = NULL;
 	pSavePathway=false;
-	//MPI:
-	pPedtransfering = vector<Pedestrian*> ();
 }
 
 Building::Building(const Building& orig) {
@@ -143,9 +141,8 @@ Room* Building::GetRoom(int index) const {
 
 int Building::GetAnzPedestrians() const {
 	int sum = 0;
-	const vector<int>& workingArea = pMPIDispatcher->GetMyWorkingArea();
-	for (unsigned int wa = 0; wa < workingArea.size(); wa++) {
-		sum += pRooms[workingArea[wa]]->GetAnzPedestrians();
+	for (unsigned int wa = 0; wa < pRooms.size(); wa++) {
+		sum += pRooms[wa]->GetAnzPedestrians();
 	}
 	return sum;
 }
@@ -235,7 +232,6 @@ void Building::InitGeometry() {
 						goals.push_back(goal);
 					}
 			}
-			cout<<"converting: " <<endl;
 			// anschliessend ist pPoly initialisiert
 			s->ConvertLineToPoly(goals);
 			s->CalculateArea();
@@ -250,11 +246,8 @@ void Building::Update() {
 	// in that case they are set in the wrong room.
 	vector<Pedestrian*> nonConformPeds;
 
-	const vector<int>& workingArea = pMPIDispatcher->GetMyWorkingArea();
-
-	for (unsigned int wa = 0; wa < workingArea.size(); wa++) {
-		int roomID = workingArea[wa];
-		Room* room = pRooms[roomID];
+	for (int i = 0; i <  GetAnzRooms(); i++) {
+			Room* room =  GetRoom(i);
 
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
@@ -285,21 +278,14 @@ void Building::Update() {
 						continue; // next pedestrian
 					}
 
-					SubRoom* other_sub = cross->GetOtherSubRoom(roomID, j);
+					SubRoom* other_sub = cross->GetOtherSubRoom(room->GetRoomID(), j);
 					if (other_sub) {
 						int nextSubRoom = other_sub->GetSubRoomID();
 						int nextRoom = other_sub->GetRoomID();
 						ped->SetSubRoomID(nextSubRoom);
 						ped->SetRoomID(nextRoom,GetRoom(nextRoom)->GetCaption());
-						// MPI:
-						// add only if this is my working area
-						if (pMPIDispatcher->IsMyWorkingArea(nextRoom)) {
-							other_sub->AddPedestrian(ped);
-						} else {
-							pPedtransfering.push_back(ped);
-							DeletePedestrian(ped);
-							//continue;
-						}
+						other_sub->AddPedestrian(ped);
+
 					} else {
 						DeletePedestrian(ped);
 						//continue;
@@ -384,9 +370,8 @@ void Building::Update() {
 }
 
 void Building::InitPhiAllPeds() {
-	const vector<int>& workingArea = pMPIDispatcher->GetMyWorkingArea();
-	for (unsigned int wa = 0; wa < workingArea.size(); wa++) {
-		Room* room = GetRoom(workingArea[wa]);
+	for (int i = 0; i <  GetAnzRooms(); i++) {
+		Room* room =  GetRoom(i);
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
@@ -460,9 +445,8 @@ void Building::InitGrid(double cellSize) {
 		}
 	}
 
-	const vector<int>& workingArea = pMPIDispatcher->GetMyWorkingArea();
-	for (unsigned int wa = 0; wa < workingArea.size(); wa++) {
-		Room* room = GetRoom(workingArea[wa]);
+	for (unsigned int wa = 0; wa < pRooms.size(); wa++) {
+		Room* room =  pRooms[wa];
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
@@ -479,9 +463,8 @@ void Building::InitGrid(double cellSize) {
 	y_max = y_max + 1.0;
 
 	double boundaries[] = { x_min, x_max, y_min, y_max };
-	//int pedsCount=pAllPedestians.size();
-	int pedsCount = pMPIDispatcher->GetGlobalPedestriansCount();
-	//cout<<"received: "<<pedsCount<<" pedestrians"<<endl;
+	int pedsCount=pAllPedestians.size();
+
 	pLinkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
 	pLinkedCellGrid->ShallowCopy(pAllPedestians);
 
@@ -568,6 +551,7 @@ void Building::LoadBuilding(string filename) {
 
 			//looking for obstacles
 			int nObst=xSubroomsNode.nChildNode("obstacle");
+
 			for(int obst=0;obst<nObst;obst++){
 				XMLNode xObstacle=xSubroomsNode.getChildNode("obstacle",obst);
 				int nPoly=xObstacle.nChildNode("polygon");
@@ -583,9 +567,8 @@ void Building::LoadBuilding(string filename) {
 				obstacle->SetHeight(height);
 
 				for(int p=0;p<nPoly;p++){
-					XMLNode xPolyVertices=xObstacle.getChildNode("polygone",p);
-					int nVertices=xObstacle.getChildNode("polygone",p).nChildNode("vertex");
-
+					XMLNode xPolyVertices=xObstacle.getChildNode("polygon",p);
+					int nVertices=xObstacle.getChildNode("polygon",p).nChildNode("vertex");
 					for(int v=0;v<nVertices-1;v++){
 						double x1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("px"));
 						double y1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("py"));
@@ -599,7 +582,6 @@ void Building::LoadBuilding(string filename) {
 			}
 			room->AddSubRoom(subroom);
 		}
-
 		//parsing the crossings
 		XMLNode xCrossingsNode = xRoom.getChildNode("crossings");
 		int nCrossing =xCrossingsNode.nChildNode("crossing");
@@ -685,7 +667,6 @@ void Building::LoadBuilding(string filename) {
 		}
 		pRouting->AddGoal(t);
 	}
-
 	Log->write("INFO: \tLoading building file successful!!!\n");
 }
 
@@ -847,6 +828,7 @@ void Building::LoadTrafficInfo(string filename) {
 		double id=xmltof(xDoor.getAttribute("trans_id"),-1);
 		string state=xmltoa(xDoor.getAttribute("state"),"open");
 
+		//TODO: this should be done only for transitions and nothing else...
 		if(state=="open"){
 			((Transition*)	pRouting->GetGoal(id) )->Open();
 		}else if(state=="close"){
@@ -919,31 +901,6 @@ void Building::AddPedestrian(Pedestrian* ped) {
 
 }
 
-void Building::SetMPIDispatcher(MPIDispatcher *mpi) {
-	pMPIDispatcher = mpi;
-}
-
-MPIDispatcher* Building::GetMPIDispatcher() const {
-	return pMPIDispatcher;
-}
-
-void Building::AddPedestrianWaitingForTransfer(Pedestrian* ped) {
-	pPedtransfering.push_back(ped);
-}
-
-void Building::GetPedestriansTransferringToRoom(int roomID,
-		vector<Pedestrian*>& transfer) {
-
-	for (unsigned int p = 0; p < pPedtransfering.size(); p++) {
-		Pedestrian* ped = pPedtransfering[p];
-		if (ped->GetRoomID() == roomID) {
-			transfer.push_back(ped);
-			pPedtransfering.erase(pPedtransfering.begin() + p);
-			printf("transferring [%d] to Room [%s][%d] \n", ped->GetPedIndex(),
-					pRooms[roomID]->GetCaption().c_str(), ped->GetRoomID());
-		}
-	}
-}
 
 void Building::InitRoomsAndSubroomsMap(){
 	Log->write("INFO: \tcreating the rooms maps!!!\n");
@@ -1006,13 +963,6 @@ void Building::InitSavePedPathway(string filename){
 	}
 }
 
-// just for control should always be empty
-void Building::ClearTranfer() {
-	if (pPedtransfering.size() > 0){
-		printf(" there should not be any pedestrian waiting to be transfered");
-		exit(0);
-	}
-}
 
 void Building::CleanUpTheScene() {
 	//return;

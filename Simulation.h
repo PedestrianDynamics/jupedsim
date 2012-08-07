@@ -33,8 +33,8 @@
 #include "routing/QuickestPathRouter.h"
 #include "routing/DirectionStrategy.h"
 #include "routing/CircleRouter.h"
+#include "routing/DummyRouter.h"
 #include "pedestrian/PedDistributor.h"
-#include "mpi/MPIDispatcher.h"
 
 
 extern OutputHandler* Log;

@@ -31,6 +31,7 @@
 						<Vertex px="13.0" py="6.0"/>
 						<Vertex px="13.0" py="5.5"/>
 						<Vertex px="12.0" py="5.5"/>
+						<Vertex px="12.0" py="6.0"/>
 					</polygon>
 				</obstacle>
 				<obstacle id="1" caption="table" height="1.0" closed="1">
@@ -39,6 +40,7 @@
 						<Vertex px="17.0" py="-2.0"/>
 						<Vertex px="17.0" py="-3.0"/>
 						<Vertex px="16.5" py="-3.0"/>
+						<!--<Vertex px="16.5" py="-2.0"/>-->
 					</polygon>
 				</obstacle>
 			</subroom>

@@ -24,7 +24,6 @@ private:
 	int pID;
 	string pCaption;
 	vector<Wall> pWalls;
-	vector<Point> pPoly;
 
 public:
 	Obstacle();
@@ -33,14 +32,20 @@ public:
 
 	string GetCaption() const;
 	void SetCaption(string caption);
+
 	double GetClosed() const;
 	void SetClosed(double closed);
+
 	double GetHeight() const;
 	void SetHeight(double height);
+
 	int GetId() const;
 	void SetId(int id);
 
 	void AddWall(const Wall& w);
+	const vector<Wall>& GetAllWalls() const;
+
+	string Write();
 };
 
 #endif /* OBSTACLE_H_ */

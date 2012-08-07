@@ -9,7 +9,14 @@
 #include "Wall.h"
 #include "Point.h"
 
-Obstacle::Obstacle() {}
+Obstacle::Obstacle() {
+	pClosed=0.0;
+	pHeight=0.0;
+	pID=-1;
+	pCaption="obstacle";
+	pWalls = vector<Wall > ();
+
+}
 
 Obstacle::~Obstacle() {}
 
@@ -49,5 +56,26 @@ int Obstacle::GetId() const {
 void Obstacle::SetId(int id) {
 	pID = id;
 }
+
+string Obstacle::Write() {
+	string s;
+	Point pos;
+
+	for (unsigned int j = 0; j < pWalls.size(); j++) {
+		Wall w = pWalls[j];
+		s.append(w.Write());
+		pos = pos + w.GetPoint1() + w.GetPoint2();
+	}
+	pos = pos * (0.5 / pWalls.size());
+
+	//add the obstacle caption
+	char tmp[CLENGTH];
+	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
+			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, pCaption.c_str());
+	s.append(tmp);
+
+	return s;
+}
+
 
 

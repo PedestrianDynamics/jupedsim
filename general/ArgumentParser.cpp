@@ -82,7 +82,7 @@ ArgumentParser::ArgumentParser() {
 	pSolver = 1;
 	pGeometryFilename = "inputfiles/geo.xml";
 	pTmax = 900;
-	pfps=1.0;
+	pfps=10.0;
 	pdt = 0.01;
 	pExitStrategy = 2;
 	//pRandomize = 2;
@@ -648,7 +648,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	//stepsize
 	if(!xPara.getChildNode("stepsize").isEmpty()){
 		const char* stepsize=xPara.getChildNode("stepsize").getText();
-		pdt=atoi(stepsize);
+		pdt=atof(stepsize);
 		Log->write("INFO: \tstepsize <"+string(stepsize)+">");
 	}
 
