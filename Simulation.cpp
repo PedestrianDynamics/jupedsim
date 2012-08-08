@@ -1,23 +1,5 @@
-/*Simulation.cpp
-  Implements the methods of the class Simulation.
-  Copyright (C) <2009-2010>  <Jonas Mehlich and Mohcine Chraibi>
 
-  This file is part of OpenPedSim.
 
-  OpenPedSim is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  any later version.
-
-  OpenPedSim is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
-
- */
 #include "Simulation.h"
 
 /************************************************
@@ -25,7 +7,7 @@
  ************************************************/
 
 Simulation::Simulation() {
-	pOnline = false; // true wenn online simulation (TraVisTo)
+	pOnline = false; // true when online simulation (TraVisTo) is wished
 	pLinkedCells = false;
 	pActionPt = 0; // on or off, wird für GCFM benötigt
 	pNPeds = 0; // number of pedestrians, Default 10
@@ -105,6 +87,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	switch (args->GetLog()) {
 		case 0:
+			// no log file
 			//Log = new OutputHandler();
 			break;
 		case 1:
@@ -133,15 +116,14 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 1:
 		{
 			//iod = new IODispatcher();
-			char name[30]="Output.xml";
-			OutputHandler* tofile = new FileHandler(name);
+			OutputHandler* tofile = new FileHandler(args->GetTrajOutputDir().c_str());
 			iod->AddIO(tofile);
 			break;
 		}
 
 		case 2:
 		{
-			OutputHandler* tofile = new FileHandler("./Output.xml");
+			OutputHandler* tofile = new FileHandler(args->GetTrajOutputDir().c_str());
 			iod->AddIO(tofile);
 			OutputHandler* travisto = new TraVisToHandler();
 			iod->AddIO(travisto);
@@ -150,7 +132,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case 3: //plain text
 			delete iod; // delete the previously allocated memory
-			Log->write("ERROR:\tdont use this writer, not implemetned");
+			Log->write("ERROR:\tdon't use this writer, not implemented");
 			exit(0);
 			break;
 
@@ -324,7 +306,7 @@ int Simulation::RunSimulation() {
 	writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 	double t;
 
-	// erste Augabe
+	// writing the header
 	iod->WriteHeader(pNPeds, fps, pBuilding);
 	iod->WriteGeometry(pBuilding);
 	iod->WriteFrame(0, pBuilding);
@@ -333,10 +315,7 @@ int Simulation::RunSimulation() {
 	if (pLinkedCells) Update();
 
 
-	/************************************************************/
-	/*************     main simulation loop *********************/
-	/************************************************************/
-	// bis Tmax oder alle Fußgänger raus
+	// main program loop
 	for (t = 0; t < pTmax && GetNPeds() > 0; ++frameNr) {
 		t = 0 + (frameNr - 1) * pDt;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
@@ -348,7 +327,7 @@ int Simulation::RunSimulation() {
 			iod->WriteFrame(frameNr / writeInterval, pBuilding);
 		}
 	}
-	// Abschluss für TraVisTo
+	// writing the footer
 	iod->WriteFooter();
 
 	//return the evacuation time
@@ -363,7 +342,6 @@ int Simulation::RunSimulation() {
 void Simulation::Update() {
 	pBuilding->Update();
 	// Neue Anzahl von Fußgänger, falls jemand ganz raus geht
-	//	SetNPeds(pBuilding->GetAnzPedestrians());
 	SetNPeds(pBuilding->GetAllPedestrians().size());
 
 	//update the cells position

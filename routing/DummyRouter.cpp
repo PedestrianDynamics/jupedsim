@@ -2,15 +2,17 @@
  * DummyRouter.cpp
  *
  *  Created on: Aug 7, 2012
- *      Author: piccolo
+ *      Author: Ulrich Kemloh
  */
 
 #include "DummyRouter.h"
 
 DummyRouter::DummyRouter() {
+
 }
 
 DummyRouter::~DummyRouter() {
+
 }
 
 int DummyRouter::FindExit(Pedestrian* p) {

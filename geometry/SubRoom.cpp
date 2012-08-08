@@ -1,8 +1,29 @@
-/*
+/**
  * File:   SubRoom.cpp
- * Author: andrea
  *
- * Created on 8. Oktober 2010, 10:56
+ * Created on 8. October 2010, 10:56
+ *
+ * @section LICENSE
+ *
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ *
+ *
+ *
  */
 
 
@@ -15,15 +36,16 @@
  ************************************************************/
 
 
-
-// Konstruktoren
-
 SubRoom::SubRoom() {
 	pID = -1;
 	pWalls = vector<Wall > ();
 	pPoly = vector<Point > ();
 	pPeds = vector<Pedestrian* > ();
-	pPeds.reserve(200);
+
+	pCrossings = vector<Crossing*>();
+	pTransitions = vector<Transition*>();
+	pHlines = vector<Hline*>();
+
 	pGoalIDs = vector<int> ();
 	pArea = 0.0;
 	pClosed=false;
@@ -217,6 +239,30 @@ void SubRoom::AddGoalID(int ID) {
 	pGoalIDs.push_back(ID);
 }
 
+//void SubRoom::AddCrossing(Crossing* line){
+//	pCrossings.push_back(line);
+//}
+//
+//void SubRoom::AddTransition(Transition* line){
+//	pTransitions.push_back(line);
+//}
+//
+//void SubRoom::AddHline(Hline* line){
+//	pHlines.push_back(line);
+//}
+//
+//const vector<Crossing*>& SubRoom::GetAllCrossings() const{
+//	return pCrossings;
+//}
+//
+//const vector<Transition*>& SubRoom::GetAllTransitions() const{
+//	return pTransitions;
+//}
+//
+//const vector<Hline*>& SubRoom::GetAllHlines() const{
+//	return pHlines;
+//}
+
 void SubRoom::RemoveGoalID(int ID){
 	for (unsigned int i=0;i<pGoalIDs.size();i++){
 		if(pGoalIDs[i]==ID){
@@ -280,6 +326,7 @@ void SubRoom::ClearAllPedestrians(){
 	}
 	pPeds.clear();
 }
+
 
 /************************************************************
  NormalSubRoom

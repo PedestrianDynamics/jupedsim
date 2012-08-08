@@ -12,7 +12,7 @@
 	<!-- traffic information: e.g closed doors -->
 	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" version="0.4">outputfile/trajectories.xml
+	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
 	</trajectories>
 	<!-- where to store the logs 
 	<logfile>outputfiles/log.txt</logfile>

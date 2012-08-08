@@ -1,8 +1,28 @@
-/* 
+/**
  * File:   SubRoom.h
- * Author: andrea
  *
- * Created on 8. Oktober 2010, 10:56
+ * Created on 8. October 2010, 10:56
+ *
+ * @section LICENSE
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section DESCRIPTION
+ *
+ *
+ *
  */
 
 #ifndef _SUBROOM_H
@@ -20,24 +40,31 @@
 
 class SubRoom {
 private:
-	int pID; // gleich Index nur innerhalb des Rooms eindeutig
+	int pID;
 	int pRoomID;
-	vector<Pedestrian*> pPeds; // Fussgänger
+	vector<Pedestrian*> pPeds; // pedestrians container
 	vector<Obstacle*> pObstacles; // obstacles
-	vector<int> pGoalIDs; // Indizes aller gaols (Crossings und Transitions)
-	double pArea; // Fläche des SubRooms
+	vector<int> pGoalIDs; // all navigation lines contained in this subroom
+	double pArea;
 	double pClosed;
 
+	//different types of navigation lines
+	vector<Crossing*> pCrossings;
+	vector<Transition*> pTransitions;
+	vector<Hline*> pHlines;
+
 protected:
-	vector<Wall> pWalls; // Wände
-	vector<Point> pPoly; // Alle Eckpunkte des Unter-Raums als Polygon
+	vector<Wall> pWalls;
+	vector<Point> pPoly; // Polygon representation of the subroom
+
 public:
-	// Konstruktoren
+
+	// constructors
 	SubRoom();
 	SubRoom(const SubRoom& orig);
 	virtual ~SubRoom();
 
-	// Setter -Funktionen
+	// Set-methods
 	void SetSubRoomID(int ID);
 	void SetRoomID(int ID);
 	void SetAllWalls(const vector<Wall>& walls);
@@ -48,7 +75,7 @@ public:
 	void SetArea(double a);
 	void SetClosed(double c);
 
-	// Getter - Funktionen
+	// Get-methods
 	int GetSubRoomID() const;
 	int GetAnzWalls() const;
 	const vector<Wall>& GetAllWalls() const;
@@ -66,8 +93,17 @@ public:
 	double GetClosed() const ;
 	double GetArea() const;
 
+//	//navigation
+//	void AddCrossing(Crossing* line);
+//	void AddTransition(Transition* line);
+//	void AddHline(Hline* line);
+//
+//	const vector<Crossing*>& GetAllCrossings() const;
+//	const vector<Transition*>& GetAllTransitions() const;
+//	const vector<Hline*>& GetAllHlines() const;
 
-	// Sonstiges
+
+	// Misc
 	void AddWall(const Wall& w);
 	void AddObstacle(Obstacle* obs);
 	void DeleteWall(int index);
@@ -78,14 +114,18 @@ public:
 	void CalculateArea();
 	bool IsDirectlyConnectedWith(const SubRoom* sub) const;
 
-	// Ein-Ausgabe
-	void LoadWall(string line); // wird in LoadNormalSubRooom() bzw LoadStair() benötigt
-	virtual string WriteSubRoom() const = 0;
+	/// @see LoadNormalSubRooom()  @see  LoadStair()
+	void LoadWall(string line);
 
-	// virtuelle Funktionen
-	virtual void WriteToErrorLog() const = 0; // Testausgabe nach Log verschieden für Stair und normal
-	virtual void ConvertLineToPoly(vector<Line*> goals) = 0; // Erstellt einen Polygonzug aus Walls und Übergängen
-	virtual bool IsInSubRoom(Pedestrian* ped) const; // prüft, ob Fußgänger noch im SubRoom
+	// virtual functions
+	virtual string WriteSubRoom() const = 0;
+	virtual void WriteToErrorLog() const = 0;
+
+	/// convert all walls and transitions(doors) into a polygon representing the subroom
+	virtual void ConvertLineToPoly(vector<Line*> goals) = 0;
+
+	///check whether the pedestrians is still in the subroom
+	virtual bool IsInSubRoom(Pedestrian* ped) const;
 	virtual bool IsInSubRoom(const Point& ped) const = 0;
 
 
@@ -100,8 +140,10 @@ public:
 class NormalSubRoom : public SubRoom {
 private:
 
-	int WhichQuad(const Point& vertex, const Point& hitPos) const; // wird in IsInSubRoom benötigt
+	///@see IsInSubRoom
+	int WhichQuad(const Point& vertex, const Point& hitPos) const;
 	double Xintercept(const Point& point1, const Point& point2, double hitY) const;
+
 public:
 	NormalSubRoom();
 	NormalSubRoom(const NormalSubRoom& orig);
@@ -119,8 +161,8 @@ public:
 
 class Stair : public SubRoom {
 private:
-	Point pUp; // Punkt der den oberen Bereich der Treppe markiert
-	Point pDown; // Punkt der den unteren Bereich der Treppe markiert
+	Point pUp; /// Punkt der den oberen Bereich der Treppe markiert
+	Point pDown; /// Punkt der den unteren Bereich der Treppe markiert
 
 	const Point* CheckCorner(const Point** otherPoint, const Point** aktPoint, const Point* nextPoint);
 public:
@@ -136,9 +178,10 @@ public:
 	const Point& GetUp() const;
 	const Point& GetDown() const;
 
-	// Sonstiges
-	bool IsUpStairs() const; // Fußgänger bewegt sich die Treppe runter
-	bool IsDownStair() const; // Fußgänger bewegt sich die Treppe rauf
+	/// pedestrians are going the stairs downwards
+	bool IsUpStairs() const;
+	/// pedestrians are going the stairs upwards
+	bool IsDownStair() const;
 
 	string WriteSubRoom() const;
 	virtual void WriteToErrorLog() const;

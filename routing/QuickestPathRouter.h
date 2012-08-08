@@ -6,7 +6,7 @@
  * Copyright (C) <2009-2011>
  *
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
  * OpenPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

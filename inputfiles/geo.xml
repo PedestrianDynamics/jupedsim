@@ -40,7 +40,7 @@
 						<Vertex px="17.0" py="-2.0"/>
 						<Vertex px="17.0" py="-3.0"/>
 						<Vertex px="16.5" py="-3.0"/>
-						<!--<Vertex px="16.5" py="-2.0"/>-->
+						<Vertex px="16.5" py="-2.0"/>
 					</polygon>
 				</obstacle>
 			</subroom>

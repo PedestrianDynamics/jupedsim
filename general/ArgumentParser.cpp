@@ -85,7 +85,6 @@ ArgumentParser::ArgumentParser() {
 	pfps=10.0;
 	pdt = 0.01;
 	pExitStrategy = 2;
-	//pRandomize = 2;
 	pRouter = 1;
 	pLinkedCells = false;
 	pLinkedCellSize=2.2;
