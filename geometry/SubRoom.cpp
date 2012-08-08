@@ -42,9 +42,9 @@ SubRoom::SubRoom() {
 	pPoly = vector<Point > ();
 	pPeds = vector<Pedestrian* > ();
 
-	pCrossings = vector<Crossing*>();
-	pTransitions = vector<Transition*>();
-	pHlines = vector<Hline*>();
+	//pCrossings = vector<Crossing*>();
+	//pTransitions = vector<Transition*>();
+	//pHlines = vector<Hline*>();
 
 	pGoalIDs = vector<int> ();
 	pArea = 0.0;

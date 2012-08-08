@@ -49,9 +49,9 @@ private:
 	double pClosed;
 
 	//different types of navigation lines
-	vector<Crossing*> pCrossings;
-	vector<Transition*> pTransitions;
-	vector<Hline*> pHlines;
+	//vector<Crossing*> pCrossings;
+	//vector<Transition*> pTransitions;
+	//vector<Hline*> pHlines;
 
 protected:
 	vector<Wall> pWalls;
