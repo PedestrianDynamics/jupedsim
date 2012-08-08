@@ -125,7 +125,7 @@ ArgumentParser::ArgumentParser() {
 }
 
 
-string ArgumentParser::GetNumberFilename() const {
+string ArgumentParser::GetPersonsFilename() const {
 	return pNumberFilename;
 }
 

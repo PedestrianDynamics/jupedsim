@@ -65,24 +65,6 @@ void StartDistributionRoom::SetAnz(int N) {
 	pN = N;
 }
 
-// Sonstige Funktionen
-
-string StartDistributionRoom::ReadDistribution(string line) {
-	char tmp[CLENGTH] = "";
-	istringstream iss(line, istringstream::in);
-	string room_caption = "-1";
-	int N = -88;
-	iss >> room_caption >> N;
-	if (room_caption != "-1" && N != -88) {
-		sprintf(tmp, "\t\tRaum: %s Anzahl Fußgänger: %d\n", room_caption.c_str(), N);
-		SetRoomCaption(room_caption);
-		SetAnz(N);
-	} else {
-		Log->write("ERROR: \t wrong format in StartDistributionRoom::ReadDistribution()!!!");
-		exit(0);
-	}
-	return tmp;
-}
 
 /************************************************************
  StartDistributionSubRoom
@@ -108,26 +90,6 @@ void StartDistributionSubroom::SetSubroomID(int i) {
 	pSubroomID = i;
 }
 
-// Sonstige Funktionen
-
-string StartDistributionSubroom::ReadDistribution(string line) {
-	char tmp[CLENGTH] = "";
-	istringstream iss(line, istringstream::in);
-	string room_caption = "-1";
-	int subroom_ID = -88;
-	int N = -88;
-	iss >> room_caption >> subroom_ID >> N;
-	if (room_caption != "-1" && N != -88 && subroom_ID != -88) {
-		sprintf(tmp, "\t\tRaum: %s Subroom: %d Anzahl Fußgänger: %d\n", room_caption.c_str(), subroom_ID, N);
-		SetRoomCaption(room_caption);
-		SetSubroomID(subroom_ID);
-		SetAnz(N);
-	} else {
-		Log->write("ERROR: \t wrong format in StartDistributionSubroom::ReadDistribution()!!!");
-		exit(0);
-	}
-	return tmp;
-}
 
 /************************************************************
  PedDistributor
@@ -201,6 +163,8 @@ Distribution* PedDistributor::GetTau() const {
 
 void PedDistributor::InitDistributor(string filename){
 
+	pInitialisationFile=filename;
+
 	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"persons");
 	Log->write("INFO: \tLoading and parsing the persons file");
 
@@ -234,45 +198,265 @@ void PedDistributor::InitDistributor(string filename){
 
 int PedDistributor::Distribute(Building* building) const {
 
-	int nPeds = 0; //Gesamtanzahl
-		vector<Point> allpos = vector<Point > ();
-		char tmp[CLENGTH];
+	Log->write("INFO: \tInit Distribute");
 
-		Log->write("INFO: \tInit Simulation");
-		// Alle Starträume durchgehen
-		int pid = 1; // Pedestrian ID (wird immer erhöht)
-		for (int i = 0; i < (int) start_dis_sub.size(); i++) {
+	int nPeds = 0;
+	char tmp[CLENGTH];
 
-			string room_caption = start_dis_sub[i].GetRoomCaption();
-			Room* r = building->GetRoom(room_caption);
-			if(!r) continue;
-
-			int roomID = r->GetRoomID();
-
-			int subroomID = start_dis_sub[i].GetSubroomID();
-			int N = start_dis_sub[i].GetAnz();
-			if (N <= 0) {
-				Log->write("ERROR: \t negative  (or null ) number of pedestrians!");
-				exit(0);
-			}
-
-			SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
-			allpos = PossiblePositions(sr, building->GetRouting());
-			int max_pos = allpos.size();
-			if (max_pos < N) {
-				sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
-						N, roomID, allpos.size());
-				Log->write(tmp);
-				exit(0);
-			} else {
-				sprintf(tmp, "INFO: \tVerteilung von %d Fußgängern in [%d/%d]! Maximale Anzahl: %d", N, roomID, subroomID, max_pos);
-				Log->write(tmp);
-			}
-			// Befüllen
-			DistributeInSubRoom(sr, N, allpos, roomID, &pid, building->GetRouting());
-			nPeds += N;
+	//first compute all possible positions in the geometry
+	vector<vector< vector<Point > > > allFreePos = vector<vector< vector<Point > > >();
+	for (int r = 0; r < building->GetAnzRooms(); r++) {
+		vector< vector<Point > >  allFreePosRoom = vector< vector<Point > > ();
+		Room* room = building->GetRoom(r);
+		for (int s = 0; s < room->GetAnzSubRooms(); s++) {
+			SubRoom* subr = room->GetSubRoom(s);
+			allFreePosRoom.push_back(PossiblePositions(subr, building->GetRouting()));
 		}
-		return nPeds;
+		allFreePos.push_back(allFreePosRoom);
+	}
+
+	// first do the distribution in the subrooms (if any)
+	int pid = 1; // the pedID is being increased throughout...
+	for (int i = 0; i < (int) start_dis_sub.size(); i++) {
+
+		string room_caption = start_dis_sub[i].GetRoomCaption();
+		Room* r = building->GetRoom(room_caption);
+		if(!r) continue;
+
+		int roomID = r->GetRoomID();
+
+		int subroomID = start_dis_sub[i].GetSubroomID();
+		int N = start_dis_sub[i].GetAnz();
+		if (N <= 0) {
+			Log->write("ERROR: \t negative  (or null ) number of pedestrians!");
+			exit(0);
+		}
+
+		vector<Point> &allpos = allFreePos[roomID][subroomID];
+		int max_pos = allpos.size();
+		if (max_pos < N) {
+			sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
+					N, roomID, allpos.size());
+			Log->write(tmp);
+			exit(0);
+		} else {
+			sprintf(tmp, "INFO: \tVerteilung von %d Fußgängern in [%d/%d]! Maximale Anzahl: %d", N, roomID, subroomID, max_pos);
+			Log->write(tmp);
+		}
+		// Befüllen
+		SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
+		DistributeInSubRoom(sr, N, allpos, roomID, &pid, building->GetRouting());
+		nPeds += N;
+	}
+
+	// then do the distribution in the room
+
+	for (int i = 0; i < (int) start_dis.size(); i++) {
+		string room_caption = start_dis[i].GetRoomCaption();
+		Room* r = building->GetRoom(room_caption);
+		if(!r) continue;
+		int N = start_dis[i].GetAnz();
+		if (N <= 0) {
+			Log->write("ERROR: \t negative number of pedestrians! Ignoring");
+			continue;
+		}
+
+		int roomID=r->GetRoomID();
+		double sum_area = 0;
+		int max_pos = 0;
+		double ppm; // pedestrians per square meter
+		int ges_anz = 0;
+		vector<int> max_anz = vector<int>();
+		vector<int> akt_anz = vector<int>();
+
+		vector< vector<Point > >&  allFreePosInRoom=allFreePos[roomID];
+		for (int i = 0; i < r->GetAnzSubRooms(); i++) {
+			SubRoom* sr = r->GetSubRoom(i);
+			double area = sr->GetArea();
+			sum_area += area;
+			int anz = allFreePosInRoom[i].size();
+			max_anz.push_back(anz);
+			max_pos += anz;
+		}
+		if (max_pos < N) {
+			sprintf(tmp, "ERROR: \t Distribution of %d pedestrians in Room %d not possible! Maximale number: %d\n",
+					N, r->GetRoomID(), max_pos);
+			Log->write(tmp);
+			exit(0);
+		}
+		ppm = N / sum_area;
+		// Anzahl der Personen pro SubRoom bestimmen
+		for (int i = 0; i < r->GetAnzSubRooms(); i++) {
+			SubRoom* sr = r->GetSubRoom(i);
+			int anz = sr->GetArea() * ppm + 0.5; // wird absichtlich gerundet
+			while (anz > max_anz[i]) {
+				anz--;
+			}
+			akt_anz.push_back(anz);
+			ges_anz += anz;
+		}
+		// Falls N noch nicht ganz erreicht, von vorne jeweils eine Person dazu
+		int j = 0;
+		while (ges_anz < N) {
+			if (akt_anz[j] < max_anz[j]) {
+				akt_anz[j] = akt_anz[j] + 1;
+				ges_anz++;
+			}
+			j = (j + 1) % max_anz.size();
+		}
+		j = 0;
+		while (ges_anz > N) {
+			if (akt_anz[j] > 0) {
+				akt_anz[j] = akt_anz[j] - 1;
+				ges_anz--;
+			}
+			j = (j + 1) % max_anz.size();
+		}
+		// BefÃŒllen
+		for (unsigned int i = 0; i < akt_anz.size(); i++) {
+			SubRoom* sr = r->GetSubRoom(i);
+			if (akt_anz[i] > 0)
+				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], r->GetRoomID(), &pid, building->GetRouting());
+		}
+		nPeds += N;
+	}
+
+
+	// now assign individual attributes
+
+	XMLNode xMainNode=XMLNode::openFileHelper(pInitialisationFile.c_str(),"persons");
+	Log->write("INFO: \tLoading and parsing the persons file");
+
+	//get the distribution node
+	int nPersons=xMainNode.nChildNode("person");
+	for(int i=0;i<nPersons;i++){
+		XMLNode xPerson=xMainNode.getChildNode("person",i);
+		int id=xmltoi(xPerson.getAttribute("id"),-1);
+
+		if(id==-1){
+			Log->write("ERROR:\tin the person attribute file. The id is mandatory ! skipping the entry");
+			continue;
+		}
+		//look for that pedestrian.
+		Pedestrian* ped=NULL;
+		for (int i = 0; i < building->GetAnzRooms(); i++) {
+			Room* room = building->GetRoom(i);
+			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+				SubRoom* sub = room->GetSubRoom(j);
+				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+					Pedestrian* p=sub->GetPedestrian(k);
+					if(p->GetPedIndex()==id){
+						ped=p;
+						goto END;
+					}
+				}
+			}
+		}
+		END:
+		if(!ped){
+			sprintf(tmp, "WARNING: \t Ped [%d] doenst not exit yet. I am creating a new one",id);
+			Log->write(tmp);
+			ped=new Pedestrian();
+			ped->SetPedIndex(id);
+
+			// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
+			Ellipse E = Ellipse();
+			double atau = GetAtau()->GetRand();
+			double amin = GetAmin()->GetRand();
+			E.SetAv(atau);
+			E.SetAmin(amin);
+			double bmax = GetBmax()->GetRand();
+			double bmin = GetBmin()->GetRand();
+			E.SetBmax(bmax);
+			E.SetBmin(bmin);
+			ped->SetEllipse(E);
+			// tau
+			double tau = GetTau()->GetRand();
+			ped->SetTau(tau);
+			// V0
+			double v0 = GetV0()->GetRand();
+			ped->SetV0Norm(v0);
+		}
+
+		double height=xmltof(xPerson.getAttribute("height"),-1);
+		if( height!=-1){
+			ped->SetHeight(height);
+		}
+
+		double age=xmltof(xPerson.getAttribute("age"),-1);
+		if( age!=-1){
+			ped->SetAge(age);
+		}
+
+		string gender=xmltoa(xPerson.getAttribute("gender"),"-1");
+		if( gender!="-1"){
+			ped->SetGender(gender);
+		}
+
+		double destination=xmltof(xPerson.getAttribute("goal"),-1);
+		if( destination!=-1){
+			ped->SetFinalDestination(destination);
+		}
+
+		double wishVelo=xmltof(xPerson.getAttribute("wishVelo"),-1);
+		if( wishVelo!=-1){
+			ped->SetV0Norm(wishVelo);
+		}
+
+		double startX=xmltof(xPerson.getAttribute("startX"),-1);
+		double startY=xmltof(xPerson.getAttribute("startY"),-1);
+		if(startX!=-1 && startY!=-1){
+			ped->SetPos(Point(startX,startY));
+
+			//in that case the room should be automatically adjusted
+			for (int i = 0; i < building->GetAnzRooms(); i++) {
+				Room* room = building->GetRoom(i);
+				for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+					SubRoom* sub = room->GetSubRoom(j);
+					if(sub->IsInSubRoom(Point(startX,startY))){
+						//if a room was already assigned
+						if(ped->GetRoomID()!=-1){
+							if(FindPedAndDeleteFromRoom(building,ped)){
+								sprintf(tmp, "WARNING: \t Ped [%d] doenst not exit yet and will be be moved. ",id);
+								Log->write(tmp);
+							}
+						}
+						ped->SetRoomID(room->GetRoomID(),room->GetCaption());
+						ped->SetSubRoomID(sub->GetSubRoomID());
+						sub->AddPedestrian(ped);
+
+					}
+				}
+			}
+		}
+	}
+	//	for (int r = 0; r < building->GetAnzRooms(); r++) {
+	//		Room* room = building->GetRoom(r);
+	//		for (int s = 0; s < room->GetAnzSubRooms(); s++) {
+	//			SubRoom* subr = room->GetSubRoom(s);
+	//			cout<<"size: "<<allFreePos[room->GetRoomID()][subr->GetSubRoomID()].size()<<endl;
+	//		}
+	//	}
+
+	return nPeds;
+}
+
+bool PedDistributor::FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const {
+
+	for (int i = 0; i < building->GetAnzRooms(); i++) {
+		Room* room = building->GetRoom(i);
+		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+				Pedestrian* p=sub->GetPedestrian(k);
+				if(p->GetPedIndex()==ped->GetPedIndex()){
+					sub->DeletePedestrian(k);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 
@@ -418,7 +602,7 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r, Routing * routing) c
  *              nächsten Aufruf)
  *   - routing: wird benötigt um die Zielline der Fußgänger zu initialisieren
  * */
-void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point> positions, int roomID, int* pid, Routing * routing) const {
+void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid, Routing * routing) const {
 	char tmp[CLENGTH];
 	int anz = positions.size();
 

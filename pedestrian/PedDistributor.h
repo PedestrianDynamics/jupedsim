@@ -61,8 +61,6 @@ public:
 	void SetRoomCaption(string caption);
 	void SetAnz(int N);
 
-	// Sonstige Funktionen
-	virtual string ReadDistribution(string line);
 };
 
 class StartDistributionSubroom : public StartDistributionRoom {
@@ -78,8 +76,6 @@ public:
 
 	// Setter-Funktionen
 	void SetSubroomID(int i);
-	// Sonstige Funktionen
-	virtual string ReadDistribution(string line);
 };
 
 /************************************************************
@@ -95,6 +91,9 @@ private:
 	Distribution* pTau;
 	vector<StartDistributionRoom> start_dis; // ID startraum, subroom und Anz
 	vector<StartDistributionSubroom> start_dis_sub; // ID startraum, subroom und Anz
+	string pInitialisationFile; // store the file for later user
+	// find aped in a subroom and delete him
+	bool FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const;
 
 public:
 	// Konstruktoren
@@ -118,7 +117,7 @@ public:
 	vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
 			SubRoom* r, double bufx, double bufy, double dx, Routing* routing) const;
 	vector<Point> PossiblePositions(SubRoom* r, Routing * routing) const;
-	void DistributeInSubRoom(SubRoom* r, int N, vector<Point> positions, int roomID, int* pid, Routing * routing)const;
+	void DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid, Routing * routing)const;
 	string writeParameter() const;
 
 	void InitDistributor(string start_file);

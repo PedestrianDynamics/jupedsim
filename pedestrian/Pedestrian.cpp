@@ -57,9 +57,9 @@ Pedestrian::Pedestrian() {
 	pV0=Point(0,0);
 	pLastPosition=Point(0,0);
 
-	//	for(int i=0;i<15;i++)
-	//		for(int j=0;j<130;j++)
-	//			pMentalMapArray[i][j]=-1;
+	pHeight=160;
+	pAge=30;
+	pGender="male";
 
 }
 
@@ -391,6 +391,30 @@ void Pedestrian::RerouteIn(double time){
 
 bool Pedestrian::IsReadyForRerouting(){
 	return(pReroutingEnabled &&(pTimeBeforeRerouting<=0.0));
+}
+
+double Pedestrian::GetAge() const {
+	return pAge;
+}
+
+void Pedestrian::SetAge(double age) {
+	pAge = age;
+}
+
+string Pedestrian::GetGender() const {
+	return pGender;
+}
+
+void Pedestrian::SetGender(string gender) {
+	pGender = gender;
+}
+
+double Pedestrian::GetHeight() const {
+	return pHeight;
+}
+
+void Pedestrian::SetHeight(double height) {
+	pHeight = height;
 }
 
 void Pedestrian::ResetRerouting(){

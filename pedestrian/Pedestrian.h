@@ -40,6 +40,10 @@ class Building;
 class Pedestrian {
 private:
 	int pPedIndex; // Index des Fußgängers 1,..., N
+	double pHeight;
+	double pAge;
+	string pGender;
+
 	int pRoomID;
 	int pSubRoomID;
 	string pRoomCaption;
@@ -177,6 +181,12 @@ public:
 
 
 	//void SetMaxOberservationTime(double time);
+	double GetAge() const;
+	void SetAge(double age);
+	string GetGender() const;
+	void SetGender(string gender);
+	double GetHeight() const;
+	void SetHeight(double height);
 };
 
 #endif	/* _PEDESTRIAN_H */

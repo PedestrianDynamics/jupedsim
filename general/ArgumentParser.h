@@ -60,7 +60,7 @@ public:
 	ArgumentParser(); // gibt die Programmoptionen aus
 
 	// Getter-Funktionen
-	string GetNumberFilename() const;
+	string GetPersonsFilename() const;
 	string GetPathwayFile() const;
 	int GetSolver() const;
 	double GetTmax() const;

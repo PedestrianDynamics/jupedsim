@@ -162,7 +162,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
 			args->GetTauSigma());
 	s.append(pDistribution->writeParameter());
-	pDistribution->InitDistributor(args->GetNumberFilename());
+	pDistribution->InitDistributor(args->GetPersonsFilename());
 
 
 	// Richtungswahl zum Ziel
