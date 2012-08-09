@@ -107,7 +107,6 @@ void InteractorStyle::OnChar() {
 	case 27:
 		extern_fullscreen_enable = false;
 		extern_force_system_update = true;
-		std::cout << "esc pressed" << std::endl;
 		break;
 
 	case 'a': {

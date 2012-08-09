@@ -69,6 +69,9 @@ public:
 	static void parseGeometryPG3(QString content, FacilityGeometry *geo);
 
 	/// provided for convenience and will be removed in the next version
+	static void parseGeometryXMLV04(QString content, FacilityGeometry *geo);
+
+	/// provided for convenience and will be removed in the next version
 	static void parseGeometryTRAV(QString content, FacilityGeometry *geo,QDomNode geoNode=NULL);
 
 private:

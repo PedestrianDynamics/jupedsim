@@ -33,7 +33,7 @@
 #ifndef FACILITYGEOMETRY_H_
 #define FACILITYGEOMETRY_H_
 
-#include<string>
+#include <string>
 
 //forwarded classes
 class vtkPolyData;

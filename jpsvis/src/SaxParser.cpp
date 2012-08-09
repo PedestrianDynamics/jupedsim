@@ -59,10 +59,9 @@ SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps){
 	geometry=geo;
 	dataset=data;
 	para=fps;
+	parsingWalls=false;
 
 	dataset->clearFrames();
-
-	parsingWalls=false;
 }
 
 SaxParser::~SaxParser() {
@@ -869,4 +868,124 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 	}
 }
 
+void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
+	QDomDocument doc("");
 
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly)) {
+		qDebug()<<"could not open the file: "<<filename<<endl;
+		return ;
+	}
+	QString *errorCode = new QString();
+	if (!doc.setContent(&file, errorCode)) {
+		file.close();
+		qDebug()<<errorCode<<endl;
+		return ;
+	}
+	QDomElement root= doc.documentElement();
+
+	//only parsing the geometry node
+	if(root.tagName()!="geometry") return;
+
+
+	double version =root.attribute("version","-1").toDouble();
+
+	if(version<0.4){
+		QMessageBox::warning(0, QObject::tr("Parsing Error"),
+				QObject::tr("Only geometry version >= 0.4 supported"));
+	}
+
+	//parsing the subrooms
+	QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
+	//parsing the walls
+	for (unsigned int i = 0; i < xSubRoomsNodeList.length(); i++) {
+		QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
+		while(!xPoly.isNull()) {
+			//wall thickness, default to 30 cm
+			double thickness = xPoly.attribute("thickness","15").toDouble();
+			//wall height default to 250 cm
+			double height = xPoly.attribute("height","250").toDouble();
+			//wall color default to blue
+			double color = xPoly.attribute("color","0").toDouble();
+
+			QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
+			for( int i=0;i<xVertices.count()-1;i++){
+				double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble();
+				double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble();
+				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble();
+
+				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble();
+				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble();
+				geo->addWall(x1, y1, x2, y2,z1,thickness,height,color);
+			}
+			xPoly = xPoly.nextSiblingElement("polygon");
+		}
+	}
+
+	QDomNodeList xObstaclesList=doc.elementsByTagName("obstacle");
+	for (unsigned int i = 0; i < xObstaclesList.length(); i++) {
+		QDomElement xPoly = xObstaclesList.item(i).firstChildElement("polygon");
+		while(!xPoly.isNull()) {
+			//wall thickness, default to 30 cm
+			double thickness = xPoly.attribute("thickness","15").toDouble();
+			//wall height default to 250 cm
+			double height = xPoly.attribute("height","250").toDouble();
+			//wall color default to blue
+			double color = xPoly.attribute("color","0").toDouble();
+
+			QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
+			for( int i=0;i<xVertices.count()-1;i++){
+				double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble();
+				double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble();
+				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble();
+
+				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble();
+				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble();
+				geo->addWall(x1, y1, x2, y2,z1,thickness,height,color);
+			}
+			xPoly = xPoly.nextSiblingElement("polygon");
+		}
+	}
+
+	QDomNodeList xCrossingsList=doc.elementsByTagName("crossing");
+	for (unsigned int i = 0; i < xCrossingsList.length(); i++) {
+		QDomElement xCrossing = xCrossingsList.item(i).toElement();
+		QDomNodeList xVertices=xCrossing.elementsByTagName("vertex");
+
+		///door thickness, default to 15 cm
+		double thickness = xCrossing.attribute("thickness","15").toDouble();
+		//door height default to 250 cm
+		double height = xCrossing.attribute("height","250").toDouble();
+		//door color default to blue
+		double color = xCrossing.attribute("color","255").toDouble();
+
+		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble();
+		double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble();
+		double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble();
+
+		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble();
+		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble();
+		geo->addDoor(x1, y1, x2, y2,z1,thickness,height,color);
+	}
+
+	QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
+	for (unsigned int i = 0; i < xTransitionsList.length(); i++) {
+		QDomElement xTransition = xTransitionsList.item(i).toElement();
+		QDomNodeList xVertices=xTransition.elementsByTagName("vertex");
+
+		///door thickness, default to 15 cm
+		double thickness = xTransition.attribute("thickness","15").toDouble();
+		//door height default to 250 cm
+		double height = xTransition.attribute("height","250").toDouble();
+		//door color default to blue
+		double color = xTransition.attribute("color","255").toDouble();
+
+		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble();
+		double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble();
+		double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble();
+
+		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble();
+		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble();
+		geo->addDoor(x1, y1, x2, y2,z1,thickness,height,color);
+	}
+}

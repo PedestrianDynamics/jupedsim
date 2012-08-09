@@ -266,10 +266,10 @@ void TraVisTo::slotHelpAbout() {
 	QMessageBox::about(
 			this,
 			"About TraVisTo",
-			"Version 0.2 build with  QT 4.6 and VTK 5.4\n\n"
+			"Version 0.4 build with  QT 4.6 and VTK 5.4\n\n"
 			"TraVisTo stands for Trajectories Visualisation Tool. It is a tool for visualizing pedestrians motion\n"
-			"developped at the Forschungszentrum Juelich, Germany\n\n"
-			"Copyright 2009-2011.\n"
+			"developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
+			"Copyright 2009-2012.\n"
 			"Authors: Ulrich Kemloh\n\n"
 			"For questions, contact +49-40-246161-4193 \nor mail at \n"
 			"u.kemloh@fz-juelich.de\n");
@@ -579,14 +579,14 @@ bool TraVisTo::addPedestrianGroup(int groupID,QString fileName){
 	{
 		//geometry=parseGeometryPG3(fileName);
 		SaxParser::parseGeometryPG3(fileName,geometry);
-
 	}
 
-	//	// if jul is detected, just load and show the geometry then exit
-	//	if(fileName.endsWith(".jul",Qt::CaseInsensitive)){
-	//		slotLoadParseShowGeometry(fileName);
-	//		return false;
-	//	}
+	// if xml is detected, just load and show the geometry then exit
+	else if(fileName.endsWith(".xml",Qt::CaseInsensitive)){
+		SaxParser::parseGeometryXMLV04(fileName,geometry);
+		//slotLoadParseShowGeometry(fileName);
+		//return false;
+	}
 
 	QFile file(fileName);
 	if (!file.open(QIODevice::ReadOnly)) {
