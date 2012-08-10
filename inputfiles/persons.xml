@@ -15,6 +15,10 @@
 
 	<groups> <!-- sich kennende Leute -->
 		<group id ="1">1,2,3</group>
+		<group id ="1">
+			<members>1,2,3</members>
+			<trip>1</trip>
+		</group>
 	</groups>
 
 	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 

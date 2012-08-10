@@ -36,6 +36,7 @@ Routing::Routing() {
 	pCrossings = vector<Crossing* > ();
 	pTransitions = vector<Transition* > ();
 	pHlines = vector<Hline* > ();
+	pTrips=vector<vector<int> > ();
 }
 
 Routing::Routing(const Routing& orig) {
@@ -50,6 +51,10 @@ Routing::~Routing() {
 
 const vector<Crossing*>& Routing::GetAllGoals() const {
 	return goals;
+}
+
+const vector<int> Routing::GetTrip(int id) const {
+	return pTrips[id];
 }
 
 Crossing* Routing::GetGoal(int index) const {
@@ -88,6 +93,10 @@ void Routing::AddTransition(Transition* line){
 
 void Routing::AddHline(Hline* line){
 	pHlines.push_back(line);
+}
+
+void Routing::AddTrip(vector<int> trip){
+	pTrips.push_back(trip);
 }
 
 const vector<Crossing*>& Routing::GetAllCrossings() const{

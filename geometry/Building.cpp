@@ -772,7 +772,7 @@ void Building::LoadRoutingInfo(string filename) {
 		exit(EXIT_FAILURE);
 	}
 
-	//actually only contains one Hline node
+	//actually only contains one Hlines node
 	XMLNode xHlinesNode = xMainNode.getChildNode("Hlines");
 	int nHlines=xHlinesNode.nChildNode("Hline");
 
@@ -802,6 +802,31 @@ void Building::LoadRoutingInfo(string filename) {
 		pRouting->AddGoal(c);
 	}
 
+
+	//load the pre-defined trips
+	XMLNode xTripsNode = xMainNode.getChildNode("trips");
+	int nTrips=xTripsNode.nChildNode("trip");
+
+	//processing the rooms node
+	for(int i=0;i<nTrips;i++){
+		XMLNode trip = xTripsNode.getChildNode("trip",i);
+		double id=xmltof(trip.getAttribute("id"),-1);
+		if(id==-1){
+			Log->write("ERROR:\t id missing for trip");
+			exit(EXIT_FAILURE);
+		}
+		string sTrip=trip.getText();
+		vector<int> vTrip;
+		vTrip.clear();
+
+		char* str = (char*) sTrip.c_str();
+		char *p = strtok(str, ":");
+		while (p) {
+			vTrip.push_back(xmltoi(p));
+			p = strtok(NULL, ":");
+		}
+		pRouting->AddTrip(vTrip);
+	}
 	Log->write("INFO:\t done with loading extra routing information");
 }
 

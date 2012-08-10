@@ -45,6 +45,7 @@ private:
 	vector<Crossing*> goals;
 	vector<Transition*> pTransitions;
 	vector<Hline*> pHlines;
+	vector<vector<int> >pTrips;
 
 public:
 	Routing();
@@ -60,10 +61,13 @@ public:
 	void AddCrossing(Crossing* line);
 	void AddTransition(Transition* line);
 	void AddHline(Hline* line);
+	void AddTrip(vector<int> trip);
 
 	const vector<Crossing*>& GetAllCrossings() const;
 	const vector<Transition*>& GetAllTransitions() const;
 	const vector<Hline*>& GetAllHlines() const;
+
+	const vector<int> GetTrip(int id) const;
 
 	// Ausgabe
 	void WriteToErrorLog() const;

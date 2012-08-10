@@ -57,6 +57,7 @@ private:
 	//int pMentalMapArray[15][130];
 	Point pV0; //vector V0
 	Point pLastPosition;
+	vector<int> pTrip;
 
 	//routing parameters
 	double pReroutingThreshold; // new orientation after 10 seconds
@@ -99,8 +100,10 @@ public:
 	void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
 	void SetPhiPed();
 	void SetFinalDestination(int UID);
+	void SetTrip(vector<int> trip);
 
 	// Getter-Funktionen
+	const vector<int> GetTrip() const;
 	int GetPedIndex() const;
 	int GetRoomID() const;
 	int GetSubRoomID() const;

@@ -437,7 +437,6 @@ int PedDistributor::Distribute(Building* building) const {
 	//			cout<<"size: "<<allFreePos[room->GetRoomID()][subr->GetSubRoomID()].size()<<endl;
 	//		}
 	//	}
-
 	return nPeds;
 }
 

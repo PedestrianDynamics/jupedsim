@@ -60,6 +60,7 @@ Pedestrian::Pedestrian() {
 	pHeight=160;
 	pAge=30;
 	pGender="male";
+	pTrip=vector<int> ();
 
 }
 
@@ -142,6 +143,10 @@ void Pedestrian::Setdt(double dt) {
 	pDt = dt;
 }
 
+void Pedestrian::SetTrip(vector<int> trip){
+	pTrip=trip;
+}
+
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
@@ -176,6 +181,10 @@ int Pedestrian::GetExitIndex() const {
 
 Line* Pedestrian::GetExitLine() const {
 	return pExitLine;
+}
+
+const vector<int> Pedestrian::GetTrip() const{
+	return pTrip;
 }
 
 // return the unique subroom Identifier
@@ -213,7 +222,6 @@ void Pedestrian::ClearMentalMap(){
 }
 
 
-// Eigenschaften der Ellipse
 
 const Point& Pedestrian::GetPos() const {
 	return pEllipse.GetCenter();
