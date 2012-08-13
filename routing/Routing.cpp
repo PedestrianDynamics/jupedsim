@@ -53,9 +53,18 @@ const vector<Crossing*>& Routing::GetAllGoals() const {
 	return goals;
 }
 
-const vector<int> Routing::GetTrip(int id) const {
-	return pTrips[id];
+const vector<int> Routing::GetTrip(int index) const {
+	if ((index >= 0) && (index < (int) pTrips.size()))
+		return pTrips[index];
+	else {
+		char tmp[CLENGTH];
+		sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",index,pTrips.size());
+		Log->write(tmp);
+		exit(0);
+	}
 }
+
+
 
 Crossing* Routing::GetGoal(int index) const {
 	if ((index >= 0) && (index < (int) goals.size()))

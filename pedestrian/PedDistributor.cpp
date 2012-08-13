@@ -354,7 +354,7 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 		END:
 		if(!ped){
-			sprintf(tmp, "WARNING: \t Ped [%d] doenst not exit yet. I am creating a new one",id);
+			sprintf(tmp, "WARNING: \t Ped [%d] does not not exit yet. I am creating a new one",id);
 			Log->write(tmp);
 			ped=new Pedestrian();
 			ped->SetPedIndex(id);
@@ -405,9 +405,9 @@ int PedDistributor::Distribute(Building* building) const {
 
 		double startX=xmltof(xPerson.getAttribute("startX"),-1);
 		double startY=xmltof(xPerson.getAttribute("startY"),-1);
+
 		if(startX!=-1 && startY!=-1){
 			ped->SetPos(Point(startX,startY));
-
 			//in that case the room should be automatically adjusted
 			for (int i = 0; i < building->GetAnzRooms(); i++) {
 				Room* room = building->GetRoom(i);
@@ -417,26 +417,46 @@ int PedDistributor::Distribute(Building* building) const {
 						//if a room was already assigned
 						if(ped->GetRoomID()!=-1){
 							if(FindPedAndDeleteFromRoom(building,ped)){
-								sprintf(tmp, "WARNING: \t Ped [%d] doenst not exit yet and will be be moved. ",id);
+								sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet and will be be moved.", id);
 								Log->write(tmp);
 							}
 						}
 						ped->SetRoomID(room->GetRoomID(),room->GetCaption());
 						ped->SetSubRoomID(sub->GetSubRoomID());
 						sub->AddPedestrian(ped);
-
 					}
 				}
 			}
 		}
 	}
-	//	for (int r = 0; r < building->GetAnzRooms(); r++) {
-	//		Room* room = building->GetRoom(r);
-	//		for (int s = 0; s < room->GetAnzSubRooms(); s++) {
-	//			SubRoom* subr = room->GetSubRoom(s);
-	//			cout<<"size: "<<allFreePos[room->GetRoomID()][subr->GetSubRoomID()].size()<<endl;
-	//		}
-	//	}
+
+	//now parse the different groups
+	XMLNode xGroups=xMainNode.getChildNode("groups");
+	int nGroup=xGroups.nChildNode("group");
+	for(int i=0;i<nGroup;i++){
+		XMLNode group=xGroups.getChildNode("group",i);
+		int group_id=xmltoi(group.getAttribute("id"),-1);
+		int trip_id=xmltoi(group.getChildNode("trip").getText(),-1);
+
+		//get the members
+		string members=group.getChildNode("members").getText();
+
+		char* str = (char*) members.c_str();
+		char *p = strtok(str, ",");
+		while (p) {
+			int ped_id=xmltoi(p);
+			Pedestrian* ped=building->GetPedestrian(ped_id);
+			if(ped){
+				ped->SetGroup(group_id);
+				ped->SetTrip(building->GetRouting()->GetTrip(trip_id));
+			}else{
+				sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet ",ped_id);
+				Log->write(tmp);
+			}
+			p = strtok(NULL, ",");
+		}
+	}
+
 	return nPeds;
 }
 

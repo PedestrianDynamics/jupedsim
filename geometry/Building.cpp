@@ -720,8 +720,8 @@ Room* Building::GetRoom(string caption) const {
 			return pRooms[r];
 	}
 	Log->write("Warning: Room not found with caption " + caption);
-	return NULL;
-	//exit(EXIT_FAILURE);
+	//return NULL;
+	exit(EXIT_FAILURE);
 }
 
 Transition* Building::GetTransition(string caption) const {
@@ -736,8 +736,8 @@ Transition* Building::GetTransition(string caption) const {
 
 	}
 	Log->write("WARNING: No Transition with Caption: " + caption);
-	//return NULL;
-	exit(EXIT_FAILURE);
+	return NULL;
+	//exit(EXIT_FAILURE);
 }
 
 Crossing* Building::GetGoal(string caption) const {
@@ -1058,4 +1058,20 @@ void Building::StringExplode(string str, string separator, vector<string>* resul
 	if(str.length() > 0){
 		results->push_back(str);
 	}
+}
+
+Pedestrian* Building::GetPedestrian( int pedID) const {
+	for (int i = 0; i < pRooms.size(); i++) {
+		Room* room = pRooms[i];
+		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+				Pedestrian* p=sub->GetPedestrian(k);
+				if(p->GetPedIndex()==pedID){
+					return p;
+				}
+			}
+		}
+	}
+	return NULL;
 }

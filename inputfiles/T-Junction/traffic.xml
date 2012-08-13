@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<traffic version="0.4">
+	<rooms>
+		<room room_id="0" state="good" />
+	</rooms>
+	<doors>
+		<door trans_id="3" state="open" />
+		<door trans_id="4" state="open" />
+		<door trans_id="5" state="open" />
+	</doors>
+</traffic>

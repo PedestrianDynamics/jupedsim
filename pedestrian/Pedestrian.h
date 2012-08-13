@@ -58,6 +58,7 @@ private:
 	Point pV0; //vector V0
 	Point pLastPosition;
 	vector<int> pTrip;
+	int pGroup;
 
 	//routing parameters
 	double pReroutingThreshold; // new orientation after 10 seconds
@@ -131,7 +132,6 @@ public:
 
 	void RecordActualPosition();
 	double GetDistanceSinceLastRecord();
-	bool IsInThePromenade() const;
 
 	///write the pedestrian path (room and exit taken ) to file
 	void WritePath(ofstream& file, Building* building=NULL);
@@ -190,6 +190,8 @@ public:
 	void SetGender(string gender);
 	double GetHeight() const;
 	void SetHeight(double height);
+	int GetGroup() const;
+	void SetGroup(int group);
 };
 
 #endif	/* _PEDESTRIAN_H */

@@ -8,21 +8,19 @@
 	<!-- default distribution -->
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
-		<dist room_caption="hall" subroom_id="0" number="7"/>
-		<dist room_caption="hall" subroom_id="1" number="5"/>
-		<dist room_caption="hall" number="3"/>
+		<dist room_caption="T-Junction" subroom_id="0" number="7" />
 	</distribution>
 
-	<groups> <!-- Leute, die sich auskennen -->
-		<group id ="1">
-			<members>1,2,3</members>
-			<trip>1</trip>
+	<groups>
+		<group id="0">
+			<members>4,5,6</members>
+			<trip>0</trip>
 		</group>
 	</groups>
 
 	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
 		direction="" goal="" age="18" gender="male"/> -->
-	<person id="1" height="180" wishVelo="1.3" age="18" gender="male" />
-	<person id="2" height="170" age="20" gender="male" />
-	<person id="3" height="182" age="25" gender="female" />
+	<person id="1" goal="5" />
+	<person id="2" goal="4" />
+	<person id="3" goal="3" />
 </persons> 

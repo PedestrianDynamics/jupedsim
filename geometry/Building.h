@@ -86,6 +86,7 @@ public:
     Routing* GetRouting() const;
     const vector<Room*>& GetAllRooms() const;
     const vector<Pedestrian*>& GetAllPedestrians() const;
+    Pedestrian* GetPedestrian( int pedID) const;
     int GetAnzRooms() const;
     Room* GetRoom(int index) const; // Gibt Raum der Nummer "index" zurueck
     Room* GetRoom(string caption)const;

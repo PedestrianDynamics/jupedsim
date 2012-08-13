@@ -45,7 +45,7 @@
 				</obstacle>
 			</subroom>
 			<crossings>
-				<!-- virtuals exits between subrooms -->
+				<!-- virtual exits between subrooms -->
 				<crossing id="0" subroom1_id="0" subroom2_id="1">
 					<vertex px="10.0" py="6.0"/>
 					<vertex px="10.0" py="4.0"/>

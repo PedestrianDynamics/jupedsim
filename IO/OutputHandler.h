@@ -40,6 +40,7 @@ using namespace std;
 class OutputHandler {
 public:
     virtual void write(string str);
+    virtual ~OutputHandler(){};
 };
 
 class STDIOHandler : public OutputHandler {
@@ -53,7 +54,7 @@ private:
 
 public:
     FileHandler(const char *fn);
-    ~FileHandler();
+    virtual ~FileHandler();
     void write(string str);
 };
 
@@ -63,7 +64,7 @@ private:
 
 public:
     TraVisToHandler();
-    ~TraVisToHandler();
+    virtual ~TraVisToHandler();
     void write(string str);
 
     //Some tags are broken

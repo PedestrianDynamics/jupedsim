@@ -61,6 +61,7 @@ Pedestrian::Pedestrian() {
 	pAge=30;
 	pGender="male";
 	pTrip=vector<int> ();
+	pGroup=-1;
 
 }
 
@@ -331,35 +332,6 @@ void Pedestrian::SetSmoothTurning(bool smt) {
 
 }
 
-bool Pedestrian::IsInThePromenade() const {
-	int label = atoi(pRoomCaption.c_str());
-
-	if (label<60 ){
-
-		switch (label){
-			case 10:
-				switch (pSubRoomID){
-					case 0: case 2: case 3:
-						return false;
-						break;
-				}
-				break;
-
-			case 30:
-				switch (pSubRoomID){
-					case 1: case 2: case 3:
-						return false;
-						break;
-				}
-				break;
-		}
-		return true;
-	}
-
-	else{
-		return false;
-	}
-}
 
 bool Pedestrian::IsFeelingLikeInJam(){
 	//return true;
@@ -375,12 +347,6 @@ void Pedestrian::UpdateTimeInJam(){
 }
 
 void Pedestrian::UpdateJamData(){
-	//if(GetV().NormSquare()<0.5*GetV0().NormSquare()){
-	//	pTimeInJam+=pDt;
-	//}else{
-	//	pTimeInJam=0.0;
-	//}
-
 	if(GetV().NormSquare()<0.25*GetV0().NormSquare()){
 		pTimeInJam+=pDt;
 	}else{
@@ -421,6 +387,14 @@ double Pedestrian::GetHeight() const {
 	return pHeight;
 }
 
+int Pedestrian::GetGroup() const {
+	return pGroup;
+}
+
+void Pedestrian::SetGroup(int group) {
+	pGroup = group;
+}
+
 void Pedestrian::SetHeight(double height) {
 	pHeight = height;
 }
@@ -439,10 +413,7 @@ void Pedestrian::SetFinalDestination(int final) {
 }
 
 int Pedestrian::GetFinalDestination() const {
-	//the first aim is to get out the tribune/rang
-	if((IsInThePromenade()==false) /*&& (GetDistanceToNextTarget()>.5)*/)
-		return FINAL_DEST_OUT;
-
+	//cout<<"dest: " <<pDesiredFinalDestination<<endl;
 	return pDesiredFinalDestination;
 }
 
@@ -455,19 +426,11 @@ void Pedestrian::WritePath(ofstream& file, Building* building){
 		for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
 			file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
 		}
-
 	}else{
 		for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
 			file<<iter->first/1000<<" "<<iter->second<<endl;
 		}
 	}
-
-	//	for(int i=0;i<15;i++){
-	//		for(int j=0;j<130;j++){
-	//			if(pMentalMapArray[i][j]!=-1)
-	//				file<<i<<" "<<pMentalMapArray[i][j]<<endl;
-	//		}
-	//	}
 }
 
 string Pedestrian::GetPath(){
@@ -542,8 +505,6 @@ void Pedestrian::Dump(int ID, int pa) {
 		break;
 
 	}
-	//printf("-----------(key?)------------\n\n");
-	//getc(stdin);
 }
 
 void Pedestrian::RecordActualPosition(){

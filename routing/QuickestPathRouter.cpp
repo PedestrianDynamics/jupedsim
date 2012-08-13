@@ -37,26 +37,16 @@ QuickestPathRouter::~QuickestPathRouter() {
 
 int QuickestPathRouter::FindExit(Pedestrian* ped){
 
-	//FIXME: reduce the graph correctly
-	//to avoid this distinction
-	if(ped->IsInThePromenade()==false){
-		return GlobalRouter::FindExit(ped);
-	}
-//	cout<<"ped now in the promenade: " <<ped->GetPedIndex()<<endl;
-//	cout<<"dest: "<<ped->GetFinalDestination()<<endl;
 	int next=FindNextExit(ped);
 
 	// that ped will be deleted
 	if(next==-1) return next;
 
 	if(ped->IsFeelingLikeInJam()){
-		//cout<<" ped in Jam: "<<ped->GetPedIndex()<<endl;
 		Redirect(ped);
 		ped->ResetTimeInJam();
 		//ped->RerouteIn(2.50); // seconds
 	}else if(ped->IsReadyForRerouting()){
-		//	ped->ClearMentalMap();
-		//	pRouting->FindExit(ped);
 		Redirect(ped);
 		ped->ResetRerouting();
 	}else{

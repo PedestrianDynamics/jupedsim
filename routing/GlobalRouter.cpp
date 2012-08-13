@@ -396,11 +396,7 @@ void GlobalRouter::Init(Building* building){
 			// set the intermediate path to global final destination
 			GetPath(from_door,to_door);
 			if (pTmpPedPath.size()>=2){
-				//double dist=pDistMatrix[from_door][to_door];
-				//from_AP->AddFinalDestination(to_UID,dist);
-				//from_AP->AddIntermediateDest(to_UID,pTmpPedPath[1]);
 				from_AP->AddTransitAPsTo(to_UID, pAccessPoints[pTmpPedPath[1]]);
-
 			}else{
 				if((from_AP->isFinalDestination()==false) && (GetAllGoals()[from_door]->IsOpen())){
 
@@ -427,11 +423,6 @@ void GlobalRouter::Init(Building* building){
 	//dumping the complete system
 	//DumpAccessPoints(825);
 	//DumpAccessPoints(826);
-
-	//DumpAccessPoints(1290);
-	//DumpAccessPoints(1291);
-	//DumpAccessPoints(1293);
-	//DumpAccessPoints(1357);
 
 	//WriteGraphGV("routing_graph.gv");
 	//exit(0);
@@ -716,13 +707,10 @@ void GlobalRouter::LoadNavigationGraph(string fileName){
 	}
 
 	cout<<"done loading graph"<<endl;
-	vector<string> rooms;
-	rooms.push_back("010");
+
+	//vector<string> rooms;
+	//rooms.push_back("010");
 	//rooms.push_back("020");
-	//rooms.push_back("030");
-	//rooms.push_back("040");
-	//rooms.push_back("050");
-	//WriteGraphGV("routing_graph.gv",FINAL_DEST_PARKING_BOTTOM,rooms);
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
 	//exit(0);
 }
@@ -731,16 +719,6 @@ int GlobalRouter::FindExit(Pedestrian* ped){
 
 	int nextDestination=ped->GetNextDestination();
 
-	//int pedToLog=1;
-	//if(ped->GetPedIndex()==5 && (nextDestination==553)){
-	//if(ped->GetPedIndex()==1 && (nextDestination!=56)&& (ped->GetSubRoomID()==46)){
-	//	if(ped->GetPedIndex()==-30){
-	//		cout<<"---------------"<<endl;
-	//		cout <<" pedID: "<<ped->GetPedIndex()<<endl;
-	//		cout <<" roomID: "<<" [ "<< ped->GetRoomID()<<" "<<ped->GetSubRoomID()<<" ]"<<endl;
-	//		cout <<" next: "<<nextDestination<<endl;
-	//		cout<<"---------------"<<endl;
-	//	}
 	//get the room and find the corresponding node
 
 	SubRoom* sub = pBuilding->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
@@ -810,10 +788,6 @@ int GlobalRouter::FindExit(Pedestrian* ped){
 			}
 			else // we are still having a valid destination, don't change
 			{
-				//				if(ped->GetPedIndex()==pedToLog){
-				//					cout<<"called2: "<<previousDestination<<endl;
-				//					//cout<<"Raum/Subroom[in rout]: "<<ped->GetRoomID()<<" / "<<ped->GetSubRoomID()<<endl;
-				//				}
 				return previousDestination;
 			}
 		}
