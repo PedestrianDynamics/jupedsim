@@ -39,6 +39,7 @@ protected:
     ForceModel *model;
 public:
     ODESolver(ForceModel* model);
+    virtual ~ODESolver(){};
     virtual void solveODE(double t, double tp, Building* building) const = 0;
 };
 

@@ -52,30 +52,10 @@ public:
 
 	virtual void Init(Building* building);
 
-	// Many extra final destinations may be added (bahnhof, parking,...).
-	// They should be outside the geometry, thus not linked with any room
-	// They should be provided with a UID (Unique IDentifier) to use in
-	// getNextDestination.
-	void AddFinalDestination(int UID, const Line& position);
-
-	void InitializeHermesFinalDestinations();
-
-	// perfornm basic initialization for the hermes project
-	void InitializeHermes();
-	// load additional goals
-	void LoadAdditionalGoals(string fileName);
 	//performs a check of the geometry and fixes if possible. transitions/crossings and hlines.
 	void CheckInconsistencies();
-	// Load a navigation graph, override existing nodes
-	void LoadNavigationGraph(string fileName);
-
-
 
 	virtual int FindExit(Pedestrian* p);
-
-	//todo: not implemented
-	//void GetAllFinalDestinations();
-
 
 
 	/**

@@ -124,7 +124,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID){
 		AccessPoint* best_ap=possibleDest[0];
 		double min_dist=GetDistanceTo(best_ap);
 
-		for (int i=0;i<possibleDest.size();i++){
+		for (unsigned int i=0;i<possibleDest.size();i++){
 			double tmp= GetDistanceTo(possibleDest[i]);
 			if(tmp<min_dist){
 				min_dist=tmp;

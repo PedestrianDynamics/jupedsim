@@ -32,11 +32,12 @@
  ************************************************************/
 
 Routing::Routing() {
-	goals = vector<Crossing* > ();
-	pCrossings = vector<Crossing* > ();
-	pTransitions = vector<Transition* > ();
-	pHlines = vector<Hline* > ();
-	pTrips=vector<vector<int> > ();
+	goals = vector<Crossing*>();
+	pCrossings = vector<Crossing*>();
+	pTransitions = vector<Transition*>();
+	pHlines = vector<Hline*>();
+	pTrips = vector<vector<int> >();
+	pFinalDestinations = vector<int>();
 }
 
 Routing::Routing(const Routing& orig) {
@@ -116,18 +117,23 @@ const vector<Transition*>& Routing::GetAllTransitions() const{
 	return pTransitions;
 }
 
+void Routing::AddFinalDestinationID(int id){
+	pFinalDestinations.push_back(id);
+}
+
 const vector<Hline*>& Routing::GetAllHlines() const{
 	return pHlines;
 }
 
-
-// Ausgabe
+const vector<int> Routing::GetFinalDestinations() const{
+	return pFinalDestinations;
+}
 
 void Routing::WriteToErrorLog() const {
 	for (int i = 0; i < GetAnzGoals(); i++)
 		goals[i]->WriteToErrorLog();
-
 }
+
 
 
 

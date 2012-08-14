@@ -396,6 +396,7 @@ int PedDistributor::Distribute(Building* building) const {
 		double destination=xmltof(xPerson.getAttribute("goal"),-1);
 		if( destination!=-1){
 			ped->SetFinalDestination(destination);
+			building->GetRouting()->AddFinalDestinationID(destination);
 		}
 
 		double wishVelo=xmltof(xPerson.getAttribute("wishVelo"),-1);
@@ -437,6 +438,13 @@ int PedDistributor::Distribute(Building* building) const {
 		XMLNode group=xGroups.getChildNode("group",i);
 		int group_id=xmltoi(group.getAttribute("id"),-1);
 		int trip_id=xmltoi(group.getChildNode("trip").getText(),-1);
+		int goal_id=xmltoi(group.getChildNode("goal").getText(),-1);
+
+		if((goal_id !=-1) && (trip_id!=-1)){
+			sprintf(tmp, "WARNING: \t trip and goal cannot be set for the same group [%d] !.",group_id);
+			Log->write(tmp);
+			exit(EXIT_FAILURE);
+		}
 
 		//get the members
 		string members=group.getChildNode("members").getText();
@@ -448,7 +456,10 @@ int PedDistributor::Distribute(Building* building) const {
 			Pedestrian* ped=building->GetPedestrian(ped_id);
 			if(ped){
 				ped->SetGroup(group_id);
+				if(trip_id!=-1)
 				ped->SetTrip(building->GetRouting()->GetTrip(trip_id));
+				if(goal_id!=-1)
+				ped->SetFinalDestination(goal_id);
 			}else{
 				sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet ",ped_id);
 				Log->write(tmp);

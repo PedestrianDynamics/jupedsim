@@ -15,6 +15,7 @@
 		<group id="0">
 			<members>4,5,6</members>
 			<trip>0</trip>
+			<!-- <goal>0</goal> -->
 		</group>
 	</groups>
 

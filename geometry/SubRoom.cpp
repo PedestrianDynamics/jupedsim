@@ -41,6 +41,7 @@ SubRoom::SubRoom() {
 	pWalls = vector<Wall > ();
 	pPoly = vector<Point > ();
 	pPeds = vector<Pedestrian* > ();
+	pObstacles=vector<Obstacle*> ();
 
 	//pCrossings = vector<Crossing*>();
 	//pTransitions = vector<Transition*>();
@@ -69,7 +70,10 @@ SubRoom::~SubRoom() {
 	}
 	if (pGoalIDs.size() > 0) pGoalIDs.clear();
 
-	//TODO: delete the obstacles
+	for (int i = 0; i < pObstacles.size(); i++) {
+		delete pObstacles[i];
+	}
+	pObstacles.clear();
 }
 
 // Setter -Funktionen

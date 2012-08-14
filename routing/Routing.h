@@ -46,6 +46,11 @@ private:
 	vector<Transition*> pTransitions;
 	vector<Hline*> pHlines;
 	vector<vector<int> >pTrips;
+	// store the possible final destination identified while parsing the person format./
+	// only those destination are considered in the floyd warshal algorithm.
+
+protected:
+	vector<int> pFinalDestinations;
 
 public:
 	Routing();
@@ -62,12 +67,14 @@ public:
 	void AddTransition(Transition* line);
 	void AddHline(Hline* line);
 	void AddTrip(vector<int> trip);
+	void AddFinalDestinationID(int id);
 
 	const vector<Crossing*>& GetAllCrossings() const;
 	const vector<Transition*>& GetAllTransitions() const;
 	const vector<Hline*>& GetAllHlines() const;
 
 	const vector<int> GetTrip(int id) const;
+	const vector<int> GetFinalDestinations() const;
 
 	// Ausgabe
 	void WriteToErrorLog() const;

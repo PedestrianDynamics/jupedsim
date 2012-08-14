@@ -413,7 +413,7 @@ void Pedestrian::SetFinalDestination(int final) {
 }
 
 int Pedestrian::GetFinalDestination() const {
-	//cout<<"dest: " <<pDesiredFinalDestination<<endl;
+	//cout<<"ID: "<< pPedIndex<<" dest: " <<pDesiredFinalDestination<<endl;
 	return pDesiredFinalDestination;
 }
 

@@ -378,6 +378,7 @@ void Building::Update() {
 
 		for (int p = start; p <= end; ++p) {
 
+			//todo: hermes
 			if(pRouting->FindExit(pAllPedestians[p])==-1){
 				//a destination could not be found for that pedestrian
 				DeletePedFromSim(pAllPedestians[p]);
@@ -1061,7 +1062,7 @@ void Building::StringExplode(string str, string separator, vector<string>* resul
 }
 
 Pedestrian* Building::GetPedestrian( int pedID) const {
-	for (int i = 0; i < pRooms.size(); i++) {
+	for (unsigned int i = 0; i < pRooms.size(); i++) {
 		Room* room = pRooms[i];
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);

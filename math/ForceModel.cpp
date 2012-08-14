@@ -627,6 +627,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			int pedExitIndex=ped->GetExitIndex();
 
 			// alle Crossings/Transitons außer der eigenen wirken abstoßend (nur in der Tribuene)
+			//TODO: Hermes
 			int roomID=ped->GetRoomID();
 			if((roomID!=10 ) && (roomID!=11)&& (roomID!=12)&& (roomID!=13)&& (roomID!=14))
 				for (int i = 0; i < (int) rep_goals.size(); i++) {
@@ -650,6 +651,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Pedestrian* ped = allPeds[p];
 			Point v_neu = ped->GetV() + result_acc[p - start] * h;
 			//only update the position if the velocity has reached a certain threshold
+			//TODO: Hermes
 			if (v_neu.Norm() >= EPS_V*0.7){
 				Point pos_neu = ped->GetPos() + v_neu * h;
 				ped->SetPos(pos_neu);

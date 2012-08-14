@@ -50,7 +50,7 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
     double h = tip1 - ti;
     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
-    // Schleife übr alle Räume
+    // Schleife über alle Räume
     for (int i = 0; i < building->GetAnzRooms(); i++) {
         Room* r = building->GetRoom(i);
         vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();

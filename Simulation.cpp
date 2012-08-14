@@ -264,7 +264,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	InitSimulation();
 
-	//using linkedcells?
+	//using linkedcells
 	if (pLinkedCells){
 		pBuilding->InitGrid(args->GetLinkedCellSize());
 	}
