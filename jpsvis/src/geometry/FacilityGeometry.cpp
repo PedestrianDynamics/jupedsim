@@ -276,8 +276,8 @@ void FacilityGeometry::addDoor(double x1, double y1, double x2, double y2, doubl
 
 	//double m[]={x1,y1,z+1};
 	//double n[]={x2,y2,z+1};
+	//printf("[%f %f %f]---[%f %f %f]\n",x1,y1,z,x2,y2,z);
 
-	printf("[%f %f %f]---[%f %f %f]\n",x1,y1,z,x2,y2,z);
 	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 }
 
@@ -570,7 +570,7 @@ vtkActor2DCollection* FacilityGeometry::getCaptions(){
 void FacilityGeometry::addNewElementText(double center[3], double orientation[3],
 		string text, double color) {
 
-	return ;
+	//return ;
 
 		{//caption
 			VTK_CREATE(vtkTextActor3D,caption);

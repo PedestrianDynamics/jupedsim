@@ -890,6 +890,11 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 
 	double version =root.attribute("version","-1").toDouble();
 
+	string unit=root.attribute("unit","cm").toStdString();
+	double xToCmfactor=100;
+	if (unit=="cm") xToCmfactor=1;
+	if (unit=="m") xToCmfactor=100;
+
 	if(version<0.4){
 		QMessageBox::warning(0, QObject::tr("Parsing Error"),
 				QObject::tr("Only geometry version >= 0.4 supported"));
@@ -900,26 +905,48 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	//parsing the walls
 	for (unsigned int i = 0; i < xSubRoomsNodeList.length(); i++) {
 		QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
+		double position[3]={0,0,0};
+		double pos_count=1;
+		double color=0;
+
 		while(!xPoly.isNull()) {
 			//wall thickness, default to 30 cm
 			double thickness = xPoly.attribute("thickness","15").toDouble();
 			//wall height default to 250 cm
 			double height = xPoly.attribute("height","250").toDouble();
 			//wall color default to blue
-			double color = xPoly.attribute("color","0").toDouble();
+			 color = xPoly.attribute("color","0").toDouble();
 
 			QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
-			for( int i=0;i<xVertices.count()-1;i++){
-				double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble();
-				double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble();
-				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble();
+			pos_count+=xVertices.count()-1;
 
-				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble();
-				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble();
+			for( int i=0;i<xVertices.count()-1;i++){
+				//all unit are converted in cm
+				double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+				double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+
+				position[0]+= x1;
+				position[1]+= y1;
+				position[2]+= z1;
+
 				geo->addWall(x1, y1, x2, y2,z1,thickness,height,color);
 			}
 			xPoly = xPoly.nextSiblingElement("polygon");
 		}
+
+		//add the caption
+		string roomCaption = xSubRoomsNodeList.item(i).parentNode().toElement().attribute("caption").toStdString();
+		string subroomCaption=xSubRoomsNodeList.item(i).toElement().attribute("id").toStdString();
+		string caption=roomCaption+" ( " + subroomCaption + " ) ";
+		position[0]/=pos_count;
+		position[1]/=pos_count;
+		position[2]/=pos_count;
+		geo->addObjectLabel(position,position,caption,color);
+		//cout<<"position: [" <<position[0]<<", "<<position[1]<<", "<<position[2]<<" ]"<<endl;;
+
 	}
 
 	QDomNodeList xObstaclesList=doc.elementsByTagName("obstacle");
@@ -935,12 +962,12 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 
 			QDomNodeList xVertices=xPoly.elementsByTagName("vertex");
 			for( int i=0;i<xVertices.count()-1;i++){
-				double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble();
-				double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble();
-				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble();
+				double x1=xVertices.item(i).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+				double y1=xVertices.item(i).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
 
-				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble();
-				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble();
+				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
 				geo->addWall(x1, y1, x2, y2,z1,thickness,height,color);
 			}
 			xPoly = xPoly.nextSiblingElement("polygon");
@@ -958,14 +985,18 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		double height = xCrossing.attribute("height","250").toDouble();
 		//door color default to blue
 		double color = xCrossing.attribute("color","255").toDouble();
+		QString id= xCrossing.attribute("id","-1");
 
-		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble();
-		double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble();
-		double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble();
+		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+		double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+		double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
 
-		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble();
-		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble();
+		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
 		geo->addDoor(x1, y1, x2, y2,z1,thickness,height,color);
+
+		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, z1};
+		geo->addObjectLabel(center,center,id.toStdString(),21);
 	}
 
 	QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
@@ -980,12 +1011,16 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		//door color default to blue
 		double color = xTransition.attribute("color","255").toDouble();
 
-		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble();
-		double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble();
-		double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble();
+		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+		double y1=xVertices.item(0).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+		double z1=xVertices.item(0).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
 
-		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble();
-		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble();
+		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
+		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
 		geo->addDoor(x1, y1, x2, y2,z1,thickness,height,color);
+
+		string id= xTransition.attribute("id","-1").toStdString();
+		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, z1};
+		geo->addObjectLabel(center,center,id,21);
 	}
 }
