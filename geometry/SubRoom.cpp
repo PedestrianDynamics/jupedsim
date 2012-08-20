@@ -28,7 +28,6 @@
 
 
 
-
 #include "SubRoom.h"
 
 /************************************************************
@@ -38,6 +37,7 @@
 
 SubRoom::SubRoom() {
 	pID = -1;
+	pRoomID=-1;
 	pWalls = vector<Wall > ();
 	pPoly = vector<Point > ();
 	pPeds = vector<Pedestrian* > ();
@@ -60,17 +60,18 @@ SubRoom::SubRoom(const SubRoom& orig) {
 	pGoalIDs = orig.GetAllGoalIDs();
 	pArea = orig.GetArea();
 	pClosed=orig.GetClosed();
+	pRoomID=orig.GetRoomID();
 }
 
 SubRoom::~SubRoom() {
 	if (pWalls.size() > 0) pWalls.clear();
 	if (pPoly.size() > 0) pPoly.clear();
-	for (int i = 0; i < GetAnzPedestrians(); i++) {
+	for (unsigned int i = 0; i < pPeds.size(); i++) {
 		delete pPeds[i];
 	}
 	if (pGoalIDs.size() > 0) pGoalIDs.clear();
 
-	for (int i = 0; i < pObstacles.size(); i++) {
+	for (unsigned int i = 0; i < pObstacles.size(); i++) {
 		delete pObstacles[i];
 	}
 	pObstacles.clear();

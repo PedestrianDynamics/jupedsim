@@ -29,8 +29,10 @@
 #ifndef _CROSSING_H
 #define	_CROSSING_H
 
-#include "Line.h"
+//#include "Line.h"
 #include "Room.h"
+
+class Line;
 
 class Crossing : public Line {
 private:

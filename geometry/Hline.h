@@ -29,9 +29,11 @@
 #ifndef HLINE_H_
 #define HLINE_H_
 
-#include "Line.h"
-#include "SubRoom.h"
 #include "Room.h"
+
+class Line;
+class SubRoom;
+
 
 class Hline: public Line {
 

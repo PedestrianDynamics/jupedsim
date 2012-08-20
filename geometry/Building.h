@@ -54,14 +54,13 @@ private:
     vector<Pedestrian*> pAllPedestians;
     LCGrid* pLinkedCellGrid;
     // this is only for the Hermes Project
-    bool pSubroomConnectionMap[16][130][16][130];
+    //bool pSubroomConnectionMap[16][130][16][130];
 
     // pedestrians pathway
     bool pSavePathway;
     ofstream PpathWayStream;
 
     // wird nur innerhalb von Building benötigt
-    void LoadHeader(ifstream* buildingfile, int* i);
     void StringExplode(string str, string separator, vector<string>* results);
 
 public:
@@ -98,7 +97,7 @@ public:
     // Sonstiges
     void InitGeometry();
     void InitGrid(double cellSize);
-    void InitRoomsAndSubroomsMap();
+    //void InitRoomsAndSubroomsMap();
     void InitPhiAllPeds(); // Initialisiert die Ausrichtung der Ellipse
     void InitSavePedPathway(string filename);
     void AddRoom(Room* room);
@@ -118,7 +117,7 @@ public:
 
 
 	// saving computation
-	bool IsDirectlyConnected(int room1, int subroom1,int room2, int subroom2);
+	//bool IsDirectlyConnected(int room1, int subroom1,int room2, int subroom2);
 
 };
 

@@ -588,32 +588,31 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			building->GetGrid()->GetNeighbourhood(ped,neighbours,&nSize);
 
 			// The forces are computed only when the rooms of the pedestrians share a transition/crossing
+//			for (int i = 0; i < nSize; i++) {
+//				Pedestrian* ped1 = neighbours[i];
+//				int r1= ped->GetRoomID();
+//				int s1=ped->GetSubRoomID();
+//				int r2=ped1->GetRoomID();
+//				int s2=ped1->GetSubRoomID();
+//				if(building->IsDirectlyConnected(r1,s1,r2,s2))
+//					//if(Building::pSubroomConnectionMap[r1][s1][r2][s2])
+//					F_rep = F_rep + ForceRepPed(ped, ped1);
+//
+//			}
 
 			for (int i = 0; i < nSize; i++) {
 				Pedestrian* ped1 = neighbours[i];
-				int r1= ped->GetRoomID();
-				int s1=ped->GetSubRoomID();
-				int r2=ped1->GetRoomID();
-				int s2=ped1->GetSubRoomID();
-				if(building->IsDirectlyConnected(r1,s1,r2,s2))
-					//if(Building::pSubroomConnectionMap[r1][s1][r2][s2])
+				//if they are in the same subroom
+				if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
 					F_rep = F_rep + ForceRepPed(ped, ped1);
-
+				} else {
+					// or in neighbour subrooms
+					SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+					if(subroom->IsDirectlyConnectedWith(sb2)){
+						F_rep = F_rep + ForceRepPed(ped, ped1);
+					}
+				}
 			}
-
-			//			for (int i = 0; i < nSize; i++) {
-			//				Pedestrian* ped1 = neighbours[i];
-			//				//if they are in the same subroom
-			//				if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-			//					F_rep = F_rep + ForceRepPed(ped, ped1);
-			//				} else {
-			//					// or in neighbour subrooms
-			//					SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-			//					if(subroom->IsDirectlyConnectedWith(sb2)){
-			//						F_rep = F_rep + ForceRepPed(ped, ped1);
-			//					}
-			//				}
-			//			}
 
 
 			//repulsive forces to the walls and transitions that are not my target
@@ -628,18 +627,18 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 			// alle Crossings/Transitons außer der eigenen wirken abstoßend (nur in der Tribuene)
 			//TODO: Hermes
-			int roomID=ped->GetRoomID();
-			if((roomID!=10 ) && (roomID!=11)&& (roomID!=12)&& (roomID!=13)&& (roomID!=14))
-				for (int i = 0; i < (int) rep_goals.size(); i++) {
-					int goalID=rep_goals[i];
-					Crossing* goal=allGoals[goalID];
-					// ignore my transition
-					if (goalID != pedExitIndex) {
-						// ignore the hlines
-						if(goal->GetSubRoom1()!=goal->GetSubRoom2())
-							repwall = repwall + ForceRepWall(ped,*((Wall*)goal));
-					}
-				}
+			//int roomID=ped->GetRoomID();
+			//if((roomID!=10 ) && (roomID!=11)&& (roomID!=12)&& (roomID!=13)&& (roomID!=14))
+//				for (int i = 0; i < (int) rep_goals.size(); i++) {
+//					int goalID=rep_goals[i];
+//					Crossing* goal=allGoals[goalID];
+//					// ignore my transition
+//					if (goalID != pedExitIndex) {
+//						// ignore the hlines
+//						if(goal->GetSubRoom1()!=goal->GetSubRoom2())
+//							repwall = repwall + ForceRepWall(ped,*((Wall*)goal));
+//					}
+//				}
 
 			Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
 			result_acc.push_back(acc);

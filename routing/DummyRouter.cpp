@@ -16,8 +16,8 @@ DummyRouter::~DummyRouter() {
 }
 
 int DummyRouter::FindExit(Pedestrian* p) {
-	p->SetExitIndex(1);
-	p->SetExitLine(GetAllGoals()[1]);
+	p->SetExitIndex(46);
+	p->SetExitLine(GetAllGoals()[46]);
 	return 1;
 }
 

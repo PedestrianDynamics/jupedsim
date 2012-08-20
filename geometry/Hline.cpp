@@ -29,7 +29,9 @@
 #include "Hline.h"
 
 Hline::Hline() {
-
+	pRoom=NULL;
+	pSubRoom=NULL;
+	pID=-1;
 }
 
 Hline::~Hline() {

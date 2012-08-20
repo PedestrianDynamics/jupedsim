@@ -28,11 +28,17 @@
 #ifndef _SUBROOM_H
 #define	_SUBROOM_H
 
+
+#include "Line.h"
 #include "Wall.h"
 #include "../general/Macros.h"
 #include "../pedestrian/Pedestrian.h"
 #include "Obstacle.h"
 
+
+class Transition;
+class Crossing;
+class Hline;
 
 /************************************************************
  SubRoom
@@ -49,9 +55,9 @@ private:
 	double pClosed;
 
 	//different types of navigation lines
-	//vector<Crossing*> pCrossings;
-	//vector<Transition*> pTransitions;
-	//vector<Hline*> pHlines;
+	vector<Crossing*> pCrossings;
+	vector<Transition*> pTransitions;
+	vector<Hline*> pHlines;
 
 protected:
 	vector<Wall> pWalls;

@@ -28,7 +28,6 @@
  */
 
 #include "Crossing.h"
-#include "Room.h"
 
 /************************************************************
  Crossing (abgeleitet von Line)

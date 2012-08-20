@@ -32,46 +32,6 @@
 
 using namespace std;
 
-/*************************************************************
- private Funktionen
- ************************************************************/
-
-void Building::LoadHeader(ifstream* buildingfile, int* i) {
-	string line;
-
-	getline(*buildingfile, line);
-	(*i)++;
-	while (line.find("</header>") == string::npos) {
-		istringstream iss(line, istringstream::in);
-		string tmp; // Schlüsselwort, z.B.: "caption"
-		if (line.find("caption") != string::npos) {
-			iss >> tmp >> pCaption;
-		} else if (line.find("version") != string::npos) {
-			double version;
-			iss >> tmp >> version;
-			if (version != VERSION) {
-				char tmp[CLENGTH];
-				sprintf(tmp, "ERROR: \tBuilding::LoadHeader() "
-						"neue Version im Geometrieformat!!! %f != %f", version,
-						VERSION);
-				Log->write(tmp);
-				exit(0);
-			}
-		} else {
-			char tmp[CLENGTH];
-			sprintf(tmp, "ERROR: \tBuilding::LoadHeader() "
-					"Wrong object in building file <header>: [%s] line %d ",
-					line.c_str(), *i);
-			Log->write(tmp);
-			exit(0);
-		}
-		getline(*buildingfile, line);
-		(*i)++;
-	}
-}
-
-
-
 /************************************************************
  Konstruktoren
  ************************************************************/
@@ -88,6 +48,8 @@ Building::Building(const Building& orig) {
 	pCaption = orig.GetCaption();
 	pRooms = orig.GetAllRooms();
 	pRouting = orig.GetRouting();
+	pSavePathway=false;
+	pLinkedCellGrid = NULL;
 }
 
 Building::~Building() {
@@ -948,38 +910,38 @@ void Building::AddPedestrian(Pedestrian* ped) {
 }
 
 
-void Building::InitRoomsAndSubroomsMap(){
-	Log->write("INFO: \tcreating the rooms maps!!!\n");
-
-	for (int i=0;i<16;i++)
-		for (int j=0;j<130;j++)
-			for (int k=0;k<16;k++)
-				for (int l=0;l<130;l++)
-					pSubroomConnectionMap[i][j][k][l]=0;
-
-	//create the subroom connections map
-	for (unsigned int r1=0;r1< pRooms.size();r1++){
-		Room* room1= GetRoom(r1);
-		const vector <SubRoom*> sb1s=room1->GetAllSubRooms();
-
-		for (unsigned int r2=0;r2<pRooms.size();r2++){
-			Room* room2= GetRoom(r2);
-			const vector <SubRoom*> sb2s=room2->GetAllSubRooms();
-
-			// now looping over all subrooms
-			for(unsigned int s1=0;s1<sb1s.size();s1++){
-				for(unsigned int s2=0;s2<sb2s.size();s2++){
-					if(sb1s[s1]->IsDirectlyConnectedWith(sb2s[s2])){
-						pSubroomConnectionMap[r1][s1][r2][s2]=1;
-						//cout<<"connected"<<endl;
-					}else{
-						pSubroomConnectionMap[r1][s1][r2][s2]=0;
-					}
-				}
-			}
-		}
-	}
-}
+//void Building::InitRoomsAndSubroomsMap(){
+//	Log->write("INFO: \tcreating the rooms maps!!!\n");
+//
+//	for (int i=0;i<16;i++)
+//		for (int j=0;j<130;j++)
+//			for (int k=0;k<16;k++)
+//				for (int l=0;l<130;l++)
+//					pSubroomConnectionMap[i][j][k][l]=0;
+//
+//	//create the subroom connections map
+//	for (unsigned int r1=0;r1< pRooms.size();r1++){
+//		Room* room1= GetRoom(r1);
+//		const vector <SubRoom*> sb1s=room1->GetAllSubRooms();
+//
+//		for (unsigned int r2=0;r2<pRooms.size();r2++){
+//			Room* room2= GetRoom(r2);
+//			const vector <SubRoom*> sb2s=room2->GetAllSubRooms();
+//
+//			// now looping over all subrooms
+//			for(unsigned int s1=0;s1<sb1s.size();s1++){
+//				for(unsigned int s2=0;s2<sb2s.size();s2++){
+//					if(sb1s[s1]->IsDirectlyConnectedWith(sb2s[s2])){
+//						pSubroomConnectionMap[r1][s1][r2][s2]=1;
+//						//cout<<"connected"<<endl;
+//					}else{
+//						pSubroomConnectionMap[r1][s1][r2][s2]=0;
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
 
 void Building::InitSavePedPathway(string filename){
 	PpathWayStream.open(filename.c_str());
@@ -1041,10 +1003,10 @@ void Building::CleanUpTheScene() {
 
 }
 
-bool  Building::IsDirectlyConnected(int room1, int subroom1, int room2,
-		int subroom2) {
-	return pSubroomConnectionMap[room1][subroom1][room2][subroom2];
-}
+//bool  Building::IsDirectlyConnected(int room1, int subroom1, int room2,
+//		int subroom2) {
+//	return pSubroomConnectionMap[room1][subroom1][room2][subroom2];
+//}
 
 void Building::StringExplode(string str, string separator, vector<string>* results){
 	size_t found;

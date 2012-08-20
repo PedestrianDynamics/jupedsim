@@ -222,8 +222,8 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	Routing* rout = NULL;
 	switch (router) {
 		case 1:
-			rout = new GlobalRouter();
-			//rout = new DummyRouter();
+			//rout = new GlobalRouter();
+			rout = new DummyRouter();
 			break;
 		case 2:
 			rout = new GlobalRouter();
