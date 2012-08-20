@@ -9,7 +9,7 @@
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
 <!--		<dist room_caption="Floor" subroom_id="0" number="1"/> -->
-		<dist room_caption="200C" number="10"/>
+		<dist room_caption="200C" number="3"/>
 	</distribution>
 
 <!--	<groups> 
@@ -21,7 +21,8 @@
 -->
 	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
 		direction="" goal="" age="18" gender="male"/> -->
-	<person id="1" height="180" wishVelo="1.3" age="18" gender="male" />
+	<!--<person id="1" height="180" wishVelo="1.3" age="18" gender="male" />
 	<person id="2" height="170" age="20" gender="male" />
 	<person id="3" height="182" age="25" gender="female" />
+	-->
 </persons> 

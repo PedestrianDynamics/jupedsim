@@ -44,7 +44,6 @@
 
 
 
-class MPIDispatcher;
 
 class Building {
 private:

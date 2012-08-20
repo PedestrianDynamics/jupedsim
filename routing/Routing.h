@@ -41,8 +41,10 @@ class Building;
 
 class Routing {
 private:
-	vector<Crossing*> pCrossings;
 	vector<Crossing*> goals;
+	std::map<int, Crossing*>pGoal; // map the actual room to a destination
+
+	vector<Crossing*> pCrossings;
 	vector<Transition*> pTransitions;
 	vector<Hline*> pHlines;
 	vector<vector<int> >pTrips;
@@ -54,12 +56,11 @@ protected:
 
 public:
 	Routing();
-	Routing(const Routing& orig);
 	virtual ~Routing();
 
 	// Getter-Funktionen
-	const vector<Crossing*>& GetAllGoals() const;
-	Crossing* GetGoal(int index) const;
+	//const vector<Crossing*>& GetAllGoals() const;
+	Crossing* GetGoal(int index);
 	int GetAnzGoals() const;
 
 	// Sonstiges

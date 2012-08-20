@@ -21,6 +21,7 @@ Simulation::Simulation() {
 	pSolver = NULL;
 	iod = new IODispatcher();
 	pTrajectories = new Trajectories();
+	fps=1;
 }
 
 Simulation::~Simulation() {
@@ -222,8 +223,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	Routing* rout = NULL;
 	switch (router) {
 		case 1:
-			//rout = new GlobalRouter();
-			rout = new DummyRouter();
+			rout = new GlobalRouter();
 			break;
 		case 2:
 			rout = new GlobalRouter();
@@ -232,7 +232,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			rout = new QuickestPathRouter();
 			break;
 		case 4:
-			rout = new CircleRouter();
+			rout = new DummyRouter();
 			break;
 	}
 

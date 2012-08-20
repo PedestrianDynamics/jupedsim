@@ -99,14 +99,14 @@ public:
 	double GetClosed() const ;
 	double GetArea() const;
 
-//	//navigation
-//	void AddCrossing(Crossing* line);
-//	void AddTransition(Transition* line);
-//	void AddHline(Hline* line);
-//
-//	const vector<Crossing*>& GetAllCrossings() const;
-//	const vector<Transition*>& GetAllTransitions() const;
-//	const vector<Hline*>& GetAllHlines() const;
+	//navigation
+	void AddCrossing(Crossing* line);
+	void AddTransition(Transition* line);
+	void AddHline(Hline* line);
+
+	const vector<Crossing*>& GetAllCrossings() const;
+	const vector<Transition*>& GetAllTransitions() const;
+	const vector<Hline*>& GetAllHlines() const;
 
 
 	// Misc

@@ -32,7 +32,6 @@
 #include "routing/GlobalRouter.h"
 #include "routing/QuickestPathRouter.h"
 #include "routing/DirectionStrategy.h"
-#include "routing/CircleRouter.h"
 #include "routing/DummyRouter.h"
 #include "pedestrian/PedDistributor.h"
 
@@ -57,7 +56,6 @@ private:
     Trajectories* pTrajectories;
 
     //MPI
-    MPIDispatcher* pMPIDispatcher;
     int pNpedsGlobal; // number of pedestrians on all processors
 
 public:
@@ -83,9 +81,6 @@ public:
 
     void InitRoutineClearing(); // set some parameters specific to routine clearing
 
-    //MPI
-    void SetMPIDispatcher(MPIDispatcher *mpi);
-    const MPIDispatcher* GetMPIDispatcher() const;
 };
 
 #endif /*SIMULATION_H_*/

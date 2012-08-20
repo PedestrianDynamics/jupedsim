@@ -43,9 +43,9 @@ SubRoom::SubRoom() {
 	pPeds = vector<Pedestrian* > ();
 	pObstacles=vector<Obstacle*> ();
 
-	//pCrossings = vector<Crossing*>();
-	//pTransitions = vector<Transition*>();
-	//pHlines = vector<Hline*>();
+	pCrossings = vector<Crossing*>();
+	pTransitions = vector<Transition*>();
+	pHlines = vector<Hline*>();
 
 	pGoalIDs = vector<int> ();
 	pArea = 0.0;
@@ -244,29 +244,29 @@ void SubRoom::AddGoalID(int ID) {
 	pGoalIDs.push_back(ID);
 }
 
-//void SubRoom::AddCrossing(Crossing* line){
-//	pCrossings.push_back(line);
-//}
-//
-//void SubRoom::AddTransition(Transition* line){
-//	pTransitions.push_back(line);
-//}
-//
-//void SubRoom::AddHline(Hline* line){
-//	pHlines.push_back(line);
-//}
-//
-//const vector<Crossing*>& SubRoom::GetAllCrossings() const{
-//	return pCrossings;
-//}
-//
-//const vector<Transition*>& SubRoom::GetAllTransitions() const{
-//	return pTransitions;
-//}
-//
-//const vector<Hline*>& SubRoom::GetAllHlines() const{
-//	return pHlines;
-//}
+void SubRoom::AddCrossing(Crossing* line){
+	pCrossings.push_back(line);
+}
+
+void SubRoom::AddTransition(Transition* line){
+	pTransitions.push_back(line);
+}
+
+void SubRoom::AddHline(Hline* line){
+	pHlines.push_back(line);
+}
+
+const vector<Crossing*>& SubRoom::GetAllCrossings() const{
+	return pCrossings;
+}
+
+const vector<Transition*>& SubRoom::GetAllTransitions() const{
+	return pTransitions;
+}
+
+const vector<Hline*>& SubRoom::GetAllHlines() const{
+	return pHlines;
+}
 
 void SubRoom::RemoveGoalID(int ID){
 	for (unsigned int i=0;i<pGoalIDs.size();i++){

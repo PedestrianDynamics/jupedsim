@@ -38,10 +38,8 @@ Routing::Routing() {
 	pHlines = vector<Hline*>();
 	pTrips = vector<vector<int> >();
 	pFinalDestinations = vector<int>();
-}
 
-Routing::Routing(const Routing& orig) {
-	goals = orig.GetAllGoals();
+	pGoal=map<int, Crossing*>();
 }
 
 Routing::~Routing() {
@@ -50,9 +48,9 @@ Routing::~Routing() {
 }
 
 
-const vector<Crossing*>& Routing::GetAllGoals() const {
-	return goals;
-}
+//const vector<Crossing*>& Routing::GetAllGoals() const {
+//	return goals;
+//}
 
 const vector<int> Routing::GetTrip(int index) const {
 	if ((index >= 0) && (index < (int) pTrips.size()))
@@ -67,9 +65,12 @@ const vector<int> Routing::GetTrip(int index) const {
 
 
 
-Crossing* Routing::GetGoal(int index) const {
-	if ((index >= 0) && (index < (int) goals.size()))
-		return goals[index];
+Crossing* Routing::GetGoal(int index) {
+
+	if(pGoal.count(index)==1){
+		//return goals[index];
+		return pGoal[index];
+	}
 	else {
 		if (index == -1)
 			return NULL;
@@ -77,7 +78,7 @@ Crossing* Routing::GetGoal(int index) const {
 			char tmp[CLENGTH];
 			sprintf(tmp, "ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal()",index,goals.size());
 			Log->write(tmp);
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 	}
 }
@@ -89,6 +90,9 @@ int Routing::GetAnzGoals() const {
 
 void Routing::AddGoal(Crossing* line) {
 	goals.push_back(line);
+
+	//new implementation
+	pGoal[line->GetIndex()]=line;
 }
 
 

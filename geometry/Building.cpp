@@ -597,6 +597,11 @@ void Building::LoadBuilding(string filename) {
 			c->SetRoom1(room);
 
 			pRouting->AddGoal(c);
+
+			//new implementation
+			pRouting->AddCrossing(c);
+			room->GetSubRoom(sub1_id)->AddCrossing(c);
+			room->GetSubRoom(sub2_id)->AddCrossing(c);
 		}
 
 		AddRoom(room);
@@ -638,6 +643,9 @@ void Building::LoadBuilding(string filename) {
 			room->AddTransitionID(t->GetIndex());
 			t->SetRoom1(room);
 			t->SetSubRoom1(subroom);
+
+			//new implementation
+			subroom->AddTransition(t);
 		}
 		if (room2_id != -1 && subroom2_id != -1) {
 			Room* room = pRooms[room2_id];
@@ -647,8 +655,13 @@ void Building::LoadBuilding(string filename) {
 			room->AddTransitionID(t->GetIndex());
 			t->SetRoom2(room);
 			t->SetSubRoom2(subroom);
+
+			//new implementation
+			subroom->AddTransition(t);
 		}
+
 		pRouting->AddGoal(t);
+		pRouting->AddTransition(t);
 	}
 	Log->write("INFO: \tLoading building file successful!!!\n");
 }
@@ -704,9 +717,7 @@ Transition* Building::GetTransition(string caption) const {
 }
 
 Crossing* Building::GetGoal(string caption) const {
-	const vector<Crossing*>& allGoals =  GetRouting()->GetAllGoals();
-
-	for (unsigned int g=0;g<allGoals.size();g++){
+	for (int g=0;g<pRouting->GetAnzGoals();g++){
 		Crossing* cr= pRouting->GetGoal(g);
 		if (cr->GetCaption() == caption)
 			return cr;
@@ -762,7 +773,18 @@ void Building::LoadRoutingInfo(string filename) {
 		c->SetSubRoom1(subroom);
 		c->SetSubRoom2(subroom);
 		c->SetRoom1(room);
+
 		pRouting->AddGoal(c);
+
+		//new implementation
+		Hline* h = new Hline();
+		h->SetID(id);
+		h->SetPoint1(Point(x1, y1));
+		h->SetPoint2(Point(x2, y2));
+		h->SetRoom(room);
+		h->SetSubRoom(subroom);
+		pRouting->AddHline(h);
+
 	}
 
 
@@ -836,10 +858,10 @@ void Building::LoadTrafficInfo(string filename) {
 		double id=xmltof(xDoor.getAttribute("trans_id"),-1);
 		string state=xmltoa(xDoor.getAttribute("state"),"open");
 
-		//TODO: this should be done only for transitions and nothing else...
-		if(state=="open"){
+		//TODO:FIXME this should be done only for transitions and nothing else...
+		if(state=="-open"){
 			((Transition*)	pRouting->GetGoal(id) )->Open();
-		}else if(state=="close"){
+		}else if(state=="-close"){
 			((Transition*)	pRouting->GetGoal(id) )->Close();
 		}else{
 			char tmp[CLENGTH];
@@ -867,7 +889,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 				vector<string> tags;
 				StringExplode(brokenpaths[i], ":",&tags);
 				string room=pRooms[atoi(tags[0].c_str())]->GetCaption();
-				string trans=pRouting->GetAllGoals()[atoi(tags[1].c_str())]->GetCaption();
+				string trans=pRouting->GetGoal(atoi(tags[1].c_str()))->GetCaption();
 				//ignore crossings/hlines
 				if(trans!="")
 				PpathWayStream<<room <<" "<<trans<<endl;
@@ -877,6 +899,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 		cout << "deleting " << (*it)->GetPedIndex() << endl;
 		pAllPedestians.erase(it);
 	}
+	delete ped;
 }
 
 void Building::DeletePedFromSim(Pedestrian* ped){

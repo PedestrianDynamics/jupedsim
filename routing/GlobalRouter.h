@@ -79,7 +79,7 @@ protected:
 	 * what does connectable means?
 	 * this is very special to the tribune of the arena
 	 */
-	bool Connectable(SubRoom* sub, int from, int to) const;
+	bool Connectable(SubRoom* sub, int from, int to);
 
 	/**
 	 * @obsolete

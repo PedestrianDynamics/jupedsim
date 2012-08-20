@@ -24,7 +24,7 @@
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<linkedcells enabled="true" cell_size="2.2"/>
-		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
+		<routeChoiceStrategy>dynamic</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />
 		<bmin mu="0.20" sigma="0.001" />

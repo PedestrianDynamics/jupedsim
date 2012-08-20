@@ -672,7 +672,8 @@ void ArgumentParser::ParseIniFile(string inifile){
 		if(strategy=="local_shortest") pRouter=1;
 		else if(strategy=="global_shortest") pRouter=2;
 		else if(strategy=="quickest") pRouter=3;
-		else if(strategy=="from_file") pRouter=4;
+		else if(strategy=="dynamic") pRouter=4;
+		else if(strategy=="from_file") pRouter=5;
 		else{
 			Log->write("ERROR: \twrong value for routing strategy!!!\n");
 			exit(0);

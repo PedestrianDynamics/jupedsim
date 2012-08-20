@@ -464,10 +464,9 @@ void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Buildin
 
 	//Abstoßende Kräfte zu anderen Fußgängern
 	// Crossings und Transitions durchgehen
-	vector<Crossing*> goals = building->GetRouting()->GetAllGoals();
-	for (int i = 0; i < (int) goals.size(); i++) {
-		Crossing* goal = goals[i];
-		if (goals[i]->GetSubRoom1() != goals[i]->GetSubRoom2()) {
+	for (int i = 0; i < building->GetRouting()->GetAnzGoals(); i++) {
+		Crossing* goal = building->GetRouting()->GetGoal(i);
+		if (goal->GetSubRoom1() != goal->GetSubRoom2()) {
 			if (goal->IsInRoom(roomID) && goal->IsInSubRoom(subroomID)) {
 				rep_goals.push_back(goal); // alle goals des Raums speichern
 				SubRoom* other_subroom = goal->GetOtherSubRoom(roomID, subroomID);
@@ -616,29 +615,31 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 
 			//repulsive forces to the walls and transitions that are not my target
-			// Abstoßende Kräfte zu Wänden
-			const vector<int>& rep_goals = subroom->GetAllGoalIDs();
-			const vector<Crossing*>& allGoals = building->GetRouting()->GetAllGoals();
 
 			// "normale" Wände
 			Point repwall = ForceRepRoom(allPeds[p], subroom);
 
-			int pedExitIndex=ped->GetExitIndex();
+
+			// Abstoßende Kräfte zu Wänden
+			//const vector<int>& rep_goals = subroom->GetAllGoalIDs();
+			//const vector<Crossing*>& allGoals = building->GetRouting()->GetAllGoals();
+
+			//int pedExitIndex=ped->GetExitIndex();
 
 			// alle Crossings/Transitons außer der eigenen wirken abstoßend (nur in der Tribuene)
 			//TODO: Hermes
 			//int roomID=ped->GetRoomID();
 			//if((roomID!=10 ) && (roomID!=11)&& (roomID!=12)&& (roomID!=13)&& (roomID!=14))
-//				for (int i = 0; i < (int) rep_goals.size(); i++) {
-//					int goalID=rep_goals[i];
-//					Crossing* goal=allGoals[goalID];
-//					// ignore my transition
-//					if (goalID != pedExitIndex) {
-//						// ignore the hlines
-//						if(goal->GetSubRoom1()!=goal->GetSubRoom2())
-//							repwall = repwall + ForceRepWall(ped,*((Wall*)goal));
-//					}
-//				}
+			//for (int i = 0; i < (int) rep_goals.size(); i++) {
+			//	int goalID=rep_goals[i];
+			//	Crossing* goal=allGoals[goalID];
+			//	// ignore my transition
+			//	if (goalID != pedExitIndex) {
+			//		// ignore the hlines
+			//		if(goal->GetSubRoom1()!=goal->GetSubRoom2())
+			//			repwall = repwall + ForceRepWall(ped,*((Wall*)goal));
+			//	}
+			//}
 
 			Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
 			result_acc.push_back(acc);
@@ -651,7 +652,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Point v_neu = ped->GetV() + result_acc[p - start] * h;
 			//only update the position if the velocity has reached a certain threshold
 			//TODO: Hermes
-			if (v_neu.Norm() >= EPS_V*0.7){
+			if (v_neu.Norm() >= -EPS_V*0.07){
 				Point pos_neu = ped->GetPos() + v_neu * h;
 				ped->SetPos(pos_neu);
 				ped->ResetTimeInJam();
