@@ -24,11 +24,11 @@ private:
 	int pID;
 	string pCaption;
 	vector<Wall> pWalls;
+	vector<Point> pPoly;
 
 public:
 	Obstacle();
 	virtual ~Obstacle();
-
 
 	string GetCaption() const;
 	void SetCaption(string caption);
@@ -45,6 +45,15 @@ public:
 	void AddWall(const Wall& w);
 	const vector<Wall>& GetAllWalls() const;
 
+	bool Contains(const Point& ped) const;
+
+	void ConvertLineToPoly();
+
+	int WhichQuad(const Point& vertex, const Point& hitPos) const;
+
+	// x-Koordinate der Linie von einer Eccke zur nächsten
+	double Xintercept(const Point& point1, const Point& point2,
+			double hitY) const;
 	string Write();
 };
 

@@ -55,9 +55,6 @@ private:
     IODispatcher* iod;
     Trajectories* pTrajectories;
 
-    //MPI
-    int pNpedsGlobal; // number of pedestrians on all processors
-
 public:
     // Konstruktor
     Simulation();

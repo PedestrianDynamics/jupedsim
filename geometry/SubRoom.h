@@ -107,6 +107,9 @@ public:
 	const vector<Crossing*>& GetAllCrossings() const;
 	const vector<Transition*>& GetAllTransitions() const;
 	const vector<Hline*>& GetAllHlines() const;
+	const Crossing* GetCrossing(int i) const;
+	const Transition* GetTransition(int i) const;
+	const Hline* GetHline(int i) const;
 
 
 	// Misc

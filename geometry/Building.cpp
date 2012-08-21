@@ -206,7 +206,7 @@ void Building::InitGeometry() {
 			// Alle Übergänge in diesem Raum bestimmen
 			// Übergänge müssen zu Wänden ergänzt werden
 			// dabei werden die Hilfslinien ignoriert
-			vector<Line*> goals = vector<Line*> ();
+			vector<Line*> goals = vector<Line*>();
 			for (int k = 0; k < pRouting->GetAnzGoals(); k++) {
 				Crossing* goal = pRouting->GetGoal(k);
 				if (goal->GetSubRoom1() != goal->GetSubRoom2()) // Kennzeichen fuer Hlines
@@ -218,6 +218,13 @@ void Building::InitGeometry() {
 			s->ConvertLineToPoly(goals);
 			s->CalculateArea();
 			goals.clear();
+
+			//do the same for the obstacles that are closed
+			const vector<Obstacle*>& obstacles = s->GetAllObstacles();
+			for (unsigned int obs = 0; obs < obstacles.size(); ++obs) {
+				if (obstacles[obs]->GetClosed() == 1)
+					obstacles[obs]->ConvertLineToPoly();
+			}
 		}
 	}
 	Log->write("INFO: \tInit Geometry successful!!!\n");
@@ -352,7 +359,7 @@ void Building::Update() {
 	//CleanUpTheScene();
 }
 
-void Building::InitPhiAllPeds() {
+void Building::InitPhiAllPeds(double pDt) {
 	for (int i = 0; i <  GetAnzRooms(); i++) {
 		Room* room =  GetRoom(i);
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
@@ -360,6 +367,8 @@ void Building::InitPhiAllPeds() {
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				double cosPhi, sinPhi;
 				Pedestrian* ped = sub->GetPedestrian(k);
+				ped->Setdt(pDt); //set the simulation step
+				pRouting->FindExit(ped);
 				Line* e = ped->GetExitLine();
 				const Point& e1 = e->GetPoint1();
 				const Point& e2 = e->GetPoint2();
@@ -858,11 +867,10 @@ void Building::LoadTrafficInfo(string filename) {
 		double id=xmltof(xDoor.getAttribute("trans_id"),-1);
 		string state=xmltoa(xDoor.getAttribute("state"),"open");
 
-		//TODO:FIXME this should be done only for transitions and nothing else...
-		if(state=="-open"){
-			((Transition*)	pRouting->GetGoal(id) )->Open();
-		}else if(state=="-close"){
-			((Transition*)	pRouting->GetGoal(id) )->Close();
+		if(state=="open"){
+			dynamic_cast<Transition*>(pRouting->GetGoal(id))->Open();
+		}else if(state=="close"){
+			dynamic_cast<Transition*>(pRouting->GetGoal(id) )->Close();
 		}else{
 			char tmp[CLENGTH];
 			sprintf(tmp,"WARNING:\t Unknown door state: %s",state.c_str());

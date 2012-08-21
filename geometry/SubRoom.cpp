@@ -268,6 +268,18 @@ const vector<Hline*>& SubRoom::GetAllHlines() const{
 	return pHlines;
 }
 
+const Crossing* SubRoom::GetCrossing(int i) const {
+	return pCrossings[i];
+}
+
+const Transition* SubRoom::GetTransition(int i) const {
+	return pTransitions[i];
+}
+
+const Hline* SubRoom::GetHline(int i) const {
+	return pHlines[i];
+}
+
 void SubRoom::RemoveGoalID(int ID){
 	for (unsigned int i=0;i<pGoalIDs.size();i++){
 		if(pGoalIDs[i]==ID){
@@ -324,6 +336,7 @@ bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const{
 
 	return false;
 }
+
 
 void SubRoom::ClearAllPedestrians(){
 	for(unsigned int p=0;p<pPeds.size();p++){

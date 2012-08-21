@@ -394,8 +394,6 @@ void GlobalRouter::Init(Building* building) {
 
 	for (unsigned int p = 0; p < pFinalDestinations.size(); p++) {
 		int to_door = pFinalDestinations[p];
-		cout<<"checking final path to: "<<to_door<<endl;
-		exit(0);
 
 		for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
 			// set the distance
@@ -680,8 +678,8 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 				bestAPsID);
 		Log->write(tmp);
 
+		return -1;
 		exit(EXIT_FAILURE);
-		//return -1;
 	}
 
 	nextDestination = bestAPsID;

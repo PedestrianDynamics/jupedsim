@@ -29,7 +29,10 @@
 #define	_FORCEMODEL_H
 
 #include <vector>
+
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 using namespace std;
 
@@ -45,12 +48,10 @@ extern OutputHandler* Log;
  ************************************************************/
 
 class ForceModel {
-private:
 
 public:
     // Konstruktoren
     ForceModel();
-    ForceModel(const ForceModel& orig);
     virtual ~ForceModel();
     // virtuelle Funktionen (werden in den abgeleiteten Klassen implementiert)
     virtual void CalculateForce(double time, vector< Point >& result_acc, Building* building, int roomID, int SubRoomID) const = 0;

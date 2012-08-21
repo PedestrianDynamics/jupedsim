@@ -97,7 +97,7 @@ public:
     void InitGeometry();
     void InitGrid(double cellSize);
     //void InitRoomsAndSubroomsMap();
-    void InitPhiAllPeds(); // Initialisiert die Ausrichtung der Ellipse
+    void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
     void InitSavePedPathway(string filename);
     void AddRoom(Room* room);
     void Update();

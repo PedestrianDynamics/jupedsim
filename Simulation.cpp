@@ -11,7 +11,6 @@ Simulation::Simulation() {
 	pLinkedCells = false;
 	pActionPt = 0; // on or off, wird für GCFM benötigt
 	pNPeds = 0; // number of pedestrians, Default 10
-	pNpedsGlobal=0;// number of pedestrians on all processors
 	pTmax = 0;
 	pDt = 0;
 	pBuilding = NULL;
@@ -65,11 +64,6 @@ bool Simulation::IsLinkedCells() {
 int Simulation::GetNPeds() const {
 	return pNPeds;
 }
-
-int Simulation::GetNPedsGlobal() const {
-	return pNpedsGlobal;
-}
-
 
 Building * Simulation::GetBuilding() const {
 	return pBuilding;
@@ -232,41 +226,42 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			rout = new QuickestPathRouter();
 			break;
 		case 4:
-			rout = new DummyRouter();
+			//rout = new DummyRouter();
+			rout = new GlobalRouter();
 			break;
 	}
 
-	// Building benötigt Routing
+	// IMPORTANT: do not change the order in the following..
 	pBuilding = new Building();
-
-	//FIXME: why need routing here?
 	pBuilding->SetRouting(rout);
+
 	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
 	s.append(tmp);
 	Log->write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
 	//pBuilding->AddSurroundingRoom();
-	pBuilding->InitGeometry(); // Polygone erzeugen
+	pBuilding->InitGeometry(); // create the polygones
 
 	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
 
 	pBuilding->LoadRoutingInfo(args->GetRoutingFile());
 
+	pNPeds=pDistribution->Distribute(pBuilding);
+
 	// initialise the routing engine before doing any other things
 	rout->Init(pBuilding);
+	pBuilding->InitPhiAllPeds(pDt);
+
+	//using linkedcells
+	if (pLinkedCells){
+		pBuilding->InitGrid(args->GetLinkedCellSize());
+	}
 
 	// init pathway
 	if(args->GetPathwayFile()!=""){
 		char name[30]="";
 		sprintf(name,"%s_p0",args->GetPathwayFile().c_str());
 		pBuilding->InitSavePedPathway(name);
-	}
-
-	InitSimulation();
-
-	//using linkedcells
-	if (pLinkedCells){
-		pBuilding->InitGrid(args->GetLinkedCellSize());
 	}
 
 	//pBuilding->WriteToErrorLog();
@@ -276,24 +271,25 @@ void Simulation::InitArgs(ArgumentParser* args) {
  * und intialisiert phi (Winkel/Ausrichtung der Ellipse)
  * */
 
-int Simulation::InitSimulation() {
-	int nPeds = pDistribution->Distribute(pBuilding);
-	pBuilding->InitPhiAllPeds();
-	SetNPeds(nPeds);
-
-	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
-		Room* room = pBuilding->GetRoom(i);
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-				sub->GetPedestrian(k)->Setdt(pDt);
-			}
-		}
-	}
-
-	Log->write("INFO: \tInit Simulation successful!!!\n");
-	return 0;
-}
+//int Simulation::InitSimulation() {
+//
+//	pNPeds=pDistribution->Distribute(pBuilding);
+//
+//	pBuilding->InitPhiAllPeds();
+//
+//	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+//		Room* room = pBuilding->GetRoom(i);
+//		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+//			SubRoom* sub = room->GetSubRoom(j);
+//			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+//				sub->GetPedestrian(k)->Setdt(pDt);
+//			}
+//		}
+//	}
+//
+//	Log->write("INFO: \tInit Simulation successful!!!\n");
+//	return 0;
+//}
 
 /* Eigentliche Simulation
  * Rückgabewert:

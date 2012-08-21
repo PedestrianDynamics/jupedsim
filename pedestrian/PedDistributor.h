@@ -113,10 +113,10 @@ public:
 
 	// sonstige Funktionen
 	vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
-			SubRoom* r, double bufx, double bufy, double dy, Routing* routing) const;
+			SubRoom* r, double bufx, double bufy, double dy) const;
 	vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
-			SubRoom* r, double bufx, double bufy, double dx, Routing* routing) const;
-	vector<Point> PossiblePositions(SubRoom* r, Routing * routing) const;
+			SubRoom* r, double bufx, double bufy, double dx) const;
+	vector<Point> PossiblePositions(SubRoom* r) const;
 	void DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid, Routing * routing)const;
 	string writeParameter() const;
 

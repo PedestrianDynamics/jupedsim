@@ -36,7 +36,7 @@ Obstacle::Obstacle() {
 	pID=-1;
 	pCaption="obstacle";
 	pWalls = vector<Wall > ();
-
+	pPoly = vector<Point > ();
 }
 
 Obstacle::~Obstacle() {}
@@ -98,5 +98,121 @@ string Obstacle::Write() {
 	return s;
 }
 
+const vector<Wall>& Obstacle::GetAllWalls() const {
+	return pWalls;
+}
+
+int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const {
+	return (vertex.GetX() > hitPos.GetX()) ? ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
+			((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
+
+}
+
+// x-Koordinate der Linie von einer Eccke zur nächsten
+double Obstacle::Xintercept(const Point& point1, const Point& point2, double hitY) const {
+	return (point2.GetX() - (((point2.GetY() - hitY) * (point1.GetX() - point2.GetX())) /
+			(point1.GetY() - point2.GetY())));
+}
 
 
+bool Obstacle::Contains(const Point& ped) const {
+
+	// in the case the obstacle is not a close surface, allow
+	// pedestrians distribution 'inside'
+	if(pClosed==0.0) {
+		char tmp[CLENGTH];
+		sprintf(tmp, "ERROR: \tObstacle::Contains(): the obstacle [%d] is open!!!\n", pID);
+		Log->write(tmp);
+		exit(EXIT_FAILURE);
+	}
+
+	short edge, first, next;
+	short quad, next_quad, delta, total;
+
+	/////////////////////////////////////////////////////////////
+	edge = first = 0;
+	quad = WhichQuad(pPoly[edge], ped);
+	total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
+	/* LOOP THROUGH THE VERTICES IN A SECTOR */
+	do {
+		next = (edge + 1) % pPoly.size();
+		next_quad = WhichQuad(pPoly[next], ped);
+		delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
+
+		// SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
+		//QUAD
+
+		switch (delta) {
+			case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
+				//WAS CLOCKWISE OR COUNTER
+			case -2: // US THE X POSITION AT THE HIT POINT TO
+				// DETERMINE WHICH WAY AROUND
+				if (Xintercept(pPoly[edge], pPoly[next], ped.GetY()) > ped.GetX())
+					delta = -(delta);
+				break;
+			case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
+				delta = -1;
+				break;
+			case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
+				delta = 1;
+				break;
+		}
+		/* ADD IN THE DELTA */
+		total += delta;
+		quad = next_quad; // RESET FOR NEXT STEP
+		edge = next;
+	} while (edge != first);
+
+	/* AFTER ALL IS DONE IF THE TOTAL IS 4 THEN WE ARE INSIDE */
+	if (abs(total) == 4)
+		return true;
+	else
+		return false;
+}
+
+void Obstacle::ConvertLineToPoly() {
+
+	if(pClosed==0.0){
+		char tmp[CLENGTH];
+		sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", pID);
+		Log->write(tmp);
+		return;
+	}
+	vector<Line*> copy;
+	vector<Point> tmpPoly;
+	Point point;
+	Line* line;
+	// Alle Linienelemente in copy speichern
+	for (unsigned int i = 0; i < pWalls.size(); i++) {
+		copy.push_back(&pWalls[i]);
+	}
+
+	line = copy[0];
+	tmpPoly.push_back(line->GetPoint1());
+	point = line->GetPoint2();
+	copy.erase(copy.begin());
+	// Polygon aus allen Linen erzeugen
+	for (int i = 0; i < (int) copy.size(); i++) {
+		line = copy[i];
+		if ((point - line->GetPoint1()).Norm() < TOLERANZ) {
+			tmpPoly.push_back(line->GetPoint1());
+			point = line->GetPoint2();
+			copy.erase(copy.begin() + i);
+			// von vorne suchen
+			i = -1;
+		} else if ((point - line->GetPoint2()).Norm() < TOLERANZ) {
+			tmpPoly.push_back(line->GetPoint2());
+			point = line->GetPoint1();
+			copy.erase(copy.begin() + i);
+			// von vorne suchen
+			i = -1;
+		}
+	}
+	if ((tmpPoly[0] - point).Norm() > TOLERANZ) {
+		char tmp[CLENGTH];
+		sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", pID);
+		Log->write(tmp);
+		exit(0);
+	}
+	pPoly = tmpPoly;
+}

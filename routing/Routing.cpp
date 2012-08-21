@@ -32,7 +32,10 @@
  ************************************************************/
 
 Routing::Routing() {
+
+	//TODO: delete the variable goals
 	goals = vector<Crossing*>();
+
 	pCrossings = vector<Crossing*>();
 	pTransitions = vector<Transition*>();
 	pHlines = vector<Hline*>();
@@ -46,11 +49,6 @@ Routing::~Routing() {
 	for (int i = 0; i < GetAnzGoals(); i++)
 		delete goals[i];
 }
-
-
-//const vector<Crossing*>& Routing::GetAllGoals() const {
-//	return goals;
-//}
 
 const vector<int> Routing::GetTrip(int index) const {
 	if ((index >= 0) && (index < (int) pTrips.size()))

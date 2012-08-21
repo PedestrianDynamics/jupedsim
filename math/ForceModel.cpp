@@ -34,8 +34,6 @@
 ForceModel::ForceModel() {
 }
 
-ForceModel::ForceModel(const ForceModel& orig) {
-}
 
 ForceModel::~ForceModel() {
 }
@@ -205,9 +203,19 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 
 inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 	Point f = Point(0., 0.);
+	//first the walls
 	const vector<Wall>& walls = subroom->GetAllWalls();
 	for (int i = 0; i < subroom->GetAnzWalls(); i++) {
 		f = f + ForceRepWall(ped, walls[i]);
+	}
+
+	//then the obstacles
+	const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
+	for(unsigned int obs=0;obs<obstacles.size();++obs){
+		const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
+		for (unsigned int i = 0; i < walls.size(); i++) {
+			f = f + ForceRepWall(ped, walls[i]);
+		}
 	}
 	return f;
 }
@@ -343,16 +351,6 @@ GCFMModel::GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double
 	pDistEffMaxPed = dist_effPed;
 	pDistEffMaxWall = dist_effWall;
 
-}
-
-GCFMModel::GCFMModel(const GCFMModel& orig) {
-	pdirection = orig.GetDirection();
-	pNuPed = orig.GetNuPed();
-	pNuWall = orig.GetNuWall();
-	pintp_widthPed = orig.GetIntpWidthPed();
-	pintp_widthWall = orig.GetIntpWidthWall();
-	pDistEffMaxPed = orig.GetDistEffMaxPed();
-	pDistEffMaxWall = orig.GetDistEffMaxWall();
 }
 
 GCFMModel::~GCFMModel(void) {
@@ -541,12 +539,10 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
 	{
-
 		vector< Point > result_acc = vector<Point > ();
 		result_acc.reserve(2200);
 
-
-		const int threadID = omp_get_thread_num();
+		int threadID = omp_get_thread_num();
 		int start = threadID*partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1)) end = nSize - 1;
@@ -586,19 +582,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			int nSize=0;
 			building->GetGrid()->GetNeighbourhood(ped,neighbours,&nSize);
 
-			// The forces are computed only when the rooms of the pedestrians share a transition/crossing
-//			for (int i = 0; i < nSize; i++) {
-//				Pedestrian* ped1 = neighbours[i];
-//				int r1= ped->GetRoomID();
-//				int s1=ped->GetSubRoomID();
-//				int r2=ped1->GetRoomID();
-//				int s2=ped1->GetSubRoomID();
-//				if(building->IsDirectlyConnected(r1,s1,r2,s2))
-//					//if(Building::pSubroomConnectionMap[r1][s1][r2][s2])
-//					F_rep = F_rep + ForceRepPed(ped, ped1);
-//
-//			}
-
 			for (int i = 0; i < nSize; i++) {
 				Pedestrian* ped1 = neighbours[i];
 				//if they are in the same subroom
@@ -618,28 +601,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 			// "normale" Wände
 			Point repwall = ForceRepRoom(allPeds[p], subroom);
-
-
-			// Abstoßende Kräfte zu Wänden
-			//const vector<int>& rep_goals = subroom->GetAllGoalIDs();
-			//const vector<Crossing*>& allGoals = building->GetRouting()->GetAllGoals();
-
-			//int pedExitIndex=ped->GetExitIndex();
-
-			// alle Crossings/Transitons außer der eigenen wirken abstoßend (nur in der Tribuene)
-			//TODO: Hermes
-			//int roomID=ped->GetRoomID();
-			//if((roomID!=10 ) && (roomID!=11)&& (roomID!=12)&& (roomID!=13)&& (roomID!=14))
-			//for (int i = 0; i < (int) rep_goals.size(); i++) {
-			//	int goalID=rep_goals[i];
-			//	Crossing* goal=allGoals[goalID];
-			//	// ignore my transition
-			//	if (goalID != pedExitIndex) {
-			//		// ignore the hlines
-			//		if(goal->GetSubRoom1()!=goal->GetSubRoom2())
-			//			repwall = repwall + ForceRepWall(ped,*((Wall*)goal));
-			//	}
-			//}
 
 			Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
 			result_acc.push_back(acc);
