@@ -227,7 +227,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			break;
 		case 4:
 			//rout = new DummyRouter();
-			rout = new GlobalRouter();
+		    rout = new GraphRouter();
 			break;
 	}
 

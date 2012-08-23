@@ -10,6 +10,22 @@
 	<distribution>
 <!--		<dist room_caption="Floor" subroom_id="0" number="1"/> -->
 		<dist room_caption="207" number="3"/>
+		<dist room_caption="208" number="3"/>
+		<dist room_caption="209" number="3"/>
+		<dist room_caption="210" number="3"/>
+		<dist room_caption="211" number="4"/>
+		<dist room_caption="213a" number="6"/>
+		<dist room_caption="214" number="4"/>
+		<dist room_caption="215" number="3"/>
+		<dist room_caption="216" number="2"/>
+		<dist room_caption="226" number="2"/>
+		<dist room_caption="225" number="2"/>
+		<dist room_caption="224" number="2"/>
+		<dist room_caption="223a" number="2"/>
+		<dist room_caption="222" number="2"/>
+		<dist room_caption="221" number="2"/>
+		<dist room_caption="220" number="2"/>
+
 	</distribution>
 
 <!--	<groups> 

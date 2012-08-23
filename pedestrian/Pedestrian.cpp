@@ -53,6 +53,7 @@ Pedestrian::Pedestrian() {
 	pPatienceTime=5.0;// time after which the ped feels to be in jam
 	pDesiredFinalDestination=FINAL_DEST_OUT;
 	pMentalMap=std::map<int, int>();
+	pDestHistory=std::vector<int>();
 	pDt=0.01;
 	pV0=Point(0,0);
 	pLastPosition=Point(0,0);
@@ -80,6 +81,7 @@ Pedestrian::Pedestrian(const Pedestrian& orig) {
 	pPatienceTime=10.0;
 	pDt=0.01;
 	pMentalMap=std::map<int, int>();
+	pDestHistory=std::vector<int>();
 	pLastPosition=Point(0,0);
 }
 
@@ -120,6 +122,7 @@ void Pedestrian::SetExitIndex(int i) {
 	pExitIndex = i;
 	//save that destination for that room
 	pMentalMap[GetUniqueRoomID()] = i;
+	pDestHistory.push_back(i);
 }
 
 void Pedestrian::SetExitLine(Line* l) {
@@ -215,6 +218,14 @@ int Pedestrian::GetNextDestination() {
 	}
 }
 
+
+int Pedestrian::GetLastDestination() {
+  if(pDestHistory.size() == 0)
+    return -1;
+  else
+    return pDestHistory.back();
+
+}
 // erase the peds memory
 void Pedestrian::ClearMentalMap(){
 	//	pMentalMapArray[pRoomID][pSubRoomID]=-1;

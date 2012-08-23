@@ -54,6 +54,7 @@ private:
 	int pExitIndex; // aktueller Ausgang, Index in routing->GetGoal(index)
 	Line* pExitLine; // aktuelle Ausgangslinie
 	std::map<int, int>pMentalMap; // map the actual room to a destination
+	std::vector<int> pDestHistory;
 	//int pMentalMapArray[15][130];
 	Point pV0; //vector V0
 	Point pLastPosition;
@@ -127,6 +128,7 @@ public:
 
 	int GetUniqueRoomID() const;
 	int GetNextDestination();
+	int GetLastDestination();
 	double GetDistanceToNextTarget() const;
 	double GetDisTanceToPreviousTarget() const;
 

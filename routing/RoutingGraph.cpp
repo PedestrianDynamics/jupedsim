@@ -24,6 +24,24 @@ struct vertex
   int id;
   vector<edge> edges;
   map<int, exit_distance> distances;
+
+  //public functions
+    exit_distance getShortestExit() {
+    map<int, exit_distance>::iterator it;
+    exit_distance return_var;
+    //TODO INF einstzen
+    return_var.distance = 9999999;
+    std::cout << "num distances" << distances.size() << std::endl; 
+    std::cout << "id" << this->crossing << std::endl; 
+    for(it = distances.begin(); it != distances.end(); it++) {
+	std::cout << (*it).second.distance << " asdasdas- " << return_var.distance << std::endl; 
+      if((*it).second.distance < return_var.distance) {
+	return_var.distance = (*it).second.distance;
+	return_var.last_vertex = (*it).second.last_vertex;
+      }
+    }
+    return return_var;
+  }
 };
 
 
@@ -101,6 +119,13 @@ RoutingGraph* RoutingGraph::BuildGraph()
   return this;
 };
 
+
+Crossing * RoutingGraph::GetNextDestination(int crossing_index) {
+  exit_distance dist = vertexes[crossing_index].getShortestExit();
+  std::cout << vertexes.size() << std::endl;
+  std::cout << "ID " <<   vertexes[crossing_index].id<< std::endl;
+  return dist.last_vertex->crossing;
+}
 void RoutingGraph::calculateDistances(vertex * exit, vertex * last_vertex, vertex * act_vertex, double act_distance) 
 {
 
@@ -120,6 +145,8 @@ void RoutingGraph::calculateDistances(vertex * exit, vertex * last_vertex, verte
     }
   }
 }
+
+
 
 
 void RoutingGraph::processSubroom(SubRoom * sub, map<int, vertex> & vertexes, Crossing * crossing)
@@ -155,7 +182,7 @@ void RoutingGraph::print()
   map<int, exit_distance>::iterator it2;
 
   for(it=vertexes.begin(); it != vertexes.end(); it++ ) {
-    std::cout << "vertex: " << (*it).second.crossing->GetIndex()<< "  from: " << (*it).second.crossing->GetSubRoom1()->GetRoomID() << "-" << (*it).second.crossing->GetSubRoom1()->GetSubRoomID() << " to:";
+    std::cout << "\n\nvertex: " << (*it).second.crossing->GetIndex()<< "  from: " << (*it).second.crossing->GetSubRoom1()->GetRoomID() << "-" << (*it).second.crossing->GetSubRoom1()->GetSubRoomID() << " to:";
 
     if((*it).second.crossing->GetSubRoom2())
       std::cout <<  (*it).second.crossing->GetSubRoom2()->GetRoomID() << "-" << (*it).second.crossing->GetSubRoom2()->GetSubRoomID() << std::endl;
