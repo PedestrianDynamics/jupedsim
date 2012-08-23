@@ -33,6 +33,7 @@
 #include "routing/QuickestPathRouter.h"
 #include "routing/DirectionStrategy.h"
 #include "routing/DummyRouter.h"
+#include "routing/GraphRouter.h"
 #include "pedestrian/PedDistributor.h"
 
 
