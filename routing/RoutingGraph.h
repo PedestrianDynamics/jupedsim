@@ -27,16 +27,17 @@ class RoutingGraph {
   const vector<Transition*> * transitions;
   map<int, vertex> vertexes;
   void processSubroom(SubRoom * sub, map<int, vertex> & vertexes, Crossing * crossing);
-  void processNewCrossingEdge(Crossing * new_crossing, Crossing * act_crossing);
-  void calculateDistances(vertex * exit, vertex * last_vertex, vertex * act_vertex, double act_distance);
+  void processNewCrossingEdge(SubRoom * sub, Crossing * new_crossing, Crossing * act_crossing);
+  void calculateDistances(vertex * exit, vertex * last_vertex, int edge_index, double act_distance);
  
 public:
   RoutingGraph();
   RoutingGraph(const vector<Transition*> &trans , const vector<Crossing*> &cross);
   virtual ~RoutingGraph();
   void print();
-  Crossing * GetNextDestination(int crossing_index);
+  Crossing * GetNextDestination(int crossing_index, SubRoom * sub);
   RoutingGraph * BuildGraph();
+  Crossing * GetVertexCrossing(int index);
 
 
 };
