@@ -55,10 +55,11 @@ Crossing * RoutingGraph::GetNextDestination(Pedestrian * p)
 	
 	if(it->second.crossing->IsInRoom(p->GetRoomID()) && it->second.crossing->IsInSubRoom(p->GetSubRoomID())) {
 	    double distance = it->second.crossing->DistTo(p->GetPos());
-	    if(!it->second.crossing->IsExit()) {
-		//TODO: look if there is an other exit in the subroom
-		return it->second.crossing; 
+	    if(it->second.crossing->IsExit()) {
+		return it->second.crossing;
 	    }
+	    distance = distance + it->second.getShortestExit().distance;
+	    
 	    if(act_shortest_dist > distance) {
 		act_shortest_dist  = distance; 
 		crossing = it->second.crossing;
