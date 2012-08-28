@@ -9,7 +9,7 @@
 #define GRAPHROUTER_H_
 
 #include "Routing.h"
-#include "RoutingGraph.h"
+#include "graph/RoutingGraph.h"
 #include "../geometry/Building.h"
 #include "../geometry/Crossing.h"
 #include "../geometry/SubRoom.h"
@@ -21,10 +21,10 @@ public:
 	GraphRouter();
 	virtual ~GraphRouter();
 
-	// virtuelle Funktionen
 	virtual int FindExit(Pedestrian* p);
 	virtual void Init(Building* b);
- private:
+
+private:
 	RoutingGraph * graph;
 	Building * building;
 

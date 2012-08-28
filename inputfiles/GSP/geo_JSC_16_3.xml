@@ -231,6 +231,10 @@
 	</polygon>
 	<polygon caption="wall">
 	  <vertex px="42.36" py="9.02"/>
+	  <vertex px="28.11" py="9.02"/>
+	</polygon>
+	<polygon caption="wall">
+	  <vertex px="27.11" py="9.02"/>
 	  <vertex px="15.29" py="9.02"/>
 	</polygon>
       </subroom>
@@ -311,6 +315,10 @@
       <subroom id="5" closed="0" class="subroom">
 	<polygon caption="wall">
 	  <vertex px="8.75" py="35.27"/>
+	  <vertex px="24.00" py="35.27"/>
+	</polygon>
+	<polygon caption="wall">
+	  <vertex px="25.00" py="35.27"/>
 	  <vertex px="42.36" py="35.27"/>
 	</polygon>
 	<polygon caption="wall">
@@ -731,6 +739,28 @@
 	</polygon>
       </subroom>
     </room>
+    <room id="36" caption="T1" zpos="0.00">
+      <subroom id="0" closed="0" class="subroom">
+	<polygon caption="wall">
+	  <vertex px="27.11" py="9.02"/>
+	  <vertex px="22.00" py="9.02"/>
+	  <vertex px="22.00" py="14.54"/>
+	  <vertex px="28.11" py="14.54"/>
+	  <vertex px="28.11" py="9.02"/>
+	</polygon>
+      </subroom>
+    </room>
+    <room id="37" caption="T2" zpos="0.00">
+      <subroom id="0" closed="0" class="subroom">
+	<polygon caption="wall">
+	  <vertex px="24.00" py="35.27"/>
+	  <vertex px="24.00" py="31.00"/>
+	  <vertex px="30.00" py="31,00"/>
+	  <vertex px="30.00" py="35.27"/>
+	  <vertex px="25.00" py="35.27"/>
+	</polygon>
+      </subroom>
+    </room>
   </rooms>
 
   <transitions>
@@ -950,6 +980,16 @@
 		room1_id="35" subroom1_id="0" room2_id="14" subroom2_id="6">
       <vertex px="6.8" py="8.0"/>
       <vertex px="6.80" py="9.0"/>
+    </transition>    
+    <transition id="52" caption="T1 door" type="emergency"
+		room1_id="36" subroom1_id="0" room2_id="14" subroom2_id="0">
+      <vertex px="27.11" py="9.02"/>
+      <vertex px="28.11" py="9.02"/>
+    </transition>    
+    <transition id="53" caption="T2 door" type="emergency"
+		room1_id="37" subroom1_id="0" room2_id="14" subroom2_id="5">
+      <vertex px="24.00" py="35.27"/>
+      <vertex px="25.00" py="35.27"/>
     </transition>
   </transitions>
 </geometry>
