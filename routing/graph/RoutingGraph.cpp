@@ -52,8 +52,14 @@ Crossing * RoutingGraph::GetNextDestination(Pedestrian * p)
     double act_shortest_dist = INFINITY;
     Crossing * crossing = NULL;
     for(it = vertexes.begin(); it != vertexes.end(); it++) {
-	
-	if(it->second.crossing->IsInRoom(p->GetRoomID()) && it->second.crossing->IsInSubRoom(p->GetSubRoomID())) {
+	// don't use the function Crossing::IsInRoom and Crossing::IsInSubRoom. that will not work for transitions (there could be a combination of room1 and subroom2)
+
+	if(
+	   (it->second.crossing->GetSubRoom1() && it->second.crossing->GetSubRoom1()->GetRoomID() == p->GetRoomID() && it->second.crossing->GetSubRoom1()->GetSubRoomID() == p->GetSubRoomID()) 
+	   || 
+	   ( it->second.crossing->GetSubRoom2() && it->second.crossing->GetSubRoom2()->GetRoomID() == p->GetRoomID() && it->second.crossing->GetSubRoom2()->GetSubRoomID() == p->GetSubRoomID())
+	   ) {
+
 	    double distance = it->second.crossing->DistTo(p->GetPos());
 	    if(it->second.crossing->IsExit()) {
 		return it->second.crossing;
@@ -66,7 +72,6 @@ Crossing * RoutingGraph::GetNextDestination(Pedestrian * p)
 	    }
 	}
     }
-    
     return crossing;
 }
 
@@ -79,46 +84,20 @@ Crossing * RoutingGraph::GetNextDestination(Pedestrian * p)
 RoutingGraph* RoutingGraph::BuildGraph() 
 {
     //processing crossings
-    for(int i = 0; i < (int) crossings->size(); i++) 
-    {
-	Crossing * crossing = (*crossings)[i];
-	vertexes[crossing->GetIndex()].crossing = crossing;
-	vertexes[crossing->GetIndex()].id = crossing->GetIndex();
-	//add edges
-	//adding transitions and crossings from 1 subroom
-	processSubroom(crossing->GetSubRoom1(), vertexes, crossing);
-	//now subroom2
-	processSubroom(crossing->GetSubRoom2(), vertexes, crossing);
+    for(int i = 0; i < (int) crossings->size(); i++) {
+	addVertex((*crossings)[i]);
     }
     //processing transition
     //take care about EXITs!
-    for(int i = 0; i < (int) transitions->size(); i++) 
-    {
-	Crossing * crossing = (*transitions)[i];
-	vertexes[crossing->GetIndex()].crossing = crossing;
-	vertexes[crossing->GetIndex()].id = crossing->GetIndex();
-	//add edges
-	//adding transitions and crossings from 1 subroom
-	processSubroom(crossing->GetSubRoom1(), vertexes, crossing);
-	//now subroom2
-	processSubroom(crossing->GetSubRoom2(), vertexes, crossing);
-      
-      
+    for(int i = 0; i < (int) transitions->size(); i++) {
+	addVertex((*transitions)[i]);
     }
     
     //calculate the distances for Exits!
-    for(int i = 0; i < (int) transitions->size(); i++) 
-    {
-	Crossing * crossing = (*transitions)[i];
-	if(crossing->IsExit()) 
-	{
-	    vertex * act_vertex =  & vertexes[crossing->GetIndex()];
-	    for(int k = 0; k < act_vertex->edges.size(); k++) 
-	    {
-	     
-		calculateDistances(act_vertex, act_vertex, k, act_vertex->edges[k].distance);
-	    }
-
+    for(int i = 0; i < (int) transitions->size(); i++) {
+	Transition * crossing = (*transitions)[i];
+	if(crossing->IsExit()) {
+	    calculateDistancesForExit(crossing);
 	}
     }
     print();
@@ -126,6 +105,22 @@ RoutingGraph* RoutingGraph::BuildGraph()
     return this;
 };
 
+/**
+ * RoutingGraph::addVertex(Crossing * crossing)
+ * adds a new vertex with the given crossing
+ */
+
+void RoutingGraph::addVertex(Crossing * crossing)
+{
+    if(!crossing->IsOpen()) return;
+    vertexes[crossing->GetIndex()].crossing = crossing;
+    vertexes[crossing->GetIndex()].id = crossing->GetIndex();
+    //add edges
+    //adding transitions and crossings from 1 subroom
+    processSubroom(crossing->GetSubRoom1(), vertexes, crossing);
+    //now subroom2
+    processSubroom(crossing->GetSubRoom2(), vertexes, crossing);
+}
 
 void RoutingGraph::processSubroom(SubRoom * sub, map<int, vertex> & vertexes, Crossing * crossing)
 {
@@ -145,7 +140,9 @@ void RoutingGraph::processSubroom(SubRoom * sub, map<int, vertex> & vertexes, Cr
 void RoutingGraph::processNewCrossingEdge(SubRoom* sub, Crossing * new_crossing, Crossing * act_crossing)
 {
     edge new_edge;
-    if(act_crossing->GetIndex() == new_crossing->GetIndex()) 
+    // dont add the same crossing twice
+    // dont add a closed crossing!
+    if(act_crossing->GetIndex() == new_crossing->GetIndex() || !new_crossing->IsOpen()) 
 	return;
 
     new_edge.next_vertex = & vertexes[new_crossing->GetIndex()];
@@ -154,6 +151,14 @@ void RoutingGraph::processNewCrossingEdge(SubRoom* sub, Crossing * new_crossing,
     new_edge.sub = sub; 
     this->vertexes[act_crossing->GetIndex()].edges.push_back(new_edge);
 };
+
+void RoutingGraph::calculateDistancesForExit(Transition * crossing)
+{
+    vertex * act_vertex =  & vertexes[crossing->GetIndex()];
+    for(int k = 0; k < act_vertex->edges.size(); k++) {
+	calculateDistances(act_vertex, act_vertex, k, act_vertex->edges[k].distance);
+    }
+}
 
 void RoutingGraph::calculateDistances(vertex * exit, vertex * last_vertex, int edge_index, double act_distance) 
 {

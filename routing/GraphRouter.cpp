@@ -46,7 +46,9 @@ int GraphRouter::FindExit(Pedestrian* p)
     } else {
       // get next destination for person in subroom (in the subroom not next to a crossing) 
       Crossing * exit = graph->GetNextDestination(p);
-
+      if(p->GetPedIndex() == 43) {
+	std::cout << "43 geht -----> " << exit->GetIndex()<< " von " << p->GetRoomID() << "-" << p->GetSubRoomID() <<  std::endl; 
+      }
       p->SetExitIndex(exit->GetIndex());
       p->SetExitLine(exit);
       return 1;

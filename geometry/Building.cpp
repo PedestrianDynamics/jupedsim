@@ -260,6 +260,7 @@ void Building::Update() {
 								ped->GetPos().GetY());
 						//ped->Dump(ped->GetPedIndex());
 						Log->write(tmp);
+						std::cout << ped->GetLastDestination() << " " << ped->GetNextDestination() << std::endl;
 						//exit(0);
 						//DeletePedestrian(ped);
 						nonConformPeds.push_back(ped);

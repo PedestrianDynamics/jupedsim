@@ -5,6 +5,8 @@
 		<room room_id="0" state="good" />
 	</rooms>
 	<doors>
-		<door trans_id="1" state="open" />
+		<door trans_id="5" state="close" />
+		<door trans_id="41" state="close" />
+		<door trans_id="43" state="close" />
 	</doors>
 </traffic>

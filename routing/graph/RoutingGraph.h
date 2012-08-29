@@ -63,8 +63,10 @@ private:
     /***********************
      * internal graph init functions
      **********************/
+    void addVertex(Crossing * crossing);
     void processSubroom(SubRoom * sub, map<int, vertex> & vertexes, Crossing * crossing);
     void processNewCrossingEdge(SubRoom * sub, Crossing * new_crossing, Crossing * act_crossing);
+    void calculateDistancesForExit(Transition * crossing);
     void calculateDistances(vertex * exit, vertex * last_vertex, int edge_index, double act_distance);
 
 

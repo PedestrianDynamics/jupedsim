@@ -29,23 +29,23 @@
 		<dist room_caption="225" number="3"/>
 		<dist room_caption="224" number="3"/>
 		<dist room_caption="223a" number="3"/>
-		<dist room_caption="223b" number="4"/>
-		<dist room_caption="222" number="6"/>
+		<dist room_caption="223b" number="14"/>
+		<dist room_caption="222" number="26"/>
 		<dist room_caption="221" number="4"/>
-		<dist room_caption="220" number="3"/>
+		<dist room_caption="220" number="13"/>
 		<dist room_caption="219" number="2"/>
 		<dist room_caption="218" number="2"/>
 		<dist room_caption="217" number="2"/>
 		<dist room_caption="216" number="2"/>
 		<dist room_caption="215" number="2"/>
 		<dist room_caption="214" number="2"/>
-		<dist room_caption="213a" number="2"/>
+		<dist room_caption="213a" number="22"/>
 		<dist room_caption="213b" number="2"/>
 		<dist room_caption="200C" number="3"/>
-		<dist room_caption="211" number="3"/>
+		<dist room_caption="211" number="23"/>
 		<dist room_caption="210" number="3"/>
-		<dist room_caption="T1" number="20"/>
-		<dist room_caption="T2" number="20"/>
+		<dist room_caption="T1" number="30"/>
+		<dist room_caption="T2" number="30"/>
 
 	</distribution>
 
