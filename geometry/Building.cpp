@@ -29,7 +29,6 @@
 #include "../general/xmlParser.h"
 #include "Obstacle.h"
 
-
 using namespace std;
 
 /************************************************************
@@ -38,17 +37,17 @@ using namespace std;
 
 Building::Building() {
 	pCaption = "no_caption";
-	pRooms = vector<Room*> ();
+	pRooms = vector<Room*>();
 	pRouting = NULL;
 	pLinkedCellGrid = NULL;
-	pSavePathway=false;
+	pSavePathway = false;
 }
 
 Building::Building(const Building& orig) {
 	pCaption = orig.GetCaption();
 	pRooms = orig.GetAllRooms();
 	pRouting = orig.GetRouting();
-	pSavePathway=false;
+	pSavePathway = false;
 	pLinkedCellGrid = NULL;
 }
 
@@ -59,7 +58,7 @@ Building::~Building() {
 
 	delete pLinkedCellGrid;
 
-	if(PpathWayStream.is_open())
+	if (PpathWayStream.is_open())
 		PpathWayStream.close();
 }
 
@@ -112,8 +111,7 @@ Room* Building::GetRoom(int index) const {
 		return pRooms[index];
 	} else {
 		char tmp[CLENGTH];
-		sprintf(
-				tmp,
+		sprintf(tmp,
 				"ERROR: Wrong 'index' in CBuiling::GetRoom() index: %d size: %d",
 				index, pRooms.size());
 		Log->write(tmp);
@@ -140,8 +138,7 @@ void Building::AddRoom(Room* room) {
 	pRooms.push_back(room);
 }
 
-
-void Building::AddSurroundingRoom(){
+void Building::AddSurroundingRoom() {
 	Log->write("INFO: \tAdding the room 'outside' or 'world' ");
 	// first look for the geometry boundaries
 	double x_min = FLT_MAX;
@@ -176,18 +173,17 @@ void Building::AddSurroundingRoom(){
 		}
 	}
 
-
 	//make the grid slightly larger.
 	x_min = x_min - 10.0;
 	x_max = x_max + 10.0;
 	y_min = y_min - 10.0;
 	y_max = y_max + 10.0;
 
-	SubRoom* bigSubroom= new NormalSubRoom();
-	bigSubroom->AddWall(Wall (Point(x_min,y_min), Point(x_min,y_max)));
-	bigSubroom->AddWall(Wall (Point(x_min,y_max), Point(x_max,y_max)));
-	bigSubroom->AddWall(Wall (Point(x_max,y_max), Point(x_max,y_min)));
-	bigSubroom->AddWall(Wall (Point(x_max,y_min), Point(x_min,y_min)));
+	SubRoom* bigSubroom = new NormalSubRoom();
+	bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
+	bigSubroom->AddWall(Wall(Point(x_min, y_max), Point(x_max, y_max)));
+	bigSubroom->AddWall(Wall(Point(x_max, y_max), Point(x_max, y_min)));
+	bigSubroom->AddWall(Wall(Point(x_max, y_min), Point(x_min, y_min)));
 
 	Room * bigRoom = new Room();
 	bigRoom->AddSubRoom(bigSubroom);
@@ -235,8 +231,8 @@ void Building::Update() {
 	// in that case they are set in the wrong room.
 	vector<Pedestrian*> nonConformPeds;
 
-	for (int i = 0; i <  GetAnzRooms(); i++) {
-			Room* room =  GetRoom(i);
+	for (int i = 0; i < GetAnzRooms(); i++) {
+		Room* room = GetRoom(i);
 
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
@@ -249,10 +245,9 @@ void Building::Update() {
 					// the exit, thats a real problem.
 					if (ped->GetExitLine()->DistTo(ped->GetPos()) > 0.50) {
 						char tmp[CLENGTH];
-						sprintf(
-								tmp,
+						sprintf(tmp,
 								"WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
-								"via unknown exit[??%d] Position: (%f, %f)",
+										"via unknown exit[??%d] Position: (%f, %f)",
 								ped->GetPedIndex(),
 								pRooms[ped->GetRoomID()]->GetCaption().c_str(),
 								ped->GetRoomID(), ped->GetSubRoomID(),
@@ -264,16 +259,18 @@ void Building::Update() {
 						//exit(0);
 						//DeletePedestrian(ped);
 						nonConformPeds.push_back(ped);
-						sub->DeletePedestrian(k); //k--;
+						sub->DeletePedestrian(k);
 						continue; // next pedestrian
 					}
 
-					SubRoom* other_sub = cross->GetOtherSubRoom(room->GetRoomID(), j);
+					SubRoom* other_sub = cross->GetOtherSubRoom(
+							room->GetRoomID(), j);
 					if (other_sub) {
 						int nextSubRoom = other_sub->GetSubRoomID();
 						int nextRoom = other_sub->GetRoomID();
 						ped->SetSubRoomID(nextSubRoom);
-						ped->SetRoomID(nextRoom,GetRoom(nextRoom)->GetCaption());
+						ped->SetRoomID(nextRoom,
+								GetRoom(nextRoom)->GetCaption());
 						other_sub->AddPedestrian(ped);
 
 					} else {
@@ -304,15 +301,14 @@ void Building::Update() {
 				if (sub->IsInSubRoom(ped->GetPos())) {
 					//set in the new room
 					char tmp[CLENGTH];
-					sprintf(
-							tmp,
+					sprintf(tmp,
 							"pedestrian %d relocated from room/subroom [%s] %d/%d to [%s] %d/%d ",
 							ped->GetPedIndex(),
 							GetRoom(ped->GetRoomID())->GetCaption().c_str(),
 							ped->GetRoomID(), ped->GetSubRoomID(),
 							room->GetCaption().c_str(), i, j);
 					Log->write(tmp);
-					ped->SetRoomID(i,room->GetCaption());
+					ped->SetRoomID(i, room->GetCaption());
 					ped->SetSubRoomID(j);
 					ped->ClearMentalMap(); // reset the destination
 					pRouting->FindExit(ped);
@@ -332,7 +328,7 @@ void Building::Update() {
 	// find the new goals, the parallel way
 
 	const unsigned int nSize = pAllPedestians.size();
-	int nThreads = omp_get_max_threads(); //nThreads=1;
+	int nThreads = omp_get_max_threads();
 	// check if worth sharing the work
 	if (nSize < 12)
 		nThreads = 1;
@@ -349,7 +345,7 @@ void Building::Update() {
 		for (int p = start; p <= end; ++p) {
 
 			//todo: hermes
-			if(pRouting->FindExit(pAllPedestians[p])==-1){
+			if (pRouting->FindExit(pAllPedestians[p]) == -1) {
 				//a destination could not be found for that pedestrian
 				DeletePedFromSim(pAllPedestians[p]);
 			}
@@ -361,8 +357,8 @@ void Building::Update() {
 }
 
 void Building::InitPhiAllPeds(double pDt) {
-	for (int i = 0; i <  GetAnzRooms(); i++) {
-		Room* room =  GetRoom(i);
+	for (int i = 0; i < GetAnzRooms(); i++) {
+		Room* room = GetRoom(i);
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
@@ -382,7 +378,7 @@ void Building::InitPhiAllPeds(double pDt) {
 				} else {
 					Log->write(
 							"ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
-							"dist to target ist 0\n");
+									"dist to target ist 0\n");
 					exit(0);
 				}
 
@@ -390,7 +386,7 @@ void Building::InitPhiAllPeds(double pDt) {
 				E.SetCosPhi(cosPhi);
 				E.SetSinPhi(sinPhi);
 				ped->SetEllipse(E);
-				ped->SetRoomID(room->GetRoomID(),room->GetCaption());
+				ped->SetRoomID(room->GetRoomID(), room->GetCaption());
 			}
 		}
 	}
@@ -403,7 +399,7 @@ void Building::UpdateGrid() {
 void Building::InitGrid(double cellSize) {
 
 	char tmp[CLENGTH];
-	sprintf(tmp,"INFO: \tInitializing the grid with cell size: %f ",cellSize);
+	sprintf(tmp, "INFO: \tInitializing the grid with cell size: %f ", cellSize);
 	Log->write(tmp);
 	// first look for the geometry boundaries
 	double x_min = FLT_MAX;
@@ -439,7 +435,7 @@ void Building::InitGrid(double cellSize) {
 	}
 
 	for (unsigned int wa = 0; wa < pRooms.size(); wa++) {
-		Room* room =  pRooms[wa];
+		Room* room = pRooms[wa];
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
@@ -456,7 +452,7 @@ void Building::InitGrid(double cellSize) {
 	y_max = y_max + 1.0;
 
 	double boundaries[] = { x_min, x_max, y_min, y_max };
-	int pedsCount=pAllPedestians.size();
+	int pedsCount = pAllPedestians.size();
 
 	pLinkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
 	pLinkedCellGrid->ShallowCopy(pAllPedestians);
@@ -472,102 +468,135 @@ void Building::LoadBuilding(string filename) {
 
 	Log->write("INFO: \tParsing the geometry file");
 
-	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"geometry");
+	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "geometry");
 
-	double version=xmltof(xMainNode.getAttribute("version"),-1);
-	if(version<0.4){
+	double version = xmltof(xMainNode.getAttribute("version"), -1);
+	if (version < 0.4) {
 		Log->write("ERROR: \tOnly version > 0.4 supported");
 		Log->write("ERROR: \tparsing geometry file failed!");
 		exit(EXIT_FAILURE);
 	}
-	pCaption=xmltoa(xMainNode.getAttribute("caption"),"virtual building");
+	pCaption = xmltoa(xMainNode.getAttribute("caption"), "virtual building");
 
 	//The file has two main nodes
 	//<rooms> and <transitions>
 
 	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
-	int nRooms=xRoomsNode.nChildNode("room");
+	int nRooms = xRoomsNode.nChildNode("room");
 
 	//processing the rooms node
-	for(int i=0;i<nRooms;i++){
-		XMLNode xRoom = xRoomsNode.getChildNode("room",i);
+	for (int i = 0; i < nRooms; i++) {
+		XMLNode xRoom = xRoomsNode.getChildNode("room", i);
 		Room* room = new Room();
 
-		string room_id=xmltoa(xRoom.getAttribute("id"),"-1");
-		room->SetRoomID(xmltoi(room_id.c_str(),-1));
+		string room_id = xmltoa(xRoom.getAttribute("id"), "-1");
+		room->SetRoomID(xmltoi(room_id.c_str(), -1));
 
-		string caption="room " + room_id;
-		room->SetCaption(xmltoa(xRoom.getAttribute("caption"),caption.c_str() ));
+		string caption = "room " + room_id;
+		room->SetCaption(
+				xmltoa(xRoom.getAttribute("caption"), caption.c_str()));
 
-		room->SetZPos(xmltoi(xRoom.getAttribute("zpos"),0.0));
+		room->SetZPos(xmltoi(xRoom.getAttribute("zpos"), 0.0));
 
 		//parsing the subrooms
-		int nSubRooms=xRoom.nChildNode("subroom");
+		int nSubRooms = xRoom.nChildNode("subroom");
 
-		for(int s=0;s<nSubRooms;s++){
-			XMLNode xSubroomsNode = xRoom.getChildNode("subroom",s);
+		for (int s = 0; s < nSubRooms; s++) {
+			XMLNode xSubroomsNode = xRoom.getChildNode("subroom", s);
 
-			string subroom_id= xmltoa(xSubroomsNode.getAttribute("id"),"-1");
-			string closed= xmltoa(xSubroomsNode.getAttribute("closed"),"0");
-			string type= xmltoa(xSubroomsNode.getAttribute("class"),"subroom");
+			string subroom_id = xmltoa(xSubroomsNode.getAttribute("id"), "-1");
+			string closed = xmltoa(xSubroomsNode.getAttribute("closed"), "0");
+			string type = xmltoa(xSubroomsNode.getAttribute("class"),
+					"subroom");
 
-			SubRoom* subroom=NULL;
+			SubRoom* subroom = NULL;
 
-			if(type=="stair"){
+			if (type == "stair") {
 				//TODO: stairs should be read differently, with setUp,...
-				subroom= new Stair();
-			}else{
+				subroom = new Stair();
+			} else {
 				//normal subroom or corridor
-				subroom= new NormalSubRoom();
+				subroom = new NormalSubRoom();
 			}
 
 			subroom->SetRoomID(room->GetRoomID());
-			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(),-1));
+			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
 
 			//looking for polygons (walls)
-			int nPoly=xSubroomsNode.nChildNode("polygon");
-			for(int p=0;p<nPoly;p++){
-				XMLNode xPolyVertices=xSubroomsNode.getChildNode("polygon",p);
-				int nVertices=xSubroomsNode.getChildNode("polygon",p).nChildNode("vertex");
+			int nPoly = xSubroomsNode.nChildNode("polygon");
+			for (int p = 0; p < nPoly; p++) {
+				XMLNode xPolyVertices = xSubroomsNode.getChildNode("polygon",
+						p);
+				int nVertices =
+						xSubroomsNode.getChildNode("polygon", p).nChildNode(
+								"vertex");
 
+				for (int v = 0; v < nVertices - 1; v++) {
+					double x1 =
+							xmltof(
+									xPolyVertices.getChildNode("vertex", v).getAttribute(
+											"px"));
+					double y1 =
+							xmltof(
+									xPolyVertices.getChildNode("vertex", v).getAttribute(
+											"py"));
 
-				for(int v=0;v<nVertices-1;v++){
-					double x1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("px"));
-					double y1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("py"));
-
-					double x2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("px"));
-					double y2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("py"));
+					double x2 =
+							xmltof(
+									xPolyVertices.getChildNode("vertex", v + 1).getAttribute(
+											"px"));
+					double y2 =
+							xmltof(
+									xPolyVertices.getChildNode("vertex", v + 1).getAttribute(
+											"py"));
 					subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
 				}
 
 			}
 
 			//looking for obstacles
-			int nObst=xSubroomsNode.nChildNode("obstacle");
+			int nObst = xSubroomsNode.nChildNode("obstacle");
 
-			for(int obst=0;obst<nObst;obst++){
-				XMLNode xObstacle=xSubroomsNode.getChildNode("obstacle",obst);
-				int nPoly=xObstacle.nChildNode("polygon");
-				int id= xmltof(xObstacle.getAttribute("id"),-1);
-				int height= xmltof(xObstacle.getAttribute("height"),0);
-				double closed= xmltof(xObstacle.getAttribute("closed"),0);
-				string caption= xmltoa(xObstacle.getAttribute("caption"),"-1");
+			for (int obst = 0; obst < nObst; obst++) {
+				XMLNode xObstacle = xSubroomsNode.getChildNode("obstacle",
+						obst);
+				int nPoly = xObstacle.nChildNode("polygon");
+				int id = xmltof(xObstacle.getAttribute("id"), -1);
+				int height = xmltof(xObstacle.getAttribute("height"), 0);
+				double closed = xmltof(xObstacle.getAttribute("closed"), 0);
+				string caption = xmltoa(xObstacle.getAttribute("caption"),
+						"-1");
 
-				Obstacle* obstacle= new Obstacle();
+				Obstacle* obstacle = new Obstacle();
 				obstacle->SetId(id);
 				obstacle->SetCaption(caption);
 				obstacle->SetClosed(closed);
 				obstacle->SetHeight(height);
 
-				for(int p=0;p<nPoly;p++){
-					XMLNode xPolyVertices=xObstacle.getChildNode("polygon",p);
-					int nVertices=xObstacle.getChildNode("polygon",p).nChildNode("vertex");
-					for(int v=0;v<nVertices-1;v++){
-						double x1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("px"));
-						double y1=xmltof(xPolyVertices.getChildNode("vertex",v).getAttribute("py"));
+				for (int p = 0; p < nPoly; p++) {
+					XMLNode xPolyVertices = xObstacle.getChildNode("polygon",
+							p);
+					int nVertices =
+							xObstacle.getChildNode("polygon", p).nChildNode(
+									"vertex");
+					for (int v = 0; v < nVertices - 1; v++) {
+						double x1 =
+								xmltof(
+										xPolyVertices.getChildNode("vertex", v).getAttribute(
+												"px"));
+						double y1 =
+								xmltof(
+										xPolyVertices.getChildNode("vertex", v).getAttribute(
+												"py"));
 
-						double x2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("px"));
-						double y2=xmltof(xPolyVertices.getChildNode("vertex",v+1).getAttribute("py"));
+						double x2 =
+								xmltof(
+										xPolyVertices.getChildNode("vertex",
+												v + 1).getAttribute("px"));
+						double y2 =
+								xmltof(
+										xPolyVertices.getChildNode("vertex",
+												v + 1).getAttribute("py"));
 						obstacle->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
 					}
 				}
@@ -577,19 +606,23 @@ void Building::LoadBuilding(string filename) {
 		}
 		//parsing the crossings
 		XMLNode xCrossingsNode = xRoom.getChildNode("crossings");
-		int nCrossing =xCrossingsNode.nChildNode("crossing");
+		int nCrossing = xCrossingsNode.nChildNode("crossing");
 
 		//processing the rooms node
-		for(int i=0;i<nCrossing;i++){
-			XMLNode xCrossing = xCrossingsNode.getChildNode("crossing",i);
+		for (int i = 0; i < nCrossing; i++) {
+			XMLNode xCrossing = xCrossingsNode.getChildNode("crossing", i);
 
-			int id=xmltoi(xCrossing.getAttribute("id"),-1);
-			int sub1_id=xmltoi(xCrossing.getAttribute("subroom1_id"),-1);
-			int sub2_id=xmltoi(xCrossing.getAttribute("subroom2_id"),-1);
-			double x1=xmltof(xCrossing.getChildNode("vertex",0).getAttribute("px"));
-			double y1=xmltof(xCrossing.getChildNode("vertex",0).getAttribute("py"));
-			double x2=xmltof(xCrossing.getChildNode("vertex",1).getAttribute("px"));
-			double y2=xmltof(xCrossing.getChildNode("vertex",1).getAttribute("py"));
+			int id = xmltoi(xCrossing.getAttribute("id"), -1);
+			int sub1_id = xmltoi(xCrossing.getAttribute("subroom1_id"), -1);
+			int sub2_id = xmltoi(xCrossing.getAttribute("subroom2_id"), -1);
+			double x1 = xmltof(
+					xCrossing.getChildNode("vertex", 0).getAttribute("px"));
+			double y1 = xmltof(
+					xCrossing.getChildNode("vertex", 0).getAttribute("py"));
+			double x2 = xmltof(
+					xCrossing.getChildNode("vertex", 1).getAttribute("px"));
+			double y2 = xmltof(
+					xCrossing.getChildNode("vertex", 1).getAttribute("py"));
 
 			Crossing* c = new Crossing();
 			c->SetIndex(id);
@@ -617,26 +650,25 @@ void Building::LoadBuilding(string filename) {
 		AddRoom(room);
 	}
 
-
 	// all rooms are read, now proceed with transitions
 	XMLNode xTransNode = xMainNode.getChildNode("transitions");
-	int nTrans=xTransNode.nChildNode("transition");
+	int nTrans = xTransNode.nChildNode("transition");
 
-	for(int i=0;i<nTrans;i++){
-		XMLNode xTrans = xTransNode.getChildNode("transition",i);
+	for (int i = 0; i < nTrans; i++) {
+		XMLNode xTrans = xTransNode.getChildNode("transition", i);
 
-		int id=xmltoi(xTrans.getAttribute("id"),-1);
-		string caption="door " + id;
-		caption= xmltoa(xTrans.getAttribute("caption"),caption.c_str());
-		int room1_id=xmltoi(xTrans.getAttribute("room1_id"),-1);
-		int room2_id=xmltoi(xTrans.getAttribute("room2_id"),-1);
-		int subroom1_id=xmltoi(xTrans.getAttribute("subroom1_id"),-1);
-		int subroom2_id=xmltoi(xTrans.getAttribute("subroom2_id"),-1);
-		double x1=xmltof(xTrans.getChildNode("vertex",0).getAttribute("px"));
-		double y1=xmltof(xTrans.getChildNode("vertex",0).getAttribute("py"));
-		double x2=xmltof(xTrans.getChildNode("vertex",1).getAttribute("px"));
-		double y2=xmltof(xTrans.getChildNode("vertex",1).getAttribute("py"));
-		string type =  xmltoa(xTrans.getAttribute("type"),"normal");
+		int id = xmltoi(xTrans.getAttribute("id"), -1);
+		string caption = "door " + id;
+		caption = xmltoa(xTrans.getAttribute("caption"), caption.c_str());
+		int room1_id = xmltoi(xTrans.getAttribute("room1_id"), -1);
+		int room2_id = xmltoi(xTrans.getAttribute("room2_id"), -1);
+		int subroom1_id = xmltoi(xTrans.getAttribute("subroom1_id"), -1);
+		int subroom2_id = xmltoi(xTrans.getAttribute("subroom2_id"), -1);
+		double x1 = xmltof(xTrans.getChildNode("vertex", 0).getAttribute("px"));
+		double y1 = xmltof(xTrans.getChildNode("vertex", 0).getAttribute("py"));
+		double x2 = xmltof(xTrans.getChildNode("vertex", 1).getAttribute("px"));
+		double y2 = xmltof(xTrans.getChildNode("vertex", 1).getAttribute("py"));
+		string type = xmltoa(xTrans.getAttribute("type"), "normal");
 
 		Transition* t = new Transition();
 		t->SetIndex(id);
@@ -715,7 +747,7 @@ Transition* Building::GetTransition(string caption) const {
 		const vector<int>& trans_ids = pRooms[r]->GetAllTransitionsIDs();
 		for (unsigned int t = 0; t < trans_ids.size(); t++) {
 			int id = trans_ids[t];
-			Transition* tr = static_cast<Transition*> (pRouting->GetGoal(id));
+			Transition* tr = static_cast<Transition*>(pRouting->GetGoal(id));
 			if (tr->GetCaption() == caption)
 				return tr;
 		}
@@ -727,8 +759,8 @@ Transition* Building::GetTransition(string caption) const {
 }
 
 Crossing* Building::GetGoal(string caption) const {
-	for (int g=0;g<pRouting->GetAnzGoals();g++){
-		Crossing* cr= pRouting->GetGoal(g);
+	for (int g = 0; g < pRouting->GetAnzGoals(); g++) {
+		Crossing* cr = pRouting->GetGoal(g);
 		if (cr->GetCaption() == caption)
 			return cr;
 	}
@@ -741,16 +773,16 @@ Crossing* Building::GetGoal(string caption) const {
 void Building::LoadRoutingInfo(string filename) {
 
 	Log->write("INFO:\tLoading extra routing information");
-	if(filename==""){
+	if (filename == "") {
 		Log->write("INFO:\t No file supplied !");
 		Log->write("INFO:\t done with loading extra routing information");
 		return;
 	}
 
-	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"routing");
+	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "routing");
 
-	double version=xmltof(xMainNode.getAttribute("version"),-1);
-	if(version<0.4){
+	double version = xmltof(xMainNode.getAttribute("version"), -1);
+	if (version < 0.4) {
 		Log->write("ERROR: \tOnly version > 0.4 supported");
 		Log->write("ERROR: \tparsing routing file failed!");
 		exit(EXIT_FAILURE);
@@ -758,19 +790,19 @@ void Building::LoadRoutingInfo(string filename) {
 
 	//actually only contains one Hlines node
 	XMLNode xHlinesNode = xMainNode.getChildNode("Hlines");
-	int nHlines=xHlinesNode.nChildNode("Hline");
+	int nHlines = xHlinesNode.nChildNode("Hline");
 
 	//processing the rooms node
-	for(int i=0;i<nHlines;i++){
-		XMLNode hline = xHlinesNode.getChildNode("hline",i);
-		double id=xmltof(hline.getAttribute("id"),-1);
-		int room_id=xmltoi(hline.getAttribute("room_id"),-1);
-		int subroom_id=xmltoi(hline.getAttribute("subroom_id"),-1);
+	for (int i = 0; i < nHlines; i++) {
+		XMLNode hline = xHlinesNode.getChildNode("hline", i);
+		double id = xmltof(hline.getAttribute("id"), -1);
+		int room_id = xmltoi(hline.getAttribute("room_id"), -1);
+		int subroom_id = xmltoi(hline.getAttribute("subroom_id"), -1);
 
-		double x1=xmltof(hline.getChildNode("vertex",0).getAttribute("px"));
-		double y1=xmltof(hline.getChildNode("vertex",0).getAttribute("py"));
-		double x2=xmltof(hline.getChildNode("vertex",1).getAttribute("px"));
-		double y2=xmltof(hline.getChildNode("vertex",1).getAttribute("py"));
+		double x1 = xmltof(hline.getChildNode("vertex", 0).getAttribute("px"));
+		double y1 = xmltof(hline.getChildNode("vertex", 0).getAttribute("py"));
+		double x2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("px"));
+		double y2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("py"));
 
 		Crossing* c = new Crossing();
 		c->SetIndex(id);
@@ -798,20 +830,19 @@ void Building::LoadRoutingInfo(string filename) {
 
 	}
 
-
 	//load the pre-defined trips
 	XMLNode xTripsNode = xMainNode.getChildNode("trips");
-	int nTrips=xTripsNode.nChildNode("trip");
+	int nTrips = xTripsNode.nChildNode("trip");
 
 	//processing the rooms node
-	for(int i=0;i<nTrips;i++){
-		XMLNode trip = xTripsNode.getChildNode("trip",i);
-		double id=xmltof(trip.getAttribute("id"),-1);
-		if(id==-1){
+	for (int i = 0; i < nTrips; i++) {
+		XMLNode trip = xTripsNode.getChildNode("trip", i);
+		double id = xmltof(trip.getAttribute("id"), -1);
+		if (id == -1) {
 			Log->write("ERROR:\t id missing for trip");
 			exit(EXIT_FAILURE);
 		}
-		string sTrip=trip.getText();
+		string sTrip = trip.getText();
 		vector<int> vTrip;
 		vTrip.clear();
 
@@ -830,16 +861,16 @@ void Building::LoadTrafficInfo(string filename) {
 
 	Log->write("INFO:\tLoading  the traffic info file");
 
-	if(filename==""){
+	if (filename == "") {
 		Log->write("INFO:\t No file supplied !");
 		Log->write("INFO:\t done with loading traffic info file");
 		return;
 	}
 
-	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"traffic");
+	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "traffic");
 
-	double version=xmltof(xMainNode.getAttribute("version"),-1);
-	if(version<0.4){
+	double version = xmltof(xMainNode.getAttribute("version"), -1);
+	if (version < 0.4) {
 		Log->write("ERROR: \tOnly version > 0.4 supported");
 		Log->write("ERROR: \tparsing traffic file failed!");
 		exit(EXIT_FAILURE);
@@ -849,33 +880,33 @@ void Building::LoadTrafficInfo(string filename) {
 	//<rooms> and <transitions>
 
 	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
-	int nRooms=xRoomsNode.nChildNode("room");
+	int nRooms = xRoomsNode.nChildNode("room");
 
 	//processing the rooms node
-	for(int i=0;i<nRooms;i++){
-		XMLNode xRoom = xRoomsNode.getChildNode("room",i);
-		double id=xmltof(xRoom.getAttribute("room_id"),-1);
-		string state=xmltoa(xRoom.getAttribute("state"),"good");
-		int status=(state=="good")?0:1;
+	for (int i = 0; i < nRooms; i++) {
+		XMLNode xRoom = xRoomsNode.getChildNode("room", i);
+		double id = xmltof(xRoom.getAttribute("room_id"), -1);
+		string state = xmltoa(xRoom.getAttribute("state"), "good");
+		int status = (state == "good") ? 0 : 1;
 		pRooms[id]->SetRoomState(status);
 	}
 
 	//processing the doors node
 	XMLNode xDoorsNode = xMainNode.getChildNode("doors");
-	int nDoors=xDoorsNode.nChildNode("door");
+	int nDoors = xDoorsNode.nChildNode("door");
 
-	for(int i=0;i<nDoors;i++){
-		XMLNode xDoor = xDoorsNode.getChildNode("door",i);
-		double id=xmltof(xDoor.getAttribute("trans_id"),-1);
-		string state=xmltoa(xDoor.getAttribute("state"),"open");
+	for (int i = 0; i < nDoors; i++) {
+		XMLNode xDoor = xDoorsNode.getChildNode("door", i);
+		double id = xmltof(xDoor.getAttribute("trans_id"), -1);
+		string state = xmltoa(xDoor.getAttribute("state"), "open");
 
-		if(state=="open"){
+		if (state == "open") {
 			dynamic_cast<Transition*>(pRouting->GetGoal(id))->Open();
-		}else if(state=="close"){
-			dynamic_cast<Transition*>(pRouting->GetGoal(id) )->Close();
-		}else{
+		} else if (state == "close") {
+			dynamic_cast<Transition*>(pRouting->GetGoal(id))->Close();
+		} else {
 			char tmp[CLENGTH];
-			sprintf(tmp,"WARNING:\t Unknown door state: %s",state.c_str());
+			sprintf(tmp, "WARNING:\t Unknown door state: %s", state.c_str());
 			Log->write(tmp);
 		}
 	}
@@ -890,19 +921,20 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 		cout << " Ped not found" << endl;
 	} else {
 		//save the path history for this pedestrian before removing from the simulation
-		if(pSavePathway){
+		if (pSavePathway) {
 			string results;
-			string path=(*it)->GetPath();
+			string path = (*it)->GetPath();
 			vector<string> brokenpaths;
-			StringExplode(path, ">",&brokenpaths);
-			for(unsigned int i=0;i<brokenpaths.size();i++){
+			StringExplode(path, ">", &brokenpaths);
+			for (unsigned int i = 0; i < brokenpaths.size(); i++) {
 				vector<string> tags;
-				StringExplode(brokenpaths[i], ":",&tags);
-				string room=pRooms[atoi(tags[0].c_str())]->GetCaption();
-				string trans=pRouting->GetGoal(atoi(tags[1].c_str()))->GetCaption();
+				StringExplode(brokenpaths[i], ":", &tags);
+				string room = pRooms[atoi(tags[0].c_str())]->GetCaption();
+				string trans =
+						pRouting->GetGoal(atoi(tags[1].c_str()))->GetCaption();
 				//ignore crossings/hlines
-				if(trans!="")
-				PpathWayStream<<room <<" "<<trans<<endl;
+				if (trans != "")
+					PpathWayStream << room << " " << trans << endl;
 			}
 
 		}
@@ -912,12 +944,10 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 	delete ped;
 }
 
-void Building::DeletePedFromSim(Pedestrian* ped){
-	SubRoom* sub = pRooms[ped->GetRoomID()]->GetSubRoom(
-			ped->GetSubRoomID());
+void Building::DeletePedFromSim(Pedestrian* ped) {
+	SubRoom* sub = pRooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
 	for (int p = 0; p < sub->GetAnzPedestrians(); p++) {
-		if (sub->GetPedestrian(p)->GetPedIndex()
-				== ped->GetPedIndex()) {
+		if (sub->GetPedestrian(p)->GetPedIndex() == ped->GetPedIndex()) {
 			sub->DeletePedestrian(p);
 			DeletePedestrian(ped);
 			return;
@@ -941,7 +971,6 @@ void Building::AddPedestrian(Pedestrian* ped) {
 	pAllPedestians.push_back(ped);
 
 }
-
 
 //void Building::InitRoomsAndSubroomsMap(){
 //	Log->write("INFO: \tcreating the rooms maps!!!\n");
@@ -976,14 +1005,14 @@ void Building::AddPedestrian(Pedestrian* ped) {
 //	}
 //}
 
-void Building::InitSavePedPathway(string filename){
+void Building::InitSavePedPathway(string filename) {
 	PpathWayStream.open(filename.c_str());
-	pSavePathway=true;
+	pSavePathway = true;
 
-	if (PpathWayStream.is_open()){
-		Log->write("#INFO:\tsaving pedestrian paths to [ "+filename+" ]");
-		PpathWayStream<<"##pedestrian ways"<<endl;
-		PpathWayStream<<"#nomenclature roomid  caption"<<endl;
+	if (PpathWayStream.is_open()) {
+		Log->write("#INFO:\tsaving pedestrian paths to [ " + filename + " ]");
+		PpathWayStream << "##pedestrian ways" << endl;
+		PpathWayStream << "#nomenclature roomid  caption" << endl;
 		//		for (unsigned int r=0;r< pRooms.size();r++){
 		//			Room* room= GetRoom(r);
 		//			const vector<int>& goals=room->GetAllTransitionsIDs();
@@ -995,21 +1024,19 @@ void Building::InitSavePedPathway(string filename){
 		//			}
 		//		}
 		//
-		PpathWayStream<<"#data room exit_id"<<endl;
-	}
-	else{
-		Log->write("#INFO:\t Unable to open [ "+filename+" ]");
+		PpathWayStream << "#data room exit_id" << endl;
+	} else {
+		Log->write("#INFO:\t Unable to open [ " + filename + " ]");
 		Log->write("#INFO:\t saving to stdout");
 
 	}
 }
 
-
 void Building::CleanUpTheScene() {
 	//return;
 	static int counter = 0;
 	counter++;
-	static int totalSliced=0;
+	static int totalSliced = 0;
 
 	int updateRate = 80.0 / 0.01; // 20 seconds/pDt
 
@@ -1025,7 +1052,8 @@ void Building::CleanUpTheScene() {
 				char msg[CLENGTH];
 				sprintf(msg, "INFO:\t slicing Ped %d from room %s, total [%d]",
 						ped->GetPedIndex(),
-						pRooms[ped->GetRoomID()]->GetCaption().c_str(),totalSliced);
+						pRooms[ped->GetRoomID()]->GetCaption().c_str(),
+						totalSliced);
 				Log->write(msg);
 			} else {
 				ped->RecordActualPosition();
@@ -1041,29 +1069,30 @@ void Building::CleanUpTheScene() {
 //	return pSubroomConnectionMap[room1][subroom1][room2][subroom2];
 //}
 
-void Building::StringExplode(string str, string separator, vector<string>* results){
+void Building::StringExplode(string str, string separator,
+		vector<string>* results) {
 	size_t found;
 	found = str.find_first_of(separator);
-	while(found != string::npos){
-		if(found > 0){
-			results->push_back(str.substr(0,found));
+	while (found != string::npos) {
+		if (found > 0) {
+			results->push_back(str.substr(0, found));
 		}
-		str = str.substr(found+1);
+		str = str.substr(found + 1);
 		found = str.find_first_of(separator);
 	}
-	if(str.length() > 0){
+	if (str.length() > 0) {
 		results->push_back(str);
 	}
 }
 
-Pedestrian* Building::GetPedestrian( int pedID) const {
+Pedestrian* Building::GetPedestrian(int pedID) const {
 	for (unsigned int i = 0; i < pRooms.size(); i++) {
 		Room* room = pRooms[i];
 		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-				Pedestrian* p=sub->GetPedestrian(k);
-				if(p->GetPedIndex()==pedID){
+				Pedestrian* p = sub->GetPedestrian(k);
+				if (p->GetPedIndex() == pedID) {
 					return p;
 				}
 			}

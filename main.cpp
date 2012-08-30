@@ -31,14 +31,12 @@
 #include "general/ArgumentParser.h"
 #include "Simulation.h"
 
-
 ///global unique log variable
 OutputHandler* Log;
 
 int main(int argc, char **argv) {
 
-
-	time_t starttime,endtime;
+	time_t starttime, endtime;
 
 	//Log = new FileHandler("./Logfile.dat");
 	Log = new STDIOHandler();
@@ -54,22 +52,22 @@ int main(int argc, char **argv) {
 	// Simulation
 	time(&starttime);
 	Log->write("INFO: \tStart runSimulation()\n");
-	int evacTime=sim.RunSimulation();
+	int evacTime = sim.RunSimulation();
 	Log->write("INFO: \tEnd runSimulation()\n");
 	time(&endtime);
 
 	//some output
-	double execTime=difftime(endtime,starttime);
+	double execTime = difftime(endtime, starttime);
 	char tmp[CLENGTH];
-	sprintf(tmp,"\nPedestrians [%d] threads [%d]",sim.GetNPeds(),args->GetMaxOmpThreads());
+	sprintf(tmp, "\nPedestrians [%d] threads [%d]", sim.GetNPeds(),
+			args->GetMaxOmpThreads());
 	Log->write(tmp);
-	sprintf(tmp,"\nExec Time [s]     : %.2f",execTime);
+	sprintf(tmp, "\nExec Time [s]     : %.2f", execTime);
 	Log->write(tmp);
-	sprintf(tmp,"Evac Time [s]     : %d",evacTime);
+	sprintf(tmp, "Evac Time [s]     : %d", evacTime);
 	Log->write(tmp);
-	sprintf(tmp,"Real Time Factor  : %.2f X\n",evacTime/execTime);
+	sprintf(tmp, "Real Time Factor  : %.2f X\n", evacTime / execTime);
 	Log->write(tmp);
-
 
 	//do the last cleaning
 	delete args;

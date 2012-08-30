@@ -21,9 +21,7 @@ private:
 public:
     // Konstruktoren
     Transition();
-    Transition(const Transition& orig);
     virtual ~Transition();
-
 
     void Close(); /// schliesst Tür
     void Open(); /// öffnet Tür

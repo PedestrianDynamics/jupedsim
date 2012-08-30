@@ -52,6 +52,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
 
     double d = 0.2; // beide Seiten um 20 cm verkürzen
 
+    //TODO: hermes
     if(exitLine->Length()>4.0){
     	d=0.7;
     }

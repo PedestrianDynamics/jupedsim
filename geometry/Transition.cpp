@@ -36,11 +36,6 @@ Transition::Transition() : Crossing() {
 	pRoom2 = NULL;
 }
 
-Transition::Transition(const Transition& orig) : Crossing(orig) {
-	pIsOpen = orig.IsOpen();
-	pRoom2 = orig.GetRoom2();
-}
-
 Transition::~Transition() {
 }
 

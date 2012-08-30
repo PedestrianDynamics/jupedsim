@@ -41,8 +41,8 @@ class Building;
 
 class Routing {
 private:
-	vector<Crossing*> goals;
-	std::map<int, Crossing*>pGoal; // map the actual room to a destination
+	//vector<Crossing*> goals;
+	std::map<int, Crossing*>pGoals;
 
 	vector<Crossing*> pCrossings;
 	vector<Transition*> pTransitions;
@@ -59,7 +59,6 @@ public:
 	virtual ~Routing();
 
 	// Getter-Funktionen
-	//const vector<Crossing*>& GetAllGoals() const;
 	Crossing* GetGoal(int index);
 	int GetAnzGoals() const;
 
@@ -83,7 +82,6 @@ public:
 	// virtuelle Funktionen
 	virtual int FindExit(Pedestrian* p) = 0;
 	virtual void Init(Building* b) = 0;
-
 
 	//FIXME: to be deleted
 	void  AddGoal(Crossing* line);

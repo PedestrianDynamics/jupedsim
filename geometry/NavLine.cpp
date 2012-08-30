@@ -1,7 +1,7 @@
 /**
- * Hline.h
+ * NavLine.cpp
  *
- *  Created on: Aug 1, 2012
+ *  Created on: Aug 30, 2012
  *
  *
  * @section LICENSE
@@ -26,46 +26,17 @@
  *
  */
 
-#ifndef HLINE_H_
-#define HLINE_H_
-
-#include "Room.h"
 #include "NavLine.h"
 
-class SubRoom;
+int NavLine::pUID=0;
 
+NavLine::NavLine() {
+	pUID++;
+}
 
-class Hline: public NavLine {
+NavLine::~NavLine() {
+}
 
-private:
-    int pID;
-    Room* pRoom;
-    string pCaption;
-    SubRoom* pSubRoom;
-
-public:
-	Hline();
-	virtual ~Hline();
-
-    // Setter -Funktionen
-    void SetID(int ID);
-    void SetRoom(Room* r);
-    void SetCaption(string s);
-    void SetSubRoom(SubRoom* r);
-
-    // Getter - Funktionen
-    int GetID() const;
-    string GetCaption() const;
-    Room* GetRoom() const;
-    SubRoom* GetSubRoom() const;
-
-    // Sonstiges
-    bool IsInSubRoom(int subroomID) const;
-    bool IsInRoom(int roomID) const;
-
-    // Ausgabe
-    void WriteToErrorLog() const;
-    string WriteElement() const;
-};
-
-#endif /* HLINE_H_ */
+int NavLine::GetUniqueID() {
+	return pUID;
+}

@@ -29,12 +29,13 @@
 #ifndef _CROSSING_H
 #define	_CROSSING_H
 
-//#include "Line.h"
+#include "NavLine.h"
 #include "Room.h"
 
 class Line;
+class NavLine;
 
-class Crossing : public Line {
+class Crossing : public NavLine {
 private:
     int pID; // eindeutig zwischen ALLEN Crossings und Transitions
     Room* pRoom1; // benötigt nur einen Raum in dem beide SubRooms enthalten sind
@@ -45,8 +46,6 @@ private:
 public:
     // Konstruktoren
     Crossing();
-    Crossing(const Point& p1, const Point& p2);
-    Crossing(const Crossing& orig);
     virtual ~Crossing();
     // Setter -Funktionen
     void SetIndex(int ID);

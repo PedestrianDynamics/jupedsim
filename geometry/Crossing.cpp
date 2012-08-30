@@ -32,28 +32,13 @@
 /************************************************************
  Crossing (abgeleitet von Line)
  ************************************************************/
-Crossing::Crossing() : Line() {
+Crossing::Crossing(){
     pID = -1;
     pRoom1 = NULL;
     pSubRoom1 = NULL;
     pSubRoom2 = NULL;
 	pCaption = "";
 
-}
-
-Crossing::Crossing(const Point& p1, const Point& p2) : Line(p1, p2) {
-    pID = -1;
-    pRoom1 = NULL;
-    pSubRoom1 = NULL;
-    pSubRoom2 = NULL;
-}
-
-Crossing::Crossing(const Crossing& orig) : Line(orig) {
-    pID = orig.GetIndex();
-    pRoom1 = orig.GetRoom1();
-    pSubRoom1 = orig.GetSubRoom1();
-    pSubRoom2 = orig.GetSubRoom2();
-    pCaption=orig.GetCaption();
 }
 
 Crossing::~Crossing() {

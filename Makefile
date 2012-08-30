@@ -22,11 +22,11 @@ SOURCES=main.cpp Simulation.cpp general/ArgumentParser.cpp general/xmlParser.cpp
 geometry/SubRoom.cpp geometry/Wall.cpp geometry/Transition.cpp geometry/Line.cpp\
 geometry/Point.cpp geometry/Room.cpp geometry/Building.cpp geometry/Crossing.cpp\
 geometry/Hline.cpp geometry/Obstacle.cpp IO/IODispatcher.cpp IO/TraVisToClient.cpp\
-IO/OutputHandler.cpp\
+IO/OutputHandler.cpp geometry/NavLine.cpp\
 math/Distribution.cpp math/Mathematics.cpp math/ODESolver.cpp math/ForceModel.cpp\
 routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp routing/DummyRouter.cpp\
 routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\
-pedestrian/Ellipse.cpp mpi/LCGrid.cpp\
+pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
 routing/QuickestPathRouter.cpp \
 routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp  \
 
