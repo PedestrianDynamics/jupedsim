@@ -794,6 +794,7 @@ void Building::LoadRoutingInfo(string filename) {
 		h->SetRoom(room);
 		h->SetSubRoom(subroom);
 		pRouting->AddHline(h);
+		subroom->AddHline(h);
 
 	}
 
