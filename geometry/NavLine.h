@@ -32,7 +32,8 @@
 
 class NavLine: public Line {
 private:
-	static int pUID;
+	static int UID;
+	int pUID;
 public:
 	NavLine();
 	virtual ~NavLine();

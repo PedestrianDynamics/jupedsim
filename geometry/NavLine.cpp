@@ -28,10 +28,10 @@
 
 #include "NavLine.h"
 
-int NavLine::pUID=0;
+int NavLine::UID=0;
 
 NavLine::NavLine() {
-	pUID++;
+    pUID = UID++;
 }
 
 NavLine::~NavLine() {
