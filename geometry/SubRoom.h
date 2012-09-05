@@ -31,6 +31,7 @@
 
 #include "Line.h"
 #include "Wall.h"
+#include "NavLine.h"
 #include "../general/Macros.h"
 #include "../pedestrian/Pedestrian.h"
 #include "Obstacle.h"

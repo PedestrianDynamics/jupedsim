@@ -313,8 +313,7 @@ void SubRoom::LoadWall(string line) {
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
 	Point pos = ped->GetPos();
-	Line* exit = ped->GetExitLine();
-	if (exit->DistTo(pos) <= EPS_GOAL)
+	if (ped->GetExitLine()->DistTo(pos) <= EPS_GOAL)
 		return true;
 	else
 		return IsInSubRoom(pos);

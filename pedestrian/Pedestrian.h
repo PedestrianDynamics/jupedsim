@@ -36,6 +36,7 @@
 #include "../general/Macros.h"
 
 class Building;
+class NavLine;
 
 class Pedestrian {
 private:
@@ -52,10 +53,9 @@ private:
 	double pDt; // step size
 	Ellipse pEllipse;
 	int pExitIndex; // aktueller Ausgang, Index in routing->GetGoal(index)
-	Line* pExitLine; // aktuelle Ausgangslinie
+	NavLine* pNavLine; // aktuelle Ausgangslinie
 	std::map<int, int>pMentalMap; // map the actual room to a destination
 	std::vector<int> pDestHistory;
-	//int pMentalMapArray[15][130];
 	Point pV0; //vector V0
 	Point pLastPosition;
 	vector<int> pTrip;
@@ -92,7 +92,7 @@ public:
 	void SetTau(double tau);
 	void SetEllipse(const Ellipse& e);
 	void SetExitIndex(int i);
-	void SetExitLine(Line* l);
+	void SetExitLine(NavLine* l);
 	void Setdt(double dt);
 
 	// Eigenschaften der Ellipse
@@ -113,7 +113,7 @@ public:
 	double GetTau() const;
 	const Ellipse& GetEllipse() const;
 	int GetExitIndex() const;
-	Line* GetExitLine() const;
+	NavLine* GetExitLine() const;
 	// Eigenschaften der Ellipse
 	const Point& GetPos() const;
 	const Point& GetV() const;

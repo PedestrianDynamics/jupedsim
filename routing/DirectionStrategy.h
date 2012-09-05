@@ -30,12 +30,12 @@
 
 #include "../geometry/Room.h"
 
+
 /************************************************************
  DirectionStrategy (abstrakte Klasse)
  ************************************************************/
 
 class DirectionStrategy {
-private:
 
 public:
     DirectionStrategy();

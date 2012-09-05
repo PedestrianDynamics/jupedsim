@@ -25,6 +25,7 @@
  */
 
 #include "DirectionStrategy.h"
+#include "../geometry/NavLine.h"
 
 DirectionStrategy::DirectionStrategy() {
 }
@@ -36,29 +37,19 @@ DirectionStrategy::~DirectionStrategy() {
 }
 
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const {
-
-    //The pedestrian knows which exit it wants.
-    Line* exitLine = ped->GetExitLine();
-    return (exitLine->GetPoint1() + exitLine->GetPoint2())*0.5;
+    return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 
 Point DirectionMinSeperation::GetTarget(Room* room, Pedestrian* ped) const {
-    Line* exitLine = ped->GetExitLine();
-    return exitLine->ShortestPoint(ped->GetPos());
+    return ped->GetExitLine()->ShortestPoint(ped->GetPos());
 }
 
 Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const {
-    Line* exitLine = ped->GetExitLine();
 
     double d = 0.2; // beide Seiten um 20 cm verkürzen
 
-    //TODO: hermes
-    if(exitLine->Length()>4.0){
-    	d=0.7;
-    }
-
-    const Point& p1 = exitLine->GetPoint1();
-    const Point& p2 = exitLine->GetPoint2();
+    const Point& p1 = ped->GetExitLine()->GetPoint1();
+    const Point& p2 = ped->GetExitLine()->GetPoint2();
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
 

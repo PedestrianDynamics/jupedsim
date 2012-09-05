@@ -45,7 +45,7 @@ Pedestrian::Pedestrian() {
 	pUpdateRate = 0;
 	pTurninAngle=0.0;
 	pEllipse = Ellipse();
-	pExitLine = NULL;
+	pNavLine = NULL;
 	pReroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
 	pTimeBeforeRerouting=0.0;
 	pReroutingEnabled=false;
@@ -74,7 +74,7 @@ Pedestrian::Pedestrian(const Pedestrian& orig) {
 	pMass = orig.GetMass();
 	pTau = orig.GetTau();
 	pEllipse = orig.GetEllipse();
-	pExitLine = orig.GetExitLine();
+	pNavLine = orig.GetExitLine();
 	pDesiredFinalDestination = orig.GetFinalDestination();
 	pTimeInJam=orig.GetTimeInJam();
 	pReroutingThreshold=0;
@@ -118,15 +118,14 @@ void Pedestrian::SetEllipse(const Ellipse& e) {
 }
 
 void Pedestrian::SetExitIndex(int i) {
-	//pMentalMapArray[pRoomID][pSubRoomID]=i;
 	pExitIndex = i;
 	//save that destination for that room
 	pMentalMap[GetUniqueRoomID()] = i;
 	pDestHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(Line* l) {
-	pExitLine = l;
+void Pedestrian::SetExitLine(NavLine* l) {
+	pNavLine = l;
 }
 // ruft entsprechende Ellipsenfunktionen auf
 
@@ -183,8 +182,8 @@ int Pedestrian::GetExitIndex() const {
 	return pExitIndex;
 }
 
-Line* Pedestrian::GetExitLine() const {
-	return pExitLine;
+NavLine* Pedestrian::GetExitLine() const {
+	return pNavLine;
 }
 
 const vector<int> Pedestrian::GetTrip() const{
@@ -201,16 +200,6 @@ int Pedestrian::GetUniqueRoomID() const {
 // unique subroom identifier
 
 int Pedestrian::GetNextDestination() {
-	//return pMentalMapArray[pRoomID][pSubRoomID];
-	//return pExitIndex;
-	//reset the actual target after 10 seconds
-	//    if(pReroutingThreshold>10){
-	//            pReroutingThreshold=0;
-	//            pMentalMap.erase(GetUniqueRoomID());
-	//            cout<<"resetting"<<endl;
-	//            return -1;
-	//    }
-
 	if (pMentalMap.count(GetUniqueRoomID()) == 0) {
 		return -1;
 	} else {
@@ -416,7 +405,7 @@ void Pedestrian::ResetRerouting(){
 }
 
 double Pedestrian::GetDistanceToNextTarget() const {
-	return (pExitLine->DistTo(GetPos()));
+	return (pNavLine->DistTo(GetPos()));
 }
 
 void Pedestrian::SetFinalDestination(int final) {
@@ -424,7 +413,6 @@ void Pedestrian::SetFinalDestination(int final) {
 }
 
 int Pedestrian::GetFinalDestination() const {
-	//cout<<"ID: "<< pPedIndex<<" dest: " <<pDesiredFinalDestination<<endl;
 	return pDesiredFinalDestination;
 }
 

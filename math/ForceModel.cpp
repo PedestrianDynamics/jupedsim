@@ -217,6 +217,33 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 			f = f + ForceRepWall(ped, walls[i]);
 		}
 	}
+
+	//eventually crossings
+
+	const vector<Crossing*>& crossings = subroom->GetAllCrossings();
+	for (unsigned int i = 0; i < crossings.size(); i++) {
+		Crossing* goal=crossings[i];
+		int uid1= goal->GetUniqueID();
+		int uid2=ped->GetExitLine()->GetUniqueID();
+		// ignore my transition
+		if (uid1 != uid2) {
+			f = f + ForceRepWall(ped,*((Wall*)goal));
+		}
+	}
+
+	// and finally the closed doors
+	const vector<Transition*>& transitions = subroom->GetAllTransitions();
+	for (unsigned int i = 0; i < transitions.size(); i++) {
+		Transition* goal=transitions[i];
+		int uid1= goal->GetUniqueID();
+		int uid2=ped->GetExitLine()->GetUniqueID();
+		// ignore my transition consider closed doors
+		//closed doors are considered as wall
+		if( (goal->IsOpen()==false) || (uid1 != uid2) ) {
+			f = f + ForceRepWall(ped,*((Wall*)goal));
+		}
+	}
+
 	return f;
 }
 
@@ -530,11 +557,16 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 	// collect all pedestrians in the simulation.
 	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-	const unsigned int nSize = allPeds.size();
-	int nThreads = omp_get_max_threads();
-	//nThreads=1;
+	unsigned int nSize = allPeds.size();
+
+	int nThreads = 1;
+
+#ifdef _OPENMP
+	 nThreads = omp_get_max_threads();
+#endif
+
 	// check if worth sharing the work
-	if (nSize < 20) nThreads = 1;
+	//if (nSize < 20) nThreads = 1;
 	int partSize = nSize / nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
@@ -613,7 +645,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Point v_neu = ped->GetV() + result_acc[p - start] * h;
 			//only update the position if the velocity has reached a certain threshold
 			//TODO: Hermes
-			if (v_neu.Norm() >= -EPS_V*0.07){
+			if (v_neu.Norm() >= EPS_V){
 				Point pos_neu = ped->GetPos() + v_neu * h;
 				ped->SetPos(pos_neu);
 				ped->ResetTimeInJam();
