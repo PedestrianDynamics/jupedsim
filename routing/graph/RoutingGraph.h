@@ -12,9 +12,8 @@
 #include <vector>
 #include <map>
 
-#include "../../geometry/Transition.h"
-#include "../../geometry/Crossing.h"
-#include "../../geometry/SubRoom.h"
+#include "../../geometry/Building.h"
+#include "../../geometry/NavLine.h"
 
 struct edge;
 struct exit_distance; 
@@ -29,7 +28,7 @@ public:
      ****************************/
     
     RoutingGraph();
-    RoutingGraph(const vector<Transition*> &trans , const vector<Crossing*> &cross);
+    RoutingGraph(Building * b);
     virtual ~RoutingGraph();
 
     /**************************
@@ -44,29 +43,30 @@ public:
      * Routing helpers
      **************************/
 
-    Crossing * GetNextDestination(int crossing_index);
-    Crossing * GetNextDestination(Pedestrian * p);
+    NavLine * GetNextDestination(int crossing_index);
+    NavLine * GetNextDestination(Pedestrian * p);
     
     /**
      * Getter and Setter
      */
+    vertex * GetVertex(int id);
     map<int,vertex> * GetAllVertexes();
     
 private:
     /***********************
      * variabels
      ***********************/
-    const vector<Crossing*> * crossings;
-    const vector<Transition*> * transitions;
+    Building * building;
     map<int, vertex> vertexes;
 
     /***********************
      * internal graph init functions
      **********************/
-    void addVertex(Crossing * crossing);
-    void processSubroom(SubRoom * sub, map<int, vertex> & vertexes, Crossing * crossing);
-    void processNewCrossingEdge(SubRoom * sub, Crossing * new_crossing, Crossing * act_crossing);
-    void calculateDistancesForExit(Transition * crossing);
+    int addVertex(NavLine * nav_line, bool exit = false);
+    void processSubroom(SubRoom * sub);
+    void addEdge(vertex * v1, vertex * v2, SubRoom * sub);
+    bool checkVisibility(Line * l1, Line * l2, SubRoom * sub);
+    void calculateDistancesForExit(vertex * act_vertex);
     void calculateDistances(vertex * exit, vertex * last_vertex, int edge_index, double act_distance);
 
 
@@ -92,8 +92,9 @@ public:
 struct vertex
 {
 public:
-    Crossing* crossing;
+    NavLine * nav_line;
     int id;
+    bool exit;
     vector<edge> edges;
     map<int, exit_distance> distances;
 
