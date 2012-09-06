@@ -29,6 +29,7 @@
 
 
 #include "SubRoom.h"
+#include "Transition.h"
 
 /************************************************************
  SubRoom
@@ -321,15 +322,29 @@ bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
 
 
 // this is the case if they share a transition or crossing
-bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const{
+bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const {
 
-	const vector<int>& goals= sub->GetAllGoalIDs();
-	unsigned int size1=pGoalIDs.size();
-	unsigned int size2=goals.size();
+	//check the crossings
+	const vector<Crossing*>& crossings = sub->GetAllCrossings();
+	for (unsigned int i = 0; i < crossings.size(); i++) {
+		for (unsigned int j = 0; j < pCrossings.size(); j++) {
+			int uid1 = crossings[i]->GetUniqueID();
+			int uid2 = pCrossings[j]->GetUniqueID();
+			// ignore my transition
+			if (uid1 == uid2)
+				return true;
+		}
+	}
 
-	for(unsigned int i=0;i<size1;i++){
-		for(unsigned int j=0;j<size2;j++){
-			if(goals[j]==pGoalIDs[i]) return true;
+	// and finally the transitions
+	const vector<Transition*>& transitions = sub->GetAllTransitions();
+	for (unsigned int i = 0; i < transitions.size(); i++) {
+		for (unsigned int j = 0; j < pTransitions.size(); j++) {
+			int uid1 = transitions[i]->GetUniqueID();
+			int uid2 = pTransitions[j]->GetUniqueID();
+			// ignore my transition
+			if (uid1 == uid2)
+				return true;
 		}
 	}
 

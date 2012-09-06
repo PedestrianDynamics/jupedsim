@@ -219,7 +219,6 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 	}
 
 	//eventually crossings
-
 	const vector<Crossing*>& crossings = subroom->GetAllCrossings();
 	for (unsigned int i = 0; i < crossings.size(); i++) {
 		Crossing* goal=crossings[i];
@@ -566,7 +565,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 #endif
 
 	// check if worth sharing the work
-	//if (nSize < 20) nThreads = 1;
+	if (nSize < 20) nThreads = 1;
 	int partSize = nSize / nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
@@ -628,10 +627,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 				}
 			}
 
-
 			//repulsive forces to the walls and transitions that are not my target
-
-			// "normale" Wände
 			Point repwall = ForceRepRoom(allPeds[p], subroom);
 
 			Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
@@ -643,15 +639,16 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 		for (int p = start; p <= end; ++p) {
 			Pedestrian* ped = allPeds[p];
 			Point v_neu = ped->GetV() + result_acc[p - start] * h;
-			//only update the position if the velocity has reached a certain threshold
-			//TODO: Hermes
+			Point pos_neu = ped->GetPos() + v_neu * h;
+
+			//Jam is based on the current velocity
 			if (v_neu.Norm() >= EPS_V){
-				Point pos_neu = ped->GetPos() + v_neu * h;
-				ped->SetPos(pos_neu);
 				ped->ResetTimeInJam();
 			}else{
 				ped->UpdateTimeInJam();
 			}
+
+			ped->SetPos(pos_neu);
 			ped->SetV(v_neu);
 			ped->SetPhiPed();
 		}

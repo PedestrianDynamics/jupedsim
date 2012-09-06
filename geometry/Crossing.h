@@ -30,10 +30,10 @@
 #define	_CROSSING_H
 
 #include "NavLine.h"
-#include "Room.h"
 
-class Line;
-class NavLine;
+//class Line;
+class Room;
+class SubRoom;
 
 class Crossing : public NavLine {
 private:

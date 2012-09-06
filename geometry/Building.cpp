@@ -201,16 +201,21 @@ void Building::InitGeometry() {
 			SubRoom* s = room->GetSubRoom(j);
 			// Alle Übergänge in diesem Raum bestimmen
 			// Übergänge müssen zu Wänden ergänzt werden
-			// dabei werden die Hilfslinien ignoriert
 			vector<Line*> goals = vector<Line*>();
-			for (int k = 0; k < pRouting->GetAnzGoals(); k++) {
-				Crossing* goal = pRouting->GetGoal(k);
-				if (goal->GetSubRoom1() != goal->GetSubRoom2()) // Kennzeichen fuer Hlines
-					if (goal->IsInRoom(i) && goal->IsInSubRoom(j)) {
-						goals.push_back(goal);
-					}
+
+			//  crossings
+			const vector<Crossing*>& crossings = s->GetAllCrossings();
+			for (unsigned int i = 0; i < crossings.size(); i++) {
+				goals.push_back(crossings[i]);
 			}
-			// anschliessend ist pPoly initialisiert
+
+			// and  transitions
+			const vector<Transition*>& transitions = s->GetAllTransitions();
+			for (unsigned int i = 0; i < transitions.size(); i++) {
+				goals.push_back(transitions[i]);
+			}
+
+			// initialize the poly
 			s->ConvertLineToPoly(goals);
 			s->CalculateArea();
 			goals.clear();
@@ -240,7 +245,6 @@ void Building::Update() {
 				Pedestrian* ped = sub->GetPedestrian(k);
 				//set the new room if needed
 				if (!sub->IsInSubRoom(ped)) {
-					Crossing* cross = pRouting->GetGoal(ped->GetExitIndex());
 					// the peds has changed the room and is farther than 50 cm from
 					// the exit, thats a real problem.
 					if (ped->GetExitLine()->DistTo(ped->GetPos()) > 0.50) {
@@ -255,12 +259,24 @@ void Building::Update() {
 								ped->GetPos().GetY());
 						//ped->Dump(ped->GetPedIndex());
 						Log->write(tmp);
-						std::cout << ped->GetLastDestination() << " " << ped->GetNextDestination() << std::endl;
+						std::cout << ped->GetLastDestination() << " "
+								<< ped->GetNextDestination() << std::endl;
 						//exit(0);
 						//DeletePedestrian(ped);
 						nonConformPeds.push_back(ped);
 						sub->DeletePedestrian(k);
 						continue; // next pedestrian
+					}
+
+					//safely converting  (upcasting) the NavLine to a crossing.
+					Crossing* cross =
+							dynamic_cast<Crossing*>(ped->GetExitLine());
+					if (cross == NULL) {
+						char tmp[CLENGTH];
+						sprintf(tmp,
+								"ERROR: Building::update() type casting error");
+						Log->write(tmp);
+						exit(EXIT_FAILURE);
 					}
 
 					SubRoom* other_sub = cross->GetOtherSubRoom(
@@ -327,8 +343,13 @@ void Building::Update() {
 
 	// find the new goals, the parallel way
 
-	const unsigned int nSize = pAllPedestians.size();
-	int nThreads = omp_get_max_threads();
+	unsigned int nSize = pAllPedestians.size();
+	int nThreads = 1;
+
+#ifdef _OPENMP
+	nThreads = omp_get_max_threads();
+#endif
+
 	// check if worth sharing the work
 	if (nSize < 12)
 		nThreads = 1;
@@ -343,7 +364,6 @@ void Building::Update() {
 			end = nSize - 1;
 
 		for (int p = start; p <= end; ++p) {
-
 			//todo: hermes
 			if (pRouting->FindExit(pAllPedestians[p]) == -1) {
 				//a destination could not be found for that pedestrian
@@ -639,7 +659,7 @@ void Building::LoadBuilding(string filename) {
 			c->SetSubRoom2(room->GetSubRoom(sub2_id));
 			c->SetRoom1(room);
 
-			pRouting->AddGoal(c);
+			//pRouting->AddGoal(c);
 
 			//new implementation
 			pRouting->AddCrossing(c);
@@ -747,7 +767,7 @@ Transition* Building::GetTransition(string caption) const {
 		const vector<int>& trans_ids = pRooms[r]->GetAllTransitionsIDs();
 		for (unsigned int t = 0; t < trans_ids.size(); t++) {
 			int id = trans_ids[t];
-			Transition* tr = static_cast<Transition*>(pRouting->GetGoal(id));
+			Transition* tr = pRouting->GetTransition(id);
 			if (tr->GetCaption() == caption)
 				return tr;
 		}
@@ -771,7 +791,6 @@ Crossing* Building::GetGoal(string caption) const {
 }
 
 void Building::LoadRoutingInfo(string filename) {
-
 	Log->write("INFO:\tLoading extra routing information");
 	if (filename == "") {
 		Log->write("INFO:\t No file supplied !");
@@ -816,7 +835,7 @@ void Building::LoadRoutingInfo(string filename) {
 		c->SetSubRoom2(subroom);
 		c->SetRoom1(room);
 
-		pRouting->AddGoal(c);
+		//pRouting->AddGoal(c);
 
 		//new implementation
 		Hline* h = new Hline();
@@ -900,17 +919,17 @@ void Building::LoadTrafficInfo(string filename) {
 		double id = xmltof(xDoor.getAttribute("trans_id"), -1);
 		string state = xmltoa(xDoor.getAttribute("state"), "open");
 
+		//store transition in a map and call getTransition/getCrossin
 		if (state == "open") {
-			dynamic_cast<Transition*>(pRouting->GetGoal(id))->Open();
+			pRouting->GetTransition(id)->Open();
 		} else if (state == "close") {
-			dynamic_cast<Transition*>(pRouting->GetGoal(id))->Close();
+			pRouting->GetTransition(id)->Close();
 		} else {
 			char tmp[CLENGTH];
 			sprintf(tmp, "WARNING:\t Unknown door state: %s", state.c_str());
 			Log->write(tmp);
 		}
 	}
-
 	Log->write("INFO:\t done with loading traffic info file");
 }
 
@@ -931,7 +950,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 				StringExplode(brokenpaths[i], ":", &tags);
 				string room = pRooms[atoi(tags[0].c_str())]->GetCaption();
 				string trans =
-						pRouting->GetGoal(atoi(tags[1].c_str()))->GetCaption();
+						pRouting->GetTransition(atoi(tags[1].c_str()))->GetCaption();
 				//ignore crossings/hlines
 				if (trans != "")
 					PpathWayStream << room << " " << trans << endl;

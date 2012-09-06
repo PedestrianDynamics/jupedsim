@@ -44,12 +44,16 @@ private:
 	//vector<Crossing*> goals;
 	std::map<int, Crossing*>pGoals;
 
-	vector<Crossing*> pCrossings;
-	vector<Transition*> pTransitions;
-	vector<Hline*> pHlines;
+//	vector<Crossing*> pCrossings;
+//	vector<Transition*> pTransitions;
+//	vector<Hline*> pHlines;
+//	vector<vector<int> >pTrips;
+
+	map<int, Crossing*> pCrossings;
+	map<int, Transition*> pTransitions;
+	map<int, Hline*> pHlines;
+
 	vector<vector<int> >pTrips;
-	// store the possible final destination identified while parsing the person format./
-	// only those destination are considered in the floyd warshal algorithm.
 
 protected:
 	vector<int> pFinalDestinations;
@@ -69,9 +73,13 @@ public:
 	void AddTrip(vector<int> trip);
 	void AddFinalDestinationID(int id);
 
-	const vector<Crossing*>& GetAllCrossings() const;
-	const vector<Transition*>& GetAllTransitions() const;
-	const vector<Hline*>& GetAllHlines() const;
+	Hline* GetHLine(int ID /* not the unique id*/);
+	Transition* GetTransition(int ID /* not the unique id*/);
+	Crossing* GetCrossing(int ID /* not the unique id*/);
+
+//	const vector<Crossing*>& GetAllCrossings() const;
+//	const vector<Transition*>& GetAllTransitions() const;
+//	const vector<Hline*>& GetAllHlines() const;
 
 	const vector<int> GetTrip(int id) const;
 	const vector<int> GetFinalDestinations() const;

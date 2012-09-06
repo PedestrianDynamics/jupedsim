@@ -27,11 +27,12 @@
  *
  */
 
-#include "Crossing.h"
 
-/************************************************************
- Crossing (abgeleitet von Line)
- ************************************************************/
+#include "Crossing.h"
+#include "Room.h"
+#include "SubRoom.h"
+
+
 Crossing::Crossing(){
     pID = -1;
     pRoom1 = NULL;
@@ -42,10 +43,8 @@ Crossing::Crossing(){
 }
 
 Crossing::~Crossing() {
-
 }
 
-// Setter-Funktionen
 
 void Crossing::SetIndex(int ID) {
     pID = ID;
