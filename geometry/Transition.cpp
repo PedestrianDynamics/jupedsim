@@ -148,7 +148,7 @@ SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const {
 	else {
 		char tmp[CLENGTH];
 		sprintf(tmp,"ERROR: \tTransition::GetOtherSubRoom No exit found "
-				"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetIndex(),roomID,subroomID);
+				"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetUniqueID(),roomID,subroomID);
 		Log->write(tmp);
 		exit(0);
 	}
@@ -186,7 +186,7 @@ string Transition::WriteElement() const {
 	string geometry;
 	char tmp[CLENGTH] = "";
 
-	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%s\">\n",GetIndex(),GetIndex(),GetCaption().c_str());
+	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%s\">\n",GetUniqueID(),GetUniqueID(),GetCaption().c_str());
 	geometry.append(tmp);
 	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
 			(GetPoint1().GetX()) * FAKTOR,
