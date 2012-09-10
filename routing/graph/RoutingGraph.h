@@ -29,6 +29,8 @@ public:
     
     RoutingGraph();
     RoutingGraph(Building * b);
+    RoutingGraph(RoutingGraph * orig);
+    
     virtual ~RoutingGraph();
 
     /**************************

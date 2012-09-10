@@ -28,7 +28,7 @@ routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp routing/Dum
 routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\
 pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
 routing/QuickestPathRouter.cpp \
-routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp  \
+routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp  \
 
 OBJECTS=$(SOURCES:.cpp=.o)
 DEP=$(SOURCES:.cpp=.d)

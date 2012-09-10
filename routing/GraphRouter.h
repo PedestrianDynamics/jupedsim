@@ -9,7 +9,7 @@
 #define GRAPHROUTER_H_
 
 #include "Routing.h"
-#include "graph/RoutingGraph.h"
+#include "graph/RoutingGraphStorage.h"
 #include "../geometry/Building.h"
 #include "../geometry/Crossing.h"
 #include "../geometry/SubRoom.h"
@@ -18,15 +18,17 @@
 
 class GraphRouter: public Routing {
 public:
-	GraphRouter();
-	virtual ~GraphRouter();
+    GraphRouter();
+    virtual ~GraphRouter();
 
-	virtual int FindExit(Pedestrian* p);
-	virtual void Init(Building* b);
-
+    virtual int FindExit(Pedestrian* p);
+    virtual void Init(Building* b);
+    
 private:
-	RoutingGraph * graph;
-	Building * building;
+    RoutingGraphStorage  g;
+    Building * building;
+    const set<int> empty_set;
+    
 
 };
 

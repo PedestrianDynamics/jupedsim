@@ -11,7 +11,7 @@
  */
 RoutingGraph::RoutingGraph(Building * b) : building(b)
 {
-  BuildGraph();
+    BuildGraph();
 };
 
 RoutingGraph::RoutingGraph()
@@ -23,6 +23,34 @@ RoutingGraph::~RoutingGraph()
 
 };
 
+RoutingGraph::RoutingGraph(RoutingGraph * orig) 
+{
+    building = orig->building;
+    vertexes = orig->vertexes;
+    
+    map<int, Vertex>::iterator itv;
+    map<int, Edge>::iterator ite;
+    map<int, ExitDistance>::iterator ited;
+    
+    for(itv = orig->vertexes.begin(); itv != orig->vertexes.end(); itv++) {
+	// set the right edge->src and edge->dest pointers
+	for(ite = itv->second.edges.begin(); ite != itv->second.edges.end(); ite++) {
+	    vertexes[itv->first].edges[ite->first].src = &vertexes[itv->first];
+	    vertexes[itv->first].edges[ite->first].dest = &vertexes[ite->second.dest->id];
+	}
+	
+	// set the right ExitDistance->edge pointer
+	for(ited = itv->second.distances.begin(); ited != itv->second.distances.end(); ited++){
+	    if(ited->second.exit_edge)
+		vertexes[itv->first].distances[ited->first].exit_edge = &vertexes[itv->first].edges[ited->second.exit_edge->dest->id];
+	    
+	}
+	
+    }
+    
+    
+}
+
 
 
 /**
@@ -31,20 +59,20 @@ RoutingGraph::~RoutingGraph()
  */
 ExitDistance RoutingGraph::GetNextDestination(int nav_line_index, Pedestrian * p)
 {
-  ExitDistance dist = vertexes[nav_line_index].getShortestExit();
-  // check if the exit is through the right subroom
-  // if(p != NULL && dist.exit_subroom != NULL) {
-  //   Hline * hline = dynamic_cast<Hline*>(dist.last_vertex->nav_line);
-  //   if(!hline && (dist.exit_subroom->GetRoomID() != p->GetRoomID() || dist.exit_subroom->GetSubRoomID() != p->GetSubRoomID())) {
+    ExitDistance dist = vertexes[nav_line_index].getShortestExit();
+    // check if the exit is through the right subroom
+    // if(p != NULL && dist.exit_subroom != NULL) {
+    //   Hline * hline = dynamic_cast<Hline*>(dist.last_vertex->nav_line);
+    //   if(!hline && (dist.exit_subroom->GetRoomID() != p->GetRoomID() || dist.exit_subroom->GetSubRoomID() != p->GetSubRoomID())) {
     	
-  // 	  NavLine * navline = GetNextDestination(p);
-  // 	  if(p->GetPedIndex() == 24)
-  // 	    std::cout << "neues ziel für 24 " << navline->GetUniqueID() << std::endl;
-  // 	  return GetNextDestination(p);
+    // 	  NavLine * navline = GetNextDestination(p);
+    // 	  if(p->GetPedIndex() == 24)
+    // 	    std::cout << "neues ziel für 24 " << navline->GetUniqueID() << std::endl;
+    // 	  return GetNextDestination(p);
 	
-  //   }
-  // }
-  return dist;
+    //   }
+    // }
+    return dist;
      
 }
 
@@ -56,41 +84,41 @@ ExitDistance RoutingGraph::GetNextDestination(int nav_line_index, Pedestrian * p
  */
 ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 {
-  double act_shortest_dist = INFINITY;
-  NavLine * return_line = NULL;
-  SubRoom * sub = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
-  ExitDistance ed;
+    double act_shortest_dist = INFINITY;
+    NavLine * return_line = NULL;
+    SubRoom * sub = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
+    ExitDistance ed;
 
-  //collecting all lines to check
-  vector<NavLine*> lines;
-  lines.insert(lines.end(), sub->GetAllCrossings().begin(), sub->GetAllCrossings().end());
-  lines.insert(lines.end(), sub->GetAllTransitions().begin(), sub->GetAllTransitions().end());
-  lines.insert(lines.end(), sub->GetAllHlines().begin(), sub->GetAllHlines().end());
+    //collecting all lines to check
+    vector<NavLine*> lines;
+    lines.insert(lines.end(), sub->GetAllCrossings().begin(), sub->GetAllCrossings().end());
+    lines.insert(lines.end(), sub->GetAllTransitions().begin(), sub->GetAllTransitions().end());
+    lines.insert(lines.end(), sub->GetAllHlines().begin(), sub->GetAllHlines().end());
 
-  for(unsigned int i = 0; i < lines.size(); i++) {
-    //  check if  the exit exists in the routing graph and  the line is visible for the pedestrian
-    if(GetVertex(lines[i]->GetUniqueID())->id && checkVisibility(p, lines[i], sub )) {
-      ed = GetVertex(lines[i]->GetUniqueID())->getShortestExit();
-      Hline * hline  = dynamic_cast<Hline*>(lines[i]);
-      //check if it is a hline OR it is an exit OR the exit is not thorugh the same subroom
-      if(hline || GetVertex(lines[i]->GetUniqueID())->exit || p->GetRoomID() != ed.GetSubRoom()->GetRoomID() || p->GetSubRoomID() != ed.GetSubRoom()->GetSubRoomID()) {
-	// check if the distance is shorter
-	double distance = lines[i]->DistTo(p->GetPos()) + ed.distance;
-	if(act_shortest_dist > distance ) {
-	  act_shortest_dist  = distance; 
-	  return_line = lines[i];
+    for(unsigned int i = 0; i < lines.size(); i++) {
+	//  check if  the exit exists in the routing graph and  the line is visible for the pedestrian
+	if(GetVertex(lines[i]->GetUniqueID()) && checkVisibility(p, lines[i], sub )) {
+	    ed = GetVertex(lines[i]->GetUniqueID())->getShortestExit();
+	    Hline * hline  = dynamic_cast<Hline*>(lines[i]);
+	    //check if it is a hline OR it is an exit OR the exit is not thorugh the same subroom
+	    if(hline || GetVertex(lines[i]->GetUniqueID())->exit || p->GetRoomID() != ed.GetSubRoom()->GetRoomID() || p->GetSubRoomID() != ed.GetSubRoom()->GetSubRoomID()) {
+		// check if the distance is shorter
+		double distance = lines[i]->DistTo(p->GetPos()) + ed.distance;
+		if(act_shortest_dist > distance ) {
+		    act_shortest_dist  = distance; 
+		    return_line = lines[i];
+		}
+	    }
 	}
-      }
-    }
 	   
-  }
-  ExitDistance return_dist;
-  return_dist.distance = act_shortest_dist;
-  return_dist.exit_edge = new Edge();
-  return_dist.exit_edge->dest = GetVertex(return_line->GetUniqueID());
-  return_dist.exit_edge->sub = sub;
+    }
+    ExitDistance return_dist;
+    return_dist.distance = act_shortest_dist;
+    return_dist.exit_edge = new Edge();
+    return_dist.exit_edge->dest = GetVertex(return_line->GetUniqueID());
+    return_dist.exit_edge->sub = sub;
   
-  return return_dist;
+    return return_dist;
 }
 
 
@@ -101,26 +129,26 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 
 RoutingGraph * RoutingGraph::BuildGraph() 
 {
-  // Get all Rooms from the building object
-  const vector<Room*> * rooms = & building->GetAllRooms();
-  for(unsigned int i = 0; i < rooms->size(); i++) {
-    // go through all subroom and retrieve all nav lines
-    const vector<SubRoom*> * subrooms = & (*rooms)[i]->GetAllSubRooms();
-    for(unsigned int k = 0; k < subrooms->size(); k++) {
-      processSubroom((*subrooms)[k]);
+    // Get all Rooms from the building object
+    const vector<Room*> * rooms = & building->GetAllRooms();
+    for(unsigned int i = 0; i < rooms->size(); i++) {
+	// go through all subroom and retrieve all nav lines
+	const vector<SubRoom*> * subrooms = & (*rooms)[i]->GetAllSubRooms();
+	for(unsigned int k = 0; k < subrooms->size(); k++) {
+	    processSubroom((*subrooms)[k]);
+	}
     }
-  }
 
-  map<int, Vertex>::iterator it; 
-  //calculate the distances for Exits!
-  for(it = vertexes.begin(); it != vertexes.end(); it++) {
+    map<int, Vertex>::iterator it; 
+    //calculate the distances for Exits!
+    for(it = vertexes.begin(); it != vertexes.end(); it++) {
 
-    if(it->second.exit) {
-      calculateDistancesForExit(&it->second);
+	if(it->second.exit) {
+	    calculateDistancesForExit(&it->second);
+	}
     }
-  }
-  print();
-  return this;
+    print();
+    return this;
 };
 
 /**
@@ -131,39 +159,42 @@ RoutingGraph * RoutingGraph::BuildGraph()
 
 int RoutingGraph::addVertex(NavLine * nav_line, bool exit)
 {
-  if(!nav_line) return -1;
-  int id = nav_line->GetUniqueID();
-  vertexes[id].nav_line = nav_line;
-  vertexes[id].id = id;
-  vertexes[id].exit = exit;
-  return id;
+    if(!nav_line) return -1;
+    int id = nav_line->GetUniqueID();
+    vertexes[id].nav_line = nav_line;
+    vertexes[id].id = id;
+    vertexes[id].exit = exit;
+    return id;
 }
 
 void RoutingGraph::removeVertex(Vertex * remove_vertex)
 {
-  // remove all edges
-  map<int, Edge>::iterator it_e;
-  
-  for(it_e = remove_vertex->edges.begin(); it_e != remove_vertex->edges.end(); it_e++) {
-    it_e->second.dest->edges.erase(remove_vertex->id);
-  }
+    if(!remove_vertex)
+	return;
     
-  // remove vertex
-  vertexes.erase(remove_vertex->id);
-
-  // calculate new distance, maybe some distance changed because the door is closed. 
-  map<int, Vertex>::iterator it; 
-  //calculate the distances for Exits!
-  for(it = vertexes.begin(); it != vertexes.end(); it++) {
-    it->second.distances.clear();
-  }
-
-  for(it = vertexes.begin(); it != vertexes.end(); it++) {
-
-    if(it->second.exit) {
-      calculateDistancesForExit(&it->second);
+    // remove all edges
+    map<int, Edge>::iterator it_e;
+  
+    for(it_e = remove_vertex->edges.begin(); it_e != remove_vertex->edges.end(); it_e++) {
+	it_e->second.dest->edges.erase(remove_vertex->id);
     }
-  }
+    
+    // remove vertex
+    vertexes.erase(remove_vertex->id);
+
+    // calculate new distance, maybe some distance changed because the door is closed. 
+    map<int, Vertex>::iterator it; 
+    //calculate the distances for Exits!
+    for(it = vertexes.begin(); it != vertexes.end(); it++) {
+	it->second.distances.clear();
+    }
+
+    for(it = vertexes.begin(); it != vertexes.end(); it++) {
+
+	if(it->second.exit) {
+	    calculateDistancesForExit(&it->second);
+	}
+    }
     
     
 
@@ -172,8 +203,8 @@ void RoutingGraph::removeVertex(Vertex * remove_vertex)
 
 void RoutingGraph::closeDoor(int id)
 {
-  removeVertex(GetVertex(id));
-  return;
+    removeVertex(GetVertex(id));
+    return;
 }
 /**
  * RoutingGraph::processSubroom
@@ -181,30 +212,30 @@ void RoutingGraph::closeDoor(int id)
  */
 void RoutingGraph::processSubroom(SubRoom * sub)
 {
-  vector<int> goals;
-  // add all crossings, transitions, hlines as vertex
-  // save the insert id to add all edges in a subroom
-  for(unsigned int i = 0; i < sub->GetAllCrossings().size(); i++) {
-    goals.push_back(addVertex(sub->GetAllCrossings()[i]));
-  }
-  for(unsigned int i = 0; i < sub->GetAllTransitions().size(); i++) {
-    if(sub->GetAllTransitions()[i]->IsOpen())
-      goals.push_back(addVertex(sub->GetAllTransitions()[i], sub->GetAllTransitions()[i]->IsExit()));
-  }
-  for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {
-    goals.push_back(addVertex(sub->GetAllHlines()[i]));
-  }
-    
-  // now add all edges between all goals
-  // check if they visible by each other
-  if(goals.size() > 1) {
-    for(unsigned int k = 0; k < goals.size()-1; k++) {
-      for(unsigned int i = k+1; i < goals.size(); i++) {
-	addEdge(GetVertex(goals[k]), GetVertex(goals[i]), sub);
-	addEdge(GetVertex(goals[i]), GetVertex(goals[k]), sub);
-      }
+    vector<int> goals;
+    // add all crossings, transitions, hlines as vertex
+    // save the insert id to add all edges in a subroom
+    for(unsigned int i = 0; i < sub->GetAllCrossings().size(); i++) {
+	goals.push_back(addVertex(sub->GetAllCrossings()[i]));
     }
-  }
+    for(unsigned int i = 0; i < sub->GetAllTransitions().size(); i++) {
+	if(sub->GetAllTransitions()[i]->IsOpen())
+	    goals.push_back(addVertex(sub->GetAllTransitions()[i], sub->GetAllTransitions()[i]->IsExit()));
+    }
+    for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {
+	goals.push_back(addVertex(sub->GetAllHlines()[i]));
+    }
+    
+    // now add all edges between all goals
+    // check if they visible by each other
+    if(goals.size() > 1) {
+	for(unsigned int k = 0; k < goals.size()-1; k++) {
+	    for(unsigned int i = k+1; i < goals.size(); i++) {
+		addEdge(GetVertex(goals[k]), GetVertex(goals[i]), sub);
+		addEdge(GetVertex(goals[i]), GetVertex(goals[k]), sub);
+	    }
+	}
+    }
 };
 
 /**
@@ -214,103 +245,103 @@ void RoutingGraph::processSubroom(SubRoom * sub)
 
 void RoutingGraph::addEdge(Vertex * v1, Vertex * v2, SubRoom* sub)
 {
-  Edge new_edge;
+    Edge new_edge;
     
-  // do not add loops!
-  if(v1->id == v2->id)
-    return;
+    // do not add loops!
+    if(v1->id == v2->id)
+	return;
     
   
-  //TODO: sometime checkVisibility is not commutative (cV(v1,v2) != cV(v2,v1))
-  if(checkVisibility(v1->nav_line, v2->nav_line, sub) ||  checkVisibility(v2->nav_line, v1->nav_line, sub)) {
+    //TODO: sometime checkVisibility is not commutative (cV(v1,v2) != cV(v2,v1))
+    if(checkVisibility(v1->nav_line, v2->nav_line, sub) ||  checkVisibility(v2->nav_line, v1->nav_line, sub)) {
   
-    new_edge.dest = v2;
-    new_edge.src = v1;
+	new_edge.dest = v2;
+	new_edge.src = v1;
 
-    // attention!! this is not the shortest distance.
-    new_edge.distance = (v1->nav_line->GetCentre() - v2->nav_line->GetCentre()).Norm();
-    new_edge.sub = sub; 
-    v1->edges[v2->id] = new_edge;
-  }
+	// attention!! this is not the shortest distance.
+	new_edge.distance = (v1->nav_line->GetCentre() - v2->nav_line->GetCentre()).Norm();
+	new_edge.sub = sub; 
+	v1->edges[v2->id] = new_edge;
+    }
   
 };
 
 bool RoutingGraph::checkVisibility(Line* l1, Line* l2, SubRoom* sub)
 {
-  // generate certain connection lines
-  // connecting p1 mit p1, p1 mit p2, p2 mit p1, p2 mit p2 und center mit center
-  Line cl[5];
-  cl[0] = Line(l1->GetPoint1(), l2->GetPoint1());
-  cl[1] = Line(l1->GetPoint1(), l2->GetPoint2());
-  cl[2] = Line(l1->GetPoint2(), l2->GetPoint1());
-  cl[3] = Line(l1->GetPoint2(), l2->GetPoint2());
-  cl[4] = Line(l1->GetCentre(), l2->GetCentre());
-  bool temp[5] = {true, true, true, true, true};
-  //check intersection with Walls
-  for(unsigned int i = 0; i < sub->GetAllWalls().size(); i++) {
-    for(int k = 0; k < 5; k++) {
-      if(temp[k] && cl[k].IntersectionWith(sub->GetAllWalls()[i]) && (cl[k].NormalVec() != sub->GetAllWalls()[i].NormalVec() ||  l1->NormalVec() != l2->NormalVec()))
-	temp[k] = false;
+    // generate certain connection lines
+    // connecting p1 mit p1, p1 mit p2, p2 mit p1, p2 mit p2 und center mit center
+    Line cl[5];
+    cl[0] = Line(l1->GetPoint1(), l2->GetPoint1());
+    cl[1] = Line(l1->GetPoint1(), l2->GetPoint2());
+    cl[2] = Line(l1->GetPoint2(), l2->GetPoint1());
+    cl[3] = Line(l1->GetPoint2(), l2->GetPoint2());
+    cl[4] = Line(l1->GetCentre(), l2->GetCentre());
+    bool temp[5] = {true, true, true, true, true};
+    //check intersection with Walls
+    for(unsigned int i = 0; i < sub->GetAllWalls().size(); i++) {
+	for(int k = 0; k < 5; k++) {
+	    if(temp[k] && cl[k].IntersectionWith(sub->GetAllWalls()[i]) && (cl[k].NormalVec() != sub->GetAllWalls()[i].NormalVec() ||  l1->NormalVec() != l2->NormalVec()))
+		temp[k] = false;
+	}
     }
-  }
 
-  //check intersection with obstacles
-  for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
-    Obstacle * obs = sub->GetAllObstacles()[i];
-    for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
-      Wall w = obs->GetAllWalls()[k];
-      for(int j = 0; j < 5; j++) {
-	if(temp[j] && cl[j].IntersectionWith(w))
-	  temp[j] = false;
-      }
+    //check intersection with obstacles
+    for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
+	Obstacle * obs = sub->GetAllObstacles()[i];
+	for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
+	    Wall w = obs->GetAllWalls()[k];
+	    for(int j = 0; j < 5; j++) {
+		if(temp[j] && cl[j].IntersectionWith(w))
+		    temp[j] = false;
+	    }
+	}
     }
-  }
 
-  // check intersection with other hlines in room
-  for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {
-    if(l1 != sub->GetAllHlines()[i] && l2 != sub->GetAllHlines()[i]) {
-      for(int k = 0; k < 5; k++) {
-	if(temp[k] && cl[k].IntersectionWith((*sub->GetAllHlines()[i])))
-	  temp[k] = false;
-      }
+    // check intersection with other hlines in room
+    for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {
+	if(l1 != sub->GetAllHlines()[i] && l2 != sub->GetAllHlines()[i]) {
+	    for(int k = 0; k < 5; k++) {
+		if(temp[k] && cl[k].IntersectionWith((*sub->GetAllHlines()[i])))
+		    temp[k] = false;
+	    }
+	}
     }
-  }
-  return temp[0] || temp[1] || temp[2] || temp[3] || temp[4];
+    return temp[0] || temp[1] || temp[2] || temp[3] || temp[4];
 }
 
 
 bool RoutingGraph::checkVisibility(Point p1, Point p2, SubRoom* sub)
 {
-  // generate certain connection lines
-  // connecting p1 with p2
-  Line cl = Line(p1,p2);
-  bool temp =  true;
-  //check intersection with Walls
-  for(unsigned int i = 0; i < sub->GetAllWalls().size(); i++) {
-    if(temp  && cl.IntersectionWith(sub->GetAllWalls()[i]))
-      temp = false;
-  }
+    // generate certain connection lines
+    // connecting p1 with p2
+    Line cl = Line(p1,p2);
+    bool temp =  true;
+    //check intersection with Walls
+    for(unsigned int i = 0; i < sub->GetAllWalls().size(); i++) {
+	if(temp  && cl.IntersectionWith(sub->GetAllWalls()[i]))
+	    temp = false;
+    }
   
 
-  //check intersection with obstacles
-  for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
-    Obstacle * obs = sub->GetAllObstacles()[i];
-    for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
-      Wall w = obs->GetAllWalls()[k];
-      if(temp && cl.IntersectionWith(w))
-	temp = false;
+    //check intersection with obstacles
+    for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
+	Obstacle * obs = sub->GetAllObstacles()[i];
+	for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
+	    Wall w = obs->GetAllWalls()[k];
+	    if(temp && cl.IntersectionWith(w))
+		temp = false;
+	}
     }
-  }
 
 
-  // check intersection with other hlines in room
-  for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {	
-    if(temp && cl.IntersectionWith((*sub->GetAllHlines()[i])))
-      temp = false;
-  }
+    // check intersection with other hlines in room
+    for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {	
+	if(temp && cl.IntersectionWith((*sub->GetAllHlines()[i])))
+	    temp = false;
+    }
 	
     
-  return temp;
+    return temp;
 }
 
 
@@ -318,45 +349,45 @@ bool RoutingGraph::checkVisibility(Point p1, Point p2, SubRoom* sub)
 //checks if a pedestrian is standing in a hline
 bool RoutingGraph::checkVisibility(Pedestrian * p, NavLine * l, SubRoom* sub)
 {
-  // connecting lines to check
-  const int num_lines = 3;
-  Line cl[num_lines] = { Line(p->GetPos(), l->GetCentre()), Line(p->GetPos(), l->GetPoint1()), Line(p->GetPos(), l->GetPoint2()) };
-  bool temp[num_lines] = { true, true, true };
+    // connecting lines to check
+    const int num_lines = 3;
+    Line cl[num_lines] = { Line(p->GetPos(), l->GetCentre()), Line(p->GetPos(), l->GetPoint1()), Line(p->GetPos(), l->GetPoint2()) };
+    bool temp[num_lines] = { true, true, true };
   
-  //check for intersection with walls
-  for(unsigned int i = 0; i <  sub->GetAllWalls().size(); i++) {
-    for(int j = 0; j < num_lines; j++) {
-      if(temp[j] && cl[j].IntersectionWith(sub->GetAllWalls()[i])) {
-	temp[j] = false;
-      }	 
+    //check for intersection with walls
+    for(unsigned int i = 0; i <  sub->GetAllWalls().size(); i++) {
+	for(int j = 0; j < num_lines; j++) {
+	    if(temp[j] && cl[j].IntersectionWith(sub->GetAllWalls()[i])) {
+		temp[j] = false;
+	    }	 
+	}
     }
-  }
-  //check for intersection with hlines
-  for(unsigned int i = 0; i <  sub->GetAllHlines().size(); i++) {
-    for(int j = 0; j < num_lines; j++) {
-      if(temp[j]
-	 && l->GetUniqueID() != sub->GetAllHlines()[i]->GetUniqueID() 
-	 && !l->IsInLine(p->GetPos())
-	 &&  cl[j].IntersectionWith((*sub->GetAllHlines()[i]))
-	 ) {
-	temp[j] = false;
-      }
+    //check for intersection with hlines
+    for(unsigned int i = 0; i <  sub->GetAllHlines().size(); i++) {
+	for(int j = 0; j < num_lines; j++) {
+	    if(temp[j]
+	       && l->GetUniqueID() != sub->GetAllHlines()[i]->GetUniqueID() 
+	       && !l->IsInLine(p->GetPos())
+	       &&  cl[j].IntersectionWith((*sub->GetAllHlines()[i]))
+	       ) {
+		temp[j] = false;
+	    }
+	}
     }
-  }
 
 
-  for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
-    Obstacle * obs = sub->GetAllObstacles()[i];
-    for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
-      Wall w = obs->GetAllWalls()[k];
-      for(int j = 0; j < num_lines; j++) {
-	if(temp[j] && cl[j].IntersectionWith(w))
-	  temp[j] = false;
-      }
+    for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
+	Obstacle * obs = sub->GetAllObstacles()[i];
+	for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
+	    Wall w = obs->GetAllWalls()[k];
+	    for(int j = 0; j < num_lines; j++) {
+		if(temp[j] && cl[j].IntersectionWith(w))
+		    temp[j] = false;
+	    }
+	}
     }
-  }
-  //at the moment no check for intersection with obstacles
-  return temp[0] || temp[1] || temp[2]; 
+    //at the moment no check for intersection with obstacles
+    return temp[0] || temp[1] || temp[2]; 
 }
 
 
@@ -365,15 +396,15 @@ bool RoutingGraph::checkVisibility(Pedestrian * p, NavLine * l, SubRoom* sub)
  */
 void RoutingGraph::calculateDistancesForExit(Vertex *act_vertex)
 {
-  act_vertex->distances[act_vertex->id].distance = 0;
-  act_vertex->distances[act_vertex->id].exit_edge = NULL;
+    act_vertex->distances[act_vertex->id].distance = 0;
+    act_vertex->distances[act_vertex->id].exit_edge = NULL;
     
-  map<int, Edge>::iterator it;
+    map<int, Edge>::iterator it;
   
   
-  for(it = act_vertex->edges.begin(); it != act_vertex->edges.end(); it++) {
-    calculateDistances(act_vertex, act_vertex, it->second.dest, it->second.distance);
-  }
+    for(it = act_vertex->edges.begin(); it != act_vertex->edges.end(); it++) {
+	calculateDistances(act_vertex, act_vertex, it->second.dest, it->second.distance);
+    }
 }
 /** 
  * recursive function to calculate distances from one vertex to all others
@@ -381,27 +412,27 @@ void RoutingGraph::calculateDistancesForExit(Vertex *act_vertex)
  */
 void RoutingGraph::calculateDistances(Vertex * exit, Vertex * last_vertex, Vertex * act_vertex, double act_distance) 
 {
-  // Don't change the exit way, if the other route is shorter.
-  if(act_vertex->distances[exit->id].distance && act_vertex->distances[exit->id].distance < act_distance) {
-    return;
-  }
-  act_vertex->distances[exit->id].distance = act_distance;
-  act_vertex->distances[exit->id].exit_edge = & act_vertex->edges[last_vertex->id];
+    // Don't change the exit way, if the other route is shorter.
+    if(act_vertex->distances[exit->id].distance && act_vertex->distances[exit->id].distance < act_distance) {
+	return;
+    }
+    act_vertex->distances[exit->id].distance = act_distance;
+    act_vertex->distances[exit->id].exit_edge = & act_vertex->edges[last_vertex->id];
 
-  map<int, Edge>::iterator it;
+    map<int, Edge>::iterator it;
   
-  for(it = act_vertex->edges.begin(); it != act_vertex->edges.end(); it++) {
-    //if the next vertex is an exit here is nothing to do.
-    if(!it->second.dest->exit) {
+    for(it = act_vertex->edges.begin(); it != act_vertex->edges.end(); it++) {
+	//if the next vertex is an exit here is nothing to do.
+	if(!it->second.dest->exit) {
      
       
-      // if the edge is through the same room then the exit here is nothing to do, except it is a hline
-      Hline * hline1 = dynamic_cast<Hline*>(act_vertex->nav_line);
-      if(hline1 || !(act_vertex->edges[last_vertex->id].sub->GetRoomID() == it->second.sub->GetRoomID() && act_vertex->edges[last_vertex->id].sub->GetSubRoomID() == it->second.sub->GetSubRoomID())) {
-	calculateDistances(exit, act_vertex, it->second.dest, it->second.distance + act_distance);
-      }
+	    // if the edge is through the same room then the exit here is nothing to do, except it is a hline
+	    Hline * hline1 = dynamic_cast<Hline*>(act_vertex->nav_line);
+	    if(hline1 || !(act_vertex->edges[last_vertex->id].sub->GetRoomID() == it->second.sub->GetRoomID() && act_vertex->edges[last_vertex->id].sub->GetSubRoomID() == it->second.sub->GetSubRoomID())) {
+		calculateDistances(exit, act_vertex, it->second.dest, it->second.distance + act_distance);
+	    }
+	}
     }
-  }
 }
 
 /**
@@ -409,45 +440,45 @@ void RoutingGraph::calculateDistances(Vertex * exit, Vertex * last_vertex, Verte
  */
 void RoutingGraph::print()
 {
-  map<int, Vertex>::iterator it;
-  map<int, ExitDistance>::iterator it2;
-  std::cout << vertexes.size() << std::endl; 
-  for(it=vertexes.begin(); it != vertexes.end(); it++ ) {
-    std::cout << "\n\nvertex: " << (*it).second.nav_line->GetUniqueID();
+    map<int, Vertex>::iterator it;
+    map<int, ExitDistance>::iterator it2;
+    std::cout << vertexes.size() << std::endl; 
+    for(it=vertexes.begin(); it != vertexes.end(); it++ ) {
+	std::cout << "\n\nvertex: " << (*it).second.nav_line->GetUniqueID() << " - " << &it->second << std::endl;
 	
-    Crossing * crossing = dynamic_cast<Crossing*>(it->second.nav_line);
+	Crossing * crossing = dynamic_cast<Crossing*>(it->second.nav_line);
 	
-    if(crossing) {
-      std::cout << "  from: " << crossing->GetSubRoom1()->GetRoomID() << "-" << crossing->GetSubRoom1()->GetSubRoomID() << " to:";
+	if(crossing) {
+	    std::cout << "  from: " << crossing->GetSubRoom1()->GetRoomID() << "-" << crossing->GetSubRoom1()->GetSubRoomID() << " to:";
 
-      if(crossing->GetSubRoom2())
-	std::cout <<  crossing->GetSubRoom2()->GetRoomID() << "-" << crossing->GetSubRoom2()->GetSubRoomID() << std::endl;
-      else
-	std::cout << "exit" << std::endl;
-    } else {
-      std::cout << "hline" << std::endl; 
-    }
-    std::cout << " edges to   ";
-    map<int, Edge>::iterator it_edges;
+	    if(crossing->GetSubRoom2())
+		std::cout <<  crossing->GetSubRoom2()->GetRoomID() << "-" << crossing->GetSubRoom2()->GetSubRoomID() << std::endl;
+	    else
+		std::cout << "exit" << std::endl;
+	} else {
+	    std::cout << "hline" << std::endl; 
+	}
+	std::cout << " edges to   ";
+	map<int, Edge>::iterator it_edges;
     
-    for(it_edges = it->second.edges.begin(); it_edges != (*it).second.edges.end(); it_edges++) {
-      if(it_edges->second.dest)
-	std::cout << it_edges->second.dest->nav_line->GetUniqueID() << "(distance " << it_edges->second.distance <<") - ";
-      else
-	std::cout << "NULL" << "-" ;
-    }
-    std::cout << std::endl << std::endl; 
-    std::cout << "exit distances: \n ";
+	for(it_edges = it->second.edges.begin(); it_edges != (*it).second.edges.end(); it_edges++) {
+	    if(it_edges->second.dest)
+		std::cout << it_edges->second.dest->nav_line->GetUniqueID() << "(distance " << it_edges->second.distance <<") - " << it_edges->second.src;
+	    else
+		std::cout << "NULL" << "-" ;
+	}
+	std::cout << std::endl << std::endl; 
+	std::cout << "exit distances: \n ";
 
-    for(it2 = (*it).second.distances.begin(); it2 !=  (*it).second.distances.end(); it2++) {
-      std::cout << (*it2).first << " (" << (*it2).second.distance << ")" ;
-      if(it2->second.exit_edge) {
-	std::cout <<"subroom "<<  it2->second.GetSubRoom()->GetRoomID() << "-" << (*it2).second.GetSubRoom()->GetSubRoomID() << "next vertex: " << (*it2).second.GetDest()->id <<" \n";
-      } else {
-	std::cout << std::endl;
-      }
+	for(it2 = (*it).second.distances.begin(); it2 !=  (*it).second.distances.end(); it2++) {
+	    std::cout << (*it2).first << " (" << (*it2).second.distance << ")" ;
+	    if(it2->second.exit_edge) {
+		std::cout <<"subroom "<<  it2->second.GetSubRoom()->GetRoomID() << "-" << (*it2).second.GetSubRoom()->GetSubRoomID() << "next vertex: " << (*it2).second.GetDest()->id <<" \n";
+	    } else {
+		std::cout << std::endl;
+	    }
+	}
     }
-  }
 }
 
 /**
@@ -456,13 +487,19 @@ void RoutingGraph::print()
 
 map <int, Vertex> * RoutingGraph::GetAllVertexes()
 { 
-  return  &vertexes; 
+    return  &vertexes; 
 };
 
 
 Vertex * RoutingGraph::GetVertex(int id)
 {
-  return & vertexes[id];
+    map<int, Vertex>::iterator it;
+    it = vertexes.find(id);
+    if(it != vertexes.end()) {
+	return &it->second;
+    } else {
+	return NULL;
+    }
 };
 
 /****************************************
@@ -470,16 +507,16 @@ Vertex * RoutingGraph::GetVertex(int id)
  ***************************************/
 
 ExitDistance Vertex::getShortestExit() {
-  map<int, ExitDistance>::iterator it;
-  ExitDistance return_var;
+    map<int, ExitDistance>::iterator it;
+    ExitDistance return_var;
 
-  return_var.distance = INFINITY;
-  for(it = distances.begin(); it != distances.end(); it++) {
-    if((*it).second.distance < return_var.distance) {
-      return_var = it->second;
+    return_var.distance = INFINITY;
+    for(it = distances.begin(); it != distances.end(); it++) {
+	if((*it).second.distance < return_var.distance) {
+	    return_var = it->second;
+	}
     }
-  }
-  return return_var;
+    return return_var;
 }
 
 
@@ -489,26 +526,26 @@ ExitDistance Vertex::getShortestExit() {
 
 SubRoom * ExitDistance::GetSubRoom() const 
 {
-  if(exit_edge)
-    return exit_edge->sub;
-  else
-    return NULL;
+    if(exit_edge)
+	return exit_edge->sub;
+    else
+	return NULL;
 }
 
 Vertex * ExitDistance::GetDest() const
 {
-  if(exit_edge)
-    return exit_edge->dest;
-  else
-    return NULL;
+    if(exit_edge)
+	return exit_edge->dest;
+    else
+	return NULL;
 }
 
 Vertex * ExitDistance::GetSrc() const 
 {
-  if(exit_edge)
-    return exit_edge->src;
-  else
-    return NULL;
+    if(exit_edge)
+	return exit_edge->src;
+    else
+	return NULL;
   
 }
 
