@@ -25,45 +25,74 @@ GraphRouter::~GraphRouter()
 
 int GraphRouter::FindExit(Pedestrian* p) 
 {
-  //if the pedestrian has a destination in the actual subroom, there is nothing to do
-  if(p->GetNextDestination() != -1) {
-    //TODO check if the destination ist still the right one!
-    //TODO check if the next destination is a hline!
-    Hline * hline = dynamic_cast<Hline*>(graph->GetVertex(p->GetLastDestination())->nav_line);
-    if(hline) {
-      if(hline->DistTo(p->GetPos()) < EPS) {
-	//std::cout << "new route from HLINE" << std::endl; 
-	NavLine * next_dest = graph->GetNextDestination(p->GetLastDestination());
-	p->SetExitIndex(next_dest->GetUniqueID());
-      	p->SetExitLine(next_dest);
-      	return 1;
-      }
-    }
-    return 1;
-  } else {
-    int last_dest = p->GetLastDestination();
-    //If there was a previous destination the routing starts from there!
-    if(last_dest != -1) {
-      SubRoom * sub = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
-      NavLine * next_dest = (*graph).GetNextDestination(last_dest);
-      //std::cout << "new route for "<< p->GetPedIndex() << std::endl;
-      	p->SetExitIndex(next_dest->GetUniqueID());
-      	p->SetExitLine(next_dest);
-      	return 1;
+
+
+    if(p->GetLastDestination() == -1) {
+	//this is needed for initialisation
+	p->ChangedSubRoom();
+	//Set Initial Route at the beginning
+	// get next destination for person in subroom (in the subroom not next to a crossing) 
+	ExitDistance ed = graph->GetNextDestination(p);
+	p->SetExitIndex(ed.GetDest()->id);
+	p->SetExitLine(ed.GetDest()->nav_line);
+	return 1;
     } else {
-      // get next destination for person in subroom (in the subroom not next to a crossing) 
-      NavLine * exit = graph->GetNextDestination(p);
-      p->SetExitIndex(exit->GetUniqueID());
-      p->SetExitLine(exit);
-      return 1;
+	//the pedestrian at least had a route, now check if he needs a new one
+	//if the pedestrian changed the subroom he needs a new route
+	if(p->ChangedSubRoom()) {
+	    ExitDistance ed = graph->GetNextDestination(p->GetLastDestination(), p);
+	    // check if the next destination is in the right subroom
+	    // if the routing graph changes, it could happen, that the pedestrian has to turn.
+	    if(ed.GetSubRoom()->GetRoomID() != p->GetRoomID() || ed.GetSubRoom()->GetSubRoomID() != p->GetSubRoomID()) {
+		p->SetExitIndex(p->GetLastDestination());
+		p->SetExitLine(ed.GetSrc()->nav_line);
+		return 1;
+	    }
+	    p->SetExitIndex(ed.GetDest()->id);
+	    p->SetExitLine(ed.GetDest()->nav_line);
+	    return 1;
+	}
+	//check if the pedestrian reached an hline
+	Hline * hline = dynamic_cast<Hline*>(graph->GetVertex(p->GetLastDestination())->nav_line);
+	if(hline) {
+	    if(graph->GetVertex(p->GetLastDestination())->nav_line->DistTo(p->GetPos()) < EPS * 10) {
+		//std::cout << "new route from HLINE" << std::endl; 
+		ExitDistance ed = graph->GetNextDestination(p->GetLastDestination(),p);
+		p->SetExitIndex(ed.GetDest()->id);
+		p->SetExitLine(ed.GetDest()->nav_line);
+		return 1;
+	    }
+	}
+	Transition * transition = dynamic_cast<Transition*>(graph->GetVertex(p->GetLastDestination())->nav_line);
+	if(transition) {
+      
+	    if(!transition->IsOpen()) {
+		std::cout << "transition" << transition->GetUniqueID() << std::endl;
+
+		graph->closeDoor(transition->GetUniqueID());
+		//graph->print();
+		ExitDistance ed = graph->GetNextDestination(p);
+
+		p->SetExitIndex(ed.GetDest()->id);
+		p->SetExitLine(ed.GetDest()->nav_line);
+		return 1;
+
+	    } 
+	}
+	return 1;
+	
     }
-  }
 }
+
 
 void GraphRouter::Init(Building* b) 
 {
   Log->write("ERROR: Router is not ready to use yet");
   building = b;
   graph = new RoutingGraph(b);
+  std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 
+  b->GetTransition("200E Normal Exit E3")->Close();
+
+  std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 
 
 }

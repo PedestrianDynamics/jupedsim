@@ -37,6 +37,6 @@ NavLine::NavLine() {
 NavLine::~NavLine() {
 }
 
-int NavLine::GetUniqueID() {
+int NavLine::GetUniqueID()  const {
 	return pUID;
 }

@@ -69,6 +69,8 @@ private:
 	int pDesiredFinalDestination;
 	double pPatienceTime; // time after which the ped feels to be in jam
 
+	int oldRoomID;
+	int oldSubRoomID;
 	// necessary for smooth turning at sharp bend
 	bool pNewOrientationFlag;
 	int pNewOrientationDelay; //2 seconds, in steps
@@ -129,8 +131,11 @@ public:
 	int GetUniqueRoomID() const;
 	int GetNextDestination();
 	int GetLastDestination();
+	int GetDestinationCount();
 	double GetDistanceToNextTarget() const;
 	double GetDisTanceToPreviousTarget() const;
+	
+	bool ChangedSubRoom();
 
 	void RecordActualPosition();
 	double GetDistanceSinceLastRecord();

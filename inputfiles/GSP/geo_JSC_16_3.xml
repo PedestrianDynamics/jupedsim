@@ -230,6 +230,23 @@
 	  <vertex px="40.53" py="5.22"/>
 	</polygon>
 	<polygon caption="wall">
+	  <vertex px="44.16" py="5.22"/>
+	  <vertex px="45.99" py="5.22"/>
+	</polygon>
+	<polygon caption="wall">
+	  <vertex px="46.99" py="5.22"/>
+	  <vertex px="48.88" py="5.22"/>
+	</polygon>
+	<polygon caption="wall">
+	  <vertex px="49.88" py="5.22"/>
+	  <vertex px="49.88" py="5.79"/>
+	</polygon>
+	<polygon caption="wall">
+	  <vertex px="49.88" py="6.59"/>
+	  <vertex px="49.88" py="7.37"/>
+	  <vertex px="44.16" py="7.37"/>
+	</polygon>
+	<polygon caption="wall">
 	  <vertex px="42.36" py="9.02"/>
 	  <vertex px="28.11" py="9.02"/>
 	</polygon>
@@ -291,6 +308,15 @@
 	    <vertex px="28.11" py="8.52"/>
 	  </polygon>
 	</obstacle>
+	<obstacle id="4" caption="table" height="1.0" closed="1">
+	  <polygon>
+	    <vertex px="44.29" py="7.0"/>
+	    <vertex px="44.79" py="7.0"/>
+	    <vertex px="44.79" py="7.37"/>
+	    <vertex px="44.29" py="7.37"/>
+	    <vertex px="44.29" py="7.0"/>
+	  </polygon>
+	</obstacle>
       </subroom>
       <subroom id="1" closed="0" class="subroom">
 	<polygon caption="wall">
@@ -307,31 +333,17 @@
       </subroom>
       <subroom id="2" closed="0" class="subroom">
 	<polygon caption="wall">
-	  <vertex px="44.16" py="5.22"/>
-	  <vertex px="45.99" py="5.22"/>
+	  <vertex px="6.8" py="7.54"/>
+	  <vertex px="10.42" py="7.54"/>
 	</polygon>
 	<polygon caption="wall">
-	  <vertex px="46.99" py="5.22"/>
-	  <vertex px="48.88" py="5.22"/>
+	  <vertex px="11.27" py="7.54"/>
+	  <vertex px="14.29" py="7.54"/>
 	</polygon>
 	<polygon caption="wall">
-	  <vertex px="49.88" py="5.22"/>
-	  <vertex px="49.88" py="5.79"/>
+	  <vertex px="15.29" py="9.02"/>
+	  <vertex px="8.75" py="9.02"/>
 	</polygon>
-	<polygon caption="wall">
-	  <vertex px="49.88" py="6.59"/>
-	  <vertex px="49.88" py="7.37"/>
-	  <vertex px="44.16" py="7.37"/>
-	</polygon>
-	<obstacle id="4" caption="table" height="1.0" closed="1">
-	  <polygon>
-	    <vertex px="44.29" py="7.0"/>
-	    <vertex px="44.79" py="7.0"/>
-	    <vertex px="44.79" py="7.37"/>
-	    <vertex px="44.29" py="7.37"/>
-	    <vertex px="44.29" py="7.0"/>
-	  </polygon>
-	</obstacle>
       </subroom>
       <subroom id="3" closed="0" class="subroom">
 	<polygon caption="wall">
@@ -489,7 +501,7 @@
 	  </polygon>
 	</obstacle>
       </subroom>
-   
+      
       <subroom id="6" closed="0" class="subroom">
 	<polygon caption="wall">
 	  <vertex px="44.16" py="17.15"/>
@@ -523,60 +535,42 @@
 	  </polygon>
 	</obstacle>
       </subroom>
-   <subroom id="7" closed="0" class="subroom">
-	<polygon caption="wall">
-	  <vertex px="6.8" py="7.54"/>
-	  <vertex px="10.42" py="7.54"/>
-	</polygon>
-	<polygon caption="wall">
-	  <vertex px="11.27" py="7.54"/>
-	  <vertex px="14.29" py="7.54"/>
-	</polygon>
-	<polygon caption="wall">
-	  <vertex px="15.29" py="9.02"/>
-	  <vertex px="8.75" py="9.02"/>
-	</polygon>
-      </subroom>
       <crossings>
 	<!-- virtual exits between subrooms -->
-	<crossing id="44" subroom1_id="0" subroom2_id="1">
+	<crossing id="46" subroom1_id="0" subroom2_id="1">
 	  <vertex px="40.53" py="5.22"/>
 	  <vertex px="44.16" py="5.22"/>
 	</crossing>
-	<crossing id="45" subroom1_id="0" subroom2_id="2">
-	  <vertex px="44.16" py="5.22"/>
-	  <vertex px="44.16" py="7.37"/>
-	</crossing>
-	<crossing id="46" subroom1_id="0" subroom2_id="3">
+	<crossing id="47" subroom1_id="0" subroom2_id="3">
 	  <vertex px="42.36" py="9.02"/>
 	  <vertex px="44.16" py="7.37"/>
 	</crossing>
-	<crossing id="47" subroom1_id="6" subroom2_id="4">
+	<crossing id="48" subroom1_id="6" subroom2_id="4">
 	  <vertex px="46.66" py="17.15"/>
 	  <vertex px="46.66" py="19.4"/>
 	</crossing>
-	<crossing id="48" subroom1_id="3" subroom2_id="5">
+	<crossing id="49" subroom1_id="3" subroom2_id="5">
 	  <vertex px="42.36" py="35.27"/>
 	  <vertex px="44.16" py="36.66"/>
 	</crossing>
-	<crossing id="50" subroom1_id="5" subroom2_id="7">
+	<crossing id="50" subroom1_id="5" subroom2_id="2">
 	  <vertex px="6.8" py="7.54"/>
 	  <vertex px="8.75" py="9.02"/>
 	</crossing>
-	<crossing id="51" subroom1_id="7" subroom2_id="0">
+	<crossing id="51" subroom1_id="2" subroom2_id="0">
 	  <vertex px="14.29" py="7.54"/>
 	  <vertex px="15.29" py="9.02"/>
 	</crossing>
-	<crossing id="0" subroom1_id="6" subroom2_id="3">
+	<crossing id="52" subroom1_id="6" subroom2_id="3">
 	  <vertex px="44.16" py="17.15"/>
 	  <vertex px="44.16" py="19.65"/>
 	</crossing>
-	<crossing id="49" subroom1_id="6" subroom2_id="3">
+	<crossing id="0" subroom1_id="6" subroom2_id="3">
 	  <vertex px="44.16" py="25.18"/>
 	  <vertex px="44.16" py="27.68"/>
 	</crossing>
       </crossings>
-    
+      
     </room>
     <room id="15" caption="227" zpos="0.00">
       <subroom id="0" closed="0" class="subroom">
@@ -961,7 +955,7 @@
       <vertex px="9.75" py="0.0"/>
     </transition>    
     <transition id="5" caption="209 door" type="normal"
-		room1_id="3" subroom1_id="0" room2_id="14" subroom2_id="7">
+		room1_id="3" subroom1_id="0" room2_id="14" subroom2_id="2">
       <vertex px="10.42" py="7.54"/>
       <vertex px="11.27" py="7.54"/>
     </transition>    
@@ -1016,17 +1010,17 @@
       <vertex px="39.55" py="5.22"/>
     </transition>    
     <transition id="16" caption="229 door" type="normal"
-		room1_id="12" subroom1_id="0" room2_id="14" subroom2_id="2">
+		room1_id="12" subroom1_id="0" room2_id="14" subroom2_id="0">
       <vertex px="45.99" py="5.22"/>
       <vertex px="46.99" py="5.22"/>
     </transition>    
     <transition id="17" caption="228 door" type="normal"
-		room1_id="13" subroom1_id="0" room2_id="14" subroom2_id="2">
+		room1_id="13" subroom1_id="0" room2_id="14" subroom2_id="0">
       <vertex px="48.88" py="5.22"/>
       <vertex px="49.88" py="5.22"/>
     </transition>    
     <transition id="18" caption="227 door" type="normal"
-		room1_id="15" subroom1_id="0" room2_id="14" subroom2_id="2">
+		room1_id="15" subroom1_id="0" room2_id="14" subroom2_id="0">
       <vertex px="49.88" py="5.79"/>
       <vertex px="49.88" py="6.59"/>
     </transition>    
@@ -1155,12 +1149,12 @@
       <vertex px="6.8" py="8.0"/>
       <vertex px="6.80" py="9.0"/>
     </transition>    
-    <transition id="52" caption="T1 door" type="normal"
+    <transition id="44" caption="T1 door" type="normal"
 		room1_id="36" subroom1_id="0" room2_id="14" subroom2_id="0">
       <vertex px="27.11" py="9.02"/>
       <vertex px="28.11" py="9.02"/>
     </transition>    
-    <transition id="53" caption="T2 door" type="normal"
+    <transition id="45" caption="T2 door" type="normal"
 		room1_id="37" subroom1_id="0" room2_id="14" subroom2_id="5">
       <vertex px="24.00" py="35.27"/>
       <vertex px="25.00" py="35.27"/>

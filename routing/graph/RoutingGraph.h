@@ -15,9 +15,9 @@
 #include "../../geometry/Building.h"
 #include "../../geometry/NavLine.h"
 
-struct edge;
-struct exit_distance; 
-struct vertex;
+struct Edge;
+struct ExitDistance; 
+struct Vertex;
 
 
 class RoutingGraph {
@@ -43,62 +43,71 @@ public:
      * Routing helpers
      **************************/
 
-    NavLine * GetNextDestination(int crossing_index);
-    NavLine * GetNextDestination(Pedestrian * p);
+    ExitDistance  GetNextDestination(int nav_line_index, Pedestrian * p );
+    ExitDistance  GetNextDestination(Pedestrian * p);
+    void closeDoor(int id);
     
     /**
      * Getter and Setter
      */
-    vertex * GetVertex(int id);
-    map<int,vertex> * GetAllVertexes();
+    Vertex * GetVertex(int id);
+    map<int,Vertex> * GetAllVertexes();
     
 private:
     /***********************
      * variabels
      ***********************/
     Building * building;
-    map<int, vertex> vertexes;
+    map<int, Vertex> vertexes;
 
     /***********************
      * internal graph init functions
      **********************/
     int addVertex(NavLine * nav_line, bool exit = false);
+    void removeVertex(Vertex * remove_vertex);
     void processSubroom(SubRoom * sub);
-    void addEdge(vertex * v1, vertex * v2, SubRoom * sub);
+    void addEdge(Vertex * v1, Vertex * v2, SubRoom * sub);
     bool checkVisibility(Line * l1, Line * l2, SubRoom * sub);
-    void calculateDistancesForExit(vertex * act_vertex);
-    void calculateDistances(vertex * exit, vertex * last_vertex, int edge_index, double act_distance);
+  
+    bool checkVisibility(Point  p1, Point  p2, SubRoom * sub);
+    bool checkVisibility(Pedestrian * p, NavLine* l, SubRoom * sub);
+    void calculateDistancesForExit(Vertex * act_vertex);
+    void calculateDistances(Vertex * exit, Vertex * last_vertex, Vertex * act_vertex, double act_distance);
 
 
 };
 
 
-struct edge 
+struct Edge 
 {
 public:
-    vertex* next_vertex;
+    Vertex * dest;
+    Vertex * src;
     double distance;
     SubRoom * sub;
 };
 
-struct exit_distance 
+struct ExitDistance 
 {
 public:
     double distance;
-    vertex* last_vertex;
-    SubRoom * exit_subroom;
+    Edge * exit_edge;
+    SubRoom * GetSubRoom() const;
+    Vertex * GetDest() const;
+    Vertex * GetSrc() const;
+    
 };
 
-struct vertex
+struct Vertex
 {
 public:
     NavLine * nav_line;
     int id;
     bool exit;
-    vector<edge> edges;
-    map<int, exit_distance> distances;
+    map<int, Edge> edges;
+    map<int, ExitDistance> distances;
 
-    exit_distance getShortestExit();
+    ExitDistance getShortestExit();
 };
 
 

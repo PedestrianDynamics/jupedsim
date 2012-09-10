@@ -35,6 +35,8 @@
 Pedestrian::Pedestrian() {
 	pRoomID = -1;
 	pSubRoomID = -1;
+	oldRoomID = -1;
+	oldSubRoomID = -1;
 	pExitIndex = -1;
 	pPedIndex = 0;
 	pMass = 1;
@@ -57,7 +59,8 @@ Pedestrian::Pedestrian() {
 	pDt=0.01;
 	pV0=Point(0,0);
 	pLastPosition=Point(0,0);
-
+	
+	
 	pHeight=160;
 	pAge=30;
 	pGender="male";
@@ -69,6 +72,8 @@ Pedestrian::Pedestrian() {
 Pedestrian::Pedestrian(const Pedestrian& orig) {
 	pRoomID = orig.GetRoomID();
 	pSubRoomID = orig.GetSubRoomID();
+	oldRoomID = orig.GetRoomID();
+	oldSubRoomID = orig.GetSubRoomID();
 	pExitIndex = orig.GetExitIndex();
 	pPedIndex = orig.GetPedIndex();
 	pMass = orig.GetMass();
@@ -214,6 +219,19 @@ int Pedestrian::GetLastDestination() {
   else
     return pDestHistory.back();
 
+}
+
+bool Pedestrian::ChangedSubRoom() {
+    if(oldRoomID != GetRoomID() || oldSubRoomID != GetSubRoomID()) {
+	oldRoomID = GetRoomID();
+	oldSubRoomID = GetSubRoomID();
+	return true;
+    }
+    return false;
+}
+
+int Pedestrian::GetDestinationCount() {
+    return pDestHistory.size();
 }
 // erase the peds memory
 void Pedestrian::ClearMentalMap(){

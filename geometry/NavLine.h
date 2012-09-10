@@ -37,7 +37,7 @@ private:
 public:
 	NavLine();
 	virtual ~NavLine();
-	int GetUniqueID();
+	int GetUniqueID() const;
 };
 
 #endif /* NAVLINE_H_ */
