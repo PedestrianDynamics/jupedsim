@@ -16,6 +16,13 @@ RoutingGraphStorage::RoutingGraphStorage()
 
 RoutingGraphStorage::~RoutingGraphStorage()
 {
+  map<set<int>, RoutingGraph*>::iterator it;
+  
+  for(it = graphs.begin(); it != graphs.end(); it++) {
+    delete it->second;
+    
+  }
+  
 };
 
 
@@ -39,8 +46,6 @@ RoutingGraph * RoutingGraphStorage::GetGraph(set<int> closed_doors)
   // find the biggest existing subset
   
   GenerateNewGraph(closed_doors);
-  graphs[empty_set]->print();
-  graphs[closed_doors]->print();
   
   return graphs[closed_doors];
 };

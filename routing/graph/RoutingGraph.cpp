@@ -11,12 +11,16 @@
  */
 RoutingGraph::RoutingGraph(Building * b) : building(b)
 {
+    vertexes = map<int, Vertex>();
+    
     BuildGraph();
+
 };
 
 RoutingGraph::RoutingGraph()
 {
-  
+    vertexes = map<int, Vertex>();
+    
 }
 RoutingGraph::~RoutingGraph() 
 {
@@ -60,20 +64,7 @@ RoutingGraph::RoutingGraph(RoutingGraph * orig)
 ExitDistance RoutingGraph::GetNextDestination(int nav_line_index, Pedestrian * p)
 {
     ExitDistance dist = vertexes[nav_line_index].getShortestExit();
-    // check if the exit is through the right subroom
-    // if(p != NULL && dist.exit_subroom != NULL) {
-    //   Hline * hline = dynamic_cast<Hline*>(dist.last_vertex->nav_line);
-    //   if(!hline && (dist.exit_subroom->GetRoomID() != p->GetRoomID() || dist.exit_subroom->GetSubRoomID() != p->GetSubRoomID())) {
-    	
-    // 	  NavLine * navline = GetNextDestination(p);
-    // 	  if(p->GetPedIndex() == 24)
-    // 	    std::cout << "neues ziel für 24 " << navline->GetUniqueID() << std::endl;
-    // 	  return GetNextDestination(p);
-	
-    //   }
-    // }
     return dist;
-     
 }
 
 
@@ -112,11 +103,23 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 	}
 	   
     }
+    ed = GetVertex(return_line->GetUniqueID())->getShortestExit();
     ExitDistance return_dist;
     return_dist.distance = act_shortest_dist;
-    return_dist.exit_edge = new Edge();
-    return_dist.exit_edge->dest = GetVertex(return_line->GetUniqueID());
-    return_dist.exit_edge->sub = sub;
+    //
+    return_dist.exit_edge = NULL;
+    
+    if(ed.exit_vertex->id != return_line->GetUniqueID()){
+	return_dist.exit_edge = new Edge();
+	return_dist.exit_edge->dest = GetVertex(return_line->GetUniqueID());
+	return_dist.exit_edge->sub = sub;
+	
+    }
+	
+    
+    return_dist.exit_vertex = ed.exit_vertex;
+    
+
   
     return return_dist;
 }
@@ -396,8 +399,12 @@ bool RoutingGraph::checkVisibility(Pedestrian * p, NavLine * l, SubRoom* sub)
  */
 void RoutingGraph::calculateDistancesForExit(Vertex *act_vertex)
 {
+    if(!act_vertex->exit) return;
+    
     act_vertex->distances[act_vertex->id].distance = 0;
     act_vertex->distances[act_vertex->id].exit_edge = NULL;
+    act_vertex->distances[act_vertex->id].exit_vertex = act_vertex;
+    
     
     map<int, Edge>::iterator it;
   
@@ -418,6 +425,8 @@ void RoutingGraph::calculateDistances(Vertex * exit, Vertex * last_vertex, Verte
     }
     act_vertex->distances[exit->id].distance = act_distance;
     act_vertex->distances[exit->id].exit_edge = & act_vertex->edges[last_vertex->id];
+    act_vertex->distances[exit->id].exit_vertex = exit;
+    
 
     map<int, Edge>::iterator it;
   
@@ -534,10 +543,15 @@ SubRoom * ExitDistance::GetSubRoom() const
 
 Vertex * ExitDistance::GetDest() const
 {
-    if(exit_edge)
+    if(exit_edge) {
 	return exit_edge->dest;
-    else
-	return NULL;
+    } else {
+	if(exit_vertex)
+	    return exit_vertex;
+	else
+	    return NULL;
+    }
+    
 }
 
 Vertex * ExitDistance::GetSrc() const 
@@ -549,3 +563,10 @@ Vertex * ExitDistance::GetSrc() const
   
 }
 
+ExitDistance::~ExitDistance() 
+{
+    if(!GetSrc() )
+    {
+	delete exit_edge;
+    }
+}

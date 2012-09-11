@@ -60,6 +60,7 @@ Pedestrian::Pedestrian() {
 	pV0=Point(0,0);
 	pLastPosition=Point(0,0);
 	
+	knownClosedDoors = set<int>();
 	
 	pHeight=160;
 	pAge=30;
@@ -238,6 +239,24 @@ void Pedestrian::ClearMentalMap(){
 	//	pMentalMapArray[pRoomID][pSubRoomID]=-1;
 	pMentalMap.clear();
 	pExitIndex=-1;
+}
+
+// adds the UniqueID to known closed Doors (Transitions, Crossings or Hline)
+void Pedestrian::AddKnownClosedDoor(int uID) 
+{
+    knownClosedDoors.insert(uID);
+    return;
+}
+
+set<int> Pedestrian::GetKnownClosedDoors() const 
+{
+    return knownClosedDoors;
+}
+
+void Pedestrian::MergeKnownClosedDoors(set<int> input) 
+{
+    knownClosedDoors.insert(input.begin(), input.end());
+    return;
 }
 
 

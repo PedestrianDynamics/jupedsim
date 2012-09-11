@@ -94,6 +94,9 @@ struct ExitDistance
 public:
     double distance;
     Edge * exit_edge;
+    Vertex * exit_vertex;
+    
+    ~ExitDistance();
     SubRoom * GetSubRoom() const;
     Vertex * GetDest() const;
     Vertex * GetSrc() const;
