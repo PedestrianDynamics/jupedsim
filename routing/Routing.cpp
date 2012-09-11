@@ -45,17 +45,18 @@ Routing::Routing() {
 }
 
 Routing::~Routing() {
-	for (int i = 0; i < GetAnzGoals(); i++)
-		delete pGoals[i];
-
-	for (unsigned int i = 0; i < pTransitions.size(); i++)
-		delete pTransitions[i];
-
-	for (unsigned int i = 0; i < pCrossings.size(); i++)
-		delete pCrossings[i];
-
-	for (unsigned int i = 0; i < pHlines.size(); i++)
-		delete pHlines[i];
+	for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
+			iter != pCrossings.end(); ++iter) {
+		delete iter->second;
+	}
+	for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
+			iter != pTransitions.end(); ++iter) {
+		delete iter->second;
+	}
+	for (map<int, Hline*>::const_iterator iter = pHlines.begin();
+			iter != pHlines.end(); ++iter) {
+		delete iter->second;
+	}
 }
 
 const vector<int> Routing::GetTrip(int index) const {
@@ -218,8 +219,16 @@ const vector<int> Routing::GetFinalDestinations() const {
 }
 
 void Routing::WriteToErrorLog() const {
-	map<int, Crossing*>::const_iterator iter;
-	for (iter = pGoals.begin(); iter != pGoals.end(); ++iter) {
+	for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
+			iter != pCrossings.end(); ++iter) {
+		iter->second->WriteToErrorLog();
+	}
+	for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
+			iter != pTransitions.end(); ++iter) {
+		iter->second->WriteToErrorLog();
+	}
+	for (map<int, Hline*>::const_iterator iter = pHlines.begin();
+			iter != pHlines.end(); ++iter) {
 		iter->second->WriteToErrorLog();
 	}
 }
