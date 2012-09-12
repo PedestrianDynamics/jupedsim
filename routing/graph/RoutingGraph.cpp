@@ -103,6 +103,16 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 	}
 	   
     }
+
+    if(!return_line) {
+	char tmp[CLENGTH];
+	sprintf(tmp,
+		"ERROR: \t Pedestrian  [%d] can't find a exit",
+		p->GetPedIndex());
+	Log->write(tmp);
+	exit(0);
+    }
+    
     ed = GetVertex(return_line->GetUniqueID())->getShortestExit();
     ExitDistance return_dist;
     return_dist.distance = act_shortest_dist;
@@ -113,6 +123,7 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 	return_dist.exit_edge = new Edge();
 	return_dist.exit_edge->dest = GetVertex(return_line->GetUniqueID());
 	return_dist.exit_edge->sub = sub;
+	return_dist.exit_edge->src = NULL;
 	
     }
 	
@@ -543,7 +554,7 @@ SubRoom * ExitDistance::GetSubRoom() const
 
 Vertex * ExitDistance::GetDest() const
 {
-    if(exit_edge) {
+    if(exit_edge && exit_edge->dest) {
 	return exit_edge->dest;
     } else {
 	if(exit_vertex)
@@ -556,7 +567,7 @@ Vertex * ExitDistance::GetDest() const
 
 Vertex * ExitDistance::GetSrc() const 
 {
-    if(exit_edge)
+    if(exit_edge && exit_edge->src)
 	return exit_edge->src;
     else
 	return NULL;
@@ -565,7 +576,7 @@ Vertex * ExitDistance::GetSrc() const
 
 ExitDistance::~ExitDistance() 
 {
-    if(!GetSrc() )
+    if(!GetSrc())
     {
 	delete exit_edge;
     }

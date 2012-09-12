@@ -10,7 +10,7 @@
 	<distribution>
 <!--		<dist room_caption="Floor" subroom_id="0" number="1"/> -->
 		<dist room_caption="EV2-EG" number="3"/>
-<!--		<dist room_caption="EV1-EG" number="3"/>
+		<dist room_caption="EV1-EG" number="3"/>
 		<dist room_caption="EV3-EG" number="3"/>
 		<dist room_caption="209" number="3"/>
 		<dist room_caption="208" number="4"/>
@@ -45,7 +45,7 @@
 		<dist room_caption="211" number="2"/>
 		<dist room_caption="210" number="3"/>
 		<dist room_caption="T1" number="3"/>
-		<dist room_caption="T2" number="3"/>-->
+		<dist room_caption="T2" number="3"/>
 
 	</distribution>
 

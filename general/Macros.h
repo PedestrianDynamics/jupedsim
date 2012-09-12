@@ -30,6 +30,7 @@
 // Genauigkeit
 #define EPS 0.001
 #define EPS_DIST 0.05// [m]
+#define EPS_INFO_DIST 0.4 // [m] abstand für Informationsaustausch (GraphRouter)
 #define EPS_GOAL 0.05 // [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define TOLERANZ 0.03  // [m] Toleranz beim erstellen der Linien
 #define EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet

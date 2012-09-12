@@ -26,7 +26,12 @@ GraphRouter::~GraphRouter()
 int GraphRouter::FindExit(Pedestrian* p) 
 {
 
-
+    // if(p->GetPedIndex() == 56) 
+    // {
+    // 	std::cout << p->GetKnownClosedDoors().size()<< "\n" << g.GetGraph(p->GetKnownClosedDoors()) << "\n";
+	
+    // }
+    
     if(p->GetLastDestination() == -1) {
 	//this is needed for initialisation
 	p->ChangedSubRoom();
@@ -37,6 +42,8 @@ int GraphRouter::FindExit(Pedestrian* p)
 	p->SetExitLine(ed.GetDest()->nav_line);
 	return 1;
     } else {
+
+	
 	//the pedestrian at least had a route, now check if he needs a new one
 	//if the pedestrian changed the subroom he needs a new route
 	if(p->ChangedSubRoom()) {
@@ -52,10 +59,15 @@ int GraphRouter::FindExit(Pedestrian* p)
 	    p->SetExitLine(ed.GetDest()->nav_line);
 	    return 1;
 	}
+	if(p->GetNextDestination() != -1 && !g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetLastDestination())) {
+	    	ExitDistance ed = g.GetGraph(p->GetKnownClosedDoors())->GetNextDestination(p);
+		p->SetExitIndex(ed.GetDest()->id);
+		p->SetExitLine(ed.GetDest()->nav_line);
+	}
 	//check if the pedestrian reached an hline
-	Hline * hline = dynamic_cast<Hline*>(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetLastDestination())->nav_line);
+	Hline * hline = dynamic_cast<Hline*>(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetNextDestination())->nav_line);
 	if(hline) {
-	    if(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetLastDestination())->nav_line->DistTo(p->GetPos()) < EPS * 10) {
+	    if(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetNextDestination())->nav_line->DistTo(p->GetPos()) < EPS * 10) {
 		//std::cout << "new route from HLINE" << std::endl; 
 		ExitDistance ed = g.GetGraph(p->GetKnownClosedDoors())->GetNextDestination(p->GetLastDestination(),p);
 		p->SetExitIndex(ed.GetDest()->id);
@@ -63,24 +75,44 @@ int GraphRouter::FindExit(Pedestrian* p)
 		return 1;
 	    }
 	}
-	Transition * transition = dynamic_cast<Transition*>(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetLastDestination())->nav_line);
+	Transition * transition = dynamic_cast<Transition*>(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetNextDestination())->nav_line);
 	if(transition) {
-      
-	    if(!transition->IsOpen()) {
+	    if(!transition->IsOpen() && transition->DistTo(p->GetPos()) < EPS_INFO_DIST) {
 		p->AddKnownClosedDoor(transition->GetUniqueID());
-		
-		//g.GetGraph(p->GetKnownClosedDoors())->closeDoor(transition->GetUniqueID());
-		//graph->print();
 		ExitDistance ed = g.GetGraph(p->GetKnownClosedDoors())->GetNextDestination(p);
-
 		p->SetExitIndex(ed.GetDest()->id);
 		p->SetExitLine(ed.GetDest()->nav_line);
-		return 1;
-
 	    } 
 	}
-	return 1;
+
+    // if(p-> GetPedIndex() == 55)
+	// std::cout << "55 : " << p->GetKnownClosedDoors().size()<< "\n" << g.GetGraph(p->GetKnownClosedDoors()) << "\n";
+	//share Information about closed Doors
+	if(p->GetKnownClosedDoors() != empty_set) {
+	    // std::cout << "ped" << p->GetPedIndex() << std::endl;
+	    
+	    SubRoom * sub  = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
+	    const vector<Pedestrian*> ps = sub->GetAllPedestrians();
+	     
+	    for(unsigned int i = 0; i < ps.size(); i++) {
+		if((p->GetPos() - ps[i]->GetPos()).NormSquare() < EPS_INFO_DIST * 10) {
+		    if(ps[i]->GetKnownClosedDoors() != p->GetKnownClosedDoors())
+		    {
+			ps[i]->MergeKnownClosedDoors(p->GetKnownClosedDoors());
+			//maybe the other pedestrian needs a new route
+			ExitDistance ed = g.GetGraph(ps[i]->GetKnownClosedDoors())->GetNextDestination(ps[i]);
+			ps[i]->SetExitIndex(ed.GetDest()->id);
+			ps[i]->SetExitLine(ed.GetDest()->nav_line);
+		    }
+		    
+		    
+		}
+		
+	    }
+	    
+	}
 	
+	return 1;
     }
 }
 
@@ -92,7 +124,7 @@ void GraphRouter::Init(Building* b)
   g.init(b);
   
   std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 
-  //b->GetTransition("200E Normal Exit E3")->Close();
+  b->GetTransition("200E Normal Exit E3")->Close();
 
   std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 
 
