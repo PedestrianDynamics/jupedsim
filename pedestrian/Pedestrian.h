@@ -31,6 +31,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <time.h>
 
 #include "../pedestrian/Ellipse.h"
 #include "../geometry/Point.h"
@@ -81,6 +82,8 @@ private:
     int pUpdateRate;
     double pTurninAngle;
     bool tmpFirstOrientation; // possibility to get rid of this variable
+// the Pedestrian start after a certain amount of clockticks
+int clockTicksTillStart;
 
 
 public:

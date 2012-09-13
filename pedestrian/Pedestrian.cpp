@@ -67,7 +67,8 @@ Pedestrian::Pedestrian() {
 	pGender="male";
 	pTrip=vector<int> ();
 	pGroup=-1;
-
+	clockTicksTillStart = clock() + 3*CLOCKS_PER_SEC*( (double) rand() / RAND_MAX);
+	
 }
 
 Pedestrian::Pedestrian(const Pedestrian& orig) {
@@ -89,6 +90,8 @@ Pedestrian::Pedestrian(const Pedestrian& orig) {
 	pMentalMap=std::map<int, int>();
 	pDestHistory=std::vector<int>();
 	pLastPosition=Point(0,0);
+	clockTicksTillStart = orig.clockTicksTillStart;
+	
 }
 
 Pedestrian::~Pedestrian() {
@@ -136,7 +139,21 @@ void Pedestrian::SetExitLine(NavLine* l) {
 // ruft entsprechende Ellipsenfunktionen auf
 
 void Pedestrian::SetPos(const Point& pos) {
+    //set initial Position
+    if(pEllipse.GetCenter() == Point() || clockTicksTillStart == 0) 
+    {
 	pEllipse.SetCenter(pos);
+	return;
+    }
+    
+    if(clockTicksTillStart < clock()) 
+    {
+	clockTicksTillStart = 0;
+	pEllipse.SetCenter(pos);
+	return;
+    }
+    return;
+    
 
 }
 
