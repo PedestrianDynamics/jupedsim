@@ -381,7 +381,7 @@ bool RoutingGraph::checkVisibility(Pedestrian * p, NavLine * l, SubRoom* sub)
 	for(int j = 0; j < num_lines; j++) {
 	    if(temp[j]
 	       && l->GetUniqueID() != sub->GetAllHlines()[i]->GetUniqueID() 
-	       && !l->IsInLine(p->GetPos())
+	       && !l->IsInLineSegment(p->GetPos())
 	       &&  cl[j].IntersectionWith((*sub->GetAllHlines()[i]))
 	       ) {
 		temp[j] = false;

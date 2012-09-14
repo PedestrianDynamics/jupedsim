@@ -64,6 +64,8 @@ public:
     Point LotPoint(const Point& p) const;
     Point ShortestPoint(const Point& p) const; // Punkt auf Line mit kürzstem Abstand zu p
     bool IsInLine(const Point& p) const; // Prüft, ob p in der Wand (Segment) liegt oder außerhalb
+    bool IsInLineSegment(const Point& p) const;
+    
     double DistTo(const Point& p) const;
     double DistToSquare(const Point& p) const;
     double Length() const; // return the length/norm of the line

@@ -65,7 +65,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 	if(hline) {
 
 	    // check if the pedestrian is near the Line or In LIne
-	    if(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetNextDestination())->nav_line->DistTo(p->GetPos()) < EPS*10 )  {
+	    if(g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetNextDestination())->nav_line->DistTo(p->GetPos()) < EPS*10 || g.GetGraph(p->GetKnownClosedDoors())->GetVertex(p->GetNextDestination())->nav_line->IsInLineSegment(p->GetPos()))  {
 		//std::cout << "new route from HLINE" << std::endl; 
 		ExitDistance ed = g.GetGraph(p->GetKnownClosedDoors())->GetNextDestination(p->GetLastDestination(),p);
 	   
@@ -84,8 +84,6 @@ int GraphRouter::FindExit(Pedestrian* p)
 	    } 
 	}
 
-    // if(p-> GetPedIndex() == 55)
-	// std::cout << "55 : " << p->GetKnownClosedDoors().size()<< "\n" << g.GetGraph(p->GetKnownClosedDoors()) << "\n";
 	//share Information about closed Doors
 	if(p->GetKnownClosedDoors() != empty_set) {
 	    // std::cout << "ped" << p->GetPedIndex() << std::endl;

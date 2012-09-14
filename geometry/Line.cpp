@@ -210,6 +210,35 @@ bool Line::IsInLine(const Point& p) const {
 	return (0 <= lambda) && (lambda <= 1);
 }
 
+/*
+ *  Prüft, ob Punkt p im Liniensegment enthalten ist
+ * algorithm from:
+ * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+ * */
+bool Line::IsInLineSegment(const Point& p) const {
+    double ax, ay, bx, by, px, py, crossp, dotp, lengthsq;
+	const Point& a = GetPoint1();
+	const Point& b = GetPoint2();
+	double lambda;
+	ax = a.GetX();
+	ay = a.GetY();
+	bx = b.GetX();
+	by = b.GetY();
+	px = p.GetX();
+	py = p.GetY();
+	
+	// cross product to check if point i colinear
+	crossp = (py-ay)*(bx-ax)-(px-ax)*(by-ay);
+	if(fabs(crossp) > EPS) return false;
+	
+	// dotproduct and distSquared to check if point is in segment and not just in line
+	dotp = (px-ax)*(bx-ax)+(py-ay)*(by-ay);
+	if(dotp < 0 || (a-b).NormSquare() < dotp) return false;
+	
+	return true;
+	
+}
+
 /* Berechnet direkt den Abstand von p zum Segment l
  * dazu wird die Funktion Line::ShortestPoint()
  * benuzt
