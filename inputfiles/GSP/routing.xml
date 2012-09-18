@@ -8,7 +8,7 @@
     </Hline>
     <Hline id="54" room_id="14" subroom_id="0">
       <vertex px="14.79" py="7.0"/>
-      <vertex px="15.79" py="6.0"/>
+      <vertex px="14.79" py="6.0"/>
     </Hline>
 
     <Hline id="55" room_id="14" subroom_id="0">
@@ -21,7 +21,7 @@
     </Hline>
     <Hline id="57" room_id="14" subroom_id="0">
       <vertex px="40.53" py="5.22"/>
-      <vertex px="40.53" py="8.42"/>
+      <vertex px="40.53" py="7.0"/>
     </Hline>
     <Hline id="58" room_id="14" subroom_id="5">
       <vertex px="6.8" py="26.83"/>
@@ -61,7 +61,51 @@
     </Hline>
     <Hline id="67" room_id="14" subroom_id="0">
       <vertex px="19.0" py="9.02"/>
+      <vertex px="19.0" py="7.5"/>
+    </Hline>
+    <Hline id="68" room_id="14" subroom_id="0">
+      <vertex px="37.0" py="7.0"/>
+      <vertex px="37.0" py="5.22"/>
+    </Hline>
+    <Hline id="69" room_id="14" subroom_id="0">
+      <vertex px="37.0" py="7.5"/>
+      <vertex px="37.0" py="8.5"/>
+    </Hline>
+    <Hline id="70" room_id="14" subroom_id="0">
+      <vertex px="29.5" py="7.0"/>
+      <vertex px="29.5" py="5.22"/>
+    </Hline>
+    <Hline id="71" room_id="14" subroom_id="0">
+      <vertex px="29.5" py="7.5"/>
+      <vertex px="29.5" py="8.5"/>
+    </Hline>
+    <Hline id="72" room_id="14" subroom_id="0">
+      <vertex px="22.0" py="7.0"/>
+      <vertex px="22.0" py="5.22"/>
+    </Hline>
+    <Hline id="73" room_id="14" subroom_id="0">
+      <vertex px="22.0" py="7.5"/>
+      <vertex px="22.0" py="8.5"/>
+    </Hline>
+    <Hline id="74" room_id="14" subroom_id="0">
+      <vertex px="40.53" py="8.42"/>
+      <vertex px="40.53" py="7.5"/>
+    </Hline>
+    <Hline id="75" room_id="14" subroom_id="0">
       <vertex px="19.0" py="5.22"/>
+      <vertex px="19.0" py="7.0"/>
+    </Hline>
+    <Hline id="76" room_id="14" subroom_id="0">
+      <vertex px="14.79" py="7.0"/>
+      <vertex px="15.29" py="7.0"/>
+    </Hline>
+    <Hline id="77" room_id="21" subroom_id="0">
+      <vertex px="44.79" py="29.72"/>
+      <vertex px="45.79" py="29.72"/>
+    </Hline>
+    <Hline id="78" room_id="21" subroom_id="0">
+      <vertex px="44.79" py="37.22"/>
+      <vertex px="45.79" py="37.22"/>
     </Hline>
   </Hlines>
 

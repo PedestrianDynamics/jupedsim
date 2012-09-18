@@ -96,6 +96,8 @@ public:
     Edge * exit_edge;
     Vertex * exit_vertex;
     
+    ExitDistance();
+    
     ~ExitDistance();
     SubRoom * GetSubRoom() const;
     Vertex * GetDest() const;

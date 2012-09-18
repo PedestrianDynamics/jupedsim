@@ -36,6 +36,7 @@
 #include "../pedestrian/Ellipse.h"
 #include "../geometry/Point.h"
 #include "../general/Macros.h"
+#include "../routing/graph/NavLineState.h"
 
 class Building;
 class NavLine;
@@ -63,7 +64,7 @@ private:
     vector<int> pTrip;
     int pGroup;
     
-    set<int> knownClosedDoors; // a set with UniqueIDs of closed crossings, transitions or hlines (hlines doesnt make that much sense, just that they are removed from the routing graph)
+    map<int, NavLineState> knownDoors; // a set with UniqueIDs of closed crossings, transitions or hlines (hlines doesnt make that much sense, just that they are removed from the routing graph)
     
 
     //routing parameters
@@ -136,9 +137,12 @@ public:
     void ClearMentalMap(); // erase the peds memory
 
     // functions for known closed Doors (needed for the Graphrouting and Rerouting)
-    void AddKnownClosedDoor(int uID);
-    set<int> GetKnownClosedDoors() const;
-    void MergeKnownClosedDoors(set<int>);
+    void AddKnownClosedDoor(int door);
+    set<int>  GetKnownClosedDoors();
+    void MergeKnownClosedDoors(map<int, NavLineState> * input);
+    map<int, NavLineState> * GetKnownDoors();
+    int DoorKnowledgeCount() const;
+    
     
 
     int GetUniqueRoomID() const;

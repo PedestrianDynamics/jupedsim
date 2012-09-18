@@ -29,6 +29,7 @@ routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestria
 pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
 routing/QuickestPathRouter.cpp \
 routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp  \
+routing/graph/NavLineState.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)
 DEP=$(SOURCES:.cpp=.d)

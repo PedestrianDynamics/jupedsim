@@ -60,14 +60,16 @@ Pedestrian::Pedestrian() {
 	pV0=Point(0,0);
 	pLastPosition=Point(0,0);
 	
-	knownClosedDoors = set<int>();
+	knownDoors = map<int, NavLineState>();
 	
 	pHeight=160;
 	pAge=30;
 	pGender="male";
 	pTrip=vector<int> ();
 	pGroup=-1;
-	clockTicksTillStart = clock() + 3*CLOCKS_PER_SEC*( (double) rand() / RAND_MAX);
+	clockTicksTillStart = 0;
+	
+	    //clock() + 3*CLOCKS_PER_SEC*( (double) rand() / RAND_MAX);
 	
 }
 
@@ -91,6 +93,7 @@ Pedestrian::Pedestrian(const Pedestrian& orig) {
 	pDestHistory=std::vector<int>();
 	pLastPosition=Point(0,0);
 	clockTicksTillStart = orig.clockTicksTillStart;
+	knownDoors = orig.knownDoors;
 	
 }
 
@@ -258,21 +261,46 @@ void Pedestrian::ClearMentalMap(){
 	pExitIndex=-1;
 }
 
-// adds the UniqueID to known closed Doors (Transitions, Crossings or Hline)
-void Pedestrian::AddKnownClosedDoor(int uID) 
+void Pedestrian::AddKnownClosedDoor(int door)
 {
-    knownClosedDoors.insert(uID);
+    knownDoors[door] = NavLineState(false);
     return;
+    
+}
+int Pedestrian::DoorKnowledgeCount() const 
+{
+    return knownDoors.size();
+    
 }
 
-set<int> Pedestrian::GetKnownClosedDoors() const 
+
+
+set<int>  Pedestrian::GetKnownClosedDoors() 
 {
-    return knownClosedDoors;
+    map<int, NavLineState>::iterator it;
+    set<int> doors_closed;
+    for(it = knownDoors.begin(); it != knownDoors.end(); it++){
+	if(it->second.closed()) {
+	    doors_closed.insert(it->first);
+	}
+    }
+    
+    return doors_closed;
 }
 
-void Pedestrian::MergeKnownClosedDoors(set<int> input) 
+map<int, NavLineState> *  Pedestrian::GetKnownDoors()
 {
-    knownClosedDoors.insert(input.begin(), input.end());
+    return & knownDoors;
+}
+
+void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input) 
+{
+    map<int, NavLineState>::iterator it;
+    for(it = input->begin(); it != input->end(); it++) {
+	if(it->second.isShareable()) {
+	    knownDoors[it->first].mergeDoor(it->second);
+	}
+    }
     return;
 }
 

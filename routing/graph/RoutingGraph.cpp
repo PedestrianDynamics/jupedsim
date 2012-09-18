@@ -103,18 +103,24 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 	}
 	   
     }
+    ExitDistance return_dist;
 
     if(!return_line) {
+	
 	char tmp[CLENGTH];
 	sprintf(tmp,
-		"ERROR: \t Pedestrian  [%d] can't find a exit",
+		"ERROR: \t Pedestrian  [%d] can't find a exit. Removed Pedestrian.",
 		p->GetPedIndex());
 	Log->write(tmp);
-	exit(0);
+	
+	//	building->DeletePedFromSim(p);
+	return return_dist;
+	
+	//exit(0);
     }
     
     ed = GetVertex(return_line->GetUniqueID())->getShortestExit();
-    ExitDistance return_dist;
+    
     return_dist.distance = act_shortest_dist;
     //
     return_dist.exit_edge = NULL;
@@ -464,7 +470,7 @@ void RoutingGraph::print()
     map<int, ExitDistance>::iterator it2;
     std::cout << vertexes.size() << std::endl; 
     for(it=vertexes.begin(); it != vertexes.end(); it++ ) {
-	std::cout << "\n\nvertex: " << (*it).second.nav_line->GetUniqueID() << " - " << &it->second << std::endl;
+	std::cout << "\n\nvertex: " << (*it).second.nav_line->GetUniqueID() << std::endl;
 	
 	Crossing * crossing = dynamic_cast<Crossing*>(it->second.nav_line);
 	
@@ -483,7 +489,7 @@ void RoutingGraph::print()
     
 	for(it_edges = it->second.edges.begin(); it_edges != (*it).second.edges.end(); it_edges++) {
 	    if(it_edges->second.dest)
-		std::cout << it_edges->second.dest->nav_line->GetUniqueID() << "(distance " << it_edges->second.distance <<") - " << it_edges->second.src;
+		std::cout << it_edges->second.dest->nav_line->GetUniqueID() << "(distance " << it_edges->second.distance <<") ";
 	    else
 		std::cout << "NULL" << "-" ;
 	}
@@ -580,4 +586,12 @@ ExitDistance::~ExitDistance()
     {
 	delete exit_edge;
     }
+}
+
+ExitDistance::ExitDistance() 
+{
+    distance = 0.0;
+    exit_edge = NULL;
+    exit_vertex = NULL;
+    
 }
