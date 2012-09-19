@@ -280,7 +280,8 @@ set<int>  Pedestrian::GetKnownClosedDoors()
     map<int, NavLineState>::iterator it;
     set<int> doors_closed;
     for(it = knownDoors.begin(); it != knownDoors.end(); it++){
-	if(it->second.closed()) {
+
+      if(it->second.closed()) {
 	    doors_closed.insert(it->first);
 	}
     }
@@ -297,8 +298,16 @@ void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
 {
     map<int, NavLineState>::iterator it;
     for(it = input->begin(); it != input->end(); it++) {
+      //it->second.print();
 	if(it->second.isShareable()) {
+	  if(knownDoors.find(it->first) == knownDoors.end()) {
+	    knownDoors[it->first] = NavLineState();
+	    if(!knownDoors[it->first].mergeDoor(it->second)) {
+	      knownDoors.erase(it->first);
+	    }
+	  } else {
 	    knownDoors[it->first].mergeDoor(it->second);
+	  }
 	}
     }
     return;

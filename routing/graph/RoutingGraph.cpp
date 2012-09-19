@@ -109,8 +109,8 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 	
 	char tmp[CLENGTH];
 	sprintf(tmp,
-		"ERROR: \t Pedestrian  [%d] can't find a exit. Removed Pedestrian.",
-		p->GetPedIndex());
+		"ERROR: \t Pedestrian  [%d] can't find a exit.at X=%f Y = %f Removed Pedestrian.",
+		p->GetPedIndex(), p->GetPos().GetX(), p->GetPos().GetY());
 	Log->write(tmp);
 	
 	//	building->DeletePedFromSim(p);

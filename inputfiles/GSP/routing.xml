@@ -107,6 +107,14 @@
       <vertex px="44.79" py="37.22"/>
       <vertex px="45.79" py="37.22"/>
     </Hline>
+    <Hline id="79" room_id="14" subroom_id="0">
+      <vertex px="42.36" py="8.52"/>
+      <vertex px="43.16" py="7.37"/>
+    </Hline>
+    <Hline id="80" room_id="14" subroom_id="0">
+      <vertex px="45.0" py="15.72"/>
+      <vertex px="44.79" py="14.72"/>
+    </Hline>
   </Hlines>
 
 </routing>

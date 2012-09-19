@@ -10,6 +10,7 @@
 
 
 #include <time.h>
+#include <iostream>
 
 //time between a pedestrian got the information and uses the information
 #define INFO_OFFSET CLOCKS_PER_SEC*3
@@ -20,14 +21,13 @@ class NavLineState
 public:
     NavLineState();
     NavLineState(bool open);
-    
     NavLineState(const NavLineState & orig);
     ~NavLineState();
     
     bool closed();
     bool isShareable();
-    void mergeDoor(NavLineState & orig);
-    
+    bool mergeDoor(NavLineState & orig);
+  void print();
 
 private:
     bool open; // aka state
