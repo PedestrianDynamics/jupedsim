@@ -40,10 +40,16 @@ NavLineState::~NavLineState()
     
 }
 
+void NavLineState::close(){
+  open = false;
+  timeOfInformation = clock();
+  timeFirstSeen = clock();
+}
+
 bool NavLineState::closed() 
 {
     return !open;
-    
+   
 }
 
 bool NavLineState::isShareable() 

@@ -106,17 +106,12 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
     ExitDistance return_dist;
 
     if(!return_line) {
-	
 	char tmp[CLENGTH];
 	sprintf(tmp,
 		"ERROR: \t Pedestrian  [%d] can't find a exit.at X=%f Y = %f Removed Pedestrian.",
 		p->GetPedIndex(), p->GetPos().GetX(), p->GetPos().GetY());
 	Log->write(tmp);
-	
-	//	building->DeletePedFromSim(p);
 	return return_dist;
-	
-	//exit(0);
     }
     
     ed = GetVertex(return_line->GetUniqueID())->getShortestExit();
@@ -206,6 +201,7 @@ void RoutingGraph::removeVertex(Vertex * remove_vertex)
     map<int, Vertex>::iterator it; 
     //calculate the distances for Exits!
     for(it = vertexes.begin(); it != vertexes.end(); it++) {
+      
 	it->second.distances.clear();
     }
 
@@ -573,8 +569,14 @@ Vertex * ExitDistance::GetDest() const
 
 Vertex * ExitDistance::GetSrc() const 
 {
-    if(exit_edge && exit_edge->src)
+  if(exit_edge) {
+    // std::cout<< "edge " << exit_edge << std::endl;
+    if(exit_edge->src) {
+      // std::cout<< " src " << exit_edge->src << std::endl; 
 	return exit_edge->src;
+    }
+    else { return NULL;}
+  }
     else
 	return NULL;
   
@@ -582,10 +584,11 @@ Vertex * ExitDistance::GetSrc() const
 
 ExitDistance::~ExitDistance() 
 {
-    if(!GetSrc())
-    {
-	delete exit_edge;
-    }
+
+    // if(!GetSrc() && exit_edge != NULL)
+    // {
+    // 	delete exit_edge;
+    // }
 }
 
 ExitDistance::ExitDistance() 

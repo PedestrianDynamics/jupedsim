@@ -263,7 +263,9 @@ void Pedestrian::ClearMentalMap(){
 
 void Pedestrian::AddKnownClosedDoor(int door)
 {
-    knownDoors[door] = NavLineState(false);
+  if(knownDoors.find(door) == knownDoors.end()) {
+    knownDoors[door].close();
+  }
     return;
     
 }
