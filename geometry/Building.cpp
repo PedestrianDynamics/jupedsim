@@ -347,7 +347,7 @@ void Building::Update() {
 	int nThreads = 1;
 
 #ifdef _OPENMP
-	nThreads = 1;
+	nThreads = omp_get_max_threads();
 #endif
 
 	// check if worth sharing the work

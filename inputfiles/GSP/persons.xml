@@ -9,7 +9,7 @@
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
 <!--		<dist room_caption="Floor" subroom_id="0" number="1"/> -->
-<!--		<dist room_caption="EV2-EG" number="3"/>
+		<dist room_caption="EV2-EG" number="3"/>
 		<dist room_caption="EV1-EG" number="3"/>
 		<dist room_caption="EV3-EG" number="3"/>
 		<dist room_caption="209" number="3"/>
@@ -27,7 +27,7 @@
 		<dist room_caption="227" number="1"/>
 		<dist room_caption="226" number="7"/>
 		<dist room_caption="225" number="7"/>
-		<dist room_caption="224" number="0"/>-->
+		<dist room_caption="224" number="0"/>
 		<dist room_caption="223a" number="5"/>
 		<dist room_caption="223b" number="1"/>
 		<dist room_caption="222" number="22"/>
@@ -35,7 +35,7 @@
 		<dist room_caption="220" number="6"/>
 		<dist room_caption="219" number="6"/>
 		<dist room_caption="218" number="6"/>
-<!--		<dist room_caption="217" number="6"/>
+		<dist room_caption="217" number="6"/>
 		<dist room_caption="216" number="6"/>
 		<dist room_caption="215" number="6"/>
 		<dist room_caption="214" number="6"/>
@@ -45,7 +45,7 @@
 		<dist room_caption="211" number="42"/>
 		<dist room_caption="210" number="7"/>
 		<dist room_caption="T1" number="7"/>
-		<dist room_caption="T2" number="7"/>-->
+		<dist room_caption="T2" number="7"/>
 
 	</distribution>
 

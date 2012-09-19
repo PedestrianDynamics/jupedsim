@@ -45,9 +45,9 @@ int GraphRouter::FindExit(Pedestrian* p)
   } else {
     //the pedestrian at least had a route, now check if he needs a new one
     //if the pedestrian changed the subroom he needs a new route
-    if(p->ChangedSubRoom() && p->GetNextDestination() == -1) {
+    if(p->ChangedSubRoom()) {
       ExitDistance ed = g.GetGraph(closed_doors)->GetNextDestination(p->GetLastDestination(), p);
-     
+      
       // check if the next destination is in the right subroom
       // if the routing graph changes, it could happen, that the pedestrian has to turn.
       if(ed.GetSubRoom()->GetRoomID() != p->GetRoomID() || ed.GetSubRoom()->GetSubRoomID() != p->GetSubRoomID()) {
@@ -88,6 +88,7 @@ int GraphRouter::FindExit(Pedestrian* p)
     }
 
     // share Information about closed Doors
+    #pragma omp critical
     if(p->DoorKnowledgeCount() != 0) {
       // std::cout << "ped" << p->GetPedIndex() << std::endl;
       SubRoom * sub  = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
@@ -101,14 +102,16 @@ int GraphRouter::FindExit(Pedestrian* p)
 	      ExitDistance ed = g.GetGraph(ps[i]->GetKnownClosedDoors())->GetNextDestination(ps[i]);
 	      if(!ed.GetDest()) 
 		{
-		  std::cout << "DELETE " << p->GetPedIndex() << std::endl;
+		  std::cout << "DELETE " << ps[i]->GetPedIndex() << std::endl;
 			    
-		  building->DeletePedFromSim(p);
-		  return 1;
-		}
-			
+		  building->DeletePedFromSim(ps[i]);
+		} else {
+	      // FIXME: ps[i] changedsubroom has to be called to avoid to give a new route twice!
+	      // sometimes the outher pedestrian changed the subroom and gets a new route here. after this he is looking for a new route but there is no need for.
+	      ps[i]->ChangedSubRoom();
 	      ps[i]->SetExitIndex(ed.GetDest()->id);
 	      ps[i]->SetExitLine(ed.GetDest()->nav_line);
+	      }
 	    }
 	}
       }
