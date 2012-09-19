@@ -94,7 +94,7 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 	    //check if it is a hline OR it is an exit OR the exit is not thorugh the same subroom
 	    if(hline || GetVertex(lines[i]->GetUniqueID())->exit || p->GetRoomID() != ed.GetSubRoom()->GetRoomID() || p->GetSubRoomID() != ed.GetSubRoom()->GetSubRoomID()) {
 		// check if the distance is shorter
-		double distance = lines[i]->DistTo(p->GetPos()) + ed.distance;
+		double distance = (lines[i]->GetCentre()-p->GetPos()).Norm() + ed.distance;
 		if(act_shortest_dist > distance ) {
 		    act_shortest_dist  = distance; 
 		    return_line = lines[i];

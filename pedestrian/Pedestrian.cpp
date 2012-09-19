@@ -171,6 +171,10 @@ void Pedestrian::SetV0Norm(double v0) {
 void Pedestrian::Setdt(double dt) {
 	pDt = dt;
 }
+double Pedestrian::Getdt() {
+    return pDt;
+    
+}
 
 void Pedestrian::SetTrip(vector<int> trip){
 	pTrip=trip;

@@ -104,6 +104,8 @@ public:
     void SetExitIndex(int i);
     void SetExitLine(NavLine* l);
     void Setdt(double dt);
+    double Getdt();
+    
 
     // Eigenschaften der Ellipse
     void SetPos(const Point& pos); // setzt x und y-Koordinaten
