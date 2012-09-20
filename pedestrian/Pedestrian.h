@@ -83,8 +83,11 @@ private:
     int pUpdateRate;
     double pTurninAngle;
     bool tmpFirstOrientation; // possibility to get rid of this variable
-// the Pedestrian start after a certain amount of clockticks
-int clockTicksTillStart;
+    // the Pedestrian start after a certain amount of clockticks
+    int clockTicksTillStart;
+
+    // the current time in the simulation
+    static double pGlobalTime;
 
 
 public:
@@ -220,6 +223,10 @@ public:
     void SetHeight(double height);
     int GetGroup() const;
     void SetGroup(int group);
+
+    //
+    static double GetGlobalTime();
+    static void SetGlobalTime(double time);
 };
 
 #endif	/* _PEDESTRIAN_H */

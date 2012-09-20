@@ -28,9 +28,11 @@
 #include "Pedestrian.h"
 #include "../geometry/Building.h"
 
+
 /************************************************************
   Konstruktoren
  ************************************************************/
+double Pedestrian::pGlobalTime=0.0;
 
 Pedestrian::Pedestrian() {
 	pRoomID = -1;
@@ -609,4 +611,12 @@ void Pedestrian::RecordActualPosition(){
 
 double Pedestrian::GetDistanceSinceLastRecord(){
 	return (pLastPosition-GetPos()).Norm();
+}
+
+double Pedestrian::GetGlobalTime(){
+	return pGlobalTime;
+}
+
+void Pedestrian::SetGlobalTime(double time){
+	pGlobalTime=time;
 }

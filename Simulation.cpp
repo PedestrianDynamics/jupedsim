@@ -340,8 +340,12 @@ void Simulation::Update() {
 	// Neue Anzahl von Fußgänger, falls jemand ganz raus geht
 	SetNPeds(pBuilding->GetAllPedestrians().size());
 
+	// update the general time
+	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+pDt);
+
 	//update the cells position
 	if (pLinkedCells){
 		pBuilding->UpdateGrid();
 	}
+
 }

@@ -592,7 +592,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 						sqrt(normVi), ped->GetPedIndex(), ped->GetV0Norm(), time);
 
 
-				//remove the pedestrian and continue
+				// FIXME: remove the pedestrian and continue
 				for(int p=0;p<subroom->GetAnzPedestrians();p++){
 					if (subroom->GetPedestrian(p)->GetPedIndex()==ped->GetPedIndex()){
 						subroom->DeletePedestrian(p);
