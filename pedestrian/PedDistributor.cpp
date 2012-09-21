@@ -629,7 +629,7 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
 
 				// check the distance to all Wall
 				for (int k = 0; k < r->GetAnzWalls(); k++) {
-					Wall w = r->GetWall(k);
+					const Wall& w = r->GetWall(k);
 					if (w.DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
 						tooNear=true;
 						break; // too close
@@ -674,7 +674,7 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
 					//only continue if...
 					if(tooNear==true) continue;
 
-					if((obst->GetClosed()==0 ) && (obst->Contains(pos)==true)){
+					if((obst->GetClosed()==1) && (obst->Contains(pos)==true)){
 						tooNear=true;
 						break; // too close
 					}
@@ -751,8 +751,6 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& posit
 		ped->SetRoomID(roomID,"");
 		// SubRoomID
 		ped->SetSubRoomID(r->GetSubRoomID());
-
-		//routing->FindExit(ped);
 		// setzen
 		r->AddPedestrian(ped);
 		(*pid)++;

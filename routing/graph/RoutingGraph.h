@@ -71,7 +71,7 @@ private:
     void addEdge(Vertex * v1, Vertex * v2, SubRoom * sub);
     bool checkVisibility(Line * l1, Line * l2, SubRoom * sub);
   
-    bool checkVisibility(Point  p1, Point  p2, SubRoom * sub);
+    bool checkVisibility(Point&  p1, Point&  p2, SubRoom * sub);
     bool checkVisibility(Pedestrian * p, NavLine* l, SubRoom * sub);
     void calculateDistancesForExit(Vertex * act_vertex);
     void calculateDistances(Vertex * exit, Vertex * last_vertex, Vertex * act_vertex, double act_distance);

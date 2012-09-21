@@ -385,7 +385,10 @@ void Building::InitPhiAllPeds(double pDt) {
 				double cosPhi, sinPhi;
 				Pedestrian* ped = sub->GetPedestrian(k);
 				ped->Setdt(pDt); //set the simulation step
-				pRouting->FindExit(ped);
+				//a destination could not be found for that pedestrian
+				if (pRouting->FindExit(ped) == -1) {
+					DeletePedFromSim(ped);
+				}
 				Line* e = ped->GetExitLine();
 				const Point& e1 = e->GetPoint1();
 				const Point& e2 = e->GetPoint2();

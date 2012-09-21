@@ -29,30 +29,30 @@ RoutingGraph::~RoutingGraph()
 
 RoutingGraph::RoutingGraph(RoutingGraph * orig) 
 {
-    building = orig->building;
-    vertexes = orig->vertexes;
-    
-    map<int, Vertex>::iterator itv;
-    map<int, Edge>::iterator ite;
-    map<int, ExitDistance>::iterator ited;
-    
-    for(itv = orig->vertexes.begin(); itv != orig->vertexes.end(); itv++) {
-	// set the right edge->src and edge->dest pointers
-	for(ite = itv->second.edges.begin(); ite != itv->second.edges.end(); ite++) {
-	    vertexes[itv->first].edges[ite->first].src = &vertexes[itv->first];
-	    vertexes[itv->first].edges[ite->first].dest = &vertexes[ite->second.dest->id];
+	building = orig->building;
+	vertexes = orig->vertexes;
+
+	map<int, Vertex>::iterator itv;
+	map<int, Edge>::iterator ite;
+	map<int, ExitDistance>::iterator ited;
+
+	for(itv = orig->vertexes.begin(); itv != orig->vertexes.end(); itv++) {
+		// set the right edge->src and edge->dest pointers
+		for(ite = itv->second.edges.begin(); ite != itv->second.edges.end(); ite++) {
+			vertexes[itv->first].edges[ite->first].src = &vertexes[itv->first];
+			vertexes[itv->first].edges[ite->first].dest = &vertexes[ite->second.dest->id];
+		}
+
+		// set the right ExitDistance->edge pointer
+		for(ited = itv->second.distances.begin(); ited != itv->second.distances.end(); ited++){
+			if(ited->second.exit_edge)
+				vertexes[itv->first].distances[ited->first].exit_edge = &vertexes[itv->first].edges[ited->second.exit_edge->dest->id];
+
+		}
+
 	}
-	
-	// set the right ExitDistance->edge pointer
-	for(ited = itv->second.distances.begin(); ited != itv->second.distances.end(); ited++){
-	    if(ited->second.exit_edge)
-		vertexes[itv->first].distances[ited->first].exit_edge = &vertexes[itv->first].edges[ited->second.exit_edge->dest->id];
-	    
-	}
-	
-    }
-    
-    
+
+
 }
 
 
@@ -326,38 +326,38 @@ bool RoutingGraph::checkVisibility(Line* l1, Line* l2, SubRoom* sub)
 }
 
 
-bool RoutingGraph::checkVisibility(Point p1, Point p2, SubRoom* sub)
+bool RoutingGraph::checkVisibility(Point& p1, Point& p2, SubRoom* sub)
 {
-    // generate certain connection lines
-    // connecting p1 with p2
-    Line cl = Line(p1,p2);
-    bool temp =  true;
-    //check intersection with Walls
-    for(unsigned int i = 0; i < sub->GetAllWalls().size(); i++) {
-	if(temp  && cl.IntersectionWith(sub->GetAllWalls()[i]))
-	    temp = false;
-    }
-  
-
-    //check intersection with obstacles
-    for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
-	Obstacle * obs = sub->GetAllObstacles()[i];
-	for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
-	    Wall w = obs->GetAllWalls()[k];
-	    if(temp && cl.IntersectionWith(w))
-		temp = false;
+	// generate certain connection lines
+	// connecting p1 with p2
+	Line cl = Line(p1,p2);
+	bool temp =  true;
+	//check intersection with Walls
+	for(unsigned int i = 0; i < sub->GetAllWalls().size(); i++) {
+		if(temp  && cl.IntersectionWith(sub->GetAllWalls()[i]))
+			temp = false;
 	}
-    }
 
 
-    // check intersection with other hlines in room
-    for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {	
-	if(temp && cl.IntersectionWith((*sub->GetAllHlines()[i])))
-	    temp = false;
-    }
-	
-    
-    return temp;
+	//check intersection with obstacles
+	for(unsigned int i = 0; i < sub->GetAllObstacles().size(); i++) {
+		Obstacle * obs = sub->GetAllObstacles()[i];
+		for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
+			const Wall& w = obs->GetAllWalls()[k];
+			if(temp && cl.IntersectionWith(w))
+				temp = false;
+		}
+	}
+
+
+	// check intersection with other hlines in room
+	for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {
+		if(temp && cl.IntersectionWith((*sub->GetAllHlines()[i])))
+			temp = false;
+	}
+
+
+	return temp;
 }
 
 

@@ -26,9 +26,9 @@ public:
     
     bool closed();
     bool isShareable();
-  void close();
+    void close();
     bool mergeDoor(NavLineState & orig);
-  void print();
+    void print();
 
 private:
     bool open; // aka state
@@ -37,4 +37,4 @@ private:
     
 };
 #endif /* ROUTINGGRAPHSTORAGE_H_ */
-#
+
