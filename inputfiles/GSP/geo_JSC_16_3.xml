@@ -1054,7 +1054,7 @@
       <vertex px="44.5" py="27.68"/>
       <vertex px="45.5" py="27.68"/>
     </transition>    
-    <transition id="25" caption="200E Normal Exit E3" type="emergency"
+    <transition id="25" caption="200E Normal Exit E3" type="emergency" open="0"
 		room1_id="14" subroom1_id="4" room2_id="-1" subroom2_id="-1">
       <vertex px="51.66" py="17.27"/>
       <vertex px="51.66" py="19.27"/>

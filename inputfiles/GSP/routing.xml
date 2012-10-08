@@ -59,10 +59,10 @@
       <vertex px="28.11" py="8.5"/>
       <vertex px="28.11" py="7.0"/>
     </Hline>
-    <Hline id="67" room_id="14" subroom_id="0">
+   <!-- <Hline id="67" room_id="14" subroom_id="0">
       <vertex px="19.0" py="9.02"/>
       <vertex px="19.0" py="7.5"/>
-    </Hline>
+    </Hline>-->
     <Hline id="68" room_id="14" subroom_id="0">
       <vertex px="37.0" py="7.0"/>
       <vertex px="37.0" py="5.22"/>
@@ -91,10 +91,10 @@
       <vertex px="40.53" py="8.42"/>
       <vertex px="40.53" py="7.5"/>
     </Hline>
-    <Hline id="75" room_id="14" subroom_id="0">
+ <!--   <Hline id="75" room_id="14" subroom_id="0">
       <vertex px="19.0" py="5.22"/>
       <vertex px="19.0" py="7.0"/>
-    </Hline>
+    </Hline>-->
     <Hline id="76" room_id="14" subroom_id="0">
       <vertex px="14.79" py="7.0"/>
       <vertex px="15.29" py="7.0"/>
@@ -130,6 +130,38 @@
     <Hline id="84" room_id="14" subroom_id="5">
       <vertex px="14.53" py="37.16"/>
       <vertex px="14.53" py="38.9"/>
+    </Hline>
+    <Hline id="85" room_id="14" subroom_id="0">
+      <vertex px="27.1" py="5.22"/>
+      <vertex px="27.1" py="6.8"/>
+    </Hline>
+
+    <Hline id="86" room_id="14" subroom_id="2">
+      <vertex px="8.75" py="9.02"/>
+      <vertex px="8.75" py="7.54"/>
+    </Hline>
+
+    <Hline id="87" room_id="14" subroom_id="5">
+      <vertex px="7.3" py="17.0"/>
+      <vertex px="8.75" py="17.0"/>
+    </Hline>
+    <Hline id="88" room_id="14" subroom_id="5">
+      <vertex px="7.3" py="22.0"/>
+      <vertex px="8.75" py="22.0"/>
+    </Hline>
+
+    <Hline id="89" room_id="14" subroom_id="0">
+      <vertex px="33.0" py="5.22"/>
+      <vertex px="33.0" py="6.8"/>
+    </Hline>
+    <Hline id="90" room_id="14" subroom_id="0">
+      <vertex px="33.0" py="7.0"/>
+      <vertex px="33.0" py="8.5"/>
+    </Hline>
+
+    <Hline id="91" room_id="14" subroom_id="0">
+      <vertex px="42.0" py="7.0"/>
+      <vertex px="42.0" py="5.22"/>
     </Hline>
   </Hlines>
 

@@ -20,7 +20,7 @@
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
-		<tmax unit="sec">900</tmax>
+		<tmax unit="sec">400</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<linkedcells enabled="true" cell_size="2.2"/>

@@ -12,27 +12,9 @@
 
 NavLineState::NavLineState() 
 {
-  open = true;
-  timeOfInformation = 0;
-  timeFirstSeen = 0;
-}
-
-NavLineState::NavLineState(bool open) 
-{
-    open = open;
-    timeOfInformation = clock();
-    timeFirstSeen = clock();
-    return;
-    
-}
-
-
-NavLineState::NavLineState(const NavLineState & orig)
-{
-    open = orig.open;
-    timeFirstSeen = orig.timeFirstSeen;
-    // set the current clocks() to know how old the information is
-    timeOfInformation = clock();    
+    open = true;
+    timeOfInformation = 0;
+    timeFirstSeen = 0;
 }
 
 NavLineState::~NavLineState()
@@ -40,10 +22,10 @@ NavLineState::~NavLineState()
     
 }
 
-void NavLineState::close(){
-  open = false;
-  timeOfInformation = clock();
-  timeFirstSeen = clock();
+void NavLineState::close(double time){
+    open = false;
+    timeOfInformation = time;
+    timeFirstSeen = time;
 }
 
 bool NavLineState::closed() 
@@ -52,10 +34,10 @@ bool NavLineState::closed()
    
 }
 
-bool NavLineState::isShareable() 
+bool NavLineState::isShareable(double time) 
 {
     if(!timeOfInformation) return true;
-    if(timeOfInformation+INFO_OFFSET < clock()) {
+    if(timeOfInformation+INFO_OFFSET < time) {
 	timeOfInformation = 0;
 	return true;
     }
@@ -64,17 +46,17 @@ bool NavLineState::isShareable()
     
 }
 
-bool NavLineState::mergeDoor(NavLineState & orig)
+bool NavLineState::mergeDoor(NavLineState & orig, double time)
 {
     if(timeFirstSeen == 0 || orig.timeFirstSeen > timeFirstSeen) {
 	open = orig.open;
 	timeFirstSeen = orig.timeFirstSeen;
-	timeOfInformation = clock();
+	timeOfInformation = time;
 	return true;
     }
     return false;
 }
 
 void NavLineState::print() {
-  std::cout << open << " - "<< timeFirstSeen << " - " << timeOfInformation << std::endl;
+    std::cout << open << " - "<< timeFirstSeen << " - " << timeOfInformation << std::endl;
 }

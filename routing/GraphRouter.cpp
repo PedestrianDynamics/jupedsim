@@ -129,7 +129,7 @@ void GraphRouter::Init(Building* b)
     g.init(b);
   
     std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 
-    b->GetTransition("200E Normal Exit E3")->Close();
+        b->GetTransition("200E Normal Exit E3")->Close();
 
     std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl;
 }

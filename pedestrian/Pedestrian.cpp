@@ -270,7 +270,7 @@ void Pedestrian::ClearMentalMap(){
 void Pedestrian::AddKnownClosedDoor(int door)
 {
   if(knownDoors.find(door) == knownDoors.end()) {
-    knownDoors[door].close();
+      knownDoors[door].close(GetGlobalTime());
   }
     return;
     
@@ -307,14 +307,14 @@ void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
     map<int, NavLineState>::iterator it;
     for(it = input->begin(); it != input->end(); it++) {
       //it->second.print();
-	if(it->second.isShareable()) {
+	if(it->second.isShareable(GetGlobalTime())) {
 	  if(knownDoors.find(it->first) == knownDoors.end()) {
 	    knownDoors[it->first] = NavLineState();
-	    if(!knownDoors[it->first].mergeDoor(it->second)) {
+	    if(!knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
 	      knownDoors.erase(it->first);
 	    }
 	  } else {
-	    knownDoors[it->first].mergeDoor(it->second);
+	      knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
 	  }
 	}
     }
