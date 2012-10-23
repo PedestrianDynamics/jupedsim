@@ -7,6 +7,9 @@
 	<geometry>inputfiles/T-Junction/T-Junction.xml</geometry>
 	<!--persons information and distribution -->
 	<person>inputfiles/persons-test.xml</person>
+	<routing>inputfiles/T-Junction/routing.xml</routing>
+	<!-- traffic information: e.g closed doors -->
+	<traffic>inputfiles/T-Junction/traffic.xml</traffic>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
 	</trajectories>

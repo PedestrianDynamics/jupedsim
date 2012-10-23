@@ -79,9 +79,24 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 	double cos2 = Ell.GetCosPhi();
 	double sin2 = Ell.GetSinPhi();
 	Point c1c2 = (pCenter - Ell.GetCenter()).Normalized();
+
+
+	//make sure that the the major axis points always points into the uppper
+	// two quadrants, Bug found by Sean Curtis
+	if (sin1 < 0 )
+	{
+		sin1 = -sin1;
+		cos1 = -cos1;
+	}
+	if (sin2 < 0 )
+	{
+		sin2 = -sin2;
+		cos2 = -cos2;
+	}
 	Point e11 = Point(cos1, sin1); //unit vector of the direction of E1
 	Point e12 = Point(cos2, sin2); //unit vector of the direction of E2
 	/*----------------------------------------------*/
+
 	double eps1, eps2, k1dotd, k2dotd, k1dotk2, nu, Ap[2][2], lambdaplus,
 			lambdaminus, bp2, ap2, cosphi, tanphi2, delta, dp;
 	complex<double> A, B, C, D, E, alpha, beta, gamma, P, Q, U, y, qu;
@@ -129,7 +144,7 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 	ap2 = 1.0 / sqrt(lambdaminus);
 
 	//original: if (fabs(k1dotk2) == 1.0) {
-	if ((fabs(k1dotk2) - 1.0) < EPS) {
+	if ( fabs(k1dotk2) > 1.0 - EPS) {
 		if (Ap[0][0] > Ap[1][1])
 			cosphi = qb1 / qa1 * qk1dotd / (1.0 - eps1 * k1dotd * k1dotd);
 		else

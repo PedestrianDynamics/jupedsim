@@ -27,7 +27,7 @@
  */
 
 #include "Mathematics.h"
-
+#include <cassert>
 
 
 
@@ -86,7 +86,7 @@ y(x) = c0 + c1*(x-x1) + c2*(x-x1)(x-x2) + c3*(x-x1)*(x-x2)*(x-x3)
 Y(x) = y1 +  dy1*(x-x1) +  [x1 x1 x2]y*(x-x1)^2 + [x1 x1 x2 x2]y*(x-x1)^2*(x-x2)
 
  */
-double hermite_interp(double x, double x1, double x2, double y1, double y2, double dy1, double dy2) {
+/*double hermite_interp(double x, double x1, double x2, double y1, double y2, double dy1, double dy2) {
     int n = 4;
     int i, j, i1;
     double c[n][n + 1];
@@ -133,6 +133,25 @@ double hermite_interp(double x, double x1, double x2, double y1, double y2, doub
     // Calculate polynomial from coefficients using Eq. 2
     px = pcoeff[0] + pcoeff[1] * xp1 + pcoeff[2] * xp1 * xp1 + pcoeff[3] * xp1 * xp1 * xp2;
     return px;
+}*/
+
+
+// thanks to Sean Curtis
+double hermite_interp(double t, double x1, double x2, double y1, double y2, double dy1, double dy2) {
+	assert( t >= x1 && t <= x2 && "Can only interpolate values inside the range" );
+	assert( x2 > x1 && "Intervals must be defined as x1 < x2" );
+
+	double scale = x2 - x1;
+	t = ( t - x1 ) / scale;
+	double t2 = t * t;
+	double t3 = t2 * t;
+	double h1 = 2 * t3 - 3 * t2 + 1;
+	double h2 = -2 * t3 + 3 * t2;
+	double h3 = t3 - 2 * t2 + t;
+	double h4 = t3 - t2;
+	double left = y1 * h1 + dy1 * h3 * scale;
+	double right = y2 * h2 + dy2 * h4 * scale;
+	return left + right;
 }
 
 /////////////////////////////////////////////////////////////////////////////
