@@ -589,8 +589,8 @@ Point Ellipse::PointOnEllipse(const Line& line, const Point& P) const {
  * Rückgabewerte:
  *   - mindist: gesuchter minimal möglicher Abstand
  * */
-
-double Ellipse::MinimumDistanceToLine(const Line& l) const {
+// das enspricht NICHT die obere Dokumentation! Seltsam!
+/*double Ellipse::MinimumDistanceToLine(const Line& l) const {
 	// Line muss in Koordinaten der Ellipse transformiert werden
 	Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
 	Point BinE = l.GetPoint2().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
@@ -678,11 +678,97 @@ double Ellipse::MinimumDistanceToLine(const Line& l) const {
 	}
 
 	return mindist;
+}*/
+// thanks to Sean Curtis
+double Ellipse::MinimumDistanceToLine(const Line& l) const {
+	 Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
+	 Point BinE = l.GetPoint2().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
+
+	 	// Action Point der Ellipse
+	 Point APinE = Point(pXp, 0);
+	 Line linE = Line(AinE, BinE);
+	 double xa = linE.GetPoint1().GetX();
+	 double ya = linE.GetPoint1().GetY();
+	 double xb = linE.GetPoint2().GetX();
+	 double yb = linE.GetPoint2().GetY();
+	 double a = GetLargerAxis();
+	 double b = GetSmallerAxis();
+	 Line l_strich_inE;
+	 // Punkt auf line mit kürzestem Abstand zum Action Point der Ellipse
+	Point PinE = linE.ShortestPoint(APinE);
+
+
+	 double mindist; // Rückgabewert
+
+	 // kürzester Punkt ist Randpunkt
+	 if (PinE == AinE || PinE == BinE) {
+		 mindist = 0;
+	 } else {
+		 double Dx, Dy      // D
+		 , NormD, NormT;
+		 double Nx, Ny;	    // N
+		 double P1x, P1y; 	// P1
+		 double Rx, Ry;     // R
+		 double Tx, Ty;     // R
+		 double d, e;
+		 double dummy;
+		 Dx = xa - xb;
+		 Dy = ya - yb;
+
+		 if(Dx*ya - Dy*xa < 0)
+		 {
+			 Dx = -Dx;
+			 Dy = -Dy;
+		 }
+
+		 NormD = sqrt(Dx*Dx + Dy*Dy);
+		 Dx /= NormD;
+		 Dy /= NormD;
+		 //N. The normal of the line
+		 Nx = -Dy;
+		 Ny = Dx;
+
+		 Tx = -Dy/b;
+		 Ty = Dx/a;
+		 NormT = sqrt(Tx*Tx + Ty*Ty);
+		 Tx /= NormT;
+		 Ty /= NormT;
+
+		 P1x = a*Nx;
+		 P1y = b*Ny; //Eq. (2.3)
+
+		 dummy = Nx*xa + Ny*ya; //second part of Eq. (2.1)
+
+		 e = Nx*P1x + Ny*P1y - dummy; //Eq. (2.4)
+
+		 //R
+		 Rx = a*Tx;
+		 Ry = b*Ty; // Eq. (2.13)
+
+		 d = Nx*Rx + Ny*Ry - dummy;
+
+
+/*		 if (1)
+		 {
+			 printf("\n----------- dca2 --------------\n");
+			 printf("Dx = %.2f, Dy=%.2f (det=%.2f)\n", Dx, Dy, Dx*ya - Dy*xa);
+			 printf("Nx = %.2f, Ny=%.2f\n", Nx, Ny);
+			 printf("P1x = %.2f, P1y=%.2f\n", P1x, P1y);
+			 printf("Rx = %.2f, Ry=%.2f\n", Rx, Ry);
+			 printf("dummy=%f\n",dummy);
+			 printf("theta=%.2f\n",theta*180/PI);
+			 printf("e=%f, d=%f\n",e, d);
+			 printf("-------------------------\n\n");
+		 }*/
+		 mindist = d - e;
+	 }
+	 return mindist;
 }
+
 
 /*
  min distance ellipses
- closest approeach between two ellipses
+ closest approach between two ellipses
 
  P1(x1,y1): Action-point in E1
  P2(x2,y2): Action-point in E2
