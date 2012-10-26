@@ -28,15 +28,13 @@
 
 #include "NavLine.h"
 
-int NavLine::UID=0;
+
 
 NavLine::NavLine() {
-    pUID = UID++;
+
 }
 
 NavLine::~NavLine() {
 }
 
-int NavLine::GetUniqueID()  const {
-	return pUID;
-}
+

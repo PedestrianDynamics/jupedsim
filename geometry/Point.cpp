@@ -26,6 +26,7 @@
 
 #include "Point.h"
 
+
 /************************************************************
  private
  ************************************************************/
@@ -54,6 +55,12 @@ Point::Point(const Point& orig) {
     pY = orig.GetY();
 }
 
+std::string Point::toString(){
+	std::stringstream tmp;
+	tmp<<"( "<<pX<<" : " <<pY<<" )";
+	return tmp.str();
+
+};
 //Point::~Point() {
 //}
 

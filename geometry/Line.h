@@ -39,12 +39,19 @@ private:
 	Point pPoint1; // (Koordinaten des ersten Punkts)
 	Point pPoint2; // (Koordinaten des zweiten Punkts)
 	Point pCentre;
+
+	//unique identifier for all line elements
+	static int _UID;
+	int pUID;
+
 public:
 	// Konstruktoren
 	Line();
 	Line(const Point& p1, const Point& p2);
 	Line(const Line& orig);
 	virtual ~Line();
+
+	int GetUniqueID() const;
 
 	// Setter -Funktionen
 	void SetPoint1(const Point& p); // setzt die Anfangskoordinaten

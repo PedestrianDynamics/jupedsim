@@ -31,6 +31,7 @@
 #include <cmath>
 #include <cstdio>
 #include "../general/Macros.h"
+#include <sstream>
 
 class Point {
 private:
@@ -68,6 +69,9 @@ public:
     const Point operator-(const Point& p) const; // Subtrahiert zwei Vektoren
     bool operator==(const Point& p) const; // Vergleicht zwei Punkte/Vektoren komponentweise
     bool operator!=(const Point& p) const; // Vergleicht zwei Punkte/Vektoren komponentweise
+
+    //debug
+    std::string toString();
 };
 
 

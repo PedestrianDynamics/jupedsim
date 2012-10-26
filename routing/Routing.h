@@ -44,18 +44,12 @@ private:
 	//vector<Crossing*> goals;
 	std::map<int, Crossing*>pGoals;
 
-//	vector<Crossing*> pCrossings;
-//	vector<Transition*> pTransitions;
-//	vector<Hline*> pHlines;
-//	vector<vector<int> >pTrips;
-
+protected:
 	map<int, Crossing*> pCrossings;
 	map<int, Transition*> pTransitions;
 	map<int, Hline*> pHlines;
-
 	vector<vector<int> >pTrips;
 
-protected:
 	vector<int> pFinalDestinations;
 
 public:
@@ -77,9 +71,9 @@ public:
 	Transition* GetTransition(int ID /* not the unique id*/);
 	Crossing* GetCrossing(int ID /* not the unique id*/);
 
-//	const vector<Crossing*>& GetAllCrossings() const;
-//	const vector<Transition*>& GetAllTransitions() const;
-//	const vector<Hline*>& GetAllHlines() const;
+	const map<int, Crossing*>& GetAllCrossings() const;
+	const  map<int, Transition*>& GetAllTransitions() const;
+	const  map<int, Hline*>& GetAllHlines() const;
 
 	const vector<int> GetTrip(int id) const;
 	const vector<int> GetFinalDestinations() const;
@@ -91,8 +85,6 @@ public:
 	virtual int FindExit(Pedestrian* p) = 0;
 	virtual void Init(Building* b) = 0;
 
-	//FIXME: to be deleted
-	void  AddGoal(Crossing* line);
 };
 
 #endif	/* _ROUTING_H */

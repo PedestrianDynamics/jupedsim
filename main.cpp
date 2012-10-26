@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 	ArgumentParser* args = new ArgumentParser();
 	args->ParseArgs(argc, argv);
 
-	// init the simulation engine
+	// create and init the simulation engine
 	Simulation sim = Simulation();
 	sim.InitArgs(args);
 

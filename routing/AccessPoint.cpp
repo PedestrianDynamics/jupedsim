@@ -35,8 +35,8 @@ using namespace std;
 AccessPoint::AccessPoint(int id, double center[2],double radius) {
 
 	pID=id;
-	this->center[0]=center[0];
-	this->center[1]=center[1];
+	pCenter[0]=center[0];
+	pCenter[1]=center[1];
 	pRadius=radius;
 	pFinalDestination=false;
 	pRoom1ID=-1;
@@ -46,6 +46,8 @@ AccessPoint::AccessPoint(int id, double center[2],double radius) {
 	pCentre=Point(center[0],center[1]);
 	pTransitPedestrians = vector<Pedestrian*>();
 	pConnectingAPs = vector<AccessPoint*>();
+	pIsClosed=0;
+	pNavLine=NULL;
 }
 
 AccessPoint::~AccessPoint() {
@@ -57,6 +59,13 @@ int AccessPoint::GetID()
 	return pID;
 }
 
+int AccessPoint::IsClosed(){
+	return pIsClosed;
+}
+
+void AccessPoint::SetClosed(int isClosed){
+	 pIsClosed=isClosed;
+}
 void AccessPoint::setFinalDestination(bool isFinal)
 {
 	pFinalDestination=isFinal;
@@ -107,7 +116,7 @@ void AccessPoint::AddConnectingAP(AccessPoint* ap){
 int  AccessPoint::GetNextApTo(int UID){
 	//this is probably a final destination
 	if(pMapDestToAp.count(UID)==0){
-		//cout<<"No route to host ["<< UID<<" ]"<<endl;
+		cout<<"No route to host ["<< UID<<" ]"<<endl;
 		return -1;
 	}
 	return pMapDestToAp[UID];
@@ -142,7 +151,7 @@ void AccessPoint::setConnectingRooms(int r1, int r2){
 
 double AccessPoint::distanceTo(double x, double y){
 
-	return sqrt((x-center[0])*(x-center[0]) + (y-center[1])*(y-center[1]));
+	return sqrt((x-pCenter[0])*(x-pCenter[0]) + (y-pCenter[1])*(y-pCenter[1]));
 }
 
 
@@ -158,8 +167,8 @@ bool AccessPoint::isInRange(double xPed, double yPed, int roomID){
 	if((roomID!=pRoom1ID)&& (roomID!=pRoom2ID)){
 		return false;
 	}
-	if (((xPed - center[0]) * (xPed - center[0]) + (yPed - center[1]) * (yPed
-			- center[1])) <= pRadius * pRadius)
+	if (((xPed - pCenter[0]) * (xPed - pCenter[0]) + (yPed - pCenter[1]) * (yPed
+			- pCenter[1])) <= pRadius * pRadius)
 		return true;
 
 	return false;
@@ -178,6 +187,14 @@ void AccessPoint::DeleteTransitPed(Pedestrian* ped){
 
 void AccessPoint::AddTransitPed(Pedestrian* ped){
 	pTransitPedestrians.push_back(ped);
+}
+
+void AccessPoint::SetNavLine(NavLine* line) {
+	pNavLine=line;
+}
+
+NavLine* AccessPoint::GetNavLine() const {
+	return pNavLine;
 }
 
 const vector<Pedestrian*>& AccessPoint::GetAllTransitPed() const{
@@ -215,11 +232,12 @@ void AccessPoint::Reset(int UID){
 void AccessPoint::Dump(){
 
 	cout<<" -----------------------"<<endl;
-	cout<<" ID: " <<pID<<" centre = [ "<< center[0] <<", " <<center[1] <<" ]"<<endl;
+	cout<<" ID: " <<pID<<" centre = [ "<< pCenter[0] <<", " <<pCenter[1] <<" ]"<<endl;
 
+	cout <<" Is Final destination :"<<isFinalDestination()<<endl;
 	cout <<" Distance to final destination"<<endl;
 
-	for(std::map<int, double>::iterator p = pMapDestToDist.begin(); p != pMapDestToDist.end(); p++) {
+	for(std::map<int, double>::iterator p = pMapDestToDist.begin(); p != pMapDestToDist.end(); ++p) {
 		cout<<" [ "<<p->first<<", " << p->second<<" m ]";
 	}
 	cout<<endl<<endl;

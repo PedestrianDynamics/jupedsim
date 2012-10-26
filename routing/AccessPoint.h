@@ -106,7 +106,11 @@ public:
 
 	void setFinalDestination(bool isFinal);
 	bool isFinalDestination();
-	//double getDistanceToFinalDestination(int UID);
+	int IsClosed();
+	void  SetClosed(int isClosed);
+	void SetNavLine(NavLine* line);
+	NavLine* GetNavLine() const;
+
 
 	void AddIntermediateDest(int final, int inter);
 	void AddFinalDestination(int UID, double distance);
@@ -138,14 +142,15 @@ public:
 
 private:
 	int pID;
-	double center[2];
+	double pCenter[2];
 	double pRadius;
 	bool pFinalDestination;
 	int pRoom1ID;
 	int pRoom2ID;
 	Point pCentre;
-	Line* pExitLine;
+	NavLine* pNavLine;
 	vector<Pedestrian*> pTransitPedestrians;
+	int pIsClosed;
 
 	// store the final destinations
 	//std::vector <int> pFinalDestination;

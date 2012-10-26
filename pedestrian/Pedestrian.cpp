@@ -72,7 +72,7 @@ Pedestrian::Pedestrian() {
 	clockTicksTillStart = 0;
 	
 	    //clock() + 3*CLOCKS_PER_SEC*( (double) rand() / RAND_MAX);
-	
+
 }
 
 Pedestrian::Pedestrian(const Pedestrian& orig) {

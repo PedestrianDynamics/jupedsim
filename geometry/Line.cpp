@@ -26,23 +26,33 @@
 
 #include "Line.h"
 
+int Line::_UID=0;
+
 /************************************************************
   Konstruktoren
  ************************************************************/
 Line::Line() {
 	SetPoint1(Point()); //Default-Constructor  (0.0,0.0)
 	SetPoint2(Point());
+	pUID = _UID++;
 }
 
 Line::Line(const Point& p1, const Point& p2) {
 	SetPoint1(p1);
 	SetPoint2(p2);
+	pUID = _UID++;
+}
+
+int Line::GetUniqueID()  const {
+	return pUID;
 }
 
 Line::Line(const Line& orig) {
 	pPoint1 = orig.GetPoint1();
 	pPoint2 = orig.GetPoint2();
 	pCentre = orig.GetCentre();
+	pUID	= orig.GetUniqueID();
+	//pUID = UID++;
 }
 
 Line::~Line() {
@@ -150,7 +160,6 @@ double Line::NormalComp(const Point& v) const {
 // Muss nicht im Segment liegen
 
 Point Line::LotPoint(const Point& p) const {
-	//TODO: reference vs copy??
 	const Point& r = GetPoint1();
 	const Point& s = GetPoint2();
 	const Point& t = r - s;
@@ -216,10 +225,9 @@ bool Line::IsInLine(const Point& p) const {
  * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
  * */
 bool Line::IsInLineSegment(const Point& p) const {
-    double ax, ay, bx, by, px, py, crossp, dotp, lengthsq;
+    double ax, ay, bx, by, px, py, crossp, dotp;
 	const Point& a = GetPoint1();
 	const Point& b = GetPoint2();
-	double lambda;
 	ax = a.GetX();
 	ay = a.GetY();
 	bx = b.GetX();

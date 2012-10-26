@@ -656,8 +656,8 @@ void Building::LoadBuilding(string filename) {
 			// only add the id instead, in that case the ordering of
 			//the subroom/crossings wont have any influences.
 
-			room->GetSubRoom(sub1_id)->AddGoalID(id);
-			room->GetSubRoom(sub2_id)->AddGoalID(id);
+//			room->GetSubRoom(sub1_id)->AddGoalID(c->GetUniqueID());
+//			room->GetSubRoom(sub2_id)->AddGoalID(c->GetUniqueID());
 			c->SetSubRoom1(room->GetSubRoom(sub1_id));
 			c->SetSubRoom2(room->GetSubRoom(sub2_id));
 			c->SetRoom1(room);
@@ -703,9 +703,10 @@ void Building::LoadBuilding(string filename) {
 		if (room1_id != -1 && subroom1_id != -1) {
 			Room* room = pRooms[room1_id];
 			SubRoom* subroom = room->GetSubRoom(subroom1_id);
-			subroom->AddGoalID(t->GetIndex());
+
+			//subroom->AddGoalID(t->GetUniqueID());
 			//MPI
-			room->AddTransitionID(t->GetIndex());
+			room->AddTransitionID(t->GetUniqueID());
 			t->SetRoom1(room);
 			t->SetSubRoom1(subroom);
 
@@ -715,9 +716,9 @@ void Building::LoadBuilding(string filename) {
 		if (room2_id != -1 && subroom2_id != -1) {
 			Room* room = pRooms[room2_id];
 			SubRoom* subroom = room->GetSubRoom(subroom2_id);
-			subroom->AddGoalID(t->GetIndex());
+			//subroom->AddGoalID(t->GetUniqueID());
 			//MPI
-			room->AddTransitionID(t->GetIndex());
+			room->AddTransitionID(t->GetUniqueID());
 			t->SetRoom2(room);
 			t->SetSubRoom2(subroom);
 
@@ -725,7 +726,7 @@ void Building::LoadBuilding(string filename) {
 			subroom->AddTransition(t);
 		}
 
-		pRouting->AddGoal(t);
+
 		pRouting->AddTransition(t);
 	}
 	Log->write("INFO: \tLoading building file successful!!!\n");
@@ -765,6 +766,7 @@ Room* Building::GetRoom(string caption) const {
 	exit(EXIT_FAILURE);
 }
 
+//TODO
 Transition* Building::GetTransition(string caption) const {
 	for (unsigned int r = 0; r < pRooms.size(); r++) {
 		const vector<int>& trans_ids = pRooms[r]->GetAllTransitionsIDs();
@@ -782,10 +784,24 @@ Transition* Building::GetTransition(string caption) const {
 }
 
 Crossing* Building::GetGoal(string caption) const {
-	for (int g = 0; g < pRouting->GetAnzGoals(); g++) {
-		Crossing* cr = pRouting->GetGoal(g);
-		if (cr->GetCaption() == caption)
-			return cr;
+
+	{
+		//eventually
+		const map<int, Transition*>& transitions = pRouting->GetAllTransitions();
+		map<int, Transition*>::const_iterator itr;
+		for(itr = transitions.begin(); itr != transitions.end(); ++itr){
+			if (itr->second->GetCaption() == caption)
+				return itr->second;
+		}
+	}
+	{
+		//finally the  crossings
+		const map<int, Crossing*>& crossings = pRouting->GetAllCrossings();
+		map<int, Crossing*>::const_iterator itr;
+		for(itr = crossings.begin(); itr != crossings.end(); ++itr){
+			if (itr->second->GetCaption() == caption)
+				return itr->second;
+		}
 	}
 
 	Log->write("WARNING: No Transition with Caption: " + caption);
@@ -826,19 +842,10 @@ void Building::LoadRoutingInfo(string filename) {
 		double x2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("px"));
 		double y2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("py"));
 
-		Crossing* c = new Crossing();
-		c->SetIndex(id);
-		c->SetPoint1(Point(x1, y1));
-		c->SetPoint2(Point(x2, y2));
 
 		Room* room = pRooms[room_id];
 		SubRoom* subroom = room->GetSubRoom(subroom_id);
-		subroom->AddGoalID(c->GetIndex());
-		c->SetSubRoom1(subroom);
-		c->SetSubRoom2(subroom);
-		c->SetRoom1(room);
 
-		//pRouting->AddGoal(c);
 
 		//new implementation
 		Hline* h = new Hline();
@@ -1122,3 +1129,4 @@ Pedestrian* Building::GetPedestrian(int pedID) const {
 	}
 	return NULL;
 }
+

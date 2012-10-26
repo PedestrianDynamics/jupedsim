@@ -72,16 +72,22 @@ const vector<int> Routing::GetTrip(int index) const {
 }
 
 Crossing* Routing::GetGoal(int index) {
-	if (pGoals.count(index) == 1) {
-		return pGoals[index];
-	} else {
+
+	if (pTransitions.count(index) == 1) {
+		return pTransitions[index];
+	} else if (pCrossings.count(index) == 1) {
+		return pCrossings[index];
+	}else if (pHlines.count(index) == 1) {
+		exit(0);
+//		return pHlines[index];
+	}else {
 		if (index == -1)
 			return NULL;
 		else {
 			char tmp[CLENGTH];
 			sprintf(tmp,
-					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal()",
-					index, pGoals.size());
+					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal(), counts in map= [%d]",
+					index, pGoals.size(),pGoals.count(index));
 			Log->write(tmp);
 			exit(EXIT_FAILURE);
 		}
@@ -89,30 +95,17 @@ Crossing* Routing::GetGoal(int index) {
 }
 
 int Routing::GetAnzGoals() const {
-	return pGoals.size();
+	return pCrossings.size()+ pTransitions.size()+pHlines.size();
 }
 // Sonstiges
 
-void Routing::AddGoal(Crossing* line) {
-	//new implementation
-	if (pGoals.count(line->GetIndex()) != 0) {
-		char tmp[CLENGTH];
-		sprintf(tmp,
-				"ERROR: Duplicate index for goal found [%d] in Routing::AddGoal()",
-				line->GetIndex());
-		Log->write(tmp);
-		exit(EXIT_FAILURE);
-	}
-
-	pGoals[line->GetIndex()] = line;
-}
 
 // Sonstiges
 void Routing::AddCrossing(Crossing* line) {
 	if (pCrossings.count(line->GetIndex()) != 0) {
 		char tmp[CLENGTH];
 		sprintf(tmp,
-				"ERROR: Duplicate index for crossing found [%d] in Routing::AddGoal()",
+				"ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
 				line->GetIndex());
 		Log->write(tmp);
 		exit(EXIT_FAILURE);
@@ -124,7 +117,7 @@ void Routing::AddTransition(Transition* line) {
 	if (pTransitions.count(line->GetIndex()) != 0) {
 		char tmp[CLENGTH];
 		sprintf(tmp,
-				"ERROR: Duplicate index for transition found [%d] in Routing::AddGoal()",
+				"ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
 				line->GetIndex());
 		Log->write(tmp);
 		exit(EXIT_FAILURE);
@@ -173,7 +166,7 @@ Transition* Routing::GetTransition(int ID /* not the unique id*/) {
 		else {
 			char tmp[CLENGTH];
 			sprintf(tmp,
-					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal()",
+					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetTransition()",
 					ID, pTransitions.size());
 			Log->write(tmp);
 			exit(EXIT_FAILURE);
@@ -197,18 +190,19 @@ Hline* Routing::GetHLine(int ID /* not the unique id*/) {
 		}
 	}
 }
-//const vector<Crossing*>& Routing::GetAllCrossings() const {
-//	return pCrossings;
-//}
-//
-//const vector<Transition*>& Routing::GetAllTransitions() const {
-//	return pTransitions;
-//}
-//
-//
-//const vector<Hline*>& Routing::GetAllHlines() const {
-//	return pHlines;
-//}
+
+const map<int, Crossing*>& Routing::GetAllCrossings() const {
+	return pCrossings;
+}
+
+const map<int, Transition*>& Routing::GetAllTransitions() const {
+	return pTransitions;
+}
+
+
+const map<int, Hline*>& Routing::GetAllHlines() const {
+	return pHlines;
+}
 
 void Routing::AddFinalDestinationID(int id) {
 	pFinalDestinations.push_back(id);

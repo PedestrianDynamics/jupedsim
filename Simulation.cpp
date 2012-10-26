@@ -104,7 +104,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	Log->write("INFO: \tOptionen an Simulation geben\n");
 
-	// Online Simulation für TraVisTo?
+	// Online Simulation for TraVisTo?
 	switch (args->GetTravisto()) {
 		case 0:
 			break;
@@ -226,8 +226,14 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			rout = new QuickestPathRouter();
 			break;
 		case 4:
-			//rout = new DummyRouter();
 		    rout = new GraphRouter();
+			break;
+		case 5:
+			cout<<"router not available"<<endl;
+			exit(EXIT_FAILURE);
+			break;
+		case 6:
+			rout = new DummyRouter();
 			break;
 	}
 
@@ -267,29 +273,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	//pBuilding->WriteToErrorLog();
 }
 
-/* Setzt die Fußgänger in die einzelnen Räume
- * und intialisiert phi (Winkel/Ausrichtung der Ellipse)
- * */
-
-//int Simulation::InitSimulation() {
-//
-//	pNPeds=pDistribution->Distribute(pBuilding);
-//
-//	pBuilding->InitPhiAllPeds();
-//
-//	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
-//		Room* room = pBuilding->GetRoom(i);
-//		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-//			SubRoom* sub = room->GetSubRoom(j);
-//			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
-//				sub->GetPedestrian(k)->Setdt(pDt);
-//			}
-//		}
-//	}
-//
-//	Log->write("INFO: \tInit Simulation successful!!!\n");
-//	return 0;
-//}
 
 /* Eigentliche Simulation
  * Rückgabewert:
@@ -302,7 +285,11 @@ int Simulation::RunSimulation() {
 	writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 	double t;
 
+	//Sean
+	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
+	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
 	// writing the header
+
 	iod->WriteHeader(pNPeds, fps, pBuilding);
 	iod->WriteGeometry(pBuilding);
 	iod->WriteFrame(0, pBuilding);
@@ -321,6 +308,12 @@ int Simulation::RunSimulation() {
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			iod->WriteFrame(frameNr / writeInterval, pBuilding);
+		}
+		if (frameNr % 100 == 0) {
+			cout<<"                        \r";
+			cout<<" >> Frames : "<<frameNr<<"\r";
+			cout.flush();
+			//cout<<"Frame : "<<frameNr<<"\n";
 		}
 	}
 	// writing the footer

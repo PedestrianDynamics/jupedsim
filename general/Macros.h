@@ -43,7 +43,8 @@
 
 
 // Faktor für TraVisTo (cm <-> m)
-#define FAKTOR 100
+//#define FAKTOR 100
+#define FAKTOR 1
 
 
 // final destinations for the pedestrians

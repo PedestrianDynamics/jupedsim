@@ -100,6 +100,18 @@ protected:
 		}
 	}
 
+	//map with a default return value if the key is not contained
+	template <typename K, typename V>
+	V GetWithDef(const  std::map <K,V> & m, const K & key, const V & defval ) {
+	   typename std::map<K,V>::const_iterator it = m.find( key );
+	   if ( it == m.end() ) {
+	      return defval;
+	   }
+	   else {
+	      return it->second;
+	   }
+	}
+
 
 
 protected:
@@ -110,7 +122,11 @@ protected:
 	//map the internal crossings/transition id to the global ID (description) for that final destination
 	map<int, int> pMapIdToFinalDestination;
 	Building *pBuilding;
-	std::vector<AccessPoint*> pAccessPoints;
+	//std::vector<AccessPoint*> pAccessPoints;
+	std::map <int, AccessPoint*> pAccessPoints;
+
+	std::map<int,int> pMap_id_to_index;
+	std::map<int,int> pMap_index_to_id;
 
 };
 

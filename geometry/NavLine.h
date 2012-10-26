@@ -31,13 +31,11 @@
 #include "Line.h"
 
 class NavLine: public Line {
-private:
-	static int UID;
-	int pUID;
+
 public:
 	NavLine();
 	virtual ~NavLine();
-	int GetUniqueID() const;
+
 };
 
 #endif /* NAVLINE_H_ */

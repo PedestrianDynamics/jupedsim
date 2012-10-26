@@ -511,7 +511,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			case 'R':
 			{
 				int r = atoi(optarg);
-				if (r < 5)
+				if (r < 6)
 					pRouter = r;
 				else {
 					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
@@ -674,6 +674,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		else if(strategy=="quickest") pRouter=3;
 		else if(strategy=="dynamic") pRouter=4;
 		else if(strategy=="from_file") pRouter=5;
+		else if(strategy=="dummy") pRouter=6;
 		else{
 			Log->write("ERROR: \twrong value for routing strategy!!!\n");
 			exit(0);

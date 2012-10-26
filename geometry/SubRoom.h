@@ -60,6 +60,9 @@ private:
 	vector<Transition*> pTransitions;
 	vector<Hline*> pHlines;
 
+	static int UID;
+	int pUID;
+
 protected:
 	vector<Wall> pWalls;
 	vector<Point> pPoly; // Polygon representation of the subroom
@@ -99,6 +102,7 @@ public:
 	int GetUID() const; // unique identifier for this subroom
 	double GetClosed() const ;
 	double GetArea() const;
+	Point GetCentroid() const;
 
 	//navigation
 	void AddCrossing(Crossing* line);
@@ -123,6 +127,8 @@ public:
 	void RemoveGoalID(int ID);
 	void CalculateArea();
 	bool IsDirectlyConnectedWith(const SubRoom* sub) const;
+	bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+	bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
 	/// @see LoadNormalSubRooom()  @see  LoadStair()
 	void LoadWall(string line);
@@ -130,6 +136,7 @@ public:
 	// virtual functions
 	virtual string WriteSubRoom() const = 0;
 	virtual void WriteToErrorLog() const = 0;
+	virtual string WritePolyLine() const=0;
 
 	/// convert all walls and transitions(doors) into a polygon representing the subroom
 	virtual void ConvertLineToPoly(vector<Line*> goals) = 0;
@@ -160,6 +167,8 @@ public:
 	virtual ~NormalSubRoom();
 
 	string WriteSubRoom() const;
+	string WritePolyLine() const;
+
 	void WriteToErrorLog() const;
 	void ConvertLineToPoly(vector<Line*> goals);
 	bool IsInSubRoom(const Point& ped) const;
@@ -194,6 +203,7 @@ public:
 	bool IsDownStair() const;
 
 	string WriteSubRoom() const;
+	string WritePolyLine() const;
 	virtual void WriteToErrorLog() const;
 	virtual void ConvertLineToPoly(vector<Line*> goals);
 	bool IsInSubRoom(const Point& ped) const;
