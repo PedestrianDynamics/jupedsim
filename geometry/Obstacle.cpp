@@ -83,7 +83,7 @@ string Obstacle::Write() {
 	Point pos;
 
 	for (unsigned int j = 0; j < pWalls.size(); j++) {
-		Wall w = pWalls[j];
+		const Wall& w = pWalls[j];
 		s.append(w.Write());
 		pos = pos + w.GetPoint1() + w.GetPoint2();
 	}

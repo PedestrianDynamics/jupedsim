@@ -496,13 +496,11 @@ NormalSubRoom::~NormalSubRoom() {
 
 string NormalSubRoom::WriteSubRoom() const {
 	string s;
-	Point pos;
+	Point pos = GetCentroid();
 	for (int j = 0; j < GetAnzWalls(); j++) {
 		Wall w = GetWall(j);
 		s.append(w.Write());
-		pos = pos + w.GetPoint1() + w.GetPoint2();
 	}
-	pos = pos * (0.5 / GetAnzWalls());
 	//add the subroom caption
 	char tmp[CLENGTH];
 	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
@@ -696,11 +694,10 @@ const Point & Stair::GetDown() const {
 
 string Stair::WriteSubRoom() const {
 	string s;
-	Point pos;
+	Point pos = GetCentroid();
 	char tmp_c[300];
 	for (int j = 0; j < GetAnzWalls(); j++) {
 		Wall w = GetWall(j);
-		pos = pos + w.GetPoint1() + w.GetPoint2();
 		s.append(w.Write());
 	}
 	//Line tmp = Line(GetUp(), GetDown());
@@ -710,7 +707,6 @@ string Stair::WriteSubRoom() const {
 	//s.append(tmp_c);
 
 	//add the subroom caption
-	pos = pos * (0.5 / GetAnzWalls());
 	sprintf(tmp_c, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
 			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, GetSubRoomID());
 	s.append(tmp_c);
@@ -724,7 +720,7 @@ string Stair::WritePolyLine() const {
 	char tmp[CLENGTH];
 
 	s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
-	for (int j = 0; j < pPoly.size(); j++) {
+	for (unsigned int j = 0; j < pPoly.size(); j++) {
 	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",pPoly[j].GetX(),pPoly[j].GetY());
 		s.append(tmp);
 	}

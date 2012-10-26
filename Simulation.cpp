@@ -309,12 +309,11 @@ int Simulation::RunSimulation() {
 		if (frameNr % writeInterval == 0) {
 			iod->WriteFrame(frameNr / writeInterval, pBuilding);
 		}
-		if (frameNr % 100 == 0) {
-			cout<<"                        \r";
-			cout<<" >> Frames : "<<frameNr<<"\r";
-			cout.flush();
-			//cout<<"Frame : "<<frameNr<<"\n";
-		}
+//		if (frameNr % 1000 == 0) {
+//			cout<<"                        \r";
+//			cout<<">> Frames : "<<frameNr<<"\r";
+//			cout.flush();
+//		}
 	}
 	// writing the footer
 	iod->WriteFooter();

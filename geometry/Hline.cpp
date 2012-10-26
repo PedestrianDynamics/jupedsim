@@ -94,7 +94,7 @@ void Hline::WriteToErrorLog() const {
 string Hline::WriteElement() const {
     string geometry;
     char tmp[CLENGTH] = "";
-    sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d\">\n",GetUniqueID(),GetUniqueID());
+    sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
     geometry.append(tmp);
     //geometry.append("\t\t<door color=\"250\">\n");
     sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",

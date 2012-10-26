@@ -41,7 +41,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-										Routing() {
+																		Routing() {
 
 	pAccessPoints = map <int, AccessPoint*>();
 
@@ -241,18 +241,18 @@ void GlobalRouter::Init(Building* building) {
 
 			//dump goals and APs
 
-//			for (map<int, AccessPoint*>::const_iterator itr = pAccessPoints.begin();
-//					itr != pAccessPoints.end(); ++itr) {
-//
-//						AccessPoint* from_AP = itr->second;
-//						cout <<" AP ID: "<<itr->first<<endl;
-//			}
-//
-//			cout<<"size: "<<allGoals.size()<<endl;
-//			for(unsigned int i =0;i<allGoals.size();i++){
-//				cout<<"ID: " <<allGoals[i]->GetUniqueID()<<endl;
-//			}
-//			exit(0);
+			//			for (map<int, AccessPoint*>::const_iterator itr = pAccessPoints.begin();
+			//					itr != pAccessPoints.end(); ++itr) {
+			//
+			//						AccessPoint* from_AP = itr->second;
+			//						cout <<" AP ID: "<<itr->first<<endl;
+			//			}
+			//
+			//			cout<<"size: "<<allGoals.size()<<endl;
+			//			for(unsigned int i =0;i<allGoals.size();i++){
+			//				cout<<"ID: " <<allGoals[i]->GetUniqueID()<<endl;
+			//			}
+			//			exit(0);
 
 			//process the hlines
 			//process the crossings
@@ -286,42 +286,42 @@ void GlobalRouter::Init(Building* building) {
 	// Handle the extra final destination which are not in any rooms
 	// check which of the actual final destinations are connected to the extra
 
-//	for (map<int, int>::iterator it = pMapIdToFinalDestination.begin();
-//			it != pMapIdToFinalDestination.end(); it++) {
-//
-//		int to_door = it->first;
-//		AccessPoint* to_AP = pAccessPoints[to_door];
-//		printf("checking final [%d] aka [%s]\n", to_door,
-//				GetGoal(to_door)->GetCaption().c_str());
-//
-//		for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
-//			AccessPoint* from_AP = pAccessPoints[i];
-//			int from_door = from_AP->GetID();
-//			if (to_door == from_door)
-//				continue;
-//
-//			// connect only the final exits to the virtual final destinations
-//			if (from_AP->isFinalDestination() == false)
-//				continue;
-//
-//			// connect only open final exits
-//			//if(GetAllGoals()[from_door]->IsOpen()==false) continue;
-//
-//			string to_room_caption = GetGoal(to_door)->GetCaption();
-//			string from_room_caption = "room_"
-//					+ GetGoal(from_door)->GetRoom1()->GetCaption();
-//
-//			if (from_room_caption == to_room_caption) {
-//				double dist = from_AP->GetDistanceTo(to_AP);
-//				dist = GetGoal(to_door)->DistTo(from_AP->GetCentre());
-//				//they are all situated at the same distance cuz they are virtual
-//				if (dist < 18.0)
-//					pDistMatrix[from_door][to_door] = 1.0;
-//			}
-//		}
-//		Log->write("FATAL ERROR: \t you should never get here");
-//		exit(0);
-//	}
+	//	for (map<int, int>::iterator it = pMapIdToFinalDestination.begin();
+	//			it != pMapIdToFinalDestination.end(); it++) {
+	//
+	//		int to_door = it->first;
+	//		AccessPoint* to_AP = pAccessPoints[to_door];
+	//		printf("checking final [%d] aka [%s]\n", to_door,
+	//				GetGoal(to_door)->GetCaption().c_str());
+	//
+	//		for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
+	//			AccessPoint* from_AP = pAccessPoints[i];
+	//			int from_door = from_AP->GetID();
+	//			if (to_door == from_door)
+	//				continue;
+	//
+	//			// connect only the final exits to the virtual final destinations
+	//			if (from_AP->isFinalDestination() == false)
+	//				continue;
+	//
+	//			// connect only open final exits
+	//			//if(GetAllGoals()[from_door]->IsOpen()==false) continue;
+	//
+	//			string to_room_caption = GetGoal(to_door)->GetCaption();
+	//			string from_room_caption = "room_"
+	//					+ GetGoal(from_door)->GetRoom1()->GetCaption();
+	//
+	//			if (from_room_caption == to_room_caption) {
+	//				double dist = from_AP->GetDistanceTo(to_AP);
+	//				dist = GetGoal(to_door)->DistTo(from_AP->GetCentre());
+	//				//they are all situated at the same distance cuz they are virtual
+	//				if (dist < 18.0)
+	//					pDistMatrix[from_door][to_door] = 1.0;
+	//			}
+	//		}
+	//		Log->write("FATAL ERROR: \t you should never get here");
+	//		exit(0);
+	//	}
 
 	//run the floyd warshall algorithm
 	FloydWarshall();
@@ -332,65 +332,64 @@ void GlobalRouter::Init(Building* building) {
 	for (map<int, AccessPoint*>::const_iterator itr = pAccessPoints.begin();
 			itr != pAccessPoints.end(); ++itr) {
 
-				AccessPoint* from_AP = itr->second;
-				int from_door = pMap_id_to_index[itr->first];
+		AccessPoint* from_AP = itr->second;
+		int from_door = pMap_id_to_index[itr->first];
 
-				double tmpMinDist = FLT_MAX;
-				int tmpFinalGlobalNearestID = from_door;
+		double tmpMinDist = FLT_MAX;
+		int tmpFinalGlobalNearestID = from_door;
 
-				for (map<int, AccessPoint*>::const_iterator itr1 = pAccessPoints.begin();
-						itr1 != pAccessPoints.end(); ++itr1) {
-					AccessPoint* to_AP = itr1->second;
-					int to_door = pMap_id_to_index[itr1->first];
-					if (from_door == to_door)
-						continue;
+		for (map<int, AccessPoint*>::const_iterator itr1 = pAccessPoints.begin();
+				itr1 != pAccessPoints.end(); ++itr1) {
+			AccessPoint* to_AP = itr1->second;
+			int to_door = pMap_id_to_index[itr1->first];
+			if (from_door == to_door)
+				continue;
 
-					if (to_AP->isFinalDestination()) {
-						//cout <<" checking final destination: "<< pAccessPoints[j]->GetID()<<endl;
-						double dist = pDistMatrix[from_door][to_door];
-						if (dist < tmpMinDist) {
-							tmpFinalGlobalNearestID = to_door;
-							tmpMinDist = dist;
-						}
-					}
+			if (to_AP->isFinalDestination()) {
+				//cout <<" checking final destination: "<< pAccessPoints[j]->GetID()<<endl;
+				double dist = pDistMatrix[from_door][to_door];
+				if (dist < tmpMinDist) {
+					tmpFinalGlobalNearestID = to_door;
+					tmpMinDist = dist;
 				}
-
-				// in the case it is the final APs
-				if (tmpFinalGlobalNearestID == from_door)
-					tmpMinDist = 0;
-
-				if (tmpMinDist == FLT_MAX) {
-					char tmp[CLENGTH];
-					sprintf(tmp,
-							"ERROR: GlobalRouter: There is no path from hline/crossing/transition [ %d ] to the outside\n",
-							from_door);
-					Log->write(tmp);
-					exit(EXIT_FAILURE);
-				}
-
-				// set the distance to the final destination ( OUT )
-				from_AP->AddFinalDestination(FINAL_DEST_OUT, tmpMinDist);
-
-				// set the intermediate path to global final destination
-				GetPath(from_door, tmpFinalGlobalNearestID);
-
-				if (pTmpPedPath.size() >= 2) {
-					//pAccessPoints[i]->setGlobalNearestAP(pTmpPedPath[1]);
-					//from_AP->AddIntermediateDest(FINAL_DEST_OUT, pTmpPedPath[1]);
-					from_AP->AddTransitAPsTo(FINAL_DEST_OUT,
-							pAccessPoints[pMap_index_to_id[pTmpPedPath[1]]]);
-				} else {
-					if ((from_AP->isFinalDestination() == false)
-							&& (from_AP->IsClosed())) {
-
-						from_AP->Dump();
-						Log->write("ERROR: GlobalRouter: hline/crossing/transition [ %d ] in room [%s] is out of visibility range \n");
-						exit(EXIT_FAILURE);
-					}
-				}
-				pTmpPedPath.clear();
 			}
+		}
 
+		// in the case it is the final APs
+		if (tmpFinalGlobalNearestID == from_door)
+			tmpMinDist = 0;
+
+		if (tmpMinDist == FLT_MAX) {
+			char tmp[CLENGTH];
+			sprintf(tmp,
+					"ERROR: GlobalRouter: There is no path from hline/crossing/transition [ %d ] to the outside\n",
+					from_door);
+			Log->write(tmp);
+			exit(EXIT_FAILURE);
+		}
+
+		// set the distance to the final destination ( OUT )
+		from_AP->AddFinalDestination(FINAL_DEST_OUT, tmpMinDist);
+
+		// set the intermediate path to global final destination
+		GetPath(from_door, tmpFinalGlobalNearestID);
+
+		if (pTmpPedPath.size() >= 2) {
+			//pAccessPoints[i]->setGlobalNearestAP(pTmpPedPath[1]);
+			//from_AP->AddIntermediateDest(FINAL_DEST_OUT, pTmpPedPath[1]);
+			from_AP->AddTransitAPsTo(FINAL_DEST_OUT,
+					pAccessPoints[pMap_index_to_id[pTmpPedPath[1]]]);
+		} else {
+			if ((from_AP->isFinalDestination() == false)
+					&& (from_AP->IsClosed())) {
+
+				from_AP->Dump();
+				Log->write("ERROR: GlobalRouter: hline/crossing/transition [ %d ] in room [%s] is out of visibility range \n");
+				exit(EXIT_FAILURE);
+			}
+		}
+		pTmpPedPath.clear();
+	}
 
 
 
@@ -399,47 +398,47 @@ void GlobalRouter::Init(Building* building) {
 	// in the persons file
 	// set the distances to alternative destinations
 
-//	for (unsigned int p = 0; p < pFinalDestinations.size(); p++) {
-//		int to_door = pFinalDestinations[p];
-//
-//		for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
-//			// set the distance
-//			AccessPoint* from_AP = pAccessPoints[i];
-//			int from_door = from_AP->GetID();
-//
-//			// if enable, you will have problems if the investigated AP is a final destination
-//			//if(to_door==from_door) continue;
-//
-//			//comment this if you want infinite as distance to unreachable destinations
-//			double dist = pDistMatrix[from_door][to_door];
-//			from_AP->AddFinalDestination(to_door, dist);
-//
-//			// set the intermediate path
-//			// set the intermediate path to global final destination
-//			GetPath(from_door, to_door);
-//			if (pTmpPedPath.size() >= 2) {
-//				from_AP->AddTransitAPsTo(to_door,
-//						pAccessPoints[pTmpPedPath[1]]);
-//			} else {
-//				if ((from_AP->isFinalDestination() == false)
-//						&& (GetGoal(from_door)->IsOpen())) {
-//					string room_caption =
-//							GetGoal(from_door)->GetRoom1()->GetCaption();
-//					char tmp[CLENGTH];
-//					sprintf(tmp,
-//							"ERROR: GlobalRouter: hline/crossing/transition [ %d ] is out of visibility range 2\n",
-//							from_door);
-//					Log->write(tmp);
-//					sprintf(tmp,
-//							"ERROR: GlobalRouter: No path  from [ %d ] to [%d] in room [%s] \n",
-//							from_door, to_door, room_caption.c_str());
-//					Log->write(tmp);
-//					exit(EXIT_FAILURE);
-//				}
-//			}
-//			pTmpPedPath.clear();
-//		}
-//	}
+	//	for (unsigned int p = 0; p < pFinalDestinations.size(); p++) {
+	//		int to_door = pFinalDestinations[p];
+	//
+	//		for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
+	//			// set the distance
+	//			AccessPoint* from_AP = pAccessPoints[i];
+	//			int from_door = from_AP->GetID();
+	//
+	//			// if enable, you will have problems if the investigated AP is a final destination
+	//			//if(to_door==from_door) continue;
+	//
+	//			//comment this if you want infinite as distance to unreachable destinations
+	//			double dist = pDistMatrix[from_door][to_door];
+	//			from_AP->AddFinalDestination(to_door, dist);
+	//
+	//			// set the intermediate path
+	//			// set the intermediate path to global final destination
+	//			GetPath(from_door, to_door);
+	//			if (pTmpPedPath.size() >= 2) {
+	//				from_AP->AddTransitAPsTo(to_door,
+	//						pAccessPoints[pTmpPedPath[1]]);
+	//			} else {
+	//				if ((from_AP->isFinalDestination() == false)
+	//						&& (GetGoal(from_door)->IsOpen())) {
+	//					string room_caption =
+	//							GetGoal(from_door)->GetRoom1()->GetCaption();
+	//					char tmp[CLENGTH];
+	//					sprintf(tmp,
+	//							"ERROR: GlobalRouter: hline/crossing/transition [ %d ] is out of visibility range 2\n",
+	//							from_door);
+	//					Log->write(tmp);
+	//					sprintf(tmp,
+	//							"ERROR: GlobalRouter: No path  from [ %d ] to [%d] in room [%s] \n",
+	//							from_door, to_door, room_caption.c_str());
+	//					Log->write(tmp);
+	//					exit(EXIT_FAILURE);
+	//				}
+	//			}
+	//			pTmpPedPath.clear();
+	//		}
+	//	}
 
 
 	//create a complete navigation graph
@@ -452,8 +451,12 @@ void GlobalRouter::Init(Building* building) {
 	//exit(0);
 	//DumpAccessPoints(826);
 
-	//WriteGraphGV("routing_graph.gv");
+
+	//vector<string> rooms;
+	//rooms.push_back("050");
+	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
 	//exit(0);
+
 	Log->write("INFO:\tDone with the Global Router Engine!");
 }
 
@@ -506,80 +509,79 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 
 	int nextDestination = ped->GetNextDestination();
 
-	//get the room and find the corresponding node
 
+	if(nextDestination==-1){
+		return GetBestDefaultRandomExit(ped);
+
+	}else {
+
+		SubRoom* sub = pBuilding->GetRoom(ped->GetRoomID())->GetSubRoom(
+				ped->GetSubRoomID());
+
+
+		const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
+		for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
+
+			int apID = accessPointsInSubRoom[i];
+			AccessPoint* ap=pAccessPoints[apID];
+
+			const Point& pt3 = ped->GetPos();
+			double distToExit = ap->GetNavLine()->DistTo(pt3);
+
+			if (distToExit > EPS_DIST)
+				continue;
+
+			//one AP is near actualize destination:
+			nextDestination = ap->GetNearestTransitAPTO(
+					ped->GetFinalDestination());
+
+
+			if (nextDestination == -1) { // we are almost at the exit
+				return ped->GetNextDestination();
+
+			} else {
+
+				//check that the next destination is in the actual room of the pedestrian
+				if (pAccessPoints[nextDestination]->isInRange(
+						sub->GetUID())==false) {
+					//return the last destination if defined
+					int previousDestination = ped->GetNextDestination();
+
+					//we are still somewhere in the initialization phase
+					if (previousDestination == -1) {
+						ped->SetExitIndex(apID);
+						ped->SetExitLine(pAccessPoints[apID]->GetNavLine());
+						return apID;
+					} else // we are still having a valid destination, don't change
+					{
+						return previousDestination;
+					}
+				} else // we have reached the new room
+				{
+					ped->SetExitIndex(nextDestination);
+					ped->SetExitLine(pAccessPoints[nextDestination]->GetNavLine());
+					return nextDestination;
+				}
+			}
+
+		}
+
+		return GetBestDefaultRandomExit(ped);
+	}
+
+}
+
+int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
+
+	// get the opened exits
 	SubRoom* sub = pBuilding->GetRoom(ped->GetRoomID())->GetSubRoom(
 			ped->GetSubRoomID());
 
 	// get the opened exits
+	const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
 	int bestAPsID = -1;
 	double minDist = FLT_MAX;
 
-	const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
-
-	for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-
-		int apID = accessPointsInSubRoom[i];
-		AccessPoint* ap=pAccessPoints[apID];
-
-		const Point& pt3 = ped->GetPos();
-		double distToExit = ap->GetNavLine()->DistTo(pt3);
-
-		if (distToExit > EPS_DIST)
-			continue;
-
-		//one AP is near actualize destination:
-
-		nextDestination = ap->GetNearestTransitAPTO(
-				ped->GetFinalDestination());
-
-
-		if (nextDestination == -1) { // we are almost at the exit
-			nextDestination = apID;
-		}
-
-		//check that the next destination is in the actual room of the pedestrian
-		if (pAccessPoints[nextDestination]->isInRange(
-				sub->GetUID())==false) {
-			//return the last destination if defined
-			int previousDestination = ped->GetNextDestination();
-
-			//we are still somewhere in the initialization phase
-			if (previousDestination == -1) {
-				ped->SetExitIndex(apID);
-				ped->SetExitLine(pAccessPoints[apID]->GetNavLine());
-				ped->SetSmoothTurning(true);
-				return apID;
-			} else // we are still having a valid destination, don't change
-			{
-				return previousDestination;
-			}
-		} else // we have reached the new room
-		{
-			// only assigned if not already assigned
-			// quite messed up code, sry
-			//if(nextDestination!=ped->GetNextDestination()){
-			ped->SetExitIndex(nextDestination);
-			ped->SetExitLine(pAccessPoints[nextDestination]->GetNavLine());
-			ped->SetSmoothTurning(true);
-			return nextDestination;
-		}
-
-	}
-
-	//any actual valid destinations?
-	// if so keep it
-	int next = ped->GetNextDestination();
-
-	if (next != -1)
-		return next;
-
-	//ich checke alles was ich sehen kann
-	//dann entscheide ich  mich fuer die kurzeste Variante
-
-	// in the case the previous attempt didnt work
-	minDist = FLT_MAX;
-	bestAPsID = -1;
 
 	for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
 		int apID = accessPointsInSubRoom[i];
@@ -593,11 +595,20 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 		if (ap->IsClosed())
 			continue;
 
-		double x = ped->GetPos().GetX();
-		double y = ped->GetPos().GetY();
+
+		//the line from the current position to the centre of the nav line.
+		// at least the line in that direction minus EPS
+		const Point& posA = ped->GetPos();
+		const Point& posB = ap->GetNavLine()->GetCentre();
+		const Point& posC= (posB-posA).Normalized()*( (posA-posB ).Norm() - EPS ) + posA;
+
+		//check if visible
+		if(sub->IsVisible(posA,posC,true)==false) continue;
+
+
 		double dist = ap->GetDistanceTo(
 				ped->GetFinalDestination())
-				+ ap->distanceTo(x, y);
+												+ ap->distanceTo(posA.GetX(),posA.GetY());
 
 		if (dist < minDist) {
 			bestAPsID = ap->GetID();
@@ -605,67 +616,15 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 		}
 	}
 
-	if (bestAPsID == -1) {
-
-		char tmp[CLENGTH];
-		const char* caption =
-				pBuilding->GetRoom(ped->GetRoomID())->GetCaption().c_str();
-		sprintf(tmp,
-				"WARNING: GlobalRouter: best AP could not be identified for pedestrian %d in room/subroom [%s] %d/%d \n",
-				ped->GetPedIndex(), caption, ped->GetRoomID(),
-				ped->GetSubRoomID());
-		Log->write(tmp);
-		Log->write(
-				"WARNING: GlobalRouter: There are no exit in the sight range");
-
-		sprintf(tmp, "WARNING: GlobalRouter: I am choosing a random one [ %d ]",
-				bestAPsID);
-		Log->write(tmp);
-
+	if(bestAPsID!=-1){
+		ped->SetExitIndex(bestAPsID);
+		ped->SetExitLine(pAccessPoints[bestAPsID]->GetNavLine());
+		return bestAPsID;
+	}else {
+		cout<<"no correct ID"<<endl;
+		exit(EXIT_FAILURE);
 		return -1;
 	}
-
-	ped->SetExitIndex(bestAPsID);
-	ped->SetExitLine(pAccessPoints[bestAPsID]->GetNavLine());
-
-	return bestAPsID;
-}
-
-int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
-
-	SubRoom* sub = pBuilding->GetRoom(ped->GetRoomID())->GetSubRoom(
-			ped->GetSubRoomID());
-
-	// get the opened exits
-	int bestAPsID = -1;
-	double minDist = FLT_MAX;
-
-	const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
-
-	for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-		int apID = accessPointsInSubRoom[i];
-		int uniqueRoomID = ped->GetUniqueRoomID();
-		if (pAccessPoints[apID]->isInRange(uniqueRoomID) == false)
-			continue;
-
-		double x = ped->GetPos().GetX();
-		double y = ped->GetPos().GetY();
-		double dist = pAccessPoints[apID]->GetDistanceTo(
-				ped->GetFinalDestination())
-				+ pAccessPoints[apID]->distanceTo(x, y);
-
-		if (dist < minDist) {
-			bestAPsID = pAccessPoints[apID]->GetID();
-			minDist = dist;
-			//cout<<" best found: " <<apID<<" " <<bestAPsID<<endl;
-		}
-	}
-	if (bestAPsID == -1) {
-		Log->write("ERROR:\t unrecoverable error in the routing class");
-		Log->write("ERROR:\t the results/trajectories are now meaningless");
-		return 0;
-	}
-	return bestAPsID;
 }
 
 bool GlobalRouter::CanSeeEachother(const Point&pt1, const Point& pt2) {
@@ -864,67 +823,6 @@ SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2) {
 }
 
 
-//TODO: del me
-void GlobalRouter::CheckInconsistencies() {
-
-	Log->write("INFO: Checking all goals");
-
-	// TODO: only check the hlines
-	for (int g = 0; g < pBuilding->GetRouting()->GetAnzGoals(); g++) {
-
-		Crossing * c1 = GetGoal(g);
-
-		//that goal is located outside the complete geometry
-		if (!c1->GetSubRoom1()) {
-			continue;
-		}
-
-		if (c1->GetSubRoom1() == c1->GetSubRoom2()) {
-			//cout<<"checking: "<<c1->GetIndex()<<endl;
-			const Point& p1 = (c1->GetPoint1() + c1->GetPoint2()) * 0.5;
-			if (c1->GetSubRoom1()->IsInSubRoom(p1) == false) {
-				SubRoom* sub = c1->GetSubRoom1();
-				char tmp[CLENGTH];
-				sprintf(tmp,
-						"Hlines [%d] in room/subroom %s [%d / %d] failed. It is probably somewhere else",
-						c1->GetIndex(),
-						pBuilding->GetRoom(sub->GetRoomID())->GetCaption().c_str(),
-						sub->GetRoomID(), sub->GetSubRoomID());
-				Log->write(tmp);
-				Log->write("I am trying to fix that.");
-
-				bool fixed = false;
-				// I only check that one room
-				Room* room = c1->GetRoom1();
-				for (int j = 0; j < room->GetAnzSubRooms(); j++) {
-					SubRoom* sub1 = room->GetSubRoom(j);
-					//set the new room if needed
-					if (sub1->IsInSubRoom(p1)) {
-						c1->SetSubRoom1(sub1);
-						c1->SetSubRoom2(sub1);
-						fixed = true;
-						sprintf(tmp,
-								"Fixed! relocated to room/subroom %s [%d / %d]",
-								pBuilding->GetRoom(sub1->GetRoomID())->GetCaption().c_str(),
-								sub1->GetRoomID(), sub1->GetSubRoomID());
-						Log->write(tmp);
-
-						//just dont forget this
-						sub->RemoveGoalID(c1->GetUniqueID());
-						sub1->AddGoalID(c1->GetUniqueID());
-						break;
-					}
-				}
-
-				if (fixed == false) {
-					Log->write("Could not fix...");
-				}
-			}
-		}
-	}
-	Log->write("INFO: Checking all goals  done!");
-}
-
 void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 		const vector<string> rooms_captions) {
 	ofstream graph_file(filename.c_str());
@@ -961,14 +859,31 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 		}
 	}
 
-	// all nodes
-	for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
-		AccessPoint* from_AP = pAccessPoints[i];
+	for (map<int, AccessPoint*>::const_iterator itr = pAccessPoints.begin();
+			itr != pAccessPoints.end(); ++itr) {
+
+		AccessPoint* from_AP = itr->second;
+
 		int from_door = from_AP->GetID();
 
 		// check for valid room
-		Crossing* cross = GetGoal(from_door);
-		int room_id = cross->GetRoom1()->GetRoomID();
+		NavLine* nav= from_AP->GetNavLine();
+		int room_id=-1;
+
+		if(dynamic_cast<Crossing*>(nav)!=NULL) {
+			room_id =  ((Crossing*)(nav))->GetRoom1()->GetRoomID();
+
+		}else if(dynamic_cast<Hline*>(nav)!=NULL) {
+			room_id =  ((Hline*)(nav))->GetRoom()->GetRoomID();
+
+		}else if(dynamic_cast<Transition*>(nav)!=NULL) {
+			room_id =  ((Transition*)(nav))->GetRoom1()->GetRoomID();
+
+		}else {
+			cout<<"WARNING: Unkown navigation line type"<<endl;
+			continue;
+		}
+
 		if (IsElementInVector(rooms_ids, room_id) == false)
 			continue;
 
@@ -998,11 +913,23 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 			// if not marked as sink.
 			bool isSink = true;
 			for (unsigned int j = 0; j < from_aps.size(); j++) {
-				AccessPoint* to_AP = from_aps[j];
-				int to_door = to_AP->GetID();
+				NavLine* nav= from_aps[j]->GetNavLine();
+				int room_id=-1;
 
-				Crossing* cross = GetGoal(to_door);
-				int room_id = cross->GetRoom1()->GetRoomID();
+				if(dynamic_cast<Crossing*>(nav)!=NULL) {
+					room_id =  ((Crossing*)(nav))->GetRoom1()->GetRoomID();
+
+				}else if(dynamic_cast<Hline*>(nav)!=NULL) {
+					room_id =  ((Hline*)(nav))->GetRoom()->GetRoomID();
+
+				}else if(dynamic_cast<Transition*>(nav)!=NULL) {
+					room_id =  ((Transition*)(nav))->GetRoom1()->GetRoomID();
+
+				}else {
+					cout<<"WARNING: Unkown navigation line type"<<endl;
+					continue;
+				}
+
 				if (IsElementInVector(rooms_ids, room_id) == true) {
 					isSink = false;
 					break;
@@ -1025,16 +952,34 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 	}
 
 	//connections
-	for (unsigned int i = 0; i < pAccessPoints.size(); i++) {
-		AccessPoint* from_AP = pAccessPoints[i];
+
+	for (map<int, AccessPoint*>::const_iterator itr = pAccessPoints.begin();
+			itr != pAccessPoints.end(); ++itr) {
+
+		AccessPoint* from_AP = itr->second;
 		int from_door = from_AP->GetID();
 
 		//const vector<AccessPoint*>& aps = from_AP->GetConnectingAPs();
 		const vector<AccessPoint*>& aps = from_AP->GetTransitAPsTo(
 				finalDestination);
 
-		Crossing* cross = GetGoal(from_door);
-		int room_id = cross->GetRoom1()->GetRoomID();
+		NavLine* nav= from_AP->GetNavLine();
+		int room_id=-1;
+
+		if(dynamic_cast<Crossing*>(nav)!=NULL) {
+			room_id =  ((Crossing*)(nav))->GetRoom1()->GetRoomID();
+
+		}else if(dynamic_cast<Hline*>(nav)!=NULL) {
+			room_id =  ((Hline*)(nav))->GetRoom()->GetRoomID();
+
+		}else if(dynamic_cast<Transition*>(nav)!=NULL) {
+			room_id =  ((Transition*)(nav))->GetRoom1()->GetRoomID();
+
+		}else {
+			cout<<"WARNING: Unkown navigation line type"<<endl;
+			continue;
+		}
+
 		if (IsElementInVector(rooms_ids, room_id) == false)
 			continue;
 
@@ -1042,8 +987,24 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 			AccessPoint* to_AP = aps[j];
 			int to_door = to_AP->GetID();
 
-			Crossing* cross = GetGoal(to_door);
-			int room_id = cross->GetRoom1()->GetRoomID();
+			NavLine* nav= to_AP->GetNavLine();
+			int room_id=-1;
+
+			if(dynamic_cast<Crossing*>(nav)!=NULL) {
+				room_id =  ((Crossing*)(nav))->GetRoom1()->GetRoomID();
+
+			}else if(dynamic_cast<Hline*>(nav)!=NULL) {
+				room_id =  ((Hline*)(nav))->GetRoom()->GetRoomID();
+
+			}else if(dynamic_cast<Transition*>(nav)!=NULL) {
+				room_id =  ((Transition*)(nav))->GetRoom1()->GetRoomID();
+
+			}else {
+				cout<<"WARNING: Unkown navigation line type"<<endl;
+				continue;
+			}
+
+
 			if (IsElementInVector(rooms_ids, room_id) == false)
 				continue;
 

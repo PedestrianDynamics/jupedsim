@@ -186,7 +186,7 @@ string Transition::WriteElement() const {
 	string geometry;
 	char tmp[CLENGTH] = "";
 
-	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%s\">\n",GetUniqueID(),GetUniqueID(),GetCaption().c_str());
+	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%d_%s\">\n",GetUniqueID(),GetIndex(),GetUniqueID(),GetCaption().c_str());
 	geometry.append(tmp);
 	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
 			(GetPoint1().GetX()) * FAKTOR,

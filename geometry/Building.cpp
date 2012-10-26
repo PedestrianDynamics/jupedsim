@@ -766,21 +766,19 @@ Room* Building::GetRoom(string caption) const {
 	exit(EXIT_FAILURE);
 }
 
-//TODO
-Transition* Building::GetTransition(string caption) const {
-	for (unsigned int r = 0; r < pRooms.size(); r++) {
-		const vector<int>& trans_ids = pRooms[r]->GetAllTransitionsIDs();
-		for (unsigned int t = 0; t < trans_ids.size(); t++) {
-			int id = trans_ids[t];
-			Transition* tr = pRouting->GetTransition(id);
-			if (tr->GetCaption() == caption)
-				return tr;
-		}
 
+Transition* Building::GetTransition(string caption) const {
+	//eventually
+	const map<int, Transition*>& transitions = pRouting->GetAllTransitions();
+	map<int, Transition*>::const_iterator itr;
+	for(itr = transitions.begin(); itr != transitions.end(); ++itr){
+		if (itr->second->GetCaption() == caption)
+			return itr->second;
 	}
+
 	Log->write("WARNING: No Transition with Caption: " + caption);
-	return NULL;
-	//exit(EXIT_FAILURE);
+	//return NULL;
+	exit(EXIT_FAILURE);
 }
 
 Crossing* Building::GetGoal(string caption) const {

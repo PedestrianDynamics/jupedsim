@@ -32,10 +32,6 @@
  ************************************************************/
 
 Routing::Routing() {
-	//pCrossings = vector<Crossing*>();
-	//pTransitions = vector<Transition*>();
-	//pHlines = vector<Hline*>();
-
 	pCrossings = map<int, Crossing*>();
 	pTransitions = map<int, Transition*>();
 	pHlines = map<int, Hline*>();

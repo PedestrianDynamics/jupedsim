@@ -106,10 +106,10 @@ double Point::NormSquare() const {
 // gibt den normierten Vector zurueck
 
 Point Point::Normalized() const {
-	double norm=NormSquare();
+	double norm=Norm();
 
-    if (norm != 0)
-        return (Point(pX, pY) / sqrt(norm));
+    if (norm != 0.0)
+        return (Point(pX, pY) / (norm));
     else return Point(0.0, 0.0);
 }
 

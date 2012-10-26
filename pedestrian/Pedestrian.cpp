@@ -603,6 +603,7 @@ void Pedestrian::Dump(int ID, int pa) {
 		break;
 
 	}
+	getc(stdin);
 }
 
 void Pedestrian::RecordActualPosition(){
