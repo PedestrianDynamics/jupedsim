@@ -44,13 +44,14 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 	a = ped->GetLargerAxis();
 	b = ped->GetSmallerAxis();
 	phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-	sprintf(tmp, "<agent ID=\"%d\"\t"
-			"xPos=\"%.2f\"\tyPos=\"%.2f\""
+ 	sprintf(tmp, "<agent ID=\"%d\"\t"
+			"xPos=\"%.2f\"\tyPos=\"%.2f\"\t"
 			"radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
 			"ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
 			ped->GetPedIndex(), (ped->GetPos().GetX()) * FAKTOR,
 			(ped->GetPos().GetY()) * FAKTOR, a * FAKTOR, b * FAKTOR,
 			phi * RAD2DEG, color);
+	
 	return tmp;
 }
 
