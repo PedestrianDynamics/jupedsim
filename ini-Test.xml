@@ -4,12 +4,12 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfiles/T-Junction/T-Junction.xml</geometry>
+	<geometry>inputfiles/geo.xml</geometry>
 	<!--persons information and distribution -->
 	<person>inputfiles/persons-test.xml</person>
-	<routing>inputfiles/T-Junction/routing.xml</routing>
-	<!-- traffic information: e.g closed doors -->
-	<traffic>inputfiles/T-Junction/traffic.xml</traffic>
+	<routing>inputfiles/routing.xml</routing>
+	<!-- <\!-- traffic information: e.g closed doors -\-> -->
+	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
 	</trajectories>
@@ -19,9 +19,10 @@
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
-		<tmax unit="sec">900</tmax>
+		<tmax unit="sec">40</tmax>
 		<solver>euler</solver>
-		<stepsize>0.001</stepsize>
+		<stepsize>0.01</stepsize>
+		<exitStrategy>1</exitStrategy>
 		<linkedcells enabled="true" cell_size="2.2"/>
 		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />

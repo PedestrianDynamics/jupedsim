@@ -287,6 +287,7 @@ int ArgumentParser::GetMaxOmpThreads() const{
 void ArgumentParser::ParseArgs(int argc, char **argv) {
 	int c;
 	int option_index = 0;
+
 	static struct option long_options[] = {
 			{"number", 1, 0, 'n'},
 			{"tmax", 1, 0, 't'},
@@ -331,6 +332,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	while ((c = getopt_long_only(argc, argv,
 			"n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q",
 			long_options, &option_index)) != -1) {
+
 		switch (c) {
 			case 'T':
 			{
@@ -534,7 +536,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				string inifile="ini.xml";
 				if (optarg)
 					inifile=optarg;
-				Log->write("INFO: \t Loading initialization file < "+inifile+" >");
+				Log->write("INFO: \t Loading initialization file <"+inifile+">");
 				ParseIniFile(inifile);
 			}
 			break;
@@ -682,7 +684,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->write("INFO: \trouting  <"+string(strategy)+">");
 	}
 
-	//desired velocity
+	//desired speed
 	if(!xPara.getChildNode("v0").isEmpty()){
 		string mu=string(xPara.getChildNode("v0").getAttribute("mu"));
 		string sigma=string(xPara.getChildNode("v0").getAttribute("sigma"));
@@ -730,6 +732,24 @@ void ArgumentParser::ParseIniFile(string inifile){
 		pAtauMu=atof(mu.c_str());
 		pAtauSigma=atof(sigma.c_str());
 		Log->write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+	}
+
+	//pExitStrategy
+	if(!xPara.getChildNode("exitStrategy").isEmpty()){
+		const char* e=xPara.getChildNode("exitStrategy").getText();
+		int ie = atoi(e);
+		if (ie == 1 || ie == 2 || ie == 3)
+		{
+			pExitStrategy = ie;
+			Log->write("INFO: \texitStrategy <"+ string(e) +">");
+		}
+		else
+		{
+			pExitStrategy = 2;
+
+			Log->write("WARNING: \twrong value for exitStrategy. Use strategy 2\n");
+		}
+
 	}
 	//force_ped
 	if(!xPara.getChildNode("force_ped").isEmpty()){

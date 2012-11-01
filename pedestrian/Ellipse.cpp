@@ -359,12 +359,12 @@ double Ellipse::GetLargerAxis() const {
 	return (ea > eb) ? ea : eb;
 }
 
-// ellipse axe in the direction of the velocity
-double Ellipse::GetEA() const {
-	return pAmin + pV.Norm() * pAv;
-}
+// ellipse  semi-axis in the direction of the velocity
+	double Ellipse::GetEA() const {
+		return pAmin + pV.Norm() * pAv;
+	}
 
-// ellipse axe in the direction of the velocity
+// ellipse semi-axis in the direction of the velocity
 double Ellipse::GetEB() const {
 	double x = (pBmax - pBmin) / pV0;
 	return pBmax - pV.Norm() * x;
