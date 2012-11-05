@@ -11,9 +11,11 @@
 		<dist room_caption="T-Junction" subroom_id="0" number="7" />
 	</distribution>
 
+
 	<groups>
 		<group id="0">
-			<members>4,5,6</members>
+			<!-- <members>4,5,6</members>-->
+			<members>4</members>
 			<trip>0</trip>
 			<!-- <goal>0</goal> -->
 		</group>
@@ -21,7 +23,9 @@
 
 	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
 		direction="" goal="" age="18" gender="male"/> -->
+	
 	<person id="1" goal="5" />
 	<person id="2" goal="4" />
 	<person id="3" goal="3" />
+	
 </persons> 

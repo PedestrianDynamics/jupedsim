@@ -117,10 +117,10 @@ public:
     void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
     void SetPhiPed();
     void SetFinalDestination(int UID);
-    void SetTrip(vector<int> trip);
+    void SetTrip(const vector<int>& trip);
 
     // Getter-Funktionen
-    const vector<int> GetTrip() const;
+    const vector<int>& GetTrip() const;
     int GetPedIndex() const;
     int GetRoomID() const;
     int GetSubRoomID() const;

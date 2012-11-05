@@ -34,6 +34,7 @@
 #include "routing/DirectionStrategy.h"
 #include "routing/DummyRouter.h"
 #include "routing/GraphRouter.h"
+#include "routing/NavMesh.h"
 #include "pedestrian/PedDistributor.h"
 
 

@@ -38,6 +38,7 @@ Routing::Routing() {
 
 	pTrips = vector<vector<int> >();
 	pFinalDestinations = vector<int>();
+	//pFinalDestinations.push_back(FINAL_DEST_OUT);
 }
 
 Routing::~Routing() {

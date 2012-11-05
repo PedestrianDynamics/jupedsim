@@ -69,7 +69,6 @@ public:
     virtual bool IsExit() const; // prüft ob Ausgang nach draußen, für Croosings IMMER false
     virtual bool IsTransition() const; // check whether this is a transition or not
     virtual bool IsInRoom(int roomID) const; // prüft ob Crossing zu Raum mit roomID gehört
-    virtual void UpdatePedestrian(int RoomID, int SubID, int PedID, Crossing* goal_new) const;
     virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const; // gibt anderen SubRoom zurück
 
     // Ausgabe

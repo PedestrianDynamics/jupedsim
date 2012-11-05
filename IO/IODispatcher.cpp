@@ -340,6 +340,7 @@ void IODispatcher::WriteNavMeshORCA(Building* building) {
 	//	        f.close()
 
 	//to avoid vertices being written twice
+
 	vector<Point> vertices;
 
 	stringstream str_vertices;
@@ -394,14 +395,13 @@ void IODispatcher::WriteNavMeshORCA(Building* building) {
 			for (unsigned w = 0; w < walls.size(); w++) {
 				edges.push_back(walls[w]);
 
-				Point p1 = s->GetCentroid();
-				Point p2 = walls[w].GetCentre();
-				double dist = (p2 - p1).Norm();
+				const Point& p1 = s->GetCentroid();
+				const Point& p2 = walls[w].GetCentre() -p1;
 
 				str_edges << " " << walls[w].GetPoint1().GetX() << " "
 						<< walls[w].GetPoint1().GetY() << endl << "\t"
-						<< walls[w].GetPoint2().GetX() << " "
-						<< walls[w].GetPoint2().GetY() << endl << "\t" << dist
+						<< p2.GetX() << " "
+						<< p2.GetY() << endl << "\t"
 						<< " " << "-1 " << s->GetUID() << endl;
 			}
 

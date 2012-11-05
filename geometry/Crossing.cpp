@@ -153,27 +153,7 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
     }
 }
 
-/* Setzt Fußgänger von einem SubRoom in den zugehörigen nächsten SubRoom
- * Parameter:
- *    - RoomID: aktuelle RoomID des Fußgängers
- *    - SubID: aktuelle SubRoomID des Fußgängers
- *    - PedID: ID des Fußgängers
- *    - goal_new: neues Ziel des Fußgängers, kann Crossing oder Transition sein,
- *          wird in Routing bestimmt und hier gesetzt
- * */
 
-void Crossing::UpdatePedestrian(int RoomID, int SubID, int PedID, Crossing* goal_new) const {
-    SubRoom* sub = GetSubRoom(SubID);
-    Pedestrian* ped = sub->GetPedestrian(PedID);
-    SubRoom* other_sub = GetOtherSubRoom(RoomID, SubID);
-    // Lösche Fußgänger aus aktuellem SubRoom
-    sub->DeletePedestrian(PedID);
-    // neues Ziel setzten
-    ped->SetExitIndex(goal_new->GetIndex());
-    ped->SetExitLine(goal_new);
-    // Setzte Fußgänger in neuen SubRoom
-    other_sub->AddPedestrian(ped);
-}
 // Ausgabe
 
 void Crossing::WriteToErrorLog() const {

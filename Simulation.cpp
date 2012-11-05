@@ -235,6 +235,10 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 6:
 			rout = new DummyRouter();
 			break;
+		default:
+			cout<<"router not available"<<endl;
+			exit(EXIT_FAILURE);
+			break;
 	}
 
 	// IMPORTANT: do not change the order in the following..
@@ -286,6 +290,11 @@ int Simulation::RunSimulation() {
 	double t;
 
 	//Sean
+	//NavMesh* nv= new NavMesh();
+	//nv->BuildNavMesh(pBuilding);
+	//nv->WriteToFile("navigation.nav");
+	//nv->WriteToFileTraVisTo("navigation.nav");
+	//exit(EXIT_FAILURE);
 	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
 	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
 	// writing the header

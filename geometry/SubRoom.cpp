@@ -704,7 +704,7 @@ string Stair::WriteSubRoom() const {
 	// s.append(tmp.Write());
 	sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" radius=\"20\" color=\"100\" />\n"
 			, GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR);
-	//s.append(tmp_c);
+	s.append(tmp_c);
 
 	//add the subroom caption
 	sprintf(tmp_c, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
@@ -762,6 +762,7 @@ const Point* Stair::CheckCorner(const Point** otherPoint, const Point** aktPoint
 }
 
 void Stair::ConvertLineToPoly(vector<Line*> goals) {
+
 	vector<Line*> copy;
 	vector<Point> orgPoly = vector<Point > ();
 	const Point* aktPoint;

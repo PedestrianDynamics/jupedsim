@@ -117,6 +117,8 @@ int  AccessPoint::GetNextApTo(int UID){
 	//this is probably a final destination
 	if(pMapDestToAp.count(UID)==0){
 		cout<<"No route to host ["<< UID<<" ]"<<endl;
+		Dump();
+
 		return -1;
 	}
 	return pMapDestToAp[UID];

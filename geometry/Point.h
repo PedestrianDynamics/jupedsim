@@ -58,6 +58,8 @@ public:
     double NormSquare() const; // Norm des Vektors zum quadrat
     Point Normalized() const; // normierten Vector zurück
     double ScalarP(const Point& v) const; // Skalarprodukt zweier Vektoren
+    /// determinant of the square matrix formed by the vectors [ this, v]
+    double Det(const Point& v) const;
 
     Point CoordTransToEllipse(const Point& center, double cphi, double sphi) const; // Verschiebung und Drehung
     Point CoordTransToCart(const Point& center, double cphi, double sphi) const; // Verschiebung und Drehung

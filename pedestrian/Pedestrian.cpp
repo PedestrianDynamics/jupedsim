@@ -178,7 +178,7 @@ double Pedestrian::Getdt() {
     
 }
 
-void Pedestrian::SetTrip(vector<int> trip){
+void Pedestrian::SetTrip(const vector<int>& trip){
 	pTrip=trip;
 }
 
@@ -218,7 +218,7 @@ NavLine* Pedestrian::GetExitLine() const {
 	return pNavLine;
 }
 
-const vector<int> Pedestrian::GetTrip() const{
+const vector<int>& Pedestrian::GetTrip() const{
 	return pTrip;
 }
 

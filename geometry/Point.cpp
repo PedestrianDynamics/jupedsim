@@ -119,6 +119,11 @@ double Point::ScalarP(const Point& v) const {
     return pX * v.GetX() + pY * v.GetY();
 }
 
+/// determinant of the square matrix formed by the vectors [ this, v]
+double Point::Det(const Point& v) const {
+	return pX * v.pY - pY * v.pX;
+}
+
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
  * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
  * alle Punkte müssen in "normalen" Koordinaten gegeben sein
