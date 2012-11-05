@@ -32,6 +32,7 @@
 
 #include <QtXml>
 #include <QTreeWidget>
+#include <vector>
 #include "SyncData.h"
 
 

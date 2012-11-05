@@ -595,7 +595,8 @@ void TimerCallback::takeScreenshotSequence(vtkRenderWindow* renderWindow){
 	QString screenshots;
 	SystemSettings::getOutputDirectory(screenshots);
 
-	screenshots.append("./png_seq_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm")+"_"+SystemSettings::getFilenamePrefix());
+	screenshots.append("./png_seq_"+QDateTime::currentDateTime().toString("yyMMddhh")+"_"+SystemSettings::getFilenamePrefix());
+	screenshots.truncate(screenshots.size()-1);
 
 	//create directory if not exits
 	if(!QDir(screenshots).exists()){
@@ -603,13 +604,14 @@ void TimerCallback::takeScreenshotSequence(vtkRenderWindow* renderWindow){
 		if(!dir.mkpath (screenshots )){
 			cerr<<"could not create directory: "<< screenshots.toStdString();
 			//try with the current directory
-			screenshots="./png_seq_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm")+"_"+SystemSettings::getFilenamePrefix();
+			screenshots="./png_seq_"+QDateTime::currentDateTime().toString("yyMMdd")+"_"+SystemSettings::getFilenamePrefix();
+			screenshots.truncate(screenshots.size()-1);
 		}
 	}
 
 
 	char filename[30]={0};
-	sprintf(filename,"/tmp_%d.png",imageID++);
+	sprintf(filename,"/tmp_%07d.png",imageID++);
 	screenshots.append(filename);
 	image->SetFileName(screenshots.toStdString().c_str());
 	winToImFilter->Modified();

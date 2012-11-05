@@ -196,20 +196,19 @@ void ThreadVisualisation::run(){
 	// Create a real circle, not a sphere
 	{
 
-		VTK_CREATE(vtkRegularPolygonSource, polygonSource);
-		polygonSource->GeneratePolygonOff();
-		polygonSource->SetNumberOfSides(50);
-		polygonSource->SetRadius(700);
-		polygonSource->SetCenter(0,0,0);
-		polygonSource->Update();
-
-		VTK_CREATE(vtkPolyDataMapper,mapper);
-		mapper->SetInputConnection(polygonSource->GetOutputPort());
-		VTK_CREATE(vtkActor,actor);
-		actor->GetProperty()->SetColor(180.0/255,180.0/255.0,180.0/255.0);
-		actor->SetMapper(mapper);
-
-		//renderer->AddActor(actor);
+//		VTK_CREATE(vtkRegularPolygonSource, polygonSource);
+//		polygonSource->GeneratePolygonOff();
+//		polygonSource->SetNumberOfSides(50);
+//		polygonSource->SetRadius(700);
+//		polygonSource->SetCenter(0,0,0);
+//		polygonSource->Update();
+//
+//		VTK_CREATE(vtkPolyDataMapper,mapper);
+//		mapper->SetInputConnection(polygonSource->GetOutputPort());
+//		VTK_CREATE(vtkActor,actor);
+//		actor->GetProperty()->SetColor(180.0/255,180.0/255.0,180.0/255.0);
+//		actor->SetMapper(mapper);
+//		renderer->AddActor(actor);
 	}
 
 

@@ -581,8 +581,8 @@ void FacilityGeometry::addNewElementText(double center[3], double orientation[3]
 			// set the properties of the caption
 			//FARBE
 			vtkTextProperty* tprop = caption->GetTextProperty();
-			tprop->SetFontFamilyToArial();
-			tprop->BoldOn();
+			//tprop->SetFontFamilyToArial();
+			//tprop->BoldOn();
 			//tprop->ShadowOn();
 			//tprop->SetLineSpacing(1.0);
 			tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize());
@@ -590,6 +590,8 @@ void FacilityGeometry::addNewElementText(double center[3], double orientation[3]
 			double colorRGB[3];
 			lookupTable->GetColor(color, colorRGB);
 			tprop->SetColor(colorRGB);
+
+			//cout<<"size:" <<tprop->GetFontSize()<<endl;
 			//tprop->SetColor(1,0,0);
 
 			caption->SetPosition(center);

@@ -42,6 +42,7 @@
 #include <QString>
 #include <limits>
 #include <iostream>
+#include <cmath>
 
 
 using namespace std;
@@ -60,6 +61,7 @@ SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps){
 	dataset=data;
 	para=fps;
 	parsingWalls=false;
+	color=0.0;
 
 	dataset->clearFrames();
 }
