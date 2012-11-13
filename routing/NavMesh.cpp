@@ -76,12 +76,14 @@ void NavMesh::BuildNavMesh(Building* b) {
 				Point P1 = crossings[c]->GetPoint2();
 				Point D0 = P1 - P0;
 				if (D0.Det(centroid0) < 0) {
-					e->pDisp=D0;
+					//e->pDisp=D0;
+					e->pEnd=*GetVertex(P1);
 					e->pStart= *GetVertex(P0);
 
 				}else{
 					e->pStart= *GetVertex(P1);
-					e->pDisp=Point(0,0)-D0;
+					e->pEnd=*GetVertex(P0);
+					//e->pDisp=Point(0,0)-D0;
 				}
 				AddEdge(e);
 			}
@@ -117,12 +119,14 @@ void NavMesh::BuildNavMesh(Building* b) {
 				Point P1 = transitions[t]->GetPoint2();
 				Point D0 = P1 - P0;
 				if (D0.Det(centroid0) < 0) {
-					e->pDisp=D0;
+					e->pEnd=*GetVertex(P1);
+					//e->pDisp=D0;
 					e->pStart= *GetVertex(P0);
 
 				}else{
 					e->pStart= *GetVertex(P1);
-					e->pDisp=Point(0,0)-D0;
+					e->pEnd=*GetVertex(P0);
+					//e->pDisp=Point(0,0)-D0;
 				}
 
 				AddEdge(e);
@@ -156,12 +160,14 @@ void NavMesh::BuildNavMesh(Building* b) {
 				Point P1 = walls[w].GetPoint2();
 				Point D0 = P1 - P0;
 				if (D0.Det(centroid0) < 0) {
-					o->pDisp=D0;
+					//o->pDisp=D0;
+					o->pEnd=*GetVertex(P1);
 					o->pStart= *GetVertex(P0);
 
 				}else{
 					o->pStart= *GetVertex(P1);
-					o->pDisp=Point(0,0)-D0;
+					//o->pDisp=Point(0,0)-D0;
+					o->pEnd=*GetVertex(P0);
 				}
 
 				AddObst(o);
@@ -226,8 +232,9 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 			<<"\t<geometry>"<<endl;
 
 	//writing the nodes
-	vector<int> nodes_to_plot;
-	//nodes_to_plot.push_back(1);
+	//int mynodes[] = {16,2,77,29};
+	int mynodes[] = {37};
+	vector<int> nodes_to_plot (mynodes, mynodes + sizeof(mynodes) / sizeof(int) );
 
 
 	for (unsigned int n=0;n<pNodes.size();n++){
@@ -254,8 +261,8 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 			for(unsigned int i=0;i<node->pObstacles.size();i++){
 				double x1=pObst[node->pObstacles[i]]->pStart.pPos.GetX()*FAKTOR;
 				double y1=pObst[node->pObstacles[i]]->pStart.pPos.GetY()*FAKTOR;
-				double x2=pObst[node->pObstacles[i]]->pDisp.GetX()*FAKTOR +x1;
-				double y2=pObst[node->pObstacles[i]]->pDisp.GetY()*FAKTOR +y1;
+				double x2=pObst[node->pObstacles[i]]->pEnd.pPos.GetX()*FAKTOR;
+				double y2=pObst[node->pObstacles[i]]->pEnd.pPos.GetY()*FAKTOR;
 
 				file<<"\t\t<wall>"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -272,8 +279,8 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 			if(edge->pNode0==node_id || edge->pNode1==node_id ){
 				double x1=edge->pStart.pPos.GetX()*FAKTOR;
 				double y1=edge->pStart.pPos.GetY()*FAKTOR;
-				double x2=edge->pDisp.GetX()*FAKTOR +x1;
-				double y2=edge->pDisp.GetY()*FAKTOR +y1;
+				double x2=edge->pEnd.pPos.GetX()*FAKTOR;
+				double y2=edge->pEnd.pPos.GetY()*FAKTOR;
 
 				file<<"\t\t<door>"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -287,6 +294,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 	file<<"\t</geometry>"<<endl;
 	file.close();
 }
+
 void NavMesh::WriteToFile(std::string fileName) {
 
 	ofstream file(fileName.c_str());
@@ -299,7 +307,7 @@ void NavMesh::WriteToFile(std::string fileName) {
 	}
 
 	//write the vertices
-	file<<"# vertices section"<<endl;
+	//file<<"# vertices section"<<endl;
 	file<<pVertices.size()<<endl;
 	for (unsigned int v=0;v<pVertices.size();v++){
 		file<<"\t"<<pVertices[v]->pPos.GetX()<<" " <<pVertices[v]->pPos.GetY()<<endl;
@@ -307,27 +315,28 @@ void NavMesh::WriteToFile(std::string fileName) {
 	}
 
 	//write the edges
-	file<<endl<<"# edges section"<<endl;
+	//file<<endl<<"# edges section"<<endl;
 	file<<pEdges.size()<<endl;
 	for (unsigned int e=0;e<pEdges.size();e++){
-		file<<pEdges[e]->pStart.pPos.GetX()<<" " <<pEdges[e]->pStart.pPos.GetY()<<endl;
-		file<<"\t"<<pEdges[e]->pDisp.GetX()<<" " <<pEdges[e]->pDisp.GetY()<<endl;
-		file<<"\t"<<pEdges[e]->pNode0<<" " <<pEdges[e]->pNode1<<endl;
+		//file<<pEdges[e]->pStart.pPos.GetX()<<" " <<pEdges[e]->pStart.pPos.GetY()<<endl;
+		//file<<"\t"<<pEdges[e]->pDisp.GetX()<<" " <<pEdges[e]->pDisp.GetY()<<endl;
+		file<<"\t";
+		file<<pEdges[e]->pStart.id<<" " <<pEdges[e]->pEnd.id<<" ";
+		file<<pEdges[e]->pNode0<<" " <<pEdges[e]->pNode1<<endl;
 	}
 
 
 	//write the obstacles
-	file<<endl<<"# Obstacles section"<<endl;
+	//file<<endl<<"# Obstacles section"<<endl;
 	file<<pObst.size()<<endl;
 	for (unsigned int ob=0;ob<pObst.size();ob++){
-		file<<pObst[ob]->pStart.pPos.GetX()<<" " <<pObst[ob]->pStart.pPos.GetY()<<endl;
-		file<<"\t"<<pObst[ob]->pDisp.GetX()<<" " <<pObst[ob]->pDisp.GetY()<<endl;
-		file<<"\t"<<pObst[ob]->pNode0<<endl;
-		file<<"\t"<<pObst[ob]->pNextObst<<endl;
+		file<<"\t";
+		file<<pObst[ob]->pStart.id<<" " <<pObst[ob]->pEnd.id<<" ";
+		file<<pObst[ob]->pNode0<<" "<<pObst[ob]->pNextObst<<endl;
 	}
 
 	//write the nodes
-	file<<endl<<"# Nodes section"<<endl;
+	//file<<endl<<"# Nodes section"<<endl;
 
 	std::map<string,int> ngroup_to_size;
 	for (unsigned int n=0;n<pNodes.size();n++){
@@ -335,7 +344,7 @@ void NavMesh::WriteToFile(std::string fileName) {
 	}
 
 	string previousGroup= pNodes[0]->pGroup;
-	file<<previousGroup<<endl;
+	file<<endl<<previousGroup<<endl;
 	file<<ngroup_to_size[previousGroup]<<endl;
 
 	for (unsigned int n=0;n<pNodes.size();n++){
@@ -343,25 +352,26 @@ void NavMesh::WriteToFile(std::string fileName) {
 		string actualGroup=node->pGroup;
 		if(actualGroup!=previousGroup){
 			previousGroup=actualGroup;
-			file<<"# Node group"<<endl;
+			//file<<"# Node group"<<endl;
 			file<<previousGroup<<endl;
 			file<<ngroup_to_size[previousGroup]<<endl;
 		}
 
-		file<<node->id<<endl;
-		file<<node->pCentroid.GetX()<<" "<<node->pCentroid.GetY()<<endl;
+		//file<<node->id<<endl;
+		file<<endl;
+		file<<"\t"<<node->pCentroid.GetX()<<" "<<node->pCentroid.GetY()<<endl;
 		file<<"\t"<<node->pHull.size()<<" ";
 		for(unsigned int i=0;i<node->pHull.size();i++){
 			file<<node->pHull[i].id<<" ";
 		}
 		file<<endl;
+		file<<"\t"<<node->pNormalVec[0]<<" "<<node->pNormalVec[1]<<" "<<node->pNormalVec[2]<<endl;
 
 		file<<"\t"<<node->pObstacles.size()<<" ";
 		for(unsigned int i=0;i<node->pObstacles.size();i++){
 			file<<node->pObstacles[i]<<" ";
 		}
 		file<<endl;
-		file<<"\t"<<node->pNormalVec[0]<<" "<<node->pNormalVec[1]<<" "<<node->pNormalVec[2]<<endl;
 	}
 
 	file.close();

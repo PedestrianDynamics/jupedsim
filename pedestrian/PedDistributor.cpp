@@ -394,10 +394,18 @@ int PedDistributor::Distribute(Building* building) const {
 			ped->SetGender(gender);
 		}
 
-		double destination=xmltof(xPerson.getAttribute("goal"),-1);
-		if( destination!=-1){
-			ped->SetFinalDestination(destination);
-			building->GetRouting()->AddFinalDestinationID(destination);
+		double goal_id=xmltof(xPerson.getAttribute("goal"),-1);
+		if( goal_id!=-1){
+			if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
+					(ped->GetFinalDestination()!=goal_id)){
+				sprintf(tmp, "ERROR: \tconflicting final destination for Ped [%d]", ped->GetPedIndex());
+				Log->write(tmp);
+				sprintf(tmp, "ERROR: \talready assigned to destination [%d]", ped->GetFinalDestination());
+				Log->write(tmp);
+				exit(EXIT_FAILURE);
+			}
+			ped->SetFinalDestination(goal_id);
+			building->GetRouting()->AddFinalDestinationID(goal_id);
 		}
 
 		double wishVelo=xmltof(xPerson.getAttribute("wishVelo"),-1);
@@ -419,7 +427,7 @@ int PedDistributor::Distribute(Building* building) const {
 						//if a room was already assigned
 						if(ped->GetRoomID()!=-1){
 							if(FindPedAndDeleteFromRoom(building,ped)){
-								sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet and will be be moved.", id);
+								sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet , will be created and moved to the corresponding room.", id);
 								Log->write(tmp);
 							}
 						}
@@ -432,6 +440,8 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 	}
 
+	int nPedsExpected= xmltoi(xMainNode.getChildNode("header").getChildNode("number").getText(),-1);
+
 	//now parse the different groups
 	XMLNode xGroups=xMainNode.getChildNode("groups");
 	int nGroup=xGroups.nChildNode("group");
@@ -442,7 +452,9 @@ int PedDistributor::Distribute(Building* building) const {
 		int goal_id=xmltoi(group.getChildNode("goal").getText(),-1);
 
 		if((goal_id !=-1) && (trip_id!=-1)){
-			sprintf(tmp, "WARNING: \t trip and goal cannot be set for the same group [%d] !.",group_id);
+			sprintf(tmp, "ERROR: \ttrip and goal cannot be set for the same group [%d] !",group_id);
+			Log->write(tmp);
+			sprintf(tmp, "ERROR: \tas they might conflict!");
 			Log->write(tmp);
 			exit(EXIT_FAILURE);
 		}
@@ -457,13 +469,31 @@ int PedDistributor::Distribute(Building* building) const {
 			Pedestrian* ped=building->GetPedestrian(ped_id);
 			if(ped){
 				ped->SetGroup(group_id);
-				if(trip_id!=-1)
-				ped->SetTrip(building->GetRouting()->GetTrip(trip_id));
-				if(goal_id!=-1)
-				ped->SetFinalDestination(goal_id);
+				if(trip_id!=-1){
+					ped->SetTrip(building->GetRouting()->GetTrip(trip_id));
+					sprintf(tmp, "ERROR: \tTrip is actually not supported for pedestrian [%d]. Please use <goal><goal/> instead", ped->GetPedIndex());
+					Log->write(tmp);
+					exit(EXIT_FAILURE);
+				}
+				if(goal_id!=-1){
+					if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
+							(ped->GetFinalDestination()!=goal_id)){
+						sprintf(tmp, "ERROR: \tconflicting final destinations for Ped [%d]", ped->GetPedIndex());
+						Log->write(tmp);
+						sprintf(tmp, "ERROR: \talready assigned to a destination with ID [%d]", ped->GetFinalDestination());
+						Log->write(tmp);
+						exit(EXIT_FAILURE);
+					}
+
+					ped->SetFinalDestination(goal_id);
+					building->GetRouting()->AddFinalDestinationID(goal_id);
+				}
 			}else{
-				sprintf(tmp, "WARNING:\t Ped [%d] does not not exist yet ",ped_id);
+				sprintf(tmp, "ERROR:\tID [%d] out of range. The largest allowed ID based on the current distribution is [%d]",ped_id,building->GetAnzPedestrians());
 				Log->write(tmp);
+				sprintf(tmp, "ERROR:\tVerify that you have distributed all [%d] pedestrians",nPedsExpected);
+				Log->write(tmp);
+				exit(EXIT_FAILURE);
 			}
 			p = strtok(NULL, ",");
 		}
@@ -471,11 +501,12 @@ int PedDistributor::Distribute(Building* building) const {
 
 
 	//now do the last check if all pedestrians were distributed:
-	int nPedsExpected= xmltoi(xMainNode.getChildNode("header").getChildNode("number").getText(),-1);
+
 	if(nPedsExpected!=nPeds){
-		sprintf(tmp, "WARNING:\tThe number of distributed pedestrians [%d] does not match \n"
-					  "        \tthe total number of specified pedestrians in the header [%d]!",nPeds,nPedsExpected);
+		sprintf(tmp, "ERROR:\tThe number of distributed pedestrians [%d] does not match \n"
+				"        \tthe total number of specified pedestrians in the header [%d]!",nPeds,nPedsExpected);
 		Log->write(tmp);
+		exit(EXIT_FAILURE);
 	}
 
 	return nPeds;

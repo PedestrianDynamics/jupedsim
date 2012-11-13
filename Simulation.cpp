@@ -292,9 +292,10 @@ int Simulation::RunSimulation() {
 	//Sean
 	//NavMesh* nv= new NavMesh();
 	//nv->BuildNavMesh(pBuilding);
-	//nv->WriteToFile("navigation.nav");
+	//nv->WriteToFile("tribune.nav");
 	//nv->WriteToFileTraVisTo("navigation.nav");
 	//exit(EXIT_FAILURE);
+
 	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
 	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
 	// writing the header

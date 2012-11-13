@@ -30,7 +30,6 @@ class NavMesh {
 		double pNormalVec[3];
 
 		bool operator()(Node*a ,Node* b){
-			cout<<"calling"<<endl;
 			return a->pGroup < b->pGroup;
 		}
 
@@ -49,7 +48,8 @@ class NavMesh {
 	public:
 		int id;
 		Vertex pStart;
-		Point pDisp;
+		Vertex pEnd;
+		//Point pDisp;
 		int pNode0;
 		int pNode1;
 	};
@@ -58,7 +58,8 @@ class NavMesh {
 	public:
 		int id;
 		Vertex pStart;
-		Point pDisp;
+		Vertex pEnd;
+		//Point pDisp;
 		int pNode0;
 		int pNextObst;
 	};
