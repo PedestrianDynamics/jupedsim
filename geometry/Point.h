@@ -34,51 +34,62 @@
 #include <sstream>
 
 class Point {
-private:
+public:
     double pX;
     double pY;
 
 public:
-    // Konstruktoren
+    // constructors
     Point();
     Point(double x, double y);
     Point(const Point& orig);
-//    virtual ~Point();
+    //    virtual ~Point();
 
-    // Setter-Funktionen
-    void SetX(double x); // setzt x-Koordinate
-    void SetY(double y); // setzt y-Koordinate
 
-    // Getter-Funktionen
-    double GetX() const; // gibt x-Koordinate zurück
-    double GetY() const; // gibt y-Koordinate zurück
+    void SetX(double x);
+    void SetY(double y);
 
-    // Sonstiges
-    double Norm() const; // Norm des Vektors
-    double NormSquare() const; // Norm des Vektors zum quadrat
-    Point Normalized() const; // normierten Vector zurück
-    double ScalarP(const Point& v) const; // Skalarprodukt zweier Vektoren
+
+    double GetX() const;
+    double GetY() const;
+
+    /// Norm
+    double Norm() const;
+    /// Norm square
+    double NormSquare() const;
+     /// normalized vector
+    Point Normalized() const;
+    /// dot product
+    double ScalarP(const Point& v) const;
     /// determinant of the square matrix formed by the vectors [ this, v]
     double Det(const Point& v) const;
+    /// translation and rotation in Ellipse coordinate system
+    Point CoordTransToEllipse(const Point& center, double cphi, double sphi) const;
+    /// translation and rotation in cartesian system
+    Point CoordTransToCart(const Point& center, double cphi, double sphi) const;
+    /// rotate the vector by theta
+    Point Rotate(double ctheta, double stheta) const;
 
-    Point CoordTransToEllipse(const Point& center, double cphi, double sphi) const; // Verschiebung und Drehung
-    Point CoordTransToCart(const Point& center, double cphi, double sphi) const; // Verschiebung und Drehung
-    Point Rotate(double ctheta, double stheta) const; // rotiert Vektor um den Winkel theta
 
-
-    // überladene Operatoren
-    const Point operator+(const Point& p) const; // Addiert zwei Vektoren
-    const Point operator-(const Point& p) const; // Subtrahiert zwei Vektoren
-    bool operator==(const Point& p) const; // Vergleicht zwei Punkte/Vektoren komponentweise
-    bool operator!=(const Point& p) const; // Vergleicht zwei Punkte/Vektoren komponentweise
+    // operators
+    /// addition
+    const Point operator+(const Point& p) const;
+    /// substraction
+    const Point operator-(const Point& p) const;
+    /// comparision
+    bool operator==(const Point& p) const;
+    /// comparision
+    bool operator!=(const Point& p) const;
 
     //debug
     std::string toString();
 };
 
 
-// Operatoren mit double
+/// multiplication
 const Point operator*(const Point& p, const double f);
+
+/// division
 const Point operator/(const Point& p, const double f);
 
 #endif	/* _POINT_H */

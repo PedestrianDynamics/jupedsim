@@ -29,7 +29,10 @@ routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestria
 pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
 routing/QuickestPathRouter.cpp routing/NavMesh.cpp\
 routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp  \
-routing/graph/NavLineState.cpp
+routing/graph/NavLineState.cpp \
+MCD/AlgorithmBase.cpp  MCD/AlgorithmMCD.cpp  MCD/AlgorithmMWT.cpp  MCD/AlgorithmVP.cpp \
+MCD/GeomHomog.cpp  MCD/GeomPairDeque.cpp  MCD/GeomPoly.cpp  MCD/GeomVector.cpp \
+
 
 OBJECTS=$(SOURCES:.cpp=.o)
 DEP=$(SOURCES:.cpp=.d)

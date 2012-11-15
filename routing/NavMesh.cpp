@@ -6,23 +6,24 @@
  */
 
 #include "NavMesh.h"
+#include "../MCD/GeomPoly.h"
+#include "../MCD/GeomVector.h"
+#include "../MCD/AlgorithmMCD.h"
 
-#define _DEBUG
+
+#define _DEBUG 1
 
 
-NavMesh::NavMesh() {
-	pBuilding=NULL;
+NavMesh::NavMesh(Building* b) {
+	pBuilding=b;
 }
 
 NavMesh::~NavMesh() {
 }
 
-void NavMesh::BuildNavMesh(Building* b) {
-
-	pBuilding=b;
+void NavMesh::BuildNavMesh() {
 
 	std::map<int,int> subroom_to_node;
-
 
 	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
 		Room* r = pBuilding->GetRoom(i);
@@ -91,6 +92,7 @@ void NavMesh::BuildNavMesh(Building* b) {
 
 			const vector<Transition*>& transitions = s->GetAllTransitions();
 			for (unsigned t = 0; t < transitions.size(); t++) {
+
 				int node0 = transitions[t]->GetSubRoom1()->GetUID();
 				int node1 =
 						(transitions[t]->GetSubRoom2() == NULL) ?
@@ -151,7 +153,7 @@ void NavMesh::BuildNavMesh(Building* b) {
 				const Point& centroid0 = s->GetCentroid();
 				int node0 = s->GetUID();
 
-				Obst* o= new Obst();
+				Obstacle* o= new Obstacle();
 				o->pNode0=node0;
 				o->pNextObst=-1;
 
@@ -206,8 +208,92 @@ void NavMesh::BuildNavMesh(Building* b) {
 		pObst[ob]->pNode0=subroom_to_node[pObst[ob]->pNode0];
 	}
 
+	//chain the obstacles
+
+	for (unsigned int ob1 = 0; ob1 < pObst.size(); ob1++)
+	{
+		for (unsigned int ob2 = 0; ob2 < pObst.size(); ob2++)
+		{
+			Obstacle* obst1 = pObst[ob1];
+			Obstacle* obst2 = pObst[ob2];
+
+			if (obst1->id == obst2->id)
+				continue;
+			int comVertex=obst1->GetCommonVertex(obst2);
+			if(comVertex==-1)
+				continue;
+
+			if(obst1->pStart.id==comVertex)
+			{
+				obst2->pNextObst=obst1->id;
+			}
+			else
+			{
+				obst1->pNextObst=obst2->id;
+			}
+
+		}
+	}
+
+	// convexify the mesh
+	Convexify();
+	//DumpNode(54);
 
 }
+
+void NavMesh::DumpNode(int id) {
+	Node *nd=pNodes[id];
+
+	std::cerr<<"ID: [ "<<endl;
+	for(unsigned int i=0;i<nd->pHull.size();i++)
+	{
+		std::cerr<<nd->pHull[i].id<<" ";
+	}
+	std::cerr<<endl<<" ]"<<endl;
+	//exit(0);
+}
+
+void NavMesh::Convexify(){
+
+	for (unsigned int n=0;n<pNodes.size();n++)
+	{
+
+		Node* node=pNodes[n];
+		if(node->IsClockwise()==true){
+			reverse(node->pHull.begin(),node->pHull.end());
+		}
+
+
+		if(node->IsConvex()==false){
+
+			//cout<<node->IsClockwise()<<" : "<<node->IsConvex()<<endl;
+			cout<<"Non convex polygon found: converting"<<endl;
+
+			//cout<<"size of int: "<<sizeof(double)<<endl;
+
+			//convert the node in the appropriate structure
+			CGeomPoly* poly = new CGeomPoly();
+
+			for(unsigned int i=0;i<node->pHull.size();i++)
+			{
+				Point current=node->pHull[i].pPos;
+				poly->m_pPrevious = poly->m_pCurrent;
+				poly->m_pCurrent = current;
+				poly->m_pList[poly->m_nCount++] = current;
+
+			}
+			AlgorithmBase* algo = new AlgorithmMCD(poly);
+			algo->compute();
+
+			cout<<"done "<<endl;
+			//exit(0);
+		}
+	}
+
+
+	exit(0);
+}
+
 
 void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 	ofstream file(fileName.c_str());
@@ -233,7 +319,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 
 	//writing the nodes
 	//int mynodes[] = {16,2,77,29};
-	int mynodes[] = {37};
+	int mynodes[] = { };
 	vector<int> nodes_to_plot (mynodes, mynodes + sizeof(mynodes) / sizeof(int) );
 
 
@@ -244,6 +330,9 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		if(nodes_to_plot.size()!=0)
 			if (IsElementInVector(nodes_to_plot, node_id) == false)
 				continue;
+
+		if(node->IsConvex()==true) continue;
+		//if(node->IsClockwise()==true) continue;
 
 		file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*FAKTOR<<"\" centerY=\""<<node->pCentroid.GetY()*FAKTOR<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
 
@@ -409,7 +498,7 @@ void NavMesh::AddEdge(Edge* e) {
 	}
 }
 
-void NavMesh::AddObst(Obst* o) {
+void NavMesh::AddObst(Obstacle* o) {
 	if (IsElementInVector(pObst, o) == false) {
 		if (pObst.size() == 0) {
 			o->id = 0;
