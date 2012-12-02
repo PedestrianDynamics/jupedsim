@@ -165,13 +165,13 @@ const Point Point::operator-(const Point& p) const {
 // Vergleicht zwei Punkte/Vektoren komponentweise
 
 bool Point::operator==(const Point& p) const {
-    return (fabs(pX - p.GetX()) < EPS && fabs(pY - p.GetY()) < EPS);
+    return (fabs(pX - p.GetX()) < J_EPS && fabs(pY - p.GetY()) < J_EPS);
 }
 
 // Vergleicht zwei Punkte/Vektoren komponentweise
 
 bool Point::operator!=(const Point& p) const {
-    return (fabs(pX - p.GetX()) > EPS || fabs(pY - p.GetY()) > EPS);
+    return (fabs(pX - p.GetX()) > J_EPS || fabs(pY - p.GetY()) > J_EPS);
 }
 
 

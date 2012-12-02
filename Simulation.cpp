@@ -249,12 +249,28 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	Log->write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
-	//pBuilding->AddSurroundingRoom();
+	pBuilding->AddSurroundingRoom();
 	pBuilding->InitGeometry(); // create the polygones
 
 	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
 
 	pBuilding->LoadRoutingInfo(args->GetRoutingFile());
+
+	/////////
+
+	//Sean
+	NavMesh* nv= new NavMesh(pBuilding);
+	nv->BuildNavMesh();
+	nv->WriteToFile("../pedunc/examples/Room080/Room080.nav");
+	nv->WriteToFileTraVisTo("promenade.nav.xml");
+	exit(EXIT_FAILURE);
+
+	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
+	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
+
+
+	////////
+
 
 	pNPeds=pDistribution->Distribute(pBuilding);
 
@@ -289,15 +305,7 @@ int Simulation::RunSimulation() {
 	writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 	double t;
 
-	//Sean
-	//NavMesh* nv= new NavMesh();
-	//nv->BuildNavMesh(pBuilding);
-	//nv->WriteToFile("tribune.nav");
-	//nv->WriteToFileTraVisTo("navigation.nav");
-	//exit(EXIT_FAILURE);
 
-	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
-	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
 	// writing the header
 
 	iod->WriteHeader(pNPeds, fps, pBuilding);

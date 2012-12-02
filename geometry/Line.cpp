@@ -122,7 +122,7 @@ Point Line::NormalVec() const {
 		ny = 1;
 		/* Normieren */
 		norm = sqrt(nx * nx + ny * ny);
-		if (fabs(norm) < EPS) {
+		if (fabs(norm) < J_EPS) {
 			Log->write("ERROR: \tLine::NormalVec() norm==0\n");
 			exit(0);
 		}
@@ -146,9 +146,9 @@ double Line::NormalComp(const Point& v) const {
 	double ny = n.GetY();
 	double alpha;
 
-	if (fabs(lx) < EPS) {
+	if (fabs(lx) < J_EPS) {
 		alpha = v.GetX() / nx;
-	} else if (fabs(ly) < EPS) {
+	} else if (fabs(ly) < J_EPS) {
 		alpha = v.GetY() / ny;
 	} else {
 		alpha = (v.GetY() * lx - v.GetX() * ly) / (nx * ly - ny * lx);
@@ -208,9 +208,9 @@ bool Line::IsInLine(const Point& p) const {
 	by = b.GetY();
 	px = p.GetX();
 	py = p.GetY();
-	if (fabs(ax - bx) > EPS_DIST) {
+	if (fabs(ax - bx) > J_EPS_DIST) {
 		lambda = (px - ax) / (bx - ax);
-	} else if (fabs(ay - by) > EPS_DIST) {
+	} else if (fabs(ay - by) > J_EPS_DIST) {
 		lambda = (py - ay) / (by - ay);
 	} else {
 		Log->write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
@@ -237,7 +237,7 @@ bool Line::IsInLineSegment(const Point& p) const {
 	
 	// cross product to check if point i colinear
 	crossp = (py-ay)*(bx-ax)-(px-ax)*(by-ay);
-	if(fabs(crossp) > EPS) return false;
+	if(fabs(crossp) > J_EPS) return false;
 	
 	// dotproduct and distSquared to check if point is in segment and not just in line
 	dotp = (px-ax)*(bx-ax)+(py-ay)*(by-ay);

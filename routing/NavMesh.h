@@ -2,16 +2,56 @@
  * NavMesh.h
  *
  *  Created on: Oct 29, 2012
- *      Author: piccolo
+ *      Author: Ulrich Kemloh
  */
 
 #ifndef NAVMESH_H_
 #define NAVMESH_H_
 
+
+//#define _CGAL
+
+// CGAL libs
+#ifdef _CGAL
+
+#include "ConvexDecomp.h"
+#include "Triangulation.h"
+
+//#include <CGAL/basic.h>
+//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+//#include <CGAL/Partition_traits_2.h>
+//#include <CGAL/Partition_is_valid_traits_2.h>
+//#include <CGAL/polygon_function_objects.h>
+//#include <CGAL/partition_2.h>
+//#include <CGAL/point_generators_2.h>
+//#include <CGAL/random_polygon_2.h>
+//#include <cassert>
+//#include <list>
+//
+//#include <CGAL/Cartesian.h>
+//#include <CGAL/centroid.h>
+//
+//typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+//typedef CGAL::Partition_traits_2<K> Traits;
+//typedef CGAL::Is_convex_2<Traits> Is_convex_2;
+//typedef Traits::Polygon_2 Polygon_2;
+//typedef Traits::Point_2 Point_2;
+//
+//
+//typedef Polygon_2::Vertex_const_iterator Vertex_iterator;
+//typedef Polygon_2::Vertex_const_circulator Vertex_circulator;
+//typedef Polygon_2::Edge_const_iterator Edge_iterator;
+//typedef std::list<Polygon_2> Polygon_list;
+//typedef Polygon_list::const_iterator Polygon_iterator;
+//typedef CGAL::Partition_is_valid_traits_2<Traits, Is_convex_2> Validity_traits;
+
+#endif
+
 #include "../geometry/Point.h"
 #include "cmath"
 #include "../geometry/Building.h"
 #include <string>
+
 
 class NavMesh {
 
@@ -19,6 +59,15 @@ class NavMesh {
 	public:
 		Point pPos;
 		int id;
+		bool operator==(const  Vertex& v) const {
+			return v.pPos==pPos;
+		}
+		bool operator< (const Vertex& v) const{
+			return v.pPos.pX<pPos.pX;
+		}
+		bool operator> (const Vertex& v) const{
+			return v.pPos.pX>pPos.pX;
+		}
 	};
 
 	class Node {
@@ -28,11 +77,13 @@ class NavMesh {
 		int id;
 		std::vector<Vertex> pHull;
 		std::vector<int> pObstacles;
+		std::vector<int> pPortals;
 		double pNormalVec[3];
 
 		bool operator()(Node*a ,Node* b){
 			return a->pGroup < b->pGroup;
 		}
+
 
 		///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
 		bool IsConvex(){
@@ -46,7 +97,7 @@ class NavMesh {
 				Point vecAB= pHull[(i+1)%hsize].pPos-pHull[i%hsize].pPos;
 				Point vecBC= pHull[(i+2)%hsize].pPos-pHull[(i+1)%hsize].pPos;
 				double det= vecAB.Det(vecBC);
-				if(fabs(det)<EPS) det=0.0;
+				if(fabs(det)<J_EPS) det=0.0;
 
 				if(det<0.0){
 					neg++;
@@ -80,7 +131,7 @@ class NavMesh {
 			Point vecBC= pHull[2].pPos-pHull[1].pPos;
 
 			double det=vecAB.Det(vecBC);
-			if(fabs(det)<EPS) det=0.0;
+			if(fabs(det)<J_EPS) det=0.0;
 
 			return ( det<=0.0 );
 		}
@@ -96,6 +147,11 @@ class NavMesh {
 		//Point pDisp;
 		int pNode0;
 		int pNode1;
+		Edge(){
+			id=-1;
+			pNode0=-1;
+			pNode1=-1;
+		}
 	};
 
 	class Obstacle {
@@ -135,10 +191,12 @@ public:
 	void BuildNavMesh();
 	void WriteToFile(std::string fileName);
 	void WriteToFileTraVisTo(std::string fileName);
-	void AddVertex(Vertex* v);
-	void AddEdge(Edge* e);
-	void AddObst(Obstacle* o);
-	void AddNode(Node* n);
+	void WriteToFileTraVisTo(std::string fileName, const std::vector<Point>& points);
+
+	int AddVertex(Vertex* v);
+	int AddEdge(Edge* e);
+	int AddObst(Obstacle* o);
+	int AddNode(Node* n);
 	///return the vertex with the corresponding point
 	Vertex* GetVertex(const Point& p);
 	void DumpNode(int id);
@@ -150,10 +208,20 @@ private:
 	std::vector<Node*> pNodes;
 	Building* pBuilding;
 
+	// convexify the created nav mesh
 	void Convexify();
 
+	//add the additional surrounding world obstacle
+	void Finalize();
+
+	/// return the id of the edge
+	int IsPortal(Point& p1, Point&  p2);
+	/// return the id of the obstacle
+	int IsObstacle(Point& p1, Point&  p2);
 
 
+	std::vector<Node*> new_nodes;
+	vector<int> problem_nodes;
 };
 
 #endif /* NAVMESH_H_ */

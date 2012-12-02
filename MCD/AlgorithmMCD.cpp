@@ -355,14 +355,15 @@ void AlgorithmMCD::recoverSolution(int i, int k)
 
 void AlgorithmMCD::Draw( )
 {
-	drawDiagnal(0, m_pl->m_nCount - 1);
+	//drawDiagnal(0, m_pl->m_nCount - 1);
 	drawSubPoly(0, m_pl->m_nCount - 1);
 }
 
 
 void AlgorithmMCD::drawDiagnal(int i, int k)
 {
-	printf(" New Edge [%d] -- > [%d]",i,k);
+	printf(" New Edge [%d] -- > [%d]\n",i,k);
+	//getc(stdin);
 }
 
 void AlgorithmMCD::drawSubPoly(int i, int k)

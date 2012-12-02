@@ -551,7 +551,7 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
 			//check all transitions
 			bool tooNear=false;
 			for(unsigned int t=0;t<r->GetAllTransitions().size();t++){
-				if(r->GetTransition(t)->DistTo(pos)<EPS_GOAL){
+				if(r->GetTransition(t)->DistTo(pos)<J_EPS_GOAL){
 					//too close
 					tooNear=true;
 					break;
@@ -562,7 +562,7 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
 			//reset and check all crossings
 			tooNear=false;
 			for(unsigned int c=0;c<r->GetAllCrossings().size();c++){
-				if(r->GetCrossing(c)->DistTo(pos)<EPS_GOAL){
+				if(r->GetCrossing(c)->DistTo(pos)<J_EPS_GOAL){
 					//too close
 					tooNear=true;
 					break;
@@ -596,7 +596,7 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 			//check all transitions
 			bool tooNear=false;
 			for(unsigned int t=0;t<r->GetAllTransitions().size();t++){
-				if(r->GetTransition(t)->DistTo(pos)<EPS_GOAL){
+				if(r->GetTransition(t)->DistTo(pos)<J_EPS_GOAL){
 					//too close
 					tooNear=true;
 					break;
@@ -607,7 +607,7 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 			//reset and check all crossings
 			tooNear=false;
 			for(unsigned int c=0;c<r->GetAllCrossings().size();c++){
-				if(r->GetCrossing(c)->DistTo(pos)<EPS_GOAL){
+				if(r->GetCrossing(c)->DistTo(pos)<J_EPS_GOAL){
 					//too close
 					tooNear=true;
 					break;

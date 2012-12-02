@@ -29,15 +29,15 @@ CGeomPairDeque::CGeomPairDeque(int n)
 	m_nBp = 0;
 }
 
-CGeomPairDeque::CGeomPairDeque(CGeomPairDeque &pd)
+CGeomPairDeque::CGeomPairDeque(const CGeomPairDeque &pd)
 {
-	this->m_nLast = pd.m_nLast;
-	this->m_nBp = pd.m_nBp;
-	this->m_nFp = pd.m_nFp;
-	this->m_nLength = pd.m_nLength;
+	m_nLast = pd.m_nLast;
+	m_nBp = pd.m_nBp;
+	m_nFp = pd.m_nFp;
+	m_nLength = pd.m_nLength;
 
-	this->m_nA = new int[m_nLength];
-	this->m_nA = new int[m_nLength];
+	m_nA = new int[m_nLength];
+	m_nB = new int[m_nLength];
 	for (int i = 0; i < m_nLength; i++)
 	{
 		m_nA[i] = pd.m_nA[i];

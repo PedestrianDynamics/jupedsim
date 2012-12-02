@@ -3,11 +3,15 @@ MCC = g++
 CC=g++
 VTT= vtcxx -vt:cxx mpicxx
 CFLAGS=-c -Wall -ansi
-LDFLAGS= -fopenmp
+LDFLAGS= -fopenmp 
 LDEBUG= -g3
 LREALEASE= -O3
-
 VERSION=RELEASE
+ENABLE_CGAL=FALSE
+
+ifeq "$(ENABLE_CGAL)" "TRUE"
+LIBS= -lCGAL -lgmp
+endif
 
 ifeq "$(VERSION)" "DEBUG"
 CFLAGS += $(LDEBUG)
@@ -28,11 +32,13 @@ routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp routing/Dum
 routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\
 pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
 routing/QuickestPathRouter.cpp routing/NavMesh.cpp\
-routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp  \
+routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp\
 routing/graph/NavLineState.cpp \
+routing/DTriangulation.cpp \
 MCD/AlgorithmBase.cpp  MCD/AlgorithmMCD.cpp  MCD/AlgorithmMWT.cpp  MCD/AlgorithmVP.cpp \
 MCD/GeomHomog.cpp  MCD/GeomPairDeque.cpp  MCD/GeomPoly.cpp  MCD/GeomVector.cpp \
-
+poly2tri/common/shapes.cpp poly2tri/sweep/sweep_context.cpp \
+poly2tri/sweep/advancing_front.cpp  poly2tri/sweep/cdt.cpp  poly2tri/sweep/sweep.cpp  \
 
 OBJECTS=$(SOURCES:.cpp=.o)
 DEP=$(SOURCES:.cpp=.d)
@@ -41,7 +47,7 @@ EXECUTABLE=rebuild.exe
 all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS)
-	$(MCC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(MCC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
 
 # pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)
@@ -68,7 +74,4 @@ purge :
 	rm -f $(EXECUTABLE) 
 	rm -f $(OBJECTS)
 	rm -f $(DEP)
-	rm *xml
-	rm *dat
-	rm *txt
 	rm trace_*

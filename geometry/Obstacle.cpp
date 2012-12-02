@@ -194,13 +194,13 @@ void Obstacle::ConvertLineToPoly() {
 	// Polygon aus allen Linen erzeugen
 	for (int i = 0; i < (int) copy.size(); i++) {
 		line = copy[i];
-		if ((point - line->GetPoint1()).Norm() < TOLERANZ) {
+		if ((point - line->GetPoint1()).Norm() < J_TOLERANZ) {
 			tmpPoly.push_back(line->GetPoint1());
 			point = line->GetPoint2();
 			copy.erase(copy.begin() + i);
 			// von vorne suchen
 			i = -1;
-		} else if ((point - line->GetPoint2()).Norm() < TOLERANZ) {
+		} else if ((point - line->GetPoint2()).Norm() < J_TOLERANZ) {
 			tmpPoly.push_back(line->GetPoint2());
 			point = line->GetPoint1();
 			copy.erase(copy.begin() + i);
@@ -208,7 +208,7 @@ void Obstacle::ConvertLineToPoly() {
 			i = -1;
 		}
 	}
-	if ((tmpPoly[0] - point).Norm() > TOLERANZ) {
+	if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", pID);
 		Log->write(tmp);

@@ -434,7 +434,7 @@ void SubRoom::LoadWall(string line) {
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
 	Point pos = ped->GetPos();
-	if (ped->GetExitLine()->DistTo(pos) <= EPS_GOAL)
+	if (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
 		return true;
 	else
 		return IsInSubRoom(pos);
@@ -562,13 +562,13 @@ void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals) {
 	// Polygon aus allen Linen erzeugen
 	for (int i = 0; i < (int) copy.size(); i++) {
 		line = copy[i];
-		if ((point - line->GetPoint1()).Norm() < TOLERANZ) {
+		if ((point - line->GetPoint1()).Norm() < J_TOLERANZ) {
 			tmpPoly.push_back(line->GetPoint1());
 			point = line->GetPoint2();
 			copy.erase(copy.begin() + i);
 			// von vorne suchen
 			i = -1;
-		} else if ((point - line->GetPoint2()).Norm() < TOLERANZ) {
+		} else if ((point - line->GetPoint2()).Norm() < J_TOLERANZ) {
 			tmpPoly.push_back(line->GetPoint2());
 			point = line->GetPoint1();
 			copy.erase(copy.begin() + i);
@@ -576,7 +576,7 @@ void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals) {
 			i = -1;
 		}
 	}
-	if ((tmpPoly[0] - point).Norm() > TOLERANZ) {
+	if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tNormalSubRoom::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
 				"\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), tmpPoly[0].GetX(), tmpPoly[0].GetY(), point.GetX(),
@@ -789,9 +789,9 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 	for (int i = 0; i < (int) copy.size(); i++) {
 		nextLine = copy[i];
 		nextPoint = NULL;
-		if ((*aktPoint - nextLine->GetPoint1()).Norm() < TOLERANZ) {
+		if ((*aktPoint - nextLine->GetPoint1()).Norm() < J_TOLERANZ) {
 			nextPoint = &nextLine->GetPoint2();
-		} else if ((*aktPoint - nextLine->GetPoint2()).Norm() < TOLERANZ) {
+		} else if ((*aktPoint - nextLine->GetPoint2()).Norm() < J_TOLERANZ) {
 			nextPoint = &nextLine->GetPoint1();
 		}
 		if (nextPoint != NULL) {
@@ -802,7 +802,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 			i = -1; // von vorne suchen
 		}
 	}
-	if ((*aktPoint - *firstOtherPoint).Norm() < TOLERANZ) {
+	if ((*aktPoint - *firstOtherPoint).Norm() < J_TOLERANZ) {
 		const Point* rueck = CheckCorner(&otherPoint, &aktPoint, firstAktPoint);
 		if (rueck != NULL)
 			orgPoly.push_back(*rueck);
@@ -841,9 +841,9 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 			Point l2 = p3 - p2;
 
 			if (l1.Norm() < l2.Norm()) {
-				neuPoly[i2] = neuPoly[i2] + l1.Normalized() * 2 * EPS_GOAL;
+				neuPoly[i2] = neuPoly[i2] + l1.Normalized() * 2 * J_EPS_GOAL;
 				l2 = p3 - p4;
-				neuPoly[i3] = neuPoly[i3] + l2.Normalized() * 2 * EPS_GOAL;
+				neuPoly[i3] = neuPoly[i3] + l2.Normalized() * 2 * J_EPS_GOAL;
 			}
 		}
 	}

@@ -28,12 +28,12 @@
 #define	_MACROS_H
 
 // Genauigkeit
-#define EPS 0.001
-#define EPS_DIST 0.05// [m]
-#define EPS_INFO_DIST 2.0 // [m] abstand für Informationsaustausch (GraphRouter)
-#define EPS_GOAL 0.05 // [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
-#define TOLERANZ 0.03  // [m] Toleranz beim erstellen der Linien
-#define EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
+#define J_EPS 0.001
+#define J_EPS_DIST 0.05// [m]
+#define J_EPS_INFO_DIST 2.0 // [m] abstand für Informationsaustausch (GraphRouter)
+#define J_EPS_GOAL 0.05 // [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
+#define J_TOLERANZ 0.03  // [m] Toleranz beim erstellen der Linien
+#define J_EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
 // zur Versionskontrolle beim Geometrieformat
 #define VERSION 0.40
@@ -60,8 +60,8 @@
 //#define FINAL_DEST_TRAIN 8
 
 //routing
-#define EPS_HL_DIST 0.012
-#define EPS_AP_DIST EPS_GOAL+EPS_HL_DIST
+#define J_EPS_HL_DIST 0.012
+#define J_EPS_AP_DIST J_EPS_GOAL+J_EPS_HL_DIST
 
 // Linked cells
 #define LIST_EMPTY 	-1

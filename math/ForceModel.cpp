@@ -57,7 +57,7 @@ inline Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
 	const Point& pos = ped->GetPos();
 	double dist = ped->GetExitLine()->DistTo(pos);
 
-	if (dist > EPS_GOAL) {
+	if (dist > J_EPS_GOAL) {
 		const Point& v0 = ped->GetV0(target);
 		F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 	} else {
@@ -127,7 +127,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	double f = 0.0f, f1 = 0.0f; //function value and its derivative at the interpolation point'
 
 	//todo: runtime normsquare?
-	if (distp12.Norm() >= EPS) {
+	if (distp12.Norm() >= J_EPS) {
 		ep12 = distp12.Normalized();
 	} else {
 		Log->write("ERROR: \tin GCFMModel::forcePedPed() ep12 kann nicht berechnet werden!!!\n");
@@ -142,13 +142,13 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	tmp2 = vp1.ScalarP(ep12); // < v_i , e_ij >
 
 	//todo: runtime normsquare?
-	if (vp1.Norm() < EPS) { // if(norm(v_i)==0)
+	if (vp1.Norm() < J_EPS) { // if(norm(v_i)==0)
 		K_ij = 0;
 	} else {
 		double bla = tmp2 + fabs(tmp2);
 		K_ij = 0.25 * bla * bla / vp1.ScalarP(vp1); //squared
 
-		if (K_ij < EPS * EPS) {
+		if (K_ij < J_EPS * J_EPS) {
 			F_rep = Point(0.0, 0.0);
 			return F_rep;
 		}
@@ -262,7 +262,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
 		return F; //ignore small lines
 	}
 	// Kraft soll nur orthgonal wirken
-	if (fabs((w.GetPoint1() - w.GetPoint2()).ScalarP(ped->GetPos() - pt)) > EPS)
+	if (fabs((w.GetPoint1() - w.GetPoint2()).ScalarP(ped->GetPos() - pt)) > J_EPS)
 		return F;
 
 	double mind = ped->GetEllipse().MinimumDistanceToLine(w);
@@ -293,14 +293,14 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
 	Point pinE; // vorher x1, y1
 	const Ellipse& E = ped->GetEllipse();
 
-	if (d < EPS)
+	if (d < J_EPS)
 		return Point(0.0, 0.0);
 	e_ij = dist / d;
 	tmp = v.ScalarP(e_ij); // < v_i , e_ij >;
 	bla = (tmp + fabs(tmp));
 	if (!bla) // Fussgaenger nicht im Sichtfeld
 		return Point(0.0, 0.0);
-	if (fabs(v.GetX()) < EPS && fabs(v.GetY()) < EPS) // v==0)
+	if (fabs(v.GetX()) < J_EPS && fabs(v.GetY()) < J_EPS) // v==0)
 		return Point(0.0, 0.0);
 	K_ij = 0.5 * bla / v.Norm(); // K_ij
 	// Punkt auf der Ellipse
@@ -642,7 +642,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Point pos_neu = ped->GetPos() + v_neu * h;
 
 			//Jam is based on the current velocity
-			if (v_neu.Norm() >= EPS_V){
+			if (v_neu.Norm() >= J_EPS_V){
 				ped->ResetTimeInJam();
 			}else{
 				ped->UpdateTimeInJam();

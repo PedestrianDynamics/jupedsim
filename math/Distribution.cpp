@@ -70,10 +70,10 @@ void Gauss::GetPair() {
     double x = GetMean() + sqrt(-2. * GetSigma() * log(x1)) * cos(2. * M_PI * x2);
     double y = GetMean() + sqrt(-2. * GetSigma() * log(x1)) * sin(2. * M_PI * x2);
 
-    if (x > EPS) {
+    if (x > J_EPS) {
         pQueue.push_back(fabs(x));
     }
-    if (y > EPS) {
+    if (y > J_EPS) {
         pQueue.push_back(fabs(y));
     }
 }

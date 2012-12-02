@@ -80,9 +80,9 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		//double distToExit2=(pt3-cross->ShortestPoint(pt3)).NormSquare();
 		//if(distToExit2 >EPS_AP_DIST*EPS_AP_DIST) continue;
 
-		double tolerance=EPS_AP_DIST;
+		double tolerance=J_EPS_AP_DIST;
 		if(cross->GetSubRoom1()==cross->GetSubRoom2()){
-			tolerance=EPS_HL_DIST;
+			tolerance=J_EPS_HL_DIST;
 		}
 		if(distToExit >tolerance) continue;
 

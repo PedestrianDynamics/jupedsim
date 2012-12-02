@@ -70,7 +70,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 		Hline * hline = dynamic_cast<Hline*>(g.GetGraph(closed_doors)->GetVertex(p->GetNextDestination())->nav_line);
 		if(hline) {
 			// check if the pedestrian is near the Line or In LIne
-			if(g.GetGraph(closed_doors)->GetVertex(p->GetNextDestination())->nav_line->DistTo(p->GetPos()) < EPS*10 || g.GetGraph(closed_doors)->GetVertex(p->GetNextDestination())->nav_line->IsInLineSegment(p->GetPos()))  {
+			if(g.GetGraph(closed_doors)->GetVertex(p->GetNextDestination())->nav_line->DistTo(p->GetPos()) < J_EPS*10 || g.GetGraph(closed_doors)->GetVertex(p->GetNextDestination())->nav_line->IsInLineSegment(p->GetPos()))  {
 				//std::cout << "new route from HLINE" << std::endl;
 				ExitDistance ed = g.GetGraph(closed_doors)->GetNextDestination(p->GetLastDestination(),p);
 				p->SetExitIndex(ed.GetDest()->id);
@@ -96,7 +96,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 			SubRoom * sub  = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
 			const vector<Pedestrian*> ps = sub->GetAllPedestrians();
 			for(unsigned int i = 0; i < ps.size(); i++) {
-				if((p->GetPos() - ps[i]->GetPos()).Norm() < EPS_INFO_DIST) {
+				if((p->GetPos() - ps[i]->GetPos()).Norm() < J_EPS_INFO_DIST) {
 					if(ps[i]->GetKnownClosedDoors() != closed_doors)
 					{
 						ps[i]->MergeKnownClosedDoors(p->GetKnownDoors());

@@ -84,7 +84,7 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
                 Pedestrian* ped = s->GetPedestrian(k);
                 Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
                 v_neu = (result_acc * h) + ped->GetV();
-                if (v_neu.Norm() < EPS_V)
+                if (v_neu.Norm() < J_EPS_V)
                     pos_neu = ped->GetPos();
                 else
                     pos_neu = (v_neu * h) + ped->GetPos();
@@ -141,7 +141,7 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
             for (int k = 0; k < anzpeds; ++k) {
                 Pedestrian* ped = s->GetPedestrian(k);
                 Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
-                if ((ped->GetV() + result1_acc_room[i][j][k]*0.5 * h).Norm() < EPS_V)
+                if ((ped->GetV() + result1_acc_room[i][j][k]*0.5 * h).Norm() < J_EPS_V)
                     pos_neu = ped->GetPos();
                 else
                     pos_neu = ped->GetPos() + ped->GetV() * h + result1_acc_room[i][j][k]*0.5 * h2;
@@ -252,7 +252,7 @@ void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const 
                 } else {
                     v_neu = (result_acc * h) + ped->GetV();
                 }
-                if (v_neu.Norm() < EPS_V)
+                if (v_neu.Norm() < J_EPS_V)
                     pos_neu = ped->GetPos();
                 else
                     pos_neu = (v_neu * h) + ped->GetPos();

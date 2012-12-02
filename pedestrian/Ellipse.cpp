@@ -129,7 +129,7 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 	//Ap[0][1] = qb1 / qb2 * 0.5 * sqrt(1.0 - qk1dotk2)*
 	//        (nu * (2.0 + nu) + eps2 * (1.0 - qnu * qk1dotk2));
 
-	double tmp0 = fabs(1.0 - qk1dotk2) < EPS ? 0.0 : (1.0 - qk1dotk2);
+	double tmp0 = fabs(1.0 - qk1dotk2) < J_EPS ? 0.0 : (1.0 - qk1dotk2);
 	Ap[0][1] = qb1 / qb2 * 0.5 * sqrt(tmp0) * (nu * (2.0 + nu) + eps2 * (1.0
 			- qnu * qk1dotk2));
 
@@ -144,7 +144,7 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 	ap2 = 1.0 / sqrt(lambdaminus);
 
 	//original: if (fabs(k1dotk2) == 1.0) {
-	if ( fabs(k1dotk2) > 1.0 - EPS) {
+	if ( fabs(k1dotk2) > 1.0 - J_EPS) {
 		if (Ap[0][0] > Ap[1][1])
 			cosphi = qb1 / qa1 * qk1dotd / (1.0 - eps1 * k1dotd * k1dotd);
 		else
@@ -347,7 +347,7 @@ double Ellipse::GetArea() const {
 	return ea * eb * M_PI;
 }
 double Ellipse::GetLargerAxis() const {
-	if (pV0 < EPS) {
+	if (pV0 < J_EPS) {
 		Log->write("ERROR: \tCEllipse::GetLargerAxis() v0 of ped is null\n");
 		exit(0);
 	}
@@ -371,7 +371,7 @@ double Ellipse::GetEB() const {
 }
 
 double Ellipse::GetSmallerAxis() const {
-	if (pV0 < EPS) {
+	if (pV0 < J_EPS) {
 		Log->write("ERROR: \tCEllipse::GetSmallerAxis: v0 of ped is null\n");
 		exit(0);
 	}
@@ -461,7 +461,7 @@ Point Ellipse::PointOnEllipse(const Point& P) const {
 	b2 = b * b;
 	b4 = b2 * b2;
 
-	if (fabs(P.GetX() - pXp) < EPS) {// Sonderfall: Ellipsen liegen Parallel
+	if (fabs(P.GetX() - pXp) < J_EPS) {// Sonderfall: Ellipsen liegen Parallel
 		double y1, y2;
 		y1 = sqrt(-pXp * pXp + a2) * b / a;
 		y2 = -y1;
@@ -532,7 +532,7 @@ Point Ellipse::PointOnEllipse(const Line& line, const Point& P) const {
 	if (IsOn(L2))
 		return L2;
 
-	if (fabs(L1.GetX() - L2.GetX()) < EPS) { // parallel zur y-Achse der Ellipse, EPS_DIST zu ungenau
+	if (fabs(L1.GetX() - L2.GetX()) < J_EPS) { // parallel zur y-Achse der Ellipse, EPS_DIST zu ungenau
 		double y1, y2;
 		y1 = sqrt(-L2.GetX() * L2.GetX() + a2) * b / a;
 		y2 = -y1;
@@ -814,7 +814,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 		exit(0);
 	}
 	//todo: runtime normsquare?
-	if ((C1 - C2).Norm() < EPS) {
+	if ((C1 - C2).Norm() < J_EPS) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() m=0\n"
 			"xc1: %f xc2: %f yc1: %f yc2: %f\n", C1.GetX(), C2.GetX(),
@@ -849,7 +849,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 	double x = p.GetX();
 	double y = p.GetY();
 
-	return (x * x) / (a * a) + (y * y) / (b * b) < 1 + EPS_DIST;
+	return (x * x) / (a * a) + (y * y) / (b * b) < 1 + J_EPS_DIST;
 }
 
 /* prüft, ob ein Punkt sich außerhalb der Ellipse befindet
@@ -864,7 +864,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 	double x = p.GetX();
 	double y = p.GetY();
 
-	return (x * x) / (a * a) + (y * y) / (b * b) > 1 - EPS_DIST;
+	return (x * x) / (a * a) + (y * y) / (b * b) > 1 - J_EPS_DIST;
 }
 
 /* prüft, ob ein Punkt sich außerhalb der Ellipse befindet
@@ -883,8 +883,8 @@ bool Ellipse::IsOn(const Point& p) const {
 	double x = p.GetX();
 	double y = p.GetY();
 
-	return (-EPS_DIST < (x * x) / (a * a) + (y * y) / (b * b) - 1) && ((x * x)
-			/ (a * a) + (y * y) / (b * b) - 1 < EPS_DIST);
+	return (-J_EPS_DIST < (x * x) / (a * a) + (y * y) / (b * b) - 1) && ((x * x)
+			/ (a * a) + (y * y) / (b * b) - 1 < J_EPS_DIST);
 }
 
 bool Ellipse::IntersectionWithLine(const Line& line) {

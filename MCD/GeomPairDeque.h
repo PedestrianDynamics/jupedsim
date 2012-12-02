@@ -34,7 +34,7 @@ public:
 	void pushNarrow(int i, int j);
 	void push(int i, int j);
 	CGeomPairDeque();
-	CGeomPairDeque(CGeomPairDeque& pd);
+	CGeomPairDeque(const CGeomPairDeque& pd);
 
 	int m_nLength;
 	int* m_nA;

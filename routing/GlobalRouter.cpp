@@ -539,7 +539,7 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 			const Point& pt3 = ped->GetPos();
 			double distToExit = ap->GetNavLine()->DistTo(pt3);
 
-			if (distToExit > EPS_DIST)
+			if (distToExit > J_EPS_DIST)
 				continue;
 
 			//one AP is near actualize destination:
@@ -610,7 +610,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		const Point& posA = ped->GetPos();
 		const Point& posB = ap->GetNavLine()->GetCentre();
 		const Point& posC = (posB - posA).Normalized()
-				* ((posA - posB).Norm() - EPS) + posA;
+				* ((posA - posB).Norm() - J_EPS) + posA;
 
 		//check if visible
 		if (sub->IsVisible(posA, posC, true) == false)
