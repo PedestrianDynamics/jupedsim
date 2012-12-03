@@ -159,7 +159,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(pDistribution->writeParameter());
 	pDistribution->InitDistributor(args->GetPersonsFilename());
 
-
 	// Richtungswahl zum Ziel
 	int direction = args->GetExitStrategy();
 	sprintf(tmp, "\tRichtung zum Ausgang: %d\n", direction);
@@ -249,7 +248,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	Log->write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
-	pBuilding->AddSurroundingRoom();
+	//pBuilding->AddSurroundingRoom();
 	pBuilding->InitGeometry(); // create the polygones
 
 	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
@@ -259,11 +258,11 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	/////////
 
 	//Sean
-	NavMesh* nv= new NavMesh(pBuilding);
-	nv->BuildNavMesh();
-	nv->WriteToFile("../pedunc/examples/Room080/Room080.nav");
-	nv->WriteToFileTraVisTo("promenade.nav.xml");
-	exit(EXIT_FAILURE);
+	//NavMesh* nv= new NavMesh(pBuilding);
+	///nv->BuildNavMesh();
+	//nv->WriteToFile("../pedunc/examples/Room080/Room080.nav");
+	//nv->WriteToFileTraVisTo("promenade.nav.xml");
+	//exit(EXIT_FAILURE);
 
 	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
 	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);

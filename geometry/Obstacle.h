@@ -51,6 +51,8 @@ public:
 
 	int WhichQuad(const Point& vertex, const Point& hitPos) const;
 
+	const vector<Point>&  GetPolygon() const;
+
 	// x-Koordinate der Linie von einer Eccke zur nächsten
 	double Xintercept(const Point& point1, const Point& point2,
 			double hitY) const;

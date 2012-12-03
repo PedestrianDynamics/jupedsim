@@ -9,7 +9,7 @@
 #define NAVMESH_H_
 
 
-//#define _CGAL
+#define _CGAL1
 
 // CGAL libs
 #ifdef _CGAL
@@ -17,33 +17,6 @@
 #include "ConvexDecomp.h"
 #include "Triangulation.h"
 
-//#include <CGAL/basic.h>
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//#include <CGAL/Partition_traits_2.h>
-//#include <CGAL/Partition_is_valid_traits_2.h>
-//#include <CGAL/polygon_function_objects.h>
-//#include <CGAL/partition_2.h>
-//#include <CGAL/point_generators_2.h>
-//#include <CGAL/random_polygon_2.h>
-//#include <cassert>
-//#include <list>
-//
-//#include <CGAL/Cartesian.h>
-//#include <CGAL/centroid.h>
-//
-//typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-//typedef CGAL::Partition_traits_2<K> Traits;
-//typedef CGAL::Is_convex_2<Traits> Is_convex_2;
-//typedef Traits::Polygon_2 Polygon_2;
-//typedef Traits::Point_2 Point_2;
-//
-//
-//typedef Polygon_2::Vertex_const_iterator Vertex_iterator;
-//typedef Polygon_2::Vertex_const_circulator Vertex_circulator;
-//typedef Polygon_2::Edge_const_iterator Edge_iterator;
-//typedef std::list<Polygon_2> Polygon_list;
-//typedef Polygon_list::const_iterator Polygon_iterator;
-//typedef CGAL::Partition_is_valid_traits_2<Traits, Is_convex_2> Validity_traits;
 
 #endif
 
@@ -55,35 +28,51 @@
 
 class NavMesh {
 
-	class Vertex {
+	class JVertex {
 	public:
 		Point pPos;
 		int id;
-		bool operator==(const  Vertex& v) const {
+		bool operator==(const  JVertex& v) const {
 			return v.pPos==pPos;
 		}
-		bool operator< (const Vertex& v) const{
+		bool operator< (const JVertex& v) const{
 			return v.pPos.pX<pPos.pX;
 		}
-		bool operator> (const Vertex& v) const{
+		bool operator> (const JVertex& v) const{
 			return v.pPos.pX>pPos.pX;
 		}
 	};
 
-	class Node {
+	class JNode {
 	public:
 		std::string pGroup;
 		Point pCentroid;
 		int id;
-		std::vector<Vertex> pHull;
+		std::vector<JVertex> pHull;
 		std::vector<int> pObstacles;
 		std::vector<int> pPortals;
 		double pNormalVec[3];
 
-		bool operator()(Node*a ,Node* b){
+		bool operator()(JNode*a ,JNode* b){
 			return a->pGroup < b->pGroup;
 		}
 
+		bool operator==(const JNode& other){
+
+			if(pCentroid!=other.pCentroid) return false;
+			if(pObstacles.size()!=other.pObstacles.size()) return false;
+			if(pPortals.size()!=other.pPortals.size()) return false;
+
+
+			// the obstacles and the portals are sorted
+			for(unsigned int s=0;s<pPortals.size();s++){
+				if(pPortals[s]!=other.pPortals[s]) return false;
+			}
+			for(unsigned int s=0;s<pObstacles.size();s++){
+				if(pObstacles[s]!=other.pObstacles[s]) return false;
+			}
+			return true;
+		}
 
 		///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
 		bool IsConvex(){
@@ -123,7 +112,7 @@ class NavMesh {
 		///http://stackoverflow.com/questions/9473570/polygon-vertices-clockwise-or-counterclockwise/
 		bool IsClockwise(){
 			if(pHull.size()<3){
-				std::cerr<<"You need at least 3 vertices. Node ID ["<<id<<" ]"<<endl;
+				std::cerr<<"You need at least 3 vertices. JNode ID ["<<id<<" ]"<<endl;
 				exit(EXIT_FAILURE);
 			}
 
@@ -139,31 +128,31 @@ class NavMesh {
 
 	};
 
-	class Edge {
+	class JEdge {
 	public:
 		int id;
-		Vertex pStart;
-		Vertex pEnd;
+		JVertex pStart;
+		JVertex pEnd;
 		//Point pDisp;
 		int pNode0;
 		int pNode1;
-		Edge(){
+		JEdge(){
 			id=-1;
 			pNode0=-1;
 			pNode1=-1;
 		}
 	};
 
-	class Obstacle {
+	class JObstacle {
 	public:
 		int id;
-		Vertex pStart;
-		Vertex pEnd;
+		JVertex pStart;
+		JVertex pEnd;
 		//Point pDisp;
 		int pNode0;
 		int pNextObst;
 
-		int GetCommonVertex(Obstacle* obst){
+		int GetCommonVertex(JObstacle* obst){
 			if(obst->pEnd.id==pEnd.id) return pEnd.id;
 			if(obst->pEnd.id==pStart.id) return pStart.id;
 			if(obst->pStart.id==pStart.id) return pStart.id;
@@ -193,34 +182,47 @@ public:
 	void WriteToFileTraVisTo(std::string fileName);
 	void WriteToFileTraVisTo(std::string fileName, const std::vector<Point>& points);
 
-	int AddVertex(Vertex* v);
-	int AddEdge(Edge* e);
-	int AddObst(Obstacle* o);
-	int AddNode(Node* n);
-	///return the vertex with the corresponding point
-	Vertex* GetVertex(const Point& p);
+	int AddVertex(JVertex* v);
+	int AddEdge(JEdge* e);
+	int AddObst(JObstacle* o);
+	int AddNode(JNode* n);
+	///return the JVertex with the corresponding point
+	JVertex* GetVertex(const Point& p);
 	void DumpNode(int id);
 
 private:
-	std::vector<Vertex*> pVertices;
-	std::vector<Edge*> pEdges;
-	std::vector<Obstacle*> pObst;
-	std::vector<Node*> pNodes;
+	std::vector<JVertex*> pVertices;
+	std::vector<JEdge*> pEdges;
+	std::vector<JObstacle*> pObst;
+	std::vector<JNode*> pNodes;
 	Building* pBuilding;
 
+	// Check the created navmesh for convex polygons
 	// convexify the created nav mesh
 	void Convexify();
 
-	//add the additional surrounding world obstacle
+	// Add the additional surrounding world JObstacle
+	// and triangulate
 	void Finalize();
 
-	/// return the id of the edge
+
+	// Triangulate a subroom possibly with obstacles
+	void Triangulate(SubRoom* sub);
+	void Triangulate(JNode* JNode);
+
+	/// Return the id of the JEdge
 	int IsPortal(Point& p1, Point&  p2);
-	/// return the id of the obstacle
+	/// Return the id of the JObstacle
 	int IsObstacle(Point& p1, Point&  p2);
 
+	/// Write the simulation scenario for the
+	/// pedunc simulator
+	void WriteScenario();
+	void WriteBehavior();
+	void WriteViewer();
+	void WriteStartPosition();
 
-	std::vector<Node*> new_nodes;
+	std::vector<JNode*> new_nodes;
 	vector<int> problem_nodes;
 };
 

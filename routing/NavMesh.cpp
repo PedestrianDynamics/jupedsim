@@ -42,7 +42,7 @@ void NavMesh::BuildNavMesh() {
 
 			// Vertices
 			for (unsigned int p = 0; p < pol.size(); p++) {
-				Vertex* v = new Vertex();
+				JVertex* v = new JVertex();
 				v->pPos= pol[p];
 				if(AddVertex(v)==-1) {
 					delete v;
@@ -50,7 +50,7 @@ void NavMesh::BuildNavMesh() {
 			}
 
 			//Nodes vertices
-			Node* node = new Node();
+			JNode* node = new JNode();
 			node->pGroup = r->GetCaption();
 			node->pCentroid = s->GetCentroid();
 			node->pNormalVec[0]=0;
@@ -66,7 +66,7 @@ void NavMesh::BuildNavMesh() {
 			const vector<Crossing*>& crossings = s->GetAllCrossings();
 			for (unsigned c = 0; c < crossings.size(); c++) {
 
-				Edge* e= new Edge();
+				JEdge* e= new JEdge();
 				int node0 = crossings[c]->GetSubRoom1()->GetUID();
 				int node1 = crossings[c]->GetSubRoom2()->GetUID();
 				Point centroid0=crossings[c]->GetSubRoom1()->GetCentroid();
@@ -97,7 +97,7 @@ void NavMesh::BuildNavMesh() {
 				}
 
 				if (AddEdge(e)==-1) {
-					// the edge is already there
+					// the JEdge is already there
 					e->id=IsPortal(e->pStart.pPos, e->pEnd.pPos);
 				}
 				// caution: the ID is automatically assigned in the AddEdge method
@@ -123,7 +123,7 @@ void NavMesh::BuildNavMesh() {
 				//assert(node1!=-1);
 				if(node1!=-1) { // we are having an egde
 
-					Edge* e= new Edge();
+					JEdge* e= new JEdge();
 
 					if (node0 > node1) {
 						swap(node0, node1);
@@ -150,17 +150,16 @@ void NavMesh::BuildNavMesh() {
 					}
 
 					if (AddEdge(e)==-1) {
-						// the edge is already there
+						// the JEdge is already there
 						e->id=IsPortal(e->pStart.pPos, e->pEnd.pPos);
 					}
 					// caution: the ID is automatically assigned in the AddEdge method
 					node->pPortals.push_back(e->id);
 				}
 				else
-				{ // we are having an obstacle
-					Obstacle* o= new Obstacle();
+				{ // we are having an JObstacle
+					JObstacle* o= new JObstacle();
 					o->pNode0=node0;
-					//FIXME: bug in seans reader
 					o->pNextObst=-1;
 
 					//first attempt
@@ -180,7 +179,7 @@ void NavMesh::BuildNavMesh() {
 					}
 
 					if (AddObst(o)==-1) {
-						// the obstacle is already there
+						// the JObstacle is already there
 						o->id=IsObstacle(o->pStart.pPos, o->pEnd.pPos);
 					}
 					node->pObstacles.push_back(o->id);
@@ -190,7 +189,7 @@ void NavMesh::BuildNavMesh() {
 
 			//determine the group based on the crossings
 			if(crossings.size()==1 && transitions.size()==0){
-				//node->pGroup="seat";
+				//JNode->pGroup="seat";
 				node->pGroup=r->GetCaption();
 			}else {
 				if(crossings.size()==2){
@@ -206,9 +205,8 @@ void NavMesh::BuildNavMesh() {
 				const Point& centroid0 = s->GetCentroid();
 				int node0 = s->GetUID();
 
-				Obstacle* o= new Obstacle();
+				JObstacle* o= new JObstacle();
 				o->pNode0=node0;
-				//FIXME: bug in seans reader
 				o->pNextObst=-1;
 
 				//first attempt
@@ -228,7 +226,7 @@ void NavMesh::BuildNavMesh() {
 				}
 
 				if (AddObst(o)==-1) {
-					// the edge is already there
+					// the JEdge is already there
 					o->id=IsObstacle(o->pStart.pPos, o->pEnd.pPos);
 				}
 				node->pObstacles.push_back(o->id);
@@ -239,10 +237,10 @@ void NavMesh::BuildNavMesh() {
 	}
 
 	// convexify the mesh
-	//Convexify();
+	Convexify();
 	Finalize();
 
-	std::sort(pNodes.begin(), pNodes.end(),Node());
+	std::sort(pNodes.begin(), pNodes.end(),JNode());
 
 	//	doing the mapping
 	for(unsigned int i=0;i<pNodes.size();i++){
@@ -263,33 +261,33 @@ void NavMesh::BuildNavMesh() {
 
 	//chain the obstacles
 	for (unsigned int ob1 = 0; ob1 < pObst.size(); ob1++)
-	{ //continue;
-		for (unsigned int ob2 = 0; ob2 < pObst.size(); ob2++)
+	{ continue; //FIXME
+	for (unsigned int ob2 = 0; ob2 < pObst.size(); ob2++)
+	{
+		JObstacle* obst1 = pObst[ob1];
+		JObstacle* obst2 = pObst[ob2];
+
+		if (obst1->id == obst2->id)
+			continue;
+		int comVertex=obst1->GetCommonVertex(obst2);
+		if(comVertex==-1)
+			continue;
+
+		if(obst1->pStart.id==comVertex)
 		{
-			Obstacle* obst1 = pObst[ob1];
-			Obstacle* obst2 = pObst[ob2];
-
-			if (obst1->id == obst2->id)
-				continue;
-			int comVertex=obst1->GetCommonVertex(obst2);
-			if(comVertex==-1)
-				continue;
-
-			if(obst1->pStart.id==comVertex)
-			{
-				obst2->pNextObst=obst1->id;
-			}
-			else
-			{
-				obst1->pNextObst=obst2->id;
-			}
-
+			obst2->pNextObst=obst1->id;
 		}
+		else
+		{
+			obst1->pNextObst=obst2->id;
+		}
+
+	}
 	}
 }
 
 void NavMesh::DumpNode(int id) {
-	Node *nd=pNodes[id];
+	JNode *nd=pNodes[id];
 
 	std::cerr<<"ID: [ "<<endl;
 	for(unsigned int i=0;i<nd->pHull.size();i++)
@@ -303,16 +301,16 @@ void NavMesh::DumpNode(int id) {
 void NavMesh::Convexify() {
 
 	//will hold the newly created elements
-	std::vector<Vertex*> new_vertices;
-	std::vector<Edge*> new_edges;
-	std::vector<Obstacle*> new_obsts;
+	std::vector<JVertex*> new_vertices;
+	std::vector<JEdge*> new_edges;
+	std::vector<JObstacle*> new_obsts;
 
 
-	std::vector<Node*> nodes_to_be_deleted;
+	std::vector<JNode*> nodes_to_be_deleted;
 
 	for (unsigned int n = 0; n < pNodes.size(); n++) {
 
-		Node* old_node = pNodes[n];
+		JNode* old_node = pNodes[n];
 		if (old_node->IsClockwise()) {
 			reverse(old_node->pHull.begin(), old_node->pHull.end());
 		}
@@ -332,7 +330,7 @@ void NavMesh::Convexify() {
 
 
 
-			//schedule this node for deletion
+			//schedule this JNode for deletion
 			nodes_to_be_deleted.push_back(old_node);
 
 			Polygon_2 polygon;
@@ -348,41 +346,43 @@ void NavMesh::Convexify() {
 
 			}
 
-			//			polygon.
+			//polygon
 			try {
 				if(polygon.is_clockwise_oriented()) polygon.reverse_orientation();
-				if(polygon.is_simple()==false) {
-					cout<<" not simple:"<<endl;
-					exit(0);
-				}
+
 				//create the partitions
 				CGAL::optimal_convex_partition_2(polygon.vertices_begin(),
 						//CGAL::approx_convex_partition_2(polygon.vertices_begin(),
 						polygon.vertices_end(), std::back_inserter(partition_polys),
 						partition_traits);
+
+				//check the created partitions
+				assert(CGAL::partition_is_valid_2(polygon.vertices_begin(),
+						polygon.vertices_end(), partition_polys.begin(),
+						partition_polys.end(), validity_traits));
+
+
 			}
 			catch(const exception & e) {
 
-				cout<<"node :" <<old_node->id <<" could not be converted" <<endl;
+				cout<<"JNode :" <<old_node->id <<" could not be converted" <<endl;
 				cout<<" in Group: " <<old_node->pGroup <<endl;
+				cout<<" Portals: " <<old_node->pPortals.size() <<endl;
+				cout<<" Obstacles: " <<old_node->pObstacles.size() <<endl;
 				problem_nodes.push_back(old_node->id);
 				cout<<e.what()<<endl;
-				//exit(EXIT_FAILURE);
+				Triangulate(old_node);
+//				exit(EXIT_FAILURE);
 				//return;
-				continue;
+				//continue;
 			}
-			//continue;
-			//check the created partitions
-			assert(CGAL::partition_is_valid_2(polygon.vertices_begin(),
-					polygon.vertices_end(), partition_polys.begin(),
-					partition_polys.end(), validity_traits));
 
 			//make the changes to the nav mesh
 			for (Polygon_iterator pit = partition_polys.begin();
 					pit != partition_polys.end(); ++pit) {
 
 
-				Node* new_node = new Node();
+				JNode* new_node = new JNode();
 				new_node->pGroup = old_node->pGroup;
 				//to get a correct ID
 				AddNode(new_node);
@@ -409,9 +409,9 @@ void NavMesh::Convexify() {
 					int edge_id=IsPortal(P0,P1);
 					if(edge_id != -1){
 						new_node->pPortals.push_back(edge_id);
-						Edge* e = pEdges[edge_id];
+						JEdge* e = pEdges[edge_id];
 
-						// check if all edge information are present
+						// check if all JEdge information are present
 						// in particular one the second node_id might not be set yet
 						//assert(e->pNode1==-1);
 						if(e->pNode1 == -1){
@@ -438,7 +438,7 @@ void NavMesh::Convexify() {
 
 					int obstacle_id=IsObstacle(P0,P1);
 					if(obstacle_id != -1){
-						//std::cerr<<"Error: the convexification has created an obstacle"<<endl;
+						//std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
 						new_node->pObstacles.push_back(obstacle_id);
 						pObst[obstacle_id]->pNode0=new_node->id;
 					}
@@ -446,7 +446,7 @@ void NavMesh::Convexify() {
 					// this portal was newly created
 					if ((obstacle_id==-1) && (edge_id==-1)){
 
-						Edge* e= new Edge();
+						JEdge* e= new JEdge();
 						e->pEnd=*GetVertex(P1);
 						e->pStart= *GetVertex(P0);
 						AddEdge(e);
@@ -462,15 +462,9 @@ void NavMesh::Convexify() {
 
 					}
 				}
-
-				//cout << " next polygon" << endl;
 			}
-
-			//exit(0);
-
 #endif
 		}
-
 	}
 
 #ifdef _DEBUG
@@ -482,16 +476,10 @@ void NavMesh::Convexify() {
 
 	// now post processing the newly created nodes
 
-	//	for (unsigned int i=0;i<new_nodes.size();i++){
-	//		Node* node = new_nodes[i];
-	//		cout << node->id<<endl;
-	//	}
-
-
 	for (unsigned int i=0;i<nodes_to_be_deleted.size();i++){
-		Node* node_to_delete = nodes_to_be_deleted[i];
-		assert (node_to_delete->id != (pNodes.size() -1) && "Trying to remove the last node !");
-		Node* new_node = pNodes.back();
+		JNode* node_to_delete = nodes_to_be_deleted[i];
+		assert (node_to_delete->id != (pNodes.size() -1) && "Trying to remove the last JNode !");
+		JNode* new_node = pNodes.back();
 		pNodes.pop_back();
 
 		//making the transformation
@@ -515,7 +503,7 @@ void NavMesh::Convexify() {
 		new_node->id=node_to_delete->id;
 		pNodes[node_to_delete->id]=new_node;
 
-		cout<<"deleting node: "<<node_to_delete->id<<endl;
+		cout<<"deleting JNode: "<<node_to_delete->id<<endl;
 		//delete node_to_delete;
 	}
 
@@ -562,12 +550,12 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 
 
 	//for (unsigned int n=0;n<new_nodes.size();n++){
-	//	Node* node=new_nodes[n];
+	//	JNode* JNode=new_nodes[n];
 
 	for (unsigned int n=0;n<pNodes.size();n++){
-		Node* node=pNodes[n];
+		JNode* JNode=pNodes[n];
 
-		int node_id=node->id;
+		int node_id=JNode->id;
 		if(nodes_to_plot.size()!=0)
 			if (IsElementInVector(nodes_to_plot, node_id) == false)
 				continue;
@@ -575,32 +563,32 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		//			if (IsElementInVector(problem_nodes, node_id) == false)
 		//				continue;
 
-		//		if(node->pGroup!="090") continue;
-		//		if(node->pPortals.size()<10) continue;
-		//if(node->IsConvex()==true) continue;
-		//if(node->IsClockwise()==true) continue;
+		//		if(JNode->pGroup!="090") continue;
+		//		if(JNode->pPortals.size()<10) continue;
+		//if(JNode->IsConvex()==true) continue;
+		//if(JNode->IsClockwise()==true) continue;
 
-		//		file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.pX<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.pY<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+		//		file<<"\t\t<label centerX=\""<<JNode->pCentroid.GetX()*factor -centre.pX<<"\" centerY=\""<<JNode->pCentroid.GetY()*factor-centre.pY<<"\" centerZ=\"0\" text=\""<<JNode->id <<"\" color=\"100\" />"<<endl;
 
-		//		cout<<"size: "<< node->pHull.size()<<endl;
-		//		std::sort(node->pHull.begin(), node->pHull.end());
-		//		node->pHull.erase(std::unique(node->pHull.begin(), node->pHull.end()), node->pHull.end());
-		//		cout<<"size: "<< node->pHull.size()<<endl;
+		//		cout<<"size: "<< JNode->pHull.size()<<endl;
+		//		std::sort(JNode->pHull.begin(), JNode->pHull.end());
+		//		JNode->pHull.erase(std::unique(JNode->pHull.begin(), JNode->pHull.end()), JNode->pHull.end());
+		//		cout<<"size: "<< JNode->pHull.size()<<endl;
 
-		for(unsigned int i=0;i<node->pHull.size();i++){
-			double x=pVertices[node->pHull[i].id]->pPos.GetX()*factor -centre.pX;
-			double y=pVertices[node->pHull[i].id]->pPos.GetY()*factor -centre.pY;
+		for(unsigned int i=0;i<JNode->pHull.size();i++){
+			//double x=pVertices[JNode->pHull[i].id]->pPos.GetX()*factor -centre.pX;
+			//double y=pVertices[JNode->pHull[i].id]->pPos.GetY()*factor -centre.pY;
 			//file<<" \t\t<sphere centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" radius=\"5\" color=\"100\" />"<<endl;
-			//file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<node->pHull[i].id<<"\" color=\"20\" />"<<endl;
+			//file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<JNode->pHull[i].id<<"\" color=\"20\" />"<<endl;
 
 			// draw the convex hull
-			//			unsigned int size= node->pHull.size();
+			//			unsigned int size= JNode->pHull.size();
 			//			file<<" \t\t<sphere centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" radius=\"5\" color=\"100\" />"<<endl;
 			//			file<<"\t\t<label centerX=\""<<x<<"\" centerY=\""<<y<<"\" centerZ=\"0\" text=\""<<i<<"\" color=\"20\" />"<<endl;
-			//			double x1=pVertices[node->pHull[i%size].id]->pPos.GetX()*factor -centre.pX;
-			//			double y1=pVertices[node->pHull[i%size].id]->pPos.GetY()*factor -centre.pY;
-			//			double x2=pVertices[node->pHull[(i+1)%size].id]->pPos.GetX()*factor -centre.pX;
-			//			double y2=pVertices[node->pHull[(i+1)%size].id]->pPos.GetY()*factor -centre.pY;
+			//			double x1=pVertices[JNode->pHull[i%size].id]->pPos.GetX()*factor -centre.pX;
+			//			double y1=pVertices[JNode->pHull[i%size].id]->pPos.GetY()*factor -centre.pY;
+			//			double x2=pVertices[JNode->pHull[(i+1)%size].id]->pPos.GetX()*factor -centre.pX;
+			//			double y2=pVertices[JNode->pHull[(i+1)%size].id]->pPos.GetY()*factor -centre.pY;
 			//			file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
 			//			file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
 			//			file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -613,7 +601,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		//break;
 
 		for(unsigned int i=0;i<pObst.size();i++){
-			Obstacle* obst=pObst[i];
+			JObstacle* obst=pObst[i];
 
 			if(obst->pNode0==node_id ){
 				double x1=obst->pStart.pPos.GetX()*factor-centre.pX;
@@ -631,13 +619,13 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		file<<endl;
 
 		for(unsigned int i=0;i<pEdges.size();i++){
-			Edge* edge=pEdges[i];
+			JEdge* JEdge=pEdges[i];
 
-			if(edge->pNode0==node_id || edge->pNode1==node_id){
-				double x1=edge->pStart.pPos.GetX()*factor-centre.pX;
-				double y1=edge->pStart.pPos.GetY()*factor-centre.pY;
-				double x2=edge->pEnd.pPos.GetX()*factor-centre.pX;
-				double y2=edge->pEnd.pPos.GetY()*factor-centre.pY;
+			if(JEdge->pNode0==node_id || JEdge->pNode1==node_id){
+				double x1=JEdge->pStart.pPos.GetX()*factor-centre.pX;
+				double y1=JEdge->pStart.pPos.GetY()*factor-centre.pY;
+				double x2=JEdge->pEnd.pPos.GetX()*factor-centre.pX;
+				double y2=JEdge->pEnd.pPos.GetY()*factor-centre.pY;
 
 				file<<"\t\t<door id = \""<<i<<"\">"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -648,12 +636,12 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		}
 
 
-		//		for(unsigned int i=0;i<node->pObstacles.size();i++)
+		//		for(unsigned int i=0;i<JNode->pObstacles.size();i++)
 		//		{ continue;
-		//			double x1=pObst[node->pObstacles[i]]->pStart.pPos.GetX()*FAKTOR;
-		//			double y1=pObst[node->pObstacles[i]]->pStart.pPos.GetY()*FAKTOR;
-		//			double x2=pObst[node->pObstacles[i]]->pEnd.pPos.GetX()*FAKTOR;
-		//			double y2=pObst[node->pObstacles[i]]->pEnd.pPos.GetY()*FAKTOR;
+		//			double x1=pObst[JNode->pObstacles[i]]->pStart.pPos.GetX()*FAKTOR;
+		//			double y1=pObst[JNode->pObstacles[i]]->pStart.pPos.GetY()*FAKTOR;
+		//			double x2=pObst[JNode->pObstacles[i]]->pEnd.pPos.GetX()*FAKTOR;
+		//			double y2=pObst[JNode->pObstacles[i]]->pEnd.pPos.GetY()*FAKTOR;
 		//
 		//			file<<"\t\t<wall>"<<endl;
 		//			file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -663,12 +651,12 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		//
 		//		file<<endl;
 		//
-		//		for(unsigned int i=0;i<node->pPortals.size();i++)
+		//		for(unsigned int i=0;i<JNode->pPortals.size();i++)
 		//		{
-		//			double x1=pEdges[node->pPortals[i]]->pStart.pPos.GetX()*FAKTOR;
-		//			double y1=pEdges[node->pPortals[i]]->pStart.pPos.GetY()*FAKTOR;
-		//			double x2=pEdges[node->pPortals[i]]->pEnd.pPos.GetX()*FAKTOR;
-		//			double y2=pEdges[node->pPortals[i]]->pEnd.pPos.GetY()*FAKTOR;
+		//			double x1=pEdges[JNode->pPortals[i]]->pStart.pPos.GetX()*FAKTOR;
+		//			double y1=pEdges[JNode->pPortals[i]]->pStart.pPos.GetY()*FAKTOR;
+		//			double x2=pEdges[JNode->pPortals[i]]->pEnd.pPos.GetX()*FAKTOR;
+		//			double y2=pEdges[JNode->pPortals[i]]->pEnd.pPos.GetY()*FAKTOR;
 		//
 		//			file<<"\t\t<door>"<<endl;
 		//			file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -792,37 +780,37 @@ void NavMesh::WriteToFile(std::string fileName) {
 	file<<ngroup_to_size[previousGroup]<<"";
 
 	for (unsigned int n=0;n<pNodes.size();n++){
-		Node* node=pNodes[n];
-		string actualGroup=node->pGroup;
+		JNode* JNode=pNodes[n];
+		string actualGroup=JNode->pGroup;
 		if(actualGroup!=previousGroup){
 			previousGroup=actualGroup;
-			//file<<"# Node group"<<endl;
+			//file<<"# JNode group"<<endl;
 			file<<endl<<previousGroup<<endl;
 			file<<ngroup_to_size[previousGroup]<<"";
 		}
 
-		//assert(node->pObstacles.size()<20);
-		//assert(node->pPortals.size()<20);
-		//file<<node->id<<endl;
+		//assert(JNode->pObstacles.size()<20);
+		//assert(JNode->pPortals.size()<20);
+		//file<<JNode->id<<endl;
 		file<<endl;
-		file<<"\t"<<node->pCentroid.GetX()<<" "<<node->pCentroid.GetY()<<endl;
-		file<<"\t"<<node->pHull.size()<<" ";
-		for(unsigned int i=0;i<node->pHull.size();i++){
-			file<<node->pHull[i].id<<" ";
+		file<<"\t"<<JNode->pCentroid.GetX()<<" "<<JNode->pCentroid.GetY()<<endl;
+		file<<"\t"<<JNode->pHull.size()<<" ";
+		for(unsigned int i=0;i<JNode->pHull.size();i++){
+			file<<JNode->pHull[i].id<<" ";
 		}
 		file<<endl;
-		file<<"\t"<<node->pNormalVec[0]<<" "<<node->pNormalVec[1]<<" "<<node->pNormalVec[2]<<endl;
+		file<<"\t"<<JNode->pNormalVec[0]<<" "<<JNode->pNormalVec[1]<<" "<<JNode->pNormalVec[2]<<endl;
 
 
-		file<<"\t"<<node->pPortals.size()<<" ";
-		for(unsigned int i=0;i<node->pPortals.size();i++){
-			file<<node->pPortals[i]<<" ";
+		file<<"\t"<<JNode->pPortals.size()<<" ";
+		for(unsigned int i=0;i<JNode->pPortals.size();i++){
+			file<<JNode->pPortals[i]<<" ";
 		}
 		file<<endl;
 
-		file<<"\t"<<node->pObstacles.size()<<" ";
-		for(unsigned int i=0;i<node->pObstacles.size();i++){
-			file<<node->pObstacles[i]<<" ";
+		file<<"\t"<<JNode->pObstacles.size()<<" ";
+		for(unsigned int i=0;i<JNode->pObstacles.size();i++){
+			file<<JNode->pObstacles[i]<<" ";
 		}
 
 		file<<endl;
@@ -831,11 +819,11 @@ void NavMesh::WriteToFile(std::string fileName) {
 	file.close();
 }
 
-int NavMesh::AddVertex(Vertex* v) {
+int NavMesh::AddVertex(JVertex* v) {
 	for (unsigned int vc = 0; vc < pVertices.size(); vc++) {
 		if (pVertices[vc]->pPos.operator ==(v->pPos)) {
 #ifdef _DEBUG
-			cout << "vertex already present:" << pVertices[vc]->id << endl;
+			cout << "JVertex already present:" << pVertices[vc]->id << endl;
 #endif
 			return -1;
 		}
@@ -849,7 +837,7 @@ int NavMesh::AddVertex(Vertex* v) {
 	return v->id;
 }
 
-int NavMesh::AddEdge(Edge* e) {
+int NavMesh::AddEdge(JEdge* e) {
 	int id = IsPortal(e->pStart.pPos, e->pEnd.pPos);
 
 	if ((IsElementInVector(pEdges, e) == false) && (id == -1)) {
@@ -862,14 +850,14 @@ int NavMesh::AddEdge(Edge* e) {
 		return e->id;
 	} else {
 #ifdef _DEBUG
-		cout << "Edge already present:" << id << endl;
+		cout << "JEdge already present:" << id << endl;
 #endif
 	}
 
 	return -1;
 }
 
-int NavMesh::AddObst(Obstacle* o) {
+int NavMesh::AddObst(JObstacle* o) {
 	int id= IsObstacle(o->pStart.pPos, o->pEnd.pPos);
 
 	if ( (IsElementInVector(pObst, o) == false) &&
@@ -890,26 +878,41 @@ int NavMesh::AddObst(Obstacle* o) {
 	return -1;
 }
 
-int NavMesh::AddNode(Node* n) {
-	if (IsElementInVector(pNodes, n) == false) {
-		if (pNodes.size() == 0) {
-			n->id = 0;
-		} else {
-			n->id = pNodes[pNodes.size() - 1]->id + 1;
-		}
-		pNodes.push_back(n);
-		return n->id;
-	} else {
+int NavMesh::AddNode(JNode* node) {
+
+	std::sort(node->pObstacles.begin(),node->pObstacles.end());
+	std::sort(node->pPortals.begin(),node->pPortals.end());
+
+	for(unsigned int n=0;n<pNodes.size();n++){
+		if(*pNodes[n]==*node)  {
 #ifdef _DEBUG
-		cout << "Node already present:" << n->id << endl;
+			cout << "JNode already present:" << node->id << endl;
 #endif
+			return -1;
+		}
 	}
-	return -1;
+
+
+	if (IsElementInVector(pNodes, node)) {
+
+#ifdef _DEBUG
+		cout << "JNode already present:" << node->id << endl;
+#endif
+		return -1;
+	}
+
+	if (pNodes.size() == 0) {
+		node->id = 0;
+	} else {
+		node->id = pNodes[pNodes.size() - 1]->id + 1;
+	}
+	pNodes.push_back(node);
+	return node->id;
 }
 
 
 
-NavMesh::Vertex* NavMesh::GetVertex(const Point& p) {
+NavMesh::JVertex* NavMesh::GetVertex(const Point& p) {
 
 	for(unsigned int v=0;v<pVertices.size();v++){
 		if(pVertices[v]->pPos.operator ==(p)){
@@ -917,11 +920,11 @@ NavMesh::Vertex* NavMesh::GetVertex(const Point& p) {
 		}
 	}
 #ifdef _DEBUG
-	cout<<"Vertex not found: "<< p.GetX()<<":"<<p.GetY()<<endl;
+	cout<<"JVertex not found: "<< p.GetX()<<":"<<p.GetY()<<endl;
 	cout<<"Adding "<<endl;
 	cout<<"pVertices.size()="<<pVertices.size()<<endl;
 #endif
-	Vertex* v = new Vertex();
+	JVertex* v = new JVertex();
 	v->pPos= p;
 	AddVertex(v);
 	//this could lead to an infinite loop if the point cannot be added and cannot be found
@@ -933,14 +936,14 @@ NavMesh::Vertex* NavMesh::GetVertex(const Point& p) {
 int NavMesh::IsPortal(Point& p1, Point& p2) {
 
 	for(unsigned int i=0;i<pEdges.size();i++){
-		Edge* edge=pEdges[i];
+		JEdge* JEdge=pEdges[i];
 
-		if( (edge->pStart.pPos==p1) && (edge->pEnd.pPos==p2)){
-			return edge->id;
+		if( (JEdge->pStart.pPos==p1) && (JEdge->pEnd.pPos==p2)){
+			return JEdge->id;
 		}
 
-		if( (edge->pStart.pPos==p2) && (edge->pEnd.pPos==p1)){
-			return edge->id;
+		if( (JEdge->pStart.pPos==p2) && (JEdge->pEnd.pPos==p1)){
+			return JEdge->id;
 		}
 	}
 	return -1;
@@ -950,44 +953,8 @@ void NavMesh::Finalize() {
 
 #ifdef _CGAL
 	cout<<"finalizing"<<endl;
-	//	//	Delaunay
-	//	DT dt;
-	//	std::list<Point_2> lp;
-	//
-	//	for(unsigned int i = 0; i< pVertices.size(); i++) {
-	//		double x=pVertices[i]->pPos.GetX() ;
-	//		double y=pVertices[i]->pPos.GetY() ;
-	//		dt.insert(Point_2(x, y));
-	//		lp.push_back(Point_2(x, y));
-	//	}
-	//	std::cout << "Delaunay computed." << std::endl;
-	//
-	//	// compute alpha shape
-	//	Alpha_shape_2 as(dt);
-	//	//Alpha_shape_2 as(lp.begin(),lp.end());
-	//	std::cout << "Alpha shape computed in REGULARIZED mode by defaut."
-	//			<< std::endl;
-	//
-	//
-	//	// find optimal alpha values
-	//	Alpha_iterator opt = as.find_optimal_alpha(1.5);
-	//	std::cout << "Optimal alpha value to get one connected component is "
-	//			<<  *opt    << std::endl;
-	//	as.set_alpha(*opt);
-	//	assert(as.number_of_solid_components() == 1);
-	//
-	//
-	//	std::list<Point_2> env=as.Output();
-	//	std::cout <<"size alpha: " <<env.size()<<std::endl;
-	//	std::cout <<"size init: " <<pVertices.size()<<std::endl;
-	//
-	//	vector<Point> envelope;
-	//	for (std::list<Point_2>::const_iterator it  = env.begin(), end = env.end(); it  != end; ++it ) {
-	//		//std::cout << *it;
-	//		envelope.push_back(Point((*it).x(),(*it).y()));
-	//	}
-	//	WriteToFileTraVisTo("arena_envelope.xml",envelope);
 
+	//	WriteToFileTraVisTo("arena_envelope.xml",envelope);
 
 	//collect all possible vertices that form that envelope
 
@@ -1146,29 +1113,111 @@ void NavMesh::Finalize() {
 		vector<p2t::Triangle*> triangles=tri->GetTriangles();
 		cout<<"size:"<<triangles.size()<<endl;
 
-		CGAL::Geomview_stream gv(CGAL::Bbox_3(-100, -100, -100, 100, 100, 100));
-		gv.set_line_width(4);
-		gv.set_trace(true);
-		gv.set_bg_color(CGAL::Color(0, 200, 200));
-		// gv.clear();
-
-		// use different colors, and put a few sleeps/clear.
-		gv << CGAL::BLUE;
-		gv.set_wired(true);
+		//		CGAL::Geomview_stream gv(CGAL::Bbox_3(-100, -100, -100, 100, 100, 100));
+		//		gv.set_line_width(4);
+		//		gv.set_trace(true);
+		//		gv.set_bg_color(CGAL::Color(0, 200, 200));
+		//		// gv.clear();
+		//
+		//		// use different colors, and put a few sleeps/clear.
+		//		gv << CGAL::BLUE;
+		//		gv.set_wired(true);
 
 		for(unsigned int t=0;t<triangles.size();t++){
 			p2t::Triangle* tr =triangles[t];
 
-			Point_2 P0  = Point_2 (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
-			Point_2 P1  = Point_2 (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
-			Point_2 P2  = Point_2 (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
-			gv << Segment_2(P0,P1);
-			gv << Segment_2(P1,P2);
-			gv << Segment_2(P0,P2);
+			//			Point_2 P0  = Point_2 (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+			//			Point_2 P1  = Point_2 (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+			//			Point_2 P2  = Point_2 (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+			//			gv << Segment_2(P0,P1);
+			//			gv << Segment_2(P1,P2);
+			//			gv << Segment_2(P0,P2);
 
+			Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+			Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+			Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+
+			//create the new nodes
+			{
+
+				JNode* new_node = new JNode();
+				new_node->pGroup = "outside";
+				//to get a correct ID
+				AddNode(new_node);
+				new_nodes.push_back(new_node);
+				new_node->pCentroid= (P0+P1+P2)*(1/3);
+
+				new_node->pNormalVec[0]=0;
+				new_node->pNormalVec[1]=0;
+				new_node->pNormalVec[2]=0;
+
+				// Points are by default counterclockwise
+				new_node->pHull.push_back(*(GetVertex(P0)));
+				new_node->pHull.push_back(*(GetVertex(P1)));
+				new_node->pHull.push_back(*(GetVertex(P2)));
+
+
+				for (int index=0;index<3;index++){
+
+					Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+					Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+
+
+					int edge_id=IsPortal(P0,P1);
+					if(edge_id != -1){
+						new_node->pPortals.push_back(edge_id);
+						JEdge* e = pEdges[edge_id];
+
+						// check if all JEdge information are present
+						// in particular one the second node_id might not be set yet
+						//assert(e->pNode1==-1);
+						if(e->pNode1 == -1){
+							e->pNode1=new_node->id;
+							if (e->pNode0 > e->pNode1){
+								swap (e->pNode0, e->pNode1);
+							}
+
+							//new set the correct orientation
+							//first attempt
+							Point D0 = P1 - P0;
+							Point centroid0=pNodes[e->pNode0]->pCentroid;
+							if (D0.Det(centroid0) < 0) {
+								e->pEnd=*GetVertex(P1);
+								e->pStart= *GetVertex(P0);
+
+							}else{
+								e->pStart= *GetVertex(P1);
+								e->pEnd=*GetVertex(P0);
+							}
+
+						}
+					}
+
+					int obstacle_id=IsObstacle(P0,P1);
+					if(obstacle_id != -1){
+						//std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
+						new_node->pObstacles.push_back(obstacle_id);
+						pObst[obstacle_id]->pNode0=new_node->id;
+					}
+
+					// this portal was newly created
+					if ((obstacle_id==-1) && (edge_id==-1)){
+
+						JEdge* e= new JEdge();
+						e->pEnd=*GetVertex(P1);
+						e->pStart= *GetVertex(P0);
+						AddEdge(e);
+
+						// add so we can get a correct ID
+						e->pNode0=new_node->id;
+
+						// caution: the ID is automatically assigned in the AddEdge method
+						new_node->pPortals.push_back(e->id);
+
+					}
+				}
+			}
 		}
-
-		getc(stdin);
 	}
 	//	//Insert the polyons into a constrained triangulation
 
@@ -1225,15 +1274,276 @@ void NavMesh::Finalize() {
 	//
 	//	getc(stdin);
 
-	exit(0);
+	//exit(0);
 
 #endif //_CGAL
+
+	cout<<"done with finalization"<<endl;
+}
+
+
+void NavMesh::Triangulate(SubRoom* sub) {
+
+	//vertices
+	vector<Point> outerHull= sub->GetPolygon();
+
+	// Vertices
+	for (unsigned int p = 0; p < outerHull.size(); p++) {
+		JVertex* v = new JVertex();
+		v->pPos= outerHull[p];
+		if(AddVertex(v)==-1) {
+			delete v;
+		}
+	}
+
+
+	vector<vector<Point> >holes;
+	const vector<Obstacle*>& obstacles= sub->GetAllObstacles();
+
+	for(unsigned int p=0;p<obstacles.size();p++){
+		holes.push_back(obstacles[p]->GetPolygon());
+	}
+
+
+#ifdef _CGAL
+
+	//perform some checks
+	Polygon_2 polygon;
+	Polygon_2 holesP[holes.size()];
+
+	for(unsigned int i=0;i<outerHull.size();i++){
+		polygon.push_back(Point_2(outerHull[i].pX,outerHull[i].pY));
+	}
+	assert(polygon.is_simple());
+	if(polygon.is_clockwise_oriented()){
+		std::reverse(outerHull.begin(), outerHull.end());
+		polygon.reverse_orientation();
+	}
+	assert(polygon.is_counterclockwise_oriented());
+
+
+	for(unsigned int i=0;i<holes.size();i++){
+		for(unsigned int j=0;j<holes[i].size();j++){
+			holesP[i].push_back(Point_2(holes[j][i].pX,holes[j][i].pY));
+		}
+
+		if(holesP[i].is_clockwise_oriented()) {
+			holesP[i].reverse_orientation();
+			std::reverse(holes[i].begin(), holes[i].end());
+		}
+		assert(holesP[i].is_counterclockwise_oriented());
+		assert(holesP[i].is_simple());
+	}
+
+#endif // _CGAL
+
+
+	DTriangulation* tri= new DTriangulation();
+	tri->SetOuterPolygone(outerHull);
+
+	//add the holes
+	for(unsigned int i=0;i<holes.size();i++){
+		tri->AddHole(holes[i]);
+	}
+
+	tri->Triangulate();
+
+	vector<p2t::Triangle*> triangles=tri->GetTriangles();
+	//cout<<"size:"<<triangles.size()<<endl;
+
+	for(unsigned int t=0;t<triangles.size();t++)
+	{
+		p2t::Triangle* tr =triangles[t];
+
+		Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+		Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+		Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+
+		//create the new nodes
+		JNode* new_node = new JNode();
+		new_node->pGroup = "outside";
+		//to get a correct ID
+		AddNode(new_node);
+		new_nodes.push_back(new_node);
+		new_node->pCentroid= (P0+P1+P2)*(1/3);
+
+		new_node->pNormalVec[0]=0;
+		new_node->pNormalVec[1]=0;
+		new_node->pNormalVec[2]=pBuilding->GetRoom(sub->GetRoomID())->GetZPos();
+
+		// Points are by default counterclockwise
+		new_node->pHull.push_back(*(GetVertex(P0)));
+		new_node->pHull.push_back(*(GetVertex(P1)));
+		new_node->pHull.push_back(*(GetVertex(P2)));
+
+
+		for (int index=0;index<3;index++){
+
+			Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+			Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+
+			int edge_id=IsPortal(P0,P1);
+			if(edge_id != -1){
+				new_node->pPortals.push_back(edge_id);
+				JEdge* e = pEdges[edge_id];
+
+				// check if all JEdge information are present
+				// in particular one the second node_id might not be set yet
+				//assert(e->pNode1==-1);
+				if(e->pNode1 == -1){
+					e->pNode1=new_node->id;
+					if (e->pNode0 > e->pNode1){
+						swap (e->pNode0, e->pNode1);
+					}
+
+					//new set the correct orientation
+					//first attempt
+					Point D0 = P1 - P0;
+					Point centroid0=pNodes[e->pNode0]->pCentroid;
+					if (D0.Det(centroid0) < 0) {
+						e->pEnd=*GetVertex(P1);
+						e->pStart= *GetVertex(P0);
+
+					}else{
+						e->pStart= *GetVertex(P1);
+						e->pEnd=*GetVertex(P0);
+					}
+				}
+			}
+
+			int obstacle_id=IsObstacle(P0,P1);
+			if(obstacle_id != -1){
+				//std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
+				new_node->pObstacles.push_back(obstacle_id);
+				pObst[obstacle_id]->pNode0=new_node->id;
+			}
+
+			// this portal was newly created
+			if ((obstacle_id==-1) && (edge_id==-1)){
+
+				JEdge* e= new JEdge();
+				e->pEnd=*GetVertex(P1);
+				e->pStart= *GetVertex(P0);
+				AddEdge(e);
+
+				// add so we can get a correct ID
+				e->pNode0=new_node->id;
+
+				// caution: the ID is automatically assigned in the AddEdge method
+				new_node->pPortals.push_back(e->id);
+			}
+		}
+	}
+}
+
+void NavMesh::Triangulate(JNode* node) {
+
+	if(node->IsConvex()) return;
+
+	vector<Point> outerHull;
+
+	for(unsigned int h=0;h<node->pHull.size();h++){
+		outerHull.push_back(node->pHull[h].pPos);
+	}
+
+	DTriangulation* tri= new DTriangulation();
+	tri->SetOuterPolygone(outerHull);
+
+	//no hole
+	//tri->AddHole(Hull2);
+	tri->Triangulate();
+	vector<p2t::Triangle*> triangles=tri->GetTriangles();
+	cout<<"size:"<<triangles.size()<<endl;
+
+
+	for(unsigned int t=0;t<triangles.size();t++){
+		p2t::Triangle* tr =triangles[t];
+
+		Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+		Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+		Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+
+		//create the new nodes
+		JNode* new_node = new JNode();
+		new_node->pGroup = node->pGroup;
+		//to get a correct ID
+		AddNode(new_node);
+		new_nodes.push_back(new_node);
+		new_node->pCentroid= (P0+P1+P2)*(1/3);
+
+		new_node->pNormalVec[0]=node->pNormalVec[0];
+		new_node->pNormalVec[1]=node->pNormalVec[1];
+		new_node->pNormalVec[2]=node->pNormalVec[2];
+
+		// Points are by default counterclockwise
+		new_node->pHull.push_back(*(GetVertex(P0)));
+		new_node->pHull.push_back(*(GetVertex(P1)));
+		new_node->pHull.push_back(*(GetVertex(P2)));
+
+
+		for (int index=0;index<3;index++){
+
+			Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+			Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+
+			int edge_id=IsPortal(P0,P1);
+			if(edge_id != -1){
+				new_node->pPortals.push_back(edge_id);
+				JEdge* e = pEdges[edge_id];
+
+				// check if all JEdge information are present
+				// in particular one the second node_id might not be set yet
+				//assert(e->pNode1==-1);
+				if(e->pNode1 == -1){
+					e->pNode1=new_node->id;
+					if (e->pNode0 > e->pNode1){
+						swap (e->pNode0, e->pNode1);
+					}
+
+					//new set the correct orientation
+					//first attempt
+					Point D0 = P1 - P0;
+					Point centroid0=pNodes[e->pNode0]->pCentroid;
+					if (D0.Det(centroid0) < 0) {
+						e->pEnd=*GetVertex(P1);
+						e->pStart= *GetVertex(P0);
+
+					}else{
+						e->pStart= *GetVertex(P1);
+						e->pEnd=*GetVertex(P0);
+					}
+				}
+			}
+
+			int obstacle_id=IsObstacle(P0,P1);
+			if(obstacle_id != -1){
+				//std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
+				new_node->pObstacles.push_back(obstacle_id);
+				pObst[obstacle_id]->pNode0=new_node->id;
+			}
+
+			// this portal was newly created
+			if ((obstacle_id==-1) && (edge_id==-1)){
+
+				JEdge* e= new JEdge();
+				e->pEnd=*GetVertex(P1);
+				e->pStart= *GetVertex(P0);
+				AddEdge(e);
+
+				// add so we can get a correct ID
+				e->pNode0=new_node->id;
+
+				// caution: the ID is automatically assigned in the AddEdge method
+				new_node->pPortals.push_back(e->id);
+			}
+		}
+	}
 }
 
 int NavMesh::IsObstacle(Point& p1, Point& p2) {
 
 	for(unsigned int i=0;i<pObst.size();i++){
-		Obstacle* obst=pObst[i];
+		JObstacle* obst=pObst[i];
 
 		if( (obst->pStart.pPos==p1) && (obst->pEnd.pPos==p2)){
 			return obst->id;
@@ -1245,4 +1555,21 @@ int NavMesh::IsObstacle(Point& p1, Point& p2) {
 	}
 
 	return -1;
+}
+
+void NavMesh::WriteScenario() {
+	WriteBehavior();
+	WriteViewer();
+	WriteStartPosition();
+}
+
+void NavMesh::WriteBehavior() {
+
+}
+
+void NavMesh::WriteViewer() {
+
+}
+
+void NavMesh::WriteStartPosition() {
 }

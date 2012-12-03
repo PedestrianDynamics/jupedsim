@@ -78,6 +78,10 @@ void Obstacle::SetId(int id) {
 	pID = id;
 }
 
+const vector<Point>& Obstacle::GetPolygon() const {
+	return pPoly;
+}
+
 string Obstacle::Write() {
 	string s;
 	Point pos;
