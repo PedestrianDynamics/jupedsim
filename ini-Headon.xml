@@ -20,7 +20,7 @@
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
-		<tmax unit="sec">900</tmax>
+		<tmax unit="sec">1200</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<linkedcells enabled="true" cell_size="2.2"/>
@@ -31,7 +31,7 @@
 		<amin mu="0.18" sigma="0.001" />
 		<tau mu="0.5" sigma="0.001" />
 		<atau mu="0.5" sigma="0.001" />
-		<force_ped nu="0.3" dist_max="3" disteff_max="2"
+		<force_ped nu="0.4" dist_max="3" disteff_max="2"
 			interpolation_width="0.1" />
 		<force_wall nu="0.2" dist_max="3" disteff_max="2"
 			interpolation_width="0.1" />
