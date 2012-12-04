@@ -43,22 +43,22 @@ poly2tri/sweep/advancing_front.cpp  poly2tri/sweep/cdt.cpp  poly2tri/sweep/sweep
 OBJECTS=$(SOURCES:.cpp=.o)
 DEP=$(SOURCES:.cpp=.d)
 EXECUTABLE=rebuild.exe
-
+	
 all: $(SOURCES) $(EXECUTABLE)
 	
 $(EXECUTABLE): $(OBJECTS)
 	$(MCC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
-
+	
 # pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)
-
+	
 .cpp.o:
 	$(MCC) $(CFLAGS) $(LDFLAGS) $< -o $@
 	$(MCC) -MM $(CFLAGS) $*.cpp > $*.d
-
+	
 release:
 	$(MCC) $(LDFLAGS) $(LREALEASE) -o $(EXECUTABLE) $(SOURCES)
-
+	
 vampire:
 	$(VTT) $(LDFLAGS) $(LDEBUG) -DVTRACE -o $(EXECUTABLE) $(SOURCES)
 	
