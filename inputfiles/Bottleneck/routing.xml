@@ -2,7 +2,7 @@
 
 <routing version="0.4">
 	<trips>
-		<trip id="0">0:1</trip>
+		<trip id="0">0:1:2</trip>
 	</trips>
 
 </routing>

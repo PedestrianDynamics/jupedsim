@@ -25,7 +25,7 @@
 		direction="" goal="" age="18" gender="male"/> -->
 	
 
-	<person id="1" startX="100" startY="100" goal="2" age="18" gender="male"/>
-	<person id="2" startX="120" startY="120" goal="2" age="18" gender="female" />
+	<person id="1" startX="92" startY="132" goal="2" age="18" gender="male"/>
+	<person id="2" startX="95" startY="130" goal="2" age="18" gender="female" />
 
 </persons> 
