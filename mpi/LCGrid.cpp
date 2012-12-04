@@ -49,10 +49,6 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds){
 	pGrid_ymax=boundaries[3];
 	pCellSize=cellsize;
 	pNpeds=nPeds;
-	// only pedestrians within that pMaxEffectivDist radius will be returned
-
-	pMaxEffectivDist=1.0; //	pMaxEffectivDist=2.2;
-
 
 	// add 1 to ensure that the whole area is covered by cells if not divisable without remainder
 	pGridSizeX = (int) ((pGrid_xmax - pGrid_xmin) / pCellSize) + 1 + 2; // 1 dummy cell on each side
@@ -172,7 +168,7 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighbourhood,
 				double x=pLocalPedsCopy[p]->GetPos().GetX();
 				double y=pLocalPedsCopy[p]->GetPos().GetY();
 				double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
-				if((dist<pMaxEffectivDist*pMaxEffectivDist) && (p!=myID)){
+				if((dist<pCellSize*pCellSize) && (p!=myID)){
 					neighbourhood[(*nSize)++]=pLocalPedsCopy[p];
 					if(*nSize>299) return;
 				}
@@ -204,7 +200,7 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
 				double x=pLocalPedsCopy[p]->GetPos().GetX();
 				double y=pLocalPedsCopy[p]->GetPos().GetY();
 				double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
-				if((dist<pMaxEffectivDist*pMaxEffectivDist) && (p!=myID)){
+				if((dist<pCellSize*pCellSize) && (p!=myID)){
 					neighbourhood.push_back(pLocalPedsCopy[p]);
 				}
 				// next ped
@@ -231,7 +227,7 @@ void LCGrid::getNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhoo
 				double x=pLocalPedsCopy[p]->GetPos().GetX();
 				double y=pLocalPedsCopy[p]->GetPos().GetY();
 				double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
-				if((dist<pMaxEffectivDist*pMaxEffectivDist)){
+				if((dist<pCellSize*pCellSize)){
 					neighbourhood.push_back(pLocalPedsCopy[p]);
 				}
 				// next ped
@@ -287,9 +283,6 @@ void LCGrid::dumpCellsOnly(){
 			if(ped==LIST_EMPTY) continue;
 
 			printf("Cell[%d][%d] = { ",l,k);
-			//getc(stdin);
-			//while (ped != EMPTY) {
-			//printf("%d, ",ped+1);
 
 			// all neighbor cells
 			// dummy cells will be empty

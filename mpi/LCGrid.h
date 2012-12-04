@@ -69,7 +69,7 @@ private:
 	int pNpeds;
 
 	// only pedestrians within that radius will be returned
-	double pMaxEffectivDist;
+	//double pMaxEffectivDist;
 
 public:
 

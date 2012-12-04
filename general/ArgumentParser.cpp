@@ -147,7 +147,7 @@ double ArgumentParser::Getfps() const {
 
 string ArgumentParser::GetGeometryFilename() const {
 	return pGeometryFilename;
-};
+}
 
 int ArgumentParser::GetExitStrategy() const {
 	return pExitStrategy;

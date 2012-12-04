@@ -1564,10 +1564,69 @@ void NavMesh::WriteScenario() {
 }
 
 void NavMesh::WriteBehavior() {
+	string filename="../pedunc/examples/stadium/arena.nav";
+	ofstream file(filename.c_str());
+	file.precision(2);
+	file<<fixed;
+
+	if(file.is_open()==false){
+		cout <<"could not open the file: "<<filename<<endl;
+		return;
+	}
+
+
+//	file<< "<?xml version=\"1.0\"?>"<<endl;
+//
+//
+//	file<< " <Population>"<<endl;
+//			file<< "<GoalSet id=\"0\">"<<endl;
+//
+//	<Goal type="point" id="0" x="10.22" y="31.89"/>
+//
+//	<Goal type="point" id="1" x="3" y="5.0"/>
+//	<Goal type="AABB" id="2" xmin="-0.5" xmax="0.5" ymin="4.5" ymax="5.5" />
+//	<Goal type="point" id="3" x="0.0" y="-0.5" />
+//	-->
+//	file<< "</GoalSet>"<<endl;
+
+//	file<< "<Behavior class="1">"<<endl;
+//	file<< "<Property name="prefSpeed" type="float" dist="c" value="1.3" />"<<endl;
+//	file<< "<Property type="2D" name="stride" dist="c" factor_value="100.57" buffer_value="0.0" />"<<endl;
+//	file<< ""<<endl;
+//	file<< "<State name="Walk1" speedPolicy="min" final="0" >"<<endl;
+//	file<< "<!--"<<endl;
+//	file<< "<NavMeshGoal goalSet="0" goal="farthest" filename="../examples/stadium/arena.nav"/>"<<endl;
+//	file<< "-->"<<endl;
+//	file<< "<AbsoluteGoal goalSet="0" goal="0" perAgent="0" />"<<endl;
+//	file<< "<VelComponent type="navMesh" weight="1.0"  filename="../examples/stadium/arena.nav" />"<<endl;
+//	file<< "</State>"<<endl;
+//	file<< "<State name="Stop1" speedPolicy="min" final="1">"<<endl;
+//	file<< "<HoldPosGoal />"<<endl;
+//	file<< "<VelComponent type="goal" weight="1.0"/>"<<endl;
+//	file<< "</State>"<<endl;
+//	file<< ""<<endl;
+//	file<< "<Transition order="0" type="goal_circle" from="Walk1" to="Stop1" radius="0.25" inside="1" />"<<endl;
+//	file<< "</Behavior>"<<endl;
+//	file<< ""<<endl;
+//	file<< "</Population>"<<endl;
 
 }
 
 void NavMesh::WriteViewer() {
+/*
+	<?xml version="1.0"?>
+
+	<View width="640" height="480">
+	    <!-- Multiple cameras are mapped to a key from 1-9 in the order they are defined here -->
+		<Camera xpos="6.53453" ypos="7.05969" zpos="-4.31638" xtgt="0.609475" ytgt="0.961173" ztgt="1.77459" far="200" near="0.01" fov="45" />
+		<Camera xpos="-0.947526" ypos="17.2771" zpos="1.64757" xtgt="-0.947526" ytgt="2.61554" ztgt="1.64584" far="200" near="0.01" fov="0.0" />
+
+		<!-- Comment out lights for a constant-illuminated visualization -->
+		<Light x="1" y="0" z="-1" type="directional" diffR="1.0" diffG="0.8" diffB="0.8" space="camera"/>
+		<Light x="-1" y="0" z="-1" type="directional" diffR="0.8" diffG="0.8" diffB="1.0" space="camera"/>
+		<Light x="0" y="1" z="0" type="directional" diffR="0.8" diffG="0.8" diffB="0.8" space="world"/>
+	</View>
+*/
 
 }
 

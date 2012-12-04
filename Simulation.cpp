@@ -259,8 +259,8 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	//Sean
 	//NavMesh* nv= new NavMesh(pBuilding);
-	///nv->BuildNavMesh();
-	//nv->WriteToFile("../pedunc/examples/Room080/Room080.nav");
+	//nv->BuildNavMesh();
+	//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
 	//nv->WriteToFileTraVisTo("promenade.nav.xml");
 	//exit(EXIT_FAILURE);
 
