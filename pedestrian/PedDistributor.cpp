@@ -208,6 +208,7 @@ int PedDistributor::Distribute(Building* building) const {
 	for (int r = 0; r < building->GetAnzRooms(); r++) {
 		vector< vector<Point > >  allFreePosRoom = vector< vector<Point > > ();
 		Room* room = building->GetRoom(r);
+		//if(room->GetCaption()=="outside") continue;
 		for (int s = 0; s < room->GetAnzSubRooms(); s++) {
 			SubRoom* subr = room->GetSubRoom(s);
 			allFreePosRoom.push_back(PossiblePositions(subr));

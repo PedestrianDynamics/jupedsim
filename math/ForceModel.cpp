@@ -591,7 +591,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 						"is bigger than desired velocity (%f) at time: %fs\n",
 						sqrt(normVi), ped->GetPedIndex(), ped->GetV0Norm(), time);
 
-
 				// FIXME: remove the pedestrian and continue
 				for(int p=0;p<subroom->GetAnzPedestrians();p++){
 					if (subroom->GetPedestrian(p)->GetPedIndex()==ped->GetPedIndex()){

@@ -98,13 +98,13 @@ ArgumentParser::ArgumentParser() {
 	pAtauSigma = 0.001;
 	pAminMu = 0.18;
 	pAminSigma = 0.001;
-	pNuPed = 0.2;
+	pNuPed = 0.4;
 	pNuWall = 0.2;
 	pIntPWidthPed = 0.1;
 	pIntPWidthWall = 0.1;
 	pMaxFPed = 3;
 	pMaxFWall = 3;
-	pDistEffMaxPed = 0.8;
+	pDistEffMaxPed = 2; //0.8
 	pDistEffMaxWall = 2;
 	pTauMu = 0.5;
 	pTauSigma = 0.001;

@@ -630,7 +630,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		ped->SetExitLine(pAccessPoints[bestAPsID]->GetNavLine());
 		return bestAPsID;
 	} else {
-		cout << "no correct ID" << endl;
+		cout << "ERROR:\t GlobalRouter.cpp: a valid destination could not be found" << endl;
 		exit(EXIT_FAILURE);
 		return -1;
 	}

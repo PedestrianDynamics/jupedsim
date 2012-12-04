@@ -139,7 +139,7 @@ void Building::AddRoom(Room* room) {
 }
 
 void Building::AddSurroundingRoom() {
-	Log->write("INFO: \tAdding the room 'outside' or 'world' ");
+	Log->write("INFO: \tAdding the room 'outside' ");
 	// first look for the geometry boundaries
 	double x_min = FLT_MAX;
 	double x_max = -FLT_MAX;
@@ -180,6 +180,8 @@ void Building::AddSurroundingRoom() {
 	y_max = y_max + 10.0;
 
 	SubRoom* bigSubroom = new NormalSubRoom();
+	bigSubroom->SetRoomID(pRooms.size());
+	bigSubroom->SetSubRoomID(0); // should be the single subroom
 	bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
 	bigSubroom->AddWall(Wall(Point(x_min, y_max), Point(x_max, y_max)));
 	bigSubroom->AddWall(Wall(Point(x_max, y_max), Point(x_max, y_min)));

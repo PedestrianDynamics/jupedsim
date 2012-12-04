@@ -9,7 +9,7 @@
 #define NAVMESH_H_
 
 
-#define _CGAL1
+#define _CGAL
 
 // CGAL libs
 #ifdef _CGAL
