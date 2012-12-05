@@ -4,7 +4,7 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfiles/Bottleneck/0.8_bottleneck.xml</geometry>
+	<geometry>/home/chraibi/Workspace/peddynamics/JuPedSim/JPSgcfm/trunk/inputfiles/Bottleneck/1.1_bottleneck.xml</geometry>
 	<!--persons information and distribution -->
 	<person>inputfiles/Bottleneck/persons.xml</person>
 	<!-- extra routing information -->
@@ -12,7 +12,7 @@
 	<!-- traffic information: e.g closed doors -->
 	<!-- <traffic>inputfiles/Bottleneck/traffic.xml</traffic> -->
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml</trajectories>
+	<trajectories format="xml-plain" version="0.4">/home/chraibi/Workspace/peddynamics/JuPedSim/JPSgcfm/trunk/outputfiles/1.1_TrajBottleneck.xml</trajectories>
 	<!-- where to store the logs 
 	<logfile>outputfiles/log.txt</logfile>
  	-->
