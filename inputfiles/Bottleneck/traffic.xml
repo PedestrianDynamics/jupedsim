@@ -2,7 +2,7 @@
 
 <traffic version="0.4">
 	<rooms>
-		<room room_id="2" state="good" />
+		<room room_id="0" state="good" />
 	</rooms>
 	<doors>
 		<door trans_id="2" state="open" />

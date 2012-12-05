@@ -2,13 +2,13 @@
 <persons version="0.4">
 	<header>
 		<description>Bottleneck</description>
-		<number>2</number>
+		<number>170</number>
 	</header>
 
 	<!-- default distribution -->
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
-		<dist room_caption="bottleneck" subroom_id="0" number="2" />
+		<dist room_caption="botleneckHolding" subroom_id="0" number="170" />
 	</distribution>
 
  <!-- 
@@ -25,7 +25,7 @@
 		direction="" goal="" age="18" gender="male"/> -->
 	
 
-	<person id="1" startX="92" startY="132" goal="2" age="18" gender="male"/>
-	<person id="2" startX="95" startY="130" goal="2" age="18" gender="female" />
+	<!-- <person id="1" startX="63" startY="102" goal="2" age="18" gender="male"/> -->
+	<!-- <person id="2" startX="64" startY="101" goal="2" age="18" gender="female" /> -->
 
 </persons> 
