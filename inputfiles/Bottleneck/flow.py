@@ -6,21 +6,18 @@ import time
 from os import path, system
 from matplotlib.pyplot import *
 
-SIM = 0 # 0: shutdown simulations, 1: make simulations
-
+#-------------------- CONTROL VARS ----------------------
+SIM = 1 # 0: shutdown simulations, 1: make simulations
+MAKE_INI = 1 # generate new ini-files. 
+PLOT = 1 # plot or not?
+#--------------------------------------------------------
+#-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
 TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/JPSgcfm/trunk/"
 GEODIR = TRUNK + "inputfiles/Bottleneck/"
 TRAJDIR = TRUNK + "outputfiles/"
 CWD = os.getcwd()
-
-
-
-# if len(argv) == 1:
-#    print "Usage: python dom1.py file"
-#    exit()
-# file = argv[1]
-
+#--------------------------------------------------------
 
 def sh(script):
 	# run bash command
@@ -84,6 +81,8 @@ def flow(fps, N, data, x0):
 if __name__ == "__main__":
 	widths = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]
 	flows = []
+	if MAKE_INI:
+		sh("python makeBottleneckInifile.py")
 
 	for w in widths:
 		geofile = GEODIR + str(w) + "_" + "bottleneck.xml"
@@ -113,7 +112,7 @@ if __name__ == "__main__":
 		flows.append(J)
 
 	print "flows: ", flows
-	if len(flows) > 1:
+	if len(flows) > 1 and PLOT:
 		ms = 10 #marker size
 		plot(widths, flows, "o-", lw = 2, ms = ms, label = "simulation")
 		sey = np.loadtxt("bck-b-scaling/seyfried-j-b.dat")

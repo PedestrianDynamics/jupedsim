@@ -1,18 +1,21 @@
+# make some new ini-files based on the file <ini-Bottleneck.xml>
+# so first make changes in <ini-Bottleneck.xml> and then spread them with this script to the  world         
+
 import re
 from os import path
 
 HOME = path.expanduser("~")
-TRUNK = "/Workspace/peddynamics/JuPedSim/JPSgcfm/trunk/"
-GEODIR = HOME + TRUNK + "inputfiles/Bottleneck/"
-TRAJDIR = HOME + TRUNK + "outputfiles/"
-inifile = HOME + TRUNK + "ini-Bottleneck.xml"
+TRUNK =  HOME + "/Workspace/peddynamics/JuPedSim/JPSgcfm/trunk/"
+GEODIR = TRUNK + "inputfiles/Bottleneck/"
+TRAJDIR = TRUNK + "outputfiles/"
+inifile =  TRUNK + "ini-Bottleneck.xml"
 
 f = open(inifile)
 read_data = f.read()
 f.close()
 W = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]
 for w in W:
-	ofile = HOME + TRUNK + str(w) + "_ini-Bottleneck.xml"
+	ofile = TRUNK + str(w) + "_ini-Bottleneck.xml"
 	geofile = GEODIR + str(w) + "_" + "bottleneck.xml" 
 	trajfile = TRAJDIR + str(w) + "_" + "TrajBottleneck.xml"
 	
