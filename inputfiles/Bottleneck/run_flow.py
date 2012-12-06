@@ -6,26 +6,22 @@ import os
 import time
 from os import path, system
 from matplotlib.pyplot import *
-import optparse,logging
+import argparse
 
-
-logging.basicConfig(level=logging.INFO)
-parser = optparse.OptionParser()
-parser.add_option('--plt' , type='string', help="Plot and save the results in a flow_pngs/")
-parser.add_option('--sim' , type='string', help="Make first simulations. Old sim-trajectories will be deleted")
-parser.add_option('--ini' , type='string', help="Produce ini-files based on the ini-Bottleneck.xml file")
-
-(options, args) = parser.parse_args()
-
-print "options", options
-print "args", args
-
+parser = argparse.ArgumentParser(description='Simulate the bottleneck-scenario with GCFM and calculte the flow with respect to the width of the bottleneck')
+parser.add_argument("-p", "--plt", type=int , choices=xrange(0, 2), required=True, help='Plot and save the results in flow_pngs/')
+parser.add_argument("-s", "--sim" , type=int , choices=xrange(0, 2), required=True, help="Make simulations. Old sim-trajectories will be deleted")
+parser.add_argument("-i" , "--ini" , type=int , choices=xrange(0, 2), required=True, help="Produce ini-files based on the <ini-Bottleneck.xml> file")
+args = parser.parse_args()
 #-------------------- CONTROL VARS ----------------------
-SIM = 1 # 0: shutdown simulations, 1: make simulations
-MAKE_INI = 0 # generate new ini-files. 
-PLOT = 1 # plot or not?
+SIM = args.sim # 0: shutdown simulations, 1: make simulations
+MAKE_INI = args.ini # generate new ini-files. 
+PLOT = args.plt # plot or not?
 #--------------------------------------------------------
 
+print 'SIM', SIM
+print 'MAKE_INI', MAKE_INI
+print 'PLOT', PLOT
 
 raw_input("pause")
 
