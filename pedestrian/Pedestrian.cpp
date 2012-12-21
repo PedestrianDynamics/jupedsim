@@ -338,21 +338,21 @@ const Point& Pedestrian::GetV0() const {
 double Pedestrian::GetV0Norm() const {
 	return pEllipse.GetV0();
 }
-
+//get axis in the walking direction
 double Pedestrian::GetLargerAxis() const {
-	return pEllipse.GetLargerAxis();
+	//return pEllipse.GetLargerAxis();
+	return pEllipse.GetEA();
 }
-
+//get axis in the shoulder direction = orthogonal to the walking direction
 double Pedestrian::GetSmallerAxis() const {
-	return pEllipse.GetSmallerAxis();
+	//return pEllipse.GetSmallerAxis();
+	return pEllipse.GetEB();
 }
 
 void Pedestrian::SetPhiPed() {
 	double cosPhi, sinPhi;
 	double vx = GetV().GetX();
 	double vy = GetV().GetY();
-
-
 
 	cosPhi = GetEllipse().GetCosPhi();
 	sinPhi = GetEllipse().GetSinPhi();

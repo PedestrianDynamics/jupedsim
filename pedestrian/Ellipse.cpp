@@ -70,17 +70,44 @@ double Ellipse::EffectiveDistanceToLine(const Line& linE) const {
 
 double Ellipse::Distance2d(const Ellipse& Ell) const {
 	/*----------------- INPUT Params --------------*/
-	double a1 = this->GetLargerAxis(), qa1 = a1 * a1;
-	double b1 = this->GetSmallerAxis(), qb1 = b1 * b1;
-	double a2 = Ell.GetLargerAxis(), qa2 = a2 * a2;
-	double b2 = Ell.GetSmallerAxis(), qb2 = b2 * b2;
+	double a1 = this->GetEA();
+	double b1 = this->GetEB();
+	double a2 = Ell.GetEA();
+	double b2 = Ell.GetEB();
 	double cos1 = pCosPhi;
 	double sin1 = pSinPhi;
 	double cos2 = Ell.GetCosPhi();
 	double sin2 = Ell.GetSinPhi();
 	Point c1c2 = (pCenter - Ell.GetCenter()).Normalized();
+	double dummy;
 
+	if (a1 < b1)
+	{
+		//switch axes
+		dummy = a1;
+		a1 = b1;
+		b1 = dummy;
+		// orthogonal axis --> phi+pi
+		dummy = cos1;
+		cos1 = -sin1;
+		sin1 = cos1;
+	}
+	if (a2 < b2)
+	{
+		//switch axes
+		dummy = a2;
+		a2 = b2;
+		b2 = dummy;
+		// orthogonal axis --> phi+pi
+		dummy = cos2;
+		cos2 = -sin2;
+		sin2 = cos2;
+	}
 
+	double qa1 = a1 * a1;
+	double qb1 = b1 * b1;
+	double qa2 = a2 * a2;
+	double qb2 = b2 * b2;
 	//make sure that the the major axis points always points into the uppper
 	// two quadrants, Bug found by Sean Curtis
 	if (sin1 < 0 )
@@ -93,6 +120,18 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 		sin2 = -sin2;
 		cos2 = -cos2;
 	}
+	//the fix on July 2012
+/*	if(fabs(angle2-angle1)==pi)
+	{
+		angle2=angle1;
+	}*/
+	if ( fabs(sin1*cos2 - cos1*sin2) < J_EPS )//angle2-angle1=pi eqv. sin(angle1-angl1)=sin(pi)=0
+	{
+		sin1 = sin2;
+		cos1 = cos2;
+	}
+	//
+
 	Point e11 = Point(cos1, sin1); //unit vector of the direction of E1
 	Point e12 = Point(cos2, sin2); //unit vector of the direction of E2
 	/*----------------------------------------------*/
@@ -101,15 +140,7 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 			lambdaminus, bp2, ap2, cosphi, tanphi2, delta, dp;
 	complex<double> A, B, C, D, E, alpha, beta, gamma, P, Q, U, y, qu;
 
-	if (a1 < b1 || a2 < b2) {
-		char tmp[CLENGTH];
-		sprintf(
-				tmp,
-				"ERROR: \tEllipse::Distance2d() a1=%f < b1=%f || a2=%f<b2=%f\n",
-				a1, b1, a2, b2);
-		Log->write(tmp);
-		exit(0);
-	}
+
 	eps1 = 1.0 - qb1 / qa1;
 	eps2 = 1.0 - qb2 / qa2;
 	k1dotd = e11.ScalarP(c1c2);
@@ -346,7 +377,7 @@ double Ellipse::GetArea() const {
 	double eb = pBmax - V * x;
 	return ea * eb * M_PI;
 }
-double Ellipse::GetLargerAxis() const {
+/*double Ellipse::GetLargerAxis() const {
 	if (pV0 < J_EPS) {
 		Log->write("ERROR: \tCEllipse::GetLargerAxis() v0 of ped is null\n");
 		exit(0);
@@ -357,20 +388,20 @@ double Ellipse::GetLargerAxis() const {
 	double eb = pBmax - V * x;
 	// groessere Achse zurueckgeben
 	return (ea > eb) ? ea : eb;
-}
+}*/
 
 // ellipse  semi-axis in the direction of the velocity
 	double Ellipse::GetEA() const {
 		return pAmin + pV.Norm() * pAv;
 	}
 
-// ellipse semi-axis in the direction of the velocity
+// ellipse semi-axis in the orthogonal direction of the velocity
 double Ellipse::GetEB() const {
 	double x = (pBmax - pBmin) / pV0;
 	return pBmax - pV.Norm() * x;
 }
 
-double Ellipse::GetSmallerAxis() const {
+/*double Ellipse::GetSmallerAxis() const {
 	if (pV0 < J_EPS) {
 		Log->write("ERROR: \tCEllipse::GetSmallerAxis: v0 of ped is null\n");
 		exit(0);
@@ -381,7 +412,7 @@ double Ellipse::GetSmallerAxis() const {
 	double eb = pBmax - V * x;
 	// kleinere Achse zurueck
 	return (ea < eb) ? ea : eb;
-}
+}*/
 
 /*************************************************************
  Sonstige Funktionen
@@ -447,7 +478,7 @@ double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) cons
  *   - Punkt auf der Ellipse in "normalen" Koordinaten (S1 oder S2)
  * */
 
-Point Ellipse::PointOnEllipse(const Point& P) const {
+/*Point Ellipse::PointOnEllipse(const Point& P) const {
 	double m, n; // y=m*x+n Steigung und y-Achsenabschnitt der Geraden
 	double a, b;
 	double a2, b2, m2, n2, b4; // a2 = a*a usw. damit Berechnung nur einmal
@@ -499,7 +530,34 @@ Point Ellipse::PointOnEllipse(const Point& P) const {
 		rueck = S2.CoordTransToCart(pCenter, pCosPhi, pSinPhi);
 	}
 	return rueck;
+}*/
+
+//
+// input: P is a point in the ellipse world.
+// output: The point on the ellipse (in cartesian coord) that lays on the same line OP
+// O beeing the centre of the ellipse
+Point Ellipse::PointOnEllipse(const Point& P) const {
+
+
+	Point S;
+	double x = P.GetX(), y = P.GetY();
+	double r = sqrt(x*x + y*y);
+	if ( r < J_EPS)
+	{
+		char tmp[CLENGTH];
+		sprintf(tmp, "ERROR: \tEllipse:: PointOnEllipse() r=%f\n", r);
+		Log->write(tmp);
+		exit(0);
+	}
+	double cosTheta = x/r;
+	double sinTheta = y/r;
+	double a = GetEA();
+	double b = GetEB();
+	S.SetX(a*cosTheta);
+	S.SetY(b*sinTheta);
+	return S.CoordTransToCart(pCenter, pCosPhi, pSinPhi);
 }
+
 
 /* Berechnet den Punkt auf der Ellipse, der Schnittpunkt mit dem Liniensegment ist und den kürzesten
  * Abstand zu P hat
@@ -509,6 +567,8 @@ Point Ellipse::PointOnEllipse(const Point& P) const {
  * Rückgabewerte:
  *   - Punkt auf der Ellipse in Ellipsenkoordinaten
  * */
+/*
+ * NOT USED
 Point Ellipse::PointOnEllipse(const Line& line, const Point& P) const {
 	double m, n; // y=m*x+n Steigung und y-Achsenabschnitt der Geraden
 	double a, b;
@@ -571,6 +631,7 @@ Point Ellipse::PointOnEllipse(const Line& line, const Point& P) const {
 
 	return rueck;
 }
+*/
 
 /* minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Segment
  * ausführliche Domkumentation siehe:
@@ -679,7 +740,7 @@ Point Ellipse::PointOnEllipse(const Line& line, const Point& P) const {
 
 	return mindist;
 }*/
-// thanks to Sean Curtis
+// thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
 double Ellipse::MinimumDistanceToLine(const Line& l) const {
 	 Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
 	 Point BinE = l.GetPoint2().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
@@ -691,8 +752,10 @@ double Ellipse::MinimumDistanceToLine(const Line& l) const {
 	 double ya = linE.GetPoint1().GetY();
 	 double xb = linE.GetPoint2().GetX();
 	 double yb = linE.GetPoint2().GetY();
-	 double a = GetLargerAxis();
-	 double b = GetSmallerAxis();
+/*	 double a = GetLargerAxis();
+	 double b = GetSmallerAxis();*/
+	 double a = GetEA();
+	 double b = GetEB();
 	 Line l_strich_inE;
 	 // Punkt auf line mit kürzestem Abstand zum Action Point der Ellipse
 	Point PinE = linE.ShortestPoint(APinE);
@@ -821,7 +884,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 				C1.GetY(), C2.GetY());
 		Log->write(tmp);
 		//FIXME:
-		cout << "press a key: " << endl;
+		//cout << "press a key: " << endl;
 		//getc(stdin);
 		return 0.0;
 		exit(0);
@@ -843,7 +906,10 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
  * Rückgabewert:
  *    - true, wenn drin
  *    - false, wenn draußen
- * */bool Ellipse::IsInside(const Point& p) const {
+ * */
+//NOT USED
+/*
+bool Ellipse::IsInside(const Point& p) const {
 	double a = GetLargerAxis();
 	double b = GetSmallerAxis();
 	double x = p.GetX();
@@ -851,6 +917,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 
 	return (x * x) / (a * a) + (y * y) / (b * b) < 1 + J_EPS_DIST;
 }
+*/
 
 /* prüft, ob ein Punkt sich außerhalb der Ellipse befindet
  * * Parameter:
@@ -858,14 +925,16 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
  * Rückgabewert:
  *    - true, wenn draußen
  *    - false, wenn drin
- * */bool Ellipse::IsOutside(const Point& p) const {
+ * */
+//NOT USED
+/* bool Ellipse::IsOutside(const Point& p) const {
 	double a = GetLargerAxis();
 	double b = GetSmallerAxis();
 	double x = p.GetX();
 	double y = p.GetY();
 
 	return (x * x) / (a * a) + (y * y) / (b * b) > 1 - J_EPS_DIST;
-}
+}*/
 
 /* prüft, ob ein Punkt sich außerhalb der Ellipse befindet
  * * Parameter:
@@ -882,12 +951,11 @@ bool Ellipse::IsOn(const Point& p) const {
 	double b = GetEB();
 	double x = p.GetX();
 	double y = p.GetY();
-
-	return (-J_EPS_DIST < (x * x) / (a * a) + (y * y) / (b * b) - 1) && ((x * x)
-			/ (a * a) + (y * y) / (b * b) - 1 < J_EPS_DIST);
+	double impliciteEllipse = (x * x) / (a * a) + (y * y) / (b * b) - 1;
+	return (-J_EPS_DIST < impliciteEllipse) && (impliciteEllipse < J_EPS_DIST);
 }
 
-bool Ellipse::IntersectionWithLine(const Line& line) {
+/*bool Ellipse::IntersectionWithLine(const Line& line) {
 	//int Mathematics::IntersectionWithLine(ELLIPSE * E, float xa, float xb, float ya, float yb){
 	//	float xc = E->xc, yc = E->yc;
 	//	float phi = E->phi;
@@ -916,4 +984,4 @@ bool Ellipse::IntersectionWithLine(const Line& line) {
 	//	}
 	//	return is;
 	exit(EXIT_FAILURE); // what are you looking for here?
-}
+}*/
