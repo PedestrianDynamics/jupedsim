@@ -535,20 +535,20 @@ double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) cons
 //
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
-// O beeing the centre of the ellipse
+// O being the center of the ellipse
 Point Ellipse::PointOnEllipse(const Point& P) const {
 
 
 	Point S;
 	double x = P.GetX(), y = P.GetY();
-	double r = sqrt(x*x + y*y);
-	if ( r < J_EPS)
+	double r = x*x + y*y;
+	if ( r < J_EPS*J_EPS)
 	{
-		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tEllipse:: PointOnEllipse() r=%f\n", r);
-		Log->write(tmp);
-		exit(0);
+		return pCenter;
 	}
+
+	r = sqrt(r);
+
 	double cosTheta = x/r;
 	double sinTheta = y/r;
 	double a = GetEA();

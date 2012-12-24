@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # make some new ini-files based on the file <ini-Bottleneck.xml>
 # so first make changes in <ini-Bottleneck.xml> and then spread them with this script to the  world         
 
@@ -13,7 +14,7 @@ inifile =  TRUNK + "ini-Bottleneck.xml"
 f = open(inifile)
 read_data = f.read()
 f.close()
-W = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]
+W = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5]
 for w in W:
 	ofile = TRUNK + str(w) + "_ini-Bottleneck.xml"
 	geofile = GEODIR + str(w) + "_" + "bottleneck.xml" 

@@ -63,5 +63,11 @@ class DirectionMinSeperationShorterLine : public DirectionStrategy
         virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
+class DirectionInRangeBottleneck : public DirectionStrategy
+{
+    public:
+        virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+};
+
 #endif	/* _DIRECTIONSTRATEGY_H */
 

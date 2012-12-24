@@ -8,7 +8,7 @@ from sys import argv ,exit
 #----------------------------
 parser = argparse.ArgumentParser(description='Simulate the bottleneck-scenario with GCFM and calculte the flow with respect to the width of the bottleneck')
 parser.add_argument("-p", "--plt", type=int , choices=xrange(0, 2), required=True, help='Plot and save the results in flow_pngs/')
-parser.add_argument("-s", "--sim" , type=int , choices=xrange(0, 2), required=True, help="Make simulations. Old sim-trajectories will be deleted")
+parser.add_argument("-s", "--sim" , type=int , choices=xrange(0, 2), required=True, help="Make simulations. Calles rebuild.exe with different ini-files. Old sim-trajectories will be deleted")
 parser.add_argument("-i" , "--ini" , type=int , choices=xrange(0, 2), required=True, help="Produce ini-files based on the <ini-Bottleneck.xml> file")
 parser.add_argument("-l" , "--log" , type=argparse.FileType('w'), default='log.txt', help="log file (default log.txt)")
 args = parser.parse_args()
@@ -73,7 +73,7 @@ def flow(fps, N, data, x0):
 	trajectories are given by <data> in the following format: id    frame    x    y
 	input: 
 	- fps: frame per second
-	- N: number od peds
+	- N: number of peds
 	- data: trajectories
 	- x0: x-coordinate of the vertical measurement line
 	output:
@@ -96,7 +96,8 @@ def flow(fps, N, data, x0):
 
 
 if __name__ == "__main__":
-	widths = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0]
+	time1 = time.clock()
+	widths = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5]
 	flows = []
 	if MAKE_INI:
 		sh("python makeBottleneckInifile.py")
@@ -133,7 +134,8 @@ if __name__ == "__main__":
 	
 	# ----------------------- PLOT RESULTS ----------------------
 	if len(flows) > 1 and PLOT:
-		timestamp = str( int (time.time() ) )
+		#timestamp = str( int (time.time() ) )
+		timestamp = time.strftime("%d-%b-%Y-%H_%M_%S", time.gmtime())
 		flow_file = "flow_pngs/flow_" + timestamp + ".txt"
 		ff = open(flow_file, "w")
 		logging.info('write flow values in \"%s\"'%flow_file)
@@ -145,12 +147,19 @@ if __name__ == "__main__":
 		kretz = np.loadtxt("bck-b-scaling/kretz-j-b.dat")
 		muel32 = np.loadtxt("bck-b-scaling/mueller-bg-32-No.dat")
 		muel26 = np.loadtxt("bck-b-scaling/mueller-bg-26-No.dat")
+		lid = np.loadtxt("bck-b-scaling/Flow_vs_b_v2.dat")
 		plot(sey[:,0], sey[:,3], "s", ms = ms, label = "Seyfried")
 		plot(kretz[:,0], kretz[:,1], "D", ms = ms, label = "Kretz")
-		plot(muel32[:,0], muel32[:,1]/muel32[:,2], "*", ms = ms, label = "Mueller b_g=3.2m")
-		plot(muel26[:,0], muel26[:,1]/muel26[:,2], "x", ms = ms, label = "Mueller b_g=2.6m")
+		#plot(muel32[:,0], muel32[:,1]/muel32[:,2], "*", ms = ms, label = "Mueller b_g=3.2m")
+		#plot(muel26[:,0], muel26[:,1]/muel26[:,2], "x", ms = ms, label = "Mueller b_g=2.6m")
+		plot(lid[:,0]/100.0 , 150.0/(lid[:,4]-lid[:,1]), "^k", ms = ms, label = "Liddle")
+		axes().set_aspect(1./axes().get_data_ratio())  # Das Bild ist quadratisch
 		legend(loc='best')
 		grid()
+		xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
+		ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
+		#xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
+		xlim([0.7, 2.6])
 		figname = "flow_pngs/flow_" + timestamp + ".png"
 		logging.info("saving figure in \"%s\" "%figname)
 		savefig(figname)
@@ -159,3 +168,5 @@ if __name__ == "__main__":
 		logging.info("svn add %s"%flow_file)
 		sh("svn add %s"%flow_file)
 		#show()
+	time2 = time.clock()
+	logging.info("time elapsed %.2f [s]"%(time2-time1))

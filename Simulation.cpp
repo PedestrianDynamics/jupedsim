@@ -173,6 +173,9 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 3:
 			pDirection = new DirectionMinSeperationShorterLine();
 			break;
+		case 4:
+			pDirection = new DirectionInRangeBottleneck();
+			break;
 	}
 	pModel = new GCFMModel(pDirection, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
 			args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),

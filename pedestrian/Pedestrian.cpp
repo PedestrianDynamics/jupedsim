@@ -354,12 +354,16 @@ void Pedestrian::SetPhiPed() {
 	double vx = GetV().GetX();
 	double vy = GetV().GetY();
 
-	cosPhi = GetEllipse().GetCosPhi();
-	sinPhi = GetEllipse().GetSinPhi();
-	if (fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
+	if (fabs(vx) > J_EPS || fabs(vy) > J_EPS) 
+	{
 		double normv = sqrt(vx * vx + vy * vy); //MC, 24.10.12
 		cosPhi = vx / normv;
 		sinPhi = vy / normv;
+	}
+	else
+	{
+		cosPhi = GetEllipse().GetCosPhi();
+		sinPhi = GetEllipse().GetSinPhi();
 	}
 	pEllipse.SetCosPhi(cosPhi);
 	pEllipse.SetSinPhi(sinPhi);

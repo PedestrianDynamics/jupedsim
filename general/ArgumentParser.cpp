@@ -109,7 +109,7 @@ ArgumentParser::ArgumentParser() {
 	pTauMu = 0.5;
 	pTauSigma = 0.001;
 	pLog = 0;
-	pTravisto = 0;
+	pTravisto = 1;
 	pErrorLogFile="./Logfile.dat";
 	pPathwayfile=""; // saving pedestrian path
 	pTrajOutputDir="";
@@ -501,7 +501,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			case 'e':
 			{
 				int e = atoi(optarg);
-				if (e == 1 || e == 2 || e == 3)
+				if (e == 1 || e == 2 || e == 3 || e == 4 )
 					pExitStrategy = e;
 				else {
 					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
@@ -738,7 +738,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	if(!xPara.getChildNode("exitStrategy").isEmpty()){
 		const char* e=xPara.getChildNode("exitStrategy").getText();
 		int ie = atoi(e);
-		if (ie == 1 || ie == 2 || ie == 3)
+		if (ie == 1 || ie == 2 || ie == 3 || ie == 4)
 		{
 			pExitStrategy = ie;
 			Log->write("INFO: \texitStrategy <"+ string(e) +">");
