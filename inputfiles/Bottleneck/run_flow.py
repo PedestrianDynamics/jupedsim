@@ -6,11 +6,11 @@ from os import path, system
 from matplotlib.pyplot import *
 from sys import argv ,exit
 #----------------------------
-parser = argparse.ArgumentParser(description='Simulate the bottleneck-scenario with GCFM and calculte the flow with respect to the width of the bottleneck')
+parser = argparse.ArgumentParser(description='Simulate the bottleneck-scenario with GCFM and calculte the flow with respect to the width of the bottleneck. Widths are [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5]')
 parser.add_argument("-p", "--plt", type=int , choices=xrange(0, 2), required=True, help='Plot and save the results in flow_pngs/')
 parser.add_argument("-s", "--sim" , type=int , choices=xrange(0, 2), required=True, help="Make simulations. Calles rebuild.exe with different ini-files. Old sim-trajectories will be deleted")
-parser.add_argument("-i" , "--ini" , type=int , choices=xrange(0, 2), required=True, help="Produce ini-files based on the <ini-Bottleneck.xml> file")
-parser.add_argument("-l" , "--log" , type=argparse.FileType('w'), default='log.txt', help="log file (default log.txt)")
+parser.add_argument("-i" , "--ini" , type=int , choices=xrange(0, 2), required=True, help="Produce ini-files based on the <ini-Bottleneck.xml> file. Tipp: Change parameters in ini-Bottleneck.xml and use this option to spread the changes to all ini-files")
+parser.add_argument("-l" , "--log" , type=argparse.FileType('w'), default='log.txt', help="log file (default log.txt). Tipp: tail -f log.txt to online monitor the progress of this script")
 args = parser.parse_args()
 #-------------------- CONTROL VARS ----------------------
 SIM = args.sim # 0: shutdown simulations, 1: make simulations
@@ -158,15 +158,17 @@ if __name__ == "__main__":
 		grid()
 		xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
 		ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-		#xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
+		xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
 		xlim([0.7, 2.6])
+		ylim([1, 6])
+		
 		figname = "flow_pngs/flow_" + timestamp + ".png"
 		logging.info("saving figure in \"%s\" "%figname)
 		savefig(figname)
-		logging.info("svn add %s"%figname)
-		sh("svn add %s"%figname)
-		logging.info("svn add %s"%flow_file)
-		sh("svn add %s"%flow_file)
+		#logging.info("svn add %s"%figname)
+		#sh("svn add %s"%figname)
+		#logging.info("svn add %s"%flow_file)
+		#sh("svn add %s"%flow_file)
 		#show()
 	time2 = time.clock()
 	logging.info("time elapsed %.2f [s]"%(time2-time1))
