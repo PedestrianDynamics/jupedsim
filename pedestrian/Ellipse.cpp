@@ -867,7 +867,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 	const Point& C2 = E2.GetCenter();
 
 	//double d = this->Distance2d(E2); //dist closest approach between centres
-	double d = 0.5; //this->Distance2d(E2); //dist closest approach between centres
+	double d = 0.0; //this->Distance2d(E2); //dist closest approach between centres
 	double distance; //between c1 and c2
 	double mind; // Rueckgabewert
 	if (d < 0 || d != d) {

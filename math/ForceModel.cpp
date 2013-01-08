@@ -262,6 +262,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
 		return F; //ignore small lines
 	}
 	// Kraft soll nur orthgonal wirken
+
 	if (fabs((w.GetPoint1() - w.GetPoint2()).ScalarP(ped->GetPos() - pt)) > J_EPS)
 		return F;
 
