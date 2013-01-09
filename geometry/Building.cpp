@@ -521,7 +521,9 @@ void Building::LoadBuilding(string filename) {
 		room->SetCaption(
 				xmltoa(xRoom.getAttribute("caption"), caption.c_str()));
 
-		room->SetZPos(xmltoi(xRoom.getAttribute("zpos"), 0.0));
+		double position = xmltof(xRoom.getAttribute("zpos"), 0.0);
+		if(position>6.0) position+=50;
+		room->SetZPos(position);
 
 		//parsing the subrooms
 		int nSubRooms = xRoom.nChildNode("subroom");
@@ -537,8 +539,13 @@ void Building::LoadBuilding(string filename) {
 			SubRoom* subroom = NULL;
 
 			if (type == "stair") {
-				//TODO: stairs should be read differently, with setUp,...
+				double up_x = xmltof( xSubroomsNode.getChildNode("up").getAttribute("px"), 0.0);
+				double up_y = xmltof( xSubroomsNode.getChildNode("up").getAttribute("py"), 0.0);
+				double down_x = xmltof( xSubroomsNode.getChildNode("down").getAttribute("py"), 0.0);
+				double down_y = xmltof( xSubroomsNode.getChildNode("down").getAttribute("py"), 0.0);
 				subroom = new Stair();
+				((Stair*)subroom)->SetUp(Point(up_x,up_y));
+				((Stair*)subroom)->SetDown(Point(down_x,down_y));
 			} else {
 				//normal subroom or corridor
 				subroom = new NormalSubRoom();
@@ -926,18 +933,27 @@ void Building::LoadTrafficInfo(string filename) {
 
 	for (int i = 0; i < nDoors; i++) {
 		XMLNode xDoor = xDoorsNode.getChildNode("door", i);
-		double id = xmltof(xDoor.getAttribute("trans_id"), -1);
+		int id = xmltoi(xDoor.getAttribute("trans_id"), -1);
 		string state = xmltoa(xDoor.getAttribute("state"), "open");
 
-		//store transition in a map and call getTransition/getCrossin
-		if (state == "open") {
-			pRouting->GetTransition(id)->Open();
-		} else if (state == "close") {
-			pRouting->GetTransition(id)->Close();
-		} else {
-			char tmp[CLENGTH];
-			sprintf(tmp, "WARNING:\t Unknown door state: %s", state.c_str());
-			Log->write(tmp);
+		//maybe the door caption is specified ?
+		if(id==-1){
+			string caption=xmltoa(xDoor.getAttribute("caption"), "-1");
+			if( (caption!="-1") && (state =="close") ){
+				GetTransition(caption)->Close();
+			}
+		}
+		else {
+			//store transition in a map and call getTransition/getCrossin
+			if (state == "open") {
+				pRouting->GetTransition(id)->Open();
+			} else if (state == "close") {
+				pRouting->GetTransition(id)->Close();
+			} else {
+				char tmp[CLENGTH];
+				sprintf(tmp, "WARNING:\t Unknown door state: %s", state.c_str());
+				Log->write(tmp);
+			}
 		}
 	}
 	Log->write("INFO:\t done with loading traffic info file");

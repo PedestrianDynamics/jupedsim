@@ -123,7 +123,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	mindist = E1.MinimumDistanceToEllipse(E2); //ONE
 	double dist_intpol_left = mindist + pintp_widthPed; // lower cut-off for Frep (modCFM)
 	double dist_intpol_right = pDistEffMaxPed - pintp_widthPed; //upper cut-off for Frep (modCFM)
-	double smax = mindist - pintp_widthPed; //max overlappig
+	double smax = mindist - pintp_widthPed; //max overlapping
 	double f = 0.0f, f1 = 0.0f; //function value and its derivative at the interpolation point'
 
 	//todo: runtime normsquare?

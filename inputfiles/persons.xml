@@ -2,7 +2,7 @@
 <persons version="0.4">
 	<header>
 		<description>casern, 21.06.2008</description>
-		<number>15</number>
+		<number>23</number>
 	</header>
 
 	<!-- default distribution -->
@@ -16,7 +16,7 @@
 	<groups> <!-- Leute, die sich auskennen -->
 		<group id ="1">
 			<members>1,2,3</members>
-			<trip>1</trip>
+			<goal>1</goal>
 		</group>
 	</groups>
 

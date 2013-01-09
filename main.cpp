@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 	double execTime = difftime(endtime, starttime);
 	char tmp[CLENGTH];
 	sprintf(tmp, "\nPedestrians [%d] threads [%d]", sim.GetNPeds(),
-			args->GetMaxOmpThreads());
+			args->GetMaxOpenMPThreads());
 	Log->write(tmp);
 	sprintf(tmp, "\nExec Time [s]     : %.2f", execTime);
 	Log->write(tmp);

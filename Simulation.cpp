@@ -7,7 +7,6 @@
  ************************************************/
 
 Simulation::Simulation() {
-	pOnline = false; // true when online simulation (TraVisTo) is wished
 	pLinkedCells = false;
 	pActionPt = 0; // on or off, wird für GCFM benötigt
 	pNPeds = 0; // number of pedestrians, Default 10
@@ -37,9 +36,9 @@ Simulation::~Simulation() {
 // Setter-Funktionen
  ************************************************/
 
-int Simulation::SetOnline(bool o) {
-	return pOnline = o;
-}
+//int Simulation::SetOnline(bool o) {
+//	return pOnline = o;
+//}
 
 int Simulation::SetNPeds(int i) {
 	return pNPeds = i;
@@ -53,9 +52,9 @@ int Simulation::SetLinkedCells(bool l) {
 // Getter-Funktionen
  ************************************************/
 
-bool Simulation::IsOnline() const {
-	return pOnline;
-}
+//bool Simulation::IsOnline() const {
+//	return pOnline;
+//}
 
 bool Simulation::IsLinkedCells() {
 	return pLinkedCells;
@@ -104,48 +103,73 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	Log->write("INFO: \tOptionen an Simulation geben\n");
 
-	// Online Simulation for TraVisTo?
-	switch (args->GetTravisto()) {
-		case 0:
-			break;
-		case 1:
+	if(args->GetPort()!=-1){
+		switch(args->GetFileFormat())
 		{
-			//iod = new IODispatcher();
-			OutputHandler* tofile = new FileHandler(args->GetTrajOutputDir().c_str());
-			iod->AddIO(tofile);
-			break;
-		}
-
-		case 2:
+		case FORMAT_XML_PLAIN:
 		{
-			OutputHandler* tofile = new FileHandler(args->GetTrajOutputDir().c_str());
-			iod->AddIO(tofile);
-			OutputHandler* travisto = new TraVisToHandler();
+			OutputHandler* travisto = new TraVisToHandler(args->GetHostname(),
+					args->GetPort());
 			iod->AddIO(travisto);
-			pOnline = true;
 			break;
 		}
-		case 3: //plain text
-			delete iod; // delete the previously allocated memory
-			Log->write("ERROR:\tdon't use this writer, not implemented");
-			exit(0);
-			break;
-
-		case 4: //flat format
+		case FORMAT_XML_BIN:
 		{
-			OutputHandler* file = new FileHandler("./Trajektorien.dat");
-			pTrajectories->AddIO(file);
-		}
-			break;
-
-		default:
-			printf("Wrong option for TraVisTo Output!\n\n");
+			Log->write("INFO: \tFormat xml-bin not yet supported\n");
 			exit(0);
+			break;
+		}
+		case FORMAT_PLAIN:
+		{
+			Log->write("INFO: \tFormat plain not yet supported\n");
+			exit(0);
+			break;
+		}
+		case FORMAT_VTK:
+		{
+			Log->write("INFO: \tFormat vtk not yet supported\n");
+			exit(0);
+			break;
+		}
+		}
+
+		s.append("\tonline streaming enabled \n");
 	}
 
+	if(args->GetTrajectoriesFile().empty()==false)
+	{
+		switch (args->GetFileFormat())
+		{
+		case FORMAT_XML_PLAIN:
+		{
+			OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
+			iod->AddIO(tofile);
+			break;
+		}
+		case FORMAT_XML_BIN:
+		{
+			Log->write("INFO: \tFormat xml-bin not yet supported\n");
+			exit(0);
+			break;
+		}
+		case FORMAT_PLAIN:
+		{
+			Log->write("INFO: \tFormat plain not yet supported\n");
+			OutputHandler* file = new FileHandler("./Trajektorien.dat");
+			pTrajectories->AddIO(file);
+			exit(0);
+			break;
+		}
+		case FORMAT_VTK:
+		{
+			Log->write("INFO: \tFormat vtk not yet supported\n");
+			exit(0);
+			break;
+		}
+		}
 
-	if (pOnline)
-		s.append("\tonline\n");
+	}
+
 
 	// Linked Cells?
 	pLinkedCells = args->GetLinkedCells();
@@ -251,7 +275,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	Log->write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
-	//pBuilding->AddSurroundingRoom();
+	pBuilding->AddSurroundingRoom();
 	pBuilding->InitGeometry(); // create the polygones
 
 	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
@@ -265,6 +289,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	//nv->BuildNavMesh();
 	//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
 	//nv->WriteToFileTraVisTo("promenade.nav.xml");
+	//nv->WriteScenario();
 	//exit(EXIT_FAILURE);
 
 	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);

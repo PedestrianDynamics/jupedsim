@@ -81,7 +81,6 @@ public:
     /// comparision
     bool operator!=(const Point& p) const;
 
-    //debug
     std::string toString();
 };
 

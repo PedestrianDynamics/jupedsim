@@ -379,3 +379,9 @@ bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pe
 	if((t2<0.0) || (t2>1.0)) return false;
 	return true;
 }
+
+std::string Line::toString() {
+	std::stringstream tmp;
+	tmp<<pPoint1.toString()<<"--"<<pPoint2.toString();
+	return tmp.str();
+}

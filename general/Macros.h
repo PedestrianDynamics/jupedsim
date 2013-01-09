@@ -31,7 +31,7 @@
 #define J_EPS 0.001
 #define J_EPS_DIST 0.05// [m]
 #define J_EPS_INFO_DIST 2.0 // [m] abstand für Informationsaustausch (GraphRouter)
-#define J_EPS_GOAL 0.05 // [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
+#define J_EPS_GOAL 0.005 // [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  // [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
@@ -50,14 +50,7 @@
 
 // final destinations for the pedestrians
 #define FINAL_DEST_OUT -1 //default
-//#define FINAL_DEST_PARKING_TOP 1
-//#define FINAL_DEST_PARKING_BOTTOM 2
-//#define FINAL_DEST_ROOM_010 3
-//#define FINAL_DEST_ROOM_020 4
-//#define FINAL_DEST_ROOM_030 5
-//#define FINAL_DEST_ROOM_040 6
-//#define FINAL_DEST_ROOM_050 7
-//#define FINAL_DEST_TRAIN 8
+
 
 //routing
 #define J_EPS_HL_DIST 0.012
@@ -67,9 +60,29 @@
 #define LIST_EMPTY 	-1
 
 //rooms states
-#define ROOM_CLEAN 0
-#define ROOM_SMOKED 1
+//#define ROOM_CLEAN 0
+//#define ROOM_SMOKED 1
 
+enum RoomState {
+	ROOM_CLEAN=0,
+	ROOM_SMOKED=1,
+};
+
+enum FileFormat {
+	FORMAT_XML_PLAIN,
+	FORMAT_XML_BIN,
+	FORMAT_PLAIN,
+	FORMAT_VTK
+};
+
+enum RoutingStrategy {
+	ROUTING_LOCAL_SHORTEST,
+	ROUTING_GLOBAL_SHORTEST,
+	ROUTING_QUCIKEST,
+	ROUTING_DYNAMIC,
+	ROUTING_FROM_FILE,
+	ROUTING_DUMMY
+};
 
 #endif	/* _MACROS_H */
 

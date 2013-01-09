@@ -63,6 +63,9 @@ private:
 	static int UID;
 	int pUID;
 
+	//defined by: Z = Ax + By + C
+	double pPlanEquation[3];
+
 protected:
 	vector<Wall> pWalls;
 	vector<Point> pPoly; // Polygon representation of the subroom
@@ -84,6 +87,7 @@ public:
 	void SetPedestrian(Pedestrian* ped, int index);
 	void SetArea(double a);
 	void SetClosed(double c);
+	void SetPlanEquation(double A, double B, double C);
 
 	// Get-methods
 	int GetSubRoomID() const;
@@ -103,6 +107,8 @@ public:
 	double GetClosed() const ;
 	double GetArea() const;
 	Point GetCentroid() const;
+	const double * GetPlanEquation () const;
+	double GetElevation(const Point & p1);
 
 	//navigation
 	void AddCrossing(Crossing* line);
@@ -178,7 +184,7 @@ public:
  Stair
  ************************************************************/
 
-class Stair : public SubRoom {
+class Stair : public NormalSubRoom {
 private:
 	Point pUp; /// Punkt der den oberen Bereich der Treppe markiert
 	Point pDown; /// Punkt der den unteren Bereich der Treppe markiert

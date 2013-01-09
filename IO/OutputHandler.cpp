@@ -56,8 +56,8 @@ void FileHandler::write(string str) {
     }
 }
 
-TraVisToHandler::TraVisToHandler() {
-    client = new TraVisToClient();
+TraVisToHandler::TraVisToHandler(string host, int port) {
+    client = new TraVisToClient(host, port);
     brokentags.push_back("<trajectoriesDataset>");
     brokentags.push_back("</trajectoriesDataset>");
     brokentags.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

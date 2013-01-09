@@ -88,6 +88,9 @@ public:
 
 	bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
 
+    std::string toString();
+
+
 };
 
 

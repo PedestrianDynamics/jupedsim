@@ -102,13 +102,13 @@ public:
     /// create a client with the default parameters
 
     /// create a client with specific parameters
-    TraVisToClient(const char* hostname = HOST, unsigned short port = PORT);
+    TraVisToClient(std::string hostname = HOST, unsigned short port = PORT);
 
     /// destructor
     virtual ~TraVisToClient();
 
     /// send datablock to the server
-    /// this functions is still blocking unfortunalty, so it may
+    /// this functions is still blocking unfortunately, so it may
     /// influence the execution time of your program
     void sendData(const char* data);
 
@@ -146,13 +146,12 @@ private:
 
 
 private:
-    bool isConnected;
+    bool _isConnected;
     //bool dataPending;
-    socket_t tcpSocket;
-    //FIXME: this could be a security issue. the lenght shuolnd be limited
-    char hostname[50];
-    unsigned short port;
-    std::vector<const char *> msgQueue;
+    socket_t _tcpSocket;
+    std::string _hostname;
+    unsigned short _port;
+    std::vector<const char *> _msgQueue;
 
 };
 

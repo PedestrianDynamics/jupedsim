@@ -50,10 +50,15 @@ SubRoom::SubRoom() {
 	pTransitions = vector<Transition*>();
 	pHlines = vector<Hline*>();
 
+	pPlanEquation[0]=0.0;
+	pPlanEquation[1]=0.0;
+	pPlanEquation[2]=0.0;
+
 	pGoalIDs = vector<int> ();
 	pArea = 0.0;
 	pClosed=false;
 	pUID = UID++;
+
 }
 
 SubRoom::SubRoom(const SubRoom& orig) {
@@ -66,7 +71,6 @@ SubRoom::SubRoom(const SubRoom& orig) {
 	pClosed=orig.GetClosed();
 	pRoomID=orig.GetRoomID();
 	pUID = orig.GetUID();
-	//pUID = UID++;
 }
 
 SubRoom::~SubRoom() {
@@ -471,6 +475,19 @@ bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const {
 	return false;
 }
 
+void SubRoom::SetPlanEquation(double A, double B, double C) {
+	pPlanEquation[0]=A;
+	pPlanEquation[1]=B;
+	pPlanEquation[2]=C;
+}
+
+const double* SubRoom::GetPlanEquation() const {
+	return pPlanEquation;
+}
+
+double SubRoom::GetElevation(const Point& p) {
+	return pPlanEquation[0] * p.pX + pPlanEquation[1] * p.pY + pPlanEquation[2];
+}
 
 void SubRoom::ClearAllPedestrians(){
 	for(unsigned int p=0;p<pPeds.size();p++){
@@ -659,12 +676,12 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const {
  Stair
  ************************************************************/
 
-Stair::Stair() : SubRoom() {
+Stair::Stair() : NormalSubRoom() {
 	pUp = Point();
 	pDown = Point();
 }
 
-Stair::Stair(const Stair & orig) : SubRoom(orig) {
+Stair::Stair(const Stair & orig) : NormalSubRoom(orig) {
 	pUp = orig.GetUp();
 	pDown = orig.GetDown();
 }
@@ -763,6 +780,8 @@ const Point* Stair::CheckCorner(const Point** otherPoint, const Point** aktPoint
 
 void Stair::ConvertLineToPoly(vector<Line*> goals) {
 
+	//return NormalSubRoom::ConvertLineToPoly(goals);
+
 	vector<Line*> copy;
 	vector<Point> orgPoly = vector<Point > ();
 	const Point* aktPoint;
@@ -816,6 +835,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 		sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
 				"\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), x1, y1, x2, y2);
 		Log->write(tmp);
+		exit(EXIT_FAILURE);
 	}
 
 	if (orgPoly.size() != 4) {
@@ -823,7 +843,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 		sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): Stair %d Room %d ist kein Viereck!!!\n"
 				"Anzahl Ecken: %d\n", GetSubRoomID(), GetRoomID(), orgPoly.size());
 		Log->write(tmp);
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	vector<Point> neuPoly = (orgPoly);
 	// ganz kleine Treppen (nur eine Stufe) nicht

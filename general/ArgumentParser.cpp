@@ -17,31 +17,28 @@
 
 void ArgumentParser::Usage() {
 
-	//TODO: randomize autodetect
 	fprintf(stderr,
 			"Usage: program options\n\n"
 			"with the following options (default values in parenthesis):\n\n"
-			"  [-n/--number <filepath>]         file with number of pedestrians in room (./Inputfiles/start.dat)\n"
+			"  [-n/--number <filepath>]         file with the pedestrian distribution in room(./Inputfiles/persons.xml)\n"
 			"  [-t/--tmax <double>]             maximal simulation time (500)\n"
 			"  [-d/--dt <double>]               time step (0.001)\n"
-			"  [--fps <double>]               	framerate (1.0 fps)\n"
+			"  [--fps <double>]                 framerate (1.0 fps)\n"
 			"  [-s/--solver <int>]              type of solver, if needed (euler)\n"
 			"                                       1: euler\n"
 			"                                       2: verlet\n"
 			"                                       3: leapfrog\n"
-			"  [-g/--geometry <string>]         path to .jul-geometry file (./Inputfiles/Engstelle.jul)\n"
+			"  [-g/--geometry <string>]         path to the geometry file (./Inputfiles/geo.xml)\n"
 			"  [-e/--exitstrategy <int>]        strategy how the direction to the exit is computed (3).\n"
 			"                                       1: Middlepoint of the exit line\n"
 			"                                       2: Shortest distance point of the exit line\n"
 			"                                       3: Shortest distance point of the exit line, but exit is 20 cm  shorter\n"
-			"  [-o/--online]                    online simulation (default offline)\n"
 			"  [-l/--linkedcells [<double>]]    use of linked-cells with optional cell size (default cellsize = 2.2m)\n"
 			"  [-R/--routing <int> [<string>]]             routing strategy (1):\n"
 			"                                       1: local shortest path\n"
 			"                                       2: global shortest path\n"
 			"                                       3: quickest path\n"
-			"                                       4: from file <filename.txt>\n"
-			"										5: circle router\n"
+			"                                       4: from file <./Inputfiles/persons.xml>\n"
 			"  [-v/--v0mu <double>]             mu for normal distribution of v0, desired velocity (1.24)\n"
 			"  [-V/--v0sigma <double>]          sigma for normal distribution of v0, desired velocity (0.26)\n"
 			"  [-a/--ataumu <double>]           mu for normal distribution of a_tau, factor for velocity 1st axis (0.53)\n"
@@ -62,27 +59,26 @@ void ArgumentParser::Usage() {
 			"  [-M/--maxfwall <double>]         interpolation parameter of wall forces (3)\n"
 			"  [-f/--disteffmaxped  <double>]   maximal effective distance to pedestrians (2)\n"
 			"  [-F/--disteffmaxwall <double>]   maximal effective distance to walls (2)\n"
-			"  [--pathway <filepath>]   		file for saving pedestrians path\n"
+			"  [--pathway <filepath>]           file for saving pedestrians path\n"
 			"  [-L/--log <int>]                 log output (0):\n"
 			"                                       0: no output\n"
 			"                                       1: log output to stdout\n"
 			"                                       2: log output to file ./outputfiles/log.txt\n"
-			"  [-T/--travisto <int>]            TraVisTo output (0):\n"
-			"                                       0: no output\n"
-			"                                       1: TraVisTo output to file ./Output.xml\n"
-			"                                       2: TraVisTo output to file ./Output.xml AND online\n"
+			"  [-T/--output-file <string>]      file to write the trajectories ( no trajectories are written if omited0):\n"
+			"  [-P/--streaming-port <int>]      stream the ouput to the specified address/port\n"
+			"  [-O/--streaming-ip <string>]     stream the ouput to the specified address/port\n"
 			"  [-h/--help]                      this manual output\n"
 			"\n");
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
 ArgumentParser::ArgumentParser() {
 	// Default parameter values
-	pNumberFilename = "inputfiles/person.xml";
+	pNumberFilename = "inputfiles/persons.xml";
 	pSolver = 1;
 	pGeometryFilename = "inputfiles/geo.xml";
-	pTmax = 900;
-	pfps=10.0;
+	pTmax = 500;
+	pfps=1.0;
 	pdt = 0.01;
 	pExitStrategy = 2;
 	pRouter = 1;
@@ -109,18 +105,19 @@ ArgumentParser::ArgumentParser() {
 	pTauMu = 0.5;
 	pTauSigma = 0.001;
 	pLog = 0;
-	pTravisto = 1;
 	pErrorLogFile="./Logfile.dat";
 	pPathwayfile=""; // saving pedestrian path
-	pTrajOutputDir="";
 	pRoutingFilename="";
 	pTrafficFilename="";
 	pSeed=0;
+	pFormat=FORMAT_XML_PLAIN;
+	pPort=-1;
+	pHostname="localhost";
 
 #ifdef _OPENMP
-	pMaxOpenmpThreads = omp_get_thread_num();
+	pMaxOpenMPThreads = omp_get_thread_num();
 #else
-	pMaxOpenmpThreads = 1;
+	pMaxOpenMPThreads = 1;
 #endif
 }
 
@@ -128,7 +125,21 @@ ArgumentParser::ArgumentParser() {
 string ArgumentParser::GetPersonsFilename() const {
 	return pNumberFilename;
 }
-
+FileFormat ArgumentParser::GetFileFormat() const {
+	return pFormat;
+}
+const string& ArgumentParser::GetHostname() const {
+	return pHostname;
+}
+void ArgumentParser::SetHostname(const string& hostname) {
+	pHostname = hostname;
+}
+int ArgumentParser::GetPort() const {
+	return pPort;
+}
+void ArgumentParser::SetPort(int port) {
+	pPort = port;
+}
 int ArgumentParser::GetSolver() const {
 	return pSolver;
 }
@@ -246,10 +257,6 @@ int ArgumentParser::GetLog() const {
 	return pLog;
 }
 
-int ArgumentParser::GetTravisto() const {
-	return pTravisto;
-}
-
 double ArgumentParser::GetLinkedCellSize() const{
 	return pLinkedCellSize;
 }
@@ -263,10 +270,6 @@ string ArgumentParser::GetPathwayFile() const {
 }
 
 
-string ArgumentParser::GetTrajOutputDir() const {
-	return pTrajOutputDir;
-}
-
 string ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
 }
@@ -279,8 +282,8 @@ string ArgumentParser::GetRoutingFile() const{
 	return pRoutingFilename;
 }
 
-int ArgumentParser::GetMaxOmpThreads() const{
-	return pMaxOpenmpThreads;
+int ArgumentParser::GetMaxOpenMPThreads() const{
+	return pMaxOpenMPThreads;
 }
 
 
@@ -322,8 +325,9 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			{"tausigma", 1, 0, 'C'},
 			{"log", 1, 0, 'L'},
 			{"pathway", 1, 0, 'Q'},
-			{"travisto", 1, 0, 'T'},
-			{"trajectory", 1, 0, 'O'},
+			{"output-file", 1, 0, 'T'},
+			{"streaming-port", 1, 0, 'P'},
+			{"streaming-ip", 1, 0, 'O'},
 			{"help", 0, 0, 'h'},
 			{"inifile", optional_argument, 0, 'q'},
 			{0, 0, 0, 0}
@@ -336,7 +340,20 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 		switch (c) {
 			case 'T':
 			{
-				pTravisto = atoi(optarg);
+				if (optarg)
+					pTrajectoriesFile=optarg;
+				break;
+			}
+			case 'P':
+			{
+				if (optarg)
+					pPort=atoi(optarg);
+				break;
+			}
+			case 'O':
+			{
+				if (optarg)
+					pHostname=optarg;
 				break;
 			}
 			case 'L':
@@ -542,9 +559,9 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			break;
 
 			case 'p':
-				pMaxOpenmpThreads = atof(optarg);
+				pMaxOpenMPThreads = atof(optarg);
 #ifdef _OPENMP
-				omp_set_num_threads(pMaxOpenmpThreads);
+				omp_set_num_threads(pMaxOpenMPThreads);
 #endif
 				break;
 
@@ -562,14 +579,20 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	}
 }
 
+const string& ArgumentParser::GetTrajectoriesFile() const {
+	return pTrajectoriesFile;
+}
 
+void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
+	pTrajectoriesFile = trajectoriesFile;
+}
 
 void ArgumentParser::ParseIniFile(string inifile){
 
 	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSgcfm");
 
 	Log->write("INFO: \tParsing the ini file");
-	//I just assume all parameter are present
+	//I just assume all parameters are present
 
 	//seed
 	if(!xMainNode.getChildNode("seed").isEmpty()){
@@ -605,19 +628,40 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 	//logfile
 	if(!xMainNode.getChildNode("logfile").isEmpty()){
-
 		pErrorLogFile=xMainNode.getChildNode("logfile").getText();
 		pLog=2;
 		Log->write("INFO: \tlogfile <"+string(pErrorLogFile)+">");
 	}
 
 	//trajectories
-	if(!xMainNode.getChildNode("trajectories").isEmpty()){
-		pTrajOutputDir=xMainNode.getChildNode("trajectories").getText();
-		pTravisto=1;
-		Log->write("INFO: \toutput directory  <"+string(pTrajOutputDir)+">");
-	}
+	XMLNode xTrajectories=xMainNode.getChildNode("trajectories");
+	if(!xTrajectories.isEmpty()){
 
+		pfps = xmltof(xTrajectories.getAttribute("fps"),pfps);
+		string format=xmltoa(xTrajectories.getAttribute("format"),"xml-plain");
+		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
+		if(format=="xml-bin") pFormat=FORMAT_XML_BIN;
+		if(format=="plain") pFormat=FORMAT_PLAIN;
+		if(format=="vtk") pFormat=FORMAT_VTK;
+
+		//a file descriptor was given
+		if(!xTrajectories.getChildNode("file").isEmpty()){
+			pTrajectoriesFile =
+					xmltoa(
+							xTrajectories.getChildNode(
+									"file").getAttribute("location"),
+									pTrajectoriesFile.c_str());
+
+		Log->write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
+		}
+
+		if(!xTrajectories.getChildNode("socket").isEmpty()){
+			pHostname=xmltoa(xTrajectories.getChildNode("socket").getAttribute("hostname"),pHostname.c_str());
+			pPort=xmltoi(xTrajectories.getChildNode("socket").getAttribute("port"),pPort);
+		}
+		Log->write("INFO: \toutput socket  <"+string(pHostname)+">");
+
+	}
 	//model parameters, only one node
 	XMLNode xPara=xMainNode.getChildNode("parameters");
 	if(xPara.isEmpty()){
@@ -638,7 +682,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string solver=string(xPara.getChildNode("solver").getText());
 		if(solver=="euler") pSolver=1;
 		else if(solver=="verlet") pSolver=2;
-		else if(solver=="leapfrogr") pSolver=3;
+		else if(solver=="leapfrog") pSolver=3;
 		else {
 			Log->write("ERROR: \twrong value for solver type!!!\n");
 			exit(0);
@@ -662,7 +706,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pLinkedCellSize=atoi(cell_size.c_str());
 			Log->write("INFO: \tlinked cells enable with size  <"+cell_size+">");
 		}else{
-
 			Log->write("WARNING: \tinvalid parameters for linkedcells");
 		}
 	}
@@ -746,7 +789,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 		else
 		{
 			pExitStrategy = 2;
-
 			Log->write("WARNING: \twrong value for exitStrategy. Use strategy 2\n");
 		}
 

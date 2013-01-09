@@ -63,7 +63,7 @@ private:
     TraVisToClient* client;
 
 public:
-    TraVisToHandler();
+    TraVisToHandler(string host, int port);
     virtual ~TraVisToHandler();
     void write(string str);
 

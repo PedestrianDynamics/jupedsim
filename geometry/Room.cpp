@@ -96,7 +96,8 @@ string Room::GetCaption() const {
 }
 
 double Room::GetZPos() const {
-    return pZPos;
+    //if(pCaption=="070") return pZPos+1.0;
+	return pZPos;
 }
 
 int Room::GetAnzSubRooms() const {

@@ -42,7 +42,6 @@ extern OutputHandler* Log;
 
 class Simulation {
 private:
-    bool pOnline; // true, wenn online simulation (TraVisTo)
     bool pLinkedCells; // true, wenn LinkedCell-Listen
     int pActionPt; // on or off
     int pNPeds; // number of pedestrians

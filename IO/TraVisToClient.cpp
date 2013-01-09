@@ -38,21 +38,17 @@
 
 using namespace std;
 
-TraVisToClient::TraVisToClient(const char* hostname, unsigned short port) {
-
-    //this->hostname= string(hostname);
-    strcpy(this->hostname, hostname);
-    this->port = port;
-    this->isConnected = false;
-    //this->dataPending=false;
+TraVisToClient::TraVisToClient(string hostname, unsigned short port) {
+    _hostname=hostname;
+    _port = port;
+    _isConnected = false;
     createConnection();
 
 
 }
 
 TraVisToClient::~TraVisToClient() {
-
-    if (isConnected) close();
+    if (_isConnected) close();
 }
 
 
@@ -62,7 +58,7 @@ void TraVisToClient::sendData(const char* data) {
 
     // first create a new connection, in the case the last one was lost/close
 
-    if (!isConnected) {
+    if (!_isConnected) {
         createConnection();
         //FIXME: queue messsage in a vector
         // msgQueue.push_back(data);
@@ -77,7 +73,7 @@ void TraVisToClient::sendData(const char* data) {
     if (NULL == data) {
         fprintf(stderr, "invalid message buffer!");
         fprintf(stderr, "leaving sendMessage()");
-        isConnected = false;
+        _isConnected = false;
         return;
     }
 
@@ -87,18 +83,18 @@ void TraVisToClient::sendData(const char* data) {
 
     /*send the length of the message*/
     int msgsize = strlen(msgSizeStr);
-    if (msgsize != send(tcpSocket, (const char *) msgSizeStr, strlen(msgSizeStr), 0)) {
+    if (msgsize != send(_tcpSocket, (const char *) msgSizeStr, strlen(msgSizeStr), 0)) {
         fprintf(stderr, "sending message Size failed");
         fprintf(stderr, "leaving sendMessage()");
-        isConnected = false;
+        _isConnected = false;
         return;
     }
 
     /* now send the message */
-    if (msgSize != send(tcpSocket, (const char *) data, msgSize, 0)) {
+    if (msgSize != send(_tcpSocket, (const char *) data, msgSize, 0)) {
         fprintf(stderr, "sending message failed");
         fprintf(stderr, "leaving sendMessage()");
-        isConnected = false;
+        _isConnected = false;
         return;
     }
 
@@ -108,9 +104,9 @@ void TraVisToClient::sendData(const char* data) {
 /// close the client (end the connection)
 
 void TraVisToClient::close() {
-    if (isConnected) {
+    if (_isConnected) {
         /* all things are done, so shutdown the connection */
-        if (!shutdownAndCloseSocket(tcpSocket)) {
+        if (!shutdownAndCloseSocket(_tcpSocket)) {
             fprintf(stderr, "shutdown and close socket failed!");
             stopSocketSession();
             fprintf(stderr, "leaving main() with error");
@@ -133,15 +129,13 @@ void TraVisToClient::createConnection() {
     }
 
     /* create a new socket and connect the socket to the given service */
-    if (INVALID_SOCKET == (tcpSocket = createClientSocket(hostname, port))) {
+    if (INVALID_SOCKET == (_tcpSocket = createClientSocket(_hostname.c_str(), _port))) {
         fprintf(stderr, "socket creation failed!");
         stopSocketSession();
         fprintf(stderr, "leaving main() with error");
         return;
     }
-    isConnected = true;
-
-
+    _isConnected = true;
 }
 
 /********* function definitions **************************************/

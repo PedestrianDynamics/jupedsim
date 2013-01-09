@@ -12,7 +12,9 @@
 	<!-- traffic information: e.g closed doors -->
 	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
+	<trajectories format="xml-plain" fps="8"> 
+		<file location="outputfiles/trajectories.xml"/>
+		<socket hostname="127.0.0.1" port="8989"/>
 	</trajectories>
 	<!-- where to store the logs 
 	<logfile>outputfiles/log.txt</logfile>
@@ -24,7 +26,7 @@
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<linkedcells enabled="true" cell_size="2.2"/>
-		<qrouteChoiceStrategy>local_shortest</qrouteChoiceStrategy>
+		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />
 		<bmin mu="0.20" sigma="0.001" />

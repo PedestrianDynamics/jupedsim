@@ -9,7 +9,7 @@
 #define NAVMESH_H_
 
 
-#define _CGAL1
+#define _CGAL
 
 // CGAL libs
 #ifdef _CGAL
@@ -181,6 +181,7 @@ public:
 	void WriteToFile(std::string fileName);
 	void WriteToFileTraVisTo(std::string fileName);
 	void WriteToFileTraVisTo(std::string fileName, const std::vector<Point>& points);
+	void WriteToFileTraVisTo(std::string fileName, JNode* node);
 
 	int AddVertex(JVertex* v);
 	int AddEdge(JEdge* e);
@@ -189,6 +190,8 @@ public:
 	///return the JVertex with the corresponding point
 	JVertex* GetVertex(const Point& p);
 	void DumpNode(int id);
+	void DumpEdge(int id);
+	void DumpObstacle(int id);
 
 private:
 	std::vector<JVertex*> pVertices;
@@ -196,6 +199,9 @@ private:
 	std::vector<JObstacle*> pObst;
 	std::vector<JNode*> pNodes;
 	Building* pBuilding;
+
+	std::vector<JNode*> new_nodes;
+	vector<int> problem_nodes;
 
 	// Check the created navmesh for convex polygons
 	// convexify the created nav mesh
@@ -205,6 +211,10 @@ private:
 	// and triangulate
 	void Finalize();
 
+	void ComputePlaneEquation(SubRoom* sub, double* coefficents);
+
+	void ComputeStairsEquation();
+	void ComputePlanesEquation();
 
 	// Triangulate a subroom possibly with obstacles
 	void Triangulate(SubRoom* sub);
@@ -215,15 +225,20 @@ private:
 	/// Return the id of the JObstacle
 	int IsObstacle(Point& p1, Point&  p2);
 
+public:
 	/// Write the simulation scenario for the
 	/// pedunc simulator
 	void WriteScenario();
 	void WriteBehavior();
 	void WriteViewer();
-	void WriteStartPosition();
+	void WriteStartPositions();
 
-	std::vector<JNode*> new_nodes;
-	vector<int> problem_nodes;
+	void UpdateEdges();
+	void UpdateObstacles();
+	void UpdateNodes();
+
+	void Test();
+
 };
 
 #endif /* NAVMESH_H_ */
