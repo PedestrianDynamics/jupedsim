@@ -1,0 +1,10 @@
+JPSreport steps
+* Define all input parameters  via commandline or initialization file
+* Read/Parse the input parameters
+* Read/Parse the geometry from the predefined format (e.g Travisto) to the internal boostformat
+* Voronoi-cell generation
+* Results/Diagrams
+* Cells clipping with the geometry
+* Output  (Images...)
+
+* User Interface
