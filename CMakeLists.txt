@@ -4,69 +4,44 @@ project(JPSgcfm)
 
 set(LIBRARY_OUTPUT_PATH ../lib/${CMAKE_BUILD_TYPE})
 
-set(EXECUTABLE_OUTPUT_PATH "./")
+set(EXECUTABLE_OUTPUT_PATH "../../")
 
 file(
 	GLOB_RECURSE
 	source_files
 	main.cpp
 	Simulation.cpp
-	*.h
 	
 	general/ArgumentParser.cpp  
-	general/ArgumentParser.h  
-	general/Macros.h  
 	general/xmlParser.cpp  
-	general/xmlParser.h
-	
+
 	geometry/Building.cpp  
-	geometry/Crossing.h  
 	geometry/Line.cpp     
-	geometry/NavLine.h     
 	geometry/Point.cpp  
-	geometry/Room.h       
 	geometry/Transition.cpp  
-	geometry/Wall.h
 	geometry/Building.h    
 	geometry/Hline.cpp   
-	geometry/Line.h       
 	geometry/Obstacle.cpp  
-	geometry/Point.h    
 	geometry/SubRoom.cpp  
-	geometry/Transition.h
 	geometry/Crossing.cpp  
-	geometry/Hline.h     
 	geometry/NavLine.cpp  
-	geometry/Obstacle.h    
 	geometry/Room.cpp   
-	geometry/SubRoom.h    
 	geometry/Wall.cpp
 	
 	IO/IODispatcher.cpp  
-	IO/IODispatcher.h  
 	IO/OutputHandler.cpp  
-	IO/OutputHandler.h  
 	IO/TraVisToClient.cpp  
-	IO/TraVisToClient.h
 
 	math/Distribution.cpp  
-	math/Distribution.h  
 	math/ForceModel.cpp  
-	math/ForceModel.h  
 	math/Mathematics.cpp  
-	math/Mathematics.h  
 	math/ODESolver.cpp  
-	math/ODESolver.h
 
 	mpi/LCGrid.cpp  
-	mpi/LCGrid.h
 
 	pedestrian/Ellipse.cpp  
-	pedestrian/Ellipse.h  
 	pedestrian/PedDistributor.cpp  
-	pedestrian/PedDistributor.h  
 	pedestrian/Pedestrian.cpp  
-	pedestrian/Pedestrian.h
 
 	routing/AccessPoint.cpp  
 	routing/DirectionStrategy.cpp  
@@ -74,14 +49,10 @@ file(
 	routing/GlobalRouter.cpp  
 	routing/GraphRouter.cpp  
 	routing/QuickestPathRouter.cpp  
-	routing/Routing.cpp
-	routing/AccessPoint.h    
-	routing/DirectionStrategy.h    
-	routing/DummyRouter.h    
-	routing/GlobalRouter.h    
-	routing/GraphRouter.h    
-	routing/QuickestPathRouter.h    
-	routing/Routing.h
+	routing/Router.cpp
+	routing/RoutingEngine.cpp
+	routing/NavMesh.cpp
+	routing/DTriangulation.cpp    
 	
 	routing/graph/NavLineState.cpp  
 	routing/graph/NavLineState.h  
@@ -90,8 +61,55 @@ file(
 	routing/graph/RoutingGraphStorage.cpp  
 	routing/graph/RoutingGraphStorage.h
 
-    *.h
-    */*.h
+	poly2tri/common/shapes.cpp          
+	poly2tri/sweep/sweep_context.cpp
+	poly2tri/sweep/advancing_front.cpp  
+	poly2tri/sweep/sweep.cpp
+	poly2tri/sweep/cdt.cpp
+
+	header_files:
+	routing/NavMesh.ch
+	routing/DirectionStrategy.h    
+	routing/DummyRouter.h    
+	routing/GlobalRouter.h    
+	routing/GraphRouter.h    
+	routing/QuickestPathRouter.h    
+	routing/Router.h
+	routing/RoutingEngine.h
+	routing/AccessPoint.h    
+	routing/DTriangulation.h    
+	pedestrian/Pedestrian.h
+	pedestrian/PedDistributor.h  
+	pedestrian/Ellipse.h  
+	mpi/LCGrid.h
+	general/ArgumentParser.h  
+	general/Macros.h  
+	general/xmlParser.h
+	geometry/Crossing.h  
+	geometry/NavLine.h     
+	geometry/Room.h       
+	geometry/Wall.h
+	geometry/Line.h       
+	geometry/Point.h    
+	geometry/Transition.h
+	geometry/Hline.h     
+	geometry/Obstacle.h    
+	geometry/SubRoom.h    
+	IO/IODispatcher.h  
+	IO/OutputHandler.h  
+	IO/TraVisToClient.h
+	math/ForceModel.h  
+	math/Distribution.h  
+	math/Mathematics.h  
+	math/ODESolver.h
+	poly2tri/poly2tri.h
+	poly2tri/common/shapes.h          
+	poly2tri/sweep/cdt.h
+	poly2tri/common/utils.h           
+	poly2tri/sweep/sweep_context.h
+	poly2tri/sweep/advancing_front.h  
+	poly2tri/sweep/sweep.h
+	
 )
 
 
@@ -103,9 +121,14 @@ if(OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+#find and add the CGAL library
+FIND_PACKAGE(CGAL)
+if(CGAL_FOUND)
+#    set (_CGAL 1)
+endif()
+
+
 add_executable(
 	rebuild.exe
 	${source_files}
 )
-
-

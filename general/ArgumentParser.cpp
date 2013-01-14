@@ -81,7 +81,6 @@ ArgumentParser::ArgumentParser() {
 	pfps=1.0;
 	pdt = 0.01;
 	pExitStrategy = 2;
-	//pRoutingStrategies = vector<RoutingStrategy>();
 	pLinkedCells = false;
 	pLinkedCellSize=2.2;
 	pV0Mu = 1.24;
@@ -535,6 +534,13 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tstepsize <"+string(stepsize)+">");
 	}
 
+	//exit crossing strategy
+	if(!xPara.getChildNode("exitCrossingStrategy").isEmpty()){
+		string exitStrategy=xPara.getChildNode("exitCrossingStrategy").getText();
+		pExitStrategy=xmltof(exitStrategy.c_str(),pExitStrategy);
+		Log->Write("INFO: \exitCrossingStrategy <"+string(exitStrategy)+">");
+	}
+
 	//linked-cells
 	if(!xPara.getChildNode("linkedcells").isEmpty()){
 		string linkedcells=string(xPara.getChildNode("linkedcells").getAttribute("enabled"));
@@ -674,10 +680,11 @@ void ArgumentParser::ParseIniFile(string inifile){
 }
 
 
-string ArgumentParser::GetPersonsFilename() const {
+const string& ArgumentParser::GetPersonsFilename() const {
 	return pNumberFilename;
 }
-FileFormat ArgumentParser::GetFileFormat() const {
+
+const FileFormat& ArgumentParser::GetFileFormat() const {
 	return pFormat;
 }
 const string& ArgumentParser::GetHostname() const {
@@ -708,7 +715,7 @@ double ArgumentParser::Getfps() const {
 	return pfps;
 }
 
-string ArgumentParser::GetGeometryFilename() const {
+const string& ArgumentParser::GetGeometryFilename() const {
 	return pGeometryFilename;
 }
 
@@ -817,20 +824,20 @@ unsigned int ArgumentParser::GetSeed() const {
 }
 
 
-string ArgumentParser::GetPathwayFile() const {
+const string& ArgumentParser::GetPathwayFile() const {
 	return pPathwayfile;
 }
 
 
-string ArgumentParser::GetErrorLogFile() const {
+const string& ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
 }
 
-string ArgumentParser::GetTrafficFile() const {
+const string& ArgumentParser::GetTrafficFile() const {
 	return pTrafficFilename;
 }
 
-string ArgumentParser::GetRoutingFile() const{
+const string& ArgumentParser::GetRoutingFile() const{
 	return pRoutingFilename;
 }
 

@@ -399,7 +399,7 @@ void GlobalRouter::Init(Building* building) {
 	// in the persons file
 	// set the distances to alternative destinations
 
-	for (unsigned int p = 0; p < pFinalDestinations.size(); p++) {
+	for (unsigned int p = 0; p < _finalDestinations.size(); p++) {
 
 		//get the uniqueID and find the corresponding index in the matrix
 		//loop over all transitions
@@ -410,7 +410,7 @@ void GlobalRouter::Init(Building* building) {
 				itr != pBuilding->GetAllTransitions().end(); ++itr) {
 
 			int index = itr->second->GetIndex();
-			if (pFinalDestinations[p]==index){
+			if (_finalDestinations[p]==index){
 				to_door_matrix_index=pMap_id_to_index[itr->second->GetUniqueID()];
 				to_door_uid=itr->second->GetUniqueID();
 				break;
@@ -421,7 +421,7 @@ void GlobalRouter::Init(Building* building) {
 			char tmp[CLENGTH];
 			sprintf(tmp,
 					"ERROR: GlobalRouter: Final destination not found [ %d ]\n",
-					pFinalDestinations[p]);
+					_finalDestinations[p]);
 			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
@@ -436,13 +436,13 @@ void GlobalRouter::Init(Building* building) {
 
 			//comment this if you want infinite as distance to unreachable destinations
 			double dist = pDistMatrix[from_door_matrix_index][to_door_matrix_index];
-			from_AP->AddFinalDestination(pFinalDestinations[p], dist);
+			from_AP->AddFinalDestination(_finalDestinations[p], dist);
 
 			// set the intermediate path
 			// set the intermediate path to global final destination
 			GetPath(from_door_matrix_index, to_door_matrix_index);
 			if (pTmpPedPath.size() >= 2) {
-				from_AP->AddTransitAPsTo(pFinalDestinations[p],
+				from_AP->AddTransitAPsTo(_finalDestinations[p],
 						pAccessPoints[pMap_index_to_id[pTmpPedPath[1]]]);
 			} else {
 				if ((from_AP->isFinalDestination() == false)

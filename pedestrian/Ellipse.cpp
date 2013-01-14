@@ -280,8 +280,6 @@ Ellipse::Ellipse(const Ellipse& orig) {
 	pV0 = orig.GetV0(); // Wunschgeschwindigkeit (Betrag)
 }
 
-//Ellipse::~Ellipse() {
-//}
 
 /*************************************************************
  Setter-Funktionen
@@ -377,18 +375,6 @@ double Ellipse::GetArea() const {
 	double eb = pBmax - V * x;
 	return ea * eb * M_PI;
 }
-/*double Ellipse::GetLargerAxis() const {
-	if (pV0 < J_EPS) {
-		Log->write("ERROR: \tCEllipse::GetLargerAxis() v0 of ped is null\n");
-		exit(0);
-	}
-	double x = (pBmax - pBmin) / pV0;
-	double V = pV.Norm();
-	double ea = pAmin + V * pAv;
-	double eb = pBmax - V * x;
-	// groessere Achse zurueckgeben
-	return (ea > eb) ? ea : eb;
-}*/
 
 // ellipse  semi-axis in the direction of the velocity
 	double Ellipse::GetEA() const {
@@ -401,18 +387,6 @@ double Ellipse::GetEB() const {
 	return pBmax - pV.Norm() * x;
 }
 
-/*double Ellipse::GetSmallerAxis() const {
-	if (pV0 < J_EPS) {
-		Log->write("ERROR: \tCEllipse::GetSmallerAxis: v0 of ped is null\n");
-		exit(0);
-	}
-	double x = (pBmax - pBmin) / pV0;
-	double V = pV.Norm();
-	double ea = pAmin + V * pAv;
-	double eb = pBmax - V * x;
-	// kleinere Achse zurueck
-	return (ea < eb) ? ea : eb;
-}*/
 
 /*************************************************************
  Sonstige Funktionen
@@ -465,81 +439,12 @@ double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) cons
 	return (AP1 - AP2).Norm() - (AP1 - R1).Norm() - (AP2 - R2).Norm(); // negative Werte sind bei Überlappung möglich
 }
 
-/* Berechnet den Punkt auf der Ellipse, der Schnittpunkt der Geraden durch P und dem
- * ActionPoint (AP) der Ellipse E, ist (wird beim effektiven Abstand benötigt)
- * Algorithms:
- *   - berechne Gerade g: y=m*x+n durch P und AP
- *   - Schnittpunkte S1, S2 von g mit E bestimmen
- *   - Gesuchter Punkt ist der mit kürzestem Abstand zu P
- *   - emtsprechend S1 oder S2 zrückgeben
- * Parameter:
- *   - Point P in muss in den Koordinaten der Ellipse gegeben sein
- * Rückgabewerte:
- *   - Punkt auf der Ellipse in "normalen" Koordinaten (S1 oder S2)
- * */
-
-/*Point Ellipse::PointOnEllipse(const Point& P) const {
-	double m, n; // y=m*x+n Steigung und y-Achsenabschnitt der Geraden
-	double a, b;
-	double a2, b2, m2, n2, b4; // a2 = a*a usw. damit Berechnung nur einmal
-	double x1, x2;
-	Point S1, S2;
-	Point rueck;
-
-	a = GetLargerAxis();
-	b = GetSmallerAxis();
-	a2 = a * a;
-	b2 = b * b;
-	b4 = b2 * b2;
-
-	if (fabs(P.GetX() - pXp) < J_EPS) {// Sonderfall: Ellipsen liegen Parallel
-		double y1, y2;
-		y1 = sqrt(-pXp * pXp + a2) * b / a;
-		y2 = -y1;
-		S1 = Point(pXp, y1);
-		S2 = Point(pXp, y2);
-	} else { // m und n bestimmen
-		m = P.GetY() / (P.GetX() - pXp); // y-Wert des ActionPoints der Ellipse ist 0
-		n = -m * pXp;
-		m2 = m * m;
-		n2 = n * n;
-
-		// Schnittpunkte bestimmen
-		// E: b^2*x^2+a^2*y^2 = a^2*b^2
-		// g: y = m*x+n
-		//
-		//              (-n*m+sqrt(-b^2*n^2+b^4+a^2*b^2*m^2))*a
-		//    x1 =     _________________________________________
-		//                           b^2+a^2*m^2
-		//              (n*m+sqrt(-b^2*n^2+b^4+a^2*b^2*m^2))*a
-		//    x2 =   - _________________________________________
-		//                           b^2+a^2*m^2
-
-		double tmp = sqrt(-b2 * n2 + b4 + a2 * b2 * m2);
-		x1 = (-n * m * a + tmp) * a / (b2 + a2 * m2);
-		x2 = (-n * m * a - tmp) * a / (b2 + a2 * m2);
-		S1 = Point(x1, m * x1 + n);
-		S2 = Point(x2, m * x2 + n);
-	}
-	// den Punkt mit kürzerem Abstand wählen
-	// todo:fixme: save the squareroot computation
-	//if ((P - S1).Norm() < (P - S2).Norm()) {
-	if ((P - S1).NormSquare() < (P - S2).NormSquare()) {
-		rueck = S1.CoordTransToCart(pCenter, pCosPhi, pSinPhi);
-	} else {
-		rueck = S2.CoordTransToCart(pCenter, pCosPhi, pSinPhi);
-	}
-	return rueck;
-}*/
 
 //
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
 // O being the center of the ellipse
 Point Ellipse::PointOnEllipse(const Point& P) const {
-
-
-	Point S;
 	double x = P.GetX(), y = P.GetY();
 	double r = x*x + y*y;
 	if ( r < J_EPS*J_EPS)
@@ -553,193 +458,13 @@ Point Ellipse::PointOnEllipse(const Point& P) const {
 	double sinTheta = y/r;
 	double a = GetEA();
 	double b = GetEB();
+	Point S;
 	S.SetX(a*cosTheta);
 	S.SetY(b*sinTheta);
 	return S.CoordTransToCart(pCenter, pCosPhi, pSinPhi);
 }
 
 
-/* Berechnet den Punkt auf der Ellipse, der Schnittpunkt mit dem Liniensegment ist und den kürzesten
- * Abstand zu P hat
- * Parameter:
- *   - Line line muss in den Koordinaten der Ellipse gegeben sein
- *   - Point P muss in den Koordinaten der Ellipse gegeben sein, ist ein Punkt aus l
- * Rückgabewerte:
- *   - Punkt auf der Ellipse in Ellipsenkoordinaten
- * */
-/*
- * NOT USED
-Point Ellipse::PointOnEllipse(const Line& line, const Point& P) const {
-	double m, n; // y=m*x+n Steigung und y-Achsenabschnitt der Geraden
-	double a, b;
-	double a2, b2, m2, n2, b4; // a2 = a*a usw. damit Berechnung nur einmal
-	double x1, x2;
-	Point S1, S2;
-	Point rueck;
-
-	a = GetLargerAxis();
-	b = GetSmallerAxis();
-	a2 = a * a;
-	b2 = b * b;
-	b4 = b2 * b2;
-
-	const Point& L1 = line.GetPoint1();
-	const Point& L2 = line.GetPoint2();
-
-	// Sonderfall Punkte sind bereits Punkt der Ellipse
-	if (IsOn(L1))
-		return L1;
-	if (IsOn(L2))
-		return L2;
-
-	if (fabs(L1.GetX() - L2.GetX()) < J_EPS) { // parallel zur y-Achse der Ellipse, EPS_DIST zu ungenau
-		double y1, y2;
-		y1 = sqrt(-L2.GetX() * L2.GetX() + a2) * b / a;
-		y2 = -y1;
-		S1 = Point(L2.GetX(), y1);
-		S2 = Point(L2.GetX(), y2);
-	} else { // m und n bestimmen
-		m = (L1.GetY() - L2.GetY()) / (L1.GetX() - L2.GetX());
-		n = L2.GetY() - m * L2.GetX();
-		m2 = m * m;
-		n2 = n * n;
-		// Schnittpunkte bestimmen
-		// E: b^2*x^2+a^2*y^2 = a^2*b^2
-		// g: y = m*x+n
-		//
-		//              (-n*m+sqrt(-b^2*n^2+b^4+a^2*b^2*m^2))*a
-		//    x1 =     _________________________________________
-		//                           b^2+a^2*m^2
-		//              (n*m+sqrt(-b^2*n^2+b^4+a^2*b^2*m^2))*a
-		//    x2 =   - _________________________________________
-		//                           b^2+a^2*m^2
-
-		double tmp = sqrt(-b2 * n2 + b4 + a2 * b2 * m2);
-		x1 = (-n * m * a + tmp) * a / (b2 + a2 * m2);
-		x2 = (-n * m * a - tmp) * a / (b2 + a2 * m2);
-		S1 = Point(x1, m * x1 + n);
-		S2 = Point(x2, m * x2 + n);
-	}
-	// den Punkt mit kürzerem Abstand wählen
-	//todo: runtime normsquare?
-	//if ((P - S1).Norm() < (P - S2).Norm()) {
-	if ((P - S1).NormSquare() < (P - S2).NormSquare()) {
-		rueck = S1;
-	} else {
-		rueck = S2;
-	}
-
-	return rueck;
-}
-*/
-
-/* minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Segment
- * ausführliche Domkumentation siehe:
- * http://chraibi.de/sites/default/files/mindel2.pdf
- * Algorithms:
- *   - l in Koordinaten der Ellipse transformieren
- *   - Punt P mit kürzestem Abstand zu AP bestimmen
- *   - l ist Teil der Geraden g: y=m*x+n
- *   - Steigung von g, also m bestimmen
- *   - g' ist die verschobene Gerade, Verschiebungsvektor ist AP-P
- *   - Betrag der Verschienbung d = min(d1, d2) berechnen
- *   - g verschieben nach g'
- *   - gesuchter Avstand ist nun effektiver Abstand zu g'
- * Parameter:
- *   - Line l in "normalen" Koordinaten
- * Rückgabewerte:
- *   - mindist: gesuchter minimal möglicher Abstand
- * */
-// das enspricht NICHT die obere Dokumentation! Seltsam!
-/*double Ellipse::MinimumDistanceToLine(const Line& l) const {
-	// Line muss in Koordinaten der Ellipse transformiert werden
-	Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
-	Point BinE = l.GetPoint2().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
-
-	// Action Point der Ellipse
-	Point APinE = Point(pXp, 0);
-	Line linE = Line(AinE, BinE);
-	Line l_strich_inE;
-	// Punkt auf line mit kürzestem Abstand zum Action Point der Ellipse
-	Point PinE = linE.ShortestPoint(APinE);
-	// Sonstige Punkte in Ellipsen Koordinaten
-	Point A_strich_inE, B_strich_inE, SinE;
-
-	double mindist; // Rückgabewert
-	double n_strich; // neuer y_achsen-Abschnitt g': y=m*x+n'
-	double sx, sy; // Koordinaten des Schnittpunktes der Ellipse mit dem verschobenen Segment
-
-	// kürzester Punkt ist Randpunkt
-	if (PinE == AinE || PinE == BinE) {
-		mindist = 0;
-	} else {
-		// normierter Verschiebungsvector
-		Point n = (APinE - PinE).Normalized();
-		// Halbachsen der Ellipse
-		double a = this->GetLargerAxis();
-		double a2 = a * a; // um Rechenaufwand zu sparen
-		double b = this->GetSmallerAxis();
-		double b2 = b * b;
-		// Abstand zwischen g und g'
-		double d;
-
-		// Steigung der Geraden
-		if (fabs(AinE.GetX() - BinE.GetX()) < EPS_DIST) { // Gerade parallel zur y-Achse der Ellipse
-			d = fabs(AinE.GetX()) - a;
-			sx = sign(AinE.GetX()) * a;
-			sy = 0.0;
-		} else if (fabs(AinE.GetY() - BinE.GetY()) < EPS_DIST) { // Gerade parallel zur x-Achse der Ellipse
-			d = fabs(AinE.GetY()) - b;
-			sx = 0.0;
-			sy = sign(AinE.GetY()) * b;
-		} else { // Steigung der Geraden muss berechnet werden
-			double m = (AinE.GetY() - BinE.GetY())
-					/ (AinE.GetX() - BinE.GetX());
-			// d berechnen
-			double tmp1, tmp2, d1, d2;
-			tmp1 = (-m * AinE.GetX() + AinE.GetY()) / (m * n.GetX() - n.GetY());
-			tmp2 = sqrt(a2 * m * m + b2) / (m * n.GetX() - n.GetY());
-			d1 = tmp1 + tmp2;
-			d2 = tmp1 - tmp2;
-			d = min(d1, d2);
-			n_strich = -m * AinE.GetX() - m * d * n.GetX() + AinE.GetY() + d
-					* n.GetY();
-			// möglichen Schnittpunkt berechnen
-			sx = (-n_strich * m * a2) / (a2 * m * m + b2);
-			sy = m * sx + n_strich;
-		}
-		A_strich_inE = AinE + n * d; // verschobene Punkte
-		B_strich_inE = BinE + n * d;
-		// Schnittpunkt
-		SinE = Point(sx, sy);
-		// Prüfen ob S im verschobenen Liniensegment liegt
-		l_strich_inE = Line(A_strich_inE, B_strich_inE);
-		if (!l_strich_inE.IsInLine(SinE)) { // liegt nicht drin
-			PinE = l_strich_inE.ShortestPoint(APinE);
-			//TODO: runtime normquare?
-			//if ((SinE - A_strich_inE).Norm() < (SinE - B_strich_inE).Norm()) { // A' ist eigentlicher Schnittpunkt
-			if ((SinE - A_strich_inE).NormSquare()
-					< (SinE - B_strich_inE).NormSquare()) { // A' ist eigentlicher Schnittpunkt
-				Line tmpline = Line(A_strich_inE, A_strich_inE + APinE - PinE);
-				A_strich_inE = PointOnEllipse(tmpline, A_strich_inE);
-				B_strich_inE = BinE + A_strich_inE - AinE;
-			} else { // B' ist eigentlicher Schnittpunkt
-				Line tmpline = Line(B_strich_inE, B_strich_inE + APinE - PinE);
-				B_strich_inE = PointOnEllipse(tmpline, B_strich_inE);
-				A_strich_inE = AinE + B_strich_inE - BinE;
-			}
-
-		}
-		if (IsOn(SinE)) { // Prüfen, ob S auf der Ellipse liegt
-			mindist = 0;
-		} else {
-			Line g_strich = Line(A_strich_inE, B_strich_inE); //Verschobenes Segment
-			mindist = this->EffectiveDistanceToLine(g_strich);
-		}
-	}
-
-	return mindist;
-}*/
 // thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
 double Ellipse::MinimumDistanceToLine(const Line& l) const {
 	 Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
@@ -752,8 +477,6 @@ double Ellipse::MinimumDistanceToLine(const Line& l) const {
 	 double ya = linE.GetPoint1().GetY();
 	 double xb = linE.GetPoint2().GetX();
 	 double yb = linE.GetPoint2().GetY();
-/*	 double a = GetLargerAxis();
-	 double b = GetSmallerAxis();*/
 	 double a = GetEA();
 	 double b = GetEB();
 	 Line l_strich_inE;
@@ -876,18 +599,15 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 		Log->Write(tmp);
 		exit(0);
 	}
-	//todo: runtime normsquare?
-	if ((C1 - C2).Norm() < J_EPS) {
+
+	if ((C1 - C2).NormSquare() < J_EPS*J_EPS) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() m=0\n"
 			"xc1: %f xc2: %f yc1: %f yc2: %f\n", C1.GetX(), C2.GetX(),
 				C1.GetY(), C2.GetY());
 		Log->Write(tmp);
-		//FIXME:
-		//cout << "press a key: " << endl;
-		//getc(stdin);
-		return 0.0;
-		exit(0);
+		exit(EXIT_FAILURE);
+		//return 0.0;
 	}
 	// Verschiebungsvektor bestimmen und normieren
 	v = (C2 - C1).Normalized();
@@ -900,41 +620,25 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 	return mind;
 }
 
-/* prüft, ob ein Punkt sich innerhalb der Ellipse befindet
- * Parameter:
- *    Point p muss in Koordinaten der Ellipse gegeben sein
- * Rückgabewert:
- *    - true, wenn drin
- *    - false, wenn draußen
- * */
-//NOT USED
-/*
+
 bool Ellipse::IsInside(const Point& p) const {
-	double a = GetLargerAxis();
-	double b = GetSmallerAxis();
+	double a = GetEA();
+	double b = GetEB();
 	double x = p.GetX();
 	double y = p.GetY();
 
 	return (x * x) / (a * a) + (y * y) / (b * b) < 1 + J_EPS_DIST;
 }
-*/
 
-/* prüft, ob ein Punkt sich außerhalb der Ellipse befindet
- * * Parameter:
- *    Point p muss in Koordinaten der Ellipse gegeben sein
- * Rückgabewert:
- *    - true, wenn draußen
- *    - false, wenn drin
- * */
-//NOT USED
-/* bool Ellipse::IsOutside(const Point& p) const {
-	double a = GetLargerAxis();
-	double b = GetSmallerAxis();
+
+bool Ellipse::IsOutside(const Point& p) const {
+	double a = GetEA();
+	double b = GetEB();
 	double x = p.GetX();
 	double y = p.GetY();
 
 	return (x * x) / (a * a) + (y * y) / (b * b) > 1 - J_EPS_DIST;
-}*/
+}
 
 /* prüft, ob ein Punkt sich außerhalb der Ellipse befindet
  * * Parameter:
@@ -945,8 +649,6 @@ bool Ellipse::IsInside(const Point& p) const {
  * */
 
 bool Ellipse::IsOn(const Point& p) const {
-	//double a = GetLargerAxis();
-	//double b = GetSmallerAxis();
 	double a = GetEA();
 	double b = GetEB();
 	double x = p.GetX();
@@ -984,4 +686,5 @@ bool Ellipse::IsOn(const Point& p) const {
 	//	}
 	//	return is;
 	exit(EXIT_FAILURE); // what are you looking for here?
-}*/
+}
+*/

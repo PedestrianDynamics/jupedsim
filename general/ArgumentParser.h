@@ -44,14 +44,14 @@ private:
 	string pRoutingFilename; /// routing information
 	string pTrafficFilename; /// traffic information (closed doors,...)
 	string pNumberFilename; /// initial distribution and person specifications
-	int pSolver; /// solver for the differential equation
 	string pGeometryFilename;
 	string pPathwayfile; // saving pedestrian path
+	string pHostname;
+	string pTrajectoriesFile;
+	string pErrorLogFile;
 	double pTmax; // maximale Simulationszeit
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
-	int pExitStrategy; // Strategie zur Richtungswahl (v0)
-	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
 	bool pLinkedCells; // use of linked-cells neighbourhood list
 	double pLinkedCellSize; // cell size of the linkedcell (default to 2.2m)
 	double pV0Mu; // mu für die Normalverteilung von v0
@@ -74,16 +74,14 @@ private:
 	double pMaxFWall;
 	double pDistEffMaxPed;
 	double pDistEffMaxWall;
-	int pLog;
-	//int pTravisto;
-	string pErrorLogFile;
-	//string pTrajOutputDir;
 	unsigned int pSeed;
+	int pSolver; /// solver for the differential equation
+	int pExitStrategy; // Strategie zur Richtungswahl (v0)
+	int pLog;
+	int pPort;
 	int pMaxOpenMPThreads;
 	FileFormat pFormat;
-	int pPort;
-	string pHostname;
-	string pTrajectoriesFile;
+	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
 
 	// private Funktionen
 	void Usage();
@@ -93,19 +91,23 @@ public:
 	ArgumentParser(); // gibt die Programmoptionen aus
 
 	// Getter-Funktionen
-	string GetPersonsFilename() const;
-	string GetPathwayFile() const;
+	bool IsOnline() const;
+	bool GetLinkedCells() const;
+
 	int GetSolver() const;
-	double GetTmax() const;
-	double Getdt() const;
-	string GetGeometryFilename() const;
 	int GetExitStrategy() const;
 	int GetRandomize() const;
-	bool IsOnline() const;
-	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
-	bool GetLinkedCells() const;
-	double GetLinkedCellSize() const;
 	int GetMaxOpenMPThreads() const;
+	int GetLog() const;
+	int GetTravisto() const;
+	int GetTrajektorien() const;
+	int GetPort() const;
+	unsigned int GetSeed() const;
+
+	double Getfps() const;
+	double GetLinkedCellSize() const;
+	double GetTmax() const;
+	double Getdt() const;
 	double GetV0Mu() const;
 	double GetV0Sigma() const;
 	double GetBmaxMu() const;
@@ -126,23 +128,22 @@ public:
 	double GetDistEffMaxWall() const;
 	double GetTauMu() const;
 	double GetTauSigma() const;
-	int GetLog() const;
-	int GetTravisto() const;
-	int GetTrajektorien() const;
-	double Getfps() const;
-	FileFormat GetFileFormat() const;
-	const string& GetHostname() const;
 	void SetHostname(const string& hostname);
-	int GetPort() const;
 	void SetPort(int port);
-	const string& GetTrajectoriesFile() const;
 	void SetTrajectoriesFile(const string& trajectoriesFile);
-	string GetErrorLogFile() const;
-	string GetTrafficFile() const;
-	string GetRoutingFile() const;
 
-	//TODO: check which methods are still needed?
-	unsigned int GetSeed() const;
+	const string& GetHostname() const;
+	const string& GetTrajectoriesFile() const;
+	const string& GetErrorLogFile() const;
+	const string& GetTrafficFile() const;
+	const string& GetRoutingFile() const;
+	const string& GetPersonsFilename() const;
+	const string& GetPathwayFile() const;
+	const string& GetGeometryFilename() const;
+
+	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
+	const FileFormat& GetFileFormat() const;
+
 
 	void ParseArgs(int argc, char **argv);
 

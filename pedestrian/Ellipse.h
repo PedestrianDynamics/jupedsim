@@ -82,8 +82,7 @@ public:
     double GetBmin() const;
     double GetBmax() const;
     double GetV0() const;
-    /*double GetLargerAxis() const;
-    double GetSmallerAxis() const;*/
+
     double GetEA()const;// ellipse axe in the direction of the velocity
     double GetEB()const;// ellipse axe in the orthogonal direction of the velocity
     double GetArea()const;

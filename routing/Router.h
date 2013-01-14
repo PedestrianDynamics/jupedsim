@@ -1,5 +1,5 @@
 /**
- * File:   Routing.h
+ * File:   Router.h
  *
  * Created on 11. November 2010, 12:55
  * @section LICENSE
@@ -39,44 +39,35 @@ class Building;
  Routing
  ************************************************************/
 
-class Routing {
+class Router {
 private:
-	//vector<Crossing*> goals;
-	std::map<int, Crossing*>pGoals;
+	/// routing strategy as defined in the Macros.h file
+	RoutingStrategy _strategy;
+	/// the id as present in the persons.xml file
+	int _id;
 
 protected:
-	map<int, Crossing*> pCrossings;
-	map<int, Transition*> pTransitions;
-	map<int, Hline*> pHlines;
-	vector<vector<int> >pTrips;
 
-	vector<int> pFinalDestinations;
+	vector<vector<int> >_trips;
+	vector<int> _finalDestinations;
 
 public:
-	Routing();
-	virtual ~Routing();
+	Router();
+	virtual ~Router();
 
-	// Getter-Funktionen
-	Crossing* GetGoal(int index);
-	int GetAnzGoals() const;
-
-	// Sonstiges
-	void AddCrossing(Crossing* line);
-	void AddTransition(Transition* line);
-	void AddHline(Hline* line);
 	void AddTrip(vector<int> trip);
 	void AddFinalDestinationID(int id);
 
-	Hline* GetHLine(int ID /* not the unique id*/);
-	Transition* GetTransition(int ID /* not the unique id*/);
-	Crossing* GetCrossing(int ID /* not the unique id*/);
 
-	const map<int, Crossing*>& GetAllCrossings() const;
-	const  map<int, Transition*>& GetAllTransitions() const;
-	const  map<int, Hline*>& GetAllHlines() const;
-
+	//TODO: investigate Trip for compatibility with ID starting with 0 or 1.
 	const vector<int> GetTrip(int id) const;
 	const vector<int> GetFinalDestinations() const;
+
+	void SetID(int id);
+	int GetID() const;
+
+	void SetStrategy(RoutingStrategy strategy);
+	RoutingStrategy GetStrategy() const;
 
 	// Ausgabe
 	void WriteToErrorLog() const;
@@ -84,6 +75,7 @@ public:
 	// virtuelle Funktionen
 	virtual int FindExit(Pedestrian* p) = 0;
 	virtual void Init(Building* b) = 0;
+
 
 };
 

@@ -1,77 +1,34 @@
-MCC = g++
-#MCC = mpicxx
-CC=g++
-VTT= vtcxx -vt:cxx mpicxx
-CFLAGS=-c -Wall -ansi
-LDFLAGS= -fopenmp 
-LDEBUG= -g3
-LREALEASE= -O3
-VERSION=RELEASE
-ENABLE_CGAL=TRUE
+.PHONY: release debug clean clean-release clean-debug install
 
-ifeq "$(ENABLE_CGAL)" "TRUE"
-LIBS= -lCGAL -lgmp
-endif
+DIRS:=build build/release build/debug
 
-ifeq "$(VERSION)" "DEBUG"
-CFLAGS += $(LDEBUG)
-else
-ifeq "$(VERSION)" "RELEASE"
-CFLAGS += $(LREALEASE)
-endif
-endif
+all: $(DIRS) release
 
 
-SOURCES=main.cpp Simulation.cpp general/ArgumentParser.cpp general/xmlParser.cpp\
-geometry/SubRoom.cpp geometry/Wall.cpp geometry/Transition.cpp geometry/Line.cpp\
-geometry/Point.cpp geometry/Room.cpp geometry/Building.cpp geometry/Crossing.cpp\
-geometry/Hline.cpp geometry/Obstacle.cpp IO/IODispatcher.cpp IO/TraVisToClient.cpp\
-IO/OutputHandler.cpp geometry/NavLine.cpp\
-math/Distribution.cpp math/Mathematics.cpp math/ODESolver.cpp math/ForceModel.cpp\
-routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Router.cpp routing/DummyRouter.cpp\
-routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\
-pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
-routing/QuickestPathRouter.cpp routing/NavMesh.cpp\
-routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp\
-routing/graph/NavLineState.cpp routing/RoutingEngine.cpp\
-routing/DTriangulation.cpp \
-MCD/AlgorithmBase.cpp  MCD/AlgorithmMCD.cpp  MCD/AlgorithmMWT.cpp  MCD/AlgorithmVP.cpp \
-MCD/GeomHomog.cpp  MCD/GeomPairDeque.cpp  MCD/GeomPoly.cpp  MCD/GeomVector.cpp \
-poly2tri/common/shapes.cpp poly2tri/sweep/sweep_context.cpp \
-poly2tri/sweep/advancing_front.cpp  poly2tri/sweep/cdt.cpp  poly2tri/sweep/sweep.cpp  \
+$(DIRS):
+	mkdir $@
 
-OBJECTS=$(SOURCES:.cpp=.o)
-DEP=$(SOURCES:.cpp=.d)
-EXECUTABLE=rebuild.exe
-	
-all: $(SOURCES) $(EXECUTABLE)
-	
-$(EXECUTABLE): $(OBJECTS)
-	$(MCC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
-	
-# pull in dependency info for *existing* .o files
--include $(OBJECTS:.o=.d)
-	
-.cpp.o:
-	$(MCC) $(CFLAGS) $(LDFLAGS) $< -o $@
-	$(MCC) -MM $(CFLAGS) $*.cpp > $*.d
-	
+
 release:
-	$(MCC) $(LDFLAGS) $(LREALEASE) -o $(EXECUTABLE) $(SOURCES)
-	
-vampire:
-	$(VTT) $(LDFLAGS) $(LDEBUG) -DVTRACE -o $(EXECUTABLE) $(SOURCES)
-	
+	( cd build/release && cmake -DCMAKE_BUILD_TYPE=release ../.. && $(MAKE) --no-print-directory )
+#	ctags -R  --language-force=c++ *.*
+#	ctags -eR  --language-force=c++ *.*
+
 debug:
-	$(MCC) $(LDFLAGS) $(LDEBUG) -o $(EXECUTABLE) $(SOURCES)
-	
-clean :
-	rm -f $(EXECUTABLE) 
-	rm -f $(OBJECTS)
-	rm -f $(DEP)
-	
-purge :
-	rm -f $(EXECUTABLE) 
-	rm -f $(OBJECTS)
-	rm -f $(DEP)
-	rm trace_*
+	( cd build/debug && cmake -DCMAKE_BUILD_TYPE=debug ../.. && $(MAKE) --no-print-directory )
+#	ctags -R  --language-force=c++ *.*
+#	ctags -eR  --language-force=c++ *.*
+
+clean: clean-release clean-debug
+
+clean-release:
+	( cd build/release && $(MAKE) --no-print-directory clean )
+
+clean-debug:
+	( cd build/debug && $(MAKE) --no-print-directory clean )
+
+
+#release:
+#	( cd build/release && cmake -DCMAKE_BUILD_TYPE=release ../.. && $(MAKE) --no-print-directory && make  --no-print-directory install)
+#	ctags -R  --language-force=c++ *.*
+#	ctags -eR  --language-force=c++ *.*

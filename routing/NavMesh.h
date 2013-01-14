@@ -9,16 +9,14 @@
 #define NAVMESH_H_
 
 
-#define _CGAL
+//#define _CGAL
 
 // CGAL libs
 #ifdef _CGAL
-
 #include "ConvexDecomp.h"
 #include "Triangulation.h"
-
-
 #endif
+
 
 #include "../geometry/Point.h"
 #include "cmath"

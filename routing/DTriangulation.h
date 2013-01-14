@@ -2,7 +2,7 @@
  * DTriangulation.h
  *
  *  Created on: Nov 30, 2012
- *      Author: piccolo
+ *      Author: Ulrich Kemloh
  */
 
 #ifndef DTRIANGULATION_H_

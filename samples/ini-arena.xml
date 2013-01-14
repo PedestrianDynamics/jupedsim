@@ -4,17 +4,18 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfiles/geo.xml</geometry>
+	<!--
+	<geometry>inputfiles/arena/Raum080a.jul.xml</geometry>
+	-->
+	<geometry>inputfiles/arena/complete_arena.jul.xml</geometry>
 	<!--persons information and distribution -->
-	<person>inputfiles/persons.xml</person>
+	<person>inputfiles/arena/persons.xml</person>
 	<!-- extra routing information -->
-	<routing>inputfiles/routing.xml</routing>
+	<routing>inputfiles/arena/routing.xml</routing>
 	<!-- traffic information: e.g closed doors -->
-	<traffic>inputfiles/traffic.xml</traffic>
+	<traffic>inputfiles/arena/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" fps="8"> 
-		<file location="outputfiles/trajectories.xml"/>
-		<!--<socket hostname="127.0.0.1" port="8989"/> -->
+	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
 	</trajectories>
 	<!-- where to store the logs 
 	<logfile>outputfiles/log.txt</logfile>
@@ -22,11 +23,11 @@
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
-		<tmax unit="sec">900</tmax>
+		<tmax unit="sec">400</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
-		<exitCrossingStrategy>3</exitCrossingStrategy>
 		<linkedcells enabled="true" cell_size="2.2"/>
+		<routeChoiceStrategy>dummy</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />
 		<bmin mu="0.20" sigma="0.001" />

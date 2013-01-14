@@ -1,6 +1,6 @@
 .PHONY: release debug clean clean-release clean-debug install
 
-DIRS:=bin build build/release build/debug
+DIRS:=build build/release build/debug
 
 all: $(DIRS) release
 
@@ -11,13 +11,13 @@ $(DIRS):
 
 release:
 	( cd build/release && cmake -DCMAKE_BUILD_TYPE=release ../.. && $(MAKE) --no-print-directory )
-	ctags -R  --language-force=c++ *.*
-	ctags -eR  --language-force=c++ *.*
+#	ctags -R  --language-force=c++ *.*
+#	ctags -eR  --language-force=c++ *.*
 
 debug:
 	( cd build/debug && cmake -DCMAKE_BUILD_TYPE=debug ../.. && $(MAKE) --no-print-directory )
-	ctags -R  --language-force=c++ *.*
-	ctags -eR  --language-force=c++ *.*
+#	ctags -R  --language-force=c++ *.*
+#	ctags -eR  --language-force=c++ *.*
 
 clean: clean-release clean-debug
 
