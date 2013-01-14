@@ -434,9 +434,6 @@ void Building::UpdateGrid() {
 
 void Building::InitGrid(double cellSize) {
 
-	char tmp[CLENGTH];
-	sprintf(tmp, "INFO: \tInitializing the grid with cell size: %f ", cellSize);
-	Log->Write(tmp);
 	// first look for the geometry boundaries
 	double x_min = FLT_MAX;
 	double x_max = FLT_MIN;
@@ -489,6 +486,20 @@ void Building::InitGrid(double cellSize) {
 
 	double boundaries[] = { x_min, x_max, y_min, y_max };
 	int pedsCount = pAllPedestians.size();
+
+	//no algorithms
+	// the domain is made of a sigle cell
+	if(cellSize==-1){
+		Log->Write("INFO: \tBrute Force will be used for neighborhoods query");
+		if ( (x_max-x_min) < (y_max-y_min) ){
+			cellSize=(y_max-y_min);
+		}else {
+			cellSize=(x_max-x_min);
+		}
+
+	}else{
+		Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
+	}
 
 	pLinkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
 	pLinkedCellGrid->ShallowCopy(pAllPedestians);

@@ -43,7 +43,6 @@ extern OutputHandler* Log;
 
 class Simulation {
 private:
-    bool pLinkedCells; // true, wenn LinkedCell-Listen
     int pActionPt; // on or off
     int pNPeds; // number of pedestrians
     double pTmax; // Maximale Simulationszeit
@@ -62,10 +61,8 @@ public:
     Simulation();
     virtual ~Simulation();
     // Setter-Funktionen
-    int SetLinkedCells(bool l);
     int SetNPeds(int i);
     // Getter-Funktionen
-    bool IsLinkedCells();
     int GetNPeds() const;
     int GetNPedsGlobal() const;
     Building* GetBuilding() const;

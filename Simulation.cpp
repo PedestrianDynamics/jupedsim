@@ -7,7 +7,6 @@
  ************************************************/
 
 Simulation::Simulation() {
-	pLinkedCells = false;
 	pActionPt = 0; // on or off, wird für GCFM benötigt
 	pNPeds = 0; // number of pedestrians, Default 10
 	pTmax = 0;
@@ -41,17 +40,11 @@ int Simulation::SetNPeds(int i) {
 	return pNPeds = i;
 }
 
-int Simulation::SetLinkedCells(bool l) {
-	return pLinkedCells = l;
-}
 
 /************************************************
 // Getter-Funktionen
  ************************************************/
 
-bool Simulation::IsLinkedCells() {
-	return pLinkedCells;
-}
 
 int Simulation::GetNPeds() const {
 	return pNPeds;
@@ -164,11 +157,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	}
 
 
-	// Linked Cells?
-	pLinkedCells = args->GetLinkedCells();
-	if (pLinkedCells)
-		s.append("\tusing Linked-Cells\n");
-
 	pDistribution = new PedDistributor(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
 			args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
 			args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
@@ -200,16 +188,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append("\tModel: GCFMModel\n");
 	s.append(pModel->writeParameter());
 
-	// ODE Löser
+	// ODE solver
 	int solver = args->GetSolver();
 	sprintf(tmp, "\tODE Loeser: %d\n", solver);
 	s.append(tmp);
 	switch (solver) {
 		case 1:
-			if (pLinkedCells)
-				pSolver = new EulerSolverLC(pModel);
-			else
-				pSolver = new EulerSolver(pModel);
+			pSolver = new EulerSolverLC(pModel);
 			break;
 		case 2:
 			pSolver = new VelocityVerletSolver(pModel);
@@ -332,10 +317,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	routingEngine->Init(pBuilding);
 	pBuilding->InitPhiAllPeds(pDt);
 
-	//TODO: set the cellsize to geometry bound in the case no linked cells are wished
 	//using linkedcells
-	if (pLinkedCells){
+	if (args->GetLinkedCells()){
+		s.append("\tusing Linked-Cells\n");
 		pBuilding->InitGrid(args->GetLinkedCellSize());
+	}else {
+		pBuilding->InitGrid(-1);
+
 	}
 
 	// init pathway
@@ -368,7 +356,7 @@ int Simulation::RunSimulation() {
 	iod->WriteFrame(0, pBuilding);
 
 	//first initialisation needed by the linked-cells
-	if (pLinkedCells) Update();
+	 Update();
 
 
 	// main program loop
@@ -409,8 +397,8 @@ void Simulation::Update() {
 	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+pDt);
 
 	//update the cells position
-	if (pLinkedCells){
+	//if (pLinkedCells){
 		pBuilding->UpdateGrid();
-	}
+	//}
 
 }
