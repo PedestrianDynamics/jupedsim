@@ -130,8 +130,8 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	if (distp12.Norm() >= J_EPS) {
 		ep12 = distp12.Normalized();
 	} else {
-		Log->write("ERROR: \tin GCFMModel::forcePedPed() ep12 kann nicht berechnet werden!!!\n");
-		Log->write("ERROR:\t fix this as soon as possible");
+		Log->Write("ERROR: \tin GCFMModel::forcePedPed() ep12 kann nicht berechnet werden!!!\n");
+		Log->Write("ERROR:\t fix this as soon as possible");
 		return F_rep; // FIXME: should never happen
 		exit(0);
 
@@ -185,8 +185,8 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 		char tmp[CLENGTH];
 		sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetPedIndex(),
 				ped2->GetPedIndex(), F_rep.GetX(), F_rep.GetY());
-		Log->write(tmp);
-		Log->write("ERROR:\t fix this as soon as possible");
+		Log->Write(tmp);
+		Log->Write("ERROR:\t fix this as soon as possible");
 		return Point(0,0); // FIXME: should never happen
 		exit(0);
 	}
@@ -442,108 +442,12 @@ string GCFMModel::writeParameter() const {
 // virtuelle Funktionen
 
 /* berechnet die Kräfte nach dem GCFM Modell
- * Parameter:
- *   - time:
- *   - building:
- *   - roomID:
- *   -subroomID:
- * Rückgabewerte:
- *   - result_acc:
- * */
+*/
 void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Building* building,
 		int roomID, int subroomID) const {
-	double delta = 0.5;
-	Room* room = building->GetRoom(roomID);
-	SubRoom* subroom = room->GetSubRoom(subroomID);
-	vector<Pedestrian*> allpeds = subroom->GetAllPedestrians(); //All the peds in this room
 
-
-	vector<Pedestrian*> allpeds_otherrooms = vector<Pedestrian*>(); //All the peds in the neighbouring rooms
-	vector<Crossing*> rep_goals = vector<Crossing*>();
-	vector<Point> fdriv = vector<Point > (); //Driven force.
-	vector<Point> frep = vector<Point > (); //Repulsive pedestrian force
-	vector<Point> fwall = vector<Point > (); //Repulsive from wall
-
-
-	for (int p = 0; p < (int) allpeds.size(); ++p) {
-		Pedestrian* ped = allpeds[p];
-		double normVi = ped->GetV().ScalarP(ped->GetV());
-		double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
-		if (normVi > tmp && ped->GetV0Norm() > 0) {
-			char tmp[CLENGTH];
-			sprintf(tmp, "WARNING:\t GCFMModel::calculateForce() actual velocity (%f) of iped %d "
-					"[%d/%d] is bigger than desired velocity (%f) at time: %f s\n",
-					sqrt(normVi), ped->GetPedIndex(), ped->GetRoomID(), ped->GetSubRoomID(),
-					ped->GetV0Norm(), time);
-			Log->write(tmp);
-			exit(0);
-		}
-	}
-
-
-	// Driving Force
-	for (int p = 0; p < (int) allpeds.size(); ++p) {
-		Point temp = ForceDriv(allpeds[p], room);
-		fdriv.push_back(temp);
-	}
-
-	//Abstoßende Kräfte zu anderen Fußgängern
-	// Crossings und Transitions durchgehen
-	for (int i = 0; i < building->GetRouting()->GetAnzGoals(); i++) {
-		Crossing* goal = building->GetRouting()->GetGoal(i);
-		if (goal->GetSubRoom1() != goal->GetSubRoom2()) {
-			if (goal->IsInRoom(roomID) && goal->IsInSubRoom(subroomID)) {
-				rep_goals.push_back(goal); // alle goals des Raums speichern
-				SubRoom* other_subroom = goal->GetOtherSubRoom(roomID, subroomID);
-				if (other_subroom != NULL) {
-					vector<Pedestrian*> other_peds = other_subroom->GetAllPedestrians();
-					allpeds_otherrooms.insert(allpeds_otherrooms.end(), other_peds.begin(), other_peds.end());
-				}
-			}
-		}
-	}
-	for (int p1 = 0; p1 < (int) allpeds.size(); p1++) {
-		Point F_rep;
-		for (int p2 = 0; p2 < (int) allpeds.size(); p2++) {
-			if (p1 != p2) {
-				Point tmp;
-				tmp = ForceRepPed(allpeds[p1], allpeds[p2]);
-				F_rep = F_rep + tmp;
-			}
-		}
-
-		//And also the force between peds in neighbouring rooms
-		for (int p2 = 0; p2 < (int) allpeds_otherrooms.size(); p2++) {
-			Point tmp = ForceRepPed(allpeds[p1], allpeds_otherrooms[p2]);
-			F_rep = F_rep + tmp;
-		}
-		frep.push_back(F_rep);
-	}
-
-	// Abstoßende Kräfte zu Wänden
-	for (int p = 0; p < (int) allpeds.size(); p++) {
-		// "normale" Wände
-		Point repwall = ForceRepRoom(allpeds[p], subroom);
-		// alle Crossings/Transitons außer der eigenen wirken abstoßend
-		for (int i = 0; i < (int) rep_goals.size(); i++) {
-			if (rep_goals[i]->GetIndex() != allpeds[p]->GetExitIndex()) {
-				Point tmp = ForceRepWall(allpeds[p], Wall(rep_goals[i]->GetPoint1(), rep_goals[i]->GetPoint2()));
-				repwall = repwall + tmp;
-			}
-		}
-
-		fwall.push_back(repwall);
-	}
-
-	// Addition
-	for (int i = 0; i < (int) allpeds.size(); ++i) {
-		result_acc.push_back((fdriv[i] + frep[i] + fwall[i]) / allpeds[i]->GetMass());
-	}
-
-	allpeds_otherrooms.clear();
-	fdriv.clear();
-	frep.clear();
-	fwall.clear();
+	printf("CalculateForce is not working: ");
+	exit(0);
 }
 
 /**
@@ -592,7 +496,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 						"is bigger than desired velocity (%f) at time: %fs\n",
 						sqrt(normVi), ped->GetPedIndex(), ped->GetV0Norm(), time);
 
-				// FIXME: remove the pedestrian and continue
+				// FIXME: remove the pedestrian and abort
 				for(int p=0;p<subroom->GetAnzPedestrians();p++){
 					if (subroom->GetPedestrian(p)->GetPedIndex()==ped->GetPedIndex()){
 						subroom->DeletePedestrian(p);
@@ -601,18 +505,19 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 				}
 
 				building->DeletePedestrian(ped);
-				Log->write("\tCRITICAL: one ped was removed due to high velocity");
+				Log->Write("\tCRITICAL: one ped was removed due to high velocity");
 
-				continue;
-				//exit(0);
+				//	continue;
+				exit(EXIT_FAILURE);
 			}
 
 			Point F_rep;
-			//vector<Pedestrian*> neighbours;
-			Pedestrian* neighbours[300]={NULL};
-			int nSize=0;
-			building->GetGrid()->GetNeighbourhood(ped,neighbours,&nSize);
+			vector<Pedestrian*> neighbours;
+			//Pedestrian* neighbours[300]={NULL};
+			//building->GetGrid()->GetNeighbourhood(ped,neighbours,&nSize);
+			building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
+			int nSize=neighbours.size();
 			for (int i = 0; i < nSize; i++) {
 				Pedestrian* ped1 = neighbours[i];
 				//if they are in the same subroom

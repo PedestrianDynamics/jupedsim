@@ -40,6 +40,7 @@
 
 class Building;
 class NavLine;
+class Router;
 
 class Pedestrian {
 private:
@@ -89,11 +90,14 @@ private:
     // the current time in the simulation
     static double pGlobalTime;
 
+    /// the router responsible for this pedestrians
+    Router* _router;
+
 
 public:
     // Konstruktoren
     Pedestrian();
-    Pedestrian(const Pedestrian& orig);
+//    Pedestrian(const Pedestrian& orig);
     virtual ~Pedestrian();
 
     // Setter-Funktionen
@@ -118,6 +122,7 @@ public:
     void SetPhiPed();
     void SetFinalDestination(int UID);
     void SetTrip(const vector<int>& trip);
+    void SetRouter(Router* router);
 
     // Getter-Funktionen
     const vector<int>& GetTrip() const;
@@ -128,7 +133,9 @@ public:
     double GetTau() const;
     const Ellipse& GetEllipse() const;
     int GetExitIndex() const;
+    Router* GetRouter() const;
     NavLine* GetExitLine() const;
+
     // Eigenschaften der Ellipse
     const Point& GetPos() const;
     const Point& GetV() const;
@@ -163,6 +170,17 @@ public:
 
     void RecordActualPosition();
     double GetDistanceSinceLastRecord();
+
+
+    /**
+     * Compute and update the route.
+     * This method should be called at each time step;
+     *
+     * @return -1 if no route could be found. The ID of the
+     * next target is returned otherwise.
+     *
+     */
+    int FindRoute();
 
     ///write the pedestrian path (room and exit taken ) to file
     void WritePath(ofstream& file, Building* building=NULL);

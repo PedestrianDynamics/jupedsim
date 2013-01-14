@@ -124,16 +124,15 @@ void TraVisToClient::createConnection() {
     /* start the socket session */
     if (!startSocketSession()) {
         fprintf(stderr, "startSocketSession() failed!");
-        fprintf(stderr, "leaving main() with error");
-        return;
+        fprintf(stderr, "socket creation failed for host [%s] on port [%d]!",_hostname.c_str(),_port);
+        exit(EXIT_FAILURE);
     }
 
     /* create a new socket and connect the socket to the given service */
     if (INVALID_SOCKET == (_tcpSocket = createClientSocket(_hostname.c_str(), _port))) {
-        fprintf(stderr, "socket creation failed!");
+        fprintf(stderr, "\nsocket creation failed for host [%s] on port [%d]!\n",_hostname.c_str(),_port);
         stopSocketSession();
-        fprintf(stderr, "leaving main() with error");
-        return;
+        exit(EXIT_FAILURE);
     }
     _isConnected = true;
 }

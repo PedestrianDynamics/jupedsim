@@ -14,6 +14,7 @@
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 
+using namespace std;
 
 void ArgumentParser::Usage() {
 
@@ -38,7 +39,6 @@ void ArgumentParser::Usage() {
 			"                                       1: local shortest path\n"
 			"                                       2: global shortest path\n"
 			"                                       3: quickest path\n"
-			"                                       4: from file <./Inputfiles/persons.xml>\n"
 			"  [-v/--v0mu <double>]             mu for normal distribution of v0, desired velocity (1.24)\n"
 			"  [-V/--v0sigma <double>]          sigma for normal distribution of v0, desired velocity (0.26)\n"
 			"  [-a/--ataumu <double>]           mu for normal distribution of a_tau, factor for velocity 1st axis (0.53)\n"
@@ -81,7 +81,7 @@ ArgumentParser::ArgumentParser() {
 	pfps=1.0;
 	pdt = 0.01;
 	pExitStrategy = 2;
-	pRouter = 1;
+	//pRoutingStrategies = vector<RoutingStrategy>();
 	pLinkedCells = false;
 	pLinkedCellSize=2.2;
 	pV0Mu = 1.24;
@@ -106,7 +106,7 @@ ArgumentParser::ArgumentParser() {
 	pTauSigma = 0.001;
 	pLog = 0;
 	pErrorLogFile="./Logfile.dat";
-	pPathwayfile=""; // saving pedestrian path
+	pPathwayfile="";
 	pRoutingFilename="";
 	pTrafficFilename="";
 	pSeed=0;
@@ -121,170 +121,6 @@ ArgumentParser::ArgumentParser() {
 #endif
 }
 
-
-string ArgumentParser::GetPersonsFilename() const {
-	return pNumberFilename;
-}
-FileFormat ArgumentParser::GetFileFormat() const {
-	return pFormat;
-}
-const string& ArgumentParser::GetHostname() const {
-	return pHostname;
-}
-void ArgumentParser::SetHostname(const string& hostname) {
-	pHostname = hostname;
-}
-int ArgumentParser::GetPort() const {
-	return pPort;
-}
-void ArgumentParser::SetPort(int port) {
-	pPort = port;
-}
-int ArgumentParser::GetSolver() const {
-	return pSolver;
-}
-
-double ArgumentParser::GetTmax() const {
-	return pTmax;
-}
-
-double ArgumentParser::Getdt() const {
-	return pdt;
-}
-
-double ArgumentParser::Getfps() const {
-	return pfps;
-}
-
-string ArgumentParser::GetGeometryFilename() const {
-	return pGeometryFilename;
-}
-
-int ArgumentParser::GetExitStrategy() const {
-	return pExitStrategy;
-}
-
-
-bool ArgumentParser::GetLinkedCells() const {
-	return pLinkedCells;
-}
-
-int ArgumentParser::GetRoutingStrategy() const {
-	return pRouter;
-}
-
-double ArgumentParser::GetV0Mu() const {
-	return pV0Mu;
-}
-
-double ArgumentParser::GetV0Sigma() const {
-	return pV0Sigma;
-}
-
-double ArgumentParser::GetBmaxMu() const {
-	return pBmaxMu;
-}
-
-double ArgumentParser::GetBmaxSigma() const {
-	return pBmaxSigma;
-}
-
-double ArgumentParser::GetBminMu() const {
-	return pBminMu;
-}
-
-double ArgumentParser::GetBminSigma() const {
-	return pBminSigma;
-}
-
-double ArgumentParser::GetAtauMu() const {
-	return pAtauMu;
-}
-
-double ArgumentParser::GetAtauSigma() const {
-	return pAtauSigma;
-}
-
-double ArgumentParser::GetAminMu() const {
-	return pAminMu;
-}
-
-double ArgumentParser::GetAminSigma() const {
-	return pAminSigma;
-}
-
-double ArgumentParser::GetNuPed() const {
-	return pNuPed;
-}
-
-double ArgumentParser::GetNuWall() const {
-	return pNuWall;
-}
-
-double ArgumentParser::GetIntPWidthPed() const {
-	return pIntPWidthPed;
-}
-
-double ArgumentParser::GetIntPWidthWall() const {
-	return pIntPWidthWall;
-}
-
-double ArgumentParser::GetMaxFPed() const {
-	return pMaxFPed;
-}
-
-double ArgumentParser::GetMaxFWall() const {
-	return pMaxFWall;
-}
-
-double ArgumentParser::GetDistEffMaxPed() const {
-	return pDistEffMaxPed;
-}
-
-double ArgumentParser::GetDistEffMaxWall() const {
-	return pDistEffMaxWall;
-}
-
-double ArgumentParser::GetTauMu() const {
-	return pTauMu;
-}
-
-double ArgumentParser::GetTauSigma() const {
-	return pTauSigma;
-}
-
-int ArgumentParser::GetLog() const {
-	return pLog;
-}
-
-double ArgumentParser::GetLinkedCellSize() const{
-	return pLinkedCellSize;
-}
-unsigned int ArgumentParser::GetSeed() const {
-	return pSeed;
-}
-
-
-string ArgumentParser::GetPathwayFile() const {
-	return pPathwayfile;
-}
-
-
-string ArgumentParser::GetErrorLogFile() const {
-	return pErrorLogFile;
-}
-
-string ArgumentParser::GetTrafficFile() const {
-	return pTrafficFilename;
-}
-
-string ArgumentParser::GetRoutingFile() const{
-	return pRoutingFilename;
-}
-
-int ArgumentParser::GetMaxOpenMPThreads() const{
-	return pMaxOpenMPThreads;
-}
 
 
 void ArgumentParser::ParseArgs(int argc, char **argv) {
@@ -482,7 +318,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				if (t > 0)
 					pTmax = t;
 				else {
-					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
+					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 							"tmax has to be positiv!!!\n");
 					exit(0);
 				}
@@ -494,7 +330,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				if (d > 0)
 					pdt = d;
 				else {
-					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
+					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 							"dt has to be positiv!!!\n");
 					exit(0);
 				}
@@ -506,7 +342,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				if (s == 1 || s==2 || s==3) // spaeter erweitern
 					pSolver = s;
 				else {
-					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
+					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 							"wrong value for solver type!!!\n");
 					exit(0);
 				}
@@ -521,7 +357,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				if (e == 1 || e == 2 || e == 3 || e == 4 )
 					pExitStrategy = e;
 				else {
-					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
+					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 							"wrong value for exit strategy!!!\n");
 					exit(0);
 				}
@@ -530,14 +366,23 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			case 'R':
 			{
 				int r = atoi(optarg);
-				if (r < 6)
-					pRouter = r;
-				else {
-					Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
+				switch(r){
+				case 1:
+					pRoutingStrategies.push_back(make_pair (1,ROUTING_LOCAL_SHORTEST));
+					break;
+				case 2:
+					pRoutingStrategies.push_back(make_pair (2, ROUTING_GLOBAL_SHORTEST));
+					break;
+				case 3:
+					pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
+					break;
+				default:
+					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 							"wrong value for routing strategy!!!\n");
 					exit(0);
+					break;
 				}
-				break;
+			break;
 			}
 			case 'l':
 			{
@@ -553,7 +398,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				string inifile="ini.xml";
 				if (optarg)
 					inifile=optarg;
-				Log->write("INFO: \t Loading initialization file <"+inifile+">");
+				Log->Write("INFO: \t Loading initialization file <"+inifile+">");
 				ParseIniFile(inifile);
 			}
 			break;
@@ -570,7 +415,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				break;
 			default:
 			{
-				Log->write("ERROR: \tin ArgumentParser::ParseArgs() "
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 						"wrong program options!!!\n");
 				Usage();
 				exit(0);
@@ -579,19 +424,12 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	}
 }
 
-const string& ArgumentParser::GetTrajectoriesFile() const {
-	return pTrajectoriesFile;
-}
-
-void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
-	pTrajectoriesFile = trajectoriesFile;
-}
 
 void ArgumentParser::ParseIniFile(string inifile){
 
 	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSgcfm");
 
-	Log->write("INFO: \tParsing the ini file");
+	Log->Write("INFO: \tParsing the ini file");
 	//I just assume all parameters are present
 
 	//seed
@@ -599,38 +437,38 @@ void ArgumentParser::ParseIniFile(string inifile){
 		const char* seed=xMainNode.getChildNode("seed").getText();
 		pSeed=atoi(seed);
 		srand(pSeed);
-		Log->write("INFO: \tseed <"+string(seed)+">");
+		Log->Write("INFO: \tseed <"+string(seed)+">");
 	}
 
 	//geometry
 	if(!xMainNode.getChildNode("geometry").isEmpty()){
 		pGeometryFilename=xMainNode.getChildNode("geometry").getText();
-		Log->write("INFO: \tgeometry <"+string(pGeometryFilename)+">");
+		Log->Write("INFO: \tgeometry <"+string(pGeometryFilename)+">");
 	}
 
 	//persons and distributions
 	if(!xMainNode.getChildNode("person").isEmpty()){
 		pNumberFilename=xMainNode.getChildNode("person").getText();
-		Log->write("INFO: \tperson <"+string(pNumberFilename)+">");
+		Log->Write("INFO: \tperson <"+string(pNumberFilename)+">");
 	}
 
 	//routing
 	if(!xMainNode.getChildNode("routing").isEmpty()){
 		pRoutingFilename=xMainNode.getChildNode("routing").getText();
-		Log->write("INFO: \trouting <"+string(pRoutingFilename)+">");
+		Log->Write("INFO: \trouting <"+string(pRoutingFilename)+">");
 	}
 
 	//traffic
 	if(!xMainNode.getChildNode("traffic").isEmpty()){
 		pTrafficFilename=xMainNode.getChildNode("traffic").getText();
-		Log->write("INFO: \ttraffic <"+string(pTrafficFilename)+">");
+		Log->Write("INFO: \ttraffic <"+string(pTrafficFilename)+">");
 	}
 
 	//logfile
 	if(!xMainNode.getChildNode("logfile").isEmpty()){
 		pErrorLogFile=xMainNode.getChildNode("logfile").getText();
 		pLog=2;
-		Log->write("INFO: \tlogfile <"+string(pErrorLogFile)+">");
+		Log->Write("INFO: \tlogfile <"+string(pErrorLogFile)+">");
 	}
 
 	//trajectories
@@ -652,20 +490,20 @@ void ArgumentParser::ParseIniFile(string inifile){
 									"file").getAttribute("location"),
 									pTrajectoriesFile.c_str());
 
-		Log->write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
+		Log->Write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
 		}
 
 		if(!xTrajectories.getChildNode("socket").isEmpty()){
 			pHostname=xmltoa(xTrajectories.getChildNode("socket").getAttribute("hostname"),pHostname.c_str());
 			pPort=xmltoi(xTrajectories.getChildNode("socket").getAttribute("port"),pPort);
 		}
-		Log->write("INFO: \toutput socket  <"+string(pHostname)+">");
+		Log->Write("INFO: \toutput socket  <"+string(pHostname)+">");
 
 	}
 	//model parameters, only one node
 	XMLNode xPara=xMainNode.getChildNode("parameters");
 	if(xPara.isEmpty()){
-		Log->write("INFO: \tno gcfm parameter values found");
+		Log->Write("INFO: \tno gcfm parameter values found");
 		return;
 	}
 
@@ -674,7 +512,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		const char* tmax=xPara.getChildNode("tmax").getText();
 		const char* unit=xPara.getChildNode("tmax").getAttribute("unit");
 		pTmax=atof(tmax);
-		Log->write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
+		Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
 	}
 
 	//solver
@@ -684,17 +522,17 @@ void ArgumentParser::ParseIniFile(string inifile){
 		else if(solver=="verlet") pSolver=2;
 		else if(solver=="leapfrog") pSolver=3;
 		else {
-			Log->write("ERROR: \twrong value for solver type!!!\n");
+			Log->Write("ERROR: \twrong value for solver type!!!\n");
 			exit(0);
 		}
-		Log->write("INFO: \tpSolver <"+string(solver)+">");
+		Log->Write("INFO: \tpSolver <"+string(solver)+">");
 	}
 
 	//stepsize
 	if(!xPara.getChildNode("stepsize").isEmpty()){
 		const char* stepsize=xPara.getChildNode("stepsize").getText();
 		pdt=atof(stepsize);
-		Log->write("INFO: \tstepsize <"+string(stepsize)+">");
+		Log->Write("INFO: \tstepsize <"+string(stepsize)+">");
 	}
 
 	//linked-cells
@@ -703,28 +541,11 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string cell_size=string(xPara.getChildNode("linkedcells").getAttribute("cell_size"));
 		if(linkedcells=="true"){
 			pLinkedCells=true;
-			pLinkedCellSize=atoi(cell_size.c_str());
-			Log->write("INFO: \tlinked cells enable with size  <"+cell_size+">");
+			pLinkedCellSize=xmltof(cell_size.c_str(),pLinkedCellSize);
+			Log->Write("INFO: \tlinked cells enable with size  <"+cell_size+">");
 		}else{
-			Log->write("WARNING: \tinvalid parameters for linkedcells");
+			Log->Write("WARNING: \tinvalid parameters for linkedcells");
 		}
-	}
-
-	//route choice strategy
-	if(!xPara.getChildNode("routeChoiceStrategy").isEmpty()){
-		string strategy=string(xPara.getChildNode("routeChoiceStrategy").getText());
-
-		if(strategy=="local_shortest") pRouter=1;
-		else if(strategy=="global_shortest") pRouter=2;
-		else if(strategy=="quickest") pRouter=3;
-		else if(strategy=="dynamic") pRouter=4;
-		else if(strategy=="from_file") pRouter=5;
-		else if(strategy=="dummy") pRouter=6;
-		else{
-			Log->write("ERROR: \twrong value for routing strategy!!!\n");
-			exit(0);
-		}
-		Log->write("INFO: \trouting  <"+string(strategy)+">");
 	}
 
 	//desired speed
@@ -733,7 +554,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string sigma=string(xPara.getChildNode("v0").getAttribute("sigma"));
 		pV0Mu=atof(mu.c_str());
 		pV0Sigma=atof(sigma.c_str());
-		Log->write("INFO: \tdesired velocity mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		Log->Write("INFO: \tdesired velocity mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 
 	//bmax
@@ -742,7 +563,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string sigma=string(xPara.getChildNode("bmax").getAttribute("sigma"));
 		pBmaxMu=atof(mu.c_str());
 		pBmaxSigma=atof(sigma.c_str());
-		Log->write("INFO: \tBmax mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		Log->Write("INFO: \tBmax mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 	//bmin
 	if(!xPara.getChildNode("bmin").isEmpty()){
@@ -750,7 +571,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string sigma=string(xPara.getChildNode("bmin").getAttribute("sigma"));
 		pBminMu=atof(mu.c_str());
 		pBminSigma=atof(sigma.c_str());
-		Log->write("INFO: \tBmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		Log->Write("INFO: \tBmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 	//amin
 	if(!xPara.getChildNode("amin").isEmpty()){
@@ -758,7 +579,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string sigma=string(xPara.getChildNode("amin").getAttribute("sigma"));
 		pAminMu=atof(mu.c_str());
 		pAminSigma=atof(sigma.c_str());
-		Log->write("INFO: \tAmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		Log->Write("INFO: \tAmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 	//tau
 	if(!xPara.getChildNode("tau").isEmpty()){
@@ -766,7 +587,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string sigma=string(xPara.getChildNode("tau").getAttribute("sigma"));
 		pTauMu=atof(mu.c_str());
 		pTauSigma=atof(sigma.c_str());
-		Log->write("INFO: \tTau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		Log->Write("INFO: \tTau mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 	//atau
 	if(!xPara.getChildNode("atau").isEmpty()){
@@ -774,7 +595,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string sigma=string(xPara.getChildNode("atau").getAttribute("sigma"));
 		pAtauMu=atof(mu.c_str());
 		pAtauSigma=atof(sigma.c_str());
-		Log->write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		Log->Write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 
 	//pExitStrategy
@@ -784,12 +605,12 @@ void ArgumentParser::ParseIniFile(string inifile){
 		if (ie == 1 || ie == 2 || ie == 3 || ie == 4)
 		{
 			pExitStrategy = ie;
-			Log->write("INFO: \texitStrategy <"+ string(e) +">");
+			Log->Write("INFO: \texitStrategy <"+ string(e) +">");
 		}
 		else
 		{
 			pExitStrategy = 2;
-			Log->write("WARNING: \twrong value for exitStrategy. Use strategy 2\n");
+			Log->Write("WARNING: \twrong value for exitStrategy. Use strategy 2\n");
 		}
 
 	}
@@ -803,7 +624,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		pNuPed=atof(nu.c_str());
 		pDistEffMaxPed=atof(disteff_max.c_str());
 		pIntPWidthPed=atof(interpolation_width.c_str());
-		Log->write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
+		Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
 				+ disteff_max+ ", interpolation_width="+interpolation_width);
 	}
 	//force_wall
@@ -816,8 +637,210 @@ void ArgumentParser::ParseIniFile(string inifile){
 		pNuWall=atof(nu.c_str());
 		pDistEffMaxWall=atof(disteff_max.c_str());
 		pIntPWidthWall=atof(interpolation_width.c_str());
-		Log->write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
+		Log->Write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
 				+ disteff_max+ ", interpolation_width="+interpolation_width);
 	}
-	Log->write("INFO: \tdone parsing ini");
+
+
+	// pre parse the person file to extract some information we need
+	//route choice strategy
+	XMLNode xPersonsNode=XMLNode::openFileHelper(pNumberFilename.c_str(),"persons");
+	XMLNode xRouters=xPersonsNode.getChildNode("routers");
+	int nRouters=xRouters.nChildNode("router");
+	for(int i=0;i<nRouters;i++){
+		XMLNode routerNode=xRouters.getChildNode("router",i);
+		string strategy=routerNode.getAttribute("method");
+		int id=atoi(routerNode.getAttribute("id"));
+
+		if(strategy=="local_shortest")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_LOCAL_SHORTEST));
+		else if(strategy=="global_shortest")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_GLOBAL_SHORTEST));
+		else if(strategy=="quickest")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_QUICKEST));
+		else if(strategy=="dynamic")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_DYNAMIC));
+		else if(strategy=="dummy")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_DUMMY));
+		else{
+			Log->Write("ERROR: \twrong value for routing strategy!!!\n");
+			cout<<strategy<<endl;
+			exit(0);
+		}
+	}
+
+
+	Log->Write("INFO: \tdone parsing ini");
+}
+
+
+string ArgumentParser::GetPersonsFilename() const {
+	return pNumberFilename;
+}
+FileFormat ArgumentParser::GetFileFormat() const {
+	return pFormat;
+}
+const string& ArgumentParser::GetHostname() const {
+	return pHostname;
+}
+void ArgumentParser::SetHostname(const string& hostname) {
+	pHostname = hostname;
+}
+int ArgumentParser::GetPort() const {
+	return pPort;
+}
+void ArgumentParser::SetPort(int port) {
+	pPort = port;
+}
+int ArgumentParser::GetSolver() const {
+	return pSolver;
+}
+
+double ArgumentParser::GetTmax() const {
+	return pTmax;
+}
+
+double ArgumentParser::Getdt() const {
+	return pdt;
+}
+
+double ArgumentParser::Getfps() const {
+	return pfps;
+}
+
+string ArgumentParser::GetGeometryFilename() const {
+	return pGeometryFilename;
+}
+
+int ArgumentParser::GetExitStrategy() const {
+	return pExitStrategy;
+}
+
+
+bool ArgumentParser::GetLinkedCells() const {
+	return pLinkedCells;
+}
+
+vector< pair<int, RoutingStrategy> > ArgumentParser::GetRoutingStrategy() const {
+	return pRoutingStrategies;
+}
+
+double ArgumentParser::GetV0Mu() const {
+	return pV0Mu;
+}
+
+double ArgumentParser::GetV0Sigma() const {
+	return pV0Sigma;
+}
+
+double ArgumentParser::GetBmaxMu() const {
+	return pBmaxMu;
+}
+
+double ArgumentParser::GetBmaxSigma() const {
+	return pBmaxSigma;
+}
+
+double ArgumentParser::GetBminMu() const {
+	return pBminMu;
+}
+
+double ArgumentParser::GetBminSigma() const {
+	return pBminSigma;
+}
+
+double ArgumentParser::GetAtauMu() const {
+	return pAtauMu;
+}
+
+double ArgumentParser::GetAtauSigma() const {
+	return pAtauSigma;
+}
+
+double ArgumentParser::GetAminMu() const {
+	return pAminMu;
+}
+
+double ArgumentParser::GetAminSigma() const {
+	return pAminSigma;
+}
+
+double ArgumentParser::GetNuPed() const {
+	return pNuPed;
+}
+
+double ArgumentParser::GetNuWall() const {
+	return pNuWall;
+}
+
+double ArgumentParser::GetIntPWidthPed() const {
+	return pIntPWidthPed;
+}
+
+double ArgumentParser::GetIntPWidthWall() const {
+	return pIntPWidthWall;
+}
+
+double ArgumentParser::GetMaxFPed() const {
+	return pMaxFPed;
+}
+
+double ArgumentParser::GetMaxFWall() const {
+	return pMaxFWall;
+}
+
+double ArgumentParser::GetDistEffMaxPed() const {
+	return pDistEffMaxPed;
+}
+
+double ArgumentParser::GetDistEffMaxWall() const {
+	return pDistEffMaxWall;
+}
+
+double ArgumentParser::GetTauMu() const {
+	return pTauMu;
+}
+
+double ArgumentParser::GetTauSigma() const {
+	return pTauSigma;
+}
+
+int ArgumentParser::GetLog() const {
+	return pLog;
+}
+
+double ArgumentParser::GetLinkedCellSize() const{
+	return pLinkedCellSize;
+}
+unsigned int ArgumentParser::GetSeed() const {
+	return pSeed;
+}
+
+
+string ArgumentParser::GetPathwayFile() const {
+	return pPathwayfile;
+}
+
+
+string ArgumentParser::GetErrorLogFile() const {
+	return pErrorLogFile;
+}
+
+string ArgumentParser::GetTrafficFile() const {
+	return pTrafficFilename;
+}
+
+string ArgumentParser::GetRoutingFile() const{
+	return pRoutingFilename;
+}
+
+int ArgumentParser::GetMaxOpenMPThreads() const{
+	return pMaxOpenMPThreads;
+}
+const string& ArgumentParser::GetTrajectoriesFile() const {
+	return pTrajectoriesFile;
+}
+
+void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
+	pTrajectoriesFile = trajectoriesFile;
 }

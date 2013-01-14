@@ -37,7 +37,7 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 	int color;
 	double v0 = ped->GetV0Norm();
 	if (v0 == 0) {
-		Log->write("ERROR: IODispatcher::WritePed()\t v0=0");
+		Log->Write("ERROR: IODispatcher::WritePed()\t v0=0");
 		exit(0);
 	}
 	color = (int) (v / v0 * 255);
@@ -82,7 +82,7 @@ const vector<OutputHandler*>& IODispatcher::GetIOHandlers() {
 void IODispatcher::Write(string str) {
 	for (vector<OutputHandler*>::iterator it = pHandlers.begin();
 			it != pHandlers.end(); ++it) {
-		(*it)->write(str);
+		(*it)->Write(str);
 	}
 
 }

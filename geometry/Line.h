@@ -63,7 +63,7 @@ public:
 	const Point& GetCentre(void) const;
 
 	// Ausgabe
-	virtual string Write() const;
+	virtual std::string Write() const;
 
     // Sonstiges
     Point NormalVec() const; // Normalen_Vector zu Line

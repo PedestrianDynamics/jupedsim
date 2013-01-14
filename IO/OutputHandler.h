@@ -31,7 +31,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-using namespace std;
 
 
 #include "../IO/TraVisToClient.h"
@@ -39,23 +38,25 @@ using namespace std;
 
 class OutputHandler {
 public:
-    virtual void write(string str);
+    virtual void Write(std::string str);
+	virtual void Write(const char *string, ...);
     virtual ~OutputHandler(){};
 };
 
 class STDIOHandler : public OutputHandler {
 public:
-    void write(string str);
+    void Write(std::string str);
 };
 
 class FileHandler : public OutputHandler {
 private:
-    ofstream pfp;
+    std::ofstream pfp;
 
 public:
     FileHandler(const char *fn);
     virtual ~FileHandler();
-    void write(string str);
+    void Write(std::string str);
+    void Write(const char *string,...);
 };
 
 class TraVisToHandler : public OutputHandler {
@@ -63,12 +64,12 @@ private:
     TraVisToClient* client;
 
 public:
-    TraVisToHandler(string host, int port);
+    TraVisToHandler(std::string host, int port);
     virtual ~TraVisToHandler();
-    void write(string str);
+    void Write(std::string str);
 
     //Some tags are broken
-    vector<string> brokentags;
+    std::vector<std::string> brokentags;
 };
 
 

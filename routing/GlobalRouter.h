@@ -40,10 +40,10 @@ class OutputHandler;
 //log output
 extern OutputHandler* Log;
 
-#include "Routing.h"
+#include "Router.h"
 
 
-class GlobalRouter: public Routing {
+class GlobalRouter: public Router {
 
 public:
 	//GlobalRouter(Building* building);
@@ -74,12 +74,6 @@ protected:
 	//http://alienryderflex.com/intersect/
 
 	bool CanSeeEachOther(Crossing* c1, Crossing* c2);
-	/**
-	 * find if this two exits are connectable
-	 * what does connectable means?
-	 * this is very special to the tribune of the arena
-	 */
-	bool Connectable(SubRoom* sub, int from, int to);
 
 	/**
 	 * @obsolete

@@ -33,7 +33,7 @@
 
 #include "GlobalRouter.h"
 #include "AccessPoint.h"
-#include "Routing.h"
+#include "Router.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
 

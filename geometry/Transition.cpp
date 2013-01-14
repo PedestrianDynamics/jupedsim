@@ -82,7 +82,7 @@ Room* Transition::GetOtherRoom(int roomID) const {
 	} else {
 		char msg[CLENGTH];
 		sprintf(msg,"ERROR: \tTransition::GetOtherRoom() wrong roomID [%d]",roomID);
-		Log->write(msg);
+		Log->Write(msg);
 		exit(0);
 	}
 
@@ -149,7 +149,7 @@ SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const {
 		char tmp[CLENGTH];
 		sprintf(tmp,"ERROR: \tTransition::GetOtherSubRoom No exit found "
 				"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetUniqueID(),roomID,subroomID);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(0);
 	}
 }
@@ -178,7 +178,7 @@ void Transition::WriteToErrorLog() const {
 		sprintf(tmp, " <->\tAusgang\n");
 	}
 	s.append(tmp);
-	Log->write(s);
+	Log->Write(s);
 }
 
 // TraVisTo Ausgabe

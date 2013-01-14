@@ -139,10 +139,7 @@ void LCGrid::ClearGrid(){
 		}
 	}
 
-	//int len=sizeof ( pList ) / sizeof ( *pList );
-	//cout<<" size: "<<len<<endl;
 	for(int i=0;i<pNpeds;i++) pList[i]=LIST_EMPTY;
-
 }
 
 void LCGrid::GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighbourhood, int* nSize){
@@ -170,7 +167,6 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighbourhood,
 				double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
 				if((dist<pCellSize*pCellSize) && (p!=myID)){
 					neighbourhood[(*nSize)++]=pLocalPedsCopy[p];
-					if(*nSize>299) return;
 				}
 				// next ped
 				p = pList[p];
@@ -209,7 +205,7 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
 		}
 	}
 }
-void LCGrid::getNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhood){
+void LCGrid::GetNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhood){
 	double xPed=pt.GetX();
 	double yPed=pt.GetY();
 
@@ -248,10 +244,6 @@ void LCGrid::Dump(){
 			if(ped==LIST_EMPTY) continue;
 
 			printf("Cell[%d][%d] = { ",l,k);
-			//getc(stdin);
-			//while (ped != EMPTY) {
-			//printf("%d, ",ped+1);
-
 			// all neighbor cells
 			for (int i = l - 1; i <= l + 1; ++i) {
 				for (int j = k - 1; j <= k + 1; ++j) {
@@ -264,9 +256,6 @@ void LCGrid::Dump(){
 						p = pList[p];
 					}
 				}
-				//}
-				// next ped
-				//ped = list[ped];
 			}
 			printf("}\n");
 		}
@@ -274,7 +263,6 @@ void LCGrid::Dump(){
 }
 
 void LCGrid::dumpCellsOnly(){
-
 	for(int l =1;l<pGridSizeY-1;l++){
 		for(int k=1;k<pGridSizeX-1;k++){
 

@@ -13,9 +13,17 @@
 		<dist room_caption="hall" number="3"/>
 	</distribution>
 
+	<routers>
+		<router id="1" method="local_shortest"/>
+		<router id="2" method="global_shortest"/>
+		<!--<router id="3" method="quickest"/>-->
+		<router id="4" method="dummy"/>
+	</routers>
+	
 	<groups> <!-- Leute, die sich auskennen -->
 		<group id ="1">
 			<members>1,2,3</members>
+			<router>1</router>
 			<goal>1</goal>
 		</group>
 	</groups>

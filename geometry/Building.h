@@ -37,7 +37,7 @@
 
 #include "Room.h"
 #include "../general/Macros.h"
-#include "../routing/Routing.h"
+#include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Transition.h"
 #include "../mpi/LCGrid.h"
@@ -48,29 +48,28 @@
 class Building {
 private:
     string pCaption; // Name des Projekts
-    Routing* pRouting;
+    RoutingEngine* pRoutingEngine;
     vector<Room*> pRooms; // Liste der Räume
     vector<Pedestrian*> pAllPedestians;
     LCGrid* pLinkedCellGrid;
-    // this is only for the Hermes Project
-    //bool pSubroomConnectionMap[16][130][16][130];
 
-    // pedestrians pathway
+    /// pedestrians pathway
     bool pSavePathway;
     ofstream PpathWayStream;
 
-    // wird nur innerhalb von Building benötigt
-    void StringExplode(string str, string separator, vector<string>* results);
+	map<int, Crossing*> _crossings;
+	map<int, Transition*> _transitions;
+	map<int, Hline*> _hLines;
+
 
 public:
     // Konstruktor
     Building();
-    Building(const Building& orig);
     virtual ~Building();
 
     // Setter -Funktionen
     void SetCaption(string s);
-    void SetRouting(Routing* r);
+    void SetRoutingEngine(RoutingEngine* r);
     void SetAllRooms(const vector<Room*>& rooms);
     void SetRoom(Room* room, int index);
     /// delete the ped from the ped vector
@@ -81,15 +80,21 @@ public:
 
     // Getter - Funktionen
     string GetCaption() const;
-    Routing* GetRouting() const;
+    RoutingEngine* GetRoutingEngine() const;
     const vector<Room*>& GetAllRooms() const;
     const vector<Pedestrian*>& GetAllPedestrians() const;
     Pedestrian* GetPedestrian( int pedID) const;
     int GetAnzRooms() const;
+    int GetGoalsCount()const;
     Room* GetRoom(int index) const; // Gibt Raum der Nummer "index" zurueck
     Room* GetRoom(string caption)const;
     Transition* GetTransition(string caption) const;
+    Transition* GetTransition(int id) ;
     Crossing* GetGoal(string caption) const;
+
+    //FIXME: obsolete shold get rid of this method
+    Crossing* GetGoal(int id);
+
     int GetAnzPedestrians() const;
     LCGrid* GetGrid() const;
 
@@ -105,6 +110,15 @@ public:
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
     void  DumpSubRoomInRoom(int roomID, int subID);
 
+	const map<int, Crossing*>& GetAllCrossings() const;
+	const map<int, Transition*>& GetAllTransitions() const;
+	const map<int, Hline*>& GetAllHlines() const;
+
+	void AddCrossing(Crossing* line);
+	void AddTransition(Transition* line);
+	void AddHline(Hline* line);
+
+
 
     // Ein-Ausgabe
     void LoadBuilding(string filename); // Laedt Geometrie-Datei
@@ -117,6 +131,10 @@ public:
 
 	// saving computation
 	//bool IsDirectlyConnected(int room1, int subroom1,int room2, int subroom2);
+
+private:
+	// wird nur innerhalb von Building benötigt
+	void StringExplode(string str, string separator, vector<string>* results);
 
 };
 

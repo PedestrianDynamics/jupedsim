@@ -8,7 +8,7 @@
 #ifndef GRAPHROUTER_H_
 #define GRAPHROUTER_H_
 
-#include "Routing.h"
+#include "Router.h"
 #include "graph/RoutingGraphStorage.h"
 #include "../geometry/Building.h"
 #include "../geometry/Crossing.h"
@@ -16,7 +16,7 @@
 
 
 
-class GraphRouter: public Routing {
+class GraphRouter: public Router {
 public:
     GraphRouter();
     virtual ~GraphRouter();

@@ -86,7 +86,7 @@ void Hline::WriteToErrorLog() const {
     sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", pRoom->GetRoomID(),
             pSubRoom->GetSubRoomID());
     s.append(tmp);
-    Log->write(s);
+    Log->Write(s);
 }
 
 // TraVisTo Ausgabe

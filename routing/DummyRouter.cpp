@@ -8,7 +8,7 @@
 #include "DummyRouter.h"
 
 DummyRouter::DummyRouter() {
-
+	_building=NULL;
 }
 
 DummyRouter::~DummyRouter() {
@@ -17,12 +17,13 @@ DummyRouter::~DummyRouter() {
 
 int DummyRouter::FindExit(Pedestrian* p) {
 	p->SetExitIndex(0);
-	p->SetExitLine(GetCrossing(0));
+	//p->SetExitLine(_building->getGetCrossing(0));
 	return 1;
 }
 
 void DummyRouter::Init(Building* b) {
-	Log->write("ERROR: Do not use this router !!");
+	_building=b;
+	Log->Write("ERROR: Do not use this router !!");
 
 	//dump all navigation lines
 

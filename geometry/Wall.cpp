@@ -26,6 +26,8 @@
 
 #include "Wall.h"
 
+using namespace std;
+
 /************************************************************
  Wall
  ************************************************************/
@@ -40,15 +42,11 @@ Wall::Wall(const Point& p1, const Point& p2) : Line(p1, p2) {
 Wall::Wall(const Wall& orig) : Line(orig) {
 }
 
-//Wall::~Wall() {
-//
-//}
-
 void Wall::WriteToErrorLog() const {
     char tmp[CLENGTH];
     sprintf(tmp, "\t\tWALL: (%f, %f) -- (%f, %f)\n", GetPoint1().GetX(),
             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
-    Log->write(tmp);
+    Log->Write(tmp);
 }
 
 string Wall::Write() const {

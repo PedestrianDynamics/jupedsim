@@ -59,9 +59,6 @@
 // Linked cells
 #define LIST_EMPTY 	-1
 
-//rooms states
-//#define ROOM_CLEAN 0
-//#define ROOM_SMOKED 1
 
 enum RoomState {
 	ROOM_CLEAN=0,
@@ -78,10 +75,11 @@ enum FileFormat {
 enum RoutingStrategy {
 	ROUTING_LOCAL_SHORTEST,
 	ROUTING_GLOBAL_SHORTEST,
-	ROUTING_QUCIKEST,
+	ROUTING_QUICKEST,
 	ROUTING_DYNAMIC,
 	ROUTING_FROM_FILE,
-	ROUTING_DUMMY
+	ROUTING_DUMMY,
+	ROUTING_UNDEFINED =-1
 };
 
 #endif	/* _MACROS_H */

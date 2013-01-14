@@ -44,7 +44,7 @@ public:
 
     // Ausgabe
     void WriteToErrorLog() const; // zur Kontrolle nach Log
-    virtual string Write() const;
+    virtual std::string Write() const;
 };
 
 

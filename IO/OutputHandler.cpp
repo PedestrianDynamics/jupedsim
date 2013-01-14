@@ -27,12 +27,29 @@
 
 #include "OutputHandler.h"
 
-void OutputHandler::write(string str) {
+#include <stdio.h>
+#include <stdarg.h>
+
+using namespace std;
+
+
+void OutputHandler::Write(string str) {
+	if (this != NULL)
+		cout << str << endl;
 }
 
-void STDIOHandler::write(string str) {
-    if (this != NULL)
-        cout << str << endl;
+void OutputHandler::Write(const char* string,...) {
+	char msg[CLENGTH];
+	va_list ap;
+	va_start (ap, string);
+	vsprintf (msg,string ,ap);
+	va_end (ap);
+	cout<<msg<<endl;
+}
+
+void STDIOHandler::Write(string str) {
+	if (this != NULL)
+		cout << str << endl;
 }
 
 FileHandler::FileHandler(const char *fn) {
@@ -49,11 +66,21 @@ FileHandler::~FileHandler() {
     pfp.close();
 }
 
-void FileHandler::write(string str) {
+void FileHandler::Write(string str) {
     if (this != NULL) {
         pfp << str << endl;
         pfp.flush();
     }
+}
+
+void FileHandler::Write(const char* string,...) {
+	char msg[CLENGTH];
+	va_list ap;
+	va_start (ap, string);
+	vsprintf (msg,string ,ap);
+	va_end (ap);
+	pfp<<msg<<endl;
+	pfp.flush();
 }
 
 TraVisToHandler::TraVisToHandler(string host, int port) {
@@ -67,7 +94,7 @@ TraVisToHandler::~TraVisToHandler(){
 	delete client;
 }
 
-void TraVisToHandler::write(string str) {
+void TraVisToHandler::Write(string str) {
 
     vector<string>::iterator str_it;
 
@@ -80,3 +107,8 @@ void TraVisToHandler::write(string str) {
     }
     client->sendData(str.c_str());
 }
+
+
+
+
+

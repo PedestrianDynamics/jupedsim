@@ -244,7 +244,7 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
 	if (result != result || result < 0) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tEllipse::Distance2d(): result=%f\n", result);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(0);
 	}
 	return (result);
@@ -873,7 +873,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 	if (d < 0 || d != d) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() d=%f\n", d);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(0);
 	}
 	//todo: runtime normsquare?
@@ -882,7 +882,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 		sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() m=0\n"
 			"xc1: %f xc2: %f yc1: %f yc2: %f\n", C1.GetX(), C2.GetX(),
 				C1.GetY(), C2.GetY());
-		Log->write(tmp);
+		Log->Write(tmp);
 		//FIXME:
 		//cout << "press a key: " << endl;
 		//getc(stdin);

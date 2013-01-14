@@ -107,7 +107,7 @@ void SubRoom::SetWall(const Wall& wall, int index) {
 	if ((index >= 0) && (index < GetAnzWalls())) {
 		pWalls[index] = wall;
 	} else {
-		Log->write("ERROR: Wrong Index in SubRoom::SetWall()");
+		Log->Write("ERROR: Wrong Index in SubRoom::SetWall()");
 		exit(0);
 	}
 }
@@ -124,7 +124,7 @@ void SubRoom::SetPedestrian(Pedestrian* ped, int index) {
 	if ((index >= 0) && (index < GetAnzPedestrians())) {
 		pPeds[index] = ped;
 	} else {
-		Log->write("ERROR: Wrong Index in SubRoom::SetPedestrian()");
+		Log->Write("ERROR: Wrong Index in SubRoom::SetPedestrian()");
 		exit(0);
 	}
 }
@@ -168,7 +168,7 @@ const Wall SubRoom::GetWall(int index) const {
 	if ((index >= 0) && (index < GetAnzWalls()))
 		return pWalls[index];
 	else {
-		Log->write("ERROR: Wrong 'index' in SubRoom::GetWall()");
+		Log->Write("ERROR: Wrong 'index' in SubRoom::GetWall()");
 		exit(0);
 	}
 
@@ -195,7 +195,7 @@ Pedestrian* SubRoom::GetPedestrian(int index) const {
 	if ((index >= 0) && (index < (int) GetAnzPedestrians()))
 		return pPeds[index];
 	else {
-		Log->write("ERROR: Wrong 'index' in SubRoom::GetPedestrian()");
+		Log->Write("ERROR: Wrong 'index' in SubRoom::GetPedestrian()");
 		exit(0);
 	}
 }
@@ -219,7 +219,7 @@ void SubRoom::DeleteWall(int index) {
 	if ((index >= 0) && (index < (int) pWalls.size()))
 		pWalls.erase(pWalls.begin() + index);
 	else {
-		Log->write("ERROR: Wrong Index in SubRoom::DeleteWall()");
+		Log->Write("ERROR: Wrong Index in SubRoom::DeleteWall()");
 		exit(0);
 	}
 }
@@ -237,7 +237,7 @@ void SubRoom::DeletePedestrian(int index) {
 		pPeds.erase(pPeds.begin() + index);
 
 	} else {
-		Log->write("ERROR: Wrong Index in SubRoom::DeletePedestrian()");
+		Log->Write("ERROR: Wrong Index in SubRoom::DeletePedestrian()");
 		exit(0);
 	}
 }
@@ -288,12 +288,12 @@ const Hline* SubRoom::GetHline(int i) const {
 void SubRoom::RemoveGoalID(int ID){
 	for (unsigned int i=0;i<pGoalIDs.size();i++){
 		if(pGoalIDs[i]==ID){
-			Log->write("Removing goal");
+			Log->Write("Removing goal");
 			pGoalIDs.erase(pGoalIDs.begin()+i);
 			return;
 		}
 	}
-	Log->write("There is no goal with that id to remove");
+	Log->Write("There is no goal with that id to remove");
 }
 
 // berechnet die Fläche eines beliebigen Polygons und setzt die Variable pArea entsprechend
@@ -553,7 +553,7 @@ string NormalSubRoom::WritePolyLine() const {
 }
 
 void NormalSubRoom::WriteToErrorLog() const {
-	Log->write("\t\tNormal SubRoom:\n");
+	Log->Write("\t\tNormal SubRoom:\n");
 	for (int i = 0; i < GetAnzWalls(); i++) {
 		Wall w = GetWall(i);
 		w.WriteToErrorLog();
@@ -598,9 +598,9 @@ void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals) {
 		sprintf(tmp, "ERROR: \tNormalSubRoom::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
 				"\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), tmpPoly[0].GetX(), tmpPoly[0].GetY(), point.GetX(),
 				point.GetY());
-		Log->write(tmp);
+		Log->Write(tmp);
 		sprintf(tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
 	pPoly = tmpPoly;
@@ -751,7 +751,7 @@ string Stair::WritePolyLine() const {
 	return s;
 }
 void Stair::WriteToErrorLog() const {
-	Log->write("\t\tStair:\n");
+	Log->Write("\t\tStair:\n");
 	for (int i = 0; i < GetAnzWalls(); i++) {
 		Wall w = GetWall(i);
 		w.WriteToErrorLog();
@@ -834,7 +834,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 		y2 = aktPoint->GetY();
 		sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
 				"\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), x1, y1, x2, y2);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
 
@@ -842,7 +842,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): Stair %d Room %d ist kein Viereck!!!\n"
 				"Anzahl Ecken: %d\n", GetSubRoomID(), GetRoomID(), orgPoly.size());
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
 	vector<Point> neuPoly = (orgPoly);

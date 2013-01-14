@@ -39,7 +39,7 @@ class Crossing : public NavLine {
 private:
     int pID; // eindeutig zwischen ALLEN Crossings und Transitions
     Room* pRoom1; // benötigt nur einen Raum in dem beide SubRooms enthalten sind
-    string pCaption;
+    std::string pCaption;
     SubRoom* pSubRoom1; // SubRoom1
     SubRoom* pSubRoom2; // SubRoom2
 
@@ -50,12 +50,12 @@ public:
     // Setter -Funktionen
     void SetIndex(int ID);
     void SetRoom1(Room* r);
-    void SetCaption(string s);
+    void SetCaption(std::string s);
     void SetSubRoom1(SubRoom* r1);
     void SetSubRoom2(SubRoom* r2);
     // Getter - Funktionen
     int GetIndex() const;
-    string GetCaption() const;
+    std::string GetCaption() const;
     Room* GetRoom1() const;
     SubRoom* GetSubRoom(int ID) const;
     SubRoom* GetSubRoom1() const;
@@ -73,7 +73,7 @@ public:
 
     // Ausgabe
     virtual void WriteToErrorLog() const;
-    virtual string WriteElement() const; // TraVisTo Ausgabe
+    virtual std::string WriteElement() const; // TraVisTo Ausgabe
 };
 
 #endif	/* _CROSSING_H */

@@ -34,7 +34,7 @@ using namespace std;
 
 #include "../geometry/Room.h"
 #include "../math/Distribution.h"
-#include "../routing/Routing.h"
+#include "../routing/Router.h"
 #include "../geometry/Building.h"
 
 
@@ -117,7 +117,7 @@ public:
 	vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
 			SubRoom* r, double bufx, double bufy, double dx) const;
 	vector<Point> PossiblePositions(SubRoom* r) const;
-	void DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid, Routing * routing)const;
+	void DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid)const;
 	string writeParameter() const;
 
 	void InitDistributor(string start_file);

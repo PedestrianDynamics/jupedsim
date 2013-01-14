@@ -54,6 +54,7 @@ public:
     ForceModel();
     virtual ~ForceModel();
     // virtuelle Funktionen (werden in den abgeleiteten Klassen implementiert)
+    //FIXME: remove
     virtual void CalculateForce(double time, vector< Point >& result_acc, Building* building, int roomID, int SubRoomID) const = 0;
     virtual void CalculateForceLC(double t, double tp, Building* building) const = 0;
     virtual string writeParameter() const = 0;

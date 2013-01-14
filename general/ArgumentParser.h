@@ -34,6 +34,7 @@
 #include "Macros.h"
 using std::string;
 using std::vector;
+using std::pair;
 
 class OutputHandler;
 extern OutputHandler* Log;
@@ -50,8 +51,7 @@ private:
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
 	int pExitStrategy; // Strategie zur Richtungswahl (v0)
-	//int pRandomize; // Verteilung inerhalb des Raums
-	int pRouter; // Routing-Strategie
+	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
 	bool pLinkedCells; // use of linked-cells neighbourhood list
 	double pLinkedCellSize; // cell size of the linkedcell (default to 2.2m)
 	double pV0Mu; // mu für die Normalverteilung von v0
@@ -102,7 +102,7 @@ public:
 	int GetExitStrategy() const;
 	int GetRandomize() const;
 	bool IsOnline() const;
-	int GetRoutingStrategy() const;
+	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	bool GetLinkedCells() const;
 	double GetLinkedCellSize() const;
 	int GetMaxOpenMPThreads() const;

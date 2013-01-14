@@ -50,6 +50,7 @@ Pedestrian::Pedestrian() {
 	pTurninAngle=0.0;
 	pEllipse = Ellipse();
 	pNavLine = NULL;
+	_router=NULL;
 	pReroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
 	pTimeBeforeRerouting=0.0;
 	pReroutingEnabled=false;
@@ -75,29 +76,30 @@ Pedestrian::Pedestrian() {
 
 }
 
-Pedestrian::Pedestrian(const Pedestrian& orig) {
-	pRoomID = orig.GetRoomID();
-	pSubRoomID = orig.GetSubRoomID();
-	oldRoomID = orig.GetRoomID();
-	oldSubRoomID = orig.GetSubRoomID();
-	pExitIndex = orig.GetExitIndex();
-	pPedIndex = orig.GetPedIndex();
-	pMass = orig.GetMass();
-	pTau = orig.GetTau();
-	pEllipse = orig.GetEllipse();
-	pNavLine = orig.GetExitLine();
-	pDesiredFinalDestination = orig.GetFinalDestination();
-	pTimeInJam=orig.GetTimeInJam();
-	pReroutingThreshold=0;
-	pPatienceTime=10.0;
-	pDt=0.01;
-	pMentalMap=std::map<int, int>();
-	pDestHistory=std::vector<int>();
-	pLastPosition=Point(0,0);
-	clockTicksTillStart = orig.clockTicksTillStart;
-	knownDoors = orig.knownDoors;
-	
-}
+//Pedestrian::Pedestrian(const Pedestrian& orig) {
+//	pRoomID = orig.GetRoomID();
+//	pSubRoomID = orig.GetSubRoomID();
+//	oldRoomID = orig.GetRoomID();
+//	oldSubRoomID = orig.GetSubRoomID();
+//	pExitIndex = orig.GetExitIndex();
+//	pPedIndex = orig.GetPedIndex();
+//	pMass = orig.GetMass();
+//	pTau = orig.GetTau();
+//	pEllipse = orig.GetEllipse();
+//	pNavLine = orig.GetExitLine();
+//	pDesiredFinalDestination = orig.GetFinalDestination();
+//	pTimeInJam=orig.GetTimeInJam();
+//	pReroutingThreshold=0;
+//	pPatienceTime=10.0;
+//	pDt=0.01;
+//	_router=orig._router;
+//	pMentalMap=std::map<int, int>();
+//	pDestHistory=std::vector<int>();
+//	pLastPosition=Point(0,0);
+//	clockTicksTillStart = orig.clockTicksTillStart;
+//	knownDoors = orig.knownDoors;
+//
+//}
 
 Pedestrian::~Pedestrian() {
 }
@@ -621,6 +623,18 @@ double Pedestrian::GetDistanceSinceLastRecord(){
 
 double Pedestrian::GetGlobalTime(){
 	return pGlobalTime;
+}
+
+void Pedestrian::SetRouter(Router* router) {
+	_router=router;
+}
+
+Router* Pedestrian::GetRouter() const {
+	return _router;
+}
+
+int Pedestrian::FindRoute() {
+	return _router->FindExit(this);
 }
 
 void Pedestrian::SetGlobalTime(double time){

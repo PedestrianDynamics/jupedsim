@@ -124,7 +124,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 
 void GraphRouter::Init(Building* b) 
 {
-    Log->write("ERROR: Router is not ready to use yet");
+    Log->Write("ERROR: Router is not ready to use yet");
     building = b;
     g.init(b);
   

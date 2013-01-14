@@ -7,7 +7,7 @@ LDFLAGS= -fopenmp
 LDEBUG= -g3
 LREALEASE= -O3
 VERSION=RELEASE
-ENABLE_CGAL=TRUE1
+ENABLE_CGAL=TRUE
 
 ifeq "$(ENABLE_CGAL)" "TRUE"
 LIBS= -lCGAL -lgmp
@@ -28,12 +28,12 @@ geometry/Point.cpp geometry/Room.cpp geometry/Building.cpp geometry/Crossing.cpp
 geometry/Hline.cpp geometry/Obstacle.cpp IO/IODispatcher.cpp IO/TraVisToClient.cpp\
 IO/OutputHandler.cpp geometry/NavLine.cpp\
 math/Distribution.cpp math/Mathematics.cpp math/ODESolver.cpp math/ForceModel.cpp\
-routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Routing.cpp routing/DummyRouter.cpp\
+routing/AccessPoint.cpp routing/GlobalRouter.cpp routing/Router.cpp routing/DummyRouter.cpp\
 routing/DirectionStrategy.cpp pedestrian/PedDistributor.cpp pedestrian/Pedestrian.cpp\
 pedestrian/Ellipse.cpp mpi/LCGrid.cpp \
 routing/QuickestPathRouter.cpp routing/NavMesh.cpp\
 routing/GraphRouter.cpp  routing/graph/RoutingGraph.cpp routing/graph/RoutingGraphStorage.cpp\
-routing/graph/NavLineState.cpp \
+routing/graph/NavLineState.cpp routing/RoutingEngine.cpp\
 routing/DTriangulation.cpp \
 MCD/AlgorithmBase.cpp  MCD/AlgorithmMCD.cpp  MCD/AlgorithmMWT.cpp  MCD/AlgorithmVP.cpp \
 MCD/GeomHomog.cpp  MCD/GeomPairDeque.cpp  MCD/GeomPoly.cpp  MCD/GeomVector.cpp \

@@ -24,8 +24,26 @@
  * @section DESCRIPTION
  *
  *
- *
  */
+
+/**
+* @mainpage
+*
+* \date 15.1.2013
+*
+* JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
+*
+* @image html logo.png " "
+*
+* Some useful links:
+*
+* 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
+* 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
+* 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
+* 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+* 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+*
+*/
 
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
@@ -51,9 +69,9 @@ int main(int argc, char **argv) {
 
 	// Simulation
 	time(&starttime);
-	Log->write("INFO: \tStart runSimulation()\n");
+	Log->Write("INFO: \tStart runSimulation()\n");
 	int evacTime = sim.RunSimulation();
-	Log->write("INFO: \tEnd runSimulation()\n");
+	Log->Write("INFO: \tEnd runSimulation()\n");
 	time(&endtime);
 
 	//some output
@@ -61,13 +79,13 @@ int main(int argc, char **argv) {
 	char tmp[CLENGTH];
 	sprintf(tmp, "\nPedestrians [%d] threads [%d]", sim.GetNPeds(),
 			args->GetMaxOpenMPThreads());
-	Log->write(tmp);
+	Log->Write(tmp);
 	sprintf(tmp, "\nExec Time [s]     : %.2f", execTime);
-	Log->write(tmp);
+	Log->Write(tmp);
 	sprintf(tmp, "Evac Time [s]     : %d", evacTime);
-	Log->write(tmp);
+	Log->Write(tmp);
 	sprintf(tmp, "Real Time Factor  : %.2f X\n", evacTime / execTime);
-	Log->write(tmp);
+	Log->Write(tmp);
 
 	//do the last cleaning
 	delete args;

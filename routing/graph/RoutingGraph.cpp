@@ -110,7 +110,7 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
 		sprintf(tmp,
 				"ERROR: \t Pedestrian  [%d] can't find a exit.at X=%f Y = %f Removed Pedestrian.",
 				p->GetPedIndex(), p->GetPos().GetX(), p->GetPos().GetY());
-		Log->write(tmp);
+		Log->Write(tmp);
 		return return_dist;
 	}
 

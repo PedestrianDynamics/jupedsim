@@ -8,9 +8,11 @@
 #ifndef DUMMYROUTER_H_
 #define DUMMYROUTER_H_
 
-#include "Routing.h"
+#include "Router.h"
 
-class DummyRouter: public Routing {
+class DummyRouter: public Router {
+private:
+	Building* _building;
 public:
 	DummyRouter();
 	virtual ~DummyRouter();

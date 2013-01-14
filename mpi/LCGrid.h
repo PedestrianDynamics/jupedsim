@@ -1,7 +1,7 @@
 /**
  * @file LCGrid.h
  * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
- * @version not versioned
+ * @version 0.4
  * Copyright (C) <2009-2010>
  *
  * @section LICENSE
@@ -32,7 +32,6 @@
  *
  *   The class is static as only one instance is needed per simulation round.
  *   This solution is fine for parallelisation as well, at least for OpenMP.
- *   TODO: investigate compliance with MPI
  *
  *
  *  Created on: Nov 16, 2010
@@ -68,58 +67,79 @@ private:
 	//total number of pedestrians
 	int pNpeds;
 
-	// only pedestrians within that radius will be returned
-	//double pMaxEffectivDist;
 
 public:
 
 
-	LCGrid(double bounds[4], double cellsize, int nPeds);
+	/**
+	 * Constructor
+	 * @param boundaries the boundaries of the grid [xmin xmax ymin ymax]
+	 * @param cellsize the cell size
+	 * @param nPeds the number of pedestrians
+	 */
+	LCGrid(double boundaries[4], double cellsize, int nPeds);
 
+	/**
+	 * Desctructor
+	 */
 	~LCGrid();
 
 	/**
-	 *update the cells occupation
+	 *Update the cells occupation
 	 */
+
 	void Update(Pedestrian** peds);
+	/**
+	 *Update the cells occupation
+	 */
 	void Update(const vector<Pedestrian*>& peds);
 
-
 	/**
-	 * update this special pedestrian on the grid
+	 * Update this special pedestrian on the grid
 	 */
 	void Update(Pedestrian* ped);
 
 	/**
-	 * make a shallow copy of the initial pedestrians
+	 * Make a shallow copy of the initial pedestrians distribution
 	 */
 	void ShallowCopy(const vector<Pedestrian*>& peds);
 
 	/**
-	 * clear the grid.
+	 * Clear the grid.
 	 */
 	void ClearGrid();
 
 	/**
-	 * Dump the grid, output cells and corresponding pedestrians informations
+	 * Dump the content of the cells, output cells and corresponding pedestrians information
 	 */
 	void Dump();
 
 	/**
-	 * Dump the cells only
+	 * Dump the cells positions
 	 */
 	void dumpCellsOnly();
 
 	/**
-	 * return a vector containing the neighbourhood of the pedestrians ped
-	 * TODO: more than  10 neighbours is really too much...
+	 * Return a vector containing the neighbourhood of the pedestrians ped
+	 * @param ped the considered pedestrian
+	 * @param neighborhood an array containing the pedestrians
+	 * @param nSize the number of returned pedestrians
 	 */
+	void GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighborhood, int* nSize);
 
-	void GetNeighbourhood(const Pedestrian* ped, Pedestrian** n, int* nSize);
 
+	/**
+	 * Return the pedestrians in the neighborhood of a specific location
+	 * @param position
+	 * @param neighbourhood
+	 */
+	void GetNeighbourhood(const Point& position, vector<Pedestrian*>& neighbourhood);
 
-	void getNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhood);
-
+	/**
+	 * Returns neighbourhood of the pedestrians ped
+	 * @param ped
+	 * @param neighbourhood
+	 */
 	void GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighbourhood);
 
 };

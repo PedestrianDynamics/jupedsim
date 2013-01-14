@@ -85,7 +85,7 @@ SubRoom* Crossing::GetSubRoom(int ID) const {
     else if (pSubRoom2 != NULL && pSubRoom2->GetSubRoomID() == ID)
         return pSubRoom2;
     else {
-        Log->write("ERROR: \tCrossing::GetSubRoom() wrong ID");
+        Log->Write("ERROR: \tCrossing::GetSubRoom() wrong ID");
         exit(0);
     }
 }
@@ -148,7 +148,7 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
     	 char tmp[CLENGTH];
     	    sprintf(tmp,"ERROR: \tCrossing::GetOtherSubRoom No exit found "
     	    		"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetIndex(),roomID,subroomID);
-        Log->write(tmp);
+        Log->Write(tmp);
         exit(0);
     }
 }
@@ -165,7 +165,7 @@ void Crossing::WriteToErrorLog() const {
     sprintf(tmp, "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n", GetSubRoom1()->GetSubRoomID(),
             GetSubRoom2()->GetSubRoomID());
     s.append(tmp);
-    Log->write(s);
+    Log->Write(s);
 }
 
 // TraVisTo Ausgabe

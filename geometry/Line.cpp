@@ -26,7 +26,10 @@
 
 #include "Line.h"
 
+using namespace std;
+
 int Line::_UID=0;
+
 
 /************************************************************
   Konstruktoren
@@ -123,7 +126,7 @@ Point Line::NormalVec() const {
 		/* Normieren */
 		norm = sqrt(nx * nx + ny * ny);
 		if (fabs(norm) < J_EPS) {
-			Log->write("ERROR: \tLine::NormalVec() norm==0\n");
+			Log->Write("ERROR: \tLine::NormalVec() norm==0\n");
 			exit(0);
 		}
 		nx /= norm;
@@ -213,7 +216,7 @@ bool Line::IsInLine(const Point& p) const {
 	} else if (fabs(ay - by) > J_EPS_DIST) {
 		lambda = (py - ay) / (by - ay);
 	} else {
-		Log->write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
+		Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
 		exit(0);
 	}
 	return (0 <= lambda) && (lambda <= 1);
@@ -361,14 +364,14 @@ bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pe
 	delta=b*b-4*a*c;
 
 	if((x1==x2)&&(y1==y2)){
-		Log->write("isLineCrossingCircle: Your line is a point");
+		Log->Write("isLineCrossingCircle: Your line is a point");
 		return false;
 	}
 	if(delta<0.0){
 		char tmp[CLENGTH];
 		sprintf(tmp,"there is a bug in 'isLineCrossingCircle', delta(%f) can t be <0 at this point.",delta);
-		Log->write(tmp);
-		Log->write("press ENTER");
+		Log->Write(tmp);
+		Log->Write("press ENTER");
 		return false; //fixme
 		//getc(stdin);
 	}

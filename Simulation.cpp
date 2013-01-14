@@ -36,9 +36,6 @@ Simulation::~Simulation() {
 // Setter-Funktionen
  ************************************************/
 
-//int Simulation::SetOnline(bool o) {
-//	return pOnline = o;
-//}
 
 int Simulation::SetNPeds(int i) {
 	return pNPeds = i;
@@ -51,10 +48,6 @@ int Simulation::SetLinkedCells(bool l) {
 /************************************************
 // Getter-Funktionen
  ************************************************/
-
-//bool Simulation::IsOnline() const {
-//	return pOnline;
-//}
 
 bool Simulation::IsLinkedCells() {
 	return pLinkedCells;
@@ -101,7 +94,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			exit(0);
 	}
 
-	Log->write("INFO: \tOptionen an Simulation geben\n");
+	Log->Write("INFO: \tOptionen an Simulation geben\n");
 
 	if(args->GetPort()!=-1){
 		switch(args->GetFileFormat())
@@ -115,19 +108,19 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case FORMAT_XML_BIN:
 		{
-			Log->write("INFO: \tFormat xml-bin not yet supported\n");
+			Log->Write("INFO: \tFormat xml-bin not yet supported\n");
 			exit(0);
 			break;
 		}
 		case FORMAT_PLAIN:
 		{
-			Log->write("INFO: \tFormat plain not yet supported\n");
+			Log->Write("INFO: \tFormat plain not yet supported\n");
 			exit(0);
 			break;
 		}
 		case FORMAT_VTK:
 		{
-			Log->write("INFO: \tFormat vtk not yet supported\n");
+			Log->Write("INFO: \tFormat vtk not yet supported\n");
 			exit(0);
 			break;
 		}
@@ -148,13 +141,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case FORMAT_XML_BIN:
 		{
-			Log->write("INFO: \tFormat xml-bin not yet supported\n");
+			Log->Write("INFO: \tFormat xml-bin not yet supported\n");
 			exit(0);
 			break;
 		}
 		case FORMAT_PLAIN:
 		{
-			Log->write("INFO: \tFormat plain not yet supported\n");
+			Log->Write("INFO: \tFormat plain not yet supported\n");
 			OutputHandler* file = new FileHandler("./Trajektorien.dat");
 			pTrajectories->AddIO(file);
 			exit(0);
@@ -162,7 +155,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case FORMAT_VTK:
 		{
-			Log->write("INFO: \tFormat vtk not yet supported\n");
+			Log->Write("INFO: \tFormat vtk not yet supported\n");
 			exit(0);
 			break;
 		}
@@ -237,43 +230,77 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 
 	// Routing
-	int router = args->GetRoutingStrategy();
-	sprintf(tmp, "\tRouting Strategy: %d\n", router);
-	s.append(tmp);
-	Routing* rout = NULL;
-	switch (router) {
-		case 1:
-			rout = new GlobalRouter();
+	vector< pair<int, RoutingStrategy> >  routers=  args->GetRoutingStrategy();
+	RoutingEngine* routingEngine= new RoutingEngine();
+
+	for (unsigned int r= 0;r<routers.size();r++){
+
+		RoutingStrategy strategy=routers[r].second;
+		int routerID=routers[r].first;
+
+		switch (strategy) {
+		case ROUTING_LOCAL_SHORTEST:
+		{
+			Router* router=new GlobalRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy local shortest added\n");
 			break;
-		case 2:
-			rout = new GlobalRouter();
+		}
+		case ROUTING_GLOBAL_SHORTEST:
+		{
+			Router* router=new GlobalRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy global shortest added\n");
 			break;
-		case 3:
-			rout = new QuickestPathRouter();
+		}
+		case ROUTING_QUICKEST:
+		{
+			Router* router=new QuickestPathRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy quickest path added\n");
 			break;
-		case 4:
-		    rout = new GraphRouter();
+		}
+		case ROUTING_DYNAMIC:
+		{
+			Router* router=new GraphRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy graph router added\n");
 			break;
-		case 5:
-			cout<<"router not available"<<endl;
-			exit(EXIT_FAILURE);
+		}
+		case ROUTING_DUMMY:
+		{
+			Router* router=new DummyRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy dummy router added\n");
 			break;
-		case 6:
-			rout = new DummyRouter();
-			break;
+		}
+		case ROUTING_UNDEFINED:
 		default:
 			cout<<"router not available"<<endl;
 			exit(EXIT_FAILURE);
 			break;
+		}
 	}
+	s.append("\n");
+
 
 	// IMPORTANT: do not change the order in the following..
 	pBuilding = new Building();
-	pBuilding->SetRouting(rout);
+	pBuilding->SetRoutingEngine(routingEngine);
 
 	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
 	s.append(tmp);
-	Log->write("INFO: \t" + s);
+	Log->Write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
 	pBuilding->AddSurroundingRoom();
 	pBuilding->InitGeometry(); // create the polygones
@@ -302,9 +329,10 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	pNPeds=pDistribution->Distribute(pBuilding);
 
 	// initialise the routing engine before doing any other things
-	rout->Init(pBuilding);
+	routingEngine->Init(pBuilding);
 	pBuilding->InitPhiAllPeds(pDt);
 
+	//TODO: set the cellsize to geometry bound in the case no linked cells are wished
 	//using linkedcells
 	if (pLinkedCells){
 		pBuilding->InitGrid(args->GetLinkedCellSize());

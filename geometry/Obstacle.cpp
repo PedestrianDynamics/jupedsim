@@ -126,7 +126,7 @@ bool Obstacle::Contains(const Point& ped) const {
 	if(pClosed==0.0) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tObstacle::Contains(): the obstacle [%d] is open!!!\n", pID);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
 
@@ -179,7 +179,7 @@ void Obstacle::ConvertLineToPoly() {
 	if(pClosed==0.0){
 		char tmp[CLENGTH];
 		sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", pID);
-		Log->write(tmp);
+		Log->Write(tmp);
 		return;
 	}
 	vector<Line*> copy;
@@ -215,7 +215,7 @@ void Obstacle::ConvertLineToPoly() {
 	if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", pID);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(0);
 	}
 	pPoly = tmpPoly;

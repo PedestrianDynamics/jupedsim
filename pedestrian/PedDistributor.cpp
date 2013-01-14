@@ -166,7 +166,7 @@ void PedDistributor::InitDistributor(string filename){
 	pInitialisationFile=filename;
 
 	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"persons");
-	Log->write("INFO: \tLoading and parsing the persons file");
+	Log->Write("INFO: \tLoading and parsing the persons file");
 
 	//get the distribution node
 	XMLNode xDist=xMainNode.getChildNode("distribution");
@@ -193,12 +193,13 @@ void PedDistributor::InitDistributor(string filename){
 			start_dis.push_back(dis);
 		}
 	}
-	Log->write("INFO: \t done with loading and parsing the persons file");
+
+	Log->Write("INFO: \t done with loading and parsing the persons file");
 }
 
 int PedDistributor::Distribute(Building* building) const {
 
-	Log->write("INFO: \tInit Distribute");
+	Log->Write("INFO: \tInit Distribute");
 
 	int nPeds = 0;
 	char tmp[CLENGTH];
@@ -216,7 +217,8 @@ int PedDistributor::Distribute(Building* building) const {
 		allFreePos.push_back(allFreePosRoom);
 	}
 
-	// first do the distribution in the subrooms (if any)
+	// first perform the distribution according to the  subrooms (if any)
+
 	int pid = 1; // the pedID is being increased throughout...
 	for (int i = 0; i < (int) start_dis_sub.size(); i++) {
 
@@ -229,7 +231,7 @@ int PedDistributor::Distribute(Building* building) const {
 		int subroomID = start_dis_sub[i].GetSubroomID();
 		int N = start_dis_sub[i].GetAnz();
 		if (N <= 0) {
-			Log->write("ERROR: \t negative  (or null ) number of pedestrians!");
+			Log->Write("ERROR: \t negative  (or null ) number of pedestrians!");
 			exit(0);
 		}
 
@@ -238,19 +240,19 @@ int PedDistributor::Distribute(Building* building) const {
 		if (max_pos < N) {
 			sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
 					N, roomID, allpos.size());
-			Log->write(tmp);
+			Log->Write(tmp);
 			exit(0);
 		} else {
 			sprintf(tmp, "INFO: \tVerteilung von %d Fußgängern in [%d/%d]! Maximale Anzahl: %d", N, roomID, subroomID, max_pos);
-			Log->write(tmp);
+			Log->Write(tmp);
 		}
 		// Befüllen
 		SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
-		DistributeInSubRoom(sr, N, allpos, roomID, &pid, building->GetRouting());
+		DistributeInSubRoom(sr, N, allpos, roomID, &pid);
 		nPeds += N;
 	}
 
-	// then do the distribution in the room
+	// then continue the distribution according to the rooms
 
 	for (int i = 0; i < (int) start_dis.size(); i++) {
 		string room_caption = start_dis[i].GetRoomCaption();
@@ -258,7 +260,7 @@ int PedDistributor::Distribute(Building* building) const {
 		if(!r) continue;
 		int N = start_dis[i].GetAnz();
 		if (N <= 0) {
-			Log->write("ERROR: \t negative number of pedestrians! Ignoring");
+			Log->Write("ERROR: \t negative number of pedestrians! Ignoring");
 			continue;
 		}
 
@@ -282,7 +284,7 @@ int PedDistributor::Distribute(Building* building) const {
 		if (max_pos < N) {
 			sprintf(tmp, "ERROR: \t Distribution of %d pedestrians in Room %d not possible! Maximale number: %d\n",
 					N, r->GetRoomID(), max_pos);
-			Log->write(tmp);
+			Log->Write(tmp);
 			exit(0);
 		}
 		ppm = N / sum_area;
@@ -317,16 +319,28 @@ int PedDistributor::Distribute(Building* building) const {
 		for (unsigned int i = 0; i < akt_anz.size(); i++) {
 			SubRoom* sr = r->GetSubRoom(i);
 			if (akt_anz[i] > 0)
-				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], r->GetRoomID(), &pid, building->GetRouting());
+				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], r->GetRoomID(), &pid);
 		}
 		nPeds += N;
 	}
 
+	//actualize routing attributes which could not being set earlier
+	for (int i = 0; i < building->GetAnzRooms(); i++) {
+		Room* room = building->GetRoom(i);
+		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+				Pedestrian* ped=sub->GetPedestrian(k);
+				ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
+
+			}
+		}
+	}
+
 
 	// now assign individual attributes
-
 	XMLNode xMainNode=XMLNode::openFileHelper(pInitialisationFile.c_str(),"persons");
-	Log->write("INFO: \tLoading and parsing the persons file");
+	Log->Write("INFO: \tLoading and parsing the persons file");
 
 	//get the distribution node
 	int nPersons=xMainNode.nChildNode("person");
@@ -335,7 +349,7 @@ int PedDistributor::Distribute(Building* building) const {
 		int id=xmltoi(xPerson.getAttribute("id"),-1);
 
 		if(id==-1){
-			Log->write("ERROR:\tin the person attribute file. The id is mandatory ! skipping the entry");
+			Log->Write("ERROR:\tin the person attribute file. The id is mandatory ! skipping the entry");
 			continue;
 		}
 		//look for that pedestrian.
@@ -355,8 +369,7 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 		END:
 		if(!ped){
-			sprintf(tmp, "WARNING: \t Ped [%d] does not not exit yet. I am creating a new one",id);
-			Log->write(tmp);
+			Log->Write("WARNING: \t Ped [%d] does not not exit yet. I am creating a new one",id);
 			ped=new Pedestrian();
 			ped->SetPedIndex(id);
 
@@ -395,18 +408,26 @@ int PedDistributor::Distribute(Building* building) const {
 			ped->SetGender(gender);
 		}
 
+		int router= xmltoi(xPerson.getAttribute("router"),-1);
+		if( router != -1){
+			ped->SetRouter(building->GetRoutingEngine()->GetRouter(router));
+		}else
+		{
+			ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
+		}
+
 		double goal_id=xmltof(xPerson.getAttribute("goal"),-1);
 		if( goal_id!=-1){
 			if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
 					(ped->GetFinalDestination()!=goal_id)){
 				sprintf(tmp, "ERROR: \tconflicting final destination for Ped [%d]", ped->GetPedIndex());
-				Log->write(tmp);
+				Log->Write(tmp);
 				sprintf(tmp, "ERROR: \talready assigned to destination [%d]", ped->GetFinalDestination());
-				Log->write(tmp);
+				Log->Write(tmp);
 				exit(EXIT_FAILURE);
 			}
 			ped->SetFinalDestination(goal_id);
-			building->GetRouting()->AddFinalDestinationID(goal_id);
+			building->GetRoutingEngine()->AddFinalDestinationID(goal_id);
 		}
 
 		double wishVelo=xmltof(xPerson.getAttribute("wishVelo"),-1);
@@ -429,7 +450,7 @@ int PedDistributor::Distribute(Building* building) const {
 						if(ped->GetRoomID()!=-1){
 							if(FindPedAndDeleteFromRoom(building,ped)){
 								sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet , will be created and moved to the corresponding room.", id);
-								Log->write(tmp);
+								Log->Write(tmp);
 							}
 						}
 						ped->SetRoomID(room->GetRoomID(),room->GetCaption());
@@ -451,12 +472,13 @@ int PedDistributor::Distribute(Building* building) const {
 		int group_id=xmltoi(group.getAttribute("id"),-1);
 		int trip_id=xmltoi(group.getChildNode("trip").getText(),-1);
 		int goal_id=xmltoi(group.getChildNode("goal").getText(),-1);
+		int router_id=xmltoi(group.getChildNode("router").getText(),-1);
 
 		if((goal_id !=-1) && (trip_id!=-1)){
 			sprintf(tmp, "ERROR: \ttrip and goal cannot be set for the same group [%d] !",group_id);
-			Log->write(tmp);
+			Log->Write(tmp);
 			sprintf(tmp, "ERROR: \tas they might conflict!");
-			Log->write(tmp);
+			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
 
@@ -470,30 +492,33 @@ int PedDistributor::Distribute(Building* building) const {
 			Pedestrian* ped=building->GetPedestrian(ped_id);
 			if(ped){
 				ped->SetGroup(group_id);
+				//FIXME
 				if(trip_id!=-1){
-					ped->SetTrip(building->GetRouting()->GetTrip(trip_id));
-					sprintf(tmp, "ERROR: \tTrip is actually not supported for pedestrian [%d]. Please use <goal><goal/> instead", ped->GetPedIndex());
-					Log->write(tmp);
+					//ped->SetTrip(building->GetRoutingEngine()->GetTrip(trip_id));
+					sprintf(tmp, "ERROR: \tTrip is actually not supported for pedestrian [%d]. Please use <goal></goal> instead", ped->GetPedIndex());
+					Log->Write(tmp);
 					exit(EXIT_FAILURE);
 				}
 				if(goal_id!=-1){
 					if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
 							(ped->GetFinalDestination()!=goal_id)){
 						sprintf(tmp, "ERROR: \tconflicting final destinations for Ped [%d]", ped->GetPedIndex());
-						Log->write(tmp);
+						Log->Write(tmp);
 						sprintf(tmp, "ERROR: \talready assigned to a destination with ID [%d]", ped->GetFinalDestination());
-						Log->write(tmp);
+						Log->Write(tmp);
 						exit(EXIT_FAILURE);
 					}
 
 					ped->SetFinalDestination(goal_id);
-					building->GetRouting()->AddFinalDestinationID(goal_id);
+					building->GetRoutingEngine()->AddFinalDestinationID(goal_id);
 				}
+				ped->SetRouter(building->GetRoutingEngine()->GetRouter(router_id));
+
 			}else{
 				sprintf(tmp, "ERROR:\tID [%d] out of range. The largest allowed ID based on the current distribution is [%d]",ped_id,building->GetAnzPedestrians());
-				Log->write(tmp);
+				Log->Write(tmp);
 				sprintf(tmp, "ERROR:\tVerify that you have distributed all [%d] pedestrians",nPedsExpected);
-				Log->write(tmp);
+				Log->Write(tmp);
 				exit(EXIT_FAILURE);
 			}
 			p = strtok(NULL, ",");
@@ -506,7 +531,7 @@ int PedDistributor::Distribute(Building* building) const {
 	if(nPedsExpected!=nPeds){
 		sprintf(tmp, "ERROR:\tThe number of distributed pedestrians [%d] does not match \n"
 				"        \tthe total number of specified pedestrians in the header [%d]!",nPeds,nPedsExpected);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
 
@@ -737,19 +762,19 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
  *              nächsten Aufruf)
  *   - routing: wird benötigt um die Zielline der Fußgänger zu initialisieren
  * */
-void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid, Routing * routing) const {
+void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid) const {
 	char tmp[CLENGTH];
 	int anz = positions.size();
 
 	if (anz < N) {
 		sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Subroom %d nicht möglich! Maximale Anzahl: %d\n",
 				N, r->GetSubRoomID(), anz);
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(0);
 	} else {
 		sprintf(tmp, "\t\tVerteilung von %d Fußgängern! Maximale Anzahl: %d",
 				N, anz);
-		Log->write(tmp);
+		Log->Write(tmp);
 	}
 	// set the pedestrians
 	for (int i = 0; i < N; ++i) {

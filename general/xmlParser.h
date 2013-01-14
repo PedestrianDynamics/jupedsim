@@ -1,5 +1,5 @@
 /****************************************************************************/
-/*! \mainpage XMLParser library
+/** mainpage mainpage XMLParser library
  * \section intro_sec Introduction
  *
  * This is a basic XML parser written in ANSI C++ for portability.

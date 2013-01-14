@@ -76,7 +76,7 @@ void Room::SetSubRoom(SubRoom* subroom, int index) {
     if ((index >= 0) && (index < GetAnzSubRooms())) {
         pSubRooms[index] = subroom;
     } else {
-        Log->write("ERROR: Wrong Index in Room::SetSubRoom()");
+        Log->Write("ERROR: Wrong Index in Room::SetSubRoom()");
         exit(0);
     }
 }
@@ -114,7 +114,7 @@ SubRoom* Room::GetSubRoom(int index) const {
     else {
     	char tmp[CLENGTH];
         sprintf(tmp,"ERROR: Room::GetSubRoom() Wrong subroom index [%d] for room index [%d] ",index,pRoomID);
-        Log->write(tmp);
+        Log->Write(tmp);
         exit(0);
     }
 }
@@ -141,7 +141,7 @@ void Room::DeleteSubRoom(int index) {
     if ((index >= 0) && (index < (int) pSubRooms.size()))
         pSubRooms.erase(pSubRooms.begin() + index);
     else {
-        Log->write("ERROR: Wrong Index in Room::DeleteSubRoom()");
+        Log->Write("ERROR: Wrong Index in Room::DeleteSubRoom()");
         exit(0);
     }
 }
@@ -172,7 +172,7 @@ void Room::LoadNormalSubRoom(ifstream* buildingfile, int* i) {
             char tmp[CLENGTH];
             sprintf(tmp, "ERROR: \tRoom::LoadNormalSubRoom()"
                     "Wrong object in building file <subroom>: [%s] line %d ", line.c_str(), *i);
-            Log->write(tmp);
+            Log->Write(tmp);
             exit(0);
         }
         getline(*buildingfile, line);
@@ -182,7 +182,7 @@ void Room::LoadNormalSubRoom(ifstream* buildingfile, int* i) {
         char tmp[CLENGTH];
         sprintf(tmp, "ERROR: \tRoom::LoadNormalSubRoom()"
                 "Wrong number of Walls: %d != %d", NWalls, subroom->GetAnzWalls());
-        Log->write(tmp);
+        Log->Write(tmp);
         exit(0);
     }
     AddSubRoom(subroom);
@@ -218,7 +218,7 @@ void Room::LoadStair(ifstream* buildingfile, int* i) {
             char tmp[CLENGTH];
             sprintf(tmp, "ERROR: \tRoom::LoadStair() Wrong object in building file <stair>: [%s] line %d "
                     , line.c_str(), *i);
-            Log->write(tmp);
+            Log->Write(tmp);
             exit(0);
         }
         getline(*buildingfile, line);
@@ -227,7 +227,7 @@ void Room::LoadStair(ifstream* buildingfile, int* i) {
     if (NWalls != stair->GetAnzWalls()) {
         char tmp[CLENGTH];
         sprintf(tmp, "ERROR: \tWrong number of Walls: %d != %d", NWalls, stair->GetAnzWalls());
-        Log->write(tmp);
+        Log->Write(tmp);
         exit(0);
     }
     AddSubRoom(stair);
@@ -238,7 +238,7 @@ void Room::WriteToErrorLog() const {
     string s;
     sprintf(tmp, "\tRaum: %d [%s]:\n", pRoomID, pCaption.c_str());
     s.append(tmp);
-    Log->write(s);
+    Log->Write(s);
     // SubRooms
     for (int i = 0; i < GetAnzSubRooms(); i++) {
         SubRoom* s = GetSubRoom(i);

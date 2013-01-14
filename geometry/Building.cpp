@@ -38,28 +38,35 @@ using namespace std;
 Building::Building() {
 	pCaption = "no_caption";
 	pRooms = vector<Room*>();
-	pRouting = NULL;
+	pRoutingEngine = NULL;
 	pLinkedCellGrid = NULL;
 	pSavePathway = false;
 }
 
-Building::Building(const Building& orig) {
-	pCaption = orig.GetCaption();
-	pRooms = orig.GetAllRooms();
-	pRouting = orig.GetRouting();
-	pSavePathway = false;
-	pLinkedCellGrid = NULL;
-}
 
 Building::~Building() {
 	for (int i = 0; i < GetAnzRooms(); i++)
 		delete pRooms[i];
-	delete pRouting;
+	delete pRoutingEngine;
 
 	delete pLinkedCellGrid;
 
 	if (PpathWayStream.is_open())
 		PpathWayStream.close();
+
+// FIXME:
+//	for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
+//				iter != pCrossings.end(); ++iter) {
+//			delete iter->second;
+//		}
+//		for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
+//				iter != pTransitions.end(); ++iter) {
+//			delete iter->second;
+//		}
+//		for (map<int, Hline*>::const_iterator iter = pHlines.begin();
+//				iter != pHlines.end(); ++iter) {
+//			delete iter->second;
+//		}
 }
 
 /************************************************************
@@ -69,8 +76,8 @@ void Building::SetCaption(string s) {
 	pCaption = s;
 }
 
-void Building::SetRouting(Routing* r) {
-	pRouting = r;
+void Building::SetRoutingEngine(RoutingEngine* r) {
+	pRoutingEngine = r;
 }
 
 void Building::SetAllRooms(const vector<Room*>& rooms) {
@@ -81,7 +88,7 @@ void Building::SetRoom(Room* room, int index) {
 	if ((index >= 0) && (index < (int) pRooms.size())) {
 		pRooms[index] = room;
 	} else {
-		Log->write("ERROR: \tWrong Index in CBuilding::SetRoom()");
+		Log->Write("ERROR: \tWrong Index in CBuilding::SetRoom()");
 		exit(0);
 	}
 }
@@ -94,12 +101,16 @@ string Building::GetCaption() const {
 	return pCaption;
 }
 
-Routing* Building::GetRouting() const {
-	return pRouting;
+RoutingEngine* Building::GetRoutingEngine() const {
+	return pRoutingEngine;
 }
 
 int Building::GetAnzRooms() const {
 	return pRooms.size();
+}
+
+int Building::GetGoalsCount() const {
+	return _transitions.size() + _hLines.size() + _crossings.size();
 }
 
 const vector<Room*>& Building::GetAllRooms() const {
@@ -114,7 +125,7 @@ Room* Building::GetRoom(int index) const {
 		sprintf(tmp,
 				"ERROR: Wrong 'index' in CBuiling::GetRoom() index: %d size: %d",
 				index, pRooms.size());
-		Log->write(tmp);
+		Log->Write(tmp);
 		exit(0);
 	}
 }
@@ -139,7 +150,7 @@ void Building::AddRoom(Room* room) {
 }
 
 void Building::AddSurroundingRoom() {
-	Log->write("INFO: \tAdding the room 'outside' ");
+	Log->Write("INFO: \tAdding the room 'outside' ");
 	// first look for the geometry boundaries
 	double x_min = FLT_MAX;
 	double x_max = -FLT_MAX;
@@ -195,7 +206,7 @@ void Building::AddSurroundingRoom() {
 }
 
 void Building::InitGeometry() {
-	Log->write("INFO: \tInit Geometry");
+	Log->Write("INFO: \tInit Geometry");
 	for (int i = 0; i < GetAnzRooms(); i++) {
 		Room* room = GetRoom(i);
 		// Polygone berechnen
@@ -230,7 +241,7 @@ void Building::InitGeometry() {
 			}
 		}
 	}
-	Log->write("INFO: \tInit Geometry successful!!!\n");
+	Log->Write("INFO: \tInit Geometry successful!!!\n");
 }
 
 void Building::Update() {
@@ -260,7 +271,7 @@ void Building::Update() {
 								ped->GetExitIndex(), ped->GetPos().GetX(),
 								ped->GetPos().GetY());
 						//ped->Dump(ped->GetPedIndex());
-						Log->write(tmp);
+						Log->Write(tmp);
 						std::cout << ped->GetLastDestination() << " "
 								<< ped->GetNextDestination() << std::endl;
 						//exit(0);
@@ -274,15 +285,14 @@ void Building::Update() {
 					Crossing* cross =
 							dynamic_cast<Crossing*>(ped->GetExitLine());
 					if (cross == NULL) {
-						char tmp[CLENGTH];
-						sprintf(tmp,
-								"ERROR: Building::update() type casting error");
-						Log->write(tmp);
+						Log->Write("ERROR: Building::update() type casting error");
+						cout<<"ped: "<<ped->GetPedIndex()<<endl;
 						exit(EXIT_FAILURE);
 					}
 
 					SubRoom* other_sub = cross->GetOtherSubRoom(
 							room->GetRoomID(), j);
+
 					if (other_sub) {
 						int nextSubRoom = other_sub->GetSubRoomID();
 						int nextRoom = other_sub->GetRoomID();
@@ -325,11 +335,11 @@ void Building::Update() {
 							GetRoom(ped->GetRoomID())->GetCaption().c_str(),
 							ped->GetRoomID(), ped->GetSubRoomID(),
 							room->GetCaption().c_str(), i, j);
-					Log->write(tmp);
+					Log->Write(tmp);
 					ped->SetRoomID(i, room->GetCaption());
 					ped->SetSubRoomID(j);
 					ped->ClearMentalMap(); // reset the destination
-					pRouting->FindExit(ped);
+					ped->FindRoute();
 					sub->AddPedestrian(ped);
 					assigned = true;
 					break;
@@ -366,10 +376,11 @@ void Building::Update() {
 			end = nSize - 1;
 
 		for (int p = start; p <= end; ++p) {
-			//todo: hermes
-			if (pRouting->FindExit(pAllPedestians[p]) == -1) {
+			if (pAllPedestians[p]->FindRoute() == -1) {
 				//a destination could not be found for that pedestrian
-				DeletePedFromSim(pAllPedestians[p]);
+				Log->Write("Could not found a route for pedestrian");
+				exit(EXIT_FAILURE);
+				//DeletePedFromSim(pAllPedestians[p]);
 			}
 		}
 	}
@@ -388,7 +399,7 @@ void Building::InitPhiAllPeds(double pDt) {
 				Pedestrian* ped = sub->GetPedestrian(k);
 				ped->Setdt(pDt); //set the simulation step
 				//a destination could not be found for that pedestrian
-				if (pRouting->FindExit(ped) == -1) {
+				if (ped->FindRoute() == -1) {
 					DeletePedFromSim(ped);
 				}
 				Line* e = ped->GetExitLine();
@@ -401,7 +412,7 @@ void Building::InitPhiAllPeds(double pDt) {
 					cosPhi = d.GetX() / dist;
 					sinPhi = d.GetY() / dist;
 				} else {
-					Log->write(
+					Log->Write(
 							"ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
 									"dist to target ist 0\n");
 					exit(0);
@@ -425,7 +436,7 @@ void Building::InitGrid(double cellSize) {
 
 	char tmp[CLENGTH];
 	sprintf(tmp, "INFO: \tInitializing the grid with cell size: %f ", cellSize);
-	Log->write(tmp);
+	Log->Write(tmp);
 	// first look for the geometry boundaries
 	double x_min = FLT_MAX;
 	double x_max = FLT_MIN;
@@ -482,7 +493,7 @@ void Building::InitGrid(double cellSize) {
 	pLinkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
 	pLinkedCellGrid->ShallowCopy(pAllPedestians);
 
-	Log->write("INFO: \tDone with Initializing the grid ");
+	Log->Write("INFO: \tDone with Initializing the grid ");
 }
 
 /*************************************************************
@@ -491,14 +502,14 @@ void Building::InitGrid(double cellSize) {
 
 void Building::LoadBuilding(string filename) {
 
-	Log->write("INFO: \tParsing the geometry file");
+	Log->Write("INFO: \tParsing the geometry file");
 
 	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "geometry");
 
 	double version = xmltof(xMainNode.getAttribute("version"), -1);
 	if (version < 0.4) {
-		Log->write("ERROR: \tOnly version > 0.4 supported");
-		Log->write("ERROR: \tparsing geometry file failed!");
+		Log->Write("ERROR: \tOnly version > 0.4 supported");
+		Log->Write("ERROR: \tparsing geometry file failed!");
 		exit(EXIT_FAILURE);
 	}
 	pCaption = xmltoa(xMainNode.getAttribute("caption"), "virtual building");
@@ -661,20 +672,11 @@ void Building::LoadBuilding(string filename) {
 			c->SetPoint1(Point(x1, y1));
 			c->SetPoint2(Point(x2, y2));
 
-			//TODO: only a sequential read is possible.
-			// only add the id instead, in that case the ordering of
-			//the subroom/crossings wont have any influences.
-
-//			room->GetSubRoom(sub1_id)->AddGoalID(c->GetUniqueID());
-//			room->GetSubRoom(sub2_id)->AddGoalID(c->GetUniqueID());
 			c->SetSubRoom1(room->GetSubRoom(sub1_id));
 			c->SetSubRoom2(room->GetSubRoom(sub2_id));
 			c->SetRoom1(room);
+			AddCrossing(c);
 
-			//pRouting->AddGoal(c);
-
-			//new implementation
-			pRouting->AddCrossing(c);
 			room->GetSubRoom(sub1_id)->AddCrossing(c);
 			room->GetSubRoom(sub2_id)->AddCrossing(c);
 		}
@@ -735,10 +737,9 @@ void Building::LoadBuilding(string filename) {
 			subroom->AddTransition(t);
 		}
 
-
-		pRouting->AddTransition(t);
+		AddTransition(t);
 	}
-	Log->write("INFO: \tLoading building file successful!!!\n");
+	Log->Write("INFO: \tLoading building file successful!!!\n");
 }
 
 void Building::DumpSubRoomInRoom(int roomID, int subID) {
@@ -755,14 +756,26 @@ void Building::DumpSubRoomInRoom(int roomID, int subID) {
 }
 
 void Building::WriteToErrorLog() const {
-	Log->write("GEOMETRY: ");
+	Log->Write("GEOMETRY: ");
 	for (int i = 0; i < GetAnzRooms(); i++) {
 		Room* r = GetRoom(i);
 		r->WriteToErrorLog();
 	}
-	Log->write("ROUTING: ");
-	pRouting->WriteToErrorLog();
-	Log->write("\n");
+	Log->Write("ROUTING: ");
+
+	for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
+			iter != _crossings.end(); ++iter) {
+		iter->second->WriteToErrorLog();
+	}
+	for (map<int, Transition*>::const_iterator iter = _transitions.begin();
+			iter != _transitions.end(); ++iter) {
+		iter->second->WriteToErrorLog();
+	}
+	for (map<int, Hline*>::const_iterator iter = _hLines.begin();
+			iter != _hLines.end(); ++iter) {
+		iter->second->WriteToErrorLog();
+	}
+	Log->Write("\n");
 }
 
 Room* Building::GetRoom(string caption) const {
@@ -770,57 +783,118 @@ Room* Building::GetRoom(string caption) const {
 		if (pRooms[r]->GetCaption() == caption)
 			return pRooms[r];
 	}
-	Log->write("Warning: Room not found with caption " + caption);
+	Log->Write("Warning: Room not found with caption " + caption);
 	//return NULL;
 	exit(EXIT_FAILURE);
 }
 
+void Building::AddCrossing(Crossing* line) {
+	if (_crossings.count(line->GetIndex()) != 0) {
+		char tmp[CLENGTH];
+		sprintf(tmp,
+				"ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
+				line->GetIndex());
+		Log->Write(tmp);
+		exit(EXIT_FAILURE);
+	}
+	_crossings[line->GetIndex()] = line;
+}
+
+void Building::AddTransition(Transition* line) {
+	if (_transitions.count(line->GetIndex()) != 0) {
+		char tmp[CLENGTH];
+		sprintf(tmp,
+				"ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
+				line->GetIndex());
+		Log->Write(tmp);
+		exit(EXIT_FAILURE);
+	}
+	_transitions[line->GetIndex()] = line;
+}
+
+void Building::AddHline(Hline* line) {
+	if (_hLines.count(line->GetID()) != 0) {
+		char tmp[CLENGTH];
+		sprintf(tmp,
+				"ERROR: Duplicate index for hlines found [%d] in Routing::AddGoal()",
+				line->GetID());
+		Log->Write(tmp);
+		exit(EXIT_FAILURE);
+	}
+	_hLines[line->GetID()] = line;
+}
+
+const map<int, Crossing*>& Building::GetAllCrossings() const {
+	return _crossings;
+}
+
+const map<int, Transition*>& Building::GetAllTransitions() const {
+	return _transitions;
+}
+
+
+const map<int, Hline*>& Building::GetAllHlines() const {
+	return _hLines;
+}
 
 Transition* Building::GetTransition(string caption) const {
 	//eventually
-	const map<int, Transition*>& transitions = pRouting->GetAllTransitions();
 	map<int, Transition*>::const_iterator itr;
-	for(itr = transitions.begin(); itr != transitions.end(); ++itr){
+	for(itr = _transitions.begin(); itr != _transitions.end(); ++itr){
 		if (itr->second->GetCaption() == caption)
 			return itr->second;
 	}
 
-	Log->write("WARNING: No Transition with Caption: " + caption);
-	//return NULL;
+	Log->Write("WARNING: No Transition with Caption: " + caption);
 	exit(EXIT_FAILURE);
+}
+
+Transition* Building::GetTransition(int ID) {
+	if (_transitions.count(ID) == 1) {
+		return _transitions[ID];
+	} else {
+		if (ID == -1)
+			return NULL;
+		else {
+			char tmp[CLENGTH];
+			sprintf(tmp,
+					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetTransition()",
+					ID, _transitions.size());
+			Log->Write(tmp);
+			exit(EXIT_FAILURE);
+		}
+	}
 }
 
 Crossing* Building::GetGoal(string caption) const {
 
 	{
 		//eventually
-		const map<int, Transition*>& transitions = pRouting->GetAllTransitions();
 		map<int, Transition*>::const_iterator itr;
-		for(itr = transitions.begin(); itr != transitions.end(); ++itr){
+		for(itr = _transitions.begin(); itr != _transitions.end(); ++itr){
 			if (itr->second->GetCaption() == caption)
 				return itr->second;
 		}
 	}
 	{
 		//finally the  crossings
-		const map<int, Crossing*>& crossings = pRouting->GetAllCrossings();
 		map<int, Crossing*>::const_iterator itr;
-		for(itr = crossings.begin(); itr != crossings.end(); ++itr){
+		for(itr = _crossings.begin(); itr != _crossings.end(); ++itr){
 			if (itr->second->GetCaption() == caption)
 				return itr->second;
 		}
 	}
 
-	Log->write("WARNING: No Transition with Caption: " + caption);
+	Log->Write("WARNING: No Transition with Caption: " + caption);
 	//return NULL;
 	exit(EXIT_FAILURE);
 }
 
 void Building::LoadRoutingInfo(string filename) {
-	Log->write("INFO:\tLoading extra routing information");
+	Log->Write("INFO:\tLoading extra routing information");
 	if (filename == "") {
-		Log->write("INFO:\t No file supplied !");
-		Log->write("INFO:\t done with loading extra routing information");
+		Log->Write("INFO:\t No file supplied !");
+		Log->Write("INFO:\t done with loading extra routing information");
 		return;
 	}
 
@@ -828,8 +902,8 @@ void Building::LoadRoutingInfo(string filename) {
 
 	double version = xmltof(xMainNode.getAttribute("version"), -1);
 	if (version < 0.4) {
-		Log->write("ERROR: \tOnly version > 0.4 supported");
-		Log->write("ERROR: \tparsing routing file failed!");
+		Log->Write("ERROR: \tOnly version > 0.4 supported");
+		Log->Write("ERROR: \tparsing routing file failed!");
 		exit(EXIT_FAILURE);
 	}
 
@@ -861,7 +935,8 @@ void Building::LoadRoutingInfo(string filename) {
 		h->SetPoint2(Point(x2, y2));
 		h->SetRoom(room);
 		h->SetSubRoom(subroom);
-		pRouting->AddHline(h);
+
+		AddHline(h);
 		subroom->AddHline(h);
 
 	}
@@ -875,31 +950,31 @@ void Building::LoadRoutingInfo(string filename) {
 		XMLNode trip = xTripsNode.getChildNode("trip", i);
 		double id = xmltof(trip.getAttribute("id"), -1);
 		if (id == -1) {
-			Log->write("ERROR:\t id missing for trip");
+			Log->Write("ERROR:\t id missing for trip");
 			exit(EXIT_FAILURE);
 		}
 		string sTrip = trip.getText();
-		vector<int> vTrip;
+		vector<string> vTrip;
 		vTrip.clear();
 
 		char* str = (char*) sTrip.c_str();
 		char *p = strtok(str, ":");
 		while (p) {
-			vTrip.push_back(xmltoi(p));
+			vTrip.push_back(xmltoa(p));
 			p = strtok(NULL, ":");
 		}
-		pRouting->AddTrip(vTrip);
+		pRoutingEngine->AddTrip(vTrip);
 	}
-	Log->write("INFO:\t done with loading extra routing information");
+	Log->Write("INFO:\t done with loading extra routing information");
 }
 
 void Building::LoadTrafficInfo(string filename) {
 
-	Log->write("INFO:\tLoading  the traffic info file");
+	Log->Write("INFO:\tLoading  the traffic info file");
 
 	if (filename == "") {
-		Log->write("INFO:\t No file supplied !");
-		Log->write("INFO:\t done with loading traffic info file");
+		Log->Write("INFO:\t No file supplied !");
+		Log->Write("INFO:\t done with loading traffic info file");
 		return;
 	}
 
@@ -907,8 +982,8 @@ void Building::LoadTrafficInfo(string filename) {
 
 	double version = xmltof(xMainNode.getAttribute("version"), -1);
 	if (version < 0.4) {
-		Log->write("ERROR: \tOnly version > 0.4 supported");
-		Log->write("ERROR: \tparsing traffic file failed!");
+		Log->Write("ERROR: \tOnly version > 0.4 supported");
+		Log->Write("ERROR: \tparsing traffic file failed!");
 		exit(EXIT_FAILURE);
 	}
 
@@ -946,17 +1021,17 @@ void Building::LoadTrafficInfo(string filename) {
 		else {
 			//store transition in a map and call getTransition/getCrossin
 			if (state == "open") {
-				pRouting->GetTransition(id)->Open();
+				GetTransition(id)->Open();
 			} else if (state == "close") {
-				pRouting->GetTransition(id)->Close();
+				GetTransition(id)->Close();
 			} else {
 				char tmp[CLENGTH];
 				sprintf(tmp, "WARNING:\t Unknown door state: %s", state.c_str());
-				Log->write(tmp);
+				Log->Write(tmp);
 			}
 		}
 	}
-	Log->write("INFO:\t done with loading traffic info file");
+	Log->Write("INFO:\t done with loading traffic info file");
 }
 
 void Building::DeletePedestrian(Pedestrian* ped) {
@@ -975,8 +1050,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 				vector<string> tags;
 				StringExplode(brokenpaths[i], ":", &tags);
 				string room = pRooms[atoi(tags[0].c_str())]->GetCaption();
-				string trans =
-						pRouting->GetTransition(atoi(tags[1].c_str()))->GetCaption();
+				string trans =GetTransition(atoi(tags[1].c_str()))->GetCaption();
 				//ignore crossings/hlines
 				if (trans != "")
 					PpathWayStream << room << " " << trans << endl;
@@ -1055,7 +1129,7 @@ void Building::InitSavePedPathway(string filename) {
 	pSavePathway = true;
 
 	if (PpathWayStream.is_open()) {
-		Log->write("#INFO:\tsaving pedestrian paths to [ " + filename + " ]");
+		Log->Write("#INFO:\tsaving pedestrian paths to [ " + filename + " ]");
 		PpathWayStream << "##pedestrian ways" << endl;
 		PpathWayStream << "#nomenclature roomid  caption" << endl;
 		//		for (unsigned int r=0;r< pRooms.size();r++){
@@ -1071,8 +1145,8 @@ void Building::InitSavePedPathway(string filename) {
 		//
 		PpathWayStream << "#data room exit_id" << endl;
 	} else {
-		Log->write("#INFO:\t Unable to open [ " + filename + " ]");
-		Log->write("#INFO:\t saving to stdout");
+		Log->Write("#INFO:\t Unable to open [ " + filename + " ]");
+		Log->Write("#INFO:\t saving to stdout");
 
 	}
 }
@@ -1099,7 +1173,7 @@ void Building::CleanUpTheScene() {
 						ped->GetPedIndex(),
 						pRooms[ped->GetRoomID()]->GetCaption().c_str(),
 						totalSliced);
-				Log->write(msg);
+				Log->Write(msg);
 			} else {
 				ped->RecordActualPosition();
 			}
@@ -1146,3 +1220,26 @@ Pedestrian* Building::GetPedestrian(int pedID) const {
 	return NULL;
 }
 
+// FIXME: you should get rid of this method
+
+Crossing* Building::GetGoal(int index) {
+	if (_transitions.count(index) == 1) {
+		return _transitions[index];
+	} else if (_crossings.count(index) == 1) {
+		return _crossings[index];
+	}else if (_hLines.count(index) == 1) {
+		exit(EXIT_FAILURE);
+		//return pHlines[index];
+	}else {
+		if (index == -1)
+			return NULL;
+		else {
+			char tmp[CLENGTH];
+			sprintf(tmp,
+					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal(), counts in map= [%d]",
+					index, _crossings.size(),_crossings.count(index));
+			Log->Write(tmp);
+			exit(EXIT_FAILURE);
+		}
+	}
+}

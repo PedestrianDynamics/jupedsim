@@ -30,7 +30,7 @@
 #include "GlobalRouter.h"
 
 #include "AccessPoint.h"
-#include "Routing.h"
+#include "Router.h"
 #include "../general/xmlParser.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
@@ -41,7 +41,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-		Routing() {
+		Router() {
 
 	pAccessPoints = map<int, AccessPoint*>();
 
@@ -57,7 +57,7 @@ GlobalRouter::GlobalRouter() :
 GlobalRouter::~GlobalRouter() {
 
 	if (pDistMatrix && pPathsMatrix) {
-		const int exitsCnt = GetAnzGoals();
+		const int exitsCnt = pBuilding->GetGoalsCount();
 		for (int p = 0; p < exitsCnt; ++p) {
 			delete[] pDistMatrix[p];
 			delete[] pPathsMatrix[p];
@@ -76,7 +76,7 @@ GlobalRouter::~GlobalRouter() {
 
 void GlobalRouter::Init(Building* building) {
 
-	Log->write("INFO:\tInit the Global Router Engine");
+	Log->Write("INFO:\tInit the Global Router Engine");
 	pBuilding = building;
 
 	//check the loaded routing informations (crossings, hlines,...)
@@ -87,8 +87,8 @@ void GlobalRouter::Init(Building* building) {
 	// initialize the network for the floydwarshall algo
 	// initialize the distances matrix
 
-	//	const int exitsCnt = pCrossings.size()+ pTransitions.size()+pHlines.size();
-	int exitsCnt = GetAnzGoals();
+	//		const int exitsCnt = pCrossings.size()+ pTransitions.size()+pHlines.size();
+	const int exitsCnt = pBuilding->GetGoalsCount();
 
 	pDistMatrix = new double*[exitsCnt];
 	pPathsMatrix = new int*[exitsCnt];
@@ -108,8 +108,8 @@ void GlobalRouter::Init(Building* building) {
 	// init the access points
 	int index = 0;
 
-	for (map<int, Hline*>::const_iterator itr = pHlines.begin();
-			itr != pHlines.end(); ++itr) {
+	for (map<int, Hline*>::const_iterator itr = pBuilding->GetAllHlines().begin();
+			itr != pBuilding->GetAllHlines().end(); ++itr) {
 
 		//int door=itr->first;
 		int door = itr->second->GetUniqueID();
@@ -137,7 +137,8 @@ void GlobalRouter::Init(Building* building) {
 	}
 
 
-	for (map<int, Crossing*>::const_iterator itr = pCrossings.begin(); itr != pCrossings.end(); ++itr) {
+	for (map<int, Crossing*>::const_iterator itr = pBuilding->GetAllCrossings().begin();
+			itr != pBuilding->GetAllCrossings().end(); ++itr) {
 
 		//int door=itr->first;
 		int door = itr->second->GetUniqueID();
@@ -169,8 +170,8 @@ void GlobalRouter::Init(Building* building) {
 
 	}
 
-	for (map<int, Transition*>::const_iterator itr = pTransitions.begin();
-			itr != pTransitions.end(); ++itr) {
+	for (map<int, Transition*>::const_iterator itr = pBuilding->GetAllTransitions().begin();
+			itr != pBuilding->GetAllTransitions().end(); ++itr) {
 
 		//int door=itr->first;
 		int door = itr->second->GetUniqueID();
@@ -200,7 +201,7 @@ void GlobalRouter::Init(Building* building) {
 		if (cross->IsExit() && cross->IsOpen()) {
 			ap->setFinalDestination(true);
 		} else if ((id1 == -1) && (id2 == -1)) {
-			Log->write(" a final destination outside the geometry was found");
+			Log->Write(" a final destination outside the geometry was found");
 			ap->setFinalDestination(true);
 		} else if (cross->GetRoom1()->GetCaption() == "outside") {
 			ap->setFinalDestination(true);
@@ -366,7 +367,7 @@ void GlobalRouter::Init(Building* building) {
 			sprintf(tmp,
 					"ERROR: GlobalRouter: There is no path from hline/crossing/transition [ %d ] to the outside\n",
 					from_door);
-			Log->write(tmp);
+			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
 
@@ -386,7 +387,7 @@ void GlobalRouter::Init(Building* building) {
 					&& (!from_AP->IsClosed())) {
 
 				from_AP->Dump();
-				Log->write(
+				Log->Write(
 						"ERROR: GlobalRouter: hline/crossing/transition [ %d ] in room [%s] is out of visibility range \n");
 				exit(EXIT_FAILURE);
 			}
@@ -405,8 +406,8 @@ void GlobalRouter::Init(Building* building) {
 
 		int to_door_matrix_index=-1;
 		int to_door_uid=-1;
-		for (map<int, Transition*>::const_iterator itr = pTransitions.begin();
-				itr != pTransitions.end(); ++itr) {
+		for (map<int, Transition*>::const_iterator itr = pBuilding->GetAllTransitions().begin();
+				itr != pBuilding->GetAllTransitions().end(); ++itr) {
 
 			int index = itr->second->GetIndex();
 			if (pFinalDestinations[p]==index){
@@ -421,7 +422,7 @@ void GlobalRouter::Init(Building* building) {
 			sprintf(tmp,
 					"ERROR: GlobalRouter: Final destination not found [ %d ]\n",
 					pFinalDestinations[p]);
-			Log->write(tmp);
+			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
 
@@ -471,7 +472,7 @@ void GlobalRouter::Init(Building* building) {
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
 	//WriteGraphGV("routing_graph.gv",4,rooms);
 	//exit(0);
-	Log->write("INFO:\tDone with the Global Router Engine!");
+	Log->Write("INFO:\tDone with the Global Router Engine!");
 }
 
 void GlobalRouter::GetPath(int i, int j) {
@@ -492,7 +493,7 @@ void GlobalRouter::GetPath(int i, int j) {
  */
 void GlobalRouter::FloydWarshall() {
 	//	int i, j, k;
-	const int n = GetAnzGoals();
+	const int n = pBuilding->GetGoalsCount();
 
 	for (int k = 0; k < n; k++)
 		for (int i = 0; i < n; i++)
@@ -657,87 +658,19 @@ bool GlobalRouter::CanSeeEachother(const Point&pt1, const Point& pt2) {
 	}
 
 	// then all goals
-	for (int door = 0; door < GetAnzGoals(); door++) {
-		Crossing *cross = GetGoal(door);
-		if (cross->GetRoom1()->GetCaption() == "outside")
-			continue;
-		if (segment.IntersectionWith(*cross) == true) {
-			return false;
-		}
-	}
+	//fIXME
+//	for (int door = 0; door < pBuilding->GetGoalsCount(); door++) {
+//		Crossing *cross =pBuilding-> GetGoal(door);
+//		if (cross->GetRoom1()->GetCaption() == "outside")
+//			continue;
+//		if (segment.IntersectionWith(*cross) == true) {
+//			return false;
+//		}
+//	}
 
 	return true;
 }
 
-//workaround. Don't connect crossing from the tribune.
-// This will avoid getting from one rang into another
-// both are crossings && both are <51cm && there are more than 2
-bool GlobalRouter::Connectable(SubRoom* sub, int from, int to) {
-
-	//check if both are crossings or transitions
-	Crossing* from_goal = GetGoal(from);
-	Crossing* to_goal = GetGoal(to);
-
-	//check if one of them are closed
-	if ((from_goal->IsOpen() == false) || (to_goal->IsOpen() == false))
-		return false;
-
-	//check if hlines
-	if (from_goal->GetSubRoom1() == from_goal->GetSubRoom2())
-		return true;
-	if (to_goal->GetSubRoom1() == to_goal->GetSubRoom2())
-		return true;
-
-	// we are not going in the rangs
-	// provided it is possible
-	if ((to_goal->Length() <= 0.53) && (from_goal->Length() <= 0.53)) {
-
-		// avoid entering the rang
-		if (sub->GetAllGoalIDs().size() > 10)
-			return false;
-		//else return true;
-	}
-
-	//check if transition
-	int id1 = -1;
-	if (from_goal->GetSubRoom1()) {
-		id1 = from_goal->GetSubRoom1()->GetRoomID();
-	}
-
-	int id2 = -1;
-	if (from_goal->GetSubRoom2()) {
-		id2 = from_goal->GetSubRoom2()->GetRoomID();
-	}
-	if (id1 != id2)
-		return true;
-
-	id1 = -1;
-	if (to_goal->GetSubRoom1()) {
-		id1 = to_goal->GetSubRoom1()->GetRoomID();
-	}
-
-	id2 = -1;
-	if (to_goal->GetSubRoom2()) {
-		id2 = to_goal->GetSubRoom2()->GetRoomID();
-	}
-	if (id1 != id2)
-		return true;
-
-	// at this this stage they should be both crossings in the same room
-	// now check the size
-	if (from_goal->Length() > 0.53)
-		return true;
-	if (to_goal->Length() > 0.53)
-		return true;
-
-	// another special case
-	// necessary for room 100.
-	// if the crossing are too close, connect
-	if ((from_goal->GetCentre() - to_goal->GetCentre()).Norm() < 3.0)
-		return true;
-
-	return false;
-}
 
 bool GlobalRouter::CanSeeEachOther(Crossing* c1, Crossing* c2) {
 
@@ -796,7 +729,7 @@ bool GlobalRouter::CanSeeEachOther(Crossing* c1, Crossing* c2) {
 		// skip the concerned exits door and d
 		if ((id1 == gID) || (id2 == gID))
 			continue;
-		if (segment.IntersectionWith(*GetGoal(exitsInSubroom[g])) == true) {
+		if (segment.IntersectionWith(*pBuilding->GetGoal(exitsInSubroom[g])) == true) {
 			return false;
 		}
 	}
@@ -835,7 +768,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 		const vector<string> rooms_captions) {
 	ofstream graph_file(filename.c_str());
 	if (graph_file.is_open() == false) {
-		Log->write("Unable to open file" + filename);
+		Log->Write("Unable to open file" + filename);
 		return;
 	}
 

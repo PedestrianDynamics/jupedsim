@@ -35,6 +35,7 @@
 #include "routing/DummyRouter.h"
 #include "routing/GraphRouter.h"
 #include "routing/NavMesh.h"
+#include "routing/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
 
 
@@ -61,11 +62,9 @@ public:
     Simulation();
     virtual ~Simulation();
     // Setter-Funktionen
-    int SetOnline(bool o); // setzt online auf true oder false
     int SetLinkedCells(bool l);
     int SetNPeds(int i);
     // Getter-Funktionen
-    bool IsOnline() const;
     bool IsLinkedCells();
     int GetNPeds() const;
     int GetNPedsGlobal() const;
@@ -76,7 +75,6 @@ public:
     int RunSimulation();
     void Update(); // update the complete system
     void DistributeDestinations(); //assign the pedestrians their final destinations
-
     void InitRoutineClearing(); // set some parameters specific to routine clearing
 
 };
