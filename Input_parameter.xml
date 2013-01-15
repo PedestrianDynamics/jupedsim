@@ -1,0 +1,138 @@
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JPSgcfm project="JPS-Project" version="0.4">
+	<!-- seed used for initialising random generator -->
+	<seed>12542</seed>
+	<!-- geometry file -->
+	<geometry>inputfiles/geo.xml</geometry>
+	<!--persons information and distribution -->
+	<person>inputfiles/persons.xml</person>
+	<!-- extra routing information -->
+	<routing>inputfiles/routing.xml</routing>
+	<!-- traffic information: e.g closed doors -->
+	<traffic>inputfiles/traffic.xml</traffic>
+	<!-- trajectories file and format -->
+	<trajectories format="xml-plain" fps="8"> 
+		<file location="outputfiles/trajectories.xml"/>
+		<!--<socket hostname="127.0.0.1" port="8989"/> -->
+	</trajectories>
+	<!-- where to store the logs 
+	<logfile>outputfiles/log.txt</logfile>
+ 	-->
+
+	<!-- These parameters may be overwritten -->
+	<parameters>
+		<MeasurementArea>
+			<LeftBottomX>-240</LeftBottomX>;
+			<LeftBottomY>-240</LeftBottomY>;
+			<LengthinX>240</LengthinX>;
+			<LengthinY>240</LengthinY>;
+		</MeasurementArea>;
+
+		<Calc_v>
+			<!-- 0:  use_Vx=true	use_Vy=false	use_Vxy=false
+				 1:	 use_Vx=false	use_Vy=true		use_Vxy=false
+				 2:	 use_Vx=false	use_Vy=false	use_Vxy=true
+				 use_Vx=false;  				// only the x coordinate is used when calculating the velocity
+				 use_Vy=false; 					// only the y coordinate is used when calculating the velocity
+				 use_Vxy=true; 					// both x and y coordinate are used when calculating the velocity
+			-->
+			<V_x_y_xy>0</V_x_y_xy>
+			<!-- half of the time interval that used to calculate instantaneous velocity of ped i [fr] 
+				 here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
+			-->
+			<DeltaT>5</DeltaT>
+		</Calc_v>
+		<!-- Method A (Zhang2011a) -->
+		<Method_A>
+			<!-- Time interval used to count the flow [fr] -->
+			<Time_inteval unit = "Frame">70</Time_interval>; 	
+			<!-- The coordinate of the line used to calculate the flow and velocity -->
+			<MeasureArea>
+				<startX>-240</startX>;
+				<startY>-240</startY>;
+				<endX>-240</endX>;
+				<endY>-240</endY>;
+			</MeasureArea>
+		</Method_A>
+		
+		<!-- Method B (Zhang2011a) -->
+		<Method_B>
+			<!-- Length of measurement area along movement direction -->
+			<LengthMeasurementarea>70</LengthMeasurementarea>; 	
+		</Method_B>
+		
+		<!-- Method C (Zhang2011a) -->
+		<Method_C>
+			<!-- Length of measurement area along movement direction -->
+			<LengthMeasurementarea>70</LengthMeasurementarea>; 	
+		</Method_C>		
+		
+		<!-- Method D (Zhang2011a) -->
+		<Method_D>
+			cutbycircle = false;  								// Adjust whether cut each original Voronoi cell by a circle (for bottleneck exp is necessary)
+			IsOutputGraph = true;   							// Whether output the data to plot the Voronoi diagram each frame
+			fieldAnalysis = false;   							// Whether make field analysis or not
+			calcIndividualfunddata = true; 						// Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
+			
+			<!-- /*to get the individual Fundamental diagram based on Voronoi diagram (personal space and velocity),
+			 * it better to give the start and end time of the steady state. */
+			 -->
+			int beginstationary=700;  							//the begin of stationary state
+			int endstationary=1800;  							//the end of stationary state
+			
+			<!-- /*to make field analysis, the geometery has to be discretized into small cells. Here NRow is the number
+			 * of rows for the discretization, NColumn is the number of column. scale_x and scale_y represent the
+			 * size of the cells. low_ed_x and low_ed_y are the coordinates of the lowest vertex of the geometry.
+			 * these prameters are necessary for the discretization.*/
+			 -->
+			if(fieldAnalysis)
+			{
+				NRow=80;    									// the number of rows that the geometry will be discretized for field analysis
+				NColumn=65;										//the number of columns that the geometry will be discretized for field analysis
+				scale_x=10;   									// the size of the grid
+				scale_y=10;
+				low_ed_x = -100;								//0; //todo LOWest vertex of the geometry
+				low_ed_y = -200; 								// 0 todo
+			}
+		</Method_D>
+		
+	</parameters>
+</JPSgcfm>
+
+#============================= Measurement Methods and expected results choice ==============================================
+
+	IsFlowVelocity = true; 								// Method A (Zhang2011a)
+	IsFundamentalTinTout = true; 						// Method B (Zhang2011a)
+	IsClassicMethod = true; 							// Method C //calculate and save results of classic in separate file
+	IsVoronoiMethod =true;  							// Method D--Voronoi method
+	//--------------------------------------   Parameters related to the Voronoi method ------------------------------------
+
+
+
+	//PLOT VORONOI GRAPHS
+   /*In this code, the Voronoi diagram has to be generated with the help of an accessory rectangle!!!!!!
+    * here we use the minimal and maximal coordinates of the geometry (xmin, xmax, ymin, ymax) to
+    * define the rectangle-------*/
+	float xmin = -500;
+	float xmax = 400;
+	float ymin = -240;
+	float ymax = 400;
+
+
+
+	//-------------------------------------- Start to Analyze and calculate --------------------------------------------------------------
+	  //TODO: select geometry with input parameters
+	  polygon_2d geom=geometry.Tshape();
+	  float cor_x=-500, cor_y=-240, cor_l=900, cor_w=640;  //---coordination of the left bottom point of the corridor as well as its length and width
+	
+	  string datafile=  "ko-240-050-240";  				//trajectory file name
+
+
+
+
+
+
+
