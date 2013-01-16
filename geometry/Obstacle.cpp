@@ -30,6 +30,8 @@
 #include "Wall.h"
 #include "Point.h"
 
+#include <cstdlib>
+
 Obstacle::Obstacle() {
 	pClosed=0.0;
 	pHeight=0.0;

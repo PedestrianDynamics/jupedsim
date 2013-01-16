@@ -25,6 +25,7 @@
  */
 
 #include "Line.h"
+#include <cstdlib>
 
 using namespace std;
 
@@ -127,7 +128,7 @@ Point Line::NormalVec() const {
 		norm = sqrt(nx * nx + ny * ny);
 		if (fabs(norm) < J_EPS) {
 			Log->Write("ERROR: \tLine::NormalVec() norm==0\n");
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 		nx /= norm;
 		ny /= norm;
@@ -217,7 +218,7 @@ bool Line::IsInLine(const Point& p) const {
 		lambda = (py - ay) / (by - ay);
 	} else {
 		Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
-		exit(0);
+		exit(EXIT_FAILURE);
 	}
 	return (0 <= lambda) && (lambda <= 1);
 }
