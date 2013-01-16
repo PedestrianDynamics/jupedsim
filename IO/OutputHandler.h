@@ -33,7 +33,6 @@
 #include <vector>
 
 
-#include "../IO/TraVisToClient.h"
 #include "../general/Macros.h"
 
 class OutputHandler {
@@ -57,19 +56,6 @@ public:
     virtual ~FileHandler();
     void Write(std::string str);
     void Write(const char *string,...);
-};
-
-class TraVisToHandler : public OutputHandler {
-private:
-    TraVisToClient* client;
-
-public:
-    TraVisToHandler(std::string host, int port);
-    virtual ~TraVisToHandler();
-    void Write(std::string str);
-
-    //Some tags are broken
-    std::vector<std::string> brokentags;
 };
 
 

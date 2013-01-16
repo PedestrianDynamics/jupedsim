@@ -83,32 +83,3 @@ void FileHandler::Write(const char* string,...) {
 	pfp.flush();
 }
 
-TraVisToHandler::TraVisToHandler(string host, int port) {
-    client = new TraVisToClient(host, port);
-    brokentags.push_back("<trajectoriesDataset>");
-    brokentags.push_back("</trajectoriesDataset>");
-    brokentags.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-}
-
-TraVisToHandler::~TraVisToHandler(){
-	delete client;
-}
-
-void TraVisToHandler::Write(string str) {
-
-    vector<string>::iterator str_it;
-
-    //There are a few broken tags which need to be checked for and removed.
-    for (str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {
-        int tagstart = str.find(*str_it);
-        if (tagstart != (int) string::npos) {
-            str.erase(str.begin() + tagstart, str.begin() + tagstart + (*str_it).size());
-        }
-    }
-    client->sendData(str.c_str());
-}
-
-
-
-
-
