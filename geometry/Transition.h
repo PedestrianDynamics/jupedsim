@@ -16,7 +16,7 @@ class Transition : public Crossing {
 private:
     Room* pRoom2; // zweiter Room zusätzlich zu Crossing
     bool pIsOpen;
-    string pType;
+    std::string pType;
 
 public:
     // Konstruktoren
@@ -25,13 +25,12 @@ public:
 
     void Close(); /// schliesst Tür
     void Open(); /// öffnet Tür
-    void SetType(string s);
+    void SetType(std::string s);
     void SetRoom2(Room* ID);
 
 
-    string GetType() const;
+    std::string GetType() const;
     Room* GetRoom2() const;
-
 
     Room* GetOtherRoom(int room_id) const; // gibt anderen Room zurück
 
@@ -40,12 +39,11 @@ public:
     virtual bool IsExit() const; // prüft ob Ausgang nach draußen
     virtual bool IsTransition() const; //check whether this is a transition or not
     virtual bool IsInRoom(int roomID) const; // prüft ob Transition zu Raum mit roomID gehört
-    virtual void UpdatePedestrian(int RoomID, int SubID, int PedID, Crossing* goal_new) const;
     virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const; // gibt anderen SubRoom zurück
 
     // Ein-Ausgabe
     virtual void WriteToErrorLog() const;
-    virtual string WriteElement() const; // TraVisTo Ausgabe
+    virtual std::string WriteElement() const; // TraVisTo Ausgabe
 };
 
 #endif	/* _TRANSITION_H */

@@ -28,6 +28,7 @@
 
 #include "Room.h"
 
+using namespace std;
 /************************************************************
   Konstruktoren
  ************************************************************/
@@ -119,13 +120,6 @@ SubRoom* Room::GetSubRoom(int index) const {
     }
 }
 
-int Room::GetAnzPedestrians() const {
-    int sum = 0;
-    for (int i = 0; i < GetAnzSubRooms(); i++) {
-        sum += GetSubRoom(i)->GetAnzPedestrians();
-    }
-    return sum;
-}
 
 int Room::GetRoomState() const {
 	return pState;

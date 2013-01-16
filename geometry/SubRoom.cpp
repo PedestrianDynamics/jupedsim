@@ -36,6 +36,8 @@
  SubRoom
  ************************************************************/
 
+using namespace std;
+
 int SubRoom::UID=0;
 
 SubRoom::SubRoom() {
@@ -43,7 +45,6 @@ SubRoom::SubRoom() {
 	pRoomID=-1;
 	pWalls = vector<Wall > ();
 	pPoly = vector<Point > ();
-	pPeds = vector<Pedestrian* > ();
 	pObstacles=vector<Obstacle*> ();
 
 	pCrossings = vector<Crossing*>();
@@ -65,7 +66,6 @@ SubRoom::SubRoom(const SubRoom& orig) {
 	pID = orig.GetSubRoomID();
 	pWalls = orig.GetAllWalls();
 	pPoly = orig.GetPolygon();
-	pPeds = orig.GetAllPedestrians();
 	pGoalIDs = orig.GetAllGoalIDs();
 	pArea = orig.GetArea();
 	pClosed=orig.GetClosed();
@@ -76,9 +76,6 @@ SubRoom::SubRoom(const SubRoom& orig) {
 SubRoom::~SubRoom() {
 	if (pWalls.size() > 0) pWalls.clear();
 	if (pPoly.size() > 0) pPoly.clear();
-	for (unsigned int i = 0; i < pPeds.size(); i++) {
-		delete pPeds[i];
-	}
 
 	for (unsigned int i = 0; i < pObstacles.size(); i++) {
 		delete pObstacles[i];
@@ -116,18 +113,6 @@ void SubRoom::SetPolygon(const vector<Point>& poly) {
 	pPoly = poly;
 }
 
-void SubRoom::SetAllPedestrians(const vector<Pedestrian*>& peds) {
-	pPeds = peds;
-}
-
-void SubRoom::SetPedestrian(Pedestrian* ped, int index) {
-	if ((index >= 0) && (index < GetAnzPedestrians())) {
-		pPeds[index] = ped;
-	} else {
-		Log->Write("ERROR: Wrong Index in SubRoom::SetPedestrian()");
-		exit(0);
-	}
-}
 
 void SubRoom::SetArea(double a) {
 	pArea = a;
@@ -178,27 +163,11 @@ const vector<Point>& SubRoom::GetPolygon() const {
 	return pPoly;
 }
 
-int SubRoom::GetAnzPedestrians() const {
-	return pPeds.size();
-}
-
-const vector<Pedestrian*>& SubRoom::GetAllPedestrians() const {
-	return pPeds;
-}
-
 const vector<Obstacle*>& SubRoom::GetAllObstacles() const {
 	return pObstacles;
 }
 
 
-Pedestrian* SubRoom::GetPedestrian(int index) const {
-	if ((index >= 0) && (index < (int) GetAnzPedestrians()))
-		return pPeds[index];
-	else {
-		Log->Write("ERROR: Wrong 'index' in SubRoom::GetPedestrian()");
-		exit(0);
-	}
-}
 
 int SubRoom::GetAnzGoalIDs() const {
 	return pGoalIDs.size();
@@ -224,23 +193,10 @@ void SubRoom::DeleteWall(int index) {
 	}
 }
 
-void SubRoom::AddPedestrian(Pedestrian* ped) {
-	pPeds.push_back(ped);
-}
-
 void SubRoom::AddObstacle(Obstacle* obs){
 	pObstacles.push_back(obs);
 }
 
-void SubRoom::DeletePedestrian(int index) {
-	if ((index >= 0) && (index < (int) GetAnzPedestrians())) {
-		pPeds.erase(pPeds.begin() + index);
-
-	} else {
-		Log->Write("ERROR: Wrong Index in SubRoom::DeletePedestrian()");
-		exit(0);
-	}
-}
 
 void SubRoom::AddGoalID(int ID) {
 	pGoalIDs.push_back(ID);
@@ -436,14 +392,6 @@ void SubRoom::LoadWall(string line) {
 	AddWall(wall);
 }
 
-bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
-	Point pos = ped->GetPos();
-	if (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
-		return true;
-	else
-		return IsInSubRoom(pos);
-}
-
 
 // this is the case if they share a transition or crossing
 bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const {
@@ -487,13 +435,6 @@ const double* SubRoom::GetPlanEquation() const {
 
 double SubRoom::GetElevation(const Point& p) {
 	return pPlanEquation[0] * p.pX + pPlanEquation[1] * p.pY + pPlanEquation[2];
-}
-
-void SubRoom::ClearAllPedestrians(){
-	for(unsigned int p=0;p<pPeds.size();p++){
-		delete pPeds[p];
-	}
-	pPeds.clear();
 }
 
 

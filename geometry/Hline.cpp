@@ -27,6 +27,7 @@
 
 
 #include "Hline.h"
+#include "SubRoom.h"
 
 Hline::Hline() {
 	pRoom=NULL;

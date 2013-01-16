@@ -10,7 +10,6 @@
 
 #include <string>
 #include <algorithm>
-using namespace std;
 
 #include "../geometry/SubRoom.h"
 
@@ -18,10 +17,10 @@ class Room {
 private:
     int pRoomID; // Raumindex
     int pState; // ROOM_SMOKED or ROOM_CLEAN
-    string pCaption; // Raumname
+    std::string pCaption; // Raumname
     double pZPos; // Hoehenindex für Trajektorien
-    vector<SubRoom*> pSubRooms; // alle Unterräume (Stairs und "normale")
-    vector<int> pTransitionsIDs; // transitions only
+    std::vector<SubRoom*> pSubRooms; // alle Unterräume (Stairs und "normale")
+    std::vector<int> pTransitionsIDs; // transitions only
     OutputHandler* pOutputFile;
 
 public:
@@ -42,10 +41,9 @@ public:
     string GetCaption() const;
     double GetZPos() const;
     int GetAnzSubRooms() const;
-    const vector<SubRoom*>& GetAllSubRooms() const;
-	const vector<int>& GetAllTransitionsIDs() const;
+    const std::vector<SubRoom*>& GetAllSubRooms() const;
+	const std::vector<int>& GetAllTransitionsIDs() const;
     SubRoom* GetSubRoom(int index) const;
-    int GetAnzPedestrians() const;
     int GetRoomState()const;
 
 
@@ -56,8 +54,8 @@ public:
 
 
     // Ein-Ausgabe
-    void LoadNormalSubRoom(ifstream* buildingfile, int* i);
-    void LoadStair(ifstream* buildingfile, int* i);
+    void LoadNormalSubRoom(std::ifstream* buildingfile, int* i);
+    void LoadStair(std::ifstream* buildingfile, int* i);
     void WriteToErrorLog() const;
     //MPI
     void SetOutputHandler(OutputHandler* oh);

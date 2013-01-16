@@ -33,14 +33,12 @@ extern OutputHandler* Log;
 
 class Analysis {
 private:
-    int pActionPt;
     int pNPeds;
     double pTmax;
     double pDt;
     double fps;
     Building* pBuilding;
     IODispatcher* iod;
-    Trajectories* pTrajectories;
 
 public:
 

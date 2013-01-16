@@ -33,24 +33,23 @@
 #include <vector>
 #include <fstream>
 #include <cfloat>
-#include <omp.h>
+#include <map>
 
-#include "Room.h"
-#include "../general/Macros.h"
 
+class Crossing;
+class Transition;
+class Hline;
+class Room;
 
 class Building {
 private:
-    string pCaption; // Name des Projekts
-    vector<Room*> pRooms; // Liste der Räume
+    std::string pCaption; // Name des Projekts
+    std::vector<Room*> pRooms; // Liste der Räume
 
-    /// pedestrians pathway
-    bool pSavePathway;
-    ofstream PpathWayStream;
 
-	map<int, Crossing*> _crossings;
-	map<int, Transition*> _transitions;
-	map<int, Hline*> _hLines;
+	std::map<int, Crossing*> _crossings;
+	std::map<int, Transition*> _transitions;
+	std::map<int, Hline*> _hLines;
 
 
 public:
@@ -59,51 +58,35 @@ public:
     virtual ~Building();
 
     // Setter -Funktionen
-    void SetCaption(string s);
-    void SetRoutingEngine(RoutingEngine* r);
-    void SetAllRooms(const vector<Room*>& rooms);
+    void SetCaption(std::string s);
+    void SetAllRooms(const std::vector<Room*>& rooms);
     void SetRoom(Room* room, int index);
-    /// delete the ped from the ped vector
-    void DeletePedestrian(Pedestrian* ped);
-    /// delete the ped from the simulation
-    void DeletePedFromSim(Pedestrian* ped);
-    void AddPedestrian(Pedestrian* ped);
+
 
     // Getter - Funktionen
-    string GetCaption() const;
-    RoutingEngine* GetRoutingEngine() const;
-    const vector<Room*>& GetAllRooms() const;
-    const vector<Pedestrian*>& GetAllPedestrians() const;
-    Pedestrian* GetPedestrian( int pedID) const;
+    std::string GetCaption() const;
+    const std::vector<Room*>& GetAllRooms() const;
     int GetAnzRooms() const;
     int GetGoalsCount()const;
-    Room* GetRoom(int index) const; // Gibt Raum der Nummer "index" zurueck
-    Room* GetRoom(string caption)const;
-    Transition* GetTransition(string caption) const;
-    Transition* GetTransition(int id) ;
-    Crossing* GetGoal(string caption) const;
+    Room* GetRoom(int index) const;
+    Room* GetRoom(std::string caption)const;
+    Transition* GetTransition(std::string caption) const;
+    Transition* GetTransition(int id);
+    Crossing* GetGoal(std::string caption) const;
 
     //FIXME: obsolete shold get rid of this method
     Crossing* GetGoal(int id);
 
-    int GetAnzPedestrians() const;
-    LCGrid* GetGrid() const;
 
     // Sonstiges
     void InitGeometry();
-    void InitGrid(double cellSize);
-    //void InitRoomsAndSubroomsMap();
-    void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
-    void InitSavePedPathway(string filename);
     void AddRoom(Room* room);
-    void Update();
-    void UpdateGrid();
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
     void  DumpSubRoomInRoom(int roomID, int subID);
 
-	const map<int, Crossing*>& GetAllCrossings() const;
-	const map<int, Transition*>& GetAllTransitions() const;
-	const map<int, Hline*>& GetAllHlines() const;
+	const std::map<int, Crossing*>& GetAllCrossings() const;
+	const std::map<int, Transition*>& GetAllTransitions() const;
+	const std::map<int, Hline*>& GetAllHlines() const;
 
 	void AddCrossing(Crossing* line);
 	void AddTransition(Transition* line);
@@ -112,9 +95,9 @@ public:
 
 
     // Ein-Ausgabe
-    void LoadBuilding(string filename); // Laedt Geometrie-Datei
-    void LoadTrafficInfo(string filename);
-    void LoadRoutingInfo(string filename);
+    void LoadBuilding(std::string filename); // Laedt Geometrie-Datei
+    void LoadTrafficInfo(std::string filename);
+    void LoadRoutingInfo(std::string filename);
     void WriteToErrorLog() const;
 
 	void CleanUpTheScene();
@@ -123,7 +106,7 @@ public:
 
 private:
 	// wird nur innerhalb von Building benötigt
-	void StringExplode(string str, string separator, vector<string>* results);
+	void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 
 };
 

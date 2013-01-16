@@ -111,32 +111,6 @@ bool Transition::IsTransition() const {
 	return true;
 }
 
-/* Setzt Fußgänger von einem SubRoom in den zugehörigen nächsten SubRoom in einem neuen Raum
- * Parameter:
- *    - RoomID: aktuelle RoomID des Fußgängers
- *    - SubID: aktuelle SubRoomID des Fußgängers
- *    - PedID: ID des Fußgängers
- *    - goal_new: neues Ziel des Fußgängers, kann Crossing oder Transition sein,
- *          wird in Routing bestimmt und hier gesetzt
- * */
-void Transition::UpdatePedestrian(int RoomID, int SubID, int PedID, Crossing* goal_new) const {
-	SubRoom* sub = GetSubRoom(SubID);
-	Pedestrian* ped = sub->GetPedestrian(PedID);
-	Room* other_room = GetOtherRoom(RoomID);
-	if (other_room != NULL) {
-		SubRoom* other_sub = GetOtherSubRoom(RoomID, SubID);
-		// Fußgänger löschen
-		sub->DeletePedestrian(PedID);
-		// neues Ziel setzen
-		ped->SetExitIndex(goal_new->GetIndex());
-		ped->SetExitLine(goal_new);
-		// in neuem SubRoom setzten
-		other_sub->AddPedestrian(ped);
-	} else {
-		// Fußgänger löschen und NICHT neu setzen
-		sub->DeletePedestrian(PedID);
-	}
-}
 /* gibt den ANDEREN Subroom mit GetRoomID() != roomID zurück
  * subroomID wird hier nicht benötigt, aber in Crossings::GetOtherSubRoom()
  * (virtuelle Funktion) */

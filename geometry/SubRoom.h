@@ -33,30 +33,31 @@
 #include "Wall.h"
 #include "NavLine.h"
 #include "Crossing.h"
-#include "../general/Macros.h"
 #include "Obstacle.h"
-
-
-class Transition;
-class Hline;
+#include "Transition.h"
+#include "../general/Macros.h"
 
 /************************************************************
  SubRoom
  ************************************************************/
 
+class Hline;
+class Crossing;
+class Transition;
+
 class SubRoom {
 private:
 	int pID;
 	int pRoomID;
-	vector<Obstacle*> pObstacles; // obstacles
-	vector<int> pGoalIDs; // all navigation lines contained in this subroom
+	std::vector<Obstacle*> pObstacles; // obstacles
+	std::vector<int> pGoalIDs; // all navigation lines contained in this subroom
 	double pArea;
 	double pClosed;
 
 	//different types of navigation lines
-	vector<Crossing*> pCrossings;
-	vector<Transition*> pTransitions;
-	vector<Hline*> pHlines;
+	std::vector<Crossing*> pCrossings;
+	std::vector<Transition*> pTransitions;
+	std::vector<Hline*> pHlines;
 
 	static int UID;
 	int pUID;
@@ -65,8 +66,8 @@ private:
 	double pPlanEquation[3];
 
 protected:
-	vector<Wall> pWalls;
-	vector<Point> pPoly; // Polygon representation of the subroom
+	std::vector<Wall> pWalls;
+	std::vector<Point> pPoly; // Polygon representation of the subroom
 
 public:
 
@@ -78,9 +79,9 @@ public:
 	// Set-methods
 	void SetSubRoomID(int ID);
 	void SetRoomID(int ID);
-	void SetAllWalls(const vector<Wall>& walls);
+	void SetAllWalls(const std::vector<Wall>& walls);
 	void SetWall(const Wall& wall, int index);
-	void SetPolygon(const vector<Point>& poly);
+	void SetPolygon(const std::vector<Point>& poly);
 	void SetArea(double a);
 	void SetClosed(double c);
 	void SetPlanEquation(double A, double B, double C);
@@ -88,13 +89,13 @@ public:
 	// Get-methods
 	int GetSubRoomID() const;
 	int GetAnzWalls() const;
-	const vector<Wall>& GetAllWalls() const;
+	const std::vector<Wall>& GetAllWalls() const;
 	const Wall GetWall(int index) const;
 	const vector<Point>& GetPolygon() const;
 	int GetAnzPedestrians() const;
-	const vector<Obstacle*>& GetAllObstacles() const;
+	const std::vector<Obstacle*>& GetAllObstacles() const;
 	int GetAnzGoalIDs() const;
-	const vector<int>& GetAllGoalIDs() const;
+	const std::vector<int>& GetAllGoalIDs() const;
 	int GetGoalID(int index) const;
 	int GetRoomID() const;
 	int GetUID() const; // unique identifier for this subroom
@@ -109,9 +110,9 @@ public:
 	void AddTransition(Transition* line);
 	void AddHline(Hline* line);
 
-	const vector<Crossing*>& GetAllCrossings() const;
-	const vector<Transition*>& GetAllTransitions() const;
-	const vector<Hline*>& GetAllHlines() const;
+	const std::vector<Crossing*>& GetAllCrossings() const;
+	const std::vector<Transition*>& GetAllTransitions() const;
+	const std::vector<Hline*>& GetAllHlines() const;
 	const Crossing* GetCrossing(int i) const;
 	const Transition* GetTransition(int i) const;
 	const Hline* GetHline(int i) const;
@@ -130,15 +131,15 @@ public:
 	bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
 	/// @see LoadNormalSubRooom()  @see  LoadStair()
-	void LoadWall(string line);
+	void LoadWall(std::string line);
 
 	// virtual functions
-	virtual string WriteSubRoom() const = 0;
+	virtual std::string WriteSubRoom() const = 0;
 	virtual void WriteToErrorLog() const = 0;
-	virtual string WritePolyLine() const=0;
+	virtual std::string WritePolyLine() const=0;
 
 	/// convert all walls and transitions(doors) into a polygon representing the subroom
-	virtual void ConvertLineToPoly(vector<Line*> goals) = 0;
+	virtual void ConvertLineToPoly(std::vector<Line*> goals) = 0;
 
 	///check whether the pedestrians is still in the subroom
 	virtual bool IsInSubRoom(const Point& ped) const = 0;
@@ -164,11 +165,11 @@ public:
 	NormalSubRoom(const NormalSubRoom& orig);
 	virtual ~NormalSubRoom();
 
-	string WriteSubRoom() const;
-	string WritePolyLine() const;
+	std::string WriteSubRoom() const;
+	std::string WritePolyLine() const;
 
 	void WriteToErrorLog() const;
-	void ConvertLineToPoly(vector<Line*> goals);
+	void ConvertLineToPoly(std::vector<Line*> goals);
 	bool IsInSubRoom(const Point& ped) const;
 };
 
@@ -200,10 +201,10 @@ public:
 	/// pedestrians are going the stairs upwards
 	bool IsDownStair() const;
 
-	string WriteSubRoom() const;
-	string WritePolyLine() const;
+	std::string WriteSubRoom() const;
+	std::string WritePolyLine() const;
 	virtual void WriteToErrorLog() const;
-	virtual void ConvertLineToPoly(vector<Line*> goals);
+	virtual void ConvertLineToPoly(std::vector<Line*> goals);
 	bool IsInSubRoom(const Point& ped) const;
 };
 

@@ -47,7 +47,7 @@
 
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
-#include "Simulation.h"
+#include "Analysis.h"
 
 ///global unique log variable
 OutputHandler* Log;
@@ -66,9 +66,8 @@ int main(int argc, char **argv) {
 
 	// Simulation
 	Log->Write("INFO: \tStart Analysis()\n");
-	int evacTime = analysis.RunAnalysis();
+	analysis.RunAnalysis();
 	Log->Write("INFO: \tEnd Analysis()\n");
-	time(&endtime);
 
 	//do the last cleaning
 	delete args;
