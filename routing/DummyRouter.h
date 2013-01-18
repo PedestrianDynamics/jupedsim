@@ -17,7 +17,6 @@ public:
 	DummyRouter();
 	virtual ~DummyRouter();
 
-	// virtuelle Funktionen
 	virtual int FindExit(Pedestrian* p);
 	virtual void Init(Building* b);
 

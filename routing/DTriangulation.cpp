@@ -7,6 +7,8 @@
 
 #include "DTriangulation.h"
 
+using namespace std;
+
 DTriangulation::DTriangulation() {
 	_cdt=NULL;
 }

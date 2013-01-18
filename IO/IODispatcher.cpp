@@ -531,20 +531,20 @@ void IODispatcher::WriteFooter() {
 	Write("</trajectoriesDataset>\n");
 }
 
-Trajectories::Trajectories() :
+TrajectoriesFLAT::TrajectoriesFLAT() :
 		IODispatcher() {
 
 }
 
-void Trajectories::WriteHeader(int nPeds, int fps, Building* building) {
+void TrajectoriesFLAT::WriteHeader(int nPeds, int fps, Building* building) {
 
 }
 
-void Trajectories::WriteGeometry(Building* building) {
+void TrajectoriesFLAT::WriteGeometry(Building* building) {
 
 }
 
-void Trajectories::WriteFrame(int frameNr, Building* building) {
+void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building) {
 	char tmp[CLENGTH] = "";
 
 	for (int roomindex = 0; roomindex < building->GetAnzRooms(); roomindex++) {
@@ -563,7 +563,7 @@ void Trajectories::WriteFrame(int frameNr, Building* building) {
 	}
 }
 
-void Trajectories::WriteFooter() {
+void TrajectoriesFLAT::WriteFooter() {
 
 }
 

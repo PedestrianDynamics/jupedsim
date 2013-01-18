@@ -1,34 +1,54 @@
-
+/**
+ * @file    Simulation.cpp
+ * @date Created on: Dec 15, 2010
+ * Copyright (C) <2009-2011>
+ *
+ * @section LICENSE
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section description
+ * The Simulation class represents a simulation of pedestrians
+ * based on a certain model in a specific scenario. A simulation is defined by
+ * various parameters and functions.
+ *
+ */
 
 #include "Simulation.h"
 
-/************************************************
-// Konstruktoren
- ************************************************/
 
 Simulation::Simulation() {
-	pActionPt = 0; // on or off, wird für GCFM benötigt
-	pNPeds = 0; // number of pedestrians, Default 10
-	pTmax = 0;
-	pDt = 0;
-	pBuilding = NULL;
-	pDistribution = NULL;
-	pDirection = NULL;
-	pModel = NULL;
-	pSolver = NULL;
-	iod = new IODispatcher();
-	pTrajectories = new Trajectories();
-	fps=1;
+	_nPeds = 0; // number of pedestrians, Default 10
+	_tmax = 0;
+	_deltaT = 0;
+	_building = NULL;
+	_distribution = NULL;
+	_direction = NULL;
+	_model = NULL;
+	_solver = NULL;
+	_iod = new IODispatcher();
+	_fps=1;
 }
 
 Simulation::~Simulation() {
-	delete pBuilding;
-	delete pDistribution;
-	delete pDirection;
-	delete pModel;
-	delete pSolver;
-	delete iod;
-	delete pTrajectories;
+	delete _building;
+	delete _distribution;
+	delete _direction;
+	delete _model;
+	delete _solver;
+	delete _iod;
 }
 
 /************************************************
@@ -36,8 +56,8 @@ Simulation::~Simulation() {
  ************************************************/
 
 
-int Simulation::SetNPeds(int i) {
-	return pNPeds = i;
+void Simulation::SetPedsNumber(int i) {
+	_nPeds = i;
 }
 
 
@@ -46,21 +66,15 @@ int Simulation::SetNPeds(int i) {
  ************************************************/
 
 
-int Simulation::GetNPeds() const {
-	return pNPeds;
+int Simulation::GetPedsNumber() const {
+	return _nPeds;
 }
 
 Building * Simulation::GetBuilding() const {
-	return pBuilding;
+	return _building;
 }
 
-/************************************************
-// Sonstige-Funktionen
- ************************************************/
 
-/* bekommt alle Konsolenoptionen vom ArgumentParser
- * und setzt die entsprechenden Parameter in der Simulation
- * */
 void Simulation::InitArgs(ArgumentParser* args) {
 	char tmp[CLENGTH];
 	string s = "Parameter:\n";
@@ -96,7 +110,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		{
 			OutputHandler* travisto = new TraVisToHandler(args->GetHostname(),
 					args->GetPort());
-			iod->AddIO(travisto);
+			_iod->AddIO(travisto);
 			break;
 		}
 		case FORMAT_XML_BIN:
@@ -129,7 +143,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case FORMAT_XML_PLAIN:
 		{
 			OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-			iod->AddIO(tofile);
+			_iod->AddIO(tofile);
 			break;
 		}
 		case FORMAT_XML_BIN:
@@ -141,8 +155,11 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case FORMAT_PLAIN:
 		{
 			Log->Write("INFO: \tFormat plain not yet supported\n");
-			OutputHandler* file = new FileHandler("./Trajektorien.dat");
-			pTrajectories->AddIO(file);
+			OutputHandler* file = new FileHandler(args->GetTrajectoriesFile().c_str());
+
+			if(_iod) delete _iod;
+			_iod = new TrajectoriesFLAT();
+			_iod->AddIO(file);
 			exit(0);
 			break;
 		}
@@ -157,36 +174,36 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	}
 
 
-	pDistribution = new PedDistributor(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
+	_distribution = new PedDistributor(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
 			args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
 			args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
 			args->GetTauSigma());
-	s.append(pDistribution->writeParameter());
-	pDistribution->InitDistributor(args->GetPersonsFilename());
+	s.append(_distribution->writeParameter());
+	_distribution->InitDistributor(args->GetPersonsFilename());
 
-	// Richtungswahl zum Ziel
+	// define how the navigation line is crossed
 	int direction = args->GetExitStrategy();
 	sprintf(tmp, "\tRichtung zum Ausgang: %d\n", direction);
 	s.append(tmp);
 	switch (direction) {
 		case 1:
-			pDirection = new DirectionMiddlePoint();
+			_direction = new DirectionMiddlePoint();
 			break;
 		case 2:
-			pDirection = new DirectionMinSeperation();
+			_direction = new DirectionMinSeperation();
 			break;
 		case 3:
-			pDirection = new DirectionMinSeperationShorterLine();
+			_direction = new DirectionMinSeperationShorterLine();
 			break;
 		case 4:
-			pDirection = new DirectionInRangeBottleneck();
+			_direction = new DirectionInRangeBottleneck();
 			break;
 	}
-	pModel = new GCFMModel(pDirection, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+	_model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
 			args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
 			args->GetMaxFPed(), args->GetMaxFWall());
 	s.append("\tModel: GCFMModel\n");
-	s.append(pModel->writeParameter());
+	s.append(_model->writeParameter());
 
 	// ODE solver
 	int solver = args->GetSolver();
@@ -194,24 +211,24 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	switch (solver) {
 		case 1:
-			pSolver = new EulerSolverLC(pModel);
+			_solver = new EulerSolverLC(_model);
 			break;
 		case 2:
-			pSolver = new VelocityVerletSolver(pModel);
+			_solver = new VelocityVerletSolver(_model);
 			break;
 		case 3:
-			pSolver = new LeapfrogSolver(pModel);
+			_solver = new LeapfrogSolver(_model);
 			break;
 	}
-	pTmax = args->GetTmax();
-	sprintf(tmp, "\tt_max: %f\n", pTmax);
+	_tmax = args->GetTmax();
+	sprintf(tmp, "\tt_max: %f\n", _tmax);
 	s.append(tmp);
-	pDt = args->Getdt();
-	sprintf(tmp, "\tdt: %f\n", pDt);
+	_deltaT = args->Getdt();
+	sprintf(tmp, "\tdt: %f\n", _deltaT);
 	s.append(tmp);
 
-	fps=args->Getfps();
-	sprintf(tmp, "\tfps: %f\n", fps);
+	_fps=args->Getfps();
+	sprintf(tmp, "\tfps: %f\n", _fps);
 	s.append(tmp);
 
 	// Routing
@@ -280,19 +297,19 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 
 	// IMPORTANT: do not change the order in the following..
-	pBuilding = new Building();
-	pBuilding->SetRoutingEngine(routingEngine);
+	_building = new Building();
+	_building->SetRoutingEngine(routingEngine);
 
 	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
 	s.append(tmp);
 	Log->Write("INFO: \t" + s);
-	pBuilding->LoadBuilding(args->GetGeometryFilename());
-	pBuilding->AddSurroundingRoom();
-	pBuilding->InitGeometry(); // create the polygones
+	_building->LoadBuilding(args->GetGeometryFilename());
+	_building->AddSurroundingRoom();
+	_building->InitGeometry(); // create the polygones
 
-	pBuilding->LoadTrafficInfo(args->GetTrafficFile());
+	_building->LoadTrafficInfo(args->GetTrafficFile());
 
-	pBuilding->LoadRoutingInfo(args->GetRoutingFile());
+	_building->LoadRoutingInfo(args->GetRoutingFile());
 
 	/////////
 
@@ -311,18 +328,18 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	////////
 
 
-	pNPeds=pDistribution->Distribute(pBuilding);
+	_nPeds=_distribution->Distribute(_building);
 
 	// initialise the routing engine before doing any other things
-	routingEngine->Init(pBuilding);
-	pBuilding->InitPhiAllPeds(pDt);
+	routingEngine->Init(_building);
+	_building->InitPhiAllPeds(_deltaT);
 
 	//using linkedcells
 	if (args->GetLinkedCells()){
 		s.append("\tusing Linked-Cells\n");
-		pBuilding->InitGrid(args->GetLinkedCellSize());
+		_building->InitGrid(args->GetLinkedCellSize());
 	}else {
-		pBuilding->InitGrid(-1);
+		_building->InitGrid(-1);
 
 	}
 
@@ -330,45 +347,41 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	if(args->GetPathwayFile()!=""){
 		char name[30]="";
 		sprintf(name,"%s_p0",args->GetPathwayFile().c_str());
-		pBuilding->InitSavePedPathway(name);
+		_building->InitSavePedPathway(name);
 	}
 
 	//pBuilding->WriteToErrorLog();
 }
 
 
-/* Eigentliche Simulation
- * Rückgabewert:
- *   - Evakuierungszeit
- * */
 
 int Simulation::RunSimulation() {
 	int frameNr = 1; // Frame Number
-	int writeInterval = (int) ((1. / fps) / pDt + 0.5);
+	int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
 	writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 	double t;
 
 
 	// writing the header
 
-	iod->WriteHeader(pNPeds, fps, pBuilding);
-	iod->WriteGeometry(pBuilding);
-	iod->WriteFrame(0, pBuilding);
+	_iod->WriteHeader(_nPeds, _fps, _building);
+	_iod->WriteGeometry(_building);
+	_iod->WriteFrame(0,_building);
 
 	//first initialisation needed by the linked-cells
 	 Update();
 
 
 	// main program loop
-	for (t = 0; t < pTmax && GetNPeds() > 0; ++frameNr) {
-		t = 0 + (frameNr - 1) * pDt;
+	for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
+		t = 0 + (frameNr - 1) * _deltaT;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
-		pSolver->solveODE(t, t + pDt, pBuilding);
+		_solver->solveODE(t, t + _deltaT, _building);
 		// gucken ob Fußgänger in neuen Räumen/Unterräumen
 		Update();
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
-			iod->WriteFrame(frameNr / writeInterval, pBuilding);
+			_iod->WriteFrame(frameNr / writeInterval, _building);
 		}
 //		if (frameNr % 1000 == 0) {
 //			cout<<"                        \r";
@@ -377,7 +390,7 @@ int Simulation::RunSimulation() {
 //		}
 	}
 	// writing the footer
-	iod->WriteFooter();
+	_iod->WriteFooter();
 
 	//return the evacuation time
 	return (int) t;
@@ -387,18 +400,18 @@ int Simulation::RunSimulation() {
  * ob Fußgänger von einem Raum in einen anderen gesetzt
  * werden müßen
  * */
-
+// TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
-	pBuilding->Update();
+	_building->Update();
 	// Neue Anzahl von Fußgänger, falls jemand ganz raus geht
-	SetNPeds(pBuilding->GetAllPedestrians().size());
+	_nPeds=_building->GetAllPedestrians().size();
 
 	// update the general time
-	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+pDt);
+	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+_deltaT);
 
 	//update the cells position
 	//if (pLinkedCells){
-		pBuilding->UpdateGrid();
+		_building->UpdateGrid();
 	//}
 
 }

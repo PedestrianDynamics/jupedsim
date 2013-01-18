@@ -75,12 +75,12 @@ public:
 };
 
 
-class Trajectories:public IODispatcher {
+class TrajectoriesFLAT:public IODispatcher {
 
 
 public:
-	Trajectories();
-	virtual ~Trajectories(){};
+	TrajectoriesFLAT();
+	virtual ~TrajectoriesFLAT(){};
 
 	virtual void WriteHeader(int nPeds, int fps, Building* building);
 	virtual void WriteGeometry(Building* building);

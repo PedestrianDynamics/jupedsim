@@ -145,10 +145,14 @@ public:
 	const FileFormat& GetFileFormat() const;
 
 
+	/**
+	 * Parse the commands passed to the command line
+	 * specially looks for the initialization file
+	 */
 	void ParseArgs(int argc, char **argv);
 
 	/**
-	 * parse the initialization file
+	 * Parse the initialization file
 	 * @param inifile
 	 */
 	void ParseIniFile(string inifile);

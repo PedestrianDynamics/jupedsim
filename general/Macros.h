@@ -37,7 +37,7 @@
 
 // zur Versionskontrolle beim Geometrieformat
 #define VERSION 0.40
-#define JPS_VERSION "1.1"
+#define JPS_VERSION "0.4"
 
 // Länge von char vectoren zur Ausgabe
 #define CLENGTH 1000

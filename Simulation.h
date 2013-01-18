@@ -1,23 +1,29 @@
-/*Simulation.h:
-  The Simulation class represents a simulation of pedestrians
-  based on a certain model in a specific scenario. A simulation is defined by
-  various parameters and functions.
-  Copyright (C) <2009-2010>  <Jonas Mehlich and Mohcine Chraibi>
-
-  This file is part of OpenPedSim.
-
-  OpenPedSim is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  any later version.
-
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  OpenPedSim is distributed in the hope that it will be useful,
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with Foobar. If not, see <http://www.gnu.org/licenses/>.
+/**
+ * @file    Simulation.h
+ * @date Created on: Dec 15, 2010
+ * Copyright (C) <2009-2011>
+ *
+ * @section LICENSE
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section description
+ * The Simulation class represents a simulation of pedestrians
+ * based on a certain model in a specific scenario. A simulation is defined by
+ * various parameters and functions.
+ *
  */
 
 #ifndef SIMULATION_H_
@@ -43,36 +49,67 @@ extern OutputHandler* Log;
 
 class Simulation {
 private:
-    int pActionPt; // on or off
-    int pNPeds; // number of pedestrians
-    double pTmax; // Maximale Simulationszeit
-    double pDt; // Zeitschritt
-    double fps; // framerate
-    Building* pBuilding; // Geometrie mit Rooms, SubRooms und Wänden
-    PedDistributor* pDistribution; // verteilt die Fußgänger zu Beginn der Simulation
-    DirectionStrategy* pDirection; // gibt die Richtungswahl zum Ziel an
-    ForceModel* pModel; // das verwendete Kraftmodell (im Moment nur GCFM)
-    ODESolver* pSolver; // Löser für die ODE
-    IODispatcher* iod;
-    Trajectories* pTrajectories;
+	///Number of pedestrians in the simulation
+    int _nPeds;
+    ///Maximum simulation time
+    double _tmax;
+    /// time step
+    double _deltaT;
+    /// frame rate for the trajectories
+    double _fps;
+    /// building object
+    Building* _building;
+    ///initial distribution of the pedestrians
+    PedDistributor* _distribution;
+    /// door crossing strategy for the pedestrians
+    DirectionStrategy* _direction;
+    /// Force model to use
+    ForceModel* _model;
+    /// differential equation solver
+    ODESolver* _solver;
+    /// writing the trajectories to file
+    IODispatcher* _iod;
 
 public:
-    // Konstruktor
     Simulation();
     virtual ~Simulation();
-    // Setter-Funktionen
-    int SetNPeds(int i);
-    // Getter-Funktionen
-    int GetNPeds() const;
+
+    /**
+     * Initialize the number of agents in the simulation
+     */
+    void SetPedsNumber(int i);
+
+    /**
+     * Initialize the number of agents in the simulation
+     */
+    int GetPedsNumber() const;
+
+    /**
+     * Returns the number of agents when running on a distributed system (MPI)
+     * NOT IMPLEMENTED
+     */
     int GetNPedsGlobal() const;
+
+    /**
+     * @return the building object containing all geometry elements
+     */
     Building* GetBuilding() const;
-    // Sonstige-Funktionen
+
+    /**
+     * Read parameters from the argument parser class.
+     */
     void InitArgs(ArgumentParser *args);
-    int InitSimulation();
+
+    /**
+     *
+     * @return the total simulated/evacuation time
+     */
     int RunSimulation();
-    void Update(); // update the complete system
-    void DistributeDestinations(); //assign the pedestrians their final destinations
-    void InitRoutineClearing(); // set some parameters specific to routine clearing
+
+    /**
+     * Update the pedestrians states: positions, velocity, route
+     */
+    void Update();
 
 };
 

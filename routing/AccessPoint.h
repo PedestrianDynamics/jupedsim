@@ -6,20 +6,20 @@
  * Copyright (C) <2009-2010>
  *
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
- * OpenPedSim is free software: you can redistribute it and/or modify
+ * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
  *
@@ -141,35 +141,33 @@ public:
 
 
 private:
-	int pID;
-	double pCenter[2];
-	double pRadius;
-	bool pFinalDestination;
-	int pRoom1ID;
-	int pRoom2ID;
+	int _id;
+	double _center[2];
+	double _radius;
+	bool _finalDestination;
+	int _room1ID;
+	int _room2ID;
 	Point pCentre;
-	NavLine* pNavLine;
-	vector<Pedestrian*> pTransitPedestrians;
-	int pIsClosed;
+	NavLine* _navLine;
+	vector<Pedestrian*> _transitPedestrians;
+	int _isClosed;
 
-	// store the final destinations
-	//std::vector <int> pFinalDestination;
 
 	// stores the connecting APs
-	vector<AccessPoint*>pConnectingAPs;
+	vector<AccessPoint*>_connectingAPs;
 
 
 	// store part of a graph
 	// map a final destination to the next ap to reach it
 	// store the nearest AP to reach the destination
-	map<int, int> pMapDestToAp;
+	map<int, int> _mapDestToAp;
 
 	// store part of the weight matrix
 	// store the total distance to the destination int
-	map <int,double> pMapDestToDist;
+	map <int,double> _mapDestToDist;
 
 	//store the navigation graph
-	map<int,vector<AccessPoint*> > pNavigationGraphTo;
+	map<int,vector<AccessPoint*> > _navigationGraphTo;
 
 };
 

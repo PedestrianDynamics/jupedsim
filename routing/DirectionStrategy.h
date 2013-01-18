@@ -22,7 +22,6 @@
  * @section DESCRIPTION
  *
  *
- *
  */
 
 #ifndef _DIRECTIONSTRATEGY_H
@@ -31,17 +30,16 @@
 #include "../geometry/Room.h"
 
 
-/************************************************************
- DirectionStrategy (abstrakte Klasse)
- ************************************************************/
 
+/**
+ *
+ */
 class DirectionStrategy {
 
 public:
     DirectionStrategy();
     DirectionStrategy(const DirectionStrategy& orig);
     virtual ~DirectionStrategy();
-    // virtuelle Funktionen werden in den abgeleiteten Klassen implementiert
     virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
 };
 

@@ -1,7 +1,8 @@
 /**
- * File:   Router.h
+ * \file  Router.h
+ * \date Created on 11. November 2010, 12:55
  *
- * Created on 11. November 2010, 12:55
+ *
  * @section LICENSE
  * This file is part of JuPedSim.
  *
@@ -19,13 +20,14 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
- *
- *
+ * @description
+ * virtual base class for all routers.
+ * Each router implementation should be derived from this class.
  *
  */
 
-#ifndef _ROUTING_H
-#define	_ROUTING_H
+#ifndef _ROUTER_H
+#define	 _ROUTER_H
 
 #include "../geometry/Crossing.h"
 #include "../geometry/Transition.h"
@@ -35,45 +37,92 @@
 
 class Building;
 
-/************************************************************
- Routing
- ************************************************************/
 
 class Router {
+
 private:
 	/// routing strategy as defined in the Macros.h file
 	RoutingStrategy _strategy;
+
 	/// the id as present in the persons.xml file
 	int _id;
 
 protected:
 
+	/// Contain the ids of the intermediate destinations
 	vector<vector<int> >_trips;
+
+	/// All final destinations of the pedestrians
 	vector<int> _finalDestinations;
 
 public:
 	Router();
+
 	virtual ~Router();
 
+	/**
+	 * Add a new trip to this router
+	 * @param trip A vector containing the IDs of the intermediate destination
+	 */
 	void AddTrip(vector<int> trip);
+
+	/**
+	 * Add a new final destination to this router
+	 * @param id of an intermediate destination as presented in the geometry/routing files
+	 */
 	void AddFinalDestinationID(int id);
 
 
-	//TODO: investigate Trip for compatibility with ID starting with 0 or 1.
+	/**
+	 * TODO: investigate Trip for compatibility with ID starting with 0 or 1.
+	 * @return a vector containing the IDs of the intermediate destinations
+	 */
 	const vector<int> GetTrip(int id) const;
+
+	/**
+	 * @return all final destinations
+	 */
 	const vector<int> GetFinalDestinations() const;
 
+	/**
+	 * Set the id of the router as defined in the person file
+	 */
 	void SetID(int id);
+
+	/**
+	 * @return the id of the router as defined in the person file
+	 */
 	int GetID() const;
 
+	/**
+	 * The strategy is automatically set based on the description in the
+	 * person file.
+	 */
 	void SetStrategy(RoutingStrategy strategy);
+
+	/**
+	 * The strategy is automatically set based on the description in the
+	 * person file.
+	 */
 	RoutingStrategy GetStrategy() const;
 
-	// Ausgabe
+	/**
+	 * Debug output for this class
+	 */
 	void WriteToErrorLog() const;
 
-	// virtuelle Funktionen
+	/**
+	 * Find the next suitable target for Pedestrian p
+	 * @param p the Pedestrian
+	 * @return -1 in the case no destination could be found
+	 */
 	virtual int FindExit(Pedestrian* p) = 0;
+
+	/**
+	 * Each implementation of this virtual class has the possibility to initialize
+	 * its Routing engine using the supplied building object.
+	 * @param b the building object
+	 */
 	virtual void Init(Building* b) = 0;
 
 

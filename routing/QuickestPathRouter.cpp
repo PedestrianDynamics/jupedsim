@@ -6,20 +6,20 @@
  * Copyright (C) <2009-2011>
  *
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
- * OpenPedSim is free software: you can redistribute it and/or modify
+ * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
  *
@@ -61,7 +61,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 	int nextDestination=ped->GetNextDestination();
 	//get the room and find the corresponding node
 
-	SubRoom* sub = pBuilding->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+	SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
 
 	// get the opened exits
 	int bestAPsID=-1;
@@ -74,7 +74,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		int apID=accessPointsInSubRoom[i];
 
 		const Point& pt3=ped->GetPos();
-		Crossing* cross = pBuilding->GetGoal(apID);
+		Crossing* cross = _building->GetGoal(apID);
 		double distToExit=cross->DistTo(pt3);
 
 		//double distToExit2=(pt3-cross->ShortestPoint(pt3)).NormSquare();
@@ -91,7 +91,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		//nextDestination=pAccessPoints[apID]->GetNextApTo(ped->GetFinalDestination());;
 		//int dum=pAccessPoints[apID]->GetNextApTo(ped->GetFinalDestination());;
 
-		nextDestination = GetQuickestRoute(ped,pAccessPoints[apID]);
+		nextDestination = GetQuickestRoute(ped,_accessPoints[apID]);
 		//printf("[%d === %d]\n",dum,nextDestination);
 
 		if(nextDestination==-1){ // we are almost at the exit
@@ -99,7 +99,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		}
 
 		//check that the next destination is in the actual room of the pedestrian
-		if(pAccessPoints[nextDestination]->isInRange(ped->GetUniqueRoomID())==false) {
+		if(_accessPoints[nextDestination]->isInRange(ped->GetUniqueRoomID())==false) {
 			//return the last destination if defined
 			int previousDestination=ped->GetNextDestination();
 
@@ -113,7 +113,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 				//pAccessPoints[apID]->AddTransitPed(ped);
 
 				ped->SetExitIndex(apID);
-				ped->SetExitLine(pBuilding->GetGoal(apID));
+				ped->SetExitLine(_building->GetGoal(apID));
 				ped->SetSmoothTurning(true);
 				return apID;
 			}
@@ -127,7 +127,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 			// only assigned if not already assigned
 
 			ped->SetExitIndex(nextDestination);
-			ped->SetExitLine(pBuilding->GetGoal(nextDestination));
+			ped->SetExitLine(_building->GetGoal(nextDestination));
 			ped->SetSmoothTurning(true);
 			return nextDestination;
 		}
@@ -155,10 +155,10 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		int apID=accessPointsInSubRoom[i];
 		//randomExit=apID;
 		int uniqueRoomID= ped->GetUniqueRoomID();
-		if(pAccessPoints[apID]->isInRange(uniqueRoomID)==false) continue;
+		if(_accessPoints[apID]->isInRange(uniqueRoomID)==false) continue;
 
 		//check if that exit is open.
-		if(pBuilding->GetGoal(apID)->IsOpen()==false) continue;
+		if(_building->GetGoal(apID)->IsOpen()==false) continue;
 
 		//FIXME
 		//will not longer be needed if the agents take the exits they see and
@@ -169,14 +169,14 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 
 		//avoid going into rang charakterized by size==2
 		// provided there are more choices
-		if ((pBuilding->GetGoal(apID)->Length()<0.53)&&
+		if ((_building->GetGoal(apID)->Length()<0.53)&&
 				(accessPointsInSubRoom.size()>10)) continue;
 
 		//check if I can see the exit
-		SubRoom* sub = pBuilding->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
+		SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID());
 
 		// segment connecting the two APs/goals
-		const Point& p1 = (pBuilding->GetGoal(apID)->GetPoint1()+pBuilding->GetGoal(apID)->GetPoint2())*0.5;
+		const Point& p1 = (_building->GetGoal(apID)->GetPoint1()+_building->GetGoal(apID)->GetPoint2())*0.5;
 		const Point& p2 = ped->GetPos();
 		Line segment = Line(p1,p2);
 
@@ -200,7 +200,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 			int gID=accessPointsInSubRoom[g];
 			if(gID==apID) continue;
 			// skip the concerned exits door and d
-			if(segment.IntersectionWith(*pBuilding->GetGoal(gID))==true) {
+			if(segment.IntersectionWith(*_building->GetGoal(gID))==true) {
 				isVisible=false;
 				//cout<<"failed: goal "<<gID<<endl;
 				break;
@@ -209,11 +209,11 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		if(isVisible==false) continue;
 		double x = ped->GetPos().GetX();
 		double y = ped->GetPos().GetY();
-		double dist=pAccessPoints[apID]->GetDistanceTo(ped->GetFinalDestination())+pAccessPoints[apID]->distanceTo(x,y);
+		double dist=_accessPoints[apID]->GetDistanceTo(ped->GetFinalDestination())+_accessPoints[apID]->distanceTo(x,y);
 
 		//FIXME: should be based on time not on distance
 		if(dist<minDist){
-			bestAPsID=pAccessPoints[apID]->GetID();
+			bestAPsID=_accessPoints[apID]->GetID();
 			minDist=dist;
 			//cout<<" best found: " <<apID<<" " <<bestAPsID<<endl;
 		}
@@ -223,7 +223,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 
 
 		char tmp[CLENGTH];
-		const char* caption=pBuilding->GetRoom(ped->GetRoomID())->GetCaption().c_str();
+		const char* caption=_building->GetRoom(ped->GetRoomID())->GetCaption().c_str();
 		sprintf(tmp,"WARNING: GlobalRouter: best AP could not be identified for pedestrian %d in room/subroom [%s] %d/%d \n",ped->GetPedIndex(), caption, ped->GetSubRoomID(),ped->GetSubRoomID());
 		Log->Write(tmp);
 		Log->Write("WARNING: GlobalRouter: There are no exit in the sight range");
@@ -231,7 +231,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		sprintf(tmp,"WARNING: GlobalRouter: I am choosing a random one [ %d ]",bestAPsID);
 		Log->Write(tmp);
 
-		ped->SetExitLine(pBuilding->GetGoal(0));
+		ped->SetExitLine(_building->GetGoal(0));
 		exit(EXIT_FAILURE);
 		//return -1;
 	}
@@ -239,7 +239,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 
 	ped->SetExitIndex(bestAPsID);
 	ped->SetSmoothTurning(true);
-	ped->SetExitLine(pBuilding->GetGoal(bestAPsID));
+	ped->SetExitLine(_building->GetGoal(bestAPsID));
 
 	//pAccessPoints[0]->Dump();
 	return bestAPsID;
@@ -443,8 +443,8 @@ double QuickestPathRouter::GetJamSizeAtExit(int exitID){
 
 	// get the connecting rooms
 	// cant do this with the APs, need subrooms
-	SubRoom* sbr1 = pBuilding->GetGoal(exitID)->GetSubRoom1();
-	SubRoom* sbr2 = pBuilding->GetGoal(exitID)->GetSubRoom2();
+	SubRoom* sbr1 = _building->GetGoal(exitID)->GetSubRoom1();
+	SubRoom* sbr2 = _building->GetGoal(exitID)->GetSubRoom2();
 
 	if (sbr1){
 		const vector<Pedestrian*>& peds = sbr1->GetAllPedestrians();
@@ -481,9 +481,9 @@ double QuickestPathRouter::GetJamSizeAtExit(int exitID){
 
 void QuickestPathRouter::ReduceGraph(){
 
-	for(unsigned int i=0;i<pAccessPoints.size();i++){
+	for(unsigned int i=0;i<_accessPoints.size();i++){
 		vector<AccessPoint*>toBeDeleted;
-		AccessPoint* from_AP=pAccessPoints[i];
+		AccessPoint* from_AP=_accessPoints[i];
 		int from_door=from_AP->GetID();
 
 		// get all AP connected to the nearest
@@ -538,13 +538,13 @@ void QuickestPathRouter::ReduceGraph(){
 
 void QuickestPathRouter::CheckAndClearDoubleLinkedNodes(){
 
-	for(unsigned int i=0;i<pAccessPoints.size();i++){
+	for(unsigned int i=0;i<_accessPoints.size();i++){
 		vector<AccessPoint*>toBeDeleted;
-		AccessPoint* from_AP=pAccessPoints[i];
+		AccessPoint* from_AP=_accessPoints[i];
 		const vector<AccessPoint*>& from_aps = from_AP->GetConnectingAPs();
 
-		for(unsigned int j=0;j<pAccessPoints.size();j++){
-			AccessPoint* to_AP=pAccessPoints[j];
+		for(unsigned int j=0;j<_accessPoints.size();j++){
+			AccessPoint* to_AP=_accessPoints[j];
 			const vector<AccessPoint*>& to_aps = to_AP->GetConnectingAPs();
 
 			// if one contains the other
@@ -564,9 +564,9 @@ void QuickestPathRouter::CheckAndClearDoubleLinkedNodes(){
 
 void QuickestPathRouter::ExpandGraph(){
 
-	for(unsigned int i=0;i<pAccessPoints.size();i++){
+	for(unsigned int i=0;i<_accessPoints.size();i++){
 		vector<AccessPoint*>toBeDeleted;
-		AccessPoint* tmp=pAccessPoints[i];
+		AccessPoint* tmp=_accessPoints[i];
 		//int tmpID=tmp->GetID();
 
 		// get all AP connected to the nearest
@@ -587,7 +587,7 @@ void QuickestPathRouter::ExpandGraph(){
 				toBeDeleted.push_back(tmp1);
 
 			int bestID=tmp1->GetNearestTransitAPTO(FINAL_DEST_OUT);
-			double dist1=pAccessPoints[bestID]->GetDistanceTo(tmp)+tmp->GetDistanceTo(tmp1);
+			double dist1=_accessPoints[bestID]->GetDistanceTo(tmp)+tmp->GetDistanceTo(tmp1);
 			double dist2=tmp->GetDistanceTo(tmp1);
 			if(dist1<dist2)
 				toBeDeleted.push_back(tmp1);
@@ -664,7 +664,7 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* me, Pedestrian** 
 	double jamThreshold=0.5;
 	*flag=FREE_EXIT; // assume free exit
 
-	Crossing* crossing=pBuilding->GetGoal(exitID);
+	Crossing* crossing=_building->GetGoal(exitID);
 
 	bool done=false;
 	double radius=3.0;//start radius in metres
@@ -809,7 +809,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
 
 	int ignore_ped1=ped->GetPedIndex();
 	int ignore_ped2=ref->GetPedIndex();
-	Crossing* ignore_crossing=pBuilding->GetGoal(ref->GetExitIndex());
+	Crossing* ignore_crossing=_building->GetGoal(ref->GetExitIndex());
 
 	int obstacles=GetObstaclesCountBetween(ped->GetPos(),ref->GetPos(),ignore_crossing,ignore_ped1,ignore_ped2);
 
@@ -895,7 +895,7 @@ int QuickestPathRouter::isCongested(Pedestrian* ped){
 	vector<Pedestrian*> neighbourhood;
 	double range=1.0;//1m
 
-	pBuilding->GetGrid()->GetNeighbourhood(ped,neighbourhood);
+	_building->GetGrid()->GetNeighbourhood(ped,neighbourhood);
 
 
 	std::vector<int> conflictings;
@@ -952,7 +952,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
 	int flag=FREE_EXIT; //assume free exit
 	SelectReferencePedestrian(ped,&myref,exitid,&flag);
 
-	AccessPoint* ap=pAccessPoints[exitid];
+	AccessPoint* ap=_accessPoints[exitid];
 
 	// compute the time
 	double time=FLT_MAX;
@@ -1017,21 +1017,21 @@ void QuickestPathRouter::Redirect(Pedestrian* ped){
 	// then no redirection is possible
 
 	// collect the possible alternatives
-	Room* room=pBuilding->GetRoom(ped->GetRoomID());
+	Room* room=_building->GetRoom(ped->GetRoomID());
 	SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
 
 	const vector<int>& goals=room->GetAllTransitionsIDs();
 
 	for(unsigned int g=0;g<goals.size();g++){
 		int exitid=goals[g];
-		AccessPoint* ap=pAccessPoints[exitid];
+		AccessPoint* ap=_accessPoints[exitid];
 
 		//only final are accounted
 		if(ap->isFinalDestination()==false) continue;
 
 		//check if I can reach that exit, there should exits a direct line
 		// segment connecting the two APs/goals
-		const Point& p1 = pBuilding->GetGoal(exitid)->GetCentre();
+		const Point& p1 = _building->GetGoal(exitid)->GetCentre();
 		const Point& p2 = ped->GetPos();
 		Line segment = Line(p1,p2);
 
@@ -1068,7 +1068,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped){
 		//cout<<"cba:" <<cba<<endl;
 		if (cba>0.010){
 			ped->SetExitIndex(quickest);
-			ped->SetExitLine(pBuilding->GetGoal(quickest));
+			ped->SetExitLine(_building->GetGoal(quickest));
 		}
 
 	}

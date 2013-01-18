@@ -1,28 +1,26 @@
 /**
  * @file    GlobalRouter.h
- * @author  Ulrich Kemloh <kemlohulrich@gmail.com>
- * @version 0.1
- * Created on: Dec 15, 2010
+ * @date Created on: Dec 15, 2010
  * Copyright (C) <2009-2011>
  *
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
- * OpenPedSim is free software: you can redistribute it and/or modify
+ * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
- *
+ * implement the global shortest path using the dijkstra algorithm
  *
  *
  */
@@ -46,33 +44,41 @@ extern OutputHandler* Log;
 class GlobalRouter: public Router {
 
 public:
-	//GlobalRouter(Building* building);
 	GlobalRouter();
 	virtual ~GlobalRouter();
 
 	virtual void Init(Building* building);
 
-	//performs a check of the geometry and fixes if possible. transitions/crossings and hlines.
-	void CheckInconsistencies();
 
 	virtual int FindExit(Pedestrian* p);
 
+	/**
+	 * Performs a check of the geometry and fixes if possible.
+	 * NOT IMPLEMENTED
+	 */
+	void CheckInconsistencies();
 
 	/**
 	 * write the graph as GV format to be used with graphviz
 	 * @param filename
 	 */
-	void WriteGraphGV(string filename, int finalDestination  ,const vector<string> rooms= vector<string>());
+	void WriteGraphGV(std::string filename, int finalDestination,
+			const std::vector<std::string> rooms= std::vector<std::string>());
+
+
 
 protected:
-	void GetPath(int transID1, int transID2);
-	void FloydWarshall();
 	void DumpAccessPoints(int p=-1);
 
-	// check if 2 points can see each other in the geometry
+	/**
+	 * @return true if the two points are in the visibility range of each other
+	 * @note based on http://alienryderflex.com/intersect/
+	 */
 	bool CanSeeEachother(const Point&pt1, const Point&pt2);
-	//http://alienryderflex.com/intersect/
 
+	/**
+	 * @return true if the two segments are in the visibility range of each other
+	 */
 	bool CanSeeEachOther(Crossing* c1, Crossing* c2);
 
 	/**
@@ -81,8 +87,15 @@ protected:
 	 */
 	int GetBestDefaultRandomExit(Pedestrian* p);
 
+	/**
+	 * @return the subroom which contains both crossings.
+	 *  Null is return is there is no such subroom.
+	 */
 	SubRoom* GetCommonSubRoom(Crossing* c1, Crossing* c2);
 
+	/**
+	 * @return true if the element is present in the vector
+	 */
 	template<typename A>
 	bool IsElementInVector(const std::vector<A> &vec, A& el) {
 		typename std::vector<A>::const_iterator it;
@@ -94,7 +107,10 @@ protected:
 		}
 	}
 
-	//map with a default return value if the key is not contained
+	/**
+	 * Implementation of a map with a default value.
+	 * @return the default value if the element was not found in the map
+	 */
 	template <typename K, typename V>
 	V GetWithDef(const  std::map <K,V> & m, const K & key, const V & defval ) {
 	   typename std::map<K,V>::const_iterator it = m.find( key );
@@ -107,20 +123,34 @@ protected:
 	}
 
 
+private:
+	/**
+	 * Compute the intermediate paths between the two given transitions IDs
+	 */
+	void GetPath(int transID1, int transID2);
+
+	/**
+	 * Perform the FloydWahrshal algorithm
+	 */
+	void FloydWarshall();
+
+
+private:
+	int **_pathsMatrix;
+	double **_distMatrix;
+	std::vector< int > _tmpPedPath;
+	std::map<int,int> _map_id_to_index;
+	std::map<int,int> _map_index_to_id;
+	///map the internal crossings/transition id to
+	///the global ID (description) for that final destination
+	std::map<int, int> _mapIdToFinalDestination;
 
 protected:
-	int **pPathsMatrix;
-	double **pDistMatrix;
-	std::vector< int > pTmpPedPath;
+	std::map <int, AccessPoint*> _accessPoints;
+	Building *_building;
 
-	//map the internal crossings/transition id to the global ID (description) for that final destination
-	map<int, int> pMapIdToFinalDestination;
-	Building *pBuilding;
-	//std::vector<AccessPoint*> pAccessPoints;
-	std::map <int, AccessPoint*> pAccessPoints;
 
-	std::map<int,int> pMap_id_to_index;
-	std::map<int,int> pMap_index_to_id;
+
 
 };
 
