@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include<math.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -18,9 +19,50 @@ using namespace std;
 
 void ArgumentParser::Usage() {
 
+	cout<<" JPSreport.exe --inifile=input.xml"<<endl;
+/*
 	fprintf(stderr,
 			"Usage: program options\n\n"
-			"with the following options (default values in parenthesis):\n\n"
+			"With the following options (default values in parenthesis):\n\n"
+			"	[-t/--trajectory <string>]						name of input trajectory file\n"
+			"  	[-I/--input path <filepath>]    				path of the input file(./Inputfiles/)\n"
+			"  	[-O/--output path <filepath>]   				path of the input file(./Outputfiles/)\n"
+			"	[-g/--geometry <string>]        				path to the geometry file (./Inputfiles/geo.xml)\n"
+			"	[-m/--measurment area <int>]    			type of measurement area(1)\n"
+			"                                   							1: Bounding box\n"
+			"                                       						2: Line\n"
+			"	[-b/--bounding box  <double>]				p1.x p1.y p2.x p2.y p3.x p3.y p4.x p4.y (in clockwise)\n"
+			"	[-d/--moving direction <double>]			p1.x p1.y p2.x p2.y \n"
+			"	[-l/--line <double>]								p1.x p1.y p2.x p2.y \n"
+
+
+
+	fprintf(stderr, "-c --> set cutbycircle=true (false)\n");
+	fprintf(stderr, "-a --> set fieldAnalysis=true (false)\n");
+	fprintf(stderr, "-g --> set IsOutputGraph=true (false)\n");
+	fprintf(stderr, "-v --> set calcIndividualfunddata=true (false)\n");
+	fprintf(stderr, "-s scale (3000)\n");
+	fprintf(stderr, "-l --> set IsClassicMethod=true (false)\n");
+	fprintf(stderr, "-F --> set IsFundamentalTinTout=true (false). density is classical. So IsClassicMethod should be true\n");
+	fprintf(stderr, "-V --> set IsFlowVelocity=true (false)\n");
+	fprintf(stderr, "-L x1 y1 x2 y2 (0.0, 300.0, 250.0, 300.0)\n");
+	fprintf(stderr, "-y  beginstationary (700)\n");
+	fprintf(stderr, "-Y  endstationary (1800)\n");
+	fprintf(stderr, "-R Row (65)\n");
+	fprintf(stderr, "-C Column (80)\n");
+	fprintf(stderr, "-m  Meas. Area ax1 (-300)\n");
+	fprintf(stderr, "-n  Meas. Area ay1 (100)\n");
+	fprintf(stderr, "-M  Meas. Area ax2 (300)\n");
+	fprintf(stderr, "-N  Meas. Area ay2 (200)\n");
+	fprintf(stderr, "-o  Outputfile (result.dat)\n");
+	fprintf(stderr, "-O  goes in the name of the polygons, speed and point files (dummy)\n");
+	fprintf(stderr, "-d --> set use_Vxy false (true)\n");
+	fprintf(stderr, "-e --> set use_Vy true (false)\n");
+	fprintf(stderr, "-k --> set use_Vx true (false)\n");
+	fprintf(stderr, "-p fps (10)\n");
+	fprintf(stderr, "-G cor_x cor_y length width (corridor)\n");
+
+
 			"  [-n/--number <filepath>]         file with the pedestrian distribution in room(./Inputfiles/persons.xml)\n"
 			"  [-t/--tmax <double>]             maximal simulation time (500)\n"
 			"  [-d/--dt <double>]               time step (0.001)\n"
@@ -69,12 +111,14 @@ void ArgumentParser::Usage() {
 			"  [-O/--streaming-ip <string>]     stream the ouput to the specified address/port\n"
 			"  [-h/--help]                      this manual output\n"
 			"\n");
+
+
+*/
 	exit(EXIT_SUCCESS);
 }
 
 ArgumentParser::ArgumentParser() {
 	// Default parameter values
-	pNumberFilename = "inputfiles/persons.xml";
 	pSolver = 1;
 	pGeometryFilename = "inputfiles/geo.xml";
 	pTmax = 500;
@@ -105,19 +149,8 @@ ArgumentParser::ArgumentParser() {
 	pTauSigma = 0.001;
 	pLog = 0;
 	pErrorLogFile="./Logfile.dat";
-	pPathwayfile="";
-	pRoutingFilename="";
-	pTrafficFilename="";
 	pSeed=0;
 	pFormat=FORMAT_XML_PLAIN;
-	pPort=-1;
-	pHostname="localhost";
-
-#ifdef _OPENMP
-	pMaxOpenMPThreads = omp_get_thread_num();
-#else
-	pMaxOpenMPThreads = 1;
-#endif
 }
 
 
@@ -127,287 +160,26 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	int option_index = 0;
 
 	static struct option long_options[] = {
-			{"number", 1, 0, 'n'},
-			{"tmax", 1, 0, 't'},
-			{"dt", 1, 0, 'd'},
-			{"fps", 1, 0, 'D'},
-			{"solver", 1, 0, 's'},
-			{"geometry", 1, 0, 'g'},
-			{"exitstrategy", 1, 0, 'e'},
-			{"randomize", 1, 0, 'r'},
-			{"routing", 1, 0, 'R'},
-			{"linkedcells", optional_argument, 0, 'l'},
-			{"maxompthreads", 1, 0, 'p'},
-			{"v0mu", 1, 0, 'v'},
-			{"v0sigma", 1, 0, 'V'},
-			{"ataumu", 1, 0, 'a'},
-			{"atausigma", 1, 0, 'A'},
-			{"aminmu", 1, 0, 'z'},
-			{"aminsigma", 1, 0, 'Z'},
-			{"bmaxmu", 1, 0, 'b'},
-			{"bmaxsigma", 1, 0, 'B'},
-			{"bminmu", 1, 0, 'y'},
-			{"bminsigma", 1, 0, 'Y'},
-			{"nuped", 1, 0, 'x'},
-			{"nuwall", 1, 0, 'X'},
-			{"intpwidthped", 1, 0, 'i'},
-			{"intpwidthwall", 1, 0, 'I'},
-			{"maxfped", 1, 0, 'm'},
-			{"maxfwall", 1, 0, 'M'},
-			{"disteffmaxped", 1, 0, 'f'},
-			{"disteffmaxwall", 1, 0, 'F'},
-			{"taumu", 1, 0, 'c'},
-			{"tausigma", 1, 0, 'C'},
-			{"log", 1, 0, 'L'},
-			{"pathway", 1, 0, 'Q'},
-			{"output-file", 1, 0, 'T'},
-			{"streaming-port", 1, 0, 'P'},
-			{"streaming-ip", 1, 0, 'O'},
 			{"help", 0, 0, 'h'},
 			{"inifile", optional_argument, 0, 'q'},
 			{0, 0, 0, 0}
 	};
 
 	while ((c = getopt_long_only(argc, argv,
-			"n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q",
+			"q:h",
 			long_options, &option_index)) != -1) {
 
 		switch (c) {
-			case 'T':
-			{
-				if (optarg)
-					pTrajectoriesFile=optarg;
-				break;
-			}
-			case 'P':
-			{
-				if (optarg)
-					pPort=atoi(optarg);
-				break;
-			}
-			case 'O':
-			{
-				if (optarg)
-					pHostname=optarg;
-				break;
-			}
-			case 'L':
-			{
-				pLog = atoi(optarg);
-				break;
-			}
-			case 'c':
-			{
-				pTauMu = atof(optarg);
-				break;
-			}
-			case 'C':
-			{
-				pTauSigma = atof(optarg);
-				break;
-			}
-			case 'f':
-			{
-				pDistEffMaxPed = atof(optarg);
-				break;
-			}
-			case 'F':
-			{
-				pDistEffMaxWall = atof(optarg);
-				break;
-			}
-			case 'm':
-			{
-				pMaxFPed = atof(optarg);
-				break;
-			}
-			case 'M':
-			{
-				pMaxFWall = atof(optarg);
-				break;
-			}
-			case 'i':
-			{
-				pIntPWidthPed = atof(optarg);
-				break;
-			}
-			case 'I':
-			{
-				pIntPWidthWall = atof(optarg);
-				break;
-			}
-			case 'x':
-			{
-				pNuPed = atof(optarg);
-				break;
-			}
-			case 'X':
-			{
-				pNuWall = atof(optarg);
-				break;
-			}
-			case 'z':
-			{
-				pAminMu = atof(optarg);
-				break;
-			}
-			case 'Z':
-			{
-				pAminSigma = atof(optarg);
-				break;
-			}
-			case 'a':
-			{
-				pAtauMu = atof(optarg);
-				break;
-			}
-			case 'A':
-			{
-				pAtauSigma = atof(optarg);
-				break;
-			}
-			case 'y':
-			{
-				pBminMu = atof(optarg);
-				break;
-			}
-			case 'Y':
-			{
-				pBminSigma = atof(optarg);
-				break;
-			}
-			case 'b':
-			{
-				pBmaxMu = atof(optarg);
-				break;
-			}
-			case 'B':
-			{
-				pBmaxSigma = atof(optarg);
-				break;
-			}
-			case 'v':
-			{
-				pV0Mu = atof(optarg);
-				break;
-			}
-			case 'V':
-			{
-				pV0Sigma = atof(optarg);
-				break;
-			}
-			case 'n':
-			{
-				pNumberFilename = optarg;
-				break;
-			}
-			case 'D':
-			{
-				pfps=atof(optarg);
-				break;
-			}
-			case 'Q':
-			{
-				pPathwayfile = optarg;
-				break;
-			}
-			case 't':
-			{
-				double t = atof(optarg);
-				if (t > 0)
-					pTmax = t;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"tmax has to be positiv!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 'd':
-			{
-				double d = atof(optarg);
-				if (d > 0)
-					pdt = d;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"dt has to be positiv!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 's':
-			{
-				int s = atoi(optarg);
-				if (s == 1 || s==2 || s==3) // spaeter erweitern
-					pSolver = s;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for solver type!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 'g':
-				pGeometryFilename = optarg;
-				break;
-			case 'e':
-			{
-				int e = atoi(optarg);
-				if (e == 1 || e == 2 || e == 3 || e == 4 )
-					pExitStrategy = e;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for exit strategy!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 'R':
-			{
-				int r = atoi(optarg);
-				switch(r){
-				case 1:
-					pRoutingStrategies.push_back(make_pair (1,ROUTING_LOCAL_SHORTEST));
-					break;
-				case 2:
-					pRoutingStrategies.push_back(make_pair (2, ROUTING_GLOBAL_SHORTEST));
-					break;
-				case 3:
-					pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
-					break;
-				default:
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for routing strategy!!!\n");
-					exit(0);
-					break;
-				}
-			break;
-			}
-			case 'l':
-			{
-				pLinkedCells = true;
-				if (optarg)
-					pLinkedCellSize=atof(optarg);
-				break;
-			}
-			break;
 
 			case 'q':
 			{
-				string inifile="ini.xml";
+				string inifile="input.xml";
 				if (optarg)
 					inifile=optarg;
 				Log->Write("INFO: \t Loading initialization file <"+inifile+">");
 				ParseIniFile(inifile);
 			}
 			break;
-
-			case 'p':
-				pMaxOpenMPThreads = atof(optarg);
-#ifdef _OPENMP
-				omp_set_num_threads(pMaxOpenMPThreads);
-#endif
-				break;
 
 			case 'h':
 				Usage();
@@ -417,7 +189,6 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 						"wrong program options!!!\n");
 				Usage();
-				exit(0);
 			}
 		}
 	}
@@ -426,42 +197,182 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 
 void ArgumentParser::ParseIniFile(string inifile){
 
-	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSgcfm");
+	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSreport");
 
 	Log->Write("INFO: \tParsing the ini file");
 	//I just assume all parameters are present
 
-	//seed
-	if(!xMainNode.getChildNode("seed").isEmpty()){
-		const char* seed=xMainNode.getChildNode("seed").getText();
-		pSeed=atoi(seed);
-		srand(pSeed);
-		Log->Write("INFO: \tseed <"+string(seed)+">");
+	//geometry
+	XMLNode xGeometry = xMainNode.getChildNode("Geometry");
+	if(!xGeometry.isEmpty()){
+		string geometry = xmltoa(xGeometry.getAttribute("file"));
+		Log->Write("INFO: \tgeometry  <"+geometry+">");
 	}
 
-	//geometry
-	if(!xMainNode.getChildNode("geometry").isEmpty()){
+	//trajectories
+	XMLNode xTrajectories=xMainNode.getChildNode("Trajectories");
+	if(!xTrajectories.isEmpty()){
+
+/*		pfps = xmltof(xTrajectories.getAttribute("fps"),pfps);
+		string format=xmltoa(xTrajectories.getAttribute("format"),"xml-plain");
+		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
+		if(format=="xml-bin") pFormat=FORMAT_XML_BIN;
+		if(format=="plain") pFormat=FORMAT_PLAIN;
+		if(format=="vtk") pFormat=FORMAT_VTK;*/
+
+		//a file descriptor was given
+		string trajectory_path;
+		if(!xTrajectories.getChildNode("directory").isEmpty()){
+			trajectory_path =
+					xmltoa(
+								xTrajectories.getChildNode(
+										"directory").getAttribute("location"));
+			pTrajectoriesFile =
+					trajectory_path + xmltoa(
+							xTrajectories.getChildNode(
+									"file").getAttribute("name"),
+									pTrajectoriesFile.c_str())+".xml";
+
+		Log->Write("INFO: \ttrajectory file  <"+string(pTrajectoriesFile)+">");
+		}
+
+
+	}
+
+	//measurement area
+	XMLNode xMeasurementArea=xMainNode.getChildNode("MeasurementAreas");
+	if(!xMeasurementArea.isEmpty()){
+		if(!xMeasurementArea.getChildNode("Area_B").isEmpty())
+		{
+			string pMeasureAreaId =
+							xmltoa(
+									xMeasurementArea.getChildNode(
+											"Area_B").getAttribute("id"));
+			string pMeasureAreaType =
+							xmltoa(
+									xMeasurementArea.getChildNode(
+											"Area_B").getAttribute("type"));
+			XMLNode xBox = xMeasurementArea.getChildNode("Area_B");
+			string box_p1x = xmltoa(xBox.getChildNode("p1").getAttribute("x"));
+			string box_p1y = xmltoa(xBox.getChildNode("p1").getAttribute("y"));
+			string box_p2x = xmltoa(xBox.getChildNode("p2").getAttribute("x"));
+			string box_p2y = xmltoa(xBox.getChildNode("p2").getAttribute("y"));
+			string box_p3x = xmltoa(xBox.getChildNode("p3").getAttribute("x"));
+			string box_p3y = xmltoa(xBox.getChildNode("p3").getAttribute("y"));
+			string box_p4x = xmltoa(xBox.getChildNode("p4").getAttribute("x"));
+			string box_p4y = xmltoa(xBox.getChildNode("p5").getAttribute("y"));
+			string MovingDire_start = xmltoa(xBox.getChildNode("MovingDirection").getAttribute("start"));
+			string MovingDire_end = xmltoa(xBox.getChildNode("MovingDirection").getAttribute("end"));
+			double start_x = atof(xmltoa(xBox.getChildNode(MovingDire_start.c_str()).getAttribute("x")));
+			double start_y = atof(xmltoa(xBox.getChildNode(MovingDire_start.c_str()).getAttribute("y")));
+			double end_x = atof(xmltoa(xBox.getChildNode(MovingDire_end.c_str()).getAttribute("x")));
+			double end_y = atof(xmltoa(xBox.getChildNode(MovingDire_end.c_str()).getAttribute("y")));
+			double LengthMeasurementArea = sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
+
+			Log->Write("INFO: \tmeasure area id  <"+pMeasureAreaId+">");
+			Log->Write("INFO: \tmeasure area type  <"+pMeasureAreaType+">");
+			Log->Write("INFO: \tp1 of Box  <"+box_p1x+','+box_p1y+">");
+			cout<<"INFO: \tlength of measurement area is:  <" << LengthMeasurementArea<<">"<<endl;
+		}
+		if(!xMeasurementArea.getChildNode("Area_L").isEmpty())
+		{
+			string pMeasureAreaId = xmltoa(xMeasurementArea.getChildNode("Area_L").getAttribute("id"));
+			string pMeasureAreaType = xmltoa(xMeasurementArea.getChildNode("Area_L").getAttribute("type"));
+			XMLNode xLine = xMeasurementArea.getChildNode("Area_L");
+			string line_startx = xmltoa(xLine.getChildNode("Start").getAttribute("x"));
+			string line_starty = xmltoa(xLine.getChildNode("Start").getAttribute("y"));
+			string line_endx = xmltoa(xLine.getChildNode("End").getAttribute("x"));
+			string line_endy = xmltoa(xLine.getChildNode("End").getAttribute("y"));
+			Log->Write("INFO: \tmeasure area id  <"+pMeasureAreaId+">" + "\t<"+pMeasureAreaType+">");
+			Log->Write("INFO: \treference line starts from  <"+line_startx+","+line_starty+">" +" to  <"+line_endx+","+line_endy+">" );
+		}
+	}
+
+	//instantaneous velocity
+	XMLNode xVelocity=xMainNode.getChildNode("Velocity");
+	if(!xVelocity.isEmpty()){
+		string UseXComponent = string(xVelocity.getChildNode("UseXComponent").getText());
+		string UseYComponent = string(xVelocity.getChildNode("UseYComponent").getText());
+		string HalfFrameNumberToUse = string(xVelocity.getChildNode("HalfFrameNumberToUse").getText());
+		if(UseXComponent == "true"&&UseYComponent == "false"){
+			Log->Write("INFO: \tonly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+		}
+		else if(UseXComponent == "false"&&UseYComponent == "true"){
+			Log->Write("INFO: \tonly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+		}
+		else if(UseXComponent == "true"&&UseYComponent == "true"){
+			Log->Write("INFO: \tx and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+		}
+		else{
+			Log->Write("INFO: \ttype of velocity is not selected, please check it !!! " );
+			return;
+		}
+	}
+
+	// method A
+	XMLNode xMethod_A=xMainNode.getChildNode("Method_A");
+	if(string(xMethod_A.getAttribute("enabled"))=="true"){
+		string TimeInterval_A = string(xMethod_A.getChildNode("TimeInterval").getText());
+		string MeasureAreaId = string(xMethod_A.getChildNode("MeasurementArea").getAttribute("id"));
+		Log->Write("INFO: \tMethod A is selected" );
+		Log->Write("INFO: \ttime interval used in Method A is <"+TimeInterval_A+" frames>" );
+	}
+
+	// method B
+	XMLNode xMethod_B=xMainNode.getChildNode("Method_B");
+	if(string(xMethod_B.getAttribute("enabled"))=="true"){
+		string MeasureAreaId = string(xMethod_B.getChildNode("MeasurementArea").getAttribute("id"));
+		Log->Write("INFO: \tMethod B is selected" );
+	}
+
+	// method C
+	XMLNode xMethod_C=xMainNode.getChildNode("Method_C");
+	if(string(xMethod_C.getAttribute("enabled"))=="true"){
+		string MeasureAreaId = string(xMethod_C.getChildNode("MeasurementArea").getAttribute("id"));
+		Log->Write("INFO: \tMethod C is selected" );
+	}
+
+/*
+	<Method_D enabled="true" cutbycircle="true" IsOutputGraph="false"
+		IndividualFDdata="true">
+		<MeasurementArea id="1" />
+		<SteadyState start="" end="" /> <!-- //the begin of stationary state //the end of stationary state -->
+		<fieldAnalysis enabled="true" NRow="80" NColumn="65"
+			scale_x="10" scale_y="10" low_ed_x="-100" low_ed_x="-100" />*/
+
+	// method D
+	XMLNode xMethod_D=xMainNode.getChildNode("Method_D");
+	if(string(xMethod_D.getAttribute("enabled"))=="true"){
+		string xIsCutByCircle = string(xMethod_D.getAttribute("cutbycircle"));
+		string xIsOutputGraph = string(xMethod_D.getAttribute("IsOutputGraph"));
+		string xIsIndividualFD = string(xMethod_D.getAttribute("IndividualFDdata"));
+		string MeasureAreaId = string(xMethod_D.getChildNode("MeasurementArea").getAttribute("id"));
+
+		if(!xMethod_D.getChildNode("SteadyState").isEmpty()){
+			const char* steady_start = xMethod_D.getChildNode("SteadyState").getAttribute("start");
+			const char* steady_end = xMethod_D.getChildNode("SteadyState").getAttribute("end");
+			double pSteady_start = atof(steady_start);
+			double pSteady_end = atof(steady_end);
+			Log->Write("INFO: \tthe steady state is from  <" + string(steady_start) + "> to <"+string(steady_end) +"> frame"  );
+		}
+		if(string(xMethod_D.getChildNode("fieldAnalysis").getAttribute("enabled")) == "true"){
+			const char* Nrow = xMethod_D.getChildNode("fieldAnalysis").getAttribute("NRow");
+			const char* Ncolumn = xMethod_D.getChildNode("fieldAnalysis").getAttribute("NColumn");
+			const char* scale_x = xMethod_D.getChildNode("fieldAnalysis").getAttribute("scale_x");
+			const char* scale_y = xMethod_D.getChildNode("fieldAnalysis").getAttribute("scale_y");
+			const char* low_ed_x = xMethod_D.getChildNode("fieldAnalysis").getAttribute("low_ed_x");
+			const char* low_ed_y = xMethod_D.getChildNode("fieldAnalysis").getAttribute("low_ed_y");
+			Log->Write("INFO: \tprofiles will be calculated" );
+			Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: <" + string(scale_x) + "> and <"+string(scale_y) +">"  );
+		}
+		Log->Write("INFO: \tMethod D is selected" );
+	}
+/*
+	if(!xMainNode.getChildNode("Geometry").isEmpty()){
 		pGeometryFilename=xMainNode.getChildNode("geometry").getText();
 		Log->Write("INFO: \tgeometry <"+string(pGeometryFilename)+">");
 	}
 
-	//persons and distributions
-	if(!xMainNode.getChildNode("person").isEmpty()){
-		pNumberFilename=xMainNode.getChildNode("person").getText();
-		Log->Write("INFO: \tperson <"+string(pNumberFilename)+">");
-	}
-
-	//routing
-	if(!xMainNode.getChildNode("routing").isEmpty()){
-		pRoutingFilename=xMainNode.getChildNode("routing").getText();
-		Log->Write("INFO: \trouting <"+string(pRoutingFilename)+">");
-	}
-
-	//traffic
-	if(!xMainNode.getChildNode("traffic").isEmpty()){
-		pTrafficFilename=xMainNode.getChildNode("traffic").getText();
-		Log->Write("INFO: \ttraffic <"+string(pTrafficFilename)+">");
-	}
 
 	//logfile
 	if(!xMainNode.getChildNode("logfile").isEmpty()){
@@ -470,35 +381,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tlogfile <"+string(pErrorLogFile)+">");
 	}
 
-	//trajectories
-	XMLNode xTrajectories=xMainNode.getChildNode("trajectories");
-	if(!xTrajectories.isEmpty()){
 
-		pfps = xmltof(xTrajectories.getAttribute("fps"),pfps);
-		string format=xmltoa(xTrajectories.getAttribute("format"),"xml-plain");
-		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
-		if(format=="xml-bin") pFormat=FORMAT_XML_BIN;
-		if(format=="plain") pFormat=FORMAT_PLAIN;
-		if(format=="vtk") pFormat=FORMAT_VTK;
-
-		//a file descriptor was given
-		if(!xTrajectories.getChildNode("file").isEmpty()){
-			pTrajectoriesFile =
-					xmltoa(
-							xTrajectories.getChildNode(
-									"file").getAttribute("location"),
-									pTrajectoriesFile.c_str());
-
-		Log->Write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
-		}
-
-		if(!xTrajectories.getChildNode("socket").isEmpty()){
-			pHostname=xmltoa(xTrajectories.getChildNode("socket").getAttribute("hostname"),pHostname.c_str());
-			pPort=xmltoi(xTrajectories.getChildNode("socket").getAttribute("port"),pPort);
-		}
-		Log->Write("INFO: \toutput socket  <"+string(pHostname)+">");
-
-	}
 	//model parameters, only one node
 	XMLNode xPara=xMainNode.getChildNode("parameters");
 	if(xPara.isEmpty()){
@@ -514,18 +397,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
 	}
 
-	//solver
-	if(!xPara.getChildNode("solver").isEmpty()){
-		string solver=string(xPara.getChildNode("solver").getText());
-		if(solver=="euler") pSolver=1;
-		else if(solver=="verlet") pSolver=2;
-		else if(solver=="leapfrog") pSolver=3;
-		else {
-			Log->Write("ERROR: \twrong value for solver type!!!\n");
-			exit(0);
-		}
-		Log->Write("INFO: \tpSolver <"+string(solver)+">");
-	}
 
 	//stepsize
 	if(!xPara.getChildNode("stepsize").isEmpty()){
@@ -647,58 +518,15 @@ void ArgumentParser::ParseIniFile(string inifile){
 				+ disteff_max+ ", interpolation_width="+interpolation_width);
 	}
 
-
-	// pre parse the person file to extract some information we need
-	//route choice strategy
-	XMLNode xPersonsNode=XMLNode::openFileHelper(pNumberFilename.c_str(),"persons");
-	XMLNode xRouters=xPersonsNode.getChildNode("routers");
-	int nRouters=xRouters.nChildNode("router");
-	for(int i=0;i<nRouters;i++){
-		XMLNode routerNode=xRouters.getChildNode("router",i);
-		string strategy=routerNode.getAttribute("method");
-		int id=atoi(routerNode.getAttribute("id"));
-
-		if(strategy=="local_shortest")
-			pRoutingStrategies.push_back(make_pair(id,ROUTING_LOCAL_SHORTEST));
-		else if(strategy=="global_shortest")
-			pRoutingStrategies.push_back(make_pair(id,ROUTING_GLOBAL_SHORTEST));
-		else if(strategy=="quickest")
-			pRoutingStrategies.push_back(make_pair(id,ROUTING_QUICKEST));
-		else if(strategy=="dynamic")
-			pRoutingStrategies.push_back(make_pair(id,ROUTING_DYNAMIC));
-		else if(strategy=="dummy")
-			pRoutingStrategies.push_back(make_pair(id,ROUTING_DUMMY));
-		else{
-			Log->Write("ERROR: \twrong value for routing strategy!!!\n");
-			cout<<strategy<<endl;
-			exit(0);
-		}
-	}
-
-
+*/
 	Log->Write("INFO: \tdone parsing ini");
 }
 
 
-const string& ArgumentParser::GetPersonsFilename() const {
-	return pNumberFilename;
-}
-
 const FileFormat& ArgumentParser::GetFileFormat() const {
 	return pFormat;
 }
-const string& ArgumentParser::GetHostname() const {
-	return pHostname;
-}
-void ArgumentParser::SetHostname(const string& hostname) {
-	pHostname = hostname;
-}
-int ArgumentParser::GetPort() const {
-	return pPort;
-}
-void ArgumentParser::SetPort(int port) {
-	pPort = port;
-}
+
 int ArgumentParser::GetSolver() const {
 	return pSolver;
 }
@@ -824,26 +652,10 @@ unsigned int ArgumentParser::GetSeed() const {
 }
 
 
-const string& ArgumentParser::GetPathwayFile() const {
-	return pPathwayfile;
-}
-
-
 const string& ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
 }
 
-const string& ArgumentParser::GetTrafficFile() const {
-	return pTrafficFilename;
-}
-
-const string& ArgumentParser::GetRoutingFile() const{
-	return pRoutingFilename;
-}
-
-int ArgumentParser::GetMaxOpenMPThreads() const{
-	return pMaxOpenMPThreads;
-}
 const string& ArgumentParser::GetTrajectoriesFile() const {
 	return pTrajectoriesFile;
 }

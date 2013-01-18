@@ -6,28 +6,27 @@
 	<Geometry file=inputfiles/geo.xml />
 	<!-- trajectories file and format -->
 	<Trajectories>
-		<file location="outputfiles/trajectories.xml" />
+		<file name="trajectories" />
 		<directory location="outputfiles/" />
 	</Trajectories>
 	<!-- all files in the directories will be used -->
 
 	<MeasurementAreas unit="cm">
-		<Area id="1" type="BoundingBox">
-			<BoundingBox xmin="-240" xmax="240" ymin="-240" ymax="240" />
-			<p1 x="" y="" /> <!-- CCW -->
-			<p2 x="" y="" />
-			<p3 x="" y="" />
-			<p4 x="" y="" />
+		<Area_B id="1" type="BoundingBox">
+			<p1 x="100" y="100" /> <!-- CCW -->
+			<p2 x="100" y="300" />
+			<p3 x="200" y="300" />
+			<p4 x="200" y="100" />
 			<MovingDirection start="p1" end="p2" />
-		</Area>
-		<Area id="2" type="Line">
+		</Area_B>
+		<Area_L id="2" type="Line">
 			<Start x="-240" y="-240" />
 			<End x="-240" y="-240" />
-		</Area>
+		</Area_L>
 	</MeasurementAreas>
 
-	<Velocity enabled="true">
-		<UseXComponent>true</UseXComponent>
+	<Velocity>
+		<UseXComponent>false</UseXComponent>
 		<UseYComponent>true</UseYComponent>
 
 		<!-- half of the time interval that used to calculate instantaneous velocity 
@@ -38,7 +37,7 @@
 	<!-- Method A (Zhang2011a) Flow and Vel -->
 	<Method_A enabled="true">
 		<!-- Time interval used to count the flow [fr] -->
-		<TimeInteval unit="frame">
+		<TimeInterval unit="frame">
 			70
 		</TimeInterval>
 			<!-- The coordinate of the line used to calculate the flow and velocity -->
@@ -56,10 +55,10 @@
 	</Method_C>
 
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
-	<Method_D enabled="true" cutbycircle="true" IsOutputGraph="false"
+	<Method_D enabled="true" cutbycircle="false" IsOutputGraph="false"
 		IndividualFDdata="true">
 		<MeasurementArea id="1" />
-		<SteadyState start="" end="" /> <!-- //the begin of stationary state //the end of stationary state -->
+		<SteadyState start="500" end="1500" /> <!-- //the begin of stationary state //the end of stationary state -->
 		<fieldAnalysis enabled="true" NRow="80" NColumn="65"
 			scale_x="10" scale_y="10" low_ed_x="-100" low_ed_x="-100" />
 

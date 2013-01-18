@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
 	// Parsing the arguments
 	ArgumentParser* args = new ArgumentParser();
 	args->ParseArgs(argc, argv);
-
+/*
 	// create and init the simulation engine
 	Analysis analysis = Analysis();
 	analysis.InitArgs(args);
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
 	Log->Write("INFO: \tStart Analysis()\n");
 	analysis.RunAnalysis();
 	Log->Write("INFO: \tEnd Analysis()\n");
-
+*/
 	//do the last cleaning
 	delete args;
 	delete Log;

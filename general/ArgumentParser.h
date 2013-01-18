@@ -41,14 +41,10 @@ extern OutputHandler* Log;
 
 class ArgumentParser {
 private:
-	string pRoutingFilename; /// routing information
-	string pTrafficFilename; /// traffic information (closed doors,...)
-	string pNumberFilename; /// initial distribution and person specifications
 	string pGeometryFilename;
-	string pPathwayfile; // saving pedestrian path
-	string pHostname;
 	string pTrajectoriesFile;
 	string pErrorLogFile;
+
 	double pTmax; // maximale Simulationszeit
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
@@ -78,8 +74,6 @@ private:
 	int pSolver; /// solver for the differential equation
 	int pExitStrategy; // Strategie zur Richtungswahl (v0)
 	int pLog;
-	int pPort;
-	int pMaxOpenMPThreads;
 	FileFormat pFormat;
 	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
 
