@@ -26,7 +26,7 @@ CGeomHomog::CGeomHomog(double pw, double px, double py)
 
 CGeomHomog::CGeomHomog(Point p)
 {
-	CGeomHomog(1.0, p.pX, p.pY);
+	CGeomHomog(1.0, p._x, p._y);
 }
 
 CGeomHomog::CGeomHomog(int px, int py) 
@@ -67,7 +67,7 @@ bool CGeomHomog::right(Point p)
 
 double CGeomHomog::dot(Point p)
 {
-	return w + x * p.pX + y * p.pY;
+	return w + x * p._x + y * p._y;
 }
 
 double CGeomHomog::dot(CGeomHomog h)
@@ -105,17 +105,17 @@ CGeomHomog& CGeomHomog::neg()
 
 void CGeomHomog::meet(Point i, Point j)
 {
-	w = i.pX * j.pY - i.pY * j.pX;
-	x = i.pY - j.pY;
-	y = j.pX - i.pX;
+	w = i._x * j._y - i._y * j._x;
+	x = i._y - j._y;
+	y = j._x - i._x;
 }
 
 void CGeomHomog::meet(Point p)
 {
 	double tempW, tempX, tempY;
-	tempW = x * p.pY - y * p.pX;
-	tempX = y - w * p.pY;
-	tempY = w * p.pX - x;
+	tempW = x * p._y - y * p._x;
+	tempX = y - w * p._y;
+	tempY = w * p._x - x;
 	w = tempW;
 	x = tempX;
 	y = tempY;

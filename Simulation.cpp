@@ -305,7 +305,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	Log->Write("INFO: \t" + s);
 	_building->LoadBuilding(args->GetGeometryFilename());
 	_building->AddSurroundingRoom();
-	_building->InitGeometry(); // create the polygones
+	_building->InitGeometry(); // create the polygons
 
 	_building->LoadTrafficInfo(args->GetTrafficFile());
 
@@ -314,7 +314,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	/////////
 
 	//Sean
-	//NavMesh* nv= new NavMesh(pBuilding);
+	//NavMesh* nv= new NavMesh(_building);
 	//nv->BuildNavMesh();
 	//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
 	//nv->WriteToFileTraVisTo("promenade.nav.xml");
@@ -340,7 +340,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		_building->InitGrid(args->GetLinkedCellSize());
 	}else {
 		_building->InitGrid(-1);
-
 	}
 
 	// init pathway
@@ -359,7 +358,7 @@ int Simulation::RunSimulation() {
 	int frameNr = 1; // Frame Number
 	int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
 	writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
-	double t;
+	double t=0.0;
 
 
 	// writing the header
@@ -396,10 +395,9 @@ int Simulation::RunSimulation() {
 	return (int) t;
 }
 
-/* Geht alle Räume, dann Unterräume durch um zugucken
- * ob Fußgänger von einem Raum in einen anderen gesetzt
- * werden müßen
- * */
+
+
+
 // TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
 	_building->Update();

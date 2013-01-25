@@ -54,7 +54,7 @@ GlobalRouter::GlobalRouter() :
 GlobalRouter::~GlobalRouter() {
 
 	if (_distMatrix && _pathsMatrix) {
-		const int exitsCnt = _building->GetGoalsCount();
+		const int exitsCnt = _building->GetNumberOfGoals();
 		for (int p = 0; p < exitsCnt; ++p) {
 			delete[] _distMatrix[p];
 			delete[] _pathsMatrix[p];
@@ -85,7 +85,7 @@ void GlobalRouter::Init(Building* building) {
 	// initialize the distances matrix
 
 	//		const int exitsCnt = pCrossings.size()+ pTransitions.size()+pHlines.size();
-	const int exitsCnt = _building->GetGoalsCount();
+	const int exitsCnt = _building->GetNumberOfGoals();
 
 	_distMatrix = new double*[exitsCnt];
 	_pathsMatrix = new int*[exitsCnt];
@@ -173,7 +173,7 @@ void GlobalRouter::Init(Building* building) {
 		//int door=itr->first;
 		int door = itr->second->GetUniqueID();
 		Transition* cross = itr->second;
-		Point centre = cross->GetCentre();
+		const Point& centre = cross->GetCentre();
 		double center[2] = { centre.GetX(), centre.GetY() };
 
 		AccessPoint* ap = new AccessPoint(door, center);
@@ -216,10 +216,10 @@ void GlobalRouter::Init(Building* building) {
 	// get the transitions in the subrooms
 	// and compute the distances
 
-	for (int i = 0; i < _building->GetAnzRooms(); i++) {
+	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
 		Room* room = _building->GetRoom(i);
 
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 
 			SubRoom* sub = room->GetSubRoom(j);
 
@@ -490,7 +490,7 @@ void GlobalRouter::GetPath(int i, int j) {
  */
 void GlobalRouter::FloydWarshall() {
 	//	int i, j, k;
-	const int n = _building->GetGoalsCount();
+	const int n = _building->GetNumberOfGoals();
 
 	for (int k = 0; k < n; k++)
 		for (int i = 0; i < n; i++)
@@ -539,6 +539,7 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 
 			if (distToExit > J_EPS_DIST)
 				continue;
+			if(ped->GetID()==7) exit(0);
 
 			//one AP is near actualize destination:
 			nextDestination = ap->GetNearestTransitAPTO(
@@ -637,10 +638,10 @@ bool GlobalRouter::CanSeeEachother(const Point&pt1, const Point& pt2) {
 
 	Line segment = Line(pt1, pt2);
 
-	for (int i = 0; i < _building->GetAnzRooms(); i++) {
+	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
 		Room* room = _building->GetRoom(i);
 
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			//  walls
 			const vector<Wall>& walls = sub->GetAllWalls();
@@ -785,14 +786,14 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 	if (rooms_captions.empty()) {
 		// then all rooms should be printed
-		for (int i = 0; i < _building->GetAnzRooms(); i++) {
+		for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
 			rooms_ids.push_back(i);
 		}
 
 	} else {
 		for (unsigned int i = 0; i < rooms_captions.size(); i++) {
 			rooms_ids.push_back(
-					_building->GetRoom(rooms_captions[i])->GetRoomID());
+					_building->GetRoom(rooms_captions[i])->GetID());
 		}
 	}
 
@@ -808,13 +809,13 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 		int room_id = -1;
 
 		if (dynamic_cast<Crossing*>(nav) != NULL) {
-			room_id = ((Crossing*) (nav))->GetRoom1()->GetRoomID();
+			room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
 		} else if (dynamic_cast<Hline*>(nav) != NULL) {
-			room_id = ((Hline*) (nav))->GetRoom()->GetRoomID();
+			room_id = ((Hline*) (nav))->GetRoom()->GetID();
 
 		} else if (dynamic_cast<Transition*>(nav) != NULL) {
-			room_id = ((Transition*) (nav))->GetRoom1()->GetRoomID();
+			room_id = ((Transition*) (nav))->GetRoom1()->GetID();
 
 		} else {
 			cout << "WARNING: Unkown navigation line type" << endl;
@@ -854,13 +855,13 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 				int room_id = -1;
 
 				if (dynamic_cast<Crossing*>(nav) != NULL) {
-					room_id = ((Crossing*) (nav))->GetRoom1()->GetRoomID();
+					room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
 				} else if (dynamic_cast<Hline*>(nav) != NULL) {
-					room_id = ((Hline*) (nav))->GetRoom()->GetRoomID();
+					room_id = ((Hline*) (nav))->GetRoom()->GetID();
 
 				} else if (dynamic_cast<Transition*>(nav) != NULL) {
-					room_id = ((Transition*) (nav))->GetRoom1()->GetRoomID();
+					room_id = ((Transition*) (nav))->GetRoom1()->GetID();
 
 				} else {
 					cout << "WARNING: Unkown navigation line type" << endl;
@@ -904,13 +905,13 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 		int room_id = -1;
 
 		if (dynamic_cast<Crossing*>(nav) != NULL) {
-			room_id = ((Crossing*) (nav))->GetRoom1()->GetRoomID();
+			room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
 		} else if (dynamic_cast<Hline*>(nav) != NULL) {
-			room_id = ((Hline*) (nav))->GetRoom()->GetRoomID();
+			room_id = ((Hline*) (nav))->GetRoom()->GetID();
 
 		} else if (dynamic_cast<Transition*>(nav) != NULL) {
-			room_id = ((Transition*) (nav))->GetRoom1()->GetRoomID();
+			room_id = ((Transition*) (nav))->GetRoom1()->GetID();
 
 		} else {
 			cout << "WARNING: Unkown navigation line type" << endl;
@@ -928,13 +929,13 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 			int room_id = -1;
 
 			if (dynamic_cast<Crossing*>(nav) != NULL) {
-				room_id = ((Crossing*) (nav))->GetRoom1()->GetRoomID();
+				room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
 			} else if (dynamic_cast<Hline*>(nav) != NULL) {
-				room_id = ((Hline*) (nav))->GetRoom()->GetRoomID();
+				room_id = ((Hline*) (nav))->GetRoom()->GetID();
 
 			} else if (dynamic_cast<Transition*>(nav) != NULL) {
-				room_id = ((Transition*) (nav))->GetRoom1()->GetRoomID();
+				room_id = ((Transition*) (nav))->GetRoom1()->GetID();
 
 			} else {
 				cout << "WARNING: Unkown navigation line type" << endl;

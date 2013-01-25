@@ -206,11 +206,11 @@ int PedDistributor::Distribute(Building* building) const {
 
 	//first compute all possible positions in the geometry
 	vector<vector< vector<Point > > > allFreePos = vector<vector< vector<Point > > >();
-	for (int r = 0; r < building->GetAnzRooms(); r++) {
+	for (int r = 0; r < building->GetNumberOfRooms(); r++) {
 		vector< vector<Point > >  allFreePosRoom = vector< vector<Point > > ();
 		Room* room = building->GetRoom(r);
 		//if(room->GetCaption()=="outside") continue;
-		for (int s = 0; s < room->GetAnzSubRooms(); s++) {
+		for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
 			SubRoom* subr = room->GetSubRoom(s);
 			allFreePosRoom.push_back(PossiblePositions(subr));
 		}
@@ -226,7 +226,7 @@ int PedDistributor::Distribute(Building* building) const {
 		Room* r = building->GetRoom(room_caption);
 		if(!r) continue;
 
-		int roomID = r->GetRoomID();
+		int roomID = r->GetID();
 
 		int subroomID = start_dis_sub[i].GetSubroomID();
 		int N = start_dis_sub[i].GetAnz();
@@ -264,7 +264,7 @@ int PedDistributor::Distribute(Building* building) const {
 			continue;
 		}
 
-		int roomID=r->GetRoomID();
+		int roomID=r->GetID();
 		double sum_area = 0;
 		int max_pos = 0;
 		double ppm; // pedestrians per square meter
@@ -273,7 +273,7 @@ int PedDistributor::Distribute(Building* building) const {
 		vector<int> akt_anz = vector<int>();
 
 		vector< vector<Point > >&  allFreePosInRoom=allFreePos[roomID];
-		for (int i = 0; i < r->GetAnzSubRooms(); i++) {
+		for (int i = 0; i < r->GetNumberOfSubRooms(); i++) {
 			SubRoom* sr = r->GetSubRoom(i);
 			double area = sr->GetArea();
 			sum_area += area;
@@ -283,13 +283,13 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 		if (max_pos < N) {
 			sprintf(tmp, "ERROR: \t Distribution of %d pedestrians in Room %d not possible! Maximale number: %d\n",
-					N, r->GetRoomID(), max_pos);
+					N, r->GetID(), max_pos);
 			Log->Write(tmp);
 			exit(0);
 		}
 		ppm = N / sum_area;
 		// Anzahl der Personen pro SubRoom bestimmen
-		for (int i = 0; i < r->GetAnzSubRooms(); i++) {
+		for (int i = 0; i < r->GetNumberOfSubRooms(); i++) {
 			SubRoom* sr = r->GetSubRoom(i);
 			int anz = sr->GetArea() * ppm + 0.5; // wird absichtlich gerundet
 			while (anz > max_anz[i]) {
@@ -319,15 +319,15 @@ int PedDistributor::Distribute(Building* building) const {
 		for (unsigned int i = 0; i < akt_anz.size(); i++) {
 			SubRoom* sr = r->GetSubRoom(i);
 			if (akt_anz[i] > 0)
-				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], r->GetRoomID(), &pid);
+				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], r->GetID(), &pid);
 		}
 		nPeds += N;
 	}
 
 	//actualize routing attributes which could not being set earlier
-	for (int i = 0; i < building->GetAnzRooms(); i++) {
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* room = building->GetRoom(i);
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				Pedestrian* ped=sub->GetPedestrian(k);
@@ -354,13 +354,13 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 		//look for that pedestrian.
 		Pedestrian* ped=NULL;
-		for (int i = 0; i < building->GetAnzRooms(); i++) {
+		for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 			Room* room = building->GetRoom(i);
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 				SubRoom* sub = room->GetSubRoom(j);
 				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 					Pedestrian* p=sub->GetPedestrian(k);
-					if(p->GetPedIndex()==id){
+					if(p->GetID()==id){
 						ped=p;
 						goto END;
 					}
@@ -371,7 +371,7 @@ int PedDistributor::Distribute(Building* building) const {
 		if(!ped){
 			Log->Write("WARNING: \t Ped [%d] does not not exit yet. I am creating a new one",id);
 			ped=new Pedestrian();
-			ped->SetPedIndex(id);
+			ped->SetID(id);
 
 			// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
 			Ellipse E = Ellipse();
@@ -420,7 +420,7 @@ int PedDistributor::Distribute(Building* building) const {
 		if( goal_id!=-1){
 			if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
 					(ped->GetFinalDestination()!=goal_id)){
-				sprintf(tmp, "ERROR: \tconflicting final destination for Ped [%d]", ped->GetPedIndex());
+				sprintf(tmp, "ERROR: \tconflicting final destination for Ped [%d]", ped->GetID());
 				Log->Write(tmp);
 				sprintf(tmp, "ERROR: \talready assigned to destination [%d]", ped->GetFinalDestination());
 				Log->Write(tmp);
@@ -441,9 +441,9 @@ int PedDistributor::Distribute(Building* building) const {
 		if(startX!=-1 && startY!=-1){
 			ped->SetPos(Point(startX,startY));
 			//in that case the room should be automatically adjusted
-			for (int i = 0; i < building->GetAnzRooms(); i++) {
+			for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 				Room* room = building->GetRoom(i);
-				for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+				for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 					SubRoom* sub = room->GetSubRoom(j);
 					if(sub->IsInSubRoom(Point(startX,startY))){
 						//if a room was already assigned
@@ -453,7 +453,7 @@ int PedDistributor::Distribute(Building* building) const {
 								Log->Write(tmp);
 							}
 						}
-						ped->SetRoomID(room->GetRoomID(),room->GetCaption());
+						ped->SetRoomID(room->GetID(),room->GetCaption());
 						ped->SetSubRoomID(sub->GetSubRoomID());
 						sub->AddPedestrian(ped);
 					}
@@ -495,14 +495,14 @@ int PedDistributor::Distribute(Building* building) const {
 				//FIXME
 				if(trip_id!=-1){
 					//ped->SetTrip(building->GetRoutingEngine()->GetTrip(trip_id));
-					sprintf(tmp, "ERROR: \tTrip is actually not supported for pedestrian [%d]. Please use <goal></goal> instead", ped->GetPedIndex());
+					sprintf(tmp, "ERROR: \tTrip is actually not supported for pedestrian [%d]. Please use <goal></goal> instead", ped->GetID());
 					Log->Write(tmp);
 					exit(EXIT_FAILURE);
 				}
 				if(goal_id!=-1){
 					if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
 							(ped->GetFinalDestination()!=goal_id)){
-						sprintf(tmp, "ERROR: \tconflicting final destinations for Ped [%d]", ped->GetPedIndex());
+						sprintf(tmp, "ERROR: \tconflicting final destinations for Ped [%d]", ped->GetID());
 						Log->Write(tmp);
 						sprintf(tmp, "ERROR: \talready assigned to a destination with ID [%d]", ped->GetFinalDestination());
 						Log->Write(tmp);
@@ -540,13 +540,13 @@ int PedDistributor::Distribute(Building* building) const {
 
 bool PedDistributor::FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const {
 
-	for (int i = 0; i < building->GetAnzRooms(); i++) {
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* room = building->GetRoom(i);
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				Pedestrian* p=sub->GetPedestrian(k);
-				if(p->GetPedIndex()==ped->GetPedIndex()){
+				if(p->GetID()==ped->GetID()){
 					sub->DeletePedestrian(k);
 					return true;
 				}
@@ -781,7 +781,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& posit
 
 		Pedestrian* ped = new Pedestrian();
 		// PedIndex
-		ped->SetPedIndex(*pid);
+		ped->SetID(*pid);
 		// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
 		Ellipse E = Ellipse();
 		double atau = GetAtau()->GetRand();

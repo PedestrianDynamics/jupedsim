@@ -35,15 +35,14 @@
 
 class Point {
 public:
-    double pX;
-    double pY;
+    double _x;
+    double _y;
 
 public:
     // constructors
     Point();
     Point(double x, double y);
     Point(const Point& orig);
-    //    virtual ~Point();
 
 
     void SetX(double x);

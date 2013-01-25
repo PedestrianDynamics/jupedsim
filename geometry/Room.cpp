@@ -33,113 +33,113 @@
  ************************************************************/
 
 Room::Room() {
-    pRoomID = -1;
-    pState=0; //smoke-free
-    pCaption = "no room caption";
-    pZPos = -1.0;
-    pSubRooms = vector<SubRoom* > ();
+    _id = -1;
+    _state=ROOM_CLEAN; //smoke-free
+    _caption = "no room caption";
+    _zPos = -1.0;
+    _subRooms = vector<SubRoom* > ();
+    _outputFile=NULL;
 }
 
 Room::Room(const Room& orig) {
-    pRoomID = orig.GetRoomID();
-    pCaption = orig.GetCaption();
-    pZPos = orig.GetZPos();
-    pSubRooms = orig.GetAllSubRooms();
-
+    _id = orig.GetID();
+    _caption = orig.GetCaption();
+    _zPos = orig.GetZPos();
+    _subRooms = orig.GetAllSubRooms();
+    _state=orig.GetState();
+    _outputFile=orig.GetOutputHandler();
 }
 
 Room::~Room() {
-    for (int i = 0; i < GetAnzSubRooms(); i++)
-        delete pSubRooms[i];
+    for (int i = 0; i < GetNumberOfSubRooms(); i++)
+        delete _subRooms[i];
 }
 
 /*************************************************************
  Setter-Funktionen
  ************************************************************/
-void Room::SetRoomID(int ID) {
-    pRoomID = ID;
+void Room::SetID(int ID) {
+    _id = ID;
 }
 
 void Room::SetCaption(string s) {
-    pCaption = s;
+    _caption = s;
 }
 
 void Room::SetZPos(double z) {
-    pZPos = z;
-}
-
-void Room::SetAllSubRooms(const vector<SubRoom*>& subrooms) {
-    pSubRooms = subrooms;
+    _zPos = z;
 }
 
 void Room::SetSubRoom(SubRoom* subroom, int index) {
-    if ((index >= 0) && (index < GetAnzSubRooms())) {
-        pSubRooms[index] = subroom;
+    if ((index >= 0) && (index < GetNumberOfSubRooms())) {
+        _subRooms[index] = subroom;
     } else {
         Log->Write("ERROR: Wrong Index in Room::SetSubRoom()");
         exit(0);
     }
 }
 
-void Room::SetRoomState(int state) {
-	pState=state;
+void Room::SetState(RoomState state) {
+	_state=state;
 }
+
+
 /*************************************************************
- Getter-Funktionen
+ Getter-Functions
  ************************************************************/
-int Room::GetRoomID() const {
-    return pRoomID;
+int Room::GetID() const {
+    return _id;
 }
 
 string Room::GetCaption() const {
-    return pCaption;
+    return _caption;
 }
 
 double Room::GetZPos() const {
     //if(pCaption=="070") return pZPos+1.0;
-	return pZPos;
+	return _zPos;
 }
 
-int Room::GetAnzSubRooms() const {
-    return pSubRooms.size();
+int Room::GetNumberOfSubRooms() const {
+    return _subRooms.size();
 }
 
 const vector<SubRoom*>& Room::GetAllSubRooms() const {
-    return pSubRooms;
+    return _subRooms;
 }
 
 SubRoom* Room::GetSubRoom(int index) const {
-    if ((index >= 0) && (index < (int) pSubRooms.size()))
-        return pSubRooms[index];
+    if ((index >= 0) && (index < (int) _subRooms.size()))
+        return _subRooms[index];
     else {
     	char tmp[CLENGTH];
-        sprintf(tmp,"ERROR: Room::GetSubRoom() Wrong subroom index [%d] for room index [%d] ",index,pRoomID);
+        sprintf(tmp,"ERROR: Room::GetSubRoom() Wrong subroom index [%d] for room index [%d] ",index,_id);
         Log->Write(tmp);
         exit(0);
     }
 }
 
-int Room::GetAnzPedestrians() const {
+int Room::GetNumberOfPedestrians() const {
     int sum = 0;
-    for (int i = 0; i < GetAnzSubRooms(); i++) {
+    for (int i = 0; i < GetNumberOfSubRooms(); i++) {
         sum += GetSubRoom(i)->GetAnzPedestrians();
     }
     return sum;
 }
 
-int Room::GetRoomState() const {
-	return pState;
+RoomState Room::GetState() const {
+	return _state;
 }
 /*************************************************************
  Sonstige Funktionen
  ************************************************************/
 void Room::AddSubRoom(SubRoom* r) {
-    pSubRooms.push_back(r);
+    _subRooms.push_back(r);
 }
 
 void Room::DeleteSubRoom(int index) {
-    if ((index >= 0) && (index < (int) pSubRooms.size()))
-        pSubRooms.erase(pSubRooms.begin() + index);
+    if ((index >= 0) && (index < (int) _subRooms.size()))
+        _subRooms.erase(_subRooms.begin() + index);
     else {
         Log->Write("ERROR: Wrong Index in Room::DeleteSubRoom()");
         exit(0);
@@ -163,7 +163,7 @@ void Room::LoadNormalSubRoom(ifstream* buildingfile, int* i) {
             int ID;
             iss >> tmp >> ID;
             subroom->SetSubRoomID(ID);
-            subroom->SetRoomID(pRoomID);
+            subroom->SetRoomID(_id);
         } else if (line.find("Welements") != string::npos) {
             iss >> tmp >> NWalls;
         } else if (line.find("wall") != string::npos) {
@@ -201,7 +201,7 @@ void Room::LoadStair(ifstream* buildingfile, int* i) {
             int ID;
             iss >> tmp >> ID;
             stair->SetSubRoomID(ID);
-            stair->SetRoomID(pRoomID);
+            stair->SetRoomID(_id);
         } else if (line.find("Welements") != string::npos) {
             iss >> tmp >> NWalls;
         } else if (line.find("wall") != string::npos) {
@@ -236,11 +236,11 @@ void Room::LoadStair(ifstream* buildingfile, int* i) {
 void Room::WriteToErrorLog() const {
     char tmp[CLENGTH];
     string s;
-    sprintf(tmp, "\tRaum: %d [%s]:\n", pRoomID, pCaption.c_str());
+    sprintf(tmp, "\tRaum: %d [%s]:\n", _id, _caption.c_str());
     s.append(tmp);
     Log->Write(s);
     // SubRooms
-    for (int i = 0; i < GetAnzSubRooms(); i++) {
+    for (int i = 0; i < GetNumberOfSubRooms(); i++) {
         SubRoom* s = GetSubRoom(i);
         s->WriteToErrorLog();
     }
@@ -248,17 +248,17 @@ void Room::WriteToErrorLog() const {
 }
 
 const vector<int>& Room::GetAllTransitionsIDs() const {
-	return pTransitionsIDs;
+	return _transitionsIDs;
 }
 
 void Room::AddTransitionID(int ID){
-	pTransitionsIDs.push_back(ID);
+	_transitionsIDs.push_back(ID);
 }
 
 void Room::SetOutputHandler(OutputHandler* oh){
-	pOutputFile=oh;
+	_outputFile=oh;
 }
 
 OutputHandler* Room::GetOutputHandler() const {
-	return pOutputFile;
+	return _outputFile;
 }

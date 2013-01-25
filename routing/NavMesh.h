@@ -34,10 +34,10 @@ class NavMesh {
 			return v.pPos==pPos;
 		}
 		bool operator< (const JVertex& v) const{
-			return v.pPos.pX<pPos.pX;
+			return v.pPos._x<pPos._x;
 		}
 		bool operator> (const JVertex& v) const{
-			return v.pPos.pX>pPos.pX;
+			return v.pPos._x>pPos._x;
 		}
 	};
 

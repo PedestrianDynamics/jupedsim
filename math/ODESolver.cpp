@@ -51,11 +51,11 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
     // Schleife über alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             vector< Point > result_acc = vector< Point > ();
@@ -72,10 +72,10 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
     /* PRARALLELES UPDATE */
 
     // Schleife über alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             // Schleife über alle Fußgänger im SubRoom
@@ -110,11 +110,11 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
     vector< vector < vector < Point > > > result1_acc_room = vector<vector < vector < Point > > >();
     vector< vector < vector < Point > > > result2_acc_room = vector<vector < vector < Point > > >();
     // Schleife über alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         vector < vector < Point > > result1_acc_subroom = vector < vector < Point > > ();
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             vector< Point > result1_acc = vector< Point > ();
@@ -131,10 +131,10 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
     /* ERSTES PRARALLELES UPDATE */
 
     // Schleife über alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             // Schleife über alle Fußgänger im SubRoom
@@ -153,11 +153,11 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
     }
 
     // Schleife über alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         vector < vector < Point > > result2_acc_subroom = vector < vector < Point > > ();
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             vector< Point > result2_acc = vector< Point > ();
@@ -175,10 +175,10 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
     /* ZWEITES PRARALLELES UPDATE */
 
     // Schleife übr alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             for (int k = 0; k < anzpeds; ++k) {
@@ -215,11 +215,11 @@ void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const 
     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
     // Schleife übr alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             vector< Point > result_acc = vector< Point > ();
@@ -236,10 +236,10 @@ void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const 
     /* PRARALLELES UPDATE */
 
     // Schleife übr alle Räume
-    for (int i = 0; i < building->GetAnzRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetAnzSubRooms(); j++) {
+        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
             int anzpeds = s->GetAnzPedestrians();
             // Schleife über alle Fußgänger im SubRoom

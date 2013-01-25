@@ -48,7 +48,7 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 			"xPos=\"%.2f\"\tyPos=\"%.2f\"\t"
 			"radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
 			"ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
-			ped->GetPedIndex(), (ped->GetPos().GetX()) * FAKTOR,
+			ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
 			(ped->GetPos().GetY()) * FAKTOR, a * FAKTOR, b * FAKTOR,
 			phi * RAD2DEG, color);
 	
@@ -125,14 +125,14 @@ void IODispatcher::WriteGeometry(Building* building) {
 	//to avoid writing navigation line twice
 	vector<int> navLineWritten;
 
-	for (int i = 0; i < building->GetAnzRooms(); i++) {
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* r = building->GetRoom(i);
 		string caption = r->GetCaption();
 		if (rooms_to_plot.empty() == false)
 			if (IsElementInVector(rooms_to_plot, caption) == false)
 				continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 			geometry.append(s->WriteSubRoom());
 
@@ -231,14 +231,14 @@ void IODispatcher::WriteGeometryRVO(Building* building) {
 	//to avoid writing navigation line twice
 	vector<int> navLineWritten;
 
-	for (int i = 0; i < building->GetAnzRooms(); i++) {
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* r = building->GetRoom(i);
 		string caption = r->GetCaption();
 		if (rooms_to_plot.empty() == false)
 			if (IsElementInVector(rooms_to_plot, caption) == false)
 				continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 			geometry.append(s->WritePolyLine());
 
@@ -360,14 +360,14 @@ void IODispatcher::WriteNavMeshORCA(Building* building) {
 	int edgesCount = 0;
 	int subRoomCount = 0;
 
-	for (int i = 0; i < building->GetAnzRooms(); i++) {
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* r = building->GetRoom(i);
 		string caption = r->GetCaption();
 		if (rooms_to_plot.empty() == false)
 			if (IsElementInVector(rooms_to_plot, caption) == false)
 				continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 			subRoomCount++;
 			vector<Line> edges;
@@ -506,7 +506,7 @@ void IODispatcher::WriteFrame(int frameNr, Building* building) {
 	sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
 	data.append(tmp);
 
-	for (int roomindex = 0; roomindex < building->GetAnzRooms(); roomindex++) {
+	for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
 		Room* r = building->GetRoom(roomindex);
 		string caption = r->GetCaption();
 
@@ -515,7 +515,7 @@ void IODispatcher::WriteFrame(int frameNr, Building* building) {
 			continue;
 		}
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 			for (int i = 0; i < s->GetAnzPedestrians(); ++i) {
 				Pedestrian* ped = s->GetPedestrian(i);
@@ -547,15 +547,15 @@ void TrajectoriesFLAT::WriteGeometry(Building* building) {
 void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building) {
 	char tmp[CLENGTH] = "";
 
-	for (int roomindex = 0; roomindex < building->GetAnzRooms(); roomindex++) {
+	for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
 		Room* r = building->GetRoom(roomindex);
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 			for (int i = 0; i < s->GetAnzPedestrians(); ++i) {
 				Pedestrian* ped = s->GetPedestrian(i);
 				double x = ped->GetPos().GetX();
 				double y = ped->GetPos().GetY();
-				sprintf(tmp, "%d\t%d\t%f\t%f", ped->GetPedIndex(), frameNr, x,
+				sprintf(tmp, "%d\t%d\t%f\t%f", ped->GetID(), frameNr, x,
 						y);
 				Write(tmp);
 			}

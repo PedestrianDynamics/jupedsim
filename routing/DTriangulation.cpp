@@ -37,7 +37,7 @@ void DTriangulation::Triangulate() {
 void DTriangulation::SetOuterPolygone(std::vector<Point> outPoly) {
 
 	for(unsigned int i=0;i<outPoly.size();i++){
-		_outerConstraintsPolyline.push_back(new p2t::Point(outPoly[i].pX,outPoly[i].pY));
+		_outerConstraintsPolyline.push_back(new p2t::Point(outPoly[i]._x,outPoly[i]._y));
 	}
 
 }
@@ -47,7 +47,7 @@ void DTriangulation::AddHole(std::vector<Point> hole) {
 	std::vector<p2t::Point*> newHole;
 
 	for(unsigned int i=0;i<hole.size();i++){
-		newHole.push_back(new p2t::Point(hole[i].pX,hole[i].pY));
+		newHole.push_back(new p2t::Point(hole[i]._x,hole[i]._y));
 	}
 	_holesPolylines.push_back(newHole);
 }

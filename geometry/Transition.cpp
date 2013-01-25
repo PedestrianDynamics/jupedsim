@@ -75,9 +75,9 @@ string Transition::GetType() const {
 
 // gibt den ANDEREN room != roomID zurück
 Room* Transition::GetOtherRoom(int roomID) const {
-	if (GetRoom1()!=NULL && GetRoom1()->GetRoomID() == roomID) {
+	if (GetRoom1()!=NULL && GetRoom1()->GetID() == roomID) {
 		return GetRoom2();
-	} else if (GetRoom2()!=NULL && GetRoom2()->GetRoomID() == roomID) {
+	} else if (GetRoom2()!=NULL && GetRoom2()->GetID() == roomID) {
 		return GetRoom1();
 	} else {
 		char msg[CLENGTH];
@@ -100,9 +100,9 @@ bool Transition::IsExit() const {
 bool Transition::IsInRoom(int roomID) const {
 	bool c1 = false;
 	bool c2 = false;
-	if (GetRoom1() != NULL && GetRoom1()->GetRoomID() == roomID)
+	if (GetRoom1() != NULL && GetRoom1()->GetID() == roomID)
 		c1 = true;
-	if (GetRoom2() != NULL && GetRoom2()->GetRoomID() == roomID)
+	if (GetRoom2() != NULL && GetRoom2()->GetID() == roomID)
 		c2 = true;
 	return c1 || c2;
 }
@@ -141,9 +141,9 @@ void Transition::UpdatePedestrian(int RoomID, int SubID, int PedID, Crossing* go
  * subroomID wird hier nicht benötigt, aber in Crossings::GetOtherSubRoom()
  * (virtuelle Funktion) */
 SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const {
-	if ((GetRoom1() != NULL) && (GetRoom1()->GetRoomID() == roomID))
+	if ((GetRoom1() != NULL) && (GetRoom1()->GetID() == roomID))
 		return GetSubRoom2();
-	else if ((GetRoom2() != NULL) && (GetRoom2()->GetRoomID() == roomID))
+	else if ((GetRoom2() != NULL) && (GetRoom2()->GetID() == roomID))
 		return GetSubRoom1();
 	else {
 		char tmp[CLENGTH];
@@ -164,7 +164,7 @@ void Transition::WriteToErrorLog() const {
 	s.append(tmp);
 	// erster Raum
 	if (GetRoom1() != NULL) {
-		sprintf(tmp, "\t\t\t\tRoom: %d [%s] SubRoom: %d", GetRoom1()->GetRoomID(),
+		sprintf(tmp, "\t\t\t\tRoom: %d [%s] SubRoom: %d", GetRoom1()->GetID(),
 				GetRoom1()->GetCaption().c_str(), GetSubRoom1()->GetSubRoomID());
 	} else {
 		sprintf(tmp, "\t\t\t\tAusgang");
@@ -172,7 +172,7 @@ void Transition::WriteToErrorLog() const {
 	s.append(tmp);
 	// zweiter Raum
 	if (GetRoom2() != NULL) {
-		sprintf(tmp, " <->\tRoom: %d [%s] SubRoom: %d\n", GetRoom2()->GetRoomID(),
+		sprintf(tmp, " <->\tRoom: %d [%s] SubRoom: %d\n", GetRoom2()->GetID(),
 				GetRoom2()->GetCaption().c_str(), GetSubRoom2()->GetSubRoomID());
 	} else {
 		sprintf(tmp, " <->\tAusgang\n");

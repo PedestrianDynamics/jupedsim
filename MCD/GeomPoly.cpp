@@ -37,13 +37,13 @@ CGeomPoly::~CGeomPoly()
 int CGeomPoly::mostLeftPoint()
 {
 	int leftPoint = 0;
-	long x = m_pList[0].pX;
+	long x = m_pList[0]._x;
 	for (int i = 1; i < m_nCount; i++)
 	{
-		if (m_pList[i].pX < x)
+		if (m_pList[i]._x < x)
 		{
 			leftPoint = i;
-			x = m_pList[i].pX;
+			x = m_pList[i]._x;
 		}
 	}
 	return leftPoint;

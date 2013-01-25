@@ -101,7 +101,7 @@ public:
     virtual ~Pedestrian();
 
     // Setter-Funktionen
-    void SetPedIndex(int i);
+    void SetID(int i);
     //TODO: use setRoom(Room*) and setSubRoom(SubRoom*)
     void SetRoomID(int i, string roomCaption);
     void SetSubRoomID(int i);
@@ -126,7 +126,7 @@ public:
 
     // Getter-Funktionen
     const vector<int>& GetTrip() const;
-    int GetPedIndex() const;
+    int GetID() const;
     int GetRoomID() const;
     int GetSubRoomID() const;
     double GetMass() const;

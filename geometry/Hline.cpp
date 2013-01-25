@@ -74,7 +74,7 @@ bool Hline::IsInSubRoom(int subroomID) const {
 }
 
 bool Hline::IsInRoom(int roomID) const {
-	 return pRoom->GetRoomID() == roomID;
+	 return pRoom->GetID() == roomID;
 }
 
 void Hline::WriteToErrorLog() const {
@@ -83,7 +83,7 @@ void Hline::WriteToErrorLog() const {
     sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
     s.append(tmp);
-    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", pRoom->GetRoomID(),
+    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", pRoom->GetID(),
             pSubRoom->GetSubRoomID());
     s.append(tmp);
     Log->Write(s);

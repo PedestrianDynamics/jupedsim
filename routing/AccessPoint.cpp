@@ -257,7 +257,7 @@ void AccessPoint::Dump(){
 	cout<<endl<<endl;
 	cout <<" queue [ ";
 	for(unsigned int p=0;p<_transitPedestrians.size();p++){
-		cout<<" "<<_transitPedestrians[p]->GetPedIndex();
+		cout<<" "<<_transitPedestrians[p]->GetID();
 	}
 	cout<<" ]"<<endl;
 

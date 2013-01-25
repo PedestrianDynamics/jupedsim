@@ -486,7 +486,7 @@ const double* SubRoom::GetPlanEquation() const {
 }
 
 double SubRoom::GetElevation(const Point& p) {
-	return pPlanEquation[0] * p.pX + pPlanEquation[1] * p.pY + pPlanEquation[2];
+	return pPlanEquation[0] * p._x + pPlanEquation[1] * p._y + pPlanEquation[2];
 }
 
 void SubRoom::ClearAllPedestrians(){

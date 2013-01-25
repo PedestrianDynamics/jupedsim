@@ -104,7 +104,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 						ExitDistance ed = g.GetGraph(ps[i]->GetKnownClosedDoors())->GetNextDestination(ps[i]);
 						if(!ed.GetDest())
 						{
-							std::cout << "DELETE " << ps[i]->GetPedIndex() << std::endl;
+							std::cout << "DELETE " << ps[i]->GetID() << std::endl;
 
 							building->DeletePedFromSim(ps[i]);
 						} else {

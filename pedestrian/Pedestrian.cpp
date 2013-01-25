@@ -108,7 +108,7 @@ Pedestrian::~Pedestrian() {
  Setter-Funktionen
  ************************************************************/
 
-void Pedestrian::SetPedIndex(int i) {
+void Pedestrian::SetID(int i) {
 	pPedIndex = i;
 }
 
@@ -188,7 +188,7 @@ void Pedestrian::SetTrip(const vector<int>& trip){
  Getter-Funktionen
  ************************************************************/
 
-int Pedestrian::GetPedIndex() const {
+int Pedestrian::GetID() const {
 	return pPedIndex;
 }
 

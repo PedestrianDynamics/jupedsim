@@ -12,6 +12,12 @@
 		<dist room_caption="080" number="15"/> 
 	</distribution>
 
+	<routers>
+		<router id="1" method="local_shortest"/>
+		<router id="2" method="global_shortest"/>
+		<router id="3" method="dummy"/>
+	</routers>
+	
 <!--	<groups> 
 		<group id ="1">
 			<members>1,2,3</members>

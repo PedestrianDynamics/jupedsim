@@ -224,7 +224,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 
 		char tmp[CLENGTH];
 		const char* caption=_building->GetRoom(ped->GetRoomID())->GetCaption().c_str();
-		sprintf(tmp,"WARNING: GlobalRouter: best AP could not be identified for pedestrian %d in room/subroom [%s] %d/%d \n",ped->GetPedIndex(), caption, ped->GetSubRoomID(),ped->GetSubRoomID());
+		sprintf(tmp,"WARNING: GlobalRouter: best AP could not be identified for pedestrian %d in room/subroom [%s] %d/%d \n",ped->GetID(), caption, ped->GetSubRoomID(),ped->GetSubRoomID());
 		Log->Write(tmp);
 		Log->Write("WARNING: GlobalRouter: There are no exit in the sight range");
 		bestAPsID=GetBestDefaultRandomExit(ped);
@@ -719,7 +719,7 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* me, Pedestrian** 
 
 				//FIXME: this should be remove if you reach a stable version.
 				Log->Write("ERROR: QuickestPathRouter: reference ped cannot be found");
-				printf("ERROR: reference ped cannot be found for ped %d within [%f] m  around the exit [%d]\n",me->GetPedIndex(),radius,crossing->GetIndex());
+				printf("ERROR: reference ped cannot be found for ped %d within [%f] m  around the exit [%d]\n",me->GetID(),radius,crossing->GetIndex());
 				//exit(EXIT_FAILURE);
 			}
 		}
@@ -807,8 +807,8 @@ void QuickestPathRouter::GetQueueAtExit(Crossing* crossing, double minVel,
 
 bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* ref){
 
-	int ignore_ped1=ped->GetPedIndex();
-	int ignore_ped2=ref->GetPedIndex();
+	int ignore_ped1=ped->GetID();
+	int ignore_ped2=ref->GetID();
 	Crossing* ignore_crossing=_building->GetGoal(ref->GetExitIndex());
 
 	int obstacles=GetObstaclesCountBetween(ped->GetPos(),ref->GetPos(),ignore_crossing,ignore_ped1,ignore_ped2);
@@ -819,7 +819,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
 
 bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Crossing* crossing){
 
-	int ignore_ped1=myself->GetPedIndex();
+	int ignore_ped1=myself->GetID();
 	int ignore_ped2=-1;//there is no second ped to ignore
 
 	int obstacles=GetObstaclesCountBetween(myself->GetPos(),crossing->GetCentre(),crossing,ignore_ped1,ignore_ped2);
@@ -851,8 +851,8 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
 			Pedestrian* ped = peds[p];
 
 			//avoiding myself
-			if(ped->GetPedIndex()==ignore_ped1) continue;
-			if(ped->GetPedIndex()==ignore_ped2) continue;
+			if(ped->GetID()==ignore_ped1) continue;
+			if(ped->GetID()==ignore_ped2) continue;
 			// pedestrian going in that direction are not obstacles to me
 			if(ped->GetExitIndex()==exitID) continue;
 
@@ -870,8 +870,8 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
 			Pedestrian* ped = peds[p];
 
 			//avoiging myself
-			if(ped->GetPedIndex()==ignore_ped1) continue;
-			if(ped->GetPedIndex()==ignore_ped2) continue;
+			if(ped->GetID()==ignore_ped1) continue;
+			if(ped->GetID()==ignore_ped2) continue;
 			// pedestrian going in that direction are not obstacles to me
 			if(ped->GetExitIndex()==exitID) continue;
 
@@ -922,7 +922,7 @@ int QuickestPathRouter::isCongested(Pedestrian* ped){
 
 			if((ped->GetPos()-ref->GetPos()).NormSquare()>1.0) continue;
 			// do not add a pedestrian twice
-			vector<int>::iterator per = find(conflictings.begin(), conflictings.end(), ref->GetPedIndex());
+			vector<int>::iterator per = find(conflictings.begin(), conflictings.end(), ref->GetID());
 			if (per != conflictings.end()) continue;
 
 			if(line.IntersectionWithCircle(ref->GetPos())==false) continue;
@@ -934,7 +934,7 @@ int QuickestPathRouter::isCongested(Pedestrian* ped){
 			// only those  behind me
 			if(pos2.ScalarP(vel1)) pedCrossing++;
 
-			conflictings.push_back(ref->GetPedIndex());
+			conflictings.push_back(ref->GetID());
 
 		}
 

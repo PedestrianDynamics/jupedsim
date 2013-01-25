@@ -183,8 +183,8 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	}
 	if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
 		char tmp[CLENGTH];
-		sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetPedIndex(),
-				ped2->GetPedIndex(), F_rep.GetX(), F_rep.GetY());
+		sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
+				ped2->GetID(), F_rep.GetX(), F_rep.GetY());
 		Log->Write(tmp);
 		Log->Write("ERROR:\t fix this as soon as possible");
 		return Point(0,0); // FIXME: should never happen
@@ -494,11 +494,11 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			if (normVi > tmp && ped->GetV0Norm() > 0) {
 				fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
 						"is bigger than desired velocity (%f) at time: %fs\n",
-						sqrt(normVi), ped->GetPedIndex(), ped->GetV0Norm(), time);
+						sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
 
 				// FIXME: remove the pedestrian and abort
 				for(int p=0;p<subroom->GetAnzPedestrians();p++){
-					if (subroom->GetPedestrian(p)->GetPedIndex()==ped->GetPedIndex()){
+					if (subroom->GetPedestrian(p)->GetID()==ped->GetID()){
 						subroom->DeletePedestrian(p);
 						break;
 					}

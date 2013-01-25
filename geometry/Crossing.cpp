@@ -118,7 +118,7 @@ bool Crossing::IsTransition() const {
 // Prüft, ob Crossing in Raum mit roomID
 
 bool Crossing::IsInRoom(int roomID) const {
-    return pRoom1->GetRoomID() == roomID;
+    return pRoom1->GetID() == roomID;
 }
 
 // Prüft, ob Crossing in SubRoom mit subroomID

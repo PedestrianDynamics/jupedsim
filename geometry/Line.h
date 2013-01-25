@@ -36,16 +36,16 @@ extern OutputHandler* Log;
 
 class Line {
 private:
-	Point pPoint1; // (Koordinaten des ersten Punkts)
-	Point pPoint2; // (Koordinaten des zweiten Punkts)
-	Point pCentre;
+	Point _point1;
+	Point _point2;
+	Point _centre;
 
 	//unique identifier for all line elements
-	static int _UID;
-	int pUID;
+	static int _static_UID;
+	int _uid;
 
 public:
-	// Konstruktoren
+
 	Line();
 	Line(const Point& p1, const Point& p2);
 	Line(const Line& orig);
@@ -54,12 +54,12 @@ public:
 	int GetUniqueID() const;
 
 	// Setter -Funktionen
-	void SetPoint1(const Point& p); // setzt die Anfangskoordinaten
-	void SetPoint2(const Point& p); // setzt die Endkoordinaten
+	void SetPoint1(const Point& p);
+	void SetPoint2(const Point& p);
 
 	// Getter - Funktionen
-	const Point& GetPoint1(void) const; // gibt die Koordinaten des Anfangspunkts zurück
-	const Point& GetPoint2(void) const; // gibt die Koordinaten des Endpunkts zurück
+	const Point& GetPoint1(void) const;
+	const Point& GetPoint2(void) const;
 	const Point& GetCentre(void) const;
 
 	// Ausgabe

@@ -47,15 +47,14 @@
 
 class Building {
 private:
-    string pCaption; // Name des Projekts
-    RoutingEngine* pRoutingEngine;
-    vector<Room*> pRooms; // Liste der Räume
-    vector<Pedestrian*> pAllPedestians;
-    LCGrid* pLinkedCellGrid;
-
+    string _caption;
+    RoutingEngine* _routingEngine;
+    LCGrid* _linkedCellGrid;
+    vector<Room*> _rooms;
+    vector<Pedestrian*> _allPedestians;
     /// pedestrians pathway
-    bool pSavePathway;
-    ofstream PpathWayStream;
+    bool _savePathway;
+    ofstream _pathWayStream;
 
 	map<int, Crossing*> _crossings;
 	map<int, Transition*> _transitions;
@@ -70,7 +69,6 @@ public:
     // Setter -Funktionen
     void SetCaption(string s);
     void SetRoutingEngine(RoutingEngine* r);
-    void SetAllRooms(const vector<Room*>& rooms);
     void SetRoom(Room* room, int index);
     /// delete the ped from the ped vector
     void DeletePedestrian(Pedestrian* ped);
@@ -84,15 +82,15 @@ public:
     const vector<Room*>& GetAllRooms() const;
     const vector<Pedestrian*>& GetAllPedestrians() const;
     Pedestrian* GetPedestrian( int pedID) const;
-    int GetAnzRooms() const;
-    int GetGoalsCount()const;
+    int GetNumberOfRooms() const;
+    int GetNumberOfGoals()const;
     Room* GetRoom(int index) const; // Gibt Raum der Nummer "index" zurueck
     Room* GetRoom(string caption)const;
     Transition* GetTransition(string caption) const;
     Transition* GetTransition(int id) ;
     Crossing* GetGoal(string caption) const;
 
-    //FIXME: obsolete shold get rid of this method
+    //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(int id);
 
     int GetAnzPedestrians() const;
@@ -108,7 +106,7 @@ public:
     void Update();
     void UpdateGrid();
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
-    void  DumpSubRoomInRoom(int roomID, int subID);
+    void DumpSubRoomInRoom(int roomID, int subID);
 
 	const map<int, Crossing*>& GetAllCrossings() const;
 	const map<int, Transition*>& GetAllTransitions() const;

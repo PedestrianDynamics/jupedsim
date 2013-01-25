@@ -36,23 +36,23 @@ using namespace std;
  ************************************************************/
 
 Building::Building() {
-	pCaption = "no_caption";
-	pRooms = vector<Room*>();
-	pRoutingEngine = NULL;
-	pLinkedCellGrid = NULL;
-	pSavePathway = false;
+	_caption = "no_caption";
+	_rooms = vector<Room*>();
+	_routingEngine = NULL;
+	_linkedCellGrid = NULL;
+	_savePathway = false;
 }
 
 
 Building::~Building() {
-	for (int i = 0; i < GetAnzRooms(); i++)
-		delete pRooms[i];
-	delete pRoutingEngine;
+	for (int i = 0; i < GetNumberOfRooms(); i++)
+		delete _rooms[i];
+	delete _routingEngine;
 
-	delete pLinkedCellGrid;
+	delete _linkedCellGrid;
 
-	if (PpathWayStream.is_open())
-		PpathWayStream.close();
+	if (_pathWayStream.is_open())
+		_pathWayStream.close();
 
 // FIXME:
 //	for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
@@ -73,20 +73,16 @@ Building::~Building() {
  Setter-Funktionen
  ************************************************************/
 void Building::SetCaption(string s) {
-	pCaption = s;
+	_caption = s;
 }
 
 void Building::SetRoutingEngine(RoutingEngine* r) {
-	pRoutingEngine = r;
-}
-
-void Building::SetAllRooms(const vector<Room*>& rooms) {
-	pRooms = rooms;
+	_routingEngine = r;
 }
 
 void Building::SetRoom(Room* room, int index) {
-	if ((index >= 0) && (index < (int) pRooms.size())) {
-		pRooms[index] = room;
+	if ((index >= 0) && (index < (int) _rooms.size())) {
+		_rooms[index] = room;
 	} else {
 		Log->Write("ERROR: \tWrong Index in CBuilding::SetRoom()");
 		exit(0);
@@ -98,33 +94,33 @@ void Building::SetRoom(Room* room, int index) {
  ************************************************************/
 
 string Building::GetCaption() const {
-	return pCaption;
+	return _caption;
 }
 
 RoutingEngine* Building::GetRoutingEngine() const {
-	return pRoutingEngine;
+	return _routingEngine;
 }
 
-int Building::GetAnzRooms() const {
-	return pRooms.size();
+int Building::GetNumberOfRooms() const {
+	return _rooms.size();
 }
 
-int Building::GetGoalsCount() const {
+int Building::GetNumberOfGoals() const {
 	return _transitions.size() + _hLines.size() + _crossings.size();
 }
 
 const vector<Room*>& Building::GetAllRooms() const {
-	return pRooms;
+	return _rooms;
 }
 
 Room* Building::GetRoom(int index) const {
-	if ((index >= 0) && (index < (int) pRooms.size())) {
-		return pRooms[index];
+	if ((index >= 0) && (index < (int) _rooms.size())) {
+		return _rooms[index];
 	} else {
 		char tmp[CLENGTH];
 		sprintf(tmp,
 				"ERROR: Wrong 'index' in CBuiling::GetRoom() index: %d size: %d",
-				index, pRooms.size());
+				index, _rooms.size());
 		Log->Write(tmp);
 		exit(0);
 	}
@@ -132,21 +128,21 @@ Room* Building::GetRoom(int index) const {
 
 int Building::GetAnzPedestrians() const {
 	int sum = 0;
-	for (unsigned int wa = 0; wa < pRooms.size(); wa++) {
-		sum += pRooms[wa]->GetAnzPedestrians();
+	for (unsigned int wa = 0; wa < _rooms.size(); wa++) {
+		sum += _rooms[wa]->GetNumberOfPedestrians();
 	}
 	return sum;
 }
 
 LCGrid* Building::GetGrid() const {
-	return pLinkedCellGrid;
+	return _linkedCellGrid;
 }
 /*************************************************************
  Sonstiges
  ************************************************************/
 
 void Building::AddRoom(Room* room) {
-	pRooms.push_back(room);
+	_rooms.push_back(room);
 }
 
 void Building::AddSurroundingRoom() {
@@ -159,9 +155,9 @@ void Building::AddSurroundingRoom() {
 
 	//finding the bounding of the grid
 	// and collect the pedestrians
-	for (unsigned int r = 0; r < pRooms.size(); r++) {
-		Room* room = pRooms[r];
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+	for (unsigned int r = 0; r < _rooms.size(); r++) {
+		Room* room = _rooms[r];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			const vector<Wall>& allWalls = sub->GetAllWalls();
 
@@ -191,7 +187,7 @@ void Building::AddSurroundingRoom() {
 	y_max = y_max + 10.0;
 
 	SubRoom* bigSubroom = new NormalSubRoom();
-	bigSubroom->SetRoomID(pRooms.size());
+	bigSubroom->SetRoomID(_rooms.size());
 	bigSubroom->SetSubRoomID(0); // should be the single subroom
 	bigSubroom->AddWall(Wall(Point(x_min, y_min), Point(x_min, y_max)));
 	bigSubroom->AddWall(Wall(Point(x_min, y_max), Point(x_max, y_max)));
@@ -201,16 +197,16 @@ void Building::AddSurroundingRoom() {
 	Room * bigRoom = new Room();
 	bigRoom->AddSubRoom(bigSubroom);
 	bigRoom->SetCaption("outside");
-	bigRoom->SetRoomID(pRooms.size());
+	bigRoom->SetID(_rooms.size());
 	AddRoom(bigRoom);
 }
 
 void Building::InitGeometry() {
 	Log->Write("INFO: \tInit Geometry");
-	for (int i = 0; i < GetAnzRooms(); i++) {
+	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
 		// Polygone berechnen
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* s = room->GetSubRoom(j);
 			// Alle Übergänge in diesem Raum bestimmen
 			// Übergänge müssen zu Wänden ergänzt werden
@@ -249,10 +245,10 @@ void Building::Update() {
 	// in that case they are set in the wrong room.
 	vector<Pedestrian*> nonConformPeds;
 
-	for (int i = 0; i < GetAnzRooms(); i++) {
+	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
 
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				Pedestrian* ped = sub->GetPedestrian(k);
@@ -265,8 +261,8 @@ void Building::Update() {
 						sprintf(tmp,
 								"WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
 										"via unknown exit[??%d] Position: (%f, %f)",
-								ped->GetPedIndex(),
-								pRooms[ped->GetRoomID()]->GetCaption().c_str(),
+								ped->GetID(),
+								_rooms[ped->GetRoomID()]->GetCaption().c_str(),
 								ped->GetRoomID(), ped->GetSubRoomID(),
 								ped->GetExitIndex(), ped->GetPos().GetX(),
 								ped->GetPos().GetY());
@@ -286,12 +282,12 @@ void Building::Update() {
 							dynamic_cast<Crossing*>(ped->GetExitLine());
 					if (cross == NULL) {
 						Log->Write("ERROR: Building::update() type casting error");
-						cout<<"ped: "<<ped->GetPedIndex()<<endl;
+						cout<<"ped: "<<ped->GetID()<<endl;
 						exit(EXIT_FAILURE);
 					}
 
 					SubRoom* other_sub = cross->GetOtherSubRoom(
-							room->GetRoomID(), j);
+							room->GetID(), j);
 
 					if (other_sub) {
 						int nextSubRoom = other_sub->GetSubRoomID();
@@ -318,9 +314,9 @@ void Building::Update() {
 	for (int p = 0; p < (int) nonConformPeds.size(); p++) {
 		Pedestrian* ped = nonConformPeds[p];
 		bool assigned = false;
-		for (int i = 0; i < GetAnzRooms(); i++) {
+		for (int i = 0; i < GetNumberOfRooms(); i++) {
 			Room* room = GetRoom(i);
-			for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 				SubRoom* sub = room->GetSubRoom(j);
 				//only relocate in the same room
 				// or only in neighbouring rooms
@@ -331,7 +327,7 @@ void Building::Update() {
 					char tmp[CLENGTH];
 					sprintf(tmp,
 							"pedestrian %d relocated from room/subroom [%s] %d/%d to [%s] %d/%d ",
-							ped->GetPedIndex(),
+							ped->GetID(),
 							GetRoom(ped->GetRoomID())->GetCaption().c_str(),
 							ped->GetRoomID(), ped->GetSubRoomID(),
 							room->GetCaption().c_str(), i, j);
@@ -355,7 +351,7 @@ void Building::Update() {
 
 	// find the new goals, the parallel way
 
-	unsigned int nSize = pAllPedestians.size();
+	unsigned int nSize = _allPedestians.size();
 	int nThreads = 1;
 
 #ifdef _OPENMP
@@ -376,7 +372,7 @@ void Building::Update() {
 			end = nSize - 1;
 
 		for (int p = start; p <= end; ++p) {
-			if (pAllPedestians[p]->FindRoute() == -1) {
+			if (_allPedestians[p]->FindRoute() == -1) {
 				//a destination could not be found for that pedestrian
 				Log->Write("Could not found a route for pedestrian");
 				exit(EXIT_FAILURE);
@@ -390,9 +386,9 @@ void Building::Update() {
 }
 
 void Building::InitPhiAllPeds(double pDt) {
-	for (int i = 0; i < GetAnzRooms(); i++) {
+	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				double cosPhi, sinPhi;
@@ -422,14 +418,14 @@ void Building::InitPhiAllPeds(double pDt) {
 				E.SetCosPhi(cosPhi);
 				E.SetSinPhi(sinPhi);
 				ped->SetEllipse(E);
-				ped->SetRoomID(room->GetRoomID(), room->GetCaption());
+				ped->SetRoomID(room->GetID(), room->GetCaption());
 			}
 		}
 	}
 }
 
 void Building::UpdateGrid() {
-	pLinkedCellGrid->Update(pAllPedestians);
+	_linkedCellGrid->Update(_allPedestians);
 }
 
 void Building::InitGrid(double cellSize) {
@@ -442,9 +438,9 @@ void Building::InitGrid(double cellSize) {
 
 	//finding the bounding of the grid
 	// and collect the pedestrians
-	for (unsigned int r = 0; r < pRooms.size(); r++) {
-		Room* room = pRooms[r];
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+	for (unsigned int r = 0; r < _rooms.size(); r++) {
+		Room* room = _rooms[r];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			const vector<Wall>& allWalls = sub->GetAllWalls();
 
@@ -467,13 +463,13 @@ void Building::InitGrid(double cellSize) {
 		}
 	}
 
-	for (unsigned int wa = 0; wa < pRooms.size(); wa++) {
-		Room* room = pRooms[wa];
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+	for (unsigned int wa = 0; wa < _rooms.size(); wa++) {
+		Room* room = _rooms[wa];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				Pedestrian* ped = sub->GetPedestrian(k);
-				pAllPedestians.push_back(ped);
+				_allPedestians.push_back(ped);
 			}
 		}
 	}
@@ -485,7 +481,7 @@ void Building::InitGrid(double cellSize) {
 	y_max = y_max + 1.0;
 
 	double boundaries[] = { x_min, x_max, y_min, y_max };
-	int pedsCount = pAllPedestians.size();
+	int pedsCount = _allPedestians.size();
 
 	//no algorithms
 	// the domain is made of a sigle cell
@@ -501,8 +497,8 @@ void Building::InitGrid(double cellSize) {
 		Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
 	}
 
-	pLinkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
-	pLinkedCellGrid->ShallowCopy(pAllPedestians);
+	_linkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
+	_linkedCellGrid->ShallowCopy(_allPedestians);
 
 	Log->Write("INFO: \tDone with Initializing the grid ");
 }
@@ -523,7 +519,7 @@ void Building::LoadBuilding(string filename) {
 		Log->Write("ERROR: \tparsing geometry file failed!");
 		exit(EXIT_FAILURE);
 	}
-	pCaption = xmltoa(xMainNode.getAttribute("caption"), "virtual building");
+	_caption = xmltoa(xMainNode.getAttribute("caption"), "virtual building");
 
 	//The file has two main nodes
 	//<rooms> and <transitions>
@@ -537,7 +533,7 @@ void Building::LoadBuilding(string filename) {
 		Room* room = new Room();
 
 		string room_id = xmltoa(xRoom.getAttribute("id"), "-1");
-		room->SetRoomID(xmltoi(room_id.c_str(), -1));
+		room->SetID(xmltoi(room_id.c_str(), -1));
 
 		string caption = "room " + room_id;
 		room->SetCaption(
@@ -573,7 +569,7 @@ void Building::LoadBuilding(string filename) {
 				subroom = new NormalSubRoom();
 			}
 
-			subroom->SetRoomID(room->GetRoomID());
+			subroom->SetRoomID(room->GetID());
 			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
 
 			//looking for polygons (walls)
@@ -723,7 +719,7 @@ void Building::LoadBuilding(string filename) {
 		t->SetType(type);
 
 		if (room1_id != -1 && subroom1_id != -1) {
-			Room* room = pRooms[room1_id];
+			Room* room = _rooms[room1_id];
 			SubRoom* subroom = room->GetSubRoom(subroom1_id);
 
 			//subroom->AddGoalID(t->GetUniqueID());
@@ -736,7 +732,7 @@ void Building::LoadBuilding(string filename) {
 			subroom->AddTransition(t);
 		}
 		if (room2_id != -1 && subroom2_id != -1) {
-			Room* room = pRooms[room2_id];
+			Room* room = _rooms[room2_id];
 			SubRoom* subroom = room->GetSubRoom(subroom2_id);
 			//subroom->AddGoalID(t->GetUniqueID());
 			//MPI
@@ -760,7 +756,7 @@ void Building::DumpSubRoomInRoom(int roomID, int subID) {
 	cout << "dumping room/subroom " << roomID << " / " << subID << endl;
 	for (int p = 0; p < sub->GetAnzPedestrians(); p++) {
 		Pedestrian* ped = sub->GetPedestrian(p);
-		cout << " ID: " << ped->GetPedIndex();
+		cout << " ID: " << ped->GetID();
 		cout << " Index: " << p << endl;
 	}
 
@@ -768,7 +764,7 @@ void Building::DumpSubRoomInRoom(int roomID, int subID) {
 
 void Building::WriteToErrorLog() const {
 	Log->Write("GEOMETRY: ");
-	for (int i = 0; i < GetAnzRooms(); i++) {
+	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* r = GetRoom(i);
 		r->WriteToErrorLog();
 	}
@@ -790,9 +786,9 @@ void Building::WriteToErrorLog() const {
 }
 
 Room* Building::GetRoom(string caption) const {
-	for (unsigned int r = 0; r < pRooms.size(); r++) {
-		if (pRooms[r]->GetCaption() == caption)
-			return pRooms[r];
+	for (unsigned int r = 0; r < _rooms.size(); r++) {
+		if (_rooms[r]->GetCaption() == caption)
+			return _rooms[r];
 	}
 	Log->Write("Warning: Room not found with caption " + caption);
 	//return NULL;
@@ -935,7 +931,7 @@ void Building::LoadRoutingInfo(string filename) {
 		double y2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("py"));
 
 
-		Room* room = pRooms[room_id];
+		Room* room = _rooms[room_id];
 		SubRoom* subroom = room->GetSubRoom(subroom_id);
 
 
@@ -974,7 +970,7 @@ void Building::LoadRoutingInfo(string filename) {
 			vTrip.push_back(xmltoa(p));
 			p = strtok(NULL, ":");
 		}
-		pRoutingEngine->AddTrip(vTrip);
+		_routingEngine->AddTrip(vTrip);
 	}
 	Log->Write("INFO:\t done with loading extra routing information");
 }
@@ -1009,8 +1005,8 @@ void Building::LoadTrafficInfo(string filename) {
 		XMLNode xRoom = xRoomsNode.getChildNode("room", i);
 		double id = xmltof(xRoom.getAttribute("room_id"), -1);
 		string state = xmltoa(xRoom.getAttribute("state"), "good");
-		int status = (state == "good") ? 0 : 1;
-		pRooms[id]->SetRoomState(status);
+		RoomState status = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
+		_rooms[id]->SetState(status);
 	}
 
 	//processing the doors node
@@ -1047,12 +1043,12 @@ void Building::LoadTrafficInfo(string filename) {
 
 void Building::DeletePedestrian(Pedestrian* ped) {
 	vector<Pedestrian*>::iterator it;
-	it = find(pAllPedestians.begin(), pAllPedestians.end(), ped);
-	if (it == pAllPedestians.end()) {
+	it = find(_allPedestians.begin(), _allPedestians.end(), ped);
+	if (it == _allPedestians.end()) {
 		cout << " Ped not found" << endl;
 	} else {
 		//save the path history for this pedestrian before removing from the simulation
-		if (pSavePathway) {
+		if (_savePathway) {
 			string results;
 			string path = (*it)->GetPath();
 			vector<string> brokenpaths;
@@ -1060,24 +1056,24 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 			for (unsigned int i = 0; i < brokenpaths.size(); i++) {
 				vector<string> tags;
 				StringExplode(brokenpaths[i], ":", &tags);
-				string room = pRooms[atoi(tags[0].c_str())]->GetCaption();
+				string room = _rooms[atoi(tags[0].c_str())]->GetCaption();
 				string trans =GetTransition(atoi(tags[1].c_str()))->GetCaption();
 				//ignore crossings/hlines
 				if (trans != "")
-					PpathWayStream << room << " " << trans << endl;
+					_pathWayStream << room << " " << trans << endl;
 			}
 
 		}
-		cout << "deleting " << (*it)->GetPedIndex() << endl;
-		pAllPedestians.erase(it);
+		cout << "deleting " << (*it)->GetID() << endl;
+		_allPedestians.erase(it);
 	}
 	delete ped;
 }
 
 void Building::DeletePedFromSim(Pedestrian* ped) {
-	SubRoom* sub = pRooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
+	SubRoom* sub = _rooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
 	for (int p = 0; p < sub->GetAnzPedestrians(); p++) {
-		if (sub->GetPedestrian(p)->GetPedIndex() == ped->GetPedIndex()) {
+		if (sub->GetPedestrian(p)->GetID() == ped->GetID()) {
 			sub->DeletePedestrian(p);
 			DeletePedestrian(ped);
 			return;
@@ -1086,7 +1082,7 @@ void Building::DeletePedFromSim(Pedestrian* ped) {
 }
 
 const vector<Pedestrian*>& Building::GetAllPedestrians() const {
-	return pAllPedestians;
+	return _allPedestians;
 }
 
 void Building::AddPedestrian(Pedestrian* ped) {
@@ -1098,7 +1094,7 @@ void Building::AddPedestrian(Pedestrian* ped) {
 	//			return;
 	//		}
 	//	}
-	pAllPedestians.push_back(ped);
+	_allPedestians.push_back(ped);
 
 }
 
@@ -1136,13 +1132,13 @@ void Building::AddPedestrian(Pedestrian* ped) {
 //}
 
 void Building::InitSavePedPathway(string filename) {
-	PpathWayStream.open(filename.c_str());
-	pSavePathway = true;
+	_pathWayStream.open(filename.c_str());
+	_savePathway = true;
 
-	if (PpathWayStream.is_open()) {
+	if (_pathWayStream.is_open()) {
 		Log->Write("#INFO:\tsaving pedestrian paths to [ " + filename + " ]");
-		PpathWayStream << "##pedestrian ways" << endl;
-		PpathWayStream << "#nomenclature roomid  caption" << endl;
+		_pathWayStream << "##pedestrian ways" << endl;
+		_pathWayStream << "#nomenclature roomid  caption" << endl;
 		//		for (unsigned int r=0;r< pRooms.size();r++){
 		//			Room* room= GetRoom(r);
 		//			const vector<int>& goals=room->GetAllTransitionsIDs();
@@ -1154,7 +1150,7 @@ void Building::InitSavePedPathway(string filename) {
 		//			}
 		//		}
 		//
-		PpathWayStream << "#data room exit_id" << endl;
+		_pathWayStream << "#data room exit_id" << endl;
 	} else {
 		Log->Write("#INFO:\t Unable to open [ " + filename + " ]");
 		Log->Write("#INFO:\t saving to stdout");
@@ -1171,8 +1167,8 @@ void Building::CleanUpTheScene() {
 	int updateRate = 80.0 / 0.01; // 20 seconds/pDt
 
 	if (counter % updateRate == 0) {
-		for (unsigned int i = 0; i < pAllPedestians.size(); i++) {
-			Pedestrian* ped = pAllPedestians[i];
+		for (unsigned int i = 0; i < _allPedestians.size(); i++) {
+			Pedestrian* ped = _allPedestians[i];
 
 			if (ped->GetDistanceSinceLastRecord() < 0.1) {
 				//delete from the simulation
@@ -1181,8 +1177,8 @@ void Building::CleanUpTheScene() {
 				totalSliced++;
 				char msg[CLENGTH];
 				sprintf(msg, "INFO:\t slicing Ped %d from room %s, total [%d]",
-						ped->GetPedIndex(),
-						pRooms[ped->GetRoomID()]->GetCaption().c_str(),
+						ped->GetID(),
+						_rooms[ped->GetRoomID()]->GetCaption().c_str(),
 						totalSliced);
 				Log->Write(msg);
 			} else {
@@ -1216,13 +1212,13 @@ void Building::StringExplode(string str, string separator,
 }
 
 Pedestrian* Building::GetPedestrian(int pedID) const {
-	for (unsigned int i = 0; i < pRooms.size(); i++) {
-		Room* room = pRooms[i];
-		for (int j = 0; j < room->GetAnzSubRooms(); j++) {
+	for (unsigned int i = 0; i < _rooms.size(); i++) {
+		Room* room = _rooms[i];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
 			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
 				Pedestrian* p = sub->GetPedestrian(k);
-				if (p->GetPedIndex() == pedID) {
+				if (p->GetID() == pedID) {
 					return p;
 				}
 			}

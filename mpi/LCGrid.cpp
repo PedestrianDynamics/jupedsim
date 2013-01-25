@@ -89,7 +89,7 @@ LCGrid::~LCGrid(){
 void LCGrid::ShallowCopy(const vector<Pedestrian*>& peds){
 
 	for(unsigned int p=0;p<peds.size();p++){
-		int id= peds[p]->GetPedIndex()-1;
+		int id= peds[p]->GetID()-1;
 		pLocalPedsCopy[id]=peds[p];
 	}
 }
@@ -101,7 +101,7 @@ void LCGrid::Update(const vector<Pedestrian*>& peds){
 
 	for (int p = 0; p < nSize; p++) {
 		Pedestrian* ped = peds[p];
-		int id=ped->GetPedIndex()-1;
+		int id=ped->GetID()-1;
 		// determine the cell coordinates of pedestrian i
 		int ix = (int) ((ped->GetPos().GetX() - pGrid_xmin) / pCellSize) + 1; // +1 because of dummy cells
 		int iy = (int) ((ped->GetPos().GetY() - pGrid_ymin) / pCellSize) + 1;
@@ -118,7 +118,7 @@ void LCGrid::Update(const vector<Pedestrian*>& peds){
 // I hope you had called Clear() first
 void LCGrid::Update(Pedestrian* ped){
 
-	int id=ped->GetPedIndex()-1;
+	int id=ped->GetID()-1;
 	// determine the cell coordinates of pedestrian i
 	int ix = (int) ((ped->GetPos().GetX() - pGrid_xmin) / pCellSize) + 1; // +1 because of dummy cells
 	int iy = (int) ((ped->GetPos().GetY() - pGrid_ymin) / pCellSize) + 1;
@@ -152,7 +152,7 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighbourhood,
 	int k = (int) ((yPed - pGrid_ymin) / pCellSize) + 1;
 
 	//-1 to get  correct mapping in the array local
-	int myID=ped->GetPedIndex()-1;
+	int myID=ped->GetID()-1;
 
 	*nSize=0;
 	// all neighbor cells
@@ -184,7 +184,7 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
 	int k = (int) ((yPed - pGrid_ymin) / pCellSize) + 1;
 
 	//-1 to get  correct mapping in the array local
-	int myID=ped->GetPedIndex()-1;
+	int myID=ped->GetID()-1;
 
 	// all neighbor cells
 	for (int i = l - 1; i <= l + 1; ++i) {

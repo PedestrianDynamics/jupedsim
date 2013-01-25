@@ -28,7 +28,7 @@
 
 using namespace std;
 
-int Line::_UID=0;
+int Line::_static_UID=0;
 
 
 /************************************************************
@@ -37,24 +37,24 @@ int Line::_UID=0;
 Line::Line() {
 	SetPoint1(Point()); //Default-Constructor  (0.0,0.0)
 	SetPoint2(Point());
-	pUID = _UID++;
+	_uid = _static_UID++;
 }
 
 Line::Line(const Point& p1, const Point& p2) {
 	SetPoint1(p1);
 	SetPoint2(p2);
-	pUID = _UID++;
+	_uid = _static_UID++;
 }
 
 int Line::GetUniqueID()  const {
-	return pUID;
+	return _uid;
 }
 
 Line::Line(const Line& orig) {
-	pPoint1 = orig.GetPoint1();
-	pPoint2 = orig.GetPoint2();
-	pCentre = orig.GetCentre();
-	pUID	= orig.GetUniqueID();
+	_point1 = orig.GetPoint1();
+	_point2 = orig.GetPoint2();
+	_centre = orig.GetCentre();
+	_uid	= orig.GetUniqueID();
 	//pUID = UID++;
 }
 
@@ -65,27 +65,27 @@ Line::~Line() {
  Setter-Funktionen
  ************************************************************/
 void Line::SetPoint1(const Point& p) {
-	pPoint1 = p;
+	_point1 = p;
 }
 
 void Line::SetPoint2(const Point& p) {
-	pPoint2 = p;
-	pCentre = (pPoint1+pPoint2)*0.5;
+	_point2 = p;
+	_centre = (_point1+_point2)*0.5;
 }
 
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
 const Point& Line::GetPoint1() const {
-	return pPoint1;
+	return _point1;
 }
 
 const Point& Line::GetPoint2() const {
-	return pPoint2;
+	return _point2;
 }
 
 const Point& Line::GetCentre()const {
-	return pCentre;
+	return _centre;
 }
 
 /*************************************************************
@@ -181,17 +181,17 @@ Point Line::LotPoint(const Point& p) const {
  * */
 Point Line::ShortestPoint(const Point& p) const {
 
-	const Point& t = pPoint1 - pPoint2;
+	const Point& t = _point1 - _point2;
 
-	Point tmp = p - pPoint2;
+	Point tmp = p - _point2;
 	double lambda = tmp.ScalarP(t) / t.ScalarP(t);
-	Point f = pPoint2 + t*lambda;
+	Point f = _point2 + t*lambda;
 
 	/* Prüfen ob Punkt in der Linie,sonst entsprechenden Eckpunkt zurückgeben */
 	if (lambda < 0)
-		f = pPoint2;
+		f = _point2;
 	if (lambda > 1)
-		f = pPoint1;
+		f = _point1;
 
 	return f;
 }
@@ -266,34 +266,34 @@ double Line::DistToSquare(const Point& p) const {
  * gleich sind
  * */
 bool Line::operator==(const Line& l) const {
-	return ((pPoint1 == l.GetPoint1() && pPoint2 == l.GetPoint2()) ||
-			(pPoint2 == l.GetPoint1() && pPoint1 == l.GetPoint2()));
+	return ((_point1 == l.GetPoint1() && _point2 == l.GetPoint2()) ||
+			(_point2 == l.GetPoint1() && _point1 == l.GetPoint2()));
 }
 
 /* Zwei Linien sind ungleich, wenn ihre beiden Punkte
  * ungleich sind
  * */
 bool Line::operator!=(const Line& l) const {
-	return ((pPoint1 != l.GetPoint1() && pPoint2 != l.GetPoint2()) &&
-			(pPoint2 != l.GetPoint1() && pPoint1 != l.GetPoint2()));
+	return ((_point1 != l.GetPoint1() && _point2 != l.GetPoint2()) &&
+			(_point2 != l.GetPoint1() && _point1 != l.GetPoint2()));
 }
 
 double Line::Length() const {
-	return (pPoint1 - pPoint2).Norm();
+	return (_point1 - _point2).Norm();
 }
 
 double Line::LengthSquare() const {
-	return (pPoint1 - pPoint2).NormSquare();
+	return (_point1 - _point2).NormSquare();
 }
 
 bool Line::IntersectionWith(const Line& l) const {
 
-	double deltaACy = this->pPoint1.GetY() - l.GetPoint1().GetY();
+	double deltaACy = this->_point1.GetY() - l.GetPoint1().GetY();
 	double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
-	double deltaACx = this->pPoint1.GetX() - l.GetPoint1().GetX();
+	double deltaACx = this->_point1.GetX() - l.GetPoint1().GetX();
 	double deltaDCy = l.GetPoint2().GetY() - l.GetPoint1().GetY();
-	double deltaBAx = this->pPoint2.GetX() - this->pPoint1.GetX();
-	double deltaBAy = this->pPoint2.GetY() - this->pPoint1.GetY();
+	double deltaBAx = this->_point2.GetX() - this->_point1.GetX();
+	double deltaBAy = this->_point2.GetY() - this->_point1.GetY();
 
 	double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
 	double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
@@ -302,10 +302,10 @@ bool Line::IntersectionWith(const Line& l) const {
 		if (numerator == 0) {
 			// collinear. Potentially infinite intersection points.
 			// Check and return one of them.
-			if (pPoint1.GetX() >= l.GetPoint1().GetX() && pPoint1.GetX() <= l.GetPoint2().GetX()) {
+			if (_point1.GetX() >= l.GetPoint1().GetX() && _point1.GetX() <= l.GetPoint2().GetX()) {
 				//return AB.Start;
 				return true;
-			} else if (l.GetPoint1().GetX() >= pPoint1.GetX() && l.GetPoint1().GetX() <= pPoint2.GetX()) {
+			} else if (l.GetPoint1().GetX() >= _point1.GetX() && l.GetPoint1().GetX() <= _point2.GetX()) {
 				//return CD.Start;
 				return true;
 			} else {
@@ -333,11 +333,11 @@ bool Line::IntersectionWith(const Line& l) const {
 bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pedestrians*/){
 
 	double r=radius;
-	double x1=pPoint1.GetX();
-	double y1=pPoint1.GetY();
+	double x1=_point1.GetX();
+	double y1=_point1.GetY();
 
-	double x2=pPoint2.GetX();
-	double y2=pPoint2.GetY();
+	double x2=_point2.GetX();
+	double y2=_point2.GetY();
 
 	double xc=centre.GetX();
 	double yc=centre.GetY();
@@ -385,6 +385,6 @@ bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pe
 
 std::string Line::toString() {
 	std::stringstream tmp;
-	tmp<<pPoint1.toString()<<"--"<<pPoint2.toString();
+	tmp<<_point1.toString()<<"--"<<_point2.toString();
 	return tmp.str();
 }

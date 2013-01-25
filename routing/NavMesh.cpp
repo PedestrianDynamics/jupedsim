@@ -31,14 +31,14 @@ void NavMesh::BuildNavMesh() {
 
 
 	std::map<int,int> subroom_to_node;
-	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+	for (int i = 0; i < pBuilding->GetNumberOfRooms(); i++) {
 		Room* r = pBuilding->GetRoom(i);
 		string caption = r->GetCaption();
 
 		//skip the virtual room containing the complete geometry
 		//if(r->GetCaption()=="outside") continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 
 			//vertices
@@ -639,12 +639,12 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		//			if (IsElementInVector(problem_nodes, node_id) == false)
 		//				continue;
 
-		if(node->pGroup!="080") continue;
+		//if(node->pGroup!="080") continue;
 		//		if(node->pPortals.size()<10) continue;
 		//if(node->IsConvex()==true) continue;
 		//if(node->IsClockwise()==true) continue;
 
-		file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.pX<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.pY<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+		//file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.pX<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.pY<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
 		//		cout<<"size: "<< node->pHull.size()<<endl;
 		//		std::sort(node->pHull.begin(), node->pHull.end());
 		//		node->pHull.erase(std::unique(node->pHull.begin(), node->pHull.end()), node->pHull.end());
@@ -678,12 +678,12 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 			JObstacle* obst=pObst[i];
 
 			if(obst->pNode0==node_id ){
-				double x1=obst->pStart.pPos.GetX()*factor-centre.pX;
-				double y1=obst->pStart.pPos.GetY()*factor-centre.pY;
-				double x2=obst->pEnd.pPos.GetX()*factor-centre.pX;
-				double y2=obst->pEnd.pPos.GetY()*factor-centre.pY;
+				double x1=obst->pStart.pPos.GetX()*factor-centre._x;
+				double y1=obst->pStart.pPos.GetY()*factor-centre._y;
+				double x2=obst->pEnd.pPos.GetX()*factor-centre._x;
+				double y2=obst->pEnd.pPos.GetY()*factor-centre._y;
 
-				file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<obst->id<<"\" color=\"20\" />"<<endl;
+				//file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<obst->id<<"\" color=\"20\" />"<<endl;
 				file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -697,12 +697,12 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 			JEdge* edge=pEdges[i];
 
 			if(edge->pNode0==node_id || edge->pNode1==node_id){
-				double x1=edge->pStart.pPos.GetX()*factor-centre.pX;
-				double y1=edge->pStart.pPos.GetY()*factor-centre.pY;
-				double x2=edge->pEnd.pPos.GetX()*factor-centre.pX;
-				double y2=edge->pEnd.pPos.GetY()*factor-centre.pY;
+				double x1=edge->pStart.pPos.GetX()*factor-centre._x;
+				double y1=edge->pStart.pPos.GetY()*factor-centre._y;
+				double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
+				double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
 
-				file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
+				//file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
 				file<<"\t\t<door id = \""<<i<<"\">"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -749,10 +749,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, const std::vector<Point>
 	for(unsigned int i=0;i<points.size();i++){
 
 		unsigned int size= points.size();
-		double x1=points[ i%size].GetX()*factor -centre.pX;
-		double y1=points[ i%size].GetY()*factor -centre.pY;
-		double x2=points[ (i+1)%size].GetX()*factor -centre.pX;
-		double y2=points[ (i+1)%size].GetY()*factor -centre.pY;
+		double x1=points[ i%size].GetX()*factor -centre._x;
+		double y1=points[ i%size].GetY()*factor -centre._y;
+		double x2=points[ (i+1)%size].GetX()*factor -centre._x;
+		double y2=points[ (i+1)%size].GetY()*factor -centre._y;
 
 		//		draw the convex hull
 		file<<" \t\t<sphere centerX=\""<<x1<<"\" centerY=\""<<y1<<"\" centerZ=\"0\" radius=\"150\" color=\"100\" />"<<endl;
@@ -804,7 +804,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node){
 
 	int node_id=node->id; //cout<<"node id: "<<node_id<<endl;
 
-	file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.pX<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.pY<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+	file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre._x<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre._y<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
 
 	//		cout<<"size: "<< JNode->pHull.size()<<endl;
 	//		std::sort(JNode->pHull.begin(), JNode->pHull.end());
@@ -839,10 +839,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node){
 		JObstacle* obst=pObst[i];
 
 		if(obst->pNode0==node_id ){
-			double x1=obst->pStart.pPos.GetX()*factor-centre.pX;
-			double y1=obst->pStart.pPos.GetY()*factor-centre.pY;
-			double x2=obst->pEnd.pPos.GetX()*factor-centre.pX;
-			double y2=obst->pEnd.pPos.GetY()*factor-centre.pY;
+			double x1=obst->pStart.pPos.GetX()*factor-centre._x;
+			double y1=obst->pStart.pPos.GetY()*factor-centre._y;
+			double x2=obst->pEnd.pPos.GetX()*factor-centre._x;
+			double y2=obst->pEnd.pPos.GetY()*factor-centre._y;
 
 			file<<"\t\t<wall id = \""<<i<<"\">"<<endl;
 			file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
@@ -857,10 +857,10 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName, JNode* node){
 		JEdge* edge=pEdges[i];
 
 		if(edge->pNode0==node_id || edge->pNode1==node_id){
-			double x1=edge->pStart.pPos.GetX()*factor-centre.pX;
-			double y1=edge->pStart.pPos.GetY()*factor-centre.pY;
-			double x2=edge->pEnd.pPos.GetX()*factor-centre.pX;
-			double y2=edge->pEnd.pPos.GetY()*factor-centre.pY;
+			double x1=edge->pStart.pPos.GetX()*factor-centre._x;
+			double y1=edge->pStart.pPos.GetY()*factor-centre._y;
+			double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
+			double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
 
 			file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
 			file<<"\t\t<door id = \""<<i<<"\">"<<endl;
@@ -1102,7 +1102,7 @@ int NavMesh::IsPortal(Point& p1, Point& p2) {
 
 void NavMesh::Finalize() {
 
-#ifdef _CGAL
+
 	cout<<"finalizing"<<endl;
 
 	//	WriteToFileTraVisTo("arena_envelope.xml",envelope);
@@ -1126,7 +1126,7 @@ void NavMesh::Finalize() {
 	centroids.push_back(Point(-60,-20));
 
 
-	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+	for (int i = 0; i < pBuilding->GetNumberOfRooms(); i++) {
 		Room* r = pBuilding->GetRoom(i);
 		string caption = r->GetCaption();
 
@@ -1135,7 +1135,7 @@ void NavMesh::Finalize() {
 		if(r->GetZPos()>6) continue;
 		const Point& centroid0 = Point(0,0);
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 
 			//walls
@@ -1210,6 +1210,10 @@ void NavMesh::Finalize() {
 	//eject the last point which is a duplicate.
 	Hull.pop_back();
 
+	//the surrounding room
+	vector<Point> Hull2=pBuilding->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
+
+#ifdef _CGAL
 	//print for some check
 	//WriteToFileTraVisTo("arena_envelope.xml",Hull);
 	//exit(0);
@@ -1232,18 +1236,19 @@ void NavMesh::Finalize() {
 	//	}
 	//WriteToFileTraVisTo("arena_envelope.xml",Hull);
 
+	//perform some tests using CGAL
+
 	//first polygon
 	Polygon_2 polygon2;
 	Polygon_2 holesP[1];
 
 
 	for(unsigned int i=0;i<Hull.size();i++){
-		holesP[0].push_back(Point_2(Hull[i].pX,Hull[i].pY));
+		holesP[0].push_back(Point_2(Hull[i]._x,Hull[i]._y));
 	}
 
-	vector<Point> Hull2=pBuilding->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
 	for(unsigned int i=0;i<Hull2.size();i++){
-		polygon2.push_back(Point_2(Hull2[i].pX,Hull2[i].pY));
+		polygon2.push_back(Point_2(Hull2[i]._x,Hull2[i]._y));
 	}
 
 	if(holesP[0].is_clockwise_oriented())holesP[0].reverse_orientation();
@@ -1253,6 +1258,8 @@ void NavMesh::Finalize() {
 	assert(polygon2.is_counterclockwise_oriented());
 	assert(holesP[0].is_simple());
 	assert(polygon2.is_simple());
+
+#endif //_CGAL
 
 	cout<<"performing the triangulation"<<endl;
 	DTriangulation* tri= new DTriangulation();
@@ -1352,7 +1359,7 @@ void NavMesh::Finalize() {
 
 	UpdateEdges();
 
-#endif //_CGAL
+
 	cout<<"done with finalization"<<endl;
 }
 
@@ -1387,7 +1394,7 @@ void NavMesh::Triangulate(SubRoom* sub) {
 	Polygon_2 holesP[holes.size()];
 
 	for(unsigned int i=0;i<outerHull.size();i++){
-		polygon.push_back(Point_2(outerHull[i].pX,outerHull[i].pY));
+		polygon.push_back(Point_2(outerHull[i]._x,outerHull[i]._y));
 	}
 	assert(polygon.is_simple());
 	if(polygon.is_clockwise_oriented()){
@@ -1399,7 +1406,7 @@ void NavMesh::Triangulate(SubRoom* sub) {
 
 	for(unsigned int i=0;i<holes.size();i++){
 		for(unsigned int j=0;j<holes[i].size();j++){
-			holesP[i].push_back(Point_2(holes[j][i].pX,holes[j][i].pY));
+			holesP[i].push_back(Point_2(holes[j][i]._x,holes[j][i]._y));
 		}
 
 		if(holesP[i].is_clockwise_oriented()) {
@@ -1653,18 +1660,42 @@ void NavMesh::WriteBehavior() {
 
 	file<< "<?xml version=\"1.0\"?>"<<endl;
 	file<< "\t<Population>"<<endl;
-	file<< "\t\t<GoalSet id=\"0\">"<<endl;
 
-	vector<Point> goals=pBuilding->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
-	for(unsigned int g=0;g<goals.size();g++){
-		double factor=(10.0/(goals[g].Norm())-1);
-		file<< "\t\t\t<Goal type=\"point\" id=\""<<g<<"\" x=\""<< factor*goals[g].pX<<"\" y=\""<<factor*goals[g].pY<<"\"/>"<<endl;
+
+	int goalsetid=0;
+	//Write the goal set outside
+	{
+		file<< "\t\t<GoalSet id=\""<<goalsetid++<<"\" description=\"outside\">"<<endl;
+
+		vector<Point> goals=pBuilding->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
+		for(unsigned int g=0;g<goals.size();g++){
+			double factor=(10.0/(goals[g].Norm())-1);
+			file<< "\t\t\t<Goal type=\"point\" id=\""<<g<<"\" x=\""<< factor*goals[g]._x<<"\" y=\""<<factor*goals[g]._y<<"\"/>"<<endl;
+		}
+		file<< "\t\t</GoalSet>"<<endl;
 	}
 
-	//Point p1= pBuilding->GetRoom(15)->GetSubRoom(0)->GetCentroid();
-	//file<< "\t\t\t<Goal type=\"point\" id=\""<<0<<"\" x=\""<< p1.pX<<"\" y=\""<<p1.pY<<"\"/>"<<endl;
 
-	file<< "\t\t</GoalSet>"<<endl;
+	//write the goal set tunnel
+	{
+		file<< "\t\t<GoalSet id=\""<<goalsetid++<<"\" description=\"tunnel\">"<<endl;
+
+		for (map<int, Transition*>::const_iterator itr = pBuilding->GetAllTransitions().begin();
+				itr != pBuilding->GetAllTransitions().end(); ++itr) {
+
+			int door=itr->first;
+			//int door = itr->second->GetUniqueID();
+			Transition* cross = itr->second;
+			const Point& centre = cross->GetCentre();
+
+			if((cross->Length()<2.6) && (cross->Length()>2.4))
+
+				file<< "\t\t\t<Goal type=\"point\" id=\""<<door<<"\" x=\""<< centre._x<<"\" y=\""<<centre._y<<"\"/>"<<endl;
+		}
+		file<< "\t\t</GoalSet>"<<endl;
+	}
+	//write the goal set promenade
+
 
 	file<< "\t\t<Behavior class=\"1\">"<<endl;
 	file<< "\t\t\t<Property name=\"prefSpeed\" type=\"float\" dist=\"c\" value=\"1.3\" />"<<endl;
@@ -1674,7 +1705,7 @@ void NavMesh::WriteBehavior() {
 	file<< "<!--"<<endl;
 	file<< "<NavMeshGoal goalSet=\"0\" goal=\"farthest\" filename=\"../examples/stadium/arena.nav\"/>"<<endl;
 	file<< "-->"<<endl;
-	file<< "\t\t\t\t<AbsoluteGoal goalSet=\"0\" goal=\"0\" perAgent=\"0\" />"<<endl;
+	file<< "\t\t\t\t<AbsoluteGoal goalSet=\"0\" goal=\"nearest\" perAgent=\"1\" />"<<endl;
 	file<< "\t\t\t\t<VelComponent type=\"navMesh\" weight=\"1.0\"  filename=\"../examples/stadium/arena.nav\" />"<<endl;
 	file<< "\t\t\t</State>"<<endl;
 	file<< "\t\t\t<State name=\"Stop1\" speedPolicy=\"min\" final=\"1\">"<<endl;
@@ -1717,11 +1748,11 @@ void NavMesh::WriteStartPositions() {
 
 	vector< vector<Point > >  availablePos = vector< vector<Point> >();
 
-	for (int r = 0; r < pBuilding->GetAnzRooms(); r++) {
+	for (int r = 0; r < pBuilding->GetNumberOfRooms(); r++) {
 		vector<Point >   freePosRoom =  vector<Point >  ();
 		Room* room = pBuilding->GetRoom(r);
 		if(room->GetCaption()=="outside") continue;
-		for (int s = 0; s < room->GetAnzSubRooms(); s++) {
+		for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
 			SubRoom* subr = room->GetSubRoom(s);
 			vector<Point > pos = pDistribution->PossiblePositions(subr);
 			freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
@@ -1769,16 +1800,25 @@ void NavMesh::WriteStartPositions() {
 	file<< "\t\t<Zanlungo mass=\"80\" orient_weight=\"0.75\" />"<<endl;
 	file<< ""<<endl;
 
-	vector<Point > freePosRoom = availablePos[pBuilding->GetRoom("100")->GetRoomID()];
-	//vector<Point > freePosRoom = availablePos[pBuilding->GetRoom(0)->GetRoomID()];
 
-	int nAgents=50; // the number of agents to distribute
-	for (int a=0;a<nAgents;a++){
-		int index = rand() % freePosRoom.size();
-		file<< "\t\t<Agent p_x=\""<<freePosRoom[index].pX<<" \"p_y=\""<<freePosRoom[index].pY<<"\"/>"<<endl;
+	for(int i=0;i<pBuilding->GetNumberOfRooms();i++){
+		//int room_id=pBuilding->GetRoom("100")->GetRoomID();
 
-		//cout<<"Position: "<<freePosRoom[index].toString()<<endl;
-		freePosRoom.erase(freePosRoom.begin() + index);
+		Room* room = pBuilding->GetRoom(i);
+		if(room->GetCaption()=="outside") continue;
+		if(room->GetCaption()=="150") continue;
+		int room_id=room->GetID();
+		vector<Point > freePosRoom = availablePos[room_id];
+
+		int nAgentsPerRoom=50; // the number of agents to distribute
+		for (int a=0;a<nAgentsPerRoom;a++){
+			int index = rand() % freePosRoom.size();
+			file<< "\t\t<Agent p_x=\""<<freePosRoom[index]._x<<" \"p_y=\""<<freePosRoom[index]._y<<"\"/>"<<endl;
+			//cout<<"Position: "<<freePosRoom[index].toString()<<endl;
+			freePosRoom.erase(freePosRoom.begin() + index);
+		}
+
+//		break;
 	}
 
 	file<< "\t</AgentSet>"<<endl;
@@ -1980,11 +2020,11 @@ void NavMesh::ComputePlanesEquation() {
 
 	ComputeStairsEquation();
 
-	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+	for (int i = 0; i < pBuilding->GetNumberOfRooms(); i++) {
 		Room* r = pBuilding->GetRoom(i);
 		//if(r->GetCaption()!="090") continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* sub = r->GetSubRoom(k);
 
 			Stair* stair=dynamic_cast<Stair*>(sub);
@@ -1994,9 +2034,9 @@ void NavMesh::ComputePlanesEquation() {
 				bool connection=false;
 
 				//check if the subroom is connected with a stair
-				for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+				for (int i = 0; i < pBuilding->GetNumberOfRooms(); i++) {
 					Room* r = pBuilding->GetRoom(i);
-					for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+					for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 						SubRoom* s = r->GetSubRoom(k);
 						Stair* st=dynamic_cast<Stair*>(s);
 						//if ((st!=NULL) && (s->GetSubRoomID()!=sub->GetSubRoomID()) ){
@@ -2080,14 +2120,14 @@ void NavMesh::ComputeStairsEquation() {
 	double StairAngle=34.0; // degrees
 	double theta = ( StairAngle * M_PI / 180.0 );
 
-	for (int i = 0; i < pBuilding->GetAnzRooms(); i++) {
+	for (int i = 0; i < pBuilding->GetNumberOfRooms(); i++) {
 		Room* r = pBuilding->GetRoom(i);
 		//cout<<"room: "<<r->GetCaption()<<endl;
 		//cout<<"elevation: "<<base<<endl;
 
 		//if(r->GetCaption()!="090") continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* sub = r->GetSubRoom(k);
 
 			Stair* stair=dynamic_cast<Stair*>(sub);
@@ -2186,13 +2226,13 @@ void NavMesh::ComputeStairsEquation() {
 
 
 				double vecDA[3];
-				vecDA[0]= (A-D).pX;
-				vecDA[1]= (A-D).pY;
+				vecDA[0]= (A-D)._x;
+				vecDA[1]= (A-D)._y;
 				vecDA[2]= 0.0;
 
 				double vecDC[3];
-				vecDC[0]= (C-D).pX;
-				vecDC[1]= (C-D).pY;
+				vecDC[0]= (C-D)._x;
+				vecDC[1]= (C-D)._y;
 				vecDC[2]= (C-D).Norm()*tan(theta);
 
 				double vecNormal[3];
@@ -2208,7 +2248,7 @@ void NavMesh::ComputeStairsEquation() {
 
 				// the equation of the plan is given as: Ax+By+Cz+d=0;
 				// using the Point A:
-				double d = - (vecNormal[0]*A.pX+vecNormal[1]*A.pY+vecNormal[2]*base);
+				double d = - (vecNormal[0]*A._x+vecNormal[1]*A._y+vecNormal[2]*base);
 				double coef[3];
 				coef[0]= - vecNormal[0] / vecNormal[2];
 				coef[1]= - vecNormal[1] / vecNormal[2];
