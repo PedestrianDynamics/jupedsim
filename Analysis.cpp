@@ -54,7 +54,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	char tmp[CLENGTH];
 	string s = "Parameter:\n";
 
-	switch (args->GetLog()) {
+/*	switch (args->GetLog()) {
 		case 0:
 			// no log file
 			//Log = new OutputHandler();
@@ -74,7 +74,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 		default:
 			printf("Wrong option for Logfile!\n\n");
 			exit(0);
-	}
+	}*/
 
 	Log->Write("INFO: \tOptionen an Simulation geben\n");
 
@@ -114,7 +114,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	Log->Write("INFO: \t" + s);
 	pBuilding->LoadBuilding(args->GetGeometryFilename());
-	pBuilding->AddSurroundingRoom();
+	//pBuilding->AddSurroundingRoom();
 	pBuilding->InitGeometry(); // create the polygones
 
 
