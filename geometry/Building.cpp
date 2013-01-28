@@ -200,11 +200,6 @@ void Building::InitGeometry() {
 			s->CalculateArea();
 			goals.clear();
 
-			const vector<Point> geoPolygon = s->GetPolygon();
-			for (unsigned int i = 0; i < geoPolygon.size(); i++) {
-				cout<<geoPolygon[i].pX<<'\t'<<geoPolygon[i].pY<<endl;
-			}
-
 			//do the same for the obstacles that are closed
 			const vector<Obstacle*>& obstacles = s->GetAllObstacles();
 			for (unsigned int obs = 0; obs < obstacles.size(); ++obs) {
@@ -238,9 +233,10 @@ void Building::LoadBuilding(string filename) {
 
 	//The file has two main nodes
 	//<rooms> and <transitions>
+
 	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
 	int nRooms = xRoomsNode.nChildNode("room");
-    cout<<nRooms<<endl;
+
 	//processing the rooms node
 	for (int i = 0; i < nRooms; i++) {
 		XMLNode xRoom = xRoomsNode.getChildNode("room", i);
@@ -288,13 +284,13 @@ void Building::LoadBuilding(string filename) {
 
 			//looking for polygons (walls)
 			int nPoly = xSubroomsNode.nChildNode("polygon");
-			geopoly.resize(nPoly);
 			for (int p = 0; p < nPoly; p++) {
 				XMLNode xPolyVertices = xSubroomsNode.getChildNode("polygon",
 						p);
 				int nVertices =
 						xSubroomsNode.getChildNode("polygon", p).nChildNode(
 								"vertex");
+
 				for (int v = 0; v < nVertices - 1; v++) {
 					double x1 =
 							xmltof(
@@ -314,15 +310,13 @@ void Building::LoadBuilding(string filename) {
 									xPolyVertices.getChildNode("vertex", v + 1).getAttribute(
 											"py"));
 					subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-					geopoly[p].push_back(Point(x1,y1));
-
 				}
-				subroom->SetPolygon(geopoly[p]);
+
 			}
 
 			//looking for obstacles
 			int nObst = xSubroomsNode.nChildNode("obstacle");
-			obstpoly.resize(nObst);
+
 			for (int obst = 0; obst < nObst; obst++) {
 				XMLNode xObstacle = xSubroomsNode.getChildNode("obstacle",
 						obst);
@@ -339,7 +333,6 @@ void Building::LoadBuilding(string filename) {
 				obstacle->SetClosed(closed);
 				obstacle->SetHeight(height);
 
-				obstpoly[obst].resize(nPoly);
 				for (int p = 0; p < nPoly; p++) {
 					XMLNode xPolyVertices = xObstacle.getChildNode("polygon",
 							p);
@@ -365,9 +358,7 @@ void Building::LoadBuilding(string filename) {
 										xPolyVertices.getChildNode("vertex",
 												v + 1).getAttribute("py"));
 						obstacle->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
-						obstpoly[obst].push_back(Point(x1,y1));
 					}
-					subroom->SetPolygon(obstpoly[obst]);
 				}
 				subroom->AddObstacle(obstacle);
 			}
