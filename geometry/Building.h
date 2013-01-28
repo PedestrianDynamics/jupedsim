@@ -35,7 +35,6 @@
 #include <cfloat>
 #include <map>
 
-
 class Crossing;
 class Transition;
 class Hline;
@@ -51,7 +50,8 @@ private:
 	std::map<int, Transition*> _transitions;
 	std::map<int, Hline*> _hLines;
 
-
+	std::vector <std::vector<Point>> obstpoly; //Obstacle polygons
+	std::vector <std::vector<Point>> geopoly; // geometry polygons
 public:
     // Konstruktor
     Building();
@@ -61,7 +61,6 @@ public:
     void SetCaption(std::string s);
     void SetAllRooms(const std::vector<Room*>& rooms);
     void SetRoom(Room* room, int index);
-
 
     // Getter - Funktionen
     std::string GetCaption() const;
