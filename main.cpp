@@ -59,11 +59,11 @@ int main(int argc, char **argv) {
 	// Parsing the arguments
 	ArgumentParser* args = new ArgumentParser();
 	args->ParseArgs(argc, argv);
-/*
+
 	// create and init the simulation engine
 	Analysis analysis = Analysis();
 	analysis.InitArgs(args);
-
+/*
 	// Simulation
 	Log->Write("INFO: \tStart Analysis()\n");
 	analysis.RunAnalysis();
