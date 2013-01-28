@@ -36,46 +36,55 @@ using std::string;
 using std::vector;
 using std::pair;
 
+#include <boost/geometry/geometry.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
+#include <boost/geometry/geometries/polygon.hpp>
+#include <boost/geometry/geometries/adapted/c_array.hpp>
+using namespace boost::geometry;
+typedef model::d2::point_xy<double,  cs::cartesian> point_2d;
+typedef model::polygon<point_2d> polygon_2d;
+
+
 class OutputHandler;
 extern OutputHandler* Log;
 
+
+
 class ArgumentParser {
 private:
-	string pGeometryFilename;
-	string pTrajectoriesFile;
-	string pErrorLogFile;
 
-	double pTmax; // maximale Simulationszeit
-	double pdt; // Zeitschritt
-	double pfps; //frame rate
-	bool pLinkedCells; // use of linked-cells neighbourhood list
-	double pLinkedCellSize; // cell size of the linkedcell (default to 2.2m)
-	double pV0Mu; // mu für die Normalverteilung von v0
-	double pV0Sigma; // sigma für die Normalverteilung von v0
-	double pBmaxMu; // mu für die Normalverteilung von b_max
-	double pBmaxSigma; // sigma für die Normalverteilung von b_max
-	double pBminMu; // mu für die Normalverteilung von b_min
-	double pBminSigma; // sigma für die Normalverteilung von b_min
-	double pAtauMu; // mu für die Normalverteilung von a_tau
-	double pAtauSigma; // sigma für die Normalverteilung von a_tau
-	double pAminMu; // mu für die Normalverteilung von a_min
-	double pAminSigma; // sigma für die Normalverteilung von a_min
-	double pTauMu;
-	double pTauSigma;
-	double pNuPed;
-	double pNuWall;
-	double pIntPWidthPed;
-	double pIntPWidthWall;
-	double pMaxFPed;
-	double pMaxFWall;
-	double pDistEffMaxPed;
-	double pDistEffMaxWall;
-	unsigned int pSeed;
-	int pSolver; /// solver for the differential equation
-	int pExitStrategy; // Strategie zur Richtungswahl (v0)
-	int pLog;
 	FileFormat pFormat;
-	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
+
+	string pGeometryFilename;
+	string pErrorLogFile;
+	string pTrajectoriesFile;
+	string pTrajectoryName;
+
+	string pMeasureAreaId;
+	double pLengthMeasurementArea;
+	polygon_2d pMeasureArea;
+	double pLine_startx;
+	double pLine_starty;
+	double pLine_endx;
+	double pLine_endy;
+	char	pVComponent;
+	bool pIsMethodA;
+	int pTimeInterval_A;
+	bool pIsMethodB;
+	bool pIsMethodC;
+	bool pIsMethodD;
+	bool pIsCutByCircle;
+	bool pIsOutputGraph;
+	bool pIsIndividualFD;
+	double pSteady_start;
+	double pSteady_end;
+	int pNrow;
+	int pNcolumn;
+	int pScale_x;
+	int pScale_y;
+	double pLow_ed_x;
+	double pLow_ed_y;
+
 
 	// private Funktionen
 	void Usage();
@@ -85,57 +94,41 @@ public:
 	ArgumentParser(); // gibt die Programmoptionen aus
 
 	// Getter-Funktionen
-	bool IsOnline() const;
-	bool GetLinkedCells() const;
+	const string& GetTrajectoriesFile() const;
+	const string& GetMeasureAreaId() const;
 
-	int GetSolver() const;
-	int GetExitStrategy() const;
-	int GetRandomize() const;
-	int GetMaxOpenMPThreads() const;
-	int GetLog() const;
-	int GetTravisto() const;
-	int GetTrajektorien() const;
-	int GetPort() const;
-	unsigned int GetSeed() const;
 
-	double Getfps() const;
-	double GetLinkedCellSize() const;
-	double GetTmax() const;
-	double Getdt() const;
-	double GetV0Mu() const;
-	double GetV0Sigma() const;
-	double GetBmaxMu() const;
-	double GetBmaxSigma() const;
-	double GetBminMu() const;
-	double GetBminSigma() const;
-	double GetAtauMu() const;
-	double GetAtauSigma() const;
-	double GetAminMu() const;
-	double GetAminSigma() const;
-	double GetNuPed() const;
-	double GetNuWall() const;
-	double GetIntPWidthPed() const;
-	double GetIntPWidthWall() const;
-	double GetMaxFPed() const;
-	double GetMaxFWall() const;
-	double GetDistEffMaxPed() const;
-	double GetDistEffMaxWall() const;
-	double GetTauMu() const;
-	double GetTauSigma() const;
+	double GetLengthMeasurementArea() const;
+	polygon_2d GetMeasureArea() const;
+	double GetLine_startx() const;
+	double GetLine_starty() const;
+	double GetLine_endx() const;
+	double GetLine_endy() const;
+	char	GetVComponent() const;
+	bool GetIsMethodA() const;
+	int GetTimeInterval_A() const;
+	bool GetIsMethodB() const;
+	bool GetIsMethodC() const;
+	bool GetIsMethodD() const;
+	bool GetIsCutByCircle() const;
+	bool GetIsOutputGraph() const;
+	bool GetIsIndividualFD() const;
+	double GetSteady_start() const;
+	double GetSteady_end() const;
+	int GetNrow() const;
+	int GetNcolumn() const;
+	int GetScale_x() const;
+	int GetScale_y() const;
+
+
+
 	void SetHostname(const string& hostname);
 	void SetPort(int port);
 	void SetTrajectoriesFile(const string& trajectoriesFile);
-
-	const string& GetHostname() const;
-	const string& GetTrajectoriesFile() const;
-	const string& GetErrorLogFile() const;
-	const string& GetTrafficFile() const;
-	const string& GetRoutingFile() const;
-	const string& GetPersonsFilename() const;
-	const string& GetPathwayFile() const;
+	void SetTrajectoriesPath(const string& trajectoriesPath);
 	const string& GetGeometryFilename() const;
 
-	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
+	//vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;
 
 
