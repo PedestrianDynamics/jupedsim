@@ -3,7 +3,7 @@
 
 <JPSreport project="JPS-Project" version="0.4">
 	<!-- geometry file -->
-	<Geometry file=inputfiles/geo.xml />
+	<Geometry file = "D:/workspace/JuPedSim/JPSreport/geo.xml" />
 	<!-- trajectories file and format -->
 	<Trajectories>
 		<file name="trajectories" />
