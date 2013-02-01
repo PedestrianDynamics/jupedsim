@@ -517,7 +517,7 @@ void IODispatcher::WriteFrame(int frameNr, Building* building) {
 
 		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
-			for (int i = 0; i < s->GetAnzPedestrians(); ++i) {
+			for (int i = 0; i < s->GetNumberOfPedestrians(); ++i) {
 				Pedestrian* ped = s->GetPedestrian(i);
 				data.append(WritePed(ped));
 			}
@@ -551,7 +551,7 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building) {
 		Room* r = building->GetRoom(roomindex);
 		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
-			for (int i = 0; i < s->GetAnzPedestrians(); ++i) {
+			for (int i = 0; i < s->GetNumberOfPedestrians(); ++i) {
 				Pedestrian* ped = s->GetPedestrian(i);
 				double x = ped->GetPos().GetX();
 				double y = ped->GetPos().GetY();

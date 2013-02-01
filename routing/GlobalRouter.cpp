@@ -406,7 +406,7 @@ void GlobalRouter::Init(Building* building) {
 		for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
 				itr != _building->GetAllTransitions().end(); ++itr) {
 
-			int index = itr->second->GetIndex();
+			int index = itr->second->GetID();
 			if (_finalDestinations[p]==index){
 				to_door_matrix_index=_map_id_to_index[itr->second->GetUniqueID()];
 				to_door_uid=itr->second->GetUniqueID();
@@ -718,8 +718,8 @@ bool GlobalRouter::CanSeeEachOther(Crossing* c1, Crossing* c2) {
 	// also take into account other crossings/transitions
 	const vector<int>& exitsInSubroom = sub->GetAllGoalIDs();
 
-	int id1 = c1->GetIndex();
-	int id2 = c2->GetIndex();
+	int id1 = c1->GetID();
+	int id2 = c2->GetID();
 	// then all goals
 	for (int g = 0; g < (int) exitsInSubroom.size(); g++) {
 		int gID = exitsInSubroom[g];

@@ -30,80 +30,84 @@
 #include "Wall.h"
 #include "Point.h"
 
+
+using namespace std;
+
+
 Obstacle::Obstacle() {
-	pClosed=0.0;
-	pHeight=0.0;
-	pID=-1;
-	pCaption="obstacle";
-	pWalls = vector<Wall > ();
-	pPoly = vector<Point > ();
+	_isClosed=0.0;
+	_height=0.0;
+	_id=-1;
+	_caption="obstacle";
+	_walls = vector<Wall > ();
+	_poly = vector<Point > ();
 }
 
 Obstacle::~Obstacle() {}
 
 
 void Obstacle::AddWall(const Wall& w) {
-	pWalls.push_back(w);
+	_walls.push_back(w);
 }
 
 string Obstacle::GetCaption() const {
-	return pCaption;
+	return _caption;
 }
 
 void Obstacle::SetCaption(string caption) {
-	pCaption = caption;
+	_caption = caption;
 }
 
 double Obstacle::GetClosed() const {
-	return pClosed;
+	return _isClosed;
 }
 
 void Obstacle::SetClosed(double closed) {
-	pClosed = closed;
+	_isClosed = closed;
 }
 
 double Obstacle::GetHeight() const {
-	return pHeight;
+	return _height;
 }
 
 void Obstacle::SetHeight(double height) {
-	pHeight = height;
+	_height = height;
 }
 
 int Obstacle::GetId() const {
-	return pID;
+	return _id;
 }
 
 void Obstacle::SetId(int id) {
-	pID = id;
+	_id = id;
 }
 
 const vector<Point>& Obstacle::GetPolygon() const {
-	return pPoly;
+	return _poly;
 }
 
 string Obstacle::Write() {
 	string s;
 	Point pos;
 
-	for (unsigned int j = 0; j < pWalls.size(); j++) {
-		const Wall& w = pWalls[j];
+	for (unsigned int j = 0; j < _walls.size(); j++) {
+		const Wall& w = _walls[j];
 		s.append(w.Write());
 		pos = pos + w.GetPoint1() + w.GetPoint2();
 	}
-	pos = pos * (0.5 / pWalls.size());
+	pos = pos * (0.5 / _walls.size());
 
 	//add the obstacle caption
 	char tmp[CLENGTH];
 	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
-			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, pCaption.c_str());
+			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
 	s.append(tmp);
 
 	return s;
 }
 
 const vector<Wall>& Obstacle::GetAllWalls() const {
-	return pWalls;
+	return _walls;
 }
 
 int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const {
@@ -123,9 +127,9 @@ bool Obstacle::Contains(const Point& ped) const {
 
 	// in the case the obstacle is not a close surface, allow
 	// pedestrians distribution 'inside'
-	if(pClosed==0.0) {
+	if(_isClosed==0.0) {
 		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tObstacle::Contains(): the obstacle [%d] is open!!!\n", pID);
+		sprintf(tmp, "ERROR: \tObstacle::Contains(): the obstacle [%d] is open!!!\n", _id);
 		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
@@ -135,12 +139,12 @@ bool Obstacle::Contains(const Point& ped) const {
 
 	/////////////////////////////////////////////////////////////
 	edge = first = 0;
-	quad = WhichQuad(pPoly[edge], ped);
+	quad = WhichQuad(_poly[edge], ped);
 	total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
 	/* LOOP THROUGH THE VERTICES IN A SECTOR */
 	do {
-		next = (edge + 1) % pPoly.size();
-		next_quad = WhichQuad(pPoly[next], ped);
+		next = (edge + 1) % _poly.size();
+		next_quad = WhichQuad(_poly[next], ped);
 		delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
 
 		// SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
@@ -151,7 +155,7 @@ bool Obstacle::Contains(const Point& ped) const {
 				//WAS CLOCKWISE OR COUNTER
 			case -2: // US THE X POSITION AT THE HIT POINT TO
 				// DETERMINE WHICH WAY AROUND
-				if (Xintercept(pPoly[edge], pPoly[next], ped.GetY()) > ped.GetX())
+				if (Xintercept(_poly[edge], _poly[next], ped.GetY()) > ped.GetX())
 					delta = -(delta);
 				break;
 			case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
@@ -176,9 +180,9 @@ bool Obstacle::Contains(const Point& ped) const {
 
 void Obstacle::ConvertLineToPoly() {
 
-	if(pClosed==0.0){
+	if(_isClosed==0.0){
 		char tmp[CLENGTH];
-		sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", pID);
+		sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
 		Log->Write(tmp);
 		return;
 	}
@@ -187,8 +191,8 @@ void Obstacle::ConvertLineToPoly() {
 	Point point;
 	Line* line;
 	// Alle Linienelemente in copy speichern
-	for (unsigned int i = 0; i < pWalls.size(); i++) {
-		copy.push_back(&pWalls[i]);
+	for (unsigned int i = 0; i < _walls.size(); i++) {
+		copy.push_back(&_walls[i]);
 	}
 
 	line = copy[0];
@@ -214,9 +218,9 @@ void Obstacle::ConvertLineToPoly() {
 	}
 	if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
 		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", pID);
+		sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
 		Log->Write(tmp);
 		exit(0);
 	}
-	pPoly = tmpPoly;
+	_poly = tmpPoly;
 }

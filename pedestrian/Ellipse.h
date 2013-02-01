@@ -34,7 +34,7 @@
 #include "../general/Macros.h"
 #include "../math/Mathematics.h"
 
-class Ellipse {
+class JEllipse {
 private:
     Point pV; // Geschwindigkeitskoordinaten
     Point pCenter; // cartesian-coord of the centre
@@ -51,12 +51,12 @@ private:
     // effektiver Abstand Segement l und Ellipse (geg. durch ActionPoint)
     double EffectiveDistanceToLine(const Line& l) const;
     // Distance of Closest Approach of two arbitrary ellipses
-    double Distance2d(const Ellipse& E) const;
+    double Distance2d(const JEllipse& E) const;
 
 public:
     /* Konstruktoren */
-    Ellipse();
-    Ellipse(const Ellipse& orig);
+    JEllipse();
+    JEllipse(const JEllipse& orig);
     //virtual ~Ellipse();
 
     /* Setter-Funktionen */
@@ -90,7 +90,7 @@ public:
     // Sonstige Funktionen
 
     // effektiver Abstand zwischen zwei Ellipsen (geg. durch ActionPoints),
-    double EffectiveDistanceToEllipse(const Ellipse& other, double* dist) const;
+    double EffectiveDistanceToEllipse(const JEllipse& other, double* dist) const;
     // Schnittpunkt der Ellipse mit der Gerade durch P und AP (=ActionPoint von E)
     Point PointOnEllipse(const Point& p) const;
     // Schnittpunkt der Ellipse mit dem Liniensegment line
@@ -98,7 +98,7 @@ public:
     // minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Segment
     double MinimumDistanceToLine(const Line& l)const;
     // minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Ellipse
-    double MinimumDistanceToEllipse(const Ellipse& E) const;
+    double MinimumDistanceToEllipse(const JEllipse& E) const;
     // prüft, ob ein Punkt sich innerhalb der Ellipse befindet
     bool IsInside(const Point& p) const;
     // prüft, ob ein Punkt sich außerhalb der Ellipse befindet

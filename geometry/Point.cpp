@@ -25,17 +25,15 @@
  */
 
 #include "Point.h"
+#include "../general/Macros.h"
 
 
-/************************************************************
- private
- ************************************************************/
+#include  <cmath>
+#include  <sstream>
 
-// rotiert Vektor um den Winkel theta
 
-Point Point::Rotate(double ctheta, double stheta) const {
-    return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
-}
+
+
 
 /************************************************************
   Konstruktoren
@@ -61,8 +59,7 @@ std::string Point::toString(){
 	return tmp.str();
 
 };
-//Point::~Point() {
-//}
+
 
 /*************************************************************
  Setter-Funktionen
@@ -144,6 +141,11 @@ Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) 
 Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const {
     Point p = Point(_x, _y);
     return (p.Rotate(cphi, sphi) + center);
+}
+
+// rotiert Vektor um den Winkel theta
+Point Point::Rotate(double ctheta, double stheta) const {
+    return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
 }
 
 /*************************************************************

@@ -6,6 +6,8 @@
  */
 
 #include "RoutingGraph.h"
+#include "../../geometry/Obstacle.h"
+
 /**
  * Constructors & Destructors
  */

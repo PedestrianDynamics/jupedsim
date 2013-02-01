@@ -24,12 +24,17 @@
  *
  */
 
+#include "Point.h"
+#include "../general/Macros.h"
 #include "Line.h"
 
-using namespace std;
+
+#include  <cmath>
+#include  <sstream>
 
 int Line::_static_UID=0;
 
+using namespace std;
 
 /************************************************************
   Konstruktoren
@@ -55,7 +60,6 @@ Line::Line(const Line& orig) {
 	_point2 = orig.GetPoint2();
 	_centre = orig.GetCentre();
 	_uid	= orig.GetUniqueID();
-	//pUID = UID++;
 }
 
 Line::~Line() {

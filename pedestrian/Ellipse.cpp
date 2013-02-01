@@ -40,7 +40,7 @@
  *   Line l muss in den Koordinaten der Ellipse übergeben werden
  * */
 
-double Ellipse::EffectiveDistanceToLine(const Line& linE) const {
+double JEllipse::EffectiveDistanceToLine(const Line& linE) const {
 	double eff_dist;
 	// Koordinaten alle im System der Ellipse
 	Point APinE = Point(pXp, 0);
@@ -68,7 +68,7 @@ double Ellipse::EffectiveDistanceToLine(const Line& linE) const {
  * thanks to Xiaoyu zheng for sharing!
  * */
 
-double Ellipse::Distance2d(const Ellipse& Ell) const {
+double JEllipse::Distance2d(const JEllipse& Ell) const {
 	/*----------------- INPUT Params --------------*/
 	double a1 = this->GetEA();
 	double b1 = this->GetEB();
@@ -254,7 +254,7 @@ double Ellipse::Distance2d(const Ellipse& Ell) const {
  Konstruktoren
  ************************************************************/
 
-Ellipse::Ellipse() {
+JEllipse::JEllipse() {
 	pV = Point(); // Geschwindigkeitskoordinaten
 	pCenter = Point(); // cartesian-coord of the centre
 	pCosPhi = 1; // = cos(0)
@@ -267,7 +267,7 @@ Ellipse::Ellipse() {
 	pV0 = 0; // Wunschgeschwindigkeit (Betrag)
 }
 
-Ellipse::Ellipse(const Ellipse& orig) {
+JEllipse::JEllipse(const JEllipse& orig) {
 	pV = orig.GetV(); // Geschwindigkeitskoordinaten
 	pCenter = orig.GetCenter();
 	pCosPhi = orig.GetCosPhi();
@@ -285,43 +285,43 @@ Ellipse::Ellipse(const Ellipse& orig) {
  Setter-Funktionen
  ************************************************************/
 
-void Ellipse::SetV(const Point& v) {
+void JEllipse::SetV(const Point& v) {
 	pV = v;
 }
 
-void Ellipse::SetCenter(Point pos) {
+void JEllipse::SetCenter(Point pos) {
 	pCenter = pos;
 }
 
-void Ellipse::SetCosPhi(double c) {
+void JEllipse::SetCosPhi(double c) {
 	pCosPhi = c;
 }
 
-void Ellipse::SetSinPhi(double s) {
+void JEllipse::SetSinPhi(double s) {
 	pSinPhi = s;
 }
 
-void Ellipse::SetXp(double xp) {
+void JEllipse::SetXp(double xp) {
 	pXp = xp;
 }
 
-void Ellipse::SetAmin(double a_min) {
+void JEllipse::SetAmin(double a_min) {
 	pAmin = a_min;
 }
 
-void Ellipse::SetAv(double a_v) {
+void JEllipse::SetAv(double a_v) {
 	pAv = a_v;
 }
 
-void Ellipse::SetBmin(double b_min) {
+void JEllipse::SetBmin(double b_min) {
 	pBmin = b_min;
 }
 
-void Ellipse::SetBmax(double b_max) {
+void JEllipse::SetBmax(double b_max) {
 	pBmax = b_max;
 }
 
-void Ellipse::SetV0(double v0) {
+void JEllipse::SetV0(double v0) {
 	pV0 = v0;
 }
 
@@ -329,46 +329,46 @@ void Ellipse::SetV0(double v0) {
  Getter-Funktionen
  ************************************************************/
 
-const Point& Ellipse::GetV() const {
+const Point& JEllipse::GetV() const {
 	return pV;
 }
 
-const Point& Ellipse::GetCenter() const {
+const Point& JEllipse::GetCenter() const {
 	return pCenter;
 }
 
-double Ellipse::GetCosPhi() const {
+double JEllipse::GetCosPhi() const {
 	return pCosPhi;
 }
 
-double Ellipse::GetSinPhi() const {
+double JEllipse::GetSinPhi() const {
 	return pSinPhi;
 }
 
-double Ellipse::GetXp() const {
+double JEllipse::GetXp() const {
 	return pXp;
 }
 
-double Ellipse::GetAmin() const {
+double JEllipse::GetAmin() const {
 	return pAmin;
 }
 
-double Ellipse::GetAv() const {
+double JEllipse::GetAv() const {
 	return pAv;
 }
 
-double Ellipse::GetBmin() const {
+double JEllipse::GetBmin() const {
 	return pBmin;
 }
 
-double Ellipse::GetBmax() const {
+double JEllipse::GetBmax() const {
 	return pBmax;
 }
 
-double Ellipse::GetV0() const {
+double JEllipse::GetV0() const {
 	return pV0;
 }
-double Ellipse::GetArea() const {
+double JEllipse::GetArea() const {
 	double x = (pBmax - pBmin) / pV0;
 	double V = pV.Norm();
 	double ea = pAmin + V * pAv;
@@ -377,12 +377,12 @@ double Ellipse::GetArea() const {
 }
 
 // ellipse  semi-axis in the direction of the velocity
-	double Ellipse::GetEA() const {
+	double JEllipse::GetEA() const {
 		return pAmin + pV.Norm() * pAv;
 	}
 
 // ellipse semi-axis in the orthogonal direction of the velocity
-double Ellipse::GetEB() const {
+double JEllipse::GetEB() const {
 	double x = (pBmax - pBmin) / pV0;
 	return pBmax - pV.Norm() * x;
 }
@@ -410,7 +410,7 @@ double Ellipse::GetEB() const {
  *   - gesuchter effektiver Abstand
  * */
 
-double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) const {
+double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) const {
 	//  E1 ist Objekt auf dem aufgerufen wird
 	Point AP1inE1 = Point(this->GetXp(), 0); //Koords in E1
 	Point AP2inE2 = Point(E2.GetXp(), 0); //Koords in E2
@@ -444,7 +444,7 @@ double Ellipse::EffectiveDistanceToEllipse(const Ellipse& E2, double* dist) cons
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
 // O being the center of the ellipse
-Point Ellipse::PointOnEllipse(const Point& P) const {
+Point JEllipse::PointOnEllipse(const Point& P) const {
 	double x = P.GetX(), y = P.GetY();
 	double r = x*x + y*y;
 	if ( r < J_EPS*J_EPS)
@@ -466,7 +466,7 @@ Point Ellipse::PointOnEllipse(const Point& P) const {
 
 
 // thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
-double Ellipse::MinimumDistanceToLine(const Line& l) const {
+double JEllipse::MinimumDistanceToLine(const Line& l) const {
 	 Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
 	 Point BinE = l.GetPoint2().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
 
@@ -582,8 +582,8 @@ P1 *			\
  (yA-yB)/(yA-yC) = AB/AC
  --> yB = yA - (yA-yC)*AB/AC
  */
-double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
-	Ellipse tmpE2 = E2; // verschobene Ellipse E2, so dass Berührung mit E1
+double JEllipse::MinimumDistanceToEllipse(const JEllipse& E2) const {
+	JEllipse tmpE2 = E2; // verschobene Ellipse E2, so dass Berührung mit E1
 	Point v; // Verschiebungsvektor
 	Point tmpC2 = Point(); // verschobenes Centrum von E2
 	const Point& C1 = this->GetCenter();
@@ -621,7 +621,7 @@ double Ellipse::MinimumDistanceToEllipse(const Ellipse& E2) const {
 }
 
 
-bool Ellipse::IsInside(const Point& p) const {
+bool JEllipse::IsInside(const Point& p) const {
 	double a = GetEA();
 	double b = GetEB();
 	double x = p.GetX();
@@ -631,7 +631,7 @@ bool Ellipse::IsInside(const Point& p) const {
 }
 
 
-bool Ellipse::IsOutside(const Point& p) const {
+bool JEllipse::IsOutside(const Point& p) const {
 	double a = GetEA();
 	double b = GetEB();
 	double x = p.GetX();
@@ -648,7 +648,7 @@ bool Ellipse::IsOutside(const Point& p) const {
  *    - false, sonst
  * */
 
-bool Ellipse::IsOn(const Point& p) const {
+bool JEllipse::IsOn(const Point& p) const {
 	double a = GetEA();
 	double b = GetEB();
 	double x = p.GetX();

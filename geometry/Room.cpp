@@ -24,9 +24,11 @@
  *
  */
 
-#include <vector>
 
 #include "Room.h"
+#include <sstream>
+
+using namespace std;
 
 /************************************************************
   Konstruktoren
@@ -122,7 +124,7 @@ SubRoom* Room::GetSubRoom(int index) const {
 int Room::GetNumberOfPedestrians() const {
     int sum = 0;
     for (int i = 0; i < GetNumberOfSubRooms(); i++) {
-        sum += GetSubRoom(i)->GetAnzPedestrians();
+        sum += GetSubRoom(i)->GetNumberOfPedestrians();
     }
     return sum;
 }
@@ -149,89 +151,7 @@ void Room::DeleteSubRoom(int index) {
 /*************************************************************
  Ein-Ausgabe
  ************************************************************/
-void Room::LoadNormalSubRoom(ifstream* buildingfile, int* i) {
-    string line;
-    int NWalls = 0;
-    getline(*buildingfile, line);
-    (*i)++;
-    NormalSubRoom* subroom = new NormalSubRoom();
 
-    while (line.find("</subroom>") == string::npos) {
-        istringstream iss(line, istringstream::in);
-        string tmp; // Schlüsselwort, z.B.: "caption"
-        if (line.find("index") != string::npos) {
-            int ID;
-            iss >> tmp >> ID;
-            subroom->SetSubRoomID(ID);
-            subroom->SetRoomID(_id);
-        } else if (line.find("Welements") != string::npos) {
-            iss >> tmp >> NWalls;
-        } else if (line.find("wall") != string::npos) {
-            subroom->LoadWall(line);
-        } else {
-            char tmp[CLENGTH];
-            sprintf(tmp, "ERROR: \tRoom::LoadNormalSubRoom()"
-                    "Wrong object in building file <subroom>: [%s] line %d ", line.c_str(), *i);
-            Log->Write(tmp);
-            exit(0);
-        }
-        getline(*buildingfile, line);
-        (*i)++;
-    }
-    if (NWalls != subroom->GetAnzWalls()) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "ERROR: \tRoom::LoadNormalSubRoom()"
-                "Wrong number of Walls: %d != %d", NWalls, subroom->GetAnzWalls());
-        Log->Write(tmp);
-        exit(0);
-    }
-    AddSubRoom(subroom);
-}
-
-void Room::LoadStair(ifstream* buildingfile, int* i) {
-    string line;
-    int NWalls = 0;
-    getline(*buildingfile, line);
-    (*i)++;
-    Stair* stair = new Stair();
-    while (line.find("</stair>") == string::npos) {
-        istringstream iss(line, istringstream::in);
-        string tmp; // Schlüsselwort, z.B.: "caption"
-        if (line.find("index") != string::npos) {
-            int ID;
-            iss >> tmp >> ID;
-            stair->SetSubRoomID(ID);
-            stair->SetRoomID(_id);
-        } else if (line.find("Welements") != string::npos) {
-            iss >> tmp >> NWalls;
-        } else if (line.find("wall") != string::npos) {
-            stair->LoadWall(line);
-        } else if (line.find("up") != string::npos) {
-            double x_up, y_up;
-            iss >> tmp >> x_up >> y_up;
-            stair->SetUp(Point(x_up, y_up));
-        } else if (line.find("down") != string::npos) {
-            double x_down, y_down;
-            iss >> tmp >> x_down >> y_down;
-            stair->SetDown(Point(x_down, y_down));
-        } else {
-            char tmp[CLENGTH];
-            sprintf(tmp, "ERROR: \tRoom::LoadStair() Wrong object in building file <stair>: [%s] line %d "
-                    , line.c_str(), *i);
-            Log->Write(tmp);
-            exit(0);
-        }
-        getline(*buildingfile, line);
-        (*i)++;
-    }
-    if (NWalls != stair->GetAnzWalls()) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "ERROR: \tWrong number of Walls: %d != %d", NWalls, stair->GetAnzWalls());
-        Log->Write(tmp);
-        exit(0);
-    }
-    AddSubRoom(stair);
-}
 
 void Room::WriteToErrorLog() const {
     char tmp[CLENGTH];

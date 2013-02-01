@@ -53,14 +53,6 @@
 
 #endif /* TRACE_LOGGING */
 
-#ifndef _WIN32
-//#define closesocket          close
-#define INVALID_SOCKET       (-1)
-#define SOCKET_ERROR         (-1)
-#endif
-
-
-
 
 #ifdef _WIN32
 #include <winsock.h>
@@ -72,8 +64,6 @@ typedef int socklen_t;
 #define startSocketSession() _startWin32SocketSession()
 #define stopSocketSession()  _stopWin32SocketSession()
 
-//bool _startWin32SocketSession(void);
-//void _stopWin32SocketSession(void);
 
 #else
 #include <unistd.h>
@@ -85,6 +75,9 @@ typedef int socket_t;
 #define u_int_32_t unsigned int
 #define startSocketSession() (true)
 #define stopSocketSession()  ((void) 0)
+//#define closesocket          close
+#define INVALID_SOCKET       (-1)
+#define SOCKET_ERROR         (-1)
 #endif
 
 
@@ -92,19 +85,18 @@ typedef int socket_t;
 #define IPPORT_USERRESERVED  (5000)  ///< up to this number, ports are reserved and should not be used
 #endif
 
-/******** public constants *******************************************/
+
 
 #define PORT 8989
 #define HOST "localhost"
 
 class TraVisToClient {
 public:
-    /// create a client with the default parameters
 
     /// create a client with specific parameters
     TraVisToClient(std::string hostname = HOST, unsigned short port = PORT);
 
-    /// destructor
+    /// Destructor
     virtual ~TraVisToClient();
 
     /// send datablock to the server
@@ -140,14 +132,13 @@ private:
     bool _startWin32SocketSession(void);
     void _stopWin32SocketSession(void);
 #else
-#define closesocket          close
+	#define closesocket          close
 #endif
 
 
 
 private:
     bool _isConnected;
-    //bool dataPending;
     socket_t _tcpSocket;
     std::string _hostname;
     unsigned short _port;

@@ -48,7 +48,7 @@ Pedestrian::Pedestrian() {
 	tmpFirstOrientation = true;
 	pUpdateRate = 0;
 	pTurninAngle=0.0;
-	pEllipse = Ellipse();
+	pEllipse = JEllipse();
 	pNavLine = NULL;
 	_router=NULL;
 	pReroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
@@ -129,7 +129,7 @@ void Pedestrian::SetTau(double tau) {
 	pTau = tau;
 }
 
-void Pedestrian::SetEllipse(const Ellipse& e) {
+void Pedestrian::SetEllipse(const JEllipse& e) {
 	pEllipse = e;
 }
 
@@ -208,7 +208,7 @@ double Pedestrian::GetTau() const {
 	return pTau;
 }
 
-const Ellipse& Pedestrian::GetEllipse() const {
+const JEllipse& Pedestrian::GetEllipse() const {
 	return pEllipse;
 }
 

@@ -30,20 +30,21 @@
 
 #include "Line.h"
 
-/************************************************************
- Wall
- ************************************************************/
 class Wall : public Line {
-private:
-    // keine neuen Elemente zu Line
+
 public:
     Wall();
     Wall(const Point& p1, const Point& p2);
     Wall(const Wall& orig);
-    //virtual ~Wall();
 
-    // Ausgabe
-    void WriteToErrorLog() const; // zur Kontrolle nach Log
+    /**
+     *  Debug output from the object
+     */
+    void WriteToErrorLog() const;
+
+    /**
+     * @return a nicely formated string of the object
+     */
     virtual std::string Write() const;
 };
 

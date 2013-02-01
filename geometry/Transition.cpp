@@ -26,14 +26,18 @@
  */
 
 #include "Transition.h"
+#include "Room.h"
+#include "SubRoom.h"
+
+using namespace std;
 
 /************************************************************
  Transition (abgeleitet von Crossing)
  ************************************************************/
 
 Transition::Transition() : Crossing() {
-	pIsOpen = true;
-	pRoom2 = NULL;
+	_isOpen = true;
+	_room2 = NULL;
 }
 
 Transition::~Transition() {
@@ -42,34 +46,34 @@ Transition::~Transition() {
 // Setter-Funktionen
 
 void Transition::Close() {
-	pIsOpen = false;
+	_isOpen = false;
 }
 
 void Transition::Open() {
-	pIsOpen = true;
+	_isOpen = true;
 }
 
 void Transition::SetType(string type){
-	pType=type;
+	_type=type;
 }
 
 void Transition::SetRoom2(Room* r) {
-	pRoom2 = r;
+	_room2 = r;
 }
 
 // Getter-Funktionen
 
 bool Transition::IsOpen() const {
-	return pIsOpen;
+	return _isOpen;
 }
 
 
 Room* Transition::GetRoom2() const {
-	return pRoom2;
+	return _room2;
 }
 
 string Transition::GetType() const {
-	return pType;
+	return _type;
 }
 // Sonstiges
 
@@ -91,7 +95,7 @@ Room* Transition::GetOtherRoom(int roomID) const {
 
 // prüft ob Ausgang nach draußen
 bool Transition::IsExit() const {
-	if(GetRoom1()!=NULL && pRoom2!=NULL)
+	if(GetRoom1()!=NULL && _room2!=NULL)
 		return false;
 	else
 		return true;
@@ -111,32 +115,7 @@ bool Transition::IsTransition() const {
 	return true;
 }
 
-/* Setzt Fußgänger von einem SubRoom in den zugehörigen nächsten SubRoom in einem neuen Raum
- * Parameter:
- *    - RoomID: aktuelle RoomID des Fußgängers
- *    - SubID: aktuelle SubRoomID des Fußgängers
- *    - PedID: ID des Fußgängers
- *    - goal_new: neues Ziel des Fußgängers, kann Crossing oder Transition sein,
- *          wird in Routing bestimmt und hier gesetzt
- * */
-void Transition::UpdatePedestrian(int RoomID, int SubID, int PedID, Crossing* goal_new) const {
-	SubRoom* sub = GetSubRoom(SubID);
-	Pedestrian* ped = sub->GetPedestrian(PedID);
-	Room* other_room = GetOtherRoom(RoomID);
-	if (other_room != NULL) {
-		SubRoom* other_sub = GetOtherSubRoom(RoomID, SubID);
-		// Fußgänger löschen
-		sub->DeletePedestrian(PedID);
-		// neues Ziel setzen
-		ped->SetExitIndex(goal_new->GetIndex());
-		ped->SetExitLine(goal_new);
-		// in neuem SubRoom setzten
-		other_sub->AddPedestrian(ped);
-	} else {
-		// Fußgänger löschen und NICHT neu setzen
-		sub->DeletePedestrian(PedID);
-	}
-}
+
 /* gibt den ANDEREN Subroom mit GetRoomID() != roomID zurück
  * subroomID wird hier nicht benötigt, aber in Crossings::GetOtherSubRoom()
  * (virtuelle Funktion) */
@@ -159,7 +138,7 @@ SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const {
 void Transition::WriteToErrorLog() const {
 	string s;
 	char tmp[CLENGTH];
-	sprintf(tmp, "\t\tTRANS: %d [%s] (%f, %f) -- (%f, %f)\n", GetIndex(), GetCaption().c_str(),
+	sprintf(tmp, "\t\tTRANS: %d [%s] (%f, %f) -- (%f, %f)\n", GetID(), GetCaption().c_str(),
 			GetPoint1().GetX(), GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
 	s.append(tmp);
 	// erster Raum
@@ -186,7 +165,7 @@ string Transition::WriteElement() const {
 	string geometry;
 	char tmp[CLENGTH] = "";
 
-	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%d_%s\">\n",GetUniqueID(),GetIndex(),GetUniqueID(),GetCaption().c_str());
+	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%d_%s\">\n",GetUniqueID(),GetID(),GetUniqueID(),GetCaption().c_str());
 	geometry.append(tmp);
 	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
 			(GetPoint1().GetX()) * FAKTOR,

@@ -21,7 +21,6 @@
  * @section DESCRIPTION
  *
  *
- *
  */
 
 #ifndef _ROOM_H
@@ -31,6 +30,7 @@
 #include <algorithm>
 
 #include "../geometry/SubRoom.h"
+//class SubRoom;
 
 class Room {
 private:
@@ -141,21 +141,6 @@ public:
      */
 	void AddTransitionID(int ID);
 
-    /**
-     * Read a  <subroom> </subroom> section from the geometry file
-     *
-     * @param buildingfile input stream to the geometry file
-     * @param i stores the value of the attributed index
-     */
-    void LoadNormalSubRoom(std::ifstream* buildingfile, int* i);
-
-    /**
-     * Read a  <stair> </stair> section from the geometry file
-     *
-     * @param buildingfile input stream to the geometry file
-     * @param i stores the value of the attributed index
-     */
-    void LoadStair(std::ifstream* buildingfile, int* i);
 
     /**
      * Debug output for this class

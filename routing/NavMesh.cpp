@@ -12,6 +12,7 @@
 //#include "../MCD/AlgorithmMCD.h"
 #include "DTriangulation.h"
 #include "../pedestrian/PedDistributor.h"
+#include "../geometry/Obstacle.h"
 
 //#define _DEBUG 1
 

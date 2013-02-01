@@ -250,7 +250,7 @@ void Building::Update() {
 
 		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* ped = sub->GetPedestrian(k);
 				//set the new room if needed
 				if (!sub->IsInSubRoom(ped)) {
@@ -390,7 +390,7 @@ void Building::InitPhiAllPeds(double pDt) {
 		Room* room = GetRoom(i);
 		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				double cosPhi, sinPhi;
 				Pedestrian* ped = sub->GetPedestrian(k);
 				ped->Setdt(pDt); //set the simulation step
@@ -414,7 +414,7 @@ void Building::InitPhiAllPeds(double pDt) {
 					exit(0);
 				}
 
-				Ellipse E = ped->GetEllipse();
+				JEllipse E = ped->GetEllipse();
 				E.SetCosPhi(cosPhi);
 				E.SetSinPhi(sinPhi);
 				ped->SetEllipse(E);
@@ -467,7 +467,7 @@ void Building::InitGrid(double cellSize) {
 		Room* room = _rooms[wa];
 		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* ped = sub->GetPedestrian(k);
 				_allPedestians.push_back(ped);
 			}
@@ -675,7 +675,7 @@ void Building::LoadBuilding(string filename) {
 					xCrossing.getChildNode("vertex", 1).getAttribute("py"));
 
 			Crossing* c = new Crossing();
-			c->SetIndex(id);
+			c->SetID(id);
 			c->SetPoint1(Point(x1, y1));
 			c->SetPoint2(Point(x2, y2));
 
@@ -712,7 +712,7 @@ void Building::LoadBuilding(string filename) {
 		string type = xmltoa(xTrans.getAttribute("type"), "normal");
 
 		Transition* t = new Transition();
-		t->SetIndex(id);
+		t->SetID(id);
 		t->SetCaption(caption);
 		t->SetPoint1(Point(x1, y1));
 		t->SetPoint2(Point(x2, y2));
@@ -751,10 +751,10 @@ void Building::LoadBuilding(string filename) {
 
 void Building::DumpSubRoomInRoom(int roomID, int subID) {
 	SubRoom* sub = GetRoom(roomID)->GetSubRoom(subID);
-	if (sub->GetAnzPedestrians() == 0)
+	if (sub->GetNumberOfPedestrians() == 0)
 		return;
 	cout << "dumping room/subroom " << roomID << " / " << subID << endl;
-	for (int p = 0; p < sub->GetAnzPedestrians(); p++) {
+	for (int p = 0; p < sub->GetNumberOfPedestrians(); p++) {
 		Pedestrian* ped = sub->GetPedestrian(p);
 		cout << " ID: " << ped->GetID();
 		cout << " Index: " << p << endl;
@@ -796,27 +796,27 @@ Room* Building::GetRoom(string caption) const {
 }
 
 void Building::AddCrossing(Crossing* line) {
-	if (_crossings.count(line->GetIndex()) != 0) {
+	if (_crossings.count(line->GetID()) != 0) {
 		char tmp[CLENGTH];
 		sprintf(tmp,
 				"ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-				line->GetIndex());
+				line->GetID());
 		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
-	_crossings[line->GetIndex()] = line;
+	_crossings[line->GetID()] = line;
 }
 
 void Building::AddTransition(Transition* line) {
-	if (_transitions.count(line->GetIndex()) != 0) {
+	if (_transitions.count(line->GetID()) != 0) {
 		char tmp[CLENGTH];
 		sprintf(tmp,
 				"ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
-				line->GetIndex());
+				line->GetID());
 		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
-	_transitions[line->GetIndex()] = line;
+	_transitions[line->GetID()] = line;
 }
 
 void Building::AddHline(Hline* line) {
@@ -1072,7 +1072,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 
 void Building::DeletePedFromSim(Pedestrian* ped) {
 	SubRoom* sub = _rooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
-	for (int p = 0; p < sub->GetAnzPedestrians(); p++) {
+	for (int p = 0; p < sub->GetNumberOfPedestrians(); p++) {
 		if (sub->GetPedestrian(p)->GetID() == ped->GetID()) {
 			sub->DeletePedestrian(p);
 			DeletePedestrian(ped);
@@ -1216,7 +1216,7 @@ Pedestrian* Building::GetPedestrian(int pedID) const {
 		Room* room = _rooms[i];
 		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* p = sub->GetPedestrian(k);
 				if (p->GetID() == pedID) {
 					return p;

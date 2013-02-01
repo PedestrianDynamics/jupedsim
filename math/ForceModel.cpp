@@ -26,6 +26,7 @@
  */
 
 #include "ForceModel.h"
+#include "../geometry/Obstacle.h"
 
 /************************************************************
  ForceModel
@@ -88,8 +89,8 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	//double r1, r2;
 	double nom; //nominator of Frep
 	double px; // hermite Interpolation value
-	const Ellipse& E1 = ped1->GetEllipse();
-	const Ellipse& E2 = ped2->GetEllipse();
+	const JEllipse& E1 = ped1->GetEllipse();
+	const JEllipse& E2 = ped2->GetEllipse();
 	double distsq;
 	double dist_eff = E1.EffectiveDistanceToEllipse(E2, &distsq);
 
@@ -205,7 +206,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 	Point f = Point(0., 0.);
 	//first the walls
 	const vector<Wall>& walls = subroom->GetAllWalls();
-	for (int i = 0; i < subroom->GetAnzWalls(); i++) {
+	for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
 		f = f + ForceRepWall(ped, walls[i]);
 	}
 
@@ -292,7 +293,7 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
 	double bla;
 	Point r;
 	Point pinE; // vorher x1, y1
-	const Ellipse& E = ped->GetEllipse();
+	const JEllipse& E = ped->GetEllipse();
 
 	if (d < J_EPS)
 		return Point(0.0, 0.0);
@@ -497,7 +498,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 						sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
 
 				// FIXME: remove the pedestrian and abort
-				for(int p=0;p<subroom->GetAnzPedestrians();p++){
+				for(int p=0;p<subroom->GetNumberOfPedestrians();p++){
 					if (subroom->GetPedestrian(p)->GetID()==ped->GetID()){
 						subroom->DeletePedestrian(p);
 						break;

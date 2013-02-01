@@ -55,7 +55,7 @@ private:
     double pMass; // Masse: 1
     double pTau; // Reaktinszeit: 0.5
     double pDt; // step size
-    Ellipse pEllipse;
+    JEllipse pEllipse;
     int pExitIndex; // aktueller Ausgang, Index in routing->GetGoal(index)
     NavLine* pNavLine; // aktuelle Ausgangslinie
     std::map<int, int>pMentalMap; // map the actual room to a destination
@@ -107,7 +107,7 @@ public:
     void SetSubRoomID(int i);
     void SetMass(double m);
     void SetTau(double tau);
-    void SetEllipse(const Ellipse& e);
+    void SetEllipse(const JEllipse& e);
     void SetExitIndex(int i);
     void SetExitLine(NavLine* l);
     void Setdt(double dt);
@@ -131,7 +131,7 @@ public:
     int GetSubRoomID() const;
     double GetMass() const;
     double GetTau() const;
-    const Ellipse& GetEllipse() const;
+    const JEllipse& GetEllipse() const;
     int GetExitIndex() const;
     Router* GetRouter() const;
     NavLine* GetExitLine() const;

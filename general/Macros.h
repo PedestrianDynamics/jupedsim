@@ -27,6 +27,9 @@
 #ifndef _MACROS_H
 #define	_MACROS_H
 
+
+#define _SIMULATOR 1
+
 // Genauigkeit
 #define J_EPS 0.001
 #define J_EPS_DIST 0.05// [m]

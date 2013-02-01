@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.8)
 
 project(JPSgcfm)
 
+if(WIN32)
+#Set the default compiler to MinGW instead of NMake
+#set(-G "MinGW Makefiles")
+endif()
+
 set(LIBRARY_OUTPUT_PATH ../lib/${CMAKE_BUILD_TYPE})
 
 set(EXECUTABLE_OUTPUT_PATH "../../")
@@ -124,7 +129,7 @@ endif()
 #find and add the CGAL library
 FIND_PACKAGE(CGAL)
 if(CGAL_FOUND)
-#    set (_CGAL 1)
+	add_definitions(-D_CGAL=1)
 endif()
 
 
@@ -132,3 +137,13 @@ add_executable(
 	rebuild.exe
 	${source_files}
 )
+
+if(WIN32)
+target_link_libraries (rebuild.exe wsock32)
+endif()
+
+#ADD_CUSTOM_COMMAND(TARGET rebuild
+#          POST_BUILD
+#          COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}
+#          COMMAND ${CMAKE_COMMAND} -E copy ${EXAMPLE_BIN_NAME} ${PROJECT_BINARY_DIR}/.
+#)

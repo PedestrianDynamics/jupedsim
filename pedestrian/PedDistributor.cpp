@@ -27,6 +27,7 @@
 
 #include "PedDistributor.h"
 #include "../general/xmlParser.h"
+#include "../geometry/Obstacle.h"
 
 /************************************************************
  StartDistributionRoom
@@ -329,7 +330,7 @@ int PedDistributor::Distribute(Building* building) const {
 		Room* room = building->GetRoom(i);
 		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* ped=sub->GetPedestrian(k);
 				ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
 
@@ -358,7 +359,7 @@ int PedDistributor::Distribute(Building* building) const {
 			Room* room = building->GetRoom(i);
 			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+				for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 					Pedestrian* p=sub->GetPedestrian(k);
 					if(p->GetID()==id){
 						ped=p;
@@ -374,7 +375,7 @@ int PedDistributor::Distribute(Building* building) const {
 			ped->SetID(id);
 
 			// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
-			Ellipse E = Ellipse();
+			JEllipse E = JEllipse();
 			double atau = GetAtau()->GetRand();
 			double amin = GetAmin()->GetRand();
 			E.SetAv(atau);
@@ -544,7 +545,7 @@ bool PedDistributor::FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped)
 		Room* room = building->GetRoom(i);
 		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetAnzPedestrians(); k++) {
+			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* p=sub->GetPedestrian(k);
 				if(p->GetID()==ped->GetID()){
 					sub->DeletePedestrian(k);
@@ -567,13 +568,13 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
 		Point pos = Point(x, y);
 		// Abstand zu allen Wänden prüfen
 		int k;
-		for (k = 0; k < r->GetAnzWalls(); k++) {
+		for (k = 0; k < r->GetNumberOfWalls(); k++) {
 			Wall w = r->GetWall(k);
 			if (w.DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
 				break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
 			}
 		}
-		if (k == r->GetAnzWalls()) {
+		if (k == r->GetNumberOfWalls()) {
 			//check all transitions
 			bool tooNear=false;
 			for(unsigned int t=0;t<r->GetAllTransitions().size();t++){
@@ -612,13 +613,13 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
 		Point pos = Point(x, y);
 		// check distance to wall
 		int k;
-		for (k = 0; k < r->GetAnzWalls(); k++) {
+		for (k = 0; k < r->GetNumberOfWalls(); k++) {
 			Wall w = r->GetWall(k);
 			if (w.DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
 				break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
 			}
 		}
-		if (k == r->GetAnzWalls()) {
+		if (k == r->GetNumberOfWalls()) {
 			//check all transitions
 			bool tooNear=false;
 			for(unsigned int t=0;t<r->GetAllTransitions().size();t++){
@@ -685,7 +686,7 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
 				bool tooNear=false;
 
 				// check the distance to all Wall
-				for (int k = 0; k < r->GetAnzWalls(); k++) {
+				for (int k = 0; k < r->GetNumberOfWalls(); k++) {
 					const Wall& w = r->GetWall(k);
 					if (w.DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
 						tooNear=true;
@@ -783,7 +784,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& posit
 		// PedIndex
 		ped->SetID(*pid);
 		// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
-		Ellipse E = Ellipse();
+		JEllipse E = JEllipse();
 		double atau = GetAtau()->GetRand();
 		double amin = GetAmin()->GetRand();
 		E.SetAv(atau);

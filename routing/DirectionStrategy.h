@@ -27,13 +27,11 @@
 #ifndef _DIRECTIONSTRATEGY_H
 #define	_DIRECTIONSTRATEGY_H
 
-#include "../geometry/Room.h"
 
+class Room;
+class Pedestrian;
+class Point;
 
-
-/**
- *
- */
 class DirectionStrategy {
 
 public:

@@ -26,147 +26,152 @@
  *
  */
 
-
-
+#include "Obstacle.h"
 #include "SubRoom.h"
 #include "Transition.h"
 #include "Hline.h"
+#include "Wall.h"
+#include "../pedestrian/Pedestrian.h"
+
+
+
+using namespace std;
 
 /************************************************************
  SubRoom
  ************************************************************/
 
-int SubRoom::UID=0;
+int SubRoom::_static_uid=0;
 
 SubRoom::SubRoom() {
-	pID = -1;
-	pRoomID=-1;
-	pWalls = vector<Wall > ();
-	pPoly = vector<Point > ();
-	pPeds = vector<Pedestrian* > ();
-	pObstacles=vector<Obstacle*> ();
+	_id = -1;
+	_roomID=-1;
+	_walls = vector<Wall > ();
+	_poly = vector<Point > ();
+	_peds = vector<Pedestrian* > ();
+	_obstacles=vector<Obstacle*> ();
 
-	pCrossings = vector<Crossing*>();
-	pTransitions = vector<Transition*>();
-	pHlines = vector<Hline*>();
+	_crossings = vector<Crossing*>();
+	_transitions = vector<Transition*>();
+	_hlines = vector<Hline*>();
 
-	pPlanEquation[0]=0.0;
-	pPlanEquation[1]=0.0;
-	pPlanEquation[2]=0.0;
+	_planeEquation[0]=0.0;
+	_planeEquation[1]=0.0;
+	_planeEquation[2]=0.0;
 
-	pGoalIDs = vector<int> ();
-	pArea = 0.0;
-	pClosed=false;
-	pUID = UID++;
+	_goalIDs = vector<int> ();
+	_area = 0.0;
+	_closed=false;
+	_uid = _static_uid++;
 
 }
 
 SubRoom::SubRoom(const SubRoom& orig) {
-	pID = orig.GetSubRoomID();
-	pWalls = orig.GetAllWalls();
-	pPoly = orig.GetPolygon();
-	pPeds = orig.GetAllPedestrians();
-	pGoalIDs = orig.GetAllGoalIDs();
-	pArea = orig.GetArea();
-	pClosed=orig.GetClosed();
-	pRoomID=orig.GetRoomID();
-	pUID = orig.GetUID();
+	_id = orig.GetSubRoomID();
+	_walls = orig.GetAllWalls();
+	_poly = orig.GetPolygon();
+	_peds = orig.GetAllPedestrians();
+	_goalIDs = orig.GetAllGoalIDs();
+	_area = orig.GetArea();
+	_closed=orig.GetClosed();
+	_roomID=orig.GetRoomID();
+	_uid = orig.GetUID();
 }
 
 SubRoom::~SubRoom() {
-	if (pWalls.size() > 0) pWalls.clear();
-	if (pPoly.size() > 0) pPoly.clear();
-	for (unsigned int i = 0; i < pPeds.size(); i++) {
-		delete pPeds[i];
+	if (_walls.size() > 0) _walls.clear();
+	if (_poly.size() > 0) _poly.clear();
+	for (unsigned int i = 0; i < _peds.size(); i++) {
+		delete _peds[i];
 	}
 
-	for (unsigned int i = 0; i < pObstacles.size(); i++) {
-		delete pObstacles[i];
+	for (unsigned int i = 0; i < _obstacles.size(); i++) {
+		delete _obstacles[i];
 	}
-	pObstacles.clear();
+	_obstacles.clear();
 }
 
 // Setter -Funktionen
 
 void SubRoom::SetSubRoomID(int ID) {
-	pID = ID;
+	_id = ID;
 }
 void SubRoom::SetClosed(double closed) {
-	pClosed = closed;
+	_closed = closed;
 }
 
 void SubRoom::SetRoomID(int ID) {
-	pRoomID = ID;
+	_roomID = ID;
 }
 
-void SubRoom::SetAllWalls(const vector<Wall>& walls) {
-	pWalls = walls;
-}
+//void SubRoom::SetAllWalls(const vector<Wall>& walls) {
+//	_walls = walls;
+//}
+//
+//void SubRoom::SetWall(const Wall& wall, int index) {
+//	if ((index >= 0) && (index < GetAnzWalls())) {
+//		_walls[index] = wall;
+//	} else {
+//		Log->Write("ERROR: Wrong Index in SubRoom::SetWall()");
+//		exit(0);
+//	}
+//}
 
-void SubRoom::SetWall(const Wall& wall, int index) {
-	if ((index >= 0) && (index < GetAnzWalls())) {
-		pWalls[index] = wall;
-	} else {
-		Log->Write("ERROR: Wrong Index in SubRoom::SetWall()");
-		exit(0);
-	}
-}
-
-void SubRoom::SetPolygon(const vector<Point>& poly) {
-	pPoly = poly;
-}
+//void SubRoom::SetPolygon(const vector<Point>& poly) {
+//	_poly = poly;
+//}
 
 void SubRoom::SetAllPedestrians(const vector<Pedestrian*>& peds) {
-	pPeds = peds;
+	_peds = peds;
 }
 
 void SubRoom::SetPedestrian(Pedestrian* ped, int index) {
-	if ((index >= 0) && (index < GetAnzPedestrians())) {
-		pPeds[index] = ped;
+	if ((index >= 0) && (index < GetNumberOfPedestrians())) {
+		_peds[index] = ped;
 	} else {
 		Log->Write("ERROR: Wrong Index in SubRoom::SetPedestrian()");
 		exit(0);
 	}
 }
 
-void SubRoom::SetArea(double a) {
-	pArea = a;
-}
+//void SubRoom::SetArea(double a) {
+//	_area = a;
+//}
 // Getter - Funktionen
 
 int SubRoom::GetSubRoomID() const {
-	return pID;
+	return _id;
 }
 
 double SubRoom::GetClosed() const {
-	return pClosed;
+	return _closed;
 }
 
 // unique identifier for this subroom
 int SubRoom::GetUID() const {
-	return pUID;
+	return _uid;
 	//return pRoomID * 1000 + pID;
 }
 
 double SubRoom::GetArea() const {
-	return pArea;
+	return _area;
 }
 
 int SubRoom::GetRoomID() const {
-	return pRoomID;
+	return _roomID;
 }
 
-int SubRoom::GetAnzWalls() const {
-	return pWalls.size();
+int SubRoom::GetNumberOfWalls() const {
+	return _walls.size();
 }
 
 const vector<Wall>& SubRoom::GetAllWalls() const {
-	return pWalls;
+	return _walls;
 }
 
-const Wall SubRoom::GetWall(int index) const {
-	if ((index >= 0) && (index < GetAnzWalls()))
-		return pWalls[index];
+const Wall& SubRoom::GetWall(int index) const {
+	if ((index >= 0) && (index < GetNumberOfWalls()))
+		return _walls[index];
 	else {
 		Log->Write("ERROR: Wrong 'index' in SubRoom::GetWall()");
 		exit(0);
@@ -175,66 +180,57 @@ const Wall SubRoom::GetWall(int index) const {
 }
 
 const vector<Point>& SubRoom::GetPolygon() const {
-	return pPoly;
+	return _poly;
 }
 
-int SubRoom::GetAnzPedestrians() const {
-	return pPeds.size();
+int SubRoom::GetNumberOfPedestrians() const {
+	return _peds.size();
 }
 
 const vector<Pedestrian*>& SubRoom::GetAllPedestrians() const {
-	return pPeds;
+	return _peds;
 }
 
 const vector<Obstacle*>& SubRoom::GetAllObstacles() const {
-	return pObstacles;
+	return _obstacles;
 }
 
 
 Pedestrian* SubRoom::GetPedestrian(int index) const {
-	if ((index >= 0) && (index < (int) GetAnzPedestrians()))
-		return pPeds[index];
+	if ((index >= 0) && (index < (int) GetNumberOfPedestrians()))
+		return _peds[index];
 	else {
 		Log->Write("ERROR: Wrong 'index' in SubRoom::GetPedestrian()");
 		exit(0);
 	}
 }
 
-int SubRoom::GetAnzGoalIDs() const {
-	return pGoalIDs.size();
+int SubRoom::GetNumberOfGoalIDs() const {
+	return _goalIDs.size();
 }
 
 const vector<int>& SubRoom::GetAllGoalIDs() const {
-	return pGoalIDs;
+	return _goalIDs;
 }
 
 
 // Sonstiges
 
 void SubRoom::AddWall(const Wall& w) {
-	pWalls.push_back(w);
-}
-
-void SubRoom::DeleteWall(int index) {
-	if ((index >= 0) && (index < (int) pWalls.size()))
-		pWalls.erase(pWalls.begin() + index);
-	else {
-		Log->Write("ERROR: Wrong Index in SubRoom::DeleteWall()");
-		exit(0);
-	}
+	_walls.push_back(w);
 }
 
 void SubRoom::AddPedestrian(Pedestrian* ped) {
-	pPeds.push_back(ped);
+	_peds.push_back(ped);
 }
 
 void SubRoom::AddObstacle(Obstacle* obs){
-	pObstacles.push_back(obs);
+	_obstacles.push_back(obs);
 }
 
 void SubRoom::DeletePedestrian(int index) {
-	if ((index >= 0) && (index < (int) GetAnzPedestrians())) {
-		pPeds.erase(pPeds.begin() + index);
+	if ((index >= 0) && (index < (int) GetNumberOfPedestrians())) {
+		_peds.erase(_peds.begin() + index);
 
 	} else {
 		Log->Write("ERROR: Wrong Index in SubRoom::DeletePedestrian()");
@@ -243,53 +239,53 @@ void SubRoom::DeletePedestrian(int index) {
 }
 
 void SubRoom::AddGoalID(int ID) {
-	pGoalIDs.push_back(ID);
+	_goalIDs.push_back(ID);
 }
 
 void SubRoom::AddCrossing(Crossing* line){
-	pCrossings.push_back(line);
-	pGoalIDs.push_back(line->GetUniqueID());
+	_crossings.push_back(line);
+	_goalIDs.push_back(line->GetUniqueID());
 }
 
 void SubRoom::AddTransition(Transition* line){
-	pTransitions.push_back(line);
-	pGoalIDs.push_back(line->GetUniqueID());
+	_transitions.push_back(line);
+	_goalIDs.push_back(line->GetUniqueID());
 }
 
 void SubRoom::AddHline(Hline* line){
-	pHlines.push_back(line);
-	pGoalIDs.push_back(line->GetUniqueID());
+	_hlines.push_back(line);
+	_goalIDs.push_back(line->GetUniqueID());
 }
 
 const vector<Crossing*>& SubRoom::GetAllCrossings() const{
-	return pCrossings;
+	return _crossings;
 }
 
 const vector<Transition*>& SubRoom::GetAllTransitions() const{
-	return pTransitions;
+	return _transitions;
 }
 
 const vector<Hline*>& SubRoom::GetAllHlines() const{
-	return pHlines;
+	return _hlines;
 }
 
 const Crossing* SubRoom::GetCrossing(int i) const {
-	return pCrossings[i];
+	return _crossings[i];
 }
 
 const Transition* SubRoom::GetTransition(int i) const {
-	return pTransitions[i];
+	return _transitions[i];
 }
 
 const Hline* SubRoom::GetHline(int i) const {
-	return pHlines[i];
+	return _hlines[i];
 }
 
 void SubRoom::RemoveGoalID(int ID){
-	for (unsigned int i=0;i<pGoalIDs.size();i++){
-		if(pGoalIDs[i]==ID){
+	for (unsigned int i=0;i<_goalIDs.size();i++){
+		if(_goalIDs[i]==ID){
 			Log->Write("Removing goal");
-			pGoalIDs.erase(pGoalIDs.begin()+i);
+			_goalIDs.erase(_goalIDs.begin()+i);
 			return;
 		}
 	}
@@ -300,11 +296,11 @@ void SubRoom::RemoveGoalID(int ID){
 
 void SubRoom::CalculateArea() {
 	double sum = 0;
-	int n = (int) pPoly.size();
+	int n = (int) _poly.size();
 	for (int i = 0; i < n; i++) {
-		sum += (pPoly[i].GetY() + pPoly[(i + 1) % n].GetY())*(pPoly[i].GetX() - pPoly[(i + 1) % n].GetX());
+		sum += (_poly[i].GetY() + _poly[(i + 1) % n].GetY())*(_poly[i].GetX() - _poly[(i + 1) % n].GetX());
 	}
-	SetArea(0.5 * fabs(sum));
+	_area=(0.5 * fabs(sum));
 }
 
 Point SubRoom::GetCentroid() const {
@@ -319,12 +315,12 @@ Point SubRoom::GetCentroid() const {
 
     // For all vertices except last
     unsigned int i=0;
-    for (i=0; i<pPoly.size()-1; ++i)
+    for (i=0; i<_poly.size()-1; ++i)
     {
-        x0 = pPoly[i].GetX();
-        y0 = pPoly[i].GetY();
-        x1 = pPoly[i+1].GetX();
-        y1 = pPoly[i+1].GetY();
+        x0 = _poly[i].GetX();
+        y0 = _poly[i].GetY();
+        x1 = _poly[i+1].GetX();
+        y1 = _poly[i+1].GetY();
         a = x0*y1 - x1*y0;
         signedArea += a;
         px += (x0 + x1)*a;
@@ -332,10 +328,10 @@ Point SubRoom::GetCentroid() const {
     }
 
     // Do last vertex
-    x0 = pPoly[i].GetX();
-    y0 = pPoly[i].GetY();
-    x1 = pPoly[0].GetX();
-    y1 = pPoly[0].GetY();
+    x0 = _poly[i].GetX();
+    y0 = _poly[i].GetY();
+    x1 = _poly[0].GetX();
+    y1 = _poly[0].GetY();
     a = x0*y1 - x1*y0;
     signedArea += a;
     px += (x0 + x1)*a;
@@ -355,15 +351,15 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 	Line cl = Line(p1,p2);
 	bool temp =  true;
 	//check intersection with Walls
-	for(unsigned int i = 0; i < pWalls.size(); i++) {
-		if(temp  && cl.IntersectionWith(pWalls[i]))
+	for(unsigned int i = 0; i < _walls.size(); i++) {
+		if(temp  && cl.IntersectionWith(_walls[i]))
 			temp = false;
 	}
 
 
 	//check intersection with obstacles
-	for(unsigned int i = 0; i < pObstacles.size(); i++) {
-		Obstacle * obs = pObstacles[i];
+	for(unsigned int i = 0; i < _obstacles.size(); i++) {
+		Obstacle * obs = _obstacles[i];
 		for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
 			const Wall& w = obs->GetAllWalls()[k];
 			if(temp && cl.IntersectionWith(w))
@@ -374,8 +370,8 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 
 	// check intersection with other hlines in room
 	if(considerHlines)
-	for(unsigned int i = 0; i < pHlines.size(); i++) {
-		if(temp && cl.IntersectionWith(*(Line*)pHlines[i]))
+	for(unsigned int i = 0; i < _hlines.size(); i++) {
+		if(temp && cl.IntersectionWith(*(Line*)_hlines[i]))
 			temp = false;
 	}
 
@@ -396,7 +392,7 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
 	//check intersection with Walls
 	for(unsigned int i = 0; i <  GetAllWalls().size(); i++) {
 		for(int k = 0; k < 5; k++) {
-			if(temp[k] && cl[k].IntersectionWith(pWalls[i]) && (cl[k].NormalVec() != pWalls[i].NormalVec() ||  l1->NormalVec() != l2->NormalVec()))
+			if(temp[k] && cl[k].IntersectionWith(_walls[i]) && (cl[k].NormalVec() != _walls[i].NormalVec() ||  l1->NormalVec() != l2->NormalVec()))
 				temp[k] = false;
 		}
 	}
@@ -416,10 +412,10 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
 
 	// check intersection with other hlines in room
 	if(considerHlines)
-	for(unsigned int i = 0; i <  pHlines.size(); i++) {
-		if ( (l1->operator !=(*(Line*)pHlines[i])) &&  (l2->operator !=(*(Line*)pHlines[i])) ) {
+	for(unsigned int i = 0; i <  _hlines.size(); i++) {
+		if ( (l1->operator !=(*(Line*)_hlines[i])) &&  (l2->operator !=(*(Line*)_hlines[i])) ) {
 			for(int k = 0; k < 5; k++) {
-				if(temp[k] && cl[k].IntersectionWith(*(Line*)pHlines[i]))
+				if(temp[k] && cl[k].IntersectionWith(*(Line*)_hlines[i]))
 					temp[k] = false;
 			}
 		}
@@ -427,14 +423,6 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
 	return temp[0] || temp[1] || temp[2] || temp[3] || temp[4];
 }
 
-void SubRoom::LoadWall(string line) {
-	string tmp; //Schlüsselwort "wall"
-	istringstream iss(line, istringstream::in);
-	double x1, y1, x2, y2;
-	iss >> tmp >> x1 >> y1 >> x2 >> y2;
-	Wall wall = Wall(Point(x1, y1), Point(x2, y2));
-	AddWall(wall);
-}
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
 	Point pos = ped->GetPos();
@@ -451,9 +439,9 @@ bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const {
 	//check the crossings
 	const vector<Crossing*>& crossings = sub->GetAllCrossings();
 	for (unsigned int i = 0; i < crossings.size(); i++) {
-		for (unsigned int j = 0; j < pCrossings.size(); j++) {
+		for (unsigned int j = 0; j < _crossings.size(); j++) {
 			int uid1 = crossings[i]->GetUniqueID();
-			int uid2 = pCrossings[j]->GetUniqueID();
+			int uid2 = _crossings[j]->GetUniqueID();
 			// ignore my transition
 			if (uid1 == uid2)
 				return true;
@@ -463,9 +451,9 @@ bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const {
 	// and finally the transitions
 	const vector<Transition*>& transitions = sub->GetAllTransitions();
 	for (unsigned int i = 0; i < transitions.size(); i++) {
-		for (unsigned int j = 0; j < pTransitions.size(); j++) {
+		for (unsigned int j = 0; j < _transitions.size(); j++) {
 			int uid1 = transitions[i]->GetUniqueID();
-			int uid2 = pTransitions[j]->GetUniqueID();
+			int uid2 = _transitions[j]->GetUniqueID();
 			// ignore my transition
 			if (uid1 == uid2)
 				return true;
@@ -476,24 +464,24 @@ bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const {
 }
 
 void SubRoom::SetPlanEquation(double A, double B, double C) {
-	pPlanEquation[0]=A;
-	pPlanEquation[1]=B;
-	pPlanEquation[2]=C;
+	_planeEquation[0]=A;
+	_planeEquation[1]=B;
+	_planeEquation[2]=C;
 }
 
 const double* SubRoom::GetPlanEquation() const {
-	return pPlanEquation;
+	return _planeEquation;
 }
 
 double SubRoom::GetElevation(const Point& p) {
-	return pPlanEquation[0] * p._x + pPlanEquation[1] * p._y + pPlanEquation[2];
+	return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
 }
 
 void SubRoom::ClearAllPedestrians(){
-	for(unsigned int p=0;p<pPeds.size();p++){
-		delete pPeds[p];
+	for(unsigned int p=0;p<_peds.size();p++){
+		delete _peds[p];
 	}
-	pPeds.clear();
+	_peds.clear();
 }
 
 
@@ -514,7 +502,7 @@ NormalSubRoom::~NormalSubRoom() {
 string NormalSubRoom::WriteSubRoom() const {
 	string s;
 	Point pos = GetCentroid();
-	for (int j = 0; j < GetAnzWalls(); j++) {
+	for (int j = 0; j < GetNumberOfWalls(); j++) {
 		Wall w = GetWall(j);
 		s.append(w.Write());
 	}
@@ -538,8 +526,8 @@ string NormalSubRoom::WritePolyLine() const {
 	char tmp[CLENGTH];
 
 	s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
-	for (unsigned int j = 0; j < pPoly.size(); j++) {
-	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",pPoly[j].GetX(),pPoly[j].GetY());
+	for (unsigned int j = 0; j < _poly.size(); j++) {
+	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
 		s.append(tmp);
 	}
 	s.append("\t</Obstacle>\n");
@@ -554,7 +542,7 @@ string NormalSubRoom::WritePolyLine() const {
 
 void NormalSubRoom::WriteToErrorLog() const {
 	Log->Write("\t\tNormal SubRoom:\n");
-	for (int i = 0; i < GetAnzWalls(); i++) {
+	for (int i = 0; i < GetNumberOfWalls(); i++) {
 		Wall w = GetWall(i);
 		w.WriteToErrorLog();
 	}
@@ -566,8 +554,8 @@ void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals) {
 	Point point;
 	Line* line;
 	// Alle Linienelemente in copy speichern
-	for (int i = 0; i < GetAnzWalls(); i++) {
-		copy.push_back(&pWalls[i]);
+	for (int i = 0; i < GetNumberOfWalls(); i++) {
+		copy.push_back(&_walls[i]);
 	}
 	// Transitions und Crossings sind in goal abgespeichert
 	copy.insert(copy.end(), goals.begin(), goals.end());
@@ -603,7 +591,7 @@ void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals) {
 		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
-	pPoly = tmpPoly;
+	_poly = tmpPoly;
 }
 
 
@@ -633,12 +621,12 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const {
 
 	/////////////////////////////////////////////////////////////
 	edge = first = 0;
-	quad = WhichQuad(pPoly[edge], ped);
+	quad = WhichQuad(_poly[edge], ped);
 	total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
 	/* LOOP THROUGH THE VERTICES IN A SECTOR */
 	do {
-		next = (edge + 1) % pPoly.size();
-		next_quad = WhichQuad(pPoly[next], ped);
+		next = (edge + 1) % _poly.size();
+		next_quad = WhichQuad(_poly[next], ped);
 		delta = next_quad - quad; // HOW MANY QUADS HAVE I MOVED
 
 		// SPECIAL CASES TO HANDLE CROSSINGS OF MORE THEN ONE
@@ -649,7 +637,7 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const {
 				//WAS CLOCKWISE OR COUNTER
 			case -2: // US THE X POSITION AT THE HIT POINT TO
 				// DETERMINE WHICH WAY AROUND
-				if (Xintercept(pPoly[edge], pPoly[next], ped.GetY()) > ped.GetX())
+				if (Xintercept(_poly[edge], _poly[next], ped.GetY()) > ped.GetX())
 					delta = -(delta);
 				break;
 			case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
@@ -713,7 +701,7 @@ string Stair::WriteSubRoom() const {
 	string s;
 	Point pos = GetCentroid();
 	char tmp_c[300];
-	for (int j = 0; j < GetAnzWalls(); j++) {
+	for (int j = 0; j < GetNumberOfWalls(); j++) {
 		Wall w = GetWall(j);
 		s.append(w.Write());
 	}
@@ -737,8 +725,8 @@ string Stair::WritePolyLine() const {
 	char tmp[CLENGTH];
 
 	s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
-	for (unsigned int j = 0; j < pPoly.size(); j++) {
-	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",pPoly[j].GetX(),pPoly[j].GetY());
+	for (unsigned int j = 0; j < _poly.size(); j++) {
+	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
 		s.append(tmp);
 	}
 	s.append("\t</Obstacle>\n");
@@ -752,7 +740,7 @@ string Stair::WritePolyLine() const {
 }
 void Stair::WriteToErrorLog() const {
 	Log->Write("\t\tStair:\n");
-	for (int i = 0; i < GetAnzWalls(); i++) {
+	for (int i = 0; i < GetNumberOfWalls(); i++) {
 		Wall w = GetWall(i);
 		w.WriteToErrorLog();
 	}
@@ -792,8 +780,8 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 	Line *nextLine;
 
 	// Alle Linienelemente in copy speichern
-	for (int i = 0; i < GetAnzWalls(); i++) {
-		copy.push_back(&pWalls[i]);
+	for (int i = 0; i < GetNumberOfWalls(); i++) {
+		copy.push_back(&_walls[i]);
 	}
 	// Transitions und Crossings sind in goal abgespeichert
 	copy.insert(copy.end(), goals.begin(), goals.end());
@@ -867,16 +855,16 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 			}
 		}
 	}
-	pPoly = neuPoly;
+	_poly = neuPoly;
 }
 
 bool Stair::IsInSubRoom(const Point& ped) const {
 	bool rueck = false;
-	int N = (int) pPoly.size();
+	int N = (int) _poly.size();
 	int sum = 0;
 
 	for (int i = 0; i < N; i++) {
-		Line l = Line(pPoly[i], pPoly[(i + 1) % N]);
+		Line l = Line(_poly[i], _poly[(i + 1) % N]);
 		Point s = l.LotPoint(ped);
 		if (l.IsInLine(s))
 			sum++;

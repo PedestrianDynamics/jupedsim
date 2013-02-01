@@ -57,7 +57,7 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             vector< Point > result_acc = vector< Point > ();
             if (anzpeds != 0) {
                 model->CalculateForce(ti, result_acc, building, i, s->GetSubRoomID());
@@ -77,7 +77,7 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             // Schleife über alle Fußgänger im SubRoom
             for (int k = 0; k < anzpeds; ++k) {
                 Point result_acc = result_acc_room[i][j][k];
@@ -116,7 +116,7 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             vector< Point > result1_acc = vector< Point > ();
             if (anzpeds != 0) {
                 model->CalculateForce(ti, result1_acc, building, i, s->GetSubRoomID());
@@ -136,7 +136,7 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             // Schleife über alle Fußgänger im SubRoom
             for (int k = 0; k < anzpeds; ++k) {
                 Pedestrian* ped = s->GetPedestrian(k);
@@ -159,7 +159,7 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             vector< Point > result2_acc = vector< Point > ();
             if (anzpeds != 0) {
                 model->CalculateForce(ti, result2_acc, building, i, s->GetSubRoomID());
@@ -180,7 +180,7 @@ void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) 
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             for (int k = 0; k < anzpeds; ++k) {
                 Pedestrian* ped = s->GetPedestrian(k);
                 Point v_neu; // neue Positionen und Geschwindigkeiten setzen
@@ -221,7 +221,7 @@ void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const 
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             vector< Point > result_acc = vector< Point > ();
             if (anzpeds != 0) {
                 model->CalculateForce(ti, result_acc, building, i, s->GetSubRoomID());
@@ -241,7 +241,7 @@ void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const 
         // Schleife über alle SubRooms im Raum
         for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
             SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetAnzPedestrians();
+            int anzpeds = s->GetNumberOfPedestrians();
             // Schleife über alle Fußgänger im SubRoom
             for (int k = 0; k < anzpeds; ++k) {
                 Point result_acc = result_acc_room[i][j][k];

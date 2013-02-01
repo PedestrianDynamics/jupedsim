@@ -719,7 +719,7 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* me, Pedestrian** 
 
 				//FIXME: this should be remove if you reach a stable version.
 				Log->Write("ERROR: QuickestPathRouter: reference ped cannot be found");
-				printf("ERROR: reference ped cannot be found for ped %d within [%f] m  around the exit [%d]\n",me->GetID(),radius,crossing->GetIndex());
+				printf("ERROR: reference ped cannot be found for ped %d within [%f] m  around the exit [%d]\n",me->GetID(),radius,crossing->GetID());
 				//exit(EXIT_FAILURE);
 			}
 		}
@@ -759,7 +759,7 @@ void QuickestPathRouter::GetQueueAtExit(Crossing* crossing, double minVel,
 
 	SubRoom* sbr1 = crossing->GetSubRoom1();
 	SubRoom* sbr2 = crossing->GetSubRoom2();
-	int exitID=crossing->GetIndex();
+	int exitID=crossing->GetID();
 	double radius2=radius*radius;
 	double minVel2=minVel*minVel;
 
@@ -837,7 +837,7 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
 	SubRoom* sbr2 = crossing->GetSubRoom2();
 	Line visibilityLine = Line(p1,p2);
 
-	int exitID=crossing->GetIndex();
+	int exitID=crossing->GetID();
 	int obstacles=0;
 
 	//if this is a hline

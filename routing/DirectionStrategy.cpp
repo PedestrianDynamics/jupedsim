@@ -26,6 +26,8 @@
 
 #include "DirectionStrategy.h"
 #include "../geometry/NavLine.h"
+#include "../geometry/Room.h"
+#include "../pedestrian/Pedestrian.h"
 
 DirectionStrategy::DirectionStrategy() {
 }
@@ -57,6 +59,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
     return  e_neu.ShortestPoint(ped->GetPos());
 
 }
+
 Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const {
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
