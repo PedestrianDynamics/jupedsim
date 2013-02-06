@@ -29,61 +29,69 @@
 #define	_DISTRIBUTION_H
 
 
-#include <cstdlib>
-#include <cmath>
 #include <vector>
-using namespace std;
 
-#include "../general/Macros.h"
-
-/* Virtuelle Klasse zur Berechnung von Zufallszahlen
- * */
 
 class Distribution {
 private:
-    double pMean;
-    double pSigma;
+    double _mean;
+    double _sigma;
 public:
     Distribution();
-    Distribution(double m, double s);
+    Distribution(double mean, double sigma);
     Distribution(const Distribution& orig);
     virtual ~Distribution();
 
-    // Getter-Funktionen
+    /**
+     * @return the mean of the distribution
+     */
     double GetMean() const;
+
+    /**
+     * @return the standard deviation of the distribution
+     */
     double GetSigma() const;
 
-    // virtuelle Funktionen
+    /**
+     * @return a random number
+     */
     virtual double GetRand() =0; // Gibt EINE Zufallszahl zurück
 };
 
 class Gauss : public Distribution {
 private:
-    vector<double> pQueue;
-    // private Getter Funktionen (werden nur innerhalb der Klasse benötigt)
-    const vector<double>& GetQueue() const;
+    std::vector<double> _queue;
+    const std::vector<double>& GetQueue() const;
     void GetPair();
+
 public:
-    // Konstruktoren
+
     Gauss();
-    Gauss(double m, double s);
+    Gauss(double mean, double sigma);
     Gauss(const Gauss& orig);
     virtual ~Gauss();
-    // Getter-Funktionen
-    double GetRand(); // Gibt EINE normal verteilte Zufallszahl zurück
+
+    /**
+     * @return a number (gauss distributed)
+     */
+    double GetRand();
 };
+
 
 class Equal : public Distribution {
 private:
 
 public:
-    // Konstruktoren
-    Equal();
+
+	Equal();
     Equal(double m, double s);
     Equal(const Gauss& orig);
     virtual ~Equal();
-    // Getter-Funktionen
-    double GetRand(); // Gibt EINE normal verteilte Zufallszahl zurück
+
+    /**
+     * @return a random number (normal distributed)
+     */
+    double GetRand();
 };
 
 #endif	/* _DISTRIBUTION_H */

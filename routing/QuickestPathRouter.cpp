@@ -28,6 +28,9 @@
  */
 
 #include "QuickestPathRouter.h"
+#include "../mpi/LCGrid.h"
+
+using namespace std;
 
 QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() {
 }

@@ -26,7 +26,11 @@
  */
 
 #include "IODispatcher.h"
-//#include <boost/foreach.hpp>
+#include "../pedestrian/Pedestrian.h"
+
+#include <cmath>
+
+using namespace std;
 
 string IODispatcher::WritePed(Pedestrian* ped) {
 	double v, a, b, phi;

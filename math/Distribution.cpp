@@ -27,20 +27,27 @@
  */
 
 #include "Distribution.h"
+#include "../general/Macros.h"
+
+
+#include <cstdlib>
+#include <cmath>
+
+using namespace std;
 
 Distribution::Distribution() {
-    pMean = 0.;
-    pSigma = 1.;
+    _mean = 0.;
+    _sigma = 1.;
 }
 
 Distribution::Distribution(double m, double s) {
-    pMean = m;
-    pSigma = s;
+    _mean = m;
+    _sigma = s;
 }
 
 Distribution::Distribution(const Distribution& orig) {
-    pMean = orig.GetMean();
-    pSigma = orig.GetSigma();
+    _mean = orig.GetMean();
+    _sigma = orig.GetSigma();
 }
 
 Distribution::~Distribution() {
@@ -49,11 +56,11 @@ Distribution::~Distribution() {
 // Getter-Funktionen
 
 double Distribution::GetMean() const {
-    return pMean;
+    return _mean;
 }
 
 double Distribution::GetSigma() const {
-    return pSigma;
+    return _sigma;
 }
 
 /*************************************************************
@@ -61,7 +68,7 @@ double Distribution::GetSigma() const {
  ************************************************************/
 
 const vector<double>& Gauss::GetQueue() const {
-    return pQueue;
+    return _queue;
 }
 
 void Gauss::GetPair() {
@@ -71,36 +78,36 @@ void Gauss::GetPair() {
     double y = GetMean() + sqrt(-2. * GetSigma() * log(x1)) * sin(2. * M_PI * x2);
 
     if (x > J_EPS) {
-        pQueue.push_back(fabs(x));
+        _queue.push_back(fabs(x));
     }
     if (y > J_EPS) {
-        pQueue.push_back(fabs(y));
+        _queue.push_back(fabs(y));
     }
 }
 
 Gauss::Gauss() : Distribution() {
-    pQueue = vector<double>();
+    _queue = vector<double>();
 }
 
 Gauss::Gauss(double m, double s) : Distribution(m, s) {
-    pQueue = vector<double>();
+    _queue = vector<double>();
 }
 
 Gauss::Gauss(const Gauss& orig) : Distribution(orig) {
-    pQueue = orig.GetQueue();
+    _queue = orig.GetQueue();
 }
 
 Gauss::~Gauss() {
-    pQueue.clear();
+    _queue.clear();
 }
 
 double Gauss::GetRand() {
-    if (!pQueue.size()) {
+    if (!_queue.size()) {
         GetPair();
     }
 
-    double r = pQueue.back(); // nur ein Wert wird zurück gegeben
-    pQueue.pop_back(); // andere Wert kommt zurück in die Queue
+    double r = _queue.back(); // nur ein Wert wird zurück gegeben
+    _queue.pop_back(); // andere Wert kommt zurück in die Queue
     return r;
 
 }

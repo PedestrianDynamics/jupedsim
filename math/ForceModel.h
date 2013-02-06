@@ -34,18 +34,14 @@
 #include <omp.h>
 #endif
 
-using namespace std;
-
-#include "../IO/OutputHandler.h"
 #include "../geometry/Building.h"
-#include "../routing/DirectionStrategy.h"
-#include "../mpi/LCGrid.h"
 
-extern OutputHandler* Log;
 
-/************************************************************
- ForceModel (abstrakte Klasse)
- ************************************************************/
+
+class Pedestrian;
+class DirectionStrategy;
+
+
 
 class ForceModel {
 
@@ -53,11 +49,22 @@ public:
     // Konstruktoren
     ForceModel();
     virtual ~ForceModel();
-    // virtuelle Funktionen (werden in den abgeleiteten Klassen implementiert)
+
     //FIXME: remove
-    virtual void CalculateForce(double time, vector< Point >& result_acc, Building* building, int roomID, int SubRoomID) const = 0;
+    virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building, int roomID, int SubRoomID) const = 0;
+
+    /**
+     * Solve the differential equations and update the positions and velocities
+     * @param t the actual time
+     * @param tp the next timestep
+     * @param building the geometry object
+     */
     virtual void CalculateForceLC(double t, double tp, Building* building) const = 0;
-    virtual string writeParameter() const = 0;
+
+    /**
+     * @return all model parameters in a nicely formatted string
+     */
+    virtual std::string writeParameter() const = 0;
 };
 
 /************************************************************
@@ -66,32 +73,32 @@ public:
 
 class GCFMModel : public ForceModel {
 private:
-    DirectionStrategy* pdirection; // Strategie zur Richtungswahl, wird in Fdriv benötigt
+    /// define the strategy for crossing a door (used for calculating the driving foce)
+	DirectionStrategy* _direction;
     // Modellparameter
-    double pNuPed;
-    double pNuWall;
-    double pintp_widthPed; // Interpolation cutoff radius (in cm)
-    double pintp_widthWall; // Interpolation cutoff radius (in cm)
-    double pmaxfPed;
-    double pmaxfWall;
-    double pDistEffMaxPed; // maximal effective distance
-    double pDistEffMaxWall; // maximal effective distance
+    double _nuPed;
+    double _nuWall;
+    double _intp_widthPed; // Interpolation cutoff radius (in cm)
+    double _intp_widthWall; // Interpolation cutoff radius (in cm)
+    double _maxfPed;
+    double _maxfWall;
+    double _distEffMaxPed; // maximal effective distance
+    double _distEffMaxWall; // maximal effective distance
 
     // Private Funktionen
-    inline Point ForceDriv(Pedestrian* ped, Room* room) const;
+    Point ForceDriv(Pedestrian* ped, Room* room) const;
     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
-    inline Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-    inline Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
+    Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
+    Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
 public:
-    // Konstruktoren
+
     GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
             double intp_widthped, double intp_widthwall, double maxfped, double maxfwall);
-    GCFMModel(const GCFMModel& orig);
     virtual ~GCFMModel(void);
 
-    // Getter-Funktionen
+    // Getter
     DirectionStrategy* GetDirection() const;
     double GetNuPed() const;
     double GetNuWall() const;
@@ -106,10 +113,10 @@ public:
 
 
     // virtuelle Funktionen
-    virtual void CalculateForce(double time, vector< Point >& result_acc, Building* building,
+    virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
     int roomID, int SubRoomID) const;
     virtual void CalculateForceLC(double t, double tp, Building* building) const;
-    virtual string writeParameter() const;
+    virtual std::string writeParameter() const;
 };
 
 

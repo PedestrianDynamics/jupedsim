@@ -39,6 +39,10 @@
  */
 
 #include"LCGrid.h"
+#include "../pedestrian/Pedestrian.h"
+
+
+using namespace std;
 
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds){

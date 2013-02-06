@@ -9,6 +9,9 @@
 
 #include "RoutingGraphStorage.h"
 
+using namespace std;
+
+
 RoutingGraphStorage::RoutingGraphStorage()
 {
 };

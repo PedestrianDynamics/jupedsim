@@ -12,6 +12,12 @@
 
 #include "Router.h"
 
+#include <string>
+#include <vector>
+
+class Pedestrian;
+
+
 class RoutingEngine {
 public:
 	/**
@@ -35,7 +41,7 @@ public:
 	 * Add a new trip to the system. Individual pedestrian can be assigned a particular trip.
 	 * @param trip
 	 */
-	void AddTrip(vector<string> trip);
+	void AddTrip(std::vector<std::string> trip);
 
 	/**
 	 * Return a trip/route with the particular id
@@ -43,7 +49,7 @@ public:
 	 * @param id
 	 * @return
 	 */
-	const vector<string> GetTrip(int id) const;
+	const std::vector<std::string> GetTrip(int id) const;
 
 	/**
 	 * Find the next destination using the appropriate router from
@@ -76,9 +82,9 @@ public:
 
 private:
 	/// collections of all routers used
-	vector<Router*> _routersCollection;
+	std::vector<Router*> _routersCollection;
 	/// collection of all trips/routes
-	vector<vector<string> >_tripsCollection;
+	std::vector<std::vector<std::string> >_tripsCollection;
 };
 
 #endif /* ROUTINGENGINE_H_ */

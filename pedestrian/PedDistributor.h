@@ -30,23 +30,20 @@
 
 #include <vector>
 #include <string>
-using namespace std;
 
-#include "../geometry/Room.h"
 #include "../math/Distribution.h"
 #include "../routing/Router.h"
 #include "../geometry/Building.h"
 
 
-extern OutputHandler* Log;
 
 /************************************************************
  StartDistributionRoom
  ************************************************************/
 class StartDistributionRoom {
 private:
-	string pRoomCaption; // Raumname
-	int pN; // Anzahl Personen
+	std::string _roomCaption;
+	int _nPeds;
 
 public:
 	StartDistributionRoom();
@@ -54,18 +51,18 @@ public:
 	virtual ~StartDistributionRoom();
 
 	// Getter-Funktionen
-	string GetRoomCaption() const;
-	int GetAnz() const;
+	std::string GetRoomCaption() const;
+	int GetNumberOfPedestrian() const;
 
 	// Setter-Funktionen
-	void SetRoomCaption(string caption);
-	void SetAnz(int N);
+	void SetRoomCaption(std::string caption);
+	void SetNumberOfPedestrians(int N);
 
 };
 
 class StartDistributionSubroom : public StartDistributionRoom {
 private:
-	int pSubroomID; // zusätzlich noch SubRoomID
+	int _subroomID;
 
 public:
 	StartDistributionSubroom();
@@ -83,15 +80,16 @@ public:
  ************************************************************/
 class PedDistributor {
 private:
-	Distribution* pv0; // Gauss - Verteilung für v0
-	Distribution* pBmax;
-	Distribution* pBmin;
-	Distribution* pAtau;
-	Distribution* pAmin;
-	Distribution* pTau;
-	vector<StartDistributionRoom> start_dis; // ID startraum, subroom und Anz
-	vector<StartDistributionSubroom> start_dis_sub; // ID startraum, subroom und Anz
-	string pInitialisationFile; // store the file for later user
+	Distribution* _v0; // Gauss - Verteilung für v0
+	Distribution* _Bmax;
+	Distribution* _Bmin;
+	Distribution* _Atau;
+	Distribution* _Amin;
+	Distribution* _Tau;
+	std::vector<StartDistributionRoom> _start_dis; // ID startraum, subroom und Anz
+	std::vector<StartDistributionSubroom> _start_dis_sub; // ID startraum, subroom und Anz
+	std::string _initialisationFile; // store the file for later user
+
 	// find aped in a subroom and delete him
 	bool FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const;
 
@@ -112,15 +110,15 @@ public:
 	Distribution* GetTau() const;
 
 	// sonstige Funktionen
-	vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
+	std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
 			SubRoom* r, double bufx, double bufy, double dy) const;
-	vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
+	std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
 			SubRoom* r, double bufx, double bufy, double dx) const;
-	vector<Point> PossiblePositions(SubRoom* r) const;
-	void DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid)const;
-	string writeParameter() const;
+	std::vector<Point> PossiblePositions(SubRoom* r) const;
+	void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int roomID, int* pid)const;
+	std::string writeParameter() const;
 
-	void InitDistributor(string start_file);
+	void InitDistributor(std::string start_file);
 	int Distribute(Building* building) const;
 };
 

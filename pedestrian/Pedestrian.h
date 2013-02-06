@@ -34,7 +34,6 @@
 #include <time.h>
 
 #include "../pedestrian/Ellipse.h"
-#include "../geometry/Point.h"
 #include "../general/Macros.h"
 #include "../routing/graph/NavLineState.h"
 
@@ -42,56 +41,67 @@ class Building;
 class NavLine;
 class Router;
 
+
 class Pedestrian {
 private:
-    int pPedIndex; // Index des Fußgängers 1,..., N
-    double pHeight;
-    double pAge;
-    string pGender;
+	/// starting with 1
+    int _id;
+    double _height;
+    double _age;
+    double _mass; // Masse: 1
+    double _tau; // Reaktinszeit: 0.5
+    double _deltaT; // step size
 
-    int pRoomID;
-    int pSubRoomID;
-    string pRoomCaption;
-    double pMass; // Masse: 1
-    double pTau; // Reaktinszeit: 0.5
-    double pDt; // step size
-    JEllipse pEllipse;
-    int pExitIndex; // aktueller Ausgang, Index in routing->GetGoal(index)
-    NavLine* pNavLine; // aktuelle Ausgangslinie
-    std::map<int, int>pMentalMap; // map the actual room to a destination
-    std::vector<int> pDestHistory;
-    Point pV0; //vector V0
-    Point pLastPosition;
-    vector<int> pTrip;
-    int pGroup;
+    std::string _gender;
+    std::string _roomCaption;
+
+    int _roomID;
+    int _subRoomID;
+    int _exitIndex; // aktueller Ausgang, Index in routing->GetGoal(index)
+    int _group;
+
+    NavLine* _navLine; // aktuelle Ausgangslinie
+    std::map<int, int>_mentalMap; // map the actual room to a destination
+    std::vector<int> _destHistory;
+    std::vector<int> _trip;
+    Point _V0; //vector V0
+    Point _lastPosition;
     
-    map<int, NavLineState> knownDoors; // a set with UniqueIDs of closed crossings, transitions or hlines (hlines doesnt make that much sense, just that they are removed from the routing graph)
+    /**
+     * A set with UniqueIDs of closed crossings,
+     * transitions or hlines (hlines doesnt make that much sense,
+     * just that they are removed from the routing graph)
+     */
+    std::map<int, NavLineState> _knownDoors;
     
 
     //routing parameters
-    double pReroutingThreshold; // new orientation after 10 seconds
-    double pTimeBeforeRerouting; // a new orientation starts after this time
-    bool  pReroutingEnabled;
-    double pTimeInJam; // actual time im Jam
-    int pDesiredFinalDestination;
-    double pPatienceTime; // time after which the ped feels to be in jam
+    double _reroutingThreshold; // new orientation after 10 seconds
+    double _timeBeforeRerouting; // a new orientation starts after this time
+    double _timeInJam; // actual time im Jam
+    double _patienceTime; // time after which the ped feels to be in jam
 
-    int oldRoomID;
-    int oldSubRoomID;
+    int _desiredFinalDestination;
+    int _oldRoomID;
+    int _oldSubRoomID;
+    int _newOrientationDelay; //2 seconds, in steps
+
+
     // necessary for smooth turning at sharp bend
-    bool pNewOrientationFlag;
-    int pNewOrientationDelay; //2 seconds, in steps
-    int pUpdateRate;
-    double pTurninAngle;
-    bool tmpFirstOrientation; // possibility to get rid of this variable
+    int _updateRate;
+    double _turninAngle;
+    bool _reroutingEnabled;
+    bool _tmpFirstOrientation; // possibility to get rid of this variable
+    bool _newOrientationFlag;
     // the Pedestrian start after a certain amount of clockticks
-    int clockTicksTillStart;
+    int _clockTicsTillStart;
 
     // the current time in the simulation
-    static double pGlobalTime;
+    static double _globalTime;
 
-    /// the router responsible for this pedestrians
+    /// the router responsible for this pedestrian
     Router* _router;
+    JEllipse _ellipse;
 
 
 public:
@@ -103,7 +113,7 @@ public:
     // Setter-Funktionen
     void SetID(int i);
     //TODO: use setRoom(Room*) and setSubRoom(SubRoom*)
-    void SetRoomID(int i, string roomCaption);
+    void SetRoomID(int i, std::string roomCaption);
     void SetSubRoomID(int i);
     void SetMass(double m);
     void SetTau(double tau);
@@ -121,11 +131,11 @@ public:
     void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
     void SetPhiPed();
     void SetFinalDestination(int UID);
-    void SetTrip(const vector<int>& trip);
+    void SetTrip(const std::vector<int>& trip);
     void SetRouter(Router* router);
 
     // Getter-Funktionen
-    const vector<int>& GetTrip() const;
+    const std::vector<int>& GetTrip() const;
     int GetID() const;
     int GetRoomID() const;
     int GetSubRoomID() const;
@@ -150,9 +160,9 @@ public:
 
     // functions for known closed Doors (needed for the Graphrouting and Rerouting)
     void AddKnownClosedDoor(int door);
-    set<int>  GetKnownClosedDoors();
-    void MergeKnownClosedDoors(map<int, NavLineState> * input);
-    map<int, NavLineState> * GetKnownDoors();
+    std::set<int>  GetKnownClosedDoors();
+    void MergeKnownClosedDoors(std::map<int, NavLineState> * input);
+    std::map<int, NavLineState> * GetKnownDoors();
     int DoorKnowledgeCount() const;
     
     
@@ -183,11 +193,11 @@ public:
     int FindRoute();
 
     ///write the pedestrian path (room and exit taken ) to file
-    void WritePath(ofstream& file, Building* building=NULL);
+    void WritePath(std::ofstream& file, Building* building=NULL);
 
     ///write the pedestrian path (room and exit taken ) to file
     /// in the format room1:exit1>room2:exit2
-    string GetPath();
+    std::string GetPath();
 
     //debug
     void Dump(int ID, int pa = 0); // dump pedestrians parameter, 0 for all parameters
@@ -235,8 +245,8 @@ public:
     //void SetMaxOberservationTime(double time);
     double GetAge() const;
     void SetAge(double age);
-    string GetGender() const;
-    void SetGender(string gender);
+    std::string GetGender() const;
+    void SetGender(std::string gender);
     double GetHeight() const;
     void SetHeight(double height);
     int GetGroup() const;

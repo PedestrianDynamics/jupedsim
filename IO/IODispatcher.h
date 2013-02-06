@@ -32,14 +32,16 @@
 #include "OutputHandler.h"
 #include "../geometry/Building.h"
 
+#include <cstring>
+#include <vector>
 
 extern OutputHandler* Log;
 
 class IODispatcher {
 private:
-	vector<OutputHandler* > pHandlers;
+	std::vector<OutputHandler* > pHandlers;
 	// private Funktionen
-	string WritePed(Pedestrian* ped);
+	std::string WritePed(Pedestrian* ped);
 
 public:
 	IODispatcher();
@@ -47,13 +49,13 @@ public:
 	virtual ~IODispatcher();
 
 	void AddIO(OutputHandler* ioh);
-	const vector<OutputHandler*>& GetIOHandlers();
-	void Write(string str);
+	const std::vector<OutputHandler*>& GetIOHandlers();
+	void Write(std::string str);
 	virtual void WriteHeader(int nPeds, int fps, Building* building, int seed=0, int szenarioID=0);
 	virtual void WriteGeometry(Building* building);
 	virtual void WriteFrame(int frameNr, Building* building);
 	virtual void WriteFooter();
-	int AreaLevel(string caption);
+	int AreaLevel(std::string caption);
 
 	//dump the geometry in another format
 	void WriteGeometryRVO(Building* building);
@@ -63,7 +65,7 @@ public:
 	template<typename A>
 	bool IsElementInVector(const std::vector<A> &vec, A& el) {
 		typename std::vector<A>::const_iterator it;
-		it = find (vec.begin(), vec.end(), el);
+		it = std::find (vec.begin(), vec.end(), el);
 		if(it==vec.end()){
 			return false;
 		}else{

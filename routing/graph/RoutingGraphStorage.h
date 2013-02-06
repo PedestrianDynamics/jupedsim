@@ -20,21 +20,21 @@ public:
     RoutingGraphStorage();
     ~RoutingGraphStorage();
     void init(Building * b);
-    RoutingGraph * GetGraph(set<int> closed_doors);
+    RoutingGraph * GetGraph(std::set<int> closed_doors);
     
     
 
 private:
-    map<set<int>, RoutingGraph*> graphs;
-    set<int> empty_set;
+    std::map<std::set<int>, RoutingGraph*> graphs;
+    std::set<int> empty_set;
     // do not use this function now
-    set<int> GetBiggestSubSet(set<int> iset) const;
+    std::set<int> GetBiggestSubSet(std::set<int> iset) const;
+
     /**
-     *
      * @param iset
      * @param from
      */
-    void GenerateNewGraph(set<int> iset, set<int> from = set<int>());
+    void GenerateNewGraph(std::set<int> iset, std::set<int> from = std::set<int>());
     
     
     

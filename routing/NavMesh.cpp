@@ -16,6 +16,7 @@
 
 //#define _DEBUG 1
 
+using namespace std;
 
 
 NavMesh::NavMesh(Building* b) {

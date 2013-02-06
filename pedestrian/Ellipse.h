@@ -29,23 +29,22 @@
 #ifndef _ELLIPSE_H
 #define	_ELLIPSE_H
 
-#include "../geometry/Point.h"
 #include "../geometry/Line.h"
 #include "../general/Macros.h"
 #include "../math/Mathematics.h"
 
 class JEllipse {
 private:
-    Point pV; // Geschwindigkeitskoordinaten
-    Point pCenter; // cartesian-coord of the centre
-    double pCosPhi; // cos(phi)
-    double pSinPhi; // sin(phi)
-    double pXp; //x Ellipse-coord of the centre (Center in (xc,yc) )
-    double pAmin; // Laenge 1. Achse:  pAmin + V * pAv
-    double pAv;
-    double pBmin; // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
-    double pBmax;
-    double pV0; // Wunschgeschwindigkeit (Betrag)
+    Point _vel; // Geschwindigkeitskoordinaten
+    Point _center; // cartesian-coord of the centre
+    double _cosPhi; // cos(phi)
+    double _sinPhi; // sin(phi)
+    double _Xp; //x Ellipse-coord of the centre (Center in (xc,yc) )
+    double _Amin; // Laenge 1. Achse:  pAmin + V * pAv
+    double _Av;
+    double _Bmin; // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
+    double _Bmax;
+    double __vel0; // Wunschgeschwindigkeit (Betrag)
 
     // private Funktionen:
     // effektiver Abstand Segement l und Ellipse (geg. durch ActionPoint)
@@ -57,11 +56,10 @@ public:
     /* Konstruktoren */
     JEllipse();
     JEllipse(const JEllipse& orig);
-    //virtual ~Ellipse();
 
     /* Setter-Funktionen */
-    void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
-    void SetCenter(Point pos); // setzt x und y-Koordinaten
+    void SetV(const Point& v);
+    void SetCenter(Point pos);
     void SetCosPhi(double c);
     void SetSinPhi(double s);
     void SetXp(double xp);

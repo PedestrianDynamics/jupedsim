@@ -27,7 +27,15 @@
 
 #include "Building.h"
 #include "../general/xmlParser.h"
-#include "Obstacle.h"
+#include "../pedestrian/Pedestrian.h"
+#include "../mpi/LCGrid.h"
+#include "../routing/RoutingEngine.h"
+
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 using namespace std;
 

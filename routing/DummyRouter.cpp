@@ -6,6 +6,8 @@
  */
 
 #include "DummyRouter.h"
+#include "../geometry/Building.h"
+#include "../pedestrian/Pedestrian.h"
 
 DummyRouter::DummyRouter() {
 	_building=NULL;

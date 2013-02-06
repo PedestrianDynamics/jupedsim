@@ -28,42 +28,47 @@
 #include "PedDistributor.h"
 #include "../general/xmlParser.h"
 #include "../geometry/Obstacle.h"
+#include "../routing/RoutingEngine.h"
+#include "../pedestrian/Pedestrian.h"
+
+using namespace std;
+
 
 /************************************************************
  StartDistributionRoom
  ************************************************************/
 StartDistributionRoom::StartDistributionRoom() {
-	pRoomCaption = "no caption";
-	pN = -1;
+	_roomCaption = "no caption";
+	_nPeds = -1;
 }
 
 StartDistributionRoom::StartDistributionRoom(const StartDistributionRoom& orig) {
-	pRoomCaption = orig.GetRoomCaption();
-	pN = orig.GetAnz();
+	_roomCaption = orig.GetRoomCaption();
+	_nPeds = orig.GetNumberOfPedestrian();
 }
 
 StartDistributionRoom::~StartDistributionRoom() {
 }
 
-// Getter-Funktione
+
 
 string StartDistributionRoom::GetRoomCaption() const {
-	return pRoomCaption;
+	return _roomCaption;
 }
 
-int StartDistributionRoom::GetAnz() const {
-	return pN;
+int StartDistributionRoom::GetNumberOfPedestrian() const {
+	return _nPeds;
 }
 
 
 // Setter-Funktionen
 
 void StartDistributionRoom::SetRoomCaption(string caption) {
-	pRoomCaption = caption;
+	_roomCaption = caption;
 }
 
-void StartDistributionRoom::SetAnz(int N) {
-	pN = N;
+void StartDistributionRoom::SetNumberOfPedestrians(int N) {
+	_nPeds = N;
 }
 
 
@@ -71,24 +76,24 @@ void StartDistributionRoom::SetAnz(int N) {
  StartDistributionSubRoom
  ************************************************************/
 StartDistributionSubroom::StartDistributionSubroom() : StartDistributionRoom() {
-	pSubroomID = -1;
+	_subroomID = -1;
 }
 
 StartDistributionSubroom::StartDistributionSubroom(const StartDistributionSubroom& orig) : StartDistributionRoom(orig) {
-	pSubroomID = orig.GetSubroomID();
+	_subroomID = orig.GetSubroomID();
 }
 
 StartDistributionSubroom::~StartDistributionSubroom() {
 }
 
 int StartDistributionSubroom::GetSubroomID() const {
-	return pSubroomID;
+	return _subroomID;
 }
 
 // Setter-Funktionen
 
 void StartDistributionSubroom::SetSubroomID(int i) {
-	pSubroomID = i;
+	_subroomID = i;
 }
 
 
@@ -97,74 +102,74 @@ void StartDistributionSubroom::SetSubroomID(int i) {
  ************************************************************/
 
 PedDistributor::PedDistributor() {
-	pv0 = new Equal(1.24, 0.26);
-	pBmax = new Equal(0.25, 0.001);
-	pBmin = new Equal(0.2, 0.001);
-	pAtau = new Equal(0.53, 0.001);
-	pAmin = new Equal(0.18, 0.001);
-	pTau = new Equal(0.5, 0.001);
+	_v0 = new Equal(1.24, 0.26);
+	_Bmax = new Equal(0.25, 0.001);
+	_Bmin = new Equal(0.2, 0.001);
+	_Atau = new Equal(0.53, 0.001);
+	_Amin = new Equal(0.18, 0.001);
+	_Tau = new Equal(0.5, 0.001);
 }
 
 PedDistributor::PedDistributor(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
 		double BminMu, double BminSigma, double AtauMu, double AtauSigma, double AminMu,
 		double AminSigma, double tauMu, double tauSigma) {
-	pv0 = new Equal(v0mu, v0sigma);
-	pBmax = new Equal(BmaxMu, BmaxSigma);
-	pBmin = new Equal(BminMu, BminSigma);
-	pAtau = new Equal(AtauMu, AtauSigma);
-	pAmin = new Equal(AminMu, AminSigma);
-	pTau = new Equal(tauMu, tauSigma);
-	start_dis = vector<StartDistributionRoom > ();
-	start_dis_sub = vector<StartDistributionSubroom> ();
+	_v0 = new Equal(v0mu, v0sigma);
+	_Bmax = new Equal(BmaxMu, BmaxSigma);
+	_Bmin = new Equal(BminMu, BminSigma);
+	_Atau = new Equal(AtauMu, AtauSigma);
+	_Amin = new Equal(AminMu, AminSigma);
+	_Tau = new Equal(tauMu, tauSigma);
+	_start_dis = vector<StartDistributionRoom > ();
+	_start_dis_sub = vector<StartDistributionSubroom> ();
 }
 
 PedDistributor::PedDistributor(const PedDistributor& orig) {
-	pv0 = orig.GetV0();
-	pBmax = orig.GetBmax();
-	pBmin = orig.GetBmin();
-	pAtau = orig.GetAtau();
-	pAmin = orig.GetAmin();
-	pTau = orig.GetTau();
+	_v0 = orig.GetV0();
+	_Bmax = orig.GetBmax();
+	_Bmin = orig.GetBmin();
+	_Atau = orig.GetAtau();
+	_Amin = orig.GetAmin();
+	_Tau = orig.GetTau();
 }
 
 PedDistributor::~PedDistributor() {
-	delete pv0;
-	delete pBmax;
-	delete pBmin;
-	delete pAtau;
-	delete pAmin;
-	delete pTau;
+	delete _v0;
+	delete _Bmax;
+	delete _Bmin;
+	delete _Atau;
+	delete _Amin;
+	delete _Tau;
 }
 
 // Getter-Funktionen
 
 Distribution* PedDistributor::GetV0() const {
-	return pv0;
+	return _v0;
 }
 
 Distribution* PedDistributor::GetBmax() const {
-	return pBmax;
+	return _Bmax;
 }
 
 Distribution* PedDistributor::GetBmin() const {
-	return pBmin;
+	return _Bmin;
 }
 
 Distribution* PedDistributor::GetAtau() const {
-	return pAtau;
+	return _Atau;
 }
 
 Distribution* PedDistributor::GetAmin() const {
-	return pAmin;
+	return _Amin;
 }
 
 Distribution* PedDistributor::GetTau() const {
-	return pTau;
+	return _Tau;
 }
 
 void PedDistributor::InitDistributor(string filename){
 
-	pInitialisationFile=filename;
+	_initialisationFile=filename;
 
 	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"persons");
 	Log->Write("INFO: \tLoading and parsing the persons file");
@@ -185,13 +190,13 @@ void PedDistributor::InitDistributor(string filename){
 			StartDistributionSubroom dis = StartDistributionSubroom();
 			dis.SetRoomCaption(room_caption);
 			dis.SetSubroomID(subroom_id);
-			dis.SetAnz(number);
-			start_dis_sub.push_back(dis);
+			dis.SetNumberOfPedestrians(number);
+			_start_dis_sub.push_back(dis);
 		}else{
 			StartDistributionRoom dis = StartDistributionRoom();
 			dis.SetRoomCaption(room_caption);
-			dis.SetAnz(number);
-			start_dis.push_back(dis);
+			dis.SetNumberOfPedestrians(number);
+			_start_dis.push_back(dis);
 		}
 	}
 
@@ -221,16 +226,16 @@ int PedDistributor::Distribute(Building* building) const {
 	// first perform the distribution according to the  subrooms (if any)
 
 	int pid = 1; // the pedID is being increased throughout...
-	for (int i = 0; i < (int) start_dis_sub.size(); i++) {
+	for (int i = 0; i < (int) _start_dis_sub.size(); i++) {
 
-		string room_caption = start_dis_sub[i].GetRoomCaption();
+		string room_caption = _start_dis_sub[i].GetRoomCaption();
 		Room* r = building->GetRoom(room_caption);
 		if(!r) continue;
 
 		int roomID = r->GetID();
 
-		int subroomID = start_dis_sub[i].GetSubroomID();
-		int N = start_dis_sub[i].GetAnz();
+		int subroomID = _start_dis_sub[i].GetSubroomID();
+		int N = _start_dis_sub[i].GetNumberOfPedestrian();
 		if (N <= 0) {
 			Log->Write("ERROR: \t negative  (or null ) number of pedestrians!");
 			exit(0);
@@ -255,11 +260,11 @@ int PedDistributor::Distribute(Building* building) const {
 
 	// then continue the distribution according to the rooms
 
-	for (int i = 0; i < (int) start_dis.size(); i++) {
-		string room_caption = start_dis[i].GetRoomCaption();
+	for (int i = 0; i < (int) _start_dis.size(); i++) {
+		string room_caption = _start_dis[i].GetRoomCaption();
 		Room* r = building->GetRoom(room_caption);
 		if(!r) continue;
-		int N = start_dis[i].GetAnz();
+		int N = _start_dis[i].GetNumberOfPedestrian();
 		if (N <= 0) {
 			Log->Write("ERROR: \t negative number of pedestrians! Ignoring");
 			continue;
@@ -340,7 +345,7 @@ int PedDistributor::Distribute(Building* building) const {
 
 
 	// now assign individual attributes
-	XMLNode xMainNode=XMLNode::openFileHelper(pInitialisationFile.c_str(),"persons");
+	XMLNode xMainNode=XMLNode::openFileHelper(_initialisationFile.c_str(),"persons");
 	Log->Write("INFO: \tLoading and parsing the persons file");
 
 	//get the distribution node

@@ -4,6 +4,7 @@
 
 #include "cstdlib"
 #include "climits"
+#include <stdio.h>
 #include "AlgorithmMCD.h"
 
 

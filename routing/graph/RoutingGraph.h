@@ -11,13 +11,21 @@
 
 #include <vector>
 #include <map>
+#include "../../geometry/Line.h"
 
-#include "../../geometry/Building.h"
-#include "../../geometry/NavLine.h"
+
 
 struct Edge;
 struct ExitDistance; 
 struct Vertex;
+
+class Pedestrian;
+class NavLine;
+class Building;
+class SubRoom;
+class Room;
+
+
 
 
 class RoutingGraph {
@@ -53,18 +61,15 @@ public:
 	 * Getter and Setter
 	 */
 	Vertex * GetVertex(int id);
-	map<int,Vertex> * GetAllVertexes();
+	std::map<int,Vertex> * GetAllVertexes();
 
 private:
-	/***********************
-	 * variabels
-	 ***********************/
-	Building * building;
-	map<int, Vertex> vertexes;
 
-	/***********************
-	 * internal graph init functions
-	 **********************/
+	Building * building;
+	std::map<int, Vertex> vertexes;
+
+
+
 	int addVertex(NavLine * nav_line, bool exit = false);
 	void removeVertex(Vertex * remove_vertex);
 	void processSubroom(SubRoom * sub);
@@ -111,8 +116,8 @@ public:
 	NavLine * nav_line;
 	int id;
 	bool exit;
-	map<int, Edge> edges;
-	map<int, ExitDistance> distances;
+	std::map<int, Edge> edges;
+	std::map<int, ExitDistance> distances;
 
 	ExitDistance getShortestExit();
 };

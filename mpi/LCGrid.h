@@ -41,30 +41,33 @@
 #ifndef LCGRID_H_
 #define LCGRID_H_
 
+#include <vector>
+#include "../geometry/Point.h"
 
 //forwarded classes
-#include "../pedestrian/Pedestrian.h"
+class Pedestrian;
+
 
 class LCGrid {
 
 private:
 
-	// the 'first' pedestrian in each cell
+	/// the 'first' pedestrian in each cell
 	int **pCellHead;
-	//  the next pedestrians. more efficient than the double linked- list
+	///  the next pedestrians. more efficient than the double linked- list
 	int *pList;
-	// number of cells in x- and y-direction respectively.
-	// Also to be interpreted as cell coordinates in the grid
+	/// number of cells in x- and y-direction respectively.
+	/// Also to be interpreted as cell coordinates in the grid
 	int pGridSizeX, pGridSizeY;
-	// the cell size default to 2.2 metres
+	/// the cell size default to 2.2 metres
 	double pCellSize;
-	// rectangular area for linked cells which covers the whole geometry
+	/// rectangular area for linked cells which covers the whole geometry
 	double pGrid_xmin, pGrid_xmax, pGrid_ymin, pGrid_ymax;
-	// for convenience
-	// will be delete in next versions
+	/// for convenience
+	/// will be delete in next versions
 	Pedestrian** pLocalPedsCopy;
 
-	//total number of pedestrians
+	///total number of pedestrians
 	int pNpeds;
 
 
@@ -92,7 +95,7 @@ public:
 	/**
 	 *Update the cells occupation
 	 */
-	void Update(const vector<Pedestrian*>& peds);
+	void Update(const std::vector<Pedestrian*>& peds);
 
 	/**
 	 * Update this special pedestrian on the grid
@@ -102,7 +105,7 @@ public:
 	/**
 	 * Make a shallow copy of the initial pedestrians distribution
 	 */
-	void ShallowCopy(const vector<Pedestrian*>& peds);
+	void ShallowCopy(const std::vector<Pedestrian*>& peds);
 
 	/**
 	 * Clear the grid.
@@ -133,14 +136,14 @@ public:
 	 * @param position
 	 * @param neighbourhood
 	 */
-	void GetNeighbourhood(const Point& position, vector<Pedestrian*>& neighbourhood);
+	void GetNeighbourhood(const Point& position, std::vector<Pedestrian*>& neighbourhood);
 
 	/**
 	 * Returns neighbourhood of the pedestrians ped
 	 * @param ped
 	 * @param neighbourhood
 	 */
-	void GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighbourhood);
+	void GetNeighbourhood(const Pedestrian* ped, std::vector<Pedestrian*>& neighbourhood);
 
 };
 

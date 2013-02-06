@@ -33,32 +33,36 @@
 #include <vector>
 #include <fstream>
 #include <cfloat>
-#include <omp.h>
+#include <map>
 
 #include "Room.h"
-#include "../general/Macros.h"
-#include "../routing/RoutingEngine.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../geometry/Transition.h"
-#include "../mpi/LCGrid.h"
+#include "NavLine.h"
+#include "Transition.h"
+#include "Hline.h"
+#include "Obstacle.h"
 
+
+class RoutingEngine;
+class Pedestrian;
+class Transition;
+class LCGrid;
 
 
 
 class Building {
 private:
-    string _caption;
+    std::string _caption;
     RoutingEngine* _routingEngine;
     LCGrid* _linkedCellGrid;
-    vector<Room*> _rooms;
-    vector<Pedestrian*> _allPedestians;
+    std::vector<Room*> _rooms;
+    std::vector<Pedestrian*> _allPedestians;
     /// pedestrians pathway
     bool _savePathway;
-    ofstream _pathWayStream;
+    std::ofstream _pathWayStream;
 
-	map<int, Crossing*> _crossings;
-	map<int, Transition*> _transitions;
-	map<int, Hline*> _hLines;
+    std::map<int, Crossing*> _crossings;
+    std::map<int, Transition*> _transitions;
+    std::map<int, Hline*> _hLines;
 
 
 public:
@@ -67,7 +71,7 @@ public:
     virtual ~Building();
 
     // Setter -Funktionen
-    void SetCaption(string s);
+    void SetCaption(std::string s);
     void SetRoutingEngine(RoutingEngine* r);
     void SetRoom(Room* room, int index);
     /// delete the ped from the ped vector
@@ -77,18 +81,18 @@ public:
     void AddPedestrian(Pedestrian* ped);
 
     // Getter - Funktionen
-    string GetCaption() const;
+    std::string GetCaption() const;
     RoutingEngine* GetRoutingEngine() const;
-    const vector<Room*>& GetAllRooms() const;
-    const vector<Pedestrian*>& GetAllPedestrians() const;
+    const std::vector<Room*>& GetAllRooms() const;
+    const std::vector<Pedestrian*>& GetAllPedestrians() const;
     Pedestrian* GetPedestrian( int pedID) const;
     int GetNumberOfRooms() const;
     int GetNumberOfGoals()const;
-    Room* GetRoom(int index) const; // Gibt Raum der Nummer "index" zurueck
-    Room* GetRoom(string caption)const;
-    Transition* GetTransition(string caption) const;
+    Room* GetRoom(int index) const;
+    Room* GetRoom(std::string caption)const;
+    Transition* GetTransition(std::string caption) const;
     Transition* GetTransition(int id) ;
-    Crossing* GetGoal(string caption) const;
+    Crossing* GetGoal(std::string caption) const;
 
     //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(int id);
@@ -101,16 +105,16 @@ public:
     void InitGrid(double cellSize);
     //void InitRoomsAndSubroomsMap();
     void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
-    void InitSavePedPathway(string filename);
+    void InitSavePedPathway(std::string filename);
     void AddRoom(Room* room);
     void Update();
     void UpdateGrid();
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
     void DumpSubRoomInRoom(int roomID, int subID);
 
-	const map<int, Crossing*>& GetAllCrossings() const;
-	const map<int, Transition*>& GetAllTransitions() const;
-	const map<int, Hline*>& GetAllHlines() const;
+	const std::map<int, Crossing*>& GetAllCrossings() const;
+	const std::map<int, Transition*>& GetAllTransitions() const;
+	const std::map<int, Hline*>& GetAllHlines() const;
 
 	void AddCrossing(Crossing* line);
 	void AddTransition(Transition* line);
@@ -119,9 +123,9 @@ public:
 
 
     // Ein-Ausgabe
-    void LoadBuilding(string filename); // Laedt Geometrie-Datei
-    void LoadTrafficInfo(string filename);
-    void LoadRoutingInfo(string filename);
+    void LoadBuilding(std::string filename); // Laedt Geometrie-Datei
+    void LoadTrafficInfo(std::string filename);
+    void LoadRoutingInfo(std::string filename);
     void WriteToErrorLog() const;
 
 	void CleanUpTheScene();
@@ -132,7 +136,7 @@ public:
 
 private:
 	// wird nur innerhalb von Building benötigt
-	void StringExplode(string str, string separator, vector<string>* results);
+	void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 
 };
 

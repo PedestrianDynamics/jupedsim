@@ -186,7 +186,7 @@ private:
 	 * @param queue
 	 */
 	void GetQueueAtExit(Crossing* crossing, double minVel,
-			double radius, vector<Pedestrian*>& queue);
+			double radius, std::vector<Pedestrian*>& queue);
 
 
 	/**

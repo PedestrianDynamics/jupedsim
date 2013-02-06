@@ -7,6 +7,16 @@
 
 #include "RoutingGraph.h"
 #include "../../geometry/Obstacle.h"
+#include "../../pedestrian/Pedestrian.h"
+#include "../../geometry/Building.h"
+#include "../../geometry/NavLine.h"
+#include "../../geometry/Hline.h"
+#include "../../geometry/Transition.h"
+#include "../../general/Macros.h"
+
+#include <cmath>
+
+using namespace std;
 
 /**
  * Constructors & Destructors

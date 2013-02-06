@@ -26,11 +26,11 @@
  */
 
 #include "ForceModel.h"
-#include "../geometry/Obstacle.h"
+#include "../routing/DirectionStrategy.h"
+#include "../mpi/LCGrid.h"
+#include "../pedestrian/Pedestrian.h"
 
-/************************************************************
- ForceModel
- ************************************************************/
+using namespace std;
 
 ForceModel::ForceModel() {
 }
@@ -53,7 +53,7 @@ ForceModel::~ForceModel() {
  *   - Vektor(x,y) zum Ziel
  * */
 inline Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
-	const Point& target = pdirection->GetTarget(room, ped);
+	const Point& target = _direction->GetTarget(room, ped);
 	Point F_driv;
 	const Point& pos = ped->GetPos();
 	double dist = ped->GetExitLine()->DistTo(pos);
@@ -100,7 +100,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	//       5   |     4       |            3             |      2       | 1
 
 	// If the pedestrian is outside the cutoff distance, the force is zero.
-	if (dist_eff >= pDistEffMaxPed) {
+	if (dist_eff >= _distEffMaxPed) {
 		F_rep = Point(0.0, 0.0);
 		return F_rep;
 	}
@@ -122,9 +122,9 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	p2 = Point(E2.GetXp(), 0).CoordTransToCart(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
 	distp12 = p2 - p1;
 	mindist = E1.MinimumDistanceToEllipse(E2); //ONE
-	double dist_intpol_left = mindist + pintp_widthPed; // lower cut-off for Frep (modCFM)
-	double dist_intpol_right = pDistEffMaxPed - pintp_widthPed; //upper cut-off for Frep (modCFM)
-	double smax = mindist - pintp_widthPed; //max overlapping
+	double dist_intpol_left = mindist + _intp_widthPed; // lower cut-off for Frep (modCFM)
+	double dist_intpol_right = _distEffMaxPed - _intp_widthPed; //upper cut-off for Frep (modCFM)
+	double smax = mindist - _intp_widthPed; //max overlapping
 	double f = 0.0f, f1 = 0.0f; //function value and its derivative at the interpolation point'
 
 	//todo: runtime normsquare?
@@ -154,13 +154,13 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 			return F_rep;
 		}
 	}
-	nom = pNuPed * ped1->GetV0Norm() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
+	nom = _nuPed * ped1->GetV0Norm() + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
 	nom *= nom;
 
 	K_ij = sqrt(K_ij);
 	if (dist_eff <= smax) { //5
 		f = -ped1->GetMass() * K_ij * nom / dist_intpol_left;
-		F_rep = ep12 * pmaxfPed * f;
+		F_rep = ep12 * _maxfPed * f;
 		return F_rep;
 	}
 
@@ -171,7 +171,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	if (dist_eff >= dist_intpol_right) { //2
 		f = -ped1->GetMass() * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
 		f1 = -f / dist_intpol_right;
-		px = hermite_interp(dist_eff, dist_intpol_right, pDistEffMaxPed, f, 0, f1, 0);
+		px = hermite_interp(dist_eff, dist_intpol_right, _distEffMaxPed, f, 0, f1, 0);
 		F_rep = ep12 * px;
 	} else if (dist_eff >= dist_intpol_left) { //3
 		f = -ped1->GetMass() * K_ij * nom / fabs(dist_eff); // abs(NR-Dv(i)+Sa)
@@ -179,7 +179,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	} else {//4
 		f = -ped1->GetMass() * K_ij * nom / dist_intpol_left;
 		f1 = -f / dist_intpol_left;
-		px = hermite_interp(dist_eff, smax, dist_intpol_left, pmaxfPed*f, f, 0, f1);
+		px = hermite_interp(dist_eff, smax, dist_intpol_left, _maxfPed*f, f, 0, f1);
 		F_rep = ep12 * px;
 	}
 	if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
@@ -316,13 +316,13 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
 
 Point GCFMModel::ForceInterpolation(double v0, double K_ij, const Point& e, double vn, double d, double r, double l) const {
 	Point F_rep;
-	double nominator = pNuWall * v0 + vn;
+	double nominator = _nuWall * v0 + vn;
 	nominator *= nominator*K_ij;
 	double f = 0, f1 = 0; //function value and its derivative at the interpolation point
 	//BEGIN ------- interpolation parameter
-	double smax = l - pintp_widthWall; // max overlapping radius
-	double dist_intpol_left = l + pintp_widthWall; //r_eps
-	double dist_intpol_right = pDistEffMaxWall - pintp_widthWall;
+	double smax = l - _intp_widthWall; // max overlapping radius
+	double dist_intpol_left = l + _intp_widthWall; //r_eps
+	double dist_intpol_right = _distEffMaxWall - _intp_widthWall;
 	//END ------- interpolation parameter
 
 	double dist_eff = d - r;
@@ -332,7 +332,7 @@ Point GCFMModel::ForceInterpolation(double v0, double K_ij, const Point& e, doub
 	//       5   |     4       |            3             |      2       | 1
 
 	double px = 0; //value of the interpolated function
-	double tmp1 = pDistEffMaxWall;
+	double tmp1 = _distEffMaxWall;
 	double tmp2 = dist_intpol_right;
 	double tmp3 = dist_intpol_left;
 	double tmp5 = smax + r;
@@ -343,14 +343,14 @@ Point GCFMModel::ForceInterpolation(double v0, double K_ij, const Point& e, doub
 	}
 
 	if (dist_eff <= tmp5) { // 5
-		F_rep = e * (-pmaxfWall);
+		F_rep = e * (-_maxfWall);
 		return F_rep;
 	}
 
 	if (dist_eff > tmp2) { //2
 		f = -nominator / dist_intpol_right;
 		f1 = -f / dist_intpol_right; // nominator / (dist_intpol_right^2) = derivativ of f
-		px = hermite_interp(dist_eff, dist_intpol_right, pDistEffMaxWall, f, 0, f1, 0);
+		px = hermite_interp(dist_eff, dist_intpol_right, _distEffMaxWall, f, 0, f1, 0);
 		F_rep = e * px;
 	} else if (dist_eff >= tmp3) { //3
 		f = -nominator / fabs(dist_eff); //devided by abs f the effective distance
@@ -358,26 +358,26 @@ Point GCFMModel::ForceInterpolation(double v0, double K_ij, const Point& e, doub
 	} else { //4 d > smax FIXME
 		f = -nominator / dist_intpol_left;
 		f1 = -f / dist_intpol_left;
-		px = hermite_interp(dist_eff, smax, dist_intpol_left, pmaxfWall*f, f, 0, f1);
+		px = hermite_interp(dist_eff, smax, dist_intpol_left, _maxfWall*f, f, 0, f1);
 		F_rep = e * px;
 	}
 	return F_rep;
 }
 
-// Konstruktoren
+
 
 GCFMModel::GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed,
 		double dist_effWall, double intp_widthped, double intp_widthwall, double maxfped,
 		double maxfwall) {
-	pdirection = dir;
-	pNuPed = nuped;
-	pNuWall = nuwall;
-	pintp_widthPed = intp_widthped;
-	pintp_widthWall = intp_widthwall;
-	pmaxfPed = maxfped;
-	pmaxfWall = maxfwall;
-	pDistEffMaxPed = dist_effPed;
-	pDistEffMaxWall = dist_effWall;
+	_direction = dir;
+	_nuPed = nuped;
+	_nuWall = nuwall;
+	_intp_widthPed = intp_widthped;
+	_intp_widthWall = intp_widthwall;
+	_maxfPed = maxfped;
+	_maxfWall = maxfwall;
+	_distEffMaxPed = dist_effPed;
+	_distEffMaxWall = dist_effWall;
 
 }
 
@@ -388,52 +388,52 @@ GCFMModel::~GCFMModel(void) {
 // Getter-Funktionen
 
 DirectionStrategy* GCFMModel::GetDirection() const {
-	return pdirection;
+	return _direction;
 }
 
 double GCFMModel::GetNuPed() const {
-	return pNuPed;
+	return _nuPed;
 }
 
 double GCFMModel::GetNuWall() const {
-	return pNuWall;
+	return _nuWall;
 }
 
 double GCFMModel::GetIntpWidthPed() const {
-	return pintp_widthPed;
+	return _intp_widthPed;
 }
 
 double GCFMModel::GetIntpWidthWall() const {
-	return pintp_widthWall;
+	return _intp_widthWall;
 }
 
 double GCFMModel::GetMaxFPed() const {
-	return pmaxfPed;
+	return _maxfPed;
 }
 
 double GCFMModel::GetMaxFWall() const {
-	return pmaxfWall;
+	return _maxfWall;
 }
 
 double GCFMModel::GetDistEffMaxPed() const {
-	return pDistEffMaxPed;
+	return _distEffMaxPed;
 }
 
 double GCFMModel::GetDistEffMaxWall() const {
-	return pDistEffMaxWall;
+	return _distEffMaxWall;
 }
 
 string GCFMModel::writeParameter() const {
 	string rueck;
 	char tmp[CLENGTH];
 
-	sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", pNuPed, pNuWall);
+	sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
 	rueck.append(tmp);
-	sprintf(tmp, "\t\tInterp. Width: \tPed: %f \tWall: %f\n", pintp_widthPed, pintp_widthWall);
+	sprintf(tmp, "\t\tInterp. Width: \tPed: %f \tWall: %f\n", _intp_widthPed, _intp_widthWall);
 	rueck.append(tmp);
-	sprintf(tmp, "\t\tMaxF: \t\tPed: %f \tWall: %f\n", pmaxfPed, pmaxfWall);
+	sprintf(tmp, "\t\tMaxF: \t\tPed: %f \tWall: %f\n", _maxfPed, _maxfWall);
 	rueck.append(tmp);
-	sprintf(tmp, "\t\tDistEffMax: \tPed: %f \tWall: %f\n", pDistEffMaxPed, pDistEffMaxWall);
+	sprintf(tmp, "\t\tDistEffMax: \tPed: %f \tWall: %f\n", _distEffMaxPed, _distEffMaxWall);
 	rueck.append(tmp);
 
 	return rueck;

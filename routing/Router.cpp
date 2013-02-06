@@ -26,6 +26,10 @@
  */
 
 #include "Router.h"
+#include "../geometry/Building.h"
+#include "../pedestrian/Pedestrian.h"
+
+using namespace std;
 
 
 Router::Router() {

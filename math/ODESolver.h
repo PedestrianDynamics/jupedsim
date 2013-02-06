@@ -28,12 +28,15 @@
 #ifndef _ODESOLVER_H
 #define	_ODESOLVER_H
 
-#include "ForceModel.h"
-#include "../geometry/Building.h"
 
-#include <vector>
-using namespace std;
+//forward declarations
+class ForceModel;
+class Building;
 
+
+/**
+ * General template for ODE solvers
+ */
 class ODESolver {
 protected:
     ForceModel *model;
@@ -43,31 +46,35 @@ public:
     virtual void solveODE(double t, double tp, Building* building) const = 0;
 };
 
-// Euler Löser für die Differentialgleichung
 
+/**
+ * Implementation of the explicit  Euler method for solving different equations.
+ */
 class EulerSolver : public ODESolver {
 public:
     EulerSolver(ForceModel *model);
     virtual void solveODE(double t, double tp, Building* building) const;
 };
 
-// Velocity Verlet Löser für die Differentialgleichung
 
+/**
+ * Implementation of the Velocity - Verlet method
+ */
 class VelocityVerletSolver : public ODESolver {
 public:
     VelocityVerletSolver(ForceModel *model);
     virtual void solveODE(double t, double tp, Building* building) const;
 };
 
-// Leapfrog Löser für die Differentialgleichung
-
+/**
+ * Implementation of the LeapFrog algorithm
+ */
 class LeapfrogSolver : public ODESolver {
 public:
     LeapfrogSolver(ForceModel *model);
     virtual void solveODE(double t, double tp, Building* building) const;
 };
 
-// für Linked Cell (Ulrich)
 
 class EulerSolverLC : public ODESolver {
 public:

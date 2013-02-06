@@ -29,14 +29,12 @@
 #ifndef _ROUTER_H
 #define	 _ROUTER_H
 
-#include "../geometry/Crossing.h"
-#include "../geometry/Transition.h"
-#include "../geometry/Hline.h"
-#include "../pedestrian/Pedestrian.h"
-#include "../geometry/Room.h"
+#include <vector>
+
+#include "../general/Macros.h"
 
 class Building;
-
+class Pedestrian;
 
 class Router {
 
@@ -50,10 +48,10 @@ private:
 protected:
 
 	/// Contain the ids of the intermediate destinations
-	vector<vector<int> >_trips;
+	std::vector<std::vector<int> >_trips;
 
 	/// All final destinations of the pedestrians
-	vector<int> _finalDestinations;
+	std::vector<int> _finalDestinations;
 
 public:
 	Router();
@@ -64,7 +62,7 @@ public:
 	 * Add a new trip to this router
 	 * @param trip A vector containing the IDs of the intermediate destination
 	 */
-	void AddTrip(vector<int> trip);
+	void AddTrip(std::vector<int> trip);
 
 	/**
 	 * Add a new final destination to this router
@@ -77,12 +75,12 @@ public:
 	 * TODO: investigate Trip for compatibility with ID starting with 0 or 1.
 	 * @return a vector containing the IDs of the intermediate destinations
 	 */
-	const vector<int> GetTrip(int id) const;
+	const std::vector<int> GetTrip(int id) const;
 
 	/**
 	 * @return all final destinations
 	 */
-	const vector<int> GetFinalDestinations() const;
+	const std::vector<int> GetFinalDestinations() const;
 
 	/**
 	 * Set the id of the router as defined in the person file

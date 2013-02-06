@@ -124,10 +124,10 @@ public:
 	//FIXME: remove those functions
 	void AddConnectingAP(AccessPoint* ap);
 	int  GetNextApTo(int UID=FINAL_DEST_OUT); //default is the shortest path to the outside ( -1 )
-	const vector <AccessPoint*>& GetConnectingAPs();
+	const std::vector <AccessPoint*>& GetConnectingAPs();
 
 
-	const vector <AccessPoint*>& GetTransitAPsTo(int UID=FINAL_DEST_OUT);
+	const std::vector <AccessPoint*>& GetTransitAPsTo(int UID=FINAL_DEST_OUT);
 	int GetNearestTransitAPTO(int UID=FINAL_DEST_OUT);
 	void AddTransitAPsTo(int UID,AccessPoint* ap);
 
@@ -136,7 +136,7 @@ public:
 	//FIXME: not compatible with pedestrians reset target after 10 sec
 	void AddTransitPed(Pedestrian* ped);
 	void DeleteTransitPed(Pedestrian* ped);
-	const vector<Pedestrian*>& GetAllTransitPed() const;
+	const std::vector<Pedestrian*>& GetAllTransitPed() const;
 
 
 
@@ -149,25 +149,24 @@ private:
 	int _room2ID;
 	Point pCentre;
 	NavLine* _navLine;
-	vector<Pedestrian*> _transitPedestrians;
+	std::vector<Pedestrian*> _transitPedestrians;
 	int _isClosed;
 
 
 	// stores the connecting APs
-	vector<AccessPoint*>_connectingAPs;
-
+	std::vector<AccessPoint*>_connectingAPs;
 
 	// store part of a graph
 	// map a final destination to the next ap to reach it
 	// store the nearest AP to reach the destination
-	map<int, int> _mapDestToAp;
+	std::map<int, int> _mapDestToAp;
 
 	// store part of the weight matrix
 	// store the total distance to the destination int
-	map <int,double> _mapDestToDist;
+	std::map <int,double> _mapDestToDist;
 
 	//store the navigation graph
-	map<int,vector<AccessPoint*> > _navigationGraphTo;
+	std::map<int,std::vector<AccessPoint*> > _navigationGraphTo;
 
 };
 

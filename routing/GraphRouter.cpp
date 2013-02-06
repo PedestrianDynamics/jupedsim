@@ -6,7 +6,9 @@
  */
 
 #include "GraphRouter.h"
+#include "../pedestrian/Pedestrian.h"
 
+using namespace std;
 
 /******************************
  * GraphGrouter Methods

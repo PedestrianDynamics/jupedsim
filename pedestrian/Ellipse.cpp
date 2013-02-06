@@ -25,6 +25,8 @@
 
 #include "Ellipse.h"
 
+using namespace std;
+
 /*************************************************************
  private Funktionen
  ************************************************************/
@@ -43,13 +45,13 @@
 double JEllipse::EffectiveDistanceToLine(const Line& linE) const {
 	double eff_dist;
 	// Koordinaten alle im System der Ellipse
-	Point APinE = Point(pXp, 0);
+	Point APinE = Point(_Xp, 0);
 	Point PinE = linE.ShortestPoint(APinE); // Punkt auf l mit kuerzestem Abstand zu AP
 	if (IsOn(PinE)) {// P liegt bereits auf der Ellipse => Abstand 0
 		eff_dist = 0.0;
 	} else {
-		Point P = PinE.CoordTransToCart(this->pCenter, this->pCosPhi,
-				this->pSinPhi); // in "normalen" Koordinaten
+		Point P = PinE.CoordTransToCart(this->_center, this->_cosPhi,
+				this->_sinPhi); // in "normalen" Koordinaten
 		Point R; //Schnittpunkt der geraden durch AP und P mit E
 
 //		double dist = (PinE - APinE).Norm(); // beide Punkte in E
@@ -74,11 +76,11 @@ double JEllipse::Distance2d(const JEllipse& Ell) const {
 	double b1 = this->GetEB();
 	double a2 = Ell.GetEA();
 	double b2 = Ell.GetEB();
-	double cos1 = pCosPhi;
-	double sin1 = pSinPhi;
+	double cos1 = _cosPhi;
+	double sin1 = _sinPhi;
 	double cos2 = Ell.GetCosPhi();
 	double sin2 = Ell.GetSinPhi();
-	Point c1c2 = (pCenter - Ell.GetCenter()).Normalized();
+	Point c1c2 = (_center - Ell.GetCenter()).Normalized();
 	double dummy;
 
 	if (a1 < b1)
@@ -255,29 +257,29 @@ double JEllipse::Distance2d(const JEllipse& Ell) const {
  ************************************************************/
 
 JEllipse::JEllipse() {
-	pV = Point(); // Geschwindigkeitskoordinaten
-	pCenter = Point(); // cartesian-coord of the centre
-	pCosPhi = 1; // = cos(0)
-	pSinPhi = 0; // = sin(0)
-	pXp = 0; //x Ellipse-coord of the centre (Center in (xc,yc) )
-	pAmin = 0.18; // Laenge 1. Achse:  pAmin + V * pAv
-	pAv = 0.53;
-	pBmin = 0.20; // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
-	pBmax = 0.25;
-	pV0 = 0; // Wunschgeschwindigkeit (Betrag)
+	_vel = Point(); // Geschwindigkeitskoordinaten
+	_center = Point(); // cartesian-coord of the centre
+	_cosPhi = 1; // = cos(0)
+	_sinPhi = 0; // = sin(0)
+	_Xp = 0; //x Ellipse-coord of the centre (Center in (xc,yc) )
+	_Amin = 0.18; // Laenge 1. Achse:  pAmin + V * pAv
+	_Av = 0.53;
+	_Bmin = 0.20; // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
+	_Bmax = 0.25;
+	__vel0 = 0; // Wunschgeschwindigkeit (Betrag)
 }
 
 JEllipse::JEllipse(const JEllipse& orig) {
-	pV = orig.GetV(); // Geschwindigkeitskoordinaten
-	pCenter = orig.GetCenter();
-	pCosPhi = orig.GetCosPhi();
-	pSinPhi = orig.GetSinPhi();
-	pXp = orig.GetXp(); //x Ellipse-coord of the centre (Center in (xc,yc) )
-	pAmin = orig.GetAmin(); // Laenge 1. Achse:  pAmin + V * pAv
-	pAv = orig.GetAv();
-	pBmin = orig.GetBmin(); // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
-	pBmax = orig.GetBmax();
-	pV0 = orig.GetV0(); // Wunschgeschwindigkeit (Betrag)
+	_vel = orig.GetV(); // Geschwindigkeitskoordinaten
+	_center = orig.GetCenter();
+	_cosPhi = orig.GetCosPhi();
+	_sinPhi = orig.GetSinPhi();
+	_Xp = orig.GetXp(); //x Ellipse-coord of the centre (Center in (xc,yc) )
+	_Amin = orig.GetAmin(); // Laenge 1. Achse:  pAmin + V * pAv
+	_Av = orig.GetAv();
+	_Bmin = orig.GetBmin(); // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
+	_Bmax = orig.GetBmax();
+	__vel0 = orig.GetV0(); // Wunschgeschwindigkeit (Betrag)
 }
 
 
@@ -286,43 +288,43 @@ JEllipse::JEllipse(const JEllipse& orig) {
  ************************************************************/
 
 void JEllipse::SetV(const Point& v) {
-	pV = v;
+	_vel = v;
 }
 
 void JEllipse::SetCenter(Point pos) {
-	pCenter = pos;
+	_center = pos;
 }
 
 void JEllipse::SetCosPhi(double c) {
-	pCosPhi = c;
+	_cosPhi = c;
 }
 
 void JEllipse::SetSinPhi(double s) {
-	pSinPhi = s;
+	_sinPhi = s;
 }
 
 void JEllipse::SetXp(double xp) {
-	pXp = xp;
+	_Xp = xp;
 }
 
 void JEllipse::SetAmin(double a_min) {
-	pAmin = a_min;
+	_Amin = a_min;
 }
 
 void JEllipse::SetAv(double a_v) {
-	pAv = a_v;
+	_Av = a_v;
 }
 
 void JEllipse::SetBmin(double b_min) {
-	pBmin = b_min;
+	_Bmin = b_min;
 }
 
 void JEllipse::SetBmax(double b_max) {
-	pBmax = b_max;
+	_Bmax = b_max;
 }
 
 void JEllipse::SetV0(double v0) {
-	pV0 = v0;
+	__vel0 = v0;
 }
 
 /*************************************************************
@@ -330,61 +332,61 @@ void JEllipse::SetV0(double v0) {
  ************************************************************/
 
 const Point& JEllipse::GetV() const {
-	return pV;
+	return _vel;
 }
 
 const Point& JEllipse::GetCenter() const {
-	return pCenter;
+	return _center;
 }
 
 double JEllipse::GetCosPhi() const {
-	return pCosPhi;
+	return _cosPhi;
 }
 
 double JEllipse::GetSinPhi() const {
-	return pSinPhi;
+	return _sinPhi;
 }
 
 double JEllipse::GetXp() const {
-	return pXp;
+	return _Xp;
 }
 
 double JEllipse::GetAmin() const {
-	return pAmin;
+	return _Amin;
 }
 
 double JEllipse::GetAv() const {
-	return pAv;
+	return _Av;
 }
 
 double JEllipse::GetBmin() const {
-	return pBmin;
+	return _Bmin;
 }
 
 double JEllipse::GetBmax() const {
-	return pBmax;
+	return _Bmax;
 }
 
 double JEllipse::GetV0() const {
-	return pV0;
+	return __vel0;
 }
 double JEllipse::GetArea() const {
-	double x = (pBmax - pBmin) / pV0;
-	double V = pV.Norm();
-	double ea = pAmin + V * pAv;
-	double eb = pBmax - V * x;
+	double x = (_Bmax - _Bmin) / __vel0;
+	double V = _vel.Norm();
+	double ea = _Amin + V * _Av;
+	double eb = _Bmax - V * x;
 	return ea * eb * M_PI;
 }
 
 // ellipse  semi-axis in the direction of the velocity
 	double JEllipse::GetEA() const {
-		return pAmin + pV.Norm() * pAv;
+		return _Amin + _vel.Norm() * _Av;
 	}
 
 // ellipse semi-axis in the orthogonal direction of the velocity
 double JEllipse::GetEB() const {
-	double x = (pBmax - pBmin) / pV0;
-	return pBmax - pV.Norm() * x;
+	double x = (_Bmax - _Bmin) / __vel0;
+	return _Bmax - _vel.Norm() * x;
 }
 
 
@@ -449,7 +451,7 @@ Point JEllipse::PointOnEllipse(const Point& P) const {
 	double r = x*x + y*y;
 	if ( r < J_EPS*J_EPS)
 	{
-		return pCenter;
+		return _center;
 	}
 
 	r = sqrt(r);
@@ -461,17 +463,17 @@ Point JEllipse::PointOnEllipse(const Point& P) const {
 	Point S;
 	S.SetX(a*cosTheta);
 	S.SetY(b*sinTheta);
-	return S.CoordTransToCart(pCenter, pCosPhi, pSinPhi);
+	return S.CoordTransToCart(_center, _cosPhi, _sinPhi);
 }
 
 
 // thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
 double JEllipse::MinimumDistanceToLine(const Line& l) const {
-	 Point AinE = l.GetPoint1().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
-	 Point BinE = l.GetPoint2().CoordTransToEllipse(pCenter, pCosPhi, pSinPhi);
+	 Point AinE = l.GetPoint1().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
+	 Point BinE = l.GetPoint2().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
 
 	 	// Action Point der Ellipse
-	 Point APinE = Point(pXp, 0);
+	 Point APinE = Point(_Xp, 0);
 	 Line linE = Line(AinE, BinE);
 	 double xa = linE.GetPoint1().GetX();
 	 double ya = linE.GetPoint1().GetY();

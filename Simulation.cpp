@@ -28,6 +28,7 @@
 
 #include "Simulation.h"
 
+using namespace std;
 
 Simulation::Simulation() {
 	_nPeds = 0; // number of pedestrians, Default 10

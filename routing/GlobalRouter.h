@@ -28,6 +28,10 @@
 #ifndef GLOBALROUTER_H_
 #define GLOBALROUTER_H_
 
+#include <string.h>
+#include <vector>
+#include "Router.h"
+#include "../geometry/Building.h"
 
 // forwarded classes
 class Pedestrian;
@@ -38,7 +42,6 @@ class OutputHandler;
 //log output
 extern OutputHandler* Log;
 
-#include "Router.h"
 
 
 class GlobalRouter: public Router {
@@ -99,7 +102,7 @@ protected:
 	template<typename A>
 	bool IsElementInVector(const std::vector<A> &vec, A& el) {
 		typename std::vector<A>::const_iterator it;
-		it = find (vec.begin(), vec.end(), el);
+		it = std::find (vec.begin(), vec.end(), el);
 		if(it==vec.end()){
 			return false;
 		}else{

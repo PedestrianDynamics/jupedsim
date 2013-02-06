@@ -27,79 +27,58 @@
 
 #include "Pedestrian.h"
 #include "../geometry/Building.h"
+#include "../geometry/NavLine.h"
+#include "../routing/Router.h"
 
+using namespace std;
 
 /************************************************************
   Konstruktoren
  ************************************************************/
-double Pedestrian::pGlobalTime=0.0;
+double Pedestrian::_globalTime=0.0;
 
 Pedestrian::Pedestrian() {
-	pRoomID = -1;
-	pSubRoomID = -1;
-	oldRoomID = -1;
-	oldSubRoomID = -1;
-	pExitIndex = -1;
-	pPedIndex = 0;
-	pMass = 1;
-	pTau = 0.5;
-	pNewOrientationFlag = false;
-	pNewOrientationDelay = 0; //0 seconds, in steps
-	tmpFirstOrientation = true;
-	pUpdateRate = 0;
-	pTurninAngle=0.0;
-	pEllipse = JEllipse();
-	pNavLine = NULL;
+	_roomID = -1;
+	_subRoomID = -1;
+	_oldRoomID = -1;
+	_oldSubRoomID = -1;
+	_exitIndex = -1;
+	_id = 0;
+	_mass = 1;
+	_tau = 0.5;
+	_newOrientationFlag = false;
+	_newOrientationDelay = 0; //0 seconds, in steps
+	_tmpFirstOrientation = true;
+	_updateRate = 0;
+	_turninAngle=0.0;
+	_ellipse = JEllipse();
+	_navLine = NULL;
 	_router=NULL;
-	pReroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
-	pTimeBeforeRerouting=0.0;
-	pReroutingEnabled=false;
-	pTimeInJam=0.0;
-	pPatienceTime=5.0;// time after which the ped feels to be in jam
-	pDesiredFinalDestination=FINAL_DEST_OUT;
-	pMentalMap=std::map<int, int>();
-	pDestHistory=std::vector<int>();
-	pDt=0.01;
-	pV0=Point(0,0);
-	pLastPosition=Point(0,0);
+	_reroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
+	_timeBeforeRerouting=0.0;
+	_reroutingEnabled=false;
+	_timeInJam=0.0;
+	_patienceTime=5.0;// time after which the ped feels to be in jam
+	_desiredFinalDestination=FINAL_DEST_OUT;
+	_mentalMap=map<int, int>();
+	_destHistory=vector<int>();
+	_deltaT=0.01;
+	_V0=Point(0,0);
+	_lastPosition=Point(0,0);
 	
-	knownDoors = map<int, NavLineState>();
+	_knownDoors = map<int, NavLineState>();
 	
-	pHeight=160;
-	pAge=30;
-	pGender="male";
-	pTrip=vector<int> ();
-	pGroup=-1;
-	clockTicksTillStart = 0;
+	_height=160;
+	_age=30;
+	_gender="male";
+	_trip=vector<int> ();
+	_group=-1;
+	_clockTicsTillStart = 0;
 	
 	    //clock() + 3*CLOCKS_PER_SEC*( (double) rand() / RAND_MAX);
 
 }
 
-//Pedestrian::Pedestrian(const Pedestrian& orig) {
-//	pRoomID = orig.GetRoomID();
-//	pSubRoomID = orig.GetSubRoomID();
-//	oldRoomID = orig.GetRoomID();
-//	oldSubRoomID = orig.GetSubRoomID();
-//	pExitIndex = orig.GetExitIndex();
-//	pPedIndex = orig.GetPedIndex();
-//	pMass = orig.GetMass();
-//	pTau = orig.GetTau();
-//	pEllipse = orig.GetEllipse();
-//	pNavLine = orig.GetExitLine();
-//	pDesiredFinalDestination = orig.GetFinalDestination();
-//	pTimeInJam=orig.GetTimeInJam();
-//	pReroutingThreshold=0;
-//	pPatienceTime=10.0;
-//	pDt=0.01;
-//	_router=orig._router;
-//	pMentalMap=std::map<int, int>();
-//	pDestHistory=std::vector<int>();
-//	pLastPosition=Point(0,0);
-//	clockTicksTillStart = orig.clockTicksTillStart;
-//	knownDoors = orig.knownDoors;
-//
-//}
 
 Pedestrian::~Pedestrian() {
 }
@@ -109,54 +88,54 @@ Pedestrian::~Pedestrian() {
  ************************************************************/
 
 void Pedestrian::SetID(int i) {
-	pPedIndex = i;
+	_id = i;
 }
 
 void Pedestrian::SetRoomID(int i, string roomCaption) {
-	pRoomID = i;
-	pRoomCaption=roomCaption;
+	_roomID = i;
+	_roomCaption=roomCaption;
 }
 
 void Pedestrian::SetSubRoomID(int i) {
-	pSubRoomID = i;
+	_subRoomID = i;
 }
 
 void Pedestrian::SetMass(double m) {
-	pMass = m;
+	_mass = m;
 }
 
 void Pedestrian::SetTau(double tau) {
-	pTau = tau;
+	_tau = tau;
 }
 
 void Pedestrian::SetEllipse(const JEllipse& e) {
-	pEllipse = e;
+	_ellipse = e;
 }
 
 void Pedestrian::SetExitIndex(int i) {
-	pExitIndex = i;
+	_exitIndex = i;
 	//save that destination for that room
-	pMentalMap[GetUniqueRoomID()] = i;
-	pDestHistory.push_back(i);
+	_mentalMap[GetUniqueRoomID()] = i;
+	_destHistory.push_back(i);
 }
 
 void Pedestrian::SetExitLine(NavLine* l) {
-	pNavLine = l;
+	_navLine = l;
 }
 // ruft entsprechende Ellipsenfunktionen auf
 
 void Pedestrian::SetPos(const Point& pos) {
     //set initial Position
-    if(pEllipse.GetCenter() == Point() || clockTicksTillStart == 0) 
+    if(_ellipse.GetCenter() == Point() || _clockTicsTillStart == 0) 
     {
-	pEllipse.SetCenter(pos);
+	_ellipse.SetCenter(pos);
 	return;
     }
     
-    if(clockTicksTillStart < clock()) 
+    if(_clockTicsTillStart < clock()) 
     {
-	clockTicksTillStart = 0;
-	pEllipse.SetCenter(pos);
+	_clockTicsTillStart = 0;
+	_ellipse.SetCenter(pos);
 	return;
     }
     return;
@@ -165,23 +144,23 @@ void Pedestrian::SetPos(const Point& pos) {
 }
 
 void Pedestrian::SetV(const Point& v) {
-	pEllipse.SetV(v);
+	_ellipse.SetV(v);
 }
 
 void Pedestrian::SetV0Norm(double v0) {
-	pEllipse.SetV0(v0);
+	_ellipse.SetV0(v0);
 }
 
 void Pedestrian::Setdt(double dt) {
-	pDt = dt;
+	_deltaT = dt;
 }
 double Pedestrian::Getdt() {
-    return pDt;
+    return _deltaT;
     
 }
 
 void Pedestrian::SetTrip(const vector<int>& trip){
-	pTrip=trip;
+	_trip=trip;
 }
 
 /*************************************************************
@@ -189,97 +168,97 @@ void Pedestrian::SetTrip(const vector<int>& trip){
  ************************************************************/
 
 int Pedestrian::GetID() const {
-	return pPedIndex;
+	return _id;
 }
 
 int Pedestrian::GetRoomID() const {
-	return pRoomID;
+	return _roomID;
 }
 
 int Pedestrian::GetSubRoomID() const {
-	return pSubRoomID;
+	return _subRoomID;
 }
 
 double Pedestrian::GetMass() const {
-	return pMass;
+	return _mass;
 }
 
 double Pedestrian::GetTau() const {
-	return pTau;
+	return _tau;
 }
 
 const JEllipse& Pedestrian::GetEllipse() const {
-	return pEllipse;
+	return _ellipse;
 }
 
 int Pedestrian::GetExitIndex() const {
-	return pExitIndex;
+	return _exitIndex;
 }
 
 NavLine* Pedestrian::GetExitLine() const {
-	return pNavLine;
+	return _navLine;
 }
 
 const vector<int>& Pedestrian::GetTrip() const{
-	return pTrip;
+	return _trip;
 }
 
 // return the unique subroom Identifier
 
 int Pedestrian::GetUniqueRoomID() const {
-	return pRoomID * 1000 + pSubRoomID;
+	return _roomID * 1000 + _subRoomID;
 }
 
 // returns the exit Id corresponding to the
 // unique subroom identifier
 
 int Pedestrian::GetNextDestination() {
-	if (pMentalMap.count(GetUniqueRoomID()) == 0) {
+	if (_mentalMap.count(GetUniqueRoomID()) == 0) {
 		return -1;
 	} else {
-		return pMentalMap[GetUniqueRoomID()];
+		return _mentalMap[GetUniqueRoomID()];
 	}
 }
 
 
 int Pedestrian::GetLastDestination() {
-  if(pDestHistory.size() == 0)
+  if(_destHistory.size() == 0)
     return -1;
   else
-    return pDestHistory.back();
+    return _destHistory.back();
 
 }
 
 bool Pedestrian::ChangedSubRoom() {
-    if(oldRoomID != GetRoomID() || oldSubRoomID != GetSubRoomID()) {
-	oldRoomID = GetRoomID();
-	oldSubRoomID = GetSubRoomID();
+    if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
+	_oldRoomID = GetRoomID();
+	_oldSubRoomID = GetSubRoomID();
 	return true;
     }
     return false;
 }
 
 int Pedestrian::GetDestinationCount() {
-    return pDestHistory.size();
+    return _destHistory.size();
 }
 // erase the peds memory
 void Pedestrian::ClearMentalMap(){
 	//	pMentalMapArray[pRoomID][pSubRoomID]=-1;
-	pMentalMap.clear();
-	pExitIndex=-1;
+	_mentalMap.clear();
+	_exitIndex=-1;
 }
 
 void Pedestrian::AddKnownClosedDoor(int door)
 {
-  if(knownDoors.find(door) == knownDoors.end()) {
-      knownDoors[door].close(GetGlobalTime());
+  if(_knownDoors.find(door) == _knownDoors.end()) {
+      _knownDoors[door].close(GetGlobalTime());
   }
     return;
     
 }
 int Pedestrian::DoorKnowledgeCount() const 
 {
-    return knownDoors.size();
+    return _knownDoors.size();
     
 }
 
@@ -289,7 +268,7 @@ set<int>  Pedestrian::GetKnownClosedDoors()
 {
     map<int, NavLineState>::iterator it;
     set<int> doors_closed;
-    for(it = knownDoors.begin(); it != knownDoors.end(); it++){
+    for(it = _knownDoors.begin(); it != _knownDoors.end(); it++){
 
       if(it->second.closed()) {
 	    doors_closed.insert(it->first);
@@ -301,7 +280,7 @@ set<int>  Pedestrian::GetKnownClosedDoors()
 
 map<int, NavLineState> *  Pedestrian::GetKnownDoors()
 {
-    return & knownDoors;
+    return & _knownDoors;
 }
 
 void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input) 
@@ -310,13 +289,13 @@ void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
     for(it = input->begin(); it != input->end(); it++) {
       //it->second.print();
 	if(it->second.isShareable(GetGlobalTime())) {
-	  if(knownDoors.find(it->first) == knownDoors.end()) {
-	    knownDoors[it->first] = NavLineState();
-	    if(!knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
-	      knownDoors.erase(it->first);
+	  if(_knownDoors.find(it->first) == _knownDoors.end()) {
+	    _knownDoors[it->first] = NavLineState();
+	    if(!_knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
+	      _knownDoors.erase(it->first);
 	    }
 	  } else {
-	      knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
+	      _knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
 	  }
 	}
     }
@@ -326,29 +305,29 @@ void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
 
 
 const Point& Pedestrian::GetPos() const {
-	return pEllipse.GetCenter();
+	return _ellipse.GetCenter();
 }
 
 const Point& Pedestrian::GetV() const {
-	return pEllipse.GetV();
+	return _ellipse.GetV();
 }
 
 const Point& Pedestrian::GetV0() const {
-	return pV0;
+	return _V0;
 }
 
 double Pedestrian::GetV0Norm() const {
-	return pEllipse.GetV0();
+	return _ellipse.GetV0();
 }
 //get axis in the walking direction
 double Pedestrian::GetLargerAxis() const {
 	//return pEllipse.GetLargerAxis();
-	return pEllipse.GetEA();
+	return _ellipse.GetEA();
 }
 //get axis in the shoulder direction = orthogonal to the walking direction
 double Pedestrian::GetSmallerAxis() const {
 	//return pEllipse.GetSmallerAxis();
-	return pEllipse.GetEB();
+	return _ellipse.GetEB();
 }
 
 void Pedestrian::SetPhiPed() {
@@ -367,8 +346,8 @@ void Pedestrian::SetPhiPed() {
 		cosPhi = GetEllipse().GetCosPhi();
 		sinPhi = GetEllipse().GetSinPhi();
 	}
-	pEllipse.SetCosPhi(cosPhi);
-	pEllipse.SetSinPhi(sinPhi);
+	_ellipse.SetCosPhi(cosPhi);
+	_ellipse.SetSinPhi(sinPhi);
 }
 
 const Point& Pedestrian::GetV0(const Point& target) {
@@ -385,42 +364,42 @@ const Point& Pedestrian::GetV0(const Point& target) {
 
 	// Rotation
 	double smoothingGrad = 15;
-	if (pNewOrientationFlag) {
+	if (_newOrientationFlag) {
 		double pi = 3.14159265;
-		pTurninAngle = atan2(new_v0.GetY(), new_v0.GetX()) - atan2(pV0.GetY(), pV0.GetX());
+		_turninAngle = atan2(new_v0.GetY(), new_v0.GetX()) - atan2(_V0.GetY(), _V0.GetX());
 
 		// prefer turning of -30° instead of 330°
-		if (pTurninAngle <= -pi)pTurninAngle += 2 * pi;
-		if (pTurninAngle >= pi)pTurninAngle -= 2 * pi;
+		if (_turninAngle <= -pi)_turninAngle += 2 * pi;
+		if (_turninAngle >= pi)_turninAngle -= 2 * pi;
 
-		pNewOrientationFlag = false; //disable and set the delay
-		if (fabs(pTurninAngle) > 1.22) {// only for turn greater than +/-70 degrees
-			pNewOrientationDelay = 2.0 / pDt; //2 seconds/dt, in steps
-			pUpdateRate = pNewOrientationDelay / smoothingGrad;
+		_newOrientationFlag = false; //disable and set the delay
+		if (fabs(_turninAngle) > 1.22) {// only for turn greater than +/-70 degrees
+			_newOrientationDelay = 2.0 / _deltaT; //2 seconds/dt, in steps
+			_updateRate = _newOrientationDelay / smoothingGrad;
 		}
 	}
-	if (pNewOrientationDelay > 0) {
-		double smoothingAngle_k = pTurninAngle / smoothingGrad;
-		if (pNewOrientationDelay % pUpdateRate == 0) {
-			pV0 = pV0.Rotate(cos(smoothingAngle_k), sin(smoothingAngle_k));
+	if (_newOrientationDelay > 0) {
+		double smoothingAngle_k = _turninAngle / smoothingGrad;
+		if (_newOrientationDelay % _updateRate == 0) {
+			_V0 = _V0.Rotate(cos(smoothingAngle_k), sin(smoothingAngle_k));
 		}
-		pNewOrientationDelay--;
+		_newOrientationDelay--;
 
 		//stop the rotation if the velocity is too high,  0.9m/s
 		// this avoid  drifting
 		if (GetV().Norm() > 0.90) {
-			pNewOrientationDelay = 0;
+			_newOrientationDelay = 0;
 		}
 	}
-	if (pNewOrientationDelay <= 0) {
-		pV0 = new_v0;
+	if (_newOrientationDelay <= 0) {
+		_V0 = new_v0;
 	}
 
-	return pV0;
+	return _V0;
 }
 
 double Pedestrian::GetTimeInJam() const {
-	return pTimeInJam;
+	return _timeInJam;
 }
 
 // set the new orientation flag
@@ -429,11 +408,11 @@ double Pedestrian::GetTimeInJam() const {
 
 void Pedestrian::SetSmoothTurning(bool smt) {
 	//ignoring first turn
-	if (tmpFirstOrientation) {
-		tmpFirstOrientation = false;
+	if (_tmpFirstOrientation) {
+		_tmpFirstOrientation = false;
 	} else {
-		if (pNewOrientationDelay <= 0)// in the case the pedestrian is still rotating
-			pNewOrientationFlag = smt;
+		if (_newOrientationDelay <= 0)// in the case the pedestrian is still rotating
+			_newOrientationFlag = smt;
 	}
 
 }
@@ -441,85 +420,85 @@ void Pedestrian::SetSmoothTurning(bool smt) {
 
 bool Pedestrian::IsFeelingLikeInJam(){
 	//return true;
-	return (pPatienceTime<pTimeInJam);
+	return (_patienceTime<_timeInJam);
 }
 
 void Pedestrian::ResetTimeInJam(){
-	pTimeInJam=0.0;
+	_timeInJam=0.0;
 }
 
 void Pedestrian::UpdateTimeInJam(){
-	pTimeInJam+=pDt;
+	_timeInJam+=_deltaT;
 }
 
 void Pedestrian::UpdateJamData(){
 	if(GetV().NormSquare()<0.25*GetV0().NormSquare()){
-		pTimeInJam+=pDt;
+		_timeInJam+=_deltaT;
 	}else{
-		pTimeInJam/=2.0;
+		_timeInJam/=2.0;
 	}
 }
 
 void Pedestrian::UpdateReroutingTime(){
-	pTimeBeforeRerouting-=pDt;
+	_timeBeforeRerouting-=_deltaT;
 }
 
 void Pedestrian::RerouteIn(double time){
-	pReroutingEnabled=true;
-	pTimeBeforeRerouting=time;
+	_reroutingEnabled=true;
+	_timeBeforeRerouting=time;
 }
 
 bool Pedestrian::IsReadyForRerouting(){
-	return(pReroutingEnabled &&(pTimeBeforeRerouting<=0.0));
+	return(_reroutingEnabled &&(_timeBeforeRerouting<=0.0));
 }
 
 double Pedestrian::GetAge() const {
-	return pAge;
+	return _age;
 }
 
 void Pedestrian::SetAge(double age) {
-	pAge = age;
+	_age = age;
 }
 
 string Pedestrian::GetGender() const {
-	return pGender;
+	return _gender;
 }
 
 void Pedestrian::SetGender(string gender) {
-	pGender = gender;
+	_gender = gender;
 }
 
 double Pedestrian::GetHeight() const {
-	return pHeight;
+	return _height;
 }
 
 int Pedestrian::GetGroup() const {
-	return pGroup;
+	return _group;
 }
 
 void Pedestrian::SetGroup(int group) {
-	pGroup = group;
+	_group = group;
 }
 
 void Pedestrian::SetHeight(double height) {
-	pHeight = height;
+	_height = height;
 }
 
 void Pedestrian::ResetRerouting(){
-	pReroutingEnabled=false;
-	pTimeBeforeRerouting=-1.00;
+	_reroutingEnabled=false;
+	_timeBeforeRerouting=-1.00;
 }
 
 double Pedestrian::GetDistanceToNextTarget() const {
-	return (pNavLine->DistTo(GetPos()));
+	return (_navLine->DistTo(GetPos()));
 }
 
 void Pedestrian::SetFinalDestination(int final) {
-	pDesiredFinalDestination = final;
+	_desiredFinalDestination = final;
 }
 
 int Pedestrian::GetFinalDestination() const {
-	return pDesiredFinalDestination;
+	return _desiredFinalDestination;
 }
 
 
@@ -528,11 +507,11 @@ void Pedestrian::WritePath(ofstream& file, Building* building){
 	map<int, int>::iterator iter;
 
 	if(building){
-		for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
+		for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
 			file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
 		}
 	}else{
-		for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
+		for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
 			file<<iter->first/1000<<" "<<iter->second<<endl;
 		}
 	}
@@ -542,7 +521,7 @@ string Pedestrian::GetPath(){
 	map<int, int>::iterator iter;
 	string path;
 
-	for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
+	for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
 		stringstream ss;//create a stringstream
 		ss << iter->first/1000<<":"<<iter->second<<">";
 		path.append(ss.str());
@@ -552,29 +531,29 @@ string Pedestrian::GetPath(){
 
 void Pedestrian::Dump(int ID, int pa) {
 
-	if (ID != pPedIndex) return;
+	if (ID != _id) return;
 
-	printf("------> ped %d <-------\n", pPedIndex);
+	printf("------> ped %d <-------\n", _id);
 
 	switch (pa) {
 
 		case 0:
 		{
-			printf(">> Room/Subroom [%d / %d]\n", pRoomID, pSubRoomID);
-			printf(">> Destination [ %d ]\n", pExitIndex);
-			printf(">> Final Destination [ %d ]\n", pDesiredFinalDestination);
+			printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
+			printf(">> Destination [ %d ]\n", _exitIndex);
+			printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
 			printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
-			printf(">> V0       [%f, %f]  Norm = [%f]\n", pV0.GetX(), pV0.GetY(), GetV0Norm());
+			printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
 			printf(">> Velocity [%f, %f]  Norm = [%f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
 			if(GetExitLine()){
 				printf(">> ExitLine: (%f, %f) -- (%f, %f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
 					GetExitLine()->GetPoint2().GetX(), GetExitLine()->GetPoint2().GetY());
 				printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
 			}
-			printf(">> smooth rotating: %s \n", (pNewOrientationDelay > 0) ? "yes" : "no");
+			printf(">> smooth rotating: %s \n", (_newOrientationDelay > 0) ? "yes" : "no");
 			printf(">> mental map");
 			map<int, int>::iterator iter;
-			for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
+			for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
 				printf("\t room / destination  [%d, %d]\n", iter->first, iter->second);
 			}
 		}
@@ -589,21 +568,21 @@ void Pedestrian::Dump(int ID, int pa) {
 			break;
 
 		case 3:
-			printf(">> V0       [%f, %f]  Norm = [%f]\n", pV0.GetX(), pV0.GetY(), GetV0Norm());
+			printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
 			break;
 
 		case 4:
-			printf(">> Room/Subroom [%d / %d]\n", pRoomID, pSubRoomID);
+			printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
 			break;
 
 		case 5:
-			printf(">> Destination [ %d ]\n", pExitIndex);
+			printf(">> Destination [ %d ]\n", _exitIndex);
 			break;
 		case 6: //Mental Map
 		{
 			printf(">> mental map");
 			map<int, int>::iterator iter;
-			for (iter = pMentalMap.begin(); iter != pMentalMap.end(); iter++) {
+			for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
 				printf("\t room / destination  [%d, %d]", iter->first, iter->second);
 			}
 		}
@@ -614,15 +593,15 @@ void Pedestrian::Dump(int ID, int pa) {
 }
 
 void Pedestrian::RecordActualPosition(){
-	pLastPosition=GetPos();
+	_lastPosition=GetPos();
 }
 
 double Pedestrian::GetDistanceSinceLastRecord(){
-	return (pLastPosition-GetPos()).Norm();
+	return (_lastPosition-GetPos()).Norm();
 }
 
 double Pedestrian::GetGlobalTime(){
-	return pGlobalTime;
+	return _globalTime;
 }
 
 void Pedestrian::SetRouter(Router* router) {
@@ -638,5 +617,5 @@ int Pedestrian::FindRoute() {
 }
 
 void Pedestrian::SetGlobalTime(double time){
-	pGlobalTime=time;
+	_globalTime=time;
 }

@@ -22,6 +22,7 @@
 #include "cmath"
 #include "../geometry/Building.h"
 #include <string>
+#include <vector>
 
 
 class NavMesh {
@@ -110,7 +111,7 @@ class NavMesh {
 		///http://stackoverflow.com/questions/9473570/polygon-vertices-clockwise-or-counterclockwise/
 		bool IsClockwise(){
 			if(pHull.size()<3){
-				std::cerr<<"You need at least 3 vertices. JNode ID ["<<id<<" ]"<<endl;
+				std::cerr<<"You need at least 3 vertices. JNode ID ["<<id<<" ]"<<std::endl;
 				exit(EXIT_FAILURE);
 			}
 
@@ -164,7 +165,7 @@ class NavMesh {
 	template<typename A>
 	bool IsElementInVector(const std::vector<A> &vec, A& el) {
 		typename std::vector<A>::const_iterator it;
-		it = find (vec.begin(), vec.end(), el);
+		it = std::find (vec.begin(), vec.end(), el);
 		if(it==vec.end()){
 			return false;
 		}else{
@@ -199,7 +200,7 @@ private:
 	Building* pBuilding;
 
 	std::vector<JNode*> new_nodes;
-	vector<int> problem_nodes;
+	std::vector<int> problem_nodes;
 
 	// Check the created navmesh for convex polygons
 	// convexify the created nav mesh

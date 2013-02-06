@@ -11,8 +11,6 @@
 #include "Router.h"
 #include "graph/RoutingGraphStorage.h"
 #include "../geometry/Building.h"
-#include "../geometry/Crossing.h"
-#include "../geometry/SubRoom.h"
 
 
 
@@ -27,7 +25,7 @@ public:
 private:
     RoutingGraphStorage  g;
     Building * building;
-    const set<int> empty_set;
+    const std::set<int> empty_set;
     
 
 };
