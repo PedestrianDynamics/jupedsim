@@ -33,21 +33,19 @@
 using namespace std;
 
 string IODispatcher::WritePed(Pedestrian* ped) {
-	double v, a, b, phi;
 	double RAD2DEG = 180.0 / M_PI;
 	char tmp[CLENGTH] = "";
 
-	v = ped->GetV().Norm();
-	int color;
 	double v0 = ped->GetV0Norm();
 	if (v0 == 0) {
 		Log->Write("ERROR: IODispatcher::WritePed()\t v0=0");
 		exit(0);
 	}
-	color = (int) (v / v0 * 255);
-	a = ped->GetLargerAxis();
-	b = ped->GetSmallerAxis();
-	phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+	double v = ped->GetV().Norm();
+	int color = (int) (v / v0 * 255);
+	double a = ped->GetLargerAxis();
+	double b = ped->GetSmallerAxis();
+	double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
  	sprintf(tmp, "<agent ID=\"%d\"\t"
 			"xPos=\"%.2f\"\tyPos=\"%.2f\"\t"
 			"radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
@@ -95,7 +93,7 @@ void IODispatcher::Write(string str) {
 void IODispatcher::WriteHeader(int nPeds, int fps, Building* building, int seed,
 		int szenarioID) {
 
-	nPeds = building->GetAnzPedestrians();
+	nPeds = building->GetNumberOfPedestrians();
 	string tmp;
 	tmp =
 			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectoriesDataset>\n";
@@ -105,7 +103,7 @@ void IODispatcher::WriteHeader(int nPeds, int fps, Building* building, int seed,
 	tmp.append(agents);
 	sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
 	tmp.append(agents);
-	sprintf(agents, "\t\t<frameRate>%d</frameRate>\n", fps);
+	sprintf(agents, "\t\t<frameRate>%f</frameRate>\n", fps);
 	tmp.append(agents);
 	tmp.append("\t</header>\n");
 	Write(tmp);

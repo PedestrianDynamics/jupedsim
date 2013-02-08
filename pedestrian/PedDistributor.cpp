@@ -521,7 +521,7 @@ int PedDistributor::Distribute(Building* building) const {
 				ped->SetRouter(building->GetRoutingEngine()->GetRouter(router_id));
 
 			}else{
-				sprintf(tmp, "ERROR:\tID [%d] out of range. The largest allowed ID based on the current distribution is [%d]",ped_id,building->GetAnzPedestrians());
+				sprintf(tmp, "ERROR:\tID [%d] out of range. The largest allowed ID based on the current distribution is [%d]",ped_id,building->GetNumberOfPedestrians());
 				Log->Write(tmp);
 				sprintf(tmp, "ERROR:\tVerify that you have distributed all [%d] pedestrians",nPedsExpected);
 				Log->Write(tmp);

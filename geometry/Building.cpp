@@ -134,7 +134,7 @@ Room* Building::GetRoom(int index) const {
 	}
 }
 
-int Building::GetAnzPedestrians() const {
+int Building::GetNumberOfPedestrians() const {
 	int sum = 0;
 	for (unsigned int wa = 0; wa < _rooms.size(); wa++) {
 		sum += _rooms[wa]->GetNumberOfPedestrians();

@@ -97,7 +97,7 @@ public:
     //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(int id);
 
-    int GetAnzPedestrians() const;
+    int GetNumberOfPedestrians() const;
     LCGrid* GetGrid() const;
 
     // Sonstiges
