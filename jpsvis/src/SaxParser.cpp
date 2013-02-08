@@ -623,15 +623,15 @@ void SaxParser::parseGeometryJUL(QString fileName, FacilityGeometry *geometry){
 		for(int j=0; j<anz_walls; j++)
 		{
 			Line l = r.GetWall(j).GetLine();
-			geometry->addWall(l.GetPoint1().GetX()*100, l.GetPoint1().GetY()*100,
-					l.GetPoint2().GetX()*100, l.GetPoint2().GetY()*100);
+			geometry->addWall(l.GetPoint1().GetX()*100, l.GetPoint1().GetY()*100,0.0,
+					l.GetPoint2().GetX()*100, l.GetPoint2().GetY()*100,0.0);
 		}
 		int anz_trans = r.GetAllTransitions().size();
 		for(int j=0; j<anz_trans; j++)
 		{
 			Line l = r.GetTransition(j).GetLine();
-			geometry->addDoor(l.GetPoint1().GetX()*100, l.GetPoint1().GetY()*100,
-					l.GetPoint2().GetX()*100, l.GetPoint2().GetY()*100);
+			geometry->addDoor(l.GetPoint1().GetX()*100, l.GetPoint1().GetY()*100,0.0,
+					l.GetPoint2().GetX()*100, l.GetPoint2().GetY()*100,0.0);
 		}
 	}
 
@@ -667,15 +667,15 @@ void SaxParser::parseGeometryPG3(QString fileName, FacilityGeometry *geometry){
 			l.CopyData(r.GetLine(j));
 
 			if(l.GetType()==1) /* WALL */
-				geometry->addWall(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,
-						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y);
+				geometry->addWall(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,0.0,
+						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y,0.0);
 
 			if(l.GetType()==2) /* STEP */
-				geometry->addStep(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,
-						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y);
+				geometry->addStep(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,0.0,
+						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y,0.0);
 			if(l.GetType()==3) /* TRANS */
-				geometry->addDoor(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,
-						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y);
+				geometry->addDoor(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,0.0,
+						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y,0.0);
 		}
 	}
 
@@ -767,7 +767,8 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 				double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble();
 				double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble();
-				geometry->addWall(x1, y1, x2, y2,z1,thickness,height,color);
+				double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble();
+				geometry->addWall(x1, y1,z1 ,x2, y2,z2,thickness,height,color);
 			}
 		}
 
@@ -791,12 +792,12 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 					double x1=points.item(i).toElement().attribute("xPos", "0").toDouble();
 					double y1=points.item(i).toElement().attribute("yPos", "0").toDouble();
-					double z=points.item(i).toElement().attribute("zPos", "0").toDouble();
+					double z1=points.item(i).toElement().attribute("zPos", "0").toDouble();
 
 					double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble();
 					double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble();
-					z=points.item(i+1).toElement().attribute("z", "0").toDouble();
-					geometry->addDoor(x1, y1, x2, y2,z,thickness,height,color);
+					double z2=points.item(i+1).toElement().attribute("z", "0").toDouble();
+					geometry->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
 				}
 			}
 
@@ -929,12 +930,13 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 				double z1=xVertices.item(i).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
 				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
 				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
+				double z2=xVertices.item(i+1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
 
 				position[0]+= x1;
 				position[1]+= y1;
 				position[2]+= z1;
 
-				geo->addWall(x1, y1, x2, y2,z1,thickness,height,color);
+				geo->addWall(x1, y1, z1, x2, y2,z2,thickness,height,color);
 			}
 			xPoly = xPoly.nextSiblingElement("polygon");
 		}
@@ -970,7 +972,8 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 
 				double x2=xVertices.item(i+1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
 				double y2=xVertices.item(i+1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-				geo->addWall(x1, y1, x2, y2,z1,thickness,height,color);
+				double z2=xVertices.item(i+1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+				geo->addWall(x1, y1, z1, x2, y2,z2,thickness,height,color);
 			}
 			xPoly = xPoly.nextSiblingElement("polygon");
 		}
@@ -995,9 +998,10 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 
 		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
 		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-		geo->addDoor(x1, y1, x2, y2,z1,thickness,height,color);
+		double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+		geo->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
 
-		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, z1};
+		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
 		geo->addObjectLabel(center,center,id.toStdString(),21);
 	}
 
@@ -1019,10 +1023,11 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 
 		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
 		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
-		geo->addDoor(x1, y1, x2, y2,z1,thickness,height,color);
+		double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
+		geo->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
 
 		string id= xTransition.attribute("id","-1").toStdString();
-		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, z1};
+		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
 		geo->addObjectLabel(center,center,id,21);
 	}
 }

@@ -35,7 +35,7 @@
 *
 * \date 7.6.2010
 *
-* TraVisTo stands for Trajectories Visualisation Tool and is part of the OPS Project.
+* JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
 *
 * @image html travisto.png " "
 *
@@ -45,6 +45,7 @@
 * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
 * 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
 * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+* 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
 *
 */
 

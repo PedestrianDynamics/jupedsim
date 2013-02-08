@@ -254,25 +254,25 @@ vtkAssembly* FacilityGeometry::getActor(){
 //	actor->Delete();
 //}
 
-void FacilityGeometry::addWall(double x1, double y1, double x2, double y2, double z,double thickness,double height,double color){
+void FacilityGeometry::addWall(double x1, double y1, double z1, double x2, double y2, double z2,double thickness,double height,double color){
 
 	// all walls will have this parameters until changed
 	wallColor=color;
 
 	//	if(SystemSettings::get2D()){
-	double m[]={x1,y1,z};
-	double n[]={x2,y2,z};
+	double m[]={x1,y1,z1};
+	double n[]={x2,y2,z2};
 	linesPlotter2D->PlotWall(m,n,wallColor/255.0);
 }
 
-void FacilityGeometry::addDoor(double x1, double y1, double x2, double y2, double z,double thickness ,double height, double color){
+void FacilityGeometry::addDoor(double x1, double y1, double z1, double x2, double y2, double z2,double thickness ,double height, double color){
 
 	// all doors will take this color upon changed
 	doorColor=color;
 	//constructing the 2D assembly
 	//	if(SystemSettings::get2D()){
-	double m[]={x1,y1,z};
-	double n[]={x2,y2,z};
+	double m[]={x1,y1,z1};
+	double n[]={x2,y2,z2};
 
 	//double m[]={x1,y1,z+1};
 	//double n[]={x2,y2,z+1};
@@ -281,10 +281,10 @@ void FacilityGeometry::addDoor(double x1, double y1, double x2, double y2, doubl
 	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 }
 
-void FacilityGeometry::addStep(double x1, double y1, double x2, double y2, double z)
+void FacilityGeometry::addStep(double x1, double y1, double z1, double x2, double y2, double z2)
 {
-	double m[]={x1,y1,z};
-	double n[]={x2,y2,z};
+	double m[]={x1,y1,z1};
+	double n[]={x2,y2,z2};
 	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 }
 

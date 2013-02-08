@@ -71,7 +71,7 @@ void InteractorStyle::SetSource() {
 
 //forward the event only if not in 2d mode
 void InteractorStyle::Rotate() {
-	if(!SystemSettings::get2D())
+	//if(!SystemSettings::get2D())
 	vtkInteractorStyleTrackballCamera::Rotate();
 }
 

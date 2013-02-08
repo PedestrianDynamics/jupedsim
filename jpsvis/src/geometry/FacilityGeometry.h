@@ -71,18 +71,18 @@ public:
 	vtkActor2DCollection* getCaptions();
 
 	///draw a wall
-	void addWall(double x1, double y1, double x2, double y2, double z=0, double thickness=15, double height=250,double col=255);
+	void addWall(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=15, double height=250,double col=255);
 	//void addWall(double center[3], double width, double orientation);
 	void addWall(Point* p1, Point* p2, std::string caption="");
 
 	///draw a door
-	void addDoor(double x1, double y1, double x2, double y2, double z=0, double thickness=17, double height=250,double col=30);
+	void addDoor(double x1, double y1, double z1 ,double x2, double y2, double z2, double thickness=17, double height=250,double col=30);
 	//void addDoor(double center[3], double width, double orientation);
 	void addDoor(Point* p1, Point* p2, std::string caption="");
 
 	///draw a step
 	///todo: implement thickness and color
-	void addStep(double x1, double y1, double x2, double y2, double z=0/*, double thickness=30, double height=10,double col=50*/);
+	void addStep(double x1, double y1, double z1, double x2, double y2, double z2=0/*, double thickness=30, double height=10,double col=50*/);
 	//void addStep(double center[3], double width, double orientation);
 	void addStep(Point* p1, Point* p2);
 
