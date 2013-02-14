@@ -17,10 +17,10 @@ using namespace std;
 
 Analysis::Analysis() {
 
-	pBuilding = NULL;
-	iod = new IODispatcher();
+	_building = NULL;
+	_iod = new IODispatcher();
 	fps=1;
-	numFrames = 10;
+	_numFrames = 10;
 
 	Tin = NULL;
 	Tout = NULL;
@@ -63,8 +63,8 @@ Analysis::Analysis() {
 }
 
 Analysis::~Analysis() {
-	delete pBuilding;
-	delete iod;
+	delete _building;
+	delete _iod;
 	delete  firstFrame;
 	delete  lastFrame;
 	delete  Tin;
@@ -85,7 +85,7 @@ Analysis::~Analysis() {
 
 
 Building * Analysis::GetBuilding() const {
-	return pBuilding;
+	return _building;
 }
 
 /************************************************
@@ -99,7 +99,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	char tmp[CLENGTH];
 	string s = "Parameter:\n";
 
-	/*	switch (args->GetLog()) {
+		switch (args->GetLog()) {
 		case 0:
 			// no log file
 			//Log = new OutputHandler();
@@ -119,37 +119,13 @@ void Analysis::InitArgs(ArgumentParser* args) {
 		default:
 			printf("Wrong option for Logfile!\n\n");
 			exit(0);
-	}*/
+	}
 
 	Log->Write("INFO: \tOptionen an Simulation geben\n");
 
 	pMeasureZone = args->GetMeasureArea();
 
-	if(args->GetTrajectoriesFile().empty()==false)
-	{
-		switch (args->GetFileFormat())
-		{
-		case FORMAT_XML_PLAIN:
-		{
-			OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-			iod->AddIO(tofile);
-			break;
-		}
-		case FORMAT_XML_BIN:
-		{
-			Log->Write("INFO: \tFormat xml-bin not yet supported\n");
-			exit(0);
-			break;
-		}
-		case FORMAT_VTK:
-		{
-			Log->Write("INFO: \tFormat vtk not yet supported\n");
-			exit(0);
-			break;
-		}
-		}
 
-	}
 	IsFlowVelocity = args->GetIsMethodA();
 	IsFundamentalTinTout = args->GetIsMethodB();
 	IsClassicMethod = args ->GetIsMethodC();
@@ -167,13 +143,13 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	IscalcIndividualFD = args->GetIsIndividualFD();
 	VComponent = args->GetVComponent();
 	scale_x = args->GetScale_x();
-	scale_y = args ->GetScale_y();
+	scale_y = args->GetScale_y();
 
 	if(IsClassicMethod)
 	{
 			#ifdef WIN32
-		//string results_C=  "Output\\Fundamental_Diagram\\Classical_Voronoi\\rho_v_Classic_"+TrajectoryName+".dat";
-				  string results_C=  "rho_v_Classic_"+TrajectoryName+".dat";
+		string results_C=  ".\\Output\\Fundamental_Diagram\\Classical_Voronoi\\rho_v_Classic_"+TrajectoryName+".dat";
+		//		  string results_C=  "rho_v_Classic_"+TrajectoryName+".dat";
 			#else
 				  string results_C=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+TrajectoryName+".dat";
 			#endif
@@ -194,7 +170,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 			#endif
 			  if((fVoronoi_rho_v=fopen(results_V.c_str(),"w"))==NULL)
 				{
-				  printf("cannot open the file to write Voronoi density and velocity\n");
+				  Log->Write("cannot open the file to write Voronoi density and velocity\n");
 				  exit(0);
 				}
 			  fprintf(fVoronoi_rho_v,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
@@ -210,7 +186,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 
 			if((IndividualFD=fopen(Individualfundment.c_str(),"w"))==NULL)
 			{
-				printf("cannot open the file individual\n");
+				Log->Write("cannot open the file individual\n");
 				exit(0);
 			}
 			fprintf(IndividualFD,"#Individual density(m^(-2))\t	Individual velocity(m/s)\n");
@@ -230,28 +206,28 @@ void Analysis::InitArgs(ArgumentParser* args) {
 
 polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 
-	pBuilding = new Building();
-	pBuilding->LoadBuilding(geometryFile);
+	_building = new Building();
+	_building->LoadBuilding(geometryFile);
 	double geo_minX  = FLT_MAX;
 	double geo_minY  = FLT_MAX;
 	double geo_maxX  = -FLT_MAX;
 	double geo_maxY  = -FLT_MAX;
 	polygon_2d geoPoly;
 	// create the polygons
-	pBuilding->InitGeometry();
+	_building->InitGeometry();
 	vector<Obstacle*> GeoObst;
-	for(int i=0;i<pBuilding->GetAnzRooms();i++){
-		Room* room=pBuilding->GetRoom(i);
+	for(int i=0;i<_building->GetNumberOfRooms();i++){
+		Room* room=_building->GetRoom(i);
 
-		for( int j=0;j<room->GetAnzSubRooms();j++){
+		for( int j=0;j<room->GetNumberOfSubRooms();j++){
 			SubRoom* subroom = room->GetSubRoom(i);
 			const vector<Point>& temp_GeoPoly = subroom->GetPolygon();
 			for (unsigned int j = 0; j< temp_GeoPoly.size();j++){
-				append(geoPoly, make<point_2d>(temp_GeoPoly[j].pX, temp_GeoPoly[j].pY));
-				geo_minX = (temp_GeoPoly[j].pX<=geo_minX) ? temp_GeoPoly[j].pX : geo_minX;
-				geo_minY = (temp_GeoPoly[j].pY<=geo_minY) ? temp_GeoPoly[j].pY : geo_minY;
-				geo_maxX = (temp_GeoPoly[j].pX>=geo_maxX) ? temp_GeoPoly[j].pX : geo_maxX;
-				geo_maxY = (temp_GeoPoly[j].pY>=geo_maxY) ? temp_GeoPoly[j].pY : geo_maxY;
+				append(geoPoly, make<point_2d>(temp_GeoPoly[j]._x, temp_GeoPoly[j]._y));
+				geo_minX = (temp_GeoPoly[j]._x<=geo_minX) ? temp_GeoPoly[j]._x : geo_minX;
+				geo_minY = (temp_GeoPoly[j]._y<=geo_minY) ? temp_GeoPoly[j]._y : geo_minY;
+				geo_maxX = (temp_GeoPoly[j]._x>=geo_maxX) ? temp_GeoPoly[j]._x : geo_maxX;
+				geo_maxY = (temp_GeoPoly[j]._y>=geo_maxY) ? temp_GeoPoly[j]._y : geo_maxY;
 
 			}
 			correct(geoPoly);
@@ -267,7 +243,7 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 			geoPoly.inners().back();
 			model::ring<point_2d>& inner = geoPoly.inners().back();
 			for (unsigned int j = 0; j< temp_obst.size();j++){
-				append(inner, make<point_2d>(temp_obst[j].pX, temp_obst[j].pY));
+				append(inner, make<point_2d>(temp_obst[j]._x, temp_obst[j]._y));
 			}
 
 			correct(geoPoly);
@@ -292,9 +268,9 @@ void Analysis::ReadTrajetories(string trajectoriesFile){
 	  XMLNode xMainNode = XMLNode::openFileHelper(trajectoriesFile.c_str(),"trajectoriesDataset");
 	  XMLNode xHeader = xMainNode.getChildNode("header"); // header
 	  XMLNode xFrame = xMainNode.getChildNode("frame"); // frame
-	  numFrames = xMainNode.nChildNode("frame"); // how much frames
+	  _numFrames = xMainNode.nChildNode("frame"); // how much frames
 
-	  printf("numFrames = %d\n",numFrames);
+	  printf("numFrames = %d\n",_numFrames);
 	  if(!xHeader.getChildNode("agents").isEmpty()){
 		  const char* N = xHeader.getChildNode("agents").getText();
 		  MaxNumofPed = atoi(N);
@@ -308,8 +284,8 @@ void Analysis::ReadTrajetories(string trajectoriesFile){
 	  Ycor = new float* [MaxNumofPed];
 	  for (int i=0; i<MaxNumofPed; i++)
 	  {
-		  Xcor[i] = new float [numFrames];
-		  Ycor[i] = new float [numFrames];
+		  Xcor[i] = new float [_numFrames];
+		  Ycor[i] = new float [_numFrames];
 	  }
 	  firstFrame = new int[MaxNumofPed];  // Record the first frame of each pedestrian
 	  lastFrame = new int[MaxNumofPed];  // Record the last frame of each pedestrian
@@ -319,7 +295,7 @@ void Analysis::ReadTrajetories(string trajectoriesFile){
 
 	  for(int i = 0; i <MaxNumofPed; i++)
 	  {
-		  for (int j = 0; j < numFrames; j++)
+		  for (int j = 0; j < _numFrames; j++)
 		  {
 			  Xcor[i][j] = 0;
 			  Ycor[i][j] = 0;
@@ -335,7 +311,7 @@ void Analysis::ReadTrajetories(string trajectoriesFile){
 
 	  if(!xFrame.isEmpty())
 	  {
-		  for (int f=0; f<numFrames; f++) //read the data frame by frame
+		  for (int f=0; f<_numFrames; f++) //read the data frame by frame
 		  {
 			  xFrame = xMainNode.getChildNode("frame", f); // frame j
 			  int numPedsInFrame = xFrame.nChildNode("agent"); // how much agents in this frame
@@ -386,17 +362,17 @@ int Analysis::RunAnalysis()
 	  XMLNode xMainNode = XMLNode::openFileHelper(TrajectoryFile.c_str(),"trajectoriesDataset");
 	  XMLNode xHeader = xMainNode.getChildNode("header"); // header
 	  XMLNode xFrame = xMainNode.getChildNode("frame"); // frame
-	  numFrames = xMainNode.nChildNode("frame"); // how much frames
+	  _numFrames = xMainNode.nChildNode("frame"); // how much frames
 	  int ClassicFlow=0; // the number of pedestrians pass a line in a certain time
 	  float V_deltaT=0;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
-	  float DensityPerFrame[numFrames+1];
-	  for(int i=0;i<=numFrames;i++)
+	  float DensityPerFrame[_numFrames+1];
+	  for(int i=0;i<=_numFrames;i++)
 		{
 		  DensityPerFrame[i]=0;
 		}
 	  if(!xFrame.isEmpty())
 	   {
-	 	  for (int f=0; f<numFrames; f++) //read the data frame by frame
+	 	  for (int f=0; f<_numFrames; f++) //read the data frame by frame
 	 	  {
 	 		  xFrame = xMainNode.getChildNode("frame", f); // frame j
 			  const char* frid = xFrame.getAttribute("ID");
@@ -423,7 +399,7 @@ int Analysis::RunAnalysis()
 	 				 YInFrame[i] = atof(y);
 	 				 int Tpast = f - DeltaF;
 	 				 int Tfuture = f + DeltaF;
-	 				 VInFrame[i] = getVinFrame(f, Tpast, Tfuture, firstFrame[ID], lastFrame[ID], Xcor[ID][Tpast], Xcor[ID][f], Xcor[ID][Tfuture], Ycor[ID][Tpast], Ycor[ID][f], Ycor[ID][Tfuture], VComponent);
+	 				 VInFrame[i] = GetVinFrame(f, Tpast, Tfuture, firstFrame[ID], lastFrame[ID], Xcor[ID][Tpast], Xcor[ID][f], Xcor[ID][Tfuture], Ycor[ID][Tpast], Ycor[ID][f], Ycor[ID][Tfuture], VComponent);
 
 	 				  //printf("ID=%d, X=%.2f, Y=%.2f, Vx=%.2f\n", ID, Xcor[ID][f],Ycor[ID][f], VInFrame[i]);
 //	 				  if(IsFlowVelocity)
@@ -929,7 +905,7 @@ float Analysis::getVoronoiVelocity(vector<polygon_2d> polygon, float* Velocity, 
  * this function is to calculate the instantneous velocity of ped ID in Frame Tnow based on his coordinates and his state.
  */
 
-float Analysis::getVinFrame(int Tnow,int Tpast, int Tfuture, int Tfirst, int Tlast, float Xcor_past, float Xcor_now, float Xcor_future,float Ycor_past, float Ycor_now, float Ycor_future, char VComponent){
+float Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int Tfirst, int Tlast, float Xcor_past, float Xcor_now, float Xcor_future,float Ycor_past, float Ycor_now, float Ycor_future, char VComponent){
 
 	float v=0;
 
@@ -990,8 +966,8 @@ void Analysis::GetProfiles(string frameId, vector<polygon_2d> polygons, float * 
 		  string Prfvelocity="Fundamental_Diagram\\Classical_Voronoi\\Profile\\velocity\\Prf_v_"+TrajectoryName+"_"+frameId+".dat";
 		  string Prfdensity= "Fundamental_Diagram\\Classical_Voronoi\\Profile\\density\\Prf_d_"+TrajectoryName+"_"+frameId+".dat";
 	  #else
-		  string Prfvelocity="Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+datafile+"_"+frameId+".dat";
-		  string Prfdensity="Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+datafile+"_"+frameId+".dat";
+		  string Prfvelocity="Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+TrajectoryName+"_"+frameId+".dat";
+		  string Prfdensity="Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+TrajectoryName+"_"+frameId+".dat";
 	  #endif
 	  FILE *Prf_velocity;
 	  if((Prf_velocity=fopen(Prfvelocity.c_str(),"w"))==NULL)

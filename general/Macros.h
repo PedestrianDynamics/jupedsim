@@ -27,6 +27,9 @@
 #ifndef _MACROS_H
 #define	_MACROS_H
 
+
+//#define _SIMULATOR 1
+
 // Genauigkeit
 #define J_EPS 0.001
 #define J_EPS_DIST 0.05// [m]
@@ -37,7 +40,7 @@
 
 // zur Versionskontrolle beim Geometrieformat
 #define VERSION 0.40
-#define JPS_VERSION "1.1"
+#define JPS_VERSION "0.4"
 
 // Länge von char vectoren zur Ausgabe
 #define CLENGTH 1000

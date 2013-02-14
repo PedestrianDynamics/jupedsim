@@ -25,55 +25,52 @@
  */
 
 #include "Point.h"
+#include "../general/Macros.h"
 
 
-/************************************************************
- private
- ************************************************************/
+#include  <cmath>
+#include  <sstream>
 
-// rotiert Vektor um den Winkel theta
 
-Point Point::Rotate(double ctheta, double stheta) const {
-    return Point(pX * ctheta - pY*stheta, pX * stheta + pY * ctheta);
-}
+
+
 
 /************************************************************
   Konstruktoren
  ************************************************************/
 Point::Point() {
-    pX = 0.0;
-    pY = 0.0;
+    _x = 0.0;
+    _y = 0.0;
 }
 
 Point::Point(double x, double y) {
-    pX = x;
-    pY = y;
+    _x = x;
+    _y = y;
 }
 
 Point::Point(const Point& orig) {
-    pX = orig.GetX();
-    pY = orig.GetY();
+    _x = orig.GetX();
+    _y = orig.GetY();
 }
 
 std::string Point::toString(){
 	std::stringstream tmp;
-	tmp<<"( "<<pX<<" : " <<pY<<" )";
+	tmp<<"( "<<_x<<" : " <<_y<<" )";
 	return tmp.str();
 
 };
-//Point::~Point() {
-//}
+
 
 /*************************************************************
  Setter-Funktionen
  ************************************************************/
 
 void Point::SetX(double x) {
-    pX = x;
+    _x = x;
 }
 
 void Point::SetY(double y) {
-    pY = y;
+    _y = y;
 }
 
 /*************************************************************
@@ -81,11 +78,11 @@ void Point::SetY(double y) {
  ************************************************************/
 
 double Point::GetX() const {
-    return pX;
+    return _x;
 }
 
 double Point::GetY() const {
-    return pY;
+    return _y;
 }
 
 /*************************************************************
@@ -95,12 +92,12 @@ double Point::GetY() const {
 // Norm des Vektors
 
 double Point::Norm() const {
-    return sqrt(pX * pX + pY * pY);
+    return sqrt(_x * _x + _y * _y);
 }
 
 // Norm des Vektors zum quadrat
 double Point::NormSquare() const {
-	return (pX * pX + pY * pY);
+	return (_x * _x + _y * _y);
 }
 
 // gibt den normierten Vector zurueck
@@ -109,19 +106,19 @@ Point Point::Normalized() const {
 	double norm=Norm();
 
     if (norm != 0.0)
-        return (Point(pX, pY) / (norm));
+        return (Point(_x, _y) / (norm));
     else return Point(0.0, 0.0);
 }
 
 // Skalarprodukt zweier Vektoren
 
 double Point::ScalarP(const Point& v) const {
-    return pX * v.GetX() + pY * v.GetY();
+    return _x * v.GetX() + _y * v.GetY();
 }
 
 /// determinant of the square matrix formed by the vectors [ this, v]
 double Point::Det(const Point& v) const {
-	return pX * v.pY - pY * v.pX;
+	return _x * v._y - _y * v._x;
 }
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
@@ -132,7 +129,7 @@ double Point::Det(const Point& v) const {
  * */
 
 Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) const {
-    Point p = Point(pX, pY);
+    Point p = Point(_x, _y);
     return (p - center).Rotate(cphi, -sphi);
 }
 
@@ -142,8 +139,13 @@ Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) 
  * phi: Winkel der Ellipse aus deren System transformiert werden soll
  * */
 Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const {
-    Point p = Point(pX, pY);
+    Point p = Point(_x, _y);
     return (p.Rotate(cphi, sphi) + center);
+}
+
+// rotiert Vektor um den Winkel theta
+Point Point::Rotate(double ctheta, double stheta) const {
+    return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
 }
 
 /*************************************************************
@@ -153,25 +155,25 @@ Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) con
 // Addiert zwei Vektoren
 
 const Point Point::operator+(const Point& p) const {
-    return Point(pX + p.GetX(), pY + p.GetY());
+    return Point(_x + p.GetX(), _y + p.GetY());
 }
 
 // Subtrahiert zwei Vektoren
 
 const Point Point::operator-(const Point& p) const {
-    return Point(pX - p.GetX(), pY - p.GetY());
+    return Point(_x - p.GetX(), _y - p.GetY());
 }
 
 // Vergleicht zwei Punkte/Vektoren komponentweise
 
 bool Point::operator==(const Point& p) const {
-    return (fabs(pX - p.GetX()) < J_EPS && fabs(pY - p.GetY()) < J_EPS);
+    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
 }
 
 // Vergleicht zwei Punkte/Vektoren komponentweise
 
 bool Point::operator!=(const Point& p) const {
-    return (fabs(pX - p.GetX()) > J_EPS || fabs(pY - p.GetY()) > J_EPS);
+    return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
 }
 
 

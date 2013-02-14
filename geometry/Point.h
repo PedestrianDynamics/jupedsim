@@ -28,29 +28,40 @@
 #ifndef _POINT_H
 #define	_POINT_H
 
-#include <cmath>
-#include <cstdio>
-#include "../general/Macros.h"
-#include <sstream>
+
+#include <string>
 
 class Point {
 public:
-    double pX;
-    double pY;
+    double _x;
+    double _y;
 
 public:
     // constructors
     Point();
     Point(double x, double y);
     Point(const Point& orig);
-    //    virtual ~Point();
 
 
+    /**
+     * Set/Get the x component
+     */
     void SetX(double x);
+
+    /**
+     * Set/Get the y component
+     */
     void SetY(double y);
 
 
+    /**
+     * Set/Get the x component
+     */
     double GetX() const;
+
+    /**
+     * Set/Get the y component
+     */
     double GetY() const;
 
     /// Norm
@@ -81,6 +92,7 @@ public:
     /// comparision
     bool operator!=(const Point& p) const;
 
+    /// nice formatiing of the point
     std::string toString();
 };
 

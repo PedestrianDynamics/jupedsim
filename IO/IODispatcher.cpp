@@ -128,14 +128,14 @@ void IODispatcher::WriteGeometry(Building* building) {
 	//to avoid writing navigation line twice
 	vector<int> navLineWritten;
 
-	for (int i = 0; i < building->GetAnzRooms(); i++) {
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* r = building->GetRoom(i);
 		string caption = r->GetCaption();
 		if (rooms_to_plot.empty() == false)
 			if (IsElementInVector(rooms_to_plot, caption) == false)
 				continue;
 
-		for (int k = 0; k < r->GetAnzSubRooms(); k++) {
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* s = r->GetSubRoom(k);
 			geometry.append(s->WriteSubRoom());
 

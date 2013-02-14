@@ -82,6 +82,7 @@ private:
 	double pSteady_end;
 	int pScale_x;
 	int pScale_y;
+	int _log;
 
 
 	// private Funktionen
@@ -97,6 +98,7 @@ public:
 	const string& GetMeasureAreaId() const;
 	const FileFormat& GetFileFormat() const;
 	const string& GetGeometryFilename() const;
+	const string& GetErrorLogFile() const;
 
 	double GetLengthMeasurementArea() const;
 	polygon_2d GetMeasureArea() const;
@@ -119,6 +121,7 @@ public:
 	bool GetIsGetProfile() const;
 	int GetScale_x() const;
 	int GetScale_y() const;
+	int GetLog() const;
 
 
 
@@ -126,10 +129,6 @@ public:
 	void SetPort(int port);
 	void SetTrajectoriesFile(const string& trajectoriesFile);
 	void SetTrajectoriesPath(const string& trajectoriesPath);
-
-
-	//vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
-
 
 
 	void ParseArgs(int argc, char **argv);

@@ -3,11 +3,11 @@
 
 <JPSreport project="JPS-Project" version="0.4">
 	<!-- geometry file -->
-	<Geometry file = "D:\\workspace\\JuPedSim\\JPSreport\\geo.xml" />
+	<Geometry file = "geo.xml" />
 	<!-- trajectories file and format -->
 	<Trajectories>
 		<file name="ko-240-050-240" />
-		<path location="D:\\workspace\\JuPedSim\\JPSreport\\" />
+		<path location="./" />
 	</Trajectories>
 	<!-- all files in the directories will be used -->
 

@@ -33,39 +33,82 @@
 #include "NavLine.h"
 
 class SubRoom;
+class Room;
 
 
 class Hline: public NavLine {
 
 private:
-    int pID;
-    Room* pRoom;
-    string pCaption;
-    SubRoom* pSubRoom;
+	int _id;
+	Room* _room;
+	std::string _caption;
+	SubRoom* _subRoom;
 
 public:
 	Hline();
 	virtual ~Hline();
 
-    // Setter -Funktionen
-    void SetID(int ID);
-    void SetRoom(Room* r);
-    void SetCaption(string s);
-    void SetSubRoom(SubRoom* r);
+	/**
+	 * Set/Get the id of the line
+	 */
+	void SetID(int ID);
 
-    // Getter - Funktionen
-    int GetID() const;
-    string GetCaption() const;
-    Room* GetRoom() const;
-    SubRoom* GetSubRoom() const;
+	/**
+	 * Set/Get the Room containing this line
+	 */
+	void SetRoom(Room* r);
 
-    // Sonstiges
-    bool IsInSubRoom(int subroomID) const;
-    bool IsInRoom(int roomID) const;
+	/**
+	 * Set/Get the line caption
+	 */
+	void SetCaption(std::string s);
 
-    // Ausgabe
-    void WriteToErrorLog() const;
-    string WriteElement() const;
+	/**
+	 * Set/Get the subroom containing this line
+	 */
+	void SetSubRoom(SubRoom* r);
+
+
+	/**
+	 * Set/Get the id of the line
+	 */
+	int GetID() const;
+
+	/**
+	 * Set/Get the line caption
+	 */
+	std::string GetCaption() const;
+
+	/**
+	 * Set/Get the Room containing this line
+	 */
+	Room* GetRoom() const;
+
+	/**
+	 * Set/Get the subroom containing this line
+	 */
+	SubRoom* GetSubRoom() const;
+
+
+	/**
+	 * @return true if the line is in the given subroom
+	 */
+	bool IsInSubRoom(int subroomID) const;
+
+	/**
+	 * @return true if the line is in the given room
+	 */
+	bool IsInRoom(int roomID) const;
+
+	/**
+	 * Debug output
+	 */
+	void WriteToErrorLog() const;
+
+	/**
+	 * @return a nicely formatted string representation of the object
+	 */
+	std::string WriteElement() const;
 };
 
 #endif /* HLINE_H_ */

@@ -27,55 +27,56 @@
 
 
 #include "Hline.h"
-#include "SubRoom.h"
+
+using namespace std;
 
 Hline::Hline() {
-	pRoom=NULL;
-	pSubRoom=NULL;
-	pID=-1;
+	_room=NULL;
+	_subRoom=NULL;
+	_id=-1;
 }
 
 Hline::~Hline() {
 }
 
 void Hline::SetID(int ID) {
-	pID=ID;
+	_id=ID;
 }
 
 void Hline::SetRoom(Room* r) {
-	pRoom=r;
+	_room=r;
 }
 
 void Hline::SetCaption(string s) {
-	pCaption=s;
+	_caption=s;
 }
 
 void Hline::SetSubRoom(SubRoom* s) {
-	pSubRoom=s;
+	_subRoom=s;
 }
 
 int Hline::GetID() const {
-	return pID;
+	return _id;
 }
 
 string Hline::GetCaption() const {
-	return pCaption;
+	return _caption;
 }
 
 Room* Hline::GetRoom() const {
-	return pRoom;
+	return _room;
 }
 
 SubRoom* Hline::GetSubRoom() const {
-	return pSubRoom;
+	return _subRoom;
 }
 
 bool Hline::IsInSubRoom(int subroomID) const {
-	return pSubRoom->GetSubRoomID() == subroomID;
+	return _subRoom->GetSubRoomID() == subroomID;
 }
 
 bool Hline::IsInRoom(int roomID) const {
-	 return pRoom->GetRoomID() == roomID;
+	 return _room->GetID() == roomID;
 }
 
 void Hline::WriteToErrorLog() const {
@@ -84,8 +85,8 @@ void Hline::WriteToErrorLog() const {
     sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
     s.append(tmp);
-    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", pRoom->GetRoomID(),
-            pSubRoom->GetSubRoomID());
+    sprintf(tmp, "\t\t\t\tRoom: %d <-> SubRoom: %d\n", _room->GetID(),
+            _subRoom->GetSubRoomID());
     s.append(tmp);
     Log->Write(s);
 }

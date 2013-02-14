@@ -144,6 +144,7 @@ ArgumentParser::ArgumentParser() {
 	pScale_y = 10;
 
 	pErrorLogFile="./Logfile.dat";
+	_log=1; //no output wanted
 	pFormat=FORMAT_XML_PLAIN;
 }
 
@@ -399,9 +400,13 @@ const FileFormat& ArgumentParser::GetFileFormat() const {
 	return pFormat;
 }
 
-/*const string& ArgumentParser::GetErrorLogFile() const {
+const string& ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
-}*/
+}
+
+int ArgumentParser::GetLog() const {
+	return _log;
+}
 
 const string& ArgumentParser::GetGeometryFilename() const {
 	return pGeometryFilename;

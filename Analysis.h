@@ -44,47 +44,45 @@ extern OutputHandler* Log;
 
 class Analysis {
 private:
-    //int pNPeds;
-    //double pTmax;
-    //double pDt;
-    Building* pBuilding;
-    IODispatcher* iod;
+	//int pNPeds;
+	//double pTmax;
+	//double pDt;
+	Building* _building;
+	IODispatcher* _iod;
 	polygon_2d pGeoPoly;
 	polygon_2d pMeasureZone;
 	string TrajectoryName;
 	string TrajectoryFile;
-	int numFrames; // how much frames
+	int _numFrames; // how much frames
 
 
 	int *Tin;   //the time for each pedestrian enter the measurement area
 	int *Tout;  //the time for each pedestrian exit the measurement area
 	//float *DensityPerFrame; // the density in measurement area each frame. this will be used to calculate the fundamental diagram with Tin Tout
-    float LengthMeasurementarea;  // the length of the measurement area
-    int MaxNumofPed;  //the maximum index of the pedestrian in the trajectory data
-	int DeltaF;											// half of the time interval that used to calculate instantaneous velocity of ped i.
-																	// here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
-	  float **Xcor;
-	  float **Ycor;
-	  int 	  *firstFrame;   // Record the first frame of each pedestrian
-	  int 	  *lastFrame;	// Record the last frame of each pedestrian
-//	  int	  Tin[MaxNumofPed+1];				// Record the time of each pedestrian entering measurement area
-//	  int	  Tout[MaxNumofPed+1];				// Record the time of each pedestrian exiting measurement area
-    int DeltaT;   // the time interval to calculate the classic flow
-    float Line_startX ;  			//the coordinate of the line used to calculate the flow and velocity
-    float Line_startY ;
-    float Line_endX ;
-    float Line_endY ;
+	float LengthMeasurementarea;  // the length of the measurement area
+	int MaxNumofPed;  //the maximum index of the pedestrian in the trajectory data
+	int DeltaF;		// half of the time interval that used to calculate instantaneous velocity of ped i.
+	// here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
+	float **Xcor;
+	float **Ycor;
+	int *firstFrame;   // Record the first frame of each pedestrian
+	int *lastFrame;	// Record the last frame of each pedestrian
+	int DeltaT;   // the time interval to calculate the classic flow
+	float Line_startX ;  			//the coordinate of the line used to calculate the flow and velocity
+	float Line_startY ;
+	float Line_endX ;
+	float Line_endY ;
 	bool IsFlowVelocity; 						// Method A (Zhang2011a)
 	bool IsFundamentalTinTout; 			// Method B (Zhang2011a)
 	bool IsClassicMethod; 					// Method C //calculate and save results of classic in separate file
 	bool IsVoronoiMethod;  					// Method D--Voronoi method
-    bool cutbycircle;  //Adjust whether cut each original voronoi cell by a circle
-    bool IsGetProfile;   // Whether make field analysis or not
-    bool IsOutputGraph;   // Whether output the data for plot the fundamental diagram each frame
-    bool IscalcIndividualFD; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
-    char VComponent; // to mark whether x, y or x and y coordinate are used when calculating the velocity
-    std::vector<int> AccumPedsPassLine; // the accumulative pedestrians pass a line with time
-    std::vector<float> AccumVPassLine;  // the accumulative instantaneous velocity of the pedestrians pass a line
+	bool cutbycircle;  //Adjust whether cut each original voronoi cell by a circle
+	bool IsGetProfile;   // Whether make field analysis or not
+	bool IsOutputGraph;   // Whether output the data for plot the fundamental diagram each frame
+	bool IscalcIndividualFD; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
+	char VComponent; // to mark whether x, y or x and y coordinate are used when calculating the velocity
+	std::vector<int> AccumPedsPassLine; // the accumulative pedestrians pass a line with time
+	std::vector<float> AccumVPassLine;  // the accumulative instantaneous velocity of the pedestrians pass a line
 	int fps;												// Frame rate of data
 	FILE *fClassic_rho_v;
 	FILE *fVoronoi_rho_v;
@@ -96,7 +94,7 @@ private:
 	float low_ed_y; //  LOWest vertex of the geometry (y coordinate)
 	float high_ed_x; // Highest vertex of the geometry
 	float high_ed_y;
-	float getVinFrame(int Tnow,int Tpast, int Tfuture, int Tfirst, int Tlast, float Xcor_past, float Xcor_now, float Xcor_future,float Ycor_past, float Ycor_now, float Ycor_future, char VComponent);
+	float GetVinFrame(int Tnow,int Tpast, int Tfuture, int Tfirst, int Tlast, float Xcor_past, float Xcor_now, float Xcor_future,float Ycor_past, float Ycor_now, float Ycor_future, char VComponent);
 	bool IsPassLine(float Line_startX,float Line_startY, float Line_endX, float Line_endY,float pt1_X, float pt1_Y,float pt2_X, float pt2_Y);
 	void getFundamentalTinTout(int *Tin, int *Tout, float *DensityPerFrame, int fps, int LengthMeasurementarea,int Nped, string ofile);
 	void FlowRate_Velocity(int DeltaT, int fps, vector<int> AccumPeds, vector<float> AccumVelocity, string ofile);
@@ -111,17 +109,17 @@ private:
 	void DistributionOnLine(int *frequency,int fraction, float Line_startX,float Line_startY, float Line_endX, float Line_endY,float pt1_X, float pt1_Y,float pt2_X, float pt2_Y);
 public:
 
-    Analysis();
-    virtual ~Analysis();
+	Analysis();
+	virtual ~Analysis();
 
-    int GetNPedsGlobal() const;
-    Building* GetBuilding() const;
+	int GetNPedsGlobal() const;
+	Building* GetBuilding() const;
 
-    void InitArgs(ArgumentParser *args);
-    int InitAnalysis();
-    void ReadTrajetories(string trajectoriesFile);
-    polygon_2d ReadGeometry(const string& geometryFile);
-    int RunAnalysis();
+	void InitArgs(ArgumentParser *args);
+	int InitAnalysis();
+	void ReadTrajetories(string trajectoriesFile);
+	polygon_2d ReadGeometry(const string& geometryFile);
+	int RunAnalysis();
 
 };
 

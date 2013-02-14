@@ -32,80 +32,67 @@
 #include "Room.h"
 #include "SubRoom.h"
 
+using namespace std;
+
 
 Crossing::Crossing(){
-    pID = -1;
-    pRoom1 = NULL;
-    pSubRoom1 = NULL;
-    pSubRoom2 = NULL;
-	pCaption = "";
-
+    _id = -1;
+    _room1 = NULL;
+    _subRoom1 = NULL;
+    _subRoom2 = NULL;
+	_caption = "";
 }
 
 Crossing::~Crossing() {
 }
 
 
-void Crossing::SetIndex(int ID) {
-    pID = ID;
+void Crossing::SetID(int ID) {
+    _id = ID;
 }
 
 void Crossing::SetRoom1(Room* r) {
-    pRoom1 = r;
+    _room1 = r;
 }
 
 void Crossing::SetSubRoom1(SubRoom* r1) {
-    pSubRoom1 = r1;
+    _subRoom1 = r1;
 }
 
 void Crossing::SetSubRoom2(SubRoom* r2) {
-    pSubRoom2 = r2;
+    _subRoom2 = r2;
 }
 
 void Crossing::SetCaption(string s) {
-	pCaption = s;
+	_caption = s;
 }
 // Getter-Funktionen
 
-int Crossing::GetIndex() const {
-    return pID;
+int Crossing::GetID() const {
+    return _id;
 }
 string Crossing::GetCaption() const {
-	return pCaption;
+	return _caption;
 }
 Room* Crossing::GetRoom1() const {
-    return pRoom1;
+    return _room1;
 }
 
-// gibt den SubRoom mit ID zurück
-
-SubRoom* Crossing::GetSubRoom(int ID) const {
-    if (pSubRoom1 != NULL && pSubRoom1->GetSubRoomID() == ID)
-        return pSubRoom1;
-    else if (pSubRoom2 != NULL && pSubRoom2->GetSubRoomID() == ID)
-        return pSubRoom2;
-    else {
-        Log->Write("ERROR: \tCrossing::GetSubRoom() wrong ID");
-        exit(0);
-    }
-}
 
 SubRoom* Crossing::GetSubRoom1() const {
-    return pSubRoom1;
+    return _subRoom1;
 }
 
 SubRoom* Crossing::GetSubRoom2() const {
-    return pSubRoom2;
+    return _subRoom2;
 }
 // Sonstiges
 
-// prüft ob Ausgnag nach draußen, für Croosings IMMER false
 
 bool Crossing::IsExit() const {
     return false;
 }
 
-// prüft ob Ausgnag nach draußen, für Croosings IMMER false
 
 bool Crossing::IsOpen() const {
     return true;
@@ -115,22 +102,20 @@ bool Crossing::IsTransition() const {
 	return false;
 }
 
-// Prüft, ob Crossing in Raum mit roomID
 
 bool Crossing::IsInRoom(int roomID) const {
-    return pRoom1->GetRoomID() == roomID;
+    return _room1->GetID() == roomID;
 }
 
-// Prüft, ob Crossing in SubRoom mit subroomID
 
 bool Crossing::IsInSubRoom(int subroomID) const {
     bool r1, r2;
-    if (pSubRoom1 != NULL)
-        r1 = pSubRoom1->GetSubRoomID() == subroomID;
+    if (_subRoom1 != NULL)
+        r1 = _subRoom1->GetSubRoomID() == subroomID;
     else
         r1 = false;
-    if (pSubRoom2 != NULL)
-        r2 = pSubRoom2->GetSubRoomID() == subroomID;
+    if (_subRoom2 != NULL)
+        r2 = _subRoom2->GetSubRoomID() == subroomID;
     else
         r2 = false;
     return (r1 || r2);
@@ -140,14 +125,14 @@ bool Crossing::IsInSubRoom(int subroomID) const {
  * roomID wird hier nicht benötigt, aber in Transition::GetOtherSubRoom()
  * (virtuelle Funktion) */
 SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
-    if (pSubRoom1->GetSubRoomID() == subroomID)
-        return pSubRoom2;
-    else if (pSubRoom2->GetSubRoomID() == subroomID)
-        return pSubRoom1;
+    if (_subRoom1->GetSubRoomID() == subroomID)
+        return _subRoom2;
+    else if (_subRoom2->GetSubRoomID() == subroomID)
+        return _subRoom1;
     else {
     	 char tmp[CLENGTH];
     	    sprintf(tmp,"ERROR: \tCrossing::GetOtherSubRoom No exit found "
-    	    		"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetIndex(),roomID,subroomID);
+    	    		"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
         Log->Write(tmp);
         exit(0);
     }
@@ -159,7 +144,7 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
 void Crossing::WriteToErrorLog() const {
     string s;
     char tmp[CLENGTH];
-    sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetIndex(), GetPoint1().GetX(),
+    sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
     s.append(tmp);
     sprintf(tmp, "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n", GetSubRoom1()->GetSubRoomID(),
@@ -174,7 +159,7 @@ string Crossing::WriteElement() const {
 	//return "";
     string geometry;
     char tmp[CLENGTH] = "";
-    sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetIndex(),GetUniqueID());
+    sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
     geometry.append(tmp);
     //geometry.append("\t\t<door color=\"250\">\n");
     sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",

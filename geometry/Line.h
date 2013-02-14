@@ -30,64 +30,150 @@
 
 #include "Point.h"
 #include "../IO/OutputHandler.h"
-#include "../general/Macros.h"
 
+#include <string>
+
+
+// external variables
 extern OutputHandler* Log;
+
 
 class Line {
 private:
-	Point pPoint1; // (Koordinaten des ersten Punkts)
-	Point pPoint2; // (Koordinaten des zweiten Punkts)
-	Point pCentre;
+	Point _point1;
+	Point _point2;
+	Point _centre;
 
 	//unique identifier for all line elements
-	static int _UID;
-	int pUID;
+	static int _static_UID;
+	int _uid;
 
 public:
-	// Konstruktoren
+
 	Line();
 	Line(const Point& p1, const Point& p2);
 	Line(const Line& orig);
 	virtual ~Line();
 
+	/**
+	 * All Line elements (also derived class) have a unique ID
+	 * @return the unique ID of this line element.
+	 */
 	int GetUniqueID() const;
 
-	// Setter -Funktionen
-	void SetPoint1(const Point& p); // setzt die Anfangskoordinaten
-	void SetPoint2(const Point& p); // setzt die Endkoordinaten
+	/**
+	 * Set/Get the first end point of the line
+	 */
+	void SetPoint1(const Point& p);
 
-	// Getter - Funktionen
-	const Point& GetPoint1(void) const; // gibt die Koordinaten des Anfangspunkts zurück
-	const Point& GetPoint2(void) const; // gibt die Koordinaten des Endpunkts zurück
+	/**
+	 * Set/Get the second end point of the line
+	 */
+	void SetPoint2(const Point& p);
+
+
+	/**
+	 * Set/Get the first end point of the line
+	 */
+	const Point& GetPoint1(void) const;
+
+	/**
+	 * Set/Get the second end point of the line
+	 */
+	const Point& GetPoint2(void) const;
+
+	/**
+	 * Return the center of the line
+	 */
 	const Point& GetCentre(void) const;
 
-	// Ausgabe
-	virtual std::string Write() const;
 
-    // Sonstiges
+    /**
+     * @return a normal vector to this line
+     */
     Point NormalVec() const; // Normalen_Vector zu Line
+
+    /**
+     *TODO: FIXME
+     */
     double NormalComp(const Point& v) const; // Normale Komponente von v auf l
+
+    /**
+     * Note that that result must not lie on the segment
+     * @return the orthogonal projection of p on the line defined by the segment points.
+     */
     Point LotPoint(const Point& p) const;
-    Point ShortestPoint(const Point& p) const; // Punkt auf Line mit kürzstem Abstand zu p
-    bool IsInLine(const Point& p) const; // Prüft, ob p in der Wand (Segment) liegt oder außerhalb
+
+    /**
+     * @return the point on the segment with the minimum distance to p
+     */
+    Point ShortestPoint(const Point& p) const;
+
+    /**
+     * @return true if the point p lies on the line defined by the first and the second point
+     */
+    bool IsInLine(const Point& p) const;
+
+    /**
+     * @see IsInLine
+     * @return true if the point p is within the line segment defined the line end points
+     */
     bool IsInLineSegment(const Point& p) const;
     
+    /**
+     * @return the distance from the line to the point p
+     */
     double DistTo(const Point& p) const;
-    double DistToSquare(const Point& p) const;
-    double Length() const; // return the length/norm of the line
-    double LengthSquare() const;  // return the square of the norm, for convenience sving some computation time
 
-	bool operator==(const Line& l) const; // Vergleicht zwei Linien (Anfangs- und Endpunkte gleich)
+    /**
+     * @return the distance square from the line to the point p
+     */
+    double DistToSquare(const Point& p) const;
+
+
+    /**
+     * @return the length (Norm) of the line
+     */
+    double Length() const;
+
+    /**
+     * @return the lenght square of  the segment
+     */
+    double LengthSquare() const;
+
+    /**
+     * @return true if both segments are equal. The end points must be in the range of J_EPS.
+     * @see Macro.h
+     */
+	bool operator==(const Line& l) const;
+
+    /**
+     * @return true if both segments are not equal. The end points must be in the range of J_EPS.
+     * @see Macro.h
+     */
 	bool operator!=(const Line& l) const;
 
-	//http://alienryderflex.com/intersect/
-	//http://social.msdn.microsoft.com/Forums/en-US/
-	//	csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
+	/**
+	 * @see http://alienryderflex.com/intersect/
+	 * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
+	 * @return true if both segments intersect
+	 */
 	bool IntersectionWith(const Line& l) const; // check two segments for intersections
 
+	/**
+	 * @return true if the segment intersects with the circle of radius r
+	 */
 	bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
 
+
+	/**
+	 * @return a nice formated string describing the line
+	 */
+	virtual std::string Write() const;
+
+	/**
+	 * @return a nice formated string describing the line
+	 */
     std::string toString();
 
 

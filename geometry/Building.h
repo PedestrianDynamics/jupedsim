@@ -35,21 +35,34 @@
 #include <cfloat>
 #include <map>
 
+#include "Room.h"
+#include "NavLine.h"
+#include "Transition.h"
+#include "Hline.h"
+#include "Obstacle.h"
 
-class Crossing;
+
+class RoutingEngine;
+class Pedestrian;
 class Transition;
-class Hline;
-class Room;
+class LCGrid;
+
+
 
 class Building {
 private:
-    std::string pCaption; // Name des Projekts
-    std::vector<Room*> pRooms; // Liste der Räume
+    std::string _caption;
+    RoutingEngine* _routingEngine;
+    LCGrid* _linkedCellGrid;
+    std::vector<Room*> _rooms;
+    std::vector<Pedestrian*> _allPedestians;
+    /// pedestrians pathway
+    bool _savePathway;
+    std::ofstream _pathWayStream;
 
-
-	std::map<int, Crossing*> _crossings;
-	std::map<int, Transition*> _transitions;
-	std::map<int, Hline*> _hLines;
+    std::map<int, Crossing*> _crossings;
+    std::map<int, Transition*> _transitions;
+    std::map<int, Hline*> _hLines;
 
 
 public:
@@ -59,30 +72,45 @@ public:
 
     // Setter -Funktionen
     void SetCaption(std::string s);
-    void SetAllRooms(const std::vector<Room*>& rooms);
+    void SetRoutingEngine(RoutingEngine* r);
     void SetRoom(Room* room, int index);
-
+    /// delete the ped from the ped vector
+    void DeletePedestrian(Pedestrian* ped);
+    /// delete the ped from the simulation
+    void DeletePedFromSim(Pedestrian* ped);
+    void AddPedestrian(Pedestrian* ped);
 
     // Getter - Funktionen
     std::string GetCaption() const;
+    RoutingEngine* GetRoutingEngine() const;
     const std::vector<Room*>& GetAllRooms() const;
-    int GetAnzRooms() const;
-    int GetGoalsCount()const;
+    const std::vector<Pedestrian*>& GetAllPedestrians() const;
+    Pedestrian* GetPedestrian( int pedID) const;
+    int GetNumberOfRooms() const;
+    int GetNumberOfGoals()const;
     Room* GetRoom(int index) const;
     Room* GetRoom(std::string caption)const;
     Transition* GetTransition(std::string caption) const;
-    Transition* GetTransition(int id);
+    Transition* GetTransition(int id) ;
     Crossing* GetGoal(std::string caption) const;
 
-    //FIXME: obsolete shold get rid of this method
+    //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(int id);
 
+    int GetNumberOfPedestrians() const;
+    LCGrid* GetGrid() const;
 
     // Sonstiges
     void InitGeometry();
+    void InitGrid(double cellSize);
+    //void InitRoomsAndSubroomsMap();
+    void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
+    void InitSavePedPathway(std::string filename);
     void AddRoom(Room* room);
+    void Update();
+    void UpdateGrid();
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
-    void  DumpSubRoomInRoom(int roomID, int subID);
+    void DumpSubRoomInRoom(int roomID, int subID);
 
 	const std::map<int, Crossing*>& GetAllCrossings() const;
 	const std::map<int, Transition*>& GetAllTransitions() const;
@@ -103,6 +131,8 @@ public:
 	void CleanUpTheScene();
 
 
+	// saving computation
+	//bool IsDirectlyConnected(int room1, int subroom1,int room2, int subroom2);
 
 private:
 	// wird nur innerhalb von Building benötigt
