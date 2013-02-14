@@ -3,11 +3,11 @@
 
 <JPSreport project="JPS-Project" version="0.4">
 	<!-- geometry file -->
-	<Geometry file = "D:/workspace/JuPedSim/JPSreport/geo.xml" />
+	<Geometry file = "D:\\workspace\\JuPedSim\\JPSreport\\geo.xml" />
 	<!-- trajectories file and format -->
 	<Trajectories>
-		<file name="trajectories" />
-		<directory location="outputfiles/" />
+		<file name="ko-240-050-240" />
+		<path location="D:\\workspace\\JuPedSim\\JPSreport\\" />
 	</Trajectories>
 	<!-- all files in the directories will be used -->
 
@@ -35,17 +35,17 @@
 	</Velocity>
 
 	<!-- Method A (Zhang2011a) Flow and Vel -->
-	<Method_A enabled="true">
+	<Method_A enabled="false">
 		<!-- Time interval used to count the flow [fr] -->
 		<TimeInterval unit="frame">
 			70
 		</TimeInterval>
 			<!-- The coordinate of the line used to calculate the flow and velocity -->
-			<MeasurementArea id="2" />
+		<MeasurementArea id="2" />
 	</Method_A>
 
 	<!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout -->
-	<Method_B enabled="true">
+	<Method_B enabled="false">
 		<MeasurementArea id="1" />
 	</Method_B>
 
@@ -56,11 +56,10 @@
 
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
 	<Method_D enabled="true" cutbycircle="false" IsOutputGraph="false"
-		IndividualFDdata="true">
+		IndividualFDdata="false">
 		<MeasurementArea id="1" />
 		<SteadyState start="500" end="1500" /> <!-- //the begin of stationary state //the end of stationary state -->
-		<fieldAnalysis enabled="true" NRow="80" NColumn="65"
-			scale_x="10" scale_y="10" low_ed_x="-100" low_ed_x="-100" />
+		<GetProfile enabled="true" scale_x="10" scale_y="10"/>
 
 
 		<!-- // Adjust whether cut each original Voronoi cell by a circle (for 

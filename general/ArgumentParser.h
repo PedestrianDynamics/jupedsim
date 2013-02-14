@@ -68,6 +68,7 @@ private:
 	double pLine_endx;
 	double pLine_endy;
 	char	pVComponent;
+	int pDelatT_Vins;
 	bool pIsMethodA;
 	int pTimeInterval_A;
 	bool pIsMethodB;
@@ -76,14 +77,11 @@ private:
 	bool pIsCutByCircle;
 	bool pIsOutputGraph;
 	bool pIsIndividualFD;
+	bool pIsGetProfile;
 	double pSteady_start;
 	double pSteady_end;
-	int pNrow;
-	int pNcolumn;
 	int pScale_x;
 	int pScale_y;
-	double pLow_ed_x;
-	double pLow_ed_y;
 
 
 	// private Funktionen
@@ -95,8 +93,10 @@ public:
 
 	// Getter-Funktionen
 	const string& GetTrajectoriesFile() const;
+	const string& GetTrajectoryName() const;
 	const string& GetMeasureAreaId() const;
-
+	const FileFormat& GetFileFormat() const;
+	const string& GetGeometryFilename() const;
 
 	double GetLengthMeasurementArea() const;
 	polygon_2d GetMeasureArea() const;
@@ -105,6 +105,7 @@ public:
 	double GetLine_endx() const;
 	double GetLine_endy() const;
 	char	GetVComponent() const;
+	int GetDelatT_Vins() const;
 	bool GetIsMethodA() const;
 	int GetTimeInterval_A() const;
 	bool GetIsMethodB() const;
@@ -115,8 +116,7 @@ public:
 	bool GetIsIndividualFD() const;
 	double GetSteady_start() const;
 	double GetSteady_end() const;
-	int GetNrow() const;
-	int GetNcolumn() const;
+	bool GetIsGetProfile() const;
 	int GetScale_x() const;
 	int GetScale_y() const;
 
@@ -126,10 +126,10 @@ public:
 	void SetPort(int port);
 	void SetTrajectoriesFile(const string& trajectoriesFile);
 	void SetTrajectoriesPath(const string& trajectoriesPath);
-	const string& GetGeometryFilename() const;
+
 
 	//vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
-	const FileFormat& GetFileFormat() const;
+
 
 
 	void ParseArgs(int argc, char **argv);

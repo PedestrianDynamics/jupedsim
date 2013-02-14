@@ -61,14 +61,14 @@ int main(int argc, char **argv) {
 	args->ParseArgs(argc, argv);
 
 	// create and init the simulation engine
-	Analysis analysis = Analysis();
+	 Analysis analysis = Analysis();
 	analysis.InitArgs(args);
-/*
+
 	// Simulation
 	Log->Write("INFO: \tStart Analysis()\n");
-	analysis.RunAnalysis();
+	//analysis.RunAnalysis();
 	Log->Write("INFO: \tEnd Analysis()\n");
-*/
+
 	//do the last cleaning
 	delete args;
 	delete Log;

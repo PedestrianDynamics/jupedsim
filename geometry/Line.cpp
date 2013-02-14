@@ -373,7 +373,7 @@ bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pe
 		sprintf(tmp,"there is a bug in 'isLineCrossingCircle', delta(%f) can t be <0 at this point.",delta);
 		Log->Write(tmp);
 		Log->Write("press ENTER");
-		return false; //fixme
+		return false; //
 		//getc(stdin);
 	}
 

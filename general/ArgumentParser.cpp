@@ -121,17 +121,23 @@ ArgumentParser::ArgumentParser() {
 	// Default parameter values
 	pGeometryFilename = "geo.xml";
 
+	pLine_startx = 0;
+	pLine_starty = 0;
+	pLine_endx = 0;
+	pLine_endy = 0;
 	pMeasureAreaId = '1';
 	pLengthMeasurementArea = 200;
 	pVComponent = 'B';
 	pIsMethodA = false;
-	pTimeInterval_A = 70;
+	pTimeInterval_A = 160;
+	pDelatT_Vins = 5;
 	pIsMethodB = false;
 	pIsMethodC =true;
 	pIsMethodD = false;
 	pIsCutByCircle = false;
 	pIsOutputGraph= false;
 	pIsIndividualFD = false;
+	pIsGetProfile =false;
 	pSteady_start =100;
 	pSteady_end = 1000;
 	pScale_x = 10;
@@ -210,19 +216,23 @@ void ArgumentParser::ParseIniFile(string inifile){
 		if(format=="vtk") pFormat=FORMAT_VTK;*/
 
 		//a file descriptor was given
-		string trajectory_path;
-		if(!xTrajectories.getChildNode("directory").isEmpty()){
+		//if(!xTrajectories.getChildNode("directory").isEmpty()){
 			pTrajectoryName =
 					xmltoa(
 						xTrajectories.getChildNode(
 								"file").getAttribute("name"), pTrajectoryName.c_str());
-			pTrajectoriesFile =
+			string trajectoriesfile =
 					xmltoa(
 						xTrajectories.getChildNode(
-								"directory").getAttribute("location"))+ string(pTrajectoryName)+".xml";
+								"path").getAttribute("location"))+ string(pTrajectoryName)+".xml";
+/*			pTrajectoriesFile =
+								xmltoa(
+									xTrajectories.getChildNode(
+											"path").getAttribute("location"),pTrajectoriesFile.c_str());*/
+			pTrajectoriesFile = trajectoriesfile.c_str();
 
-		Log->Write("INFO: \ttrajectory file  <" + string(pTrajectoriesFile)+">");
-		}
+		Log->Write("INFO: \ttrajectory file  <" + pTrajectoriesFile+">");
+		//}
 
 
 	}
@@ -302,6 +312,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string UseXComponent = string(xVelocity.getChildNode("UseXComponent").getText());
 		string UseYComponent = string(xVelocity.getChildNode("UseYComponent").getText());
 		string HalfFrameNumberToUse = string(xVelocity.getChildNode("HalfFrameNumberToUse").getText());
+		pDelatT_Vins = atof(HalfFrameNumberToUse.c_str());
 		if(UseXComponent == "true"&&UseYComponent == "false"){
 			pVComponent = 'X';
 			Log->Write("INFO: \tonly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
@@ -316,7 +327,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 		else{
 			Log->Write("INFO: \ttype of velocity is not selected, please check it !!! " );
-			return;
+			exit(0) ;
 		}
 	}
 
@@ -347,13 +358,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tMethod C is selected" );
 	}
 
-/*
-	<Method_D enabled="true" cutbycircle="true" IsOutputGraph="false"
-		IndividualFDdata="true">
-		<MeasurementArea id="1" />
-		<SteadyState start="" end="" /> <!-- //the begin of stationary state //the end of stationary state -->
-		<fieldAnalysis enabled="true" NRow="80" NColumn="65"
-			scale_x="10" scale_y="10" low_ed_x="-100" low_ed_x="-100" />*/
 
 	// method D
 	XMLNode xMethod_D=xMainNode.getChildNode("Method_D");
@@ -374,19 +378,13 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pSteady_end = atof(steady_end);
 			Log->Write("INFO: \tthe steady state is from  <" + string(steady_start) + "> to <"+string(steady_end) +"> frame"  );
 		}
-		if(string(xMethod_D.getChildNode("fieldAnalysis").getAttribute("enabled")) == "true"){
-			const char* Nrow = xMethod_D.getChildNode("fieldAnalysis").getAttribute("NRow");
-			pNrow = atoi(Nrow);
-			const char* Ncolumn = xMethod_D.getChildNode("fieldAnalysis").getAttribute("NColumn");
-			pNcolumn = atoi(Ncolumn);
-			const char* scale_x = xMethod_D.getChildNode("fieldAnalysis").getAttribute("scale_x");
+
+		if(string(xMethod_D.getChildNode("GetProfile").getAttribute("enabled")) == "true"){
+			pIsGetProfile = true;
+			const char* scale_x = xMethod_D.getChildNode("GetProfile").getAttribute("scale_x");
 			pScale_x = atoi(scale_x);
-			const char* scale_y = xMethod_D.getChildNode("fieldAnalysis").getAttribute("scale_y");
+			const char* scale_y = xMethod_D.getChildNode("GetProfile").getAttribute("scale_y");
 			pScale_y = atoi(scale_y);
-			const char* low_ed_x = xMethod_D.getChildNode("fieldAnalysis").getAttribute("low_ed_x");
-			pLow_ed_x = atof(low_ed_x);
-			const char* low_ed_y = xMethod_D.getChildNode("fieldAnalysis").getAttribute("low_ed_y");
-			pLow_ed_y = atof(low_ed_y);
 			Log->Write("INFO: \tprofiles will be calculated" );
 			Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: <" + string(scale_x) + "> and <"+string(scale_y) +">"  );
 		}
@@ -411,6 +409,10 @@ const string& ArgumentParser::GetGeometryFilename() const {
 
 const string& ArgumentParser::GetTrajectoriesFile() const {
 	return pTrajectoriesFile;
+}
+
+const string& ArgumentParser::GetTrajectoryName() const {
+	return pTrajectoryName;
 }
 
 void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
@@ -449,6 +451,11 @@ char	ArgumentParser::GetVComponent() const {
 	return pVComponent;
 }
 
+int ArgumentParser::GetDelatT_Vins() const {
+	return pDelatT_Vins;
+}
+
+
 bool ArgumentParser::GetIsMethodA() const {
 	return pIsMethodA;
 }
@@ -481,6 +488,10 @@ bool ArgumentParser::GetIsIndividualFD() const {
 	return pIsIndividualFD;
 }
 
+bool ArgumentParser::GetIsGetProfile() const {
+	return pIsGetProfile;
+}
+
 double ArgumentParser::GetSteady_start() const {
 	return pSteady_start;
 }
@@ -489,17 +500,11 @@ double ArgumentParser::GetSteady_end() const {
 	return pSteady_end;
 }
 
-int ArgumentParser::GetNrow() const {
-	return pNrow;
-}
-
-int ArgumentParser::GetNcolumn() const {
-	return pNcolumn;
-}
 
 int ArgumentParser::GetScale_x() const {
 	return pScale_x;
 }
+
 int ArgumentParser::GetScale_y() const {
 	return pScale_y;
 }
