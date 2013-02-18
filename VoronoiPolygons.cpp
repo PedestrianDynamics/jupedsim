@@ -14,7 +14,7 @@
 struct PtsSort
 {
    point_2d pt;
-   float angle;
+   double angle;
 };
 bool myclockwise(const   PtsSort&   s1,const   PtsSort&   s2)
 {
@@ -22,22 +22,22 @@ bool myclockwise(const   PtsSort&   s1,const   PtsSort&   s2)
   return   s1.angle   >   s2.angle;
 
 }
-float angleSubtendedBy(point_2d point,point_2d about);
+double angleSubtendedBy(point_2d point,point_2d about);
 bool compareByAngle(point_2d p1, point_2d p2, point_2d about);
 model::segment<point_2d> forceSegmentClockwise(model::segment<point_2d> s1, point_2d about);
 bool segIntersects(model::segment<point_2d> *s1, model::segment<point_2d> s2);
 
 
 
-std::vector<polygon_2d>  getVoronoiPolygons(float* xs, float* ys, int Npoints, float xmin, float xmax, float ymin, float ymax)
+std::vector<polygon_2d>  getVoronoiPolygons(double* xs, double* ys, int Npoints, double xmin, double xmax, double ymin, double ymax)
 {
    VoronoiDiagramGenerator vd;
-   float x1,y1,x2,y2;
+   double x1,y1,x2,y2;
 
    std::vector<model::segment<point_2d>* > edges;              // Edges of the Voronoi diagram.
    std::vector<model::segment<point_2d>* > boundaries;         // Boundaries of the diagram.
    std::vector<point_2d> intersections;                 //Intersections of the Voronoi diagram with the bounding box
-   std::vector<model::segment<point_2d>* > intersecting_edges;
+   //std::vector<model::segment<point_2d>* > intersecting_edges;
    std::vector<model::segment<point_2d > *>::iterator edge_iterator;
 
    std::vector<polygon_2d> polygons;
@@ -100,9 +100,15 @@ std::vector<polygon_2d>  getVoronoiPolygons(float* xs, float* ys, int Npoints, f
       BOOST_FOREACH(model::segment<point_2d> *boundary_segment,boundaries)
       {
          //intersection_inserter<point_2d>(*boundary_segment, *edge_segment,back_inserter(intersections) );
-         intersection(*boundary_segment, *edge_segment, intersections );
+    	  std::deque<point_2d> temp_intersection;
+    	  intersection(*boundary_segment, *edge_segment, temp_intersection );
+    	  if(temp_intersection.size()==1)
+    	  {
+    		  intersections.push_back(temp_intersection[0]);
+    	  }
       }
    }
+
    // 2)
    BOOST_FOREACH(model::segment<point_2d> *boundary_segment,boundaries) {intersections.push_back( (*boundary_segment).first );}
    // 3)
@@ -160,7 +166,7 @@ std::vector<polygon_2d>  getVoronoiPolygons(float* xs, float* ys, int Npoints, f
    {
       point_2d midpoint = (*edge_segment).first;
       add_point(midpoint,(*edge_segment).second);
-      divide_value(midpoint,2);
+      divide_value(midpoint,2.0);
       midpoints.push_back(midpoint);
    }
 
@@ -176,19 +182,23 @@ std::vector<polygon_2d>  getVoronoiPolygons(float* xs, float* ys, int Npoints, f
 
          // 3) 
     	  model::segment<point_2d> midpoint_seg(thispoint,midpoint);
-         intersecting_edges.clear();
+         //intersecting_edges.clear();
+    	  std::vector<model::segment<point_2d>* > intersecting_edges;
          // 4)
          //********************************************************************
          BOOST_FOREACH (model::segment<point_2d> *egs, edges)
          {
-        	 if(!(segIntersects(egs ,midpoint_seg)))
+        	 if((segIntersects(egs ,midpoint_seg)))
         	 {
-        		 back_inserter(intersecting_edges)++= egs;
+        		 //back_inserter(intersecting_edges)++= egs;
+        		 intersecting_edges.push_back(egs);
         	 }
          }
          //********************************************************************
-         //remove_copy_if(edges.begin(), edges.end(), back_inserter(intersecting_edges),bind(&segIntersects,_1,midpoint_seg));
-         if (intersecting_edges.size() == 1) {thispolygon.push_back(intersecting_edges[0]); }
+         if (intersecting_edges.size() == 1)
+         {
+        	 thispolygon.push_back(intersecting_edges[0]);
+         }
       }
 
       // 5
@@ -198,10 +208,7 @@ std::vector<polygon_2d>  getVoronoiPolygons(float* xs, float* ys, int Npoints, f
     	  **edge_iterator = forceSegmentClockwise(**edge_iterator,thispoint);
       }
       BOOST_FOREACH (model::segment<point_2d> *edge_segment,thispolygon) { polypoints.push_back( (*edge_segment).first);}
-/*      for (int i=0;i<(int)thispolygon.size();i++)
-      {
-   	   std::cout <<"please pay attention"<< dsv(thispolygon[i]) << std::endl;
-      }*/
+
       // 6)
       //******************************************************************************
       PtsSort *pts;
@@ -242,7 +249,7 @@ std::vector<polygon_2d>  getVoronoiPolygons(float* xs, float* ys, int Npoints, f
 
 }
 
-float angleSubtendedBy(point_2d point,point_2d about)
+double angleSubtendedBy(point_2d point,point_2d about)
 {
       /*
          Calculate the bearing from 'about' to 'point'
@@ -250,7 +257,7 @@ float angleSubtendedBy(point_2d point,point_2d about)
       */
       
       subtract_point(point,about);
-      float angle=0;
+      double angle=0;
 
       if (point.x() > 0.  && point.y() > 0.)
          {
@@ -299,13 +306,13 @@ bool compareByAngle(point_2d p1, point_2d p2, point_2d about)
 
 model::segment<point_2d> forceSegmentClockwise(model::segment<point_2d> s1, point_2d about)
 {
-   //float ex = s1.second.x() - s1.first.x();
-   //float ey = s1.second.y() - s1.first.y();
-	float ex1=s1.first.x()-about.x();
-	float ey1=s1.first.y()-about.y();
-	float ex2=s1.second.x()-about.x();
-	float ey2=s1.second.y()-about.y();
-   float lambda;
+   //double ex = s1.second.x() - s1.first.x();
+   //double ey = s1.second.y() - s1.first.y();
+	double ex1=s1.first.x()-about.x();
+	double ey1=s1.first.y()-about.y();
+	double ex2=s1.second.x()-about.x();
+	double ey2=s1.second.y()-about.y();
+   double lambda;
 	lambda=ex1*ey2-ex2*ey1;
    //lambda = s1.first.y()*ex - s1.first.x()*ey + about.x()*ey - about.y()*ex;
 
@@ -322,18 +329,28 @@ model::segment<point_2d> forceSegmentClockwise(model::segment<point_2d> s1, poin
 bool segIntersects(model::segment<point_2d> *s1, model::segment<point_2d> s2)
 {
 	std::vector<point_2d> intersections;
-//	std::vector<point_2d>::iterator intersections_iterator;
-//  intersection_inserter<point_2d>(*s1, s2,back_inserter(intersections) );
-  intersection(*s1, s2,intersections );
-  return intersections.size() == 0;
+	double eps = 10.0E-16;
+	double midx =(s1->first.x()+s1->second.x())*0.5;
+	double midy =(s1->first.y()+s1->second.y())*0.5;
+	if( ((fabs(midx-s2.first.x())<eps) && (fabs(midy-s2.first.y())<eps))
+			||((fabs(midx-s2.second.x())<eps) && (fabs(midy-s2.second.y())<eps))
+	  )
+	{
+		return true;
+	}
+	else
+	{
+		intersection(*s1, s2,intersections );
+		return intersections.size() == 1;
+	}
 }
 //----------------------------------------------------------------------------------------------
-std::vector<polygon_2d>  cutPolygonsWithGgeometry(std::vector<polygon_2d> polygon, polygon_2d Geometry, float* xs, float* ys)
+std::vector<polygon_2d>  cutPolygonsWithGeometry(std::vector<polygon_2d> polygon, polygon_2d Geometry, double* xs, double* ys)
 {
 	std::vector<polygon_2d> intersetionpolygons;
 	std::vector<polygon_2d>::iterator polygon_iterator;
-	std::vector<float> tempXs;
-	std::vector<float> tempYs;
+	std::vector<double> tempXs;
+	std::vector<double> tempYs;
 	int temp=0;
 	for(polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
@@ -341,15 +358,17 @@ std::vector<polygon_2d>  cutPolygonsWithGgeometry(std::vector<polygon_2d> polygo
 		polygon_list v;
 //		intersection_inserter<polygon_2d>(Geometry, *polygon_iterator, std::back_inserter(v));
 		intersection(Geometry, *polygon_iterator, v);
-
+		//std::cout<<"polygon without clip:\t"<<dsv(*polygon_iterator)<<std::endl;
 		//judge whether the polygon is cut into two separate parts,if so delete the part without including the point
 		if(v.size()==1)
 		{
 			if(within(make<point_2d>(xs[temp], ys[temp]), v[0]))
 			{
+				correct(v[0]);
 				intersetionpolygons.push_back(v[0]);
 				tempXs.push_back(xs[temp]);
 				tempYs.push_back(ys[temp]);
+				//std::cout<<"clipped polygon:\t"<<dsv(v[0])<<std::endl;
 				//cout<< area(v[0])/area(*polygon_iterator)<<'\t';
 			}
 		}
@@ -359,6 +378,7 @@ std::vector<polygon_2d>  cutPolygonsWithGgeometry(std::vector<polygon_2d> polygo
 			{
 				if(within(make<point_2d>(xs[temp], ys[temp]), *it))
 				{
+					//correct(*it);
 					intersetionpolygons.push_back(*it);
 					tempXs.push_back(xs[temp]);
 					tempYs.push_back(ys[temp]);
@@ -377,10 +397,11 @@ std::vector<polygon_2d>  cutPolygonsWithGgeometry(std::vector<polygon_2d> polygo
 	BOOST_FOREACH(polygon_2d &poly, intersetionpolygons)
 	{
 		correct(poly);
+
 	}
 	return intersetionpolygons;
 }
-std::vector<polygon_2d>  cutPolygonsWithSquare(std::vector<polygon_2d> polygon, float* xs, float* ys, float length)
+std::vector<polygon_2d>  cutPolygonsWithSquare(std::vector<polygon_2d> polygon, double* xs, double* ys, double length)
 {
 	// length is the side length of the square that used to cut the voronoi cell
 
@@ -424,7 +445,7 @@ std::vector<polygon_2d>  cutPolygonsWithSquare(std::vector<polygon_2d> polygon, 
 	}
 	return intersetionpolygons;
 }
-std::vector<polygon_2d>  cutPolygonsWithCircle(std::vector<polygon_2d> polygon, float* xs, float* ys, float radius)
+std::vector<polygon_2d>  cutPolygonsWithCircle(std::vector<polygon_2d> polygon, double* xs, double* ys, double radius)
 {
 	std::vector<polygon_2d> intersetionpolygons;
 	std::vector<polygon_2d>::iterator polygon_iterator;
@@ -433,7 +454,7 @@ std::vector<polygon_2d>  cutPolygonsWithCircle(std::vector<polygon_2d> polygon, 
 	{
 		polygon_2d circle;
 		{
-			float Cpoint[361][2];
+			double Cpoint[361][2];
 			for(int angle=0;angle<361;angle++)
 			{
 				Cpoint[angle][0]=xs[temp]+radius*cos(angle*PI/180);

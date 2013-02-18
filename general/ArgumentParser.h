@@ -54,34 +54,32 @@ class ArgumentParser {
 private:
 
 	FileFormat pFormat;
-
-	string pGeometryFilename;
-	string pErrorLogFile;
-	string pTrajectoriesFile;
-	string pTrajectoryName;
-
-	string pMeasureAreaId;
-	double pLengthMeasurementArea;
-	polygon_2d pMeasureArea;
-	double pLine_startx;
-	double pLine_starty;
-	double pLine_endx;
-	double pLine_endy;
-	char	pVComponent;
-	int pDelatT_Vins;
-	bool pIsMethodA;
-	int pTimeInterval_A;
-	bool pIsMethodB;
-	bool pIsMethodC;
-	bool pIsMethodD;
-	bool pIsCutByCircle;
-	bool pIsOutputGraph;
-	bool pIsIndividualFD;
-	bool pIsGetProfile;
-	double pSteady_start;
-	double pSteady_end;
-	int pScale_x;
-	int pScale_y;
+	string _geometryFileName;
+	string _errorLogFile;
+	string _trajectoryFile;
+	string _trajectoryName;
+	string _measureAreaId;
+	double _lengthMeasureArea;
+	polygon_2d _measureArea;
+	double _lineStartX;
+	double _lineStartY;
+	double _lineEndX;
+	double _lineEndY;
+	char	_vComponent;
+	int _delatTVInst;
+	bool _isMethodA;
+	int _timeIntervalA;
+	bool _isMethodB;
+	bool _isMethodC;
+	bool _isMethodD;
+	bool _isCutByCircle;
+	bool _isOutputGraph;
+	bool _isIndividualFD;
+	bool _isGetProfile;
+	double _steadyStart;
+	double _steadyEnd;
+	int _scaleX;
+	int _scaleY;
 	int _log;
 
 
@@ -99,38 +97,32 @@ public:
 	const FileFormat& GetFileFormat() const;
 	const string& GetGeometryFilename() const;
 	const string& GetErrorLogFile() const;
-
 	double GetLengthMeasurementArea() const;
 	polygon_2d GetMeasureArea() const;
-	double GetLine_startx() const;
-	double GetLine_starty() const;
-	double GetLine_endx() const;
-	double GetLine_endy() const;
+	double GetLineStartX() const;
+	double GetLineStartY() const;
+	double GetLineEndX() const;
+	double GetLineEndY() const;
 	char	GetVComponent() const;
 	int GetDelatT_Vins() const;
 	bool GetIsMethodA() const;
-	int GetTimeInterval_A() const;
+	int GetTimeIntervalA() const;
 	bool GetIsMethodB() const;
 	bool GetIsMethodC() const;
 	bool GetIsMethodD() const;
 	bool GetIsCutByCircle() const;
 	bool GetIsOutputGraph() const;
 	bool GetIsIndividualFD() const;
-	double GetSteady_start() const;
-	double GetSteady_end() const;
+	double GetSteadyStart() const;
+	double GetSteadyEnd() const;
 	bool GetIsGetProfile() const;
-	int GetScale_x() const;
-	int GetScale_y() const;
+	int GetScaleX() const;
+	int GetScaleY() const;
 	int GetLog() const;
-
-
-
 	void SetHostname(const string& hostname);
 	void SetPort(int port);
 	void SetTrajectoriesFile(const string& trajectoriesFile);
 	void SetTrajectoriesPath(const string& trajectoriesPath);
-
-
 	void ParseArgs(int argc, char **argv);
 
 	/**

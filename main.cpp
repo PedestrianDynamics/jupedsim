@@ -62,11 +62,11 @@ int main(int argc, char **argv) {
 
 	// create and init the simulation engine
 	 Analysis analysis = Analysis();
-	analysis.InitArgs(args);
+	 analysis.InitArgs(args);
 
 	// Simulation
 	Log->Write("INFO: \tStart Analysis()\n");
-	//analysis.RunAnalysis();
+	analysis.RunAnalysis();
 	Log->Write("INFO: \tEnd Analysis()\n");
 
 	//do the last cleaning

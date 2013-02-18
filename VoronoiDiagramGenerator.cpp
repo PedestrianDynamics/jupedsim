@@ -55,7 +55,7 @@ VoronoiDiagramGenerator::~VoronoiDiagramGenerator()
 
 
 
-bool VoronoiDiagramGenerator::generateVoronoi(float *xValues, float *yValues, int numPoints, float minX, float maxX, float minY, float maxY, float minDist)
+bool VoronoiDiagramGenerator::generateVoronoi(double *xValues, double *yValues, int numPoints, double minX, double maxX, double minY, double maxY, double minDist)
 {
 	cleanup();
 	cleanupEdges();
@@ -104,7 +104,7 @@ bool VoronoiDiagramGenerator::generateVoronoi(float *xValues, float *yValues, in
 	
 	siteidx = 0;
 	geominit();
-	float temp = 0;
+	double temp = 0;
 	if(minX > maxX)
 	{
 		temp = minX;
@@ -284,12 +284,12 @@ struct Site * VoronoiDiagramGenerator::rightreg(struct Halfedge *he)
 
 void VoronoiDiagramGenerator::geominit()
 {	
-	float sn;
+	double sn;
 
 	freeinit(&efl, sizeof(Edge));
 	nvertices = 0;
 	nedges = 0;
-	sn = (float)nsites+4;
+	sn = (double)nsites+4;
 	sqrt_nsites = (int)sqrt(sn);
 	deltay = ymax - ymin;
 	deltax = xmax - xmin;
@@ -298,7 +298,7 @@ void VoronoiDiagramGenerator::geominit()
 
 struct Edge * VoronoiDiagramGenerator::bisect(struct Site *s1,struct	Site *s2)
 {
-	float dx,dy,adx,ady;
+	double dx,dy,adx,ady;
 	struct Edge *newedge;	
 
 	newedge = (struct Edge *) getfree(&efl);
@@ -314,7 +314,7 @@ struct Edge * VoronoiDiagramGenerator::bisect(struct Site *s1,struct	Site *s2)
 	dy = s2->coord.y - s1->coord.y;
 	adx = dx>0 ? dx : -dx;					//make sure that the difference in positive
 	ady = dy>0 ? dy : -dy;
-	newedge -> c = (float)(s1->coord.x * dx + s1->coord.y * dy + (dx*dx + dy*dy)*0.5);//get the slope of the line
+	newedge -> c = (double)(s1->coord.x * dx + s1->coord.y * dy + (dx*dx + dy*dy)*0.5);//get the slope of the line
 
 	if (adx>ady)
 	{	
@@ -338,7 +338,7 @@ struct Site * VoronoiDiagramGenerator::intersect(struct Halfedge *el1, struct Ha
 {
 	struct	Edge *e1,*e2, *e;
 	struct  Halfedge *el;
-	float d, xint, yint;
+	double d, xint, yint;
 	int right_of_site;
 	struct Site *v;
 	
@@ -389,7 +389,7 @@ int VoronoiDiagramGenerator::right_of(struct Halfedge *el,struct Point_V *p)
 	struct Edge *e;
 	struct Site *topsite;
 	int right_of_site, above, fast;
-	float dxp, dyp, dxs, t1, t2, t3, yl;
+	double dxp, dyp, dxs, t1, t2, t3, yl;
 	
 	e = el -> ELedge;
 	topsite = e -> reg[1];
@@ -443,12 +443,12 @@ void VoronoiDiagramGenerator::endpoint(struct Edge *e,int lr,struct Site * s)
 }
 
 
-float VoronoiDiagramGenerator::dist(struct Site *s,struct Site *t)
+double VoronoiDiagramGenerator::dist(struct Site *s,struct Site *t)
 {
-	float dx,dy;
+	double dx,dy;
 	dx = s->coord.x - t->coord.x;
 	dy = s->coord.y - t->coord.y;
-	return (float)(sqrt(dx*dx + dy*dy));
+	return (double)(sqrt(dx*dx + dy*dy));
 }
 
 
@@ -473,13 +473,13 @@ void VoronoiDiagramGenerator::ref(struct Site *v)
 }
 
 //push the HalfEdge into the ordered linked list of vertices
-void VoronoiDiagramGenerator::PQinsert(struct Halfedge *he,struct Site * v, float offset)
+void VoronoiDiagramGenerator::PQinsert(struct Halfedge *he,struct Site * v, double offset)
 {
 	struct Halfedge *last, *next;
 	
 	he -> vertex = v;
 	ref(v);
-	he -> ystar = (float)(v -> coord.y + offset);
+	he -> ystar = (double)(v -> coord.y + offset);
 	last = &PQhash[PQbucket(he)];
 	while ((next = last -> PQnext) != (struct Halfedge *) NULL &&
 		(he -> ystar  > next -> ystar  ||
@@ -656,7 +656,7 @@ void VoronoiDiagramGenerator::cleanupEdges()
 
 }
 
-void VoronoiDiagramGenerator::pushGraphEdge(float x1, float y1, float x2, float y2)
+void VoronoiDiagramGenerator::pushGraphEdge(double x1, double y1, double x2, double y2)
 {
 	GraphEdge* newEdge = new GraphEdge;
 	newEdge->next = allEdges;
@@ -680,13 +680,13 @@ char * VoronoiDiagramGenerator::myalloc(unsigned n)
 /* for those who don't have Cherry's plot */
 /* #include <plot.h> */
 void VoronoiDiagramGenerator::openpl(){}
-void VoronoiDiagramGenerator::line(float x1, float y1, float x2, float y2)
+void VoronoiDiagramGenerator::line(double x1, double y1, double x2, double y2)
 {	
 	pushGraphEdge(x1,y1,x2,y2);
 
 }
-void VoronoiDiagramGenerator::circle(float x, float y, float radius){}
-void VoronoiDiagramGenerator::range(float minX, float minY, float maxX, float maxY){}
+void VoronoiDiagramGenerator::circle(double x, double y, double radius){}
+void VoronoiDiagramGenerator::range(double minX, double minY, double maxX, double maxY){}
 
 
 
@@ -726,16 +726,16 @@ void VoronoiDiagramGenerator::out_triple(struct Site *s1, struct Site *s2,struct
 
 void VoronoiDiagramGenerator::plotinit()
 {
-	float dx,dy,d;
+	double dx,dy,d;
 	
 	dy = ymax - ymin;
 	dx = xmax - xmin;
-	d = (float)(( dx > dy ? dx : dy) * 1.1);
-	pxmin = (float)(xmin - (d-dx)/2.0);
-	pxmax = (float)(xmax + (d-dx)/2.0);
-	pymin = (float)(ymin - (d-dy)/2.0);
-	pymax = (float)(ymax + (d-dy)/2.0);
-	cradius = (float)((pxmax - pxmin)/350.0);
+	d = (double)(( dx > dy ? dx : dy) * 1.1);
+	pxmin = (double)(xmin - (d-dx)/2.0);
+	pxmax = (double)(xmax + (d-dx)/2.0);
+	pymin = (double)(ymin - (d-dy)/2.0);
+	pymax = (double)(ymax + (d-dy)/2.0);
+	cradius = (double)((pxmax - pxmin)/350.0);
 	openpl();
 	range(pxmin, pymin, pxmax, pymax);
 }
@@ -744,7 +744,7 @@ void VoronoiDiagramGenerator::plotinit()
 void VoronoiDiagramGenerator::clip_line(struct Edge *e)
 {
 	struct Site *s1, *s2;
-	float x1=0,x2=0,y1=0,y2=0;
+	double x1=0,x2=0,y1=0,y2=0;
 
 	x1 = e->reg[0]->coord.x;
 	x2 = e->reg[1]->coord.x;

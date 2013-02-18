@@ -19,7 +19,8 @@ using namespace std;
 
 void ArgumentParser::Usage() {
 
-	cout<<" JPSreport.exe --inifile=input.xml"<<endl;
+	Log->Write("Usage: \n");
+	Log->Write("\tJPSreport.exe --inifile=input.xml\n");
 /*
 	fprintf(stderr,
 			"Usage: program options\n\n"
@@ -119,31 +120,30 @@ void ArgumentParser::Usage() {
 
 ArgumentParser::ArgumentParser() {
 	// Default parameter values
-	pGeometryFilename = "geo.xml";
+	_geometryFileName = "geo.xml";
 
-	pLine_startx = 0;
-	pLine_starty = 0;
-	pLine_endx = 0;
-	pLine_endy = 0;
-	pMeasureAreaId = '1';
-	pLengthMeasurementArea = 200;
-	pVComponent = 'B';
-	pIsMethodA = false;
-	pTimeInterval_A = 160;
-	pDelatT_Vins = 5;
-	pIsMethodB = false;
-	pIsMethodC =true;
-	pIsMethodD = false;
-	pIsCutByCircle = false;
-	pIsOutputGraph= false;
-	pIsIndividualFD = false;
-	pIsGetProfile =false;
-	pSteady_start =100;
-	pSteady_end = 1000;
-	pScale_x = 10;
-	pScale_y = 10;
-
-	pErrorLogFile="./Logfile.dat";
+	_lineStartX = 0;
+	_lineStartY = 0;
+	_lineEndX = 0;
+	_lineEndY = 0;
+	_measureAreaId = '1';
+	_lengthMeasureArea = 200;
+	_vComponent = 'B';
+	_isMethodA = false;
+	_timeIntervalA = 160;
+	_delatTVInst = 5;
+	_isMethodB = false;
+	_isMethodC =false;
+	_isMethodD = false;
+	_isCutByCircle = false;
+	_isOutputGraph= false;
+	_isIndividualFD = false;
+	_isGetProfile =false;
+	_steadyStart =100;
+	_steadyEnd = 1000;
+	_scaleX = 10;
+	_scaleY = 10;
+	_errorLogFile="./Logfile.dat";
 	_log=1; //no output wanted
 	pFormat=FORMAT_XML_PLAIN;
 }
@@ -160,6 +160,9 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			{0, 0, 0, 0}
 	};
 
+	if(argc==1){
+		Usage();
+	}
 	while ((c = getopt_long_only(argc, argv,
 			"q:h",
 			long_options, &option_index)) != -1) {
@@ -201,7 +204,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	XMLNode xGeometry = xMainNode.getChildNode("Geometry");
 	if(!xGeometry.isEmpty()){
 		string geometry = xmltoa(xGeometry.getAttribute("file"));
-		pGeometryFilename =geometry.c_str();
+		_geometryFileName =geometry.c_str();
 		Log->Write("INFO: \tgeometry  <"+geometry+">");
 	}
 
@@ -217,25 +220,17 @@ void ArgumentParser::ParseIniFile(string inifile){
 		if(format=="vtk") pFormat=FORMAT_VTK;*/
 
 		//a file descriptor was given
-		//if(!xTrajectories.getChildNode("directory").isEmpty()){
-			pTrajectoryName =
+			_trajectoryName =
 					xmltoa(
 						xTrajectories.getChildNode(
-								"file").getAttribute("name"), pTrajectoryName.c_str());
+								"file").getAttribute("name"), _trajectoryName.c_str());
 			string trajectoriesfile =
 					xmltoa(
 						xTrajectories.getChildNode(
-								"path").getAttribute("location"))+ string(pTrajectoryName)+".xml";
-/*			pTrajectoriesFile =
-								xmltoa(
-									xTrajectories.getChildNode(
-											"path").getAttribute("location"),pTrajectoriesFile.c_str());*/
-			pTrajectoriesFile = trajectoriesfile.c_str();
+								"path").getAttribute("location"))+ string(_trajectoryName)+".xml";
+			_trajectoryFile = trajectoriesfile.c_str();
 
-		Log->Write("INFO: \ttrajectory file  <" + pTrajectoriesFile+">");
-		//}
-
-
+		Log->Write("INFO: \ttrajectory file  <" + _trajectoryFile+">");
 	}
 
 	//measurement area
@@ -243,7 +238,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	if(!xMeasurementArea.isEmpty()){
 		if(!xMeasurementArea.getChildNode("Area_B").isEmpty())
 		{
-			pMeasureAreaId =
+			_measureAreaId =
 							xmltoa(
 									xMeasurementArea.getChildNode(
 											"Area_B").getAttribute("id"));
@@ -259,7 +254,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 			const char* box_p3x = xmltoa(xBox.getChildNode("p3").getAttribute("x"));
 			const char* box_p3y = xmltoa(xBox.getChildNode("p3").getAttribute("y"));
 			const char* box_p4x = xmltoa(xBox.getChildNode("p4").getAttribute("x"));
-			const char* box_p4y = xmltoa(xBox.getChildNode("p5").getAttribute("y"));
+			const char* box_p4y = xmltoa(xBox.getChildNode("p4").getAttribute("y"));
 			//-------------the following codes define measurement area-------------------------------------
 		    polygon_2d poly;
 		    {
@@ -270,7 +265,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		        assign_points(poly, coor);
 		        correct(poly);     // Polygons should be closed, and directed clockwise. If you're not sure if that is the case, call this function
 		    }
-		    pMeasureArea = poly;
+		    _measureArea = poly;
 
 
 			string MovingDire_start = xmltoa(xBox.getChildNode("MovingDirection").getAttribute("start"));
@@ -280,16 +275,16 @@ void ArgumentParser::ParseIniFile(string inifile){
 			double end_x = atof(xmltoa(xBox.getChildNode(MovingDire_end.c_str()).getAttribute("x")));
 			double end_y = atof(xmltoa(xBox.getChildNode(MovingDire_end.c_str()).getAttribute("y")));
 
-			pLengthMeasurementArea = sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
+			_lengthMeasureArea = sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
 
-			Log->Write("INFO: \tmeasure area id  <"+pMeasureAreaId+">");
+			Log->Write("INFO: \tmeasure area id  <"+_measureAreaId+">");
 			Log->Write("INFO: \tmeasure area type  <"+pMeasureAreaType+">");
 			Log->Write("INFO: \tp1 of Box  <"+string(box_p1x)+','+string(box_p1y)+">");
-			cout<<"INFO: \tlength of measurement area is:  <" << pLengthMeasurementArea<<">"<<endl;
+			cout<<"INFO: \tlength of measurement area is:  <" << _lengthMeasureArea<<">"<<endl;
 		}
 		if(!xMeasurementArea.getChildNode("Area_L").isEmpty())
 		{
-			pMeasureAreaId = xmltoa(xMeasurementArea.getChildNode("Area_L").getAttribute("id"));
+			_measureAreaId = xmltoa(xMeasurementArea.getChildNode("Area_L").getAttribute("id"));
 			string pMeasureAreaType = xmltoa(xMeasurementArea.getChildNode("Area_L").getAttribute("type"));
 			XMLNode xLine = xMeasurementArea.getChildNode("Area_L");
 			string line_startx = xmltoa(xLine.getChildNode("Start").getAttribute("x"));
@@ -297,12 +292,12 @@ void ArgumentParser::ParseIniFile(string inifile){
 			string line_endx = xmltoa(xLine.getChildNode("End").getAttribute("x"));
 			string line_endy = xmltoa(xLine.getChildNode("End").getAttribute("y"));
 
-			pLine_startx = atof(line_startx.c_str());
-			pLine_starty = atof(line_starty.c_str());
-			pLine_endx = atof(line_endx.c_str());
-			pLine_endy = atof(line_endy.c_str());
+			_lineStartX = atof(line_startx.c_str());
+			_lineStartY = atof(line_starty.c_str());
+			_lineEndX = atof(line_endx.c_str());
+			_lineEndY = atof(line_endy.c_str());
 
-			Log->Write("INFO: \tmeasure area id  <"+pMeasureAreaId+">" + "\t<"+pMeasureAreaType+">");
+			Log->Write("INFO: \tmeasure area id  <"+_measureAreaId+">" + "\t<"+pMeasureAreaType+">");
 			Log->Write("INFO: \treference line starts from  <"+line_startx+","+line_starty+">" +" to  <"+line_endx+","+line_endy+">" );
 		}
 	}
@@ -313,17 +308,17 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string UseXComponent = string(xVelocity.getChildNode("UseXComponent").getText());
 		string UseYComponent = string(xVelocity.getChildNode("UseYComponent").getText());
 		string HalfFrameNumberToUse = string(xVelocity.getChildNode("HalfFrameNumberToUse").getText());
-		pDelatT_Vins = atof(HalfFrameNumberToUse.c_str());
+		_delatTVInst = atof(HalfFrameNumberToUse.c_str());
 		if(UseXComponent == "true"&&UseYComponent == "false"){
-			pVComponent = 'X';
+			_vComponent = 'X';
 			Log->Write("INFO: \tonly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
 		}
 		else if(UseXComponent == "false"&&UseYComponent == "true"){
-			pVComponent = 'Y';
+			_vComponent = 'Y';
 			Log->Write("INFO: \tonly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
 		}
 		else if(UseXComponent == "true"&&UseYComponent == "true"){
-			pVComponent = 'B';  // both components
+			_vComponent = 'B';  // both components
 			Log->Write("INFO: \tx and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
 		}
 		else{
@@ -336,9 +331,9 @@ void ArgumentParser::ParseIniFile(string inifile){
 	XMLNode xMethod_A=xMainNode.getChildNode("Method_A");
 	if(string(xMethod_A.getAttribute("enabled"))=="true"){
 		const char* TimeInterval_A = xMethod_A.getChildNode("TimeInterval").getText();
-		pMeasureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
-		pIsMethodA = true;
-		pTimeInterval_A = atoi(TimeInterval_A);
+		_measureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
+		_isMethodA = true;
+		_timeIntervalA = atoi(TimeInterval_A);
 		Log->Write("INFO: \tMethod A is selected" );
 		Log->Write("INFO: \ttime interval used in Method A is <"+string(TimeInterval_A)+" frames>" );
 	}
@@ -346,16 +341,16 @@ void ArgumentParser::ParseIniFile(string inifile){
 	// method B
 	XMLNode xMethod_B=xMainNode.getChildNode("Method_B");
 	if(string(xMethod_B.getAttribute("enabled"))=="true"){
-		pIsMethodB = true;
-		pMeasureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
+		_isMethodB = true;
+		_measureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
 		Log->Write("INFO: \tMethod B is selected" );
 	}
 
 	// method C
 	XMLNode xMethod_C=xMainNode.getChildNode("Method_C");
 	if(string(xMethod_C.getAttribute("enabled"))=="true"){
-		pIsMethodC = true;
-		pMeasureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
+		_isMethodC = true;
+		_measureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
 		Log->Write("INFO: \tMethod C is selected" );
 	}
 
@@ -363,29 +358,33 @@ void ArgumentParser::ParseIniFile(string inifile){
 	// method D
 	XMLNode xMethod_D=xMainNode.getChildNode("Method_D");
 	if(string(xMethod_D.getAttribute("enabled"))=="true"){
-		pIsMethodD = true;
+		_isMethodD = true;
 		string xIsCutByCircle = string(xMethod_D.getAttribute("cutbycircle")) ;
-		pIsCutByCircle = (xIsCutByCircle == "true") ? true: false;
+		_isCutByCircle = (xIsCutByCircle == "true") ? true: false;
 		string xIsOutputGraph = string(xMethod_D.getAttribute("IsOutputGraph"));
-		pIsOutputGraph =  (xIsOutputGraph == "true") ? true: false;
+		_isOutputGraph =  (xIsOutputGraph == "true") ? true: false;
+		if(_isOutputGraph)
+		{
+			Log->Write("INFO: \tVoronoi graph is asked to output!" );
+		}
 		string xIsIndividualFD = string(xMethod_D.getAttribute("IndividualFDdata"));
-		pIsIndividualFD = (xIsIndividualFD== "true") ? true: false;
-		pMeasureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
+		_isIndividualFD = (xIsIndividualFD== "true") ? true: false;
+		_measureAreaId = xmltoa(xMeasurementArea.getChildNode("MeasurementArea").getAttribute("id"));
 
 		if(!xMethod_D.getChildNode("SteadyState").isEmpty()){
 			const char* steady_start = xMethod_D.getChildNode("SteadyState").getAttribute("start");
 			const char* steady_end = xMethod_D.getChildNode("SteadyState").getAttribute("end");
-			pSteady_start = atof(steady_start);
-			pSteady_end = atof(steady_end);
+			_steadyStart = atof(steady_start);
+			_steadyEnd = atof(steady_end);
 			Log->Write("INFO: \tthe steady state is from  <" + string(steady_start) + "> to <"+string(steady_end) +"> frame"  );
 		}
 
 		if(string(xMethod_D.getChildNode("GetProfile").getAttribute("enabled")) == "true"){
-			pIsGetProfile = true;
+			_isGetProfile = true;
 			const char* scale_x = xMethod_D.getChildNode("GetProfile").getAttribute("scale_x");
-			pScale_x = atoi(scale_x);
+			_scaleX = atoi(scale_x);
 			const char* scale_y = xMethod_D.getChildNode("GetProfile").getAttribute("scale_y");
-			pScale_y = atoi(scale_y);
+			_scaleY = atoi(scale_y);
 			Log->Write("INFO: \tprofiles will be calculated" );
 			Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: <" + string(scale_x) + "> and <"+string(scale_y) +">"  );
 		}
@@ -401,7 +400,7 @@ const FileFormat& ArgumentParser::GetFileFormat() const {
 }
 
 const string& ArgumentParser::GetErrorLogFile() const {
-	return pErrorLogFile;
+	return _errorLogFile;
 }
 
 int ArgumentParser::GetLog() const {
@@ -409,109 +408,109 @@ int ArgumentParser::GetLog() const {
 }
 
 const string& ArgumentParser::GetGeometryFilename() const {
-	return pGeometryFilename;
+	return _geometryFileName;
 }
 
 const string& ArgumentParser::GetTrajectoriesFile() const {
-	return pTrajectoriesFile;
+	return _trajectoryFile;
 }
 
 const string& ArgumentParser::GetTrajectoryName() const {
-	return pTrajectoryName;
+	return _trajectoryName;
 }
 
 void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
-	pTrajectoriesFile = trajectoriesFile;
+	_trajectoryFile = trajectoriesFile;
 }
 
 const string& ArgumentParser::GetMeasureAreaId() const {
-	return pMeasureAreaId;
+	return _measureAreaId;
 }
 
 double ArgumentParser::GetLengthMeasurementArea() const {
-	return pLengthMeasurementArea;
+	return _lengthMeasureArea;
 }
 
 polygon_2d ArgumentParser::GetMeasureArea() const {
-	return pMeasureArea;
+	return _measureArea;
 }
 
-double ArgumentParser::GetLine_startx() const {
-	return pLine_startx;
+double ArgumentParser::GetLineStartX() const {
+	return _lineStartX;
 }
 
-double ArgumentParser::GetLine_starty() const {
-	return pLine_starty;
+double ArgumentParser::GetLineStartY() const {
+	return _lineStartY;
 }
 
-double ArgumentParser::GetLine_endx() const {
-	return pLine_endx;
+double ArgumentParser::GetLineEndX() const {
+	return _lineEndX;
 }
 
-double ArgumentParser::GetLine_endy() const {
-	return pLine_endy;
+double ArgumentParser::GetLineEndY() const {
+	return _lineEndY;
 }
 
 char	ArgumentParser::GetVComponent() const {
-	return pVComponent;
+	return _vComponent;
 }
 
 int ArgumentParser::GetDelatT_Vins() const {
-	return pDelatT_Vins;
+	return _delatTVInst;
 }
 
 
 bool ArgumentParser::GetIsMethodA() const {
-	return pIsMethodA;
+	return _isMethodA;
 }
 
-int ArgumentParser::GetTimeInterval_A() const {
-	return pTimeInterval_A;
+int ArgumentParser::GetTimeIntervalA() const {
+	return _timeIntervalA;
 }
 
 bool ArgumentParser::GetIsMethodB() const {
-	return pIsMethodB;
+	return _isMethodB;
 }
 
 bool ArgumentParser::GetIsMethodC() const {
-	return pIsMethodC;
+	return _isMethodC;
 }
 
 bool ArgumentParser::GetIsMethodD() const {
-	return pIsMethodD;
+	return _isMethodD;
 }
 
 bool ArgumentParser::GetIsCutByCircle() const {
-	return pIsCutByCircle;
+	return _isCutByCircle;
 }
 
 bool ArgumentParser::GetIsOutputGraph() const {
-	return pIsOutputGraph;
+	return _isOutputGraph;
 }
 
 bool ArgumentParser::GetIsIndividualFD() const {
-	return pIsIndividualFD;
+	return _isIndividualFD;
 }
 
 bool ArgumentParser::GetIsGetProfile() const {
-	return pIsGetProfile;
+	return _isGetProfile;
 }
 
-double ArgumentParser::GetSteady_start() const {
-	return pSteady_start;
+double ArgumentParser::GetSteadyStart() const {
+	return _steadyStart;
 }
 
-double ArgumentParser::GetSteady_end() const {
-	return pSteady_end;
+double ArgumentParser::GetSteadyEnd() const {
+	return _steadyEnd;
 }
 
 
-int ArgumentParser::GetScale_x() const {
-	return pScale_x;
+int ArgumentParser::GetScaleX() const {
+	return _scaleX;
 }
 
-int ArgumentParser::GetScale_y() const {
-	return pScale_y;
+int ArgumentParser::GetScaleY() const {
+	return _scaleY;
 }
 
 

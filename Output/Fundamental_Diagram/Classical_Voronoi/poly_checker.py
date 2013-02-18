@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon as pgon
 #from Polygon import *         
 
-for i in range(20,150):
+for i in range(89,170):
    fig = plt.figure()
    ax1 = fig.add_subplot(111,aspect='equal')
    polys = open("VoronoiCell\\polygonko-240-050-240_"+str(i)+".dat").readlines()
