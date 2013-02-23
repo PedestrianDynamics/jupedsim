@@ -4,8 +4,10 @@
 #include "geometry/Room.h"
 #include "general/xmlParser.h"
 
-#include "VoronoiDiagramGenerator.h"
-#include "VoronoiPolygons.h"
+//#include "VoronoiDiagramGenerator.h"
+//#include "VoronoiPolygons.h"
+
+#include "VoronoiDiagram.h"
 
 #include <iostream>
 #include <fstream>
@@ -436,55 +438,65 @@ int Analysis::RunAnalysis()
 			   {
 
 					  vector<polygon_2d> polygons;
-					  polygons = getVoronoiPolygons(XInFrame, YInFrame,numPedsInFrame, 4.0*_lowVertexX-3.0*_highVertexX, 4.0*_highVertexX-3.0*_lowVertexX, 4.0*_lowVertexY-3.0*_highVertexY, 4.0*_highVertexY-3.0*_lowVertexY);
-					  if(_cutByCircle)
+					  VoronoiDiagram vd;
+					  //polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, numPedsInFrame, double(4.0*_lowVertexX-3.0*_highVertexX), double(4.0*_highVertexX-3.0*_lowVertexX), double(4.0*_lowVertexY-3.0*_highVertexY), double(4.0*_highVertexY-3.0*_lowVertexY));
+					  //cout<< double(4.0*_lowVertexX-3.0*_highVertexX)<<'\t'<< double(4.0*_highVertexX-3.0*_lowVertexX)<<'\t'<< double(4.0*_lowVertexY-3.0*_highVertexY)<<'\t'<< double(4.0*_highVertexY-3.0*_lowVertexY)<<std::endl;
+					  if(numPedsInFrame>2)
 					  {
-						  polygons = cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 50);
-					  }
+						  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, numPedsInFrame);
+						  if(_cutByCircle)
+						  {
+							  //polygons = cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 50);
+						  }
 
-					 /*-----------------------------!!!! pay attention!!!!-------------------------
-					  * the function cutPolygonsWithGgeometry() will change the pointxs and pointys
-					  * if the geometry doesn't contain all the points (In other words,
-					  * the geometry is smaller that the actual used space)
-					*/
-					  polygons = cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
-					  double VoronoiVelocity;
-					  if(numPedsInFrame>0)
-					  {
-						  VoronoiVelocity=GetVoronoiVelocity(polygons,VInFrame,_measureZone);
-					  }
-					  else
-					  {
-						  VoronoiVelocity=0;
-					  }
-					  double VoronoiDensity=GetVoronoiDensity(polygons, _measureZone);
-					  fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",atoi(frid),VoronoiDensity, VoronoiVelocity);
+						 /*-----------------------------!!!! pay attention!!!!-------------------------
+						  * the function cutPolygonsWithGgeometry() will change the pointxs and pointys
+						  * if the geometry doesn't contain all the points (In other words,
+						  * the geometry is smaller that the actual used space)
+						*/
 
-					  if(_calcIndividualFD)
-						{
-						  	if(numPedsInFrame>0)
-						  	{
-						  		// if(i>beginstationary&&i<endstationary)
-								{
-									GetIndividualFD(polygons,VInFrame,_measureZone);
-								}
-						  	}
-						}
-					  //------------------field analysis----------------------------------------------------------
-					  if(_getProfile)
-					{
+						  polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
+						  double VoronoiVelocity;
 						  if(numPedsInFrame>0)
 						  {
-							  GetProfiles(string(frid), polygons, VInFrame);
+							  VoronoiVelocity=GetVoronoiVelocity(polygons,VInFrame,_measureZone);
 						  }
-					}
-					 //------------the following codes is written to output the Voronoi polygons of a frame-----------
-					  if(_outputGraph)
-					{
-					  OutputVoroGraph(string(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame);
-					}
+						  else
+						  {
+							  VoronoiVelocity=0;
+						  }
+						  double VoronoiDensity=GetVoronoiDensity(polygons, _measureZone);
+						  fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",atoi(frid),VoronoiDensity, VoronoiVelocity);
 
-				 }
+						  if(_calcIndividualFD)
+							{
+								if(numPedsInFrame>0)
+								{
+									// if(i>beginstationary&&i<endstationary)
+									{
+										GetIndividualFD(polygons,VInFrame,_measureZone);
+									}
+								}
+							}
+						  //------------------field analysis----------------------------------------------------------
+						  if(_getProfile)
+						{
+							  if(numPedsInFrame>0)
+							  {
+								  GetProfiles(string(frid), polygons, VInFrame);
+							  }
+						}
+						 //------------the following codes is written to output the Voronoi polygons of a frame-----------
+						  if(_outputGraph)
+						{
+						  OutputVoroGraph(string(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame);
+						}
+					}
+					else
+					{
+						  cout<<" the number of the pedestrians is less than 2 !!"<< endl;
+					}
+			   }
 
 			  delete []XInFrame;
 			  delete []YInFrame;
@@ -955,8 +967,6 @@ void Analysis::GetProfiles(string frameId, vector<polygon_2d> polygons, double *
 
 void Analysis::OutputVoroGraph(string frameId, vector<polygon_2d> polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame)
 {
-	  //std::string buffer(frameId);
-	 cout<<"hahahahahahaha"<<endl;
 	  #ifdef WIN32
 	  string point="Fundamental_Diagram\\Classical_Voronoi\\VoronoiCell\\points"+_trajectoryName+"_"+frameId+".dat";
 	  //string polygon="Fundamental_Diagram\\Classical_Voronoi\\VoronoiCell\\polygon"+_trajectoryName+"_"+frameId+".dat";

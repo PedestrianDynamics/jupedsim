@@ -45,7 +45,7 @@
 	</Method_A>
 
 	<!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout -->
-	<Method_B enabled="true">
+	<Method_B enabled="false">
 		<MeasurementArea id="1" />
 	</Method_B>
 
@@ -55,7 +55,7 @@
 	</Method_C>
 
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
-	<Method_D enabled="false" cutbycircle="false" IsOutputGraph="false"
+	<Method_D enabled="true" cutbycircle="false" IsOutputGraph="true"
 		IndividualFDdata="false">
 		<MeasurementArea id="1" />
 		<SteadyState start="500" end="1500" /> <!-- //the begin of stationary state //the end of stationary state -->
