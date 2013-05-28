@@ -461,5 +461,59 @@ std::vector<polygon_2d>  VoronoiDiagram::cutPolygonsWithGeometry(std::vector<pol
 	return intersetionpolygons;
 }
 
+std::vector<polygon_2d>  VoronoiDiagram::cutPolygonsWithCircle(std::vector<polygon_2d> polygon, float* xs, float* ys, float radius)
+{
+	std::vector<polygon_2d> intersetionpolygons;
+	std::vector<polygon_2d>::iterator polygon_iterator;
+	int temp=0;
+	for(polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
+	{
+		polygon_2d circle;
+		{
+			float Cpoint[361][2];
+			for(int angle=0;angle<361;angle++)
+			{
+				Cpoint[angle][0]=xs[temp]+radius*cos(angle*PI/180);
+				Cpoint[angle][1]=ys[temp]+radius*sin(angle*PI/180);
+			}
+			boost::geometry::append(circle, Cpoint);
+			//assign_points(circle, Cpoint);
+		}
+		boost::geometry::correct(circle);
 
+		typedef std::vector<polygon_2d > polygon_list;
+		polygon_list v;
+		//intersection_inserter<polygon_2d>(circle, *polygon_iterator, std::back_inserter(v));
+		boost::geometry::intersection(circle, *polygon_iterator, v);
+
+		//judge whether the polygon is cut into two separate parts,if so delete the part without including the point
+		if(v.size()==1)
+		{
+			//correct(v[0]);
+			intersetionpolygons.push_back(v[0]);
+			//cout<< area(v[0])/area(*polygon_iterator)<<'\t';
+		}
+		else
+		{
+			for (polygon_list::const_iterator it = v.begin(); it != v.end(); ++it)
+			{
+				if(boost::geometry::within(point_2d(xs[temp], ys[temp]), *it))
+				{
+					//correct(*it);
+					intersetionpolygons.push_back(*it);
+					//cout<< area(*it)/area(*polygon_iterator)<<'\t';
+				}
+			}
+		}
+		temp++;
+	}
+
+	BOOST_FOREACH(polygon_2d &poly, intersetionpolygons)
+	{
+		boost::geometry::correct(poly);
+	}
+	return intersetionpolygons;
+
+
+}
 

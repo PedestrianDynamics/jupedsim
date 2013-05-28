@@ -4,11 +4,15 @@
 		<room id="0" caption="hall" zpos="0.00">
 			<subroom id="0" closed="0" class="subroom">
 				<polygon caption="wall">
+					<vertex px="-500.0" py="-240.0"/>
+					<vertex px="-500.0" py="0.0"/>
+					<vertex px="-240.0" py="0.0"/>
+					<vertex px="-240.0" py="450.0"/>
+					<vertex px="0.0" py="450.0"/>
 					<vertex px="0.0" py="0.0"/>
-					<vertex px="600.0" py="0.0"/>
-					<vertex px="600.0" py="300.0"/>
-					<vertex px="0.0" py="300.0"/>
-					<vertex px="0.0" py="0.0"/>
+					<vertex px="400.0" py="0.0"/>
+					<vertex px="400.0" py="-240.0"/>
+					<vertex px="-500.0" py="-240.0"/>
 				</polygon>
 			</subroom>
 		</room>

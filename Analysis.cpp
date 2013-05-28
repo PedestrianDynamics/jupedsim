@@ -21,7 +21,6 @@ Analysis::Analysis() {
 
 	_building = NULL;
 	_iod = new IODispatcher();
-	_fps=1;
 	_numFrames = 10;
 
 	_tIn = NULL;
@@ -151,52 +150,6 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	_scaleX = args->GetScaleX();
 	_scaleY = args->GetScaleY();
 
-	if(_classicMethod)
-	{
-			#ifdef WIN32
-		//string results_C=  ".\\Output\\Fundamental_Diagram\\Classical_Voronoi\\rho_v_Classic_"+TrajectoryName+".dat";
-				  string results_C=  "rho_v_Classic_"+_trajectoryName+".dat";
-			#else
-				  string results_C=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+_trajectoryName+".dat";
-			#endif
-			  if((_fClassicRhoV=fopen(results_C.c_str(),"w"))==NULL)
-				{
-				  Log->Write("cannot open the file to write classical density and velocity\n");
-				  exit(0);
-				}
-			  fprintf(_fClassicRhoV,"#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n");
-	}
-	if(_voronoiMethod)
-	{
-			#ifdef WIN32
-				  //string results_V=  "Output\\Fundamental_Diagram\\Classical_Voronoi\\rho_v_Voronoi_"+TrajectoryName+".dat";
-				  string results_V=  "rho_v_Voronoi_"+_trajectoryName+".dat";
-			#else
-				  string results_V=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+_trajectoryName+".dat";
-			#endif
-			  if((_fVoronoiRhoV=fopen(results_V.c_str(),"w"))==NULL)
-				{
-				  Log->Write("cannot open the file to write Voronoi density and velocity\n");
-				  exit(0);
-				}
-			  fprintf(_fVoronoiRhoV,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
-	}
-	if(_calcIndividualFD)
-	{
-		#ifdef WIN32
-			//string Individualfundment="Output\\Fundamental_Diagram\\Individual_FD\\IndividualFD"+TrajectoryName+".dat";
-			string Individualfundment="IndividualFD"+_trajectoryName+".dat";
-		#else
-			  string Individualfundment="Output/Fundamental_Diagram/Individual_FD/IndividualFD"+_trajectoryName+".dat";
-		#endif
-
-			if((_individualFD=fopen(Individualfundment.c_str(),"w"))==NULL)
-			{
-				Log->Write("cannot open the file individual\n");
-				exit(0);
-			}
-			fprintf(_individualFD,"#Individual density(m^(-2))\t	Individual velocity(m/s)\n");
-	}
 	// IMPORTANT: do not change the order in the following..
 	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
 	s.append(tmp);
@@ -209,6 +162,42 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	std::cout<<_trajectoryFile.c_str();
 	Log->Write(string("INFO: \t") + _trajectoryFile);
 	ReadTrajetories(_trajectoryFile);
+
+	if(_classicMethod)
+		{
+				  string results_C=  "rho_v_Classic_"+_trajectoryName+".dat";
+				  if((_fClassicRhoV=fopen(results_C.c_str(),"w"))==NULL)
+					{
+					  Log->Write("cannot open the file to write classical density and velocity\n");
+					  exit(0);
+					}
+				  fprintf(_fClassicRhoV,"#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n");
+		}
+		if(_voronoiMethod)
+		{
+				#ifdef WIN32
+					  //string results_V=  "Output\\Fundamental_Diagram\\Classical_Voronoi\\rho_v_Voronoi_"+TrajectoryName+".dat";
+					  string results_V=  "rho_v_Voronoi_"+_trajectoryName+".dat";
+				#else
+					  string results_V=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+_trajectoryName+".dat";
+				#endif
+				  if((_fVoronoiRhoV=fopen(results_V.c_str(),"w"))==NULL)
+					{
+					  Log->Write("cannot open the file to write Voronoi density and velocity\n");
+					  exit(0);
+					}
+				  fprintf(_fVoronoiRhoV,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
+		}
+		if(_calcIndividualFD)
+		{
+				string Individualfundment="IndividualFD"+_trajectoryName+".dat";
+				if((_individualFD=fopen(Individualfundment.c_str(),"w"))==NULL)
+				{
+					Log->Write("cannot open the file individual\n");
+					exit(0);
+				}
+				fprintf(_individualFD,"#Individual density(m^(-2))\t	Individual velocity(m/s)\n");
+		}
 }
 
 polygon_2d Analysis::ReadGeometry(const string& geometryFile){
@@ -377,6 +366,14 @@ int Analysis::RunAnalysis()
 	  {
 		  DensityPerFrame[i]=0;
 	  }
+	  bool *PassLine = new bool[_maxNumofPed];
+	  for(int i=0; i<_maxNumofPed; i++)
+	  {
+		  PassLine[i] = false;
+	  }
+
+	  string N_t="Flow_NT_"+_trajectoryName+"_Out.dat";
+	  ofstream flowNTs(N_t.c_str());
 	  if(!xFrame.isEmpty())
 	  {
 	 	  for (int f=0; f<_numFrames; f++) //read the data frame by frame
@@ -407,14 +404,16 @@ int Analysis::RunAnalysis()
 	 				 int Tfuture = f + _deltaF;
 	 				 VInFrame[i] = GetVinFrame(f, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
 					 bool IspassLine=false;
-					 if(f-1>=0)
+					 if(f >_firstFrame[ID]&&!PassLine[ID])
 					 {
 						  IspassLine = IsPassLine(_lineStartX,_lineStartY, _lineEndX, _lineEndY,_xCor[ID][f-1],_yCor[ID][f-1],_xCor[ID][f],_yCor[ID][f]);
 					 }
 					 if(IspassLine==true)
 					 {
-						  ClassicFlow++;
+						 PassLine[ID] = true;
+						 ClassicFlow++;
 						  V_deltaT+=VInFrame[i];
+						  cout<<_xCor[ID][f-1]<< "\t"<<_yCor[ID][f-1]<< "\t"<<_xCor[ID][f]<< "\t"<<_yCor[ID][f]<< endl;
 					 }
 	 			  }
 	 		  } //for i
@@ -423,6 +422,9 @@ int Analysis::RunAnalysis()
 				  _accumPedsPassLine.push_back(ClassicFlow);
 				  _accumVPassLine.push_back(V_deltaT);
 //				}
+
+				flowNTs << string(frid) << "\t" << ClassicFlow << endl;
+
 
 			   if(_classicMethod)
 				{
@@ -489,7 +491,8 @@ int Analysis::RunAnalysis()
 						 //------------the following codes is written to output the Voronoi polygons of a frame-----------
 						  if(_outputGraph)
 						{
-						  OutputVoroGraph(string(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame);
+							  cout<<"output polygons"<<endl;
+							  OutputVoroGraph(string(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame);
 						}
 					}
 					else
@@ -505,25 +508,19 @@ int Analysis::RunAnalysis()
 	  }
 		  fclose(_fClassicRhoV);
 		  fclose(_fVoronoiRhoV);
+		  flowNTs.close();
+		  delete []PassLine;
 	 				     //--------------------Fundamental diagram based on Tin and Tout----------------------------------------------------------------------
 		  if(_fundamentalTinTout)
 		   {
-			  #ifdef WIN32
-				  string FD_TinTout=  "Output\\Fundamental_Diagram\\TinTout\\FDTinTout_"+_trajectoryName+".dat";
-			  #else
-				  string FD_TinTout=  "Output/Fundamental_Diagram/TinTout/FDTinTout_"+_trajectoryName+".dat";
-			  #endif
+			  string FD_TinTout=  "FDTinTout_"+_trajectoryName+".dat";
 			  Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
 			  GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _lengthMeasurementarea,_maxNumofPed, FD_TinTout); //MC. 15.8.12. replaced "datafile" by results
 		   }
 		 //-----------------------------------------------------------------------------------------------------------------------------------
 		  if(_flowVelocity)
 		   {
-			  #ifdef WIN32
-				  string FD_FlowVelocity=  "Output\\Fundamental_Diagram\\FlowVelocity\\FDFlowVelocity_"+_trajectoryName+".dat";
-			  #else
-				  string FD_FlowVelocity=  "Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajectoryName+".dat";
-			  #endif
+			  string FD_FlowVelocity=  "FDFlowVelocity_"+_trajectoryName+".dat";
 			  FlowRate_Velocity(_deltaT,_fps, _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
 		   }
 		  delete []DensityPerFrame;
@@ -968,8 +965,9 @@ void Analysis::GetProfiles(string frameId, vector<polygon_2d> polygons, double *
 void Analysis::OutputVoroGraph(string frameId, vector<polygon_2d> polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame)
 {
 	  #ifdef WIN32
-	  string point="Fundamental_Diagram\\Classical_Voronoi\\VoronoiCell\\points"+_trajectoryName+"_"+frameId+".dat";
+	  //string point="Fundamental_Diagram\\Classical_Voronoi\\VoronoiCell\\points"+_trajectoryName+"_"+frameId+".dat";
 	  //string polygon="Fundamental_Diagram\\Classical_Voronoi\\VoronoiCell\\polygon"+_trajectoryName+"_"+frameId+".dat";
+	  string point="points"+_trajectoryName+"_"+frameId+".dat";
 	  string polygon="polygon"+_trajectoryName+"_"+frameId+".dat";
 	  string v_individual="Fundamental_Diagram\\Classical_Voronoi\\VoronoiCell\\speed"+_trajectoryName+"_"+frameId+".dat";
 	  #else

@@ -10,6 +10,9 @@
 
 #include <vector>
 #include <iostream>
+#include <math.h>
+
+#define PI 3.14159265
 
 //#include <boost/geometry/geometries/adapted/boost_polygon.hpp>
 #include <boost/polygon/voronoi.hpp>
@@ -52,6 +55,7 @@ public:
 	virtual ~VoronoiDiagram();
 	std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, int numPedsInFrame);
 	std::vector<polygon_2d> cutPolygonsWithGeometry(std::vector<polygon_2d> polygon, polygon_2d Geometry, double* xs, double* ys);
+	std::vector<polygon_2d> cutPolygonsWithCircle(std::vector<polygon_2d> polygon, float* xs, float* ys, float radius);
 };
 
 #endif /* VORONOIDIAGRAM_H_ */

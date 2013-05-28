@@ -3,25 +3,25 @@
 
 <JPSreport project="JPS-Project" version="0.4">
 	<!-- geometry file -->
-	<Geometry file = "D:\\workspace\\JuPedSim\\JPSreport\\geo.xml" />
+	<Geometry file = "D:\\workspace\\JuPedSim\\JPSreport\\geo_EO300.xml" />
 	<!-- trajectories file and format -->
 	<Trajectories>
-		<file name="test" />
+		<file name="eo-300-050-300" />
 		<path location="D:\\workspace\\JuPedSim\\JPSreport\\" />
 	</Trajectories>
 	<!-- all files in the directories will be used -->
 
 	<MeasurementAreas unit="cm">
 		<Area_B id="1" type="BoundingBox">
-			<p1 x="-240" y="240" /> <!-- CCW -->
-			<p2 x="0" y="240" />
-			<p3 x="0" y="0" />
-			<p4 x="-240" y="0" />
-			<MovingDirection start="p1" end="p4" />
+			<p1 x="-300" y="100" /> <!-- CCW -->
+			<p2 x="0" y="100" />
+			<p3 x="0" y="300" />
+			<p4 x="-300" y="300" />
+			<MovingDirection start="p3" end="p4" />
 		</Area_B>
 		<Area_L id="2" type="Line">
-			<Start x="-240" y="0" />
-			<End x="0" y="0" />
+			<Start x="400" y="0" />
+			<End x="400" y="300" />
 		</Area_L>
 	</MeasurementAreas>
 
@@ -55,7 +55,7 @@
 	</Method_C>
 
 	<!-- Method D (Zhang2011a) Voronoi density and Vel -->
-	<Method_D enabled="true" cutbycircle="false" IsOutputGraph="true"
+	<Method_D enabled="true" cutbycircle="false" IsOutputGraph="false"
 		IndividualFDdata="false">
 		<MeasurementArea id="1" />
 		<SteadyState start="500" end="1500" /> <!-- //the begin of stationary state //the end of stationary state -->

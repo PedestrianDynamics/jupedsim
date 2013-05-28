@@ -3,25 +3,25 @@
 
 <JPSreport project="JPS-Project" version="0.4">
 	<!-- geometry file -->
-	<Geometry file = "D:\\workspace\\JuPedSim\\JPSreport\\geo.xml" />
+	<Geometry file = "D:\\workspace\\JuPedSim\\JPSreport\\geo_bottleneck_b90.xml" />
 	<!-- trajectories file and format -->
 	<Trajectories>
-		<file name="test" />
+		<file name="b090" />
 		<path location="D:\\workspace\\JuPedSim\\JPSreport\\" />
 	</Trajectories>
 	<!-- all files in the directories will be used -->
 
 	<MeasurementAreas unit="cm">
 		<Area_B id="1" type="BoundingBox">
-			<p1 x="-240" y="240" /> <!-- CCW -->
-			<p2 x="0" y="240" />
-			<p3 x="0" y="0" />
-			<p4 x="-240" y="0" />
+			<p1 x="-45" y="100" /> <!-- CCW -->
+			<p2 x="-45" y="200" />
+			<p3 x="45" y="200" />
+			<p4 x="45" y="100" />
 			<MovingDirection start="p1" end="p4" />
 		</Area_B>
 		<Area_L id="2" type="Line">
-			<Start x="-240" y="0" />
-			<End x="0" y="0" />
+			<Start x="-100" y="50" />
+			<End x="100" y="50" />
 		</Area_L>
 	</MeasurementAreas>
 
@@ -50,7 +50,7 @@
 	</Method_B>
 
 	<!-- Method C (Zhang2011a) Classical density and Vel -->
-	<Method_C enabled="false">
+	<Method_C enabled="true">
 		<MeasurementArea id="1" />
 	</Method_C>
 
