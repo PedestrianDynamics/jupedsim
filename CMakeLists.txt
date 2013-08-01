@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(JPSgcfm)
+project(JPSreport)
 
 if(WIN32)
 #Set the default compiler to MinGW instead of NMake
@@ -10,6 +10,7 @@ endif()
 set(LIBRARY_OUTPUT_PATH ../lib/${CMAKE_BUILD_TYPE})
 
 #set(EXECUTABLE_OUTPUT_PATH "../")
+INCLUDE_DIRECTORIES("./")
 
 file(
 	GLOB_RECURSE
@@ -25,7 +26,7 @@ file(
 
 	general/ArgumentParser.cpp
 	general/xmlParser.cpp
-	
+		
 	geometry/Building.cpp  
 	geometry/Line.cpp      
 	geometry/Point.cpp    
@@ -76,13 +77,6 @@ file(
 #    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 #endif()
 
-FIND_PACKAGE(Boost)
-
-#find and add the CGAL library
-#FIND_PACKAGE(CGAL)
-#if(CGAL_FOUND)
-#	add_definitions(-D_CGAL=1)
-#endif()
 
 message(source_files)
 

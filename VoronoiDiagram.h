@@ -14,11 +14,10 @@
 
 #define PI 3.14159265
 
-//#include <boost/geometry/geometries/adapted/boost_polygon.hpp>
+//#include <boost/polygon/voronoi.hpp>
 #include <boost/polygon/voronoi.hpp>
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
-//using namespace boost::polygon;
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometry.hpp>
@@ -29,7 +28,6 @@ using boost::polygon::voronoi_diagram;
 #include <boost/geometry/algorithms/intersection.hpp>
 #include <boost/geometry/algorithms/within.hpp>
 #include <boost/foreach.hpp>
-//#include <boost/geometry/core/cs.hpp>
 
 typedef boost::geometry::model::d2::point_xy<double, boost::geometry::cs::cartesian> point_2d;
 typedef boost::geometry::model::polygon<point_2d> polygon_2d;
