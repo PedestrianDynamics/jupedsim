@@ -908,6 +908,7 @@ double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirs
 		}
 	}
 
+	//v = fabs(v);
 	return v;
 }
 
