@@ -445,7 +445,7 @@ int Analysis::RunAnalysis()
 					  //cout<< double(4.0*_lowVertexX-3.0*_highVertexX)<<'\t'<< double(4.0*_highVertexX-3.0*_lowVertexX)<<'\t'<< double(4.0*_lowVertexY-3.0*_highVertexY)<<'\t'<< double(4.0*_highVertexY-3.0*_lowVertexY)<<std::endl;
 					  if(numPedsInFrame>2)
 					  {
-						  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, numPedsInFrame);
+						  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, numPedsInFrame);
 						  if(_cutByCircle)
 						  {
 							  //polygons = cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 50);
@@ -839,7 +839,8 @@ double Analysis::GetVoronoiVelocity(vector<polygon_2d> polygon, double* Velocity
 		intersection(measureArea, *polygon_iterator, v);
 		if(!v.empty())
 		{
-			meanV+=Velocity[temp]*area(v[0])/area(measureArea);
+			meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
+			//std::cout<<"the velocity and areas:"<<Velocity[temp]<<'\t'<<area(v[0])<<'\t'<<meanV<<'\t'<<temp<<'\n';
 			if((area(v[0])/area(*polygon_iterator))>1.00001)
 			{
 				std::cout<<"this is a wrong result"<<area(v[0])<<'\t'<<area(*polygon_iterator);
@@ -896,7 +897,6 @@ double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirs
 		if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
 		{
 			v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
-
 		}
 		else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
 		{

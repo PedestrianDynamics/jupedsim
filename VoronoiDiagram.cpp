@@ -21,12 +21,19 @@ VoronoiDiagram::~VoronoiDiagram() {
 
 
 // Traversing Voronoi edges using cell iterator.
-std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, double *YInFrame, int numPedsInFrame)
+std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame, int numPedsInFrame)
 {
 
+
+	int XInFrame_temp[numPedsInFrame];
+	int YInFrame_temp[numPedsInFrame];
+	double VInFrame_temp[numPedsInFrame];
 	for(int i = 0; i < numPedsInFrame; i++)
 	{
-	    points.push_back(point_type2(ceil(XInFrame[i]), ceil(YInFrame[i])));
+	    points.push_back(point_type2((int)(XInFrame[i]+0.5), (int)(YInFrame[i]+0.5)));
+	    XInFrame_temp[i] = (int)(XInFrame[i]+0.5);
+	    YInFrame_temp[i] = (int)(YInFrame[i]+0.5);
+	    VInFrame_temp[i] = VInFrame[i];
 	}
 		//voronoi_diagram<double> vd;
 	VD vd;
@@ -53,6 +60,14 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
 				  const voronoi_diagram<double>::edge_type* edge = cell.incident_edge();
 				  point_type2 pt_temp;
 				  point_type2 thispoint = retrieve_point(*it);
+				  for(int k = 0; k < numPedsInFrame; k++)
+				  {
+					    if(XInFrame_temp[k]==thispoint.x()&&YInFrame_temp[k]==thispoint.y())
+					    {
+					    	VInFrame[Ncell] = VInFrame_temp[k];
+					    	break;
+					    }
+				  }
 				  XInFrame[Ncell] = thispoint.x();
 				  YInFrame[Ncell] = thispoint.y();
 				  int NumVertex = 0;
@@ -423,14 +438,12 @@ std::vector<polygon_2d>  VoronoiDiagram::cutPolygonsWithGeometry(std::vector<pol
 {
 	std::vector<polygon_2d> intersetionpolygons;
 	std::vector<polygon_2d>::iterator polygon_iterator;
-
 	int temp=0;
 	for(polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
 		boost::geometry::intersection(Geometry, *polygon_iterator, v);
-
 		//judge whether the polygon is cut into two separate parts,if so delete the part without including the point
 		if(v.size()==1)
 		{
