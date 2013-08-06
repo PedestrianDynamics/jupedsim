@@ -48,6 +48,7 @@ private:
 	FILE *_fClassicRhoV;
 	FILE *_fVoronoiRhoV;
 	FILE *_individualFD;
+	FILE *_fN_t;
 
 	Building* _building;
 	IODispatcher* _iod;

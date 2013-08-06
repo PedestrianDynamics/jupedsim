@@ -124,26 +124,7 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
 					  if(!vertexes.empty())
 					  {
 						  polypts.reserve(polypts.size()+vertexes.size());
-						  //polypts.insert(polypts.end(), vertexes.begin(), vertexes.end() );
 						  polypts.insert(polypts.begin()+index_end, vertexes.begin(), vertexes.end() );
-						  // 6)
-						  //******************************************************************************
-						  /*PtsSort *pts;
-						  pts = new PtsSort[polypts.size()];
-						  std::vector<PtsSort>   polypt;
-
-						  for (int i = 0; i < (int)polypts.size(); i++)
-						  {
-							  pts[i].pt= polypts[i];
-							  pts[i].angle=angleSubtendedBy(polypts[i],thispoint);
-							  polypt.push_back(pts[i]);
-						  }
-						  sort(polypt.begin(), polypt.end(),myclockwise);
-						  for (int i=0;i<(int)polypts.size();i++)
-						  {
-							  polypts[i]=polypt[i].pt;
-						  }
-						  delete pts;*/
 					  }
 				  }
 				  for (int i=0;i<(int)polypts.size();i++)
@@ -496,7 +477,6 @@ std::vector<polygon_2d>  VoronoiDiagram::cutPolygonsWithCircle(std::vector<polyg
 
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
-		//intersection_inserter<polygon_2d>(circle, *polygon_iterator, std::back_inserter(v));
 		boost::geometry::intersection(circle, *polygon_iterator, v);
 
 		//judge whether the polygon is cut into two separate parts,if so delete the part without including the point
