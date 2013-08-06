@@ -18,14 +18,14 @@ DummyRouter::~DummyRouter() {
 }
 
 int DummyRouter::FindExit(Pedestrian* p) {
-	p->SetExitIndex(0);
+	p->SetExitIndex(1);
 	//p->SetExitLine(_building->getGetCrossing(0));
 	return 1;
 }
 
 void DummyRouter::Init(Building* b) {
 	_building=b;
-	Log->Write("ERROR: Do not use this router !!");
+	Log->Write("ERROR: \tdo not use this  <<Dummy>> router !!");
 
 	//dump all navigation lines
 

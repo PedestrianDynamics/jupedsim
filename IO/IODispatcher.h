@@ -51,7 +51,7 @@ public:
 	void AddIO(OutputHandler* ioh);
 	const std::vector<OutputHandler*>& GetIOHandlers();
 	void Write(std::string str);
-	virtual void WriteHeader(int nPeds, int fps, Building* building, int seed=0, int szenarioID=0);
+	virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
 	virtual void WriteGeometry(Building* building);
 	virtual void WriteFrame(int frameNr, Building* building);
 	virtual void WriteFooter();
@@ -79,12 +79,24 @@ public:
 
 class TrajectoriesFLAT:public IODispatcher {
 
-
 public:
 	TrajectoriesFLAT();
 	virtual ~TrajectoriesFLAT(){};
 
-	virtual void WriteHeader(int nPeds, int fps, Building* building);
+	virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
+	virtual void WriteGeometry(Building* building);
+	virtual void WriteFrame(int frameNr, Building* building);
+	virtual void WriteFooter();
+
+};
+
+class TrajectoriesVTK:public IODispatcher {
+
+public:
+	TrajectoriesVTK();
+	virtual ~TrajectoriesVTK(){};
+
+	virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
 	virtual void WriteGeometry(Building* building);
 	virtual void WriteFrame(int frameNr, Building* building);
 	virtual void WriteFooter();

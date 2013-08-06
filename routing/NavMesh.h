@@ -40,6 +40,7 @@ class NavMesh {
 		bool operator> (const JVertex& v) const{
 			return v.pPos._x>pPos._x;
 		}
+
 	};
 
 	class JNode {
@@ -173,24 +174,6 @@ class NavMesh {
 		}
 	}
 
-public:
-	NavMesh(Building* b);
-	virtual ~NavMesh();
-	void BuildNavMesh();
-	void WriteToFile(std::string fileName);
-	void WriteToFileTraVisTo(std::string fileName);
-	void WriteToFileTraVisTo(std::string fileName, const std::vector<Point>& points);
-	void WriteToFileTraVisTo(std::string fileName, JNode* node);
-
-	int AddVertex(JVertex* v);
-	int AddEdge(JEdge* e);
-	int AddObst(JObstacle* o);
-	int AddNode(JNode* n);
-	///return the JVertex with the corresponding point
-	JVertex* GetVertex(const Point& p);
-	void DumpNode(int id);
-	void DumpEdge(int id);
-	void DumpObstacle(int id);
 
 private:
 	std::vector<JVertex*> pVertices;
@@ -224,7 +207,27 @@ private:
 	/// Return the id of the JObstacle
 	int IsObstacle(Point& p1, Point&  p2);
 
+
 public:
+
+	NavMesh(Building* b);
+	virtual ~NavMesh();
+	void BuildNavMesh();
+	void WriteToFile(std::string fileName);
+	void WriteToFileTraVisTo(std::string fileName);
+	void WriteToFileTraVisTo(std::string fileName, const std::vector<Point>& points);
+	void WriteToFileTraVisTo(std::string fileName, JNode* node);
+
+	int AddVertex(JVertex* v);
+	int AddEdge(JEdge* e);
+	int AddObst(JObstacle* o);
+	int AddNode(JNode* n);
+	///return the JVertex with the corresponding point
+	JVertex* GetVertex(const Point& p);
+	void DumpNode(int id);
+	void DumpEdge(int id);
+	void DumpObstacle(int id);
+
 	/// Write the simulation scenario for the
 	/// pedunc simulator
 	void WriteScenario();
@@ -237,6 +240,14 @@ public:
 	void UpdateNodes();
 
 	void Test();
+
+	const std::vector<NavMesh::JEdge*>& GetEdges() const;
+	const std::vector<NavMesh::JNode*>& GetNodes() const;
+	const std::vector<NavMesh::JObstacle*>& GetObst() const;
+	const std::vector<NavMesh::JVertex*>& GetVertices() const;
+
+	// need to access vertices and nodes
+	friend class TrajectoriesVTK;
 
 };
 

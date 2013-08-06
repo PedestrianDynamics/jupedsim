@@ -624,13 +624,14 @@ void QuickestPathRouter::Init(Building* building){
 	Log->Write("INFO:\tInit Quickest Path Router Engine");
 	GlobalRouter::Init(building);
 	//	pBuilding=building;
-	ReduceGraph();
+	//TODO: reduce graph is missbehaving
+	//ReduceGraph();
 	//ExpandGraph();
 	//	DumpAccessPoints(981);
 	//	exit(0);
 	vector<string> rooms;
 	//rooms.push_back("050");
-	rooms.push_back("010");
+	//rooms.push_back("010");
 	//rooms.push_back("020");
 	//rooms.push_back("030");
 	//rooms.push_back("040");
@@ -647,7 +648,7 @@ void QuickestPathRouter::Init(Building* building){
 	//rooms.push_back("150");
 	//rooms.push_back("outside");
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
-	WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
+	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
 	//DumpAccessPoints(1185);
 	//DumpAccessPoints(1186);
 	//DumpAccessPoints(1188);

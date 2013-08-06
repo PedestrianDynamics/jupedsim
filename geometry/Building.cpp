@@ -980,7 +980,7 @@ void Building::LoadRoutingInfo(string filename) {
 		}
 		_routingEngine->AddTrip(vTrip);
 	}
-	Log->Write("INFO:\t done with loading extra routing information");
+	Log->Write("INFO:\tdone with loading extra routing information");
 }
 
 void Building::LoadTrafficInfo(string filename) {
@@ -989,7 +989,7 @@ void Building::LoadTrafficInfo(string filename) {
 
 	if (filename == "") {
 		Log->Write("INFO:\t No file supplied !");
-		Log->Write("INFO:\t done with loading traffic info file");
+		Log->Write("INFO:\tdone with loading traffic info file");
 		return;
 	}
 

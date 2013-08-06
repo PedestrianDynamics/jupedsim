@@ -57,6 +57,8 @@ private:
     double _deltaT;
     /// frame rate for the trajectories
     double _fps;
+    ///seed using for the random number generator
+    unsigned int _seed;
     /// building object
     Building* _building;
     ///initial distribution of the pedestrians
@@ -69,6 +71,7 @@ private:
     ODESolver* _solver;
     /// writing the trajectories to file
     IODispatcher* _iod;
+
 
 public:
     Simulation();

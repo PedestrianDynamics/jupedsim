@@ -12,13 +12,13 @@
 	<!-- traffic information: e.g closed doors -->
 	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" fps="8"> 
+	<trajectories format="xml" fps="8"> 
 		<file location="outputfiles/trajectories.xml"/>
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
-	<!-- where to store the logs 
+	<!-- where to store the logs  -->
 	<logfile>outputfiles/log.txt</logfile>
- 	-->
+ 	
 
 	<!-- These parameters may be overwritten -->
 	<parameters>

@@ -33,6 +33,7 @@ using namespace std;
 Simulation::Simulation() {
 	_nPeds = 0; // number of pedestrians, Default 10
 	_tmax = 0;
+	_seed=8091983;
 	_deltaT = 0;
 	_building = NULL;
 	_distribution = NULL;
@@ -167,7 +168,12 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case FORMAT_VTK:
 		{
 			Log->Write("INFO: \tFormat vtk not yet supported\n");
-			exit(0);
+			OutputHandler* file = new FileHandler((args->GetTrajectoriesFile() +".vtk").c_str());
+
+			if(_iod) delete _iod;
+			_iod = new TrajectoriesVTK();
+			_iod->AddIO(file);
+			//exit(0);
 			break;
 		}
 		}
@@ -351,6 +357,9 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	}
 
 	//pBuilding->WriteToErrorLog();
+
+	//get the seed
+	_seed=args->GetSeed();
 }
 
 
@@ -364,7 +373,7 @@ int Simulation::RunSimulation() {
 
 	// writing the header
 
-	_iod->WriteHeader(_nPeds, _fps, _building);
+	_iod->WriteHeader(_nPeds, _fps, _building,_seed);
 	_iod->WriteGeometry(_building);
 	_iod->WriteFrame(0,_building);
 

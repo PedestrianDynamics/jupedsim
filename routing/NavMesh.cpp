@@ -1696,8 +1696,8 @@ void NavMesh::WriteBehavior() {
 		}
 		file<< "\t\t</GoalSet>"<<endl;
 	}
-	//write the goal set promenade
 
+	//write the goal set promenade
 
 	file<< "\t\t<Behavior class=\"1\">"<<endl;
 	file<< "\t\t\t<Property name=\"prefSpeed\" type=\"float\" dist=\"c\" value=\"1.3\" />"<<endl;
@@ -1812,7 +1812,7 @@ void NavMesh::WriteStartPositions() {
 		int room_id=room->GetID();
 		vector<Point > freePosRoom = availablePos[room_id];
 
-		int nAgentsPerRoom=50; // the number of agents to distribute
+		int nAgentsPerRoom=10; // the number of agents to distribute
 		for (int a=0;a<nAgentsPerRoom;a++){
 			int index = rand() % freePosRoom.size();
 			file<< "\t\t<Agent p_x=\""<<freePosRoom[index]._x<<" \"p_y=\""<<freePosRoom[index]._y<<"\"/>"<<endl;
@@ -2304,4 +2304,20 @@ void NavMesh::Test(){
 
 	}
 	cout<<"Test passed !"<<endl;
+}
+
+const std::vector<NavMesh::JEdge*>& NavMesh::GetEdges() const {
+	return pEdges;
+}
+
+const std::vector<NavMesh::JNode*>& NavMesh::GetNodes() const {
+	return pNodes;
+}
+
+const std::vector<NavMesh::JObstacle*>& NavMesh::GetObst() const {
+	return pObst;
+}
+
+const std::vector<NavMesh::JVertex*>& NavMesh::GetVertices() const {
+	return pVertices;
 }

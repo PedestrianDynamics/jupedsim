@@ -362,7 +362,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				}
 				break;
 			}
-			case 'R':
+			case 'R': // TODO: are these options still correct ?
 			{
 				int r = atoi(optarg);
 				switch(r){
@@ -374,6 +374,12 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 					break;
 				case 3:
 					pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
+					break;
+				case 4:
+					pRoutingStrategies.push_back(make_pair (4,ROUTING_DYNAMIC));
+					break;
+				case 5:
+					pRoutingStrategies.push_back(make_pair (5,ROUTING_DUMMY));
 					break;
 				default:
 					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
@@ -538,7 +544,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	if(!xPara.getChildNode("exitCrossingStrategy").isEmpty()){
 		string exitStrategy=xPara.getChildNode("exitCrossingStrategy").getText();
 		pExitStrategy=xmltof(exitStrategy.c_str(),pExitStrategy);
-		Log->Write("INFO: \exitCrossingStrategy <"+string(exitStrategy)+">");
+		Log->Write("INFO: \texitCrossingStrategy <"+string(exitStrategy)+">");
 	}
 
 	//linked-cells

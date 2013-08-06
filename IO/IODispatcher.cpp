@@ -27,6 +27,7 @@
 
 #include "IODispatcher.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../routing/NavMesh.h"
 
 #include <cmath>
 
@@ -90,8 +91,7 @@ void IODispatcher::Write(string str) {
 }
 ;
 
-void IODispatcher::WriteHeader(int nPeds, int fps, Building* building, int seed,
-		int szenarioID) {
+void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int seed	) {
 
 	nPeds = building->GetNumberOfPedestrians();
 	string tmp;
@@ -117,6 +117,7 @@ void IODispatcher::WriteGeometry(Building* building) {
 	bool plotHlines = true;
 	bool plotCrossings = true;
 	bool plotTransitions = true;
+	bool plotPlayingField=false;
 	vector<string> rooms_to_plot;
 
 	//Promenade
@@ -212,6 +213,32 @@ void IODispatcher::WriteGeometry(Building* building) {
 		}
 	}
 
+	if(plotPlayingField){
+		//add the playing area
+		double width=3282;
+		double length=5668;
+		char tmp[100];
+		geometry.append("\t\t<wall>\n");
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",-length,width);
+		geometry.append(tmp);
+
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",-length,-width);
+		geometry.append(tmp);
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",length,-width);
+		geometry.append(tmp);
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",length,width);
+		geometry.append(tmp);
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",-length,width);
+		geometry.append(tmp);
+		geometry.append("\t\t</wall>\n");
+
+		geometry.append("\t\t<wall>\n");
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",0.0,width);
+		geometry.append(tmp);
+		sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",0.0,-width);
+		geometry.append(tmp);
+		geometry.append("\t\t</wall>\n");
+	}
 	geometry.append("\t</geometry>\n");
 	Write(geometry);
 }
@@ -533,12 +560,16 @@ void IODispatcher::WriteFooter() {
 	Write("</trajectoriesDataset>\n");
 }
 
+
+/**
+ * FLAT format implementation
+ */
+
 TrajectoriesFLAT::TrajectoriesFLAT() :
 		IODispatcher() {
-
 }
 
-void TrajectoriesFLAT::WriteHeader(int nPeds, int fps, Building* building) {
+void TrajectoriesFLAT::WriteHeader(int nPeds, double fps, Building* building, int seed) {
 
 }
 
@@ -569,3 +600,69 @@ void TrajectoriesFLAT::WriteFooter() {
 
 }
 
+
+/**
+ *  VTK Implementation of the geometry and trajectories
+ */
+
+
+TrajectoriesVTK::TrajectoriesVTK() {
+}
+
+void TrajectoriesVTK::WriteHeader(int nPeds, double fps, Building* building, int seed) {
+	Write("# vtk DataFile Version 4.0");
+	Write(building->GetCaption());
+	Write("ASCII");
+	Write("");
+}
+
+void TrajectoriesVTK::WriteGeometry(Building* building) {
+	stringstream tmp;
+
+	NavMesh* nv= new NavMesh(building);
+	nv->BuildNavMesh();
+	//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
+	Write("DATASET UNSTRUCTURED_GRID");
+
+	//writing the vertices
+	const vector<NavMesh::JVertex*>& vertices= nv->GetVertices() ;
+	tmp<<"POINTS "<<vertices.size()<<" FLOAT"<<endl;
+	for (unsigned int v=0;v<vertices.size();v++){
+		tmp<<vertices[v]->pPos.GetX()<<" " <<vertices[v]->pPos.GetY() <<" 0.0"<<endl;
+	}
+	Write(tmp.str());
+	tmp.str(std::string());
+
+	//writing the cells data
+	const vector<NavMesh::JNode*>& cells= nv->GetNodes();
+	int nComponents=cells.size();
+	stringstream tmp1;
+	for (unsigned int n=0;n<cells.size();n++){
+		int hSize=cells[n]->pHull.size();
+
+		tmp1<<hSize<<"";
+		for(unsigned int i=0;i<cells[n]->pHull.size();i++){
+			tmp1<<" "<<cells[n]->pHull[i].id;
+		}
+		tmp1<<endl;
+		nComponents+= hSize;
+	}
+	tmp<<"CELLS "<<cells.size()<<" "<<nComponents<<endl;
+	tmp<<tmp1.str();
+	Write(tmp.str());
+	tmp.str(std::string());
+
+	// writing the cell type
+	tmp<<"CELL_TYPES "<<cells.size()<<endl;
+	for (unsigned int n=0;n<cells.size();n++){
+		tmp<<"9"<<endl;
+	}
+
+	Write(tmp.str());
+}
+
+void TrajectoriesVTK::WriteFrame(int frameNr, Building* building) {
+}
+
+void TrajectoriesVTK::WriteFooter() {
+}

@@ -117,6 +117,12 @@ file(
 	
 )
 
+#Target
+add_executable(
+	rebuild.exe
+	${source_files}
+)
+
 
 #find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
@@ -127,16 +133,19 @@ if(OPENMP_FOUND)
 endif()
 
 #find and add the CGAL library
+#fixme: complete this section
 FIND_PACKAGE(CGAL)
 if(CGAL_FOUND)
-	add_definitions(-D_CGAL=1)
+	#include (${CGAL_USE_FILE})
+	#INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
+	#add_definitions(-D_CGAL=1)
+	#target_link_libraries (rebuild.exe ${CGAL_CORE_LIBRARY})
+	#message (SEND_ERROR "${CGAL_FOUND}")
+	#message (FATAL_ERROR "${CGAL_CORE_INCLUDE_DIR}")
+	#message (SEND_ERROR " Erreur: ${CGAL_FOUND}")
+	#message (SEND_ERROR " Erreur: ${CGAL_USE_FILE}")
 endif()
 
-
-add_executable(
-	rebuild.exe
-	${source_files}
-)
 
 if(WIN32)
 target_link_libraries (rebuild.exe wsock32)

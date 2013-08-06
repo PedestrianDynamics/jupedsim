@@ -1,0 +1,1188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<trajectoriesDataset>
+	<header formatVersion = "1.0">
+		<agents>23</agents>
+		<seed>12542</seed>
+		<frameRate>8.000000</frameRate>
+	</header>
+
+	<geometry>
+		<wall>
+			<point xPos="1000.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</wall>
+		<wall>
+			<point xPos="1000.00" yPos="0.00"/>
+			<point xPos="0.00" yPos="0.00"/>
+		</wall>
+		<wall>
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="0.00" yPos="1000.00"/>
+		</wall>
+		<wall>
+			<point xPos="0.00" yPos="1000.00"/>
+			<point xPos="1000.00" yPos="1000.00"/>
+		</wall>
+		<wall>
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="1000.00" yPos="600.00"/>
+		</wall>
+		<label centerX="500.00" centerY="500.00" centerZ="0" text="0" color="100" />
+		<door ID="17" color = "250" caption="0_17">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1000.00" yPos="400.00"/>
+		</door>
+		<wall>
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</wall>
+		<wall>
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</wall>
+		<wall>
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1500.00" yPos="400.00"/>
+		</wall>
+		<wall>
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="400.00"/>
+		</wall>
+		<label centerX="1490.62" centerY="190.62" centerZ="0" text="1" color="100" />
+		<wall>
+			<point xPos="1200.00" yPos="600.00"/>
+			<point xPos="1300.00" yPos="600.00"/>
+		</wall>
+		<wall>
+			<point xPos="1300.00" yPos="600.00"/>
+			<point xPos="1300.00" yPos="550.00"/>
+		</wall>
+		<wall>
+			<point xPos="1300.00" yPos="550.00"/>
+			<point xPos="1200.00" yPos="550.00"/>
+		</wall>
+		<wall>
+			<point xPos="1200.00" yPos="550.00"/>
+			<point xPos="1200.00" yPos="600.00"/>
+		</wall>
+		<label centerX="1250.00" centerY="575.00" centerZ="0" text="table" color="100" />
+		<wall>
+			<point xPos="1650.00" yPos="-200.00"/>
+			<point xPos="1700.00" yPos="-200.00"/>
+		</wall>
+		<wall>
+			<point xPos="1700.00" yPos="-200.00"/>
+			<point xPos="1700.00" yPos="-300.00"/>
+		</wall>
+		<wall>
+			<point xPos="1700.00" yPos="-300.00"/>
+			<point xPos="1650.00" yPos="-300.00"/>
+		</wall>
+		<wall>
+			<point xPos="1650.00" yPos="-300.00"/>
+			<point xPos="1650.00" yPos="-200.00"/>
+		</wall>
+		<label centerX="1675.00" centerY="-250.00" centerZ="0" text="table" color="100" />
+		<door ID="23" color = "250" caption="2_23">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</door>
+		<door ID="18" color="180" caption="1_18_main exit">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</door>
+		<wall>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</wall>
+		<wall>
+			<point xPos="-1000.00" yPos="2000.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</wall>
+		<wall>
+			<point xPos="2700.00" yPos="2000.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</wall>
+		<wall>
+			<point xPos="2700.00" yPos="-1500.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</wall>
+		<label centerX="850.00" centerY="250.00" centerZ="0" text="0" color="100" />
+	</geometry>
+
+<frame ID="0">
+<agent ID="1"	xPos="540.00"	yPos="851.00"	radiusA="17.95"	radiusB="24.96"	ellipseOrientation="-37.35" ellipseColor="0"/>
+<agent ID="2"	xPos="600.00"	yPos="296.00"	radiusA="18.00"	radiusB="24.99"	ellipseOrientation="27.02" ellipseColor="0"/>
+<agent ID="3"	xPos="840.00"	yPos="407.00"	radiusA="18.08"	radiusB="24.98"	ellipseOrientation="30.17" ellipseColor="0"/>
+<agent ID="4"	xPos="180.00"	yPos="925.00"	radiusA="18.09"	radiusB="25.00"	ellipseOrientation="-27.40" ellipseColor="0"/>
+<agent ID="5"	xPos="570.00"	yPos="74.00"	radiusA="17.94"	radiusB="25.06"	ellipseOrientation="44.73" ellipseColor="0"/>
+<agent ID="6"	xPos="870.00"	yPos="925.00"	radiusA="18.03"	radiusB="25.06"	ellipseOrientation="-72.99" ellipseColor="0"/>
+<agent ID="7"	xPos="660.00"	yPos="925.00"	radiusA="18.01"	radiusB="25.06"	ellipseOrientation="-51.34" ellipseColor="0"/>
+<agent ID="8"	xPos="210.00"	yPos="407.00"	radiusA="18.00"	radiusB="24.95"	ellipseOrientation="6.71" ellipseColor="0"/>
+<agent ID="9"	xPos="180.00"	yPos="555.00"	radiusA="18.03"	radiusB="25.04"	ellipseOrientation="-3.84" ellipseColor="0"/>
+<agent ID="10"	xPos="120.00"	yPos="851.00"	radiusA="18.01"	radiusB="25.09"	ellipseOrientation="-21.75" ellipseColor="0"/>
+<agent ID="21"	xPos="330.00"	yPos="592.00"	radiusA="18.09"	radiusB="25.07"	ellipseOrientation="-7.82" ellipseColor="0"/>
+<agent ID="22"	xPos="180.00"	yPos="703.00"	radiusA="17.98"	radiusB="25.05"	ellipseOrientation="-13.90" ellipseColor="0"/>
+<agent ID="11"	xPos="1600.00"	yPos="351.00"	radiusA="18.10"	radiusB="25.08"	ellipseOrientation="-90.00" ellipseColor="0"/>
+<agent ID="12"	xPos="1540.00"	yPos="-389.00"	radiusA="18.09"	radiusB="25.10"	ellipseOrientation="-61.61" ellipseColor="0"/>
+<agent ID="13"	xPos="1540.00"	yPos="-130.00"	radiusA="18.10"	radiusB="25.08"	ellipseOrientation="-80.79" ellipseColor="0"/>
+<agent ID="14"	xPos="1420.00"	yPos="536.00"	radiusA="17.91"	radiusB="25.05"	ellipseOrientation="-11.31" ellipseColor="0"/>
+<agent ID="15"	xPos="1660.00"	yPos="-463.00"	radiusA="17.99"	radiusB="25.01"	ellipseOrientation="-148.34" ellipseColor="0"/>
+<agent ID="16"	xPos="1360.00"	yPos="536.00"	radiusA="17.94"	radiusB="24.96"	ellipseOrientation="-8.53" ellipseColor="0"/>
+<agent ID="17"	xPos="1600.00"	yPos="-389.00"	radiusA="18.00"	radiusB="25.07"	ellipseOrientation="-90.00" ellipseColor="0"/>
+<agent ID="18"	xPos="1570.00"	yPos="462.00"	radiusA="17.96"	radiusB="24.93"	ellipseOrientation="-88.21" ellipseColor="0"/>
+<agent ID="19"	xPos="1540.00"	yPos="573.00"	radiusA="18.03"	radiusB="24.96"	ellipseOrientation="-50.58" ellipseColor="0"/>
+<agent ID="20"	xPos="1540.00"	yPos="-315.00"	radiusA="17.97"	radiusB="24.98"	ellipseOrientation="-72.03" ellipseColor="0"/>
+<agent ID="23"	xPos="1330.00"	yPos="499.00"	radiusA="18.07"	radiusB="25.09"	ellipseOrientation="0.21" ellipseColor="0"/>
+</frame>
+
+<frame ID="1">
+<agent ID="1"	xPos="541.58"	yPos="850.01"	radiusA="32.11"	radiusB="23.89"	ellipseOrientation="-32.25" ellipseColor="55"/>
+<agent ID="2"	xPos="601.72"	yPos="296.53"	radiusA="31.72"	radiusB="23.87"	ellipseOrientation="17.22" ellipseColor="56"/>
+<agent ID="3"	xPos="841.80"	yPos="407.15"	radiusA="31.84"	radiusB="23.87"	ellipseOrientation="4.65" ellipseColor="56"/>
+<agent ID="4"	xPos="181.66"	yPos="924.30"	radiusA="31.85"	radiusB="23.89"	ellipseOrientation="-22.82" ellipseColor="56"/>
+<agent ID="5"	xPos="571.40"	yPos="75.13"	radiusA="31.65"	radiusB="23.95"	ellipseOrientation="38.82" ellipseColor="56"/>
+<agent ID="6"	xPos="870.62"	yPos="923.31"	radiusA="31.68"	radiusB="23.93"	ellipseOrientation="-69.99" ellipseColor="56"/>
+<agent ID="7"	xPos="661.21"	yPos="923.72"	radiusA="31.42"	radiusB="23.95"	ellipseOrientation="-46.69" ellipseColor="55"/>
+<agent ID="8"	xPos="211.80"	yPos="407.03"	radiusA="31.73"	radiusB="23.87"	ellipseOrientation="0.94" ellipseColor="56"/>
+<agent ID="9"	xPos="181.71"	yPos="555.00"	radiusA="31.01"	radiusB="24.00"	ellipseOrientation="-0.11" ellipseColor="53"/>
+<agent ID="10"	xPos="121.65"	yPos="850.46"	radiusA="31.20"	radiusB="24.00"	ellipseOrientation="-17.95" ellipseColor="54"/>
+<agent ID="21"	xPos="331.80"	yPos="591.97"	radiusA="31.83"	radiusB="23.94"	ellipseOrientation="-1.03" ellipseColor="56"/>
+<agent ID="22"	xPos="181.73"	yPos="702.78"	radiusA="31.28"	radiusB="23.95"	ellipseOrientation="-7.07" ellipseColor="54"/>
+<agent ID="11"	xPos="1600.00"	yPos="349.20"	radiusA="31.82"	radiusB="23.96"	ellipseOrientation="-90.00" ellipseColor="56"/>
+<agent ID="12"	xPos="1539.97"	yPos="-390.77"	radiusA="31.62"	radiusB="23.99"	ellipseOrientation="-91.22" ellipseColor="55"/>
+<agent ID="13"	xPos="1540.00"	yPos="-131.72"	radiusA="31.16"	radiusB="24.00"	ellipseOrientation="-90.00" ellipseColor="53"/>
+<agent ID="14"	xPos="1421.13"	yPos="534.80"	radiusA="30.30"	radiusB="24.05"	ellipseOrientation="-46.61" ellipseColor="50"/>
+<agent ID="15"	xPos="1660.00"	yPos="-464.80"	radiusA="31.73"	radiusB="23.88"	ellipseOrientation="-90.00" ellipseColor="56"/>
+<agent ID="16"	xPos="1360.94"	yPos="535.08"	radiusA="27.42"	radiusB="24.21"	ellipseOrientation="-45.52" ellipseColor="38"/>
+<agent ID="17"	xPos="1599.94"	yPos="-390.68"	radiusA="30.76"	radiusB="24.03"	ellipseOrientation="-92.36" ellipseColor="52"/>
+<agent ID="18"	xPos="1569.96"	yPos="460.33"	radiusA="30.58"	radiusB="23.93"	ellipseOrientation="-91.35" ellipseColor="51"/>
+<agent ID="19"	xPos="1541.21"	yPos="571.84"	radiusA="30.68"	radiusB="23.96"	ellipseOrientation="-43.89" ellipseColor="51"/>
+<agent ID="20"	xPos="1539.90"	yPos="-316.29"	radiusA="27.31"	radiusB="24.23"	ellipseOrientation="-95.02" ellipseColor="38"/>
+<agent ID="23"	xPos="1331.38"	yPos="498.07"	radiusA="30.62"	radiusB="24.07"	ellipseOrientation="-34.08" ellipseColor="51"/>
+</frame>
+
+<frame ID="2">
+<agent ID="1"	xPos="545.78"	yPos="847.34"	radiusA="43.05"	radiusB="23.06"	ellipseOrientation="-32.58" ellipseColor="98"/>
+<agent ID="2"	xPos="606.34"	yPos="297.97"	radiusA="42.40"	radiusB="23.00"	ellipseOrientation="17.22" ellipseColor="100"/>
+<agent ID="3"	xPos="846.62"	yPos="407.54"	radiusA="42.55"	radiusB="23.00"	ellipseOrientation="4.65" ellipseColor="100"/>
+<agent ID="4"	xPos="186.13"	yPos="922.42"	radiusA="42.55"	radiusB="23.03"	ellipseOrientation="-22.82" ellipseColor="100"/>
+<agent ID="5"	xPos="575.17"	yPos="78.16"	radiusA="42.33"	radiusB="23.08"	ellipseOrientation="38.82" ellipseColor="100"/>
+<agent ID="6"	xPos="872.25"	yPos="918.79"	radiusA="42.28"	radiusB="23.05"	ellipseOrientation="-70.21" ellipseColor="99"/>
+<agent ID="7"	xPos="664.44"	yPos="920.28"	radiusA="41.73"	radiusB="23.09"	ellipseOrientation="-47.04" ellipseColor="97"/>
+<agent ID="8"	xPos="216.64"	yPos="407.11"	radiusA="42.43"	radiusB="23.04"	ellipseOrientation="0.94" ellipseColor="100"/>
+<agent ID="9"	xPos="186.26"	yPos="554.98"	radiusA="40.94"	radiusB="23.20"	ellipseOrientation="-0.21" ellipseColor="94"/>
+<agent ID="10"	xPos="126.06"	yPos="849.04"	radiusA="41.33"	radiusB="23.16"	ellipseOrientation="-17.88" ellipseColor="95"/>
+<agent ID="21"	xPos="336.64"	yPos="591.88"	radiusA="42.53"	radiusB="23.06"	ellipseOrientation="-1.03" ellipseColor="100"/>
+<agent ID="22"	xPos="186.36"	yPos="702.22"	radiusA="41.55"	radiusB="23.10"	ellipseOrientation="-6.94" ellipseColor="96"/>
+<agent ID="11"	xPos="1600.00"	yPos="344.36"	radiusA="42.50"	radiusB="23.09"	ellipseOrientation="-90.00" ellipseColor="100"/>
+<agent ID="12"	xPos="1539.86"	yPos="-395.52"	radiusA="42.13"	radiusB="23.12"	ellipseOrientation="-91.34" ellipseColor="98"/>
+<agent ID="13"	xPos="1540.00"	yPos="-136.26"	radiusA="40.74"	radiusB="23.22"	ellipseOrientation="-90.00" ellipseColor="92"/>
+<agent ID="14"	xPos="1424.07"	yPos="531.71"	radiusA="38.97"	radiusB="23.35"	ellipseOrientation="-46.25" ellipseColor="86"/>
+<agent ID="15"	xPos="1660.00"	yPos="-469.64"	radiusA="42.43"	radiusB="23.00"	ellipseOrientation="-90.00" ellipseColor="100"/>
+<agent ID="16"	xPos="1362.95"	yPos="532.92"	radiusA="31.26"	radiusB="23.91"	ellipseOrientation="-48.06" ellipseColor="54"/>
+<agent ID="17"	xPos="1599.72"	yPos="-395.12"	radiusA="40.28"	radiusB="23.25"	ellipseOrientation="-93.11" ellipseColor="91"/>
+<agent ID="18"	xPos="1569.84"	yPos="455.93"	radiusA="39.87"	radiusB="23.19"	ellipseOrientation="-91.77" ellipseColor="90"/>
+<agent ID="19"	xPos="1544.36"	yPos="568.80"	radiusA="39.92"	radiusB="23.23"	ellipseOrientation="-44.11" ellipseColor="89"/>
+<agent ID="20"	xPos="1539.60"	yPos="-319.01"	radiusA="29.02"	radiusB="24.09"	ellipseOrientation="-97.85" ellipseColor="45"/>
+<agent ID="23"	xPos="1335.01"	yPos="495.62"	radiusA="39.95"	radiusB="23.32"	ellipseOrientation="-33.66" ellipseColor="90"/>
+</frame>
+
+<frame ID="3">
+<agent ID="1"	xPos="552.00"	yPos="843.34"	radiusA="51.51"	radiusB="22.42"	ellipseOrientation="-32.93" ellipseColor="131"/>
+<agent ID="2"	xPos="613.22"	yPos="300.10"	radiusA="50.71"	radiusB="22.32"	ellipseOrientation="17.22" ellipseColor="134"/>
+<agent ID="3"	xPos="853.80"	yPos="408.12"	radiusA="50.89"	radiusB="22.32"	ellipseOrientation="4.65" ellipseColor="134"/>
+<agent ID="4"	xPos="192.77"	yPos="919.66"	radiusA="50.76"	radiusB="22.36"	ellipseOrientation="-22.31" ellipseColor="134"/>
+<agent ID="5"	xPos="580.77"	yPos="82.66"	radiusA="50.59"	radiusB="22.41"	ellipseOrientation="38.75" ellipseColor="134"/>
+<agent ID="6"	xPos="874.66"	yPos="912.05"	radiusA="50.49"	radiusB="22.37"	ellipseOrientation="-70.44" ellipseColor="133"/>
+<agent ID="7"	xPos="669.17"	yPos="915.15"	radiusA="49.62"	radiusB="22.44"	ellipseOrientation="-47.40" ellipseColor="130"/>
+<agent ID="8"	xPos="223.84"	yPos="407.23"	radiusA="50.75"	radiusB="22.39"	ellipseOrientation="0.94" ellipseColor="134"/>
+<agent ID="9"	xPos="192.98"	yPos="554.95"	radiusA="48.44"	radiusB="22.60"	ellipseOrientation="-0.35" ellipseColor="125"/>
+<agent ID="10"	xPos="132.59"	yPos="846.94"	radiusA="49.09"	radiusB="22.52"	ellipseOrientation="-17.80" ellipseColor="127"/>
+<agent ID="21"	xPos="343.83"	yPos="591.75"	radiusA="50.86"	radiusB="22.37"	ellipseOrientation="-1.03" ellipseColor="134"/>
+<agent ID="22"	xPos="193.23"	yPos="701.39"	radiusA="49.47"	radiusB="22.45"	ellipseOrientation="-6.81" ellipseColor="129"/>
+<agent ID="11"	xPos="1600.00"	yPos="337.17"	radiusA="50.82"	radiusB="22.41"	ellipseOrientation="-90.00" ellipseColor="134"/>
+<agent ID="12"	xPos="1539.69"	yPos="-402.59"	radiusA="50.31"	radiusB="22.45"	ellipseOrientation="-91.42" ellipseColor="132"/>
+<agent ID="13"	xPos="1540.00"	yPos="-142.76"	radiusA="46.95"	radiusB="22.71"	ellipseOrientation="-89.98" ellipseColor="118"/>
+<agent ID="14"	xPos="1428.27"	yPos="527.36"	radiusA="44.74"	radiusB="22.89"	ellipseOrientation="-45.75" ellipseColor="110"/>
+<agent ID="15"	xPos="1660.00"	yPos="-476.83"	radiusA="50.76"	radiusB="22.32"	ellipseOrientation="-90.00" ellipseColor="134"/>
+<agent ID="16"	xPos="1365.21"	yPos="530.39"	radiusA="31.27"	radiusB="23.91"	ellipseOrientation="-48.03" ellipseColor="54"/>
+<agent ID="17"	xPos="1599.31"	yPos="-401.58"	radiusA="47.03"	radiusB="22.70"	ellipseOrientation="-94.24" ellipseColor="119"/>
+<agent ID="18"	xPos="1569.61"	yPos="449.59"	radiusA="46.22"	radiusB="22.69"	ellipseOrientation="-92.46" ellipseColor="116"/>
+<agent ID="19"	xPos="1548.90"	yPos="564.38"	radiusA="46.45"	radiusB="22.71"	ellipseOrientation="-44.27" ellipseColor="116"/>
+<agent ID="20"	xPos="1539.17"	yPos="-321.42"	radiusA="26.53"	radiusB="24.29"	ellipseOrientation="-102.32" ellipseColor="35"/>
+<agent ID="23"	xPos="1340.37"	yPos="492.15"	radiusA="46.74"	radiusB="22.77"	ellipseOrientation="-32.23" ellipseColor="118"/>
+</frame>
+
+<frame ID="4">
+<agent ID="1"	xPos="559.75"	yPos="838.28"	radiusA="58.02"	radiusB="21.93"	ellipseOrientation="-33.28" ellipseColor="157"/>
+<agent ID="2"	xPos="621.86"	yPos="302.78"	radiusA="57.18"	radiusB="21.80"	ellipseOrientation="17.22" ellipseColor="161"/>
+<agent ID="3"	xPos="862.81"	yPos="408.85"	radiusA="57.37"	radiusB="21.79"	ellipseOrientation="4.65" ellipseColor="161"/>
+<agent ID="4"	xPos="201.11"	yPos="916.27"	radiusA="57.12"	radiusB="21.85"	ellipseOrientation="-21.95" ellipseColor="160"/>
+<agent ID="5"	xPos="587.78"	yPos="88.19"	radiusA="56.39"	radiusB="21.94"	ellipseOrientation="37.84" ellipseColor="158"/>
+<agent ID="6"	xPos="877.65"	yPos="903.59"	radiusA="56.85"	radiusB="21.85"	ellipseOrientation="-70.67" ellipseColor="160"/>
+<agent ID="7"	xPos="675.04"	yPos="908.73"	radiusA="55.62"	radiusB="21.94"	ellipseOrientation="-47.76" ellipseColor="154"/>
+<agent ID="8"	xPos="232.87"	yPos="407.37"	radiusA="57.13"	radiusB="21.89"	ellipseOrientation="0.72" ellipseColor="160"/>
+<agent ID="9"	xPos="201.32"	yPos="554.89"	radiusA="54.01"	radiusB="22.16"	ellipseOrientation="-0.51" ellipseColor="148"/>
+<agent ID="10"	xPos="140.73"	yPos="844.33"	radiusA="54.99"	radiusB="22.03"	ellipseOrientation="-17.72" ellipseColor="152"/>
+<agent ID="21"	xPos="352.87"	yPos="591.59"	radiusA="57.35"	radiusB="21.84"	ellipseOrientation="-1.03" ellipseColor="161"/>
+<agent ID="22"	xPos="201.83"	yPos="700.37"	radiusA="55.56"	radiusB="21.95"	ellipseOrientation="-6.69" ellipseColor="154"/>
+<agent ID="11"	xPos="1600.00"	yPos="328.13"	radiusA="57.30"	radiusB="21.87"	ellipseOrientation="-90.00" ellipseColor="161"/>
+<agent ID="12"	xPos="1539.47"	yPos="-411.46"	radiusA="56.65"	radiusB="21.93"	ellipseOrientation="-91.50" ellipseColor="158"/>
+<agent ID="13"	xPos="1540.01"	yPos="-150.44"	radiusA="50.46"	radiusB="22.42"	ellipseOrientation="-89.94" ellipseColor="132"/>
+<agent ID="14"	xPos="1433.32"	yPos="522.24"	radiusA="48.28"	radiusB="22.60"	ellipseOrientation="-45.15" ellipseColor="124"/>
+<agent ID="15"	xPos="1660.00"	yPos="-485.87"	radiusA="57.25"	radiusB="21.79"	ellipseOrientation="-90.00" ellipseColor="161"/>
+<agent ID="16"	xPos="1367.29"	yPos="528.14"	radiusA="28.98"	radiusB="24.09"	ellipseOrientation="-46.30" ellipseColor="45"/>
+<agent ID="17"	xPos="1598.62"	yPos="-409.39"	radiusA="51.31"	radiusB="22.35"	ellipseOrientation="-95.83" ellipseColor="136"/>
+<agent ID="18"	xPos="1569.21"	yPos="442.02"	radiusA="49.77"	radiusB="22.41"	ellipseOrientation="-93.62" ellipseColor="130"/>
+<agent ID="19"	xPos="1554.40"	yPos="559.00"	radiusA="50.97"	radiusB="22.35"	ellipseOrientation="-44.39" ellipseColor="135"/>
+<agent ID="20"	xPos="1538.80"	yPos="-323.32"	radiusA="25.11"	radiusB="24.40"	ellipseOrientation="-88.99" ellipseColor="29"/>
+<agent ID="23"	xPos="1347.02"	yPos="488.09"	radiusA="51.17"	radiusB="22.41"	ellipseOrientation="-31.02" ellipseColor="136"/>
+</frame>
+
+<frame ID="5">
+<agent ID="1"	xPos="568.66"	yPos="832.39"	radiusA="63.03"	radiusB="21.55"	ellipseOrientation="-33.63" ellipseColor="177"/>
+<agent ID="2"	xPos="631.86"	yPos="305.88"	radiusA="62.22"	radiusB="21.39"	ellipseOrientation="17.22" ellipseColor="182"/>
+<agent ID="3"	xPos="873.24"	yPos="409.70"	radiusA="62.42"	radiusB="21.38"	ellipseOrientation="4.65" ellipseColor="182"/>
+<agent ID="4"	xPos="210.78"	yPos="912.41"	radiusA="62.05"	radiusB="21.45"	ellipseOrientation="-21.69" ellipseColor="180"/>
+<agent ID="5"	xPos="595.88"	yPos="94.41"	radiusA="60.83"	radiusB="21.58"	ellipseOrientation="37.22" ellipseColor="176"/>
+<agent ID="6"	xPos="881.06"	yPos="893.80"	radiusA="61.78"	radiusB="21.44"	ellipseOrientation="-70.89" ellipseColor="180"/>
+<agent ID="7"	xPos="681.75"	yPos="901.29"	radiusA="60.17"	radiusB="21.56"	ellipseOrientation="-48.12" ellipseColor="173"/>
+<agent ID="8"	xPos="243.29"	yPos="407.47"	radiusA="62.02"	radiusB="21.51"	ellipseOrientation="0.44" ellipseColor="180"/>
+<agent ID="9"	xPos="210.85"	yPos="554.79"	radiusA="58.05"	radiusB="21.83"	ellipseOrientation="-0.70" ellipseColor="164"/>
+<agent ID="10"	xPos="150.11"	yPos="841.34"	radiusA="59.43"	radiusB="21.66"	ellipseOrientation="-17.66" ellipseColor="170"/>
+<agent ID="21"	xPos="363.34"	yPos="591.40"	radiusA="62.40"	radiusB="21.42"	ellipseOrientation="-1.03" ellipseColor="182"/>
+<agent ID="22"	xPos="211.75"	yPos="699.22"	radiusA="60.23"	radiusB="21.56"	ellipseOrientation="-6.58" ellipseColor="173"/>
+<agent ID="11"	xPos="1600.00"	yPos="317.66"	radiusA="62.34"	radiusB="21.46"	ellipseOrientation="-90.00" ellipseColor="182"/>
+<agent ID="12"	xPos="1539.19"	yPos="-421.72"	radiusA="61.58"	radiusB="21.52"	ellipseOrientation="-91.57" ellipseColor="178"/>
+<agent ID="13"	xPos="1540.02"	yPos="-158.78"	radiusA="52.29"	radiusB="22.27"	ellipseOrientation="-89.90" ellipseColor="140"/>
+<agent ID="14"	xPos="1438.89"	yPos="516.70"	radiusA="50.17"	radiusB="22.45"	ellipseOrientation="-44.47" ellipseColor="132"/>
+<agent ID="15"	xPos="1660.00"	yPos="-496.33"	radiusA="62.30"	radiusB="21.37"	ellipseOrientation="-90.00" ellipseColor="182"/>
+<agent ID="16"	xPos="1369.00"	yPos="526.44"	radiusA="26.25"	radiusB="24.31"	ellipseOrientation="-41.46" ellipseColor="34"/>
+<agent ID="17"	xPos="1597.62"	yPos="-417.98"	radiusA="53.60"	radiusB="22.16"	ellipseOrientation="-97.45" ellipseColor="146"/>
+<agent ID="18"	xPos="1568.58"	yPos="433.88"	radiusA="51.05"	radiusB="22.30"	ellipseOrientation="-95.29" ellipseColor="136"/>
+<agent ID="19"	xPos="1560.57"	yPos="552.94"	radiusA="54.17"	radiusB="22.10"	ellipseOrientation="-44.68" ellipseColor="148"/>
+<agent ID="20"	xPos="1538.75"	yPos="-325.17"	radiusA="26.07"	radiusB="24.33"	ellipseOrientation="-94.68" ellipseColor="33"/>
+<agent ID="23"	xPos="1354.43"	yPos="483.64"	radiusA="53.68"	radiusB="22.21"	ellipseOrientation="-31.03" ellipseColor="146"/>
+</frame>
+
+<frame ID="6">
+<agent ID="1"	xPos="578.45"	yPos="825.83"	radiusA="66.88"	radiusB="21.26"	ellipseOrientation="-33.98" ellipseColor="192"/>
+<agent ID="2"	xPos="642.92"	yPos="309.31"	radiusA="66.14"	radiusB="21.07"	ellipseOrientation="17.22" ellipseColor="198"/>
+<agent ID="3"	xPos="884.79"	yPos="410.64"	radiusA="66.35"	radiusB="21.06"	ellipseOrientation="4.65" ellipseColor="198"/>
+<agent ID="4"	xPos="221.46"	yPos="908.18"	radiusA="65.87"	radiusB="21.14"	ellipseOrientation="-21.48" ellipseColor="196"/>
+<agent ID="5"	xPos="604.80"	yPos="101.13"	radiusA="64.22"	radiusB="21.30"	ellipseOrientation="36.77" ellipseColor="190"/>
+<agent ID="6"	xPos="884.79"	yPos="882.96"	radiusA="65.59"	radiusB="21.12"	ellipseOrientation="-71.10" ellipseColor="196"/>
+<agent ID="7"	xPos="689.07"	yPos="893.08"	radiusA="63.58"	radiusB="21.28"	ellipseOrientation="-48.46" ellipseColor="187"/>
+<agent ID="8"	xPos="254.80"	yPos="407.54"	radiusA="65.83"	radiusB="21.21"	ellipseOrientation="0.26" ellipseColor="196"/>
+<agent ID="9"	xPos="221.24"	yPos="554.64"	radiusA="60.90"	radiusB="21.60"	ellipseOrientation="-0.91" ellipseColor="176"/>
+<agent ID="10"	xPos="160.40"	yPos="838.07"	radiusA="62.74"	radiusB="21.39"	ellipseOrientation="-17.61" ellipseColor="184"/>
+<agent ID="21"	xPos="374.92"	yPos="591.20"	radiusA="66.33"	radiusB="21.10"	ellipseOrientation="-1.03" ellipseColor="198"/>
+<agent ID="22"	xPos="222.69"	yPos="697.97"	radiusA="63.81"	radiusB="21.27"	ellipseOrientation="-6.48" ellipseColor="187"/>
+<agent ID="11"	xPos="1600.00"	yPos="306.08"	radiusA="66.27"	radiusB="21.14"	ellipseOrientation="-90.00" ellipseColor="198"/>
+<agent ID="12"	xPos="1538.90"	yPos="-433.09"	radiusA="65.59"	radiusB="21.19"	ellipseOrientation="-91.25" ellipseColor="195"/>
+<agent ID="13"	xPos="1540.04"	yPos="-167.45"	radiusA="53.32"	radiusB="22.18"	ellipseOrientation="-89.86" ellipseColor="144"/>
+<agent ID="14"	xPos="1444.77"	yPos="511.01"	radiusA="50.90"	radiusB="22.39"	ellipseOrientation="-43.70" ellipseColor="135"/>
+<agent ID="16"	xPos="1370.50"	yPos="525.37"	radiusA="24.72"	radiusB="24.43"	ellipseOrientation="-29.08" ellipseColor="27"/>
+<agent ID="17"	xPos="1596.55"	yPos="-427.19"	radiusA="57.60"	radiusB="21.84"	ellipseOrientation="-94.54" ellipseColor="162"/>
+<agent ID="18"	xPos="1567.69"	yPos="425.60"	radiusA="51.42"	radiusB="22.27"	ellipseOrientation="-96.93" ellipseColor="137"/>
+<agent ID="19"	xPos="1567.18"	yPos="546.35"	radiusA="56.57"	radiusB="21.91"	ellipseOrientation="-45.24" ellipseColor="158"/>
+<agent ID="20"	xPos="1538.51"	yPos="-327.53"	radiusA="29.06"	radiusB="24.09"	ellipseOrientation="-95.90" ellipseColor="45"/>
+<agent ID="23"	xPos="1361.87"	yPos="479.05"	radiusA="52.33"	radiusB="22.32"	ellipseOrientation="-32.01" ellipseColor="141"/>
+</frame>
+
+<frame ID="7">
+<agent ID="1"	xPos="588.91"	yPos="818.75"	radiusA="69.82"	radiusB="21.04"	ellipseOrientation="-34.31" ellipseColor="203"/>
+<agent ID="2"	xPos="654.81"	yPos="312.99"	radiusA="69.19"	radiusB="20.82"	ellipseOrientation="17.22" ellipseColor="210"/>
+<agent ID="3"	xPos="897.20"	yPos="411.65"	radiusA="69.41"	radiusB="20.81"	ellipseOrientation="4.65" ellipseColor="210"/>
+<agent ID="4"	xPos="232.95"	yPos="903.68"	radiusA="68.84"	radiusB="20.90"	ellipseOrientation="-21.31" ellipseColor="208"/>
+<agent ID="5"	xPos="614.37"	yPos="108.23"	radiusA="66.78"	radiusB="21.09"	ellipseOrientation="36.41" ellipseColor="201"/>
+<agent ID="6"	xPos="888.76"	yPos="871.32"	radiusA="68.53"	radiusB="20.88"	ellipseOrientation="-71.30" ellipseColor="208"/>
+<agent ID="7"	xPos="696.83"	yPos="884.27"	radiusA="66.12"	radiusB="21.07"	ellipseOrientation="-48.78" ellipseColor="198"/>
+<agent ID="8"	xPos="267.14"	yPos="407.58"	radiusA="68.79"	radiusB="20.98"	ellipseOrientation="0.15" ellipseColor="208"/>
+<agent ID="9"	xPos="232.22"	yPos="554.45"	radiusA="62.86"	radiusB="21.45"	ellipseOrientation="-1.12" ellipseColor="184"/>
+<agent ID="10"	xPos="171.38"	yPos="834.59"	radiusA="65.15"	radiusB="21.19"	ellipseOrientation="-17.58" ellipseColor="193"/>
+<agent ID="21"	xPos="387.37"	yPos="590.97"	radiusA="69.39"	radiusB="20.85"	ellipseOrientation="-1.03" ellipseColor="210"/>
+<agent ID="22"	xPos="234.41"	yPos="696.64"	radiusA="66.54"	radiusB="21.04"	ellipseOrientation="-6.41" ellipseColor="199"/>
+<agent ID="11"	xPos="1600.00"	yPos="293.62"	radiusA="69.32"	radiusB="20.89"	ellipseOrientation="-90.00" ellipseColor="210"/>
+<agent ID="12"	xPos="1538.68"	yPos="-445.36"	radiusA="68.82"	radiusB="20.93"	ellipseOrientation="-90.86" ellipseColor="208"/>
+<agent ID="13"	xPos="1540.06"	yPos="-176.34"	radiusA="54.06"	radiusB="22.12"	ellipseOrientation="-89.80" ellipseColor="147"/>
+<agent ID="14"	xPos="1450.79"	yPos="505.34"	radiusA="51.00"	radiusB="22.38"	ellipseOrientation="-42.80" ellipseColor="136"/>
+<agent ID="16"	xPos="1372.09"	yPos="524.67"	radiusA="25.43"	radiusB="24.37"	ellipseOrientation="-19.96" ellipseColor="30"/>
+<agent ID="17"	xPos="1596.02"	yPos="-437.69"	radiusA="62.35"	radiusB="21.45"	ellipseOrientation="-91.61" ellipseColor="182"/>
+<agent ID="18"	xPos="1566.58"	yPos="417.22"	radiusA="52.03"	radiusB="22.23"	ellipseOrientation="-97.97" ellipseColor="140"/>
+<agent ID="19"	xPos="1574.07"	yPos="539.30"	radiusA="58.42"	radiusB="21.76"	ellipseOrientation="-46.04" ellipseColor="165"/>
+<agent ID="20"	xPos="1538.19"	yPos="-330.73"	radiusA="32.63"	radiusB="23.80"	ellipseOrientation="-95.63" ellipseColor="60"/>
+<agent ID="23"	xPos="1369.03"	yPos="474.57"	radiusA="51.23"	radiusB="22.41"	ellipseOrientation="-31.93" ellipseColor="136"/>
+</frame>
+
+<frame ID="8">
+<agent ID="1"	xPos="599.85"	yPos="811.23"	radiusA="72.06"	radiusB="20.87"	ellipseOrientation="-34.63" ellipseColor="212"/>
+<agent ID="2"	xPos="667.35"	yPos="316.88"	radiusA="71.56"	radiusB="20.62"	ellipseOrientation="17.22" ellipseColor="220"/>
+<agent ID="3"	xPos="910.28"	yPos="412.71"	radiusA="71.79"	radiusB="20.62"	ellipseOrientation="4.65" ellipseColor="220"/>
+<agent ID="4"	xPos="245.06"	yPos="898.98"	radiusA="71.13"	radiusB="20.71"	ellipseOrientation="-21.17" ellipseColor="218"/>
+<agent ID="5"	xPos="624.42"	yPos="115.60"	radiusA="68.70"	radiusB="20.94"	ellipseOrientation="36.13" ellipseColor="209"/>
+<agent ID="6"	xPos="892.89"	yPos="859.05"	radiusA="70.80"	radiusB="20.69"	ellipseOrientation="-71.48" ellipseColor="217"/>
+<agent ID="7"	xPos="704.90"	yPos="875.01"	radiusA="67.97"	radiusB="20.92"	ellipseOrientation="-49.07" ellipseColor="205"/>
+<agent ID="8"	xPos="280.14"	yPos="407.60"	radiusA="71.10"	radiusB="20.80"	ellipseOrientation="0.06" ellipseColor="218"/>
+<agent ID="9"	xPos="243.60"	yPos="554.21"	radiusA="64.18"	radiusB="21.34"	ellipseOrientation="-1.31" ellipseColor="189"/>
+<agent ID="10"	xPos="182.84"	yPos="830.96"	radiusA="66.86"	radiusB="21.05"	ellipseOrientation="-17.59" ellipseColor="201"/>
+<agent ID="21"	xPos="400.49"	yPos="590.74"	radiusA="71.78"	radiusB="20.65"	ellipseOrientation="-1.03" ellipseColor="220"/>
+<agent ID="22"	xPos="246.72"	yPos="695.27"	radiusA="68.61"	radiusB="20.87"	ellipseOrientation="-6.35" ellipseColor="207"/>
+<agent ID="11"	xPos="1600.00"	yPos="280.50"	radiusA="71.70"	radiusB="20.69"	ellipseOrientation="-90.00" ellipseColor="220"/>
+<agent ID="12"	xPos="1538.51"	yPos="-458.35"	radiusA="71.33"	radiusB="20.72"	ellipseOrientation="-90.61" ellipseColor="218"/>
+<agent ID="13"	xPos="1540.10"	yPos="-185.39"	radiusA="54.67"	radiusB="22.07"	ellipseOrientation="-89.74" ellipseColor="150"/>
+<agent ID="14"	xPos="1456.90"	yPos="499.78"	radiusA="50.88"	radiusB="22.39"	ellipseOrientation="-41.72" ellipseColor="135"/>
+<agent ID="16"	xPos="1374.09"	yPos="524.05"	radiusA="27.34"	radiusB="24.22"	ellipseOrientation="-15.00" ellipseColor="38"/>
+<agent ID="17"	xPos="1595.89"	yPos="-449.27"	radiusA="66.10"	radiusB="21.14"	ellipseOrientation="-89.89" ellipseColor="197"/>
+<agent ID="18"	xPos="1565.35"	yPos="408.65"	radiusA="53.10"	radiusB="22.14"	ellipseOrientation="-98.32" ellipseColor="144"/>
+<agent ID="19"	xPos="1581.14"	yPos="531.84"	radiusA="59.87"	radiusB="21.65"	ellipseOrientation="-47.03" ellipseColor="171"/>
+<agent ID="20"	xPos="1537.80"	yPos="-334.85"	radiusA="36.34"	radiusB="23.50"	ellipseOrientation="-95.27" ellipseColor="75"/>
+<agent ID="23"	xPos="1375.98"	yPos="470.28"	radiusA="50.22"	radiusB="22.49"	ellipseOrientation="-31.42" ellipseColor="132"/>
+</frame>
+
+<frame ID="9">
+<agent ID="1"	xPos="611.15"	yPos="803.38"	radiusA="73.75"	radiusB="20.74"	ellipseOrientation="-34.93" ellipseColor="219"/>
+<agent ID="2"	xPos="680.39"	yPos="320.92"	radiusA="73.41"	radiusB="20.47"	ellipseOrientation="17.22" ellipseColor="228"/>
+<agent ID="3"	xPos="923.89"	yPos="413.82"	radiusA="73.65"	radiusB="20.47"	ellipseOrientation="4.65" ellipseColor="228"/>
+<agent ID="4"	xPos="257.64"	yPos="894.12"	radiusA="72.90"	radiusB="20.57"	ellipseOrientation="-21.04" ellipseColor="225"/>
+<agent ID="5"	xPos="634.85"	yPos="123.18"	radiusA="70.13"	radiusB="20.82"	ellipseOrientation="35.91" ellipseColor="214"/>
+<agent ID="6"	xPos="897.14"	yPos="846.29"	radiusA="72.54"	radiusB="20.55"	ellipseOrientation="-71.64" ellipseColor="224"/>
+<agent ID="7"	xPos="713.19"	yPos="865.41"	radiusA="69.30"	radiusB="20.81"	ellipseOrientation="-49.34" ellipseColor="211"/>
+<agent ID="8"	xPos="293.65"	yPos="407.61"	radiusA="72.89"	radiusB="20.66"	ellipseOrientation="0.00" ellipseColor="225"/>
+<agent ID="9"	xPos="255.26"	yPos="553.92"	radiusA="65.09"	radiusB="21.27"	ellipseOrientation="-1.47" ellipseColor="193"/>
+<agent ID="10"	xPos="194.64"	yPos="827.21"	radiusA="68.02"	radiusB="20.95"	ellipseOrientation="-17.63" ellipseColor="205"/>
+<agent ID="21"	xPos="414.14"	yPos="590.49"	radiusA="73.63"	radiusB="20.50"	ellipseOrientation="-1.03" ellipseColor="228"/>
+<agent ID="22"	xPos="259.48"	yPos="693.85"	radiusA="70.16"	radiusB="20.74"	ellipseOrientation="-6.30" ellipseColor="214"/>
+<agent ID="11"	xPos="1600.00"	yPos="266.84"	radiusA="73.56"	radiusB="20.54"	ellipseOrientation="-90.00" ellipseColor="228"/>
+<agent ID="12"	xPos="1538.39"	yPos="-471.89"	radiusA="73.29"	radiusB="20.56"	ellipseOrientation="-90.44" ellipseColor="226"/>
+<agent ID="13"	xPos="1540.15"	yPos="-194.60"	radiusA="55.25"	radiusB="22.03"	ellipseOrientation="-89.67" ellipseColor="152"/>
+<agent ID="14"	xPos="1463.11"	yPos="494.36"	radiusA="50.76"	radiusB="22.40"	ellipseOrientation="-40.62" ellipseColor="135"/>
+<agent ID="16"	xPos="1376.63"	yPos="523.44"	radiusA="29.49"	radiusB="24.05"	ellipseOrientation="-12.55" ellipseColor="47"/>
+<agent ID="17"	xPos="1596.04"	yPos="-461.67"	radiusA="69.03"	radiusB="20.90"	ellipseOrientation="-88.75" ellipseColor="209"/>
+<agent ID="18"	xPos="1564.06"	yPos="399.77"	radiusA="54.52"	radiusB="22.03"	ellipseOrientation="-98.17" ellipseColor="150"/>
+<agent ID="19"	xPos="1588.28"	yPos="524.02"	radiusA="61.01"	radiusB="21.55"	ellipseOrientation="-48.16" ellipseColor="176"/>
+<agent ID="20"	xPos="1537.35"	yPos="-339.88"	radiusA="40.00"	radiusB="23.21"	ellipseOrientation="-94.91" ellipseColor="90"/>
+<agent ID="23"	xPos="1382.78"	yPos="466.18"	radiusA="49.28"	radiusB="22.56"	ellipseOrientation="-30.71" ellipseColor="128"/>
+</frame>
+
+<frame ID="10">
+<agent ID="1"	xPos="622.71"	yPos="795.26"	radiusA="75.03"	radiusB="20.65"	ellipseOrientation="-35.22" ellipseColor="224"/>
+<agent ID="2"	xPos="693.82"	yPos="325.08"	radiusA="74.84"	radiusB="20.36"	ellipseOrientation="17.22" ellipseColor="234"/>
+<agent ID="3"	xPos="937.90"	yPos="414.95"	radiusA="75.09"	radiusB="20.35"	ellipseOrientation="4.65" ellipseColor="234"/>
+<agent ID="4"	xPos="270.61"	yPos="889.15"	radiusA="74.27"	radiusB="20.46"	ellipseOrientation="-20.93" ellipseColor="230"/>
+<agent ID="5"	xPos="645.55"	yPos="130.90"	radiusA="71.18"	radiusB="20.74"	ellipseOrientation="35.74" ellipseColor="219"/>
+<agent ID="6"	xPos="901.48"	yPos="833.15"	radiusA="73.88"	radiusB="20.44"	ellipseOrientation="-71.79" ellipseColor="230"/>
+<agent ID="7"	xPos="721.61"	yPos="855.56"	radiusA="70.20"	radiusB="20.73"	ellipseOrientation="-49.57" ellipseColor="214"/>
+<agent ID="8"	xPos="307.55"	yPos="407.61"	radiusA="74.28"	radiusB="20.55"	ellipseOrientation="-0.04" ellipseColor="231"/>
+<agent ID="9"	xPos="267.11"	yPos="553.61"	radiusA="65.77"	radiusB="21.21"	ellipseOrientation="-1.58" ellipseColor="196"/>
+<agent ID="10"	xPos="206.65"	yPos="823.39"	radiusA="68.73"	radiusB="20.89"	ellipseOrientation="-17.70" ellipseColor="208"/>
+<agent ID="21"	xPos="428.21"	yPos="590.24"	radiusA="75.08"	radiusB="20.38"	ellipseOrientation="-1.03" ellipseColor="234"/>
+<agent ID="22"	xPos="272.58"	yPos="692.41"	radiusA="71.32"	radiusB="20.65"	ellipseOrientation="-6.27" ellipseColor="218"/>
+<agent ID="11"	xPos="1600.00"	yPos="252.78"	radiusA="75.00"	radiusB="20.42"	ellipseOrientation="-90.00" ellipseColor="234"/>
+<agent ID="12"	xPos="1538.30"	yPos="-485.87"	radiusA="74.82"	radiusB="20.43"	ellipseOrientation="-90.32" ellipseColor="232"/>
+<agent ID="13"	xPos="1540.21"	yPos="-203.94"	radiusA="55.81"	radiusB="21.98"	ellipseOrientation="-89.59" ellipseColor="154"/>
+<agent ID="14"	xPos="1469.33"	yPos="489.07"	radiusA="50.36"	radiusB="22.43"	ellipseOrientation="-40.26" ellipseColor="133"/>
+<agent ID="16"	xPos="1379.72"	yPos="522.77"	radiusA="31.68"	radiusB="23.88"	ellipseOrientation="-12.01" ellipseColor="56"/>
+<agent ID="17"	xPos="1596.42"	yPos="-474.71"	radiusA="71.30"	radiusB="20.72"	ellipseOrientation="-87.97" ellipseColor="219"/>
+<agent ID="18"	xPos="1562.79"	yPos="390.51"	radiusA="56.08"	radiusB="21.90"	ellipseOrientation="-97.42" ellipseColor="156"/>
+<agent ID="19"	xPos="1595.43"	yPos="515.87"	radiusA="61.91"	radiusB="21.48"	ellipseOrientation="-49.42" ellipseColor="180"/>
+<agent ID="20"	xPos="1536.86"	yPos="-345.81"	radiusA="43.46"	radiusB="22.93"	ellipseOrientation="-94.55" ellipseColor="104"/>
+<agent ID="23"	xPos="1389.43"	yPos="462.29"	radiusA="48.41"	radiusB="22.63"	ellipseOrientation="-29.97" ellipseColor="125"/>
+</frame>
+
+<frame ID="11">
+<agent ID="1"	xPos="634.46"	yPos="786.92"	radiusA="75.98"	radiusB="20.58"	ellipseOrientation="-35.49" ellipseColor="227"/>
+<agent ID="2"	xPos="707.55"	yPos="329.34"	radiusA="75.96"	radiusB="20.27"	ellipseOrientation="17.22" ellipseColor="238"/>
+<agent ID="3"	xPos="952.23"	yPos="416.12"	radiusA="76.21"	radiusB="20.26"	ellipseOrientation="4.65" ellipseColor="238"/>
+<agent ID="4"	xPos="283.86"	yPos="884.09"	radiusA="75.33"	radiusB="20.37"	ellipseOrientation="-20.84" ellipseColor="235"/>
+<agent ID="5"	xPos="656.44"	yPos="138.73"	radiusA="71.92"	radiusB="20.67"	ellipseOrientation="35.61" ellipseColor="222"/>
+<agent ID="6"	xPos="905.88"	yPos="819.73"	radiusA="74.90"	radiusB="20.35"	ellipseOrientation="-71.93" ellipseColor="234"/>
+<agent ID="7"	xPos="730.12"	yPos="845.54"	radiusA="70.78"	radiusB="20.68"	ellipseOrientation="-49.77" ellipseColor="217"/>
+<agent ID="8"	xPos="321.77"	yPos="407.59"	radiusA="75.36"	radiusB="20.46"	ellipseOrientation="-0.06" ellipseColor="235"/>
+<agent ID="9"	xPos="279.12"	yPos="553.27"	radiusA="66.32"	radiusB="21.17"	ellipseOrientation="-1.64" ellipseColor="198"/>
+<agent ID="10"	xPos="218.79"	yPos="819.50"	radiusA="69.07"	radiusB="20.87"	ellipseOrientation="-17.82" ellipseColor="210"/>
+<agent ID="21"	xPos="442.59"	yPos="589.98"	radiusA="76.20"	radiusB="20.29"	ellipseOrientation="-1.03" ellipseColor="238"/>
+<agent ID="22"	xPos="285.92"	yPos="690.95"	radiusA="72.17"	radiusB="20.58"	ellipseOrientation="-6.25" ellipseColor="222"/>
+<agent ID="11"	xPos="1600.00"	yPos="238.39"	radiusA="76.12"	radiusB="20.33"	ellipseOrientation="-90.00" ellipseColor="238"/>
+<agent ID="12"	xPos="1538.23"	yPos="-500.18"	radiusA="76.00"	radiusB="20.34"	ellipseOrientation="-90.23" ellipseColor="237"/>
+<agent ID="13"	xPos="1540.28"	yPos="-213.42"	radiusA="56.34"	radiusB="21.94"	ellipseOrientation="-89.50" ellipseColor="157"/>
+<agent ID="14"	xPos="1475.52"	yPos="483.86"	radiusA="50.28"	radiusB="22.44"	ellipseOrientation="-39.82" ellipseColor="133"/>
+<agent ID="16"	xPos="1383.33"	yPos="521.98"	radiusA="33.77"	radiusB="23.72"	ellipseOrientation="-12.84" ellipseColor="65"/>
+<agent ID="17"	xPos="1596.97"	yPos="-488.25"	radiusA="73.07"	radiusB="20.57"	ellipseOrientation="-87.43" ellipseColor="226"/>
+<agent ID="18"	xPos="1561.59"	yPos="380.83"	radiusA="57.71"	radiusB="21.77"	ellipseOrientation="-96.68" ellipseColor="163"/>
+<agent ID="19"	xPos="1602.49"	yPos="507.38"	radiusA="62.21"	radiusB="21.46"	ellipseOrientation="-52.70" ellipseColor="181"/>
+<agent ID="20"	xPos="1536.34"	yPos="-352.58"	radiusA="46.68"	radiusB="22.67"	ellipseOrientation="-94.20" ellipseColor="118"/>
+<agent ID="23"	xPos="1395.95"	yPos="458.59"	radiusA="47.60"	radiusB="22.70"	ellipseOrientation="-29.25" ellipseColor="121"/>
+</frame>
+
+<frame ID="12">
+<agent ID="1"	xPos="646.34"	yPos="778.42"	radiusA="76.68"	radiusB="20.52"	ellipseOrientation="-35.73" ellipseColor="230"/>
+<agent ID="2"	xPos="721.52"	yPos="333.67"	radiusA="76.84"	radiusB="20.19"	ellipseOrientation="17.22" ellipseColor="242"/>
+<agent ID="3"	xPos="966.81"	yPos="417.30"	radiusA="77.08"	radiusB="20.19"	ellipseOrientation="4.65" ellipseColor="242"/>
+<agent ID="4"	xPos="297.34"	yPos="878.97"	radiusA="76.14"	radiusB="20.31"	ellipseOrientation="-20.75" ellipseColor="238"/>
+<agent ID="5"	xPos="667.48"	yPos="146.62"	radiusA="72.43"	radiusB="20.63"	ellipseOrientation="35.53" ellipseColor="224"/>
+<agent ID="6"	xPos="910.31"	yPos="806.09"	radiusA="75.67"	radiusB="20.29"	ellipseOrientation="-72.06" ellipseColor="237"/>
+<agent ID="7"	xPos="738.66"	yPos="835.41"	radiusA="71.09"	radiusB="20.66"	ellipseOrientation="-49.93" ellipseColor="218"/>
+<agent ID="8"	xPos="336.22"	yPos="407.58"	radiusA="76.20"	radiusB="20.40"	ellipseOrientation="-0.08" ellipseColor="239"/>
+<agent ID="9"	xPos="291.25"	yPos="552.92"	radiusA="66.81"	radiusB="21.13"	ellipseOrientation="-1.66" ellipseColor="200"/>
+<agent ID="10"	xPos="230.95"	yPos="815.57"	radiusA="69.09"	radiusB="20.86"	ellipseOrientation="-18.05" ellipseColor="210"/>
+<agent ID="21"	xPos="457.21"	yPos="589.72"	radiusA="77.08"	radiusB="20.22"	ellipseOrientation="-1.03" ellipseColor="242"/>
+<agent ID="22"	xPos="299.44"	yPos="689.47"	radiusA="72.78"	radiusB="20.53"	ellipseOrientation="-6.25" ellipseColor="224"/>
+<agent ID="11"	xPos="1600.00"	yPos="223.76"	radiusA="77.00"	radiusB="20.26"	ellipseOrientation="-90.00" ellipseColor="242"/>
+<agent ID="13"	xPos="1540.37"	yPos="-223.06"	radiusA="57.13"	radiusB="21.87"	ellipseOrientation="-89.43" ellipseColor="160"/>
+<agent ID="14"	xPos="1481.75"	yPos="478.68"	radiusA="50.29"	radiusB="22.44"	ellipseOrientation="-39.71" ellipseColor="133"/>
+<agent ID="16"	xPos="1387.46"	yPos="520.99"	radiusA="36.11"	radiusB="23.53"	ellipseOrientation="-14.28" ellipseColor="74"/>
+<agent ID="18"	xPos="1560.47"	yPos="370.74"	radiusA="59.32"	radiusB="21.65"	ellipseOrientation="-95.99" ellipseColor="170"/>
+<agent ID="19"	xPos="1608.09"	yPos="498.00"	radiusA="62.07"	radiusB="21.47"	ellipseOrientation="-64.56" ellipseColor="180"/>
+<agent ID="20"	xPos="1535.81"	yPos="-360.47"	radiusA="52.55"	radiusB="22.20"	ellipseOrientation="-93.38" ellipseColor="142"/>
+<agent ID="23"	xPos="1402.32"	yPos="455.06"	radiusA="46.68"	radiusB="22.77"	ellipseOrientation="-28.78" ellipseColor="117"/>
+</frame>
+
+<frame ID="13">
+<agent ID="1"	xPos="658.31"	yPos="769.77"	radiusA="77.18"	radiusB="20.49"	ellipseOrientation="-35.96" ellipseColor="232"/>
+<agent ID="2"	xPos="735.59"	yPos="338.06"	radiusA="75.97"	radiusB="20.27"	ellipseOrientation="17.70" ellipseColor="238"/>
+<agent ID="3"	xPos="981.58"	yPos="418.50"	radiusA="77.76"	radiusB="20.13"	ellipseOrientation="4.65" ellipseColor="245"/>
+<agent ID="4"	xPos="310.99"	yPos="873.81"	radiusA="76.77"	radiusB="20.26"	ellipseOrientation="-20.68" ellipseColor="241"/>
+<agent ID="5"	xPos="678.61"	yPos="154.56"	radiusA="72.74"	radiusB="20.61"	ellipseOrientation="35.47" ellipseColor="225"/>
+<agent ID="6"	xPos="914.77"	yPos="792.28"	radiusA="76.24"	radiusB="20.24"	ellipseOrientation="-72.18" ellipseColor="239"/>
+<agent ID="7"	xPos="747.21"	yPos="825.23"	radiusA="71.19"	radiusB="20.65"	ellipseOrientation="-50.05" ellipseColor="219"/>
+<agent ID="8"	xPos="350.85"	yPos="407.55"	radiusA="76.86"	radiusB="20.35"	ellipseOrientation="-0.09" ellipseColor="241"/>
+<agent ID="9"	xPos="303.50"	yPos="552.57"	radiusA="67.28"	radiusB="21.09"	ellipseOrientation="-1.64" ellipseColor="202"/>
+<agent ID="10"	xPos="243.06"	yPos="811.58"	radiusA="68.80"	radiusB="20.89"	ellipseOrientation="-18.43" ellipseColor="208"/>
+<agent ID="21"	xPos="472.04"	yPos="589.46"	radiusA="77.76"	radiusB="20.16"	ellipseOrientation="-1.03" ellipseColor="245"/>
+<agent ID="22"	xPos="313.09"	yPos="687.97"	radiusA="73.22"	radiusB="20.49"	ellipseOrientation="-6.27" ellipseColor="226"/>
+<agent ID="11"	xPos="1600.00"	yPos="208.94"	radiusA="77.68"	radiusB="20.21"	ellipseOrientation="-90.00" ellipseColor="245"/>
+<agent ID="13"	xPos="1540.47"	yPos="-232.95"	radiusA="58.36"	radiusB="21.77"	ellipseOrientation="-89.39" ellipseColor="165"/>
+<agent ID="14"	xPos="1487.95"	yPos="473.52"	radiusA="49.89"	radiusB="22.47"	ellipseOrientation="-39.89" ellipseColor="131"/>
+<agent ID="16"	xPos="1392.09"	yPos="519.73"	radiusA="38.19"	radiusB="23.37"	ellipseOrientation="-16.15" ellipseColor="83"/>
+<agent ID="18"	xPos="1559.43"	yPos="360.24"	radiusA="60.86"	radiusB="21.52"	ellipseOrientation="-95.37" ellipseColor="176"/>
+<agent ID="19"	xPos="1612.18"	yPos="487.64"	radiusA="63.36"	radiusB="21.37"	ellipseOrientation="-71.67" ellipseColor="186"/>
+<agent ID="20"	xPos="1535.39"	yPos="-369.90"	radiusA="58.60"	radiusB="21.72"	ellipseOrientation="-92.03" ellipseColor="167"/>
+<agent ID="23"	xPos="1408.51"	yPos="451.69"	radiusA="45.71"	radiusB="22.85"	ellipseOrientation="-28.35" ellipseColor="113"/>
+</frame>
+
+<frame ID="14">
+<agent ID="1"	xPos="670.33"	yPos="761.02"	radiusA="77.55"	radiusB="20.46"	ellipseOrientation="-36.16" ellipseColor="233"/>
+<agent ID="2"	xPos="748.89"	yPos="342.49"	radiusA="72.29"	radiusB="20.57"	ellipseOrientation="19.11" ellipseColor="223"/>
+<agent ID="3"	xPos="996.50"	yPos="419.72"	radiusA="78.29"	radiusB="20.09"	ellipseOrientation="4.65" ellipseColor="247"/>
+<agent ID="4"	xPos="324.78"	yPos="868.61"	radiusA="77.24"	radiusB="20.22"	ellipseOrientation="-20.62" ellipseColor="243"/>
+<agent ID="5"	xPos="689.80"	yPos="162.51"	radiusA="72.83"	radiusB="20.60"	ellipseOrientation="35.37" ellipseColor="226"/>
+<agent ID="6"	xPos="919.23"	yPos="778.34"	radiusA="76.65"	radiusB="20.21"	ellipseOrientation="-72.29" ellipseColor="241"/>
+<agent ID="7"	xPos="755.74"	yPos="815.02"	radiusA="71.05"	radiusB="20.66"	ellipseOrientation="-50.21" ellipseColor="218"/>
+<agent ID="8"	xPos="365.63"	yPos="407.53"	radiusA="77.36"	radiusB="20.31"	ellipseOrientation="-0.09" ellipseColor="244"/>
+<agent ID="9"	xPos="315.87"	yPos="552.22"	radiusA="67.73"	radiusB="21.06"	ellipseOrientation="-1.58" ellipseColor="204"/>
+<agent ID="10"	xPos="255.04"	yPos="807.53"	radiusA="68.25"	radiusB="20.93"	ellipseOrientation="-18.94" ellipseColor="206"/>
+<agent ID="21"	xPos="487.01"	yPos="589.19"	radiusA="78.29"	radiusB="20.12"	ellipseOrientation="-1.03" ellipseColor="247"/>
+<agent ID="22"	xPos="326.83"	yPos="686.46"	radiusA="73.53"	radiusB="20.47"	ellipseOrientation="-6.31" ellipseColor="227"/>
+<agent ID="11"	xPos="1600.00"	yPos="193.96"	radiusA="78.21"	radiusB="20.16"	ellipseOrientation="-90.00" ellipseColor="247"/>
+<agent ID="13"	xPos="1540.59"	yPos="-243.08"	radiusA="58.80"	radiusB="21.74"	ellipseOrientation="-89.31" ellipseColor="167"/>
+<agent ID="14"	xPos="1493.99"	yPos="468.47"	radiusA="48.87"	radiusB="22.55"	ellipseOrientation="-39.84" ellipseColor="127"/>
+<agent ID="16"	xPos="1397.15"	yPos="518.16"	radiusA="40.11"	radiusB="23.22"	ellipseOrientation="-18.27" ellipseColor="91"/>
+<agent ID="18"	xPos="1558.46"	yPos="349.35"	radiusA="62.31"	radiusB="21.41"	ellipseOrientation="-94.82" ellipseColor="182"/>
+<agent ID="19"	xPos="1615.33"	yPos="476.59"	radiusA="64.75"	radiusB="21.26"	ellipseOrientation="-76.03" ellipseColor="191"/>
+<agent ID="20"	xPos="1535.08"	yPos="-380.68"	radiusA="63.33"	radiusB="21.34"	ellipseOrientation="-91.31" ellipseColor="186"/>
+<agent ID="23"	xPos="1414.50"	yPos="448.54"	radiusA="44.37"	radiusB="22.96"	ellipseOrientation="-26.70" ellipseColor="108"/>
+</frame>
+
+<frame ID="15">
+<agent ID="1"	xPos="682.38"	yPos="752.18"	radiusA="77.78"	radiusB="20.44"	ellipseOrientation="-36.37" ellipseColor="234"/>
+<agent ID="2"	xPos="761.36"	yPos="346.95"	radiusA="69.68"	radiusB="20.78"	ellipseOrientation="20.22" ellipseColor="212"/>
+<agent ID="4"	xPos="338.67"	yPos="863.39"	radiusA="77.61"	radiusB="20.19"	ellipseOrientation="-20.56" ellipseColor="244"/>
+<agent ID="5"	xPos="700.99"	yPos="170.44"	radiusA="72.73"	radiusB="20.61"	ellipseOrientation="35.24" ellipseColor="225"/>
+<agent ID="6"	xPos="923.70"	yPos="764.31"	radiusA="76.94"	radiusB="20.18"	ellipseOrientation="-72.39" ellipseColor="242"/>
+<agent ID="7"	xPos="764.10"	yPos="804.83"	radiusA="70.19"	radiusB="20.73"	ellipseOrientation="-51.16" ellipseColor="214"/>
+<agent ID="8"	xPos="380.53"	yPos="407.51"	radiusA="77.76"	radiusB="20.28"	ellipseOrientation="-0.09" ellipseColor="245"/>
+<agent ID="9"	xPos="328.35"	yPos="551.88"	radiusA="68.18"	radiusB="21.02"	ellipseOrientation="-1.51" ellipseColor="206"/>
+<agent ID="10"	xPos="266.82"	yPos="803.42"	radiusA="67.49"	radiusB="21.00"	ellipseOrientation="-19.55" ellipseColor="203"/>
+<agent ID="21"	xPos="502.10"	yPos="588.92"	radiusA="78.70"	radiusB="20.08"	ellipseOrientation="-1.03" ellipseColor="249"/>
+<agent ID="22"	xPos="340.64"	yPos="684.92"	radiusA="73.75"	radiusB="20.45"	ellipseOrientation="-6.36" ellipseColor="228"/>
+<agent ID="11"	xPos="1600.00"	yPos="178.87"	radiusA="78.62"	radiusB="20.13"	ellipseOrientation="-90.00" ellipseColor="249"/>
+<agent ID="13"	xPos="1540.72"	yPos="-253.19"	radiusA="58.33"	radiusB="21.77"	ellipseOrientation="-89.17" ellipseColor="165"/>
+<agent ID="14"	xPos="1499.83"	yPos="463.62"	radiusA="47.61"	radiusB="22.65"	ellipseOrientation="-39.49" ellipseColor="122"/>
+<agent ID="16"	xPos="1402.58"	yPos="516.24"	radiusA="41.90"	radiusB="23.08"	ellipseOrientation="-20.55" ellipseColor="98"/>
+<agent ID="18"	xPos="1557.56"	yPos="338.11"	radiusA="63.65"	radiusB="21.30"	ellipseOrientation="-94.35" ellipseColor="188"/>
+<agent ID="19"	xPos="1617.89"	yPos="465.05"	radiusA="65.94"	radiusB="21.16"	ellipseOrientation="-78.79" ellipseColor="196"/>
+<agent ID="20"	xPos="1534.86"	yPos="-392.50"	radiusA="67.02"	radiusB="21.04"	ellipseOrientation="-90.88" ellipseColor="201"/>
+<agent ID="23"	xPos="1420.25"	yPos="445.81"	radiusA="42.67"	radiusB="23.10"	ellipseOrientation="-24.23" ellipseColor="101"/>
+<agent ID="3"	xPos="1011.53"	yPos="420.84"	radiusA="78.66"	radiusB="20.06"	ellipseOrientation="3.71" ellipseColor="248"/>
+</frame>
+
+<frame ID="16">
+<agent ID="1"	xPos="694.43"	yPos="743.26"	radiusA="77.93"	radiusB="20.43"	ellipseOrientation="-36.61" ellipseColor="235"/>
+<agent ID="2"	xPos="773.23"	yPos="351.43"	radiusA="67.79"	radiusB="20.93"	ellipseOrientation="21.07" ellipseColor="205"/>
+<agent ID="4"	xPos="352.64"	yPos="858.16"	radiusA="77.89"	radiusB="20.17"	ellipseOrientation="-20.52" ellipseColor="245"/>
+<agent ID="5"	xPos="712.18"	yPos="178.32"	radiusA="72.51"	radiusB="20.63"	ellipseOrientation="35.10" ellipseColor="224"/>
+<agent ID="6"	xPos="928.15"	yPos="750.22"	radiusA="77.12"	radiusB="20.17"	ellipseOrientation="-72.50" ellipseColor="243"/>
+<agent ID="7"	xPos="772.15"	yPos="794.68"	radiusA="69.41"	radiusB="20.80"	ellipseOrientation="-51.93" ellipseColor="211"/>
+<agent ID="8"	xPos="395.50"	yPos="407.49"	radiusA="78.06"	radiusB="20.25"	ellipseOrientation="-0.08" ellipseColor="246"/>
+<agent ID="9"	xPos="340.93"	yPos="551.56"	radiusA="68.61"	radiusB="20.99"	ellipseOrientation="-1.42" ellipseColor="208"/>
+<agent ID="10"	xPos="278.36"	yPos="799.24"	radiusA="66.60"	radiusB="21.07"	ellipseOrientation="-20.23" ellipseColor="199"/>
+<agent ID="21"	xPos="517.28"	yPos="588.65"	radiusA="79.03"	radiusB="20.06"	ellipseOrientation="-1.03" ellipseColor="250"/>
+<agent ID="22"	xPos="354.48"	yPos="683.37"	radiusA="73.88"	radiusB="20.44"	ellipseOrientation="-6.43" ellipseColor="229"/>
+<agent ID="11"	xPos="1600.00"	yPos="163.68"	radiusA="78.94"	radiusB="20.10"	ellipseOrientation="-90.00" ellipseColor="250"/>
+<agent ID="13"	xPos="1540.88"	yPos="-263.16"	radiusA="57.81"	radiusB="21.82"	ellipseOrientation="-89.03" ellipseColor="163"/>
+<agent ID="14"	xPos="1505.48"	yPos="458.45"	radiusA="49.53"	radiusB="22.50"	ellipseOrientation="-45.17" ellipseColor="130"/>
+<agent ID="16"	xPos="1408.31"	yPos="513.99"	radiusA="43.15"	radiusB="22.98"	ellipseOrientation="-22.04" ellipseColor="103"/>
+<agent ID="18"	xPos="1556.73"	yPos="326.55"	radiusA="64.86"	radiusB="21.21"	ellipseOrientation="-93.94" ellipseColor="193"/>
+<agent ID="19"	xPos="1620.04"	yPos="453.17"	radiusA="66.89"	radiusB="21.09"	ellipseOrientation="-80.58" ellipseColor="200"/>
+<agent ID="20"	xPos="1534.70"	yPos="-405.13"	radiusA="69.89"	radiusB="20.81"	ellipseOrientation="-90.61" ellipseColor="213"/>
+<agent ID="23"	xPos="1425.73"	yPos="443.49"	radiusA="41.00"	radiusB="23.23"	ellipseOrientation="-21.62" ellipseColor="94"/>
+<agent ID="3"	xPos="1026.67"	yPos="421.68"	radiusA="78.96"	radiusB="20.04"	ellipseOrientation="2.67" ellipseColor="250"/>
+</frame>
+
+<frame ID="17">
+<agent ID="1"	xPos="706.47"	yPos="734.29"	radiusA="78.02"	radiusB="20.42"	ellipseOrientation="-36.80" ellipseColor="235"/>
+<agent ID="2"	xPos="784.66"	yPos="355.91"	radiusA="66.33"	radiusB="21.05"	ellipseOrientation="21.70" ellipseColor="199"/>
+<agent ID="4"	xPos="366.67"	yPos="852.92"	radiusA="78.09"	radiusB="20.15"	ellipseOrientation="-20.48" ellipseColor="246"/>
+<agent ID="5"	xPos="723.32"	yPos="186.14"	radiusA="72.22"	radiusB="20.65"	ellipseOrientation="34.98" ellipseColor="223"/>
+<agent ID="6"	xPos="932.60"	yPos="736.09"	radiusA="77.20"	radiusB="20.16"	ellipseOrientation="-72.61" ellipseColor="243"/>
+<agent ID="7"	xPos="779.99"	yPos="784.59"	radiusA="68.80"	radiusB="20.85"	ellipseOrientation="-52.34" ellipseColor="209"/>
+<agent ID="8"	xPos="410.55"	yPos="407.47"	radiusA="78.29"	radiusB="20.23"	ellipseOrientation="-0.07" ellipseColor="247"/>
+<agent ID="9"	xPos="353.63"	yPos="551.25"	radiusA="69.03"	radiusB="20.95"	ellipseOrientation="-1.33" ellipseColor="209"/>
+<agent ID="10"	xPos="289.63"	yPos="795.01"	radiusA="65.64"	radiusB="21.15"	ellipseOrientation="-20.91" ellipseColor="195"/>
+<agent ID="21"	xPos="532.53"	yPos="588.37"	radiusA="79.28"	radiusB="20.03"	ellipseOrientation="-1.03" ellipseColor="251"/>
+<agent ID="22"	xPos="368.35"	yPos="681.80"	radiusA="73.97"	radiusB="20.43"	ellipseOrientation="-6.51" ellipseColor="229"/>
+<agent ID="11"	xPos="1600.00"	yPos="148.43"	radiusA="79.19"	radiusB="20.08"	ellipseOrientation="-90.00" ellipseColor="251"/>
+<agent ID="13"	xPos="1541.06"	yPos="-273.05"	radiusA="57.71"	radiusB="21.82"	ellipseOrientation="-88.95" ellipseColor="162"/>
+<agent ID="14"	xPos="1511.00"	yPos="452.49"	radiusA="51.17"	radiusB="22.37"	ellipseOrientation="-48.83" ellipseColor="136"/>
+<agent ID="16"	xPos="1414.15"	yPos="511.62"	radiusA="43.11"	radiusB="22.98"	ellipseOrientation="-22.20" ellipseColor="103"/>
+<agent ID="18"	xPos="1555.95"	yPos="314.69"	radiusA="65.97"	radiusB="21.12"	ellipseOrientation="-93.58" ellipseColor="197"/>
+<agent ID="19"	xPos="1621.91"	yPos="441.01"	radiusA="67.65"	radiusB="21.03"	ellipseOrientation="-81.78" ellipseColor="203"/>
+<agent ID="20"	xPos="1534.58"	yPos="-418.40"	radiusA="72.12"	radiusB="20.63"	ellipseOrientation="-90.43" ellipseColor="222"/>
+<agent ID="23"	xPos="1430.93"	yPos="441.57"	radiusA="39.46"	radiusB="23.36"	ellipseOrientation="-18.70" ellipseColor="88"/>
+<agent ID="3"	xPos="1041.89"	yPos="422.27"	radiusA="79.20"	radiusB="20.02"	ellipseOrientation="1.84" ellipseColor="251"/>
+</frame>
+
+<frame ID="18">
+<agent ID="1"	xPos="718.48"	yPos="725.26"	radiusA="77.52"	radiusB="20.46"	ellipseOrientation="-37.33" ellipseColor="233"/>
+<agent ID="2"	xPos="795.74"	yPos="360.37"	radiusA="65.15"	radiusB="21.15"	ellipseOrientation="22.17" ellipseColor="194"/>
+<agent ID="4"	xPos="380.74"	yPos="847.66"	radiusA="78.25"	radiusB="20.14"	ellipseOrientation="-20.45" ellipseColor="247"/>
+<agent ID="5"	xPos="734.42"	yPos="193.89"	radiusA="71.88"	radiusB="20.68"	ellipseOrientation="34.86" ellipseColor="222"/>
+<agent ID="6"	xPos="937.01"	yPos="721.93"	radiusA="77.21"	radiusB="20.16"	ellipseOrientation="-72.73" ellipseColor="243"/>
+<agent ID="7"	xPos="787.70"	yPos="774.57"	radiusA="68.25"	radiusB="20.89"	ellipseOrientation="-52.51" ellipseColor="206"/>
+<agent ID="8"	xPos="425.65"	yPos="407.45"	radiusA="78.47"	radiusB="20.22"	ellipseOrientation="-0.05" ellipseColor="248"/>
+<agent ID="9"	xPos="366.43"	yPos="550.97"	radiusA="69.43"	radiusB="20.92"	ellipseOrientation="-1.24" ellipseColor="211"/>
+<agent ID="10"	xPos="300.62"	yPos="790.74"	radiusA="64.68"	radiusB="21.23"	ellipseOrientation="-21.55" ellipseColor="192"/>
+<agent ID="21"	xPos="547.83"	yPos="588.09"	radiusA="79.10"	radiusB="20.05"	ellipseOrientation="-1.32" ellipseColor="250"/>
+<agent ID="22"	xPos="382.24"	yPos="680.20"	radiusA="74.01"	radiusB="20.43"	ellipseOrientation="-6.61" ellipseColor="229"/>
+<agent ID="11"	xPos="1600.00"	yPos="133.12"	radiusA="79.39"	radiusB="20.07"	ellipseOrientation="-90.00" ellipseColor="252"/>
+<agent ID="13"	xPos="1541.24"	yPos="-282.97"	radiusA="58.10"	radiusB="21.79"	ellipseOrientation="-88.92" ellipseColor="164"/>
+<agent ID="14"	xPos="1516.43"	yPos="445.99"	radiusA="52.30"	radiusB="22.28"	ellipseOrientation="-51.27" ellipseColor="141"/>
+<agent ID="16"	xPos="1419.95"	yPos="509.26"	radiusA="42.96"	radiusB="22.99"	ellipseOrientation="-21.99" ellipseColor="102"/>
+<agent ID="18"	xPos="1555.22"	yPos="302.56"	radiusA="66.95"	radiusB="21.04"	ellipseOrientation="-93.28" ellipseColor="201"/>
+<agent ID="19"	xPos="1623.60"	yPos="428.66"	radiusA="68.29"	radiusB="20.98"	ellipseOrientation="-82.60" ellipseColor="206"/>
+<agent ID="20"	xPos="1534.49"	yPos="-432.17"	radiusA="73.86"	radiusB="20.49"	ellipseOrientation="-90.31" ellipseColor="229"/>
+<agent ID="23"	xPos="1435.89"	yPos="440.02"	radiusA="38.19"	radiusB="23.46"	ellipseOrientation="-15.87" ellipseColor="82"/>
+<agent ID="3"	xPos="1057.17"	yPos="422.68"	radiusA="79.40"	radiusB="20.00"	ellipseOrientation="1.19" ellipseColor="251"/>
+</frame>
+
+<frame ID="19">
+<agent ID="1"	xPos="729.96"	yPos="716.26"	radiusA="75.22"	radiusB="20.63"	ellipseOrientation="-38.70" ellipseColor="224"/>
+<agent ID="2"	xPos="806.53"	yPos="364.81"	radiusA="64.12"	radiusB="21.23"	ellipseOrientation="22.50" ellipseColor="189"/>
+<agent ID="4"	xPos="394.85"	yPos="842.41"	radiusA="78.36"	radiusB="20.13"	ellipseOrientation="-20.42" ellipseColor="247"/>
+<agent ID="5"	xPos="745.45"	yPos="201.56"	radiusA="71.24"	radiusB="20.73"	ellipseOrientation="34.96" ellipseColor="219"/>
+<agent ID="6"	xPos="941.39"	yPos="707.78"	radiusA="77.14"	radiusB="20.17"	ellipseOrientation="-72.86" ellipseColor="243"/>
+<agent ID="7"	xPos="795.30"	yPos="764.64"	radiusA="67.72"	radiusB="20.94"	ellipseOrientation="-52.52" ellipseColor="204"/>
+<agent ID="8"	xPos="440.78"	yPos="407.43"	radiusA="78.57"	radiusB="20.21"	ellipseOrientation="-0.10" ellipseColor="249"/>
+<agent ID="9"	xPos="379.33"	yPos="550.70"	radiusA="69.88"	radiusB="20.88"	ellipseOrientation="-1.14" ellipseColor="213"/>
+<agent ID="10"	xPos="311.36"	yPos="786.44"	radiusA="63.81"	radiusB="21.30"	ellipseOrientation="-22.11" ellipseColor="188"/>
+<agent ID="21"	xPos="562.76"	yPos="587.48"	radiusA="76.80"	radiusB="20.24"	ellipseOrientation="-3.31" ellipseColor="241"/>
+<agent ID="22"	xPos="396.13"	yPos="678.58"	radiusA="74.05"	radiusB="20.42"	ellipseOrientation="-6.71" ellipseColor="230"/>
+<agent ID="11"	xPos="1600.00"	yPos="117.76"	radiusA="79.54"	radiusB="20.05"	ellipseOrientation="-90.00" ellipseColor="252"/>
+<agent ID="13"	xPos="1541.43"	yPos="-293.04"	radiusA="58.86"	radiusB="21.73"	ellipseOrientation="-88.94" ellipseColor="167"/>
+<agent ID="14"	xPos="1521.75"	yPos="439.12"	radiusA="52.95"	radiusB="22.22"	ellipseOrientation="-53.04" ellipseColor="144"/>
+<agent ID="16"	xPos="1425.76"	yPos="506.96"	radiusA="43.05"	radiusB="22.99"	ellipseOrientation="-21.14" ellipseColor="103"/>
+<agent ID="18"	xPos="1554.55"	yPos="290.20"	radiusA="67.84"	radiusB="20.97"	ellipseOrientation="-93.02" ellipseColor="205"/>
+<agent ID="19"	xPos="1625.16"	yPos="416.14"	radiusA="68.84"	radiusB="20.93"	ellipseOrientation="-83.19" ellipseColor="208"/>
+<agent ID="20"	xPos="1534.43"	yPos="-446.32"	radiusA="75.22"	radiusB="20.39"	ellipseOrientation="-90.22" ellipseColor="235"/>
+<agent ID="23"	xPos="1440.59"	yPos="438.84"	radiusA="36.66"	radiusB="23.58"	ellipseOrientation="-12.18" ellipseColor="76"/>
+<agent ID="3"	xPos="1072.49"	yPos="422.92"	radiusA="79.56"	radiusB="19.99"	ellipseOrientation="0.67" ellipseColor="252"/>
+</frame>
+
+<frame ID="20">
+<agent ID="1"	xPos="740.93"	yPos="707.37"	radiusA="73.59"	radiusB="20.76"	ellipseOrientation="-39.25" ellipseColor="218"/>
+<agent ID="2"	xPos="817.08"	yPos="369.20"	radiusA="63.16"	radiusB="21.31"	ellipseOrientation="22.74" ellipseColor="186"/>
+<agent ID="4"	xPos="408.98"	yPos="837.15"	radiusA="78.45"	radiusB="20.12"	ellipseOrientation="-20.40" ellipseColor="248"/>
+<agent ID="5"	xPos="756.05"	yPos="209.17"	radiusA="68.89"	radiusB="20.92"	ellipseOrientation="36.50" ellipseColor="209"/>
+<agent ID="6"	xPos="945.73"	yPos="693.64"	radiusA="76.98"	radiusB="20.18"	ellipseOrientation="-73.02" ellipseColor="243"/>
+<agent ID="7"	xPos="802.84"	yPos="754.83"	radiusA="67.17"	radiusB="20.98"	ellipseOrientation="-52.39" ellipseColor="202"/>
+<agent ID="8"	xPos="455.92"	yPos="407.40"	radiusA="78.59"	radiusB="20.21"	ellipseOrientation="-0.20" ellipseColor="249"/>
+<agent ID="9"	xPos="392.36"	yPos="550.45"	radiusA="70.34"	radiusB="20.85"	ellipseOrientation="-1.03" ellipseColor="215"/>
+<agent ID="10"	xPos="321.87"	yPos="782.12"	radiusA="63.00"	radiusB="21.37"	ellipseOrientation="-22.52" ellipseColor="185"/>
+<agent ID="21"	xPos="577.16"	yPos="586.44"	radiusA="75.09"	radiusB="20.38"	ellipseOrientation="-4.83" ellipseColor="234"/>
+<agent ID="22"	xPos="410.03"	yPos="676.93"	radiusA="74.09"	radiusB="20.42"	ellipseOrientation="-6.81" ellipseColor="230"/>
+<agent ID="11"	xPos="1600.00"	yPos="102.37"	radiusA="79.66"	radiusB="20.04"	ellipseOrientation="-90.00" ellipseColor="253"/>
+<agent ID="13"	xPos="1541.62"	yPos="-303.34"	radiusA="59.87"	radiusB="21.65"	ellipseOrientation="-88.98" ellipseColor="171"/>
+<agent ID="14"	xPos="1526.92"	yPos="432.01"	radiusA="52.87"	radiusB="22.23"	ellipseOrientation="-57.31" ellipseColor="143"/>
+<agent ID="16"	xPos="1431.66"	yPos="504.75"	radiusA="43.40"	radiusB="22.96"	ellipseOrientation="-19.86" ellipseColor="104"/>
+<agent ID="18"	xPos="1553.91"	yPos="277.62"	radiusA="68.63"	radiusB="20.91"	ellipseOrientation="-92.79" ellipseColor="208"/>
+<agent ID="19"	xPos="1626.62"	yPos="403.48"	radiusA="69.33"	radiusB="20.90"	ellipseOrientation="-83.62" ellipseColor="210"/>
+<agent ID="20"	xPos="1534.38"	yPos="-460.77"	radiusA="76.28"	radiusB="20.30"	ellipseOrientation="-90.16" ellipseColor="239"/>
+<agent ID="23"	xPos="1445.02"	yPos="438.04"	radiusA="35.58"	radiusB="23.67"	ellipseOrientation="-8.14" ellipseColor="72"/>
+<agent ID="3"	xPos="1087.85"	yPos="423.04"	radiusA="79.68"	radiusB="19.98"	ellipseOrientation="0.26" ellipseColor="253"/>
+</frame>
+
+<frame ID="21">
+<agent ID="1"	xPos="751.49"	yPos="698.65"	radiusA="71.48"	radiusB="20.92"	ellipseOrientation="-40.01" ellipseColor="210"/>
+<agent ID="2"	xPos="827.39"	yPos="373.54"	radiusA="62.22"	radiusB="21.39"	ellipseOrientation="22.89" ellipseColor="182"/>
+<agent ID="4"	xPos="423.14"	yPos="831.89"	radiusA="78.50"	radiusB="20.12"	ellipseOrientation="-20.38" ellipseColor="248"/>
+<agent ID="5"	xPos="765.99"	yPos="216.73"	radiusA="66.98"	radiusB="21.08"	ellipseOrientation="37.91" ellipseColor="201"/>
+<agent ID="6"	xPos="949.83"	yPos="679.54"	radiusA="76.29"	radiusB="20.24"	ellipseOrientation="-74.71" ellipseColor="240"/>
+<agent ID="7"	xPos="810.32"	yPos="745.16"	radiusA="66.50"	radiusB="21.04"	ellipseOrientation="-52.18" ellipseColor="199"/>
+<agent ID="8"	xPos="471.07"	yPos="407.33"	radiusA="78.56"	radiusB="20.21"	ellipseOrientation="-0.33" ellipseColor="248"/>
+<agent ID="9"	xPos="405.49"	yPos="550.23"	radiusA="70.76"	radiusB="20.81"	ellipseOrientation="-0.93" ellipseColor="216"/>
+<agent ID="10"	xPos="332.15"	yPos="777.84"	radiusA="62.09"	radiusB="21.44"	ellipseOrientation="-22.67" ellipseColor="181"/>
+<agent ID="21"	xPos="591.16"	yPos="585.11"	radiusA="73.77"	radiusB="20.49"	ellipseOrientation="-5.99" ellipseColor="228"/>
+<agent ID="22"	xPos="423.93"	yPos="675.26"	radiusA="74.09"	radiusB="20.42"	ellipseOrientation="-6.90" ellipseColor="230"/>
+<agent ID="11"	xPos="1600.00"	yPos="86.96"	radiusA="79.75"	radiusB="20.04"	ellipseOrientation="-90.00" ellipseColor="253"/>
+<agent ID="13"	xPos="1541.80"	yPos="-313.91"	radiusA="61.00"	radiusB="21.55"	ellipseOrientation="-89.02" ellipseColor="176"/>
+<agent ID="14"	xPos="1530.63"	yPos="424.05"	radiusA="53.94"	radiusB="22.14"	ellipseOrientation="-71.14" ellipseColor="148"/>
+<agent ID="16"	xPos="1437.78"	yPos="502.61"	radiusA="44.55"	radiusB="22.87"	ellipseOrientation="-18.69" ellipseColor="109"/>
+<agent ID="18"	xPos="1553.31"	yPos="264.86"	radiusA="69.33"	radiusB="20.85"	ellipseOrientation="-92.59" ellipseColor="211"/>
+<agent ID="19"	xPos="1628.01"	yPos="390.70"	radiusA="69.78"	radiusB="20.86"	ellipseOrientation="-83.96" ellipseColor="212"/>
+<agent ID="20"	xPos="1534.34"	yPos="-475.45"	radiusA="77.10"	radiusB="20.23"	ellipseOrientation="-90.12" ellipseColor="243"/>
+<agent ID="23"	xPos="1449.56"	yPos="437.49"	radiusA="37.01"	radiusB="23.55"	ellipseOrientation="-5.42" ellipseColor="78"/>
+<agent ID="3"	xPos="1103.24"	yPos="423.08"	radiusA="79.78"	radiusB="19.97"	ellipseOrientation="0.06" ellipseColor="253"/>
+</frame>
+
+<frame ID="22">
+<agent ID="1"	xPos="761.40"	yPos="690.17"	radiusA="68.83"	radiusB="21.12"	ellipseOrientation="-40.99" ellipseColor="199"/>
+<agent ID="2"	xPos="837.47"	yPos="377.81"	radiusA="61.26"	radiusB="21.46"	ellipseOrientation="22.99" ellipseColor="178"/>
+<agent ID="4"	xPos="437.30"	yPos="826.63"	radiusA="78.54"	radiusB="20.12"	ellipseOrientation="-20.36" ellipseColor="248"/>
+<agent ID="5"	xPos="775.44"	yPos="224.24"	radiusA="65.52"	radiusB="21.19"	ellipseOrientation="38.99" ellipseColor="195"/>
+<agent ID="6"	xPos="953.46"	yPos="665.50"	radiusA="75.54"	radiusB="20.30"	ellipseOrientation="-76.36" ellipseColor="237"/>
+<agent ID="7"	xPos="817.72"	yPos="735.67"	radiusA="65.66"	radiusB="21.11"	ellipseOrientation="-51.89" ellipseColor="196"/>
+<agent ID="8"	xPos="486.20"	yPos="407.22"	radiusA="78.50"	radiusB="20.22"	ellipseOrientation="-0.47" ellipseColor="248"/>
+<agent ID="9"	xPos="418.71"	yPos="550.02"	radiusA="71.10"	radiusB="20.79"	ellipseOrientation="-0.85" ellipseColor="218"/>
+<agent ID="10"	xPos="342.23"	yPos="773.63"	radiusA="61.18"	radiusB="21.52"	ellipseOrientation="-22.62" ellipseColor="177"/>
+<agent ID="21"	xPos="604.83"	yPos="583.56"	radiusA="72.60"	radiusB="20.58"	ellipseOrientation="-6.92" ellipseColor="223"/>
+<agent ID="22"	xPos="437.81"	yPos="673.57"	radiusA="73.99"	radiusB="20.43"	ellipseOrientation="-6.95" ellipseColor="229"/>
+<agent ID="11"	xPos="1600.00"	yPos="71.53"	radiusA="79.82"	radiusB="20.03"	ellipseOrientation="-90.00" ellipseColor="253"/>
+<agent ID="13"	xPos="1541.98"	yPos="-324.76"	radiusA="62.18"	radiusB="21.46"	ellipseOrientation="-89.08" ellipseColor="181"/>
+<agent ID="14"	xPos="1532.97"	yPos="415.03"	radiusA="56.47"	radiusB="21.94"	ellipseOrientation="-79.07" ellipseColor="158"/>
+<agent ID="16"	xPos="1444.25"	yPos="500.51"	radiusA="45.89"	radiusB="22.76"	ellipseOrientation="-17.27" ellipseColor="114"/>
+<agent ID="18"	xPos="1552.74"	yPos="251.93"	radiusA="69.96"	radiusB="20.80"	ellipseOrientation="-92.42" ellipseColor="214"/>
+<agent ID="19"	xPos="1629.34"	yPos="377.80"	radiusA="70.21"	radiusB="20.83"	ellipseOrientation="-84.23" ellipseColor="214"/>
+<agent ID="20"	xPos="1534.32"	yPos="-490.32"	radiusA="77.74"	radiusB="20.18"	ellipseOrientation="-90.09" ellipseColor="245"/>
+<agent ID="23"	xPos="1454.38"	yPos="437.13"	radiusA="37.70"	radiusB="23.50"	ellipseOrientation="-3.26" ellipseColor="80"/>
+<agent ID="3"	xPos="1118.66"	yPos="423.09"	radiusA="79.86"	radiusB="19.96"	ellipseOrientation="0.01" ellipseColor="253"/>
+</frame>
+
+<frame ID="23">
+<agent ID="1"	xPos="770.78"	yPos="681.97"	radiusA="66.78"	radiusB="21.27"	ellipseOrientation="-41.27" ellipseColor="191"/>
+<agent ID="2"	xPos="847.32"	yPos="382.00"	radiusA="60.25"	radiusB="21.55"	ellipseOrientation="23.03" ellipseColor="174"/>
+<agent ID="4"	xPos="451.47"	yPos="821.37"	radiusA="78.56"	radiusB="20.11"	ellipseOrientation="-20.35" ellipseColor="248"/>
+<agent ID="5"	xPos="784.52"	yPos="231.70"	radiusA="64.35"	radiusB="21.29"	ellipseOrientation="39.83" ellipseColor="191"/>
+<agent ID="6"	xPos="956.65"	yPos="651.56"	radiusA="74.68"	radiusB="20.37"	ellipseOrientation="-77.89" ellipseColor="233"/>
+<agent ID="7"	xPos="825.04"	yPos="726.40"	radiusA="64.69"	radiusB="21.19"	ellipseOrientation="-51.52" ellipseColor="192"/>
+<agent ID="8"	xPos="501.31"	yPos="407.08"	radiusA="78.43"	radiusB="20.22"	ellipseOrientation="-0.61" ellipseColor="248"/>
+<agent ID="9"	xPos="432.01"	yPos="549.83"	radiusA="71.25"	radiusB="20.78"	ellipseOrientation="-0.81" ellipseColor="218"/>
+<agent ID="10"	xPos="352.10"	yPos="769.53"	radiusA="60.36"	radiusB="21.59"	ellipseOrientation="-22.46" ellipseColor="174"/>
+<agent ID="21"	xPos="618.21"	yPos="581.84"	radiusA="71.55"	radiusB="20.67"	ellipseOrientation="-7.68" ellipseColor="219"/>
+<agent ID="22"	xPos="451.67"	yPos="671.88"	radiusA="73.84"	radiusB="20.44"	ellipseOrientation="-6.97" ellipseColor="229"/>
+<agent ID="11"	xPos="1600.00"	yPos="56.08"	radiusA="79.88"	radiusB="20.03"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.15"	yPos="-335.95"	radiusA="64.30"	radiusB="21.28"	ellipseOrientation="-89.22" ellipseColor="189"/>
+<agent ID="14"	xPos="1534.39"	yPos="405.18"	radiusA="58.91"	radiusB="21.74"	ellipseOrientation="-84.03" ellipseColor="168"/>
+<agent ID="16"	xPos="1451.10"	yPos="498.47"	radiusA="47.26"	radiusB="22.66"	ellipseOrientation="-15.95" ellipseColor="120"/>
+<agent ID="18"	xPos="1552.21"	yPos="238.85"	radiusA="70.51"	radiusB="20.76"	ellipseOrientation="-92.27" ellipseColor="216"/>
+<agent ID="19"	xPos="1630.63"	yPos="364.78"	radiusA="70.62"	radiusB="20.79"	ellipseOrientation="-84.46" ellipseColor="215"/>
+<agent ID="23"	xPos="1459.41"	yPos="436.91"	radiusA="38.68"	radiusB="23.42"	ellipseOrientation="-2.21" ellipseColor="84"/>
+<agent ID="3"	xPos="1134.09"	yPos="423.11"	radiusA="79.92"	radiusB="19.96"	ellipseOrientation="0.07" ellipseColor="254"/>
+</frame>
+
+<frame ID="24">
+<agent ID="1"	xPos="779.80"	yPos="674.06"	radiusA="65.01"	radiusB="21.40"	ellipseOrientation="-41.16" ellipseColor="184"/>
+<agent ID="2"	xPos="856.93"	yPos="386.08"	radiusA="59.17"	radiusB="21.63"	ellipseOrientation="23.03" ellipseColor="169"/>
+<agent ID="4"	xPos="465.65"	yPos="816.12"	radiusA="78.57"	radiusB="20.11"	ellipseOrientation="-20.33" ellipseColor="248"/>
+<agent ID="5"	xPos="793.29"	yPos="239.11"	radiusA="63.33"	radiusB="21.37"	ellipseOrientation="40.46" ellipseColor="186"/>
+<agent ID="6"	xPos="959.43"	yPos="637.78"	radiusA="73.57"	radiusB="20.46"	ellipseOrientation="-79.42" ellipseColor="228"/>
+<agent ID="7"	xPos="832.26"	yPos="717.39"	radiusA="63.66"	radiusB="21.27"	ellipseOrientation="-51.08" ellipseColor="188"/>
+<agent ID="8"	xPos="516.41"	yPos="406.90"	radiusA="78.35"	radiusB="20.23"	ellipseOrientation="-0.74" ellipseColor="248"/>
+<agent ID="9"	xPos="445.31"	yPos="549.64"	radiusA="71.18"	radiusB="20.78"	ellipseOrientation="-0.80" ellipseColor="218"/>
+<agent ID="10"	xPos="361.82"	yPos="765.54"	radiusA="59.67"	radiusB="21.64"	ellipseOrientation="-22.21" ellipseColor="171"/>
+<agent ID="21"	xPos="631.31"	yPos="580.00"	radiusA="70.59"	radiusB="20.75"	ellipseOrientation="-8.27" ellipseColor="215"/>
+<agent ID="22"	xPos="465.48"	yPos="670.19"	radiusA="73.65"	radiusB="20.46"	ellipseOrientation="-6.97" ellipseColor="228"/>
+<agent ID="11"	xPos="1600.00"	yPos="40.61"	radiusA="79.92"	radiusB="20.02"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.29"	yPos="-347.95"	radiusA="67.82"	radiusB="20.99"	ellipseOrientation="-89.44" ellipseColor="204"/>
+<agent ID="14"	xPos="1535.17"	yPos="394.68"	radiusA="61.02"	radiusB="21.57"	ellipseOrientation="-87.22" ellipseColor="177"/>
+<agent ID="16"	xPos="1458.32"	yPos="496.48"	radiusA="48.44"	radiusB="22.56"	ellipseOrientation="-15.03" ellipseColor="125"/>
+<agent ID="18"	xPos="1551.70"	yPos="225.64"	radiusA="71.01"	radiusB="20.72"	ellipseOrientation="-92.14" ellipseColor="218"/>
+<agent ID="19"	xPos="1631.88"	yPos="351.67"	radiusA="71.01"	radiusB="20.76"	ellipseOrientation="-84.67" ellipseColor="217"/>
+<agent ID="23"	xPos="1464.64"	yPos="436.78"	radiusA="39.12"	radiusB="23.38"	ellipseOrientation="-0.70" ellipseColor="86"/>
+<agent ID="3"	xPos="1149.53"	yPos="423.13"	radiusA="79.97"	radiusB="19.96"	ellipseOrientation="0.13" ellipseColor="254"/>
+</frame>
+
+<frame ID="25">
+<agent ID="1"	xPos="788.52"	yPos="666.47"	radiusA="63.37"	radiusB="21.53"	ellipseOrientation="-40.86" ellipseColor="178"/>
+<agent ID="2"	xPos="866.28"	yPos="390.05"	radiusA="58.00"	radiusB="21.73"	ellipseOrientation="22.98" ellipseColor="164"/>
+<agent ID="4"	xPos="479.83"	yPos="810.87"	radiusA="78.57"	radiusB="20.11"	ellipseOrientation="-20.31" ellipseColor="248"/>
+<agent ID="5"	xPos="801.81"	yPos="246.43"	radiusA="62.39"	radiusB="21.45"	ellipseOrientation="40.93" ellipseColor="183"/>
+<agent ID="6"	xPos="961.80"	yPos="624.25"	radiusA="72.04"	radiusB="20.59"	ellipseOrientation="-80.83" ellipseColor="222"/>
+<agent ID="7"	xPos="839.39"	yPos="708.64"	radiusA="62.58"	radiusB="21.36"	ellipseOrientation="-50.55" ellipseColor="183"/>
+<agent ID="8"	xPos="531.49"	yPos="406.69"	radiusA="78.27"	radiusB="20.23"	ellipseOrientation="-0.86" ellipseColor="247"/>
+<agent ID="9"	xPos="458.57"	yPos="549.46"	radiusA="70.97"	radiusB="20.80"	ellipseOrientation="-0.81" ellipseColor="217"/>
+<agent ID="10"	xPos="371.42"	yPos="761.65"	radiusA="59.16"	radiusB="21.68"	ellipseOrientation="-21.90" ellipseColor="169"/>
+<agent ID="21"	xPos="644.17"	yPos="578.08"	radiusA="69.70"	radiusB="20.82"	ellipseOrientation="-8.76" ellipseColor="212"/>
+<agent ID="22"	xPos="479.24"	yPos="668.51"	radiusA="73.44"	radiusB="20.47"	ellipseOrientation="-6.96" ellipseColor="227"/>
+<agent ID="11"	xPos="1600.00"	yPos="25.14"	radiusA="79.96"	radiusB="20.02"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.40"	yPos="-360.72"	radiusA="70.56"	radiusB="20.77"	ellipseOrientation="-89.59" ellipseColor="215"/>
+<agent ID="14"	xPos="1535.48"	yPos="383.67"	radiusA="62.78"	radiusB="21.43"	ellipseOrientation="-89.33" ellipseColor="184"/>
+<agent ID="16"	xPos="1465.67"	yPos="494.53"	radiusA="48.33"	radiusB="22.57"	ellipseOrientation="-14.81" ellipseColor="124"/>
+<agent ID="18"	xPos="1551.22"	yPos="212.31"	radiusA="71.45"	radiusB="20.68"	ellipseOrientation="-92.02" ellipseColor="220"/>
+<agent ID="19"	xPos="1633.09"	yPos="338.45"	radiusA="71.39"	radiusB="20.73"	ellipseOrientation="-84.85" ellipseColor="218"/>
+<agent ID="23"	xPos="1469.90"	yPos="436.78"	radiusA="38.96"	radiusB="23.40"	ellipseOrientation="0.12" ellipseColor="86"/>
+<agent ID="3"	xPos="1164.98"	yPos="423.15"	radiusA="80.00"	radiusB="19.95"	ellipseOrientation="0.02" ellipseColor="254"/>
+</frame>
+
+<frame ID="26">
+<agent ID="1"	xPos="796.99"	yPos="659.20"	radiusA="61.75"	radiusB="21.65"	ellipseOrientation="-40.46" ellipseColor="171"/>
+<agent ID="2"	xPos="875.36"	yPos="393.89"	radiusA="56.72"	radiusB="21.83"	ellipseOrientation="22.88" ellipseColor="159"/>
+<agent ID="4"	xPos="494.01"	yPos="805.62"	radiusA="78.56"	radiusB="20.11"	ellipseOrientation="-20.30" ellipseColor="248"/>
+<agent ID="5"	xPos="810.10"	yPos="253.67"	radiusA="61.48"	radiusB="21.52"	ellipseOrientation="41.29" ellipseColor="179"/>
+<agent ID="6"	xPos="963.76"	yPos="611.14"	radiusA="69.70"	radiusB="20.78"	ellipseOrientation="-82.20" ellipseColor="213"/>
+<agent ID="7"	xPos="846.43"	yPos="700.17"	radiusA="61.44"	radiusB="21.46"	ellipseOrientation="-49.97" ellipseColor="178"/>
+<agent ID="8"	xPos="546.54"	yPos="406.44"	radiusA="78.20"	radiusB="20.24"	ellipseOrientation="-0.96" ellipseColor="247"/>
+<agent ID="9"	xPos="471.77"	yPos="549.27"	radiusA="70.69"	radiusB="20.82"	ellipseOrientation="-0.83" ellipseColor="216"/>
+<agent ID="10"	xPos="380.94"	yPos="757.85"	radiusA="58.84"	radiusB="21.71"	ellipseOrientation="-21.57" ellipseColor="167"/>
+<agent ID="21"	xPos="656.79"	yPos="576.08"	radiusA="68.85"	radiusB="20.89"	ellipseOrientation="-9.23" ellipseColor="208"/>
+<agent ID="22"	xPos="492.95"	yPos="666.84"	radiusA="73.22"	radiusB="20.49"	ellipseOrientation="-6.93" ellipseColor="226"/>
+<agent ID="11"	xPos="1600.00"	yPos="9.66"	radiusA="79.98"	radiusB="20.02"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.48"	yPos="-374.09"	radiusA="72.69"	radiusB="20.60"	ellipseOrientation="-89.69" ellipseColor="224"/>
+<agent ID="14"	xPos="1535.46"	yPos="372.27"	radiusA="64.21"	radiusB="21.31"	ellipseOrientation="-90.74" ellipseColor="190"/>
+<agent ID="16"	xPos="1473.01"	yPos="492.58"	radiusA="48.50"	radiusB="22.56"	ellipseOrientation="-14.91" ellipseColor="125"/>
+<agent ID="18"	xPos="1550.76"	yPos="198.87"	radiusA="71.85"	radiusB="20.65"	ellipseOrientation="-91.92" ellipseColor="221"/>
+<agent ID="19"	xPos="1634.27"	yPos="325.14"	radiusA="71.75"	radiusB="20.70"	ellipseOrientation="-85.02" ellipseColor="220"/>
+<agent ID="23"	xPos="1475.16"	yPos="436.76"	radiusA="39.31"	radiusB="23.37"	ellipseOrientation="-0.99" ellipseColor="87"/>
+<agent ID="3"	xPos="1180.44"	yPos="423.17"	radiusA="80.03"	radiusB="19.95"	ellipseOrientation="0.05" ellipseColor="254"/>
+</frame>
+
+<frame ID="27">
+<agent ID="1"	xPos="805.20"	yPos="652.25"	radiusA="60.09"	radiusB="21.78"	ellipseOrientation="-40.03" ellipseColor="165"/>
+<agent ID="2"	xPos="884.12"	yPos="397.54"	radiusA="54.09"	radiusB="22.05"	ellipseOrientation="20.67" ellipseColor="148"/>
+<agent ID="4"	xPos="508.19"	yPos="800.38"	radiusA="78.54"	radiusB="20.12"	ellipseOrientation="-20.28" ellipseColor="248"/>
+<agent ID="5"	xPos="818.18"	yPos="260.80"	radiusA="60.54"	radiusB="21.60"	ellipseOrientation="41.54" ellipseColor="175"/>
+<agent ID="6"	xPos="965.31"	yPos="598.78"	radiusA="64.10"	radiusB="21.25"	ellipseOrientation="-80.94" ellipseColor="189"/>
+<agent ID="7"	xPos="853.37"	yPos="692.01"	radiusA="60.15"	radiusB="21.57"	ellipseOrientation="-49.26" ellipseColor="173"/>
+<agent ID="8"	xPos="561.58"	yPos="406.18"	radiusA="78.12"	radiusB="20.25"	ellipseOrientation="-1.05" ellipseColor="247"/>
+<agent ID="9"	xPos="484.89"	yPos="549.08"	radiusA="70.34"	radiusB="20.85"	ellipseOrientation="-0.85" ellipseColor="215"/>
+<agent ID="10"	xPos="390.43"	yPos="754.13"	radiusA="58.69"	radiusB="21.72"	ellipseOrientation="-21.23" ellipseColor="167"/>
+<agent ID="21"	xPos="669.19"	yPos="574.01"	radiusA="67.66"	radiusB="20.99"	ellipseOrientation="-10.06" ellipseColor="203"/>
+<agent ID="22"	xPos="506.61"	yPos="665.18"	radiusA="73.00"	radiusB="20.51"	ellipseOrientation="-6.90" ellipseColor="225"/>
+<agent ID="11"	xPos="1600.00"	yPos="-5.82"	radiusA="80.00"	radiusB="20.02"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.55"	yPos="-387.93"	radiusA="74.36"	radiusB="20.46"	ellipseOrientation="-89.77" ellipseColor="230"/>
+<agent ID="14"	xPos="1535.21"	yPos="360.54"	radiusA="65.38"	radiusB="21.22"	ellipseOrientation="-91.64" ellipseColor="195"/>
+<agent ID="16"	xPos="1480.43"	yPos="490.58"	radiusA="49.00"	radiusB="22.52"	ellipseOrientation="-15.32" ellipseColor="127"/>
+<agent ID="18"	xPos="1550.31"	yPos="185.33"	radiusA="72.21"	radiusB="20.62"	ellipseOrientation="-91.82" ellipseColor="223"/>
+<agent ID="19"	xPos="1635.41"	yPos="311.73"	radiusA="72.09"	radiusB="20.68"	ellipseOrientation="-85.18" ellipseColor="221"/>
+<agent ID="23"	xPos="1480.62"	yPos="436.61"	radiusA="40.60"	radiusB="23.27"	ellipseOrientation="-1.98" ellipseColor="92"/>
+<agent ID="3"	xPos="1195.91"	yPos="423.18"	radiusA="80.05"	radiusB="19.95"	ellipseOrientation="0.05" ellipseColor="254"/>
+</frame>
+
+<frame ID="28">
+<agent ID="1"	xPos="813.21"	yPos="645.60"	radiusA="59.24"	radiusB="21.84"	ellipseOrientation="-39.27" ellipseColor="162"/>
+<agent ID="2"	xPos="892.16"	yPos="399.93"	radiusA="49.80"	radiusB="22.40"	ellipseOrientation="13.44" ellipseColor="131"/>
+<agent ID="4"	xPos="522.36"	yPos="795.14"	radiusA="78.52"	radiusB="20.12"	ellipseOrientation="-20.27" ellipseColor="248"/>
+<agent ID="5"	xPos="826.02"	yPos="267.73"	radiusA="58.92"	radiusB="21.73"	ellipseOrientation="41.33" ellipseColor="168"/>
+<agent ID="6"	xPos="968.94"	yPos="588.91"	radiusA="58.29"	radiusB="21.73"	ellipseOrientation="-58.93" ellipseColor="165"/>
+<agent ID="7"	xPos="860.22"	yPos="684.17"	radiusA="59.18"	radiusB="21.65"	ellipseOrientation="-48.38" ellipseColor="169"/>
+<agent ID="8"	xPos="576.59"	yPos="405.89"	radiusA="78.01"	radiusB="20.26"	ellipseOrientation="-1.19" ellipseColor="246"/>
+<agent ID="9"	xPos="497.90"	yPos="548.88"	radiusA="69.76"	radiusB="20.89"	ellipseOrientation="-0.89" ellipseColor="212"/>
+<agent ID="10"	xPos="399.93"	yPos="750.48"	radiusA="58.70"	radiusB="21.72"	ellipseOrientation="-20.87" ellipseColor="167"/>
+<agent ID="21"	xPos="681.04"	yPos="571.66"	radiusA="65.47"	radiusB="21.17"	ellipseOrientation="-12.14" ellipseColor="194"/>
+<agent ID="22"	xPos="520.20"	yPos="663.55"	radiusA="72.69"	radiusB="20.54"	ellipseOrientation="-6.82" ellipseColor="224"/>
+<agent ID="11"	xPos="1600.00"	yPos="-21.31"	radiusA="80.02"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.60"	yPos="-402.15"	radiusA="75.65"	radiusB="20.35"	ellipseOrientation="-89.82" ellipseColor="236"/>
+<agent ID="14"	xPos="1534.80"	yPos="348.55"	radiusA="66.32"	radiusB="21.14"	ellipseOrientation="-92.19" ellipseColor="199"/>
+<agent ID="16"	xPos="1487.97"	yPos="488.48"	radiusA="49.63"	radiusB="22.47"	ellipseOrientation="-15.79" ellipseColor="130"/>
+<agent ID="18"	xPos="1549.89"	yPos="171.72"	radiusA="72.53"	radiusB="20.60"	ellipseOrientation="-91.74" ellipseColor="224"/>
+<agent ID="19"	xPos="1636.53"	yPos="298.24"	radiusA="72.42"	radiusB="20.65"	ellipseOrientation="-85.33" ellipseColor="223"/>
+<agent ID="23"	xPos="1486.49"	yPos="436.36"	radiusA="42.46"	radiusB="23.11"	ellipseOrientation="-2.49" ellipseColor="100"/>
+<agent ID="3"	xPos="1211.38"	yPos="423.20"	radiusA="80.07"	radiusB="19.95"	ellipseOrientation="0.03" ellipseColor="254"/>
+</frame>
+
+<frame ID="29">
+<agent ID="1"	xPos="821.24"	yPos="639.13"	radiusA="59.17"	radiusB="21.84"	ellipseOrientation="-38.58" ellipseColor="161"/>
+<agent ID="2"	xPos="900.53"	yPos="401.52"	radiusA="54.58"	radiusB="22.01"	ellipseOrientation="8.86" ellipseColor="150"/>
+<agent ID="4"	xPos="536.54"	yPos="789.91"	radiusA="78.50"	radiusB="20.12"	ellipseOrientation="-20.25" ellipseColor="248"/>
+<agent ID="5"	xPos="833.58"	yPos="274.35"	radiusA="57.44"	radiusB="21.85"	ellipseOrientation="41.16" ellipseColor="162"/>
+<agent ID="6"	xPos="975.44"	yPos="581.25"	radiusA="58.74"	radiusB="21.69"	ellipseOrientation="-41.32" ellipseColor="167"/>
+<agent ID="7"	xPos="867.09"	yPos="676.56"	radiusA="58.84"	radiusB="21.67"	ellipseOrientation="-47.52" ellipseColor="168"/>
+<agent ID="8"	xPos="591.58"	yPos="405.56"	radiusA="77.89"	radiusB="20.26"	ellipseOrientation="-1.34" ellipseColor="246"/>
+<agent ID="9"	xPos="510.75"	yPos="548.67"	radiusA="69.07"	radiusB="20.95"	ellipseOrientation="-0.94" ellipseColor="209"/>
+<agent ID="10"	xPos="409.47"	yPos="746.87"	radiusA="58.86"	radiusB="21.71"	ellipseOrientation="-20.53" ellipseColor="168"/>
+<agent ID="21"	xPos="692.41"	yPos="569.08"	radiusA="64.17"	radiusB="21.28"	ellipseOrientation="-13.35" ellipseColor="189"/>
+<agent ID="22"	xPos="533.71"	yPos="661.94"	radiusA="72.35"	radiusB="20.56"	ellipseOrientation="-6.72" ellipseColor="223"/>
+<agent ID="11"	xPos="1600.00"	yPos="-36.81"	radiusA="80.03"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.64"	yPos="-416.64"	radiusA="76.66"	radiusB="20.27"	ellipseOrientation="-89.87" ellipseColor="240"/>
+<agent ID="14"	xPos="1534.30"	yPos="336.36"	radiusA="67.09"	radiusB="21.08"	ellipseOrientation="-92.52" ellipseColor="202"/>
+<agent ID="16"	xPos="1495.65"	yPos="486.29"	radiusA="50.25"	radiusB="22.42"	ellipseOrientation="-16.08" ellipseColor="132"/>
+<agent ID="18"	xPos="1549.48"	yPos="158.02"	radiusA="72.82"	radiusB="20.57"	ellipseOrientation="-91.67" ellipseColor="225"/>
+<agent ID="19"	xPos="1637.62"	yPos="284.67"	radiusA="72.73"	radiusB="20.63"	ellipseOrientation="-85.48" ellipseColor="224"/>
+<agent ID="23"	xPos="1492.80"	yPos="436.09"	radiusA="43.95"	radiusB="22.99"	ellipseOrientation="-2.30" ellipseColor="106"/>
+<agent ID="3"	xPos="1226.86"	yPos="423.22"	radiusA="80.08"	radiusB="19.95"	ellipseOrientation="0.13" ellipseColor="254"/>
+</frame>
+
+<frame ID="30">
+<agent ID="1"	xPos="829.32"	yPos="632.72"	radiusA="59.15"	radiusB="21.85"	ellipseOrientation="-38.34" ellipseColor="161"/>
+<agent ID="2"	xPos="910.20"	yPos="402.86"	radiusA="59.22"	radiusB="21.63"	ellipseOrientation="7.24" ellipseColor="169"/>
+<agent ID="4"	xPos="550.70"	yPos="784.69"	radiusA="78.48"	radiusB="20.12"	ellipseOrientation="-20.24" ellipseColor="248"/>
+<agent ID="5"	xPos="840.91"	yPos="280.78"	radiusA="56.54"	radiusB="21.92"	ellipseOrientation="41.40" ellipseColor="158"/>
+<agent ID="6"	xPos="984.06"	yPos="575.40"	radiusA="60.93"	radiusB="21.51"	ellipseOrientation="-28.26" ellipseColor="176"/>
+<agent ID="7"	xPos="874.01"	yPos="669.09"	radiusA="58.50"	radiusB="21.70"	ellipseOrientation="-46.90" ellipseColor="166"/>
+<agent ID="8"	xPos="606.53"	yPos="405.19"	radiusA="77.78"	radiusB="20.27"	ellipseOrientation="-1.48" ellipseColor="245"/>
+<agent ID="9"	xPos="523.42"	yPos="548.46"	radiusA="68.40"	radiusB="21.00"	ellipseOrientation="-0.96" ellipseColor="207"/>
+<agent ID="10"	xPos="419.08"	yPos="743.31"	radiusA="59.11"	radiusB="21.69"	ellipseOrientation="-20.19" ellipseColor="169"/>
+<agent ID="21"	xPos="703.48"	yPos="566.37"	radiusA="63.27"	radiusB="21.35"	ellipseOrientation="-14.09" ellipseColor="185"/>
+<agent ID="22"	xPos="547.15"	yPos="660.37"	radiusA="72.05"	radiusB="20.59"	ellipseOrientation="-6.61" ellipseColor="221"/>
+<agent ID="11"	xPos="1600.00"	yPos="-52.30"	radiusA="80.04"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.67"	yPos="-431.36"	radiusA="77.44"	radiusB="20.21"	ellipseOrientation="-89.90" ellipseColor="243"/>
+<agent ID="14"	xPos="1533.73"	yPos="323.99"	radiusA="67.73"	radiusB="21.03"	ellipseOrientation="-92.70" ellipseColor="204"/>
+<agent ID="16"	xPos="1503.46"	yPos="484.02"	radiusA="50.84"	radiusB="22.38"	ellipseOrientation="-16.47" ellipseColor="135"/>
+<agent ID="18"	xPos="1549.09"	yPos="144.26"	radiusA="73.08"	radiusB="20.55"	ellipseOrientation="-91.60" ellipseColor="226"/>
+<agent ID="19"	xPos="1638.69"	yPos="271.02"	radiusA="73.03"	radiusB="20.60"	ellipseOrientation="-85.61" ellipseColor="225"/>
+<agent ID="23"	xPos="1499.41"	yPos="435.88"	radiusA="44.99"	radiusB="22.91"	ellipseOrientation="-1.48" ellipseColor="110"/>
+<agent ID="3"	xPos="1242.33"	yPos="423.24"	radiusA="80.09"	radiusB="19.95"	ellipseOrientation="0.06" ellipseColor="254"/>
+</frame>
+
+<frame ID="31">
+<agent ID="1"	xPos="837.37"	yPos="626.34"	radiusA="58.74"	radiusB="21.88"	ellipseOrientation="-38.48" ellipseColor="160"/>
+<agent ID="2"	xPos="920.93"	yPos="404.17"	radiusA="63.03"	radiusB="21.32"	ellipseOrientation="6.81" ellipseColor="185"/>
+<agent ID="4"	xPos="564.87"	yPos="779.47"	radiusA="78.46"	radiusB="20.12"	ellipseOrientation="-20.23" ellipseColor="248"/>
+<agent ID="5"	xPos="848.07"	yPos="287.16"	radiusA="56.07"	radiusB="21.96"	ellipseOrientation="41.99" ellipseColor="157"/>
+<agent ID="6"	xPos="994.23"	yPos="570.92"	radiusA="63.97"	radiusB="21.26"	ellipseOrientation="-20.05" ellipseColor="189"/>
+<agent ID="7"	xPos="880.92"	yPos="661.76"	radiusA="58.02"	radiusB="21.74"	ellipseOrientation="-46.53" ellipseColor="164"/>
+<agent ID="8"	xPos="621.46"	yPos="404.79"	radiusA="77.70"	radiusB="20.28"	ellipseOrientation="-1.58" ellipseColor="245"/>
+<agent ID="9"	xPos="535.94"	yPos="548.25"	radiusA="67.79"	radiusB="21.05"	ellipseOrientation="-0.97" ellipseColor="204"/>
+<agent ID="10"	xPos="428.78"	yPos="739.78"	radiusA="59.24"	radiusB="21.68"	ellipseOrientation="-19.61" ellipseColor="169"/>
+<agent ID="21"	xPos="714.32"	yPos="563.59"	radiusA="62.52"	radiusB="21.41"	ellipseOrientation="-14.65" ellipseColor="182"/>
+<agent ID="22"	xPos="560.52"	yPos="658.84"	radiusA="71.81"	radiusB="20.61"	ellipseOrientation="-6.52" ellipseColor="220"/>
+<agent ID="11"	xPos="1600.00"	yPos="-67.80"	radiusA="80.05"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.69"	yPos="-446.25"	radiusA="78.05"	radiusB="20.16"	ellipseOrientation="-89.92" ellipseColor="246"/>
+<agent ID="14"	xPos="1533.13"	yPos="311.47"	radiusA="68.26"	radiusB="20.99"	ellipseOrientation="-92.78" ellipseColor="207"/>
+<agent ID="16"	xPos="1511.38"	yPos="481.53"	radiusA="51.63"	radiusB="22.31"	ellipseOrientation="-18.84" ellipseColor="138"/>
+<agent ID="18"	xPos="1548.71"	yPos="130.43"	radiusA="73.32"	radiusB="20.53"	ellipseOrientation="-91.54" ellipseColor="227"/>
+<agent ID="19"	xPos="1639.73"	yPos="257.30"	radiusA="73.31"	radiusB="20.58"	ellipseOrientation="-85.74" ellipseColor="226"/>
+<agent ID="23"	xPos="1506.27"	yPos="434.76"	radiusA="47.21"	radiusB="22.73"	ellipseOrientation="-16.84" ellipseColor="120"/>
+<agent ID="3"	xPos="1257.81"	yPos="423.25"	radiusA="80.09"	radiusB="19.95"	ellipseOrientation="0.10" ellipseColor="254"/>
+</frame>
+
+<frame ID="32">
+<agent ID="1"	xPos="845.29"	yPos="620.02"	radiusA="58.16"	radiusB="21.92"	ellipseOrientation="-38.71" ellipseColor="157"/>
+<agent ID="2"	xPos="932.52"	yPos="405.55"	radiusA="66.04"	radiusB="21.07"	ellipseOrientation="6.85" ellipseColor="197"/>
+<agent ID="4"	xPos="579.03"	yPos="774.25"	radiusA="78.44"	radiusB="20.12"	ellipseOrientation="-20.23" ellipseColor="248"/>
+<agent ID="5"	xPos="855.10"	yPos="293.57"	radiusA="55.90"	radiusB="21.98"	ellipseOrientation="42.87" ellipseColor="156"/>
+<agent ID="7"	xPos="887.78"	yPos="654.55"	radiusA="57.51"	radiusB="21.78"	ellipseOrientation="-46.35" ellipseColor="162"/>
+<agent ID="8"	xPos="636.37"	yPos="404.37"	radiusA="77.63"	radiusB="20.28"	ellipseOrientation="-1.64" ellipseColor="245"/>
+<agent ID="9"	xPos="548.30"	yPos="548.04"	radiusA="67.22"	radiusB="21.10"	ellipseOrientation="-0.95" ellipseColor="202"/>
+<agent ID="10"	xPos="438.51"	yPos="736.40"	radiusA="59.15"	radiusB="21.69"	ellipseOrientation="-18.70" ellipseColor="169"/>
+<agent ID="21"	xPos="724.95"	yPos="560.76"	radiusA="61.79"	radiusB="21.47"	ellipseOrientation="-15.15" ellipseColor="179"/>
+<agent ID="22"	xPos="573.84"	yPos="657.32"	radiusA="71.60"	radiusB="20.63"	ellipseOrientation="-6.43" ellipseColor="219"/>
+<agent ID="11"	xPos="1600.00"	yPos="-83.30"	radiusA="80.05"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.71"	yPos="-461.28"	radiusA="78.53"	radiusB="20.12"	ellipseOrientation="-89.94" ellipseColor="248"/>
+<agent ID="14"	xPos="1532.51"	yPos="298.84"	radiusA="68.71"	radiusB="20.95"	ellipseOrientation="-92.80" ellipseColor="208"/>
+<agent ID="16"	xPos="1519.36"	yPos="478.55"	radiusA="52.49"	radiusB="22.25"	ellipseOrientation="-21.78" ellipseColor="141"/>
+<agent ID="18"	xPos="1548.35"	yPos="116.55"	radiusA="73.53"	radiusB="20.52"	ellipseOrientation="-91.49" ellipseColor="228"/>
+<agent ID="19"	xPos="1640.74"	yPos="243.51"	radiusA="73.57"	radiusB="20.56"	ellipseOrientation="-85.86" ellipseColor="227"/>
+<agent ID="23"	xPos="1513.38"	yPos="431.79"	radiusA="50.52"	radiusB="22.46"	ellipseOrientation="-27.40" ellipseColor="133"/>
+<agent ID="3"	xPos="1273.29"	yPos="423.27"	radiusA="80.10"	radiusB="19.95"	ellipseOrientation="0.11" ellipseColor="254"/>
+<agent ID="6"	xPos="1005.43"	yPos="567.33"	radiusA="64.77"	radiusB="21.19"	ellipseOrientation="-17.36" ellipseColor="192"/>
+</frame>
+
+<frame ID="33">
+<agent ID="1"	xPos="853.07"	yPos="613.76"	radiusA="57.55"	radiusB="21.97"	ellipseOrientation="-38.91" ellipseColor="155"/>
+<agent ID="2"	xPos="944.75"	yPos="407.03"	radiusA="68.24"	radiusB="20.90"	ellipseOrientation="6.91" ellipseColor="206"/>
+<agent ID="4"	xPos="593.18"	yPos="769.03"	radiusA="78.42"	radiusB="20.12"	ellipseOrientation="-20.23" ellipseColor="247"/>
+<agent ID="5"	xPos="862.00"	yPos="300.10"	radiusA="55.98"	radiusB="21.97"	ellipseOrientation="43.94" ellipseColor="156"/>
+<agent ID="7"	xPos="894.57"	yPos="647.44"	radiusA="57.10"	radiusB="21.82"	ellipseOrientation="-46.29" ellipseColor="161"/>
+<agent ID="8"	xPos="651.27"	yPos="403.94"	radiusA="77.59"	radiusB="20.29"	ellipseOrientation="-1.67" ellipseColor="244"/>
+<agent ID="9"	xPos="560.53"	yPos="547.85"	radiusA="66.67"	radiusB="21.14"	ellipseOrientation="-0.92" ellipseColor="200"/>
+<agent ID="10"	xPos="448.29"	yPos="733.17"	radiusA="59.24"	radiusB="21.68"	ellipseOrientation="-17.97" ellipseColor="169"/>
+<agent ID="21"	xPos="735.38"	yPos="557.89"	radiusA="61.04"	radiusB="21.53"	ellipseOrientation="-15.64" ellipseColor="176"/>
+<agent ID="22"	xPos="587.11"	yPos="655.84"	radiusA="71.43"	radiusB="20.64"	ellipseOrientation="-6.35" ellipseColor="219"/>
+<agent ID="11"	xPos="1600.00"	yPos="-98.80"	radiusA="80.06"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.72"	yPos="-476.41"	radiusA="78.90"	radiusB="20.09"	ellipseOrientation="-89.95" ellipseColor="249"/>
+<agent ID="14"	xPos="1532.05"	yPos="286.10"	radiusA="69.03"	radiusB="20.92"	ellipseOrientation="-91.57" ellipseColor="210"/>
+<agent ID="16"	xPos="1527.39"	yPos="475.23"	radiusA="52.97"	radiusB="22.21"	ellipseOrientation="-22.98" ellipseColor="143"/>
+<agent ID="18"	xPos="1547.99"	yPos="102.61"	radiusA="73.73"	radiusB="20.50"	ellipseOrientation="-91.44" ellipseColor="229"/>
+<agent ID="19"	xPos="1641.73"	yPos="229.65"	radiusA="73.82"	radiusB="20.54"	ellipseOrientation="-85.97" ellipseColor="228"/>
+<agent ID="23"	xPos="1520.69"	yPos="427.39"	radiusA="53.58"	radiusB="22.22"	ellipseOrientation="-34.39" ellipseColor="146"/>
+<agent ID="3"	xPos="1288.77"	yPos="423.29"	radiusA="80.10"	radiusB="19.95"	ellipseOrientation="0.09" ellipseColor="254"/>
+<agent ID="6"	xPos="1016.36"	yPos="563.77"	radiusA="63.10"	radiusB="21.33"	ellipseOrientation="-18.70" ellipseColor="185"/>
+</frame>
+
+<frame ID="34">
+<agent ID="1"	xPos="860.70"	yPos="607.58"	radiusA="56.85"	radiusB="22.02"	ellipseOrientation="-39.07" ellipseColor="152"/>
+<agent ID="2"	xPos="957.44"	yPos="408.58"	radiusA="69.75"	radiusB="20.77"	ellipseOrientation="7.07" ellipseColor="213"/>
+<agent ID="4"	xPos="607.33"	yPos="763.82"	radiusA="78.39"	radiusB="20.13"	ellipseOrientation="-20.17" ellipseColor="247"/>
+<agent ID="5"	xPos="868.80"	yPos="306.79"	radiusA="56.24"	radiusB="21.95"	ellipseOrientation="45.12" ellipseColor="157"/>
+<agent ID="7"	xPos="901.30"	yPos="640.40"	radiusA="56.72"	radiusB="21.85"	ellipseOrientation="-46.30" ellipseColor="159"/>
+<agent ID="8"	xPos="666.15"	yPos="403.50"	radiusA="77.56"	radiusB="20.29"	ellipseOrientation="-1.67" ellipseColor="244"/>
+<agent ID="9"	xPos="572.62"	yPos="547.66"	radiusA="66.12"	radiusB="21.19"	ellipseOrientation="-0.94" ellipseColor="197"/>
+<agent ID="10"	xPos="458.14"	yPos="730.03"	radiusA="59.44"	radiusB="21.66"	ellipseOrientation="-17.38" ellipseColor="170"/>
+<agent ID="21"	xPos="745.61"	yPos="554.98"	radiusA="60.26"	radiusB="21.60"	ellipseOrientation="-16.12" ellipseColor="173"/>
+<agent ID="22"	xPos="600.35"	yPos="654.37"	radiusA="71.27"	radiusB="20.65"	ellipseOrientation="-6.26" ellipseColor="218"/>
+<agent ID="11"	xPos="1600.00"	yPos="-114.30"	radiusA="80.06"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="13"	xPos="1542.73"	yPos="-491.63"	radiusA="79.19"	radiusB="20.06"	ellipseOrientation="-89.96" ellipseColor="250"/>
+<agent ID="14"	xPos="1531.83"	yPos="273.28"	radiusA="69.30"	radiusB="20.90"	ellipseOrientation="-90.43" ellipseColor="211"/>
+<agent ID="16"	xPos="1535.44"	yPos="471.75"	radiusA="53.26"	radiusB="22.19"	ellipseOrientation="-23.84" ellipseColor="145"/>
+<agent ID="18"	xPos="1547.65"	yPos="88.63"	radiusA="73.91"	radiusB="20.49"	ellipseOrientation="-91.39" ellipseColor="230"/>
+<agent ID="19"	xPos="1642.69"	yPos="215.73"	radiusA="74.05"	radiusB="20.52"	ellipseOrientation="-86.08" ellipseColor="229"/>
+<agent ID="23"	xPos="1526.92"	yPos="421.35"	radiusA="52.87"	radiusB="22.27"	ellipseOrientation="-52.70" ellipseColor="143"/>
+<agent ID="3"	xPos="1304.26"	yPos="423.30"	radiusA="80.10"	radiusB="19.95"	ellipseOrientation="0.02" ellipseColor="254"/>
+<agent ID="6"	xPos="1026.85"	yPos="560.11"	radiusA="61.78"	radiusB="21.44"	ellipseOrientation="-19.75" ellipseColor="180"/>
+</frame>
+
+<frame ID="35">
+<agent ID="1"	xPos="868.10"	yPos="601.62"	radiusA="54.69"	radiusB="22.18"	ellipseOrientation="-38.58" ellipseColor="144"/>
+<agent ID="2"	xPos="970.42"	yPos="410.24"	radiusA="70.69"	radiusB="20.70"	ellipseOrientation="7.54" ellipseColor="217"/>
+<agent ID="4"	xPos="621.49"	yPos="758.65"	radiusA="78.34"	radiusB="20.13"	ellipseOrientation="-19.95" ellipseColor="247"/>
+<agent ID="5"	xPos="875.50"	yPos="313.65"	radiusA="56.21"	radiusB="21.95"	ellipseOrientation="46.29" ellipseColor="157"/>
+<agent ID="7"	xPos="907.95"	yPos="633.44"	radiusA="56.27"	radiusB="21.89"	ellipseOrientation="-46.35" ellipseColor="157"/>
+<agent ID="8"	xPos="680.80"	yPos="403.18"	radiusA="74.37"	radiusB="20.54"	ellipseOrientation="-0.26" ellipseColor="231"/>
+<agent ID="9"	xPos="584.57"	yPos="547.43"	radiusA="65.55"	radiusB="21.23"	ellipseOrientation="-1.17" ellipseColor="195"/>
+<agent ID="10"	xPos="468.08"	yPos="726.97"	radiusA="59.71"	radiusB="21.64"	ellipseOrientation="-16.89" ellipseColor="171"/>
+<agent ID="21"	xPos="755.62"	yPos="552.04"	radiusA="59.44"	radiusB="21.67"	ellipseOrientation="-16.64" ellipseColor="169"/>
+<agent ID="22"	xPos="613.55"	yPos="652.94"	radiusA="71.14"	radiusB="20.66"	ellipseOrientation="-6.18" ellipseColor="218"/>
+<agent ID="11"	xPos="1600.00"	yPos="-129.81"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.77"	yPos="260.40"	radiusA="69.53"	radiusB="20.88"	ellipseOrientation="-90.21" ellipseColor="212"/>
+<agent ID="16"	xPos="1543.50"	yPos="468.07"	radiusA="53.66"	radiusB="22.15"	ellipseOrientation="-25.33" ellipseColor="146"/>
+<agent ID="18"	xPos="1547.31"	yPos="74.60"	radiusA="74.08"	radiusB="20.47"	ellipseOrientation="-91.35" ellipseColor="231"/>
+<agent ID="19"	xPos="1643.64"	yPos="201.75"	radiusA="74.27"	radiusB="20.50"	ellipseOrientation="-86.19" ellipseColor="230"/>
+<agent ID="23"	xPos="1531.47"	yPos="413.68"	radiusA="54.82"	radiusB="22.11"	ellipseOrientation="-64.85" ellipseColor="151"/>
+<agent ID="3"	xPos="1319.19"	yPos="423.32"	radiusA="74.52"	radiusB="20.40"	ellipseOrientation="0.09" ellipseColor="231"/>
+<agent ID="6"	xPos="1037.00"	yPos="556.38"	radiusA="60.65"	radiusB="21.53"	ellipseOrientation="-20.60" ellipseColor="175"/>
+</frame>
+
+<frame ID="36">
+<agent ID="1"	xPos="875.24"	yPos="596.05"	radiusA="54.15"	radiusB="22.22"	ellipseOrientation="-37.20" ellipseColor="142"/>
+<agent ID="2"	xPos="983.53"	yPos="412.09"	radiusA="71.00"	radiusB="20.67"	ellipseOrientation="8.80" ellipseColor="218"/>
+<agent ID="4"	xPos="635.65"	yPos="753.53"	radiusA="78.32"	radiusB="20.13"	ellipseOrientation="-19.85" ellipseColor="247"/>
+<agent ID="5"	xPos="882.01"	yPos="320.61"	radiusA="55.84"	radiusB="21.98"	ellipseOrientation="47.45" ellipseColor="156"/>
+<agent ID="7"	xPos="914.51"	yPos="626.55"	radiusA="55.68"	radiusB="21.94"	ellipseOrientation="-46.43" ellipseColor="155"/>
+<agent ID="8"	xPos="694.34"	yPos="403.36"	radiusA="70.22"	radiusB="20.86"	ellipseOrientation="1.68" ellipseColor="214"/>
+<agent ID="9"	xPos="596.38"	yPos="547.17"	radiusA="64.99"	radiusB="21.28"	ellipseOrientation="-1.34" ellipseColor="193"/>
+<agent ID="10"	xPos="478.11"	yPos="723.96"	radiusA="60.02"	radiusB="21.61"	ellipseOrientation="-16.47" ellipseColor="172"/>
+<agent ID="21"	xPos="765.40"	yPos="549.07"	radiusA="58.62"	radiusB="21.73"	ellipseOrientation="-17.13" ellipseColor="166"/>
+<agent ID="22"	xPos="626.72"	yPos="651.52"	radiusA="71.02"	radiusB="20.67"	ellipseOrientation="-6.09" ellipseColor="217"/>
+<agent ID="11"	xPos="1600.00"	yPos="-145.31"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.74"	yPos="247.46"	radiusA="69.74"	radiusB="20.87"	ellipseOrientation="-90.17" ellipseColor="213"/>
+<agent ID="16"	xPos="1551.55"	yPos="464.09"	radiusA="54.22"	radiusB="22.11"	ellipseOrientation="-27.34" ellipseColor="148"/>
+<agent ID="18"	xPos="1546.99"	yPos="60.54"	radiusA="74.23"	radiusB="20.46"	ellipseOrientation="-91.31" ellipseColor="231"/>
+<agent ID="19"	xPos="1644.56"	yPos="187.71"	radiusA="74.48"	radiusB="20.49"	ellipseOrientation="-86.29" ellipseColor="231"/>
+<agent ID="23"	xPos="1534.87"	yPos="404.79"	radiusA="57.33"	radiusB="21.91"	ellipseOrientation="-72.52" ellipseColor="161"/>
+<agent ID="3"	xPos="1332.57"	yPos="423.34"	radiusA="69.20"	radiusB="20.83"	ellipseOrientation="0.13" ellipseColor="210"/>
+<agent ID="6"	xPos="1046.84"	yPos="552.61"	radiusA="59.53"	radiusB="21.62"	ellipseOrientation="-21.33" ellipseColor="171"/>
+</frame>
+
+<frame ID="37">
+<agent ID="1"	xPos="882.42"	yPos="590.61"	radiusA="53.60"	radiusB="22.27"	ellipseOrientation="-37.31" ellipseColor="139"/>
+<agent ID="2"	xPos="996.48"	yPos="414.47"	radiusA="69.56"	radiusB="20.79"	ellipseOrientation="12.93" ellipseColor="212"/>
+<agent ID="4"	xPos="649.82"	yPos="748.42"	radiusA="78.32"	radiusB="20.13"	ellipseOrientation="-19.85" ellipseColor="247"/>
+<agent ID="5"	xPos="888.32"	yPos="327.62"	radiusA="55.46"	radiusB="22.01"	ellipseOrientation="48.56" ellipseColor="154"/>
+<agent ID="7"	xPos="920.93"	yPos="619.80"	radiusA="54.39"	radiusB="22.04"	ellipseOrientation="-46.17" ellipseColor="149"/>
+<agent ID="8"	xPos="706.99"	yPos="403.89"	radiusA="67.31"	radiusB="21.09"	ellipseOrientation="3.03" ellipseColor="202"/>
+<agent ID="9"	xPos="608.05"	yPos="546.89"	radiusA="64.43"	radiusB="21.32"	ellipseOrientation="-1.43" ellipseColor="190"/>
+<agent ID="10"	xPos="488.24"	yPos="721.00"	radiusA="60.36"	radiusB="21.59"	ellipseOrientation="-16.10" ellipseColor="174"/>
+<agent ID="21"	xPos="774.97"	yPos="546.08"	radiusA="57.85"	radiusB="21.80"	ellipseOrientation="-17.57" ellipseColor="163"/>
+<agent ID="22"	xPos="639.87"	yPos="650.12"	radiusA="70.93"	radiusB="20.68"	ellipseOrientation="-6.01" ellipseColor="217"/>
+<agent ID="11"	xPos="1600.00"	yPos="-160.81"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.71"	yPos="234.48"	radiusA="69.93"	radiusB="20.85"	ellipseOrientation="-90.13" ellipseColor="213"/>
+<agent ID="16"	xPos="1559.21"	yPos="459.59"	radiusA="51.58"	radiusB="22.32"	ellipseOrientation="-36.34" ellipseColor="138"/>
+<agent ID="18"	xPos="1546.67"	yPos="46.43"	radiusA="74.37"	radiusB="20.45"	ellipseOrientation="-91.27" ellipseColor="232"/>
+<agent ID="19"	xPos="1645.46"	yPos="173.63"	radiusA="74.68"	radiusB="20.47"	ellipseOrientation="-86.38" ellipseColor="232"/>
+<agent ID="23"	xPos="1537.46"	yPos="394.99"	radiusA="59.68"	radiusB="21.72"	ellipseOrientation="-77.46" ellipseColor="171"/>
+<agent ID="3"	xPos="1344.77"	yPos="423.36"	radiusA="64.31"	radiusB="21.23"	ellipseOrientation="0.09" ellipseColor="189"/>
+<agent ID="6"	xPos="1056.29"	yPos="548.82"	radiusA="59.09"	radiusB="21.66"	ellipseOrientation="-21.60" ellipseColor="169"/>
+</frame>
+
+<frame ID="38">
+<agent ID="1"	xPos="889.39"	yPos="585.29"	radiusA="52.44"	radiusB="22.35"	ellipseOrientation="-37.31" ellipseColor="135"/>
+<agent ID="4"	xPos="663.98"	yPos="743.30"	radiusA="78.34"	radiusB="20.13"	ellipseOrientation="-19.92" ellipseColor="247"/>
+<agent ID="5"	xPos="894.47"	yPos="334.70"	radiusA="55.56"	radiusB="22.00"	ellipseOrientation="49.46" ellipseColor="154"/>
+<agent ID="7"	xPos="927.02"	yPos="613.66"	radiusA="50.98"	radiusB="22.33"	ellipseOrientation="-44.41" ellipseColor="135"/>
+<agent ID="8"	xPos="719.01"	yPos="404.62"	radiusA="65.13"	radiusB="21.26"	ellipseOrientation="3.91" ellipseColor="193"/>
+<agent ID="9"	xPos="619.57"	yPos="546.60"	radiusA="63.81"	radiusB="21.37"	ellipseOrientation="-1.42" ellipseColor="188"/>
+<agent ID="10"	xPos="498.47"	yPos="718.08"	radiusA="60.69"	radiusB="21.56"	ellipseOrientation="-15.77" ellipseColor="175"/>
+<agent ID="21"	xPos="784.33"	yPos="543.07"	radiusA="57.02"	radiusB="21.86"	ellipseOrientation="-18.07" ellipseColor="159"/>
+<agent ID="22"	xPos="653.00"	yPos="648.75"	radiusA="70.87"	radiusB="20.69"	ellipseOrientation="-5.96" ellipseColor="216"/>
+<agent ID="11"	xPos="1600.00"	yPos="-176.32"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.68"	yPos="221.45"	radiusA="70.11"	radiusB="20.84"	ellipseOrientation="-90.08" ellipseColor="214"/>
+<agent ID="16"	xPos="1565.21"	yPos="454.38"	radiusA="48.32"	radiusB="22.57"	ellipseOrientation="-44.56" ellipseColor="124"/>
+<agent ID="18"	xPos="1546.36"	yPos="32.29"	radiusA="74.51"	radiusB="20.44"	ellipseOrientation="-91.24" ellipseColor="232"/>
+<agent ID="19"	xPos="1646.35"	yPos="159.49"	radiusA="74.86"	radiusB="20.46"	ellipseOrientation="-86.47" ellipseColor="233"/>
+<agent ID="23"	xPos="1539.46"	yPos="384.50"	radiusA="61.68"	radiusB="21.56"	ellipseOrientation="-80.76" ellipseColor="179"/>
+<agent ID="3"	xPos="1355.73"	yPos="423.38"	radiusA="60.02"	radiusB="21.58"	ellipseOrientation="0.19" ellipseColor="172"/>
+<agent ID="6"	xPos="1066.47"	yPos="545.03"	radiusA="63.49"	radiusB="21.30"	ellipseOrientation="-19.43" ellipseColor="187"/>
+<agent ID="2"	xPos="1008.50"	yPos="417.45"	radiusA="67.15"	radiusB="20.98"	ellipseOrientation="10.95" ellipseColor="202"/>
+</frame>
+
+<frame ID="39">
+<agent ID="1"	xPos="896.18"	yPos="580.12"	radiusA="51.74"	radiusB="22.41"	ellipseOrientation="-37.27" ellipseColor="132"/>
+<agent ID="4"	xPos="678.14"	yPos="738.15"	radiusA="78.38"	radiusB="20.13"	ellipseOrientation="-20.04" ellipseColor="247"/>
+<agent ID="5"	xPos="900.57"	yPos="341.93"	radiusA="56.01"	radiusB="21.97"	ellipseOrientation="50.18" ellipseColor="156"/>
+<agent ID="7"	xPos="932.66"	yPos="608.14"	radiusA="47.96"	radiusB="22.58"	ellipseOrientation="-44.98" ellipseColor="123"/>
+<agent ID="8"	xPos="730.54"	yPos="405.47"	radiusA="63.41"	radiusB="21.40"	ellipseOrientation="4.40" ellipseColor="186"/>
+<agent ID="9"	xPos="630.93"	yPos="546.33"	radiusA="63.17"	radiusB="21.42"	ellipseOrientation="-1.35" ellipseColor="185"/>
+<agent ID="10"	xPos="508.80"	yPos="715.20"	radiusA="61.01"	radiusB="21.53"	ellipseOrientation="-15.45" ellipseColor="176"/>
+<agent ID="21"	xPos="793.46"	yPos="540.04"	radiusA="56.16"	radiusB="21.94"	ellipseOrientation="-18.64" ellipseColor="156"/>
+<agent ID="22"	xPos="666.12"	yPos="647.38"	radiusA="70.82"	radiusB="20.69"	ellipseOrientation="-6.00" ellipseColor="216"/>
+<agent ID="11"	xPos="1600.00"	yPos="-191.82"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.65"	yPos="208.37"	radiusA="70.27"	radiusB="20.82"	ellipseOrientation="-90.17" ellipseColor="215"/>
+<agent ID="16"	xPos="1570.20"	yPos="449.07"	radiusA="46.17"	radiusB="22.74"	ellipseOrientation="-48.62" ellipseColor="115"/>
+<agent ID="18"	xPos="1546.06"	yPos="18.12"	radiusA="74.63"	radiusB="20.43"	ellipseOrientation="-91.21" ellipseColor="233"/>
+<agent ID="19"	xPos="1647.21"	yPos="145.31"	radiusA="75.04"	radiusB="20.44"	ellipseOrientation="-86.55" ellipseColor="233"/>
+<agent ID="23"	xPos="1541.01"	yPos="373.47"	radiusA="63.33"	radiusB="21.43"	ellipseOrientation="-83.02" ellipseColor="186"/>
+<agent ID="3"	xPos="1365.86"	yPos="423.39"	radiusA="57.56"	radiusB="21.78"	ellipseOrientation="0.01" ellipseColor="162"/>
+<agent ID="6"	xPos="1077.69"	yPos="541.24"	radiusA="66.96"	radiusB="21.01"	ellipseOrientation="-18.03" ellipseColor="201"/>
+<agent ID="2"	xPos="1020.83"	yPos="419.16"	radiusA="68.41"	radiusB="20.88"	ellipseOrientation="5.36" ellipseColor="207"/>
+</frame>
+
+<frame ID="40">
+<agent ID="1"	xPos="902.87"	yPos="575.01"	radiusA="51.55"	radiusB="22.42"	ellipseOrientation="-37.51" ellipseColor="131"/>
+<agent ID="4"	xPos="692.30"	yPos="732.96"	radiusA="78.42"	radiusB="20.12"	ellipseOrientation="-20.21" ellipseColor="248"/>
+<agent ID="5"	xPos="906.69"	yPos="349.27"	radiusA="56.02"	radiusB="21.97"	ellipseOrientation="49.50" ellipseColor="156"/>
+<agent ID="7"	xPos="937.65"	yPos="603.01"	radiusA="45.37"	radiusB="22.79"	ellipseOrientation="-46.81" ellipseColor="112"/>
+<agent ID="8"	xPos="741.68"	yPos="406.35"	radiusA="62.01"	radiusB="21.51"	ellipseOrientation="4.61" ellipseColor="180"/>
+<agent ID="9"	xPos="642.13"	yPos="546.07"	radiusA="62.46"	radiusB="21.48"	ellipseOrientation="-1.27" ellipseColor="182"/>
+<agent ID="10"	xPos="519.21"	yPos="712.35"	radiusA="61.31"	radiusB="21.51"	ellipseOrientation="-15.16" ellipseColor="178"/>
+<agent ID="21"	xPos="802.28"	yPos="537.10"	radiusA="53.73"	radiusB="22.13"	ellipseOrientation="-17.17" ellipseColor="146"/>
+<agent ID="22"	xPos="679.22"	yPos="645.99"	radiusA="70.72"	radiusB="20.70"	ellipseOrientation="-6.07" ellipseColor="216"/>
+<agent ID="11"	xPos="1600.00"	yPos="-207.33"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.62"	yPos="195.26"	radiusA="70.43"	radiusB="20.81"	ellipseOrientation="-90.09" ellipseColor="216"/>
+<agent ID="16"	xPos="1574.59"	yPos="443.78"	radiusA="45.04"	radiusB="22.83"	ellipseOrientation="-52.10" ellipseColor="111"/>
+<agent ID="18"	xPos="1545.76"	yPos="3.92"	radiusA="74.74"	radiusB="20.42"	ellipseOrientation="-91.18" ellipseColor="233"/>
+<agent ID="19"	xPos="1648.06"	yPos="131.09"	radiusA="75.20"	radiusB="20.43"	ellipseOrientation="-86.63" ellipseColor="234"/>
+<agent ID="23"	xPos="1542.24"	yPos="362.03"	radiusA="64.65"	radiusB="21.32"	ellipseOrientation="-84.62" ellipseColor="192"/>
+<agent ID="3"	xPos="1375.54"	yPos="423.41"	radiusA="56.31"	radiusB="21.88"	ellipseOrientation="0.09" ellipseColor="157"/>
+<agent ID="6"	xPos="1089.72"	yPos="537.45"	radiusA="69.69"	radiusB="20.78"	ellipseOrientation="-17.06" ellipseColor="212"/>
+<agent ID="2"	xPos="1033.62"	yPos="419.94"	radiusA="69.97"	radiusB="20.75"	ellipseOrientation="1.89" ellipseColor="214"/>
+</frame>
+
+<frame ID="41">
+<agent ID="1"	xPos="909.55"	yPos="570.02"	radiusA="50.45"	radiusB="22.50"	ellipseOrientation="-34.85" ellipseColor="127"/>
+<agent ID="4"	xPos="706.45"	yPos="727.73"	radiusA="78.21"	radiusB="20.14"	ellipseOrientation="-20.20" ellipseColor="247"/>
+<agent ID="5"	xPos="912.91"	yPos="356.22"	radiusA="53.62"	radiusB="22.16"	ellipseOrientation="45.91" ellipseColor="146"/>
+<agent ID="7"	xPos="942.27"	yPos="598.14"	radiusA="46.00"	radiusB="22.74"	ellipseOrientation="-42.46" ellipseColor="115"/>
+<agent ID="8"	xPos="752.50"	yPos="407.23"	radiusA="60.97"	radiusB="21.59"	ellipseOrientation="4.68" ellipseColor="176"/>
+<agent ID="9"	xPos="653.12"	yPos="545.83"	radiusA="61.47"	radiusB="21.56"	ellipseOrientation="-1.20" ellipseColor="178"/>
+<agent ID="10"	xPos="529.71"	yPos="709.53"	radiusA="61.59"	radiusB="21.48"	ellipseOrientation="-14.87" ellipseColor="179"/>
+<agent ID="21"	xPos="810.45"	yPos="534.80"	radiusA="50.76"	radiusB="22.38"	ellipseOrientation="-14.48" ellipseColor="134"/>
+<agent ID="22"	xPos="692.27"	yPos="644.61"	radiusA="70.35"	radiusB="20.73"	ellipseOrientation="-6.02" ellipseColor="214"/>
+<agent ID="11"	xPos="1600.00"	yPos="-222.83"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.60"	yPos="182.10"	radiusA="70.58"	radiusB="20.80"	ellipseOrientation="-90.17" ellipseColor="216"/>
+<agent ID="16"	xPos="1578.53"	yPos="438.32"	radiusA="45.00"	radiusB="22.83"	ellipseOrientation="-56.43" ellipseColor="111"/>
+<agent ID="18"	xPos="1545.47"	yPos="-10.31"	radiusA="74.85"	radiusB="20.41"	ellipseOrientation="-91.15" ellipseColor="234"/>
+<agent ID="19"	xPos="1648.89"	yPos="116.82"	radiusA="75.36"	radiusB="20.42"	ellipseOrientation="-86.71" ellipseColor="235"/>
+<agent ID="23"	xPos="1543.22"	yPos="350.26"	radiusA="65.72"	radiusB="21.23"	ellipseOrientation="-85.77" ellipseColor="196"/>
+<agent ID="3"	xPos="1385.00"	yPos="423.43"	radiusA="55.79"	radiusB="21.92"	ellipseOrientation="0.11" ellipseColor="154"/>
+<agent ID="6"	xPos="1102.39"	yPos="533.65"	radiusA="71.82"	radiusB="20.61"	ellipseOrientation="-16.38" ellipseColor="221"/>
+<agent ID="2"	xPos="1046.82"	yPos="420.10"	radiusA="71.43"	radiusB="20.63"	ellipseOrientation="0.12" ellipseColor="220"/>
+</frame>
+
+<frame ID="42">
+<agent ID="1"	xPos="916.25"	yPos="565.70"	radiusA="49.41"	radiusB="22.58"	ellipseOrientation="-30.80" ellipseColor="123"/>
+<agent ID="4"	xPos="720.41"	yPos="722.74"	radiusA="76.66"	radiusB="20.27"	ellipseOrientation="-19.22" ellipseColor="240"/>
+<agent ID="5"	xPos="919.04"	yPos="362.18"	radiusA="50.82"	radiusB="22.39"	ellipseOrientation="42.90" ellipseColor="135"/>
+<agent ID="7"	xPos="948.36"	yPos="593.58"	radiusA="50.80"	radiusB="22.34"	ellipseOrientation="-32.28" ellipseColor="135"/>
+<agent ID="8"	xPos="763.10"	yPos="408.10"	radiusA="60.08"	radiusB="21.66"	ellipseOrientation="4.62" ellipseColor="173"/>
+<agent ID="9"	xPos="663.84"	yPos="545.62"	radiusA="60.45"	radiusB="21.64"	ellipseOrientation="-1.11" ellipseColor="174"/>
+<agent ID="10"	xPos="540.29"	yPos="706.76"	radiusA="61.85"	radiusB="21.46"	ellipseOrientation="-14.57" ellipseColor="180"/>
+<agent ID="21"	xPos="818.19"	yPos="532.97"	radiusA="49.30"	radiusB="22.50"	ellipseOrientation="-12.20" ellipseColor="128"/>
+<agent ID="22"	xPos="705.20"	yPos="643.25"	radiusA="69.89"	radiusB="20.77"	ellipseOrientation="-5.96" ellipseColor="212"/>
+<agent ID="11"	xPos="1600.00"	yPos="-238.34"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.58"	yPos="168.91"	radiusA="70.71"	radiusB="20.79"	ellipseOrientation="-90.06" ellipseColor="217"/>
+<agent ID="16"	xPos="1582.07"	yPos="432.45"	radiusA="45.98"	radiusB="22.76"	ellipseOrientation="-61.35" ellipseColor="115"/>
+<agent ID="18"	xPos="1545.20"	yPos="-24.60"	radiusA="75.53"	radiusB="20.36"	ellipseOrientation="-90.97" ellipseColor="236"/>
+<agent ID="19"	xPos="1649.70"	yPos="102.52"	radiusA="75.50"	radiusB="20.41"	ellipseOrientation="-86.78" ellipseColor="235"/>
+<agent ID="23"	xPos="1544.02"	yPos="338.24"	radiusA="66.57"	radiusB="21.17"	ellipseOrientation="-86.60" ellipseColor="199"/>
+<agent ID="3"	xPos="1394.40"	yPos="423.45"	radiusA="55.69"	radiusB="21.93"	ellipseOrientation="0.16" ellipseColor="154"/>
+<agent ID="6"	xPos="1115.54"	yPos="529.85"	radiusA="73.48"	radiusB="20.47"	ellipseOrientation="-15.89" ellipseColor="228"/>
+<agent ID="2"	xPos="1060.34"	yPos="420.12"	radiusA="72.56"	radiusB="20.54"	ellipseOrientation="-0.00" ellipseColor="224"/>
+</frame>
+
+<frame ID="43">
+<agent ID="1"	xPos="923.07"	yPos="561.87"	radiusA="48.98"	radiusB="22.61"	ellipseOrientation="-28.51" ellipseColor="121"/>
+<agent ID="4"	xPos="734.10"	yPos="718.03"	radiusA="75.05"	radiusB="20.40"	ellipseOrientation="-18.94" ellipseColor="234"/>
+<agent ID="5"	xPos="924.94"	yPos="367.54"	radiusA="48.92"	radiusB="22.54"	ellipseOrientation="41.83" ellipseColor="127"/>
+<agent ID="7"	xPos="956.03"	yPos="589.40"	radiusA="54.87"	radiusB="22.00"	ellipseOrientation="-25.41" ellipseColor="151"/>
+<agent ID="8"	xPos="773.32"	yPos="408.77"	radiusA="58.02"	radiusB="21.82"	ellipseOrientation="3.04" ellipseColor="164"/>
+<agent ID="9"	xPos="674.34"	yPos="545.42"	radiusA="59.57"	radiusB="21.71"	ellipseOrientation="-1.05" ellipseColor="170"/>
+<agent ID="10"	xPos="550.94"	yPos="704.01"	radiusA="62.10"	radiusB="21.44"	ellipseOrientation="-14.28" ellipseColor="181"/>
+<agent ID="21"	xPos="825.74"	yPos="531.47"	radiusA="48.50"	radiusB="22.57"	ellipseOrientation="-10.23" ellipseColor="124"/>
+<agent ID="22"	xPos="718.03"	yPos="641.91"	radiusA="69.49"	radiusB="20.80"	ellipseOrientation="-5.99" ellipseColor="211"/>
+<agent ID="11"	xPos="1600.00"	yPos="-253.85"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.56"	yPos="155.70"	radiusA="70.82"	radiusB="20.78"	ellipseOrientation="-90.12" ellipseColor="217"/>
+<agent ID="16"	xPos="1585.25"	yPos="425.99"	radiusA="47.71"	radiusB="22.62"	ellipseOrientation="-66.09" ellipseColor="122"/>
+<agent ID="18"	xPos="1544.99"	yPos="-39.14"	radiusA="76.49"	radiusB="20.28"	ellipseOrientation="-90.72" ellipseColor="240"/>
+<agent ID="19"	xPos="1650.50"	yPos="88.18"	radiusA="75.63"	radiusB="20.40"	ellipseOrientation="-86.85" ellipseColor="236"/>
+<agent ID="23"	xPos="1544.67"	yPos="326.02"	radiusA="67.25"	radiusB="21.11"	ellipseOrientation="-87.22" ellipseColor="202"/>
+<agent ID="3"	xPos="1403.80"	yPos="423.46"	radiusA="55.79"	radiusB="21.92"	ellipseOrientation="0.18" ellipseColor="154"/>
+<agent ID="6"	xPos="1129.07"	yPos="526.04"	radiusA="74.78"	radiusB="20.36"	ellipseOrientation="-15.52" ellipseColor="233"/>
+<agent ID="2"	xPos="1074.11"	yPos="420.13"	radiusA="73.35"	radiusB="20.48"	ellipseOrientation="0.03" ellipseColor="228"/>
+</frame>
+
+<frame ID="44">
+<agent ID="1"	xPos="929.82"	yPos="558.22"	radiusA="48.23"	radiusB="22.67"	ellipseOrientation="-28.54" ellipseColor="118"/>
+<agent ID="4"	xPos="746.99"	yPos="713.47"	radiusA="70.54"	radiusB="20.76"	ellipseOrientation="-20.10" ellipseColor="215"/>
+<agent ID="5"	xPos="930.56"	yPos="372.47"	radiusA="46.34"	radiusB="22.75"	ellipseOrientation="39.94" ellipseColor="116"/>
+<agent ID="7"	xPos="964.95"	yPos="585.72"	radiusA="58.14"	radiusB="21.73"	ellipseOrientation="-19.62" ellipseColor="165"/>
+<agent ID="8"	xPos="783.12"	yPos="409.20"	radiusA="56.52"	radiusB="21.94"	ellipseOrientation="2.10" ellipseColor="158"/>
+<agent ID="9"	xPos="684.62"	yPos="545.23"	radiusA="58.77"	radiusB="21.77"	ellipseOrientation="-1.07" ellipseColor="167"/>
+<agent ID="10"	xPos="561.68"	yPos="701.31"	radiusA="62.40"	radiusB="21.42"	ellipseOrientation="-13.98" ellipseColor="182"/>
+<agent ID="21"	xPos="833.13"	yPos="530.24"	radiusA="47.68"	radiusB="22.63"	ellipseOrientation="-8.86" ellipseColor="121"/>
+<agent ID="22"	xPos="730.47"	yPos="640.66"	radiusA="66.83"	radiusB="21.02"	ellipseOrientation="-5.59" ellipseColor="200"/>
+<agent ID="11"	xPos="1600.00"	yPos="-269.35"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.55"	yPos="142.45"	radiusA="70.91"	radiusB="20.77"	ellipseOrientation="-90.01" ellipseColor="217"/>
+<agent ID="16"	xPos="1588.10"	yPos="418.84"	radiusA="49.86"	radiusB="22.45"	ellipseOrientation="-70.12" ellipseColor="131"/>
+<agent ID="18"	xPos="1544.83"	yPos="-53.90"	radiusA="77.25"	radiusB="20.22"	ellipseOrientation="-90.54" ellipseColor="244"/>
+<agent ID="19"	xPos="1651.28"	yPos="73.81"	radiusA="75.72"	radiusB="20.39"	ellipseOrientation="-86.90" ellipseColor="236"/>
+<agent ID="23"	xPos="1545.22"	yPos="313.65"	radiusA="67.80"	radiusB="21.07"	ellipseOrientation="-87.67" ellipseColor="205"/>
+<agent ID="3"	xPos="1413.22"	yPos="423.48"	radiusA="55.83"	radiusB="21.92"	ellipseOrientation="0.07" ellipseColor="155"/>
+<agent ID="6"	xPos="1142.91"	yPos="522.24"	radiusA="75.78"	radiusB="20.28"	ellipseOrientation="-15.24" ellipseColor="238"/>
+<agent ID="2"	xPos="1088.03"	yPos="420.15"	radiusA="73.85"	radiusB="20.44"	ellipseOrientation="0.02" ellipseColor="230"/>
+</frame>
+
+<frame ID="45">
+<agent ID="1"	xPos="936.37"	yPos="554.60"	radiusA="47.62"	radiusB="22.72"	ellipseOrientation="-29.29" ellipseColor="116"/>
+<agent ID="4"	xPos="758.84"	yPos="709.01"	radiusA="67.17"	radiusB="21.03"	ellipseOrientation="-21.07" ellipseColor="201"/>
+<agent ID="5"	xPos="935.75"	yPos="376.74"	radiusA="43.22"	radiusB="23.01"	ellipseOrientation="39.60" ellipseColor="104"/>
+<agent ID="7"	xPos="974.88"	yPos="582.65"	radiusA="60.89"	radiusB="21.50"	ellipseOrientation="-14.94" ellipseColor="176"/>
+<agent ID="8"	xPos="792.58"	yPos="409.50"	radiusA="55.16"	radiusB="22.04"	ellipseOrientation="1.52" ellipseColor="152"/>
+<agent ID="9"	xPos="694.70"	yPos="545.04"	radiusA="57.95"	radiusB="21.84"	ellipseOrientation="-1.17" ellipseColor="164"/>
+<agent ID="10"	xPos="572.50"	yPos="698.65"	radiusA="62.72"	radiusB="21.39"	ellipseOrientation="-13.68" ellipseColor="183"/>
+<agent ID="21"	xPos="840.32"	yPos="529.17"	radiusA="46.66"	radiusB="22.72"	ellipseOrientation="-8.13" ellipseColor="117"/>
+<agent ID="22"	xPos="742.33"	yPos="639.48"	radiusA="64.30"	radiusB="21.23"	ellipseOrientation="-5.90" ellipseColor="190"/>
+<agent ID="11"	xPos="1600.00"	yPos="-284.86"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.53"	yPos="129.19"	radiusA="71.02"	radiusB="20.76"	ellipseOrientation="-90.04" ellipseColor="218"/>
+<agent ID="16"	xPos="1590.68"	yPos="411.01"	radiusA="52.09"	radiusB="22.28"	ellipseOrientation="-73.28" ellipseColor="140"/>
+<agent ID="18"	xPos="1544.70"	yPos="-68.82"	radiusA="77.84"	radiusB="20.17"	ellipseOrientation="-90.40" ellipseColor="246"/>
+<agent ID="19"	xPos="1652.05"	yPos="59.83"	radiusA="71.87"	radiusB="20.69"	ellipseOrientation="-86.76" ellipseColor="220"/>
+<agent ID="23"	xPos="1545.69"	yPos="301.14"	radiusA="68.24"	radiusB="21.03"	ellipseOrientation="-88.01" ellipseColor="206"/>
+<agent ID="3"	xPos="1422.63"	yPos="423.50"	radiusA="55.70"	radiusB="21.93"	ellipseOrientation="0.15" ellipseColor="154"/>
+<agent ID="6"	xPos="1156.97"	yPos="518.44"	radiusA="76.57"	radiusB="20.21"	ellipseOrientation="-15.03" ellipseColor="241"/>
+<agent ID="2"	xPos="1102.05"	yPos="420.16"	radiusA="74.09"	radiusB="20.42"	ellipseOrientation="0.08" ellipseColor="231"/>
+</frame>
+
+<frame ID="46">
+<agent ID="1"	xPos="942.76"	yPos="550.95"	radiusA="47.06"	radiusB="22.76"	ellipseOrientation="-30.16" ellipseColor="114"/>
+<agent ID="4"	xPos="769.97"	yPos="704.64"	radiusA="64.81"	radiusB="21.23"	ellipseOrientation="-21.78" ellipseColor="192"/>
+<agent ID="5"	xPos="940.32"	yPos="380.59"	radiusA="40.64"	radiusB="23.22"	ellipseOrientation="40.79" ellipseColor="93"/>
+<agent ID="7"	xPos="985.63"	yPos="580.19"	radiusA="63.15"	radiusB="21.32"	ellipseOrientation="-10.90" ellipseColor="185"/>
+<agent ID="8"	xPos="801.69"	yPos="409.71"	radiusA="53.72"	radiusB="22.15"	ellipseOrientation="1.23" ellipseColor="146"/>
+<agent ID="9"	xPos="704.57"	yPos="544.82"	radiusA="57.07"	radiusB="21.91"	ellipseOrientation="-1.39" ellipseColor="160"/>
+<agent ID="10"	xPos="583.40"	yPos="696.03"	radiusA="62.77"	radiusB="21.39"	ellipseOrientation="-13.39" ellipseColor="184"/>
+<agent ID="21"	xPos="847.26"	yPos="528.22"	radiusA="45.63"	radiusB="22.80"	ellipseOrientation="-7.44" ellipseColor="113"/>
+<agent ID="22"	xPos="753.30"	yPos="638.25"	radiusA="60.40"	radiusB="21.55"	ellipseOrientation="-7.05" ellipseColor="174"/>
+<agent ID="11"	xPos="1600.00"	yPos="-300.36"	radiusA="80.07"	radiusB="20.01"	ellipseOrientation="-90.00" ellipseColor="254"/>
+<agent ID="14"	xPos="1531.51"	yPos="115.89"	radiusA="71.15"	radiusB="20.75"	ellipseOrientation="-90.18" ellipseColor="218"/>
+<agent ID="16"	xPos="1593.02"	yPos="402.53"	radiusA="54.24"	radiusB="22.11"	ellipseOrientation="-75.69" ellipseColor="149"/>
+<agent ID="18"	xPos="1544.61"	yPos="-83.87"	radiusA="78.30"	radiusB="20.14"	ellipseOrientation="-90.30" ellipseColor="248"/>
+<agent ID="19"	xPos="1652.80"	yPos="46.93"	radiusA="67.99"	radiusB="21.00"	ellipseOrientation="-86.65" ellipseColor="205"/>
+<agent ID="23"	xPos="1546.10"	yPos="288.53"	radiusA="68.61"	radiusB="21.00"	ellipseOrientation="-88.26" ellipseColor="208"/>
+<agent ID="3"	xPos="1432.01"	yPos="423.52"	radiusA="55.61"	radiusB="21.93"	ellipseOrientation="0.18" ellipseColor="154"/>
+<agent ID="6"	xPos="1171.22"	yPos="514.64"	radiusA="77.17"	radiusB="20.16"	ellipseOrientation="-14.87" ellipseColor="243"/>
+<agent ID="2"	xPos="1116.09"	yPos="420.18"	radiusA="74.10"	radiusB="20.42"	ellipseOrientation="0.02" ellipseColor="231"/>
+</frame>
+
