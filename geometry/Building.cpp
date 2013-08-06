@@ -373,7 +373,13 @@ void Building::Update() {
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
 	{
-		const int threadID = omp_get_thread_num();
+#ifdef _OPENMP
+        const int threadID = omp_get_thread_num();
+#else
+        const int threadID = 0;
+
+#endif
+        
 		int start = threadID * partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1))

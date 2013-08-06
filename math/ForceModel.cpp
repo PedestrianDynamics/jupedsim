@@ -479,7 +479,11 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 		vector< Point > result_acc = vector<Point > ();
 		result_acc.reserve(2200);
 
-		int threadID = omp_get_thread_num();
+#ifdef _OPENMP
+        const int threadID = omp_get_thread_num();
+#else
+        const int threadID = 0;
+#endif
 		int start = threadID*partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1)) end = nSize - 1;
