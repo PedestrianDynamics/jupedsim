@@ -16,8 +16,8 @@
 		<file location="outputfiles/trajectories.xml"/>
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
-	<!-- where to store the logs  -->
-	<logfile>outputfiles/log.txt</logfile>
+	<!-- where to store the logs 
+	<logfile>outputfiles/log.txt</logfile>  -->
  	
 
 	<!-- These parameters may be overwritten -->

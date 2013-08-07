@@ -458,16 +458,17 @@ void GlobalRouter::Init(Building* building) {
 	//LoadNavigationGraph("./Inputfiles/120531_navigation_graph_arena.xml");
 
 	//dumping the complete system
-	//DumpAccessPoints(17);
+	//DumpAccessPoints(-1);
 	//DumpAccessPoints(18);
 	//DumpAccessPoints(19);
 	//exit(0);
 	//DumpAccessPoints(826);
-
+	//cout<<building->GetRoom(0)->GetCaption()<<endl;
 	//vector<string> rooms;
+	//rooms.push_back("hall");
 	//rooms.push_back("050");
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
-	//WriteGraphGV("routing_graph.gv",4,rooms);
+	//WriteGraphGV("routing_graph.gv",1,rooms);
 	//exit(0);
 	Log->Write("INFO:\tDone with the Global Router Engine!");
 }
@@ -539,11 +540,11 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 
 			if (distToExit > J_EPS_DIST)
 				continue;
-			if(ped->GetID()==7) exit(0);
 
 			//one AP is near actualize destination:
 			nextDestination = ap->GetNearestTransitAPTO(
 					ped->GetFinalDestination());
+
 
 			if (nextDestination == -1) { // we are almost at the exit
 				return ped->GetNextDestination();
@@ -575,9 +576,9 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 			}
 		}
 
-		return GetBestDefaultRandomExit(ped);
+		// still have a valid destination, so return it
+		return nextDestination;
 	}
-
 }
 
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
@@ -608,14 +609,14 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		const Point& posA = ped->GetPos();
 		const Point& posB = ap->GetNavLine()->GetCentre();
 		const Point& posC = (posB - posA).Normalized()
-				* ((posA - posB).Norm() - J_EPS) + posA;
+						* ((posA - posB).Norm() - J_EPS) + posA;
 
 		//check if visible
 		if (sub->IsVisible(posA, posC, true) == false)
 			continue;
 
 		double dist = ap->GetDistanceTo(ped->GetFinalDestination())
-				+ ap->distanceTo(posA.GetX(), posA.GetY());
+						+ ap->distanceTo(posA.GetX(), posA.GetY());
 
 		if (dist < minDist) {
 			bestAPsID = ap->GetID();

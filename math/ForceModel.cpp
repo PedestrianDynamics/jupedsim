@@ -30,6 +30,14 @@
 #include "../mpi/LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
 
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
+#endif
+
 using namespace std;
 
 ForceModel::ForceModel() {
@@ -464,11 +472,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 	unsigned int nSize = allPeds.size();
 
-	int nThreads = 1;
-
-#ifdef _OPENMP
-	 nThreads = omp_get_max_threads();
-#endif
+	int nThreads = omp_get_max_threads();
 
 	// check if worth sharing the work
 	if (nSize < 20) nThreads = 1;
@@ -479,11 +483,8 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 		vector< Point > result_acc = vector<Point > ();
 		result_acc.reserve(2200);
 
-#ifdef _OPENMP
         const int threadID = omp_get_thread_num();
-#else
-        const int threadID = 0;
-#endif
+
 		int start = threadID*partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1)) end = nSize - 1;

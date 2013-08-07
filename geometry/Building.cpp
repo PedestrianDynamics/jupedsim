@@ -31,9 +31,13 @@
 #include "../mpi/LCGrid.h"
 #include "../routing/RoutingEngine.h"
 
+//#undef _OPENMP
 
 #ifdef _OPENMP
 #include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
 #endif
 
 
@@ -360,26 +364,17 @@ void Building::Update() {
 	// find the new goals, the parallel way
 
 	unsigned int nSize = _allPedestians.size();
-	int nThreads = 1;
-
-#ifdef _OPENMP
-	nThreads = omp_get_max_threads();
-#endif
+	int nThreads = omp_get_max_threads();
 
 	// check if worth sharing the work
-	if (nSize < 12)
-		nThreads = 1;
+	//if (nSize < 12)
+	//	nThreads = 1;
+
 	int partSize = nSize / nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
 	{
-#ifdef _OPENMP
         const int threadID = omp_get_thread_num();
-#else
-        const int threadID = 0;
-
-#endif
-        
 		int start = threadID * partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1))

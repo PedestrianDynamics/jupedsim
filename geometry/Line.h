@@ -71,7 +71,6 @@ public:
 	 */
 	void SetPoint2(const Point& p);
 
-
 	/**
 	 * Set/Get the first end point of the line
 	 */
@@ -86,7 +85,6 @@ public:
 	 * Return the center of the line
 	 */
 	const Point& GetCentre(void) const;
-
 
     /**
      * @return a normal vector to this line
@@ -130,7 +128,6 @@ public:
      */
     double DistToSquare(const Point& p) const;
 
-
     /**
      * @return the length (Norm) of the line
      */
@@ -165,6 +162,27 @@ public:
 	 */
 	bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
 
+	/**
+	 * return the same value if the checked points are all situated on the same side.
+	 * @return 0 or 1 depending on which side of the line the point is located.
+	 */
+	int WichSide (const Point& pt);
+
+	/**
+	 * @return true if the point is located in the left hand side of the line.
+	 * For horizontal lines return true if the point is above the line.
+	 */
+	bool IsLeft (const Point& pt);
+
+	/**
+	 * @return true for horizontal lines
+	 */
+	bool IsHorizontal();
+
+	/**
+	 * @return true for vertical lines
+	 */
+	bool IsVertical();
 
 	/**
 	 * @return a nice formated string describing the line
