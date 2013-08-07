@@ -320,13 +320,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	/////////
 
-	//Sean
-	//NavMesh* nv= new NavMesh(_building);
-	//nv->BuildNavMesh();
+	//Navigation mesh implementation
+	NavMesh* nv= new NavMesh(_building);
+	nv->BuildNavMesh();
 	//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
-	//nv->WriteToFileTraVisTo("promenade.nav.xml");
+	nv->WriteToFileTraVisTo("promenade.nav.xml");
 	//nv->WriteScenario();
-	//exit(EXIT_FAILURE);
+	exit(EXIT_FAILURE);
 
 	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
 	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);

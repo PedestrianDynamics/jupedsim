@@ -8,7 +8,11 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
 #endif
+
 
 #include "../general/xmlParser.h"
 #include "../IO/OutputHandler.h"
@@ -21,6 +25,7 @@ void ArgumentParser::Usage() {
 	fprintf(stderr,
 			"Usage: program options\n\n"
 			"with the following options (default values in parenthesis):\n\n"
+			"  [-q/--inifile <filepath>]        initialisation file( ini.xml found in the actual directory)\n"
 			"  [-n/--number <filepath>]         file with the pedestrian distribution in room(./Inputfiles/persons.xml)\n"
 			"  [-t/--tmax <double>]             maximal simulation time (500)\n"
 			"  [-d/--dt <double>]               time step (0.001)\n"
@@ -112,12 +117,8 @@ ArgumentParser::ArgumentParser() {
 	pFormat=FORMAT_XML_PLAIN;
 	pPort=-1;
 	pHostname="localhost";
-
-#ifdef _OPENMP
 	pMaxOpenMPThreads = omp_get_thread_num();
-#else
-	pMaxOpenMPThreads = 1;
-#endif
+
 }
 
 
@@ -125,6 +126,13 @@ ArgumentParser::ArgumentParser() {
 void ArgumentParser::ParseArgs(int argc, char **argv) {
 	int c;
 	int option_index = 0;
+
+	//special case of the default configuration
+	if(argc==1){
+		Log->Write("INFO: \tTrying to load the default configuration from the file <ini.xml>");
+		ParseIniFile("ini.xml");
+		return;
+	}
 
 	static struct option long_options[] = {
 			{"number", 1, 0, 'n'},
@@ -423,7 +431,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
 						"wrong program options!!!\n");
 				Usage();
-				exit(0);
+				exit(EXIT_FAILURE);
 			}
 		}
 	}

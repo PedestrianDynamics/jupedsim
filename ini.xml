@@ -22,7 +22,7 @@
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
-		<tmax unit="sec">900</tmax>
+		<tmax unit="sec">1</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<exitCrossingStrategy>3</exitCrossingStrategy>
