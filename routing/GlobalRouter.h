@@ -152,9 +152,6 @@ protected:
 	std::map <int, AccessPoint*> _accessPoints;
 	Building *_building;
 
-
-
-
 };
 
 #endif /* GLOBALROUTER_H_ */

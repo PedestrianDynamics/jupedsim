@@ -12,7 +12,7 @@
 	<!-- traffic information: e.g closed doors -->
 	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml" fps="8"> 
+	<trajectories format="xml-plain" fps="8"> 
 		<file location="outputfiles/trajectories.xml"/>
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
@@ -22,7 +22,7 @@
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
-		<tmax unit="sec">1</tmax>
+		<tmax unit="sec">900</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<exitCrossingStrategy>3</exitCrossingStrategy>

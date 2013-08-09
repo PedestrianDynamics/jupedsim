@@ -302,7 +302,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	}
 	s.append("\n");
 
-
 	// IMPORTANT: do not change the order in the following..
 	_building = new Building();
 	_building->SetRoutingEngine(routingEngine);
@@ -318,21 +317,20 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	_building->LoadRoutingInfo(args->GetRoutingFile());
 
-	/////////
-
-	//Navigation mesh implementation
-	NavMesh* nv= new NavMesh(_building);
-	nv->BuildNavMesh();
-	//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
-	nv->WriteToFileTraVisTo("promenade.nav.xml");
-	//nv->WriteScenario();
-	exit(EXIT_FAILURE);
-
-	//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
-	//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
-
-
-	////////
+	// in the case the navigation mesh should be written to a file
+	if(args->GetNavigationMesh()!=""){
+		Log->Write("INFO: \tWriting the navigation mesh to: " + args->GetNavigationMesh());
+		//Navigation mesh implementation
+		NavMesh* nv= new NavMesh(_building);
+		nv->BuildNavMesh();
+		//nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
+		nv->WriteToFile(args->GetNavigationMesh()+".nav");
+		nv->WriteToFileTraVisTo(args->GetNavigationMesh());
+		//nv->WriteScenario();
+		exit(EXIT_FAILURE);
+		//iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
+		//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
+	}
 
 
 	_nPeds=_distribution->Distribute(_building);

@@ -14,7 +14,7 @@
 #endif
 
 
-#include "../general/xmlParser.h"
+#include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 
@@ -72,6 +72,7 @@ void ArgumentParser::Usage() {
 			"  [-T/--output-file <string>]      file to write the trajectories ( no trajectories are written if omited0):\n"
 			"  [-P/--streaming-port <int>]      stream the ouput to the specified address/port\n"
 			"  [-O/--streaming-ip <string>]     stream the ouput to the specified address/port\n"
+			"  [-N/--generate-mesh <string>]    write the navigation mesh to the given file\n"
 			"  [-h/--help]                      this manual output\n"
 			"\n");
 	exit(EXIT_SUCCESS);
@@ -110,15 +111,15 @@ ArgumentParser::ArgumentParser() {
 	pTauSigma = 0.001;
 	pLog = 0;
 	pErrorLogFile="./Logfile.dat";
-	pPathwayfile="";
+	pPathwayFilename="";
 	pRoutingFilename="";
 	pTrafficFilename="";
+	pNavMeshFilename="";
 	pSeed=0;
 	pFormat=FORMAT_XML_PLAIN;
 	pPort=-1;
 	pHostname="localhost";
 	pMaxOpenMPThreads = omp_get_thread_num();
-
 }
 
 
@@ -173,11 +174,12 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			{"streaming-ip", 1, 0, 'O'},
 			{"help", 0, 0, 'h'},
 			{"inifile", optional_argument, 0, 'q'},
+			{"generate-mesh", required_argument, 0, 'N'},
 			{0, 0, 0, 0}
 	};
 
 	while ((c = getopt_long_only(argc, argv,
-			"n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q",
+			"n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:",
 			long_options, &option_index)) != -1) {
 
 		switch (c) {
@@ -316,7 +318,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			}
 			case 'Q':
 			{
-				pPathwayfile = optarg;
+				pPathwayFilename = optarg;
 				break;
 			}
 			case 't':
@@ -426,6 +428,11 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			case 'h':
 				Usage();
 				break;
+
+			case 'N':
+				pNavMeshFilename=optarg;
+				break;
+
 			default:
 			{
 				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
@@ -440,206 +447,212 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 
 void ArgumentParser::ParseIniFile(string inifile){
 
-	XMLNode xMainNode=XMLNode::openFileHelper(inifile.c_str(),"JPSgcfm");
-
 	Log->Write("INFO: \tParsing the ini file");
-	//I just assume all parameters are present
+
+	TiXmlDocument doc(inifile);
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the ini file");
+		exit(EXIT_FAILURE);
+	}
+
+	// everything is fine. proceed with parsing
+
+	TiXmlElement* xMainNode = doc.RootElement();
+	if( ! xMainNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xMainNode->ValueStr () != "JPSgcfm" ) {
+		Log->Write("ERROR:\tRoot element value is not 'JPSgcfm'.");
+		exit(EXIT_FAILURE);
+	}
 
 	//seed
-	if(!xMainNode.getChildNode("seed").isEmpty()){
-		const char* seed=xMainNode.getChildNode("seed").getText();
-		pSeed=atoi(seed);
+	if(xMainNode->FirstChild("seed")){
+		pSeed=atoi(xMainNode->FirstChild("seed")->FirstChild()->Value());
 		srand(pSeed);
-		Log->Write("INFO: \tseed <"+string(seed)+">");
+		Log->Write("INFO: \tseed < %d >",pSeed);
 	}
 
 	//geometry
-	if(!xMainNode.getChildNode("geometry").isEmpty()){
-		pGeometryFilename=xMainNode.getChildNode("geometry").getText();
-		Log->Write("INFO: \tgeometry <"+string(pGeometryFilename)+">");
+	if(xMainNode->FirstChild("geometry")){
+		pGeometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+		Log->Write("INFO: \tgeometry <"+pGeometryFilename+">");
 	}
 
 	//persons and distributions
-	if(!xMainNode.getChildNode("person").isEmpty()){
-		pNumberFilename=xMainNode.getChildNode("person").getText();
-		Log->Write("INFO: \tperson <"+string(pNumberFilename)+">");
+	if(xMainNode->FirstChild("person")){
+		pNumberFilename=xMainNode->FirstChild("person")->FirstChild()->Value();
+		Log->Write("INFO: \tperson <"+(pNumberFilename)+">");
 	}
 
 	//routing
-	if(!xMainNode.getChildNode("routing").isEmpty()){
-		pRoutingFilename=xMainNode.getChildNode("routing").getText();
-		Log->Write("INFO: \trouting <"+string(pRoutingFilename)+">");
+	if(xMainNode->FirstChild("routing")){
+		pRoutingFilename=xMainNode->FirstChild("routing")->FirstChild()->Value();
+		Log->Write("INFO: \trouting <"+(pRoutingFilename)+">");
 	}
 
 	//traffic
-	if(!xMainNode.getChildNode("traffic").isEmpty()){
-		pTrafficFilename=xMainNode.getChildNode("traffic").getText();
-		Log->Write("INFO: \ttraffic <"+string(pTrafficFilename)+">");
+	if(xMainNode->FirstChild("traffic")){
+		pTrafficFilename=xMainNode->FirstChild("traffic")->FirstChild()->Value();
+		Log->Write("INFO: \ttraffic <"+ (pTrafficFilename)+">");
 	}
 
 	//logfile
-	if(!xMainNode.getChildNode("logfile").isEmpty()){
-		pErrorLogFile=xMainNode.getChildNode("logfile").getText();
+	if(xMainNode->FirstChild("logfile")){
+		pErrorLogFile=xMainNode->FirstChild("logfile")->FirstChild()->Value();
 		pLog=2;
-		Log->Write("INFO: \tlogfile <"+string(pErrorLogFile)+">");
+		Log->Write("INFO: \tlogfile <"+(pErrorLogFile)+">");
 	}
 
 	//trajectories
-	XMLNode xTrajectories=xMainNode.getChildNode("trajectories");
-	if(!xTrajectories.isEmpty()){
+	TiXmlNode* xTrajectories=xMainNode->FirstChild("trajectories");
+	if(xTrajectories){
 
-		pfps = xmltof(xTrajectories.getAttribute("fps"),pfps);
-		string format=xmltoa(xTrajectories.getAttribute("format"),"xml-plain");
+		xMainNode->FirstChildElement("trajectories")->Attribute("fps",&pfps);
+
+		string format= xMainNode->FirstChildElement("trajectories")->Attribute("format")?
+				xMainNode->FirstChildElement("trajectories")->Attribute("format"):"xml-plain";
+
 		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
 		if(format=="xml-bin") pFormat=FORMAT_XML_BIN;
 		if(format=="plain") pFormat=FORMAT_PLAIN;
 		if(format=="vtk") pFormat=FORMAT_VTK;
 
 		//a file descriptor was given
-		if(!xTrajectories.getChildNode("file").isEmpty()){
-			pTrajectoriesFile =
-					xmltoa(
-							xTrajectories.getChildNode(
-									"file").getAttribute("location"),
-									pTrajectoriesFile.c_str());
-
-		Log->Write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
+		if(xTrajectories->FirstChild("file")){
+			const char* tmp = xTrajectories->FirstChildElement("file")->Attribute("location");
+			if(tmp) pTrajectoriesFile = tmp;
+			Log->Write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
+			Log->Write("INFO: \tin format <%s> at <%f> frames per seconds",format.c_str(),pfps);
 		}
 
-		if(!xTrajectories.getChildNode("socket").isEmpty()){
-			pHostname=xmltoa(xTrajectories.getChildNode("socket").getAttribute("hostname"),pHostname.c_str());
-			pPort=xmltoi(xTrajectories.getChildNode("socket").getAttribute("port"),pPort);
+		if(xTrajectories->FirstChild("socket")){
+			const char* tmp = xTrajectories->FirstChildElement("socket")->Attribute("hostname");
+			if(tmp) pHostname = tmp;
+			xTrajectories->FirstChildElement("socket")->Attribute("port",&pPort);
+			Log->Write("INFO: \tStreaming results to output [%s:%d] ",pHostname.c_str(),pPort);
 		}
-		Log->Write("INFO: \toutput socket  <"+string(pHostname)+">");
-
 	}
+
 	//model parameters, only one node
-	XMLNode xPara=xMainNode.getChildNode("parameters");
-	if(xPara.isEmpty()){
+	TiXmlNode* xPara=xMainNode->FirstChild("parameters");
+	if(!xPara){
 		Log->Write("INFO: \tno gcfm parameter values found");
 		return;
 	}
 
 	//tmax
-	if(!xPara.getChildNode("tmax").isEmpty()){
-		const char* tmax=xPara.getChildNode("tmax").getText();
-		const char* unit=xPara.getChildNode("tmax").getAttribute("unit");
+	if(xPara->FirstChild("tmax")){
+		const char* tmax=xPara->FirstChildElement("tmax")->FirstChild()->Value();
+		const char* unit=xPara->FirstChildElement("tmax")->Attribute("unit");
 		pTmax=atof(tmax);
 		Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
 	}
 
 	//solver
-	if(!xPara.getChildNode("solver").isEmpty()){
-		string solver=string(xPara.getChildNode("solver").getText());
+	if(xPara->FirstChild("solver")){
+		string solver=xPara->FirstChild("solver")->FirstChild()->Value();
 		if(solver=="euler") pSolver=1;
 		else if(solver=="verlet") pSolver=2;
 		else if(solver=="leapfrog") pSolver=3;
 		else {
 			Log->Write("ERROR: \twrong value for solver type!!!\n");
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 		Log->Write("INFO: \tpSolver <"+string(solver)+">");
 	}
 
 	//stepsize
-	if(!xPara.getChildNode("stepsize").isEmpty()){
-		const char* stepsize=xPara.getChildNode("stepsize").getText();
-		pdt=atof(stepsize);
-		Log->Write("INFO: \tstepsize <"+string(stepsize)+">");
+	if(xPara->FirstChild("stepsize")){
+		const char* stepsize=xPara->FirstChild("stepsize")->FirstChild()->Value();
+		if(stepsize)
+			pdt=atof(stepsize);
+		Log->Write("INFO: \tstepsize <%f>",pdt);
 	}
 
 	//exit crossing strategy
-	if(!xPara.getChildNode("exitCrossingStrategy").isEmpty()){
-		string exitStrategy=xPara.getChildNode("exitCrossingStrategy").getText();
-		pExitStrategy=xmltof(exitStrategy.c_str(),pExitStrategy);
-		Log->Write("INFO: \texitCrossingStrategy <"+string(exitStrategy)+">");
+	if(xPara->FirstChild("exitCrossingStrategy")){
+		const char* tmp=xPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+		if(tmp) 	pExitStrategy= atoi(tmp);
+		Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
 	}
 
 	//linked-cells
-	if(!xPara.getChildNode("linkedcells").isEmpty()){
-		string linkedcells=string(xPara.getChildNode("linkedcells").getAttribute("enabled"));
-		string cell_size=string(xPara.getChildNode("linkedcells").getAttribute("cell_size"));
+	if(xPara->FirstChild("linkedcells")){
+		string linkedcells=xPara->FirstChildElement("linkedcells")->Attribute("enabled");
+		string cell_size=xPara->FirstChildElement("linkedcells")->Attribute("cell_size");
+
 		if(linkedcells=="true"){
 			pLinkedCells=true;
-			pLinkedCellSize=xmltof(cell_size.c_str(),pLinkedCellSize);
-			Log->Write("INFO: \tlinked cells enable with size  <"+cell_size+">");
+			pLinkedCellSize=atof(cell_size.c_str());
+			Log->Write("INFO: \tlinked cells enabled with size  <"+cell_size+">");
 		}else{
 			Log->Write("WARNING: \tinvalid parameters for linkedcells");
 		}
 	}
 
 	//desired speed
-	if(!xPara.getChildNode("v0").isEmpty()){
-		string mu=string(xPara.getChildNode("v0").getAttribute("mu"));
-		string sigma=string(xPara.getChildNode("v0").getAttribute("sigma"));
+	if(xPara->FirstChild("v0")){
+		string mu=xPara->FirstChildElement("v0")->Attribute("mu");
+		string sigma=xPara->FirstChildElement("v0")->Attribute("sigma");
 		pV0Mu=atof(mu.c_str());
 		pV0Sigma=atof(sigma.c_str());
 		Log->Write("INFO: \tdesired velocity mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 
 	//bmax
-	if(!xPara.getChildNode("bmax").isEmpty()){
-		string mu=string(xPara.getChildNode("bmax").getAttribute("mu"));
-		string sigma=string(xPara.getChildNode("bmax").getAttribute("sigma"));
+	if(xPara->FirstChild("bmax")){
+		string mu=xPara->FirstChildElement("bmax")->Attribute("mu");
+		string sigma=xPara->FirstChildElement("bmax")->Attribute("sigma");
 		pBmaxMu=atof(mu.c_str());
 		pBmaxSigma=atof(sigma.c_str());
 		Log->Write("INFO: \tBmax mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
+
 	//bmin
-	if(!xPara.getChildNode("bmin").isEmpty()){
-		string mu=string(xPara.getChildNode("bmin").getAttribute("mu"));
-		string sigma=string(xPara.getChildNode("bmin").getAttribute("sigma"));
+	if(xPara->FirstChild("bmin")){
+		string mu=xPara->FirstChildElement("bmin")->Attribute("mu");
+		string sigma=xPara->FirstChildElement("bmin")->Attribute("sigma");
 		pBminMu=atof(mu.c_str());
 		pBminSigma=atof(sigma.c_str());
 		Log->Write("INFO: \tBmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
+
 	//amin
-	if(!xPara.getChildNode("amin").isEmpty()){
-		string mu=string(xPara.getChildNode("amin").getAttribute("mu"));
-		string sigma=string(xPara.getChildNode("amin").getAttribute("sigma"));
+	if(xPara->FirstChild("amin")){
+		string mu=xPara->FirstChildElement("amin")->Attribute("mu");
+		string sigma=xPara->FirstChildElement("amin")->Attribute("sigma");
 		pAminMu=atof(mu.c_str());
 		pAminSigma=atof(sigma.c_str());
 		Log->Write("INFO: \tAmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 	//tau
-	if(!xPara.getChildNode("tau").isEmpty()){
-		string mu=string(xPara.getChildNode("tau").getAttribute("mu"));
-		string sigma=string(xPara.getChildNode("tau").getAttribute("sigma"));
+	if(xPara->FirstChild("tau")){
+		string mu=xPara->FirstChildElement("tau")->Attribute("mu");
+		string sigma=xPara->FirstChildElement("tau")->Attribute("sigma");
 		pTauMu=atof(mu.c_str());
 		pTauSigma=atof(sigma.c_str());
 		Log->Write("INFO: \tTau mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 	//atau
-	if(!xPara.getChildNode("atau").isEmpty()){
-		string mu=string(xPara.getChildNode("atau").getAttribute("mu"));
-		string sigma=string(xPara.getChildNode("atau").getAttribute("sigma"));
+	if(xPara->FirstChild("atau")){
+		string mu=xPara->FirstChildElement("atau")->Attribute("mu");
+		string sigma=xPara->FirstChildElement("atau")->Attribute("sigma");
 		pAtauMu=atof(mu.c_str());
 		pAtauSigma=atof(sigma.c_str());
 		Log->Write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
 	}
 
-	//pExitStrategy
-	if(!xPara.getChildNode("exitStrategy").isEmpty()){
-		const char* e=xPara.getChildNode("exitStrategy").getText();
-		int ie = atoi(e);
-		if (ie == 1 || ie == 2 || ie == 3 || ie == 4)
-		{
-			pExitStrategy = ie;
-			Log->Write("INFO: \texitStrategy <"+ string(e) +">");
-		}
-		else
-		{
-			pExitStrategy = 2;
-			Log->Write("WARNING: \twrong value for exitStrategy. Use strategy 2\n");
-		}
-
-	}
 	//force_ped
-	if(!xPara.getChildNode("force_ped").isEmpty()){
-		string nu=string(xPara.getChildNode("force_ped").getAttribute("nu"));
-		string dist_max=string(xPara.getChildNode("force_ped").getAttribute("dist_max"));
-		string disteff_max=string(xPara.getChildNode("force_ped").getAttribute("disteff_max"));
-		string interpolation_width=string(xPara.getChildNode("force_ped").getAttribute("interpolation_width"));
+	if(xPara->FirstChild("force_ped")){
+		string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
+		string dist_max=xPara->FirstChildElement("force_ped")->Attribute("dist_max");
+		string disteff_max=xPara->FirstChildElement("force_ped")->Attribute("disteff_max");
+		string interpolation_width=xPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
+
 		pMaxFPed=atof(dist_max.c_str());
 		pNuPed=atof(nu.c_str());
 		pDistEffMaxPed=atof(disteff_max.c_str());
@@ -647,12 +660,13 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
 				+ disteff_max+ ", interpolation_width="+interpolation_width);
 	}
+
 	//force_wall
-	if(!xPara.getChildNode("force_wall").isEmpty()){
-		string nu=string(xPara.getChildNode("force_wall").getAttribute("nu"));
-		string dist_max=string(xPara.getChildNode("force_wall").getAttribute("dist_max"));
-		string disteff_max=string(xPara.getChildNode("force_wall").getAttribute("disteff_max"));
-		string interpolation_width=string(xPara.getChildNode("force_wall").getAttribute("interpolation_width"));
+	if(xPara->FirstChild("force_wall")){
+		string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
+		string dist_max=xPara->FirstChildElement("force_wall")->Attribute("dist_max");
+		string disteff_max=xPara->FirstChildElement("force_wall")->Attribute("disteff_max");
+		string interpolation_width=xPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
 		pMaxFWall=atof(dist_max.c_str());
 		pNuWall=atof(nu.c_str());
 		pDistEffMaxWall=atof(disteff_max.c_str());
@@ -661,16 +675,39 @@ void ArgumentParser::ParseIniFile(string inifile){
 				+ disteff_max+ ", interpolation_width="+interpolation_width);
 	}
 
-
 	// pre parse the person file to extract some information we need
 	//route choice strategy
-	XMLNode xPersonsNode=XMLNode::openFileHelper(pNumberFilename.c_str(),"persons");
-	XMLNode xRouters=xPersonsNode.getChildNode("routers");
-	int nRouters=xRouters.nChildNode("router");
-	for(int i=0;i<nRouters;i++){
-		XMLNode routerNode=xRouters.getChildNode("router",i);
-		string strategy=routerNode.getAttribute("method");
-		int id=atoi(routerNode.getAttribute("id"));
+	TiXmlDocument docPersons(pNumberFilename);
+	if (!docPersons.LoadFile()){
+		Log->Write("ERROR: \t%s", docPersons.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the person file");
+		exit(EXIT_FAILURE);
+	}
+
+
+	TiXmlElement* xPersonsNode = docPersons.RootElement();
+	if( ! xPersonsNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xPersonsNode->ValueStr () != "persons" ) {
+		Log->Write("ERROR:\tRoot element value is not 'persons'.");
+		exit(EXIT_FAILURE);
+	}
+
+	TiXmlNode* xRouters=xPersonsNode->FirstChild("routers");
+
+	if(!xRouters) {
+		Log->Write("ERROR:\tNo routers found.");
+				exit(EXIT_FAILURE);
+	}
+
+	for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+			e = e->NextSiblingElement("router")) {
+
+		string strategy=e->Attribute("method");
+		int id=atoi(e->Attribute("id"));
 
 		if(strategy=="local_shortest")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_LOCAL_SHORTEST));
@@ -685,10 +722,9 @@ void ArgumentParser::ParseIniFile(string inifile){
 		else{
 			Log->Write("ERROR: \twrong value for routing strategy!!!\n");
 			cout<<strategy<<endl;
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 	}
-
 
 	Log->Write("INFO: \tdone parsing ini");
 }
@@ -731,6 +767,10 @@ double ArgumentParser::Getfps() const {
 
 const string& ArgumentParser::GetGeometryFilename() const {
 	return pGeometryFilename;
+}
+
+const string& ArgumentParser::GetNavigationMesh() const {
+	return pNavMeshFilename;
 }
 
 int ArgumentParser::GetExitStrategy() const {
@@ -839,7 +879,7 @@ unsigned int ArgumentParser::GetSeed() const {
 
 
 const string& ArgumentParser::GetPathwayFile() const {
-	return pPathwayfile;
+	return pPathwayFilename;
 }
 
 

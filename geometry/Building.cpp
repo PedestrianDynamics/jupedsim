@@ -26,7 +26,7 @@
  */
 
 #include "Building.h"
-#include "../general/xmlParser.h"
+#include "../tinyxml/tinyxml.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../routing/RoutingEngine.h"
@@ -66,19 +66,19 @@ Building::~Building() {
 	if (_pathWayStream.is_open())
 		_pathWayStream.close();
 
-// FIXME:
-//	for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
-//				iter != pCrossings.end(); ++iter) {
-//			delete iter->second;
-//		}
-//		for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
-//				iter != pTransitions.end(); ++iter) {
-//			delete iter->second;
-//		}
-//		for (map<int, Hline*>::const_iterator iter = pHlines.begin();
-//				iter != pHlines.end(); ++iter) {
-//			delete iter->second;
-//		}
+
+	for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
+			iter != _crossings.end(); ++iter) {
+		delete iter->second;
+	}
+	for (map<int, Transition*>::const_iterator iter = _transitions.begin();
+			iter != _transitions.end(); ++iter) {
+		delete iter->second;
+	}
+	for (map<int, Hline*>::const_iterator iter = _hLines.begin();
+			iter != _hLines.end(); ++iter) {
+		delete iter->second;
+	}
 }
 
 /************************************************************
@@ -520,56 +520,84 @@ void Building::LoadBuilding(string filename) {
 
 	Log->Write("INFO: \tParsing the geometry file");
 
-	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "geometry");
+	TiXmlDocument docGeo(filename);
+	if (!docGeo.LoadFile()){
+		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the geometry file");
+		exit(EXIT_FAILURE);
+	}
 
-	double version = xmltof(xMainNode.getAttribute("version"), -1);
+
+	TiXmlElement* xRootNode = docGeo.RootElement();
+	if( ! xRootNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xRootNode->ValueStr () != "geometry" ) {
+		Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+		exit(EXIT_FAILURE);
+	}
+
+
+	double version = xmltof(xRootNode->Attribute("version"), -1);
 	if (version < 0.4) {
 		Log->Write("ERROR: \tOnly version > 0.4 supported");
 		Log->Write("ERROR: \tparsing geometry file failed!");
 		exit(EXIT_FAILURE);
 	}
-	_caption = xmltoa(xMainNode.getAttribute("caption"), "virtual building");
+	_caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
+
 
 	//The file has two main nodes
 	//<rooms> and <transitions>
 
-	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
-	int nRooms = xRoomsNode.nChildNode("room");
 
 	//processing the rooms node
-	for (int i = 0; i < nRooms; i++) {
-		XMLNode xRoom = xRoomsNode.getChildNode("room", i);
+	TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
+	if (!xRoomsNode){
+		Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
+		exit(EXIT_FAILURE);
+	}
+
+	for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+			xRoom = xRoom->NextSiblingElement("room")) {
+
 		Room* room = new Room();
 
-		string room_id = xmltoa(xRoom.getAttribute("id"), "-1");
+		string room_id = xmltoa(xRoom->Attribute("id"), "-1");
 		room->SetID(xmltoi(room_id.c_str(), -1));
 
 		string caption = "room " + room_id;
 		room->SetCaption(
-				xmltoa(xRoom.getAttribute("caption"), caption.c_str()));
+				xmltoa(xRoom->Attribute("caption"), caption.c_str()));
 
-		double position = xmltof(xRoom.getAttribute("zpos"), 0.0);
+		double position = xmltof(xRoom->Attribute("zpos"), 0.0);
+
+		//TODO?? what the hell is that for ?
 		if(position>6.0) position+=50;
 		room->SetZPos(position);
 
 		//parsing the subrooms
-		int nSubRooms = xRoom.nChildNode("subroom");
+		//processing the rooms node
+		//TiXmlNode*  xSubroomsNode = xRoom->FirstChild("subroom");
 
-		for (int s = 0; s < nSubRooms; s++) {
-			XMLNode xSubroomsNode = xRoom.getChildNode("subroom", s);
+		for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
+				xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
 
-			string subroom_id = xmltoa(xSubroomsNode.getAttribute("id"), "-1");
-			string closed = xmltoa(xSubroomsNode.getAttribute("closed"), "0");
-			string type = xmltoa(xSubroomsNode.getAttribute("class"),
+
+			string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
+			string closed = xmltoa(xSubRoom->Attribute("closed"), "0");
+			string type = xmltoa(xSubRoom->Attribute("class"),
 					"subroom");
 
 			SubRoom* subroom = NULL;
 
 			if (type == "stair") {
-				double up_x = xmltof( xSubroomsNode.getChildNode("up").getAttribute("px"), 0.0);
-				double up_y = xmltof( xSubroomsNode.getChildNode("up").getAttribute("py"), 0.0);
-				double down_x = xmltof( xSubroomsNode.getChildNode("down").getAttribute("py"), 0.0);
-				double down_y = xmltof( xSubroomsNode.getChildNode("down").getAttribute("py"), 0.0);
+				double up_x = xmltof( xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
+				double up_y = xmltof( xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
+				double down_x = xmltof( xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
+				double down_y = xmltof( xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
 				subroom = new Stair();
 				((Stair*)subroom)->SetUp(Point(up_x,up_y));
 				((Stair*)subroom)->SetDown(Point(down_x,down_y));
@@ -582,49 +610,32 @@ void Building::LoadBuilding(string filename) {
 			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
 
 			//looking for polygons (walls)
-			int nPoly = xSubroomsNode.nChildNode("polygon");
-			for (int p = 0; p < nPoly; p++) {
-				XMLNode xPolyVertices = xSubroomsNode.getChildNode("polygon",
-						p);
-				int nVertices =
-						xSubroomsNode.getChildNode("polygon", p).nChildNode(
-								"vertex");
+			for(TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
+					xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
-				for (int v = 0; v < nVertices - 1; v++) {
-					double x1 =
-							xmltof(
-									xPolyVertices.getChildNode("vertex", v).getAttribute(
-											"px"));
-					double y1 =
-							xmltof(
-									xPolyVertices.getChildNode("vertex", v).getAttribute(
-											"py"));
+				for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+						"vertex");
+						xVertex && xVertex != xPolyVertices->LastChild("vertex");
+						xVertex = xVertex->NextSiblingElement("vertex")) {
 
-					double x2 =
-							xmltof(
-									xPolyVertices.getChildNode("vertex", v + 1).getAttribute(
-											"px"));
-					double y2 =
-							xmltof(
-									xPolyVertices.getChildNode("vertex", v + 1).getAttribute(
-											"py"));
+					double x1 = xmltof(xVertex->Attribute("px"));
+					double y1 = xmltof(xVertex->Attribute("py"));
+					double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+					double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+
 					subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
 				}
 
 			}
 
 			//looking for obstacles
-			int nObst = xSubroomsNode.nChildNode("obstacle");
+			for(TiXmlElement* xObstacle = xSubRoom->FirstChildElement("obstacle"); xObstacle;
+					xObstacle = xObstacle->NextSiblingElement("obstacle")) {
 
-			for (int obst = 0; obst < nObst; obst++) {
-				XMLNode xObstacle = xSubroomsNode.getChildNode("obstacle",
-						obst);
-				int nPoly = xObstacle.nChildNode("polygon");
-				int id = xmltof(xObstacle.getAttribute("id"), -1);
-				int height = xmltof(xObstacle.getAttribute("height"), 0);
-				double closed = xmltof(xObstacle.getAttribute("closed"), 0);
-				string caption = xmltoa(xObstacle.getAttribute("caption"),
-						"-1");
+				int id = xmltof(xObstacle->Attribute("id"), -1);
+				int height = xmltof(xObstacle->Attribute("height"), 0);
+				double closed = xmltof(xObstacle->Attribute("closed"), 0);
+				string caption = xmltoa(xObstacle->Attribute("caption"),"-1");
 
 				Obstacle* obstacle = new Obstacle();
 				obstacle->SetId(id);
@@ -632,30 +643,19 @@ void Building::LoadBuilding(string filename) {
 				obstacle->SetClosed(closed);
 				obstacle->SetHeight(height);
 
-				for (int p = 0; p < nPoly; p++) {
-					XMLNode xPolyVertices = xObstacle.getChildNode("polygon",
-							p);
-					int nVertices =
-							xObstacle.getChildNode("polygon", p).nChildNode(
-									"vertex");
-					for (int v = 0; v < nVertices - 1; v++) {
-						double x1 =
-								xmltof(
-										xPolyVertices.getChildNode("vertex", v).getAttribute(
-												"px"));
-						double y1 =
-								xmltof(
-										xPolyVertices.getChildNode("vertex", v).getAttribute(
-												"py"));
+				//looking for polygons (walls)
+				for(TiXmlElement* xPolyVertices = xObstacle->FirstChildElement("polygon"); xPolyVertices;
+						xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
-						double x2 =
-								xmltof(
-										xPolyVertices.getChildNode("vertex",
-												v + 1).getAttribute("px"));
-						double y2 =
-								xmltof(
-										xPolyVertices.getChildNode("vertex",
-												v + 1).getAttribute("py"));
+					for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+							"vertex");
+							xVertex && xVertex != xPolyVertices->LastChild("vertex");
+							xVertex = xVertex->NextSiblingElement("vertex")) {
+
+						double x1 = xmltof(xVertex->Attribute("px"));
+						double y1 = xmltof(xVertex->Attribute("py"));
+						double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+						double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
 						obstacle->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
 					}
 				}
@@ -663,25 +663,21 @@ void Building::LoadBuilding(string filename) {
 			}
 			room->AddSubRoom(subroom);
 		}
+
 		//parsing the crossings
-		XMLNode xCrossingsNode = xRoom.getChildNode("crossings");
-		int nCrossing = xCrossingsNode.nChildNode("crossing");
+		TiXmlNode*  xCrossingsNode = xRoom->FirstChild("crossings");
+		if(xCrossingsNode)
+		for(TiXmlElement* xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
+				xCrossing = xCrossing->NextSiblingElement("crossing")) {
 
-		//processing the rooms node
-		for (int i = 0; i < nCrossing; i++) {
-			XMLNode xCrossing = xCrossingsNode.getChildNode("crossing", i);
+			int id = xmltoi(xCrossing->Attribute("id"), -1);
+			int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
+			int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
 
-			int id = xmltoi(xCrossing.getAttribute("id"), -1);
-			int sub1_id = xmltoi(xCrossing.getAttribute("subroom1_id"), -1);
-			int sub2_id = xmltoi(xCrossing.getAttribute("subroom2_id"), -1);
-			double x1 = xmltof(
-					xCrossing.getChildNode("vertex", 0).getAttribute("px"));
-			double y1 = xmltof(
-					xCrossing.getChildNode("vertex", 0).getAttribute("py"));
-			double x2 = xmltof(
-					xCrossing.getChildNode("vertex", 1).getAttribute("px"));
-			double y2 = xmltof(
-					xCrossing.getChildNode("vertex", 1).getAttribute("py"));
+			double x1 = xmltof(	xCrossing->FirstChildElement("vertex")->Attribute("px"));
+			double y1 = xmltof(	xCrossing->FirstChildElement("vertex")->Attribute("py"));
+			double x2 = xmltof(	xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
+			double y2 = xmltof(	xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
 
 			Crossing* c = new Crossing();
 			c->SetID(id);
@@ -700,25 +696,28 @@ void Building::LoadBuilding(string filename) {
 		AddRoom(room);
 	}
 
+
 	// all rooms are read, now proceed with transitions
-	XMLNode xTransNode = xMainNode.getChildNode("transitions");
-	int nTrans = xTransNode.nChildNode("transition");
+	TiXmlNode*  xTransNode = xRootNode->FirstChild("transitions");
 
-	for (int i = 0; i < nTrans; i++) {
-		XMLNode xTrans = xTransNode.getChildNode("transition", i);
+	for(TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
+			xTrans = xTrans->NextSiblingElement("transition")) {
 
-		int id = xmltoi(xTrans.getAttribute("id"), -1);
+		int id = xmltoi(xTrans->Attribute("id"), -1);
 		string caption = "door " + id;
-		caption = xmltoa(xTrans.getAttribute("caption"), caption.c_str());
-		int room1_id = xmltoi(xTrans.getAttribute("room1_id"), -1);
-		int room2_id = xmltoi(xTrans.getAttribute("room2_id"), -1);
-		int subroom1_id = xmltoi(xTrans.getAttribute("subroom1_id"), -1);
-		int subroom2_id = xmltoi(xTrans.getAttribute("subroom2_id"), -1);
-		double x1 = xmltof(xTrans.getChildNode("vertex", 0).getAttribute("px"));
-		double y1 = xmltof(xTrans.getChildNode("vertex", 0).getAttribute("py"));
-		double x2 = xmltof(xTrans.getChildNode("vertex", 1).getAttribute("px"));
-		double y2 = xmltof(xTrans.getChildNode("vertex", 1).getAttribute("py"));
-		string type = xmltoa(xTrans.getAttribute("type"), "normal");
+		caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
+		int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
+		int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
+		int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
+		int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
+		string type = xmltoa(xTrans->Attribute("type"), "normal");
+
+		double x1 = xmltof(	xTrans->FirstChildElement("vertex")->Attribute("px"));
+		double y1 = xmltof(	xTrans->FirstChildElement("vertex")->Attribute("py"));
+
+		double x2 = xmltof(	xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
+		double y2 = xmltof(	xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
+
 
 		Transition* t = new Transition();
 		t->SetID(id);
@@ -755,6 +754,8 @@ void Building::LoadBuilding(string filename) {
 
 		AddTransition(t);
 	}
+
+
 	Log->Write("INFO: \tLoading building file successful!!!\n");
 }
 
@@ -914,35 +915,49 @@ void Building::LoadRoutingInfo(string filename) {
 		return;
 	}
 
-	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "routing");
+	TiXmlDocument docRouting(filename);
+	if (!docRouting.LoadFile()){
+		Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the routing file");
+		exit(EXIT_FAILURE);
+	}
 
-	double version = xmltof(xMainNode.getAttribute("version"), -1);
+	TiXmlElement* xRootNode = docRouting.RootElement();
+	if( ! xRootNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xRootNode->ValueStr () != "routing" ) {
+		Log->Write("ERROR:\tRoot element value is not 'routing'.");
+		exit(EXIT_FAILURE);
+	}
+
+	double version = xmltof(xRootNode->Attribute("version"), -1);
 	if (version < 0.4) {
 		Log->Write("ERROR: \tOnly version > 0.4 supported");
 		Log->Write("ERROR: \tparsing routing file failed!");
 		exit(EXIT_FAILURE);
 	}
 
-	//actually only contains one Hlines node
-	XMLNode xHlinesNode = xMainNode.getChildNode("Hlines");
-	int nHlines = xHlinesNode.nChildNode("Hline");
+	//parsing the crossings
+	TiXmlNode*  xHlinesNode = xRootNode->FirstChild("Hlines");
 
-	//processing the rooms node
-	for (int i = 0; i < nHlines; i++) {
-		XMLNode hline = xHlinesNode.getChildNode("hline", i);
-		double id = xmltof(hline.getAttribute("id"), -1);
-		int room_id = xmltoi(hline.getAttribute("room_id"), -1);
-		int subroom_id = xmltoi(hline.getAttribute("subroom_id"), -1);
+	if(xHlinesNode)
+	for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
+			hline = hline->NextSiblingElement("Hline")) {
 
-		double x1 = xmltof(hline.getChildNode("vertex", 0).getAttribute("px"));
-		double y1 = xmltof(hline.getChildNode("vertex", 0).getAttribute("py"));
-		double x2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("px"));
-		double y2 = xmltof(hline.getChildNode("vertex", 1).getAttribute("py"));
+		double id = xmltof(hline->Attribute("id"), -1);
+		int room_id = xmltoi(hline->Attribute("room_id"), -1);
+		int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
 
+		double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
+		double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
+		double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
+		double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
 
 		Room* room = _rooms[room_id];
 		SubRoom* subroom = room->GetSubRoom(subroom_id);
-
 
 		//new implementation
 		Hline* h = new Hline();
@@ -954,22 +969,21 @@ void Building::LoadRoutingInfo(string filename) {
 
 		AddHline(h);
 		subroom->AddHline(h);
-
 	}
 
 	//load the pre-defined trips
-	XMLNode xTripsNode = xMainNode.getChildNode("trips");
-	int nTrips = xTripsNode.nChildNode("trip");
+	TiXmlNode*  xTripsNode = xRootNode->FirstChild("trips");
 
-	//processing the rooms node
-	for (int i = 0; i < nTrips; i++) {
-		XMLNode trip = xTripsNode.getChildNode("trip", i);
-		double id = xmltof(trip.getAttribute("id"), -1);
+	if(xTripsNode)
+	for(TiXmlElement* trip = xTripsNode->FirstChildElement("trip"); trip;
+			trip = trip->NextSiblingElement("trip")) {
+
+		double id = xmltof(trip->Attribute("id"), -1);
 		if (id == -1) {
 			Log->Write("ERROR:\t id missing for trip");
 			exit(EXIT_FAILURE);
 		}
-		string sTrip = trip.getText();
+		string sTrip = trip->FirstChild()->ValueStr();
 		vector<string> vTrip;
 		vTrip.clear();
 
@@ -994,42 +1008,53 @@ void Building::LoadTrafficInfo(string filename) {
 		return;
 	}
 
-	XMLNode xMainNode = XMLNode::openFileHelper(filename.c_str(), "traffic");
+	TiXmlDocument docTraffic(filename);
+	if (!docTraffic.LoadFile()){
+		Log->Write("ERROR: \t%s", docTraffic.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the traffic file");
+		exit(EXIT_FAILURE);
+	}
 
-	double version = xmltof(xMainNode.getAttribute("version"), -1);
+	TiXmlElement* xRootNode = docTraffic.RootElement();
+	if( ! xRootNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xRootNode->ValueStr () != "traffic" ) {
+		Log->Write("ERROR:\tRoot element value is not 'traffic'.");
+		exit(EXIT_FAILURE);
+	}
+
+	double version = xmltof(xRootNode->Attribute("version"), -1);
 	if (version < 0.4) {
 		Log->Write("ERROR: \tOnly version > 0.4 supported");
 		Log->Write("ERROR: \tparsing traffic file failed!");
 		exit(EXIT_FAILURE);
 	}
 
-	//The file has two main nodes
-	//<rooms> and <transitions>
-
-	XMLNode xRoomsNode = xMainNode.getChildNode("rooms");
-	int nRooms = xRoomsNode.nChildNode("room");
-
 	//processing the rooms node
-	for (int i = 0; i < nRooms; i++) {
-		XMLNode xRoom = xRoomsNode.getChildNode("room", i);
-		double id = xmltof(xRoom.getAttribute("room_id"), -1);
-		string state = xmltoa(xRoom.getAttribute("state"), "good");
+	TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
+	for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+			xRoom = xRoom->NextSiblingElement("room")) {
+
+		double id = xmltof(xRoom->Attribute("room_id"), -1);
+		string state = xmltoa(xRoom->Attribute("state"), "good");
 		RoomState status = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
 		_rooms[id]->SetState(status);
 	}
 
 	//processing the doors node
-	XMLNode xDoorsNode = xMainNode.getChildNode("doors");
-	int nDoors = xDoorsNode.nChildNode("door");
+	TiXmlNode*  xDoorsNode = xRootNode->FirstChild("doors");
+		for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
+				xDoor = xDoor->NextSiblingElement("door")) {
 
-	for (int i = 0; i < nDoors; i++) {
-		XMLNode xDoor = xDoorsNode.getChildNode("door", i);
-		int id = xmltoi(xDoor.getAttribute("trans_id"), -1);
-		string state = xmltoa(xDoor.getAttribute("state"), "open");
+		int id = xmltoi(xDoor->Attribute("trans_id"), -1);
+		string state = xmltoa(xDoor->Attribute("state"), "open");
 
 		//maybe the door caption is specified ?
 		if(id==-1){
-			string caption=xmltoa(xDoor.getAttribute("caption"), "-1");
+			string caption=xmltoa(xDoor->Attribute("caption"), "-1");
 			if( (caption!="-1") && (state =="close") ){
 				GetTransition(caption)->Close();
 			}

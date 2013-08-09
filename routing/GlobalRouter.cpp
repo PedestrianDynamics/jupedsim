@@ -30,7 +30,6 @@
 
 #include "AccessPoint.h"
 #include "Router.h"
-#include "../general/xmlParser.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
 
@@ -629,7 +628,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
 		return bestAPsID;
 	} else {
-		cout << "ERROR:\t GlobalRouter.cpp: a valid destination could not be found" << endl;
+		Log->Write("ERROR:\tGlobalRouter.cpp: a valid destination could not be found for ped [%d] going to destination [%d]",ped->GetID(),ped->GetFinalDestination());
 		exit(EXIT_FAILURE);
 		return -1;
 	}

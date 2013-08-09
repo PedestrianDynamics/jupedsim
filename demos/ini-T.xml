@@ -4,15 +4,16 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfiles/T-Junction/T-Junction.xml</geometry>
+	<geometry>./demos/T-Junction/T-Junction.xml</geometry>
 	<!--persons information and distribution -->
-	<person>inputfiles/T-Junction/persons.xml</person>
+	<person>./demos/T-Junction/persons.xml</person>
 	<!-- extra routing information -->
-	<routing>inputfiles/T-Junction/routing.xml</routing>
+	<routing>./demos/T-Junction/routing.xml</routing>
 	<!-- traffic information: e.g closed doors -->
-	<traffic>inputfiles/T-Junction/traffic.xml</traffic>
+	<traffic>./demos/T-Junction/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
+	<trajectories format="xml-plain" fps="8" version="0.4">
+		<file location="./outputfiles/trajectories-tjunction.xml"/>
 	</trajectories>
 	<!-- where to store the logs 
 	<logfile>outputfiles/log.txt</logfile>
@@ -24,7 +25,6 @@
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
 		<linkedcells enabled="true" cell_size="2.2"/>
-		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />
 		<bmin mu="0.20" sigma="0.001" />

@@ -18,7 +18,12 @@ file(
 	Simulation.cpp
 	
 	general/ArgumentParser.cpp  
-	general/xmlParser.cpp  
+	
+	tinyxml/tinystr.cpp
+	tinyxml/tinyxml.cpp
+	tinyxml/tinyxmlerror.cpp
+	tinyxml/tinyxmlparser.cpp
+	  
 
 	geometry/Building.cpp  
 	geometry/Line.cpp     
@@ -89,7 +94,8 @@ file(
 	mpi/LCGrid.h
 	general/ArgumentParser.h  
 	general/Macros.h  
-	general/xmlParser.h
+	tinyxml/tinyxml.h
+	tinyxml/tinystr.h
 	geometry/Crossing.h  
 	geometry/NavLine.h     
 	geometry/Room.h       

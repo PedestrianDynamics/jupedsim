@@ -121,7 +121,6 @@ public:
 	void AddHline(Hline* line);
 
 
-
     // Ein-Ausgabe
     void LoadBuilding(std::string filename); // Laedt Geometrie-Datei
     void LoadTrafficInfo(std::string filename);
@@ -135,7 +134,6 @@ public:
 	//bool IsDirectlyConnected(int room1, int subroom1,int room2, int subroom2);
 
 private:
-	// wird nur innerhalb von Building benötigt
 	void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 
 };

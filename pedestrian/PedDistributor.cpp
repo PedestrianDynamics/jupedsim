@@ -26,7 +26,7 @@
  */
 
 #include "PedDistributor.h"
-#include "../general/xmlParser.h"
+#include "../tinyxml/tinyxml.h"
 #include "../geometry/Obstacle.h"
 #include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
@@ -49,7 +49,6 @@ StartDistributionRoom::StartDistributionRoom(const StartDistributionRoom& orig) 
 
 StartDistributionRoom::~StartDistributionRoom() {
 }
-
 
 
 string StartDistributionRoom::GetRoomCaption() const {
@@ -170,34 +169,49 @@ Distribution* PedDistributor::GetTau() const {
 void PedDistributor::InitDistributor(string filename){
 
 	_initialisationFile=filename;
-
-	XMLNode xMainNode=XMLNode::openFileHelper(filename.c_str(),"persons");
 	Log->Write("INFO: \tLoading and parsing the persons file");
 
-	//get the distribution node
-	XMLNode xDist=xMainNode.getChildNode("distribution");
-	int nDist=xDist.nChildNode("dist");
-	for(int i=0;i<nDist;i++){
-		XMLNode path=xDist.getChildNode("dist",i);
-
-		//FIXME: id oder caption
-		//int room_id=atoi(path.getAttribute("room_id"));
-		string room_caption=path.getAttribute("room_caption");
-		int number=atoi(path.getAttribute("number"));
-
-		if(path.getAttribute("subroom_id")){
-			int subroom_id=atoi(path.getAttribute("subroom_id"));
-			StartDistributionSubroom dis = StartDistributionSubroom();
-			dis.SetRoomCaption(room_caption);
-			dis.SetSubroomID(subroom_id);
-			dis.SetNumberOfPedestrians(number);
-			_start_dis_sub.push_back(dis);
-		}else{
-			StartDistributionRoom dis = StartDistributionRoom();
-			dis.SetRoomCaption(room_caption);
-			dis.SetNumberOfPedestrians(number);
-			_start_dis.push_back(dis);
+		TiXmlDocument docPersons(filename);
+		if (!docPersons.LoadFile()){
+			Log->Write("ERROR: \t%s", docPersons.ErrorDesc());
+			Log->Write("ERROR: \t could not parse the person file");
+			exit(EXIT_FAILURE);
 		}
+
+
+		TiXmlElement* xRootNode = docPersons.RootElement();
+		if( ! xRootNode ) {
+			Log->Write("ERROR:\tRoot element does not exist");
+			exit(EXIT_FAILURE);
+		}
+
+		if( xRootNode->ValueStr () != "persons" ) {
+			Log->Write("ERROR:\tRoot element value is not 'persons'");
+			exit(EXIT_FAILURE);
+		}
+
+		TiXmlNode* xDist=xRootNode->FirstChild("distribution");
+		for(TiXmlElement* e = xDist->FirstChildElement("dist"); e;
+				e = e->NextSiblingElement("dist")) {
+
+			//FIXME: id oder caption
+			//int room_id=atoi(path.getAttribute("room_id"));
+			string room_caption=e->Attribute("room_caption");
+			int number=atoi(e->Attribute("number"));
+
+			if(e->Attribute("subroom_id")){
+				int subroom_id=atoi(e->Attribute("subroom_id"));
+				StartDistributionSubroom dis = StartDistributionSubroom();
+				dis.SetRoomCaption(room_caption);
+				dis.SetSubroomID(subroom_id);
+				dis.SetNumberOfPedestrians(number);
+				_start_dis_sub.push_back(dis);
+			}else{
+				StartDistributionRoom dis = StartDistributionRoom();
+				dis.SetRoomCaption(room_caption);
+				dis.SetNumberOfPedestrians(number);
+				_start_dis.push_back(dis);
+			}
 	}
 
 	Log->Write("INFO: \t done with loading and parsing the persons file");
@@ -343,16 +357,32 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 	}
 
-
 	// now assign individual attributes
-	XMLNode xMainNode=XMLNode::openFileHelper(_initialisationFile.c_str(),"persons");
-	Log->Write("INFO: \tLoading and parsing the persons file");
 
-	//get the distribution node
-	int nPersons=xMainNode.nChildNode("person");
-	for(int i=0;i<nPersons;i++){
-		XMLNode xPerson=xMainNode.getChildNode("person",i);
-		int id=xmltoi(xPerson.getAttribute("id"),-1);
+	TiXmlDocument docPersons(_initialisationFile);
+	if (!docPersons.LoadFile()){
+		Log->Write("ERROR: \t%s", docPersons.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the person file");
+		exit(EXIT_FAILURE);
+	}
+
+
+	TiXmlElement* xRootNode = docPersons.RootElement();
+	if( ! xRootNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xRootNode->ValueStr () != "persons" ) {
+		Log->Write("ERROR:\tRoot element value is not 'persons'");
+		exit(EXIT_FAILURE);
+	}
+
+	for(TiXmlElement* xPerson = xRootNode->FirstChildElement("person"); xPerson;
+			xPerson = xPerson->NextSiblingElement("person")) {
+
+
+		int id=xmltoi(xPerson->Attribute("id"),-1);
 
 		if(id==-1){
 			Log->Write("ERROR:\tin the person attribute file. The id is mandatory ! skipping the entry");
@@ -399,30 +429,31 @@ int PedDistributor::Distribute(Building* building) const {
 			nPeds++;
 		}
 
-		double height=xmltof(xPerson.getAttribute("height"),-1);
+		double height=xmltof(xPerson->Attribute("height"),-1);
 		if( height!=-1){
 			ped->SetHeight(height);
 		}
 
-		double age=xmltof(xPerson.getAttribute("age"),-1);
+		double age=xmltof(xPerson->Attribute("age"),-1);
 		if( age!=-1){
 			ped->SetAge(age);
 		}
 
-		string gender=xmltoa(xPerson.getAttribute("gender"),"-1");
+		string gender=xmltoa(xPerson->Attribute("gender"),"-1");
 		if( gender!="-1"){
 			ped->SetGender(gender);
 		}
 
-		int router= xmltoi(xPerson.getAttribute("router"),-1);
+		int router= xmltoi(xPerson->Attribute("router"),-1);
 		if( router != -1){
 			ped->SetRouter(building->GetRoutingEngine()->GetRouter(router));
 		}else
 		{
+			Log->Write("WARNING: \tNo router was set for ped [%d]. Default router will be used!",ped->GetID());
 			ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
 		}
 
-		double goal_id=xmltof(xPerson.getAttribute("goal"),-1);
+		double goal_id=xmltof(xPerson->Attribute("goal"),-1);
 		if( goal_id!=-1){
 			if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
 					(ped->GetFinalDestination()!=goal_id)){
@@ -436,13 +467,13 @@ int PedDistributor::Distribute(Building* building) const {
 			building->GetRoutingEngine()->AddFinalDestinationID(goal_id);
 		}
 
-		double wishVelo=xmltof(xPerson.getAttribute("wishVelo"),-1);
+		double wishVelo=xmltof(xPerson->Attribute("wishVelo"),-1);
 		if( wishVelo!=-1){
 			ped->SetV0Norm(wishVelo);
 		}
 
-		double startX=xmltof(xPerson.getAttribute("startX"),-1);
-		double startY=xmltof(xPerson.getAttribute("startY"),-1);
+		double startX=xmltof(xPerson->Attribute("startX"),-1);
+		double startY=xmltof(xPerson->Attribute("startY"),-1);
 
 		if(startX!=-1 && startY!=-1){
 			ped->SetPos(Point(startX,startY));
@@ -468,17 +499,22 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 	}
 
-	int nPedsExpected= xmltoi(xMainNode.getChildNode("header").getChildNode("number").getText(),-1);
+
+
+	// read the expected number of pedestrians
+	int nPedsExpected= atoi(xRootNode->FirstChild("header")->FirstChildElement("number")->GetText());
 
 	//now parse the different groups
-	XMLNode xGroups=xMainNode.getChildNode("groups");
-	int nGroup=xGroups.nChildNode("group");
-	for(int i=0;i<nGroup;i++){
-		XMLNode group=xGroups.getChildNode("group",i);
-		int group_id=xmltoi(group.getAttribute("id"),-1);
-		int trip_id=xmltoi(group.getChildNode("trip").getText(),-1);
-		int goal_id=xmltoi(group.getChildNode("goal").getText(),-1);
-		int router_id=xmltoi(group.getChildNode("router").getText(),-1);
+
+	TiXmlNode* xGroups=xRootNode->FirstChild("groups");
+	if(xGroups)
+	for(TiXmlElement* group = xGroups->FirstChildElement("dist"); group;
+			group = group->NextSiblingElement("dist")) {
+
+		int group_id=xmltoi(group->Attribute("id"),-1);
+		int trip_id=xmltoi(group->FirstChild("trip")->FirstChild()->Value(),-1);
+		int goal_id=xmltoi(group->FirstChild("goal")->FirstChild()->Value(),-1);
+		int router_id=xmltoi(group->FirstChild("router")->FirstChild()->Value(),-1);
 
 		if((goal_id !=-1) && (trip_id!=-1)){
 			sprintf(tmp, "ERROR: \ttrip and goal cannot be set for the same group [%d] !",group_id);
@@ -489,7 +525,7 @@ int PedDistributor::Distribute(Building* building) const {
 		}
 
 		//get the members
-		string members=group.getChildNode("members").getText();
+		string members=group->FirstChild("members")->FirstChild()->Value();
 
 		char* str = (char*) members.c_str();
 		char *p = strtok(str, ",");
@@ -533,7 +569,6 @@ int PedDistributor::Distribute(Building* building) const {
 
 
 	//now do the last check if all pedestrians were distributed:
-
 	if(nPedsExpected!=nPeds){
 		sprintf(tmp, "ERROR:\tThe number of distributed pedestrians [%d] does not match \n"
 				"        \tthe total number of specified pedestrians in the header [%d]!",nPeds,nPedsExpected);

@@ -31,6 +31,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include "Macros.h"
 using std::string;
 using std::vector;
@@ -45,10 +46,11 @@ private:
 	string pTrafficFilename; /// traffic information (closed doors,...)
 	string pNumberFilename; /// initial distribution and person specifications
 	string pGeometryFilename;
-	string pPathwayfile; // saving pedestrian path
+	string pPathwayFilename; // saving pedestrian path
 	string pHostname;
 	string pTrajectoriesFile;
 	string pErrorLogFile;
+	string pNavMeshFilename;
 	double pTmax; // maximale Simulationszeit
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
@@ -140,6 +142,7 @@ public:
 	const string& GetPersonsFilename() const;
 	const string& GetPathwayFile() const;
 	const string& GetGeometryFilename() const;
+	const string& GetNavigationMesh() const;
 
 	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;
@@ -156,6 +159,21 @@ public:
 	 * @param inifile
 	 */
 	void ParseIniFile(string inifile);
+
+	/**
+	 * convert a non null string to int.
+	 */
+	void Str2Int(const char* str, int* value){
+		if(!str) *value=atoi(str);
+	};
+
+	/**
+	 * convert a non null string to double.
+	 */
+	void Str2double(const char* str, double* value){
+		if(!str) *value=atof(str);
+	};
+
 };
 
 #endif /*ARGPARSER_H_*/
