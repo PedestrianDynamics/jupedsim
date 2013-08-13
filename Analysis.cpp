@@ -166,7 +166,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 
 	if(_classicMethod)
 	{
-			  string results_C=  "rho_v_Classic_"+_trajectoryName+".dat";
+			  string results_C=  "Output\\Fundamental_Diagram\\Classical_Voronoi\\rho_v_Classic_"+_trajectoryName+".dat";
 			  if((_fClassicRhoV=fopen(results_C.c_str(),"w"))==NULL)
 				{
 				  Log->Write("cannot open the file to write classical density and velocity\n");
@@ -609,7 +609,7 @@ void Analysis::GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFram
 			density_temp+=DensityPerFrame[j];
 		}
 		density_temp/=(Tout[i]-Tin[i]);
-		fprintf(fFD_TinTout,"%d\t%f\t%f\n",i,density_temp,velocity_temp);
+		fprintf(fFD_TinTout,"%d\t%f\t%f\n",i+1,density_temp,velocity_temp);
 	}
 	fclose(fFD_TinTout);
 }
