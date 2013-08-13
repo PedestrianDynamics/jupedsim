@@ -4,8 +4,8 @@ make
 #./rebuild.exe  --inifile=./samples/ini-arena.xml
 #./rebuild.exe  --inifile=ini-unc.xml -e 3
 #./rebuild.exe  --inifile=ini-Headon.xml
-#./rebuild.exe  --inifile=ini.xml 
+./rebuild.exe  --inifile=ini.xml 
 #./rebuild.exe  --inifile=ini-Bottleneck.xml -e 3 --fps=16
 #./rebuild.exe  --inifile=./demos/ini-Perpen.xml
 #./rebuild.exe  --inifile=ini-GSP.xml
-./rebuild.exe  --inifile=./demos/ini-T.xml --fps=8
+#./rebuild.exe  --inifile=./demos/ini-T.xml --fps=8
