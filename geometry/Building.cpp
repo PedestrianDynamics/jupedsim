@@ -256,7 +256,7 @@ void Building::Update() {
 	// some peds may change the room via another crossing than the primary intended one
 	// in that case they are set in the wrong room.
 	vector<Pedestrian*> nonConformPeds;
-
+        printf("enter Building::update\n");
 	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
 

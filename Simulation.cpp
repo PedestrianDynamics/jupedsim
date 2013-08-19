@@ -384,6 +384,7 @@ int Simulation::RunSimulation() {
 		t = 0 + (frameNr - 1) * _deltaT;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
 		_solver->solveODE(t, t + _deltaT, _building);
+                printf("t=%f\n",t);
 		// gucken ob Fußgänger in neuen Räumen/Unterräumen
 		Update();
 		// ggf. Ausgabe für TraVisTo
@@ -392,7 +393,7 @@ int Simulation::RunSimulation() {
 		}
 //		if (frameNr % 1000 == 0) {
 //			cout<<"                        \r";
-//			cout<<">> Frames : "<<frameNr<<"\r";
+                cout<<">> Frames : "<<frameNr<<"\n";
 //			cout.flush();
 //		}
 	}
@@ -408,16 +409,22 @@ int Simulation::RunSimulation() {
 
 // TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
+    printf("update building\n");
 	_building->Update();
+        printf("update building. OK\n");
 	// Neue Anzahl von Fußgänger, falls jemand ganz raus geht
+        // printf("GetAllPedestrians\n");
 	_nPeds=_building->GetAllPedestrians().size();
-
+        //printf("GetAllPedestrians OK n=%d\n", _nPeds);
 	// update the general time
+        //printf("GetGlobalTime\n");
 	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+_deltaT);
-
+        //printf("GetGlobalTime OK\n");
 	//update the cells position
 	//if (pLinkedCells){
+        //printf("UpdateGrid\n");
 		_building->UpdateGrid();
+                //      printf("UpdateGrid OK\n");
 	//}
 
 }
