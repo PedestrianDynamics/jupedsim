@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persons version="0.4">
+	<header>
+		<description>casern, 21.06.2008</description>
+		<number>40</number>
+	</header>
+
+	<!-- default distribution -->
+	<!-- TODO: also distribute with room_id only -->
+	<distribution>
+		<dist room_caption="T-Junction" subroom_id="3" number="20" />
+		<dist room_caption="T-Junction" subroom_id="1" number="20" />
+	</distribution>
+	
+	<routers>
+		<router id="1" method="local_shortest"/>
+		<router id="2" method="global_shortest"/>
+		<router id="3" method="quickest"/>
+		<router id="4" method="dummy"/>
+	</routers>
+	
+	<groups>
+		<group id="1">
+			<members>1,3,2,4,5,6</members>
+			<!-- <trip>0</trip> -->
+			<goal>5</goal>
+			<router>1</router>>
+		</group>
+		<group id="2">
+			<!-- <members>4,5,6</members>-->
+			<members>20</members>
+			<!-- <trip>0:1</trip> -->
+			<goal>3</goal>
+			<router>2</router>>
+		</group>
+	</groups>
+	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
+		direction="" goal="" age="18" gender="male"/> -->
+	
+
+	<person id="7" goal="4" />
+
+</persons> 
