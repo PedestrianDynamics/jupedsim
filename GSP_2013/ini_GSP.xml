@@ -4,26 +4,28 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>../demos/T-Junction/T-Junction.xml</geometry>
+	<geometry>inputfiles/geo.xml</geometry>
 	<!--persons information and distribution -->
-	<person>../demos/T-Junction/persons.xml</person>
+	<person>inputfiles/persons.xml</person>
 	<!-- extra routing information -->
-	<routing>../demos/T-Junction/routing.xml</routing>
+	<routing>inputfiles/routing.xml</routing>
 	<!-- traffic information: e.g closed doors -->
-	<traffic>../demos/T-Junction/traffic.xml</traffic>
+	<traffic>inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" fps="8" version="0.4">
-		<file location="../outputfiles/trajectories-tjunction.xml"/>
+	<trajectories format="xml-plain" fps="8"> 
+		<file location="outputfiles/trajectories.xml"/>
+		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	<!-- where to store the logs 
-	<logfile>outputfiles/log.txt</logfile>
- 	-->
+	<logfile>outputfiles/log.txt</logfile>  -->
+ 	
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
 		<tmax unit="sec">900</tmax>
 		<solver>euler</solver>
 		<stepsize>0.001</stepsize>
+		<exitCrossingStrategy>3</exitCrossingStrategy>
 		<linkedcells enabled="true" cell_size="2.2"/>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />

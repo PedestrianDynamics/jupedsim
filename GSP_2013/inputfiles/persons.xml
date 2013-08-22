@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<persons version="0.4">
+	<header>
+		<description>casern, 21.06.2008</description>
+		<number>23</number>
+	</header>
+
+	<!-- default distribution -->
+	<!-- TODO: also distribute with room_id only -->
+	<distribution>
+		<dist room_caption="hall" subroom_id="0" number="10"/>
+		<dist room_caption="hall" subroom_id="1" number="10"/>
+		<dist room_caption="hall" number="3"/>
+	</distribution>
+
+	<routers>
+		<router id="1" method="local_shortest"/>
+		<router id="2" method="global_shortest"/>
+		<router id="3" method="quickest"/>
+		<router id="4" method="dummy"/>
+	</routers>
+	
+	<groups> <!-- Leute, die sich auskennen -->
+		<group id ="1">
+			<members>1,2,3</members>
+			<router>1</router>
+			<goal>1</goal>
+		</group>
+	</groups>
+
+	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
+		direction="" goal="" age="18" gender="male"/> -->
+	<person id="1" height="180" wishVelo="1.3" age="18" gender="male" />
+	<person id="2" height="170" age="20" gender="male" />
+	<person id="3" height="182" age="25" gender="female" />
+</persons> 
