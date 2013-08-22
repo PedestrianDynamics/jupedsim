@@ -389,7 +389,10 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 					pRoutingStrategies.push_back(make_pair (4,ROUTING_DYNAMIC));
 					break;
 				case 5:
-					pRoutingStrategies.push_back(make_pair (5,ROUTING_DUMMY));
+					pRoutingStrategies.push_back(make_pair (5,ROUTING_NAV_MESH));
+					break;
+				case 6:
+					pRoutingStrategies.push_back(make_pair (6,ROUTING_DUMMY));
 					break;
 				default:
 					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
@@ -717,6 +720,8 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_QUICKEST));
 		else if(strategy=="dynamic")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_DYNAMIC));
+		else if(strategy=="nav_mesh")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_NAV_MESH));
 		else if(strategy=="dummy")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_DUMMY));
 		else{

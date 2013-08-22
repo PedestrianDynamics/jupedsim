@@ -256,7 +256,6 @@ void Building::Update() {
 	// some peds may change the room via another crossing than the primary intended one
 	// in that case they are set in the wrong room.
 	vector<Pedestrian*> nonConformPeds;
-        printf("enter Building::update\n");
 	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
 
@@ -418,7 +417,7 @@ void Building::InitPhiAllPeds(double pDt) {
 					sinPhi = d.GetY() / dist;
 				} else {
 					Log->Write(
-							"ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
+							"ERROR: \tBuilding::InitPhiAllPeds() cannot initialize phi! "
 									"dist to target ist 0\n");
 					exit(0);
 				}

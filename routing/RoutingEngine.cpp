@@ -60,6 +60,8 @@ Router* RoutingEngine::GetRouter(RoutingStrategy strategy) const {
 		if(_routersCollection[r]->GetStrategy()==strategy)
 			return _routersCollection[r];
 	}
+	//Log->Write("ERROR: \t Could not Find any router with ID:  [%d].",strategy);
+	//exit(EXIT_FAILURE);
 	return (Router*) NULL;
 }
 

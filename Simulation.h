@@ -41,6 +41,7 @@
 #include "routing/DummyRouter.h"
 #include "routing/GraphRouter.h"
 #include "routing/NavMesh.h"
+#include "routing/MeshRouter.h"
 #include "routing/RoutingEngine.h"
 #include "pedestrian/PedDistributor.h"
 

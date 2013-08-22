@@ -284,6 +284,15 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			s.append("\tRouting Strategy graph router added\n");
 			break;
 		}
+		case ROUTING_NAV_MESH:
+		{
+			Router* router=new MeshRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy nav_mesh  router added\n");
+			break;
+		}
 		case ROUTING_DUMMY:
 		{
 			Router* router=new DummyRouter();
@@ -335,7 +344,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	_nPeds=_distribution->Distribute(_building);
 
-	// initialise the routing engine before doing any other things
+	// initialize the routing engine before doing any other things
 	routingEngine->Init(_building);
 	_building->InitPhiAllPeds(_deltaT);
 
@@ -384,7 +393,6 @@ int Simulation::RunSimulation() {
 		t = 0 + (frameNr - 1) * _deltaT;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
 		_solver->solveODE(t, t + _deltaT, _building);
-                printf("t=%f\n",t);
 		// gucken ob Fußgänger in neuen Räumen/Unterräumen
 		Update();
 		// ggf. Ausgabe für TraVisTo
@@ -393,7 +401,7 @@ int Simulation::RunSimulation() {
 		}
 //		if (frameNr % 1000 == 0) {
 //			cout<<"                        \r";
-                cout<<">> Frames : "<<frameNr<<"\n";
+//                cout<<">> Frames : "<<frameNr<<"\n";
 //			cout.flush();
 //		}
 	}
@@ -409,9 +417,7 @@ int Simulation::RunSimulation() {
 
 // TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
-    printf("update building\n");
 	_building->Update();
-        printf("update building. OK\n");
 	// Neue Anzahl von Fußgänger, falls jemand ganz raus geht
         // printf("GetAllPedestrians\n");
 	_nPeds=_building->GetAllPedestrians().size();

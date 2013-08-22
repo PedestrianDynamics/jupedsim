@@ -449,7 +449,8 @@ int PedDistributor::Distribute(Building* building) const {
 			ped->SetRouter(building->GetRoutingEngine()->GetRouter(router));
 		}else
 		{
-			Log->Write("WARNING: \tNo router was set for ped [%d]. Default router will be used!",ped->GetID());
+			//FIXME: the warning is not legitimate. It should be given after the group has been checked.
+			Log->Write("WARNING: \tNo router was set for ped [%d]. Default router will be used unless something is specified in group. You may ignore this message. It is being fixed !",ped->GetID());
 			ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
 		}
 
@@ -505,16 +506,24 @@ int PedDistributor::Distribute(Building* building) const {
 	int nPedsExpected= atoi(xRootNode->FirstChild("header")->FirstChildElement("number")->GetText());
 
 	//now parse the different groups
-
 	TiXmlNode* xGroups=xRootNode->FirstChild("groups");
-	if(xGroups)
-	for(TiXmlElement* group = xGroups->FirstChildElement("dist"); group;
-			group = group->NextSiblingElement("dist")) {
 
+	if(xGroups)
+	for(TiXmlElement* group = xGroups->FirstChildElement("group"); group;
+			group = group->NextSiblingElement("group")) {
 		int group_id=xmltoi(group->Attribute("id"),-1);
-		int trip_id=xmltoi(group->FirstChild("trip")->FirstChild()->Value(),-1);
-		int goal_id=xmltoi(group->FirstChild("goal")->FirstChild()->Value(),-1);
-		int router_id=xmltoi(group->FirstChild("router")->FirstChild()->Value(),-1);
+
+		int trip_id=-1;
+		if(group->FirstChild("trip"))
+			trip_id=xmltoi(group->FirstChild("trip")->FirstChild()->Value());
+
+		int goal_id=-1;
+		if(group->FirstChild("goal"))
+			goal_id=xmltoi(group->FirstChild("goal")->FirstChild()->Value());
+
+		int router_id=-1;
+		if(group->FirstChild("router")->FirstChild())
+			router_id=xmltoi(group->FirstChild("router")->FirstChild()->Value());
 
 		if((goal_id !=-1) && (trip_id!=-1)){
 			sprintf(tmp, "ERROR: \ttrip and goal cannot be set for the same group [%d] !",group_id);
