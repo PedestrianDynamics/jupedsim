@@ -16,6 +16,7 @@ MeshRouter::MeshRouter() {
 }
 
 MeshRouter::~MeshRouter() {
+	_meshdata.~MeshData();
 
 }
 
@@ -29,12 +30,22 @@ void MeshRouter::Init(Building* b) {
 	_building=b;
 	Log->Write("ERROR: \tdo not use this  <<Mesh>> router !!");
 
-	std::ifstream meshfile;
-	meshfile.open("../GSP_2013/test.nav", std::ios::in);
-	if(!meshfile.is_open()){
+	std::ifstream meshfiled;
+	meshfiled.open("../GSP_2013/test.nav", std::ios::in);
+	if(!meshfiled.is_open()){
 		Log->Write("ERROR: \tcould not open meshfile");
 	}
+	std::stringstream meshfile;
+	meshfile<<meshfiled.rdbuf();
+	meshfiled.close();
+
 	std::vector<MeshNode*> nodes;
+	std::vector<MeshEdge*> edges;
+	std::vector<MeshEdge*> outedges;
+	std::vector<MeshCellGroup*> mCellGroups;
+
+
+
     unsigned int countNodes=0;
 	meshfile>>countNodes;
 	for(unsigned int i=0;i<countNodes;i++){
@@ -44,7 +55,7 @@ void MeshRouter::Init(Building* b) {
 	}
 	std::cout<<"Read "<<nodes.size()<<" Nodes from file"<<std::endl;
 
-	std::vector<MeshEdge*> edges;
+
 	unsigned int countEdges=0;
 	meshfile>>countEdges;
 	for(unsigned int i=0;i<countEdges;i++){
@@ -54,7 +65,7 @@ void MeshRouter::Init(Building* b) {
 	}
 	std::cout<<"Read "<<edges.size()<<" inner Edges from file"<<std::endl;
 
-	std::vector<MeshEdge*> outedges;
+
 	unsigned int countOutEdges=0;
 	meshfile>>countOutEdges;
 	for(unsigned int i=0;i<countOutEdges;i++){
@@ -68,7 +79,6 @@ void MeshRouter::Init(Building* b) {
 
 
 
-	std::vector<MeshCellGroup*> mCellGroups;
 	/*char tmp[256];
 	meshfile.getline(tmp,256);
 	std::string tmp;
@@ -76,6 +86,7 @@ void MeshRouter::Init(Building* b) {
 	std::getline(meshfile,tmp);
 	std::cout<<"<"<<std::string(tmp)<<">"<<std::endl;
 	int stop=0;*/
+	/*
 	while(!meshfile.eof()){
 		//std::cout<<"here"<<std::endl;
 		std::string groupname;
@@ -134,12 +145,14 @@ void MeshRouter::Init(Building* b) {
 		std::cout<<mCellGroups.back()->get_cells().back()->get_midx()<<std::endl;
 	}
 	std::cout<<"Ende while"<<std::endl;
-	meshfile.close();
+    */
 	//std::cout<<"here"<<std::endl;
 	//MeshData meshdat(nodes,edges,outedges,mCellGroups);
 	//_meshdata=meshdat;
 	//MeshData meshdat(nodes,edges,outedges,mCellGroups);
+	std::cout<<"here"<<std::endl;
 	_meshdata=*(new MeshData(nodes,edges,outedges,mCellGroups));
+	std::cout<<"here"<<std::endl;
 }
 
 
