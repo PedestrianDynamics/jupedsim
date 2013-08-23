@@ -4,16 +4,16 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfiles/geo.xml</geometry>
+	<geometry>../GSP_2013/inputfiles/geo.xml</geometry>
 	<!--persons information and distribution -->
-	<person>inputfiles/persons.xml</person>
+	<person>../GSP_2013/inputfiles/persons.xml</person>
 	<!-- extra routing information -->
-	<routing>inputfiles/routing.xml</routing>
+	<routing>../GSP_2013/inputfiles/routing.xml</routing>
 	<!-- traffic information: e.g closed doors -->
-	<traffic>inputfiles/traffic.xml</traffic>
+	<traffic>../GSP_2013/inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="8"> 
-		<file location="outputfiles/trajectories.xml"/>
+		<file location="../GSP_2013/outputfiles/trajectories.xml"/>
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	<!-- where to store the logs 
