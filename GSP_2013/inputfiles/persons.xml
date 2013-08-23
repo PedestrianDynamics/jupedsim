@@ -14,10 +14,11 @@
 	</distribution>
 
 	<routers>
-		<router id="1" method="local_shortest"/>
+		<!--<router id="1" method="local_shortest"/>
 		<router id="2" method="global_shortest"/>
 		<router id="3" method="quickest"/>
-		<router id="4" method="dummy"/>
+		<router id="4" method="dummy"/-->
+      <router id="1" method="nav_mesh"/>
 	</routers>
 	
 	<groups> <!-- Leute, die sich auskennen -->

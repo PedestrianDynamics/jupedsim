@@ -18,6 +18,7 @@ class MeshCellGroup;
 class MeshData{
 public:
 	MeshData();
+	~MeshData();
 	MeshData(std::vector<MeshNode*>,std::vector<MeshEdge*>,
 			std::vector<MeshEdge*>,std::vector<MeshCellGroup*>);
 private:
@@ -43,6 +44,10 @@ private:
 class MeshEdge{
 public:
 	MeshEdge(int,int,int,int);
+	int get_n1(){return _n1;};
+	int get_n2(){return _n2;};
+	int get_c1(){return _c1;};
+	int get_c2(){return _c2;};
 	//friend std::istream& operator>>(std::istream& is, MeshEdge& mn);
 private:
 	int _n1;
@@ -55,6 +60,7 @@ class MeshCell{
 public:
 	MeshCell(double,double,std::vector<int>,
 			 double*,std::vector<int>,std::vector<int>);
+	double get_midx(){return _midx;};
 private:
 	double _midx;
 	double _midy;
@@ -67,6 +73,8 @@ private:
 class MeshCellGroup{
 public:
 	MeshCellGroup(std::string,std::vector<MeshCell*>);
+	~MeshCellGroup();
+	std::vector<MeshCell*> get_cells();
 private:
     std::string _groupname;
     std::vector<MeshCell*> _cells;
