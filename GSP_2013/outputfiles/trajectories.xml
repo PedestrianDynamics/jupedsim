@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<trajectoriesDataset>
+	<header formatVersion = "1.0">
+		<agents>0</agents>
+		<seed>12542</seed>
+		<frameRate>8.000000</frameRate>
+	</header>
+
+	<geometry>
+		<wall>
+			<point xPos="1000.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</wall>
+		<wall>
+			<point xPos="1000.00" yPos="0.00"/>
+			<point xPos="0.00" yPos="0.00"/>
+		</wall>
+		<wall>
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="0.00" yPos="1000.00"/>
+		</wall>
+		<wall>
+			<point xPos="0.00" yPos="1000.00"/>
+			<point xPos="1000.00" yPos="1000.00"/>
+		</wall>
+		<wall>
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="1000.00" yPos="600.00"/>
+		</wall>
+		<label centerX="500.00" centerY="500.00" centerZ="0" text="0" color="100" />
+		<door ID="17" color = "250" caption="0_17">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1000.00" yPos="400.00"/>
+		</door>
+		<wall>
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</wall>
+		<wall>
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</wall>
+		<wall>
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1500.00" yPos="400.00"/>
+		</wall>
+		<wall>
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="400.00"/>
+		</wall>
+		<label centerX="1490.63" centerY="190.63" centerZ="0" text="1" color="100" />
+		<wall>
+			<point xPos="1200.00" yPos="600.00"/>
+			<point xPos="1300.00" yPos="600.00"/>
+		</wall>
+		<wall>
+			<point xPos="1300.00" yPos="600.00"/>
+			<point xPos="1300.00" yPos="550.00"/>
+		</wall>
+		<wall>
+			<point xPos="1300.00" yPos="550.00"/>
+			<point xPos="1200.00" yPos="550.00"/>
+		</wall>
+		<wall>
+			<point xPos="1200.00" yPos="550.00"/>
+			<point xPos="1200.00" yPos="600.00"/>
+		</wall>
+		<label centerX="1250.00" centerY="575.00" centerZ="0" text="table" color="100" />
+		<wall>
+			<point xPos="1650.00" yPos="-200.00"/>
+			<point xPos="1700.00" yPos="-200.00"/>
+		</wall>
+		<wall>
+			<point xPos="1700.00" yPos="-200.00"/>
+			<point xPos="1700.00" yPos="-300.00"/>
+		</wall>
+		<wall>
+			<point xPos="1700.00" yPos="-300.00"/>
+			<point xPos="1650.00" yPos="-300.00"/>
+		</wall>
+		<wall>
+			<point xPos="1650.00" yPos="-300.00"/>
+			<point xPos="1650.00" yPos="-200.00"/>
+		</wall>
+		<label centerX="1675.00" centerY="-250.00" centerZ="0" text="table" color="100" />
+		<door ID="23" color = "250" caption="2_23">
+			<point xPos="1200.00" yPos="550.00"/>
+			<point xPos="1200.00" yPos="400.00"/>
+		</door>
+		<door ID="24" color = "250" caption="3_24">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</door>
+		<door ID="25" color = "250" caption="4_25">
+			<point xPos="1500.00" yPos="-200.00"/>
+			<point xPos="1650.00" yPos="-200.00"/>
+		</door>
+		<door ID="18" color="180" caption="1_18_main exit">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</door>
+		<wall>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</wall>
+		<wall>
+			<point xPos="-1000.00" yPos="2000.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</wall>
+		<wall>
+			<point xPos="2700.00" yPos="2000.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</wall>
+		<wall>
+			<point xPos="2700.00" yPos="-1500.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</wall>
+		<label centerX="850.00" centerY="250.00" centerZ="0" text="0" color="100" />
+	</geometry>
+
+<frame ID="0">
+</frame>
+
+</trajectoriesDataset>
+

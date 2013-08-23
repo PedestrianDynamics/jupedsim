@@ -12,23 +12,27 @@
 
 MeshRouter::MeshRouter() {
 	_building=NULL;
+	//TODO: umstellung auf Zeigern
 	_meshdata=MeshData();
 }
 
 MeshRouter::~MeshRouter() {
-	_meshdata.~MeshData();
-
+	delete &_meshdata;
 }
 
 int MeshRouter::FindExit(Pedestrian* p) {
-	p->SetExitIndex(1);
-	//p->SetExitLine(_building->getGetCrossing(0));
-	return 1;
+	std::cout<<"calling the mesh router"<<std::endl;
+	//return any transition or crossing in the actual room.
+	p->SetExitIndex(-1);
+	//find a proper navigation line
+//	p->SetExitLine(_building->GetAllTransitions()[0]);
+//	p->SetExitLine(_building->GetTransition(0)GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()[0]);
+	return -1;
 }
 
 void MeshRouter::Init(Building* b) {
 	_building=b;
-	Log->Write("ERROR: \tdo not use this  <<Mesh>> router !!");
+	Log->Write("ERROR: \tdo not use this  <<Mesh>>  router !!");
 
 	std::ifstream meshfiled;
 	meshfiled.open("../GSP_2013/test.nav", std::ios::in);

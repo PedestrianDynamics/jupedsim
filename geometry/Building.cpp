@@ -401,10 +401,13 @@ void Building::InitPhiAllPeds(double pDt) {
 			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				double cosPhi, sinPhi;
 				Pedestrian* ped = sub->GetPedestrian(k);
+				ped->SetRoomID(room->GetID(), room->GetCaption());
 				ped->Setdt(pDt); //set the simulation step
 				//a destination could not be found for that pedestrian
 				if (ped->FindRoute() == -1) {
-					DeletePedFromSim(ped);
+//					DeletePedFromSim(ped);
+					sub->DeletePedestrian(k--);
+					continue;
 				}
 				Line* e = ped->GetExitLine();
 				const Point& e1 = e->GetPoint1();
@@ -426,7 +429,6 @@ void Building::InitPhiAllPeds(double pDt) {
 				E.SetCosPhi(cosPhi);
 				E.SetSinPhi(sinPhi);
 				ped->SetEllipse(E);
-				ped->SetRoomID(room->GetID(), room->GetCaption());
 			}
 		}
 	}
