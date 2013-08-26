@@ -13,11 +13,16 @@
 MeshRouter::MeshRouter() {
 	_building=NULL;
 	//TODO: umstellung auf Zeigern
-	_meshdata=MeshData();
+	//DONE
+	//_meshdata=MeshData();
+	_meshdata=new MeshData();
 }
 
 MeshRouter::~MeshRouter() {
-	delete &_meshdata;
+	//delete &_meshdata;
+	std::cout<<"Start Desctructor Meshrouter"<<std::endl;
+	delete _meshdata;
+	std::cout<<"End Desctructor Meshrouter"<<std::endl;
 }
 
 int MeshRouter::FindExit(Pedestrian* p) {
@@ -90,8 +95,8 @@ void MeshRouter::Init(Building* b) {
 	std::getline(meshfile,tmp);
 	std::cout<<"<"<<std::string(tmp)<<">"<<std::endl;
 	int stop=0;*/
-	/*
-	while(!meshfile.eof()){
+    //int cont=0;
+	while(!meshfile.eof() /*&& cont<2*/){
 		//std::cout<<"here"<<std::endl;
 		std::string groupname;
 		bool  namefound=false;
@@ -100,63 +105,74 @@ void MeshRouter::Init(Building* b) {
 				namefound=true;
 			}
 		}
-		std::cout<<"<"<<groupname<<">"<<std::endl;
-		//if(!(meshfile>>groupname)){
-		//	Log->Write("Konnte Gruppennamen der Zellen nicht lesen");
-		//}
-		unsigned int countCells=0;
-		meshfile>>countCells;
-		std::cout<<countCells<<std::endl;
-		std::vector<MeshCell*> mCells;
-		for(unsigned int i=0;i<countCells;i++){
-			double midx,midy;
-			meshfile>>midx>>midy;
-			unsigned int countNodes=0;
-			meshfile>>countNodes;
-			std::vector<int> node_id;
-			for(unsigned int j=0;j<countNodes;j++){
-				int tmp;
-				meshfile>>tmp;
-				node_id.push_back(tmp);
+		if (!meshfile.eof()){
+			std::cout<<"<"<<groupname<<">"<<std::endl;
+
+			//	std::cout<<"Read EOF!"<<std::endl;
+			//if(!(meshfile>>groupname)){
+			//	Log->Write("Konnte Gruppennamen der Zellen nicht lesen");
+			//}
+
+			unsigned int countCells=0;
+			meshfile>>countCells;
+			std::cout<<"size:"<<countCells<<std::endl;
+			//cont=false;
+
+			std::vector<MeshCell*> mCells;
+			for(unsigned int i=0;i<countCells;i++){
+				double midx,midy;
+				meshfile>>midx>>midy;
+				unsigned int countNodes=0;
+				meshfile>>countNodes;
+				std::vector<int> node_id;
+				for(unsigned int j=0;j<countNodes;j++){
+					int tmp;
+					meshfile>>tmp;
+					node_id.push_back(tmp);
+				}
+				//double* normvec=new double[3];
+				double normvec[3];
+				for (unsigned int j=0;j<3;j++){
+					double tmp;
+					meshfile>>tmp;
+					normvec[i]=tmp;
+				}
+				unsigned int countEdges=0;
+				meshfile>>countEdges;
+				std::vector<int> edge_id;
+				for(unsigned int j=0;j<countEdges;j++){
+					int tmp;
+					meshfile>>tmp;
+					edge_id.push_back(tmp);
+				}
+				unsigned int countWalls=0;
+				meshfile>>countWalls;
+				std::vector<int> wall_id;
+				for(unsigned int j=0;j<countWalls;j++){
+					int tmp;
+					meshfile>>tmp;
+					wall_id.push_back(tmp);
+				}
+				//std::cout<<midx<<std::endl;
+				mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id));
+				//std::cout<<mCells.back()->get_midx()<<std::endl;
 			}
-			double* normvec=new double[3];
-			for (unsigned int j=0;j<3;j++){
-				int tmp;
-				meshfile>>tmp;
-				normvec[i]=tmp;
-			}
-			unsigned int countEdges=0;
-			meshfile>>countEdges;
-			std::vector<int> edge_id;
-			for(unsigned int j=0;j<countEdges;j++){
-				int tmp;
-				meshfile>>tmp;
-				edge_id.push_back(tmp);
-			}
-			unsigned int countWalls=0;
-			meshfile>>countWalls;
-			std::vector<int> wall_id;
-			for(unsigned int j=0;j<countWalls;j++){
-				int tmp;
-				meshfile>>tmp;
-				wall_id.push_back(tmp);
-			}
-			std::cout<<midx<<std::endl;
-			mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id));
-			std::cout<<mCells.back()->get_midx()<<std::endl;
+			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
+			//std::cout<<mCellGroups.back()->get_cells().back()->get_midx()<<std::endl;
 		}
-		mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
-		std::cout<<mCellGroups.back()->get_cells().back()->get_midx()<<std::endl;
 	}
-	std::cout<<"Ende while"<<std::endl;
-    */
+	//std::cout<<"Ende while"<<std::endl;
+
 	//std::cout<<"here"<<std::endl;
 	//MeshData meshdat(nodes,edges,outedges,mCellGroups);
 	//_meshdata=meshdat;
 	//MeshData meshdat(nodes,edges,outedges,mCellGroups);
-	std::cout<<"here"<<std::endl;
-	_meshdata=*(new MeshData(nodes,edges,outedges,mCellGroups));
-	std::cout<<"here"<<std::endl;
+	//std::cout<<"here"<<std::endl;
+	//_meshdata=*(new MeshData(nodes,edges,outedges,mCellGroups));
+	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
+
+	std::cout<<_meshdata->get_cellGroups().back()->get_cells().back()->get_midx()<<std::endl;
+	//std::cout<<"here"<<std::endl;
 }
 
 

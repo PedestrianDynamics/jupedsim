@@ -14,7 +14,7 @@
 class MeshRouter: public Router {
 private:
 	Building* _building;
-	MeshData _meshdata;
+	MeshData* _meshdata;
 public:
 	MeshRouter();
 	virtual ~MeshRouter();
