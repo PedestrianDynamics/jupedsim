@@ -48,19 +48,17 @@ void MeshRouter::Init(Building* b) {
 	meshfile<<meshfiled.rdbuf();
 	meshfiled.close();
 
-	std::vector<MeshNode*> nodes;
+	std::vector<Point*> nodes;
 	std::vector<MeshEdge*> edges;
 	std::vector<MeshEdge*> outedges;
 	std::vector<MeshCellGroup*> mCellGroups;
-
-
 
     unsigned int countNodes=0;
 	meshfile>>countNodes;
 	for(unsigned int i=0;i<countNodes;i++){
 		double temp1,temp2;
 		meshfile>>temp1>>temp2;
-		nodes.push_back(new MeshNode(temp1,temp2));
+		nodes.push_back(new Point(temp1,temp2));
 	}
 	std::cout<<"Read "<<nodes.size()<<" Nodes from file"<<std::endl;
 
@@ -70,34 +68,20 @@ void MeshRouter::Init(Building* b) {
 	for(unsigned int i=0;i<countEdges;i++){
 		int t1,t2,t3,t4;
 		meshfile>>t1>>t2>>t3>>t4;
-		edges.push_back(new MeshEdge(t1,t2,t3,t4));
+		edges.push_back(new MeshEdge(t1,t2,t3,t4,*(nodes.at(t1)),*(nodes.at(t2))));
 	}
 	std::cout<<"Read "<<edges.size()<<" inner Edges from file"<<std::endl;
-
 
 	unsigned int countOutEdges=0;
 	meshfile>>countOutEdges;
 	for(unsigned int i=0;i<countOutEdges;i++){
 		int t1,t2,t3,t4;
 		meshfile>>t1>>t2>>t3>>t4;
-		outedges.push_back(new MeshEdge(t1,t2,t3,t4));
+		outedges.push_back(new MeshEdge(t1,t2,t3,t4,*(nodes.at(t1)),*(nodes.at(t2))));
 	}
 	std::cout<<"Read "<<outedges.size()<<" outer Edges from file"<<std::endl;
-	/***/
-	//std::cout<<outedges[0]->get_n1()<<" "<<outedges[1]->get_c2()<<std::endl;
 
-
-
-	/*char tmp[256];
-	meshfile.getline(tmp,256);
-	std::string tmp;
-	meshfile.ignore(2);
-	std::getline(meshfile,tmp);
-	std::cout<<"<"<<std::string(tmp)<<">"<<std::endl;
-	int stop=0;*/
-    //int cont=0;
-	while(!meshfile.eof() /*&& cont<2*/){
-		//std::cout<<"here"<<std::endl;
+	while(!meshfile.eof()){
 		std::string groupname;
 		bool  namefound=false;
 		while(!namefound && getline(meshfile,groupname)){
@@ -116,7 +100,6 @@ void MeshRouter::Init(Building* b) {
 			unsigned int countCells=0;
 			meshfile>>countCells;
 			std::cout<<"size:"<<countCells<<std::endl;
-			//cont=false;
 
 			std::vector<MeshCell*> mCells;
 			for(unsigned int i=0;i<countCells;i++){
@@ -153,26 +136,23 @@ void MeshRouter::Init(Building* b) {
 					meshfile>>tmp;
 					wall_id.push_back(tmp);
 				}
-				//std::cout<<midx<<std::endl;
 				mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id));
-				//std::cout<<mCells.back()->get_midx()<<std::endl;
 			}
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
-			//std::cout<<mCellGroups.back()->get_cells().back()->get_midx()<<std::endl;
 		}
 	}
-	//std::cout<<"Ende while"<<std::endl;
-
-	//std::cout<<"here"<<std::endl;
-	//MeshData meshdat(nodes,edges,outedges,mCellGroups);
-	//_meshdata=meshdat;
-	//MeshData meshdat(nodes,edges,outedges,mCellGroups);
-	//std::cout<<"here"<<std::endl;
-	//_meshdata=*(new MeshData(nodes,edges,outedges,mCellGroups));
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
+	//std::cout<<_meshdata->get_cellGroups().back()->get_cells().back()->get_midx()<<std::endl;
 
-	std::cout<<_meshdata->get_cellGroups().back()->get_cells().back()->get_midx()<<std::endl;
-	//std::cout<<"here"<<std::endl;
+	// Test
+	int id;
+	Point testp(0,0);
+	if(_meshdata->findCell(testp,id)!=NULL){
+		std::cout<<testp.toString()<<"Gefunden in Zelle: "<<id<<std::endl;
+	}
+	else{
+		std::cout<<"Nicht gefunden"<<std::endl;
+	}
 }
 
 

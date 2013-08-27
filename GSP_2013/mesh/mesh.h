@@ -10,61 +10,62 @@
 
 #include <fstream>
 #include <vector>
+#include "../../geometry/Point.h"
+#include "../../geometry/Line.h"
 
-class MeshNode;
 class MeshEdge;
+class MeshCell;
 class MeshCellGroup;
 
 class MeshData{
 public:
 	MeshData();
 	~MeshData();
-	MeshData(std::vector<MeshNode*>,std::vector<MeshEdge*>,
+	MeshData(std::vector<Point*>,std::vector<MeshEdge*>,
 			std::vector<MeshEdge*>,std::vector<MeshCellGroup*>);
+	std::vector<Point*> get_nodes(){return _mNodes;}
+	std::vector<MeshEdge*> get_edges(){return _mEdges;}
+	std::vector<MeshEdge*> gedt_outEdges(){return _mOutEdges;}
+	std::vector<MeshCellGroup*> get_cellGroups(){return _mCellGroups;}
+
+	MeshCell* findCell(Point testp,int& cell_id);
+
 private:
-	std::vector<MeshNode*> _mNodes;
+	std::vector<Point*> _mNodes;
 	std::vector<MeshEdge*> _mEdges;
 	std::vector<MeshEdge*> _mOutEdges;
 	std::vector<MeshCellGroup*> _mCellGroups;
 
 };
 
-class MeshNode{
+class MeshEdge:public Line{
 public:
-	MeshNode();
-	MeshNode(double,double);
-	double get_x();
-	double get_y();
-	//friend std::istream& operator>>(std::istream& is, MeshNode& mn);
-private:
-	double _x;
-	double _y;
-};
-
-class MeshEdge{
-public:
-	MeshEdge(int,int,int,int);
+	MeshEdge(int,int,int,int,Point p1=Point(),Point p2=Point());//:Line(p1,p2);
 	int get_n1(){return _n1;};
 	int get_n2(){return _n2;};
 	int get_c1(){return _c1;};
 	int get_c2(){return _c2;};
 	//friend std::istream& operator>>(std::istream& is, MeshEdge& mn);
 private:
-	int _n1;
-	int _n2;
-	int _c1;
-    int _c2;
+	int _n1; //ID of Node 1
+	int _n2; //ID of Node 2
+	int _c1; //ID of Cell 1
+    int _c2; //ID of Cell 2
 };
 
 class MeshCell{
 public:
 	MeshCell(double,double,std::vector<int>,
 			 double*,std::vector<int>,std::vector<int>);
+	~MeshCell();
 	double get_midx(){return _midx;};
+	double get_midy(){return _midy;};
+	std::vector<int> get_nodes(){return _node_id;};
 private:
 	double _midx;
 	double _midy;
 	std::vector<int> _node_id;
+	//double *_normvec;
 	double _normvec[3];
 	std::vector<int> _edge_id;
 	std::vector<int> _wall_id;

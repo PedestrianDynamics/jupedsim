@@ -49,7 +49,7 @@
 			<point xPos="1500.00" yPos="400.00"/>
 			<point xPos="1000.00" yPos="400.00"/>
 		</wall>
-		<label centerX="1490.63" centerY="190.63" centerZ="0" text="1" color="100" />
+		<label centerX="1490.62" centerY="190.62" centerZ="0" text="1" color="100" />
 		<wall>
 			<point xPos="1200.00" yPos="600.00"/>
 			<point xPos="1300.00" yPos="600.00"/>

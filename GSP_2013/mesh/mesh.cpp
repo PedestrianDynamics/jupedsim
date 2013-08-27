@@ -8,16 +8,16 @@
 #include "mesh.h"
 #include <iostream>
 
-MeshNode::MeshNode(){
+/*MeshNode::MeshNode(){
 	_x=0.0;
 	_y=0.0;
 }
 MeshNode::MeshNode(double x,double y){
 	_x=x;
 	_y=y;
-}
+}*/
 
-MeshEdge::MeshEdge(int n1,int n2,int c1, int c2){
+MeshEdge::MeshEdge(int n1,int n2,int c1, int c2,Point p1,Point p2):Line(p1,p2){
 	_n1=n1;
 	_n2=n2;
 	_c1=c1;
@@ -25,7 +25,7 @@ MeshEdge::MeshEdge(int n1,int n2,int c1, int c2){
 }
 
 MeshCell::MeshCell(double midx,double midy,std::vector<int> node_id,
-			 double normvec[3],std::vector<int> edge_id,
+			 double *normvec,std::vector<int> edge_id,
 			 std::vector<int> wall_id){
 	_midx=midx;
 	_midy=midy;
@@ -34,6 +34,10 @@ MeshCell::MeshCell(double midx,double midy,std::vector<int> node_id,
 		_normvec[i]=normvec[i];
 	_edge_id=edge_id;
 	_wall_id=wall_id;
+}
+
+MeshCell::~MeshCell(){
+	//delete[] _normvec;
 }
 
 MeshCellGroup::MeshCellGroup(std::string groupname,std::vector<MeshCell*> cells){
@@ -49,13 +53,13 @@ std::vector<MeshCell*> MeshCellGroup::get_cells(){
 }
 
 MeshData::MeshData(){
-	_mNodes=std::vector<MeshNode*>();
+	_mNodes=std::vector<Point*>();
 	_mEdges=std::vector<MeshEdge*>();
 	_mOutEdges=std::vector<MeshEdge*>();
 	_mCellGroups=std::vector<MeshCellGroup*>();
 }
 MeshData::~MeshData(){
-	std::cout<<"Meshdata wird zerstoert"<<std::endl;
+	std::cout<<"\tStart Destructor Meshdata"<<std::endl;
 	for(unsigned int i=0;i<_mNodes.size();i++)
 		delete _mNodes[i];
 	for(unsigned int i=0;i<_mEdges.size();i++)
@@ -64,9 +68,10 @@ MeshData::~MeshData(){
 			delete _mOutEdges[i];
 	for(unsigned int i=0;i<_mCellGroups.size();i++)
 			delete _mCellGroups[i];
+	std::cout<<"\tEnd Destructor Meshdata"<<std::endl;
 }
 
-MeshData::MeshData(std::vector<MeshNode*> mn,std::vector<MeshEdge*> me,
+MeshData::MeshData(std::vector<Point*> mn,std::vector<MeshEdge*> me,
 		std::vector<MeshEdge*> moe,std::vector<MeshCellGroup*> mcg){
 	_mNodes=mn;
 	_mEdges=me;
@@ -74,6 +79,46 @@ MeshData::MeshData(std::vector<MeshNode*> mn,std::vector<MeshEdge*> me,
 	_mCellGroups=mcg;
 }
 
+ MeshCell* MeshData::findCell(Point test, int& cell_id){
+
+	int tmp_id=-1;
+	std::vector<MeshCellGroup*>::const_iterator it_g;
+	for(it_g=_mCellGroups.begin();it_g!=_mCellGroups.end();it_g++){
+		std::vector<MeshCell*>::const_iterator it_c;
+		std::vector<MeshCell*> act_cg=(*it_g)->get_cells();
+		for(it_c=act_cg.begin();it_c!=act_cg.end();it_c++){
+			bool found=true;
+			std::vector<int> act_n=(*it_c)->get_nodes();
+			int count_nodes=act_n.size();
+			double n1x= _mNodes.at(act_n.at(0))->GetX();
+			double n1y= _mNodes.at(act_n.at(0))->GetY();
+
+			for(int pos=0;pos<count_nodes;pos++){
+				double n2x= _mNodes.at(act_n.at((pos+1)%count_nodes))->GetX();
+				double n2y= _mNodes.at(act_n.at((pos+1)%count_nodes))->GetY();
+
+				Point temp_nxny(n2y-n1y,n1x-n2x);
+				Point temp_xy=test-Point(n1x,n1y);
+
+				if (temp_xy.ScalarP(temp_nxny)>0){
+					found=false;
+					break;
+				}
+				n1x=n2x;
+				n1y=n2y;
+			}
+			tmp_id++;
+			if (found){
+				cell_id=tmp_id;
+				return (*it_c);
+			}
+
+		}
+	}
+	// Point test is in no polygon of MeshData
+	cell_id=-1;
+	return NULL;
+}
 /*
 std::istream& operator>>(std::istream& is, MeshNode& mn){
 	is>>mn._x>>mn._y;
