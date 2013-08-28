@@ -30,7 +30,6 @@
 #include "Wall.h"
 #include "Point.h"
 
-#include  <cstdlib>
 
 using namespace std;
 

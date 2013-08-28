@@ -122,9 +122,24 @@ SubRoom* Room::GetSubRoom(int index) const {
 }
 
 
+#ifdef _SIMULATOR
+
+int Room::GetNumberOfPedestrians() const {
+    int sum = 0;
+    for (int i = 0; i < GetNumberOfSubRooms(); i++) {
+        sum += GetSubRoom(i)->GetNumberOfPedestrians();
+    }
+    return sum;
+}
+
+#endif // _SIMULATOR
+
 RoomState Room::GetState() const {
 	return _state;
 }
+
+
+
 /*************************************************************
  Sonstige Funktionen
  ************************************************************/
@@ -140,6 +155,10 @@ void Room::DeleteSubRoom(int index) {
         exit(0);
     }
 }
+
+/*************************************************************
+ Ein-Ausgabe
+ ************************************************************/
 
 
 void Room::WriteToErrorLog() const {
@@ -171,15 +190,3 @@ void Room::SetOutputHandler(OutputHandler* oh){
 OutputHandler* Room::GetOutputHandler() const {
 	return _outputFile;
 }
-
-#ifdef _SIMULATOR
-
-int Room::GetNumberOfPedestrians() const {
-    int sum = 0;
-    for (int i = 0; i < GetNumberOfSubRooms(); i++) {
-        sum += GetSubRoom(i)->GetNumberOfPedestrians();
-    }
-    return sum;
-}
-
-#endif

@@ -31,7 +31,6 @@
 
 #include  <cmath>
 #include  <sstream>
-#include  <cstdlib>
 
 int Line::_static_UID=0;
 
@@ -132,7 +131,7 @@ Point Line::NormalVec() const {
 		norm = sqrt(nx * nx + ny * ny);
 		if (fabs(norm) < J_EPS) {
 			Log->Write("ERROR: \tLine::NormalVec() norm==0\n");
-			exit(EXIT_FAILURE);
+			exit(0);
 		}
 		nx /= norm;
 		ny /= norm;
@@ -222,7 +221,7 @@ bool Line::IsInLine(const Point& p) const {
 		lambda = (py - ay) / (by - ay);
 	} else {
 		Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
-		exit(EXIT_FAILURE);
+		exit(0);
 	}
 	return (0 <= lambda) && (lambda <= 1);
 }
@@ -293,12 +292,12 @@ double Line::LengthSquare() const {
 
 bool Line::IntersectionWith(const Line& l) const {
 
-	double deltaACy = this->_point1.GetY() - l.GetPoint1().GetY();
+	double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
 	double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
-	double deltaACx = this->_point1.GetX() - l.GetPoint1().GetX();
+	double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
 	double deltaDCy = l.GetPoint2().GetY() - l.GetPoint1().GetY();
-	double deltaBAx = this->_point2.GetX() - this->_point1.GetX();
-	double deltaBAy = this->_point2.GetY() - this->_point1.GetY();
+	double deltaBAx = _point2.GetX() - _point1.GetX();
+	double deltaBAy = _point2.GetY() - _point1.GetY();
 
 	double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
 	double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
@@ -333,6 +332,29 @@ bool Line::IntersectionWith(const Line& l) const {
 
 	//return new PointF ((float) (AB.Start.X + r * deltaBAx), (float) (AB.Start.Y + r * deltaBAy));
 	return true;
+}
+
+bool Line::IsHorizontal(){
+	return fabs (_point1._y-_point2._y ) <= J_EPS;
+}
+
+bool Line::IsVertical(){
+	return fabs (_point1._x-_point2._x ) <= J_EPS;
+}
+
+int Line::WichSide(const Point& pt) {
+	//special case for horizontal lines
+	if (IsVertical()) {
+		//left
+		if (pt._x < _point1._x)
+			return 0;
+		//right or colinear
+		if (pt._x >= _point1._x)
+			return 1;
+	}
+
+	return ((_point2._x - _point1._x) * (pt._y - _point1._y)
+			- (_point2._y - _point1._y) * (pt._x - _point1._x)) > 0;
 }
 
 bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pedestrians*/){

@@ -25,10 +25,15 @@
  */
 
 #ifndef _MACROS_H
-#define	_MACROS_H
+#define _MACROS_H
 
+#include <cstdlib>
+#include <vector>
+#include <string.h>
 
 //#define _SIMULATOR 1
+
+//#undef _OPENMP
 
 // Genauigkeit
 #define J_EPS 0.001
@@ -41,13 +46,14 @@
 // zur Versionskontrolle beim Geometrieformat
 #define VERSION 0.40
 #define JPS_VERSION "0.4"
+#define JPS_MAJOR_VERSION 0
+#define JPS_MINOR_VERSION 4
 
 // Länge von char vectoren zur Ausgabe
 #define CLENGTH 1000
 
 
 // Faktor für TraVisTo (cm <-> m)
-//#define FAKTOR 100
 #define FAKTOR 100
 
 
@@ -84,6 +90,17 @@ enum RoutingStrategy {
 	ROUTING_DUMMY,
 	ROUTING_UNDEFINED =-1
 };
+
+
+//global functions for convenience
+// convenience functions
+
+inline char    xmltob(const char * t,char    v=0){ if (t&&(*t)) return (char)atoi(t); return v; }
+inline int     xmltoi(const char * t,int     v=0){ if (t&&(*t)) return atoi(t); return v; }
+inline long    xmltol(const char * t,long    v=0){ if (t&&(*t)) return atol(t); return v; }
+inline double  xmltof(const char * t,double  v=0.0){ if (t&&(*t)) return atof(t); return v; }
+inline const char * xmltoa(const char * t,      const char * v=""){ if (t)       return  t; return v; }
+inline char xmltoc(const char * t,const char v='\0'){ if (t&&(*t)) return *t; return v; }
 
 #endif	/* _MACROS_H */
 

@@ -116,13 +116,11 @@ public:
 	 */
     SubRoom* GetSubRoom(int index) const;
 
-#ifdef _SIMULATOR
     /**
      * @return the number of pedestrians in the rooms (all subrooms)
      */
     int GetNumberOfPedestrians() const;
 
-#endif
     /**
      * @return the state for this room
      */

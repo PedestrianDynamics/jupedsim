@@ -56,8 +56,8 @@ private:
 	FileFormat pFormat;
 	string _geometryFileName;
 	string _errorLogFile;
-	string _trajectoryFile;
-	string _trajectoryName;
+	string _trajectoriesLocation;
+	string _trajectoriesFilename;
 	string _measureAreaId;
 	double _lengthMeasureArea;
 	polygon_2d _measureArea;
@@ -91,8 +91,8 @@ public:
 	ArgumentParser(); // gibt die Programmoptionen aus
 
 	// Getter-Funktionen
-	const string& GetTrajectoriesFile() const;
-	const string& GetTrajectoryName() const;
+	const string& GetTrajectoriesFilename() const;
+	const string& GetTrajectoriesLocation() const;
 	const string& GetMeasureAreaId() const;
 	const FileFormat& GetFileFormat() const;
 	const string& GetGeometryFilename() const;
@@ -121,8 +121,6 @@ public:
 	int GetLog() const;
 	void SetHostname(const string& hostname);
 	void SetPort(int port);
-	void SetTrajectoriesFile(const string& trajectoriesFile);
-	void SetTrajectoriesPath(const string& trajectoriesPath);
 	void ParseArgs(int argc, char **argv);
 
 	/**

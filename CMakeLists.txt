@@ -15,18 +15,18 @@ INCLUDE_DIRECTORIES("./")
 file(
 	GLOB_RECURSE
 	source_files
-        Analysis.cpp  
-        main.cpp  
-        VoronoiDiagram.cpp  
-        VoronoiDiagramGenerator.cpp   
-        VoronoiPolygons.cpp
-
+	Analysis.cpp
+	main.cpp
+	VoronoiDiagram.cpp
+	VoronoiDiagramGenerator.cpp
+	VoronoiPolygons.cpp
 	IO/IODispatcher.cpp
 	IO/OutputHandler.cpp
-
 	general/ArgumentParser.cpp
-	general/xmlParser.cpp
-		
+	tinyxml/tinystr.cpp
+	tinyxml/tinyxml.cpp
+	tinyxml/tinyxmlerror.cpp
+	tinyxml/tinyxmlparser.cpp
 	geometry/Building.cpp  
 	geometry/Line.cpp      
 	geometry/Point.cpp    
@@ -39,21 +39,17 @@ file(
 	geometry/Obstacle.cpp  
 	geometry/SubRoom.cpp
 
-
-
 	header_files:
-        Analysis.h  
-        VoronoiDiagramGenerator.h  
-        VoronoiDiagram.h  
-        VoronoiPolygons.h
-
+	Analysis.h  
+	VoronoiDiagramGenerator.h  
+	VoronoiDiagram.h  
+	VoronoiPolygons.h
 	IO/IODispatcher.h
 	IO/OutputHandler.h
-
 	general/ArgumentParser.h
-	general/xmlParser.h	
+	tinyxml/tinyxml.h
+	tinyxml/tinystr.h
 	general/Macros.h
-
 	geometry/Building.h  
 	geometry/Line.h      
 	geometry/Point.h    

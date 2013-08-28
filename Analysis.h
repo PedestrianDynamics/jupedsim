@@ -1,24 +1,3 @@
-/*Simulation.h:
-  The Simulation class represents a simulation of pedestrians
-  based on a certain model in a specific scenario. A simulation is defined by
-  various parameters and functions.
-  Copyright (C) <2009-2010>  <Jonas Mehlich and Mohcine Chraibi>
-
-  This file is part of OpenPedSim.
-
-  OpenPedSim is free software: you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or
-  any later version.
-
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  OpenPedSim is distributed in the hope that it will be useful,
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with Foobar. If not, see <http://www.gnu.org/licenses/>.
- */
 
 #ifndef ANALYSIS_H_
 #define ANALYSIS_H_
@@ -55,7 +34,7 @@ private:
 	polygon_2d _geoPoly;
 	polygon_2d _measureZone;
 	string _trajectoryName;
-	string _trajectoryFile;
+	string _trajectoriesLocation;
 
 	int _numFrames; // how much frames
 	int *_tIn;   //the time for each pedestrian enter the measurement area
@@ -106,6 +85,11 @@ private:
 	void GetProfiles(string frameId, vector<polygon_2d> polygons, double * velocity);
 	void OutputVoroGraph(string frameId, vector<polygon_2d> polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame);
 	void DistributionOnLine(int *frequency,int fraction, double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
+
+	//create a file and the directory structure if needed.
+	FILE* CreateFile(const string& filename);
+	int mkpath(const char* file_path, mode_t mode=0755);
+
 public:
 
 	Analysis();
