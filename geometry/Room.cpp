@@ -121,6 +121,9 @@ SubRoom* Room::GetSubRoom(int index) const {
     }
 }
 
+
+#ifdef _SIMULATOR
+
 int Room::GetNumberOfPedestrians() const {
     int sum = 0;
     for (int i = 0; i < GetNumberOfSubRooms(); i++) {
@@ -129,9 +132,14 @@ int Room::GetNumberOfPedestrians() const {
     return sum;
 }
 
+#endif // _SIMULATOR
+
 RoomState Room::GetState() const {
 	return _state;
 }
+
+
+
 /*************************************************************
  Sonstige Funktionen
  ************************************************************/
