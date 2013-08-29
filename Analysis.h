@@ -3,6 +3,7 @@
 #define ANALYSIS_H_
 
 #include "general/ArgumentParser.h"
+#include "tinyxml/tinyxml.h"
 #include "geometry/Building.h"
 #include "IO/OutputHandler.h"
 #include "IO/IODispatcher.h"
@@ -13,6 +14,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 #include <boost/geometry/geometries/ring.hpp>
+
 using namespace boost::geometry;
 typedef model::d2::point_xy<double,  cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
@@ -33,8 +35,6 @@ private:
 	IODispatcher* _iod;
 	polygon_2d _geoPoly;
 	polygon_2d _measureZone;
-	string _trajectoryName;
-	string _trajectoriesLocation;
 
 	int _numFrames; // how much frames
 	int *_tIn;   //the time for each pedestrian enter the measurement area
@@ -71,37 +71,36 @@ private:
 	double _highVertexX; // Highest vertex of the geometry
 	double _highVertexY;
 
-	//double GetVinFrame(int Tnow,int Tpast, int Tfuture, int Tfirst, int Tlast, double Xcor_past, double Xcor_now, double Xcor_future,double Ycor_past, double Ycor_now, double Ycor_future, char VComponent);
 	double GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor,double **Ycor, char VComponent);
 	bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
-	void GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, string ofile);
-	void FlowRate_Velocity(int DeltaT, int fps, vector<int> AccumPeds, vector<double> AccumVelocity, string ofile);
-	void GetIndividualFD(vector<polygon_2d> polygon, double* Velocity, polygon_2d measureArea);
+	void GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, const string & ofile);
+	void FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPeds, const vector<double>& AccumVelocity, const string& ofile);
+	void GetIndividualFD(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea);
 	double Distance(double x1, double y1, double x2, double y2);
-	double GetVoronoiDensity(vector<polygon_2d> polygon, polygon_2d measureArea);
-	double GetVoronoiVelocity(vector<polygon_2d> polygon, double* Velocity, polygon_2d measureArea);
-	double GetClassicalDensity(double *xs, double *ys, int pednum, polygon_2d measureArea);
-	double GetClassicalVelocity(double *xs, double *ys, double *VInFrame, int pednum, polygon_2d measureArea);
-	void GetProfiles(string frameId, vector<polygon_2d> polygons, double * velocity);
-	void OutputVoroGraph(string frameId, vector<polygon_2d> polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame);
+	double GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d& measureArea);
+	double GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea);
+	double GetClassicalDensity(double *xs, double *ys, int pednum, const polygon_2d& measureArea);
+	double GetClassicalVelocity(double *xs, double *ys, double *VInFrame, int pednum, const polygon_2d& measureArea);
+	void GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, double * velocity, const string& filename);
+	void OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame, const string& filename);
 	void DistributionOnLine(int *frequency,int fraction, double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 
 	//create a file and the directory structure if needed.
 	FILE* CreateFile(const string& filename);
-	int mkpath(const char* file_path, mode_t mode=0755);
+	int mkpath(char* file_path, mode_t mode=0755);
+	void InitializeVariables(TiXmlElement* xRootNode);
+	void InitializeFiles(const string& file);
 
 public:
 
 	Analysis();
 	virtual ~Analysis();
 
-	int GetNPedsGlobal() const;
-	Building* GetBuilding() const;
 	void InitArgs(ArgumentParser *args);
-	int InitAnalysis();
+
 	void ReadTrajetories(const string& trajectoriesFile);
 	polygon_2d ReadGeometry(const string& geometryFile);
-	int RunAnalysis();
+	int RunAnalysis(const string& file, const string& path);
 
 };
 

@@ -60,14 +60,20 @@ int main(int argc, char **argv) {
 	ArgumentParser* args = new ArgumentParser();
 	args->ParseArgs(argc, argv);
 
-	// create and init the simulation engine
-	 Analysis analysis = Analysis();
-	 analysis.InitArgs(args);
+	// get the number of file to analyse
+	const vector<string>& files=args->GetTrajectoriesFiles();
+	const string& path = args->GetTrajectoriesLocation();
 
-	// Simulation
-	Log->Write("INFO: \tStart Analysis()\n");
-	analysis.RunAnalysis();
-	Log->Write("INFO: \tEnd Analysis()\n");
+		// create and initialize the analysis engine
+	for(unsigned int i=0;i<files.size();i++)
+	{
+		const string& file=files[i];
+		Analysis analysis = Analysis();
+		analysis.InitArgs(args);
+		Log->Write("INFO: \tStart Analysis for the file: " +file);
+		analysis.RunAnalysis(file, path);
+		Log->Write("INFO: \tEnd Analysis for the file: "+file);
+	}
 
 	//do the last cleaning
 	delete args;

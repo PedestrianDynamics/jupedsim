@@ -32,23 +32,20 @@
 #include <string>
 #include <vector>
 #include "Macros.h"
-using std::string;
-using std::vector;
-using std::pair;
 
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 using namespace boost::geometry;
-typedef model::d2::point_xy<double,  cs::cartesian> point_2d;
+typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 
-
+using std::string;
+using std::vector;
+using std::pair;
 class OutputHandler;
 extern OutputHandler* Log;
-
-
 
 class ArgumentParser {
 private:
@@ -58,6 +55,7 @@ private:
 	string _errorLogFile;
 	string _trajectoriesLocation;
 	string _trajectoriesFilename;
+	vector<string> _trajectoriesFiles;
 	string _measureAreaId;
 	double _lengthMeasureArea;
 	polygon_2d _measureArea;
@@ -65,7 +63,7 @@ private:
 	double _lineStartY;
 	double _lineEndX;
 	double _lineEndY;
-	char	_vComponent;
+	char _vComponent;
 	int _delatTVInst;
 	bool _isMethodA;
 	int _timeIntervalA;
@@ -82,16 +80,15 @@ private:
 	int _scaleY;
 	int _log;
 
-
 	// private Funktionen
 	void Usage();
 
 public:
 	// Konstruktor
-	ArgumentParser(); // gibt die Programmoptionen aus
+	ArgumentParser();
 
-	// Getter-Funktionen
 	const string& GetTrajectoriesFilename() const;
+	const vector<string>& GetTrajectoriesFiles() const;
 	const string& GetTrajectoriesLocation() const;
 	const string& GetMeasureAreaId() const;
 	const FileFormat& GetFileFormat() const;
@@ -103,7 +100,7 @@ public:
 	double GetLineStartY() const;
 	double GetLineEndX() const;
 	double GetLineEndY() const;
-	char	GetVComponent() const;
+	char GetVComponent() const;
 	int GetDelatT_Vins() const;
 	bool GetIsMethodA() const;
 	int GetTimeIntervalA() const;
@@ -119,8 +116,6 @@ public:
 	int GetScaleX() const;
 	int GetScaleY() const;
 	int GetLog() const;
-	void SetHostname(const string& hostname);
-	void SetPort(int port);
 	void ParseArgs(int argc, char **argv);
 
 	/**

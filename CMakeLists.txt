@@ -74,7 +74,7 @@ file(
 #endif()
 
 
-message(source_files)
+#message(source_files)
 
 add_executable(
 	report.exe

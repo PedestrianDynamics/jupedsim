@@ -2,13 +2,20 @@
 
 #include "Analysis.h"
 #include "geometry/Room.h"
-#include "tinyxml/tinyxml.h"
 
 #include "VoronoiDiagram.h"
 
 #include <iostream>
 #include <fstream>
+
+#ifdef __linux__
+#include <sys/stat.h>
+#include <dirent.h>
+#else
 #include <direct.h>
+#endif
+
+
 
 using namespace std;
 
@@ -20,7 +27,7 @@ Analysis::Analysis() {
 
 	_building = NULL;
 	_iod = new IODispatcher();
-	_numFrames = 10;
+	_numFrames = 0;
 
 	_tIn = NULL;
 	_tOut = NULL;
@@ -65,18 +72,18 @@ Analysis::Analysis() {
 Analysis::~Analysis() {
 	delete _building;
 	delete _iod;
-	delete  _firstFrame;
-	delete  _lastFrame;
-	delete  _tIn;
-	delete  _tOut;
+	delete  [] _firstFrame;
+	delete  [] _lastFrame;
+	delete  [] _tIn;
+	delete  [] _tOut;
 
 	for (int i=0; i<_maxNumofPed; i++)
 	{
-		delete _xCor[i];
-		delete _yCor[i];
+		delete [] _xCor[i];
+		delete [] _yCor[i];
 	}
-	delete []_xCor;
-	delete []_yCor;
+	delete [] _xCor;
+	delete [] _yCor;
 }
 
 /************************************************
@@ -84,19 +91,7 @@ Analysis::~Analysis() {
  ************************************************/
 
 
-Building * Analysis::GetBuilding() const {
-	return _building;
-}
-
-/************************************************
- // Sonstige-Funktionen
- ************************************************/
-
-/* bekommt alle Konsolenoptionen vom ArgumentParser
- * und setzt die entsprechenden Parameter in der Simulation
- * */
 void Analysis::InitArgs(ArgumentParser* args) {
-	char tmp[CLENGTH];
 	string s = "Parameter:\n";
 
 	switch (args->GetLog()) {
@@ -125,7 +120,6 @@ void Analysis::InitArgs(ArgumentParser* args) {
 
 	_measureZone = args->GetMeasureArea();
 
-
 	_flowVelocity = args->GetIsMethodA();
 	_fundamentalTinTout = args->GetIsMethodB();
 	_classicMethod = args ->GetIsMethodC();
@@ -148,65 +142,10 @@ void Analysis::InitArgs(ArgumentParser* args) {
 	_vComponent = args->GetVComponent();
 	_scaleX = args->GetScaleX();
 	_scaleY = args->GetScaleY();
-
-	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
-	s.append(tmp);
-	Log->Write("INFO: \t" + s);
 	_geoPoly = ReadGeometry(args->GetGeometryFilename());
-	//pBuilding->WriteToErrorLog();
 
-	_trajectoryName = args->GetTrajectoriesFilename();
-	_trajectoriesLocation= args->GetTrajectoriesLocation();
+	Log->Write("INFO: \tGeometrie file: [%s]\n", args->GetGeometryFilename().c_str());
 
-
-	ReadTrajetories(_trajectoriesLocation+"/"+_trajectoryName);
-
-	if(_classicMethod)
-	{
-		string results_C= "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+_trajectoryName+".dat";
-		if((_fClassicRhoV=CreateFile(results_C))==NULL)
-		{
-			Log->Write("cannot open file %s to write classical density and velocity\n", results_C.c_str());
-			exit(EXIT_FAILURE);
-		}
-		fprintf(_fClassicRhoV,"#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n");
-	}
-	if(_voronoiMethod)
-	{
-		string results_V=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+_trajectoryName+".dat";
-		if((_fVoronoiRhoV=CreateFile(results_V))==NULL)
-		{
-			Log->Write("cannot open the file to write Voronoi density and velocity\n");
-			exit(EXIT_FAILURE);
-		}
-		fprintf(_fVoronoiRhoV,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
-	}
-
-	if(_calcIndividualFD)
-	{
-		string Individualfundment="Output/Fundamental_Diagram/Individual_FD/IndividualFD"+_trajectoryName+".dat";
-		if((_individualFD=CreateFile(Individualfundment))==NULL)
-		{
-			Log->Write("cannot open the file individual\n");
-			exit(EXIT_FAILURE);
-		}
-		fprintf(_individualFD,"#Individual density(m^(-2))\t	Individual velocity(m/s)\n");
-	}
-
-	if(_flowVelocity)
-	{
-
-		string N_t= "Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajectoryName+"_Out.dat";
-		if((_fN_t=CreateFile(N_t))==NULL)
-		{
-			Log->Write("cannot open the file %s  t\n", N_t.c_str() );
-			exit(EXIT_FAILURE);
-		}
-		else
-			cout << "can open \n";
-
-		fprintf(_fN_t,"#Frame\t	Cumulative pedestrians\n");
-	}
 }
 
 polygon_2d Analysis::ReadGeometry(const string& geometryFile){
@@ -236,12 +175,9 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 
 			}
 			correct(geoPoly);
-			//std::cout << "poly without hole: " << boost::geometry::dsv(geoPoly) << std::endl;
 			GeoObst = subroom->GetAllObstacles();
 		}
 		for (unsigned int k = 0; k < GeoObst.size(); k++) {
-			//std::cout<< GeoObst.size()<<std::endl;
-			//std::cout<< pBuilding->GetAnzRooms() <<'\t'<<room->GetAnzSubRooms()<<std::endl;
 			const vector<Point>& temp_obst = GeoObst[k]->GetPolygon();
 
 			geoPoly.inners().resize(k+1);
@@ -262,37 +198,8 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 	return geoPoly;
 }
 
-void Analysis::ReadTrajetories(const string& trajectoriesFile){
-	//---------read the trajectory data from file-----------
-
-	Log->Write("INFO:\t input file <%s>\n",trajectoriesFile.c_str());
-	TiXmlDocument docGeo(trajectoriesFile);
-	if (!docGeo.LoadFile()){
-		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the trajectories file");
-		exit(EXIT_FAILURE);
-	}
-
-
-	TiXmlElement* xRootNode = docGeo.RootElement();
-	if( ! xRootNode ) {
-		Log->Write("ERROR:\tRoot element does not exist");
-		exit(EXIT_FAILURE);
-	}
-
-	if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
-		Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-		exit(EXIT_FAILURE);
-	}
-
-	//fixme in JPSGCFM
-	double version = xmltof(xRootNode->Attribute("version"), -1);
-	if (version != JPS_MAJOR_VERSION) {
-		Log->Write("ERROR: \tOnly version [%f] > 0.4 supported",version);
-		Log->Write("ERROR: \tparsing trajectories file failed!");
-		//exit(EXIT_FAILURE);
-	}
-
+// initialize the global variables variables
+void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 
 	//counting the number of frames
 	_numFrames=0;
@@ -300,20 +207,19 @@ void Analysis::ReadTrajetories(const string& trajectoriesFile){
 			xFrame = xFrame->NextSiblingElement("frame")) {
 		_numFrames++;
 	}
-	Log->Write("numFrames = %d\n",_numFrames);
-
+	Log->Write("INFO:\tnumFrames = %d",_numFrames);
 
 	TiXmlNode*  xHeader = xRootNode->FirstChild("header"); // header
 	//Number of agents
 	if(xHeader->FirstChild("agents")){
 		_maxNumofPed=atoi(xHeader->FirstChild("agents")->FirstChild()->Value());
-		Log->Write("N=%d\n", _maxNumofPed);
+		Log->Write("INFO:\tmax num of peds N=%d", _maxNumofPed);
 	}
 
 	//framerate
 	if(xHeader->FirstChild("frameRate")){
 		_fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-		Log->Write("fps=%d\n", _fps);
+		Log->Write("INFO:\tFramerate fps=%d", _fps);
 	}
 
 	_xCor = new double* [_maxNumofPed];
@@ -343,7 +249,6 @@ void Analysis::ReadTrajetories(const string& trajectoriesFile){
 		IsinMeasurezone[i] = false;
 	}
 
-
 	//processing the frames node
 	TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
 	if (!xFramesNode){
@@ -355,6 +260,7 @@ void Analysis::ReadTrajetories(const string& trajectoriesFile){
 	for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
 			xFrame = xFrame->NextSiblingElement("frame")) {
 
+		//todo: can be parallelized with OpenMP
 		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
 				xAgent = xAgent->NextSiblingElement("agent")) {
 
@@ -390,13 +296,58 @@ void Analysis::ReadTrajetories(const string& trajectoriesFile){
 		frameNr++;
 	}
 
-	Log->Write("INFO:\tDone reading the trajectories");
 }
 
-int Analysis::RunAnalysis()
+void Analysis::InitializeFiles(const string& trajectoriesFilename)
 {
+	if(_classicMethod)
+	{
+		string results_C= "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+trajectoriesFilename+".dat";
+		if((_fClassicRhoV=CreateFile(results_C))==NULL)
+		{
+			Log->Write("cannot open file %s to write classical density and velocity\n", results_C.c_str());
+			exit(EXIT_FAILURE);
+		}
+		fprintf(_fClassicRhoV,"#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n");
+	}
+	if(_voronoiMethod)
+	{
+		string results_V=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+trajectoriesFilename+".dat";
+		if((_fVoronoiRhoV=CreateFile(results_V))==NULL)
+		{
+			Log->Write("cannot open the file to write Voronoi density and velocity\n");
+			exit(EXIT_FAILURE);
+		}
+		fprintf(_fVoronoiRhoV,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
+	}
 
-	string fullTrajectoriesPathName= _trajectoriesLocation+"/"+_trajectoryName;
+	if(_calcIndividualFD)
+	{
+		string Individualfundment="Output/Fundamental_Diagram/Individual_FD/IndividualFD"+trajectoriesFilename+".dat";
+		if((_individualFD=CreateFile(Individualfundment))==NULL)
+		{
+			Log->Write("cannot open the file individual\n");
+			exit(EXIT_FAILURE);
+		}
+		fprintf(_individualFD,"#Individual density(m^(-2))\t	Individual velocity(m/s)\n");
+	}
+
+	if(_flowVelocity)
+	{
+		string N_t= "Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+trajectoriesFilename+"_Out.dat";
+		if((_fN_t=CreateFile(N_t))==NULL)
+		{
+			Log->Write("cannot open the file %s  t\n", N_t.c_str() );
+			exit(EXIT_FAILURE);
+		}
+		fprintf(_fN_t,"#Frame\t	Cumulative pedestrians\n");
+	}
+}
+
+
+int Analysis::RunAnalysis(const string& filename, const string& path)
+{
+	string fullTrajectoriesPathName= path+"/"+filename;
 
 	TiXmlDocument docGeo(fullTrajectoriesPathName);
 	if (!docGeo.LoadFile()){
@@ -416,42 +367,47 @@ int Analysis::RunAnalysis()
 		exit(EXIT_FAILURE);
 	}
 
+	//initialize some global variables
+	InitializeVariables(xRootNode);
+	//initialize the files
+	InitializeFiles(filename);
+
+
 	int ClassicFlow=0; // the number of pedestrians pass a line in a certain time
 	double V_deltaT=0;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
-	double *DensityPerFrame;
-	DensityPerFrame = new double[_numFrames];
+	double *DensityPerFrame = new double[_numFrames];
+
 	for(int i=0;i<_numFrames;i++)
 	{
 		DensityPerFrame[i]=0;
 	}
+
 	bool *PassLine = new bool[_maxNumofPed];
 	for(int i=0; i<_maxNumofPed; i++)
 	{
 		PassLine[i] = false;
 	}
 
-	string N_t="Flow_NT_"+_trajectoryName+"_Out.dat";
-	ofstream flowNTs(N_t.c_str());
+	string N_t="Flow_NT_"+filename+"_Out.dat";
+	//ofstream flowNTs(N_t.c_str());
 
 	int frameNr=0;
 	for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
 			xFrame = xFrame->NextSiblingElement("frame")) {
 
 		int frid = atoi(xFrame->Attribute("ID"));
-		frameNr++;
 
 		//counting the agents in the frame
 		int numPedsInFrame=0;
 		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
 				xAgent = xAgent->NextSiblingElement("agent")) numPedsInFrame++;
 
+		if(!(frid%100))
+		Log->Write("frame ID = %d",frid);
 
-		Log->Write("frame ID = %d\n",(frid));
-
-		//printf("This frame has %d peds\n",numPedsInFrame);
-		double *XInFrame = new double[numPedsInFrame]; 				// save the X coordinates of pedestrian in the geometry in this frame
-		double *YInFrame = new double[numPedsInFrame];				// save the Y coordinates of pedestrian in the geometry in this frame
-		double *VInFrame = new double[numPedsInFrame]; 				// save the instantaneous velocity of pedestrians in the geometry in this frame
+		double *XInFrame = new double[numPedsInFrame]; 	// save the X coordinates of pedestrian in the geometry in this frame
+		double *YInFrame = new double[numPedsInFrame];	// save the Y coordinates of pedestrian in the geometry in this frame
+		double *VInFrame = new double[numPedsInFrame]; 	// save the instantaneous velocity of pedestrians in the geometry in this frame
 
 		int agentCnt=0;
 		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
@@ -462,9 +418,8 @@ int Analysis::RunAnalysis()
 			double y= atof(xAgent->Attribute("yPos"));
 			int ID= atoi(xAgent->Attribute("ID"))-1;
 
-
-			XInFrame[agentCnt] =  (x);
-			YInFrame[agentCnt] =  (y);
+			XInFrame[agentCnt] = x;
+			YInFrame[agentCnt] = y;
 			int Tpast = frameNr - _deltaF;
 			int Tfuture = frameNr + _deltaF;
 			VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
@@ -478,10 +433,9 @@ int Analysis::RunAnalysis()
 				PassLine[ID] = true;
 				ClassicFlow++;
 				V_deltaT+=VInFrame[agentCnt];
-				//cout<<_xCor[ID][f-1]<< "\t"<<_yCor[ID][f-1]<< "\t"<<_xCor[ID][f]<< "\t"<<_yCor[ID][f]<< endl;
 			}
+			agentCnt++;
 		}
-		agentCnt++;
 		//for agentCnt
 
 		if(_flowVelocity)
@@ -502,17 +456,17 @@ int Analysis::RunAnalysis()
 		//------------------Voronoi Method---------------------------------
 		if(_voronoiMethod)
 		{
-			vector<polygon_2d> polygons;
 			VoronoiDiagram vd;
 			if(numPedsInFrame>2)
 			{
-				polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, numPedsInFrame);
+				vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, numPedsInFrame);
+				//FIXME nothing is done here
 				if(_cutByCircle)
 				{
 					//polygons = cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 50);
 				}
 				polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
-				double VoronoiVelocity;
+				double VoronoiVelocity=0.0;
 				if(numPedsInFrame>0)
 				{
 					VoronoiVelocity=GetVoronoiVelocity(polygons,VInFrame,_measureZone);
@@ -521,6 +475,7 @@ int Analysis::RunAnalysis()
 				{
 					VoronoiVelocity=0;
 				}
+
 				double VoronoiDensity=GetVoronoiDensity(polygons, _measureZone);
 				fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
 
@@ -539,15 +494,14 @@ int Analysis::RunAnalysis()
 				{
 					if(numPedsInFrame>0)
 					{
-						GetProfiles(boost::lexical_cast<string>(frid), polygons, VInFrame);
-						//						GetProfiles(lexical_cast<string>(frid)string(frid_str), polygons, VInFrame);
+						GetProfiles(boost::lexical_cast<string>(frid), polygons, VInFrame,filename);
 					}
 				}
 				//------------the following codes is written to output the Voronoi polygons of a frame-----------
 				if(_outputGraph)
 				{
 					cout<<"output polygons"<<endl;
-					OutputVoroGraph(boost::lexical_cast<string>(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame);
+					OutputVoroGraph(boost::lexical_cast<string>(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame,filename);
 				}
 			}
 			else
@@ -556,13 +510,28 @@ int Analysis::RunAnalysis()
 			}
 		}
 
+		frameNr++;
+
 		delete []XInFrame;
-
 		delete []YInFrame;
-
 		delete []VInFrame;
 
 	}// getFrame number j
+
+	//--------------------Fundamental diagram based on Tin and Tout----------------------------------------------------------------------
+	if(_fundamentalTinTout)
+	{
+		string FD_TinTout=  "Output/Fundamental_Diagram/TinTout/FDTinTout_"+filename+".dat";
+		Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
+		GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _lengthMeasurementarea,_maxNumofPed, FD_TinTout); //MC. 15.8.12. replaced "datafile" by results
+	}
+	//-----------------------------------------------------------------------------------------------------------------------------------
+	if(_flowVelocity)
+	{
+		string FD_FlowVelocity=  "Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+filename+".dat";
+		FlowRate_Velocity(_deltaT,_fps, _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
+	}
+
 
 	if(_classicMethod)
 		fclose(_fClassicRhoV);
@@ -571,24 +540,10 @@ int Analysis::RunAnalysis()
 		fclose(_fVoronoiRhoV);
 
 	if(_flowVelocity)
-		fclose(_fN_t);//
+		fclose(_fN_t);
 
-	delete []PassLine;
-
-	//--------------------Fundamental diagram based on Tin and Tout----------------------------------------------------------------------
-	if(_fundamentalTinTout)
-	{
-		string FD_TinTout=  "Output/Fundamental_Diagram/TinTout/FDTinTout_"+_trajectoryName+".dat";
-		Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
-		GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _lengthMeasurementarea,_maxNumofPed, FD_TinTout); //MC. 15.8.12. replaced "datafile" by results
-	}
-	//-----------------------------------------------------------------------------------------------------------------------------------
-	if(_flowVelocity)
-	{
-		string FD_FlowVelocity=  "Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+_trajectoryName+".dat";
-		FlowRate_Velocity(_deltaT,_fps, _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
-	}
-	delete []DensityPerFrame;
+	delete [] PassLine;
+	delete [] DensityPerFrame;
 	return 0;
 }
 
@@ -608,7 +563,7 @@ bool Analysis::IsPassLine(double Line_startX,double Line_startY, double Line_end
 	double y4=pt2_Y;
 
 	double d=(y2-y1)*(x4-x3)-(y4-y3)*(x2-x1);
-	if(d==0)
+	if(d==0.0)
 	{
 		return false;
 	}
@@ -653,7 +608,7 @@ bool Analysis::IsPassLine(double Line_startX,double Line_startY, double Line_end
  * MC 15.08.2012
  * input: outputfile is given not anymore "datafile"
  */
-void Analysis::GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, string ofile)
+void Analysis::GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, const string & ofile)
 {
 	FILE *fFD_TinTout;
 	string fdTinTout=ofile;
@@ -685,7 +640,7 @@ void Analysis::GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFram
  * MC 15.08.2012
  * input: outputfile is given not anymore "datafile"
  */
-void Analysis::FlowRate_Velocity(int DeltaT, int fps, vector<int> AccumPeds, vector<double> AccumVelocity, string ofile)
+void Analysis::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPeds, const vector<double>& AccumVelocity, const string& ofile)
 {
 
 	FILE *fFD_FlowVelocity;
@@ -733,14 +688,12 @@ void Analysis::FlowRate_Velocity(int DeltaT, int fps, vector<int> AccumPeds, vec
  *  of the area of the pedestrian's voronoi cell. The individual velocity is his instantaneous velocity at this time.
  *  note that, Only the pedestrians in the measurement area are considered.
  */
-void Analysis::GetIndividualFD(vector<polygon_2d> polygon, double* Velocity, polygon_2d measureArea)
+void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea)
 {
-
-	vector<polygon_2d>::iterator polygon_iterator;
 	double uniquedensity=0;
 	double uniquevelocity=0;
 	int temp=0;
-	for(polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
+	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
 		typedef std::vector<polygon_2d> polygon_list;
 		polygon_list v;
@@ -757,8 +710,7 @@ void Analysis::GetIndividualFD(vector<polygon_2d> polygon, double* Velocity, pol
 
 double Analysis::Distance(double x1, double y1, double x2, double y2)
 {
-	double distance=sqrt(pow((x1-x2),2)+pow((y1-y2),2));
-	return distance;
+	return sqrt(pow((x1-x2),2)+pow((y1-y2),2));
 }
 ///---------------------------------------------------------------------------------------------------------------------
 /*this function is to obtain the frequency distribution of the pedestrian movement through a line from (Line_startX,Line_startY)
@@ -788,10 +740,10 @@ void Analysis::DistributionOnLine(int *frequency,int fraction, double Line_start
 		double x4=pt2_X;
 		double y4=pt2_Y;
 		double x =((x1 - x2) * (x3 * y4 - x4 * y3) - (x3 - x4) * (x1 * y2 - x2 * y1))
-							/((x3 - x4) * (y1 - y2) - (x1 - x2) * (y3 - y4));
+									/((x3 - x4) * (y1 - y2) - (x1 - x2) * (y3 - y4));
 
 		double y =((y1 - y2) * (x3 * y4 - x4 * y3) - (x1 * y2 - x2 * y1) * (y3 - y4))
-							/((y1 - y2) * (x3 - x4) - (x1 - x2) * (y3 - y4));
+									/((y1 - y2) * (x3 - x4) - (x1 - x2) * (y3 - y4));
 		int index=(int)floor(Distance(x,y,x1,y1)*fraction/sumdistance);
 		frequency[index]++;
 	}
@@ -812,11 +764,10 @@ void Analysis::DistributionOnLine(int *frequency,int fraction, double Line_start
  * output: the voronoi density in the measurement area
  * note the unit of the polygons
  */
-double Analysis::GetVoronoiDensity(vector<polygon_2d> polygon, polygon_2d measureArea)
+double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d& measureArea)
 {
-	vector<polygon_2d>::iterator polygon_iterator;
 	double density=0;
-	for(polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
+	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
@@ -844,7 +795,7 @@ double Analysis::GetVoronoiDensity(vector<polygon_2d> polygon, polygon_2d measur
  * is very important. because sometimes the selected
  * geometry is smaller than the actual one. in this case, some pedestrian can not included in the geometry.
  */
-double Analysis::GetClassicalDensity(double *xs, double *ys, int pednum, polygon_2d measureArea)
+double Analysis::GetClassicalDensity(double *xs, double *ys, int pednum, const polygon_2d& measureArea)
 {
 	int pedsinMeasureArea=0;
 	for(int i=0;i<pednum;i++)
@@ -859,8 +810,8 @@ double Analysis::GetClassicalDensity(double *xs, double *ys, int pednum, polygon
 	return density;
 }
 
-double Analysis::GetClassicalVelocity(double *xs, double *ys, double *VInFrame, int pednum, polygon_2d measureArea){
-
+double Analysis::GetClassicalVelocity(double *xs, double *ys, double *VInFrame, int pednum, const polygon_2d& measureArea)
+{
 	int pedsinMeasureArea=0;
 	double velocity = 0;
 	for(int i=0;i<pednum;i++)
@@ -889,18 +840,17 @@ double Analysis::GetClassicalVelocity(double *xs, double *ys, double *VInFrame, 
  * input: voronoi cell and velocity of each pedestrian and the measurement area
  * output: the voronoi velocity in the measurement area
  */
-double Analysis::GetVoronoiVelocity(vector<polygon_2d> polygon, double* Velocity, polygon_2d measureArea)
+double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea)
 {
-	vector<polygon_2d>::iterator polygon_iterator;
 	double meanV=0;
 	int temp=0;
 
-	for(polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
+	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
-		typedef std::vector<polygon_2d > polygon_list;
 
+		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
-		//intersection_inserter<polygon_2d>(measureArea, *polygon_iterator, std::back_inserter(v));
+
 		intersection(measureArea, *polygon_iterator, v);
 		if(!v.empty())
 		{
@@ -918,14 +868,12 @@ double Analysis::GetVoronoiVelocity(vector<polygon_2d> polygon, double* Velocity
 }
 
 /*
- * this function is to calculate the instantneous velocity of ped ID in Frame Tnow based on his coordinates and his state.
+ * this function is to calculate the instantaneous velocity of ped ID in Frame Tnow based on his coordinates and his state.
  */
 
-//double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int Tfirst, int Tlast, double Xcor_past, double Xcor_now, double Xcor_future,double Ycor_past, double Ycor_now, double Ycor_future, char VComponent){
 double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor, char VComponent){
 
-	double v=0;
-	//VInFrame[i] = GetVinFrame(f, Tpast, Tfuture, _firstFrame[ID], _lastFrame[ID], _xCor[ID][Tpast], _xCor[ID][f], _xCor[ID][Tfuture], _yCor[ID][Tpast], _yCor[ID][f], _yCor[ID][Tfuture], _vComponent);
+	double v=0.0;
 
 	if(VComponent == 'X')
 	{
@@ -973,14 +921,13 @@ double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirs
 		}
 	}
 
-	v = fabs(v);
-	return v;
+	return fabs(v);
 }
 
-void Analysis::GetProfiles(string frameId, vector<polygon_2d> polygons, double * velocity)
+void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, double * velocity, const string& filename)
 {
-	string Prfvelocity="Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+_trajectoryName+"_"+frameId+".dat";
-	string Prfdensity="Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+_trajectoryName+"_"+frameId+".dat";
+	string Prfvelocity="Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+filename+"_"+frameId+".dat";
+	string Prfdensity="Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+filename+"_"+frameId+".dat";
 
 	FILE *Prf_velocity;
 	if((Prf_velocity=CreateFile(Prfvelocity))==NULL)
@@ -1023,28 +970,61 @@ void Analysis::GetProfiles(string frameId, vector<polygon_2d> polygons, double *
 	fclose(Prf_density);
 }
 
-void Analysis::OutputVoroGraph(string frameId, vector<polygon_2d> polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame)
+void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame, const string& filename)
 {
-	string point="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/points"+_trajectoryName+"_"+frameId+".dat";
-	string polygon="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+_trajectoryName+"_"+frameId+".dat";
-	string v_individual="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/speed"+_trajectoryName+"_"+frameId+".dat";
 
-	ofstream points (point.c_str());
+	string polygon="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
 	ofstream polys (polygon.c_str());
+
+	if(polys.is_open())
+	{
+		for(vector<polygon_2d>::const_iterator polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end();polygon_iterator++)
+		{
+			polys << dsv(*polygon_iterator) << endl;
+		}
+	}
+	else
+	{
+		Log->Write("ERROR:\tcannot create the file <%s>",polygon.c_str());
+		exit(EXIT_FAILURE);
+	}
+
+
+	string v_individual="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/speed"+filename+"_"+frameId+".dat";
 	ofstream velo (v_individual.c_str());
 
-	for(vector<polygon_2d>::iterator polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end();polygon_iterator++)
-	{
-		polys << dsv(*polygon_iterator) << endl;
+	if(velo.is_open()) {
+		for(int pts=0;pts<numPedsInFrame;pts++)
+		{
+			velo << fabs(VInFrame[pts]) << endl;
+		}
 	}
-	for(int pts=0;pts<numPedsInFrame;pts++)
+	else
 	{
-		points << XInFrame[pts] << "\t" << YInFrame[pts] << endl;
-		velo << fabs(VInFrame[pts]) << endl;
+		Log->Write("ERROR:\tcannot create the file <%s>",v_individual.c_str());
+		exit(EXIT_FAILURE);
 	}
+
+
+	string point="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/points"+filename+"_"+frameId+".dat";
+	ofstream points (point.c_str());
+	if( points.is_open())  {
+		for(int pts=0;pts<numPedsInFrame;pts++)
+		{
+			points << XInFrame[pts] << "\t" << YInFrame[pts] << endl;
+		}
+	}
+	else
+	{
+		Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
+		exit(EXIT_FAILURE);
+	}
+
+
 	points.close();
 	polys.close();
 	velo.close();
+
 }
 
 FILE* Analysis::CreateFile(const string& filename){
@@ -1054,10 +1034,10 @@ FILE* Analysis::CreateFile(const string& filename){
 
 	unsigned int found=filename.find_last_of("/\\");
 	string dir = filename.substr(0,found)+"/";
-	string file= filename.substr(found+1);
+	//string file= filename.substr(found+1);
 
 	// the directories are probably missing, create it
-	if (mkpath(dir.c_str())==-1) {
+	if (mkpath((char*)dir.c_str())==-1) {
 		Log->Write("ERROR:\tcannot create the directory <%s>",dir.c_str());
 		return NULL;
 	}
@@ -1066,21 +1046,21 @@ FILE* Analysis::CreateFile(const string& filename){
 }
 
 
-int Analysis::mkpath(const char* file_path, mode_t mode) {
-  assert(file_path && *file_path);
-  char* p;
-  for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
-    *p='\0';
+int Analysis::mkpath(char* file_path, mode_t mode) {
+	assert(file_path && *file_path);
+	char* p;
+	for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
+		*p='\0';
 
 #ifdef __linux__
-    if (_mkdir(file_path, mode)==-1) {
+		if (mkdir(file_path, mode)==-1) {
 #else
-    if (_mkdir(file_path)==-1) {
+			if (_mkdir(file_path)==-1) {
 #endif
 
-      if (errno!=EEXIST) { *p='/'; return -1; }
-    }
-    *p='/';
-  }
-  return 0;
-}
+				if (errno!=EEXIST) { *p='/'; return -1; }
+			}
+			*p='/';
+		}
+		return 0;
+	}

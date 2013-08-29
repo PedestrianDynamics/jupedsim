@@ -5,7 +5,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include<math.h>
+#include <math.h>
+#include <dirent.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -194,6 +195,9 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	}
 }
 
+const vector<string>& ArgumentParser::GetTrajectoriesFiles() const {
+	return _trajectoriesFiles;
+}
 
 void ArgumentParser::ParseIniFile(string inifile){
 
@@ -231,15 +235,39 @@ void ArgumentParser::ParseIniFile(string inifile){
 	if(xTrajectories){
 		//a file descriptor was given
 		if(xTrajectories->FirstChild("file")){
-			if(xTrajectories->FirstChildElement("file"))
+			//check if a file was specified
+			if(xTrajectories->FirstChildElement("file")) {
 				_trajectoriesFilename = xTrajectories->FirstChildElement("file")->Attribute("name");
-
-			if(xTrajectories->FirstChildElement("path"))
-				_trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
-
-			Log->Write("INFO: \tinput file  <"+ (_trajectoriesFilename)+">");
-			Log->Write("INFO: \tinput dir  <"+ (_trajectoriesLocation)+">");
+				_trajectoriesFiles.push_back(_trajectoriesFilename);
+			}
 		}
+
+		if(xTrajectories->FirstChildElement("path")) {
+			_trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
+
+			// in the case no file was specified, collect all xml files in the specified directory
+			if(_trajectoriesFiles.empty()){
+
+				DIR *dir;
+				struct dirent *ent;
+				if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL) {
+					/* print all the files and directories within directory */
+					while ((ent = readdir (dir)) != NULL) {
+						string filename=ent->d_name;
+						if (filename.find(".xml")!=std::string::npos)
+							_trajectoriesFiles.push_back(filename);
+					}
+					closedir (dir);
+				} else {
+					/* could not open directory */
+					Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
+					exit( EXIT_FAILURE);
+				}
+			}
+		}
+
+		Log->Write("INFO: \tinput file  <"+ (_trajectoriesFilename)+">");
+		Log->Write("INFO: \tinput dir  <"+ (_trajectoriesLocation)+">");
 	}
 
 	//measurement area
@@ -390,14 +418,14 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 
 		if(xMethod_D->FirstChildElement("getProfile"))
-		if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true")
-		{
-			_isGetProfile = true;
-			_scaleX =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
-			_scaleY =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
-			Log->Write("INFO: \tprofiles will be calculated" );
-			Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %d > and < %d >",_scaleX, _scaleY);
-		}
+			if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true")
+			{
+				_isGetProfile = true;
+				_scaleX =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
+				_scaleY =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
+				Log->Write("INFO: \tprofiles will be calculated" );
+				Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %d > and < %d >",_scaleX, _scaleY);
+			}
 
 		Log->Write("INFO: \tMethod D is selected" );
 	}

@@ -48,6 +48,7 @@ private:
 	double area_triangle(point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
 	bool point_inside_triangle(point_type2 pt, point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
 	std::vector<point_type2> add_bounding_points(point_type2 pt1, point_type2 pt2, point_type2 pt, double minX, double minY, double maxX, double maxY);
+
 public:
 	VoronoiDiagram();
 	virtual ~VoronoiDiagram();
