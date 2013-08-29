@@ -26,14 +26,16 @@ MeshEdge::MeshEdge(int n1,int n2,int c1, int c2,Point p1,Point p2):Line(p1,p2){
 
 MeshCell::MeshCell(double midx,double midy,std::vector<int> node_id,
 			 double *normvec,std::vector<int> edge_id,
-			 std::vector<int> wall_id){
-	_midx=midx;
-	_midy=midy;
+			 std::vector<int> wall_id,int id){
+	//_midx=midx;
+	//_midy=midy;
+	_mid=Point(midx,midy);
 	_node_id=node_id;
 	for(int i=0;i<3;i++)
 		_normvec[i]=normvec[i];
 	_edge_id=edge_id;
 	_wall_id=wall_id;
+	_tc_id=id;
 }
 
 MeshCell::~MeshCell(){

@@ -25,7 +25,7 @@ public:
 			std::vector<MeshEdge*>,std::vector<MeshCellGroup*>);
 	std::vector<Point*> get_nodes(){return _mNodes;}
 	std::vector<MeshEdge*> get_edges(){return _mEdges;}
-	std::vector<MeshEdge*> gedt_outEdges(){return _mOutEdges;}
+	std::vector<MeshEdge*> get_outEdges(){return _mOutEdges;}
 	std::vector<MeshCellGroup*> get_cellGroups(){return _mCellGroups;}
 
 	MeshCell* findCell(Point testp,int& cell_id);
@@ -56,19 +56,24 @@ private:
 class MeshCell{
 public:
 	MeshCell(double,double,std::vector<int>,
-			 double*,std::vector<int>,std::vector<int>);
+			 double*,std::vector<int>,std::vector<int>,int);
 	~MeshCell();
-	double get_midx(){return _midx;};
-	double get_midy(){return _midy;};
+	//double get_midx(){return _midx;};
+	//double get_midy(){return _midy;};
+	Point get_mid(){return _mid;};
 	std::vector<int> get_nodes(){return _node_id;};
+	std::vector<int> get_edges(){return _edge_id;};
+	int get_id(){return _tc_id;};
 private:
-	double _midx;
-	double _midy;
+	//double _midx;
+	//double _midy;
+	Point _mid;
 	std::vector<int> _node_id;
 	//double *_normvec;
 	double _normvec[3];
 	std::vector<int> _edge_id;
 	std::vector<int> _wall_id;
+	int _tc_id;//Cell ID unique for all cells in building
 };
 
 class MeshCellGroup{

@@ -89,6 +89,7 @@ void MeshRouter::Init(Building* b) {
 				namefound=true;
 			}
 		}
+		int tc_id=0;
 		if (!meshfile.eof()){
 			std::cout<<"<"<<groupname<<">"<<std::endl;
 
@@ -136,7 +137,8 @@ void MeshRouter::Init(Building* b) {
 					meshfile>>tmp;
 					wall_id.push_back(tmp);
 				}
-				mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id));
+				mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id,tc_id));
+				tc_id++;
 			}
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
 		}
@@ -144,15 +146,147 @@ void MeshRouter::Init(Building* b) {
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 	//std::cout<<_meshdata->get_cellGroups().back()->get_cells().back()->get_midx()<<std::endl;
 
-	// Test
-	int id;
-	Point testp(0,0);
-	if(_meshdata->findCell(testp,id)!=NULL){
-		std::cout<<testp.toString()<<"Gefunden in Zelle: "<<id<<std::endl;
+	/*
+	 * A* TEST IMPLEMENTATION
+	 */
+	int c_start_id;
+	Point testp_start(0,0);
+	MeshCell* start_cell=_meshdata->findCell(testp_start,c_start_id);
+	if(start_cell!=NULL){
+		std::cout<<testp_start.toString()<<"Gefunden in Zelle: "<<c_start_id<<std::endl;
 	}
 	else{
 		std::cout<<"Nicht gefunden"<<std::endl;
 	}
+	int c_goal_id;
+	Point testp_goal(16,-4);
+	MeshCell* goal_cell=_meshdata->findCell(testp_goal,c_goal_id);
+	if(goal_cell!=NULL){
+		std::cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<std::endl;
+	}
+	else{
+		std::cout<<"Nicht gefunden"<<std::endl;
+	}
+	unsigned int c_totalcount=0;
+	//for(unsigned int i=0;i<_meshdata->get_cellGroups().size();i++)
+	//	c_totalcount+=_meshdata->get_cellGroups().at(i)->get_cells().size();
+	c_totalcount+=_meshdata->get_cellGroups().at(0)->get_cells().size();
+	//std::cout<<c_totalcount<<std::endl;
+	bool* closedlist=new bool[c_totalcount];
+	bool* inopenlist=new bool[c_totalcount];
+	//std::pair<double, MeshCell*>* inopenlist=new std::pair<double, MeshCell*>[c_totalcount];
+	int* predlist=new int[c_totalcount]; // to gain the path from start to goal
+	double* costlist=new double[c_totalcount];
+	for(unsigned int i=0;i<c_totalcount;i++){
+		closedlist[i]=false;
+		inopenlist[i]=false;
+		predlist[i]=-1;
+	}
+	//int ie_count=_meshdata->get_edges().size();
+	std::vector<std::pair< double , MeshCell*> > openlist;
+	openlist.push_back(std::make_pair(0.0,start_cell));
+	inopenlist[c_start_id]=true;
+
+	MeshCell* act_cell=start_cell;
+	int act_id=c_start_id;
+	double act_cost=0.0;
+
+	std::cout<<"Begin while"<<std::endl;
+	while(act_id!=c_goal_id){
+		std::cout<<"act_id: "<<act_id<<std::endl;
+		if (act_cell==NULL)
+			std::cout<<"act_cell=NULL !!"<<std::endl;
+
+		//std::cout<<"act_cell->get_edges().size(): "<<act_cell->get_edges().size()<<std::endl;
+		for(unsigned int i=0;i<act_cell->get_edges().size();i++){
+			int act_edge_id=act_cell->get_edges().at(i);
+			int nb_id=-1;
+			if(_meshdata->get_edges().at(act_edge_id)->get_c1()==act_id){
+				nb_id=_meshdata->get_edges().at(act_edge_id)->get_c2();
+			}
+			else if(_meshdata->get_edges().at(act_edge_id)->get_c2()==act_id){
+				nb_id=_meshdata->get_edges().at(act_edge_id)->get_c1();
+			}
+			else{// Error: inconsistant
+				Log->Write("Error:\tInconsistant Mesh-Data");
+			}
+			//std::cout<<"nb_id: "<<nb_id<<std::endl;
+			if (!closedlist[nb_id]){// neighbour-cell not fully evaluated
+				MeshCell* nb_cell=_meshdata->get_cellGroups().at(0)->get_cells().at(nb_id);
+				double new_cost=act_cost+(act_cell->get_mid()-nb_cell->get_mid()).Norm();
+				if(!inopenlist[nb_id]){// neighbour-cell not evaluated at all
+					predlist[nb_id]=act_id;
+					costlist[nb_id]=new_cost;
+					inopenlist[nb_id]=true;
+
+					double f=new_cost+(nb_cell->get_mid()-testp_goal).Norm();
+					openlist.push_back(std::make_pair(f,nb_cell));
+
+				}
+				else{ // neighbour-cell has already a distance value
+					if (new_cost<costlist[nb_id]){
+						//found shorter path to nb_cell
+						predlist[nb_id]=act_id;
+						costlist[nb_id]=new_cost;
+						// update nb in openlist
+						for(unsigned int j=0;j<openlist.size();j++){
+							if(openlist.at(i).second->get_id()==nb_id){
+								MeshCell* nb_cell=openlist.at(i).second;
+								double f=new_cost+(nb_cell->get_mid()-testp_goal).Norm();
+								openlist.at(i)=std::make_pair(f,nb_cell);
+								break;
+							}
+						}
+					}
+					else{
+						// Do nothing: Path is worse
+					}
+				}
+			}
+		}
+
+		std::vector<std::pair<double,MeshCell*> >::iterator it=openlist.begin();
+		while(it->second->get_id()!=act_id){
+			it++;
+		}
+		closedlist[act_id]=true;
+		openlist.erase(it);
+
+		int next_cell_id=-1;
+		MeshCell* next_cell=NULL;
+		if (openlist.size()>0){
+			double min_f=openlist.at(0).first;
+			next_cell_id=openlist.at(0).second->get_id();
+			next_cell=openlist.at(0).second;
+			for(unsigned int j=1;j<openlist.size();j++){
+				if (openlist.at(j).first<min_f){
+					min_f=openlist.at(j).first;
+					next_cell=openlist.at(j).second;
+					next_cell_id=act_cell->get_id();
+				}
+			}
+			//while(it->second->get_id()!=act_id){
+			//	it++;
+			//}
+			//std::cout<<"openlist.size(): "<<openlist.size()<<std::endl; ////
+			//for(unsigned int k=0;k<openlist.size();k++)
+			//	std::cout<<"openlist.at(k).first: "<<openlist.at(k).first<<std::endl;
+			//openlist.erase(it);
+			//for(unsigned int k=0;k<openlist.size();k++)
+			//	std::cout<<"openlist.at(k).first: "<<openlist.at(k).first<<std::endl;
+			//std::cout<<"openlist.size(): "<<openlist.size()<<std::endl; ////
+			//closedlist[act_id]=true;
+			//std::cout<<"next_cell_id: "<<next_cell_id<<std::endl;
+			act_id=next_cell_id;
+			act_cell=next_cell;
+		}
+		else{
+			Log->Write("Error:\tA* did not find a path");
+		}
+	}
+	std::cout<<"act_id: "<<act_id<<std::endl;
+	//std::cout<<"End while"<<std::endl;
+
 }
 
 
