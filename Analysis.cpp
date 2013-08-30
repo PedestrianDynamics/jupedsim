@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #ifdef __linux__
 #include <sys/stat.h>
@@ -989,6 +990,10 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 {
 
 	string polygon="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
+
+	//TODO: the method will fail if the directory doens not exits
+	//use the CREATE File instead combiend with
+	//std::stringstream ss;
 
 	ofstream polys (polygon.c_str());
 
