@@ -123,12 +123,11 @@ ArgumentParser::ArgumentParser() {
 	// Default parameter values
 	_geometryFileName = "geo.xml";
 
-	_lineStartX = 0;
-	_lineStartY = 0;
-	_lineEndX = 0;
-	_lineEndY = 0;
-	_measureAreaId = '1';
-	_lengthMeasureArea = 200;
+	_areaIDforMethodA=-1;
+	_areaIDforMethodB=-1;
+	_areaIDforMethodC=-1;
+	_areaIDforMethodD=-1;
+
 	_vComponent = 'B';
 	_isMethodA = false;
 	_timeIntervalA = 160;
@@ -146,11 +145,9 @@ ArgumentParser::ArgumentParser() {
 	_scaleY = 10;
 	_errorLogFile="./Logfile.dat";
 	_log=1; //no output wanted
-	pFormat=FORMAT_XML_PLAIN;
 	_trajectoriesLocation="";
 	_trajectoriesFilename="";
 }
-
 
 
 void ArgumentParser::ParseArgs(int argc, char **argv) {
@@ -211,7 +208,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 		exit(EXIT_FAILURE);
 	}
 
-	// everything is fine. proceed with parsing
 
 	TiXmlElement* xMainNode = doc.RootElement();
 	if( ! xMainNode ) {
@@ -233,13 +229,13 @@ void ArgumentParser::ParseIniFile(string inifile){
 	//trajectories
 	TiXmlNode* xTrajectories=xMainNode->FirstChild("trajectories");
 	if(xTrajectories){
+
 		//a file descriptor was given
-		if(xTrajectories->FirstChild("file")){
-			//check if a file was specified
-			if(xTrajectories->FirstChildElement("file")) {
-				_trajectoriesFilename = xTrajectories->FirstChildElement("file")->Attribute("name");
-				_trajectoriesFiles.push_back(_trajectoriesFilename);
-			}
+		for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file"); xFile;
+				xFile = xFile->NextSiblingElement("file")) {
+			//collect all the files given
+			_trajectoriesFilename =	xFile->Attribute("name");
+			_trajectoriesFiles.push_back(_trajectoriesFilename);
 		}
 
 		if(xTrajectories->FirstChildElement("path")) {
@@ -283,9 +279,10 @@ void ArgumentParser::ParseIniFile(string inifile){
 		TiXmlNode* xMeasurementArea_B=xMainNode->FirstChild("measurementAreas")->FirstChild("area_B");
 		if(xMeasurementArea_B)
 		{
-			_measureAreaId =xMeasurementArea_B->ToElement()->Attribute("id");
-			//FIXME: you never used this variable
-			string pMeasureAreaType = xMeasurementArea_B->ToElement()->Attribute("type");
+
+			MeasurementArea_B* areaB = new MeasurementArea_B();
+			areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
+			areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
 
 			double box_p1x = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("x"));
 			double box_p1y = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("y"));
@@ -299,16 +296,16 @@ void ArgumentParser::ParseIniFile(string inifile){
 			//-------------the following codes define measurement area---------------------------
 			// Polygons should be closed, and directed clockwise.
 			// If you're not sure if that is the case, call the function correct
-			polygon_2d poly;
 			const double coor[][2] = {
 					{box_p1x,box_p1y}, {box_p2x,box_p2y}, {box_p3x,box_p3y}, {box_p4x,box_p4y},
 					{box_p1x,box_p1y} // closing point is opening point
 			};
 
+			polygon_2d poly;
 			assign_points(poly, coor);
 			correct(poly); // in the case the Polygone is not closed
 
-			_measureArea = poly;
+			areaB->_poly=poly;
 
 			string MovingDire_start = xMeasurementArea_B->FirstChildElement("movingDirection")->Attribute("start");
 			string MovingDire_end   = xMeasurementArea_B->FirstChildElement("movingDirection")->Attribute("end");
@@ -317,28 +314,31 @@ void ArgumentParser::ParseIniFile(string inifile){
 			double end_x   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("x"));
 			double end_y   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("y"));
 
-			_lengthMeasureArea = sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
+			areaB->_length=sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
 
-			Log->Write("INFO: \tmeasure area id  <"+_measureAreaId+">");
-			Log->Write("INFO: \tmeasure area type  <"+pMeasureAreaType+">");
+			Log->Write("INFO: \tmeasure area id  < %d>",areaB->_id);
+			Log->Write("INFO: \tmeasure area type  <"+areaB->_type+">");
 			Log->Write("INFO: \tp1 of Box  < %f, %f>",box_p1x,box_p1y);
-			Log->Write("INFO: \tlength of measurement area is:  < %f>", _lengthMeasureArea);
+			Log->Write("INFO: \tlength of measurement area is:  < %f>", areaB->_length);
+			//add the area to the collection
+			_measurementAreas[areaB->_id]=areaB;
 		}
 
 		TiXmlNode* xMeasurementArea_L=xMainNode->FirstChild("measurementAreas")->FirstChild("area_L");
 		if(xMeasurementArea_L)
 		{
-			//fixme: this value overwrite the previous one vom area_B
-			_measureAreaId =xMeasurementArea_L->ToElement()->Attribute("id");
-			string pMeasureAreaType = xMeasurementArea_L->ToElement()->Attribute("type");
+			MeasurementArea_L* areaL = new MeasurementArea_L();
+			areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
+			areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
 
-			_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"));
-			_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"));
-			_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"));
-			_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"));
+			areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"));
+			areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"));
+			areaL->_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"));
+			areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"));
 
-			Log->Write("INFO: \tmeasure area id  <"+_measureAreaId+">" + "\t<"+pMeasureAreaType+">");
-			Log->Write("INFO: \treference line starts from  <%f, %f> to <%f, %f>",_lineStartX,_lineStartY,_lineEndX,_lineEndY);
+			_measurementAreas[areaL->_id]=areaL;
+			Log->Write("INFO: \tmeasure area id  <%d> with \ttype <%s>",areaL->_id,areaL->_type.c_str());
+			Log->Write("INFO: \treference line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX,areaL->_lineStartY,areaL->_lineEndX,areaL->_lineEndY);
 		}
 	}
 
@@ -373,7 +373,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	if(xMethod_A){
 		if(string(xMethod_A->Attribute("enabled"))=="true"){
 			_timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
-			_measureAreaId = xMethod_A->FirstChildElement("measurementArea")->Attribute("id");
+			_areaIDforMethodA = xmltoi(xMethod_A->FirstChildElement("measurementArea")->Attribute("id"));
 			_isMethodA = true;
 			Log->Write("INFO: \tMethod A is selected" );
 			Log->Write("INFO: \ttime interval used in Method A is < %d>",_timeIntervalA);
@@ -384,8 +384,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	TiXmlElement* xMethod_B=xMainNode->FirstChildElement("method_B");
 	if(string(xMethod_B->Attribute("enabled"))=="true"){
 		_isMethodB = true;
-		//FIXME> this value is overwritten
-		_measureAreaId = xMethod_A->FirstChildElement("measurementArea")->Attribute("id");
+		_areaIDforMethodB = xmltoi(xMethod_A->FirstChildElement("measurementArea")->Attribute("id"));
 		Log->Write("INFO: \tMethod B is selected" );
 	}
 
@@ -393,7 +392,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	TiXmlElement* xMethod_C=xMainNode->FirstChildElement("method_C");
 	if(string(xMethod_C->Attribute("enabled"))=="true"){
 		_isMethodC = true;
-		_measureAreaId = xMethod_C->FirstChildElement("measurementArea")->Attribute("id");
+		_areaIDforMethodC = xmltoi(xMethod_C->FirstChildElement("measurementArea")->Attribute("id"));
 		Log->Write("INFO: \tMethod C is selected" );
 	}
 
@@ -408,7 +407,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 			Log->Write("INFO: \tVoronoi graph is asked to output!" );
 		}
 		_isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
-		_measureAreaId = xMethod_D->FirstChildElement("measurementArea")->Attribute("id");
+		_areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
 
 		if ( xMethod_D->FirstChildElement("steadyState"))
 		{
@@ -434,11 +433,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 }
 
 
-
-const FileFormat& ArgumentParser::GetFileFormat() const {
-	return pFormat;
-}
-
 const string& ArgumentParser::GetErrorLogFile() const {
 	return _errorLogFile;
 }
@@ -457,34 +451,6 @@ const string& ArgumentParser::GetTrajectoriesLocation() const {
 
 const string& ArgumentParser::GetTrajectoriesFilename() const {
 	return _trajectoriesFilename;
-}
-
-const string& ArgumentParser::GetMeasureAreaId() const {
-	return _measureAreaId;
-}
-
-double ArgumentParser::GetLengthMeasurementArea() const {
-	return _lengthMeasureArea;
-}
-
-polygon_2d ArgumentParser::GetMeasureArea() const {
-	return _measureArea;
-}
-
-double ArgumentParser::GetLineStartX() const {
-	return _lineStartX;
-}
-
-double ArgumentParser::GetLineStartY() const {
-	return _lineStartY;
-}
-
-double ArgumentParser::GetLineEndX() const {
-	return _lineEndX;
-}
-
-double ArgumentParser::GetLineEndY() const {
-	return _lineEndY;
 }
 
 char	ArgumentParser::GetVComponent() const {
@@ -549,5 +515,25 @@ int ArgumentParser::GetScaleY() const {
 	return _scaleY;
 }
 
+int ArgumentParser::GetAreaIDforMethodA() const {
+	return _areaIDforMethodA;
+}
 
+int ArgumentParser::GetAreaIDforMethodB() const {
+	return _areaIDforMethodB;
+}
 
+int ArgumentParser::GetAreaIDforMethodC() const {
+	return _areaIDforMethodC;
+}
+
+int ArgumentParser::GetAreaIDforMethodD() const {
+	return _areaIDforMethodD;
+}
+
+MeasurementArea* ArgumentParser::GetMeasurementArea(int id) {
+	if (_measurementAreas.count(id) == 0)
+		return NULL;
+	return _measurementAreas[id];
+
+}

@@ -31,7 +31,6 @@ Analysis::Analysis() {
 
 	_tIn = NULL;
 	_tOut = NULL;
-	_lengthMeasurementarea = 200;  // the length of the measurement area
 	_maxNumofPed =0;  //the maximum index of the pedestrian in the trajectory data
 	_deltaF=5;											// half of the time interval that used to calculate instantaneous velocity of ped i.
 	// here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
@@ -40,10 +39,6 @@ Analysis::Analysis() {
 	_firstFrame = NULL;   // Record the first frame of each pedestrian
 	_lastFrame = NULL;	// Record the last frame of each pedestrian
 	_deltaT =160;   // the time interval to calculate the classic flow
-	_lineStartX = 0;  			//the coordinate of the line used to calculate the flow and velocity
-	_lineStartY =10;
-	_lineEndX = 0;
-	_lineEndY =100;
 	_flowVelocity = false; 						// Method A (Zhang2011a)
 	_fundamentalTinTout = false; 			// Method B (Zhang2011a)
 	_classicMethod = false; 					// Method C //calculate and save results of classic in separate file
@@ -67,6 +62,11 @@ Analysis::Analysis() {
 	_lowVertexY = 0; //  LOWest vertex of the geometry (y coordinate)
 	_highVertexX = 10; // Highest vertex of the geometry
 	_highVertexY = 10;
+
+	_areaForMethod_A=NULL;
+	_areaForMethod_B=NULL;
+	_areaForMethod_C=NULL;
+	_areaForMethod_D=NULL;
 }
 
 Analysis::~Analysis() {
@@ -85,10 +85,6 @@ Analysis::~Analysis() {
 	delete [] _xCor;
 	delete [] _yCor;
 }
-
-/************************************************
- // Setter-Funktionen
- ************************************************/
 
 
 void Analysis::InitArgs(ArgumentParser* args) {
@@ -118,23 +114,34 @@ void Analysis::InitArgs(ArgumentParser* args) {
 
 	Log->Write("INFO: \tOptionen an Simulation geben\n");
 
-	_measureZone = args->GetMeasureArea();
 
-	_flowVelocity = args->GetIsMethodA();
-	_fundamentalTinTout = args->GetIsMethodB();
-	_classicMethod = args ->GetIsMethodC();
-	if(_fundamentalTinTout)
+	if(args->GetIsMethodA())
+	{
+		_flowVelocity = true;
+		_areaForMethod_A = dynamic_cast<MeasurementArea_L*>( args->GetMeasurementArea(args->GetAreaIDforMethodA()) );
+	}
+
+	if(args->GetIsMethodB())
+	{
+		_fundamentalTinTout = true;
+		_classicMethod = true;
+		_areaForMethod_B = dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(args->GetAreaIDforMethodB()) );
+	}
+
+	if(args ->GetIsMethodC())
 	{
 		_classicMethod = true;
+		_areaForMethod_C = dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(args->GetAreaIDforMethodC()) );
 	}
-	_voronoiMethod = args ->GetIsMethodD();
-	_lengthMeasurementarea = args->GetLengthMeasurementArea();
+
+	if(args ->GetIsMethodD())
+	{
+		_voronoiMethod = true;
+		_areaForMethod_D = dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(args->GetAreaIDforMethodD()) );
+	}
+
 	_deltaF = args->GetDelatT_Vins();
 	_deltaT = args->GetTimeIntervalA();
-	_lineStartX = args->GetLineStartX();
-	_lineStartY = args->GetLineStartY();
-	_lineEndX = args->GetLineEndX();
-	_lineEndY = args->GetLineEndY();
 	_cutByCircle = args->GetIsCutByCircle();
 	_getProfile = args->GetIsGetProfile();
 	_outputGraph = args->GetIsOutputGraph();
@@ -152,13 +159,15 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 
 	_building = new Building();
 	_building->LoadBuilding(geometryFile);
+	// create the polygons
+	_building->InitGeometry();
+
 	double geo_minX  = FLT_MAX;
 	double geo_minY  = FLT_MAX;
 	double geo_maxX  = -FLT_MAX;
 	double geo_maxY  = -FLT_MAX;
+
 	polygon_2d geoPoly;
-	// create the polygons
-	_building->InitGeometry();
 	vector<Obstacle*> GeoObst;
 	for(int i=0;i<_building->GetNumberOfRooms();i++){
 		Room* room=_building->GetRoom(i);
@@ -281,12 +290,12 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 			}
 			if(_fundamentalTinTout==true)
 			{
-				if(within(make<point_2d>( (x), (y)), _measureZone)&&!(IsinMeasurezone[ID]))
+				if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID]))
 				{
 					_tIn[ID]=frameNr;
 					IsinMeasurezone[ID] = true;
 				}
-				if((!within(make<point_2d>( (x), (y)), _measureZone))&&IsinMeasurezone[ID])
+				if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID])
 				{
 					_tOut[ID]=frameNr;
 					IsinMeasurezone[ID] = false;
@@ -389,7 +398,6 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 	}
 
 	string N_t="Flow_NT_"+filename+"_Out.dat";
-	//ofstream flowNTs(N_t.c_str());
 
 	int frameNr=0;
 	for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
@@ -423,20 +431,28 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			int Tpast = frameNr - _deltaF;
 			int Tfuture = frameNr + _deltaF;
 			VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
-			bool IspassLine=false;
-			if(frameNr >_firstFrame[ID]&&!PassLine[ID])
+
+			if(_flowVelocity)
 			{
-				IspassLine = IsPassLine(_lineStartX,_lineStartY, _lineEndX, _lineEndY,_xCor[ID][frameNr-1],_yCor[ID][frameNr-1],_xCor[ID][frameNr],_yCor[ID][frameNr]);
-			}
-			if(IspassLine==true)
-			{
-				PassLine[ID] = true;
-				ClassicFlow++;
-				V_deltaT+=VInFrame[agentCnt];
+				bool IspassLine=false;
+				if(frameNr >_firstFrame[ID]&&!PassLine[ID])
+				{
+					IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+							_areaForMethod_A->_lineStartY,
+							_areaForMethod_A->_lineEndX,
+							_areaForMethod_A->_lineEndY, _xCor[ID][frameNr - 1],
+							_yCor[ID][frameNr - 1], _xCor[ID][frameNr],
+							_yCor[ID][frameNr]);
+				}
+				if(IspassLine==true)
+				{
+					PassLine[ID] = true;
+					ClassicFlow++;
+					V_deltaT+=VInFrame[agentCnt];
+				}
 			}
 			agentCnt++;
 		}
-		//for agentCnt
 
 		if(_flowVelocity)
 		{
@@ -447,8 +463,8 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
 		if(_classicMethod)
 		{
-			double ClassicDensity = GetClassicalDensity(XInFrame, YInFrame, numPedsInFrame, _measureZone);
-			double ClassicVelocity = GetClassicalVelocity(XInFrame, YInFrame, VInFrame, numPedsInFrame, _measureZone);
+			double ClassicDensity = GetClassicalDensity(XInFrame, YInFrame, numPedsInFrame, _areaForMethod_C->_poly);
+			double ClassicVelocity = GetClassicalVelocity(XInFrame, YInFrame, VInFrame, numPedsInFrame, _areaForMethod_C->_poly);
 			DensityPerFrame[frameNr]=ClassicDensity;
 			fprintf(_fClassicRhoV,"%d\t%.3f\t%.3f\n", frid, ClassicDensity,ClassicVelocity);
 		}
@@ -469,14 +485,14 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 				double VoronoiVelocity=0.0;
 				if(numPedsInFrame>0)
 				{
-					VoronoiVelocity=GetVoronoiVelocity(polygons,VInFrame,_measureZone);
+					VoronoiVelocity=GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
 				}
 				else
 				{
 					VoronoiVelocity=0;
 				}
 
-				double VoronoiDensity=GetVoronoiDensity(polygons, _measureZone);
+				double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
 				fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
 
 				if(_calcIndividualFD)
@@ -485,7 +501,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 					{
 						// if(i>beginstationary&&i<endstationary)
 						{
-							GetIndividualFD(polygons,VInFrame,_measureZone);
+							GetIndividualFD(polygons,VInFrame,_areaForMethod_D->_poly);
 						}
 					}
 				}
@@ -510,8 +526,8 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			}
 		}
 
-		frameNr++;
 
+		frameNr++;
 		delete []XInFrame;
 		delete []YInFrame;
 		delete []VInFrame;
@@ -523,7 +539,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 	{
 		string FD_TinTout=  "Output/Fundamental_Diagram/TinTout/FDTinTout_"+filename+".dat";
 		Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
-		GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _lengthMeasurementarea,_maxNumofPed, FD_TinTout); //MC. 15.8.12. replaced "datafile" by results
+		GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _areaForMethod_B->_length,_maxNumofPed, FD_TinTout); //MC. 15.8.12. replaced "datafile" by results
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	if(_flowVelocity)
@@ -781,8 +797,7 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 			}
 		}
 	}
-	density=density/(area(measureArea)*CMtoM*CMtoM);
-	return density;
+	return density/(area(measureArea)*CMtoM*CMtoM);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -806,8 +821,7 @@ double Analysis::GetClassicalDensity(double *xs, double *ys, int pednum, const p
 		}
 	}
 
-	double density=pedsinMeasureArea/(area(measureArea)*CMtoM*CMtoM);
-	return density;
+	return pedsinMeasureArea/(area(measureArea)*CMtoM*CMtoM);
 }
 
 double Analysis::GetClassicalVelocity(double *xs, double *ys, double *VInFrame, int pednum, const polygon_2d& measureArea)
@@ -871,7 +885,8 @@ double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* V
  * this function is to calculate the instantaneous velocity of ped ID in Frame Tnow based on his coordinates and his state.
  */
 
-double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor, char VComponent){
+double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor, char VComponent)
+{
 
 	double v=0.0;
 
@@ -974,6 +989,7 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 {
 
 	string polygon="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
+
 	ofstream polys (polygon.c_str());
 
 	if(polys.is_open())
@@ -1046,17 +1062,15 @@ FILE* Analysis::CreateFile(const string& filename){
 }
 
 
+#ifdef __linux__
+
 int Analysis::mkpath(char* file_path, mode_t mode) {
 	assert(file_path && *file_path);
 	char* p;
 	for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
 		*p='\0';
 
-#ifdef __linux__
 		if (mkdir(file_path, mode)==-1) {
-#else
-			if (_mkdir(file_path)==-1) {
-#endif
 
 				if (errno!=EEXIST) { *p='/'; return -1; }
 			}
@@ -1064,3 +1078,25 @@ int Analysis::mkpath(char* file_path, mode_t mode) {
 		}
 		return 0;
 	}
+
+#else
+
+	int Analysis::mkpath(char* file_path) {
+		assert(file_path && *file_path);
+		char* p;
+		for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
+			*p='\0';
+
+				if (_mkdir(file_path)==-1) {
+
+					if (errno!=EEXIST) { *p='/'; return -1; }
+				}
+				*p='/';
+			}
+			return 0;
+		}
+
+#endif
+
+
+

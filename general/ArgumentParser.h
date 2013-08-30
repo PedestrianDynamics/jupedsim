@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include "Macros.h"
+#include "MeasurementArea.h"
 
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -41,32 +42,24 @@ using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 
-using std::string;
-using std::vector;
-using std::pair;
+//using std::string;
+//using std::vector;
+//using std::map;
+
 class OutputHandler;
 extern OutputHandler* Log;
 
 class ArgumentParser {
 private:
 
-	FileFormat pFormat;
-	string _geometryFileName;
-	string _errorLogFile;
-	string _trajectoriesLocation;
-	string _trajectoriesFilename;
-	vector<string> _trajectoriesFiles;
-	string _measureAreaId;
-	double _lengthMeasureArea;
-	polygon_2d _measureArea;
-	double _lineStartX;
-	double _lineStartY;
-	double _lineEndX;
-	double _lineEndY;
+	std::string _geometryFileName;
+	std::string _errorLogFile;
+	std::string _trajectoriesLocation;
+	std::string _trajectoriesFilename;
+	std::vector<std::string> _trajectoriesFiles;
+
 	char _vComponent;
-	int _delatTVInst;
 	bool _isMethodA;
-	int _timeIntervalA;
 	bool _isMethodB;
 	bool _isMethodC;
 	bool _isMethodD;
@@ -76,37 +69,48 @@ private:
 	bool _isGetProfile;
 	double _steadyStart;
 	double _steadyEnd;
+	int _delatTVInst;
+	int _timeIntervalA;
+	int _areaIDforMethodA;
+	int _areaIDforMethodB;
+	int _areaIDforMethodC;
+	int _areaIDforMethodD;
 	int _scaleX;
 	int _scaleY;
 	int _log;
 
-	// private Funktionen
+	std::map <int, MeasurementArea*> _measurementAreas;
 	void Usage();
 
 public:
 	// Konstruktor
 	ArgumentParser();
 
-	const string& GetTrajectoriesFilename() const;
-	const vector<string>& GetTrajectoriesFiles() const;
-	const string& GetTrajectoriesLocation() const;
-	const string& GetMeasureAreaId() const;
+	const std::string& GetTrajectoriesFilename() const;
+	const std::vector<std::string>& GetTrajectoriesFiles() const;
+	const std::string& GetTrajectoriesLocation() const;
 	const FileFormat& GetFileFormat() const;
-	const string& GetGeometryFilename() const;
-	const string& GetErrorLogFile() const;
+	const std::string& GetGeometryFilename() const;
+	const std::string& GetErrorLogFile() const;
+
 	double GetLengthMeasurementArea() const;
 	polygon_2d GetMeasureArea() const;
 	double GetLineStartX() const;
 	double GetLineStartY() const;
 	double GetLineEndX() const;
 	double GetLineEndY() const;
+
 	char GetVComponent() const;
 	int GetDelatT_Vins() const;
-	bool GetIsMethodA() const;
 	int GetTimeIntervalA() const;
+	bool GetIsMethodA() const;
 	bool GetIsMethodB() const;
 	bool GetIsMethodC() const;
 	bool GetIsMethodD() const;
+	int GetAreaIDforMethodA() const;
+	int GetAreaIDforMethodB() const;
+	int GetAreaIDforMethodC() const;
+	int GetAreaIDforMethodD() const;
 	bool GetIsCutByCircle() const;
 	bool GetIsOutputGraph() const;
 	bool GetIsIndividualFD() const;
@@ -118,11 +122,13 @@ public:
 	int GetLog() const;
 	void ParseArgs(int argc, char **argv);
 
+	MeasurementArea* GetMeasurementArea(int id);
+
 	/**
 	 * parse the initialization file
 	 * @param inifile
 	 */
-	void ParseIniFile(string inifile);
+	void ParseIniFile(std::string inifile);
 };
 
 #endif /*ARGPARSER_H_*/
