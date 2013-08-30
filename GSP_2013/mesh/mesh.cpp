@@ -59,6 +59,7 @@ MeshData::MeshData(){
 	_mEdges=std::vector<MeshEdge*>();
 	_mOutEdges=std::vector<MeshEdge*>();
 	_mCellGroups=std::vector<MeshCellGroup*>();
+	_mCellCount=0;
 }
 MeshData::~MeshData(){
 	std::cout<<"\tStart Destructor Meshdata"<<std::endl;
@@ -73,12 +74,38 @@ MeshData::~MeshData(){
 	std::cout<<"\tEnd Destructor Meshdata"<<std::endl;
 }
 
+unsigned int calc_CellCount(std::vector<MeshCellGroup*> mcg){
+	unsigned int count=0;
+	for (unsigned int i=0;i<mcg.size();i++)
+		count+=mcg.at(i)->get_cells().size();
+
+	return count;
+}
+
 MeshData::MeshData(std::vector<Point*> mn,std::vector<MeshEdge*> me,
 		std::vector<MeshEdge*> moe,std::vector<MeshCellGroup*> mcg){
 	_mNodes=mn;
 	_mEdges=me;
 	_mOutEdges=moe;
 	_mCellGroups=mcg;
+	_mCellCount=calc_CellCount(mcg);
+}
+
+MeshCell* MeshData::getCellAtPos(unsigned int tpos){
+	if( tpos<0 || tpos>= this->get_cellCount())
+		return NULL;
+	else{
+		for(unsigned int i=0;i<_mCellGroups.size();i++){
+			if(tpos<_mCellGroups.at(i)->get_cells().size()){
+				return _mCellGroups.at(i)->get_cells().at(tpos);
+			}
+			else{
+				tpos-=_mCellGroups.at(i)->get_cells().size();
+			}
+		}
+
+		return NULL;
+	}
 }
 
  MeshCell* MeshData::findCell(Point test, int& cell_id){

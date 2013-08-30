@@ -5,6 +5,8 @@
  *      Author: dominik
  */
 
+#include <iomanip>
+
 #include "MeshRouter.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
@@ -29,10 +31,44 @@ int MeshRouter::FindExit(Pedestrian* p) {
 	std::cout<<"calling the mesh router"<<std::endl;
 	//return any transition or crossing in the actual room.
 	p->SetExitIndex(-1);
+	//p->GetPos();
 	//find a proper navigation line
 //	p->SetExitLine(_building->GetAllTransitions()[0]);
 //	p->SetExitLine(_building->GetTransition(0)GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID())->GetAllCrossings()[0]);
 	return -1;
+}
+// Debug
+void astar_print(bool* closedlist,bool* inopenlist,int* predlist,
+	unsigned int c_totalcount,int act_id,std::vector<std::pair<double,MeshCell*> >openlist){
+	std::cout<<"----------------------------------"<<std::endl;
+	std::cout<<"act_id: "<<act_id<<std::endl;
+	std::cout<<"Closed-List"<<std::endl;
+	for(unsigned int i=0;i<c_totalcount;i++)
+		std::cout<<(closedlist[i]?"1 ":"0 ");
+	std::cout<<std::endl;
+	std::cout<<"Inopen-List"<<std::endl;
+		for(unsigned int i=0;i<c_totalcount;i++)
+			std::cout<<(inopenlist[i]?"1 ":"0 ");
+		std::cout<<std::endl;
+	std::cout<<"Predecessor-List"<<std::endl;
+	for(unsigned int i=0;i<c_totalcount;i++)
+		(predlist[i]!=-1?std::cout<<predlist[i]<<" ":std::cout<<"* ");
+	std::cout<<std::endl;
+	std::cout<<"Openlist"<<std::endl;
+	for(unsigned int i=0;i<openlist.size();i++)
+		std::cout<<openlist.at(i).second->get_id()<<"(f="<<openlist.at(i).first<<") ";
+	std::cout<<std::endl;
+	std::cout<<"----------------------------------"<<std::endl;
+}
+
+void print_path(int* predlist,int c_start_id,int c_goal_id){
+	std::cout<<"reverse path:"<<std::endl;
+	int act_id=c_goal_id;
+	while(act_id!=c_start_id){
+		std::cout<<act_id<<" "<<std::endl;
+		act_id=predlist[act_id];
+	}
+	std::cout<<c_start_id<<std::endl;
 }
 
 void MeshRouter::Init(Building* b) {
@@ -60,7 +96,7 @@ void MeshRouter::Init(Building* b) {
 		meshfile>>temp1>>temp2;
 		nodes.push_back(new Point(temp1,temp2));
 	}
-	std::cout<<"Read "<<nodes.size()<<" Nodes from file"<<std::endl;
+	std::cout<<std::setw(2)<<"Read "<<nodes.size()<<" Nodes from file"<<std::endl;
 
 
 	unsigned int countEdges=0;
@@ -81,6 +117,7 @@ void MeshRouter::Init(Building* b) {
 	}
 	std::cout<<"Read "<<outedges.size()<<" outer Edges from file"<<std::endl;
 
+	int tc_id=0;
 	while(!meshfile.eof()){
 		std::string groupname;
 		bool  namefound=false;
@@ -89,9 +126,8 @@ void MeshRouter::Init(Building* b) {
 				namefound=true;
 			}
 		}
-		int tc_id=0;
 		if (!meshfile.eof()){
-			std::cout<<"<"<<groupname<<">"<<std::endl;
+			//std::cout<<"<"<<groupname<<">"<<std::endl;
 
 			//	std::cout<<"Read EOF!"<<std::endl;
 			//if(!(meshfile>>groupname)){
@@ -100,7 +136,7 @@ void MeshRouter::Init(Building* b) {
 
 			unsigned int countCells=0;
 			meshfile>>countCells;
-			std::cout<<"size:"<<countCells<<std::endl;
+			//std::cout<<"size:"<<countCells<<std::endl;
 
 			std::vector<MeshCell*> mCells;
 			for(unsigned int i=0;i<countCells;i++){
@@ -138,13 +174,15 @@ void MeshRouter::Init(Building* b) {
 					wall_id.push_back(tmp);
 				}
 				mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id,tc_id));
+				//std::cout<<"mCells.back()->get_id()"<<mCells.back()->get_id()<<std::endl; /////////
 				tc_id++;
 			}
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
 		}
 	}
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
-	//std::cout<<_meshdata->get_cellGroups().back()->get_cells().back()->get_midx()<<std::endl;
+
+
 
 	/*
 	 * A* TEST IMPLEMENTATION
@@ -159,7 +197,7 @@ void MeshRouter::Init(Building* b) {
 		std::cout<<"Nicht gefunden"<<std::endl;
 	}
 	int c_goal_id;
-	Point testp_goal(16,-4);
+	Point testp_goal(-5,13);
 	MeshCell* goal_cell=_meshdata->findCell(testp_goal,c_goal_id);
 	if(goal_cell!=NULL){
 		std::cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<std::endl;
@@ -167,14 +205,12 @@ void MeshRouter::Init(Building* b) {
 	else{
 		std::cout<<"Nicht gefunden"<<std::endl;
 	}
-	unsigned int c_totalcount=0;
-	//for(unsigned int i=0;i<_meshdata->get_cellGroups().size();i++)
-	//	c_totalcount+=_meshdata->get_cellGroups().at(i)->get_cells().size();
-	c_totalcount+=_meshdata->get_cellGroups().at(0)->get_cells().size();
-	//std::cout<<c_totalcount<<std::endl;
+
+	//Initialisation
+	unsigned int c_totalcount=_meshdata->get_cellCount();
+	std::cout<<"Total Number of Cells: "<<c_totalcount<<std::endl;
 	bool* closedlist=new bool[c_totalcount];
 	bool* inopenlist=new bool[c_totalcount];
-	//std::pair<double, MeshCell*>* inopenlist=new std::pair<double, MeshCell*>[c_totalcount];
 	int* predlist=new int[c_totalcount]; // to gain the path from start to goal
 	double* costlist=new double[c_totalcount];
 	for(unsigned int i=0;i<c_totalcount;i++){
@@ -182,7 +218,6 @@ void MeshRouter::Init(Building* b) {
 		inopenlist[i]=false;
 		predlist[i]=-1;
 	}
-	//int ie_count=_meshdata->get_edges().size();
 	std::vector<std::pair< double , MeshCell*> > openlist;
 	openlist.push_back(std::make_pair(0.0,start_cell));
 	inopenlist[c_start_id]=true;
@@ -191,16 +226,15 @@ void MeshRouter::Init(Building* b) {
 	int act_id=c_start_id;
 	double act_cost=0.0;
 
-	std::cout<<"Begin while"<<std::endl;
 	while(act_id!=c_goal_id){
-		std::cout<<"act_id: "<<act_id<<std::endl;
+		//astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id);
 		if (act_cell==NULL)
 			std::cout<<"act_cell=NULL !!"<<std::endl;
 
-		//std::cout<<"act_cell->get_edges().size(): "<<act_cell->get_edges().size()<<std::endl;
 		for(unsigned int i=0;i<act_cell->get_edges().size();i++){
 			int act_edge_id=act_cell->get_edges().at(i);
 			int nb_id=-1;
+			// Find neighbouring cell
 			if(_meshdata->get_edges().at(act_edge_id)->get_c1()==act_id){
 				nb_id=_meshdata->get_edges().at(act_edge_id)->get_c2();
 			}
@@ -210,9 +244,8 @@ void MeshRouter::Init(Building* b) {
 			else{// Error: inconsistant
 				Log->Write("Error:\tInconsistant Mesh-Data");
 			}
-			//std::cout<<"nb_id: "<<nb_id<<std::endl;
 			if (!closedlist[nb_id]){// neighbour-cell not fully evaluated
-				MeshCell* nb_cell=_meshdata->get_cellGroups().at(0)->get_cells().at(nb_id);
+				MeshCell* nb_cell=_meshdata->getCellAtPos(nb_id);
 				double new_cost=act_cost+(act_cell->get_mid()-nb_cell->get_mid()).Norm();
 				if(!inopenlist[nb_id]){// neighbour-cell not evaluated at all
 					predlist[nb_id]=act_id;
@@ -221,10 +254,10 @@ void MeshRouter::Init(Building* b) {
 
 					double f=new_cost+(nb_cell->get_mid()-testp_goal).Norm();
 					openlist.push_back(std::make_pair(f,nb_cell));
-
 				}
-				else{ // neighbour-cell has already a distance value
+				else{
 					if (new_cost<costlist[nb_id]){
+						std::cout<<"ERROR"<<std::endl;
 						//found shorter path to nb_cell
 						predlist[nb_id]=act_id;
 						costlist[nb_id]=new_cost;
@@ -246,37 +279,30 @@ void MeshRouter::Init(Building* b) {
 		}
 
 		std::vector<std::pair<double,MeshCell*> >::iterator it=openlist.begin();
+
 		while(it->second->get_id()!=act_id){
 			it++;
 		}
 		closedlist[act_id]=true;
+		inopenlist[act_id]=false;
 		openlist.erase(it);
 
 		int next_cell_id=-1;
 		MeshCell* next_cell=NULL;
+		//astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id,openlist); ///////////////
 		if (openlist.size()>0){
+			//Find cell with best f value
 			double min_f=openlist.at(0).first;
 			next_cell_id=openlist.at(0).second->get_id();
+			//std::cout<<"next_cell_id: "<<next_cell_id<<std::endl;
 			next_cell=openlist.at(0).second;
 			for(unsigned int j=1;j<openlist.size();j++){
 				if (openlist.at(j).first<min_f){
 					min_f=openlist.at(j).first;
 					next_cell=openlist.at(j).second;
-					next_cell_id=act_cell->get_id();
+					next_cell_id=openlist.at(j).second->get_id();
 				}
 			}
-			//while(it->second->get_id()!=act_id){
-			//	it++;
-			//}
-			//std::cout<<"openlist.size(): "<<openlist.size()<<std::endl; ////
-			//for(unsigned int k=0;k<openlist.size();k++)
-			//	std::cout<<"openlist.at(k).first: "<<openlist.at(k).first<<std::endl;
-			//openlist.erase(it);
-			//for(unsigned int k=0;k<openlist.size();k++)
-			//	std::cout<<"openlist.at(k).first: "<<openlist.at(k).first<<std::endl;
-			//std::cout<<"openlist.size(): "<<openlist.size()<<std::endl; ////
-			//closedlist[act_id]=true;
-			//std::cout<<"next_cell_id: "<<next_cell_id<<std::endl;
 			act_id=next_cell_id;
 			act_cell=next_cell;
 		}
@@ -284,8 +310,8 @@ void MeshRouter::Init(Building* b) {
 			Log->Write("Error:\tA* did not find a path");
 		}
 	}
-	std::cout<<"act_id: "<<act_id<<std::endl;
-	//std::cout<<"End while"<<std::endl;
+	print_path(predlist,c_start_id,c_goal_id);
+	//astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id,openlist);
 
 }
 

@@ -27,6 +27,9 @@ public:
 	std::vector<MeshEdge*> get_edges(){return _mEdges;}
 	std::vector<MeshEdge*> get_outEdges(){return _mOutEdges;}
 	std::vector<MeshCellGroup*> get_cellGroups(){return _mCellGroups;}
+	unsigned int get_cellCount(){return _mCellCount;};
+
+	MeshCell* getCellAtPos(unsigned int tpos);
 
 	MeshCell* findCell(Point testp,int& cell_id);
 
@@ -35,6 +38,7 @@ private:
 	std::vector<MeshEdge*> _mEdges;
 	std::vector<MeshEdge*> _mOutEdges;
 	std::vector<MeshCellGroup*> _mCellGroups;
+	unsigned int _mCellCount;
 
 };
 
@@ -85,5 +89,7 @@ private:
     std::string _groupname;
     std::vector<MeshCell*> _cells;
 };
+
+unsigned int calc_CellCount(std::vector<MeshCellGroup*> mcg);
 
 #endif /* MESH_H_ */
