@@ -795,6 +795,7 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 			if((area(v[0])/area(*polygon_iterator))>1.00001)
 			{
 				std::cout<<"this is a wrong result "<<area(v[0])<<'\t'<<area(*polygon_iterator)<<"\n";
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
@@ -991,8 +992,8 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 
 	string polygon="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
 
-	//TODO: the method will fail if the directory doens not exits
-	//use the CREATE File instead combiend with
+	//TODO: the method will fail if the directory does not not exits
+	//use the CREATE File instead combined with
 	//std::stringstream ss;
 
 	ofstream polys (polygon.c_str());
