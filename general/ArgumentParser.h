@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 #include "Macros.h"
-#include "MeasurementArea.h"
+#include "./MeasurementArea.h"
 
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>

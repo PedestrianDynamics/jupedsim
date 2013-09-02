@@ -40,7 +40,8 @@ file(
 	geometry/SubRoom.cpp
 
 	header_files:
-	Analysis.h  
+	Analysis.h
+	MeasurementArea.h  
 	VoronoiDiagramGenerator.h  
 	VoronoiDiagram.h  
 	VoronoiPolygons.h
