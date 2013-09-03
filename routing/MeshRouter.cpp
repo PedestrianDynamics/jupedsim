@@ -11,10 +11,11 @@
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
 
+using namespace std;
 
 MeshRouter::MeshRouter() {
 	_building=NULL;
-	_meshdata=new MeshData();
+	_meshdata=NULL;
 }
 
 MeshRouter::~MeshRouter() {
@@ -68,7 +69,7 @@ int MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge){
 			//std::cout<<testp_start.toString()<<std::endl;;
 			MeshCell* start_cell=_meshdata->findCell(testp_start,c_start_id);
 			if(start_cell!=NULL){
-				std::cout<<testp_start.toString()<<"Gefunden in Zelle: "<<c_start_id<<std::endl;
+				//std::cout<<testp_start.toString()<<"Gefunden in Zelle: "<<c_start_id<<std::endl;
 			}
 			else{
 				std::cout<<"Nicht gefunden"<<std::endl;
@@ -222,10 +223,10 @@ int MeshRouter::FindExit(Pedestrian* p) {
 	//std::cout<<"calling the mesh router"<<std::endl;
 	MeshEdge* edge=NULL;
 	GetNextEdge(p,&edge);
-	if (edge!=NULL)
-	   std::cout<<edge->toString()<<std::endl;
-	else
-		std::cout<<"Keine Kante gefunden"<<std::endl;
+//	if (edge!=NULL)
+//	   std::cout<<edge->toString()<<std::endl;
+//	else
+//		std::cout<<"Keine Kante gefunden"<<std::endl;
 
 	p->SetExitLine(edge);
 	return 0;
@@ -241,18 +242,20 @@ int MeshRouter::FindExit(Pedestrian* p) {
 
 void MeshRouter::Init(Building* b) {
 	_building=b;
-	Log->Write("ERROR: \tdo not use this  <<Mesh>>  router !!");
+	Log->Write("WARNING: \tdo not use this  <<Mesh>>  router !!");
 
+	std::string meshfileName=b->GetFilename()+".nav";
 	std::ifstream meshfiled;
-	meshfiled.open("../GSP_2013/test.nav", std::ios::in);
+	meshfiled.open(meshfileName.c_str(), std::ios::in);
 	if(!meshfiled.is_open()){
-		Log->Write("ERROR: \tcould not open meshfile");
+		Log->Write("ERROR: \tcould not open meshfile <%s>",meshfileName.c_str());
+		exit(EXIT_FAILURE);
 	}
 	std::stringstream meshfile;
 	meshfile<<meshfiled.rdbuf();
 	meshfiled.close();
 
-	std::vector<Point*> nodes;
+	std::vector<Point*> nodes; nodes.clear();
 	std::vector<MeshEdge*> edges;
 	std::vector<MeshEdge*> outedges;
 	std::vector<MeshCellGroup*> mCellGroups;
@@ -295,18 +298,11 @@ void MeshRouter::Init(Building* b) {
 			}
 		}
 		if (!meshfile.eof()){
-			//std::cout<<"<"<<groupname<<">"<<std::endl;
-
-			//	std::cout<<"Read EOF!"<<std::endl;
-			//if(!(meshfile>>groupname)){
-			//	Log->Write("Konnte Gruppennamen der Zellen nicht lesen");
-			//}
 
 			unsigned int countCells=0;
 			meshfile>>countCells;
-			//std::cout<<"size:"<<countCells<<std::endl;
 
-			std::vector<MeshCell*> mCells;
+			std::vector<MeshCell*> mCells; mCells.clear();
 			for(unsigned int i=0;i<countCells;i++){
 				double midx,midy;
 				meshfile>>midx>>midy;
@@ -321,9 +317,9 @@ void MeshRouter::Init(Building* b) {
 				//double* normvec=new double[3];
 				double normvec[3];
 				for (unsigned int j=0;j<3;j++){
-					double tmp;
+					double tmp=0.0;
 					meshfile>>tmp;
-					normvec[i]=tmp;
+					normvec[j]=tmp;
 				}
 				unsigned int countEdges=0;
 				meshfile>>countEdges;
@@ -342,14 +338,13 @@ void MeshRouter::Init(Building* b) {
 					wall_id.push_back(tmp);
 				}
 				mCells.push_back(new MeshCell(midx,midy,node_id,normvec,edge_id,wall_id,tc_id));
-				//std::cout<<"mCells.back()->get_id()"<<mCells.back()->get_id()<<std::endl; /////////
 				tc_id++;
 			}
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
 		}
 	}
-	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 
+	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 }
 
 

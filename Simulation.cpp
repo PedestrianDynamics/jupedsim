@@ -341,7 +341,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		//iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
 	}
 
-
 	_nPeds=_distribution->Distribute(_building);
 
 	// initialize the routing engine before doing any other things
@@ -411,8 +410,6 @@ int Simulation::RunSimulation() {
 	//return the evacuation time
 	return (int) t;
 }
-
-
 
 
 // TODO: make the building class more independent by moving the update routing here.

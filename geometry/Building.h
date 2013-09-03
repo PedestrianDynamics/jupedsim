@@ -41,29 +41,28 @@
 #include "Hline.h"
 #include "Obstacle.h"
 
-
 class RoutingEngine;
 class Pedestrian;
 class Transition;
 class LCGrid;
 
 
-
 class Building {
 private:
     std::string _caption;
+    std::string _filename;
     RoutingEngine* _routingEngine;
     LCGrid* _linkedCellGrid;
     std::vector<Room*> _rooms;
     std::vector<Pedestrian*> _allPedestians;
-    /// pedestrians pathway
-    bool _savePathway;
-    std::ofstream _pathWayStream;
 
     std::map<int, Crossing*> _crossings;
     std::map<int, Transition*> _transitions;
     std::map<int, Hline*> _hLines;
 
+    /// pedestrians pathway
+    bool _savePathway;
+    std::ofstream _pathWayStream;
 
 public:
     // Konstruktor
@@ -105,7 +104,7 @@ public:
     void InitGrid(double cellSize);
     //void InitRoomsAndSubroomsMap();
     void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
-    void InitSavePedPathway(std::string filename);
+    void InitSavePedPathway(const std::string &filename);
     void AddRoom(Room* room);
     void Update();
     void UpdateGrid();
@@ -121,17 +120,14 @@ public:
 	void AddHline(Hline* line);
 
 
-    // Ein-Ausgabe
-    void LoadBuilding(std::string filename); // Laedt Geometrie-Datei
-    void LoadTrafficInfo(std::string filename);
-    void LoadRoutingInfo(std::string filename);
+	const std::string& GetFilename() const;
+    void LoadBuilding(const std::string &filename); // Laedt Geometrie-Datei
+    void LoadTrafficInfo(const std::string &filename);
+    void LoadRoutingInfo(const std::string &filename);
     void WriteToErrorLog() const;
 
 	void CleanUpTheScene();
 
-
-	// saving computation
-	//bool IsDirectlyConnected(int room1, int subroom1,int room2, int subroom2);
 
 private:
 	void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);

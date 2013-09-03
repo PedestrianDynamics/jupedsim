@@ -70,6 +70,7 @@ Line::~Line() {
  ************************************************************/
 void Line::SetPoint1(const Point& p) {
 	_point1 = p;
+	_centre = (_point1+_point2)*0.5;
 }
 
 void Line::SetPoint2(const Point& p) {

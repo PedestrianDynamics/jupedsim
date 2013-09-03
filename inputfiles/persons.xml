@@ -18,7 +18,7 @@
 		<router id="2" method="global_shortest"/>
 		<router id="3" method="quickest"/> 
 		<router id="4" method="dummy"/>  
-	   <router id="5" method="nav_mesh"/>
+		<!-- <router id="5" method="nav_mesh"/>  --> 
 	</routers>
 	
 	<groups> <!-- Leute, die sich auskennen -->

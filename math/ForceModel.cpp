@@ -247,7 +247,10 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 		int uid2=ped->GetExitLine()->GetUniqueID();
 		// ignore my transition consider closed doors
 		//closed doors are considered as wall
-		if( (goal->IsOpen()==false) || (uid1 != uid2) ) {
+		//TODO: fix for the arena
+		//if( (goal->IsOpen()==false) || (uid1 != uid2) )
+
+		if( goal->IsOpen()==false ) {
 			f = f + ForceRepWall(ped,*((Wall*)goal));
 		}
 	}

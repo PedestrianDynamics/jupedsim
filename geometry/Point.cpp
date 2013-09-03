@@ -111,7 +111,7 @@ Point Point::Normalized() const {
 }
 
 // Skalarprodukt zweier Vektoren
-
+//TODO: get rid of methods call GetX, getY
 double Point::ScalarP(const Point& v) const {
     return _x * v.GetX() + _y * v.GetY();
 }

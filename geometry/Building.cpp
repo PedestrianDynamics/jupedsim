@@ -52,6 +52,7 @@ using namespace std;
 
 Building::Building() {
 	_caption = "no_caption";
+	_filename = "";
 	_rooms = vector<Room*>();
 	_routingEngine = NULL;
 	_linkedCellGrid = NULL;
@@ -255,11 +256,18 @@ void Building::InitGeometry() {
  Ein-Ausgabe
  ************************************************************/
 
-void Building::LoadBuilding(string filename) {
+const string& Building::GetFilename() const{
+	return _filename;
+}
+
+void Building::LoadBuilding(const string &filename) {
+
+	//save for later use
+	_filename =filename;
 
 	Log->Write("INFO: \tParsing the geometry file");
 
-	TiXmlDocument docGeo(filename);
+	TiXmlDocument docGeo(_filename);
 	if (!docGeo.LoadFile()){
 		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the geometry file");
@@ -914,7 +922,7 @@ void Building::DumpSubRoomInRoom(int roomID, int subID) {
 }
 
 
-void Building::LoadRoutingInfo(string filename) {
+void Building::LoadRoutingInfo(const string &filename) {
 	Log->Write("INFO:\tLoading extra routing information");
 	if (filename == "") {
 		Log->Write("INFO:\t No file supplied !");
@@ -1005,7 +1013,7 @@ void Building::LoadRoutingInfo(string filename) {
 	Log->Write("INFO:\tdone with loading extra routing information");
 }
 
-void Building::LoadTrafficInfo(string filename) {
+void Building::LoadTrafficInfo(const string &filename) {
 
 	Log->Write("INFO:\tLoading  the traffic info file");
 
@@ -1140,7 +1148,7 @@ void Building::AddPedestrian(Pedestrian* ped) {
 }
 
 
-void Building::InitSavePedPathway(string filename) {
+void Building::InitSavePedPathway(const string &filename) {
 	_pathWayStream.open(filename.c_str());
 	_savePathway = true;
 
