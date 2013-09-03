@@ -676,7 +676,7 @@ void Building::Update() {
 						//exit(0);
 						//DeletePedestrian(ped);
 						nonConformPeds.push_back(ped);
-						sub->DeletePedestrian(k);
+						sub->DeletePedestrian(k--);
 						continue; // next pedestrian
 					}
 
@@ -705,7 +705,7 @@ void Building::Update() {
 						//continue;
 					}
 					// Lösche Fußgänger aus aktuellem SubRoom
-					sub->DeletePedestrian(k); // k--;
+					sub->DeletePedestrian(k--); // k--;
 				}
 				// neues Ziel setzten
 				//pRouting->FindExit(ped);

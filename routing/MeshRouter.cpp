@@ -19,9 +19,7 @@ MeshRouter::MeshRouter() {
 }
 
 MeshRouter::~MeshRouter() {
-	std::cout<<"Start Desctructor Meshrouter"<<std::endl;
 	delete _meshdata;
-	std::cout<<"End Desctructor Meshrouter"<<std::endl;
 }
 
 // Debug

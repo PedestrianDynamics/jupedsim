@@ -53,7 +53,6 @@ MeshData::MeshData(){
 	_mCellCount=0;
 }
 MeshData::~MeshData(){
-	std::cout<<"\tStart Destructor Meshdata"<<std::endl;
 	for(unsigned int i=0;i<_mNodes.size();i++)
 		delete _mNodes[i];
 	for(unsigned int i=0;i<_mEdges.size();i++)
@@ -62,7 +61,6 @@ MeshData::~MeshData(){
 			delete _mOutEdges[i];
 	for(unsigned int i=0;i<_mCellGroups.size();i++)
 			delete _mCellGroups[i];
-	std::cout<<"\tEnd Destructor Meshdata"<<std::endl;
 }
 
 unsigned int calc_CellCount(std::vector<MeshCellGroup*> mcg){
