@@ -8,16 +8,7 @@
 #include "mesh.h"
 #include <iostream>
 
-/*MeshNode::MeshNode(){
-	_x=0.0;
-	_y=0.0;
-}
-MeshNode::MeshNode(double x,double y){
-	_x=x;
-	_y=y;
-}*/
-
-MeshEdge::MeshEdge(int n1,int n2,int c1, int c2,Point p1,Point p2):Line(p1,p2){
+MeshEdge::MeshEdge(int n1,int n2,int c1, int c2,Point p1,Point p2):NavLine(Line(p1,p2)){
 	_n1=n1;
 	_n2=n2;
 	_c1=c1;

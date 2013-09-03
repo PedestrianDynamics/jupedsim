@@ -11,7 +11,7 @@
 #include <fstream>
 #include <vector>
 #include "../../geometry/Point.h"
-#include "../../geometry/Line.h"
+#include "../../geometry/NavLine.h"
 
 class MeshEdge;
 class MeshCell;
@@ -42,7 +42,7 @@ private:
 
 };
 
-class MeshEdge:public Line{
+class MeshEdge:public NavLine{
 public:
 	MeshEdge(int,int,int,int,Point p1=Point(),Point p2=Point());//:Line(p1,p2);
 	int get_n1(){return _n1;};

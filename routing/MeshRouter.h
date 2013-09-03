@@ -15,6 +15,8 @@ class MeshRouter: public Router {
 private:
 	Building* _building;
 	MeshData* _meshdata;
+
+	int GetNextEdge(Pedestrian* p, MeshEdge** edge);
 public:
 	MeshRouter();
 	virtual ~MeshRouter();
