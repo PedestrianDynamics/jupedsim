@@ -23,15 +23,15 @@ public:
 	~MeshData();
 	MeshData(std::vector<Point*>,std::vector<MeshEdge*>,
 			std::vector<MeshEdge*>,std::vector<MeshCellGroup*>);
-	std::vector<Point*> get_nodes(){return _mNodes;}
-	std::vector<MeshEdge*> get_edges(){return _mEdges;}
-	std::vector<MeshEdge*> get_outEdges(){return _mOutEdges;}
-	std::vector<MeshCellGroup*> get_cellGroups(){return _mCellGroups;}
-	unsigned int get_cellCount(){return _mCellCount;};
+	std::vector<Point*> Get_nodes(){return _mNodes;}
+	std::vector<MeshEdge*> Get_edges(){return _mEdges;}
+	std::vector<MeshEdge*> Get_outEdges(){return _mOutEdges;}
+	std::vector<MeshCellGroup*> Get_cellGroups(){return _mCellGroups;}
+	unsigned int Get_cellCount(){return _mCellCount;};
 
-	MeshCell* getCellAtPos(unsigned int tpos);
+	MeshCell* GetCellAtPos(unsigned int tpos);
 
-	MeshCell* findCell(Point testp,int& cell_id);
+	MeshCell* FindCell(Point testp,int& cell_id);
 
 private:
 	std::vector<Point*> _mNodes;
@@ -45,10 +45,10 @@ private:
 class MeshEdge:public NavLine{
 public:
 	MeshEdge(int,int,int,int,Point p1=Point(),Point p2=Point());//:Line(p1,p2);
-	int get_n1(){return _n1;};
-	int get_n2(){return _n2;};
-	int get_c1(){return _c1;};
-	int get_c2(){return _c2;};
+	int Get_n1(){return _n1;};
+	int Get_n2(){return _n2;};
+	int Get_c1(){return _c1;};
+	int Get_c2(){return _c2;};
 	//friend std::istream& operator>>(std::istream& is, MeshEdge& mn);
 private:
 	int _n1; //ID of Node 1
@@ -64,10 +64,10 @@ public:
 	~MeshCell();
 	//double get_midx(){return _midx;};
 	//double get_midy(){return _midy;};
-	Point get_mid(){return _mid;};
-	std::vector<int> get_nodes(){return _node_id;};
-	std::vector<int> get_edges(){return _edge_id;};
-	int get_id(){return _tc_id;};
+	Point Get_mid(){return _mid;};
+	std::vector<int> Get_nodes(){return _node_id;};
+	std::vector<int> Get_edges(){return _edge_id;};
+	int Get_id(){return _tc_id;};
 private:
 	//double _midx;
 	//double _midy;
@@ -84,12 +84,12 @@ class MeshCellGroup{
 public:
 	MeshCellGroup(std::string,std::vector<MeshCell*>);
 	~MeshCellGroup();
-	std::vector<MeshCell*> get_cells();
+	std::vector<MeshCell*> Get_cells();
 private:
     std::string _groupname;
     std::vector<MeshCell*> _cells;
 };
 
-unsigned int calc_CellCount(std::vector<MeshCellGroup*> mcg);
+unsigned int Calc_CellCount(std::vector<MeshCellGroup*> mcg);
 
 #endif /* MESH_H_ */

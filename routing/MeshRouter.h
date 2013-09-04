@@ -9,12 +9,13 @@
 #define MESHROUTER_H_
 
 #include "Router.h"
-#include "../GSP_2013/mesh/mesh.h"
+#include "mesh/Mesh.h"
 
 class MeshRouter: public Router {
 private:
 	Building* _building;
 	MeshData* _meshdata;
+	int* _lastpos;
 
 	int GetNextEdge(Pedestrian* p, MeshEdge** edge);
 public:
