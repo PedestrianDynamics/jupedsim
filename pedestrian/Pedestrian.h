@@ -66,6 +66,7 @@ private:
     std::vector<int> _trip;
     Point _V0; //vector V0
     Point _lastPosition;
+    int _lastCellPosition;
     
     /**
      * A set with UniqueIDs of closed crossings,
@@ -126,6 +127,7 @@ public:
 
     // Eigenschaften der Ellipse
     void SetPos(const Point& pos); // setzt x und y-Koordinaten
+    void SetCellPos(int cp);
     void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
     void SetV0Norm(double v0);
     void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
@@ -148,6 +150,7 @@ public:
 
     // Eigenschaften der Ellipse
     const Point& GetPos() const;
+    int GetCellPos() const;
     const Point& GetV() const;
     const Point& GetV0() const;
     const Point& GetV0(const Point& target);

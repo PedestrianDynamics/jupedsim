@@ -16,12 +16,10 @@ using namespace std;
 MeshRouter::MeshRouter() {
 	_building=NULL;
 	_meshdata=NULL;
-	_lastpos=NULL;
 }
 
 MeshRouter::~MeshRouter() {
 	delete _meshdata;
-	delete[] _lastpos;
 }
 
 // Debug
@@ -188,6 +186,9 @@ int MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge){
 					Log->Write("Error:\tA* did not find a path");
 				}
 			}
+			delete[] closedlist;
+			delete[] inopenlist;
+			delete[] costlist;
 			//print_path(predlist,c_start_id,c_goal_id);/////////////////
 			//astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id,openlist);
 
@@ -212,6 +213,7 @@ int MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge){
 						 }
 					}
 				}
+				delete[] predlist;
 				//cout<<(*edge)->toString()<<endl;
 				if((*edge)!=NULL || c_start_id!=c_goal_id )
 					return 0;
@@ -228,18 +230,16 @@ int MeshRouter::FindExit(Pedestrian* p) {
 
 	MeshEdge* edge=NULL;
 	NavLine* nextline=NULL;
-	if(_lastpos[p->GetID()]==c_start_id){
-		//GetNextEdge(p,&edge);
+	if(p->GetCellPos()==c_start_id){
+	//if(false){
 		nextline=p->GetExitLine();
-		//std::cout<<"no new cell"<<std::endl;
 	}else{
-		//std::cout<<"person moved to another cell "<<_lastpos[p->GetID()]<<"->"<<c_start_id<<std::endl;
 		GetNextEdge(p,&edge);
 		nextline=dynamic_cast<NavLine*>(edge);
 	}
-	p->SetExitLine(nextline);
 
-	_lastpos[p->GetID()]=c_start_id;
+	p->SetExitLine(nextline);
+	p->SetCellPos(c_start_id);
 	return 0;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	//return any transition or crossing in the actual room.
@@ -351,11 +351,6 @@ void MeshRouter::Init(Building* b) {
 	}
 
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
-	_lastpos=new int[b->GetAllPedestrians().size()];
-	for(unsigned i=0;i<b->GetAllPedestrians().size();i++){
-		_meshdata->FindCell(b->GetAllPedestrians().at(i)->GetPos(),_lastpos[i]);
-	}
-
 }
 
 

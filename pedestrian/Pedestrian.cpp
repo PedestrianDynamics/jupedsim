@@ -65,6 +65,7 @@ Pedestrian::Pedestrian() {
 	_deltaT=0.01;
 	_V0=Point(0,0);
 	_lastPosition=Point(0,0);
+	_lastCellPosition=-1;
 	
 	_knownDoors = map<int, NavLineState>();
 	
@@ -141,6 +142,10 @@ void Pedestrian::SetPos(const Point& pos) {
     return;
     
 
+}
+
+void Pedestrian::SetCellPos(int cp){
+	_lastCellPosition=cp;
 }
 
 void Pedestrian::SetV(const Point& v) {
@@ -306,6 +311,10 @@ void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
 
 const Point& Pedestrian::GetPos() const {
 	return _ellipse.GetCenter();
+}
+
+ int Pedestrian::GetCellPos() const {
+	return _lastCellPosition;;
 }
 
 const Point& Pedestrian::GetV() const {
