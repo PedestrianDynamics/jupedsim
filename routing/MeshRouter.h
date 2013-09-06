@@ -15,9 +15,10 @@ class MeshRouter: public Router {
 private:
 	Building* _building;
 	MeshData* _meshdata;
-	int* _lastpos;
 
 	int GetNextEdge(Pedestrian* p, MeshEdge** edge);
+	std::vector<MeshEdge*> AStar(Pedestrian* p);
+	NavLine Funnel(Point&,Point&,std::vector<MeshEdge*>);
 public:
 	MeshRouter();
 	virtual ~MeshRouter();
