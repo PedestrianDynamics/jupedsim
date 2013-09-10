@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version ="0.40" caption="Projectname" gridSizeX="20.000000" gridSizeY="20.000000" unit="m">
+<geometry version="0.40" caption="Projectname" gridSizeX="20.000000"
+	gridSizeY="20.000000" unit="m">
 	<rooms>
 		<room id="0" caption="130" zpos="10.000000">
 			<subroom id="7" closed="0" class="subroom">
-				 <polygon caption="wall">
-					 <vertex px="-7535.520508" py="-711.437500"/>
-					 <vertex px="-7535.664551" py="-711.437500"/>
+				<polygon caption="wall">
+					<vertex px="-7535.520508" py="-711.437500" />
+					<vertex px="-7535.664551" py="-711.437500" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7534.920654" py="-711.437500"/>
-					 <vertex px="-7529.266113" py="-711.487427"/>
+				<polygon caption="wall">
+					<vertex px="-7534.920654" py="-711.437500" />
+					<vertex px="-7529.266113" py="-711.487427" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7536.265137" py="-711.437988"/>
-					 <vertex px="-7550.865234" py="-711.488037"/>
+				<polygon caption="wall">
+					<vertex px="-7536.265137" py="-711.437988" />
+					<vertex px="-7550.865234" py="-711.488037" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7550.864746" py="-753.787842"/>
-					 <vertex px="-7550.865234" py="-711.488037"/>
+				<polygon caption="wall">
+					<vertex px="-7550.864746" py="-753.787842" />
+					<vertex px="-7550.865234" py="-711.488037" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7550.864746" py="-753.787842"/>
-					 <vertex px="-7536.265381" py="-753.837891"/>
+				<polygon caption="wall">
+					<vertex px="-7550.864746" py="-753.787842" />
+					<vertex px="-7536.265381" py="-753.837891" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7529.266113" py="-753.788452"/>
-					 <vertex px="-7535.065186" py="-753.837891"/>
+				<polygon caption="wall">
+					<vertex px="-7529.266113" py="-753.788452" />
+					<vertex px="-7535.065186" py="-753.837891" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7529.264893" py="-742.638184"/>
-					 <vertex px="-7529.264893" py="-722.637329"/>
+				<polygon caption="wall">
+					<vertex px="-7529.264893" py="-742.638184" />
+					<vertex px="-7529.264893" py="-722.637329" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7529.265625" py="-743.838501"/>
-					 <vertex px="-7529.266113" py="-753.788452"/>
+				<polygon caption="wall">
+					<vertex px="-7529.265625" py="-743.838501" />
+					<vertex px="-7529.266113" py="-753.788452" />
 				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-7529.266113" py="-711.487427"/>
-					 <vertex px="-7529.265625" py="-721.437378"/>
+				<polygon caption="wall">
+					<vertex px="-7529.266113" py="-711.487427" />
+					<vertex px="-7529.265625" py="-721.437378" />
 				</polygon>
 			</subroom>
-			</room>
-			</rooms>
+		</room>
+	</rooms>
 </geometry>

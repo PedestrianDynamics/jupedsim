@@ -11,21 +11,14 @@
 		<dist room_caption="headon" subroom_id="0" number="2" />
 	</distribution>
 
- <!-- 
-	<groups>
-		<group id="0">
-			<members>1</members>
-			<!-- <trip>0</trip> -->
- <!-- 			<goal>0</goal>
-		</group>
-	</groups>
- -->
- 
+	<!-- <groups> <group id="0"> <members>1</members> <!-- <trip>0</trip> -->
+	<!-- <goal>0</goal> </group> </groups> -->
+
 	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
 		direction="" goal="" age="18" gender="male"/> -->
-	
 
-	<person id="1" startX="1" startY="0" goal="1" age="18" gender="male"/>
+
+	<person id="1" startX="1" startY="0" goal="1" age="18" gender="male" />
 	<person id="2" startX="19" startY="0" goal="0" age="18" gender="female" />
 
 </persons> 

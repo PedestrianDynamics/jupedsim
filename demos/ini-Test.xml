@@ -6,16 +6,14 @@
 	<!-- geometry file -->
 	<geometry>inputfiles/T-Junction/T-Junction.xml</geometry>
 	<!--persons information and distribution -->
-	<person>inputfiles/T-Junction/persons.xml</person> 
+	<person>inputfiles/T-Junction/persons.xml</person>
 	<routing>inputfiles/T-Junction/routing.xml</routing>
 	<!-- <!-- traffic information: e.g closed doors -->
 	<!-- <traffic>inputfiles/T-Junction/traffic.xml</traffic> -->
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
 	</trajectories>
-	<!-- where to store the logs 
-	<logfile>outputfiles/log.txt</logfile>
- 	-->
+	<!-- where to store the logs <logfile>outputfiles/log.txt</logfile> -->
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
@@ -23,7 +21,7 @@
 		<solver>euler</solver>
 		<stepsize>0.01</stepsize>
 		<exitStrategy>2</exitStrategy>
-		<linkedcells enabled="true" cell_size="2.2"/>
+		<linkedcells enabled="true" cell_size="2.2" />
 		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />

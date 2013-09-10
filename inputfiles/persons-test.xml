@@ -7,7 +7,7 @@
 	<!-- default distribution -->
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
-		<dist room_caption="T-Junction" subroom_id="3" number="10"/>
-		<dist room_caption="T-Junction" subroom_id="1" number="10"/>
+		<dist room_caption="T-Junction" subroom_id="3" number="10" />
+		<dist room_caption="T-Junction" subroom_id="1" number="10" />
 	</distribution>
 </persons> 

@@ -8,7 +8,7 @@
 		<door trans_id="5" state="close" />
 		<door trans_id="41" state="close" />
 		<door trans_id="43" state="close" />
-	
-<!--	<door trans_id="25" state="close" />-->
+
+		<!-- <door trans_id="25" state="close" /> -->
 	</doors>
 </traffic>

@@ -8,58 +8,52 @@
 	<!-- default distribution -->
 	<!-- TODO: also distribute with room_id only -->
 	<distribution>
-<!--		<dist room_caption="Floor" subroom_id="0" number="1"/> -->
-		<dist room_caption="EV2-EG" number="3"/>
-		<dist room_caption="EV1-EG" number="3"/>
-		<dist room_caption="EV3-EG" number="3"/>
-		<dist room_caption="209" number="3"/>
-		<dist room_caption="208" number="3"/>
-		<dist room_caption="207" number="3"/>
-		<dist room_caption="206" number="1"/>
-		<dist room_caption="205" number="3"/>
-		<dist room_caption="204" number="2"/>
-		<dist room_caption="203" number="3"/>
-		<dist room_caption="202" number="1"/>
-		<dist room_caption="201" number="3"/>
-		<dist room_caption="229" number="2"/>
-		<dist room_caption="228" number="3"/>
-		<dist room_caption="Floor" number="3"/>
-		<dist room_caption="227" number="1"/>
-		<dist room_caption="226" number="3"/>
-		<dist room_caption="225" number="2"/>
-		<dist room_caption="224" number="3"/>
-		<dist room_caption="223a" number="3"/>
-		<dist room_caption="223b" number="3"/>
-		<dist room_caption="222" number="10"/>
-		<dist room_caption="221" number="3"/>
-		<dist room_caption="220" number="2"/>
-		<dist room_caption="219" number="3"/>
-		<dist room_caption="218" number="3"/>
-		<dist room_caption="217" number="3"/>
-		<dist room_caption="216" number="2"/>
-		<dist room_caption="215" number="2"/>
-		<dist room_caption="214" number="3"/>
-		<dist room_caption="213a" number="10"/>
-		<dist room_caption="213b" number="3"/>
-		<dist room_caption="200C" number="3"/>
-		<dist room_caption="211" number="10"/>
-		<dist room_caption="210" number="3"/>
-		<dist room_caption="T1" number="3"/>
-		<dist room_caption="T2" number="3"/>
+		<!-- <dist room_caption="Floor" subroom_id="0" number="1"/> -->
+		<dist room_caption="EV2-EG" number="3" />
+		<dist room_caption="EV1-EG" number="3" />
+		<dist room_caption="EV3-EG" number="3" />
+		<dist room_caption="209" number="3" />
+		<dist room_caption="208" number="3" />
+		<dist room_caption="207" number="3" />
+		<dist room_caption="206" number="1" />
+		<dist room_caption="205" number="3" />
+		<dist room_caption="204" number="2" />
+		<dist room_caption="203" number="3" />
+		<dist room_caption="202" number="1" />
+		<dist room_caption="201" number="3" />
+		<dist room_caption="229" number="2" />
+		<dist room_caption="228" number="3" />
+		<dist room_caption="Floor" number="3" />
+		<dist room_caption="227" number="1" />
+		<dist room_caption="226" number="3" />
+		<dist room_caption="225" number="2" />
+		<dist room_caption="224" number="3" />
+		<dist room_caption="223a" number="3" />
+		<dist room_caption="223b" number="3" />
+		<dist room_caption="222" number="10" />
+		<dist room_caption="221" number="3" />
+		<dist room_caption="220" number="2" />
+		<dist room_caption="219" number="3" />
+		<dist room_caption="218" number="3" />
+		<dist room_caption="217" number="3" />
+		<dist room_caption="216" number="2" />
+		<dist room_caption="215" number="2" />
+		<dist room_caption="214" number="3" />
+		<dist room_caption="213a" number="10" />
+		<dist room_caption="213b" number="3" />
+		<dist room_caption="200C" number="3" />
+		<dist room_caption="211" number="10" />
+		<dist room_caption="210" number="3" />
+		<dist room_caption="T1" number="3" />
+		<dist room_caption="T2" number="3" />
 
 	</distribution>
 
-<!--	<groups> 
-		<group id ="1">
-			<members>1,2,3</members>
-			<trip>1</trip>
-		</group>
-	</groups>
--->
+	<!-- <groups> <group id ="1"> <members>1,2,3</members> <trip>1</trip> </group> 
+		</groups> -->
 	<!-- <person id="1" height="180" startX= startY= startZ="" wishVelo="double" 
 		direction="" goal="" age="18" gender="male"/> -->
-	<!--<person id="1" height="180" wishVelo="1.3" age="18" gender="male" />
-	<person id="2" height="170" age="20" gender="male" />
-	<person id="3" height="182" age="25" gender="female" />
-	-->
+	<!--<person id="1" height="180" wishVelo="1.3" age="18" gender="male" /> 
+		<person id="2" height="170" age="20" gender="male" /> <person id="3" height="182" 
+		age="25" gender="female" /> -->
 </persons> 

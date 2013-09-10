@@ -206,6 +206,7 @@ public:
 	void AddWall(const Wall& w);
 	void AddObstacle(Obstacle* obs);
 	void DeletePedestrian(int index);
+	//void DeletePedestrian(Pedestrian* ped);
 	void AddGoalID(int ID);
 	void RemoveGoalID(int ID);
 	void CalculateArea();

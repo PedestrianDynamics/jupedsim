@@ -10,20 +10,18 @@
 	<!-- extra routing information -->
 	<routing>inputfiles/bottleneck/routing.xml</routing>
 	<!-- traffic information: e.g closed doors -->
-	<!-- <traffic>inputfiles/bottleneck/traffic.xml</traffic>-->
+	<!-- <traffic>inputfiles/bottleneck/traffic.xml</traffic> -->
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" version="0.4">outputfiles/trajectories.xml
 	</trajectories>
-	<!-- where to store the logs 
-	<logfile>outputfiles/log.txt</logfile>
- 	-->
+	<!-- where to store the logs <logfile>outputfiles/log.txt</logfile> -->
 
 	<!-- These parameters may be overwritten -->
 	<parameters>
 		<tmax unit="sec">900</tmax>
 		<solver>euler</solver>
 		<stepsize>0.01</stepsize>
-		<linkedcells enabled="true" cell_size="2.2"/>
+		<linkedcells enabled="true" cell_size="2.2" />
 		<routeChoiceStrategy>local_shortest</routeChoiceStrategy>
 		<v0 mu="1.24" sigma="0.001" />
 		<bmax mu="0.25" sigma="0.001" />

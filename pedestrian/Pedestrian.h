@@ -88,6 +88,7 @@ private:
     int _newOrientationDelay; //2 seconds, in steps
 
 
+
     // necessary for smooth turning at sharp bend
     int _updateRate;
     double _turninAngle;

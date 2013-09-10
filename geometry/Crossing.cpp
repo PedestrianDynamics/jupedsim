@@ -130,11 +130,9 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
     else if (_subRoom2->GetSubRoomID() == subroomID)
         return _subRoom1;
     else {
-    	 char tmp[CLENGTH];
-    	    sprintf(tmp,"ERROR: \tCrossing::GetOtherSubRoom No exit found "
+    	 Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
     	    		"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
-        Log->Write(tmp);
-        exit(0);
+       return NULL;
     }
 }
 

@@ -414,31 +414,31 @@ void Building::LoadBuilding(const string &filename) {
 		//parsing the crossings
 		TiXmlNode*  xCrossingsNode = xRoom->FirstChild("crossings");
 		if(xCrossingsNode)
-		for(TiXmlElement* xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
-				xCrossing = xCrossing->NextSiblingElement("crossing")) {
+			for(TiXmlElement* xCrossing = xCrossingsNode->FirstChildElement("crossing"); xCrossing;
+					xCrossing = xCrossing->NextSiblingElement("crossing")) {
 
-			int id = xmltoi(xCrossing->Attribute("id"), -1);
-			int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
-			int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
+				int id = xmltoi(xCrossing->Attribute("id"), -1);
+				int sub1_id = xmltoi(xCrossing->Attribute("subroom1_id"), -1);
+				int sub2_id = xmltoi(xCrossing->Attribute("subroom2_id"), -1);
 
-			double x1 = xmltof(	xCrossing->FirstChildElement("vertex")->Attribute("px"));
-			double y1 = xmltof(	xCrossing->FirstChildElement("vertex")->Attribute("py"));
-			double x2 = xmltof(	xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
-			double y2 = xmltof(	xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
+				double x1 = xmltof(	xCrossing->FirstChildElement("vertex")->Attribute("px"));
+				double y1 = xmltof(	xCrossing->FirstChildElement("vertex")->Attribute("py"));
+				double x2 = xmltof(	xCrossing->LastChild("vertex")->ToElement()->Attribute("px"));
+				double y2 = xmltof(	xCrossing->LastChild("vertex")->ToElement()->Attribute("py"));
 
-			Crossing* c = new Crossing();
-			c->SetID(id);
-			c->SetPoint1(Point(x1, y1));
-			c->SetPoint2(Point(x2, y2));
+				Crossing* c = new Crossing();
+				c->SetID(id);
+				c->SetPoint1(Point(x1, y1));
+				c->SetPoint2(Point(x2, y2));
 
-			c->SetSubRoom1(room->GetSubRoom(sub1_id));
-			c->SetSubRoom2(room->GetSubRoom(sub2_id));
-			c->SetRoom1(room);
-			AddCrossing(c);
+				c->SetSubRoom1(room->GetSubRoom(sub1_id));
+				c->SetSubRoom2(room->GetSubRoom(sub2_id));
+				c->SetRoom1(room);
+				AddCrossing(c);
 
-			room->GetSubRoom(sub1_id)->AddCrossing(c);
-			room->GetSubRoom(sub2_id)->AddCrossing(c);
-		}
+				room->GetSubRoom(sub1_id)->AddCrossing(c);
+				room->GetSubRoom(sub2_id)->AddCrossing(c);
+			}
 
 		AddRoom(room);
 	}
@@ -447,60 +447,60 @@ void Building::LoadBuilding(const string &filename) {
 	// all rooms are read, now proceed with transitions
 	TiXmlNode*  xTransNode = xRootNode->FirstChild("transitions");
 	if(xTransNode)
-	for(TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
-			xTrans = xTrans->NextSiblingElement("transition")) {
+		for(TiXmlElement* xTrans = xTransNode->FirstChildElement("transition"); xTrans;
+				xTrans = xTrans->NextSiblingElement("transition")) {
 
-		int id = xmltoi(xTrans->Attribute("id"), -1);
-		string caption = "door " + id;
-		caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
-		int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
-		int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
-		int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
-		int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
-		string type = xmltoa(xTrans->Attribute("type"), "normal");
+			int id = xmltoi(xTrans->Attribute("id"), -1);
+			string caption = "door " + id;
+			caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
+			int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
+			int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);
+			int subroom1_id = xmltoi(xTrans->Attribute("subroom1_id"), -1);
+			int subroom2_id = xmltoi(xTrans->Attribute("subroom2_id"), -1);
+			string type = xmltoa(xTrans->Attribute("type"), "normal");
 
-		double x1 = xmltof(	xTrans->FirstChildElement("vertex")->Attribute("px"));
-		double y1 = xmltof(	xTrans->FirstChildElement("vertex")->Attribute("py"));
+			double x1 = xmltof(	xTrans->FirstChildElement("vertex")->Attribute("px"));
+			double y1 = xmltof(	xTrans->FirstChildElement("vertex")->Attribute("py"));
 
-		double x2 = xmltof(	xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
-		double y2 = xmltof(	xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
+			double x2 = xmltof(	xTrans->LastChild("vertex")->ToElement()->Attribute("px"));
+			double y2 = xmltof(	xTrans->LastChild("vertex")->ToElement()->Attribute("py"));
 
 
-		Transition* t = new Transition();
-		t->SetID(id);
-		t->SetCaption(caption);
-		t->SetPoint1(Point(x1, y1));
-		t->SetPoint2(Point(x2, y2));
-		t->SetType(type);
+			Transition* t = new Transition();
+			t->SetID(id);
+			t->SetCaption(caption);
+			t->SetPoint1(Point(x1, y1));
+			t->SetPoint2(Point(x2, y2));
+			t->SetType(type);
 
-		if (room1_id != -1 && subroom1_id != -1) {
-			Room* room = _rooms[room1_id];
-			SubRoom* subroom = room->GetSubRoom(subroom1_id);
+			if (room1_id != -1 && subroom1_id != -1) {
+				Room* room = _rooms[room1_id];
+				SubRoom* subroom = room->GetSubRoom(subroom1_id);
 
-			//subroom->AddGoalID(t->GetUniqueID());
-			//MPI
-			room->AddTransitionID(t->GetUniqueID());
-			t->SetRoom1(room);
-			t->SetSubRoom1(subroom);
+				//subroom->AddGoalID(t->GetUniqueID());
+				//MPI
+				room->AddTransitionID(t->GetUniqueID());
+				t->SetRoom1(room);
+				t->SetSubRoom1(subroom);
 
-			//new implementation
-			subroom->AddTransition(t);
+				//new implementation
+				subroom->AddTransition(t);
+			}
+			if (room2_id != -1 && subroom2_id != -1) {
+				Room* room = _rooms[room2_id];
+				SubRoom* subroom = room->GetSubRoom(subroom2_id);
+				//subroom->AddGoalID(t->GetUniqueID());
+				//MPI
+				room->AddTransitionID(t->GetUniqueID());
+				t->SetRoom2(room);
+				t->SetSubRoom2(subroom);
+
+				//new implementation
+				subroom->AddTransition(t);
+			}
+
+			AddTransition(t);
 		}
-		if (room2_id != -1 && subroom2_id != -1) {
-			Room* room = _rooms[room2_id];
-			SubRoom* subroom = room->GetSubRoom(subroom2_id);
-			//subroom->AddGoalID(t->GetUniqueID());
-			//MPI
-			room->AddTransitionID(t->GetUniqueID());
-			t->SetRoom2(room);
-			t->SetSubRoom2(subroom);
-
-			//new implementation
-			subroom->AddTransition(t);
-		}
-
-		AddTransition(t);
-	}
 
 
 	Log->Write("INFO: \tLoading building file successful!!!\n");
@@ -663,7 +663,7 @@ void Building::Update() {
 						char tmp[CLENGTH];
 						sprintf(tmp,
 								"WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
-										"via unknown exit[??%d] Position: (%f, %f)",
+								"via unknown exit[??%d] Position: (%f, %f)",
 								ped->GetID(),
 								_rooms[ped->GetRoomID()]->GetCaption().c_str(),
 								ped->GetRoomID(), ped->GetSubRoomID(),
@@ -684,9 +684,12 @@ void Building::Update() {
 					Crossing* cross =
 							dynamic_cast<Crossing*>(ped->GetExitLine());
 					if (cross == NULL) {
-						Log->Write("ERROR: Building::update() type casting error");
-						cout<<"ped: "<<ped->GetID()<<endl;
-						exit(EXIT_FAILURE);
+						Log->Write("ERROR: Building::update() type casting error for ped %d",ped->GetID());
+						Log->Write("ERROR: Fix Me !");
+						nonConformPeds.push_back(ped);
+						continue;
+						//fixme all portal should be derived from crossings
+						//exit(EXIT_FAILURE);
 					}
 
 					SubRoom* other_sub = cross->GetOtherSubRoom(
@@ -765,7 +768,7 @@ void Building::Update() {
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
 	{
-        const int threadID = omp_get_thread_num();
+		const int threadID = omp_get_thread_num();
 		int start = threadID * partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1))
@@ -774,8 +777,10 @@ void Building::Update() {
 		for (int p = start; p <= end; ++p) {
 			if (_allPedestians[p]->FindRoute() == -1) {
 				//a destination could not be found for that pedestrian
-				Log->Write("Could not found a route for pedestrian");
-				exit(EXIT_FAILURE);
+				Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+				Log->Write("\tINFO: \tHe has reached the target cell");
+				DeletePedFromSim(_allPedestians[p]);
+				// exit(EXIT_FAILURE);
 				//DeletePedFromSim(pAllPedestians[p]);
 			}
 		}
@@ -814,7 +819,7 @@ void Building::InitPhiAllPeds(double pDt) {
 				} else {
 					Log->Write(
 							"ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
-									"dist to target ist 0\n");
+							"dist to target ist 0\n");
 					exit(0);
 				}
 
@@ -959,57 +964,57 @@ void Building::LoadRoutingInfo(const string &filename) {
 	TiXmlNode*  xHlinesNode = xRootNode->FirstChild("Hlines");
 
 	if(xHlinesNode)
-	for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
-			hline = hline->NextSiblingElement("Hline")) {
+		for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
+				hline = hline->NextSiblingElement("Hline")) {
 
-		double id = xmltof(hline->Attribute("id"), -1);
-		int room_id = xmltoi(hline->Attribute("room_id"), -1);
-		int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
+			double id = xmltof(hline->Attribute("id"), -1);
+			int room_id = xmltoi(hline->Attribute("room_id"), -1);
+			int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
 
-		double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
-		double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
-		double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
-		double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
+			double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
+			double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
+			double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
+			double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
 
-		Room* room = _rooms[room_id];
-		SubRoom* subroom = room->GetSubRoom(subroom_id);
+			Room* room = _rooms[room_id];
+			SubRoom* subroom = room->GetSubRoom(subroom_id);
 
-		//new implementation
-		Hline* h = new Hline();
-		h->SetID(id);
-		h->SetPoint1(Point(x1, y1));
-		h->SetPoint2(Point(x2, y2));
-		h->SetRoom(room);
-		h->SetSubRoom(subroom);
+			//new implementation
+			Hline* h = new Hline();
+			h->SetID(id);
+			h->SetPoint1(Point(x1, y1));
+			h->SetPoint2(Point(x2, y2));
+			h->SetRoom(room);
+			h->SetSubRoom(subroom);
 
-		AddHline(h);
-		subroom->AddHline(h);
-	}
+			AddHline(h);
+			subroom->AddHline(h);
+		}
 
 	//load the pre-defined trips
 	TiXmlNode*  xTripsNode = xRootNode->FirstChild("trips");
 
 	if(xTripsNode)
-	for(TiXmlElement* trip = xTripsNode->FirstChildElement("trip"); trip;
-			trip = trip->NextSiblingElement("trip")) {
+		for(TiXmlElement* trip = xTripsNode->FirstChildElement("trip"); trip;
+				trip = trip->NextSiblingElement("trip")) {
 
-		double id = xmltof(trip->Attribute("id"), -1);
-		if (id == -1) {
-			Log->Write("ERROR:\t id missing for trip");
-			exit(EXIT_FAILURE);
-		}
-		string sTrip = trip->FirstChild()->ValueStr();
-		vector<string> vTrip;
-		vTrip.clear();
+			double id = xmltof(trip->Attribute("id"), -1);
+			if (id == -1) {
+				Log->Write("ERROR:\t id missing for trip");
+				exit(EXIT_FAILURE);
+			}
+			string sTrip = trip->FirstChild()->ValueStr();
+			vector<string> vTrip;
+			vTrip.clear();
 
-		char* str = (char*) sTrip.c_str();
-		char *p = strtok(str, ":");
-		while (p) {
-			vTrip.push_back(xmltoa(p));
-			p = strtok(NULL, ":");
+			char* str = (char*) sTrip.c_str();
+			char *p = strtok(str, ":");
+			while (p) {
+				vTrip.push_back(xmltoa(p));
+				p = strtok(NULL, ":");
+			}
+			_routingEngine->AddTrip(vTrip);
 		}
-		_routingEngine->AddTrip(vTrip);
-	}
 	Log->Write("INFO:\tdone with loading extra routing information");
 }
 
@@ -1061,8 +1066,8 @@ void Building::LoadTrafficInfo(const string &filename) {
 
 	//processing the doors node
 	TiXmlNode*  xDoorsNode = xRootNode->FirstChild("doors");
-		for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
-				xDoor = xDoor->NextSiblingElement("door")) {
+	for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
+			xDoor = xDoor->NextSiblingElement("door")) {
 
 		int id = xmltoi(xDoor->Attribute("trans_id"), -1);
 		string state = xmltoa(xDoor->Attribute("state"), "open");
@@ -1094,7 +1099,9 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 	vector<Pedestrian*>::iterator it;
 	it = find(_allPedestians.begin(), _allPedestians.end(), ped);
 	if (it == _allPedestians.end()) {
-		cout << " Ped not found" << endl;
+		Log->Write ("\tINFO: \tPed not found with ID %d ",ped->GetID());
+		//FIXME: the pedestrians should always exists. check this in connection with the mesh router.
+		return;
 	} else {
 		//save the path history for this pedestrian before removing from the simulation
 		if (_savePathway) {
@@ -1113,7 +1120,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 			}
 
 		}
-		cout << "deleting " << (*it)->GetID() << endl;
+		cout << "rescued agent: " << (*it)->GetID() << endl;
 		_allPedestians.erase(it);
 	}
 	delete ped;

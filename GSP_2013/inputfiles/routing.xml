@@ -2,20 +2,20 @@
 
 <routing version="0.4">
 	<Hlines>
-      <Hline id="2" room_id="0" subroom_id="1">
-			<vertex px="12.0" py="5.5"/>
-			<vertex px="12.0" py="4.0"/>
+		<Hline id="2" room_id="0" subroom_id="1">
+			<vertex px="12.0" py="5.5" />
+			<vertex px="12.0" py="4.0" />
 		</Hline>
 		<Hline id="3" room_id="0" subroom_id="1">
-			<vertex px="15.0" py="4.0"/>
-			<vertex px="17.0" py="6.0"/>
+			<vertex px="15.0" py="4.0" />
+			<vertex px="17.0" py="6.0" />
 		</Hline>
 		<Hline id="4" room_id="0" subroom_id="1">
-			<vertex px="15.0" py="-2.0"/>
-			<vertex px="16.5" py="-2.0"/>
+			<vertex px="15.0" py="-2.0" />
+			<vertex px="16.5" py="-2.0" />
 		</Hline>
 	</Hlines>
-	
+
 	<trips>
 		<trip id="1">0:1:0:1:0:1:2</trip>
 		<trip id="2">0:1:0:1:2</trip>
