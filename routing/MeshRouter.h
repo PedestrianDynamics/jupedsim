@@ -17,7 +17,8 @@ private:
 	MeshData* _meshdata;
 
 	int GetNextEdge(Pedestrian* p, MeshEdge** edge);
-	std::vector<MeshEdge*> AStar(Pedestrian* p);
+	//std::vector<MeshEdge*> AStar(Pedestrian* p);
+	int AStar(Pedestrian* p,MeshEdge** edge);
 	NavLine Funnel(Point&,Point&,std::vector<MeshEdge*>);
 public:
 	MeshRouter();

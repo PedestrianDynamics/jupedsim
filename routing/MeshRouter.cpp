@@ -106,31 +106,108 @@ int TestinFunnel(Point apex, Point left,Point right,Point test){
 	}
 }
 
-NavLine MeshRouter::Funnel(Point& start,Point& end,vector<MeshEdge*> edge_path){
+NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path){
 
 	if(edge_path.empty()){
+		// Start and End Point in same Cell
+		Line goal_line(goal,goal);
+		return NavLine(goal_line);
 
 	}
 	else{
+		int goal_cell_id=-1;
+		MeshCell* goal_cell=_meshdata->FindCell(goal,goal_cell_id);
+
 		Point apex=start;
-		int start_cell_id=-1;
-		unsigned int ind_n1;
-		int ind_left,ind_right;
-		MeshCell* start_cell=_meshdata->FindCell(apex,start_cell_id);
+		int act_cell_id=-1;
+		int loc_ind=-1; // local index of first node to be found in startphase
+		unsigned int path_ind=0;
+		int loc_ind_left,loc_ind_right; // local Indices of nodes creating the wedge
+		int ind_left,ind_right;// Indices of nodes creating the wedge
+		int ind_run_left,ind_run_right; //Indices of nodes creating the funnel
+		Point point_left,point_right; // Nodes creatin the wedge
+		MeshCell* start_cell=_meshdata->FindCell(apex,act_cell_id);
 		for (unsigned int i=0;i<start_cell->Get_nodes().size();i++){
 			if (start_cell->Get_nodes().at(i)==edge_path.at(0)->Get_n1())
-				ind_n1=i;
+				loc_ind=i;
 		}
-		if (start_cell->Get_nodes().at((ind_n1+1)%start_cell->Get_nodes().size())==edge_path.at(0)->Get_n2()){
-			//ind_left=
+		unsigned int nodes_of_cell=start_cell->Get_nodes().size();
+		if (start_cell->Get_nodes().at((loc_ind+1)%nodes_of_cell)==edge_path.at(0)->Get_n2()){
+			loc_ind_left=loc_ind;
+			loc_ind_right=edge_path.at(0)->Get_n2();
+		}
+		else if(start_cell->Get_nodes().at((loc_ind-1)%nodes_of_cell)==edge_path.at(0)->Get_n2()){
+			loc_ind_left=loc_ind;
+			loc_ind_right=edge_path.at(0)->Get_n2();
+		}
+		else{
+			cout<<"Error: Path not consistant with cell"<<endl;
+			loc_ind_left=-1;
+			loc_ind_right=-1;
 		}
 
+		ind_left=start_cell->Get_nodes().at(loc_ind_left);
+		ind_right=start_cell->Get_nodes().at(loc_ind_right);
+
+		point_left=*_meshdata->Get_nodes().at(ind_left);
+		point_right=*_meshdata->Get_nodes().at(ind_right);
+		ind_run_left=ind_left;
+		ind_run_right=ind_right;
+
+
+		Point point_run_left=point_left;
+		Point point_run_right=point_right;
+
+		bool apex_found=false;
+		// lengthen the funnel at side
+		bool run_left=true,run_right=true;
+		while(!apex_found){
+			if(path_ind<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
+
+				//  Run left(right) till next MeshEdge to be traversed
+				while(run_left){
+					//...
+				}
+				while(run_right){
+					//..
+				}
+				// Test for new Points to be in the wedge of start
+				int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
+				int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
+
+				if(test_l==0 && test_r==0){ //Narrow wedge
+
+				}
+				else if(test_l==1 && test_r==1){// apex=left
+
+					apex_found=true;
+				}
+				else if(test_l==3 && test_r==3){//apex=right
+
+					apex_found=true;
+				}
+				else if(test_l==1 && test_r==3){ //  Widen wedge
+
+				}
+				else{// Corrupted data
+
+				}
+
+				path_ind++;
+			}
+			else{ // goal in actual cell => apex= goal or node on edge
+
+				apex_found=true;
+			}
+
+		}
 	}
 	return NavLine();
 }
 
-vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p){
-	int c_start_id;
+int MeshRouter::AStar(Pedestrian* p,MeshEdge** edge){
+	cout<<"A*"<<endl;
+				int c_start_id;
 				Point  testp_start=p->GetPos();
 				MeshCell* start_cell=_meshdata->FindCell(testp_start,c_start_id);
 				if(start_cell!=NULL){
@@ -168,7 +245,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p){
 				MeshCell* act_cell=start_cell;
 				int act_id=c_start_id;
 				double act_cost=0.0;
-				cout<<"vor while"<<endl;
+				//cout<<"vor while"<<endl;
 				while(act_id!=c_goal_id){
 					if (act_cell==NULL)
 						cout<<"act_cell=NULL !!"<<endl;
@@ -268,9 +345,12 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p){
 					// Reverse the reversed path to gain path from start to goal
 					reverse(path_edges.begin(),path_edges.end());
 					delete[] predlist;
+
+					*edge=&**path_edges.begin();
 					delete[] predEdgelist;
 
-					return path_edges;
+					return 0;
+					//return path_edges;
 }
 
 
@@ -312,15 +392,19 @@ int MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge){
 				inopenlist[i]=false;
 				predlist[i]=-1;
 			}
-			vector<pair< double , MeshCell*> > openlist;
-			openlist.push_back(make_pair(0.0,start_cell));
-			inopenlist[c_start_id]=true;
+
 
 			MeshCell* act_cell=start_cell;
 			int act_id=c_start_id;
-			double act_cost=0.0;
+			double f= (act_cell->Get_mid()-testp_goal).Norm();/////////////////////////////////////////////////////////////////////////
+			double act_cost=f;//
+			vector<pair< double , MeshCell*> > openlist;//
+			openlist.push_back(make_pair(f,start_cell));//
+			costlist[act_id]=f;
+			inopenlist[c_start_id]=true;////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			while(act_id!=c_goal_id){
+				act_cost=costlist[act_id]; ////////////////////////////////////////////////////////////////////////////////////////////////////////
 				//astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id);
 				if (act_cell==NULL)
 					cout<<"act_cell=NULL !!"<<endl;
@@ -457,25 +541,34 @@ int MeshRouter::FindExit(Pedestrian* p) {
 		nextline=p->GetExitLine();
 	}else{
 		//GetNextEdge(p,&edge);
-		cout<<"vor  A*"<<endl;
-		vector<MeshEdge*> astar_path=AStar(p);
+		//cout<<"vor  A*"<<endl;
+		//vector<MeshEdge*> astar_path=AStar(p);
+		//AStar(p,&edge2);
+
 		//if (astar_path.empty())
 		if(true){
 			GetNextEdge(p,&edge);
-			edge2=*(astar_path.begin());
-			if(edge!=edge2)
-				cout<<"dif"<<endl;
+			AStar(p,&edge2);
+			//edge2=*(astar_path.begin());
+			if(*edge!=*edge2)
+			cout<<"dif"<<endl;
 		}
 		else
-			edge=*(astar_path.begin());
-		cout<<"nach A*"<<endl;
+			AStar(p,&edge);
+			//edge=*(astar_path.begin());
+		//cout<<"nach A*"<<endl;
 		nextline=dynamic_cast<NavLine*>(edge);
+		if(nextline==NULL)
+			cout<<"1. Nextline=NULL!"<<endl;
 	}
+
+	if(nextline==NULL)
+				cout<<"2. Nextline=NULL!"<<endl;
 
 	p->SetExitLine(nextline);
 	p->SetCellPos(c_start_id);
 	return 0;
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	//return any transition or crossing in the actual room.
 	//p->SetExitIndex(-1);
 }
