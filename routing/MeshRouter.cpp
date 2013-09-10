@@ -216,7 +216,7 @@ int MeshRouter::AStar(Pedestrian* p,MeshEdge** edge){
 					cout<<"Nicht gefunden"<<endl;
 				}
 				int c_goal_id;
-				Point testp_goal(-6,17);
+				Point testp_goal(-6,13);
 				MeshCell* goal_cell=_meshdata->FindCell(testp_goal,c_goal_id);
 				if(goal_cell!=NULL){
 					//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
@@ -371,7 +371,7 @@ int MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge){
 				cout<<"Nicht gefunden"<<endl;
 			}
 			int c_goal_id;
-			Point testp_goal(-6,17);
+			Point testp_goal(-6,13);
 			MeshCell* goal_cell=_meshdata->FindCell(testp_goal,c_goal_id);
 			if(goal_cell!=NULL){
 				//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
@@ -520,8 +520,8 @@ int MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge){
 				//MeshEdge* etst=*(AStar(p).begin());
 				//*edge=*(AStar(p).begin());
 
-				//cout<<(*edge)->toString()<<endl;
-				if((*edge)!=NULL || c_start_id!=c_goal_id )
+				cout<<(*edge)->toString()<<endl;
+				if(*edge!=NULL || c_start_id!=c_goal_id )
 					return 0;
 				else
 					return -1;
@@ -538,6 +538,7 @@ int MeshRouter::FindExit(Pedestrian* p) {
 	NavLine* nextline=NULL;
 	if(p->GetCellPos()==c_start_id){
 	//if(false){
+		//cout<<p->GetExitLine()->toString()<<""<<endl;
 		nextline=p->GetExitLine();
 	}else{
 		//GetNextEdge(p,&edge);
@@ -548,10 +549,10 @@ int MeshRouter::FindExit(Pedestrian* p) {
 		//if (astar_path.empty())
 		if(true){
 			GetNextEdge(p,&edge);
-			AStar(p,&edge2);
+			//AStar(p,&edge2);
 			//edge2=*(astar_path.begin());
-			if(*edge!=*edge2)
-			cout<<"dif"<<endl;
+			//if(*edge!=*edge2)
+			//cout<<"dif"<<endl;
 		}
 		else
 			AStar(p,&edge);
@@ -571,6 +572,96 @@ int MeshRouter::FindExit(Pedestrian* p) {
 
 	//return any transition or crossing in the actual room.
 	//p->SetExitIndex(-1);
+}
+
+void MeshRouter::FixMeshEdgesandCo(){
+	for(int i=0;i<_meshdata->Get_edges().size();i++){
+
+		MeshEdge* edge=_meshdata->Get_edges().at(i);
+		for (map<int, Crossing*>::const_iterator itr = _building->GetAllCrossings().begin();
+				itr != _building->GetAllCrossings().end(); ++itr) {
+
+			//int door=itr->first;
+			int door = itr->second->GetUniqueID();
+			Crossing* cross = itr->second;
+			if(edge->operator ==(*cross)){
+				edge->SetRoom1(cross->GetRoom1());
+				edge->SetSubRoom1(cross->GetSubRoom1());
+				edge->SetSubRoom2(cross->GetSubRoom2());
+
+			}
+		}
+		for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+				itr != _building->GetAllTransitions().end(); ++itr) {
+
+			//int door=itr->first;
+			int door = itr->second->GetUniqueID();
+			Transition* cross = itr->second;
+			const Point& centre = cross->GetCentre();
+			double center[2] = { centre.GetX(), centre.GetY() };
+			if(edge->operator ==(*cross)){
+				edge->SetRoom1(cross->GetRoom1());
+				edge->SetSubRoom1(cross->GetSubRoom1());
+				edge->SetSubRoom2(cross->GetSubRoom2());
+			}
+		}
+	}
+
+//	int  size=_meshdata->Get_outEdges().size();
+//	for(int i=0;i<size;i++){
+//		MeshEdge* edge=_meshdata->Get_outEdges().at(i);
+//		for (map<int, Crossing*>::const_iterator itr = _building->GetAllCrossings().begin();
+//				itr != _building->GetAllCrossings().end(); ++itr) {
+//
+//			//int door=itr->first;
+//			int door = itr->second->GetUniqueID();
+//			Crossing* cross = itr->second;
+//			if(edge->operator ==(*cross)){
+//				edge->SetRoom1(cross->GetRoom1());
+//				edge->SetSubRoom1(cross->GetSubRoom1());
+//				edge->SetSubRoom2(cross->GetSubRoom2());
+//
+//			}
+//		}
+//		for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+//				itr != _building->GetAllTransitions().end(); ++itr) {
+//
+////			int door=itr->first;
+//			int door = itr->second->GetUniqueID();
+//			Transition* cross = itr->second;
+//			const Point& centre = cross->GetCentre();
+//			double center[2] = { centre.GetX(), centre.GetY() };
+//			if(edge->operator ==(*cross)){
+//				edge->SetRoom1(cross->GetRoom1());
+//				edge->SetSubRoom1(cross->GetSubRoom1());
+//				edge->SetSubRoom2(cross->GetSubRoom2());
+//			}
+//		}
+//	}
+
+	for(int i=0;i<_meshdata->Get_edges().size();i++){
+		MeshEdge* edge=_meshdata->Get_edges().at(i);
+		if(edge->GetRoom1()==NULL){
+
+			for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+				Room* room = _building->GetRoom(i);
+				for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+					SubRoom* sub = room->GetSubRoom(j);
+					if(sub->IsInSubRoom( edge->GetCentre())){
+						edge->SetSubRoom1(sub);
+						edge->SetSubRoom2(sub);
+						edge->SetRoom1(room);
+					}
+				}
+			}
+		}
+	}
+	for(int i=0;i<_meshdata->Get_edges().size();i++){
+			MeshEdge* edge=_meshdata->Get_edges().at(i);
+			if(edge->GetRoom1()==NULL){
+				exit(EXIT_FAILURE);
+			}
+	}
 }
 
 void MeshRouter::Init(Building* b) {
@@ -678,6 +769,7 @@ void MeshRouter::Init(Building* b) {
 	}
 
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
+	FixMeshEdgesandCo();
 
 	/*
 	 *  Test

@@ -20,6 +20,7 @@ private:
 	//std::vector<MeshEdge*> AStar(Pedestrian* p);
 	int AStar(Pedestrian* p,MeshEdge** edge);
 	NavLine Funnel(Point&,Point&,std::vector<MeshEdge*>);
+	void FixMeshEdgesandCo();
 public:
 	MeshRouter();
 	virtual ~MeshRouter();

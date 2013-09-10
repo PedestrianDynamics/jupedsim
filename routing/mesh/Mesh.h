@@ -12,10 +12,12 @@
 #include <vector>
 #include "../../geometry/Point.h"
 #include "../../geometry/NavLine.h"
+#include "../../geometry/Crossing.h"
 
 class MeshEdge;
 class MeshCell;
 class MeshCellGroup;
+class Crossing;
 
 class MeshData{
 public:
@@ -42,7 +44,7 @@ private:
 
 };
 
-class MeshEdge:public NavLine{
+class MeshEdge:public Crossing{
 public:
 	MeshEdge(int,int,int,int,Point p1=Point(),Point p2=Point());//:Line(p1,p2);
 	int Get_n1(){return _n1;};

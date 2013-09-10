@@ -8,11 +8,13 @@
 #include "Mesh.h"
 #include <iostream>
 
-MeshEdge::MeshEdge(int n1,int n2,int c1, int c2,Point p1,Point p2):NavLine(Line(p1,p2)){
+MeshEdge::MeshEdge(int n1,int n2,int c1, int c2,Point p1,Point p2){
 	_n1=n1;
 	_n2=n2;
 	_c1=c1;
 	_c2=c2;
+	 SetPoint1(p1);
+	 SetPoint2(p2);
 }
 
 MeshCell::MeshCell(double midx,double midy,std::vector<int> node_id,
