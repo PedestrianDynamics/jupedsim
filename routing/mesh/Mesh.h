@@ -25,11 +25,11 @@ public:
 	~MeshData();
 	MeshData(std::vector<Point*>,std::vector<MeshEdge*>,
 			std::vector<MeshEdge*>,std::vector<MeshCellGroup*>);
-	std::vector<Point*> Get_nodes(){return _mNodes;}
-	std::vector<MeshEdge*> Get_edges(){return _mEdges;}
-	std::vector<MeshEdge*> Get_outEdges(){return _mOutEdges;}
-	std::vector<MeshCellGroup*> Get_cellGroups(){return _mCellGroups;}
-	unsigned int Get_cellCount(){return _mCellCount;};
+	std::vector<Point*> GetNodes(){return _mNodes;}
+	std::vector<MeshEdge*> GetEdges(){return _mEdges;}
+	std::vector<MeshEdge*> GetObstacles(){return _mObstacles;}
+	std::vector<MeshCellGroup*> GetCellGroups(){return _mCellGroups;}
+	unsigned int GetCellCount(){return _mCellCount;};
 
 	MeshCell* GetCellAtPos(unsigned int tpos);
 
@@ -38,7 +38,7 @@ public:
 private:
 	std::vector<Point*> _mNodes;
 	std::vector<MeshEdge*> _mEdges;
-	std::vector<MeshEdge*> _mOutEdges;
+	std::vector<MeshEdge*> _mObstacles;
 	std::vector<MeshCellGroup*> _mCellGroups;
 	unsigned int _mCellCount;
 
@@ -47,10 +47,10 @@ private:
 class MeshEdge:public Crossing{
 public:
 	MeshEdge(int,int,int,int,Point p1=Point(),Point p2=Point());//:Line(p1,p2);
-	int Get_n1(){return _n1;};
-	int Get_n2(){return _n2;};
-	int Get_c1(){return _c1;};
-	int Get_c2(){return _c2;};
+	int GetNode1(){return _n1;};
+	int GetNode2(){return _n2;};
+	int GetCell1(){return _c1;};
+	int GetCell2(){return _c2;};
 	//friend std::istream& operator>>(std::istream& is, MeshEdge& mn);
 private:
 	int _n1; //ID of Node 1
@@ -66,10 +66,10 @@ public:
 	~MeshCell();
 	//double get_midx(){return _midx;};
 	//double get_midy(){return _midy;};
-	Point Get_mid(){return _mid;};
-	std::vector<int> Get_nodes(){return _node_id;};
-	std::vector<int> Get_edges(){return _edge_id;};
-	int Get_id(){return _tc_id;};
+	Point GetMidpoint(){return _mid;};
+	std::vector<int> GetNodes(){return _node_id;};
+	std::vector<int> GetEdges(){return _edge_id;};
+	int GetID(){return _tc_id;};
 private:
 	//double _midx;
 	//double _midy;
@@ -86,7 +86,7 @@ class MeshCellGroup{
 public:
 	MeshCellGroup(std::string,std::vector<MeshCell*>);
 	~MeshCellGroup();
-	std::vector<MeshCell*> Get_cells();
+	std::vector<MeshCell*> GetCells();
 private:
     std::string _groupname;
     std::vector<MeshCell*> _cells;

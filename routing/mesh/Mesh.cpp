@@ -43,14 +43,14 @@ MeshCellGroup::~MeshCellGroup(){
 	for(unsigned int i=0;i<_cells.size();i++)
 			delete _cells[i];
 }
-std::vector<MeshCell*> MeshCellGroup::Get_cells(){
+std::vector<MeshCell*> MeshCellGroup::GetCells(){
 	return _cells;
 }
 
 MeshData::MeshData(){
 	_mNodes=std::vector<Point*>();
 	_mEdges=std::vector<MeshEdge*>();
-	_mOutEdges=std::vector<MeshEdge*>();
+	_mObstacles=std::vector<MeshEdge*>();
 	_mCellGroups=std::vector<MeshCellGroup*>();
 	_mCellCount=0;
 }
@@ -59,8 +59,8 @@ MeshData::~MeshData(){
 		delete _mNodes[i];
 	for(unsigned int i=0;i<_mEdges.size();i++)
 			delete _mEdges[i];
-	for(unsigned int i=0;i<_mOutEdges.size();i++)
-			delete _mOutEdges[i];
+	for(unsigned int i=0;i<_mObstacles.size();i++)
+			delete _mObstacles[i];
 	for(unsigned int i=0;i<_mCellGroups.size();i++)
 			delete _mCellGroups[i];
 }
@@ -68,7 +68,7 @@ MeshData::~MeshData(){
 unsigned int Calc_CellCount(std::vector<MeshCellGroup*> mcg){
 	unsigned int count=0;
 	for (unsigned int i=0;i<mcg.size();i++)
-		count+=mcg.at(i)->Get_cells().size();
+		count+=mcg.at(i)->GetCells().size();
 
 	return count;
 }
@@ -77,21 +77,21 @@ MeshData::MeshData(std::vector<Point*> mn,std::vector<MeshEdge*> me,
 		std::vector<MeshEdge*> moe,std::vector<MeshCellGroup*> mcg){
 	_mNodes=mn;
 	_mEdges=me;
-	_mOutEdges=moe;
+	_mObstacles=moe;
 	_mCellGroups=mcg;
 	_mCellCount=Calc_CellCount(mcg);
 }
 
 MeshCell* MeshData::GetCellAtPos(unsigned int tpos){
-	if( tpos<0 || tpos>= this->Get_cellCount())
+	if( tpos<0 || tpos>= this->GetCellCount())
 		return NULL;
 	else{
 		for(unsigned int i=0;i<_mCellGroups.size();i++){
-			if(tpos<_mCellGroups.at(i)->Get_cells().size()){
-				return _mCellGroups.at(i)->Get_cells().at(tpos);
+			if(tpos<_mCellGroups.at(i)->GetCells().size()){
+				return _mCellGroups.at(i)->GetCells().at(tpos);
 			}
 			else{
-				tpos-=_mCellGroups.at(i)->Get_cells().size();
+				tpos-=_mCellGroups.at(i)->GetCells().size();
 			}
 		}
 
@@ -105,10 +105,10 @@ MeshCell* MeshData::GetCellAtPos(unsigned int tpos){
 	std::vector<MeshCellGroup*>::const_iterator it_g;
 	for(it_g=_mCellGroups.begin();it_g!=_mCellGroups.end();it_g++){
 		std::vector<MeshCell*>::const_iterator it_c;
-		std::vector<MeshCell*> act_cg=(*it_g)->Get_cells();
+		std::vector<MeshCell*> act_cg=(*it_g)->GetCells();
 		for(it_c=act_cg.begin();it_c!=act_cg.end();it_c++){
 			bool found=true;
-			std::vector<int> act_n=(*it_c)->Get_nodes();
+			std::vector<int> act_n=(*it_c)->GetNodes();
 			int count_nodes=act_n.size();
 			double n1x= _mNodes.at(act_n.at(0))->GetX();
 			double n1y= _mNodes.at(act_n.at(0))->GetY();
