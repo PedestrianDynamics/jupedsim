@@ -205,159 +205,9 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 	return NavLine();
 }
 
-int MeshRouter::AStar(Pedestrian* p,MeshEdge** edge){
-	cout<<"A*"<<endl;
-	int c_start_id;
-	Point  testp_start=p->GetPos();
-	MeshCell* start_cell=_meshdata->FindCell(testp_start,c_start_id);
-	if(start_cell!=NULL){
-	}
-	else{
-		cout<<"Nicht gefunden"<<endl;
-	}
-	int c_goal_id;
-	Point testp_goal(-6,13);
-	MeshCell* goal_cell=_meshdata->FindCell(testp_goal,c_goal_id);
-	if(goal_cell!=NULL){
-		//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
-	}
-	else{
-		cout<<"Nicht gefunden"<<endl;
-	}
+vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p, MeshEdge** edge,int& status){
 
-	//Initialisation
-	unsigned int c_totalcount=_meshdata->GetCellCount();
-	bool* closedlist=new bool[c_totalcount];
-	bool* inopenlist=new bool[c_totalcount];
-	int* predlist=new int[c_totalcount]; // to gain the path from start to goal (contains cell ID)
-	MeshEdge** predEdgelist= new MeshEdge*[c_totalcount];
-	double* costlist=new double[c_totalcount];
-	for(unsigned int i=0;i<c_totalcount;i++){
-		closedlist[i]=false;
-		inopenlist[i]=false;
-		predlist[i]=-1;
-		predEdgelist[i]=NULL;
-	}
-	vector<pair< double , MeshCell*> > openlist;
-	openlist.push_back(make_pair(0.0,start_cell));
-	inopenlist[c_start_id]=true;
-
-	MeshCell* act_cell=start_cell;
-	int act_id=c_start_id;
-	double act_cost=0.0;
-	//cout<<"vor while"<<endl;
-	while(act_id!=c_goal_id){
-		if (act_cell==NULL)
-			cout<<"act_cell=NULL !!"<<endl;
-
-		for(unsigned int i=0;i<act_cell->GetEdges().size();i++){
-			int act_edge_id=act_cell->GetEdges().at(i);
-			int nb_id=-1;
-			// Find neighbouring cell
-			if(_meshdata->GetEdges().at(act_edge_id)->GetCell1()==act_id){
-				nb_id=_meshdata->GetEdges().at(act_edge_id)->GetCell2();
-			}
-			else if(_meshdata->GetEdges().at(act_edge_id)->GetCell2()==act_id){
-				nb_id=_meshdata->GetEdges().at(act_edge_id)->GetCell1();
-			}
-			else{// Error: inconsistant
-				Log->Write("Error:\tInconsistant Mesh-Data");
-			}
-			if (!closedlist[nb_id]){// neighbour-cell not fully evaluated
-				MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
-				double new_cost=act_cost+(act_cell->GetMidpoint()-nb_cell->GetMidpoint()).Norm();
-				if(!inopenlist[nb_id]){// neighbour-cell not evaluated at all
-					predlist[nb_id]=act_id;
-					predEdgelist[nb_id]=_meshdata->GetEdges().at(act_edge_id);
-					costlist[nb_id]=new_cost;
-					inopenlist[nb_id]=true;
-
-					double f=new_cost+(nb_cell->GetMidpoint()-testp_goal).Norm();
-					openlist.push_back(make_pair(f,nb_cell));
-				}
-				else{
-					if (new_cost<costlist[nb_id]){
-						cout<<"ERROR"<<endl;
-						//found shorter path to nb_cell
-						predlist[nb_id]=act_id;
-						predEdgelist[nb_id]=_meshdata->GetEdges().at(act_edge_id);
-						costlist[nb_id]=new_cost;
-						// update nb in openlist
-						for(unsigned int j=0;j<openlist.size();j++){
-							if(openlist.at(i).second->GetID()==nb_id){
-								MeshCell* nb_cell=openlist.at(i).second;
-								double f=new_cost+(nb_cell->GetMidpoint()-testp_goal).Norm();
-								openlist.at(i)=make_pair(f,nb_cell);
-								break;
-							}
-						}
-					}
-					else{
-						// Do nothing: Path is worse
-					}
-				}
-			}
-		}
-
-		vector<pair<double,MeshCell*> >::iterator it=openlist.begin();
-
-		while(it->second->GetID()!=act_id){
-			it++;
-		}
-		closedlist[act_id]=true;
-		inopenlist[act_id]=false;
-		openlist.erase(it);
-
-		int next_cell_id=-1;
-		MeshCell* next_cell=NULL;
-		if (openlist.size()>0){
-			//Find cell with best f value
-			double min_f=openlist.at(0).first;
-			next_cell_id=openlist.at(0).second->GetID();
-			//cout<<"next_cell_id: "<<next_cell_id<<endl;
-			next_cell=openlist.at(0).second;
-			for(unsigned int j=1;j<openlist.size();j++){
-				if (openlist.at(j).first<min_f){
-					min_f=openlist.at(j).first;
-					next_cell=openlist.at(j).second;
-					next_cell_id=openlist.at(j).second->GetID();
-				}
-			}
-			act_id=next_cell_id;
-			act_cell=next_cell;
-		}
-		else{
-			Log->Write("Error:\tA* did not find a path");
-		}
-	}
-	delete[] closedlist;
-	delete[] inopenlist;
-	delete[] costlist;
-	//cout<<"erstelle Pfad"<<endl;
-	vector <MeshEdge*> path_edges;
-
-	// The next edge on the path + building the reverse Path through edges
-	act_id=c_goal_id;
-	while(predlist[act_id]!=c_start_id){
-		path_edges.push_back(predEdgelist[act_id]);
-		act_id=predlist[act_id];
-	}
-	// Reverse the reversed path to gain path from start to goal
-	reverse(path_edges.begin(),path_edges.end());
-	delete[] predlist;
-
-	*edge=&**path_edges.begin();
-	delete[] predEdgelist;
-
-	return 0;
-	//return path_edges;
-}
-
-
-vector<MeshEdge*> MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge,int& status){
-	/*
-	 * A* TEST IMPLEMENTATION
-	 */
+	// Path from start to goal through this edges
 	vector<MeshEdge*> pathedge;
 
 	int c_start_id;
@@ -369,16 +219,16 @@ vector<MeshEdge*> MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge,int& st
 		//cout<<testp_start.toString()<<"Gefunden in Zelle: "<<c_start_id<<endl;
 	}
 	else{
-		cout<<"Nicht gefunden"<<endl;
+		cout<<"Startpoint not found"<<endl;
 	}
 	int c_goal_id;
-	Point testp_goal(-6,13);
+	Point testp_goal(15,-10);
 	MeshCell* goal_cell=_meshdata->FindCell(testp_goal,c_goal_id);
 	if(goal_cell!=NULL){
 		//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
 	}
 	else{
-		cout<<"Nicht gefunden"<<endl;
+		cout<<"Goal not found"<<endl;
 	}
 
 	//Initialisation
@@ -395,18 +245,17 @@ vector<MeshEdge*> MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge,int& st
 		predlist[i]=-1;
 	}
 
-
 	MeshCell* act_cell=start_cell;
 	int act_id=c_start_id;
-	double f= (act_cell->GetMidpoint()-testp_goal).Norm();/////////////////////////////////////////////////////////////////////////
-	double act_cost=f;//
-	vector<pair< double , MeshCell*> > openlist;//
-	openlist.push_back(make_pair(f,start_cell));//
+	double f= (act_cell->GetMidpoint()-testp_goal).Norm();
+	double act_cost=f;
+	vector<pair< double , MeshCell*> > openlist;
+	openlist.push_back(make_pair(f,start_cell));
 	costlist[act_id]=f;
-	inopenlist[c_start_id]=true;////////////////////////////////////////////////////////////////////////////////////////////////////////
+	inopenlist[c_start_id]=true;
 
 	while(act_id!=c_goal_id){
-		act_cost=costlist[act_id]; ////////////////////////////////////////////////////////////////////////////////////////////////////////
+		act_cost=costlist[act_id];
 		//astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id);
 		if (act_cell==NULL)
 			cout<<"act_cell=NULL !!"<<endl;
@@ -429,6 +278,7 @@ vector<MeshEdge*> MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge,int& st
 				double new_cost=act_cost+(act_cell->GetMidpoint()-nb_cell->GetMidpoint()).Norm();
 				if(!inopenlist[nb_id]){// neighbour-cell not evaluated at all
 					predlist[nb_id]=act_id;
+					predEdgelist[nb_id]=_meshdata->GetEdges().at(act_edge_id);
 					costlist[nb_id]=new_cost;
 					inopenlist[nb_id]=true;
 
@@ -502,12 +352,16 @@ vector<MeshEdge*> MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge,int& st
 		return pathedge;
 	}
 
-	// The next edge on the path
+	// Building the path reversly from goal to start
 	act_id=c_goal_id;
 	while(predlist[act_id]!=c_start_id){
 		pathedge.push_back(predEdgelist[act_id]);
 		act_id=predlist[act_id];
 	}
+
+	if(predlist[act_id]==c_start_id)
+		pathedge.push_back(predEdgelist[act_id]);
+
 
 	if(c_start_id!=c_goal_id){
 		for (unsigned i=0;i<start_cell->GetEdges().size();i++){
@@ -531,6 +385,7 @@ vector<MeshEdge*> MeshRouter::GetNextEdge(Pedestrian* p, MeshEdge** edge,int& st
 	delete[] predlist;
 	delete[] predEdgelist;
 
+	// Reverse the reversed path
 	std::reverse(pathedge.begin(),pathedge.end());
 
 	status=0;
@@ -542,61 +397,44 @@ int MeshRouter::FindExit(Pedestrian* p) {
 	Point  testp_start=p->GetPos();
 	int c_start_id=-1;
 	_meshdata->FindCell(testp_start,c_start_id);
-
 	MeshEdge* edge=NULL;
-	//MeshEdge* edge2=NULL;
 	NavLine* nextline=NULL;
+
 	if(p->GetCellPos()==c_start_id){
-		//if(false){
-		//cout<<p->GetExitLine()->toString()<<""<<endl;
 		nextline=p->GetExitLine();
 	}else{
-		//GetNextEdge(p,&edge);
-		//cout<<"vor  A*"<<endl;
-		//vector<MeshEdge*> astar_path=AStar(p);
-		//AStar(p,&edge2);
-
-		//if (astar_path.empty())
-		if(true){
-			//if (GetNextEdge(p,&edge)==-1) return -1;
-			int status=-1;
-			vector<MeshEdge*> pathedge=GetNextEdge(p,&edge,status);
-			if (status==-1) return -1;
-			if(pathedge.empty()){
-				Log->Write("Path is empty but next edge is defined");
-				exit(EXIT_FAILURE);
-			}
-			//if(*(pathedge.begin())!=edge){
-				//cout<<"Vector of Edges not consistent with next edge"<<endl;
-				//exit(EXIT_FAILURE);
-				//edge=*(pathedge.begin());
-			//}
-			//AStar(p,&edge2);
-			//edge2=*(astar_path.begin());
-			//if(*edge!=*edge2)
-			//cout<<"dif"<<endl;
+		int status=-1;
+		vector<MeshEdge*> edgepath=AStar(p,&edge,status);
+		if (status==-1) return -1;
+		if(edgepath.empty()){
+			Log->Write("Path is empty but next edge is defined");
+			exit(EXIT_FAILURE);
 		}
-		else
-			AStar(p,&edge);
-		//edge=*(astar_path.begin());
-		//cout<<"nach A*"<<endl;
+		// Test path
+		if(*(edgepath.begin())!=edge){
+			cout<<"Vector of Edges not consistent with next edge"<<endl;
+			cout<<"pedestrian ["<<p->GetID()<<"] path of edges:"<<endl;
+			for(unsigned int i=0;i<edgepath.size();i++)
+				cout<<edgepath.at(i)->toString()<<endl;
+			cout<<endl;
+			cout<<edge->toString()<<endl;
+			exit(EXIT_FAILURE);
+		}
+		//edge=Funnel(edge)
+
+		edge=*(edgepath.begin());
 		nextline=dynamic_cast<NavLine*>(edge);
-		if(nextline==NULL)
-			cout<<"1. Nextline=NULL!"<<endl;
+		if(nextline==NULL){
+			Log->Write("Edge is corrupt");
+			exit(EXIT_FAILURE);
+		}
 	}
-
-	if(nextline==NULL)
-		cout<<"2. Nextline=NULL!"<<endl;
-
 	p->SetExitLine(nextline);
 	p->SetCellPos(c_start_id);
 	return 0;
-
-	//return any transition or crossing in the actual room.
-	//p->SetExitIndex(-1);
 }
 
-void MeshRouter::FixMeshEdgesandCo(){
+void MeshRouter::FixMeshEdges(){
 	for(unsigned int i=0;i<_meshdata->GetEdges().size();i++){
 
 		MeshEdge* edge=_meshdata->GetEdges().at(i);
@@ -715,7 +553,6 @@ void MeshRouter::Init(Building* b) {
 	}
 	cout<<setw(2)<<"Read "<<nodes.size()<<" Nodes from file"<<endl;
 
-
 	unsigned int countEdges=0;
 	meshfile>>countEdges;
 	for(unsigned int i=0;i<countEdges;i++){
@@ -789,9 +626,8 @@ void MeshRouter::Init(Building* b) {
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
 		}
 	}
-
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
-	FixMeshEdgesandCo();
+	FixMeshEdges();
 
 	/*
 	 *  Test
@@ -800,6 +636,3 @@ void MeshRouter::Init(Building* b) {
 	//Point test_apex(2,3),test_test(2,-2);
 	//cout<<"Test funnel "<<TestinFunnel(test_apex,test_l,test_r,test_test)<<endl;
 }
-
-
-
