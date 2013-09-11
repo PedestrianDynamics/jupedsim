@@ -108,6 +108,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	if(args->GetPort()!=-1){
 		switch(args->GetFileFormat())
 		{
+		case FORMAT_XML_PLAIN_WITH_MESH:
 		case FORMAT_XML_PLAIN:
 		{
 			OutputHandler* travisto = new TraVisToHandler(args->GetHostname(),
@@ -117,19 +118,19 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case FORMAT_XML_BIN:
 		{
-			Log->Write("INFO: \tFormat xml-bin not yet supported\n");
+			Log->Write("INFO: \tFormat xml-bin not yet supported in streaming\n");
 			exit(0);
 			break;
 		}
 		case FORMAT_PLAIN:
 		{
-			Log->Write("INFO: \tFormat plain not yet supported\n");
+			Log->Write("INFO: \tFormat plain not yet supported in streaming\n");
 			exit(0);
 			break;
 		}
 		case FORMAT_VTK:
 		{
-			Log->Write("INFO: \tFormat vtk not yet supported\n");
+			Log->Write("INFO: \tFormat vtk not yet supported in streaming\n");
 			exit(0);
 			break;
 		}
@@ -148,6 +149,14 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			_iod->AddIO(tofile);
 			break;
 		}
+		case FORMAT_XML_PLAIN_WITH_MESH:
+		{
+			OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
+			if(_iod) delete _iod;
+			_iod = new TrajectoriesXML_MESH();
+			_iod->AddIO(tofile);
+			break;
+		}
 		case FORMAT_XML_BIN:
 		{
 			Log->Write("INFO: \tFormat xml-bin not yet supported\n");
@@ -162,6 +171,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			if(_iod) delete _iod;
 			_iod = new TrajectoriesFLAT();
 			_iod->AddIO(file);
+			Log->Write("INFO: \tFormat plain maybe not yet implemented ?");
 			exit(0);
 			break;
 		}

@@ -12,7 +12,7 @@
 	<!-- traffic information: e.g closed doors -->
 	<traffic>../GSP_2013/inputfiles/traffic.xml</traffic>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" fps="8">
+	<trajectories format="xml-plain" embed_mesh="true" fps="8">
 		<file location="../GSP_2013/outputfiles/trajectories.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>

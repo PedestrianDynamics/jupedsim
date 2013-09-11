@@ -214,6 +214,7 @@ public:
 	virtual ~NavMesh();
 	void BuildNavMesh();
 	void WriteToFile(std::string fileName);
+	void WriteToString(std::string& output);
 	void WriteToFileTraVisTo(std::string fileName);
 	void WriteToFileTraVisTo(std::string fileName, const std::vector<Point>& points);
 	void WriteToFileTraVisTo(std::string fileName, JNode* node);

@@ -38,7 +38,7 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 	char tmp[CLENGTH] = "";
 
 	double v0 = ped->GetV0Norm();
-	if (v0 == 0) {
+	if (v0 == 0.0) {
 		Log->Write("ERROR: IODispatcher::WritePed()\t v0=0");
 		exit(0);
 	}
@@ -82,7 +82,7 @@ const vector<OutputHandler*>& IODispatcher::GetIOHandlers() {
 	return pHandlers;
 }
 
-void IODispatcher::Write(string str) {
+void IODispatcher::Write(const std::string& str) {
 	for (vector<OutputHandler*>::iterator it = pHandlers.begin();
 			it != pHandlers.end(); ++it) {
 		(*it)->Write(str);
@@ -666,3 +666,16 @@ void TrajectoriesVTK::WriteFrame(int frameNr, Building* building) {
 
 void TrajectoriesVTK::WriteFooter() {
 }
+
+
+
+void TrajectoriesXML_MESH::WriteGeometry(Building* building){
+	//Navigation mesh implementation
+	NavMesh* nv= new NavMesh(building);
+	nv->BuildNavMesh();
+	string geometry;
+	nv->WriteToString(geometry);
+	Write(geometry);
+
+}
+

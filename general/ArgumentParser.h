@@ -81,6 +81,7 @@ private:
 	int pExitStrategy; // Strategie zur Richtungswahl (v0)
 	int pLog;
 	int pPort;
+	int _embedMesh;
 	int pMaxOpenMPThreads;
 	FileFormat pFormat;
 	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
@@ -104,6 +105,7 @@ public:
 	int GetTravisto() const;
 	int GetTrajektorien() const;
 	int GetPort() const;
+	int GetEmbededMesh() const ;
 	unsigned int GetSeed() const;
 
 	double Getfps() const;

@@ -593,31 +593,17 @@ void NavMesh::Convexify() {
 }
 
 
-void NavMesh::WriteToFileTraVisTo(std::string fileName) {
-	ofstream file(fileName.c_str());
-	file.precision(2);
-	file<<fixed;
 
-	//Point centre (10299,2051);
-	Point centre (0,0);
-	double factor=100;
+void NavMesh::WriteToString(std::string& output) {
 
-	if(file.is_open()==false){
-		cout <<"could not open the file: "<<fileName<<endl;
-		return;
-	}
 
-	//writing the header
-	file<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<endl
-			<<"<trajectoriesDataset>"<<endl
-			<<"\t<header formatVersion = \"1.0\">"<<endl
-			<<"\t\t<agents>3</agents>"<<endl
-			<<"\t\t<seed>0</seed>"<<endl
-			<<"\t\t<frameRate>10</frameRate>"<<endl
-			<<"\t</header>"<<endl
-			<<endl
-			<<endl
-			<<"\t<geometry>"<<endl;
+	std::stringstream file;
+		file.precision(2);
+		file<<fixed;
+
+		//Point centre (10299,2051);
+		Point centre (0,0);
+		double factor=100;
 
 	//writing the nodes
 	//	int mynodes[] = {47, 30 ,38};
@@ -646,7 +632,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		//if(node->IsConvex()==true) continue;
 		//if(node->IsClockwise()==true) continue;
 
-		//file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.pX<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.pY<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+		file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.GetX()<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.GetY()<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
 		//		cout<<"size: "<< node->pHull.size()<<endl;
 		//		std::sort(node->pHull.begin(), node->pHull.end());
 		//		node->pHull.erase(std::unique(node->pHull.begin(), node->pHull.end()), node->pHull.end());
@@ -704,7 +690,7 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 				double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
 				double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
 
-				//file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
+				file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
 				file<<"\t\t<door id = \""<<i<<"\">"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
 				file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -716,6 +702,36 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName) {
 		file<<endl;
 	}
 
+	output=file.str();
+}
+
+void NavMesh::WriteToFileTraVisTo(std::string fileName) {
+	ofstream file(fileName.c_str());
+	file.precision(2);
+	file<<fixed;
+
+
+	if(file.is_open()==false){
+		Log->Write("\tERROR:\tcould not open the file:  " + fileName +" for writing the mesh");
+		return;
+	}
+
+	//writing the header
+	file<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<endl
+			<<"<trajectoriesDataset>"<<endl
+			<<"\t<header formatVersion = \"1.0\">"<<endl
+			<<"\t\t<agents>3</agents>"<<endl
+			<<"\t\t<seed>0</seed>"<<endl
+			<<"\t\t<frameRate>10</frameRate>"<<endl
+			<<"\t</header>"<<endl
+			<<endl
+			<<endl;
+
+	//writing the geometry
+	string output;
+	WriteToString(output);
+	file<<"\t<geometry>"<<endl;
+	file<<output<<endl;
 	file<<"\t</geometry>"<<endl;
 	file.close();
 }

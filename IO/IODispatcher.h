@@ -40,7 +40,6 @@ extern OutputHandler* Log;
 class IODispatcher {
 private:
 	std::vector<OutputHandler* > pHandlers;
-	// private Funktionen
 	std::string WritePed(Pedestrian* ped);
 
 public:
@@ -50,7 +49,7 @@ public:
 
 	void AddIO(OutputHandler* ioh);
 	const std::vector<OutputHandler*>& GetIOHandlers();
-	void Write(std::string str);
+	void Write(const std::string& str);
 	virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
 	virtual void WriteGeometry(Building* building);
 	virtual void WriteFrame(int frameNr, Building* building);
@@ -102,6 +101,20 @@ public:
 	virtual void WriteFooter();
 
 };
+
+class TrajectoriesXML_MESH:public IODispatcher {
+
+public:
+	TrajectoriesXML_MESH(){};
+	virtual ~TrajectoriesXML_MESH(){};
+
+	//virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
+	//virtual void WriteFrame(int frameNr, Building* building);
+	//virtual void WriteFooter();
+	virtual void WriteGeometry(Building* building);
+
+};
+
 
 
 #endif	/* _IODISPATCHER_H */

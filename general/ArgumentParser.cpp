@@ -119,6 +119,7 @@ ArgumentParser::ArgumentParser() {
 	pFormat=FORMAT_XML_PLAIN;
 	pPort=-1;
 	pHostname="localhost";
+	_embedMesh=0;
 	pMaxOpenMPThreads = omp_get_thread_num();
 }
 
@@ -518,11 +519,14 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 		string format= xMainNode->FirstChildElement("trajectories")->Attribute("format")?
 				xMainNode->FirstChildElement("trajectories")->Attribute("format"):"xml-plain";
+		_embedMesh = string(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true"?1:0;
 
 		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
+		if(format=="xml-plain" && _embedMesh==1) pFormat=FORMAT_XML_PLAIN_WITH_MESH;
 		if(format=="xml-bin") pFormat=FORMAT_XML_BIN;
 		if(format=="plain") pFormat=FORMAT_PLAIN;
 		if(format=="vtk") pFormat=FORMAT_VTK;
+
 
 		//a file descriptor was given
 		if(xTrajectories->FirstChild("file")){
@@ -885,6 +889,10 @@ unsigned int ArgumentParser::GetSeed() const {
 
 const string& ArgumentParser::GetPathwayFile() const {
 	return pPathwayFilename;
+}
+
+int ArgumentParser::GetEmbededMesh() const {
+	return _embedMesh;
 }
 
 
