@@ -45,7 +45,7 @@ void astar_print(bool* closedlist,bool* inopenlist,int* predlist,
 	cout<<endl;
 	cout<<"----------------------------------"<<endl;
 }
-
+/*
 void print_path(int* predlist,int c_start_id,int c_goal_id){
 	cout<<"reverse path:"<<endl;
 	int act_id=c_goal_id;
@@ -54,6 +54,13 @@ void print_path(int* predlist,int c_start_id,int c_goal_id){
 		act_id=predlist[act_id];
 	}
 	cout<<c_start_id<<endl;
+}*/
+
+void print_path(vector<MeshEdge*>edge_path){
+	cout<<"path from start to goal"<<endl;
+	for(unsigned int i=0;i<edge_path.size();i++){
+		cout<<edge_path.at(i)->GetCell1()<<" "<<edge_path.at(i)->GetCell2()<<endl;
+	}
 }
 
 
@@ -67,31 +74,8 @@ void print_path(int* predlist,int c_start_id,int c_goal_id){
  */
 int TestinFunnel(Point apex, Point left,Point right,Point test){
 
-	double n1x=right.GetX();
-	double n1y=right.GetX();
-	double n2x= apex.GetX();
-	double n2y= apex.GetY();
-	Point temp_nxny(n2y-n1y,n1x-n2x);
-	Point temp_xy=test-Point(n1x,n1y);
-
-	bool r_test;
-	if (temp_xy.ScalarP(temp_nxny)>0)
-		r_test=true;
-	else
-		r_test=false;
-
-	n1x=n2x;
-	n1y=n2y;
-	n2x=left.GetX();
-	n2y=left.GetY();
-	temp_nxny=Point(n2y-n1y,n1x-n2x);
-	temp_xy=test-Point(n1x,n1y);
-
-	bool l_test;
-	if (temp_xy.ScalarP(temp_nxny)>0)
-		l_test=true;
-	else
-		l_test=false;
+	bool r_test=Line(apex,right).IsLeft(test);
+	bool l_test=Line(left,apex).IsLeft(test);
 
 	if (r_test){
 		if(l_test)
@@ -112,7 +96,6 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 		// Start and End Point in same Cell
 		Line goal_line(goal,goal);
 		return NavLine(goal_line);
-
 	}
 	else{
 		int goal_cell_id=-1;
@@ -120,56 +103,47 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 
 		Point apex=start;
 		int act_cell_id=-1;
-		int loc_ind=-1; // local index of first node to be found in startphase
+		//int loc_ind=-1; // local index of first node to be found in startphase
 		unsigned int path_ind=0;
-		int loc_ind_left,loc_ind_right; // local Indices of nodes creating the wedge
-		int ind_left,ind_right;// Indices of nodes creating the wedge
-		int ind_run_left,ind_run_right; //Indices of nodes creating the funnel
 		Point point_left,point_right; // Nodes creatin the wedge
-		MeshCell* start_cell=_meshdata->FindCell(apex,act_cell_id);
-		for (unsigned int i=0;i<start_cell->GetNodes().size();i++){
-			if (start_cell->GetNodes().at(i)==edge_path.at(0)->GetNode1())
-				loc_ind=i;
-		}
-		unsigned int nodes_of_cell=start_cell->GetNodes().size();
-		if (start_cell->GetNodes().at((loc_ind+1)%nodes_of_cell)==edge_path.at(0)->GetNode2()){
-			loc_ind_left=loc_ind;
-			loc_ind_right=edge_path.at(0)->GetNode2();
-		}
-		else if(start_cell->GetNodes().at((loc_ind-1)%nodes_of_cell)==edge_path.at(0)->GetNode2()){
-			loc_ind_left=loc_ind;
-			loc_ind_right=edge_path.at(0)->GetNode2();
-		}
-		else{
-			cout<<"Error: Path not consistant with cell"<<endl;
-			loc_ind_left=-1;
-			loc_ind_right=-1;
-		}
+		MeshCell* act_cell=_meshdata->FindCell(apex,act_cell_id);
 
-		ind_left=start_cell->GetNodes().at(loc_ind_left);
-		ind_right=start_cell->GetNodes().at(loc_ind_right);
+		Point p_act_ref=act_cell->GetMidpoint();
+		point_left=edge_path.at(0)->GetLeft(p_act_ref);
+		point_right=edge_path.at(0)->GetRight(p_act_ref);
 
-		point_left=*_meshdata->GetNodes().at(ind_left);
-		point_right=*_meshdata->GetNodes().at(ind_right);
-		ind_run_left=ind_left;
-		ind_run_right=ind_right;
-
+		//Test
+		//print_path(edge_path);
+		cout<<"left: "<<point_left.toString()<<" right: "<<point_right.toString()<<endl;
 
 		Point point_run_left=point_left;
 		Point point_run_right=point_right;
 
+
 		bool apex_found=false;
 		// lengthen the funnel at side
 		bool run_left=true,run_right=true;
+
 		while(!apex_found){
 			if(path_ind<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
 
-				//  Run left(right) till next MeshEdge to be traversed
-				while(run_left){
-					//...
+
+				if(edge_path.at(path_ind)->GetCell1()==act_cell_id)
+					act_cell_id=edge_path.at(path_ind)->GetCell2();
+				else if (edge_path.at(path_ind)->GetCell2()==act_cell_id)
+					act_cell_id=edge_path.at(path_ind)->GetCell1();
+				else{
+					Log->Write("ERROR:\t inconsistence between act_cell and edgepath");
+					exit(EXIT_FAILURE);
 				}
-				while(run_right){
-					//..
+				act_cell=_meshdata->GetCellAtPos(act_cell_id);
+				p_act_ref=act_cell->GetMidpoint();
+				//find next points for wedge
+				if(run_left){
+					//point_run_left=edge_path.at(path_ind)->GetLeft(p_act_ref);
+				}
+				if(run_right){
+					//point_run_right=edge_path.at(path_ind)->GetRight(p_act_ref);
 				}
 				// Test for new Points to be in the wedge of start
 				int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
@@ -191,6 +165,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				}
 				else{// Corrupted data
 
+					exit(EXIT_FAILURE);
 				}
 
 				path_ind++;
@@ -201,7 +176,9 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 			}
 
 		}
+
 	}
+	//exit(EXIT_FAILURE);
 	return NavLine();
 }
 
@@ -222,8 +199,8 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p, MeshEdge** edge,int& status){
 		cout<<"Startpoint not found"<<endl;
 	}
 	int c_goal_id;
-	Point testp_goal(15,-10);
-	MeshCell* goal_cell=_meshdata->FindCell(testp_goal,c_goal_id);
+	Point point_goal(13,3);
+	MeshCell* goal_cell=_meshdata->FindCell(point_goal,c_goal_id);
 	if(goal_cell!=NULL){
 		//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
 	}
@@ -247,7 +224,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p, MeshEdge** edge,int& status){
 
 	MeshCell* act_cell=start_cell;
 	int act_id=c_start_id;
-	double f= (act_cell->GetMidpoint()-testp_goal).Norm();
+	double f= (act_cell->GetMidpoint()-point_goal).Norm();
 	double act_cost=f;
 	vector<pair< double , MeshCell*> > openlist;
 	openlist.push_back(make_pair(f,start_cell));
@@ -282,7 +259,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p, MeshEdge** edge,int& status){
 					costlist[nb_id]=new_cost;
 					inopenlist[nb_id]=true;
 
-					double f=new_cost+(nb_cell->GetMidpoint()-testp_goal).Norm();
+					double f=new_cost+(nb_cell->GetMidpoint()-point_goal).Norm();
 					openlist.push_back(make_pair(f,nb_cell));
 				}
 				else{
@@ -295,7 +272,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p, MeshEdge** edge,int& status){
 						for(unsigned int j=0;j<openlist.size();j++){
 							if(openlist.at(i).second->GetID()==nb_id){
 								MeshCell* nb_cell=openlist.at(i).second;
-								double f=new_cost+(nb_cell->GetMidpoint()-testp_goal).Norm();
+								double f=new_cost+(nb_cell->GetMidpoint()-point_goal).Norm();
 								openlist.at(i)=make_pair(f,nb_cell);
 								break;
 							}
@@ -394,9 +371,9 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p, MeshEdge** edge,int& status){
 
 int MeshRouter::FindExit(Pedestrian* p) {
 	//cout<<"calling the mesh router"<<endl;
-	Point  testp_start=p->GetPos();
+	Point  point_start=p->GetPos();
 	int c_start_id=-1;
-	_meshdata->FindCell(testp_start,c_start_id);
+	_meshdata->FindCell(point_start,c_start_id);
 	MeshEdge* edge=NULL;
 	NavLine* nextline=NULL;
 
@@ -414,13 +391,13 @@ int MeshRouter::FindExit(Pedestrian* p) {
 		if(*(edgepath.begin())!=edge){
 			cout<<"Vector of Edges not consistent with next edge"<<endl;
 			cout<<"pedestrian ["<<p->GetID()<<"] path of edges:"<<endl;
-			for(unsigned int i=0;i<edgepath.size();i++)
-				cout<<edgepath.at(i)->toString()<<endl;
+			print_path(edgepath);
 			cout<<endl;
 			cout<<edge->toString()<<endl;
 			exit(EXIT_FAILURE);
 		}
-		//edge=Funnel(edge)
+		Point point_goal(13,3);
+		Funnel(point_start,point_goal,edgepath);
 
 		edge=*(edgepath.begin());
 		nextline=dynamic_cast<NavLine*>(edge);
@@ -632,7 +609,14 @@ void MeshRouter::Init(Building* b) {
 	/*
 	 *  Test
 	 */
-	//Point test_l(3,0), test_r(0,0);
-	//Point test_apex(2,3),test_test(2,-2);
+
+	Point test_l(3,0), test_r(0,0);
+	Point test_apex(2,3);
+	Point test_test(1,1);// 0!
+	//Point test_test(1,2);// 3!
+	//Point test_test(2,4);// 2!
+	//Point test_test(3,3);// 1!
 	//cout<<"Test funnel "<<TestinFunnel(test_apex,test_l,test_r,test_test)<<endl;
+	//exit(EXIT_SUCCESS);
+
 }

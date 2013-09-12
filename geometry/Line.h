@@ -185,6 +185,16 @@ public:
 	bool IsVertical();
 
 	/**
+	 * @return left point wrt. the point pt
+	*/
+	const Point& GetLeft(const Point& pt);
+
+	/**
+		 * @return left point wrt. the point pt
+		*/
+	const Point& GetRight(const Point& pt);
+
+	/**
 	 * @return a nice formated string describing the line
 	 */
 	virtual std::string Write() const;
