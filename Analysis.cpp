@@ -478,11 +478,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			{
 				vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, numPedsInFrame);
 				//FIXME nothing is done here
+				polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
 				if(_cutByCircle)
 				{
-					//polygons = cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 50);
+					polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 100);
 				}
-				polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
 				double VoronoiVelocity=0.0;
 				if(numPedsInFrame>0)
 				{
@@ -789,12 +789,25 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
 		intersection(measureArea, *polygon_iterator, v);
+		polygon_2d a,b;
+		a = measureArea;
+		b = *polygon_iterator;
+		polygon_list v1;
 		if(!v.empty())
 		{
 			density+=area(v[0])/area(*polygon_iterator);
 			if((area(v[0])/area(*polygon_iterator))>1.00001)
 			{
+				std::cout<<dsv(v[0])<<"\n";
+				std::cout<<dsv(measureArea)<<"\n";
+				std::cout<<dsv(*polygon_iterator)<<"\n";
 				std::cout<<"this is a wrong result "<<area(v[0])<<'\t'<<area(*polygon_iterator)<<"\n";
+				correct(a);
+				correct(b);
+				intersection(a,b,v1);
+				std::cout<<dsv(v1[0])<<"\n";
+				std::cout<<dsv(a)<<"\n";
+				std::cout<<dsv(b)<<"\n";
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -874,7 +887,7 @@ double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* V
 			//std::cout<<"the velocity and areas:"<<Velocity[temp]<<'\t'<<area(v[0])<<'\t'<<meanV<<'\t'<<temp<<'\n';
 			if((area(v[0])/area(*polygon_iterator))>1.00001)
 			{
-				std::cout<<"this is a wrong result"<<area(v[0])<<'\t'<<area(*polygon_iterator);
+				std::cout<<"this is a wrong result"<<area(v[0])<<'\t'<<area(*polygon_iterator);;
 			}
 		}
 		temp++;
@@ -990,7 +1003,7 @@ void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
 void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame, const string& filename)
 {
 
-	string polygon="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
+	string polygon="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
 
 	//TODO: the method will fail if the directory does not not exits
 	//use the CREATE File instead combined with
@@ -1012,7 +1025,7 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 	}
 
 
-	string v_individual="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/speed"+filename+"_"+frameId+".dat";
+	string v_individual="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/speed"+filename+"_"+frameId+".dat";
 	ofstream velo (v_individual.c_str());
 
 	if(velo.is_open()) {
@@ -1028,7 +1041,7 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 	}
 
 
-	string point="Fundamental_Diagram/Classical_Voronoi/VoronoiCell/points"+filename+"_"+frameId+".dat";
+	string point="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/points"+filename+"_"+frameId+".dat";
 	ofstream points (point.c_str());
 	if( points.is_open())  {
 		for(int pts=0;pts<numPedsInFrame;pts++)
