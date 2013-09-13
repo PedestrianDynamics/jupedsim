@@ -16,7 +16,7 @@ private:
 	Building* _building;
 	MeshData* _meshdata;
 
-	std::vector<MeshEdge*> AStar(Pedestrian* p, MeshEdge** edge,int& status);
+	std::vector<MeshEdge*> AStar(Pedestrian* p,int& status);
 	NavLine Funnel(Point&,Point&,std::vector<MeshEdge*>);
 	void FixMeshEdges();
 public:
