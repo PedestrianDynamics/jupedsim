@@ -38,35 +38,100 @@ using namespace std;
  StartDistributionRoom
  ************************************************************/
 StartDistributionRoom::StartDistributionRoom() {
-	_roomCaption = "no caption";
+	_roomID = -1;
 	_nPeds = -1;
-}
-
-StartDistributionRoom::StartDistributionRoom(const StartDistributionRoom& orig) {
-	_roomCaption = orig.GetRoomCaption();
-	_nPeds = orig.GetNumberOfPedestrian();
+	_groupID = -1;
+	_goalID = -1;
+	_routerID = -1;
+	_routeID = -1;
+	_age = -1;
+	_height = -1;
+	_startX = NAN;
+	_startY = NAN;
+	_startZ = NAN;
+	_gender = "male";
 }
 
 StartDistributionRoom::~StartDistributionRoom() {
 }
 
 
-string StartDistributionRoom::GetRoomCaption() const {
-	return _roomCaption;
-}
-
-int StartDistributionRoom::GetNumberOfPedestrian() const {
+int StartDistributionRoom::GetAgentsNumber() const {
 	return _nPeds;
 }
 
 
 // Setter-Funktionen
 
-void StartDistributionRoom::SetRoomCaption(string caption) {
-	_roomCaption = caption;
+void StartDistributionRoom::SetRoomID(int id) {
+	_roomID = id;
 }
 
-void StartDistributionRoom::SetNumberOfPedestrians(int N) {
+int StartDistributionRoom::GetAge() const {
+	return _age;
+}
+
+void StartDistributionRoom::SetAge(int age) {
+	_age = age;
+}
+
+const std::string& StartDistributionRoom::GetGender() const {
+	return _gender;
+}
+
+void StartDistributionRoom::SetGender(const std::string& gender) {
+	_gender = gender;
+}
+
+int StartDistributionRoom::GetGoalId() const {
+	return _goalID;
+}
+
+void StartDistributionRoom::SetGoalId(int goalId) {
+	_goalID = goalId;
+}
+
+int StartDistributionRoom::GetGroupId() const {
+	return _groupID;
+}
+
+void StartDistributionRoom::SetGroupId(int groupId) {
+	_groupID = groupId;
+}
+
+int StartDistributionRoom::GetHeight() const {
+	return _height;
+}
+
+void StartDistributionRoom::SetHeight(int height) {
+	_height = height;
+}
+
+int StartDistributionRoom::GetRoomId() const {
+	return _roomID;
+}
+
+void StartDistributionRoom::SetRoomId(int roomId) {
+	_roomID = roomId;
+}
+
+int StartDistributionRoom::GetRouteId() const {
+	return _routeID;
+}
+
+void StartDistributionRoom::SetRouteId(int routeId) {
+	_routeID = routeId;
+}
+
+int StartDistributionRoom::GetRouterId() const {
+	return _routerID;
+}
+
+void StartDistributionRoom::SetRouterId(int routerId) {
+	_routerID = routerId;
+}
+
+void StartDistributionRoom::SetAgentsNumber(int N) {
 	_nPeds = N;
 }
 
@@ -78,9 +143,6 @@ StartDistributionSubroom::StartDistributionSubroom() : StartDistributionRoom() {
 	_subroomID = -1;
 }
 
-StartDistributionSubroom::StartDistributionSubroom(const StartDistributionSubroom& orig) : StartDistributionRoom(orig) {
-	_subroomID = orig.GetSubroomID();
-}
 
 StartDistributionSubroom::~StartDistributionSubroom() {
 }
@@ -118,18 +180,10 @@ PedDistributor::PedDistributor(double v0mu, double v0sigma, double BmaxMu, doubl
 	_Atau = new Equal(AtauMu, AtauSigma);
 	_Amin = new Equal(AminMu, AminSigma);
 	_Tau = new Equal(tauMu, tauSigma);
-	_start_dis = vector<StartDistributionRoom > ();
-	_start_dis_sub = vector<StartDistributionSubroom> ();
+	_start_dis = vector<StartDistributionRoom* > ();
+	_start_dis_sub = vector<StartDistributionSubroom* > ();
 }
 
-PedDistributor::PedDistributor(const PedDistributor& orig) {
-	_v0 = orig.GetV0();
-	_Bmax = orig.GetBmax();
-	_Bmin = orig.GetBmin();
-	_Atau = orig.GetAtau();
-	_Amin = orig.GetAmin();
-	_Tau = orig.GetTau();
-}
 
 PedDistributor::~PedDistributor() {
 	delete _v0;
@@ -138,9 +192,17 @@ PedDistributor::~PedDistributor() {
 	delete _Atau;
 	delete _Amin;
 	delete _Tau;
+
+	for (unsigned int i = 0; i < _start_dis.size(); i++) {
+		delete _start_dis[i];
+	}
+	for (unsigned int i = 0; i < _start_dis_sub.size(); i++) {
+		delete _start_dis_sub[i];
+	}
+	_start_dis_sub.clear();
+	_start_dis.clear();
 }
 
-// Getter-Funktionen
 
 Distribution* PedDistributor::GetV0() const {
 	return _v0;
@@ -166,55 +228,76 @@ Distribution* PedDistributor::GetTau() const {
 	return _Tau;
 }
 
-void PedDistributor::InitDistributor(string filename){
+void PedDistributor::InitDistributor(const string& filename){
 
-	_initialisationFile=filename;
-	Log->Write("INFO: \tLoading and parsing the persons file");
+	_projectFilename=filename;
+	Log->Write("INFO: \tLoading and parsing the persons attributes");
 
-		TiXmlDocument docPersons(filename);
-		if (!docPersons.LoadFile()){
-			Log->Write("ERROR: \t%s", docPersons.ErrorDesc());
-			Log->Write("ERROR: \t could not parse the person file");
-			exit(EXIT_FAILURE);
-		}
-
-
-		TiXmlElement* xRootNode = docPersons.RootElement();
-		if( ! xRootNode ) {
-			Log->Write("ERROR:\tRoot element does not exist");
-			exit(EXIT_FAILURE);
-		}
-
-		if( xRootNode->ValueStr () != "persons" ) {
-			Log->Write("ERROR:\tRoot element value is not 'persons'");
-			exit(EXIT_FAILURE);
-		}
-
-		TiXmlNode* xDist=xRootNode->FirstChild("distribution");
-		for(TiXmlElement* e = xDist->FirstChildElement("dist"); e;
-				e = e->NextSiblingElement("dist")) {
-
-			//FIXME: id oder caption
-			//int room_id=atoi(path.getAttribute("room_id"));
-			string room_caption=e->Attribute("room_caption");
-			int number=atoi(e->Attribute("number"));
-
-			if(e->Attribute("subroom_id")){
-				int subroom_id=atoi(e->Attribute("subroom_id"));
-				StartDistributionSubroom dis = StartDistributionSubroom();
-				dis.SetRoomCaption(room_caption);
-				dis.SetSubroomID(subroom_id);
-				dis.SetNumberOfPedestrians(number);
-				_start_dis_sub.push_back(dis);
-			}else{
-				StartDistributionRoom dis = StartDistributionRoom();
-				dis.SetRoomCaption(room_caption);
-				dis.SetNumberOfPedestrians(number);
-				_start_dis.push_back(dis);
-			}
+	TiXmlDocument doc(_projectFilename);
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the project file");
+		exit(EXIT_FAILURE);
 	}
 
-	Log->Write("INFO: \t done with loading and parsing the persons file");
+
+	TiXmlNode* xRootNode = doc.RootElement()->FirstChild("agents");
+	if( ! xRootNode ) {
+		Log->Write("ERROR:\tcould not load persons attributes");
+		exit(EXIT_FAILURE);
+	}
+
+
+	TiXmlNode* xDist=xRootNode->FirstChild("agents_distribution");
+	for(TiXmlElement* e = xDist->FirstChildElement("group"); e;
+			e = e->NextSiblingElement("group")) {
+
+		int room_id = xmltoi(e->Attribute("room_id"));
+		int subroom_id = xmltoi(e->Attribute("subroom_id"));
+		int number = xmltoi(e->Attribute("number"));
+
+		int goal_id = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
+		int router_id = xmltoi(e->Attribute("router_id"), -1);
+		int route_id = xmltoi(e->Attribute("route_id"), -1);
+		int age = xmltoi(e->Attribute("age"), -1);
+		string gender = xmltoa(e->Attribute("gender"), "male");
+		double height = xmltof(e->Attribute("height"), -1);
+
+		StartDistributionRoom* dis=NULL;
+
+		if(subroom_id==-1){
+			dis = new StartDistributionRoom();
+			_start_dis.push_back(dis);
+		}else{
+			dis = new StartDistributionSubroom();
+			dynamic_cast<StartDistributionSubroom*>(dis)->SetSubroomID(subroom_id);
+			_start_dis_sub.push_back(dynamic_cast<StartDistributionSubroom*>(dis));
+		}
+
+		dis->SetRoomID(room_id);
+		dis->SetAgentsNumber(number);
+		dis->SetAge(age);
+		dis->SetGender(gender);
+		dis->SetGoalId(goal_id);
+		dis->SetRouteId(route_id);
+		dis->SetRouterId(router_id);
+		dis->SetHeight(height);
+		if(e->Attribute("startX") && e->Attribute("startY")){
+			double startX = xmltof(e->Attribute("startX"),NAN);
+			double startY = xmltof(e->Attribute("startY"),NAN);
+			dis->SetStartPosition(startX,startY,0.0);
+		}
+	}
+
+	//TODO: Parse the sources
+	TiXmlNode* xSources=xRootNode->FirstChild("agents_sources");
+	for(TiXmlElement* e = xSources->FirstChildElement("source"); e;
+			e = e->NextSiblingElement("source")) {
+		Log->Write("INFO:\tSource with id %s will not be parsed !",e->Attribute("id"));
+
+	}
+
+	Log->Write("INFO: \tDone with loading and parsing the persons file");
 }
 
 int PedDistributor::Distribute(Building* building) const {
@@ -242,14 +325,14 @@ int PedDistributor::Distribute(Building* building) const {
 	int pid = 1; // the pedID is being increased throughout...
 	for (int i = 0; i < (int) _start_dis_sub.size(); i++) {
 
-		string room_caption = _start_dis_sub[i].GetRoomCaption();
-		Room* r = building->GetRoom(room_caption);
+		int room_id = _start_dis_sub[i]->GetRoomId();
+		Room* r = building->GetRoom(room_id);
 		if(!r) continue;
 
 		int roomID = r->GetID();
 
-		int subroomID = _start_dis_sub[i].GetSubroomID();
-		int N = _start_dis_sub[i].GetNumberOfPedestrian();
+		int subroomID = _start_dis_sub[i]->GetSubroomID();
+		int N = _start_dis_sub[i]->GetAgentsNumber();
 		if (N <= 0) {
 			Log->Write("ERROR: \t negative  (or null ) number of pedestrians!");
 			exit(0);
@@ -258,27 +341,26 @@ int PedDistributor::Distribute(Building* building) const {
 		vector<Point> &allpos = allFreePos[roomID][subroomID];
 		int max_pos = allpos.size();
 		if (max_pos < N) {
-			sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Room %d nicht möglich! Maximale Anzahl: %d\n",
+			Log->Write("ERROR: \tCannot distribute %d agents in Room %d . Maximum allowed: %d\n",
 					N, roomID, allpos.size());
-			Log->Write(tmp);
-			exit(0);
-		} else {
-			sprintf(tmp, "INFO: \tVerteilung von %d Fußgängern in [%d/%d]! Maximale Anzahl: %d", N, roomID, subroomID, max_pos);
-			Log->Write(tmp);
+			exit(EXIT_FAILURE);
 		}
+
 		// Befüllen
+		Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID, max_pos);
 		SubRoom* sr = building->GetRoom(roomID)->GetSubRoom(subroomID);
-		DistributeInSubRoom(sr, N, allpos, roomID, &pid);
+		DistributeInSubRoom(sr, N, allpos, &pid,_start_dis_sub[i],building);
+		Log->Write("\t...Done");
+
 		nPeds += N;
 	}
 
 	// then continue the distribution according to the rooms
-
 	for (int i = 0; i < (int) _start_dis.size(); i++) {
-		string room_caption = _start_dis[i].GetRoomCaption();
-		Room* r = building->GetRoom(room_caption);
+		int room_id = _start_dis[i]->GetRoomId();
+		Room* r = building->GetRoom(room_id);
 		if(!r) continue;
-		int N = _start_dis[i].GetNumberOfPedestrian();
+		int N = _start_dis[i]->GetAgentsNumber();
 		if (N <= 0) {
 			Log->Write("ERROR: \t negative number of pedestrians! Ignoring");
 			continue;
@@ -339,250 +421,9 @@ int PedDistributor::Distribute(Building* building) const {
 		for (unsigned int i = 0; i < akt_anz.size(); i++) {
 			SubRoom* sr = r->GetSubRoom(i);
 			if (akt_anz[i] > 0)
-				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], r->GetID(), &pid);
+				DistributeInSubRoom(sr, akt_anz[i], allFreePosInRoom[i], &pid, (StartDistributionSubroom*)_start_dis[i],building);
 		}
 		nPeds += N;
-	}
-
-	//actualize routing attributes which could not being set earlier
-	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-		Room* room = building->GetRoom(i);
-		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-			SubRoom* sub = room->GetSubRoom(j);
-			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-				Pedestrian* ped=sub->GetPedestrian(k);
-				ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
-
-			}
-		}
-	}
-
-	// now assign individual attributes
-
-	TiXmlDocument docPersons(_initialisationFile);
-	if (!docPersons.LoadFile()){
-		Log->Write("ERROR: \t%s", docPersons.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the person file");
-		exit(EXIT_FAILURE);
-	}
-
-
-	TiXmlElement* xRootNode = docPersons.RootElement();
-	if( ! xRootNode ) {
-		Log->Write("ERROR:\tRoot element does not exist");
-		exit(EXIT_FAILURE);
-	}
-
-	if( xRootNode->ValueStr () != "persons" ) {
-		Log->Write("ERROR:\tRoot element value is not 'persons'");
-		exit(EXIT_FAILURE);
-	}
-
-	for(TiXmlElement* xPerson = xRootNode->FirstChildElement("person"); xPerson;
-			xPerson = xPerson->NextSiblingElement("person")) {
-
-
-		int id=xmltoi(xPerson->Attribute("id"),-1);
-
-		if(id==-1){
-			Log->Write("ERROR:\tin the person attribute file. The id is mandatory ! skipping the entry");
-			continue;
-		}
-		//look for that pedestrian.
-		Pedestrian* ped=NULL;
-		for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-			Room* room = building->GetRoom(i);
-			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-					Pedestrian* p=sub->GetPedestrian(k);
-					if(p->GetID()==id){
-						ped=p;
-						goto END;
-					}
-				}
-			}
-		}
-		END:
-		if(!ped){
-			Log->Write("WARNING: \t Ped [%d] does not not exit yet. I am creating a new one",id);
-			ped=new Pedestrian();
-			ped->SetID(id);
-
-			// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
-			JEllipse E = JEllipse();
-			double atau = GetAtau()->GetRand();
-			double amin = GetAmin()->GetRand();
-			E.SetAv(atau);
-			E.SetAmin(amin);
-			double bmax = GetBmax()->GetRand();
-			double bmin = GetBmin()->GetRand();
-			E.SetBmax(bmax);
-			E.SetBmin(bmin);
-			ped->SetEllipse(E);
-			// tau
-			double tau = GetTau()->GetRand();
-			ped->SetTau(tau);
-			// V0
-			double v0 = GetV0()->GetRand();
-			ped->SetV0Norm(v0);
-			nPeds++;
-		}
-
-		double height=xmltof(xPerson->Attribute("height"),-1);
-		if( height!=-1){
-			ped->SetHeight(height);
-		}
-
-		double age=xmltof(xPerson->Attribute("age"),-1);
-		if( age!=-1){
-			ped->SetAge(age);
-		}
-
-		string gender=xmltoa(xPerson->Attribute("gender"),"-1");
-		if( gender!="-1"){
-			ped->SetGender(gender);
-		}
-
-		int router= xmltoi(xPerson->Attribute("router"),-1);
-		if( router != -1){
-			ped->SetRouter(building->GetRoutingEngine()->GetRouter(router));
-		}else
-		{
-			//FIXME: the warning is not legitimate. It should be given after the group has been checked.
-			Log->Write("WARNING: \tNo router was set for ped [%d]. Default router will be used unless something is specified in group. You may ignore this message. It is being fixed !",ped->GetID());
-			ped->SetRouter(building->GetRoutingEngine()->GetRouter(ROUTING_LOCAL_SHORTEST));
-		}
-
-		double goal_id=xmltof(xPerson->Attribute("goal"),-1);
-		if( goal_id!=-1){
-			if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
-					(ped->GetFinalDestination()!=goal_id)){
-				sprintf(tmp, "ERROR: \tconflicting final destination for Ped [%d]", ped->GetID());
-				Log->Write(tmp);
-				sprintf(tmp, "ERROR: \talready assigned to destination [%d]", ped->GetFinalDestination());
-				Log->Write(tmp);
-				exit(EXIT_FAILURE);
-			}
-			ped->SetFinalDestination(goal_id);
-			building->GetRoutingEngine()->AddFinalDestinationID(goal_id);
-		}
-
-		double wishVelo=xmltof(xPerson->Attribute("wishVelo"),-1);
-		if( wishVelo!=-1){
-			ped->SetV0Norm(wishVelo);
-		}
-
-		double startX=xmltof(xPerson->Attribute("startX"),-1);
-		double startY=xmltof(xPerson->Attribute("startY"),-1);
-
-		if(startX!=-1 && startY!=-1){
-			ped->SetPos(Point(startX,startY));
-			//in that case the room should be automatically adjusted
-			for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-				Room* room = building->GetRoom(i);
-				for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-					SubRoom* sub = room->GetSubRoom(j);
-					if(sub->IsInSubRoom(Point(startX,startY))){
-						//if a room was already assigned
-						if(ped->GetRoomID()!=-1){
-							if(FindPedAndDeleteFromRoom(building,ped)){
-								sprintf(tmp, "WARNING: \t Ped [%d] does not not exist yet , will be created and moved to the corresponding room.", id);
-								Log->Write(tmp);
-							}
-						}
-						ped->SetRoomID(room->GetID(),room->GetCaption());
-						ped->SetSubRoomID(sub->GetSubRoomID());
-						sub->AddPedestrian(ped);
-					}
-				}
-			}
-		}
-	}
-
-
-
-	// read the expected number of pedestrians
-	int nPedsExpected= atoi(xRootNode->FirstChild("header")->FirstChildElement("number")->GetText());
-
-	//now parse the different groups
-	TiXmlNode* xGroups=xRootNode->FirstChild("groups");
-
-	if(xGroups)
-	for(TiXmlElement* group = xGroups->FirstChildElement("group"); group;
-			group = group->NextSiblingElement("group")) {
-		int group_id=xmltoi(group->Attribute("id"),-1);
-
-		int trip_id=-1;
-		if(group->FirstChild("trip"))
-			trip_id=xmltoi(group->FirstChild("trip")->FirstChild()->Value());
-
-		int goal_id=-1;
-		if(group->FirstChild("goal"))
-			goal_id=xmltoi(group->FirstChild("goal")->FirstChild()->Value());
-
-		int router_id=-1;
-		if(group->FirstChild("router")->FirstChild())
-			router_id=xmltoi(group->FirstChild("router")->FirstChild()->Value());
-
-		if((goal_id !=-1) && (trip_id!=-1)){
-			sprintf(tmp, "ERROR: \ttrip and goal cannot be set for the same group [%d] !",group_id);
-			Log->Write(tmp);
-			sprintf(tmp, "ERROR: \tas they might conflict!");
-			Log->Write(tmp);
-			exit(EXIT_FAILURE);
-		}
-
-		//get the members
-		string members=group->FirstChild("members")->FirstChild()->Value();
-
-		char* str = (char*) members.c_str();
-		char *p = strtok(str, ",");
-		while (p) {
-			int ped_id=xmltoi(p);
-			Pedestrian* ped=building->GetPedestrian(ped_id);
-			if(ped){
-				ped->SetGroup(group_id);
-				//FIXME
-				if(trip_id!=-1){
-					//ped->SetTrip(building->GetRoutingEngine()->GetTrip(trip_id));
-					sprintf(tmp, "ERROR: \tTrip is actually not supported for pedestrian [%d]. Please use <goal></goal> instead", ped->GetID());
-					Log->Write(tmp);
-					exit(EXIT_FAILURE);
-				}
-				if(goal_id!=-1){
-					if((ped->GetFinalDestination()!=FINAL_DEST_OUT ) &&
-							(ped->GetFinalDestination()!=goal_id)){
-						sprintf(tmp, "ERROR: \tconflicting final destinations for Ped [%d]", ped->GetID());
-						Log->Write(tmp);
-						sprintf(tmp, "ERROR: \talready assigned to a destination with ID [%d]", ped->GetFinalDestination());
-						Log->Write(tmp);
-						exit(EXIT_FAILURE);
-					}
-
-					ped->SetFinalDestination(goal_id);
-					building->GetRoutingEngine()->AddFinalDestinationID(goal_id);
-				}
-				ped->SetRouter(building->GetRoutingEngine()->GetRouter(router_id));
-
-			}else{
-				sprintf(tmp, "ERROR:\tID [%d] out of range. The largest allowed ID based on the current distribution is [%d]",ped_id,building->GetNumberOfPedestrians());
-				Log->Write(tmp);
-				sprintf(tmp, "ERROR:\tVerify that you have distributed all [%d] pedestrians",nPedsExpected);
-				Log->Write(tmp);
-				exit(EXIT_FAILURE);
-			}
-			p = strtok(NULL, ",");
-		}
-	}
-
-
-	//now do the last check if all pedestrians were distributed:
-	if(nPedsExpected!=nPeds){
-		sprintf(tmp, "ERROR:\tThe number of distributed pedestrians [%d] does not match \n"
-				"        \tthe total number of specified pedestrians in the header [%d]!",nPeds,nPedsExpected);
-		Log->Write(tmp);
-		exit(EXIT_FAILURE);
 	}
 
 	return nPeds;
@@ -763,7 +604,6 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
 					}
 				}
 
-
 				// and finally all opened obstacles
 				if(tooNear==true) continue;
 
@@ -787,9 +627,7 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
 					}
 				}
 
-
 				if(tooNear==false) positions.push_back(pos);
-
 			}
 			x += dx;
 		}
@@ -812,57 +650,53 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const {
  *              nächsten Aufruf)
  *   - routing: wird benötigt um die Zielline der Fußgänger zu initialisieren
  * */
-void PedDistributor::DistributeInSubRoom(SubRoom* r, int N, vector<Point>& positions, int roomID, int* pid) const {
-	char tmp[CLENGTH];
-	int anz = positions.size();
+void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>& positions, int* pid,
+		StartDistributionSubroom* para, Building* building) const {
 
-	if (anz < N) {
-		sprintf(tmp, "ERROR: \tVerteilung von %d Fußgängern in Subroom %d nicht möglich! Maximale Anzahl: %d\n",
-				N, r->GetSubRoomID(), anz);
-		Log->Write(tmp);
-		exit(0);
-	} else {
-		sprintf(tmp, "\t\tVerteilung von %d Fußgängern! Maximale Anzahl: %d",
-				N, anz);
-		Log->Write(tmp);
-	}
 	// set the pedestrians
-	for (int i = 0; i < N; ++i) {
+	for (int i = 0; i < nAgents; ++i) {
 
 		Pedestrian* ped = new Pedestrian();
 		// PedIndex
 		ped->SetID(*pid);
-		// a und b setzen muss vor v0 gesetzt werden, da sonst v0 mit Null überschrieben wird
+		ped->SetAge(para->GetAge());
+		ped->SetGender(para->GetGender());
+		ped->SetHeight(para->GetHeight());
+		ped->SetFinalDestination(para->GetGoalId());
+		ped->SetGroup(para->GetGroupId());
+		ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
+		//ped->SetTrip(); //todo: not implemented
+
+		// a und b setzen muss vor v0 gesetzt werden,
+		// da sonst v0 mit Null überschrieben wird
 		JEllipse E = JEllipse();
-		double atau = GetAtau()->GetRand();
-		double amin = GetAmin()->GetRand();
-		E.SetAv(atau);
-		E.SetAmin(amin);
-		double bmax = GetBmax()->GetRand();
-		double bmin = GetBmin()->GetRand();
-		E.SetBmax(bmax);
-		E.SetBmin(bmin);
+		E.SetAv(GetAtau()->GetRand());
+		E.SetAmin(GetAmin()->GetRand());
+		E.SetBmax(GetBmax()->GetRand());
+		E.SetBmin(GetBmin()->GetRand());
 		ped->SetEllipse(E);
-		// tau
-		double tau = GetTau()->GetRand();
-		ped->SetTau(tau);
-		// V0
-		double v0 = GetV0()->GetRand();
-		ped->SetV0Norm(v0);
+		ped->SetTau(GetTau()->GetRand());
+		ped->SetV0Norm(GetV0()->GetRand());
 		// Position
 		int index = rand() % positions.size();
 		Point pos = positions[index];
 		ped->SetPos(pos);
 		positions.erase(positions.begin() + index);
-		// roomID
-		ped->SetRoomID(roomID,"");
-		// SubRoomID
+		ped->SetRoomID(para->GetRoomId(),"");
 		ped->SetSubRoomID(r->GetSubRoomID());
+
+
+		Point start_pos=para->GetStartPosition();
+		if(isnan(start_pos._x)==0){
+			ped->SetPos(start_pos);
+			cout<<"pos: "<<start_pos.toString()<<endl;
+		}
+
 		// setzen
 		r->AddPedestrian(ped);
 		(*pid)++;
-	}
 
+	}
 }
 
 
@@ -885,4 +719,19 @@ string PedDistributor::writeParameter() const {
 	s.append(tmp);
 
 	return s;
+}
+
+void StartDistributionRoom::SetStartPosition(double x, double y, double z) {
+	if(_nPeds!=1){
+		Log->Write("INFO:\t you cannot specify the same start position for many agents");
+		Log->Write("INFO:\t Ignoring the start position");
+		return;
+	}
+	_startX=x;
+	_startY=y;
+	_startZ=z;
+}
+
+Point StartDistributionRoom::GetStartPosition() const {
+	return Point(_startX, _startY);
 }

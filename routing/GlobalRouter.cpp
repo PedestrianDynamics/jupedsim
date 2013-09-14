@@ -32,6 +32,7 @@
 #include "Router.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../tinyxml/tinyxml.h"
 
 #include <cfloat>
 #include <fstream>
@@ -39,7 +40,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-		Router() {
+				Router() {
 
 	_accessPoints = map<int, AccessPoint*>();
 	_map_id_to_index = std::map<int, int>();
@@ -74,6 +75,8 @@ void GlobalRouter::Init(Building* building) {
 
 	Log->Write("INFO:\tInit the Global Router Engine");
 	_building = building;
+
+	LoadRoutingInfos(GetRoutingInfoFile());
 
 	//check the loaded routing informations (crossings, hlines,...)
 	// for inconsistencies
@@ -196,6 +199,7 @@ void GlobalRouter::Init(Building* building) {
 		//set the final destination
 		if (cross->IsExit() && cross->IsOpen()) {
 			ap->setFinalDestination(true);
+			Log->Write("INFO: \tExit to outside found: %d",ap->GetID());
 		} else if ((id1 == -1) && (id2 == -1)) {
 			Log->Write(" a final destination outside the geometry was found");
 			ap->setFinalDestination(true);
@@ -322,6 +326,7 @@ void GlobalRouter::Init(Building* building) {
 	// set the configuration for reaching the outside
 	// set the distances to all final APs
 
+
 	for (map<int, AccessPoint*>::const_iterator itr = _accessPoints.begin();
 			itr != _accessPoints.end(); ++itr) {
 
@@ -382,9 +387,8 @@ void GlobalRouter::Init(Building* building) {
 			if ((from_AP->isFinalDestination() == false)
 					&& (!from_AP->IsClosed())) {
 
+				Log->Write(	"\nERROR: GlobalRouter: hline/crossing/transition is out of visibility range \n");
 				from_AP->Dump();
-				Log->Write(
-						"ERROR: GlobalRouter: hline/crossing/transition [ %d ] in room [%s] is out of visibility range \n");
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -395,13 +399,18 @@ void GlobalRouter::Init(Building* building) {
 	// in the persons file
 	// set the distances to alternative destinations
 
+
 	for (unsigned int p = 0; p < _finalDestinations.size(); p++) {
+
+		//todo: ID for final destinaion and aps are mixed
+		continue;
 
 		//get the uniqueID and find the corresponding index in the matrix
 		//loop over all transitions
 
 		int to_door_matrix_index=-1;
 		int to_door_uid=-1;
+
 		for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
 				itr != _building->GetAllTransitions().end(); ++itr) {
 
@@ -411,14 +420,15 @@ void GlobalRouter::Init(Building* building) {
 				to_door_uid=itr->second->GetUniqueID();
 				break;
 			}
+
 		}
 
+		// thats probably a goal located outside the geometry or not an exit from the geometry
 		if(to_door_uid==-1){
-			char tmp[CLENGTH];
-			sprintf(tmp,
+			//look for the nearest transition
+			Log->Write(
 					"ERROR: GlobalRouter: Final destination not found [ %d ]\n",
 					_finalDestinations[p]);
-			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
 
@@ -468,8 +478,8 @@ void GlobalRouter::Init(Building* building) {
 	//rooms.push_back("050");
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
 	//WriteGraphGV("routing_graph.gv",1,rooms);
-	//exit(0);
 	Log->Write("INFO:\tDone with the Global Router Engine!");
+	//exit(0);
 }
 
 void GlobalRouter::GetPath(int i, int j) {
@@ -608,14 +618,14 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		const Point& posA = ped->GetPos();
 		const Point& posB = ap->GetNavLine()->GetCentre();
 		const Point& posC = (posB - posA).Normalized()
-						* ((posA - posB).Norm() - J_EPS) + posA;
+								* ((posA - posB).Norm() - J_EPS) + posA;
 
 		//check if visible
 		if (sub->IsVisible(posA, posC, true) == false)
 			continue;
 
 		double dist = ap->GetDistanceTo(ped->GetFinalDestination())
-						+ ap->distanceTo(posA.GetX(), posA.GetY());
+								+ ap->distanceTo(posA.GetX(), posA.GetY());
 
 		if (dist < minDist) {
 			bestAPsID = ap->GetID();
@@ -629,7 +639,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		return bestAPsID;
 	} else {
 		Log->Write("ERROR:\tGlobalRouter.cpp: a valid destination could not be found for ped [%d] going to destination [%d]",ped->GetID(),ped->GetFinalDestination());
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 		return -1;
 	}
 }
@@ -656,14 +666,14 @@ bool GlobalRouter::CanSeeEachother(const Point&pt1, const Point& pt2) {
 
 	// then all goals
 	//fIXME
-//	for (int door = 0; door < pBuilding->GetGoalsCount(); door++) {
-//		Crossing *cross =pBuilding-> GetGoal(door);
-//		if (cross->GetRoom1()->GetCaption() == "outside")
-//			continue;
-//		if (segment.IntersectionWith(*cross) == true) {
-//			return false;
-//		}
-//	}
+	//	for (int door = 0; door < pBuilding->GetGoalsCount(); door++) {
+	//		Crossing *cross =pBuilding-> GetGoal(door);
+	//		if (cross->GetRoom1()->GetCaption() == "outside")
+	//			continue;
+	//		if (segment.IntersectionWith(*cross) == true) {
+	//			return false;
+	//		}
+	//	}
 
 	return true;
 }
@@ -779,8 +789,8 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 	graph_file << "splines=false;" << endl;
 	graph_file << "fontsize=20;" << endl;
 	graph_file
-			<< "label=\"Graph generated by the routing engine for destination: "
-			<< finalDestination << "\"" << endl;
+	<< "label=\"Graph generated by the routing engine for destination: "
+	<< finalDestination << "\"" << endl;
 
 	vector<int> rooms_ids = vector<int>();
 
@@ -947,7 +957,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 			graph_file << from_door << " -> " << to_door << " [ label="
 					<< from_AP->GetDistanceTo(to_AP)
-							+ to_AP->GetDistanceTo(finalDestination)
+					+ to_AP->GetDistanceTo(finalDestination)
 					<< ", fontsize=10]; " << endl;
 		}
 
@@ -961,4 +971,102 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 	//done
 	graph_file.close();
+}
+
+string GlobalRouter::GetRoutingInfoFile() const {
+
+	TiXmlDocument doc(_building->GetPojectFilename());
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the project file");
+		exit(EXIT_FAILURE);
+	}
+
+	// everything is fine. proceed with parsing
+	TiXmlElement* xMainNode = doc.RootElement();
+	TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
+
+	string nav_line_file="";
+
+	for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+			e = e->NextSiblingElement("router")) {
+
+		string strategy=e->Attribute("description");
+
+		if(strategy=="local_shortest") {
+			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+		}
+		else if(strategy=="global_shortest") {
+			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+		}
+	}
+
+	return nav_line_file;
+}
+
+
+void GlobalRouter::LoadRoutingInfos(const std::string &filename){
+
+	if(filename=="") return;
+
+	Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");
+	Log->Write("INFO:\t  from the file "+filename);
+
+	TiXmlDocument docRouting(filename);
+	if (!docRouting.LoadFile()){
+		Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the routing file");
+		exit(EXIT_FAILURE);
+	}
+
+	TiXmlElement* xRootNode = docRouting.RootElement();
+	if( ! xRootNode ) {
+		Log->Write("ERROR:\tRoot element does not exist");
+		exit(EXIT_FAILURE);
+	}
+
+	if( xRootNode->ValueStr () != "routing" ) {
+		Log->Write("ERROR:\tRoot element value is not 'routing'.");
+		exit(EXIT_FAILURE);
+	}
+
+	string  version = xRootNode->Attribute("version");
+	if (version != JPS_VERSION) {
+		Log->Write("ERROR: \tOnly version  %d.%d supported",JPS_VERSION_MAJOR,JPS_VERSION_MINOR);
+		Log->Write("ERROR: \tparsing routing file failed!");
+		exit(EXIT_FAILURE);
+	}
+
+	//parsing the crossings
+	TiXmlNode*  xHlinesNode = xRootNode->FirstChild("Hlines");
+
+	for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
+			hline = hline->NextSiblingElement("Hline")) {
+
+		double id = xmltof(hline->Attribute("id"), -1);
+		int room_id = xmltoi(hline->Attribute("room_id"), -1);
+		int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
+
+		double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
+		double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
+		double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
+		double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
+
+		Room* room = _building->GetRoom(room_id);
+		SubRoom* subroom = room->GetSubRoom(subroom_id);
+
+		//new implementation
+		Hline* h = new Hline();
+		h->SetID(id);
+		h->SetPoint1(Point(x1, y1));
+		h->SetPoint2(Point(x2, y2));
+		h->SetRoom(room);
+		h->SetSubRoom(subroom);
+
+		_building->AddHline(h);
+		subroom->AddHline(h);
+	}
+	Log->Write("INFO:\tDone with loading extra routing information");
 }

@@ -42,36 +42,59 @@
  ************************************************************/
 class StartDistributionRoom {
 private:
-	std::string _roomCaption;
+	int _roomID;
 	int _nPeds;
+	int _groupID;
+	int _goalID;
+	int _routerID;
+	int _routeID;
+	int _age;
+	int _height;
+	//int _width;
+	double _startX; //only valid when _nPeds=1
+	double _startY; //only valid when _nPeds=1
+	double _startZ; //only valid when _nPeds=1
+
+	std::string _gender;
 
 public:
 	StartDistributionRoom();
-	StartDistributionRoom(const StartDistributionRoom& orig);
 	virtual ~StartDistributionRoom();
 
-	// Getter-Funktionen
-	std::string GetRoomCaption() const;
-	int GetNumberOfPedestrian() const;
+	int GetAgentsNumber() const;
 
-	// Setter-Funktionen
-	void SetRoomCaption(std::string caption);
-	void SetNumberOfPedestrians(int N);
-
+	void SetRoomID(int id);
+	void SetAgentsNumber(int N);
+	int GetAge() const;
+	void SetAge(int age);
+	const std::string& GetGender() const;
+	void SetGender(const std::string& gender);
+	int GetGoalId() const;
+	void SetGoalId(int goalId);
+	int GetGroupId() const;
+	void SetGroupId(int groupId);
+	int GetHeight() const;
+	void SetHeight(int height);
+	int GetRoomId() const;
+	void SetRoomId(int roomId);
+	int GetRouteId() const;
+	void SetRouteId(int routeId);
+	int GetRouterId() const;
+	void SetRouterId(int routerId);
+	void SetStartPosition(double x,double y, double z);
+	Point GetStartPosition() const;
 };
 
+//TODO:FIXME merge the two classes and set the _subRoomID=-1
 class StartDistributionSubroom : public StartDistributionRoom {
 private:
 	int _subroomID;
 
 public:
 	StartDistributionSubroom();
-	StartDistributionSubroom(const StartDistributionSubroom& orig);
 	virtual ~StartDistributionSubroom();
-	// Getter-Funktionen
-	int GetSubroomID() const;
 
-	// Setter-Funktionen
+	int GetSubroomID() const;
 	void SetSubroomID(int i);
 };
 
@@ -86,9 +109,9 @@ private:
 	Distribution* _Atau;
 	Distribution* _Amin;
 	Distribution* _Tau;
-	std::vector<StartDistributionRoom> _start_dis; // ID startraum, subroom und Anz
-	std::vector<StartDistributionSubroom> _start_dis_sub; // ID startraum, subroom und Anz
-	std::string _initialisationFile; // store the file for later user
+	std::vector<StartDistributionRoom*> _start_dis; // ID startraum, subroom und Anz
+	std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
+	std::string _projectFilename; // store the file for later user
 
 	// find aped in a subroom and delete him
 	bool FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const;
@@ -99,7 +122,7 @@ public:
 	PedDistributor(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
 			double BminMu, double BminSigma, double AtauMu, double AtauSigma, double AminMu,
 			double AminSigma, double tauMu, double tauSigma);
-	PedDistributor(const PedDistributor& orig);
+	//PedDistributor(const PedDistributor& orig);
 	virtual ~PedDistributor();
 	// Getter-Funktionen
 	Distribution* GetV0() const;
@@ -115,10 +138,10 @@ public:
 	std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
 			SubRoom* r, double bufx, double bufy, double dx) const;
 	std::vector<Point> PossiblePositions(SubRoom* r) const;
-	void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int roomID, int* pid)const;
+	void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionSubroom* parameters,Building* building) const;
 	std::string writeParameter() const;
 
-	void InitDistributor(std::string start_file);
+	void InitDistributor(const std::string &start_file);
 	int Distribute(Building* building) const;
 };
 

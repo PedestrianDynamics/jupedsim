@@ -44,8 +44,10 @@
 #define J_EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
 // zur Versionskontrolle beim Geometrieformat
-#define VERSION 0.40
-#define JPS_VERSION "0.4"
+//#define VERSION 0.40
+#define JPS_VERSION "0.5"
+#define JPS_VERSION_MINOR 5
+#define JPS_VERSION_MAJOR 0
 
 // Länge von char vectoren zur Ausgabe
 #define CLENGTH 1000

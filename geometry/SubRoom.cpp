@@ -874,9 +874,6 @@ void SubRoom::DeletePedestrian(int index) {
 	}
 }
 
-//void SubRoom::DeletePedestrian(Pedestrian* ped){
-//
-//}
 
 void SubRoom::ClearAllPedestrians(){
 	for(unsigned int p=0;p<_peds.size();p++){

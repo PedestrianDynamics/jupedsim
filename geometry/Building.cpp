@@ -52,7 +52,7 @@ using namespace std;
 
 Building::Building() {
 	_caption = "no_caption";
-	_filename = "";
+	_projectFilename = "";
 	_rooms = vector<Room*>();
 	_routingEngine = NULL;
 	_linkedCellGrid = NULL;
@@ -256,18 +256,38 @@ void Building::InitGeometry() {
  Ein-Ausgabe
  ************************************************************/
 
-const string& Building::GetFilename() const{
-	return _filename;
+const string& Building::GetPojectFilename() const{
+	return _projectFilename;
 }
 
-void Building::LoadBuilding(const string &filename) {
+void Building::SetPojectFilename(const std::string &filename){
+	_projectFilename=filename;
+}
 
-	//save for later use
-	_filename =filename;
+
+void Building::LoadBuildingFromFile() {
+
+	//get the geometry filename from the project file
+
+	string geoFilename="";
+	TiXmlDocument doc(_projectFilename);
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the project file");
+		exit(EXIT_FAILURE);
+	}
+
+	// everything is fine. proceed with parsing
 
 	Log->Write("INFO: \tParsing the geometry file");
+	TiXmlElement* xMainNode = doc.RootElement();
+	if(xMainNode->FirstChild("geometry")){
+		geoFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+		Log->Write("INFO: \tgeometry <"+geoFilename+">");
+	}
 
-	TiXmlDocument docGeo(_filename);
+
+	TiXmlDocument docGeo(geoFilename);
 	if (!docGeo.LoadFile()){
 		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the geometry file");
@@ -566,14 +586,22 @@ void Building::AddTransition(Transition* line) {
 
 void Building::AddHline(Hline* line) {
 	if (_hLines.count(line->GetID()) != 0) {
-		char tmp[CLENGTH];
-		sprintf(tmp,
-				"ERROR: Duplicate index for hlines found [%d] in Routing::AddGoal()",
+		Log->Write(
+				"ERROR: Duplicate index for hlines found [%d] in Routing::AddHline()",
 				line->GetID());
-		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
 	_hLines[line->GetID()] = line;
+}
+
+void Building::AddGoal(Goal* goal) {
+	if (_goals.count(goal->GetId()) != 0) {
+		Log->Write(
+				"ERROR: Duplicate index for goal found [%d] in Routing::AddGoal()",
+				goal->GetId());
+		exit(EXIT_FAILURE);
+	}
+	_goals[goal->GetId()] = goal;
 }
 
 const map<int, Crossing*>& Building::GetAllCrossings() const {
@@ -584,9 +612,12 @@ const map<int, Transition*>& Building::GetAllTransitions() const {
 	return _transitions;
 }
 
-
 const map<int, Hline*>& Building::GetAllHlines() const {
 	return _hLines;
+}
+
+const map<int, Goal*>& Building::GetAllGoals() const {
+	return _goals;
 }
 
 Transition* Building::GetTransition(string caption) const {
@@ -608,11 +639,9 @@ Transition* Building::GetTransition(int ID) {
 		if (ID == -1)
 			return NULL;
 		else {
-			char tmp[CLENGTH];
-			sprintf(tmp,
-					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetTransition()",
+			Log->Write(
+					"ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
 					ID, _transitions.size());
-			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -663,12 +692,12 @@ void Building::Update() {
 						char tmp[CLENGTH];
 						sprintf(tmp,
 								"WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
-								"via unknown exit[??%d] Position: (%f, %f)",
+								"via unknown exit[??%d] \n Position: (%f, %f), distance to exit: (%f)",
 								ped->GetID(),
 								_rooms[ped->GetRoomID()]->GetCaption().c_str(),
 								ped->GetRoomID(), ped->GetSubRoomID(),
 								ped->GetExitIndex(), ped->GetPos().GetX(),
-								ped->GetPos().GetY());
+								ped->GetPos().GetY(),ped->GetExitLine()->DistTo(ped->GetPos()));
 						//ped->Dump(ped->GetPedIndex());
 						Log->Write(tmp);
 						std::cout << ped->GetLastDestination() << " "
@@ -928,6 +957,8 @@ void Building::DumpSubRoomInRoom(int roomID, int subID) {
 
 
 void Building::LoadRoutingInfo(const string &filename) {
+
+
 	Log->Write("INFO:\tLoading extra routing information");
 	if (filename == "") {
 		Log->Write("INFO:\t No file supplied !");
@@ -948,55 +979,51 @@ void Building::LoadRoutingInfo(const string &filename) {
 		exit(EXIT_FAILURE);
 	}
 
-	if( xRootNode->ValueStr () != "routing" ) {
-		Log->Write("ERROR:\tRoot element value is not 'routing'.");
-		exit(EXIT_FAILURE);
-	}
+	//load goals and routes
+	TiXmlNode*  xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
-	double version = xmltof(xRootNode->Attribute("version"), -1);
-	if (version < 0.4) {
-		Log->Write("ERROR: \tOnly version > 0.4 supported");
-		Log->Write("ERROR: \tparsing routing file failed!");
-		exit(EXIT_FAILURE);
-	}
 
-	//parsing the crossings
-	TiXmlNode*  xHlinesNode = xRootNode->FirstChild("Hlines");
 
-	if(xHlinesNode)
-		for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
-				hline = hline->NextSiblingElement("Hline")) {
+	for(TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
+			e = e->NextSiblingElement("goal")) {
 
-			double id = xmltof(hline->Attribute("id"), -1);
-			int room_id = xmltoi(hline->Attribute("room_id"), -1);
-			int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
+		int id = xmltof(e->Attribute("id"), -1);
+		int isFinal= string(e->Attribute("final"))=="true"?true:false;
+		string caption = xmltoa(e->Attribute("caption"),"-1");
 
-			double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
-			double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
-			double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
-			double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
+		Goal* goal = new Goal();
+		goal->SetId(id);
+		goal->SetCaption(caption);
+		goal->SetIsFinalGoal(isFinal);
 
-			Room* room = _rooms[room_id];
-			SubRoom* subroom = room->GetSubRoom(subroom_id);
+		//looking for polygons (walls)
+		for(TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+				xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
-			//new implementation
-			Hline* h = new Hline();
-			h->SetID(id);
-			h->SetPoint1(Point(x1, y1));
-			h->SetPoint2(Point(x2, y2));
-			h->SetRoom(room);
-			h->SetSubRoom(subroom);
+			for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+					"vertex");
+					xVertex && xVertex != xPolyVertices->LastChild("vertex");
+					xVertex = xVertex->NextSiblingElement("vertex")) {
 
-			AddHline(h);
-			subroom->AddHline(h);
+				double x1 = xmltof(xVertex->Attribute("px"));
+				double y1 = xmltof(xVertex->Attribute("py"));
+				double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+				double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+				goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+			}
 		}
 
-	//load the pre-defined trips
-	TiXmlNode*  xTripsNode = xRootNode->FirstChild("trips");
+		goal->ConvertLineToPoly();
+		AddGoal(goal);
+		_routingEngine->AddFinalDestinationID(goal->GetId());
+	}
+
+	//load routes
+	TiXmlNode*  xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
 
 	if(xTripsNode)
-		for(TiXmlElement* trip = xTripsNode->FirstChildElement("trip"); trip;
-				trip = trip->NextSiblingElement("trip")) {
+		for(TiXmlElement* trip = xTripsNode->FirstChildElement("route"); trip;
+				trip = trip->NextSiblingElement("route")) {
 
 			double id = xmltof(trip->Attribute("id"), -1);
 			if (id == -1) {
@@ -1018,38 +1045,21 @@ void Building::LoadRoutingInfo(const string &filename) {
 	Log->Write("INFO:\tdone with loading extra routing information");
 }
 
-void Building::LoadTrafficInfo(const string &filename) {
+void Building::LoadTrafficInfo() {
 
 	Log->Write("INFO:\tLoading  the traffic info file");
 
-	if (filename == "") {
-		Log->Write("INFO:\t No file supplied !");
-		Log->Write("INFO:\tdone with loading traffic info file");
-		return;
-	}
-
-	TiXmlDocument docTraffic(filename);
-	if (!docTraffic.LoadFile()){
-		Log->Write("ERROR: \t%s", docTraffic.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the traffic file");
+	string trafficFile="";
+	TiXmlDocument doc(_projectFilename);
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the project file");
 		exit(EXIT_FAILURE);
 	}
 
-	TiXmlElement* xRootNode = docTraffic.RootElement();
+	TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
 	if( ! xRootNode ) {
-		Log->Write("ERROR:\tRoot element does not exist");
-		exit(EXIT_FAILURE);
-	}
-
-	if( xRootNode->ValueStr () != "traffic" ) {
-		Log->Write("ERROR:\tRoot element value is not 'traffic'.");
-		exit(EXIT_FAILURE);
-	}
-
-	double version = xmltof(xRootNode->Attribute("version"), -1);
-	if (version < 0.4) {
-		Log->Write("ERROR: \tOnly version > 0.4 supported");
-		Log->Write("ERROR: \tparsing traffic file failed!");
+		Log->Write("ERROR:\tcould not load traffic information");
 		exit(EXIT_FAILURE);
 	}
 
@@ -1072,28 +1082,18 @@ void Building::LoadTrafficInfo(const string &filename) {
 		int id = xmltoi(xDoor->Attribute("trans_id"), -1);
 		string state = xmltoa(xDoor->Attribute("state"), "open");
 
-		//maybe the door caption is specified ?
-		if(id==-1){
-			string caption=xmltoa(xDoor->Attribute("caption"), "-1");
-			if( (caption!="-1") && (state =="close") ){
-				GetTransition(caption)->Close();
-			}
-		}
-		else {
-			//store transition in a map and call getTransition/getCrossin
-			if (state == "open") {
-				GetTransition(id)->Open();
-			} else if (state == "close") {
-				GetTransition(id)->Close();
-			} else {
-				char tmp[CLENGTH];
-				sprintf(tmp, "WARNING:\t Unknown door state: %s", state.c_str());
-				Log->Write(tmp);
-			}
+		//store transition in a map and call getTransition/getCrossin
+		if (state == "open") {
+			GetTransition(id)->Open();
+		} else if (state == "close") {
+			GetTransition(id)->Close();
+		} else {
+			Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
 		}
 	}
-	Log->Write("INFO:\t done with loading traffic info file");
+	Log->Write("INFO:\tDone with loading traffic info file");
 }
+
 
 void Building::DeletePedestrian(Pedestrian* ped) {
 	vector<Pedestrian*>::iterator it;
@@ -1155,6 +1155,7 @@ void Building::AddPedestrian(Pedestrian* ped) {
 }
 
 
+//obsolete
 void Building::InitSavePedPathway(const string &filename) {
 	_pathWayStream.open(filename.c_str());
 	_savePathway = true;

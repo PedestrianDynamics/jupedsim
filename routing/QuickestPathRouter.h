@@ -58,6 +58,11 @@ public:
 private:
 
 	/**
+	 * @return the right path for the extra information
+	 */
+	virtual std::string GetRoutingInfoFile() const;
+
+	/**
 	 * find the next suitable destination for the pedestrian
 	 * @param ped
 	 * @return the index of the destination

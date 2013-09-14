@@ -137,6 +137,15 @@ private:
 	 */
 	void FloydWarshall();
 
+	/**
+	 * Load extra routing information e.g navigation lines
+	 */
+	void LoadRoutingInfos(const std::string &filename);
+
+	/**
+	 * Each router is responsible of getting the correct filename
+	 */
+	virtual std::string GetRoutingInfoFile() const;
 
 private:
 	int **_pathsMatrix;

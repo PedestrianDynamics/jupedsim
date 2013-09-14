@@ -103,7 +103,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			exit(0);
 	}
 
-	Log->Write("INFO: \tOptionen an Simulation geben\n");
 
 	if(args->GetPort()!=-1){
 		switch(args->GetFileFormat())
@@ -196,7 +195,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
 			args->GetTauSigma());
 	s.append(_distribution->writeParameter());
-	_distribution->InitDistributor(args->GetPersonsFilename());
+	_distribution->InitDistributor(args->GetProjectFile());
 
 	// define how the navigation line is crossed
 	int direction = args->GetExitStrategy();
@@ -324,17 +323,15 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	// IMPORTANT: do not change the order in the following..
 	_building = new Building();
 	_building->SetRoutingEngine(routingEngine);
+	_building->SetPojectFilename(args->GetProjectFile());
 
-	sprintf(tmp, "\tGeometrie: [%s]\n", args->GetGeometryFilename().c_str());
-	s.append(tmp);
-	Log->Write("INFO: \t" + s);
-	_building->LoadBuilding(args->GetGeometryFilename());
+	_building->LoadBuildingFromFile();
 	_building->AddSurroundingRoom();
 	_building->InitGeometry(); // create the polygons
 
-	_building->LoadTrafficInfo(args->GetTrafficFile());
+	_building->LoadTrafficInfo();
 
-	_building->LoadRoutingInfo(args->GetRoutingFile());
+	_building->LoadRoutingInfo(args->GetProjectFile());
 
 	// in the case the navigation mesh should be written to a file
 	if(args->GetNavigationMesh()!=""){
@@ -355,6 +352,8 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	// initialize the routing engine before doing any other things
 	routingEngine->Init(_building);
+
+	//this is very specific to the gcfm model
 	_building->InitPhiAllPeds(_deltaT);
 
 	//using linkedcells
@@ -365,19 +364,11 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		_building->InitGrid(-1);
 	}
 
-	// init pathway
-	if(args->GetPathwayFile()!=""){
-		char name[30]="";
-		sprintf(name,"%s_p0",args->GetPathwayFile().c_str());
-		_building->InitSavePedPathway(name);
-	}
-
 	//pBuilding->WriteToErrorLog();
 
 	//get the seed
 	_seed=args->GetSeed();
 }
-
 
 
 int Simulation::RunSimulation() {
@@ -395,7 +386,6 @@ int Simulation::RunSimulation() {
 
 	//first initialisation needed by the linked-cells
 	 Update();
-
 
 	// main program loop
 	for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
@@ -425,19 +415,11 @@ int Simulation::RunSimulation() {
 // TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
 	_building->Update();
-	// Neue Anzahl von Fußgänger, falls jemand ganz raus geht
-        // printf("GetAllPedestrians\n");
+	//someone might have leave the building
 	_nPeds=_building->GetAllPedestrians().size();
-        //printf("GetAllPedestrians OK n=%d\n", _nPeds);
-	// update the general time
-        //printf("GetGlobalTime\n");
+	// update the global time
 	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+_deltaT);
-        //printf("GetGlobalTime OK\n");
 	//update the cells position
-	//if (pLinkedCells){
-        //printf("UpdateGrid\n");
-		_building->UpdateGrid();
-                //      printf("UpdateGrid OK\n");
-	//}
+	_building->UpdateGrid();
 
 }

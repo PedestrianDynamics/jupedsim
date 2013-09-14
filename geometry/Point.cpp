@@ -53,11 +53,10 @@ Point::Point(const Point& orig) {
     _y = orig.GetY();
 }
 
-std::string Point::toString(){
+std::string Point::toString() const {
 	std::stringstream tmp;
 	tmp<<"( "<<_x<<" : " <<_y<<" )";
 	return tmp.str();
-
 };
 
 

@@ -80,9 +80,9 @@ void ArgumentParser::Usage() {
 
 ArgumentParser::ArgumentParser() {
 	// Default parameter values
-	pNumberFilename = "inputfiles/persons.xml";
+	//pNumberFilename = "inputfiles/persons.xml";
 	pSolver = 1;
-	pGeometryFilename = "inputfiles/geo.xml";
+	_projectFile="";
 	pTmax = 500;
 	pfps=1.0;
 	pdt = 0.01;
@@ -111,9 +111,9 @@ ArgumentParser::ArgumentParser() {
 	pTauSigma = 0.001;
 	pLog = 0;
 	pErrorLogFile="./Logfile.dat";
-	pPathwayFilename="";
-	pRoutingFilename="";
-	pTrafficFilename="";
+	//pPathwayFilename="";
+	//pRoutingFilename="";
+	//pTrafficFilename="";
 	pNavMeshFilename="";
 	pSeed=0;
 	pFormat=FORMAT_XML_PLAIN;
@@ -184,266 +184,252 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			long_options, &option_index)) != -1) {
 
 		switch (c) {
-			case 'T':
-			{
-				if (optarg)
-					pTrajectoriesFile=optarg;
-				break;
-			}
-			case 'P':
-			{
-				if (optarg)
-					pPort=atoi(optarg);
-				break;
-			}
-			case 'O':
-			{
-				if (optarg)
-					pHostname=optarg;
-				break;
-			}
-			case 'L':
-			{
-				pLog = atoi(optarg);
-				break;
-			}
-			case 'c':
-			{
-				pTauMu = atof(optarg);
-				break;
-			}
-			case 'C':
-			{
-				pTauSigma = atof(optarg);
-				break;
-			}
-			case 'f':
-			{
-				pDistEffMaxPed = atof(optarg);
-				break;
-			}
-			case 'F':
-			{
-				pDistEffMaxWall = atof(optarg);
-				break;
-			}
-			case 'm':
-			{
-				pMaxFPed = atof(optarg);
-				break;
-			}
-			case 'M':
-			{
-				pMaxFWall = atof(optarg);
-				break;
-			}
-			case 'i':
-			{
-				pIntPWidthPed = atof(optarg);
-				break;
-			}
-			case 'I':
-			{
-				pIntPWidthWall = atof(optarg);
-				break;
-			}
-			case 'x':
-			{
-				pNuPed = atof(optarg);
-				break;
-			}
-			case 'X':
-			{
-				pNuWall = atof(optarg);
-				break;
-			}
-			case 'z':
-			{
-				pAminMu = atof(optarg);
-				break;
-			}
-			case 'Z':
-			{
-				pAminSigma = atof(optarg);
-				break;
-			}
-			case 'a':
-			{
-				pAtauMu = atof(optarg);
-				break;
-			}
-			case 'A':
-			{
-				pAtauSigma = atof(optarg);
-				break;
-			}
-			case 'y':
-			{
-				pBminMu = atof(optarg);
-				break;
-			}
-			case 'Y':
-			{
-				pBminSigma = atof(optarg);
-				break;
-			}
-			case 'b':
-			{
-				pBmaxMu = atof(optarg);
-				break;
-			}
-			case 'B':
-			{
-				pBmaxSigma = atof(optarg);
-				break;
-			}
-			case 'v':
-			{
-				pV0Mu = atof(optarg);
-				break;
-			}
-			case 'V':
-			{
-				pV0Sigma = atof(optarg);
-				break;
-			}
-			case 'n':
-			{
-				pNumberFilename = optarg;
-				break;
-			}
-			case 'D':
-			{
-				pfps=atof(optarg);
-				break;
-			}
-			case 'Q':
-			{
-				pPathwayFilename = optarg;
-				break;
-			}
-			case 't':
-			{
-				double t = atof(optarg);
-				if (t > 0)
-					pTmax = t;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"tmax has to be positiv!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 'd':
-			{
-				double d = atof(optarg);
-				if (d > 0)
-					pdt = d;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"dt has to be positiv!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 's':
-			{
-				int s = atoi(optarg);
-				if (s == 1 || s==2 || s==3) // spaeter erweitern
-					pSolver = s;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for solver type!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 'g':
-				pGeometryFilename = optarg;
-				break;
-			case 'e':
-			{
-				int e = atoi(optarg);
-				if (e == 1 || e == 2 || e == 3 || e == 4 )
-					pExitStrategy = e;
-				else {
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for exit strategy!!!\n");
-					exit(0);
-				}
-				break;
-			}
-			case 'R': // TODO: are these options still correct ?
-			{
-				int r = atoi(optarg);
-				switch(r){
-				case 1:
-					pRoutingStrategies.push_back(make_pair (1,ROUTING_LOCAL_SHORTEST));
-					break;
-				case 2:
-					pRoutingStrategies.push_back(make_pair (2, ROUTING_GLOBAL_SHORTEST));
-					break;
-				case 3:
-					pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
-					break;
-				case 4:
-					pRoutingStrategies.push_back(make_pair (4,ROUTING_DYNAMIC));
-					break;
-				case 5:
-					pRoutingStrategies.push_back(make_pair (5,ROUTING_NAV_MESH));
-					break;
-				case 6:
-					pRoutingStrategies.push_back(make_pair (6,ROUTING_DUMMY));
-					break;
-				default:
-					Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-							"wrong value for routing strategy!!!\n");
-					exit(0);
-					break;
-				}
+		case 'T':
+		{
+			if (optarg)
+				pTrajectoriesFile=optarg;
 			break;
-			}
-			case 'l':
-			{
-				pLinkedCells = true;
-				if (optarg)
-					pLinkedCellSize=atof(optarg);
-				break;
-			}
+		}
+		case 'P':
+		{
+			if (optarg)
+				pPort=atoi(optarg);
 			break;
-
-			case 'q':
-			{
-				string inifile="ini.xml";
-				if (optarg)
-					inifile=optarg;
-				Log->Write("INFO: \t Loading initialization file <"+inifile+">");
-				ParseIniFile(inifile);
-			}
+		}
+		case 'O':
+		{
+			if (optarg)
+				pHostname=optarg;
 			break;
-
-			case 'p':
-				pMaxOpenMPThreads = atof(optarg);
-#ifdef _OPENMP
-				omp_set_num_threads(pMaxOpenMPThreads);
-#endif
-				break;
-
-			case 'h':
-				Usage();
-				break;
-
-			case 'N':
-				pNavMeshFilename=optarg;
-				break;
-
-			default:
-			{
+		}
+		case 'L':
+		{
+			pLog = atoi(optarg);
+			break;
+		}
+		case 'c':
+		{
+			pTauMu = atof(optarg);
+			break;
+		}
+		case 'C':
+		{
+			pTauSigma = atof(optarg);
+			break;
+		}
+		case 'f':
+		{
+			pDistEffMaxPed = atof(optarg);
+			break;
+		}
+		case 'F':
+		{
+			pDistEffMaxWall = atof(optarg);
+			break;
+		}
+		case 'm':
+		{
+			pMaxFPed = atof(optarg);
+			break;
+		}
+		case 'M':
+		{
+			pMaxFWall = atof(optarg);
+			break;
+		}
+		case 'i':
+		{
+			pIntPWidthPed = atof(optarg);
+			break;
+		}
+		case 'I':
+		{
+			pIntPWidthWall = atof(optarg);
+			break;
+		}
+		case 'x':
+		{
+			pNuPed = atof(optarg);
+			break;
+		}
+		case 'X':
+		{
+			pNuWall = atof(optarg);
+			break;
+		}
+		case 'z':
+		{
+			pAminMu = atof(optarg);
+			break;
+		}
+		case 'Z':
+		{
+			pAminSigma = atof(optarg);
+			break;
+		}
+		case 'a':
+		{
+			pAtauMu = atof(optarg);
+			break;
+		}
+		case 'A':
+		{
+			pAtauSigma = atof(optarg);
+			break;
+		}
+		case 'y':
+		{
+			pBminMu = atof(optarg);
+			break;
+		}
+		case 'Y':
+		{
+			pBminSigma = atof(optarg);
+			break;
+		}
+		case 'b':
+		{
+			pBmaxMu = atof(optarg);
+			break;
+		}
+		case 'B':
+		{
+			pBmaxSigma = atof(optarg);
+			break;
+		}
+		case 'v':
+		{
+			pV0Mu = atof(optarg);
+			break;
+		}
+		case 'V':
+		{
+			pV0Sigma = atof(optarg);
+			break;
+		}
+		case 'D':
+		{
+			pfps=atof(optarg);
+			break;
+		}
+		case 't':
+		{
+			double t = atof(optarg);
+			if (t > 0)
+				pTmax = t;
+			else {
 				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-						"wrong program options!!!\n");
-				Usage();
-				exit(EXIT_FAILURE);
+						"tmax has to be positiv!!!\n");
+				exit(0);
 			}
+			break;
+		}
+		case 'd':
+		{
+			double d = atof(optarg);
+			if (d > 0)
+				pdt = d;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"dt has to be positiv!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 's':
+		{
+			int s = atoi(optarg);
+			if (s == 1 || s==2 || s==3) // spaeter erweitern
+				pSolver = s;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"wrong value for solver type!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 'e':
+		{
+			int e = atoi(optarg);
+			if (e == 1 || e == 2 || e == 3 || e == 4 )
+				pExitStrategy = e;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"wrong value for exit strategy!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 'R': // TODO: are these options still correct ?
+		{
+			int r = atoi(optarg);
+			switch(r){
+			case 1:
+				pRoutingStrategies.push_back(make_pair (1,ROUTING_LOCAL_SHORTEST));
+				break;
+			case 2:
+				pRoutingStrategies.push_back(make_pair (2, ROUTING_GLOBAL_SHORTEST));
+				break;
+			case 3:
+				pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
+				break;
+			case 4:
+				pRoutingStrategies.push_back(make_pair (4,ROUTING_DYNAMIC));
+				break;
+			case 5:
+				pRoutingStrategies.push_back(make_pair (5,ROUTING_NAV_MESH));
+				break;
+			case 6:
+				pRoutingStrategies.push_back(make_pair (6,ROUTING_DUMMY));
+				break;
+			default:
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"wrong value for routing strategy!!!\n");
+				exit(0);
+				break;
+			}
+			break;
+		}
+		case 'l':
+		{
+			pLinkedCells = true;
+			if (optarg)
+				pLinkedCellSize=atof(optarg);
+			break;
+		}
+		break;
+
+		case 'q':
+		{
+			string inifile="ini.xml";
+			if (optarg)
+				inifile=optarg;
+			ParseIniFile(inifile);
+		}
+		break;
+
+		case 'p':
+			pMaxOpenMPThreads = atof(optarg);
+#ifdef _OPENMP
+			omp_set_num_threads(pMaxOpenMPThreads);
+#endif
+			break;
+
+		case 'h':
+			Usage();
+			break;
+
+		case 'N':
+			pNavMeshFilename=optarg;
+			break;
+
+		default:
+		{
+			Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+					"wrong program options!!!\n");
+			Usage();
+			exit(EXIT_FAILURE);
+		}
 		}
 	}
 }
@@ -451,12 +437,13 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 
 void ArgumentParser::ParseIniFile(string inifile){
 
-	Log->Write("INFO: \tParsing the ini file");
+	Log->Write("INFO: \tLoading and parsing the project file file <%s>",inifile.c_str());
+	_projectFile=inifile;
 
 	TiXmlDocument doc(inifile);
 	if (!doc.LoadFile()){
 		Log->Write("ERROR: \t%s", doc.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the ini file");
+		Log->Write("ERROR: \t could not parse the project file");
 		exit(EXIT_FAILURE);
 	}
 
@@ -468,8 +455,8 @@ void ArgumentParser::ParseIniFile(string inifile){
 		exit(EXIT_FAILURE);
 	}
 
-	if( xMainNode->ValueStr () != "JPSgcfm" ) {
-		Log->Write("ERROR:\tRoot element value is not 'JPSgcfm'.");
+	if( xMainNode->ValueStr () != "JuPedSim" ) {
+		Log->Write("ERROR:\tRoot element value is not 'JuPedSim'.");
 		exit(EXIT_FAILURE);
 	}
 
@@ -480,29 +467,6 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tseed < %d >",pSeed);
 	}
 
-	//geometry
-	if(xMainNode->FirstChild("geometry")){
-		pGeometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
-		Log->Write("INFO: \tgeometry <"+pGeometryFilename+">");
-	}
-
-	//persons and distributions
-	if(xMainNode->FirstChild("person")){
-		pNumberFilename=xMainNode->FirstChild("person")->FirstChild()->Value();
-		Log->Write("INFO: \tperson <"+(pNumberFilename)+">");
-	}
-
-	//routing
-	if(xMainNode->FirstChild("routing")){
-		pRoutingFilename=xMainNode->FirstChild("routing")->FirstChild()->Value();
-		Log->Write("INFO: \trouting <"+(pRoutingFilename)+">");
-	}
-
-	//traffic
-	if(xMainNode->FirstChild("traffic")){
-		pTrafficFilename=xMainNode->FirstChild("traffic")->FirstChild()->Value();
-		Log->Write("INFO: \ttraffic <"+ (pTrafficFilename)+">");
-	}
 
 	//logfile
 	if(xMainNode->FirstChild("logfile")){
@@ -544,177 +508,162 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 	}
 
-	//model parameters, only one node
-	TiXmlNode* xPara=xMainNode->FirstChild("parameters");
-	if(!xPara){
+	//gcfm model parameters, only one node
+	TiXmlElement* xGCFM=xMainNode->FirstChild("operational_models")->FirstChildElement("model");
+	if(string(xGCFM->Attribute("description"))=="gcfm"){
+		TiXmlNode* xPara=xGCFM->FirstChild("parameters");
+
+		Log->Write("INFO:\tgcfm model found");
+		//tmax
+		if(xPara->FirstChild("tmax")){
+			const char* tmax=xPara->FirstChildElement("tmax")->FirstChild()->Value();
+			const char* unit=xPara->FirstChildElement("tmax")->Attribute("unit");
+			pTmax=atof(tmax);
+			Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
+		}
+
+		//solver
+		if(xPara->FirstChild("solver")){
+			string solver=xPara->FirstChild("solver")->FirstChild()->Value();
+			if(solver=="euler") pSolver=1;
+			else if(solver=="verlet") pSolver=2;
+			else if(solver=="leapfrog") pSolver=3;
+			else {
+				Log->Write("ERROR: \twrong value for solver type!!!\n");
+				exit(EXIT_FAILURE);
+			}
+			Log->Write("INFO: \tpSolver <"+string(solver)+">");
+		}
+
+		//stepsize
+		if(xPara->FirstChild("stepsize")){
+			const char* stepsize=xPara->FirstChild("stepsize")->FirstChild()->Value();
+			if(stepsize)
+				pdt=atof(stepsize);
+			Log->Write("INFO: \tstepsize <%f>",pdt);
+		}
+
+		//exit crossing strategy
+		if(xPara->FirstChild("exitCrossingStrategy")){
+			const char* tmp=xPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+			if(tmp) 	pExitStrategy= atoi(tmp);
+			Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
+		}
+
+		//linked-cells
+		if(xPara->FirstChild("linkedcells")){
+			string linkedcells=xPara->FirstChildElement("linkedcells")->Attribute("enabled");
+			string cell_size=xPara->FirstChildElement("linkedcells")->Attribute("cell_size");
+
+			if(linkedcells=="true"){
+				pLinkedCells=true;
+				pLinkedCellSize=atof(cell_size.c_str());
+				Log->Write("INFO: \tlinked cells enabled with size  <"+cell_size+">");
+			}else{
+				Log->Write("WARNING: \tinvalid parameters for linkedcells");
+			}
+		}
+
+		//desired speed
+		if(xPara->FirstChild("v0")){
+			string mu=xPara->FirstChildElement("v0")->Attribute("mu");
+			string sigma=xPara->FirstChildElement("v0")->Attribute("sigma");
+			pV0Mu=atof(mu.c_str());
+			pV0Sigma=atof(sigma.c_str());
+			Log->Write("INFO: \tdesired velocity mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		}
+
+		//bmax
+		if(xPara->FirstChild("bmax")){
+			string mu=xPara->FirstChildElement("bmax")->Attribute("mu");
+			string sigma=xPara->FirstChildElement("bmax")->Attribute("sigma");
+			pBmaxMu=atof(mu.c_str());
+			pBmaxSigma=atof(sigma.c_str());
+			Log->Write("INFO: \tBmax mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		}
+
+		//bmin
+		if(xPara->FirstChild("bmin")){
+			string mu=xPara->FirstChildElement("bmin")->Attribute("mu");
+			string sigma=xPara->FirstChildElement("bmin")->Attribute("sigma");
+			pBminMu=atof(mu.c_str());
+			pBminSigma=atof(sigma.c_str());
+			Log->Write("INFO: \tBmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		}
+
+		//amin
+		if(xPara->FirstChild("amin")){
+			string mu=xPara->FirstChildElement("amin")->Attribute("mu");
+			string sigma=xPara->FirstChildElement("amin")->Attribute("sigma");
+			pAminMu=atof(mu.c_str());
+			pAminSigma=atof(sigma.c_str());
+			Log->Write("INFO: \tAmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		}
+		//tau
+		if(xPara->FirstChild("tau")){
+			string mu=xPara->FirstChildElement("tau")->Attribute("mu");
+			string sigma=xPara->FirstChildElement("tau")->Attribute("sigma");
+			pTauMu=atof(mu.c_str());
+			pTauSigma=atof(sigma.c_str());
+			Log->Write("INFO: \tTau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		}
+		//atau
+		if(xPara->FirstChild("atau")){
+			string mu=xPara->FirstChildElement("atau")->Attribute("mu");
+			string sigma=xPara->FirstChildElement("atau")->Attribute("sigma");
+			pAtauMu=atof(mu.c_str());
+			pAtauSigma=atof(sigma.c_str());
+			Log->Write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
+		}
+
+		//force_ped
+		if(xPara->FirstChild("force_ped")){
+			string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
+			string dist_max=xPara->FirstChildElement("force_ped")->Attribute("dist_max");
+			string disteff_max=xPara->FirstChildElement("force_ped")->Attribute("disteff_max");
+			string interpolation_width=xPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
+
+			pMaxFPed=atof(dist_max.c_str());
+			pNuPed=atof(nu.c_str());
+			pDistEffMaxPed=atof(disteff_max.c_str());
+			pIntPWidthPed=atof(interpolation_width.c_str());
+			Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
+					+ disteff_max+ ", interpolation_width="+interpolation_width);
+		}
+
+		//force_wall
+		if(xPara->FirstChild("force_wall")){
+			string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
+			string dist_max=xPara->FirstChildElement("force_wall")->Attribute("dist_max");
+			string disteff_max=xPara->FirstChildElement("force_wall")->Attribute("disteff_max");
+			string interpolation_width=xPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
+			pMaxFWall=atof(dist_max.c_str());
+			pNuWall=atof(nu.c_str());
+			pDistEffMaxWall=atof(disteff_max.c_str());
+			pIntPWidthWall=atof(interpolation_width.c_str());
+			Log->Write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
+					+ disteff_max+ ", interpolation_width="+interpolation_width);
+		}
+	}
+	else
+	{
 		Log->Write("INFO: \tno gcfm parameter values found");
-		return;
 	}
 
-	//tmax
-	if(xPara->FirstChild("tmax")){
-		const char* tmax=xPara->FirstChildElement("tmax")->FirstChild()->Value();
-		const char* unit=xPara->FirstChildElement("tmax")->Attribute("unit");
-		pTmax=atof(tmax);
-		Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
-	}
 
-	//solver
-	if(xPara->FirstChild("solver")){
-		string solver=xPara->FirstChild("solver")->FirstChild()->Value();
-		if(solver=="euler") pSolver=1;
-		else if(solver=="verlet") pSolver=2;
-		else if(solver=="leapfrog") pSolver=3;
-		else {
-			Log->Write("ERROR: \twrong value for solver type!!!\n");
-			exit(EXIT_FAILURE);
-		}
-		Log->Write("INFO: \tpSolver <"+string(solver)+">");
-	}
-
-	//stepsize
-	if(xPara->FirstChild("stepsize")){
-		const char* stepsize=xPara->FirstChild("stepsize")->FirstChild()->Value();
-		if(stepsize)
-			pdt=atof(stepsize);
-		Log->Write("INFO: \tstepsize <%f>",pdt);
-	}
-
-	//exit crossing strategy
-	if(xPara->FirstChild("exitCrossingStrategy")){
-		const char* tmp=xPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
-		if(tmp) 	pExitStrategy= atoi(tmp);
-		Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
-	}
-
-	//linked-cells
-	if(xPara->FirstChild("linkedcells")){
-		string linkedcells=xPara->FirstChildElement("linkedcells")->Attribute("enabled");
-		string cell_size=xPara->FirstChildElement("linkedcells")->Attribute("cell_size");
-
-		if(linkedcells=="true"){
-			pLinkedCells=true;
-			pLinkedCellSize=atof(cell_size.c_str());
-			Log->Write("INFO: \tlinked cells enabled with size  <"+cell_size+">");
-		}else{
-			Log->Write("WARNING: \tinvalid parameters for linkedcells");
-		}
-	}
-
-	//desired speed
-	if(xPara->FirstChild("v0")){
-		string mu=xPara->FirstChildElement("v0")->Attribute("mu");
-		string sigma=xPara->FirstChildElement("v0")->Attribute("sigma");
-		pV0Mu=atof(mu.c_str());
-		pV0Sigma=atof(sigma.c_str());
-		Log->Write("INFO: \tdesired velocity mu=" +mu +" ,"+ " sigma="+sigma+" ");
-	}
-
-	//bmax
-	if(xPara->FirstChild("bmax")){
-		string mu=xPara->FirstChildElement("bmax")->Attribute("mu");
-		string sigma=xPara->FirstChildElement("bmax")->Attribute("sigma");
-		pBmaxMu=atof(mu.c_str());
-		pBmaxSigma=atof(sigma.c_str());
-		Log->Write("INFO: \tBmax mu=" +mu +" ,"+ " sigma="+sigma+" ");
-	}
-
-	//bmin
-	if(xPara->FirstChild("bmin")){
-		string mu=xPara->FirstChildElement("bmin")->Attribute("mu");
-		string sigma=xPara->FirstChildElement("bmin")->Attribute("sigma");
-		pBminMu=atof(mu.c_str());
-		pBminSigma=atof(sigma.c_str());
-		Log->Write("INFO: \tBmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
-	}
-
-	//amin
-	if(xPara->FirstChild("amin")){
-		string mu=xPara->FirstChildElement("amin")->Attribute("mu");
-		string sigma=xPara->FirstChildElement("amin")->Attribute("sigma");
-		pAminMu=atof(mu.c_str());
-		pAminSigma=atof(sigma.c_str());
-		Log->Write("INFO: \tAmin mu=" +mu +" ,"+ " sigma="+sigma+" ");
-	}
-	//tau
-	if(xPara->FirstChild("tau")){
-		string mu=xPara->FirstChildElement("tau")->Attribute("mu");
-		string sigma=xPara->FirstChildElement("tau")->Attribute("sigma");
-		pTauMu=atof(mu.c_str());
-		pTauSigma=atof(sigma.c_str());
-		Log->Write("INFO: \tTau mu=" +mu +" ,"+ " sigma="+sigma+" ");
-	}
-	//atau
-	if(xPara->FirstChild("atau")){
-		string mu=xPara->FirstChildElement("atau")->Attribute("mu");
-		string sigma=xPara->FirstChildElement("atau")->Attribute("sigma");
-		pAtauMu=atof(mu.c_str());
-		pAtauSigma=atof(sigma.c_str());
-		Log->Write("INFO: \tAtau mu=" +mu +" ,"+ " sigma="+sigma+" ");
-	}
-
-	//force_ped
-	if(xPara->FirstChild("force_ped")){
-		string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
-		string dist_max=xPara->FirstChildElement("force_ped")->Attribute("dist_max");
-		string disteff_max=xPara->FirstChildElement("force_ped")->Attribute("disteff_max");
-		string interpolation_width=xPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
-
-		pMaxFPed=atof(dist_max.c_str());
-		pNuPed=atof(nu.c_str());
-		pDistEffMaxPed=atof(disteff_max.c_str());
-		pIntPWidthPed=atof(interpolation_width.c_str());
-		Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
-				+ disteff_max+ ", interpolation_width="+interpolation_width);
-	}
-
-	//force_wall
-	if(xPara->FirstChild("force_wall")){
-		string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
-		string dist_max=xPara->FirstChildElement("force_wall")->Attribute("dist_max");
-		string disteff_max=xPara->FirstChildElement("force_wall")->Attribute("disteff_max");
-		string interpolation_width=xPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
-		pMaxFWall=atof(dist_max.c_str());
-		pNuWall=atof(nu.c_str());
-		pDistEffMaxWall=atof(disteff_max.c_str());
-		pIntPWidthWall=atof(interpolation_width.c_str());
-		Log->Write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
-				+ disteff_max+ ", interpolation_width="+interpolation_width);
-	}
-
-	// pre parse the person file to extract some information we need
 	//route choice strategy
-	TiXmlDocument docPersons(pNumberFilename);
-	if (!docPersons.LoadFile()){
-		Log->Write("ERROR: \t%s", docPersons.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the person file");
-		exit(EXIT_FAILURE);
-	}
-
-
-	TiXmlElement* xPersonsNode = docPersons.RootElement();
-	if( ! xPersonsNode ) {
-		Log->Write("ERROR:\tRoot element does not exist");
-		exit(EXIT_FAILURE);
-	}
-
-	if( xPersonsNode->ValueStr () != "persons" ) {
-		Log->Write("ERROR:\tRoot element value is not 'persons'.");
-		exit(EXIT_FAILURE);
-	}
-
-	TiXmlNode* xRouters=xPersonsNode->FirstChild("routers");
+	TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
 
 	if(!xRouters) {
 		Log->Write("ERROR:\tNo routers found.");
-				exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
 			e = e->NextSiblingElement("router")) {
 
-		string strategy=e->Attribute("method");
-		int id=atoi(e->Attribute("id"));
+		string strategy=e->Attribute("description");
+		int id=atoi(e->Attribute("router_id"));
 
 		if(strategy=="local_shortest")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_LOCAL_SHORTEST));
@@ -735,13 +684,9 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 	}
 
-	Log->Write("INFO: \tdone parsing ini");
+	Log->Write("INFO: \tParsing the project file completed");
 }
 
-
-const string& ArgumentParser::GetPersonsFilename() const {
-	return pNumberFilename;
-}
 
 const FileFormat& ArgumentParser::GetFileFormat() const {
 	return pFormat;
@@ -774,8 +719,8 @@ double ArgumentParser::Getfps() const {
 	return pfps;
 }
 
-const string& ArgumentParser::GetGeometryFilename() const {
-	return pGeometryFilename;
+const string& ArgumentParser::GetProjectFile() const {
+	return _projectFile;
 }
 
 const string& ArgumentParser::GetNavigationMesh() const {
@@ -887,10 +832,6 @@ unsigned int ArgumentParser::GetSeed() const {
 }
 
 
-const string& ArgumentParser::GetPathwayFile() const {
-	return pPathwayFilename;
-}
-
 int ArgumentParser::GetEmbededMesh() const {
 	return _embedMesh;
 }
@@ -898,14 +839,6 @@ int ArgumentParser::GetEmbededMesh() const {
 
 const string& ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
-}
-
-const string& ArgumentParser::GetTrafficFile() const {
-	return pTrafficFilename;
-}
-
-const string& ArgumentParser::GetRoutingFile() const{
-	return pRoutingFilename;
 }
 
 int ArgumentParser::GetMaxOpenMPThreads() const{

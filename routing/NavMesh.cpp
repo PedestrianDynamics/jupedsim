@@ -596,14 +596,13 @@ void NavMesh::Convexify() {
 
 void NavMesh::WriteToString(std::string& output) {
 
-
 	std::stringstream file;
-		file.precision(2);
-		file<<fixed;
+	file.precision(2);
+	file<<fixed;
 
-		//Point centre (10299,2051);
-		Point centre (0,0);
-		double factor=100;
+	//Point centre (10299,2051);
+	Point centre (0,0);
+	double factor=100;
 
 	//writing the nodes
 	//	int mynodes[] = {47, 30 ,38};
@@ -696,12 +695,19 @@ void NavMesh::WriteToString(std::string& output) {
 				file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
 				file<<"\t\t</door>"<<endl;
 			}
-
 		}
 
 		file<<endl;
 	}
 
+	//eventually write any goal
+	for (map<int, Goal*>::const_iterator itr = pBuilding->GetAllGoals().begin();
+			itr != pBuilding->GetAllGoals().end(); ++itr) {
+
+		//int door=itr->first;
+		Goal* goal		= itr->second;
+		file<<goal->Write()<<endl;
+	}
 	output=file.str();
 }
 

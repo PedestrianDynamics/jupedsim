@@ -42,15 +42,11 @@ extern OutputHandler* Log;
 
 class ArgumentParser {
 private:
-	string pRoutingFilename; /// routing information
-	string pTrafficFilename; /// traffic information (closed doors,...)
-	string pNumberFilename; /// initial distribution and person specifications
-	string pGeometryFilename;
-	string pPathwayFilename; // saving pedestrian path
 	string pHostname;
 	string pTrajectoriesFile;
 	string pErrorLogFile;
 	string pNavMeshFilename;
+	string _projectFile;
 	double pTmax; // maximale Simulationszeit
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
@@ -145,6 +141,7 @@ public:
 	const string& GetPathwayFile() const;
 	const string& GetGeometryFilename() const;
 	const string& GetNavigationMesh() const;
+	const string& GetProjectFile() const;
 
 	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;

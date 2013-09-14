@@ -40,6 +40,7 @@
 #include "Transition.h"
 #include "Hline.h"
 #include "Obstacle.h"
+#include "Goal.h"
 
 class RoutingEngine;
 class Pedestrian;
@@ -50,7 +51,7 @@ class LCGrid;
 class Building {
 private:
     std::string _caption;
-    std::string _filename;
+    std::string _projectFilename;
     RoutingEngine* _routingEngine;
     LCGrid* _linkedCellGrid;
     std::vector<Room*> _rooms;
@@ -59,6 +60,7 @@ private:
     std::map<int, Crossing*> _crossings;
     std::map<int, Transition*> _transitions;
     std::map<int, Hline*> _hLines;
+    std::map<int, Goal*>_goals;
 
     /// pedestrians pathway
     bool _savePathway;
@@ -91,6 +93,8 @@ public:
     Room* GetRoom(std::string caption)const;
     Transition* GetTransition(std::string caption) const;
     Transition* GetTransition(int id) ;
+
+    //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(std::string caption) const;
 
     //FIXME: obsolete should get rid of this method
@@ -114,15 +118,18 @@ public:
 	const std::map<int, Crossing*>& GetAllCrossings() const;
 	const std::map<int, Transition*>& GetAllTransitions() const;
 	const std::map<int, Hline*>& GetAllHlines() const;
+	const std::map<int, Goal*>& GetAllGoals() const;
 
 	void AddCrossing(Crossing* line);
 	void AddTransition(Transition* line);
 	void AddHline(Hline* line);
+	void AddGoal(Goal* goal);
 
 
-	const std::string& GetFilename() const;
-    void LoadBuilding(const std::string &filename); // Laedt Geometrie-Datei
-    void LoadTrafficInfo(const std::string &filename);
+	const std::string& GetPojectFilename() const;
+	void SetPojectFilename(const std::string &filename) ;
+    void LoadBuildingFromFile();
+    void LoadTrafficInfo();
     void LoadRoutingInfo(const std::string &filename);
     void WriteToErrorLog() const;
 

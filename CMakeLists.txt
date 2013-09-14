@@ -37,6 +37,7 @@ file(
 	geometry/NavLine.cpp  
 	geometry/Room.cpp   
 	geometry/Wall.cpp
+	geometry/Goal.cpp
 	
 	IO/IODispatcher.cpp  
 	IO/OutputHandler.cpp  
@@ -63,6 +64,8 @@ file(
 	routing/RoutingEngine.cpp
 	routing/NavMesh.cpp
 	routing/DTriangulation.cpp    
+	routing/MeshRouter.cpp    
+	routing/mesh/Mesh.cpp    
 	
 	routing/graph/NavLineState.cpp  
 	routing/graph/NavLineState.h  
@@ -87,7 +90,9 @@ file(
 	routing/Router.h
 	routing/RoutingEngine.h
 	routing/AccessPoint.h    
-	routing/DTriangulation.h    
+	routing/DTriangulation.h 
+	routing/MeshRouter.h    
+	routing/mesh/Mesh.h     
 	pedestrian/Pedestrian.h
 	pedestrian/PedDistributor.h  
 	pedestrian/Ellipse.h  
@@ -106,6 +111,7 @@ file(
 	geometry/Hline.h     
 	geometry/Obstacle.h    
 	geometry/SubRoom.h    
+	geometry/Goal.h    
 	IO/IODispatcher.h  
 	IO/OutputHandler.h  
 	IO/TraVisToClient.h

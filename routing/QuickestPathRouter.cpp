@@ -28,6 +28,7 @@
  */
 
 #include "QuickestPathRouter.h"
+#include "../tinyxml/tinyxml.h"
 #include "../mpi/LCGrid.h"
 
 using namespace std;
@@ -36,6 +37,38 @@ QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() {
 }
 
 QuickestPathRouter::~QuickestPathRouter() {
+}
+
+//TODO: open the project file and get the routing name
+//todo: conflicts, the file ist already loaded by the global router
+string QuickestPathRouter::GetRoutingInfoFile() const {
+	return"";
+
+	TiXmlDocument doc(_building->GetPojectFilename());
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the project file");
+		exit(EXIT_FAILURE);
+	}
+
+	// everything is fine. proceed with parsing
+	TiXmlElement* xMainNode = doc.RootElement();
+	TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
+
+	string nav_line_file="";
+
+	for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+			e = e->NextSiblingElement("router")) {
+
+		string strategy=e->Attribute("description");
+
+		if(strategy=="quickest"){
+			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+		}
+
+	}
+	return nav_line_file;
 }
 
 int QuickestPathRouter::FindExit(Pedestrian* ped){

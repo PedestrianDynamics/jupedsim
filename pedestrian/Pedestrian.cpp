@@ -29,6 +29,7 @@
 #include "../geometry/Building.h"
 #include "../geometry/NavLine.h"
 #include "../routing/Router.h"
+#include <cassert>
 
 using namespace std;
 
@@ -76,8 +77,6 @@ Pedestrian::Pedestrian() {
 	_group=-1;
 	_clockTicsTillStart = 0;
 	
-	    //clock() + 3*CLOCKS_PER_SEC*( (double) rand() / RAND_MAX);
-
 }
 
 
@@ -123,25 +122,27 @@ void Pedestrian::SetExitIndex(int i) {
 void Pedestrian::SetExitLine(NavLine* l) {
 	_navLine = l;
 }
-// ruft entsprechende Ellipsenfunktionen auf
+
 
 void Pedestrian::SetPos(const Point& pos) {
-    //set initial Position
-    if(_ellipse.GetCenter() == Point() || _clockTicsTillStart == 0) 
-    {
+	//set initial Position
 	_ellipse.SetCenter(pos);
-	return;
-    }
-    
-    if(_clockTicsTillStart < clock()) 
-    {
-	_clockTicsTillStart = 0;
-	_ellipse.SetCenter(pos);
-	return;
-    }
-    return;
-    
 
+	/*TODO: what the hell is that ?
+	if(_ellipse.GetCenter() == Point() || _clockTicsTillStart == 0)
+	{
+		_ellipse.SetCenter(pos);
+		return;
+	}
+
+	if(_clockTicsTillStart < clock())
+	{
+		_clockTicsTillStart = 0;
+		_ellipse.SetCenter(pos);
+		return;
+	}
+	return;
+	 */
 }
 
 void Pedestrian::SetCellPos(int cp){
@@ -314,7 +315,7 @@ const Point& Pedestrian::GetPos() const {
 }
 
  int Pedestrian::GetCellPos() const {
-	return _lastCellPosition;;
+	return _lastCellPosition;
 }
 
 const Point& Pedestrian::GetV() const {
@@ -622,6 +623,7 @@ Router* Pedestrian::GetRouter() const {
 }
 
 int Pedestrian::FindRoute() {
+	assert(_router);
 	return _router->FindExit(this);
 }
 

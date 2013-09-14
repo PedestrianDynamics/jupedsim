@@ -92,8 +92,8 @@ public:
     /// comparision
     bool operator!=(const Point& p) const;
 
-    /// nice formatiing of the point
-    std::string toString();
+    /// nice formating of the point
+    std::string toString() const;
 };
 
 

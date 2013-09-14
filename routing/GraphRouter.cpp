@@ -17,7 +17,7 @@ using namespace std;
 
 GraphRouter::GraphRouter() 
 {
-
+	_building=NULL;
 }
 
 GraphRouter::~GraphRouter() 
@@ -95,7 +95,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 #pragma omp critical
 		if(p->DoorKnowledgeCount() != 0) {
 			// std::cout << "ped" << p->GetPedIndex() << std::endl;
-			SubRoom * sub  = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
+			SubRoom * sub  = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
 			const vector<Pedestrian*> ps = sub->GetAllPedestrians();
 			for(unsigned int i = 0; i < ps.size(); i++) {
 				if((p->GetPos() - ps[i]->GetPos()).Norm() < J_EPS_INFO_DIST) {
@@ -108,7 +108,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 						{
 							std::cout << "DELETE " << ps[i]->GetID() << std::endl;
 
-							building->DeletePedFromSim(ps[i]);
+							_building->DeletePedFromSim(ps[i]);
 						} else {
 							// FIXME: ps[i] changedsubroom has to be called to avoid to give a new route twice!
 							// sometimes the outher pedestrian changed the subroom and gets a new route here. after this he is looking for a new route but there is no need for.
@@ -127,7 +127,7 @@ int GraphRouter::FindExit(Pedestrian* p)
 void GraphRouter::Init(Building* b) 
 {
     Log->Write("ERROR: Router is not ready to use yet");
-    building = b;
+    _building = b;
     g.init(b);
   
     std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 

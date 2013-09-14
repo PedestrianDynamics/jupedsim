@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include "MeshRouter.h"
+#include "../tinyxml/tinyxml.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
 
@@ -514,7 +515,7 @@ void MeshRouter::Init(Building* b) {
 	_building=b;
 	Log->Write("WARNING: \tdo not use this  <<Mesh>>  router !!");
 
-	string meshfileName=b->GetFilename()+".nav";
+	string meshfileName=GetMeshFileName();
 	ifstream meshfiled;
 	meshfiled.open(meshfileName.c_str(), ios::in);
 	if(!meshfiled.is_open()){
@@ -630,4 +631,34 @@ void MeshRouter::Init(Building* b) {
 
 
 	//STABLE
+}
+
+
+string MeshRouter::GetMeshFileName() const {
+
+	TiXmlDocument doc(_building->GetPojectFilename());
+	if (!doc.LoadFile()){
+		Log->Write("ERROR: \t%s", doc.ErrorDesc());
+		Log->Write("ERROR: \t could not parse the project file");
+		exit(EXIT_FAILURE);
+	}
+
+	// everything is fine. proceed with parsing
+	TiXmlElement* xMainNode = doc.RootElement();
+	TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
+
+	string mesh_file="";
+
+	for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+			e = e->NextSiblingElement("router")) {
+
+		string strategy=e->Attribute("description");
+
+		if(strategy=="nav_mesh"){
+			if (e->FirstChild("parameters")->FirstChildElement("mesh_file"))
+				mesh_file=e->FirstChild("parameters")->FirstChildElement("mesh_file")->Attribute("file");
+		}
+
+	}
+	return mesh_file;
 }

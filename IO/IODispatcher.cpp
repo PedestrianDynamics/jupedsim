@@ -675,7 +675,8 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building){
 	nv->BuildNavMesh();
 	string geometry;
 	nv->WriteToString(geometry);
+	Write("<geometry>");
 	Write(geometry);
-
+	Write("</geometry>");
 }
 
