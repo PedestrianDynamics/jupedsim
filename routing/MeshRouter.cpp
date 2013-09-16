@@ -99,15 +99,15 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 		return NavLine(goal_line);
 	}
 	else{
-		int goal_cell_id=-1;
+		//int goal_cell_id=-1;
 		//MeshCell* goal_cell=_meshdata->FindCell(goal,goal_cell_id);
 
-		Point apex=start;
+		Point apex=goal;
 		int act_cell_id=-1;
 		//int loc_ind=-1; // local index of first node to be found in startphase
 		unsigned int path_ind=0;
 		Point point_left,point_right; // Nodes creatin the wedge
-		MeshCell* act_cell=_meshdata->FindCell(apex,act_cell_id);
+		MeshCell* act_cell=_meshdata->FindCell(start,act_cell_id);
 
 		Point p_act_ref=act_cell->GetMidpoint();
 		point_left=edge_path.at(0)->GetLeft(p_act_ref);
@@ -120,48 +120,45 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 		Point point_run_left=point_left;
 		Point point_run_right=point_right;
 
-
 		bool apex_found=false;
 		// lengthen the funnel at side
 		bool run_left=true,run_right=true;
 
 		while(!apex_found){
-
-			if(path_ind+1<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
-				//cout<<path_ind<<"while"<<endl;
-
-
+			if(path_ind!=edge_path.size()){
 				if(edge_path.at(path_ind)->GetCell1()==act_cell_id)
 					act_cell_id=edge_path.at(path_ind)->GetCell2();
 				else if (edge_path.at(path_ind)->GetCell2()==act_cell_id)
 					act_cell_id=edge_path.at(path_ind)->GetCell1();
 				else{
 					Log->Write("ERROR:\t inconsistence between act_cell and edgepath");
+					cout<<"act cell id="<<act_cell_id;
+					cout<<"Cells 1 and 2 are"<<edge_path.at(path_ind)->GetCell1()<<"and "<<edge_path.at(path_ind)->GetCell2()<<endl;
 					exit(EXIT_FAILURE);
 				}
 				act_cell=_meshdata->GetCellAtPos(act_cell_id);
 				p_act_ref=act_cell->GetMidpoint();
 				//find next points for wedge
-				if(run_left){
-					point_run_left=edge_path.at(path_ind+1)->GetLeft(p_act_ref);
-				}
-				if(run_right){
-					point_run_right=edge_path.at(path_ind+1)->GetRight(p_act_ref);
+				if(path_ind+1<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
+					if(run_left){
+						point_run_left=edge_path.at(path_ind+1)->GetLeft(p_act_ref);
+					}
+					if(run_right){
+						point_run_right=edge_path.at(path_ind+1)->GetRight(p_act_ref);
+					}
+				}else{//goal in actual cell => apex= goal or node on edge
+					cout<<"In else case!"<<endl;
+					point_run_left=goal;
+					point_run_right=goal;
 				}
 				// Test for new Points to be in the wedge of start
 				int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
 				int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
-				/*
-				cout<<"start: "<<start.toString()<<endl;
-				cout<<"left: "<<point_left.toString()<<endl;
-				cout<<"right: "<<point_right.toString()<<endl;
-				cout<<"run_left: "<<point_run_left.toString()<<endl;
-				cout<<"run_right: "<<point_run_right.toString()<<endl;
-				cout<<"p_act_ref"<<p_act_ref.toString()<<endl;
-				cout<<"test_l: "<<test_l<<"test_r: "<<test_r<<endl;
-				 */
+
 				if(test_l==0 && test_r==0){ //Narrow wedge on both sides
 					cout<<"narrow wedge on both sides"<<endl;
+					point_left=point_run_left;
+					point_right=point_run_right;
 
 				}
 				else if(test_l==1 && test_r==0){// narrow right side
@@ -183,37 +180,190 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				}
 				else if(test_l==3 && test_r==3){//apex=right
 					cout<<"apex=right"<<endl;
-					apex=point_left;
+					apex=point_right;
 
 					apex_found=true;
 				}
 				else if(test_l==1 && test_r==3){ //  Widen wedge
-					cout<<"apex=right"<<endl;
+					cout<<"widen wedge"<<endl;
 
 				}
 				else{// Corrupted data
-
-					//exit(EXIT_FAILURE);
+					Log->Write("ERROR:\tFunnel reaches undefined state");
+					exit(EXIT_FAILURE);
 				}
-
-				//Test
-				//apex_found=true;
-
-
 				path_ind++;
-			}
-			else{ // goal in actual cell => apex= goal or node on edge
-
+			}else{//After some Funnel iterations the cell containing the goal is reached;
+				//apex=goal; // Initialisation!
 				apex_found=true;
 			}
-
-		}
+		}//END WHILE
 		cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
 		return NavLine(Line(apex,apex));
 
+	}//END IF
+}
+
+MeshEdge* MeshRouter::Visibility(Point& start,Point& goal,vector<MeshEdge*> edge_path){
+
+	//return *(edge_path.begin());
+	if(edge_path.empty()){
+		exit(EXIT_FAILURE);
+	}else{
+		cout<<start.toString()<<endl;
+
+		int act_cell_id=-1;
+		Point point_left,point_right; // Nodes creatin the wedge
+		MeshCell* act_cell=_meshdata->FindCell(start,act_cell_id);
+
+		Point p_act_ref=act_cell->GetMidpoint();
+		point_left=edge_path.at(0)->GetLeft(p_act_ref);
+		point_right=edge_path.at(0)->GetRight(p_act_ref);
+
+		Point point_run_left=point_left;
+		Point point_run_right=point_right;
+
+		bool mesh_edge_found=false;
+
+		MeshEdge* act_edge=edge_path.at(0);
+		unsigned int mesh_pos=1;
+		while(!mesh_edge_found && mesh_pos<edge_path.size()){
+			cout<<mesh_pos<<endl;
+
+			point_run_left=edge_path.at(mesh_pos)->GetLeft(p_act_ref);
+			point_run_right=edge_path.at(mesh_pos)->GetRight(p_act_ref);
+
+			int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
+			int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
+
+			if(point_left==point_run_left)
+				test_l=0;
+			else if (point_right==point_run_right)
+				test_r=0;
+
+			if(test_l==0 && test_r==0){ //Narrow wedge on both sides
+				cout<<"narrow wedge on both sides"<<endl;
+				point_left=point_run_left;
+				point_right=point_run_right;
+			}else{
+				act_edge=edge_path.at(mesh_pos);
+				mesh_edge_found=true;
+			}
+			mesh_pos++;
+		}
+		cout<<"The next edge is: "<<act_edge->toString()<<endl;
+		return act_edge;
 	}
-	exit(EXIT_FAILURE);
-	//return NavLine();
+/*
+	if(edge_path.empty()){
+		// Start and End Point in same Cell
+		Line goal_line(goal,goal);
+		return  new NavLine(goal_line); //ATTENTION
+	}
+	else{
+		//int goal_cell_id=-1;
+		//MeshCell* goal_cell=_meshdata->FindCell(goal,goal_cell_id);
+
+		Point apex=goal;
+		int act_cell_id=-1;
+		//int loc_ind=-1; // local index of first node to be found in startphase
+		unsigned int path_ind=0;
+		Point point_left,point_right; // Nodes creatin the wedge
+		MeshCell* act_cell=_meshdata->FindCell(start,act_cell_id);
+
+		Point p_act_ref=act_cell->GetMidpoint();
+		point_left=edge_path.at(0)->GetLeft(p_act_ref);
+		point_right=edge_path.at(0)->GetRight(p_act_ref);
+
+		//Test
+		//print_path(edge_path);
+		cout<<"left: "<<point_left.toString()<<" right: "<<point_right.toString()<<endl;
+
+		Point point_run_left=point_left;
+		Point point_run_right=point_right;
+
+		bool apex_found=false;
+		// lengthen the funnel at side
+		bool run_left=true,run_right=true;
+
+		while(!apex_found){
+			if(path_ind!=edge_path.size()){
+				if(edge_path.at(path_ind)->GetCell1()==act_cell_id)
+					act_cell_id=edge_path.at(path_ind)->GetCell2();
+				else if (edge_path.at(path_ind)->GetCell2()==act_cell_id)
+					act_cell_id=edge_path.at(path_ind)->GetCell1();
+				else{
+					Log->Write("ERROR:\t inconsistence between act_cell and edgepath");
+					cout<<"act cell id="<<act_cell_id;
+					cout<<"Cells 1 and 2 are"<<edge_path.at(path_ind)->GetCell1()<<"and "<<edge_path.at(path_ind)->GetCell2()<<endl;
+					exit(EXIT_FAILURE);
+				}
+				act_cell=_meshdata->GetCellAtPos(act_cell_id);
+				p_act_ref=act_cell->GetMidpoint();
+				//find next points for wedge
+				if(path_ind+1<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
+					if(run_left){
+						point_run_left=edge_path.at(path_ind+1)->GetLeft(p_act_ref);
+					}
+					if(run_right){
+						point_run_right=edge_path.at(path_ind+1)->GetRight(p_act_ref);
+					}
+				}else{//goal in actual cell => apex= goal or node on edge
+					cout<<"In else case!"<<endl;
+					point_run_left=goal;
+					point_run_right=goal;
+				}
+				// Test for new Points to be in the wedge of start
+				int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
+				int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
+
+				if(test_l==0 && test_r==0){ //Narrow wedge on both sides
+					cout<<"narrow wedge on both sides"<<endl;
+					point_left=point_run_left;
+					point_right=point_run_right;
+
+				}
+				else if(test_l==1 && test_r==0){// narrow right side
+					cout<<"narrow right side"<<endl;
+					point_right=point_run_right;
+
+					//apex_found=true;
+				}
+				else if(test_l==0 && test_r==3){// narrow left side
+					cout<<"narrow left side"<<endl;
+					point_left=point_run_left;
+
+				}
+				else if(test_l==1 && test_r==1){// apex=left
+					cout<<"apex=left"<<endl;
+					apex=point_left;
+
+					apex_found=true;
+				}
+				else if(test_l==3 && test_r==3){//apex=right
+					cout<<"apex=right"<<endl;
+					apex=point_right;
+
+					apex_found=true;
+				}
+				else if(test_l==1 && test_r==3){ //  Widen wedge
+					cout<<"widen wedge"<<endl;
+
+				}
+				else{// Corrupted data
+					Log->Write("ERROR:\tFunnel reaches undefined state");
+					exit(EXIT_FAILURE);
+				}
+				path_ind++;
+			}else{//After some Funnel iterations the cell containing the goal is reached;
+				//apex=goal; // Initialisation!
+				apex_found=true;
+			}
+		}//END WHILE
+		cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
+		return NavLine(Line(apex,apex));
+
+	}//END IF*/
 }
 
 vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status){
@@ -391,6 +541,7 @@ int MeshRouter::FindExit(Pedestrian* p) {
 	MeshEdge* edge=NULL;
 	NavLine* nextline=NULL;
 	NavLine line;
+	MeshEdge* meshline=NULL;
 
 	if(p->GetCellPos()==c_start_id){
 		nextline=p->GetExitLine();
@@ -402,19 +553,24 @@ int MeshRouter::FindExit(Pedestrian* p) {
 			Log->Write("Path is empty but next edge is defined");
 			exit(EXIT_FAILURE);
 		}
+		print_path(edgepath);
 
 		//TODO: save the point goal in the ped class
 		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
-		line=Funnel(point_start,point_goal,edgepath);
-		/*
-		nextline=&line;
-		 */
-		edge=*(edgepath.begin());
-		nextline=dynamic_cast<NavLine*>(edge);
+		//line=Funnel(point_start,point_goal,edgepath);
+
+		meshline=Visibility(point_start,point_goal,edgepath);
+		nextline=dynamic_cast<NavLine*>(meshline);
+
+		//nextline=&line;
+
+		//edge=*(edgepath.begin());
+		//nextline=dynamic_cast<NavLine*>(edge);
 		if(nextline==NULL){
 			Log->Write("Edge is corrupt");
 			exit(EXIT_FAILURE);
 		}
+		//cout<<"here"<<endl;
 
 	}
 	p->SetExitLine(nextline);
