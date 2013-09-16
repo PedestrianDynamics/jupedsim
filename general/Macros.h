@@ -33,7 +33,9 @@
 
 #define _SIMULATOR 1
 
+#ifdef _NDEBUG
 //#undef _OPENMP
+#endif
 
 // Genauigkeit
 #define J_EPS 0.001

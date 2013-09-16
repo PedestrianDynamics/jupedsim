@@ -100,6 +100,10 @@ public:
     //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(int id);
 
+
+    //TOD0: rename later to GetGoal
+    Goal* GetFinalGoal(int id);
+
     int GetNumberOfPedestrians() const;
     LCGrid* GetGrid() const;
 

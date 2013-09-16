@@ -151,7 +151,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				// Test for new Points to be in the wedge of start
 				int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
 				int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
-/*
+				/*
 				cout<<"start: "<<start.toString()<<endl;
 				cout<<"left: "<<point_left.toString()<<endl;
 				cout<<"right: "<<point_right.toString()<<endl;
@@ -159,7 +159,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				cout<<"run_right: "<<point_run_right.toString()<<endl;
 				cout<<"p_act_ref"<<p_act_ref.toString()<<endl;
 				cout<<"test_l: "<<test_l<<"test_r: "<<test_r<<endl;
-*/
+				 */
 				if(test_l==0 && test_r==0){ //Narrow wedge on both sides
 					cout<<"narrow wedge on both sides"<<endl;
 
@@ -233,7 +233,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status){
 		cout<<"Startpoint not found"<<endl;
 	}
 	int c_goal_id;
-	Point point_goal(13,3);
+	Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
 	MeshCell* goal_cell=_meshdata->FindCell(point_goal,c_goal_id);
 	if(goal_cell!=NULL){
 		//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
@@ -403,11 +403,12 @@ int MeshRouter::FindExit(Pedestrian* p) {
 			exit(EXIT_FAILURE);
 		}
 
-		Point point_goal(13,3);
+		//TODO: save the point goal in the ped class
+		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
 		line=Funnel(point_start,point_goal,edgepath);
 		/*
 		nextline=&line;
-*/
+		 */
 		edge=*(edgepath.begin());
 		nextline=dynamic_cast<NavLine*>(edge);
 		if(nextline==NULL){

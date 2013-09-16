@@ -31,15 +31,16 @@
 
 #include <string>
 #include <vector>
+#include "Point.h"
 
 class Wall;
-class Point;
 
 class Goal {
 
 private:
 	int _isFinalGoal;
 	int _id;
+	Point _centroid;
 	std::string _caption;
 	std::vector<Wall> _walls;
 	std::vector<Point> _poly;
@@ -102,6 +103,18 @@ public:
 	 * agents are remove from the simulation when they reached a final goal
 	 */
 	void SetIsFinalGoal(int isFinalGoal);
+
+	/**
+	 * @return the centroid of the subroom
+	 * @see http://en.wikipedia.org/wiki/Centroid
+	 */
+	void ComputeControid() ;
+
+	/**
+	 * @return the centroid of the goal
+	 * @see ComputeControid
+	 */
+	const Point& GetCentroid() const;
 
 	/**
 	 * @return a nicely formatted string representation of the Goal

@@ -333,7 +333,7 @@ int PedDistributor::Distribute(Building* building) const {
 
 		int subroomID = _start_dis_sub[i]->GetSubroomID();
 		int N = _start_dis_sub[i]->GetAgentsNumber();
-		if (N <= 0) {
+		if (N < 0) {
 			Log->Write("ERROR: \t negative  (or null ) number of pedestrians!");
 			exit(0);
 		}

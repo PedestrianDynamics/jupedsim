@@ -8,7 +8,7 @@
 	<geometry>../GSP_2013/inputfiles/geo.xml</geometry>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="true" fps="8">
-		<file location="outputfiles/trajectories.xml" />
+		<file location="../GSP_2013/outputfiles/trajectories.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	<!-- where to store the logs -->
@@ -68,10 +68,10 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-			<group group_id="5" room_id="0" subroom_id="0" number="1" goal_id="" router_id="3" route_id="" age="" gender="" height="" startX="" startY="" />
-			<group group_id="0" room_id="0" subroom_id="0" number="100" goal_id="" router_id="3" route_id="" />
-			<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="" router_id="3" route_id="" />
-			<group group_id="2" room_id="0" number="3" router_id="3"/>
+			<group group_id="5" room_id="0" subroom_id="0" number="1" goal_id="0" router_id="3" route_id="" age="" gender="" height="" startX="" startY="" />
+			<group group_id="0" room_id="0" subroom_id="0" number="100" goal_id="1" router_id="3" route_id="" />
+			<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="2" router_id="3" route_id="" />
+			<group group_id="2" room_id="0" number="0" router_id="3"/>
 		</agents_distribution>
 
 		<agents_sources><!-- frequency in persons/minute -->

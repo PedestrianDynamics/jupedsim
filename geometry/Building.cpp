@@ -85,6 +85,10 @@ Building::~Building() {
 			iter != _hLines.end(); ++iter) {
 		delete iter->second;
 	}
+	for (map<int, Goal*>::const_iterator iter = _goals.begin();
+			iter != _goals.end(); ++iter) {
+		delete iter->second;
+	}
 }
 
 /************************************************************
@@ -642,6 +646,21 @@ Transition* Building::GetTransition(int ID) {
 			Log->Write(
 					"ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
 					ID, _transitions.size());
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
+Goal* Building::GetFinalGoal(int ID) {
+	if (_goals.count(ID) == 1) {
+		return _goals[ID];
+	} else {
+		if (ID == -1)
+			return NULL;
+		else {
+			Log->Write(
+					"ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
+					ID, _goals.size());
 			exit(EXIT_FAILURE);
 		}
 	}
