@@ -39,7 +39,7 @@
 *
 * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
 * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
-* 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
+* 	3: <a href="http://www.digia.com/">www.digia.com</a> <br>
 * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
 * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
 *
@@ -71,21 +71,18 @@ int main(int argc, char **argv) {
 	time(&starttime);
 	Log->Write("INFO: \tStart runSimulation()\n");
 	int evacTime = sim.RunSimulation();
-	Log->Write("INFO: \tEnd runSimulation()\n");
+	Log->Write("\nINFO: \tEnd runSimulation()\n");
 	time(&endtime);
 
 	//some output
 	double execTime = difftime(endtime, starttime);
-	char tmp[CLENGTH];
-	sprintf(tmp, "\nPedestrians not evacuated [%d] threads [%d]", sim.GetPedsNumber(),
+
+	if(sim.GetPedsNumber())
+		Log->Write("\nPedestrians not evacuated [%d] threads [%d]", sim.GetPedsNumber(),
 			args->GetMaxOpenMPThreads());
-	Log->Write(tmp);
-	sprintf(tmp, "\nExec Time [s]     : %.2f", execTime);
-	Log->Write(tmp);
-	sprintf(tmp, "Evac Time [s]     : %d", evacTime);
-	Log->Write(tmp);
-	sprintf(tmp, "Real Time Factor  : %.2f X\n", evacTime / execTime);
-	Log->Write(tmp);
+	Log->Write("\nExec Time [s]     : %.2f", execTime);
+	Log->Write("Evac Time [s]     : %d", evacTime);
+	Log->Write("Real Time Factor  : %.2f X\n", evacTime / execTime);
 
 	//do the last cleaning
 	delete args;

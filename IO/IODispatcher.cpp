@@ -659,6 +659,7 @@ void TrajectoriesVTK::WriteGeometry(Building* building) {
 	}
 
 	Write(tmp.str());
+	delete nv;
 }
 
 void TrajectoriesVTK::WriteFrame(int frameNr, Building* building) {

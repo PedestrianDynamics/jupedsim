@@ -176,11 +176,11 @@ class NavMesh {
 
 
 private:
-	std::vector<JVertex*> pVertices;
-	std::vector<JEdge*> pEdges;
-	std::vector<JObstacle*> pObst;
-	std::vector<JNode*> pNodes;
-	Building* pBuilding;
+	std::vector<JVertex*> _vertices;
+	std::vector<JEdge*> _edges;
+	std::vector<JObstacle*> _obst;
+	std::vector<JNode*> _nodes;
+	Building* _building;
 
 	std::vector<JNode*> new_nodes;
 	std::vector<int> problem_nodes;

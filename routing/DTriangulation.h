@@ -66,14 +66,14 @@ public:
 	 * Set the boundaries of the domain
 	 * @param outerConstraints
 	 */
-	void SetOuterPolygone(std::vector<Point>  outerConstraints);
+	void SetOuterPolygone(const std::vector<Point>&  outerConstraints);
 
 	/**
 	 * Add a new hole
 	 * A domain can contains holes.
 	 * They should fully be inside the domain.
 	 */
-	void AddHole(std::vector<Point>  hole);
+	void AddHole(const std::vector<Point>&  hole);
 
 	//templates for freing and clearing a vector of pointers
 	template <class C> void FreeClear( C & cntr ) {

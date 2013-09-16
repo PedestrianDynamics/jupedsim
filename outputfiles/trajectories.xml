@@ -8,6 +8,324 @@
 	</header>
 
 <geometry>
+		<label centerX="1566.67" centerY="-200.00" centerZ="0" text="0" color="100" />
+
+		<wall id = "7">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1500.00" yPos="-500.00"/>
+		</wall>
+
+		<label centerX="1600.00" centerY="-500.00" centerZ="0" text="1" color="20" />
+		<door id = "1">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</door>
+		<label centerX="1600.00" centerY="-50.00" centerZ="0" text="4" color="20" />
+		<door id = "4">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</door>
+
+		<label centerX="1400.00" centerY="533.33" centerZ="0" text="1" color="100" />
+
+		<wall id = "5">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</wall>
+		<wall id = "9">
+			<point xPos="-1000.00" yPos="-1500.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</wall>
+		<wall id = "10">
+			<point xPos="-1000.00" yPos="2000.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</wall>
+		<wall id = "11">
+			<point xPos="2700.00" yPos="2000.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</wall>
+		<wall id = "12">
+			<point xPos="2700.00" yPos="-1500.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</wall>
+
+		<label centerX="1250.00" centerY="500.00" centerZ="0" text="2" color="20" />
+		<door id = "2">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1500.00" yPos="400.00"/>
+		</door>
+		<label centerX="1600.00" centerY="500.00" centerZ="0" text="3" color="20" />
+		<door id = "3">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</door>
+
+		<label centerX="1166.67" centerY="466.67" centerZ="0" text="2" color="100" />
+
+		<wall id = "8">
+			<point xPos="1000.00" yPos="400.00"/>
+			<point xPos="1500.00" yPos="400.00"/>
+		</wall>
+
+		<label centerX="1000.00" centerY="500.00" centerZ="0" text="0" color="20" />
+		<door id = "0">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1000.00" yPos="400.00"/>
+		</door>
+		<label centerX="1250.00" centerY="500.00" centerZ="0" text="2" color="20" />
+		<door id = "2">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1500.00" yPos="400.00"/>
+		</door>
+
+		<label centerX="1633.33" centerY="166.67" centerZ="0" text="3" color="100" />
+
+		<wall id = "6">
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</wall>
+
+		<label centerX="1600.00" centerY="500.00" centerZ="0" text="3" color="20" />
+		<door id = "3">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</door>
+		<label centerX="1600.00" centerY="-50.00" centerZ="0" text="4" color="20" />
+		<door id = "4">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</door>
+
+		<label centerX="500.00" centerY="500.00" centerZ="0" text="4" color="100" />
+
+		<wall id = "0">
+			<point xPos="1000.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</wall>
+		<wall id = "1">
+			<point xPos="1000.00" yPos="0.00"/>
+			<point xPos="0.00" yPos="0.00"/>
+		</wall>
+		<wall id = "2">
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="0.00" yPos="1000.00"/>
+		</wall>
+		<wall id = "3">
+			<point xPos="0.00" yPos="1000.00"/>
+			<point xPos="1000.00" yPos="1000.00"/>
+		</wall>
+		<wall id = "4">
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="1000.00" yPos="600.00"/>
+		</wall>
+
+		<label centerX="1000.00" centerY="500.00" centerZ="0" text="0" color="20" />
+		<door id = "0">
+			<point xPos="1000.00" yPos="600.00"/>
+			<point xPos="1000.00" yPos="400.00"/>
+		</door>
+
+		<label centerX="1166.67" centerY="266.67" centerZ="0" text="5" color="100" />
+
+
+		<label centerX="1250.00" centerY="200.00" centerZ="0" text="18" color="20" />
+		<door id = "18">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</door>
+
+		<label centerX="1333.33" centerY="-33.33" centerZ="0" text="6" color="100" />
+
+
+		<label centerX="1250.00" centerY="-250.00" centerZ="0" text="17" color="20" />
+		<door id = "17">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</door>
+		<label centerX="1250.00" centerY="200.00" centerZ="0" text="18" color="20" />
+		<door id = "18">
+			<point xPos="1500.00" yPos="400.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</door>
+
+		<label centerX="833.33" centerY="-166.67" centerZ="0" text="7" color="100" />
+
+
+		<label centerX="750.00" centerY="-250.00" centerZ="0" text="14" color="20" />
+		<door id = "14">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="0.00" yPos="0.00"/>
+		</door>
+		<label centerX="1250.00" centerY="-250.00" centerZ="0" text="17" color="20" />
+		<door id = "17">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1000.00" yPos="0.00"/>
+		</door>
+
+		<label centerX="0.00" centerY="1333.33" centerZ="0" text="8" color="100" />
+
+
+		<label centerX="0.00" centerY="1500.00" centerZ="0" text="5" color="20" />
+		<door id = "5">
+			<point xPos="-1000.00" yPos="2000.00"/>
+			<point xPos="1000.00" yPos="1000.00"/>
+		</door>
+		<label centerX="-500.00" centerY="1500.00" centerZ="0" text="16" color="20" />
+		<door id = "16">
+			<point xPos="0.00" yPos="1000.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</door>
+
+		<label centerX="-333.33" centerY="1000.00" centerZ="0" text="9" color="100" />
+
+
+		<label centerX="-500.00" centerY="1000.00" centerZ="0" text="15" color="20" />
+		<door id = "15">
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</door>
+		<label centerX="-500.00" centerY="1500.00" centerZ="0" text="16" color="20" />
+		<door id = "16">
+			<point xPos="0.00" yPos="1000.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</door>
+
+		<label centerX="-666.67" centerY="166.67" centerZ="0" text="10" color="100" />
+
+
+		<label centerX="-500.00" centerY="-750.00" centerZ="0" text="13" color="20" />
+		<door id = "13">
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</door>
+		<label centerX="-500.00" centerY="1000.00" centerZ="0" text="15" color="20" />
+		<door id = "15">
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="-1000.00" yPos="2000.00"/>
+		</door>
+
+		<label centerX="166.67" centerY="-666.67" centerZ="0" text="11" color="100" />
+
+
+		<label centerX="250.00" centerY="-1000.00" centerZ="0" text="12" color="20" />
+		<door id = "12">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</door>
+		<label centerX="-500.00" centerY="-750.00" centerZ="0" text="13" color="20" />
+		<door id = "13">
+			<point xPos="0.00" yPos="0.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</door>
+		<label centerX="750.00" centerY="-250.00" centerZ="0" text="14" color="20" />
+		<door id = "14">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="0.00" yPos="0.00"/>
+		</door>
+
+		<label centerX="1066.67" centerY="-1166.67" centerZ="0" text="12" color="100" />
+
+
+		<label centerX="2100.00" centerY="-1000.00" centerZ="0" text="11" color="20" />
+		<door id = "11">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</door>
+		<label centerX="250.00" centerY="-1000.00" centerZ="0" text="12" color="20" />
+		<door id = "12">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="-1000.00" yPos="-1500.00"/>
+		</door>
+
+		<label centerX="1966.67" centerY="-833.33" centerZ="0" text="13" color="100" />
+
+
+		<label centerX="1600.00" centerY="-500.00" centerZ="0" text="1" color="20" />
+		<door id = "1">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="1700.00" yPos="-500.00"/>
+		</door>
+		<label centerX="2200.00" centerY="-1000.00" centerZ="0" text="10" color="20" />
+		<door id = "10">
+			<point xPos="1700.00" yPos="-500.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</door>
+		<label centerX="2100.00" centerY="-1000.00" centerZ="0" text="11" color="20" />
+		<door id = "11">
+			<point xPos="1500.00" yPos="-500.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</door>
+
+		<label centerX="2033.33" centerY="-466.67" centerZ="0" text="14" color="100" />
+
+
+		<label centerX="2200.00" centerY="-450.00" centerZ="0" text="9" color="20" />
+		<door id = "9">
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</door>
+		<label centerX="2200.00" centerY="-1000.00" centerZ="0" text="10" color="20" />
+		<door id = "10">
+			<point xPos="1700.00" yPos="-500.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</door>
+
+		<label centerX="2366.67" centerY="366.67" centerZ="0" text="15" color="100" />
+
+
+		<label centerX="2200.00" centerY="1300.00" centerZ="0" text="8" color="20" />
+		<door id = "8">
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</door>
+		<label centerX="2200.00" centerY="-450.00" centerZ="0" text="9" color="20" />
+		<door id = "9">
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="2700.00" yPos="-1500.00"/>
+		</door>
+
+		<label centerX="1233.33" centerY="733.33" centerZ="0" text="16" color="100" />
+
+
+		<label centerX="1350.00" centerY="800.00" centerZ="0" text="7" color="20" />
+		<door id = "7">
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</door>
+
+		<label centerX="1800.00" centerY="1200.00" centerZ="0" text="17" color="100" />
+
+
+		<label centerX="1850.00" centerY="1500.00" centerZ="0" text="6" color="20" />
+		<door id = "6">
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</door>
+		<label centerX="1350.00" centerY="800.00" centerZ="0" text="7" color="20" />
+		<door id = "7">
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="1700.00" yPos="600.00"/>
+		</door>
+		<label centerX="2200.00" centerY="1300.00" centerZ="0" text="8" color="20" />
+		<door id = "8">
+			<point xPos="1700.00" yPos="600.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</door>
+
+		<label centerX="900.00" centerY="1666.67" centerZ="0" text="18" color="100" />
+
+
+		<label centerX="0.00" centerY="1500.00" centerZ="0" text="5" color="20" />
+		<door id = "5">
+			<point xPos="-1000.00" yPos="2000.00"/>
+			<point xPos="1000.00" yPos="1000.00"/>
+		</door>
+		<label centerX="1850.00" centerY="1500.00" centerZ="0" text="6" color="20" />
+		<door id = "6">
+			<point xPos="1000.00" yPos="1000.00"/>
+			<point xPos="2700.00" yPos="2000.00"/>
+		</door>
+
 		<wall>
 			<point xPos="-500.00" yPos="-500.00"/>
 			<point xPos="-500.00" yPos="-200.00"/>

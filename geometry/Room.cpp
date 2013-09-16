@@ -53,7 +53,7 @@ Room::Room(const Room& orig) {
 }
 
 Room::~Room() {
-    for (int i = 0; i < GetNumberOfSubRooms(); i++)
+    for (unsigned int i = 0; i < _subRooms.size(); i++)
         delete _subRooms[i];
 }
 
