@@ -672,7 +672,7 @@ void TrajectoriesVTK::WriteFooter() {
 void TrajectoriesXML_MESH::WriteGeometry(Building* building){
 	//Navigation mesh implementation
 	NavMesh* nv= new NavMesh(building);
-	//nv->BuildNavMesh();
+	nv->BuildNavMesh();
 	string geometry;
 	nv->WriteToString(geometry);
 	Write("<geometry>");
