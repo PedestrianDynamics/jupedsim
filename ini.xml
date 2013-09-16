@@ -7,7 +7,7 @@
 	<!-- geometry file -->
 	<geometry>inputfiles/geo.xml</geometry>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" embed_mesh="htrue" fps="8">
+	<trajectories format="xml-plain" embed_mesh="true" fps="8">
 		<file location="outputfiles/trajectories.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
