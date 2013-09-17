@@ -155,7 +155,6 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 					cout<<"narrow right side"<<endl;
 					point_right=point_run_right;
 
-					//apex_found=true;
 				}
 				else if(test_l==0 && test_r==3){// narrow left side
 					cout<<"narrow left side"<<endl;
@@ -165,12 +164,15 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				else if(test_l==1 && test_r==1){// apex=left
 					cout<<"apex=left"<<endl;
 					apex=point_left;
+					return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
 				else if(test_l==3 && test_r==3){//apex=right
 					cout<<"apex=right"<<endl;
 					apex=point_right;
+					return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
+					//return Nav	Line(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
@@ -186,6 +188,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 			}else{//After some Funnel iterations the cell containing the goal is reached;
 				//apex=goal; // Initialisation!
 				apex_found=true;
+				return NavLine(Line(edge_path.at(path_ind-1)->GetPoint1(),edge_path.at(path_ind-1)->GetPoint2()));
 			}
 		}//END WHILE
 		cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
@@ -413,12 +416,12 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const{
 	return pathedge;
 }
 
-int MeshRouter::FindExit(Pedestrian* p) {
+int MeshRouter::FindExit(Pedestrian* p){
 	//cout<<"calling the mesh router"<<endl;
 	Point  point_start=p->GetPos();
 	int c_start_id=-1;
 	_meshdata->FindCell(point_start,c_start_id);
-	MeshEdge* edge=NULL;
+	//MeshEdge* edge=NULL;
 	NavLine* nextline=NULL;
 	NavLine line;
 	MeshEdge* meshline=NULL;
@@ -433,19 +436,39 @@ int MeshRouter::FindExit(Pedestrian* p) {
 			Log->Write("Path is empty but next edge is defined");
 			exit(EXIT_FAILURE);
 		}
-		//print_path(edgepath);
+		//if(p->GetID()==54)
+			print_path(edgepath);
+			cout<<"Start-ID: "<<c_start_id<<endl;
+			cout<<"Start-Position: "<<point_start.toString()<<endl;
+
 
 		//TODO: save the point goal in the ped class
 		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
+		cout<<"Goal: "<<point_goal.toString()<<endl;
 		//line=Funnel(point_start,point_goal,edgepath);
-
-		meshline=Visibility(point_start,point_goal,edgepath);
-		nextline=dynamic_cast<NavLine*>(meshline);
+		bool funnel=false;
+		if(funnel){
+			line=Funnel(point_start,point_goal,edgepath);
+			if(line.GetPoint1()==line.GetPoint2()){
+				Log->Write("ERROR:\tNavLine is a point");
+				cout<<"This point is: "<<line.GetPoint1().toString()<<endl;
+				exit(EXIT_FAILURE);
+			}else{
+				cout<<"The line is: "<<line.toString()<<endl;
+			}
+			nextline=&line;
+		}else{
+			meshline=Visibility(point_start,point_goal,edgepath);
+			nextline=dynamic_cast<NavLine*>(meshline);
+		}
 
 		//nextline=&line;
 
 		//edge=*(edgepath.begin());
 		//nextline=dynamic_cast<NavLine*>(edge);
+
+		//Debug
+		cout<<"nextline: "<<nextline->toString()<<endl;
 		if(nextline==NULL){
 			Log->Write("Edge is corrupt");
 			exit(EXIT_FAILURE);

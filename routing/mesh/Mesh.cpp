@@ -43,7 +43,7 @@ MeshCellGroup::~MeshCellGroup(){
 	for(unsigned int i=0;i<_cells.size();i++)
 			delete _cells[i];
 }
-std::vector<MeshCell*> MeshCellGroup::GetCells(){
+std::vector<MeshCell*> MeshCellGroup::GetCells()const{
 	return _cells;
 }
 
@@ -82,7 +82,7 @@ MeshData::MeshData(std::vector<Point*> mn,std::vector<MeshEdge*> me,
 	_mCellCount=Calc_CellCount(mcg);
 }
 
-MeshCell* MeshData::GetCellAtPos(unsigned int tpos){
+MeshCell* MeshData::GetCellAtPos(unsigned int tpos)const{
 	if( tpos<0 || tpos>= this->GetCellCount())
 		return NULL;
 	else{
@@ -99,7 +99,7 @@ MeshCell* MeshData::GetCellAtPos(unsigned int tpos){
 	}
 }
 
- MeshCell* MeshData::FindCell(Point test, int& cell_id){
+ MeshCell* MeshData::FindCell(Point test, int& cell_id)const{
 
 	int tmp_id=-1;
 	std::vector<MeshCellGroup*>::const_iterator it_g;
