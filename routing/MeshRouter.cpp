@@ -85,6 +85,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 
 	if(edge_path.empty()){
 		// Start and End Point in same Cell
+		cout<<"Endpoint is in current cell"<<endl;
 		Line goal_line(goal,goal);
 		return NavLine(goal_line);
 	}
@@ -164,14 +165,13 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				else if(test_l==1 && test_r==1){// apex=left
 					cout<<"apex=left"<<endl;
 					apex=point_left;
-					return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
+					//return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
 				else if(test_l==3 && test_r==3){//apex=right
 					cout<<"apex=right"<<endl;
 					apex=point_right;
-					return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 					//return Nav	Line(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
@@ -187,12 +187,37 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				path_ind++;
 			}else{//After some Funnel iterations the cell containing the goal is reached;
 				//apex=goal; // Initialisation!
+				cout<<"Funnel progressed to goal and stopped"<<endl;
 				apex_found=true;
-				return NavLine(Line(edge_path.at(path_ind-1)->GetPoint1(),edge_path.at(path_ind-1)->GetPoint2()));
+				apex=edge_path.back()->GetPoint1();//Test
+				//return NavLine(Line(edge_path.at(path_ind-1)->GetPoint1(),edge_path.at(path_ind-1)->GetPoint2()));
 			}
 		}//END WHILE
 		cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
-		return NavLine(Line(apex,apex));
+
+		// Some kind of workaround
+		// First Edge which contains the found apex
+		bool edgefound=false;
+		path_ind=0;
+		Point p1=apex,p2=apex;
+		while(!edgefound){
+			if(edge_path.at(path_ind)->GetPoint1()==apex){
+				p1=apex;
+				p2=edge_path.at(path_ind)->GetPoint2();
+				edgefound=true;
+			}
+			else if(edge_path.at(path_ind)->GetPoint2()==apex){
+				p1=apex;
+				p2=edge_path.at(path_ind)->GetPoint1();
+				edgefound=true;
+			}
+			path_ind++;
+		}
+
+		NavLine exitline(Line(p1,p2));
+		cout<<"Funnel: exitline: "<<exitline.toString()<<endl;
+		return exitline;
+
 
 	}//END IF
 }
@@ -396,7 +421,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const{
 		return pathedge;
 	}
 
-	// Building the path reversly from goal to start
+	// Building the path reversely from goal to start
 	act_id=c_goal_id;
 	while(predlist[act_id]!=c_start_id){
 		pathedge.push_back(predEdgelist[act_id]);
@@ -421,7 +446,7 @@ int MeshRouter::FindExit(Pedestrian* p){
 	Point  point_start=p->GetPos();
 	int c_start_id=-1;
 	_meshdata->FindCell(point_start,c_start_id);
-	//MeshEdge* edge=NULL;
+	MeshEdge* edge=NULL;
 	NavLine* nextline=NULL;
 	NavLine line;
 	MeshEdge* meshline=NULL;
@@ -437,14 +462,14 @@ int MeshRouter::FindExit(Pedestrian* p){
 			exit(EXIT_FAILURE);
 		}
 		//if(p->GetID()==54)
-			print_path(edgepath);
-			cout<<"Start-ID: "<<c_start_id<<endl;
-			cout<<"Start-Position: "<<point_start.toString()<<endl;
+			//print_path(edgepath);
+			//cout<<"Start-ID: "<<c_start_id<<endl;
+			//cout<<"Start-Position: "<<point_start.toString()<<endl;
 
 
 		//TODO: save the point goal in the ped class
 		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
-		cout<<"Goal: "<<point_goal.toString()<<endl;
+		//cout<<"Goal: "<<point_goal.toString()<<endl;
 		//line=Funnel(point_start,point_goal,edgepath);
 		bool funnel=false;
 		if(funnel){
@@ -468,14 +493,16 @@ int MeshRouter::FindExit(Pedestrian* p){
 		//nextline=dynamic_cast<NavLine*>(edge);
 
 		//Debug
-		cout<<"nextline: "<<nextline->toString()<<endl;
+
 		if(nextline==NULL){
 			Log->Write("Edge is corrupt");
 			exit(EXIT_FAILURE);
 		}
 		//cout<<"here"<<endl;
 
-	}
+		//cout<<"nextline: "<<nextline->toString()<<endl;
+	}// END ELSE
+
 	p->SetExitLine(nextline);
 	p->SetCellPos(c_start_id);
 	return 0;
