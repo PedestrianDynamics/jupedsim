@@ -162,6 +162,17 @@ public:
 	 */
 	bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
 
+
+	/**
+	 * @return true if both segments share at least one common point
+	 */
+	bool ShareCommonPointWith(const Line& line) const;
+
+	/**
+	 * @return true if the given point is one end point of the segment
+	 */
+	bool HasEndPoint(const Point& point) const;
+
 	/**
 	 * return the same value if the checked points are all situated on the same side.
 	 * @return 0 or 1 depending on which side of the line the point is located.

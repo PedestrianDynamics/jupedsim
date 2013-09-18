@@ -195,7 +195,7 @@ void Building::AddSurroundingRoom() {
 			}
 		}
 	}
-
+	//cout<<"xmin: "<<x_min<<" xmax: "<<x_max<<" ymin: " <<y_min <<" ymax: " <<y_max <<endl; exit(0);
 	//make the grid slightly larger.
 	x_min = x_min - 10.0;
 	x_max = x_max + 10.0;

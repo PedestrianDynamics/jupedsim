@@ -193,6 +193,13 @@ private:
 	// and triangulate
 	void Finalize();
 
+	void FinalizeAlphaShape();
+
+	/**
+	 * @return true if there is a visibility line between the segment and a portion of the circle
+	 */
+	bool IsCircleVisibleFromLine(const Point& center, double radius, const Line& segment);
+
 	void ComputePlaneEquation(SubRoom* sub, double* coefficents);
 
 	void ComputeStairsEquation();

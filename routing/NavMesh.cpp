@@ -244,7 +244,8 @@ void NavMesh::BuildNavMesh() {
 	//Triangulate(pNodes[pBuilding->GetRoom("030")->GetSubRoom(0)->GetUID()]);
 	//Triangulate(pNodes[pBuilding->GetRoom("040a")->GetSubRoom(0)->GetUID()]);
 	//Triangulate(pNodes[pBuilding->GetRoom("030a")->GetSubRoom(0)->GetUID()]);
-	Finalize();
+//	Finalize();
+	FinalizeAlphaShape();
 	//WriteToFileTraVisTo("promenade.nav.xml", pNodes[364]); exit(0);
 	//WriteToFileTraVisTo("promenade.nav.xml");
 	//cout<<"groupe:"<<pNodes[365]->pGroup<<endl;
@@ -1141,6 +1142,289 @@ int NavMesh::IsPortal(Point& p1, Point& p2) {
 		}
 	}
 	return -1;
+}
+
+
+void NavMesh::FinalizeAlphaShape(){
+	Log->Write("INFO:\tFinalizing the mesh with an Alpha Shape");
+
+	//	WriteToFileTraVisTo("arena_envelope.xml",envelope);
+	//collect all possible vertices that form that envelope
+
+	vector<Line> envelope;
+
+	Room* outside = _building->GetRoom("outside");
+	if(outside==NULL){
+		Log->Write("INFO:\t there is no outside room for constructing the alpha shape");
+		exit(EXIT_FAILURE);
+	}
+
+	//const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
+	//double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
+	//outside->WriteToErrorLog();
+	//cout<<"Center:" <<env_center.toString()<<endl;
+	//cout<<"Radius:" <<env_radius<<endl; exit(0);
+
+
+	double xmin=0.1;
+	double xmax= 50.0;
+	double ymin=0.1;
+	double ymax= 44.0;
+
+	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+		Room* r = _building->GetRoom(i);
+		string caption = r->GetCaption();
+
+		//skip the virtual room containing the complete geometry
+		if(r->GetCaption()=="outside") continue;
+		const Point& centroid0 = Point(0,0);
+
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+			SubRoom* s = r->GetSubRoom(k);
+
+			//walls
+			const vector<Wall>& walls = s->GetAllWalls();
+
+			for (unsigned w = 0; w < walls.size(); w++) {
+
+				//FIXME: this method is more general but is not working
+				//if(IsCircleVisibleFromLine(env_center,env_radius,walls[w])==false) continue;
+
+				Point pt1= walls[w].GetPoint1();
+				Point pt2= walls[w].GetPoint2();
+
+				if( (xmin < pt1._x) && (pt1._x < xmax) &&
+				    (ymin < pt1._y) && (pt1._y < ymax) ) continue;
+
+				if( (xmin < pt2._x) && (pt2._x < xmax) &&
+						(ymin < pt2._y) && (pt2._y < ymax) ) continue;
+
+
+				//first attempt
+				Point P0 = walls[w].GetPoint1();
+				Point P1 = walls[w].GetPoint2();
+				Point D0 = P1 - P0;
+				Point D1 = centroid0-P0;
+				if (D0.Det(D1) < 0) {
+					envelope.push_back(Line(P0, P1));
+				}else{
+					envelope.push_back(Line(P1, P0));
+				}
+			}
+
+
+			const vector<Transition*>& transitions = s->GetAllTransitions();
+			for (unsigned t = 0; t < transitions.size(); t++) {
+
+				Point pt1= transitions[t]->GetPoint1();
+				Point pt2= transitions[t]->GetPoint2();
+
+				if( (xmin < pt1._x) && (pt1._x < xmax) &&
+				    (ymin < pt1._y) && (pt1._y < ymax) ) continue;
+
+				if( (xmin < pt2._x) && (pt2._x < xmax) &&
+						(ymin < pt2._y) && (pt2._y < ymax) ) continue;
+
+				//first attempt
+				Point P0 = transitions[t]->GetPoint1();
+				Point P1 = transitions[t]->GetPoint2();
+				Point D0 = P1 - P0;
+				Point D1 = centroid0-P0;
+				if (D0.Det(D1) < 0) {
+					envelope.push_back(Line(P0, P1));
+				}else{
+					envelope.push_back(Line(P1, P0));
+				}
+			}
+		}
+	}
+
+	vector<Point> env;
+	for(unsigned int i=0;i<envelope.size();i++){
+		env.push_back(envelope[i].GetPoint1());
+		env.push_back(envelope[i].GetPoint2());
+	}
+
+	//	WriteToFileTraVisTo("jst_test_ulrich.xml",env);
+	//	cout<<"done"<<endl;
+	//	cout<<"env size: "<<envelope.size()<<endl;
+	//	exit(0);
+
+	//link those vertices
+	vector<Point> Hull;
+	Hull.push_back(envelope[envelope.size()-1].GetPoint1());
+	Hull.push_back(envelope[envelope.size()-1].GetPoint2());
+	envelope.pop_back();
+
+	while(envelope.empty()==false){
+		for(unsigned int i=0;i<envelope.size();i++){
+			if(envelope[i].GetPoint1()==Hull[Hull.size()-1]){
+				Hull.push_back(envelope[i].GetPoint2());
+				envelope.erase(envelope.begin()+i);
+			} else if(envelope[i].GetPoint2()==Hull[Hull.size()-1])
+			{
+				Hull.push_back(envelope[i].GetPoint1());
+				envelope.erase(envelope.begin()+i);
+			}
+		}
+	}
+
+	//eject the last point which is a duplicate.
+	Hull.pop_back();
+
+	//the surrounding room
+	vector<Point> Hull2=_building->GetRoom("outside")->GetSubRoom(0)->GetPolygon();
+
+#ifdef _CGAL
+	//print for some check
+	//WriteToFileTraVisTo("arena_envelope.xml",Hull);
+	//exit(0);
+	//now check the polygon with holes.
+
+	//	{
+	//		ofstream myfile ("mypoints.pts");
+	//		if (myfile.is_open())
+	//		{
+	//			//quick testing
+	//			for(unsigned int i=0;i<Hull2.size();i++){
+	//				myfile <<"P "<<Hull2[i].pX <<" "<<Hull2[i].pY<<endl;
+	//			}
+	//			myfile <<"H "<<Hull[0].pX <<" "<<Hull[0].pY<<endl;
+	//			for(unsigned int i=1;i<Hull.size();i++){
+	//				myfile <<"P "<<Hull[i].pX <<" "<<Hull[i].pY<<endl;
+	//			}
+	//		}
+	//
+	//	}
+	//WriteToFileTraVisTo("arena_envelope.xml",Hull);
+
+	//perform some tests using CGAL
+
+	//first polygon
+	Polygon_2 polygon2;
+	Polygon_2 holesP[1];
+
+
+	for(unsigned int i=0;i<Hull.size();i++){
+		holesP[0].push_back(Point_2(Hull[i]._x,Hull[i]._y));
+	}
+
+	for(unsigned int i=0;i<Hull2.size();i++){
+		polygon2.push_back(Point_2(Hull2[i]._x,Hull2[i]._y));
+	}
+
+	if(holesP[0].is_clockwise_oriented())holesP[0].reverse_orientation();
+	if(polygon2.is_clockwise_oriented())polygon2.reverse_orientation();
+
+	assert(holesP[0].is_counterclockwise_oriented());
+	assert(polygon2.is_counterclockwise_oriented());
+	assert(holesP[0].is_simple());
+	assert(polygon2.is_simple());
+
+#endif //_CGAL
+
+	Log->Write("INFO:\tPerforming final triangulation with the outside!");
+
+	DTriangulation* tri= new DTriangulation();
+	tri->SetOuterPolygone(Hull);
+	tri->AddHole(Hull2);
+	tri->Triangulate();
+	vector<p2t::Triangle*> triangles=tri->GetTriangles();
+
+	// CGAL::Geomview_stream gv(CGAL::Bbox_3(-100, -100, -100, 100, 100, 100));
+	// gv.set_line_width(4);
+	// gv.set_trace(true);
+	// gv.set_bg_color(CGAL::Color(0, 200, 200));
+	//		// gv.clear();
+	//
+	//		// use different colors, and put a few sleeps/clear.
+	// gv << CGAL::BLUE;
+	// gv.set_wired(true);
+
+	for(unsigned int t=0;t<triangles.size();t++){
+		p2t::Triangle* tr =triangles[t];
+
+		//	Point_2 P0  = Point_2 (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+		//	Point_2 P1  = Point_2 (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+		//	Point_2 P2  = Point_2 (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+		//	gv << Segment_2(P0,P1);
+		//	gv << Segment_2(P1,P2);
+		//	gv << Segment_2(P0,P2);
+
+		Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+		Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+		Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+
+		//create the new nodes
+
+		JNode* new_node = new JNode();
+		new_node->pGroup = "outside";
+		//to get a correct ID
+		AddNode(new_node);
+		new_nodes.push_back(new_node);
+		new_node->pCentroid= (P0+P1+P2)*(1.0/3);
+
+		new_node->pNormalVec[0]=0.0;
+		new_node->pNormalVec[1]=0.0;
+		new_node->pNormalVec[2]=0.0;
+
+		// Points are by default counterclockwise
+		new_node->pHull.push_back(*(GetVertex(P0)));
+		new_node->pHull.push_back(*(GetVertex(P1)));
+		new_node->pHull.push_back(*(GetVertex(P2)));
+
+		for (int index=0;index<3;index++){
+
+			Point P0  = Point (tr->GetPoint(index%3)->x,tr->GetPoint(index%3)->y);
+			Point P1  = Point (tr->GetPoint((index+1)%3)->x,tr->GetPoint((index+1)%3)->y);
+
+			int edge_id=IsPortal(P0,P1);
+			if(edge_id != -1){
+				//if(IsElementInVector(new_node->pPortals,edge_id)==false)
+				new_node->pPortals.push_back(edge_id);
+
+				//invalidate any previous information
+				// they will be set later
+				JEdge* e = _edges[edge_id];
+				e->pNode0=-1;
+				e->pNode1=-1;
+			}
+
+			int obstacle_id=IsObstacle(P0,P1);
+			if(obstacle_id != -1){
+				//std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
+				//if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
+				new_node->pObstacles.push_back(obstacle_id);
+
+				// FIXME 23
+				//pObst[obstacle_id]->pNode0=new_node->id;
+			}
+
+			// this portal was newly created
+			if ((obstacle_id==-1) && (edge_id==-1)){
+
+				JEdge* e= new JEdge();
+				e->pEnd=*GetVertex(P1);
+				e->pStart= *GetVertex(P0);
+				AddEdge(e);
+
+				//invalidate any previous information
+				// they will be set later
+				e->pNode0=-1;
+				e->pNode1=-1;
+				// caution: the ID is automatically assigned in the AddEdge method
+				//if(IsElementInVector(new_node->pPortals,edge_id)==false)
+				new_node->pPortals.push_back(e->id);
+
+			}
+		}
+	}
+
+	UpdateEdges();
+	delete tri;
+
+	Log->Write("INFO:\t...Done!");
+
 }
 
 void NavMesh::Finalize() {
@@ -2303,6 +2587,131 @@ void NavMesh::ComputeStairsEquation() {
 		}
 	}
 }
+
+
+bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const Line& segment){
+
+	int nLine=0;
+
+	for(double alpha=0.0;alpha<=2*M_PI;alpha+=0.1){
+
+		bool isVisible=true;
+		bool done=false;
+
+		double x= radius*cos(alpha);
+		double y= radius*sin(alpha);
+		Point point_on_circle = Point(x,y) + center;
+		//test must be done for the two points separately
+		Line seg1=Line(segment.GetPoint1(),point_on_circle);
+		//Line seg2=Line(segment.GetPoint2(),point_on_circle);
+
+		for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+			Room* r = _building->GetRoom(i);
+
+			//skip the virtual room containing the complete geometry
+			if(r->GetCaption()=="outside") continue;
+
+			for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+				SubRoom* s = r->GetSubRoom(k);
+				const vector<Wall>& walls = s->GetAllWalls();
+				const vector<Transition*>& transitions = s->GetAllTransitions();
+
+				for (unsigned w = 0; w < walls.size(); w++) {
+
+					//if(walls[w]==segment) continue;
+					// dont check if they share a common vertex
+					//if(walls[w].ShareCommonPointWith(segment)) continue;
+					if(walls[w].HasEndPoint(segment.GetPoint1())) continue;
+
+					if(seg1.IntersectionWith(walls[w])) {
+						//cout<<"X";
+						done=true;
+						isVisible=false;
+						break;
+					}
+				}
+				if(!done)
+				for (unsigned t = 0; t < transitions.size(); t++) {
+					if(transitions[t]->operator ==(segment)) continue;
+					if(transitions[t]->IntersectionWith(segment)){
+						//done=true;
+						//isVisible=false;
+						//break;
+					}
+				}
+
+				if(done) break;
+			}
+			if(done) break;
+		}
+
+		//one visibility line was found
+		if(isVisible==true) {
+			nLine++;
+			break;
+		}
+	}
+
+	//the first point failed.
+	// check the second one
+	if(nLine==0) 	return false;
+
+	//if (nLine==1) return true;
+
+	//restart the same procedure with the second point
+
+	for(double alpha=0.0;alpha<=2*M_PI;alpha+=0.1){
+
+		bool isVisible=true;
+		bool done=false;
+
+		double x= radius*cos(alpha);
+		double y= radius*sin(alpha);
+		Point point_on_circle = Point(x,y) + center;
+		//test must be done for the two points separately
+		//Line seg1=Line(segment.GetPoint1(),point_on_circle);
+		Line seg2=Line(segment.GetPoint2(),point_on_circle);
+
+		for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+			Room* r = _building->GetRoom(i);
+
+			//skip the virtual room containing the complete geometry
+			if(r->GetCaption()=="outside") continue;
+
+			for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+				SubRoom* s = r->GetSubRoom(k);
+				const vector<Wall>& walls = s->GetAllWalls();
+
+				for (unsigned w = 0; w < walls.size(); w++) {
+
+					//if(walls[w]==segment) continue;
+					//if(walls[w].ShareCommonPointWith(segment)) continue;
+					if(walls[w].HasEndPoint(segment.GetPoint2())) continue;
+
+					if(seg2.IntersectionWith(walls[w])) {
+						//cout<<"X";
+						done=true;
+						isVisible=false;
+						break;
+					}
+				}
+				if(done) break;
+			}
+			if(done) break;
+		}
+
+		//one visibility line was found
+		if(isVisible==true) {
+			nLine++;
+			break;
+		}
+	}
+
+	if(nLine==2) return true;
+	else return false;
+
+}
+
 
 void NavMesh::Test(){
 

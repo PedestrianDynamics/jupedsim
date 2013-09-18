@@ -293,6 +293,8 @@ double Line::LengthSquare() const {
 
 bool Line::IntersectionWith(const Line& l) const {
 
+	//if(ShareCommonPointWith(l)) return true;
+
 	double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
 	double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
 	double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
@@ -303,8 +305,8 @@ bool Line::IntersectionWith(const Line& l) const {
 	double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
 	double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
 
-	if (denominator == 0) {
-		if (numerator == 0) {
+	if (denominator == 0.0) {
+		if (numerator == 0.0) {
 			// collinear. Potentially infinite intersection points.
 			// Check and return one of them.
 			if (_point1.GetX() >= l.GetPoint1().GetX() && _point1.GetX() <= l.GetPoint2().GetX()) {
@@ -322,12 +324,12 @@ bool Line::IntersectionWith(const Line& l) const {
 	}
 
 	double r = numerator / denominator;
-	if (r < 0 || r > 1) {
+	if (r < 0.0 || r > 1.0) {
 		return false;
 	}
 
 	double s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
-	if (s < 0 || s > 1) {
+	if (s < 0.0 || s > 1.0) {
 		return false;
 	}
 
@@ -356,6 +358,23 @@ int Line::WichSide(const Point& pt) {
 
 	return ((_point2._x - _point1._x) * (pt._y - _point1._y)
 			- (_point2._y - _point1._y) * (pt._x - _point1._x)) > 0;
+}
+
+
+bool Line::ShareCommonPointWith(const Line& line) const {
+	if(line.GetPoint1()==_point1) return true;
+	if(line.GetPoint2()==_point1) return true;
+
+	if(line.GetPoint1()==_point2) return true;
+	if(line.GetPoint2()==_point2) return true;
+
+	return false;
+}
+
+bool Line::HasEndPoint(const Point& point) const {
+	if (_point1==point) return true;
+	if (_point2==point) return true;
+	return false;
 }
 
 bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pedestrians*/){
