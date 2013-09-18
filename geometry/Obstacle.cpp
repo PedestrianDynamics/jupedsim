@@ -224,3 +224,44 @@ void Obstacle::ConvertLineToPoly() {
 	}
 	_poly = tmpPoly;
 }
+
+const Point& Obstacle::GetCentroid() const{
+
+    double px=0,py=0;
+    double signedArea = 0.0;
+    double x0 = 0.0; // Current vertex X
+    double y0 = 0.0; // Current vertex Y
+    double x1 = 0.0; // Next vertex X
+    double y1 = 0.0; // Next vertex Y
+    double a = 0.0;  // Partial signed area
+
+    // For all vertices except last
+    unsigned int i=0;
+    for (i=0; i<_poly.size()-1; ++i)
+    {
+        x0 = _poly[i].GetX();
+        y0 = _poly[i].GetY();
+        x1 = _poly[i+1].GetX();
+        y1 = _poly[i+1].GetY();
+        a = x0*y1 - x1*y0;
+        signedArea += a;
+        px += (x0 + x1)*a;
+        py += (y0 + y1)*a;
+    }
+
+    // Do last vertex
+    x0 = _poly[i].GetX();
+    y0 = _poly[i].GetY();
+    x1 = _poly[0].GetX();
+    y1 = _poly[0].GetY();
+    a = x0*y1 - x1*y0;
+    signedArea += a;
+    px += (x0 + x1)*a;
+    py += (y0 + y1)*a;
+
+    signedArea *= 0.5;
+    px /= (6*signedArea);
+    py /= (6*signedArea);
+
+    return Point (px,py);
+}

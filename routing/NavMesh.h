@@ -185,6 +185,9 @@ private:
 	std::vector<JNode*> new_nodes;
 	std::vector<int> problem_nodes;
 
+	//this is used for subroom with obstacles
+	std::map<int, std::pair<int,int> > map_node_to_subroom;
+
 	// Check the created navmesh for convex polygons
 	// convexify the created nav mesh
 	void Convexify();

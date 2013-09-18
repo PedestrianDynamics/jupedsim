@@ -638,6 +638,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
 		return bestAPsID;
 	} else {
+		if(_building->GetRoom(ped->GetRoomID())->GetCaption()!="outside")
 		Log->Write("ERROR:\tGlobalRouter.cpp: a valid destination could not be found for ped [%d] going to destination [%d]",ped->GetID(),ped->GetFinalDestination());
 		//exit(EXIT_FAILURE);
 		return -1;

@@ -73,8 +73,8 @@ public:
 	 * Set/Get the height of the obstacle.
 	 * Is used for computing visibility
 	 */
-
 	double GetHeight() const;
+
 	/**
 	 * Set/Get the height of the obstacle.
 	 * Is used for computing visibility
@@ -117,6 +117,10 @@ public:
 	 */
 	const std::vector<Point>&  GetPolygon() const;
 
+	/**
+	 * @return the centroid of the obstacle
+	 */
+	const Point& GetCentroid() const;
 
 	/**
 	 * @return a nicely formatted string representation of the obstacle

@@ -694,8 +694,7 @@ Crossing* Building::GetGoal(string caption) const {
 
 //TODO: merge this with Update and improve runtime
 void Building::UpdateVerySlow(){
-	// some peds may change the room via another crossing than the primary intended one
-	// in that case they are set in the wrong room.
+
 	vector<Pedestrian*> nonConformPeds;
 	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
@@ -722,16 +721,10 @@ void Building::UpdateVerySlow(){
 			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 				SubRoom* sub = room->GetSubRoom(j);
 				if (sub->IsInSubRoom(ped->GetPos())) {
-					//set in the new room
-					//Log->Write("pedestrian %d relocated from room/subroom [%s] %d/%d to [%s] %d/%d ",
-					//		ped->GetID(),
-					//		GetRoom(ped->GetRoomID())->GetCaption().c_str(),
-					//		ped->GetRoomID(), ped->GetSubRoomID(),
-					//		room->GetCaption().c_str(), i, j);
 					ped->SetRoomID(room->GetID(), room->GetCaption());
 					ped->SetSubRoomID(sub->GetSubRoomID());
 					ped->ClearMentalMap(); // reset the destination
-					ped->FindRoute();
+					//ped->FindRoute();
 					sub->AddPedestrian(ped);
 					assigned = true;
 					break;
@@ -774,7 +767,6 @@ void Building::UpdateVerySlow(){
 			}
 		}
 	}
-
 }
 
 void Building::Update() {

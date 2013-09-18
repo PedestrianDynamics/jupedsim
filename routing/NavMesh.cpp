@@ -232,6 +232,7 @@ void NavMesh::BuildNavMesh() {
 
 			if(r->GetCaption()!="outside") {
 				AddNode(node);
+				map_node_to_subroom[node->id]=make_pair(r->GetID(),s->GetSubRoomID());
 			}
 			else {
 				delete node;
@@ -1842,7 +1843,65 @@ void NavMesh::Triangulate(JNode* node) {
 	DTriangulation* tri= new DTriangulation();
 	tri->SetOuterPolygone(outerHull);
 
-	//no hole
+	//treating obstacles as holes
+	int rID=map_node_to_subroom[node->id].first;
+	int sID=map_node_to_subroom[node->id].second;
+	SubRoom* sub = _building->GetRoom(rID)->GetSubRoom(sID);
+
+	const vector<Obstacle*> obstacles=sub->GetAllObstacles();
+
+	for( unsigned int a = 0; a < obstacles.size(); a++){
+		Obstacle* obst=  obstacles[a];
+
+		const vector<Point>& pol =obst->GetPolygon();
+		// Vertices
+		for (unsigned int p = 0; p < pol.size(); p++) {
+			JVertex* v = new JVertex();
+			v->pPos= pol[p];
+			if(AddVertex(v)==-1) {
+				delete v;
+			}
+		}
+
+		//obstacles
+		const vector<Wall>& walls = obst->GetAllWalls();
+		for (unsigned w = 0; w < walls.size(); w++) {
+//continue;
+			const Point& centroid0 = obst->GetCentroid();
+			//int node0 = s->GetUID();
+
+			JObstacle* o= new JObstacle();
+			o->pNode0=node->id;
+			o->pNextObst=-1;
+
+			//first attempt
+			Point P0 = walls[w].GetPoint1();
+			Point P1 = walls[w].GetPoint2();
+			Point D0 = P1 - P0;
+			Point D1 = centroid0-P0;
+			if (D0.Det(D1) < 0) {
+				//o->pDisp=D0;
+				o->pEnd=*GetVertex(P1);
+				o->pStart= *GetVertex(P0);
+
+			}else{
+				o->pStart= *GetVertex(P1);
+				//o->pDisp=Point(0,0)-D0;
+				o->pEnd=*GetVertex(P0);
+			}
+
+			if (AddObst(o)==-1) {
+				// the JEdge is already there
+				o->id=IsObstacle(o->pStart.pPos, o->pEnd.pPos);
+				delete o;
+			}
+			//node->pObstacles.push_back(o->id);
+		}
+		//tri->AddHole(pol);
+		cout<<"obstacle in sub"<<endl;
+		//exit(0);
+	}
+
 	//tri->AddHole(Hull2);
 	tri->Triangulate();
 	vector<p2t::Triangle*> triangles=tri->GetTriangles();
@@ -2752,7 +2811,7 @@ void NavMesh::Test(){
 		if((_obst[i]->pNode0)==-1){
 			cout<<"Node 0 id (obst): "<< _obst[i]->pNode0<<" for obstacle"<<endl;
 			cout<<"test failed"<<endl;
-			exit(0);
+			exit(EXIT_FAILURE);
 		}
 
 	}
