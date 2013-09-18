@@ -414,7 +414,8 @@ int Simulation::RunSimulation() {
 
 // TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
-	_building->Update();
+//	_building->Update();
+	_building->UpdateVerySlow();
 	//someone might have leave the building
 	_nPeds=_building->GetAllPedestrians().size();
 	// update the global time

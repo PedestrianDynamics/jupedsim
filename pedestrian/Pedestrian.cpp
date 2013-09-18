@@ -53,7 +53,7 @@ Pedestrian::Pedestrian() {
 	_updateRate = 0;
 	_turninAngle=0.0;
 	_ellipse = JEllipse();
-	_navLine = NULL;
+	_navLine = new NavLine(); //FIXME this is not release
 	_router=NULL;
 	_reroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
 	_timeBeforeRerouting=0.0;
@@ -81,6 +81,7 @@ Pedestrian::Pedestrian() {
 
 
 Pedestrian::~Pedestrian() {
+	//if(_navLine) delete _navLine;
 }
 
 /*************************************************************
@@ -120,7 +121,9 @@ void Pedestrian::SetExitIndex(int i) {
 }
 
 void Pedestrian::SetExitLine(NavLine* l) {
-	_navLine = l;
+	//_navLine = l;
+	_navLine->SetPoint1(l->GetPoint1());
+	_navLine->SetPoint2(l->GetPoint2());
 }
 
 

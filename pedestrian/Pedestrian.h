@@ -36,6 +36,7 @@
 #include "../pedestrian/Ellipse.h"
 #include "../general/Macros.h"
 #include "../routing/graph/NavLineState.h"
+#include "../geometry/NavLine.h"
 
 class Building;
 class NavLine;
@@ -61,6 +62,7 @@ private:
     int _group;
 
     NavLine* _navLine; // aktuelle Ausgangslinie
+//    NavLine _navLine;
     std::map<int, int>_mentalMap; // map the actual room to a destination
     std::vector<int> _destHistory;
     std::vector<int> _trip;
