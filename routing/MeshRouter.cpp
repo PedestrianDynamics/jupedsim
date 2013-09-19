@@ -451,6 +451,7 @@ int MeshRouter::FindExit(Pedestrian* p){
 	NavLine line;
 	MeshEdge* meshline=NULL;
 
+	//if (false){// Compute the goal each update
 	if(p->GetCellPos()==c_start_id){
 		nextline=p->GetExitLine();
 	}else{
@@ -471,7 +472,7 @@ int MeshRouter::FindExit(Pedestrian* p){
 		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
 		//cout<<"Goal: "<<point_goal.toString()<<endl;
 		//line=Funnel(point_start,point_goal,edgepath);
-		bool funnel=false;
+		bool funnel=true;
 		if(funnel){
 			line=Funnel(point_start,point_goal,edgepath);
 			if(line.GetPoint1()==line.GetPoint2()){
@@ -535,6 +536,7 @@ void MeshRouter::FixMeshEdges(){
 			//double center[2] = { centre.GetX(), centre.GetY() };
 			if(edge->operator ==(*cross)){
 				edge->SetRoom1(cross->GetRoom1());
+				//edge->SetRoom2(cross->GetRoom2());
 				edge->SetSubRoom1(cross->GetSubRoom1());
 				edge->SetSubRoom2(cross->GetSubRoom2());
 			}
@@ -646,12 +648,15 @@ void MeshRouter::Init(Building* b) {
 	cout<<"Read "<<outedges.size()<<" outer Edges from file"<<endl;
 
 	int tc_id=0;
+	//int while_counter=0;//
 	while(!meshfile.eof()){
+		//cout<<"in while(!meshfile.eof()): "<<while_counter<<endl;
 		string groupname;
 		bool  namefound=false;
 		while(!namefound && getline(meshfile,groupname)){
-			if (groupname.size()>2){
+			if (groupname.size()>1){
 				namefound=true;
+				cout<<"groupname: "<<groupname<<endl;
 			}
 		}
 		if (!meshfile.eof()){
@@ -699,6 +704,9 @@ void MeshRouter::Init(Building* b) {
 			}
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
 		}
+		//while_counter++;//
+		//if(while_counter>50)//
+		//	break;//
 	}
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 	FixMeshEdges();
