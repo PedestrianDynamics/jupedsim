@@ -88,19 +88,24 @@ const vector<Point>& Obstacle::GetPolygon() const {
 
 string Obstacle::Write() {
 	string s;
-	Point pos;
+	//Point pos;
 
 	for (unsigned int j = 0; j < _walls.size(); j++) {
 		const Wall& w = _walls[j];
 		s.append(w.Write());
-		pos = pos + w.GetPoint1() + w.GetPoint2();
+		//pos = pos + w.GetPoint1() + w.GetPoint2();
 	}
-	pos = pos * (0.5 / _walls.size());
+	//pos = pos * (0.5 / _walls.size());
+
+	Point pos = GetCentroid();
 
 	//add the obstacle caption
 	char tmp[CLENGTH];
-	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
-			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
+	//sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
+	//		, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
+
+	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
+			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _id);
 	s.append(tmp);
 
 	return s;
@@ -225,7 +230,7 @@ void Obstacle::ConvertLineToPoly() {
 	_poly = tmpPoly;
 }
 
-const Point& Obstacle::GetCentroid() const{
+const Point Obstacle::GetCentroid() const{
 
     double px=0,py=0;
     double signedArea = 0.0;

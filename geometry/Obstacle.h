@@ -120,7 +120,7 @@ public:
 	/**
 	 * @return the centroid of the obstacle
 	 */
-	const Point& GetCentroid() const;
+	const Point GetCentroid() const;
 
 	/**
 	 * @return a nicely formatted string representation of the obstacle
