@@ -82,12 +82,12 @@ MeshData::MeshData(std::vector<Point*> mn,std::vector<MeshEdge*> me,
 	_mCellCount=Calc_CellCount(mcg);
 }
 
-MeshCell* MeshData::GetCellAtPos(unsigned int tpos)const{
-	if( tpos<0 || tpos>= this->GetCellCount())
+MeshCell* MeshData::GetCellAtPos( int tpos)const{
+	if( tpos<0 || tpos>= (int)this->GetCellCount())
 		return NULL;
 	else{
 		for(unsigned int i=0;i<_mCellGroups.size();i++){
-			if(tpos<_mCellGroups.at(i)->GetCells().size()){
+			if(tpos< (int)_mCellGroups.at(i)->GetCells().size()){
 				return _mCellGroups.at(i)->GetCells().at(tpos);
 			}
 			else{

@@ -233,6 +233,7 @@ public:
 	int AddEdge(JEdge* e);
 	int AddObst(JObstacle* o);
 	int AddNode(JNode* n);
+
 	///return the JVertex with the corresponding point
 	JVertex* GetVertex(const Point& p);
 	void DumpNode(int id);

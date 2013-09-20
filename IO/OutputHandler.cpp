@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <cstdlib>
 
 using namespace std;
 
@@ -38,13 +39,24 @@ void OutputHandler::Write(string str) {
 		cout << str << endl;
 }
 
-void OutputHandler::Write(const char* string,...) {
+void OutputHandler::Write(const char* message,...) {
 	char msg[CLENGTH];
 	va_list ap;
-	va_start (ap, string);
-	vsprintf (msg,string ,ap);
+	va_start (ap, message);
+	vsprintf (msg,message ,ap);
 	va_end (ap);
-	cout<<msg<<endl;
+
+	string str(msg);
+	if(str.find("ERROR")==string::npos) {
+		cout<<msg<<endl;
+	}
+	else {
+		cerr<<msg<<endl;
+	}
+
+	//cout << "\033[1;30mbold red text\033[0m\n";
+	//cout << "\033[1;31"<<msg<<"\033[0m\n";
+	//cout << "\033[1;31 bla bla \033[0m\n";
 }
 
 void STDIOHandler::Write(string str) {

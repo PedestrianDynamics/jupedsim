@@ -31,7 +31,7 @@ public:
 	std::vector<MeshCellGroup*> GetCellGroups()const{return _mCellGroups;}
 	unsigned int GetCellCount()const{return _mCellCount;};
 
-	MeshCell* GetCellAtPos(unsigned int tpos)const;
+	MeshCell* GetCellAtPos(int tpos)const;
 
 	MeshCell* FindCell(Point testp,int& cell_id)const;
 

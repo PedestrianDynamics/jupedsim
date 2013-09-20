@@ -32,8 +32,9 @@
 #include <string>
 #include <vector>
 
-class Wall;
-class Point;
+#include "Point.h"
+#include "Wall.h"
+
 
 class Obstacle {
 
@@ -121,6 +122,12 @@ public:
 	 * @return the centroid of the obstacle
 	 */
 	const Point GetCentroid() const;
+
+	/**
+	 * return true if the given line intersects
+	 * or share common vertex with the obstacle
+	 */
+	bool IntersectWithLine(const Line & line) const;
 
 	/**
 	 * @return a nicely formatted string representation of the obstacle

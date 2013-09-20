@@ -213,7 +213,7 @@ public:
 	/**
 	 * @return a nice formated string describing the line
 	 */
-    std::string toString();
+    std::string toString() const;
 
 
 };

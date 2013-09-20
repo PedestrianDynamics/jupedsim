@@ -716,23 +716,25 @@ void Building::UpdateVerySlow(){
 	for (int p = 0; p < (int) nonConformPeds.size(); p++) {
 		Pedestrian* ped = nonConformPeds[p];
 		bool assigned = false;
-		for (int i = 0; i < GetNumberOfRooms(); i++) {
-			Room* room = GetRoom(i);
-			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-				SubRoom* sub = room->GetSubRoom(j);
-				if (sub->IsInSubRoom(ped->GetPos())) {
-					ped->SetRoomID(room->GetID(), room->GetCaption());
-					ped->SetSubRoomID(sub->GetSubRoomID());
-					ped->ClearMentalMap(); // reset the destination
-					//ped->FindRoute();
-					sub->AddPedestrian(ped);
-					assigned = true;
-					break;
+		if(_goals[ped->GetFinalDestination()]->Contains(ped->GetPos())==false)
+			for (int i = 0; i < GetNumberOfRooms(); i++) {
+				Room* room = GetRoom(i);
+				//if(room->GetCaption()=="outside") continue;
+				for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+					SubRoom* sub = room->GetSubRoom(j);
+					if (sub->IsInSubRoom(ped->GetPos())) {
+						ped->SetRoomID(room->GetID(), room->GetCaption());
+						ped->SetSubRoomID(sub->GetSubRoomID());
+						ped->ClearMentalMap(); // reset the destination
+						//ped->FindRoute();
+						sub->AddPedestrian(ped);
+						assigned = true;
+						break;
+					}
 				}
+				if (assigned == true)
+					break; // stop the loop
 			}
-			if (assigned == true)
-				break; // stop the loop
-		}
 		if (assigned == false) {
 			DeletePedestrian(ped);
 		}

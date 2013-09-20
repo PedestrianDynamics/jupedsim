@@ -27,8 +27,18 @@
  */
 
 #include "Obstacle.h"
-#include "Wall.h"
+
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <iterator>
+#include <string>
+#include <vector>
+
+#include "../IO/OutputHandler.h"
+#include "Line.h"
 #include "Point.h"
+#include "Wall.h"
 
 
 using namespace std;
@@ -269,4 +279,15 @@ const Point Obstacle::GetCentroid() const{
     py /= (6*signedArea);
 
     return Point (px,py);
+}
+
+
+bool Obstacle::IntersectWithLine(const Line& line) const {
+
+	for (unsigned int i=0;i<_walls.size();i++){
+
+		if(_walls[i].IntersectionWith(line)) return true;
+	}
+
+	return false;
 }

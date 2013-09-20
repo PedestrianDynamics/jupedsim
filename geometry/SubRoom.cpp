@@ -116,9 +116,6 @@ void SubRoom::SetRoomID(int ID) {
 	_roomID = ID;
 }
 
-
-
-
 int SubRoom::GetSubRoomID() const {
 	return _id;
 }
@@ -156,19 +153,15 @@ const Wall& SubRoom::GetWall(int index) const {
 		Log->Write("ERROR: Wrong 'index' in SubRoom::GetWall()");
 		exit(0);
 	}
-
 }
 
 const vector<Point>& SubRoom::GetPolygon() const {
 	return _poly;
 }
 
-
 const vector<Obstacle*>& SubRoom::GetAllObstacles() const {
 	return _obstacles;
 }
-
-
 
 int SubRoom::GetNumberOfGoalIDs() const {
 	return _goalIDs.size();
@@ -188,6 +181,7 @@ void SubRoom::AddWall(const Wall& w) {
 
 void SubRoom::AddObstacle(Obstacle* obs){
 	_obstacles.push_back(obs);
+	CheckSubroom();
 }
 
 
@@ -423,6 +417,17 @@ double SubRoom::GetElevation(const Point& p) {
 	return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
 }
 
+void SubRoom::CheckSubroom(){
+	for(unsigned int i = 0; i<_walls.size();i++){
+		for(unsigned int j = 0; j<_obstacles.size();j++){
+			if(_obstacles[j]->IntersectWithLine(_walls[i])){
+				Log->Write("INFO: \tthe obstacle id [%d] is intersection with subroom [%d]",_obstacles[j]->GetId(),_id);
+				Log->Write("INFO: \tthe triangulation will not work.");
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
+}
 
 
 /************************************************************
@@ -806,7 +811,7 @@ bool Stair::IsInSubRoom(const Point& ped) const {
 	for (int i = 0; i < N; i++) {
 		Line l = Line(_poly[i], _poly[(i + 1) % N]);
 		Point s = l.LotPoint(ped);
-		if (l.IsInLine(s))
+		if (l.IsInLineSegment(s))
 			sum++;
 	}
 	if (sum == 4)

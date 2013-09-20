@@ -79,7 +79,7 @@ private:
 
 protected:
 	std::vector<Wall> _walls;
-	std::vector<Point> _poly; // Polygon representation of the subroom
+	std::vector<Point> _poly; // Polygonal representation of the subroom
 
 public:
 
@@ -189,6 +189,21 @@ public:
 	 */
 	double GetElevation(const Point & p1);
 
+
+	/**
+	 * Compute the area of the subroom.
+	 * @see GetArea()
+	 */
+	void CalculateArea();
+
+
+	/**
+	 * check the subroom for some inconsistencies.
+	 * e.g. simple polygons
+	 * no intersection between the walls and the obstacles.
+	 */
+	void CheckSubroom();
+
 	//navigation
 	void AddCrossing(Crossing* line);
 	void AddTransition(Transition* line);
@@ -202,14 +217,31 @@ public:
 	const Hline* GetHline(int i) const;
 
 
-	// Misc
+	/**
+	 * Add a wall to the subroom
+	 */
 	void AddWall(const Wall& w);
+
+	/**
+	 * Adds an obstacle to the subroom.
+	 * They are used for the triangulation/convexifivation process
+	 */
 	void AddObstacle(Obstacle* obs);
+
+	/**
+	 * Remove the pedestrian from the subroom.
+	 * @param index, the index of the peds in the vector (NOT THE ID !)
+	 */
 	void DeletePedestrian(int index);
 	//void DeletePedestrian(Pedestrian* ped);
 	void AddGoalID(int ID);
 	void RemoveGoalID(int ID);
-	void CalculateArea();
+
+
+
+	/**
+	 * @return true if the two subrooms share a common walkable Edge (crossing or transition)
+	 */
 	bool IsDirectlyConnectedWith(const SubRoom* sub) const;
 
 	/**

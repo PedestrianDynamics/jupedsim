@@ -295,8 +295,8 @@
 					<polygon>
 						<vertex px="21.45" py="8.52" />
 						<vertex px="27.11" py="8.52" />
-						<vertex px="27.11" py="9.02" />
-						<vertex px="21.45" py="9.02" />
+						<vertex px="27.11" py="9.00" />
+						<vertex px="21.45" py="9.00" />
 						<vertex px="21.45" py="8.52" />
 					</polygon>
 				</obstacle>
@@ -304,8 +304,8 @@
 					<polygon>
 						<vertex px="28.11" py="8.52" />
 						<vertex px="42.36" py="8.52" />
-						<vertex px="42.36" py="9.02" />
-						<vertex px="28.11" py="9.02" />
+						<vertex px="42.36" py="9.00" />
+						<vertex px="28.11" py="9.00" />
 						<vertex px="28.11" py="8.52" />
 					</polygon>
 				</obstacle>
@@ -313,8 +313,8 @@
 					<polygon>
 						<vertex px="44.29" py="7.0" />
 						<vertex px="44.79" py="7.0" />
-						<vertex px="44.79" py="7.37" />
-						<vertex px="44.29" py="7.37" />
+						<vertex px="44.79" py="7.35" />
+						<vertex px="44.29" py="7.35" />
 						<vertex px="44.29" py="7.0" />
 					</polygon>
 				</obstacle>
@@ -456,11 +456,11 @@
 
 				<obstacle id="17" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="8.75" py="35.27" />
-						<vertex px="24.0" py="35.27" />
+						<vertex px="8.75" py="35.30" />
+						<vertex px="24.0" py="35.30" />
 						<vertex px="24.0" py="35.77" />
 						<vertex px="8.75" py="35.77" />
-						<vertex px="8.75" py="35.27" />
+						<vertex px="8.75" py="35.30" />
 					</polygon>
 				</obstacle>
 				<polygon caption="wall">
@@ -485,20 +485,20 @@
 				</polygon>
 				<obstacle id="13" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="6.8" py="36.8" />
-						<vertex px="6.8" py="29.3" />
+						<vertex px="6.9" py="36.8" />
+						<vertex px="6.9" py="29.3" />
 						<vertex px="7.3" py="29.3" />
 						<vertex px="7.3" py="36.8" />
-						<vertex px="6.8" py="36.8" />
+						<vertex px="6.9" py="36.8" />
 					</polygon>
 				</obstacle>
 				<obstacle id="14" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="6.8" py="22.0" />
-						<vertex px="6.8" py="17.0" />
+						<vertex px="6.9" py="22.0" />
+						<vertex px="6.9" py="17.0" />
 						<vertex px="7.3" py="17.0" />
 						<vertex px="7.3" py="22.0" />
-						<vertex px="6.8" py="22.0" />
+						<vertex px="6.9" py="22.0" />
 					</polygon>
 				</obstacle>
 			</subroom>
@@ -528,11 +528,11 @@
 				</polygon>
 				<obstacle id="6" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="44.16" py="21.72" />
+						<vertex px="44.18" py="21.72" />
 						<vertex px="44.79" py="21.72" />
 						<vertex px="44.79" py="22.22" />
-						<vertex px="44.16" py="22.22" />
-						<vertex px="44.16" py="21.72" />
+						<vertex px="44.18" py="22.22" />
+						<vertex px="44.18" py="21.72" />
 					</polygon>
 				</obstacle>
 			</subroom>
@@ -621,11 +621,11 @@
 				</polygon>
 				<obstacle id="5" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="44.29" py="14.22" />
-						<vertex px="44.79" py="14.22" />
+						<vertex px="44.29" py="14.24" />
+						<vertex px="44.79" py="14.24" />
 						<vertex px="44.79" py="14.72" />
 						<vertex px="44.29" py="14.72" />
-						<vertex px="44.29" py="14.22" />
+						<vertex px="44.29" py="14.24" />
 					</polygon>
 				</obstacle>
 			</subroom>
@@ -718,21 +718,21 @@
 
 				<obstacle id="9" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="37.06" py="36.66" />
-						<vertex px="37.56" py="36.66" />
-						<vertex px="37.56" py="37.16" />
+						<vertex px="37.06" py="36.68" />
+						<vertex px="37.54" py="36.68" />
+						<vertex px="37.54" py="37.16" />
 						<vertex px="37.06" py="37.16" />
-						<vertex px="37.06" py="36.66" />
+						<vertex px="37.06" py="36.68" />
 					</polygon>
 				</obstacle>
 
 				<obstacle id="10" caption="table" height="1.0" closed="1">
 					<polygon>
-						<vertex px="29.33" py="36.66" />
-						<vertex px="29.83" py="36.66" />
+						<vertex px="29.35" py="36.68" />
+						<vertex px="29.83" py="36.68" />
 						<vertex px="29.83" py="37.16" />
-						<vertex px="29.33" py="37.16" />
-						<vertex px="29.33" py="36.66" />
+						<vertex px="29.35" py="37.16" />
+						<vertex px="29.35" py="36.68" />
 					</polygon>
 				</obstacle>
 			</subroom>

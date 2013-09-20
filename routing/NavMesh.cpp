@@ -1832,7 +1832,7 @@ void NavMesh::Triangulate(SubRoom* sub) {
 
 void NavMesh::Triangulate(JNode* node) {
 
-	if(node->IsConvex()) return;
+	//if(node->IsConvex()) return;
 
 	vector<Point> outerHull;
 
@@ -1851,6 +1851,7 @@ void NavMesh::Triangulate(JNode* node) {
 	const vector<Obstacle*> obstacles=sub->GetAllObstacles();
 
 	for( unsigned int a = 0; a < obstacles.size(); a++){
+
 		Obstacle* obst=  obstacles[a];
 
 		const vector<Point>& pol =obst->GetPolygon();
@@ -1866,7 +1867,6 @@ void NavMesh::Triangulate(JNode* node) {
 		//obstacles
 		const vector<Wall>& walls = obst->GetAllWalls();
 		for (unsigned w = 0; w < walls.size(); w++) {
-//continue;
 			const Point& centroid0 = obst->GetCentroid();
 			//int node0 = s->GetUID();
 
@@ -1897,8 +1897,8 @@ void NavMesh::Triangulate(JNode* node) {
 			}
 			//node->pObstacles.push_back(o->id);
 		}
-		//tri->AddHole(pol);
-		cout<<"obstacle in sub"<<endl;
+		tri->AddHole(pol);
+		//cout<<"obstacle in sub"<<endl;
 		//exit(0);
 	}
 

@@ -24,6 +24,7 @@
 		<!-- doors states are: close or open -->
 		<doors>
 			<door trans_id="1" caption="" state="open" />
+			<door trans_id="4" caption="" state="close" />
 		</doors>
 	</traffic_constraints>
 
@@ -66,7 +67,7 @@
 			<group group_id="7" room_id="2" number="5" router_id="3" goal_id="1"/>
 			<group group_id="8" room_id="3" number="5" router_id="3" goal_id="1"/>
 			<group group_id="9" room_id="4" number="5" router_id="3" goal_id="1"/>
-			<group group_id="10" room_id="5" number="5" router_id="3" goal_id="1"/>-->
+			<group group_id="10" room_id="5" number="5" router_id="3" goal_id="1"/>
 			<group group_id="11" room_id="6" number="5" router_id="3" goal_id="1"/>
 			<group group_id="12" room_id="7" number="5" router_id="3" goal_id="1"/>
 			<group group_id="13" room_id="8" number="5" router_id="3" goal_id="1"/>
@@ -84,7 +85,7 @@
 			<group group_id="25" room_id="20" number="5" router_id="3" goal_id="1"/>
 			<group group_id="26" room_id="21" number="5" router_id="3" goal_id="1"/>
 			<group group_id="27" room_id="22" number="15" router_id="3" goal_id="1"/>
-			<group group_id="28" room_id="23" number="5" router_id="3" goal_id="1"/>
+			<group group_id="28" room_id="23" number="5" router_id="3" goal_id="1"/>-->
 			<group group_id="29" room_id="24" number="5" router_id="3" goal_id="1"/>
 		</agents_distribution>
 
@@ -150,7 +151,7 @@
 		<router router_id="3" description="nav_mesh">
 			<parameters>
 				<decomposition method="triangulation" />
-				<mesh_file file="geo_JSC_16_3.xml.nav"/>
+				<mesh_file file="geo_JSC_16_3.xml.full.nav"/>
 			</parameters>
 		</router>
 

@@ -205,27 +205,27 @@ Point Line::ShortestPoint(const Point& p) const {
  * Verfahren wie bei Line::ShortestPoint(), d. h,
  * lambda berechnen und prüfen ob zwischen 0 und 1
  * */
-bool Line::IsInLine(const Point& p) const {
-	double ax, ay, bx, by, px, py;
-	const Point& a = GetPoint1();
-	const Point& b = GetPoint2();
-	double lambda;
-	ax = a.GetX();
-	ay = a.GetY();
-	bx = b.GetX();
-	by = b.GetY();
-	px = p.GetX();
-	py = p.GetY();
-	if (fabs(ax - bx) > J_EPS_DIST) {
-		lambda = (px - ax) / (bx - ax);
-	} else if (fabs(ay - by) > J_EPS_DIST) {
-		lambda = (py - ay) / (by - ay);
-	} else {
-		Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
-		exit(0);
-	}
-	return (0 <= lambda) && (lambda <= 1);
-}
+//bool Line::IsInLine(const Point& p) const {
+//	double ax, ay, bx, by, px, py;
+//	const Point& a = GetPoint1();
+//	const Point& b = GetPoint2();
+//	double lambda;
+//	ax = a.GetX();
+//	ay = a.GetY();
+//	bx = b.GetX();
+//	by = b.GetY();
+//	px = p.GetX();
+//	py = p.GetY();
+//	if (fabs(ax - bx) > J_EPS_DIST) {
+//		lambda = (px - ax) / (bx - ax);
+//	} else if (fabs(ay - by) > J_EPS_DIST) {
+//		lambda = (py - ay) / (by - ay);
+//	} else {
+//		Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
+//		exit(0);
+//	}
+//	return (0 <= lambda) && (lambda <= 1);
+//}
 
 /*
  *  Prüft, ob Punkt p im Liniensegment enthalten ist
@@ -233,23 +233,22 @@ bool Line::IsInLine(const Point& p) const {
  * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
  * */
 bool Line::IsInLineSegment(const Point& p) const {
-    double ax, ay, bx, by, px, py, crossp, dotp;
-	const Point& a = GetPoint1();
-	const Point& b = GetPoint2();
-	ax = a.GetX();
-	ay = a.GetY();
-	bx = b.GetX();
-	by = b.GetY();
-	px = p.GetX();
-	py = p.GetY();
+	//const Point& _point1 = GetPoint1();
+	//const Point& _point2 = GetPoint2();
+	double ax = _point1.GetX();
+	double ay = _point1.GetY();
+	double bx = _point2.GetX();
+	double by = _point2.GetY();
+	double px = p._x;
+	double py = p._y;
 	
 	// cross product to check if point i colinear
-	crossp = (py-ay)*(bx-ax)-(px-ax)*(by-ay);
+	double crossp = (py-ay)*(bx-ax)-(px-ax)*(by-ay);
 	if(fabs(crossp) > J_EPS) return false;
 	
 	// dotproduct and distSquared to check if point is in segment and not just in line
-	dotp = (px-ax)*(bx-ax)+(py-ay)*(by-ay);
-	if(dotp < 0 || (a-b).NormSquare() < dotp) return false;
+	double dotp = (px-ax)*(bx-ax)+(py-ay)*(by-ay);
+	if(dotp < 0 || (_point1-_point2).NormSquare() < dotp) return false;
 	
 	return true;
 	
@@ -305,24 +304,24 @@ bool Line::IntersectionWith(const Line& l) const {
 	double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
 	double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
 
+	// the lines are parallel
 	if (denominator == 0.0) {
+
+		// the lines are superposed
 		if (numerator == 0.0) {
-			// collinear. Potentially infinite intersection points.
-			// Check and return one of them.
-			if (_point1.GetX() >= l.GetPoint1().GetX() && _point1.GetX() <= l.GetPoint2().GetX()) {
-				//return AB.Start;
-				return true;
-			} else if (l.GetPoint1().GetX() >= _point1.GetX() && l.GetPoint1().GetX() <= _point2.GetX()) {
-				//return CD.Start;
-				return true;
-			} else {
-				return false;
-			}
-		} else { // parallel
+
+			// the segment are superposed
+			if(IsInLineSegment(l.GetPoint1()) ||
+					IsInLineSegment(l.GetPoint2()) ) return true;
+			else return false;
+
+		} else { // the lines are just parallel and do not share a common point
+
 			return false;
 		}
 	}
 
+	// the lines intersect
 	double r = numerator / denominator;
 	if (r < 0.0 || r > 1.0) {
 		return false;
@@ -333,7 +332,9 @@ bool Line::IntersectionWith(const Line& l) const {
 		return false;
 	}
 
-	//return new PointF ((float) (AB.Start.X + r * deltaBAx), (float) (AB.Start.Y + r * deltaBAy));
+	//Point PointF = Point ((float) (_point1._x + r * deltaBAx), (float) (_point1._y + r * deltaBAy));
+	//cout<< l.toString() << " intersects with " << toString() <<endl;
+	//cout<<" at point " << PointF.toString()<<endl;
 	return true;
 }
 
@@ -456,7 +457,7 @@ const Point& Line::GetRight(const Point& pt){
 	}
 }
 
-std::string Line::toString() {
+std::string Line::toString() const {
 	std::stringstream tmp;
 	tmp<<_point1.toString()<<"--"<<_point2.toString();
 	return tmp.str();
