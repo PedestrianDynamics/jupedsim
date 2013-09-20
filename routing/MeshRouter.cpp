@@ -106,7 +106,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 
 		//Test
 		//print_path(edge_path);
-		cout<<"left: "<<point_left.toString()<<" right: "<<point_right.toString()<<endl;
+		//cout<<"left: "<<point_left.toString()<<" right: "<<point_right.toString()<<endl;
 
 		Point point_run_left=point_left;
 		Point point_run_right=point_right;
@@ -138,7 +138,7 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 						point_run_right=edge_path.at(path_ind+1)->GetRight(p_act_ref);
 					}
 				}else{//goal in actual cell => apex= goal or node on edge
-					cout<<"In else case!"<<endl;
+					//cout<<"In else case!"<<endl;
 					point_run_left=goal;
 					point_run_right=goal;
 				}
@@ -147,37 +147,37 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
 
 				if(test_l==0 && test_r==0){ //Narrow wedge on both sides
-					cout<<"narrow wedge on both sides"<<endl;
+					//cout<<"narrow wedge on both sides"<<endl;
 					point_left=point_run_left;
 					point_right=point_run_right;
 
 				}
 				else if(test_l==1 && test_r==0){// narrow right side
-					cout<<"narrow right side"<<endl;
+					//cout<<"narrow right side"<<endl;
 					point_right=point_run_right;
 
 				}
 				else if(test_l==0 && test_r==3){// narrow left side
-					cout<<"narrow left side"<<endl;
+					//cout<<"narrow left side"<<endl;
 					point_left=point_run_left;
 
 				}
 				else if(test_l==1 && test_r==1){// apex=left
-					cout<<"apex=left"<<endl;
+					//cout<<"apex=left"<<endl;
 					apex=point_left;
 					//return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
 				else if(test_l==3 && test_r==3){//apex=right
-					cout<<"apex=right"<<endl;
+					//cout<<"apex=right"<<endl;
 					apex=point_right;
 					//return Nav	Line(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
 				else if(test_l==1 && test_r==3){ //  Widen wedge
-					cout<<"widen wedge"<<endl;
+					//cout<<"widen wedge"<<endl;
 
 				}
 				else{// Corrupted data
@@ -187,13 +187,13 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 				path_ind++;
 			}else{//After some Funnel iterations the cell containing the goal is reached;
 				//apex=goal; // Initialisation!
-				cout<<"Funnel progressed to goal and stopped"<<endl;
+				//cout<<"Funnel progressed to goal and stopped"<<endl;
 				apex_found=true;
 				apex=edge_path.back()->GetPoint1();//Test
 				//return NavLine(Line(edge_path.at(path_ind-1)->GetPoint1(),edge_path.at(path_ind-1)->GetPoint2()));
 			}
 		}//END WHILE
-		cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
+		//cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
 
 		// Some kind of workaround
 		// First Edge which contains the found apex
@@ -214,8 +214,11 @@ NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)
 			path_ind++;
 		}
 
-		NavLine exitline(Line(p1,p2));
-		cout<<"Funnel: exitline: "<<exitline.toString()<<endl;
+		//NavLine exitline(Line(p1,p2));
+		Point p1_new=(p1-p2)*0.9+p2;
+		Point p2_new=(p2-p1)*0.9+p1;
+		NavLine exitline(Line(p1_new,p2_new));
+		//cout<<"Funnel: exitline: "<<exitline.toString()<<endl;
 		return exitline;
 
 
@@ -281,24 +284,30 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const{
 
 	int c_start_id;
 	//Point testp_start(0,0);
-	Point  testp_start=p->GetPos();
+	Point  p_start=p->GetPos();
 	//cout<<testp_start.toString()<<endl;;
-	MeshCell* start_cell=_meshdata->FindCell(testp_start,c_start_id);
+	MeshCell* start_cell=_meshdata->FindCell(p_start,c_start_id);
 	if(start_cell!=NULL){
-		//cout<<testp_start.toString()<<"Gefunden in Zelle: "<<c_start_id<<endl;
+		//cout<<testp_start.toString()<<"Found in cell "<<c_start_id<<endl;
 	}
 	else{
-		cout<<"Startpoint not found"<<endl;
+		Log->Write("Startpoint not found");
+		std::cout.precision(10);
+		std::cout.setf( std::ios::fixed, std:: ios::floatfield );
+		cout<<"startpoint: "<< p_start.GetX()<<" "<<p_start.GetY()<<"of pedestrian: "<<p->GetID()<<endl;
+		exit(EXIT_FAILURE);
 	}
 	int c_goal_id;
 	Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
+	//cout<<"here"<<endl;
 	MeshCell* goal_cell=_meshdata->FindCell(point_goal,c_goal_id);
 	if(goal_cell!=NULL){
-		//cout<<testp_goal.toString()<<"Gefunden in Zelle: "<<c_goal_id<<endl;//
+		//cout<<testp_goal.toString()<<"Found in cell: "<<c_goal_id<<endl;//
 	}
 	else{
 		cout<<"Goal not found"<<endl;
 	}
+
 
 	//Initialisation
 	unsigned int c_totalcount=_meshdata->GetCellCount();
@@ -356,7 +365,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const{
 				}
 				else{
 					if (new_cost<costlist[nb_id]){
-						cout<<"ERROR"<<endl;
+						//cout<<"ERROR"<<endl;
 						//found shorter path to nb_cell
 						predlist[nb_id]=act_id;
 						costlist[nb_id]=new_cost;
@@ -451,12 +460,15 @@ int MeshRouter::FindExit(Pedestrian* p){
 	NavLine line;
 	MeshEdge* meshline=NULL;
 
-	//if (false){// Compute the goal each update
-	if(p->GetCellPos()==c_start_id){
+
+	if (false){// Compute the goal each update
+	//if(p->GetCellPos()==c_start_id){
 		nextline=p->GetExitLine();
 	}else{
 		int status=-1;
+		//cout<<"before A*"<<endl;
 		vector<MeshEdge*> edgepath=AStar(p,status);
+		//cout<<"after A*"<<endl;
 		if (status==-1) return -1;
 		if(edgepath.empty()){
 			Log->Write("Path is empty but next edge is defined");
@@ -467,27 +479,40 @@ int MeshRouter::FindExit(Pedestrian* p){
 			//cout<<"Start-ID: "<<c_start_id<<endl;
 			//cout<<"Start-Position: "<<point_start.toString()<<endl;
 
-
+		//cout<<p->GetID()<<endl;
 		//TODO: save the point goal in the ped class
 		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
 		//cout<<"Goal: "<<point_goal.toString()<<endl;
 		//line=Funnel(point_start,point_goal,edgepath);
-		bool funnel=true;
+		bool funnel=false;
 		if(funnel){
 			line=Funnel(point_start,point_goal,edgepath);
 			if(line.GetPoint1()==line.GetPoint2()){
 				Log->Write("ERROR:\tNavLine is a point");
-				cout<<"This point is: "<<line.GetPoint1().toString()<<endl;
+				//cout<<"This point is: "<<line.GetPoint1().toString()<<endl;
 				exit(EXIT_FAILURE);
 			}else{
-				cout<<"The line is: "<<line.toString()<<endl;
+				//cout<<"The line is: "<<line.toString()<<endl;
 			}
 			nextline=&line;
 		}else{
 			meshline=Visibility(point_start,point_goal,edgepath);
 			nextline=dynamic_cast<NavLine*>(meshline);
-		}
+			Point p1=nextline->GetPoint1();
+			Point p2=nextline->GetPoint2();
+			//Point p1_new=(p1-p2)*0.9+p2;
+			//Point p2_new=(p2-p1)*0.9+p1;
+			nextline->SetPoint1((p1-p2)*0.90+p2);
+			nextline->SetPoint2((p2-p1)*0.90+p1);
 
+			//NavLine exitline(Line(p1_new,p2_new));
+			/*
+			if(p->GetID()==22){
+				cout<<meshline->GetID()<<endl;
+				print_path(edgepath);
+			}*/
+		}
+		//cout<<"Goal"<<point_goal.toString()<<endl;
 		//nextline=&line;
 
 		//edge=*(edgepath.begin());
@@ -602,7 +627,7 @@ void MeshRouter::FixMeshEdges(){
 
 void MeshRouter::Init(Building* b) {
 	_building=b;
-	Log->Write("WARNING: \tdo not use this  <<Mesh>>  router !!");
+	//Log->Write("WARNING: \tdo not use this  <<Mesh>>  router !!");
 
 	string meshfileName=GetMeshFileName();
 	ifstream meshfiled;
@@ -653,10 +678,11 @@ void MeshRouter::Init(Building* b) {
 		//cout<<"in while(!meshfile.eof()): "<<while_counter<<endl;
 		string groupname;
 		bool  namefound=false;
+		//TODO better rouine for skipping empty lines
 		while(!namefound && getline(meshfile,groupname)){
 			if (groupname.size()>1){
 				namefound=true;
-				cout<<"groupname: "<<groupname<<endl;
+				//cout<<"groupname: "<<groupname<<endl;
 			}
 		}
 		if (!meshfile.eof()){
@@ -710,6 +736,28 @@ void MeshRouter::Init(Building* b) {
 	}
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 	FixMeshEdges();
+/*
+	int found_cell;
+	//_meshdata->FindCell(Point(14.5386998558,7.9135540711),found_cell);
+	_meshdata->FindCell(Point(14,7.91),found_cell);
+	double xl=14.0,xu=17.0,yl=7.0,yu=10.0;
+	int n=30,m=30;
+	int** field=new int*[n];
+	for(int i=0;i<n;i++)
+		field[i]=new int[m];
+
+	for(int i=0;i<n;i++){
+		for(int j=0;j<m;j++){
+			int cell_id=-2;
+			_meshdata->FindCell(Point(xl+(xu-xl)/(n-1)*i,yl+(yu-yl)/(m-1)*j),cell_id);
+			cout<<cell_id<<" ";
+		}
+		cout<<endl;
+	}
+
+
+	cout<<found_cell<<endl;
+	exit(EXIT_SUCCESS);*/
 }
 
 

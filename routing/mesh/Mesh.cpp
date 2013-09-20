@@ -120,7 +120,10 @@ MeshCell* MeshData::GetCellAtPos(unsigned int tpos)const{
 				Point temp_nxny(n2y-n1y,n1x-n2x);
 				Point temp_xy=test-Point(n1x,n1y);
 
-				if (temp_xy.ScalarP(temp_nxny)>0){
+			//	if(abs(temp_xy.ScalarP(temp_nxny))<J_EPS)
+				//	Log->Write("Point near to line");
+
+				if (temp_xy.ScalarP(temp_nxny)>J_EPS){
 					found=false;
 					break;
 				}
