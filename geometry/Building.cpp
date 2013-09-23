@@ -704,6 +704,10 @@ void Building::UpdateVerySlow(){
 			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* ped = sub->GetPedestrian(k);
 				//set the new room if needed
+				if(_goals[ped->GetFinalDestination()]->Contains(ped->GetPos())) {
+					sub->DeletePedestrian(k--);
+					DeletePedestrian(ped);
+				} else
 				if (!sub->IsInSubRoom(ped)) {
 					nonConformPeds.push_back(ped);
 					sub->DeletePedestrian(k--);
