@@ -704,11 +704,17 @@ void Building::UpdateVerySlow(){
 			for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
 				Pedestrian* ped = sub->GetPedestrian(k);
 				//set the new room if needed
-				if(_goals[ped->GetFinalDestination()]->Contains(ped->GetPos())) {
+				if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+						&& (GetRoom(ped->GetRoomID())->GetCaption() == "outside")) {
+
 					sub->DeletePedestrian(k--);
 					DeletePedestrian(ped);
-				} else
-				if (!sub->IsInSubRoom(ped)) {
+				} else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
+						&& (_goals[ped->GetFinalDestination()]->Contains(
+								ped->GetPos()))) {
+					sub->DeletePedestrian(k--);
+					DeletePedestrian(ped);
+				} else if (!sub->IsInSubRoom(ped)) {
 					nonConformPeds.push_back(ped);
 					sub->DeletePedestrian(k--);
 				}
@@ -720,25 +726,24 @@ void Building::UpdateVerySlow(){
 	for (int p = 0; p < (int) nonConformPeds.size(); p++) {
 		Pedestrian* ped = nonConformPeds[p];
 		bool assigned = false;
-		if(_goals[ped->GetFinalDestination()]->Contains(ped->GetPos())==false)
-			for (int i = 0; i < GetNumberOfRooms(); i++) {
-				Room* room = GetRoom(i);
-				//if(room->GetCaption()=="outside") continue;
-				for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-					SubRoom* sub = room->GetSubRoom(j);
-					if (sub->IsInSubRoom(ped->GetPos())) {
-						ped->SetRoomID(room->GetID(), room->GetCaption());
-						ped->SetSubRoomID(sub->GetSubRoomID());
-						ped->ClearMentalMap(); // reset the destination
-						//ped->FindRoute();
-						sub->AddPedestrian(ped);
-						assigned = true;
-						break;
-					}
+		for (int i = 0; i < GetNumberOfRooms(); i++) {
+			Room* room = GetRoom(i);
+			//if(room->GetCaption()=="outside") continue;
+			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+				SubRoom* sub = room->GetSubRoom(j);
+				if (sub->IsInSubRoom(ped->GetPos())) {
+					ped->SetRoomID(room->GetID(), room->GetCaption());
+					ped->SetSubRoomID(sub->GetSubRoomID());
+					ped->ClearMentalMap(); // reset the destination
+					//ped->FindRoute();
+					sub->AddPedestrian(ped);
+					assigned = true;
+					break;
 				}
-				if (assigned == true)
-					break; // stop the loop
 			}
+			if (assigned == true)
+				break; // stop the loop
+		}
 		if (assigned == false) {
 			DeletePedestrian(ped);
 		}

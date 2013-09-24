@@ -1160,8 +1160,8 @@ void NavMesh::FinalizeAlphaShape(){
 		exit(EXIT_FAILURE);
 	}
 
-	//const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
-	//double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
+	const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
+	double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
 	//outside->WriteToErrorLog();
 	//cout<<"Center:" <<env_center.toString()<<endl;
 	//cout<<"Radius:" <<env_radius<<endl; exit(0);
@@ -1217,6 +1217,8 @@ void NavMesh::FinalizeAlphaShape(){
 			const vector<Transition*>& transitions = s->GetAllTransitions();
 			for (unsigned t = 0; t < transitions.size(); t++) {
 
+				//if(IsCircleVisibleFromLine(env_center,env_radius,*transitions[t])==false) continue;
+
 				Point pt1= transitions[t]->GetPoint1();
 				Point pt2= transitions[t]->GetPoint2();
 
@@ -1246,9 +1248,9 @@ void NavMesh::FinalizeAlphaShape(){
 		env.push_back(envelope[i].GetPoint2());
 	}
 
-	//	WriteToFileTraVisTo("jst_test_ulrich.xml",env);
-	//	cout<<"done"<<endl;
-	//	cout<<"env size: "<<envelope.size()<<endl;
+		//WriteToFileTraVisTo("jst_test_ulrich.xml",env);
+		//cout<<"done"<<endl;
+		//cout<<"env size: "<<envelope.size()<<endl;
 	//	exit(0);
 
 	//link those vertices
@@ -2652,7 +2654,7 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 
 	int nLine=0;
 
-	for(double alpha=0.0;alpha<=2*M_PI;alpha+=0.1){
+	for(double alpha=0.0;alpha<=2*M_PI;alpha+=0.01){
 
 		bool isVisible=true;
 		bool done=false;
@@ -2673,7 +2675,7 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 			for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 				SubRoom* s = r->GetSubRoom(k);
 				const vector<Wall>& walls = s->GetAllWalls();
-				const vector<Transition*>& transitions = s->GetAllTransitions();
+				//const vector<Transition*>& transitions = s->GetAllTransitions();
 
 				for (unsigned w = 0; w < walls.size(); w++) {
 
@@ -2690,14 +2692,16 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 					}
 				}
 				if(!done)
-				for (unsigned t = 0; t < transitions.size(); t++) {
-					if(transitions[t]->operator ==(segment)) continue;
-					if(transitions[t]->IntersectionWith(segment)){
-						//done=true;
-						//isVisible=false;
-						//break;
+					for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+							itr != _building->GetAllTransitions().end(); ++itr) {
+						Transition* cross = itr->second;
+						//if(cross->operator ==(segment)) continue;
+						if(cross->IntersectionWith(segment)){
+							done=true;
+							isVisible=false;
+							break;
+						}
 					}
-				}
 
 				if(done) break;
 			}
@@ -2719,7 +2723,7 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 
 	//restart the same procedure with the second point
 
-	for(double alpha=0.0;alpha<=2*M_PI;alpha+=0.1){
+	for(double alpha=0.0;alpha<=2*M_PI;alpha+=0.01){
 
 		bool isVisible=true;
 		bool done=false;
@@ -2730,6 +2734,7 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 		//test must be done for the two points separately
 		//Line seg1=Line(segment.GetPoint1(),point_on_circle);
 		Line seg2=Line(segment.GetPoint2(),point_on_circle);
+
 
 		for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
 			Room* r = _building->GetRoom(i);
@@ -2754,6 +2759,17 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 						break;
 					}
 				}
+				if(!done)
+					for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
+							itr != _building->GetAllTransitions().end(); ++itr) {
+						Transition* cross = itr->second;
+						//if(cross->operator ==(segment)) continue;
+						if(cross->IntersectionWith(segment)){
+							done=true;
+							isVisible=false;
+							break;
+						}
+					}
 				if(done) break;
 			}
 			if(done) break;
@@ -2766,6 +2782,7 @@ bool NavMesh::IsCircleVisibleFromLine(const Point& center, double radius, const 
 		}
 	}
 
+	cout<<"nline: " <<nLine<<endl;
 	if(nLine==2) return true;
 	else return false;
 
