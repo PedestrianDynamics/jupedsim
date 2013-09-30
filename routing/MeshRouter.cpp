@@ -274,6 +274,7 @@ MeshEdge* MeshRouter::Visibility(Point& start,Point& goal,vector<MeshEdge*> edge
 		}
 		//cout<<"The next edge is: "<<act_edge->toString()<<endl;
 		return act_edge;
+		return edge_path.at(0);
 	}
 }
 
@@ -340,23 +341,36 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const{
 
 		for(unsigned int i=0;i<act_cell->GetEdges().size();i++){
 			int act_edge_id=act_cell->GetEdges().at(i);
+			MeshEdge* act_edge=_meshdata->GetEdges().at(act_edge_id);
 			int nb_id=-1;
 			// Find neighbouring cell
-			if(_meshdata->GetEdges().at(act_edge_id)->GetCell1()==act_id){
-				nb_id=_meshdata->GetEdges().at(act_edge_id)->GetCell2();
+
+			if(act_edge->GetCell1()==act_id){
+				nb_id=act_edge->GetCell2();
 			}
-			else if(_meshdata->GetEdges().at(act_edge_id)->GetCell2()==act_id){
-				nb_id=_meshdata->GetEdges().at(act_edge_id)->GetCell1();
+			else if(act_edge->GetCell2()==act_id){
+				nb_id=act_edge->GetCell1();
 			}
 			else{// Error: inconsistant
 				Log->Write("Error:\tInconsistant Mesh-Data");
 			}
-			if (!closedlist[nb_id]){// neighbour-cell not fully evaluated
-				MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
+			int n1_pos=act_edge->GetNode1();
+			int n2_pos=act_edge->GetNode2();
+			Point p1_p=*_meshdata->GetNodes().at(n1_pos);
+			Point p2_p=*_meshdata->GetNodes().at(n2_pos);
+			double length=(p1_p-p2_p).Norm();
+			MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
+			// Calculate
+			if (nb_cell->GetEdges().size()==3){
+
+			}
+			if (!closedlist[nb_id] && length>0.2){// neighbour-cell not fully evaluated
+				//MeshCell* nb_cell=_meshdata->GetCellAtPos(nb_id);
 				double new_cost=act_cost+(act_cell->GetMidpoint()-nb_cell->GetMidpoint()).Norm();
 				if(!inopenlist[nb_id]){// neighbour-cell not evaluated at all
 					predlist[nb_id]=act_id;
-					predEdgelist[nb_id]=_meshdata->GetEdges().at(act_edge_id);
+					//predEdgelist[nb_id]=_meshdata->GetEdges().at(act_edge_id);
+					predEdgelist[nb_id]=act_edge;
 					costlist[nb_id]=new_cost;
 					inopenlist[nb_id]=true;
 
@@ -474,12 +488,7 @@ int MeshRouter::FindExit(Pedestrian* p){
 			Log->Write("Path is empty but next edge is defined");
 			exit(EXIT_FAILURE);
 		}
-		//if(p->GetID()==54)
-			//print_path(edgepath);
-			//cout<<"Start-ID: "<<c_start_id<<endl;
-			//cout<<"Start-Position: "<<point_start.toString()<<endl;
 
-		//cout<<p->GetID()<<endl;
 		//TODO: save the point goal in the ped class
 		Point point_goal = _building->GetFinalGoal(p->GetFinalDestination())->GetCentroid();
 		//cout<<"Goal: "<<point_goal.toString()<<endl;
@@ -502,8 +511,8 @@ int MeshRouter::FindExit(Pedestrian* p){
 			Point p2=nextline->GetPoint2();
 			//Point p1_new=(p1-p2)*0.9+p2;
 			//Point p2_new=(p2-p1)*0.9+p1;
-			nextline->SetPoint1((p1-p2)*0.90+p2);
-			nextline->SetPoint2((p2-p1)*0.90+p1);
+			nextline->SetPoint1((p1-p2)*0.9+p2);
+			nextline->SetPoint2((p2-p1)*0.9+p1);
 
 			//NavLine exitline(Line(p1_new,p2_new));
 			/*
@@ -530,7 +539,7 @@ int MeshRouter::FindExit(Pedestrian* p){
 	}// END ELSE
 
 	p->SetExitLine(nextline);
-	p->SetCellPos(c_start_id);
+	//p->SetCellPos(c_start_id);
 	return 0;
 }
 
