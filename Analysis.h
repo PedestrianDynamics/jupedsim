@@ -80,7 +80,7 @@ private:
 	bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 	void GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, const std::string & ofile);
 	void FlowRate_Velocity(int DeltaT, int fps, const std::vector<int>& AccumPeds, const std::vector<double>& AccumVelocity, const std::string& ofile);
-	void GetIndividualFD(const std::vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea);
+	void GetIndividualFD(const std::vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea, int frid);
 	double Distance(double x1, double y1, double x2, double y2);
 	double GetVoronoiDensity(const std::vector<polygon_2d>& polygon, const polygon_2d& measureArea);
 	double GetVoronoiVelocity(const std::vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea);

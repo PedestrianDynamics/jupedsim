@@ -502,7 +502,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 					{
 						// if(i>beginstationary&&i<endstationary)
 						{
-							GetIndividualFD(polygons,VInFrame,_areaForMethod_D->_poly);
+							GetIndividualFD(polygons,VInFrame,_areaForMethod_D->_poly, frid);
 						}
 					}
 				}
@@ -705,7 +705,7 @@ void Analysis::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPe
  *  of the area of the pedestrian's voronoi cell. The individual velocity is his instantaneous velocity at this time.
  *  note that, Only the pedestrians in the measurement area are considered.
  */
-void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea)
+void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea, int frid)
 {
 	double uniquedensity=0;
 	double uniquevelocity=0;
@@ -719,7 +719,7 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
 		{
 			uniquedensity=1/(area(*polygon_iterator)*CMtoM*CMtoM);
 			uniquevelocity=Velocity[temp];
-			fprintf(_individualFD,"%.3f\t%.3f\n",uniquedensity,uniquevelocity);
+			fprintf(_individualFD,"%d\t%.3f\t%.3f\n",frid, uniquedensity,uniquevelocity);
 		}
 		temp++;
 	}
@@ -808,7 +808,7 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 				std::cout<<dsv(v1[0])<<"\n";
 				std::cout<<dsv(a)<<"\n";
 				std::cout<<dsv(b)<<"\n";
-				exit(EXIT_FAILURE);
+				//exit(EXIT_FAILURE);
 			}
 		}
 	}
