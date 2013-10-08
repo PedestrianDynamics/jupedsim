@@ -81,6 +81,297 @@ int TestinFunnel(Point apex, Point left,Point right,Point test){
 	}
 }
 
+// Computes the intersection points of two circles
+int CutCircleCircle(Point mp1, double r1, Point mp2, double r2,
+                       Point& sp1, Point& sp2)
+{
+   double d, dx, dy, a, h;
+
+   dx = mp2.GetX() - mp1.GetX();
+   dy = mp2.GetY() - mp1.GetY();
+
+   d=(mp2-mp1).Norm();
+
+   if (d > r1 + r2) // no intersection
+   {
+      return (-1);
+   }
+   else if (fabs(d) < 0.0001) // same midpoint
+   {
+      return (-2);
+   }
+
+    a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+
+    h = sqrt (r1 * r1 - a * a);
+
+    sp1.SetX(mp1.GetX() + (a/d) * dx - (h/d) * dy);
+    sp1.SetY(mp1.GetY() + (a/d) * dy + (h/d) * dx);
+
+    sp2.SetX(mp1.GetX() + (a/d) * dx + (h/d) * dy);
+    sp2.SetY(mp1.GetY() + (a/d) * dy - (h/d) * dx);
+
+    return(0);
+}
+
+// Thales' theorem
+int Funnelpoint(Point start, Point goal, bool left, Point& result){
+	Point mp1=(start+goal)/2;
+	double r1=((start-goal).Norm())/2;
+	Point sp1,sp2;
+	// TODO: radius of pedestrian
+	double r2= 0.3;
+	int success=CutCircleCircle(mp1,r1,goal,r2,sp1,sp2);
+	if (success==0){
+		if (left){// right point
+			result=sp2;
+		}
+		else{ // left point
+			result=sp1;
+		}
+		return 0;
+	}
+	else
+		return -1;
+}
+
+
+MeshEdge* MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*> edge_path,Point& use_left,Point& use_right){
+
+	if(edge_path.empty()){
+		// Start and End Point in same Cell
+		//cout<<"Endpoint is in current cell"<<endl;
+		//Line goal_line(goal,goal);
+		//return NavLine(goal_line);
+		exit(EXIT_FAILURE);
+	}
+	else{
+		//int goal_cell_id=-1;
+		//MeshCell* goal_cell=_meshdata->FindCell(goal,goal_cell_id);
+
+		Point apex=goal;
+		int act_cell_id=-1;
+		//int loc_ind=-1; // local index of first node to be found in startphase
+		unsigned int path_ind=0;
+		Point point_left,point_right; // Nodes creatin the wedge
+		MeshCell* act_cell=_meshdata->FindCell(start,act_cell_id);
+
+		Point p_act_ref=act_cell->GetMidpoint();
+		point_left=edge_path.at(0)->GetLeft(p_act_ref);
+		point_right=edge_path.at(0)->GetRight(p_act_ref);
+
+
+		//-------------------------//
+		//cout<<point_left.toString()<<endl;
+
+
+		//Test
+		//print_path(edge_path);
+		//cout<<"left: "<<point_left.toString()<<" right: "<<point_right.toString()<<endl;
+
+		Point point_run_left=point_left;
+		Point point_run_right=point_right;
+
+
+		////////////////////////////////////Modification/////////
+
+		Point wedge_left,wedge_right,wedge_run_left,wedge_run_right;
+		Funnelpoint(start,point_left,true,wedge_left);
+		Funnelpoint(start,point_right,false,wedge_right);
+		Funnelpoint(start,point_run_left,true,wedge_run_left);
+		Funnelpoint(start,point_run_right,false,wedge_run_right);
+
+
+		////////////////////////////////////////////////////////
+
+
+		bool apex_found=false;
+		// lengthen the funnel at side
+		bool run_left=true,run_right=true;
+
+		while(!apex_found){
+			if(path_ind!=edge_path.size()){
+				if(edge_path.at(path_ind)->GetCell1()==act_cell_id)
+					act_cell_id=edge_path.at(path_ind)->GetCell2();
+				else if (edge_path.at(path_ind)->GetCell2()==act_cell_id)
+					act_cell_id=edge_path.at(path_ind)->GetCell1();
+				else{
+					Log->Write("ERROR:\t inconsistence between act_cell and edgepath");
+					cout<<"act cell id="<<act_cell_id;
+					cout<<"Cells 1 and 2 are"<<edge_path.at(path_ind)->GetCell1()<<"and "<<edge_path.at(path_ind)->GetCell2()<<endl;
+					exit(EXIT_FAILURE);
+				}
+				act_cell=_meshdata->GetCellAtPos(act_cell_id);
+				p_act_ref=act_cell->GetMidpoint();
+				//find next points for wedge
+				if(path_ind+1<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
+					if(run_left){
+						point_run_left=edge_path.at(path_ind+1)->GetLeft(p_act_ref);
+						//////////////////////Modification////////////////////////
+						Funnelpoint(start,point_run_left,true,wedge_run_left);
+						////////////////////////////////////////////////////////
+					}
+					if(run_right){
+						point_run_right=edge_path.at(path_ind+1)->GetRight(p_act_ref);
+						//////////////////////Modification////////////////////////
+						Funnelpoint(start,point_run_right,false,wedge_run_right);
+						////////////////////////////////////////////////////////
+
+					}
+				}else{//goal in actual cell => apex= goal or node on edge
+					//cout<<"In else case!"<<endl;
+					point_run_left=goal;
+					point_run_right=goal;
+					//////////////////////Modification////////////////////////
+					Funnelpoint(start,point_run_right,false,wedge_run_right);
+					Funnelpoint(start,point_run_left,true,wedge_run_left);
+					////////////////////////////////////////////////////////
+				}
+				// Test for new Points to be in the wedge of start
+
+				//////////////////////Modification////////////////////////
+				//int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
+				//int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
+
+				// Widen Wedge per default
+				int test_l=1;
+				int test_r=3;
+				if(point_left!=point_run_left)
+					test_l=TestinFunnel(start,wedge_left,wedge_right,wedge_run_left);
+				if(point_right!=point_run_right)
+					test_r=TestinFunnel(start,wedge_left,wedge_right,wedge_run_right);
+				////////////////////////////////////////////////////////
+
+
+				if(test_l==0 && test_r==0){ //Narrow wedge on both sides
+					//cout<<"narrow wedge on both sides"<<endl;
+					point_left=point_run_left;
+					point_right=point_run_right;
+					//////////////////////Modification////////////////////////
+					Funnelpoint(start,point_left,true,wedge_left);
+					Funnelpoint(start,point_right,false,wedge_right);
+					////////////////////////////////////////////////////////
+				}
+				else if(test_l==1 && test_r==0){// narrow right side
+					//cout<<"narrow right side"<<endl;
+					point_right=point_run_right;
+					//////////////////////Modification////////////////////////
+					Funnelpoint(start,point_right,false,wedge_right);
+					////////////////////////////////////////////////////////
+
+				}
+				else if(test_l==0 && test_r==3){// narrow left side
+					//cout<<"narrow left side"<<endl;
+					point_left=point_run_left;
+					//////////////////////Modification////////////////////////
+					Funnelpoint(start,point_left,true,wedge_left);
+					////////////////////////////////////////////////////////
+				}
+				else if(test_l==1 && test_r==1){// apex=left
+					//cout<<"apex=left"<<endl;
+					apex=point_left;
+					//////////////////////Modification////////////////////////
+					use_left=point_left;
+					//use_right=use_left+2*(wedge_left-use_left);
+					use_right=wedge_left+wedge_left-use_left;
+					////////////////////////////////////////////////////////
+					//return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
+
+					apex_found=true;
+				}
+				else if(test_l==3 && test_r==3){//apex=right
+					//cout<<"apex=right"<<endl;
+					apex=point_right;
+					//////////////////////Modification////////////////////////
+					use_right=point_right;
+					//use_left=use_right+2*(wedge_right-use_right);
+					use_left=wedge_right+wedge_right-use_right;
+					////////////////////////////////////////////////////////
+					//return Nav	Line(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
+
+					apex_found=true;
+				}
+				else if(test_l==1 && test_r==3){ //  Widen wedge
+					//cout<<"widen wedge"<<endl;
+
+				}
+				else{// Corrupted data (works with walkaround)
+					// Uncomment !
+					//Log->Write("ERROR:\tFunnel reaches undefined state test_l %d test_r %d",test_l,test_r);
+
+					/*cout<<start.toString()<<endl;
+					cout<<point_left.toString()<<endl;
+					cout<<point_right.toString()<<endl;
+					cout<<wedge_left.toString()<<endl;
+					cout<<wedge_right.toString()<<endl;
+					cout<<"run"<<endl;
+					cout<<point_run_left.toString()<<endl;
+					cout<<point_run_right.toString()<<endl;
+
+					print_path(edge_path);
+					exit(EXIT_FAILURE);*/
+					// Walkaround
+					use_left=wedge_left;
+					use_right=wedge_right;
+					apex_found=true;
+				}
+				path_ind++;
+			}else{//After some Funnel iterations the cell containing the goal is reached;
+				//apex=goal; // Initialisation!
+				//cout<<"Funnel progressed to goal and stopped"<<endl;
+				apex_found=true;
+				apex=edge_path.back()->GetPoint1();//Test
+
+				//////////////////////Modification////////////////////////
+				//Log->Write("Info: Goal in Funnel");
+				Funnelpoint(start,goal,false,use_left);
+				Funnelpoint(start,goal,true,use_right);
+
+				////////////////////////////////////////////////////////
+
+				//return NavLine(Line(edge_path.at(path_ind-1)->GetPoint1(),edge_path.at(path_ind-1)->GetPoint2()));
+			}
+		}//END WHILE
+		//cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
+
+		// Some kind of workaround
+		// First Edge which contains the found apex
+		/*
+		bool edgefound=false;
+		path_ind=0;
+		Point p1=apex,p2=apex;
+		while(!edgefound){
+			if(edge_path.at(path_ind)->GetPoint1()==apex){
+				p1=apex;
+				p2=edge_path.at(path_ind)->GetPoint2();
+				edgefound=true;
+			}
+			else if(edge_path.at(path_ind)->GetPoint2()==apex){
+				p1=apex;
+				p2=edge_path.at(path_ind)->GetPoint1();
+				edgefound=true;
+			}
+			path_ind++;
+		}
+		*/
+
+		//NavLine exitline(Line(p1,p2));
+		/*
+		Point p1_new=(p1-p2)*0.9+p2;
+		Point p2_new=(p2-p1)*0.9+p1;
+		NavLine exitline(Line(p1_new,p2_new));
+		//cout<<"Funnel: exitline: "<<exitline.toString()<<endl;
+		return exitline;
+		*/
+
+		// here: dummy
+		return edge_path.at(0);
+
+
+	}//END IF
+}
+
+
 NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)const{
 
 	if(edge_path.empty()){
@@ -504,7 +795,7 @@ int MeshRouter::FindExit(Pedestrian* p){
 				//cout<<"The line is: "<<line.toString()<<endl;
 			}
 			nextline=&line;
-		}else{
+		}else{/*
 			meshline=Visibility(point_start,point_goal,edgepath);
 			nextline=dynamic_cast<NavLine*>(meshline);
 			Point p1=nextline->GetPoint1();
@@ -513,6 +804,20 @@ int MeshRouter::FindExit(Pedestrian* p){
 			//Point p2_new=(p2-p1)*0.9+p1;
 			nextline->SetPoint1((p1-p2)*0.9+p2);
 			nextline->SetPoint2((p2-p1)*0.9+p1);
+            */
+
+			//////////////////////Modification////////////////////////
+
+			Point use_left,use_right;
+			meshline=FunnelRad(point_start,point_goal,edgepath,use_left,use_right);
+			//nextline=dynamic_cast<NavLine*>(meshline);
+			//nextline->SetPoint1(use_left);
+			//nextline->SetPoint2(use_right);
+			line.SetPoint1(use_left);
+			line.SetPoint2(use_right);
+			nextline=&line;
+
+			//////////////////////////////////////////////////////////
 
 			//NavLine exitline(Line(p1_new,p2_new));
 			/*
@@ -745,6 +1050,16 @@ void MeshRouter::Init(Building* b) {
 	}
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 	FixMeshEdges();
+
+/*
+	Point start(0.0,0.0);
+	Point goal(1.0,3.0);
+	bool left=false;
+	Point result(0.0,0.0);
+	cout<<Funnelpoint(start,goal,left,result)<<endl;
+	cout<<result.toString()<<endl;
+	exit(EXIT_SUCCESS);
+	*/
 /*
 	int found_cell;
 	//_meshdata->FindCell(Point(14.5386998558,7.9135540711),found_cell);
