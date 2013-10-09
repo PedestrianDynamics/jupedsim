@@ -339,7 +339,7 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
 			Log->Write("cannot open the file individual\n");
 			exit(EXIT_FAILURE);
 		}
-		fprintf(_individualFD,"#Individual density(m^(-2))\t	Individual velocity(m/s)\n");
+		fprintf(_individualFD,"#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n");
 	}
 
 	if(_flowVelocity)
@@ -417,6 +417,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 		double *XInFrame = new double[numPedsInFrame]; 	// save the X coordinates of pedestrian in the geometry in this frame
 		double *YInFrame = new double[numPedsInFrame];	// save the Y coordinates of pedestrian in the geometry in this frame
 		double *VInFrame = new double[numPedsInFrame]; 	// save the instantaneous velocity of pedestrians in the geometry in this frame
+		int *IdInFrame = new int[numPedsInFrame]; 	// save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
 
 		int agentCnt=0;
 		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
@@ -432,6 +433,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			int Tpast = frameNr - _deltaF;
 			int Tfuture = frameNr + _deltaF;
 			VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
+			IdInFrame[agentCnt] = ID;
 
 			if(_flowVelocity)
 			{
@@ -502,7 +504,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 					{
 						// if(i>beginstationary&&i<endstationary)
 						{
-							GetIndividualFD(polygons,VInFrame,_areaForMethod_D->_poly, frid);
+							GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, frid);
 						}
 					}
 				}
@@ -532,6 +534,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 		delete []XInFrame;
 		delete []YInFrame;
 		delete []VInFrame;
+		delete []IdInFrame;
 
 	}// getFrame number j
 
@@ -705,10 +708,11 @@ void Analysis::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPe
  *  of the area of the pedestrian's voronoi cell. The individual velocity is his instantaneous velocity at this time.
  *  note that, Only the pedestrians in the measurement area are considered.
  */
-void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Velocity, const polygon_2d& measureArea, int frid)
+void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Velocity, int* Id, const polygon_2d& measureArea, int frid)
 {
 	double uniquedensity=0;
 	double uniquevelocity=0;
+	int uniqueId=0;
 	int temp=0;
 	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
@@ -719,7 +723,8 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
 		{
 			uniquedensity=1/(area(*polygon_iterator)*CMtoM*CMtoM);
 			uniquevelocity=Velocity[temp];
-			fprintf(_individualFD,"%d\t%.3f\t%.3f\n",frid, uniquedensity,uniquevelocity);
+			uniqueId=Id[temp];
+			fprintf(_individualFD,"%d\t%d\t%.3f\t%.3f\n",frid, uniqueId, uniquedensity,uniquevelocity);
 		}
 		temp++;
 	}
@@ -956,8 +961,8 @@ double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirs
 
 void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, double * velocity, const string& filename)
 {
-	string Prfvelocity="Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+filename+"_"+frameId+".dat";
-	string Prfdensity="Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+filename+"_"+frameId+".dat";
+	string Prfvelocity="./Output/Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+filename+"_"+frameId+".dat";
+	string Prfdensity="./Output/Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+filename+"_"+frameId+".dat";
 
 	FILE *Prf_velocity;
 	if((Prf_velocity=CreateFile(Prfvelocity))==NULL)
