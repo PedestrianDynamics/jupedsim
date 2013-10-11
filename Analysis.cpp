@@ -433,7 +433,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			int Tpast = frameNr - _deltaF;
 			int Tfuture = frameNr + _deltaF;
 			VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
-			IdInFrame[agentCnt] = ID;
+			IdInFrame[agentCnt] = ID+1;
 
 			if(_flowVelocity)
 			{
@@ -478,7 +478,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			VoronoiDiagram vd;
 			if(numPedsInFrame>2)
 			{
-				vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame, numPedsInFrame);
+				vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, numPedsInFrame);
 				//FIXME nothing is done here
 				polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
 				if(_cutByCircle)
@@ -714,6 +714,7 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
 	double uniquevelocity=0;
 	int uniqueId=0;
 	int temp=0;
+
 	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
 		typedef std::vector<polygon_2d> polygon_list;

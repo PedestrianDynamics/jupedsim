@@ -52,7 +52,7 @@ private:
 public:
 	VoronoiDiagram();
 	virtual ~VoronoiDiagram();
-	std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame, int numPedsInFrame);
+	std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame);
 	std::vector<polygon_2d> cutPolygonsWithGeometry(std::vector<polygon_2d> polygon, polygon_2d Geometry, double* xs, double* ys);
 	std::vector<polygon_2d> cutPolygonsWithCircle(std::vector<polygon_2d> polygon, double* xs, double* ys, double radius);
 };

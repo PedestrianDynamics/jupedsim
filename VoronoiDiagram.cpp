@@ -21,19 +21,22 @@ VoronoiDiagram::~VoronoiDiagram() {
 
 
 // Traversing Voronoi edges using cell iterator.
-std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame, int numPedsInFrame)
+std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame, int *IdInFrame, int numPedsInFrame)
 {
 
 
 	int XInFrame_temp[numPedsInFrame];
 	int YInFrame_temp[numPedsInFrame];
 	double VInFrame_temp[numPedsInFrame];
+	int IdInFrame_temp[numPedsInFrame];
+
 	for(int i = 0; i < numPedsInFrame; i++)
 	{
 	    points.push_back(point_type2((int)(XInFrame[i]+0.5), (int)(YInFrame[i]+0.5)));
 	    XInFrame_temp[i] = (int)(XInFrame[i]+0.5);
 	    YInFrame_temp[i] = (int)(YInFrame[i]+0.5);
 	    VInFrame_temp[i] = VInFrame[i];
+	    IdInFrame_temp[i] = IdInFrame[i];
 	}
 		//voronoi_diagram<double> vd;
 	VD vd;
@@ -65,6 +68,7 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
 					    if(XInFrame_temp[k]==thispoint.x()&&YInFrame_temp[k]==thispoint.y())
 					    {
 					    	VInFrame[Ncell] = VInFrame_temp[k];
+					    	IdInFrame[Ncell] = IdInFrame_temp[k];
 					    	break;
 					    }
 				  }
