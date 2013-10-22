@@ -245,8 +245,8 @@ void NavMesh::BuildNavMesh() {
 	//Triangulate(pNodes[pBuilding->GetRoom("030")->GetSubRoom(0)->GetUID()]);
 	//Triangulate(pNodes[pBuilding->GetRoom("040a")->GetSubRoom(0)->GetUID()]);
 	//Triangulate(pNodes[pBuilding->GetRoom("030a")->GetSubRoom(0)->GetUID()]);
-	//Finalize();
-	FinalizeAlphaShape();
+	Finalize();
+	//FinalizeAlphaShape();
 	//WriteToFileTraVisTo("promenade.nav.xml", pNodes[364]); exit(0);
 	//WriteToFileTraVisTo("promenade.nav.xml");
 	//cout<<"groupe:"<<pNodes[365]->pGroup<<endl;

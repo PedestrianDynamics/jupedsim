@@ -47,6 +47,7 @@ private:
 	string pErrorLogFile;
 	string pNavMeshFilename;
 	string _projectFile;
+	string _projectRootDir;
 	double pTmax; // maximale Simulationszeit
 	double pdt; // Zeitschritt
 	double pfps; //frame rate
@@ -142,6 +143,7 @@ public:
 	const string& GetGeometryFilename() const;
 	const string& GetNavigationMesh() const;
 	const string& GetProjectFile() const;
+	const string& GetProjectRootDir() const;
 
 	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;

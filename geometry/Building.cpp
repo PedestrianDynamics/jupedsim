@@ -260,20 +260,26 @@ void Building::InitGeometry() {
  Ein-Ausgabe
  ************************************************************/
 
-const string& Building::GetPojectFilename() const{
+const string& Building::GetProjectFilename() const{
 	return _projectFilename;
 }
 
-void Building::SetPojectFilename(const std::string &filename){
+void Building::SetProjectFilename(const std::string &filename){
 	_projectFilename=filename;
+}
+
+void Building::SetProjectRootDir(const std::string &filename){
+	_projectRootDir= filename;
+}
+
+const string& Building::GetProjectRootDir() const{
+	return _projectRootDir;
 }
 
 
 void Building::LoadBuildingFromFile() {
 
 	//get the geometry filename from the project file
-
-	string geoFilename="";
 	TiXmlDocument doc(_projectFilename);
 	if (!doc.LoadFile()){
 		Log->Write("ERROR: \t%s", doc.ErrorDesc());
@@ -281,15 +287,13 @@ void Building::LoadBuildingFromFile() {
 		exit(EXIT_FAILURE);
 	}
 
-	// everything is fine. proceed with parsing
-
 	Log->Write("INFO: \tParsing the geometry file");
 	TiXmlElement* xMainNode = doc.RootElement();
+	string geoFilename="";
 	if(xMainNode->FirstChild("geometry")){
-		geoFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+		geoFilename=_projectRootDir+xMainNode->FirstChild("geometry")->FirstChild()->Value();
 		Log->Write("INFO: \tgeometry <"+geoFilename+">");
 	}
-
 
 	TiXmlDocument docGeo(geoFilename);
 	if (!docGeo.LoadFile()){
@@ -297,7 +301,6 @@ void Building::LoadBuildingFromFile() {
 		Log->Write("ERROR: \t could not parse the geometry file");
 		exit(EXIT_FAILURE);
 	}
-
 
 	TiXmlElement* xRootNode = docGeo.RootElement();
 	if( ! xRootNode ) {
@@ -309,7 +312,6 @@ void Building::LoadBuildingFromFile() {
 		Log->Write("ERROR:\tRoot element value is not 'geometry'.");
 		exit(EXIT_FAILURE);
 	}
-
 
 	double version = xmltof(xRootNode->Attribute("version"), -1);
 	if (version < 0.4) {

@@ -49,9 +49,11 @@ void OutputHandler::Write(const char* message,...) {
 	string str(msg);
 	if(str.find("ERROR")==string::npos) {
 		cout<<msg<<endl;
+		cout.flush();
 	}
 	else {
 		cerr<<msg<<endl;
+		cerr.flush();
 	}
 
 	//cout << "\033[1;30mbold red text\033[0m\n";

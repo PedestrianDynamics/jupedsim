@@ -402,7 +402,7 @@ void GlobalRouter::Init(Building* building) {
 
 	for (unsigned int p = 0; p < _finalDestinations.size(); p++) {
 
-		//todo: ID for final destinaion and aps are mixed
+		//todo: ID for final destination and aps are mixed
 		continue;
 
 		//get the uniqueID and find the corresponding index in the matrix
@@ -462,9 +462,6 @@ void GlobalRouter::Init(Building* building) {
 		}
 
 	}
-
-	//create a complete navigation graph
-	//LoadNavigationGraph("./Inputfiles/120531_navigation_graph_arena.xml");
 
 	//dumping the complete system
 	//DumpAccessPoints(-1);
@@ -976,7 +973,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 string GlobalRouter::GetRoutingInfoFile() const {
 
-	TiXmlDocument doc(_building->GetPojectFilename());
+	TiXmlDocument doc(_building->GetProjectFilename());
 	if (!doc.LoadFile()){
 		Log->Write("ERROR: \t%s", doc.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the project file");
@@ -1004,7 +1001,7 @@ string GlobalRouter::GetRoutingInfoFile() const {
 		}
 	}
 
-	return nav_line_file;
+	return _building->GetProjectRootDir()+nav_line_file;
 }
 
 
@@ -1040,34 +1037,36 @@ void GlobalRouter::LoadRoutingInfos(const std::string &filename){
 		exit(EXIT_FAILURE);
 	}
 
-	//parsing the crossings
-	TiXmlNode*  xHlinesNode = xRootNode->FirstChild("Hlines");
+	for(TiXmlElement* xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
+			xHlinesNode = xHlinesNode->NextSiblingElement("Hlines")) {
 
-	for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
-			hline = hline->NextSiblingElement("Hline")) {
 
-		double id = xmltof(hline->Attribute("id"), -1);
-		int room_id = xmltoi(hline->Attribute("room_id"), -1);
-		int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
+		for(TiXmlElement* hline = xHlinesNode->FirstChildElement("Hline"); hline;
+				hline = hline->NextSiblingElement("Hline")) {
 
-		double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
-		double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
-		double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
-		double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
+			double id = xmltof(hline->Attribute("id"), -1);
+			int room_id = xmltoi(hline->Attribute("room_id"), -1);
+			int subroom_id = xmltoi(hline->Attribute("subroom_id"), -1);
 
-		Room* room = _building->GetRoom(room_id);
-		SubRoom* subroom = room->GetSubRoom(subroom_id);
+			double x1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("px"));
+			double y1 = xmltof(	hline->FirstChildElement("vertex")->Attribute("py"));
+			double x2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("px"));
+			double y2 = xmltof(	hline->LastChild("vertex")->ToElement()->Attribute("py"));
 
-		//new implementation
-		Hline* h = new Hline();
-		h->SetID(id);
-		h->SetPoint1(Point(x1, y1));
-		h->SetPoint2(Point(x2, y2));
-		h->SetRoom(room);
-		h->SetSubRoom(subroom);
+			Room* room = _building->GetRoom(room_id);
+			SubRoom* subroom = room->GetSubRoom(subroom_id);
 
-		_building->AddHline(h);
-		subroom->AddHline(h);
+			//new implementation
+			Hline* h = new Hline();
+			h->SetID(id);
+			h->SetPoint1(Point(x1, y1));
+			h->SetPoint2(Point(x2, y2));
+			h->SetRoom(room);
+			h->SetSubRoom(subroom);
+
+			_building->AddHline(h);
+			subroom->AddHline(h);
+		}
 	}
 	Log->Write("INFO:\tDone with loading extra routing information");
 }

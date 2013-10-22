@@ -52,6 +52,7 @@ class Building {
 private:
     std::string _caption;
     std::string _projectFilename;
+    std::string _projectRootDir;
     RoutingEngine* _routingEngine;
     LCGrid* _linkedCellGrid;
     std::vector<Room*> _rooms;
@@ -130,9 +131,10 @@ public:
 	void AddHline(Hline* line);
 	void AddGoal(Goal* goal);
 
-
-	const std::string& GetPojectFilename() const;
-	void SetPojectFilename(const std::string &filename) ;
+	const std::string& GetProjectRootDir() const;
+	const std::string& GetProjectFilename() const;
+	void SetProjectFilename(const std::string &filename) ;
+	void SetProjectRootDir(const std::string &filename);
     void LoadBuildingFromFile();
     void LoadTrafficInfo();
     void LoadRoutingInfo(const std::string &filename);

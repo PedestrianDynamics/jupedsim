@@ -440,6 +440,10 @@ void ArgumentParser::ParseIniFile(string inifile){
 	Log->Write("INFO: \tLoading and parsing the project file file <%s>",inifile.c_str());
 	_projectFile=inifile;
 
+	//extract and set the project root dir
+	size_t found=inifile.find_last_of("/\\");
+	_projectRootDir= inifile.substr(0,found) + "/";
+
 	TiXmlDocument doc(inifile);
 	if (!doc.LoadFile()){
 		Log->Write("ERROR: \t%s", doc.ErrorDesc());
@@ -470,7 +474,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 	//logfile
 	if(xMainNode->FirstChild("logfile")){
-		pErrorLogFile=xMainNode->FirstChild("logfile")->FirstChild()->Value();
+		pErrorLogFile=_projectRootDir+xMainNode->FirstChild("logfile")->FirstChild()->Value();
 		pLog=2;
 		Log->Write("INFO: \tlogfile <"+(pErrorLogFile)+">");
 	}
@@ -495,7 +499,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		//a file descriptor was given
 		if(xTrajectories->FirstChild("file")){
 			const char* tmp = xTrajectories->FirstChildElement("file")->Attribute("location");
-			if(tmp) pTrajectoriesFile = tmp;
+			if(tmp) pTrajectoriesFile = _projectRootDir+tmp;
 			Log->Write("INFO: \toutput file  <"+string(pTrajectoriesFile)+">");
 			Log->Write("INFO: \tin format <%s> at <%f> frames per seconds",format.c_str(),pfps);
 		}
@@ -723,6 +727,7 @@ const string& ArgumentParser::GetProjectFile() const {
 	return _projectFile;
 }
 
+/// @deprecated
 const string& ArgumentParser::GetNavigationMesh() const {
 	return pNavMeshFilename;
 }
@@ -730,7 +735,6 @@ const string& ArgumentParser::GetNavigationMesh() const {
 int ArgumentParser::GetExitStrategy() const {
 	return pExitStrategy;
 }
-
 
 bool ArgumentParser::GetLinkedCells() const {
 	return pLinkedCells;
@@ -827,15 +831,14 @@ int ArgumentParser::GetLog() const {
 double ArgumentParser::GetLinkedCellSize() const{
 	return pLinkedCellSize;
 }
+
 unsigned int ArgumentParser::GetSeed() const {
 	return pSeed;
 }
 
-
 int ArgumentParser::GetEmbededMesh() const {
 	return _embedMesh;
 }
-
 
 const string& ArgumentParser::GetErrorLogFile() const {
 	return pErrorLogFile;
@@ -850,4 +853,8 @@ const string& ArgumentParser::GetTrajectoriesFile() const {
 
 void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
 	pTrajectoriesFile = trajectoriesFile;
+}
+
+const string& ArgumentParser::GetProjectRootDir() const {
+	return _projectRootDir;
 }

@@ -1087,7 +1087,7 @@ void MeshRouter::Init(Building* b) {
 
 string MeshRouter::GetMeshFileName() const {
 
-	TiXmlDocument doc(_building->GetPojectFilename());
+	TiXmlDocument doc(_building->GetProjectFilename());
 	if (!doc.LoadFile()){
 		Log->Write("ERROR: \t%s", doc.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the project file");

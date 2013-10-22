@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="arena-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>inputfiles/geo.xml</geometry>
+	<geometry>131021_arena_geo.xml</geometry>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
-		<file location="outputfiles/trajectories.xml" />
+		<file location="trajectories-arena.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	<!-- where to store the logs -->
@@ -23,7 +23,29 @@
 		</rooms>
 		<!-- doors states are: close or open -->
 		<doors>
-			<door trans_id="1" caption="" state="open" />
+			<door trans_id="2501" caption="TREPPE001" state="close" />
+			<door trans_id="2505" caption="TREPPE002" state="close" />
+			<door trans_id="2510" caption="TREPPE003" state="close" />
+			<door trans_id="2509" caption="TREPPE004" state="close" />
+			<door trans_id="2508" caption="TREPPE005" state="close" />
+			<door trans_id="2507" caption="TREPPE006" state="close" />
+			<door trans_id="2573" caption="TREPPE007" state="close" />
+			<door trans_id="2574" caption="TREPPE008" state="close" />
+			<door trans_id="2571" caption="TREPPE009" state="close" />
+			<door trans_id="2572" caption="TREPPE010" state="close" />
+			<door trans_id="2620" caption="TREPPE001a" state="close" />
+			<door trans_id="2624" caption="TREPPE002a" state="close" />
+			<door trans_id="2629" caption="TREPPE003a" state="close" />
+			<door trans_id="2628" caption="TREPPE004a" state="close" />
+			<door trans_id="2625" caption="TREPPE005a" state="close" />
+			<door trans_id="2626" caption="TREPPE006a" state="close" />
+			<door trans_id="2565" caption="AR02-2053" state="close" />
+			<door trans_id="2569" caption="AR03-2147" state="close" />
+			<door trans_id="2568" caption="AR04-2194" state="close" />
+			<door trans_id="2567" caption="AR06-2294" state="close" />
+			<door trans_id="2570" caption="AR07-2358" state="close" />
+			<door trans_id="2566" caption="AR08-2415" state="close" />
+			<door trans_id="2617" caption="AR0300090" state="close" />
 		</doors>
 	</traffic_constraints>
 
@@ -71,7 +93,7 @@
 			<group group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" age="" gender="" height="" startX="" startY="" />
 			<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
 			<group group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="1" route_id="" />
-			<group group_id="2" room_id="0" number="50" router_id="1"/>
+			<group group_id="2" room_id="0" number="20" router_id="1"/>
 		</agents_distribution>
 
 		<agents_sources><!-- frequency in persons/minute -->
@@ -95,7 +117,7 @@
 			<parameters>
 				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
-				<stepsize>0.001</stepsize>
+				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
@@ -122,17 +144,16 @@
 		<router router_id="1" description="global_shortest">
 			<parameters>
 				<!-- extra routing information -->
-				<navigation_lines file="inputfiles/routing.xml" />
+				<navigation_lines file="131021_arena_routing.xml" />
 			</parameters>
 		</router>
-
+<!--
 		<router router_id="2" description="quickest">
 			<parameters>
-				<!-- extra routing information -->
-				<navigation_lines file="inputfiles/routing.xml" />
+				<navigation_lines file="131021_arena_routing.xml" />
 			</parameters>
 		</router>
-<!--  
+  
 		<router router_id="3" description="nav_mesh">
 			<parameters>
 				<decomposition method="triangulation" />

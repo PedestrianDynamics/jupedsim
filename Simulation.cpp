@@ -31,7 +31,7 @@
 using namespace std;
 
 Simulation::Simulation() {
-	_nPeds = 0; // number of pedestrians, Default 10
+	_nPeds = 0;
 	_tmax = 0;
 	_seed=8091983;
 	_deltaT = 0;
@@ -323,7 +323,8 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	// IMPORTANT: do not change the order in the following..
 	_building = new Building();
 	_building->SetRoutingEngine(routingEngine);
-	_building->SetPojectFilename(args->GetProjectFile());
+	_building->SetProjectFilename(args->GetProjectFile());
+	_building->SetProjectRootDir(args->GetProjectRootDir());
 
 	_building->LoadBuildingFromFile();
 	_building->AddSurroundingRoom();
