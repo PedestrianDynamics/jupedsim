@@ -64,12 +64,11 @@ int main(int argc, char **argv) {
 	args->ParseArgs(argc, argv);
 
 	// create and init the simulation engine
-	Simulation sim = Simulation();
-	sim.InitArgs(args);
-
 	// Simulation
 	time(&starttime);
 	Log->Write("INFO: \tStart runSimulation()\n");
+	Simulation sim = Simulation();
+	sim.InitArgs(args);
 	int evacTime = sim.RunSimulation();
 	Log->Write("\nINFO: \tEnd runSimulation()\n");
 	time(&endtime);

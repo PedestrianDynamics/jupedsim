@@ -199,7 +199,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	// define how the navigation line is crossed
 	int direction = args->GetExitStrategy();
-	sprintf(tmp, "\tRichtung zum Ausgang: %d\n", direction);
+	sprintf(tmp, "\tDirection to the exit: %d\n", direction);
 	s.append(tmp);
 	switch (direction) {
 		case 1:
