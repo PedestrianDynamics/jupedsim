@@ -679,7 +679,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building){
 	Write("<geometry>");
 	Write(geometry);
 	Write("</geometry>");
-	nv->WriteToFile(building->GetProjectFilename()+".full.nav"); exit(0);
+	nv->WriteToFile(building->GetProjectFilename()+".full.nav");
 	delete nv;
 }
 

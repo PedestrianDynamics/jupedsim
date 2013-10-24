@@ -6,6 +6,9 @@
 #include <string>
 #include <sstream>
 
+#include <limits.h>
+#include <stdlib.h>
+
 #ifdef _OPENMP
 #include <omp.h>
 #else
@@ -442,7 +445,14 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 	//extract and set the project root dir
 	size_t found=inifile.find_last_of("/\\");
-	_projectRootDir= inifile.substr(0,found) + "/";
+	if (found!=string::npos)
+		_projectRootDir= inifile.substr(0,found) + "/";
+
+	//cout<<inifile<<endl;
+	//cout<<_projectRootDir<<endl; exit(0);
+	//char *real_path = _realpath(path, NULL);
+	// use real_path
+	//free(real_path);
 
 	TiXmlDocument doc(inifile);
 	if (!doc.LoadFile()){

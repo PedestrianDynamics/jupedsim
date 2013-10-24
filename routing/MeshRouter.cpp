@@ -1111,5 +1111,5 @@ string MeshRouter::GetMeshFileName() const {
 		}
 
 	}
-	return mesh_file;
+	return _building->GetProjectRootDir()+mesh_file;
 }
