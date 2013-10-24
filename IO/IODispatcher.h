@@ -56,10 +56,6 @@ public:
 	virtual void WriteFooter();
 	int AreaLevel(std::string caption);
 
-	//dump the geometry in another format
-	void WriteGeometryRVO(Building* building);
-	void WriteNavMeshORCA(Building* building);
-
 
 	template<typename A>
 	bool IsElementInVector(const std::vector<A> &vec, A& el) {

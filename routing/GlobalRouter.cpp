@@ -526,6 +526,7 @@ void GlobalRouter::DumpAccessPoints(int p) {
 int GlobalRouter::FindExit(Pedestrian* ped) {
 
 	int nextDestination = ped->GetNextDestination();
+	//ped->Dump(13);
 
 	if (nextDestination == -1) {
 		return GetBestDefaultRandomExit(ped);

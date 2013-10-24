@@ -53,29 +53,40 @@
 		<goals>
 			<goal id="0" final="false" caption="goal 1">
 				<polygon>
-					<vertex px="-5.0" py="-5.0" />
-					<vertex px="-5.0" py="-2.0" />
-					<vertex px="-3.0" py="-2.0" />
-					<vertex px="-3.0" py="-5.0" />
-					<vertex px="-5.0" py="-5.0" />
+					<vertex px="-115.0" py="-95.0" />
+					<vertex px="-100.0" py="-95.0" />
+					<vertex px="-100.0" py="-80.0" />
+					<vertex px="-115.0" py="-80.0" />
+					<vertex px="-115.0" py="-95.0" />
 				</polygon>
 			</goal>
 			<goal id="1" final="false" caption="goal 2">
 				<polygon>
-					<vertex px="15.0" py="-5.0" />
-					<vertex px="17.0" py="-5.0" />
-					<vertex px="17.0" py="-7.0" />
-					<vertex px="15.0" py="-7.0" />
-					<vertex px="15.0" py="-5.0" />
+					<vertex px="-115.0" py="95.0" />
+					<vertex px="-100.0" py="95.0" />
+					<vertex px="-100.0" py="80.0" />
+					<vertex px="-115.0" py="80.0" />
+					<vertex px="-115.0" py="95.0" />
 				</polygon>
 			</goal>
+			
 			<goal id="2" final="true" caption="goal 3">
 				<polygon>
-					<vertex px="20.0" py="17.0" />
-					<vertex px="22.0" py="17.0" />
-					<vertex px="22.0" py="15.0" />
-					<vertex px="20.0" py="15.0" />
-					<vertex px="20.0" py="17.0" />
+					<vertex px="115.0" py="95.0" />
+					<vertex px="100.0" py="95.0" />
+					<vertex px="100.0" py="80.0" />
+					<vertex px="115.0" py="80.0" />
+					<vertex px="115.0" py="95.0" />
+				</polygon>
+			</goal>
+			
+			<goal id="3" final="true" caption="goal 3">
+				<polygon>
+					<vertex px="115.0" py="-95.0" />
+					<vertex px="100.0" py="-95.0" />
+					<vertex px="100.0" py="-80.0" />
+					<vertex px="115.0" py="-80.0" />
+					<vertex px="115.0" py="-95.0" />
 				</polygon>
 			</goal>
 		</goals>
@@ -90,10 +101,34 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-		 	<group group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" age="" gender="" height="" startX="" startY="" />
-			<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
-			<group group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="1" route_id="" />
-			<group group_id="2" room_id="0" number="60" router_id="1"/>
+		 	<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
+			<group group_id="1" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
+			<group group_id="2" room_id="0" subroom_id="1" number="0" goal_id="" router_id="1" route_id="" />
+			<group group_id="3" room_id="1" number="60" router_id="1"/>
+			<group1 group_id="4" room_id="2" number="60" router_id="1"/>
+			<group1 group_id="5" room_id="3" number="60" router_id="1"/>
+			<group1 group_id="6" room_id="4" number="60" router_id="1"/>
+			<group1 group_id="7" room_id="5" number="60" router_id="1"/>
+			<group1 group_id="8" room_id="6" number="60" router_id="1"/>
+			<group1 group_id="9" room_id="7" number="60" router_id="1"/>
+			<group1 group_id="10" room_id="8" number="60" router_id="1"/>
+			<group1 group_id="11" room_id="9" number="60" router_id="1"/>
+			<group1 group_id="12" room_id="10" number="60" router_id="1"/>
+			<group1 group_id="13" room_id="11" number="60" router_id="1"/>
+			<group1 group_id="14" room_id="12" number="60" router_id="1"/>
+			<group1 group_id="15" room_id="13" number="60" router_id="1"/>
+			<group1 group_id="16" room_id="14" number="60" router_id="1"/>
+			<group1 group_id="17" room_id="15" number="60" router_id="1"/>
+			<group1 group_id="18" room_id="16" number="60" router_id="1"/>
+			<group1 group_id="19" room_id="17" number="60" router_id="1"/>
+			<group1 group_id="20" room_id="18" number="60" router_id="1"/>
+			<group1 group_id="21" room_id="19" number="60" router_id="1"/>
+			<group1 group_id="22" room_id="20" number="60" router_id="1"/>
+			<group1 group_id="23" room_id="21" number="60" router_id="1"/>
+			<group1 group_id="24" room_id="22" number="60" router_id="1"/>
+			<group1 group_id="25" room_id="23" number="60" router_id="1"/>
+			<group1 group_id="26" room_id="24" number="60" router_id="1"/>
+			<group1 group_id="27" room_id="25" number="60" router_id="1"/>
 		</agents_distribution>
 
 		<agents_sources><!-- frequency in persons/minute -->

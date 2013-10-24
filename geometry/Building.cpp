@@ -168,7 +168,6 @@ void Building::AddSurroundingRoom() {
 	double x_max = -FLT_MAX;
 	double y_min = FLT_MAX;
 	double y_max = -FLT_MAX;
-
 	//finding the bounding of the grid
 	// and collect the pedestrians
 	for (unsigned int r = 0; r < _rooms.size(); r++) {
@@ -195,6 +194,30 @@ void Building::AddSurroundingRoom() {
 			}
 		}
 	}
+
+	for (map<int, Goal*>::const_iterator itr = _goals.begin();
+			itr != _goals.end(); ++itr) {
+
+		const vector<Wall>& allWalls = itr->second->GetAllWalls();
+
+		for (unsigned int a = 0; a < allWalls.size(); a++) {
+			double x1 = allWalls[a].GetPoint1().GetX();
+			double y1 = allWalls[a].GetPoint1().GetY();
+			double x2 = allWalls[a].GetPoint2().GetX();
+			double y2 = allWalls[a].GetPoint2().GetY();
+
+			double xmax = (x1 > x2) ? x1 : x2;
+			double xmin = (x1 > x2) ? x2 : x1;
+			double ymax = (y1 > y2) ? y1 : y2;
+			double ymin = (y1 > y2) ? y2 : y1;
+
+			x_min = (xmin <= x_min) ? xmin : x_min;
+			x_max = (xmax >= x_max) ? xmax : x_max;
+			y_max = (ymax >= y_max) ? ymax : y_max;
+			y_min = (ymin <= y_min) ? ymin : y_min;
+		}
+	}
+
 	//cout<<"xmin: "<<x_min<<" xmax: "<<x_max<<" ymin: " <<y_min <<" ymax: " <<y_max <<endl; exit(0);
 	//make the grid slightly larger.
 	x_min = x_min - 10.0;
@@ -733,7 +756,8 @@ void Building::UpdateVerySlow(){
 			//if(room->GetCaption()=="outside") continue;
 			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
 				SubRoom* sub = room->GetSubRoom(j);
-				if (sub->IsInSubRoom(ped->GetPos())) {
+				SubRoom* old_sub= _rooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
+				if ((sub->IsInSubRoom(ped->GetPos())) && (sub->IsDirectlyConnectedWith(old_sub))) {
 					ped->SetRoomID(room->GetID(), room->GetCaption());
 					ped->SetSubRoomID(sub->GetSubRoomID());
 					ped->ClearMentalMap(); // reset the destination

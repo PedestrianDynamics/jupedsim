@@ -327,12 +327,12 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	_building->SetProjectRootDir(args->GetProjectRootDir());
 
 	_building->LoadBuildingFromFile();
+	_building->LoadRoutingInfo(args->GetProjectFile());
 	_building->AddSurroundingRoom();
 	_building->InitGeometry(); // create the polygons
 
 	_building->LoadTrafficInfo();
 
-	_building->LoadRoutingInfo(args->GetProjectFile());
 
 	// in the case the navigation mesh should be written to a file
 	if(args->GetNavigationMesh()!=""){
@@ -415,7 +415,7 @@ int Simulation::RunSimulation() {
 
 // TODO: make the building class more independent by moving the update routing here.
 void Simulation::Update() {
-	//	_building->Update();
+	//_building->Update();
 	_building->UpdateVerySlow();
 	//someone might have leave the building
 	_nPeds=_building->GetAllPedestrians().size();
