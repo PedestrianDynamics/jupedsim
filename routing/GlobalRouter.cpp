@@ -40,7 +40,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-				Router() {
+						Router() {
 
 	_accessPoints = map<int, AccessPoint*>();
 	_map_id_to_index = std::map<int, int>();
@@ -86,7 +86,6 @@ void GlobalRouter::Init(Building* building) {
 	// initialize the network for the floydwarshall algo
 	// initialize the distances matrix
 
-	//		const int exitsCnt = pCrossings.size()+ pTransitions.size()+pHlines.size();
 	const int exitsCnt = _building->GetNumberOfGoals();
 
 	_distMatrix = new double*[exitsCnt];
@@ -142,7 +141,7 @@ void GlobalRouter::Init(Building* building) {
 		//int door=itr->first;
 		int door = itr->second->GetUniqueID();
 		Crossing* cross = itr->second;
-		Point centre = cross->GetCentre();
+		const Point& centre = cross->GetCentre();
 		double center[2] = { centre.GetX(), centre.GetY() };
 
 		AccessPoint* ap = new AccessPoint(door, center);
@@ -166,7 +165,6 @@ void GlobalRouter::Init(Building* building) {
 		_map_id_to_index[door] = index;
 		_map_index_to_id[index] = door;
 		index++;
-
 	}
 
 	for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
@@ -364,11 +362,9 @@ void GlobalRouter::Init(Building* building) {
 			tmpMinDist = 0;
 
 		if (tmpMinDist == FLT_MAX) {
-			char tmp[CLENGTH];
-			sprintf(tmp,
+			Log->Write(
 					"ERROR: GlobalRouter: There is no path from hline/crossing/transition [ %d ] to the outside\n",
 					from_door);
-			Log->Write(tmp);
 			exit(EXIT_FAILURE);
 		}
 
@@ -387,7 +383,7 @@ void GlobalRouter::Init(Building* building) {
 			if ((from_AP->isFinalDestination() == false)
 					&& (!from_AP->IsClosed())) {
 
-				Log->Write(	"\nERROR: GlobalRouter: hline/crossing/transition is out of visibility range \n");
+				Log->Write("ERROR: GlobalRouter: hline/crossing/transition is out of visibility range \n");
 				from_AP->Dump();
 				exit(EXIT_FAILURE);
 			}
@@ -399,40 +395,38 @@ void GlobalRouter::Init(Building* building) {
 	// in the persons file
 	// set the distances to alternative destinations
 
-
 	for (unsigned int p = 0; p < _finalDestinations.size(); p++) {
 
-		//todo: ID for final destination and aps are mixed
-		continue;
-
+		//find the nearest door to that goal
 		//get the uniqueID and find the corresponding index in the matrix
 		//loop over all transitions
 
 		int to_door_matrix_index=-1;
 		int to_door_uid=-1;
 
+		double min_dist = FLT_MAX;
+
 		for (map<int, Transition*>::const_iterator itr = _building->GetAllTransitions().begin();
 				itr != _building->GetAllTransitions().end(); ++itr) {
 
-			int index = itr->second->GetID();
-			if (_finalDestinations[p]==index){
-				to_door_matrix_index=_map_id_to_index[itr->second->GetUniqueID()];
-				to_door_uid=itr->second->GetUniqueID();
-				break;
-			}
+			double distance =
+					itr->second->DistTo(
+							_building->GetFinalGoal(_finalDestinations[p])->GetCentroid());
 
+			if(distance<min_dist){
+				min_dist=distance;
+				to_door_uid=itr->second->GetUniqueID();
+				to_door_matrix_index=_map_id_to_index[to_door_uid];
+			}
 		}
 
 		// thats probably a goal located outside the geometry or not an exit from the geometry
 		if(to_door_uid==-1){
-			//look for the nearest transition
 			Log->Write(
-					"ERROR: GlobalRouter: Final destination not found [ %d ]\n",
+					"ERROR: \tGlobalRouter: there is something wron with final destination [ %d ]\n",
 					_finalDestinations[p]);
 			exit(EXIT_FAILURE);
 		}
-
-
 
 		for (map<int, AccessPoint*>::const_iterator itr =
 				_accessPoints.begin(); itr != _accessPoints.end(); ++itr) {
@@ -458,9 +452,7 @@ void GlobalRouter::Init(Building* building) {
 				}
 			}
 			_tmpPedPath.clear();
-
 		}
-
 	}
 
 	//dumping the complete system
@@ -472,7 +464,7 @@ void GlobalRouter::Init(Building* building) {
 	//cout<<building->GetRoom(0)->GetCaption()<<endl;
 	//vector<string> rooms;
 	//rooms.push_back("hall");
-	//rooms.push_back("050");
+	//rooms.push_back("070");
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
 	//WriteGraphGV("routing_graph.gv",1,rooms);
 	Log->Write("INFO:\tDone with the Global Router Engine!");
@@ -519,14 +511,13 @@ void GlobalRouter::DumpAccessPoints(int p) {
 				itr != _accessPoints.end(); ++itr) {
 			itr->second->Dump();
 		}
-
 	}
 }
 
 int GlobalRouter::FindExit(Pedestrian* ped) {
 
 	int nextDestination = ped->GetNextDestination();
-	//ped->Dump(13);
+	//ped->Dump(1);
 
 	if (nextDestination == -1) {
 		return GetBestDefaultRandomExit(ped);
@@ -555,9 +546,7 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 
 			if (nextDestination == -1) { // we are almost at the exit
 				return ped->GetNextDestination();
-
 			} else {
-
 				//check that the next destination is in the actual room of the pedestrian
 				if (_accessPoints[nextDestination]->isInRange(
 						sub->GetUID())==false) {
@@ -589,7 +578,6 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 }
 
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
-
 	// get the opened exits
 	SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
 			ped->GetSubRoomID());
@@ -616,14 +604,14 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		const Point& posA = ped->GetPos();
 		const Point& posB = ap->GetNavLine()->GetCentre();
 		const Point& posC = (posB - posA).Normalized()
-								* ((posA - posB).Norm() - J_EPS) + posA;
+										* ((posA - posB).Norm() - J_EPS) + posA;
 
 		//check if visible
 		if (sub->IsVisible(posA, posC, true) == false)
 			continue;
 
 		double dist = ap->GetDistanceTo(ped->GetFinalDestination())
-								+ ap->distanceTo(posA.GetX(), posA.GetY());
+										+ ap->distanceTo(posA.GetX(), posA.GetY());
 
 		if (dist < minDist) {
 			bestAPsID = ap->GetID();
@@ -637,7 +625,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		return bestAPsID;
 	} else {
 		if(_building->GetRoom(ped->GetRoomID())->GetCaption()!="outside")
-		Log->Write("ERROR:\tGlobalRouter.cpp: a valid destination could not be found for ped [%d] going to destination [%d]",ped->GetID(),ped->GetFinalDestination());
+			Log->Write("ERROR:\tGlobalRouter.cpp: a valid destination could not be found for ped [%d] going to destination [%d]",ped->GetID(),ped->GetFinalDestination());
 		//exit(EXIT_FAILURE);
 		return -1;
 	}
@@ -884,12 +872,12 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 			}
 
 			if (isSink) {
-				//				graph_file << from_door <<" [width=\"0.3\", height=\"0.21\",fixedsize=false,pos=\""<<px<<", "<<py<<" \" ,style=filled, color=green, fontsize=4] ;"<<endl;
+				//graph_file << from_door <<" [width=\"0.3\", height=\"0.21\",fixedsize=false,pos=\""<<px<<", "<<py<<" \" ,style=filled, color=green, fontsize=4] ;"<<endl;
 				graph_file << from_door << " [pos=\"" << px << ", " << py
-						<< " \" ,style=filled, color=green, fontsize=5] ;"
+						<< " \" ,style=filled, color=blue, fontsize=5] ;"
 						<< endl;
 			} else {
-				//				graph_file << from_door <<" [width=\"0.3\", height=\"0.231\",fixedsize=false, pos=\""<<px<<", "<<py<<" \", fontsize=4] ;"<<endl;
+				//graph_file << from_door <<" [width=\"0.3\", height=\"0.231\",fixedsize=false, pos=\""<<px<<", "<<py<<" \", fontsize=4] ;"<<endl;
 				graph_file << from_door << " [pos=\"" << px << ", " << py
 						<< " \", style=filled, color=yellow, fontsize=5] ;"
 						<< endl;

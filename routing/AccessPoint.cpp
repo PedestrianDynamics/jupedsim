@@ -92,11 +92,10 @@ void AccessPoint::AddFinalDestination(int UID, double distance){
 double AccessPoint::GetDistanceTo(int UID){
 	//this is probably a final destination
 	if(_mapDestToDist.count(UID)==0){
-		cout<<"No route to host ["<< UID<<" ]"<<endl;
+		Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
+		Log->Write("ERROR:\tCheck your configuration file");
 		Dump();
-		//TODO:FIXME: this should not happened
 		exit(EXIT_FAILURE);
-		//return -1;
 	}
 	return _mapDestToDist[UID];
 }
@@ -116,9 +115,11 @@ void AccessPoint::AddConnectingAP(AccessPoint* ap){
 int  AccessPoint::GetNextApTo(int UID){
 	//this is probably a final destination
 	if(_mapDestToAp.count(UID)==0){
-		cout<<"No route to host ["<< UID<<" ]"<<endl;
+		Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
+		Log->Write("ERROR:\tCheck your configuration file");
 		Dump();
-		return -1;
+		exit(EXIT_FAILURE);
+		//return -1;
 	}
 	return _mapDestToAp[UID];
 }

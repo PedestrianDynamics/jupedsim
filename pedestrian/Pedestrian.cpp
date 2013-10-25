@@ -67,16 +67,16 @@ Pedestrian::Pedestrian() {
 	_V0=Point(0,0);
 	_lastPosition=Point(0,0);
 	_lastCellPosition=-1;
-	
+
 	_knownDoors = map<int, NavLineState>();
-	
+
 	_height=160;
 	_age=30;
 	_gender="male";
 	_trip=vector<int> ();
 	_group=-1;
 	_clockTicsTillStart = 0;
-	
+
 }
 
 
@@ -130,22 +130,6 @@ void Pedestrian::SetExitLine(NavLine* l) {
 void Pedestrian::SetPos(const Point& pos) {
 	//set initial Position
 	_ellipse.SetCenter(pos);
-
-	/*TODO: what the hell is that ?
-	if(_ellipse.GetCenter() == Point() || _clockTicsTillStart == 0)
-	{
-		_ellipse.SetCenter(pos);
-		return;
-	}
-
-	if(_clockTicsTillStart < clock())
-	{
-		_clockTicsTillStart = 0;
-		_ellipse.SetCenter(pos);
-		return;
-	}
-	return;
-	 */
 }
 
 void Pedestrian::SetCellPos(int cp){
@@ -164,8 +148,8 @@ void Pedestrian::Setdt(double dt) {
 	_deltaT = dt;
 }
 double Pedestrian::Getdt() {
-    return _deltaT;
-    
+	return _deltaT;
+
 }
 
 void Pedestrian::SetTrip(const vector<int>& trip){
@@ -231,84 +215,83 @@ int Pedestrian::GetNextDestination() {
 
 
 int Pedestrian::GetLastDestination() {
-  if(_destHistory.size() == 0)
-    return -1;
-  else
-    return _destHistory.back();
+	if(_destHistory.size() == 0)
+		return -1;
+	else
+		return _destHistory.back();
 
 }
 
 bool Pedestrian::ChangedSubRoom() {
-    if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
-	_oldRoomID = GetRoomID();
-	_oldSubRoomID = GetSubRoomID();
-	return true;
-    }
-    return false;
+	if(_oldRoomID != GetRoomID() || _oldSubRoomID != GetSubRoomID()) {
+		_oldRoomID = GetRoomID();
+		_oldSubRoomID = GetSubRoomID();
+		return true;
+	}
+	return false;
 }
 
 int Pedestrian::GetDestinationCount() {
-    return _destHistory.size();
+	return _destHistory.size();
 }
 // erase the peds memory
 void Pedestrian::ClearMentalMap(){
-	//	pMentalMapArray[pRoomID][pSubRoomID]=-1;
 	_mentalMap.clear();
 	_exitIndex=-1;
 }
 
 void Pedestrian::AddKnownClosedDoor(int door)
 {
-  if(_knownDoors.find(door) == _knownDoors.end()) {
-      _knownDoors[door].close(GetGlobalTime());
-  }
-    return;
-    
+	if(_knownDoors.find(door) == _knownDoors.end()) {
+		_knownDoors[door].close(GetGlobalTime());
+	}
+	return;
 }
+
 int Pedestrian::DoorKnowledgeCount() const 
 {
-    return _knownDoors.size();
-    
+	return _knownDoors.size();
+
 }
 
 
 
 set<int>  Pedestrian::GetKnownClosedDoors() 
 {
-    map<int, NavLineState>::iterator it;
-    set<int> doors_closed;
-    for(it = _knownDoors.begin(); it != _knownDoors.end(); it++){
+	map<int, NavLineState>::iterator it;
+	set<int> doors_closed;
+	for(it = _knownDoors.begin(); it != _knownDoors.end(); it++){
 
-      if(it->second.closed()) {
-	    doors_closed.insert(it->first);
+		if(it->second.closed()) {
+			doors_closed.insert(it->first);
+		}
 	}
-    }
-    
-    return doors_closed;
+
+	return doors_closed;
 }
 
 map<int, NavLineState> *  Pedestrian::GetKnownDoors()
 {
-    return & _knownDoors;
+	return & _knownDoors;
 }
 
 void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input) 
 {
-    map<int, NavLineState>::iterator it;
-    for(it = input->begin(); it != input->end(); it++) {
-      //it->second.print();
-	if(it->second.isShareable(GetGlobalTime())) {
-	  if(_knownDoors.find(it->first) == _knownDoors.end()) {
-	    _knownDoors[it->first] = NavLineState();
-	    if(!_knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
-	      _knownDoors.erase(it->first);
-	    }
-	  } else {
-	      _knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
-	  }
+	map<int, NavLineState>::iterator it;
+	for(it = input->begin(); it != input->end(); it++) {
+		//it->second.print();
+		if(it->second.isShareable(GetGlobalTime())) {
+			if(_knownDoors.find(it->first) == _knownDoors.end()) {
+				_knownDoors[it->first] = NavLineState();
+				if(!_knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
+					_knownDoors.erase(it->first);
+				}
+			} else {
+				_knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
+			}
+		}
 	}
-    }
-    return;
+	return;
 }
 
 
@@ -317,7 +300,7 @@ const Point& Pedestrian::GetPos() const {
 	return _ellipse.GetCenter();
 }
 
- int Pedestrian::GetCellPos() const {
+int Pedestrian::GetCellPos() const {
 	return _lastCellPosition;
 }
 
@@ -334,12 +317,10 @@ double Pedestrian::GetV0Norm() const {
 }
 //get axis in the walking direction
 double Pedestrian::GetLargerAxis() const {
-	//return pEllipse.GetLargerAxis();
 	return _ellipse.GetEA();
 }
 //get axis in the shoulder direction = orthogonal to the walking direction
 double Pedestrian::GetSmallerAxis() const {
-	//return pEllipse.GetSmallerAxis();
 	return _ellipse.GetEB();
 }
 
@@ -444,6 +425,7 @@ void Pedestrian::UpdateTimeInJam(){
 	_timeInJam+=_deltaT;
 }
 
+//TODO: magic
 void Pedestrian::UpdateJamData(){
 	if(GetV().NormSquare()<0.25*GetV0().NormSquare()){
 		_timeInJam+=_deltaT;
@@ -514,7 +496,6 @@ int Pedestrian::GetFinalDestination() const {
 	return _desiredFinalDestination;
 }
 
-
 ///@deprecated
 void Pedestrian::WritePath(ofstream& file, Building* building){
 	map<int, int>::iterator iter;
@@ -550,56 +531,56 @@ void Pedestrian::Dump(int ID, int pa) {
 
 	switch (pa) {
 
-		case 0:
-		{
-			printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
-			printf(">> Destination [ %d ]\n", _exitIndex);
-			printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
-			printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
-			printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
-			printf(">> Velocity [%f, %f]  Norm = [%f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
-			if(GetExitLine()){
-				printf(">> ExitLine: (%f, %f) -- (%f, %f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
+	case 0:
+	{
+		printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
+		printf(">> Destination [ %d ]\n", _exitIndex);
+		printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
+		printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
+		printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
+		printf(">> Velocity [%f, %f]  Norm = [%f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
+		if(GetExitLine()){
+			printf(">> ExitLine: (%f, %f) -- (%f, %f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
 					GetExitLine()->GetPoint2().GetX(), GetExitLine()->GetPoint2().GetY());
-				printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
-			}
-			printf(">> smooth rotating: %s \n", (_newOrientationDelay > 0) ? "yes" : "no");
-			printf(">> mental map");
-			map<int, int>::iterator iter;
-			for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-				printf("\t room / destination  [%d, %d]\n", iter->first, iter->second);
-			}
+			printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
 		}
+		printf(">> smooth rotating: %s \n", (_newOrientationDelay > 0) ? "yes" : "no");
+		printf(">> mental map");
+		map<int, int>::iterator iter;
+		for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
+			printf("\t room / destination  [%d, %d]\n", iter->first, iter->second);
+		}
+	}
+	break;
+
+	case 1:
+		printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
 		break;
 
-		case 1:
-			printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
-			break;
-
-		case 2:
-			printf(">> Velocity [%f, %f]\n", GetV().GetX(), GetV().GetY());
-			break;
-
-		case 3:
-			printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
-			break;
-
-		case 4:
-			printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
-			break;
-
-		case 5:
-			printf(">> Destination [ %d ]\n", _exitIndex);
-			break;
-		case 6: //Mental Map
-		{
-			printf(">> mental map");
-			map<int, int>::iterator iter;
-			for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-				printf("\t room / destination  [%d, %d]", iter->first, iter->second);
-			}
-		}
+	case 2:
+		printf(">> Velocity [%f, %f]\n", GetV().GetX(), GetV().GetY());
 		break;
+
+	case 3:
+		printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
+		break;
+
+	case 4:
+		printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
+		break;
+
+	case 5:
+		printf(">> Destination [ %d ]\n", _exitIndex);
+		break;
+	case 6: //Mental Map
+	{
+		printf(">> mental map");
+		map<int, int>::iterator iter;
+		for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
+			printf("\t room / destination  [%d, %d]", iter->first, iter->second);
+		}
+	}
+	break;
 
 	}
 	getc(stdin);

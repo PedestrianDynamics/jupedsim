@@ -62,7 +62,6 @@ private:
     int _group;
 
     NavLine* _navLine; // aktuelle Ausgangslinie
-//    NavLine _navLine;
     std::map<int, int>_mentalMap; // map the actual room to a destination
     std::vector<int> _destHistory;
     std::vector<int> _trip;
@@ -111,7 +110,6 @@ private:
 public:
     // Konstruktoren
     Pedestrian();
-//    Pedestrian(const Pedestrian& orig);
     virtual ~Pedestrian();
 
     // Setter-Funktionen
@@ -258,7 +256,6 @@ public:
     int GetGroup() const;
     void SetGroup(int group);
 
-    //
     static double GetGlobalTime();
     static void SetGlobalTime(double time);
 };

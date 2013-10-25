@@ -58,7 +58,7 @@
 			</goal>
 		</goals>
 
-		<!-- in the form goal_id1:goal_id2:goal_id3:..:goal_idn -->
+		<!-- in the from goal_id1:goal_id2:goal_id3:..:goal_idn -->
 		<routes>
 			<route id="1">0:1:0:1:0:1:2</route>
 			<route id="2">0:1:0:1:2</route>

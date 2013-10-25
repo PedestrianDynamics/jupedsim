@@ -2,6 +2,7 @@
 #ifndef _GEOMETRY_FUNCTIONS_
 #define _GEOMETRY_FUNCTIONS_
 
+#ifdef _CGAL
 #include <CGAL/basic.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Partition_traits_2.h>
@@ -299,4 +300,5 @@ void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container
   }
   std::cout << " }" << std::endl;
 }
+#endif /* _CGAL */
 #endif /* _GEOMETRY_FUNCTIONS_ */
