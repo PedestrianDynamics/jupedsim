@@ -1091,7 +1091,6 @@ void Building::LoadRoutingInfo(const string &filename) {
 		Log->Write("INFO:\t done with loading extra routing information");
 		return;
 	}
-
 	TiXmlDocument docRouting(filename);
 	if (!docRouting.LoadFile()){
 		Log->Write("ERROR: \t%s", docRouting.ErrorDesc());

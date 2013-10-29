@@ -1,12 +1,10 @@
-make
-#./rebuild.exe -n ./Inputfiles/start.dat --geometry ./Inputfiles/Raum60.jul --exitstrategy 1 --dt 0.001 --linkedcells --routing 2
-#./rebuild.exe  --inifile  --exitstrategy 3 --routing 3 --travisto 1 --linkedcells --log 2 --fps 8
-#./rebuild.exe  --inifile=./samples/ini-arena.xml
-#./rebuild.exe  --inifile=ini-unc.xml -e 3
-#./rebuild.exe  --inifile=ini-Headon.xml
+#!/bin/bash
+
+COMPILE=0  # 1 -> compile first
+if [ $COMPILE -eq 1 ];then
+    make
+fi
+
 #./rebuild.exe  --inifile=ini.xml 
-./rebuild.exe  --inifile="inputfiles/arena/131021_arena_ini.xml" 
-#./rebuild.exe  --inifile=ini-Bottleneck.xml -e 3 --fps=16
-#./rebuild.exe  --inifile=./demos/ini-Perpen.xml
-#./rebuild.exe  --inifile=ini-GSP.xml
-#./rebuild.exe  --inifile=./demos/ini-T.xml --fps=8
+./rebuild.exe  --inifile=inputfiles/Bottleneck/ini_bottleneck.xml 
+#./rebuild.exe  --inifile="inputfiles/arena/131021_arena_ini.xml" 

@@ -196,7 +196,6 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			args->GetTauSigma());
 	s.append(_distribution->writeParameter());
 	_distribution->InitDistributor(args->GetProjectFile());
-
 	// define how the navigation line is crossed
 	int direction = args->GetExitStrategy();
 	sprintf(tmp, "\tDirection to the exit: %d\n", direction);
@@ -268,6 +267,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case ROUTING_GLOBAL_SHORTEST:
 		{
+                           
 			Router* router=new GlobalRouter();
 			router->SetID(routerID);
 			router->SetStrategy(strategy);
@@ -330,10 +330,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	_building->LoadRoutingInfo(args->GetProjectFile());
 	_building->AddSurroundingRoom();
 	_building->InitGeometry(); // create the polygons
-
 	_building->LoadTrafficInfo();
-
-
 	// in the case the navigation mesh should be written to a file
 	if(args->GetNavigationMesh()!=""){
 		Log->Write("INFO: \tWriting the navigation mesh to: " + args->GetNavigationMesh());

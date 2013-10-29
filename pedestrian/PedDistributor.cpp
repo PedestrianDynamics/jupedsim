@@ -229,11 +229,11 @@ Distribution* PedDistributor::GetTau() const {
 }
 
 void PedDistributor::InitDistributor(const string& filename){
-
 	_projectFilename=filename;
 	Log->Write("INFO: \tLoading and parsing the persons attributes");
 
 	TiXmlDocument doc(_projectFilename);
+
 	if (!doc.LoadFile()){
 		Log->Write("ERROR: \t%s", doc.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the project file");
@@ -282,6 +282,7 @@ void PedDistributor::InitDistributor(const string& filename){
 		dis->SetRouteId(route_id);
 		dis->SetRouterId(router_id);
 		dis->SetHeight(height);
+
 		if(e->Attribute("startX") && e->Attribute("startY")){
 			double startX = xmltof(e->Attribute("startX"),NAN);
 			double startY = xmltof(e->Attribute("startY"),NAN);
@@ -298,7 +299,7 @@ void PedDistributor::InitDistributor(const string& filename){
 
 	}
 
-	Log->Write("INFO: \t...Done");
+    Log->Write("INFO: \t...Done");
 }
 
 int PedDistributor::Distribute(Building* building) const {

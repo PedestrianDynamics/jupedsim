@@ -75,9 +75,7 @@ void GlobalRouter::Init(Building* building) {
 
 	Log->Write("INFO:\tInit the Global Router Engine");
 	_building = building;
-
 	LoadRoutingInfos(GetRoutingInfoFile());
-
 	//check the loaded routing informations (crossings, hlines,...)
 	// for inconsistencies
 	//TODO: enable me when the navigation lines IDs are fixed
@@ -989,8 +987,10 @@ string GlobalRouter::GetRoutingInfoFile() const {
 				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 		}
 	}
-
-	return _building->GetProjectRootDir()+nav_line_file;
+        if (nav_line_file == "")
+            return nav_line_file;
+        else
+            return _building->GetProjectRootDir()+nav_line_file;
 }
 
 
