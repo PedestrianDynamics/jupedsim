@@ -1,0 +1,43 @@
+INFO: 	Loading and parsing the persons attributes
+INFO: 	...Done
+INFO: 	Parsing the geometry file
+INFO: 	geometry <inputfiles/libreCad/test_libreCad.xml>
+INFO: 	Loading building file successful!!!
+
+INFO:	Loading extra routing information
+INFO:	done with loading extra routing information
+INFO: 	Adding the room 'outside' 
+INFO: 	Init Geometry
+INFO: 	Init Geometry successful!!!
+
+INFO:	Loading  the traffic info file
+INFO:	Done with loading traffic info file
+INFO: 	Init Distribute
+INFO: 	Distributing 1 Agents in Room/Subrom [5/0]! Maximum allowed: 12644
+	...Done
+INFO:	Init the Global Router Engine
+INFO: 	Exit to outside found: 33
+INFO: 	Exit to outside found: 34
+INFO: 	Exit to outside found: 35
+INFO: 	Exit to outside found: 36
+INFO: 	Exit to outside found: 37
+INFO: 	Exit to outside found: 38
+INFO: 	Exit to outside found: 39
+INFO: 	Exit to outside found: 40
+INFO: 	Exit to outside found: 41
+INFO: 	Exit to outside found: 42
+INFO: 	Exit to outside found: 43
+INFO: 	Exit to outside found: 44
+INFO: 	Exit to outside found: 45
+INFO:	Done with the Global Router Engine!
+ERROR:	GlobalRouter.cpp: a valid destination could not be found for ped [1] going to destination [0]
+INFO: 	Initializing the grid with cell size: 2.200000 
+INFO: 	Done with Initializing the grid 
+
+INFO: 	End runSimulation()
+
+
+Exec Time [s]     : 1.00
+Evac Time [s]     : 0
+Real Time Factor  : 0.00 X
+
