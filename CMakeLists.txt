@@ -1,6 +1,6 @@
 # Documentation: Some useful options:
 # -D CMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# CMAKE_BUILD_TYPE_STRING=Release (default Debug)
+# CMAKE_BUILD_TYPE:STRING=Release (default Debug)
 
 # CMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 # ------------------------- Begin Generic CMake Variable Logging ------------------
@@ -167,9 +167,9 @@ if(WIN32)
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Debug) #this set is not necessary.
+  set (CMAKE_BUILD_TYPE Release) 
 endif()
-message( STATUS "CMAKE_BUILD_TYPE:     "${CMAKE_BUILD_TYPE})
+message( STATUS "CMAKE_BUILD_TYPE:     " ${CMAKE_BUILD_TYPE})
 #set(LIBRARY_OUTPUT_PATH ./lib/${CMAKE_BUILD_TYPE})
 #message( STATUS "LIBRARY_OUTPUT_PATH:     " ${LIBRARY_OUTPUT_PATH} )
 set(EXECUTABLE_OUTPUT_PATH "../")
@@ -349,7 +349,7 @@ endif()
 message("-- Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG})
 message("-- Release flags: " ${CMAKE_CXX_FLAGS_RELEASE})
 
-message("**** JPSCORE_VERSION: "${JPSCORE_VERSION} " ****" )
+message("**** JPSCORE_VERSION: " ${JPSCORE_VERSION} " ****" )
 
 
 # if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR CMAKE_COMPILER_IS_GNUCXX) 
@@ -365,7 +365,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "JPScore - the simulation core of JuPedSim
 set(CPACK_PACKAGE_VERSION ${JPSCORE_VERSION})
 SET (CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 SET (CPACK_DEBIAN_PACKAGE_SECTION "developement")
-SET (CPACK_DEBIAN_PACKAGE_DEPENDS " libvtk5.8, libvtk5.8-qt4, libqt4-dev, libopenmpi-dev")
+SET (CPACK_DEBIAN_PACKAGE_DEPENDS "libvtk5.8, libvtk5.8-qt4, libqt4-dev, libopenmpi-dev")
 
 #linux
 if(UNIX)
