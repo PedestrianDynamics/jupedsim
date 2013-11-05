@@ -1,7 +1,7 @@
 INFO: 	Loading and parsing the persons attributes
 INFO: 	...Done
 INFO: 	Parsing the geometry file
-INFO: 	geometry <inputfiles/libreCad/test_libreCad.xml>
+INFO: 	geometry <./inputfiles/libreCad/test_libreCad.xml>
 INFO: 	Loading building file successful!!!
 
 INFO:	Loading extra routing information
