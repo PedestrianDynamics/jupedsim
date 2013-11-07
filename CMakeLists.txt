@@ -1,6 +1,6 @@
 # Documentation: Some useful options:
 # -D CMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# CMAKE_BUILD_TYPE:STRING=Release (default Debug)
+# CMAKE_BUILD_TYPE:STRING=Debug (default Release)
 # CMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 #--------------------------------------------------------------------------
 
@@ -243,6 +243,13 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 message( STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
 message( STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
 
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES DEBUG)
+  set(WITH_COVERAGE TRUE)
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -W -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage")
+  set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+  message( STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
+endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES DEBUG)
+
 #--------------------------- cPack ---------------------------------------------
 set(CPACK_PACKAGE_NAME "JPScore")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "JPScore - the simulation core of JuPedSim")
@@ -302,13 +309,10 @@ set (CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
 #)
 
 # ----------------------------- cTest ------------------------------------------
-#enable_testing()
-include(CTest)
-find_program(CTEST_GIT_COMMAND NAMES git)
-set(WITH_MEMCHECK TRUE)
-find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
-set(WITH_COVERAGE TRUE)
+enable_testing() #adds another build target, which is test for Makefile generators
+include(CTest) #adding Dart support
 
+#test if code compiles and runs default setting. Takes about 30 seconds
 
 add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
   --build-and-test "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" #"${CMAKE_BINARY_DIR}"
@@ -320,68 +324,19 @@ add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND}
   --test-command jpscore
   )
 
-add_executable(testSign math/Mathematics.cpp Utest/testSign.cpp)
-add_executable(testSign1 math/Mathematics.cpp Utest/testSign1.cpp)
-add_test(NAME testmath_pos COMMAND testSign)
-add_test(NAME testmath_neg COMMAND testSign1)
+# todo: make list of tests and iterate over 
+add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
+add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
+add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
+#----------------- append to this list more tests ... but first add_executable() ---------------
+set (tests testSignPos testSignNeg testPointOnEllipse)
+#--------------------------------------------------------------------
+foreach (test ${tests})
+  add_test(NAME ${test} COMMAND ${test})
+endforeach(test)
 
-
-#todo
 # add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]
 #             [WORKING_DIRECTORY dir]
 #             COMMAND <command> [arg1 [arg2 ...]])
-# ctest using git
-# set(CTEST_SOURCE_DIRECTORY "$ENV{HOME}/workspace/tmp/dashboards/libssh/source")
-# set(CTEST_BINARY_DIRECTORY "$ENV{HOME}/workspace/tmp/dashboards/libssh/build")
-
-# set(CTEST_SITE "github.org")
-# set(CTEST_DROP_METHOD "http")
-# set(CTEST_DROP_SITE "my.cdash.org")
-# set(CTEST_DROP_LOCATION "/submit.php?project=VALG1")
-# set(CTEST_DROP_SITE_CDASH TRUE)
-
-# set(CTEST_BUILD_NAME "linux-gcc-default")
-
-# set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
-# set(CTEST_BUILD_CONFIGURATION "Profiling")
-# set(CTEST_BUILD_OPTIONS "-DWITH_SSH1=ON -WITH_SFTP=ON -DWITH_SERVER=ON -DWITH_ZLIB=ON -DWITH_PCAP=ON -DWITH_GCRYPT=OFF")
 
 
-
-# #######################################################################
-
-# ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
-
-
-# find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
-
-#if (WITH_MEMCHECK)
-
-#set(CTEST_NIGHTLY_START_TIME "00:00:00 GMT")
-  
-# set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/tests/valgrind.supp)
-
-# if(NOT EXISTS "${CTEST_SOURCE_DIRECTORY}")
-#   set(CTEST_CHECKOUT_COMMAND "${CTEST_GIT_COMMAND} clone git://git.libssh.org/projects/libssh/libssh.git ${CTEST_SOURCE_DIRECTORY}")
-# endif()
-
-# set(CTEST_UPDATE_COMMAND "${CTEST_GIT_COMMAND}")
-
-# set(CTEST_CONFIGURE_COMMAND "${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION}")
-# set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} -DWITH_TESTING:BOOL=ON ${CTEST_BUILD_OPTIONS}")
-# set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} \"-G${CTEST_CMAKE_GENERATOR}\"")
-# set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} \"${CTEST_SOURCE_DIRECTORY}\"")
-
-#ctest_start("Nightly")
-# ctest_update()
-# ctest_configure()
-#ctest_build()
-# ctest_test()
-# if (WITH_COVERAGE AND CTEST_COVERAGE_COMMAND)
-#   ctest_coverage()
-# endif (WITH_COVERAGE AND CTEST_COVERAGE_COMMAND)
-# if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
-#   ctest_memcheck( res )
-# endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
-
-# ctest_submit()
