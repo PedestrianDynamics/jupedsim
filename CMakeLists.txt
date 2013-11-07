@@ -47,7 +47,7 @@ endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
   # add 1 should be magic! http://www.kitware.com/blog/home/post/63
-  math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
+  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
   message( STATUS "PROCESSOR_COUNT " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
@@ -58,9 +58,8 @@ endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
 #------------------ set important directories --------------------
-#todo: where to put the bins?
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(EXECUTABLE_OUTPUT_PATH "../")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
@@ -315,11 +314,11 @@ include(CTest) #adding Dart support
 #test if code compiles and runs default setting. Takes about 30 seconds
 
 add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
-  --build-and-test "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}" #"${CMAKE_BINARY_DIR}"
+  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
   --build-makeprogram ${CMAKE_MAKE_PROGRAM}
   --build-two-config
-  --build-exe-dir ${CMAKE_SOURCE_DIR}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   --build-project JPScore
   --test-command jpscore
   )
