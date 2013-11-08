@@ -1,7 +1,7 @@
 # Documentation: Some useful options:
-# -D CMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# CMAKE_BUILD_TYPE:STRING=Debug (default Release)
-# CMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
+# -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
+# -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
+# -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
@@ -30,14 +30,14 @@ if(NOT DEFINED PROCESSOR_COUNT)
   endif(EXISTS "${cpuinfo_file}")
 
   # Mac:
-  if(APPLE)
-    find_program(cmd_sys_pro "system_profiler")
-    if(cmd_sys_pro)
-      execute_process(COMMAND ${cmd_sys_pro} OUTPUT_VARIABLE info)
-      string(REGEX REPLACE "^.*Total Number Of Cores: ([0-9]+).*$" "\\1"
-        PROCESSOR_COUNT "${info}")
-    endif(cmd_sys_pro)
-  endif(APPLE)
+  # if(APPLE)
+  #   find_program(cmd_sys_pro "system_profiler")
+  #   if(cmd_sys_pro)
+  #     execute_process(COMMAND ${cmd_sys_pro} OUTPUT_VARIABLE info)
+  #     string(REGEX REPLACE "^.*Total Number Of Cores: ([0-9]+).*$" "\\1"
+  #       PROCESSOR_COUNT "${info}")
+  #   endif(cmd_sys_pro)
+  # endif(APPLE)
 
   # Windows:
   if(WIN32)
@@ -231,7 +231,7 @@ endif(WIN32)
 
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  message( STATUS "Using CLANG++" )
+  message(STATUS "Using CLANG++" )
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -239,15 +239,16 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
 endif(CMAKE_COMPILER_IS_GNUCXX)
-message( STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
-message( STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
+message(STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
+message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
 
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES DEBUG)
+
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
   set(WITH_COVERAGE TRUE)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -W -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage")
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-  message( STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
-endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES DEBUG)
+  message(STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
+endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
 
 #--------------------------- cPack ---------------------------------------------
 set(CPACK_PACKAGE_NAME "JPScore")
@@ -290,37 +291,23 @@ else(UNIX)
   endif ( WIN32 )
 endif(UNIX)
 #INCLUDE(CPack Documentation)
-
 #include(CheckCXXSourceRuns)
 #include(CheckCXXSourceCompiles)
 set (CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")   
-# check_cxx_source_compiles(
-# "
-# int main() { return 0;}" DUMMY)
-# check_cxx_source_compiles(
-# main.cpp DUMMY)
-# message (STATUS "Dummy: " ${DUMMY})
-
-#ADD_CUSTOM_COMMAND(TARGET rebuild
-#          POST_BUILD
-#          COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}
-#          COMMAND ${CMAKE_COMMAND} -E copy ${EXAMPLE_BIN_NAME} ${PROJECT_BINARY_DIR}/.
-#)
 
 # ----------------------------- cTest ------------------------------------------
 enable_testing() #adds another build target, which is test for Makefile generators
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-
 add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
   --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-  --build-two-config
+  --build-two-config  
   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   --build-project JPScore
-  --test-command jpscore
+  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
   )
 
 # todo: make list of tests and iterate over 
