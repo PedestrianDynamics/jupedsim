@@ -384,7 +384,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 	TiXmlElement* xMethod_B=xMainNode->FirstChildElement("method_B");
 	if(string(xMethod_B->Attribute("enabled"))=="true"){
 		_isMethodB = true;
-		_areaIDforMethodB = xmltoi(xMethod_A->FirstChildElement("measurementArea")->Attribute("id"));
+		_areaIDforMethodB = xmltoi(xMethod_B->FirstChildElement("measurementArea")->Attribute("id"));
 		Log->Write("INFO: \tMethod B is selected" );
 	}
 

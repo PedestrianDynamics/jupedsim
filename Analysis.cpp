@@ -127,6 +127,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 		_fundamentalTinTout = true;
 		_classicMethod = true;
 		_areaForMethod_B = dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(args->GetAreaIDforMethodB()) );
+		_areaForMethod_C = _areaForMethod_B;
 	}
 
 	if(args ->GetIsMethodC())
@@ -229,7 +230,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 	//framerate
 	if(xHeader->FirstChild("frameRate")){
 		_fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-		Log->Write("INFO:\tFramerate fps=%d", _fps);
+		Log->Write("INFO:\tFrame rate fps=%d", _fps);
 	}
 
 	_xCor = new double* [_maxNumofPed];
@@ -291,12 +292,12 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 			}
 			if(_fundamentalTinTout==true)
 			{
-				if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID]))
+				if(within(make<point_2d>(x, y), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID]))
 				{
 					_tIn[ID]=frameNr;
 					IsinMeasurezone[ID] = true;
 				}
-				if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID])
+				if((!within(make<point_2d>( x, y), _areaForMethod_B->_poly))&&IsinMeasurezone[ID])
 				{
 					_tOut[ID]=frameNr;
 					IsinMeasurezone[ID] = false;
