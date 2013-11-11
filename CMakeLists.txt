@@ -18,7 +18,6 @@ set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
 
-
 if(NOT DEFINED PROCESSOR_COUNT)
   # Unknown:
   set(PROCESSOR_COUNT 0)
@@ -301,16 +300,15 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-
-#add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
-#  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-#  --build-generator ${CMAKE_GENERATOR}
-#  --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-#  --build-two-config  
-#  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#  --build-project JPScore
-#  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-#  )
+add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
+  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+  --build-generator ${CMAKE_GENERATOR}
+  --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+  --build-two-config  
+  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  --build-project JPScore
+  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+  )
 
 # todo: make list of tests and iterate over 
 add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)

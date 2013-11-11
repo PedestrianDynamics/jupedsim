@@ -6,14 +6,13 @@ set (CTEST_PROJECT_NAME "JuPedSim")
 set (CTEST_BUILD_NAME "linux-gcc-zam")
 set (CTEST_TIMEOUT "1500") # max run time for tests 1500 s 
 
-set (CTEST_SOURCE_DIRECTORY "$ENV{HOME}/peddynamics/JPScore/trunk")
-set (CTEST_BINARY_DIRECTORY "$ENV{HOME}/peddynamics/JPScore/trunk/build")
+set (CTEST_SOURCE_DIRECTORY "$ENV{HOME}/workspace/peddynamics/JuPedSim/JPScore/trunk")
+set (CTEST_BINARY_DIRECTORY "$ENV{HOME}/workspace/peddynamics/JuPedSim/JPScore/trunk/build")
 
 set (CTEST_NIGHTLY_START_TIME "00:00:00 CET")
-#find_program (HOSTNAME_CMD NAMES hostname)
+find_program (HOSTNAME_CMD NAMES hostname)
 #exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
-#set (CTEST_SITE  "${HOSTNAME}")
-set (CTEST_SITE  "Workstation")
+set (CTEST_SITE  "Workspace")
 set (CTEST_DROP_METHOD "http")
 set (CTEST_DROP_SITE "my.cdash.org")
 set (CTEST_DROP_LOCATION "/submit.php?project=JuPedSim")
@@ -22,25 +21,26 @@ set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
 set(CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS 1000)
 #set (CTEST_BUILD_CONFIGURATION "Debug")
 set (CTEST_CONFIGURATION_TYPE "Debug")
-#=================== get procs ========================
+
+#----------------------------------------------------------------------
 if(NOT DEFINED PROCESSOR_COUNT)
   # Unknown:
   set(PROCESSOR_COUNT 0)
-
   # Linux:
   set(cpuinfo_file "/proc/cpuinfo")
   if(EXISTS "${cpuinfo_file}")
     file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
     list(LENGTH procs PROCESSOR_COUNT)
   endif(EXISTS "${cpuinfo_file}")
-
 endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
-  message( "PROCESSOR_COUNT " ${PROCESSOR_COUNT})
+  # add 1 should be magic! http://www.kitware.com/blog/home/post/63
+  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
+  message("PROCESSOR_COUNT " ${PROCESSOR_COUNT})
+  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
-#======================================================
-
+#----------------------------------------------------------------------
 
 # Errors that will be ignored
 set(CTEST_CUSTOM_ERROR_EXCEPTION
@@ -50,9 +50,6 @@ set(CTEST_CUSTOM_ERROR_EXCEPTION
   "GConf Error"
   "Client failed to connect to the D-BUS daemon"
   "Failed to connect to socket"
-  "qlist.h.*increases required alignment of target type"
-  "qmap.h.*increases required alignment of target type"
-  "qhash.h.*increases required alignment of target type"
   )
 
 # No coverage for these files (auto-generated, unit tests, etc)
@@ -66,7 +63,7 @@ set(WITH_COVERAGE TRUE)
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -W -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage")
 #set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
 #message("Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
-#endif(CMAKE_COMPILER_IS_GNUCXX)
+##endif(CMAKE_COMPILER_IS_GNUCXX)
 
 
 #set (CTEST_CMAKE_COMMAND "${BDIR}/cmake")
@@ -100,25 +97,23 @@ set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 ctest_start ("Nightly")
 
 ctest_update (SOURCE "${CTEST_SOURCE_DIRECTORY}" RETURN_VALUE res)
-message ( "ctest_update() return: " ${res} ) 
+
 ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}" 
   SOURCE   ${CTEST_SOURCE_DIRECTORY}
   OPTIONS   "-DCMAKE_BUILD_TYPE:STRING=Debug"
   RETURN_VALUE res)
-message ( "ctest_configure() return: " ${res} ) 
 
 ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
-message ( "ctest_build() return: " ${res} ) 
+
 ctest_test (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
-message ( "ctest_test() return: " ${res} ) 
+
 if (WITH_COVERAGE AND CTEST_COVERAGE_COMMAND)
-  ctest_coverage(BUILD ${CTEST_SOURCE_DIRECTORY} RETURN_VALUE res)
-  message ( "ctest_coverage() return: " ${res} )
+  ctest_coverage(BUILD  ${CTEST_SOURCE_DIRECTORY} RETURN_VALUE res)
+  message ("ctest_coverage() return: " ${res} )
 endif (WITH_COVERAGE AND CTEST_COVERAGE_COMMAND)
 
 if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
   ctest_memcheck(RETURN_VALUE res)
-  message ( "ctest_memcheck() return: " ${res} ) 
 endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
 
 ctest_submit(RETURN_VALUE res)
@@ -126,4 +121,4 @@ ctest_submit(RETURN_VALUE res)
 #ctest_empty_binary_directory (${CTEST_BINARY_DIRECTORY})
 
 #######################################################################
-message ("-----------> -DONE! <------------")
+message ("DONE!")
