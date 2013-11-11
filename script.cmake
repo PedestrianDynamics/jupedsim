@@ -36,7 +36,7 @@ endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
   # add 1 should be magic! http://www.kitware.com/blog/home/post/63
-  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
+  ##math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
   message("PROCESSOR_COUNT " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)

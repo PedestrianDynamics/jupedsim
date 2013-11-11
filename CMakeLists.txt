@@ -310,7 +310,7 @@ add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND}
   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
   )
 
-# todo: make list of tests and iterate over 
+## todo: make list of tests and iterate over 
 add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
 add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
