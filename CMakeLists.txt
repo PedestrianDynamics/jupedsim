@@ -301,6 +301,7 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
+
 #add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
 #  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
 #  --build-generator ${CMAKE_GENERATOR}

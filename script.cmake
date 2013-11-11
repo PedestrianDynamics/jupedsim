@@ -112,7 +112,7 @@ message ( "ctest_build() return: " ${res} )
 ctest_test (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
 message ( "ctest_test() return: " ${res} ) 
 if (WITH_COVERAGE AND CTEST_COVERAGE_COMMAND)
-  ctest_coverage(BUILD ${CTEST_SOURCE_DIRECTORY}/Utest RETURN_VALUE res)
+  ctest_coverage(BUILD ${CTEST_SOURCE_DIRECTORY} RETURN_VALUE res)
   message ( "ctest_coverage() return: " ${res} )
 endif (WITH_COVERAGE AND CTEST_COVERAGE_COMMAND)
 
@@ -126,4 +126,4 @@ ctest_submit(RETURN_VALUE res)
 #ctest_empty_binary_directory (${CTEST_BINARY_DIRECTORY})
 
 #######################################################################
-message ("DONE!")
+message ("-----------> -DONE! <------------")
