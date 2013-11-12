@@ -5,6 +5,7 @@ import os, argparse, logging, time
 from os import path, system
 from matplotlib.pyplot import *
 from sys import argv ,exit
+import subprocess
 
 SUCCESS = 0
 FAILURE = 1
@@ -15,9 +16,9 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 
 
 #-------------------- DIRS ------------------------------
-HOME = path.expanduser("~")
-TRUNK = HOME + "/workspace/peddynamics/JuPedSim/JPScore/trunk/"
-GEODIR = TRUNK + "inputfiles/Bottleneck/"
+#HOME = path.expanduser("~")
+TRUNK = argv[1]#HOME + "/workspace/peddynamics/JuPedSim/JPScore/trunk/"
+GEODIR = TRUNK + "/inputfiles/Bottleneck/"
 TRAJDIR = GEODIR
 CWD = os.getcwd()
 #--------------------------------------------------------
@@ -39,7 +40,8 @@ def parse_file(filename):
     try:
         xmldoc = minidom.parse(filename)
     except:
-        exit(logging.critical('could not parse file. exit'))
+        logging.critical('could not parse file. exit')
+        exit(FAILURE)
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
     fps= xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
     fps = float(fps)
@@ -73,7 +75,8 @@ def flow(fps, N, data, x0):
     """
     logging.info('measure flow')
     if not isinstance(data, np.ndarray):
-        exit(logging.critical("flow() accepts data of type <ndarray>. exit"))
+        logging.critical("flow() accepts data of type <ndarray>. exit")
+        exit(FAILURE)
     peds = np.unique(data[:,0]).astype(int)
     times = []
     for ped in peds:
@@ -98,25 +101,29 @@ if __name__ == "__main__":
         trajfile = GEODIR +  str(w) + "_" + "TrajBottleneck.xml"
         inifile =  GEODIR +  str(w) + "_ini-Bottleneck.xml"
         if not path.exists(geofile):
-            exit(logging.critical("geofile <%s> does not exist"%geofile))
+            logging.critical("geofile <%s> does not exist"%geofile)
+            exit(FAILURE)
         if not path.exists(inifile):
-            exit(logging.critical("inifile <%s> does not exist"%inifile))
-
+            logging.critical("inifile <%s> does not exist"%inifile)
+            exit(FAILURE)
         #--------------------- SIMULATION ------------------------  
         #os.chdir(TRUNK) #cd to the simulation directory
-        executable = "%sbin/jpscore"%TRUNK
+        executable = "%s/bin/jpscore"%TRUNK
         if not path.exists(executable):
-            exit(logging.critical("executable <%s> does not exit yet."%executable))
+            logging.critical("executable <%s> does not exit yet."%executable)
+            exit(FAILURE)
         cmd = "%s --inifile=%s"%(executable, inifile)
-        print cmd
-        logging.info('start simulating ...')
-        sh(cmd) #make simulation
+
+        logging.info('start simulating wirh exe=<%s>'%cmd)
+        #sh(cmd) #make simulation
+        subprocess.call([executable, "--inifile=%s"%inifile])
         logging.info('end simulation ...')
         #os.chdir(CWD) # cd back to the working directory
             
         #--------------------- PARSING & FLOW-MEASUREMENT --------
         if not path.exists(trajfile):
-            exit(logging.critical("trajfile <%s> does not exit"%trajfile))
+            logging.critical("trajfile <%s> does not exit"%trajfile)
+            exit(FAILURE)
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 6100)
         flows.append(J)
@@ -170,7 +177,6 @@ if __name__ == "__main__":
     tolerance = 0.5
     logging.info("time elapsed %.2f [s]."%(time2-time1))
     logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
-    sys.exit(SUCCESS)
     if err > tolerance:
         sys.exit(FAILURE)
     else:
