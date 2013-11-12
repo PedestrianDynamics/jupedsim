@@ -118,7 +118,7 @@ if __name__ == "__main__":
 				remove = "remove <%s>"%trajfile
 				sh(remove)
 			os.chdir(TRUNK) #cd to the simulation directory
-			cmd = "./rebuild.exe --inifile=%s"%inifile
+			cmd = "./jpscore --inifile=%s"%inifile
 			logging.info('start simulating ...')
 			sh(cmd) #make simulation
 			os.chdir(CWD) # cd back to the working directory

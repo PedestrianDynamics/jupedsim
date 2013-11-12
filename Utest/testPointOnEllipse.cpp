@@ -6,7 +6,8 @@
 OutputHandler* Log;
 
 
-int testPointOnEllipse(int argc, char* argv[])
+//int testPointOnEllipse(int argc, char* argv[])
+int testPointOnEllipse()
 {
     int i, j, ntests=0, res=0;
     float r=2.0;
@@ -36,6 +37,7 @@ int testPointOnEllipse(int argc, char* argv[])
             T.SetY(r*sy/l);
             P = E.PointOnEllipse(S);
             res += (P==T)?1:0;
+            
             ntests++;
         }
     return (res==ntests)?EXIT_SUCCESS:EXIT_FAILURE;
@@ -43,5 +45,5 @@ int testPointOnEllipse(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-    return testPointOnEllipse(argc, argv);
+    return testPointOnEllipse();
 }

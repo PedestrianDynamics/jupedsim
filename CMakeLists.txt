@@ -300,6 +300,7 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
+
 add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
@@ -320,6 +321,23 @@ set (tests testSignPos testSignNeg testPointOnEllipse)
 foreach (test ${tests})
   add_test(NAME ${test} COMMAND ${test})
 endforeach(test)
+
+# add_test( NAME timetest
+#   COMMAND ${CMAKE_COMMAND}
+#   -DTEST_PROG=$<TARGET_FILE:testPointOnEllipse>  
+#   -P    ${EXECUTABLE_OUTPUT_PATH}/runtest.cmake
+#     )
+
+
+find_package(PythonInterp)
+if(PYTHONINTERP_FOUND)
+  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+  message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
+  add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/testflow.py")
+  #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
+endif(PYTHONINTERP_FOUND)
+
+
 
 # add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]
 #             [WORKING_DIRECTORY dir]

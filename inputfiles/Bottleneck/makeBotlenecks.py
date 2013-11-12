@@ -10,7 +10,7 @@ f = open(infile)
 read_data = f.read()
 f.close()
 
-W = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5]
+W = [0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5]
 for w in W:
 	ofile = str(w) + "_" +infile
 	print "---> ", ofile
