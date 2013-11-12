@@ -3,9 +3,10 @@ import numpy as np
 from xml.dom import minidom
 import os, argparse, logging, time
 from os import path, system
-from matplotlib.pyplot import *
 from sys import argv ,exit
 import subprocess
+
+#from matplotlib.pyplot import *
 
 SUCCESS = 0
 FAILURE = 1
@@ -17,15 +18,15 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 
 #-------------------- DIRS ------------------------------
 #HOME = path.expanduser("~")
-TRUNK = argv[1]#HOME + "/workspace/peddynamics/JuPedSim/JPScore/trunk/"
+TRUNK = argv[1] #HOME + "/workspace/peddynamics/JuPedSim/JPScore/trunk/"
 GEODIR = TRUNK + "/inputfiles/Bottleneck/"
 TRAJDIR = GEODIR
 CWD = os.getcwd()
 #--------------------------------------------------------
 
-def sh(script):
-    # run bash command
-    system("bash -c '%s'" % script)
+# def sh(script):
+#     # run bash command
+#     system("bash -c '%s'" % script)
     
 def parse_file(filename):
     """
@@ -147,31 +148,22 @@ if __name__ == "__main__":
     logging.info('write flow values in \"%s\"'%flow_file)
     print >>ff, flows
     ff.close
-    ms = 8
-    plot(widths, flows, "o-", lw = 2, ms = ms, label = "simulation")
-	
-    #plot(sey[:,0], sey[:,3], "s", ms = ms, label = "Seyfried")
-    #plot(kretz[:,0], kretz[:,1], "D", ms = ms, label = "Kretz")
-    #plot(muel32[:,0], muel32[:,1]/muel32[:,2], "*", ms = ms, label = "Mueller b_g=3.2m")
-    #plot(muel26[:,0], muel26[:,1]/muel26[:,2], "x", ms = ms, label = "Mueller b_g=2.6m")
-    plot(lid_w , lid_f, "^k", ms = ms, label = "Liddle")
-    axes().set_aspect(1./axes().get_data_ratio())  # Das Bild ist quadratisch
-    legend(loc='best')
-    grid()
-    xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
-    ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
-    xlim([0.7, 2.6])
-    ylim([1, 6])
+    #########################################################################
+    # ms = 8
+    # plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
+    # plot(lid_w , lid_f, "D-k", ms = ms, label = "experiment")
+    # axes().set_aspect(1./axes().get_data_ratio())  
+    # legend(loc='best')
+    # grid()
+    # xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
+    # ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
+    # xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
+    # xlim([0.7, 2.6])
+    # ylim([1, 6])
+    # savefig("flow.png")
+    # show()
+    #########################################################################
     
-    # figname = "flow_pngs/flow_" + timestamp + ".png"
-    # logging.info("saving figure in \"%s\" "%figname)
-    savefig("flow.png")
-    #logging.info("svn add %s"%figname)
-    #sh("svn add %s"%figname)
-    #logging.info("svn add %s"%flow_file)
-    #sh("svn add %s"%flow_file)
-    #show()
     time2 = time.clock()
     err = np.sqrt( sum((flows-lid_f)**2) )
     tolerance = 0.5
