@@ -5,17 +5,13 @@
 #include <iostream>
 
 
-
-int test_equal(){
-
-	double mu = 1.24;
-	double sigma = 0.26;
-
-	Equal distequal(mu, sigma);
-
-	return (distequal.GetRand()< mu-sigma || mu+sigma<distequal.GetRand())?EXIT_SUCCESS:EXIT_FAILURE;
-
-
+//x should be in [mu-sigma, mu+sigma]
+int test_equal()
+{
+    double mu = 1.24;
+    double sigma = 0.26;
+    Equal distequal(mu, sigma);
+    return (distequal.GetRand()< mu-sigma || mu+sigma<distequal.GetRand())?EXIT_FAILURE:EXIT_SUCCESS;
 }
 
 

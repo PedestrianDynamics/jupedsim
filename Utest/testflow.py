@@ -6,7 +6,7 @@ from os import path, system
 from sys import argv ,exit
 import subprocess
 
-#from matplotlib.pyplot import *
+from matplotlib.pyplot import *
 
 SUCCESS = 0
 FAILURE = 1
@@ -149,19 +149,19 @@ if __name__ == "__main__":
     print >>ff, flows
     ff.close
     #########################################################################
-    # ms = 8
-    # plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
-    # plot(lid_w , lid_f, "D-k", ms = ms, label = "experiment")
-    # axes().set_aspect(1./axes().get_data_ratio())  
-    # legend(loc='best')
-    # grid()
-    # xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
-    # ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    # xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
-    # xlim([0.7, 2.6])
-    # ylim([1, 6])
-    # savefig("flow.png")
-    # show()
+    ms = 8
+    plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
+    plot(lid_w , lid_f, "D-k", ms = ms, label = "experiment")
+    axes().set_aspect(1./axes().get_data_ratio())  
+    legend(loc='best')
+    grid()
+    xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
+    ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
+    xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
+    xlim([0.7, 2.6])
+    ylim([1, 6])
+    savefig("flow.png")
+    show()
     #########################################################################
     
     time2 = time.clock()
@@ -170,6 +170,6 @@ if __name__ == "__main__":
     logging.info("time elapsed %.2f [s]."%(time2-time1))
     logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
     if err > tolerance:
-        sys.exit(FAILURE)
+        exit(FAILURE)
     else:
-        sys.exit(SUCCESS)
+        exit(SUCCESS)
