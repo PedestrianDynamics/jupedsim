@@ -5,12 +5,12 @@ set (BDIR "/usr/bin")
 set (CTEST_PROJECT_NAME "JuPedSim")
 set (CTEST_BUILD_NAME "linux-gcc-zam")
 set (CTEST_TIMEOUT "1500") # max run time for tests 1500 s 
-
+set (CTEST_BACKUP_AND_RESTORE TRUE)
 set (CTEST_SOURCE_DIRECTORY "$ENV{HOME}/workspace/peddynamics/JuPedSim/JPScore/trunk")
 set (CTEST_BINARY_DIRECTORY "$ENV{HOME}/workspace/peddynamics/JuPedSim/JPScore/trunk/build")
 
-set (CTEST_NIGHTLY_START_TIME "00:00:00 CET")
-find_program (HOSTNAME_CMD NAMES hostname)
+#set (CTEST_NIGHTLY_START_TIME "00:00:00 CET")
+#find_program (HOSTNAME_CMD NAMES hostname)
 #exec_program (${HOSTNAME_CMD} ARGS OUTPUT_VARIABLE HOSTNAME)
 set (CTEST_SITE  "Workspace")
 set (CTEST_DROP_METHOD "http")
@@ -95,7 +95,6 @@ set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 #######################################################################
 # get the party started
 ctest_start ("Nightly")
-
 ctest_update (SOURCE "${CTEST_SOURCE_DIRECTORY}" RETURN_VALUE res)
 
 ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}" 
