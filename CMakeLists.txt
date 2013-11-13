@@ -304,14 +304,14 @@ include(CTest) #adding Dart support
 add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
-  --build-makeprogram ${CMAKE_MAKE_PROGRAM}
+  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
   --build-two-config  
   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   --build-project JPScore
   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
   )
 
-## todo: make list of tests and iterate over 
+# todo: make list of tests and iterate over 
 add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
 add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)

@@ -93,8 +93,13 @@ set ( $ENV{LC_MESSAGES}    "en_EN" )
 set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 
 #######################################################################
+ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
 # get the party started
-ctest_start ("Nightly")
+ctest_start ("Experimental")
+# specify how long to run the continuous in minutes
+SET (CTEST_CONTINUOUS_DURATION 650)
+SET (CTEST_CONTINUOUS_MINIMUM_INTERVAL 15)
+
 ctest_update (SOURCE "${CTEST_SOURCE_DIRECTORY}" RETURN_VALUE res)
 
 ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}" 
