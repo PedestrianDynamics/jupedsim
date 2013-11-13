@@ -92,8 +92,8 @@ private:
 
 	//create a file and the directory structure if needed.
 	FILE* CreateFile(const std::string& filename);
-	void InitializeVariables(TiXmlElement* xRootNode);
-	void InitializeFiles(const std::string& file);
+
+
 
 #ifdef __linux__
 	int mkpath(char* file_path, mode_t mode=0755);
@@ -107,6 +107,10 @@ public:
 	virtual ~Analysis();
 
 	void InitArgs(ArgumentParser *args);
+        void InitializeVariables(TiXmlElement* xRootNode);
+	void InitializeFiles(const std::string& file);
+        std::string GetBasename(const std::string& str);
+        std::string GetFilename (const std::string& str);
 
 	polygon_2d ReadGeometry(const std::string& geometryFile);
 	int RunAnalysis(const std::string& file, const std::string& path);

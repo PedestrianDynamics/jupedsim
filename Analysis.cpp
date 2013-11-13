@@ -20,6 +20,7 @@
 
 using namespace std;
 
+
 /************************************************
  // Konstruktoren
  ************************************************/
@@ -88,6 +89,22 @@ Analysis::~Analysis() {
 }
 
 
+// file.txt ---> file
+std::string Analysis::GetBasename (const std::string& str)
+{
+    std::cout << "Splitting: " << str << '\n';
+    unsigned found = str.find_last_of(".");
+    return  str.substr(0,found);
+}
+// c:\\windows\\winhelp.exe ---> winhelp.exe 
+std::string Analysis::GetFilename (const std::string& str)
+{
+    std::cout << "GetFilename: " << str << '\n';
+    unsigned found = str.find_last_of("/\\");
+    return   str.substr(found+1);
+}
+
+
 void Analysis::InitArgs(ArgumentParser* args) {
 	string s = "Parameter:\n";
 
@@ -127,7 +144,6 @@ void Analysis::InitArgs(ArgumentParser* args) {
 		_fundamentalTinTout = true;
 		_classicMethod = true;
 		_areaForMethod_B = dynamic_cast<MeasurementArea_B*>( args->GetMeasurementArea(args->GetAreaIDforMethodB()) );
-		_areaForMethod_C = _areaForMethod_B;
 	}
 
 	if(args ->GetIsMethodC())
@@ -230,7 +246,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 	//framerate
 	if(xHeader->FirstChild("frameRate")){
 		_fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-		Log->Write("INFO:\tFrame rate fps=%d", _fps);
+		Log->Write("INFO:\tFramerate fps=%d", _fps);
 	}
 
 	_xCor = new double* [_maxNumofPed];
@@ -292,12 +308,12 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 			}
 			if(_fundamentalTinTout==true)
 			{
-				if(within(make<point_2d>(x, y), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID]))
+				if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID]))
 				{
 					_tIn[ID]=frameNr;
 					IsinMeasurezone[ID] = true;
 				}
-				if((!within(make<point_2d>( x, y), _areaForMethod_B->_poly))&&IsinMeasurezone[ID])
+				if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID])
 				{
 					_tOut[ID]=frameNr;
 					IsinMeasurezone[ID] = false;
@@ -359,6 +375,14 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
 	string fullTrajectoriesPathName= path+"/"+filename;
+        string takahiroFile = path + "/" + GetBasename(filename) + ".vor";
+        FILE *takahiro;
+	if((takahiro=CreateFile(takahiroFile))==NULL)
+	{
+		Log->Write("cannot open the file to write takahiro File\n");
+		exit(0);
+	}
+
 
 	TiXmlDocument docGeo(fullTrajectoriesPathName);
 	if (!docGeo.LoadFile()){
@@ -456,7 +480,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 				}
 			}
 			agentCnt++;
-		}
+		}//agent
 
 		if(_flowVelocity)
 		{
@@ -495,10 +519,15 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 				{
 					VoronoiVelocity=0;
 				}
-
+                                double areaPolygon;
 				double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
 				fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
-
+                                int counter=0;
+                                for(vector<polygon_2d>::const_iterator polygon_iterator = polygons.begin(); polygon_iterator!=polygons.end();polygon_iterator++)
+                                {
+                                    areaPolygon = area(*polygon_iterator);
+                                    fprintf(takahiro,"%d\t %d\t %.3f\t %.3f\t %.3f\n", counter + 1, frid, XInFrame[counter], YInFrame[counter++], areaPolygon);
+                                }
 				if(_calcIndividualFD)
 				{
 					if(numPedsInFrame>0)
@@ -520,7 +549,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 				//------------the following codes is written to output the Voronoi polygons of a frame-----------
 				if(_outputGraph)
 				{
-					cout<<"output polygons"<<endl;
+                                    //cout<<"output polygons"<<endl;
 					OutputVoroGraph(boost::lexical_cast<string>(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame,filename);
 				}
 			}
@@ -563,6 +592,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 	if(_flowVelocity)
 		fclose(_fN_t);
 
+        fclose(takahiro);
 	delete [] PassLine;
 	delete [] DensityPerFrame;
 	return 0;
@@ -790,11 +820,13 @@ void Analysis::DistributionOnLine(int *frequency,int fraction, double Line_start
  */
 double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d& measureArea)
 {
+
 	double density=0;
 	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
+                double areaPolygon = area(*polygon_iterator);
 		intersection(measureArea, *polygon_iterator, v);
 		polygon_2d a,b;
 		a = measureArea;
