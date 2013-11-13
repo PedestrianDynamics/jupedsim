@@ -152,14 +152,22 @@ add_test (jpsreport_compile ${CMAKE_CTEST_COMMAND}
   --test-command jpsreport --ini=${CMAKE_SOURCE_DIR}/Testing/input_UO_180.xml
   )
 
+add_library ( report ${source_files} )
+#----------------------------- ADD TESTS HERE --------------------------
+add_executable(
+	testGetFilename
+	Utest/testGetFilename.cpp
+)
+target_link_libraries (testGetFilename report)
+
 # todo: make list of tests and iterate over 
 # add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 # #----------------- append to this list more tests ... but first add_executable() ---------------
-# set (tests testSignPos testSignNeg testPointOnEllipse testEqual)
+set (tests testGetFilename)
 # #--------------------------------------------------------------------
-# foreach (test ${tests})
-#   add_test(NAME ${test} COMMAND ${test})
-# endforeach(test)
+foreach (test ${tests})
+  add_test(NAME ${test} COMMAND ${test})
+endforeach(test)
 
 # add_test( NAME timetest
 #   COMMAND ${CMAKE_COMMAND}
