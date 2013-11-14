@@ -85,7 +85,7 @@ public:
 
 	Equal();
     Equal(double m, double s);
-    Equal(const Gauss& orig);
+    Equal(const Equal& orig);
     virtual ~Equal();
 
     /**

@@ -122,11 +122,12 @@ Equal::Equal() : Distribution() {
 Equal::Equal(double m, double s) : Distribution(m, s) {
 }
 
-Equal::Equal(const Gauss& orig) : Distribution(orig) {
+Equal::Equal(const Equal& orig) : Distribution(orig) {
 }
 
 Equal::~Equal() {
 }
+
 // Gleichverteilte ZUfallszahl auf [mu-sigma, mu+sigma]
 double Equal::GetRand() {
     double x;
