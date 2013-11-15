@@ -562,11 +562,11 @@ double JEllipse::MinimumDistanceToLine(const Line& l) const {
  P2(x2,y2): Action-point in E2
 
 
- C1*------------*C2
- /              \
+     C1*------------*C2
+      /              \
      /                \
     /                  \
-P1 *			\
+   P1 *			\
  *P2
 
  1. find the closest distance between C1 and C2: d

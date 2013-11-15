@@ -128,7 +128,7 @@ Equal::Equal(const Equal& orig) : Distribution(orig) {
 Equal::~Equal() {
 }
 
-// Gleichverteilte ZUfallszahl auf [mu-sigma, mu+sigma]
+// Uniform distribution in [mu-sigma, mu+sigma]
 double Equal::GetRand() {
     double x;
     double mu = GetMean();

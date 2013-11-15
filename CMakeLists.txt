@@ -5,18 +5,22 @@
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
-project(JPScore)
-set(CMAKE_COLOR_MAKEFILE ON)
-message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
-message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
-message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 
+project(JPScore)
+
+set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
 set(JPSCORE_MINOR_VERSION 1)
 set(JPSCORE_PATCH_VERSION 0)
 set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
+
+# configure_file (
+#   "${CMAKE_SOURCE_DIR}/Config.h.in"
+#   "${CMAKE_BINARY_DIR}/Config.h"
+# )
+#include_directories ("${CMAKE_BINARY_DIR}")
 
 if(NOT DEFINED PROCESSOR_COUNT)
   # Unknown:
@@ -60,9 +64,42 @@ message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 #------------------ set important directories --------------------
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+set(LIBRARY_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
+#include_directories( ${LIBRARY_OUTPUT_PATH} )
+#add_subdirectory(${LIBRARY_OUTPUT_PATH} )
+message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
+message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
+message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
+#add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} --verbose)
+
+#find the correct OpenMP flag
+FIND_PACKAGE(OpenMP)
+if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+else(OPENMP_FOUND)
+  message( STATUS "Disabling OpenMP support" )
+endif(OPENMP_FOUND)
+
+#find and add the CGAL library
+#fixme: complete this section
+FIND_PACKAGE(CGAL QUIET)
+if(CGAL_FOUND)
+	include (${CGAL_USE_FILE})
+	INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
+	add_definitions(-D_CGAL=1)
+	target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+	#message (SEND_ERROR "${CGAL_FOUND}")
+	#message (FATAL_ERROR "${CGAL_CORE_INCLUDE_DIR}")
+	#message (SEND_ERROR " Erreur: ${CGAL_FOUND}")
+	#message (SEND_ERROR " Erreur: ${CGAL_USE_FILE}")
+else(CGAL_FOUND)
+  message( STATUS "CGAL not found. But don't panik .." )
+endif(CGAL_FOUND)
 
 file(
 	GLOB_RECURSE
@@ -189,51 +226,25 @@ file(
 	
 )
 
-# foreach(next_ITEM ${source_files})
-#    message(STATUS "next item: ${next_ITEM}")
-# endforeach(next_ITEM ${sourc_files})
 #Target
 add_executable(
   jpscore
   ${source_files}
 )
 
-#find the correct OpenMP flag
-FIND_PACKAGE(OpenMP)
-if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-else(OPENMP_FOUND)
-  message( STATUS "Disabling OpenMP support" )
-endif(OPENMP_FOUND)
-
-#find and add the CGAL library
-#fixme: complete this section
-FIND_PACKAGE(CGAL QUIET)
-if(CGAL_FOUND)
-	include (${CGAL_USE_FILE})
-	INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
-	add_definitions(-D_CGAL=1)
-	target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
-	#message (SEND_ERROR "${CGAL_FOUND}")
-	#message (FATAL_ERROR "${CGAL_CORE_INCLUDE_DIR}")
-	#message (SEND_ERROR " Erreur: ${CGAL_FOUND}")
-	#message (SEND_ERROR " Erreur: ${CGAL_USE_FILE}")
-else(CGAL_FOUND)
-  message( STATUS "CGAL not found. But don't panik .." )
-endif(CGAL_FOUND)
-
 
 if(WIN32)
-target_link_libraries (jpscore wsock32)
+  target_link_libraries (jpscore wsock32)
 endif(WIN32)
 
+add_library ( core SHARED ${source_files} )
 
+
+
+#---------------------------- compiler -------------------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   message(STATUS "Using CLANG++" )
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-
 if(CMAKE_COMPILER_IS_GNUCXX)
   message( STATUS "Set compiler flags (g++)" )
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
@@ -241,7 +252,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif(CMAKE_COMPILER_IS_GNUCXX)
 message(STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
 message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
-
 
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
   set(WITH_COVERAGE TRUE)
@@ -300,8 +310,7 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-
-add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND} 
+add_test (jpscore_compile ${CMAKE_CTEST_COMMAND} 
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
@@ -310,13 +319,23 @@ add_test (jpscore_compile_and_test ${CMAKE_CTEST_COMMAND}
   --build-project JPScore
   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
   )
-
 # todo: make list of tests and iterate over 
-add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
-add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
-add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
+#add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
+add_executable(testSignPos Utest/testSign.cpp)
+target_link_libraries (testSignPos  core)
+#add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
+add_executable(testSignNeg  Utest/testSign1.cpp)
+target_link_libraries (testSignNeg  core)
+#add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
+add_executable(testPointOnEllipse Utest/testPointOnEllipse.cpp)
+
+#add_subdirectory ()
+target_link_libraries (testPointOnEllipse  core)
+#add_executable(testEqual math/Distribution.cpp Utest/testequal.cpp)
+add_executable(testEqual Utest/testequal.cpp)
+target_link_libraries (testEqual core)
 #----------------- append to this list more tests ... but first add_executable() ---------------
-set (tests testSignPos testSignNeg testPointOnEllipse)
+set (tests testSignPos testSignNeg testPointOnEllipse testEqual)
 #--------------------------------------------------------------------
 foreach (test ${tests})
   add_test(NAME ${test} COMMAND ${test})
@@ -326,7 +345,7 @@ endforeach(test)
 #   COMMAND ${CMAKE_COMMAND}
 #   -DTEST_PROG=$<TARGET_FILE:testPointOnEllipse>  
 #   -P    ${EXECUTABLE_OUTPUT_PATH}/runtest.cmake
-#     )
+#     )#
 
 
 find_package(PythonInterp)
@@ -334,7 +353,7 @@ if(PYTHONINTERP_FOUND)
   message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
   message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
   set (test_parameters "${CMAKE_SOURCE_DIR}")
-  add_test(NAME testflow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
+  add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
   #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
 endif(PYTHONINTERP_FOUND)
 
