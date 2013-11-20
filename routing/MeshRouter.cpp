@@ -56,7 +56,7 @@ void print_path(vector<MeshEdge*>edge_path){
 }
 
 /* Helper for Funnel
-     \   2 /
+     \   2  /
        \   /
     3   X apex  1
       /    \
@@ -81,9 +81,17 @@ int TestinFunnel(Point apex, Point left,Point right,Point test){
 	}
 }
 
-// Computes the intersection points of two circles
+// Computes the intersection points  of two circles
+// mp1: Midpoint 1
+// r1 : Radius 1
+// mp2: Midpoint 2
+// r2 : Radius 2
+// sp1: intersection point 1 (left)
+// sp1: intersection point 2 (left)
+
 int CutCircleCircle(Point mp1, double r1, Point mp2, double r2,
                        Point& sp1, Point& sp2)
+
 {
    double d, dx, dy, a, h;
 
@@ -96,10 +104,12 @@ int CutCircleCircle(Point mp1, double r1, Point mp2, double r2,
    {
       return (-1);
    }
-   else if (fabs(d) < 0.0001) // same midpoint
+   else if (fabs(d) < J_EPS) // same midpoint
    {
       return (-2);
    }
+   //TODO: Verify formula
+   // esp. test if sp1 is always on the left
 
     a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
 
@@ -114,8 +124,15 @@ int CutCircleCircle(Point mp1, double r1, Point mp2, double r2,
     return(0);
 }
 
-// Thales' theorem
+/* Narrows the wedge by agents radius
+ *
+ *  start : apex of wedge
+ *  goal  : point of the original funnel
+ *  left  : goal is left point (false=right)
+ *  result: shifted goal by agents radius
+ */
 int Funnelpoint(Point start, Point goal, bool left, Point& result){
+	// Thales' circle
 	Point mp1=(start+goal)/2;
 	double r1=((start-goal).Norm())/2;
 	Point sp1,sp2;
@@ -135,23 +152,16 @@ int Funnelpoint(Point start, Point goal, bool left, Point& result){
 		return -1;
 }
 
-
-MeshEdge* MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*> edge_path,Point& use_left,Point& use_right){
+// Funnel for pathfinding using non-zero size agents
+// Moves around corners on a fixed arc
+NavLine MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*> edge_path){
 
 	if(edge_path.empty()){
-		// Start and End Point in same Cell
-		//cout<<"Endpoint is in current cell"<<endl;
-		//Line goal_line(goal,goal);
-		//return NavLine(goal_line);
 		exit(EXIT_FAILURE);
 	}
 	else{
-		//int goal_cell_id=-1;
-		//MeshCell* goal_cell=_meshdata->FindCell(goal,goal_cell_id);
-
-		Point apex=goal;
+		Point apex=goal,use_left,use_right;
 		int act_cell_id=-1;
-		//int loc_ind=-1; // local index of first node to be found in startphase
 		unsigned int path_ind=0;
 		Point point_left,point_right; // Nodes creatin the wedge
 		MeshCell* act_cell=_meshdata->FindCell(start,act_cell_id);
@@ -160,30 +170,14 @@ MeshEdge* MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*>
 		point_left=edge_path.at(0)->GetLeft(p_act_ref);
 		point_right=edge_path.at(0)->GetRight(p_act_ref);
 
-
-		//-------------------------//
-		//cout<<point_left.toString()<<endl;
-
-
-		//Test
-		//print_path(edge_path);
-		//cout<<"left: "<<point_left.toString()<<" right: "<<point_right.toString()<<endl;
-
 		Point point_run_left=point_left;
 		Point point_run_right=point_right;
-
-
-		////////////////////////////////////Modification/////////
 
 		Point wedge_left,wedge_right,wedge_run_left,wedge_run_right;
 		Funnelpoint(start,point_left,true,wedge_left);
 		Funnelpoint(start,point_right,false,wedge_right);
 		Funnelpoint(start,point_run_left,true,wedge_run_left);
 		Funnelpoint(start,point_run_right,false,wedge_run_right);
-
-
-		////////////////////////////////////////////////////////
-
 
 		bool apex_found=false;
 		// lengthen the funnel at side
@@ -207,32 +201,23 @@ MeshEdge* MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*>
 				if(path_ind+1<edge_path.size()){ // Last Cell not yet reached =>Continue or node on edge
 					if(run_left){
 						point_run_left=edge_path.at(path_ind+1)->GetLeft(p_act_ref);
-						//////////////////////Modification////////////////////////
+
 						Funnelpoint(start,point_run_left,true,wedge_run_left);
-						////////////////////////////////////////////////////////
 					}
 					if(run_right){
 						point_run_right=edge_path.at(path_ind+1)->GetRight(p_act_ref);
-						//////////////////////Modification////////////////////////
-						Funnelpoint(start,point_run_right,false,wedge_run_right);
-						////////////////////////////////////////////////////////
 
+						Funnelpoint(start,point_run_right,false,wedge_run_right);
 					}
 				}else{//goal in actual cell => apex= goal or node on edge
 					//cout<<"In else case!"<<endl;
 					point_run_left=goal;
 					point_run_right=goal;
-					//////////////////////Modification////////////////////////
+
 					Funnelpoint(start,point_run_right,false,wedge_run_right);
 					Funnelpoint(start,point_run_left,true,wedge_run_left);
-					////////////////////////////////////////////////////////
 				}
 				// Test for new Points to be in the wedge of start
-
-				//////////////////////Modification////////////////////////
-				//int test_l=TestinFunnel(start,point_left,point_right,point_run_left);
-				//int test_r=TestinFunnel(start,point_left,point_right,point_run_right);
-
 				// Widen Wedge per default
 				int test_l=1;
 				int test_r=3;
@@ -240,54 +225,37 @@ MeshEdge* MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*>
 					test_l=TestinFunnel(start,wedge_left,wedge_right,wedge_run_left);
 				if(point_right!=point_run_right)
 					test_r=TestinFunnel(start,wedge_left,wedge_right,wedge_run_right);
-				////////////////////////////////////////////////////////
-
 
 				if(test_l==0 && test_r==0){ //Narrow wedge on both sides
 					//cout<<"narrow wedge on both sides"<<endl;
 					point_left=point_run_left;
 					point_right=point_run_right;
-					//////////////////////Modification////////////////////////
 					Funnelpoint(start,point_left,true,wedge_left);
 					Funnelpoint(start,point_right,false,wedge_right);
-					////////////////////////////////////////////////////////
 				}
 				else if(test_l==1 && test_r==0){// narrow right side
 					//cout<<"narrow right side"<<endl;
 					point_right=point_run_right;
-					//////////////////////Modification////////////////////////
 					Funnelpoint(start,point_right,false,wedge_right);
-					////////////////////////////////////////////////////////
-
 				}
 				else if(test_l==0 && test_r==3){// narrow left side
 					//cout<<"narrow left side"<<endl;
 					point_left=point_run_left;
-					//////////////////////Modification////////////////////////
 					Funnelpoint(start,point_left,true,wedge_left);
-					////////////////////////////////////////////////////////
 				}
 				else if(test_l==1 && test_r==1){// apex=left
 					//cout<<"apex=left"<<endl;
 					apex=point_left;
-					//////////////////////Modification////////////////////////
 					use_left=point_left;
-					//use_right=use_left+2*(wedge_left-use_left);
 					use_right=wedge_left+wedge_left-use_left;
-					////////////////////////////////////////////////////////
-					//return NavLine(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
 				else if(test_l==3 && test_r==3){//apex=right
 					//cout<<"apex=right"<<endl;
 					apex=point_right;
-					//////////////////////Modification////////////////////////
 					use_right=point_right;
-					//use_left=use_right+2*(wedge_right-use_right);
 					use_left=wedge_right+wedge_right-use_right;
-					////////////////////////////////////////////////////////
-					//return Nav	Line(Line(edge_path.at(path_ind)->GetPoint1(),edge_path.at(path_ind)->GetPoint2()));
 
 					apex_found=true;
 				}
@@ -317,61 +285,26 @@ MeshEdge* MeshRouter::FunnelRad(Point& start,Point& goal,const vector<MeshEdge*>
 				}
 				path_ind++;
 			}else{//After some Funnel iterations the cell containing the goal is reached;
-				//apex=goal; // Initialisation!
-				//cout<<"Funnel progressed to goal and stopped"<<endl;
 				apex_found=true;
 				apex=edge_path.back()->GetPoint1();//Test
 
-				//////////////////////Modification////////////////////////
 				//Log->Write("Info: Goal in Funnel");
 				Funnelpoint(start,goal,false,use_left);
 				Funnelpoint(start,goal,true,use_right);
 
-				////////////////////////////////////////////////////////
-
-				//return NavLine(Line(edge_path.at(path_ind-1)->GetPoint1(),edge_path.at(path_ind-1)->GetPoint2()));
 			}
 		}//END WHILE
-		//cout<<"Funnel from"<<start.toString()<<" results in "<<apex.toString()<<endl;
 
-		// Some kind of workaround
-		// First Edge which contains the found apex
-		/*
-		bool edgefound=false;
-		path_ind=0;
-		Point p1=apex,p2=apex;
-		while(!edgefound){
-			if(edge_path.at(path_ind)->GetPoint1()==apex){
-				p1=apex;
-				p2=edge_path.at(path_ind)->GetPoint2();
-				edgefound=true;
-			}
-			else if(edge_path.at(path_ind)->GetPoint2()==apex){
-				p1=apex;
-				p2=edge_path.at(path_ind)->GetPoint1();
-				edgefound=true;
-			}
-			path_ind++;
-		}
-		*/
-
-		//NavLine exitline(Line(p1,p2));
-		/*
-		Point p1_new=(p1-p2)*0.9+p2;
-		Point p2_new=(p2-p1)*0.9+p1;
-		NavLine exitline(Line(p1_new,p2_new));
-		//cout<<"Funnel: exitline: "<<exitline.toString()<<endl;
-		return exitline;
-		*/
-
-		// here: dummy
-		return edge_path.at(0);
-
-
+		NavLine line;
+		line.SetPoint1(use_left);
+		line.SetPoint2(use_right);
+		return line;
+		//return edge_path.at(0);
 	}//END IF
 }
 
-
+// Just for testing do not use
+// Use more stable Funnelrad instead
 NavLine MeshRouter::Funnel(Point& start,Point& goal,vector<MeshEdge*> edge_path)const{
 
 	if(edge_path.empty()){
@@ -760,10 +693,10 @@ int MeshRouter::FindExit(Pedestrian* p){
 	Point  point_start=p->GetPos();
 	int c_start_id=-1;
 	_meshdata->FindCell(point_start,c_start_id);
-	MeshEdge* edge=NULL;
+	//MeshEdge* edge=NULL;
 	NavLine* nextline=NULL;
 	NavLine line;
-	MeshEdge* meshline=NULL;
+	//MeshEdge* meshline=NULL;
 
 
 	if (false){// Compute the goal each update
@@ -795,52 +728,19 @@ int MeshRouter::FindExit(Pedestrian* p){
 				//cout<<"The line is: "<<line.toString()<<endl;
 			}
 			nextline=&line;
-		}else{/*
-			meshline=Visibility(point_start,point_goal,edgepath);
-			nextline=dynamic_cast<NavLine*>(meshline);
-			Point p1=nextline->GetPoint1();
-			Point p2=nextline->GetPoint2();
-			//Point p1_new=(p1-p2)*0.9+p2;
-			//Point p2_new=(p2-p1)*0.9+p1;
-			nextline->SetPoint1((p1-p2)*0.9+p2);
-			nextline->SetPoint2((p2-p1)*0.9+p1);
-            */
+		}else{
 
-			//////////////////////Modification////////////////////////
+			//Point use_left,use_right;
+			//meshline=FunnelRad(point_start,point_goal,edgepath,use_left,use_right);
+			line=FunnelRad(point_start,point_goal,edgepath);
 
-			Point use_left,use_right;
-			meshline=FunnelRad(point_start,point_goal,edgepath,use_left,use_right);
-			//nextline=dynamic_cast<NavLine*>(meshline);
-			//nextline->SetPoint1(use_left);
-			//nextline->SetPoint2(use_right);
-			line.SetPoint1(use_left);
-			line.SetPoint2(use_right);
 			nextline=&line;
 
-			//////////////////////////////////////////////////////////
-
-			//NavLine exitline(Line(p1_new,p2_new));
-			/*
-			if(p->GetID()==22){
-				cout<<meshline->GetID()<<endl;
-				print_path(edgepath);
-			}*/
 		}
-		//cout<<"Goal"<<point_goal.toString()<<endl;
-		//nextline=&line;
-
-		//edge=*(edgepath.begin());
-		//nextline=dynamic_cast<NavLine*>(edge);
-
-		//Debug
-
 		if(nextline==NULL){
 			Log->Write("Edge is corrupt");
 			exit(EXIT_FAILURE);
 		}
-		//cout<<"here"<<endl;
-
-		//cout<<"nextline: "<<nextline->toString()<<endl;
 	}// END ELSE
 
 	p->SetExitLine(nextline);
@@ -1044,44 +944,9 @@ void MeshRouter::Init(Building* b) {
 			}
 			mCellGroups.push_back(new MeshCellGroup(groupname,mCells));
 		}
-		//while_counter++;//
-		//if(while_counter>50)//
-		//	break;//
 	}
 	_meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
 	FixMeshEdges();
-
-/*
-	Point start(0.0,0.0);
-	Point goal(1.0,3.0);
-	bool left=false;
-	Point result(0.0,0.0);
-	cout<<Funnelpoint(start,goal,left,result)<<endl;
-	cout<<result.toString()<<endl;
-	exit(EXIT_SUCCESS);
-	*/
-/*
-	int found_cell;
-	//_meshdata->FindCell(Point(14.5386998558,7.9135540711),found_cell);
-	_meshdata->FindCell(Point(14,7.91),found_cell);
-	double xl=14.0,xu=17.0,yl=7.0,yu=10.0;
-	int n=30,m=30;
-	int** field=new int*[n];
-	for(int i=0;i<n;i++)
-		field[i]=new int[m];
-
-	for(int i=0;i<n;i++){
-		for(int j=0;j<m;j++){
-			int cell_id=-2;
-			_meshdata->FindCell(Point(xl+(xu-xl)/(n-1)*i,yl+(yu-yl)/(m-1)*j),cell_id);
-			cout<<cell_id<<" ";
-		}
-		cout<<endl;
-	}
-
-
-	cout<<found_cell<<endl;
-	exit(EXIT_SUCCESS);*/
 }
 
 
