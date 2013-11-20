@@ -281,6 +281,7 @@ bool VoronoiDiagram::point_inside_triangle(point_type2 pt, point_type2 tri_p1, p
 	return true;
 }
 
+
 vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_type2 pt2, point_type2 pt, double minX, double minY, double maxX, double maxY)
 {
 	double eps = 10E-16;

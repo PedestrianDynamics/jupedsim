@@ -4,7 +4,7 @@ project(JPSreport)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 
-#set(LIBRARY_OUTPUT_PATH ../lib/${CMAKE_BUILD_TYPE})
+set(LIBRARY_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 
 #set(EXECUTABLE_OUTPUT_PATH "../")
 #INCLUDE_DIRECTORIES("./")
@@ -160,10 +160,17 @@ add_executable(
 )
 target_link_libraries (testGetFilename report)
 
+
+add_executable(
+	testGetBasename
+	Utest/testGetBasename.cpp
+)
+target_link_libraries (testGetBasename report)
+
 # todo: make list of tests and iterate over 
 # add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 # #----------------- append to this list more tests ... but first add_executable() ---------------
-set (tests testGetFilename)
+set (tests testGetFilename testGetBasename)  #list of tests
 # #--------------------------------------------------------------------
 foreach (test ${tests})
   add_test(NAME ${test} COMMAND ${test})

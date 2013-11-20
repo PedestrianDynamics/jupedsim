@@ -826,7 +826,7 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 	{
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
-                double areaPolygon = area(*polygon_iterator);
+                // double areaPolygon = area(*polygon_iterator);
 		intersection(measureArea, *polygon_iterator, v);
 		polygon_2d a,b;
 		a = measureArea;
