@@ -46,11 +46,7 @@ private:
     double _Bmax;
     double __vel0; // Wunschgeschwindigkeit (Betrag)
 
-    // private Funktionen:
-    // effektiver Abstand Segement l und Ellipse (geg. durch ActionPoint)
-    double EffectiveDistanceToLine(const Line& l) const;
-    // Distance of Closest Approach of two arbitrary ellipses
-    double Distance2d(const JEllipse& E) const;
+
 
 public:
     /* Konstruktoren */

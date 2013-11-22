@@ -27,259 +27,36 @@
 
 using namespace std;
 
-/*************************************************************
- private Funktionen
- ************************************************************/
 
-/* effektiver Abstand Segement l und Ellipse (geg. durch ActionPoint)
- * Effektiver Abstand = Abstand Punkt auf dem Rand der Ellipse
- * Algorithms:
- *   - bestimme Lotfußpunkt (P) von L zum ActionPoint der Ellipse (AP)
- *     (ggf. Randpunkte des Segments L)
- *   - R ist der Schnittpunkt der Geraden durch AP und P
- *   - gesuchter Abstand zwischen R und AP
- * Parameter:
- *   Line l muss in den Koordinaten der Ellipse übergeben werden
- * */
-
-double JEllipse::EffectiveDistanceToLine(const Line& linE) const {
-	double eff_dist;
-	// Koordinaten alle im System der Ellipse
-	Point APinE = Point(_Xp, 0);
-	Point PinE = linE.ShortestPoint(APinE); // Punkt auf l mit kuerzestem Abstand zu AP
-	if (IsOn(PinE)) {// P liegt bereits auf der Ellipse => Abstand 0
-		eff_dist = 0.0;
-	} else {
-		Point P = PinE.CoordTransToCart(this->_center, this->_cosPhi,
-				this->_sinPhi); // in "normalen" Koordinaten
-		Point R; //Schnittpunkt der geraden durch AP und P mit E
-
-//		double dist = (PinE - APinE).Norm(); // beide Punkte in E
-		R = this->PointOnEllipse(PinE); // PointOnEllipe gibt "normale" Koordinaten zurück
-		eff_dist = (R - P).Norm(); // beide Punkte in "normalen" Koordinaten
-	}
-	return eff_dist;
-}
-
-/* Distance of Closest Approach of two arbitrary ellipses
- * ai: semi-axis length with a1>=b1, a2>=b2,
- * angle1=orientation of E1 with respect to C1C2, with C1: centre E1, C2 center E2.
- * angle2=orientation of E2 with respect to C1C2.
- *
- * Original Version: http://www.math.kent.edu/~zheng/ellipsoid.c
- * thanks to Xiaoyu zheng for sharing!
- * */
-
-double JEllipse::Distance2d(const JEllipse& Ell) const {
-	/*----------------- INPUT Params --------------*/
-	double a1 = this->GetEA();
-	double b1 = this->GetEB();
-	double a2 = Ell.GetEA();
-	double b2 = Ell.GetEB();
-	double cos1 = _cosPhi;
-	double sin1 = _sinPhi;
-	double cos2 = Ell.GetCosPhi();
-	double sin2 = Ell.GetSinPhi();
-	Point c1c2 = (_center - Ell.GetCenter()).Normalized();
-	double dummy;
-
-	if (a1 < b1)
-	{
-		//switch axes
-		dummy = a1;
-		a1 = b1;
-		b1 = dummy;
-		// orthogonal axis --> phi+pi
-		dummy = cos1;
-		cos1 = -sin1;
-		sin1 = cos1;
-	}
-	if (a2 < b2)
-	{
-		//switch axes
-		dummy = a2;
-		a2 = b2;
-		b2 = dummy;
-		// orthogonal axis --> phi+pi
-		dummy = cos2;
-		cos2 = -sin2;
-		sin2 = cos2;
-	}
-
-	double qa1 = a1 * a1;
-	double qb1 = b1 * b1;
-	double qa2 = a2 * a2;
-	double qb2 = b2 * b2;
-	//make sure that the the major axis points always points into the uppper
-	// two quadrants, Bug found by Sean Curtis
-	if (sin1 < 0 )
-	{
-		sin1 = -sin1;
-		cos1 = -cos1;
-	}
-	if (sin2 < 0 )
-	{
-		sin2 = -sin2;
-		cos2 = -cos2;
-	}
-	//the fix on July 2012
-/*	if(fabs(angle2-angle1)==pi)
-	{
-		angle2=angle1;
-	}*/
-	if ( fabs(sin1*cos2 - cos1*sin2) < J_EPS )//angle2-angle1=pi eqv. sin(angle1-angl1)=sin(pi)=0
-	{
-		sin1 = sin2;
-		cos1 = cos2;
-	}
-	//
-
-	Point e11 = Point(cos1, sin1); //unit vector of the direction of E1
-	Point e12 = Point(cos2, sin2); //unit vector of the direction of E2
-	/*----------------------------------------------*/
-
-	double eps1, eps2, k1dotd, k2dotd, k1dotk2, nu, Ap[2][2], lambdaplus,
-			lambdaminus, bp2, ap2, cosphi, tanphi2, delta, dp;
-	complex<double> A, B, C, D, E, alpha, beta, gamma, P, Q, U, y, qu;
-
-
-	eps1 = 1.0 - qb1 / qa1;
-	eps2 = 1.0 - qb2 / qa2;
-	k1dotd = e11.ScalarP(c1c2);
-	k2dotd = e12.ScalarP(c1c2);
-	k1dotk2 = e11.ScalarP(e12);
-	nu = a1 / b1 - 1.0;
-
-	double qk1dotk2 = k1dotk2 * k1dotk2;
-	double qk1dotd = k1dotd * k1dotd;
-	double qnu = nu * nu;
-	Ap[0][0] = qb1 / qb2 * (1.0 + 0.5 * (1.0 + k1dotk2) * (nu * (2.0 + nu)
-			- eps2 * (1.0 + nu * k1dotk2) * (1.0 + nu * k1dotk2)));
-	Ap[1][1] = qb1 / qb2 * (1.0 + 0.5 * (1.0 - k1dotk2) * (nu * (2.0 + nu)
-			- eps2 * (1.0 - nu * k1dotk2) * (1.0 - nu * k1dotk2)));
-
-	// original:
-	//Ap[0][1] = qb1 / qb2 * 0.5 * sqrt(1.0 - qk1dotk2)*
-	//        (nu * (2.0 + nu) + eps2 * (1.0 - qnu * qk1dotk2));
-
-	double tmp0 = fabs(1.0 - qk1dotk2) < J_EPS ? 0.0 : (1.0 - qk1dotk2);
-	Ap[0][1] = qb1 / qb2 * 0.5 * sqrt(tmp0) * (nu * (2.0 + nu) + eps2 * (1.0
-			- qnu * qk1dotk2));
-
-	double tmp1 = 0.5 * (Ap[0][0] + Ap[1][1]);
-	double tmp3 = Ap[0][0] - Ap[1][1];
-	double tmp2 = 0.25 * tmp3 * tmp3 + Ap[0][1] * Ap[0][1];
-	tmp3 = sqrt(tmp2);
-	lambdaplus = tmp1 + tmp3;
-	lambdaminus = tmp1 - tmp3;
-	tmp1 = sqrt(lambdaplus);
-	bp2 = 1.0 / tmp1;
-	ap2 = 1.0 / sqrt(lambdaminus);
-
-	//original: if (fabs(k1dotk2) == 1.0) {
-	if ( fabs(k1dotk2) > 1.0 - J_EPS) {
-		if (Ap[0][0] > Ap[1][1])
-			cosphi = qb1 / qa1 * qk1dotd / (1.0 - eps1 * k1dotd * k1dotd);
-		else
-			cosphi = (1.0 - k1dotd * k1dotd) / (1.0 - eps1 * k1dotd * k1dotd);
-	} else {
-		double Tmp1, Tmp2, Tmp3, Tmp4, Tmp5, Tmp6, Tmp7, Tmp8;
-		Tmp1 = 2.0 * (Ap[0][1] * Ap[0][1] + (lambdaplus - Ap[0][0])
-				* (lambdaplus - Ap[0][0]));
-		Tmp2 = (1.0 - eps1 * k1dotd * k1dotd);
-		Tmp8 = Tmp1 * Tmp2;
-
-		Tmp3 = k2dotd + (b1 / a1 - 1.0) * k1dotd * k1dotk2;
-		Tmp4 = b1 / a1 * k1dotd;
-		Tmp5 = Tmp4 + Tmp3;
-		Tmp6 = Tmp4 - Tmp3;
-		Tmp7 = Ap[0][1] / sqrt(1.0 + k1dotk2) * (Tmp5)
-				+ (lambdaplus - Ap[0][0]) / sqrt(1.0 - k1dotk2) * (Tmp6);
-		cosphi = 1.0 / Tmp8 * (Tmp7 * Tmp7);
-	}
-	double qap2 = ap2 * ap2;
-	double qbp2 = bp2 * bp2;
-	delta = qap2 / qbp2 - 1.0;
-	if (delta == 0.0 || cosphi == 0.0)
-		dp = 1.0 + ap2;
-	else {
-		double Tmp, Tmp1;
-		tanphi2 = 1.0 / (cosphi) - 1.0;
-		Tmp = 1.0 + tanphi2;
-		Tmp1 = 1.0 + delta;
-		A = -(Tmp) / qbp2;
-		B = -2.0 * (Tmp + delta) / bp2;
-		C = -tanphi2 - Tmp1 * Tmp1 + (1.0 + Tmp1 * tanphi2) / qbp2;
-		D = 2.0 * Tmp * Tmp1 / bp2;
-		E = (Tmp + delta) * Tmp1;
-		complex<double> qA = A * A;
-		complex<double> qB = B * B;
-		alpha = -3.0 * qB / (8.0 * qA) + C / A;
-		beta = qB * B / (8.0 * qA * A) - B * C / (2.0 * qA) + D / A;
-		gamma = -3.0 * qB * qB / (256.0 * qA * qA) + C * qB / (16.0 * qA * A)
-				- B * D / (4.0 * qA) + E / A;
-		complex<double> qalpha = alpha * alpha;
-		if (beta == 0.0) {
-			qu = -B / (4.0 * A) + sqrt(
-					0.5 * (-alpha + sqrt(qalpha - 4.0 * gamma)));
-		} else {
-			P = -qalpha / 12.0 - gamma;
-			Q = -qalpha * alpha / 108.0 + alpha * gamma / 3.0 - beta * beta
-					/ 8.0;
-			U = c_cbrt(-Q * 0.5 + sqrt(Q * Q * 0.25 + P * P * P / 27.0));
-			if (U == 0.0)
-				y = -5.0 * alpha / 6.0 - c_cbrt(Q);
-			else
-				y = -5.0 * alpha / 6.0 + U - P / (3.0 * U);
-			complex<double> tsqrt = sqrt(alpha + 2.0 * y);
-
-			qu = -B / (4.0 * A) + 0.5 * (tsqrt + sqrt(
-					-(3.0 * alpha + 2.0 * y + 2.0 * beta / tsqrt)));
-
-		}
-		complex<double> Tmp2 = (qu * qu - 1.0) / delta * (1.0 + bp2 * (1.0
-				+ delta) / qu) * (1.0 + bp2 * (1.0 + delta) / qu) + (1.0 - (qu
-				* qu - 1.0) / delta) * (1.0 + bp2 / qu) * (1.0 + bp2 / qu);
-		dp = real(sqrt(Tmp2));
-	}
-	double result = dp * b1 / sqrt(1.0 - eps1 * qk1dotd);
-	if (result != result || result < 0) {
-		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tEllipse::Distance2d(): result=%f\n", result);
-		Log->Write(tmp);
-		exit(0);
-	}
-	return (result);
-}
 
 /************************************************************
  Konstruktoren
  ************************************************************/
 
 JEllipse::JEllipse() {
-	_vel = Point(); // Geschwindigkeitskoordinaten
-	_center = Point(); // cartesian-coord of the centre
+	_vel = Point(); // velocity vector
+	_center = Point(); // cartesian coordinates of the center
 	_cosPhi = 1; // = cos(0)
 	_sinPhi = 0; // = sin(0)
 	_Xp = 0; //x Ellipse-coord of the centre (Center in (xc,yc) )
-	_Amin = 0.18; // Laenge 1. Achse:  pAmin + V * pAv
+	_Amin = 0.18; // Semi-axis in direction of motion:  pAmin + V * pAv
 	_Av = 0.53;
-	_Bmin = 0.20; // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
+	_Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
 	_Bmax = 0.25;
-	__vel0 = 0; // Wunschgeschwindigkeit (Betrag)
+	__vel0 = 0; // desired speed
 }
 
 JEllipse::JEllipse(const JEllipse& orig) {
-	_vel = orig.GetV(); // Geschwindigkeitskoordinaten
+	_vel = orig.GetV(); // velocity vector
 	_center = orig.GetCenter();
 	_cosPhi = orig.GetCosPhi();
 	_sinPhi = orig.GetSinPhi();
 	_Xp = orig.GetXp(); //x Ellipse-coord of the centre (Center in (xc,yc) )
-	_Amin = orig.GetAmin(); // Laenge 1. Achse:  pAmin + V * pAv
+	_Amin = orig.GetAmin(); // Semi-axis in direction of motion:  pAmin + V * pAv 
 	_Av = orig.GetAv();
-	_Bmin = orig.GetBmin(); // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
+	_Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
 	_Bmax = orig.GetBmax();
-	__vel0 = orig.GetV0(); // Wunschgeschwindigkeit (Betrag)
+	__vel0 = orig.GetV0(); // desired speed
 }
 
 

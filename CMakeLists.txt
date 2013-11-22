@@ -323,19 +323,25 @@ add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
 #add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 add_executable(testSignPos Utest/testSign.cpp)
 target_link_libraries (testSignPos  core)
+
 #add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
 add_executable(testSignNeg  Utest/testSign1.cpp)
 target_link_libraries (testSignNeg  core)
+
 #add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
 add_executable(testPointOnEllipse Utest/testPointOnEllipse.cpp)
-
 #add_subdirectory ()
 target_link_libraries (testPointOnEllipse  core)
+
 #add_executable(testEqual math/Distribution.cpp Utest/testequal.cpp)
 add_executable(testEqual Utest/testequal.cpp)
 target_link_libraries (testEqual core)
+
+add_executable(testGetArea Utest/testGetArea.cpp)
+target_link_libraries (testGetArea core)
+
 #----------------- append to this list more tests ... but first add_executable() ---------------
-set (tests testSignPos testSignNeg testPointOnEllipse testEqual)
+set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea)
 #--------------------------------------------------------------------
 foreach (test ${tests})
   add_test(NAME ${test} COMMAND ${test})
