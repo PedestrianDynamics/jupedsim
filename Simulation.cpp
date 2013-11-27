@@ -348,24 +348,28 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	_nPeds=_distribution->Distribute(_building);
 
+	//using linkedcells
+	if (args->GetLinkedCells()){
+		s.append("\tusing Linked-Cells for spatial queries\n");
+		_building->InitGrid(args->GetLinkedCellSize());
+	}else {
+		_building->InitGrid(-1);
+	}
+
 	// initialize the routing engine before doing any other things
 	routingEngine->Init(_building);
 
 	//this is very specific to the gcfm model
 	_building->InitPhiAllPeds(_deltaT);
 
-	//using linkedcells
-	if (args->GetLinkedCells()){
-		s.append("\tusing Linked-Cells\n");
-		_building->InitGrid(args->GetLinkedCellSize());
-	}else {
-		_building->InitGrid(-1);
-	}
 
 	//pBuilding->WriteToErrorLog();
 
 	//get the seed
 	_seed=args->GetSeed();
+
+	// perform a general check to the .
+	_building->SanityCheck();
 }
 
 

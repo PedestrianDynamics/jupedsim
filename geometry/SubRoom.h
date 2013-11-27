@@ -53,7 +53,7 @@ class SubRoom {
 private:
 	/// the id set using the SetID method
 	int _id;
-	/// the unique id resulting from the count
+	/// the unique id resulting from the count of all subrooms in the system
 	int _uid;
 	int _roomID;
 	std::vector<int> _goalIDs; // all navigation lines contained in this subroom
@@ -196,13 +196,31 @@ public:
 	 */
 	void CalculateArea();
 
+	/**
+	 * @return true if the polygon is convex
+	 * @see http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
+	 */
+	bool IsConvex();
+
+	/**
+	 * @return true if the polygon is clockwise oriented
+	 * @see http://stackoverflow.com/questions/9473570/polygon-vertices-clockwise-or-counterclockwise/
+	 */
+	bool IsClockwise();
+
 
 	/**
 	 * check the subroom for some inconsistencies.
 	 * e.g. simple polygons
 	 * no intersection between the walls and the obstacles.
 	 */
-	void CheckSubroom();
+	void CheckObstacles();
+
+ 	/**
+	 * Check the subroom for possible errors and
+	 * output user specific informations.
+	 */
+	void SanityCheck();
 
 	//navigation
 	void AddCrossing(Crossing* line);
@@ -254,9 +272,10 @@ public:
 	/**
 	 * @return true if the two points are visible from each other.
 	 * Alls walls and transitions and crossings are used in this check.
-	 * The use of hlines is optional, because they are not real, can can be considered transparent
+	 * The use of hlines is optional, because they are not real, can be considered transparent
 	 */
 	bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+
 
 
 	// virtual functions

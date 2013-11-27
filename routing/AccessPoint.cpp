@@ -33,12 +33,12 @@ using namespace std;
 
 
 AccessPoint::AccessPoint(int id, double center[2],double radius) {
-
 	_id=id;
 	_center[0]=center[0];
 	_center[1]=center[1];
 	_radius=radius;
-	_finalDestination=false;
+	_finaExitToOutside=false;
+	_finalGoalOutside=false;
 	_room1ID=-1;
 	_room2ID=-1;
 	_connectingAPs.clear();
@@ -66,20 +66,27 @@ int AccessPoint::IsClosed(){
 void AccessPoint::SetClosed(int isClosed){
 	 _isClosed=isClosed;
 }
-void AccessPoint::setFinalDestination(bool isFinal)
+void AccessPoint::SetFinalExitToOutside(bool isFinal)
 {
-	_finalDestination=isFinal;
+	_finaExitToOutside=isFinal;
 }
 
-bool AccessPoint::isFinalDestination()
+bool AccessPoint::GetFinalExitToOutside()
 {
-	return _finalDestination;
+	return _finaExitToOutside;
 }
 
 const Point& AccessPoint::GetCentre() const{
 	return pCentre;
 }
 
+void AccessPoint::SetFinalGoalOutside(bool isFinal) {
+	_finalGoalOutside=isFinal;
+}
+
+bool AccessPoint::GetFinalGoalOutside(){
+	return _finalGoalOutside;
+}
 
 void AccessPoint::AddIntermediateDest(int final, int inter){
 	_mapDestToAp[final]=inter;
@@ -116,10 +123,9 @@ int  AccessPoint::GetNextApTo(int UID){
 	//this is probably a final destination
 	if(_mapDestToAp.count(UID)==0){
 		Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
-		Log->Write("ERROR:\tCheck your configuration file");
+		Log->Write("ERROR:\t Did you forget to define the goal in the configuration file?");
 		Dump();
 		exit(EXIT_FAILURE);
-		//return -1;
 	}
 	return _mapDestToAp[UID];
 }
@@ -151,7 +157,7 @@ void AccessPoint::setConnectingRooms(int r1, int r2){
 	_room2ID=r2;
 }
 
-double AccessPoint::distanceTo(double x, double y){
+double AccessPoint::DistanceTo(double x, double y){
 
 	return sqrt((x-_center[0])*(x-_center[0]) + (y-_center[1])*(y-_center[1]));
 }
@@ -164,7 +170,7 @@ bool AccessPoint::isInRange(int roomID){
 	return true;
 }
 
-bool AccessPoint::isInRange(double xPed, double yPed, int roomID){
+bool AccessPoint::IsInRange(double xPed, double yPed, int roomID){
 
 	if((roomID!=_room1ID)&& (roomID!=_room2ID)){
 		return false;
@@ -231,28 +237,43 @@ void AccessPoint::Reset(int UID){
 }
 
 
+void AccessPoint::SetFriendlyName(const std::string& name){
+	_friendlyName=name;
+}
+
+
+const std::string AccessPoint::GetFriendlyName(){
+	return _friendlyName;
+}
+
+
 void AccessPoint::Dump(){
 
-	cout<<" -----------------------"<<endl;
-	cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
+	cout<<endl<<"--------> Dumping AP <-----------"<<endl<<endl;
+	//cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
+	cout<<" ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
 
-	cout <<" Is Final destination :"<<isFinalDestination()<<endl;
-	cout <<" Distance to final destination"<<endl;
+	cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<endl;
+	cout <<" Distance to final goals"<<endl;
 
 	for(std::map<int, double>::iterator p = _mapDestToDist.begin(); p != _mapDestToDist.end(); ++p) {
-		cout<<" [ "<<p->first<<", " << p->second<<" m ]";
+		cout<<"\t [ "<<p->first<<", " << p->second<<" m ]";
 	}
 	cout<<endl<<endl;
 
-	cout<<" transit to final destination:"<<endl;
+	cout<<" transit to final goals:"<<endl;
 	for(std::map<int, int>::iterator p = _mapDestToAp.begin(); p != _mapDestToAp.end(); p++) {
-		cout<<" ---> [ "<<p->first<<" via " << p->second<<" ]";
+		cout<<"\t ---> [ "<<p->first<<" via " << p->second<<" ]";
+	}
+	if(_mapDestToAp.size()==0){
+		cout<<"\t ---> [ Nothing ]";
 	}
 	cout<<endl<<endl;
 
 	cout<<" connected to aps : " ;
 	for(unsigned int p=0;p<_connectingAPs.size();p++){
-		cout<<" [ "<<_connectingAPs[p]->GetID()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
+		//cout<<" [ "<<_connectingAPs[p]->GetID()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
+		cout<<endl<<"\t [ "<<_connectingAPs[p]->GetFriendlyName()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
 	}
 
 	cout<<endl<<endl;
@@ -262,7 +283,8 @@ void AccessPoint::Dump(){
 	}
 	cout<<" ]"<<endl;
 
-	cout<<endl<<" connected to rooms: "<<_room1ID<<" and "<<_room2ID<<endl;
+	//cout<<endl<<" connected to rooms: "<<_room1ID<<" and "<<_room2ID<<endl;
 	cout<<endl;
+	cout<<endl<<"------------------------------"<<endl<<endl;
 
 }

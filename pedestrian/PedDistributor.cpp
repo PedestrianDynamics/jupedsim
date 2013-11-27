@@ -293,6 +293,7 @@ void PedDistributor::InitDistributor(const string& filename){
 
 	//TODO: Parse the sources
 	TiXmlNode* xSources=xRootNode->FirstChild("agents_sources");
+	if(xSources)
 	for(TiXmlElement* e = xSources->FirstChildElement("source"); e;
 			e = e->NextSiblingElement("source")) {
 		Log->Write("INFO:\tSource with id %s will not be parsed !",e->Attribute("id"));

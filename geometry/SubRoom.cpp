@@ -181,7 +181,7 @@ void SubRoom::AddWall(const Wall& w) {
 
 void SubRoom::AddObstacle(Obstacle* obs){
 	_obstacles.push_back(obs);
-	CheckSubroom();
+	CheckObstacles();
 }
 
 
@@ -239,7 +239,6 @@ void SubRoom::RemoveGoalID(int ID){
 	Log->Write("There is no goal with that id to remove");
 }
 
-// berechnet die Fläche eines beliebigen Polygons und setzt die Variable pArea entsprechend
 
 void SubRoom::CalculateArea() {
 	double sum = 0;
@@ -252,43 +251,43 @@ void SubRoom::CalculateArea() {
 
 Point SubRoom::GetCentroid() const {
 
-    double px=0,py=0;
-    double signedArea = 0.0;
-    double x0 = 0.0; // Current vertex X
-    double y0 = 0.0; // Current vertex Y
-    double x1 = 0.0; // Next vertex X
-    double y1 = 0.0; // Next vertex Y
-    double a = 0.0;  // Partial signed area
+	double px=0,py=0;
+	double signedArea = 0.0;
+	double x0 = 0.0; // Current vertex X
+	double y0 = 0.0; // Current vertex Y
+	double x1 = 0.0; // Next vertex X
+	double y1 = 0.0; // Next vertex Y
+	double a = 0.0;  // Partial signed area
 
-    // For all vertices except last
-    unsigned int i=0;
-    for (i=0; i<_poly.size()-1; ++i)
-    {
-        x0 = _poly[i].GetX();
-        y0 = _poly[i].GetY();
-        x1 = _poly[i+1].GetX();
-        y1 = _poly[i+1].GetY();
-        a = x0*y1 - x1*y0;
-        signedArea += a;
-        px += (x0 + x1)*a;
-        py += (y0 + y1)*a;
-    }
+	// For all vertices except last
+	unsigned int i=0;
+	for (i=0; i<_poly.size()-1; ++i)
+	{
+		x0 = _poly[i].GetX();
+		y0 = _poly[i].GetY();
+		x1 = _poly[i+1].GetX();
+		y1 = _poly[i+1].GetY();
+		a = x0*y1 - x1*y0;
+		signedArea += a;
+		px += (x0 + x1)*a;
+		py += (y0 + y1)*a;
+	}
 
-    // Do last vertex
-    x0 = _poly[i].GetX();
-    y0 = _poly[i].GetY();
-    x1 = _poly[0].GetX();
-    y1 = _poly[0].GetY();
-    a = x0*y1 - x1*y0;
-    signedArea += a;
-    px += (x0 + x1)*a;
-    py += (y0 + y1)*a;
+	// Do last vertex
+	x0 = _poly[i].GetX();
+	y0 = _poly[i].GetY();
+	x1 = _poly[0].GetX();
+	y1 = _poly[0].GetY();
+	a = x0*y1 - x1*y0;
+	signedArea += a;
+	px += (x0 + x1)*a;
+	py += (y0 + y1)*a;
 
-    signedArea *= 0.5;
-    px /= (6*signedArea);
-    py /= (6*signedArea);
+	signedArea *= 0.5;
+	px /= (6.0*signedArea);
+	py /= (6.0*signedArea);
 
-    return Point(px,py);
+	return Point(px,py);
 }
 
 bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
@@ -317,10 +316,10 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 
 	// check intersection with other hlines in room
 	if(considerHlines)
-	for(unsigned int i = 0; i < _hlines.size(); i++) {
-		if(temp && cl.IntersectionWith(*(Line*)_hlines[i]))
-			temp = false;
-	}
+		for(unsigned int i = 0; i < _hlines.size(); i++) {
+			if(temp && cl.IntersectionWith(*(Line*)_hlines[i]))
+				temp = false;
+		}
 
 	return temp;
 }
@@ -350,23 +349,23 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
 		for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++){
 			const Wall& w = obs->GetAllWalls()[k];
 			if((w.operator !=(*l1)) && (w.operator !=(*l2)))
-			for(int j = 0; j < 5; j++) {
-				if(temp[j] && cl[j].IntersectionWith(w))
-					temp[j] = false;
-			}
+				for(int j = 0; j < 5; j++) {
+					if(temp[j] && cl[j].IntersectionWith(w))
+						temp[j] = false;
+				}
 		}
 	}
 
 	// check intersection with other hlines in room
 	if(considerHlines)
-	for(unsigned int i = 0; i <  _hlines.size(); i++) {
-		if ( (l1->operator !=(*(Line*)_hlines[i])) &&  (l2->operator !=(*(Line*)_hlines[i])) ) {
-			for(int k = 0; k < 5; k++) {
-				if(temp[k] && cl[k].IntersectionWith(*(Line*)_hlines[i]))
-					temp[k] = false;
+		for(unsigned int i = 0; i <  _hlines.size(); i++) {
+			if ( (l1->operator !=(*(Line*)_hlines[i])) &&  (l2->operator !=(*(Line*)_hlines[i])) ) {
+				for(int k = 0; k < 5; k++) {
+					if(temp[k] && cl[k].IntersectionWith(*(Line*)_hlines[i]))
+						temp[k] = false;
+				}
 			}
 		}
-	}
 	return temp[0] || temp[1] || temp[2] || temp[3] || temp[4];
 }
 
@@ -417,7 +416,7 @@ double SubRoom::GetElevation(const Point& p) {
 	return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
 }
 
-void SubRoom::CheckSubroom(){
+void SubRoom::CheckObstacles(){
 	for(unsigned int i = 0; i<_walls.size();i++){
 		for(unsigned int j = 0; j<_obstacles.size();j++){
 			if(_obstacles[j]->IntersectWithLine(_walls[i])){
@@ -427,6 +426,82 @@ void SubRoom::CheckSubroom(){
 			}
 		}
 	}
+}
+
+void SubRoom::SanityCheck(){
+	if(_obstacles.size()==0){
+		if((IsConvex()==false) && (_hlines.size()==0)){
+			Log->Write("WARNING:\t Room [%d] Subroom [%d] is not convex!",_roomID,_id);
+			Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+		} else {
+			// everything is fine
+		}
+	} else {
+		if(_hlines.size()==0){
+			Log->Write("WARNING:\t you have obstacles in room [%d] Subroom [%d]!",_roomID,_id);
+			Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+		}else {
+			 // everything is fine
+		}
+	}
+
+}
+
+///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
+bool SubRoom::IsConvex(){
+	unsigned int hsize=_poly.size();
+	unsigned int pos=0;
+	unsigned int neg=0;
+
+	if(hsize==0){
+		Log->Write("WARNING:\t cannot check empty polygon for convexification");
+		Log->Write("WARNING:\t Did you forget to tall ConvertLineToPoly() ?");
+		return false;
+	}
+
+	for(unsigned int i=0;i<hsize;i++)
+	{
+		Point vecAB= _poly[(i+1)%hsize]-_poly[i%hsize];
+		Point vecBC= _poly[(i+2)%hsize]-_poly[(i+1)%hsize];
+		double det= vecAB.Det(vecBC);
+		if(fabs(det)<J_EPS) det=0.0;
+
+		if(det<0.0){
+			neg++;
+		}
+		else if(det>0.0)
+		{
+			pos++;
+		}
+		else
+		{
+			pos++;
+			neg++;
+		}
+
+	}
+
+	if ( (pos==hsize ) || (neg==hsize) ) {
+		return true;
+	}
+	return false;
+}
+
+///http://stackoverflow.com/questions/9473570/polygon-vertices-clockwise-or-counterclockwise/
+bool SubRoom::IsClockwise(){
+	if(_poly.size()<3){
+		Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+		return false;
+		//exit(EXIT_FAILURE);
+	}
+
+	Point vecAB= _poly[1]-_poly[0];
+	Point vecBC= _poly[2]-_poly[1];
+
+	double det=vecAB.Det(vecBC);
+	if(fabs(det)<J_EPS) det=0.0;
+
+	return ( det<=0.0 );
 }
 
 
@@ -472,7 +547,7 @@ string NormalSubRoom::WritePolyLine() const {
 
 	s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
 	for (unsigned int j = 0; j < _poly.size(); j++) {
-	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
+		sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
 		s.append(tmp);
 	}
 	s.append("\t</Obstacle>\n");
@@ -578,19 +653,19 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const {
 		//QUAD
 
 		switch (delta) {
-			case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
-				//WAS CLOCKWISE OR COUNTER
-			case -2: // US THE X POSITION AT THE HIT POINT TO
-				// DETERMINE WHICH WAY AROUND
-				if (Xintercept(_poly[edge], _poly[next], ped.GetY()) > ped.GetX())
-					delta = -(delta);
-				break;
-			case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
-				delta = -1;
-				break;
-			case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
-				delta = 1;
-				break;
+		case 2: // IF WE CROSSED THE MIDDLE, FIGURE OUT IF IT
+			//WAS CLOCKWISE OR COUNTER
+		case -2: // US THE X POSITION AT THE HIT POINT TO
+			// DETERMINE WHICH WAY AROUND
+			if (Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
+				delta = -(delta);
+			break;
+		case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
+			delta = -1;
+			break;
+		case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
+			delta = 1;
+			break;
 		}
 		/* ADD IN THE DELTA */
 		total += delta;
@@ -671,7 +746,7 @@ string Stair::WritePolyLine() const {
 
 	s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
 	for (unsigned int j = 0; j < _poly.size(); j++) {
-	sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
+		sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
 		s.append(tmp);
 	}
 	s.append("\t</Obstacle>\n");
@@ -837,6 +912,7 @@ void SubRoom::SetPedestrian(Pedestrian* ped, int index) {
 }
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const {
+	//TODO: reference ?
 	Point pos = ped->GetPos();
 	if (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
 		return true;

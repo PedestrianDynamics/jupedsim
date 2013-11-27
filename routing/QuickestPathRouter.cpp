@@ -245,7 +245,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 		if(isVisible==false) continue;
 		double x = ped->GetPos().GetX();
 		double y = ped->GetPos().GetY();
-		double dist=_accessPoints[apID]->GetDistanceTo(ped->GetFinalDestination())+_accessPoints[apID]->distanceTo(x,y);
+		double dist=_accessPoints[apID]->GetDistanceTo(ped->GetFinalDestination())+_accessPoints[apID]->DistanceTo(x,y);
 
 		//FIXME: should be based on time not on distance
 		if(dist<minDist){
@@ -1064,7 +1064,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped){
 		AccessPoint* ap=_accessPoints[exitid];
 
 		//only final are accounted
-		if(ap->isFinalDestination()==false) continue;
+		if(ap->GetFinalExitToOutside()==false) continue;
 
 		//check if I can reach that exit, there should exits a direct line
 		// segment connecting the two APs/goals

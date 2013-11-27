@@ -37,7 +37,7 @@
 //#undef _OPENMP
 #endif
 
-// Genauigkeit
+// precision error
 #define J_EPS 0.001
 #define J_EPS_DIST 0.05// [m]
 #define J_EPS_INFO_DIST 2.0 // [m] abstand für Informationsaustausch (GraphRouter)
@@ -45,8 +45,7 @@
 #define J_TOLERANZ 0.03  // [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
-// zur Versionskontrolle beim Geometrieformat
-//#define VERSION 0.40
+
 #define JPS_VERSION "0.5"
 #define JPS_VERSION_MINOR 5
 #define JPS_VERSION_MAJOR 0
@@ -97,7 +96,6 @@ enum RoutingStrategy {
 
 
 //global functions for convenience
-// convenience functions
 
 inline char    xmltob(const char * t,char    v=0){ if (t&&(*t)) return (char)atoi(t); return v; }
 inline int     xmltoi(const char * t,int     v=0){ if (t&&(*t)) return atoi(t); return v; }

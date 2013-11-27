@@ -75,7 +75,7 @@ public:
 	 */
 	void AddHole(const std::vector<Point>&  hole);
 
-	//templates for freing and clearing a vector of pointers
+	//templates for freeing and clearing a vector of pointers
 	template <class C> void FreeClear( C & cntr ) {
 		for ( typename C::iterator it = cntr.begin();
 				it != cntr.end(); ++it ) {

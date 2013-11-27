@@ -27,23 +27,23 @@
  */
 
 /**
-* @mainpage
-*
-* \date 15.1.2013
-*
-* JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
-*
-* @image html logo.png " "
-*
-* Some useful links:
-*
-* 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
-* 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
-* 	3: <a href="http://www.digia.com/">www.digia.com</a> <br>
-* 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
-* 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
-*
-*/
+ * @mainpage
+ *
+ * \date 15.1.2013
+ *
+ * JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
+ *
+ * @image html logo.png " "
+ *
+ * Some useful links:
+ *
+ * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
+ * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
+ * 	3: <a href="http://www.digia.com/">www.digia.com</a> <br>
+ * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+ * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+ *
+ */
 
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
@@ -77,11 +77,18 @@ int main(int argc, char **argv) {
 	double execTime = difftime(endtime, starttime);
 
 	if(sim.GetPedsNumber())
-		Log->Write("\nPedestrians not evacuated [%d] threads [%d]", sim.GetPedsNumber(),
-			args->GetMaxOpenMPThreads());
+		Log->Write("\nPedestrians not evacuated [%d] using [%d] threads", sim.GetPedsNumber(),
+				args->GetMaxOpenMPThreads());
+
 	Log->Write("\nExec Time [s]     : %.2f", execTime);
 	Log->Write("Evac Time [s]     : %d", evacTime);
 	Log->Write("Real Time Factor  : %.2f X\n", evacTime / execTime);
+
+	if (NULL == dynamic_cast<STDIOHandler*>(Log)){
+		printf("\nExec Time [s]     : %.2f\n", execTime);
+		printf("Evac Time [s]     : %d\n", evacTime);
+		printf("Real Time Factor  : %.2f X\n", evacTime / execTime);
+	}
 
 	//do the last cleaning
 	delete args;

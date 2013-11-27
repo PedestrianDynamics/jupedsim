@@ -68,12 +68,13 @@ private:
     std::ofstream _pathWayStream;
 
 public:
-    // Konstruktor
+    /// constructor
     Building();
+    /// destructor
     virtual ~Building();
 
-    // Setter -Funktionen
-    void SetCaption(std::string s);
+
+    void SetCaption(const std::string& s);
     void SetRoutingEngine(RoutingEngine* r);
     void SetRoom(Room* room, int index);
     /// delete the ped from the ped vector
@@ -82,7 +83,7 @@ public:
     void DeletePedFromSim(Pedestrian* ped);
     void AddPedestrian(Pedestrian* ped);
 
-    // Getter - Funktionen
+
     std::string GetCaption() const;
     RoutingEngine* GetRoutingEngine() const;
     const std::vector<Room*>& GetAllRooms() const;
@@ -94,6 +95,21 @@ public:
     Room* GetRoom(std::string caption)const;
     Transition* GetTransition(std::string caption) const;
     Transition* GetTransition(int id) ;
+
+    /**
+     * @return true if the two segments are visible from each other.
+     * Alls walls and transitions and crossings are used in this check.
+     * The use of hlines is optional, because they are not real, can can be considered transparent
+     */
+    bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+
+    /**
+     * @return true if the two points are visible from each other.
+     * Alls walls and transitions and crossings are used in this check.
+     * The use of hlines is optional, because they are not real, can be considered transparent
+     */
+    bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+
 
     //FIXME: obsolete should get rid of this method
     Crossing* GetGoal(std::string caption) const;
@@ -141,6 +157,12 @@ public:
     void WriteToErrorLog() const;
 
 	void CleanUpTheScene();
+
+	/**
+	 * Check the scenario for possible errors and
+	 * output user specific informations.
+	 */
+	void SanityCheck();
 
 
 private:

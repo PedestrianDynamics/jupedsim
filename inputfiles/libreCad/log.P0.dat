@@ -15,8 +15,33 @@ INFO:	Done with loading traffic info file
 INFO: 	Init Distribute
 INFO: 	Distributing 1 Agents in Room/Subrom [5/0]! Maximum allowed: 12644
 	...Done
+INFO: 	Initializing the grid with cell size: 2.200000 
+INFO: 	Done with Initializing the grid 
 INFO:	Init the Global Router Engine
 INFO: 	Exit to outside found: 33 [trans_0_room_0_subroom_0]
 INFO: 	Exit to outside found: 34 [trans_1_room_2_subroom_0]
 INFO: 	Exit to outside found: 35 [trans_2_room_2_subroom_0]
 INFO: 	Exit to outside found: 36 [trans_3_room_1_subroom_0]
+INFO: 	Exit to outside found: 37 [trans_4_room_4_subroom_0]
+INFO: 	Exit to outside found: 38 [trans_5_room_3_subroom_0]
+INFO: 	Exit to outside found: 39 [trans_6_room_5_subroom_0]
+INFO: 	Exit to outside found: 40 [trans_7_room_5_subroom_0]
+INFO: 	Exit to outside found: 41 [trans_8_room_5_subroom_0]
+INFO: 	Exit to outside found: 42 [trans_9_room_2_subroom_0]
+INFO: 	Exit to outside found: 43 [trans_10_room_2_subroom_0]
+INFO: 	Exit to outside found: 44 [trans_11_room_2_subroom_0]
+INFO: 	Exit to outside found: 45 [trans_12_room_2_subroom_0]
+INFO:	Done with the Global Router Engine!
+INFO: 	Checking the geometry for artifacts
+WARNING:	 Room [5] Subroom [0] is not convex!
+		 you might consider adding extra hlines in your routing.xml file
+INFO: 	...Done!!!
+
+
+INFO: 	End runSimulation()
+
+
+Exec Time [s]     : 0.00
+Evac Time [s]     : 5
+Real Time Factor  : inf X
+

@@ -34,6 +34,7 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <string>
 #include <algorithm>
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Point.h"
@@ -72,7 +73,7 @@ public:
 	 * @param y
 	 * @return
 	 */
-	bool isInRange(double xPed, double yPed, int roomID);
+	bool IsInRange(double xPed, double yPed, int roomID);
 
 
 	/**
@@ -95,22 +96,76 @@ public:
 	 * @param y
 	 * @return
 	 */
-	double distanceTo(double x, double y);
+	double DistanceTo(double x, double y);
+
+	/**
+	 *  set/get a human readable name for this points.
+	 *  t23 means Transition with id 23
+	 *  c23 means Crossing with id 23
+	 *  h23 means Hlines with id 23
+	 */
+	void SetFriendlyName(const std::string& name);
+
+	/**
+	 *  set/get a human readable name for this points.
+	 *  t23 means Transition with id 23
+	 *  c23 means Crossing with id 23
+	 *  h23 means Hlines with id 23
+	 */
+	const std::string GetFriendlyName();
 
 	/**
 	 * dump the class
 	 */
 	void Dump();
 
+	/**
+	 * Set/Get the centre of the navigation line defining this access point
+	 */
 	const Point& GetCentre() const;
 
-	void setFinalDestination(bool isFinal);
-	bool isFinalDestination();
+	/**
+	 * True if this is the last exit that leads to the outside
+	 */
+	void SetFinalExitToOutside(bool isFinal);
+
+	/**
+	 * True if this is the last exit that leads to the outside
+	 */
+	bool GetFinalExitToOutside();
+
+	/**
+	 * @return true if the door is closed
+	 */
 	int IsClosed();
+
+	/**
+	 * Close the door
+	 * @param isClosed
+	 */
 	void  SetClosed(int isClosed);
+
+	/**
+	 * Set/Get the navigation line.
+	 * The direction taken by the pedestrian strongly depends on this line.
+	 */
 	void SetNavLine(NavLine* line);
+
+	/**
+	 * Set/Get the navigation line.
+	 * The direction taken by the pedestrian strongly depends on this line.
+	 */
 	NavLine* GetNavLine() const;
 
+	/**
+	 * True if this is a goal outside the building
+	 */
+	void SetFinalGoalOutside(bool isFinal);
+
+	/**
+	 * True if this is a goal outside the building
+	 */
+	bool GetFinalGoalOutside();
 
 	void AddIntermediateDest(int final, int inter);
 	void AddFinalDestination(int UID, double distance);
@@ -144,13 +199,17 @@ private:
 	int _id;
 	double _center[2];
 	double _radius;
-	bool _finalDestination;
+	/// true if this exit leads to outside
+	bool _finaExitToOutside;
+	/// true if this a goal outside the building
+	bool _finalGoalOutside;
 	int _room1ID;
 	int _room2ID;
 	Point pCentre;
 	NavLine* _navLine;
 	std::vector<Pedestrian*> _transitPedestrians;
 	int _isClosed;
+	std::string _friendlyName;
 
 
 	// stores the connecting APs

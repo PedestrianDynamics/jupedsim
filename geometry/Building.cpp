@@ -94,7 +94,7 @@ Building::~Building() {
 /************************************************************
  Setter-Funktionen
  ************************************************************/
-void Building::SetCaption(string s) {
+void Building::SetCaption(const std::string& s) {
 	_caption = s;
 }
 
@@ -153,9 +153,6 @@ Room* Building::GetRoom(int index) const {
 LCGrid* Building::GetGrid() const {
 	return _linkedCellGrid;
 }
-/*************************************************************
- Sonstiges
- ************************************************************/
 
 void Building::AddRoom(Room* room) {
 	_rooms.push_back(room);
@@ -218,7 +215,6 @@ void Building::AddSurroundingRoom() {
 		}
 	}
 
-	//cout<<"xmin: "<<x_min<<" xmax: "<<x_max<<" ymin: " <<y_min <<" ymax: " <<y_max <<endl; exit(0);
 	//make the grid slightly larger.
 	x_min = x_min - 10.0;
 	x_max = x_max + 10.0;
@@ -239,6 +235,7 @@ void Building::AddSurroundingRoom() {
 	bigRoom->SetID(_rooms.size());
 	AddRoom(bigRoom);
 }
+
 
 void Building::InitGeometry() {
 	Log->Write("INFO: \tInit Geometry");
@@ -279,9 +276,8 @@ void Building::InitGeometry() {
 	Log->Write("INFO: \tInit Geometry successful!!!\n");
 }
 
-/*************************************************************
- Ein-Ausgabe
- ************************************************************/
+
+
 
 const string& Building::GetProjectFilename() const{
 	return _projectFilename;
@@ -333,6 +329,11 @@ void Building::LoadBuildingFromFile() {
 
 	if( xRootNode->ValueStr () != "geometry" ) {
 		Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+		exit(EXIT_FAILURE);
+	}
+
+	if(string(xRootNode->Attribute("unit"))!="m") {
+		Log->Write("ERROR:\tOnly the unit m (metres) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
 		exit(EXIT_FAILURE);
 	}
 
@@ -715,6 +716,41 @@ Crossing* Building::GetGoal(string caption) const {
 	exit(EXIT_FAILURE);
 }
 
+bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines){
+	for (unsigned int i = 0; i < _rooms.size();i++) {
+		Room* room = _rooms[i];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			if(sub->IsVisible(l1,l2,considerHlines)==false) return false;
+		}
+	}
+	return true;
+}
+
+bool Building::IsVisible(const Point& p1, const Point& p2, bool considerHlines){
+	for (unsigned int i = 0; i < _rooms.size();i++) {
+		Room* room = _rooms[i];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			if(sub->IsVisible(p1,p2,considerHlines)==false) return false;
+		}
+	}
+	return true;
+}
+
+void Building::SanityCheck(){
+	Log->Write("INFO: \tChecking the geometry for artifacts");
+	for (unsigned int i = 0; i < _rooms.size();i++) {
+		Room* room = _rooms[i];
+
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			sub->SanityCheck();
+		}
+	}
+	Log->Write("INFO: \t...Done!!!\n");
+}
+
 #ifdef _SIMULATOR
 
 //TODO: merge this with Update and improve runtime
@@ -941,7 +977,7 @@ void Building::Update() {
 		}
 	}
 
-	//cleaning up. removing some long standing pedestrians
+	//cleaning up
 	//CleanUpTheScene();
 }
 
@@ -1108,7 +1144,7 @@ void Building::LoadRoutingInfo(const string &filename) {
 	TiXmlNode*  xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
 
-
+	if(xGoalsNode)
 	for(TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
 			e = e->NextSiblingElement("goal")) {
 
@@ -1276,7 +1312,6 @@ void Building::AddPedestrian(Pedestrian* ped) {
 	//		}
 	//	}
 	_allPedestians.push_back(ped);
-
 }
 
 

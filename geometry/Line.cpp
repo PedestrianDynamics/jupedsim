@@ -431,7 +431,7 @@ bool Line::IntersectionWithCircle(const Point& centre, double radius /*cm for pe
 	return true;
 }
 
-//TODO: consider numerical stability and special case pt is on line
+//TODO: Consider numerical stability and special case pt is on line
 // Returns true if pt is on the left side ( from point1 toward point2)
 bool Line::IsLeft(const Point& pt){
 	double test=(_point2._x-_point1._x)*(pt.GetY()-_point1._y)-(_point2._y-_point1._y)*(pt.GetX()-_point1._x);

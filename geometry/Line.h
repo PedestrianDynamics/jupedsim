@@ -218,7 +218,5 @@ public:
 
 };
 
-
-
 #endif	/* _LINE_H */
 

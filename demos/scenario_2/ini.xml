@@ -28,10 +28,9 @@
 		<!-- doors states are: close or open -->
 		<doors>
 			<door trans_id="0" caption="" state="open" />
-                        <door trans_id="1" caption="" state="open" />
-                        <door trans_id="2" caption="" state="open" />
-                        <door trans_id="3" caption="" state="open" />
-                        <!-- <door trans_id="4" caption="" state="open" /> -->
+			<door trans_id="1" caption="" state="open" />
+			<door trans_id="2" caption="" state="open" />
+			<door trans_id="3" caption="" state="open" />
 		</doors>
 
 	</traffic_constraints>
@@ -52,13 +51,13 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-			<group group_id="2" room_id="0" subroom_id="0" number="20" goal_id="0" router_id="1" route_id=""/>
-			<group group_id="0" room_id="1" subroom_id="0" number="20" goal_id="0" router_id="1" route_id="" />
-			<group group_id="1" room_id="2"  number="10" goal_id="00" router_id="1" route_id="" />
+			<group group_id="2" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="1" route_id="" />
+			<group group_id="0" room_id="1" subroom_id="0" number="10" goal_id="0" router_id="1" route_id="" />
+			<group group_id="1" room_id="2" number="10" goal_id="-1" router_id="1" route_id="" />
 		</agents_distribution>
 
-                <!-- frequency in persons/minute -->
-		<agents_sources/>
+		<!-- frequency in persons/minute -->
+		<agents_sources />
 	</agents>
 
 	<!-- These parameters may be overwritten -->
@@ -86,7 +85,7 @@
 	<route_choice_models>
 		<router router_id="1" description="global_shortest">
 			<parameters>
-                             <!-- <navigation_lines file="routing.xml" /> -->
+				<!-- <navigation_lines file="routing.xml" /> -->
 			</parameters>
 		</router>
 	</route_choice_models>

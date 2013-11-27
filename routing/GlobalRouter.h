@@ -28,7 +28,10 @@
 #ifndef GLOBALROUTER_H_
 #define GLOBALROUTER_H_
 
-#include <string.h>
+#include <string>
+#include <sstream>
+#include <cfloat>
+#include <fstream>
 #include <vector>
 #include "Router.h"
 #include "../geometry/Building.h"
@@ -125,6 +128,12 @@ protected:
 	   }
 	}
 
+	std::string concatenate(std::string const& name, int i)
+	{
+	    std::stringstream s;
+	    s << name << i;
+	    return s.str();
+	}
 
 private:
 	/**
