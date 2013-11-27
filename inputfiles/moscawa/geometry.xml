@@ -5,6 +5,10 @@
 			<subroom id="0" closed="0" class="subroom">
 				<polygon caption="wall">
 					 <vertex px="2.16" py="71.28"/>
+					 <vertex px="13.50" py="71.28"/>
+				</polygon> 	 
+				<polygon caption="wall">					 				 
+					 <vertex px="14.60" py="71.28"/>
 					 <vertex px="18.36" py="71.28"/>
 					 <vertex px="18.36" py="77.22"/>
 					 <vertex px="2.16" py="77.22"/>
@@ -14,6 +18,10 @@
 			<subroom id="1" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="18.36" py="71.28"/>
+					 <vertex px="20.50" py="71.5957"/>
+				</polygon> 
+				<polygon caption="wall">					 			 
+					 <vertex px="21.60" py="71.76"/>
 					 <vertex px="23.22" py="72.00"/>
 					 <vertex px="23.22" py="77.22"/>
 					 <vertex px="18.36" py="77.22"/>
@@ -23,6 +31,10 @@
 			<subroom id="2" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="23.22" py="72.00"/>
+					 <vertex px="24.30" py="72.23"/>
+				</polygon> 
+				<polygon caption="wall">					 				 
+					 <vertex px="25.40" py="72.465"/>
 					 <vertex px="26.50" py="72.70"/>
 					 <vertex px="26.50" py="77.22"/>
 					 <vertex px="23.22" py="77.22"/>
@@ -32,7 +44,11 @@
 			<subroom id="3" closed="0" class="subroom">
 				 <polygon caption="wall">
 					<vertex px="26.50" py="72.70"/>
-					<vertex px="34.56" py="73.40"/>
+					<vertex px="30.24" py="73.025"/>
+				</polygon> 
+				<polygon caption="wall">								
+					<vertex px="31.34" py="73.12"/>
+					<vertex px="34.56" py="73.40"/>		
 					<vertex px="34.56" py="77.22"/>
 					<vertex px="26.50" py="77.22"/>
 					<vertex px="26.50" py="72.70"/>
@@ -42,6 +58,14 @@
 				 <polygon caption="wall">
 					 <vertex px="2.16" py="77.22"/>
 					 <vertex px="34.56" py="77.22"/>
+					 <vertex px="34.56" py="80.30"/>
+				</polygon> 
+				<polygon caption="wall">					 			 
+					 <vertex px="34.56" py="81.40"/>
+					 <vertex px="34.56" py="85.30"/>
+				</polygon> 
+				<polygon caption="wall">					 				 
+					 <vertex px="34.56" py="86.40"/>
 					 <vertex px="34.56" py="88.80"/>
 					 <vertex px="18.36" py="88.80"/>
 					 <vertex px="18.36" py="93.96"/>
@@ -53,6 +77,10 @@
 				<polygon caption="wall">
 					 <vertex px="18.36" py="88.80"/>
 					 <vertex px="34.56" py="88.80"/>
+					 <vertex px="34.56" py="90.70"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="34.56" py="91.80"/>
 					 <vertex px="34.56" py="93.96"/>
 					 <vertex px="18.36" py="93.96"/>
 					 <vertex px="18.36" py="88.80"/>
@@ -76,6 +104,10 @@
 					 <vertex px="50.76" py="42.80"/>
 					 <vertex px="58.94" py="42.80"/>
 					 <vertex px="58.94" py="56.70"/>
+					 <vertex px="55.10" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">					 			 
+					 <vertex px="54.00" py="56.70"/>
 					 <vertex px="50.76" py="56.70"/>
 					 <vertex px="50.76" py="42.80"/>
 				</polygon>
@@ -85,8 +117,24 @@
 					 <vertex px="27.00" py="48.00"/>
 					 <vertex px="50.76" py="48.00"/>
 					 <vertex px="50.76" py="56.70"/>
+					 <vertex px="47.60" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="46.50" py="56.70"/>
+					 <vertex px="38.90" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">
+					 <vertex px="37.80" py="56.70"/>
 					 <vertex px="34.56" py="56.70"/>
+					 <vertex px="34.56" py="59.50"/>
+				</polygon>
+				<polygon caption="wall">
+					 <vertex px="34.56" py="60.60"/> 
 					 <vertex px="34.56" py="64.80"/>
+					 <vertex px="31.34" py="64.80"/>
+				</polygon> 
+				<polygon caption="wall">					 
+					 <vertex px="30.24" py="64.80"/>
 					 <vertex px="27.00" py="64.80"/>
 					 <vertex px="27.00" py="48.00"/>
 				</polygon>
@@ -96,6 +144,14 @@
 					 <vertex px="10.80" py="56.70"/>
 					 <vertex px="27.00" py="56.70"/>
 					 <vertex px="27.00" py="64.80"/>
+					 <vertex px="22.70" py="64.80"/>
+				</polygon> 				 
+				<polygon caption="wall">
+					 <vertex px="21.60" py="64.80"/>
+					 <vertex px="18.10" py="64.80"/>
+				</polygon> 
+				<polygon caption="wall">					 
+					 <vertex px="17.00" py="64.80"/>
 					 <vertex px="10.80" py="64.80"/>
 					 <vertex px="10.80" py="56.70"/>
 				</polygon>
@@ -104,7 +160,11 @@
 				 <polygon caption="wall">
 					 <vertex px="2.16" py="56.70"/>
 					 <vertex px="10.80" py="56.70"/>
-					 <vertex px="10.80" py="64.80"/>
+					 <vertex px="10.80" py="64.80"/>	 
+					 <vertex px="9.10" py="64.80"/>
+				</polygon> 
+				<polygon caption="wall">					 			 
+					 <vertex px="8.00" py="64.80"/>				 
 					 <vertex px="2.16" py="64.80"/>
 					 <vertex px="2.16" py="56.70"/>
 				</polygon>
@@ -193,8 +253,12 @@
 					 <vertex px="61.02" py="42.80"/>
 					 <vertex px="74.52" py="42.80"/>
 					 <vertex px="74.52" py="56.70"/>
+					 <vertex px="67.10" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">					 
+					<vertex px="66.00" py="56.70"/>
 					 <vertex px="61.02" py="56.70"/>
-					 <vertex px="61.020" py="42.80"/>
+					 <vertex px="61.02" py="42.80"/>
 				</polygon>
 			</subroom>
 			<subroom id="1" closed="0" class="subroom">
@@ -202,6 +266,10 @@
 					 <vertex px="74.52" py="42.80"/>
 					 <vertex px="82.08" py="42.80"/>
 					 <vertex px="82.08" py="56.70"/>
+					 <vertex px="79.10" py="56.70"/> 
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="78.00" py="56.70"/>
 					 <vertex px="74.52" py="56.70"/>
 					 <vertex px="74.52" py="42.80"/>	 
 				</polygon>
@@ -212,7 +280,11 @@
 					 <vertex px="90.18" py="42.80"/>
 					 <vertex px="90.18" py="43.40"/>
 					 <vertex px="90.78" py="43.40"/>
-					 <vertex px="90.78" py="56.70"/>
+					 <vertex px="90.78" py="56.70"/>		 
+					 <vertex px="88.00" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="86.90" py="56.70"/>
 					 <vertex px="82.08" py="56.70"/>
 					 <vertex px="82.08" py="42.80"/>
 				</polygon>
@@ -222,6 +294,10 @@
 					 <vertex px="90.78" py="43.40"/>
 					 <vertex px="98.28" py="43.40"/>
 					 <vertex px="98.28" py="56.70"/>
+					 <vertex px="96.10" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="95.00" py="56.70"/>
 					 <vertex px="90.78" py="56.70"/>
 					 <vertex px="90.78" py="43.40"/>
 				</polygon>
@@ -232,6 +308,10 @@
 					 <vertex px="101.52" py="43.40"/>
 					 <vertex px="108.940" py="50.76"/>
 					 <vertex px="103.140" py="56.70"/>
+					 <vertex px="102.10" py="56.70"/>
+				</polygon>
+				<polygon caption="wall">
+					 <vertex px="101.00" py="56.70"/>
 					 <vertex px="98.28" py="56.70"/>
 					 <vertex px="98.28" py="43.40"/>
 				</polygon>
@@ -351,6 +431,10 @@
 			<subroom id="4" closed="0" class="subroom">
 				<polygon caption="wall">
 					<vertex px="105.84" py="64.80"/>
+					<vertex px="102.60" py="64.80"/>
+				</polygon>
+				<polygon caption="wall">				
+					<vertex px="101.50" py="64.80"/>
 					<vertex px="97.20" py="64.80"/>
 					<vertex px="97.20" py="86.40"/>
 					<vertex px="114.48" py="86.40"/>
@@ -364,7 +448,16 @@
 					 <vertex px="97.20" py="64.80"/>
 					 <vertex px="97.20" py="86.40"/>
 					 <vertex px="85.50" py="86.40"/>
-					 <vertex px="85.50" py="64.80"/>
+					 <vertex px="85.50" py="64.80"/>				 
+					 <vertex px="86.40" py="64.80"/>
+					 <vertex px="87.10" py="64.80"/>
+				</polygon>
+				<polygon caption="wall">
+					 <vertex px="88.20" py="64.80"/>
+					 <vertex px="94.00" py="64.80"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="95.10" py="64.80"/>
 					 <vertex px="97.20" py="64.80"/>
 				</polygon>
 			</subroom>
@@ -378,7 +471,15 @@
 					 <vertex px="58.50" py="75.60"/>
 					 <vertex px="66.96" py="75.60"/>
 					 <vertex px="66.96" py="64.80"/>
-					 <vertex px="85.50" py="64.80"/>
+					 <vertex px="70.20" py="64.80"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="71.30" py="64.80"/>
+					 <vertex px="77.00" py="64.80"/>
+				</polygon>
+				<polygon caption="wall">
+					<vertex px="78.10" py="64.80"/>
+					<vertex px="85.50" py="64.80"/>
 				</polygon>
 			</subroom>
 			<subroom id="7" closed="0" class="subroom">
@@ -398,6 +499,10 @@
 					 <vertex px="58.50" py="73.44"/>
 					 <vertex px="55.08" py="73.44"/>
 					 <vertex px="56.70" py="64.80"/>
+					 <vertex px="61.50" py="64.80"/>
+				</polygon>
+				<polygon caption="wall">					 
+					 <vertex px="62.60" py="64.80"/>
 					 <vertex px="66.96" py="64.80"/>
 				</polygon>
 			</subroom>
@@ -573,17 +678,13 @@
 			<subroom id="4" closed="0" class="subroom">
 				<polygon caption="wall">
 					 <vertex px="61.02" py="56.70"/>
-					 <vertex px="61.02" py="42.80"/>
-					 
-					 
+					 <vertex px="61.02" py="42.80"/>				 
 				</polygon>
 				<polygon caption="wall">
 					 <vertex px="58.94" py="56.70"/>
 					 <vertex px="58.94" py="42.80"/>
 				</polygon>
-			</subroom>
-			
-			
+			</subroom>	
 			<subroom id="5" closed="0" class="subroom">
 				<polygon caption="wall">			
 					<vertex px="58.94" py="42.80"/>
@@ -598,11 +699,6 @@
 					<vertex px="58.94" py="40.50"/>
 				</polygon>
 			</subroom>
-
-
-		
-
-
 			<subroom id="6" closed="0" class="subroom">
 				<polygon caption="wall">
 					 <vertex px="58.94" py="40.50"/>
@@ -710,7 +806,7 @@
 					 <vertex px="133.92" py="41.04"/>
 				</polygon>
 			</subroom>
-						<crossings>
+			<crossings>
 				<crossing id="0" subroom1_id="0" subroom2_id="1">
 							<vertex px="34.56" py="64.80" />
 							<vertex px="34.56" py="73.40" />

@@ -69,7 +69,6 @@
 			<door trans_id="26" caption="" state="open" />
 			<door trans_id="27" caption="" state="open" />
 			<door trans_id="28" caption="" state="open" />
-                        <!-- <door trans_id="4" caption="" state="open" /> -->
 		</doors>
 
 	</traffic_constraints>
@@ -95,7 +94,7 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-			<group group_id="0" room_id="0" subroom_id="4" number="20" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="0" room_id="0" subroom_id="4" number="5" goal_id="0" router_id="1" route_id=""/>
 		</agents_distribution>
 
                 <!-- frequency in persons/minute -->
@@ -108,7 +107,7 @@
 			<parameters>
 				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
-				<stepsize>0.1</stepsize>
+				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
