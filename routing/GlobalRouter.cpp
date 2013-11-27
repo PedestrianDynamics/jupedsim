@@ -278,6 +278,7 @@ void GlobalRouter::Init(Building* building) {
 		const Wall& line=_building->GetFinalGoal(_finalDestinations[p])->GetAllWalls()[0];
 		double center[2] = { goal->GetCentroid()._x, goal->GetCentroid()._y };
 
+
 		AccessPoint* to_AP = new AccessPoint(line.GetUniqueID(), center);
 		to_AP->SetFinalGoalOutside(true);
 		to_AP->SetNavLine(new NavLine(line));

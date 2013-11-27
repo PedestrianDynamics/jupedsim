@@ -188,10 +188,9 @@ public:
 
 
 	// re routing functions
-	//FIXME: not compatible with pedestrians reset target after 10 sec
-	void AddTransitPed(Pedestrian* ped);
-	void DeleteTransitPed(Pedestrian* ped);
-	const std::vector<Pedestrian*>& GetAllTransitPed() const;
+	//void AddTransitPed(Pedestrian* ped);
+	//void DeleteTransitPed(Pedestrian* ped);
+	//const std::vector<Pedestrian*>& GetAllTransitPed() const;
 
 
 

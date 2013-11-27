@@ -40,7 +40,7 @@ QuickestPathRouter::~QuickestPathRouter() {
 }
 
 //TODO: open the project file and get the routing name
-//todo: conflicts, the file ist already loaded by the global router
+//todo: conflicts, the file is already loaded by the global router
 string QuickestPathRouter::GetRoutingInfoFile() const {
 	return"";
 
@@ -256,7 +256,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped){
 	}
 
 	if (bestAPsID==-1){
-
 
 		char tmp[CLENGTH];
 		const char* caption=_building->GetRoom(ped->GetRoomID())->GetCaption().c_str();

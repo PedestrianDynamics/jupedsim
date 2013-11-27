@@ -81,7 +81,7 @@ Pedestrian::Pedestrian() {
 
 
 Pedestrian::~Pedestrian() {
-	//if(_navLine) delete _navLine;
+	if(_navLine) delete _navLine;
 }
 
 /*************************************************************

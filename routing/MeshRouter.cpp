@@ -455,7 +455,6 @@ MeshEdge* MeshRouter::Visibility(Point& start,Point& goal,vector<MeshEdge*> edge
 	if(edge_path.empty()){
 		exit(EXIT_FAILURE);
 	}else{
-		//cout<<start.toString()<<endl;
 
 		int act_cell_id=-1;
 		Point point_left,point_right; // Nodes creatin the wedge
