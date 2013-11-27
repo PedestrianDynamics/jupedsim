@@ -1220,12 +1220,14 @@ void Building::LoadTrafficInfo() {
 
 	TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
 	if( ! xRootNode ) {
-		Log->Write("ERROR:\tcould not load traffic information");
-		exit(EXIT_FAILURE);
+		Log->Write("WARNING:\tcould not find any traffic information");
+		return;
+		//exit(EXIT_FAILURE);
 	}
 
 	//processing the rooms node
 	TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
+	if(xRoomsNode)
 	for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
 			xRoom = xRoom->NextSiblingElement("room")) {
 
@@ -1237,6 +1239,7 @@ void Building::LoadTrafficInfo() {
 
 	//processing the doors node
 	TiXmlNode*  xDoorsNode = xRootNode->FirstChild("doors");
+	if(xDoorsNode)
 	for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
 			xDoor = xDoor->NextSiblingElement("door")) {
 
