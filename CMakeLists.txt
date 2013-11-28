@@ -310,15 +310,15 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-# add_test (jpscore_compile ${CMAKE_CTEST_COMMAND} 
-#   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-#   --build-generator ${CMAKE_GENERATOR}
-#   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-#   --build-two-config  
-#   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-#   --build-project JPScore
-#   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-#   )
+add_test (jpscore_compile ${CMAKE_CTEST_COMMAND} 
+  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+  --build-generator ${CMAKE_GENERATOR}
+  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
+  --build-two-config  
+  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  --build-project JPScore
+  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+  )
 # todo: make list of tests and iterate over 
 #add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 add_executable(testSignPos Utest/testSign.cpp)
@@ -371,13 +371,13 @@ endforeach(test)
 
 
 find_package(PythonInterp)
-# if(PYTHONINTERP_FOUND)
-#   message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
-#   message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
-#   set (test_parameters "${CMAKE_SOURCE_DIR}")
-#   add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
-#   #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
-# endif(PYTHONINTERP_FOUND)
+if(PYTHONINTERP_FOUND)
+  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+  message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
+  set (test_parameters "${CMAKE_SOURCE_DIR}")
+  add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
+  #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
+endif(PYTHONINTERP_FOUND)
  
 
 

@@ -1,0 +1,58 @@
+#include <cstdlib>
+#include <stdio.h>
+#include "../math/Mathematics.h"
+#include "../pedestrian/Ellipse.h"
+
+
+#ifdef WINDOWS
+#include <direct.h>
+    #define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+    #define GetCurrentDir getcwd
+ #endif
+
+OutputHandler* Log;
+
+int testEffectiveDistanceToLine()
+{
+    char cCurrentPath[FILENAME_MAX];
+    if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath)))
+    {
+        return EXIT_FAILURE;
+    }
+    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
+
+    FILE * f;
+    char fname[FILENAME_MAX] = "log_testEffectiveDistanceToLine.txt";
+    f = fopen(fname, "w");
+    fprintf (f, "The current working directory is %s\n\n", cCurrentPath);
+    double dist;
+    int  res=0;
+    double a=2.0,  // semi-axis 
+        b=1.5;     // orthogonal semi-axis
+    int ntests=0;
+    JEllipse E;
+    E.SetCenter( Point(0,0) );
+    E.SetV0(1);
+    E.SetV( Point(0,0) );
+    E.SetAmin(a);
+    E.SetBmax(b);
+   // parallel y 
+    Point P1(2*a, 0);
+    Point P2(2*a, 3);
+    Line L(P1, P2);
+
+    dist = E.EffectiveDistanceToLine(L);
+    res += (dist==a)?1:0;
+    fprintf (f, "1. dist=%.2f\t P1(%.2f, %.2f)\t P1(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
+    ntests++;
+
+    fclose(f);
+    return (res==ntests)?EXIT_SUCCESS:EXIT_FAILURE;
+}
+
+int main()
+{
+    return testEffectiveDistanceToLine();
+}
