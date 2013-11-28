@@ -310,15 +310,15 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-add_test (jpscore_compile ${CMAKE_CTEST_COMMAND} 
-  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-  --build-generator ${CMAKE_GENERATOR}
-  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config  
-  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  --build-project JPScore
-  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-  )
+# add_test (jpscore_compile ${CMAKE_CTEST_COMMAND} 
+#   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+#   --build-generator ${CMAKE_GENERATOR}
+#   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
+#   --build-two-config  
+#   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#   --build-project JPScore
+#   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+#   )
 # todo: make list of tests and iterate over 
 #add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 add_executable(testSignPos Utest/testSign.cpp)
@@ -330,8 +330,13 @@ target_link_libraries (testSignNeg  core)
 
 #add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
 add_executable(testPointOnEllipse Utest/testPointOnEllipse.cpp)
-#add_subdirectory ()
 target_link_libraries (testPointOnEllipse  core)
+
+add_executable(testEffectiveDistanceToEllipse Utest/testEffectiveDistanceToEllipse.cpp)
+target_link_libraries (testEffectiveDistanceToEllipse  core)
+
+# add_executable(testEffectiveDistanceToLine Utest/testEffectiveDistanceToLine.cpp)
+# target_link_libraries (testEffectiveDistanceToLine  core)
 
 #add_executable(testEqual math/Distribution.cpp Utest/testequal.cpp)
 add_executable(testEqual Utest/testequal.cpp)
@@ -340,8 +345,19 @@ target_link_libraries (testEqual core)
 add_executable(testGetArea Utest/testGetArea.cpp)
 target_link_libraries (testGetArea core)
 
+add_executable(testIsOn Utest/testIsOn.cpp)
+target_link_libraries (testIsOn core)
+
+add_executable(testIsInside Utest/testIsInside.cpp)
+target_link_libraries (testIsInside core)
+
+add_executable(testIsOutside Utest/testIsOutside.cpp)
+target_link_libraries (testIsOutside core)
+
 #----------------- append to this list more tests ... but first add_executable() ---------------
-set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea)
+set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea testEffectiveDistanceToEllipse
+  testIsOn testIsInside testIsOutside
+)
 #--------------------------------------------------------------------
 foreach (test ${tests})
   add_test(NAME ${test} COMMAND ${test})
@@ -355,14 +371,14 @@ endforeach(test)
 
 
 find_package(PythonInterp)
-if(PYTHONINTERP_FOUND)
-  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
-  message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
-  set (test_parameters "${CMAKE_SOURCE_DIR}")
-  add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
-  #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
-endif(PYTHONINTERP_FOUND)
-
+# if(PYTHONINTERP_FOUND)
+#   message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+#   message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
+#   set (test_parameters "${CMAKE_SOURCE_DIR}")
+#   add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
+#   #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
+# endif(PYTHONINTERP_FOUND)
+ 
 
 
 # add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]

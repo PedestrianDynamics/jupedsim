@@ -60,8 +60,37 @@ int testPointOnEllipse()
             P = E.PointOnEllipse(S);
             res += (P==T)?1:0;
             ntests++;
-            fprintf (f, "Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t ntests=%d\n",T.GetX(), T.GetY(), P.GetX(), P.GetY(), res, ntests);
+            fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T.GetX(), T.GetY(), P.GetX(), P.GetY(), res);
         }
+
+    // test point in the ellipse
+    sx = 0.5*r;
+    sy = 0.5*r;
+    S.SetX(sx);
+    S.SetY(sy);
+    l = S.Norm();
+    T.SetX(r*sx/l);
+    T.SetY(r*sy/l);
+    P = E.PointOnEllipse(S);
+    res += (P==T)?1:0;
+    ntests++;
+    fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T.GetX(), T.GetY(), P.GetX(), P.GetY(), res);
+    // point in the center
+
+    sx = 0;
+    sy = 0;
+    S.SetX(sx);
+    S.SetY(sy);
+
+//    T.SetX(0);
+    //  T.SetY(0);
+    E.SetCenter( Point(0.4, 1.78) );
+    T = E.GetCenter() + Point(r,0);
+    P = E.PointOnEllipse(S);
+    res += (P==T)?1:0;
+    ntests++;
+    fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T.GetX(), T.GetY(), P.GetX(), P.GetY(), res);
+    
     fclose(f);
     return (res==ntests)?EXIT_SUCCESS:EXIT_FAILURE;
 }

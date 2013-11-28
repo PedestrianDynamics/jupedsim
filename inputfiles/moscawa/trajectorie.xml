@@ -1,3 +1,14 @@
+<<<<<<< .mine
+<?xml version="1.0" encoding="UTF-8"?>
+
+<trajectoriesDataset>
+	<header formatVersion = "1.0">
+		<agents>19</agents>
+		<seed>12542</seed>
+		<frameRate>8.000000</frameRate>
+	</header>
+
+=======
 <?xml version="1.0" encoding="UTF-8"?>
 
 <trajectoriesDataset>
@@ -5600,3 +5611,4 @@
 
 </trajectoriesDataset>
 
+>>>>>>> .r1642

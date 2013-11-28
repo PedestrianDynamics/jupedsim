@@ -129,7 +129,8 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	p1 = Point(E1.GetXp(), 0).CoordTransToCart(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
 	p2 = Point(E2.GetXp(), 0).CoordTransToCart(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
 	distp12 = p2 - p1;
-	mindist = E1.MinimumDistanceToEllipse(E2); //ONE
+	//mindist = E1.MinimumDistanceToEllipse(E2); //ONE
+        mindist = 0.5; //for performance reasons, it is assumed that this distance is about 50 cm 
 	double dist_intpol_left = mindist + _intp_widthPed; // lower cut-off for Frep (modCFM)
 	double dist_intpol_right = _distEffMaxPed - _intp_widthPed; //upper cut-off for Frep (modCFM)
 	double smax = mindist - _intp_widthPed; //max overlapping
@@ -278,7 +279,8 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
 	if (fabs((w.GetPoint1() - w.GetPoint2()).ScalarP(ped->GetPos() - pt)) > J_EPS)
 		return F;
 
-	double mind = ped->GetEllipse().MinimumDistanceToLine(w);
+	//double mind = ped->GetEllipse().MinimumDistanceToLine(w);
+        double mind = 0.5; //for performance reasons this distance is assumed to be constant
 	double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
 	return  ForceRepStatPoint(ped, pt, mind, vn); //line --> l != 0
 }

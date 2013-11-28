@@ -107,7 +107,11 @@
 			<parameters>
 				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
+<<<<<<< .mine
+				<stepsize>0.001</stepsize>
+=======
 				<stepsize>0.01</stepsize>
+>>>>>>> .r1642
 				<exitCrossingStrategy>3</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
