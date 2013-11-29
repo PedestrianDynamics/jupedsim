@@ -71,6 +71,13 @@ Analysis::Analysis() {
 	_areaForMethod_B=NULL;
 	_areaForMethod_C=NULL;
 	_areaForMethod_D=NULL;
+
+	IdInFrame = NULL;
+	XInFrame = NULL;
+	YInFrame = NULL;
+	VInFrame = NULL;
+	ClassicFlow = 0;
+	V_deltaT = 0;
 }
 
 Analysis::~Analysis() {
@@ -326,24 +333,15 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
 		frameNr++;
 	}
 
-	if(NULL  !=  DensityPerFrame)
+	DensityPerFrame = new double[_numFrames];
+	for(int i=0;i<_numFrames;i++)
 	{
-	        delete DensityPerFrame;
-			DensityPerFrame = new double[_numFrames];
-			for(int i=0;i<_numFrames;i++)
-			{
-				DensityPerFrame[i]=0;
-			}
+		DensityPerFrame[i]=0;
 	}
-
-	if(NULL  !=  PassLine)
+	PassLine = new bool[_maxNumofPed];
+	for(int i=0; i<_maxNumofPed; i++)
 	{
-	        delete PassLine;
-	    	PassLine = new bool[_maxNumofPed];
-	    	for(int i=0; i<_maxNumofPed; i++)
-	    	{
-	    		PassLine[i] = false;
-	    	}
+		PassLine[i] = false;
 	}
 
 }
@@ -407,6 +405,57 @@ int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in t
 	return numPedsInFrame;
 }
 
+/**
+ * From this function, Some pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
+ * as well as the corresponding PedID will be determined.
+ */
+void Analysis::getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int frameNr)
+{
+
+	IdInFrame = new int[PedNum];
+	XInFrame = new double[PedNum];
+	YInFrame = new double[PedNum];
+	VInFrame = new double[PedNum];
+
+	int agentCnt=0;
+	for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
+			xAgent = xAgent->NextSiblingElement("agent"))
+	{
+
+		//get agent id, x, y
+		double x= atof(xAgent->Attribute("xPos"));
+		double y= atof(xAgent->Attribute("yPos"));
+		int ID= atoi(xAgent->Attribute("ID"))-1;
+
+		XInFrame[agentCnt] = x;
+		YInFrame[agentCnt] = y;
+		int Tpast = frameNr - _deltaF;
+		int Tfuture = frameNr + _deltaF;
+		VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
+		IdInFrame[agentCnt] = ID+1;
+
+		if(_flowVelocity)
+		{
+			bool IspassLine=false;
+			if(frameNr >_firstFrame[ID]&&!PassLine[ID])
+			{
+				IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+						_areaForMethod_A->_lineStartY,
+						_areaForMethod_A->_lineEndX,
+						_areaForMethod_A->_lineEndY, _xCor[ID][frameNr - 1],
+						_yCor[ID][frameNr - 1], _xCor[ID][frameNr],
+						_yCor[ID][frameNr]);
+			}
+			if(IspassLine==true)
+			{
+				PassLine[ID] = true;
+				ClassicFlow++;
+				V_deltaT+=VInFrame[agentCnt];
+			}
+		}
+		agentCnt++;
+	}//agent
+}
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
 	string fullTrajectoriesPathName= path+"/"+filename;
@@ -430,131 +479,51 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
 	InitializeVariables(xRootNode);	//initialize some global variables
 	InitializeFiles(filename);   //initialize the files
+	ClassicFlow=0; // the number of pedestrians pass a line in a certain time
+	V_deltaT=0;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
 
-	int ClassicFlow=0; // the number of pedestrians pass a line in a certain time
-	double V_deltaT=0;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
 	int frameNr=0;
 	for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
 			xFrame = xFrame->NextSiblingElement("frame"))
 	{
 		int frid = atoi(xFrame->Attribute("ID"));
 		if(!(frid%100))
-		Log->Write("frame ID = %d",frid);
-
-		int numPedsInFrame = getPedsNumInFrame(xFrame);
-
-		int *IdInFrame = new int[numPedsInFrame]; 	// save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
-		double *XInFrame = new double[numPedsInFrame]; 	// save the X coordinates of pedestrian in the geometry in this frame
-		double *YInFrame = new double[numPedsInFrame];	// save the Y coordinates of pedestrian in the geometry in this frame
-		double *VInFrame = new double[numPedsInFrame]; 	// save the instantaneous velocity of pedestrians in the geometry in this frame
-
-
-		int agentCnt=0;
-		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-				xAgent = xAgent->NextSiblingElement("agent"))
 		{
-
-			//get agent id, x, y
-			double x= atof(xAgent->Attribute("xPos"));
-			double y= atof(xAgent->Attribute("yPos"));
-			int ID= atoi(xAgent->Attribute("ID"))-1;
-
-			XInFrame[agentCnt] = x;
-			YInFrame[agentCnt] = y;
-			int Tpast = frameNr - _deltaF;
-			int Tfuture = frameNr + _deltaF;
-			VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
-			IdInFrame[agentCnt] = ID+1;
-
-			if(_flowVelocity)
-			{
-				bool IspassLine=false;
-				if(frameNr >_firstFrame[ID]&&!PassLine[ID])
-				{
-					IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
-							_areaForMethod_A->_lineStartY,
-							_areaForMethod_A->_lineEndX,
-							_areaForMethod_A->_lineEndY, _xCor[ID][frameNr - 1],
-							_yCor[ID][frameNr - 1], _xCor[ID][frameNr],
-							_yCor[ID][frameNr]);
-				}
-				if(IspassLine==true)
-				{
-					PassLine[ID] = true;
-					ClassicFlow++;
-					V_deltaT+=VInFrame[agentCnt];
-				}
-			}
-			agentCnt++;
-		}//agent
+			Log->Write("frame ID = %d",frid);
+		}
+		int numPedsInFrame = getPedsNumInFrame(xFrame);
+		getPedsParametersInFrame(numPedsInFrame, xFrame, frameNr);
 
 		if(_flowVelocity)
 		{
-			_accumPedsPassLine.push_back(ClassicFlow);
-			_accumVPassLine.push_back(V_deltaT);
-			fprintf(_fN_t,"%d\t%d\n",frid, ClassicFlow);
+			OutputFlow_NT(frid);
 		}
 
 		if(_classicMethod)
 		{
-			double ClassicDensity = GetClassicalDensity(XInFrame, YInFrame, numPedsInFrame, _areaForMethod_C->_poly);
-			double ClassicVelocity = GetClassicalVelocity(XInFrame, YInFrame, VInFrame, numPedsInFrame, _areaForMethod_C->_poly);
-			DensityPerFrame[frameNr]=ClassicDensity;
-			fprintf(_fClassicRhoV,"%d\t%.3f\t%.3f\n", frid, ClassicDensity,ClassicVelocity);
+			OutputClassicalResults(frameNr, frid, numPedsInFrame);
 		}
 
 		//------------------Voronoi Method---------------------------------
 		if(_voronoiMethod)
 		{
-			VoronoiDiagram vd;
 			if(numPedsInFrame>2)
 			{
-				vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, numPedsInFrame);
-				//FIXME nothing is done here
-				polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
-				if(_cutByCircle)
-				{
-					polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 100);
-				}
-				double VoronoiVelocity=0.0;
-				if(numPedsInFrame>0)
-				{
-					VoronoiVelocity=GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
-				}
-				else
-				{
-					VoronoiVelocity=0;
-				}
-				double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
-				fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
-/*                                int counter=0;
-                                for(vector<polygon_2d>::const_iterator polygon_iterator = polygons.begin(); polygon_iterator!=polygons.end();polygon_iterator++)
-                                {
-                                    areaPolygon = area(*polygon_iterator);
-                                    fprintf(takahiro,"%d\t %d\t %.3f\t %.3f\t %.3f\n", counter + 1, frid, XInFrame[counter], YInFrame[counter++], areaPolygon);
-                                }*/
+				vector<polygon_2d> polygons = GetPolygons(numPedsInFrame);
+				OutputVoronoiResults(polygons, frid);
 				if(_calcIndividualFD)
 				{
-					if(numPedsInFrame>0)
-					{
 						// if(i>beginstationary&&i<endstationary)
 						{
 							GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, frid);
 						}
-					}
 				}
-				//------------------field analysis----------------------------------------------------------
-				if(_getProfile)
+				if(_getProfile) //	field analysis
 				{
-					if(numPedsInFrame>0)
-					{
 						GetProfiles(boost::lexical_cast<string>(frid), polygons, VInFrame,filename);
-					}
 				}
-				//------------the following codes is written to output the Voronoi polygons of a frame-----------
-				if(_outputGraph)
+				if(_outputGraph) // output the Voronoi polygons of a frame
 				{
-                                    //cout<<"output polygons"<<endl;
 					OutputVoroGraph(boost::lexical_cast<string>(frid), polygons, numPedsInFrame,XInFrame, YInFrame,VInFrame,filename);
 				}
 			}
@@ -563,7 +532,6 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 				cout<<" the number of the pedestrians is less than 2 !!"<< endl;
 			}
 		}
-
 
 		frameNr++;
 		delete []XInFrame;
@@ -578,7 +546,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 	{
 		string FD_TinTout=  "Output/Fundamental_Diagram/TinTout/FDTinTout_"+filename+".dat";
 		Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
-		GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _areaForMethod_B->_length,_maxNumofPed, FD_TinTout); //MC. 15.8.12. replaced "datafile" by results
+		GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _areaForMethod_B->_length,_maxNumofPed, FD_TinTout);
 	}
 	//-----------------------------------------------------------------------------------------------------------------------------------
 	if(_flowVelocity)
@@ -590,19 +558,62 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
 	if(_classicMethod)
 		fclose(_fClassicRhoV);
-
 	if(_voronoiMethod)
 		fclose(_fVoronoiRhoV);
-
 	if(_flowVelocity)
 		fclose(_fN_t);
-
-        //fclose(takahiro);
 	delete [] PassLine;
 	delete [] DensityPerFrame;
+
 	return 0;
 }
 
+/**
+ * i) get Voronoi polygons without considering the geometry
+ * ii) cut these polygons by the geometry.
+ * iii) if necessary, the polygons can be cut by a circle or polygon with certain raduis.
+ */
+vector<polygon_2d> Analysis::GetPolygons(int NrInFrm)
+{
+	VoronoiDiagram vd;
+	vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm);
+	polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
+	if(_cutByCircle)
+	{
+		polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 100);
+	}
+	return polygons;
+}
+
+/**
+ * Output the classical density and velocity in the corresponding file
+ */
+void Analysis::OutputClassicalResults(int frmNr, int frmId, int numPedsInFrame)
+{
+	double ClassicDensity = GetClassicalDensity(XInFrame, YInFrame, numPedsInFrame, _areaForMethod_C->_poly);
+	double ClassicVelocity = GetClassicalVelocity(XInFrame, YInFrame, VInFrame, numPedsInFrame, _areaForMethod_C->_poly);
+	DensityPerFrame[frmNr]=ClassicDensity;
+	fprintf(_fClassicRhoV,"%d\t%.3f\t%.3f\n", frmId, ClassicDensity,ClassicVelocity);
+}
+
+/**
+ * Output the Voronoi density and velocity in the corresponding file
+ */
+void Analysis::OutputVoronoiResults(vector<polygon_2d>  polygons, int frid)
+{
+	double VoronoiVelocity = GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
+	double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
+	fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
+}
+/**
+ * Output the time series of pedestrian number N passing the reference line.
+ */
+void Analysis::OutputFlow_NT(int frmId)
+{
+	_accumPedsPassLine.push_back(ClassicFlow);
+	_accumVPassLine.push_back(V_deltaT);
+	fprintf(_fN_t,"%d\t%d\n",frmId, ClassicFlow);
+}
 /*
  *  according to the location of a pedestrian in adjacent frame (pt1_X,pt1_Y) and (pr2_X,pt2_Y), we
  *  adjust whether he pass the line from Line_start to Line_end
@@ -917,18 +928,14 @@ double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* V
 {
 	double meanV=0;
 	int temp=0;
-
 	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
 	{
-
 		typedef std::vector<polygon_2d > polygon_list;
 		polygon_list v;
-
 		intersection(measureArea, *polygon_iterator, v);
 		if(!v.empty())
 		{
 			meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
-			//std::cout<<"the velocity and areas:"<<Velocity[temp]<<'\t'<<area(v[0])<<'\t'<<meanV<<'\t'<<temp<<'\n';
 			if((area(v[0])/area(*polygon_iterator))>1.00001)
 			{
 				std::cout<<"this is a wrong result"<<area(v[0])<<'\t'<<area(*polygon_iterator);;
@@ -936,7 +943,6 @@ double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* V
 		}
 		temp++;
 	}
-
 	return meanV;
 }
 

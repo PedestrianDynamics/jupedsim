@@ -80,6 +80,14 @@ private:
 
 	TiXmlElement* xRootNode;
 
+	int *IdInFrame; 	// save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
+	double *XInFrame; 	// save the X coordinates of pedestrian in the geometry in this frame
+	double *YInFrame;	// save the Y coordinates of pedestrian in the geometry in this frame
+	double *VInFrame; 	// save the instantaneous velocity of pedestrians in the geometry in this frame
+	int ClassicFlow; // the number of pedestrians pass a line in a certain time
+	double V_deltaT;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
+
+
 	double GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor,double **Ycor, char VComponent);
 	bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 	void GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, const std::string & ofile);
@@ -96,8 +104,13 @@ private:
 	//void InitializeVariables(const  std::string& filename, const  std::string& path);
 	void InitializeVariables(TiXmlElement* xRootNode);
 	int getPedsNumInFrame(TiXmlElement* xFrame);
+	void getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int frameNr);
 	//create a file and the directory structure if needed.
 	FILE* CreateFile(const std::string& filename);
+	void OutputClassicalResults(int frmNr, int frmId, int numPedsInFrame);
+	void OutputVoronoiResults(std::vector<polygon_2d>  polygons, int frid);
+	void OutputFlow_NT(int frmId);
+	std::vector<polygon_2d> GetPolygons(int NrInFrm);
 
 
 
