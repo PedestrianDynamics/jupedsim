@@ -50,6 +50,8 @@ private:
 	int *_lastFrame;	// Record the last frame of each pedestrian
 	int _deltaT;   // the time interval to calculate the classic flow
 
+	double *DensityPerFrame; // the measured density in each frame
+	bool *PassLine;
 
 	bool _flowVelocity; 				// Method A (Zhang2011a)
 	bool _fundamentalTinTout; 			// Method B (Zhang2011a)
@@ -76,6 +78,8 @@ private:
 	double _highVertexX; // Highest vertex of the geometry
 	double _highVertexY;
 
+	TiXmlElement* xRootNode;
+
 	double GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor,double **Ycor, char VComponent);
 	bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 	void GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFrame, int fps, double LengthMeasurementarea,int Nped, const std::string & ofile);
@@ -89,7 +93,9 @@ private:
 	void GetProfiles(const std::string& frameId, const std::vector<polygon_2d>& polygons, double * velocity, const std::string& filename);
 	void OutputVoroGraph(const std::string & frameId, const std::vector<polygon_2d>& polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame, const std::string& filename);
 	void DistributionOnLine(int *frequency,int fraction, double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
-
+	//void InitializeVariables(const  std::string& filename, const  std::string& path);
+	void InitializeVariables(TiXmlElement* xRootNode);
+	int getPedsNumInFrame(TiXmlElement* xFrame);
 	//create a file and the directory structure if needed.
 	FILE* CreateFile(const std::string& filename);
 
@@ -107,10 +113,10 @@ public:
 	virtual ~Analysis();
 
 	void InitArgs(ArgumentParser *args);
-        void InitializeVariables(TiXmlElement* xRootNode);
+    //
 	void InitializeFiles(const std::string& file);
-        std::string GetBasename(const std::string& str);
-        std::string GetFilename (const std::string& str);
+    std::string GetBasename(const std::string& str);
+    std::string GetFilename (const std::string& str);
 
 	polygon_2d ReadGeometry(const std::string& geometryFile);
 	int RunAnalysis(const std::string& file, const std::string& path);

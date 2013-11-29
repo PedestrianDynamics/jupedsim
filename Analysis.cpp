@@ -57,6 +57,8 @@ Analysis::Analysis() {
 	_fVoronoiRhoV = NULL;
 	_individualFD = NULL;
 	_fN_t = NULL;
+	DensityPerFrame = NULL; // the measured density in each frame
+	PassLine = NULL;
 
 	_scaleX = 10;   // the size of the grid
 	_scaleY = 10;
@@ -226,7 +228,8 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 }
 
 // initialize the global variables variables
-void Analysis::InitializeVariables(TiXmlElement* xRootNode){
+void Analysis::InitializeVariables(TiXmlElement* xRootNode)
+{
 
 	//counting the number of frames
 	_numFrames=0;
@@ -234,7 +237,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 			xFrame = xFrame->NextSiblingElement("frame")) {
 		_numFrames++;
 	}
-	Log->Write("INFO:\tnumFrames = %d",_numFrames);
+	Log->Write("INFO:\tnum Frames = %d",_numFrames);
 
 	TiXmlNode*  xHeader = xRootNode->FirstChild("header"); // header
 	//Number of agents
@@ -246,7 +249,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 	//framerate
 	if(xHeader->FirstChild("frameRate")){
 		_fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-		Log->Write("INFO:\tFramerate fps=%d", _fps);
+		Log->Write("INFO:\tFrame rate fps=%d", _fps);
 	}
 
 	_xCor = new double* [_maxNumofPed];
@@ -323,6 +326,26 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode){
 		frameNr++;
 	}
 
+	if(NULL  !=  DensityPerFrame)
+	{
+	        delete DensityPerFrame;
+			DensityPerFrame = new double[_numFrames];
+			for(int i=0;i<_numFrames;i++)
+			{
+				DensityPerFrame[i]=0;
+			}
+	}
+
+	if(NULL  !=  PassLine)
+	{
+	        delete PassLine;
+	    	PassLine = new bool[_maxNumofPed];
+	    	for(int i=0; i<_maxNumofPed; i++)
+	    	{
+	    		PassLine[i] = false;
+	    	}
+	}
+
 }
 
 void Analysis::InitializeFiles(const string& trajectoriesFilename)
@@ -369,20 +392,24 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
 		}
 		fprintf(_fN_t,"#Frame\t	Cumulative pedestrians\n");
 	}
+
 }
 
+
+int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in the frame
+{
+	int numPedsInFrame=0;
+	for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
+			xAgent = xAgent->NextSiblingElement("agent"))
+	{
+			numPedsInFrame++;
+	}
+	return numPedsInFrame;
+}
 
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
 	string fullTrajectoriesPathName= path+"/"+filename;
-        string takahiroFile = path + "/" + GetBasename(filename) + ".vor";
-        FILE *takahiro;
-	if((takahiro=CreateFile(takahiroFile))==NULL)
-	{
-		Log->Write("cannot open the file to write takahiro File\n");
-		exit(0);
-	}
-
 
 	TiXmlDocument docGeo(fullTrajectoriesPathName);
 	if (!docGeo.LoadFile()){
@@ -391,62 +418,41 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 		exit(EXIT_FAILURE);
 	}
 
-	TiXmlElement* xRootNode = docGeo.RootElement();
+	xRootNode = docGeo.RootElement();
 	if( ! xRootNode ) {
 		Log->Write("ERROR:\tRoot element does not exist");
 		exit(EXIT_FAILURE);
 	}
-
 	if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
 		Log->Write("ERROR:\tRoot element value is not 'geometry'.");
 		exit(EXIT_FAILURE);
 	}
 
-	//initialize some global variables
-	InitializeVariables(xRootNode);
-	//initialize the files
-	InitializeFiles(filename);
-
+	InitializeVariables(xRootNode);	//initialize some global variables
+	InitializeFiles(filename);   //initialize the files
 
 	int ClassicFlow=0; // the number of pedestrians pass a line in a certain time
 	double V_deltaT=0;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
-	double *DensityPerFrame = new double[_numFrames];
-
-	for(int i=0;i<_numFrames;i++)
-	{
-		DensityPerFrame[i]=0;
-	}
-
-	bool *PassLine = new bool[_maxNumofPed];
-	for(int i=0; i<_maxNumofPed; i++)
-	{
-		PassLine[i] = false;
-	}
-
-	string N_t="Flow_NT_"+filename+"_Out.dat";
-
 	int frameNr=0;
 	for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-			xFrame = xFrame->NextSiblingElement("frame")) {
-
+			xFrame = xFrame->NextSiblingElement("frame"))
+	{
 		int frid = atoi(xFrame->Attribute("ID"));
-
-		//counting the agents in the frame
-		int numPedsInFrame=0;
-		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-				xAgent = xAgent->NextSiblingElement("agent")) numPedsInFrame++;
-
 		if(!(frid%100))
 		Log->Write("frame ID = %d",frid);
 
+		int numPedsInFrame = getPedsNumInFrame(xFrame);
+
+		int *IdInFrame = new int[numPedsInFrame]; 	// save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
 		double *XInFrame = new double[numPedsInFrame]; 	// save the X coordinates of pedestrian in the geometry in this frame
 		double *YInFrame = new double[numPedsInFrame];	// save the Y coordinates of pedestrian in the geometry in this frame
 		double *VInFrame = new double[numPedsInFrame]; 	// save the instantaneous velocity of pedestrians in the geometry in this frame
-		int *IdInFrame = new int[numPedsInFrame]; 	// save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
+
 
 		int agentCnt=0;
 		for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-				xAgent = xAgent->NextSiblingElement("agent")) {
+				xAgent = xAgent->NextSiblingElement("agent"))
+		{
 
 			//get agent id, x, y
 			double x= atof(xAgent->Attribute("xPos"));
@@ -519,15 +525,14 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 				{
 					VoronoiVelocity=0;
 				}
-                                double areaPolygon;
 				double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
 				fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
-                                int counter=0;
+/*                                int counter=0;
                                 for(vector<polygon_2d>::const_iterator polygon_iterator = polygons.begin(); polygon_iterator!=polygons.end();polygon_iterator++)
                                 {
                                     areaPolygon = area(*polygon_iterator);
                                     fprintf(takahiro,"%d\t %d\t %.3f\t %.3f\t %.3f\n", counter + 1, frid, XInFrame[counter], YInFrame[counter++], areaPolygon);
-                                }
+                                }*/
 				if(_calcIndividualFD)
 				{
 					if(numPedsInFrame>0)
@@ -592,7 +597,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 	if(_flowVelocity)
 		fclose(_fN_t);
 
-        fclose(takahiro);
+        //fclose(takahiro);
 	delete [] PassLine;
 	delete [] DensityPerFrame;
 	return 0;
