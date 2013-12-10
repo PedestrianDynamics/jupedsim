@@ -218,7 +218,6 @@ void GlobalRouter::Init(Building* building) {
 		_map_id_to_index[door] = index;
 		_map_index_to_id[index] = door;
 		index++;
-
 	}
 
 	// loop over the rooms
@@ -278,7 +277,6 @@ void GlobalRouter::Init(Building* building) {
 		const Wall& line=_building->GetFinalGoal(_finalDestinations[p])->GetAllWalls()[0];
 		double center[2] = { goal->GetCentroid()._x, goal->GetCentroid()._y };
 
-
 		AccessPoint* to_AP = new AccessPoint(line.GetUniqueID(), center);
 		to_AP->SetFinalGoalOutside(true);
 		to_AP->SetNavLine(new NavLine(line));
@@ -330,7 +328,7 @@ void GlobalRouter::Init(Building* building) {
 			AccessPoint* to_AP = itr1->second;
 
 			if(from_AP->GetID()==to_AP->GetID()) continue;
-			//if(from_AP->GetFinalExitToOutside()) continue;
+			if(from_AP->GetFinalExitToOutside()) continue;
 			//if(from_AP->GetFinalGoalOutside()) continue;
 
 			if (to_AP->GetFinalExitToOutside()) {
@@ -432,7 +430,7 @@ void GlobalRouter::Init(Building* building) {
 	}
 
 	//dumping the complete system
-	//DumpAccessPoints(19);
+	//DumpAccessPoints(-1);
 	//vector<string> rooms;
 	//rooms.push_back("hall");
 	//rooms.push_back("0");
@@ -607,7 +605,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 	}
 }
 
-
+/*
 bool GlobalRouter::CanSeeEachOther(Crossing* c1, Crossing* c2) {
 
 	//do they share at least one subroom?
@@ -681,6 +679,7 @@ bool GlobalRouter::CanSeeEachOther(Crossing* c1, Crossing* c2) {
 
 	return true;
 }
+*/
 
 SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2) {
 	SubRoom* sb11 = c1->GetSubRoom1();

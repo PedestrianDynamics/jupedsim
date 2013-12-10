@@ -85,7 +85,7 @@ protected:
 	/**
 	 * @return true if the two segments are in the visibility range of each other
 	 */
-	bool CanSeeEachOther(Crossing* c1, Crossing* c2);
+	//bool CanSeeEachOther(Crossing* c1, Crossing* c2);
 
 	/**
 	 * @obsolete

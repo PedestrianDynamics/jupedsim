@@ -93,8 +93,20 @@ public:
     int GetNumberOfGoals()const;
     Room* GetRoom(int index) const;
     Room* GetRoom(std::string caption)const;
+
+    //TODO: implement the same methods for Crossings and Hlines
     Transition* GetTransition(std::string caption) const;
     Transition* GetTransition(int id) ;
+
+    /**
+     * Not implemented
+     */
+    Crossing* GetCrossing(int id);
+
+    /**
+     * Not implemented
+     */
+    Hline* GetHline(int id);
 
     /**
      * @return true if the two segments are visible from each other.
@@ -111,17 +123,24 @@ public:
     bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
 
-    //FIXME: obsolete should get rid of this method
-    Crossing* GetGoal(std::string caption) const;
+    /**
+     * @return a crossing or a transition matching the given caption.
+     * Return NULL in the case of failure.
+     */
+    Crossing* GetTransOrCrossByName(std::string caption) const;
 
     //FIXME: obsolete should get rid of this method
-    Crossing* GetGoal(int id);
+    //Crossing* GetGoal(int id);
 
 
     //TOD0: rename later to GetGoal
     Goal* GetFinalGoal(int id);
 
     int GetNumberOfPedestrians() const;
+
+    /**
+     * @return the linked-cell grid used for spatial query
+     */
     LCGrid* GetGrid() const;
 
     // Sonstiges

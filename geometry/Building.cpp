@@ -692,7 +692,7 @@ Goal* Building::GetFinalGoal(int ID) {
 	}
 }
 
-Crossing* Building::GetGoal(string caption) const {
+Crossing* Building::GetTransOrCrossByName(string caption) const {
 
 	{
 		//eventually
@@ -711,9 +711,8 @@ Crossing* Building::GetGoal(string caption) const {
 		}
 	}
 
-	Log->Write("WARNING: No Transition with Caption: " + caption);
-	//return NULL;
-	exit(EXIT_FAILURE);
+	Log->Write("WARNING: No Transition or Crossing with Caption: " + caption);
+	return NULL;
 }
 
 bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines){
@@ -1420,27 +1419,27 @@ int Building::GetNumberOfPedestrians() const {
 }
 
 // FIXME: you should get rid of this method
-Crossing* Building::GetGoal(int index) {
-	if (_transitions.count(index) == 1) {
-		return _transitions[index];
-	} else if (_crossings.count(index) == 1) {
-		return _crossings[index];
-	}else if (_hLines.count(index) == 1) {
-		exit(EXIT_FAILURE);
-		//return pHlines[index];
-	}else {
-		if (index == -1)
-			return NULL;
-		else {
-			char tmp[CLENGTH];
-			sprintf(tmp,
-					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal(), counts in map= [%d]",
-					index, _crossings.size(),_crossings.count(index));
-			Log->Write(tmp);
-			exit(EXIT_FAILURE);
-		}
-	}
-}
+//Crossing* Building::GetGoal(int index) {
+//	if (_transitions.count(index) == 1) {
+//		return _transitions[index];
+//	} else if (_crossings.count(index) == 1) {
+//		return _crossings[index];
+//	}else if (_hLines.count(index) == 1) {
+//		exit(EXIT_FAILURE);
+//		//return pHlines[index];
+//	}else {
+//		if (index == -1)
+//			return NULL;
+//		else {
+//			char tmp[CLENGTH];
+//			sprintf(tmp,
+//					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal(), counts in map= [%d]",
+//					index, _crossings.size(),_crossings.count(index));
+//			Log->Write(tmp);
+//			exit(EXIT_FAILURE);
+//		}
+//	}
+//}
 
 
 #endif // _SIMULATOR
