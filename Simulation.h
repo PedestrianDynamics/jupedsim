@@ -43,6 +43,7 @@
 #include "routing/NavMesh.h"
 #include "routing/MeshRouter.h"
 #include "routing/RoutingEngine.h"
+#include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
 
 

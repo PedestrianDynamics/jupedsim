@@ -311,6 +311,15 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			s.append("\tRouting Strategy dummy router added\n");
 			break;
 		}
+		case ROUTING_SAFEST:
+		{
+			Router* router=new SafestPathRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy safest path router added\n");
+			break;
+		}
 		case ROUTING_UNDEFINED:
 		default:
 			cout<<"router not available"<<endl;

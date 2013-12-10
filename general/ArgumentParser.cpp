@@ -691,9 +691,10 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_NAV_MESH));
 		else if(strategy=="dummy")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_DUMMY));
+		else if(strategy=="global_safest")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_SAFEST));
 		else{
-			Log->Write("ERROR: \twrong value for routing strategy!!!\n");
-			cout<<strategy<<endl;
+			Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",strategy.c_str());
 			exit(EXIT_FAILURE);
 		}
 	}

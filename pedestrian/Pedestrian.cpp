@@ -251,7 +251,6 @@ void Pedestrian::AddKnownClosedDoor(int door)
 int Pedestrian::DoorKnowledgeCount() const 
 {
 	return _knownDoors.size();
-
 }
 
 

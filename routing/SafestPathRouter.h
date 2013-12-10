@@ -56,6 +56,32 @@ private:
 	 * @return the new safest goalID, -1, if there was an Error
 	 */
 	int ComputeSafestPath(Pedestrian* p);
+
+
+	/**
+	 * do some initialisation stuff...
+	 */
+	void Initialize();
+
+
+	/**
+	 *  reads the results from fds evac
+	 */
+	void ReadMatrixFromFDS();
+
+
+	int main_1();
+	int main_2();
+	int main_3();
+	int main_4();
+
+
+private:
+	 double dMatrixPreEvac[1][11];
+	 double dFinalLength[1][11];
+	 double dFinalMatrixOFP[300][11];
+
+
 };
 
 #endif /* SAFESTPATHROUTER_H_ */

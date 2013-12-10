@@ -929,6 +929,10 @@ string GlobalRouter::GetRoutingInfoFile() const {
 			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
 				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 		}
+		else if(strategy=="global_safest") {
+			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+		}
 	}
 	if (nav_line_file == "")
 		return nav_line_file;

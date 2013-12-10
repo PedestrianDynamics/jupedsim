@@ -14,5 +14,9 @@
 			<vertex px="103.14" py="56.70"/>
 			<vertex px="105.84" py="64.80"/>
 		</Hline>
+		<Hline id="4" room_id="0" subroom_id="4">
+			<vertex px="18.36" py="88.18"/>
+			<vertex px="2.13" py="77.21"/>
+		</Hline>
 	</Hlines>
 </routing>

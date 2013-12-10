@@ -18,23 +18,11 @@
 		<!-- <\!-- room states are: good or smoked -\-> -->
 		<rooms>
 			<room room_id="0" state="good" />
-		</rooms>
-		<rooms>
 			<room room_id="1" state="good" />
-		</rooms>
-		<rooms>
 			<room room_id="2" state="good" />
-		</rooms>
-		<rooms>
 			<room room_id="3" state="good" />
-		</rooms>
-		<rooms>
 			<room room_id="4" state="good" />
-		</rooms>
-		<rooms>
 			<room room_id="5" state="good" />
-		</rooms>
-		<rooms>
 			<room room_id="6" state="good" />
 		</rooms>
 		
@@ -76,13 +64,22 @@
 	
 	<routing>
 		<goals>
-			<goal id="0" final="true" caption="goal 1">
+			<goal id="0" final="true" caption="goal 0">
 				<polygon>
-					<vertex px="0.5" py="64.8" />
-					<vertex px="0.5" py="64.8" />
-					<vertex px="1.5" py="70.2" />
-					<vertex px="1.5" py="64.8" />
-					<vertex px="0.5" py="64.8" />
+					<vertex px="0.5" py="64" />
+					<vertex px="0.5" py="71" />
+					<vertex px="1.5" py="71" />
+					<vertex px="1.5" py="64" />
+					<vertex px="0.5" py="64" />
+				</polygon>
+			</goal>
+			<goal id="1" final="true" caption="goal 1">
+				<polygon>
+					<vertex px="48.6" py="27" />
+					<vertex px="48.6" py="30" />
+					<vertex px="54" py="30" />
+					<vertex px="54" py="27" />
+					<vertex px="48.6" py="27" />
 				</polygon>
 			</goal>
 		</goals>
@@ -94,7 +91,8 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-			<group group_id="0" room_id="0" subroom_id="4" number="5" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="0" room_id="0" subroom_id="4" number="5" goal_id="1" router_id="1" route_id=""/>
+			<group group_id="1" room_id="0" subroom_id="0" number="15" goal_id="1" router_id="1" route_id=""/>
 		</agents_distribution>
 
                 <!-- frequency in persons/minute -->
@@ -107,11 +105,7 @@
 			<parameters>
 				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
-<<<<<<< .mine
-				<stepsize>0.001</stepsize>
-=======
 				<stepsize>0.01</stepsize>
->>>>>>> .r1642
 				<exitCrossingStrategy>3</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
@@ -128,9 +122,9 @@
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="1" description="global_shortest">
+		<router router_id="1" description="global_safest">
 			<parameters>
-               <navigation_lines file="routing.xml" />
+				<navigation_lines file="routing.xml" />
 			</parameters>
 		</router>
 	</route_choice_models>

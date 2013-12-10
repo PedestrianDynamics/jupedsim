@@ -148,7 +148,6 @@ public:
 	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;
 
-
 	/**
 	 * Parse the commands passed to the command line
 	 * specially looks for the initialization file
