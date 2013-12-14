@@ -146,7 +146,8 @@ file(
 	routing/DummyRouter.cpp  
 	routing/GlobalRouter.cpp  
 	routing/GraphRouter.cpp  
-	routing/QuickestPathRouter.cpp  
+	routing/QuickestPathRouter.cpp
+	routing/SafestPathRouter.cpp  
 	routing/Router.cpp
 	routing/RoutingEngine.cpp
 	routing/NavMesh.cpp
@@ -171,7 +172,8 @@ file(
 	routing/DummyRouter.h    
 	routing/GlobalRouter.h    
 	routing/GraphRouter.h    
-	routing/QuickestPathRouter.h    
+	routing/QuickestPathRouter.h  
+	routing/SafestPathRouter.h  
 	routing/Router.h
 	routing/RoutingEngine.h
 	routing/AccessPoint.h    

@@ -39,6 +39,9 @@
 #include <fstream>
 #include <iomanip>
 
+//penalty factors for distances outdoor
+#define PENALTY_FACTOR 10
+
 
 using namespace std;
 
@@ -271,6 +274,9 @@ void GlobalRouter::Init(Building* building) {
 		}
 	}
 
+	//complete the matrix with the final distances between the exits to the outside and the
+	//final marked goals
+
 	for (unsigned int p = 0; p < _finalDestinations.size(); p++) {
 
 		Goal* goal =_building->GetFinalGoal(_finalDestinations[p]);
@@ -301,13 +307,18 @@ void GlobalRouter::Init(Building* building) {
 			from_AP->AddConnectingAP(to_AP);
 			int from_door= _map_id_to_index[from_AP->GetID()];
 			int to_door= _map_id_to_index[to_AP->GetID()];
-			_distMatrix[from_door][to_door] = from_AP->GetNavLine()->DistTo(goal->GetCentroid());
+			// I assume a direct line connection between every exit connected to the outside and
+			// any final goal also located outside
+			_distMatrix[from_door][to_door] = PENALTY_FACTOR*from_AP->GetNavLine()->DistTo(goal->GetCentroid());
+
+			// add a penalty for goals outside due to the direct line assumption while computing the distances
+			//if (_distMatrix[from_door][to_door] > 10.0)
+			//	_distMatrix[from_door][to_door]*=10;
 		}
 	}
 
 	//run the floyd warshall algorithm
 	FloydWarshall();
-
 
 	// set the configuration for reaching the outside
 	// set the distances to all final APs
@@ -386,7 +397,6 @@ void GlobalRouter::Init(Building* building) {
 	// set the distances to alternative destinations
 
 	for (unsigned int p = 0; p < _finalDestinations.size(); p++) {
-
 		int to_door_uid =
 				_building->GetFinalGoal(_finalDestinations[p])->GetAllWalls()[0].GetUniqueID();
 		int to_door_matrix_index=_map_id_to_index[to_door_uid];
@@ -448,7 +458,6 @@ void GlobalRouter::GetPath(int i, int j) {
 	if (i != j)
 		GetPath(i, _pathsMatrix[i][j]);
 	_tmpPedPath.push_back(j);
-	//printf("--%d--",j);
 }
 
 /*
@@ -459,9 +468,7 @@ void GlobalRouter::GetPath(int i, int j) {
  or 0, otherwise
  */
 void GlobalRouter::FloydWarshall() {
-	//	int i, j, k;
-	const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();;
-
+	const int n = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 	for (int k = 0; k < n; k++)
 		for (int i = 0; i < n; i++)
 			for (int j = 0; j < n; j++)
@@ -469,12 +476,9 @@ void GlobalRouter::FloydWarshall() {
 					_distMatrix[i][j] = _distMatrix[i][k] + _distMatrix[k][j];
 					_pathsMatrix[i][j] = _pathsMatrix[k][j];
 				}
-	return;
-
 }
 
 void GlobalRouter::DumpAccessPoints(int p) {
-
 	if (p != -1) {
 		_accessPoints.at(p)->Dump();
 	} else {
@@ -549,6 +553,7 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 }
 
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
+	//cout<<"default: " <<ped->GetID()<<" going to "<<ped->GetFinalDestination()<<endl;
 	// get the opened exits
 	SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
 			ped->GetSubRoomID());
@@ -828,7 +833,6 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 	}
 
 	//connections
-
 	for (map<int, AccessPoint*>::const_iterator itr = _accessPoints.begin();
 			itr != _accessPoints.end(); ++itr) {
 
