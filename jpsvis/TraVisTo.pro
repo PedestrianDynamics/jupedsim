@@ -3,7 +3,8 @@ TARGET = TraVisTo
 CONFIG += qt
 QT += xml \
     network
-	
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 win32 { 
 	INCLUDEPATH += C:/VTK/include/vtk-5.10 
 	
