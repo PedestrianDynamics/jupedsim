@@ -74,7 +74,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 		const QString & /* localName */, const QString &qName,
 		const QXmlAttributes &at)
 {
-
 	if (qName == "header") {
 		for(int i=0;i<at.length();i++){
 			if(at.localName(i)=="version")
@@ -554,6 +553,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 		while(!currentFrame.empty()){
 			frame->addElement(currentFrame.back());
 			currentFrame.pop_back();
+			//cout<<"not adding"<<endl;
 		}
 
 		dataset->addFrame(frame);
@@ -590,12 +590,13 @@ bool SaxParser::attributeDecl(const QString& eName, const QString& aName,
 
 void SaxParser::clearPoints(){
 
-	currentPointsList.clear();
+//	currentPointsList.clear();
 
 	while (!currentPointsList.empty()){
 		delete currentPointsList.back();
 		currentPointsList.pop_back();
 	}
+	currentPointsList.clear();
 	return;
 }
 
@@ -690,7 +691,7 @@ void SaxParser::parseGeometryPG3(QString fileName, FacilityGeometry *geometry){
 /// provided for convenience and will be removed in the next version
 void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo){
 
-
+	cout<<"external geometery fouind"<<endl;
 	//creating am empty document
 	// to be filled
 	QDomDocument doc("");
@@ -702,16 +703,22 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 		QFile file(content);
 		if (!file.open(QIODevice::ReadOnly)) {
 			//slotErrorOutput("could not open the File" );
+			cout<<"could not open the File"<<endl;
 			return ;
 		}
 		QString *errorCode = new QString();
 		if (!doc.setContent(&file, errorCode)) {
 			file.close();
 			//slotErrorOutput(*errorCode);
+			cout<<errorCode->toStdString()<<endl;
 			return ;
 		}
 		file.close();
-		geoNode =doc.elementsByTagName("geometry").item(0);
+		geoNode =doc.documentElement().namedItem("geometry");
+
+		if (geoNode.isNull()){
+			cout<<"No geometry information found. <geometry> <geometry/> tag is missing."<<endl;
+		}
 	}
 	else
 	{
@@ -796,7 +803,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 					double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble();
 					double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble();
-					double z2=points.item(i+1).toElement().attribute("z", "0").toDouble();
+					double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble();
 					geometry->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
 				}
 			}
@@ -875,6 +882,13 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	QDomDocument doc("");
 
 	QFile file(filename);
+	int size =file.size()/(1024*1024);
+
+	if(size>100){
+		cout<<"The file is too large: "<<filename.toStdString()<<endl;
+		return;
+	}
+
 	if (!file.open(QIODevice::ReadOnly)) {
 		qDebug()<<"could not open the file: "<<filename<<endl;
 		return ;

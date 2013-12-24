@@ -251,6 +251,7 @@ void SyncData::setFrameCursorTo(int position){
 
 int SyncData::getNumberOfAgents()
 {
+	return 0;
 	return numberOfAgents;
 }
 

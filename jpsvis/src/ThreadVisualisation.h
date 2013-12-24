@@ -37,7 +37,9 @@
 
 #include <QThread>
 #include <QObject>
-
+#include <vtkGlyph3D.h>
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
 
 // forwarded classes
 class QThread;
@@ -60,6 +62,8 @@ class FacilityGeometry;
 extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
+
+extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;
@@ -148,6 +152,9 @@ private:
 
 	/// initialize the datasets
 	void init();
+
+	/// initialize the datasets
+	void initGlyphs();
 
 	//finalize the datasets
 	void finalize();

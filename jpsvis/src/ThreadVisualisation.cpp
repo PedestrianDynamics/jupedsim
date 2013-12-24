@@ -142,6 +142,7 @@ void ThreadVisualisation::run(){
 
 	//initialize the datasets
 	init();
+	initGlyphs();
 
 	// add axis
 	axis= vtkAxesActor::New();
@@ -196,19 +197,19 @@ void ThreadVisualisation::run(){
 	// Create a real circle, not a sphere
 	{
 
-//		VTK_CREATE(vtkRegularPolygonSource, polygonSource);
-//		polygonSource->GeneratePolygonOff();
-//		polygonSource->SetNumberOfSides(50);
-//		polygonSource->SetRadius(700);
-//		polygonSource->SetCenter(0,0,0);
-//		polygonSource->Update();
-//
-//		VTK_CREATE(vtkPolyDataMapper,mapper);
-//		mapper->SetInputConnection(polygonSource->GetOutputPort());
-//		VTK_CREATE(vtkActor,actor);
-//		actor->GetProperty()->SetColor(180.0/255,180.0/255.0,180.0/255.0);
-//		actor->SetMapper(mapper);
-//		renderer->AddActor(actor);
+		VTK_CREATE(vtkRegularPolygonSource, polygonSource);
+		polygonSource->GeneratePolygonOff();
+		polygonSource->SetNumberOfSides(50);
+		polygonSource->SetRadius(1000);
+		polygonSource->SetCenter(0,0,0);
+		polygonSource->Update();
+
+		VTK_CREATE(vtkPolyDataMapper,mapper);
+		mapper->SetInputConnection(polygonSource->GetOutputPort());
+		VTK_CREATE(vtkActor,actor);
+		actor->GetProperty()->SetColor(180.0/255,180.0/255.0,180.0/255.0);
+		actor->SetMapper(mapper);
+		//renderer->AddActor(actor);
 	}
 
 
@@ -425,6 +426,42 @@ void ThreadVisualisation::showDoors(bool status){
 	}
 }
 
+void  ThreadVisualisation::initGlyphs(){
+
+	VTK_CREATE (vtkSphereSource, sphereSource);
+	sphereSource->SetRadius(30);
+	//sphereSource->SetPhiResolution(20);
+	//sphereSource->SetThetaResolution(20);
+
+	//extern_glyphs_pedestrians->SetSource(sphereSource->GetOutput());
+	extern_glyphs_pedestrians->SetSourceConnection(sphereSource->GetOutputPort());
+	extern_glyphs_pedestrians->SetInputConnection(sphereSource->GetOutputPort());
+
+	extern_glyphs_pedestrians->SetColorModeToColorByScalar();
+	extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
+	extern_glyphs_pedestrians->Update();
+
+
+	VTK_CREATE(vtkPolyDataMapper, mapper);
+	mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
+	mapper->SetScalarModeToUsePointData();
+	mapper->ScalarVisibilityOn();
+	//mapper->SelectColorArray("color");
+	mapper->ColorByArrayComponent("data", 0);
+	mapper->SetColorModeToMapScalars();
+
+	VTK_CREATE(vtkLookupTable, lut);
+	lut->SetHueRange(0.0,0.470);
+	//lut->SetSaturationRange(0,0);
+	lut->SetValueRange(1.0,1.0);
+	lut->SetNumberOfTableValues(256);
+	lut->Build();
+	mapper->SetLookupTable(lut);
+
+	VTK_CREATE(vtkActor, actor);
+	actor->SetMapper(mapper);
+	renderer->AddActor(actor);
+}
 
 void  ThreadVisualisation::init(){
 	//get the datasets parameters.

@@ -58,13 +58,13 @@ public:
 	* set/get the coordinate of the modelled ellipse.
 	* @param ellipse, the center coordinates and the 2 semi-axes
 	*/
-	void getEllipse(double ellipse[4]);
+	void getEllipse(double ellipse[7]);
 
 	/**
 	* set/get the coordinate of the modelled ellipse.
 	* @param ellipse, the center coordinates , the 2 semi-axes, the color and the orientation
 	*/
-	void setEllipse(double ellipse[4]);
+	void setEllipse(double ellipse[7]);
 
 	/**
 	 * set/get other agents infos: the color and the orientation.

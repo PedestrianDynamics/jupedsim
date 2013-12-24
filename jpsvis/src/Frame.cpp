@@ -35,9 +35,18 @@
 
 #include "TrajectoryPoint.h"
 #include "Frame.h"
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
+#include <vtkFloatArray.h>
+#include <vtkPointData.h>
+
+
+#define VTK_CREATE(type, name) \
+		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 Frame::Frame() {
 	elementCursor=0;
+	_polydata = vtkPolyData::New();
 }
 
 Frame::~Frame() {
@@ -46,6 +55,8 @@ Frame::~Frame() {
 		framePoints.pop_back();
 	}
 	framePoints.clear();
+
+	_polydata->Delete();
 }
 
 int Frame::getSize(){
@@ -95,9 +106,36 @@ TrajectoryPoint* Frame::getNextElement(){
 	}else{
 		return framePoints.at(elementCursor++);
 	}
-
+//next test
 }
 
+vtkPolyData* Frame::GetPolyData() {
+
+	VTK_CREATE (vtkPoints, points);
+	VTK_CREATE (vtkFloatArray, colors);
+	colors->SetName("color");
+	colors->SetNumberOfComponents(1);
+	for (unsigned int i=0;i<framePoints.size();i++){
+		double pos[3];
+		double data[7];
+		framePoints[i]->getPos(pos);
+		framePoints[i]->getEllipse(data);
+		points->InsertNextPoint(pos);
+		colors->InsertNextValue(data[6]/255.0);
+	}
+	//scalars->Print(cout);
+	VTK_CREATE (vtkFloatArray, data);
+	data->SetNumberOfComponents(2);
+	data->SetNumberOfTuples(framePoints.size());
+	data->CopyComponent(0, colors, 0);
+	data->CopyComponent(1, colors, 0); // radius can come here later
+	data->SetName("data");
+
+	_polydata->SetPoints(points);
+	_polydata->GetPointData()->AddArray(data);
+	_polydata->GetPointData()->SetActiveScalars("data");
+	return _polydata;
+}
 
 unsigned int Frame::getElementCursor(){
 

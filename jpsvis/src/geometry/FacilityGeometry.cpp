@@ -570,7 +570,7 @@ vtkActor2DCollection* FacilityGeometry::getCaptions(){
 void FacilityGeometry::addNewElementText(double center[3], double orientation[3],
 		string text, double color) {
 
-	//return ;
+	return ;
 
 		{//caption
 			VTK_CREATE(vtkTextActor3D,caption);

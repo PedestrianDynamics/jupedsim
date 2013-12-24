@@ -48,6 +48,9 @@ class vtkFFMPEGWriter;
 #endif
 
 
+#include <vtkGlyph3D.h>
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
 
 class SyncData;
 class QObject;
@@ -75,6 +78,8 @@ extern bool extern_take_screenshot;
 extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
+
+extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;

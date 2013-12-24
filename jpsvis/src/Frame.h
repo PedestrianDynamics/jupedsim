@@ -33,6 +33,7 @@
 #define Frame_H_
 
 class TrajectoryPoint;
+class vtkPolyData;
 
 class Frame {
 public:
@@ -54,9 +55,14 @@ public:
 
 	void resetCursor();
 
+	vtkPolyData* GetPolyData();
+
+	vtkPolyData* GetSclarData();
 
 private:
 	std::vector <TrajectoryPoint *> framePoints;
+
+	vtkPolyData * _polydata;
 
 	/// points to the actual element in the frame
 	unsigned int elementCursor;

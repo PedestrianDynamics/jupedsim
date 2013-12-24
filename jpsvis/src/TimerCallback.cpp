@@ -56,6 +56,7 @@
 #include <qwaitcondition.h>
 
 #include <vtkCommand.h>
+#include <vtkPolyData.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkRenderer.h>
 #include <vtkRendererCollection.h>
@@ -67,6 +68,12 @@
 #include <vtkTextActor.h>
 #include <vtkCamera.h>
 #include <vtkTextProperty.h>
+#include <vtkSphereSource.h>
+#include <vtkGlyph3D.h>
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
+
+
 
 
 #include "geometry/FacilityGeometry.h"
@@ -79,9 +86,11 @@
 #include "SystemSettings.h"
 #include "TimerCallback.h"
 
-//#include <vtkPostScriptWriter.h>
+#define VTK_CREATE(type, name) \
+		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 using namespace std;
+
 TimerCallback* TimerCallback::New()
 {
 	TimerCallback *cb = new TimerCallback;
@@ -133,6 +142,38 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
 					}else{
 
+						frameNumber=extern_trajectories_firstSet.getFrameCursor();
+
+#if VTK_MAJOR_VERSION <= 5
+						extern_glyphs_pedestrians->SetInput(frame->GetPolyData());
+#else
+						extern_glyphs_pedestrians->SetInputData(frame->GetPolyData());
+#endif
+
+						extern_glyphs_pedestrians->Update();
+
+						nPeds= frame->getSize();
+
+					}
+				}
+
+				// TODO: restore this if you want to use actors instead of glyphs
+				if(extern_first_dataset_loaded && false) {
+					Frame * frame=NULL;
+
+					// return the same frame if the system is paused
+					// in fact you could just return, but in this case no update will be made
+					// e.g showing captions/trails...
+
+					if(extern_is_pause)
+						frame=extern_trajectories_firstSet.getFrame(extern_trajectories_firstSet.getFrameCursor());
+					else
+						frame = extern_trajectories_firstSet.getNextFrame();
+
+					if(frame==NULL){
+
+					}else{
+
 						// just take the frame number given by this dataset
 						frameNumber=extern_trajectories_firstSet.getFrameCursor();
 						if(extern_tracking_enable)
@@ -140,22 +181,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
 						TrajectoryPoint* point=NULL;
 						while(NULL!=(point=frame->getNextElement())){
-//							if(point->getIndex()==152) continue;
-//							if(point->getIndex()==60) continue;
-//							if(point->getIndex()==57) continue;
-//							if(point->getIndex()==9) continue;
-//							if(point->getIndex()==124) continue;
-//							if(point->getIndex()==81) continue;
-//							if(point->getIndex()==55) continue;
-//
-//							if(point->getIndex()==158) continue;
-//							if(point->getIndex()==192) continue;
-//							if(point->getIndex()==150) continue;
-//							if(point->getIndex()==169) continue;
-//							if(point->getIndex()==113) continue;
-//
-							//if(point->getIndex()==16) continue;
-							//if(point->getIndex()==17) continue;
 
 							//point index start at 1. this  may needed to be fixed
 							extern_pedestrians_firstSet[point->getIndex()]->moveTo(point);
@@ -286,7 +311,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 					pAVIWriter=vtkFFMPEGWriter::New();
 #endif
 
-					pAVIWriter->SetQuality(2);//FIXME 2 is better
+					pAVIWriter->SetQuality(2);
 					pAVIWriter->SetRate(1000.0/iren->GetTimerDuration(tid));
 
 					//static int videoID=0;

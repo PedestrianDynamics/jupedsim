@@ -564,7 +564,6 @@ bool TraVisTo::addPedestrianGroup(int groupID,QString fileName){
 	if (fileName.isNull()) {
 		return false;
 	}
-
 	//the geometry actor
 	//FacilityGeometry* geometry=NULL;
 	FacilityGeometry* geometry = visualisationThread->getGeometry();
@@ -640,13 +639,14 @@ bool TraVisTo::addPedestrianGroup(int groupID,QString fileName){
 	QXmlInputSource source(&file);
 	QXmlSimpleReader reader;
 
-	// no other geometry format was detected
+	 //no other geometry format was detected
 	if(geometry==NULL)
 		geometry=new FacilityGeometry();
 	SaxParser handler(geometry,dataset,&frameRate);
 	reader.setContentHandler(&handler);
 	reader.parse(source);
 	file.close();
+
 
 	QString frameRateStr=QString::number(frameRate);
 	SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");

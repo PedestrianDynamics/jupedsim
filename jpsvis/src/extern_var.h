@@ -33,6 +33,13 @@
 #include "SyncData.h"
 #include "Pedestrian.h"
 
+#include <vtkGlyph3D.h>
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
+
+
+#define VTK_CREATE(type, name) \
+		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 //external variables
 /// define the speed/rate/pace at which  the trajectories are displayed.
@@ -71,6 +78,9 @@ Pedestrian** extern_pedestrians_firstSet=NULL;
 Pedestrian** extern_pedestrians_secondSet=NULL;
 ///The third pedestrian group
 Pedestrian** extern_pedestrians_thirdSet=NULL;
+
+
+VTK_CREATE (vtkGlyph3D, extern_glyphs_pedestrians);
 
 // and here the corresponding dataset
 
