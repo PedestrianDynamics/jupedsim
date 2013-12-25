@@ -77,7 +77,7 @@ LinePlotter::LinePlotter()
 	// create mapper
 	VTK_CREATE(vtkPolyDataMapper,mapper);
 	//vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
-	mapper->SetInput(polyData);
+    mapper->SetInputData(polyData);
 	//polyData->Delete();
 
 	//	mapper->SetLookupTable(m_lookupTable);

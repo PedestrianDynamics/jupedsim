@@ -37,6 +37,9 @@
 #include <QObject>
 #include <QMessageBox>
 
+// all modules need to be initialized in vtk6
+#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
+#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
 
 #include <vtkRenderer.h>
 #include <vtkCamera.h>
@@ -83,6 +86,8 @@
 
 #define VTK_CREATE(type, name) \
 		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+
+
 
 ThreadVisualisation::ThreadVisualisation(QObject *parent):
 QThread(parent)

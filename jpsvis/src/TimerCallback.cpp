@@ -579,7 +579,7 @@ void TimerCallback::takeScreenshot(vtkRenderWindow *renderWindow){
 	//renderWindow->Delete();
 	//vtkPostScriptWriter * image  = vtkPostScriptWriter::New();
 	vtkPNGWriter * image  = vtkPNGWriter::New();
-	image->SetInput( winToImFilter->GetOutput());
+    image->SetInputConnection(winToImFilter->GetOutputPort());
 	winToImFilter->Delete();
 
 	QString screenshots;
@@ -620,7 +620,7 @@ void TimerCallback::takeScreenshotSequence(vtkRenderWindow* renderWindow){
 	//renderWindow->Delete();
 	vtkPNGWriter * image  = vtkPNGWriter::New();
 	//vtkPostScriptWriter * image  = vtkPostScriptWriter::New();
-	image->SetInput( winToImFilter->GetOutput());
+    image->SetInputConnection( winToImFilter->GetOutputPort());
 	winToImFilter->Delete();
 
 	QString screenshots;

@@ -432,7 +432,7 @@ void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, doub
 
 	VTK_CREATE(vtkActor, imageActor);
 	VTK_CREATE(vtkDataSetMapper, map);
-	map->SetInput(image);
+    map->SetInputData(image);
 	//map->SetLookupTable(lookupTable);
 	imageActor->SetMapper(map);
 	imageActor->GetProperty()->SetAmbient(0.2);
