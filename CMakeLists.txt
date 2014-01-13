@@ -337,8 +337,8 @@ target_link_libraries (testPointOnEllipse  core)
 add_executable(testEffectiveDistanceToEllipse Utest/testEffectiveDistanceToEllipse.cpp)
 target_link_libraries (testEffectiveDistanceToEllipse  core)
 
-# add_executable(testEffectiveDistanceToLine Utest/testEffectiveDistanceToLine.cpp)
-# target_link_libraries (testEffectiveDistanceToLine  core)
+add_executable(testEffectiveDistanceToLine Utest/testEffectiveDistanceToLine.cpp)
+target_link_libraries (testEffectiveDistanceToLine  core)
 
 #add_executable(testEqual math/Distribution.cpp Utest/testequal.cpp)
 add_executable(testEqual Utest/testequal.cpp)
@@ -356,9 +356,13 @@ target_link_libraries (testIsInside core)
 add_executable(testIsOutside Utest/testIsOutside.cpp)
 target_link_libraries (testIsOutside core)
 
+add_executable(testClassPoint Utest/testClassPoint.cpp)
+target_link_libraries (testClassPoint core)
+
 #----------------- append to this list more tests ... but first add_executable() ---------------
 set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea testEffectiveDistanceToEllipse
-  testIsOn testIsInside testIsOutside
+  testIsOn testIsInside testIsOutside testEffectiveDistanceToLine
+  testClassPoint
 )
 #--------------------------------------------------------------------
 foreach (test ${tests})

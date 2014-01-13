@@ -273,6 +273,12 @@ Point JEllipse::PointOnEllipse(const Point& P) const {
 	return S.CoordTransToCart(_center, _cosPhi, _sinPhi);
 }
 
+double JEllipse::EffectiveDistanceToLine(const Line& l) const {
+    Point C = this->GetCenter();
+    Point P = l.ShortestPoint(C);
+    Point R = this->PointOnEllipse(P);
+    return (P-R).Norm();
+}
 
 // thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
 // double JEllipse::MinimumDistanceToLine(const Line& l) const {

@@ -198,7 +198,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 		Log->Write(tmp);
 		Log->Write("ERROR:\t fix this as soon as possible");
 		return Point(0,0); // FIXME: should never happen
-		exit(0);
+		exit(0); 
 	}
 	return F_rep;
 }
@@ -294,7 +294,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
  * Rückgabewerte:
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
-
+//TODO: use effective DistanceToEllipse and simplify this function.
 Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const {
 	Point F_rep = Point(0.0, 0.0);
 	const Point& v = ped->GetV();

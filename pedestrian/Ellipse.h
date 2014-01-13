@@ -35,25 +35,25 @@
 
 class JEllipse {
 private:
-    Point _vel; // Geschwindigkeitskoordinaten
+    Point _vel; // velocity vector
     Point _center; // cartesian-coord of the centre
     double _cosPhi; // cos(phi)
     double _sinPhi; // sin(phi)
     double _Xp; //x Ellipse-coord of the centre (Center in (xc,yc) )
-    double _Amin; // Laenge 1. Achse:  pAmin + V * pAv
+    double _Amin; //   pAmin + V * pAv
     double _Av;
-    double _Bmin; // Laenge 2. Achse: pBmax - V *[(pBmax - pBmin) / V0]
+    double _Bmin; //  pBmax - V *[(pBmax - pBmin) / V0]
     double _Bmax;
-    double __vel0; // Wunschgeschwindigkeit (Betrag)
+    double __vel0; // desired speed
 
 
 
 public:
-    /* Konstruktoren */
+
     JEllipse();
     JEllipse(const JEllipse& orig);
 
-    /* Setter-Funktionen */
+
     void SetV(const Point& v);
     void SetCenter(Point pos);
     void SetCosPhi(double c);
@@ -65,7 +65,7 @@ public:
     void SetBmax(double b_max);
     void SetV0(double v0);
 
-    /* Getter-Funktionen */
+
     const Point& GetV() const;
     const Point& GetCenter() const;
     double GetCosPhi() const;
@@ -77,27 +77,28 @@ public:
     double GetBmax() const;
     double GetV0() const;
 
-    double GetEA()const;// ellipse axe in the direction of the velocity
-    double GetEB()const;// ellipse axe in the orthogonal direction of the velocity
+    double GetEA()const;// ellipse semi-axis in the direction of the velocity
+    double GetEB()const;// ellipse semi-axis in the orthogonal direction of the velocity
     double GetArea()const;
 
-    // Sonstige Funktionen
 
-    // effektiver Abstand zwischen zwei Ellipsen (geg. durch ActionPoints),
+    // Effective distance between two ellipses
     double EffectiveDistanceToEllipse(const JEllipse& other, double* dist) const;
+    // Effective distance between ellipse and line segment
+    double EffectiveDistanceToLine(const Line& l) const;
     // Schnittpunkt der Ellipse mit der Gerade durch P und AP (=ActionPoint von E)
     Point PointOnEllipse(const Point& p) const;
     // Schnittpunkt der Ellipse mit dem Liniensegment line
     Point PointOnEllipse(const Line& line, const Point& P) const;
     // minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Segment
-    double MinimumDistanceToLine(const Line& l)const;
+    //double MinimumDistanceToLine(const Line& l)const;
     // minimal möglicher Abstand (durch Verschiebung) Ellipse <-> Ellipse
-    double MinimumDistanceToEllipse(const JEllipse& E) const;
-    // prüft, ob ein Punkt sich innerhalb der Ellipse befindet
+    //double MinimumDistanceToEllipse(const JEllipse& E) const;
+    // Check if point p is inside the ellipse
     bool IsInside(const Point& p) const;
-    // prüft, ob ein Punkt sich außerhalb der Ellipse befindet
+    // Check if point p is outside the ellipse
     bool IsOutside(const Point& p) const;
-    // prüft, ob ein Punkt sich auf der Ellipse befindet
+    // Check if point p is on the ellipse
     bool IsOn(const Point& p) const;
 
     bool IntersectionWithLine(const Line& line);

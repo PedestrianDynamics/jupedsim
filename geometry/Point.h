@@ -27,8 +27,6 @@
 
 #ifndef _POINT_H
 #define	_POINT_H
-
-
 #include <string>
 
 class Point {
@@ -87,19 +85,17 @@ public:
     const Point operator+(const Point& p) const;
     /// substraction
     const Point operator-(const Point& p) const;
-    /// comparision
+    /// equal
     bool operator==(const Point& p) const;
-    /// comparision
+    /// not equal
     bool operator!=(const Point& p) const;
 
     /// nice formating of the point
     std::string toString() const;
 };
 
-
 /// multiplication
 const Point operator*(const Point& p, const double f);
-
 /// division
 const Point operator/(const Point& p, const double f);
 

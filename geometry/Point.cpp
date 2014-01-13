@@ -27,7 +27,7 @@
 #include "Point.h"
 #include "../general/Macros.h"
 
-
+#include  <iostream>
 #include  <cmath>
 #include  <sstream>
 
@@ -59,11 +59,6 @@ std::string Point::toString() const {
 	return tmp.str();
 };
 
-
-/*************************************************************
- Setter-Funktionen
- ************************************************************/
-
 void Point::SetX(double x) {
     _x = x;
 }
@@ -71,10 +66,6 @@ void Point::SetX(double x) {
 void Point::SetY(double y) {
     _y = y;
 }
-
-/*************************************************************
- Getter-Funktionen
- ************************************************************/
 
 double Point::GetX() const {
     return _x;
@@ -84,35 +75,25 @@ double Point::GetY() const {
     return _y;
 }
 
-/*************************************************************
- Sonstige Funktionen
- ************************************************************/
-
-// Norm des Vektors
-
 double Point::Norm() const {
     return sqrt(_x * _x + _y * _y);
 }
 
-// Norm des Vektors zum quadrat
 double Point::NormSquare() const {
-	return (_x * _x + _y * _y);
+    return (_x * _x + _y * _y);
 }
 
-// gibt den normierten Vector zurueck
-
 Point Point::Normalized() const {
-	double norm=Norm();
-
-    if (norm != 0.0)
-        return (Point(_x, _y) / (norm));
+    double norm=Norm();
+    if (norm > J_EPS*J_EPS)
+        return ( Point(_x, _y) / norm );
     else return Point(0.0, 0.0);
 }
 
-// Skalarprodukt zweier Vektoren
-//TODO: get rid of methods call GetX, getY
+// scalar product
 double Point::ScalarP(const Point& v) const {
-    return _x * v.GetX() + _y * v.GetY();
+    //return _x * v.GetX() + _y * v.GetY();
+    return _x * v._x + _y * v._y;
 }
 
 /// determinant of the square matrix formed by the vectors [ this, v]
@@ -127,63 +108,136 @@ double Point::Det(const Point& v) const {
  * phi: Winkel der Ellipse in deren System transformiert werden soll
  * */
 
+
+/*coordinate transformation of the point P(x,y) expressed in coord system S1 to a new coord. sys S2
+           
+           A
+           * 
+         |     S_2       
+     \   |   /        
+ |    \  |  /         
+ |     \ | /^phi      
+ | yc___\ /_)_________ S_3
+ |       O1
+ |       |
+ |       |
+ |       xc
+ |
+ |___________________________
+O
+S_1
+
+
+////////////////////////////////////
+S_1 is cartesian coordinate system!! 
+////////////////////////////////////
+
+  input:
+  - (x,y)        :  coordinates of the point A in S_1
+  - (xc,yc)      : coordinate of the center in the  S_1 (Center of Ellipse)
+  - phi          : angle between the S_1 and S_2
+  
+  output:
+  +  (xnew,ynew) : new coordinate of the point A in the coord. sys S2 
+  
+OA = OO1 + O1A
+
+ [x ; y] = [xc ; yc] +  [x_3 ; y_3]   : (1) ( with [x_i ; y_i] coordinats of P in S_i and i in {1,2,3} )
+
+[x_2 ; y_2] = M(phi) * [x_3 ; y_3]  : (2)
+
+
+(1) in (2)---> 
+
+-->  [x_2 ; y_2] = M(phi) * ([x ; y] - [xc ; yc])
+
+
+
+after rotation:
+OC = OO1 +O1C
+OC  = -O1O +O1C
+
+xnew = -xc + x
+  
+*/
 Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) const {
     Point p = Point(_x, _y);
     return (p - center).Rotate(cphi, -sphi);
 }
 
-/* Transformiert den Punkt aus dem Koordinatensystem der Ellipse
- * zurueck ins urspruengliche "normale" Koordinatensystem
- * center: Center der Ellipse aus deren System transformiert werden soll
- * phi: Winkel der Ellipse aus deren System transformiert werden soll
- * */
+/*
+This is the reverse funktion of CoordTransToEllipse(), 
+where the coord. of a point are transformated to cart. coord.
+
+ input:
+  - (x,y)        :  coordinates of the point P in S_2
+  - (xc,yc)      : coordinate of the center in the  S_1 (Center of Ellipse)
+  - phi          : angle between the S_1 and S_2
+  
+  output:
+  +  (xnew,ynew) : new coordinate of the point P in the coord. sys S_1
+
+[x_2 ; y_2] = M(phi) * ([x ; y] - [xc ; yc]) (see comments in CoordTransToEllipse() )
+
+
+----> [x ; y] =  M(-phi) * [x_2 ; y_2] +  [xc ; yc]
+
+*/
+
 Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const {
     Point p = Point(_x, _y);
     return (p.Rotate(cphi, sphi) + center);
 }
 
-// rotiert Vektor um den Winkel theta
+/*rotate a two-dimensional vector by an angle of theta
+
+Rotation-matrix=[cos(theta)  -sin(theta)]
+                [ sin(theta)  cos(theta)]
+
+*/
 Point Point::Rotate(double ctheta, double stheta) const {
     return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
 }
 
-/*************************************************************
- überladene Operatoren
- ************************************************************/
-
-// Addiert zwei Vektoren
-
+//  sum
 const Point Point::operator+(const Point& p) const {
-    return Point(_x + p.GetX(), _y + p.GetY());
+    //return Point(_x + p.GetX(), _y + p.GetY());
+    return Point(_x + p._x, _y + p._y);
 }
 
-// Subtrahiert zwei Vektoren
-
+// sub
 const Point Point::operator-(const Point& p) const {
-    return Point(_x - p.GetX(), _y - p.GetY());
+    // return Point(_x - p.GetX(), _y - p.GetY());
+    return Point(_x - p._x, _y - p._y);
 }
 
-// Vergleicht zwei Punkte/Vektoren komponentweise
-
+// equal
 bool Point::operator==(const Point& p) const {
-    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
+//    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
+    return (fabs(_x - p._x) < J_EPS && fabs(_y - p._y) < J_EPS);
 }
 
-// Vergleicht zwei Punkte/Vektoren komponentweise
-
+// not equal
 bool Point::operator!=(const Point& p) const {
-    return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
+    //return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
+    return (fabs(_x - p._x) > J_EPS || fabs(_y - p._y) > J_EPS);
 }
 
 
-// Multipliziert einen Vektor mit einem Skalar
-
+// multiplication with scalar
 const Point operator*(const Point& p, double f) {
-    return Point(p.GetX() * f, p.GetY() * f);
+    //return Point(p.GetX() * f, p.GetY() * f);
+    return Point(p._x * f, p._y * f);
 }
 
-// Dividiert einen Vektor durch einen Skalar
-
+// divition with scalar
 const Point operator/(const Point& p, double f) {
-    return Point(p.GetX() / f, p.GetY() / f);
+    if (f>J_EPS*J_EPS)
+        return Point(p._x / f, p._y / f);
+    else
+    {
+        std::cout << "Warning: Point::/operator. dividand "<<f<< " is to small. Set it to 1 instead"<<std::endl;
+        return Point(p._x, p._y);
+    }
+    //return Point(p.GetX() / f, p.GetY() / f);
 }
