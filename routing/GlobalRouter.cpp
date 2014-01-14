@@ -108,7 +108,6 @@ void GlobalRouter::Init(Building* building) {
 
 	for (map<int, Hline*>::const_iterator itr = _building->GetAllHlines().begin();
 			itr != _building->GetAllHlines().end(); ++itr) {
-
 		//int door=itr->first;
 		int door = itr->second->GetUniqueID();
 		Hline* cross = itr->second;
@@ -934,6 +933,10 @@ string GlobalRouter::GetRoutingInfoFile() const {
 				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 		}
 		else if(strategy=="global_safest") {
+			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+		}
+                else if(strategy=="dynamic") {
 			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
 				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 		}

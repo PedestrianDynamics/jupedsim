@@ -9,10 +9,11 @@
 #define GRAPHROUTER_H_
 
 #include "Router.h"
+#include "GlobalRouter.h"
 #include "graph/RoutingGraphStorage.h"
 #include "../geometry/Building.h"
 
-class GraphRouter: public Router {
+class GraphRouter: public GlobalRouter {
 public:
 	GraphRouter();
 	virtual ~GraphRouter();

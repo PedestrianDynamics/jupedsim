@@ -15,19 +15,19 @@ using namespace std;
  *****************************/
 
 
-GraphRouter::GraphRouter() 
+GraphRouter::GraphRouter()
 {
 	_building=NULL;
 }
 
-GraphRouter::~GraphRouter() 
+GraphRouter::~GraphRouter()
 {
 
 }
 
-int GraphRouter::FindExit(Pedestrian* p) 
+int GraphRouter::FindExit(Pedestrian* p)
 {
-	//    std::cout << p->Getdt() << "\n";
+    //std::cout << p->Getdt() << "\n";
 
 	set<int> closed_doors = p->GetKnownClosedDoors();
 
@@ -124,14 +124,17 @@ int GraphRouter::FindExit(Pedestrian* p)
 	}
 }
 
-void GraphRouter::Init(Building* b) 
+void GraphRouter::Init(Building* b)
 {
-    Log->Write("ERROR: Router is not ready to use yet");
+    GlobalRouter::Init(b);
+
+
+    Log->Write("ERROR: GRAPHROUTER  is not ready to use yet.");
     _building = b;
     g.init(b);
-  
-    std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl; 
-        b->GetTransition("200E Normal Exit E3")->Close();
 
-    std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl;
+    //std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl;
+    //        b->GetTransition("200E Normal Exit E3")->Close();
+
+    //std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl;
 }

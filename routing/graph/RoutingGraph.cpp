@@ -34,12 +34,12 @@ RoutingGraph::RoutingGraph()
 	vertexes = map<int, Vertex>();
 
 }
-RoutingGraph::~RoutingGraph() 
+RoutingGraph::~RoutingGraph()
 {
 
 };
 
-RoutingGraph::RoutingGraph(RoutingGraph * orig) 
+RoutingGraph::RoutingGraph(RoutingGraph * orig)
 {
 	building = orig->building;
 	vertexes = orig->vertexes;
@@ -82,7 +82,7 @@ ExitDistance RoutingGraph::GetNextDestination(int nav_line_index, Pedestrian * p
 
 /**
  * RoutingGraph::GetNextDestination(Pedestrian * p)
- * return: next destination for pedestrian in a subrrom. 
+ * return: next destination for pedestrian in a subrrom.
  * just use this function, if the pedestrian did not pass an other crossing
  */
 ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
@@ -154,7 +154,7 @@ ExitDistance  RoutingGraph::GetNextDestination(Pedestrian * p)
  * Building Graph from transitions and crossing
  */
 
-RoutingGraph * RoutingGraph::BuildGraph() 
+RoutingGraph * RoutingGraph::BuildGraph()
 {
 	// Get all Rooms from the building object
 	const vector<Room*> * rooms = & building->GetAllRooms();
@@ -252,6 +252,7 @@ void RoutingGraph::processSubroom(SubRoom * sub)
 	}
 	for(unsigned int i = 0; i < sub->GetAllHlines().size(); i++) {
 		goals.push_back(addVertex(sub->GetAllHlines()[i]));
+
 	}
 
 	// now add all edges between all goals
@@ -371,11 +372,11 @@ void RoutingGraph::calculateDistancesForExit(Vertex *act_vertex)
 		calculateDistances(act_vertex, act_vertex, it->second.dest, it->second.distance);
 	}
 }
-/** 
+/**
  * recursive function to calculate distances from one vertex to all others
- * implementation like Dijkstra 
+ * implementation like Dijkstra
  */
-void RoutingGraph::calculateDistances(Vertex * exit, Vertex * last_vertex, Vertex * act_vertex, double act_distance) 
+void RoutingGraph::calculateDistances(Vertex * exit, Vertex * last_vertex, Vertex * act_vertex, double act_distance)
 {
 	// Don't change the exit way, if the other route is shorter.
 	if(act_vertex->distances[exit->id].distance && act_vertex->distances[exit->id].distance < act_distance) {
@@ -453,7 +454,7 @@ void RoutingGraph::print()
  */
 
 map <int, Vertex> * RoutingGraph::GetAllVertexes()
-{ 
+{
 	return  &vertexes;
 };
 
@@ -491,7 +492,7 @@ ExitDistance Vertex::getShortestExit() {
  * Class ExitDistance
  ***************************************/
 
-SubRoom * ExitDistance::GetSubRoom() const 
+SubRoom * ExitDistance::GetSubRoom() const
 {
 	if(exit_edge)
 		return exit_edge->sub;
@@ -512,7 +513,7 @@ Vertex * ExitDistance::GetDest() const
 
 }
 
-Vertex * ExitDistance::GetSrc() const 
+Vertex * ExitDistance::GetSrc() const
 {
 	if(exit_edge) {
 		// std::cout<< "edge " << exit_edge << std::endl;
@@ -527,7 +528,7 @@ Vertex * ExitDistance::GetSrc() const
 
 }
 
-ExitDistance::~ExitDistance() 
+ExitDistance::~ExitDistance()
 {
 
 	// if(!GetSrc() && exit_edge != NULL)
@@ -536,7 +537,7 @@ ExitDistance::~ExitDistance()
 	// }
 }
 
-ExitDistance::ExitDistance() 
+ExitDistance::ExitDistance()
 {
 	distance = 0.0;
 	exit_edge = NULL;
