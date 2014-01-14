@@ -31,9 +31,13 @@
 
 #include "../pedestrian/Pedestrian.h"
 
+#define UPDATE_FREQUENCY 10 // in seconds
+
 using namespace std;
 
 SafestPathRouter::SafestPathRouter() {
+
+	//_finalLineEvac = new double [numberOfSection];
 
 
 }
@@ -62,8 +66,10 @@ int SafestPathRouter::FindExit(Pedestrian* p) {
 int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 {
 
-
-
+	// adjust the update frequency
+	double diff= fabs((int)p->GetGlobalTime() - p->GetGlobalTime());
+	if (diff>0.015) return -1;
+	if((((int)p->GetGlobalTime())%UPDATE_FREQUENCY)!=0) return -1;
 
 
 	/*
@@ -139,7 +145,7 @@ void SafestPathRouter::main_3(Pedestrian* p)
 		peopleAtSection[0][0]=GetAgentsCountInSubroom(0,0);
 	}
 
-//////
+	//////
 
 
 	if (p->GetRoomID()==0 && p->GetSubRoomID()==2)
@@ -151,7 +157,7 @@ void SafestPathRouter::main_3(Pedestrian* p)
 		peopleAtSection[0][1]=GetAgentsCountInSubroom(0,1);
 	}
 
-//////
+	//////
 
 
 	if (p->GetRoomID()==0 && p->GetSubRoomID()==3)
@@ -196,88 +202,88 @@ void SafestPathRouter::main_3(Pedestrian* p)
 		dFinalLineEvac[i][j]= peopleAtSection[i][j] * dMatrixPreEvac[i][j];
 	}
 
-				// Print out final distance matrix
+	// Print out final distance matrix
 
-			//	int vertices = 3;
-			//	for(int j = 0; j < vertices; j++)
-			//		cout << dFinalLineEvac[i][j] << " ";
-			//		cout<<p->GetGlobalTime()<<endl;
-			//		cout << endl;
-				}
-
-
+	//	int vertices = 3;
+	//	for(int j = 0; j < vertices; j++)
+	//		cout << dFinalLineEvac[i][j] << " ";
+	//		cout<<p->GetGlobalTime()<<endl;
+	//		cout << endl;
+}
 
 
 
 
 
 
-	void SafestPathRouter::main_2(){
-
-		//double dFinalLength[1][11]={0.328,0.569,0.328,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
-		//double dFinalLength[1][11]={0.638,0.569,0.534,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
 
 
-		double dFinalLength[1][11]={0.666,0.666,1.0};
+void SafestPathRouter::main_2(){
+
+	//double dFinalLength[1][11]={0.328,0.569,0.328,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
+	//double dFinalLength[1][11]={0.638,0.569,0.534,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
 
 
-		//double dFinalLength[1][11]={0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638};
-		//double dFinalLength[1][11]={37.0,33.0,31.0,24.0,34.0,19.0,19.0,58.0,16.0,44.0,43.0};
-		double dFinalLineOFP[1][11]={0,0,0};
-		double iNt1[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		double iNt2[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		double iNt3[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		double iNt4[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		double iNt5[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		double iNt6[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		double iNt7[1][11]={0,0,0,0,0,0,0,0,0,0,0};
-		int i=0;
+	double dFinalLength[1][11]={0.666,0.666,1.0};
 
 
-		for (int j=0; j<3; j++)
-				{
-					iNt1[i][j]= dFinalLineEvac[i][j] * 1;
-					iNt2[i][j]= dFinalLineOFP[i][j] * 1;
-					iNt3[i][j]= dFinalLength[i][j] * 1;
-				}
+	//double dFinalLength[1][11]={0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638,0.638};
+	//double dFinalLength[1][11]={37.0,33.0,31.0,24.0,34.0,19.0,19.0,58.0,16.0,44.0,43.0};
+	double dFinalLineOFP[1][11]={0,0,0};
+	double iNt1[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	double iNt2[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	double iNt3[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	double iNt4[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	double iNt5[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	double iNt6[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	double iNt7[1][11]={0,0,0,0,0,0,0,0,0,0,0};
+	int i=0;
 
 
-
-		for (int j=0; j<3; j++)
-		{
-			iNt4[i][j]= iNt1[i][j] * iNt1[i][j];
-			iNt5[i][j]= iNt2[i][j] * iNt2[i][j];
-			iNt6[i][j]= iNt3[i][j] * iNt3[i][j];
-		}
-
-
-		for (int j=0; j<3; j++)
-		{
-			iNt7[i][j]=iNt4[i][j] + iNt5[i][j] + iNt6[i][j];
-		}
-
-
-		for (int j=0; j<11; j++)
-		{
-			rR[i][j]=sqrt(iNt7[i][j]);
-		}
-
-
-
-
-// Print out final distance matrix
-
-//	for(int j = 0; j < 11; j++)
-//		cout << rR[i][j] << " ";
-	//	cout << endl;
+	for (int j=0; j<3; j++)
+	{
+		iNt1[i][j]= dFinalLineEvac[i][j] * 1;
+		iNt2[i][j]= dFinalLineOFP[i][j] * 1;
+		iNt3[i][j]= dFinalLength[i][j] * 1;
 	}
+
+
+
+	for (int j=0; j<3; j++)
+	{
+		iNt4[i][j]= iNt1[i][j] * iNt1[i][j];
+		iNt5[i][j]= iNt2[i][j] * iNt2[i][j];
+		iNt6[i][j]= iNt3[i][j] * iNt3[i][j];
+	}
+
+
+	for (int j=0; j<3; j++)
+	{
+		iNt7[i][j]=iNt4[i][j] + iNt5[i][j] + iNt6[i][j];
+	}
+
+
+	for (int j=0; j<11; j++)
+	{
+		rR[i][j]=sqrt(iNt7[i][j]);
+	}
+
+
+
+
+	// Print out final distance matrix
+
+	//	for(int j = 0; j < 11; j++)
+	//		cout << rR[i][j] << " ";
+	//	cout << endl;
+}
 
 
 
 void SafestPathRouter::main_1(Pedestrian* p)
 {
 	// Initialize
-	int vertices = 3;
+	int vertices = 4;
 	vector<vector<double> > a(vertices, vector<double>(vertices,999));
 	// initialize diagonal
 	for(int i=0; i < vertices; i++)
@@ -316,19 +322,19 @@ void SafestPathRouter::main_1(Pedestrian* p)
 
 
 
-		//double g3_0=a[0][2];// From node 3 to 0 (0 is the goal O)
-		//double g3_1=a[1][2];// From node 3 to 1 (1 is the goal 1)
-		double g1_3=a[0][2];
-		double g1_4=a[0][3];
+	//double g3_0=a[0][2];// From node 3 to 0 (0 is the goal O)
+	//double g3_1=a[1][2];// From node 3 to 1 (1 is the goal 1)
+	double g1_3=a[0][2];
+	double g1_4=a[0][3];
 
 
 
 
-		//cout<<"The g5_0: "<<g5_0<<"\n";
-		//cout<<"The g5_1: "<<g5_1<<"\n";
-		//cout<<p->GetGlobalTime()<<endl;
+	//cout<<"The g5_0: "<<g5_0<<"\n";
+	//cout<<"The g5_1: "<<g5_1<<"\n";
+	//cout<<p->GetGlobalTime()<<endl;
 
-/*
+	/*
 
 		bool a1 = true;
 
@@ -349,7 +355,7 @@ void SafestPathRouter::main_1(Pedestrian* p)
 			}
 		}
 		}
-*/
+	 */
 
 
 
@@ -358,19 +364,19 @@ void SafestPathRouter::main_1(Pedestrian* p)
 
 
 
-		if (p->GetRoomID()==0 && p->GetSubRoomID()==0)
+	if (p->GetRoomID()==0 && p->GetSubRoomID()==0)
+	{
+		if (g1_3>=g1_4)
 		{
-			if (g1_3>=g1_4)
-			{
-				p->SetFinalDestination(1);
-				p->ClearMentalMap();
-			}
-			else
-			{
-				p->SetFinalDestination(0);
-				p->ClearMentalMap();
-			}
+			p->SetFinalDestination(1);
+			p->ClearMentalMap();
 		}
+		else
+		{
+			p->SetFinalDestination(0);
+			p->ClearMentalMap();
+		}
+	}
 
 
 }
@@ -384,10 +390,10 @@ void SafestPathRouter::main_1(Pedestrian* p)
 
 
 
-		//	if (p->GetRoomID()==6 && p->GetSubRoomID()==6)
-	//	{
-	//	p->SetFinalDestination(0);
-	//	}
+//	if (p->GetRoomID()==6 && p->GetSubRoomID()==6)
+//	{
+//	p->SetFinalDestination(0);
+//	}
 
 
 
@@ -425,7 +431,7 @@ void SafestPathRouter::main_1(Pedestrian* p)
 				cout<<p->GetGlobalTime()<<endl;
 			}
 
-*/
+ */
 
 
 

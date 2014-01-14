@@ -609,81 +609,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 	}
 }
 
-/*
-bool GlobalRouter::CanSeeEachOther(Crossing* c1, Crossing* c2) {
 
-	//do they share at least one subroom?
-	//find the common subroom,
-	//return false if none
-	SubRoom* sb1_a = c1->GetSubRoom1();
-	SubRoom* sb1_b = c1->GetSubRoom2();
-
-	SubRoom* sb2_a = c2->GetSubRoom1();
-	SubRoom* sb2_b = c2->GetSubRoom2();
-
-	SubRoom* sub = NULL;
-
-	if ((sb1_a != NULL) && (sb1_a == sb2_a))
-		sub = sb1_a;
-	else if ((sb1_a != NULL) && (sb1_a == sb2_b))
-		sub = sb1_a;
-	else if ((sb1_b != NULL) && (sb1_b == sb2_a))
-		sub = sb1_b;
-	else if ((sb1_b != NULL) && (sb1_b == sb2_b))
-		sub = sb1_b;
-
-	if (sub == NULL) {
-		//char tmp[CLENGTH];
-		//sprintf(tmp,"no common subroom found for transitions [%d] and [%d]",
-		//		c1->GetIndex(),c2->GetIndex());
-		//Log->write(tmp);
-		return false;
-	}
-
-	// segment connecting the two APs/goals
-	const Point& p1 = (c1->GetPoint1() + c1->GetPoint2()) * 0.5;
-	const Point& p2 = (c2->GetPoint1() + c2->GetPoint2()) * 0.5;
-	Line segment = Line(p1, p2);
-
-	// check if this in intersected by any other connections/walls/doors/trans/cross in the room
-
-	//first walls
-	const vector<Wall>& walls = sub->GetAllWalls();
-
-	for (unsigned int b = 0; b < walls.size(); b++) {
-		if (segment.IntersectionWith(walls[b]) == true) {
-			return false;
-		}
-	}
-
-	// also take into account other crossings/transitions
-	const vector<int>& exitsInSubroom = sub->GetAllGoalIDs();
-
-	int id1 = c1->GetID();
-	int id2 = c2->GetID();
-	// then all goals
-	for (int g = 0; g < (int) exitsInSubroom.size(); g++) {
-		int gID = exitsInSubroom[g];
-		// skip the concerned exits door and d
-		if ((id1 == gID) || (id2 == gID))
-			continue;
-		if (segment.IntersectionWith(*_building->GetGoal(exitsInSubroom[g])) == true) {
-			return false;
-		}
-	}
-
-	//last check in the case of a concav polygon
-	// check if the middle of the connection line lies inside the subroom
-	Point middle = (p1 + p2) * 0.5;
-	bool isVisible = sub->IsInSubRoom(middle);
-
-	if (isVisible == false) {
-		return false;
-	}
-
-	return true;
-}
-*/
 
 SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2) {
 	SubRoom* sb11 = c1->GetSubRoom1();
@@ -891,8 +817,8 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 					+ to_AP->GetDistanceTo(finalDestination)
 					<< ", fontsize=10]; " << endl;
 		}
-
 	}
+
 	//graph_file << "node [shape=box];  gy2; yr2; rg2; gy1; yr1; rg1;"<<endl;
 	//graph_file << "node [shape=circle,fixedsize=true,width=0.9];  green2; yellow2; red2; safe2; safe1; green1; yellow1; red1;"<<endl;
 

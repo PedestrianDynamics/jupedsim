@@ -84,6 +84,8 @@ private:
 	// double dFinalLineOFP[1][11];
 	// double TotalNumberofPedInsection;
 	 double dFinalLineEvac[1][11];
+//	 double *_finalLineEvac;
+
 	 double rR[1][11];
 	 double peopleAtSection[1][11];
 	// double iNt1[1][11];
