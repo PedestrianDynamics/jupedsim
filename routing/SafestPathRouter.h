@@ -41,7 +41,7 @@ public:
 	 */
 	virtual int FindExit(Pedestrian* p);
 
-	/**
+	/*
 	 * Load the fds simulation file and preprocess the input,
 	 * before calling the Init from the Global RouterEngine
 	 */
@@ -70,18 +70,27 @@ private:
 	void ReadMatrixFromFDS();
 
 
-	int main_1();
-	int main_2();
-	int main_3();
-	int main_4();
+
+	int GetAgentsCountInSubroom( int roomID, int subroomID);
+	void main_1(Pedestrian* p);
+	void main_2( );
+	void main_3(Pedestrian* p);
+
 
 
 private:
-	 double dMatrixPreEvac[1][11];
-	 double dFinalLength[1][11];
-	 double dFinalMatrixOFP[300][11];
-
-
+	// double dMatrixPreEvac[1][11];
+	// double dFinalLength[1][11];
+	// double dFinalLineOFP[1][11];
+	// double TotalNumberofPedInsection;
+	 double dFinalLineEvac[1][11];
+	 double rR[1][11];
+	 double peopleAtSection[1][11];
+	// double iNt1[1][11];
+	// double iNt2[1][11];
+	// double iNt3[1][11];
+	// double iNt4[1][11];
+	 double fI[11][11];
 };
 
 #endif /* SAFESTPATHROUTER_H_ */

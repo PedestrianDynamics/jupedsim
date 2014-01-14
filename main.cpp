@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
 
 	time_t starttime, endtime;
 
+
 	//Log = new FileHandler("./Logfile.dat");
 	Log = new STDIOHandler();
 

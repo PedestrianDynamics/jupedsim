@@ -2,21 +2,6 @@
 
 <routing version="0.5">
 	<Hlines>
-		<Hline id="1" room_id="6" subroom_id="5">
-			<vertex px="50.76" py="42.80"/>
-			<vertex px="53.35" py="40.50"/>
-		</Hline>
-		<Hline id="2" room_id="6" subroom_id="6">
-			<vertex px="102.60" py="40.50"/>
-			<vertex px="101.52" py="43.40"/>
-		</Hline>
-		<Hline id="3" room_id="6" subroom_id="7">
-			<vertex px="103.14" py="56.70"/>
-			<vertex px="105.84" py="64.80"/>
-		</Hline>
-		<Hline id="4" room_id="0" subroom_id="4">
-			<vertex px="18.36" py="88.18"/>
-			<vertex px="2.13" py="77.21"/>
-		</Hline>
+
 	</Hlines>
 </routing>
