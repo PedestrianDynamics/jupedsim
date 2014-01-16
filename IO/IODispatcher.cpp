@@ -43,7 +43,7 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 		exit(0);
 	}
 	double v = ped->GetV().Norm();
-	int color = (int) (v / v0 * 255);
+	int color = (int) (v / v0 * 255); color=-1;
 	double a = ped->GetLargerAxis();
 	double b = ped->GetSmallerAxis();
 	double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());

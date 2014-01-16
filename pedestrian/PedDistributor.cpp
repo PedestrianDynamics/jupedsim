@@ -262,6 +262,7 @@ void PedDistributor::InitDistributor(const string& filename){
 		int age = xmltoi(e->Attribute("age"), -1);
 		string gender = xmltoa(e->Attribute("gender"), "male");
 		double height = xmltof(e->Attribute("height"), -1);
+		double patience=  xmltof(e->Attribute("patience"), 5);
 
 		StartDistributionRoom* dis=NULL;
 
@@ -282,6 +283,7 @@ void PedDistributor::InitDistributor(const string& filename){
 		dis->SetRouteId(route_id);
 		dis->SetRouterId(router_id);
 		dis->SetHeight(height);
+		dis->SetPatience(patience);
 
 		if(e->Attribute("startX") && e->Attribute("startY")){
 			double startX = xmltof(e->Attribute("startX"),NAN);
@@ -678,6 +680,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
 		positions.erase(positions.begin() + index);
 		ped->SetRoomID(para->GetRoomId(),"");
 		ped->SetSubRoomID(r->GetSubRoomID());
+		ped->SetPatienceTime(para->GetPatience());
 
 		Point start_pos=para->GetStartPosition();
 		if((isnan(start_pos._x)==0 ) && (isnan(start_pos._y)==0 ) ){
@@ -686,10 +689,8 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
 					pid, para->GetRoomId(), start_pos.toString().c_str());
 		}
 
-		// setzen
 		r->AddPedestrian(ped);
 		(*pid)++;
-
 	}
 }
 
@@ -728,4 +729,12 @@ void StartDistributionRoom::SetStartPosition(double x, double y, double z) {
 
 Point StartDistributionRoom::GetStartPosition() const {
 	return Point(_startX, _startY);
+}
+
+double StartDistributionRoom::GetPatience() const {
+	return _patience;
+}
+
+void StartDistributionRoom::SetPatience(double patience) {
+	_patience = patience;
 }

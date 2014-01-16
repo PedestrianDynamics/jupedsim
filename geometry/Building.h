@@ -125,12 +125,16 @@ public:
 
     /**
      * @return a crossing or a transition matching the given caption.
-     * Return NULL in the case of failure.
+     * Return NULL if none is found
      */
     Crossing* GetTransOrCrossByName(std::string caption) const;
 
-    //FIXME: obsolete should get rid of this method
-    //Crossing* GetGoal(int id);
+
+    /**
+     * @return a crossing or a transition matching the given id.
+     * Return NULL if none is found
+     */
+    Crossing* GetTransOrCrossByID(int id) const;
 
 
     //TOD0: rename later to GetGoal

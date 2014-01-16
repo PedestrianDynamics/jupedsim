@@ -5,7 +5,7 @@
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
-	<geometry>geometry.xml</geometry>
+	<geometry>geometry-mall.xml</geometry>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
@@ -18,14 +18,10 @@
 		<!-- <\!-- room states are: good or smoked -\-> -->
 		<rooms>
 			<room room_id="0" state="good" />
-
-
 		</rooms>
 		
 		<!-- doors states are: close or open -->
 		<doors>
-			<door trans_id="0" caption="" state="open" />
-            <door trans_id="1" caption="" state="open" />
 		</doors>
 
 	</traffic_constraints>
@@ -63,7 +59,7 @@
 	<agents>
 		<agents_distribution>
 
-		<group group_id="1" room_id="0" subroom_id="0" number="15" goal_id="0" router_id="1" route_id=""/>
+		<group group_id="1" room_id="6" subroom_id="10" number="150" goal_id="0" router_id="1" route_id=""/>
 	
 		
 		</agents_distribution>

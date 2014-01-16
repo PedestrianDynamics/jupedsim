@@ -82,8 +82,7 @@ void GlobalRouter::Init(Building* building) {
 	_building = building;
 	LoadRoutingInfos(GetRoutingInfoFile());
 
-	// initialize the network for the floyd warshall algo
-	// initialize the distances matrix
+	// initialize the distances matrix for the floydwahrshall
 
 	const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 
@@ -234,6 +233,14 @@ void GlobalRouter::Init(Building* building) {
 
 			SubRoom* sub = room->GetSubRoom(j);
 
+
+			// The penalty factor should discourage pedestrians to evacuation through rooms.
+			double  penalty=1.0;
+			if(sub->GetType()!="floor") {
+				penalty=PENALTY_FACTOR;
+			}
+
+
 			//collect all navigation objects
 			vector<NavLine*> allGoals;
 			const vector<Crossing*>& crossings = sub->GetAllCrossings();
@@ -263,7 +270,7 @@ void GlobalRouter::Init(Building* building) {
 
 					if (sub->IsVisible(nav1, nav2, true)) {
 						int to_door = _map_id_to_index[nav2->GetUniqueID()];
-						_distMatrix[from_door][to_door] = (nav1->GetCentre()
+						_distMatrix[from_door][to_door] = penalty*(nav1->GetCentre()
 								- nav2->GetCentre()).Norm();
 						from_AP->AddConnectingAP(
 								_accessPoints[nav2->GetUniqueID()]);
@@ -884,7 +891,7 @@ void GlobalRouter::LoadRoutingInfos(const std::string &filename){
 	TiXmlDocument docRouting(filename);
 	if (!docRouting.LoadFile()){
 		Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the routing file");
+		Log->Write("ERROR: \t could not parse the routing file [%s]",filename.c_str());
 		exit(EXIT_FAILURE);
 	}
 

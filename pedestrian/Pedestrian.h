@@ -96,8 +96,6 @@ private:
     bool _reroutingEnabled;
     bool _tmpFirstOrientation; // possibility to get rid of this variable
     bool _newOrientationFlag;
-    // the Pedestrian start after a certain amount of clockticks
-    int _clockTicsTillStart;
 
     // the current time in the simulation
     static double _globalTime;
@@ -156,7 +154,9 @@ public:
     const Point& GetV0() const;
     const Point& GetV0(const Point& target);
     double GetV0Norm() const;
+    ///get axis in the walking direction
     double GetLargerAxis() const;
+    ///get axis in the shoulder direction = orthogonal to the walking direction
     double GetSmallerAxis() const;
     double GetTimeInJam()const;
     int GetFinalDestination() const;
@@ -229,9 +229,25 @@ public:
     void GetObservationData(int exitID, float* data);
 
     /**
-     * @return true if the time spent in jam exceed the given threshold
+     * @return true if the time spent in jam exceed the patience time
+     * @see GetPatienceTime
      */
     bool IsFeelingLikeInJam();
+
+    /**
+     * Set/Get the patience time.
+     * Higher value will cause the agent to almost never changes its current path.
+     * Small values will increase the frequency of looking for alternative
+     */
+    double GetPatienceTime() const;
+
+    /**
+     * Set/Get the patience time.
+     * Higher value will cause the agent to almost never changes its current path.
+     * Small values will increase the frequency of looking for alternative
+     */
+	void SetPatienceTime(double patienceTime);
+
 
     void ResetTimeInJam();
     void UpdateTimeInJam();
@@ -258,6 +274,7 @@ public:
 
     static double GetGlobalTime();
     static void SetGlobalTime(double time);
+
 };
 
 #endif	/* _PEDESTRIAN_H */

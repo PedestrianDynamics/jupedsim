@@ -403,6 +403,7 @@ void Building::LoadBuildingFromFile() {
 				subroom = new NormalSubRoom();
 			}
 
+			subroom->SetType(type);
 			subroom->SetRoomID(room->GetID());
 			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
 
@@ -714,6 +715,29 @@ Crossing* Building::GetTransOrCrossByName(string caption) const {
 	Log->Write("WARNING: No Transition or Crossing with Caption: " + caption);
 	return NULL;
 }
+
+Crossing* Building::GetTransOrCrossByID(int id) const {
+	{
+		//eventually
+		map<int, Transition*>::const_iterator itr;
+		for(itr = _transitions.begin(); itr != _transitions.end(); ++itr){
+			if (itr->second->GetUniqueID()== id)
+				return itr->second;
+		}
+	}
+	{
+		//finally the  crossings
+		map<int, Crossing*>::const_iterator itr;
+		for(itr = _crossings.begin(); itr != _crossings.end(); ++itr){
+			if (itr->second->GetUniqueID() == id)
+				return itr->second;
+		}
+	}
+
+	Log->Write("WARNING: No Transition or Crossing with ID %d: " ,id);
+	return NULL;
+}
+
 
 bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines){
 	for (unsigned int i = 0; i < _rooms.size();i++) {

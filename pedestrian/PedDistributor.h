@@ -50,6 +50,8 @@ private:
 	int _routeID;
 	int _age;
 	int _height;
+	double _patience;
+	//string motivation;// low, normal, high
 	//int _width;
 	double _startX; //only valid when _nPeds=1
 	double _startY; //only valid when _nPeds=1
@@ -83,6 +85,8 @@ public:
 	void SetRouterId(int routerId);
 	void SetStartPosition(double x,double y, double z);
 	Point GetStartPosition() const;
+	double GetPatience() const;
+	void SetPatience(double patience);
 };
 
 //TODO:FIXME merge the two classes and set the _subRoomID=-1

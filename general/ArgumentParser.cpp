@@ -132,10 +132,16 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	int c;
 	int option_index = 0;
 
-	//special case of the default configuration
+	//special case of the default configuration ini.xml
 	if(argc==1){
 		Log->Write("INFO: \tTrying to load the default configuration from the file <ini.xml>");
 		ParseIniFile("ini.xml");
+		return;
+	}
+
+	// other special case where a single configuration file is submited
+	if(argc==2){
+		ParseIniFile(argv[1]);
 		return;
 	}
 

@@ -929,6 +929,13 @@ const vector<Pedestrian*>& SubRoom::GetAllPedestrians() const {
 	return _peds;
 }
 
+const std::string& SubRoom::GetType() const {
+	return _type;
+}
+
+void SubRoom::SetType(const std::string& type) {
+	_type = type;
+}
 
 Pedestrian* SubRoom::GetPedestrian(int index) const {
 	if ((index >= 0) && (index < (int) GetNumberOfPedestrians()))

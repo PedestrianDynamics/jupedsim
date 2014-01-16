@@ -75,8 +75,6 @@ Pedestrian::Pedestrian() {
 	_gender="male";
 	_trip=vector<int> ();
 	_group=-1;
-	_clockTicsTillStart = 0;
-
 }
 
 
@@ -128,7 +126,6 @@ void Pedestrian::SetExitLine(NavLine* l) {
 
 
 void Pedestrian::SetPos(const Point& pos) {
-	//set initial Position
 	_ellipse.SetCenter(pos);
 }
 
@@ -605,11 +602,23 @@ Router* Pedestrian::GetRouter() const {
 	return _router;
 }
 
+//TODO: you can save some comp time if you catch this early in the configuration
 int Pedestrian::FindRoute() {
-	assert(_router);
+	if( ! _router) {
+		Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
+		exit(EXIT_FAILURE);
+	}
 	return _router->FindExit(this);
 }
 
 void Pedestrian::SetGlobalTime(double time){
 	_globalTime=time;
+}
+
+double Pedestrian::GetPatienceTime() const {
+	return _patienceTime;
+}
+
+void Pedestrian::SetPatienceTime(double patienceTime) {
+	_patienceTime = patienceTime;
 }

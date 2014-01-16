@@ -61,6 +61,7 @@ private:
 	double _closed;
 	//defined by: Z = Ax + By + C
 	double _planeEquation[3];
+	std::string _type;
 
 	std::vector<Obstacle*> _obstacles; // obstacles
 
@@ -160,6 +161,21 @@ public:
 	 * @return the unique identifier for this subroom
 	 */
 	int GetUID() const;
+
+	/**
+	 * Set/Get the type of the subroom.
+	 * Possible types are: stairs, room and floor.
+	 * @return the type of the subroom.
+	 */
+	const std::string& GetType() const;
+
+	/**
+	 * Set/Get the type of the subroom.
+	 * Possible types are: stairs, room and floor.
+	 * @return the type of the subroom.
+	 */
+	void SetType(const std::string& type);
+
 
 	/**
 	 * @return the status
