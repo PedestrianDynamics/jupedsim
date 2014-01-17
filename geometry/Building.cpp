@@ -372,7 +372,7 @@ void Building::LoadBuildingFromFile() {
 		double position = xmltof(xRoom->Attribute("zpos"), 0.0);
 
 		//TODO?? what the hell is that for ?
-		if(position>6.0) position+=50;
+		//if(position>6.0) position+=50;
 		room->SetZPos(position);
 
 		//parsing the subrooms
@@ -385,12 +385,21 @@ void Building::LoadBuildingFromFile() {
 
 			string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
 			string closed = xmltoa(xSubRoom->Attribute("closed"), "0");
-			string type = xmltoa(xSubRoom->Attribute("class"),
-					"subroom");
+			string type = xmltoa(xSubRoom->Attribute("class"),"subroom");
+
+			//get the equation of the plane if any
+			double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
+			double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
+			double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
 
 			SubRoom* subroom = NULL;
 
 			if (type == "stair") {
+				if(xSubRoom->FirstChildElement("up")==NULL){
+					Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
+					Log->Write("ERROR:\t check your geometry file");
+					exit(EXIT_FAILURE);
+				}
 				double up_x = xmltof( xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
 				double up_y = xmltof( xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
 				double down_x = xmltof( xSubRoom->FirstChildElement("down")->Attribute("py"), 0.0);
@@ -404,6 +413,7 @@ void Building::LoadBuildingFromFile() {
 			}
 
 			subroom->SetType(type);
+			subroom->SetPlanEquation(A_x,B_y,C_z);
 			subroom->SetRoomID(room->GetID());
 			subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
 

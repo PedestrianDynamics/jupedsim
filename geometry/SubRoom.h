@@ -203,7 +203,7 @@ public:
 	 * @return the elevation of a 2Dimensional point using the plane equation.
 	 * @see GetPlanEquation
 	 */
-	double GetElevation(const Point & p1);
+	double GetElevation(const Point & p1) const;
 
 
 	/**

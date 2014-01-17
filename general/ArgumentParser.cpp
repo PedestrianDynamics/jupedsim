@@ -139,12 +139,6 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 		return;
 	}
 
-	// other special case where a single configuration file is submited
-	if(argc==2){
-		ParseIniFile(argv[1]);
-		return;
-	}
-
 	static struct option long_options[] = {
 			{"number", 1, 0, 'n'},
 			{"tmax", 1, 0, 't'},
@@ -414,6 +408,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			if (optarg)
 				inifile=optarg;
 			ParseIniFile(inifile);
+			return; //stop looking
 		}
 		break;
 
@@ -440,6 +435,12 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 		}
+	}
+
+	// other special case where a single configuration file is submitted
+	if(argc==2){
+		ParseIniFile(argv[1]);
+		return;
 	}
 }
 

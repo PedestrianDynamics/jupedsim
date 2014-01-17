@@ -43,18 +43,18 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 		exit(0);
 	}
 	double v = ped->GetV().Norm();
-	int color = (int) (v / v0 * 255); color=-1;
+	int color = (int) (v / v0 * 255);
 	double a = ped->GetLargerAxis();
 	double b = ped->GetSmallerAxis();
 	double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
  	sprintf(tmp, "<agent ID=\"%d\"\t"
 			"xPos=\"%.2f\"\tyPos=\"%.2f\"\t"
+ 			"zPos=\"%.2f\"\t"
 			"radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
 			"ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
 			ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-			(ped->GetPos().GetY()) * FAKTOR, a * FAKTOR, b * FAKTOR,
+			(ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()) * FAKTOR ,a * FAKTOR, b * FAKTOR,
 			phi * RAD2DEG, color);
-	
 	return tmp;
 }
 
@@ -140,13 +140,13 @@ void IODispatcher::WriteGeometry(Building* building) {
 			if (plotHlines) {
 				const vector<Hline*>& hlines = s->GetAllHlines();
 				for (unsigned int i = 0; i < hlines.size(); i++) {
-					Hline* goal = hlines[i];
-					int uid1 = goal->GetUniqueID();
+					Hline* hline = hlines[i];
+					int uid1 = hline->GetUniqueID();
 					if (!IsElementInVector(navLineWritten, uid1)) {
 						navLineWritten.push_back(uid1);
 						if (rooms_to_plot.empty()
 								|| IsElementInVector(rooms_to_plot, caption)) {
-							geometry.append(goal->WriteElement());
+							geometry.append(hline->WriteElement());
 						}
 					}
 				}
@@ -155,14 +155,14 @@ void IODispatcher::WriteGeometry(Building* building) {
 				if (plotCrossings) {
 					const vector<Crossing*>& crossings = s->GetAllCrossings();
 					for (unsigned int i = 0; i < crossings.size(); i++) {
-						Crossing* goal = crossings[i];
-						int uid1 = goal->GetUniqueID();
+						Crossing* crossing = crossings[i];
+						int uid1 = crossing->GetUniqueID();
 						if (!IsElementInVector(navLineWritten, uid1)) {
 							navLineWritten.push_back(uid1);
 							if (rooms_to_plot.empty()
 									|| IsElementInVector(rooms_to_plot,
 											caption)) {
-								geometry.append(goal->WriteElement());
+								geometry.append(crossing->WriteElement());
 							}
 						}
 					}
@@ -173,18 +173,18 @@ void IODispatcher::WriteGeometry(Building* building) {
 					const vector<Transition*>& transitions =
 							s->GetAllTransitions();
 					for (unsigned int i = 0; i < transitions.size(); i++) {
-						Transition* goal = transitions[i];
-						int uid1 = goal->GetUniqueID();
+						Transition* transition = transitions[i];
+						int uid1 = transition->GetUniqueID();
 						if (!IsElementInVector(navLineWritten, uid1)) {
 							navLineWritten.push_back(uid1);
 
 							if (rooms_to_plot.empty()) {
-								geometry.append(goal->WriteElement());
+								geometry.append(transition->WriteElement());
 
 							} else {
 
-								Room* room1 = goal->GetRoom1();
-								Room* room2 = goal->GetRoom2();
+								Room* room1 = transition->GetRoom1();
+								Room* room2 = transition->GetRoom2();
 								string caption1 = room1->GetCaption();
 								if (room2) {
 									string caption2 = room2->GetCaption();
@@ -192,13 +192,13 @@ void IODispatcher::WriteGeometry(Building* building) {
 											caption1)
 											|| IsElementInVector(rooms_to_plot,
 													caption2)) {
-										geometry.append(goal->WriteElement());
+										geometry.append(transition->WriteElement());
 									}
 
 								} else {
 									if (IsElementInVector(rooms_to_plot,
 											caption1)) {
-										geometry.append(goal->WriteElement());
+										geometry.append(transition->WriteElement());
 									}
 								}
 

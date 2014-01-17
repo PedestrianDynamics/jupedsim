@@ -677,6 +677,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
 		int index = rand() % positions.size();
 		Point pos = positions[index];
 		ped->SetPos(pos);
+		ped->SetBuilding(building);
 		positions.erase(positions.begin() + index);
 		ped->SetRoomID(para->GetRoomId(),"");
 		ped->SetSubRoomID(r->GetSubRoomID());

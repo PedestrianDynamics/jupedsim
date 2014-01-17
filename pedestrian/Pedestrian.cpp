@@ -55,6 +55,7 @@ Pedestrian::Pedestrian() {
 	_ellipse = JEllipse();
 	_navLine = new NavLine(); //FIXME this is not release
 	_router=NULL;
+	_building=NULL;
 	_reroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
 	_timeBeforeRerouting=0.0;
 	_reroutingEnabled=false;
@@ -611,6 +612,10 @@ int Pedestrian::FindRoute() {
 	return _router->FindExit(this);
 }
 
+double Pedestrian::GetElevation() const {
+	return _building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetElevation(GetPos());
+}
+
 void Pedestrian::SetGlobalTime(double time){
 	_globalTime=time;
 }
@@ -621,4 +626,12 @@ double Pedestrian::GetPatienceTime() const {
 
 void Pedestrian::SetPatienceTime(double patienceTime) {
 	_patienceTime = patienceTime;
+}
+
+const Building* Pedestrian::GetBuilding() {
+	return _building;
+}
+
+void Pedestrian::SetBuilding(Building* building) {
+	_building = building;
 }

@@ -412,7 +412,7 @@ const double* SubRoom::GetPlanEquation() const {
 	return _planeEquation;
 }
 
-double SubRoom::GetElevation(const Point& p) {
+double SubRoom::GetElevation(const Point& p) const {
 	return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
 }
 
@@ -521,12 +521,29 @@ NormalSubRoom::~NormalSubRoom() {
 
 string NormalSubRoom::WriteSubRoom() const {
 	string s;
-	Point pos = GetCentroid();
 	for (int j = 0; j < GetNumberOfWalls(); j++) {
-		Wall w = GetWall(j);
-		s.append(w.Write());
+
+		const Wall& w = GetWall(j);
+		string geometry;
+		char wall[CLENGTH] = "";
+		geometry.append("\t\t<wall>\n");
+		sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
+				(w.GetPoint1().GetX()) * FAKTOR,
+				(w.GetPoint1().GetY()) * FAKTOR,
+				GetElevation(w.GetPoint1())*FAKTOR);
+		geometry.append(wall);
+		sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
+				(w.GetPoint2().GetX()) * FAKTOR,
+				(w.GetPoint2().GetY()) * FAKTOR,
+				GetElevation(w.GetPoint2())*FAKTOR);
+		geometry.append(wall);
+		geometry.append("\t\t</wall>\n");
+
+		s.append(geometry);
+		//s.append(GetWall(j).Write());
 	}
 	//add the subroom caption
+	Point pos = GetCentroid();
 	char tmp[CLENGTH];
 	sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
 			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, GetSubRoomID());
@@ -719,21 +736,39 @@ const Point & Stair::GetDown() const {
 
 string Stair::WriteSubRoom() const {
 	string s;
-	Point pos = GetCentroid();
-	char tmp_c[300];
+
 	for (int j = 0; j < GetNumberOfWalls(); j++) {
-		Wall w = GetWall(j);
-		s.append(w.Write());
+		const Wall& w = GetWall(j);
+
+		string geometry;
+		char wall[CLENGTH] = "";
+		geometry.append("\t\t<wall>\n");
+		sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
+				(w.GetPoint1().GetX()) * FAKTOR,
+				(w.GetPoint1().GetY()) * FAKTOR,
+				GetElevation(w.GetPoint1())*FAKTOR);
+		geometry.append(wall);
+		sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
+				(w.GetPoint2().GetX()) * FAKTOR,
+				(w.GetPoint2().GetY()) * FAKTOR,
+				GetElevation(w.GetPoint2())*FAKTOR);
+		geometry.append(wall);
+		geometry.append("\t\t</wall>\n");
+
+		s.append(geometry);
+		//s.append(w.Write());
 	}
 	//Line tmp = Line(GetUp(), GetDown());
 	// s.append(tmp.Write());
-	sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" radius=\"20\" color=\"100\" />\n"
-			, GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR);
+	Point pos = GetCentroid();
+	char tmp_c[CLENGTH];
+	sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" radius=\"20\" color=\"100\" />\n"
+			, GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR, GetElevation(GetUp())*FAKTOR);
 	s.append(tmp_c);
 
 	//add the subroom caption
-	sprintf(tmp_c, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
-			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, GetSubRoomID());
+	sprintf(tmp_c, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
+			, pos.GetX() * FAKTOR, pos.GetY() * FAKTOR,GetElevation(pos)*FAKTOR ,GetSubRoomID());
 	s.append(tmp_c);
 
 	return s;

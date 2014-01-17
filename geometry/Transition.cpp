@@ -167,13 +167,15 @@ string Transition::WriteElement() const {
 
 	sprintf(tmp,"\t\t<door ID=\"%d\" color=\"180\" caption=\"%d_%d_%s\">\n",GetUniqueID(),GetID(),GetUniqueID(),GetCaption().c_str());
 	geometry.append(tmp);
-	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
+	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
 			(GetPoint1().GetX()) * FAKTOR,
-			(GetPoint1().GetY()) * FAKTOR);
+			(GetPoint1().GetY()) * FAKTOR,
+			 GetSubRoom1()->GetElevation(GetPoint1())*FAKTOR);
 	geometry.append(tmp);
-	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
+	sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
 			(GetPoint2().GetX()) * FAKTOR,
-			(GetPoint2().GetY()) * FAKTOR);
+			(GetPoint2().GetY()) * FAKTOR,
+			GetSubRoom1()->GetElevation(GetPoint2())*FAKTOR);
 	geometry.append(tmp);
 	geometry.append("\t\t</door>\n");
 	return geometry;

@@ -52,6 +52,7 @@ private:
     double _mass; // Masse: 1
     double _tau; // Reaktinszeit: 0.5
     double _deltaT; // step size
+    //double _elevation; // the z coordinate. This can be
 
     std::string _gender;
     std::string _roomCaption;
@@ -102,6 +103,7 @@ private:
 
     /// the router responsible for this pedestrian
     Router* _router;
+    Building * _building;
     JEllipse _ellipse;
 
 
@@ -185,6 +187,12 @@ public:
     void RecordActualPosition();
     double GetDistanceSinceLastRecord();
 
+    /**
+     * The elevation is computed using the plane equation given in the subroom.
+     * @return the z coordinate of the pedestrian.
+     */
+
+    double GetElevation() const;
 
     /**
      * Compute and update the route.
@@ -274,7 +282,8 @@ public:
 
     static double GetGlobalTime();
     static void SetGlobalTime(double time);
-
+	const Building* GetBuilding();
+	void SetBuilding(Building* building);
 };
 
 #endif	/* _PEDESTRIAN_H */
