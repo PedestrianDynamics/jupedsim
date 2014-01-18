@@ -33,16 +33,29 @@
 #include "SyncData.h"
 #include "Debug.h"
 
-#include "geometry/Point.h"
+#include "geometry/JPoint.h"
 #include "geometry/FacilityGeometry.h"
-#include "geometry/jul/Building.h"
-#include "geometry/pg3/CBuilding.h"
+#include "geometry/Building.h"
 
 #include <QMessageBox>
 #include <QString>
 #include <limits>
 #include <iostream>
 #include <cmath>
+
+
+#include <vtkVersion.h>
+#include <vtkSmartPointer.h>
+#include <vtkPolygon.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkAssembly.h>
+#include <vtkProperty.h>
 
 
 using namespace std;
@@ -88,13 +101,9 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 				QString fileName=at.value(i);
 				if(!fileName.isEmpty())
 				{
-					if(fileName.endsWith(".jul",Qt::CaseInsensitive))
+					if(fileName.endsWith(".xml",Qt::CaseInsensitive))
 					{
-						SaxParser::parseGeometryJUL(fileName,geometry);
-					}
-					else if (fileName.endsWith(".pg3",Qt::CaseInsensitive))
-					{
-						SaxParser::parseGeometryPG3(fileName,geometry);
+						SaxParser::parseGeometryJPS(fileName,geometry);
 					}
 					else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
 					{
@@ -373,7 +382,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 		}
 		double CHT[3]={color,height,thickness};
 
-		Point* pt= new Point(xPos,yPos,zPos);
+		JPoint* pt= new JPoint(xPos,yPos,zPos);
 		pt->setColorHeightThicknes(CHT);
 		currentPointsList.push_back(pt);
 
@@ -604,94 +613,152 @@ void SaxParser::clearPoints(){
 
 
 /// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryJUL(QString fileName, FacilityGeometry *geometry){
+void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
-	if(!fileName.endsWith(".jul",Qt::CaseInsensitive)) return ;
+	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
 
 	Building* building = new Building();
 	string geometrypath = fileName.toStdString();
 
-
 	// read the geometry
-	building->LoadFromFile(geometrypath);
+	building->LoadBuildingFromFile(geometrypath);
+	building->InitGeometry(); // create the polygons
 
-	int anz_rooms=building->GetAllRooms().size();
+	int currentID=0;
+	// Setup the points
+	vtkSmartPointer<vtkPoints> points =
+			vtkSmartPointer<vtkPoints>::New();
 
-	for(int i=0; i<anz_rooms; i++)
-	{
-		Room r = building->GetRoom(i);
-		int anz_walls=r.GetAllWalls().size();
-		for(int j=0; j<anz_walls; j++)
-		{
-			Line l = r.GetWall(j).GetLine();
-			geometry->addWall(l.GetPoint1().GetX()*100, l.GetPoint1().GetY()*100,0.0,
-					l.GetPoint2().GetX()*100, l.GetPoint2().GetY()*100,0.0);
-		}
-		int anz_trans = r.GetAllTransitions().size();
-		for(int j=0; j<anz_trans; j++)
-		{
-			Line l = r.GetTransition(j).GetLine();
-			geometry->addDoor(l.GetPoint1().GetX()*100, l.GetPoint1().GetY()*100,0.0,
-					l.GetPoint2().GetX()*100, l.GetPoint2().GetY()*100,0.0);
+	// Add the polygon to a list of polygons
+	vtkSmartPointer<vtkCellArray> polygons =
+			vtkSmartPointer<vtkCellArray>::New();
+
+	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+		Room* r = building->GetRoom(i);
+		string caption = r->GetCaption();
+
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+			SubRoom* sub = r->GetSubRoom(k);
+			const vector<Point>& poly = sub->GetPolygon();
+			//if(sub->GetType()!="stair") continue;
+			//if( ! ( (r->GetID()==1) && (sub->GetSubRoomID()==0))) continue;
+
+			// Create the polygon
+			vtkSmartPointer<vtkPolygon> polygon =
+					vtkSmartPointer<vtkPolygon>::New();
+			polygon->GetPointIds()->SetNumberOfIds(poly.size());
+
+			for (unsigned int s=0;s<poly.size();s++){
+				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
+				polygon->GetPointIds()->SetId(s, currentID++);
+				//polygon->GetPointIds()->InsertNextId(currentID++);
+				//cout<<poly[s].toString()<<" : "<<sub->GetElevation(poly[s])<<endl;
+			}
+
+			polygons->InsertNextCell(polygon);
 		}
 	}
+
+	// Create a PolyData
+	vtkSmartPointer<vtkPolyData> polygonPolyData =
+			vtkSmartPointer<vtkPolyData>::New();
+	polygonPolyData->SetPoints(points);
+	polygonPolyData->SetPolys(polygons);
+
+	// Create a mapper and actor
+	vtkSmartPointer<vtkPolyDataMapper> mapper =
+			vtkSmartPointer<vtkPolyDataMapper>::New();
+#if VTK_MAJOR_VERSION <= 5
+	mapper->SetInput(polygonPolyData);
+#else
+	mapper->SetInputData(polygonPolyData);
+#endif
+
+	vtkSmartPointer<vtkActor> actor =
+			vtkSmartPointer<vtkActor>::New();
+	actor->SetMapper(mapper);
+	actor->GetProperty()->SetColor(0,0,1);
+	actor->GetProperty()->SetOpacity(0.5);
+	//actor->GetProperty()->SetLineWidth(5);
+
+	geometry->getActor()->AddPart(actor);
 
 	// free memory
 	delete building;
 }
+//void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
+//
+//	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
+//
+//	Building* building = new Building();
+//	string geometrypath = fileName.toStdString();
+//
+//	// read the geometry
+//	building->LoadBuildingFromFile(geometrypath);
+//	building->InitGeometry(); // create the polygons
+//
+//	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+//		Room* r = building->GetRoom(i);
+//		string caption = r->GetCaption();
+//
+//		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+//			SubRoom* sub = r->GetSubRoom(k);
+//			const vector<Point>& poly = sub->GetPolygon();
+//			//if(sub->GetType()!="stair") continue;
+//			if( ! ( (r->GetID()==1) && (sub->GetSubRoomID()==0))) continue;
+//			// Setup the points
+//			vtkSmartPointer<vtkPoints> points =
+//					vtkSmartPointer<vtkPoints>::New();
+//			// Create the polygon
+//			vtkSmartPointer<vtkPolygon> polygon =
+//					vtkSmartPointer<vtkPolygon>::New();
+//			polygon->GetPointIds()->SetNumberOfIds(poly.size());
+//
+//			for (unsigned int s=0;s<poly.size();s++){
+//				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
+//				polygon->GetPointIds()->SetId(s, s);
+//			}
+//
+//			// Add the polygon to a list of polygons
+//			vtkSmartPointer<vtkCellArray> polygons =
+//					vtkSmartPointer<vtkCellArray>::New();
+//			polygons->InsertNextCell(polygon);
+//
+//			// Create a PolyData
+//			vtkSmartPointer<vtkPolyData> polygonPolyData =
+//					vtkSmartPointer<vtkPolyData>::New();
+//			polygonPolyData->SetPoints(points);
+//			polygonPolyData->SetPolys(polygons);
+//
+//			// Create a mapper and actor
+//			vtkSmartPointer<vtkPolyDataMapper> mapper =
+//					vtkSmartPointer<vtkPolyDataMapper>::New();
+//#if VTK_MAJOR_VERSION <= 5
+//			mapper->SetInput(polygonPolyData);
+//#else
+//			mapper->SetInputData(polygonPolyData);
+//#endif
+//
+//			vtkSmartPointer<vtkActor> actor =
+//					vtkSmartPointer<vtkActor>::New();
+//			actor->SetMapper(mapper);
+//			actor->GetProperty()->SetColor(0,0,1);
+//			actor->GetProperty()->SetOpacity(0.5);
+//			actor->GetProperty()->SetLineWidth(5);
+//
+//			geometry->getActor()->AddPart(actor);
+//		}
+//	}
+//
+//	// free memory
+//	delete building;
+//}
 
-/// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryPG3(QString fileName, FacilityGeometry *geometry){
 
-	CTextLog* ErrorLog = new CTextLog;
-	CBuilding* Building = new CBuilding(ErrorLog);
-	string errorlogpath = "./LogDatei.txt";
-	string geometrypath = fileName.toStdString();
-
-	// Geometrie einlesen
-	ErrorLog->AddEntry("INFO: Geometry file: "+geometrypath);
-	Building->LoadFromFile(geometrypath);
-	int anz_rooms=(*Building).GetRoomCount();
-	CRoom r;
-
-	for(int i=0; i<anz_rooms; i++)
-	{
-		r.CopyData(Building->GetRoom(i));
-		float x=r.GetContPos().GetX()*100;
-		float y=r.GetContPos().GetY()*100;
-		int z=r.GetZPos()*30000;
-
-		int anz_lines=r.GetLineElementCount();
-		for(int j=0; j<anz_lines; j++)
-		{
-			CLine l;
-			l.CopyData(r.GetLine(j));
-
-			if(l.GetType()==1) /* WALL */
-				geometry->addWall(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,0.0,
-						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y,0.0);
-
-			if(l.GetType()==2) /* STEP */
-				geometry->addStep(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,0.0,
-						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y,0.0);
-			if(l.GetType()==3) /* TRANS */
-				geometry->addDoor(l.GetPoint1().GetX()*100+x+z, l.GetPoint1().GetY()*100+y,0.0,
-						l.GetPoint2().GetX()*100+x+z, l.GetPoint2().GetY()*100+y,0.0);
-		}
-	}
-
-	// Errorlog speichern
-	if (errorlogpath.compare("no file")!=0)
-		ErrorLog->SaveToFile(errorlogpath);
-
-	// free memory
-	delete Building;
-	delete ErrorLog;
-}
 /// provided for convenience and will be removed in the next version
 void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo){
 
-	cout<<"external geometery fouind"<<endl;
+	cout<<"external geometry found"<<endl;
 	//creating am empty document
 	// to be filled
 	QDomDocument doc("");

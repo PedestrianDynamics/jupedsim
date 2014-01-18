@@ -38,6 +38,7 @@
 #include <QThread>
 #include <QObject>
 #include <vtkGlyph3D.h>
+#include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 
@@ -64,6 +65,7 @@ extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
 
 extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
+//extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;

@@ -30,7 +30,7 @@
  */
 
 #include "FacilityGeometry.h"
-#include "Point.h"
+#include "JPoint.h"
 #include "../SystemSettings.h"
 #include "LinePlotter2D.h"
 
@@ -288,7 +288,7 @@ void FacilityGeometry::addStep(double x1, double y1, double z1, double x2, doubl
 	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 }
 
-void FacilityGeometry::addStep(Point* p1, Point* p2){
+void FacilityGeometry::addStep(JPoint* p1, JPoint* p2){
 
 	double m[3];
 	double n[3];
@@ -305,7 +305,7 @@ void FacilityGeometry::addStep(Point* p1, Point* p2){
 
 }
 
-void FacilityGeometry::addWall(Point* p1, Point* p2, string caption){
+void FacilityGeometry::addWall(JPoint* p1, JPoint* p2, string caption){
 	double m[3];
 	double n[3];
 	double CHT[3];
@@ -331,7 +331,7 @@ void FacilityGeometry::addWall(Point* p1, Point* p2, string caption){
 
 }
 
-void FacilityGeometry::addDoor(Point* p1, Point* p2, string caption){
+void FacilityGeometry::addDoor(JPoint* p1, JPoint* p2, string caption){
 
 	double m[3];
 	double n[3];
@@ -465,7 +465,7 @@ void FacilityGeometry::addObjectSphere(double center[3], double radius,
 		actor->SetMapper(mapper);
 		actor->GetProperty()->SetColor(colorRGB);
 
-		actor->SetPosition(center[0], center[1], 0);
+		actor->SetPosition(center[0], center[1], center[2]);
 		assembly2D->AddPart(actor);
 	}
 }
@@ -492,7 +492,7 @@ void FacilityGeometry::addObjectCylinder(double center[3], double radius,
 		actor->SetMapper(mapper);
 		actor->GetProperty()->SetColor(colorRGB);
 
-		actor->SetPosition(center[0], center[1], 0);
+		actor->SetPosition(center[0], center[1], center[2]);
 		assembly2D->AddPart(actor);
 	}
 }
@@ -505,7 +505,7 @@ void FacilityGeometry::addObjectBox(double center[3], double height,
 
 	{
 		VTK_CREATE(vtkCubeSource,src);
-		src->SetCenter(center[0], center[1], 0);
+		src->SetCenter(center[0], center[1], center[2]);
 		src->SetZLength(1); //todo: fake projection
 		src->SetYLength(length);
 		src->SetXLength(width);
@@ -570,7 +570,7 @@ vtkActor2DCollection* FacilityGeometry::getCaptions(){
 void FacilityGeometry::addNewElementText(double center[3], double orientation[3],
 		string text, double color) {
 
-	return ;
+	//return ;
 
 		{//caption
 			VTK_CREATE(vtkTextActor3D,caption);

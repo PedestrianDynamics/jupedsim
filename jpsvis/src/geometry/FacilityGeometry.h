@@ -38,7 +38,7 @@
 //forwarded classes
 class vtkPolyData;
 class vtkActor;
-class Point;
+class JPoint;
 class vtkAssembly;
 class vtkDataSet;
 class vtkLookupTable;
@@ -73,18 +73,18 @@ public:
 	///draw a wall
 	void addWall(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=15, double height=250,double col=255);
 	//void addWall(double center[3], double width, double orientation);
-	void addWall(Point* p1, Point* p2, std::string caption="");
+	void addWall(JPoint* p1, JPoint* p2, std::string caption="");
 
 	///draw a door
 	void addDoor(double x1, double y1, double z1 ,double x2, double y2, double z2, double thickness=17, double height=250,double col=30);
 	//void addDoor(double center[3], double width, double orientation);
-	void addDoor(Point* p1, Point* p2, std::string caption="");
+	void addDoor(JPoint* p1, JPoint* p2, std::string caption="");
 
 	///draw a step
 	///todo: implement thickness and color
 	void addStep(double x1, double y1, double z1, double x2, double y2, double z2=0/*, double thickness=30, double height=10,double col=50*/);
 	//void addStep(double center[3], double width, double orientation);
-	void addStep(Point* p1, Point* p2);
+	void addStep(JPoint* p1, JPoint* p2);
 
 	/// draw a floor, divided in cells,
 	void addFloor(double x1, double y1, double x2, double y2, double z=0);
@@ -112,8 +112,8 @@ private:
 	// TODO Check if this function is really necessary
 	//vtkActor* MapToActor(vtkDataSet *ds); //for drawing floor
 	vtkLookupTable* lookupTable;
-	void drawWall(Point* p1, Point* p2);
-	void drawDoor(Point* p1, Point* p2);
+	void drawWall(JPoint* p1, JPoint* p2);
+	void drawDoor(JPoint* p1, JPoint* p2);
 	void addNewElement(double center[3], double orientation, double width, ELEMENT_TYPE type);
 	void addNewElementText(double center[3], double orientation[3], std::string text, double color);
 

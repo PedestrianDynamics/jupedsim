@@ -114,6 +114,7 @@ vtkPolyData* Frame::GetPolyData() {
 	VTK_CREATE (vtkPoints, points);
 	VTK_CREATE (vtkFloatArray, colors);
 	colors->SetName("color");
+	//colors->SetNumberOfComponents(3);
 	colors->SetNumberOfComponents(1);
 	for (unsigned int i=0;i<framePoints.size();i++){
 		double pos[3];
@@ -121,7 +122,12 @@ vtkPolyData* Frame::GetPolyData() {
 		framePoints[i]->getPos(pos);
 		framePoints[i]->getEllipse(data);
 		points->InsertNextPoint(pos);
+		if(data[6]==-1){
+		colors->InsertNextValue(NAN);
+		}
+		else{
 		colors->InsertNextValue(data[6]/255.0);
+		}
 	}
 	//scalars->Print(cout);
 	VTK_CREATE (vtkFloatArray, data);

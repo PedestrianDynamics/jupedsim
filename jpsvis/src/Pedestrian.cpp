@@ -32,7 +32,7 @@
 //http://www.mail-archive.com/paraview@paraview.org/msg02142.html
 
 #include "Pedestrian.h"
-#include "geometry/Point.h"
+#include "geometry/JPoint.h"
 #include "geometry/PointPlotter.h"
 #include "geometry/LinePlotter.h"
 #include "forms/Settings.h"
@@ -1523,7 +1523,7 @@ void Pedestrian::enableCaption(bool status){
 
 void Pedestrian::plotTrail(double x, double y, double z){
 
-	trailPoint.push(new Point (x,y,z));
+	trailPoint.push(new JPoint (x,y,z));
 
 }
 
@@ -1561,7 +1561,7 @@ void Pedestrian::triggerPlotTrail() {
 	//	trailPlotterLine->addVertex(first);
 
 	while (!trailPoint.isEmpty()){
-		Point * next = trailPoint.pop();
+		JPoint * next = trailPoint.pop();
 		next->setColorRGB(pedsColors[0],pedsColors[1],pedsColors[2]);
 
 		//trailPlotterLine->PlotLine(first, next);

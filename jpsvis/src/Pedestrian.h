@@ -44,7 +44,7 @@ class vtkDataArray;
 class vtkTextActor3D ;
 class PointPlotter;
 class LinePlotter;
-class Point;
+class JPoint;
 class vtkPoints;
 class TrajectoryPoint;
 class vtkCamera;
@@ -232,7 +232,7 @@ private :
 	vtkTextActor3D* caption;
 
 	/// trails plotter
-	QStack<Point*> trailPoint;
+	QStack<JPoint*> trailPoint;
 	PointPlotter* trailPlotterPoint;
 	LinePlotter* trailPlotterLine;
 };

@@ -40,7 +40,7 @@ class vtkFloatArray ;
 class vtkActor ;
 class vtkPolyData;
 class vtkDataArray;
-class Point;
+class JPoint;
 
 
 class LinePlotter
@@ -53,12 +53,12 @@ public:
 	//void SetScalarRange(double minval=0.0, double maxval=1.0);
 	//void SetLookupTable(vtkLookupTable* table = 0);
 
-	void PlotLine(Point* pt1, Point* pt2);
+	void PlotLine(JPoint* pt1, JPoint* pt2);
 	void PlotLine(double m[3], double n[3], unsigned char scalar[3]);
 	void PlotLine(double x, double y, double z,
 		double x2, double y2, double z2, unsigned char scalar[3]);
 	void addVertex(double vertex[3],double scalar[3]);
-	void addVertex(Point* pt1);
+	void addVertex(JPoint* pt1);
 	void SetNumberOfPoints(int nPoints);
 	void clear();
 	static void setLineWidth(int width=1);

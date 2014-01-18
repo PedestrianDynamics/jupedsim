@@ -41,7 +41,7 @@ class vtkUnsignedCharArray ;
 class vtkPolyData ;
 class vtkActor ;
 class vtkDataArray ;
-class Point;
+class JPoint;
 
 class PointPlotter
 {
@@ -54,7 +54,7 @@ public:
 	void PlotPoint(double x, double y, double z,
 		unsigned char r='a', unsigned char g='b', unsigned char b='c');
 
-	void PlotPoint(Point* pt);
+	void PlotPoint(JPoint* pt);
 	void SetPointRadius(double radius = 1.0) { pt_radius = radius ; }
 	void SetPointResolution(int res = 15) { pt_res = res ;}
 

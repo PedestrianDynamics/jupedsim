@@ -45,9 +45,6 @@
 #include "SimpleVisualisationWindow.h"
 
 #include "geometry/FacilityGeometry.h"
-#include "geometry/jul/Building.h"
-#include "geometry/pg3/CBuilding.h"
-
 
 #include <QtGui/QMessageBox>
 #include <QtXml/QDomDocument>
@@ -418,6 +415,7 @@ bool TraVisTo::slotLoadFile() {
 // This function is only used in online Mode
 FacilityGeometry* TraVisTo::parseGeometry(QDomNode geoNode){
 
+	cout<<"parsing the geo"<<endl;
 	if(geoNode.isNull()) return NULL;
 
 	//check if there is a tag 'file' there in
@@ -426,17 +424,12 @@ FacilityGeometry* TraVisTo::parseGeometry(QDomNode geoNode){
 
 	if(!fileName.isEmpty())
 	{
-		if(fileName.endsWith(".jul",Qt::CaseInsensitive))
+		if (fileName.endsWith(".xml",Qt::CaseInsensitive))
 		{
-			//should be a file name
-			//return parseGeometryJUL(fileName);
-			SaxParser::parseGeometryJUL(fileName,geometry);
-		}
-		else if (fileName.endsWith(".pg3",Qt::CaseInsensitive))
-		{
+			//cout<<"good bye"<<endl; exit(0);
 			//should be a file name
 			//return parseGeometryPG3(fileName);
-			SaxParser::parseGeometryPG3(fileName,geometry);
+			//SaxParser::parseGeometryPG3(fileName,geometry);
 		}
 		else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
 		{
@@ -560,7 +553,6 @@ bool TraVisTo::addPedestrianGroup(int groupID,QString fileName){
 				"F:\\workspace\\TraVisTo\\data",
 				"Visualisation Files (*.dat *.trav *.xml *.pg3 *.jul);;All Files (*.*)");
 
-
 	if (fileName.isNull()) {
 		return false;
 	}
@@ -568,20 +560,8 @@ bool TraVisTo::addPedestrianGroup(int groupID,QString fileName){
 	//FacilityGeometry* geometry=NULL;
 	FacilityGeometry* geometry = visualisationThread->getGeometry();
 
-	//reading and parsing
-	if(fileName.endsWith(".jul",Qt::CaseInsensitive))
-	{
-		//geometry=parseGeometryJUL(fileName);
-		SaxParser::parseGeometryJUL(fileName,geometry);
-	}
-	else if (fileName.endsWith(".pg3",Qt::CaseInsensitive))
-	{
-		//geometry=parseGeometryPG3(fileName);
-		SaxParser::parseGeometryPG3(fileName,geometry);
-	}
-
 	// if xml is detected, just load and show the geometry then exit
-	else if(fileName.endsWith(".xml",Qt::CaseInsensitive)){
+	if(fileName.endsWith(".xml",Qt::CaseInsensitive)){
 		SaxParser::parseGeometryXMLV04(fileName,geometry);
 		//slotLoadParseShowGeometry(fileName);
 		//return false;
