@@ -60,6 +60,7 @@ SubRoom::SubRoom() {
 	_planeEquation[0]=0.0;
 	_planeEquation[1]=0.0;
 	_planeEquation[2]=0.0;
+	_cosAngleWithHorizontalPlane=0;
 
 	_goalIDs = vector<int> ();
 	_area = 0.0;
@@ -81,6 +82,7 @@ SubRoom::SubRoom(const SubRoom& orig) {
 	_closed=orig.GetClosed();
 	_roomID=orig.GetRoomID();
 	_uid = orig.GetUID();
+	_cosAngleWithHorizontalPlane=orig.GetCosAngleWithHorizontal();
 
 #ifdef _SIMULATOR
 	_peds = orig.GetAllPedestrians();
@@ -406,6 +408,8 @@ void SubRoom::SetPlanEquation(double A, double B, double C) {
 	_planeEquation[0]=A;
 	_planeEquation[1]=B;
 	_planeEquation[2]=C;
+	//compute and cache the cosine of angle with the plane z=h
+	_cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
 }
 
 const double* SubRoom::GetPlanEquation() const {
@@ -414,6 +418,11 @@ const double* SubRoom::GetPlanEquation() const {
 
 double SubRoom::GetElevation(const Point& p) const {
 	return _planeEquation[0] * p._x + _planeEquation[1] * p._y + _planeEquation[2];
+}
+
+double SubRoom::GetCosAngleWithHorizontal() const {
+	return _cosAngleWithHorizontalPlane;
+
 }
 
 void SubRoom::CheckObstacles(){
@@ -931,6 +940,14 @@ bool Stair::IsInSubRoom(const Point& ped) const {
 }
 
 
+void SubRoom::SetType(const std::string& type) {
+	_type = type;
+}
+
+const std::string& SubRoom::GetType() const {
+	return _type;
+}
+
 #ifdef _SIMULATOR
 
 void SubRoom::SetAllPedestrians(const vector<Pedestrian*>& peds) {
@@ -962,14 +979,6 @@ int SubRoom::GetNumberOfPedestrians() const {
 
 const vector<Pedestrian*>& SubRoom::GetAllPedestrians() const {
 	return _peds;
-}
-
-const std::string& SubRoom::GetType() const {
-	return _type;
-}
-
-void SubRoom::SetType(const std::string& type) {
-	_type = type;
 }
 
 Pedestrian* SubRoom::GetPedestrian(int index) const {

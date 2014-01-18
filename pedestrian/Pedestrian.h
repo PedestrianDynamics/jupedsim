@@ -155,7 +155,14 @@ public:
     const Point& GetV() const;
     const Point& GetV0() const;
     const Point& GetV0(const Point& target);
+
+    /**
+     * the desired speed is the projection of the speed on the horizontal plane.
+     * @return the norm of the desired speed.
+     */
     double GetV0Norm() const;
+
+
     ///get axis in the walking direction
     double GetLargerAxis() const;
     ///get axis in the shoulder direction = orthogonal to the walking direction

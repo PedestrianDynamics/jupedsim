@@ -310,7 +310,7 @@ const Point& Pedestrian::GetV0() const {
 }
 
 double Pedestrian::GetV0Norm() const {
-	return _ellipse.GetV0();
+	return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
 //get axis in the walking direction
 double Pedestrian::GetLargerAxis() const {

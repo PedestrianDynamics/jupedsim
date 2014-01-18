@@ -53,7 +53,7 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 			"radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
 			"ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
 			ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-			(ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+			(ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
 			phi * RAD2DEG, color);
 	return tmp;
 }

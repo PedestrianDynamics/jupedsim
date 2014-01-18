@@ -61,6 +61,7 @@ private:
 	double _closed;
 	//defined by: Z = Ax + By + C
 	double _planeEquation[3];
+	double _cosAngleWithHorizontalPlane;
 	std::string _type;
 
 	std::vector<Obstacle*> _obstacles; // obstacles
@@ -205,6 +206,12 @@ public:
 	 */
 	double GetElevation(const Point & p1) const;
 
+
+	/**
+	 * compute the cosine of the dihedral angle with the Horizontal plane Z=h
+	 * @return the cosine of the angle
+	 */
+	double GetCosAngleWithHorizontal() const;
 
 	/**
 	 * Compute the area of the subroom.

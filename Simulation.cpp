@@ -337,7 +337,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	_building->LoadBuildingFromFile();
 	_building->LoadRoutingInfo(args->GetProjectFile());
-	_building->AddSurroundingRoom();
+	//_building->AddSurroundingRoom();
 	_building->InitGeometry(); // create the polygons
 	_building->LoadTrafficInfo();
 	// in the case the navigation mesh should be written to a file

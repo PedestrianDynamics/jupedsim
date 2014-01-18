@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <geometry version="0.40" caption="Projectname" gridSizeX="20.000000" gridSizeY="20.000000" unit="m">
 	<rooms>
-		<room id="0" caption="subway" zpos="0.000000">
+		<room id="0" caption="subway">
 			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
 				<polygon caption="wall">
 					<vertex px="0.0" py="1.0" />
@@ -51,7 +51,7 @@
 				</crossing>
 			</crossings>
 		</room>
-		<room id="1" caption="Hall" zpos="6.000000">
+		<room id="1" caption="Hall">
 			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="6">
 				<polygon caption="wall">
 					<vertex px="-5.0" py="7.0" />
