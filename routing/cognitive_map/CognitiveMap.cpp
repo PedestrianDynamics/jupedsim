@@ -1,8 +1,9 @@
-/*
- * CognitiveMap.cpp
+/**
+ * @file   CognitiveMap.cpp
+ * @author David Haensel (d.haensel@fz-juelich.de)
+ * @date   January, 2014
+ * @brief  Cognitive Map models the pedestrian knowledge of building space in simulation.
  *
- *  Created on: Jan 2014
- *      Author: David Haensel
  */
 
 #include "CognitiveMap.h"
