@@ -70,6 +70,8 @@ string QuickestPathRouter::GetRoutingInfoFile() const {
 int QuickestPathRouter::FindExit(Pedestrian* ped){
 
 	int next=FindNextExit(ped);
+	vector<SubRoom*> path;
+	GetPath(ped,0,path);
 
 	// that ped will be deleted
 	if(next==-1) return next;

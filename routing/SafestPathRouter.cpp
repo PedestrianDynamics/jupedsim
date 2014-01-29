@@ -51,6 +51,26 @@ void SafestPathRouter::Init(Building* building) {
 
 	//handle over to the global router engine
 	GlobalRouter::Init(building);
+
+
+	int numberOfSubroom=0;
+
+	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+		Room* room = _building->GetRoom(i);
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+
+			SubRoom* sub = room->GetSubRoom(j);
+			if(sub->GetType()=="floor")
+				numberOfSubroom=numberOfSubroom+room->GetNumberOfSubRooms();
+		}
+	}
+
+	 peopleAtSection = new double [numberOfSubroom];
+
+	 rR = new double*[numberOfSubroom];
+	 	for (int i = 0; i < numberOfSubroom; ++i) {
+	 		rR[i] = new double[numberOfSubroom];
+	 	}
 }
 
 
@@ -138,11 +158,11 @@ void SafestPathRouter::main_3(Pedestrian* p)
 
 	if (p->GetRoomID()==0 && p->GetSubRoomID()==0)
 	{
-		peopleAtSection[0][0]=GetAgentsCountInSubroom(0,0)-1;
+		peopleAtSection[0]=GetAgentsCountInSubroom(0,0)-1;
 	}
 	else
 	{
-		peopleAtSection[0][0]=GetAgentsCountInSubroom(0,0);
+		peopleAtSection[0]=GetAgentsCountInSubroom(0,0);
 	}
 
 	//////
@@ -150,11 +170,11 @@ void SafestPathRouter::main_3(Pedestrian* p)
 
 	if (p->GetRoomID()==0 && p->GetSubRoomID()==2)
 	{
-		peopleAtSection[0][1]=GetAgentsCountInSubroom(0,1)-1;
+		peopleAtSection[1]=GetAgentsCountInSubroom(0,1)-1;
 	}
 	else
 	{
-		peopleAtSection[0][1]=GetAgentsCountInSubroom(0,1);
+		peopleAtSection[1]=GetAgentsCountInSubroom(0,1);
 	}
 
 	//////
@@ -162,11 +182,11 @@ void SafestPathRouter::main_3(Pedestrian* p)
 
 	if (p->GetRoomID()==0 && p->GetSubRoomID()==3)
 	{
-		peopleAtSection[0][2]=GetAgentsCountInSubroom(0,2)-1;
+		peopleAtSection[2]=GetAgentsCountInSubroom(0,2)-1;
 	}
 	else
 	{
-		peopleAtSection[0][2]=GetAgentsCountInSubroom(0,2);
+		peopleAtSection[2]=GetAgentsCountInSubroom(0,2);
 	}
 
 
@@ -199,7 +219,7 @@ void SafestPathRouter::main_3(Pedestrian* p)
 
 	for(int j = 0; j < 3; j ++) //
 	{
-		dFinalLineEvac[i][j]= peopleAtSection[i][j] * dMatrixPreEvac[i][j];
+		dFinalLineEvac[i][j]= peopleAtSection[j] * dMatrixPreEvac[i][j];
 	}
 
 	// Print out final distance matrix
@@ -362,9 +382,23 @@ void SafestPathRouter::main_1(Pedestrian* p)
 
 
 
+	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+			Room* room = _building->GetRoom(i);
+			for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+
+				SubRoom* sub = room->GetSubRoom(j);
+				int room;
+			}
+		}
 
 
-	if (p->GetRoomID()==0 && p->GetSubRoomID()==0)
+	int roomID=p->GetRoomID();
+	int subroomID=p->GetSubRoomID();
+	int nGoals =_building->GetNumberOfGoals();
+
+	//rR[subroomID][subroomID]=
+
+	//if (p->GetRoomID()==0 && p->GetSubRoomID()==0)
 	{
 		if (g1_3>=g1_4)
 		{

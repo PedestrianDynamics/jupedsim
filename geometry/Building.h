@@ -108,6 +108,14 @@ public:
      */
     Hline* GetHline(int id);
 
+
+    /**
+     * return the subroom with the corresponding unique identifier
+     * @param uid ,the unique identifier
+     * @return NULL if no exists with that identifier.
+     */
+    SubRoom* GetSubRoomByUID( int uid);
+
     /**
      * @return true if the two segments are visible from each other.
      * Alls walls and transitions and crossings are used in this check.
@@ -147,7 +155,7 @@ public:
      */
     LCGrid* GetGrid() const;
 
-    // Sonstiges
+    // convenience methods
     void InitGeometry();
     void InitGrid(double cellSize);
     //void InitRoomsAndSubroomsMap();

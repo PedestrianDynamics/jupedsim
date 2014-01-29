@@ -90,6 +90,9 @@ public:
 	 */
 	void setConnectingRooms(int r1, int r2);
 
+	int GetConnectingRoom1() {return _room1ID;};
+	int GetConnectingRoom2() {return _room2ID;};
+
 	/**
 	 * return the distance to the point x ,y
 	 * @param x

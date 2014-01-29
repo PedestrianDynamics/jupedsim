@@ -46,7 +46,7 @@
 	<agents>
 		<agents_distribution>
 
-		<group group_id="1" room_id="0" subroom_id="0" number="100" goal_id="" router_id="1" route_id=""/>
+		<group group_id="1" room_id="0" subroom_id="0" number="1" goal_id="" router_id="1" route_id=""/>
 	
 		
 		</agents_distribution>

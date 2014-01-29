@@ -72,7 +72,6 @@ public:
 			const std::vector<std::string> rooms= std::vector<std::string>());
 
 
-
 protected:
 	void DumpAccessPoints(int p=-1);
 
@@ -135,11 +134,21 @@ protected:
 	    return s.str();
 	}
 
+	/**
+	 *
+	 * @param ped the pedestrian
+	 * @param goalID, the goal ID.
+	 * @param path where to store the intermediate destination
+	 */
+	void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+
 private:
 	/**
 	 * Compute the intermediate paths between the two given transitions IDs
 	 */
 	void GetPath(int transID1, int transID2);
+
+
 
 	/**
 	 * Perform the FloydWahrshal algorithm
@@ -155,6 +164,8 @@ private:
 	 * Each router is responsible of getting the correct filename
 	 */
 	virtual std::string GetRoutingInfoFile() const;
+
+
 
 private:
 	int **_pathsMatrix;

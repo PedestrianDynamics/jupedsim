@@ -40,7 +40,7 @@
 #include <iomanip>
 
 //penalty factors for distances outdoor
-#define PENALTY_FACTOR 10
+#define PENALTY_FACTOR 1
 
 
 using namespace std;
@@ -465,6 +465,52 @@ void GlobalRouter::GetPath(int i, int j) {
 		GetPath(i, _pathsMatrix[i][j]);
 	_tmpPedPath.push_back(j);
 }
+
+
+void GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& path){
+
+	//find the nearest APs and start from there
+	int next = GetBestDefaultRandomExit(ped);
+	if(next==-1){
+		Log->Write("ERROR:\t there is an error in getting the path for ped %d to the goal %d", ped->GetID(),goalID);
+		exit(EXIT_FAILURE);
+	}
+
+	// get the transformed goal_id
+	int to_door_uid =
+			_building->GetFinalGoal(goalID)->GetAllWalls()[0].GetUniqueID();
+	int to_door_matrix_index=_map_id_to_index[to_door_uid];
+	int from_door_matrix_index=_map_id_to_index[next];
+
+	// thats probably a goal located outside the geometry or not an exit from the geometry
+	if(to_door_uid==-1){
+		Log->Write("ERROR: \tGlobalRouter: there is something wrong with final destination [ %d ]\n",goalID);
+		exit(EXIT_FAILURE);
+	}
+
+	//populate the line unique id to cross
+	GetPath(from_door_matrix_index,to_door_matrix_index);
+
+	for(unsigned int i=0;i<_tmpPedPath.size();i++){
+		int ap_id= _map_index_to_id[_tmpPedPath[i]];
+		int subroom_uid=_accessPoints[ap_id]->GetConnectingRoom1();
+		if(subroom_uid==-1) continue;
+		SubRoom* sub = _building->GetSubRoomByUID(subroom_uid);
+		if (sub && IsElementInVector(path, sub)==false) path.push_back(sub);
+	}
+
+	for(unsigned int i=0;i<_tmpPedPath.size();i++){
+		int ap_id= _map_index_to_id[_tmpPedPath[i]];
+		int subroom_uid=_accessPoints[ap_id]->GetConnectingRoom2();
+		if(subroom_uid==-1) continue;
+		SubRoom* sub = _building->GetSubRoomByUID(subroom_uid);
+		if (sub && IsElementInVector(path, sub)==false) path.push_back(sub);
+	}
+
+	//double distance = _accessPoints[next]->GetDistanceTo(0)+ped->GetDistanceToNextTarget();
+	//cout<<"shortest distance to outside: " <<distance<<endl;
+}
+
 
 /*
  floyd_warshall()

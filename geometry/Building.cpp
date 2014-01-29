@@ -748,6 +748,17 @@ Crossing* Building::GetTransOrCrossByID(int id) const {
 	return NULL;
 }
 
+SubRoom* Building::GetSubRoomByUID( int uid){
+	for (unsigned int i = 0; i < _rooms.size();i++) {
+		Room* room = _rooms[i];
+		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+			SubRoom* sub = room->GetSubRoom(j);
+			if (sub->GetUID()==uid) return sub;;
+		}
+	}
+	Log->Write("ERROR:\t No subroom exits with the unique id %d",uid);
+	return NULL;
+}
 
 bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines){
 	for (unsigned int i = 0; i < _rooms.size();i++) {

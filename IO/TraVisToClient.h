@@ -58,7 +58,7 @@
 #include <winsock.h>
 #define WS_MAJOR_VERSION   1        ///< major version of Winsock API
 #define WS_MINOR_VERSION   1        ///< minor version of Winsock API
-#define SHUT_RDWR          SD_BOTH  ///< @c SHUT_RDWR is POSIX standard
+#define SHUT_RDWR          2  ///< @c SHUT_RDWR is POSIX standard
 typedef SOCKET socket_t;
 typedef int socklen_t;
 #define startSocketSession() _startWin32SocketSession()

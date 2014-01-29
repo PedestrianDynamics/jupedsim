@@ -126,20 +126,6 @@
 			</parameters>
 		</router>
 
-		<router router_id="2" description="quickest">
-			<parameters>
-				<!-- extra routing information -->
-				<navigation_lines file="routing.xml" />
-			</parameters>
-		</router>
-<!--  
-		<router router_id="3" description="nav_mesh">
-			<parameters>
-				<decomposition method="triangulation" />
-				<mesh_file file="bla.nav"/>
-			</parameters>
-		</router>
--->
 	</route_choice_models>
 
 </JuPedSim>

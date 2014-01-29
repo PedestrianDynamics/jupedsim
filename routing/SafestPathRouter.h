@@ -76,23 +76,27 @@ private:
 	void main_2( );
 	void main_3(Pedestrian* p);
 
+	int MapSection;
+
 
 
 private:
 	// double dMatrixPreEvac[1][11];
 	// double dFinalLength[1][11];
 	// double dFinalLineOFP[1][11];
-	// double TotalNumberofPedInsection;
 	 double dFinalLineEvac[1][11];
 //	 double *_finalLineEvac;
 
-	 double rR[1][11];
-	 double peopleAtSection[1][11];
+	// double rR[1][11];
+	 double **rR;
+
+	 //double peopleAtSection[1][11];
+	 double *peopleAtSection;
 	// double iNt1[1][11];
 	// double iNt2[1][11];
 	// double iNt3[1][11];
 	// double iNt4[1][11];
-	 double fI[11][11];
+	 //double fI[11][11];
 };
 
 #endif /* SAFESTPATHROUTER_H_ */
