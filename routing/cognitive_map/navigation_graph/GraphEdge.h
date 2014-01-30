@@ -10,6 +10,9 @@
 #define GRAPHEDGE_H_
 
 
+class SubRoom;
+class GraphVertex;
+
 /**
  * @brief Graph Edge.
  *
@@ -22,13 +25,14 @@ public:
      * Constructors & Destructors
      ****************************/
 
-    GraphEdge();
-
+    GraphEdge(GraphVertex const * const s, GraphVertex const * const d, SubRoom const * const sr);
     virtual ~GraphEdge();
 
 
 private:
-
+    GraphVertex const * const src;
+    GraphVertex const * const dest;
+    SubRoom const * const subroom;
 
 };
 

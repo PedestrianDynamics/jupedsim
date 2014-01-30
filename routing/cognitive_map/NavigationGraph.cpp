@@ -8,6 +8,9 @@
 
 #include "NavigationGraph.h"
 
+#include "navigation_graph/GraphEdge.h"
+#include "../../geometry/Building.h"
+
 using namespace std;
 
 /**
@@ -15,6 +18,7 @@ using namespace std;
  */
 
 NavigationGraph::NavigationGraph()
+    : building(b)
 {
 
 }
@@ -22,4 +26,16 @@ NavigationGraph::NavigationGraph()
 NavigationGraph::~NavigationGraph()
 {
 
-};
+}
+
+void NavigationGraph::AddVertex(NavLine const * const nl)
+{
+    vertices.emplace(nl, GraphVertex(nl));
+    return;
+}
+
+
+void NavigationGraph::AddEdge(NavLine* src, NavLine * dest, SubRoom * sr)
+{
+
+}

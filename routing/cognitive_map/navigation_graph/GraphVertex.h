@@ -9,13 +9,17 @@
 #ifndef GRAPHVERTEX_H_
 #define GRAPHVERTEX_H_
 
-#include <map>
+#include <unordered_map>
 #include "GraphEdge.h"
+
+class SubRoom;
+class NavLine;
+
+
 /**
  * @brief Graph Vertex.
  *
  */
-
 class GraphVertex {
 
 public:
@@ -23,14 +27,21 @@ public:
      * Constructors & Destructors
      ****************************/
 
-    GraphVertex();
+    GraphVertex(NavLine const * const nl);
     virtual ~GraphVertex();
+
+    // add and remove edge pointer from vertex
+    void AddOutEdge(GraphVertex const * const dest, SubRoom const * const sr);
+    int RemoveOutEdge(GraphVertex * dest);
+    int RemoveOutEdge(GraphEdge * edge);
+
 
 
 private:
-    std::map<int, GraphEdge> edges;
+    // edges wich are "known" from this vertex
+    std::unordered_map<GraphVertex *, GraphEdge> out_edges;
+    const NavLine * const nav_line;
 
 };
-
 
 #endif /* GRAPHVERTEX_H_ */
