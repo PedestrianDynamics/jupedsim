@@ -18,10 +18,29 @@ using namespace std;
 
 GraphEdge::~GraphEdge()
 {
-
     return;
-};
+}
+
 GraphEdge::GraphEdge(GraphVertex const * const s, GraphVertex const  * const d, SubRoom const * const  sr)
     : src(s), dest(d), subroom(sr)
 {
+}
+
+GraphEdge::GraphEdge(GraphEdge const &ge)
+    : src(ge.src), dest(ge.dest), subroom(ge.subroom)
+{
+}
+const GraphVertex * GraphEdge::getDest() const
+{
+    return dest;
+}
+const GraphVertex * GraphEdge::getSrc() const
+{
+    return src;
+}
+
+const SubRoom * GraphEdge::getSubRoom() const
+{
+    return subroom;
+
 }

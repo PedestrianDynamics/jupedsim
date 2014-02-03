@@ -16,6 +16,9 @@ class Building;
 class NavLine;
 class SubRoom;
 
+typedef std::unordered_map<const NavLine * , GraphVertex> VerticesContainer;
+
+
 /**
  * @brief Navigation Graph
  *
@@ -33,11 +36,12 @@ public:
      * Constructors & Destructors
      ****************************/
 
-    NavigationGraph(Building const * const b);
+    NavigationGraph(const Building * const b);
+    NavigationGraph(const NavigationGraph & ng);
+
     virtual ~NavigationGraph();
 
     void AddVertex(NavLine const * const nl);
-
     void AddEdge(NavLine const * const src, NavLine const * const dest, SubRoom const * const sr);
 
 
@@ -46,9 +50,8 @@ private:
     /**
      * Vertices and Edges
      */
-    std::unordered_map<NavLine const * , GraphVertex> vertices;
-
-    Building const * const building;
+    VerticesContainer vertices;
+    const Building * const building;
 
 };
 

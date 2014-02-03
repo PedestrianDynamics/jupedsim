@@ -24,6 +24,12 @@ GraphVertex::GraphVertex(NavLine const * const nl)
 {
 }
 
+
+GraphVertex::GraphVertex(GraphVertex const & gv)
+    : nav_line(gv.nav_line)
+{
+}
+
 GraphVertex::~GraphVertex()
 {
     return;
@@ -33,20 +39,15 @@ void GraphVertex::AddOutEdge(GraphVertex const * const dest, SubRoom const * con
 {
     out_edges.emplace(this, this, dest, sr);
     return;
-
 }
 
 int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 {
-    //  return out_edges.erase(edge->dest);
-    return 2;
-
+    return out_edges.erase(edge->getDest());
 }
 
-int GraphVertex::RemoveOutEdge(GraphVertex * dest)
+int GraphVertex::RemoveOutEdge(const GraphVertex * dest)
 {
-    // return out_edges.erase(dest);
-    return 2;
-
+    return out_edges.erase(dest);
 
 }

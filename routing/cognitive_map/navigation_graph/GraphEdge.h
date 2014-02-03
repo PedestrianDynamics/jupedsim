@@ -26,7 +26,13 @@ public:
      ****************************/
 
     GraphEdge(GraphVertex const * const s, GraphVertex const * const d, SubRoom const * const sr);
+    GraphEdge(GraphEdge const & ge);
     virtual ~GraphEdge();
+
+    // Getter collection
+    const GraphVertex * getDest() const;
+    const GraphVertex * getSrc() const;
+    const SubRoom * getSubRoom() const;
 
 
 private:

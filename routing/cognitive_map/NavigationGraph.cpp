@@ -17,25 +17,33 @@ using namespace std;
  * Constructors & Destructors
  */
 
-NavigationGraph::NavigationGraph()
+NavigationGraph::NavigationGraph(const Building * const b)
     : building(b)
 {
+}
 
+NavigationGraph::NavigationGraph(const NavigationGraph & ng)
+    : building(ng.building)
+{
 }
 
 NavigationGraph::~NavigationGraph()
 {
-
 }
 
 void NavigationGraph::AddVertex(NavLine const * const nl)
 {
-    vertices.emplace(nl, GraphVertex(nl));
+    vertices.emplace(nl, nl);
     return;
 }
 
-
-void NavigationGraph::AddEdge(NavLine* src, NavLine * dest, SubRoom * sr)
+void NavigationGraph::AddEdge(NavLine const * const src, NavLine const * const dest, SubRoom const * const sr)
 {
+    VerticesContainer::iterator src_it = vertices.find(src);
+    VerticesContainer::iterator dest_it = vertices.find(dest);
 
+    if(src_it != vertices.end() && dest_it != vertices.end())
+    {
+        src_it->second.AddOutEdge(&dest_it->second, sr);
+    }
 }

@@ -28,18 +28,18 @@ public:
      ****************************/
 
     GraphVertex(NavLine const * const nl);
+    GraphVertex(GraphVertex const & gv);
+
     virtual ~GraphVertex();
 
     // add and remove edge pointer from vertex
-    void AddOutEdge(GraphVertex const * const dest, SubRoom const * const sr);
-    int RemoveOutEdge(GraphVertex * dest);
+    void AddOutEdge(const GraphVertex * const dest, const SubRoom  * const sr);
+    int RemoveOutEdge(const GraphVertex * dest);
     int RemoveOutEdge(GraphEdge * edge);
-
-
 
 private:
     // edges wich are "known" from this vertex
-    std::unordered_map<GraphVertex *, GraphEdge> out_edges;
+    std::unordered_map<const GraphVertex*, GraphEdge> out_edges;
     const NavLine * const nav_line;
 
 };
