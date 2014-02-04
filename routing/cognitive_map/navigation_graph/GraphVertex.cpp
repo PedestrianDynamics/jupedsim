@@ -37,7 +37,7 @@ GraphVertex::~GraphVertex()
 
 void GraphVertex::AddOutEdge(GraphVertex const * const dest, SubRoom const * const sr)
 {
-    out_edges.emplace(this, this, dest, sr);
+    out_edges.emplace(this, new GraphEdge(this, dest, sr));
     return;
 }
 

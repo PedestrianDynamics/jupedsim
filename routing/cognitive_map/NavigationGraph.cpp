@@ -33,7 +33,7 @@ NavigationGraph::~NavigationGraph()
 
 void NavigationGraph::AddVertex(NavLine const * const nl)
 {
-    vertices.emplace(nl, nl);
+    vertices.emplace(nl, new GraphVertex(nl));
     return;
 }
 
@@ -44,6 +44,6 @@ void NavigationGraph::AddEdge(NavLine const * const src, NavLine const * const d
 
     if(src_it != vertices.end() && dest_it != vertices.end())
     {
-        src_it->second.AddOutEdge(&dest_it->second, sr);
+        src_it->second->AddOutEdge(dest_it->second, sr);
     }
 }

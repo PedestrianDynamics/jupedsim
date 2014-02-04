@@ -39,7 +39,7 @@ public:
 
 private:
     // edges wich are "known" from this vertex
-    std::unordered_map<const GraphVertex*, GraphEdge> out_edges;
+    std::unordered_map<const GraphVertex*, GraphEdge *> out_edges;
     const NavLine * const nav_line;
 
 };

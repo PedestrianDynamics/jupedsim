@@ -16,7 +16,7 @@ class Building;
 class NavLine;
 class SubRoom;
 
-typedef std::unordered_map<const NavLine * , GraphVertex> VerticesContainer;
+typedef std::unordered_map<const NavLine * , GraphVertex *> VerticesContainer;
 
 
 /**
