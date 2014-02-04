@@ -238,7 +238,12 @@ vtkAssembly* LinePlotter2D::createAssembly(){
 		polyData->GetPointData()->SetScalars(door_lineScalars);
 
 		// create mapper
+
+#if VTK_MAJOR_VERSION <= 5
+        door_mapper->SetInput(polyData);
+#else
         door_mapper->SetInputData(polyData);
+#endif
 		door_mapper->SetLookupTable(m_lookupTable);
 		door_mapper->SetColorModeToMapScalars();
 		//mapper->SetScalarRange(m_scalarMin, m_scalarMax);
@@ -265,9 +270,12 @@ vtkAssembly* LinePlotter2D::createAssembly(){
 		polyData->SetPoints(wall_points);
 		polyData->SetLines(wall_lines);
 		polyData->GetPointData()->SetScalars(wall_lineScalars);
-
-		// create mapper
+        // create mapper
+#if VTK_MAJOR_VERSION <= 5
+        wall_mapper->SetInput(polyData);
+#else
         wall_mapper->SetInputData(polyData);
+#endif
 		wall_mapper->SetLookupTable(m_lookupTable);
 		wall_mapper->SetColorModeToMapScalars();
 		//mapper->SetScalarRange(m_scalarMin, m_scalarMax);

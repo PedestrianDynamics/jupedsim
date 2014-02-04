@@ -55,7 +55,11 @@ PointPlotter::PointPlotter()
 //	vtkGlyph3D* glyph = vtkGlyph3D::New();
 	VTK_CREATE(vtkGlyph3D,glyph);
 	glyph->SetSourceConnection(src->GetOutputPort());
+#if VTK_MAJOR_VERSION <= 5
+    glyph->SetInput(polyData);
+#else
     glyph->SetInputData(polyData);
+#endif
 	//src->Delete();
 	//polyData->Delete();
 	glyph->SetColorModeToColorByScalar();
