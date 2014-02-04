@@ -42,7 +42,7 @@
 #include <vtkSmartPointer.h>
 
 
-#include "Point.h"
+#include "JPoint.h"
 #include "./src/SystemSettings.h"
 #include "LinePlotter.h"
 
@@ -110,7 +110,7 @@ void LinePlotter::SetNumberOfPoints(int nPoints) {
 }
 
 
-void LinePlotter::PlotLine(Point* pt1, Point* pt2) {
+void LinePlotter::PlotLine(JPoint* pt1, JPoint* pt2) {
 
 	double m[3], n[3];
 	unsigned char col[3];
@@ -131,7 +131,7 @@ void LinePlotter::PlotLine(Point* pt1, Point* pt2) {
 }
 
 
-void LinePlotter::addVertex(Point *pt1) {
+void LinePlotter::addVertex(JPoint *pt1) {
 	double m[3];
 	unsigned char col[3];
 
@@ -163,7 +163,7 @@ void LinePlotter::addVertex(Point *pt1) {
 
 void LinePlotter::addVertex(double vertex[3],double col[3]) {
 
-	Point *pts = new Point();
+	JPoint *pts = new JPoint();
 	pts->setColorRGB(col[0],col[1],col[2]);
 	pts->setXYZ(vertex);
 	addVertex(pts);

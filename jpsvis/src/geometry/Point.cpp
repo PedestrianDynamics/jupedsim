@@ -1,157 +1,243 @@
 /**
- * @headerfile Point.cpp
- * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
- * @version 0.1
- * Copyright (C) <2009-2010>
- *
- *
+ * File:   Point.cpp
+ * 
+ * Created on 30. September 2010, 09:21
  * @section LICENSE
- * This file is part of OpenPedSim.
+ * This file is part of JuPedSim.
  *
- * OpenPedSim is free software: you can redistribute it and/or modify
+ * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OpenPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
  *
- * @brief method for plotting Plot a lot of straight lines,<br> and create a single actor to render
  *
- *  Created on: 17.05.2009
  *
  */
 
 #include "Point.h"
-#include "../Debug.h"
+#include "../general/Macros.h"
 
-#include <vtkMath.h>
-#include <math.h>
+#include  <iostream>
+#include  <cmath>
+#include  <sstream>
 
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 
-Point::Point(double xyz[3],  char color[]/*="abc"*/) {
-	x=xyz[0];
-	y=xyz[1];
-	z=xyz[2];
-	r=color[0];
-	g=color[1];
-	b=color[2];
+
+
+
+/************************************************************
+  Konstruktoren
+ ************************************************************/
+Point::Point() {
+    _x = 0.0;
+    _y = 0.0;
 }
 
-
-Point::Point(double x, double y, double z, unsigned char r/*=100*/, unsigned char g/*=100*/ , unsigned char b/*=100*/){
-	this->setColorRGB(r,g, b);
-	this->x=x;
-	this->y=y;
-	this->z=z;
-
-}
-Point::Point(){
-	x=0;
-	y=0;
-	z=0;//creates a point centered at the origin
+Point::Point(double x, double y) {
+    _x = x;
+    _y = y;
 }
 
-Point::~Point() {
-
+Point::Point(const Point& orig) {
+    _x = orig.GetX();
+    _y = orig.GetY();
 }
 
-void Point::setColorRGB(unsigned char r1, unsigned char g1,unsigned char b1){
-	r=r1;
-	g=g1;
-	b=b1;
+std::string Point::toString() const {
+	std::stringstream tmp;
+	tmp<<"( "<<_x<<" : " <<_y<<" )";
+	return tmp.str();
+};
+
+void Point::SetX(double x) {
+    _x = x;
 }
 
-void Point::setXYZ(double*xyz){
-	x=xyz[0];
-	y=xyz[1];
-	z=xyz[2];
+void Point::SetY(double y) {
+    _y = y;
 }
-void Point::getXYZ(double*xyz){
-	xyz[0]=x;
-	xyz[1]=y;
-	xyz[2]=z;
+
+double Point::GetX() const {
+    return _x;
+}
+
+double Point::GetY() const {
+    return _y;
+}
+
+double Point::Norm() const {
+    return sqrt(_x * _x + _y * _y);
+}
+
+double Point::NormSquare() const {
+    return (_x * _x + _y * _y);
+}
+
+Point Point::Normalized() const {
+    double norm=Norm();
+    if (norm > J_EPS*J_EPS)
+        return ( Point(_x, _y) / norm );
+    else return Point(0.0, 0.0);
+}
+
+// scalar product
+double Point::ScalarP(const Point& v) const {
+    //return _x * v.GetX() + _y * v.GetY();
+    return _x * v._x + _y * v._y;
+}
+
+/// determinant of the square matrix formed by the vectors [ this, v]
+double Point::Det(const Point& v) const {
+	return _x * v._y - _y * v._x;
+}
+
+/* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
+ * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
+ * alle Punkte müssen in "normalen" Koordinaten gegeben sein
+ * center: Center der Ellipse in deren System transformiert werden soll
+ * phi: Winkel der Ellipse in deren System transformiert werden soll
+ * */
+
+
+/*coordinate transformation of the point P(x,y) expressed in coord system S1 to a new coord. sys S2
+           
+           A
+           * 
+         |     S_2       
+     \   |   /        
+ |    \  |  /         
+ |     \ | /^phi      
+ | yc___\ /_)_________ S_3
+ |       O1
+ |       |
+ |       |
+ |       xc
+ |
+ |___________________________
+O
+S_1
+
+
+////////////////////////////////////
+S_1 is cartesian coordinate system!! 
+////////////////////////////////////
+
+  input:
+  - (x,y)        :  coordinates of the point A in S_1
+  - (xc,yc)      : coordinate of the center in the  S_1 (Center of Ellipse)
+  - phi          : angle between the S_1 and S_2
+  
+  output:
+  +  (xnew,ynew) : new coordinate of the point A in the coord. sys S2 
+  
+OA = OO1 + O1A
+
+ [x ; y] = [xc ; yc] +  [x_3 ; y_3]   : (1) ( with [x_i ; y_i] coordinats of P in S_i and i in {1,2,3} )
+
+[x_2 ; y_2] = M(phi) * [x_3 ; y_3]  : (2)
+
+
+(1) in (2)---> 
+
+-->  [x_2 ; y_2] = M(phi) * ([x ; y] - [xc ; yc])
+
+
+
+after rotation:
+OC = OO1 +O1C
+OC  = -O1O +O1C
+
+xnew = -xc + x
+  
+*/
+Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) const {
+    Point p = Point(_x, _y);
+    return (p - center).Rotate(cphi, -sphi);
 }
 
 /*
- * return the coordinates
- */
-double Point::getX(){return x;}
-double Point::getY(){return y;}
-double Point::getZ(){return z;}
+This is the reverse funktion of CoordTransToEllipse(), 
+where the coord. of a point are transformated to cart. coord.
 
-/**
- * return the angle of intersection between the 2 points and the x axis
- * @return the angle in degree
- * FIXME: why +90??
- */
-double Point::angleMadeWith(Point& pt){
-	double dx=x-pt.x;
-	double dy=y-pt.y;
-	//double dist=distanceTo(pt);
+ input:
+  - (x,y)        :  coordinates of the point P in S_2
+  - (xc,yc)      : coordinate of the center in the  S_1 (Center of Ellipse)
+  - phi          : angle between the S_1 and S_2
+  
+  output:
+  +  (xnew,ynew) : new coordinate of the point P in the coord. sys S_1
 
-	if((dx==0) && (dy==0)){
-		Debug::Error("error found in geometry");
-		Debug::Error("wrong angle might be returned");
-		return 0;
-		//return vtkMath::DegreesFromRadians(asin(dx/dist));
-	}
+[x_2 ; y_2] = M(phi) * ([x ; y] - [xc ; yc]) (see comments in CoordTransToEllipse() )
 
-	//	return vtkMath::DegreesFromRadians(asin(dx/dist));
-	return vtkMath::DegreesFromRadians(atan2(dy,dx))+90 ;
+
+----> [x ; y] =  M(-phi) * [x_2 ; y_2] +  [xc ; yc]
+
+*/
+
+Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const {
+    Point p = Point(_x, _y);
+    return (p.Rotate(cphi, sphi) + center);
 }
 
-double Point::distanceTo(Point& pt){
-	double dx=x-pt.x; dx*=dx;
-	double dy=y-pt.y; dy*=dy;
-	double dz=z-pt.z; dz*=dz;
-	return sqrt(dx+dy+dz);
+/*rotate a two-dimensional vector by an angle of theta
 
-}
-double * Point::centreCoordinatesWith(Point &pt){
-	double *res= new double[3];
-	res[0]=(x+pt.getX())/2;
-	res[1]=(y+pt.getY())/2;
-	res[2]=(z+pt.getZ())/2;
-	return res;
+Rotation-matrix=[cos(theta)  -sin(theta)]
+                [ sin(theta)  cos(theta)]
+
+*/
+Point Point::Rotate(double ctheta, double stheta) const {
+    return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
 }
 
-double Point::distanceBetween(Point& pt1, Point& pt2){
-	return pt1.distanceTo(pt2);
-}
-double Point::angleMadeBetween(Point& pt1, Point& pt2){
-	return pt1.angleMadeWith(pt2);
-}
-double *Point::centreCoordinatesBetween(Point& pt1, Point& pt2){
-	return pt1.centreCoordinatesWith(pt2);
+//  sum
+const Point Point::operator+(const Point& p) const {
+    //return Point(_x + p.GetX(), _y + p.GetY());
+    return Point(_x + p._x, _y + p._y);
 }
 
-/*
- * return the color
- */
-
-unsigned char Point::getR(){return r;}
-unsigned char Point::getG(){return g;}
-unsigned char Point::getB(){return b;}
-
-
-void Point::setColorHeightThicknes(double CHT[3]){
-	 thickness=CHT[2];
-	 height=CHT[1];
-	 color=CHT[0];
+// sub
+const Point Point::operator-(const Point& p) const {
+    // return Point(_x - p.GetX(), _y - p.GetY());
+    return Point(_x - p._x, _y - p._y);
 }
-void Point::getColorHeightThicknes(double *CHT){
-	CHT[0]=color;
-	CHT[1]=height;
-	CHT[2]=thickness;
+
+// equal
+bool Point::operator==(const Point& p) const {
+//    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
+    return (fabs(_x - p._x) < J_EPS && fabs(_y - p._y) < J_EPS);
+}
+
+// not equal
+bool Point::operator!=(const Point& p) const {
+    //return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
+    return (fabs(_x - p._x) > J_EPS || fabs(_y - p._y) > J_EPS);
+}
+
+
+// multiplication with scalar
+const Point operator*(const Point& p, double f) {
+    //return Point(p.GetX() * f, p.GetY() * f);
+    return Point(p._x * f, p._y * f);
+}
+
+// divition with scalar
+const Point operator/(const Point& p, double f) {
+    if (f>J_EPS*J_EPS)
+        return Point(p._x / f, p._y / f);
+    else
+    {
+        std::cout << "Warning: Point::/operator. dividand "<<f<< " is to small. Set it to 1 instead"<<std::endl;
+        return Point(p._x, p._y);
+    }
+    //return Point(p.GetX() / f, p.GetY() / f);
 }

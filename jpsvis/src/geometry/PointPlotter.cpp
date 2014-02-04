@@ -16,7 +16,7 @@
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
 
-#include "Point.h"
+#include "JPoint.h"
 #include "PointPlotter.h"
 #include "./src/SystemSettings.h"
 
@@ -91,7 +91,7 @@ PointPlotter::~PointPlotter()
  * add a point to the plot
  */
 
-void PointPlotter::PlotPoint(Point * point){
+void PointPlotter::PlotPoint(JPoint * point){
 	double x=point->getX();
 	double y=point->getY();
 	double z=point->getZ();

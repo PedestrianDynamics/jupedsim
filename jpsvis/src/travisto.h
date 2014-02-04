@@ -35,7 +35,7 @@
 
 
 #include "ui_travisto.h"
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 #include <vector>
 

@@ -341,10 +341,14 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 					pAVIWriter->SetFileName(videoName.toStdString().c_str());
 
 					if(windowToImageFilter!=NULL)
-						if(windowToImageFilter->GetInput()==NULL){ //should be the case by first call
-							windowToImageFilter->SetInput(renderWindow);
-							pAVIWriter->SetInput(windowToImageFilter->GetOutput());
-							pAVIWriter->Start();
+                        if(windowToImageFilter->GetInput()==NULL){ //should be the case by first call
+                            windowToImageFilter->SetInput(renderWindow);
+#if VTK_MAJOR_VERSION <= 5
+                            pAVIWriter->SetInput(windowToImageFilter->GetOutput());
+#else
+                            pAVIWriter->SetInputConnection(windowToImageFilter->GetOutputPort());
+#endif
+                            pAVIWriter->Start();
 						}
 					extern_recording_enable=true;
 					isRecording=true;

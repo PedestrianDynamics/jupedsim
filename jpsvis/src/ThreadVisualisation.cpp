@@ -79,6 +79,7 @@
 #include "SystemSettings.h"
 #include "Debug.h"
 #include <vtkSphereSource.h>
+#include <vtkCylinderSource.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkActor.h>
 
@@ -435,12 +436,26 @@ void  ThreadVisualisation::initGlyphs(){
 
 	VTK_CREATE (vtkSphereSource, sphereSource);
 	sphereSource->SetRadius(30);
-	//sphereSource->SetPhiResolution(20);
-	//sphereSource->SetThetaResolution(20);
+	sphereSource->SetPhiResolution(20);
+	sphereSource->SetThetaResolution(20);
+    extern_glyphs_pedestrians->SetSourceConnection(sphereSource->GetOutputPort());
 
-	//extern_glyphs_pedestrians->SetSource(sphereSource->GetOutput());
-	extern_glyphs_pedestrians->SetSourceConnection(sphereSource->GetOutputPort());
-	extern_glyphs_pedestrians->SetInputConnection(sphereSource->GetOutputPort());
+#if VTK_MAJOR_VERSION <= 5
+    extern_glyphs_pedestrians->SetSource(sphereSource->GetOutput());
+#else
+    extern_glyphs_pedestrians->SetInputConnection(sphereSource->GetOutputPort());
+#endif
+
+
+
+	//VTK_CREATE (vtkCylinderSource, cylinderSource);
+	//cylinderSource->SetHeight(160);
+	//cylinderSource->SetRadius(30);
+	//extern_glyphs_pedestrians->SetSourceConnection(cylinderSource->GetOutputPort());
+	//extern_glyphs_pedestrians->SetInputConnection(cylinderSource->GetOutputPort());
+
+
+
 
 	extern_glyphs_pedestrians->SetColorModeToColorByScalar();
 	extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
@@ -459,6 +474,7 @@ void  ThreadVisualisation::initGlyphs(){
 	lut->SetHueRange(0.0,0.470);
 	//lut->SetSaturationRange(0,0);
 	lut->SetValueRange(1.0,1.0);
+	lut->SetNanColor(0.2,0.2,0.2,0.5);
 	lut->SetNumberOfTableValues(256);
 	lut->Build();
 	mapper->SetLookupTable(lut);

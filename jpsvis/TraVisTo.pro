@@ -1,9 +1,9 @@
 TEMPLATE = app
 TARGET = TraVisTo
 CONFIG += qt
-QT += xml \
-    network
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += xml network
+
+greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
 win32 { 
         INCLUDEPATH += C:/VTK/include/vtk-6.1
@@ -104,7 +104,7 @@ win32 {
             -lvtkRenderingFreeType-6.1  \
             -lvtkRenderingFreeTypeOpenGL-6.1  \
             -lvtkRenderingGL2PS-6.1  \
-            -lvtkRenderingHybridOpenGL-6.1  \
+#            -lvtkRenderingHybridOpenGL-6.1  \
             -lvtkRenderingImage-6.1  \
             -lvtkRenderingLabel-6.1  \
             -lvtkRenderingLOD-6.1  \
@@ -113,7 +113,7 @@ win32 {
             -lvtkRenderingVolume-6.1  \
             -lvtkRenderingVolumeAMR-6.1  \
             -lvtkRenderingVolumeOpenGL-6.1  \
-            -lvtksqlite-6.1  \
+ #           -lvtksqlite-6.1  \
             -lvtksys-6.1  \
             -lvtktiff-6.1  \
             -lvtkverdict-6.1  \
@@ -123,7 +123,7 @@ win32 {
             -lvtkViewsInfovis-6.1  \
             -lvtkViewsQt-6.1  \
             -lvtkzlib-6.1  \
-           # -lwsock32
+            -lwsock32
         }
 win32er {
         INCLUDEPATH += C:/VTK/include/vtk-5.10
@@ -278,7 +278,78 @@ unix {
             -lvtkzlib-6.0  \
 }
    
-    HEADERS += forms/Settings.h \
+win323{
+    INCLUDEPATH += C:/VTK/include/vtk-5.10
+    LIBS += -LC:/VTK/bin \
+        -lvtksys \
+        -lvtkzlib \
+        -lvtkjpeg \
+        -lvtkpng \
+        -lvtktiff \
+        -lvtkexpat \
+        -lvtkfreetype \
+        -lvtklibxml2 \
+        -lvtkDICOMParser \
+        -lvtkverdict \
+        -lvtkNetCDF \
+        -lvtkmetaio \
+        -lvtkexoIIc \
+        -lvtkalglib \
+        -lvtkftgl \
+        -lvtkCommon \
+        -lvtkFiltering \
+        -lvtkImaging \
+        -lvtkGraphics \
+        -lvtkIO \
+        -lvtkRendering \
+        -lvtkParallel \
+        -lvtkHybrid \
+        -lvtkWidgets \
+        -lvtkInfovis \
+        -lvtkViews \
+        -lwsock32 \
+        }
+    unix { 
+        INCLUDEPATH += /usr/include/vtk-5.8
+        LIBS += -L/usr/lib/ \
+            -lvtkCommon \
+            -lvtkDICOMParser \
+            -lvtkFiltering \
+            -lvtkGenericFiltering \
+            -lvtkGraphics \
+            -lvtkHybrid \
+            -lvtkIO \
+            -lvtkImaging \
+            -lvtkRendering \
+            -lvtkVolumeRendering \
+            -lvtkWidgets \
+            -lvtkexoIIc \
+            -lvtkftgl \
+            -lvtksys \
+            -lvtkverdict \
+            -lvtkParallel \
+            -lvtkmetaio
+    }
+
+    HEADERS += src/geometry/Building.h \
+        src/geometry/Crossing.h \
+        src/geometry/Goal.h \
+        src/geometry/Hline.h \
+        src/geometry/Line.h \
+        src/geometry/NavLine.h \
+        src/geometry/Obstacle.h \
+        src/geometry/Point.h \
+        src/geometry/Room.h \
+        src/geometry/SubRoom.h \
+        src/geometry/Transition.h \
+        src/geometry/Wall.h \
+        src/geometry/JPoint.h \
+        src/tinyxml/tinystr.h \
+        src/tinyxml/tinyxml.h \
+        src/general/Macros.h \
+        src/IO/OutputHandler.h \
+        src/IO/TraVisToClient.h \
+        forms/Settings.h \
         src/SaxParser.h \
         src/Debug.h \
         src/travisto.h \
@@ -296,28 +367,31 @@ unix {
         src/extern_var.h \
         src/geometry/FacilityGeometry.h \
         src/geometry/LinePlotter.h \
-        src/geometry/Point.h \
         src/geometry/PointPlotter.h \
         src/geometry/LinePlotter2D.h \
         src/geometry/PointPlotter2D.h \
-        src/geometry/jul/Building.h \
-        src/geometry/jul/Room.h \
-        src/geometry/jul/Line.h \
-        src/geometry/jul/Transition.h \
-        src/geometry/jul/Wall.h \
-        src/geometry/jul/CPoint.h \
-        src/geometry/jul/Macros.h \
-        src/geometry/pg3/CLine.h \
-        src/geometry/pg3/CBuilding.h \
-        src/geometry/pg3/CRoom.h \
-        src/geometry/pg3/CCell.h \
-        src/geometry/pg3/CCoordsList.h \
-        src/geometry/pg3/Common.h \
-        src/geometry/pg3/CTextLog.h \
-        src/geometry/pg3/CTransition.h \
         src/network/TraVisToServer.h
         
-    SOURCES += forms/Settings.cpp \
+    SOURCES += src/geometry/Building.cpp \
+        src/geometry/Crossing.cpp \
+        src/geometry/Goal.cpp \
+        src/geometry/Hline.cpp \
+        src/geometry/Line.cpp \
+        src/geometry/NavLine.cpp \
+        src/geometry/Obstacle.cpp \
+        src/geometry/Point.cpp \
+        src/geometry/Room.cpp \
+        src/geometry/SubRoom.cpp \
+        src/geometry/Transition.cpp \
+        src/geometry/Wall.cpp \
+        src/geometry/JPoint.cpp \
+        src/tinyxml/tinystr.cpp \
+        src/tinyxml/tinyxml.cpp \
+        src/tinyxml/tinyxmlerror.cpp \
+        src/tinyxml/tinyxmlparser.cpp \
+        src/IO/OutputHandler.cpp \
+        src/IO/TraVisToClient.cpp \
+        forms/Settings.cpp \
         src/SaxParser.cpp \
         src/Debug.cpp \
         src/main.cpp \
@@ -336,22 +410,7 @@ unix {
         src/geometry/PointPlotter2D.cpp \
         src/geometry/FacilityGeometry.cpp \
         src/geometry/LinePlotter.cpp \
-        src/geometry/Point.cpp \
         src/geometry/PointPlotter.cpp \
-        src/geometry/jul/Building.cpp \
-        src/geometry/jul/Room.cpp \
-        src/geometry/jul/Line.cpp \
-        src/geometry/jul/Transition.cpp \
-        src/geometry/jul/Wall.cpp \
-        src/geometry/jul/CPoint.cpp \
-        src/geometry/pg3/CLine.cpp \
-        src/geometry/pg3/CBuilding.cpp \
-        src/geometry/pg3/CRoom.cpp \
-        src/geometry/pg3/CCell.cpp \
-        src/geometry/pg3/CCoordsList.cpp \
-        src/geometry/pg3/Common.cpp \
-        src/geometry/pg3/CTextLog.cpp \
-        src/geometry/pg3/CTransition.cpp \
         src/network/TraVisToServer.cpp
     FORMS += forms/settings.ui \
         forms/travisto.ui

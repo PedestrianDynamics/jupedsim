@@ -38,7 +38,7 @@
 
 
 //forwarded classes
-class Point;
+class JPoint;
 class TrajectoryPoint;
 class SyncData;
 class FacilityGeometry;
@@ -64,16 +64,13 @@ public:
 			const QString& value);
 
 	/// provided for convenience and will be removed in the next version
-	static void parseGeometryJUL(QString content, FacilityGeometry *geo);
-
-	/// provided for convenience and will be removed in the next version
-	static void parseGeometryPG3(QString content, FacilityGeometry *geo);
+	static void parseGeometryJPS(QString content, FacilityGeometry *geo);
 
 	/// provided for convenience and will be removed in the next version
 	static void parseGeometryXMLV04(QString content, FacilityGeometry *geo);
 
 	/// provided for convenience and will be removed in the next version
-	static void parseGeometryTRAV(QString content, FacilityGeometry *geo,QDomNode geoNode=NULL);
+    static void parseGeometryTRAV(QString content, FacilityGeometry *geo,QDomNode geoNode=QDomNode());
 
 private:
 	//clear the mo
@@ -84,7 +81,7 @@ private:
 	QString currentText;
 	QStringList initialPedestriansColors;
 	QStringList initialPedestriansHeights;
-	std::vector<Point *> currentPointsList;
+	std::vector<JPoint *> currentPointsList;
 	std::vector<TrajectoryPoint *> currentFrame;
 	bool parsingWalls;
 

@@ -32,7 +32,7 @@
 #ifndef PEDESTRIANSHAPE_H
 #define PEDESTRIANSHAPE_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "ui_settings.h"
 #include "./src/SystemSettings.h"
 

@@ -34,6 +34,7 @@
 #include "Pedestrian.h"
 
 #include <vtkGlyph3D.h>
+#include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 
@@ -81,6 +82,7 @@ Pedestrian** extern_pedestrians_thirdSet=NULL;
 
 
 VTK_CREATE (vtkGlyph3D, extern_glyphs_pedestrians);
+//VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
 
 // and here the corresponding dataset
 
