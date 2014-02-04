@@ -51,13 +51,13 @@ endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
   # add 1 should be magic! http://www.kitware.com/blog/home/post/63
-  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1") 
+  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1")
   message( STATUS "PROCESSOR_COUNT " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release) 
+  set (CMAKE_BUILD_TYPE Release)
 endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
@@ -105,127 +105,135 @@ file(
 	GLOB_RECURSE
 	source_files
 	main.cpp
-	Simulation.cpp	
-	general/ArgumentParser.cpp  
+	Simulation.cpp
+	general/ArgumentParser.cpp
 
 	tinyxml/tinystr.cpp
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
-	tinyxml/tinyxmlparser.cpp	  
+	tinyxml/tinyxmlparser.cpp
 
-	geometry/Building.cpp  
-	geometry/Line.cpp     
-	geometry/Point.cpp  
-	geometry/Transition.cpp  
-	geometry/Hline.cpp   
-	geometry/Obstacle.cpp  
-	geometry/SubRoom.cpp  
-	geometry/Crossing.cpp  
-	geometry/NavLine.cpp  
-	geometry/Room.cpp   
+	geometry/Building.cpp
+	geometry/Line.cpp
+	geometry/Point.cpp
+	geometry/Transition.cpp
+	geometry/Hline.cpp
+	geometry/Obstacle.cpp
+	geometry/SubRoom.cpp
+	geometry/Crossing.cpp
+	geometry/NavLine.cpp
+	geometry/Room.cpp
 	geometry/Wall.cpp
 	geometry/Goal.cpp
-	
-	IO/IODispatcher.cpp  
-	IO/OutputHandler.cpp  
-	IO/TraVisToClient.cpp  
 
-	math/Distribution.cpp  
-	math/ForceModel.cpp  
-	math/Mathematics.cpp  
-	math/ODESolver.cpp  
+	IO/IODispatcher.cpp
+	IO/OutputHandler.cpp
+	IO/TraVisToClient.cpp
 
-	mpi/LCGrid.cpp  
+	math/Distribution.cpp
+	math/ForceModel.cpp
+	math/Mathematics.cpp
+	math/ODESolver.cpp
 
-	pedestrian/Ellipse.cpp  
-	pedestrian/PedDistributor.cpp  
-	pedestrian/Pedestrian.cpp  
+	mpi/LCGrid.cpp
 
-	routing/AccessPoint.cpp  
-	routing/DirectionStrategy.cpp  
-	routing/DummyRouter.cpp  
-	routing/GlobalRouter.cpp  
-	routing/GraphRouter.cpp  
+	pedestrian/Ellipse.cpp
+	pedestrian/PedDistributor.cpp
+	pedestrian/Pedestrian.cpp
+
+	routing/AccessPoint.cpp
+	routing/DirectionStrategy.cpp
+	routing/DummyRouter.cpp
+	routing/GlobalRouter.cpp
+	routing/GraphRouter.cpp
 	routing/QuickestPathRouter.cpp
-	routing/SafestPathRouter.cpp  
+	routing/SafestPathRouter.cpp
 	routing/Router.cpp
 	routing/RoutingEngine.cpp
 	routing/NavMesh.cpp
-	routing/DTriangulation.cpp    
-	routing/MeshRouter.cpp    
-	routing/mesh/Mesh.cpp    
-	
-	routing/graph/NavLineState.cpp  
-	routing/graph/RoutingGraph.cpp  
-	routing/graph/RoutingGraphStorage.cpp  
+	routing/DTriangulation.cpp
+	routing/MeshRouter.cpp
+	routing/mesh/Mesh.cpp
 
+	routing/graph/NavLineState.cpp
+	routing/graph/RoutingGraph.cpp
+	routing/graph/RoutingGraphStorage.cpp
+        routing/cognitive_map/CognitiveMap.cpp
+        routing/cognitive_map/NavigationGraph.cpp
+        routing/cognitive_map/navigation_graph/GraphEdge.cpp
+        routing/cognitive_map/navigation_graph/GraphVertex.cpp
 
-	poly2tri/common/shapes.cpp          
+	poly2tri/common/shapes.cpp
 	poly2tri/sweep/sweep_context.cpp
-	poly2tri/sweep/advancing_front.cpp  
+	poly2tri/sweep/advancing_front.cpp
 	poly2tri/sweep/sweep.cpp
 	poly2tri/sweep/cdt.cpp
 
 	header_files:
 	routing/NavMesh.ch
-	routing/DirectionStrategy.h    
-	routing/DummyRouter.h    
-	routing/GlobalRouter.h    
-	routing/GraphRouter.h    
-	routing/QuickestPathRouter.h  
-	routing/SafestPathRouter.h  
+	routing/DirectionStrategy.h
+	routing/DummyRouter.h
+	routing/GlobalRouter.h
+	routing/GraphRouter.h
+	routing/QuickestPathRouter.h
+	routing/SafestPathRouter.h
 	routing/Router.h
 	routing/RoutingEngine.h
-	routing/AccessPoint.h    
-	routing/DTriangulation.h 
-	routing/MeshRouter.h    
-	routing/mesh/Mesh.h     
+	routing/AccessPoint.h
+	routing/DTriangulation.h
+	routing/MeshRouter.h
+	routing/mesh/Mesh.h
 	routing/graph/RoutingGraphStorage.h
-	routing/graph/RoutingGraph.h  
-	routing/graph/NavLineState.h  
+	routing/graph/RoutingGraph.h
+	routing/graph/NavLineState.h
+        routing/cognitive_map/CognitiveMap.h
+        routing/cognitive_map/NavigationGraph.h
+        routing/cognitive_map/navigation_graph/GraphEdge.h
+        routing/cognitive_map/navigation_graph/GraphVertex.h
+
 
 	pedestrian/Pedestrian.h
-	pedestrian/PedDistributor.h  
-	pedestrian/Ellipse.h  
+	pedestrian/PedDistributor.h
+	pedestrian/Ellipse.h
 
 	mpi/LCGrid.h
 
 	tinyxml/tinyxml.h
 	tinyxml/tinystr.h
 
-	general/ArgumentParser.h  
-	general/Macros.h  
+	general/ArgumentParser.h
+	general/Macros.h
 
-	geometry/Crossing.h  
-	geometry/NavLine.h     
-	geometry/Room.h 
-	geometry/Building.h          
+	geometry/Crossing.h
+	geometry/NavLine.h
+	geometry/Room.h
+	geometry/Building.h
 	geometry/Wall.h
-	geometry/Line.h       
-	geometry/Point.h    
+	geometry/Line.h
+	geometry/Point.h
 	geometry/Transition.h
-	geometry/Hline.h     
-	geometry/Obstacle.h    
-	geometry/SubRoom.h    
-	geometry/Goal.h    
+	geometry/Hline.h
+	geometry/Obstacle.h
+	geometry/SubRoom.h
+	geometry/Goal.h
 
-	IO/IODispatcher.h  
-	IO/OutputHandler.h  
+	IO/IODispatcher.h
+	IO/OutputHandler.h
 	IO/TraVisToClient.h
 
-	math/ForceModel.h  
-	math/Distribution.h  
-	math/Mathematics.h  
+	math/ForceModel.h
+	math/Distribution.h
+	math/Mathematics.h
 	math/ODESolver.h
 
 	poly2tri/poly2tri.h
-	poly2tri/common/shapes.h          
+	poly2tri/common/shapes.h
 	poly2tri/sweep/cdt.h
-	poly2tri/common/utils.h           
+	poly2tri/common/utils.h
 	poly2tri/sweep/sweep_context.h
-	poly2tri/sweep/advancing_front.h  
+	poly2tri/sweep/advancing_front.h
 	poly2tri/sweep/sweep.h
-	
+
 )
 
 #Target
@@ -305,23 +313,23 @@ endif(UNIX)
 #INCLUDE(CPack Documentation)
 #include(CheckCXXSourceRuns)
 #include(CheckCXXSourceCompiles)
-set (CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")   
+set (CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # ----------------------------- cTest ------------------------------------------
 enable_testing() #adds another build target, which is test for Makefile generators
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-add_test (jpscore_compile ${CMAKE_CTEST_COMMAND} 
+add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
   --build-generator ${CMAKE_GENERATOR}
   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config  
+  --build-two-config
   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   --build-project JPScore
   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
   )
-# todo: make list of tests and iterate over 
+# todo: make list of tests and iterate over
 #add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
 add_executable(testSignPos Utest/testSign.cpp)
 target_link_libraries (testSignPos  core)
@@ -371,7 +379,7 @@ endforeach(test)
 
 # add_test( NAME timetest
 #   COMMAND ${CMAKE_COMMAND}
-#   -DTEST_PROG=$<TARGET_FILE:testPointOnEllipse>  
+#   -DTEST_PROG=$<TARGET_FILE:testPointOnEllipse>
 #   -P    ${EXECUTABLE_OUTPUT_PATH}/runtest.cmake
 #     )#
 
@@ -384,11 +392,9 @@ if(PYTHONINTERP_FOUND)
   add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
   #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
 endif(PYTHONINTERP_FOUND)
- 
+
 
 
 # add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]
 #             [WORKING_DIRECTORY dir]
 #             COMMAND <command> [arg1 [arg2 ...]])
-
-
