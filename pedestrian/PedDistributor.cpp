@@ -31,6 +31,8 @@
 #include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
 
+#include <cmath>
+
 using namespace std;
 
 
@@ -684,7 +686,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
 		ped->SetPatienceTime(para->GetPatience());
 
 		Point start_pos=para->GetStartPosition();
-		if((isnan(start_pos._x)==0 ) && (isnan(start_pos._y)==0 ) ){
+		if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ){
 			ped->SetPos(start_pos);
 			Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
 					pid, para->GetRoomId(), start_pos.toString().c_str());
