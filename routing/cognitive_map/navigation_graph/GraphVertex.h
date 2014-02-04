@@ -15,7 +15,7 @@
 class SubRoom;
 class NavLine;
 
-
+typedef std::unordered_map<const GraphVertex*, GraphEdge *> EdgesContainer;
 /**
  * @brief Graph Vertex.
  *
@@ -39,7 +39,7 @@ public:
 
 private:
     // edges wich are "known" from this vertex
-    std::unordered_map<const GraphVertex*, GraphEdge *> out_edges;
+    EdgesContainer out_edges;
     const NavLine * const nav_line;
 
 };

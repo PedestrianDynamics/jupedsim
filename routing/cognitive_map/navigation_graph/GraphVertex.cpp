@@ -43,6 +43,9 @@ void GraphVertex::AddOutEdge(GraphVertex const * const dest, SubRoom const * con
 
 int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 {
+    EdgesContainer::iterator it = out_edges.find(edge->getDest());
+    if(it != out_edges.end())
+        delete it->second;
     return out_edges.erase(edge->getDest());
 }
 

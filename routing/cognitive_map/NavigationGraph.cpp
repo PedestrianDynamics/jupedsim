@@ -29,6 +29,11 @@ NavigationGraph::NavigationGraph(const NavigationGraph & ng)
 
 NavigationGraph::~NavigationGraph()
 {
+    //remove all vertices
+    for(VerticesContainer::iterator it = vertices.begin(); it != vertices.end(); ++it)
+    {
+        delete it->second;
+    }
 }
 
 void NavigationGraph::AddVertex(NavLine const * const nl)
