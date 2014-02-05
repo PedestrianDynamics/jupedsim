@@ -28,7 +28,7 @@
 
 #ifndef SAFESTPATHROUTER_H_
 #define SAFESTPATHROUTER_H_
-
+#include "AccessPoint.h"
 #include "GlobalRouter.h"
 
 class SafestPathRouter: public GlobalRouter {
@@ -68,13 +68,13 @@ private:
 	 *  reads the results from fds evac
 	 */
 	void ReadMatrixFromFDS();
-
-
+	void GetHline(Building* building);
+	void UpdateMatrices();
 
 	int GetAgentsCountInSubroom( int roomID, int subroomID);
 	void main_1(Pedestrian* p);
 	void main_2( );
-	void main_3(Pedestrian* p);
+	void CalculatePhi();
 
 	int MapSection;
 
@@ -83,20 +83,40 @@ private:
 private:
 	// double dMatrixPreEvac[1][11];
 	// double dFinalLength[1][11];
-	// double dFinalLineOFP[1][11];
-	 double dFinalLineEvac[1][11];
-//	 double *_finalLineEvac;
 
+	 double *dFinalLineOFP;
+	 double *dFinalLineEvac;
+
+	// double dFinalLineOFP[1][11];
+
+
+//	 double *_finalLineEvac;
+	 int numberOfSubroom;
+	 int *preSub;
+	 double maximalSquare;
+	 double *lenthOfSection;
 	// double rR[1][11];
-	 double **rR;
+	 double *rR;
+
 
 	 //double peopleAtSection[1][11];
 	 double *peopleAtSection;
+	 double *squareOfSection;
+	 double *dFinalLength;
+	 double **dPreOFP;
+
+
+	// double rR[1][11];
+
+
+	 //double peopleAtSection[1][11];
+	 //double *peopleAtSection;
+
 	// double iNt1[1][11];
 	// double iNt2[1][11];
 	// double iNt3[1][11];
 	// double iNt4[1][11];
-	 //double fI[11][11];
+
 };
 
 #endif /* SAFESTPATHROUTER_H_ */

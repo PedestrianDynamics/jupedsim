@@ -49,20 +49,19 @@ private:
     int _id;
     double _height;
     double _age;
-    double _mass; // Masse: 1
-    double _tau; // Reaktinszeit: 0.5
+    double _mass; // Mass: 1
+    double _tau; // Reaction time: 0.5
     double _deltaT; // step size
-    //double _elevation; // the z coordinate. This can be
 
     std::string _gender;
     std::string _roomCaption;
 
     int _roomID;
     int _subRoomID;
-    int _exitIndex; // aktueller Ausgang, Index in routing->GetGoal(index)
+    int _exitIndex; // current exit
     int _group;
 
-    NavLine* _navLine; // aktuelle Ausgangslinie
+    NavLine* _navLine; // current exit line
     std::map<int, int>_mentalMap; // map the actual room to a destination
     std::vector<int> _destHistory;
     std::vector<int> _trip;
@@ -90,8 +89,7 @@ private:
     int _newOrientationDelay; //2 seconds, in steps
 
 
-
-    // necessary for smooth turning at sharp bend
+    /// necessary for smooth turning at sharp bend
     int _updateRate;
     double _turninAngle;
     bool _reroutingEnabled;
@@ -101,9 +99,15 @@ private:
     // the current time in the simulation
     static double _globalTime;
 
+    static bool _enableSpotlight;
+
+    bool _spotlight;
+
     /// the router responsible for this pedestrian
     Router* _router;
+    /// a pointer to the complete building
     Building * _building;
+    /// the shape of this pdestrian
     JEllipse _ellipse;
 
 
@@ -263,6 +267,21 @@ public:
      */
 	void SetPatienceTime(double patienceTime);
 
+	/**
+	 * Set/Get the spotlight value. If true,
+	 * this pedestrians will be coloured and all other grey out.
+	 * @param spotlight true for enabling, false for disabling
+	 */
+	void SetSpotlight(bool spotlight);
+
+
+	/**
+	 * Set/Get the spotlight value. If true,
+	 * this pedestrians will be coloured and all other grey out.
+	 * @param spotlight true for enabling, false for disabling
+	 */
+	bool GetSpotlight();
+
 
     void ResetTimeInJam();
     void UpdateTimeInJam();
@@ -289,7 +308,21 @@ public:
 
     static double GetGlobalTime();
     static void SetGlobalTime(double time);
-	const Building* GetBuilding();
+
+    /**
+     * activate/deactivate the spotlight system
+     * @param status true for activating, false for deactivating
+     */
+    static void ActivateSpotlightSystem(bool status);
+
+    /**
+     * Set/Get the Building object
+     */
+    const Building* GetBuilding();
+
+    /**
+     * Set/Get the Building object
+     */
 	void SetBuilding(Building* building);
 };
 

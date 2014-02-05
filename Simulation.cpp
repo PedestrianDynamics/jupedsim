@@ -170,8 +170,8 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			if(_iod) delete _iod;
 			_iod = new TrajectoriesFLAT();
 			_iod->AddIO(file);
-			Log->Write("INFO: \tFormat plain maybe not yet implemented ?");
-			exit(0);
+			//Log->Write("INFO: \tFormat plain maybe not yet implemented ?");
+			//exit(0);
 			break;
 		}
 		case FORMAT_VTK:

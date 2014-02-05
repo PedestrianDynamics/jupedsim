@@ -29,7 +29,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/NavMesh.h"
 
-#include <cmath>
+//#include <cmath>
 
 using namespace std;
 
@@ -44,6 +44,8 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 	}
 	double v = ped->GetV().Norm();
 	int color = (int) (v / v0 * 255);
+	if(ped->GetSpotlight()==false) color=-1;
+
 	double a = ped->GetLargerAxis();
 	double b = ped->GetSmallerAxis();
 	double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());

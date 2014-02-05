@@ -33,10 +33,12 @@
 
 using namespace std;
 
-/************************************************************
-  Konstruktoren
- ************************************************************/
+/// initialize the static variables
 double Pedestrian::_globalTime=0.0;
+bool Pedestrian::_enableSpotlight=false;
+
+
+
 
 Pedestrian::Pedestrian() {
 	_roomID = -1;
@@ -53,7 +55,7 @@ Pedestrian::Pedestrian() {
 	_updateRate = 0;
 	_turninAngle=0.0;
 	_ellipse = JEllipse();
-	_navLine = new NavLine(); //FIXME this is not release
+	_navLine = new NavLine(); //FIXME this is not released
 	_router=NULL;
 	_building=NULL;
 	_reroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
@@ -76,6 +78,7 @@ Pedestrian::Pedestrian() {
 	_gender="male";
 	_trip=vector<int> ();
 	_group=-1;
+	_spotlight=false;
 }
 
 
@@ -83,9 +86,6 @@ Pedestrian::~Pedestrian() {
 	if(_navLine) delete _navLine;
 }
 
-/*************************************************************
- Setter-Funktionen
- ************************************************************/
 
 void Pedestrian::SetID(int i) {
 	_id = i;
@@ -154,9 +154,6 @@ void Pedestrian::SetTrip(const vector<int>& trip){
 	_trip=trip;
 }
 
-/*************************************************************
- Getter-Funktionen
- ************************************************************/
 
 int Pedestrian::GetID() const {
 	return _id;
@@ -634,4 +631,17 @@ const Building* Pedestrian::GetBuilding() {
 
 void Pedestrian::SetBuilding(Building* building) {
 	_building = building;
+}
+
+void Pedestrian::SetSpotlight(bool spotlight){
+	_spotlight=spotlight;
+}
+
+
+bool Pedestrian::GetSpotlight(){
+	return !_enableSpotlight || _spotlight;
+}
+
+void Pedestrian::ActivateSpotlightSystem(bool status){
+	_enableSpotlight=status;
 }

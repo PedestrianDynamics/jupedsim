@@ -70,8 +70,6 @@ string QuickestPathRouter::GetRoutingInfoFile() const {
 int QuickestPathRouter::FindExit(Pedestrian* ped){
 
 	int next=FindNextExit(ped);
-	vector<SubRoom*> path;
-	GetPath(ped,0,path);
 
 	// that ped will be deleted
 	if(next==-1) return next;
@@ -79,6 +77,7 @@ int QuickestPathRouter::FindExit(Pedestrian* ped){
 	if(ped->IsFeelingLikeInJam()){
 		Redirect(ped);
 		ped->ResetTimeInJam();
+		ped->SetSpotlight(true);
 		//cout<<"I am feeling like in Jam next: "<<ped->GetID()<<endl;
 		//ped->RerouteIn(2.50); // seconds
 	}else if(ped->IsReadyForRerouting()){
@@ -504,11 +503,15 @@ void QuickestPathRouter::Init(Building* building){
 
 	Log->Write("INFO:\tInit Quickest Path Router Engine");
 	GlobalRouter::Init(building);
+
+	// activate the spotlight for tracking some pedestrians
+	Pedestrian::ActivateSpotlightSystem(true);
+
 	//	pBuilding=building;
 	//TODO: reduce graph is missbehaving
 	//ReduceGraph();
 	//ExpandGraph();
-	vector<string> rooms;
+	//vector<string> rooms;
 	//rooms.push_back("150");
 	//rooms.push_back("outside");
 	//WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
