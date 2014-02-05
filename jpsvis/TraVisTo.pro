@@ -125,7 +125,7 @@ win32 {
             -lvtkzlib-6.1  \
             -lwsock32
         }
-win32er {
+win32_5 {
         INCLUDEPATH += C:/VTK/include/vtk-5.10
 
         LIBS += -LC:/VTK/bin \
@@ -158,7 +158,7 @@ win32er {
             -lwsock32\
 }
         
-unix { 
+unix_6 {
     INCLUDEPATH += /usr/local/include/vtk-6.0
     
     LIBS += -L/usr/local/lib/ \
@@ -278,38 +278,7 @@ unix {
             -lvtkzlib-6.0  \
 }
    
-win323{
-    INCLUDEPATH += C:/VTK/include/vtk-5.10
-    LIBS += -LC:/VTK/bin \
-        -lvtksys \
-        -lvtkzlib \
-        -lvtkjpeg \
-        -lvtkpng \
-        -lvtktiff \
-        -lvtkexpat \
-        -lvtkfreetype \
-        -lvtklibxml2 \
-        -lvtkDICOMParser \
-        -lvtkverdict \
-        -lvtkNetCDF \
-        -lvtkmetaio \
-        -lvtkexoIIc \
-        -lvtkalglib \
-        -lvtkftgl \
-        -lvtkCommon \
-        -lvtkFiltering \
-        -lvtkImaging \
-        -lvtkGraphics \
-        -lvtkIO \
-        -lvtkRendering \
-        -lvtkParallel \
-        -lvtkHybrid \
-        -lvtkWidgets \
-        -lvtkInfovis \
-        -lvtkViews \
-        -lwsock32 \
-        }
-    unix { 
+        unix_5 {
         INCLUDEPATH += /usr/include/vtk-5.8
         LIBS += -L/usr/lib/ \
             -lvtkCommon \
@@ -329,7 +298,8 @@ win323{
             -lvtkverdict \
             -lvtkParallel \
             -lvtkmetaio
-    }
+         }
+
 
     HEADERS += src/geometry/Building.h \
         src/geometry/Crossing.h \
