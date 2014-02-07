@@ -501,9 +501,10 @@ void ArgumentParser::ParseIniFile(string inifile){
 	// max simulation time
 	if(xMainNode->FirstChild("max_sim_time")){
 		const char* tmax=xMainNode->FirstChildElement("max_sim_time")->FirstChild()->Value();
-		const char* unit=xMainNode->FirstChildElement("max_sim_time")->Attribute("unit");
+		//const char* unit=xMainNode->FirstChildElement("max_sim_time")->Attribute("unit");
 		pTmax=atof(tmax);
-		Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
+		//Log->Write("INFO: \tpTmax <"+string(tmax)+" " +string(unit) +" (unit ignored)>");
+		Log->Write("INFO: \tpTmax <"+string(tmax)+"  (seconds) >");
 	}
 
 	//logfile
@@ -521,6 +522,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 		string format= xMainNode->FirstChildElement("trajectories")->Attribute("format")?
 				xMainNode->FirstChildElement("trajectories")->Attribute("format"):"xml-plain";
+		if(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))
 		_embedMesh = string(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true"?1:0;
 
 		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
