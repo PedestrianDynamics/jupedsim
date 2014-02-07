@@ -338,9 +338,10 @@ void Building::LoadBuildingFromFile() {
 	}
 
 	double version = xmltof(xRootNode->Attribute("version"), -1);
-	if (version < 0.4) {
-		Log->Write("ERROR: \tOnly version > 0.4 supported");
-		Log->Write("ERROR: \tparsing geometry file failed!");
+	if (version != 0.5) {
+		Log->Write("ERROR: \tWrong goemetry version!");
+		Log->Write("ERROR: \tOnly version >= %s supported",JPS_VERSION);
+		Log->Write("ERROR: \tPlease update the version of your geometry file to %s",JPS_VERSION);
 		exit(EXIT_FAILURE);
 	}
 	_caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");

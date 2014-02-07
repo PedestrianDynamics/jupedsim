@@ -1160,8 +1160,8 @@ void NavMesh::FinalizeAlphaShape(){
 		exit(EXIT_FAILURE);
 	}
 
-	const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
-	double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
+	//const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
+	//double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
 	//outside->WriteToErrorLog();
 	//cout<<"Center:" <<env_center.toString()<<endl;
 	//cout<<"Radius:" <<env_radius<<endl; exit(0);
@@ -1980,7 +1980,7 @@ void NavMesh::Triangulate(JNode* node) {
 	//return; //fixme
 	{
 		// now post processing the newly created nodes
-		assert (node->id != (_nodes.size() -1) && "Trying to remove the last node !");
+		assert (node->id != ((signed)_nodes.size() -1) && "Trying to remove the last node !");
 		JNode* new_node = _nodes.back();
 		_nodes.pop_back();
 

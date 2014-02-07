@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.4" caption="second life" gridSizeX="20"
+<geometry version="0.5" caption="second life" gridSizeX="20"
 	gridSizeY="20" unit="m">
 	<rooms>
 		<room id="0" caption="hall" zpos="0.00">

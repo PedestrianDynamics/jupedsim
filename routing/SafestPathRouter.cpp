@@ -550,10 +550,10 @@ void SafestPathRouter::main_1(Pedestrian* p)
 	double dF[path.size()];
 	double fF=0;
 
-	for(int i=0; i<path.size(); i++)
+	for(unsigned int i=0; i<path.size(); i++)
 		dF[i]=0;
 
-	for(int j = 0; j <path.size(); j++)
+	for(unsigned int j = 0; j <path.size(); j++)
 	{
 		int i=preSub[j];
 		dF[j]=rR[i];
