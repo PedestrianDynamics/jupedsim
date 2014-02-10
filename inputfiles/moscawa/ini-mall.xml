@@ -4,6 +4,7 @@
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
+	<max_sim_time>900</max_sim_time>
 	<!-- geometry file -->
 	<geometry>geometry-mall.xml</geometry>
 	<!-- traectories file and format -->
@@ -66,7 +67,7 @@
 			<door trans_id="36" caption="" state="open" />
 			<door trans_id="37" caption="" state="open" />
 			<door trans_id="38" caption="" state="open" />
-			<door trans_id="39" caption="" state="open" />5 1 2 3 4 5 0 6 
+			<door trans_id="39" caption="" state="open" /> 
 			<door trans_id="40" caption="" state="open" />
 			<door trans_id="41" caption="" state="open" />
 			<door trans_id="42" caption="" state="open" />
@@ -79,14 +80,7 @@
 			<door trans_id="49" caption="" state="open" />
 			<door trans_id="50" caption="" state="open" />
 			<door trans_id="51" caption="" state="open" />
-			
-			
-			
-			
-			
-			
 		</doors>
-
 	</traffic_constraints>
 	
 	
@@ -120,15 +114,9 @@
 	<agents>
 		<agents_distribution>
 		
-			<group group_id="0" room_id="6" subroom_id="7" number="1" goal_id="0" router_id="1" route_id=""/>
-			
-			
-			
+			<group group_id="0" room_id="6" subroom_id="7" number="1" goal_id="1" router_id="1" route_id=""/>
 			
 			<!--<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="0" router_id="1" route_id=""/>
-			
-
-			
 			
 			<group group_id="2" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="3" room_id="0" subroom_id="3" number="10" goal_id="0" router_id="1" route_id=""/>
@@ -243,7 +231,6 @@
 	<operational_models>
 		<model id="1" description="gcfm">
 			<parameters>
-				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
@@ -264,7 +251,7 @@
 	<route_choice_models>
 		<router router_id="1" description="global_safest">
 			<parameters>
-				<navigation_lines file="routing.xml" />
+				<navigation_lines file="routing-mall.xml" />
 			</parameters>
 		</router>
 	</route_choice_models>

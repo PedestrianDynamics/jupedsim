@@ -509,7 +509,7 @@ void QuickestPathRouter::Init(Building* building){
 	GlobalRouter::Init(building);
 
 	// activate the spotlight for tracking some pedestrians
-	Pedestrian::ActivateSpotlightSystem(true);
+	//sPedestrian::ActivateSpotlightSystem(true);
 
 	//	pBuilding=building;
 	//TODO: reduce graph is missbehaving

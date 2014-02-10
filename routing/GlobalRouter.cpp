@@ -507,6 +507,9 @@ void GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
 		if (sub && IsElementInVector(path, sub)==false) path.push_back(sub);
 	}
 
+	//clear the global variable holding the paths
+	_tmpPedPath.clear();
+
 	//double distance = _accessPoints[next]->GetDistanceTo(0)+ped->GetDistanceToNextTarget();
 	//cout<<"shortest distance to outside: " <<distance<<endl;
 }

@@ -81,7 +81,7 @@ void SafestPathRouter::Init(Building* building) {
 	dPreOFP=new double* [n];
 
 
-	 // load the matrix from fds
+	// load the matrix from fds
 	ReadMatrixFromFDS();
 
 
@@ -118,9 +118,8 @@ int SafestPathRouter::FindExit(Pedestrian* p) {
 	UpdateMatrices();
 	CalculatePhi();
 
-
 	if(ComputeSafestPath(p)==-1) {
-		//Log->Write(" sdfds");
+//		Log->Write(" sdfds");
 	}
 	//handle over to the global router engine
 	return GlobalRouter::FindExit(p);
@@ -229,10 +228,8 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 
 			// compute the cost (adding the phi values)
 			for(unsigned int j = 0; j <path.size(); j++) {
-
 				phi_current = phi_current + rR[path[j]->GetSubRoomID()];
-				cout <<"value:" <<phi_current<<endl;
-
+				//cout <<"value:" <<phi_current<<endl;
 			}
 
 			// save the goal id for that path if smaller that the previous
@@ -242,48 +239,49 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 			}
 
 		}
-	cout <<"best goal: "<< best_goal<<endl;
-	exit(0);
+		cout <<"best goal: "<< best_goal<<endl;
+		//exit(0);
 	}
 
 
 	p->SetFinalDestination(best_goal);
-//for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-//		Room* room = _building->GetRoom(i);
-//		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-//			SubRoom* sub = room->GetSubRoom(j);
-//			if(sub->GetType()=="floor")
-//			{
-//				std::vector<SubRoom*> path;
-//				GetPath(p, 1,  path);
-//				preSub=new double [path.size()];
-//				for (unsigned int i=0; i<path.size(); i++){
-//					preSub[i]=path[i]->GetSubRoomID();
-//					for(int j = 0; j <path.size(); j++)
-//						cout << preSub[j]<< " ";
-//					cout << endl;
-//
-//				}
-//			}
-//		}
-//	}
+
+	//for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
+	//		Room* room = _building->GetRoom(i);
+	//		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+	//			SubRoom* sub = room->GetSubRoom(j);
+	//			if(sub->GetType()=="floor")
+	//			{
+	//				std::vector<SubRoom*> path;
+	//				GetPath(p, 1,  path);
+	//				preSub=new double [path.size()];
+	//				for (unsigned int i=0; i<path.size(); i++){
+	//					preSub[i]=path[i]->GetSubRoomID();
+	//					for(int j = 0; j <path.size(); j++)
+	//						cout << preSub[j]<< " ";
+	//					cout << endl;
+	//
+	//				}
+	//			}
+	//		}
+	//	}
 
 
 
-// Printing a matrix
+	// Printing a matrix
 
-//cout <<"total distance: " <<distance<<endl;
-
-
-
-
-//CalculatePhi();
-main_2();
-//main_1(p);
+	//cout <<"total distance: " <<distance<<endl;
 
 
 
-return -1;
+
+	//CalculatePhi();
+	main_2();
+	//main_1(p);
+
+
+
+	return -1;
 }
 
 
@@ -503,9 +501,9 @@ void SafestPathRouter::CalculatePhi()
 
 
 	// Printing a matrix
-//	for(int j = 0; j < numberOfSubroom; j++)
-//		cout << rR[j]<< " ";
-//	cout << endl;
+	//	for(int j = 0; j < numberOfSubroom; j++)
+	//		cout << rR[j]<< " ";
+	//	cout << endl;
 
 
 
