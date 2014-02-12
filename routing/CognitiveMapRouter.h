@@ -10,9 +10,11 @@
 #define COGNITIVEMAPROUTER_H_
 
 #include "Router.h"
+#include <string>
 
 class Building;
 class Router;
+
 
 /**
  * @brief Routing Engine for Cognitive Map
@@ -27,9 +29,13 @@ public:
 
     virtual int FindExit(Pedestrian* p);
     virtual void Init(Building* b);
+protected:
+    void LoadRoutingInfos(const std::string &filename);
+    std::string GetRoutingInfoFile() const;
 
 private:
-    const Building * building;
+
+    Building * building;
 };
 
 #endif /* COGNITIVEMAPROUTER_H_ */
