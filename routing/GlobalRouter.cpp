@@ -469,6 +469,12 @@ void GlobalRouter::GetPath(int i, int j) {
 
 void GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& path){
 
+	//clear the global variable holding the paths
+	_tmpPedPath.clear();
+
+	int tmpFinalDest=ped->GetFinalDestination();
+	ped->SetFinalDestination(goalID);
+
 	//find the nearest APs and start from there
 	int next = GetBestDefaultRandomExit(ped);
 	if(next==-1){
@@ -510,6 +516,7 @@ void GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
 	//clear the global variable holding the paths
 	_tmpPedPath.clear();
 
+	ped->SetFinalDestination(tmpFinalDest);
 	//double distance = _accessPoints[next]->GetDistanceTo(0)+ped->GetDistanceToNextTarget();
 	//cout<<"shortest distance to outside: " <<distance<<endl;
 }

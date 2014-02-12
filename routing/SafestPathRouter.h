@@ -75,6 +75,7 @@ private:
 	void main_1(Pedestrian* p);
 	void main_2( );
 	void CalculatePhi();
+	void main_3( );
 
 	int MapSection;
 
@@ -93,6 +94,7 @@ private:
 //	 double *_finalLineEvac;
 	 int numberOfSubroom;
 	 int *preSub;
+	 int *flo;
 	 double maximalSquare;
 	 double *lenthOfSection;
 	// double rR[1][11];
