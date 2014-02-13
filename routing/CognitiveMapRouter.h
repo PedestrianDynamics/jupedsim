@@ -14,6 +14,7 @@
 
 class Building;
 class Router;
+class CognitiveMapStorage;
 
 
 /**
@@ -36,6 +37,8 @@ protected:
 private:
 
     Building * building;
+    CognitiveMapStorage * cm_storage;
+
 };
 
 #endif /* COGNITIVEMAPROUTER_H_ */

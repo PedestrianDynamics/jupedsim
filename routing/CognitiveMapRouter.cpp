@@ -10,7 +10,9 @@
 #include "Router.h"
 #include "../geometry/Building.h"
 #include "../tinyxml/tinyxml.h"
-
+#include "cognitive_map/CognitiveMapStorage.h"
+#include "../geometry/SubRoom.h"
+#include "../pedestrian/Pedestrian.h"
 
 
 CognitiveMapRouter::CognitiveMapRouter()
@@ -19,10 +21,19 @@ CognitiveMapRouter::CognitiveMapRouter()
 
 CognitiveMapRouter::~CognitiveMapRouter()
 {
+    delete cm_storage;
+
 }
 
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
+    SubRoom * sub_room = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
+
+    p->SetExitLine( (*sub_room->GetAllTransitions().begin()));
+    p->SetExitIndex( (*sub_room->GetAllTransitions().begin())->GetID());
+
+    return (*sub_room->GetAllTransitions().begin())->GetID();
+
 
 }
 
@@ -30,6 +41,12 @@ void CognitiveMapRouter::Init(Building * b)
 {
     Log->Write("INFO:\tInit the Cognitive Map  Router Engine");
     building = b;
+
+    //Load Routing file with HLines and further informations.
+    LoadRoutingInfos(GetRoutingInfoFile());
+
+    cm_storage = new CognitiveMapStorage(building);
+
 }
 
 
