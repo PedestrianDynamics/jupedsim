@@ -700,6 +700,8 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_DUMMY));
 		else if(strategy=="global_safest")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_SAFEST));
+		else if(strategy=="cognitive_map")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_COGNITIVEMAP));
 		else{
 			Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",strategy.c_str());
 			exit(EXIT_FAILURE);

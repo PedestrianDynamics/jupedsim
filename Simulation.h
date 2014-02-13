@@ -45,7 +45,7 @@
 #include "routing/RoutingEngine.h"
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
-
+#include "routing/CognitiveMapRouter.h"
 
 extern OutputHandler* Log;
 

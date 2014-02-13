@@ -267,7 +267,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case ROUTING_GLOBAL_SHORTEST:
 		{
-                           
+
 			Router* router=new GlobalRouter();
 			router->SetID(routerID);
 			router->SetStrategy(strategy);
@@ -313,11 +313,20 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case ROUTING_SAFEST:
 		{
-			Router* router=new SafestPathRouter();
+			Router * router=new SafestPathRouter();
 			router->SetID(routerID);
 			router->SetStrategy(strategy);
 			routingEngine->AddRouter(router);
-			s.append("\tRouting Strategy safest path router added\n");
+			s.append("\tRouting Strategy cognitive map router added\n");
+			break;
+		}
+                case ROUTING_COGNITIVEMAP:
+		{
+			Router* router=new CognitiveMapRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy dummy router added\n");
 			break;
 		}
 		case ROUTING_UNDEFINED:

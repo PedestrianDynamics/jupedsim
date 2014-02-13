@@ -92,6 +92,7 @@ enum RoutingStrategy {
 	ROUTING_NAV_MESH,
 	ROUTING_DUMMY,
 	ROUTING_SAFEST,
+        ROUTING_COGNITIVEMAP,
 	ROUTING_UNDEFINED =-1
 };
 
@@ -106,4 +107,3 @@ inline const char * xmltoa(const char * t,      const char * v=""){ if (t)      
 inline char xmltoc(const char * t,const char v='\0'){ if (t&&(*t)) return *t; return v; }
 
 #endif	/* _MACROS_H */
-
