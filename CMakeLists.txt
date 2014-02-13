@@ -158,10 +158,16 @@ file(
 	routing/graph/NavLineState.cpp
 	routing/graph/RoutingGraph.cpp
 	routing/graph/RoutingGraphStorage.cpp
+
+        routing/CognitiveMapRouter.cpp
         routing/cognitive_map/CognitiveMap.cpp
         routing/cognitive_map/NavigationGraph.cpp
+        routing/cognitive_map/CognitiveMapStorage.cpp
+        routing/cognitive_map/AbstractCognitiveMapCreator.cpp
+        routing/cognitive_map/CompleteCognitiveMapCreator.cpp
         routing/cognitive_map/navigation_graph/GraphEdge.cpp
         routing/cognitive_map/navigation_graph/GraphVertex.cpp
+
 
 	poly2tri/common/shapes.cpp
 	poly2tri/sweep/sweep_context.cpp
@@ -186,11 +192,15 @@ file(
 	routing/graph/RoutingGraphStorage.h
 	routing/graph/RoutingGraph.h
 	routing/graph/NavLineState.h
+
+        routing/CognitiveMapRouter.h
         routing/cognitive_map/CognitiveMap.h
         routing/cognitive_map/NavigationGraph.h
+        routing/cognitive_map/CognitiveMapStorage.h
+        routing/cognitive_map/AbstractCognitiveMapCreator.h
+        routing/cognitive_map/CompleteCognitiveMapCreator.h
         routing/cognitive_map/navigation_graph/GraphEdge.h
         routing/cognitive_map/navigation_graph/GraphVertex.h
-
 
 	pedestrian/Pedestrian.h
 	pedestrian/PedDistributor.h
