@@ -21,9 +21,10 @@ class CompleteCognitiveMapCreator : public AbstractCognitiveMapCreator
 
 public:
     CompleteCognitiveMapCreator(const Building * b) : AbstractCognitiveMapCreator(b) { }
-    virtual ~CompleteCognitiveMapCreator() { }
 
-    CognitiveMap * CreateCognitiveMap(const Pedestrian * ped) = 0;
+    virtual ~CompleteCognitiveMapCreator();
+
+    CognitiveMap * CreateCognitiveMap(const Pedestrian * ped);
 private:
 
 };

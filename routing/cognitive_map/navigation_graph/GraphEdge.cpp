@@ -9,6 +9,7 @@
 
 #include "GraphVertex.h"
 #include "../../../geometry/SubRoom.h"
+#include "../../../geometry/Crossing.h"
 
 using namespace std;
 
@@ -21,26 +22,25 @@ GraphEdge::~GraphEdge()
     return;
 }
 
-GraphEdge::GraphEdge(GraphVertex const * const s, GraphVertex const  * const d, SubRoom const * const  sr)
-    : src(s), dest(d), subroom(sr)
+GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, const Crossing * const crossing)
+    : src(s), dest(d), crossing(crossing)
 {
 }
 
 GraphEdge::GraphEdge(GraphEdge const &ge)
-    : src(ge.src), dest(ge.dest), subroom(ge.subroom)
+    : src(ge.src), dest(ge.dest), crossing(ge.crossing)
 {
 }
-const GraphVertex * GraphEdge::getDest() const
+const GraphVertex * GraphEdge::GetDest() const
 {
     return dest;
 }
-const GraphVertex * GraphEdge::getSrc() const
+const GraphVertex * GraphEdge::GetSrc() const
 {
     return src;
 }
 
-const SubRoom * GraphEdge::getSubRoom() const
+const Crossing * GraphEdge::GetCrossing() const
 {
-    return subroom;
-
+    return crossing;
 }

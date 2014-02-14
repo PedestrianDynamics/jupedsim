@@ -10,12 +10,15 @@
 #define GRAPHVERTEX_H_
 
 #include <unordered_map>
+#include <string>
 #include "GraphEdge.h"
 
 class SubRoom;
 class NavLine;
+class Crossing;
 
-typedef std::unordered_map<const GraphVertex*, GraphEdge *> EdgesContainer;
+
+
 /**
  * @brief Graph Vertex.
  *
@@ -23,24 +26,30 @@ typedef std::unordered_map<const GraphVertex*, GraphEdge *> EdgesContainer;
 class GraphVertex {
 
 public:
+    typedef std::unordered_map<const GraphVertex*, GraphEdge *> EdgesContainer;
     /****************************
      * Constructors & Destructors
      ****************************/
 
-    GraphVertex(NavLine const * const nl);
+    GraphVertex(const SubRoom * const sub_room);
     GraphVertex(GraphVertex const & gv);
 
     virtual ~GraphVertex();
 
+    const std::string GetCaption() const;
+    const EdgesContainer * GetAllOutEdges() const;
+
+
+
     // add and remove edge pointer from vertex
-    void AddOutEdge(const GraphVertex * const dest, const SubRoom  * const sr);
+    void AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing);
     int RemoveOutEdge(const GraphVertex * dest);
     int RemoveOutEdge(GraphEdge * edge);
 
 private:
     // edges wich are "known" from this vertex
     EdgesContainer out_edges;
-    const NavLine * const nav_line;
+    const SubRoom * const sub_room;
 
 };
 

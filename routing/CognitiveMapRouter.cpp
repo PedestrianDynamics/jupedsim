@@ -29,6 +29,8 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
     SubRoom * sub_room = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
 
+    (*cm_storage)[p];
+
     p->SetExitLine( (*sub_room->GetAllTransitions().begin()));
     p->SetExitIndex( (*sub_room->GetAllTransitions().begin())->GetID());
 
@@ -41,6 +43,7 @@ void CognitiveMapRouter::Init(Building * b)
 {
     Log->Write("INFO:\tInit the Cognitive Map  Router Engine");
     building = b;
+    Log->Write(b->GetProjectRootDir());
 
     //Load Routing file with HLines and further informations.
     LoadRoutingInfos(GetRoutingInfoFile());

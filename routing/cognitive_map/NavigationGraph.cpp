@@ -8,17 +8,20 @@
 
 #include "NavigationGraph.h"
 
+#include <iostream>
+#include <fstream>
+
 #include "navigation_graph/GraphEdge.h"
 #include "../../geometry/Building.h"
+#include "../../geometry/SubRoom.h"
 
-using namespace std;
 
 /**
  * Constructors & Destructors
  */
 
-NavigationGraph::NavigationGraph(const Building * const b)
-    : building(b)
+NavigationGraph::NavigationGraph(const Building * building)
+    : building(building)
 {
 }
 
@@ -36,19 +39,39 @@ NavigationGraph::~NavigationGraph()
     }
 }
 
-void NavigationGraph::AddVertex(NavLine const * const nl)
+void NavigationGraph::AddVertex(const SubRoom * const sub_room)
 {
-    vertices.emplace(nl, new GraphVertex(nl));
-    return;
+    vertices.emplace(sub_room, new GraphVertex(sub_room));
 }
 
-void NavigationGraph::AddEdge(NavLine const * const src, NavLine const * const dest, SubRoom const * const sr)
+void NavigationGraph::AddEdge(const Crossing * crossing)
 {
-    VerticesContainer::iterator src_it = vertices.find(src);
-    VerticesContainer::iterator dest_it = vertices.find(dest);
+    VerticesContainer::iterator src_it = vertices.find(crossing->GetSubRoom1());
+    VerticesContainer::iterator dest_it = vertices.find(crossing->GetSubRoom2());
 
     if(src_it != vertices.end() && dest_it != vertices.end())
     {
-        src_it->second->AddOutEdge(dest_it->second, sr);
+        src_it->second->AddOutEdge(dest_it->second, crossing);
+        dest_it->second->AddOutEdge(src_it->second, crossing);
     }
+}
+
+void NavigationGraph::WriteToDotFile(const std :: string filepath) const
+{
+    std::ofstream dot_file;
+    dot_file.open (filepath + "navigation_graph.dot");
+    dot_file << " digraph graphname \n {\n";
+    for(VerticesContainer::const_iterator it = vertices.begin(); it != vertices.end(); ++it) {
+        dot_file << it->second->GetCaption() + "\n" ;
+        const GraphVertex::EdgesContainer * edges = it->second->GetAllOutEdges();
+        for(GraphVertex::EdgesContainer::const_iterator it2 = edges->begin(); it2 != edges->end(); ++it2)
+        {
+            dot_file << it->second->GetCaption() + " -> " + it2->first->GetCaption() + "\n";
+        }
+
+    }
+    dot_file << "} \n";
+
+    dot_file.close();
+    return;
 }

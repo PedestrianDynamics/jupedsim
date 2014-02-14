@@ -23,7 +23,7 @@ public:
 
     virtual ~AbstractCognitiveMapCreator();
     virtual CognitiveMap * CreateCognitiveMap(const Pedestrian * ped) = 0;
-private:
+protected:
     const Building * const building;
 };
 

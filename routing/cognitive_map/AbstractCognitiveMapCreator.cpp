@@ -4,3 +4,8 @@
  * @date 02, 2014
  * @brief
  */
+#include "AbstractCognitiveMapCreator.h"
+
+AbstractCognitiveMapCreator::~AbstractCognitiveMapCreator()
+{
+}

@@ -12,6 +12,7 @@
 
 class SubRoom;
 class GraphVertex;
+class Crossing;
 
 /**
  * @brief Graph Edge.
@@ -25,20 +26,20 @@ public:
      * Constructors & Destructors
      ****************************/
 
-    GraphEdge(GraphVertex const * const s, GraphVertex const * const d, SubRoom const * const sr);
+    GraphEdge(GraphVertex const * const s, GraphVertex const * const d,  const Crossing * const crossing);
     GraphEdge(GraphEdge const & ge);
     virtual ~GraphEdge();
 
     // Getter collection
-    const GraphVertex * getDest() const;
-    const GraphVertex * getSrc() const;
-    const SubRoom * getSubRoom() const;
+    const GraphVertex * GetDest() const;
+    const GraphVertex * GetSrc() const;
+    const Crossing * GetCrossing() const;
 
 
 private:
-    GraphVertex const * const src;
-    GraphVertex const * const dest;
-    SubRoom const * const subroom;
+    const GraphVertex  * const src;
+    const GraphVertex  * const dest;
+    const Crossing  * const crossing;
 
 };
 

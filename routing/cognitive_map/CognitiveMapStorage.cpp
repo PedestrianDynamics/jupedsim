@@ -8,11 +8,16 @@
 
 #include "CognitiveMapStorage.h"
 #include "AbstractCognitiveMapCreator.h"
+#include "CompleteCognitiveMapCreator.h"
+#include "CognitiveMap.h"
+#include "../../geometry/Building.h"
+#include "NavigationGraph.h"
 
 
 CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
      : building(b)
 {
+    creator = new CompleteCognitiveMapCreator(b);
 }
 
 CognitiveMapStorage::~CognitiveMapStorage()
@@ -34,4 +39,5 @@ void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
     //todo: the possibility to have more then one creator.
     cognitive_maps.emplace(ped, creator->CreateCognitiveMap(ped));
+    cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }
