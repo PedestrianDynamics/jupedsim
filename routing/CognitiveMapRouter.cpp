@@ -46,7 +46,6 @@ void CognitiveMapRouter::Init(Building * b)
     LoadRoutingInfos(GetRoutingInfoFile());
 
     cm_storage = new CognitiveMapStorage(building);
-
 }
 
 

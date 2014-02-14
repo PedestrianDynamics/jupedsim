@@ -7,6 +7,7 @@
  */
 
 #include "CognitiveMapStorage.h"
+#include "AbstractCognitiveMapCreator.h"
 
 
 CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
@@ -23,12 +24,14 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
 {
      CMStorageType::iterator it = cognitive_maps.find(key);
      if(it == cognitive_maps.end()) {
-          return CreateCognitiveMap(key);
-     } else {
-          return it->second;
+          CreateCognitiveMap(key);
      }
+
+     return cognitive_maps[key];
 }
 
-CMStorageValueType CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
+void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
+    //todo: the possibility to have more then one creator.
+    cognitive_maps.emplace(ped, creator->CreateCognitiveMap(ped));
 }

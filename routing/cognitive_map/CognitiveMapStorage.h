@@ -44,7 +44,7 @@ private:
     AbstractCognitiveMapCreator * creator;
 
 
-    CMStorageValueType CreateCognitiveMap(CMStorageKeyType ped);
+    void CreateCognitiveMap(CMStorageKeyType ped);
 
 };
 
