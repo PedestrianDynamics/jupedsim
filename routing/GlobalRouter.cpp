@@ -40,7 +40,7 @@
 #include <iomanip>
 
 //penalty factors for distances outdoor
-#define PENALTY_FACTOR 1
+#define PENALTY_FACTOR 30
 
 
 using namespace std;
