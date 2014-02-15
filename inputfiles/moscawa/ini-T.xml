@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="Subway-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
@@ -18,10 +18,14 @@
 		<!-- <\!-- room states are: good or smoked -\-> -->
 		<rooms>
 			<room room_id="0" state="good" />
+
+
 		</rooms>
 		
 		<!-- doors states are: close or open -->
 		<doors>
+			<door trans_id="0" caption="" state="open" />
+            <door trans_id="1" caption="" state="open" />
 		</doors>
 
 	</traffic_constraints>
@@ -31,23 +35,36 @@
 		<goals>
 			<goal id="0" final="true" caption="goal 0">
 				<polygon>
-					<vertex px="0.0" py="-5.0" />
-					<vertex px="2.0" py="-5.0" />
-					<vertex px="2.0" py="-7.0" />
-					<vertex px="0.0" py="-7.0" />
-					<vertex px="0.0" py="-5.0" />
+					<vertex px="17.0" py="39.0" />
+					<vertex px="17.0" py="37.0" />
+					<vertex px="18.0" py="37.0" />
+					<vertex px="18.0" py="39.0" />
+					<vertex px="17.0" py="39.0" />
+				</polygon>
+			</goal>
+			
+			
+			<goal id="1" final="true" caption="goal 1">
+				<polygon>
+					<vertex px="74.0" py="39.0" />
+					<vertex px="74.0" py="37.0" />
+					<vertex px="75.0" py="37.0" />
+					<vertex px="75.0" py="39.0" />
+					<vertex px="74.0" py="39.0" />
 				</polygon>
 			</goal>
 		</goals>
 	</routing>
 
+
+	
 	
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
 
-		<group group_id="1" room_id="0" subroom_id="0" number="1" goal_id="" router_id="1" route_id=""/>
-	
+			<group group_id="0" room_id="0" subroom_id="1" number="20" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="0" room_id="0" subroom_id="3" number="20" goal_id="0" router_id="1" route_id=""/>
 		
 		</agents_distribution>
 
@@ -78,11 +95,15 @@
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="1" description="quickest">
+		<router router_id="1" description="global_safest">
 			<parameters>
 				<navigation_lines file="routing.xml" />
 			</parameters>
 		</router>
+		
 	</route_choice_models>
+	
+	
+	
 
 </JuPedSim>

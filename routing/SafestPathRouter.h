@@ -73,8 +73,8 @@ private:
 
 	int GetAgentsCountInSubroom( int roomID, int subroomID);
 	void main_1(Pedestrian* p);
-	void main_2( );
-	void CalculatePhi();
+	void main_2(Pedestrian* p);
+	void CalculatePhi(Pedestrian* p);
 	void main_3( );
 
 	int MapSection;
@@ -93,6 +93,12 @@ private:
 
 //	 double *_finalLineEvac;
 	 int numberOfSubroom;
+	 double a;
+	 double b;
+	 double c;
+
+
+
 	 int *preSub;
 	 int *flo;
 	 double maximalSquare;
@@ -105,7 +111,11 @@ private:
 	 double *peopleAtSection;
 	 double *squareOfSection;
 	 double *dFinalLength;
+	 double *dPeopleDensity;
 	 double **dPreOFP;
+
+	 FileHandler* _phiFile;
+	 FileHandler* _finalLineEvac;
 
 
 	// double rR[1][11];

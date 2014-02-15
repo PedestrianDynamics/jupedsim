@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<geometry version ="0.5" caption="Projectname" gridSizeX="20.000000" gridSizeY="20.000000" unit="m">
+<geometry version ="0.40" caption="Projectname" gridSizeX="20.000000" gridSizeY="20.000000" unit="m">
 <rooms>
 	<room id="0" caption="0" zpos="0.000000">
 			<subroom id="0" closed="0" class="floor">
@@ -479,25 +479,28 @@
 
 	<room id="1" caption="0" zpos="0.000000">
 	
+	<subroom id="0" closed="0" class="subroom">
+		<polygon caption="wall">
+			<vertex px="20.0" py="26.0" />
+			<vertex px="26.0" py="20.0" />
+			<vertex px="26.0" py="22.5" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="26.0" py="23.5" />
+			<vertex px="26.0" py="26.0" />
+			<vertex px="23.5" py="26.0" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="22.5" py="26.0" />
+			<vertex px="20.0" py="26.0" />
+		</polygon>
+	</subroom>
 	
-		<subroom id="0" closed="0" class="subroom">
-			<polygon caption="wall">
-				<vertex px="20.0" py="26.0" />		
-				<vertex px="20.0" py="23.5"/>
-			</polygon>
-			<polygon caption="wall">										
-				<vertex px="20.0" py="22.5"/>			
-				<vertex px="20.0" py="20.0" />
-				<vertex px="26.0" py="26.0" />
-				<vertex px="23.5" py="26.0" />
-			</polygon>
-			<polygon caption="wall">	
-				<vertex px="22.5" py="26.0" />
-				<vertex px="20.0" py="26.0" />
-			</polygon>			
-		</subroom>
-
-
+	
+	
+	
+	
+	
 	<subroom id="1" closed="0" class="subroom">
 		<polygon caption="wall">
 			<vertex px="20.0" py="18.0" />
@@ -518,56 +521,22 @@
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-		<subroom id="2" closed="0" class="subroom">
-			<polygon caption="wall">
-				<vertex px="12.0" py="18.0" />	
-				<vertex px="12.0" py="15.5" />	
-			</polygon>
-			<polygon caption="wall">			
-				<vertex px="12.0" py="14.5" />	
-				<vertex px="12.0" py="12.0" />
-				<vertex px="18.0" py="18.0" />	
-				<vertex px="15.5" py="18.0" />
-			</polygon>
-			<polygon caption="wall">				
-				<vertex px="14.5" py="18.0" />
-				<vertex px="12.0" py="18.0" />
-			</polygon>
-		</subroom>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	<subroom id="2" closed="0" class="subroom">
+		<polygon caption="wall">
+			<vertex px="12.0" py="18.0" />
+			<vertex px="18.0" py="12.0" />
+			<vertex px="18.0" py="14.5" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="18.0" py="15.5" />
+			<vertex px="18.0" py="18.0" />
+			<vertex px="15.5" py="18.0" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="14.5" py="18.0" />
+			<vertex px="12.0" py="18.0" />
+		</polygon>
+	</subroom>
 	
 	
 	
@@ -594,27 +563,26 @@
 	
 	
 	
+	
+	
 	<subroom id="4" closed="0" class="subroom">
 		<polygon caption="wall">
+			<vertex px="20.0" py="26.0" />
+			<vertex px="20.0" py="23.5" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="20.0" py="22.5" />
 			<vertex px="20.0" py="20.0" />
 			<vertex px="22.5" py="20.0" />
 		</polygon>
 		<polygon caption="wall">
 			<vertex px="23.5" py="20.0" />
 			<vertex px="26.0" py="20.0" />
-			<vertex px="26.0" py="22.5" />
-		</polygon>
-		<polygon caption="wall">
-			<vertex px="26.0" py="23.5" />
-			<vertex px="26.0" py="26.0" />
-			<vertex px="20.0" py="20.0" />
-		</polygon>
-
-
-
-	</subroom>	
+			<vertex px="20.0" py="26.0" />
+		</polygon>	
+			
 	
-	
+	</subroom>
 	
 	
 	
@@ -642,31 +610,22 @@
 	
 	
 	
-	
-	
 	<subroom id="6" closed="0" class="subroom">
-	<polygon caption="wall">
-		<vertex px="12.0" py="12.0" />
-		<vertex px="14.5" py="12.0" />
-	</polygon>
-	<polygon caption="wall">
-		<vertex px="15.5" py="12.0" />
-		<vertex px="18.0" py="12.0" />
-		<vertex px="18.0" py="14.5" />
-	</polygon>
-	<polygon caption="wall">
-		<vertex px="18.0" py="15.5" />
-		<vertex px="18.0" py="18.0" />
-		<vertex px="12.0" py="12.0" />
-	</polygon>
-</subroom>
-	
-	
-	
-	
-	
-	
-	
+		<polygon caption="wall">
+			<vertex px="12.0" py="18.0" />
+			<vertex px="12.0" py="15.5" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="12.0" py="14.5" />
+			<vertex px="12.0" py="12.0" />
+			<vertex px="14.5" py="12.0" />
+		</polygon>
+		<polygon caption="wall">
+			<vertex px="15.5" py="12.0" />
+			<vertex px="18.0" py="12.0" />
+			<vertex px="12.0" py="18.0" />
+		</polygon>		
+	</subroom>
 	
 	
 	
@@ -689,7 +648,11 @@
 			<vertex px="12.0" py="26.0" />
 		</polygon>					
 	</subroom>
-		</room>	
+	
+	
+	
+	
+	</room>	
 
 
 
@@ -729,11 +692,11 @@
 		
 		
 				
-		<transition id="4" caption="No_Name" type="emergency" room1_id="0" subroom1_id="16" room2_id="1" subroom2_id="4">
+		<transition id="4" caption="No_Name" type="emergency" room1_id="0" subroom1_id="16" room2_id="1" subroom2_id="0">
 			 <vertex px="26.0" py="23.5"/>
 			 <vertex px="26.0" py="22.5"/>
 		</transition>			
-		<transition id="5" caption="No_Name" type="emergency" room1_id="0" subroom1_id="11" room2_id="1" subroom2_id="0">
+		<transition id="5" caption="No_Name" type="emergency" room1_id="0" subroom1_id="11" room2_id="1" subroom2_id="4">
 			 <vertex px="20.0" py="23.5"/>
 			 <vertex px="20.0" py="22.5"/>
 		</transition>		
@@ -767,11 +730,11 @@
 					
 					
 		
-		<transition id="12" caption="No_Name" type="emergency" room1_id="0" subroom1_id="4" room2_id="1" subroom2_id="2">	
+		<transition id="12" caption="No_Name" type="emergency" room1_id="0" subroom1_id="4" room2_id="1" subroom2_id="6">	
 			<vertex px="12.0" py="15.5" />
 			<vertex px="12.0" py="14.5" />
 		</transition>
-		<transition id="13" caption="No_Name" type="emergency" room1_id="0" subroom1_id="9" room2_id="1" subroom2_id="6">	
+		<transition id="13" caption="No_Name" type="emergency" room1_id="0" subroom1_id="9" room2_id="1" subroom2_id="2">	
 			<vertex px="18.0" py="15.5" />
 			<vertex px="18.0" py="14.5" />
 		</transition>

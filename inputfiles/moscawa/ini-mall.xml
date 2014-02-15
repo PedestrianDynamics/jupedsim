@@ -6,6 +6,7 @@
 	<seed>12542</seed>
 	<!-- geometry file -->
 	<geometry>geometry-mall.xml</geometry>
+	<max_sim_time>900</max_sim_time>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
@@ -121,12 +122,14 @@
 		<agents_distribution>
 		
 			
-			<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="1" room_id="0" subroom_id="1" number="1" goal_id="0" router_id="1" route_id=""/>
 			
 
 			
 			
-			<group group_id="2" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" route_id=""/>
+		<!--	
+		<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="0" router_id="1" route_id=""/>
+		<group group_id="2" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="3" room_id="0" subroom_id="3" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="4" room_id="0" subroom_id="4" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="5" room_id="0" subroom_id="5" number="10" goal_id="0" router_id="1" route_id=""/>
@@ -170,7 +173,7 @@
 			<group group_id="34" room_id="5" subroom_id="7" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="35" room_id="5" subroom_id="8" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="36" room_id="5" subroom_id="9" number="10" goal_id="1" router_id="1" route_id=""/>
-			<group group_id="37" room_id="5" subroom_id="10" number="10" goal_id="0" router_id="1" route_id=""/> 
+			<group group_id="37" room_id="5" subroom_id="10" number="10" goal_id="0" router_id="1" route_id=""/> -->
 		
 		
 		
@@ -239,7 +242,6 @@
 	<operational_models>
 		<model id="1" description="gcfm">
 			<parameters>
-				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
