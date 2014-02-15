@@ -1,65 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="Subway-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
+	<max_sim_time> 20</max_sim_time>
 	<!-- geometry file -->
-	<geometry>geometry.xml</geometry>
-	<!-- traectories file and format -->
+	<geometry>geo.xml</geometry>
+	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
-		<file location="trajectorie.xml" />
+		<file location="trajectories.xml" />
+		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	<!-- where to store the logs -->
-	<!--logfile>log</logfile-->
+	<!--<logfile>outputfiles/log.txt</logfile> -->
+
 
 	<!-- traffic information: e.g closed doors or smoked rooms -->
 	<traffic_constraints>
-		<!-- <\!-- room states are: good or smoked -\-> -->
-		<rooms>
-			<room room_id="0" state="good" />
-		</rooms>
-		
-		<!-- doors states are: close or open -->
-		<doors>
-		</doors>
-
+		<!-- room states are: good or smoked -->
 	</traffic_constraints>
-	
-	
+
 	<routing>
-		<goals>
-			<goal id="0" final="true" caption="goal 0">
-				<polygon>
-					<vertex px="0.0" py="-5.0" />
-					<vertex px="2.0" py="-5.0" />
-					<vertex px="2.0" py="-7.0" />
-					<vertex px="0.0" py="-7.0" />
-					<vertex px="0.0" py="-5.0" />
-				</polygon>
-			</goal>
-		</goals>
+
 	</routing>
 
-	
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-
-		<group group_id="1" room_id="0" subroom_id="0" number="1" goal_id="" router_id="1" route_id=""/>
-	
-		
+			<group group_id="0" room_id="0" subroom_id="0" number="10000" goal_id="" router_id="1" route_id="" age="" gender="" height="" startX="" startY="" />
 		</agents_distribution>
 
-                <!-- frequency in persons/minute -->
-		<agents_sources/>
 	</agents>
 
 	<!-- These parameters may be overwritten -->
 	<operational_models>
 		<model id="1" description="gcfm">
 			<parameters>
-				<tmax unit="sec">900</tmax>
+				
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
@@ -75,14 +53,22 @@
 			</parameters>
 		</model>
 
+		<model id="2" desciption="cdt">
+			<parameters></parameters>
+		</model>
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="1" description="quickest">
+		<router router_id="0" description="dummy">
+			<parameters></parameters>
+		</router>
+
+		<router router_id="1" description="global_shortest">
 			<parameters>
-				<navigation_lines file="routing.xml" />
+
 			</parameters>
 		</router>
+
 	</route_choice_models>
 
 </JuPedSim>
