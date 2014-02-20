@@ -8,8 +8,10 @@
 
 #include "CognitiveMap.h"
 #include "NavigationGraph.h"
+
 #include "../../geometry/Crossing.h"
 #include "../../geometry/Building.h"
+#include "../../geometry/NavLine.h"
 
 
 using namespace std;
@@ -18,8 +20,8 @@ using namespace std;
  * Constructors & Destructors
  */
 
-CognitiveMap::CognitiveMap(const Building * building)
-    : building(building)
+CognitiveMap::CognitiveMap(const Building * building, const Pedestrian * pedestrian)
+    : building(building), pedestrian(pedestrian)
 {
     navigation_graph = new NavigationGraph(building);
 }
@@ -41,10 +43,14 @@ void CognitiveMap::Add(const Crossing * crossing)
 
 void CognitiveMap::AddExit(const Transition * exit)
 {
-
+    navigation_graph->AddExit(exit);
 }
 
-const NavigationGraph * CognitiveMap::GetNavigationGraph()
+const NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
     return navigation_graph;
+}
+NavLine * CognitiveMap::GetDestination()
+{
+
 }

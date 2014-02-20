@@ -17,6 +17,7 @@ class Building;
 class NavLine;
 class SubRoom;
 class Crossing;
+class Transition;
 
 
 
@@ -44,8 +45,11 @@ public:
 
     void AddVertex(const SubRoom * const sub_room);
     void AddEdge(const Crossing * crossing);
+    void AddExit(const Transition * transition);
+
 
     void WriteToDotFile(const std::string filepath) const;
+
 
 private:
     /**

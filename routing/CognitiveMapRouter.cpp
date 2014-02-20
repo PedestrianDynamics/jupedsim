@@ -8,12 +8,16 @@
 
 #include "CognitiveMapRouter.h"
 #include "Router.h"
-#include "../geometry/Building.h"
-#include "../tinyxml/tinyxml.h"
-#include "cognitive_map/CognitiveMapStorage.h"
-#include "../geometry/SubRoom.h"
-#include "../pedestrian/Pedestrian.h"
 
+#include "cognitive_map/CognitiveMapStorage.h"
+#include "cognitive_map/CognitiveMap.h"
+
+#include "../geometry/SubRoom.h"
+#include "../geometry/NavLine.h"
+#include "../geometry/Building.h"
+
+#include "../pedestrian/Pedestrian.h"
+#include "../tinyxml/tinyxml.h"
 
 CognitiveMapRouter::CognitiveMapRouter()
 {
@@ -27,16 +31,19 @@ CognitiveMapRouter::~CognitiveMapRouter()
 
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
-    SubRoom * sub_room = building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
+    //check for former goal.
+    if(p->GetLastDestination() == -1) {
+        //no former goal. so initial route has to be choosen
+        //this is needed for initialisation
+        p->ChangedSubRoom();
+    }
 
-    (*cm_storage)[p];
+    NavLine * destination = (*cm_storage)[p]->GetDestination();
 
-    p->SetExitLine( (*sub_room->GetAllTransitions().begin()));
-    p->SetExitIndex( (*sub_room->GetAllTransitions().begin())->GetID());
+    p->SetExitLine(destination);
+    p->SetExitIndex(destination->GetUniqueID());
 
-    return (*sub_room->GetAllTransitions().begin())->GetID();
-
-
+    return destination->GetUniqueID();
 }
 
 void CognitiveMapRouter::Init(Building * b)

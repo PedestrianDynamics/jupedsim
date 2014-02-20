@@ -14,6 +14,9 @@ class SubRoom;
 class Transition;
 class Crossing;
 class Building;
+class NavLine;
+class Pedestrian;
+
 
 
 /**
@@ -30,18 +33,21 @@ public:
     /****************************
      * Constructors & Destructors
      ****************************/
-    CognitiveMap(const Building * building);
+    CognitiveMap(const Building * building, const Pedestrian * pedestrian);
     virtual ~CognitiveMap();
 
     void Add(const SubRoom * sub_room);
     void Add(const Crossing * crossing);
     void AddExit(const Transition * exit);
 
-    const NavigationGraph * GetNavigationGraph();
+    const NavigationGraph * GetNavigationGraph() const;
+
+    NavLine * GetDestination();
 
 private:
     NavigationGraph * navigation_graph;
     const Building * const building;
+    const Pedestrian * const pedestrian;
 
 };
 

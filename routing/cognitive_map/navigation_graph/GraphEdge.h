@@ -26,20 +26,27 @@ public:
      * Constructors & Destructors
      ****************************/
 
-    GraphEdge(GraphVertex const * const s, GraphVertex const * const d,  const Crossing * const crossing);
+    GraphEdge(const GraphVertex * const s, const GraphVertex * const d, const Crossing * const crossing);
     GraphEdge(GraphEdge const & ge);
     virtual ~GraphEdge();
+
+    void CalcApproximateDistance();
 
     // Getter collection
     const GraphVertex * GetDest() const;
     const GraphVertex * GetSrc() const;
     const Crossing * GetCrossing() const;
 
+    double GetApproximateDistance() const;
+
 
 private:
     const GraphVertex  * const src;
     const GraphVertex  * const dest;
     const Crossing  * const crossing;
+
+    //WEIGHTS
+    double approximate_distance;
 
 };
 

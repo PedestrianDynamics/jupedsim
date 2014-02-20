@@ -10,12 +10,14 @@
 #define GRAPHVERTEX_H_
 
 #include <unordered_map>
+#include <set>
 #include <string>
 #include "GraphEdge.h"
 
 class SubRoom;
 class NavLine;
 class Crossing;
+class Transition;
 
 
 
@@ -37,18 +39,23 @@ public:
     virtual ~GraphVertex();
 
     const std::string GetCaption() const;
-    const EdgesContainer * GetAllOutEdges() const;
-
-
+    const SubRoom * GetSubRoom() const;
 
     // add and remove edge pointer from vertex
+
     void AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing);
     int RemoveOutEdge(const GraphVertex * dest);
     int RemoveOutEdge(GraphEdge * edge);
+    const EdgesContainer * GetAllOutEdges() const;
+
+
+    void AddExit(const Transition * transition);
+    bool HasExit() const;
 
 private:
     // edges wich are "known" from this vertex
     EdgesContainer out_edges;
+    std::set<GraphEdge *> exits;
     const SubRoom * const sub_room;
 
 };

@@ -22,7 +22,7 @@ CompleteCognitiveMapCreator::~CompleteCognitiveMapCreator()
 
 CognitiveMap * CompleteCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * ped)
 {
-    CognitiveMap * cm = new CognitiveMap(building);
+    CognitiveMap * cm = new CognitiveMap(building, ped);
 
     //adding all SubRooms as Vertex
     const std::vector<Room *>& rooms = building->GetAllRooms();

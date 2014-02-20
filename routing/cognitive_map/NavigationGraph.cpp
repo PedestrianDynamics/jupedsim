@@ -56,17 +56,33 @@ void NavigationGraph::AddEdge(const Crossing * crossing)
     }
 }
 
+void NavigationGraph::AddExit(const Transition * transition)
+{
+    VerticesContainer::iterator src_it = vertices.find(transition->GetSubRoom1());
+    if(src_it != vertices.end()) {
+        src_it->second->AddExit(transition);
+    }
+}
+
+
 void NavigationGraph::WriteToDotFile(const std :: string filepath) const
 {
     std::ofstream dot_file;
     dot_file.open (filepath + "navigation_graph.dot");
     dot_file << " digraph graphname \n {\n";
     for(VerticesContainer::const_iterator it = vertices.begin(); it != vertices.end(); ++it) {
-        dot_file << it->second->GetCaption() + "\n" ;
+        dot_file << it->second->GetCaption();
+        dot_file << " [ \n pos =\"" + std::to_string(it->second->GetSubRoom()->GetCentroid().GetX()) +"," + std::to_string(it->second->GetSubRoom()->GetCentroid().GetY()) +"!\"\n shape=box \n";
+        if(it->second->HasExit())
+            dot_file << "style=filled, color=red\n";
+
+        dot_file << "]\n" ;
         const GraphVertex::EdgesContainer * edges = it->second->GetAllOutEdges();
         for(GraphVertex::EdgesContainer::const_iterator it2 = edges->begin(); it2 != edges->end(); ++it2)
         {
-            dot_file << it->second->GetCaption() + " -> " + it2->first->GetCaption() + "\n";
+            dot_file << it->second->GetCaption() + " -> " + it2->first->GetCaption() + "\n [";
+            dot_file << "label = "+ std::to_string(it2->second->GetApproximateDistance()) + "] \n";
+
         }
 
     }

@@ -7,11 +7,16 @@
 
 #include "GraphEdge.h"
 
+#include<vector>
+
 #include "GraphVertex.h"
 #include "../../../geometry/SubRoom.h"
 #include "../../../geometry/Crossing.h"
+#include "../../../geometry/Transition.h"
 
 using namespace std;
+
+
 
 /**
  * Constructors & Destructors
@@ -25,12 +30,43 @@ GraphEdge::~GraphEdge()
 GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, const Crossing * const crossing)
     : src(s), dest(d), crossing(crossing)
 {
+    CalcApproximateDistance();
 }
 
 GraphEdge::GraphEdge(GraphEdge const &ge)
-    : src(ge.src), dest(ge.dest), crossing(ge.crossing)
+    : src(ge.src), dest(ge.dest), crossing(ge.crossing), approximate_distance(ge.approximate_distance)
 {
 }
+
+void GraphEdge::CalcApproximateDistance()
+{
+    double distance = 0.0;
+    int count = 0;
+    for(std::vector<Crossing*>::const_iterator it = src->GetSubRoom()->GetAllCrossings().begin(); it != src->GetSubRoom()->GetAllCrossings().end(); ++it) {
+        if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+        count++;
+        distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
+    }
+
+    for(std::vector<Transition*>::const_iterator it = src->GetSubRoom()->GetAllTransitions().begin(); it != src->GetSubRoom()->GetAllTransitions().end(); ++it) {
+        if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+        count++;
+        distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
+    }
+    if(count == 0) approximate_distance = 0;
+    else approximate_distance = distance/count;
+}
+
+
+/**
+ * GETTER AND SETTER
+ */
+
+double GraphEdge::GetApproximateDistance() const
+{
+    return approximate_distance;
+}
+
 const GraphVertex * GraphEdge::GetDest() const
 {
     return dest;

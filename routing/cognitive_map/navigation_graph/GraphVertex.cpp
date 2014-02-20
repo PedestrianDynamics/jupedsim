@@ -10,7 +10,7 @@
 
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
-
+#include "../../../geometry/Transition.h"
 #include <unordered_map>
 
 using namespace std;
@@ -41,6 +41,13 @@ void GraphVertex::AddOutEdge(const GraphVertex * const dest, const Crossing * co
     return;
 }
 
+
+void GraphVertex::AddExit(const Transition * transition)
+{
+    exits.emplace(new GraphEdge(this, NULL, transition));
+    return;
+}
+
 int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 {
     EdgesContainer::iterator it = out_edges.find(edge->GetDest());
@@ -63,4 +70,14 @@ const std::string GraphVertex::GetCaption() const
 const GraphVertex::EdgesContainer * GraphVertex::GetAllOutEdges() const
 {
     return &out_edges;
+}
+
+const SubRoom * GraphVertex::GetSubRoom() const
+{
+    return sub_room;
+}
+
+bool GraphVertex::HasExit() const
+{
+    return exits.size() > 0;
 }
