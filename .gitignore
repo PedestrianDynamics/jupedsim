@@ -1,6 +1,8 @@
 /build/
 /lib/
 /bin/
+/Debug
+/Release
 *~
 
 # Compiled Object files
@@ -34,3 +36,4 @@ install_manifest.txt
 
 CTestTestfile.cmake
 DartConfiguration.tcl
+

@@ -14,7 +14,7 @@ using namespace std;
 
 RoutingGraphStorage::RoutingGraphStorage()
 {
-};
+}
 
 
 RoutingGraphStorage::~RoutingGraphStorage()
@@ -26,7 +26,7 @@ RoutingGraphStorage::~RoutingGraphStorage()
     
   }
   
-};
+}
 
 
 void RoutingGraphStorage::init(Building * b)
@@ -34,7 +34,7 @@ void RoutingGraphStorage::init(Building * b)
   //create the first RoutingGraph with empty set as Key (no door closed right at the beginning
 
   graphs[empty_set] = new RoutingGraph(b);
-};
+}
 
 
 RoutingGraph * RoutingGraphStorage::GetGraph(set<int> closed_doors)
@@ -51,7 +51,7 @@ RoutingGraph * RoutingGraphStorage::GetGraph(set<int> closed_doors)
   GenerateNewGraph(closed_doors);
   
   return graphs[closed_doors];
-};
+}
 
 void RoutingGraphStorage::GenerateNewGraph(set<int> iset, set<int> from)
 {

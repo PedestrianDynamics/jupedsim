@@ -31,8 +31,15 @@
 #include <vector>
 #include <string.h>
 
+// should be true only when using this file in the simulation core
 #define _SIMULATOR 1
 
+
+#define JPS_VERSION "0.5"
+#define JPS_VERSION_MINOR 5
+#define JPS_VERSION_MAJOR 0
+
+// disable openmp in debug mode
 #ifdef _NDEBUG
 //#undef _OPENMP
 #endif
@@ -46,25 +53,14 @@
 #define J_EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
 
-#define JPS_VERSION "0.5"
-#define JPS_VERSION_MINOR 5
-#define JPS_VERSION_MAJOR 0
-
-// Länge von char vectoren zur Ausgabe
+// Lenght of array
 #define CLENGTH 1000
 
-
-// Faktor für TraVisTo (cm <-> m)
+// conversion (cm <-> m)
 #define FAKTOR 100
 
-
-// final destinations for the pedestrians
-#define FINAL_DEST_OUT -1 //default
-
-
-//routing
-#define J_EPS_HL_DIST 0.012
-#define J_EPS_AP_DIST J_EPS_GOAL+J_EPS_HL_DIST
+// default final destination for the pedestrians
+#define FINAL_DEST_OUT -1
 
 // Linked cells
 #define LIST_EMPTY 	-1
@@ -72,7 +68,7 @@
 
 enum RoomState {
 	ROOM_CLEAN=0,
-	ROOM_SMOKED=1,
+	ROOM_SMOKED=1
 };
 
 enum FileFormat {

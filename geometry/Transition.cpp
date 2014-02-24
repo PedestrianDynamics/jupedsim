@@ -125,11 +125,9 @@ SubRoom* Transition::GetOtherSubRoom(int roomID, int subroomID) const {
 	else if ((GetRoom2() != NULL) && (GetRoom2()->GetID() == roomID))
 		return GetSubRoom1();
 	else {
-		char tmp[CLENGTH];
-		sprintf(tmp,"ERROR: \tTransition::GetOtherSubRoom No exit found "
-				"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetUniqueID(),roomID,subroomID);
-		Log->Write(tmp);
-		exit(0);
+		Log->Write("ERROR: \tTransition::GetOtherSubRoom No exit found "
+				"on the other side\n ID=%d, roomID=%d, subroomID=%d\n",GetUniqueID(),roomID,subroomID);
+		exit(EXIT_FAILURE);
 	}
 }
 
