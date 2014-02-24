@@ -933,7 +933,7 @@
 	</rooms>
 
 	<transitions>
-		<!-- exits like crossings but between rooms or to outside (room with index 
+		<!-- exits like crossings but between rooms or to outside (room with index
 			= -1) -->
 		<transition id="1" caption="EV2-EG_exit" type="emergency"
 			room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
@@ -951,7 +951,7 @@
 			<vertex px="6.8" py="0.0" />
 		</transition>
 		<transition id="4" caption="209 exit" type="emergency"
-			open="0" room1_id="3" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+			room1_id="3" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="8.75" py="0.0" />
 			<vertex px="9.75" py="0.0" />
 		</transition>
