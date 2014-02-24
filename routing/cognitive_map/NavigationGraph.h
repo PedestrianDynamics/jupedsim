@@ -47,6 +47,8 @@ public:
     void AddEdge(const Crossing * crossing);
     void AddExit(const Transition * transition);
 
+    GraphVertex * operator[](const SubRoom * const sub_room);
+
 
     void WriteToDotFile(const std::string filepath) const;
 

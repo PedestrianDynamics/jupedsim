@@ -9,10 +9,12 @@
 #include "CognitiveMap.h"
 #include "NavigationGraph.h"
 
+#include "navigation_graph/GraphVertex.h"
+#include "navigation_graph/GraphEdge.h"
 #include "../../geometry/Crossing.h"
 #include "../../geometry/Building.h"
 #include "../../geometry/NavLine.h"
-
+#include "../../pedestrian/Pedestrian.h"
 
 using namespace std;
 
@@ -50,7 +52,8 @@ const NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
     return navigation_graph;
 }
-NavLine * CognitiveMap::GetDestination()
+const NavLine * CognitiveMap::GetDestination()
 {
-
+    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    return (*(*navigation_graph)[sub_room]->GetCheapestDestination(std::set<const GraphVertex *>()).first).GetCrossing();
 }

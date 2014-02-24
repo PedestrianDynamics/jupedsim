@@ -9,11 +9,13 @@
 #include "NavigationGraph.h"
 
 #include <iostream>
+#include <utility>
 #include <fstream>
 
 #include "navigation_graph/GraphEdge.h"
 #include "../../geometry/Building.h"
 #include "../../geometry/SubRoom.h"
+
 
 
 /**
@@ -64,6 +66,16 @@ void NavigationGraph::AddExit(const Transition * transition)
     }
 }
 
+GraphVertex * NavigationGraph::operator[](const SubRoom * const sub_room)
+{
+    VerticesContainer::iterator it = vertices.find(sub_room);
+    if(it != vertices.end()) {
+        return it->second;
+    } else {
+        return NULL;
+    }
+}
+
 
 void NavigationGraph::WriteToDotFile(const std :: string filepath) const
 {
@@ -80,9 +92,10 @@ void NavigationGraph::WriteToDotFile(const std :: string filepath) const
         const GraphVertex::EdgesContainer * edges = it->second->GetAllOutEdges();
         for(GraphVertex::EdgesContainer::const_iterator it2 = edges->begin(); it2 != edges->end(); ++it2)
         {
-            dot_file << it->second->GetCaption() + " -> " + it2->first->GetCaption() + "\n [";
-            dot_file << "label = "+ std::to_string(it2->second->GetApproximateDistance()) + "] \n";
-
+            if(!(*it2)->GetCrossing()->IsExit()) {
+                dot_file << it->second->GetCaption() + " -> " + (*it2)->GetDest()->GetCaption() + "\n [";
+                dot_file << "label = "+ std::to_string((*it2)->GetApproximateDistance()) + "] \n";
+            }
         }
 
     }

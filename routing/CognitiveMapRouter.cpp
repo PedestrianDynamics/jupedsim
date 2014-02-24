@@ -38,7 +38,7 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
         p->ChangedSubRoom();
     }
 
-    NavLine * destination = (*cm_storage)[p]->GetDestination();
+    const NavLine * destination = (*cm_storage)[p]->GetDestination();
 
     p->SetExitLine(destination);
     p->SetExitIndex(destination->GetUniqueID());

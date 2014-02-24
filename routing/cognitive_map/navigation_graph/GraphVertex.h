@@ -12,14 +12,13 @@
 #include <unordered_map>
 #include <set>
 #include <string>
-#include "GraphEdge.h"
+#include <utility>
 
 class SubRoom;
 class NavLine;
 class Crossing;
 class Transition;
-
-
+class GraphEdge;
 
 /**
  * @brief Graph Vertex.
@@ -28,7 +27,7 @@ class Transition;
 class GraphVertex {
 
 public:
-    typedef std::unordered_map<const GraphVertex*, GraphEdge *> EdgesContainer;
+typedef std::set<GraphEdge *> EdgesContainer;
     /****************************
      * Constructors & Destructors
      ****************************/
@@ -51,6 +50,9 @@ public:
 
     void AddExit(const Transition * transition);
     bool HasExit() const;
+
+    std::pair<const GraphEdge *, double> GetCheapestDestination(std::set<const GraphVertex *> visited) const;
+
 
 private:
     // edges wich are "known" from this vertex

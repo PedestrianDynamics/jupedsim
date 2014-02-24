@@ -39,5 +39,7 @@ void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
     //todo: the possibility to have more then one creator.
     cognitive_maps.emplace(ped, creator->CreateCognitiveMap(ped));
-    cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
+
+    //debug
+    //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }

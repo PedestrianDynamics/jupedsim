@@ -7,11 +7,15 @@
 
 #include "GraphVertex.h"
 
+#include <utility>
+#include <cmath>
+#include <set>
 
+#include "GraphEdge.h"
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Transition.h"
-#include <unordered_map>
+
 
 using namespace std;
 
@@ -37,28 +41,33 @@ GraphVertex::~GraphVertex()
 
 void GraphVertex::AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing)
 {
-    out_edges.emplace(dest, new GraphEdge(this, dest, crossing));
+    out_edges.emplace(new GraphEdge(this, dest, crossing));
     return;
 }
 
 
 void GraphVertex::AddExit(const Transition * transition)
 {
-    exits.emplace(new GraphEdge(this, NULL, transition));
+    out_edges.emplace(new GraphEdge(this, NULL, transition));
     return;
 }
 
 int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 {
-    EdgesContainer::iterator it = out_edges.find(edge->GetDest());
-    if(it != out_edges.end())
-        delete it->second;
-    return out_edges.erase(edge->GetDest());
+    EdgesContainer::iterator it = out_edges.find(edge);
+    if(it != out_edges.end()) {
+        delete (*it);
+        out_edges.erase(it);
+        return 1;
+    }
+    return 0;
 }
+
 
 int GraphVertex::RemoveOutEdge(const GraphVertex * dest)
 {
-    return out_edges.erase(dest);
+    //return out_edges.erase(dest);
+    return 1;
 
 }
 
@@ -79,5 +88,33 @@ const SubRoom * GraphVertex::GetSubRoom() const
 
 bool GraphVertex::HasExit() const
 {
-    return exits.size() > 0;
+    return false;
+}
+
+std::pair<const GraphEdge *, double> GraphVertex::GetCheapestDestination(std::set<const GraphVertex *> visited) const
+{
+    if(visited.find(this) != visited.end()) {
+        return std::pair<const GraphEdge *, double>(NULL, INFINITY);
+    }
+
+    double act_cheapest_dist = INFINITY;
+    const GraphEdge * act_cheapest_edge;
+
+    visited.insert(this);
+
+    for(EdgesContainer::const_iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        if((*it)->GetCrossing()->IsExit()) {
+            if((*it)->GetApproximateDistance() < act_cheapest_dist) {
+                act_cheapest_edge = (*it);
+                act_cheapest_dist = (*it)->GetApproximateDistance();
+            }
+        } else {
+            std::pair<const GraphEdge *, double> cheapest_destination = (*it)->GetDest()->GetCheapestDestination(visited);
+            if(cheapest_destination.second < act_cheapest_dist) {
+                act_cheapest_dist = cheapest_destination.second + cheapest_destination.first->GetApproximateDistance();
+                act_cheapest_edge = (*it);
+            }
+        }
+    }
+    return std::pair<const GraphEdge *, double>(act_cheapest_edge, act_cheapest_dist);
 }
