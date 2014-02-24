@@ -41,14 +41,14 @@ GraphVertex::~GraphVertex()
 
 void GraphVertex::AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing)
 {
-    out_edges.emplace(new GraphEdge(this, dest, crossing));
+    out_edges.insert(new GraphEdge(this, dest, crossing));
     return;
 }
 
 
 void GraphVertex::AddExit(const Transition * transition)
 {
-    out_edges.emplace(new GraphEdge(this, NULL, transition));
+    out_edges.insert(new GraphEdge(this, NULL, transition));
     return;
 }
 

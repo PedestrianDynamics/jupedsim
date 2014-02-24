@@ -43,7 +43,7 @@ NavigationGraph::~NavigationGraph()
 
 void NavigationGraph::AddVertex(const SubRoom * const sub_room)
 {
-    vertices.emplace(sub_room, new GraphVertex(sub_room));
+    vertices.insert(std::pair<const SubRoom  *, GraphVertex*>(sub_room, new GraphVertex(sub_room)));
 }
 
 void NavigationGraph::AddEdge(const Crossing * crossing)
