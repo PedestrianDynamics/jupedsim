@@ -68,14 +68,14 @@ private:
     Point _V0; //vector V0
     Point _lastPosition;
     int _lastCellPosition;
-    
+
     /**
      * A set with UniqueIDs of closed crossings,
      * transitions or hlines (hlines doesnt make that much sense,
      * just that they are removed from the routing graph)
      */
     std::map<int, NavLineState> _knownDoors;
-    
+
 
     //routing parameters
     double _reroutingThreshold; // new orientation after 10 seconds
@@ -125,10 +125,10 @@ public:
     void SetTau(double tau);
     void SetEllipse(const JEllipse& e);
     void SetExitIndex(int i);
-    void SetExitLine(NavLine* l);
+    void SetExitLine(const NavLine* l);
     void Setdt(double dt);
     double Getdt();
-    
+
 
     // Eigenschaften der Ellipse
     void SetPos(const Point& pos); // setzt x und y-Koordinaten
@@ -181,8 +181,8 @@ public:
     void MergeKnownClosedDoors(std::map<int, NavLineState> * input);
     std::map<int, NavLineState> * GetKnownDoors();
     int DoorKnowledgeCount() const;
-    
-    
+
+
 
     int GetUniqueRoomID() const;
     int GetNextDestination();
@@ -191,8 +191,8 @@ public:
     double GetDistanceToNextTarget() const;
     double GetDisTanceToPreviousTarget() const;
 
-    
-	
+
+
     bool ChangedSubRoom();
 
     void RecordActualPosition();
@@ -327,4 +327,3 @@ public:
 };
 
 #endif	/* _PEDESTRIAN_H */
-

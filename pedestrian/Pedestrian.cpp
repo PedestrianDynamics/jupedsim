@@ -119,12 +119,11 @@ void Pedestrian::SetExitIndex(int i) {
 	_destHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(NavLine* l) {
+void Pedestrian::SetExitLine(const NavLine* l) {
 	//_navLine = l;
 	_navLine->SetPoint1(l->GetPoint1());
 	_navLine->SetPoint2(l->GetPoint2());
 }
-
 
 void Pedestrian::SetPos(const Point& pos) {
 	_ellipse.SetCenter(pos);
@@ -243,14 +242,14 @@ void Pedestrian::AddKnownClosedDoor(int door)
 	return;
 }
 
-int Pedestrian::DoorKnowledgeCount() const 
+int Pedestrian::DoorKnowledgeCount() const
 {
 	return _knownDoors.size();
 }
 
 
 
-set<int>  Pedestrian::GetKnownClosedDoors() 
+set<int>  Pedestrian::GetKnownClosedDoors()
 {
 	map<int, NavLineState>::iterator it;
 	set<int> doors_closed;
@@ -269,7 +268,7 @@ map<int, NavLineState> *  Pedestrian::GetKnownDoors()
 	return & _knownDoors;
 }
 
-void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input) 
+void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
 {
 	map<int, NavLineState>::iterator it;
 	for(it = input->begin(); it != input->end(); it++) {
@@ -323,7 +322,7 @@ void Pedestrian::SetPhiPed() {
 	double vx = GetV().GetX();
 	double vy = GetV().GetY();
 
-	if (fabs(vx) > J_EPS || fabs(vy) > J_EPS) 
+	if (fabs(vx) > J_EPS || fabs(vy) > J_EPS)
 	{
 		double normv = sqrt(vx * vx + vy * vy); //MC, 24.10.12
 		cosPhi = vx / normv;
