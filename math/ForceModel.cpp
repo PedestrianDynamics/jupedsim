@@ -488,6 +488,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Pedestrian* ped = allPeds[p];
 			Room* room = building->GetRoom(ped->GetRoomID());
 			SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+			if(subroom->GetType()=="cellular") continue;
 
 			double normVi = ped->GetV().ScalarP(ped->GetV());
 			double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
@@ -544,6 +545,10 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Point v_neu = ped->GetV() + result_acc[p - start] * h;
 			Point pos_neu = ped->GetPos() + v_neu * h;
 
+			Room* room = building->GetRoom(ped->GetRoomID());
+			SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+			if(subroom->GetType()=="cellular") continue;
+
 			//Jam is based on the current velocity
 			if (v_neu.Norm() >= J_EPS_V){
 				ped->ResetTimeInJam();
@@ -557,4 +562,13 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 		}
 
 	}//end parallel
+
+	//update the CA Model
+	UpdateCellularModel(building);
+}
+
+void GCFMModel::UpdateCellularModel(Building* building) const {
+
+	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
 }
