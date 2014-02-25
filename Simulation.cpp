@@ -409,6 +409,7 @@ int Simulation::RunSimulation() {
 		if (frameNr % writeInterval == 0) {
 			_iod->WriteFrame(frameNr / writeInterval, _building);
 		}
+        _eventsManager->Update();
 	}
 	// writing the footer
 	_iod->WriteFooter();
