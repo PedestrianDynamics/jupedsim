@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<geometry version="0.5" caption="test" gridSizeX="20" gridSizeY="20" unit="m">
+	<rooms>
+		<room id="0" caption="hall" zpos="0.00">
+			<subroom id="0" closed="0" class="subroom">
+				<polygon caption="wall">
+					<vertex px="6.0" py="2.0" />
+					<vertex px="6.0" py="0.0" />
+					<vertex px="0.0" py="0.0" />
+					<vertex px="0.0" py="6.0" />
+					<vertex px="6.0" py="6.0" />
+					<vertex px="6.0" py="4.0" />
+				</polygon>
+			</subroom>
+		</room>
+	</rooms>
+
+	<transitions>
+		<transition id="1" caption="exit" type="emergency"
+			room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+			<vertex px="6.0" py="4.0" />
+			<vertex px="6.0" py="2.0" />
+		</transition>
+	</transitions>
+</geometry>
