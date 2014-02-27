@@ -14,6 +14,8 @@
 #include <string>
 #include <utility>
 
+#include "../../../geometry/Line.h"
+
 class SubRoom;
 class NavLine;
 class Crossing;
@@ -51,7 +53,7 @@ typedef std::set<GraphEdge *> EdgesContainer;
     void AddExit(const Transition * transition);
     bool HasExit() const;
 
-    std::pair<const GraphEdge *, double> GetCheapestDestination(std::set<const GraphVertex *> visited) const;
+    std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
 
 
 private:

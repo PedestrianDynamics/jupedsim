@@ -61,6 +61,12 @@ void GraphEdge::CalcApproximateDistance()
 /**
  * GETTER AND SETTER
  */
+double GraphEdge::GetApproximateDistance(const Point & position) const
+{
+    return (crossing->GetCentre()-position).Norm();
+}
+
+
 
 double GraphEdge::GetApproximateDistance() const
 {
@@ -79,4 +85,9 @@ const GraphVertex * GraphEdge::GetSrc() const
 const Crossing * GraphEdge::GetCrossing() const
 {
     return crossing;
+}
+
+bool GraphEdge::IsExit() const
+{
+    return crossing->IsExit();
 }

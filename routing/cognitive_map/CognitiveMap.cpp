@@ -55,5 +55,8 @@ const NavigationGraph * CognitiveMap::GetNavigationGraph() const
 const NavLine * CognitiveMap::GetDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    return (*(*navigation_graph)[sub_room]->GetCheapestDestination(std::set<const GraphVertex *>()).first).GetCrossing();
+
+    std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestination(pedestrian->GetPos());
+
+    return cheapest_destination.first->GetCrossing();
 }

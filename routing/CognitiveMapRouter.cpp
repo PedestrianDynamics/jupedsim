@@ -11,6 +11,7 @@
 
 #include "cognitive_map/CognitiveMapStorage.h"
 #include "cognitive_map/CognitiveMap.h"
+#include "cognitive_map/NavigationGraph.h"
 
 #include "../geometry/SubRoom.h"
 #include "../geometry/NavLine.h"
@@ -39,7 +40,10 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
     }
 
     if(p->GetNextDestination() == -1 || p->ChangedSubRoom()) {
+
         const NavLine * destination = (*cm_storage)[p]->GetDestination();
+//        if(p->GetID() == 285)
+//            Log->Write("Pedestrian:  285"+std::to_string(destination->GetUniqueID())+"\n");
 
         p->SetExitLine(destination);
         p->SetExitIndex(destination->GetUniqueID());

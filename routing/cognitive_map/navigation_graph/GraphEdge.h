@@ -9,6 +9,7 @@
 #ifndef GRAPHEDGE_H_
 #define GRAPHEDGE_H_
 
+#include "../../../geometry/Line.h"
 
 class SubRoom;
 class GraphVertex;
@@ -38,6 +39,8 @@ public:
     const Crossing * GetCrossing() const;
 
     double GetApproximateDistance() const;
+    double GetApproximateDistance(const Point &) const;
+    bool IsExit() const;
 
 
 private:
