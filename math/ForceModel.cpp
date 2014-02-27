@@ -244,12 +244,10 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 	const vector<Transition*>& transitions = subroom->GetAllTransitions();
 	for (unsigned int i = 0; i < transitions.size(); i++) {
 		Transition* goal=transitions[i];
-		int uid1= goal->GetUniqueID();
-		int uid2=ped->GetExitLine()->GetUniqueID();
+		//int uid1= goal->GetUniqueID();
+		//int uid2=ped->GetExitLine()->GetUniqueID();
 		// ignore my transition consider closed doors
 		//closed doors are considered as wall
-		//TODO: fix for the arena
-		//if( (goal->IsOpen()==false) || (uid1 != uid2) )
 
 		if( goal->IsOpen()==false ) {
 			f = f + ForceRepWall(ped,*((Wall*)goal));
@@ -259,20 +257,13 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 	return f;
 }
 
-/* abstoßende Kraft zwischen ped und Wand, dazu werden drei Punktkräfte benutzt
- * Parameter:
- *   - ped: Fußgänger für den die Kraft berechnet wird
- *   - w: Wand mit der abstoßende Kraft berechnet wird
- * Rückgabewerte:
- *   - Vektor(x,y) mit abstoßender Kraft zur Wand
- * */
 
 inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
 	Point F = Point(0.0, 0.0);
 	Point pt = w.ShortestPoint(ped->GetPos());
 	double wlen = w.LengthSquare();
-	if (wlen < 0.01) { // smaller than 10 cm
-		return F; //ignore small lines
+	if (wlen < 0.01) { // ignore wa;; smaller than 10 cm
+		return F;
 	}
 	// Kraft soll nur orthgonal wirken
 
@@ -280,7 +271,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
 		return F;
 
 	//double mind = ped->GetEllipse().MinimumDistanceToLine(w);
-        double mind = 0.5; //for performance reasons this distance is assumed to be constant
+	double mind = 0.5; //for performance reasons this distance is assumed to be constant
 	double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
 	return  ForceRepStatPoint(ped, pt, mind, vn); //line --> l != 0
 }
@@ -395,7 +386,7 @@ GCFMModel::GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double
 }
 
 GCFMModel::~GCFMModel(void) {
-	// pdirection wird in Simulation freigegeben
+
 }
 
 // Getter-Funktionen
@@ -455,12 +446,10 @@ string GCFMModel::writeParameter() const {
 
 // virtuelle Funktionen
 
-/* berechnet die Kräfte nach dem GCFM Modell
-*/
 void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Building* building,
 		int roomID, int subroomID) const {
 
-	printf("CalculateForce is not working: ");
+	printf("CalculateForce is not working: you should not use this function");
 	exit(0);
 }
 
@@ -499,6 +488,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Pedestrian* ped = allPeds[p];
 			Room* room = building->GetRoom(ped->GetRoomID());
 			SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+			if(subroom->GetType()=="cellular") continue;
 
 			double normVi = ped->GetV().ScalarP(ped->GetV());
 			double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
@@ -507,7 +497,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 						"is bigger than desired velocity (%f) at time: %fs\n",
 						sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
 
-				// FIXME: remove the pedestrian and abort
+				// remove the pedestrian and abort
 				for(int p=0;p<subroom->GetNumberOfPedestrians();p++){
 					if (subroom->GetPedestrian(p)->GetID()==ped->GetID()){
 						subroom->DeletePedestrian(p);
@@ -524,8 +514,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 			Point F_rep;
 			vector<Pedestrian*> neighbours;
-			//Pedestrian* neighbours[300]={NULL};
-			//building->GetGrid()->GetNeighbourhood(ped,neighbours,&nSize);
 			building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
 			int nSize=neighbours.size();
@@ -557,6 +545,10 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Point v_neu = ped->GetV() + result_acc[p - start] * h;
 			Point pos_neu = ped->GetPos() + v_neu * h;
 
+			Room* room = building->GetRoom(ped->GetRoomID());
+			SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+			if(subroom->GetType()=="cellular") continue;
+
 			//Jam is based on the current velocity
 			if (v_neu.Norm() >= J_EPS_V){
 				ped->ResetTimeInJam();
@@ -570,4 +562,13 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 		}
 
 	}//end parallel
+
+	//update the CA Model
+	UpdateCellularModel(building);
+}
+
+void GCFMModel::UpdateCellularModel(Building* building) const {
+
+	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
 }

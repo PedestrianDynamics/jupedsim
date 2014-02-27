@@ -29,9 +29,37 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/NavMesh.h"
 
-#include <cmath>
 
 using namespace std;
+
+
+IODispatcher::IODispatcher() {
+	pHandlers = vector<OutputHandler*>();
+}
+
+IODispatcher::~IODispatcher() {
+	for (int i = 0; i < (int) pHandlers.size(); i++)
+		delete pHandlers[i];
+	pHandlers.clear();
+}
+
+
+void IODispatcher::AddIO(OutputHandler* ioh) {
+	pHandlers.push_back(ioh);
+}
+
+
+const vector<OutputHandler*>& IODispatcher::GetIOHandlers() {
+	return pHandlers;
+}
+
+void IODispatcher::Write(const std::string& str) {
+	for (vector<OutputHandler*>::iterator it = pHandlers.begin();
+			it != pHandlers.end(); ++it) {
+		(*it)->Write(str);
+	}
+
+}
 
 string IODispatcher::WritePed(Pedestrian* ped) {
 	double RAD2DEG = 180.0 / M_PI;
@@ -44,6 +72,8 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 	}
 	double v = ped->GetV().Norm();
 	int color = (int) (v / v0 * 255);
+	if(ped->GetSpotlight()==false) color=-1;
+
 	double a = ped->GetLargerAxis();
 	double b = ped->GetSmallerAxis();
 	double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
@@ -58,44 +88,15 @@ string IODispatcher::WritePed(Pedestrian* ped) {
 	return tmp;
 }
 
-// Konstruktoren
-
-IODispatcher::IODispatcher() {
-	pHandlers = vector<OutputHandler*>();
-}
-
-IODispatcher::~IODispatcher() {
-	for (int i = 0; i < (int) pHandlers.size(); i++)
-		delete pHandlers[i];
-	pHandlers.clear();
-}
-
-void IODispatcher::AddIO(OutputHandler* ioh) {
-	pHandlers.push_back(ioh);
-}
-;
-
-const vector<OutputHandler*>& IODispatcher::GetIOHandlers() {
-	return pHandlers;
-}
-
-void IODispatcher::Write(const std::string& str) {
-	for (vector<OutputHandler*>::iterator it = pHandlers.begin();
-			it != pHandlers.end(); ++it) {
-		(*it)->Write(str);
-	}
-
-}
-;
-
 void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int seed	) {
 
 	nPeds = building->GetNumberOfPedestrians();
 	string tmp;
 	tmp =
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectoriesDataset>\n";
-	tmp.append("\t<header formatVersion = \"1.0\">\n");
-	char agents[50] = "";
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
+	char agents[CLENGTH] = "";
+	sprintf(agents, "\t<header version = \"%s\">\n", JPS_VERSION);
+	tmp.append(agents);
 	sprintf(agents, "\t\t<agents>%d</agents>\n", nPeds);
 	tmp.append(agents);
 	sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
@@ -279,7 +280,7 @@ void IODispatcher::WriteFrame(int frameNr, Building* building) {
 }
 
 void IODispatcher::WriteFooter() {
-	Write("</trajectoriesDataset>\n");
+	Write("</trajectories>\n");
 }
 
 

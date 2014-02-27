@@ -481,6 +481,16 @@ void ArgumentParser::ParseIniFile(string inifile){
 		exit(EXIT_FAILURE);
 	}
 
+	//check the header version
+	if(!xMainNode->Attribute("version")){
+		Log->Write("ERROR:\t There is no header version. I am assuming %s",JPS_VERSION);
+	}
+	else
+	if(string(xMainNode->Attribute("version"))!=JPS_VERSION){
+		Log->Write("ERROR:\t Wrong header version. Only version %s is supported.",JPS_VERSION);
+		exit(EXIT_FAILURE);
+	}
+
 	//seed
 	if(xMainNode->FirstChild("seed")){
 		pSeed=atoi(xMainNode->FirstChild("seed")->FirstChild()->Value());
@@ -488,6 +498,14 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("INFO: \tseed < %d >",pSeed);
 	}
 
+	// max simulation time
+	if(xMainNode->FirstChild("max_sim_time")){
+		const char* tmax=xMainNode->FirstChildElement("max_sim_time")->FirstChild()->Value();
+		//const char* unit=xMainNode->FirstChildElement("max_sim_time")->Attribute("unit");
+		pTmax=atof(tmax);
+		//Log->Write("INFO: \tpTmax <"+string(tmax)+" " +string(unit) +" (unit ignored)>");
+		Log->Write("INFO: \tpTmax <"+string(tmax)+"  (seconds) >");
+	}
 
 	//logfile
 	if(xMainNode->FirstChild("logfile")){
@@ -504,6 +522,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 		string format= xMainNode->FirstChildElement("trajectories")->Attribute("format")?
 				xMainNode->FirstChildElement("trajectories")->Attribute("format"):"xml-plain";
+		if(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))
 		_embedMesh = string(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true"?1:0;
 
 		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
@@ -535,12 +554,11 @@ void ArgumentParser::ParseIniFile(string inifile){
 		TiXmlNode* xPara=xGCFM->FirstChild("parameters");
 
 		Log->Write("INFO:\tgcfm model found");
-		//tmax
+
+		// For convenience. This moved to the header as it is not model specific
 		if(xPara->FirstChild("tmax")){
-			const char* tmax=xPara->FirstChildElement("tmax")->FirstChild()->Value();
-			const char* unit=xPara->FirstChildElement("tmax")->Attribute("unit");
-			pTmax=atof(tmax);
-			Log->Write("INFO: \tpTmax <"+string(tmax)+" " +unit +" (unit ignored)>");
+			Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
+			Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
 		}
 
 		//solver

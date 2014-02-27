@@ -139,12 +139,9 @@ Room* Building::GetRoom(int index) const {
 	if ((index >= 0) && (index < (int) _rooms.size())) {
 		return _rooms[index];
 	} else {
-		char tmp[CLENGTH];
-		sprintf(tmp,
-				"ERROR: Wrong 'index' in CBuiling::GetRoom() index: %d size: %d",
-				index, _rooms.size());
-		Log->Write(tmp);
-		exit(0);
+		Log->Write("ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",index, _rooms.size());
+		Log->Write("ERROR: Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -338,9 +335,10 @@ void Building::LoadBuildingFromFile() {
 	}
 
 	double version = xmltof(xRootNode->Attribute("version"), -1);
-	if (version < 0.4) {
-		Log->Write("ERROR: \tOnly version > 0.4 supported");
-		Log->Write("ERROR: \tparsing geometry file failed!");
+	if (version != 0.5) {
+		Log->Write("ERROR: \tWrong goemetry version!");
+		Log->Write("ERROR: \tOnly version >= %s supported",JPS_VERSION);
+		Log->Write("ERROR: \tPlease update the version of your geometry file to %s",JPS_VERSION);
 		exit(EXIT_FAILURE);
 	}
 	_caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
@@ -535,7 +533,8 @@ void Building::LoadBuildingFromFile() {
 			t->SetType(type);
 
 			if (room1_id != -1 && subroom1_id != -1) {
-				Room* room = _rooms[room1_id];
+				//Room* room = _rooms[room1_id];
+				Room* room = GetRoom(room1_id);
 				SubRoom* subroom = room->GetSubRoom(subroom1_id);
 
 				//subroom->AddGoalID(t->GetUniqueID());
@@ -1278,7 +1277,7 @@ void Building::LoadTrafficInfo() {
 		double id = xmltof(xRoom->Attribute("room_id"), -1);
 		string state = xmltoa(xRoom->Attribute("state"), "good");
 		RoomState status = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
-		_rooms[id]->SetState(status);
+		GetRoom(id)->SetState(status);
 	}
 
 	//processing the doors node

@@ -107,6 +107,7 @@ public:
     double GetDistEffMaxWall() const;
 
 
+    void UpdateCellularModel(Building* building) const;
 
     // virtuelle Funktionen
     virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
