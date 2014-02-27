@@ -40,6 +40,11 @@ public:
 
     double GetApproximateDistance() const;
     double GetApproximateDistance(const Point &) const;
+
+    double GetWeight() const;
+    double GetWeight(const Point &) const;
+
+
     bool IsExit() const;
 
 

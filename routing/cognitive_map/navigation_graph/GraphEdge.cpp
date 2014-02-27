@@ -58,15 +58,26 @@ void GraphEdge::CalcApproximateDistance()
 }
 
 
+double GraphEdge::GetWeight() const
+{
+    return GetApproximateDistance();
+}
+
+
+double GraphEdge::GetWeight(const Point & position) const
+{
+    return GetApproximateDistance(position);
+}
+
+
 /**
  * GETTER AND SETTER
  */
+
 double GraphEdge::GetApproximateDistance(const Point & position) const
 {
     return (crossing->GetCentre()-position).Norm();
 }
-
-
 
 double GraphEdge::GetApproximateDistance() const
 {

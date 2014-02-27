@@ -109,7 +109,7 @@ std::pair<const GraphEdge *, double> GraphVertex::GetCheapestDestination(const P
 
     //first edges should be handled separated to recalculate edge weight
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
-        double new_distance = (*it)->GetApproximateDistance(position);
+        double new_distance = (*it)->GetWeight(position);
         //check if the destination vertex was discovered before.
         if(destinations.find((*it)->GetDest()) == destinations.end()) {
             //initialize the new discovered vertex with distance inifity and push it to the queue
@@ -142,7 +142,7 @@ std::pair<const GraphEdge *, double> GraphVertex::GetCheapestDestination(const P
             // if the dest vertex was visited we already have the shortest path to this dest.
             if(visited.find((*it)->GetDest()) != visited.end()) continue;
 
-            double new_distance = act_distance + (*it)->GetApproximateDistance();
+            double new_distance = act_distance + (*it)->GetWeight();
             //check if the destination vertex was discovered before.
             if(destinations.find((*it)->GetDest()) == destinations.end()) {
                 //initialize the new discovered vertex with distance inifity and push it to the queue
