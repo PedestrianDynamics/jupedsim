@@ -2,14 +2,22 @@
 #include <cstdlib> 
 #include <iostream>
 #include <string>
+#include "EventManager.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 
 using namespace std;
 
-void readEventsXml(string eventfile){
-    int event_count=0;
+/*******************
+ Konstruktoren
+ ******************/
 
+EventManager::EventManager(){
+    _event_times=vector<int>();
+    _event_values=vector<string>();
+}
+
+void readEventsXml(string eventfile){
     Log->Write("INFO: \tLoading and parsing the event file <%s>",eventfile.c_str());
 
     TiXmlDocument doc(eventfile);
@@ -32,10 +40,10 @@ void readEventsXml(string eventfile){
     }
     
     for(TiXmlElement* e = xEvents->FirstChildElement("event"); e; e= e->NextSiblingElement("event")){
-	event_times[event_count]=atoi(e->Attribute("time"));
-	event_values[event_count]=e->Attribute("type"))+"-";
-	event_values[event_count]=e->Attribute("id"))+"-";
-	event_values[event_count]=e->Attribute("state"));
-	event_count++;
+	_event_times.push_back(atoi(e->Attribute("time")));
+	string tmp=e->Attribute("type"))+"-");
+	tmp=tmp+e->Attribute("id"))+"-";
+	tmp=tmp+=e->Attribute("state"));
+	_event_values.push_back(tmp);
     }
 }
