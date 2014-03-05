@@ -75,7 +75,7 @@ private:
     /// writing the trajectories to file
     IODispatcher* _iod;
     ///new: EventManager
-    EventManager _em;
+    EventManager* _em;
 
 
 public:

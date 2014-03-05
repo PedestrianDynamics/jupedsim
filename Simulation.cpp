@@ -42,7 +42,7 @@ Simulation::Simulation() {
 	_solver = NULL;
 	_iod = new IODispatcher();
 	_fps=1;
-	_em = NULL;
+    _em=NULL;
 }
 
 Simulation::~Simulation() {
@@ -52,7 +52,7 @@ Simulation::~Simulation() {
 	delete _model;
 	delete _solver;
 	delete _iod;
-	delete _em;
+    delete _em;
 }
 
 /************************************************
@@ -381,6 +381,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	// perform a general check to the .
 	_building->SanityCheck();
+
+    //read the events
+    _em = new EventManager();
+    _em->SetProjectFilename(args->GetProjectFile());
+    _em->SetProjectRootDir(args->GetProjectRootDir());
+    _em->readEventsXml();
+    _em->listEvents();
 }
 
 
