@@ -2,6 +2,7 @@
 #include <cstdlib> 
 #include <iostream>
 #include <string>
+#include <math.h>
 #include "EventManager.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
@@ -12,10 +13,13 @@ using namespace std;
  Konstruktoren
  ******************/
 
-EventManager::EventManager(){
+EventManager::EventManager(Building *_b){
     _event_times=vector<double>();
-    _event_values=vector<string>();
+    _event_types=vector<string>();
+    _event_states=vector<string>();
+    _event_ids=vector<int>();
     _projectFilename = "";
+    _building = _b;
 }
 
 /*******************
@@ -80,30 +84,24 @@ void EventManager::readEventsXml(){
     
     for(TiXmlElement* e = xEvents->FirstChildElement("event"); e; e= e->NextSiblingElement("event")){
         _event_times.push_back(atoi(e->Attribute("time")));
-        string tmp=e->Attribute("type");
-        tmp=tmp+"-";
-        tmp=tmp+e->Attribute("id")+"-";
-        tmp=tmp+=e->Attribute("state");
-        _event_values.push_back(tmp);
+        _event_types.push_back(e->Attribute("type"));
+        _event_states.push_back(e->Attribute("state"));
+        _event_ids.push_back(atoi(e->Attribute("id")));
     }
     printf("INFO: \tEvents were read\n");
 }
 
 void EventManager::listEvents(){
-    if(_event_times.size()==0&&_event_values.size()==0){
+    if(_event_times.size()==0){
         //Log->Write("INFO: \tNo events in the events.xml");
         printf("INFO: \tNo events in the events.xml\n");
-    }
-    else if(_event_times.size()!=_event_values.size()){
-        //Log->Write("ERROR: \tThe event.xml is irregular.");
-        printf("ERROR: \tThe event.xml is irregular.\n");
     }
     else{
         int i;
         for(i=0;i<_event_times.size();i++){
            // Log->Write("INFO: \tEvent "+(i+1)+" after "+_event_times[i]+" sec.: "+_event_values[i]);
 
-            cout <<"INFO: \tEvent "<<i+1<<" after "<< _event_times[i] << "sec.: "<<_event_values[i] <<endl;
+            cout <<"INFO: \tEvent "<<i+1<<" after "<< _event_times[i] << "sec.: "<< _event_types[i] << " " << _event_states[i] << " " << _event_ids[i] << endl;
         }
     }
 
@@ -113,6 +111,53 @@ void EventManager::listEvents(){
  Update
  **********/
 
-void EventManager::Update_Events(double time){
-  
+void EventManager::Update_Events(double time, double d){
+    //1. pruefen ob in _event_times der zeitstempel time zu finden ist. Wenn ja zu 2. sonst zu 3.
+    //2. Event aus _event_times und _event_values verarbeiten (Tuere schliessen/oeffnen, neues Routing)
+    //   Dann pruefen, ob eine neue Zeile in der .txt Datei steht
+    //3. .txt Datei auf neue Zeilen pruefen. Wenn es neue gibt diese Events verarbeiten ( Tuere schliessen/oeffnen,
+    //   neues Routing) ansonsten fertig
+    int i;
+    for(i=0;i<_event_times.size();i++){
+        if(fabs(_event_times[i]-time)<0.0000001){
+            //Event findet statt
+            printf("%f: Event zum Zeitpunkt %f findet statt: ",time,_event_times[i]);
+            cout << _event_types[i] << " " << _event_ids[i] << " " << _event_states[i] << endl;
+            if(_event_states[i].compare("close")==0){
+                closeDoor(_event_ids[i]);
+            }
+            else{
+                openDoor(_event_ids[i]);
+            }
+        }
+    }
+}
+
+/***************
+ Eventhandling
+ **************/
+void EventManager::closeDoor(int id){
+    //pruefen ob entsprechende Tuer schon zu ist, wenn nicht dann schliessen und neues Routing berechnen
+    Transition *t=_building->GetTransition(id);
+    if(t->IsOpen()){
+        t->Close();
+        cout << "Door " << id << " closed." << endl;
+        changeRouting();
+    }
+
+}
+
+void EventManager::openDoor(int id){
+    //pruefen ob entsprechende Tuer schon offen ist, wenn nicht dann oeffnen und neues Routing berechnen
+    Transition *t=_building->GetTransition(id);
+    if(!t->IsOpen()){
+        t->Open();
+        cout << "Door " << id << " opened." << endl;
+        changeRouting();
+    }
+}
+
+void EventManager::changeRouting(){
+
+
 }

@@ -6,6 +6,7 @@
         <seed>12542</seed>
         <!-- geometry file -->
         <geometry>geo.xml</geometry>
+	<events>events.xml</events>
         <!-- trajectories file and format -->
         <trajectories format="xml-plain" embed_mesh="false" fps="8">
                 <file location="testSchulTrajectories.xml" />

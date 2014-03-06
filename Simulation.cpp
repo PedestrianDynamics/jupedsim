@@ -383,7 +383,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	_building->SanityCheck();
 
     //read the events
-    _em = new EventManager();
+    _em = new EventManager(_building);
     _em->SetProjectFilename(args->GetProjectFile());
     _em->SetProjectRootDir(args->GetProjectRootDir());
     _em->readEventsXml();
@@ -414,11 +414,12 @@ int Simulation::RunSimulation() {
 		_solver->solveODE(t, t + _deltaT, _building);
 		// gucken ob Fußgänger in neuen Räumen/Unterräumen
 		Update();
+        _em->Update_Events(t,_deltaT);
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			_iod->WriteFrame(frameNr / writeInterval, _building);
 		}
-        //_eventsManager->Update();
+
 	}
 	// writing the footer
 	_iod->WriteFooter();

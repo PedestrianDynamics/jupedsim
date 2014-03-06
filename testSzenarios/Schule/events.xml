@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<JPScore>
+	<events>
+		<event time="1" type="door" state="close" id="8" caption="left_exit" />
+		<event time="20" type="door" state="open" id="8" caption="left_exit" />
+	</events>
+</JPScore>
