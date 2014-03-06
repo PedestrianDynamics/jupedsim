@@ -365,6 +365,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 		}
 		case 'R': // TODO: are these options still correct ?
 		{
+                    printf("---%s\n",optarg);
 			int r = atoi(optarg);
 			switch(r){
 			case 1:
