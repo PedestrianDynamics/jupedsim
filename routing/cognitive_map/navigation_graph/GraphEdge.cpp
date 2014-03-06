@@ -44,12 +44,14 @@ void GraphEdge::CalcApproximateDistance()
     int count = 0;
     for(std::vector<Crossing*>::const_iterator it = src->GetSubRoom()->GetAllCrossings().begin(); it != src->GetSubRoom()->GetAllCrossings().end(); ++it) {
         if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+        if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
         count++;
         distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
     }
 
     for(std::vector<Transition*>::const_iterator it = src->GetSubRoom()->GetAllTransitions().begin(); it != src->GetSubRoom()->GetAllTransitions().end(); ++it) {
         if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+        if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
         count++;
         distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
     }
@@ -60,19 +62,25 @@ void GraphEdge::CalcApproximateDistance()
 
 double GraphEdge::GetWeight() const
 {
-    return GetApproximateDistance();
+    return GetRoomToFloorFactor() * GetApproximateDistance();
 }
 
 
 double GraphEdge::GetWeight(const Point & position) const
 {
-    return GetApproximateDistance(position);
+    return GetRoomToFloorFactor() * GetApproximateDistance(position);
 }
 
 
 /**
  * GETTER AND SETTER
  */
+double GraphEdge::GetRoomToFloorFactor() const
+{
+    if(GetDest() == NULL || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;
+    if(GetDest()->GetSubRoom()->GetType() == "floor") return 1.0;
+    else return 5.0;
+}
 
 double GraphEdge::GetApproximateDistance(const Point & position) const
 {

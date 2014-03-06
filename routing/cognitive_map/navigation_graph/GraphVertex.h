@@ -54,6 +54,7 @@ typedef std::set<GraphEdge *> EdgesContainer;
     bool HasExit() const;
 
     std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
+    std::pair<const GraphEdge *, double> GetCheapestDestinationByEdges(const Point & position) const;
 
 
 private:

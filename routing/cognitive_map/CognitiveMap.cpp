@@ -56,7 +56,9 @@ const NavLine * CognitiveMap::GetDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
-    std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestination(pedestrian->GetPos());
+    std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
+
+//    if(pedestrian->GetID() == 81) Log->Write("Pedestrian 81 wants from " +cheapest_destination.first->GetSrc()->GetCaption()+" to "+cheapest_destination.first->GetDest()->GetCaption()+" the distance is: "+std::to_string(cheapest_destination.second));
 
     return cheapest_destination.first->GetCrossing();
 }

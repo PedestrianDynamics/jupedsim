@@ -41,6 +41,8 @@ public:
     double GetApproximateDistance() const;
     double GetApproximateDistance(const Point &) const;
 
+    double GetRoomToFloorFactor() const;
+
     double GetWeight() const;
     double GetWeight(const Point &) const;
 
