@@ -65,5 +65,12 @@ class DirectionInRangeBottleneck : public DirectionStrategy
         virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
+
+class DirectionGeneral : public DirectionStrategy
+{
+    public:
+        virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+};
+
 #endif	/* _DIRECTIONSTRATEGY_H */
 

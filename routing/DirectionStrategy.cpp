@@ -81,3 +81,27 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const {
 	}
 
 }
+
+
+// this strategy should work without Hlines for a general geometry.
+Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const {
+    const Point& p1 = ped->GetExitLine()->GetPoint1();
+    const Point& p2 = ped->GetExitLine()->GetPoint2();
+	Line ExitLine = Line(p1, p2);
+	Point Lot = ExitLine.LotPoint( ped->GetPos() );
+	Point ExitMiddle = (p1+p2)*0.5;
+	double d = 0.05;
+	Point diff = (p1 - p2).Normalized() * d;
+    Line e_neu = Line(p1 - diff, p2 + diff);
+
+
+	if ( e_neu.IsInLineSegment(Lot) )
+	{
+		return Lot;
+	}
+	else
+	{
+		return ExitMiddle;
+	}
+
+}

@@ -201,7 +201,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	sprintf(tmp, "\tDirection to the exit: %d\n", direction);
 	s.append(tmp);
 	switch (direction) {
-		case 1:
+                case 1:
 			_direction = new DirectionMiddlePoint();
 			break;
 		case 2:
@@ -213,6 +213,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 4:
 			_direction = new DirectionInRangeBottleneck();
 			break;
+                case 5:
+                        _direction = new DirectionGeneral();
+			break;
+                default:
+                    cout<<"Direction strategy not available. Exit"<<endl;
+                    exit(EXIT_FAILURE);
+                    break;     
 	}
 	_model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
 			args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
@@ -253,6 +260,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	for (unsigned int r= 0;r<routers.size();r++){
 
 		RoutingStrategy strategy=routers[r].second;
+
 		int routerID=routers[r].first;
 
 		switch (strategy) {
