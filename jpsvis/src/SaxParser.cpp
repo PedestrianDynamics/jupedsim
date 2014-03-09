@@ -56,6 +56,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkAssembly.h>
 #include <vtkProperty.h>
+#include <vtkTriangleFilter.h>
 
 
 using namespace std;
@@ -635,13 +636,15 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
 	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* r = building->GetRoom(i);
-		string caption = r->GetCaption();
+        //string caption = r->GetCaption();
 
 		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
 			SubRoom* sub = r->GetSubRoom(k);
-			const vector<Point>& poly = sub->GetPolygon();
-			//if(sub->GetType()!="stair") continue;
-			//if( ! ( (r->GetID()==1) && (sub->GetSubRoomID()==0))) continue;
+            vector<Point> poly = sub->GetPolygon();
+
+            if(sub->IsClockwise()==true){
+                std::reverse(poly.begin(),poly.end());
+            }
 
 			// Create the polygon
 			vtkSmartPointer<vtkPolygon> polygon =
@@ -651,8 +654,6 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 			for (unsigned int s=0;s<poly.size();s++){
 				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
 				polygon->GetPointIds()->SetId(s, currentID++);
-				//polygon->GetPointIds()->InsertNextId(currentID++);
-				//cout<<poly[s].toString()<<" : "<<sub->GetElevation(poly[s])<<endl;
 			}
 
 			polygons->InsertNextCell(polygon);
@@ -665,13 +666,17 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 	polygonPolyData->SetPoints(points);
 	polygonPolyData->SetPolys(polygons);
 
+    //triagulate everything
+    vtkSmartPointer<vtkTriangleFilter> filter=vtkSmartPointer<vtkTriangleFilter>::New();
+    filter->SetInputData(polygonPolyData);
+
 	// Create a mapper and actor
 	vtkSmartPointer<vtkPolyDataMapper> mapper =
 			vtkSmartPointer<vtkPolyDataMapper>::New();
 #if VTK_MAJOR_VERSION <= 5
 	mapper->SetInput(polygonPolyData);
 #else
-	mapper->SetInputData(polygonPolyData);
+    mapper->SetInputConnection(filter->GetOutputPort());
 #endif
 
 	vtkSmartPointer<vtkActor> actor =
@@ -686,73 +691,6 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 	// free memory
 	delete building;
 }
-//void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
-//
-//	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
-//
-//	Building* building = new Building();
-//	string geometrypath = fileName.toStdString();
-//
-//	// read the geometry
-//	building->LoadBuildingFromFile(geometrypath);
-//	building->InitGeometry(); // create the polygons
-//
-//	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-//		Room* r = building->GetRoom(i);
-//		string caption = r->GetCaption();
-//
-//		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-//			SubRoom* sub = r->GetSubRoom(k);
-//			const vector<Point>& poly = sub->GetPolygon();
-//			//if(sub->GetType()!="stair") continue;
-//			if( ! ( (r->GetID()==1) && (sub->GetSubRoomID()==0))) continue;
-//			// Setup the points
-//			vtkSmartPointer<vtkPoints> points =
-//					vtkSmartPointer<vtkPoints>::New();
-//			// Create the polygon
-//			vtkSmartPointer<vtkPolygon> polygon =
-//					vtkSmartPointer<vtkPolygon>::New();
-//			polygon->GetPointIds()->SetNumberOfIds(poly.size());
-//
-//			for (unsigned int s=0;s<poly.size();s++){
-//				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
-//				polygon->GetPointIds()->SetId(s, s);
-//			}
-//
-//			// Add the polygon to a list of polygons
-//			vtkSmartPointer<vtkCellArray> polygons =
-//					vtkSmartPointer<vtkCellArray>::New();
-//			polygons->InsertNextCell(polygon);
-//
-//			// Create a PolyData
-//			vtkSmartPointer<vtkPolyData> polygonPolyData =
-//					vtkSmartPointer<vtkPolyData>::New();
-//			polygonPolyData->SetPoints(points);
-//			polygonPolyData->SetPolys(polygons);
-//
-//			// Create a mapper and actor
-//			vtkSmartPointer<vtkPolyDataMapper> mapper =
-//					vtkSmartPointer<vtkPolyDataMapper>::New();
-//#if VTK_MAJOR_VERSION <= 5
-//			mapper->SetInput(polygonPolyData);
-//#else
-//			mapper->SetInputData(polygonPolyData);
-//#endif
-//
-//			vtkSmartPointer<vtkActor> actor =
-//					vtkSmartPointer<vtkActor>::New();
-//			actor->SetMapper(mapper);
-//			actor->GetProperty()->SetColor(0,0,1);
-//			actor->GetProperty()->SetOpacity(0.5);
-//			actor->GetProperty()->SetLineWidth(5);
-//
-//			geometry->getActor()->AddPart(actor);
-//		}
-//	}
-//
-//	// free memory
-//	delete building;
-//}
 
 
 /// provided for convenience and will be removed in the next version
