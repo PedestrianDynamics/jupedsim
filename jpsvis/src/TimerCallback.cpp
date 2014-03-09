@@ -73,7 +73,7 @@
 #include <vtkCamera.h>
 #include <vtkTextProperty.h>
 #include <vtkSphereSource.h>
-#include <vtkGlyph3D.h>
+//#include <vtkGlyph3D.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
 
@@ -154,7 +154,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 						extern_glyphs_pedestrians->SetInputData(frame->GetPolyData());
 #endif
 
-						extern_glyphs_pedestrians->Update();
+                        extern_glyphs_pedestrians->Update();
 
 						nPeds= frame->getSize();
 

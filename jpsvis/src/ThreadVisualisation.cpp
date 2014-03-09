@@ -41,6 +41,7 @@
 #define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
 #define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
 
+
 #include <vtkRenderer.h>
 #include <vtkCamera.h>
 #include <vtkAssembly.h>
@@ -58,8 +59,8 @@
 #include <vtkLookupTable.h>
 #include <vtkTextProperty.h>
 #include <vtkProperty.h>
-//#include <vtkMatrix4x4.h>
-//#include <vtkHomogeneousTransform.h>
+#include <vtkOutputWindow.h>
+#include <vtkFileOutputWindow.h>
 #include <vtkCallbackCommand.h>
 #include <vtkSmartPointer.h>
 #include <vtkActor2DCollection.h>
@@ -132,6 +133,13 @@ void ThreadVisualisation::slotSetFrameRate(float fps){
 
 
 void ThreadVisualisation::run(){
+
+    //deactivate the output windows
+    vtkObject::GlobalWarningDisplayOff();
+//    vtkOutputWindow *w = vtkFileOutputWindow::New();
+//    w->SetFileName("vtk_errors.txt");
+//    vtkOutputWindow::SetInstance(w);
+//    w->Delete(); // now SetInstance owns the reference
 
 	//emit signalStatusMessage("running");
 
@@ -434,6 +442,7 @@ void ThreadVisualisation::showDoors(bool status){
 
 void  ThreadVisualisation::initGlyphs(){
 
+
 	VTK_CREATE (vtkSphereSource, sphereSource);
 	sphereSource->SetRadius(30);
 	sphereSource->SetPhiResolution(20);
@@ -447,28 +456,37 @@ void  ThreadVisualisation::initGlyphs(){
 #endif
 
 
-
-	//VTK_CREATE (vtkCylinderSource, cylinderSource);
-	//cylinderSource->SetHeight(160);
-	//cylinderSource->SetRadius(30);
-	//extern_glyphs_pedestrians->SetSourceConnection(cylinderSource->GetOutputPort());
-	//extern_glyphs_pedestrians->SetInputConnection(cylinderSource->GetOutputPort());
+/*
+    VTK_CREATE (vtkCylinderSource, cylinderSource);
+    cylinderSource->SetHeight(160);
+    cylinderSource->SetRadius(30);
 
 
+#if VTK_MAJOR_VERSION <= 5
+    extern_glyphs_pedestrians->SetSource(cylinderSource->GetOutput());
+#else
+    extern_glyphs_pedestrians->SetSourceConnection(cylinderSource->GetOutputPort());
+    extern_glyphs_pedestrians->SetInputConnection(cylinderSource->GetOutputPort());
+#endif
 
+*/
 
-	extern_glyphs_pedestrians->SetColorModeToColorByScalar();
-	extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
-	extern_glyphs_pedestrians->Update();
+    extern_glyphs_pedestrians->ThreeGlyphsOff();
+    extern_glyphs_pedestrians->ExtractEigenvaluesOff();
+
+    //extern_glyphs_pedestrians->SetColorModeToScalars();
+    //extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
+    //extern_glyphs_pedestrians->Update();
 
 
 	VTK_CREATE(vtkPolyDataMapper, mapper);
 	mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
-	mapper->SetScalarModeToUsePointData();
-	mapper->ScalarVisibilityOn();
+
+    //mapper->SetScalarModeToUsePointData();
+    //mapper->ScalarVisibilityOn();
 	//mapper->SelectColorArray("color");
-	mapper->ColorByArrayComponent("data", 0);
-	mapper->SetColorModeToMapScalars();
+    //mapper->ColorByArrayComponent("data", 0);
+    //mapper->SetColorModeToMapScalars();
 
 	VTK_CREATE(vtkLookupTable, lut);
 	lut->SetHueRange(0.0,0.470);

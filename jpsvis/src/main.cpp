@@ -54,6 +54,9 @@
 #include <QApplication>
 #include "travisto.h"
 
+
+#define vtkErrorMacro (x) ()
+
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);

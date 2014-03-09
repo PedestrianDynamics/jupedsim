@@ -39,6 +39,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkFloatArray.h>
 #include <vtkPointData.h>
+#include <vtkMath.h>
 
 
 #define VTK_CREATE(type, name) \
@@ -111,35 +112,133 @@ TrajectoryPoint* Frame::getNextElement(){
 
 vtkPolyData* Frame::GetPolyData() {
 
-	VTK_CREATE (vtkPoints, points);
-	VTK_CREATE (vtkFloatArray, colors);
-	colors->SetName("color");
-	//colors->SetNumberOfComponents(3);
-	colors->SetNumberOfComponents(1);
-	for (unsigned int i=0;i<framePoints.size();i++){
-		double pos[3];
-		double data[7];
-		framePoints[i]->getPos(pos);
-		framePoints[i]->getEllipse(data);
-		points->InsertNextPoint(pos);
-		if(data[6]==-1){
-		colors->InsertNextValue(NAN);
-		}
-		else{
-		colors->InsertNextValue(data[6]/255.0);
-		}
-	}
-	//scalars->Print(cout);
-	VTK_CREATE (vtkFloatArray, data);
-	data->SetNumberOfComponents(2);
-	data->SetNumberOfTuples(framePoints.size());
-	data->CopyComponent(0, colors, 0);
-	data->CopyComponent(1, colors, 0); // radius can come here later
-	data->SetName("data");
+//	VTK_CREATE (vtkPoints, points);
+//	VTK_CREATE (vtkFloatArray, colors);
+//	colors->SetName("color");
+//	//colors->SetNumberOfComponents(3);
+//	colors->SetNumberOfComponents(1);
+//	for (unsigned int i=0;i<framePoints.size();i++){
+//		double pos[3];
+//		double data[7];
+//		framePoints[i]->getPos(pos);
+//		framePoints[i]->getEllipse(data);
+//		points->InsertNextPoint(pos);
+//		if(data[6]==-1){
+//		colors->InsertNextValue(NAN);
+//		}
+//		else{
+//		colors->InsertNextValue(data[6]/255.0);
+//		}
+//	}
+//	//scalars->Print(cout);
+//	VTK_CREATE (vtkFloatArray, data);
+//	data->SetNumberOfComponents(2);
+//	data->SetNumberOfTuples(framePoints.size());
+//	data->CopyComponent(0, colors, 0);
+//	data->CopyComponent(1, colors, 0); // radius can come here later
+//	data->SetName("data");
 
-	_polydata->SetPoints(points);
-	_polydata->GetPointData()->AddArray(data);
-	_polydata->GetPointData()->SetActiveScalars("data");
+//	_polydata->SetPoints(points);
+//	_polydata->GetPointData()->AddArray(data);
+//	_polydata->GetPointData()->SetActiveScalars("data");
+
+
+    VTK_CREATE (vtkPoints, points);
+    VTK_CREATE (vtkFloatArray, colors);
+    VTK_CREATE (vtkFloatArray, tensors);
+
+    colors->SetName("color");
+    colors->SetNumberOfComponents(1);
+
+    tensors->SetName("tensors");
+    tensors->SetNumberOfComponents(9);
+
+    for (unsigned int i=0;i<framePoints.size();i++){
+        double pos[3]={0,0,0};
+        double rad[3];
+        double rot[3];
+
+        framePoints[i]->getPos(pos); //pos[2]=90;
+        points->InsertNextPoint(pos);
+
+        double data[7];
+        framePoints[i]->getEllipse(data);
+
+
+        //framePoints[i]->GetRadius(rad);
+        rad[0]=data[3]/30;
+        rad[1]=data[4]/30;
+        rad[2]=30.0/120.0;
+
+        //rad[0]=1;
+       //rad[1]=1;
+       //rad[2]=1.0;
+
+        rot[0]=vtkMath::RadiansFromDegrees(0.0);
+        rot[1]=vtkMath::RadiansFromDegrees(0.0);
+        rot[2]=vtkMath::RadiansFromDegrees(data[5]);
+
+        //scaling matrix
+        double sc[3][3] = {{rad[0],0,0},
+                          {0,rad[1],0},
+                          {0,0,rad[2]}};
+
+
+        //rotation matrix around x-axis
+        double roX[3][3] = {{1, 0,                    0},
+                            {0, cos(rot[0]),-sin(rot[0])},
+                            {0, sin(rot[0]), cos(rot[0])}};
+
+        //rotation matrix around y-axis
+        double roY[3][3] = {{cos(rot[1]), 0,sin(rot[1])},
+                            {0,           1,          0},
+                            {-sin(rot[1]),0,cos(rot[1])}};
+
+        //rotation matrix around z-axis
+        double roZ[3][3] = {{cos(rot[2]),sin(rot[2]),0.0},
+                            {-sin(rot[2]),cos(rot[2]),0.0},
+                            {0.0,0.0,1.0}};
+
+        //final rotation matrix
+        double ro[3][3];
+        vtkMath::Multiply3x3(roX,roY,ro);
+        vtkMath::Multiply3x3(ro,roZ,ro);
+
+
+        //final transformation matrix
+        double rs[3][3];
+        vtkMath::Multiply3x3(sc,ro,rs);
+
+        tensors->InsertNextTuple9(rs[0][0],rs[0][1],rs[0][2],
+                                  rs[1][0],rs[1][1],rs[1][2],
+                                  rs[2][0],rs[2][1],rs[2][2]);
+
+
+        //color
+        if(data[6]==-1){
+            colors->InsertNextValue(NAN);
+        }
+        else{
+            colors->InsertNextValue(data[6]/255.0);
+        }
+
+      }
+
+    // setting the colors
+    _polydata->SetPoints(points);
+    _polydata->GetPointData()->AddArray(colors);
+    _polydata->GetPointData()->SetActiveScalars("color");
+
+    // setting the scaling and rotation
+    _polydata->GetPointData()->SetTensors(tensors);
+    _polydata->GetPointData()->SetActiveTensors("tensors");
+
+
+//    if(framePoints.size()<0) {
+//        cout<<"not good"<<endl;
+//        exit(0);
+//    }
+
 	return _polydata;
 }
 

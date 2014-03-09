@@ -64,8 +64,8 @@ extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
 
-extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
-//extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
+//extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
+extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;
