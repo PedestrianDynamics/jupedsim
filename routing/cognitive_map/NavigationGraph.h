@@ -11,6 +11,7 @@
 
 #include <unordered_map>
 #include "navigation_graph/GraphVertex.h"
+#include "navigation_graph/GraphEdge.h"
 #include <string>
 
 class Building;
@@ -21,7 +22,6 @@ class Transition;
 
 
 
-typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
 
 /**
  * @brief Navigation Graph
@@ -35,6 +35,8 @@ typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
 
 class NavigationGraph {
 public:
+    typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
+
     /****************************
      * Constructors & Destructors
      ****************************/
@@ -49,6 +51,7 @@ public:
 
     GraphVertex * operator[](const SubRoom * const sub_room);
 
+    NavigationGraph::VerticesContainer * GetAllVertices();
 
     void WriteToDotFile(const std::string filepath) const;
 
@@ -57,7 +60,7 @@ private:
     /**
      * Vertices and Edges
      */
-    VerticesContainer vertices;
+    NavigationGraph::VerticesContainer vertices;
     const Building * const building;
 
 

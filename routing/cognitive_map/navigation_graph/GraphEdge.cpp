@@ -60,21 +60,32 @@ void GraphEdge::CalcApproximateDistance()
 }
 
 
-double GraphEdge::GetWeight() const
-{
-    return GetRoomToFloorFactor() * GetApproximateDistance();
-}
-
-
 double GraphEdge::GetWeight(const Point & position) const
 {
-    return GetRoomToFloorFactor() * GetApproximateDistance(position);
+    if(factors.empty()) {
+        return GetApproximateDistance(position);
+    }
+    double weight = GetApproximateDistance(position);
+
+    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
+        weight = weight * it->second.first;
+    }
+
+    return weight;
 }
+
+void GraphEdge::SetFactor(double factor, std::string name)
+{
+    //TODO: set global time as second double
+    factors[name] = std::make_pair(factor, 0.0);
+}
+
 
 
 /**
  * GETTER AND SETTER
  */
+
 double GraphEdge::GetRoomToFloorFactor() const
 {
     if(GetDest() == NULL || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;

@@ -15,6 +15,7 @@
 class Building;
 class Router;
 class CognitiveMapStorage;
+class SensorManager;
 
 
 /**
@@ -38,6 +39,7 @@ private:
 
     Building * building;
     CognitiveMapStorage * cm_storage;
+    SensorManager * sensor_manager;
 
 };
 

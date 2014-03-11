@@ -84,6 +84,12 @@ const GraphVertex::EdgesContainer * GraphVertex::GetAllOutEdges() const
     return &out_edges;
 }
 
+
+GraphVertex::EdgesContainer * GraphVertex::GetAllEdges()
+{
+    return &out_edges;
+}
+
 const SubRoom * GraphVertex::GetSubRoom() const
 {
     return sub_room;
@@ -221,7 +227,7 @@ std::pair<const GraphEdge *, double> GraphVertex::GetCheapestDestination(const P
             // if the dest vertex was visited we already have the shortest path to this dest.
             if(visited.find((*it)->GetDest()) != visited.end()) continue;
 
-            double new_distance = act_distance + (*it)->GetWeight();
+            double new_distance = act_distance + (*it)->GetWeight((*it)->GetSrc()->GetSubRoom()->GetCentroid());
             //check if the destination vertex was discovered before.
             if(destinations.find((*it)->GetDest()) == destinations.end()) {
                 //initialize the new discovered vertex with distance inifity and push it to the queue

@@ -48,6 +48,7 @@ typedef std::set<GraphEdge *> EdgesContainer;
     int RemoveOutEdge(const GraphVertex * dest);
     int RemoveOutEdge(GraphEdge * edge);
     const EdgesContainer * GetAllOutEdges() const;
+    EdgesContainer * GetAllEdges();
 
 
     void AddExit(const Transition * transition);

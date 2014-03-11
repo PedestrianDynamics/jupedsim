@@ -48,6 +48,12 @@ void CognitiveMap::AddExit(const Transition * exit)
     navigation_graph->AddExit(exit);
 }
 
+NavigationGraph::VerticesContainer * CognitiveMap::GetAllVertices()
+{
+    return navigation_graph->GetAllVertices();
+}
+
+
 const NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
     return navigation_graph;
