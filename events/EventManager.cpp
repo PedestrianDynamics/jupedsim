@@ -6,6 +6,8 @@
 #include "EventManager.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
+#include "../routing/RoutingEngine.h"
+#include "../pedestrian/Pedestrian.h"
 
 using namespace std;
 
@@ -20,6 +22,7 @@ EventManager::EventManager(Building *_b){
     _event_ids=vector<int>();
     _projectFilename = "";
     _building = _b;
+    _deltaT=NULL;
 }
 
 /*******************
@@ -118,6 +121,7 @@ void EventManager::Update_Events(double time, double d){
     //3. .txt Datei auf neue Zeilen pruefen. Wenn es neue gibt diese Events verarbeiten ( Tuere schliessen/oeffnen,
     //   neues Routing) ansonsten fertig
     int i;
+    _deltaT=d;
     for(i=0;i<_event_times.size();i++){
         if(fabs(_event_times[i]-time)<0.0000001){
             //Event findet statt
@@ -142,7 +146,7 @@ void EventManager::closeDoor(int id){
     if(t->IsOpen()){
         t->Close();
         cout << "Door " << id << " closed." << endl;
-        changeRouting();
+        changeRouting(id,"close");
     }
 
 }
@@ -153,11 +157,26 @@ void EventManager::openDoor(int id){
     if(!t->IsOpen()){
         t->Open();
         cout << "Door " << id << " opened." << endl;
-        changeRouting();
+        changeRouting(id,"open");
+    }
+    else{
+        cout << "Door " << id << " is already open yet." << endl;
     }
 }
 
-void EventManager::changeRouting(){
+void EventManager::changeRouting(int id, string state){
+    RoutingEngine* routingEngine= _building->GetRoutingEngine();
+    routingEngine->Init(_building);
+    _building->InitPhiAllPeds(_deltaT);
+    vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
+    cout << "alle Pedestrians" <<endl;
+    unsigned int nSize = _allPedestrians.size();
+    cout << nSize << endl;
+    for (int p = 0; p < nSize; ++p) {
+        _allPedestrians[p]->ClearMentalMap();
 
+        cout << p << ": " << _allPedestrians[p]->FindRoute() << endl;
+    }
+    cout << "fertig" << endl;
 
 }

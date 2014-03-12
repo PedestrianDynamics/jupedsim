@@ -629,7 +629,7 @@ void Building::AddHline(Hline* line) {
 		Log->Write(
 				"ERROR: Duplicate index for hlines found [%d] in Routing::AddHline()",
 				line->GetID());
-		exit(EXIT_FAILURE);
+        //exit(EXIT_FAILURE);
 	}
 	_hLines[line->GetID()] = line;
 }
@@ -1292,8 +1292,10 @@ void Building::LoadTrafficInfo() {
 		//store transition in a map and call getTransition/getCrossin
 		if (state == "open") {
 			GetTransition(id)->Open();
+            cout << "Door" << id << "is " << state <<endl;
 		} else if (state == "close") {
 			GetTransition(id)->Close();
+            cout << "Door" << id << "is " << state <<endl;
 		} else {
 			Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
 		}

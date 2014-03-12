@@ -4,5 +4,7 @@
 	<events>
 		<event time="1" type="door" state="close" id="8" caption="left_exit" />
 		<event time="20" type="door" state="open" id="8" caption="left_exit" />
+		<event time="25" type="door" state="close" id="4" caption="main_exit" />
+		<event time="30" type="door" state="open" id="4" caption="main_exit" />
 	</events>
 </JPScore>

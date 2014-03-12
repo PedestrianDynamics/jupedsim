@@ -15,6 +15,7 @@ private:
     std::string _projectFilename;
     std::string _projectRootDir;
     Building *_building;
+    double _deltaT;
 
 public:
     //Konstruktor
@@ -30,7 +31,7 @@ public:
     //Eventhandling
     void closeDoor(int id);
     void openDoor(int id);
-    void changeRouting();
+    void changeRouting(int id, std::string state);
 
 
 };

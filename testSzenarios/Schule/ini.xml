@@ -20,39 +20,19 @@
                 <!-- room states are: good or smoked -->
                 <rooms>
                         <room room_id="0" state="good" />
-                </rooms>
-		<rooms>
                         <room room_id="1" state="good" />
-                </rooms>
-		<rooms>
                         <room room_id="2" state="good" />
                 </rooms>
                 <!-- doors states are: close or open -->
                 <doors>
                         <door trans_id="0" caption="roomdoor0" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="1" caption="roomdoor1" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="2" caption="roomdoor2" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="3" caption="roomdoor3" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="4" caption="main_exit" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="5" caption="roomdoor5" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="6" caption="roomdoor6" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="7" caption="roomdoor7" state="open" />
-                </doors>
-		<doors>
                         <door trans_id="8" caption="left_exit" state="open" />
                 </doors>
 
@@ -137,10 +117,6 @@
         </operational_models>
 
 	<route_choice_models>
-                <router router_id="0" description="dummy">
-                        <parameters></parameters>
-                </router>
-
                 <router router_id="1" description="global_shortest">
 			<parameters>
 				<!-- extra routing information -->
