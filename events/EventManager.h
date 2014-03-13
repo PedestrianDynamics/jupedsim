@@ -2,9 +2,15 @@
 #include <cstdio>
 #include <cstdlib> 
 #include <iostream>
+#include <fstream>
 #include <vector>
+#include <math.h>
 #include "../geometry/Building.h"
 #include "../geometry/Transition.h"
+#include "../tinyxml/tinyxml.h"
+#include "../IO/OutputHandler.h"
+#include "../routing/RoutingEngine.h"
+#include "../pedestrian/Pedestrian.h"
 
 class EventManager {
 private:
@@ -16,6 +22,9 @@ private:
     std::string _projectRootDir;
     Building *_building;
     double _deltaT;
+    std::fstream _file;
+    bool _dynamic;
+    int _eventCounter;
 
 public:
     //Konstruktor
@@ -25,7 +34,7 @@ public:
     void SetProjectRootDir(const std::string &filename);
     void readEventsXml();
     void listEvents();
-    void readEventsTxt(std::string eventfile);
+    void readEventsTxt(double time);
     //Update
     void Update_Events(double time, double d);
     //Eventhandling

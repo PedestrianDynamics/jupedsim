@@ -1,13 +1,4 @@
-#include <cstdio>
-#include <cstdlib> 
-#include <iostream>
-#include <string>
-#include <math.h>
 #include "EventManager.h"
-#include "../tinyxml/tinyxml.h"
-#include "../IO/OutputHandler.h"
-#include "../routing/RoutingEngine.h"
-#include "../pedestrian/Pedestrian.h"
 
 using namespace std;
 
@@ -23,6 +14,17 @@ EventManager::EventManager(Building *_b){
     _projectFilename = "";
     _building = _b;
     _deltaT=NULL;
+    _eventCounter=0;
+    _dynamic=false;
+    _file.open("../events/events.txt", ios::in);
+    if(!_file){
+        cout << "INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich." << endl;
+    }
+    else{
+        cout << "INFO:\tDatei events.txt gefunden. Dynamisches Eventhandling moeglich." << endl;
+        _dynamic=true;
+    }
+    _file.close();
 }
 
 /*******************
@@ -110,6 +112,21 @@ void EventManager::listEvents(){
 
 }
 
+void EventManager::readEventsTxt(double time){
+    _file.open("../events/events.txt", ios::in);
+    char cstring[256];
+    int lines=0;
+    do {
+        lines++;
+        _file.getline(cstring, sizeof(cstring));
+        if(lines>_eventCounter){
+            cout << time << ": " << cstring << endl;
+            _eventCounter++;
+        }
+    } while (!_file.eof());
+    _file.close();
+}
+
 /***********
  Update
  **********/
@@ -125,8 +142,7 @@ void EventManager::Update_Events(double time, double d){
     for(i=0;i<_event_times.size();i++){
         if(fabs(_event_times[i]-time)<0.0000001){
             //Event findet statt
-            printf("%f: Event zum Zeitpunkt %f findet statt: ",time,_event_times[i]);
-            cout << _event_types[i] << " " << _event_ids[i] << " " << _event_states[i] << endl;
+            printf("INFO:\t%f: Event zum Zeitpunkt %f findet statt: \n",time,_event_times[i]);
             if(_event_states[i].compare("close")==0){
                 closeDoor(_event_ids[i]);
             }
@@ -135,6 +151,8 @@ void EventManager::Update_Events(double time, double d){
             }
         }
     }
+    if(_dynamic)
+        readEventsTxt(time);
 }
 
 /***************
@@ -147,6 +165,9 @@ void EventManager::closeDoor(int id){
         t->Close();
         cout << "Door " << id << " closed." << endl;
         changeRouting(id,"close");
+    }
+    else{
+        cout << "Door " << id << " is already close yet." << endl;
     }
 
 }
@@ -169,14 +190,9 @@ void EventManager::changeRouting(int id, string state){
     routingEngine->Init(_building);
     _building->InitPhiAllPeds(_deltaT);
     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
-    cout << "alle Pedestrians" <<endl;
     unsigned int nSize = _allPedestrians.size();
-    cout << nSize << endl;
+    //cout << nSize << endl;
     for (int p = 0; p < nSize; ++p) {
         _allPedestrians[p]->ClearMentalMap();
-
-        cout << p << ": " << _allPedestrians[p]->FindRoute() << endl;
     }
-    cout << "fertig" << endl;
-
 }

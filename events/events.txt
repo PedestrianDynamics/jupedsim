@@ -1,0 +1,2 @@
+door 5 close
+door 5 open
