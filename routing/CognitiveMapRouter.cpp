@@ -44,11 +44,10 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
         sensor_manager->execute(p);
 
         const NavLine * destination = (*cm_storage)[p]->GetDestination();
-//        if(p->GetID() == 285)
-//            Log->Write("Pedestrian:  285"+std::to_string(destination->GetUniqueID())+"\n");
-
-        p->SetExitLine(destination);
-        p->SetExitIndex(destination->GetUniqueID());
+        if(destination != NULL) {
+            p->SetExitLine(destination);
+            p->SetExitIndex(destination->GetUniqueID());
+        }
     }
 
     return 1;

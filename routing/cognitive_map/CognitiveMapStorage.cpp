@@ -8,6 +8,7 @@
 
 #include "CognitiveMapStorage.h"
 #include "AbstractCognitiveMapCreator.h"
+#include "EmptyCognitiveMapCreator.h"
 #include "CompleteCognitiveMapCreator.h"
 #include "CognitiveMap.h"
 #include "../../geometry/Building.h"
@@ -17,12 +18,12 @@
 CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
      : building(b)
 {
-    creator = new CompleteCognitiveMapCreator(b);
+    creator = new EmptyCognitiveMapCreator(b);
 }
 
 CognitiveMapStorage::~CognitiveMapStorage()
 {
-
+    delete creator;
 }
 
 CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)

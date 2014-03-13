@@ -66,5 +66,9 @@ const NavLine * CognitiveMap::GetDestination()
 
 //    if(pedestrian->GetID() == 81) Log->Write("Pedestrian 81 wants from " +cheapest_destination.first->GetSrc()->GetCaption()+" to "+cheapest_destination.first->GetDest()->GetCaption()+" the distance is: "+std::to_string(cheapest_destination.second));
 
-    return cheapest_destination.first->GetCrossing();
+    if(cheapest_destination.first != NULL) {
+        return cheapest_destination.first->GetCrossing();
+    } else {
+        return NULL;
+    }
 }

@@ -69,11 +69,10 @@ void NavigationGraph::AddExit(const Transition * transition)
 GraphVertex * NavigationGraph::operator[](const SubRoom * const sub_room)
 {
     VerticesContainer::iterator it = vertices.find(sub_room);
-    if(it != vertices.end()) {
-        return it->second;
-    } else {
-        return NULL;
+    if(it == vertices.end()) {
+        AddVertex(sub_room);
     }
+    return vertices[sub_room];
 }
 
 NavigationGraph::VerticesContainer * NavigationGraph::GetAllVertices()
