@@ -16,7 +16,8 @@ EventManager::EventManager(Building *_b){
     _deltaT=NULL;
     _eventCounter=0;
     _dynamic=false;
-    _file.open("../events/events.txt", ios::in);
+    //_file.open("../events/events.txt", ios::in);
+    _file = fopen("../events/events.txt","r");
     if(!_file){
         cout << "INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich." << endl;
     }
@@ -24,7 +25,8 @@ EventManager::EventManager(Building *_b){
         cout << "INFO:\tDatei events.txt gefunden. Dynamisches Eventhandling moeglich." << endl;
         _dynamic=true;
     }
-    _file.close();
+    //fclose(_file);
+    //_file.close();
 }
 
 /*******************
@@ -113,18 +115,20 @@ void EventManager::listEvents(){
 }
 
 void EventManager::readEventsTxt(double time){
-    _file.open("../events/events.txt", ios::in);
+    rewind(_file);
     char cstring[256];
     int lines=0;
     do {
         lines++;
-        _file.getline(cstring, sizeof(cstring));
+        fgets(cstring,20,_file);
         if(lines>_eventCounter){
-            cout << time << ": " << cstring << endl;
+            //cout << time << ": " << cstring << endl;
+            printf("INFO:\tEvent zum Zeitpunkt %f findet statt: ",time);
+            getTheEvent(cstring);
             _eventCounter++;
         }
-    } while (!_file.eof());
-    _file.close();
+    }while (feof(_file)==0);
+
 }
 
 /***********
@@ -137,12 +141,23 @@ void EventManager::Update_Events(double time, double d){
     //   Dann pruefen, ob eine neue Zeile in der .txt Datei steht
     //3. .txt Datei auf neue Zeilen pruefen. Wenn es neue gibt diese Events verarbeiten ( Tuere schliessen/oeffnen,
     //   neues Routing) ansonsten fertig
-    int i;
+
+    //zuerst muss die Reroutingzeit der Peds aktualisiert werden:
     _deltaT=d;
+    vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
+    int nSize = _allPedestrians.size();
+    for(int p=0;p<nSize;p++){
+        _allPedestrians[p]->UpdateReroutingTime();
+        if(_allPedestrians[p]->IsReadyForRerouting()){
+            _allPedestrians[p]->ClearMentalMap();
+            _allPedestrians[p]->ResetRerouting();
+        }
+    }
+    int i;
     for(i=0;i<_event_times.size();i++){
         if(fabs(_event_times[i]-time)<0.0000001){
             //Event findet statt
-            printf("INFO:\t%f: Event zum Zeitpunkt %f findet statt: \n",time,_event_times[i]);
+            printf("INFO:\t%f: Event zum Zeitpunkt %f findet statt: ",time,_event_times[i]);
             if(_event_states[i].compare("close")==0){
                 closeDoor(_event_ids[i]);
             }
@@ -192,7 +207,64 @@ void EventManager::changeRouting(int id, string state){
     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
     unsigned int nSize = _allPedestrians.size();
     //cout << nSize << endl;
+    //for (int p = 0; p < nSize; ++p) {       !!!!!!so gehts, wenn alle Pedestrians sofort auf ein Ereignis reagieren.
+      //  _allPedestrians[p]->ClearMentalMap();
+    //}
+
+    //Pedestrians sollen aber, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter merken,
+    //dass sich Tueren aendern.
+    Transition *t = _building->GetTransition(id);
     for (int p = 0; p < nSize; ++p) {
-        _allPedestrians[p]->ClearMentalMap();
+        if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
+            double dist = _allPedestrians[p]->GetDistanceToNextTarget();
+            if(dist>0.0&&dist<1.0){
+                _allPedestrians[p]->ClearMentalMap();
+            }
+            else if(dist>=1.0&&dist<3.0){
+                _allPedestrians[p]->RerouteIn(2.0);
+            }
+            else{
+                _allPedestrians[p]->RerouteIn(5.0);
+            }
+        }
+        else{
+            _allPedestrians[p]->ClearMentalMap();
+        }
+    }
+}
+
+void EventManager::getTheEvent(char* c){
+    int split = 0;
+    string type = "";
+    string id = "";
+    string state = "";
+    for(int i=0;i<20;i++){
+        if(c[i]==NULL){
+            break;
+        }
+        else if(c[i]==' '){
+            split++;
+        }
+        else if(c[i]=='\n'){
+
+        }
+        else{
+            if(split==0){
+                type+=c[i];
+            }
+            else if(split==1){
+                id+=c[i];
+            }
+            else if(split==2){
+                state+=c[i];
+            }
+        }
+
+    }
+    if(state.compare("close")==0){
+        closeDoor(atoi(id.c_str()));
+    }
+    else{
+        openDoor(atoi(id.c_str()));
     }
 }

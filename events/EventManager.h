@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <stdio.h>
 #include "../geometry/Building.h"
 #include "../geometry/Transition.h"
 #include "../tinyxml/tinyxml.h"
@@ -22,7 +23,7 @@ private:
     std::string _projectRootDir;
     Building *_building;
     double _deltaT;
-    std::fstream _file;
+    FILE *_file;
     bool _dynamic;
     int _eventCounter;
 
@@ -41,6 +42,5 @@ public:
     void closeDoor(int id);
     void openDoor(int id);
     void changeRouting(int id, std::string state);
-
-
+    void getTheEvent(char* c);
 };
