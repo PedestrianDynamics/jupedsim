@@ -378,10 +378,13 @@ target_link_libraries (testIsOutside core)
 add_executable(testClassPoint Utest/testClassPoint.cpp)
 target_link_libraries (testClassPoint core)
 
+add_executable(testClassLine Utest/testClassLine.cpp)
+target_link_libraries (testClassLine core)
+
 #----------------- append to this list more tests ... but first add_executable() ---------------
 set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea testEffectiveDistanceToEllipse
   testIsOn testIsInside testIsOutside testEffectiveDistanceToLine
-  testClassPoint
+  testClassPoint testClassLine
 )
 #--------------------------------------------------------------------
 foreach (test ${tests})
