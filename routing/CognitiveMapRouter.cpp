@@ -12,6 +12,7 @@
 #include "cognitive_map/CognitiveMapStorage.h"
 #include "cognitive_map/CognitiveMap.h"
 #include "cognitive_map/NavigationGraph.h"
+#include "cognitive_map/sensor/SensorManager.h"
 
 #include "../geometry/SubRoom.h"
 #include "../geometry/NavLine.h"
@@ -40,13 +41,13 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
     }
 
     if(p->GetNextDestination() == -1 || p->ChangedSubRoom()) {
+        sensor_manager->execute(p);
 
         const NavLine * destination = (*cm_storage)[p]->GetDestination();
-//        if(p->GetID() == 285)
-//            Log->Write("Pedestrian:  285"+std::to_string(destination->GetUniqueID())+"\n");
-
-        p->SetExitLine(destination);
-        p->SetExitIndex(destination->GetUniqueID());
+        if(destination != NULL) {
+            p->SetExitLine(destination);
+            p->SetExitIndex(destination->GetUniqueID());
+        }
     }
 
     return 1;
@@ -57,12 +58,16 @@ void CognitiveMapRouter::Init(Building * b)
 {
     Log->Write("INFO:\tInit the Cognitive Map  Router Engine");
     building = b;
-    Log->Write(b->GetProjectRootDir());
 
     //Load Routing file with HLines and further informations.
     LoadRoutingInfos(GetRoutingInfoFile());
 
+    //Init Cognitive Map Storage
     cm_storage = new CognitiveMapStorage(building);
+    Log->Write("INFO:\tInitialized CognitiveMapStorage");
+    //Init Sensor Manager
+    sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
+    Log->Write("INFO:\tInitialized SensorManager");
 }
 
 

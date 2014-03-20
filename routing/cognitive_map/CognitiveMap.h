@@ -9,7 +9,8 @@
 #ifndef COGNITIVEMAP_H_
 #define COGNITIVEMAP_H_
 
-class NavigationGraph;
+#include "NavigationGraph.h"
+
 class SubRoom;
 class Transition;
 class Crossing;
@@ -39,6 +40,8 @@ public:
     void Add(const SubRoom * sub_room);
     void Add(const Crossing * crossing);
     void AddExit(const Transition * exit);
+
+    NavigationGraph::VerticesContainer * GetAllVertices();
 
     const NavigationGraph * GetNavigationGraph() const;
 

@@ -165,8 +165,12 @@ file(
         routing/cognitive_map/CognitiveMapStorage.cpp
         routing/cognitive_map/AbstractCognitiveMapCreator.cpp
         routing/cognitive_map/CompleteCognitiveMapCreator.cpp
+        routing/cognitive_map/EmptyCognitiveMapCreator.cpp
         routing/cognitive_map/navigation_graph/GraphEdge.cpp
         routing/cognitive_map/navigation_graph/GraphVertex.cpp
+        routing/cognitive_map/sensor/RoomToFloorSensor.cpp
+        routing/cognitive_map/sensor/SensorManager.cpp
+        routing/cognitive_map/sensor/AbstractSensor.cpp
 
 
 	poly2tri/common/shapes.cpp
@@ -199,8 +203,13 @@ file(
         routing/cognitive_map/CognitiveMapStorage.h
         routing/cognitive_map/AbstractCognitiveMapCreator.h
         routing/cognitive_map/CompleteCognitiveMapCreator.h
+        routing/cognitive_map/EmptyCognitiveMapCreator.h
         routing/cognitive_map/navigation_graph/GraphEdge.h
         routing/cognitive_map/navigation_graph/GraphVertex.h
+        routing/cognitive_map/sensor/AbstractSensor.h
+        routing/cognitive_map/sensor/RoomToFloorSensor.h
+        routing/cognitive_map/sensor/SensorManager.h
+
 
 	pedestrian/Pedestrian.h
 	pedestrian/PedDistributor.h

@@ -48,12 +48,14 @@ typedef std::set<GraphEdge *> EdgesContainer;
     int RemoveOutEdge(const GraphVertex * dest);
     int RemoveOutEdge(GraphEdge * edge);
     const EdgesContainer * GetAllOutEdges() const;
+    EdgesContainer * GetAllEdges();
 
 
     void AddExit(const Transition * transition);
     bool HasExit() const;
 
     std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
+    std::pair<const GraphEdge *, double> GetCheapestDestinationByEdges(const Point & position) const;
 
 
 private:

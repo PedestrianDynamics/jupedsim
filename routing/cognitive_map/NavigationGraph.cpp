@@ -69,13 +69,16 @@ void NavigationGraph::AddExit(const Transition * transition)
 GraphVertex * NavigationGraph::operator[](const SubRoom * const sub_room)
 {
     VerticesContainer::iterator it = vertices.find(sub_room);
-    if(it != vertices.end()) {
-        return it->second;
-    } else {
-        return NULL;
+    if(it == vertices.end()) {
+        AddVertex(sub_room);
     }
+    return vertices[sub_room];
 }
 
+NavigationGraph::VerticesContainer * NavigationGraph::GetAllVertices()
+{
+    return & vertices;
+}
 
 void NavigationGraph::WriteToDotFile(const std :: string filepath) const
 {
@@ -94,7 +97,7 @@ void NavigationGraph::WriteToDotFile(const std :: string filepath) const
         {
             if(!(*it2)->GetCrossing()->IsExit()) {
                 dot_file << it->second->GetCaption() + " -> " + (*it2)->GetDest()->GetCaption() + "\n [";
-                dot_file << "label = "+ std::to_string((*it2)->GetApproximateDistance()) + "] \n";
+                dot_file << "label = "+ std::to_string((*it2)->GetWeight(it->second->GetSubRoom()->GetCentroid())) + "] \n";
             }
         }
 

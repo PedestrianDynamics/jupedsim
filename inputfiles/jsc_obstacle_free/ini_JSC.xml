@@ -42,22 +42,22 @@
 	  <agents_distribution>
 <!--	    <group group_id="5" room_id="0" subroom_id="0" number="3" goal_id="" router_id="1" route_id="" />
 	    <group group_id="0" room_id="0" subroom_id="0" number="3" goal_id="" router_id="1" route_id="" />-->
-	    <group group_id="2" room_id="0" number="1" router_id="7" />
+	    <group group_id="2" room_id="0" number="2" router_id="7" />
 	    <group group_id="6" room_id="1" number="1" router_id="7" />
 	    <group group_id="7" room_id="2" number="1" router_id="7" />
 	    <group group_id="8" room_id="3" number="1" router_id="7" />
-	    <group group_id="9" room_id="4" number="5" router_id="7" />
+	    <group group_id="9" room_id="4" number="15" router_id="7" />
 	    <group group_id="10" room_id="5" number="1" router_id="7" />
-	    <group group_id="11" room_id="6" number="1" router_id="7" />
+	    <group group_id="11" room_id="6" number="10" router_id="7" />
 	    <group group_id="12" room_id="7" number="10" router_id="7" />
 	    <group group_id="13" room_id="8" number="1" router_id="7" />
 	    <group group_id="14" room_id="9" number="1" router_id="7" />
 	    <group group_id="15" room_id="10" number="1" router_id="7" />
-	    <group group_id="16" room_id="11" number="10" router_id="7" />
+	    <group group_id="16" room_id="11" number="1" router_id="7" />
 	    <group group_id="17" room_id="12" number="1" router_id="7" />
-	    <group group_id="18" room_id="13" number="10" router_id="7" />
+	    <group group_id="18" room_id="13" number="1" router_id="7" />
 
-	    <group group_id="19" room_id="14" subroom_id="0" number="2" router_id="7" />
+	    <group group_id="19" room_id="14" subroom_id="0" number="0" router_id="7" />
 	    <group group_id="19" room_id="14" subroom_id="1" number="2" router_id="7" />
 	    <group group_id="19" room_id="14" subroom_id="2" number="2" router_id="7" />
 	    <group group_id="19" room_id="14" subroom_id="3" number="2" router_id="7" />
@@ -66,17 +66,17 @@
 	    <group group_id="19" room_id="14" subroom_id="6" number="2" router_id="7" />
 	    <group group_id="19" room_id="14" subroom_id="7" number="2" router_id="7" />
 
-	    <group group_id="20" room_id="15" number="1" router_id="7" />
-	    <group group_id="21" room_id="16" number="1" router_id="7" />
-	    <group group_id="22" room_id="17" number="1" router_id="7" />
-	    <group group_id="23" room_id="18" number="10" router_id="7" />
-	    <group group_id="24" room_id="19" number="1" router_id="7" />
-	    <group group_id="25" room_id="20" number="1" router_id="7" />
-	    <group group_id="26" room_id="21" number="1" router_id="7" />
-	    <group group_id="27" room_id="22" number="15" router_id="7" />
+	    <group group_id="20" room_id="15" number="2" router_id="7" />
+	    <group group_id="21" room_id="16" number="2" router_id="7" />
+	    <group group_id="22" room_id="17" number="2" router_id="7" />
+	    <group group_id="23" room_id="18" number="2" router_id="7" />
+	    <group group_id="24" room_id="19" number="2" router_id="7" />
+	    <group group_id="25" room_id="20" number="2" router_id="7" />
+	    <group group_id="26" room_id="21" number="2" router_id="7" />
+	    <group group_id="27" room_id="22" number="1" router_id="7" />
 	    <group group_id="28" room_id="23" number="1" router_id="7" />
-	    <group group_id="29" room_id="24" number="1" router_id="7" />
-	    <group group_id="30" room_id="25" number="10" router_id="7" />
+	    <group group_id="29" room_id="24" number="10" router_id="7" />
+	    <group group_id="30" room_id="25" number="1" router_id="7" />
 	    <group group_id="31" room_id="26" number="1" router_id="7" />
 	    <group group_id="32" room_id="27" number="1" router_id="7" />
 	    <group group_id="33" room_id="28" number="15" router_id="7" />
@@ -86,7 +86,7 @@
 	    <group group_id="37" room_id="32" number="1" router_id="7" />
 	    <group group_id="38" room_id="33" number="1" router_id="7" />
 	    <group group_id="39" room_id="34" number="15" router_id="7" />
-	    <group group_id="40" room_id="35" number="1" router_id="7" />
+	    <group group_id="40" room_id="35" number="10" router_id="7" />
 	  </agents_distribution>
 
 	  <agents_sources><!-- frequency in persons/minute -->
