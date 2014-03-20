@@ -23,7 +23,7 @@
  *
  *
  */
-
+#include "../geometry/Building.h"
 #include "DirectionStrategy.h"
 #include "../geometry/NavLine.h"
 #include "../geometry/Room.h"
@@ -85,23 +85,85 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const {
 
 // this strategy should work without Hlines for a general geometry.
 Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const {
+using namespace std;
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
-	Line ExitLine = Line(p1, p2);
-	Point Lot = ExitLine.LotPoint( ped->GetPos() );
-	Point ExitMiddle = (p1+p2)*0.5;
-	double d = 0.05;
-	Point diff = (p1 - p2).Normalized() * d;
+    Line ExitLine = Line(p1, p2);
+    Point Lot = ExitLine.LotPoint( ped->GetPos() );
+    double d = 0.2; //shorten the line by  20 cm
+    Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
 
+    // kürzester Punkt auf der Linie
+    Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
 
-	if ( e_neu.IsInLineSegment(Lot) )
-	{
-		return Lot;
-	}
-	else
-	{
-		return ExitMiddle;
-	}
+    Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if 
+    //it intersect a wall/obstacle.
+// check for intersection with walls
+//todo: make a FUNCTION of this
+    double dist;
+    int inear = -1;
+    int iObs = -1;
+    double minDist = 20001;
+    int subroomId = ped->GetSubRoomID();
+    SubRoom * subroom = room->GetSubRoom(subroomId);
+    
+    //============================ WALLS ===========================
+    const vector<Wall>& walls = subroom->GetAllWalls();
+    for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
+        dist = tmpDirection.GetIntersectionDistance(walls[i]);
+        //printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
+        if (dist < minDist)
+        {
+            inear = i;
+            minDist = dist;
+        }
+    }//walls
+    //============================ WALLS ===========================
+    
+    //============================ OBST ===========================
+    const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
+    for(unsigned int obs=0; obs<obstacles.size(); ++obs){
+        const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
+        for (unsigned int i = 0; i < owalls.size(); i++) {
+            dist = tmpDirection.GetIntersectionDistance(owalls[i]);
+            //printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
+            if (dist < minDist)
+            {
+                inear = i;
+                minDist = dist;
+                iObs = obs;
+            }
+        }//walls of obstacle
+    }// obstacles
+    //============================ OBST ===========================
 
+
+    double angle = 0;
+    if (inear >= 0)
+        if(iObs >= 0)
+        {
+            const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
+            angle =  tmpDirection.GetAngle(owalls[inear]);
+            
+        }
+        else
+            angle =  tmpDirection.GetAngle(walls[inear]);
+////////////////////////////////////////////////////////////
+//    printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);    
+    Point  G;
+    if (fabs(angle) > J_EPS)
+        //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
+        G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle)) ;
+    else
+        //G  =  tmpDirection.GetPoint2();
+        G  =  NextPointOnLine;
+    //  printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
+    //printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
+    // printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
+
+    //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY());
+    // if(ped->GetPos().GetX()<8)
+    //     getc(stdin);
+    return G;
 }

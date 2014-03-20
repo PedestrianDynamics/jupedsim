@@ -65,12 +65,16 @@ inline Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
 	Point F_driv;
 	const Point& pos = ped->GetPos();
 	double dist = ped->GetExitLine()->DistTo(pos);
-
+        
+        
 	if (dist > J_EPS_GOAL) {
 		const Point& v0 = ped->GetV0(target);
-		F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+                //printf("MC v0= [%.2f %.2f]\n", v0.GetX(), v0.GetY());
+                //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 	} else {
 		const Point& v0 = ped->GetV0();
+                //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
 		F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 	}
 	return F_driv;
@@ -533,8 +537,10 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
 			//repulsive forces to the walls and transitions that are not my target
 			Point repwall = ForceRepRoom(allPeds[p], subroom);
-
-			Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
+                        Point fd = ForceDriv(ped, room);
+                        // Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
+                        Point acc = (fd + F_rep + repwall) / ped->GetMass();
+                        //printf("MC fd=[%.2f, %.2f] F_rep=[%.2f, %.2f], repWall=[%.2f, %.2f]\n", fd.GetX(), fd.GetY(),  F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY() );
 			result_acc.push_back(acc);
 		}
 
