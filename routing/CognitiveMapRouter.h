@@ -31,9 +31,6 @@ public:
 
     virtual int FindExit(Pedestrian* p);
     virtual void Init(Building* b);
-protected:
-    void LoadRoutingInfos(const std::string &filename);
-    std::string GetRoutingInfoFile() const;
 
 private:
 
