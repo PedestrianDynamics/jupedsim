@@ -79,7 +79,6 @@
 		<room id="2" caption="hall" zpos="0.00">
 			<subroom id="0" closed="0" class="subroom">
                                 <polygon caption="wall">
-                                        <vertex px="0.0" py="5.0" />
                                         <vertex px="0.0" py="6.0" />
                                         <vertex px="2.0" py="6.0" />
                                 </polygon>
@@ -105,10 +104,8 @@
 					<vertex px="15.0" py="4.0" />
                                         <vertex px="13.0" py="4.0" />
 					<vertex px="13.0" py="-1.0" />
-					<vertex px="12.0" py="-1.0" />
 				</polygon>
 				<polygon caption="wall">
-					<vertex px="11.0" py="-1.0" />
                                         <vertex px="10.0" py="-1.0" />
 					<vertex px="10.0" py="4.0" />
 					<vertex px="8.0" py="4.0" />
@@ -158,8 +155,8 @@
 		</transition>
 		<transition id="4" caption="main_exit" type="emergency"
 			room1_id="2" subroom1_id="0" room2_id="-1" subroom2_id="-1">
-			<vertex px="11.0" py="-1.0" />
-			<vertex px="12.0" py="-1.0" />
+			<vertex px="10.0" py="-1.0" />
+			<vertex px="13.0" py="-1.0" />
 		</transition>
 		<transition id="5" caption="roomdoor5" type="normal"
 			room1_id="1" subroom1_id="0" room2_id="2" subroom2_id="0">
@@ -179,7 +176,7 @@
 		<transition id="8" caption="left_exit" type="emergency"
 			room1_id="2" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			<vertex px="0.0" py="4.0" />
-			<vertex px="0.0" py="5.0" />
+			<vertex px="0.0" py="6.0" />
 		</transition>
 	</transitions>
 </geometry>

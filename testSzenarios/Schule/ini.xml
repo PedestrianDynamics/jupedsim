@@ -53,8 +53,8 @@
 				<polygon>
 					<vertex px="0.0" py="4.0" />
 					<vertex px="-1.0" py="4.0" />
-					<vertex px="-1.0" py="5.0" />
-					<vertex px="0.0" py="5.0" />
+					<vertex px="-1.0" py="6.0" />
+					<vertex px="0.0" py="6.0" />
 					<vertex px="0.0" py="4.0" />
 				</polygon>
 			</goal>
