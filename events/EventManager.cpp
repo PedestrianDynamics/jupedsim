@@ -16,17 +16,14 @@ EventManager::EventManager(Building *_b){
     _deltaT=NULL;
     _eventCounter=0;
     _dynamic=false;
-    //_file.open("../events/events.txt", ios::in);
     _file = fopen("../events/events.txt","r");
     if(!_file){
-        cout << "INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich." << endl;
+        Log->Write("INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich.");
     }
     else{
-        cout << "INFO:\tDatei events.txt gefunden. Dynamisches Eventhandling moeglich." << endl;
+        Log->Write("INFO:\tDatei events.txt gefunden. Dynamisches Eventhandling moeglich.");
         _dynamic=true;
     }
-    //fclose(_file);
-    //_file.close();
 }
 
 /*******************
@@ -41,51 +38,44 @@ void EventManager::SetProjectRootDir(const std::string &filename){
 }
 
 void EventManager::readEventsXml(){
-    printf("INFO: \tReading events\n ");
+    Log->Write("INFO: \tReading events\n ");
     //get the geometry filename from the project file
     TiXmlDocument doc(_projectFilename);
     if (!doc.LoadFile()){
-        //Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        //Log->Write("ERROR: \t could not parse the project file");
-        printf("ERROR: \t%s\nRROR: \t could not parse the project file\n",doc.ErrorDesc());
+        Log->Write("ERROR: \t%s", doc.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the project file");
         exit(EXIT_FAILURE);
     }
 
-    //Log->Write("INFO: \tParsing the event file");
-    printf("INFO: \tParsing the event file\n");
+    Log->Write("INFO: \tParsing the event file");
     TiXmlElement* xMainNode = doc.RootElement();
     string eventfile="";
     if(xMainNode->FirstChild("events")){
         eventfile=_projectRootDir+xMainNode->FirstChild("events")->FirstChild()->Value();
-        //Log->Write("INFO: \tevents <"+eventfile+">");
-        //printf("INFO: \t events <%s>\n", eventfile);
+        Log->Write("INFO: \tevents <"+eventfile+">");
     }
 
     TiXmlDocument docEvent(eventfile);
     if(!docEvent.LoadFile()){
-        //Log->Write("EROOR: \t%s",docEvent.ErrorDesc());
-        //Log->Write("ERROR: \t could not parse the event file");
-        printf("EROOR: \t%s\nERROR: \t could not parse the event file\n",docEvent.ErrorDesc());
+        Log->Write("EROOR: \t%s",docEvent.ErrorDesc());
+        Log->Write("ERROR: \t could not parse the event file");
         exit(EXIT_FAILURE);
     }
 
     TiXmlElement* xRootNode = docEvent.RootElement();
     if(!xRootNode){
-        //Log->Write("ERROR:\tRoot element does not exist.");
-        printf("ERROR:\tRoot element does not exist.\n");
+        Log->Write("ERROR:\tRoot element does not exist.");
         exit(EXIT_FAILURE);
     }
 
     if( xRootNode->ValueStr () != "JPScore" ) {
-        //Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-        printf("ERROR:\tRoot element value is not 'JPScore'.");
+        Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
         exit(EXIT_FAILURE);
     }
 
     TiXmlNode* xEvents = xRootNode->FirstChild("events");
     if(!xEvents){
-        //Log->Write("ERROR:\tNo events found.");
-        printf("ERROR:\tNo events found.\n");
+        Log->Write("ERROR:\tNo events found.");
         exit(EXIT_FAILURE);
     }
     
@@ -95,20 +85,20 @@ void EventManager::readEventsXml(){
         _event_states.push_back(e->Attribute("state"));
         _event_ids.push_back(atoi(e->Attribute("id")));
     }
-    printf("INFO: \tEvents were read\n");
+    Log->Write("INFO: \tEvents were read\n");
 }
 
 void EventManager::listEvents(){
     if(_event_times.size()==0){
-        //Log->Write("INFO: \tNo events in the events.xml");
-        printf("INFO: \tNo events in the events.xml\n");
+        Log->Write("INFO: \tNo events in the events.xml");
     }
     else{
         int i;
+        char buf[10],buf2[10];
         for(i=0;i<_event_times.size();i++){
-           // Log->Write("INFO: \tEvent "+(i+1)+" after "+_event_times[i]+" sec.: "+_event_values[i]);
-
-            cout <<"INFO: \tEvent "<<i+1<<" after "<< _event_times[i] << "sec.: "<< _event_types[i] << " " << _event_states[i] << " " << _event_ids[i] << endl;
+            sprintf(buf,"%f",_event_times[i]);
+            sprintf(buf2,"%d",_event_ids[i]);
+            Log->Write("INFO: \tAfter "+string(buf)+" sec: "+_event_types[i]+" "+string(buf2)+" "+_event_states[i]);
         }
     }
 
@@ -122,8 +112,7 @@ void EventManager::readEventsTxt(double time){
         lines++;
         fgets(cstring,20,_file);
         if(lines>_eventCounter){
-            //cout << time << ": " << cstring << endl;
-            printf("INFO:\tEvent zum Zeitpunkt %f findet statt: ",time);
+            Log->Write("INFO:\tEvent: after %f sec: ",time);
             getTheEvent(cstring);
             _eventCounter++;
         }
@@ -157,7 +146,7 @@ void EventManager::Update_Events(double time, double d){
     for(i=0;i<_event_times.size();i++){
         if(fabs(_event_times[i]-time)<0.0000001){
             //Event findet statt
-            printf("INFO:\t%f: Event zum Zeitpunkt %f findet statt: ",time,_event_times[i]);
+            Log->Write("INFO:\tEvent: after %f sec: ",time);
             if(_event_states[i].compare("close")==0){
                 closeDoor(_event_ids[i]);
             }
@@ -178,11 +167,11 @@ void EventManager::closeDoor(int id){
     Transition *t=_building->GetTransition(id);
     if(t->IsOpen()){
         t->Close();
-        cout << "Door " << id << " closed." << endl;
+        Log->Write("\tDoor %d closed.",id);
         changeRouting(id,"close");
     }
     else{
-        cout << "Door " << id << " is already close yet." << endl;
+        Log->Write("Door %d is already close yet.", id);
     }
 
 }
@@ -192,11 +181,11 @@ void EventManager::openDoor(int id){
     Transition *t=_building->GetTransition(id);
     if(!t->IsOpen()){
         t->Open();
-        cout << "Door " << id << " opened." << endl;
+        Log->Write("\tDoor %d opened.",id);
         changeRouting(id,"open");
     }
     else{
-        cout << "Door " << id << " is already open yet." << endl;
+        Log->Write("Door %d is already open yet.", id);
     }
 }
 
@@ -206,12 +195,8 @@ void EventManager::changeRouting(int id, string state){
     _building->InitPhiAllPeds(_deltaT);
     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
     unsigned int nSize = _allPedestrians.size();
-    //cout << nSize << endl;
-    //for (int p = 0; p < nSize; ++p) {       !!!!!!so gehts, wenn alle Pedestrians sofort auf ein Ereignis reagieren.
-      //  _allPedestrians[p]->ClearMentalMap();
-    //}
 
-    //Pedestrians sollen aber, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter merken,
+    //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter merken,
     //dass sich Tueren aendern.
     Transition *t = _building->GetTransition(id);
     for (int p = 0; p < nSize; ++p) {

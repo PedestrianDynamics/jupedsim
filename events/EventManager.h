@@ -10,8 +10,11 @@
 #include "../geometry/Transition.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
+#include "../IO/IODispatcher.h"
 #include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
+
+extern OutputHandler* Log;
 
 class EventManager {
 private:
