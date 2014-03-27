@@ -38,11 +38,12 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
         //no former goal. so initial route has to be choosen
         //this is needed for initialisation
         p->ChangedSubRoom();
+        sensor_manager->execute(p, SensorManager::INIT);
     }
 
     if(p->GetNextDestination() == -1 || p->ChangedSubRoom()) {
         // execute the sensors
-        sensor_manager->execute(p);
+        sensor_manager->execute(p, SensorManager::PERIODIC);
 
         // check for a destination
         const NavLine * destination = (*cm_storage)[p]->GetDestination();

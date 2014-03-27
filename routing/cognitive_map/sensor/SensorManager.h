@@ -16,19 +16,27 @@ class Pedestrian;
 
 
 #include <vector>
-
+#include <set>
 
 class SensorManager {
 public:
-    typedef std::vector<AbstractSensor *> SensorContainer;
+    typedef int EventType;
+    static const EventType NONE = 0;
+    static const EventType INIT = 1;
+    static const EventType PERIODIC = 2;
+    static const EventType NO_WAY = 4;
+
+
+    typedef std::vector<std::pair<AbstractSensor *, EventType>> SensorContainer;
+
     /****************************
      * Constructors & Destructors
      ****************************/
     SensorManager(const Building * building, CognitiveMapStorage *);
     virtual ~SensorManager();
 
-    void Register(AbstractSensor * sensor);
-    void execute(const Pedestrian *);
+    void Register(AbstractSensor *, EventType);
+    void execute(const Pedestrian *, EventType);
 
     static SensorManager * InitWithAllSensors(const Building *, CognitiveMapStorage *);
 
