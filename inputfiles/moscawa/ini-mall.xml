@@ -6,6 +6,7 @@
 	<seed>12542</seed>
 	<!-- geometry file -->
 	<geometry>geometry-mall.xml</geometry>
+	<max_sim_time>900</max_sim_time>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
@@ -241,7 +242,6 @@
 	<operational_models>
 		<model id="1" description="gcfm">
 			<parameters>
-				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
