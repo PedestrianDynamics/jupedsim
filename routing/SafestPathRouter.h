@@ -47,6 +47,12 @@ public:
 	 */
 	virtual void Init(Building* building);
 
+
+	/**
+	 * Bypass using
+	 */
+	void ComputeAndUpdateDestinations(std::vector<Pedestrian*>& pedestrians);
+
 private:
 	/**
 	 * Compute the safest path for the given pedestrian and update the destination.
@@ -63,6 +69,12 @@ private:
 	 */
 	void Initialize();
 
+	/**
+	 * Print the phi index in the file
+	 */
+
+	void PrintInfoToFile();
+
 
 	/**
 	 *  reads the results from fds evac
@@ -72,10 +84,20 @@ private:
 	void UpdateMatrices();
 
 	int GetAgentsCountInSubroom( int roomID, int subroomID);
-	void main_1(Pedestrian* p);
-	void main_2(Pedestrian* p);
-	void CalculatePhi(Pedestrian* p);
-	void main_3( );
+
+	/**
+	 *
+	 * @param p
+	 */
+	void UpdateRRmatrix(Pedestrian* p);
+
+	void CalculatePhi();
+
+
+	/**
+	 * TODO: investigate the use of a map
+	 */
+	void MappingFloorIDtoIndex( );
 
 	int MapSection;
 
@@ -84,6 +106,9 @@ private:
 private:
 	// double dMatrixPreEvac[1][11];
 	// double dFinalLength[1][11];
+
+	// last time the matrices were updated
+	long int _lastUpdateTime;
 
 	 double *dFinalLineOFP;
 	 double *dFinalLineEvac;

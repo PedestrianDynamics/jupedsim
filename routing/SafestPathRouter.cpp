@@ -38,17 +38,16 @@
 
 #include "../pedestrian/Pedestrian.h"
 
-#define UPDATE_FREQUENCY 1 // in seconds
+#define UPDATE_FREQUENCY 10 // in seconds
 
 using namespace std;
 
 SafestPathRouter::SafestPathRouter() {
-	numberOfSubroom=0;
 
+	numberOfSubroom=0;
+	_lastUpdateTime=0;
 	a=1;
 	c=1;
-
-
 	b=0;
 
 	// Output to files
@@ -83,12 +82,6 @@ void SafestPathRouter::Init(Building* building) {
 		}
 	}
 
-
-
-
-
-
-
 	//cout<<numberOfSubroom<<endl;
 	peopleAtSection = new double [numberOfSubroom];
 	squareOfSection = new double [numberOfSubroom];
@@ -97,18 +90,27 @@ void SafestPathRouter::Init(Building* building) {
 	dPeopleDensity = new double [numberOfSubroom];
 	dFinalLength = new double [numberOfSubroom];
 	rR = new double [numberOfSubroom];
+
+	for (int i = 0; i < numberOfSubroom; ++i) {
+		peopleAtSection[i]=0.0;
+		squareOfSection [i]=0.0;
+		dFinalLineOFP [i]=0.0;
+		dFinalLineEvac[i]=0.0;
+		dPeopleDensity [i]=0.0;
+		dFinalLength [i]=0.0;
+		rR [i]=0.0;
+	}
+
 	int n=300;
 	dPreOFP=new double* [n];
 	flo = new int [numberOfSubroom];
 
-	main_3();
+	MappingFloorIDtoIndex();
 	 // load the matrix from fds
 	ReadMatrixFromFDS();
 
 
 	// lenthOfSection = new double [numberOfSubroom];
-
-
 
 	//for (int i = 0; i < numberOfSubroom; ++i) {
 	//	 rR[i] = new double[numberOfSubroom];
@@ -116,15 +118,10 @@ void SafestPathRouter::Init(Building* building) {
 	//			rR[i]=0;
 
 
-
-
 	// Print out final distance matrix
 	//	for(int i = 0; i < numberOfSubroom; i++)
 	//		cout << rR[i] << " ";
 	//		cout << endl;
-
-
-
 
 
 	//	for(int i = 0; i < numberOfSubroom; i++){
@@ -136,47 +133,6 @@ void SafestPathRouter::Init(Building* building) {
 
 
 int SafestPathRouter::FindExit(Pedestrian* p) {
-
-	// adjust the update frequency
-	double diff= fabs((int)p->GetGlobalTime() - p->GetGlobalTime());
-	if (diff>0.015)
-		if((((int)p->GetGlobalTime())%UPDATE_FREQUENCY)==0) {
-			//return -1;
-
-			UpdateMatrices();
-
-
-			CalculatePhi(p);
-			//main_2(p);
-/*
-			string content;
-
-			for (int j=0; j<numberOfSubroom; j++)
-				{
-					char tmp[20];
-					sprintf(tmp,"%lf",rR[j]);
-					//cout<<"tmp: "<<tmp<<endl;
-					content.append(",");
-					content.append(tmp);
-				}
-
-				//	cout<<content<<endl;
-				_phiFile->Write(content.c_str());
-
-
-				for (int j=0; j<numberOfSubroom; j++)
-				{
-					char tmp[20];
-					sprintf(tmp,"%lf",dPeopleDensity[j]);
-					//cout<<"tmp: "<<tmp<<endl;
-					content.append(",");
-					content.append(tmp);
-				}
-
-				//	cout<<content<<endl;
-				_finalLineEvac->Write(content.c_str());
-*/
-		}
 
 
 	if(ComputeSafestPath(p)==-1) {
@@ -568,7 +524,7 @@ void SafestPathRouter::GetHline(Building* building)
 
 
 
-void SafestPathRouter::CalculatePhi(Pedestrian* p)
+void SafestPathRouter::CalculatePhi()
 {
 
 	// Here:
@@ -579,7 +535,6 @@ void SafestPathRouter::CalculatePhi(Pedestrian* p)
 	for(int j = 0; j < numberOfSubroom; j ++) //
 	{
 		dPeopleDensity[j]=peopleAtSection[j]/ squareOfSection[j];
-
 		dFinalLineEvac[j]= (peopleAtSection[j] * 0.125) / (squareOfSection[j] * 0.92);
 	}
 
@@ -653,18 +608,6 @@ void SafestPathRouter::CalculatePhi(Pedestrian* p)
 	}
 
 
-
-	if(p->GetGlobalTime()>=1)
-		{
-			//rR[1]=500;
-
-		}
-
-
-
-
-
-
 	// Printing a matrix
 	//for(int j = 0; j < numberOfSubroom; j++)
 	//	cout << rR[j]<< " ";
@@ -682,10 +625,41 @@ void SafestPathRouter::CalculatePhi(Pedestrian* p)
 
 }
 
-void SafestPathRouter::main_3(){
+void SafestPathRouter::PrintInfoToFile() {
+
+	string content;
+
+	for (int j=0; j<numberOfSubroom; j++)
+	{
+		char tmp[20];
+		sprintf(tmp,"%lf",rR[j]);
+		//cout<<"tmp: "<<tmp<<endl;
+		content.append(",");
+		content.append(tmp);
+	}
+
+	//	cout<<content<<endl;
+	_phiFile->Write(content.c_str());
+
+
+	for (int j=0; j<numberOfSubroom; j++)
+	{
+		char tmp[20];
+		sprintf(tmp,"%lf",dPeopleDensity[j]);
+		//cout<<"tmp: "<<tmp<<endl;
+		content.append(",");
+		content.append(tmp);
+	}
+
+	//	cout<<content<<endl;
+	_finalLineEvac->Write(content.c_str());
+
+
+}
+
+void SafestPathRouter::MappingFloorIDtoIndex(){
 
 	//map <int, int> flo;
-
 
 	int index=0;
 	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
@@ -711,7 +685,7 @@ void SafestPathRouter::main_3(){
 
 }
 
-void SafestPathRouter::main_2(Pedestrian* p){
+void SafestPathRouter::UpdateRRmatrix(Pedestrian* p){
 
 	//double dFinalLength[1][11]={0.328,0.569,0.328,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
 	//double dFinalLength[11]={0.638,0.569,0.534,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
@@ -726,24 +700,58 @@ void SafestPathRouter::main_2(Pedestrian* p){
 
 
 	if(p->GetGlobalTime()>=5)
-		{
-			rR[10]=1000000;
+	{
+		rR[10]=1000000;
 
+	}
+
+}
+
+
+void SafestPathRouter::ComputeAndUpdateDestinations(
+		std::vector<Pedestrian*>& pedestrians) {
+
+	int currentTime = pedestrians[0]->GetGlobalTime();
+
+	if(currentTime!=_lastUpdateTime)
+	if((currentTime%UPDATE_FREQUENCY)==0) {
+
+		UpdateMatrices();
+		CalculatePhi();
+		_lastUpdateTime=currentTime;
+		//PrintInfoToFile();
+		//cout <<" Updating at : " <<currentTime<<endl;
+	}
+
+	// Update
+
+	for (unsigned int p = 0; p < pedestrians.size(); ++p) {
+
+		if(ComputeSafestPath(pedestrians[p])==-1) {
+			//Log->Write(" sdfds");
 		}
 
+		//handle over to the global router engine
+		if (GlobalRouter::FindExit(pedestrians[p]) == -1) {
+			//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+			//Log->Write("\tINFO: \tHe has reached the target cell");
+			_building->DeletePedFromSim(pedestrians[p]);
+			//exit(EXIT_FAILURE);
+		}
+	}
 
-
-
+//	for (unsigned int p = 0; p < pedestrians.size(); ++p) {
+//
+//		if (pedestrians[p]->FindRoute() == -1) {
+//			//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+//			//Log->Write("\tINFO: \tHe has reached the target cell");
+//			_building->DeletePedFromSim(pedestrians[p]);
+//			//exit(EXIT_FAILURE);
+//		}
+//	}
 
 }
 
-
-
-void SafestPathRouter::main_1(Pedestrian* p)
-{
-
-
-}
 
 /*
 	std::vector<SubRoom*> path;
