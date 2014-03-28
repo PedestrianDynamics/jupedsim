@@ -43,7 +43,7 @@ void EventManager::readEventsXml(){
     TiXmlDocument doc(_projectFilename);
     if (!doc.LoadFile()){
         Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file");
+        Log->Write("ERROR: \t could not parse the project file. ");
         exit(EXIT_FAILURE);
     }
 
@@ -58,8 +58,9 @@ void EventManager::readEventsXml(){
     TiXmlDocument docEvent(eventfile);
     if(!docEvent.LoadFile()){
         Log->Write("EROOR: \t%s",docEvent.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the event file");
-        exit(EXIT_FAILURE);
+        Log->Write("ERROR: \t could not parse the event file. So no Events are found.");
+        //exit(EXIT_FAILURE);
+        return;
     }
 
     TiXmlElement* xRootNode = docEvent.RootElement();
@@ -108,16 +109,17 @@ void EventManager::readEventsTxt(double time){
     rewind(_file);
     char cstring[256];
     int lines=0;
-    do {
-        lines++;
-        fgets(cstring,20,_file);
-        if(lines>_eventCounter){
-            Log->Write("INFO:\tEvent: after %f sec: ",time);
-            getTheEvent(cstring);
-            _eventCounter++;
+    do{
+        fgets(cstring,30,_file);
+        if(cstring[0]!='#'){// keine Kommentarzeile
+            lines++;
+            if(lines>_eventCounter){
+                Log->Write("INFO:\tEvent: after %f sec: ",time);
+                getTheEvent(cstring);
+                _eventCounter++;
+            }
         }
-    }while (feof(_file)==0);
-
+     }while (feof(_file)==0);
 }
 
 /***********
@@ -199,22 +201,25 @@ void EventManager::changeRouting(int id, string state){
     //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter merken,
     //dass sich Tueren aendern.
     Transition *t = _building->GetTransition(id);
+    //Abstand der aktuellen Position des Pedestrians zur entsprechenden Tuer: Tuer als Linie sehen und mit
+    //DistTo(ped.GetPos()) den Abstand messen
+    Line* l = new Line(t->GetPoint1(),t->GetPoint2());
     for (int p = 0; p < nSize; ++p) {
-        if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
-            double dist = _allPedestrians[p]->GetDistanceToNextTarget();
-            if(dist>0.0&&dist<1.0){
-                _allPedestrians[p]->ClearMentalMap();
-            }
-            else if(dist>=1.0&&dist<3.0){
-                _allPedestrians[p]->RerouteIn(2.0);
-            }
-            else{
-                _allPedestrians[p]->RerouteIn(5.0);
-            }
+        //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
+        double dist = l->DistTo(_allPedestrians[p]->GetPos());
+        if(dist>0.0&&dist<0.5){
+           _allPedestrians[p]->ClearMentalMap();
+        }
+        else if(dist>=0.5&&dist<3.0){
+           _allPedestrians[p]->RerouteIn(1.0);
         }
         else{
-            _allPedestrians[p]->ClearMentalMap();
+           _allPedestrians[p]->RerouteIn(2.0);
         }
+        //}
+        //else{
+          //  _allPedestrians[p]->ClearMentalMap();
+        //}
     }
 }
 
