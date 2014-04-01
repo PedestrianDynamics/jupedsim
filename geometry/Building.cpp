@@ -53,6 +53,7 @@ using namespace std;
 Building::Building() {
 	_caption = "no_caption";
 	_projectFilename = "";
+	_geometryFilename= "";
 	_rooms = vector<Room*>();
 	_routingEngine = NULL;
 	_linkedCellGrid = NULL;
@@ -291,7 +292,9 @@ void Building::SetProjectRootDir(const std::string &filename){
 const string& Building::GetProjectRootDir() const{
 	return _projectRootDir;
 }
-
+const std::string& Building::GetGeometryFilename() const {
+	return _geometryFilename;
+}
 
 void Building::LoadBuildingFromFile() {
 
@@ -305,13 +308,14 @@ void Building::LoadBuildingFromFile() {
 
 	Log->Write("INFO: \tParsing the geometry file");
 	TiXmlElement* xMainNode = doc.RootElement();
-	string geoFilename="";
+	string geoFilenameWithPath="";
 	if(xMainNode->FirstChild("geometry")){
-		geoFilename=_projectRootDir+xMainNode->FirstChild("geometry")->FirstChild()->Value();
-		Log->Write("INFO: \tgeometry <"+geoFilename+">");
+		_geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+		geoFilenameWithPath=_projectRootDir+_geometryFilename;
+		Log->Write("INFO: \tgeometry <"+_geometryFilename+">");
 	}
 
-	TiXmlDocument docGeo(geoFilename);
+	TiXmlDocument docGeo(geoFilenameWithPath);
 	if (!docGeo.LoadFile()){
 		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the geometry file");
@@ -1420,6 +1424,7 @@ void Building::CleanUpTheScene() {
 	}
 
 }
+
 
 
 void Building::StringExplode(string str, string separator,

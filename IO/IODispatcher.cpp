@@ -109,6 +109,16 @@ void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int se
 }
 
 void IODispatcher::WriteGeometry(Building* building) {
+	// just put a link to the geometry file
+	string embed_geometry;
+	embed_geometry.append("\t<geometry>\n");
+	char file_location[CLENGTH] = "";
+	sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
+	embed_geometry.append(file_location);
+	embed_geometry.append("\t</geometry>\n");
+	Write(embed_geometry);
+	return;
+	//
 	string geometry;
 	geometry.append("\t<geometry>\n");
 
@@ -128,13 +138,13 @@ void IODispatcher::WriteGeometry(Building* building) {
 
 	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
 		Room* r = building->GetRoom(i);
-		string caption = r->GetCaption();
+		string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
 		if (rooms_to_plot.empty() == false)
 			if (IsElementInVector(rooms_to_plot, caption) == false)
 				continue;
 
 		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-			SubRoom* s = r->GetSubRoom(k);
+			SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=0) continue;
 			geometry.append(s->WriteSubRoom());
 
 			// the hlines
