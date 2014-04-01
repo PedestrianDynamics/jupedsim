@@ -6,6 +6,7 @@
 	<seed>12542</seed>
 	<!-- geometry file -->
 	<geometry>geometry-mall.xml</geometry>
+	<max_sim_time>900</max_sim_time>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
@@ -29,7 +30,7 @@
 		<!-- doors states are: close or open -->
 		<doors>
 			<door trans_id="0" caption="" state="open" />           
-			<door trans_id="2" caption="" state="open" />
+			<door trans_id="2" caption="" state="close" />
 			<door trans_id="3" caption="" state="open" />
 			<door trans_id="4" caption="" state="open" />
 			<door trans_id="5" caption="" state="open" />
@@ -41,7 +42,7 @@
 			<door trans_id="11" caption="" state="open" />
 			<door trans_id="12" caption="" state="open" />
 			<door trans_id="13" caption="" state="open" />
-			<door trans_id="14" caption="" state="open" />
+			<door trans_id="14" caption="" state="close" />
 			<door trans_id="15" caption="" state="open" />
 			<door trans_id="16" caption="" state="open" />
 			<door trans_id="17" caption="" state="open" />
@@ -121,7 +122,7 @@
 		<agents_distribution>
 		
 			
-			<group group_id="1" room_id="0" subroom_id="1" number="1" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="1" room_id="6" subroom_id="7" number="8" goal_id="-1" router_id="2" route_id=""/>
 			
 
 			
@@ -241,7 +242,6 @@
 	<operational_models>
 		<model id="1" description="gcfm">
 			<parameters>
-				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>3</exitCrossingStrategy>
@@ -261,6 +261,12 @@
 
 	<route_choice_models>
 		<router router_id="1" description="global_safest">
+			<parameters>
+				<navigation_lines file="routing.xml" />
+			</parameters>
+		</router>
+		
+		<router router_id="2" description="global_shortest">
 			<parameters>
 				<navigation_lines file="routing.xml" />
 			</parameters>
