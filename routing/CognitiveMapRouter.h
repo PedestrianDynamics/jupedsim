@@ -32,6 +32,8 @@ public:
     virtual int FindExit(Pedestrian* p);
     virtual void Init(Building* b);
 
+protected:
+    void CheckAndInitPedestrian(Pedestrian *);
 private:
 
     Building * building;

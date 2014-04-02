@@ -46,6 +46,7 @@ public:
     const NavigationGraph * GetNavigationGraph() const;
 
     const NavLine * GetDestination();
+    const NavLine * GetLocalDestination();
 
 private:
     NavigationGraph * navigation_graph;
