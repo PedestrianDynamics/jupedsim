@@ -65,9 +65,11 @@ message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
+set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 #include_directories( ${LIBRARY_OUTPUT_PATH} )
 #add_subdirectory(${LIBRARY_OUTPUT_PATH} )
 message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
+message( STATUS "CMAKE_TEST_DIR: " ${CMAKE_TEST_DIR} )
 message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
 message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
@@ -101,10 +103,10 @@ else(CGAL_FOUND)
   message( STATUS "CGAL not found. But don't panik .." )
 endif(CGAL_FOUND)
 
-file(
-	GLOB_RECURSE
-	source_files
-	main.cpp
+
+file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+set(	source_files
+        main.cpp # tounderstand
 	Simulation.cpp
 	general/ArgumentParser.cpp
 
@@ -165,8 +167,9 @@ file(
 	poly2tri/sweep/advancing_front.cpp
 	poly2tri/sweep/sweep.cpp
 	poly2tri/sweep/cdt.cpp
+)
 
-	header_files:
+set(	header_files
 	routing/NavMesh.ch
 	routing/DirectionStrategy.h
 	routing/DummyRouter.h
@@ -228,20 +231,16 @@ file(
 
 )
 
+add_library ( core SHARED ${source_files} )
 #Target
 add_executable(
-  jpscore
-  ${source_files}
+  jpscore main.cpp  
 )
-
+target_link_libraries (jpscore core)
 
 if(WIN32)
-  target_link_libraries (jpscore wsock32)
+  target_link_libraries (jpscore core wsock32)
 endif(WIN32)
-
-add_library ( core SHARED ${source_files} )
-
-
 
 #---------------------------- compiler -------------------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -321,59 +320,13 @@ add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
   --build-project JPScore
   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
   )
-# todo: make list of tests and iterate over
-#add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
-add_executable(testSignPos Utest/testSign.cpp)
-target_link_libraries (testSignPos  core)
 
-#add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
-add_executable(testSignNeg  Utest/testSign1.cpp)
-target_link_libraries (testSignNeg  core)
-
-#add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
-add_executable(testPointOnEllipse Utest/testPointOnEllipse.cpp)
-target_link_libraries (testPointOnEllipse  core)
-
-add_executable(testEffectiveDistanceToEllipse Utest/testEffectiveDistanceToEllipse.cpp)
-target_link_libraries (testEffectiveDistanceToEllipse  core)
-
-add_executable(testEffectiveDistanceToLine Utest/testEffectiveDistanceToLine.cpp)
-target_link_libraries (testEffectiveDistanceToLine  core)
-
-#add_executable(testEqual math/Distribution.cpp Utest/testequal.cpp)
-add_executable(testEqual Utest/testequal.cpp)
-target_link_libraries (testEqual core)
-
-add_executable(testGetArea Utest/testGetArea.cpp)
-target_link_libraries (testGetArea core)
-
-add_executable(testIsOn Utest/testIsOn.cpp)
-target_link_libraries (testIsOn core)
-
-add_executable(testIsInside Utest/testIsInside.cpp)
-target_link_libraries (testIsInside core)
-
-add_executable(testIsOutside Utest/testIsOutside.cpp)
-target_link_libraries (testIsOutside core)
-
-add_executable(testClassPoint Utest/testClassPoint.cpp)
-target_link_libraries (testClassPoint core)
-
-#----------------- append to this list more tests ... but first add_executable() ---------------
-set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea testEffectiveDistanceToEllipse
-  testIsOn testIsInside testIsOutside testEffectiveDistanceToLine
-  testClassPoint
-)
-#--------------------------------------------------------------------
-foreach (test ${tests})
+foreach (test_src ${test_files})
+  GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+  add_executable( ${test} ${test_src})
+  target_link_libraries (${test} core)
   add_test(NAME ${test} COMMAND ${test})
-endforeach(test)
-
-# add_test( NAME timetest
-#   COMMAND ${CMAKE_COMMAND}
-#   -DTEST_PROG=$<TARGET_FILE:testPointOnEllipse>
-#   -P    ${EXECUTABLE_OUTPUT_PATH}/runtest.cmake
-#     )#
+endforeach(test_src ${test_files})
 
 
 find_package(PythonInterp)
@@ -384,9 +337,3 @@ if(PYTHONINTERP_FOUND)
   add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
   #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
 endif(PYTHONINTERP_FOUND)
-
-
-
-# add_test(NAME <name> [CONFIGURATIONS [Debug|Release|...]]
-#             [WORKING_DIRECTORY dir]
-#             COMMAND <command> [arg1 [arg2 ...]])
