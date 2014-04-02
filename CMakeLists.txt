@@ -100,11 +100,12 @@ if(CGAL_FOUND)
 else(CGAL_FOUND)
   message( STATUS "CGAL not found. But don't panik .." )
 endif(CGAL_FOUND)
+#
+#file(
+	#GLOB_RECURSE
 
-file(
-	GLOB_RECURSE
-	source_files
-	main.cpp
+set ( 	source_files
+        main.cpp
 	Simulation.cpp
 	general/ArgumentParser.cpp
 
@@ -178,9 +179,9 @@ file(
 	poly2tri/sweep/advancing_front.cpp
 	poly2tri/sweep/sweep.cpp
 	poly2tri/sweep/cdt.cpp
-
-	header_files:
-	routing/NavMesh.ch
+)
+set (   header_files
+	routing/NavMesh.h
 	routing/DirectionStrategy.h
 	routing/DummyRouter.h
 	routing/GlobalRouter.h
@@ -255,19 +256,25 @@ file(
 
 )
 
+#message(STATUS "sources:" ${source_files})
+# this lib is only necessary for the test files. 
+add_library ( core SHARED ${source_files} ${header_files})
+#add_library(core OBJECT ${source_files} ${header_files})
 #Target
 add_executable(
-  jpscore
-  ${source_files}
+  jpscore  main.cpp  
 )
+
+target_link_libraries(jpscore  core)
 
 
 if(WIN32)
-  target_link_libraries (jpscore wsock32)
+  target_link_libraries (jpscore core wsock32)
 endif(WIN32)
 
-add_library ( core SHARED ${source_files} )
 
+
+#set_target_properties(core PROPERTIES COMPILE_FLAGS "-fPIC")
 
 
 #---------------------------- compiler -------------------------------
@@ -335,7 +342,7 @@ endif(UNIX)
 #include(CheckCXXSourceCompiles)
 set (CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}")
 
-# ----------------------------- cTest ------------------------------------------
+# # ----------------------------- cTest ------------------------------------------
 enable_testing() #adds another build target, which is test for Makefile generators
 include(CTest) #adding Dart support
 
@@ -351,14 +358,13 @@ add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
   )
 # todo: make list of tests and iterate over
 #add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
-add_executable(testSignPos Utest/testSign.cpp)
+add_executable(testSignPos  Utest/testSign.cpp )
 target_link_libraries (testSignPos  core)
 
-#add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
+# #add_executable(testSignNeg math/Mathematics.cpp Utest/testSign1.cpp)
 add_executable(testSignNeg  Utest/testSign1.cpp)
 target_link_libraries (testSignNeg  core)
 
-#add_executable(testPointOnEllipse pedestrian/Ellipse.cpp geometry/Point.cpp math/Mathematics.cpp geometry/Line.cpp Utest/testPointOnEllipse.cpp)
 add_executable(testPointOnEllipse Utest/testPointOnEllipse.cpp)
 target_link_libraries (testPointOnEllipse  core)
 
@@ -368,15 +374,14 @@ target_link_libraries (testEffectiveDistanceToEllipse  core)
 add_executable(testEffectiveDistanceToLine Utest/testEffectiveDistanceToLine.cpp)
 target_link_libraries (testEffectiveDistanceToLine  core)
 
-#add_executable(testEqual math/Distribution.cpp Utest/testequal.cpp)
 add_executable(testEqual Utest/testequal.cpp)
-target_link_libraries (testEqual core)
+target_link_libraries (testEqual  core)
 
 add_executable(testGetArea Utest/testGetArea.cpp)
-target_link_libraries (testGetArea core)
+target_link_libraries (testGetArea   core)
 
 add_executable(testIsOn Utest/testIsOn.cpp)
-target_link_libraries (testIsOn core)
+target_link_libraries (testIsOn  core) 
 
 add_executable(testIsInside Utest/testIsInside.cpp)
 target_link_libraries (testIsInside core)
@@ -395,10 +400,11 @@ set (tests testSignPos testSignNeg testPointOnEllipse testEqual testGetArea test
   testIsOn testIsInside testIsOutside testEffectiveDistanceToLine
   testClassPoint testClassLine
 )
-#--------------------------------------------------------------------
-foreach (test ${tests})
-  add_test(NAME ${test} COMMAND ${test})
-endforeach(test)
+# #--------------------------------------------------------------------
+
+# foreach (test ${tests})
+#   add_test(NAME ${test} COMMAND ${test})
+# endforeach(test)
 
 # add_test( NAME timetest
 #   COMMAND ${CMAKE_COMMAND}
