@@ -42,6 +42,7 @@ Simulation::Simulation() {
 	_solver = NULL;
 	_iod = new IODispatcher();
 	_fps=1;
+    _em=NULL;
 }
 
 Simulation::~Simulation() {
@@ -51,6 +52,7 @@ Simulation::~Simulation() {
 	delete _model;
 	delete _solver;
 	delete _iod;
+    delete _em;
 }
 
 /************************************************
@@ -379,6 +381,13 @@ void Simulation::InitArgs(ArgumentParser* args) {
 
 	// perform a general check to the .
 	_building->SanityCheck();
+
+    //read the events
+    _em = new EventManager(_building);
+    _em->SetProjectFilename(args->GetProjectFile());
+    _em->SetProjectRootDir(args->GetProjectRootDir());
+    _em->readEventsXml();
+    _em->listEvents();
 }
 
 
@@ -405,10 +414,12 @@ int Simulation::RunSimulation() {
 		_solver->solveODE(t, t + _deltaT, _building);
 		// gucken ob Fußgänger in neuen Räumen/Unterräumen
 		Update();
+        _em->Update_Events(t,_deltaT);
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			_iod->WriteFrame(frameNr / writeInterval, _building);
 		}
+
 	}
 	// writing the footer
 	_iod->WriteFooter();

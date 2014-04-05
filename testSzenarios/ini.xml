@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+
+	<!-- seed used for initialising random generator -->
+        <seed>12542</seed>
+        <!-- geometry file -->
+        <geometry>geo.xml</geometry>
+	<events>events.xml</events>
+        <!-- trajectories file and format -->
+        <trajectories format="xml-plain" embed_mesh="false" fps="8">
+                <file location="testTrajectories.xml" />
+                <!--<socket hostname="127.0.0.1" port="8989"/> -->
+        </trajectories>
+        <!-- where to store the logs -->
+        <!--<logfile>outputfiles/log.txt</logfile> -->
+
+	<!-- traffic information: e.g closed doors or smoked rooms -->
+        <traffic_constraints>
+                <!-- room states are: good or smoked -->
+                <rooms>
+                        <room room_id="0" state="good" />
+                </rooms>
+                <!-- doors states are: close or open -->
+                <doors>
+                        <door trans_id="1" caption="exit" state="open" />
+                </doors>
+        </traffic_constraints>
+
+	<routing>
+		<goals>
+			<goal id="0" final="true" caption="goal1">
+				<polygon>
+					<vertex px="6.0" py="4.0" />
+					<vertex px="8.0" py="4.0" />
+					<vertex px="8.0" py="2.0" />
+					<vertex px="6.0" py="2.0" />
+					<vertex px="6.0" py="4.0" />
+				</polygon>
+			</goal>
+		</goals>
+
+		<routes>
+			<route id="1">0</route>
+		</routes>
+	</routing>
+
+	<!--persons information and distribution -->
+	<agents>
+		<agents_distribution>
+			<group group_id="0" room_id="0" subroom_id="0" number="15" router_id="1" />
+		</agents_distribution>
+
+		<agents_sources><!-- frequency in persons/minute -->
+			<source id="1" frequency="60" agents_max="150" router_id="1" goal_id="" route_id="" caption="source 1">
+				<polygon>
+					<vertex px="6.0" py="2.0" />
+					<vertex px="6.0" py="0.0" />
+					<vertex px="0.0" py="0.0" />
+					<vertex px="0.0" py="6.0" />
+					<vertex px="6.0" py="6.0" />
+					<vertex px="6.0" py="4.0" />
+				</polygon>
+			</source>
+		</agents_sources>
+	</agents>
+
+	<operational_models>
+                <model id="1" description="gcfm">
+                        <parameters>
+                                <tmax unit="sec">900</tmax>
+                                <solver>euler</solver>
+                                <stepsize>0.001</stepsize>
+                                <exitCrossingStrategy>3</exitCrossingStrategy>
+                                <linkedcells enabled="true" cell_size="2.2" />
+                                <v0 mu="1.24" sigma="0.001" />
+                                <bmax mu="0.25" sigma="0.001" />
+                                <bmin mu="0.20" sigma="0.001" />
+                                <amin mu="0.18" sigma="0.001" />
+                                <tau mu="0.5" sigma="0.001" />
+                                <atau mu="0.5" sigma="0.001" />
+                                <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+                                <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+                        </parameters>
+                </model>
+
+                <model id="2" desciption="cdt">
+                        <parameters></parameters>
+                </model>
+        </operational_models>
+
+	<route_choice_models>
+                <router router_id="0" description="dummy">
+                        <parameters></parameters>
+                </router>
+
+                <router router_id="1" description="global_shortest">
+			<parameters></parameters>
+                </router>
+
+        </route_choice_models>
+
+</JuPedSim>

@@ -31,7 +31,7 @@
 		<!-- doors states are: close or open -->
 		<doors>
 			<door trans_id="0" caption="" state="open" />           
-			<door trans_id="2" caption="" state="close" />
+			<door trans_id="2" caption="" state="open" />
 			<door trans_id="3" caption="" state="open" />
 			<door trans_id="4" caption="" state="open" />
 			<door trans_id="5" caption="" state="open" />
@@ -43,7 +43,7 @@
 			<door trans_id="11" caption="" state="open" />
 			<door trans_id="12" caption="" state="open" />
 			<door trans_id="13" caption="" state="open" />
-			<door trans_id="14" caption="" state="close" />
+			<door trans_id="14" caption="" state="open" />
 			<door trans_id="15" caption="" state="open" />
 			<door trans_id="16" caption="" state="open" />
 			<door trans_id="17" caption="" state="open" />
@@ -123,7 +123,8 @@
 		<agents_distribution>
 		
 			
-			<group group_id="1" room_id="6" subroom_id="9" number="20" goal_id="" router_id="2" route_id=""/>
+			<group group_id="1" room_id="6" subroom_id="5" number="100" goal_id="" router_id="1" route_id=""/>
+			<group group_id="1" room_id="6" subroom_id="6" number="5" goal_id="" router_id="1" route_id=""/>
 						
 			
 		<!--	
@@ -259,13 +260,13 @@
 	</operational_models>
 
 	<route_choice_models>
-		<routerq router_id="1" description="global_safest">
+		<routerq router_id="2" description="global_safest">
 			<parameters>
 				<navigation_lines file="routing-mall.xml" />
 			</parameters>
 		</routerq>
 		
-		<router router_id="2" description="global_safest">
+		<router router_id="1" description="global_safest">
 			<parameters>
 				<navigation_lines file="routing-mall.xml" />
 			</parameters>
