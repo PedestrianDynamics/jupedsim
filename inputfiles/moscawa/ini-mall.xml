@@ -6,6 +6,7 @@
 	<seed>12542</seed>
 	<!-- geometry file -->
 	<geometry>geometry-mall.xml</geometry>
+	<events>events-mall.xml</events>
 	<max_sim_time>900</max_sim_time>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
