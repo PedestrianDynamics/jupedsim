@@ -10,6 +10,7 @@
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
+		<!-- <socket hostname="127.0.0.1" port="8989"/>  -->
 	</trajectories>
 	<!-- where to store the logs -->
 	<!--logfile>log</logfile-->
@@ -122,10 +123,8 @@
 		<agents_distribution>
 		
 			
-			<group group_id="1" room_id="6" subroom_id="7" number="8" goal_id="-1" router_id="2" route_id=""/>
-			
-
-			
+			<group group_id="1" room_id="6" subroom_id="9" number="20" goal_id="" router_id="2" route_id=""/>
+						
 			
 		<!--	
 		<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="0" router_id="1" route_id=""/>
@@ -244,7 +243,7 @@
 			<parameters>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
-				<exitCrossingStrategy>3</exitCrossingStrategy>
+				<exitCrossingStrategy>4</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
 				<bmax mu="0.25" sigma="0.001" />
@@ -260,15 +259,15 @@
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="1" description="global_safest">
+		<routerq router_id="1" description="global_safest">
 			<parameters>
-				<navigation_lines file="routing.xml" />
+				<navigation_lines file="routing-mall.xml" />
 			</parameters>
-		</router>
+		</routerq>
 		
-		<router router_id="2" description="global_shortest">
+		<router router_id="2" description="global_safest">
 			<parameters>
-				<navigation_lines file="routing.xml" />
+				<navigation_lines file="routing-mall.xml" />
 			</parameters>
 		</router>
 

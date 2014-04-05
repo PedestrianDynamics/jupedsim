@@ -430,3 +430,15 @@ void Simulation::Update() {
 	_building->UpdateGrid();
 
 }
+
+void Simulation::PrintStatistics() {
+	Log->Write("\nEXIT USAGE:");
+	const map<int, Transition*>& transitions = _building->GetAllTransitions();
+	map<int, Transition*>::const_iterator itr;
+	for(itr = transitions.begin(); itr != transitions.end(); ++itr){
+		Transition* goal =  itr->second;
+		if(goal->IsExit()){
+			Log->Write("Exit ID [%d] used by [%d] pedestrians",goal->GetID(),goal->GetDoorUsage());
+		}
+	}
+}

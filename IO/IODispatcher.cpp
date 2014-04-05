@@ -116,8 +116,8 @@ void IODispatcher::WriteGeometry(Building* building) {
 	sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
 	embed_geometry.append(file_location);
 	embed_geometry.append("\t</geometry>\n");
-	Write(embed_geometry);
-	return;
+	//Write(embed_geometry);
+	//return;
 	//
 	string geometry;
 	geometry.append("\t<geometry>\n");

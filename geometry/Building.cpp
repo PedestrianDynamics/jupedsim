@@ -631,10 +631,19 @@ void Building::AddTransition(Transition* line) {
 
 void Building::AddHline(Hline* line) {
 	if (_hLines.count(line->GetID()) != 0) {
-		Log->Write(
-				"ERROR: Duplicate index for hlines found [%d] in Routing::AddHline()",
-				line->GetID());
-		exit(EXIT_FAILURE);
+		// check if the lines are identical
+		Hline* ori= _hLines[line->GetID()];
+		if(ori->operator ==(*line)){
+			Log->Write("INFO: Skipping identical hlines with ID [%d]",line->GetID());
+			return;
+		}
+		else
+		{
+			Log->Write(
+					"ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
+					line->GetID(), _hLines.size());
+			exit(EXIT_FAILURE);
+		}
 	}
 	_hLines[line->GetID()] = line;
 }
@@ -730,7 +739,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const {
 	return NULL;
 }
 
-Crossing* Building::GetTransOrCrossByID(int id) const {
+Crossing* Building::GetTransOrCrossByUID(int id) const {
 	{
 		//eventually
 		map<int, Transition*>::const_iterator itr;
@@ -1345,6 +1354,11 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 		cout << "rescued agent: " << (*it)->GetID() << endl;
 		_allPedestians.erase(it);
 	}
+	//update the stats before deleting
+	Transition* trans =GetTransitionByUID(ped->GetExitIndex());
+	if(trans) {
+		trans->IncreaseDoorUsage(1);
+	}
 	delete ped;
 }
 
@@ -1478,28 +1492,15 @@ int Building::GetNumberOfPedestrians() const {
 	return sum;
 }
 
-// FIXME: you should get rid of this method
-//Crossing* Building::GetGoal(int index) {
-//	if (_transitions.count(index) == 1) {
-//		return _transitions[index];
-//	} else if (_crossings.count(index) == 1) {
-//		return _crossings[index];
-//	}else if (_hLines.count(index) == 1) {
-//		exit(EXIT_FAILURE);
-//		//return pHlines[index];
-//	}else {
-//		if (index == -1)
-//			return NULL;
-//		else {
-//			char tmp[CLENGTH];
-//			sprintf(tmp,
-//					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal(), counts in map= [%d]",
-//					index, _crossings.size(),_crossings.count(index));
-//			Log->Write(tmp);
-//			exit(EXIT_FAILURE);
-//		}
-//	}
-//}
+Transition* Building::GetTransitionByUID(int uid) const {
+	//eventually
+	map<int, Transition*>::const_iterator itr;
+	for(itr = _transitions.begin(); itr != _transitions.end(); ++itr){
+		if (itr->second->GetUniqueID()== uid)
+			return itr->second;
+	}
+	return NULL;
+}
 
 
 #endif // _SIMULATOR

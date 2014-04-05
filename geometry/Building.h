@@ -140,11 +140,16 @@ public:
 
 
     /**
-     * @return a crossing or a transition matching the given id.
+     * @return a crossing or a transition matching the given uid.
      * Return NULL if none is found
      */
-    Crossing* GetTransOrCrossByID(int id) const;
+    Crossing* GetTransOrCrossByUID(int uid) const;
 
+
+    /**
+     * @return the transition matching the uid
+     */
+    Transition* GetTransitionByUID(int uid) const;
 
     //TOD0: rename later to GetGoal
     Goal* GetFinalGoal(int id);

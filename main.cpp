@@ -83,7 +83,9 @@ int main(int argc, char **argv) {
 
 	Log->Write("\nExec Time [s]     : %.2f", execTime);
 	Log->Write("Evac Time [s]     : %d", evacTime);
-	Log->Write("Real Time Factor  : %.2f X\n", evacTime / execTime);
+	Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
+
+	//sim.PrintStatistics();
 
 	if (NULL == dynamic_cast<STDIOHandler*>(Log)){
 		printf("\nExec Time [s]     : %.2f\n", execTime);

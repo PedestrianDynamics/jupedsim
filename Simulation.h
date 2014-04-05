@@ -116,6 +116,12 @@ public:
      */
     void Update();
 
+
+    /**
+     * print some statistics about the simulation
+     */
+    void PrintStatistics();
+
 };
 
 #endif /*SIMULATION_H_*/

@@ -262,12 +262,20 @@ void AccessPoint::Dump(){
 	cout<<endl<<endl;
 
 	cout<<" transit to final goals:"<<endl;
-	for(std::map<int, int>::iterator p = _mapDestToAp.begin(); p != _mapDestToAp.end(); p++) {
-		cout<<"\t ---> [ "<<p->first<<" via " << p->second<<" ]";
-	}
-	if(_mapDestToAp.size()==0){
-		cout<<"\t ---> [ Nothing ]";
-	}
+//	for(std::map<int, int>::iterator p = _navigationGraphTo.begin(); p != _navigationGraphTo.end(); p++) {
+//		cout<<"\t ---> [ "<<p->first<<" via " << p->second<<" ]";
+//	}
+//	if(_navigationGraphTo.size()==0){
+//		cout<<"\t ---> [ Nothing ]";
+//	}
+
+//	cout<<" transit to final goals:"<<endl;
+//	for(std::map<int, int>::iterator p = _mapDestToAp.begin(); p != _mapDestToAp.end(); p++) {
+//		cout<<"\t ---> [ "<<p->first<<" via " << p->second<<" ]";
+//	}
+//	if(_mapDestToAp.size()==0){
+//		cout<<"\t ---> [ Nothing ]";
+//	}
 	cout<<endl<<endl;
 
 	cout<<" connected to aps : " ;

@@ -40,7 +40,7 @@
 #include <iomanip>
 
 //penalty factors for distances outdoor
-#define PENALTY_FACTOR 30
+#define PENALTY_FACTOR 1
 
 
 using namespace std;
@@ -446,7 +446,8 @@ void GlobalRouter::Init(Building* building) {
 	}
 
 	//dumping the complete system
-	//DumpAccessPoints(-1);
+	//DumpAccessPoints(3-1);
+	//DumpAccessPoints(381);
 	//vector<string> rooms;
 	//rooms.push_back("hall");
 	//rooms.push_back("0");
@@ -554,7 +555,10 @@ void GlobalRouter::DumpAccessPoints(int p) {
 int GlobalRouter::FindExit(Pedestrian* ped) {
 
 	int nextDestination = ped->GetNextDestination();
-	//ped->Dump(1);
+	if(ped->GetGlobalTime()>400){
+		//ped->Dump(143);
+		//exit(0);
+	}
 
 	if (nextDestination == -1) {
 		return GetBestDefaultRandomExit(ped);
