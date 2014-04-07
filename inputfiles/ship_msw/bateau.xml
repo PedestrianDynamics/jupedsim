@@ -38,57 +38,8 @@
 			</crossings>
 		</room>
 		<room id="1" caption="2" zpos="0.000000">
+
 			<subroom id="0" closed="0" class="subroom">
-				 <polygon caption="wall">
-					 <vertex px="-6.772081" py="131.236420"/>
-					 <vertex px="-6.844342" py="131.107803"/>
-					 <vertex px="-5.506122" py="131.329834"/>
-					 <vertex px="-5.506000" py="130.645004"/>
-					 <vertex px="-5.391122" py="130.645004"/>
-					 <vertex px="-5.391000" py="131.347351"/>
-					 <vertex px="-1.430598" py="132.005829"/>
-					 <vertex px="0.313822" py="128.984406"/>
-					 <vertex px="-5.391122" py="128.984406"/>
-					 <vertex px="-5.391000" py="129.744995"/>
-					 <vertex px="-5.506000" py="129.744995"/>
-					 <vertex px="-5.506122" py="128.984406"/>
-					 <vertex px="-13.458630" py="128.984406"/>
-					 <vertex px="-13.458630" py="131.104401"/>
-					 <vertex px="-15.558630" py="131.104401"/>
-					 <vertex px="-15.558630" py="130.603119"/>
-					 <vertex px="-15.478630" py="130.603119"/>
-					 <vertex px="-15.478630" py="131.024399"/>
-					 <vertex px="-13.538630" py="131.024399"/>
-					 <vertex px="-13.538630" py="128.984406"/>
-					 <vertex px="-15.478630" py="128.984406"/>
-					 <vertex px="-15.478630" py="129.693405"/>
-					 <vertex px="-15.558630" py="129.693405"/>
-					 <vertex px="-15.558630" py="128.984406"/>
-					 <vertex px="-17.058630" py="128.984406"/>
-					 <vertex px="-17.058630" py="132.304489"/>
-				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-6.844342" py="134.660995"/>
-					 <vertex px="-6.772081" py="134.532379"/>
-				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-1.430598" py="133.762985"/>
-					 <vertex px="-6.844342" py="134.660995"/>
-				</polygon>
-				 <polygon caption="wall">
-					 <vertex px="-17.058630" py="133.474518"/>
-					 <vertex px="-17.058630" py="133.654510"/>
-					 <vertex px="-22.858768" py="133.654510"/>
-					 <vertex px="-22.838768" py="136.784592"/>
-					 <vertex px="-20.283707" py="136.784409"/>
-					 <vertex px="-20.283707" py="134.464539"/>
-					 <vertex px="-20.203705" py="134.464539"/>
-					 <vertex px="-20.203705" py="136.784409"/>
-					 <vertex px="0.313822" py="136.784409"/>
-					 <vertex px="-1.430598" py="133.762985"/>
-				</polygon>
-			</subroom>
-			<subroom id="1" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="-5.506122" py="131.329834"/>
 					 <vertex px="-6.844342" py="131.107803"/>
@@ -133,7 +84,8 @@
 					 <vertex px="-5.506122" py="128.984406"/>
 				</polygon>
 			</subroom>
-			<subroom id="2" closed="0" class="subroom">
+			<!--  -->
+			<subroom id="1" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="-5.391122" py="130.645004"/>
 					 <vertex px="-5.506000" py="130.645004"/>
@@ -148,7 +100,7 @@
 					 <vertex px="-5.391122" py="130.645004"/>
 				</polygon>
 			</subroom>
-			<subroom id="3" closed="0" class="subroom">
+			<subroom id="2" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="-15.478630" py="130.603119"/>
 					 <vertex px="-15.558630" py="130.603119"/>
@@ -164,19 +116,11 @@
 				</polygon>
 			</subroom>
 			<crossings>
-				<crossing id="1" subroom1_id="0" subroom2_id="1">
-					 <vertex px="-17.058630" py="132.304489"/>
-					 <vertex px="-17.058630" py="133.474518"/>
-				</crossing>
-				<crossing id="2" subroom1_id="0" subroom2_id="1">
-					 <vertex px="-6.772081" py="134.532379"/>
-					 <vertex px="-6.772081" py="131.236420"/>
-				</crossing>
-				<crossing id="3" subroom1_id="1" subroom2_id="3">
+				<crossing id="1" subroom1_id="0" subroom2_id="2">
 					 <vertex px="-15.558630" py="129.693405"/>
 					 <vertex px="-15.558630" py="130.603119"/>
 				</crossing>
-				<crossing id="4" subroom1_id="1" subroom2_id="2">
+				<crossing id="2" subroom1_id="0" subroom2_id="1">
 					 <vertex px="-5.506000" py="129.744995"/>
 					 <vertex px="-5.506000" py="130.645004"/>
 				</crossing>
@@ -196,19 +140,19 @@
 		</room>
 	</rooms>
 	<transitions>
-		<transition id="5" caption="No_Name" type="emergency" room1_id="0" subroom1_id="1" room2_id="-1" subroom2_id="-1">
+		<transition id="3" caption="No_Name" type="emergency" room1_id="0" subroom1_id="1" room2_id="-1" subroom2_id="-1">
 			 <vertex px="49.863052" py="136.654587"/>
 			 <vertex px="49.863052" py="135.384552"/>
 		</transition>
-		<transition id="6" caption="No_Name" type="emergency" room1_id="0" subroom1_id="0" room2_id="1" subroom2_id="1">
+		<transition id="4" caption="No_Name" type="emergency" room1_id="0" subroom1_id="0" room2_id="1" subroom2_id="0">
 			 <vertex px="-6.772081" py="131.236420"/>
 			 <vertex px="-6.772081" py="134.532379"/>
 		</transition>
-		<transition id="7" caption="No_Name" type="emergency" room1_id="1" subroom1_id="1" room2_id="2" subroom2_id="0">
+		<transition id="5" caption="No_Name" type="emergency" room1_id="1" subroom1_id="0" room2_id="2" subroom2_id="0">
 			 <vertex px="-17.058630" py="133.474518"/>
 			 <vertex px="-17.058630" py="132.304489"/>
 		</transition>
-		<transition id="8" caption="No_Name" type="emergency" room1_id="2" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+		<transition id="6" caption="No_Name" type="emergency" room1_id="2" subroom1_id="0" room2_id="-1" subroom2_id="-1">
 			 <vertex px="-22.858768" py="133.474518"/>
 			 <vertex px="-22.858768" py="132.304489"/>
 		</transition>

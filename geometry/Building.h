@@ -53,6 +53,7 @@ private:
     std::string _caption;
     std::string _projectFilename;
     std::string _projectRootDir;
+    std::string _geometryFilename;
     RoutingEngine* _routingEngine;
     LCGrid* _linkedCellGrid;
     std::vector<Room*> _rooms;
@@ -139,11 +140,16 @@ public:
 
 
     /**
-     * @return a crossing or a transition matching the given id.
+     * @return a crossing or a transition matching the given uid.
      * Return NULL if none is found
      */
-    Crossing* GetTransOrCrossByID(int id) const;
+    Crossing* GetTransOrCrossByUID(int uid) const;
 
+
+    /**
+     * @return the transition matching the uid
+     */
+    Transition* GetTransitionByUID(int uid) const;
 
     //TOD0: rename later to GetGoal
     Goal* GetFinalGoal(int id);
@@ -180,6 +186,7 @@ public:
 
 	const std::string& GetProjectRootDir() const;
 	const std::string& GetProjectFilename() const;
+	const std::string& GetGeometryFilename() const;
 	void SetProjectFilename(const std::string &filename) ;
 	void SetProjectRootDir(const std::string &filename);
     void LoadBuildingFromFile();

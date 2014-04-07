@@ -530,7 +530,7 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 
 	*flag=FREE_EXIT; // assume free exit
 
-	Crossing* crossing=_building->GetTransOrCrossByID(exitID);
+	Crossing* crossing=_building->GetTransOrCrossByUID(exitID);
 
 	double jamThreshold=0.5;
 	double radius=3.0;//start radius for looking at the reference in metres
@@ -687,7 +687,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
 
 	int ignore_ped1=ped->GetID();
 	int ignore_ped2=ref->GetID();
-	Crossing* ignore_crossing=_building->GetTransOrCrossByID(ref->GetExitIndex());
+	Crossing* ignore_crossing=_building->GetTransOrCrossByUID(ref->GetExitIndex());
 
 	int obstacles=GetObstaclesCountBetween(ped->GetPos(),ref->GetPos(),ignore_crossing,ignore_ped1,ignore_ped2);
 

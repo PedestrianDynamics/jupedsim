@@ -38,12 +38,23 @@
 
 #include "../pedestrian/Pedestrian.h"
 
-#define UPDATE_FREQUENCY 1 // in seconds
+#define UPDATE_FREQUENCY 10 // in seconds
 
 using namespace std;
 
 SafestPathRouter::SafestPathRouter() {
+
 	numberOfSubroom=0;
+	_lastUpdateTime=0;
+	a=1;
+	c=1;
+	b=0;
+
+	// Output to files
+	// _phiFile = new FileHandler("Phi_file.csv");
+	// _finalLineEvac = new FileHandler("Evac_File.csv");
+	// Output to files
+
 
 	//_finalLineEvac = new double [numberOfSection];
 
@@ -51,6 +62,9 @@ SafestPathRouter::SafestPathRouter() {
 
 SafestPathRouter::~SafestPathRouter() {
 
+	// Output to files
+	// delete _phiFile;
+	// delete _finalLineEvac;
 }
 
 void SafestPathRouter::Init(Building* building) {
@@ -68,31 +82,35 @@ void SafestPathRouter::Init(Building* building) {
 		}
 	}
 
-
-
-
-
-
-
 	//cout<<numberOfSubroom<<endl;
 	peopleAtSection = new double [numberOfSubroom];
 	squareOfSection = new double [numberOfSubroom];
 	dFinalLineOFP = new double [numberOfSubroom];
 	dFinalLineEvac = new double [numberOfSubroom];
+	dPeopleDensity = new double [numberOfSubroom];
 	dFinalLength = new double [numberOfSubroom];
 	rR = new double [numberOfSubroom];
+
+	for (int i = 0; i < numberOfSubroom; ++i) {
+		peopleAtSection[i]=0.0;
+		squareOfSection [i]=0.0;
+		dFinalLineOFP [i]=0.0;
+		dFinalLineEvac[i]=0.0;
+		dPeopleDensity [i]=0.0;
+		dFinalLength [i]=0.0;
+		rR [i]=0.0;
+	}
+
 	int n=300;
 	dPreOFP=new double* [n];
 	flo = new int [numberOfSubroom];
 
-	main_3();
+	MappingFloorIDtoIndex();
 	 // load the matrix from fds
 	ReadMatrixFromFDS();
 
 
 	// lenthOfSection = new double [numberOfSubroom];
-
-
 
 	//for (int i = 0; i < numberOfSubroom; ++i) {
 	//	 rR[i] = new double[numberOfSubroom];
@@ -100,15 +118,10 @@ void SafestPathRouter::Init(Building* building) {
 	//			rR[i]=0;
 
 
-
-
 	// Print out final distance matrix
 	//	for(int i = 0; i < numberOfSubroom; i++)
 	//		cout << rR[i] << " ";
 	//		cout << endl;
-
-
-
 
 
 	//	for(int i = 0; i < numberOfSubroom; i++){
@@ -120,9 +133,6 @@ void SafestPathRouter::Init(Building* building) {
 
 
 int SafestPathRouter::FindExit(Pedestrian* p) {
-
-	UpdateMatrices();
-	CalculatePhi();
 
 
 	if(ComputeSafestPath(p)==-1) {
@@ -168,12 +178,6 @@ void SafestPathRouter::UpdateMatrices(){
 	//		for(int j = 0; j < numberOfSubroom; j++)
 	//			cout << peopleAtSection[j]   << " ";
 	//		cout << endl;
-
-
-
-
-
-
 /*
 
 	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
@@ -200,8 +204,6 @@ void SafestPathRouter::UpdateMatrices(){
 			}
 		}
 */
-
-
 	/*
 		int index=0;
 
@@ -231,12 +233,6 @@ void SafestPathRouter::UpdateMatrices(){
 			}
 		}
 	*/
-
-
-
-
-
-
 	/*
 
 	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
@@ -249,13 +245,6 @@ void SafestPathRouter::UpdateMatrices(){
 		}
 	}
 	 */
-
-
-
-
-
-
-
 }
 
 
@@ -265,17 +254,33 @@ void SafestPathRouter::UpdateMatrices(){
 int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 {
 
-	// adjust the update frequency
-	double diff= fabs((int)p->GetGlobalTime() - p->GetGlobalTime());
-	if (diff>0.015) return -1;
-	if((((int)p->GetGlobalTime())%UPDATE_FREQUENCY)!=0) return -1;
-
+//	// adjust the update frequency
+//	double diff= fabs((int)p->GetGlobalTime() - p->GetGlobalTime());
+//	if (diff>0.015) return -1;
+//	if((((int)p->GetGlobalTime())%UPDATE_FREQUENCY)!=0) return -1;
+//
 	//int next = GetBestDefaultRandomExit(p);
 	//double distance = _accessPoints[next]->GetDistanceTo(0)+p->GetDistanceToNextTarget();
 
 
 	//for (int i=0; i<path.size(); i++)
 	//	preSub[i]=0;
+
+
+	//Print out final distance matrix
+	//for(int j = 0; j < numberOfSubroom; j++)
+	//	cout << flo[j] << " ";
+	//cout << endl;
+
+
+
+	//Print out final distance matrix
+	//	for(int j = 0; j < numberOfSubroom; j++)
+	//		cout << rR[j] << " ";
+	//	cout << endl;
+
+
+
 
 
 
@@ -337,6 +342,7 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 		//cout <<"best phi: "<< best_phi<<endl;
 		//cout <<"best goal: "<< best_goal<<endl;
 		//exit(0);
+		//cout << rR[10]<< endl;
 	}
 
 	p->SetFinalDestination(best_goal);
@@ -354,10 +360,6 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 //	{
 //		p->SetFinalDestination(1);
 //	}
-
-
-
-
 //for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
 //		Room* room = _building->GetRoom(i);
 //		for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
@@ -377,18 +379,13 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 //			}
 //		}
 //	}
-
-
-
 // Printing a matrix
-
 //cout <<"total distance: " <<distance<<endl;
 
 
 
 
 //CalculatePhi();
-main_2();
 //main_1(p);
 
 
@@ -537,12 +534,16 @@ void SafestPathRouter::CalculatePhi()
 
 	for(int j = 0; j < numberOfSubroom; j ++) //
 	{
+		dPeopleDensity[j]=peopleAtSection[j]/ squareOfSection[j];
 		dFinalLineEvac[j]= (peopleAtSection[j] * 0.125) / (squareOfSection[j] * 0.92);
 	}
 
+
+
+
 	// Printing a matrix
 	//	for(int j = 0; j < numberOfSubroom; j++)
-	//		cout << dFinalLineEvac[j]<< " ";
+	//		cout << dPeopleDensity[j]<< " ";
 	//		cout << endl;
 
 
@@ -575,9 +576,9 @@ void SafestPathRouter::CalculatePhi()
 
 	for (int j=0; j<numberOfSubroom; j++)
 	{
-		iNt1[j]= dFinalLineEvac[j] * 0.9;
-		iNt2[j]= dFinalLineOFP[j] * 1;
-		iNt3[j]= dFinalLength[j] * 0.1;
+		iNt1[j]= dFinalLineEvac[j] * a;
+		iNt2[j]= dFinalLineOFP[j] * b;
+		iNt3[j]= dFinalLength[j] * c;
 	}
 
 	// Printing a matrix
@@ -607,10 +608,6 @@ void SafestPathRouter::CalculatePhi()
 	}
 
 
-
-
-
-
 	// Printing a matrix
 	//for(int j = 0; j < numberOfSubroom; j++)
 	//	cout << rR[j]<< " ";
@@ -628,10 +625,41 @@ void SafestPathRouter::CalculatePhi()
 
 }
 
-void SafestPathRouter::main_3(){
+void SafestPathRouter::PrintInfoToFile() {
+
+	string content;
+
+	for (int j=0; j<numberOfSubroom; j++)
+	{
+		char tmp[20];
+		sprintf(tmp,"%lf",rR[j]);
+		//cout<<"tmp: "<<tmp<<endl;
+		content.append(",");
+		content.append(tmp);
+	}
+
+	//	cout<<content<<endl;
+	_phiFile->Write(content.c_str());
+
+
+	for (int j=0; j<numberOfSubroom; j++)
+	{
+		char tmp[20];
+		sprintf(tmp,"%lf",dPeopleDensity[j]);
+		//cout<<"tmp: "<<tmp<<endl;
+		content.append(",");
+		content.append(tmp);
+	}
+
+	//	cout<<content<<endl;
+	_finalLineEvac->Write(content.c_str());
+
+
+}
+
+void SafestPathRouter::MappingFloorIDtoIndex(){
 
 	//map <int, int> flo;
-
 
 	int index=0;
 	for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
@@ -648,16 +676,16 @@ void SafestPathRouter::main_3(){
 	}
 
 	//Print out final distance matrix
-			for(int j = 0; j < numberOfSubroom; j++)
-				cout << flo[j] << " ";
-			cout << endl;
+	for(int j = 0; j < numberOfSubroom; j++)
+		cout << flo[j] << " ";
+	cout << endl;
 
 
 
 
 }
 
-void SafestPathRouter::main_2(){
+void SafestPathRouter::UpdateRRmatrix(Pedestrian* p){
 
 	//double dFinalLength[1][11]={0.328,0.569,0.328,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
 	//double dFinalLength[11]={0.638,0.569,0.534,0.414,0.586,0.328,0.328,1.000,0.276,0.759,0.741};
@@ -669,12 +697,63 @@ void SafestPathRouter::main_2(){
 	//	for(int j = 0; j < numberOfSubroom; j++)
 	//		cout << rR[j] << " ";
 	//		cout << endl;
+
+
+	if(p->GetGlobalTime()>=5)
+	{
+		rR[10]=1000000;
+
+	}
+
 }
 
 
+void SafestPathRouter::ComputeAndUpdateDestinations(
+		std::vector<Pedestrian*>& pedestrians) {
 
-void SafestPathRouter::main_1(Pedestrian* p)
-{
+	int currentTime = pedestrians[0]->GetGlobalTime();
+
+	if(currentTime!=_lastUpdateTime)
+	if((currentTime%UPDATE_FREQUENCY)==0) {
+
+		UpdateMatrices();
+		CalculatePhi();
+		_lastUpdateTime=currentTime;
+		//PrintInfoToFile();
+		//cout <<" Updating at : " <<currentTime<<endl;
+	}
+
+	// Update
+
+	for (unsigned int p = 0; p < pedestrians.size(); ++p) {
+
+		if(ComputeSafestPath(pedestrians[p])==-1) {
+			//Log->Write(" sdfds");
+		}
+
+		//handle over to the global router engine
+		if (GlobalRouter::FindExit(pedestrians[p]) == -1) {
+			//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+			//Log->Write("\tINFO: \tHe has reached the target cell");
+			_building->DeletePedFromSim(pedestrians[p]);
+			//exit(EXIT_FAILURE);
+		}
+	}
+
+//	for (unsigned int p = 0; p < pedestrians.size(); ++p) {
+//
+//		if (pedestrians[p]->FindRoute() == -1) {
+//			//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+//			//Log->Write("\tINFO: \tHe has reached the target cell");
+//			_building->DeletePedFromSim(pedestrians[p]);
+//			//exit(EXIT_FAILURE);
+//		}
+//	}
+
+}
+
+
+/*
 	std::vector<SubRoom*> path;
 	GetPath(p, 1,  path);
 
@@ -715,7 +794,7 @@ void SafestPathRouter::main_1(Pedestrian* p)
 }
 
 
-/*
+
 	// Floyd-Warchal algorithm is going here
 	// Initialize
 	int vertices = numberOfSubroom;

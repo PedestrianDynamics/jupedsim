@@ -32,6 +32,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../routing/RoutingEngine.h"
+#include "../routing/SafestPathRouter.h"
 #endif
 
 //#undef _OPENMP
@@ -53,6 +54,7 @@ using namespace std;
 Building::Building() {
 	_caption = "no_caption";
 	_projectFilename = "";
+	_geometryFilename= "";
 	_rooms = vector<Room*>();
 	_routingEngine = NULL;
 	_linkedCellGrid = NULL;
@@ -291,7 +293,9 @@ void Building::SetProjectRootDir(const std::string &filename){
 const string& Building::GetProjectRootDir() const{
 	return _projectRootDir;
 }
-
+const std::string& Building::GetGeometryFilename() const {
+	return _geometryFilename;
+}
 
 void Building::LoadBuildingFromFile() {
 
@@ -305,13 +309,14 @@ void Building::LoadBuildingFromFile() {
 
 	Log->Write("INFO: \tParsing the geometry file");
 	TiXmlElement* xMainNode = doc.RootElement();
-	string geoFilename="";
+	string geoFilenameWithPath="";
 	if(xMainNode->FirstChild("geometry")){
-		geoFilename=_projectRootDir+xMainNode->FirstChild("geometry")->FirstChild()->Value();
-		Log->Write("INFO: \tgeometry <"+geoFilename+">");
+		_geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+		geoFilenameWithPath=_projectRootDir+_geometryFilename;
+		Log->Write("INFO: \tgeometry <"+_geometryFilename+">");
 	}
 
-	TiXmlDocument docGeo(geoFilename);
+	TiXmlDocument docGeo(geoFilenameWithPath);
 	if (!docGeo.LoadFile()){
 		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
 		Log->Write("ERROR: \t could not parse the geometry file");
@@ -626,10 +631,19 @@ void Building::AddTransition(Transition* line) {
 
 void Building::AddHline(Hline* line) {
 	if (_hLines.count(line->GetID()) != 0) {
-		Log->Write(
-				"ERROR: Duplicate index for hlines found [%d] in Routing::AddHline()",
-				line->GetID());
-		exit(EXIT_FAILURE);
+		// check if the lines are identical
+		Hline* ori= _hLines[line->GetID()];
+		if(ori->operator ==(*line)){
+			Log->Write("INFO: Skipping identical hlines with ID [%d]",line->GetID());
+			return;
+		}
+		else
+		{
+			Log->Write(
+					"ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
+					line->GetID(), _hLines.size());
+			exit(EXIT_FAILURE);
+		}
 	}
 	_hLines[line->GetID()] = line;
 }
@@ -725,7 +739,7 @@ Crossing* Building::GetTransOrCrossByName(string caption) const {
 	return NULL;
 }
 
-Crossing* Building::GetTransOrCrossByID(int id) const {
+Crossing* Building::GetTransOrCrossByUID(int id) const {
 	{
 		//eventually
 		map<int, Transition*>::const_iterator itr;
@@ -856,30 +870,40 @@ void Building::UpdateVerySlow(){
 
 	// find the new goals, the parallel way
 
-	unsigned int nSize = _allPedestians.size();
-	int nThreads = omp_get_max_threads();
-
-	// check if worth sharing the work
-	if (nSize < 12)
-		nThreads = 1;
-
-	int partSize = nSize / nThreads;
-
-#pragma omp parallel  default(shared) num_threads(nThreads)
+	//FIXME temporary fix for the safest path router
+	if(dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
 	{
-		const int threadID = omp_get_thread_num();
-		int start = threadID * partSize;
-		int end = (threadID + 1) * partSize - 1;
-		if ((threadID == nThreads - 1))
-			end = nSize - 1;
 
-		for (int p = start; p <= end; ++p) {
-			if (_allPedestians[p]->FindRoute() == -1) {
-				//a destination could not be found for that pedestrian
-				//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
-				//Log->Write("\tINFO: \tHe has reached the target cell");
-				DeletePedFromSim(_allPedestians[p]);
-				//exit(EXIT_FAILURE);
+		SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
+		spr->ComputeAndUpdateDestinations(_allPedestians);
+	}
+	else
+	{
+		unsigned int nSize = _allPedestians.size();
+		int nThreads = omp_get_max_threads();
+
+		// check if worth sharing the work
+		if (nSize < 12)
+			nThreads = 1;
+
+		int partSize = nSize / nThreads;
+
+		#pragma omp parallel  default(shared) num_threads(nThreads)
+		{
+			const int threadID = omp_get_thread_num();
+			int start = threadID * partSize;
+			int end = (threadID + 1) * partSize - 1;
+			if ((threadID == nThreads - 1))
+				end = nSize - 1;
+
+			for (int p = start; p <= end; ++p) {
+				if (_allPedestians[p]->FindRoute() == -1) {
+					//a destination could not be found for that pedestrian
+					//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+					//Log->Write("\tINFO: \tHe has reached the target cell");
+					DeletePedFromSim(_allPedestians[p]);
+					//exit(EXIT_FAILURE);
+				}
 			}
 		}
 	}
@@ -1188,39 +1212,39 @@ void Building::LoadRoutingInfo(const string &filename) {
 
 
 	if(xGoalsNode)
-	for(TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
-			e = e->NextSiblingElement("goal")) {
+		for(TiXmlElement* e = xGoalsNode->FirstChildElement("goal"); e;
+				e = e->NextSiblingElement("goal")) {
 
-		int id = xmltof(e->Attribute("id"), -1);
-		int isFinal= string(e->Attribute("final"))=="true"?true:false;
-		string caption = xmltoa(e->Attribute("caption"),"-1");
+			int id = xmltof(e->Attribute("id"), -1);
+			int isFinal= string(e->Attribute("final"))=="true"?true:false;
+			string caption = xmltoa(e->Attribute("caption"),"-1");
 
-		Goal* goal = new Goal();
-		goal->SetId(id);
-		goal->SetCaption(caption);
-		goal->SetIsFinalGoal(isFinal);
+			Goal* goal = new Goal();
+			goal->SetId(id);
+			goal->SetCaption(caption);
+			goal->SetIsFinalGoal(isFinal);
 
-		//looking for polygons (walls)
-		for(TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
-				xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
+			//looking for polygons (walls)
+			for(TiXmlElement* xPolyVertices = e->FirstChildElement("polygon"); xPolyVertices;
+					xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
-			for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-					"vertex");
-					xVertex && xVertex != xPolyVertices->LastChild("vertex");
-					xVertex = xVertex->NextSiblingElement("vertex")) {
+				for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
+						"vertex");
+						xVertex && xVertex != xPolyVertices->LastChild("vertex");
+						xVertex = xVertex->NextSiblingElement("vertex")) {
 
-				double x1 = xmltof(xVertex->Attribute("px"));
-				double y1 = xmltof(xVertex->Attribute("py"));
-				double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
-				double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-				goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+					double x1 = xmltof(xVertex->Attribute("px"));
+					double y1 = xmltof(xVertex->Attribute("py"));
+					double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
+					double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
+					goal->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+				}
 			}
-		}
 
-		goal->ConvertLineToPoly();
-		AddGoal(goal);
-		_routingEngine->AddFinalDestinationID(goal->GetId());
-	}
+			goal->ConvertLineToPoly();
+			AddGoal(goal);
+			_routingEngine->AddFinalDestinationID(goal->GetId());
+		}
 
 	//load routes
 	TiXmlNode*  xTripsNode = xRootNode->FirstChild("routing")->FirstChild("routes");
@@ -1271,33 +1295,33 @@ void Building::LoadTrafficInfo() {
 	//processing the rooms node
 	TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
 	if(xRoomsNode)
-	for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
-			xRoom = xRoom->NextSiblingElement("room")) {
+		for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
+				xRoom = xRoom->NextSiblingElement("room")) {
 
-		double id = xmltof(xRoom->Attribute("room_id"), -1);
-		string state = xmltoa(xRoom->Attribute("state"), "good");
-		RoomState status = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
-		GetRoom(id)->SetState(status);
-	}
+			double id = xmltof(xRoom->Attribute("room_id"), -1);
+			string state = xmltoa(xRoom->Attribute("state"), "good");
+			RoomState status = (state == "good") ? ROOM_CLEAN : ROOM_SMOKED;
+			GetRoom(id)->SetState(status);
+		}
 
 	//processing the doors node
 	TiXmlNode*  xDoorsNode = xRootNode->FirstChild("doors");
 	if(xDoorsNode)
-	for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
-			xDoor = xDoor->NextSiblingElement("door")) {
+		for(TiXmlElement* xDoor = xDoorsNode->FirstChildElement("door"); xDoor;
+				xDoor = xDoor->NextSiblingElement("door")) {
 
-		int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-		string state = xmltoa(xDoor->Attribute("state"), "open");
+			int id = xmltoi(xDoor->Attribute("trans_id"), -1);
+			string state = xmltoa(xDoor->Attribute("state"), "open");
 
-		//store transition in a map and call getTransition/getCrossin
-		if (state == "open") {
-			GetTransition(id)->Open();
-		} else if (state == "close") {
-			GetTransition(id)->Close();
-		} else {
-			Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+			//store transition in a map and call getTransition/getCrossin
+			if (state == "open") {
+				GetTransition(id)->Open();
+			} else if (state == "close") {
+				GetTransition(id)->Close();
+			} else {
+				Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+			}
 		}
-	}
 	Log->Write("INFO:\tDone with loading traffic info file");
 }
 
@@ -1329,6 +1353,11 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 		}
 		cout << "rescued agent: " << (*it)->GetID() << endl;
 		_allPedestians.erase(it);
+	}
+	//update the stats before deleting
+	Transition* trans =GetTransitionByUID(ped->GetExitIndex());
+	if(trans) {
+		trans->IncreaseDoorUsage(1);
 	}
 	delete ped;
 }
@@ -1422,6 +1451,7 @@ void Building::CleanUpTheScene() {
 }
 
 
+
 void Building::StringExplode(string str, string separator,
 		vector<string>* results) {
 	size_t found;
@@ -1462,28 +1492,15 @@ int Building::GetNumberOfPedestrians() const {
 	return sum;
 }
 
-// FIXME: you should get rid of this method
-//Crossing* Building::GetGoal(int index) {
-//	if (_transitions.count(index) == 1) {
-//		return _transitions[index];
-//	} else if (_crossings.count(index) == 1) {
-//		return _crossings[index];
-//	}else if (_hLines.count(index) == 1) {
-//		exit(EXIT_FAILURE);
-//		//return pHlines[index];
-//	}else {
-//		if (index == -1)
-//			return NULL;
-//		else {
-//			char tmp[CLENGTH];
-//			sprintf(tmp,
-//					"ERROR: Wrong 'index' [%d] > [%d] in Routing::GetGoal(), counts in map= [%d]",
-//					index, _crossings.size(),_crossings.count(index));
-//			Log->Write(tmp);
-//			exit(EXIT_FAILURE);
-//		}
-//	}
-//}
+Transition* Building::GetTransitionByUID(int uid) const {
+	//eventually
+	map<int, Transition*>::const_iterator itr;
+	for(itr = _transitions.begin(); itr != _transitions.end(); ++itr){
+		if (itr->second->GetUniqueID()== uid)
+			return itr->second;
+	}
+	return NULL;
+}
 
 
 #endif // _SIMULATOR

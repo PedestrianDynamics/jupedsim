@@ -156,6 +156,10 @@
 		<Hline id="29" room_id="0" subroom_id="1">
 			<vertex px="18.36" py="71.28"/>
 			<vertex px="23.22" py="77.22"/>
+		</Hline>
+		<Hline id="30" room_id="6" subroom_id="2">
+			<vertex px="56.70" py="64.80"/>
+			<vertex px="50.0" py="56.7"/>
 		</Hline>	
 			
 			

@@ -38,6 +38,8 @@ private:
     Room* _room2;
     bool _isOpen;
     std::string _type;
+    // number of agents that passed that exit
+    int _doorUsage;
 
 public:
 
@@ -66,6 +68,16 @@ public:
      */
     void SetRoom2(Room* ID);
 
+    /**
+     * Increment the number of persons that used that exit
+     * @param number
+     */
+    void IncreaseDoorUsage(int number);
+
+    /**
+     * @return the number of pedestrians that used that exit.
+     */
+    int GetDoorUsage() const;
 
     /**
      * Set/Get the type of the transition

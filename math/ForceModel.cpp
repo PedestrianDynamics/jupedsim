@@ -232,28 +232,28 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 		}
 	}
 
-//	//eventually crossings
-//	const vector<Crossing*>& crossings = subroom->GetAllCrossings();
-//	for (unsigned int i = 0; i < crossings.size(); i++) {
-//		Crossing* goal=crossings[i];
-//		int uid1= goal->GetUniqueID();
-//		int uid2=ped->GetExitLine()->GetUniqueID();
-//		// ignore my transition
-//		if (uid1 != uid2) {
-//			f = f + ForceRepWall(ped,*((Wall*)goal));
-//		}
-//	}
-//
-	// and finally the closed doors
+	//eventually crossings
+	const vector<Crossing*>& crossings = subroom->GetAllCrossings();
+	for (unsigned int i = 0; i < crossings.size(); i++) {
+		//Crossing* goal=crossings[i];
+		//int uid1= goal->GetUniqueID();
+		//int uid2=ped->GetExitIndex();
+		// ignore my transition
+		//if (uid1 != uid2) {
+		//	f = f + ForceRepWall(ped,*((Wall*)goal));
+		//}
+	}
+
+	// and finally the closed doors or doors that are not my destination
 	const vector<Transition*>& transitions = subroom->GetAllTransitions();
 	for (unsigned int i = 0; i < transitions.size(); i++) {
 		Transition* goal=transitions[i];
-		//int uid1= goal->GetUniqueID();
-		//int uid2=ped->GetExitLine()->GetUniqueID();
+		int uid1= goal->GetUniqueID();
+		int uid2=ped->GetExitIndex();
 		// ignore my transition consider closed doors
 		//closed doors are considered as wall
 
-		if( goal->IsOpen()==false ) {
+		if((uid1 != uid2) || (goal->IsOpen()==false )) {
 			f = f + ForceRepWall(ped,*((Wall*)goal));
 		}
 	}
