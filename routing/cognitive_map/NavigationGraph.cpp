@@ -48,14 +48,11 @@ void NavigationGraph::AddVertex(const SubRoom * const sub_room)
 
 void NavigationGraph::AddEdge(const Crossing * crossing)
 {
-    VerticesContainer::iterator src_it = vertices.find(crossing->GetSubRoom1());
-    VerticesContainer::iterator dest_it = vertices.find(crossing->GetSubRoom2());
 
-    if(src_it != vertices.end() && dest_it != vertices.end())
-    {
-        src_it->second->AddOutEdge(dest_it->second, crossing);
-        dest_it->second->AddOutEdge(src_it->second, crossing);
-    }
+    this->operator[](crossing->GetSubRoom1())->AddOutEdge(this->operator[](crossing->GetSubRoom2()), crossing);
+    this->operator[](crossing->GetSubRoom2())->AddOutEdge(this->operator[](crossing->GetSubRoom1()), crossing);
+//    dest_it->second->AddOutEdge(src_it->second, crossing);
+
 }
 
 void NavigationGraph::AddExit(const Transition * transition)

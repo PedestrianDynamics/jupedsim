@@ -65,13 +65,17 @@ double GraphEdge::GetWeight(const Point & position) const
     if(factors.empty()) {
         return GetApproximateDistance(position);
     }
-    double weight = GetApproximateDistance(position);
-
-    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
-        weight = weight * it->second.first;
-    }
-
+    double weight = GetApproximateDistance(position) * GetFactor();
     return weight;
+}
+
+double GraphEdge::GetFactor() const
+{
+    double factor = 1.0;
+    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
+        factor = factor * it->second.first;
+    }
+    return factor;
 }
 
 void GraphEdge::SetFactor(double factor, std::string name)

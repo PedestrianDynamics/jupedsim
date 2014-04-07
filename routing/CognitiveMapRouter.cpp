@@ -33,16 +33,30 @@ CognitiveMapRouter::~CognitiveMapRouter()
 
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
-    //Checks if the Pedestrian once got a destination and calls init functions if needed (if no dest before)
-    CheckAndInitPedestrian(p);
+    //check for former goal.
+    if((*cm_storage)[p]->HadNoDestination()) {
+        sensor_manager->execute(p, SensorManager::INIT);
+    }
 
     //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
-    if(p->GetNextDestination() == -1 || p->ChangedSubRoom()) {
+    if((*cm_storage)[p]->ChangedSubRoom()) {
         //execute periodical sensors
-        sensor_manager->execute(p, SensorManager::PERIODIC);
+        sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
 
+        int status = FindDestination(p);
+
+        (*cm_storage)[p]->UpdateSubRoom();
+
+        return status;
+
+    }
+    return 1;
+}
+
+int CognitiveMapRouter::FindDestination(Pedestrian * p)
+{
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
-        const NavLine * destination = NULL;
+        const GraphEdge * destination = NULL;
         destination = (*cm_storage)[p]->GetDestination();
         if(destination == NULL) {
             //no destination was found, now we could start the discovery!
@@ -66,22 +80,13 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
             return -1;
         }
 
-        p->SetExitLine(destination);
-        p->SetExitIndex(destination->GetUniqueID());
-    }
-    return 1;
+        (*cm_storage)[p]->AddDestination(destination);
+
+        p->SetExitLine(destination->GetCrossing());
+        // p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+        return 1;
 }
 
-void CognitiveMapRouter::CheckAndInitPedestrian(Pedestrian * p)
-{
-    //check for former goal.
-    if(p->GetLastDestination() == -1) {
-        //no former goal. so initial route has to be choosen
-        //this is needed for initialisation
-        p->ChangedSubRoom();
-        sensor_manager->execute(p, SensorManager::INIT);
-    }
-}
 
 
 void CognitiveMapRouter::Init(Building * b)

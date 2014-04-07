@@ -10,6 +10,7 @@
 #define COGNITIVEMAP_H_
 
 #include "NavigationGraph.h"
+#include <vector>
 
 class SubRoom;
 class Transition;
@@ -45,13 +46,19 @@ public:
 
     const NavigationGraph * GetNavigationGraph() const;
 
-    const NavLine * GetDestination();
-    const NavLine * GetLocalDestination();
+    const GraphEdge * GetDestination();
+    const GraphEdge * GetLocalDestination();
 
+    bool HadNoDestination() const;
+    void AddDestination(const GraphEdge *);
+    bool ChangedSubRoom() const;
+    void UpdateSubRoom();
 private:
     NavigationGraph * navigation_graph;
     const Building * const building;
     const Pedestrian * const pedestrian;
+    const SubRoom * current_subroom = NULL;
+    std::vector<const GraphEdge *> destinations;
 
 };
 

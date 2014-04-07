@@ -16,6 +16,7 @@ class Building;
 class Router;
 class CognitiveMapStorage;
 class SensorManager;
+class NavLine;
 
 
 /**
@@ -33,7 +34,9 @@ public:
     virtual void Init(Building* b);
 
 protected:
-    void CheckAndInitPedestrian(Pedestrian *);
+
+    int FindDestination(Pedestrian * );
+
 private:
 
     Building * building;

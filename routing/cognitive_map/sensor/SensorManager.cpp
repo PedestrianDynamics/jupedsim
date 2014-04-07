@@ -9,6 +9,7 @@
 #include "AbstractSensor.h"
 #include "../../../geometry/Building.h"
 #include "RoomToFloorSensor.h"
+#include "DiscoverDoorsSensor.h"
 #include "../CognitiveMapStorage.h"
 #include "../navigation_graph/GraphVertex.h"
 #include "../NavigationGraph.h"
@@ -43,7 +44,8 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveM
     SensorManager * sensor_manager = new SensorManager(b, cm_storage);
 
     //Init and register Sensors
-    sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY );
+    sensor_manager->Register(new DiscoverDoorsSensor(b),  NO_WAY );
+    sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
 
     return sensor_manager;
 }

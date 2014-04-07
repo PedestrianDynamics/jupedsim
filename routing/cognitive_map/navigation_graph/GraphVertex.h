@@ -54,8 +54,9 @@ typedef std::set<GraphEdge *> EdgesContainer;
     void AddExit(const Transition * transition);
     bool HasExit() const;
 
-    std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
-    std::pair<const GraphEdge *, double> GetCheapestDestinationByEdges(const Point & position) const;
+
+    const GraphEdge * GetCheapestDestinationByEdges(const Point & position) const;
+    const GraphEdge * GetLocalCheapestDestination(const Point & position) const;
 
 
 private:

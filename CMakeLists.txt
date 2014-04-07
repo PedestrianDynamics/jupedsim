@@ -170,6 +170,7 @@ set ( 	source_files
         routing/cognitive_map/navigation_graph/GraphEdge.cpp
         routing/cognitive_map/navigation_graph/GraphVertex.cpp
         routing/cognitive_map/sensor/RoomToFloorSensor.cpp
+        routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
         routing/cognitive_map/sensor/SensorManager.cpp
         routing/cognitive_map/sensor/AbstractSensor.cpp
 
@@ -209,6 +210,7 @@ set (   header_files
         routing/cognitive_map/navigation_graph/GraphVertex.h
         routing/cognitive_map/sensor/AbstractSensor.h
         routing/cognitive_map/sensor/RoomToFloorSensor.h
+        routing/cognitive_map/sensor/DiscoverDoorsSensor.h
         routing/cognitive_map/sensor/SensorManager.h
 
 
@@ -257,12 +259,12 @@ set (   header_files
 )
 
 #message(STATUS "sources:" ${source_files})
-# this lib is only necessary for the test files. 
+# this lib is only necessary for the test files.
 add_library ( core SHARED ${source_files} ${header_files})
 #add_library(core OBJECT ${source_files} ${header_files})
 #Target
 add_executable(
-  jpscore  main.cpp  
+  jpscore  main.cpp
 )
 
 target_link_libraries(jpscore  core)
@@ -381,7 +383,7 @@ add_executable(testGetArea Utest/testGetArea.cpp)
 target_link_libraries (testGetArea   core)
 
 add_executable(testIsOn Utest/testIsOn.cpp)
-target_link_libraries (testIsOn  core) 
+target_link_libraries (testIsOn  core)
 
 add_executable(testIsInside Utest/testIsInside.cpp)
 target_link_libraries (testIsInside core)

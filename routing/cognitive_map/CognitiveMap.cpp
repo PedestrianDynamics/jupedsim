@@ -58,20 +58,34 @@ const NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
     return navigation_graph;
 }
-const NavLine * CognitiveMap::GetDestination()
+const GraphEdge * CognitiveMap::GetDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-
-    std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
-
-    if(cheapest_destination.first != NULL) {
-        return cheapest_destination.first->GetCrossing();
-    } else {
-        return NULL;
-    }
+    return (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 }
 
-const NavLine * CognitiveMap::GetLocalDestination()
+const GraphEdge * CognitiveMap::GetLocalDestination()
 {
-    return NULL;
+    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    return (*navigation_graph)[sub_room]->GetLocalCheapestDestination(pedestrian->GetPos());
+}
+
+bool CognitiveMap::HadNoDestination() const
+{
+    return destinations.empty();
+}
+
+void CognitiveMap::AddDestination(const GraphEdge* destination)
+{
+    destinations.push_back(destination);
+}
+
+bool CognitiveMap::ChangedSubRoom() const
+{
+    return current_subroom != building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+}
+
+void CognitiveMap::UpdateSubRoom()
+{
+    current_subroom = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 }

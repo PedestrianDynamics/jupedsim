@@ -50,7 +50,7 @@ public:
 
     double GetRoomToFloorFactor() const;
 
-
+    double GetFactor() const;
     double GetWeight(const Point &) const;
 
 
