@@ -256,6 +256,8 @@ set (   header_files
 	poly2tri/sweep/advancing_front.h
 	poly2tri/sweep/sweep.h
 
+	events/EventManager.cpp
+
 )
 
 #message(STATUS "sources:" ${source_files})

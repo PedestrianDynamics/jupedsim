@@ -46,6 +46,8 @@
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
 #include "routing/CognitiveMapRouter.h"
+#include "events/EventManager.h" //neuer Header fuer die Events
+
 
 extern OutputHandler* Log;
 
@@ -73,6 +75,8 @@ private:
     ODESolver* _solver;
     /// writing the trajectories to file
     IODispatcher* _iod;
+    ///new: EventManager
+    EventManager* _em;
 
 
 public:

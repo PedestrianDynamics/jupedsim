@@ -38,12 +38,12 @@
 
 #include "../pedestrian/Pedestrian.h"
 
-#define UPDATE_FREQUENCY 10 // in seconds
+#define UPDATE_FREQUENCY 1 // in seconds
 
 using namespace std;
 
-SafestPathRouter::SafestPathRouter() {
-
+SafestPathRouter::SafestPathRouter()
+{
 	numberOfSubroom=0;
 	_lastUpdateTime=0;
 	a=1;
@@ -51,19 +51,17 @@ SafestPathRouter::SafestPathRouter() {
 	b=0;
 
 	// Output to files
-	// _phiFile = new FileHandler("Phi_file.csv");
+	 _phiFile = new FileHandler("Phi_file.csv");
 	// _finalLineEvac = new FileHandler("Evac_File.csv");
 	// Output to files
 
-
 	//_finalLineEvac = new double [numberOfSection];
-
 }
 
 SafestPathRouter::~SafestPathRouter() {
 
 	// Output to files
-	// delete _phiFile;
+	 delete _phiFile;
 	// delete _finalLineEvac;
 }
 
@@ -278,11 +276,6 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 	//	for(int j = 0; j < numberOfSubroom; j++)
 	//		cout << rR[j] << " ";
 	//	cout << endl;
-
-
-
-
-
 
 	Room* room =  _building->GetRoom(p->GetRoomID());
 	SubRoom* sub = room->GetSubRoom(p->GetSubRoomID());
@@ -641,7 +634,7 @@ void SafestPathRouter::PrintInfoToFile() {
 	//	cout<<content<<endl;
 	_phiFile->Write(content.c_str());
 
-
+	/*
 	for (int j=0; j<numberOfSubroom; j++)
 	{
 		char tmp[20];
@@ -653,8 +646,7 @@ void SafestPathRouter::PrintInfoToFile() {
 
 	//	cout<<content<<endl;
 	_finalLineEvac->Write(content.c_str());
-
-
+	*/
 }
 
 void SafestPathRouter::MappingFloorIDtoIndex(){
@@ -719,7 +711,7 @@ void SafestPathRouter::ComputeAndUpdateDestinations(
 		UpdateMatrices();
 		CalculatePhi();
 		_lastUpdateTime=currentTime;
-		//PrintInfoToFile();
+		PrintInfoToFile();
 		//cout <<" Updating at : " <<currentTime<<endl;
 	}
 
