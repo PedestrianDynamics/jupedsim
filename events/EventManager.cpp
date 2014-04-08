@@ -144,8 +144,7 @@ void EventManager::Update_Events(double time, double d){
             _allPedestrians[p]->ResetRerouting();
         }
     }
-    int i;
-    for(i=0;i<_event_times.size();i++){
+    for(unsigned i=0;i<_event_times.size();i++){
         if(fabs(_event_times[i]-time)<0.0000001){
             //Event findet statt
             Log->Write("INFO:\tEvent: after %f sec: ",time);
