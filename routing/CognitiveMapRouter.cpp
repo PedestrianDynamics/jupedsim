@@ -83,7 +83,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         (*cm_storage)[p]->AddDestination(destination);
 
         p->SetExitLine(destination->GetCrossing());
-        // p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+        p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
         return 1;
 }
 
