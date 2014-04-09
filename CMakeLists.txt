@@ -33,16 +33,6 @@ if(NOT DEFINED PROCESSOR_COUNT)
     list(LENGTH procs PROCESSOR_COUNT)
   endif(EXISTS "${cpuinfo_file}")
 
-  # Mac:
-  # if(APPLE)
-  #   find_program(cmd_sys_pro "system_profiler")
-  #   if(cmd_sys_pro)
-  #     execute_process(COMMAND ${cmd_sys_pro} OUTPUT_VARIABLE info)
-  #     string(REGEX REPLACE "^.*Total Number Of Cores: ([0-9]+).*$" "\\1"
-  #       PROCESSOR_COUNT "${info}")
-  #   endif(cmd_sys_pro)
-  # endif(APPLE)
-
   # Windows:
   if(WIN32)
     set(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
@@ -106,7 +96,7 @@ endif(CGAL_FOUND)
 
 file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
 set(	source_files
-        main.cpp # tounderstand
+  main.cpp
 	Simulation.cpp
 	general/ArgumentParser.cpp
 
@@ -231,6 +221,7 @@ set(	header_files
 
 )
 
+#add_library ( core SHARED ${source_files} )
 add_library ( core SHARED ${source_files} )
 #Target
 add_executable(
@@ -311,15 +302,15 @@ enable_testing() #adds another build target, which is test for Makefile generato
 include(CTest) #adding Dart support
 
 #test if code compiles and runs default setting. Takes about 30 seconds
-add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
-  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-  --build-generator ${CMAKE_GENERATOR}
-  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config
-  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  --build-project JPScore
-  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-  )
+# add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
+#   --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+#   --build-generator ${CMAKE_GENERATOR}
+#   --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
+#   --build-two-config
+#   --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#   --build-project JPScore
+#   --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+#   )
 
 foreach (test_src ${test_files})
   GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
@@ -329,11 +320,11 @@ foreach (test_src ${test_files})
 endforeach(test_src ${test_files})
 
 
-find_package(PythonInterp)
-if(PYTHONINTERP_FOUND)
-  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
-  message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
-  set (test_parameters "${CMAKE_SOURCE_DIR}")
-  add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
-  #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
-endif(PYTHONINTERP_FOUND)
+# find_package(PythonInterp)
+# if(PYTHONINTERP_FOUND)
+#   message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+#   message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
+#   set (test_parameters "${CMAKE_SOURCE_DIR}")
+#   add_test(NAME flow  COMMAND "${CMAKE_SOURCE_DIR}/Utest/testflow.py" "${test_parameters}")
+#   #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
+# endif(PYTHONINTERP_FOUND)
