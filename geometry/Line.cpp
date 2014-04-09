@@ -533,24 +533,24 @@ double Line::GetAngle(const Line & l) const{
     double ay = _point1.GetY();
     double bx = _point2.GetX();
     double by = _point2.GetY();
-    
+    //printf("ax=%f, ay=%f --- bx=%f, by=%f\n", ax, ay, bx, by);
     double diff_x1 = bx - ax;
     double diff_y1 = by - ay;
-        
+    // printf("diff_x1=%f, diff_y1=%f\n", diff_x1, diff_y1);
     double cx =l.GetPoint1().GetX();
     double cy =l.GetPoint1().GetY();
     double dx =l.GetPoint2().GetX();
     double dy =l.GetPoint2().GetY();
-    
+    //printf("cx=%f, cy=%f --- dx=%f, dy=%f\n", cx, cy, dx, dy);
 
     double diff_x2 = dx - cx;
     double diff_y2 = dy - cy;
-        
+    //  printf("diff_x2=%f, diff_y2=%f\n", diff_x2, diff_y2);
 
     double atanA = atan2( diff_y1, diff_x1 );
-    double atanB = atan2(diff_y2, diff_x2);
+    double atanB = atan2( diff_y2, diff_x2);
 
-    //printf("atanA %f atanB %f\n", atanA*180/pi, atanB*180/pi);
+//    printf("atanA %f atanB %f\n", atanA*180/pi, atanB*180/pi);
     double angle = atanA - atanB;
 
 

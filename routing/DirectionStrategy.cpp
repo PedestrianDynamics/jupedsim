@@ -98,7 +98,8 @@ using namespace std;
     Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
 
     Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if 
-    //it intersect a wall/obstacle.
+    //printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
+//it intersect a wall/obstacle.
 // check for intersection with walls
 //todo: make a FUNCTION of this
     double dist;
@@ -112,7 +113,8 @@ using namespace std;
     const vector<Wall>& walls = subroom->GetAllWalls();
     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
         dist = tmpDirection.GetIntersectionDistance(walls[i]);
-        //printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
+        // printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
+        // printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
         if (dist < minDist)
         {
             inear = i;
@@ -127,7 +129,7 @@ using namespace std;
         const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
         for (unsigned int i = 0; i < owalls.size(); i++) {
             dist = tmpDirection.GetIntersectionDistance(owalls[i]);
-            //printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
+            printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
             if (dist < minDist)
             {
                 inear = i;
@@ -141,6 +143,7 @@ using namespace std;
 
     double angle = 0;
     if (inear >= 0)
+    { 
         if(iObs >= 0)
         {
             const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
@@ -149,21 +152,24 @@ using namespace std;
         }
         else
             angle =  tmpDirection.GetAngle(walls[inear]);
+    }
 ////////////////////////////////////////////////////////////
 //    printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);    
     Point  G;
     if (fabs(angle) > J_EPS)
         //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
-        G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle)) ;
+        G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle))+ped->GetPos() ;
     else
         //G  =  tmpDirection.GetPoint2();
         G  =  NextPointOnLine;
-    //  printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
-    //printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
+    // printf("PED=%d\n",  ped->GetID());
+    // printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
+    // printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
     // printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
 
-    //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY());
-    // if(ped->GetPos().GetX()<8)
-    //     getc(stdin);
+    fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
+
+    //if(angle)
+        //     getc(stdin);
     return G;
 }
