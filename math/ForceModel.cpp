@@ -266,7 +266,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const {
 	Point F = Point(0.0, 0.0);
 	Point pt = w.ShortestPoint(ped->GetPos());
 	double wlen = w.LengthSquare();
-	if (wlen < 0.01) { // ignore wa;; smaller than 10 cm
+	if (wlen < 0.01) { // ignore walls smaller than 10 cm
 		return F;
 	}
 	// Kraft soll nur orthgonal wirken
@@ -540,7 +540,9 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
                         Point fd = ForceDriv(ped, room);
                         // Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
                         Point acc = (fd + F_rep + repwall) / ped->GetMass();
-                        //printf("MC fd=[%.2f, %.2f] F_rep=[%.2f, %.2f], repWall=[%.2f, %.2f]\n", fd.GetX(), fd.GetY(),  F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY() );
+                        if (ped->GetID()==13){
+                            printf("MC fd=[%.2f, %.2f] F_rep=[%.2f, %.2f], repWall=[%.2f, %.2f]\n", fd.GetX(), fd.GetY(),  F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY() );
+                        }
 			result_acc.push_back(acc);
 		}
 

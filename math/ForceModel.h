@@ -69,7 +69,7 @@ public:
 
 class GCFMModel : public ForceModel {
 private:
-    /// define the strategy for crossing a door (used for calculating the driving foce)
+    /// define the strategy for crossing a door (used for calculating the driving force)
 	DirectionStrategy* _direction;
     // Modellparameter
     double _nuPed;
@@ -116,6 +116,37 @@ public:
     virtual std::string writeParameter() const;
 };
 
+/************************************************************
+ GOMPERTZ ForceModel
+ ************************************************************/
+
+class GompertzModel : public ForceModel {
+private:
+    /// define the strategy for crossing a door (used for calculating the driving force)
+    DirectionStrategy* _direction;
+    // Modellparameter
+    double _nuPed;
+    double _nuWall;
+
+    // Private Funktionen
+    Point ForceDriv(Pedestrian* ped, Room* room) const;
+    Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
+    Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
+    Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
+
+public:
+    GompertzModel(DirectionStrategy* dir, double nuped, double nuwall);
+    virtual ~GompertzModel(void);
+
+    // Getter
+    DirectionStrategy* GetDirection() const;
+    double GetNuPed() const;
+    double GetNuWall() const;
+
+    // virtuelle Funktionen
+    virtual void CalculateForceLC(double t, double tp, Building* building) const;
+    virtual std::string writeParameter() const;
+};
 
 #endif	/* _FORCEMODEL_H */
 
