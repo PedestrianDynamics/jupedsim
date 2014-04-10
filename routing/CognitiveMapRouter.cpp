@@ -81,6 +81,8 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         }
 
         (*cm_storage)[p]->AddDestination(destination);
+        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
+
 
         p->SetExitLine(destination->GetCrossing());
         p->SetExitIndex(destination->GetCrossing()->GetUniqueID());

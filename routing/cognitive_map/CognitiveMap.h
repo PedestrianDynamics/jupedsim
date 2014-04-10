@@ -44,15 +44,18 @@ public:
 
     NavigationGraph::VerticesContainer * GetAllVertices();
 
-    const NavigationGraph * GetNavigationGraph() const;
+    NavigationGraph * GetNavigationGraph() const;
 
     const GraphEdge * GetDestination();
     const GraphEdge * GetLocalDestination();
 
     bool HadNoDestination() const;
     void AddDestination(const GraphEdge *);
+    std::vector<const GraphEdge *> & GetDestinations();
+
     bool ChangedSubRoom() const;
     void UpdateSubRoom();
+
 private:
     NavigationGraph * navigation_graph;
     const Building * const building;

@@ -94,7 +94,7 @@ void NavigationGraph::WriteToDotFile(const std :: string filepath) const
         {
             if(!(*it2)->GetCrossing()->IsExit()) {
                 dot_file << it->second->GetCaption() + " -> " + (*it2)->GetDest()->GetCaption() + "\n [";
-                dot_file << "label = "+ std::to_string((*it2)->GetWeight(it->second->GetSubRoom()->GetCentroid())) + "] \n";
+                dot_file << "label = "+ std::to_string((*it2)->GetFactor()) + "] \n";
             }
         }
 

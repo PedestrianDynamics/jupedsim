@@ -26,6 +26,7 @@ public:
     static const EventType PERIODIC = 2;
     static const EventType NO_WAY = 4;
     static const EventType CHANGED_ROOM = 8;
+    static const EventType NEW_DESTINATION = 16;
 
 
     typedef std::vector<std::pair<AbstractSensor *, EventType>> SensorContainer;

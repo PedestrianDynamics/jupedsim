@@ -18,7 +18,7 @@
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Transition.h"
-
+#include <algorithm>
 
 using namespace std;
 
@@ -54,6 +54,17 @@ void GraphVertex::AddExit(const Transition * transition)
     out_edges.insert(new GraphEdge(this, NULL, transition));
     return;
 }
+
+GraphEdge * GraphVertex::operator[](const SubRoom * const sub_room)
+{
+    for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        if((*it)->GetDest() != NULL && (*it)->GetDest()->GetSubRoom() == sub_room) {
+            return (*it);
+        }
+    }
+    return NULL;
+}
+
 
 int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 {
@@ -184,14 +195,28 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
 
 const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & position) const
 {
-    const GraphEdge * act_edge = NULL;
-    double act_factor = INFINITY;
-
+    std::priority_queue<
+        std::pair<double, const GraphEdge *>,
+        vector<std::pair<double, const GraphEdge *>>,
+        std::greater<std::pair<double, const GraphEdge *>>
+        > edges;
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
-        if(act_factor > (*it)->GetFactor()) {
-            act_factor = (*it)->GetFactor();
-            act_edge = (*it);
-        }
+        edges.push(std::make_pair((*it)->GetFactor(), (*it)));
     }
-    return act_edge;
+
+    if(edges.size() == 1) return edges.top().second;
+    if(edges.size() > 1) {
+        const GraphEdge * act_edge = NULL;
+        //take the best 3 edges and choose the nearest
+        for(int i = 1; i<= std::min(3, (int) edges.size()); i++) {
+            const GraphEdge * edge = edges.top().second;
+            edges.pop();
+            if(act_edge == NULL || act_edge->GetWeight(position) > edge->GetWeight(position)) {
+                act_edge = edge;
+            }
+        }
+        return act_edge;
+    }
+
+
 }

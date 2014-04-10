@@ -54,7 +54,7 @@ NavigationGraph::VerticesContainer * CognitiveMap::GetAllVertices()
 }
 
 
-const NavigationGraph * CognitiveMap::GetNavigationGraph() const
+NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
     return navigation_graph;
 }
@@ -67,6 +67,8 @@ const GraphEdge * CognitiveMap::GetDestination()
 const GraphEdge * CognitiveMap::GetLocalDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+//    if(pedestrian->GetID() == 4) navigation_graph->WriteToDotFile("/home/david/graph.dot");
+
     return (*navigation_graph)[sub_room]->GetLocalCheapestDestination(pedestrian->GetPos());
 }
 
@@ -78,6 +80,11 @@ bool CognitiveMap::HadNoDestination() const
 void CognitiveMap::AddDestination(const GraphEdge* destination)
 {
     destinations.push_back(destination);
+}
+
+std::vector<const GraphEdge *>& CognitiveMap::GetDestinations()
+{
+    return destinations;
 }
 
 bool CognitiveMap::ChangedSubRoom() const
