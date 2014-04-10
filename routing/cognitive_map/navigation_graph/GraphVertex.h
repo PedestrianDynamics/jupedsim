@@ -42,7 +42,7 @@ typedef std::set<GraphEdge *> EdgesContainer;
     const std::string GetCaption() const;
     const SubRoom * GetSubRoom() const;
 
-    GraphEdge * operator[](const SubRoom * const sub_room);
+    GraphEdge * operator[](const Crossing *);
     // add and remove edge pointer from vertex
 
     void AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing);

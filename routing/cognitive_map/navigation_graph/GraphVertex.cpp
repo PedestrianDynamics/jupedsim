@@ -44,21 +44,31 @@ GraphVertex::~GraphVertex()
 
 void GraphVertex::AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing)
 {
+    //check if an edge through the same crossing already exists.
+    for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        //if we find an edge with the same crossing we could jump out here!
+        if((*it)->GetCrossing() == crossing) return;
+    }
+    //no edge found, so add it.
     out_edges.insert(new GraphEdge(this, dest, crossing));
-    return;
 }
 
 
 void GraphVertex::AddExit(const Transition * transition)
 {
+    //check if an edge through the same crossing already exists.
+    for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        //if we find an edge with the same crossing we could jump out here!
+        if((*it)->GetCrossing() == transition) return;
+    }
     out_edges.insert(new GraphEdge(this, NULL, transition));
     return;
 }
 
-GraphEdge * GraphVertex::operator[](const SubRoom * const sub_room)
+GraphEdge * GraphVertex::operator[](const Crossing * crossing)
 {
     for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
-        if((*it)->GetDest() != NULL && (*it)->GetDest()->GetSubRoom() == sub_room) {
+        if((*it)->GetDest() != NULL && (*it)->GetCrossing() == crossing) {
             return (*it);
         }
     }
@@ -211,7 +221,8 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
         for(int i = 1; i<= std::min(3, (int) edges.size()); i++) {
             const GraphEdge * edge = edges.top().second;
             edges.pop();
-            if(act_edge == NULL || act_edge->GetWeight(position) > edge->GetWeight(position)) {
+            // the weight should be better but the factor should not differ too much
+            if(act_edge == NULL || (act_edge->GetWeight(position) > edge->GetWeight(position) && 2 * act_edge->GetFactor() > edge->GetFactor())) {
                 act_edge = edge;
             }
         }
