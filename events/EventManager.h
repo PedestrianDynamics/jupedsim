@@ -7,7 +7,9 @@
 #include <math.h>
 #include <stdio.h>
 #include "../geometry/Building.h"
+#include "../geometry/SubRoom.h"
 #include "../geometry/Transition.h"
+#include "../geometry/Point.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 #include "../IO/IODispatcher.h"

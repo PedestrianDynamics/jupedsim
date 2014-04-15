@@ -133,20 +133,53 @@ void EventManager::Update_Events(double time, double d){
     //3. .txt Datei auf neue Zeilen pruefen. Wenn es neue gibt diese Events verarbeiten ( Tuere schliessen/oeffnen,
     //   neues Routing) ansonsten fertig
 
-    //zuerst muss die Reroutingzeit der Peds aktualisiert werden:
     _deltaT=d;
     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
     int nSize = _allPedestrians.size();
+
+    //zuerst muss geprueft werden, ob die Peds, die die neuen Infos schon haben sie an andere Peds weiter-
+    //leiten muessen (wenn diese sich in der naechsten Umgebung befinden)
     for(int p=0;p<nSize;p++){
-        _allPedestrians[p]->UpdateReroutingTime();
-        if(_allPedestrians[p]->IsReadyForRerouting()){
-            _allPedestrians[p]->ClearMentalMap();
-            _allPedestrians[p]->ResetRerouting();
+        if(_allPedestrians[p]->GetNewOrientationFlag()){
+            int rID = _allPedestrians[p]->GetRoomID();
+            int srID = _allPedestrians[p]->GetSubRoomID();
+            Room* room = _building->GetRoom(rID);
+            SubRoom* sub = room->GetSubRoom(srID);//Nur Infos an Leute im gleichen Raum weitergeben
+            for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
+                Pedestrian* ped = sub->GetPedestrian(k);
+                if(!ped->GetNewOrientationFlag()){
+                    //wenn der Pedestrian die neuen Infos noch nicht hat, pruefen ob er nah genug ist
+                    Point pos1 = _allPedestrians[p]->GetPos();
+                    Point pos2 = ped->GetPos();
+                    double distX = pos1.GetX()-pos2.GetX();
+                    double distY = pos1.GetY()-pos2.GetY();
+                    double dist = sqrt(distX*distX+distY*distY);
+                    if(dist<=J_EPS_INFO_DIST){// wenn er nah genug ist, rerouten
+                        ped->ClearMentalMap();
+                        ped->ResetRerouting();
+                        ped->SetNewOrientationFlag(true);
+                    }
+                }
+            }
         }
     }
+
+    //dann muss die Reroutingzeit der Peds, die die neuen Infos noch nciht haben, aktualisiert werden:
+    for(int p=0;p<nSize;p++){
+        if(!_allPedestrians[p]->GetNewOrientationFlag()){
+            _allPedestrians[p]->UpdateReroutingTime();
+            if(_allPedestrians[p]->IsReadyForRerouting()){
+                _allPedestrians[p]->ClearMentalMap();
+                _allPedestrians[p]->ResetRerouting();
+                _allPedestrians[p]->SetNewOrientationFlag(true);
+            }
+        }
+    }
+
+    //Events finden
     int i;
     for(i=0;i<_event_times.size();i++){
-        if(fabs(_event_times[i]-time)<0.0000001){
+        if(fabs(_event_times[i]-time)<J_EPS_EVENT){
             //Event findet statt
             Log->Write("INFO:\tEvent: after %f sec: ",time);
             if(_event_states[i].compare("close")==0){
@@ -198,24 +231,36 @@ void EventManager::changeRouting(int id, string state){
     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
     unsigned int nSize = _allPedestrians.size();
 
-    //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter merken,
-    //dass sich Tueren aendern.
+    //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter(abh. von der
+    //Entfernung zur Tuer) merken, dass sich Tueren aendern. Oder sie bekommen die Info von anderen Pedestrians
     Transition *t = _building->GetTransition(id);
     //Abstand der aktuellen Position des Pedestrians zur entsprechenden Tuer: Tuer als Linie sehen und mit
-    //DistTo(ped.GetPos()) den Abstand messen
+    //DistTo(ped.GetPos()) den Abstand messen. Reroutezeit dann aus Entfernung und Geschwindigkeit berechnen.
     Line* l = new Line(t->GetPoint1(),t->GetPoint2());
     for (int p = 0; p < nSize; ++p) {
         //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
+        _allPedestrians[p]->SetNewOrientationFlag(false);
         double dist = l->DistTo(_allPedestrians[p]->GetPos());
-        if(dist>0.0&&dist<0.5){
-           _allPedestrians[p]->ClearMentalMap();
-        }
-        else if(dist>=0.5&&dist<3.0){
-           _allPedestrians[p]->RerouteIn(1.0);
+        Point v = _allPedestrians[p]->GetV();
+        double norm =sqrt((v.GetX()*v.GetX())+(v.GetY()*v.GetY()));
+        double time = dist/norm;
+        if(time<1.0){
+            _allPedestrians[p]->ClearMentalMap();
+            _allPedestrians[p]->ResetRerouting();
+            _allPedestrians[p]->SetNewOrientationFlag(true);
         }
         else{
-           _allPedestrians[p]->RerouteIn(2.0);
+            _allPedestrians[p]->RerouteIn(time);
         }
+        //if(dist>0.0&&dist<0.5){
+          // _allPedestrians[p]->ClearMentalMap();
+        //}
+        //else if(dist>=0.5&&dist<3.0){
+          // _allPedestrians[p]->RerouteIn(1.0);
+        //}
+        //else{
+          // _allPedestrians[p]->RerouteIn(2.0);
+        //}
         //}
         //else{
           //  _allPedestrians[p]->ClearMentalMap();
