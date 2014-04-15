@@ -177,8 +177,7 @@ void EventManager::Update_Events(double time, double d){
     }
 
     //Events finden
-    int i;
-    for(i=0;i<_event_times.size();i++){
+    for(unsigned int i=0;i<_event_times.size();i++){
         if(fabs(_event_times[i]-time)<J_EPS_EVENT){
             //Event findet statt
             Log->Write("INFO:\tEvent: after %f sec: ",time);
