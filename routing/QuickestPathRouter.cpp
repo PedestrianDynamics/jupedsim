@@ -509,7 +509,7 @@ void QuickestPathRouter::Init(Building* building){
 	GlobalRouter::Init(building);
 
 	// activate the spotlight for tracking some pedestrians
-	//sPedestrian::ActivateSpotlightSystem(true);
+	Pedestrian::ActivateSpotlightSystem(true);
 
 	//	pBuilding=building;
 	//TODO: reduce graph is missbehaving
@@ -591,8 +591,8 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 	}while (done==false);
 
 	if(*myref){
-		(*myref)->SetSpotlight(true);
-		//myself->SetSpotlight(true);
+		//(*myref)->SetSpotlight(true);
+		myself->SetSpotlight(true);
 		//cout<<"ref ped found: " <<endl;
 		//getc(stdin);
 	}
@@ -671,7 +671,7 @@ void QuickestPathRouter::GetQueueAtExit(Crossing* crossing, double minVel,
 			if(ped->GetExitIndex()==exitID){
 				if(ped->GetV().NormSquare()<minVel2){
 					double dist= (ped->GetPos()-crossing->GetCentre()).NormSquare();
-					cout<<"distance: radius"<<dist<<":"<<radius<<endl;
+					//cout<<"distance: radius"<<dist<<":"<<radius<<endl;
 					//cout<<"suspect found 1 @ "<< dist<< " { "<< closestDistance<<" }"<<endl;
 					if(dist<radius2){
 						queue.push_back(ped);
@@ -882,70 +882,78 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
 
 void QuickestPathRouter::Redirect(Pedestrian* ped){
 
-		int preferredExit=ped->GetExitIndex();
+	int preferredExit=ped->GetExitIndex();
 
-		double preferredExitTime=FLT_MAX;
-		int quickest=-1;
-		double minTime=FLT_MAX;
+	double preferredExitTime=FLT_MAX;
+	int quickest=-1;
+	double minTime=FLT_MAX;
 
-		//only redirect to other final exits in the actual room.
-		// if there is no final exit in the sight range,
-		// then no redirection is possible
+	//only redirect to other final exits in the actual room.
+	// if there is no final exit in the sight range,
+	// then no redirection is possible
 
-		// collect the possible alternatives
-		Room* room=_building->GetRoom(ped->GetRoomID());
-		SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
+	// collect the possible alternatives
+	Room* room=_building->GetRoom(ped->GetRoomID());
+	SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
 
-		const vector<int>& goals=room->GetAllTransitionsIDs();
-		//filter to keep only the emergencies exits.
+	const vector<int>& goals=room->GetAllTransitionsIDs();
+	//filter to keep only the emergencies exits.
 
-		for(unsigned int g=0;g<goals.size();g++){
-			int exitid=goals[g];
-			AccessPoint* ap=_accessPoints[exitid];
+	vector <AccessPoint*> relevantAPs;
+	GetRelevantRoutesTofinalDestination(ped,relevantAPs);
 
-			//only final are accounted
-			//if(ap->GetFinalExitToOutside()==false) continue;
+	for(unsigned int g=0;g<relevantAPs.size();g++){
+		AccessPoint* ap=relevantAPs[g];
+		int exitid=ap->GetID();
+		//		}
+		//
+		//		for(unsigned int g=0;g<goals.size();g++){
+		//			int exitid=goals[g];
+		//			AccessPoint* ap=_accessPoints[exitid];
 
-			//check if I can reach that exit, there should exits a direct line
-			// segment connecting the two APs/goals
-			const Point& p1 = ap->GetCentre();
-			const Point& p2 = ped->GetPos();
-			Line segment = Line(p1,p2);
+		//only final are accounted
+		//if(ap->GetFinalExitToOutside()==false) continue;
 
-			bool isVisible=true;
-			//first walls
-			const vector<Wall>& walls= sub->GetAllWalls();
+		//check if I can reach that exit, there should exits a direct line
+		// segment connecting the two APs/goals
+		const Point& p1 = ap->GetCentre();
+		const Point& p2 = ped->GetPos();
+		Line segment = Line(p1,p2);
 
-			for(unsigned int b=0;b<walls.size();b++){
-				if(segment.IntersectionWith(walls[b])==true) {
-					isVisible=false;
-					break;
-				}
-			}
-			if(isVisible==false) continue;
+		bool isVisible=true;
+		//first walls
+		const vector<Wall>& walls= sub->GetAllWalls();
 
-			double time=GetEstimatedTravelTimeVia(ped, exitid);
-
-			if(time<minTime){
-				minTime=time;
-				quickest=exitid;
-			}
-
-			//printf(" ped [%d] checking [%d] ---> [%f]\n",ped->GetPedIndex(),exitid,time);
-			//also save the time for the default destinations for later comparison
-			if (exitid==preferredExit){
-				preferredExitTime=time;
-			}
-
-		}
-		//compare it with my preferred/current (shortest nearest)
-		if(quickest!=preferredExit){
-			double cba = CBA(gain(preferredExitTime),gain(minTime));
-			//cout<<"cba:" <<cba<<endl;
-			if (cba>CBA_THRESHOLD){
-				ped->SetExitIndex(quickest);
-				ped->SetExitLine(_accessPoints[quickest]->GetNavLine());
-				//ped->SetSpotlight(false);
+		for(unsigned int b=0;b<walls.size();b++){
+			if(segment.IntersectionWith(walls[b])==true) {
+				isVisible=false;
+				break;
 			}
 		}
+		if(isVisible==false) continue;
+
+		double time=GetEstimatedTravelTimeVia(ped, exitid);
+
+		if(time<minTime){
+			minTime=time;
+			quickest=exitid;
+		}
+
+		//printf(" ped [%d] checking [%d] ---> [%f]\n",ped->GetPedIndex(),exitid,time);
+		//also save the time for the default destinations for later comparison
+		if (exitid==preferredExit){
+			preferredExitTime=time;
+		}
+
+	}
+	//compare it with my preferred/current (shortest nearest)
+	if(quickest!=preferredExit){
+		double cba = CBA(gain(preferredExitTime),gain(minTime));
+		//cout<<"cba:" <<cba<<endl;
+		if (cba>CBA_THRESHOLD){
+			ped->SetExitIndex(quickest);
+			ped->SetExitLine(_accessPoints[quickest]->GetNavLine());
+			//ped->SetSpotlight(false);
+		}
+	}
 }

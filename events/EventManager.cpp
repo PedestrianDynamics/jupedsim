@@ -57,8 +57,8 @@ void EventManager::readEventsXml(){
 
     TiXmlDocument docEvent(eventfile);
     if(!docEvent.LoadFile()){
-        Log->Write("EROOR: \t%s",docEvent.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the event file. So no Events are found.");
+        Log->Write("INFO: \t%s",docEvent.ErrorDesc());
+        Log->Write("INFO: \t could not parse the event file. So no Events are found.");
         //exit(EXIT_FAILURE);
         return;
     }

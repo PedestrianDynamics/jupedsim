@@ -73,6 +73,7 @@ public:
 
 
 protected:
+
 	void DumpAccessPoints(int p=-1);
 
 	/**
@@ -141,6 +142,13 @@ protected:
 	 * @param path where to store the intermediate destination
 	 */
 	void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+
+
+	/**
+	 * return the relevant aps that lead to the pedestrian final destination
+	 * @param ped
+	 */
+	void GetRelevantRoutesTofinalDestination(Pedestrian *ped, std::vector<AccessPoint*>& relevantAPS);
 
 private:
 	/**

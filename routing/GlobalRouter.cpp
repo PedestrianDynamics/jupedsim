@@ -46,7 +46,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-				Router() {
+						Router() {
 	_accessPoints = map<int, AccessPoint*>();
 	_map_id_to_index = std::map<int, int>();
 	_map_index_to_id = std::map<int, int>();
@@ -259,9 +259,12 @@ void GlobalRouter::Init(Building* building) {
 				NavLine* nav1 = allGoals[n1];
 				AccessPoint* from_AP = _accessPoints[nav1->GetUniqueID()];
 				int from_door = _map_id_to_index[nav1->GetUniqueID()];
+				if(from_AP->IsClosed()) continue;
 
 				for (unsigned int n2 = 0; n2 < allGoals.size(); n2++) {
 					NavLine* nav2 = allGoals[n2];
+					AccessPoint* to_AP = _accessPoints[nav2->GetUniqueID()];
+					if(to_AP->IsClosed()) continue;
 
 					if (n1 == n2)
 						continue;
@@ -335,6 +338,8 @@ void GlobalRouter::Init(Building* building) {
 		AccessPoint* from_AP = itr->second;
 		int from_door = _map_id_to_index[itr->first];
 		if(from_AP->GetFinalGoalOutside()) continue;
+		//TODO: maybe put the distance to FLT_MAX
+		if(from_AP->IsClosed()) continue;
 
 		double tmpMinDist = FLT_MAX;
 		int tmpFinalGlobalNearestID = from_door;
@@ -346,6 +351,7 @@ void GlobalRouter::Init(Building* building) {
 
 			if(from_AP->GetID()==to_AP->GetID()) continue;
 			if(from_AP->GetFinalExitToOutside()) continue;
+
 			//if(from_AP->GetFinalGoalOutside()) continue;
 
 			if (to_AP->GetFinalExitToOutside()) {
@@ -420,6 +426,7 @@ void GlobalRouter::Init(Building* building) {
 
 			AccessPoint* from_AP = itr->second;
 			if(from_AP->GetFinalGoalOutside()) continue;
+			if(from_AP->IsClosed()) continue;
 			int from_door_matrix_index = _map_id_to_index[itr->first];
 
 			//comment this if you want infinite as distance to unreachable destinations
@@ -447,7 +454,7 @@ void GlobalRouter::Init(Building* building) {
 
 	//dumping the complete system
 	//DumpAccessPoints(3-1);
-	//DumpAccessPoints(381);
+	//DumpAccessPoints(50);
 	//vector<string> rooms;
 	//rooms.push_back("hall");
 	//rooms.push_back("0");
@@ -619,24 +626,30 @@ int GlobalRouter::FindExit(Pedestrian* ped) {
 }
 
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
-	//cout<<"default: " <<ped->GetID()<<" going to "<<ped->GetFinalDestination()<<endl;
 	// get the opened exits
 	SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
 			ped->GetSubRoomID());
 
-	// get the opened exits
-	const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
+
+
+	// get the relevant opened exits
+	vector <AccessPoint*> relevantAPs;
+	GetRelevantRoutesTofinalDestination(ped,relevantAPs);
+	//cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+
 	int bestAPsID = -1;
 	double minDist = FLT_MAX;
 
-	for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-		int apID = accessPointsInSubRoom[i];
+	//for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
+	//	int apID = accessPointsInSubRoom[i];
+	for(unsigned int g=0;g<relevantAPs.size();g++){
+		AccessPoint* ap=relevantAPs[g];
+		//int exitid=ap->GetID();
 
-		AccessPoint* ap = _accessPoints[apID];
+		//AccessPoint* ap = _accessPoints[apID];
 
 		if (ap->isInRange(sub->GetUID()) == false)
 			continue;
-
 		//check if that exit is open.
 		if (ap->IsClosed())
 			continue;
@@ -646,14 +659,16 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 		const Point& posA = ped->GetPos();
 		const Point& posB = ap->GetNavLine()->GetCentre();
 		const Point& posC = (posB - posA).Normalized()
-				* ((posA - posB).Norm() - J_EPS) + posA;
+										* ((posA - posB).Norm() - J_EPS) + posA;
+
 
 		//check if visible
 		if (sub->IsVisible(posA, posC, true) == false)
 			continue;
 
 		double dist = ap->GetDistanceTo(ped->GetFinalDestination())
-				+ ap->DistanceTo(posA.GetX(), posA.GetY());
+										+ ap->DistanceTo(posA.GetX(), posA.GetY());
+
 
 		if (dist < minDist) {
 			bestAPsID = ap->GetID();
@@ -677,6 +692,42 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 }
 
 
+void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<AccessPoint*>& relevantAPS){
+
+	//collect all the aps in the room
+	vector<AccessPoint*>toBeDeleted;
+
+	Room* room=_building->GetRoom(ped->GetRoomID());
+	SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
+
+	//first check with all goals ids. The hlines should normally be filtered out
+	// if any problems then try taking only transitions
+	//const vector<int>& goals=room->GetAllTransitionsIDs();
+	const vector<int>& goals=sub->GetAllGoalIDs();
+	//filter to keep only the emergencies exits.
+
+	for(unsigned int g1=0;g1<goals.size();g1++){
+		AccessPoint* ap=_accessPoints[goals[g1]];
+		//cout<<"Checking APs:" <<ap->GetID();
+		bool relevant=true;
+		for(unsigned int g2=0;g2<goals.size();g2++){
+			if(goals[g2]==goals[g1]) continue; // always skeep myself
+		//cout<<"Against APs:" <<goals[g2]<<endl;
+			//int exitid=goals[g2];
+			if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]){
+				relevant=false;
+				break;
+			}
+		}
+		if(relevant==true){
+			relevantAPS.push_back(ap);
+			//cout<<"relevant APs:" <<ap->GetID()<<endl;
+		}
+	}
+
+	// remove all the aps which points to one in the same room
+	//return the remaining. They represent unique routes to the final destination
+}
 
 SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2) {
 	SubRoom* sb11 = c1->GetSubRoom1();
@@ -929,7 +980,7 @@ string GlobalRouter::GetRoutingInfoFile() const {
 			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
 				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 		}
-                else if(strategy=="dynamic") {
+		else if(strategy=="dynamic") {
 			if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
 				nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 		}

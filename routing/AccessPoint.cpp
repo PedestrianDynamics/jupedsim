@@ -88,6 +88,7 @@ bool AccessPoint::GetFinalGoalOutside(){
 	return _finalGoalOutside;
 }
 
+//TODO: possibly remove
 void AccessPoint::AddIntermediateDest(int final, int inter){
 	_mapDestToAp[final]=inter;
 }
@@ -119,6 +120,7 @@ void AccessPoint::AddConnectingAP(AccessPoint* ap){
 	_connectingAPs.push_back(ap);
 }
 
+//TODO: remove this one
 int  AccessPoint::GetNextApTo(int UID){
 	//this is probably a final destination
 	if(_mapDestToAp.count(UID)==0){
@@ -131,7 +133,7 @@ int  AccessPoint::GetNextApTo(int UID){
 }
 
 int AccessPoint::GetNearestTransitAPTO(int UID){
-	const vector <AccessPoint*>& possibleDest=  _navigationGraphTo[UID];
+	const vector <AccessPoint*>& possibleDest=_navigationGraphTo[UID];
 
 	if(possibleDest.size()==0){
 		return -1;
@@ -139,7 +141,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID){
 		return possibleDest[0]->GetID();
 	}else {
 		AccessPoint* best_ap=possibleDest[0];
-		double min_dist=GetDistanceTo(best_ap);
+		double min_dist=GetDistanceTo(best_ap); // FIXME: add the shortest distance to outside
 
 		for (unsigned int i=0;i<possibleDest.size();i++){
 			double tmp= GetDistanceTo(possibleDest[i]);
@@ -262,20 +264,19 @@ void AccessPoint::Dump(){
 	cout<<endl<<endl;
 
 	cout<<" transit to final goals:"<<endl;
-//	for(std::map<int, int>::iterator p = _navigationGraphTo.begin(); p != _navigationGraphTo.end(); p++) {
-//		cout<<"\t ---> [ "<<p->first<<" via " << p->second<<" ]";
-//	}
-//	if(_navigationGraphTo.size()==0){
-//		cout<<"\t ---> [ Nothing ]";
-//	}
+	for(std::map<int, std::vector<AccessPoint*> >::iterator p = _navigationGraphTo.begin(); p != _navigationGraphTo.end(); ++p) {
+		cout<<"\t UID ---> [ "<<p->first <<" ]";
 
-//	cout<<" transit to final goals:"<<endl;
-//	for(std::map<int, int>::iterator p = _mapDestToAp.begin(); p != _mapDestToAp.end(); p++) {
-//		cout<<"\t ---> [ "<<p->first<<" via " << p->second<<" ]";
-//	}
-//	if(_mapDestToAp.size()==0){
-//		cout<<"\t ---> [ Nothing ]";
-//	}
+		if(p->second.size()==0) {
+			cout<<"\t ---> [ Nothing ]";
+		} else {
+
+			for(unsigned int i=0;i<p->second.size();i++){
+				cout<<"\t distance ---> [ "<<p->second[i]->GetID()<<" @ " << p->second[i]->GetDistanceTo(p->first)<<" ]";
+			}
+		}
+	}
+
 	cout<<endl<<endl;
 
 	cout<<" connected to aps : " ;

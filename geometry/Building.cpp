@@ -1039,7 +1039,7 @@ void Building::Update() {
 				//Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
 				//Log->Write("\tINFO: \tHe has reached the target cell");
 				DeletePedFromSim(_allPedestians[p]);
-				//exit(EXIT_FAILURE);
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
@@ -1061,8 +1061,8 @@ void Building::InitPhiAllPeds(double pDt) {
 				ped->SetRoomID(room->GetID(), room->GetCaption());
 				//a destination could not be found for that pedestrian
 				if (ped->FindRoute() == -1) {
-					// DeletePedFromSim(ped);
-					sub->DeletePedestrian(k--);
+					DeletePedFromSim(ped);
+					//sub->DeletePedestrian(k--);
 					continue;
 				}
 				Line* e = ped->GetExitLine();

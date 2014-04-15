@@ -505,7 +505,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 					}
 				}
 
-				building->DeletePedestrian(ped);
+				building->DeletePedFromSim(ped);
 				Log->Write("\tCRITICAL: one ped was removed due to high velocity");
 
 				//	continue;
