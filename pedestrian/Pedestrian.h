@@ -95,6 +95,7 @@ private:
     bool _reroutingEnabled;
     bool _tmpFirstOrientation; // possibility to get rid of this variable
     bool _newOrientationFlag;
+    bool _newEventFlag; //neue Info schon bekannt oder nicht
 
     // the current time in the simulation
     static double _globalTime;
@@ -289,6 +290,8 @@ public:
     void UpdateReroutingTime();
     void RerouteIn(double time);
     bool IsReadyForRerouting();
+    bool GetNewEventFlag();
+    void SetNewEventFlag(bool flag);
 
     /**
      * clear the parameter related to the re routing

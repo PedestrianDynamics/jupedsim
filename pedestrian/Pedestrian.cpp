@@ -50,6 +50,7 @@ Pedestrian::Pedestrian() {
 	_mass = 1;
 	_tau = 0.5;
 	_newOrientationFlag = false;
+        _newEventFlag = false;
 	_newOrientationDelay = 0; //0 seconds, in steps
 	_tmpFirstOrientation = true;
 	_updateRate = 0;
@@ -60,7 +61,7 @@ Pedestrian::Pedestrian() {
 	_building=NULL;
 	_reroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
 	_timeBeforeRerouting=0.0;
-	_reroutingEnabled=false;
+    _reroutingEnabled=false;
 	_timeInJam=0.0;
 	_patienceTime=5.0;// time after which the ped feels to be in jam
 	_desiredFinalDestination=FINAL_DEST_OUT;
@@ -439,6 +440,14 @@ void Pedestrian::RerouteIn(double time){
 
 bool Pedestrian::IsReadyForRerouting(){
 	return(_reroutingEnabled &&(_timeBeforeRerouting<=0.0));
+}
+
+bool Pedestrian::GetNewEventFlag(){
+    return _newEventFlag;
+}
+
+void Pedestrian::SetNewEventFlag(bool flag){
+    _newEventFlag=flag;
 }
 
 double Pedestrian::GetAge() const {

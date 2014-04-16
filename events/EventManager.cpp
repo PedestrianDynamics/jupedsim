@@ -140,14 +140,14 @@ void EventManager::Update_Events(double time, double d){
     //zuerst muss geprueft werden, ob die Peds, die die neuen Infos schon haben sie an andere Peds weiter-
     //leiten muessen (wenn diese sich in der naechsten Umgebung befinden)
     for(int p=0;p<nSize;p++){
-        if(_allPedestrians[p]->GetNewOrientationFlag()){
+        if(_allPedestrians[p]->GetNewEventFlag()){
             int rID = _allPedestrians[p]->GetRoomID();
             int srID = _allPedestrians[p]->GetSubRoomID();
             Room* room = _building->GetRoom(rID);
             SubRoom* sub = room->GetSubRoom(srID);//Nur Infos an Leute im gleichen Raum weitergeben
             for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
                 Pedestrian* ped = sub->GetPedestrian(k);
-                if(!ped->GetNewOrientationFlag()){
+                if(!ped->GetNewEventFlag()){
                     //wenn der Pedestrian die neuen Infos noch nicht hat, pruefen ob er nah genug ist
                     Point pos1 = _allPedestrians[p]->GetPos();
                     Point pos2 = ped->GetPos();
@@ -157,7 +157,7 @@ void EventManager::Update_Events(double time, double d){
                     if(dist<=J_EPS_INFO_DIST){// wenn er nah genug ist, rerouten
                         ped->ClearMentalMap();
                         ped->ResetRerouting();
-                        ped->SetNewOrientationFlag(true);
+                        ped->SetNewEventFlag(true);
                     }
                 }
             }
@@ -166,12 +166,12 @@ void EventManager::Update_Events(double time, double d){
 
     //dann muss die Reroutingzeit der Peds, die die neuen Infos noch nciht haben, aktualisiert werden:
     for(int p=0;p<nSize;p++){
-        if(!_allPedestrians[p]->GetNewOrientationFlag()){
+        if(!_allPedestrians[p]->GetNewEventFlag()){
             _allPedestrians[p]->UpdateReroutingTime();
             if(_allPedestrians[p]->IsReadyForRerouting()){
                 _allPedestrians[p]->ClearMentalMap();
                 _allPedestrians[p]->ResetRerouting();
-                _allPedestrians[p]->SetNewOrientationFlag(true);
+                _allPedestrians[p]->SetNewEventFlag(true);
             }
         }
     }
@@ -238,15 +238,18 @@ void EventManager::changeRouting(int id, string state){
     Line* l = new Line(t->GetPoint1(),t->GetPoint2());
     for (int p = 0; p < nSize; ++p) {
         //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
-        _allPedestrians[p]->SetNewOrientationFlag(false);
+        _allPedestrians[p]->SetNewEventFlag(false);
         double dist = l->DistTo(_allPedestrians[p]->GetPos());
         Point v = _allPedestrians[p]->GetV();
         double norm =sqrt((v.GetX()*v.GetX())+(v.GetY()*v.GetY()));
+        if(norm==0.0){
+            norm=0.001;
+        }
         double time = dist/norm;
         if(time<1.0){
             _allPedestrians[p]->ClearMentalMap();
             _allPedestrians[p]->ResetRerouting();
-            _allPedestrians[p]->SetNewOrientationFlag(true);
+            _allPedestrians[p]->SetNewEventFlag(true);
         }
         else{
             _allPedestrians[p]->RerouteIn(time);
