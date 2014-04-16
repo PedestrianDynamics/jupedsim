@@ -319,6 +319,7 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 	// check intersection with other hlines in room
 	if(considerHlines)
 		for(unsigned int i = 0; i < _hlines.size(); i++) {
+			if(_hlines[i]->IsInLineSegment(p1)|| _hlines[i]->IsInLineSegment(p2)) continue;
 			if(temp && cl.IntersectionWith(*(Line*)_hlines[i]))
 				temp = false;
 		}

@@ -236,7 +236,7 @@ void GlobalRouter::Init(Building* building) {
 
 			// The penalty factor should discourage pedestrians to evacuation through rooms.
 			double  penalty=1.0;
-			if(sub->GetType()!="floor") {
+			if((sub->GetType()!="floor") && (sub->GetType()!="dA") ) {
 				penalty=PENALTY_FACTOR;
 			}
 
@@ -271,7 +271,7 @@ void GlobalRouter::Init(Building* building) {
 					if (nav1->operator ==(*nav2))
 						continue;
 
-					if (sub->IsVisible(nav1, nav2, true)) {
+					if (sub->IsVisible(nav1->GetCentre(), nav2->GetCentre(), true)) {
 						int to_door = _map_id_to_index[nav2->GetUniqueID()];
 						_distMatrix[from_door][to_door] = penalty*(nav1->GetCentre()
 								- nav2->GetCentre()).Norm();
@@ -562,10 +562,10 @@ void GlobalRouter::DumpAccessPoints(int p) {
 int GlobalRouter::FindExit(Pedestrian* ped) {
 
 	int nextDestination = ped->GetNextDestination();
-	if(ped->GetGlobalTime()>400){
-		//ped->Dump(143);
-		//exit(0);
-	}
+//	if(ped->GetGlobalTime()>80){
+//		ped->Dump(2);
+//		//exit(0);
+//	}
 
 	if (nextDestination == -1) {
 		return GetBestDefaultRandomExit(ped);
@@ -715,7 +715,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 		//cout<<"Against APs:" <<goals[g2]<<endl;
 			//int exitid=goals[g2];
 			if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]){
-				relevant=false;
+				//FIXME there are interference with hlines. suitable only for quickest route considering exits,
+				// crossings only
+				relevant=true;
 				break;
 			}
 		}

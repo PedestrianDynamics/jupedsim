@@ -141,7 +141,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID){
 		return possibleDest[0]->GetID();
 	}else {
 		AccessPoint* best_ap=possibleDest[0];
-		double min_dist=GetDistanceTo(best_ap); // FIXME: add the shortest distance to outside
+		double min_dist=GetDistanceTo(best_ap);// + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
 
 		for (unsigned int i=0;i<possibleDest.size();i++){
 			double tmp= GetDistanceTo(possibleDest[i]);
@@ -253,7 +253,8 @@ void AccessPoint::Dump(){
 
 	cout<<endl<<"--------> Dumping AP <-----------"<<endl<<endl;
 	//cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
-	cout<<" ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
+	cout<<" Friendly ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
+	cout<<" Real ID: " <<_id<<endl;
 
 	cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<endl;
 	cout <<" Distance to final goals"<<endl;
@@ -265,14 +266,15 @@ void AccessPoint::Dump(){
 
 	cout<<" transit to final goals:"<<endl;
 	for(std::map<int, std::vector<AccessPoint*> >::iterator p = _navigationGraphTo.begin(); p != _navigationGraphTo.end(); ++p) {
-		cout<<"\t UID ---> [ "<<p->first <<" ]";
+		cout<<endl<<"\t to UID ---> [ "<<p->first <<" ]";
 
 		if(p->second.size()==0) {
 			cout<<"\t ---> [ Nothing ]";
 		} else {
 
 			for(unsigned int i=0;i<p->second.size();i++){
-				cout<<"\t distance ---> [ "<<p->second[i]->GetID()<<" @ " << p->second[i]->GetDistanceTo(p->first)<<" ]";
+				cout<<"\t distance ---> [ "<<GetDistanceTo(p->second[i])+p->second[i]->GetDistanceTo(p->first) <<" m via "<<p->second[i]->GetID() <<" ]";
+				//cout<<"\t distance ---> [ "<<p->second[i]->GetID()<<" @ " << GetDistanceTo(p->first)<<" ]";
 			}
 		}
 	}
@@ -282,7 +284,7 @@ void AccessPoint::Dump(){
 	cout<<" connected to aps : " ;
 	for(unsigned int p=0;p<_connectingAPs.size();p++){
 		//cout<<" [ "<<_connectingAPs[p]->GetID()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
-		cout<<endl<<"\t [ "<<_connectingAPs[p]->GetFriendlyName()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
+		cout<<endl<<"\t [ "<<_connectingAPs[p]->GetID()<<"_"<<_connectingAPs[p]->GetFriendlyName()<<" , "<<_connectingAPs[p]->GetDistanceTo(this)<<" m ]";
 	}
 
 	cout<<endl<<endl;
