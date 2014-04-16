@@ -1,10 +1,10 @@
 /**
- * File:   ForceModel.h
+ * @file ForceModel.h
  *
- * Created on 13. December 2010, 15:05
+ * @brief Implementation of classes for some force-based models 
  *
  * @section LICENSE
- * This file is part of JuPedSim.
+ * This file is part of JuPedSim. 
  *
  * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,15 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
+ * Implementation of classes for force-based models. 
+ * Actually we've got two different models: 
+ * 1. Generalized Centrifugal Force Model
+ * 2. Gompertz Model 
  *
- *
- *
+ * @date Tue Apr 15 19:19:04 2014
  */
 
+//
 #ifndef _FORCEMODEL_H
 #define	_FORCEMODEL_H
 
@@ -70,20 +74,46 @@ public:
 class GCFMModel : public ForceModel {
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
-	DirectionStrategy* _direction;
+    DirectionStrategy* _direction;
     // Modellparameter
-    double _nuPed;
-    double _nuWall;
-    double _intp_widthPed; // Interpolation cutoff radius (in cm)
-    double _intp_widthWall; // Interpolation cutoff radius (in cm)
+    double _nuPed;		/**< strength of the pedestrian repulsive force */
+    double _nuWall;		/**< strength of the wall repulsive force */
+    double _intp_widthPed; /**< Interpolation cutoff radius (in cm) */
+    double _intp_widthWall; /**< Interpolation cutoff radius (in cm) */
     double _maxfPed;
     double _maxfWall;
     double _distEffMaxPed; // maximal effective distance
     double _distEffMaxWall; // maximal effective distance
 
     // Private Funktionen
+    /** 
+     * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
+     * 
+     * @param ped Pointer to Pedestrians
+     * @param room Pointer to Room
+     * 
+     * @return Point
+     */   
     Point ForceDriv(Pedestrian* ped, Room* room) const;
+   /** 
+    * Repulsive force between two pedestrians ped1 and ped2 according to 
+    * the Generalized Centrifugal Force Model (chraibi2010a)
+    * 
+    * @param ped1 Pointer to Pedestrian: First pedestrian
+    * @param ped2 Pointer to Pedestrian: Second pedestrian
+    * 
+    * @return Point
+    */
     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
+   /** 
+    * Repulsive force acting on pedestrian <ped> from the walls in 
+    * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
+    * @see ForceRepWall
+    * @param ped Pointer to Pedestrian
+    * @param subroom Pointer to SubRoom
+    * 
+    * @return 
+    */
     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
     Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
@@ -107,7 +137,7 @@ public:
     double GetDistEffMaxWall() const;
 
 
-    void UpdateCellularModel(Building* building) const;
+    //void UpdateCellularModel(Building* building) const;
 
     // virtuelle Funktionen
     virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
@@ -119,26 +149,66 @@ public:
 /************************************************************
  GOMPERTZ ForceModel
  ************************************************************/
-
+/** 
+ * Class defining the Gompertz model
+ * 
+ * 
+ *  
+ */
 class GompertzModel : public ForceModel {
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
     DirectionStrategy* _direction;
-    // Modellparameter
+    /// Modellparameter
+
     double _nuPed;
     double _nuWall;
-
-    // Private Funktionen
+    
+   /** 
+    * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\$
+    * This is a duplicate of @see GCFMModel::ForceDriv  
+    * @param ped Pointer to Pedestrians
+    * @param room Pointer to Room
+    * 
+    *
+    * @return Point
+    */
     Point ForceDriv(Pedestrian* ped, Room* room) const;
+    /** 
+     * Repulsive force between two pedestrians ped1 and ped2 according to 
+     * the Gompertz model (unpublished)
+     * 
+     * @param ped1 Pointer to Pedestrian: First pedestrian
+     * @param ped2 Pointer to Pedestrian: Second pedestrian
+     * 
+     * @return Point
+     */
     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
+    /** 
+    * Repulsive force acting on pedestrian <ped> from the walls in 
+    * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
+    * @see ForceRepWall
+    * @param ped Pointer to Pedestrian
+    * @param subroom Pointer to SubRoom
+    * 
+    * @return 
+    */
     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
+    /** 
+     * Repulsive force between pedestrian <ped> and wall <l>
+     * 
+     * @param ped Pointer to Pedestrian
+     * @param l reference to Wall
+     * 
+     * @return 
+     */
     Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
 
 public:
+
     GompertzModel(DirectionStrategy* dir, double nuped, double nuwall);
     virtual ~GompertzModel(void);
 
-    // Getter
     DirectionStrategy* GetDirection() const;
     double GetNuPed() const;
     double GetNuWall() const;

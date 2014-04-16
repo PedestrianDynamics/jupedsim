@@ -37,7 +37,7 @@ DirectionStrategy::DirectionStrategy(const DirectionStrategy& orig) {
 
 DirectionStrategy::~DirectionStrategy() {
 }
-
+//@{
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const {
     return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
@@ -83,8 +83,16 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const {
 }
 
 
-// this strategy should work without Hlines for a general geometry.
-Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const {
+/** 
+ * this strategy is designed to work without Hlines for a general geometry.
+ * First tested for bottlenecks and corners. 
+ * @param room Pointer
+ * @param ped Pointer to Pedestrians
+ * 
+ * @todo Need more tests e.g. for complex geometries. 
+ * @todo Need refactoring: Put the WALL and OBS loops in appropriate functions 
+ * @return Target (Point)
+ */Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const {
 using namespace std;
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
@@ -128,7 +136,7 @@ using namespace std;
     for(unsigned int obs=0; obs<obstacles.size(); ++obs){
         const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
         for (unsigned int i = 0; i < owalls.size(); i++) {
-            dist = tmpDirection.GetIntersectionDistance(owalls[i]);
+            dist = tmpDirection.GetIntersectionDistance(owalls[i]); 
             printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
             if (dist < minDist)
             {

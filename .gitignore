@@ -3,6 +3,7 @@
 /bin/
 /Debug
 /Release
+/doc/html
 *~
 
 # Compiled Object files

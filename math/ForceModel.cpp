@@ -1,7 +1,7 @@
 /**
- * File:   ForceModel.cpp
+ * @file ForceModel.cpp
  *
- * Created on 13. December 2010, 15:05
+ * @date 13. December 2010, 15:05
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -20,7 +20,7 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
- *
+ * Implementation of the GCFM and the Gompertz model 
  *
  *
  */
@@ -51,16 +51,8 @@ ForceModel::~ForceModel() {
  GCFM ForceModel
  ************************************************************/
 
-// Private Funktionen
 
-/* treibende Kraft
- * Parameter:
- *   - ped: Fußgänger für den die Kraft berechnet wird
- *   - room: Raum (mit SubRooms) in dem das Ziel gesucht wird
- * Rückgabewerte:
- *   - Vektor(x,y) zum Ziel
- * */
-inline Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
+inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
 	const Point& target = _direction->GetTarget(room, ped);
 	Point F_driv;
 	const Point& pos = ped->GetPos();
@@ -80,13 +72,6 @@ inline Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
 	return F_driv;
 }
 
-/* abstoßende Kraft zwischen ped1 und ped2
- * Parameter:
- *   - ped1: Fußgänger für den die Kraft berechnet wird
- *   - ped2: Fußgänger mit dem die Kraft berechnet wird
- * Rückgabewerte:
- *   - Vektor(x,y) mit abstoßender Kraft
- * */
 Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 
 	Point F_rep;
@@ -143,6 +128,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	//todo: runtime normsquare?
 	if (distp12.Norm() >= J_EPS) {
 		ep12 = distp12.Normalized();
+                
 	} else {
 		Log->Write("ERROR: \tin GCFMModel::forcePedPed() ep12 kann nicht berechnet werden!!!\n");
 		Log->Write("ERROR:\t fix this as soon as possible");
@@ -572,11 +558,106 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 	}//end parallel
 
 	//update the CA Model
-	UpdateCellularModel(building);
+	//UpdateCellularModel(building);
 }
 
-void GCFMModel::UpdateCellularModel(Building* building) const {
+// void GCFMModel::UpdateCellularModel(Building* building) const {
 
-	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+// 	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
+// }
+
+/************************************************************
+ Gompertz ForceModel
+ ************************************************************/
+
+
+Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const {
+	const Point& target = _direction->GetTarget(room, ped);
+	Point F_driv;
+	const Point& pos = ped->GetPos();
+	double dist = ped->GetExitLine()->DistTo(pos);
+        
+        
+	if (dist > J_EPS_GOAL) {
+		const Point& v0 = ped->GetV0(target);
+                //printf("MC v0= [%.2f %.2f]\n", v0.GetX(), v0.GetY());
+                //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+                F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+	} else {
+		const Point& v0 = ped->GetV0();
+                //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+		F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+	}
+	return F_driv;
+}
+
+Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
+	Point F_rep = Point(0.0, 0.0);;
+	// x- and y-coordinate of the distance between p1 and p2
+	Point distp12 = ped2->GetPos() - ped1->GetPos();
+	const Point& vp1 = ped1->GetV(); // v Ped1
+	//const Point& vp2 = ped2->GetV(); // v Ped2
+	Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
+	double K_ij, B_ij, f;
+	const JEllipse& E1 = ped1->GetEllipse();
+	const JEllipse& E2 = ped2->GetEllipse();
+	Point AP1inE1 = E1.GetCenter();
+	Point AP2inE2 = E2.GetCenter();
+	// ActionPoint von E1 in Koordinaten von E2 (transformieren)
+	Point AP1inE2 = AP1inE1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+	// ActionPoint von E2 in Koordinaten von E1 (transformieren)
+	Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
+	double r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
+	double r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
+        double Distance = distp12.Norm();
+	if (Distance >= J_EPS) {
+            ep12 = distp12.Normalized();
+	} 
+        else {
+            Log->Write("ERROR: \tin GompertzModel::forcePedPed() ep12 can not be calculated!!!\n");
+            Log->Write("ERROR:\t Pedestrians are too near to each other.");
+            Log->Write("ERROR:\t How come? Are they the same? Get your model right. Going to exit.");
+            return F_rep; // should never happen
+            exit(0);
+	}
+        double vp1_sq = vp1.ScalarP(vp1);
+	if (vp1_sq < J_EPS_V*J_EPS_V){ // if(norm(v_i)==0)
+            K_ij = 0;
+        } 
+        else{  // calculate K_ij
+            double tmp = vp1.ScalarP(ep12); // < v_i , e_ij >
+            double bla = tmp + fabs(tmp);
+            K_ij = 0.25 * bla * bla / vp1_sq; //squared
+            if (K_ij < J_EPS * J_EPS){
+                return F_rep;
+            }
+            K_ij = sqrt(K_ij);
+	}
+        // calculate B_ij
+        B_ij = 1.0 - Distance/(r1 + r2);
+
+        double b=1, c=1; //Gompertz-function parameter. TODO: Check later if other values are more appropriate
+        B_ij = exp(-b*exp(-c*B_ij));
+        f = -ped1->GetMass() * ped1->GetV0Norm() * K_ij * B_ij;
+        F_rep = ep12 * f;
+        //check isNan
+	if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
+		char tmp[CLENGTH];
+		sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
+				ped2->GetID(), F_rep.GetX(), F_rep.GetY());
+		Log->Write(tmp);
+		Log->Write("ERROR:\t fix this as soon as possible");
+		return Point(0,0); // FIXME: should never happen
+		exit(0); 
+	}
+	return F_rep;
+}
+Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom){
+
+};
+
+
+Point ForceRepWall(Pedestrian* ped, const Wall& l){
 
 }
