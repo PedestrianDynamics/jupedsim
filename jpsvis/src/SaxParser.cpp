@@ -668,14 +668,18 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
     //triagulate everything
     vtkSmartPointer<vtkTriangleFilter> filter=vtkSmartPointer<vtkTriangleFilter>::New();
-    filter->SetInputData(polygonPolyData);
 
-	// Create a mapper and actor
-	vtkSmartPointer<vtkPolyDataMapper> mapper =
-			vtkSmartPointer<vtkPolyDataMapper>::New();
+    // Create a mapper and actor
+    vtkSmartPointer<vtkPolyDataMapper> mapper =
+            vtkSmartPointer<vtkPolyDataMapper>::New();
+
+
+
 #if VTK_MAJOR_VERSION <= 5
-	mapper->SetInput(polygonPolyData);
+     filter->SetInput(polygonPolyData);
+    mapper->SetInput(filter->GetOutput());
 #else
+    filter->SetInputData(polygonPolyData);
     mapper->SetInputConnection(filter->GetOutputPort());
 #endif
 

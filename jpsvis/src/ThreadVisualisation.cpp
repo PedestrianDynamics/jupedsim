@@ -65,6 +65,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkActor2DCollection.h>
 #include <vtkRegularPolygonSource.h>
+#include <vtkLabeledDataMapper.h>
+#include <vtkDiskSource.h>
 
 
 #include "geometry/FacilityGeometry.h"
@@ -443,23 +445,30 @@ void ThreadVisualisation::showDoors(bool status){
 void  ThreadVisualisation::initGlyphs(){
 
 
-	VTK_CREATE (vtkSphereSource, sphereSource);
-	sphereSource->SetRadius(30);
-	sphereSource->SetPhiResolution(20);
-	sphereSource->SetThetaResolution(20);
-    extern_glyphs_pedestrians->SetSourceConnection(sphereSource->GetOutputPort());
+    //VTK_CREATE (vtkSphereSource, agentShape);
+    //agentShape->SetRadius(30);
+    //agentShape->SetPhiResolution(20);
+    //agentShape->SetThetaResolution(20);
+
+    //now create the glyphs with ellipses
+    VTK_CREATE (vtkDiskSource, agentShape);
+    agentShape->SetCircumferentialResolution(20);
+    agentShape->SetInnerRadius(0);
+    agentShape->SetOuterRadius(30);
+
+    extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
 
 #if VTK_MAJOR_VERSION <= 5
-    extern_glyphs_pedestrians->SetSource(sphereSource->GetOutput());
+    extern_glyphs_pedestrians->SetSource(agentShape->GetOutput());
 #else
-    extern_glyphs_pedestrians->SetInputConnection(sphereSource->GetOutputPort());
+    extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
 #endif
 
 
 /*
-    VTK_CREATE (vtkCylinderSource, cylinderSource);
-    cylinderSource->SetHeight(160);
-    cylinderSource->SetRadius(30);
+    VTK_CREATE (vtkCylinderSource, agentShape);
+    agentShape->SetHeight(160);
+    agentShape->SetRadius(30);
 
 
 #if VTK_MAJOR_VERSION <= 5
@@ -500,6 +509,15 @@ void  ThreadVisualisation::initGlyphs(){
 	VTK_CREATE(vtkActor, actor);
 	actor->SetMapper(mapper);
 	renderer->AddActor(actor);
+
+
+    // structure for the labels
+    VTK_CREATE(vtkLabeledDataMapper, labelMapper);
+    extern_pedestrians_labels->SetMapper(labelMapper);
+    labelMapper->SetFieldDataName("labels");
+    labelMapper->SetLabelModeToLabelFieldData();
+    renderer->AddActor2D(extern_pedestrians_labels);
+    extern_pedestrians_labels->SetVisibility(false);
 }
 
 void  ThreadVisualisation::init(){

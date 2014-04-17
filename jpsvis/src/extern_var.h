@@ -33,7 +33,7 @@
 #include "SyncData.h"
 #include "Pedestrian.h"
 
-//#include <vtkGlyph3D.h>
+#include <vtkActor2D.h>
 #include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
@@ -84,8 +84,10 @@ Pedestrian** extern_pedestrians_thirdSet=NULL;
 //VTK_CREATE (vtkGlyph3D, extern_glyphs_pedestrians);
 VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
 
-// and here the corresponding dataset
+VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
 
+
+// and here the corresponding dataset
 ///The first dataset
 SyncData extern_trajectories_firstSet;
 ///The second dataset

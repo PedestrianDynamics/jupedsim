@@ -40,6 +40,7 @@
 #include <vtkFloatArray.h>
 #include <vtkPointData.h>
 #include <vtkMath.h>
+#include <vtkIntArray.h>
 
 
 #define VTK_CREATE(type, name) \
@@ -48,6 +49,7 @@
 Frame::Frame() {
 	elementCursor=0;
 	_polydata = vtkPolyData::New();
+    _polydataLabels = vtkPolyData::New();
 }
 
 Frame::~Frame() {
@@ -58,6 +60,7 @@ Frame::~Frame() {
 	framePoints.clear();
 
 	_polydata->Delete();
+    _polydataLabels->Delete();
 }
 
 int Frame::getSize(){
@@ -146,12 +149,16 @@ vtkPolyData* Frame::GetPolyData() {
     VTK_CREATE (vtkPoints, points);
     VTK_CREATE (vtkFloatArray, colors);
     VTK_CREATE (vtkFloatArray, tensors);
+    VTK_CREATE (vtkIntArray, labels);
 
     colors->SetName("color");
     colors->SetNumberOfComponents(1);
 
     tensors->SetName("tensors");
     tensors->SetNumberOfComponents(9);
+
+    labels->SetName("labels");
+    labels->SetNumberOfComponents(1);
 
     for (unsigned int i=0;i<framePoints.size();i++){
         double pos[3]={0,0,0};
@@ -160,6 +167,7 @@ vtkPolyData* Frame::GetPolyData() {
 
         framePoints[i]->getPos(pos); //pos[2]=90;
         points->InsertNextPoint(pos);
+        labels->InsertNextValue(framePoints[i]->getIndex()+1);
 
         double data[7];
         framePoints[i]->getEllipse(data);
@@ -234,12 +242,19 @@ vtkPolyData* Frame::GetPolyData() {
     _polydata->GetPointData()->SetActiveTensors("tensors");
 
 
-//    if(framePoints.size()<0) {
-//        cout<<"not good"<<endl;
-//        exit(0);
-//    }
+    // setting the labels
+    _polydata->GetPointData()->AddArray(labels);
+    //_polydata->GetPointData()->set
 
-	return _polydata;
+    //labels
+    //_polydataLabels->SetPoints(points);
+
+    return _polydata;
+}
+
+vtkPolyData *Frame::GetPolyDataLabels()
+{
+ return _polydataLabels;
 }
 
 unsigned int Frame::getElementCursor(){

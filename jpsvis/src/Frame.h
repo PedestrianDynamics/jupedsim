@@ -57,12 +57,18 @@ public:
 
 	vtkPolyData* GetPolyData();
 
+    vtkPolyData* GetPolyDataLabels();
+
 	vtkPolyData* GetSclarData();
 
 private:
 	std::vector <TrajectoryPoint *> framePoints;
 
-	vtkPolyData * _polydata;
+    /// ellipse parameters
+    vtkPolyData * _polydata;
+
+    /// pedestrians labels
+    vtkPolyData * _polydataLabels;
 
 	/// points to the actual element in the frame
 	unsigned int elementCursor;
