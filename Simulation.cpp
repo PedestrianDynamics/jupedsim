@@ -449,7 +449,7 @@ void Simulation::PrintStatistics() {
 	for(itr = transitions.begin(); itr != transitions.end(); ++itr){
 		Transition* goal =  itr->second;
 		if(goal->IsExit()){
-			Log->Write("Exit ID [%d] used by [%d] pedestrians",goal->GetID(),goal->GetDoorUsage());
+			Log->Write("Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",goal->GetID(),goal->GetDoorUsage(),goal->GetLastPassingTime());
 		}
 	}
 }

@@ -1357,7 +1357,7 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 	//update the stats before deleting
 	Transition* trans =GetTransitionByUID(ped->GetExitIndex());
 	if(trans) {
-		trans->IncreaseDoorUsage(1);
+		trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
 	}
 	delete ped;
 }

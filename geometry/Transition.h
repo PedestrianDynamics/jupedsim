@@ -40,6 +40,7 @@ private:
     std::string _type;
     // number of agents that passed that exit
     int _doorUsage;
+    double _lastPassingTime;
 
 public:
 
@@ -70,14 +71,20 @@ public:
 
     /**
      * Increment the number of persons that used that exit
-     * @param number
+     * @param number, how many person have passed the door
+     * @param time, at which time
      */
-    void IncreaseDoorUsage(int number);
+    void IncreaseDoorUsage(int number, double time);
 
     /**
      * @return the number of pedestrians that used that exit.
      */
     int GetDoorUsage() const;
+
+    /**
+     * @return the last time this door was crossed
+     */
+    double GetLastPassingTime() const;
 
     /**
      * Set/Get the type of the transition

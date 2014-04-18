@@ -717,7 +717,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 			if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]){
 				//FIXME there are interference with hlines. suitable only for quickest route considering exits,
 				// crossings only
-				relevant=true;
+				relevant=false;
 				break;
 			}
 		}

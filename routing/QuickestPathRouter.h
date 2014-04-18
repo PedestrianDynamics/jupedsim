@@ -158,7 +158,7 @@ private:
 	 * flag=1: the exit is free, no reference
 	 * flag=2: I can't see the exit, nor references, too crowded, too many crossing pedes
 	 */
-	void SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, int exitID, int* flag);
+	void SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
 
 	/**
 	 * extend the graph by connecting alternative routes.
@@ -186,13 +186,11 @@ private:
 
 	/**
 	 * return the queue at the specified exit within the specified radius
+	 * if subroomToConsider == -1 then the two side of the crossing will be considered
 	 *
-	 * @param exitID
-	 * @param radius
-	 * @param queue
 	 */
 	void GetQueueAtExit(Crossing* crossing, double minVel,
-			double radius, std::vector<Pedestrian*>& queue);
+			double radius, std::vector<Pedestrian*>& queue, int subroomToConsider=-1);
 
 
 	/**

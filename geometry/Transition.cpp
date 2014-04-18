@@ -38,6 +38,7 @@ using namespace std;
 Transition::Transition() : Crossing() {
 	_isOpen = true;
 	_doorUsage=0;
+	_lastPassingTime=0;
 	_room2 = NULL;
 }
 
@@ -180,10 +181,15 @@ string Transition::WriteElement() const {
 	return geometry;
 }
 
-void Transition::IncreaseDoorUsage(int number) {
+void Transition::IncreaseDoorUsage(int number, double time) {
 	_doorUsage+=number;
+	_lastPassingTime=time;
 }
 
 int Transition::GetDoorUsage() const {
 	return _doorUsage;
+}
+
+double Transition::GetLastPassingTime() const {
+	return _lastPassingTime;
 }
