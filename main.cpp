@@ -67,6 +67,9 @@ int main(int argc, char **argv) {
 	// Simulation
 	time(&starttime);
 	Log->Write("INFO: \tStart runSimulation()\n");
+
+        
+
 	Simulation sim = Simulation();
 	sim.InitArgs(args);
 	int evacTime = sim.RunSimulation();

@@ -42,7 +42,14 @@ class Pedestrian;
 class DirectionStrategy;
 
 
-
+/**
+ * @date   Fri Apr 18 16:40:39 2014
+ * 
+ * @brief The operative model. Definition of several force-based models
+ *         for ped pedestrians dynamics 
+ * 
+ * 
+ */
 class ForceModel {
 
 public:
@@ -70,7 +77,13 @@ public:
 /************************************************************
  GCFM ForceModel
  ************************************************************/
-
+/**
+ * @date   Fri Apr 18 16:39:13 2014
+ * 
+ * @brief  The Generalized Centrifugal Force Model
+ * 
+ * 
+ */
 class GCFMModel : public ForceModel {
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
@@ -153,14 +166,14 @@ public:
  * Class defining the Gompertz model
  * 
  * 
- *  
+ * @brief The Gompertz model. Not yet published.  
  */
 class GompertzModel : public ForceModel {
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
     DirectionStrategy* _direction;
+    
     /// Modellparameter
-
     double _nuPed;
     double _nuWall;
     
@@ -191,7 +204,7 @@ private:
     * @param ped Pointer to Pedestrian
     * @param subroom Pointer to SubRoom
     * 
-    * @return 
+    * @return Point
     */
     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
     /** 
@@ -200,21 +213,42 @@ private:
      * @param ped Pointer to Pedestrian
      * @param l reference to Wall
      * 
-     * @return 
+     * @return Point
      */
     Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
 
 public:
-
+    
     GompertzModel(DirectionStrategy* dir, double nuped, double nuwall);
     virtual ~GompertzModel(void);
-
+    
     DirectionStrategy* GetDirection() const;
+    /** 
+     * Get the parameter for the strength of the ped-PED repulsive force
+     * 
+     * 
+     * @return double 
+     */
     double GetNuPed() const;
+    /** 
+     * Get the parameter for the strength of the ped-WALL repulsive force
+     * 
+     * 
+     * @return 
+     */
     double GetNuWall() const;
-
-    // virtuelle Funktionen
+   virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
+    int roomID, int SubRoomID) const;
+   /**
+    * Solve the differential equations and update the positions and velocities
+    * @param t the actual time
+    * @param tp the next timestep
+    * @param building the geometry object
+    */
     virtual void CalculateForceLC(double t, double tp, Building* building) const;
+   /**
+    * @return all model parameters in a nicely formatted string
+    */
     virtual std::string writeParameter() const;
 };
 

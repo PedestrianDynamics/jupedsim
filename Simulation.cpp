@@ -28,6 +28,8 @@
 
 #include "Simulation.h"
 
+
+
 using namespace std;
 
 Simulation::Simulation() {
@@ -221,12 +223,21 @@ void Simulation::InitArgs(ArgumentParser* args) {
                     exit(EXIT_FAILURE);
                     break;     
 	}
-	_model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-			args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-			args->GetMaxFPed(), args->GetMaxFWall());
-	s.append("\tModel: GCFMModel\n");
-	s.append(_model->writeParameter());
-
+        int model =  args->GetModel();
+        if(model == 1) //GCFM
+        {
+            _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+                                   args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+                                   args->GetMaxFPed(), args->GetMaxFWall());
+            s.append("\tModel: GCFMModel\n");
+            s.append(_model->writeParameter());
+        }
+        else if (model == 2)//Gompertz
+        {
+            _model = new GompertzModel(_direction, args->GetNuPed(), args->GetNuWall() );
+            s.append("\tModel: GompertzModel\n");
+            s.append(_model->writeParameter());
+        }
 	// ODE solver
 	int solver = args->GetSolver();
 	sprintf(tmp, "\tODE Loeser: %d\n", solver);

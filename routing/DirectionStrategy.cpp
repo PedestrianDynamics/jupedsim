@@ -97,7 +97,7 @@ using namespace std;
     const Point& p1 = ped->GetExitLine()->GetPoint1();
     const Point& p2 = ped->GetExitLine()->GetPoint2();
     Line ExitLine = Line(p1, p2);
-    Point Lot = ExitLine.LotPoint( ped->GetPos() );
+    //Point Lot = ExitLine.LotPoint( ped->GetPos() );
     double d = 0.2; //shorten the line by  20 cm
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
@@ -175,7 +175,7 @@ using namespace std;
     // printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
     // printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
 
-    fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
+    // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
 
     //if(angle)
         //     getc(stdin);
