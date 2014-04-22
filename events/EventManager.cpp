@@ -13,7 +13,6 @@ EventManager::EventManager(Building *_b){
     _event_ids=vector<int>();
     _projectFilename = "";
     _building = _b;
-    _deltaT=NULL;
     _eventCounter=0;
     _dynamic=false;
     _file = fopen("../events/events.txt","r");
@@ -94,9 +93,8 @@ void EventManager::listEvents(){
         Log->Write("INFO: \tNo events in the events.xml");
     }
     else{
-        int i;
         char buf[10],buf2[10];
-        for(i=0;i<_event_times.size();i++){
+        for(unsigned int i=0;i<_event_times.size();i++){
             sprintf(buf,"%f",_event_times[i]);
             sprintf(buf2,"%d",_event_ids[i]);
             Log->Write("INFO: \tAfter "+string(buf)+" sec: "+_event_types[i]+" "+string(buf2)+" "+_event_states[i]);
@@ -164,7 +162,7 @@ void EventManager::Update_Events(double time, double d){
         }
     }
 
-    //dann muss die Reroutingzeit der Peds, die die neuen Infos noch nciht haben, aktualisiert werden:
+    //dann muss die Reroutingzeit der Peds, die die neuen Infos noch nicht haben, aktualisiert werden:
     for(int p=0;p<nSize;p++){
         if(!_allPedestrians[p]->GetNewEventFlag()){
             _allPedestrians[p]->UpdateReroutingTime();
@@ -236,7 +234,7 @@ void EventManager::changeRouting(int id, string state){
     //Abstand der aktuellen Position des Pedestrians zur entsprechenden Tuer: Tuer als Linie sehen und mit
     //DistTo(ped.GetPos()) den Abstand messen. Reroutezeit dann aus Entfernung und Geschwindigkeit berechnen.
     Line* l = new Line(t->GetPoint1(),t->GetPoint2());
-    for (int p = 0; p < nSize; ++p) {
+    for (unsigned int p = 0; p < nSize; ++p) {
         //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
         _allPedestrians[p]->SetNewEventFlag(false);
         double dist = l->DistTo(_allPedestrians[p]->GetPos());
