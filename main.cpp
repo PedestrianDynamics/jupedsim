@@ -54,24 +54,34 @@ OutputHandler* Log;
 
 int main(int argc, char **argv) {
 
-	time_t starttime, endtime;
-
+    time_t starttime, endtime, startinit, endinit, startsim, endsim;
+    time(&starttime);
 
 	//Log = new FileHandler("./Logfile.dat");
 	Log = new STDIOHandler();
-
+        
 	// Parsing the arguments
 	ArgumentParser* args = new ArgumentParser();
 	args->ParseArgs(argc, argv);
 
-	// create and init the simulation engine
+    // create and init the simulation engine
 	// Simulation
-	time(&starttime);
+//	time(&starttime);
+    if(args->GetProfileFlag()){
+        time(&startinit);
+    }
 	Log->Write("INFO: \tStart runSimulation()\n");
 	Simulation sim = Simulation();
 	sim.InitArgs(args);
+    if(args->GetProfileFlag()){
+        time(&endinit);
+        time(&startsim);
+    }
 	int evacTime = sim.RunSimulation();
 	Log->Write("\nINFO: \tEnd runSimulation()\n");
+    if(args->GetProfileFlag()){
+        time(&endsim); 
+    }
 	time(&endtime);
 
 	//some output
@@ -81,7 +91,13 @@ int main(int argc, char **argv) {
 		Log->Write("\nPedestrians not evacuated [%d] using [%d] threads", sim.GetPedsNumber(),
 				args->GetMaxOpenMPThreads());
 
-	Log->Write("\nExec Time [s]     : %.2f", execTime);
+    if(args->GetProfileFlag()){
+        double inittime = difftime(endinit,startinit);
+        double simtime = difftime(endsim,startsim);
+        Log->Write("Init Time [s]     : %.2f", inittime);
+        Log->Write("Sim Time [s]     : %.2f", simtime);
+    }
+	Log->Write("Exec Time [s]     : %.2f", execTime);
 	Log->Write("Evac Time [s]     : %d", evacTime);
 	Log->Write("Real Time Factor  : %.2f X\n", evacTime / execTime);
 

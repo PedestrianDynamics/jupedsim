@@ -82,6 +82,7 @@ private:
 	int pMaxOpenMPThreads;
 	FileFormat pFormat;
 	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
+    bool _profilingFlag;
 
 	// private Funktionen
 	void Usage();
@@ -144,6 +145,7 @@ public:
 	const string& GetNavigationMesh() const;
 	const string& GetProjectFile() const;
 	const string& GetProjectRootDir() const;
+    bool GetProfileFlag();
 
 	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;

@@ -124,6 +124,7 @@ ArgumentParser::ArgumentParser() {
 	pHostname="localhost";
 	_embedMesh=0;
 	pMaxOpenMPThreads = omp_get_thread_num();
+    _profilingFlag = false;
 }
 
 
@@ -135,7 +136,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 	//special case of the default configuration ini.xml
 	if(argc==1){
 		Log->Write("INFO: \tTrying to load the default configuration from the file <ini.xml>");
-		ParseIniFile("ini.xml");
+        ParseIniFile("ini.xml");
 		return;
 	}
 
@@ -178,18 +179,19 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			{"streaming-ip", 1, 0, 'O'},
 			{"help", 0, 0, 'h'},
 			{"inifile", optional_argument, 0, 'q'},
+            {"profiling", optional_argument, 0, 'u'},
 			{"generate-mesh", required_argument, 0, 'N'},
 			{0, 0, 0, 0}
 	};
 
 	while ((c = getopt_long_only(argc, argv,
-			"n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:",
+            "n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:u:",
 			long_options, &option_index)) != -1) {
 
 		switch (c) {
 		case 'T':
 		{
-			if (optarg)
+            if (optarg)
 				pTrajectoriesFile=optarg;
 			break;
 		}
@@ -426,7 +428,15 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 		case 'N':
 			pNavMeshFilename=optarg;
 			break;
-
+        case 'u':
+        {
+            int tmp = strcmp("true",optarg);
+            if(tmp==0)
+                _profilingFlag = true;
+            else
+                _profilingFlag = false;
+        }
+            break;
 		default:
 		{
 			Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
@@ -893,4 +903,8 @@ void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile) {
 
 const string& ArgumentParser::GetProjectRootDir() const {
 	return _projectRootDir;
+}
+
+bool ArgumentParser::GetProfileFlag(){
+    return _profilingFlag;
 }
