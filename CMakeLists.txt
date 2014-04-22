@@ -189,6 +189,7 @@ set (   source_files
   poly2tri/sweep/advancing_front.cpp
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
+  events/EventManager.cpp
   )
 set (   header_files
   routing/NavMesh.h
@@ -263,7 +264,7 @@ set (   header_files
   poly2tri/sweep/sweep_context.h
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
-
+  events/EventManager.h
   )
 
 
