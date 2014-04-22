@@ -25,8 +25,9 @@
 		</rooms>
 		<!-- doors states are: close or open -->
 		<doors>
-			<door trans_id="5" caption="" state="open" />
-			<door trans_id="8" caption="" state="open" />
+                        <door trans_id="3" caption="" state="open" />
+			<door trans_id="4" caption="" state="open" />
+			<door trans_id="6" caption="" state="open" />
 		</doors>
 	</traffic_constraints>
 
@@ -69,7 +70,7 @@
 			<group group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
 			<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
 			<group group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/>
-			<group group_id="2" room_id="0" number="1000" goal_id="-1" router_id="2" patience="5"/>
+			<group group_id="2" room_id="0" number="50" goal_id="-1" router_id="2" patience="5"/>
 			<group group_id="3" room_id="0" subroom_id="0" number="50" goal_id="-1" router_id="2" patience="5"/>
 		</agents_distribution>
 	</agents>
@@ -80,7 +81,7 @@
 			<parameters>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
-				<exitCrossingStrategy>5</exitCrossingStrategy>
+				<exitCrossingStrategy>4</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
 				<bmax mu="0.25" sigma="0.001" />
@@ -88,7 +89,7 @@
 				<amin mu="0.18" sigma="0.001" />
 				<tau mu="0.5" sigma="0.001" />
 				<atau mu="0.5" sigma="0.001" />
-				<force_ped nu="5"  />
+				<force_ped nu="10"  />
 				<force_wall nu="5" />
 			</parameters>
 		</model>

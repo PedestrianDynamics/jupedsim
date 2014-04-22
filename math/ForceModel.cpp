@@ -625,7 +625,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
     }
     double vp1_sq = vp1.ScalarP(vp1);
     if (vp1_sq < J_EPS_V*J_EPS_V){ // if(norm(v_i)==0)
-        K_ij = 0;
+        K_ij = J_EPS; //TODO: this is quick and dirty
     } 
     else{  // calculate K_ij
         double tmp = vp1.ScalarP(ep12); // < v_i , e_ij >
@@ -643,7 +643,9 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
     double b = 1.0, c=1.0; 
     
     B_ij = exp(-b*exp(-c*B_ij));
+    //TODO: check if we need K_ij in the  f
     f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * K_ij * B_ij;
+    //f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() b* B_ij;
     F_rep = ep12 * f;
     //check isNan
     if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {

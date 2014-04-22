@@ -10,8 +10,8 @@
 	<geometry>bateau.xml</geometry>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
-		<!--<file location="trajectories_4.xml" />    --> 
-		<socket hostname="127.0.0.1" port="8989"/>
+		<file location="trajectories_4.xml" /> 
+		<!-- <socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
 	<!-- where to store the logs -->
 	<!--<logfile>outputfiles/log.txt</logfile> -->
