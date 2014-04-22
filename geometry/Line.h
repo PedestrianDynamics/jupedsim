@@ -29,6 +29,7 @@
 #define	_LINE_H
 
 #include "Point.h"
+//#include "SubRoom.h"
 #include "../IO/OutputHandler.h"
 
 #include <string>
@@ -138,6 +139,11 @@ public:
      */
     double LengthSquare() const;
 
+    /* /\** */
+    /*  * @return dot product of two lines */
+    /*  *\/ */
+    /*     bool operator*(const Line& l) const; */
+
     /**
      * @return true if both segments are equal. The end points must be in the range of J_EPS.
      * @see Macro.h
@@ -157,6 +163,12 @@ public:
 	 */
 	bool IntersectionWith(const Line& l) const; // check two segments for intersections
 
+        /**
+         * @return the distance squared between the first point and the intersection
+         * point with line l. This is exactly the same function
+         * as @see IntersectionWith() but returns a double insteed.
+         */
+        double GetIntersectionDistance(const Line & l ) const;
 	/**
 	 * @return true if the segment intersects with the circle of radius r
 	 */
@@ -215,6 +227,11 @@ public:
 	 */
     std::string toString() const;
 
+	/**
+	 * @return the angle between two lines
+	 */
+    double GetAngle(const Line& l) const;
+//    double GetAngle(SubRoom s) const; 
 
 };
 

@@ -19,13 +19,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENCE</a>.
  *
  * @section DESCRIPTION
  *
  *
  */
-
 /**
  * @mainpage
  *
@@ -33,14 +32,13 @@
  *
  * JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
  *
- * @image html logo.png " "
+ * 
  *
  * Some useful links:
  *
- * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
+ * 	1: <A HREF="http://www.openpedsim.org">www.openpedsim.org</A> <BR>
  * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
- * 	3: <a href="http://www.digia.com/">www.digia.com</a> <br>
- * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+ * 	3: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
  * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
  *
  */
@@ -48,6 +46,7 @@
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 #include "Simulation.h"
+
 
 ///global unique log variable
 OutputHandler* Log;
@@ -68,6 +67,9 @@ int main(int argc, char **argv) {
 	// Simulation
 	time(&starttime);
 	Log->Write("INFO: \tStart runSimulation()\n");
+
+        
+
 	Simulation sim = Simulation();
 	sim.InitArgs(args);
 	int evacTime = sim.RunSimulation();

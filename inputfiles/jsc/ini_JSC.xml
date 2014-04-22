@@ -62,35 +62,35 @@
 	  <agents_distribution>
 <!--	    <group group_id="5" room_id="0" subroom_id="0" number="3" goal_id="" router_id="1" route_id="" />
 	    <group group_id="0" room_id="0" subroom_id="0" number="3" goal_id="" router_id="1" route_id="" />-->
-	    <group group_id="2" room_id="0" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="6" room_id="1" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="7" room_id="2" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="8" room_id="3" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="9" room_id="4" number="5" router_id="4" goal_id="1"/>
-	    <group group_id="10" room_id="5" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="11" room_id="6" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="12" room_id="7" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="13" room_id="8" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="14" room_id="9" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="15" room_id="10" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="16" room_id="11" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="17" room_id="12" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="18" room_id="13" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="19" room_id="14" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="20" room_id="15" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="21" room_id="16" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="22" room_id="17" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="23" room_id="18" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="24" room_id="19" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="25" room_id="20" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="26" room_id="21" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="27" room_id="22" number="15" router_id="4" goal_id="1"/>
-	    <group group_id="28" room_id="23" number="1" router_id="4" goal_id="1"/>
-	    <group group_id="29" room_id="24" number="1" router_id="4" goal_id="1"/>
+	    <group group_id="2" room_id="0" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="6" room_id="1" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="7" room_id="2" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="8" room_id="3" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="9" room_id="4" number="5" router_id="7" goal_id="1"/>
+	    <group group_id="10" room_id="5" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="11" room_id="6" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="12" room_id="7" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="13" room_id="8" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="14" room_id="9" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="15" room_id="10" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="16" room_id="11" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="17" room_id="12" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="18" room_id="13" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="19" room_id="14" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="20" room_id="15" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="21" room_id="16" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="22" room_id="17" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="23" room_id="18" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="24" room_id="19" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="25" room_id="20" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="26" room_id="21" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="27" room_id="22" number="15" router_id="7" goal_id="1"/>
+	    <group group_id="28" room_id="23" number="1" router_id="7" goal_id="1"/>
+	    <group group_id="29" room_id="24" number="1" router_id="7" goal_id="1"/>
 	  </agents_distribution>
 
 	  <agents_sources><!-- frequency in persons/minute -->
-	    <source id="1" frequency="60" agents_max="150" router_id="4" goal_id="" route_id="" caption="source 1">
+	    <source id="1" frequency="60" agents_max="150" router_id="7" goal_id="" route_id="" caption="source 1">
 	      <polygon>
 		<vertex px="10.0" py="4.0" />
 		<vertex px="10.0" py="0.0" />
@@ -130,7 +130,7 @@
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="4" description="dynamic">
+		<router router_id="7" description="cognitive_map">
 			<parameters>
 				<!-- extra routing information -->
 				<navigation_lines file="routing.xml" />

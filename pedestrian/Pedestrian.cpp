@@ -345,6 +345,10 @@ const Point& Pedestrian::GetV0(const Point& target) {
 
 
 	new_v0 = delta.Normalized();
+        _V0 = new_v0;
+        //printf("MC: delta = [%.2f %.2f]\n", delta.GetX(), delta.GetY());
+        //printf("MC: new_V0 = [%.2f %.2f]\n", new_v0.GetX(), new_v0.GetY());
+        return _V0;
 	// aktivieren, wenn Rotation aus sein soll
 	//pV0 = new_v0;
 	//return pV0;

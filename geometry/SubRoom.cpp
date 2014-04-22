@@ -894,7 +894,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals) {
 	if (orgPoly.size() != 4) {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): Stair %d Room %d ist kein Viereck!!!\n"
-				"Anzahl Ecken: %d\n", GetSubRoomID(), GetRoomID(), orgPoly.size());
+                        "Anzahl Ecken: %d\n", GetSubRoomID(), (int)GetRoomID(), (int)orgPoly.size());
 		Log->Write(tmp);
 		exit(EXIT_FAILURE);
 	}
