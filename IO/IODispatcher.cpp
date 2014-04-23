@@ -403,6 +403,112 @@ void TrajectoriesVTK::WriteFooter() {
 
 
 
+
+
+
+void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, int seed){
+	nPeds = building->GetNumberOfPedestrians();
+	string tmp;
+	tmp =
+			"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
+	char agents[CLENGTH] = "";
+	sprintf(agents, "\t<header version = \"0.6\">\n");
+	tmp.append(agents);
+	sprintf(agents, "\t\t<agents>%d</agents>\n", nPeds);
+	tmp.append(agents);
+	sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
+	tmp.append(agents);
+	sprintf(agents, "\t\t<frameRate>%f</frameRate>\n", fps);
+	tmp.append(agents);
+	tmp.append("\t\t<frameCount>xxxxx</frameCount>");
+	tmp.append("\t</header>\n");
+	Write(tmp);
+
+}
+
+void TrajectoriesJPSV06::WriteGeometry(Building* building){
+	// just put a link to the geometry file
+	string embed_geometry;
+	embed_geometry.append("\t<geometry>\n");
+	char file_location[CLENGTH] = "";
+	sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
+	embed_geometry.append(file_location);
+	embed_geometry.append("\t</geometry>\n");
+	Write(embed_geometry);
+
+	Write("\t<AttributeDescription>");
+	Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
+	Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
+	Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
+	Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
+	Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
+	Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
+	Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
+	Write("\t</AttributeDescription>\n");
+}
+
+void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building){
+	string data;
+	char tmp[CLENGTH] = "";
+	double RAD2DEG = 180.0 / M_PI;
+	vector<string> rooms_to_plot;
+
+	//promenade
+	//rooms_to_plot.push_back("010");
+
+	sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
+	data.append(tmp);
+
+	for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
+		Room* r = building->GetRoom(roomindex);
+		string caption = r->GetCaption();
+
+		if ((rooms_to_plot.empty() == false)
+				&& (IsElementInVector(rooms_to_plot, caption) == false)) {
+			continue;
+		}
+
+		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+			SubRoom* s = r->GetSubRoom(k);
+			for (int i = 0; i < s->GetNumberOfPedestrians(); ++i) {
+				Pedestrian* ped = s->GetPedestrian(i);
+
+
+				char tmp[CLENGTH] = "";
+
+				double v0 = ped->GetV0Norm();
+				if (v0 == 0.0) {
+					Log->Write("ERROR: TrajectoriesJPSV06()\t v0=0");
+					exit(0);
+				}
+				double v = ped->GetV().Norm();
+				int color = (int) (v / v0 * 255);
+				if(ped->GetSpotlight()==false) color=-1;
+
+				double a = ped->GetLargerAxis();
+				double b = ped->GetSmallerAxis();
+				double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+				sprintf(tmp, "<agent ID=\"%d\"\t"
+						"x=\"%.2f\"\ty=\"%.2f\"\t"
+						"z=\"%.2f\"\t"
+						"rA=\"%.2f\"\trB=\"%.2f\"\t"
+						"eO=\"%.2f\" eC=\"%d\"/>\n",
+						ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+						(ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+						phi * RAD2DEG, color);
+				data.append(tmp);
+			}
+		}
+	}
+	data.append("</frame>\n");
+	Write(data);
+}
+
+void TrajectoriesJPSV06::WriteFooter(){
+
+}
+
+
 void TrajectoriesXML_MESH::WriteGeometry(Building* building){
 	//Navigation mesh implementation
 	NavMesh* nv= new NavMesh(building);
