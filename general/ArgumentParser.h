@@ -42,6 +42,7 @@ extern OutputHandler* Log;
 
 class ArgumentParser {
 private:
+        int pModel;
 	string pHostname;
 	string pTrajectoriesFile;
 	string pErrorLogFile;
@@ -93,7 +94,7 @@ public:
 	// Getter-Funktionen
 	bool IsOnline() const;
 	bool GetLinkedCells() const;
-
+        int GetModel() const;
 	int GetSolver() const;
 	int GetExitStrategy() const;
 	int GetRandomize() const;

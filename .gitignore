@@ -3,6 +3,9 @@
 /bin/
 /Debug
 /Release
+/doc/html
+/figs
+/inputfiles
 *~
 
 # Compiled Object files
@@ -37,3 +40,12 @@ install_manifest.txt
 CTestTestfile.cmake
 DartConfiguration.tcl
 
+vgcore.*
+/d
+/figs/*
+/TAGS
+/math/test.cpp
+/.dir-locals.el
+/Doxyfile
+/*log*
+/*plot*

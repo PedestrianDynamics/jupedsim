@@ -46,7 +46,7 @@
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
 #include "events/EventManager.h" //neuer Header fuer die Events
-
+#include "routing/CognitiveMapRouter.h"
 
 extern OutputHandler* Log;
 

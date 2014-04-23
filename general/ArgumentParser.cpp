@@ -365,6 +365,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 		}
 		case 'R': // TODO: are these options still correct ?
 		{
+                    printf("---%s\n",optarg);
 			int r = atoi(optarg);
 			switch(r){
 			case 1:
@@ -548,13 +549,14 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 	}
 
-	//gcfm model parameters, only one node
+	//pick up which model to use
 	TiXmlElement* xGCFM=xMainNode->FirstChild("operational_models")->FirstChildElement("model");
-	if(string(xGCFM->Attribute("description"))=="gcfm"){
+        string modelName = string(xGCFM->Attribute("description"));
+        if(modelName == "gcfm" || modelName == "gompertz"){
+
 		TiXmlNode* xPara=xGCFM->FirstChild("parameters");
 
-		Log->Write("INFO:\tgcfm model found");
-
+		Log->Write("INFO:\t%s model used\n", modelName.c_str());
 		// For convenience. This moved to the header as it is not model specific
 		if(xPara->FirstChild("tmax")){
 			Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
@@ -656,22 +658,24 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 
 		//force_ped
-		if(xPara->FirstChild("force_ped")){
+                if(modelName == "gcfm"){
+                    pModel = 1;
+                    if(xPara->FirstChild("force_ped")){
 			string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
 			string dist_max=xPara->FirstChildElement("force_ped")->Attribute("dist_max");
 			string disteff_max=xPara->FirstChildElement("force_ped")->Attribute("disteff_max");
 			string interpolation_width=xPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
-
+                        
 			pMaxFPed=atof(dist_max.c_str());
 			pNuPed=atof(nu.c_str());
 			pDistEffMaxPed=atof(disteff_max.c_str());
 			pIntPWidthPed=atof(interpolation_width.c_str());
 			Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
-					+ disteff_max+ ", interpolation_width="+interpolation_width);
-		}
-
-		//force_wall
-		if(xPara->FirstChild("force_wall")){
+                                   + disteff_max+ ", interpolation_width="+interpolation_width);
+                    }
+                    
+                    //force_wall
+                    if(xPara->FirstChild("force_wall")){
 			string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
 			string dist_max=xPara->FirstChildElement("force_wall")->Attribute("dist_max");
 			string disteff_max=xPara->FirstChildElement("force_wall")->Attribute("disteff_max");
@@ -681,9 +685,26 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pDistEffMaxWall=atof(disteff_max.c_str());
 			pIntPWidthWall=atof(interpolation_width.c_str());
 			Log->Write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
-					+ disteff_max+ ", interpolation_width="+interpolation_width);
-		}
-	}
+                                   + disteff_max+ ", interpolation_width="+interpolation_width);
+                    }
+                }//if gcfm
+                else if(modelName == "gompertz"){
+                    pModel = 2;
+        	//force_ped
+                    if(xPara->FirstChild("force_ped")){
+                        string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
+                        pNuPed=atof(nu.c_str());
+			Log->Write("INFO: \tfrep_ped mu=" +nu);
+                                
+                    }
+                    //force_wall
+                    if(xPara->FirstChild("force_wall")){
+			string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
+                        pNuWall=atof(nu.c_str());
+			Log->Write("INFO: \tfrep_wall mu=" +nu);
+                    }            
+                }
+        }//gcfm
 	else
 	{
 		Log->Write("INFO: \tno gcfm parameter values found");
@@ -718,6 +739,8 @@ void ArgumentParser::ParseIniFile(string inifile){
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_DUMMY));
 		else if(strategy=="global_safest")
 			pRoutingStrategies.push_back(make_pair(id,ROUTING_SAFEST));
+		else if(strategy=="cognitive_map")
+			pRoutingStrategies.push_back(make_pair(id,ROUTING_COGNITIVEMAP));
 		else{
 			Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",strategy.c_str());
 			exit(EXIT_FAILURE);
@@ -728,6 +751,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 }
 
 
+int ArgumentParser::GetModel() const { return pModel; }
 const FileFormat& ArgumentParser::GetFileFormat() const {
 	return pFormat;
 }

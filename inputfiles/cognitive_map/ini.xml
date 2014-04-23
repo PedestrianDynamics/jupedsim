@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+
+  <!-- seed used for initialising random generator -->
+  <seed>12542</seed>
+  <!-- geometry file -->
+  <geometry>geo.xml</geometry>
+  <!-- trajectories file and format -->
+  <trajectories format="xml-plain" embed_mesh="false" fps="8">
+    <file location="trajectories.xml" />
+    <!--<socket hostname="127.0.0.1" port="8989"/> -->
+  </trajectories>
+  <!-- where to store the logs -->
+  <!--<logfile>outputfiles/log.txt</logfile> -->
+
+
+  <!-- traffic information: e.g closed doors or smoked rooms -->
+  <traffic_constraints>
+    <!-- room states are: good or smoked -->
+    <rooms>
+      <room room_id="0" state="good" />
+    </rooms>
+    <!-- doors states are: close or open -->
+    <doors>
+      <door trans_id="1" caption="" state="open" />
+      <door trans_id="2" caption="" state="close" />
+    </doors>
+  </traffic_constraints>
+
+  <routing>
+    <goals>
+      <goal id="0" final="false" caption="goal 1">
+	<polygon>
+	  <vertex px="-1.0" py="5.0" />
+	  <vertex px="-1.0" py="6.5" />
+	  <vertex px="-2.0" py="6.5" />
+	  <vertex px="-2.0" py="5.0" />
+	  <vertex px="-1.0" py="5.0" />
+	</polygon>
+      </goal>
+      <goal id="1" final="false" caption="goal 2">
+	<polygon>
+	  <vertex px="24.0" py="6.5" />
+	  <vertex px="23.0" py="6.5" />
+	  <vertex px="23.0" py="5.0" />
+	  <vertex px="24.0" py="5.0" />
+	  <vertex px="24.0" py="6.5" />
+	</polygon>
+      </goal>
+    </goals>
+
+    <!-- in the form goal_id1:goal_id2:goal_id3:..:goal_idn -->
+    <routes>
+      <route id="1">0:1:0:1:0:1:2</route>
+      <route id="2">0:1:0:1:2</route>
+    </routes>
+  </routing>
+
+  <!--persons information and distribution -->
+  <agents>
+    <agents_distribution>
+      <group group_id="1" room_id="0" number="50" router_id="7" />
+    </agents_distribution>
+
+  </agents>
+
+  <!-- These parameters may be overwritten -->
+  <operational_models>
+    <model id="1" description="gcfm">
+      <parameters>
+	<tmax unit="sec">900</tmax>
+	<solver>euler</solver>
+	<stepsize>0.01</stepsize>
+	<exitCrossingStrategy>3</exitCrossingStrategy>
+	<linkedcells enabled="true" cell_size="2.2" />
+	<v0 mu="1.24" sigma="0.001" />
+	<bmax mu="0.25" sigma="0.001" />
+	<bmin mu="0.20" sigma="0.001" />
+	<amin mu="0.18" sigma="0.001" />
+	<tau mu="0.5" sigma="0.001" />
+	<atau mu="0.5" sigma="0.001" />
+	<force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+	<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+      </parameters>
+    </model>
+
+  </operational_models>
+
+  <route_choice_models>
+    <router router_id="7" description="cognitive_map">
+      <parameters>
+	<!-- extra routing information -->
+	<navigation_lines file="routing.xml" />
+      </parameters>
+    </router>
+
+  </route_choice_models>
+
+</JuPedSim>

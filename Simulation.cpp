@@ -1,5 +1,5 @@
 /**
- * @file    Simulation.cpp
+ * @file Simulation.cpp
  * @date Created on: Dec 15, 2010
  * Copyright (C) <2009-2011>
  *
@@ -27,6 +27,8 @@
  */
 
 #include "Simulation.h"
+
+
 
 using namespace std;
 
@@ -207,7 +209,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	sprintf(tmp, "\tDirection to the exit: %d\n", direction);
 	s.append(tmp);
 	switch (direction) {
-		case 1:
+                case 1:
 			_direction = new DirectionMiddlePoint();
 			break;
 		case 2:
@@ -219,13 +221,29 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		case 4:
 			_direction = new DirectionInRangeBottleneck();
 			break;
+                case 5:
+                        _direction = new DirectionGeneral();
+			break;
+                default:
+                    cout<<"Direction strategy not available. Exit"<<endl;
+                    exit(EXIT_FAILURE);
+                    break;     
 	}
-	_model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-			args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-			args->GetMaxFPed(), args->GetMaxFWall());
-	s.append("\tModel: GCFMModel\n");
-	s.append(_model->writeParameter());
-
+        int model =  args->GetModel();
+        if(model == 1) //GCFM
+        {
+            _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+                                   args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+                                   args->GetMaxFPed(), args->GetMaxFWall());
+            s.append("\tModel: GCFMModel\n");
+            s.append(_model->writeParameter());
+        }
+        else if (model == 2)//Gompertz
+        {
+            _model = new GompertzModel(_direction, args->GetNuPed(), args->GetNuWall() );
+            s.append("\tModel: GompertzModel\n");
+            s.append(_model->writeParameter());
+        }
 	// ODE solver
 	int solver = args->GetSolver();
 	sprintf(tmp, "\tODE Loeser: %d\n", solver);
@@ -259,6 +277,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	for (unsigned int r= 0;r<routers.size();r++){
 
 		RoutingStrategy strategy=routers[r].second;
+
 		int routerID=routers[r].first;
 
 		switch (strategy) {
@@ -273,7 +292,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case ROUTING_GLOBAL_SHORTEST:
 		{
-                           
+
 			Router* router=new GlobalRouter();
 			router->SetID(routerID);
 			router->SetStrategy(strategy);
@@ -319,11 +338,20 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case ROUTING_SAFEST:
 		{
-			Router* router=new SafestPathRouter();
+			Router * router=new SafestPathRouter();
 			router->SetID(routerID);
 			router->SetStrategy(strategy);
 			routingEngine->AddRouter(router);
-			s.append("\tRouting Strategy safest path router added\n");
+			s.append("\tRouting Strategy cognitive map router added\n");
+			break;
+		}
+                case ROUTING_COGNITIVEMAP:
+		{
+			Router* router=new CognitiveMapRouter();
+			router->SetID(routerID);
+			router->SetStrategy(strategy);
+			routingEngine->AddRouter(router);
+			s.append("\tRouting Strategy dummy router added\n");
 			break;
 		}
 		case ROUTING_UNDEFINED:
