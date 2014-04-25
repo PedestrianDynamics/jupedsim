@@ -111,7 +111,17 @@ public:
 
 };
 
+class TrajectoriesJPSV06: public IODispatcher {
 
+public:
+	TrajectoriesJPSV06(){};
+	virtual ~TrajectoriesJPSV06(){};
+
+	virtual void WriteHeader(int nPeds, double fps, Building* building, int seed);
+	virtual void WriteGeometry(Building* building);
+	virtual void WriteFrame(int frameNr, Building* building);
+	virtual void WriteFooter();
+};
 
 #endif	/* _IODISPATCHER_H */
 

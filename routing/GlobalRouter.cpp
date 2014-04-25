@@ -663,8 +663,11 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped) {
 
 
 		//check if visible
-		if (sub->IsVisible(posA, posC, true) == false)
+		if (sub->IsVisible(posA, posC, true) == false){
+			ped->RerouteIn(10);
+			//ped->Dump(ped->GetID());
 			continue;
+		}
 
 		double dist = ap->GetDistanceTo(ped->GetFinalDestination())
 										+ ap->DistanceTo(posA.GetX(), posA.GetY());
@@ -708,12 +711,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 
 	for(unsigned int g1=0;g1<goals.size();g1++){
 		AccessPoint* ap=_accessPoints[goals[g1]];
-		//cout<<"Checking APs:" <<ap->GetID();
 		bool relevant=true;
 		for(unsigned int g2=0;g2<goals.size();g2++){
 			if(goals[g2]==goals[g1]) continue; // always skeep myself
-		//cout<<"Against APs:" <<goals[g2]<<endl;
-			//int exitid=goals[g2];
 			if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]){
 				//FIXME there are interference with hlines. suitable only for quickest route considering exits,
 				// crossings only

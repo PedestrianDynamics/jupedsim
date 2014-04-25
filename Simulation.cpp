@@ -162,8 +162,12 @@ void Simulation::InitArgs(ArgumentParser* args) {
 		}
 		case FORMAT_XML_BIN:
 		{
-			Log->Write("INFO: \tFormat xml-bin not yet supported\n");
-			exit(0);
+			OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
+			if(_iod) delete _iod;
+			_iod = new TrajectoriesJPSV06();
+			_iod->AddIO(tofile);
+			//Log->Write("INFO: \tFormat xml-bin not yet supported\n");
+			//exit(0);
 			break;
 		}
 		case FORMAT_PLAIN:
