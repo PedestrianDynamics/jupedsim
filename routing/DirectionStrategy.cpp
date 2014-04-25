@@ -54,9 +54,20 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
     const Point& p2 = ped->GetExitLine()->GetPoint2();
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
-
+    Point target = e_neu.ShortestPoint(ped->GetPos());
+    // if(ped->GetID() == 4)
+    // {
+    //     printf("X=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
+    //     printf("p1=[%.2f, %.2f], p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY());
+    //     printf("diff=[%.2f, %.2f]\n", diff.GetX(), diff.GetY());
+    //     printf("p1-diff=[%.2f, %.2f], p2+diff=[%.2f, %.2f]\n", (p1-diff).GetX(), (p1-diff).GetY(), (p2+diff).GetX(), (p2+diff).GetY() );
+        
+    //     printf("target=[%.2f, %.2f]\n", target.GetX(), target.GetY());
+        
+    // }
     // kürzester Punkt auf der Linie
-    return  e_neu.ShortestPoint(ped->GetPos());
+    
+    return  target;
 
 }
 

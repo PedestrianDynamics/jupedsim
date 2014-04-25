@@ -305,6 +305,7 @@ const Point& Pedestrian::GetV0() const {
 	return _V0;
 }
 
+
 double Pedestrian::GetV0Norm() const {
 	return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
