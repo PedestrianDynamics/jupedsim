@@ -674,6 +674,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
     }
     return F_rep;
 }//END Gompertz:ForceRepPed()
+
 Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const{
     Point f = Point(0., 0.);
     //first the walls
@@ -750,6 +751,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
     //     printf("wall2IsBehind=%f,  wallIsBehindv=%f\n", wallIsBehind, wallIsBehindv);
     // }
     
+
 
     if ( wallIsBehindv < J_EPS && wallIsBehind < J_EPS) { // Wall is behind the direction of motion
            return F_wrep;

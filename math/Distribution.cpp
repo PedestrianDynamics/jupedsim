@@ -31,7 +31,9 @@
 
 
 #include <cstdlib>
-#include <cmath>
+//http://stackoverflow.com/questions/1727881/how-to-use-the-pi-constant-in-c
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 using namespace std;
 

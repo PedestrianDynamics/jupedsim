@@ -31,6 +31,10 @@
 #include <vector>
 #include <string.h>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+#define M_PI		3.14159265358979323846
+
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
 
