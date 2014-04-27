@@ -274,15 +274,15 @@ add_library ( core SHARED ${source_files} )
 add_executable(
   jpscore main.cpp
   )
-
 target_link_libraries(jpscore  core)
-
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)
 endif(WIN32)
 
-
+if(CGAL_FOUND)
+   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+endif(CGAL_FOUND)
 #---------------------------- compiler -------------------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   message(STATUS "Using CLANG++" )

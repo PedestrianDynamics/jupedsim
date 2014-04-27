@@ -706,17 +706,6 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
     // printf("in GompertzWall\n");
     // getc(stdin);
     // if direction of pedestrians does not intersect walls --> ignore
-    const Point& v = ped->GetV();
-    Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
-    if(direction.IntersectionWith(w) == false)
-    {
-        // if(ped->GetID() == 40){
-        //     printf("------\n no intersection\n");
-        //     printf ("Wall [%f %f]<-->[%f %f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY());
-        //     printf("Pos= [%f, %f] v=[%f, %f]\n======\n",ped->GetPos().GetX(), ped->GetPos().GetY(), (v*100).GetX(), (v*100).GetY());
-        // }
-        return F_wrep;
-    }
     
     Point pt = w.ShortestPoint(ped->GetPos());
     double wlen = w.LengthSquare();
@@ -736,6 +725,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
     Point r;
     Point pinE; // vorher x1, y1
     const JEllipse& E = ped->GetEllipse();
+    const Point& v = ped->GetV();
 
     if (Distance < J_EPS){
         Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall. Return default values",ped->GetID());    
@@ -761,9 +751,9 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
     // }
     
 
-    if (wallIsBehindv < J_EPS && wallIsBehind < J_EPS) { // Wall is behind the direction of motion
-        return F_wrep;
-    }
+    if ( wallIsBehindv < J_EPS && wallIsBehind < J_EPS) { // Wall is behind the direction of motion
+           return F_wrep;
+      }
 //------------------------------------------------------------------------
 // if (fabs(v.GetX()) < J_EPS_V && fabs(v.GetY()) < J_EPS_V) // v==0)
     //     return F;
@@ -775,6 +765,24 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
     // Punkt auf der Ellipse
     r = E.PointOnEllipse(pinE);
     Radius  = (r - E.GetCenter()).Norm();
+
+    //-------------------------
+    
+    const Point& pos = ped->GetPos();
+    double distGoal = ped->GetExitLine()->DistTo(pos);
+    if(distGoal < J_EPS_GOAL)
+        return F_wrep;
+
+    Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
+    if(Distance>Radius && direction.IntersectionWith(w) == false )
+    {
+        return F_wrep;
+    }
+    
+//-------------------------
+
+
+
     //TODO: Check later if other values are more appropriate
     double b = 0.7, c = 3.0; 
     B_iw = 1.0 - Distance/(Radius);
@@ -784,11 +792,12 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
 
     F_wrep = e_iw * f;
 
-    // if(ped->GetID() == 40)// && F_wrep.Norm()>J_EPS && w.GetPoint1().GetX()==w.GetPoint2().GetX() )
-    // { 
-    //     printf ("Wall  [%f %f]<-->[%f %f] Force=[%f ,%f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F_wrep.GetX(), F_wrep.GetY());
-    //     printf("X= %f, Y=%f\n",ped->GetPos().GetX(), ped->GetPos().GetY());
-    // }
+     // if(1)// && F_wrep.Norm()>J_EPS && w.GetPoint1().GetX()==w.GetPoint2().GetX() )
+     // { 
+     //     printf("\n---- %d Radius=%f, dist=%f\n",ped->GetID(), Radius, Distance);
+     //     printf ("Wall  [%f %f]<-->[%f %f] Force=[%f ,%f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F_wrep.GetX(), F_wrep.GetY());
+     //     printf("X= %f, Y=%f\n",ped->GetPos().GetX(), ped->GetPos().GetY());
+     // }
     return F_wrep;
 }
 
@@ -899,9 +908,9 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
             //fd = fd + Point(correction, correction);
 
             Point acc = (fd + repPed + repWall) / ped->GetMass();
-            // if (ped->GetID()==logped){
-            //     printf("<<MC GOMPERTZ fd=[%.2f, %.2f] F_rep=[%.2f, %.2f], repWall=[%.2f, %.2f], acc=[%.2f, %.2f]\n", fd.GetX(), fd.GetY(),  repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY(), acc.GetX(), acc.GetY() );
-            // }
+             // if (1){
+             //     printf("<<%d GOMPERTZ fd=[%.2f, %.2f] F_rep=[%.2f, %.2f], repWall=[%.2f, %.2f], acc=[%.2f, %.2f]\n",ped->GetID(), fd.GetX(), fd.GetY(),  repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY(), acc.GetX(), acc.GetY() );
+             // }
 //--------------------------------- limiting high accelerations to v0/tau *coef
             // double  nacc = acc.Norm();
             //double maxf = ped->GetV0Norm()/ped->GetTau();
