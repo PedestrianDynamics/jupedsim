@@ -365,7 +365,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 		}
 		case 'R': // TODO: are these options still correct ?
 		{
-                    printf("---%s\n",optarg);
+			printf("---%s\n",optarg);
 			int r = atoi(optarg);
 			switch(r){
 			case 1:
@@ -487,10 +487,10 @@ void ArgumentParser::ParseIniFile(string inifile){
 		Log->Write("ERROR:\t There is no header version. I am assuming %s",JPS_VERSION);
 	}
 	else
-	if(string(xMainNode->Attribute("version"))!=JPS_VERSION){
-		Log->Write("ERROR:\t Wrong header version. Only version %s is supported.",JPS_VERSION);
-		exit(EXIT_FAILURE);
-	}
+		if(string(xMainNode->Attribute("version"))!=JPS_VERSION){
+			Log->Write("ERROR:\t Wrong header version. Only version %s is supported.",JPS_VERSION);
+			exit(EXIT_FAILURE);
+		}
 
 	//seed
 	if(xMainNode->FirstChild("seed")){
@@ -524,7 +524,7 @@ void ArgumentParser::ParseIniFile(string inifile){
 		string format= xMainNode->FirstChildElement("trajectories")->Attribute("format")?
 				xMainNode->FirstChildElement("trajectories")->Attribute("format"):"xml-plain";
 		if(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))
-		_embedMesh = string(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true"?1:0;
+			_embedMesh = string(xMainNode->FirstChildElement("trajectories")->Attribute("embed_mesh"))=="true"?1:0;
 
 		if(format=="xml-plain") pFormat=FORMAT_XML_PLAIN;
 		if(format=="xml-plain" && _embedMesh==1) pFormat=FORMAT_XML_PLAIN_WITH_MESH;
@@ -551,8 +551,8 @@ void ArgumentParser::ParseIniFile(string inifile){
 
 	//pick up which model to use
 	TiXmlElement* xGCFM=xMainNode->FirstChild("operational_models")->FirstChildElement("model");
-        string modelName = string(xGCFM->Attribute("description"));
-        if(modelName == "gcfm" || modelName == "gompertz"){
+	string modelName = string(xGCFM->Attribute("description"));
+	if(modelName == "gcfm" || modelName == "gompertz"){
 
 		TiXmlNode* xPara=xGCFM->FirstChild("parameters");
 
@@ -658,53 +658,53 @@ void ArgumentParser::ParseIniFile(string inifile){
 		}
 
 		//force_ped
-                if(modelName == "gcfm"){
-                    pModel = 1;
-                    if(xPara->FirstChild("force_ped")){
-			string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
-			string dist_max=xPara->FirstChildElement("force_ped")->Attribute("dist_max");
-			string disteff_max=xPara->FirstChildElement("force_ped")->Attribute("disteff_max");
-			string interpolation_width=xPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
-                        
-			pMaxFPed=atof(dist_max.c_str());
-			pNuPed=atof(nu.c_str());
-			pDistEffMaxPed=atof(disteff_max.c_str());
-			pIntPWidthPed=atof(interpolation_width.c_str());
-			Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
-                                   + disteff_max+ ", interpolation_width="+interpolation_width);
-                    }
-                    
-                    //force_wall
-                    if(xPara->FirstChild("force_wall")){
-			string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
-			string dist_max=xPara->FirstChildElement("force_wall")->Attribute("dist_max");
-			string disteff_max=xPara->FirstChildElement("force_wall")->Attribute("disteff_max");
-			string interpolation_width=xPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
-			pMaxFWall=atof(dist_max.c_str());
-			pNuWall=atof(nu.c_str());
-			pDistEffMaxWall=atof(disteff_max.c_str());
-			pIntPWidthWall=atof(interpolation_width.c_str());
-			Log->Write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
-                                   + disteff_max+ ", interpolation_width="+interpolation_width);
-                    }
-                }//if gcfm
-                else if(modelName == "gompertz"){
-                    pModel = 2;
-        	//force_ped
-                    if(xPara->FirstChild("force_ped")){
-                        string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
-                        pNuPed=atof(nu.c_str());
-			Log->Write("INFO: \tfrep_ped mu=" +nu);
-                                
-                    }
-                    //force_wall
-                    if(xPara->FirstChild("force_wall")){
-			string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
-                        pNuWall=atof(nu.c_str());
-			Log->Write("INFO: \tfrep_wall mu=" +nu);
-                    }            
-                }
-        }//gcfm
+		if(modelName == "gcfm"){
+			pModel = 1;
+			if(xPara->FirstChild("force_ped")){
+				string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
+				string dist_max=xPara->FirstChildElement("force_ped")->Attribute("dist_max");
+				string disteff_max=xPara->FirstChildElement("force_ped")->Attribute("disteff_max");
+				string interpolation_width=xPara->FirstChildElement("force_ped")->Attribute("interpolation_width");
+
+				pMaxFPed=atof(dist_max.c_str());
+				pNuPed=atof(nu.c_str());
+				pDistEffMaxPed=atof(disteff_max.c_str());
+				pIntPWidthPed=atof(interpolation_width.c_str());
+				Log->Write("INFO: \tfrep_ped mu=" +nu +", dist_max="+dist_max+", disteff_max="
+						+ disteff_max+ ", interpolation_width="+interpolation_width);
+			}
+
+			//force_wall
+			if(xPara->FirstChild("force_wall")){
+				string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
+				string dist_max=xPara->FirstChildElement("force_wall")->Attribute("dist_max");
+				string disteff_max=xPara->FirstChildElement("force_wall")->Attribute("disteff_max");
+				string interpolation_width=xPara->FirstChildElement("force_wall")->Attribute("interpolation_width");
+				pMaxFWall=atof(dist_max.c_str());
+				pNuWall=atof(nu.c_str());
+				pDistEffMaxWall=atof(disteff_max.c_str());
+				pIntPWidthWall=atof(interpolation_width.c_str());
+				Log->Write("INFO: \tfrep_wall mu=" +nu +", dist_max="+dist_max+", disteff_max="
+						+ disteff_max+ ", interpolation_width="+interpolation_width);
+			}
+		}//if gcfm
+		else if(modelName == "gompertz"){
+			pModel = 2;
+			//force_ped
+			if(xPara->FirstChild("force_ped")){
+				string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
+				pNuPed=atof(nu.c_str());
+				Log->Write("INFO: \tfrep_ped mu=" +nu);
+
+			}
+			//force_wall
+			if(xPara->FirstChild("force_wall")){
+				string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
+				pNuWall=atof(nu.c_str());
+				Log->Write("INFO: \tfrep_wall mu=" +nu);
+			}
+		}
+	}//gcfm
 	else
 	{
 		Log->Write("INFO: \tno gcfm parameter values found");

@@ -76,6 +76,8 @@ private:
     IODispatcher* _iod;
     ///new: EventManager
     EventManager* _em;
+    /// argument parser
+    ArgumentParser* _argsParser;
 
 
 public:

@@ -44,7 +44,7 @@ Simulation::Simulation() {
 	_solver = NULL;
 	_iod = new IODispatcher();
 	_fps=1;
-    _em=NULL;
+	_em=NULL;
 }
 
 Simulation::~Simulation() {
@@ -54,7 +54,7 @@ Simulation::~Simulation() {
 	delete _model;
 	delete _solver;
 	delete _iod;
-    delete _em;
+	delete _em;
 }
 
 /************************************************
@@ -85,26 +85,27 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	char tmp[CLENGTH];
 	string s = "Parameter:\n";
 
+	_argsParser=args;
 	switch (args->GetLog()) {
-		case 0:
-			// no log file
-			//Log = new OutputHandler();
-			break;
-		case 1:
-			if(Log) delete Log;
-			Log = new STDIOHandler();
-			break;
-		case 2:
-		{
-			char name[CLENGTH]="";
-			sprintf(name,"%s.P0.dat",args->GetErrorLogFile().c_str());
-			if(Log) delete Log;
-			Log = new FileHandler(name);
-		}
+	case 0:
+		// no log file
+		//Log = new OutputHandler();
 		break;
-		default:
-			printf("Wrong option for Logfile!\n\n");
-			exit(0);
+	case 1:
+		if(Log) delete Log;
+		Log = new STDIOHandler();
+		break;
+	case 2:
+	{
+		char name[CLENGTH]="";
+		sprintf(name,"%s.P0.dat",args->GetErrorLogFile().c_str());
+		if(Log) delete Log;
+		Log = new FileHandler(name);
+	}
+	break;
+	default:
+		printf("Wrong option for Logfile!\n\n");
+		exit(0);
 	}
 
 
@@ -209,55 +210,55 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	sprintf(tmp, "\tDirection to the exit: %d\n", direction);
 	s.append(tmp);
 	switch (direction) {
-                case 1:
-			_direction = new DirectionMiddlePoint();
-			break;
-		case 2:
-			_direction = new DirectionMinSeperation();
-			break;
-		case 3:
-			_direction = new DirectionMinSeperationShorterLine();
-			break;
-		case 4:
-			_direction = new DirectionInRangeBottleneck();
-			break;
-                case 5:
-                        _direction = new DirectionGeneral();
-			break;
-                default:
-                    cout<<"Direction strategy not available. Exit"<<endl;
-                    exit(EXIT_FAILURE);
-                    break;     
+	case 1:
+		_direction = new DirectionMiddlePoint();
+		break;
+	case 2:
+		_direction = new DirectionMinSeperation();
+		break;
+	case 3:
+		_direction = new DirectionMinSeperationShorterLine();
+		break;
+	case 4:
+		_direction = new DirectionInRangeBottleneck();
+		break;
+	case 5:
+		_direction = new DirectionGeneral();
+		break;
+	default:
+		cout<<"Direction strategy not available. Exit"<<endl;
+		exit(EXIT_FAILURE);
+		break;
 	}
-        int model =  args->GetModel();
-        if(model == 1) //GCFM
-        {
-            _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-                                   args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-                                   args->GetMaxFPed(), args->GetMaxFWall());
-            s.append("\tModel: GCFMModel\n");
-            s.append(_model->writeParameter());
-        }
-        else if (model == 2)//Gompertz
-        {
-            _model = new GompertzModel(_direction, args->GetNuPed(), args->GetNuWall() );
-            s.append("\tModel: GompertzModel\n");
-            s.append(_model->writeParameter());
-        }
+	int model =  args->GetModel();
+	if(model == 1) //GCFM
+	{
+		_model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+				args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+				args->GetMaxFPed(), args->GetMaxFWall());
+		s.append("\tModel: GCFMModel\n");
+		s.append(_model->writeParameter());
+	}
+	else if (model == 2)//Gompertz
+	{
+		_model = new GompertzModel(_direction, args->GetNuPed(), args->GetNuWall() );
+		s.append("\tModel: GompertzModel\n");
+		s.append(_model->writeParameter());
+	}
 	// ODE solver
 	int solver = args->GetSolver();
 	sprintf(tmp, "\tODE Loeser: %d\n", solver);
 	s.append(tmp);
 	switch (solver) {
-		case 1:
-			_solver = new EulerSolverLC(_model);
-			break;
-		case 2:
-			_solver = new VelocityVerletSolver(_model);
-			break;
-		case 3:
-			_solver = new LeapfrogSolver(_model);
-			break;
+	case 1:
+		_solver = new EulerSolverLC(_model);
+		break;
+	case 2:
+		_solver = new VelocityVerletSolver(_model);
+		break;
+	case 3:
+		_solver = new LeapfrogSolver(_model);
+		break;
 	}
 	_tmax = args->GetTmax();
 	sprintf(tmp, "\tt_max: %f\n", _tmax);
@@ -345,7 +346,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			s.append("\tRouting Strategy cognitive map router added\n");
 			break;
 		}
-                case ROUTING_COGNITIVEMAP:
+		case ROUTING_COGNITIVEMAP:
 		{
 			Router* router=new CognitiveMapRouter();
 			router->SetID(routerID);
@@ -414,12 +415,12 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	// perform a general check to the .
 	_building->SanityCheck();
 
-    //read the events
-    _em = new EventManager(_building);
-    _em->SetProjectFilename(args->GetProjectFile());
-    _em->SetProjectRootDir(args->GetProjectRootDir());
-    _em->readEventsXml();
-    _em->listEvents();
+	//read the events
+	_em = new EventManager(_building);
+	_em->SetProjectFilename(args->GetProjectFile());
+	_em->SetProjectRootDir(args->GetProjectRootDir());
+	_em->readEventsXml();
+	_em->listEvents();
 }
 
 
@@ -437,7 +438,7 @@ int Simulation::RunSimulation() {
 	_iod->WriteFrame(0,_building);
 
 	//first initialisation needed by the linked-cells
-	 Update();
+	Update();
 
 	// main program loop
 	for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
@@ -446,7 +447,7 @@ int Simulation::RunSimulation() {
 		_solver->solveODE(t, t + _deltaT, _building);
 		// gucken ob Fußgänger in neuen Räumen/Unterräumen
 		Update();
-        _em->Update_Events(t,_deltaT);
+		_em->Update_Events(t,_deltaT);
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			_iod->WriteFrame(frameNr / writeInterval, _building);
@@ -455,6 +456,26 @@ int Simulation::RunSimulation() {
 	}
 	// writing the footer
 	_iod->WriteFooter();
+
+
+	if(_argsParser->GetFileFormat()==FORMAT_XML_BIN){
+
+		delete _iod;
+		_iod=NULL;
+
+//		char tmp[CLENGTH];
+//		int f= frameNr / writeInterval ;
+//		sprintf(tmp,"<frameCount>%07d</frameCount>",f);
+//		string frameCount (tmp);
+
+		char replace[CLENGTH];
+		// open the file and replace the 8th line
+		sprintf(replace,"sed -i '9s/.*/ %d /' %s", frameNr/ writeInterval, _argsParser->GetTrajectoriesFile().c_str());
+		//sprintf(replace,"sed -i '8s#.*#<%s>#' %s",  "glas", _argsParser->GetTrajectoriesFile().c_str());
+		//sprintf(replace,"sed -i '8s#.*#%s#' %s",  "\\<te\\>", _argsParser->GetTrajectoriesFile().c_str());
+
+		system(replace);
+	}
 
 	//return the evacuation time
 	return (int) t;

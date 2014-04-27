@@ -6,7 +6,9 @@
  */
 
 #include "NavMesh.h"
-#include <cmath>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 //#include "../MCD/GeomPoly.h"
 //#include "../MCD/GeomVector.h"
 //#include "../MCD/AlgorithmMCD.h"

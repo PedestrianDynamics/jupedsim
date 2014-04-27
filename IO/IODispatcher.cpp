@@ -29,6 +29,9 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/NavMesh.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 using namespace std;
 
@@ -420,7 +423,10 @@ void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, 
 	tmp.append(agents);
 	sprintf(agents, "\t\t<frameRate>%f</frameRate>\n", fps);
 	tmp.append(agents);
-	tmp.append("\t\t<frameCount>xxxxx</frameCount>");
+	tmp.append("\t\t<!-- Frame count HACK\n");
+	tmp.append("replace me\n");
+	tmp.append("\t\tFrame count HACK -->\n");
+//	tmp.append("<frameCount>xxxxxxx</frameCount>\n");
 	tmp.append("\t</header>\n");
 	Write(tmp);
 
@@ -505,7 +511,7 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building){
 }
 
 void TrajectoriesJPSV06::WriteFooter(){
-
+	Write("</trajectories>\n");
 }
 
 
