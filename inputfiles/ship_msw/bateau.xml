@@ -85,11 +85,11 @@
 				</polygon>
                                 <obstacle id="0" caption="OBST_1" height="1.0" closed="1">
                                   <polygon caption="obstacle">
-                                    <vertex px="-17.0586" py="133.8"/>
-                                    <vertex px="-14" py="136.5"/>
-                                    <vertex px="-14.5" py="136.5"/>
-                                    <vertex px="-17.05" py="134.3"/>
-                                    <vertex px="-17.0586" py="133.8"/>
+                                    <vertex px="-17.0586" py="133.7"/>
+                                    <vertex px="-16.5" py="136.75"/>
+                                    <vertex px="-17." py="136.75"/>
+                                    <vertex px="-17.5" py="133.7"/>
+                                    <vertex px="-17.0586" py="133.7"/>
                                   </polygon>
                                 </obstacle>
                                 <obstacle id="1" caption="OBS_2" height="1.0" closed="1">

@@ -5,20 +5,26 @@
 import re
 from os import path
 #os.getcwd()
+GCFM = 0 # Determine which ini-file should be duplicated
+if GCFM: 
+    basename = "ini_bottleneck.xml"
+else:
+    basename = "ini_bottleneck_Gompertz.xml"
+
 HOME = path.expanduser("~")
-TRUNK =  HOME + "/workspace/peddynamics/JuPedSim/JPScore/trunk/"
+TRUNK =  HOME + "/Workspace/peddynamics/JuPedSim/jpscore/"
 GEODIR = TRUNK + "inputfiles/Bottleneck/"
 TRAJDIR = GEODIR#TRUNK + "outputfiles/"
-inifile =  GEODIR  + "ini_bottleneck.xml" #TRUNK
+inifile =  GEODIR  + basename
 
 f = open(inifile)
 read_data = f.read()
 f.close()
 W = [0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5]
 for w in W:
-    ofile = GEODIR + str(w) + "_ini-Bottleneck.xml"
+    ofile = GEODIR + str(w) + "_" + basename
     #geofile = GEODIR + str(w) + "_" + "bottleneck.xml" 
-    geofile = str(w) + "_" + "bottleneck.xml" 
+    geofile = str(w) + "_" +  basename
     #trajfile = TRAJDIR + str(w) + "_" + "TrajBottleneck.xml"
     trajfile = str(w) + "_" + "TrajBottleneck.xml"
     

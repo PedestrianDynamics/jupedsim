@@ -28,7 +28,7 @@
 #include "ForceModel.h"
 #include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
-#include "../pedestrian/Pedestrian.h"
+#include "../pedestrian/Pedestrian.h" 
 
 
 #ifdef _OPENMP
@@ -206,9 +206,10 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const {
 	Point f = Point(0., 0.);
 	//first the walls
+        
 	const vector<Wall>& walls = subroom->GetAllWalls();
 	for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-		f = f + ForceRepWall(ped, walls[i]);
+            f = f + ForceRepWall(ped, walls[i]); 
 	}
 
 	//then the obstacles
@@ -454,7 +455,6 @@ void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Buildin
 void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) const {
 	double delta = 0.5;
 	double h = tip1 - time;
-        cout << "aaaa"<<endl;
 	// collect all pedestrians in the simulation.
 	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
@@ -631,6 +631,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
     }
 //------------------------- check if others are behind using v0 instead of v 
     double tmp = ped1->GetV0().ScalarP(ep12); // < v^0_i , e_ij >
+    
     double ped2IsBehind = exp(-exp(-5*tmp)); //step function: continuous version
     if (ped2IsBehind < J_EPS){
 
@@ -701,17 +702,31 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const{
     return f;
 }
 Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
-    Point F = Point(0.0, 0.0);
+    Point F_wrep = Point(0.0, 0.0);
     // printf("in GompertzWall\n");
     // getc(stdin);
+    // if direction of pedestrians does not intersect walls --> ignore
+    const Point& v = ped->GetV();
+    Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
+    if(direction.IntersectionWith(w) == false)
+    {
+        // if(ped->GetID() == 40){
+        //     printf("------\n no intersection\n");
+        //     printf ("Wall [%f %f]<-->[%f %f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY());
+        //     printf("Pos= [%f, %f] v=[%f, %f]\n======\n",ped->GetPos().GetX(), ped->GetPos().GetY(), (v*100).GetX(), (v*100).GetY());
+        // }
+        return F_wrep;
+    }
+    
     Point pt = w.ShortestPoint(ped->GetPos());
     double wlen = w.LengthSquare();
-    if (wlen < 0.02) { // ignore walls smaller than 10 cm
-        return F;
+    if (wlen <= 0.03) { // ignore walls smaller than 0.15m  (15cm)
+        // if(ped->GetID() == 33)
+        //     printf ("Wall beeing ignored [%f %f]<-->[%f %f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY());
+        return F_wrep;          
     }
     Point dist = pt - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
     double Distance = dist.Norm(); // distance between the centre of ped and point p
-    const Point& v = ped->GetV();
     //double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
     Point e_iw; // x- and y-coordinate of the normalized vector between ped and pt
     //double K_iw;
@@ -735,10 +750,19 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
 //------------------------- check if others are behind using v0 instead of v
     tmp = ped->GetV0().ScalarP(e_iw); // < v^0_i , e_iw >
     double tmpv = v.ScalarP(e_iw);
-    double ped2IsBehind = exp(-exp(-5*tmp)); //step function: continuous version
-    double ped2IsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
-    if (ped2IsBehindv < J_EPS && ped2IsBehind < J_EPS) { // Wall is behind the direction of motion
-        return F;
+    double wallIsBehind = exp(-exp(-5*tmp)); //step function: continuous version
+    double wallIsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
+    // if(ped->GetID() == 40)
+    // {
+    //     printf ("Wall [%f %f]<-->[%f %f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY());
+    //     printf("v=[%f, %f] v0=[%f, %f] eiw=[%f, %f], wlen=%f\n",v.GetX(), v.GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), e_iw.GetX(), e_iw.GetY(), wlen);
+    //     printf("tmp=%f, tmpv=%f\n",tmp, tmpv);
+    //     printf("wall2IsBehind=%f,  wallIsBehindv=%f\n", wallIsBehind, wallIsBehindv);
+    // }
+    
+
+    if (wallIsBehindv < J_EPS && wallIsBehind < J_EPS) { // Wall is behind the direction of motion
+        return F_wrep;
     }
 //------------------------------------------------------------------------
 // if (fabs(v.GetX()) < J_EPS_V && fabs(v.GetY()) < J_EPS_V) // v==0)
@@ -758,9 +782,14 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const{
     //f = -ped->GetMass() * _nuWall * ped->GetV0Norm() * K_iw * B_iw;
     f = -ped->GetMass() * _nuWall * B_iw  * ped->GetV0Norm();
 
-    F = e_iw * f;
+    F_wrep = e_iw * f;
 
-    return F;
+    // if(ped->GetID() == 40)// && F_wrep.Norm()>J_EPS && w.GetPoint1().GetX()==w.GetPoint2().GetX() )
+    // { 
+    //     printf ("Wall  [%f %f]<-->[%f %f] Force=[%f ,%f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F_wrep.GetX(), F_wrep.GetY());
+    //     printf("X= %f, Y=%f\n",ped->GetPos().GetX(), ped->GetPos().GetY());
+    // }
+    return F_wrep;
 }
 
 void GompertzModel::CalculateForceLC(double time, double tip1, Building* building) const {
@@ -937,11 +966,11 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
             }
 //--------------------------------------- apparently this depends on the chosen model Issue 9 -----
             //          Jam is based on the current velocity
-            //if ( v_neu.Norm() >= J_EPS_V){
+            if ( v_neu.Norm() >= J_EPS_V){
                 ped->ResetTimeInJam();
-            // }else{
-            //     ped->UpdateTimeInJam();
-            // }
+            }else{
+                ped->UpdateTimeInJam();
+            }
 //--------------------------------------------------------------------------------------------------
 
 
