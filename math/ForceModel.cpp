@@ -976,8 +976,14 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                 pos_neu = ped->GetPos();
             }
 //--------------------------------------- apparently this depends on the chosen model Issue 9 -----
-            //          Jam is based on the current velocity
-            if ( v_neu.Norm() >= J_EPS_V){
+            //Jam is based on the current velocity
+//            if ( v_neu.Norm() >= J_EPS_V){
+//                ped->ResetTimeInJam();
+//            }else{
+//                ped->UpdateTimeInJam();
+//            }
+
+            if ( v_neu.Norm() >= ped->GetV0Norm()*0.5){
                 ped->ResetTimeInJam();
             }else{
                 ped->UpdateTimeInJam();

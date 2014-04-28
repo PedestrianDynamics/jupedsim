@@ -29,6 +29,7 @@
 #define	_PEDESTRIAN_H
 
 #include <vector>
+#include <queue>
 #include <map>
 #include <set>
 #include <time.h>
@@ -52,14 +53,14 @@ private:
     double _mass; // Mass: 1
     double _tau; // Reaction time: 0.5
     double _deltaT; // step size
-
     std::string _gender;
-    std::string _roomCaption;
 
+    std::string _roomCaption;
     int _roomID;
     int _subRoomID;
     int _exitIndex; // current exit
     int _group;
+
 
     NavLine* _navLine; // current exit line
     std::map<int, int>_mentalMap; // map the actual room to a destination
@@ -78,10 +79,21 @@ private:
 
 
     //routing parameters
-    double _reroutingThreshold; // new orientation after 10 seconds
-    double _timeBeforeRerouting; // a new orientation starts after this time
-    double _timeInJam; // actual time im Jam
-    double _patienceTime; // time after which the ped feels to be in jam
+
+    /// new orientation after 10 seconds
+    double _reroutingThreshold;
+    /// a new orientation starts after this time
+    double _timeBeforeRerouting;
+    /// actual time im Jam
+    double _timeInJam;
+    /// time after which the ped feels to be in jam
+    double _patienceTime;
+    /// data from the last <_recordingTime> seconds will be kept
+    double _recordingTime;
+    /// store the last positions
+    std::queue <Point> _lastPositions;
+    /// store the last velocities
+    std::queue <Point> _lastVelocites;
 
     int _desiredFinalDestination;
     int _oldRoomID;
@@ -98,16 +110,14 @@ private:
 
     // the current time in the simulation
     static double _globalTime;
-
     static bool _enableSpotlight;
-
     bool _spotlight;
 
     /// the router responsible for this pedestrian
     Router* _router;
     /// a pointer to the complete building
     Building * _building;
-    /// the shape of this pdestrian
+    /// the shape of this pedestrian
     JEllipse _ellipse;
 
 
@@ -295,8 +305,23 @@ public:
      */
     void ResetRerouting();
 
+    /**
+     * Set/Get the time period for which the data of the pedestrian should be kept.
+     * The results are used by the quickest path router
+     */
+    void SetRecordingTime(double timeInSec);
 
-    //void SetMaxOberservationTime(double time);
+    /**
+     * Set/Get the time period for which the data of the pedestrian should be kept
+     * The results are used by the quickest path router
+     */
+    double GetRecordingTime() const;
+
+    /**
+     * @return the average velocity over the recording period
+     */
+    double GetAverageVelecityOverRecordingTime() const;
+
     double GetAge() const;
     void SetAge(double age);
     std::string GetGender() const;

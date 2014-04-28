@@ -70,6 +70,7 @@ Pedestrian::Pedestrian() {
 	_V0=Point(0,0);
 	_lastPosition=Point(0,0);
 	_lastCellPosition=-1;
+	_recordingTime=5; //seconds
 
 	_knownDoors = map<int, NavLineState>();
 
@@ -127,6 +128,12 @@ void Pedestrian::SetExitLine(const NavLine* l) {
 
 void Pedestrian::SetPos(const Point& pos) {
 	_ellipse.SetCenter(pos);
+
+	//save the last values for the records
+	_lastPositions.push(pos);
+	unsigned int max_size= _recordingTime/_deltaT;
+	if(_lastPositions.size()> max_size)
+	_lastPositions.pop();
 }
 
 void Pedestrian::SetCellPos(int cp){
@@ -135,6 +142,12 @@ void Pedestrian::SetCellPos(int cp){
 
 void Pedestrian::SetV(const Point& v) {
 	_ellipse.SetV(v);
+
+	//save the last values for the records
+	_lastVelocites.push(v);
+	unsigned int max_size= _recordingTime/_deltaT;
+	if(_lastVelocites.size()> max_size)
+		_lastVelocites.pop();
 }
 
 void Pedestrian::SetV0Norm(double v0) {
@@ -482,6 +495,20 @@ void Pedestrian::ResetRerouting(){
 	_timeBeforeRerouting=-1.00;
 }
 
+void Pedestrian::SetRecordingTime(double timeInSec){
+	_recordingTime=timeInSec;
+}
+
+double Pedestrian::GetRecordingTime() const{
+	return _recordingTime;
+}
+
+double Pedestrian::GetAverageVelecityOverRecordingTime() const {
+	//just few position were saved
+	if (_lastPositions.size()<2) return _ellipse.GetV().Norm();
+	return fabs ( (_lastPositions.back()-_lastPositions.front()).Norm() / _recordingTime );
+}
+
 double Pedestrian::GetDistanceToNextTarget() const {
 	return (_navLine->DistTo(GetPos()));
 }
@@ -605,7 +632,6 @@ Router* Pedestrian::GetRouter() const {
 	return _router;
 }
 
-//TODO: you can save some comp time if you catch this early in the configuration
 int Pedestrian::FindRoute() {
 	if( ! _router) {
 		Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");

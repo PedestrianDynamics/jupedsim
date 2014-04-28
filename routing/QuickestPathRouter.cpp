@@ -83,7 +83,7 @@ int QuickestPathRouter::FindExit(Pedestrian* ped){
 		if(isCongested(ped)==true){
 			Redirect(ped);
 			ped->ResetTimeInJam();
-			//ped->SetSpotlight(true);
+			ped->SetSpotlight(true);
 		}
 		//cout<<"I am feeling like in Jam next: "<<ped->GetID()<<endl;
 		//ped->RerouteIn(2.50); // seconds
@@ -516,7 +516,7 @@ void QuickestPathRouter::Init(Building* building){
 	GlobalRouter::Init(building);
 
 	// activate the spotlight for tracking some pedestrians
-	//Pedestrian::ActivateSpotlightSystem(true);
+	Pedestrian::ActivateSpotlightSystem(true);
 
 	//	pBuilding=building;
 	//TODO: reduce graph is missbehaving
