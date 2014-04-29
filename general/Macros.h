@@ -33,7 +33,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#define M_PI		3.14159265358979323846
+#define M_PI            3.14159265358979323846
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
@@ -70,33 +70,33 @@
 #define FINAL_DEST_OUT -1
 
 // Linked cells
-#define LIST_EMPTY 	-1
+#define LIST_EMPTY      -1
 
 
 enum RoomState {
-	ROOM_CLEAN=0,
-	ROOM_SMOKED=1
+  ROOM_CLEAN=0,
+  ROOM_SMOKED=1
 };
 
 enum FileFormat {
-	FORMAT_XML_PLAIN,
-	FORMAT_XML_BIN,
-	FORMAT_PLAIN,
-	FORMAT_VTK,
-	FORMAT_XML_PLAIN_WITH_MESH
+  FORMAT_XML_PLAIN,
+  FORMAT_XML_BIN,
+  FORMAT_PLAIN,
+  FORMAT_VTK,
+  FORMAT_XML_PLAIN_WITH_MESH
 };
 
 enum RoutingStrategy {
-	ROUTING_LOCAL_SHORTEST,
-	ROUTING_GLOBAL_SHORTEST,
-	ROUTING_QUICKEST,
-	ROUTING_DYNAMIC,
-	ROUTING_FROM_FILE,
-	ROUTING_NAV_MESH,
-	ROUTING_DUMMY,
-	ROUTING_SAFEST,
-        ROUTING_COGNITIVEMAP,
-	ROUTING_UNDEFINED =-1
+  ROUTING_LOCAL_SHORTEST,
+  ROUTING_GLOBAL_SHORTEST,
+  ROUTING_QUICKEST,
+  ROUTING_DYNAMIC,
+  ROUTING_FROM_FILE,
+  ROUTING_NAV_MESH,
+  ROUTING_DUMMY,
+  ROUTING_SAFEST,
+  ROUTING_COGNITIVEMAP,
+  ROUTING_UNDEFINED =-1
 };
 
 
@@ -109,5 +109,5 @@ inline double  xmltof(const char * t,double  v=0.0){ if (t&&(*t)) return atof(t)
 inline const char * xmltoa(const char * t,      const char * v=""){ if (t)       return  t; return v; }
 inline char xmltoc(const char * t,const char v='\0'){ if (t&&(*t)) return *t; return v; }
 
-#endif	/* _MACROS_H */
+#endif  /* _MACROS_H */
 

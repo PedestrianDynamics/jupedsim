@@ -174,8 +174,8 @@ void SweepContext::MeshClean(Triangle& triangle)
   triangles.push_back(&triangle);
 
   while(!triangles.empty()){
-	Triangle *t = triangles.back();
-	triangles.pop_back();
+        Triangle *t = triangles.back();
+        triangles.pop_back();
 
     if (t != NULL && !t->IsInterior()) {
       t->IsInterior(true);

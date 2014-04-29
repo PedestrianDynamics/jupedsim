@@ -51,81 +51,81 @@
 extern OutputHandler* Log;
 
 class Simulation {
-private:
-	///Number of pedestrians in the simulation
-    int _nPeds;
-    ///Maximum simulation time
-    double _tmax;
-    /// time step
-    double _deltaT;
-    /// frame rate for the trajectories
-    double _fps;
-    ///seed using for the random number generator
-    unsigned int _seed;
-    /// building object
-    Building* _building;
-    ///initial distribution of the pedestrians
-    PedDistributor* _distribution;
-    /// door crossing strategy for the pedestrians
-    DirectionStrategy* _direction;
-    /// Force model to use
-    ForceModel* _model;
-    /// differential equation solver
-    ODESolver* _solver;
-    /// writing the trajectories to file
-    IODispatcher* _iod;
-    ///new: EventManager
-    EventManager* _em;
-    /// argument parser
-    ArgumentParser* _argsParser;
+ private:
+  ///Number of pedestrians in the simulation
+  int _nPeds;
+  ///Maximum simulation time
+  double _tmax;
+  /// time step
+  double _deltaT;
+  /// frame rate for the trajectories
+  double _fps;
+  ///seed using for the random number generator
+  unsigned int _seed;
+  /// building object
+  Building* _building;
+  ///initial distribution of the pedestrians
+  PedDistributor* _distribution;
+  /// door crossing strategy for the pedestrians
+  DirectionStrategy* _direction;
+  /// Force model to use
+  ForceModel* _model;
+  /// differential equation solver
+  ODESolver* _solver;
+  /// writing the trajectories to file
+  IODispatcher* _iod;
+  ///new: EventManager
+  EventManager* _em;
+  /// argument parser
+  ArgumentParser* _argsParser;
 
 
-public:
-    Simulation();
-    virtual ~Simulation();
+ public:
+  Simulation();
+  virtual ~Simulation();
 
-    /**
-     * Initialize the number of agents in the simulation
-     */
-    void SetPedsNumber(int i);
+  /**
+   * Initialize the number of agents in the simulation
+   */
+  void SetPedsNumber(int i);
 
-    /**
-     * Initialize the number of agents in the simulation
-     */
-    int GetPedsNumber() const;
+  /**
+   * Initialize the number of agents in the simulation
+   */
+  int GetPedsNumber() const;
 
-    /**
-     * Returns the number of agents when running on a distributed system (MPI)
-     * NOT IMPLEMENTED
-     */
-    int GetNPedsGlobal() const;
+  /**
+   * Returns the number of agents when running on a distributed system (MPI)
+   * NOT IMPLEMENTED
+   */
+  int GetNPedsGlobal() const;
 
-    /**
-     * @return the building object containing all geometry elements
-     */
-    Building* GetBuilding() const;
+  /**
+   * @return the building object containing all geometry elements
+   */
+  Building* GetBuilding() const;
 
-    /**
-     * Read parameters from the argument parser class.
-     */
-    void InitArgs(ArgumentParser *args);
+  /**
+   * Read parameters from the argument parser class.
+   */
+  void InitArgs(ArgumentParser *args);
 
-    /**
-     *
-     * @return the total simulated/evacuation time
-     */
-    int RunSimulation();
+  /**
+   *
+   * @return the total simulated/evacuation time
+   */
+  int RunSimulation();
 
-    /**
-     * Update the pedestrians states: positions, velocity, route
-     */
-    void Update();
+  /**
+   * Update the pedestrians states: positions, velocity, route
+   */
+  void Update();
 
 
-    /**
-     * print some statistics about the simulation
-     */
-    void PrintStatistics();
+  /**
+   * print some statistics about the simulation
+   */
+  void PrintStatistics();
 
 };
 

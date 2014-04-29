@@ -418,8 +418,8 @@ TraVisToClient::shutdownAndCloseSocket(socket_t sock) {
 
     //FIXME:
     //if (SOCKET_ERROR == closesocket(tcpSocket)) {
-    //	derror("closesocket() failed");
-    //	status = false;
+    //  derror("closesocket() failed");
+    //  status = false;
     //}
 
     dtrace("leaving shutdownAndCloseSocket()");

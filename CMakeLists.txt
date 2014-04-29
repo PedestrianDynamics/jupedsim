@@ -2,6 +2,7 @@
 # -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
 # -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
+# -DBUILD_TESTING=ON (default OFF)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
@@ -16,12 +17,11 @@ set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
 
-# # configure_file (
-# #   "${CMAKE_SOURCE_DIR}/Config.h.in"
-# #   "${CMAKE_BINARY_DIR}/Config.h"
-# # )
-# #include_directories ("${CMAKE_BINARY_DIR}")
+if(NOT BUILD_TESTING)
+  set(BUILD_TESTING OFF)
+endif(NOT BUILD_TESTING)
 
+message( STATUS "BUILD_TESTING: " ${BUILD_TESTING} )
 if(NOT DEFINED PROCESSOR_COUNT)
   # Unknown:
   set(PROCESSOR_COUNT 0)
@@ -33,15 +33,6 @@ if(NOT DEFINED PROCESSOR_COUNT)
     list(LENGTH procs PROCESSOR_COUNT)
   endif(EXISTS "${cpuinfo_file}")
 
-  # Mac:
-  # if(APPLE)
-  #   find_program(cmd_sys_pro "system_profiler")
-  #   if(cmd_sys_pro)
-  #     execute_process(COMMAND ${cmd_sys_pro} OUTPUT_VARIABLE info)
-  #     string(REGEX REPLACE "^.*Total Number Of Cores: ([0-9]+).*$" "\\1"
-  #       PROCESSOR_COUNT "${info}")
-  #   endif(cmd_sys_pro)
-  # endif(APPLE)
 
   # Windows:
   if(WIN32)
@@ -50,8 +41,6 @@ if(NOT DEFINED PROCESSOR_COUNT)
 endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
-  # add 1 should be magic! http://www.kitware.com/blog/home/post/63
-  #math(EXPR PROCESSOR_COUNT "${PROCESSOR_COUNT} + 1")
   message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
@@ -104,8 +93,7 @@ FIND_PACKAGE(CGAL QUIET)
 if(CGAL_FOUND)
   include (${CGAL_USE_FILE})
   INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
-  add_definitions(-D_CGAL=1)
-  target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+  add_definitions(-D_CGAL=1)  
   message (SEND_ERROR "${CGAL_FOUND}")
   message (FATAL_ERROR "${CGAL_CORE_INCLUDE_DIR}")
   message (SEND_ERROR " Erreur: ${CGAL_FOUND}")
@@ -115,7 +103,10 @@ else(CGAL_FOUND)
 endif(CGAL_FOUND)
 
 # test files: all cpp-files in Utest
-file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+if(BUILD_TESTING)
+  file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+endif(BUILD_TESTING)
+
 set (   source_files
   main.cpp
   Simulation.cpp
@@ -269,7 +260,7 @@ set (   header_files
 
 
 add_library ( core SHARED ${source_files} )
-#add_library(core OBJECT ${source_files} ${header_files})
+
 #Target
 add_executable(
   jpscore main.cpp
@@ -303,33 +294,33 @@ else(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
 endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
 
 # ----------------------------- cTest ------------------------------------------
-enable_testing() #adds another build target, which is test for Makefile generators
-include(CTest) #adding Dart support
+if(BUILD_TESTING)
+  enable_testing() #adds another build target, which is test for Makefile generators
+  include(CTest) #adding Dart support
 
-#test if code compiles and runs default setting. Takes about 30 seconds
-add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
-  --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-  --build-generator ${CMAKE_GENERATOR}
-  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config
-  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  --build-project JPScore
-  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-  )
+  #test if code compiles and runs default setting. Takes about 30 seconds
+  add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
+    --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+    --build-generator ${CMAKE_GENERATOR}
+    --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
+    --build-two-config
+    --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    --build-project JPScore
+    --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+    )
 
-foreach (test_src ${test_files})
-  GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-  add_executable( ${test} ${test_src})
-  target_link_libraries (${test} core)
-  add_test(NAME ${test} COMMAND ${test})
-endforeach(test_src ${test_files})
+  foreach (test_src ${test_files})
+    GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+    add_executable( ${test} ${test_src})
+    target_link_libraries (${test} core)
+    add_test(NAME ${test} COMMAND ${test})
+  endforeach(test_src ${test_files})
 
-
-find_package(PythonInterp)
-if(PYTHONINTERP_FOUND)
-  message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
-  message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
-  set (test_parameters "${CMAKE_SOURCE_DIR}")
-  add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
-  #add_test(testtime  "${CMAKE_SOURCE_DIR}/Utest/run.py")
-endif(PYTHONINTERP_FOUND)
+  find_package(PythonInterp)
+  if(PYTHONINTERP_FOUND)
+    message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
+    message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
+    set (test_parameters "${CMAKE_SOURCE_DIR}")
+    add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
+  endif(PYTHONINTERP_FOUND)
+endif(BUILD_TESTING)

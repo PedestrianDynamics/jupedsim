@@ -15,14 +15,14 @@
 class RoomToFloorSensor : public AbstractSensor
 {
 
-public:
-    RoomToFloorSensor(const Building * b) : AbstractSensor(b) { }
+ public:
+ RoomToFloorSensor(const Building * b) : AbstractSensor(b) { }
 
-    virtual ~RoomToFloorSensor();
+  virtual ~RoomToFloorSensor();
 
-    std::string GetName() const;
-    void execute(const Pedestrian *, CognitiveMap *) const;
-private:
+  std::string GetName() const;
+  void execute(const Pedestrian *, CognitiveMap *) const;
+ private:
 
 };
 

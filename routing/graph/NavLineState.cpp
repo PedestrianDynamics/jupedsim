@@ -38,8 +38,8 @@ bool NavLineState::isShareable(double time)
 {
     if(!timeOfInformation) return true;
     if(timeOfInformation+INFO_OFFSET < time) {
-	timeOfInformation = 0;
-	return true;
+        timeOfInformation = 0;
+        return true;
     }
     return false;
     
@@ -49,10 +49,10 @@ bool NavLineState::isShareable(double time)
 bool NavLineState::mergeDoor(NavLineState & orig, double time)
 {
     if(timeFirstSeen == 0 || orig.timeFirstSeen > timeFirstSeen) {
-	open = orig.open;
-	timeFirstSeen = orig.timeFirstSeen;
-	timeOfInformation = time;
-	return true;
+        open = orig.open;
+        timeFirstSeen = orig.timeFirstSeen;
+        timeOfInformation = time;
+        return true;
     }
     return false;
 }

@@ -31,52 +31,52 @@
 using namespace std;
 
 Hline::Hline() {
-	_room=NULL;
-	_subRoom=NULL;
-	_id=-1;
+        _room=NULL;
+        _subRoom=NULL;
+        _id=-1;
 }
 
 Hline::~Hline() {
 }
 
 void Hline::SetID(int ID) {
-	_id=ID;
+        _id=ID;
 }
 
 void Hline::SetRoom(Room* r) {
-	_room=r;
+        _room=r;
 }
 
 void Hline::SetCaption(string s) {
-	_caption=s;
+        _caption=s;
 }
 
 void Hline::SetSubRoom(SubRoom* s) {
-	_subRoom=s;
+        _subRoom=s;
 }
 
 int Hline::GetID() const {
-	return _id;
+        return _id;
 }
 
 string Hline::GetCaption() const {
-	return _caption;
+        return _caption;
 }
 
 Room* Hline::GetRoom() const {
-	return _room;
+        return _room;
 }
 
 SubRoom* Hline::GetSubRoom() const {
-	return _subRoom;
+        return _subRoom;
 }
 
 bool Hline::IsInSubRoom(int subroomID) const {
-	return _subRoom->GetSubRoomID() == subroomID;
+        return _subRoom->GetSubRoomID() == subroomID;
 }
 
 bool Hline::IsInRoom(int roomID) const {
-	 return _room->GetID() == roomID;
+         return _room->GetID() == roomID;
 }
 
 void Hline::WriteToErrorLog() const {

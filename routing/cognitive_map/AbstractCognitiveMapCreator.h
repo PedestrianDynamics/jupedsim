@@ -17,14 +17,14 @@ class CognitiveMap;
 
 class AbstractCognitiveMapCreator
 {
-public:
-    AbstractCognitiveMapCreator(const Building * b) : building(b) {}
+ public:
+ AbstractCognitiveMapCreator(const Building * b) : building(b) {}
 
 
-    virtual ~AbstractCognitiveMapCreator();
-    virtual CognitiveMap * CreateCognitiveMap(const Pedestrian * ped) = 0;
-protected:
-    const Building * const building;
+  virtual ~AbstractCognitiveMapCreator();
+  virtual CognitiveMap * CreateCognitiveMap(const Pedestrian * ped) = 0;
+ protected:
+  const Building * const building;
 };
 
 #endif // ABSTRACTCOGNITIVEMAPCREATOR_H

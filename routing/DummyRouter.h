@@ -11,14 +11,14 @@
 #include "Router.h"
 
 class DummyRouter: public Router {
-private:
-	Building* _building;
-public:
-	DummyRouter();
-	virtual ~DummyRouter();
+ private:
+  Building* _building;
+ public:
+  DummyRouter();
+  virtual ~DummyRouter();
 
-	virtual int FindExit(Pedestrian* p);
-	virtual void Init(Building* b);
+  virtual int FindExit(Pedestrian* p);
+  virtual void Init(Building* b);
 
 };
 

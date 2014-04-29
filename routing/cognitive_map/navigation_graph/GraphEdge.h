@@ -23,57 +23,57 @@ class Crossing;
 
 class GraphEdge {
 
-public:
-    typedef std::map<std::string, std::pair<double, double>> FactorContainer;
+ public:
+  typedef std::map<std::string, std::pair<double, double>> FactorContainer;
 
-    /****************************
-     * Constructors & Destructors
-     ****************************/
+  /****************************
+   * Constructors & Destructors
+   ****************************/
 
-    GraphEdge(const GraphVertex * const s, const GraphVertex * const d, const Crossing * const crossing);
-    GraphEdge(GraphEdge const & ge);
-    virtual ~GraphEdge();
+  GraphEdge(const GraphVertex * const s, const GraphVertex * const d, const Crossing * const crossing);
+  GraphEdge(GraphEdge const & ge);
+  virtual ~GraphEdge();
 
-    void CalcApproximateDistance();
+  void CalcApproximateDistance();
 
-    // Getter collection
-    const GraphVertex * GetDest() const;
-    const GraphVertex * GetSrc() const;
-    const Crossing * GetCrossing() const;
+  // Getter collection
+  const GraphVertex * GetDest() const;
+  const GraphVertex * GetSrc() const;
+  const Crossing * GetCrossing() const;
 
-    double GetApproximateDistance() const;
-    double GetApproximateDistance(const Point &) const;
-
-
-
-    void SetFactor(double factor, std::string name);
-
-    double GetRoomToFloorFactor() const;
+  double GetApproximateDistance() const;
+  double GetApproximateDistance(const Point &) const;
 
 
-    double GetWeight(const Point &) const;
+
+  void SetFactor(double factor, std::string name);
+
+  double GetRoomToFloorFactor() const;
 
 
-    bool IsExit() const;
+  double GetWeight(const Point &) const;
 
 
-private:
-    const GraphVertex  * const src;
-    const GraphVertex  * const dest;
-    const Crossing  * const crossing;
+  bool IsExit() const;
 
-    /**
-     * Factor Bag
-     *
-     * The Factor map is filled up by sensors. The key string is for identification while sharing information.
-     * The second pair value is the GlobalTime value from Pedestrian Class of this information.
-     * For calculating the weight we just iterate over the factors and dont care which factors we acutally use.
-     */
-    FactorContainer factors;
 
-    //WEIGHTS DEPRECATED!
-    double approximate_distance;
-    double density = 0.0;
+ private:
+  const GraphVertex  * const src;
+  const GraphVertex  * const dest;
+  const Crossing  * const crossing;
+
+  /**
+   * Factor Bag
+   *
+   * The Factor map is filled up by sensors. The key string is for identification while sharing information.
+   * The second pair value is the GlobalTime value from Pedestrian Class of this information.
+   * For calculating the weight we just iterate over the factors and dont care which factors we acutally use.
+   */
+  FactorContainer factors;
+
+  //WEIGHTS DEPRECATED!
+  double approximate_distance;
+  double density = 0.0;
 
 };
 

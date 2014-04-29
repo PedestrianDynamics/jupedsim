@@ -40,7 +40,7 @@ Crossing::Crossing(){
     _room1 = NULL;
     _subRoom1 = NULL;
     _subRoom2 = NULL;
-	_caption = "";
+        _caption = "";
 }
 
 Crossing::~Crossing() {
@@ -64,7 +64,7 @@ void Crossing::SetSubRoom2(SubRoom* r2) {
 }
 
 void Crossing::SetCaption(string s) {
-	_caption = s;
+        _caption = s;
 }
 // Getter-Funktionen
 
@@ -72,7 +72,7 @@ int Crossing::GetID() const {
     return _id;
 }
 string Crossing::GetCaption() const {
-	return _caption;
+        return _caption;
 }
 Room* Crossing::GetRoom1() const {
     return _room1;
@@ -99,7 +99,7 @@ bool Crossing::IsOpen() const {
 }
 
 bool Crossing::IsTransition() const {
-	return false;
+        return false;
 }
 
 
@@ -130,8 +130,8 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
     else if (_subRoom2->GetSubRoomID() == subroomID)
         return _subRoom1;
     else {
-    	 Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
-    	    		"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
+         Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
+                        "on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
        return NULL;
     }
 }
@@ -154,7 +154,7 @@ void Crossing::WriteToErrorLog() const {
 // TraVisTo Ausgabe
 
 string Crossing::WriteElement() const {
-	//return "";
+        //return "";
     string geometry;
     char tmp[CLENGTH] = "";
     sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());

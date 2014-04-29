@@ -33,68 +33,68 @@ using namespace std;
 
 
 Router::Router() {
-	_trips = vector<vector<int> >();
-	_finalDestinations = vector<int>();
-	_id=-1;
-	_strategy=ROUTING_UNDEFINED;
+        _trips = vector<vector<int> >();
+        _finalDestinations = vector<int>();
+        _id=-1;
+        _strategy=ROUTING_UNDEFINED;
 }
 
 Router::~Router() {
 }
 
 const vector<int> Router::GetTrip(int index) const {
-	if ((index >= 0) && (index < (int) _trips.size()))
-		return _trips[index];
-	else {
-		char tmp[CLENGTH];
-		sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-				index, _trips.size());
-		Log->Write(tmp);
-		exit(EXIT_FAILURE);
-	}
+        if ((index >= 0) && (index < (int) _trips.size()))
+                return _trips[index];
+        else {
+                char tmp[CLENGTH];
+                sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
+                                index, _trips.size());
+                Log->Write(tmp);
+                exit(EXIT_FAILURE);
+        }
 }
 
 void Router::AddTrip(vector<int> trip) {
-	_trips.push_back(trip);
+        _trips.push_back(trip);
 }
 
 void Router::AddFinalDestinationID(int id) {
-	_finalDestinations.push_back(id);
+        _finalDestinations.push_back(id);
 }
 
 const vector<int> Router::GetFinalDestinations() const {
-	return _finalDestinations;
+        return _finalDestinations;
 }
 
 void Router::SetID(int id) {
-	_id=id;
+        _id=id;
 }
 
 int Router::GetID() const {
-	return _id;
+        return _id;
 }
 
 void Router::SetStrategy(RoutingStrategy strategy) {
-	_strategy=strategy;
+        _strategy=strategy;
 }
 
 RoutingStrategy Router::GetStrategy() const {
-	return _strategy;
+        return _strategy;
 }
 
 void Router::WriteToErrorLog() const {
-	//TODO
-//	for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
-//			iter != pCrossings.end(); ++iter) {
-//		iter->second->WriteToErrorLog();
-//	}
-//	for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
-//			iter != pTransitions.end(); ++iter) {
-//		iter->second->WriteToErrorLog();
-//	}
-//	for (map<int, Hline*>::const_iterator iter = pHlines.begin();
-//			iter != pHlines.end(); ++iter) {
-//		iter->second->WriteToErrorLog();
-//	}
+        //TODO
+//      for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
+//                      iter != pCrossings.end(); ++iter) {
+//              iter->second->WriteToErrorLog();
+//      }
+//      for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
+//                      iter != pTransitions.end(); ++iter) {
+//              iter->second->WriteToErrorLog();
+//      }
+//      for (map<int, Hline*>::const_iterator iter = pHlines.begin();
+//                      iter != pHlines.end(); ++iter) {
+//              iter->second->WriteToErrorLog();
+//      }
 }
 

@@ -35,35 +35,35 @@ using namespace std;
 
 
 void OutputHandler::Write(string str) {
-	if (this != NULL)
-		cout << str << endl;
+        if (this != NULL)
+                cout << str << endl;
 }
 
 void OutputHandler::Write(const char* message,...) {
-	char msg[CLENGTH];
-	va_list ap;
-	va_start (ap, message);
-	vsprintf (msg,message ,ap);
-	va_end (ap);
+        char msg[CLENGTH];
+        va_list ap;
+        va_start (ap, message);
+        vsprintf (msg,message ,ap);
+        va_end (ap);
 
-	string str(msg);
-	if(str.find("ERROR")==string::npos) {
-		cout<<msg<<endl;
-		cout.flush();
-	}
-	else {
-		cerr<<msg<<endl;
-		cerr.flush();
-	}
+        string str(msg);
+        if(str.find("ERROR")==string::npos) {
+                cout<<msg<<endl;
+                cout.flush();
+        }
+        else {
+                cerr<<msg<<endl;
+                cerr.flush();
+        }
 
-	//cout << "\033[1;30mbold red text\033[0m\n";
-	//cout << "\033[1;31"<<msg<<"\033[0m\n";
-	//cout << "\033[1;31 bla bla \033[0m\n";
+        //cout << "\033[1;30mbold red text\033[0m\n";
+        //cout << "\033[1;31"<<msg<<"\033[0m\n";
+        //cout << "\033[1;31 bla bla \033[0m\n";
 }
 
 void STDIOHandler::Write(string str) {
-	if (this != NULL)
-		cout << str << endl;
+        if (this != NULL)
+                cout << str << endl;
 }
 
 FileHandler::FileHandler(const char *fn) {
@@ -88,13 +88,13 @@ void FileHandler::Write(string str) {
 }
 
 void FileHandler::Write(const char* string,...) {
-	char msg[CLENGTH];
-	va_list ap;
-	va_start (ap, string);
-	vsprintf (msg,string ,ap);
-	va_end (ap);
-	pfp<<msg<<endl;
-	pfp.flush();
+        char msg[CLENGTH];
+        va_list ap;
+        va_start (ap, string);
+        vsprintf (msg,string ,ap);
+        va_end (ap);
+        pfp<<msg<<endl;
+        pfp.flush();
 }
 
 TraVisToHandler::TraVisToHandler(string host, int port) {
@@ -105,7 +105,7 @@ TraVisToHandler::TraVisToHandler(string host, int port) {
 }
 
 TraVisToHandler::~TraVisToHandler(){
-	delete client;
+        delete client;
 }
 
 void TraVisToHandler::Write(string str) {

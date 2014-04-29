@@ -19,13 +19,13 @@ class Building;
 class EmptyCognitiveMapCreator : public AbstractCognitiveMapCreator
 {
 
-public:
-    EmptyCognitiveMapCreator(const Building * b) : AbstractCognitiveMapCreator(b) { }
+ public:
+ EmptyCognitiveMapCreator(const Building * b) : AbstractCognitiveMapCreator(b) { }
 
-    virtual ~EmptyCognitiveMapCreator();
+  virtual ~EmptyCognitiveMapCreator();
 
-    CognitiveMap * CreateCognitiveMap(const Pedestrian * ped);
-private:
+  CognitiveMap * CreateCognitiveMap(const Pedestrian * ped);
+ private:
 
 };
 

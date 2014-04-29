@@ -44,61 +44,61 @@
  
 namespace p2t {
 
-class CDT
-{
-public:
+  class CDT
+  {
+  public:
 
-  /**
-   * Constructor - add polyline with non repeating points
-   * 
-   * @param polyline
-   */
-  CDT(std::vector<Point*> polyline);
+    /**
+     * Constructor - add polyline with non repeating points
+     * 
+     * @param polyline
+     */
+    CDT(std::vector<Point*> polyline);
   
-   /**
-   * Destructor - clean up memory
-   */
-  ~CDT();
+    /**
+     * Destructor - clean up memory
+     */
+    ~CDT();
   
-  /**
-   * Add a hole
-   * 
-   * @param polyline
-   */
-  void AddHole(std::vector<Point*> polyline);
+    /**
+     * Add a hole
+     * 
+     * @param polyline
+     */
+    void AddHole(std::vector<Point*> polyline);
   
-  /**
-   * Add a steiner point
-   * 
-   * @param point
-   */
-  void AddPoint(Point* point);
+    /**
+     * Add a steiner point
+     * 
+     * @param point
+     */
+    void AddPoint(Point* point);
   
-  /**
-   * Triangulate - do this AFTER you've added the polyline, holes, and Steiner points
-   */
-  void Triangulate();
+    /**
+     * Triangulate - do this AFTER you've added the polyline, holes, and Steiner points
+     */
+    void Triangulate();
   
-  /**
-   * Get CDT triangles
-   */
-  std::vector<Triangle*> GetTriangles();
+    /**
+     * Get CDT triangles
+     */
+    std::vector<Triangle*> GetTriangles();
   
-  /**
-   * Get triangle map
-   */
-  std::list<Triangle*> GetMap();
+    /**
+     * Get triangle map
+     */
+    std::list<Triangle*> GetMap();
 
   private:
 
-  /**
-   * Internals
-   */
+    /**
+     * Internals
+     */
    
-  SweepContext* sweep_context_;
-  Sweep* sweep_;
+    SweepContext* sweep_context_;
+    Sweep* sweep_;
 
-};
+  };
 
 }
 

@@ -56,17 +56,17 @@ struct FaceInfo2
 
 
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel 		K;
-typedef CGAL::Partition_traits_2<K> 								Traits;
-typedef CGAL::Is_convex_2<Traits> 									Is_convex_2;
-typedef Traits::Polygon_2 											Polygon_2;
-//typedef CGAL::Polygon_2<K>											Polygon_2;
-typedef Traits::Point_2 											Point_2;
-typedef Polygon_2::Vertex_const_iterator 							Vertex_iterator;
-typedef std::list<Polygon_2> 										Polygon_list;
-typedef Polygon_list::const_iterator 								Polygon_iterator;
-typedef CGAL::Partition_is_valid_traits_2<Traits, Is_convex_2> 		Validity_traits;
-typedef Polygon_2::Edge_const_iterator 								Edge_iterator;
+typedef CGAL::Exact_predicates_inexact_constructions_kernel             K;
+typedef CGAL::Partition_traits_2<K>                                                             Traits;
+typedef CGAL::Is_convex_2<Traits>                                                                       Is_convex_2;
+typedef Traits::Polygon_2                                                                                       Polygon_2;
+//typedef CGAL::Polygon_2<K>                                                                                    Polygon_2;
+typedef Traits::Point_2                                                                                         Point_2;
+typedef Polygon_2::Vertex_const_iterator                                                        Vertex_iterator;
+typedef std::list<Polygon_2>                                                                            Polygon_list;
+typedef Polygon_list::const_iterator                                                            Polygon_iterator;
+typedef CGAL::Partition_is_valid_traits_2<Traits, Is_convex_2>          Validity_traits;
+typedef Polygon_2::Edge_const_iterator                                                          Edge_iterator;
 
 
 typedef CGAL::Triangulation_vertex_base_2<K>                      Vb;
@@ -78,15 +78,15 @@ typedef CGAL::Constrained_Delaunay_triangulation_2<K, TDS, Itag>  CDT;
 
 
 
-typedef CGAL::Alpha_shape_vertex_base_2<K> 							Av;
-typedef CGAL::Triangulation_face_base_2<K> 							Tf;
-typedef CGAL::Alpha_shape_face_base_2<K,Tf> 						Af;
-typedef CGAL::Triangulation_default_data_structure_2<K,Av,Af> 		Tds;
-typedef CGAL::Delaunay_triangulation_2<K,Tds> 						DT;
+typedef CGAL::Alpha_shape_vertex_base_2<K>                                                      Av;
+typedef CGAL::Triangulation_face_base_2<K>                                                      Tf;
+typedef CGAL::Alpha_shape_face_base_2<K,Tf>                                             Af;
+typedef CGAL::Triangulation_default_data_structure_2<K,Av,Af>           Tds;
+typedef CGAL::Delaunay_triangulation_2<K,Tds>                                           DT;
 
-typedef CGAL::Polygon_with_holes_2<K>                				Polygon_with_holes_2;
+typedef CGAL::Polygon_with_holes_2<K>                                           Polygon_with_holes_2;
 
-typedef CGAL::Segment_2<K>											Segment_2;
+typedef CGAL::Segment_2<K>                                                                                      Segment_2;
 
 //fast delauney
 //typedef CGAL::Alpha_shape_vertex_base_3<K>               Vb;
@@ -100,7 +100,7 @@ typedef CGAL::Segment_2<K>											Segment_2;
 
 typedef CGAL::Alpha_shape_2<DT> Alpha_shape_2;
 typedef Alpha_shape_2::Alpha_iterator               Alpha_iterator;
-typedef Alpha_shape_2::Vertex_iterator					Alpha_vertex_iterator;
+typedef Alpha_shape_2::Vertex_iterator                                  Alpha_vertex_iterator;
 
 
 
@@ -168,66 +168,66 @@ void insert_polygon(CDT& cdt,const Polygon_2& polygon){
   CDT::Vertex_handle v_prev=cdt.insert(*CGAL::cpp0x::prev(polygon.vertices_end()));
   for (Polygon_2::Vertex_iterator vit=polygon.vertices_begin();
        vit!=polygon.vertices_end();++vit)
-  {
-    CDT::Vertex_handle vh=cdt.insert(*vit);
-    cdt.insert_constraint(vh,v_prev);
-    v_prev=vh;
-  }
+    {
+      CDT::Vertex_handle vh=cdt.insert(*vit);
+      cdt.insert_constraint(vh,v_prev);
+      v_prev=vh;
+    }
 }
 
 inline
 int test_triangulation( )
 {
-	//construct two non-intersecting nested polygons
-	Polygon_2 polygon1;
-	polygon1.push_back(Point_2(0,0));
-	polygon1.push_back(Point_2(2,0));
-	polygon1.push_back(Point_2(2,2));
-	polygon1.push_back(Point_2(0,2));
-	Polygon_2 polygon2;
-	polygon2.push_back(Point_2(0.5,0.5));
-	polygon2.push_back(Point_2(1.5,0.5));
-	polygon2.push_back(Point_2(1.5,1.5));
-	polygon2.push_back(Point_2(0.5,1.5));
+  //construct two non-intersecting nested polygons
+  Polygon_2 polygon1;
+  polygon1.push_back(Point_2(0,0));
+  polygon1.push_back(Point_2(2,0));
+  polygon1.push_back(Point_2(2,2));
+  polygon1.push_back(Point_2(0,2));
+  Polygon_2 polygon2;
+  polygon2.push_back(Point_2(0.5,0.5));
+  polygon2.push_back(Point_2(1.5,0.5));
+  polygon2.push_back(Point_2(1.5,1.5));
+  polygon2.push_back(Point_2(0.5,1.5));
 
-	//Insert the polyons into a constrained triangulation
-	CDT cdt;
-	insert_polygon(cdt,polygon1);
-	insert_polygon(cdt,polygon2);
+  //Insert the polyons into a constrained triangulation
+  CDT cdt;
+  insert_polygon(cdt,polygon1);
+  insert_polygon(cdt,polygon2);
 
-	//Mark facets that are inside the domain bounded by the polygon
-	mark_domains(cdt);
+  //Mark facets that are inside the domain bounded by the polygon
+  mark_domains(cdt);
 
-	int count=0;
-	for (CDT::Finite_faces_iterator fit=cdt.finite_faces_begin();
-			fit!=cdt.finite_faces_end();++fit)
-	{
-		if ( fit->info().in_domain() ) ++count;
-	}
+  int count=0;
+  for (CDT::Finite_faces_iterator fit=cdt.finite_faces_begin();
+       fit!=cdt.finite_faces_end();++fit)
+    {
+      if ( fit->info().in_domain() ) ++count;
+    }
 
-	//cdt.draw_triangulation(std::cout);
-	std::cout << "There are " << count << " facets in the domain." << std::endl;
-
-
-	CGAL::Geomview_stream gv(CGAL::Bbox_3(-100, -100, -100, 100, 100, 100));
-	gv.set_line_width(4);
-	gv.set_trace(true);
-	gv.set_bg_color(CGAL::Color(0, 200, 200));
-	// gv.clear();
-
-	// use different colors, and put a few sleeps/clear.
-	//gv << CGAL::BLUE;
-	//gv.set_wired(true);
+  //cdt.draw_triangulation(std::cout);
+  std::cout << "There are " << count << " facets in the domain." << std::endl;
 
 
-	CDT::Finite_faces_iterator it;
-	for (it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); it++)
-	{
-		std::cout << cdt.triangle(it) << std::endl;
-		gv << cdt.triangle(it) ;
-	}
+  CGAL::Geomview_stream gv(CGAL::Bbox_3(-100, -100, -100, 100, 100, 100));
+  gv.set_line_width(4);
+  gv.set_trace(true);
+  gv.set_bg_color(CGAL::Color(0, 200, 200));
+  // gv.clear();
 
-	return 0;
+  // use different colors, and put a few sleeps/clear.
+  //gv << CGAL::BLUE;
+  //gv.set_wired(true);
+
+
+  CDT::Finite_faces_iterator it;
+  for (it = cdt.finite_faces_begin(); it != cdt.finite_faces_end(); it++)
+    {
+      std::cout << cdt.triangle(it) << std::endl;
+      gv << cdt.triangle(it) ;
+    }
+
+  return 0;
 }
 
 inline
@@ -252,13 +252,13 @@ int test_alpha_shape()
   getc(stdin);
 
   for (std::list<Point_2>::const_iterator iterator = env.begin(), end = env.end(); iterator != end; ++iterator) {
-      std::cout << *iterator;
+    std::cout << *iterator;
   }
 
-//  for (Alpha_vertex_iterator vit = as.Alpha_shape_vertices_begin();
-//			vit !=  as.alpha_shape_vertices_end(); ++vit) {
-//
-//	}
+  //  for (Alpha_vertex_iterator vit = as.Alpha_shape_vertices_begin();
+  //                    vit !=  as.alpha_shape_vertices_end(); ++vit) {
+  //
+  //    }
 
   // find optimal alpha value
   Alpha_iterator opt = as.find_optimal_alpha(1);
@@ -270,7 +270,7 @@ int test_alpha_shape()
 }
 
 template<class Kernel, class Container>
-void print_polygon (const CGAL::Polygon_2<Kernel, Container>& P)
+  void print_polygon (const CGAL::Polygon_2<Kernel, Container>& P)
 {
   typename CGAL::Polygon_2<Kernel, Container>::Vertex_const_iterator  vit;
 
@@ -281,7 +281,7 @@ void print_polygon (const CGAL::Polygon_2<Kernel, Container>& P)
 }
 
 template<class Kernel, class Container>
-void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container> & pwh)
+  void print_polygon_with_holes(const CGAL::Polygon_with_holes_2<Kernel, Container> & pwh)
 {
   if (! pwh.is_unbounded()) {
     std::cout << "{ Outer boundary = ";

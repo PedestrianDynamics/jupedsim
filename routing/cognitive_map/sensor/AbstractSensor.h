@@ -18,14 +18,14 @@ class CognitiveMap;
 
 class AbstractSensor
 {
-public:
-    AbstractSensor(const Building * b) : building(b) {}
-    virtual ~AbstractSensor();
+ public:
+ AbstractSensor(const Building * b) : building(b) {}
+  virtual ~AbstractSensor();
 
-    virtual std::string GetName() const = 0;
-    virtual void execute(const Pedestrian *, CognitiveMap *) const = 0;
-protected:
-    const Building * const building;
+  virtual std::string GetName() const = 0;
+  virtual void execute(const Pedestrian *, CognitiveMap *) const = 0;
+ protected:
+  const Building * const building;
 };
 
 #endif // ABSTRACTSENSOR_H

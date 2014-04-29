@@ -82,7 +82,7 @@ void Room::SetSubRoom(SubRoom* subroom, int index) {
 }
 
 void Room::SetState(RoomState state) {
-	_state=state;
+        _state=state;
 }
 
 
@@ -99,7 +99,7 @@ string Room::GetCaption() const {
 
 double Room::GetZPos() const {
     //if(pCaption=="070") return pZPos+1.0;
-	return _zPos;
+        return _zPos;
 }
 
 int Room::GetNumberOfSubRooms() const {
@@ -114,7 +114,7 @@ SubRoom* Room::GetSubRoom(int index) const {
     if ((index >= 0) && (index < (int) _subRooms.size()))
         return _subRooms[index];
     else {
-    	char tmp[CLENGTH];
+        char tmp[CLENGTH];
         sprintf(tmp,"ERROR: Room::GetSubRoom() Wrong subroom index [%d] for room index [%d] ",index,_id);
         Log->Write(tmp);
         exit(EXIT_FAILURE);
@@ -135,7 +135,7 @@ int Room::GetNumberOfPedestrians() const {
 #endif // _SIMULATOR
 
 RoomState Room::GetState() const {
-	return _state;
+        return _state;
 }
 
 
@@ -176,17 +176,17 @@ void Room::WriteToErrorLog() const {
 }
 
 const vector<int>& Room::GetAllTransitionsIDs() const {
-	return _transitionsIDs;
+        return _transitionsIDs;
 }
 
 void Room::AddTransitionID(int ID){
-	_transitionsIDs.push_back(ID);
+        _transitionsIDs.push_back(ID);
 }
 
 void Room::SetOutputHandler(OutputHandler* oh){
-	_outputFile=oh;
+        _outputFile=oh;
 }
 
 OutputHandler* Room::GetOutputHandler() const {
-	return _outputFile;
+        return _outputFile;
 }

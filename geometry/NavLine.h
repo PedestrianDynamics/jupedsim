@@ -32,10 +32,10 @@
 
 class NavLine: public Line {
 
-public:
-	NavLine();
-	NavLine(Line l);
-	virtual ~NavLine();
+ public:
+  NavLine();
+  NavLine(Line l);
+  virtual ~NavLine();
 
 };
 

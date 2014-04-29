@@ -587,7 +587,7 @@ void ArgumentParser::ParseIniFile(string inifile){
         //exit crossing strategy
         if(xPara->FirstChild("exitCrossingStrategy")){
             const char* tmp=xPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
-            if(tmp) 	pExitStrategy= atoi(tmp);
+            if(tmp)     pExitStrategy= atoi(tmp);
             Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
         }
 

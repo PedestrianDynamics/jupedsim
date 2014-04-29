@@ -54,9 +54,9 @@ Point::Point(const Point& orig) {
 }
 
 std::string Point::toString() const {
-	std::stringstream tmp;
-	tmp<<"( "<<_x<<" : " <<_y<<" )";
-	return tmp.str();
+        std::stringstream tmp;
+        tmp<<"( "<<_x<<" : " <<_y<<" )";
+        return tmp.str();
 };
 
 void Point::SetX(double x) {
@@ -98,7 +98,7 @@ double Point::ScalarP(const Point& v) const {
 
 /// determinant of the square matrix formed by the vectors [ this, v]
 double Point::Det(const Point& v) const {
-	return _x * v._y - _y * v._x;
+        return _x * v._y - _y * v._x;
 }
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
