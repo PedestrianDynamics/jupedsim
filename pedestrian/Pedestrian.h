@@ -320,7 +320,7 @@ public:
     /**
      * @return the average velocity over the recording period
      */
-    double GetAverageVelecityOverRecordingTime() const;
+    double GetMeanVelOverRecTime() const;
 
     double GetAge() const;
     void SetAge(double age);

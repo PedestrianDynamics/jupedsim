@@ -503,7 +503,7 @@ double Pedestrian::GetRecordingTime() const{
 	return _recordingTime;
 }
 
-double Pedestrian::GetAverageVelecityOverRecordingTime() const {
+double Pedestrian::GetMeanVelOverRecTime() const {
 	//just few position were saved
 	if (_lastPositions.size()<2) return _ellipse.GetV().Norm();
 	return fabs ( (_lastPositions.back()-_lastPositions.front()).Norm() / _recordingTime );
