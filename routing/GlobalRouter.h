@@ -184,6 +184,9 @@ private:
 	///map the internal crossings/transition id to
 	///the global ID (description) for that final destination
 	std::map<int, int> _mapIdToFinalDestination;
+    // normalize the probs
+    std::default_random_engine _rdGenerator;
+    std::uniform_real_distribution<double> _rdDistribution;
 
 protected:
 	std::map <int, AccessPoint*> _accessPoints;
