@@ -77,36 +77,41 @@ if(DOXYGEN_FOUND)
     )
 endif(DOXYGEN_FOUND)
 
-#find the correct OpenMP flag
+# find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
 if(OPENMP_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 else(OPENMP_FOUND)
-  message( STATUS "Disabling OpenMP support" )
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    # somehow find_package(openmp) does not work properly with clang
+    else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message( STATUS "Disabling OpenMP support" )
+  endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif(OPENMP_FOUND)
 
-#find and add the CGAL library
+# find and add the CGAL library
 #fixme: complete this section
-FIND_PACKAGE(CGAL QUIET)
-if(CGAL_FOUND)
-  include (${CGAL_USE_FILE})
-  INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
-  add_definitions(-D_CGAL=1)  
-  message (SEND_ERROR "${CGAL_FOUND}")
-  message (FATAL_ERROR "${CGAL_CORE_INCLUDE_DIR}")
-  message (SEND_ERROR " Erreur: ${CGAL_FOUND}")
-  message (SEND_ERROR " Erreur: ${CGAL_USE_FILE}")
-else(CGAL_FOUND)
-  message( STATUS "CGAL not found. But don't panik .." )
-endif(CGAL_FOUND)
+# FIND_PACKAGE(CGAL QUIET)
+# if(CGAL_FOUND)
+#   include (${CGAL_USE_FILE})
+#   INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
+#   add_definitions(-D_CGAL=1)
+#   message (STATUS "${CGAL_FOUND}")
+#   message (STATUS "${CGAL_CORE_INCLUDE_DIR}")
+#   message (STATUS " Erreur: ${CGAL_FOUND}")
+#   message (STATUS " Erreur: ${CGAL_USE_FILE}")
+# else(CGAL_FOUND)
+#   message( STATUS "CGAL not found." )
+# endif(CGAL_FOUND)
 
-# test files: all cpp-files in Utest
+# test all cpp-files in Utest
 if(BUILD_TESTING)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
 endif(BUILD_TESTING)
-
+# add sources and headers
 set (   source_files
   main.cpp
   Simulation.cpp
@@ -275,30 +280,43 @@ if(CGAL_FOUND)
    target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
 endif(CGAL_FOUND)
 #---------------------------- compiler -------------------------------
+# Initialize CXXFLAGS.
+set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wunused")
+set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+# check c++-11
+if((CMAKE_COMPILER_IS_GNUCXX AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.6) OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1))
+  message(STATUS "Checking for C++11 compiler - available")
+else()
+  message(STATUS "Checking for C++11 compiler - unavailable")
+endif()
+# c++-11 flags
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+endif()
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  message(STATUS "Using CLANG++" )
+  message(STATUS "Using Clang" )
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  message( STATUS "Set compiler flags (g++)" )
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall  -std=c++11")
+  message( STATUS "Using g++" )
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "In Debug Build")
-  set(WITH_COVERAGE TRUE)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -W -Wshadow -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Wno-deprecated -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage -std=c++11")
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-  message(STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
-else(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
-  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
-endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
+  message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
+else(CMAKE_BUILD_TYPE MATCHES Debug)
+  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_RELEASE} )
+ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)
-  enable_testing() #adds another build target, which is test for Makefile generators
-  include(CTest) #adding Dart support
+  enable_testing() # adds another build target, which is test for Makefile generators
+  include(CTest) # adding Dart support
 
-  #test if code compiles and runs default setting. Takes about 30 seconds
+  # test if code compiles and runs default setting. Takes about 30 seconds
   add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
     --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
     --build-generator ${CMAKE_GENERATOR}

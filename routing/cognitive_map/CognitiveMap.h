@@ -30,28 +30,28 @@ class Pedestrian;
  */
 class CognitiveMap {
 
- public:
-  /****************************
-   * Constructors & Destructors
-   ****************************/
-  CognitiveMap(const Building * building, const Pedestrian * pedestrian);
-  virtual ~CognitiveMap();
+public:
+     /****************************
+      * Constructors & Destructors
+      ****************************/
+     CognitiveMap(const Building * building, const Pedestrian * pedestrian);
+     virtual ~CognitiveMap();
 
-  void Add(const SubRoom * sub_room);
-  void Add(const Crossing * crossing);
-  void AddExit(const Transition * exit);
+     void Add(const SubRoom * sub_room);
+     void Add(const Crossing * crossing);
+     void AddExit(const Transition * exit);
 
-  NavigationGraph::VerticesContainer * GetAllVertices();
+     NavigationGraph::VerticesContainer * GetAllVertices();
 
-  const NavigationGraph * GetNavigationGraph() const;
+     const NavigationGraph * GetNavigationGraph() const;
 
-  const NavLine * GetDestination();
-  const NavLine * GetLocalDestination();
+     const NavLine * GetDestination();
+     const NavLine * GetLocalDestination();
 
- private:
-  NavigationGraph * navigation_graph;
-  const Building * const building;
-  const Pedestrian * const pedestrian;
+private:
+     NavigationGraph * navigation_graph;
+     const Building * const building;
+     const Pedestrian * const pedestrian;
 
 };
 

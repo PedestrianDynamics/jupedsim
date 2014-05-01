@@ -17,12 +17,12 @@
 
 EmptyCognitiveMapCreator::~EmptyCognitiveMapCreator()
 {
-    return;
+     return;
 }
 
 CognitiveMap * EmptyCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * ped)
 {
-    CognitiveMap * cm = new CognitiveMap(building, ped);
+     CognitiveMap * cm = new CognitiveMap(building, ped);
 
-    return cm;
+     return cm;
 }

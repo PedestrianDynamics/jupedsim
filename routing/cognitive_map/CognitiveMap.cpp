@@ -23,55 +23,55 @@ using namespace std;
  */
 
 CognitiveMap::CognitiveMap(const Building * building, const Pedestrian * pedestrian)
-    : building(building), pedestrian(pedestrian)
+     : building(building), pedestrian(pedestrian)
 {
-    navigation_graph = new NavigationGraph(building);
+     navigation_graph = new NavigationGraph(building);
 }
 
 CognitiveMap::~CognitiveMap()
 {
-    delete navigation_graph;
+     delete navigation_graph;
 }
 
 void CognitiveMap::Add(const SubRoom * sub_room)
 {
-    navigation_graph->AddVertex(sub_room);
+     navigation_graph->AddVertex(sub_room);
 }
 
 void CognitiveMap::Add(const Crossing * crossing)
 {
-    navigation_graph->AddEdge(crossing);
+     navigation_graph->AddEdge(crossing);
 }
 
 void CognitiveMap::AddExit(const Transition * exit)
 {
-    navigation_graph->AddExit(exit);
+     navigation_graph->AddExit(exit);
 }
 
 NavigationGraph::VerticesContainer * CognitiveMap::GetAllVertices()
 {
-    return navigation_graph->GetAllVertices();
+     return navigation_graph->GetAllVertices();
 }
 
 
 const NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
-    return navigation_graph;
+     return navigation_graph;
 }
 const NavLine * CognitiveMap::GetDestination()
 {
-    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
-    std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
+     std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 
-    if(cheapest_destination.first != NULL) {
-        return cheapest_destination.first->GetCrossing();
-    } else {
-        return NULL;
-    }
+     if(cheapest_destination.first != NULL) {
+          return cheapest_destination.first->GetCrossing();
+     } else {
+          return NULL;
+     }
 }
 
 const NavLine * CognitiveMap::GetLocalDestination()
 {
-    return NULL;
+     return NULL;
 }

@@ -1,8 +1,7 @@
 /**
  * @file    main.cpp
  * @author  U.Kemloh, A.Portz
- * @version 0.4
- * Created on: Apr 20, 2019
+ * @version 0.5
  * Copyright (C) <2009-2012>
  *
  * @section LICENSE
@@ -45,57 +44,59 @@
 
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
-#include "Simulation.h"
+#include "./Simulation.h"
 
 
-///global unique log variable
+/// global unique log variable
 OutputHandler* Log;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
-        time_t starttime, endtime;
+     time_t starttime, endtime;
 
 
-        //Log = new FileHandler("./Logfile.dat");
-        Log = new STDIOHandler();
+     // Log = new FileHandler("./Logfile.dat");
+     Log = new STDIOHandler();
 
-        // Parsing the arguments
-        ArgumentParser* args = new ArgumentParser();
-        args->ParseArgs(argc, argv);
+     // Parsing the arguments
 
-        // create and init the simulation engine
-        // Simulation
-        time(&starttime);
-        Log->Write("INFO: \tStart runSimulation()\n");
+     ArgumentParser* args = new ArgumentParser();
+     args->ParseArgs(argc, argv);
 
-        Simulation sim = Simulation();
-        sim.InitArgs(args);
-        int evacTime = sim.RunSimulation();
-        Log->Write("\nINFO: \tEnd runSimulation()\n");
-        time(&endtime);
+     // create and init the simulation engine
+     // Simulation
+     time(&starttime);
+     Log->Write("INFO: \tStart runSimulation()\n");
 
-        //some output
-        double execTime = difftime(endtime, starttime);
+     Simulation sim = Simulation();
+     sim.InitArgs(args);
+     int evacTime = sim.RunSimulation();
+     Log->Write("\nINFO: \tEnd runSimulation()\n");
+     time(&endtime);
 
-        if(sim.GetPedsNumber())
-                Log->Write("\nPedestrians not evacuated [%d] using [%d] threads", sim.GetPedsNumber(),
-                                args->GetMaxOpenMPThreads());
+     // some output
+     double execTime = difftime(endtime, starttime);
 
-        Log->Write("\nExec Time [s]     : %.2f", execTime);
-        Log->Write("Evac Time [s]     : %d", evacTime);
-        Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
+     if (sim.GetPedsNumber())
+          Log->Write("\nPedestrians not evacuated [%d] using [%d] threads",
+                     sim.GetPedsNumber(),
+                     args->GetMaxOpenMPThreads());
 
-        //sim.PrintStatistics();
+     Log->Write("\nExec Time [s]     : %.2f", execTime);
+     Log->Write("Evac Time [s]     : %d", evacTime);
+     Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
 
-        if (NULL == dynamic_cast<STDIOHandler*>(Log)){
-                printf("\nExec Time [s]     : %.2f\n", execTime);
-                printf("Evac Time [s]     : %d\n", evacTime);
-                printf("Real Time Factor  : %.2f X\n", evacTime / execTime);
-        }
+     // sim.PrintStatistics();
+     if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
+          printf("\nExec Time [s]     : %.2f\n", execTime);
+          printf("Evac Time [s]     : %d\n", evacTime);
+          printf("Real Time Factor  : %.2f X\n", evacTime / execTime);
+     }
 
-        //do the last cleaning
-        delete args;
-        delete Log;
+     // do the last cleaning
+     delete args;
+     delete Log;
 
-        return (EXIT_SUCCESS);
+     return (EXIT_SUCCESS);
 }

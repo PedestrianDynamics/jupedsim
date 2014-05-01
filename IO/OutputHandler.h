@@ -37,39 +37,39 @@
 #include "../general/Macros.h"
 
 class OutputHandler {
- public:
-  virtual void Write(std::string str);
-  virtual void Write(const char *string, ...);
-  virtual ~OutputHandler(){};
+public:
+     virtual void Write(std::string str);
+     virtual void Write(const char *string, ...);
+     virtual ~OutputHandler() {};
 };
 
 class STDIOHandler : public OutputHandler {
- public:
-  void Write(std::string str);
+public:
+     void Write(std::string str);
 };
 
 class FileHandler : public OutputHandler {
- private:
-  std::ofstream pfp;
+private:
+     std::ofstream pfp;
 
- public:
-  FileHandler(const char *fn);
-  virtual ~FileHandler();
-  void Write(std::string str);
-  void Write(const char *string,...);
+public:
+     FileHandler(const char *fn);
+     virtual ~FileHandler();
+     void Write(std::string str);
+     void Write(const char *string,...);
 };
 
 class TraVisToHandler : public OutputHandler {
- private:
-  TraVisToClient* client;
+private:
+     TraVisToClient* client;
 
- public:
-  TraVisToHandler(std::string host, int port);
-  virtual ~TraVisToHandler();
-  void Write(std::string str);
+public:
+     TraVisToHandler(std::string host, int port);
+     virtual ~TraVisToHandler();
+     void Write(std::string str);
 
-  //Some tags are broken
-  std::vector<std::string> brokentags;
+     //Some tags are broken
+     std::vector<std::string> brokentags;
 };
 
 

@@ -33,11 +33,13 @@
 
 using namespace std;
 
-ODESolver::ODESolver(ForceModel *model) : model(model) {
+ODESolver::ODESolver(ForceModel *model) : model(model)
+{
 
 }
 
-EulerSolver::EulerSolver(ForceModel *model) : ODESolver(model) {
+EulerSolver::EulerSolver(ForceModel *model) : ODESolver(model)
+{
 
 }
 
@@ -51,157 +53,161 @@ EulerSolver::EulerSolver(ForceModel *model) : ODESolver(model) {
  *   - entsprechend werden dann die neuen Gescwindigkeiten und Positionen der Fußgänger gesetzt
  * */
 
-void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
-    double h = tip1 - ti;
-    vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
+void EulerSolver::solveODE(double ti, double tip1, Building* building) const
+{
+     double h = tip1 - ti;
+     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
-    // Schleife über alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            vector< Point > result_acc = vector< Point > ();
-            if (anzpeds != 0) {
-                model->CalculateForce(ti, result_acc, building, i, s->GetSubRoomID());
-            }
-            result_acc_rooms.push_back(result_acc);
-            result_acc.clear();
-        }
-        result_acc_room.push_back(result_acc_rooms);
-        result_acc_rooms.clear();
-    }
+     // Schleife über alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               vector< Point > result_acc = vector< Point > ();
+               if (anzpeds != 0) {
+                    model->CalculateForce(ti, result_acc, building, i, s->GetSubRoomID());
+               }
+               result_acc_rooms.push_back(result_acc);
+               result_acc.clear();
+          }
+          result_acc_room.push_back(result_acc_rooms);
+          result_acc_rooms.clear();
+     }
 
-    /* PRARALLELES UPDATE */
+     /* PRARALLELES UPDATE */
 
-    // Schleife über alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            // Schleife über alle Fußgänger im SubRoom
-            for (int k = 0; k < anzpeds; ++k) {
-                Point result_acc = result_acc_room[i][j][k];
-                Pedestrian* ped = s->GetPedestrian(k);
-                Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
-                v_neu = (result_acc * h) + ped->GetV();
-                if (v_neu.Norm() < J_EPS_V)
-                    pos_neu = ped->GetPos();
-                else
-                    pos_neu = (v_neu * h) + ped->GetPos();
-                // neue Werte setzten
-                ped->SetPos(pos_neu);
-                ped->SetV(v_neu);
-                ped->SetPhiPed();
-                ped->UpdateJamData();
-            }
-        }
-    }
-    result_acc_room.clear();
+     // Schleife über alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               // Schleife über alle Fußgänger im SubRoom
+               for (int k = 0; k < anzpeds; ++k) {
+                    Point result_acc = result_acc_room[i][j][k];
+                    Pedestrian* ped = s->GetPedestrian(k);
+                    Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
+                    v_neu = (result_acc * h) + ped->GetV();
+                    if (v_neu.Norm() < J_EPS_V)
+                         pos_neu = ped->GetPos();
+                    else
+                         pos_neu = (v_neu * h) + ped->GetPos();
+                    // neue Werte setzten
+                    ped->SetPos(pos_neu);
+                    ped->SetV(v_neu);
+                    ped->SetPhiPed();
+                    ped->UpdateJamData();
+               }
+          }
+     }
+     result_acc_room.clear();
 }
 
-VelocityVerletSolver::VelocityVerletSolver(ForceModel *model) : ODESolver(model) {
+VelocityVerletSolver::VelocityVerletSolver(ForceModel *model) : ODESolver(model)
+{
 };
 
-void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) const {
-    double h = tip1 - ti;
-    double h2 = h*h;
-    double lambda = 0.5;
+void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) const
+{
+     double h = tip1 - ti;
+     double h2 = h*h;
+     double lambda = 0.5;
 
-    vector< vector < vector < Point > > > result1_acc_room = vector<vector < vector < Point > > >();
-    vector< vector < vector < Point > > > result2_acc_room = vector<vector < vector < Point > > >();
-    // Schleife über alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        vector < vector < Point > > result1_acc_subroom = vector < vector < Point > > ();
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            vector< Point > result1_acc = vector< Point > ();
-            if (anzpeds != 0) {
-                model->CalculateForce(ti, result1_acc, building, i, s->GetSubRoomID());
-            }
-            result1_acc_subroom.push_back(result1_acc);
-            result1_acc.clear();
-        }
-        result1_acc_room.push_back(result1_acc_subroom);
-        result1_acc_subroom.clear();
-    }
+     vector< vector < vector < Point > > > result1_acc_room = vector<vector < vector < Point > > >();
+     vector< vector < vector < Point > > > result2_acc_room = vector<vector < vector < Point > > >();
+     // Schleife über alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          vector < vector < Point > > result1_acc_subroom = vector < vector < Point > > ();
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               vector< Point > result1_acc = vector< Point > ();
+               if (anzpeds != 0) {
+                    model->CalculateForce(ti, result1_acc, building, i, s->GetSubRoomID());
+               }
+               result1_acc_subroom.push_back(result1_acc);
+               result1_acc.clear();
+          }
+          result1_acc_room.push_back(result1_acc_subroom);
+          result1_acc_subroom.clear();
+     }
 
-    /* ERSTES PRARALLELES UPDATE */
+     /* ERSTES PRARALLELES UPDATE */
 
-    // Schleife über alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            // Schleife über alle Fußgänger im SubRoom
-            for (int k = 0; k < anzpeds; ++k) {
-                Pedestrian* ped = s->GetPedestrian(k);
-                Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
-                if ((ped->GetV() + result1_acc_room[i][j][k]*0.5 * h).Norm() < J_EPS_V)
-                    pos_neu = ped->GetPos();
-                else
-                    pos_neu = ped->GetPos() + ped->GetV() * h + result1_acc_room[i][j][k]*0.5 * h2;
-                v_neu = ped->GetV() + result1_acc_room[i][j][k] * h * lambda;
-                ped->SetPos(pos_neu);
-                ped->SetV(v_neu);
-            }
-        }
-    }
+     // Schleife über alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               // Schleife über alle Fußgänger im SubRoom
+               for (int k = 0; k < anzpeds; ++k) {
+                    Pedestrian* ped = s->GetPedestrian(k);
+                    Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
+                    if ((ped->GetV() + result1_acc_room[i][j][k]*0.5 * h).Norm() < J_EPS_V)
+                         pos_neu = ped->GetPos();
+                    else
+                         pos_neu = ped->GetPos() + ped->GetV() * h + result1_acc_room[i][j][k]*0.5 * h2;
+                    v_neu = ped->GetV() + result1_acc_room[i][j][k] * h * lambda;
+                    ped->SetPos(pos_neu);
+                    ped->SetV(v_neu);
+               }
+          }
+     }
 
-    // Schleife über alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        vector < vector < Point > > result2_acc_subroom = vector < vector < Point > > ();
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            vector< Point > result2_acc = vector< Point > ();
-            if (anzpeds != 0) {
-                model->CalculateForce(ti, result2_acc, building, i, s->GetSubRoomID());
-            }
-            result2_acc_subroom.push_back(result2_acc);
-            result2_acc.clear();
-        }
-        result2_acc_room.push_back(result2_acc_subroom);
-        result2_acc_subroom.clear();
-    }
+     // Schleife über alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          vector < vector < Point > > result2_acc_subroom = vector < vector < Point > > ();
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               vector< Point > result2_acc = vector< Point > ();
+               if (anzpeds != 0) {
+                    model->CalculateForce(ti, result2_acc, building, i, s->GetSubRoomID());
+               }
+               result2_acc_subroom.push_back(result2_acc);
+               result2_acc.clear();
+          }
+          result2_acc_room.push_back(result2_acc_subroom);
+          result2_acc_subroom.clear();
+     }
 
 
-    /* ZWEITES PRARALLELES UPDATE */
+     /* ZWEITES PRARALLELES UPDATE */
 
-    // Schleife übr alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            for (int k = 0; k < anzpeds; ++k) {
-                Pedestrian* ped = s->GetPedestrian(k);
-                Point v_neu; // neue Positionen und Geschwindigkeiten setzen
-                v_neu = ped->GetV() + (result1_acc_room[i][j][k] + result2_acc_room[i][j][k])*0.5 * h;
-                ped->SetV(v_neu);
-                ped->SetPhiPed();
-            }
-        }
-    }
+     // Schleife übr alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               for (int k = 0; k < anzpeds; ++k) {
+                    Pedestrian* ped = s->GetPedestrian(k);
+                    Point v_neu; // neue Positionen und Geschwindigkeiten setzen
+                    v_neu = ped->GetV() + (result1_acc_room[i][j][k] + result2_acc_room[i][j][k])*0.5 * h;
+                    ped->SetV(v_neu);
+                    ped->SetPhiPed();
+               }
+          }
+     }
 
-    result1_acc_room.clear();
-    result2_acc_room.clear();
+     result1_acc_room.clear();
+     result2_acc_room.clear();
 
 };
 
-LeapfrogSolver::LeapfrogSolver(ForceModel *model) : ODESolver(model) {
+LeapfrogSolver::LeapfrogSolver(ForceModel *model) : ODESolver(model)
+{
 
 }
 
@@ -215,67 +221,70 @@ LeapfrogSolver::LeapfrogSolver(ForceModel *model) : ODESolver(model) {
  *   - entsprechend werden dann die neuen Gescwindigkeiten und Positionen der Fußgänger gesetzt
  * */
 
-void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const {
-    double h = tip1 - ti;
-    vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
+void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const
+{
+     double h = tip1 - ti;
+     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
-    // Schleife übr alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            vector< Point > result_acc = vector< Point > ();
-            if (anzpeds != 0) {
-                model->CalculateForce(ti, result_acc, building, i, s->GetSubRoomID());
-            }
-            result_acc_rooms.push_back(result_acc);
-            result_acc.clear();
-        }
-        result_acc_room.push_back(result_acc_rooms);
-        result_acc_rooms.clear();
-    }
+     // Schleife übr alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          vector < vector < Point > > result_acc_rooms = vector < vector < Point > > ();
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               vector< Point > result_acc = vector< Point > ();
+               if (anzpeds != 0) {
+                    model->CalculateForce(ti, result_acc, building, i, s->GetSubRoomID());
+               }
+               result_acc_rooms.push_back(result_acc);
+               result_acc.clear();
+          }
+          result_acc_room.push_back(result_acc_rooms);
+          result_acc_rooms.clear();
+     }
 
-    /* PRARALLELES UPDATE */
+     /* PRARALLELES UPDATE */
 
-    // Schleife übr alle Räume
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        // Schleife über alle SubRooms im Raum
-        for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
-            SubRoom* s = r->GetSubRoom(j);
-            int anzpeds = s->GetNumberOfPedestrians();
-            // Schleife über alle Fußgänger im SubRoom
-            for (int k = 0; k < anzpeds; ++k) {
-                Point result_acc = result_acc_room[i][j][k];
-                Pedestrian* ped = s->GetPedestrian(k);
-                Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
-                if (ti == 0.0) {
-                    v_neu = (result_acc * 0.5 * h) + ped->GetV(); // v(0.5) wird aus v(0) berechnet
-                } else {
-                    v_neu = (result_acc * h) + ped->GetV();
-                }
-                if (v_neu.Norm() < J_EPS_V)
-                    pos_neu = ped->GetPos();
-                else
-                    pos_neu = (v_neu * h) + ped->GetPos();
-                // neue Werte setzten
-                ped->SetPos(pos_neu);
-                ped->SetV(v_neu);
-                ped->SetPhiPed();
-            }
-        }
-    }
-    result_acc_room.clear();
+     // Schleife übr alle Räume
+     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+          Room* r = building->GetRoom(i);
+          // Schleife über alle SubRooms im Raum
+          for (int j = 0; j < r->GetNumberOfSubRooms(); j++) {
+               SubRoom* s = r->GetSubRoom(j);
+               int anzpeds = s->GetNumberOfPedestrians();
+               // Schleife über alle Fußgänger im SubRoom
+               for (int k = 0; k < anzpeds; ++k) {
+                    Point result_acc = result_acc_room[i][j][k];
+                    Pedestrian* ped = s->GetPedestrian(k);
+                    Point pos_neu, v_neu; // neue Positionen und Geschwindigkeiten setzen
+                    if (ti == 0.0) {
+                         v_neu = (result_acc * 0.5 * h) + ped->GetV(); // v(0.5) wird aus v(0) berechnet
+                    } else {
+                         v_neu = (result_acc * h) + ped->GetV();
+                    }
+                    if (v_neu.Norm() < J_EPS_V)
+                         pos_neu = ped->GetPos();
+                    else
+                         pos_neu = (v_neu * h) + ped->GetPos();
+                    // neue Werte setzten
+                    ped->SetPos(pos_neu);
+                    ped->SetV(v_neu);
+                    ped->SetPhiPed();
+               }
+          }
+     }
+     result_acc_room.clear();
 }
 
-EulerSolverLC::EulerSolverLC(ForceModel *model) : ODESolver(model) {
+EulerSolverLC::EulerSolverLC(ForceModel *model) : ODESolver(model)
+{
 }
 
-void EulerSolverLC::solveODE(double ti, double tip1, Building* building) const {
+void EulerSolverLC::solveODE(double ti, double tip1, Building* building) const
+{
 
-    model->CalculateForceLC(ti, tip1, building);
+     model->CalculateForceLC(ti, tip1, building);
 
 }

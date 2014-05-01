@@ -16,16 +16,15 @@ class Building;
 
 
 
-class CompleteCognitiveMapCreator : public AbstractCognitiveMapCreator
-{
+class CompleteCognitiveMapCreator : public AbstractCognitiveMapCreator {
 
- public:
- CompleteCognitiveMapCreator(const Building * b) : AbstractCognitiveMapCreator(b) { }
+public:
+     CompleteCognitiveMapCreator(const Building * b) : AbstractCognitiveMapCreator(b) { }
 
-  virtual ~CompleteCognitiveMapCreator();
+     virtual ~CompleteCognitiveMapCreator();
 
-  CognitiveMap * CreateCognitiveMap(const Pedestrian * ped);
- private:
+     CognitiveMap * CreateCognitiveMap(const Pedestrian * ped);
+private:
 
 };
 

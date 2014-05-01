@@ -30,21 +30,21 @@ typedef std::unordered_map<CMStorageKeyType, CMStorageValueType> CMStorageType;
  *
  */
 class CognitiveMapStorage {
- public:
-  CognitiveMapStorage(const Building * const b);
-  virtual ~CognitiveMapStorage();
+public:
+     CognitiveMapStorage(const Building * const b);
+     virtual ~CognitiveMapStorage();
 
 
-  CMStorageValueType operator[] (CMStorageKeyType key);
+     CMStorageValueType operator[] (CMStorageKeyType key);
 
 
- private:
-  const Building * const building;
-  CMStorageType cognitive_maps;
-  AbstractCognitiveMapCreator * creator;
+private:
+     const Building * const building;
+     CMStorageType cognitive_maps;
+     AbstractCognitiveMapCreator * creator;
 
 
-  void CreateCognitiveMap(CMStorageKeyType ped);
+     void CreateCognitiveMap(CMStorageKeyType ped);
 
 };
 

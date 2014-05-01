@@ -30,15 +30,18 @@
 
 
 
-NavLine::NavLine() {
+NavLine::NavLine()
+{
 
 }
 
-NavLine::NavLine(Line l):Line(l) {
+NavLine::NavLine(Line l):Line(l)
+{
 
 }
 
-NavLine::~NavLine() {
+NavLine::~NavLine()
+{
 }
 
 

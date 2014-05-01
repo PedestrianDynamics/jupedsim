@@ -34,92 +34,101 @@
 using namespace std;
 
 
-void OutputHandler::Write(string str) {
-        if (this != NULL)
-                cout << str << endl;
+void OutputHandler::Write(string str)
+{
+     if (this != NULL)
+          cout << str << endl;
 }
 
-void OutputHandler::Write(const char* message,...) {
-        char msg[CLENGTH];
-        va_list ap;
-        va_start (ap, message);
-        vsprintf (msg,message ,ap);
-        va_end (ap);
+void OutputHandler::Write(const char* message,...)
+{
+     char msg[CLENGTH];
+     va_list ap;
+     va_start (ap, message);
+     vsprintf (msg,message ,ap);
+     va_end (ap);
 
-        string str(msg);
-        if(str.find("ERROR")==string::npos) {
-                cout<<msg<<endl;
-                cout.flush();
-        }
-        else {
-                cerr<<msg<<endl;
-                cerr.flush();
-        }
+     string str(msg);
+     if(str.find("ERROR")==string::npos) {
+          cout<<msg<<endl;
+          cout.flush();
+     } else {
+          cerr<<msg<<endl;
+          cerr.flush();
+     }
 
-        //cout << "\033[1;30mbold red text\033[0m\n";
-        //cout << "\033[1;31"<<msg<<"\033[0m\n";
-        //cout << "\033[1;31 bla bla \033[0m\n";
+     //cout << "\033[1;30mbold red text\033[0m\n";
+     //cout << "\033[1;31"<<msg<<"\033[0m\n";
+     //cout << "\033[1;31 bla bla \033[0m\n";
 }
 
-void STDIOHandler::Write(string str) {
-        if (this != NULL)
-                cout << str << endl;
+void STDIOHandler::Write(string str)
+{
+     if (this != NULL)
+          cout << str << endl;
 }
 
-FileHandler::FileHandler(const char *fn) {
-    pfp.open(fn);
-    if (!fn) {
-        char tmp[CLENGTH];
-        sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
-        cerr << tmp << endl;
-        exit(0);
-    }
+FileHandler::FileHandler(const char *fn)
+{
+     pfp.open(fn);
+     if (!fn) {
+          char tmp[CLENGTH];
+          sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
+          cerr << tmp << endl;
+          exit(0);
+     }
 }
 
-FileHandler::~FileHandler() {
-    pfp.close();
+FileHandler::~FileHandler()
+{
+     pfp.close();
 }
 
-void FileHandler::Write(string str) {
-    if (this != NULL) {
-        pfp << str << endl;
-        pfp.flush();
-    }
+void FileHandler::Write(string str)
+{
+     if (this != NULL) {
+          pfp << str << endl;
+          pfp.flush();
+     }
 }
 
-void FileHandler::Write(const char* string,...) {
-        char msg[CLENGTH];
-        va_list ap;
-        va_start (ap, string);
-        vsprintf (msg,string ,ap);
-        va_end (ap);
-        pfp<<msg<<endl;
-        pfp.flush();
+void FileHandler::Write(const char* string,...)
+{
+     char msg[CLENGTH];
+     va_list ap;
+     va_start (ap, string);
+     vsprintf (msg,string ,ap);
+     va_end (ap);
+     pfp<<msg<<endl;
+     pfp.flush();
 }
 
-TraVisToHandler::TraVisToHandler(string host, int port) {
-    client = new TraVisToClient(host, port);
-    brokentags.push_back("<trajectories>");
-    brokentags.push_back("</trajectories>");
-    brokentags.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+TraVisToHandler::TraVisToHandler(string host, int port)
+{
+     client = new TraVisToClient(host, port);
+     brokentags.push_back("<trajectories>");
+     brokentags.push_back("</trajectories>");
+     brokentags.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 }
 
-TraVisToHandler::~TraVisToHandler(){
-        delete client;
+TraVisToHandler::~TraVisToHandler()
+{
+     delete client;
 }
 
-void TraVisToHandler::Write(string str) {
+void TraVisToHandler::Write(string str)
+{
 
-    vector<string>::iterator str_it;
+     vector<string>::iterator str_it;
 
-    //There are a few broken tags which need to be checked for and removed.
-    for (str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {
-        int tagstart = str.find(*str_it);
-        if (tagstart != (int) string::npos) {
-            str.erase(str.begin() + tagstart, str.begin() + tagstart + (*str_it).size());
-        }
-    }
-    client->sendData(str.c_str());
+     //There are a few broken tags which need to be checked for and removed.
+     for (str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {
+          int tagstart = str.find(*str_it);
+          if (tagstart != (int) string::npos) {
+               str.erase(str.begin() + tagstart, str.begin() + tagstart + (*str_it).size());
+          }
+     }
+     client->sendData(str.c_str());
 }
 
 

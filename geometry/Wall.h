@@ -32,20 +32,20 @@
 
 class Wall : public Line {
 
- public:
-  Wall();
-  Wall(const Point& p1, const Point& p2);
-  Wall(const Wall& orig);
+public:
+     Wall();
+     Wall(const Point& p1, const Point& p2);
+     Wall(const Wall& orig);
 
-  /**
-   *  Debug output from the object
-   */
-  void WriteToErrorLog() const;
+     /**
+      *  Debug output from the object
+      */
+     void WriteToErrorLog() const;
 
-  /**
-   * @return a nicely formated string of the object
-   */
-  virtual std::string Write() const;
+     /**
+      * @return a nicely formated string of the object
+      */
+     virtual std::string Write() const;
 };
 
 

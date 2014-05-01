@@ -32,58 +32,69 @@
 using namespace std;
 
 
-Router::Router() {
-        _trips = vector<vector<int> >();
-        _finalDestinations = vector<int>();
-        _id=-1;
-        _strategy=ROUTING_UNDEFINED;
+Router::Router()
+{
+     _trips = vector<vector<int> >();
+     _finalDestinations = vector<int>();
+     _id=-1;
+     _strategy=ROUTING_UNDEFINED;
 }
 
-Router::~Router() {
+Router::~Router()
+{
 }
 
-const vector<int> Router::GetTrip(int index) const {
-        if ((index >= 0) && (index < (int) _trips.size()))
-                return _trips[index];
-        else {
-                char tmp[CLENGTH];
-                sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-                                index, _trips.size());
-                Log->Write(tmp);
-                exit(EXIT_FAILURE);
-        }
+const vector<int> Router::GetTrip(int index) const
+{
+     if ((index >= 0) && (index < (int) _trips.size()))
+          return _trips[index];
+     else {
+          char tmp[CLENGTH];
+          sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
+                  index, _trips.size());
+          Log->Write(tmp);
+          exit(EXIT_FAILURE);
+     }
 }
 
-void Router::AddTrip(vector<int> trip) {
-        _trips.push_back(trip);
+void Router::AddTrip(vector<int> trip)
+{
+     _trips.push_back(trip);
 }
 
-void Router::AddFinalDestinationID(int id) {
-        _finalDestinations.push_back(id);
+void Router::AddFinalDestinationID(int id)
+{
+     _finalDestinations.push_back(id);
 }
 
-const vector<int> Router::GetFinalDestinations() const {
-        return _finalDestinations;
+const vector<int> Router::GetFinalDestinations() const
+{
+     return _finalDestinations;
 }
 
-void Router::SetID(int id) {
-        _id=id;
+void Router::SetID(int id)
+{
+     _id=id;
 }
 
-int Router::GetID() const {
-        return _id;
+int Router::GetID() const
+{
+     return _id;
 }
 
-void Router::SetStrategy(RoutingStrategy strategy) {
-        _strategy=strategy;
+void Router::SetStrategy(RoutingStrategy strategy)
+{
+     _strategy=strategy;
 }
 
-RoutingStrategy Router::GetStrategy() const {
-        return _strategy;
+RoutingStrategy Router::GetStrategy() const
+{
+     return _strategy;
 }
 
-void Router::WriteToErrorLog() const {
-        //TODO
+void Router::WriteToErrorLog() const
+{
+     //TODO
 //      for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
 //                      iter != pCrossings.end(); ++iter) {
 //              iter->second->WriteToErrorLog();

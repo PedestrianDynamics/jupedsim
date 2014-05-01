@@ -18,13 +18,13 @@
 CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
      : building(b)
 {
-    //creator = new EmptyCognitiveMapCreator(b);
-    creator = new CompleteCognitiveMapCreator(b);
+     //creator = new EmptyCognitiveMapCreator(b);
+     creator = new CompleteCognitiveMapCreator(b);
 }
 
 CognitiveMapStorage::~CognitiveMapStorage()
 {
-    delete creator;
+     delete creator;
 }
 
 CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
@@ -39,9 +39,9 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
 
 void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
-    //todo: the possibility to have more then one creator.
-    cognitive_maps.emplace(ped, creator->CreateCognitiveMap(ped));
+     //todo: the possibility to have more then one creator.
+     cognitive_maps.emplace(ped, creator->CreateCognitiveMap(ped));
 
-    //debug
-    //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
+     //debug
+     //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());
 }

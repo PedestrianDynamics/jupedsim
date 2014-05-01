@@ -25,20 +25,20 @@ class SensorManager;
  */
 
 class CognitiveMapRouter: public Router {
- public:
-  CognitiveMapRouter();
-  virtual ~CognitiveMapRouter();
+public:
+     CognitiveMapRouter();
+     virtual ~CognitiveMapRouter();
 
-  virtual int FindExit(Pedestrian* p);
-  virtual void Init(Building* b);
+     virtual int FindExit(Pedestrian* p);
+     virtual void Init(Building* b);
 
- protected:
-  void CheckAndInitPedestrian(Pedestrian *);
- private:
+protected:
+     void CheckAndInitPedestrian(Pedestrian *);
+private:
 
-  Building * building;
-  CognitiveMapStorage * cm_storage;
-  SensorManager * sensor_manager;
+     Building * building;
+     CognitiveMapStorage * cm_storage;
+     SensorManager * sensor_manager;
 
 };
 

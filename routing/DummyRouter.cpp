@@ -9,25 +9,29 @@
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
 
-DummyRouter::DummyRouter() {
-        _building=NULL;
+DummyRouter::DummyRouter()
+{
+     _building=NULL;
 }
 
-DummyRouter::~DummyRouter() {
+DummyRouter::~DummyRouter()
+{
 
 }
 
-int DummyRouter::FindExit(Pedestrian* p) {
-        p->SetExitIndex(1);
-        //p->SetExitLine(_building->getGetCrossing(0));
-        return 1;
+int DummyRouter::FindExit(Pedestrian* p)
+{
+     p->SetExitIndex(1);
+     //p->SetExitLine(_building->getGetCrossing(0));
+     return 1;
 }
 
-void DummyRouter::Init(Building* b) {
-        _building=b;
-        Log->Write("ERROR: \tdo not use this  <<Dummy>> router !!");
+void DummyRouter::Init(Building* b)
+{
+     _building=b;
+     Log->Write("ERROR: \tdo not use this  <<Dummy>> router !!");
 
-        //dump all navigation lines
+     //dump all navigation lines
 
 //      cout<<"crossing:"<<endl;
 //      for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();

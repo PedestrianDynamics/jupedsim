@@ -24,60 +24,60 @@ using namespace std;
 
 GraphEdge::~GraphEdge()
 {
-    return;
+     return;
 }
 
 GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, const Crossing * const crossing)
-    : src(s), dest(d), crossing(crossing)
+     : src(s), dest(d), crossing(crossing)
 {
-    CalcApproximateDistance();
+     CalcApproximateDistance();
 }
 
 GraphEdge::GraphEdge(GraphEdge const &ge)
-    : src(ge.src), dest(ge.dest), crossing(ge.crossing), approximate_distance(ge.approximate_distance)
+     : src(ge.src), dest(ge.dest), crossing(ge.crossing), approximate_distance(ge.approximate_distance)
 {
 }
 
 void GraphEdge::CalcApproximateDistance()
 {
-    double distance = 0.0;
-    int count = 0;
-    for(std::vector<Crossing*>::const_iterator it = src->GetSubRoom()->GetAllCrossings().begin(); it != src->GetSubRoom()->GetAllCrossings().end(); ++it) {
-        if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
-        if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
-        count++;
-        distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
-    }
+     double distance = 0.0;
+     int count = 0;
+     for(std::vector<Crossing*>::const_iterator it = src->GetSubRoom()->GetAllCrossings().begin(); it != src->GetSubRoom()->GetAllCrossings().end(); ++it) {
+          if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+          if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
+          count++;
+          distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
+     }
 
-    for(std::vector<Transition*>::const_iterator it = src->GetSubRoom()->GetAllTransitions().begin(); it != src->GetSubRoom()->GetAllTransitions().end(); ++it) {
-        if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
-        if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
-        count++;
-        distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
-    }
-    if(count == 0) approximate_distance = 0;
-    else approximate_distance = distance/count;
+     for(std::vector<Transition*>::const_iterator it = src->GetSubRoom()->GetAllTransitions().begin(); it != src->GetSubRoom()->GetAllTransitions().end(); ++it) {
+          if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+          if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
+          count++;
+          distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
+     }
+     if(count == 0) approximate_distance = 0;
+     else approximate_distance = distance/count;
 }
 
 
 double GraphEdge::GetWeight(const Point & position) const
 {
-    if(factors.empty()) {
-        return GetApproximateDistance(position);
-    }
-    double weight = GetApproximateDistance(position);
+     if(factors.empty()) {
+          return GetApproximateDistance(position);
+     }
+     double weight = GetApproximateDistance(position);
 
-    for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
-        weight = weight * it->second.first;
-    }
+     for(FactorContainer::const_iterator it = factors.begin(); it != factors.end(); ++it) {
+          weight = weight * it->second.first;
+     }
 
-    return weight;
+     return weight;
 }
 
 void GraphEdge::SetFactor(double factor, std::string name)
 {
-    //TODO: set global time as second double
-    factors[name] = std::make_pair(factor, 0.0);
+     //TODO: set global time as second double
+     factors[name] = std::make_pair(factor, 0.0);
 }
 
 
@@ -88,36 +88,36 @@ void GraphEdge::SetFactor(double factor, std::string name)
 
 double GraphEdge::GetRoomToFloorFactor() const
 {
-    if(GetDest() == NULL || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;
-    if(GetDest()->GetSubRoom()->GetType() == "floor") return 1.0;
-    else return 5.0;
+     if(GetDest() == NULL || GetDest()->GetSubRoom()->GetType() == GetSrc()->GetSubRoom()->GetType()) return 1.0;
+     if(GetDest()->GetSubRoom()->GetType() == "floor") return 1.0;
+     else return 5.0;
 }
 
 double GraphEdge::GetApproximateDistance(const Point & position) const
 {
-    return (crossing->GetCentre()-position).Norm();
+     return (crossing->GetCentre()-position).Norm();
 }
 
 double GraphEdge::GetApproximateDistance() const
 {
-    return approximate_distance;
+     return approximate_distance;
 }
 
 const GraphVertex * GraphEdge::GetDest() const
 {
-    return dest;
+     return dest;
 }
 const GraphVertex * GraphEdge::GetSrc() const
 {
-    return src;
+     return src;
 }
 
 const Crossing * GraphEdge::GetCrossing() const
 {
-    return crossing;
+     return crossing;
 }
 
 bool GraphEdge::IsExit() const
 {
-    return crossing->IsExit();
+     return crossing->IsExit();
 }
