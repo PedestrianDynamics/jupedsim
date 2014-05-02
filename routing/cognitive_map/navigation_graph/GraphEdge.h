@@ -73,7 +73,7 @@ private:
 
      //WEIGHTS DEPRECATED!
      double approximate_distance;
-     double density = 0.0;
+     // double density = 0.0;
 
 };
 

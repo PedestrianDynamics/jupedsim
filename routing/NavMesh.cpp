@@ -1174,8 +1174,8 @@ void NavMesh::FinalizeAlphaShape()
           exit(EXIT_FAILURE);
      }
 
-     const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
-     double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
+     // const Point& env_center=outside->GetSubRoom(0)->GetCentroid();
+     // double env_radius= outside->GetSubRoom(0)->GetWall(0).DistTo(env_center);
      //outside->WriteToErrorLog();
      //cout<<"Center:" <<env_center.toString()<<endl;
      //cout<<"Radius:" <<env_radius<<endl; exit(0);

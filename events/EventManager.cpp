@@ -14,7 +14,7 @@ EventManager::EventManager(Building *_b)
      _event_ids=vector<int>();
      _projectFilename = "";
      _building = _b;
-     _deltaT=NULL;
+     _deltaT= 0; // NULL;
      _eventCounter=0;
      _dynamic=false;
      _file = fopen("../events/events.txt","r");
@@ -149,7 +149,7 @@ void EventManager::Update_Events(double time, double d)
                _allPedestrians[p]->ResetRerouting();
           }
      }
-     int i;
+     unsigned int i;
      for(i=0; i<_event_times.size(); i++) {
           if(fabs(_event_times[i]-time)<0.0000001) {
                //Event findet statt
@@ -209,7 +209,7 @@ void EventManager::changeRouting(int id, string state)
      //Abstand der aktuellen Position des Pedestrians zur entsprechenden Tuer: Tuer als Linie sehen und mit
      //DistTo(ped.GetPos()) den Abstand messen
      Line* l = new Line(t->GetPoint1(),t->GetPoint2());
-     for (int p = 0; p < nSize; ++p) {
+     for (unsigned int p = 0; p < nSize; ++p) {
           //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
           double dist = l->DistTo(_allPedestrians[p]->GetPos());
           if(dist>0.0&&dist<0.5) {

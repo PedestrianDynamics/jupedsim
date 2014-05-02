@@ -55,7 +55,7 @@ const vector<string> RoutingEngine::GetTrip(int index) const
      else {
           char tmp[CLENGTH];
           sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-                  index, _tripsCollection.size());
+                  index, int(_tripsCollection.size()));
           Log->Write(tmp);
           exit(EXIT_FAILURE);
      }

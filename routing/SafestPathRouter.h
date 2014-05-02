@@ -99,7 +99,7 @@ private:
       */
      void MappingFloorIDtoIndex( );
 
-     int MapSection;
+     // int MapSection;
 
 
 
@@ -124,10 +124,10 @@ private:
 
 
 
-     int *preSub;
+     // int *preSub;
      int *flo;
      double maximalSquare;
-     double *lenthOfSection;
+     // double *lenthOfSection;
      // double rR[1][11];
      double *rR;
 
@@ -140,7 +140,7 @@ private:
      double **dPreOFP;
 
      FileHandler* _phiFile;
-     FileHandler* _finalLineEvac;
+     // FileHandler* _finalLineEvac;
 
 
      // double rR[1][11];
