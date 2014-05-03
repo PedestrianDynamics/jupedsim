@@ -51,7 +51,7 @@ const vector<int> Router::GetTrip(int index) const
      else {
           char tmp[CLENGTH];
           sprintf(tmp, "ERROR: \tWrong 'index' [%d] > [%d] in Routing::GetTrip()",
-                  index, _trips.size());
+                  index, int(_trips.size()));
           Log->Write(tmp);
           exit(EXIT_FAILURE);
      }

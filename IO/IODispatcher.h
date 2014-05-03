@@ -1,7 +1,7 @@
 /**
- * File:   IODispatcher.h
+ * @file   IODispatcher.h
  *
- * Created on 20. November 2010, 15:20
+ * @date Created on 20. November 2010, 15:20
  *
  *
  * @section LICENSE
@@ -124,4 +124,3 @@ public:
 };
 
 #endif  /* _IODISPATCHER_H */
-

@@ -134,4 +134,3 @@ inline char xmltoc(const char * t,const char v='\0')
 }
 
 #endif  /* _MACROS_H */
-

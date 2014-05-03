@@ -1,7 +1,7 @@
 /**
- * File:   OutputHandler.h
+ * @file   OutputHandler.h
  *
- * Created on 20. November 2010, 15:20
+ * @date  Created on 20. November 2010, 15:20
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -37,7 +37,18 @@
 #include "../general/Macros.h"
 
 class OutputHandler {
+protected:
+     int nWarnings;
+     int nErrors;
+     int nCriticals;
 public:
+     OutputHandler() { nWarnings = 0; nErrors = 0; nCriticals = 0; };
+     int GetWarnings();
+     void incrementWarnings();
+     int GetErrors();
+     void incrementErrors();
+     int GetCriticals();
+     void incrementCriticals();
      virtual void Write(std::string str);
      virtual void Write(const char *string, ...);
      virtual ~OutputHandler() {};
@@ -51,7 +62,6 @@ public:
 class FileHandler : public OutputHandler {
 private:
      std::ofstream pfp;
-
 public:
      FileHandler(const char *fn);
      virtual ~FileHandler();
@@ -76,4 +86,3 @@ public:
 
 
 #endif /*OUTPUT_HANDLER_H_*/
-

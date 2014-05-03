@@ -300,6 +300,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                else {
                     Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
                                "tmax has to be positiv!!!\n");
+                    Log->incrementErrors();
                     exit(0);
                }
                break;
@@ -311,6 +312,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                else {
                     Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
                                "dt has to be positiv!!!\n");
+                    Log->incrementErrors();
                     exit(0);
                }
                break;
@@ -322,6 +324,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                else {
                     Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
                                "wrong value for solver type!!!\n");
+                    Log->incrementErrors();
                     exit(0);
                }
                break;
@@ -333,6 +336,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                else {
                     Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
                                "wrong value for exit strategy!!!\n");
+                    Log->incrementErrors();
                     exit(0);
                }
                break;
@@ -362,6 +366,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                default:
                     Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
                                "wrong value for routing strategy!!!\n");
+                    Log->incrementErrors();
                     exit(0);
                     break;
                }
@@ -402,6 +407,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
           default: {
                Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
                           "wrong program options!!!\n");
+               Log->incrementErrors();
                Usage();
                exit(EXIT_FAILURE);
           }
@@ -437,6 +443,7 @@ void ArgumentParser::ParseIniFile(string inifile)
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -445,11 +452,13 @@ void ArgumentParser::ParseIniFile(string inifile)
      TiXmlElement* xMainNode = doc.RootElement();
      if( ! xMainNode ) {
           Log->Write("ERROR:\tRoot element does not exist");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
      if( xMainNode->ValueStr () != "JuPedSim" ) {
           Log->Write("ERROR:\tRoot element value is not 'JuPedSim'.");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -458,6 +467,7 @@ void ArgumentParser::ParseIniFile(string inifile)
           Log->Write("ERROR:\t There is no header version. I am assuming %s",JPS_VERSION);
      } else if(string(xMainNode->Attribute("version"))!=JPS_VERSION) {
           Log->Write("ERROR:\t Wrong header version. Only version %s is supported.",JPS_VERSION);
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -528,8 +538,9 @@ void ArgumentParser::ParseIniFile(string inifile)
           Log->Write("INFO:\t%s model used\n", modelName.c_str());
           // For convenience. This moved to the header as it is not model specific
           if(xPara->FirstChild("tmax")) {
-               Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
-               Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+               Log->Write("WARNING: \tthe maximal simulation time section moved to the header!!!");
+               Log->Write("WARNING: \t\t <max_sim_time> </max_sim_time>\n");
+               Log->incrementWarnings();
           }
 
           //solver
@@ -540,6 +551,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                else if(solver=="leapfrog") pSolver=3;
                else {
                     Log->Write("ERROR: \twrong value for solver type!!!\n");
+                    Log->incrementErrors();
                     exit(EXIT_FAILURE);
                }
                Log->Write("INFO: \tpSolver <"+string(solver)+">");
@@ -571,6 +583,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                     Log->Write("INFO: \tlinked cells enabled with size  <"+cell_size+">");
                } else {
                     Log->Write("WARNING: \tinvalid parameters for linkedcells");
+                    Log->incrementWarnings();
                }
           }
 
@@ -684,6 +697,7 @@ void ArgumentParser::ParseIniFile(string inifile)
 
      if(!xRouters) {
           Log->Write("ERROR:\tNo routers found.");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -711,6 +725,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                pRoutingStrategies.push_back(make_pair(id,ROUTING_COGNITIVEMAP));
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",strategy.c_str());
+               Log->incrementErrors();
                exit(EXIT_FAILURE);
           }
      }

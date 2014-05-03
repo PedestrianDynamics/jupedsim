@@ -61,7 +61,7 @@ public:
      virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building, int roomID, int SubRoomID) const = 0;
 
      /**
-      * Solve the differential equations and update the positions and velocities
+      * Solve the differential equations and update the positions and veloities
       * @param t the actual time
       * @param tp the next timestep
       * @param building the geometry object
@@ -253,4 +253,3 @@ public:
 };
 
 #endif  /* _FORCEMODEL_H */
-

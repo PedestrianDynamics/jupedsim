@@ -138,6 +138,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      } else {
           Log->Write("ERROR: \tin GCFMModel::forcePedPed() ep12 kann nicht berechnet werden!!!\n");
           Log->Write("ERROR:\t fix this as soon as possible");
+          Log->incrementErrors();
           return F_rep; // FIXME: should never happen
           exit(0);
 
@@ -193,6 +194,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
                   ped2->GetID(), F_rep.GetX(), F_rep.GetY());
           Log->Write(tmp);
           Log->Write("ERROR:\t fix this as soon as possible");
+          Log->incrementErrors();
           return Point(0,0); // FIXME: should never happen
           exit(0);
      }
@@ -522,7 +524,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 
                     building->DeletePedFromSim(ped);
                     Log->Write("\tCRITICAL: one ped was removed due to high velocity");
-
+                    Log->incrementCriticals();
                     //      continue;
                     exit(EXIT_FAILURE);
                }
@@ -645,9 +647,10 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           ep12 = distp12.Normalized();
      } else {
           //printf("ERROR: \tin GompertzModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("ERROR: \tin GompertzModel::forcePedPed() ep12 can not be calculated!!!\n");
+          Log->Write("WARNING: \tin GompertzModel::forcePedPed() ep12 can not be calculated!!!\n");
           Log->Write("\t\t Pedestrians are too near to each other.");
           Log->Write("\t\t Get your model right. Going to exit.");
+          Log->incrementWarnings();
           return F_rep; // should never happen
           exit(0);
      }
@@ -691,6 +694,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
                   ped2->GetID(), F_rep.GetX(), F_rep.GetY());
           Log->Write(tmp);
           Log->Write("ERROR:\t fix this as soon as possible");
+          Log->incrementErrors();
           return Point(0,0); // FIXME: should never happen
           exit(0);
      }
@@ -754,6 +758,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
 
      if (Distance < J_EPS) {
           Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall. Return default values",ped->GetID());
+          Log->incrementWarnings();
           return Point(0, 0); //quick and dirty. Should react to the warning and fix the model
      }
      e_iw = dist / Distance;
@@ -875,7 +880,7 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
 
                     printf("\tCCRITICAL: ped [%d] was removed due to high velocity\n",ped->GetID());
                     Log->Write("\tCRITICAL: ped [%d] was removed due to high velocity",ped->GetID());
-
+                    Log->incrementCriticals();
                     building->DeletePedestrian(ped);
                     //continue;  //FIXME tolerate first
                     exit(EXIT_FAILURE);

@@ -1,7 +1,7 @@
 /**
- * File:   IODispatcher.cpp
+ * @file   IODispatcher.cpp
  *
- * Created on 20. November 2010, 15:20
+ * @date Created on 20. November 2010, 15:20
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -552,4 +552,3 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
      nv->WriteToFile(building->GetProjectFilename()+".full.nav");
      delete nv;
 }
-

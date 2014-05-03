@@ -1,5 +1,5 @@
 /**
- * File:   Building.h
+ * @file   Building.h
  *
  *
  * Created on 1. October 2010, 09:25
@@ -209,4 +209,3 @@ private:
 };
 
 #endif  /* _BUILDING_H */
-

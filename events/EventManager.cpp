@@ -97,7 +97,7 @@ void EventManager::listEvents()
      if(_event_times.size()==0) {
           Log->Write("INFO: \tNo events in the events.xml");
      } else {
-          int i;
+          unsigned int i;
           char buf[10],buf2[10];
           for(i=0; i<_event_times.size(); i++) {
                sprintf(buf,"%f",_event_times[i]);

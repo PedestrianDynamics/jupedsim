@@ -52,13 +52,9 @@ OutputHandler* Log;
 
 int main(int argc, char **argv)
 {
-
      time_t starttime, endtime;
-
-
      // Log = new FileHandler("./Logfile.dat");
      Log = new STDIOHandler();
-
      // Parsing the arguments
 
      ArgumentParser* args = new ArgumentParser();
@@ -83,15 +79,20 @@ int main(int argc, char **argv)
                      sim.GetPedsNumber(),
                      args->GetMaxOpenMPThreads());
 
-     Log->Write("\nExec Time [s]     : %.2f", execTime);
+     Log->Write("\nExec Time [s]   : %.2f", execTime);
      Log->Write("Evac Time [s]     : %d", evacTime);
      Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
-
+     Log->Write("Warnings          : %d\n", Log->GetWarnings() );
+     Log->Write("Critical          : %d\n", Log->GetCriticals() );
+     Log->Write("Errors            : %d\n", Log->GetErrors() );
      // sim.PrintStatistics();
      if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
-          printf("\nExec Time [s]     : %.2f\n", execTime);
-          printf("Evac Time [s]     : %d\n", evacTime);
-          printf("Real Time Factor  : %.2f X\n", evacTime / execTime);
+          printf("\nExec Time [s]       : %4.2f\n", execTime);
+          printf("Evac Time [s]       : %d\n", evacTime);
+          printf("Real Time Factor    : %.2f (X)\n", evacTime / execTime);
+          printf("Warnings            : %d\n", Log->GetWarnings() );
+          printf("Critical            : %d\n", Log->GetCriticals() );
+          printf("Errors              : %d\n", Log->GetErrors() );
      }
 
      // do the last cleaning

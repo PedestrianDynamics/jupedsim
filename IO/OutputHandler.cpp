@@ -1,7 +1,7 @@
 /**
- * File:   OutputHandler.cpp
+ * @file:   OutputHandler.cpp
  *
- * Created on 20. November 2010, 15:20
+ * @date Created on 20. November 2010, 15:20
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -33,6 +33,35 @@
 
 using namespace std;
 
+void OutputHandler::incrementWarnings()
+{
+     nWarnings += 1;
+}
+
+int OutputHandler::GetWarnings()
+{
+     return nWarnings;
+}
+
+void OutputHandler::incrementErrors()
+{
+     nErrors += 1;
+}
+
+int OutputHandler::GetErrors()
+{
+     return nErrors;
+}
+
+void OutputHandler::incrementCriticals()
+{
+     nCriticals += 1;
+}
+
+int OutputHandler::GetCriticals()
+{
+     return nCriticals;
+}
 
 void OutputHandler::Write(string str)
 {
@@ -45,7 +74,7 @@ void OutputHandler::Write(const char* message,...)
      char msg[CLENGTH];
      va_list ap;
      va_start (ap, message);
-     vsprintf (msg,message ,ap);
+     vsprintf (msg, message, ap);
      va_end (ap);
 
      string str(msg);
@@ -56,10 +85,6 @@ void OutputHandler::Write(const char* message,...)
           cerr<<msg<<endl;
           cerr.flush();
      }
-
-     //cout << "\033[1;30mbold red text\033[0m\n";
-     //cout << "\033[1;31"<<msg<<"\033[0m\n";
-     //cout << "\033[1;31 bla bla \033[0m\n";
 }
 
 void STDIOHandler::Write(string str)
@@ -130,8 +155,3 @@ void TraVisToHandler::Write(string str)
      }
      client->sendData(str.c_str());
 }
-
-
-
-
-
