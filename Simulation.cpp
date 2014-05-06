@@ -232,7 +232,8 @@ void Simulation::InitArgs(ArgumentParser* args)
           s.append("\tModel: GCFMModel\n");
           s.append(_model->writeParameter());
      } else if (model == 2) { //Gompertz
-          _model = new GompertzModel(_direction, args->GetNuPed(), args->GetNuWall() );
+          _model = new GompertzModel(_direction, args->GetNuPed(), args->GetaPed(), args->GetbPed(), args->GetcPed(),
+                                     args->GetNuWall(), args->GetaWall(), args->GetbWall(), args->GetcWall() );
           s.append("\tModel: GompertzModel\n");
           s.append(_model->writeParameter());
      }

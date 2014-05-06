@@ -67,7 +67,13 @@ private:
      double pTauMu;
      double pTauSigma;
      double pNuPed;
+     double paPed;
+     double pbPed;
+     double pcPed;
      double pNuWall;
+     double paWall;
+     double pbWall;
+     double pcWall;
      double pIntPWidthPed;
      double pIntPWidthWall;
      double pMaxFPed;
@@ -121,7 +127,13 @@ public:
      double GetAminMu() const;
      double GetAminSigma() const;
      double GetNuPed() const;
+     double GetaPed() const;
+     double GetbPed() const;
+     double GetcPed() const;
      double GetNuWall() const;
+     double GetaWall() const;
+     double GetbWall() const;
+     double GetcWall() const;
      double GetIntPWidthPed() const;
      double GetIntPWidthWall() const;
      double GetMaxFPed() const;

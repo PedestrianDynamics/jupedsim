@@ -1,7 +1,7 @@
 /**
- * File:   Pedestrian.cpp
+ * @file   Pedestrian.cpp
  *
- * Created on 30. September 2010, 15:59
+ * @date Created on 30. September 2010, 15:59
  *
  * @section LICENSE
  * This file is part of JuPedSim.

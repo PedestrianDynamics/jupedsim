@@ -175,7 +175,14 @@ private:
 
      /// Modellparameter
      double _nuPed;
+     double _aPed;
+     double _bPed;
+     double _cPed;
+
      double _nuWall;
+     double _aWall;
+     double _bWall;
+     double _cWall;
 
      /**
       * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\$
@@ -219,7 +226,8 @@ private:
 
 public:
 
-     GompertzModel(DirectionStrategy* dir, double nuped, double nuwall);
+     GompertzModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
+                   double nuwall, double awall, double bwall, double cwall);
      virtual ~GompertzModel(void);
 
      DirectionStrategy* GetDirection() const;
@@ -231,12 +239,64 @@ public:
       */
      double GetNuPed() const;
      /**
+      * ToDO: What is this parameter doing?
+      *
+      *
+      * @return double
+      */
+     double GetaPed() const;
+     /**
+      * ToDO: What is this parameter doing?
+      *
+      *
+      * @return double
+      */
+     double GetbPed() const;
+     /**
+      * ToDO: What is this parameter doing?
+      *
+      *
+      * @return double
+      */
+     double GetcPed() const;
+
+     /**
       * Get the parameter for the strength of the ped-WALL repulsive force
       *
       *
       * @return
       */
      double GetNuWall() const;
+     /**
+      * ToDO: What is this parameter doing?
+      *
+      *
+      * @return double
+      */
+     double GetaWall() const;
+     /**
+      * ToDO: What is this parameter doing?
+      *
+      *
+      * @return double
+      */
+     double GetbWall() const;
+     /**
+      * ToDO: What is this parameter doing?
+      *
+      *
+      * @return double
+      */
+     double GetcWall() const;
+
+     /**
+      * Get the parameter for the strength of the ped-WALL repulsive force
+      *
+      *
+      * @return
+      */
+
+
      virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
                                  int roomID, int SubRoomID) const;
      /**

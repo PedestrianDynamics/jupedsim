@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-
+#include <ctime>
 #include <limits.h>
 #include <stdlib.h>
 
@@ -464,8 +464,9 @@ void ArgumentParser::ParseIniFile(string inifile)
 
      //check the header version
      if(!xMainNode->Attribute("version")) {
-          Log->Write("ERROR:\t There is no header version. I am assuming %s",JPS_VERSION);
-     } else if(string(xMainNode->Attribute("version"))!=JPS_VERSION) {
+          Log->Write("WARNING:\t There is no header version. I am assuming %s",JPS_VERSION);
+          Log->incrementWarnings();
+     } else if(string(xMainNode->Attribute("version")) != JPS_VERSION) {
           Log->Write("ERROR:\t Wrong header version. Only version %s is supported.",JPS_VERSION);
           Log->incrementErrors();
           exit(EXIT_FAILURE);
@@ -473,9 +474,20 @@ void ArgumentParser::ParseIniFile(string inifile)
 
      //seed
      if(xMainNode->FirstChild("seed")) {
-          pSeed=atoi(xMainNode->FirstChild("seed")->FirstChild()->Value());
-          srand(pSeed);
-          Log->Write("INFO: \tseed < %d >",pSeed);
+          TiXmlNode* seedNode = xMainNode->FirstChild("seed")->FirstChild();
+          if(seedNode)
+          {
+               const char* seedValue = seedNode->Value();
+               pSeed = atoi(seedValue);
+               srand(pSeed);
+               Log->Write("INFO: \tseed <%d>", pSeed);
+          }
+          else
+          {
+               pSeed = time(NULL);
+               srand(pSeed);
+               Log->Write("INFO: \trandom seed <%d>", pSeed);
+          }
      }
 
      // max simulation time
@@ -674,16 +686,53 @@ void ArgumentParser::ParseIniFile(string inifile)
                pModel = 2;
                //force_ped
                if(xPara->FirstChild("force_ped")) {
-                    string nu=xPara->FirstChildElement("force_ped")->Attribute("nu");
-                    pNuPed=atof(nu.c_str());
-                    Log->Write("INFO: \tfrep_ped mu=" +nu);
+                    string nu = xPara->FirstChildElement("force_ped")->Attribute("nu");
+                    pNuPed = atof(nu.c_str());
 
+                    if (!xPara->FirstChildElement("force_ped")->Attribute("a"))
+                         paPed = 1.0; // default value
+                    else {
+                         string a = xPara->FirstChildElement("force_ped")->Attribute("a");
+                         paPed = atof(a.c_str());
+                    }
+                    if (!xPara->FirstChildElement("force_ped")->Attribute("b"))
+                         pbPed = 1.0; // default value
+                    else {
+                         string b = xPara->FirstChildElement("force_ped")->Attribute("b");
+                         pbPed = atof(b.c_str());
+                    }
+                    if (!xPara->FirstChildElement("force_ped")->Attribute("c"))
+                         pcPed = 1.0; // default value
+                    else {
+                         string c = xPara->FirstChildElement("force_ped")->Attribute("c");
+                         pcPed = atof(c.c_str());
+                    }
+                    Log->Write("INFO: \tfrep_ped mu=" +nu +" a=" +to_string(paPed) +" b=" +to_string(pbPed) +" c=" +to_string(pcPed));
                }
                //force_wall
                if(xPara->FirstChild("force_wall")) {
-                    string nu=xPara->FirstChildElement("force_wall")->Attribute("nu");
-                    pNuWall=atof(nu.c_str());
-                    Log->Write("INFO: \tfrep_wall mu=" +nu);
+                    string nu = xPara->FirstChildElement("force_wall")->Attribute("nu");
+                    pNuWall = atof(nu.c_str());
+                    if (!xPara->FirstChildElement("force_wall")->Attribute("a"))
+                         paWall = 1.0; // default value
+                    else {
+                         string a = xPara->FirstChildElement("force_wall")->Attribute("a");
+                         paWall = atof(a.c_str());
+                    }
+                    if (!xPara->FirstChildElement("force_wall")->Attribute("b"))
+                         pbWall = 1.0; // default value
+                    else {
+                         string b = xPara->FirstChildElement("force_wall")->Attribute("b");
+                         pbWall = atof(b.c_str());
+                    }
+                    if (!xPara->FirstChildElement("force_wall")->Attribute("c"))
+                         pcWall = 1.0; // default value
+                    else {
+                         string c = xPara->FirstChildElement("force_wall")->Attribute("c");
+                         pcWall = atof(c.c_str());
+                    }
+
+                    Log->Write("INFO: \tfrep_wall mu=" +nu +" a=" +to_string(paWall) +" b=" +to_string(pbWall) +" c=" +to_string(pcWall) );
                }
           }
      }//gcfm
@@ -859,10 +908,41 @@ double ArgumentParser::GetNuPed() const
      return pNuPed;
 }
 
+double ArgumentParser::GetaPed() const
+{
+     return paPed;
+}
+
+double ArgumentParser::GetbPed() const
+{
+     return pbPed;
+}
+
+double ArgumentParser::GetcPed() const
+{
+     return pcPed;
+}
+
 double ArgumentParser::GetNuWall() const
 {
      return pNuWall;
 }
+
+double ArgumentParser::GetaWall() const
+{
+     return paWall;
+}
+
+double ArgumentParser::GetbWall() const
+{
+     return pbWall;
+}
+
+double ArgumentParser::GetcWall() const
+{
+     return pcWall;
+}
+
 
 double ArgumentParser::GetIntPWidthPed() const
 {

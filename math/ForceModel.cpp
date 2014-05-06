@@ -140,7 +140,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           Log->Write("ERROR:\t fix this as soon as possible");
           Log->incrementErrors();
           return F_rep; // FIXME: should never happen
-          exit(0);
+          exit(EXIT_FAILURE);
 
      }
      // calculate the parameter (whatever dist is)
@@ -196,7 +196,7 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           Log->Write("ERROR:\t fix this as soon as possible");
           Log->incrementErrors();
           return Point(0,0); // FIXME: should never happen
-          exit(0);
+          exit(EXIT_FAILURE);
      }
      return F_rep;
 }
@@ -467,7 +467,7 @@ void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Buildin
 {
 
      printf("CalculateForce is not working: you should not use this function");
-     exit(0);
+     exit(EXIT_FAILURE);
 }
 
 /**
@@ -652,13 +652,14 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           Log->Write("\t\t Get your model right. Going to exit.");
           Log->incrementWarnings();
           return F_rep; // should never happen
-          exit(0);
+          exit(EXIT_FAILURE);
      }
 //------------------------- check if others are behind using v0 instead of v
      double tmp = ped1->GetV0().ScalarP(ep12); // < v^0_i , e_ij >
-
+     double tmpv = ped1->GetV().ScalarP(ep12); // < v^0_i , e_ij >
      double ped2IsBehind = exp(-exp(-5*tmp)); //step function: continuous version
-     if (ped2IsBehind < J_EPS) {
+     double ped2IsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
+     if (ped2IsBehindv < J_EPS) {
 
           // if(ped1->GetID() ==logped)
           //     printf("isBehind=%f\n", ped2IsBehind);
@@ -672,8 +673,8 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      //B_ij = 1.0 - Distance/(r1 + r2);
      //Gompertz-function parameter.
      //TODO: Check later if other values are more appropriate
-     double b = 0.25, c = 3.0; //repped
-
+     //double b = 0.25, c = 3.0; //repped
+     double b = _bPed, c = _cPed; //repped
      B_ij = exp(-b*exp(-c*B_ij));
      //TODO: check if we need K_ij in the  f
      //f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * K_ij * B_ij;
@@ -696,7 +697,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           Log->Write("ERROR:\t fix this as soon as possible");
           Log->incrementErrors();
           return Point(0,0); // FIXME: should never happen
-          exit(0);
+          exit(EXIT_FAILURE);
      }
      return F_rep;
 }//END Gompertz:ForceRepPed()
@@ -782,7 +783,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
 
 
 
-     if ( wallIsBehindv < J_EPS && wallIsBehind < J_EPS) { // Wall is behind the direction of motion
+     if (wallIsBehind < J_EPS) { // Wall is behind the direction of motion
           return F_wrep;
      }
 //------------------------------------------------------------------------
@@ -800,8 +801,8 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      //-------------------------
 
      const Point& pos = ped->GetPos();
-     double distGoal = ped->GetExitLine()->DistTo(pos);
-     if(distGoal < J_EPS_GOAL)
+     double distGoal = ped->GetExitLine()->DistToSquare(pos);
+     if(distGoal < J_EPS_GOAL*J_EPS_GOAL)
           return F_wrep;
 
      Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
@@ -814,7 +815,8 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
 
 
      //TODO: Check later if other values are more appropriate
-     double b = 0.7, c = 3.0;
+     //double b = 0.7, c = 3.0;
+     double b = _bWall, c = _cWall;
      B_iw = 1.0 - Distance/(Radius);
      B_iw = exp(-b*exp(-c*B_iw));
      //f = -ped->GetMass() * _nuWall * ped->GetV0Norm() * K_iw * B_iw;
@@ -891,19 +893,19 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
                int nSize = neighbours.size();
-               // double B_ij=0;
-               // int count_Bij=0;
+               double B_ij=0;
+               int count_Bij=0;
 
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     //-------------- TESTING ---------
-                    // Point distp12 = ped1->GetPos() - ped->GetPos();
-                    // double Distance = distp12.Norm();
-                    // double tmp;
-                    // tmp = 1.0 - Distance/(0.35 + 0.35);
-                    // B_ij += exp(-1*exp(-1*tmp));
-                    // if (B_ij > J_EPS)
-                    //     count_Bij += 1;
+                    Point distp12 = ped1->GetPos() - ped->GetPos();
+                    double Distance = distp12.Norm();
+                    double tmp;
+                    tmp = 1.0 - Distance/(0.25 + 0.25);
+                    B_ij += exp(-_bPed*exp(-_cPed*tmp));
+                    if (B_ij > J_EPS)
+                        count_Bij += 1;
                     // if (ped->GetID()==logped)
                     //     printf("Bij=%f, dist=%f\n", B_ij, Distance);
                     //--------------------------------
@@ -921,11 +923,12 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                //repulsive forces to walls and closed transitions that are not my target
                Point repWall = ForceRepRoom(allPeds[p], subroom);
                Point fd = ForceDriv(ped, room);
-               // if(count_Bij)
-               //     B_ij /=count_Bij;
-               // else
-               //     B_ij = 0;
-               // double correction = ped->GetV0Norm()*(-B_ij)/ped->GetTau();
+
+               if(count_Bij)
+                   B_ij /=count_Bij;
+               else
+                   B_ij = 0;
+               double correction = ped->GetV0Norm()*(-B_ij)/ped->GetTau();
 
 
                //fprintf(stderr, "%f\n", correction);
@@ -935,7 +938,7 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                // }
 
                // make pedestrians want to walk slower in jam
-               //fd = fd + Point(correction, correction);
+               fd = fd + Point(correction, correction);
 
                Point acc = (fd + repPed + repWall) / ped->GetMass();
                // if (1){
@@ -1035,6 +1038,12 @@ string GompertzModel::writeParameter() const
 
      sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
      rueck.append(tmp);
+     sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);
+     rueck.append(tmp);
+     sprintf(tmp, "\t\tb: \t\tPed: %f \tWall: %f\n", _bPed, _bWall);
+     rueck.append(tmp);
+     sprintf(tmp, "\t\tc: \t\tPed: %f \tWall: %f\n", _cPed, _cWall);
+     rueck.append(tmp);
      return rueck;
 }
 DirectionStrategy* GompertzModel::GetDirection() const
@@ -1047,16 +1056,56 @@ double GompertzModel::GetNuPed() const
      return _nuPed;
 }
 
+double GompertzModel::GetaPed() const
+{
+     return _aPed;
+}
+
+double GompertzModel::GetbPed() const
+{
+     return _bPed;
+}
+
+double GompertzModel::GetcPed() const
+{
+     return _cPed;
+}
+
 double GompertzModel::GetNuWall() const
 {
      return _nuWall;
 }
 
-GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double nuwall)
+
+double GompertzModel::GetaWall() const
+{
+     return _aWall;
+}
+
+double GompertzModel::GetbWall() const
+{
+     return _bWall;
+}
+
+double GompertzModel::GetcWall() const
+{
+     return _cWall;
+}
+
+GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
+                             double nuwall, double awall, double bwall, double cwall)
 {
      _direction = dir;
+     // Force_rep_PED Parameter
      _nuPed = nuped;
+     _aPed = aped;
+     _bPed = bped;
+     _cPed = cped;
+     // Force_rep_WALL Parameter
      _nuWall = nuwall;
+     _aWall = awall;
+     _bWall = bwall;
+     _cWall = cwall;
 }
 
 void GompertzModel::CalculateForce(double time, vector< Point >& result_acc, Building* building,
@@ -1064,16 +1113,7 @@ void GompertzModel::CalculateForce(double time, vector< Point >& result_acc, Bui
 {
 
      printf("CalculateForce is not working: you should not use this function");
-     exit(0);
+     exit(EXIT_FAILURE);
 }
 
 GompertzModel::~GompertzModel(void) { }
-
-
-
-
-
-
-
-
-
