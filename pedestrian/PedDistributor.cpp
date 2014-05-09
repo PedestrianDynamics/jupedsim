@@ -274,6 +274,7 @@ void PedDistributor::InitDistributor(const string& filename)
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -281,6 +282,7 @@ void PedDistributor::InitDistributor(const string& filename)
      TiXmlNode* xRootNode = doc.RootElement()->FirstChild("agents");
      if( ! xRootNode ) {
           Log->Write("ERROR:\tcould not load persons attributes");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -377,6 +379,7 @@ int PedDistributor::Distribute(Building* building) const
           int N = _start_dis_sub[i]->GetAgentsNumber();
           if (N < 0) {
                Log->Write("ERROR: \t negative  (or null ) number of pedestrians!");
+               Log->incrementErrors();
                exit(EXIT_FAILURE);
           }
 
@@ -385,6 +388,7 @@ int PedDistributor::Distribute(Building* building) const
           if (max_pos < N) {
                Log->Write("ERROR: \tCannot distribute %d agents in Room %d . Maximum allowed: %d\n",
                           N, roomID, allpos.size());
+               Log->incrementErrors();
                exit(EXIT_FAILURE);
           }
 
@@ -405,6 +409,7 @@ int PedDistributor::Distribute(Building* building) const
           int N = _start_dis[i]->GetAgentsNumber();
           if (N < 0) {
                Log->Write("ERROR: \t negative number of pedestrians! Ignoring");
+               Log->incrementErrors();
                continue;
           }
 
@@ -427,7 +432,8 @@ int PedDistributor::Distribute(Building* building) const
           if (max_pos < N) {
                Log->Write("ERROR: \t Distribution of %d pedestrians in Room %d not possible! Maximum allowed: %d\n",
                           N, r->GetID(), max_pos);
-               exit(0);
+               Log->incrementErrors();
+               exit(EXIT_FAILURE);
           }
           ppm = N / sum_area;
           // Anzahl der Personen pro SubRoom bestimmen

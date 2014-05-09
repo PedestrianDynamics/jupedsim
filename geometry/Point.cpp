@@ -88,14 +88,29 @@ double Point::Norm() const
      return sqrt(_x * _x + _y * _y);
 }
 
+double Point::NormMolified() const
+{
+     double const eps_sq = 0.1;
+     return sqrt(_x * _x + _y * _y + eps_sq);
+}
+
 double Point::NormSquare() const
 {
      return (_x * _x + _y * _y);
 }
 
+Point Point::NormalizedMolified() const
+{
+     double norm = NormMolified();
+     if (norm > J_EPS*J_EPS)
+          return ( Point(_x, _y) / norm );
+     else return Point(0.0, 0.0);
+}
+
+
 Point Point::Normalized() const
 {
-     double norm=Norm();
+     double norm = Norm();
      if (norm > J_EPS*J_EPS)
           return ( Point(_x, _y) / norm );
      else return Point(0.0, 0.0);

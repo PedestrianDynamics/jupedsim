@@ -64,10 +64,16 @@ public:
 
      /// Norm
      double Norm() const;
+
+     /// Norm molified see Koester2013
+     double NormMolified() const;
+
      /// Norm square
      double NormSquare() const;
      /// normalized vector
      Point Normalized() const;
+     /// normalized vector usinf NormMolified
+     Point NormalizedMolified() const;
      /// dot product
      double ScalarP(const Point& v) const;
      /// determinant of the square matrix formed by the vectors [ this, v]

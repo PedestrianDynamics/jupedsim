@@ -396,7 +396,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      Point new_v0;
 
 
-     new_v0 = delta.Normalized();
+     new_v0 = delta.NormalizedMolified();
      _V0 = new_v0;
      //printf("MC: delta = [%.2f %.2f]\n", delta.GetX(), delta.GetY());
      //printf("MC: new_V0 = [%.2f %.2f]\n", new_v0.GetX(), new_v0.GetY());
@@ -704,6 +704,7 @@ int Pedestrian::FindRoute()
 {
      if( ! _router) {
           Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
+          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
      return _router->FindExit(this);
