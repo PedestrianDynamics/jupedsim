@@ -3,7 +3,7 @@
  * @file    main.cpp
  * @author  U.Kemloh, A.Portz
  * @version 0.5
- * Copyright (C) <2009-2012>
+ * Copyright (C) <2009-2014>
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -64,12 +64,12 @@ int main(int argc, char **argv)
      // create and init the simulation engine
      // Simulation
      time(&starttime);
-     Log->Write("INFO: \tStart runSimulation()\n");
+     Log->Write("INFO: \tStart runSimulation()");
 
      Simulation sim = Simulation();
      sim.InitArgs(args);
      int evacTime = sim.RunSimulation();
-     Log->Write("\nINFO: \tEnd runSimulation()\n");
+     Log->Write("\nINFO: \tEnd runSimulation()");
      time(&endtime);
 
      // some output
@@ -83,16 +83,14 @@ int main(int argc, char **argv)
      Log->Write("\nExec Time [s]   : %.2f", execTime);
      Log->Write("Evac Time [s]     : %d", evacTime);
      Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
-     Log->Write("Warnings          : %d\n", Log->GetWarnings() );
-     Log->Write("Critical          : %d\n", Log->GetCriticals() );
-     Log->Write("Errors            : %d\n", Log->GetErrors() );
+     Log->Write("Warnings          : %d", Log->GetWarnings() );
+     Log->Write("Errors            : %d", Log->GetErrors() );
      // sim.PrintStatistics();
      if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
           printf("\nExec Time [s]       : %4.2f\n", execTime);
           printf("Evac Time [s]       : %d\n", evacTime);
           printf("Real Time Factor    : %.2f (X)\n", evacTime / execTime);
           printf("Warnings            : %d\n", Log->GetWarnings() );
-          printf("Critical            : %d\n", Log->GetCriticals() );
           printf("Errors              : %d\n", Log->GetErrors() );
      }
 

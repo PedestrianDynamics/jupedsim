@@ -40,16 +40,13 @@ class OutputHandler {
 protected:
      int nWarnings;
      int nErrors;
-     int nCriticals;
 public:
-     OutputHandler() { nWarnings = 0; nErrors = 0; nCriticals = 0; };
+     OutputHandler() { nWarnings = 0; nErrors = 0; };
      int GetWarnings();
      void incrementWarnings();
      int GetErrors();
      void incrementErrors();
-     int GetCriticals();
-     void incrementCriticals();
-     void progress_bar(double TotalPeds, double NowPeds);
+     void ProgressBar(double TotalPeds, double NowPeds);
      virtual void Write(std::string str);
      virtual void Write(const char *string, ...);
      virtual ~OutputHandler() {};

@@ -113,7 +113,6 @@ void Building::SetRoom(Room* room, int index)
           _rooms[index] = room;
      } else {
           Log->Write("ERROR: \tWrong Index in CBuilding::SetRoom()");
-          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 }
@@ -153,8 +152,7 @@ Room* Building::GetRoom(int index) const
           return _rooms[index];
      } else {
           Log->Write("ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",index, _rooms.size());
-          Log->Write("ERROR: Control your rooms ID and make sure they are in the order 0, 1, 2,.. ");
-          Log->incrementErrors();
+          Log->Write("\tControl your rooms ID and make sure they are in the order 0, 1, 2,.. ");
           exit(EXIT_FAILURE);
      }
 }
@@ -325,8 +323,7 @@ void Building::LoadBuildingFromFile()
      TiXmlDocument doc(_projectFilename);
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the project file");
-          Log->incrementErrors();
+          Log->Write("\t could not parse the project file");
           exit(EXIT_FAILURE);
      }
 
@@ -342,36 +339,31 @@ void Building::LoadBuildingFromFile()
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the geometry file");
-          Log->incrementErrors();
+          Log->Write("\t could not parse the geometry file");
           exit(EXIT_FAILURE);
      }
 
      TiXmlElement* xRootNode = docGeo.RootElement();
      if( ! xRootNode ) {
           Log->Write("ERROR:\tRoot element does not exist");
-          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
      if( xRootNode->ValueStr () != "geometry" ) {
           Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
      if(string(xRootNode->Attribute("unit"))!="m") {
           Log->Write("ERROR:\tOnly the unit m (metres) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
      double version = xmltof(xRootNode->Attribute("version"), -1);
      if (version != 0.5) {
-          Log->Write("ERROR: \tWrong goemetry version!");
-          Log->Write("ERROR: \tOnly version >= %s supported",JPS_VERSION);
-          Log->Write("ERROR: \tPlease update the version of your geometry file to %s",JPS_VERSION);
-          Log->incrementErrors();
+          Log->Write(" \tWrong goemetry version!");
+          Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
+          Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
           exit(EXIT_FAILURE);
      }
      _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
@@ -385,7 +377,6 @@ void Building::LoadBuildingFromFile()
      TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
      if (!xRoomsNode) {
           Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
-          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
 
@@ -430,7 +421,6 @@ void Building::LoadBuildingFromFile()
                     if(xSubRoom->FirstChildElement("up")==NULL) {
                          Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
                          Log->Write("ERROR:\t check your geometry file");
-                         Log->incrementErrors();
                          exit(EXIT_FAILURE);
                     }
                     double up_x = xmltof( xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
@@ -634,8 +624,7 @@ Room* Building::GetRoom(string caption) const
           if (_rooms[r]->GetCaption() == caption)
                return _rooms[r];
      }
-     Log->Write("Critical: Room not found with caption " + caption);
-     Log->incrementCriticals();
+     Log->Write("ERROR: Room not found with caption " + caption);
      //return NULL;
      exit(EXIT_FAILURE);
 }
@@ -645,10 +634,9 @@ void Building::AddCrossing(Crossing* line)
      if (_crossings.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
           sprintf(tmp,
-                  "CRITICAL: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
+                  "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
                   line->GetID());
           Log->Write(tmp);
-          Log->incrementCriticals();
           exit(EXIT_FAILURE);
      }
      _crossings[line->GetID()] = line;
@@ -1412,7 +1400,7 @@ void Building::DeletePedestrian(Pedestrian* ped)
            int NowPeds= _allPedestians.end()-_allPedestians.begin();
           _allPedestians.erase(it);
 //          cout << "rescued agent: " << (*it)->GetID()<< "  Nowpeds "<< NowPeds << " max= "<<TotalPeds <<endl;
-          Log->progress_bar(TotalPeds, TotalPeds-NowPeds+1);
+          Log->ProgressBar(TotalPeds, TotalPeds-NowPeds+1);
      }
      //update the stats before deleting
      Transition* trans =GetTransitionByUID(ped->GetExitIndex());

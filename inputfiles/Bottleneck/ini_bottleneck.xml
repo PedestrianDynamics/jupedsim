@@ -44,7 +44,7 @@
         <!--persons information and distribution -->
         <agents>
                 <agents_distribution>
-                        <group group_id="2" room_id="1" subroom_id="0" number="20" goal_id="0" router_id="1" route_id=""/>
+                        <group group_id="2" room_id="1" subroom_id="0" number="1" goal_id="0" router_id="1" route_id=""/>
                         <!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
                         <!-- <group group_id="1" room_id="1"  number="10" goal_id="0" router_id="1" route_id="" /> -->
                 </agents_distribution>
@@ -84,8 +84,8 @@
                                 <amin mu="0.18" sigma="0.001" />
                                 <tau mu="0.5" sigma="0.001" />
                                 <atau mu="0.23" sigma="0.001" />
-                                <force_ped nu="1.5"/>
-                                <force_wall nu="1.5"/>
+                                <force_ped nu="0"/>
+                                <force_wall nu="0"/>
                         </parameters>
                 </model>
 

@@ -53,16 +53,6 @@ int OutputHandler::GetErrors()
      return nErrors;
 }
 
-void OutputHandler::incrementCriticals()
-{
-     nCriticals += 1;
-}
-
-int OutputHandler::GetCriticals()
-{
-     return nCriticals;
-}
-
 void OutputHandler::Write(string str)
 {
      if (this != NULL)
@@ -72,7 +62,7 @@ void OutputHandler::Write(string str)
 
 
 #include<math.h>
-void OutputHandler::progress_bar(double TotalPeds, double NowPeds)
+void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 {
      // based on this answer:
      // https://stackoverflow.com/questions/1637587/c-libcurl-console-progress-bar
@@ -89,6 +79,7 @@ void OutputHandler::progress_bar(double TotalPeds, double NowPeds)
      for ( ; ii < dotz; ii++) {
           printf("=");
      }
+     printf(">");
      // remaining part (spaces)
      for ( ; ii < totaldotz;ii++) {
           printf(" ");
@@ -107,12 +98,14 @@ void OutputHandler::Write(const char* message,...)
      va_end (ap);
 
      string str(msg);
-     if(str.find("ERROR")==string::npos) {
+     if(str.find("ERROR") == string::npos) {
           cout<<msg<<endl;
           cout.flush();
-     } else {
+          incrementErrors();
+     } else { // Warning
           cerr<<msg<<endl;
           cerr.flush();
+          incrementWarnings();
      }
 }
 

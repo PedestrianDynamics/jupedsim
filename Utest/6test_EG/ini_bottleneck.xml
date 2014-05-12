@@ -7,7 +7,7 @@
   <!-- geometry file -->
   <geometry>1.2_bottleneck.xml</geometry>
   <!-- traectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="8">
+<trajectories format="xml-plain" embed_mesh="false" fps="8">
     <file location="trajectorien_bottleneck.xml" />
   </trajectories>
   <!-- where to store the logs -->
@@ -39,7 +39,7 @@
         </polygon>
       </goal>
     </goals>
-  </routing>
+outing>
 
   <!--persons information and distribution -->
   <agents>

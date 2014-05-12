@@ -34,8 +34,8 @@
 using namespace std;
 
 /// initialize the static variables
-double Pedestrian::_globalTime=0.0;
-bool Pedestrian::_enableSpotlight=false;
+double Pedestrian::_globalTime = 0.0;
+bool Pedestrian::_enableSpotlight = false;
 
 
 
@@ -54,33 +54,33 @@ Pedestrian::Pedestrian()
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
      _updateRate = 0;
-     _turninAngle=0.0;
+     _turninAngle = 0.0;
      _ellipse = JEllipse();
      _navLine = new NavLine(); //FIXME this is not released
-     _router=NULL;
-     _building=NULL;
-     _reroutingThreshold=0.0; // new orientation after 10 seconds, value is incremented
-     _timeBeforeRerouting=0.0;
-     _reroutingEnabled=false;
-     _timeInJam=0.0;
-     _patienceTime=5.0;// time after which the ped feels to be in jam
-     _desiredFinalDestination=FINAL_DEST_OUT;
-     _mentalMap=map<int, int>();
-     _destHistory=vector<int>();
-     _deltaT=0.01;
-     _V0=Point(0,0);
-     _lastPosition=Point(0,0);
-     _lastCellPosition=-1;
-     _recordingTime=5; //seconds
+     _router = NULL;
+     _building = NULL;
+     _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
+     _timeBeforeRerouting = 0.0;
+     _reroutingEnabled = false;
+     _timeInJam = 0.0;
+     _patienceTime = 5.0;// time after which the ped feels to be in jam
+     _desiredFinalDestination = FINAL_DEST_OUT;
+     _mentalMap = map<int, int>();
+     _destHistory = vector<int>();
+     _deltaT = 0.01;
+     _V0 = Point(0,0);
+     _lastPosition = Point(0,0);
+     _lastCellPosition = -1;
+     _recordingTime = 5; //seconds
 
      _knownDoors = map<int, NavLineState>();
 
-     _height=160;
-     _age=30;
-     _gender="male";
-     _trip=vector<int> ();
-     _group=-1;
-     _spotlight=false;
+     _height = 160;
+     _age = 30;
+     _gender = "male";
+     _trip = vector<int> ();
+     _group = -1;
+     _spotlight = false;
 }
 
 
@@ -98,7 +98,7 @@ void Pedestrian::SetID(int i)
 void Pedestrian::SetRoomID(int i, string roomCaption)
 {
      _roomID = i;
-     _roomCaption=roomCaption;
+     _roomCaption = roomCaption;
 }
 
 void Pedestrian::SetSubRoomID(int i)
@@ -142,14 +142,14 @@ void Pedestrian::SetPos(const Point& pos)
 
      //save the last values for the records
      _lastPositions.push(pos);
-     unsigned int max_size= _recordingTime/_deltaT;
-     if(_lastPositions.size()> max_size)
+     unsigned int max_size = _recordingTime/_deltaT;
+     if(_lastPositions.size() > max_size)
           _lastPositions.pop();
 }
 
 void Pedestrian::SetCellPos(int cp)
 {
-     _lastCellPosition=cp;
+     _lastCellPosition = cp;
 }
 
 void Pedestrian::SetV(const Point& v)
@@ -158,7 +158,7 @@ void Pedestrian::SetV(const Point& v)
 
      //save the last values for the records
      _lastVelocites.push(v);
-     unsigned int max_size= _recordingTime/_deltaT;
+     unsigned int max_size = _recordingTime/_deltaT;
      if(_lastVelocites.size()> max_size)
           _lastVelocites.pop();
 }
@@ -180,7 +180,7 @@ double Pedestrian::Getdt()
 
 void Pedestrian::SetTrip(const vector<int>& trip)
 {
-     _trip=trip;
+     _trip = trip;
 }
 
 
@@ -276,7 +276,7 @@ int Pedestrian::GetDestinationCount()
 void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
-     _exitIndex=-1;
+     _exitIndex = -1;
 }
 
 void Pedestrian::AddKnownClosedDoor(int door)
@@ -359,12 +359,12 @@ double Pedestrian::GetV0Norm() const
 {
      return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
-//get axis in the walking direction
+// get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
 {
      return _ellipse.GetEA();
 }
-//get axis in the shoulder direction = orthogonal to the walking direction
+// get axis in the shoulder direction = orthogonal to the walking direction
 double Pedestrian::GetSmallerAxis() const
 {
      return _ellipse.GetEB();
@@ -377,7 +377,7 @@ void Pedestrian::SetPhiPed()
      double vy = GetV().GetY();
 
      if (fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
-          double normv = sqrt(vx * vx + vy * vy); //MC, 24.10.12
+          double normv = sqrt(vx * vx + vy * vy);
           cosPhi = vx / normv;
           sinPhi = vy / normv;
      } else {
@@ -396,10 +396,12 @@ const Point& Pedestrian::GetV0(const Point& target)
      Point new_v0;
 
 
-     new_v0 = delta.NormalizedMolified();
+     //new_v0 = delta.NormalizedMolified();
+     new_v0 = delta.Normalized();
      _V0 = new_v0;
-     //printf("MC: delta = [%.2f %.2f]\n", delta.GetX(), delta.GetY());
-     //printf("MC: new_V0 = [%.2f %.2f]\n", new_v0.GetX(), new_v0.GetY());
+     // printf("MC: pos = [%.2f %.2f] target =[%.2f %.2f]\n", pos.GetX(),  pos.GetY(), target.GetX(),  target.GetY());
+     // printf("MC: delta = [%.2f %.2f]\n", delta.GetX(), delta.GetY());
+     // printf("MC: new_V0 = [%.2f %.2f]\n", new_v0.GetX(), new_v0.GetY());
      return _V0;
      // aktivieren, wenn Rotation aus sein soll
      //pV0 = new_v0;
@@ -466,43 +468,43 @@ void Pedestrian::SetSmoothTurning(bool smt)
 bool Pedestrian::IsFeelingLikeInJam()
 {
      //return true;
-     return (_patienceTime<_timeInJam);
+     return (_patienceTime < _timeInJam);
 }
 
 void Pedestrian::ResetTimeInJam()
 {
-     _timeInJam=0.0;
+     _timeInJam = 0.0;
 }
 
 void Pedestrian::UpdateTimeInJam()
 {
-     _timeInJam+=_deltaT;
+     _timeInJam += _deltaT;
 }
 
 //TODO: magic
 void Pedestrian::UpdateJamData()
 {
-     if(GetV().NormSquare()<0.25*GetV0().NormSquare()) {
-          _timeInJam+=_deltaT;
+     if(GetV().NormSquare() < 0.25*GetV0().NormSquare()) {
+          _timeInJam += _deltaT;
      } else {
-          _timeInJam/=2.0;
+          _timeInJam /= 2.0;
      }
 }
 
 void Pedestrian::UpdateReroutingTime()
 {
-     _timeBeforeRerouting-=_deltaT;
+     _timeBeforeRerouting -= _deltaT;
 }
 
 void Pedestrian::RerouteIn(double time)
 {
-     _reroutingEnabled=true;
-     _timeBeforeRerouting=time;
+     _reroutingEnabled = true;
+     _timeBeforeRerouting = time;
 }
 
 bool Pedestrian::IsReadyForRerouting()
 {
-     return(_reroutingEnabled &&(_timeBeforeRerouting<=0.0));
+     return(_reroutingEnabled &&(_timeBeforeRerouting <= 0.0));
 }
 
 double Pedestrian::GetAge() const
@@ -547,13 +549,13 @@ void Pedestrian::SetHeight(double height)
 
 void Pedestrian::ResetRerouting()
 {
-     _reroutingEnabled=false;
-     _timeBeforeRerouting=-1.00;
+     _reroutingEnabled = false;
+     _timeBeforeRerouting = -1.00;
 }
 
 void Pedestrian::SetRecordingTime(double timeInSec)
 {
-     _recordingTime=timeInSec;
+     _recordingTime = timeInSec;
 }
 
 double Pedestrian::GetRecordingTime() const
@@ -564,8 +566,8 @@ double Pedestrian::GetRecordingTime() const
 double Pedestrian::GetAverageVelecityOverRecordingTime() const
 {
      //just few position were saved
-     if (_lastPositions.size()<2) return _ellipse.GetV().Norm();
-     return fabs ( (_lastPositions.back()-_lastPositions.front()).Norm() / _recordingTime );
+     if (_lastPositions.size() < 2) return _ellipse.GetV().Norm();
+     return fabs ( (_lastPositions.back() - _lastPositions.front()).Norm() / _recordingTime );
 }
 
 double Pedestrian::GetDistanceToNextTarget() const
@@ -677,7 +679,7 @@ void Pedestrian::Dump(int ID, int pa)
 
 void Pedestrian::RecordActualPosition()
 {
-     _lastPosition=GetPos();
+     _lastPosition = GetPos();
 }
 
 double Pedestrian::GetDistanceSinceLastRecord()
@@ -704,7 +706,6 @@ int Pedestrian::FindRoute()
 {
      if( ! _router) {
           Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
-          Log->incrementErrors();
           exit(EXIT_FAILURE);
      }
      return _router->FindExit(this);
@@ -717,7 +718,7 @@ double Pedestrian::GetElevation() const
 
 void Pedestrian::SetGlobalTime(double time)
 {
-     _globalTime=time;
+     _globalTime = time;
 }
 
 double Pedestrian::GetPatienceTime() const
@@ -742,7 +743,7 @@ void Pedestrian::SetBuilding(Building* building)
 
 void Pedestrian::SetSpotlight(bool spotlight)
 {
-     _spotlight=spotlight;
+     _spotlight = spotlight;
 }
 
 
@@ -753,5 +754,5 @@ bool Pedestrian::GetSpotlight()
 
 void Pedestrian::ActivateSpotlightSystem(bool status)
 {
-     _enableSpotlight=status;
+     _enableSpotlight = status;
 }
