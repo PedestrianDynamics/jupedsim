@@ -68,7 +68,7 @@
                 <router router_id="2" description="quickest">
                         <parameters>
                                 <!-- extra routing information -->
-                                <navigation_lines file="routing.xml" />
+                                <navigation_lines file="bateau_routing.xml" />
                         </parameters>
                 </router>
         </route_choice_models>
