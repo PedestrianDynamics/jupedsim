@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="second life" gridSizeX="20"
-	gridSizeY="20" unit="m">
+<geometry version="0.5" caption="corner" unit="m">
 	<rooms>
 		<room id="0" caption="hall">
 			<subroom id="0" closed="0" class="subroom">
