@@ -102,7 +102,7 @@ double Point::NormSquare() const
 Point Point::NormalizedMolified() const
 {
      double norm = NormMolified();
-     if (norm > J_EPS*J_EPS)
+     if (norm > J_EPS_GOAL)
           return ( Point(_x, _y) / norm );
      else return Point(0.0, 0.0);
 }
@@ -111,7 +111,7 @@ Point Point::NormalizedMolified() const
 Point Point::Normalized() const
 {
      double norm = Norm();
-     if (norm > J_EPS*J_EPS)
+     if (norm > J_EPS)
           return ( Point(_x, _y) / norm );
      else return Point(0.0, 0.0);
 }

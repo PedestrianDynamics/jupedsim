@@ -395,11 +395,11 @@ const Point& Pedestrian::GetV0(const Point& target)
      Point delta = target - pos;
      Point new_v0;
 
-
+     // Molification around the targets makes little sense
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
      // -------------------------------------- Handover new target
-     double t = _newOrientationDelay *_deltaT;
+     double t = _newOrientationDelay++ *_deltaT;
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
      // --------------------------------------
      return _V0;
