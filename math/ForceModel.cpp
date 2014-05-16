@@ -912,7 +912,7 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                     ped->UpdateTimeInJam();
                }
 //--------------------------------------------------------------------------------------------------
-               fprintf(stderr, "%f %f %f %f %f %f\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
+               //fprintf(stderr, "%f %f %f %f %f %f\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                ped->SetPos(pos_neu);
                ped->SetV(v_neu);
                ped->SetPhiPed();
