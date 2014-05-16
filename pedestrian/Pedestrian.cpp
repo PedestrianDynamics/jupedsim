@@ -398,48 +398,10 @@ const Point& Pedestrian::GetV0(const Point& target)
 
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
-     _V0 = new_v0;
-     // printf("MC: pos = [%.2f %.2f] target =[%.2f %.2f]\n", pos.GetX(),  pos.GetY(), target.GetX(),  target.GetY());
-     // printf("MC: delta = [%.2f %.2f]\n", delta.GetX(), delta.GetY());
-     // printf("MC: new_V0 = [%.2f %.2f]\n", new_v0.GetX(), new_v0.GetY());
-     return _V0;
-     // aktivieren, wenn Rotation aus sein soll
-     //pV0 = new_v0;
-     //return pV0;
-
-     // Rotation
-     double smoothingGrad = 15;
-     if (_newOrientationFlag) {
-          double pi = 3.14159265;
-          _turninAngle = atan2(new_v0.GetY(), new_v0.GetX()) - atan2(_V0.GetY(), _V0.GetX());
-
-          // prefer turning of -30° instead of 330°
-          if (_turninAngle <= -pi)_turninAngle += 2 * pi;
-          if (_turninAngle >= pi)_turninAngle -= 2 * pi;
-
-          _newOrientationFlag = false; //disable and set the delay
-          if (fabs(_turninAngle) > 1.22) {// only for turn greater than +/-70 degrees
-               _newOrientationDelay = 2.0 / _deltaT; //2 seconds/dt, in steps
-               _updateRate = _newOrientationDelay / smoothingGrad;
-          }
-     }
-     if (_newOrientationDelay > 0) {
-          double smoothingAngle_k = _turninAngle / smoothingGrad;
-          if (_newOrientationDelay % _updateRate == 0) {
-               _V0 = _V0.Rotate(cos(smoothingAngle_k), sin(smoothingAngle_k));
-          }
-          _newOrientationDelay--;
-
-          //stop the rotation if the velocity is too high,  0.9m/s
-          // this avoid  drifting
-          if (GetV().Norm() > 0.90) {
-               _newOrientationDelay = 0;
-          }
-     }
-     if (_newOrientationDelay <= 0) {
-          _V0 = new_v0;
-     }
-
+     // -------------------------------------- Handover new target
+     double t = _newOrientationDelay *_deltaT;
+     _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
+     // --------------------------------------
      return _V0;
 }
 
@@ -452,16 +414,21 @@ double Pedestrian::GetTimeInJam() const
 // to delay sharp turn
 // TODO: maybe combine this with SetExitLine
 
+// void Pedestrian::SetSmoothTurning(bool smt)
+// {
+//      //ignoring first turn
+//      if (_tmpFirstOrientation) {
+//           _tmpFirstOrientation = false;
+//      } else {
+//           if (_newOrientationDelay <= 0)// in the case the pedestrian is still rotating
+//                _newOrientationFlag = smt;
+//      }
+
+// }
+
 void Pedestrian::SetSmoothTurning(bool smt)
 {
-     //ignoring first turn
-     if (_tmpFirstOrientation) {
-          _tmpFirstOrientation = false;
-     } else {
-          if (_newOrientationDelay <= 0)// in the case the pedestrian is still rotating
-               _newOrientationFlag = smt;
-     }
-
+     _newOrientationDelay = 0;
 }
 
 

@@ -66,12 +66,9 @@ inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
 
      if (dist > J_EPS_GOAL) {
           const Point& v0 = ped->GetV0(target);
-          //printf("MC v0= [%.2f %.2f]\n", v0.GetX(), v0.GetY());
-          //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
           F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
      } else {
           const Point& v0 = ped->GetV0();
-          //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
           F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
      }
      return F_driv;
@@ -79,7 +76,6 @@ inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
 
 Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 {
-
      Point F_rep;
      // x- and y-coordinate of the distance between p1 and p2
      Point distp12 = ped2->GetPos() - ped1->GetPos();
@@ -511,7 +507,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
                     fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
                             "is bigger than desired velocity (%f) at time: %fs\n",
                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
-
                     // remove the pedestrian and abort
                     for(int p=0; p<subroom->GetNumberOfPedestrians(); p++) {
                          if (subroom->GetPedestrian(p)->GetID()==ped->GetID()) {
@@ -519,7 +514,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
                               break;
                          }
                     }
-
                     building->DeletePedFromSim(ped);
                     Log->Write("\tERROR: one ped was removed due to high velocity");
                     exit(EXIT_FAILURE);
@@ -602,12 +596,10 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      // check if the molified version works
      if (dist > J_EPS_GOAL) {
           const Point& v0 = ped->GetV0(target);
-          //printf("MC v0= [%.2f %.2f]\n", v0.GetX(), v0.GetY());
-          //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
           F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
      } else {
+          ped->SetSmoothTurning(true);
           const Point& v0 = ped->GetV0();
-          //fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f\n", v0.GetX(), v0.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
           F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
      }
      return F_driv;
@@ -720,8 +712,6 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      Point pt = w.ShortestPoint(ped->GetPos());
      double wlen = w.LengthSquare();
      if (wlen <= 0.03) { // ignore walls smaller than 0.15m  (15cm)
-          // if(ped->GetID() == 33)
-          //     printf ("Wall beeing ignored [%f %f]<-->[%f %f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY());
           return F_wrep;
      }
      Point dist = pt - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
@@ -784,13 +774,6 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      f = -ped->GetMass() * _nuWall * B_iw  * ped->GetV0Norm();
 
      F_wrep = e_iw * f;
-
-     // if(1)// && F_wrep.Norm()>J_EPS && w.GetPoint1().GetX()==w.GetPoint2().GetX() )
-     // {
-     //     printf("\n---- %d Radius=%f, dist=%f\n",ped->GetID(), Radius, Distance);
-     //     printf ("Wall  [%f %f]<-->[%f %f] Force=[%f ,%f]\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F_wrep.GetX(), F_wrep.GetY());
-     //     printf("X= %f, Y=%f\n",ped->GetPos().GetX(), ped->GetPos().GetY());
-     // }
      return F_wrep;
 }
 
@@ -828,7 +811,7 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
 
                double normVi = ped->GetV().ScalarP(ped->GetV()); //squared
                double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-               if (0 && normVi > HighVel && ped->GetV0Norm() > 0) {
+               if (normVi > HighVel && ped->GetV0Norm() > 0) {
                     fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
                             "is bigger than desired velocity (%f) at time: %fs\n",
                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
@@ -840,7 +823,6 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                               break;
                          }
                     }
-
                     printf("\tERROR: ped [%d] was removed due to high velocity\n",ped->GetID());
                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
                     building->DeletePedestrian(ped);
@@ -866,8 +848,6 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                     B_ij += exp(-_bPed*exp(-_cPed*tmp));
                     if (B_ij > J_EPS)
                         count_Bij += 1;
-                    // if (ped->GetID()==logped)
-                    //     printf("Bij=%f, dist=%f\n", B_ij, Distance);
                     //--------------------------------
                     //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
@@ -911,7 +891,6 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
 
                Point e0 = ped->GetV0();
                double isBackwards;
-               //isBackwards = ped->GetV().GetX()*e0.GetX() + ped->GetV().GetX()*e0.GetY();
                isBackwards = v_neu.GetX()*e0.GetX() + v_neu.GetY()*e0.GetY();
                if (ped->GetV().Norm()>J_EPS_V) {
                     isBackwards = isBackwards/(v_neu.Norm() * e0.Norm()); //normalize
@@ -925,7 +904,7 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                     v_neu = v_neu*0.01;
                     pos_neu = ped->GetPos();
                }
-//--------------------------------------- apparently this depends on the chosen model Issue 9 -----
+//--------------------------------------------------------------------------------------------------
                //Jam is based on the current velocity
                if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
                     ped->ResetTimeInJam();
