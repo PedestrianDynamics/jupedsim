@@ -125,6 +125,7 @@ ArgumentParser::ArgumentParser() {
 	_embedMesh=0;
 	pMaxOpenMPThreads = omp_get_thread_num();
     _profilingFlag = false;
+    _hpcFlag=0;
 }
 
 
@@ -180,12 +181,13 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			{"help", 0, 0, 'h'},
 			{"inifile", optional_argument, 0, 'q'},
             {"profiling", optional_argument, 0, 'u'},
+            {"architecture", optional_argument,0, 'H'},
 			{"generate-mesh", required_argument, 0, 'N'},
 			{0, 0, 0, 0}
 	};
 
 	while ((c = getopt_long_only(argc, argv,
-            "n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:u:",
+            "n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:u:H:",
 			long_options, &option_index)) != -1) {
 
 		switch (c) {
@@ -435,6 +437,21 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
                 _profilingFlag = true;
             else
                 _profilingFlag = false;
+        }
+            break;
+        case 'H':
+        {
+            if(strcmp("cpu",optarg)==0)
+                _hpcFlag = 0;
+            else if(strcmp("gpu",optarg)==0)
+                _hpcFlag = 1;
+            else if(strcmp("xeonphi",optarg)==0)
+                _hpcFlag = 2;
+            else{
+                _hpcFlag = 0;
+                Log->Write("ERROR: Wrong argument for architecture. Architecture is set to 'cpu'.");
+            }
+
         }
             break;
 		default:
@@ -907,4 +924,8 @@ const string& ArgumentParser::GetProjectRootDir() const {
 
 bool ArgumentParser::GetProfileFlag(){
     return _profilingFlag;
+}
+
+int ArgumentParser::GetHPCFlag()(){
+    return _hpcFlag;
 }

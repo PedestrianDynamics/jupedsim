@@ -83,6 +83,7 @@ private:
 	FileFormat pFormat;
 	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
     bool _profilingFlag;
+    int _hpcFlag; //Flag fuer die HPC-Archtitektur (0=CPU, 1=GPU, 2=XeonPhi)
 
 	// private Funktionen
 	void Usage();
@@ -146,6 +147,7 @@ public:
 	const string& GetProjectFile() const;
 	const string& GetProjectRootDir() const;
     bool GetProfileFlag();
+    int GetHPCFlag();
 
 	vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
 	const FileFormat& GetFileFormat() const;
