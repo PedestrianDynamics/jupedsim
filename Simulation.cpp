@@ -43,6 +43,8 @@ Simulation::Simulation() {
 	_iod = new IODispatcher();
 	_fps=1;
     _em=NULL;
+    _profiling = false;
+    _hpc = 0;
 }
 
 Simulation::~Simulation() {
@@ -65,6 +67,7 @@ void Simulation::SetPedsNumber(int i) {
 }
 
 
+
 /************************************************
 // Getter-Funktionen
  ************************************************/
@@ -78,6 +81,13 @@ Building * Simulation::GetBuilding() const {
 	return _building;
 }
 
+bool Simulation::GetProfileFlag(){
+    return _profiling;
+}
+
+int Simulation::GetHPCFlag(){
+    return _hpc;
+}
 
 void Simulation::InitArgs(ArgumentParser* args) {
 	char tmp[CLENGTH];
@@ -388,10 +398,21 @@ void Simulation::InitArgs(ArgumentParser* args) {
     _em->SetProjectRootDir(args->GetProjectRootDir());
     _em->readEventsXml();
     _em->listEvents();
+
+    //profiling enabled?
+    _profiling = args->GetProfileFlag();
+    //which hpc-architecture?
+    _hpc = args->GetHPCFlag();
 }
 
 
 int Simulation::RunSimulation() {
+
+    time_t startinitSim, endinitSim, startfirstUpdate, endfirstUpdate, startLoop, endLoop, startSolveODE, endSolveODE, startLoopUpdate, endLoopUpdate, startEventUpdate, endEventUpdate;
+    double initSimTime, firstUpdateTime, solveODETime = 0.0, loopUpdateTime = 0.0, eventUpdateTime = 0.0, loopTime, upBuilding = 0.0, upPeds = 0.0, upTime = 0.0, upGrid = 0.0;
+    if(GetProfileFlag()){
+        time(&startinitSim);
+    }
 	int frameNr = 1; // Frame Number
 	int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
 	writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
@@ -403,24 +424,76 @@ int Simulation::RunSimulation() {
 	_iod->WriteHeader(_nPeds, _fps, _building,_seed);
 	_iod->WriteGeometry(_building);
 	_iod->WriteFrame(0,_building);
-
+    if(GetProfileFlag()){
+        time(&endinitSim);
+        initSimTime = difftime(endinitSim,startinitSim);
+    }
 	//first initialisation needed by the linked-cells
-	 Update();
-
+    if(GetProfileFlag())
+        time(&startfirstUpdate);
+    Update(upBuilding,upPeds,upTime,upGrid);
+    if(GetProfileFlag()){
+        time(&endfirstUpdate);
+        firstUpdateTime = difftime(endfirstUpdate,startfirstUpdate);
+    }
 	// main program loop
+    if(GetProfileFlag()){
+        time(&startLoop);
+        solveODETime = 0.0, loopUpdateTime = 0.0, eventUpdateTime = 0.0;
+    }
+
 	for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
 		t = 0 + (frameNr - 1) * _deltaT;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
-		_solver->solveODE(t, t + _deltaT, _building);
-		// gucken ob Fußgänger in neuen Räumen/Unterräumen
-		Update();
+        if(GetProfileFlag())
+            time(&startSolveODE);
+        _solver->solveODE(t, t + _deltaT, _building);
+        if(GetProfileFlag()){
+            time(&endSolveODE);
+            solveODETime += difftime(endSolveODE, startSolveODE);
+        }
+
+		// gucken ob Fußgänger in neuen Räumen/Unterräum
+        if(GetProfileFlag())
+            time(&startLoopUpdate);
+        Update(upBuilding,upPeds,upTime,upGrid);
+        if(GetProfileFlag()){
+            time(&endLoopUpdate);
+            loopUpdateTime += difftime(endLoopUpdate, startLoopUpdate);
+        }
+
+        //Eventupdate
+        if(GetProfileFlag())
+            time(&startEventUpdate);
         _em->Update_Events(t,_deltaT);
+        if(GetProfileFlag()){
+            time(&endEventUpdate);
+            eventUpdateTime += difftime(endEventUpdate, startEventUpdate);
+        }
+
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			_iod->WriteFrame(frameNr / writeInterval, _building);
 		}
 
 	}
+    if(GetProfileFlag()){
+        time(&endLoop);
+        loopTime = difftime(endLoop,startLoop);
+        cout << "Messungen in Simulation.cpp: " << endl;
+        cout << "\tInit Sim [s]: " << initSimTime << endl;
+        cout << "\tFirst Update [s]: " << firstUpdateTime << endl;
+        cout << "\tLoop [s]: " << loopTime << endl;
+        cout << "\tMessungen in der Loop: " << endl;
+        cout << "\t\tSolve ODE [s]: " << solveODETime << endl;
+        cout << "\t\tUpdate [s]: " << loopUpdateTime << endl;
+        cout << "\t\tMessungen in der Update(): " << endl;
+        cout << "\t\t\tUpdate Building[s]: " << upBuilding << endl;
+        cout << "\t\t\tUpdate Pedestrians[s]: " << upPeds << endl;
+        cout << "\t\t\tUpdate GlobalTime[s]: " << upTime << endl;
+        cout << "\t\t\tUpdate Grid[s]: " << upGrid << endl;
+        cout << "\t\tEventUpdate [s]: " << eventUpdateTime << endl;
+    }
 	// writing the footer
 	_iod->WriteFooter();
 
@@ -430,14 +503,36 @@ int Simulation::RunSimulation() {
 
 
 // TODO: make the building class more independent by moving the update routing here.
-void Simulation::Update() {
+void Simulation::Update(double &b, double &p, double &t, double &g) {
+    time_t startBuilding, endBuilding, startPeds, endPeds, startTime, endTime, startGrid, endGrid;
 	//_building->Update();
+    if(GetProfileFlag())
+        time(&startBuilding);
 	_building->UpdateVerySlow();
+    if(GetProfileFlag()){
+        time(&endBuilding);
+       // b += difftime(endBuilding,startBuilding);
+        b += endBuilding-startBuilding;
+        time(&startPeds);
+    }
 	//someone might have leave the building
 	_nPeds=_building->GetAllPedestrians().size();
+    if(GetProfileFlag()){
+        time(&endPeds);
+        p += difftime(endPeds,startPeds);
+        time(&startTime);
+    }
 	// update the global time
 	Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+_deltaT);
+    if(GetProfileFlag()){
+        time(&endTime);
+        t += difftime(endTime,startTime);
+        time(&startGrid);
+    }
 	//update the cells position
 	_building->UpdateGrid();
-
+    if(GetProfileFlag()){
+        time(&endGrid);
+        g += difftime(endGrid,startGrid);
+    }
 }

@@ -926,6 +926,6 @@ bool ArgumentParser::GetProfileFlag(){
     return _profilingFlag;
 }
 
-int ArgumentParser::GetHPCFlag()(){
+int ArgumentParser::GetHPCFlag(){
     return _hpcFlag;
 }

@@ -37,7 +37,6 @@
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
 #endif
-
 using namespace std;
 
 ForceModel::ForceModel() {
@@ -83,7 +82,7 @@ inline Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const {
  * Rückgabewerte:
  *   - Vektor(x,y) mit abstoßender Kraft
  * */
-Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
+inline Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 
 	Point F_rep;
 	// x- and y-coordinate of the distance between p1 and p2
@@ -459,42 +458,44 @@ void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Buildin
 
 void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) const {
 	double delta = 0.5;
-	double h = tip1 - time;
+    double h = tip1 - time;
 
 	// collect all pedestrians in the simulation.
 	const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-	unsigned int nSize = allPeds.size();
-
+    unsigned int nSize = allPeds.size();
 	int nThreads = omp_get_max_threads();
 
 	// check if worth sharing the work
-	if (nSize < 20) nThreads = 1;
-	int partSize = nSize / nThreads;
+    if (nSize < 20) nThreads = 1;
+    int partSize = nSize / nThreads;
 
+    vector< Point > result_acc(nSize);
+    //cout << "openMp startet" << endl;
 #pragma omp parallel  default(shared) num_threads(nThreads)
-	{
-		vector< Point > result_acc = vector<Point > ();
-		result_acc.reserve(2200);
+{
+
+        //vector< Point > result_acc = vector<Point > ();
+        //result_acc.reserve(2200);
 
         const int threadID = omp_get_thread_num();
+        //cout << threadID << endl;
+        //int start = threadID*partSize;
+        //int end = (threadID + 1) * partSize - 1;
+        //if ((threadID == nThreads - 1)) end = nSize - 1;
+        //for (int p = start; p <= end; ++p) {
 
-		int start = threadID*partSize;
-		int end = (threadID + 1) * partSize - 1;
-		if ((threadID == nThreads - 1)) end = nSize - 1;
-
-		for (int p = start; p <= end; ++p) {
-
+#pragma omp for
+        for(int p=0;p<nSize;p++){
 			Pedestrian* ped = allPeds[p];
 			Room* room = building->GetRoom(ped->GetRoomID());
 			SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-
 			double normVi = ped->GetV().ScalarP(ped->GetV());
 			double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
 			if (normVi > tmp && ped->GetV0Norm() > 0) {
 				fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
 						"is bigger than desired velocity (%f) at time: %fs\n",
-						sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
+                        sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);////time statt t
 
 				// remove the pedestrian and abort
 				for(int p=0;p<subroom->GetNumberOfPedestrians();p++){
@@ -510,13 +511,12 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 				//	continue;
 				exit(EXIT_FAILURE);
 			}
-
+            //cout << threadID << ": nach der if." << endl;
 			Point F_rep;
 			vector<Pedestrian*> neighbours;
 			building->GetGrid()->GetNeighbourhood(ped,neighbours);
-
-			int nSize=neighbours.size();
-			for (int i = 0; i < nSize; i++) {
+            int NSize=neighbours.size();
+            for (int i = 0; i < NSize; i++) {
 				Pedestrian* ped1 = neighbours[i];
 				//if they are in the same subroom
 				if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
@@ -534,14 +534,20 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			Point repwall = ForceRepRoom(allPeds[p], subroom);
 
 			Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
-			result_acc.push_back(acc);
-		}
+            //result_acc.push_back(acc);
+           // cout << threadID << " " << result_acc.begin()+2 << ": " << nSize << endl;
 
-		//#pragma omp barrier
+            result_acc[p]=acc;
+		}
+        //cout << threadID << ": erste for geschafft." << endl;
+#pragma omp barrier
 		// update
-		for (int p = start; p <= end; ++p) {
+        //for (int p = start; p <= end; ++p) {
+#pragma omp for
+        for (int p = 0; p < nSize; p++) {
 			Pedestrian* ped = allPeds[p];
-			Point v_neu = ped->GetV() + result_acc[p - start] * h;
+            //Point v_neu = ped->GetV() + result_acc[p - start] * h;
+            Point v_neu = ped->GetV() + result_acc[p] * h;
 			Point pos_neu = ped->GetPos() + v_neu * h;
 
 			//Jam is based on the current velocity
@@ -555,6 +561,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) c
 			ped->SetV(v_neu);
 			ped->SetPhiPed();
 		}
-
-	}//end parallel
+}//end parallel
+    //cout << "openmp endet" << endl;
 }

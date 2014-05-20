@@ -76,7 +76,8 @@ private:
     IODispatcher* _iod;
     ///new: EventManager
     EventManager* _em;
-
+    bool _profiling;
+    int _hpc;
 
 public:
     Simulation();
@@ -117,7 +118,22 @@ public:
     /**
      * Update the pedestrians states: positions, velocity, route
      */
-    void Update();
+    void Update(double &b, double &p, double &t, double &g);
+
+    /**
+     * Set the ProfilingFlag
+     */
+    void SetProfileFlag(bool flag);
+
+    /**
+     * Get the ProfileFlag
+     */
+    bool GetProfileFlag();
+
+    /**
+     * Get the HPCFlag
+     */
+    int GetHPCFlag();
 
 };
 
