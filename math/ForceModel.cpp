@@ -456,7 +456,7 @@ void GCFMModel::CalculateForce(double time, vector< Point >& result_acc, Buildin
  * implementation of Linked-cell combined with openMP
  */
 
-void GCFMModel::CalculateForceLC(double time, double tip1, Building* building) const {
+void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, int hpc) const {
 	double delta = 0.5;
     double h = tip1 - time;
 

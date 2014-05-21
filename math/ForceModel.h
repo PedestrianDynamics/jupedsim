@@ -54,8 +54,9 @@ public:
      * @param t the actual time
      * @param tp the next timestep
      * @param building the geometry object
+     * @param hpc the hpc architecture
      */
-    virtual void CalculateForceLC(double t, double tp, Building* building) const = 0;
+    virtual void CalculateForceLC(double t, double tp, Building* building, int hpc) const = 0;
 
     /**
      * @return all model parameters in a nicely formatted string
@@ -111,7 +112,7 @@ public:
     // virtuelle Funktionen
     virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
     int roomID, int SubRoomID) const;
-    virtual void CalculateForceLC(double t, double tp, Building* building) const;
+    virtual void CalculateForceLC(double t, double tp, Building* building, int hpc) const;
     virtual std::string writeParameter() const;
 };
 

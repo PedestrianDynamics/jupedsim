@@ -447,7 +447,7 @@ int Simulation::RunSimulation() {
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
         if(GetProfileFlag())
             time(&startSolveODE);
-        _solver->solveODE(t, t + _deltaT, _building);
+        _solver->solveODE(t, t + _deltaT, _building, _hpc);
         if(GetProfileFlag()){
             time(&endSolveODE);
             solveODETime += difftime(endSolveODE, startSolveODE);

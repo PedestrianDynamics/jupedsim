@@ -43,7 +43,7 @@ protected:
 public:
     ODESolver(ForceModel* model);
     virtual ~ODESolver(){};
-    virtual void solveODE(double t, double tp, Building* building) const = 0;
+    virtual void solveODE(double t, double tp, Building* building, int hpc) const = 0;
 };
 
 
@@ -53,7 +53,7 @@ public:
 class EulerSolver : public ODESolver {
 public:
     EulerSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
+    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
 };
 
 
@@ -63,7 +63,7 @@ public:
 class VelocityVerletSolver : public ODESolver {
 public:
     VelocityVerletSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
+    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
 };
 
 /**
@@ -72,14 +72,14 @@ public:
 class LeapfrogSolver : public ODESolver {
 public:
     LeapfrogSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
+    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
 };
 
 
 class EulerSolverLC : public ODESolver {
 public:
     EulerSolverLC(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
+    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
 };
 
 

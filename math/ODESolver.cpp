@@ -51,7 +51,7 @@ EulerSolver::EulerSolver(ForceModel *model) : ODESolver(model) {
  *   - entsprechend werden dann die neuen Gescwindigkeiten und Positionen der Fußgänger gesetzt
  * */
 
-void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
+void EulerSolver::solveODE(double ti, double tip1, Building* building, int hpc) const {
     double h = tip1 - ti;
     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
@@ -73,10 +73,9 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
         result_acc_room.push_back(result_acc_rooms);
         result_acc_rooms.clear();
     }
-
     /* PRARALLELES UPDATE */
 
-    // Schleife über alle Räume
+    // Schleife über alle Räu
     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
         // Schleife über alle SubRooms im Raum
@@ -107,7 +106,7 @@ void EulerSolver::solveODE(double ti, double tip1, Building* building) const {
 VelocityVerletSolver::VelocityVerletSolver(ForceModel *model) : ODESolver(model) {
 };
 
-void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building) const {
+void VelocityVerletSolver::solveODE(double ti, double tip1, Building* building, int hpc) const {
     double h = tip1 - ti;
     double h2 = h*h;
     double lambda = 0.5;
@@ -215,7 +214,7 @@ LeapfrogSolver::LeapfrogSolver(ForceModel *model) : ODESolver(model) {
  *   - entsprechend werden dann die neuen Gescwindigkeiten und Positionen der Fußgänger gesetzt
  * */
 
-void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const {
+void LeapfrogSolver::solveODE(double ti, double tip1, Building* building, int hpc) const {
     double h = tip1 - ti;
     vector< vector < vector < Point > > > result_acc_room = vector<vector < vector < Point > > >();
 
@@ -274,8 +273,8 @@ void LeapfrogSolver::solveODE(double ti, double tip1, Building* building) const 
 EulerSolverLC::EulerSolverLC(ForceModel *model) : ODESolver(model) {
 }
 
-void EulerSolverLC::solveODE(double ti, double tip1, Building* building) const {
+void EulerSolverLC::solveODE(double ti, double tip1, Building* building, int hpc) const {
 
-    model->CalculateForceLC(ti, tip1, building);
+    model->CalculateForceLC(ti, tip1, building, hpc);
 
 }
