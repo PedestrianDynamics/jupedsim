@@ -471,7 +471,62 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
     int partSize = nSize / nThreads;
 
     vector< Point > result_acc(nSize);
-    //cout << "openMp startet" << endl;
+
+    //for gpu and xeonphi
+    if(hpc!=0){
+        pedGetV_x=malloc(nSize*sizeof(double));
+        pedGetV_y=malloc(nSize*sizeof(double));
+        pedGetV0Norm=malloc(nSize*sizeof(double));
+        pedGetID=malloc(nSize*sizeof(int));
+        pedGetPos_x=malloc(nSize*sizeof(double));
+        pedGetPos_y=malloc(nSize*sizeof(double));
+        double cellSize=building->GetGrid()->GetCellSize();
+        double gridXmin=building->GetGrid()->GetGridXmin();
+        double gridYmin=building->GetGrid()->GetGridYmin();
+        pedMass=malloc(nSize*sizeof(double));
+        //buffer fuellen
+        for(unsigned int p=0;p<nSize;p++){
+            Pedestrian* ped=allPeds[p];
+            pedGetV_x[p]=ped->GetV().GetX();
+            pedGetV_y[p]=ped->GetV().GetY();
+            pedGetV0Norm[p]=ped->GetV0Norm();
+            pedGetID[p]=ped->GetID();
+            pedGetPos_x[p]=ped->GetPos().GetX();
+            pedGetPos_y[p]=ped->GetPos().GetY();
+            pedMass[p]=ped->GetMass();
+        }
+        //Rechnung
+        for(int p=0;p<nSize;p++){
+            double normVi = pedGetV_x[p]*pedGetV_x[p]+pedGetV_y[p]*pedGetV_y[p];
+            double tmp = (pedGetV0Norm[p]+delta)*(pedGetV0Norm[p]+delta);
+            if(normVi>tmp && pedGetV0Norm[p]>0){
+                fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
+                        "is bigger than desired velocity (%f) at time: %fs\n",
+                        sqrt(normVi), pedGetID[p], pedGetV0Norm[p], time);
+                exit(EXIT_FAILURE);
+            }
+            //Nachbarn finden
+            double xPed=pedGetPos_x[p];
+            double yPed=pedGetPos_y[p];
+            int xpos=(int)xPed;
+            int ypos=(int)yPed;
+            int myID=pedGetID[p]-1;
+            for(int n=0;n<nSize;n++){
+                if(n!=p){
+                    if(pedGetPos_x[n]<=(xpos+1) && pedGetPos_x[n]>=(xpos-1)){
+                       if(pedGetPos_y[n]<=(ypos+1) && pedGetPos_y[n]>=(ypos-1)){
+                           //n liegt in der Nachbarschaft
+                           double dist=((pedGetPos_x[n]-xPed)*(pedGetPos_x[n]-xPed) + (pedGetPos_y[n]-yPed)*(pedGetPos_y[n]-yPed));
+                           if(dist<cellSize*cellSize){
+                               //n ist nah genug an p, sodass die Kraefte berechnet werden koennen
+
+                           }
+                       }
+                    }
+                }
+            }
+        }
+    }
 #pragma omp parallel  default(shared) num_threads(nThreads)
 {
 

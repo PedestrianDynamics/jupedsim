@@ -82,6 +82,15 @@ private:
     double _distEffMaxPed; // maximal effective distance
     double _distEffMaxWall; // maximal effective distance
 
+    //buffers for gpu and xeonphi
+    double* pedGetV_x;
+    double* pedGetV_y;
+    double* pedMass;
+    double* pedGetV0Norm;
+    int* pedGetID;
+    double* pedGetPos_x;
+    double* pedGetPos_y;
+
     // Private Funktionen
     Point ForceDriv(Pedestrian* ped, Room* room) const;
     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
