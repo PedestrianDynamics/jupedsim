@@ -508,8 +508,8 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
             //Nachbarn finden
             double xPed=pedGetPos_x[p];
             double yPed=pedGetPos_y[p];
-            int xpos=(int)xPed;
-            int ypos=(int)yPed;
+            int xpos=(int)(xPed/cellSize);
+            int ypos=(int)(yPed/cellSize);
             int myID=pedGetID[p]-1;
             for(int n=0;n<nSize;n++){
                 if(n!=p){
