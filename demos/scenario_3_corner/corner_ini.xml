@@ -12,6 +12,7 @@
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="corner_trajectories.xml" />
+		<socket hostname="localhost" port="8989" />
 	</trajectories>
 	<!-- where to store the logs 
 	<logfile>log</logfile> -->
