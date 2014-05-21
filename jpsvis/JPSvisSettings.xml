@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE TraVisToProject SYSTEM "TraVisToProject.dtd">
+<TraVisToProject>
+	<visualisation_mode>
+		<mode>online</mode>
+		<server>localhost</server>
+		<port>14009</port>
+	</visualisation_mode>
+	<files>
+		<trajectories>
+		e:/workspace/TraVisTo/data/evacuationTime.dat
+		</trajectories>
+		<trajectories>
+		e:/workspace/TraVisTo/data/evacuationTime2.dat
+		</trajectories>
+		<geometry>
+		e:/workspace/TraVisTo/data/geometry.dat
+		</geometry>
+	</files>
+	<settings>
+		<mode>2D</mode>
+		<showAgent>true</showAgent>
+		<showGeometry>true</showGeometry>
+		<showLegend>true</showLegend>
+		<showCaption>true</showCaption>
+		<showAxis>true</showAxis>
+		<cameraView>top</cameraView>
+		<trails>
+			<type>polygones</type>
+			<points>100</points>
+		</trails>
+		
+	</settings>
+	
+</TraVisToProject>

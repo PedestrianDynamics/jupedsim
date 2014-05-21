@@ -52,7 +52,7 @@
 #undef VTK_USE_FFMPEG
 
 #include <QApplication>
-#include "travisto.h"
+#include "MainWindow.h"
 
 
 #define vtkErrorMacro (x) ()
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	// To ensure that decimal numbers use a "point" instead of "colon" on some systems
 	setlocale(LC_NUMERIC, "en_US" );
 
-	TraVisTo w;
+    MainWindow w;
 	w.show();
 
 	return a.exec();
