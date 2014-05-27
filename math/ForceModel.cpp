@@ -483,6 +483,12 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
         double cellSize=building->GetGrid()->GetCellSize();
         double gridXmin=building->GetGrid()->GetGridXmin();
         double gridYmin=building->GetGrid()->GetGridYmin();
+        pedGetUniqueRoomID=malloc(nSize*sizeof(int));
+        force_x=malloc(nSize*sizeof(double));
+        force_y=malloc(nSize*sizeof(double));
+        elCenter_x=malloc(nSize*sizeof(double));
+        elCenter_y=malloc(nSize*sizeof(double));
+        nearDoor=malloc(mSize*sizeof(int));
         pedMass=malloc(nSize*sizeof(double));
         //buffer fuellen
         for(unsigned int p=0;p<nSize;p++){
@@ -493,6 +499,23 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
             pedGetID[p]=ped->GetID();
             pedGetPos_x[p]=ped->GetPos().GetX();
             pedGetPos_y[p]=ped->GetPos().GetY();
+            pedGetUniqueRoomID[p]=ped->GetUniqueRoomID();
+            force_x[p]=0.0;
+            force_y[p]=0.0;
+            elCenter_x[p]=ped->GetEllipse().GetCenter().GetX();
+            elCenter_y[p]=ped->GetEllipse().GetCenter().GetY();
+            //ist der Fussgaenger naeher als 1 m an einer Tuer? wenn ja ID der Tuer in nearDoor speichern sonst nearDoor=-1
+            Room* room = building->GetRoom(ped->GetRoomID());
+            SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+            vector<Transition*> t=subroom->GetAllTransitions();
+            nearDoor[p]=-1;
+            for(int i=0;i<t.size();i++){
+                Line* l = new Line(t[i]->GetPoint1(),t[i]->GetPoint2());
+                if(l->DistTo(ped->GetPos())<1.0){
+                    nearDoor[p]=t[i]->GetID();
+                    break;
+                }
+            }
             pedMass[p]=ped->GetMass();
         }
         //Rechnung
@@ -518,8 +541,13 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
                            //n liegt in der Nachbarschaft
                            double dist=((pedGetPos_x[n]-xPed)*(pedGetPos_x[n]-xPed) + (pedGetPos_y[n]-yPed)*(pedGetPos_y[n]-yPed));
                            if(dist<cellSize*cellSize){
-                               //n ist nah genug an p, sodass die Kraefte berechnet werden koennen
+                               //n ist nah genug an p, sodass die Kraefte berechnet werden koennen, falls sie im selben Raum sind
+                               //oder beide in der Naehe der gleichen Tuer sind
+                               if(pedGetUniqueRoomID[p]==pedGetUniqueRoomID[n] || nearDoor[p]==nearDoor[n]){
+                                   //Kraft berechnen
 
+
+                               }
                            }
                        }
                     }

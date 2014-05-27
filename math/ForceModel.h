@@ -90,7 +90,14 @@ private:
     int* pedGetID;
     double* pedGetPos_x;
     double* pedGetPos_y;
-
+    int* pedGetUniqueRoomID;
+    double* force_x;
+    double* force_y;
+    double* elCenter_x;
+    double* elCenter_y;
+    double* cosPhi;
+    double* sinPhi;
+    int* nearDoor;
     // Private Funktionen
     Point ForceDriv(Pedestrian* ped, Room* room) const;
     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
