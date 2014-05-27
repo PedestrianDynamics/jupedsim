@@ -30,7 +30,8 @@ void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap
 
     for(std::vector<const GraphEdge *>::iterator it = destinations.begin(); it != destinations.end(); ++it) {
         GraphEdge * to_edge = (*ng[(*it)->GetSrc()->GetSubRoom()])[(*it)->GetCrossing()];
-        to_edge->SetFactor(100.0, GetName());
+        if(to_edge != NULL)
+            to_edge->SetFactor(100.0, GetName());
         if((*it)->GetSrc() != NULL && (*it)->GetDest() != NULL && (*it)->GetCrossing() != NULL) {
             GraphEdge * back_edge = (*ng[(*it)->GetDest()->GetSubRoom()])[(*it)->GetCrossing()];
             if(back_edge != NULL) {

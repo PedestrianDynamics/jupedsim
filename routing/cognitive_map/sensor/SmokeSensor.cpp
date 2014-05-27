@@ -50,7 +50,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
             //iterating over all edges
             for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
                 if((*it_edges)->GetDest() == smoked_room) {
-                    (*it_edges)->SetFactor(1000.0, GetName());
+                    (*it_edges)->SetFactor(10000.0, GetName());
                 }
             }
         }
