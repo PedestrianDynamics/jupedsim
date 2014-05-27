@@ -172,6 +172,7 @@ set ( 	source_files
         routing/cognitive_map/sensor/RoomToFloorSensor.cpp
         routing/cognitive_map/sensor/LastDestinationsSensor.cpp
         routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
+        routing/cognitive_map/sensor/SmokeSensor.cpp
         routing/cognitive_map/sensor/SensorManager.cpp
         routing/cognitive_map/sensor/AbstractSensor.cpp
 
@@ -213,6 +214,7 @@ set (   header_files
         routing/cognitive_map/sensor/RoomToFloorSensor.h
         routing/cognitive_map/sensor/LastDestinationsSensor.h
         routing/cognitive_map/sensor/DiscoverDoorsSensor.h
+        routing/cognitive_map/sensor/SmokeSensor.h
         routing/cognitive_map/sensor/SensorManager.h
 
 

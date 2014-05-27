@@ -11,6 +11,7 @@
 #include "RoomToFloorSensor.h"
 #include "DiscoverDoorsSensor.h"
 #include "LastDestinationsSensor.h"
+#include "SmokeSensor.h"
 
 #include "../../../geometry/Building.h"
 #include "../CognitiveMapStorage.h"
@@ -49,6 +50,7 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveM
     //Init and register Sensors
     sensor_manager->Register(new DiscoverDoorsSensor(b),  NO_WAY );
     sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+    sensor_manager->Register(new SmokeSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
     sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
 
     return sensor_manager;
