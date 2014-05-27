@@ -486,10 +486,15 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
         pedGetUniqueRoomID=malloc(nSize*sizeof(int));
         force_x=malloc(nSize*sizeof(double));
         force_y=malloc(nSize*sizeof(double));
+        nearDoor=malloc(mSize*sizeof(int));
         elCenter_x=malloc(nSize*sizeof(double));
         elCenter_y=malloc(nSize*sizeof(double));
-        nearDoor=malloc(mSize*sizeof(int));
+        sinPhi=malloc(nSize*sizeof(double));
+        cosPhi=malloc(nSize*sizeof(double));
+        elEA=malloc(nSize*sizeof(double));
+        elEB=malloc(nSize*sizeof(double));
         pedMass=malloc(nSize*sizeof(double));
+
         //buffer fuellen
         for(unsigned int p=0;p<nSize;p++){
             Pedestrian* ped=allPeds[p];
@@ -502,8 +507,6 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
             pedGetUniqueRoomID[p]=ped->GetUniqueRoomID();
             force_x[p]=0.0;
             force_y[p]=0.0;
-            elCenter_x[p]=ped->GetEllipse().GetCenter().GetX();
-            elCenter_y[p]=ped->GetEllipse().GetCenter().GetY();
             //ist der Fussgaenger naeher als 1 m an einer Tuer? wenn ja ID der Tuer in nearDoor speichern sonst nearDoor=-1
             Room* room = building->GetRoom(ped->GetRoomID());
             SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
@@ -516,6 +519,12 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
                     break;
                 }
             }
+            elCenter_x[p]=ped->GetEllipse().GetCenter().GetX();
+            elCenter_y[p]=ped->GetEllipse().GetCenter().GetY();
+            cosPhi[p]=ped->GetEllipse().GetCosPhi();
+            sinPhi[p]=ped->GetEllipse().GetSinPhi();
+            elEA[p]=ped->GetEllipse().GetEA();
+            elEB[p]=ped->GetEllipse().GetEB();
             pedMass[p]=ped->GetMass();
         }
         //Rechnung
@@ -545,8 +554,71 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
                                //oder beide in der Naehe der gleichen Tuer sind
                                if(pedGetUniqueRoomID[p]==pedGetUniqueRoomID[n] || nearDoor[p]==nearDoor[n]){
                                    //Kraft berechnen
-
-
+                                   // x- and y-coordinate of the distance between p1 and p2
+                                   double distp12_x = pedGetPos_x[n] - pedGetPos_x[p];
+                                   double distp12_y = pedGetPos_y[n] - pedGetPos_y[p];
+                                   //Distanz zwischen den Ellipsen
+                                   double eff_dist;
+                                   //E2inE1
+                                   double tmp_x=elCenter_x[n]-elCenter_x[p];
+                                   double tmp_y=elCenter_y[n]-elCenter_y[p];
+                                   double E2inE1_x=tmp_x*cosPhi[p]-tmp_y*(-sinPhi[p]);
+                                   double E2inE1_y=tmp_x*(-sinPhi[p])+tmp_y*cosPhi[p];
+                                   //E1inE2
+                                   tmp_x=elCenter_x[p]-elCenter_x[n];
+                                   tmp_y=elCenter_y[p]-elCenter_y[n];
+                                   double E1inE2_x=tmp_x*cosPhi[n]-tmp_y*(-sinPhi[n]);
+                                   double E1inE2_y=tmp_x*(-sinPhi[n])+tmp_y*cosPhi[n];
+                                   // distance between centers of E1 and E2
+                                   double elDist=sqrt(tmp_x*tmp_x+tmp_y*tmp_y);
+                                   //PointOnEllipse() R1 und R2
+                                   double R1_x, R1_y, R2_x, R2_y;
+                                   //R1
+                                   double r=E2inE1_x*E2inE1_x+E2inE1_y*E2inE1_y;
+                                   if(r<0.001*0.001){
+                                       double cp_x=elEA[p];
+                                       double cp_y=0.0;
+                                       //cp.CoordTransToCart
+                                       R1_x=cp_x*cosPhi[p]-cp_y*sinPhi[p]+elCenter_x[p];
+                                       R1_y=cp_x*sinPhi[p]+cp_y*cosPhi[p]+elCenter_y[p];
+                                   }
+                                   else{
+                                       r=sqrt(r);
+                                       double cosTheta=x/r;
+                                       double sinTheta=y/r;
+                                       double a=elEA[p];
+                                       double b=elEB[p];
+                                       double s_x=a*cosTheta;
+                                       double s_y=b*sinTheta;
+                                       //s.CoordTransToCart
+                                       R1_x=s_x*cosPhi[p]-s_y*sinPhi[p]+elCenter_x[p];
+                                       R1_y=s_x*sinPhi[p]+s_y*cosPhi[p]+elCenter_y[p];
+                                   }
+                                   //R2
+                                   double r=E1inE2_x*E1inE2_x+E1inE2_y*E1inE2_y;
+                                   if(r<0.001*0.001){
+                                       double cp_x=elEA[n];
+                                       double cp_y=0.0;
+                                       //cp.CoordTransToCart
+                                       R2_x=cp_x*cosPhi[n]-cp_y*sinPhinp]+elCenter_x[n];
+                                       R2_y=cp_x*sinPhi[n]+cp_y*cosPhi[n]+elCenter_y[n];
+                                   }
+                                   else{
+                                       r=sqrt(r);
+                                       double cosTheta=x/r;
+                                       double sinTheta=y/r;
+                                       double a=elEA[n];
+                                       double b=elEB[n];
+                                       double s_x=a*cosTheta;
+                                       double s_y=b*sinTheta;
+                                       //s.CoordTransToCart
+                                       R2_x=s_x*cosPhi[n]-s_y*sinPhi[n]+elCenter_x[n];
+                                       R2_y=s_x*sinPhi[n]+s_y*cosPhi[n]+elCenter_y[n];
+                                   }
+                                   //effective distance
+                                   double norm1=sqrt((elCenter_x[p]-R1_x) * (elCenter_x[p]-R1_x) + (elCenter_y[p]-R1_y) * (elCenter_y[p]-R1_y));
+                                   double norm2=sqrt((elCenter_x[n]-R2_x) * (elCenter_x[n]-R2_x) + (elCenter_y[n]-R2_y) * (elCenter_y[n]-R2_y));
+                                   eff_dist=elDist-norm1-norm2;
                                }
                            }
                        }
