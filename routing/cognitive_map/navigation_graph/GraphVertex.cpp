@@ -205,6 +205,8 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
 
 const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & position) const
 {
+    int maximum_factor_distance = 1;
+
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
         vector<std::pair<double, const GraphEdge *>>,
@@ -216,15 +218,20 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 
     if(edges.size() == 1) return edges.top().second;
     if(edges.size() > 1) {
+        double best_factor = edges.top().first;
         const GraphEdge * act_edge = NULL;
-        //take the best 3 edges and choose the nearest
-        for(int i = 1; i<= std::min(3, (int) edges.size()); i++) {
-            const GraphEdge * edge = edges.top().second;
-            edges.pop();
-            // the weight should be better but the factor should not differ too much
-            if(act_edge == NULL || (act_edge->GetWeight(position) > edge->GetWeight(position) && 2 * act_edge->GetFactor() > edge->GetFactor())) {
-                act_edge = edge;
+        //take the best  edges and choose the nearest
+        while(!edges.empty()) {
+
+            //Log->Write("Best factor: %f ; act edge factor: %f", best_factor, edges.top().first);
+
+            //if the factor is worse than maximum_factor_distance times the best_factor the edges are rejected
+            if(edges.top().first > maximum_factor_distance * best_factor) break;
+
+            if(act_edge == NULL || act_edge->GetWeight(position) > edges.top().second->GetWeight(position)) {
+                act_edge = edges.top().second;
             }
+            edges.pop();
         }
         return act_edge;
     }

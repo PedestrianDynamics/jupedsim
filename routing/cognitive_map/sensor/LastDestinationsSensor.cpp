@@ -13,6 +13,7 @@
 #include "../CognitiveMap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include <vector>
+#include <set>
 
 LastDestinationsSensor::~LastDestinationsSensor()
 {
@@ -27,16 +28,25 @@ void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap
 {
     NavigationGraph & ng = (*cognitive_map->GetNavigationGraph());
     std::vector<const GraphEdge *> & destinations = cognitive_map->GetDestinations();
+    int i = 1;
 
-    for(std::vector<const GraphEdge *>::iterator it = destinations.begin(); it != destinations.end(); ++it) {
+    std::set<const GraphEdge *> rated;
+
+    for(std::vector<const GraphEdge *>::reverse_iterator it = destinations.rbegin(); it != destinations.rend(); ++it) {
         GraphEdge * to_edge = (*ng[(*it)->GetSrc()->GetSubRoom()])[(*it)->GetCrossing()];
-        if(to_edge != NULL)
-            to_edge->SetFactor(100.0, GetName());
+
+        if(to_edge != NULL && rated.find(to_edge) == rated.end()) {
+            to_edge->SetFactor(3000.0 / (i*3) + 100, GetName());
+            rated.insert(to_edge);
+        }
+
         if((*it)->GetSrc() != NULL && (*it)->GetDest() != NULL && (*it)->GetCrossing() != NULL) {
             GraphEdge * back_edge = (*ng[(*it)->GetDest()->GetSubRoom()])[(*it)->GetCrossing()];
-            if(back_edge != NULL) {
-                back_edge->SetFactor(100.0, GetName());
+            if(back_edge != NULL && rated.find(back_edge) == rated.end()) {
+                back_edge->SetFactor(3000.0 /(i*3) + 100, GetName());
+                rated.insert(back_edge);
             }
         }
+        i++;
     }
 }
