@@ -107,7 +107,7 @@ inline Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const {
 	//       5   |     4       |            3             |      2       | 1
 
 	// If the pedestrian is outside the cutoff distance, the force is zero.
-	if (dist_eff >= _distEffMaxPed) {
+    if (dist_eff >= _distEffMaxPed) {
 		F_rep = Point(0.0, 0.0);
 		return F_rep;
 	}
@@ -474,6 +474,8 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
 
     //for gpu and xeonphi
     if(hpc!=0){
+        //Buffer anlegen
+        //Buffer fuer die Krafteinwirkung der Fussgaenger untereinander
         pedGetV_x=malloc(nSize*sizeof(double));
         pedGetV_y=malloc(nSize*sizeof(double));
         pedGetV0Norm=malloc(nSize*sizeof(double));
@@ -483,6 +485,10 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
         double cellSize=building->GetGrid()->GetCellSize();
         double gridXmin=building->GetGrid()->GetGridXmin();
         double gridYmin=building->GetGrid()->GetGridYmin();
+        double maxEffDist=_distEffMaxPed;
+        double widthPed=_intp_widthPed;
+        double numPed=_nuPed;
+        double maxf=_maxfPed;
         pedGetUniqueRoomID=malloc(nSize*sizeof(int));
         force_x=malloc(nSize*sizeof(double));
         force_y=malloc(nSize*sizeof(double));
@@ -493,9 +499,11 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
         cosPhi=malloc(nSize*sizeof(double));
         elEA=malloc(nSize*sizeof(double));
         elEB=malloc(nSize*sizeof(double));
+        elXp=malloc(nSize*sizeof(double));
         pedMass=malloc(nSize*sizeof(double));
+        //Buffer anlegen fertig
 
-        //buffer fuellen
+        //Buffer fuellen
         for(unsigned int p=0;p<nSize;p++){
             Pedestrian* ped=allPeds[p];
             pedGetV_x[p]=ped->GetV().GetX();
@@ -525,8 +533,11 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
             sinPhi[p]=ped->GetEllipse().GetSinPhi();
             elEA[p]=ped->GetEllipse().GetEA();
             elEB[p]=ped->GetEllipse().GetEB();
+            elXp[p]=ped->GetEllipse().GetXp();
             pedMass[p]=ped->GetMass();
         }
+        //Buffer fuellen fertig
+
         //Rechnung
         for(int p=0;p<nSize;p++){
             double normVi = pedGetV_x[p]*pedGetV_x[p]+pedGetV_y[p]*pedGetV_y[p];
@@ -537,6 +548,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
                         sqrt(normVi), pedGetID[p], pedGetV0Norm[p], time);
                 exit(EXIT_FAILURE);
             }
+            //Krafteinwirkung der Nachbarn berechnen
             //Nachbarn finden
             double xPed=pedGetPos_x[p];
             double yPed=pedGetPos_y[p];
@@ -600,7 +612,7 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
                                        double cp_x=elEA[n];
                                        double cp_y=0.0;
                                        //cp.CoordTransToCart
-                                       R2_x=cp_x*cosPhi[n]-cp_y*sinPhinp]+elCenter_x[n];
+                                       R2_x=cp_x*cosPhi[n]-cp_y*sinPhi[n]+elCenter_x[n];
                                        R2_y=cp_x*sinPhi[n]+cp_y*cosPhi[n]+elCenter_y[n];
                                    }
                                    else{
@@ -619,12 +631,126 @@ void GCFMModel::CalculateForceLC(double time, double tip1, Building* building, i
                                    double norm1=sqrt((elCenter_x[p]-R1_x) * (elCenter_x[p]-R1_x) + (elCenter_y[p]-R1_y) * (elCenter_y[p]-R1_y));
                                    double norm2=sqrt((elCenter_x[n]-R2_x) * (elCenter_x[n]-R2_x) + (elCenter_y[n]-R2_y) * (elCenter_y[n]-R2_y));
                                    eff_dist=elDist-norm1-norm2;
+                                   // If the pedestrian is outside the cutoff distance, the force is zero.
+                                   if(eff_dist >= maxEffDist) {
+                                       force_x[p]=force_x[p]+0.0;
+                                       force_y[p]=force_y[p]+0.0;
+                                   }
+                                   //sonst Kraft berechnen
+                                   else{
+                                       double p1_x=elXp[p]*cosPhi[p]+elCenter_x[p];
+                                       double p1_y=elXp[p]*sinPhi[p]+elCenter_y[p];
+                                       double p2_x=elXp[n]*cosPhi[n]+elCenter_x[n];
+                                       double p2_y=elXp[n]*sinPhi[n]+elCenter_y[n];
+                                       double ep12_x, ep12_y;
+                                       distp12_x = p2_x - p1_x;
+                                       distp12_y = p2_y - p1_y;
+
+                                       //mindist = E1.MinimumDistanceToEllipse(E2); //ONE
+                                       double mindist = 0.5; //for performance reasons, it is assumed that this distance is about 50 cm
+                                       double dist_intpol_left = mindist + widthPed; // lower cut-off for Frep (modCFM)
+                                       double dist_intpol_right = maxEffDist - widthPed; //upper cut-off for Frep (modCFM)
+                                       double smax = mindist - widthPed; //max overlapping
+                                       double norm=sqrt(distp12_x*distp12_x + distp12_y*distp12_y);
+                                       double f = 0.0f, f1 = 0.0f; //function value and its derivative at the interpolation point'
+                                       if ( norm >= 0.001) {
+                                           ep12_x = distp12_x/norm;
+                                           ep12_y = distp12_y/norm;
+                                           // calculate the parameter (whatever dist is)
+                                           double tmp = (pedGetV_x[p]-pedGetV_x[n])*ep12_x + (pedGetV_y[p]-pedGetV_y[n])*ep12_y; // < v_ij , e_ij >
+                                           double v_ij = 0.5 * (tmp + fabs(tmp));
+                                           double tmp2 = pedGetV_x[p]*ep12_x + pedGetV_y[p]*ep12_y; // < v_i , e_ij >
+                                           double K_ij;
+                                           //todo: runtime normsquare?
+                                           if (sqrt(pedGetV_x[p]*pedGetV_x[p] + pedGetV_y[p]*pedGetV_y[p]) < J_EPS) { // if(norm(v_i)==0)
+                                               K_ij = 0;
+                                           } else {
+                                               double bla = tmp2 + fabs(tmp2);
+                                               K_ij = 0.25 * bla * bla / (pedGetV_x[p]*pedGetV_x[p] + pedGetV_y[p]*pedGetV_y[p]); //squared
+
+                                               if (K_ij < 0.001 * 0.001) {
+                                                   force_x[p]=force_x[p]+0.0;
+                                                   force_y[p]=force_y[p]+0.0;
+                                               }
+                                           }
+                                           double nom = numPed * pedGetV0Norm[p] + v_ij; // Nu: 0=CFM, 0.28=modifCFM;
+                                           nom = nom * nom;
+
+
+                                           K_ij = sqrt(K_ij);
+                                           if (eff_dist <= smax) { //5
+                                               f = -pedMass[p] * K_ij * nom / dist_intpol_left;
+                                               force_x[p] = ep12_x * maxf * f;
+                                               force_y[p] = ep12_y * maxf * f;
+                                           }
+                                           else{
+                                               if (eff_dist >= dist_intpol_right) { //2
+                                                   f = -pedMass[p] * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
+                                                   f1 = -f / dist_intpol_right;
+                                                   //hermite_interp
+                                                   double t = eff_dist;
+                                                   double x1 = dist_intpol_right;
+                                                   double x2 = maxEffDist;
+                                                   double y1 = f;
+                                                   double y2 =0.0;
+                                                   double dy1 = f1;
+                                                   double dy2 = 0.0;
+                                                   double scale = x2 - x1;
+                                                   t = ( t - x1 ) / scale;
+                                                   double t2 = t * t;
+                                                   double t3 = t2 * t;
+                                                   double h1 = 2 * t3 - 3 * t2 + 1;
+                                                   double h2 = -2 * t3 + 3 * t2;
+                                                   double h3 = t3 - 2 * t2 + t;
+                                                   double h4 = t3 - t2;
+                                                   double left = y1 * h1 + dy1 * h3 * scale;
+                                                   double right = y2 * h2 + dy2 * h4 * scale;
+                                                   double px = left + right; //hermite interpolation end
+                                                   force_x[p] = ep12_x * px;
+                                                   force_y[p] = ep12_y * px;
+                                               }
+                                               else if (eff_dist >= dist_intpol_left) { //3
+                                                   f = -pedMass[p] * K_ij * nom / fabs(eff_dist); // abs(NR-Dv(i)+Sa)
+                                                   force_x[p] = ep12_x * f;
+                                                   force_y[p] = ep12_y * f;
+                                               }
+                                               else {//4
+                                                   f = -pedMass[p]* K_ij * nom / dist_intpol_left;
+                                                   f1 = -f / dist_intpol_left;
+                                                   //hermite_interp
+                                                   double t = eff_dist;
+                                                   double x1 = smax;
+                                                   double x2 = dist_intpol_left;
+                                                   double y1 = maxf*f;
+                                                   double y2 =f;
+                                                   double dy1 = 0;
+                                                   double dy2 = f1;
+                                                   double scale = x2 - x1;
+                                                   t = ( t - x1 ) / scale;
+                                                   double t2 = t * t;
+                                                   double t3 = t2 * t;
+                                                   double h1 = 2 * t3 - 3 * t2 + 1;
+                                                   double h2 = -2 * t3 + 3 * t2;
+                                                   double h3 = t3 - 2 * t2 + t;
+                                                   double h4 = t3 - t2;
+                                                   double left = y1 * h1 + dy1 * h3 * scale;
+                                                   double right = y2 * h2 + dy2 * h4 * scale;
+                                                   double px = left + right; //hermite interpolation end
+                                                   force_x[p] = ep12_x * px;
+                                                   force_y[p] = ep12_y * px;
+                                               }
+                                           }
+                                       }
+                                   }
                                }
                            }
                        }
                     }
                 }
             }
+            //Krafteinwirkung der Nachbarn berechnet.
+
+
         }
     }
 #pragma omp parallel  default(shared) num_threads(nThreads)

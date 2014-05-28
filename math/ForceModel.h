@@ -100,6 +100,7 @@ private:
     double* sinPhi;
     double* elEA;
     double* elEB;
+    double* elXp;
 
     // Private Funktionen
     Point ForceDriv(Pedestrian* ped, Room* room) const;
