@@ -12,6 +12,7 @@
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="corner_trajectories.xml" />
+		<socket hostname="localhost" port="8989" />
 	</trajectories>
 	<!-- where to store the logs 
 	<logfile>log</logfile> -->
@@ -51,7 +52,7 @@
 		<model id="1" description="gcfm">
 			<parameters>
 				<solver>euler</solver>
-				<stepsize>0.001</stepsize>
+				<stepsize>0.01</stepsize>
 				<exitCrossingStrategy>4</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />

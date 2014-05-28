@@ -705,8 +705,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<AccessPoint*>& relevantAPS)
 {
 
-     //collect all the aps in the room
-     vector<AccessPoint*>toBeDeleted;
 
      Room* room=_building->GetRoom(ped->GetRoomID());
      SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
@@ -721,11 +719,11 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
           AccessPoint* ap=_accessPoints[goals[g1]];
           bool relevant=true;
           for(unsigned int g2=0; g2<goals.size(); g2++) {
-               if(goals[g2]==goals[g1]) continue; // always skeep myself
+               if(goals[g2]==goals[g1]) continue; // always skip myself
                if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]) {
                     //FIXME there are interference with hlines. suitable only for quickest route considering exits,
                     // crossings only
-                    relevant=false;
+                    //relevant=false;
                     break;
                }
           }
