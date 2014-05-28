@@ -835,19 +835,25 @@ void GompertzModel::CalculateForceLC(double time, double tip1, Building* buildin
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
                int nSize = neighbours.size();
-               double B_ij=0;
-               int count_Bij=0;
+               double B_ij = 0;
+               int count_Bij = 0;
 
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     //-------------- TESTING ---------
+                    // B_ij are calculated within the ForceRepPed() function, so this calculation is 
+                    // suboptimal
                     Point distp12 = ped1->GetPos() - ped->GetPos();
                     double Distance = distp12.Norm();
-                    double tmp;
-                    tmp = 1.0 - Distance/(0.25 + 0.25);
-                    B_ij += exp(-_bPed*exp(-_cPed*tmp));
-                    if (B_ij > J_EPS)
-                        count_Bij += 1;
+                    double tmp, b_ij;
+                    tmp = 1.0 - Distance/(0.25 + 0.25); 
+                    // here r1 and r2 are replaced by constant values (0.25). Just testing, remember?
+                    b_ij = exp(-_bPed*exp(-_cPed*tmp));
+                    
+                    if (b_ij > J_EPS){
+                         B_ij += b_ij;  
+                         count_Bij += 1;
+                    }
                     //--------------------------------
                     //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
