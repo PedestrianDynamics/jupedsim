@@ -26,6 +26,9 @@
 
 
 #include "Room.h"
+#include "SubRoom.h"
+#include "../IO/OutputHandler.h"
+
 #include <sstream>
 
 using namespace std;

@@ -26,9 +26,9 @@
  *
  */
 
+#include "Point.h"
 #include "Goal.h"
 #include "Wall.h"
-#include "Point.h"
 
 
 using namespace std;

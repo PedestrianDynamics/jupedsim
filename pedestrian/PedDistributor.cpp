@@ -30,6 +30,8 @@
 #include "../geometry/Obstacle.h"
 #include "../routing/RoutingEngine.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../geometry/SubRoom.h"
+#include "../IO/OutputHandler.h"
 
 #include <cmath>
 
@@ -53,6 +55,7 @@ StartDistributionRoom::StartDistributionRoom()
      _startY = NAN;
      _startZ = NAN;
      _gender = "male";
+     _patience=5;
 }
 
 StartDistributionRoom::~StartDistributionRoom()

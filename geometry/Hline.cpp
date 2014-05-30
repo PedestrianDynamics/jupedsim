@@ -27,6 +27,7 @@
 
 
 #include "Hline.h"
+#include "SubRoom.h"
 
 using namespace std;
 

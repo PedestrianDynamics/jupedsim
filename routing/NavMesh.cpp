@@ -15,6 +15,8 @@
 #include "DTriangulation.h"
 #include "../pedestrian/PedDistributor.h"
 #include "../geometry/Obstacle.h"
+#include "../geometry/SubRoom.h"
+#include "../IO/OutputHandler.h"
 
 //#define _DEBUG 1
 
@@ -1994,7 +1996,7 @@ void NavMesh::Triangulate(JNode* node)
      //return; //fixme
      {
           // now post processing the newly created nodes
-          assert (node->id != (_nodes.size() -1) && "Trying to remove the last node !");
+          assert ((unsigned int)node->id != (_nodes.size() -1) && "Trying to remove the last node !");
           JNode* new_node = _nodes.back();
           _nodes.pop_back();
 

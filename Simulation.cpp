@@ -29,6 +29,9 @@
 
 #include "Simulation.h"
 
+#include "math/GCFMModel.h"
+#include "math/GompertzModel.h"
+
 
 
 using namespace std;
@@ -47,6 +50,7 @@ Simulation::Simulation()
      _iod = new IODispatcher();
      _fps=1;
      _em=NULL;
+     //_argsParser=NULL;
 }
 
 Simulation::~Simulation()
@@ -243,15 +247,16 @@ void Simulation::InitArgs(ArgumentParser* args)
      s.append(tmp);
      switch (solver) {
      case 1:
-          _solver = new EulerSolverLC(_model);
+          _solver = new EulerSolver(_model);
           break;
-     case 2:
-          _solver = new VelocityVerletSolver(_model);
-          break;
-     case 3:
-          _solver = new LeapfrogSolver(_model);
-          break;
+     //case 2:
+     //     _solver = new VelocityVerletSolver(_model);
+     //     break;
+     //case 3:
+     //     _solver = new LeapfrogSolver(_model);
+     //     break;
      }
+
      _tmax = args->GetTmax();
      sprintf(tmp, "\tt_max: %f\n", _tmax);
      s.append(tmp);

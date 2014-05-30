@@ -30,6 +30,8 @@
 #include "QuickestPathRouter.h"
 #include "../tinyxml/tinyxml.h"
 #include "../mpi/LCGrid.h"
+#include "../geometry/SubRoom.h"
+#include "../IO/OutputHandler.h"
 
 #define CBA_THRESHOLD 0.15
 #define OBSTRUCTION 4

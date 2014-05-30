@@ -9,6 +9,7 @@
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
 #include "../CognitiveMap.h"
+#include "../../../geometry/SubRoom.h"
 
 RoomToFloorSensor::~RoomToFloorSensor()
 {

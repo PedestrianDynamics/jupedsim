@@ -50,35 +50,10 @@ public:
 /**
  * Implementation of the explicit  Euler method for solving different equations.
  */
+
 class EulerSolver : public ODESolver {
 public:
      EulerSolver(ForceModel *model);
-     virtual void solveODE(double t, double tp, Building* building) const;
-};
-
-
-/**
- * Implementation of the Velocity - Verlet method
- */
-class VelocityVerletSolver : public ODESolver {
-public:
-     VelocityVerletSolver(ForceModel *model);
-     virtual void solveODE(double t, double tp, Building* building) const;
-};
-
-/**
- * Implementation of the LeapFrog algorithm
- */
-class LeapfrogSolver : public ODESolver {
-public:
-     LeapfrogSolver(ForceModel *model);
-     virtual void solveODE(double t, double tp, Building* building) const;
-};
-
-
-class EulerSolverLC : public ODESolver {
-public:
-     EulerSolverLC(ForceModel *model);
      virtual void solveODE(double t, double tp, Building* building) const;
 };
 

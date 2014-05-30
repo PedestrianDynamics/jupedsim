@@ -233,7 +233,7 @@ void EventManager::getTheEvent(char* c)
      string id = "";
      string state = "";
      for(int i=0; i<20; i++) {
-          if(c[i]==NULL) {
+          if( ! c[i]) {
                break;
           } else if(c[i]==' ') {
                split++;

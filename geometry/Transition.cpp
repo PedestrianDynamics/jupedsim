@@ -28,6 +28,7 @@
 #include "Transition.h"
 #include "Room.h"
 #include "SubRoom.h"
+#include "../IO/OutputHandler.h"
 
 using namespace std;
 

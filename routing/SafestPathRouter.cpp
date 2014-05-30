@@ -28,6 +28,7 @@
 
 #include "AccessPoint.h"
 #include "SafestPathRouter.h"
+#include "../geometry/SubRoom.h"
 
 
 #include <iostream>

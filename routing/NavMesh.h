@@ -23,6 +23,7 @@
 #include "../geometry/Building.h"
 #include <string>
 #include <vector>
+#include <iostream>
 
 
 class NavMesh {

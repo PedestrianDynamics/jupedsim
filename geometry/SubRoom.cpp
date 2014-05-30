@@ -26,11 +26,15 @@
  *
  */
 
+
+#include "Point.h"
+#include "Line.h"
+#include "Wall.h"
 #include "Obstacle.h"
 #include "SubRoom.h"
 #include "Transition.h"
 #include "Hline.h"
-#include "Wall.h"
+
 
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"

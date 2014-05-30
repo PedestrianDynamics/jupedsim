@@ -29,11 +29,13 @@
 #define _LINE_H
 
 #include "Point.h"
-//#include "SubRoom.h"
 #include "../IO/OutputHandler.h"
+
 
 #include <string>
 
+//forward declarations
+class OutputHandler;
 
 // external variables
 extern OutputHandler* Log;

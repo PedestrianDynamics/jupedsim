@@ -28,6 +28,7 @@
 #include "Router.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../IO/OutputHandler.h"
 
 using namespace std;
 

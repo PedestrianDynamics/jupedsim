@@ -26,6 +26,8 @@
  */
 
 #include "Building.h"
+#include "../geometry/SubRoom.h"
+#include "../geometry/Room.h"
 #include "../tinyxml/tinyxml.h"
 
 #ifdef _SIMULATOR

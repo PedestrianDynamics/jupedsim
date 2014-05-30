@@ -29,16 +29,21 @@
 #define _SUBROOM_H
 
 
-#include "Line.h"
+//#include "Line.h"
 #include "Wall.h"
+//#include "Point.h"
 
 #include <vector>
 #include <string>
 
+//forward declarations
 class Transition;
 class Hline;
 class Obstacle;
 class Crossing;
+class Line;
+class Point;
+class Wall;
 
 #ifdef _SIMULATOR
 class Pedestrian;

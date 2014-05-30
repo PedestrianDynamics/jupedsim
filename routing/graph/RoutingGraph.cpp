@@ -13,6 +13,10 @@
 #include "../../geometry/Hline.h"
 #include "../../geometry/Transition.h"
 #include "../../general/Macros.h"
+#include "../../geometry/SubRoom.h"
+#include "../../geometry/Wall.h"
+#include "../../geometry/Line.h"
+#include "../../IO/OutputHandler.h"
 
 #include <cmath>
 

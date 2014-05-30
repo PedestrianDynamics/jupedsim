@@ -32,9 +32,10 @@
 #include <string>
 #include <vector>
 
-#include "Point.h"
-#include "Wall.h"
-
+//forward declarations
+class Point;
+class Wall;
+class Line;
 
 class Obstacle {
 

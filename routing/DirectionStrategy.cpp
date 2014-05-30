@@ -23,11 +23,15 @@
  *
  *
  */
-#include "../geometry/Building.h"
-#include "DirectionStrategy.h"
+
+#include "../geometry/Line.h"
 #include "../geometry/NavLine.h"
+#include "../geometry/Building.h"
 #include "../geometry/Room.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../geometry/SubRoom.h"
+#include "../geometry/Wall.h"
+#include "DirectionStrategy.h"
 
 DirectionStrategy::DirectionStrategy()
 {
@@ -40,7 +44,7 @@ DirectionStrategy::DirectionStrategy(const DirectionStrategy& orig)
 DirectionStrategy::~DirectionStrategy()
 {
 }
-//@{
+
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
 {
      return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;

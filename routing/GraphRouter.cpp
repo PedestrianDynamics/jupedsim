@@ -7,6 +7,7 @@
 
 #include "GraphRouter.h"
 #include "../pedestrian/Pedestrian.h"
+#include "../geometry/SubRoom.h"
 
 using namespace std;
 

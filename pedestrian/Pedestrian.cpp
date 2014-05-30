@@ -29,6 +29,8 @@
 #include "../geometry/Building.h"
 #include "../geometry/NavLine.h"
 #include "../routing/Router.h"
+#include "../geometry/SubRoom.h"
+#include "../IO/OutputHandler.h"
 #include <cassert>
 
 using namespace std;

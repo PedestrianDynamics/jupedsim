@@ -31,9 +31,12 @@
 
 #include <string>
 #include <vector>
-#include "Point.h"
 
+
+//forward declarations
 class Wall;
+class Point;
+
 
 class Goal {
 

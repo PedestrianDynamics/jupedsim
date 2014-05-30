@@ -29,6 +29,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/NavMesh.h"
 
+#include "../geometry/SubRoom.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 

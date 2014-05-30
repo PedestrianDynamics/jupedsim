@@ -28,9 +28,15 @@
 
 #include <string>
 #include <algorithm>
+#include "../general/Macros.h"
 
-#include "../geometry/SubRoom.h"
-//class SubRoom;
+//forward declarations
+class OutputHandler;
+class SubRoom;
+
+
+// external variables
+extern OutputHandler* Log;
 
 class Room {
 private:

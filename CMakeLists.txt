@@ -146,6 +146,8 @@ set (   source_files
   math/ForceModel.cpp
   math/Mathematics.cpp
   math/ODESolver.cpp
+  math/GCFMModel.cpp
+  math/GompertzModel.cpp
 
   mpi/LCGrid.cpp
 
@@ -190,6 +192,7 @@ set (   source_files
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
   )
+  
 set (   header_files
   routing/NavMesh.h
   routing/DirectionStrategy.h
@@ -255,6 +258,8 @@ set (   header_files
   math/Distribution.h
   math/Mathematics.h
   math/ODESolver.h
+  math/GCFMModel.h
+  math/GompertzModel.h
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
