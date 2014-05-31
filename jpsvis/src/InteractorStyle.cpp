@@ -280,21 +280,36 @@ void InteractorStyle::OnChar() {
 //http://vtk.1045678.n5.nabble.com/Coordinate-conversions-World-Display-td2808312.html
 void InteractorStyle::OnLeftButtonUp(){
 
-	vtkRenderWindowInteractor *rwi = this->Interactor;
+    vtkRenderWindowInteractor *rwi = this->Interactor;
 
-	int pos_x=0;
-	int pos_y=0;
-	rwi->GetMousePosition(&pos_x, &pos_y);
+    int pos_x=0;
+    int pos_y=0;
+    //rwi->GetMousePosition(&pos_x, &pos_y);
+    int pos[2];
+    rwi->GetEventPosition(pos);
+    pos_x=pos[0];
+    pos_y=pos[1];
 
-	VTK_CREATE(vtkCoordinate,coordinate);
-	coordinate->SetCoordinateSystemToDisplay();
-	coordinate->SetValue(pos_x,pos_y,0);
-	double* world = coordinate->GetComputedWorldValue(this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
+    VTK_CREATE(vtkCoordinate,coordinate);
+    coordinate->SetCoordinateSystemToDisplay();
+    coordinate->SetValue(pos_x,pos_y,0);
+    double* world = coordinate->GetComputedWorldValue(this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
+    world[0]/=100;
+    world[1]/=100;
+    world[2]/=100;
 
-	std::cout<<"mouse position: " <<endl;
-	std::cout<<"\t screen: " <<pos_x<<" "<<pos_y<<endl;
-	std::cout<<"\t world : " <<world[0] << " " << world[1] << " " << world[2] << std::endl;
+    std::cout<<"mouse position: " <<endl;
+    std::cout<<"\t screen: " <<pos_x<<" "<<pos_y<<endl;
+    std::cout<<"\t world : " <<world[0] << " " << world[1] << " " << world[2] << std::endl;
 
-	// forward events for who ever needs it
-	vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
+    //vtkRenderer *ren =rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
+    //vtkCamera *cam = ren->GetActiveCamera();
+    //cam->SetFocalPoint(world[0],world[1],world[2]);
+    //cam->Zoom(1.05);
+    //cam->Modified();
+    //double p[2]={pos[0],pos[1]};
+    //rwi->FlyToImage(ren,p);
+    // forward events for who ever needs it
+    vtkInteractorStyleTrackballCamera::OnLeftButtonUp();
+
 }
