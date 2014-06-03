@@ -169,7 +169,7 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
 
         for(EdgesContainer::const_iterator it = new_edges->begin(); it != new_edges->end(); ++it) {
             // if the destination edges was visited we already have the shortest path to this destination.
-            if(visited.find((*it)) != visited.end()) continue;
+            if(visited.find((*it)) != visited.end() || (*it)->GetDest() == act_edge->GetSrc()) continue;
 
             double new_distance = act_distance + (*it)->GetWeight(act_edge->GetCrossing()->GetCentre());
             //check if the destination edge was discovered before.

@@ -29,6 +29,8 @@ void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_
 
     for(GraphVertex::EdgesContainer::const_iterator it = edges->begin(); it != edges->end(); ++it) {
         //count pedestrians heading to this door
+        double own_distance = (*it)->GetCrossing()->DistTo(pedestrian->GetPos());
+
         double pedestrians_count = 0;
         if((*it)->GetSrc()) {
             const std::vector<Pedestrian*>& pedestrians = (*it)->GetSrc()->GetSubRoom()->GetAllPedestrians();
@@ -41,11 +43,12 @@ void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_
                  * THIS IS JUST A PROOF OF CONCEPT.
                  * PARAMETERS SHOULD BE CALIBRATED!
                  */
-                if((*ped)->GetExitIndex() == (*it)->GetCrossing()->GetUniqueID()) {
-                    if((*ped)->GetV().Norm() > 0.0)
-                        pedestrians_count = pedestrians_count + 1/(*ped)->GetV().NormSquare() * 10;
-                    else
-                        pedestrians_count = pedestrians_count + 100;
+                if((*ped)->GetExitIndex() == (*it)->GetCrossing()->GetUniqueID() && (*it)->GetCrossing()->DistTo((*ped)->GetPos()) < own_distance) {
+                    if((*ped)->GetV().Norm() > 1.0 || (*ped)->GetV().Norm() == 0.0) {
+                        pedestrians_count = pedestrians_count + 1;
+                    } else {
+                        pedestrians_count = pedestrians_count +2;
+                    }
                 }
 
             }
@@ -56,16 +59,18 @@ void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_
             const std::vector<Pedestrian*>& pedestrians = (*it)->GetDest()->GetSubRoom()->GetAllPedestrians();
             for(std::vector<Pedestrian*>::const_iterator ped = pedestrians.begin(); ped != pedestrians.end(); ++ped) {
                 if((*ped)->GetExitIndex() == (*it)->GetCrossing()->GetUniqueID()) {
-                    if((*ped)->GetV().Norm() > 0.0)
-                        pedestrians_count = pedestrians_count + 1/(*ped)->GetV().NormSquare() * 10;
-                    else
-                        pedestrians_count = pedestrians_count + 100;
+
+                    if((*ped)->GetV().Norm() > 0)
+                        pedestrians_count = pedestrians_count + 2;
                 }
             }
         }
+
         //normalize the pedestrian count with the door width
         double pedestrians_normalized = pedestrians_count / (*it)->GetCrossing()->Length();
-        if(pedestrians_normalized > 0.0 && pedestrians_count > 100) (*it)->SetFactor(pedestrians_normalized, GetName());
+
+        if(pedestrians_normalized > 0.0 && pedestrians_count > 7) (*it)->SetFactor(pedestrians_normalized, GetName());
+
 
     }
 }
