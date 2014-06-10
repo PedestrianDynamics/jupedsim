@@ -379,55 +379,56 @@ void ArgumentParser::ParseIniFile(string inifile){
 			Log->Write("INFO: \ttime interval used in Method A is < %d>",_timeIntervalA);
 		}
 	}
-
 	// method B
 	TiXmlElement* xMethod_B=xMainNode->FirstChildElement("method_B");
-	if(string(xMethod_B->Attribute("enabled"))=="true"){
-		_isMethodB = true;
-		_areaIDforMethodB = xmltoi(xMethod_B->FirstChildElement("measurementArea")->Attribute("id"));
-		Log->Write("INFO: \tMethod B is selected" );
-	}
-
+        if(xMethod_B)
+             if(string(xMethod_B->Attribute("enabled"))=="true"){
+                  _isMethodB = true;
+                  _areaIDforMethodB = xmltoi(xMethod_B->FirstChildElement("measurementArea")->Attribute("id"));
+                  Log->Write("INFO: \tMethod B is selected" );
+             }
 	// method C
 	TiXmlElement* xMethod_C=xMainNode->FirstChildElement("method_C");
-	if(string(xMethod_C->Attribute("enabled"))=="true"){
-		_isMethodC = true;
-		_areaIDforMethodC = xmltoi(xMethod_C->FirstChildElement("measurementArea")->Attribute("id"));
-		Log->Write("INFO: \tMethod C is selected" );
-	}
-
+        if(xMethod_C)
+             if(string(xMethod_C->Attribute("enabled"))=="true"){
+                  _isMethodC = true;
+                  _areaIDforMethodC = xmltoi(xMethod_C->FirstChildElement("measurementArea")->Attribute("id"));
+                  Log->Write("INFO: \tMethod C is selected" );
+             }
 	// method D
 	TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
-	if(string(xMethod_D->Attribute("enabled"))=="true"){
-		_isMethodD = true;
-		_isCutByCircle = (string(xMethod_D->Attribute("cutByCircle")) == "true");
-		_isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
-		if(_isOutputGraph)
-		{
-			Log->Write("INFO: \tVoronoi graph is asked to output!" );
-		}
-		_isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
-		_areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
-
-		if ( xMethod_D->FirstChildElement("steadyState"))
-		{
-			_steadyStart =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
-			_steadyEnd =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("end"));
-			Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
-		}
-
-		if(xMethod_D->FirstChildElement("getProfile"))
-			if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true")
-			{
-				_isGetProfile = true;
-				_scaleX =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
-				_scaleY =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
-				Log->Write("INFO: \tprofiles will be calculated" );
-				Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %d > and < %d >",_scaleX, _scaleY);
-			}
-
-		Log->Write("INFO: \tMethod D is selected" );
-	}
+        if(xMethod_D){
+             if(string(xMethod_D->Attribute("enabled"))=="true"){
+                  _isMethodD = true;
+                  _isCutByCircle = (string(xMethod_D->Attribute("cutByCircle")) == "true");
+                  _isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
+                  if(_isOutputGraph)
+                  {
+                       Log->Write("INFO: \tVoronoi graph is asked to output!" );
+                  }
+                  _isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
+                  _areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
+                  
+                  if ( xMethod_D->FirstChildElement("steadyState"))
+                  {
+                       _steadyStart =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
+                       _steadyEnd =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("end"));
+                       Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
+                  }
+                  
+                  if(xMethod_D->FirstChildElement("getProfile"))
+                       if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true")
+                       {
+                            _isGetProfile = true;
+                            _scaleX =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
+                            _scaleY =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
+                            Log->Write("INFO: \tprofiles will be calculated" );
+                            Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %d > and < %d >",_scaleX, _scaleY);
+                       }
+                  
+                  Log->Write("INFO: \tMethod D is selected" );
+             }
+        }
 
 	Log->Write("INFO: \tdone parsing ini");
 }

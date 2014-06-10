@@ -51,7 +51,6 @@ if(PROCESSOR_COUNT)
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
 
-
 file(
 	GLOB_RECURSE
 	source_files
@@ -105,9 +104,12 @@ file(
 
 )
 
+
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   message(STATUS "Using CLANG++" )
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+
+
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   message( STATUS "Set compiler flags (g++)" )
@@ -125,11 +127,20 @@ if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
 endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
 
+set(Boost_INCLUDE_DIR /home/chraibi/boost_1_55_0/)
+set(Boost_LIBRARY_DIR /home/chraibi/boost_1_55_0/libs)
+#find_package(Boost COMPONENTS system filesystem REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIR})
+
+add_library ( core SHARED ${source_files} )
 
 add_executable(
 	jpsreport
-	${source_files}
+	main.cpp
 )
+target_link_libraries( jpsreport ${Boost_LIBRARIES} )
+target_link_libraries( jpsreport core )
 
 if(WIN32)
 target_link_libraries (jpsreport wsock32)
