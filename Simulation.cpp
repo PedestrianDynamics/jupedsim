@@ -27,6 +27,7 @@
  */
 
 #include "Simulation.h"
+#include <omp.h>
 
 using namespace std;
 
@@ -226,9 +227,10 @@ void Simulation::InitArgs(ArgumentParser* args) {
 			_direction = new DirectionInRangeBottleneck();
 			break;
 	}
+
 	_model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
 			args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-			args->GetMaxFPed(), args->GetMaxFWall());
+            args->GetMaxFPed(), args->GetMaxFWall());
 	s.append("\tModel: GCFMModel\n");
 	s.append(_model->writeParameter());
 
@@ -346,7 +348,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	_building->SetRoutingEngine(routingEngine);
 	_building->SetProjectFilename(args->GetProjectFile());
 	_building->SetProjectRootDir(args->GetProjectRootDir());
-
+        _building->SetModel(_model);
 	_building->LoadBuildingFromFile();
 	_building->LoadRoutingInfo(args->GetProjectFile());
 	//_building->AddSurroundingRoom();
@@ -403,6 +405,10 @@ void Simulation::InitArgs(ArgumentParser* args) {
     _profiling = args->GetProfileFlag();
     //which hpc-architecture?
     _hpc = args->GetHPCFlag();
+    //if architecture = gpu or xeonphi create buffer
+    if(_hpc!=0){
+        _model->CreateBuffer(_building->GetNumberOfPedestrians());
+    }
 }
 
 
@@ -441,8 +447,8 @@ int Simulation::RunSimulation() {
         time(&startLoop);
         solveODETime = 0.0, loopUpdateTime = 0.0, eventUpdateTime = 0.0;
     }
-
-	for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
+    cout << "hpcFlag=" << _hpc << endl;
+    for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
 		t = 0 + (frameNr - 1) * _deltaT;
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
         if(GetProfileFlag())
@@ -474,6 +480,7 @@ int Simulation::RunSimulation() {
 		// ggf. Ausgabe für TraVisTo
 		if (frameNr % writeInterval == 0) {
 			_iod->WriteFrame(frameNr / writeInterval, _building);
+            //cout << t << endl;
 		}
 
 	}
@@ -494,6 +501,8 @@ int Simulation::RunSimulation() {
         cout << "\t\t\tUpdate Grid[s]: " << upGrid << endl;
         cout << "\t\tEventUpdate [s]: " << eventUpdateTime << endl;
     }
+    if(_hpc!=0)
+        _model->DeleteBuffers();
 	// writing the footer
 	_iod->WriteFooter();
 

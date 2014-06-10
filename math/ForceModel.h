@@ -62,6 +62,55 @@ public:
      * @return all model parameters in a nicely formatted string
      */
     virtual std::string writeParameter() const = 0;
+
+    /**
+     *Create and fill Buffers for accelerators
+     **/
+    void CreateBuffer(int n);
+    void DeleteBuffers();
+    //void FillBuffer(const std::vector<Pedestrian*>& allPeds, Building* b, DirectionStrategy* dir);
+    //void UpdateBuffers(int nSize);
+    void deletePed(int id);
+    void SetHPC(int f);
+
+    //buffers for gpu and xeonphi
+    //Buffer fuer die Krafteinwirkung der Fussgaenger untereinander
+    double* pedGetV_x;
+    double* pedGetV_y;
+    double* pedGetV0Norm;
+    int* pedGetID;
+    double* pedGetPos_x;
+    double* pedGetPos_y;
+    //double gridXmin=building->GetGrid()->GetGridXmin();
+    //double gridYmin=building->GetGrid()->GetGridYmin();
+    int* pedGetUniqueRoomID;
+    double* force_x;
+       double* force_y;
+       int* nearDoor;
+       double* elCenter_x;
+       double* elCenter_y;
+       double* sinPhi;
+       double* cosPhi;
+       double* elEA;
+       double* elEB;
+       double* elXp;
+       double* pedMass;
+       int* flag; //1 = Ped noh dabei; 0 = Ped nicht mehr dabei
+       //zusaetzliche Buffer fuer die anziehende Kraft des Ziels
+       double* forceDriv_x;
+       double* forceDriv_y;
+       double* distToExitLine;
+       double* targetV0_x;
+       double* targetV0_y;
+       double* pedTau;
+       double* pedV0_x;
+       double* pedV0_y;
+       //Buffer fuer repwall
+       double* forceWall_x;
+       double* forceWall_y;
+     int nrPeds;
+     int hpc;
+
 };
 
 /************************************************************
@@ -81,26 +130,10 @@ private:
     double _maxfWall;
     double _distEffMaxPed; // maximal effective distance
     double _distEffMaxWall; // maximal effective distance
+    
 
-    //buffers for gpu and xeonphi
-    double* pedGetV_x;
-    double* pedGetV_y;
-    double* pedMass;
-    double* pedGetV0Norm;
-    int* pedGetID;
-    double* pedGetPos_x;
-    double* pedGetPos_y;
-    int* pedGetUniqueRoomID;
-    double* force_x;
-    double* force_y;
-    int* nearDoor;
-    double* elCenter_x;
-    double* elCenter_y;
-    double* cosPhi;
-    double* sinPhi;
-    double* elEA;
-    double* elEB;
-    double* elXp;
+
+
 
     // Private Funktionen
     Point ForceDriv(Pedestrian* ped, Room* room) const;
@@ -134,6 +167,12 @@ public:
     int roomID, int SubRoomID) const;
     virtual void CalculateForceLC(double t, double tp, Building* building, int hpc) const;
     virtual std::string writeParameter() const;
+    //void CreateBuffer(int nrPeds);
+
+    //andere Funkionen
+    void CreateBuffer(int nrPeds);
+    //void FillBuffer(const std::vector<Pedestrian*>& allPeds, Building* b, DirectionStrategy* dir);
+
 };
 
 
