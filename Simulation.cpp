@@ -348,7 +348,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	_building->SetRoutingEngine(routingEngine);
 	_building->SetProjectFilename(args->GetProjectFile());
 	_building->SetProjectRootDir(args->GetProjectRootDir());
-        _building->SetModel(_model);
+   //     _building->SetModel(_model);
 	_building->LoadBuildingFromFile();
 	_building->LoadRoutingInfo(args->GetProjectFile());
 	//_building->AddSurroundingRoom();

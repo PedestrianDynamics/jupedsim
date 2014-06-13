@@ -46,6 +46,7 @@ class RoutingEngine;
 class Pedestrian;
 class Transition;
 class LCGrid;
+class ForceModel;
 
 
 class Building {
@@ -57,6 +58,7 @@ private:
     LCGrid* _linkedCellGrid;
     std::vector<Room*> _rooms;
     std::vector<Pedestrian*> _allPedestians;
+   // ForceModel* _model;
 
     std::map<int, Crossing*> _crossings;
     std::map<int, Transition*> _transitions;
@@ -77,6 +79,7 @@ public:
     void SetCaption(const std::string& s);
     void SetRoutingEngine(RoutingEngine* r);
     void SetRoom(Room* room, int index);
+    //void SetModel(ForceModel* m);
     /// delete the ped from the ped vector
     void DeletePedestrian(Pedestrian* ped);
     /// delete the ped from the simulation
