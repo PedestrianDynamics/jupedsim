@@ -403,6 +403,11 @@ void Simulation::InitArgs(ArgumentParser* args)
 
      // perform a general check to the .
      _building->SanityCheck();
+     //size of the cells/GCFM
+     if(args->GetDistEffMaxPed()>args->GetLinkedCellSize()){
+         Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",args->GetLinkedCellSize(),args->GetDistEffMaxPed());
+         exit(EXIT_FAILURE);
+     }
 
      //read the events
      _em = new EventManager(_building);

@@ -775,10 +775,10 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
      return NULL;
 }
 
-Crossing* Building::GetTransOrCrossByUID(int id) const
+Hline* Building::GetTransOrCrossByUID(int id) const
 {
      {
-          //eventually
+          //eventually transitions
           map<int, Transition*>::const_iterator itr;
           for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
                if (itr->second->GetUniqueID()== id)
@@ -786,15 +786,21 @@ Crossing* Building::GetTransOrCrossByUID(int id) const
           }
      }
      {
-          //finally the  crossings
+          //then the  crossings
           map<int, Crossing*>::const_iterator itr;
           for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
                if (itr->second->GetUniqueID() == id)
                     return itr->second;
           }
      }
-
-     Log->Write("WARNING: No Transition or Crossing with ID %d: " ,id);
+     {
+          //finally the  hlines
+          for(auto itr = _hLines.begin(); itr != _hLines.end(); ++itr) {
+               if (itr->second->GetUniqueID() == id)
+                    return itr->second;
+          }
+     }
+     Log->Write("WARNING: No Transition or Crossing or hline with ID %d: " ,id);
      return NULL;
 }
 

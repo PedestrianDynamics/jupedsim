@@ -140,10 +140,10 @@ public:
 
 
      /**
-      * @return a crossing or a transition matching the given uid.
+      * @return a crossing or a transition or a hline matching the given uid.
       * Return NULL if none is found
       */
-     Crossing* GetTransOrCrossByUID(int uid) const;
+     Hline* GetTransOrCrossByUID(int uid) const;
 
 
      /**

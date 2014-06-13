@@ -40,9 +40,9 @@ class Hline: public NavLine {
 
 private:
      int _id;
-     Room* _room;
+     Room* _room1;
      std::string _caption;
-     SubRoom* _subRoom;
+     SubRoom* _subRoom1;
 
 public:
      Hline();
@@ -56,7 +56,7 @@ public:
      /**
       * Set/Get the Room containing this line
       */
-     void SetRoom(Room* r);
+     void SetRoom1(Room* r);
 
      /**
       * Set/Get the line caption
@@ -66,7 +66,7 @@ public:
      /**
       * Set/Get the subroom containing this line
       */
-     void SetSubRoom(SubRoom* r);
+     void SetSubRoom1(SubRoom* r);
 
 
      /**
@@ -82,12 +82,12 @@ public:
      /**
       * Set/Get the Room containing this line
       */
-     Room* GetRoom() const;
+     Room* GetRoom1() const;
 
      /**
       * Set/Get the subroom containing this line
       */
-     SubRoom* GetSubRoom() const;
+     SubRoom* GetSubRoom1() const;
 
 
      /**
@@ -103,12 +103,12 @@ public:
      /**
       * Debug output
       */
-     void WriteToErrorLog() const;
+     virtual void WriteToErrorLog() const;
 
      /**
       * @return a nicely formatted string representation of the object
       */
-     std::string WriteElement() const;
+     virtual std::string WriteElement() const;
 };
 
 #endif /* HLINE_H_ */

@@ -289,9 +289,13 @@ if(CGAL_FOUND)
 endif(CGAL_FOUND)
 #---------------------------- compiler -------------------------------
 # Initialize CXXFLAGS.
-set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -Wall")
-set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wunused")
-set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -Wall")
+	set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wunused")
+	set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+endif()
+
+
 # check c++-11
 if((CMAKE_COMPILER_IS_GNUCXX AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.6) OR
     (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1))
@@ -315,8 +319,14 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
 else(CMAKE_BUILD_TYPE MATCHES Debug)
-  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_RELEASE} )
+  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
  endif(CMAKE_BUILD_TYPE MATCHES Debug)
+
+# PGI ++ Flags
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minform=inform")	
+endif()
+
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)

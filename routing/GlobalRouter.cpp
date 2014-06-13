@@ -123,14 +123,14 @@ void GlobalRouter::Init(Building* building)
           ap->SetNavLine(cross);
           char friendlyName[CLENGTH];
           sprintf(friendlyName, "hline_%d_room_%d_subroom_%d", cross->GetID(),
-                  cross->GetRoom()->GetID(),
-                  cross->GetSubRoom()->GetSubRoomID());
+                  cross->GetRoom1()->GetID(),
+                  cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
           // save the connecting sub/rooms IDs
           int id1 = -1;
-          if (cross->GetSubRoom()) {
-               id1 = cross->GetSubRoom()->GetUID();
+          if (cross->GetSubRoom1()) {
+               id1 = cross->GetSubRoom1()->GetUID();
           }
 
           ap->setConnectingRooms(id1, id1);
@@ -648,7 +648,8 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
 
      int bestAPsID = -1;
-     double minDist = FLT_MAX;
+     double minDistGlobal = FLT_MAX;
+     double minDistLocal = FLT_MAX;
 
      //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
      //      int apID = accessPointsInSubRoom[i];
@@ -679,14 +680,34 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                continue;
           }
 
-          double dist = ap->GetDistanceTo(ped->GetFinalDestination())
-                        + ap->DistanceTo(posA.GetX(), posA.GetY());
+          double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
+          double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
 
+          double dist=dist1+dist2;
 
-          if (dist < minDist) {
+          if (dist < minDistGlobal) {
                bestAPsID = ap->GetID();
-               minDist = dist;
+               minDistGlobal = dist;
           }
+
+//          //if minDistGlobal small then consider minDistLocal
+//          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < 0.25){
+//              if (dist2 < minDistLocal) {
+//              cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+//                  bestAPsID = ap->GetID();
+//                  minDistGlobal = dist;
+//                  minDistLocal= dist2;
+//                  getc(stdin);
+//              }
+//
+//          } else {
+//
+//              if (dist < minDistGlobal) {
+//                  bestAPsID = ap->GetID();
+//                  minDistGlobal = dist;
+//                  minDistLocal=dist2;
+//              }
+//          }
      }
 
      if (bestAPsID != -1) {
@@ -811,7 +832,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
           } else if (dynamic_cast<Hline*>(nav) != NULL) {
-               room_id = ((Hline*) (nav))->GetRoom()->GetID();
+               room_id = ((Hline*) (nav))->GetRoom1()->GetID();
 
           } else if (dynamic_cast<Transition*>(nav) != NULL) {
                room_id = ((Transition*) (nav))->GetRoom1()->GetID();
@@ -857,7 +878,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                          room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
                     } else if (dynamic_cast<Hline*>(nav) != NULL) {
-                         room_id = ((Hline*) (nav))->GetRoom()->GetID();
+                         room_id = ((Hline*) (nav))->GetRoom1()->GetID();
 
                     } else if (dynamic_cast<Transition*>(nav) != NULL) {
                          room_id = ((Transition*) (nav))->GetRoom1()->GetID();
@@ -906,7 +927,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
           } else if (dynamic_cast<Hline*>(nav) != NULL) {
-               room_id = ((Hline*) (nav))->GetRoom()->GetID();
+               room_id = ((Hline*) (nav))->GetRoom1()->GetID();
 
           } else if (dynamic_cast<Transition*>(nav) != NULL) {
                room_id = ((Transition*) (nav))->GetRoom1()->GetID();
@@ -930,7 +951,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                     room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
 
                } else if (dynamic_cast<Hline*>(nav) != NULL) {
-                    room_id = ((Hline*) (nav))->GetRoom()->GetID();
+                    room_id = ((Hline*) (nav))->GetRoom1()->GetID();
 
                } else if (dynamic_cast<Transition*>(nav) != NULL) {
                     room_id = ((Transition*) (nav))->GetRoom1()->GetID();
@@ -1060,8 +1081,8 @@ void GlobalRouter::LoadRoutingInfos(const std::string &filename)
                h->SetID(id);
                h->SetPoint1(Point(x1, y1));
                h->SetPoint2(Point(x2, y2));
-               h->SetRoom(room);
-               h->SetSubRoom(subroom);
+               h->SetRoom1(room);
+               h->SetSubRoom1(subroom);
 
                _building->AddHline(h);
                subroom->AddHline(h);
