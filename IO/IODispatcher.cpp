@@ -319,7 +319,17 @@ TrajectoriesFLAT::TrajectoriesFLAT() :
 
 void TrajectoriesFLAT::WriteHeader(int nPeds, double fps, Building* building, int seed)
 {
-
+    char tmp[CLENGTH] = "";
+    Write("#description: my super simulation");
+    sprintf(tmp, "#framerate: %0.2f",fps);
+    Write(tmp);
+    sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
+    Write(tmp);
+    Write("#ID: the agent ID");
+    Write("#FR: the current frame");
+    Write("#X,Y,Z: the agents coordinates (in metres)");
+    Write("\n");
+    Write("#ID\tFR\tX\tY\tZ");
 }
 
 void TrajectoriesFLAT::WriteGeometry(Building* building)
@@ -339,8 +349,9 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
                     Pedestrian* ped = s->GetPedestrian(i);
                     double x = ped->GetPos().GetX();
                     double y = ped->GetPos().GetY();
-                    sprintf(tmp, "%d\t%d\t%f\t%f", ped->GetID(), frameNr, x,
-                            y);
+                    double z = ped->GetElevation();
+                    sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x,
+                            y,z);
                     Write(tmp);
                }
           }

@@ -459,7 +459,7 @@ void GlobalRouter::Init(Building* building)
      }
 
      //dumping the complete system
-     //DumpAccessPoints(3-1);
+     //DumpAccessPoints(592); exit(0);
      //DumpAccessPoints(50);
      //vector<string> rooms;
      //rooms.push_back("hall");
@@ -649,7 +649,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
-     double minDistLocal = FLT_MAX;
+     //double minDistLocal = FLT_MAX;
 
      //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
      //      int apID = accessPointsInSubRoom[i];

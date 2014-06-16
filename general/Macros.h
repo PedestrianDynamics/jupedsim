@@ -87,7 +87,7 @@ enum FileFormat {
 };
 
 enum RoutingStrategy {
-     ROUTING_LOCAL_SHORTEST,
+     ROUTING_LOCAL_SHORTEST=1,
      ROUTING_GLOBAL_SHORTEST,
      ROUTING_QUICKEST,
      ROUTING_DYNAMIC,
@@ -99,6 +99,10 @@ enum RoutingStrategy {
      ROUTING_UNDEFINED =-1
 };
 
+enum OperativModels {
+    MODEL_GFCM=1,
+    MODEL_GOMPERTZ
+};
 
 //global functions for convenience
 
