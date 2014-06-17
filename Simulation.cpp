@@ -27,7 +27,8 @@
  */
 
 #include "Simulation.h"
-#include <omp.h>
+//#include <omp.h>
+//#include "clSetup.h"
 
 using namespace std;
 
@@ -408,6 +409,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
     //if architecture = gpu or xeonphi create buffer
     if(_hpc!=0){
         _model->CreateBuffer(_building->GetNumberOfPedestrians());
+        //initCL(_building->GetNumberOfPedestrians(),_hpc);
     }
 }
 

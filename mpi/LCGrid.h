@@ -87,7 +87,22 @@ public:
 	 */
 	~LCGrid();
 
-	/**
+    /**
+     *Get pCellSize
+     */
+    double GetCellSize();
+
+    /**
+     *Get pGrid_xmin
+     */
+    double GetGridXmin();
+
+    /**
+     *Get pGrid_ymin
+     */
+    double GetGridYmin();
+
+    /**
 	 *Update the cells occupation
 	 */
 

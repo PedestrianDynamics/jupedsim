@@ -290,6 +290,7 @@ public:
     void UpdateReroutingTime();
     void RerouteIn(double time);
     bool IsReadyForRerouting();
+    double GetReroutingTime();
     bool GetNewEventFlag();
     void SetNewEventFlag(bool flag);
 

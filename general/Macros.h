@@ -53,6 +53,8 @@
 #define J_TOLERANZ 0.03  // [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 // [m/s] wenn  v<EPS_V wird mit 0 gerechnet
 
+//max nr of Peds
+#define NR_PEDS 5000
 
 // Lenght of array
 #define CLENGTH 1000
