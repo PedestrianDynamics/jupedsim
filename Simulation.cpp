@@ -27,12 +27,16 @@
  */
 
 #include "Simulation.h"
+#include "math/GPU_GCFMModel.h"
+#include "math/GCFMModel.h"
+
 //#include <omp.h>
 //#include "clSetup.h"
 
 using namespace std;
 
-Simulation::Simulation() {
+Simulation::Simulation()
+{
 	_nPeds = 0;
 	_tmax = 0;
 	_seed=8091983;
@@ -241,14 +245,14 @@ void Simulation::InitArgs(ArgumentParser* args) {
 	s.append(tmp);
 	switch (solver) {
 		case 1:
-			_solver = new EulerSolverLC(_model);
+			_solver = new EulerSolver(_model);
 			break;
-		case 2:
-			_solver = new VelocityVerletSolver(_model);
-			break;
-		case 3:
-			_solver = new LeapfrogSolver(_model);
-			break;
+//		case 2:
+//			_solver = new VelocityVerletSolver(_model);
+//			break;
+//		case 3:
+//			_solver = new LeapfrogSolver(_model);
+//			break;
 	}
 	_tmax = args->GetTmax();
 	sprintf(tmp, "\tt_max: %f\n", _tmax);
@@ -408,7 +412,7 @@ void Simulation::InitArgs(ArgumentParser* args) {
     _hpc = args->GetHPCFlag();
     //if architecture = gpu or xeonphi create buffer
     if(_hpc!=0){
-        _model->CreateBuffer(_building->GetNumberOfPedestrians());
+       ((GPU_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
         //initCL(_building->GetNumberOfPedestrians(),_hpc);
     }
 }
@@ -455,7 +459,7 @@ int Simulation::RunSimulation() {
 		// solve ODE: berechnet Kräfte und setzt neue Werte für x und v
         if(GetProfileFlag())
             time(&startSolveODE);
-        _solver->solveODE(t, t + _deltaT, _building, _hpc);
+        _solver->solveODE(t, t + _deltaT, _building);
         if(GetProfileFlag()){
             time(&endSolveODE);
             solveODETime += difftime(endSolveODE, startSolveODE);
@@ -504,7 +508,7 @@ int Simulation::RunSimulation() {
         cout << "\t\tEventUpdate [s]: " << eventUpdateTime << endl;
     }
     if(_hpc!=0)
-        _model->DeleteBuffers();
+    	 ((GPU_GCFMModel*) _model)->DeleteBuffers();
 	// writing the footer
 	_iod->WriteFooter();
 

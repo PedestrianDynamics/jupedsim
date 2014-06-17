@@ -26,7 +26,7 @@
  */
 
 #ifndef _ODESOLVER_H
-#define	_ODESOLVER_H
+#define _ODESOLVER_H
 
 
 //forward declarations
@@ -39,50 +39,25 @@ class Building;
  */
 class ODESolver {
 protected:
-    ForceModel *model;
+     ForceModel *model;
 public:
-    ODESolver(ForceModel* model);
-    virtual ~ODESolver(){};
-    virtual void solveODE(double t, double tp, Building* building, int hpc) const = 0;
+     ODESolver(ForceModel* model);
+     virtual ~ODESolver() {};
+     virtual void solveODE(double t, double tp, Building* building) const = 0;
 };
 
 
 /**
  * Implementation of the explicit  Euler method for solving different equations.
  */
+
 class EulerSolver : public ODESolver {
 public:
-    EulerSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
-};
-
-
-/**
- * Implementation of the Velocity - Verlet method
- */
-class VelocityVerletSolver : public ODESolver {
-public:
-    VelocityVerletSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
-};
-
-/**
- * Implementation of the LeapFrog algorithm
- */
-class LeapfrogSolver : public ODESolver {
-public:
-    LeapfrogSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
-};
-
-
-class EulerSolverLC : public ODESolver {
-public:
-    EulerSolverLC(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building, int hpc) const;
+     EulerSolver(ForceModel *model);
+     virtual void solveODE(double t, double tp, Building* building) const;
 };
 
 
 
-#endif	/* _ODESOLVER_H */
+#endif  /* _ODESOLVER_H */
 

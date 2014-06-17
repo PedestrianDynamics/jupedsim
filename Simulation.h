@@ -50,7 +50,8 @@
 
 extern OutputHandler* Log;
 
-class Simulation {
+class Simulation
+{
 private:
 	///Number of pedestrians in the simulation
     int _nPeds;

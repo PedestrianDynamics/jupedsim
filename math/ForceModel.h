@@ -1,7 +1,7 @@
 /**
- * File:   ForceModel.h
+ * @file ForceModel.h
  *
- * Created on 13. December 2010, 15:05
+ * @brief Implementation of classes for some force-based models
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -20,161 +20,52 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * @section DESCRIPTION
+ * Implementation of classes for force-based models.
+ * Actually we've got two different models:
+ * 1. Generalized Centrifugal Force Model
+ * 2. Gompertz Model
  *
- *
- *
+ * @date Tue Apr 15 19:19:04 2014
  */
 
+
 #ifndef _FORCEMODEL_H
-#define	_FORCEMODEL_H
+#define _FORCEMODEL_H
 
-#include <vector>
-
-#include "../geometry/Building.h"
+#include <string>
 
 
-
-class Pedestrian;
-class DirectionStrategy;
-
+//forward declaration
+class Building;
 
 
+/**
+ * @date   Fri Apr 18 16:40:39 2014
+ *
+ * @brief The operative model. Definition of several force-based models
+ *         for ped pedestrians dynamics
+ *
+ */
 class ForceModel {
 
 public:
-    // Konstruktoren
-    ForceModel();
-    virtual ~ForceModel();
+     // constructor/destructor
+     ForceModel();
+     virtual ~ForceModel();
 
-    //FIXME: remove
-    virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building, int roomID, int SubRoomID) const = 0;
+     /**
+      * Solve the differential equations and update the positions and veloities
+      * @param t the actual time
+      * @param tp the next timestep
+      * @param building the geometry object
+      */
+     virtual void CalculateForce(double t, double tp, Building* building) const = 0;
 
-    /**
-     * Solve the differential equations and update the positions and velocities
-     * @param t the actual time
-     * @param tp the next timestep
-     * @param building the geometry object
-     * @param hpc the hpc architecture
-     */
-    virtual void CalculateForceLC(double t, double tp, Building* building, int hpc) const = 0;
-
-    /**
-     * @return all model parameters in a nicely formatted string
-     */
-    virtual std::string writeParameter() const = 0;
-
-    /**
-     *Create and fill Buffers for accelerators
-     **/
-    void CreateBuffer(int n);
-    void DeleteBuffers();
-    //void FillBuffer(const std::vector<Pedestrian*>& allPeds, Building* b, DirectionStrategy* dir);
-    //void UpdateBuffers(int nSize);
-    void deletePed(int id);
-    void SetHPC(int f);
-
-    //buffers for gpu and xeonphi
-    //Buffer fuer die Krafteinwirkung der Fussgaenger untereinander
-    double* pedGetV_x;
-    double* pedGetV_y;
-    double* pedGetV0Norm;
-    int* pedGetID;
-    double* pedGetPos_x;
-    double* pedGetPos_y;
-    //double gridXmin=building->GetGrid()->GetGridXmin();
-    //double gridYmin=building->GetGrid()->GetGridYmin();
-    int* pedGetUniqueRoomID;
-    double* force_x;
-       double* force_y;
-       int* nearDoor;
-       double* elCenter_x;
-       double* elCenter_y;
-       double* sinPhi;
-       double* cosPhi;
-       double* elEA;
-       double* elEB;
-       double* elXp;
-       double* pedMass;
-       int* flag; //1 = Ped noh dabei; 0 = Ped nicht mehr dabei
-       //zusaetzliche Buffer fuer die anziehende Kraft des Ziels
-       double* forceDriv_x;
-       double* forceDriv_y;
-       double* distToExitLine;
-       double* targetV0_x;
-       double* targetV0_y;
-       double* pedTau;
-       double* pedV0_x;
-       double* pedV0_y;
-       //Buffer fuer repwall
-       double* forceWall_x;
-       double* forceWall_y;
-     int nrPeds;
-     int hpc;
-
-};
-
-/************************************************************
- GCFM ForceModel
- ************************************************************/
-
-class GCFMModel : public ForceModel {
-private:
-    /// define the strategy for crossing a door (used for calculating the driving foce)
-	DirectionStrategy* _direction;
-    // Modellparameter
-    double _nuPed;
-    double _nuWall;
-    double _intp_widthPed; // Interpolation cutoff radius (in cm)
-    double _intp_widthWall; // Interpolation cutoff radius (in cm)
-    double _maxfPed;
-    double _maxfWall;
-    double _distEffMaxPed; // maximal effective distance
-    double _distEffMaxWall; // maximal effective distance
-    
-
-
-
-
-    // Private Funktionen
-    Point ForceDriv(Pedestrian* ped, Room* room) const;
-    Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
-    Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-    Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
-    Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
-    Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
-public:
-
-    GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
-            double intp_widthped, double intp_widthwall, double maxfped, double maxfwall);
-    virtual ~GCFMModel(void);
-
-    // Getter
-    DirectionStrategy* GetDirection() const;
-    double GetNuPed() const;
-    double GetNuWall() const;
-    double GetDistEffMax() const;
-    double GetIntpWidthPed() const;
-    double GetIntpWidthWall() const;
-    double GetMaxFPed() const;
-    double GetMaxFWall() const;
-    double GetDistEffMaxPed() const;
-    double GetDistEffMaxWall() const;
-
-
-
-    // virtuelle Funktionen
-    virtual void CalculateForce(double time, std::vector< Point >& result_acc, Building* building,
-    int roomID, int SubRoomID) const;
-    virtual void CalculateForceLC(double t, double tp, Building* building, int hpc) const;
-    virtual std::string writeParameter() const;
-    //void CreateBuffer(int nrPeds);
-
-    //andere Funkionen
-    void CreateBuffer(int nrPeds);
-    //void FillBuffer(const std::vector<Pedestrian*>& allPeds, Building* b, DirectionStrategy* dir);
-
+     /**
+      * @return all model parameters in a nicely formatted string
+      */
+     virtual std::string writeParameter() const = 0;
 };
 
 
-#endif	/* _FORCEMODEL_H */
-
+#endif  /* _FORCEMODEL_H */
