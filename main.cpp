@@ -1,9 +1,9 @@
+
 /**
  * @file    main.cpp
  * @author  U.Kemloh, A.Portz
- * @version 0.4
- * Created on: Apr 20, 2019
- * Copyright (C) <2009-2012>
+ * @version 0.5
+ * Copyright (C) <2009-2014>
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -19,13 +19,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENCE</a>.
  *
  * @section DESCRIPTION
  *
  *
  */
-
 /**
  * @mainpage
  *
@@ -33,21 +32,20 @@
  *
  * JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
  *
- * @image html logo.png " "
+ *
  *
  * Some useful links:
  *
- * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
- * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
- * 	3: <a href="http://www.digia.com/">www.digia.com</a> <br>
- * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
- * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+ *      1: <A HREF="http://www.openpedsim.org">www.openpedsim.org</A> <BR>
+ *      2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
+ *      3: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+ *      4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
  *
  */
 
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
-#include "Simulation.h"
+#include "./Simulation.h"
 
 ///global unique log variable
 OutputHandler* Log;
@@ -57,39 +55,35 @@ int main(int argc, char **argv) {
     time_t starttime, endtime, startinit, endinit, startsim, endsim;
     time(&starttime);
 
-	//Log = new FileHandler("./Logfile.dat");
-	Log = new STDIOHandler();
-        
-	// Parsing the arguments
-	ArgumentParser* args = new ArgumentParser();
-	args->ParseArgs(argc, argv);
+    //Log = new FileHandler("./Logfile.dat");
+    Log = new STDIOHandler();
+
+    // Parsing the arguments
+    ArgumentParser* args = new ArgumentParser();
+    args->ParseArgs(argc, argv);
 
     // create and init the simulation engine
-	// Simulation
-//	time(&starttime);
+    // Simulation
+    //	time(&starttime);
     if(args->GetProfileFlag()){
         time(&startinit);
     }
-	Log->Write("INFO: \tStart runSimulation()\n");
-	Simulation sim = Simulation();
-	sim.InitArgs(args);
+    Log->Write("INFO: \tStart runSimulation()\n");
+    Simulation sim = Simulation();
+    sim.InitArgs(args);
     if(args->GetProfileFlag()){
         time(&endinit);
         time(&startsim);
     }
-	int evacTime = sim.RunSimulation();
-	Log->Write("\nINFO: \tEnd runSimulation()\n");
+    int evacTime = sim.RunSimulation();
+    Log->Write("\nINFO: \tEnd runSimulation()\n");
     if(args->GetProfileFlag()){
         time(&endsim); 
     }
-	time(&endtime);
+    time(&endtime);
 
-	//some output
-	double execTime = difftime(endtime, starttime);
-
-	if(sim.GetPedsNumber())
-		Log->Write("\nPedestrians not evacuated [%d] using [%d] threads", sim.GetPedsNumber(),
-				args->GetMaxOpenMPThreads());
+    // some output
+    double execTime = difftime(endtime, starttime);
 
     if(args->GetProfileFlag()){
         double inittime = difftime(endinit,startinit);
@@ -97,19 +91,30 @@ int main(int argc, char **argv) {
         Log->Write("Init Time [s]     : %.2f", inittime);
         Log->Write("Sim Time [s]     : %.2f", simtime);
     }
-	Log->Write("Exec Time [s]     : %.2f", execTime);
-	Log->Write("Evac Time [s]     : %d", evacTime);
-	Log->Write("Real Time Factor  : %.2f X\n", evacTime / execTime);
 
-	if (NULL == dynamic_cast<STDIOHandler*>(Log)){
-		printf("\nExec Time [s]     : %.2f\n", execTime);
-		printf("Evac Time [s]     : %d\n", evacTime);
-		printf("Real Time Factor  : %.2f X\n", evacTime / execTime);
-	}
+    if (sim.GetPedsNumber())
+        Log->Write("\nPedestrians not evacuated [%d] using [%d] threads",
+                sim.GetPedsNumber(),
+                args->GetMaxOpenMPThreads());
 
-	//do the last cleaning
-	delete args;
-	delete Log;
 
-	return (EXIT_SUCCESS);
+    Log->Write("\nExec Time [s]   : %.2f", execTime);
+    Log->Write("Evac Time [s]     : %d", evacTime);
+    Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
+    Log->Write("Warnings          : %d", Log->GetWarnings() );
+    Log->Write("Errors            : %d", Log->GetErrors() );
+    // sim.PrintStatistics();
+    if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
+        printf("\nExec Time [s]       : %4.2f\n", execTime);
+        printf("Evac Time [s]       : %d\n", evacTime);
+        printf("Real Time Factor    : %.2f (X)\n", evacTime / execTime);
+        printf("Warnings            : %d\n", Log->GetWarnings() );
+        printf("Errors              : %d\n", Log->GetErrors() );
+    }
+
+    // do the last cleaning
+    delete args;
+    delete Log;
+
+    return (EXIT_SUCCESS);
 }

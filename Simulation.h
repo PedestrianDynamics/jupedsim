@@ -46,13 +46,14 @@
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
 #include "events/EventManager.h" //neuer Header fuer die Events
-
+#include "routing/CognitiveMapRouter.h"
 
 extern OutputHandler* Log;
 
 class Simulation
 {
 private:
+
 	///Number of pedestrians in the simulation
     int _nPeds;
     ///Maximum simulation time
@@ -77,7 +78,11 @@ private:
     IODispatcher* _iod;
     ///new: EventManager
     EventManager* _em;
+    /// argument parser
+    ArgumentParser* _argsParser;
+    /// profiling flag
     bool _profiling;
+    /// architecture flag
     int _hpc;
 
 public:
@@ -135,6 +140,11 @@ public:
      * Get the HPCFlag
      */
     int GetHPCFlag();
+
+    /**
+     * print some statistics about the simulation
+     */
+    void PrintStatistics();
 
 };
 

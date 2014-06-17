@@ -78,7 +78,7 @@
 					 <vertex px="55.720596" py="50.669334"/>
 				</polygon>
 			</subroom>
-			<subroom id="1" closed="0" class="subroom">
+			<subroom id="1" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="65.069336"/>
 					 <vertex px="41.923298" py="64.569534"/>
@@ -89,7 +89,7 @@
 					 <vertex px="48.320873" py="65.069084"/>
 				</polygon>
 			</subroom>
-			<subroom id="2" closed="0" class="subroom">
+			<subroom id="2" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521400" py="54.969315"/>
 					 <vertex px="50.490692" py="54.969326"/>
@@ -97,7 +97,7 @@
 					 <vertex px="49.521832" py="55.469318"/>
 				</polygon>
 			</subroom>
-			<subroom id="3" closed="0" class="subroom">
+			<subroom id="3" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="50.490734" py="54.669327"/>
 					 <vertex px="49.520859" py="54.669327"/>
@@ -108,7 +108,7 @@
 					 <vertex px="50.490734" py="54.669327"/>
 				</polygon>
 			</subroom>
-			<subroom id="4" closed="0" class="subroom">
+			<subroom id="4" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="50.490852" py="53.869282"/>
 					 <vertex px="49.520859" py="53.869282"/>
@@ -119,7 +119,7 @@
 					 <vertex px="50.490852" py="53.869282"/>
 				</polygon>
 			</subroom>
-			<subroom id="5" closed="0" class="subroom">
+			<subroom id="5" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="50.490967" py="53.069355"/>
 					 <vertex px="49.521603" py="53.069355"/>
@@ -130,7 +130,7 @@
 					 <vertex px="50.490967" py="53.069355"/>
 				</polygon>
 			</subroom>
-			<subroom id="6" closed="0" class="subroom">
+			<subroom id="6" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="50.491089" py="52.254421"/>
 					 <vertex px="49.521305" py="52.254421"/>
@@ -141,7 +141,7 @@
 					 <vertex px="50.491089" py="52.254421"/>
 				</polygon>
 			</subroom>
-			<subroom id="7" closed="0" class="subroom">
+			<subroom id="7" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521435" py="50.969318"/>
 					 <vertex px="50.491276" py="50.968971"/>
@@ -149,7 +149,7 @@
 					 <vertex px="49.521866" py="51.469254"/>
 				</polygon>
 			</subroom>
-			<subroom id="8" closed="0" class="subroom">
+			<subroom id="8" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.522987" py="56.569302"/>
 					 <vertex px="54.521038" py="56.569302"/>
@@ -159,7 +159,7 @@
 					 <vertex px="49.521740" py="57.053967"/>
 				</polygon>
 			</subroom>
-			<subroom id="9" closed="0" class="subroom">
+			<subroom id="9" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="54.521038" py="56.269302"/>
 					 <vertex px="49.521824" py="56.269299"/>
@@ -169,7 +169,7 @@
 					 <vertex px="54.521038" py="55.769253"/>
 				</polygon>
 			</subroom>
-			<subroom id="10" closed="0" class="subroom">
+			<subroom id="10" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.523319" py="57.366066"/>
 					 <vertex px="54.519749" py="57.369343"/>
@@ -179,7 +179,7 @@
 					 <vertex px="49.521809" py="57.869278"/>
 				</polygon>
 			</subroom>
-			<subroom id="11" closed="0" class="subroom">
+			<subroom id="11" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.523327" py="58.169270"/>
 					 <vertex px="54.521038" py="58.169277"/>
@@ -189,7 +189,7 @@
 					 <vertex px="49.521801" py="58.669315"/>
 				</polygon>
 			</subroom>
-			<subroom id="12" closed="0" class="subroom">
+			<subroom id="12" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521606" py="58.969318"/>
 					 <vertex px="54.519733" py="58.969322"/>
@@ -199,7 +199,7 @@
 					 <vertex px="49.521790" py="59.469238"/>
 				</polygon>
 			</subroom>
-			<subroom id="13" closed="0" class="subroom">
+			<subroom id="13" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.523289" py="60.569294"/>
 					 <vertex px="54.520382" py="60.569294"/>
@@ -209,7 +209,7 @@
 					 <vertex px="49.521778" py="61.069328"/>
 				</polygon>
 			</subroom>
-			<subroom id="14" closed="0" class="subroom">
+			<subroom id="14" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.523296" py="61.369331"/>
 					 <vertex px="54.520393" py="61.369331"/>
@@ -219,7 +219,7 @@
 					 <vertex px="49.521770" py="61.869255"/>
 				</polygon>
 			</subroom>
-			<subroom id="15" closed="0" class="subroom">
+			<subroom id="15" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521606" py="62.169258"/>
 					 <vertex px="54.519703" py="62.169376"/>
@@ -229,7 +229,7 @@
 					 <vertex px="49.521763" py="62.669308"/>
 				</polygon>
 			</subroom>
-			<subroom id="16" closed="0" class="subroom">
+			<subroom id="16" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521606" py="63.769234"/>
 					 <vertex px="54.521038" py="63.769234"/>
@@ -239,7 +239,7 @@
 					 <vertex px="49.521748" py="64.269279"/>
 				</polygon>
 			</subroom>
-			<subroom id="17" closed="0" class="subroom">
+			<subroom id="17" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="54.521038" py="63.469234"/>
 					 <vertex px="49.521606" py="63.469234"/>
@@ -249,7 +249,7 @@
 					 <vertex px="54.519695" py="62.969307"/>
 				</polygon>
 			</subroom>
-			<subroom id="18" closed="0" class="subroom">
+			<subroom id="18" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.298130" py="65.069336"/>
 					 <vertex px="55.720570" py="65.069336"/>
@@ -271,7 +271,7 @@
 					 <vertex px="62.423183" py="63.897346"/>
 				</polygon>
 			</subroom>
-			<subroom id="19" closed="0" class="subroom">
+			<subroom id="19" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.301285" py="64.269073"/>
 					 <vertex px="55.720676" py="64.269287"/>
@@ -293,7 +293,7 @@
 					 <vertex px="62.216110" py="63.124645"/>
 				</polygon>
 			</subroom>
-			<subroom id="20" closed="0" class="subroom">
+			<subroom id="20" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300583" py="63.469234"/>
 					 <vertex px="55.721016" py="63.469234"/>
@@ -315,7 +315,7 @@
 					 <vertex px="62.009037" py="62.351940"/>
 				</polygon>
 			</subroom>
-			<subroom id="21" closed="0" class="subroom">
+			<subroom id="21" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300583" py="62.669308"/>
 					 <vertex px="55.721016" py="62.669308"/>
@@ -337,7 +337,7 @@
 					 <vertex px="61.801968" py="61.579243"/>
 				</polygon>
 			</subroom>
-			<subroom id="22" closed="0" class="subroom">
+			<subroom id="22" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300587" py="61.869259"/>
 					 <vertex px="55.721016" py="61.869259"/>
@@ -359,7 +359,7 @@
 					 <vertex px="61.594894" py="60.806541"/>
 				</polygon>
 			</subroom>
-			<subroom id="23" closed="0" class="subroom">
+			<subroom id="23" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300583" py="61.069332"/>
 					 <vertex px="55.720539" py="61.069332"/>
@@ -381,7 +381,7 @@
 					 <vertex px="61.387791" py="60.033726"/>
 				</polygon>
 			</subroom>
-			<subroom id="24" closed="0" class="subroom">
+			<subroom id="24" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300583" py="60.269295"/>
 					 <vertex px="55.721016" py="60.269291"/>
@@ -403,7 +403,7 @@
 					 <vertex px="61.180717" py="59.261017"/>
 				</polygon>
 			</subroom>
-			<subroom id="25" closed="0" class="subroom">
+			<subroom id="25" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300587" py="59.469242"/>
 					 <vertex px="55.720356" py="59.469242"/>
@@ -425,7 +425,7 @@
 					 <vertex px="60.973644" py="58.488316"/>
 				</polygon>
 			</subroom>
-			<subroom id="26" closed="0" class="subroom">
+			<subroom id="26" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300583" py="58.669315"/>
 					 <vertex px="55.721016" py="58.669315"/>
@@ -447,7 +447,7 @@
 					 <vertex px="60.766541" py="57.715504"/>
 				</polygon>
 			</subroom>
-			<subroom id="27" closed="0" class="subroom">
+			<subroom id="27" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300549" py="57.869278"/>
 					 <vertex px="55.721016" py="57.869278"/>
@@ -469,7 +469,7 @@
 					 <vertex px="60.559467" py="56.942799"/>
 				</polygon>
 			</subroom>
-			<subroom id="28" closed="0" class="subroom">
+			<subroom id="28" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.301285" py="57.069134"/>
 					 <vertex px="55.720798" py="57.069351"/>
@@ -491,7 +491,7 @@
 					 <vertex px="60.352398" py="56.170097"/>
 				</polygon>
 			</subroom>
-			<subroom id="29" closed="0" class="subroom">
+			<subroom id="29" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300583" py="56.269302"/>
 					 <vertex px="55.721016" py="56.269302"/>
@@ -513,7 +513,7 @@
 					 <vertex px="60.145325" py="55.397400"/>
 				</polygon>
 			</subroom>
-			<subroom id="30" closed="0" class="subroom">
+			<subroom id="30" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300591" py="55.469250"/>
 					 <vertex px="55.721016" py="55.469250"/>
@@ -535,7 +535,7 @@
 					 <vertex px="59.938221" py="54.624580"/>
 				</polygon>
 			</subroom>
-			<subroom id="31" closed="0" class="subroom">
+			<subroom id="31" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300579" py="54.669327"/>
 					 <vertex px="55.721016" py="54.669327"/>
@@ -557,7 +557,7 @@
 					 <vertex px="59.731174" py="53.851982"/>
 				</polygon>
 			</subroom>
-			<subroom id="32" closed="0" class="subroom">
+			<subroom id="32" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.301304" py="53.869232"/>
 					 <vertex px="55.721020" py="53.869282"/>
@@ -579,7 +579,7 @@
 					 <vertex px="59.317593" py="52.306400"/>
 				</polygon>
 			</subroom>
-			<subroom id="33" closed="0" class="subroom">
+			<subroom id="33" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.076584" py="53.367489"/>
 					 <vertex px="55.820751" py="53.369217"/>
@@ -591,7 +591,7 @@
 					 <vertex px="57.076584" py="52.569309"/>
 				</polygon>
 			</subroom>
-			<subroom id="34" closed="0" class="subroom">
+			<subroom id="34" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="55.720722" py="52.269310"/>
 					 <vertex px="57.316734" py="52.269310"/>
@@ -613,7 +613,7 @@
 					 <vertex px="59.109665" py="51.530376"/>
 				</polygon>
 			</subroom>
-			<subroom id="35" closed="0" class="subroom">
+			<subroom id="35" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.301022" py="51.469143"/>
 					 <vertex px="55.721390" py="51.469261"/>
@@ -635,7 +635,7 @@
 					 <vertex px="58.903549" py="50.761066"/>
 				</polygon>
 			</subroom>
-			<subroom id="36" closed="0" class="subroom">
+			<subroom id="36" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321629" py="63.769234"/>
 					 <vertex px="41.923298" py="63.769608"/>
@@ -646,7 +646,7 @@
 					 <vertex px="41.923298" py="63.769608"/>
 				</polygon>
 			</subroom>
-			<subroom id="37" closed="0" class="subroom">
+			<subroom id="37" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.320885" py="62.969311"/>
 					 <vertex px="41.923298" py="62.969559"/>
@@ -657,7 +657,7 @@
 					 <vertex px="41.923298" py="62.969559"/>
 				</polygon>
 			</subroom>
-			<subroom id="38" closed="0" class="subroom">
+			<subroom id="38" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321629" py="62.169258"/>
 					 <vertex px="41.923294" py="62.169632"/>
@@ -668,7 +668,7 @@
 					 <vertex px="41.923294" py="62.169632"/>
 				</polygon>
 			</subroom>
-			<subroom id="39" closed="0" class="subroom">
+			<subroom id="39" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.320957" py="61.369339"/>
 					 <vertex px="41.923294" py="61.369587"/>
@@ -679,7 +679,7 @@
 					 <vertex px="41.923294" py="61.369587"/>
 				</polygon>
 			</subroom>
-			<subroom id="40" closed="0" class="subroom">
+			<subroom id="40" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.320885" py="60.569294"/>
 					 <vertex px="41.923294" py="60.569542"/>
@@ -690,7 +690,7 @@
 					 <vertex px="41.923294" py="60.569542"/>
 				</polygon>
 			</subroom>
-			<subroom id="41" closed="0" class="subroom">
+			<subroom id="41" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.320972" py="59.769241"/>
 					 <vertex px="41.923294" py="59.769611"/>
@@ -701,7 +701,7 @@
 					 <vertex px="41.923294" py="59.769611"/>
 				</polygon>
 			</subroom>
-			<subroom id="42" closed="0" class="subroom">
+			<subroom id="42" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321629" py="58.969315"/>
 					 <vertex px="41.923294" py="58.969566"/>
@@ -712,7 +712,7 @@
 					 <vertex px="41.923294" py="58.969566"/>
 				</polygon>
 			</subroom>
-			<subroom id="43" closed="0" class="subroom">
+			<subroom id="43" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321629" py="58.169277"/>
 					 <vertex px="41.923294" py="58.169640"/>
@@ -723,7 +723,7 @@
 					 <vertex px="41.923294" py="58.169640"/>
 				</polygon>
 			</subroom>
-			<subroom id="44" closed="0" class="subroom">
+			<subroom id="44" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321301" py="57.369350"/>
 					 <vertex px="41.923294" py="57.369598"/>
@@ -734,7 +734,7 @@
 					 <vertex px="41.923294" py="57.369598"/>
 				</polygon>
 			</subroom>
-			<subroom id="45" closed="0" class="subroom">
+			<subroom id="45" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.320885" py="55.768341"/>
 					 <vertex px="41.923298" py="55.768589"/>
@@ -745,7 +745,7 @@
 					 <vertex px="41.923298" py="55.768589"/>
 				</polygon>
 			</subroom>
-			<subroom id="46" closed="0" class="subroom">
+			<subroom id="46" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321629" py="53.369354"/>
 					 <vertex px="41.923298" py="53.369602"/>
@@ -756,7 +756,7 @@
 					 <vertex px="41.923298" py="53.369602"/>
 				</polygon>
 			</subroom>
-			<subroom id="47" closed="0" class="subroom">
+			<subroom id="47" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="48.321304" py="52.569309"/>
 					 <vertex px="41.923298" py="52.569557"/>
@@ -767,7 +767,7 @@
 					 <vertex px="41.923298" py="52.569557"/>
 				</polygon>
 			</subroom>
-			<subroom id="48" closed="0" class="subroom">
+			<subroom id="48" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.300682" py="49.068172"/>
 					 <vertex px="52.620750" py="49.069363"/>
@@ -789,7 +789,7 @@
 					 <vertex px="57.317806" py="48.569321"/>
 				</polygon>
 			</subroom>
-			<subroom id="49" closed="0" class="subroom">
+			<subroom id="49" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.320595" py="49.368141"/>
 					 <vertex px="58.489079" py="49.214279"/>
@@ -802,7 +802,7 @@
 					 <vertex px="57.320595" py="49.368141"/>
 				</polygon>
 			</subroom>
-			<subroom id="50" closed="0" class="subroom">
+			<subroom id="50" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="43.768486"/>
 					 <vertex px="51.419758" py="43.769276"/>
@@ -813,7 +813,7 @@
 					 <vertex px="41.923298" py="43.768486"/>
 				</polygon>
 			</subroom>
-			<subroom id="51" closed="0" class="subroom">
+			<subroom id="51" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="52.621613" py="43.769276"/>
 					 <vertex px="53.950035" py="43.769520"/>
@@ -821,7 +821,7 @@
 					 <vertex px="52.619759" py="44.269329"/>
 				</polygon>
 			</subroom>
-			<subroom id="52" closed="0" class="subroom">
+			<subroom id="52" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="57.877796" py="47.697250"/>
 					 <vertex px="58.157558" py="47.977013"/>
@@ -838,7 +838,7 @@
 					 <vertex px="57.320969" py="47.770535"/>
 				</polygon>
 			</subroom>
-			<subroom id="53" closed="0" class="subroom">
+			<subroom id="53" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="52.620720" py="47.469265"/>
 					 <vertex px="57.610397" py="47.429855"/>
@@ -852,7 +852,7 @@
 					 <vertex px="57.149883" py="46.969341"/>
 				</polygon>
 			</subroom>
-			<subroom id="54" closed="0" class="subroom">
+			<subroom id="54" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923969" py="47.769268"/>
 					 <vertex px="51.419758" py="47.769268"/>
@@ -863,7 +863,7 @@
 					 <vertex px="41.923969" py="47.769268"/>
 				</polygon>
 			</subroom>
-			<subroom id="55" closed="0" class="subroom">
+			<subroom id="55" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923832" py="46.967945"/>
 					 <vertex px="51.419876" py="46.969341"/>
@@ -874,7 +874,7 @@
 					 <vertex px="41.923832" py="46.967945"/>
 				</polygon>
 			</subroom>
-			<subroom id="56" closed="0" class="subroom">
+			<subroom id="56" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.924187" py="49.069363"/>
 					 <vertex px="41.924103" py="48.569317"/>
@@ -885,7 +885,7 @@
 					 <vertex px="41.924187" py="49.069363"/>
 				</polygon>
 			</subroom>
-			<subroom id="57" closed="0" class="subroom">
+			<subroom id="57" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="51.469627"/>
 					 <vertex px="41.923298" py="50.969582"/>
@@ -896,7 +896,7 @@
 					 <vertex px="48.320961" py="51.469379"/>
 				</polygon>
 			</subroom>
-			<subroom id="58" closed="0" class="subroom">
+			<subroom id="58" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="52.269558"/>
 					 <vertex px="41.923298" py="51.769630"/>
@@ -907,7 +907,7 @@
 					 <vertex px="48.320591" py="52.269310"/>
 				</polygon>
 			</subroom>
-			<subroom id="59" closed="0" class="subroom">
+			<subroom id="59" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="54.669575"/>
 					 <vertex px="41.923298" py="54.169651"/>
@@ -918,7 +918,7 @@
 					 <vertex px="48.320873" py="54.669327"/>
 				</polygon>
 			</subroom>
-			<subroom id="60" closed="0" class="subroom">
+			<subroom id="60" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="55.468586"/>
 					 <vertex px="41.923298" py="54.969574"/>
@@ -929,7 +929,7 @@
 					 <vertex px="48.320873" py="55.468338"/>
 				</polygon>
 			</subroom>
-			<subroom id="61" closed="0" class="subroom">
+			<subroom id="61" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923298" py="57.069599"/>
 					 <vertex px="41.923298" py="56.569550"/>
@@ -940,7 +940,7 @@
 					 <vertex px="48.320873" py="57.069351"/>
 				</polygon>
 			</subroom>
-			<subroom id="62" closed="0" class="subroom">
+			<subroom id="62" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="53.550579" py="55.469326"/>
 					 <vertex px="53.550575" py="54.969326"/>
@@ -951,7 +951,7 @@
 					 <vertex px="53.550579" py="55.469326"/>
 				</polygon>
 			</subroom>
-			<subroom id="63" closed="0" class="subroom">
+			<subroom id="63" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="53.550571" py="54.669327"/>
 					 <vertex px="53.550568" py="54.169281"/>
@@ -962,7 +962,7 @@
 					 <vertex px="53.550571" py="54.669327"/>
 				</polygon>
 			</subroom>
-			<subroom id="64" closed="0" class="subroom">
+			<subroom id="64" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="53.550564" py="53.869282"/>
 					 <vertex px="53.550560" py="53.369110"/>
@@ -973,7 +973,7 @@
 					 <vertex px="53.550564" py="53.869282"/>
 				</polygon>
 			</subroom>
-			<subroom id="65" closed="0" class="subroom">
+			<subroom id="65" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="53.550560" py="53.069107"/>
 					 <vertex px="53.550556" py="52.569309"/>
@@ -984,7 +984,7 @@
 					 <vertex px="53.550560" py="53.069107"/>
 				</polygon>
 			</subroom>
-			<subroom id="66" closed="0" class="subroom">
+			<subroom id="66" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="53.550552" py="52.269310"/>
 					 <vertex px="53.550549" py="51.769260"/>
@@ -995,7 +995,7 @@
 					 <vertex px="53.550552" py="52.269310"/>
 				</polygon>
 			</subroom>
-			<subroom id="67" closed="0" class="subroom">
+			<subroom id="67" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="53.550549" py="51.469261"/>
 					 <vertex px="53.550579" py="50.969334"/>
@@ -1006,7 +1006,7 @@
 					 <vertex px="53.550549" py="51.469261"/>
 				</polygon>
 			</subroom>
-			<subroom id="68" closed="0" class="subroom">
+			<subroom id="68" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="54.749851" py="44.569328"/>
 					 <vertex px="55.249897" py="45.069370"/>
@@ -1017,7 +1017,7 @@
 					 <vertex px="52.619759" py="44.569328"/>
 				</polygon>
 			</subroom>
-			<subroom id="69" closed="0" class="subroom">
+			<subroom id="69" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="55.549900" py="45.369373"/>
 					 <vertex px="56.049831" py="45.869297"/>
@@ -1028,7 +1028,7 @@
 					 <vertex px="52.619759" py="45.369373"/>
 				</polygon>
 			</subroom>
-			<subroom id="70" closed="0" class="subroom">
+			<subroom id="70" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="56.349831" py="46.169296"/>
 					 <vertex px="56.849880" py="46.669342"/>
@@ -1039,7 +1039,7 @@
 					 <vertex px="52.619759" py="46.169296"/>
 				</polygon>
 			</subroom>
-			<subroom id="71" closed="0" class="subroom">
+			<subroom id="71" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923515" py="45.069370"/>
 					 <vertex px="41.923431" py="44.569328"/>
@@ -1050,7 +1050,7 @@
 					 <vertex px="41.923515" py="45.069370"/>
 				</polygon>
 			</subroom>
-			<subroom id="72" closed="0" class="subroom">
+			<subroom id="72" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923649" py="45.869415"/>
 					 <vertex px="41.923565" py="45.369373"/>
@@ -1061,7 +1061,7 @@
 					 <vertex px="41.923649" py="45.869415"/>
 				</polygon>
 			</subroom>
-			<subroom id="73" closed="0" class="subroom">
+			<subroom id="73" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="41.923782" py="46.667942"/>
 					 <vertex px="41.923698" py="46.169418"/>
@@ -1072,7 +1072,7 @@
 					 <vertex px="41.923782" py="46.667942"/>
 				</polygon>
 			</subroom>
-			<subroom id="74" closed="0" class="subroom">
+			<subroom id="74" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521305" py="64.569283"/>
 					 <vertex px="54.520741" py="64.569283"/>
@@ -1082,7 +1082,7 @@
 					 <vertex px="49.520859" py="65.069336"/>
 				</polygon>
 			</subroom>
-			<subroom id="75" closed="0" class="subroom">
+			<subroom id="75" closed="0" class="cellular">
 				 <polygon caption="wall">
 					 <vertex px="49.521355" py="59.769238"/>
 					 <vertex px="54.520382" py="59.769245"/>

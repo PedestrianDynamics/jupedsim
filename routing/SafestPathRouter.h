@@ -33,89 +33,126 @@
 
 class SafestPathRouter: public GlobalRouter {
 public:
-	SafestPathRouter();
-	virtual ~SafestPathRouter();
+     SafestPathRouter();
+     virtual ~SafestPathRouter();
 
-	/**
-	 * @override the method from the global router.
-	 */
-	virtual int FindExit(Pedestrian* p);
+     /**
+      * @override the method from the global router.
+      */
+     virtual int FindExit(Pedestrian* p);
 
-	/*
-	 * Load the fds simulation file and preprocess the input,
-	 * before calling the Init from the Global RouterEngine
-	 */
-	virtual void Init(Building* building);
-
-private:
-	/**
-	 * Compute the safest path for the given pedestrian and update the destination.
-	 * FindExit from the global router is called afterward to perform the navigation
-	 * ONLY the final destination should be updated in this function, as the navigation
-	 * itself is handled by the global router engine
-	 * @return the new safest goalID, -1, if there was an Error
-	 */
-	int ComputeSafestPath(Pedestrian* p);
+     /*
+      * Load the fds simulation file and preprocess the input,
+      * before calling the Init from the Global RouterEngine
+      */
+     virtual void Init(Building* building);
 
 
-	/**
-	 * do some initialisation stuff...
-	 */
-	void Initialize();
-
-
-	/**
-	 *  reads the results from fds evac
-	 */
-	void ReadMatrixFromFDS();
-	void GetHline(Building* building);
-	void UpdateMatrices();
-
-	int GetAgentsCountInSubroom( int roomID, int subroomID);
-	void main_1(Pedestrian* p);
-	void main_2( );
-	void CalculatePhi();
-
-	int MapSection;
-
-
+     /**
+      * Bypass using
+      */
+     void ComputeAndUpdateDestinations(std::vector<Pedestrian*>& pedestrians);
 
 private:
-	// double dMatrixPreEvac[1][11];
-	// double dFinalLength[1][11];
-
-	 double *dFinalLineOFP;
-	 double *dFinalLineEvac;
-
-	// double dFinalLineOFP[1][11];
-
-
-//	 double *_finalLineEvac;
-	 int numberOfSubroom;
-	 int *preSub;
-	 double maximalSquare;
-	 double *lenthOfSection;
-	// double rR[1][11];
-	 double *rR;
+     /**
+      * Compute the safest path for the given pedestrian and update the destination.
+      * FindExit from the global router is called afterward to perform the navigation
+      * ONLY the final destination should be updated in this function, as the navigation
+      * itself is handled by the global router engine
+      * @return the new safest goalID, -1, if there was an Error
+      */
+     int ComputeSafestPath(Pedestrian* p);
 
 
-	 //double peopleAtSection[1][11];
-	 double *peopleAtSection;
-	 double *squareOfSection;
-	 double *dFinalLength;
-	 double **dPreOFP;
+     /**
+      * do some initialisation stuff...
+      */
+     void Initialize();
+
+     /**
+      * Print the phi index in the file
+      */
+
+     void PrintInfoToFile();
 
 
-	// double rR[1][11];
+     /**
+      *  reads the results from fds evac
+      */
+     void ReadMatrixFromFDS();
+     void GetHline(Building* building);
+     void UpdateMatrices();
+
+     int GetAgentsCountInSubroom( int roomID, int subroomID);
+
+     /**
+      *
+      * @param p
+      */
+     void UpdateRRmatrix(Pedestrian* p);
+
+     void CalculatePhi();
 
 
-	 //double peopleAtSection[1][11];
-	 //double *peopleAtSection;
+     /**
+      * TODO: investigate the use of a map
+      */
+     void MappingFloorIDtoIndex( );
 
-	// double iNt1[1][11];
-	// double iNt2[1][11];
-	// double iNt3[1][11];
-	// double iNt4[1][11];
+     // int MapSection;
+
+
+
+private:
+     // double dMatrixPreEvac[1][11];
+     // double dFinalLength[1][11];
+
+     // last time the matrices were updated
+     long int _lastUpdateTime;
+
+     double *dFinalLineOFP;
+     double *dFinalLineEvac;
+
+     // double dFinalLineOFP[1][11];
+
+
+     //     double *_finalLineEvac;
+     int numberOfSubroom;
+     double a;
+     double b;
+     double c;
+
+
+
+     // int *preSub;
+     int *flo;
+     double maximalSquare;
+     // double *lenthOfSection;
+     // double rR[1][11];
+     double *rR;
+
+
+     //double peopleAtSection[1][11];
+     double *peopleAtSection;
+     double *squareOfSection;
+     double *dFinalLength;
+     double *dPeopleDensity;
+     double **dPreOFP;
+
+     FileHandler* _phiFile;
+     // FileHandler* _finalLineEvac;
+
+
+     // double rR[1][11];
+
+
+     //double peopleAtSection[1][11];
+     //double *peopleAtSection;
+
+     // double iNt1[1][11];
+     // double iNt2[1][11];
+     // double iNt3[1][11];
+     // double iNt4[1][11];
 
 };
 

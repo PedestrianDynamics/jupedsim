@@ -1,7 +1,7 @@
 /**
- * File:   OutputHandler.h
+ * @file   OutputHandler.h
  *
- * Created on 20. November 2010, 15:20
+ * @date  Created on 20. November 2010, 15:20
  *
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -37,43 +37,50 @@
 #include "../general/Macros.h"
 
 class OutputHandler {
+protected:
+     int nWarnings;
+     int nErrors;
 public:
-    virtual void Write(std::string str);
-	virtual void Write(const char *string, ...);
-    virtual ~OutputHandler(){};
+     OutputHandler() { nWarnings = 0; nErrors = 0; };
+     int GetWarnings();
+     void incrementWarnings();
+     int GetErrors();
+     void incrementErrors();
+     void ProgressBar(double TotalPeds, double NowPeds);
+     virtual void Write(std::string str);
+     virtual void Write(const char *string, ...);
+     virtual ~OutputHandler() {};
 };
 
 class STDIOHandler : public OutputHandler {
 public:
-    void Write(std::string str);
+     void Write(std::string str);
 };
 
 class FileHandler : public OutputHandler {
 private:
-    std::ofstream pfp;
-
+     std::ofstream pfp;
 public:
-    FileHandler(const char *fn);
-    virtual ~FileHandler();
-    void Write(std::string str);
-    void Write(const char *string,...);
+     FileHandler(const char *fn);
+     virtual ~FileHandler();
+     void Write(std::string str);
+     void Write(const char *string,...);
 };
 
 class TraVisToHandler : public OutputHandler {
 private:
-    TraVisToClient* client;
+     TraVisToClient* client;
 
 public:
-    TraVisToHandler(std::string host, int port);
-    virtual ~TraVisToHandler();
-    void Write(std::string str);
+     TraVisToHandler(std::string host, int port);
+     virtual ~TraVisToHandler();
+     void Write(std::string str);
 
-    //Some tags are broken
-    std::vector<std::string> brokentags;
+     //Some tags are broken
+     std::vector<std::string> brokentags;
 };
 
 
 
 
 #endif /*OUTPUT_HANDLER_H_*/
-

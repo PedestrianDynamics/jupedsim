@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<JuPedSim project="Subway-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+
+	<!-- seed used for initialising random generator -->
+	<seed>12542</seed>
+	<!-- geometry file -->
+	<geometry>geo_UO_180_180_180.xml</geometry>
+	<!-- traectories file and format -->
+	<trajectories format="xml-plain" embed_mesh="false" fps="8">
+		<file location="../outputfiles/UO_180_180_180.xml" />
+	</trajectories>
+	<!-- where to store the logs -->
+	<!--logfile>log</logfile-->
+
+	<!-- traffic information: e.g closed doors or smoked rooms -->
+	<traffic_constraints>
+		<!-- <\!-- room states are: good or smoked -\-> -->
+		<rooms>
+		</rooms>
+		<!-- doors states are: close or open -->
+	</traffic_constraints>
+	<routing>
+		<goals_>
+			<goal id="0" final="true" caption="goal 1">
+				<polygon>
+					<vertex px="4.200" py="1.150"/>
+					<vertex px="8.000" py="1.150"/>
+					<vertex px="8.000" py="0.000"/>
+					<vertex px="4.200" py="0.000"/>
+					<vertex px="4.200" py="1.150"/>	
+				</polygon>
+			</goal>
+		</goals_>
+	</routing>
+
+	
+	<!--persons information and distribution -->
+	<agents>
+		<agents_distribution>
+
+			<group group_id="1" room_id="0" subroom_id="0" number="90" goal_id="" router_id="1" route_id=""/>
+	
+		</agents_distribution>
+
+                <!-- frequency in persons/minute -->
+		<agents_sources/>
+	</agents>
+
+	<!-- These parameters may be overwritten -->
+	<operational_models>
+		<model id="1" description="gcfm">
+			<parameters>
+				<tmax unit="sec">900</tmax>
+				<solver>euler</solver>
+				<stepsize>0.001</stepsize>
+				<exitCrossingStrategy>3</exitCrossingStrategy>
+				<linkedcells enabled="true" cell_size="2.2" />
+				<v0 mu="1.24" sigma="0.001" />
+				<bmax mu="0.25" sigma="0.001" />
+				<bmin mu="0.20" sigma="0.001" />
+				<amin mu="0.18" sigma="0.001" />
+				<tau mu="0.5" sigma="0.001" />
+				<atau mu="0.5" sigma="0.001" />
+				<force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+				<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+			</parameters>
+		</model>
+
+	</operational_models>
+
+	<route_choice_models>
+		<router router_id="1" description="global_shortest">
+			<parameters>
+                             <!-- <navigation_lines file="routing.xml" /> -->
+			</parameters>
+		</router>
+	</route_choice_models>
+
+</JuPedSim>

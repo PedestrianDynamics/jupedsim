@@ -9,34 +9,59 @@
 #ifndef NAVIGATIONGRAPH1_H_
 #define NAVIGATIONGRAPH1_H_
 
-#include <boost/graph/adjacency_list.hpp>
+#include <unordered_map>
+#include "navigation_graph/GraphVertex.h"
+#include "navigation_graph/GraphEdge.h"
+#include <string>
 
-typedef boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS> nav_graph;
+class Building;
+class NavLine;
+class SubRoom;
+class Crossing;
+class Transition;
+
+
+
 
 /**
- * @brief Cognitive Map
+ * @brief Navigation Graph
  *
  * The Navigation Graph represents the metric layer in a cognitive map.
  * It is modeled as a graph with weights and information's related to the edges and vertexes.
  * The Navigation Graph could be sparse.
  *
- * The BOOST Graph Library is used for the graph structure.
  *
  */
 
 class NavigationGraph {
-
 public:
-    /****************************
-     * Constructors & Destructors
-     ****************************/
+     typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
 
-    NavigationGraph();
+     /****************************
+      * Constructors & Destructors
+      ****************************/
+     NavigationGraph(const Building * building);
+     NavigationGraph(const NavigationGraph & ng);
 
-    virtual ~NavigationGraph();
+     virtual ~NavigationGraph();
+
+     void AddVertex(const SubRoom * const sub_room);
+     void AddEdge(const Crossing * crossing);
+     void AddExit(const Transition * transition);
+
+     GraphVertex * operator[](const SubRoom * const sub_room);
+
+     NavigationGraph::VerticesContainer * GetAllVertices();
+
+     void WriteToDotFile(const std::string filepath) const;
 
 
 private:
+     /**
+      * Vertices and Edges
+      */
+     NavigationGraph::VerticesContainer vertices;
+     const Building * const building;
 
 
 };

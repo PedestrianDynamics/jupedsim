@@ -25,7 +25,7 @@
  */
 
 #ifndef _DIRECTIONSTRATEGY_H
-#define	_DIRECTIONSTRATEGY_H
+#define _DIRECTIONSTRATEGY_H
 
 
 class Room;
@@ -35,35 +35,37 @@ class Point;
 class DirectionStrategy {
 
 public:
-    DirectionStrategy();
-    DirectionStrategy(const DirectionStrategy& orig);
-    virtual ~DirectionStrategy();
-    virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
+     DirectionStrategy();
+     DirectionStrategy(const DirectionStrategy& orig);
+     virtual ~DirectionStrategy();
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
 };
 
-class DirectionMiddlePoint : public DirectionStrategy
-{
-    public:
-        virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+class DirectionMiddlePoint : public DirectionStrategy {
+public:
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
-class DirectionMinSeperation : public DirectionStrategy
-{
-    public:
-        virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+class DirectionMinSeperation : public DirectionStrategy {
+public:
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
-class DirectionMinSeperationShorterLine : public DirectionStrategy
-{
-    public:
-        virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+class DirectionMinSeperationShorterLine : public DirectionStrategy {
+public:
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
-class DirectionInRangeBottleneck : public DirectionStrategy
-{
-    public:
-        virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+class DirectionInRangeBottleneck : public DirectionStrategy {
+public:
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 };
 
-#endif	/* _DIRECTIONSTRATEGY_H */
+
+class DirectionGeneral : public DirectionStrategy {
+public:
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+};
+
+#endif  /* _DIRECTIONSTRATEGY_H */
 

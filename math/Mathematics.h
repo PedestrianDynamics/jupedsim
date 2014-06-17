@@ -21,7 +21,7 @@
  *
  * @section DESCRIPTION
  *
- *	This class is used to define mathematical parameters, constants and functions.
+ *      This class is used to define mathematical parameters, constants and functions.
  *
  *
  */
@@ -35,7 +35,7 @@
 double sign(double x);
 
 double hermite_interp(double x, double x1, double x2, double y1, double y2,
-        double dy1, double dy2);
+                      double dy1, double dy2);
 
 std::complex<double> c_cbrt(std::complex<double> x);
 

@@ -25,6 +25,10 @@
 
 #include "Ellipse.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+#define M_PI            3.14159265358979323846
+
 using namespace std;
 
 
@@ -33,30 +37,32 @@ using namespace std;
  Konstruktoren
  ************************************************************/
 
-JEllipse::JEllipse() {
-	_vel = Point(); // velocity vector
-	_center = Point(); // cartesian coordinates of the center
-	_cosPhi = 1; // = cos(0)
-	_sinPhi = 0; // = sin(0)
-	_Xp = 0; //x Ellipse-coord of the centre (Center in (xc,yc) )
-	_Amin = 0.18; // Semi-axis in direction of motion:  pAmin + V * pAv
-	_Av = 0.53;
-	_Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
-	_Bmax = 0.25;
-	__vel0 = 0; // desired speed
+JEllipse::JEllipse()
+{
+     _vel = Point(); // velocity vector
+     _center = Point(); // cartesian coordinates of the center
+     _cosPhi = 1; // = cos(0)
+     _sinPhi = 0; // = sin(0)
+     _Xp = 0; //x Ellipse-coord of the centre (Center in (xc,yc) )
+     _Amin = 0.18; // Semi-axis in direction of motion:  pAmin + V * pAv
+     _Av = 0.53;
+     _Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
+     _Bmax = 0.25;
+     __vel0 = 0; // desired speed
 }
 
-JEllipse::JEllipse(const JEllipse& orig) {
-	_vel = orig.GetV(); // velocity vector
-	_center = orig.GetCenter();
-	_cosPhi = orig.GetCosPhi();
-	_sinPhi = orig.GetSinPhi();
-	_Xp = orig.GetXp(); //x Ellipse-coord of the centre (Center in (xc,yc) )
-	_Amin = orig.GetAmin(); // Semi-axis in direction of motion:  pAmin + V * pAv 
-	_Av = orig.GetAv();
-	_Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
-	_Bmax = orig.GetBmax();
-	__vel0 = orig.GetV0(); // desired speed
+JEllipse::JEllipse(const JEllipse& orig)
+{
+     _vel = orig.GetV(); // velocity vector
+     _center = orig.GetCenter();
+     _cosPhi = orig.GetCosPhi();
+     _sinPhi = orig.GetSinPhi();
+     _Xp = orig.GetXp(); //x Ellipse-coord of the centre (Center in (xc,yc) )
+     _Amin = orig.GetAmin(); // Semi-axis in direction of motion:  pAmin + V * pAv
+     _Av = orig.GetAv();
+     _Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
+     _Bmax = orig.GetBmax();
+     __vel0 = orig.GetV0(); // desired speed
 }
 
 
@@ -64,106 +70,129 @@ JEllipse::JEllipse(const JEllipse& orig) {
  Setter-Funktionen
  ************************************************************/
 
-void JEllipse::SetV(const Point& v) {
-	_vel = v;
+void JEllipse::SetV(const Point& v)
+{
+     _vel = v;
 }
 
-void JEllipse::SetCenter(Point pos) {
-	_center = pos;
+void JEllipse::SetCenter(Point pos)
+{
+     _center = pos;
 }
 
-void JEllipse::SetCosPhi(double c) {
-	_cosPhi = c;
+void JEllipse::SetCosPhi(double c)
+{
+     _cosPhi = c;
 }
 
-void JEllipse::SetSinPhi(double s) {
-	_sinPhi = s;
+void JEllipse::SetSinPhi(double s)
+{
+     _sinPhi = s;
 }
 
-void JEllipse::SetXp(double xp) {
-	_Xp = xp;
+void JEllipse::SetXp(double xp)
+{
+     _Xp = xp;
 }
 
-void JEllipse::SetAmin(double a_min) {
-	_Amin = a_min;
+void JEllipse::SetAmin(double a_min)
+{
+     _Amin = a_min;
 }
 
-void JEllipse::SetAv(double a_v) {
-	_Av = a_v;
+void JEllipse::SetAv(double a_v)
+{
+     _Av = a_v;
 }
 
-void JEllipse::SetBmin(double b_min) {
-	_Bmin = b_min;
+void JEllipse::SetBmin(double b_min)
+{
+     _Bmin = b_min;
 }
 
-void JEllipse::SetBmax(double b_max) {
-	_Bmax = b_max;
+void JEllipse::SetBmax(double b_max)
+{
+     _Bmax = b_max;
 }
 
-void JEllipse::SetV0(double v0) {
-	__vel0 = v0;
+void JEllipse::SetV0(double v0)
+{
+     __vel0 = v0;
 }
 
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
 
-const Point& JEllipse::GetV() const {
-	return _vel;
+const Point& JEllipse::GetV() const
+{
+     return _vel;
 }
 
-const Point& JEllipse::GetCenter() const {
-	return _center;
+const Point& JEllipse::GetCenter() const
+{
+     return _center;
 }
 
-double JEllipse::GetCosPhi() const {
-	return _cosPhi;
+double JEllipse::GetCosPhi() const
+{
+     return _cosPhi;
 }
 
-double JEllipse::GetSinPhi() const {
-	return _sinPhi;
+double JEllipse::GetSinPhi() const
+{
+     return _sinPhi;
 }
 
-double JEllipse::GetXp() const {
-	return _Xp;
+double JEllipse::GetXp() const
+{
+     return _Xp;
 }
 
-double JEllipse::GetAmin() const {
-	return _Amin;
+double JEllipse::GetAmin() const
+{
+     return _Amin;
 }
 
-double JEllipse::GetAv() const {
-	return _Av;
+double JEllipse::GetAv() const
+{
+     return _Av;
 }
 
-double JEllipse::GetBmin() const {
-	return _Bmin;
+double JEllipse::GetBmin() const
+{
+     return _Bmin;
 }
 
-double JEllipse::GetBmax() const {
-	return _Bmax;
+double JEllipse::GetBmax() const
+{
+     return _Bmax;
 }
 
-double JEllipse::GetV0() const {
-	return __vel0;
+double JEllipse::GetV0() const
+{
+     return __vel0;
 }
-double JEllipse::GetArea() const {
-	double x = (_Bmax - _Bmin) / __vel0;
-	double V = _vel.Norm();
-	double ea = _Amin + V * _Av;
-	double eb = _Bmax - V * x;
-	return ea * eb * M_PI;
+double JEllipse::GetArea() const
+{
+     double x = (_Bmax - _Bmin) / __vel0;
+     double V = _vel.Norm();
+     double ea = _Amin + V * _Av;
+     double eb = _Bmax - V * x;
+     return ea * eb * M_PI;
 }
 
 // ellipse  semi-axis in the direction of the velocity
-	double JEllipse::GetEA() const {
-		return _Amin + _vel.Norm() * _Av;
-	}
+double JEllipse::GetEA() const
+{
+     return _Amin + _vel.Norm() * _Av;
+}
 
 // ellipse semi-axis in the orthogonal direction of the velocity
-double JEllipse::GetEB() const {
-	double x = (_Bmax - _Bmin) / __vel0;
-	return _Bmax - _vel.Norm() * x;
+double JEllipse::GetEB() const
+{
+     double x = (_Bmax - _Bmin) / __vel0;
+     return _Bmax - _vel.Norm() * x;
 }
 
 
@@ -190,32 +219,32 @@ double JEllipse::GetEB() const {
  * */
 
 // double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) const {
-// 	//  E1 ist Objekt auf dem aufgerufen wird
-// 	Point AP1inE1 = Point(this->GetXp(), 0); //Koords in E1
-// 	Point AP2inE2 = Point(E2.GetXp(), 0); //Koords in E2
-// 	Point AP1inE2, AP2inE1;
+//      //  E1 ist Objekt auf dem aufgerufen wird
+//      Point AP1inE1 = Point(this->GetXp(), 0); //Koords in E1
+//      Point AP2inE2 = Point(E2.GetXp(), 0); //Koords in E2
+//      Point AP1inE2, AP2inE1;
 
-// 	// "normale" Koordinaten
-// 	Point R1, R2;
-// 	Point AP1, AP2;
-// 	// Koordinaten transformieren
-// 	AP1 = AP1inE1.CoordTransToCart(this->GetCenter(), this->GetCosPhi(),
-// 			this->GetSinPhi());
-// 	AP2 = AP2inE2.CoordTransToCart(E2.GetCenter(), E2.GetCosPhi(),
-// 			E2.GetSinPhi());
-// 	AP1inE2 = AP1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(),
-// 			E2.GetSinPhi());
-// 	AP2inE1 = AP2.CoordTransToEllipse(this->GetCenter(), this->GetCosPhi(),
-// 			this->GetSinPhi());
+//      // "normale" Koordinaten
+//      Point R1, R2;
+//      Point AP1, AP2;
+//      // Koordinaten transformieren
+//      AP1 = AP1inE1.CoordTransToCart(this->GetCenter(), this->GetCosPhi(),
+//                      this->GetSinPhi());
+//      AP2 = AP2inE2.CoordTransToCart(E2.GetCenter(), E2.GetCosPhi(),
+//                      E2.GetSinPhi());
+//      AP1inE2 = AP1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(),
+//                      E2.GetSinPhi());
+//      AP2inE1 = AP2.CoordTransToEllipse(this->GetCenter(), this->GetCosPhi(),
+//                      this->GetSinPhi());
 
-// 	// Abstand zwischen den beiden Actionpoints
-// 	*dist = (AP1 - AP2).Norm();
-// 	/* fuer E1: Berechnung R1 */
-// 	R1 = this->PointOnEllipse(AP2inE1); // kuerzester Schnittpunkt E1 mit Gerade durch AP2 von E2
-// 	/* fuer E2: Berechung R2 */
-// 	R2 = E2.PointOnEllipse(AP1inE2); // kuerzester Schnittpunkt E2 mit Gerade durch AP1 von E1
-// 	// Abstand zwischen den beiden Ellipsen
-// 	return (AP1 - AP2).Norm() - (AP1 - R1).Norm() - (AP2 - R2).Norm(); // negative Werte sind bei Überlappung möglich
+//      // Abstand zwischen den beiden Actionpoints
+//      *dist = (AP1 - AP2).Norm();
+//      /* fuer E1: Berechnung R1 */
+//      R1 = this->PointOnEllipse(AP2inE1); // kuerzester Schnittpunkt E1 mit Gerade durch AP2 von E2
+//      /* fuer E2: Berechung R2 */
+//      R2 = E2.PointOnEllipse(AP1inE2); // kuerzester Schnittpunkt E2 mit Gerade durch AP1 von E1
+//      // Abstand zwischen den beiden Ellipsen
+//      return (AP1 - AP2).Norm() - (AP1 - R1).Norm() - (AP2 - R2).Norm(); // negative Werte sind bei Überlappung möglich
 // }
 
 /*Effective distance between two ellipses
@@ -223,17 +252,18 @@ double JEllipse::GetEB() const {
 
  output:
  - return: Effective distance between E1 and E2. By overlaping the distance is negative
- - (call by reference) distance between centers 
+ - (call by reference) distance between centers
  */
-//Time old version:  230000 clicks (0.230000 seconds). 
+//Time old version:  230000 clicks (0.230000 seconds).
 //Time new:  180000 clicks (0.180000 seconds)
- double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) const {
-     //  E1 ist Objekt auf dem aufgerufen wird                                                                                                        
+double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) const
+{
+     //  E1 ist Objekt auf dem aufgerufen wird
      Point E1center = this->GetCenter();
      Point E2center = E2.GetCenter();
      Point R1, R2;
-     Point E1inE2, //center of E1 in coordinate system of E2 
-         E2inE1;
+     Point E1inE2, //center of E1 in coordinate system of E2
+           E2inE1;
      E2inE1 = E2center.CoordTransToEllipse(this->GetCenter(), this->GetCosPhi(),
                                            this->GetSinPhi());
      E1inE2 = E1center.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(),
@@ -244,126 +274,127 @@ double JEllipse::GetEB() const {
      R2 = E2.PointOnEllipse(E1inE2);
      //effective distance
      return *dist - (E1center - R1).Norm() - (E2center - R2).Norm();
-}   
+}
 
 //
 // input: P is a point in the ellipse world.
 // output: The point on the ellipse (in cartesian coord) that lays on the same line OP
 // O being the center of the ellipse
-// if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse 
-Point JEllipse::PointOnEllipse(const Point& P) const {
-	double x = P.GetX(), y = P.GetY();
-	double r = x*x + y*y;
-	if ( r < J_EPS*J_EPS)
-	{
-            //return _center;
-            Point CP(this->GetEA(), 0);
-            return  CP.CoordTransToCart(this->GetCenter(), this->GetCosPhi(),
-                                       this->GetSinPhi());
-	}
-	r = sqrt(r);
+// if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
+Point JEllipse::PointOnEllipse(const Point& P) const
+{
+     double x = P.GetX(), y = P.GetY();
+     double r = x*x + y*y;
+     if ( r < J_EPS*J_EPS) {
+          //return _center;
+          Point CP(this->GetEA(), 0);
+          return  CP.CoordTransToCart(this->GetCenter(), this->GetCosPhi(),
+                                      this->GetSinPhi());
+     }
+     r = sqrt(r);
 
-	double cosTheta = x/r;
-	double sinTheta = y/r;
-	double a = GetEA();
-	double b = GetEB();
-	Point S;
-	S.SetX(a*cosTheta);
-	S.SetY(b*sinTheta);
-	return S.CoordTransToCart(_center, _cosPhi, _sinPhi);
+     double cosTheta = x/r;
+     double sinTheta = y/r;
+     double a = GetEA();
+     double b = GetEB();
+     Point S;
+     S.SetX(a*cosTheta);
+     S.SetY(b*sinTheta);
+     return S.CoordTransToCart(_center, _cosPhi, _sinPhi);
 }
 
-double JEllipse::EffectiveDistanceToLine(const Line& l) const {
-    Point C = this->GetCenter();
-    Point P = l.ShortestPoint(C);
-    Point R = this->PointOnEllipse(P);
-    return (P-R).Norm();
+double JEllipse::EffectiveDistanceToLine(const Line& l) const
+{
+     Point C = this->GetCenter();
+     Point P = l.ShortestPoint(C);
+     Point R = this->PointOnEllipse(P);
+     return (P-R).Norm();
 }
 
 // thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
 // double JEllipse::MinimumDistanceToLine(const Line& l) const {
-// 	 Point AinE = l.GetPoint1().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
-// 	 Point BinE = l.GetPoint2().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
+//       Point AinE = l.GetPoint1().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
+//       Point BinE = l.GetPoint2().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
 
-// 	 	// Action Point der Ellipse
-// 	 Point APinE = Point(_Xp, 0);
-// 	 Line linE = Line(AinE, BinE);
-// 	 double xa = linE.GetPoint1().GetX();
-// 	 double ya = linE.GetPoint1().GetY();
-// 	 double xb = linE.GetPoint2().GetX();
-// 	 double yb = linE.GetPoint2().GetY();
-// 	 double a = GetEA();
-// 	 double b = GetEB();
-// 	 Line l_strich_inE;
-// 	 // Punkt auf line mit kürzestem Abstand zum Action Point der Ellipse
-// 	Point PinE = linE.ShortestPoint(APinE);
-
-
-// 	 double mindist; // Rückgabewert
-
-// 	 // kürzester Punkt ist Randpunkt
-// 	 if (PinE == AinE || PinE == BinE) {
-// 		 mindist = 0;
-// 	 } else {
-// 		 double Dx, Dy      // D
-// 		 , NormD, NormT;
-// 		 double Nx, Ny;	    // N
-// 		 double P1x, P1y; 	// P1
-// 		 double Rx, Ry;     // R
-// 		 double Tx, Ty;     // R
-// 		 double d, e;
-// 		 double dummy;
-// 		 Dx = xa - xb;
-// 		 Dy = ya - yb;
-
-// 		 if(Dx*ya - Dy*xa < 0)
-// 		 {
-// 			 Dx = -Dx;
-// 			 Dy = -Dy;
-// 		 }
-
-// 		 NormD = sqrt(Dx*Dx + Dy*Dy);
-// 		 Dx /= NormD;
-// 		 Dy /= NormD;
-// 		 //N. The normal of the line
-// 		 Nx = -Dy;
-// 		 Ny = Dx;
-
-// 		 Tx = -Dy/b;
-// 		 Ty = Dx/a;
-// 		 NormT = sqrt(Tx*Tx + Ty*Ty);
-// 		 Tx /= NormT;
-// 		 Ty /= NormT;
-
-// 		 P1x = a*Nx;
-// 		 P1y = b*Ny; //Eq. (2.3)
-
-// 		 dummy = Nx*xa + Ny*ya; //second part of Eq. (2.1)
-
-// 		 e = Nx*P1x + Ny*P1y - dummy; //Eq. (2.4)
-
-// 		 //R
-// 		 Rx = a*Tx;
-// 		 Ry = b*Ty; // Eq. (2.13)
-
-// 		 d = Nx*Rx + Ny*Ry - dummy;
+//              // Action Point der Ellipse
+//       Point APinE = Point(_Xp, 0);
+//       Line linE = Line(AinE, BinE);
+//       double xa = linE.GetPoint1().GetX();
+//       double ya = linE.GetPoint1().GetY();
+//       double xb = linE.GetPoint2().GetX();
+//       double yb = linE.GetPoint2().GetY();
+//       double a = GetEA();
+//       double b = GetEB();
+//       Line l_strich_inE;
+//       // Punkt auf line mit kürzestem Abstand zum Action Point der Ellipse
+//      Point PinE = linE.ShortestPoint(APinE);
 
 
-// /*		 if (1)
-// 		 {
-// 			 printf("\n----------- dca2 --------------\n");
-// 			 printf("Dx = %.2f, Dy=%.2f (det=%.2f)\n", Dx, Dy, Dx*ya - Dy*xa);
-// 			 printf("Nx = %.2f, Ny=%.2f\n", Nx, Ny);
-// 			 printf("P1x = %.2f, P1y=%.2f\n", P1x, P1y);
-// 			 printf("Rx = %.2f, Ry=%.2f\n", Rx, Ry);
-// 			 printf("dummy=%f\n",dummy);
-// 			 printf("theta=%.2f\n",theta*180/PI);
-// 			 printf("e=%f, d=%f\n",e, d);
-// 			 printf("-------------------------\n\n");
-// 		 }*/
-// 		 mindist = d - e;
-// 	 }
-// 	 return mindist;
+//       double mindist; // Rückgabewert
+
+//       // kürzester Punkt ist Randpunkt
+//       if (PinE == AinE || PinE == BinE) {
+//               mindist = 0;
+//       } else {
+//               double Dx, Dy      // D
+//               , NormD, NormT;
+//               double Nx, Ny;     // N
+//               double P1x, P1y;       // P1
+//               double Rx, Ry;     // R
+//               double Tx, Ty;     // R
+//               double d, e;
+//               double dummy;
+//               Dx = xa - xb;
+//               Dy = ya - yb;
+
+//               if(Dx*ya - Dy*xa < 0)
+//               {
+//                       Dx = -Dx;
+//                       Dy = -Dy;
+//               }
+
+//               NormD = sqrt(Dx*Dx + Dy*Dy);
+//               Dx /= NormD;
+//               Dy /= NormD;
+//               //N. The normal of the line
+//               Nx = -Dy;
+//               Ny = Dx;
+
+//               Tx = -Dy/b;
+//               Ty = Dx/a;
+//               NormT = sqrt(Tx*Tx + Ty*Ty);
+//               Tx /= NormT;
+//               Ty /= NormT;
+
+//               P1x = a*Nx;
+//               P1y = b*Ny; //Eq. (2.3)
+
+//               dummy = Nx*xa + Ny*ya; //second part of Eq. (2.1)
+
+//               e = Nx*P1x + Ny*P1y - dummy; //Eq. (2.4)
+
+//               //R
+//               Rx = a*Tx;
+//               Ry = b*Ty; // Eq. (2.13)
+
+//               d = Nx*Rx + Ny*Ry - dummy;
+
+
+// /*            if (1)
+//               {
+//                       printf("\n----------- dca2 --------------\n");
+//                       printf("Dx = %.2f, Dy=%.2f (det=%.2f)\n", Dx, Dy, Dx*ya - Dy*xa);
+//                       printf("Nx = %.2f, Ny=%.2f\n", Nx, Ny);
+//                       printf("P1x = %.2f, P1y=%.2f\n", P1x, P1y);
+//                       printf("Rx = %.2f, Ry=%.2f\n", Rx, Ry);
+//                       printf("dummy=%f\n",dummy);
+//                       printf("theta=%.2f\n",theta*180/PI);
+//                       printf("e=%f, d=%f\n",e, d);
+//                       printf("-------------------------\n\n");
+//               }*/
+//               mindist = d - e;
+//       }
+//       return mindist;
 // }
 
 
@@ -379,7 +410,7 @@ double JEllipse::EffectiveDistanceToLine(const Line& l) const {
       /              \
      /                \
     /                  \
-   P1 *			\
+   P1 *                 \
  *P2
 
  1. find the closest distance between C1 and C2: d
@@ -398,104 +429,107 @@ double JEllipse::EffectiveDistanceToLine(const Line& l) const {
  --> yB = yA - (yA-yC)*AB/AC
  */
 // double JEllipse::MinimumDistanceToEllipse(const JEllipse& E2) const {
-// 	JEllipse tmpE2 = E2; // verschobene Ellipse E2, so dass Berührung mit E1
-// 	Point v; // Verschiebungsvektor
-// 	Point tmpC2 = Point(); // verschobenes Centrum von E2
-// 	const Point& C1 = this->GetCenter();
-// 	const Point& C2 = E2.GetCenter();
+//      JEllipse tmpE2 = E2; // verschobene Ellipse E2, so dass Berührung mit E1
+//      Point v; // Verschiebungsvektor
+//      Point tmpC2 = Point(); // verschobenes Centrum von E2
+//      const Point& C1 = this->GetCenter();
+//      const Point& C2 = E2.GetCenter();
 
-// 	//double d = this->Distance2d(E2); //dist closest approach between centres
-// 	double d = 0.0; //this->Distance2d(E2); //dist closest approach between centres
-// 	double distance; //between c1 and c2
-// 	double mind; // Rueckgabewert
-// 	if (d < 0 || d != d) {
-// 		char tmp[CLENGTH];
-// 		sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() d=%f\n", d);
-// 		Log->Write(tmp);
-// 		exit(0);
-// 	}
+//      //double d = this->Distance2d(E2); //dist closest approach between centres
+//      double d = 0.0; //this->Distance2d(E2); //dist closest approach between centres
+//      double distance; //between c1 and c2
+//      double mind; // Rueckgabewert
+//      if (d < 0 || d != d) {
+//              char tmp[CLENGTH];
+//              sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() d=%f\n", d);
+//              Log->Write(tmp);
+//              exit(0);
+//      }
 
-// 	if ((C1 - C2).NormSquare() < J_EPS*J_EPS) {
-// 		char tmp[CLENGTH];
-// 		sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() m=0\n"
-// 			"xc1: %f xc2: %f yc1: %f yc2: %f\n", C1.GetX(), C2.GetX(),
-// 				C1.GetY(), C2.GetY());
-// 		Log->Write(tmp);
-// 		exit(EXIT_FAILURE);
-// 		//return 0.0;
-// 	}
-// 	// Verschiebungsvektor bestimmen und normieren
-// 	v = (C2 - C1).Normalized();
-// 	tmpC2 = C1 + v * d;
-// 	tmpE2.SetCenter(tmpC2);
-// 	mind = this->EffectiveDistanceToEllipse(tmpE2, &distance);
-// 	if (mind < 0) { //Overlapping
-// 		mind = 0.0;
-// 	}
-// 	return mind;
+//      if ((C1 - C2).NormSquare() < J_EPS*J_EPS) {
+//              char tmp[CLENGTH];
+//              sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() m=0\n"
+//                      "xc1: %f xc2: %f yc1: %f yc2: %f\n", C1.GetX(), C2.GetX(),
+//                              C1.GetY(), C2.GetY());
+//              Log->Write(tmp);
+//              exit(EXIT_FAILURE);
+//              //return 0.0;
+//      }
+//      // Verschiebungsvektor bestimmen und normieren
+//      v = (C2 - C1).Normalized();
+//      tmpC2 = C1 + v * d;
+//      tmpE2.SetCenter(tmpC2);
+//      mind = this->EffectiveDistanceToEllipse(tmpE2, &distance);
+//      if (mind < 0) { //Overlapping
+//              mind = 0.0;
+//      }
+//      return mind;
 // }
 
 // check if point given in the ellipse coordinates is inside an ellipse
-bool JEllipse::IsInside(const Point& p) const {
-	double a = GetEA();
-	double b = GetEB();
-	double x = p.GetX();
-	double y = p.GetY();
-        double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1; 
-        return condition <0;
-	//return (x * x) / (a * a) + (y * y) / (b * b) < 1 + J_EPS_DIST;
+bool JEllipse::IsInside(const Point& p) const
+{
+     double a = GetEA();
+     double b = GetEB();
+     double x = p.GetX();
+     double y = p.GetY();
+     double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
+     return condition <0;
+     //return (x * x) / (a * a) + (y * y) / (b * b) < 1 + J_EPS_DIST;
 }
 
 // check if point given in the ellipse coordinates is outside an ellipse
-bool JEllipse::IsOutside(const Point& p) const {
-	double a = GetEA();
-	double b = GetEB();
-	double x = p.GetX();
-	double y = p.GetY();
-        double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1; 
-        return condition >0;
-	//return (x * x) / (a * a) + (y * y) / (b * b) > 1 - J_EPS_DIST;
+bool JEllipse::IsOutside(const Point& p) const
+{
+     double a = GetEA();
+     double b = GetEB();
+     double x = p.GetX();
+     double y = p.GetY();
+     double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
+     return condition >0;
+     //return (x * x) / (a * a) + (y * y) / (b * b) > 1 - J_EPS_DIST;
 }
 
 // check if point given in the ellipse coordinates is on an ellipse
-bool JEllipse::IsOn(const Point& p) const {
-	double a = GetEA();
-	double b = GetEB();
-	double x = p.GetX();
-	double y = p.GetY();
-	double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
-        return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
-	//return (-J_EPS_DIST < impliciteEllipse) && (impliciteEllipse < J_EPS_DIST);
+bool JEllipse::IsOn(const Point& p) const
+{
+     double a = GetEA();
+     double b = GetEB();
+     double x = p.GetX();
+     double y = p.GetY();
+     double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
+     return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
+     //return (-J_EPS_DIST < impliciteEllipse) && (impliciteEllipse < J_EPS_DIST);
 }
 
 /*bool Ellipse::IntersectionWithLine(const Line& line) {
-	//int Mathematics::IntersectionWithLine(ELLIPSE * E, float xa, float xb, float ya, float yb){
-	//	float xc = E->xc, yc = E->yc;
-	//	float phi = E->phi;
-	//	float xanew, yanew;
-	//	float xbnew, ybnew;
-	//	float delta = -1;
-	//	float c,d;
-	//	float a2 = E->a*E->a;
-	//	float b2 = E->b*E->b;
-	//	int is = 0;
-	//
-	//	coord_trans(xa, ya, xc, yc, phi, &xanew, &yanew);
-	//	coord_trans(xb, yb, xc, yc, phi, &xbnew, &ybnew);
-	//
-	//
-	//	if(xanew != xbnew){
-	//		c = (yanew - ybnew)/(xanew - xbnew);
-	//		d = yanew - c * xanew;
-	//		float d2=d*d;
-	//		//delta = 4*c*c*d*d/b2/b2 - 4*( d*d/b2 - 1 )*( 1.0/a2 + c*c/b2 );
-	//		delta = 4*(1.0/a2 + c*c/b2 -d2/b2/a2);
-	//		is = (delta < 0)?0:1;
-	//	}
-	//	else{
-	//		is = (E->a < fabs(xanew))?0:1;
-	//	}
-	//	return is;
-	exit(EXIT_FAILURE); // what are you looking for here?
+        //int Mathematics::IntersectionWithLine(ELLIPSE * E, float xa, float xb, float ya, float yb){
+        //      float xc = E->xc, yc = E->yc;
+        //      float phi = E->phi;
+        //      float xanew, yanew;
+        //      float xbnew, ybnew;
+        //      float delta = -1;
+        //      float c,d;
+        //      float a2 = E->a*E->a;
+        //      float b2 = E->b*E->b;
+        //      int is = 0;
+        //
+        //      coord_trans(xa, ya, xc, yc, phi, &xanew, &yanew);
+        //      coord_trans(xb, yb, xc, yc, phi, &xbnew, &ybnew);
+        //
+        //
+        //      if(xanew != xbnew){
+        //              c = (yanew - ybnew)/(xanew - xbnew);
+        //              d = yanew - c * xanew;
+        //              float d2=d*d;
+        //              //delta = 4*c*c*d*d/b2/b2 - 4*( d*d/b2 - 1 )*( 1.0/a2 + c*c/b2 );
+        //              delta = 4*(1.0/a2 + c*c/b2 -d2/b2/a2);
+        //              is = (delta < 0)?0:1;
+        //      }
+        //      else{
+        //              is = (E->a < fabs(xanew))?0:1;
+        //      }
+        //      return is;
+        exit(EXIT_FAILURE); // what are you looking for here?
 }
 */

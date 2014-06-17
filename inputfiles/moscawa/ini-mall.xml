@@ -4,12 +4,14 @@
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
-	<max_sim_time>900</max_sim_time>
 	<!-- geometry file -->
 	<geometry>geometry-mall.xml</geometry>
+	<events>events-mall.xml</events>
+	<max_sim_time>900</max_sim_time>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
+		<!-- <socket hostname="127.0.0.1" port="8989"/>  -->
 	</trajectories>
 	<!-- where to store the logs -->
 	<!--logfile>log</logfile-->
@@ -67,7 +69,7 @@
 			<door trans_id="36" caption="" state="open" />
 			<door trans_id="37" caption="" state="open" />
 			<door trans_id="38" caption="" state="open" />
-			<door trans_id="39" caption="" state="open" /> 
+			<door trans_id="39" caption="" state="open" />
 			<door trans_id="40" caption="" state="open" />
 			<door trans_id="41" caption="" state="open" />
 			<door trans_id="42" caption="" state="open" />
@@ -80,7 +82,14 @@
 			<door trans_id="49" caption="" state="open" />
 			<door trans_id="50" caption="" state="open" />
 			<door trans_id="51" caption="" state="open" />
+			
+			
+			
+			
+			
+			
 		</doors>
+
 	</traffic_constraints>
 	
 	
@@ -114,11 +123,14 @@
 	<agents>
 		<agents_distribution>
 		
-			<group group_id="0" room_id="6" subroom_id="7" number="1" goal_id="1" router_id="1" route_id=""/>
 			
-			<!--<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="1" room_id="6" subroom_id="5" number="100" goal_id="" router_id="1" route_id=""/>
+			<group group_id="1" room_id="6" subroom_id="6" number="5" goal_id="" router_id="1" route_id=""/>
+						
 			
-			<group group_id="2" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" route_id=""/>
+		<!--	
+		<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="0" router_id="1" route_id=""/>
+		<group group_id="2" room_id="0" subroom_id="2" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="3" room_id="0" subroom_id="3" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="4" room_id="0" subroom_id="4" number="10" goal_id="0" router_id="1" route_id=""/>
 			<group group_id="5" room_id="0" subroom_id="5" number="10" goal_id="0" router_id="1" route_id=""/>
@@ -233,7 +245,7 @@
 			<parameters>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
-				<exitCrossingStrategy>3</exitCrossingStrategy>
+				<exitCrossingStrategy>4</exitCrossingStrategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
 				<bmax mu="0.25" sigma="0.001" />
@@ -249,11 +261,18 @@
 	</operational_models>
 
 	<route_choice_models>
+		<routerq router_id="2" description="global_safest">
+			<parameters>
+				<navigation_lines file="routing-mall.xml" />
+			</parameters>
+		</routerq>
+		
 		<router router_id="1" description="global_safest">
 			<parameters>
 				<navigation_lines file="routing-mall.xml" />
 			</parameters>
 		</router>
+
 	</route_choice_models>
 
 </JuPedSim>

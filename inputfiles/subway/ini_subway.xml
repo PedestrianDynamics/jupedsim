@@ -46,7 +46,7 @@
 	<agents>
 		<agents_distribution>
 
-		<group group_id="1" room_id="0" subroom_id="0" number="300" goal_id="" router_id="1" route_id=""/>
+		<group group_id="1" room_id="0" subroom_id="0" number="100" goal_id="" router_id="2" route_id=""/>
 	
 		
 		</agents_distribution>
@@ -83,6 +83,11 @@
 				<navigation_lines file="routing.xml" />
 			</parameters>
 		</router>
+			<router router_id="2" description="dynamic">
+			<parameters>
+				<navigation_lines file="routing.xml" />
+			</parameters>
+		</router>	
 	</route_choice_models>
 
 </JuPedSim>

@@ -26,7 +26,7 @@
  */
 
 #ifndef _DISTRIBUTION_H
-#define	_DISTRIBUTION_H
+#define _DISTRIBUTION_H
 
 
 #include <vector>
@@ -34,47 +34,47 @@
 
 class Distribution {
 private:
-    double _mean;
-    double _sigma;
+     double _mean;
+     double _sigma;
 public:
-    Distribution();
-    Distribution(double mean, double sigma);
-    Distribution(const Distribution& orig);
-    virtual ~Distribution();
+     Distribution();
+     Distribution(double mean, double sigma);
+     Distribution(const Distribution& orig);
+     virtual ~Distribution();
 
-    /**
-     * @return the mean of the distribution
-     */
-    double GetMean() const;
+     /**
+      * @return the mean of the distribution
+      */
+     double GetMean() const;
 
-    /**
-     * @return the standard deviation of the distribution
-     */
-    double GetSigma() const;
+     /**
+      * @return the standard deviation of the distribution
+      */
+     double GetSigma() const;
 
-    /**
-     * @return a random number
-     */
-    virtual double GetRand() =0; // Gibt EINE Zufallszahl zurück
+     /**
+      * @return a random number
+      */
+     virtual double GetRand() =0; // Gibt EINE Zufallszahl zurück
 };
 
 class Gauss : public Distribution {
 private:
-    std::vector<double> _queue;
-    const std::vector<double>& GetQueue() const;
-    void GetPair();
+     std::vector<double> _queue;
+     const std::vector<double>& GetQueue() const;
+     void GetPair();
 
 public:
 
-    Gauss();
-    Gauss(double mean, double sigma);
-    Gauss(const Gauss& orig);
-    virtual ~Gauss();
+     Gauss();
+     Gauss(double mean, double sigma);
+     Gauss(const Gauss& orig);
+     virtual ~Gauss();
 
-    /**
-     * @return a number (gauss distributed)
-     */
-    double GetRand();
+     /**
+      * @return a number (gauss distributed)
+      */
+     double GetRand();
 };
 
 
@@ -83,16 +83,16 @@ private:
 
 public:
 
-	Equal();
-    Equal(double m, double s);
-    Equal(const Equal& orig);
-    virtual ~Equal();
+     Equal();
+     Equal(double m, double s);
+     Equal(const Equal& orig);
+     virtual ~Equal();
 
-    /**
-     * @return a random number (normal distributed)
-     */
-    double GetRand();
+     /**
+      * @return a random number (normal distributed)
+      */
+     double GetRand();
 };
 
-#endif	/* _DISTRIBUTION_H */
+#endif  /* _DISTRIBUTION_H */
 

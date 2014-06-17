@@ -1,4 +1,4 @@
-/* 
+/*
  * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
  * http://code.google.com/p/poly2tri/
  *
@@ -28,13 +28,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- 
+
 #ifndef UTILS_H
 #define UTILS_H
 
 // Otherwise #defines like M_PI are undeclared under Visual Studio
 #define _USE_MATH_DEFINES
-
+#define M_PI            3.14159265358979323846
 #include <exception>
 #include <math.h>
 
@@ -58,20 +58,20 @@ enum Orientation { CW, CCW, COLLINEAR };
  */
 Orientation Orient2d(Point& pa, Point& pb, Point& pc)
 {
-  double detleft = (pa.x - pc.x) * (pb.y - pc.y);
-  double detright = (pa.y - pc.y) * (pb.x - pc.x);
-  double val = detleft - detright;
-  if (val > -EPSILON && val < EPSILON) {
-    return COLLINEAR;
-  } else if (val > 0) {
-    return CCW;
-  }
-  return CW;
+     double detleft = (pa.x - pc.x) * (pb.y - pc.y);
+     double detright = (pa.y - pc.y) * (pb.x - pc.x);
+     double val = detleft - detright;
+     if (val > -EPSILON && val < EPSILON) {
+          return COLLINEAR;
+     } else if (val > 0) {
+          return CCW;
+     }
+     return CW;
 }
 
 /*
-bool InScanArea(Point& pa, Point& pb, Point& pc, Point& pd)
-{
+  bool InScanArea(Point& pa, Point& pb, Point& pc, Point& pd)
+  {
   double pdx = pd.x;
   double pdy = pd.y;
   double adx = pa.x - pdx;
@@ -84,7 +84,7 @@ bool InScanArea(Point& pa, Point& pb, Point& pc, Point& pd)
   double oabd = adxbdy - bdxady;
 
   if (oabd <= EPSILON) {
-    return false;
+  return false;
   }
 
   double cdx = pc.x - pdx;
@@ -95,26 +95,26 @@ bool InScanArea(Point& pa, Point& pb, Point& pc, Point& pd)
   double ocad = cdxady - adxcdy;
 
   if (ocad <= EPSILON) {
-    return false;
+  return false;
   }
 
   return true;
-}
+  }
 
 */
 
 bool InScanArea(Point& pa, Point& pb, Point& pc, Point& pd)
 {
-  double oadb = (pa.x - pb.x)*(pd.y - pb.y) - (pd.x - pb.x)*(pa.y - pb.y);
-  if (oadb >= -EPSILON) {
-    return false;
-  }
+     double oadb = (pa.x - pb.x)*(pd.y - pb.y) - (pd.x - pb.x)*(pa.y - pb.y);
+     if (oadb >= -EPSILON) {
+          return false;
+     }
 
-  double oadc = (pa.x - pc.x)*(pd.y - pc.y) - (pd.x - pc.x)*(pa.y - pc.y);
-  if (oadc <= EPSILON) {
-    return false;
-  }
-  return true;
+     double oadc = (pa.x - pc.x)*(pd.y - pc.y) - (pd.x - pc.x)*(pa.y - pc.y);
+     if (oadc <= EPSILON) {
+          return false;
+     }
+     return true;
 }
 
 }

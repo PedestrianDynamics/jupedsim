@@ -42,6 +42,7 @@ extern OutputHandler* Log;
 
 class ArgumentParser {
 private:
+
 	string pHostname;
 	string pTrajectoriesFile;
 	string pErrorLogFile;
@@ -67,6 +68,12 @@ private:
 	double pTauSigma;
 	double pNuPed;
 	double pNuWall;
+	double paPed;
+	double pbPed;
+	double pcPed;
+	double paWall;
+	double pbWall;
+	double pcWall;
 	double pIntPWidthPed;
 	double pIntPWidthWall;
 	double pMaxFPed;
@@ -80,6 +87,7 @@ private:
 	int pPort;
 	int _embedMesh;
 	int pMaxOpenMPThreads;
+	int pModel;
 	FileFormat pFormat;
 	vector< pair<int, RoutingStrategy> > pRoutingStrategies;
     bool _profilingFlag;
@@ -109,6 +117,7 @@ public:
 
 	double Getfps() const;
 	double GetLinkedCellSize() const;
+	int GetModel() const;
 	double GetTmax() const;
 	double Getdt() const;
 	double GetV0Mu() const;
@@ -123,6 +132,12 @@ public:
 	double GetAminSigma() const;
 	double GetNuPed() const;
 	double GetNuWall() const;
+	double GetaPed() const;
+	double GetbPed() const;
+	double GetcPed() const;
+	double GetaWall() const;
+	double GetbWall() const;
+	double GetcWall() const;
 	double GetIntPWidthPed() const;
 	double GetIntPWidthWall() const;
 	double GetMaxFPed() const;

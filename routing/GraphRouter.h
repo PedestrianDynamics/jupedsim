@@ -15,16 +15,16 @@
 
 class GraphRouter: public GlobalRouter {
 public:
-	GraphRouter();
-	virtual ~GraphRouter();
+     GraphRouter();
+     virtual ~GraphRouter();
 
-	virtual int FindExit(Pedestrian* p);
-	virtual void Init(Building* b);
+     virtual int FindExit(Pedestrian* p);
+     virtual void Init(Building* b);
 
 private:
-	RoutingGraphStorage g;
-	Building * _building;
-	const std::set<int> empty_set;
+     RoutingGraphStorage g;
+     Building * _building;
+     const std::set<int> empty_set;
 
 };
 

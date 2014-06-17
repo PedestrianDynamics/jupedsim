@@ -1,5 +1,5 @@
 /**
- * File:   Building.h
+ * @file   Building.h
  *
  *
  * Created on 1. October 2010, 09:25
@@ -27,7 +27,7 @@
  */
 
 #ifndef _BUILDING_H
-#define	_BUILDING_H
+#define _BUILDING_H
 
 #include <string>
 #include <vector>
@@ -51,158 +51,163 @@ class ForceModel;
 
 class Building {
 private:
-    std::string _caption;
-    std::string _projectFilename;
-    std::string _projectRootDir;
-    RoutingEngine* _routingEngine;
-    LCGrid* _linkedCellGrid;
-    std::vector<Room*> _rooms;
-    std::vector<Pedestrian*> _allPedestians;
-   // ForceModel* _model;
 
-    std::map<int, Crossing*> _crossings;
-    std::map<int, Transition*> _transitions;
-    std::map<int, Hline*> _hLines;
-    std::map<int, Goal*>_goals;
+     std::string _caption;
+     std::string _projectFilename;
+     std::string _projectRootDir;
+     std::string _geometryFilename;
+     RoutingEngine* _routingEngine;
+     LCGrid* _linkedCellGrid;
+     std::vector<Room*> _rooms;
+     std::vector<Pedestrian*> _allPedestians;
 
-    /// pedestrians pathway
-    bool _savePathway;
-    std::ofstream _pathWayStream;
+     std::map<int, Crossing*> _crossings;
+     std::map<int, Transition*> _transitions;
+     std::map<int, Hline*> _hLines;
+     std::map<int, Goal*>_goals;
+
+     /// pedestrians pathway
+     bool _savePathway;
+     std::ofstream _pathWayStream;
 
 public:
-    /// constructor
-    Building();
-    /// destructor
-    virtual ~Building();
+     /// constructor
+     Building();
+     /// destructor
+     virtual ~Building();
 
 
-    void SetCaption(const std::string& s);
-    void SetRoutingEngine(RoutingEngine* r);
-    void SetRoom(Room* room, int index);
-    //void SetModel(ForceModel* m);
-    /// delete the ped from the ped vector
-    void DeletePedestrian(Pedestrian* ped);
-    /// delete the ped from the simulation
-    void DeletePedFromSim(Pedestrian* ped);
-    void AddPedestrian(Pedestrian* ped);
+     void SetCaption(const std::string& s);
+     void SetRoutingEngine(RoutingEngine* r);
+     void SetRoom(Room* room, int index);
+     /// delete the ped from the ped vector
+     void DeletePedestrian(Pedestrian* ped);
+     /// delete the ped from the simulation
+     void DeletePedFromSim(Pedestrian* ped);
+     void AddPedestrian(Pedestrian* ped);
 
 
-    std::string GetCaption() const;
-    RoutingEngine* GetRoutingEngine() const;
-    const std::vector<Room*>& GetAllRooms() const;
-    const std::vector<Pedestrian*>& GetAllPedestrians() const;
-    Pedestrian* GetPedestrian( int pedID) const;
-    int GetNumberOfRooms() const;
-    int GetNumberOfGoals()const;
-    Room* GetRoom(int index) const;
-    Room* GetRoom(std::string caption)const;
+     std::string GetCaption() const;
+     RoutingEngine* GetRoutingEngine() const;
+     const std::vector<Room*>& GetAllRooms() const;
+     const std::vector<Pedestrian*>& GetAllPedestrians() const;
+     Pedestrian* GetPedestrian( int pedID) const;
+     int GetNumberOfRooms() const;
+     int GetNumberOfGoals()const;
+     Room* GetRoom(int index) const;
+     Room* GetRoom(std::string caption)const;
 
-    //TODO: implement the same methods for Crossings and Hlines
-    Transition* GetTransition(std::string caption) const;
-    Transition* GetTransition(int id) ;
+     //TODO: implement the same methods for Crossings and Hlines
+     Transition* GetTransition(std::string caption) const;
+     Transition* GetTransition(int id) ;
 
-    /**
-     * Not implemented
-     */
-    Crossing* GetCrossing(int id);
+     /**
+      * Not implemented
+      */
+     Crossing* GetCrossing(int id);
 
-    /**
-     * Not implemented
-     */
-    Hline* GetHline(int id);
-
-
-    /**
-     * return the subroom with the corresponding unique identifier
-     * @param uid ,the unique identifier
-     * @return NULL if no exists with that identifier.
-     */
-    SubRoom* GetSubRoomByUID( int uid);
-
-    /**
-     * @return true if the two segments are visible from each other.
-     * Alls walls and transitions and crossings are used in this check.
-     * The use of hlines is optional, because they are not real, can can be considered transparent
-     */
-    bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
-
-    /**
-     * @return true if the two points are visible from each other.
-     * Alls walls and transitions and crossings are used in this check.
-     * The use of hlines is optional, because they are not real, can be considered transparent
-     */
-    bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+     /**
+      * Not implemented
+      */
+     Hline* GetHline(int id);
 
 
-    /**
-     * @return a crossing or a transition matching the given caption.
-     * Return NULL if none is found
-     */
-    Crossing* GetTransOrCrossByName(std::string caption) const;
+     /**
+      * return the subroom with the corresponding unique identifier
+      * @param uid ,the unique identifier
+      * @return NULL if no exists with that identifier.
+      */
+     SubRoom* GetSubRoomByUID( int uid);
+
+     /**
+      * @return true if the two segments are visible from each other.
+      * Alls walls and transitions and crossings are used in this check.
+      * The use of hlines is optional, because they are not real, can can be considered transparent
+      */
+     bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+
+     /**
+      * @return true if the two points are visible from each other.
+      * Alls walls and transitions and crossings are used in this check.
+      * The use of hlines is optional, because they are not real, can be considered transparent
+      */
+     bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
 
-    /**
-     * @return a crossing or a transition matching the given id.
-     * Return NULL if none is found
-     */
-    Crossing* GetTransOrCrossByID(int id) const;
+     /**
+      * @return a crossing or a transition matching the given caption.
+      * Return NULL if none is found
+      */
+     Crossing* GetTransOrCrossByName(std::string caption) const;
 
 
-    //TOD0: rename later to GetGoal
-    Goal* GetFinalGoal(int id);
+     /**
+      * @return a crossing or a transition or a hline matching the given uid.
+      * Return NULL if none is found
+      */
+     Hline* GetTransOrCrossByUID(int uid) const;
 
-    int GetNumberOfPedestrians() const;
 
-    /**
-     * @return the linked-cell grid used for spatial query
-     */
-    LCGrid* GetGrid() const;
+     /**
+      * @return the transition matching the uid
+      */
+     Transition* GetTransitionByUID(int uid) const;
 
-    // convenience methods
-    void InitGeometry();
-    void InitGrid(double cellSize);
-    //void InitRoomsAndSubroomsMap();
-    void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
-    void InitSavePedPathway(const std::string &filename);
-    void AddRoom(Room* room);
-    void Update();
-    void UpdateVerySlow();
-    void UpdateGrid();
-    void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
-    void DumpSubRoomInRoom(int roomID, int subID);
+     //TOD0: rename later to GetGoal
+     Goal* GetFinalGoal(int id);
 
-	const std::map<int, Crossing*>& GetAllCrossings() const;
-	const std::map<int, Transition*>& GetAllTransitions() const;
-	const std::map<int, Hline*>& GetAllHlines() const;
-	const std::map<int, Goal*>& GetAllGoals() const;
+     int GetNumberOfPedestrians() const;
 
-	void AddCrossing(Crossing* line);
-	void AddTransition(Transition* line);
-	void AddHline(Hline* line);
-	void AddGoal(Goal* goal);
+     /**
+      * @return the linked-cell grid used for spatial query
+      */
+     LCGrid* GetGrid() const;
 
-	const std::string& GetProjectRootDir() const;
-	const std::string& GetProjectFilename() const;
-	void SetProjectFilename(const std::string &filename) ;
-	void SetProjectRootDir(const std::string &filename);
-    void LoadBuildingFromFile();
-    void LoadTrafficInfo();
-    void LoadRoutingInfo(const std::string &filename);
-    void WriteToErrorLog() const;
+     // convenience methods
+     void InitGeometry();
+     void InitGrid(double cellSize);
+     //void InitRoomsAndSubroomsMap();
+     void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
+     void InitSavePedPathway(const std::string &filename);
+     void AddRoom(Room* room);
+     void Update();
+     void UpdateVerySlow();
+     void UpdateGrid();
+     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
+     void DumpSubRoomInRoom(int roomID, int subID);
 
-	void CleanUpTheScene();
+     const std::map<int, Crossing*>& GetAllCrossings() const;
+     const std::map<int, Transition*>& GetAllTransitions() const;
+     const std::map<int, Hline*>& GetAllHlines() const;
+     const std::map<int, Goal*>& GetAllGoals() const;
 
-	/**
-	 * Check the scenario for possible errors and
-	 * output user specific informations.
-	 */
-	void SanityCheck();
+     void AddCrossing(Crossing* line);
+     void AddTransition(Transition* line);
+     void AddHline(Hline* line);
+     void AddGoal(Goal* goal);
+
+     const std::string& GetProjectRootDir() const;
+     const std::string& GetProjectFilename() const;
+     const std::string& GetGeometryFilename() const;
+     void SetProjectFilename(const std::string &filename) ;
+     void SetProjectRootDir(const std::string &filename);
+     void LoadBuildingFromFile();
+     void LoadTrafficInfo();
+     void LoadRoutingInfo(const std::string &filename);
+     void WriteToErrorLog() const;
+
+     void CleanUpTheScene();
+
+     /**
+      * Check the scenario for possible errors and
+      * output user specific informations.
+      */
+     void SanityCheck();
 
 
 private:
-	void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
+     void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 
 };
 
-#endif	/* _BUILDING_H */
-
+#endif  /* _BUILDING_H */
