@@ -107,7 +107,7 @@ def get_product(root):
 # =======================================================
 def make_filename(directory, d):
     name = "%s/inifiles/ini"%directory
-    traj = "%s/trajectories/traj"%directory
+    traj = "../trajectories/traj" #%directory
     for key, value in d.iteritems():
         if key == "geometry":
             value = os.path.basename(value)
