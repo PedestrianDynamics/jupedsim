@@ -32,6 +32,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
 #include "../routing/RoutingEngine.h"
+#include "../math/ForceModel.h"
 #endif
 
 //#undef _OPENMP
@@ -57,6 +58,7 @@ Building::Building() {
 	_routingEngine = NULL;
 	_linkedCellGrid = NULL;
 	_savePathway = false;
+//        _model=NULL;
 }
 
 
@@ -111,6 +113,9 @@ void Building::SetRoom(Room* room, int index) {
 	}
 }
 
+//void Building::SetModel(ForceModel* m){
+  //     _model=m;
+//}
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
@@ -272,7 +277,6 @@ void Building::InitGeometry() {
 	}
 	Log->Write("INFO: \tInit Geometry successful!!!\n");
 }
-
 
 
 
@@ -867,7 +871,7 @@ void Building::UpdateVerySlow(){
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
 	{
-		const int threadID = omp_get_thread_num();
+        const int threadID = omp_get_thread_num();
 		int start = threadID * partSize;
 		int end = (threadID + 1) * partSize - 1;
 		if ((threadID == nThreads - 1))
@@ -882,7 +886,7 @@ void Building::UpdateVerySlow(){
 				//exit(EXIT_FAILURE);
 			}
 		}
-	}
+    }
 }
 
 void Building::Update() {
@@ -1327,7 +1331,8 @@ void Building::DeletePedestrian(Pedestrian* ped) {
 			}
 
 		}
-		cout << "rescued agent: " << (*it)->GetID() << endl;
+        //cout << "rescued agent: " << (*it)->GetID() << endl;!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                //_model->deletePed(ped->GetID());
 		_allPedestians.erase(it);
 	}
 	delete ped;
