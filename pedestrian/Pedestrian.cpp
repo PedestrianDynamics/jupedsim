@@ -442,6 +442,10 @@ bool Pedestrian::IsReadyForRerouting(){
 	return(_reroutingEnabled &&(_timeBeforeRerouting<=0.0));
 }
 
+double Pedestrian::GetReroutingTime(){
+    return _timeBeforeRerouting;
+}
+
 bool Pedestrian::GetNewEventFlag(){
     return _newEventFlag;
 }
