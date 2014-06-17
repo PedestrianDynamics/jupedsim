@@ -89,9 +89,10 @@ if __name__ == "__main__":
     i = 0
     flows = {}
     MAX_CPU = multiprocessing.cpu_count()
+    
     geofile = "geometry.xml"
     inifiles = glob.glob("inifiles/*.xml")
-                         
+    logging.info("MAX CPU = %d"%MAX_CPU)
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
@@ -164,9 +165,10 @@ if __name__ == "__main__":
     #axes().set_aspect(1./axes().get_data_ratio())  
     ax.legend(loc='best')
     ax.grid()
-    ax.set_xlabel(r'# CPU',fontsize=18)
+    ax.set_xlabel(r'# cores',fontsize=18)
     ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     ax.set_xlim(0.5, MAX_CPU + 0.5)
+    plt.title("# Simulations %d"%len(flows[ncpu]))
     logging.info("save file in cpu.png")
     plt.savefig("cpu.png")
     #plt.show()

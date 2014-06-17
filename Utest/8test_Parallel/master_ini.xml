@@ -3,7 +3,7 @@
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
 	<!-- seed used for initialising random generator -->
-	<seed>linspace(1, 10000, 2 )</seed>
+	<seed>linspace(1, 10000, 40 )</seed>
         <numCPU>range(1,5)</numCPU>
 	<max_sim_time unit="sec">900</max_sim_time>
 	<!-- geometry file -->
@@ -45,7 +45,7 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-			<group group_id="2" room_id="1" subroom_id="0" number="30" goal_id="0" router_id="1" route_id=""/>
+			<group group_id="2" room_id="1" subroom_id="0" number="40" goal_id="0" router_id="1" route_id=""/>
 			<!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
 			<!-- <group group_id="1" room_id="1"  number="10" goal_id="0" router_id="1" route_id="" /> -->
 		</agents_distribution>
