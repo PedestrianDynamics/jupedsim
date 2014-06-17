@@ -544,7 +544,7 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 
      *flag=FREE_EXIT; // assume free exit
 
-     Crossing* crossing=_building->GetTransOrCrossByUID(exitID);
+     Hline* crossing=_building->GetTransOrCrossByUID(exitID);
 
 
      double radius=3.0;//start radius for looking at the reference in metres
@@ -673,14 +673,19 @@ int QuickestPathRouter::GetCommonDestinationCount(AccessPoint* ap1, AccessPoint*
 
 
 
-void QuickestPathRouter::GetQueueAtExit(Crossing* crossing, double minVel,
+void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
                                         double radius, vector<Pedestrian*>& queue,int subroomToConsider)
 {
 
-     SubRoom* sbr1 = crossing->GetSubRoom1();
-     SubRoom* sbr2 = crossing->GetSubRoom2();
+     SubRoom* sbr1 = hline->GetSubRoom1();
+
+     //tentative upgrade to Crossing for getting the second subroom
+     SubRoom* sbr2 = NULL;
+     if(Crossing* cros=dynamic_cast<Crossing*>(hline)){
+         sbr2=cros->GetSubRoom2();
+     }
      //int exitID=crossing->GetID();
-     int exitID=crossing->GetUniqueID();
+     int exitID=hline->GetUniqueID();
      double radius2=radius*radius;
      double minVel2=minVel*minVel;
 
@@ -696,7 +701,7 @@ void QuickestPathRouter::GetQueueAtExit(Crossing* crossing, double minVel,
                Pedestrian* ped = peds[p];
                if(ped->GetExitIndex()==exitID) {
                     if(ped->GetV().NormSquare()<minVel2) {
-                         double dist= (ped->GetPos()-crossing->GetCentre()).NormSquare();
+                         double dist= (ped->GetPos()-hline->GetCentre()).NormSquare();
                          //cout<<"suspect found 1 @ "<< dist<< " { "<< closestDistance<<" }"<<endl;
                          if(dist<radius2) {
                               queue.push_back(ped);
@@ -713,7 +718,7 @@ void QuickestPathRouter::GetQueueAtExit(Crossing* crossing, double minVel,
                Pedestrian* ped = peds[p];
                if(ped->GetExitIndex()==exitID) {
                     if(ped->GetV().NormSquare()<minVel2) {
-                         double dist= (ped->GetPos()-crossing->GetCentre()).NormSquare();
+                         double dist= (ped->GetPos()-hline->GetCentre()).NormSquare();
                          //cout<<"distance: radius"<<dist<<":"<<radius<<endl;
                          //cout<<"suspect found 1 @ "<< dist<< " { "<< closestDistance<<" }"<<endl;
                          if(dist<radius2) {
@@ -732,36 +737,42 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
 
      int ignore_ped1=ped->GetID();
      int ignore_ped2=ref->GetID();
-     Crossing* ignore_crossing=_building->GetTransOrCrossByUID(ref->GetExitIndex());
+     Hline* ignore_hline=_building->GetTransOrCrossByUID(ref->GetExitIndex());
 
-     int obstacles=GetObstaclesCountBetween(ped->GetPos(),ref->GetPos(),ignore_crossing,ignore_ped1,ignore_ped2);
+     int obstacles=GetObstaclesCountBetween(ped->GetPos(),ref->GetPos(),ignore_hline,ignore_ped1,ignore_ped2);
 
      if(obstacles>OBSTRUCTION) return false;
      return true;
 }
 
-bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Crossing* crossing)
+bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hline)
 {
 
      int ignore_ped1=myself->GetID();
      int ignore_ped2=-1;//there is no second ped to ignore
 
-     int obstacles=GetObstaclesCountBetween(myself->GetPos(),crossing->GetCentre(),crossing,ignore_ped1,ignore_ped2);
+     int obstacles=GetObstaclesCountBetween(myself->GetPos(),hline->GetCentre(),hline,ignore_ped1,ignore_ped2);
 
      if(obstacles>OBSTRUCTION) return false;
      return true;
 
 }
 
-int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p2, Crossing* crossing,
+int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline,
           int ignore_ped1, int ignore_ped2)
 {
 
-     SubRoom* sbr1 = crossing->GetSubRoom1();
-     SubRoom* sbr2 = crossing->GetSubRoom2();
+     SubRoom* sbr1 = hline->GetSubRoom1();
+
+     //tentative upgrade to Crossing for getting the second subroom
+     SubRoom* sbr2 = NULL;
+     if(Crossing* cros=dynamic_cast<Crossing*>(hline)){
+         sbr2=cros->GetSubRoom2();
+     }
+
      Line visibilityLine = Line(p1,p2);
 
-     int exitID=crossing->GetID();
+     int exitID=hline->GetID();
      int obstacles=0;
 
      //if this is a hline

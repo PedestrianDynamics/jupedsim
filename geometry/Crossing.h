@@ -30,12 +30,13 @@
 #define _CROSSING_H
 
 #include "NavLine.h"
+#include "Hline.h"
 
 //class Line;
 class Room;
 class SubRoom;
 
-class Crossing : public NavLine {
+class Crossing : public Hline {
 private:
      /// ? unique between crossings and transitions ?
      int _id;

@@ -189,7 +189,7 @@ private:
       * if subroomToConsider == -1 then the two side of the crossing will be considered
       *
       */
-     void GetQueueAtExit(Crossing* crossing, double minVel,
+     void GetQueueAtExit(Hline* hline, double minVel,
                          double radius, std::vector<Pedestrian*>& queue, int subroomToConsider=-1);
 
 
@@ -209,7 +209,7 @@ private:
       * @param ref, the crossing/exit
       * @return true if there is a direct visibility
       */
-     bool IsDirectVisibilityBetween(Pedestrian* ped, Crossing* ref);
+     bool IsDirectVisibilityBetween(Pedestrian* ped, Hline* ref);
 
      /**
       * returns the number of obstacles between the points p1 and p2 with respect
@@ -222,7 +222,7 @@ private:
       * @param ignore_ped2
       * @return the number of obstacles
       */
-     int GetObstaclesCountBetween(const Point& p1, const Point& p2, Crossing* crossing, int ignore_ped1, int ignore_ped2);
+     int GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline, int ignore_ped1, int ignore_ped2);
 
      /**
       *

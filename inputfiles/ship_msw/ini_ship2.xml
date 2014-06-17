@@ -7,11 +7,11 @@
 	<!-- maximal simulation time -->
 	<max_sim_time unit="sec">900</max_sim_time>
 	<!-- geometry file -->
-	<geometry>bateau_obst.xml</geometry>
+	<geometry>bateau.xml</geometry>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" embed_mesh="false" fps="8">
-		<!-- <file location="trajectories.xml" />  -->
-		<socket hostname="127.0.0.1" port="8989"/>
+	<trajectories format="xml-plain" fps="8">
+		 <file location="trajectories.xml" /> 
+		 <socket hostname="127.0.0.1" port="8989"/>  
 	</trajectories>
 	<!-- where to store the logs -->
 	<!--<logfile>log.txt</logfile> -->
@@ -70,7 +70,7 @@
 			<group group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
 			<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
 			<group group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/>
-			<group group_id="2" room_id="0" number="2" goal_id="-1" router_id="2" patience="40"/>
+			<group group_id="2" room_id="0" number="500" goal_id="-1" router_id="2" patience="4"/>
 			<group group_id="3" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="2" patience="20"/>
 		</agents_distribution>
 	</agents>
@@ -90,7 +90,7 @@
 				<tau mu="0.5" sigma="0.00" />
 				<atau mu="0.1" sigma="0.01" />
 				<force_ped nu="3"  />
-				<force_wall nu="7" />
+				<force_wall nu="10" />
 			</parameters>
 		</model>
 
