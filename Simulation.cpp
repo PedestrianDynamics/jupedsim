@@ -110,6 +110,7 @@ void Simulation::InitArgs(ArgumentParser* args)
     char tmp[CLENGTH];
     string s = "Parameter:\n";
 
+
     _argsParser=args;
     switch (args->GetLog()) {
     case 0:
@@ -246,7 +247,7 @@ void Simulation::InitArgs(ArgumentParser* args)
     switch (args->GetModel())
     {
     case MODEL_GFCM:
-        if(_hpc){
+        if(args->GetHPCFlag()){
             _model = new GPU_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
                     args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
                     args->GetMaxFPed(), args->GetMaxFWall());
@@ -480,11 +481,6 @@ int Simulation::RunSimulation() {
     _iod->WriteHeader(_nPeds, _fps, _building,_seed);
     _iod->WriteGeometry(_building);
     _iod->WriteFrame(0,_building);
-
-    //first initialisation needed by the linked-cells
-    Update(upBuilding,upPeds,upTime,upGrid);
-    // TODO: FIXME: why are you not here Update();
-
 
     _iod->WriteHeader(_nPeds, _fps, _building,_seed);
     _iod->WriteGeometry(_building);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="ini.xsd">
 
 	<!-- seed used for initialising random generator -->
         <seed>12542</seed>
@@ -119,8 +120,8 @@
 	<route_choice_models>
                 <router router_id="1" description="global_shortest">
 			<parameters>
-				<!-- extra routing information -->
-				<navigation_lines file="routing.xml" />
+				<!-- extra routing information  -->
+				<navigation_lines file="routing.xml" /> 
 			</parameters>
                 </router>
 
