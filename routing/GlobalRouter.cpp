@@ -84,11 +84,15 @@ GlobalRouter::~GlobalRouter()
 void GlobalRouter::Init(Building* building)
 {
 
-     Log->Write("INFO:\tInit the Global Router Engine");
-     _building = building;
-     LoadRoutingInfos(GetRoutingInfoFile());
+    //necessary if the init is called several times during the simulation
+    Reset();
+    Log->Write("INFO:\tInit the Global Router Engine");
+    _building = building;
+    //only load the information if not previously loaded
+    //if(_building->GetNumberOfGoals()==0)
+        LoadRoutingInfos(GetRoutingInfoFile());
 
-     // initialize the distances matrix for the floydwahrshall
+    // initialize the distances matrix for the floydwahrshall
 
      const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 
@@ -470,6 +474,30 @@ void GlobalRouter::Init(Building* building)
      //WriteGraphGV("routing_graph.gv",1,rooms);
      Log->Write("INFO:\tDone with the Global Router Engine!");
      //exit(0);
+}
+
+void GlobalRouter::Reset(){
+    //clean all allocated spaces
+    if (_distMatrix && _pathsMatrix) {
+        const int exitsCnt = _building->GetNumberOfGoals();
+        for (int p = 0; p < exitsCnt; ++p) {
+            delete[] _distMatrix[p];
+            delete[] _pathsMatrix[p];
+        }
+
+        delete[] _distMatrix;
+        delete[] _pathsMatrix;
+    }
+
+    for (auto itr = _accessPoints.begin(); itr != _accessPoints.end(); ++itr) {
+        delete itr->second;
+    }
+
+    _accessPoints.clear();
+    _tmpPedPath.clear();
+    _map_id_to_index.clear();
+    _map_index_to_id.clear();
+    _mapIdToFinalDestination.clear();
 }
 
 void GlobalRouter::GetPath(int i, int j)

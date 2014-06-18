@@ -110,6 +110,7 @@ void Simulation::InitArgs(ArgumentParser* args)
     char tmp[CLENGTH];
     string s = "Parameter:\n";
 
+
     _argsParser=args;
     switch (args->GetLog()) {
     case 0:
@@ -246,7 +247,7 @@ void Simulation::InitArgs(ArgumentParser* args)
     switch (args->GetModel())
     {
     case MODEL_GFCM:
-        if(_hpc){
+        if(args->GetHPCFlag()){
             _model = new GPU_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
                     args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
                     args->GetMaxFPed(), args->GetMaxFWall());
@@ -476,19 +477,10 @@ int Simulation::RunSimulation() {
     double t=0.0;
 
     // writing the header
-
     _iod->WriteHeader(_nPeds, _fps, _building,_seed);
     _iod->WriteGeometry(_building);
     _iod->WriteFrame(0,_building);
 
-    //first initialisation needed by the linked-cells
-    Update(upBuilding,upPeds,upTime,upGrid);
-    // TODO: FIXME: why are you not here Update();
-
-
-    _iod->WriteHeader(_nPeds, _fps, _building,_seed);
-    _iod->WriteGeometry(_building);
-    _iod->WriteFrame(0,_building);
     if(GetProfileFlag()){
         time(&endinitSim);
         initSimTime = difftime(endinitSim,startinitSim);
@@ -506,7 +498,7 @@ int Simulation::RunSimulation() {
         time(&startLoop);
         solveODETime = 0.0, loopUpdateTime = 0.0, eventUpdateTime = 0.0;
     }
-    cout << "hpcFlag=" << _hpc << endl;
+
     for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
         t = 0 + (frameNr - 1) * _deltaT;
         // solve ODE: berechnet Kräfte und setzt neue Werte für x und v

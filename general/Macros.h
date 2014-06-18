@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string.h>
+#include <algorithm>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -142,4 +143,14 @@ inline char xmltoc(const char * t,const char v='\0')
      return v;
 }
 
+template<typename A>
+     bool IsElementInVector(const std::vector<A> &vec, A& el) {
+          typename std::vector<A>::const_iterator it;
+          it = std::find (vec.begin(), vec.end(), el);
+          if(it==vec.end()) {
+               return false;
+          } else {
+               return true;
+          }
+     }
 #endif  /* _MACROS_H */
