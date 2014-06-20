@@ -230,8 +230,15 @@ void SubRoom::AddTransition(Transition* line)
 
 void SubRoom::AddHline(Hline* line)
 {
-     _hlines.push_back(line);
-     _goalIDs.push_back(line->GetUniqueID());
+    for(unsigned int i=0;i<_hlines.size();i++){
+        if (line->GetID()==_hlines[i]->GetID()){
+            Log->Write("INFO:\tskipping duplicate hline [%d] in subroom [%d]",_id,line->GetID());
+            return;
+        }
+    }
+
+    _hlines.push_back(line);
+    _goalIDs.push_back(line->GetUniqueID());
 }
 
 const vector<Crossing*>& SubRoom::GetAllCrossings() const

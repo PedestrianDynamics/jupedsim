@@ -680,13 +680,13 @@ void ArgumentParser::ParseIniFile(string inifile)
                          paPed = atof(a.c_str());
                     }
                     if (!xPara->FirstChildElement("force_ped")->Attribute("b"))
-                         pbPed = 1.0; // default value
+                         pbPed = 0.25; // default value
                     else {
                          string b = xPara->FirstChildElement("force_ped")->Attribute("b");
                          pbPed = atof(b.c_str());
                     }
                     if (!xPara->FirstChildElement("force_ped")->Attribute("c"))
-                         pcPed = 1.0; // default value
+                         pcPed = 3.0; // default value
                     else {
                          string c = xPara->FirstChildElement("force_ped")->Attribute("c");
                          pcPed = atof(c.c_str());
@@ -704,13 +704,13 @@ void ArgumentParser::ParseIniFile(string inifile)
                          paWall = atof(a.c_str());
                     }
                     if (!xPara->FirstChildElement("force_wall")->Attribute("b"))
-                         pbWall = 1.0; // default value
+                         pbWall = 0.7; // default value
                     else {
                          string b = xPara->FirstChildElement("force_wall")->Attribute("b");
                          pbWall = atof(b.c_str());
                     }
                     if (!xPara->FirstChildElement("force_wall")->Attribute("c"))
-                         pcWall = 1.0; // default value
+                         pcWall = 3.0; // default value
                     else {
                          string c = xPara->FirstChildElement("force_wall")->Attribute("c");
                          pcWall = atof(c.c_str());

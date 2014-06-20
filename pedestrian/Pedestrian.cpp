@@ -274,7 +274,7 @@ int Pedestrian::GetDestinationCount()
 {
      return _destHistory.size();
 }
-// erase the peds memory
+
 void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
@@ -596,11 +596,11 @@ void Pedestrian::Dump(int ID, int pa)
           printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
           printf(">> Destination [ %d ]\n", _exitIndex);
           printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
-          printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
-          printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
-          printf(">> Velocity [%f, %f]  Norm = [%f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
+          printf(">> Position [%0.2f, %0.2f]\n", GetPos().GetX(), GetPos().GetY());
+          printf(">> V0       [%0.2f, %0.2f]  Norm = [%0.2f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
+          printf(">> Velocity [%0.2f, %0.2f]  Norm = [%0.2f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
           if(GetExitLine()) {
-               printf(">> ExitLine: (%f, %f) -- (%f, %f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
+               printf(">> ExitLine: (%0.2f, %0.2f) -- (%0.2f, %0.2f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
                       GetExitLine()->GetPoint2().GetX(), GetExitLine()->GetPoint2().GetY());
                printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
           }

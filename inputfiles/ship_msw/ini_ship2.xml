@@ -7,7 +7,7 @@
 	<!-- maximal simulation time -->
 	<max_sim_time unit="sec">900</max_sim_time>
 	<!-- geometry file -->
-	<geometry>bateau.xml</geometry>
+	<geometry>bateau_obst.xml</geometry>
 	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		 <file location="trajectories.xml" /> 
@@ -25,7 +25,7 @@
 		</rooms>
 		<!-- doors states are: close or open -->
 		<doors>
-                        <door trans_id="3" caption="" state="open" />
+			<door trans_id="3" caption="" state="open" />
 			<door trans_id="4" caption="" state="open" />
 			<door trans_id="6" caption="" state="open" />
 		</doors>
@@ -70,7 +70,7 @@
 			<group group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
 			<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
 			<group group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/>
-			<group group_id="2" room_id="0" number="500" goal_id="-1" router_id="2" patience="4"/>
+			<group group_id="2" room_id="0" number="500" goal_id="-1" router_id="2" patience="44"/>
 			<group group_id="3" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="2" patience="20"/>
 		</agents_distribution>
 	</agents>
@@ -89,8 +89,8 @@
 				<amin mu="0.22" sigma="0.02" />
 				<tau mu="0.5" sigma="0.00" />
 				<atau mu="0.1" sigma="0.01" />
-				<force_ped nu="3"  />
-				<force_wall nu="10" />
+				<force_ped nu="3"  b="0.25" c="3.0"/>
+				<force_wall nu="10" b="0.70" c="3.0"/>
 			</parameters>
 		</model>
 
@@ -103,13 +103,13 @@
 				<navigation_lines file="routing_obst.xml" />
 			</parameters>
 		</router>
-<!-- 
+
 		<router router_id="1" description="global_shortest">
 			<parameters>
-				<navigation_lines file="routing.xml" />
+				<navigation_lines file="routing_obst.xml" />
 			</parameters>
 		</router>
--->
+
 	</route_choice_models>
 
 </JuPedSim>

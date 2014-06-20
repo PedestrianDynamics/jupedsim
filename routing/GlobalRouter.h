@@ -71,6 +71,10 @@ public:
      void WriteGraphGV(std::string filename, int finalDestination,
                        const std::vector<std::string> rooms= std::vector<std::string>());
 
+     /**
+      * Reset the routing engine
+      */
+     void Reset();
 
 protected:
 

@@ -59,8 +59,10 @@
 // routing macros
 #define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
 #define J_QUEUE_VEL_THRESHOLD_JAM 0.2 // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation
+#define CBA_THRESHOLD 0.15
+#define OBSTRUCTION 4
 
-// Lenght of array
+// Length of array
 #define CLENGTH 1000
 
 // conversion (cm <-> m)
