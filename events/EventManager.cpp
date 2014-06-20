@@ -206,7 +206,7 @@ void EventManager::changeRouting(int id, string state)
 
      //clear the previous destinations
      // Method moved from Update_Events
-     for(int p=0; p<nSize; p++) {
+     for(unsigned int p=0; p<nSize; p++) {
           _allPedestrians[p]->UpdateReroutingTime();
           if(_allPedestrians[p]->IsReadyForRerouting()) {
                _allPedestrians[p]->ClearMentalMap();
