@@ -52,10 +52,15 @@ private:
      int _height;
      double _patience;
      //string motivation;// low, normal, high
-     //int _width;
      double _startX; //only valid when _nPeds=1
      double _startY; //only valid when _nPeds=1
      double _startZ; //only valid when _nPeds=1
+
+     //distributing in a square
+     double _xMin;
+     double _xMax;
+     double _yMin;
+     double _yMax;
 
      std::string _gender;
 
@@ -87,6 +92,9 @@ public:
      Point GetStartPosition() const;
      double GetPatience() const;
      void SetPatience(double patience);
+     void SetBounds(double xMin, double xMax, double yMin, double yMax);
+     void Getbounds(double bounds[4]);
+     void Setbounds(double bounds[4]);
 };
 
 //TODO:FIXME merge the two classes and set the _subRoomID=-1
