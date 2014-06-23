@@ -33,7 +33,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#define M_PI            3.14159265358979323846
+#define M_PI   3.14159265358979323846
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
@@ -59,12 +59,14 @@
 // routing macros
 #define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
 #define J_QUEUE_VEL_THRESHOLD_JAM 0.2 // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation
+#define CBA_THRESHOLD 0.15
+#define OBSTRUCTION 4
 
-// Lenght of array
+// Length of array
 #define CLENGTH 1000
 
 // conversion (cm <-> m)
-#define FAKTOR 100
+#define FAKTOR 1
 
 // default final destination for the pedestrians
 #define FINAL_DEST_OUT -1

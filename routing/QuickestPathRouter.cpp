@@ -33,8 +33,7 @@
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
 
-#define CBA_THRESHOLD 0.15
-#define OBSTRUCTION 4
+
 
 using namespace std;
 
@@ -195,7 +194,8 @@ double QuickestPathRouter::TAP (double alpha)
 int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
 {
 
-     int preferredExit=nearestAP->GetNearestTransitAPTO(ped->GetFinalDestination());
+     //int preferredExit=nearestAP->GetNearestTransitAPTO(ped->GetFinalDestination());
+     int preferredExit=GetBestDefaultRandomExit(ped);
      double preferredExitTime=FLT_MAX;
      int quickest=-1;
      double minTime=FLT_MAX;
@@ -204,13 +204,14 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
      //const vector<AccessPoint*>& aps = nearestAP->GetConnectingAPs();
 
      //TODO: should be get relevant destination
-     const vector<AccessPoint*>& aps = nearestAP->GetTransitAPsTo(ped->GetFinalDestination());
+     //const vector<AccessPoint*>& aps = nearestAP->GetTransitAPsTo(ped->GetFinalDestination());
+
+     vector <AccessPoint*> aps;
+     GetRelevantRoutesTofinalDestination(ped,aps);
 
      //special case where there is only one alternative
+     //cout<<"app size: "<<aps.size()<<endl;
      if(aps.size()==1) return preferredExit;
-
-     //TODO: what happens to hlines?
-     // this  can be mitigated with a floor field
 
      //select the optimal time
      for(unsigned int ap=0; ap<aps.size(); ap++) {

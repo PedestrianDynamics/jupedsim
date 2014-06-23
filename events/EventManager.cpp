@@ -140,17 +140,17 @@ void EventManager::Update_Events(double time, double d)
 
      //zuerst muss die Reroutingzeit der Peds aktualisiert werden:
      _deltaT=d;
-     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
-     int nSize = _allPedestrians.size();
-     for(int p=0; p<nSize; p++) {
-          _allPedestrians[p]->UpdateReroutingTime();
-          if(_allPedestrians[p]->IsReadyForRerouting()) {
-               _allPedestrians[p]->ClearMentalMap();
-               _allPedestrians[p]->ResetRerouting();
-          }
-     }
-     unsigned int i;
-     for(i=0; i<_event_times.size(); i++) {
+//     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
+//     int nSize = _allPedestrians.size();
+//     for(int p=0; p<nSize; p++) {
+//          _allPedestrians[p]->UpdateReroutingTime();
+//          if(_allPedestrians[p]->IsReadyForRerouting()) {
+//               _allPedestrians[p]->ClearMentalMap();
+//               _allPedestrians[p]->ResetRerouting();
+//          }
+//     }
+
+     for(unsigned i=0; i<_event_times.size(); i++) {
           if(fabs(_event_times[i]-time)<0.0000001) {
                //Event findet statt
                Log->Write("INFO:\tEvent: after %f sec: ",time);
@@ -202,6 +202,17 @@ void EventManager::changeRouting(int id, string state)
      _building->InitPhiAllPeds(_deltaT);
      vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
      unsigned int nSize = _allPedestrians.size();
+
+
+     //clear the previous destinations
+     // Method moved from Update_Events
+     for(unsigned int p=0; p<nSize; p++) {
+          _allPedestrians[p]->UpdateReroutingTime();
+          if(_allPedestrians[p]->IsReadyForRerouting()) {
+               _allPedestrians[p]->ClearMentalMap();
+               _allPedestrians[p]->ResetRerouting();
+          }
+     }
 
      //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter merken,
      //dass sich Tueren aendern.

@@ -84,11 +84,15 @@ GlobalRouter::~GlobalRouter()
 void GlobalRouter::Init(Building* building)
 {
 
-     Log->Write("INFO:\tInit the Global Router Engine");
-     _building = building;
-     LoadRoutingInfos(GetRoutingInfoFile());
+    //necessary if the init is called several times during the simulation
+    Reset();
+    Log->Write("INFO:\tInit the Global Router Engine");
+    _building = building;
+    //only load the information if not previously loaded
+    //if(_building->GetNumberOfGoals()==0)
+        LoadRoutingInfos(GetRoutingInfoFile());
 
-     // initialize the distances matrix for the floydwahrshall
+    // initialize the distances matrix for the floydwahrshall
 
      const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
 
@@ -460,7 +464,7 @@ void GlobalRouter::Init(Building* building)
 
      //dumping the complete system
      //DumpAccessPoints(592); exit(0);
-     //DumpAccessPoints(50);
+     //DumpAccessPoints(32);exit(0);
      //vector<string> rooms;
      //rooms.push_back("hall");
      //rooms.push_back("0");
@@ -470,6 +474,30 @@ void GlobalRouter::Init(Building* building)
      //WriteGraphGV("routing_graph.gv",1,rooms);
      Log->Write("INFO:\tDone with the Global Router Engine!");
      //exit(0);
+}
+
+void GlobalRouter::Reset(){
+    //clean all allocated spaces
+    if (_distMatrix && _pathsMatrix) {
+        const int exitsCnt = _building->GetNumberOfGoals();
+        for (int p = 0; p < exitsCnt; ++p) {
+            delete[] _distMatrix[p];
+            delete[] _pathsMatrix[p];
+        }
+
+        delete[] _distMatrix;
+        delete[] _pathsMatrix;
+    }
+
+    for (auto itr = _accessPoints.begin(); itr != _accessPoints.end(); ++itr) {
+        delete itr->second;
+    }
+
+    _accessPoints.clear();
+    _tmpPedPath.clear();
+    _map_id_to_index.clear();
+    _map_index_to_id.clear();
+    _mapIdToFinalDestination.clear();
 }
 
 void GlobalRouter::GetPath(int i, int j)
@@ -649,14 +677,13 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
-     //double minDistLocal = FLT_MAX;
+     double minDistLocal = FLT_MAX;
 
      //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
      //      int apID = accessPointsInSubRoom[i];
      for(unsigned int g=0; g<relevantAPs.size(); g++) {
           AccessPoint* ap=relevantAPs[g];
           //int exitid=ap->GetID();
-
           //AccessPoint* ap = _accessPoints[apID];
 
           if (ap->isInRange(sub->GetUID()) == false)
@@ -682,32 +709,33 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
           double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
-
           double dist=dist1+dist2;
 
-          if (dist < minDistGlobal) {
-               bestAPsID = ap->GetID();
-               minDistGlobal = dist;
-          }
-
-//          //if minDistGlobal small then consider minDistLocal
-//          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < 0.25){
-//              if (dist2 < minDistLocal) {
-//              cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-//                  bestAPsID = ap->GetID();
-//                  minDistGlobal = dist;
-//                  minDistLocal= dist2;
-//                  getc(stdin);
-//              }
-//
-//          } else {
-//
-//              if (dist < minDistGlobal) {
-//                  bestAPsID = ap->GetID();
-//                  minDistGlobal = dist;
-//                  minDistLocal=dist2;
-//              }
+//          if (dist < minDistGlobal) {
+//               bestAPsID = ap->GetID();
+//               minDistGlobal = dist;
 //          }
+
+          //very usefull for short term decisions
+          // if two doors are feasible to the final destination without much differences
+          // in the distances, then the nearest is prefered.
+          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+          {
+              if (dist2 < minDistLocal) {
+              //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+                  bestAPsID = ap->GetID();
+                  minDistGlobal = dist;
+                  minDistLocal= dist2;
+              }
+
+          } else {
+
+              if (dist < minDistGlobal) {
+                  bestAPsID = ap->GetID();
+                  minDistGlobal = dist;
+                  minDistLocal=dist2;
+              }
+          }
      }
 
      if (bestAPsID != -1) {
@@ -730,35 +758,91 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 {
 
 
-     Room* room=_building->GetRoom(ped->GetRoomID());
-     SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
+    Room* room=_building->GetRoom(ped->GetRoomID());
+    SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
 
-     //first check with all goals ids. The hlines should normally be filtered out
-     // if any problems then try taking only transitions
-     //const vector<int>& goals=room->GetAllTransitionsIDs();
-     const vector<int>& goals=sub->GetAllGoalIDs();
-     //filter to keep only the emergencies exits.
 
-     for(unsigned int g1=0; g1<goals.size(); g1++) {
-          AccessPoint* ap=_accessPoints[goals[g1]];
-          bool relevant=true;
-          for(unsigned int g2=0; g2<goals.size(); g2++) {
-               if(goals[g2]==goals[g1]) continue; // always skip myself
-               if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]) {
-                    //FIXME there are interference with hlines. suitable only for quickest route considering exits,
+    if(sub->GetAllHlines().size()==0)
+    {
+        const vector<int>& goals=sub->GetAllGoalIDs();
+        //filter to keep only the emergencies exits.
+
+        for(unsigned int g1=0; g1<goals.size(); g1++) {
+            AccessPoint* ap=_accessPoints[goals[g1]];
+            bool relevant=true;
+            for(unsigned int g2=0; g2<goals.size(); g2++) {
+                if(goals[g2]==goals[g1]) continue; // always skip myself
+                if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2]) {
                     // crossings only
-                    //relevant=false;
+                    relevant=false;
                     break;
-               }
-          }
-          if(relevant==true) {
-               relevantAPS.push_back(ap);
-               //cout<<"relevant APs:" <<ap->GetID()<<endl;
-          }
-     }
+                }
+            }
+            if(relevant==true) {
+                //only if not closed
+                if(ap->IsClosed()==false)
+                relevantAPS.push_back(ap);
+                //cout<<"relevant APs:" <<ap->GetID()<<endl;
+            }
+        }
 
-     // remove all the aps which points to one in the same room
-     //return the remaining. They represent unique routes to the final destination
+    }
+    //schnell fix for extra hlines
+    else
+    {
+        const vector<int>& goals=sub->GetAllGoalIDs();
+
+        for(unsigned int g1=0; g1<goals.size(); g1++)
+        {
+            AccessPoint* ap=_accessPoints[goals[g1]];
+
+            //check for visibility
+            //the line from the current position to the centre of the nav line.
+            // at least the line in that direction minus EPS
+            const Point& posA = ped->GetPos();
+            const Point& posB = ap->GetNavLine()->GetCentre();
+            const Point& posC = (posB - posA).Normalized() * ((posA - posB).Norm() - J_EPS) + posA;
+
+            //check if visible
+            if (sub->IsVisible(posA, posC, true) == false)
+            {
+                continue;
+            }
+
+            bool relevant=true;
+            for(unsigned int g2=0; g2<goals.size(); g2++)
+            {
+                if(goals[g2]==goals[g1]) continue; // always skip myself
+                if(ap->GetNearestTransitAPTO(ped->GetFinalDestination())==goals[g2])
+                {
+
+                    //pointing only to the one i dont see
+                    //the line from the current position to the centre of the nav line.
+                    // at least the line in that direction minus EPS
+                    AccessPoint* ap2=_accessPoints[goals[g2]];
+                    const Point& posA = ped->GetPos();
+                    const Point& posB = ap2->GetNavLine()->GetCentre();
+                    const Point& posC = (posB - posA).Normalized()* ((posA - posB).Norm() - J_EPS) + posA;
+
+                    //it points to a destination that I can see anyway
+                    if (sub->IsVisible(posA, posC, true) == true)
+                    {
+                        relevant=false;
+                    }
+
+                    break;
+                }
+            }
+            if(relevant==true)
+            {
+                if(ap->IsClosed()==false)
+                relevantAPS.push_back(ap);
+                //cout<<"relevant APs:" <<ap->GetID()<<endl;
+            }
+        }
+    }
+
+
 }
 
 SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2)

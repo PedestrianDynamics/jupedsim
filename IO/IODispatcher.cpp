@@ -112,7 +112,7 @@ void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int se
      tmp.append(agents);
      sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
      tmp.append(agents);
-     sprintf(agents, "\t\t<frameRate>%f</frameRate>\n", fps);
+     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
      tmp.append(agents);
      tmp.append("\t</header>\n");
      Write(tmp);
@@ -454,12 +454,12 @@ void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, 
      tmp.append(agents);
      sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
      tmp.append(agents);
-     sprintf(agents, "\t\t<frameRate>%f</frameRate>\n", fps);
+     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
      tmp.append(agents);
      tmp.append("\t\t<!-- Frame count HACK\n");
      tmp.append("replace me\n");
      tmp.append("\t\tFrame count HACK -->\n");
-//      tmp.append("<frameCount>xxxxxxx</frameCount>\n");
+     //tmp.append("<frameCount>xxxxxxx</frameCount>\n");
      tmp.append("\t</header>\n");
      Write(tmp);
 
@@ -474,7 +474,9 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
      embed_geometry.append(file_location);
      embed_geometry.append("\t</geometry>\n");
-     Write(embed_geometry);
+     //Write(embed_geometry);
+
+     IODispatcher::WriteGeometry(building);
 
      Write("\t<AttributeDescription>");
      Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");

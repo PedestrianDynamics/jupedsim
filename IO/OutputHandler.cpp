@@ -35,22 +35,22 @@ using namespace std;
 
 void OutputHandler::incrementWarnings()
 {
-     nWarnings += 1;
+     _nWarnings += 1;
 }
 
 int OutputHandler::GetWarnings()
 {
-     return nWarnings;
+     return _nWarnings;
 }
 
 void OutputHandler::incrementErrors()
 {
-     nErrors += 1;
+     _nErrors += 1;
 }
 
 int OutputHandler::GetErrors()
 {
-     return nErrors;
+     return _nErrors;
 }
 
 void OutputHandler::Write(string str)
@@ -59,9 +59,6 @@ void OutputHandler::Write(string str)
           cout << str << endl;
 }
 
-
-
-#include<math.h>
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 {
      // based on this answer:
@@ -90,34 +87,58 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 }
 
 void OutputHandler::Write(const char* message,...)
-{
-     char msg[CLENGTH];
-     va_list ap;
-     va_start (ap, message);
-     vsprintf (msg, message, ap);
-     va_end (ap);
+ {
+    char msg[CLENGTH];
+    va_list ap;
+    va_start(ap, message);
+    vsprintf(msg, message, ap);
+    va_end(ap);
 
-     string str(msg);
-     if(str.find("ERROR") == string::npos) {
-          cout<<msg<<endl;
-          cout.flush();
-          incrementErrors();
-     } else { // Warning
-          cerr<<msg<<endl;
-          cerr.flush();
-          incrementWarnings();
-     }
+    string str(msg);
+
+    if (str.find("ERROR") != string::npos)
+    {
+        cerr << msg << endl;
+        cerr.flush();
+        incrementErrors();
+    }
+    else if (str.find("WARNING") != string::npos)
+    {
+        cerr << msg << endl;
+        cerr.flush();
+        incrementWarnings();
+    }
+    else
+    { // infos
+        cout << msg << endl;
+        cout.flush();
+    }
 }
 
 void STDIOHandler::Write(string str)
 {
-     if (this != NULL)
-          cout << str << endl;
+    if (str.find("ERROR") != string::npos)
+       {
+           cerr << str << endl;
+           cerr.flush();
+           incrementErrors();
+       }
+       else if (str.find("WARNING") != string::npos)
+       {
+           cerr << str << endl;
+           cerr.flush();
+           incrementWarnings();
+       }
+       else
+       { // infos
+           cout << str << endl;
+           cout.flush();
+       }
 }
 
 FileHandler::FileHandler(const char *fn)
 {
-     pfp.open(fn);
+     _pfp.open(fn);
      if (!fn) {
           char tmp[CLENGTH];
           sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
@@ -128,14 +149,14 @@ FileHandler::FileHandler(const char *fn)
 
 FileHandler::~FileHandler()
 {
-     pfp.close();
+     _pfp.close();
 }
 
 void FileHandler::Write(string str)
 {
      if (this != NULL) {
-          pfp << str << endl;
-          pfp.flush();
+          _pfp << str << endl;
+          _pfp.flush();
      }
 }
 
@@ -146,8 +167,8 @@ void FileHandler::Write(const char* string,...)
      va_start (ap, string);
      vsprintf (msg,string ,ap);
      va_end (ap);
-     pfp<<msg<<endl;
-     pfp.flush();
+     _pfp<<msg<<endl;
+     _pfp.flush();
 }
 
 TraVisToHandler::TraVisToHandler(string host, int port)

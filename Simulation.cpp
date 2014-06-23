@@ -50,7 +50,7 @@ Simulation::Simulation()
      _iod = new IODispatcher();
      _fps=1;
      _em=NULL;
-     //_argsParser=NULL;
+     _argsParser=NULL;
 }
 
 Simulation::~Simulation()

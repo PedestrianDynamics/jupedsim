@@ -126,269 +126,304 @@ ArgumentParser::ArgumentParser()
      pHostname="localhost";
      _embedMesh=0;
      pMaxOpenMPThreads = omp_get_thread_num();
+     _profilingFlag = false;
+     _hpcFlag=0;
 }
 
 
+void ArgumentParser::ParseArgs(int argc, char **argv) {
+	int c;
+	int option_index = 0;
 
-void ArgumentParser::ParseArgs(int argc, char **argv)
-{
-     int c;
-     int option_index = 0;
+	//special case of the default configuration ini.xml
+	if(argc==1){
+		Log->Write("INFO: \tTrying to load the default configuration from the file <ini.xml>");
+        ParseIniFile("ini.xml");
+		return;
+	}
 
-     //special case of the default configuration ini.xml
-     if(argc==1) {
-          Log->Write("INFO: \tTrying to load the default configuration from the file <ini.xml>");
-          ParseIniFile("ini.xml");
-          return;
-     }
+	static struct option long_options[] = {
+			{"number", 1, 0, 'n'},
+			{"tmax", 1, 0, 't'},
+			{"dt", 1, 0, 'd'},
+			{"fps", 1, 0, 'D'},
+			{"solver", 1, 0, 's'},
+			{"geometry", 1, 0, 'g'},
+			{"exitstrategy", 1, 0, 'e'},
+			{"randomize", 1, 0, 'r'},
+			{"routing", 1, 0, 'R'},
+			{"linkedcells", optional_argument, 0, 'l'},
+			{"maxompthreads", 1, 0, 'p'},
+			{"v0mu", 1, 0, 'v'},
+			{"v0sigma", 1, 0, 'V'},
+			{"ataumu", 1, 0, 'a'},
+			{"atausigma", 1, 0, 'A'},
+			{"aminmu", 1, 0, 'z'},
+			{"aminsigma", 1, 0, 'Z'},
+			{"bmaxmu", 1, 0, 'b'},
+			{"bmaxsigma", 1, 0, 'B'},
+			{"bminmu", 1, 0, 'y'},
+			{"bminsigma", 1, 0, 'Y'},
+			{"nuped", 1, 0, 'x'},
+			{"nuwall", 1, 0, 'X'},
+			{"intpwidthped", 1, 0, 'i'},
+			{"intpwidthwall", 1, 0, 'I'},
+			{"maxfped", 1, 0, 'm'},
+			{"maxfwall", 1, 0, 'M'},
+			{"disteffmaxped", 1, 0, 'f'},
+			{"disteffmaxwall", 1, 0, 'F'},
+			{"taumu", 1, 0, 'c'},
+			{"tausigma", 1, 0, 'C'},
+			{"log", 1, 0, 'L'},
+			{"pathway", 1, 0, 'Q'},
+			{"output-file", 1, 0, 'T'},
+			{"streaming-port", 1, 0, 'P'},
+			{"streaming-ip", 1, 0, 'O'},
+			{"help", 0, 0, 'h'},
+			{"inifile", optional_argument, 0, 'q'},
+            {"profiling", optional_argument, 0, 'u'},
+            {"architecture", optional_argument,0, 'H'},
+			{"generate-mesh", required_argument, 0, 'N'},
+			{0, 0, 0, 0}
+	};
 
-     static struct option long_options[] = {
-          {"number", 1, 0, 'n'},
-          {"tmax", 1, 0, 't'},
-          {"dt", 1, 0, 'd'},
-          {"fps", 1, 0, 'D'},
-          {"solver", 1, 0, 's'},
-          {"geometry", 1, 0, 'g'},
-          {"exitstrategy", 1, 0, 'e'},
-          {"randomize", 1, 0, 'r'},
-          {"routing", 1, 0, 'R'},
-          {"linkedcells", optional_argument, 0, 'l'},
-          {"maxompthreads", 1, 0, 'p'},
-          {"v0mu", 1, 0, 'v'},
-          {"v0sigma", 1, 0, 'V'},
-          {"ataumu", 1, 0, 'a'},
-          {"atausigma", 1, 0, 'A'},
-          {"aminmu", 1, 0, 'z'},
-          {"aminsigma", 1, 0, 'Z'},
-          {"bmaxmu", 1, 0, 'b'},
-          {"bmaxsigma", 1, 0, 'B'},
-          {"bminmu", 1, 0, 'y'},
-          {"bminsigma", 1, 0, 'Y'},
-          {"nuped", 1, 0, 'x'},
-          {"nuwall", 1, 0, 'X'},
-          {"intpwidthped", 1, 0, 'i'},
-          {"intpwidthwall", 1, 0, 'I'},
-          {"maxfped", 1, 0, 'm'},
-          {"maxfwall", 1, 0, 'M'},
-          {"disteffmaxped", 1, 0, 'f'},
-          {"disteffmaxwall", 1, 0, 'F'},
-          {"taumu", 1, 0, 'c'},
-          {"tausigma", 1, 0, 'C'},
-          {"log", 1, 0, 'L'},
-          {"pathway", 1, 0, 'Q'},
-          {"output-file", 1, 0, 'T'},
-          {"streaming-port", 1, 0, 'P'},
-          {"streaming-ip", 1, 0, 'O'},
-          {"help", 0, 0, 'h'},
-          {"inifile", optional_argument, 0, 'q'},
-          {"generate-mesh", required_argument, 0, 'N'},
-          {0, 0, 0, 0}
-     };
+	while ((c = getopt_long_only(argc, argv,
+            "n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:u:H:",
+			long_options, &option_index)) != -1) {
 
-     while ((c = getopt_long_only(argc, argv,
-                                  "n:t:d:s:g:e:r:R:l:p:v:V:a:A:z:Z:b:B:y:Y:x:X:i:I:m:M:f:F:c:C:L:T:O:h:q:D:Q:N:",
-                                  long_options, &option_index)) != -1) {
+		switch (c) {
+		case 'T':
+		{
+            if (optarg)
+				pTrajectoriesFile=optarg;
+			break;
+		}
+		case 'P':
+		{
+			if (optarg)
+				pPort=atoi(optarg);
+			break;
+		}
+		case 'O':
+		{
+			if (optarg)
+				pHostname=optarg;
+			break;
+		}
+		case 'L':
+		{
+			pLog = atoi(optarg);
+			break;
+		}
+		case 'c':
+		{
+			pTauMu = atof(optarg);
+			break;
+		}
+		case 'C':
+		{
+			pTauSigma = atof(optarg);
+			break;
+		}
+		case 'f':
+		{
+			pDistEffMaxPed = atof(optarg);
+			break;
+		}
+		case 'F':
+		{
+			pDistEffMaxWall = atof(optarg);
+			break;
+		}
+		case 'm':
+		{
+			pMaxFPed = atof(optarg);
+			break;
+		}
+		case 'M':
+		{
+			pMaxFWall = atof(optarg);
+			break;
+		}
+		case 'i':
+		{
+			pIntPWidthPed = atof(optarg);
+			break;
+		}
+		case 'I':
+		{
+			pIntPWidthWall = atof(optarg);
+			break;
+		}
+		case 'x':
+		{
+			pNuPed = atof(optarg);
+			break;
+		}
+		case 'X':
+		{
+			pNuWall = atof(optarg);
+			break;
+		}
+		case 'z':
+		{
+			pAminMu = atof(optarg);
+			break;
+		}
+		case 'Z':
+		{
+			pAminSigma = atof(optarg);
+			break;
+		}
+		case 'a':
+		{
+			pAtauMu = atof(optarg);
+			break;
+		}
+		case 'A':
+		{
+			pAtauSigma = atof(optarg);
+			break;
+		}
+		case 'y':
+		{
+			pBminMu = atof(optarg);
+			break;
+		}
+		case 'Y':
+		{
+			pBminSigma = atof(optarg);
+			break;
+		}
+		case 'b':
+		{
+			pBmaxMu = atof(optarg);
+			break;
+		}
+		case 'B':
+		{
+			pBmaxSigma = atof(optarg);
+			break;
+		}
+		case 'v':
+		{
+			pV0Mu = atof(optarg);
+			break;
+		}
+		case 'V':
+		{
+			pV0Sigma = atof(optarg);
+			break;
+		}
+		case 'D':
+		{
+			pfps=atof(optarg);
+			break;
+		}
+		case 't':
+		{
+			double t = atof(optarg);
+			if (t > 0)
+				pTmax = t;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"tmax has to be positiv!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 'd':
+		{
+			double d = atof(optarg);
+			if (d > 0)
+				pdt = d;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"dt has to be positiv!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 's':
+		{
+			int s = atoi(optarg);
+			if (s == 1 || s==2 || s==3) // spaeter erweitern
+				pSolver = s;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"wrong value for solver type!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 'e':
+		{
+			int e = atoi(optarg);
+			if (e == 1 || e == 2 || e == 3 || e == 4 )
+				pExitStrategy = e;
+			else {
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"wrong value for exit strategy!!!\n");
+				exit(0);
+			}
+			break;
+		}
+		case 'R': // TODO: are these options still correct ?
+		{
+			int r = atoi(optarg);
+			switch(r){
+			case 1:
+				pRoutingStrategies.push_back(make_pair (1,ROUTING_LOCAL_SHORTEST));
+				break;
+			case 2:
+				pRoutingStrategies.push_back(make_pair (2, ROUTING_GLOBAL_SHORTEST));
+				break;
+			case 3:
+				pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
+				break;
+			case 4:
+				pRoutingStrategies.push_back(make_pair (4,ROUTING_DYNAMIC));
+				break;
+			case 5:
+				pRoutingStrategies.push_back(make_pair (5,ROUTING_NAV_MESH));
+				break;
+			case 6:
+				pRoutingStrategies.push_back(make_pair (6,ROUTING_DUMMY));
+				break;
+			default:
+				Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+						"wrong value for routing strategy!!!\n");
+				exit(0);
+				break;
+			}
+			break;
+		}
+		case 'l':
+		{
+			pLinkedCells = true;
+			if (optarg)
+				pLinkedCellSize=atof(optarg);
+			break;
+		}
+		break;
 
-          switch (c) {
-          case 'T': {
-               if (optarg)
-                    pTrajectoriesFile=optarg;
-               break;
-          }
-          case 'P': {
-               if (optarg)
-                    pPort=atoi(optarg);
-               break;
-          }
-          case 'O': {
-               if (optarg)
-                    pHostname=optarg;
-               break;
-          }
-          case 'L': {
-               pLog = atoi(optarg);
-               break;
-          }
-          case 'c': {
-               pTauMu = atof(optarg);
-               break;
-          }
-          case 'C': {
-               pTauSigma = atof(optarg);
-               break;
-          }
-          case 'f': {
-               pDistEffMaxPed = atof(optarg);
-               break;
-          }
-          case 'F': {
-               pDistEffMaxWall = atof(optarg);
-               break;
-          }
-          case 'm': {
-               pMaxFPed = atof(optarg);
-               break;
-          }
-          case 'M': {
-               pMaxFWall = atof(optarg);
-               break;
-          }
-          case 'i': {
-               pIntPWidthPed = atof(optarg);
-               break;
-          }
-          case 'I': {
-               pIntPWidthWall = atof(optarg);
-               break;
-          }
-          case 'x': {
-               pNuPed = atof(optarg);
-               break;
-          }
-          case 'X': {
-               pNuWall = atof(optarg);
-               break;
-          }
-          case 'z': {
-               pAminMu = atof(optarg);
-               break;
-          }
-          case 'Z': {
-               pAminSigma = atof(optarg);
-               break;
-          }
-          case 'a': {
-               pAtauMu = atof(optarg);
-               break;
-          }
-          case 'A': {
-               pAtauSigma = atof(optarg);
-               break;
-          }
-          case 'y': {
-               pBminMu = atof(optarg);
-               break;
-          }
-          case 'Y': {
-               pBminSigma = atof(optarg);
-               break;
-          }
-          case 'b': {
-               pBmaxMu = atof(optarg);
-               break;
-          }
-          case 'B': {
-               pBmaxSigma = atof(optarg);
-               break;
-          }
-          case 'v': {
-               pV0Mu = atof(optarg);
-               break;
-          }
-          case 'V': {
-               pV0Sigma = atof(optarg);
-               break;
-          }
-          case 'D': {
-               pfps=atof(optarg);
-               break;
-          }
-          case 't': {
-               double t = atof(optarg);
-               if (t > 0)
-                    pTmax = t;
-               else {
-                    Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                               "tmax has to be positiv!!!\n");
-                    exit(0);
-               }
-               break;
-          }
-          case 'd': {
-               double d = atof(optarg);
-               if (d > 0)
-                    pdt = d;
-               else {
-                    Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                               "dt has to be positiv!!!\n");
-                    exit(0);
-               }
-               break;
-          }
-          case 's': {
-               int s = atoi(optarg);
-               if (s == 1 || s==2 || s==3) // spaeter erweitern
-                    pSolver = s;
-               else {
-                    Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                               "wrong value for solver type!!!\n");
-                    exit(0);
-               }
-               break;
-          }
-          case 'e': {
-               int e = atoi(optarg);
-               if (e == 1 || e == 2 || e == 3 || e == 4 )
-                    pExitStrategy = e;
-               else {
-                    Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                               "wrong value for exit strategy!!!\n");
-                    exit(0);
-               }
-               break;
-          }
-          case 'R': { // TODO: are these options still correct ?
-               printf("---%s\n",optarg);
-               int r = atoi(optarg);
-               switch(r) {
-               case 1:
-                    pRoutingStrategies.push_back(make_pair (1,ROUTING_LOCAL_SHORTEST));
-                    break;
-               case 2:
-                    pRoutingStrategies.push_back(make_pair (2, ROUTING_GLOBAL_SHORTEST));
-                    break;
-               case 3:
-                    pRoutingStrategies.push_back(make_pair (3,ROUTING_QUICKEST));
-                    break;
-               case 4:
-                    pRoutingStrategies.push_back(make_pair (4,ROUTING_DYNAMIC));
-                    break;
-               case 5:
-                    pRoutingStrategies.push_back(make_pair (5,ROUTING_NAV_MESH));
-                    break;
-               case 6:
-                    pRoutingStrategies.push_back(make_pair (6,ROUTING_DUMMY));
-                    break;
-               default:
-                    Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                               "wrong value for routing strategy!!!\n");
-                    exit(0);
-                    break;
-               }
-               break;
-          }
-          case 'l': {
-               pLinkedCells = true;
-               if (optarg)
-                    pLinkedCellSize=atof(optarg);
-               break;
-          }
-          break;
+		case 'q':
+		{
+			string inifile="ini.xml";
+			if (optarg)
+				inifile=optarg;
+			ParseIniFile(inifile);
+			return; //stop looking
+		}
+		break;
 
-          case 'q': {
-               string inifile="ini.xml";
-               if (optarg)
-                    inifile=optarg;
-               ParseIniFile(inifile);
-               return; //stop looking
-          }
-          break;
+		case 'p':
+			pMaxOpenMPThreads = atof(optarg);
 
-          case 'p':
-               pMaxOpenMPThreads = atof(optarg);
 #ifdef _OPENMP
                omp_set_num_threads(pMaxOpenMPThreads);
 #endif
+
                break;
 
           case 'h':
@@ -396,24 +431,47 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                break;
 
           case 'N':
-               pNavMeshFilename=optarg;
-               break;
+        	  pNavMeshFilename=optarg;
+        	  break;
+          case 'u':
+          {
+        	  int tmp = strcmp("true",optarg);
+        	  if(tmp==0)
+        		  _profilingFlag = true;
+        	  else
+        		  _profilingFlag = false;
+          }
+          break;
+          case 'H':
+          {
+        	  if(strcmp("cpu",optarg)==0)
+        		  _hpcFlag = 0;
+        	  else if(strcmp("gpu",optarg)==0)
+        		  _hpcFlag = 1;
+        	  else if(strcmp("xeonphi",optarg)==0)
+        		  _hpcFlag = 2;
+        	  else{
+        		  _hpcFlag = 0;
+        		  Log->Write("ERROR: Wrong argument for architecture. Architecture is set to 'cpu'.");
+        	  }
 
+          }
+          break;
           default: {
-               Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                          "wrong program options!!!\n");
-               Usage();
-               exit(EXIT_FAILURE);
+        	  Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+        			  "wrong program options!!!\n");
+        	  Usage();
+        	  exit(EXIT_FAILURE);
           }
-          }
-     }
-
-     // other special case where a single configuration file is submitted
-     if(argc==2) {
-          ParseIniFile(argv[1]);
-          return;
-     }
 }
+		}
+
+		// other special case where a single configuration file is submitted
+		if(argc==2) {
+			ParseIniFile(argv[1]);
+			return;
+		}
+	}
 
 
 void ArgumentParser::ParseIniFile(string inifile)
@@ -680,13 +738,13 @@ void ArgumentParser::ParseIniFile(string inifile)
                          paPed = atof(a.c_str());
                     }
                     if (!xPara->FirstChildElement("force_ped")->Attribute("b"))
-                         pbPed = 1.0; // default value
+                         pbPed = 0.25; // default value
                     else {
                          string b = xPara->FirstChildElement("force_ped")->Attribute("b");
                          pbPed = atof(b.c_str());
                     }
                     if (!xPara->FirstChildElement("force_ped")->Attribute("c"))
-                         pcPed = 1.0; // default value
+                         pcPed = 3.0; // default value
                     else {
                          string c = xPara->FirstChildElement("force_ped")->Attribute("c");
                          pcPed = atof(c.c_str());
@@ -704,13 +762,13 @@ void ArgumentParser::ParseIniFile(string inifile)
                          paWall = atof(a.c_str());
                     }
                     if (!xPara->FirstChildElement("force_wall")->Attribute("b"))
-                         pbWall = 1.0; // default value
+                         pbWall = 0.7; // default value
                     else {
                          string b = xPara->FirstChildElement("force_wall")->Attribute("b");
                          pbWall = atof(b.c_str());
                     }
                     if (!xPara->FirstChildElement("force_wall")->Attribute("c"))
-                         pcWall = 1.0; // default value
+                         pcWall = 3.0; // default value
                     else {
                          string c = xPara->FirstChildElement("force_wall")->Attribute("c");
                          pcWall = atof(c.c_str());
@@ -1008,4 +1066,12 @@ void ArgumentParser::SetTrajectoriesFile(const string& trajectoriesFile)
 const string& ArgumentParser::GetProjectRootDir() const
 {
      return _projectRootDir;
+}
+
+bool ArgumentParser::GetProfileFlag(){
+    return _profilingFlag;
+}
+
+int ArgumentParser::GetHPCFlag(){
+    return _hpcFlag;
 }

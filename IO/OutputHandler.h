@@ -38,18 +38,20 @@
 
 class OutputHandler {
 protected:
-     int nWarnings;
-     int nErrors;
+     int _nWarnings;
+     int _nErrors;
 public:
-     OutputHandler() { nWarnings = 0; nErrors = 0; };
+     OutputHandler() { _nWarnings = 0; _nErrors = 0; };
+     virtual ~OutputHandler() {};
+
      int GetWarnings();
      void incrementWarnings();
      int GetErrors();
      void incrementErrors();
      void ProgressBar(double TotalPeds, double NowPeds);
+
      virtual void Write(std::string str);
      virtual void Write(const char *string, ...);
-     virtual ~OutputHandler() {};
 };
 
 class STDIOHandler : public OutputHandler {
@@ -59,7 +61,7 @@ public:
 
 class FileHandler : public OutputHandler {
 private:
-     std::ofstream pfp;
+     std::ofstream _pfp;
 public:
      FileHandler(const char *fn);
      virtual ~FileHandler();

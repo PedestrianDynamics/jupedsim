@@ -230,8 +230,15 @@ void SubRoom::AddTransition(Transition* line)
 
 void SubRoom::AddHline(Hline* line)
 {
-     _hlines.push_back(line);
-     _goalIDs.push_back(line->GetUniqueID());
+    for(unsigned int i=0;i<_hlines.size();i++){
+        if (line->GetID()==_hlines[i]->GetID()){
+            Log->Write("INFO:\tskipping duplicate hline [%d] in subroom [%d]",_id,line->GetID());
+            return;
+        }
+    }
+
+    _hlines.push_back(line);
+    _goalIDs.push_back(line->GetUniqueID());
 }
 
 const vector<Crossing*>& SubRoom::GetAllCrossings() const
@@ -619,7 +626,7 @@ string NormalSubRoom::WritePolyLine() const
 
      s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
      for (unsigned int j = 0; j < _poly.size(); j++) {
-          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
+          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX()* FAKTOR,_poly[j].GetY()* FAKTOR);
           s.append(tmp);
      }
      s.append("\t</Obstacle>\n");
@@ -850,7 +857,7 @@ string Stair::WritePolyLine() const
 
      s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
      for (unsigned int j = 0; j < _poly.size(); j++) {
-          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
+          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX()* FAKTOR,_poly[j].GetY()* FAKTOR);
           s.append(tmp);
      }
      s.append("\t</Obstacle>\n");

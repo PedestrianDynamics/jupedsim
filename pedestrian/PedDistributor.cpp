@@ -43,19 +43,23 @@ using namespace std;
  ************************************************************/
 StartDistributionRoom::StartDistributionRoom()
 {
-     _roomID = -1;
-     _nPeds = -1;
-     _groupID = -1;
-     _goalID = -1;
-     _routerID = -1;
-     _routeID = -1;
-     _age = -1;
-     _height = -1;
-     _startX = NAN;
-     _startY = NAN;
-     _startZ = NAN;
-     _gender = "male";
-     _patience=5;
+    _roomID = -1;
+    _nPeds = -1;
+    _groupID = -1;
+    _goalID = -1;
+    _routerID = -1;
+    _routeID = -1;
+    _age = -1;
+    _height = -1;
+    _startX = NAN;
+    _startY = NAN;
+    _startZ = NAN;
+    _gender = "male";
+    _patience=5;
+    _xMin=-FLT_MAX;
+    _xMax=FLT_MAX;
+    _yMin=-FLT_MAX;
+    _yMax=FLT_MAX;
 }
 
 StartDistributionRoom::~StartDistributionRoom()
@@ -293,6 +297,7 @@ void PedDistributor::InitDistributor(const string& filename)
                e = e->NextSiblingElement("group")) {
 
           int room_id = xmltoi(e->Attribute("room_id"));
+          int group_id = xmltoi(e->Attribute("group_id"));
           int subroom_id = xmltoi(e->Attribute("subroom_id"),-1);
           int number = xmltoi(e->Attribute("number"),0);
 
@@ -303,6 +308,19 @@ void PedDistributor::InitDistributor(const string& filename)
           string gender = xmltoa(e->Attribute("gender"), "male");
           double height = xmltof(e->Attribute("height"), -1);
           double patience=  xmltof(e->Attribute("patience"), 5);
+
+          double x_min=xmltof(e->Attribute("x_min"), -FLT_MAX);
+          double x_max=xmltof(e->Attribute("x_max"), FLT_MAX);
+          double y_min=xmltof(e->Attribute("y_min"), -FLT_MAX);
+          double y_max=xmltof(e->Attribute("y_max"), FLT_MAX);
+          double bounds [4] = {x_min,x_max,y_min,y_max};
+
+          //sanity check
+          if((x_max<x_min) || (y_max<y_min) ){
+              Log->Write("ERROR:\tinvalid bounds [%0.2f,%0.2f,%0.2f,%0.2f] of the group [%d]. Max and Min values mismatched?",group_id,x_min,x_max,y_min,y_max);
+              exit(EXIT_FAILURE);
+
+          }
 
           StartDistributionRoom* dis=NULL;
 
@@ -316,6 +334,7 @@ void PedDistributor::InitDistributor(const string& filename)
           }
 
           dis->SetRoomID(room_id);
+          dis->Setbounds(bounds);
           dis->SetAgentsNumber(number);
           dis->SetAge(age);
           dis->SetGender(gender);
@@ -407,7 +426,7 @@ int PedDistributor::Distribute(Building* building) const
           if(!r) continue;
           int N = _start_dis[i]->GetAgentsNumber();
           if (N < 0) {
-               Log->Write("ERROR: \t negative number of pedestrians! Ignoring");
+               Log->Write("ERROR: \t negative or null number of pedestrians! Ignoring");
                continue;
           }
 
@@ -674,6 +693,8 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
           }
      }
 
+     //shuffle the array
+     std::random_shuffle(positions.begin(), positions.end());
      return positions;
 }
 /* Verteilt N Fußgänger in SubRoom r
@@ -695,50 +716,76 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
           StartDistributionSubroom* para, Building* building) const
 {
 
-     // set the pedestrians
-     for (int i = 0; i < nAgents; ++i) {
+    //in the case a range was specified
+    double distArea[4];
+    para->Getbounds(distArea);
 
-          Pedestrian* ped = new Pedestrian();
-          // PedIndex
-          ped->SetID(*pid);
-          ped->SetAge(para->GetAge());
-          ped->SetGender(para->GetGender());
-          ped->SetHeight(para->GetHeight());
-          ped->SetFinalDestination(para->GetGoalId());
-          ped->SetGroup(para->GetGroupId());
-          ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
-          //ped->SetTrip(); //todo: not implemented
+    // set the pedestrians
+    for (int i = 0; i < nAgents; ++i) {
 
-          // a und b setzen muss vor v0 gesetzt werden,
-          // da sonst v0 mit Null überschrieben wird
-          JEllipse E = JEllipse();
-          E.SetAv(GetAtau()->GetRand());
-          E.SetAmin(GetAmin()->GetRand());
-          E.SetBmax(GetBmax()->GetRand());
-          E.SetBmin(GetBmin()->GetRand());
-          ped->SetEllipse(E);
-          ped->SetTau(GetTau()->GetRand());
-          ped->SetV0Norm(GetV0()->GetRand());
-          // Position
-          int index = rand() % positions.size();
-          Point pos = positions[index];
-          ped->SetPos(pos);
-          ped->SetBuilding(building);
-          positions.erase(positions.begin() + index);
-          ped->SetRoomID(para->GetRoomId(),"");
-          ped->SetSubRoomID(r->GetSubRoomID());
-          ped->SetPatienceTime(para->GetPatience());
+        Pedestrian* ped = new Pedestrian();
+        // PedIndex
+        ped->SetID(*pid);
+        ped->SetAge(para->GetAge());
+        ped->SetGender(para->GetGender());
+        ped->SetHeight(para->GetHeight());
+        ped->SetFinalDestination(para->GetGoalId());
+        ped->SetGroup(para->GetGroupId());
+        ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
+        //ped->SetTrip(); //todo: not implemented
 
-          Point start_pos=para->GetStartPosition();
-          if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
-               ped->SetPos(start_pos);
-               Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
-                          pid, para->GetRoomId(), start_pos.toString().c_str());
-          }
+        // a und b setzen muss vor v0 gesetzt werden,
+        // da sonst v0 mit Null überschrieben wird
+        JEllipse E = JEllipse();
+        E.SetAv(GetAtau()->GetRand());
+        E.SetAmin(GetAmin()->GetRand());
+        E.SetBmax(GetBmax()->GetRand());
+        E.SetBmin(GetBmin()->GetRand());
+        ped->SetEllipse(E);
+        ped->SetTau(GetTau()->GetRand());
+        ped->SetV0Norm(GetV0()->GetRand());
 
-          r->AddPedestrian(ped);
-          (*pid)++;
-     }
+        // first default Position
+        int index = -1;
+        //int index = rand() % positions.size();
+
+        //in the case a range was specified
+        for (unsigned int a=0;a<positions.size();a++)
+        {
+            Point pos=positions[a];
+            if((distArea[0]<=pos._x) &&
+                    (pos._x <= distArea[1])&&
+                    (distArea[2]<=pos._y) &&
+                    (pos._y < distArea[3]))
+            {
+                index=a;
+                break;
+            }
+        }
+        if(index==-1)
+        {
+            Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
+                    distArea[0],distArea[1],distArea[2],distArea[3]);
+            Log->Write("ERROR:\t Specifying a subroom_id might help");
+        }
+
+        Point pos = positions[index];
+        ped->SetPos(pos);
+        ped->SetBuilding(building);
+        positions.erase(positions.begin() + index);
+        ped->SetRoomID(para->GetRoomId(),"");
+        ped->SetSubRoomID(r->GetSubRoomID());
+        ped->SetPatienceTime(para->GetPatience());
+        Point start_pos = para->GetStartPosition();
+        if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
+            ped->SetPos(start_pos);
+            Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
+                    pid, para->GetRoomId(), start_pos.toString().c_str());
+        }
+
+        r->AddPedestrian(ped);
+        (*pid)++;
+    }
 }
 
 
@@ -789,4 +836,20 @@ double StartDistributionRoom::GetPatience() const
 void StartDistributionRoom::SetPatience(double patience)
 {
      _patience = patience;
+}
+
+void StartDistributionRoom::Getbounds(double bounds[4])
+{
+    bounds[0]=_xMin;
+    bounds[1]=_xMax;
+    bounds[2]=_yMin;
+    bounds[3]=_yMax;
+}
+
+void StartDistributionRoom::Setbounds(double bounds[4])
+{
+    _xMin=bounds[0];
+    _xMax=bounds[1];
+    _yMin=bounds[2];
+    _yMax=bounds[3];
 }
