@@ -46,52 +46,67 @@ class FacilityGeometry;
 
 class SaxParser: public QXmlDefaultHandler {
 public:
-	SaxParser(FacilityGeometry* geometry,SyncData* dataset, double * fps);
-	virtual ~SaxParser();
-	bool startElement(const QString &namespaceURI,
-			const QString &localName,
-			const QString &qName,
-			const QXmlAttributes &attributes);
-	bool endElement(const QString &namespaceURI,
-			const QString &localName,
-			const QString &qName);
-	bool characters(const QString &str);
-	bool fatalError(const QXmlParseException &exception);
-	bool attributeDecl(const QString& eName,
-			const QString& aName,
-			const QString& type,
-			const QString& valueDefault,
-			const QString& value);
+    SaxParser(FacilityGeometry* geometry,SyncData* dataset, double * fps);
+    virtual ~SaxParser();
+    bool startElement(const QString &namespaceURI,
+                      const QString &localName,
+                      const QString &qName,
+                      const QXmlAttributes &attributes);
+    bool endElement(const QString &namespaceURI,
+                    const QString &localName,
+                    const QString &qName);
+    bool characters(const QString &str);
+    bool fatalError(const QXmlParseException &exception);
+    bool attributeDecl(const QString& eName,
+                       const QString& aName,
+                       const QString& type,
+                       const QString& valueDefault,
+                       const QString& value);
 
-	/// provided for convenience and will be removed in the next version
-	static void parseGeometryJPS(QString content, FacilityGeometry *geo);
+    /// provided for convenience and will be removed in the next version
+    static void parseGeometryJPS(QString content, FacilityGeometry *geo);
 
-	/// provided for convenience and will be removed in the next version
-	static void parseGeometryXMLV04(QString content, FacilityGeometry *geo);
+    /// provided for convenience and will be removed in the next version
+    static void parseGeometryXMLV04(QString content, FacilityGeometry *geo);
 
-	/// provided for convenience and will be removed in the next version
+    /// provided for convenience and will be removed in the next version
     static void parseGeometryTRAV(QString content, FacilityGeometry *geo,QDomNode geoNode=QDomNode());
 
 private:
-	//clear the mo
-	void clearPoints();
-	FacilityGeometry* geometry;
-	SyncData* dataset;
-	double*para;
-	QString currentText;
-	QStringList initialPedestriansColors;
-	QStringList initialPedestriansHeights;
-	std::vector<JPoint *> currentPointsList;
-	std::vector<TrajectoryPoint *> currentFrame;
-	bool parsingWalls;
+    //clear the mo
+    void clearPoints();
+    void InitHeader(double version);
 
-	//wall and door parameters
-	double thickness;
-	double height;
-	double color;
+private:
+    FacilityGeometry* geometry;
+    SyncData* dataset;
+    double*para;
+    QString currentText;
+    QStringList initialPedestriansColors;
+    QStringList initialPedestriansHeights;
+    std::vector<JPoint *> currentPointsList;
+    std::vector<TrajectoryPoint *> currentFrame;
+    bool parsingWalls;
 
-	//actual caption of door/wall
-	QString caption;
+    //wall and door parameters
+    double thickness;
+    double height;
+    double color;
+
+    //actual caption of door/wall
+    QString caption;
+
+    //header dependant variables
+    QString _jps_xPos;
+    QString _jps_yPos;
+    QString _jps_zPos;
+    QString _jps_xVel;
+    QString _jps_yVel;
+    QString _jps_zVel;
+    QString _jps_radiusA;
+    QString _jps_radiusB;
+    QString _jps_ellipseOrientation;
+    QString _jps_ellipseColor;
 
 };
 

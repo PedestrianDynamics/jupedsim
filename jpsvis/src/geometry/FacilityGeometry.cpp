@@ -591,7 +591,7 @@ void FacilityGeometry::addNewElementText(double center[3], double orientation[3]
 			//tprop->BoldOn();
 			//tprop->ShadowOn();
 			//tprop->SetLineSpacing(1.0);
-			tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize());
+            tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize());
 
 			double colorRGB[3];
 			lookupTable->GetColor(color, colorRGB);

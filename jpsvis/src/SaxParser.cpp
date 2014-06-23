@@ -88,445 +88,435 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 		const QString & /* localName */, const QString &qName,
 		const QXmlAttributes &at)
 {
-	if (qName == "header") {
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="version")
-			{
-				//cout<<"version: "<<at.value(i).toStdString()<<endl;
-			}
-		}
-	}else if (qName == "file") {
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="location")
-			{
-				QString fileName=at.value(i);
-				if(!fileName.isEmpty())
-				{
-					if(fileName.endsWith(".xml",Qt::CaseInsensitive))
-					{
-						SaxParser::parseGeometryJPS(fileName,geometry);
-					}
-					else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
-					{
-						SaxParser::parseGeometryTRAV(fileName,geometry);
-					}
-				}
-			}
-		}
-	}
-	else if (qName == "floor") {
-		double xMin=0,
-				xMax=0,
-				yMin=0,
-				yMax=0;
+    if (qName == "header") {
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="version")
+            {
+                double version=at.value(i).toDouble();
+                InitHeader(version);
+            }
+        }
+    }else if (qName == "file") {
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="location")
+            {
+                QString fileName=at.value(i);
+                if(!fileName.isEmpty())
+                {
+                    if(fileName.endsWith(".xml",Qt::CaseInsensitive))
+                    {
+                        SaxParser::parseGeometryJPS(fileName,geometry);
+                    }
+                    else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
+                    {
+                        SaxParser::parseGeometryTRAV(fileName,geometry);
+                    }
+                }
+            }
+        }
+    }
+    else if (qName == "floor") {
+        double xMin=0,
+                xMax=0,
+                yMin=0,
+                yMax=0;
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="xMin")
-			{
-				xMin=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="xMax")
-			{
-				xMax=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="yMin")
-			{
-				yMin=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="yMax")
-			{
-				yMax=at.value(i).toDouble();
-			}
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="xMin")
+            {
+                xMin=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="xMax")
+            {
+                xMax=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="yMin")
+            {
+                yMin=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="yMax")
+            {
+                yMax=at.value(i).toDouble()*FAKTOR;
+            }
 
-		}
-		geometry->addFloor(xMin,yMin,xMax,yMax);
-	}
-	else if (qName == "cuboid") {
-		double length=0, height=0,
-				width=0, color=0;
-		double center[3]={0,0,0};
+        }
+        geometry->addFloor(xMin,yMin,xMax,yMax);
+    }
+    else if (qName == "cuboid") {
+        double length=0, height=0,
+                width=0, color=0;
+        double center[3]={0,0,0};
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="centerX")
-			{
-				center[0]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerY")
-			{
-				center[1]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerZ")
-			{
-				center[2]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="length")
-			{
-				length=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="height")
-			{
-				height=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="width")
-			{
-				width=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-		}
-		geometry->addObjectBox(center,height,width,length,color);
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="centerX")
+            {
+                center[0]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerY")
+            {
+                center[1]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerZ")
+            {
+                center[2]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="length")
+            {
+                length=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="width")
+            {
+                width=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble()*FAKTOR;
+            }
+        }
+        geometry->addObjectBox(center,height,width,length,color);
 
-	}
-	else if (qName == "sphere") {
-		double radius=0, color=0;
-		double center[3]={0,0,0};
+    }
+    else if (qName == "sphere") {
+        double radius=0, color=0;
+        double center[3]={0,0,0};
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="centerX")
-			{
-				center[0]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerY")
-			{
-				center[1]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerZ")
-			{
-				center[2]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="radius")
-			{
-				radius=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-		}
-		geometry->addObjectSphere(center,radius,color);
-	}
-	else if (qName == "label") {
-		double  color=0;
-		double center[3]={0,0,0};
-		QString text;
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="centerX")
+            {
+                center[0]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerY")
+            {
+                center[1]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerZ")
+            {
+                center[2]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="radius")
+            {
+                radius=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+        }
+        geometry->addObjectSphere(center,radius,color);
+    }
+    else if (qName == "label") {
+        double  color=0;
+        double center[3]={0,0,0};
+        QString text;
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="centerX")
-			{
-				center[0]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerY")
-			{
-				center[1]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerZ")
-			{
-				center[2]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="text")
-			{
-				text=at.value(i);
-			}
-			else if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-		}
-		geometry->addObjectLabel(center,center,text.toStdString(),color);
-	}
-	else if (qName == "cylinder") {
-		double height=0, radius=0, color=0;
-		double center[3]={0,0,0};
-		double rotation[3]={0,0,0};
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="centerX")
+            {
+                center[0]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerY")
+            {
+                center[1]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerZ")
+            {
+                center[2]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="text")
+            {
+                text=at.value(i);
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+        }
+        geometry->addObjectLabel(center,center,text.toStdString(),color);
+    }
+    else if (qName == "cylinder") {
+        double height=0, radius=0, color=0;
+        double center[3]={0,0,0};
+        double rotation[3]={0,0,0};
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="centerX")
-			{
-				center[0]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerY")
-			{
-				center[1]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="centerZ")
-			{
-				center[2]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="height")
-			{
-				height=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="radius")
-			{
-				radius=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="angleX")
-			{
-				rotation[0]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="angleY")
-			{
-				rotation[1]=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="angleZ")
-			{
-				rotation[2]=at.value(i).toDouble();
-			}
-		}
-		geometry->addObjectCylinder(center,radius,height,rotation,color);
-	}
-	else if (qName == "agents") {
-	} else if (qName == "roomCaption") {
-	} else if (qName == "frameRate") {
-	} else if (qName == "geometry") {
-	}
-	else if (qName == "wall")
-	{
-		parsingWalls=true;
-		thickness=15;
-		height=250;
-		color=0;
-		caption="";
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="centerX")
+            {
+                center[0]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerY")
+            {
+                center[1]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="centerZ")
+            {
+                center[2]=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="radius")
+            {
+                radius=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="angleX")
+            {
+                rotation[0]=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="angleY")
+            {
+                rotation[1]=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="angleZ")
+            {
+                rotation[2]=at.value(i).toDouble();
+            }
+        }
+        geometry->addObjectCylinder(center,radius,height,rotation,color);
+    }
+    else if (qName == "agents") {
+    } else if (qName == "roomCaption") {
+    } else if (qName == "frameRate") {
+    } else if (qName == "geometry") {
+    }
+    else if (qName == "wall")
+    {
+        parsingWalls=true;
+        thickness=15;
+        height=250;
+        color=0;
+        caption="";
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="thickness")
-			{
-				thickness=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="height")
-			{
-				height=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="caption")
-			{
-				caption=at.value(i);
-			}
-		}
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="thickness")
+            {
+                thickness=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="caption")
+            {
+                caption=at.value(i);
+            }
+        }
 
-	}
-	else if (qName == "door")
-	{
-		parsingWalls=false;
-		thickness=15;
-		height=250;
-		color=255;
-		caption="";
+    }
+    else if (qName == "door")
+    {
+        parsingWalls=false;
+        thickness=15;
+        height=250;
+        color=255;
+        caption="";
 
-		for(int i=0;i<at.length();i++){
-			if(at.localName(i)=="thickness")
-			{
-				thickness=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="height")
-			{
-				height=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="caption")
-			{
-				caption=at.value(i);
-			}
-		}
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="thickness")
+            {
+                thickness=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="caption")
+            {
+                caption=at.value(i);
+            }
+        }
 
-	}
-	else if (qName == "timeFirstFrame")
-	{
-		unsigned long timeFirstFrame_us=0;
-		unsigned long timeFirstFrame_s=0;
+    }
+    else if (qName == "timeFirstFrame")
+    {
+        unsigned long timeFirstFrame_us=0;
+        unsigned long timeFirstFrame_s=0;
 
-		for(int i=0;i<at.length();i++)
-		{
-			if(at.localName(i)=="microsec")
-			{
-				timeFirstFrame_us=at.value(i).toULong();
-			}
-			else if(at.localName(i)=="sec")
-			{
-				timeFirstFrame_s=at.value(i).toULong();
-			}
-		}
-		dataset->setDelayAbsolute(timeFirstFrame_s,timeFirstFrame_us);
-	}
-	else if (qName == "point")
-	{
-		double xPos=0;
-		double yPos=0;
-		double zPos=0;
+        for(int i=0;i<at.length();i++)
+        {
+            if(at.localName(i)=="microsec")
+            {
+                timeFirstFrame_us=at.value(i).toULong();
+            }
+            else if(at.localName(i)=="sec")
+            {
+                timeFirstFrame_s=at.value(i).toULong();
+            }
+        }
+        dataset->setDelayAbsolute(timeFirstFrame_s,timeFirstFrame_us);
+    }
+    else if (qName == "point")
+    {
+        double xPos=0;
+        double yPos=0;
+        double zPos=0;
 
-		for(int i=0;i<at.length();i++)
-		{
-			if(at.localName(i)=="xPos")
-			{
-				xPos=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="yPos")
-			{
-				yPos=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="zPos")
-			{
-				zPos=at.value(i).toDouble();
-			}
-		}
-		double CHT[3]={color,height,thickness};
+        for(int i=0;i<at.length();i++)
+        {
+            if(at.localName(i)=="xPos")
+            {
+                xPos=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="yPos")
+            {
+                yPos=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="zPos")
+            {
+                zPos=at.value(i).toDouble()*FAKTOR;
+            }
+        }
+        double CHT[3]={color,height,thickness};
 
-		JPoint* pt= new JPoint(xPos,yPos,zPos);
-		pt->setColorHeightThicknes(CHT);
-		currentPointsList.push_back(pt);
+        JPoint* pt= new JPoint(xPos,yPos,zPos);
+        pt->setColorHeightThicknes(CHT);
+        currentPointsList.push_back(pt);
 
-	}  else if (qName == "frame") {
+    }  else if (qName == "frame") {
 
-	}  else if (qName == "agent") {
+    }  else if (qName == "agent") {
 
-		int id=0;
-		double xPos=0;
-		double yPos=0;
-		double zPos=0;
-		double agent_color =std::numeric_limits<double>::quiet_NaN();
-		double xVel=std::numeric_limits<double>::quiet_NaN();
-		double yVel=std::numeric_limits<double>::quiet_NaN();
-		double zVel=std::numeric_limits<double>::quiet_NaN();
-		double dia_a=std::numeric_limits<double>::quiet_NaN();
-		double dia_b=std::numeric_limits<double>::quiet_NaN();
-		double el_angle=std::numeric_limits<double>::quiet_NaN();
-		double el_color=std::numeric_limits<double>::quiet_NaN();
-		double el_x=std::numeric_limits<double>::quiet_NaN();
-		double el_y=std::numeric_limits<double>::quiet_NaN();
-		double el_z=std::numeric_limits<double>::quiet_NaN();
+        int id=0;
+        double xPos=0;
+        double yPos=0;
+        double zPos=0;
+        double agent_color =std::numeric_limits<double>::quiet_NaN();
+        double xVel=std::numeric_limits<double>::quiet_NaN();
+        double yVel=std::numeric_limits<double>::quiet_NaN();
+        double zVel=std::numeric_limits<double>::quiet_NaN();
+        double dia_a=std::numeric_limits<double>::quiet_NaN();
+        double dia_b=std::numeric_limits<double>::quiet_NaN();
+        double el_angle=std::numeric_limits<double>::quiet_NaN();
+        double el_color=std::numeric_limits<double>::quiet_NaN();
+        double el_x=std::numeric_limits<double>::quiet_NaN();
+        double el_y=std::numeric_limits<double>::quiet_NaN();
+        double el_z=std::numeric_limits<double>::quiet_NaN();
 
-		for(int i=0;i<at.length();i++)
-		{
-			if(at.localName(i)=="ID")
-			{
-				id=at.value(i).toInt();
-				//TODO: maybe you should change ur format to take the ID 0 as first valid ID.
-				if (id==0){
-					//slotErrorOutput("Person with ID=0 detected. ID should start with 1 !");
-					return false;
-				}
-			}
-			else if(at.localName(i)=="xPos")
-			{
-				xPos=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="yPos")
-			{
-				yPos=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="zPos")
-			{
-				zPos=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="agentColor")
-			{
-				agent_color=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="xVel")
-			{
-				xVel=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="yVel")
-			{
-				yVel=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="zVel")
-			{
-				zVel=at.value(i).toDouble();
-			}
+        for(int i=0;i<at.length();i++)
+        {
+            if(at.localName(i)=="ID")
+            {
+                id=at.value(i).toInt();
+                //TODO: maybe you should change ur format to take the ID 0 as first valid ID.
+                if (id==0){
+                    //slotErrorOutput("Person with ID=0 detected. ID should start with 1 !");
+                    return false;
+                }
+            }
+            else if(at.localName(i)==_jps_xPos)
+            {
+                xPos=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)==_jps_yPos)
+            {
+                yPos=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)==_jps_zPos)
+            {
+                zPos=at.value(i).toDouble()*FAKTOR;
+            }
 
-			else if(at.localName(i)=="radiusA")
-			{
-				dia_a=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="radiusB")
-			{
-				dia_b=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="ellipseOrientation")
-			{
-				el_angle=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="ellipseColor")
-			{
-				el_color=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="xEll")
-			{
-				el_x=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="yEll")
-			{
-				el_y=at.value(i).toDouble();
-			}
-			else if(at.localName(i)=="zEll")
-			{
-				el_z=at.value(i).toDouble();
-			}
-		}
+            else if(at.localName(i)==_jps_radiusA)
+            {
+                dia_a=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)==_jps_radiusB)
+            {
+                dia_b=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)==_jps_ellipseOrientation)
+            {
+                el_angle=at.value(i).toDouble();
+            }
+            else if(at.localName(i)==_jps_ellipseColor)
+            {
+                el_color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="agentColor")
+            {
+                agent_color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)==_jps_xVel)
+            {
+                xVel=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)==_jps_yVel)
+            {
+                yVel=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)==_jps_zVel)
+            {
+                zVel=at.value(i).toDouble()*FAKTOR;
+            }
 
-		//coordinates of the ellipse, default to the head of the agent
-		if(isnan(el_x)) el_x=xPos;
-		if(isnan(el_y)) el_y=yPos;
-		if(isnan(el_z)) el_z=zPos;
+        }
 
-		double pos[3]={xPos,yPos,zPos};
-		double vel[3]={xVel,yPos,zPos};
-		double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
-		double para[2]={agent_color,el_angle};
+        //coordinates of the ellipse, default to the head of the agent
+        if(isnan(el_x)) el_x=xPos;
+        if(isnan(el_y)) el_y=yPos;
+        if(isnan(el_z)) el_z=zPos;
 
-		TrajectoryPoint * point = new TrajectoryPoint(id-1);
-		point->setEllipse(ellipse);
-		point->setPos(pos);
-		point->setVel(vel);
-		point->setAgentInfo(para);
-		currentFrame.push_back(point);
-	}
-	else if (qName == "agentInfo")
-	{
-		double height=std::numeric_limits<double>::quiet_NaN();
-		int color=std::numeric_limits<int>::quiet_NaN();
-		int id=std::numeric_limits<int>::quiet_NaN();
+        double pos[3]={xPos,yPos,zPos};
+        double vel[3]={xVel,yPos,zPos};
+        double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
+        double para[2]={agent_color,el_angle};
 
-		for(int i=0;i<at.length();i++)
-		{
-			if(at.localName(i)=="ID")
-			{
-				id=at.value(i).toInt();
-			}
-			if(at.localName(i)=="height")
-			{
-				height=at.value(i).toDouble();
-			}
-			if(at.localName(i)=="color")
-			{
-				color=at.value(i).toDouble();
-			}
-		}
-		if(isnan(id)) return true;
+        TrajectoryPoint * point = new TrajectoryPoint(id-1);
+        point->setEllipse(ellipse);
+        point->setPos(pos);
+        point->setVel(vel);
+        point->setAgentInfo(para);
+        currentFrame.push_back(point);
+    }
+    else if (qName == "agentInfo")
+    {
+        double height=std::numeric_limits<double>::quiet_NaN();
+        int color=std::numeric_limits<int>::quiet_NaN();
+        int id=std::numeric_limits<int>::quiet_NaN();
 
-		if(!isnan(height)){
-			initialPedestriansHeights.append(QString::number(id));
-			initialPedestriansHeights.append(QString::number(height));
-		}
-		if(!isnan(color)){
-			initialPedestriansColors.append(QString::number(id));
-			initialPedestriansColors.append(QString::number(color));
-		}
-	}
-	return true;
+        for(int i=0;i<at.length();i++)
+        {
+            if(at.localName(i)=="ID")
+            {
+                id=at.value(i).toInt();
+            }
+            if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+        }
+        if(isnan(id)) return true;
+
+        if(!isnan(height)){
+            initialPedestriansHeights.append(QString::number(id));
+            initialPedestriansHeights.append(QString::number(height));
+        }
+        if(!isnan(color)){
+            initialPedestriansColors.append(QString::number(id));
+            initialPedestriansColors.append(QString::number(color));
+        }
+    }
+    return true;
 }
 
 bool SaxParser::characters(const QString &str) {
@@ -846,7 +836,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			//		Debug::Error("cuboids: "<<length<<" || " <<width << " || "<<height<<" || "<<color<<endl;
 		}
 		// floors
-		for (unsigned int i = 0; i < floors.length(); i++) {
+        for (  int i = 0; i < floors.length(); i++) {
 
 			double left =floors.item(i).toElement().attribute("xMin","0").toDouble();
 			double right =floors.item(i).toElement().attribute("xMax","0").toDouble();
@@ -856,7 +846,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			geometry->addFloor(left,down,right,up,z);
 		}
 		// cylinders
-		for (unsigned int i = 0; i < cylinders.length(); i++) {
+        for (  int i = 0; i < cylinders.length(); i++) {
 
 			double center[3], rotation[3];
 			center[0] = cylinders.item(i).toElement().attribute("centerX", "0").toDouble();
@@ -872,7 +862,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 		}
 
 		//Tlabels
-		for (unsigned int i = 0; i < labels.length(); i++) {
+        for (  int i = 0; i < labels.length(); i++) {
 
 			double center[3];
 			center[0] = labels.item(i).toElement().attribute("centerX", "0").toDouble();
@@ -891,12 +881,12 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	QDomDocument doc("");
 
 	QFile file(filename);
-	int size =file.size()/(1024*1024);
+    //int size =file.size()/(1024*1024);
 
-	if(size>100){
-		cout<<"The file is too large: "<<filename.toStdString()<<endl;
-		return;
-	}
+    //if(size>100){
+    //	cout<<"The file is too large: "<<filename.toStdString()<<endl;
+    //	return;
+    //}
 
 	if (!file.open(QIODevice::ReadOnly)) {
 		qDebug()<<"could not open the file: "<<filename<<endl;
@@ -977,7 +967,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	}
 
 	QDomNodeList xObstaclesList=doc.elementsByTagName("obstacle");
-	for (unsigned int i = 0; i < xObstaclesList.length(); i++) {
+    for (  int i = 0; i < xObstaclesList.length(); i++) {
 		QDomElement xPoly = xObstaclesList.item(i).firstChildElement("polygon");
 		while(!xPoly.isNull()) {
 			//wall thickness, default to 30 cm
@@ -1003,7 +993,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	}
 
 	QDomNodeList xCrossingsList=doc.elementsByTagName("crossing");
-	for (unsigned int i = 0; i < xCrossingsList.length(); i++) {
+    for (int i = 0; i < xCrossingsList.length(); i++) {
 		QDomElement xCrossing = xCrossingsList.item(i).toElement();
 		QDomNodeList xVertices=xCrossing.elementsByTagName("vertex");
 
@@ -1029,7 +1019,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	}
 
 	QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
-	for (unsigned int i = 0; i < xTransitionsList.length(); i++) {
+    for (  int i = 0; i < xTransitionsList.length(); i++) {
 		QDomElement xTransition = xTransitionsList.item(i).toElement();
 		QDomNodeList xVertices=xTransition.elementsByTagName("vertex");
 
@@ -1053,4 +1043,39 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
 		geo->addObjectLabel(center,center,id,21);
 	}
+}
+
+void SaxParser::InitHeader(double version)
+{
+    // set the parsing String map
+    if(version==0.5){
+        _jps_xPos=QString("xPos");
+        _jps_yPos=QString("yPos");
+        _jps_zPos=QString("zPos");
+        _jps_xVel=QString("xVel");
+        _jps_yVel=QString("yVel");
+        _jps_zVel=QString("zVel");
+        _jps_radiusA=QString("radiusA");
+        _jps_radiusB=QString("radiusB");
+        _jps_ellipseOrientation=QString("ellipseOrientation");
+        _jps_ellipseColor=QString("ellipseColor");
+    }
+    else if (version==0.6){
+        _jps_xPos=QString("x");
+        _jps_yPos=QString("y");
+        _jps_zPos=QString("z");
+        _jps_xVel=QString("xV");
+        _jps_yVel=QString("yV");
+        _jps_zVel=QString("zV");
+        _jps_radiusA=QString("rA");
+        _jps_radiusB=QString("rB");
+        _jps_ellipseOrientation=QString("eO");
+        _jps_ellipseColor=QString("eC");
+    }
+    else
+    {
+        cout<<"unsupported header version: "<<version<<endl;
+        cout<<"Please use 0.5 or 0.6 "<<endl;
+        exit(0);
+    }
 }
