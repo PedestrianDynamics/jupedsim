@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 
 SUCCESS = 0
 FAILURE = 1
-
 #--------------------------------------------------------
 logfile="log_testCPU.txt"
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -168,6 +167,7 @@ if __name__ == "__main__":
     ax.set_xlabel(r'# cores',fontsize=18)
     ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     ax.set_xlim(0.5, MAX_CPU + 0.5)
+    ax.set_xticks(flows.keys())
     plt.title("# Simulations %d"%len(flows[ncpu]))
     logging.info("save file in cpu.png")
     plt.savefig("cpu.png")
