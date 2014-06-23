@@ -693,6 +693,8 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
           }
      }
 
+     //shuffle the array
+     std::random_shuffle(positions.begin(), positions.end());
      return positions;
 }
 /* Verteilt N Fußgänger in SubRoom r
@@ -719,79 +721,71 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
     para->Getbounds(distArea);
 
     // set the pedestrians
-     for (int i = 0; i < nAgents; ++i) {
+    for (int i = 0; i < nAgents; ++i) {
 
-          Pedestrian* ped = new Pedestrian();
-          // PedIndex
-          ped->SetID(*pid);
-          ped->SetAge(para->GetAge());
-          ped->SetGender(para->GetGender());
-          ped->SetHeight(para->GetHeight());
-          ped->SetFinalDestination(para->GetGoalId());
-          ped->SetGroup(para->GetGroupId());
-          ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
-          //ped->SetTrip(); //todo: not implemented
+        Pedestrian* ped = new Pedestrian();
+        // PedIndex
+        ped->SetID(*pid);
+        ped->SetAge(para->GetAge());
+        ped->SetGender(para->GetGender());
+        ped->SetHeight(para->GetHeight());
+        ped->SetFinalDestination(para->GetGoalId());
+        ped->SetGroup(para->GetGroupId());
+        ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
+        //ped->SetTrip(); //todo: not implemented
 
-          // a und b setzen muss vor v0 gesetzt werden,
-          // da sonst v0 mit Null überschrieben wird
-          JEllipse E = JEllipse();
-          E.SetAv(GetAtau()->GetRand());
-          E.SetAmin(GetAmin()->GetRand());
-          E.SetBmax(GetBmax()->GetRand());
-          E.SetBmin(GetBmin()->GetRand());
-          ped->SetEllipse(E);
-          ped->SetTau(GetTau()->GetRand());
-          ped->SetV0Norm(GetV0()->GetRand());
+        // a und b setzen muss vor v0 gesetzt werden,
+        // da sonst v0 mit Null überschrieben wird
+        JEllipse E = JEllipse();
+        E.SetAv(GetAtau()->GetRand());
+        E.SetAmin(GetAmin()->GetRand());
+        E.SetBmax(GetBmax()->GetRand());
+        E.SetBmin(GetBmin()->GetRand());
+        ped->SetEllipse(E);
+        ped->SetTau(GetTau()->GetRand());
+        ped->SetV0Norm(GetV0()->GetRand());
 
-          // first default Position
-          int index = -1;
+        // first default Position
+        int index = -1;
+        //int index = rand() % positions.size();
 
-          //in the case a range was specified
-          if (distArea[0] != FLT_MAX || distArea[1] != FLT_MAX
-                  || distArea[2] != FLT_MAX || distArea[3] != FLT_MAX)
-          {
-              for (unsigned int a=0;a<positions.size();a++)
-              {
-                  Point pos=positions[a];
-                  if((distArea[0]<=pos._x) &&
-                          (pos._x < distArea[1])&&
-                          (distArea[2]<=pos._y) &&
-                          (pos._y < distArea[3]))
-                  {
-                      index=a;
-                      break;
-                  }
-              }
-              if(index==-1)
-              {
-                  Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
-                          distArea[0],distArea[1],distArea[2],distArea[3]);
-              exit(EXIT_FAILURE);
-              }
+        //in the case a range was specified
+        for (unsigned int a=0;a<positions.size();a++)
+        {
+            Point pos=positions[a];
+            if((distArea[0]<=pos._x) &&
+                    (pos._x <= distArea[1])&&
+                    (distArea[2]<=pos._y) &&
+                    (pos._y < distArea[3]))
+            {
+                index=a;
+                break;
+            }
+        }
+        if(index==-1)
+        {
+            Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
+                    distArea[0],distArea[1],distArea[2],distArea[3]);
+            Log->Write("ERROR:\t Specifying a subroom_id might help");
+        }
 
-          }
-          else
-          {
-               index = rand() % positions.size();
-          }
+        Point pos = positions[index];
+        ped->SetPos(pos);
+        ped->SetBuilding(building);
+        positions.erase(positions.begin() + index);
+        ped->SetRoomID(para->GetRoomId(),"");
+        ped->SetSubRoomID(r->GetSubRoomID());
+        ped->SetPatienceTime(para->GetPatience());
+        Point start_pos = para->GetStartPosition();
+        if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
+            ped->SetPos(start_pos);
+            Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
+                    pid, para->GetRoomId(), start_pos.toString().c_str());
+        }
 
-          Point pos = positions[index];
-          ped->SetPos(pos);
-          ped->SetBuilding(building);
-          positions.erase(positions.begin() + index);
-          ped->SetRoomID(para->GetRoomId(),"");
-          ped->SetSubRoomID(r->GetSubRoomID());
-          ped->SetPatienceTime(para->GetPatience());
-          Point start_pos = para->GetStartPosition();
-          if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
-               ped->SetPos(start_pos);
-               Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
-                          pid, para->GetRoomId(), start_pos.toString().c_str());
-          }
-
-          r->AddPedestrian(ped);
-          (*pid)++;
-     }
+        r->AddPedestrian(ped);
+        (*pid)++;
+    }
 }
 
 
@@ -848,7 +842,7 @@ void StartDistributionRoom::Getbounds(double bounds[4])
 {
     bounds[0]=_xMin;
     bounds[1]=_xMax;
-    bounds[2]=_xMin;
+    bounds[2]=_yMin;
     bounds[3]=_yMax;
 }
 
@@ -856,6 +850,6 @@ void StartDistributionRoom::Setbounds(double bounds[4])
 {
     _xMin=bounds[0];
     _xMax=bounds[1];
-    _xMin=bounds[2];
+    _yMin=bounds[2];
     _yMax=bounds[3];
 }
