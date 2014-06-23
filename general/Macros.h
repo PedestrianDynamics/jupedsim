@@ -33,7 +33,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#define M_PI            3.14159265358979323846
+#define M_PI   3.14159265358979323846
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
@@ -66,7 +66,7 @@
 #define CLENGTH 1000
 
 // conversion (cm <-> m)
-#define FAKTOR 100
+#define FAKTOR 1
 
 // default final destination for the pedestrians
 #define FINAL_DEST_OUT -1

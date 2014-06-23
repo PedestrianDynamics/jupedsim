@@ -626,7 +626,7 @@ string NormalSubRoom::WritePolyLine() const
 
      s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
      for (unsigned int j = 0; j < _poly.size(); j++) {
-          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
+          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX()* FAKTOR,_poly[j].GetY()* FAKTOR);
           s.append(tmp);
      }
      s.append("\t</Obstacle>\n");
@@ -857,7 +857,7 @@ string Stair::WritePolyLine() const
 
      s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
      for (unsigned int j = 0; j < _poly.size(); j++) {
-          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX(),_poly[j].GetY());
+          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX()* FAKTOR,_poly[j].GetY()* FAKTOR);
           s.append(tmp);
      }
      s.append("\t</Obstacle>\n");

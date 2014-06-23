@@ -97,7 +97,7 @@ public:
      void Setbounds(double bounds[4]);
 };
 
-//TODO:FIXME merge the two classes and set the _subRoomID=-1
+//TODO merge the two classes and set the _subRoomID=-1
 class StartDistributionSubroom : public StartDistributionRoom {
 private:
      int _subroomID;
