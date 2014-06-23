@@ -9,9 +9,9 @@
 	<!-- geometry file -->
 	<geometry>bateau_obst.xml</geometry>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" fps="8">
+	<trajectories format="xml-bin" fps="8">
 		 <file location="trajectories.xml" /> 
-		 <socket hostname="127.0.0.1" port="8989"/>  
+		 <!-- <socket hostname="127.0.0.1" port="8989"/>  -->  
 	</trajectories>
 	<!-- where to store the logs -->
 	<!--<logfile>log.txt</logfile> -->
@@ -67,11 +67,11 @@
 	<!--persons information and distribution -->
 	<agents>
 		<agents_distribution>
-			<group group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
-			<group group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
-			<group group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/>
-			<group group_id="2" room_id="0" number="500" goal_id="-1" router_id="2" patience="44" x_min="6.52" x_max="41" y_min="" y_max=""/>
-			<group group_id="3" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="2"  patience="20"/>
+			<group1 group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
+			<group1 group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
+			<group1 group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/>
+			<group group_id="2" room_id="0" subroom_id="1" number="20" goal_id="-1" router_id="2" patience="44" x_min="6.52" x_max="41" y_min="" y_max=""/>
+			<group1 group_id="3" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="2"  patience="20"/>
 		</agents_distribution>
 	</agents>
 
