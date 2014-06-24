@@ -7,6 +7,7 @@ from sys import argv ,exit
 import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
+import re
 
 SUCCESS = 0
 FAILURE = 1
@@ -84,7 +85,7 @@ def flow(fps, N, data, x0):
 
 
 if __name__ == "__main__":
-    time1 = time.clock()
+    time1 = time.time()
     i = 0
     flows = {}
     MAX_CPU = multiprocessing.cpu_count()
@@ -97,6 +98,7 @@ if __name__ == "__main__":
         exit(FAILURE)
 
 
+    timedic = {}
     for inifile in inifiles:
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
@@ -107,12 +109,19 @@ if __name__ == "__main__":
         if not path.exists(executable):
             logging.critical("executable <%s> does not exist yet."%executable)
             exit(FAILURE)
-        ncpu = int(inifile.split("numCPU_")[1].split("_")[0])
+        b = inifile.split("numCPU_")[1]
+        ncpu  = int( re.split("[.|_]", b)[0] )
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
         logging.info('n CPU = <%d>'%(ncpu))
         #------------------------------------------------------
+        t1_run = time.time()
         subprocess.call([executable, "--inifile=%s"%inifile])
+        t2_run = time.time()
+        if not timedic.has_key(ncpu):
+            timedic[ncpu] = [t2_run - t1_run]
+        else:
+            timedic[ncpu].append(t2_run - t1_run)
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
         trajfile = "trajectories/traj" + inifile.split("ini")[2]
@@ -122,7 +131,7 @@ if __name__ == "__main__":
             logging.critical("trajfile <%s> does not exist"%trajfile)
             exit(FAILURE)
         fps, N, traj = parse_file(trajfile)
-        J = flow(fps, N, traj, 6100)
+        J = flow(fps, N, traj, 61)
         
         if not flows.has_key(ncpu):
             flows[ncpu] = [J]
@@ -133,14 +142,22 @@ if __name__ == "__main__":
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
     # ----------------------- PLOT RESULTS ----------------------
     flow_file = "result.txt"
+    times_file = "times.txt"
     ff = open(flow_file, "w")
-    logging.info('write flow values in \"%s\"'%flow_file)
+    tt = open(times_file, "w")
+    logging.info('write flow values in \"%s\" and times in \"%s\"'%(flow_file, times_file))
     for key, value in flows.items():
         print >>ff, key, ":", value
 
-    time2 = time.clock()
+    for key, value in timedic.items():
+        print >>tt, key, ":", value
+
+    time2 = time.time()
     M = np.array([np.mean(i) for i in flows.values()]) # std pro CPU
+    MT = np.array([np.mean(i) for i in timedic.values()]) # std pro CPU
+
     S = np.array([np.std(i) for i in flows.values()])   # std pro CPU
+    ST = np.array([np.std(i) for i in timedic.values()])   # std pro CPU
     std_all = np.std(M)
    
     print >>ff, "==========================="
@@ -156,21 +173,34 @@ if __name__ == "__main__":
     print >>ff, "==========================="
     print >>ff, "==========================="
    
-    ff.close
+    ff.close()
+    tt.close()
     #########################################################################
     ms = 8
-    fig, ax = plt.subplots(1)
+    ax = plt.subplot(211)
     ax.plot(flows.keys(), M, "o-", lw=2, label='Mean', color='blue')
     ax.errorbar(flows.keys(), M, yerr=S, fmt='-o')
     #ax.fill_between(flows.keys(), M+S, M-S, facecolor='blue', alpha=0.5)
     #axes().set_aspect(1./axes().get_data_ratio())  
-    ax.legend(loc='best')
+    #ax.legend(loc='best')
     ax.grid()
     ax.set_xlabel(r'# cores',fontsize=18)
     ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     ax.set_xlim(0.5, MAX_CPU + 0.5)
     ax.set_xticks(flows.keys())
     plt.title("# Simulations %d"%len(flows[ncpu]))
+    #------------------ plot times
+    ax2 = plt.subplot(212)
+    ax2.plot(timedic.keys(), MT, "o-", lw=2, label='Mean', color='blue')
+    ax2.errorbar(timedic.keys(), MT, yerr=ST, fmt='-o')
+    ax2.set_xlabel(r'# cores',fontsize=18)
+    ax2.set_ylabel(r'$T\; [  s ]$',fontsize=18)
+    ax2.set_xticks(timedic.keys())
+    ax2.set_xlim(0.5, MAX_CPU + 0.5)
+    ax2.set_ylim( min( MT ) - max(ST)-0.1 , max( MT ) + max(ST) +0.1)
+    #ax.legend(loc='best')
+    ax2.grid()
+    plt.tight_layout()
     logging.info("save file in cpu.png")
     plt.savefig("cpu.png")
     #plt.show()

@@ -91,7 +91,7 @@ int main(int argc, char **argv)
           printf("\nExec Time [s]       : %4.2f\n", execTime);
           printf("Evac Time [s]       : %d\n", evacTime);
           printf("Real Time Factor    : %.2f (X)\n", evacTime / execTime);
-          printf("Number of Threads Used  : %d", args->GetMaxOpenMPThreads());
+          printf("Number of Threads Used  : %d\n", args->GetMaxOpenMPThreads());
           printf("Warnings            : %d\n", Log->GetWarnings() );
           printf("Errors              : %d\n", Log->GetErrors() );
      }

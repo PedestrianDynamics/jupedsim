@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_testCPU.txt"
+logfile="log_testCELL.txt"
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
@@ -84,18 +84,14 @@ def flow(fps, N, data, x0):
 
 
 if __name__ == "__main__":
-    time1 = time.clock()
+    time1 = time.time()
     i = 0
     flows = {}
-    MAX_CPU = multiprocessing.cpu_count()
-    
     geofile = "geometry.xml"
     inifiles = glob.glob("inifiles/*.xml")
-    logging.info("MAX CPU = %d"%MAX_CPU)
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
-
 
     for inifile in inifiles:
         if not path.exists(inifile):
@@ -107,10 +103,10 @@ if __name__ == "__main__":
         if not path.exists(executable):
             logging.critical("executable <%s> does not exist yet."%executable)
             exit(FAILURE)
-        ncpu = int(inifile.split("numCPU_")[1].split("_")[0])
+        cell_size = float(inifile.split("cell_size_")[1].split("_")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
-        logging.info('n CPU = <%d>'%(ncpu))
+        logging.info('cell_size = <%.2f>'%cell_size)
         #------------------------------------------------------
         subprocess.call([executable, "--inifile=%s"%inifile])
         #------------------------------------------------------
@@ -122,12 +118,12 @@ if __name__ == "__main__":
             logging.critical("trajfile <%s> does not exist"%trajfile)
             exit(FAILURE)
         fps, N, traj = parse_file(trajfile)
-        J = flow(fps, N, traj, 6100)
+        J = flow(fps, N, traj, 61)
         
-        if not flows.has_key(ncpu):
-            flows[ncpu] = [J]
+        if not flows.has_key(cell_size):
+            flows[cell_size] = [J]
         else:
-            flows[ncpu].append(J)
+            flows[cell_size].append(J)
         
     #------------------------------------------------------------------------------ 
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
@@ -138,7 +134,7 @@ if __name__ == "__main__":
     for key, value in flows.items():
         print >>ff, key, ":", value
 
-    time2 = time.clock()
+    time2 = time.time()
     M = np.array([np.mean(i) for i in flows.values()]) # std pro CPU
     S = np.array([np.std(i) for i in flows.values()])   # std pro CPU
     std_all = np.std(M)
@@ -156,7 +152,7 @@ if __name__ == "__main__":
     print >>ff, "==========================="
     print >>ff, "==========================="
    
-    ff.close
+    ff.close()
     #########################################################################
     ms = 8
     fig, ax = plt.subplots(1)
@@ -164,15 +160,15 @@ if __name__ == "__main__":
     ax.errorbar(flows.keys(), M, yerr=S, fmt='-o')
     #ax.fill_between(flows.keys(), M+S, M-S, facecolor='blue', alpha=0.5)
     #axes().set_aspect(1./axes().get_data_ratio())  
-    ax.legend(loc='best')
+    #ax.legend(loc='best')
     ax.grid()
-    ax.set_xlabel(r'# cores',fontsize=18)
+    ax.set_xlabel(r'cell_size',fontsize=18)
     ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    ax.set_xlim(0.5, MAX_CPU + 0.5)
+    ax.set_xlim(0.5, max(flows.items() ) + 0.5)
     ax.set_xticks(flows.keys())
-    plt.title("# Simulations %d"%len(flows[ncpu]))
-    logging.info("save file in cpu.png")
-    plt.savefig("cpu.png")
+    plt.title("# Simulations %d"%len(flows[cell_size]))
+    logging.info("save file in cell.png")
+    plt.savefig("cell.png")
     #plt.show()
     #########################################################################
     

@@ -123,7 +123,7 @@
 
 		<router router_id="1" description="global_shortest">
 			<parameters>
-				<navigation_lines file="routing_obst.xml" />
+				<!-- <navigation_lines file="routing_obst.xml" /> -->
 			</parameters>
 		</router>
 
