@@ -521,14 +521,43 @@ void ArgumentParser::ParseIniFile(string inifile)
         //Log->Write("INFO: \tpTmax <"+string(tmax)+" " +string(unit) +" (unit ignored)>");
         Log->Write("INFO: \tpTmax <" + string(tmax) + "  (seconds) >");
     }
-
+    int max_cpus = 1; 
+#ifdef _OPENMP
+    max_cpus = omp_get_max_threads();
+#endif
+     //max CPU
+    if(xMainNode->FirstChild("numCPU")) {
+         TiXmlNode* seedNode = xMainNode->FirstChild("numCPU")->FirstChild();
+         int n = 1;
+         if(seedNode){
+              const char* cpuValue = seedNode->Value();
+              n = atoi(cpuValue);
+              if (n > max_cpus) n = max_cpus;
+         }
+         else {
+              n = max_cpus;
+          }
+         pMaxOpenMPThreads = n;
+         Log->Write("INFO: \tnumCPU <%d>", pMaxOpenMPThreads);
+#ifdef _OPENMP
+         if(n < omp_get_max_threads() )
+              omp_set_num_threads(pMaxOpenMPThreads);
+#endif
+     }
+    else { // no numCPU tag
+         pMaxOpenMPThreads = max_cpus;
+#ifdef _OPENMP
+         omp_set_num_threads(pMaxOpenMPThreads);
+#endif
+         Log->Write("INFO: \t Default numCPU <%d>", pMaxOpenMPThreads);
+    }
     //logfile
     if (xMainNode->FirstChild("logfile"))
     {
-        pErrorLogFile = _projectRootDir
-                + xMainNode->FirstChild("logfile")->FirstChild()->Value();
-        pLog = 2;
-        Log->Write("INFO: \tlogfile <" + (pErrorLogFile) + ">");
+         pErrorLogFile = _projectRootDir
+                         + xMainNode->FirstChild("logfile")->FirstChild()->Value();
+         pLog = 2;
+         Log->Write("INFO: \tlogfile <" + (pErrorLogFile) + ">");
     }
 
     //trajectories
@@ -880,7 +909,7 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
 {
     TiXmlNode* xPara = xGompertz->FirstChild("parameters");
 
-    Log->Write("INFO:\tGompertz %s model used\n");
+    Log->Write("INFO:\tGompertz model used\n");
     // For convenience. This moved to the header as it is not model specific
     if (xPara->FirstChild("tmax"))
     {

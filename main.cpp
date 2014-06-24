@@ -83,6 +83,7 @@ int main(int argc, char **argv)
      Log->Write("\nExec Time [s]   : %.2f", execTime);
      Log->Write("Evac Time [s]     : %d", evacTime);
      Log->Write("Real Time Factor  : %.2f X", evacTime / execTime);
+     Log->Write("Number of Threads Used  : %d", args->GetMaxOpenMPThreads());
      Log->Write("Warnings          : %d", Log->GetWarnings() );
      Log->Write("Errors            : %d", Log->GetErrors() );
      // sim.PrintStatistics();
@@ -90,6 +91,7 @@ int main(int argc, char **argv)
           printf("\nExec Time [s]       : %4.2f\n", execTime);
           printf("Evac Time [s]       : %d\n", evacTime);
           printf("Real Time Factor    : %.2f (X)\n", evacTime / execTime);
+          printf("Number of Threads Used  : %d", args->GetMaxOpenMPThreads());
           printf("Warnings            : %d\n", Log->GetWarnings() );
           printf("Errors              : %d\n", Log->GetErrors() );
      }

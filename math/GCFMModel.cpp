@@ -461,8 +461,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
 
      int nThreads = omp_get_max_threads();
 
-     // check if worth sharing the work
-     if (nSize < 20) nThreads = 1;
+     
      int partSize = nSize / nThreads;
 
      #pragma omp parallel  default(shared) num_threads(nThreads)

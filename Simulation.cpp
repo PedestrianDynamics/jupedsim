@@ -256,7 +256,8 @@ void Simulation::InitArgs(ArgumentParser* args)
      //     _solver = new LeapfrogSolver(_model);
      //     break;
      }
-
+     sprintf(tmp, "\tnCPU: %d\n", args->GetMaxOpenMPThreads());
+     s.append(tmp);
      _tmax = args->GetTmax();
      sprintf(tmp, "\tt_max: %f\n", _tmax);
      s.append(tmp);
