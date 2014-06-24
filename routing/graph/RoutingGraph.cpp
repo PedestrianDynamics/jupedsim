@@ -28,7 +28,6 @@ using namespace std;
 RoutingGraph::RoutingGraph(Building * b) : building(b)
 {
      vertexes = map<int, Vertex>();
-
      BuildGraph();
 
 };
@@ -36,6 +35,7 @@ RoutingGraph::RoutingGraph(Building * b) : building(b)
 RoutingGraph::RoutingGraph()
 {
      vertexes = map<int, Vertex>();
+     building=NULL;
 
 }
 RoutingGraph::~RoutingGraph()

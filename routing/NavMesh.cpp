@@ -1413,8 +1413,6 @@ void NavMesh::FinalizeAlphaShape()
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     //if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
                     new_node->pObstacles.push_back(obstacle_id);
-
-                    // FIXME 23
                     //pObst[obstacle_id]->pNode0=new_node->id;
                }
 
@@ -1677,8 +1675,6 @@ void NavMesh::Finalize()
                     //std::cerr<<"Error: the convexification has created an JObstacle"<<endl;
                     //if(IsElementInVector(new_node->pObstacles,obstacle_id)==false)
                     new_node->pObstacles.push_back(obstacle_id);
-
-                    // FIXME 23
                     //pObst[obstacle_id]->pNode0=new_node->id;
                }
 

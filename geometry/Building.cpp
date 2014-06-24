@@ -396,7 +396,6 @@ void Building::LoadBuildingFromFile()
 
           double position = xmltof(xRoom->Attribute("zpos"), 0.0);
 
-          //TODO?? what the hell is that for ?
           //if(position>6.0) position+=50;
           room->SetZPos(position);
 
@@ -918,13 +917,15 @@ void Building::UpdateVerySlow()
 
      // find the new goals, the parallel way
 
-     //FIXME temporary fix for the safest path router
-     if(dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1))) {
-
-          SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
-          spr->ComputeAndUpdateDestinations(_allPedestians);
-     } else {
-          unsigned int nSize = _allPedestians.size();
+    //FIXME temporary fix for the safest path router
+    if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
+    {
+        SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
+        spr->ComputeAndUpdateDestinations(_allPedestians);
+    }
+    else
+    {
+        unsigned int nSize = _allPedestians.size();
           int nThreads = omp_get_max_threads();
 
           // check if worth sharing the work
@@ -932,6 +933,7 @@ void Building::UpdateVerySlow()
                nThreads = 1;
 
           int partSize = nSize / nThreads;
+          //assert(partSize!=0);
 
           #pragma omp parallel  default(shared) num_threads(nThreads)
           {
@@ -996,8 +998,6 @@ void Building::Update()
                               Log->Write("ERROR: Fix Me !");
                               nonConformPeds.push_back(ped);
                               exit(EXIT_FAILURE);
-                              continue;
-                              //fixme all portal should be derived from crossings
                          }
 
                          SubRoom* other_sub = cross->GetOtherSubRoom(

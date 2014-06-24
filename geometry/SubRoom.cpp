@@ -837,8 +837,8 @@ string Stair::WriteSubRoom() const
      // s.append(tmp.Write());
      Point pos = GetCentroid();
      char tmp_c[CLENGTH];
-     sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" radius=\"20\" color=\"100\" />\n"
-             , GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR, GetElevation(GetUp())*FAKTOR);
+     sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" radius=\"%.2f\" color=\"100\" />\n"
+             , GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR,GetElevation(GetUp())*FAKTOR, 0.2*FAKTOR);
      s.append(tmp_c);
 
      //add the subroom caption
@@ -1039,8 +1039,7 @@ void SubRoom::SetPedestrian(Pedestrian* ped, int index)
 
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 {
-     //TODO: reference ?
-     Point pos = ped->GetPos();
+     const Point& pos = ped->GetPos();
      if (ped->GetExitLine()->DistTo(pos) <= J_EPS_GOAL)
           return true;
      else

@@ -95,7 +95,6 @@ public:
      Room* GetRoom(int index) const;
      Room* GetRoom(std::string caption)const;
 
-     //TODO: implement the same methods for Crossings and Hlines
      Transition* GetTransition(std::string caption) const;
      Transition* GetTransition(int id) ;
 

@@ -352,7 +352,7 @@ void PedDistributor::InitDistributor(const string& filename)
           }
      }
 
-     //TODO: Parse the sources
+     //Parse the sources
      TiXmlNode* xSources=xRootNode->FirstChild("agents_sources");
      if(xSources)
           for(TiXmlElement* e = xSources->FirstChildElement("source"); e;
@@ -732,7 +732,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
         ped->SetFinalDestination(para->GetGoalId());
         ped->SetGroup(para->GetGroupId());
         ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
-        //ped->SetTrip(); //todo: not implemented
+        //ped->SetTrip(); // not implemented
 
         // a und b setzen muss vor v0 gesetzt werden,
         // da sonst v0 mit Null überschrieben wird

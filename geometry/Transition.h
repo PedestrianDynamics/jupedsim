@@ -59,7 +59,6 @@ public:
 
      /**
       * Set/Get the type of the transition
-      * TODO: where is type defined?
       */
      void SetType(std::string s);
 
@@ -88,7 +87,6 @@ public:
 
      /**
       * Set/Get the type of the transition
-      * TODO: where is type defined?
       */
      std::string GetType() const;
 

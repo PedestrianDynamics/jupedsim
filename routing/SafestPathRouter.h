@@ -106,23 +106,17 @@ private:
 private:
      // double dMatrixPreEvac[1][11];
      // double dFinalLength[1][11];
-
      // last time the matrices were updated
      long int _lastUpdateTime;
-
      double *dFinalLineOFP;
      double *dFinalLineEvac;
 
      // double dFinalLineOFP[1][11];
-
-
      //     double *_finalLineEvac;
      int numberOfSubroom;
      double a;
      double b;
      double c;
-
-
 
      // int *preSub;
      int *flo;
@@ -130,7 +124,6 @@ private:
      // double *lenthOfSection;
      // double rR[1][11];
      double *rR;
-
 
      //double peopleAtSection[1][11];
      double *peopleAtSection;
@@ -141,14 +134,9 @@ private:
 
      FileHandler* _phiFile;
      // FileHandler* _finalLineEvac;
-
-
      // double rR[1][11];
-
-
      //double peopleAtSection[1][11];
      //double *peopleAtSection;
-
      // double iNt1[1][11];
      // double iNt2[1][11];
      // double iNt3[1][11];

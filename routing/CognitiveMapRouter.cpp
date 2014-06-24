@@ -23,6 +23,9 @@
 
 CognitiveMapRouter::CognitiveMapRouter()
 {
+    building=NULL;
+    cm_storage=NULL;
+    sensor_manager=NULL;
 }
 
 CognitiveMapRouter::~CognitiveMapRouter()

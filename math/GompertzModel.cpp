@@ -277,7 +277,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
           vector< Point > result_acc = vector<Point > ();
-          result_acc.reserve(2200); //FIXME What is 2200?
+          result_acc.reserve(nSize);
 
           const int threadID = omp_get_thread_num();
 

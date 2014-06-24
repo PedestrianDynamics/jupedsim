@@ -45,26 +45,44 @@ using namespace std;
 
 SafestPathRouter::SafestPathRouter()
 {
-     numberOfSubroom=0;
-     _lastUpdateTime=0;
-     a=1;
-     c=1;
-     b=0;
+    numberOfSubroom=0;
+    _lastUpdateTime=0;
+    a=1;
+    c=1;
+    b=0;
+    _lastUpdateTime=-1;
+    maximalSquare=0;
 
-     // Output to files
-     _phiFile = new FileHandler("Phi_file.csv");
-     // _finalLineEvac = new FileHandler("Evac_File.csv");
-     // Output to files
+    flo =NULL;
+    rR=NULL;
+    peopleAtSection=NULL;
+    squareOfSection=NULL;
+    dFinalLength=NULL;
+    dPeopleDensity=NULL;
+    dPreOFP=NULL;
+    dFinalLineOFP=NULL;
+    dFinalLineEvac=NULL;
 
-     //_finalLineEvac = new double [numberOfSection];
+    // Output to files
+    _phiFile = new FileHandler("Phi_file.csv");
+    // _finalLineEvac = new FileHandler("Evac_File.csv");
+    // Output to files
+    //_finalLineEvac = new double [numberOfSection];
 }
 
 SafestPathRouter::~SafestPathRouter()
 {
-
      // Output to files
      delete _phiFile;
-     // delete _finalLineEvac;
+     delete flo;
+     delete rR;
+     delete peopleAtSection;
+     delete  squareOfSection;
+     delete  dFinalLength;
+     delete dPeopleDensity;
+     delete dPreOFP;
+     delete dFinalLineOFP;
+     delete dFinalLineEvac;
 }
 
 void SafestPathRouter::Init(Building* building)

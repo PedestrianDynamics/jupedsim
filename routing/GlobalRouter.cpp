@@ -464,12 +464,9 @@ void GlobalRouter::Init(Building* building)
 
      //dumping the complete system
      //DumpAccessPoints(592); exit(0);
-     //DumpAccessPoints(32);exit(0);
      //vector<string> rooms;
      //rooms.push_back("hall");
      //rooms.push_back("0");
-     //rooms.push_back("1");
-     //rooms.push_back("2");
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
      //WriteGraphGV("routing_graph.gv",1,rooms);
      Log->Write("INFO:\tDone with the Global Router Engine!");
@@ -669,7 +666,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                          ped->GetSubRoomID());
 
 
-
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
@@ -748,7 +744,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                     "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
                     ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
                     ped->GetFinalDestination());
-          //exit(EXIT_FAILURE);
           return -1;
      }
 }
@@ -787,7 +782,8 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
         }
 
     }
-    //schnell fix for extra hlines
+    //quick fix for extra hlines
+    // it should be safe now to delete the first preceding if block
     else
     {
         const vector<int>& goals=sub->GetAllGoalIDs();
@@ -841,8 +837,6 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
             }
         }
     }
-
-
 }
 
 SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2)

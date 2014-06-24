@@ -113,11 +113,15 @@ ArgumentParser::ArgumentParser()
     pDistEffMaxWall = 2;
     pTauMu = 0.5;
     pTauSigma = 0.001;
+    paPed=1;
+    pbPed=0.25;
+    pcPed=3;
+    paWall=1;
+    pbWall=0.7;
+    pcWall=3;
     pLog = 0;
+    pModel=MODEL_GFCM;
     pErrorLogFile = "./Logfile.dat";
-    //pPathwayFilename="";
-    //pRoutingFilename="";
-    //pTrafficFilename="";
     pNavMeshFilename = "";
     pSeed = 0;
     pFormat = FORMAT_XML_PLAIN;
@@ -589,17 +593,26 @@ void ArgumentParser::ParseIniFile(string inifile)
     //pick up which model to use
     //get the wanted ped model id
     pModel=xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"),-1);
-    if(pModel==-1)
+    if( (pModel==-1) /*|| ( (pModel!=MODEL_GFCM) && pModel!=MODEL_GOMPERTZ) */)
     {
         Log->Write("ERROR: \tmissing operational_model_id attribute in the agent section. ");
         Log->Write("ERROR: \tplease specify the model id to use");
         exit(EXIT_FAILURE);
     }
 
+
+    bool parsingModelSuccessful=false;
+
     for (TiXmlElement* xModel = xMainNode->FirstChild("operational_models")->FirstChildElement(
             "model"); xModel;
             xModel = xModel->NextSiblingElement("model"))
     {
+
+        if(!xModel->Attribute("description") )
+        {
+            Log->Write("ERROR: \t missing attribute description in models ?");
+            exit(EXIT_FAILURE);
+        }
 
         string modelName = string(xModel->Attribute("description"));
         int model_id  = xmltoi(xModel->Attribute("operational_model_id"),-1);
@@ -612,6 +625,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                 exit(EXIT_FAILURE);
             }
             ParseGCFMModel(xModel);
+            parsingModelSuccessful=true;
             //only parsing one model
             break;
         }
@@ -623,16 +637,18 @@ void ArgumentParser::ParseIniFile(string inifile)
                 exit(EXIT_FAILURE);
             }
             //only parsing one model
-            break;
             ParseGompertzModel(xModel);
+            parsingModelSuccessful=true;
+            break;
         }
-        else
-        {
-            Log->Write("ERROR: \tWrong model id [%d!=%d]. Choose %d (GCFM) or %d Gompertz)",pModel,model_id,MODEL_GFCM,MODEL_GOMPERTZ);
-            Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
-            exit(EXIT_FAILURE);
-        }
+    }
 
+    if( parsingModelSuccessful==false)
+    {
+        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 Gompertz)",pModel);
+        Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
+        Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
+        exit(EXIT_FAILURE);
     }
 
     //route choice strategy
