@@ -9,7 +9,7 @@
 	<!-- geometry file -->
 	<geometry>bateau_obst.xml</geometry>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-bin" fps="8">
+	<trajectories format="xml-plain" fps="8">
 		 <file location="trajectories.xml" /> 
 		 <!-- <socket hostname="127.0.0.1" port="8989"/>  -->  
 	</trajectories>
@@ -65,7 +65,7 @@
 	</routing>
 
 	<!--persons information and distribution -->
-	<agents>
+	<agents operational_model_id="2">
 		<agents_distribution>
 			<group1 group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
 			<group1 group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
@@ -76,8 +76,8 @@
 	</agents>
 
 	<!-- These parameters may be overwritten -->
-	<operational_models>
-		<model id="2" description="gompertz">
+	<operational_models >
+		<model operational_model_id="2" description="gompertz">
 			<parameters>
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
