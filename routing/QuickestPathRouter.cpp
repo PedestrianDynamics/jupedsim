@@ -250,9 +250,6 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
                double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV().Norm();
                //double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV0Norm();
 
-               //if(myref->GetV().Norm()==0.0){
-               //      cout<<"bye"<<endl; exit(0);
-               //}
                //time for the reference to get out
                double t2=(myref->GetPos()- aps[ap]->GetCentre()).Norm()/myref->GetV().Norm();
 
@@ -273,15 +270,11 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
                quickest=exitid;
           }
 
-          //printf(" ped [%d] checking [%d] ---> [%f]\n",ped->GetPedIndex(),exitid,time);
           //also save the time for the default destinations for later comparison
           if (exitid==preferredExit) {
                preferredExitTime=time;
           }
 
-          //if(ped->GetPedIndex()==27){
-          //      printf("reference to exit [%d] is ped [%d]\n",exitid,myref->GetPedIndex());
-          //}
      }
      //compare it with my preferred (shortest nearest)
      if(quickest==preferredExit) return quickest;
@@ -826,7 +819,6 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
 
 int QuickestPathRouter::isCongested(Pedestrian* ped)
 {
-
      //define as the ratio of people in front of me and behind me
 
      Room* room=_building->GetRoom(ped->GetRoomID());
@@ -858,27 +850,16 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 
      double ratio=inFrontofMe/(inFrontofMe+behindMe);
 
-     //      if(ped->GetID()==255) cout<<"ratio:"<<ratio<<endl;
-     //      if((ped->GetID()==255) && (ratio>0.8)){
-     //              cout<<"ratio:"<<ratio<<endl;
-     //              ped->Dump(255);
-     //              exit(0);
-     //      }
-
      if(ratio>0.8) return true;
 
      return false;
 
-     //if(ped->GetID()==88)
-     //cout<<"ratio:"<<ratio<<endl;
-     //return true;
      /*
      //collect the pedestrians within 1 metre radius
      vector<Pedestrian*> neighbourhood;
      double range=1.0;//1m
 
      _building->GetGrid()->GetNeighbourhood(ped,neighbourhood);
-
 
      std::vector<int> conflictings;
      std::vector<int>::iterator per;
@@ -923,7 +904,6 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
      }
 
      if(pedCrossing<OBSTRUCTION) return false;
-
      return true;
       */
 }
@@ -967,8 +947,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
           //double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV0Norm();
 
           if(myref->GetV().Norm()==0.0) {
-               Log->Write("ERROR:\t the reference pedestrian velocity is zero");
-               exit(0);
+               Log->Write("WARNING:\t the reference pedestrian velocity is zero !");
           }
           //time for the reference to get out
           double t2=(myref->GetPos() -  ap->GetCentre()).Norm()/myref->GetV().Norm();
@@ -982,10 +961,9 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      }
 
      if((myref==NULL) && (flag==REF_PED_FOUND)) {
-          cout<<" Fatal Error in Quickest Path Router"<<endl;
-          cout<<" reference pedestrians is NULL"<<endl;
+         Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
+         Log->Write(" reference pedestrians is NULL");
           exit(EXIT_FAILURE);
-
      }
 
      return time;
