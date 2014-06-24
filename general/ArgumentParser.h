@@ -38,6 +38,7 @@ using std::vector;
 using std::pair;
 
 class OutputHandler;
+class TiXmlElement;
 extern OutputHandler* Log;
 
 class ArgumentParser {
@@ -93,7 +94,9 @@ private:
     bool _profilingFlag;
     int _hpcFlag; //Flag fuer die HPC-Archtitektur (0=CPU, 1=GPU, 2=XeonPhi)
 
-	// private Funktionen
+private:
+    void ParseGCFMModel(TiXmlElement* xGCFM);
+    void ParseGompertzModel(TiXmlElement* xGompertz);
 	void Usage();
 
 public:
