@@ -44,7 +44,7 @@ private:
      double _Av;
      double _Bmin; //  pBmax - V *[(pBmax - pBmin) / V0]
      double _Bmax;
-     double __vel0; // desired speed
+     double _vel0; // desired speed
 
 
 
