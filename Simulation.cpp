@@ -1,4 +1,3 @@
-
 /**
  * @file Simulation.cpp
  * @date Created on: Dec 15, 2010

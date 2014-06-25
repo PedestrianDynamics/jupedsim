@@ -344,9 +344,9 @@ void PedDistributor::InitDistributor(const string& filename)
           dis->SetHeight(height);
           dis->SetPatience(patience);
 
-          if(e->Attribute("startX") && e->Attribute("startY")) {
-               double startX = xmltof(e->Attribute("startX"),NAN);
-               double startY = xmltof(e->Attribute("startY"),NAN);
+          if(e->Attribute("start_x") && e->Attribute("start_y")) {
+               double startX = xmltof(e->Attribute("start_x"),NAN);
+               double startY = xmltof(e->Attribute("start_y"),NAN);
                //todo: verify that the position is valid (not nan)
                dis->SetStartPosition(startX,startY,0.0);
           }

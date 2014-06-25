@@ -1,9 +1,11 @@
 /**
- * @file    Simulation.h
- * @date Created on: Dec 15, 2010
- * Copyright (C) <2009-2011>
+ * \file    Simulation.h
+ * \date    Dec 15, 2010
+ * \version MAJOR.MINOR
  *
- * @section LICENSE
+ * Copyright (C) <2009-2014>
+ *
+ * \section LICENSE
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -45,7 +47,7 @@
 #include "routing/RoutingEngine.h"
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
-#include "events/EventManager.h" //neuer Header fuer die Events
+#include "events/EventManager.h"
 #include "routing/CognitiveMapRouter.h"
 
 extern OutputHandler* Log;
@@ -126,7 +128,6 @@ public:
       * print some statistics about the simulation
       */
      void PrintStatistics();
-
 };
 
 #endif /*SIMULATION_H_*/
