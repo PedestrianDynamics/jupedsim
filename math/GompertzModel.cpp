@@ -1,9 +1,9 @@
 /**
- * @file GOMPERTZMModel.cpp
+ * \file GompertzModel.cpp
+ * \date Tue Apr 15 19:19:04 2014
+ * \brief Implementation of classes for some force-based models
  *
- * @brief Implementation of classes for some force-based models
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -17,14 +17,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
  *
- * @section DESCRIPTION
+ * \section Description
  * Implementation of classes for force-based models.
  * Actually we've got two different models:
  * 2. Gompertz Model
  *
- * @date Tue Apr 15 19:19:04 2014
  */
 
 #include "../pedestrian/Pedestrian.h"

@@ -1,9 +1,9 @@
 /**
- * @file GOMPERTZMModel.h
- *
+ * @file GompertzModel.h
+ * @date Tue Apr 15 19:19:04 2014
  * @brief Implementation of classes for some force-based models
  *
- * @section LICENSE
+ * @section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -17,14 +17,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
  *
- * @section DESCRIPTION
+ * @section Description
  * Implementation of classes for force-based models.
  * Actually we've got two different models:
  * 2. Gompertz Model
  *
- * @date Tue Apr 15 19:19:04 2014
  */
 
 
@@ -60,7 +59,7 @@ private:
      double _cWall;
 
      /**
-      * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\$
+      * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
       * This is a duplicate of @see GCFMModel::ForceDriv
       * @param ped Pointer to Pedestrians
       * @param room Pointer to Room
