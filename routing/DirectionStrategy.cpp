@@ -44,43 +44,46 @@ DirectionStrategy::DirectionStrategy(const DirectionStrategy& orig)
 DirectionStrategy::~DirectionStrategy()
 {
 }
-
+/// 1
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
 {
      return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
-
+/// 2
 Point DirectionMinSeperation::GetTarget(Room* room, Pedestrian* ped) const
 {
      return ped->GetExitLine()->ShortestPoint(ped->GetPos());
 }
-
+/// 3
+/// @todo check if d is smaller than length of exit
 Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
 {
 
-     double d = 0.2; // beide Seiten um 20 cm verkürzen
-
+     double d = 0.5;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
      const Point& p2 = ped->GetExitLine()->GetPoint2();
-     Point diff = (p1 - p2).Normalized() * d;
-     Line e_neu = Line(p1 - diff, p2 + diff);
+     double length = (p1 - p2).Norm(); 
+     
+     double u = d/length; // d is supposed to be smaller than length, then u is in [0, 1]
+     //Point diff = (p1 - p2).Normalized() * d;
+     Line e_neu = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u));
      Point target = e_neu.ShortestPoint(ped->GetPos());
-     // if(ped->GetID() == 4)
+     // if(ped->GetID() == 81)
      // {
-     //     printf("X=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
+     //     printf("=======\nX=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
      //     printf("p1=[%.2f, %.2f], p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY());
-     //     printf("diff=[%.2f, %.2f]\n", diff.GetX(), diff.GetY());
-     //     printf("p1-diff=[%.2f, %.2f], p2+diff=[%.2f, %.2f]\n", (p1-diff).GetX(), (p1-diff).GetY(), (p2+diff).GetX(), (p2+diff).GetY() );
+     //     printf("u= %f length=%f\n", u, length);
+     //     printf("e_neu=[%.2f, %.2f]===[%.2f, %.2f]\n", e_neu.GetPoint1().GetX(), e_neu.GetPoint1().GetY(), e_neu.GetPoint2().GetX(), e_neu.GetPoint2().GetY() );
 
-     //     printf("target=[%.2f, %.2f]\n", target.GetX(), target.GetY());
-
-     // }
+     //     printf("target=[%.2f, %.2f]\n====\n\n", target.GetX(), target.GetY());
+         
+     //}
      // kürzester Punkt auf der Linie
 
      return  target;
 
 }
-
+/// 4
 Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 {
      const Point& p1 = ped->GetExitLine()->GetPoint1();
@@ -105,6 +108,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 /**
  * this strategy is designed to work without Hlines for a general geometry.
  * First tested for bottlenecks and corners.
+ * number 5
  * @param room Pointer
  * @param ped Pointer to Pedestrians
  *

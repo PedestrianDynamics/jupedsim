@@ -4,8 +4,9 @@
   <tmax unit="sec">900</tmax>
         <!-- seed used for initialising random generator -->
         <seed>12542</seed>
+        <max_sim_time unit="sec">900</max_sim_time>
         <!-- geometry file -->
-        <geometry>1.2_bottleneck.xml</geometry>
+        <geometry>0.9_bottleneck.xml</geometry>
         <!-- traectories file and format -->
         <trajectories format="xml-plain" embed_mesh="false" fps="8">
                 <file location="trajectorien_bottleneck.xml" />
@@ -42,7 +43,7 @@
         </routing>
 
         <!--persons information and distribution -->
-        <agents>
+        <agents operational_model_id="1">
                 <agents_distribution>
                         <group group_id="2" room_id="1" subroom_id="0" number="1" goal_id="0" router_id="1" route_id=""/>
                         <!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
@@ -55,23 +56,22 @@
 
         <!-- These parameters may be overwritten -->
         <operational_models>
-                <!-- <model id="1" description="gcfm"> -->
-                <!--         <parameters> -->
-                <!--                 <tmax unit="sec">900</tmax> -->
-                <!--                 <solver>euler</solver> -->
-                <!--                 <stepsize>0.001</stepsize> -->
-                <!--                 <exitCrossingStrategy>4</exitCrossingStrategy> -->
-                <!--                 <linkedcells enabled="true" cell_size="2.2" /> -->
-                <!--                 <v0 mu="1.34" sigma="0.001" /> -->
-                <!--                 <bmax mu="0.25" sigma="0.001" /> -->
-                <!--                 <bmin mu="0.20" sigma="0.001" /> -->
-                <!--                 <amin mu="0.18" sigma="0.001" /> -->
-                <!--                 <tau mu="0.5" sigma="0.001" /> -->
-                <!--                 <atau mu="0.23" sigma="0.001" /> -->
-                <!--                 <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" /> -->
-                <!--                 <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" /> -->
-                <!--         </parameters> -->
-                <!-- </model> -->
+                <model operational_model_id="1" description="gcfm">
+                        <parameters>
+                                <solver>euler</solver>
+                                <stepsize>0.001</stepsize>
+                                <exitCrossingStrategy>4</exitCrossingStrategy>
+                                <linkedcells enabled="true" cell_size="2.2" />
+                                <v0 mu="1.34" sigma="0.001" />
+                                <bmax mu="0.25" sigma="0.001" />
+                                <bmin mu="0.20" sigma="0.001" />
+                                <amin mu="0.18" sigma="0.001" />
+                                <tau mu="0.5" sigma="0.001" />
+                                <atau mu="0.23" sigma="0.001" />
+                                <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+                                <force_wall nu="10.8" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+                        </parameters>
+                </model>
                 <model id="2" description="gompertz">
                         <parameters>
                                 <solver>euler</solver>
