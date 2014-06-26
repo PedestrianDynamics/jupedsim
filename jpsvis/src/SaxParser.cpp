@@ -756,9 +756,9 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			QDomElement el = walls.item(i).toElement();
 
 			//wall thickness, default to 30 cm
-			double thickness = el.attribute("thickness","15").toDouble();
+            double thickness = el.attribute("thickness","15").toDouble()*FAKTOR;
 			//wall height default to 250 cm
-			double height = el.attribute("height","250").toDouble();
+            double height = el.attribute("height","250").toDouble()*FAKTOR;
 			//wall color default to blue
 			double color = el.attribute("color","0").toDouble();
 
@@ -767,13 +767,13 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			QDomNodeList points = el.elementsByTagName("point");
 			for (unsigned int i = 0; i < points.length() - 1; i++) {
 
-				double x1=points.item(i).toElement().attribute("xPos", "0").toDouble();
-				double y1=points.item(i).toElement().attribute("yPos", "0").toDouble();
-				double z1=points.item(i).toElement().attribute("zPos", "0").toDouble();
+                double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                double z1=points.item(i).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
 
-				double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble();
-				double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble();
-				double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble();
+                double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
 				geometry->addWall(x1, y1,z1 ,x2, y2,z2,thickness,height,color);
 			}
 		}
@@ -784,9 +784,9 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 				QDomElement el = doors.item(i).toElement();
 
 				//door thickness, default to 15 cm
-				double thickness = el.attribute("thickness","15").toDouble();
+                double thickness = el.attribute("thickness","15").toDouble()*FAKTOR;
 				//door height default to 250 cm
-				double height = el.attribute("height","250").toDouble();
+                double height = el.attribute("height","250").toDouble()*FAKTOR;
 				//door color default to blue
 				double color = el.attribute("color","255").toDouble();
 
@@ -796,13 +796,13 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 				//Debug::Messages("found:  " << points.length() <<" for this wall" <<endl;
 				for (unsigned int i = 0; i < points.length() - 1; i++) {
 
-					double x1=points.item(i).toElement().attribute("xPos", "0").toDouble();
-					double y1=points.item(i).toElement().attribute("yPos", "0").toDouble();
-					double z1=points.item(i).toElement().attribute("zPos", "0").toDouble();
+                    double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                    double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                    double z1=points.item(i).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
 
-					double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble();
-					double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble();
-					double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble();
+                    double x2=points.item(i+1).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
+                    double y2=points.item(i+1).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
+                    double z2=points.item(i+1).toElement().attribute("zPos", "0").toDouble()*FAKTOR;
 					geometry->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
 				}
 			}
@@ -811,11 +811,11 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 		for (unsigned int i = 0; i < spheres.length(); i++) {
 
 			double center[3];
-			center[0] = spheres.item(i).toElement().attribute("centerX", "0").toDouble();
-			center[1]= spheres.item(i).toElement().attribute("centerY", "0").toDouble();
-			center[2]= spheres.item(i).toElement().attribute("centerZ", "0").toDouble();
-			double color= spheres.item(i).toElement().attribute("color", "0").toDouble();
-			double radius= spheres.item(i).toElement().attribute("radius", "0").toDouble();
+            center[0] = spheres.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+            center[1]= spheres.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+            center[2]= spheres.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
+            double color= spheres.item(i).toElement().attribute("color", "0").toDouble()*FAKTOR;
+            double radius= spheres.item(i).toElement().attribute("radius", "0").toDouble()*FAKTOR;
 			//double width = spheres.item(i).toElement().attribute("width", "0").toDouble();
 			//double height= spheres.item(i).toElement().attribute("height", "0").toDouble();
 
@@ -825,49 +825,49 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 		for (unsigned int i = 0; i < cuboids.length(); i++) {
 
 			double center[3];
-			center[0] = cuboids.item(i).toElement().attribute("centerX", "0").toDouble();
-			center[1]= cuboids.item(i).toElement().attribute("centerY", "0").toDouble();
-			center[2]= cuboids.item(i).toElement().attribute("centerZ", "0").toDouble();
+            center[0] = cuboids.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+            center[1]= cuboids.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+            center[2]= cuboids.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
 			double color= cuboids.item(i).toElement().attribute("color", "0").toDouble();
-			double length= cuboids.item(i).toElement().attribute("length", "0").toDouble();
-			double width = cuboids.item(i).toElement().attribute("width", "0").toDouble();
-			double height= cuboids.item(i).toElement().attribute("height", "0").toDouble();
+            double length= cuboids.item(i).toElement().attribute("length", "0").toDouble()*FAKTOR;
+            double width = cuboids.item(i).toElement().attribute("width", "0").toDouble()*FAKTOR;
+            double height= cuboids.item(i).toElement().attribute("height", "0").toDouble()*FAKTOR;
 			geometry->addObjectBox(center,height,width,length,color);
 			//		Debug::Error("cuboids: "<<length<<" || " <<width << " || "<<height<<" || "<<color<<endl;
 		}
 		// floors
         for (  int i = 0; i < floors.length(); i++) {
 
-			double left =floors.item(i).toElement().attribute("xMin","0").toDouble();
-			double right =floors.item(i).toElement().attribute("xMax","0").toDouble();
-			double up =floors.item(i).toElement().attribute("yMax","0").toDouble();
-			double down =floors.item(i).toElement().attribute("yMin","0").toDouble();
-			double z =floors.item(i).toElement().attribute("z","0").toDouble();
+            double left =floors.item(i).toElement().attribute("xMin","0").toDouble()*FAKTOR;
+            double right =floors.item(i).toElement().attribute("xMax","0").toDouble()*FAKTOR;
+            double up =floors.item(i).toElement().attribute("yMax","0").toDouble()*FAKTOR;
+            double down =floors.item(i).toElement().attribute("yMin","0").toDouble()*FAKTOR;
+            double z =floors.item(i).toElement().attribute("z","0").toDouble()*FAKTOR;
 			geometry->addFloor(left,down,right,up,z);
 		}
 		// cylinders
         for (  int i = 0; i < cylinders.length(); i++) {
 
 			double center[3], rotation[3];
-			center[0] = cylinders.item(i).toElement().attribute("centerX", "0").toDouble();
-			center[1]= cylinders.item(i).toElement().attribute("centerY", "0").toDouble();
-			center[2]= cylinders.item(i).toElement().attribute("centerZ", "0").toDouble();
+            center[0] = cylinders.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+            center[1]= cylinders.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+            center[2]= cylinders.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
 			double color= cylinders.item(i).toElement().attribute("color", "0").toDouble();
-			double radius= cylinders.item(i).toElement().attribute("radius", "0").toDouble();
-			double height= cylinders.item(i).toElement().attribute("height", "0").toDouble();
+            double radius= cylinders.item(i).toElement().attribute("radius", "0").toDouble()*FAKTOR;
+            double height= cylinders.item(i).toElement().attribute("height", "0").toDouble()*FAKTOR;
 			rotation[0] = cylinders.item(i).toElement().attribute("angleX", "90").toDouble();
 			rotation[1] = cylinders.item(i).toElement().attribute("angleY", "0").toDouble();
 			rotation[2] = cylinders.item(i).toElement().attribute("angleZ", "0").toDouble();
 			geometry->addObjectCylinder(center,radius,height,rotation,color);
 		}
 
-		//Tlabels
+        //Labels
         for (  int i = 0; i < labels.length(); i++) {
 
 			double center[3];
-			center[0] = labels.item(i).toElement().attribute("centerX", "0").toDouble();
-			center[1]= labels.item(i).toElement().attribute("centerY", "0").toDouble();
-			center[2]= labels.item(i).toElement().attribute("centerZ", "0").toDouble();
+            center[0] = labels.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
+            center[1]= labels.item(i).toElement().attribute("centerY", "0").toDouble()*FAKTOR;
+            center[2]= labels.item(i).toElement().attribute("centerZ", "0").toDouble()*FAKTOR;
 			double color= labels.item(i).toElement().attribute("color", "0").toDouble();
 			string caption= labels.item(i).toElement().attribute("text", "").toStdString();
 			geometry->addObjectLabel(center,center,caption,color);

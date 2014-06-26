@@ -55,6 +55,7 @@
 
 #include "network/TraVisToServer.h"
 #include "geometry/FacilityGeometry.h"
+#include "general/Macros.h"
 #include "Debug.h"
 
 
@@ -169,8 +170,6 @@ void ThreadDataTransfer::slotProcessMessage(QString& data){
 		errNr++;
 		Debug::Error(">> %s",(const char *)errorMsg.toStdString().c_str());
 		Debug::Error(">> %s",(const char *)data.toStdString().c_str());
-		//Debug::Error(">> %d", errNr);
-		//Debug::Error(">> %s", (const char *)data.toStdString().c_str());
 		return;
 	}
 
@@ -267,40 +266,40 @@ void ThreadDataTransfer::parseDataNode(QDomNodeList frames){
 	//emit signal_CurrentAction("parsing data");
 
 
-	for (unsigned int i = 0; i < frames.length(); i++) {
+    for (int i = 0; i < frames.length(); i++) {
 		Frame *newFrame = new Frame();
 		QDomElement el = frames.item(i).toElement();
 		QDomNodeList agents = el.elementsByTagName("agent");
 		//cout << "found:  " << agents.length() <<" agents" <<endl;
-		for (unsigned int i = 0; i < agents.length(); i++) {
+        for (int i = 0; i < agents.length(); i++) {
 
 			bool ok=false;
 			int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
 			if(!ok) continue; // invalid ID
-			double xPos=agents.item(i).toElement().attribute("xPos","0").toDouble();
-			double yPos=agents.item(i).toElement().attribute("yPos","0").toDouble();
-			double zPos=agents.item(i).toElement().attribute("zPos","0").toDouble();
+            double xPos=agents.item(i).toElement().attribute("xPos","0").toDouble()*FAKTOR;
+            double yPos=agents.item(i).toElement().attribute("yPos","0").toDouble()*FAKTOR;
+            double zPos=agents.item(i).toElement().attribute("zPos","0").toDouble()*FAKTOR;
 
 			double agent_color =std::numeric_limits<double>::quiet_NaN();
 
-			double xVel=agents.item(i).toElement().attribute("xVel").toDouble(&ok);
+            double xVel=agents.item(i).toElement().attribute("xVel").toDouble(&ok)*FAKTOR;
 			if(!ok)xVel=std::numeric_limits<double>::quiet_NaN();
-			double yVel=agents.item(i).toElement().attribute("yVel").toDouble(&ok);
+            double yVel=agents.item(i).toElement().attribute("yVel").toDouble(&ok)*FAKTOR;
 			if(!ok)yVel=std::numeric_limits<double>::quiet_NaN();
-			double zVel=agents.item(i).toElement().attribute("zVel").toDouble(&ok);
+            double zVel=agents.item(i).toElement().attribute("zVel").toDouble(&ok)*FAKTOR;
 			if(!ok)zVel=std::numeric_limits<double>::quiet_NaN();
 
 			//coordinates of the ellipse, default to the head of the agent
-			double el_x=agents.item(i).toElement().attribute("xEll").toDouble(&ok);
+            double el_x=agents.item(i).toElement().attribute("xEll").toDouble(&ok)*FAKTOR;
 			if(!ok)	el_x=xPos;
-			double el_y=agents.item(i).toElement().attribute("yEll").toDouble(&ok);
+            double el_y=agents.item(i).toElement().attribute("yEll").toDouble(&ok)*FAKTOR;
 			if(!ok)	el_y=yPos;
-			double el_z=agents.item(i).toElement().attribute("zEll").toDouble(&ok);
+            double el_z=agents.item(i).toElement().attribute("zEll").toDouble(&ok)*FAKTOR;
 			if(!ok)	el_z=zPos;
 
-			double dia_a=agents.item(i).toElement().attribute("radiusA").toDouble(&ok);
+            double dia_a=agents.item(i).toElement().attribute("radiusA").toDouble(&ok)*FAKTOR;
 			if(!ok)dia_a=std::numeric_limits<double>::quiet_NaN();
-			double dia_b=agents.item(i).toElement().attribute("radiusB").toDouble(&ok);
+            double dia_b=agents.item(i).toElement().attribute("radiusB").toDouble(&ok)*FAKTOR;
 			if(!ok)dia_b=std::numeric_limits<double>::quiet_NaN();
 			double el_angle=agents.item(i).toElement().attribute("ellipseOrientation").toDouble(&ok);
 			if(!ok){el_angle=std::numeric_limits<double>::quiet_NaN(); }
@@ -387,7 +386,7 @@ void ThreadDataTransfer::parseShapeNode(QDomNode shape){
 	QStringList colors;
 
 
-	for (unsigned int i = 0; i < agents.length(); i++) {
+    for (int i = 0; i < agents.length(); i++) {
 
 		bool ok=false;
 		int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
