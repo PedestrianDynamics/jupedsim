@@ -1,0 +1,41 @@
+INFO: 	Loading and parsing the persons attributes
+INFO: 	...Done
+INFO: 	Parsing the geometry file
+INFO: 	geometry <test_1.xml>
+INFO: 	Loading building file successful!!!
+
+INFO:	Loading extra routing information
+INFO:	done with loading extra routing information
+INFO: 	Init Geometry
+INFO: 	Init Geometry successful!!!
+
+INFO:	Loading  the traffic info file
+INFO:	Done with loading traffic info file
+INFO: 	Init Distribute
+INFO: 	Distributing 1 Agents in Room/Subrom [0/0]! Maximum allowed: 390
+INFO: 	 fixed position for ped 2685108 in Room 0 ( 2 : 2 )
+	...Done
+INFO: 	Initializing the grid with cell size: 2.200000 
+INFO: 	Done with Initializing the grid 
+INFO:	Init the Global Router Engine
+INFO: 	Exit to outside found: 3 [trans_0_room_0_subroom_0]
+INFO:	Done with the Global Router Engine!
+INFO: 	Checking the geometry for artifacts
+INFO: 	...Done!!!
+
+INFO:	Datei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich.
+INFO: 	Reading events
+ 
+INFO: 	Parsing the event file
+INFO: 	Failed to open file
+INFO: 	 could not parse the event file. So no Events are found.
+INFO: 	No events in the events.xml
+
+INFO: 	End runSimulation()
+
+Exec Time [s]   : 3.00
+Evac Time [s]     : 10
+Real Time Factor  : 3.33 X
+Number of Threads Used  : 8
+Warnings          : 0
+Errors            : 0
