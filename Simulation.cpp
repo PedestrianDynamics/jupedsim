@@ -1,9 +1,9 @@
 /**
- * @file Simulation.cpp
- * @date Created on: Dec 15, 2010
+ * \file Simulation.cpp
+ * \date Dec 15, 2010
  * Copyright (C) <2009-2011>
  *
- * @section LICENSE
+ * \section LICENSE
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
  *
- * \section description
+ * \section Description
  * The Simulation class represents a simulation of pedestrians
  * based on a certain model in a specific scenario. A simulation is defined by
  * various parameters and functions.

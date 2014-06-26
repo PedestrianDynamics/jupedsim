@@ -48,7 +48,7 @@ JEllipse::JEllipse()
      _Av = 0.53;
      _Bmin = 0.20; // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
      _Bmax = 0.25;
-     __vel0 = 0; // desired speed
+     _vel0 = 0; // desired speed
 }
 
 JEllipse::JEllipse(const JEllipse& orig)
@@ -62,7 +62,7 @@ JEllipse::JEllipse(const JEllipse& orig)
      _Av = orig.GetAv();
      _Bmin = orig.GetBmin(); // Semi-axis in direction of shoulders: pBmax - V *[(pBmax - pBmin) / V0]
      _Bmax = orig.GetBmax();
-     __vel0 = orig.GetV0(); // desired speed
+     _vel0 = orig.GetV0(); // desired speed
 }
 
 
@@ -117,7 +117,7 @@ void JEllipse::SetBmax(double b_max)
 
 void JEllipse::SetV0(double v0)
 {
-     __vel0 = v0;
+     _vel0 = v0;
 }
 
 /*************************************************************
@@ -171,11 +171,11 @@ double JEllipse::GetBmax() const
 
 double JEllipse::GetV0() const
 {
-     return __vel0;
+     return _vel0;
 }
 double JEllipse::GetArea() const
 {
-     double x = (_Bmax - _Bmin) / __vel0;
+     double x = (_Bmax - _Bmin) / _vel0;
      double V = _vel.Norm();
      double ea = _Amin + V * _Av;
      double eb = _Bmax - V * x;
@@ -191,7 +191,7 @@ double JEllipse::GetEA() const
 // ellipse semi-axis in the orthogonal direction of the velocity
 double JEllipse::GetEB() const
 {
-     double x = (_Bmax - _Bmin) / __vel0;
+     double x = (_Bmax - _Bmin) / _vel0;
      return _Bmax - _vel.Norm() * x;
 }
 

@@ -1,11 +1,8 @@
-
 /**
- * @file    main.cpp
- * @author  U.Kemloh, A.Portz
- * @version 0.5
- * Copyright (C) <2009-2014>
+ * \file main.cpp
+ * \copyright Copyright <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved. 
  *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -19,16 +16,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENCE</a>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
  *
- * @section DESCRIPTION
- *
+ * \section Description
+ *  main function
  *
  */
 /**
- * @mainpage
+ * \mainpage
  *
- * \date 15.1.2013
+ * \date 15.01.2013
  *
  * JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
  *
