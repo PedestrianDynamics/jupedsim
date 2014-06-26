@@ -26,6 +26,7 @@ df = args.df  #10  # 16? default frame per second
 isTrajCm = args.m # 1 means trajectories are in cm. Otherwise they are in m
 isSmoothAngle = args.smoth # smooth angle
 logfile = args.log.name  #'log.txt'
+dir = args.path
 v0 = 1.3
 debug = 0
 logging.info('fps = %d'%fps)
@@ -43,7 +44,7 @@ WDir = os.getcwd() #working directory
 # dirs=["EG/Width"]
 # dirs=["UO/300"]
 # dirs=["EO/300"]
-dirs=["."]
+#dirs=["."]
 PrevDir = os.path.split(WDir)[0]
 phi = 0 # dummy initialisation
 phi2 = 0 # dummy initialisation
@@ -56,48 +57,49 @@ else:
     cm = 0.01  # to convert speed to m/s
 
 
-for dir in dirs:
-    logging.info("dir = %s"%dir)
-    files = glob.glob("%s/*.txt"%(dir))
-    logging.info("Found %d txt-files"%len(files))
-    if not files:
-        exit(logging.critical("found no files. exit.."))
-    for inputfile in files:
-        outputfile  = os.path.split(inputfile)[0] + "/" + os.path.basename(inputfile).split(".")[0] + ".xml"
-        #data = np.loadtxt(inputfile)
-        data = np.array( pd.read_csv(inputfile, sep="\s+", header=None) )
-        if len(data[0,:]) < 4: #experiment data have exactly 5 columns
-            continue
-        logging.info("|----> inputfile=%s"%inputfile)
-        logging.info("<----| outputfile=%s"%outputfile)
-        
-        Nagents = max(data[:,0]) - min(data[:,0]) + 1 
-        out = open(outputfile, "w") 
-        write_header(out, Nagents, fps)
-        # Todo: write geometry data------------------------------------------------------
-        # write geometry
-        walls = [ [-500.0,-300.0], [-500,0], [-300, 0], [-300, 430], [0, 430], [0, 0], [400, 0], [400, -300],[-500.0,-300.0]]
-        #write_geometry(out, walls)
-        #--------------------------------------------------------------------------------------
-        #write pedestrian data
-        frames = np.unique(data[:,1]).astype(int)
-        pids = np.unique(data[:,0]).astype(int)
+#for dir in dirs:
+logging.info("dir = %s"%dir)
+print(dir)
+files = glob.glob("%s/*.txt"%(dir))
+logging.info("Found %d txt-files"%len(files))
+if not files:
+	exit(logging.critical("found no files. exit.."))
+for inputfile in files:
+	outputfile  = os.path.split(inputfile)[0] + "/" + os.path.basename(inputfile).split(".")[0] + ".xml"
+	#data = np.loadtxt(inputfile)
+	data = np.array( pd.read_csv(inputfile, sep="\s+", header=None) )
+	if len(data[0,:]) < 4: #experiment data have exactly 5 columns
+		continue
+	logging.info("|----> inputfile=%s"%inputfile)
+	logging.info("<----| outputfile=%s"%outputfile)
+	
+	Nagents = max(data[:,0]) - min(data[:,0]) + 1 
+	out = open(outputfile, "w") 
+	write_header(out, Nagents, fps)
+	# Todo: write geometry data------------------------------------------------------
+	# write geometry
+	walls = [ [-500.0,-300.0], [-500,0], [-300, 0], [-300, 430], [0, 430], [0, 0], [400, 0], [400, -300],[-500.0,-300.0]]
+	#write_geometry(out, walls)
+	#--------------------------------------------------------------------------------------
+	#write pedestrian data
+	frames = np.unique(data[:,1]).astype(int)
+	pids = np.unique(data[:,0]).astype(int)
 
 
-        if np.min(pids) == 0:  #id start with 1
-            pids += 1
-            data[:,0] += 1
+	if np.min(pids) == 0:  #id start with 1
+		pids += 1
+		data[:,0] += 1
 
-        #trajectories of peds. to be smoothed
+	#trajectories of peds. to be smoothed
 
-        if isSmoothAngle == 1:
-            paths = [data[data[:,0] == pid,1:4] for pid in pids]
-            nullpoints = [getNullpoints(path) for path in paths]
-            smoothedPaths = [interpolate_polyline(npt[:,1:], 100) for npt in nullpoints]
+	if isSmoothAngle == 1:
+		paths = [data[data[:,0] == pid,1:4] for pid in pids]
+		nullpoints = [getNullpoints(path) for path in paths]
+		smoothedPaths = [interpolate_polyline(npt[:,1:], 100) for npt in nullpoints]
 
-     
-        write_frames(out, frames, data, mTocm)
-        out.write("</trajectoriesDataset>")
+ 
+	write_frames(out, frames, data, mTocm)
+	out.write("</trajectoriesDataset>")
         
 
 
