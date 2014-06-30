@@ -320,7 +320,7 @@ const std::string& Building::GetGeometryFilename() const
 
 void Building::LoadBuildingFromFile()
 {
-
+     printf("11 =============\n");
      //get the geometry filename from the project file
      TiXmlDocument doc(_projectFilename);
      if (!doc.LoadFile()) {
@@ -337,7 +337,6 @@ void Building::LoadBuildingFromFile()
           geoFilenameWithPath=_projectRootDir+_geometryFilename;
           Log->Write("INFO: \tgeometry <"+_geometryFilename+">");
      }
-
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
@@ -355,22 +354,20 @@ void Building::LoadBuildingFromFile()
           Log->Write("ERROR:\tRoot element value is not 'geometry'.");
           exit(EXIT_FAILURE);
      }
-
-     if(string(xRootNode->Attribute("unit"))!="m") {
-          Log->Write("ERROR:\tOnly the unit m (metres) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
+     if(string(xRootNode->Attribute("unit")) != "m") {
+          Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
           exit(EXIT_FAILURE);
      }
-
      double version = xmltof(xRootNode->Attribute("version"), -1);
-     if (version != 0.5) {
+     
+     if (version != 0.5) { // @todo version number is hard coded
           Log->Write(" \tWrong goemetry version!");
           Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
           Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
           exit(EXIT_FAILURE);
      }
+
      _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
-
-
      //The file has two main nodes
      //<rooms> and <transitions>
 
