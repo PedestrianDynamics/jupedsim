@@ -320,7 +320,6 @@ const std::string& Building::GetGeometryFilename() const
 
 void Building::LoadBuildingFromFile()
 {
-     printf("11 =============\n");
      //get the geometry filename from the project file
      TiXmlDocument doc(_projectFilename);
      if (!doc.LoadFile()) {
