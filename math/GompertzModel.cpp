@@ -71,18 +71,24 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
 {
      const Point& target = _direction->GetTarget(room, ped);
      Point F_driv;
+     Point v0;
      const Point& pos = ped->GetPos();
      double dist = ped->GetExitLine()->DistTo(pos);
 
      // check if the molified version works
      if (dist > J_EPS_GOAL) {
-          const Point& v0 = ped->GetV0(target);
-          F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+          v0 = ped->GetV0(target);
+               // printf("1\n");
      } else {
           ped->SetSmoothTurning(true);
-          const Point& v0 = ped->GetV0();
-          F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+          // printf("2\n");
+          v0 = ped->GetV0();
      }
+     F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+
+          // printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), v0.GetX(), v0.GetY(),v0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
+     
+     
      return F_driv;
 }
 
@@ -314,19 +320,19 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
                int nSize = neighbours.size();
-               double B_ij=0;
-               int count_Bij=0;
+               // double B_ij=0;
+               // int count_Bij=0;
 
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     //-------------- TESTING ---------
-                    Point distp12 = ped1->GetPos() - ped->GetPos();
-                    double Distance = distp12.Norm();
-                    double tmp;
-                    tmp = 1.0 - Distance/(0.25 + 0.25);
-                    B_ij += exp(-_bPed*exp(-_cPed*tmp));
-                    if (B_ij > J_EPS)
-                        count_Bij += 1;
+                    // Point distp12 = ped1->GetPos() - ped->GetPos();
+                    // double Distance = distp12.Norm();
+                    // double tmp;
+                    // tmp = 1.0 - Distance/(0.25 + 0.25);
+                    // B_ij += exp(-_bPed*exp(-_cPed*tmp));
+                    // if (B_ij > J_EPS)
+                    //     count_Bij += 1;
                     //--------------------------------
                     //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
@@ -343,17 +349,17 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                Point repWall = ForceRepRoom(allPeds[p], subroom);
                Point fd = ForceDriv(ped, room);
 
-               if(count_Bij)
-                   B_ij /=count_Bij;
-               else
-                   B_ij = 0;
-               double correction = -B_ij/ped->GetTau();
+               // if(count_Bij)
+               //     B_ij /=count_Bij;
+               // else
+               //     B_ij = 0;
+               // double correction = -B_ij/ped->GetTau();
 
                // make pedestrians want to walk slower in jam
-               fd = fd + ped->GetV0()*correction;
+               // = fd ; //+ ped->GetV0()*correction;
 
                Point acc = (fd + repPed + repWall) / ped->GetMass();
-
+               // printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
                result_acc.push_back(acc);
           }
 
@@ -364,22 +370,28 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
 
                Point vToAdd = result_acc[p - start] * h;
                //----------------- update new pos and new vel -----------------
+
+                    // printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
                Point v_neu = ped->GetV() + vToAdd;
                Point pos_neu = ped->GetPos() + v_neu * h;
                //---------------------------------------------------------------
 
-               Point e0 = ped->GetV0();
-               double isBackwards;
-               isBackwards = v_neu.GetX()*e0.GetX() + v_neu.GetY()*e0.GetY();
-               if (ped->GetV().Norm()>J_EPS_V) {
-                    isBackwards = isBackwards/(v_neu.Norm() * e0.Norm()); //normalize
-                    if(isBackwards <= J_EPS_V) { // Pedestrian is moving in the wrong direction
-                         v_neu = v_neu*0.01;
-                         pos_neu = ped->GetPos() + v_neu *h ;
-                    }
-               }
+               // Point e0 = ped->GetV0();
+               // double isBackwards;
+               // isBackwards = v_neu.GetX()*e0.GetX() + v_neu.GetY()*e0.GetY();
+               // if (ped->GetV().Norm()>J_EPS_V) {
+               //      isBackwards = isBackwards/(v_neu.Norm() * e0.Norm()); //normalize
+               //      if(isBackwards <= J_EPS_V) { // Pedestrian is moving in the wrong direction
+               //           v_neu = v_neu*0.01;
+               //           pos_neu = ped->GetPos() + v_neu *h ;
+
+               //           printf("wrong direction\n");
+               //      }
+               // }
 
                if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
+
+                    Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
                     v_neu = v_neu*0.01;
                     pos_neu = ped->GetPos();
                }
@@ -391,7 +403,8 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                     ped->UpdateTimeInJam();
                }
 //--------------------------------------------------------------------------------------------------
-               //fprintf(stderr, "%f %f %f %f %f %f\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
+
+                    // fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                ped->SetPos(pos_neu);
                ped->SetV(v_neu);
                ped->SetPhiPed();
