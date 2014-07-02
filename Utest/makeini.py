@@ -115,7 +115,7 @@ def make_filename(directory, d):
         traj += "_" + key + "_" + str(value)
     name += ".xml"
     traj += ".xml"
-    print name
+    print (name)
     return name, traj
 # =======================================================
 def update_tag_value(root, tag, value):

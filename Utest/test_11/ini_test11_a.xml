@@ -8,7 +8,7 @@
     <numCPU>4</numCPU>
 	<max_sim_time unit="sec">900</max_sim_time>
 	<!-- geometry file -->
-	<geometry>geometry_testx.xml</geometry>
+	<geometry>geometry_test11_a.xml</geometry>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" embed_mesh="false" fps="8">
 		<file location="trajectorie.xml" />
@@ -33,11 +33,11 @@
 		<goals>
 			<goal id="0" final="true" caption="goal 0">
 				<polygon>
-					<vertex px="3.0" py="29.0" />
-					<vertex px="3.0" py="30.0" />
-					<vertex px="5.0" py="30.0" />
-					<vertex px="5.0" py="29.0" />
-					<vertex px="3.0" py="29.0" />
+					<vertex px="9.0" py="3.0" />
+					<vertex px="9.0" py="5.0" />
+					<vertex px="10.0" py="5.0" />
+					<vertex px="10.0" py="3.0" />
+					<vertex px="9.0" py="3.0" />
 				</polygon>
 			</goal>
 		</goals>
@@ -47,7 +47,13 @@
 	<!--persons information and distribution -->
 	<agents operational_model_id="2">
 		<agents_distribution>
-		<group group_id="0" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>	
+		<group group_id="0" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>	
+		<group group_id="1" room_id="0" subroom_id="1" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>	
+		<group group_id="2" room_id="0" subroom_id="2" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>	
+		<group group_id="3" room_id="0" subroom_id="3" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>	
+		<group group_id="4" room_id="0" subroom_id="4" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>	
+		<group group_id="5" room_id="0" subroom_id="5" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>
+		<group group_id="6" room_id="0" subroom_id="6" number="10" goal_id="-1" router_id="1" x_min="" x_max="" y_min="" y_max=""/>			
 		</agents_distribution>
 
                 <!-- frequency in persons/minute -->
