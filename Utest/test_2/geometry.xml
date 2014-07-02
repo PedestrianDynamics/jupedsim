@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<geometry version="0.5" caption="Projectname" unit="m">
+  <rooms>
+    <room id="0" caption="bottleneck">
+      <subroom id="0" closed="0" class="subroom">
+        <polygon>
+          <vertex px="8.485" py="8.485" />
+          <vertex px="0" py="0" />
+          <vertex px="-2.828" py="2.828" />
+          <vertex px="5.657" py="11.313" />
+        </polygon>
+      </subroom>
+    </room>
+  </rooms>
+
+  <transitions>
+    <transition id="0" caption="main exit" type="emergency"
+                room1_id="0" subroom1_id="0"  room2_id="-1" subroom2_id="-1">
+      <vertex px="5.657" py="11.313" />
+      <vertex px="8.485" py="8.485" />
+    </transition>
+  </transitions>
+</geometry>

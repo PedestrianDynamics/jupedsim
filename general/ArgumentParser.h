@@ -1,11 +1,9 @@
 /**
- * @file    main.cpp
- * @author  U.Kemloh, A.Portz
- * @version 0.4
- * Created on: Apr 20, 2019
- * Copyright (C) <2009-2012>
+ * \file  ArgumentParser.h
+ * \date Apr 20, 2019
+ * \copyright Copyright <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved. 
  *
- * @section LICENSE
+ * @section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -19,9 +17,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
  *
- * @section DESCRIPTION
+ * @section Description
  *
  *
  *
