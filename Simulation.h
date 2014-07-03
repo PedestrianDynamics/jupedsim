@@ -1,11 +1,10 @@
 /**
- * \file    Simulation.h
- * \date    Dec 15, 2010
- * \version MAJOR.MINOR
+ * \file        Simulation.h
+ * \date        Dec 15, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Copyright (C) <2009-2014>
- *
- * \section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
@@ -21,12 +20,15 @@
  * You should have received a copy of the GNU General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * \section description
+ * \section Description
  * The Simulation class represents a simulation of pedestrians
  * based on a certain model in a specific scenario. A simulation is defined by
  * various parameters and functions.
  *
- */
+ *
+ **/
+
+
 
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
@@ -51,6 +53,7 @@
 #include "routing/CognitiveMapRouter.h"
 
 extern OutputHandler* Log;
+
 
 class Simulation {
 private:
@@ -83,7 +86,14 @@ private:
 
 
 public:
+     /**
+      * constructor
+      */
      Simulation();
+
+     /**
+      * Destructor
+      */
      virtual ~Simulation();
 
      /**
@@ -122,7 +132,6 @@ public:
       * Update the pedestrians states: positions, velocity, route
       */
      void Update();
-
 
      /**
       * print some statistics about the simulation
