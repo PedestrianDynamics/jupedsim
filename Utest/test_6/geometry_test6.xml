@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <geometry version="0.5" caption="Projectname" gridSizeX="20.000000" gridSizeY="20.000000" unit="m">
 	<rooms>
-		<room id="0" caption="test5">
+		<room id="0" caption="test6">
 			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
 				<polygon caption="wall">
 					<vertex px="2.0" py="0.0" />
