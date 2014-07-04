@@ -1,13 +1,14 @@
 /**
- * @file    GlobalRouter.h
- * @date Created on: Dec 15, 2010
- * Copyright (C) <2009-2011>
+ * \file        GlobalRouter.h
+ * \date        Dec 15, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,14 +17,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  * implement the global shortest path using the dijkstra algorithm
  *
  *
- */
+ **/
+
 
 #ifndef GLOBALROUTER_H_
 #define GLOBALROUTER_H_

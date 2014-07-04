@@ -1,12 +1,14 @@
 /**
- * \file Room.h
- * \copyright Copyright <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved. 
- * \date 30. September 2010, 11:58
+ * \file        Room.h
+ * \date        Sep 30, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
  * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -15,13 +17,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
- *
- * @section Description
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  *
- */
+ *
+ **/
+ 
 
 #ifndef _ROOM_H
 #define _ROOM_H

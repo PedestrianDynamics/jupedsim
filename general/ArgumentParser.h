@@ -1,13 +1,14 @@
 /**
- * \file  ArgumentParser.h
- * \date Apr 20, 2019
- * \copyright Copyright <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved. 
+ * \file        ArgumentParser.h
+ * \date        Apr 20, 2009
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * @section License
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,14 +17,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section Description
+ * \section Description
  *
  *
- *
- */
+ **/
+ 
+
 #ifndef ARGUMENTPARSER_H_
 #define ARGUMENTPARSER_H_
 
