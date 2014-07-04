@@ -141,10 +141,9 @@ public:
       */
      double LengthSquare() const;
 
-     /* /\** */
-     /*  * @return dot product of two lines */
-     /*  *\/ */
-     /*     bool operator*(const Line& l) const; */
+     //
+     //   @return dot product of two lines
+     //   bool operator*(const Line& l) const;
 
      /**
       * @return true if both segments are equal. The end points must be in the range of J_EPS.
@@ -171,6 +170,7 @@ public:
       * as @see IntersectionWith() but returns a double insteed.
       */
      double GetIntersectionDistance(const Line & l ) const;
+
      /**
       * @return true if the segment intersects with the circle of radius r
       */

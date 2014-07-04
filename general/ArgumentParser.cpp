@@ -19,6 +19,7 @@
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
+#include "../pedestrian/AgentsParameters.h"
 
 using namespace std;
 
@@ -131,6 +132,7 @@ ArgumentParser::ArgumentParser()
     pMaxOpenMPThreads = omp_get_thread_num();
     _profilingFlag = false;
     _hpcFlag = 0;
+    _agentsParameters= std::map<int, AgentsParameters*>();
 }
 
 void ArgumentParser::ParseArgs(int argc, char **argv)
@@ -437,6 +439,16 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
     }
 }
 
+const std::map<int, AgentsParameters*>& ArgumentParser::GetAgentsParameters() const
+{
+    return _agentsParameters;
+}
+
+void ArgumentParser::SetAgentsParameters(const std::map<int, AgentsParameters*>& agentsParameters)
+{
+    _agentsParameters = agentsParameters;
+}
+
 void ArgumentParser::ParseIniFile(string inifile)
 {
 
@@ -525,39 +537,39 @@ void ArgumentParser::ParseIniFile(string inifile)
 #ifdef _OPENMP
     max_cpus = omp_get_max_threads();
 #endif
-     //max CPU
+    //max CPU
     if(xMainNode->FirstChild("numCPU")) {
-         TiXmlNode* seedNode = xMainNode->FirstChild("numCPU")->FirstChild();
-         int n = 1;
-         if(seedNode){
-              const char* cpuValue = seedNode->Value();
-              n = atoi(cpuValue);
-              if (n > max_cpus) n = max_cpus;
-         }
-         else {
-              n = max_cpus;
-          }
-         pMaxOpenMPThreads = n;
-         Log->Write("INFO: \tnumCPU <%d>", pMaxOpenMPThreads);
+        TiXmlNode* seedNode = xMainNode->FirstChild("numCPU")->FirstChild();
+        int n = 1;
+        if(seedNode){
+            const char* cpuValue = seedNode->Value();
+            n = atoi(cpuValue);
+            if (n > max_cpus) n = max_cpus;
+        }
+        else {
+            n = max_cpus;
+        }
+        pMaxOpenMPThreads = n;
+        Log->Write("INFO: \tnumCPU <%d>", pMaxOpenMPThreads);
 #ifdef _OPENMP
-         if(n < omp_get_max_threads() )
-              omp_set_num_threads(pMaxOpenMPThreads);
+        if(n < omp_get_max_threads() )
+            omp_set_num_threads(pMaxOpenMPThreads);
 #endif
-     }
+    }
     else { // no numCPU tag
-         pMaxOpenMPThreads = max_cpus;
+        pMaxOpenMPThreads = max_cpus;
 #ifdef _OPENMP
-         omp_set_num_threads(pMaxOpenMPThreads);
+        omp_set_num_threads(pMaxOpenMPThreads);
 #endif
-         Log->Write("INFO: \t Default numCPU <%d>", pMaxOpenMPThreads);
+        Log->Write("INFO: \t Default numCPU <%d>", pMaxOpenMPThreads);
     }
     //logfile
     if (xMainNode->FirstChild("logfile"))
     {
-         pErrorLogFile = _projectRootDir
-                         + xMainNode->FirstChild("logfile")->FirstChild()->Value();
-         pLog = 2;
-         Log->Write("INFO: \tlogfile <" + (pErrorLogFile) + ">");
+        pErrorLogFile = _projectRootDir
+                + xMainNode->FirstChild("logfile")->FirstChild()->Value();
+        pLog = 2;
+        Log->Write("INFO: \tlogfile <" + (pErrorLogFile) + ">");
     }
 
     //trajectories
@@ -608,12 +620,10 @@ void ArgumentParser::ParseIniFile(string inifile)
         if (xTrajectories->FirstChild("socket"))
         {
             const char* tmp =
-                    xTrajectories->FirstChildElement("socket")->Attribute(
-                            "hostname");
+                    xTrajectories->FirstChildElement("socket")->Attribute("hostname");
             if (tmp)
                 pHostname = tmp;
-            xTrajectories->FirstChildElement("socket")->Attribute("port",
-                    &pPort);
+            xTrajectories->FirstChildElement("socket")->Attribute("port", &pPort);
             Log->Write("INFO: \tStreaming results to output [%s:%d] ",
                     pHostname.c_str(), pPort);
         }
@@ -726,11 +736,19 @@ void ArgumentParser::ParseIniFile(string inifile)
 
 void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
 {
-    TiXmlNode* xPara = xGCFM->FirstChild("parameters");
 
-    Log->Write("INFO:\tGCFM model used\n");
+    Log->Write("\nINFO:\tUsing the GCFM model");
+    Log->Write("INFO:\tParsing the model parameters");
+
+    TiXmlNode* xModelPara = xGCFM->FirstChild("model_parameters");
+    if(!xModelPara){
+        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
+        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        exit(EXIT_FAILURE);
+    }
+
     // For convenience. This moved to the header as it is not model specific
-    if (xPara->FirstChild("tmax"))
+    if (xModelPara->FirstChild("tmax"))
     {
         Log->Write(
                 "ERROR: \tthe maximal simulation time section moved to the header!!!");
@@ -739,9 +757,9 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     }
 
     //solver
-    if (xPara->FirstChild("solver"))
+    if (xModelPara->FirstChild("solver"))
     {
-        string solver = xPara->FirstChild("solver")->FirstChild()->Value();
+        string solver = xModelPara->FirstChild("solver")->FirstChild()->Value();
         if (solver == "euler")
             pSolver = 1;
         else if (solver == "verlet")
@@ -757,31 +775,31 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     }
 
     //stepsize
-    if (xPara->FirstChild("stepsize"))
+    if (xModelPara->FirstChild("stepsize"))
     {
         const char* stepsize =
-                xPara->FirstChild("stepsize")->FirstChild()->Value();
+                xModelPara->FirstChild("stepsize")->FirstChild()->Value();
         if (stepsize)
             pdt = atof(stepsize);
         Log->Write("INFO: \tstepsize <%f>", pdt);
     }
 
     //exit crossing strategy
-    if (xPara->FirstChild("exitCrossingStrategy"))
+    if (xModelPara->FirstChild("exitCrossingStrategy"))
     {
         const char* tmp =
-                xPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+                xModelPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
         if (tmp)
             pExitStrategy = atoi(tmp);
         Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
     }
 
     //linked-cells
-    if (xPara->FirstChild("linkedcells"))
+    if (xModelPara->FirstChild("linkedcells"))
     {
-        string linkedcells = xPara->FirstChildElement("linkedcells")->Attribute(
+        string linkedcells = xModelPara->FirstChildElement("linkedcells")->Attribute(
                 "enabled");
-        string cell_size = xPara->FirstChildElement("linkedcells")->Attribute(
+        string cell_size = xModelPara->FirstChildElement("linkedcells")->Attribute(
                 "cell_size");
 
         if (linkedcells == "true")
@@ -798,77 +816,17 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
         }
     }
 
-    //desired speed
-    if (xPara->FirstChild("v0"))
-    {
-        string mu = xPara->FirstChildElement("v0")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("v0")->Attribute("sigma");
-        pV0Mu = atof(mu.c_str());
-        pV0Sigma = atof(sigma.c_str());
-        Log->Write(
-                "INFO: \tdesired velocity mu=" + mu + " ," + " sigma=" + sigma
-                + " ");
-    }
-
-    //bmax
-    if (xPara->FirstChild("bmax"))
-    {
-        string mu = xPara->FirstChildElement("bmax")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("bmax")->Attribute("sigma");
-        pBmaxMu = atof(mu.c_str());
-        pBmaxSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tBmax mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-
-    //bmin
-    if (xPara->FirstChild("bmin"))
-    {
-        string mu = xPara->FirstChildElement("bmin")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("bmin")->Attribute("sigma");
-        pBminMu = atof(mu.c_str());
-        pBminSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tBmin mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-
-    //amin
-    if (xPara->FirstChild("amin"))
-    {
-        string mu = xPara->FirstChildElement("amin")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("amin")->Attribute("sigma");
-        pAminMu = atof(mu.c_str());
-        pAminSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tAmin mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-    //tau
-    if (xPara->FirstChild("tau"))
-    {
-        string mu = xPara->FirstChildElement("tau")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("tau")->Attribute("sigma");
-        pTauMu = atof(mu.c_str());
-        pTauSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tTau mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-    //atau
-    if (xPara->FirstChild("atau"))
-    {
-        string mu = xPara->FirstChildElement("atau")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("atau")->Attribute("sigma");
-        pAtauMu = atof(mu.c_str());
-        pAtauSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tAtau mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-
     //force_ped
-    if (xPara->FirstChild("force_ped"))
+    if (xModelPara->FirstChild("force_ped"))
     {
-        string nu = xPara->FirstChildElement("force_ped")->Attribute("nu");
-        string dist_max = xPara->FirstChildElement("force_ped")->Attribute(
+        string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+        string dist_max = xModelPara->FirstChildElement("force_ped")->Attribute(
                 "dist_max");
         string disteff_max =
-                xPara->FirstChildElement("force_ped")->Attribute(
+                xModelPara->FirstChildElement("force_ped")->Attribute(
                         "disteff_max");
         string interpolation_width =
-                xPara->FirstChildElement("force_ped")->Attribute(
+                xModelPara->FirstChildElement("force_ped")->Attribute(
                         "interpolation_width");
 
         pMaxFPed = atof(dist_max.c_str());
@@ -882,16 +840,16 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     }
 
     //force_wall
-    if (xPara->FirstChild("force_wall"))
+    if (xModelPara->FirstChild("force_wall"))
     {
-        string nu = xPara->FirstChildElement("force_wall")->Attribute("nu");
-        string dist_max = xPara->FirstChildElement("force_wall")->Attribute(
+        string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+        string dist_max = xModelPara->FirstChildElement("force_wall")->Attribute(
                 "dist_max");
         string disteff_max =
-                xPara->FirstChildElement("force_wall")->Attribute(
+                xModelPara->FirstChildElement("force_wall")->Attribute(
                         "disteff_max");
         string interpolation_width =
-                xPara->FirstChildElement("force_wall")->Attribute(
+                xModelPara->FirstChildElement("force_wall")->Attribute(
                         "interpolation_width");
         pMaxFWall = atof(dist_max.c_str());
         pNuWall = atof(nu.c_str());
@@ -902,27 +860,38 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
                 + ", disteff_max=" + disteff_max
                 + ", interpolation_width=" + interpolation_width);
     }
+
+    //Parsing the agent parameters
+    ParseAgentParameters(xGCFM);
 }
 
 
 void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
 {
-    TiXmlNode* xPara = xGompertz->FirstChild("parameters");
+    //parsing the model parameters
+    Log->Write("\nINFO:\tUsing the Gompertz model");
 
-    Log->Write("INFO:\tGompertz model used\n");
+    Log->Write("INFO:\tParsing the model parameters");
+
+    TiXmlNode* xModelPara = xGompertz->FirstChild("model_parameters");
+    if(!xModelPara){
+        Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
+        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        exit(EXIT_FAILURE);
+    }
+
     // For convenience. This moved to the header as it is not model specific
-    if (xPara->FirstChild("tmax"))
+    if (xModelPara->FirstChild("tmax"))
     {
-        Log->Write(
-                "ERROR: \tthe maximal simulation time section moved to the header!!!");
+        Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
         Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
         exit(EXIT_FAILURE);
     }
 
     //solver
-    if (xPara->FirstChild("solver"))
+    if (xModelPara->FirstChild("solver"))
     {
-        string solver = xPara->FirstChild("solver")->FirstChild()->Value();
+        string solver = xModelPara->FirstChild("solver")->FirstChild()->Value();
         if (solver == "euler")
             pSolver = 1;
         else if (solver == "verlet")
@@ -938,30 +907,30 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
     }
 
     //stepsize
-    if (xPara->FirstChild("stepsize"))
+    if (xModelPara->FirstChild("stepsize"))
     {
-        const char* stepsize = xPara->FirstChild("stepsize")->FirstChild()->Value();
+        const char* stepsize = xModelPara->FirstChild("stepsize")->FirstChild()->Value();
         if (stepsize)
             pdt = atof(stepsize);
         Log->Write("INFO: \tstepsize <%f>", pdt);
     }
 
     //exit crossing strategy
-    if (xPara->FirstChild("exitCrossingStrategy"))
+    if (xModelPara->FirstChild("exitCrossingStrategy"))
     {
         const char* tmp =
-                xPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+                xModelPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
         if (tmp)
             pExitStrategy = atoi(tmp);
         Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
     }
 
     //linked-cells
-    if (xPara->FirstChild("linkedcells"))
+    if (xModelPara->FirstChild("linkedcells"))
     {
-        string linkedcells = xPara->FirstChildElement("linkedcells")->Attribute(
+        string linkedcells = xModelPara->FirstChildElement("linkedcells")->Attribute(
                 "enabled");
-        string cell_size = xPara->FirstChildElement("linkedcells")->Attribute(
+        string cell_size = xModelPara->FirstChildElement("linkedcells")->Attribute(
                 "cell_size");
 
         if (linkedcells == "true")
@@ -977,123 +946,133 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
         }
     }
 
-    //desired speed
-    if (xPara->FirstChild("v0"))
-    {
-        string mu = xPara->FirstChildElement("v0")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("v0")->Attribute("sigma");
-        pV0Mu = atof(mu.c_str());
-        pV0Sigma = atof(sigma.c_str());
-        Log->Write(
-                "INFO: \tdesired velocity mu=" + mu + " ," + " sigma=" + sigma
-                + " ");
-    }
-
-    //bmax
-    if (xPara->FirstChild("bmax"))
-    {
-        string mu = xPara->FirstChildElement("bmax")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("bmax")->Attribute("sigma");
-        pBmaxMu = atof(mu.c_str());
-        pBmaxSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tBmax mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-
-    //bmin
-    if (xPara->FirstChild("bmin"))
-    {
-        string mu = xPara->FirstChildElement("bmin")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("bmin")->Attribute("sigma");
-        pBminMu = atof(mu.c_str());
-        pBminSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tBmin mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-
-    //amin
-    if (xPara->FirstChild("amin"))
-    {
-        string mu = xPara->FirstChildElement("amin")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("amin")->Attribute("sigma");
-        pAminMu = atof(mu.c_str());
-        pAminSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tAmin mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-    //tau
-    if (xPara->FirstChild("tau"))
-    {
-        string mu = xPara->FirstChildElement("tau")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("tau")->Attribute("sigma");
-        pTauMu = atof(mu.c_str());
-        pTauSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tTau mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-    //atau
-    if (xPara->FirstChild("atau"))
-    {
-        string mu = xPara->FirstChildElement("atau")->Attribute("mu");
-        string sigma = xPara->FirstChildElement("atau")->Attribute("sigma");
-        pAtauMu = atof(mu.c_str());
-        pAtauSigma = atof(sigma.c_str());
-        Log->Write("INFO: \tAtau mu=" + mu + " ," + " sigma=" + sigma + " ");
-    }
-
     //force_ped
-    if (xPara->FirstChild("force_ped"))
+    if (xModelPara->FirstChild("force_ped"))
     {
-        string nu = xPara->FirstChildElement("force_ped")->Attribute("nu");
+        string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
         pNuPed = atof(nu.c_str());
 
-        if (!xPara->FirstChildElement("force_ped")->Attribute("a"))
+        if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
             paPed = 1.0; // default value
         else
         {
-            string a = xPara->FirstChildElement("force_ped")->Attribute("a");
+            string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
             paPed = atof(a.c_str());
         }
-        if (!xPara->FirstChildElement("force_ped")->Attribute("b"))
+        if (!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
             pbPed = 0.25; // default value
         else
         {
-            string b = xPara->FirstChildElement("force_ped")->Attribute("b");
+            string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
             pbPed = atof(b.c_str());
         }
-        if (!xPara->FirstChildElement("force_ped")->Attribute("c"))
+        if (!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
             pcPed = 3.0; // default value
         else
         {
-            string c = xPara->FirstChildElement("force_ped")->Attribute("c");
+            string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
             pcPed = atof(c.c_str());
         }
         Log->Write("INFO: \tfrep_ped mu=%s, a=%0.2f, b=%0.2f c=%0.2f",nu.c_str(),paPed,pbPed,pcPed);
     }
     //force_wall
-    if (xPara->FirstChild("force_wall"))
+    if (xModelPara->FirstChild("force_wall"))
     {
-        string nu = xPara->FirstChildElement("force_wall")->Attribute("nu");
+        string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
         pNuWall = atof(nu.c_str());
-        if (!xPara->FirstChildElement("force_wall")->Attribute("a"))
+        if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
             paWall = 1.0; // default value
         else
         {
-            string a = xPara->FirstChildElement("force_wall")->Attribute("a");
+            string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
             paWall = atof(a.c_str());
         }
-        if (!xPara->FirstChildElement("force_wall")->Attribute("b"))
+        if (!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
             pbWall = 0.7; // default value
         else
         {
-            string b = xPara->FirstChildElement("force_wall")->Attribute("b");
+            string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
             pbWall = atof(b.c_str());
         }
-        if (!xPara->FirstChildElement("force_wall")->Attribute("c"))
+        if (!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
             pcWall = 3.0; // default value
         else
         {
-            string c = xPara->FirstChildElement("force_wall")->Attribute("c");
+            string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
             pcWall = atof(c.c_str());
         }
 
         Log->Write("INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f",nu.c_str(),paWall,pbWall,pcWall);
+    }
+
+    //Parsing the agent parameters
+    ParseAgentParameters(xGompertz);
+}
+
+void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
+{
+    //Parsing the agent parameters
+    Log->Write("\nINFO:\tParsing agents  parameters");
+    for(TiXmlElement* xAgentPara = operativModel->FirstChildElement("agent_parameters"); xAgentPara;
+            xAgentPara = xAgentPara->NextSiblingElement("agent_parameters")) {
+
+        //get the group ID
+        int para_id= xmltoi(xAgentPara->Attribute("agent_parameter_id"),-1);
+        Log->Write("INFO: \tParsing the group parameter id [%d]",para_id);
+        AgentsParameters* agentParameters = new AgentsParameters(para_id,pSeed);
+        _agentsParameters[para_id]=agentParameters;
+
+        //desired speed
+        if (xAgentPara->FirstChild("v0"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"),pV0Mu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"),pV0Sigma);
+            agentParameters->InitV0(mu,sigma);
+            Log->Write("INFO: \tdesired velocity mu=%f , sigma=%f",mu,sigma);
+        }
+
+        //bmax
+        if (xAgentPara->FirstChild("bmax"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"),pBmaxMu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"),pBmaxSigma);
+            agentParameters->InitBmax(mu,sigma);
+            Log->Write("INFO: \ttBmax mu=%f , sigma=%f",mu,sigma);
+        }
+
+        //bmin
+        if (xAgentPara->FirstChild("bmin"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"),pBminMu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"),pBminSigma);
+            agentParameters->InitBmin(mu,sigma);
+            Log->Write("INFO: \ttBmin mu=%f , sigma=%f",mu,sigma);
+        }
+
+        //amin
+        if (xAgentPara->FirstChild("amin"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"),pAminMu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"),pAminSigma);
+            agentParameters->InitAmin(mu,sigma);
+            Log->Write("INFO: \ttAmin mu=%f , sigma=%f",mu,sigma);
+        }
+        //tau
+        if (xAgentPara->FirstChild("tau"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"),pTauMu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"),pTauSigma);
+            agentParameters->InitTau(mu,sigma);
+            Log->Write("INFO: \ttTau mu=%f , sigma=%f",mu,sigma);
+        }
+        //atau
+        if (xAgentPara->FirstChild("atau"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"),pAtauMu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"),pAtauSigma);
+            agentParameters->InitAtau(mu,sigma);
+            Log->Write("INFO: \ttAtau mu=%f , sigma=%f",mu,sigma);
+        }
     }
 }
 

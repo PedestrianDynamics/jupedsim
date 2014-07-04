@@ -60,6 +60,7 @@ StartDistributionRoom::StartDistributionRoom()
     _xMax=FLT_MAX;
     _yMin=-FLT_MAX;
     _yMax=FLT_MAX;
+    _groupParameters=NULL;
 }
 
 StartDistributionRoom::~StartDistributionRoom()
@@ -204,6 +205,8 @@ PedDistributor::PedDistributor()
      _Atau = new Equal(0.53, 0.001);
      _Amin = new Equal(0.18, 0.001);
      _Tau = new Equal(0.5, 0.001);
+     _start_dis = vector<StartDistributionRoom* > ();
+     _start_dis_sub = vector<StartDistributionSubroom* > ();
 }
 
 PedDistributor::PedDistributor(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
@@ -238,6 +241,8 @@ PedDistributor::~PedDistributor()
      }
      _start_dis_sub.clear();
      _start_dis.clear();
+
+     //empty the parameters maps
 }
 
 
@@ -271,9 +276,9 @@ Distribution* PedDistributor::GetTau() const
      return _Tau;
 }
 
-void PedDistributor::InitDistributor(const string& filename)
+void PedDistributor::InitDistributor(ArgumentParser* argsParser)
 {
-     _projectFilename=filename;
+     _projectFilename=argsParser->GetProjectFile();
      Log->Write("INFO: \tLoading and parsing the persons attributes");
 
      TiXmlDocument doc(_projectFilename);
@@ -300,6 +305,7 @@ void PedDistributor::InitDistributor(const string& filename)
           int group_id = xmltoi(e->Attribute("group_id"));
           int subroom_id = xmltoi(e->Attribute("subroom_id"),-1);
           int number = xmltoi(e->Attribute("number"),0);
+          int agent_para_id= xmltoi(e->Attribute("agent_parameter_id"),-1);
 
           int goal_id = xmltoi(e->Attribute("goal_id"), FINAL_DEST_OUT);
           int router_id = xmltoi(e->Attribute("router_id"), -1);
@@ -343,12 +349,20 @@ void PedDistributor::InitDistributor(const string& filename)
           dis->SetRouterId(router_id);
           dis->SetHeight(height);
           dis->SetPatience(patience);
+          std::map<int, AgentsParameters*> agentsParameters=argsParser->GetAgentsParameters();
+
+          if(agentsParameters.count(agent_para_id)==0)
+          {
+              Log->Write("WARNING:\t Please specify which set of agents parameters to use for the group [%d]!",group_id);
+              Log->Write("WARNING:\t Default values are not implemented yet");
+              exit(EXIT_FAILURE);
+          }
+          dis->SetGroupParameters(agentsParameters[agent_para_id]);
 
           if(e->Attribute("start_x") && e->Attribute("start_y")) {
                double startX = xmltof(e->Attribute("start_x"),NAN);
                double startY = xmltof(e->Attribute("start_y"),NAN);
-               Log->Write("start_x = %f, start_y = %f\n", startX, startY);
-               //todo: verify that the position is valid (not nan)
+               Log->Write("INFO:\tstart_x = %f, start_y = %f\n", startX, startY);
                dis->SetStartPosition(startX,startY,0.0);
           }
      }
@@ -720,6 +734,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
     //in the case a range was specified
     double distArea[4];
     para->Getbounds(distArea);
+    AgentsParameters* agents_para=para->GetGroupParameters();
 
     // set the pedestrians
     for (int i = 0; i < nAgents; ++i) {
@@ -738,13 +753,14 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
         // a und b setzen muss vor v0 gesetzt werden,
         // da sonst v0 mit Null überschrieben wird
         JEllipse E = JEllipse();
-        E.SetAv(GetAtau()->GetRand());
-        E.SetAmin(GetAmin()->GetRand());
-        E.SetBmax(GetBmax()->GetRand());
-        E.SetBmin(GetBmin()->GetRand());
+        E.SetAv(agents_para->GetAtau());
+        E.SetAmin(agents_para->GetAmin());
+        E.SetBmax(agents_para->GetBmax());
+        E.SetBmin(agents_para->GetBmin());
         ped->SetEllipse(E);
-        ped->SetTau(GetTau()->GetRand());
-        ped->SetV0Norm(GetV0()->GetRand());
+        ped->SetTau(agents_para->GetTau());
+        ped->SetV0Norm(agents_para->GetV0());
+        //ped->SetV(Point(0.0,0.0));
 
         // first default Position
         int index = -1;
@@ -837,6 +853,16 @@ double StartDistributionRoom::GetPatience() const
 void StartDistributionRoom::SetPatience(double patience)
 {
      _patience = patience;
+}
+
+AgentsParameters* StartDistributionRoom::GetGroupParameters()
+{
+    return _groupParameters;
+}
+
+void StartDistributionRoom::SetGroupParameters(AgentsParameters* groupParameters)
+{
+    _groupParameters = groupParameters;
 }
 
 void StartDistributionRoom::Getbounds(double bounds[4])
