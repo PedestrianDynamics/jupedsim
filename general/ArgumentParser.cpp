@@ -674,7 +674,7 @@ void ArgumentParser::ParseIniFile(string inifile)
 
     if( parsingModelSuccessful==false)
     {
-        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 Gompertz)",pModel);
+        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz)", pModel);
         Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
         Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
         exit(EXIT_FAILURE);
