@@ -32,10 +32,10 @@
 #include <vector>
 #include <string>
 
-#include "../math/Distribution.h"
 #include "../routing/Router.h"
 #include "../geometry/Building.h"
-
+#include "AgentsParameters.h"
+#include "../general/ArgumentParser.h"
 
 
 /************************************************************
@@ -49,53 +49,59 @@ private:
      int _goalID;
      int _routerID;
      int _routeID;
+     //demographic parameters
      int _age;
+     std::string _gender;
      int _height;
      double _patience;
+     //force model parameters
+     AgentsParameters* _groupParameters;
+
      //string motivation;// low, normal, high
      double _startX; //only valid when _nPeds=1
      double _startY; //only valid when _nPeds=1
      double _startZ; //only valid when _nPeds=1
 
-     //distributing in a square
+     //bounds for distributing in a square
      double _xMin;
      double _xMax;
      double _yMin;
      double _yMax;
 
-     std::string _gender;
 
 public:
-     StartDistributionRoom();
-     virtual ~StartDistributionRoom();
+    StartDistributionRoom();
+    virtual ~StartDistributionRoom();
 
-     int GetAgentsNumber() const;
+    int GetAgentsNumber() const;
 
-     void SetRoomID(int id);
-     void SetAgentsNumber(int N);
-     int GetAge() const;
-     void SetAge(int age);
-     const std::string& GetGender() const;
-     void SetGender(const std::string& gender);
-     int GetGoalId() const;
-     void SetGoalId(int goalId);
-     int GetGroupId() const;
-     void SetGroupId(int groupId);
-     int GetHeight() const;
-     void SetHeight(int height);
-     int GetRoomId() const;
-     void SetRoomId(int roomId);
-     int GetRouteId() const;
-     void SetRouteId(int routeId);
-     int GetRouterId() const;
-     void SetRouterId(int routerId);
-     void SetStartPosition(double x,double y, double z);
-     Point GetStartPosition() const;
-     double GetPatience() const;
-     void SetPatience(double patience);
-     void SetBounds(double xMin, double xMax, double yMin, double yMax);
-     void Getbounds(double bounds[4]);
-     void Setbounds(double bounds[4]);
+    void SetRoomID(int id);
+    void SetAgentsNumber(int N);
+    int GetAge() const;
+    void SetAge(int age);
+    const std::string& GetGender() const;
+    void SetGender(const std::string& gender);
+    int GetGoalId() const;
+    void SetGoalId(int goalId);
+    int GetGroupId() const;
+    void SetGroupId(int groupId);
+    int GetHeight() const;
+    void SetHeight(int height);
+    int GetRoomId() const;
+    void SetRoomId(int roomId);
+    int GetRouteId() const;
+    void SetRouteId(int routeId);
+    int GetRouterId() const;
+    void SetRouterId(int routerId);
+    void SetStartPosition(double x, double y, double z);
+    Point GetStartPosition() const;
+    double GetPatience() const;
+    void SetPatience(double patience);
+    void SetBounds(double xMin, double xMax, double yMin, double yMax);
+    void Getbounds(double bounds[4]);
+    void Setbounds(double bounds[4]);
+    AgentsParameters* GetGroupParameters();
+    void SetGroupParameters(AgentsParameters* groupParameters);
 };
 
 //TODO merge the two classes and set the _subRoomID=-1
@@ -111,39 +117,30 @@ public:
      void SetSubroomID(int i);
 };
 
+
 /************************************************************
  PedDistributor
 ************************************************************/
 class PedDistributor {
 private:
-     Distribution* _v0; // Gauss - Verteilung für v0
-     Distribution* _Bmax;
-     Distribution* _Bmin;
-     Distribution* _Atau;
-     Distribution* _Amin;
-     Distribution* _Tau;
      std::vector<StartDistributionRoom*> _start_dis; // ID startraum, subroom und Anz
      std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
      std::string _projectFilename; // store the file for later user
+     std::map<int, AgentsParameters*> _agentsParameters;
 
      // find aped in a subroom and delete him
      bool FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const;
 
 public:
-     // Konstruktoren
+     /**
+      * constructor
+      */
      PedDistributor();
-     PedDistributor(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
-                    double BminMu, double BminSigma, double AtauMu, double AtauSigma, double AminMu,
-                    double AminSigma, double tauMu, double tauSigma);
-     //PedDistributor(const PedDistributor& orig);
+
+     /**
+      * desctructor
+      */
      virtual ~PedDistributor();
-     // Getter-Funktionen
-     Distribution* GetV0() const;
-     Distribution* GetBmax() const;
-     Distribution* GetBmin() const;
-     Distribution* GetAtau() const;
-     Distribution* GetAmin() const;
-     Distribution* GetTau() const;
 
      // sonstige Funktionen
      std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
@@ -152,9 +149,8 @@ public:
                                         SubRoom* r, double bufx, double bufy, double dx) const;
      std::vector<Point> PossiblePositions(SubRoom* r) const;
      void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionSubroom* parameters,Building* building) const;
-     std::string writeParameter() const;
 
-     void InitDistributor(const std::string &start_file);
+     void InitDistributor(ArgumentParser* argsParser);
      int Distribute(Building* building) const;
 };
 

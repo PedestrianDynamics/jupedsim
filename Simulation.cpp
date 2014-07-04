@@ -1,13 +1,13 @@
 /**
  * \file Simulation.cpp
  * \date Dec 15, 2010
- * Copyright (C) <2009-2011>
+ * Copyright (C) <2009-2014>
  *
  * \section LICENSE
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,7 +16,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <a href="http://www.gnu.org/licenses/">GNU LICENSE</a>.
  *
  * \section Description
@@ -195,13 +195,10 @@ void Simulation::InitArgs(ArgumentParser* args)
 
      }
 
+     _distribution = new PedDistributor();
+     _distribution->InitDistributor(_argsParser);
+     //s.append(_distribution->writeParameter());
 
-     _distribution = new PedDistributor(args->GetV0Mu(), args->GetV0Sigma(), args->GetBmaxMu(),
-                                        args->GetBmaxSigma(), args->GetBminMu(), args->GetBminSigma(), args->GetAtauMu(),
-                                        args->GetAtauSigma(), args->GetAminMu(), args->GetAminSigma(), args->GetTauMu(),
-                                        args->GetTauSigma());
-     s.append(_distribution->writeParameter());
-     _distribution->InitDistributor(args->GetProjectFile());
      // define how the navigation line is crossed
      int direction = args->GetExitStrategy();
      sprintf(tmp, "\tDirection to the exit: %d\n", direction);

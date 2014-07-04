@@ -76,12 +76,13 @@ string IODispatcher::WritePed(Pedestrian* ped)
      char tmp[CLENGTH] = "";
 
      double v0 = ped->GetV0Norm();
-     if (v0 == 0.0) {
-          Log->Write("ERROR: IODispatcher::WritePed()\t v0=0");
-          exit(0);
+     int color=1; // red= very low velocity
+
+     if (v0 != 0.0) {
+         double v = ped->GetV().Norm();
+         color = (int) (v / v0 * 255);
      }
-     double v = ped->GetV().Norm();
-     int color = (int) (v / v0 * 255);
+
      if(ped->GetSpotlight()==false) color=-1;
 
      double a = ped->GetLargerAxis();
@@ -513,33 +514,32 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 
           for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
                SubRoom* s = r->GetSubRoom(k);
-               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i) {
-                    Pedestrian* ped = s->GetPedestrian(i);
+               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i)
+               {
+                   char tmp[CLENGTH] = "";
+                   Pedestrian* ped = s->GetPedestrian(i);
+                   double v0 = ped->GetV0Norm();
+                   int color=1; // red= very low velocity
+
+                   if (v0 != 0.0) {
+                       double v = ped->GetV().Norm();
+                       color = (int) (v / v0 * 255);
+                   }
+                   if(ped->GetSpotlight()==false) color=-1;
 
 
-                    char tmp[CLENGTH] = "";
-
-                    double v0 = ped->GetV0Norm();
-                    if (v0 == 0.0) {
-                         Log->Write("ERROR: TrajectoriesJPSV06()\t v0=0");
-                         exit(0);
-                    }
-                    double v = ped->GetV().Norm();
-                    int color = (int) (v / v0 * 255);
-                    if(ped->GetSpotlight()==false) color=-1;
-
-                    double a = ped->GetLargerAxis();
-                    double b = ped->GetSmallerAxis();
-                    double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-                    sprintf(tmp, "<agent ID=\"%d\"\t"
-                            "x=\"%.2f\"\ty=\"%.2f\"\t"
-                            "z=\"%.2f\"\t"
-                            "rA=\"%.2f\"\trB=\"%.2f\"\t"
-                            "eO=\"%.2f\" eC=\"%d\"/>\n",
-                            ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                            (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
-                            phi * RAD2DEG, color);
-                    data.append(tmp);
+                   double a = ped->GetLargerAxis();
+                   double b = ped->GetSmallerAxis();
+                   double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+                   sprintf(tmp, "<agent ID=\"%d\"\t"
+                           "x=\"%.2f\"\ty=\"%.2f\"\t"
+                           "z=\"%.2f\"\t"
+                           "rA=\"%.2f\"\trB=\"%.2f\"\t"
+                           "eO=\"%.2f\" eC=\"%d\"/>\n",
+                           ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+                           (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                           phi * RAD2DEG, color);
+                   data.append(tmp);
                }
           }
      }
