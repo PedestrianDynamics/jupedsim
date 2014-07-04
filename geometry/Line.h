@@ -1,13 +1,14 @@
 /**
- * File:   Line.h
+ * \file        Line.h
+ * \date        Sep 30, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Created on 30. September 2010, 09:40
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,14 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  *
  *
- *
- */
+ **/
+ 
 
 #ifndef _LINE_H
 #define _LINE_H
@@ -141,10 +142,9 @@ public:
       */
      double LengthSquare() const;
 
-     /* /\** */
-     /*  * @return dot product of two lines */
-     /*  *\/ */
-     /*     bool operator*(const Line& l) const; */
+     //
+     //   @return dot product of two lines
+     //   bool operator*(const Line& l) const;
 
      /**
       * @return true if both segments are equal. The end points must be in the range of J_EPS.
@@ -171,6 +171,7 @@ public:
       * as @see IntersectionWith() but returns a double insteed.
       */
      double GetIntersectionDistance(const Line & l ) const;
+
      /**
       * @return true if the segment intersects with the circle of radius r
       */

@@ -1,13 +1,14 @@
 /**
- * @file Macros.h
+ * \file        Macros.h
+ * \date        Jun 16, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * @date Created on 16. Juni 2010, 16:59
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,13 +17,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
- *
+ * \section Description
  * useful constants
- */
+ *
+ *
+ **/
+ 
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -66,7 +69,7 @@
 #define CLENGTH 1000
 
 // conversion (cm <-> m)
-#define FAKTOR 1
+#define FAKTOR 100
 
 // default final destination for the pedestrians
 #define FINAL_DEST_OUT -1
