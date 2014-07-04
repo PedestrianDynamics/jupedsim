@@ -142,7 +142,6 @@ set (   source_files
   IO/OutputHandler.cpp
   IO/TraVisToClient.cpp
 
-  math/Distribution.cpp
   math/ForceModel.cpp
   math/Mathematics.cpp
   math/ODESolver.cpp
@@ -154,6 +153,7 @@ set (   source_files
   pedestrian/Ellipse.cpp
   pedestrian/PedDistributor.cpp
   pedestrian/Pedestrian.cpp
+  pedestrian/AgentsParameters.cpp
 
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
@@ -228,6 +228,7 @@ set (   header_files
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
   pedestrian/Ellipse.h
+  pedestrian/AgentsParameters.h
 
   mpi/LCGrid.h
 
@@ -255,7 +256,6 @@ set (   header_files
   IO/TraVisToClient.h
 
   math/ForceModel.h
-  math/Distribution.h
   math/Mathematics.h
   math/ODESolver.h
   math/GCFMModel.h
@@ -290,9 +290,9 @@ endif(CGAL_FOUND)
 #---------------------------- compiler -------------------------------
 # Initialize CXXFLAGS.
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -Wall")
-	set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wunused")
-	set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wunused")
+    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
 endif()
 
 
@@ -324,7 +324,7 @@ else(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minform=inform")	
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minform=inform")	
 endif()
 
 

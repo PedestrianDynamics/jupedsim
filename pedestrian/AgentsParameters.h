@@ -1,9 +1,32 @@
-/*
- * AgentsParameters.h
+/**
+ * \file        AgentsParameters.h
+ * \date        July 04, 2014
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- *  Created on: 03.07.2014
- *      Author: piccolo
- */
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * This class contains the different force models dependent parameters for the agents.
+ * They are used to defined different population group, for instance children, men, elderly...
+ * It is done by specifying different sizes, desired velocities and reaction times
+ *
+ **/
+
 
 #ifndef AGENTSPARAMETERS_H_
 #define AGENTSPARAMETERS_H_
@@ -16,12 +39,6 @@ public:
      * Constructor
      */
     AgentsParameters(int id, int seed=1234);
-
-    /**
-     * Default copy constructor
-     * @param orig, the object to copy
-     */
-    AgentsParameters(AgentsParameters const& orig );
 
     /**
      * Destructor
@@ -110,6 +127,11 @@ public:
      * @return a random number following the distribution
      */
     double GetTau();
+
+    /**
+     * return a summry of the parameters
+     */
+    std::string writeParameter();
 
 private:
     int _id;

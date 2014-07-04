@@ -197,7 +197,7 @@ void Simulation::InitArgs(ArgumentParser* args)
 
      _distribution = new PedDistributor();
      _distribution->InitDistributor(_argsParser);
-     s.append(_distribution->writeParameter());
+     //s.append(_distribution->writeParameter());
 
      // define how the navigation line is crossed
      int direction = args->GetExitStrategy();

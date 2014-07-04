@@ -530,8 +530,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                 xMainNode->FirstChildElement("max_sim_time")->FirstChild()->Value();
         //const char* unit=xMainNode->FirstChildElement("max_sim_time")->Attribute("unit");
         pTmax = atof(tmax);
-        //Log->Write("INFO: \tpTmax <"+string(tmax)+" " +string(unit) +" (unit ignored)>");
-        Log->Write("INFO: \tpTmax <" + string(tmax) + "  (seconds) >");
+        Log->Write("INFO: \t Maxmimal simulation time <%.2f> seconds",pTmax);
     }
     int max_cpus = 1; 
 #ifdef _OPENMP
@@ -684,7 +683,7 @@ void ArgumentParser::ParseIniFile(string inifile)
 
     if( parsingModelSuccessful==false)
     {
-        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 Gompertz)",pModel);
+        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz)", pModel);
         Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
         Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
         exit(EXIT_FAILURE);
@@ -743,7 +742,7 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     TiXmlNode* xModelPara = xGCFM->FirstChild("model_parameters");
     if(!xModelPara){
         Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
-        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+        Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship2.xml !!!");
         exit(EXIT_FAILURE);
     }
 

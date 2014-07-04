@@ -199,39 +199,14 @@ void StartDistributionSubroom::SetSubroomID(int i)
 
 PedDistributor::PedDistributor()
 {
-     _v0 = new Equal(1.24, 0.26);
-     _Bmax = new Equal(0.25, 0.001);
-     _Bmin = new Equal(0.2, 0.001);
-     _Atau = new Equal(0.53, 0.001);
-     _Amin = new Equal(0.18, 0.001);
-     _Tau = new Equal(0.5, 0.001);
      _start_dis = vector<StartDistributionRoom* > ();
      _start_dis_sub = vector<StartDistributionSubroom* > ();
-}
-
-PedDistributor::PedDistributor(double v0mu, double v0sigma, double BmaxMu, double BmaxSigma,
-                               double BminMu, double BminSigma, double AtauMu, double AtauSigma, double AminMu,
-                               double AminSigma, double tauMu, double tauSigma)
-{
-     _v0 = new Equal(v0mu, v0sigma);
-     _Bmax = new Equal(BmaxMu, BmaxSigma);
-     _Bmin = new Equal(BminMu, BminSigma);
-     _Atau = new Equal(AtauMu, AtauSigma);
-     _Amin = new Equal(AminMu, AminSigma);
-     _Tau = new Equal(tauMu, tauSigma);
-     _start_dis = vector<StartDistributionRoom* > ();
-     _start_dis_sub = vector<StartDistributionSubroom* > ();
+     _agentsParameters=std::map<int, AgentsParameters*> ();
 }
 
 
 PedDistributor::~PedDistributor()
 {
-     delete _v0;
-     delete _Bmax;
-     delete _Bmin;
-     delete _Atau;
-     delete _Amin;
-     delete _Tau;
 
      for (unsigned int i = 0; i < _start_dis.size(); i++) {
           delete _start_dis[i];
@@ -243,37 +218,6 @@ PedDistributor::~PedDistributor()
      _start_dis.clear();
 
      //empty the parameters maps
-}
-
-
-Distribution* PedDistributor::GetV0() const
-{
-     return _v0;
-}
-
-Distribution* PedDistributor::GetBmax() const
-{
-     return _Bmax;
-}
-
-Distribution* PedDistributor::GetBmin() const
-{
-     return _Bmin;
-}
-
-Distribution* PedDistributor::GetAtau() const
-{
-     return _Atau;
-}
-
-Distribution* PedDistributor::GetAmin() const
-{
-     return _Amin;
-}
-
-Distribution* PedDistributor::GetTau() const
-{
-     return _Tau;
 }
 
 void PedDistributor::InitDistributor(ArgumentParser* argsParser)
@@ -353,7 +297,7 @@ void PedDistributor::InitDistributor(ArgumentParser* argsParser)
 
           if(agentsParameters.count(agent_para_id)==0)
           {
-              Log->Write("WARNING:\t Please specify which set of agents parameters to use for the group [%d]!",group_id);
+              Log->Write("WARNING:\t Please specify which set of agents parameters (agent_parameter_id) to use for the group [%d]!",group_id);
               Log->Write("WARNING:\t Default values are not implemented yet");
               exit(EXIT_FAILURE);
           }
@@ -617,8 +561,15 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
      double bufx = 0.12;
      double bufy = 0.12;
 
-     double dx = GetAmin()->GetMean() + bufx;
-     double dy = GetBmax()->GetMean() + bufy;
+     double amin=0.18; // = GetAmin()->GetMean();
+     double bmax=0.25; // = GetBmax()->GetMean();
+
+     //TODO:
+     //double dx = GetAmin()->GetMean() + bufx;
+     //double dy = GetBmax()->GetMean() + bufy;
+
+     double dx = amin + bufx;
+     double dy = bmax + bufy;
 
      vector<double>::iterator min_x, max_x, min_y, max_y;
      vector<Point> poly = r->GetPolygon();
@@ -805,28 +756,6 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
     }
 }
 
-
-string PedDistributor::writeParameter() const
-{
-     string s;
-     char tmp[CLENGTH];
-
-     s.append("\tPedestrians Parameter:\n");
-     sprintf(tmp, "\t\tv0 ~ N(%f, %f)\n", GetV0()->GetMean(), GetV0()->GetSigma());
-     s.append(tmp);
-     sprintf(tmp, "\t\tb_max ~ N(%f, %f)\n", GetBmax()->GetMean(), GetBmax()->GetSigma());
-     s.append(tmp);
-     sprintf(tmp, "\t\tb_min ~ N(%f, %f)\n", GetBmin()->GetMean(), GetBmin()->GetSigma());
-     s.append(tmp);
-     sprintf(tmp, "\t\ta_min ~ N(%f, %f)\n", GetAmin()->GetMean(), GetAmin()->GetSigma());
-     s.append(tmp);
-     sprintf(tmp, "\t\ta_tau ~ N(%f, %f)\n", GetAtau()->GetMean(), GetAtau()->GetSigma());
-     s.append(tmp);
-     sprintf(tmp, "\t\ttau ~ N(%f, %f)\n", GetTau()->GetMean(), GetTau()->GetSigma());
-     s.append(tmp);
-
-     return s;
-}
 
 void StartDistributionRoom::SetStartPosition(double x, double y, double z)
 {
