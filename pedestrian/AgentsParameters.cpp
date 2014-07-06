@@ -1,6 +1,6 @@
 /**
  * \file        AgentsParameters.cpp
- * \date        July 04, 2014
+ * \date        Jul 4, 2014
  * \version     v0.5
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
@@ -27,6 +27,7 @@
  *
  *
  **/
+
 
 #include "AgentsParameters.h"
 #include "../general/Macros.h"
