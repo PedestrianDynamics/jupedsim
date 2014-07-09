@@ -1,13 +1,14 @@
 TEMPLATE = app
 TARGET = TraVisTo
 CONFIG += qt
-CONFIG += static
+#CONFIG += static
 QT += xml network
 
 #avoid some annoying dependencies
 #QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
-#QMAKE_LFLAGS += -static -static-libstdc++
+#QMAKE_LFLAGS += -static-libstdc++
 #QMAKE_CXXFLAGS += -static -static -static-libstdc++
+#QMAKE_CXXFLAGS += -static
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
@@ -95,7 +96,7 @@ win32 {
 #        -lvtkInteractionStyle-6.1   \
         }
 
-win32__ {
+win32_ {
         INCLUDEPATH += C:/VTK/include/vtk-6.1
 	
         LIBS += -LC:/VTK/bin \
@@ -369,26 +370,81 @@ unix_6 {
             -lvtkzlib-6.0  \
 }
    
-unix_5 {
+#dynamic linking with vtk5.10
+unix {
 INCLUDEPATH += /usr/include/vtk-5.8
-LIBS += -L/usr/lib/ \
-    -lvtkCommon \
-    -lvtkDICOMParser \
-    -lvtkFiltering \
-    -lvtkGenericFiltering \
-    -lvtkGraphics \
-    -lvtkHybrid \
-    -lvtkIO \
-    -lvtkImaging \
-    -lvtkRendering \
-    -lvtkVolumeRendering \
-    -lvtkWidgets \
-    -lvtkexoIIc \
-    -lvtkftgl \
-    -lvtksys \
-    -lvtkverdict \
-    -lvtkParallel \
-    -lvtkmetaio
+LIBS += -L/usr/lib \
+#INCLUDEPATH +=/usr/local/include/vtk-5.10
+#LIBS += -L/usr/local/lib/vtk-5.10 \
+#    -lvtkCommon \
+#    -lvtkDICOMParser \
+#    -lvtkFiltering \
+#    -lvtkGenericFiltering \
+#    -lvtkGraphics \
+#    -lvtkHybrid \
+#    -lvtkIO \
+#    -lvtkImaging \
+#    -lvtkRendering \
+#    -lvtkVolumeRendering \
+#    -lvtkWidgets \
+#    -lvtkexoIIc \
+#    -lvtkftgl \
+#    -lvtksys \
+#    -lvtkverdict \
+#    -lvtkParallel \
+#    -lvtkmetaio \
+#
+-lvtkRendering  \
+-lvtkCommon   \
+-lvtkHybrid   \
+-lvtkIO   \
+-lvtkGraphics   \
+-lvtkFiltering   \
+
+ }
+ 
+#Static compilation 
+unix_static {
+#INCLUDEPATH += /usr/include/vtk-5.8
+#LIBS += -L/usr/lib \
+INCLUDEPATH +=/usr/local/include/vtk-5.10
+LIBS += -L/usr/local/lib/vtk-5.10 \
+-lvtkRendering  \
+-lvtkCommon   \
+-lvtkHybrid   \
+-lvtkIO   \
+-lvtkGraphics   \
+-lvtkFiltering   \
+-lvtkCommon   \
+-lvtkverdict   \
+-lvtkParallel   \
+-lvtkexoIIc   \
+-lvtkImaging   \
+-lvtkDICOMParser   \
+-lvtkmetaio   \
+-lvtkftgl  \
+#-lLSDyna \ 
+-lvtkViews \
+-lvtksys   \
+-lvtkpng \
+-lvtktiff \
+-lvtkjpeg \
+-lvtklibxml2 \
+-lvtkzlib \
+-lvtkexpat \
+-lvtkfreetype \
+-lGL  \
+-lXt \
+-lX11 \
+-lXext \
+-ldl \
+#-lpng \
+#-ltiff \
+#-ljpeg \
+#-lxml2 \
+#-lz \
+#-lexpat \
+#-lfreetype \
  }
 
 
