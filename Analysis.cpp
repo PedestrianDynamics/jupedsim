@@ -230,7 +230,7 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 	_highVertexY = geo_maxY;
 	_lowVertexX = geo_minX;
 	_lowVertexY = geo_minY;
-
+	std::cout<<dsv(geoPoly)<<"\n";
 	return geoPoly;
 }
 
