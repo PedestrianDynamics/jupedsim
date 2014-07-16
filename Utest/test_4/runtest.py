@@ -87,12 +87,28 @@ if __name__ == "__main__":
         exit(FAILURE)
     fps, N, traj = parse_file(trajfile)
 
-    evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
+    traj_1 = traj[ traj[:,0] == 1 ]
+    x_1 = traj_1[:,2]
+    y_1 = traj_1[:,3]
+
+    x_2 = traj[ traj[:,0] == 2 ][:,2]
+    y_2 = traj[ traj[:,0] == 2 ][:,3]
+
+    eps = 0.3 # 10 cm
+    x_min = x_2[0] - eps
+    x_max = x_2[0] + eps
+    y_min = y_2[0] - eps
+    y_max = y_2[0] + eps
     
-    tolerance = 0.01 
-    if (evac_time- must_time) > tolerance:
-        logging.info("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
+    lx = np.logical_and( x_1 > x_min, x_1 < x_max )
+    ly = np.logical_and( y_1 > y_min, y_1 < y_max )
+
+    overlap = (lx*ly).any()
+    
+
+    if overlap:
+        logging.info("%s exits with FAILURE"%(argv[0]))
         exit(FAILURE)
     else:
-        logging.info("%s exits with SUCCESS evac_time = %f (= %f)"%(argv[0], evac_time, must_time))
+        logging.info("%s exits with SUCCESS"%(argv[0]))
         exit(SUCCESS)

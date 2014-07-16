@@ -2,7 +2,7 @@
 
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
-  <max_sim_time>90</max_sim_time>
+  <max_sim_time>50</max_sim_time>
   <!-- seed used for initialising random generator -->
   <seed>1</seed>
   <!-- geometry file -->
@@ -29,11 +29,11 @@
     <goals>
       <goal id="0" final="true" caption="goal">
         <polygon>
-          <vertex px="14" py="0.8" />
+          <vertex px="14" py="4" />
           <vertex px="14" py="0" />
           <vertex px="13" py="0" />
-          <vertex px="13" py="0.8" />
-          <vertex px="14" py="0.8" />
+          <vertex px="13" py="4" />
+          <vertex px="14" py="4" />
         </polygon>
       </goal>
     </goals>
@@ -42,47 +42,67 @@
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="1" start_x="2" start_y="0.4"  goal_id="0" router_id="1" />
-      <group group_id="0" room_id="0" subroom_id="0" number="1" start_x="4" start_y="0.4"  goal_id="0" router_id="1" />
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="2" start_y="0.5"  goal_id="0" router_id="1" />
+      <group group_id="0"  agent_parameter_id="1"  room_id="0" subroom_id="0" number="1" start_x="4" start_y="0.4"  goal_id="0" router_id="1" />
     </agents_distribution>
     <!-- frequency in persons/minute -->
     <agents_sources/>
   </agents>
 
 
-  <!-- These parameters may be overwritten -->
-  <operational_models >
+<operational_models >
     <model operational_model_id="1" description="gcfm">
-      <parameters>
+      <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exitCrossingStrategy>1</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
-        <v0 mu="1" sigma="0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
-        <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.01" sigma="0.00" />
-        <atau mu="0.23" sigma="0.001" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-      </parameters>
-    </model>
- <model operational_model_id="2" description="gompertz">
-      <parameters>
-        <solver>euler</solver>
-        <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>1</exitCrossingStrategy>
-        <linkedcells enabled="true" cell_size="2.2" />
-        <v0 mu="1" sigma="0" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="0">
+        <v0 mu="1" sigma="0.0" />
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.20" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
-        <tau mu="0.01" sigma="0.00" />
-        <atau mu="0.23" sigma="0.001" />
-        <force_ped nu="0.2" a="1" b="1" c="1"/>
-        <force_wall nu="0.2" a="1" b="1" c="1"/>
-      </parameters>
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.5" sigma="0.001" />
+      </agent_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="0.0" sigma="0.0" />
+        <bmax mu="0.25" sigma="0.001" />
+        <bmin mu="0.20" sigma="0.001" />
+        <amin mu="0.18" sigma="0.001" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.5" sigma="0.001" />
+      </agent_parameters>
+    </model>
+
+    <model operational_model_id="2" description="gompertz">
+      <model_parameters>
+        <solver>euler</solver>
+        <stepsize>0.01</stepsize>
+        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <linkedcells enabled="true" cell_size="2.2" />
+        <force_ped nu="5"  b="0.25" c="3.0"/>
+        <force_wall nu="2" b="0.70" c="3.0"/>
+      </model_parameters>
+      <agent_parameters agent_parameter_id="0">
+        <v0 mu="0.5" sigma="0.0" />
+        <bmax mu="0.25" sigma="0.001" />
+        <bmin mu="0.20" sigma="0.001" />
+        <amin mu="0.18" sigma="0.001" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.5" sigma="0.001" />
+      </agent_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="0.0" sigma="0.0" />
+        <bmax mu="0.25" sigma="0.001" />
+        <bmin mu="0.20" sigma="0.001" />
+        <amin mu="0.18" sigma="0.001" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.5" sigma="0.001" />
+      </agent_parameters>
     </model>
   </operational_models>
 

@@ -86,7 +86,8 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      }
      F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 
-          // printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), v0.GetX(), v0.GetY(),v0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
+     // if (ped->GetID() == 2)
+     //      printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), v0.GetX(), v0.GetY(),v0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
      
      
      return F_driv;
@@ -145,9 +146,13 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      B_ij = exp(-b*exp(-c*B_ij));
      //TODO: check if we need K_ij in the  f
      //f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * K_ij * B_ij;
+    
      f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * B_ij;
-     F_rep = ep12 * f;
 
+     F_rep = ep12 * f;
+     // if(ped1->GetID() == 1) {
+     //      printf("F=[%f, %f] v0=%f, nu=%f, B_ij=%f D=%f, r1=%f, r2=%f\n", F_rep.GetX(), F_rep.GetY(), ped1->GetV0Norm(), _nuPed, B_ij, Distance, r1, r2);
+     // }
 //check isNan
      if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
           char tmp[CLENGTH];
@@ -359,7 +364,11 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                // = fd ; //+ ped->GetV0()*correction;
 
                Point acc = (fd + repPed + repWall) / ped->GetMass();
-               // printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
+               // if(ped->GetID() == 2 ) {
+               //      printf("Pos1 =[%f, %f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
+               //      printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
+               //      getc(stdin);
+               // }
                result_acc.push_back(acc);
           }
 
@@ -373,6 +382,8 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
 
                     // printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
                Point v_neu = ped->GetV() + vToAdd;
+               // if(ped->GetID() == 2 )
+               //      v_neu = Point(0,0);
                Point pos_neu = ped->GetPos() + v_neu * h;
                //---------------------------------------------------------------
 
