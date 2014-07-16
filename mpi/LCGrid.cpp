@@ -1,14 +1,14 @@
 /**
- * @file LCGrid.h
- * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
- * @version not versioned
- * Copyright (C) <2009-2010>
+ * \file        LCGrid.cpp
+ * \date        Nov 16, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -17,26 +17,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
+ * \section Description
+ * This class implements the Linked-Cells algorithm
+ * \ref{cacs.usc.edu/education/cs596/01-1LinkedListCell.pdf}
+ * A grid is laid on the complete geometry and the pedestrians are assigned the cells
+ * at each simulation step. Only pedestrians in the neighbouring cells are involved
+ * in the force computations.
  *
- * \brief This class Implements the Linked-Cells algorithm.
-
- * @section DESCRIPTION
- *   This class implements the Linked-Cells algorithm
- *   \ref{cacs.usc.edu/education/cs596/01-1LinkedListCell.pdf}
- *   A grid is laid on the complete geometry and the pedestrians are assigned the cells
- *   at each simulation step. Only pedestrians in the neighbouring cells are involved
- *   in the force computations.
- *
- *   The class is static as only one instance is needed per simulation round.
- *   This solution is fine for parallelisation as well, at least for OpenMP.
+ * The class is static as only one instance is needed per simulation round.
+ * This solution is fine for parallelisation as well, at least for OpenMP.
  *
  *
- *  Created on: Nov 16, 2010
- *
- */
+ **/
+ 
 
 #include"LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
