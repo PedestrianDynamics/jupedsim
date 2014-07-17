@@ -535,7 +535,7 @@ void Building::LoadBuildingFromFile()
                int id = xmltoi(xTrans->Attribute("id"), -1);
                // string caption = "door " + id;
                string caption = "door ";
-               caption += std::to_string(id);
+               caption += to_string(id);
                caption = xmltoa(xTrans->Attribute("caption"), caption.c_str());
                int room1_id = xmltoi(xTrans->Attribute("room1_id"), -1);
                int room2_id = xmltoi(xTrans->Attribute("room2_id"), -1);

@@ -108,7 +108,6 @@ public:
      //virtual void WriteFrame(int frameNr, Building* building);
      //virtual void WriteFooter();
      virtual void WriteGeometry(Building* building);
-
 };
 
 class TrajectoriesJPSV06: public IODispatcher {
