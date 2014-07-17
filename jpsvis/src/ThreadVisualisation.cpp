@@ -161,17 +161,17 @@ void ThreadVisualisation::run(){
 	initGlyphs();
 
 	// add axis
-	axis= vtkAxesActor::New();
+    //axis= vtkAxesActor::New();
 	//axis->SetScale(10);
 	//axis->SetConeRadius(30);
 	//axis->SetXAxisLabelText("1 Meter");
 	//axis->SetYAxisLabelText("1 Meter");
 	//axis->SetZAxisLabelText("1 Meter");
-	axis->AxisLabelsOff();
+    //axis->AxisLabelsOff();
 	//axis->SetCylinderRadius(100);
 	//axis->set
-	axis->SetTotalLength(1000,1000,1000);
-	axis->SetVisibility(true);
+    //axis->SetTotalLength(1000,1000,1000);
+    //axis->SetVisibility(true);
 	//renderer->AddActor(axis);
 
 	//add big circle at null point
@@ -227,13 +227,6 @@ void ThreadVisualisation::run(){
 		actor->SetMapper(mapper);
 		//renderer->AddActor(actor);
 	}
-
-
-	//cout << "diffuse: "<<actor->GetProperty()->GetDiffuse()<<" [" << actor->GetProperty()->GetDiffuseMinValue()<<" , "<<actor->GetProperty()->GetDiffuseMaxValue() << " ]"<<endl;
-	//cout << "ambiant: "<<actor->GetProperty()->GetAmbient()<<" [" << actor->GetProperty()->GetAmbientMinValue()<<" , "<<actor->GetProperty()->GetAmbientMaxValue() << " ]"<<endl;
-	//cout << "specular:"<<actor->GetProperty()->GetSpecular()<<" [" << actor->GetProperty()->GetSpecularMinValue()<<" , "<<actor->GetProperty()->GetSpecularMaxValue()<< " ]"<<endl;
-
-
 
 	//compute the relatives delays
 	// necessary in the case several dataset were loaded
@@ -345,13 +338,6 @@ void ThreadVisualisation::run(){
 	renderingTimer->setTextActor(runningTime);
 	renderWinInteractor->AddObserver(vtkCommand::TimerEvent,renderingTimer);
 
-	// check for windows changes
-
-	//WindowCallback*  windowModified = new WindowCallback();
-	//VTK_CREATE(vtkCallbackCommand,windowModified);
-	//windowModified->SetCallback (WindowModifiedCallback);
-	//renderWindow->AddObserver(vtkCommand::ModifiedEvent ,windowModified);
-
 
 	//create the necessary connections
 	QObject::connect(renderingTimer, SIGNAL(signalRunningTime(unsigned long )),
@@ -387,11 +373,12 @@ void ThreadVisualisation::run(){
 		setWallsColor(wallcol);
 		//showDoors(false);
 	}
-
 	//renderWinInteractor->Initialize();
 	// Initialize and enter interactive mode
 	// should be called after the observer has been added
-	renderWinInteractor->Start();
+    //renderWindow->Modified();
+
+    renderWinInteractor->Start();
 
 
 	//emit signalStatusMessage("Idle");
@@ -407,7 +394,6 @@ void ThreadVisualisation::run(){
 	renderWindow->Delete();
 	renderWinInteractor->Delete();
 	renderer=NULL;
-	exit(0);
 }
 
 

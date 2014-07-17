@@ -139,6 +139,8 @@ MainWindow::MainWindow(QWidget *parent) :
     numberOfDatasetLoaded=0;
     frameSliderHold=false;
 
+    //some hand made stuffs
+    ui.BtFullscreen->setVisible(false);
 
     labelCurrentAction = new QLabel();
     labelCurrentAction->setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -285,7 +287,7 @@ void MainWindow::slotNetworkSettings() {
     bool ok;
 
     int port = QInputDialog::getInt(this, tr("input a port "), tr(
-                                        "port(default to 8081):"), 8989, 5000, 65355, 1, &ok);
+                                        "port(default to 8989):"), 8989, 5000, 65355, 1, &ok);
 
     if (ok) {
         SystemSettings::setListningPort(port);
@@ -682,8 +684,9 @@ QString MainWindow::getTagValueFromElement(QDomNode node,
 void MainWindow::slotFullScreen(bool status) {
 
     Debug::Messages("changing full screen status %d",status);
-    extern_fullscreen_enable = true;
 
+    extern_fullscreen_enable = true;
+    //cout<<"clicked "<< status <<endl;
     //dont forget this.
     extern_force_system_update=true;
 
@@ -920,7 +923,7 @@ void MainWindow::resetGraphicalElements(){
     ui.BtRecord->setEnabled(false);
 
     //disable fullscreen
-    ui.BtFullscreen->setEnabled(false);
+    //ui.BtFullscreen->setEnabled(false);
 
     //disable stop button
 

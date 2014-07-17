@@ -324,12 +324,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     pAVIWriter->SetQuality(2);
                     pAVIWriter->SetRate(1000.0/iren->GetTimerDuration(tid));
 
-                    //static int videoID=0;
-                    //char filename[20]={0};
-                    //sprintf(filename,"travisto_video_%d.avi",videoID++);
-                    //pAVIWriter->SetFileName(filename);
-
-
                     QString videoName;
                     SystemSettings::getOutputDirectory(videoName);
                     //create directory if not exits
@@ -382,8 +376,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     //exit if and only if the recording process is terminated
                     if(isRecording) extern_recording_enable=false;
                     else iren->ExitCallback();
-
-
                 }
             }
         }

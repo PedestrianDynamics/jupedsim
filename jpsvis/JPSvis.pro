@@ -1,21 +1,22 @@
 TEMPLATE = app
 TARGET = TraVisTo
 CONFIG += qt
-#CONFIG += static
+CONFIG += static
 QT += xml network
 
 #avoid some annoying dependencies
 #QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
-#QMAKE_LFLAGS += -static-libstdc++
+#QMAKE_LFLAGS += -static-libstdc++ -lstdc++
 #QMAKE_CXXFLAGS += -static -static -static-libstdc++
 #QMAKE_CXXFLAGS += -static
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
+#Dynamic linking
+#Windows  VTK 6.1
 win32 {
-        INCLUDEPATH += C:/VTK/include/vtk-6.1
-
-        LIBS += -LC:/VTK/bin \
+        INCLUDEPATH += C:/VTK/VTK6.1/include
+        LIBS += -LC:/VTK/VTK6.1/bin_shared \
         #LIBS += -LC:/VTK/bin_static/lib \
         -lwsock32 \
         -lvtkCommonCore-6.1    \
@@ -96,11 +97,11 @@ win32 {
 #        -lvtkInteractionStyle-6.1   \
         }
 
-win32_ {
-        INCLUDEPATH += C:/VTK/include/vtk-6.1
-	
-        LIBS += -LC:/VTK/bin \
-#        LIBS += -LC:/VTK/bin_static/lib \
+#Satic linking
+#Windows  VTK 6.1
+win32_6.1 {
+        INCLUDEPATH += C:/VTK/VTK6.1/include
+        LIBS += -LC:/VTK/VTK6.1/bin_static \
             -lvtkCommonCore-6.1  \
             -lvtkalglib-6.1  \
             -lvtkChartsCore-6.1  \
@@ -217,10 +218,12 @@ win32_ {
             -lvtkzlib-6.1  \
             -lwsock32
         }
-win32_5 {
-        INCLUDEPATH += C:/VTK/include/vtk-5.10
-
-        LIBS += -LC:/VTK/bin_5 \
+		
+#Dynamic linking
+#Windows  VTK 5.10
+win32_te {
+        INCLUDEPATH += C:/VTK/VTK5.1/include
+        LIBS += -LC:/VTK/VTK5.1/bin_shared \
             -lvtksys \
             -lvtkzlib \
             -lvtkjpeg \
@@ -242,14 +245,83 @@ win32_5 {
             -lvtkGraphics \
             -lvtkIO \
             -lvtkRendering \
-            -lvtkParallel \
+#            -lvtkParallel \
             -lvtkHybrid \
             -lvtkWidgets \
             -lvtkInfovis\
             -lvtkViews\
             -lwsock32\
 }
-        
+
+#Static compilation 
+#VTK 5.10 Windows
+win32_te {
+    INCLUDEPATH += C:/VTK/VTK5.1/include
+    LIBS += -LC:/VTK/VTK5.1/bin_static \
+#        -lvtkCommon   \
+        -lvtkRendering  \
+        -lvtkHybrid   \
+        -lvtkGraphics   \
+        -lvtkIO   \
+        -lvtkImaging   \
+#        -lvtkFiltering   \
+#        -lvtkCommon   \
+#        -lvtkverdict   \
+#        -lvtkexoIIc   \
+#        -lvtkDICOMParser   \
+#        -lvtkmetaio   \
+#        -lvtkftgl  \
+#        -lLSDyna \
+#        -lvtkViews \
+#        -lvtksys   \
+#        -lvtkpng \
+#        -lvtktiff \
+#        -lvtkjpeg \
+#        -lvtklibxml2 \
+#        -lvtkzlib \
+#        -lvtkexpat \
+#        -lvtkfreetype \
+        -lwsock32\
+
+#-lLSDyna \
+#-lMapReduceMPI \
+#-lmpistubs \
+#-lvtkCharts \
+#-lvtkCommon \
+#-lvtkDICOMParser \
+#-lvtkFiltering \
+#-lvtkGenericFiltering  \
+#-lvtkGeovis \
+#-lvtkGraphics \
+#-lvtkHybrid \
+#-lvtkIO \
+#-lvtkImaging \
+#-lvtkInfovis \
+#-lvtkNetCDF \
+#-lvtkNetCDF_cxx \
+#-lvtkRendering \
+#-lvtkViews \
+#-lvtkVolumeRendering \
+#-lvtkWidgets \
+#-lvtkalglib \
+#-lvtkexoIIc \
+#-lvtkexpat \
+#-lvtkfreetype \
+#-lvtkftgl \
+#-lvtkhdf5 \
+#-lvtkhdf5_hl \
+#-lvtkjpeg \
+#-lvtklibxml2 \
+#-lvtkmetaio \
+#-lvtkpng \
+#-lvtkproj4 \
+#-lvtksqlite \
+#-lvtksys \
+#-lvtktiff \
+#-lvtkverdict \
+#-lvtkzlib \
+ }
+ 
 unix_6 {
     INCLUDEPATH += /usr/local/include/vtk-6.0
     
@@ -403,7 +475,7 @@ LIBS += -L/usr/lib \
 
  }
  
-#Static compilation 
+#Static compilation linux
 unix_static {
 #INCLUDEPATH += /usr/include/vtk-5.8
 #LIBS += -L/usr/lib \

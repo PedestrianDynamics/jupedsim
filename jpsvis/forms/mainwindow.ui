@@ -61,9 +61,9 @@
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>30</y>
+      <y>20</y>
       <width>271</width>
-      <height>151</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -183,9 +183,9 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>30</y>
+      <y>20</y>
       <width>111</width>
-      <height>201</height>
+      <height>161</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -200,10 +200,10 @@
     <widget class="QPushButton" name="BtStart">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>24</y>
-       <width>81</width>
-       <height>28</height>
+       <x>11</x>
+       <y>21</y>
+       <width>80</width>
+       <height>30</height>
       </rect>
      </property>
      <property name="toolTip">
@@ -229,10 +229,10 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>58</y>
-       <width>81</width>
-       <height>28</height>
+       <x>11</x>
+       <y>55</y>
+       <width>80</width>
+       <height>30</height>
       </rect>
      </property>
      <property name="toolTip">
@@ -258,10 +258,10 @@
      </property>
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>92</y>
-       <width>81</width>
-       <height>28</height>
+       <x>11</x>
+       <y>89</y>
+       <width>80</width>
+       <height>30</height>
       </rect>
      </property>
      <property name="toolTip">
@@ -281,46 +281,20 @@
       </size>
      </property>
     </widget>
-    <widget class="QPushButton" name="BtFullscreen">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>126</y>
-       <width>81</width>
-       <height>28</height>
-      </rect>
-     </property>
-     <property name="toolTip">
-      <string>Fullscreen</string>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="icons.qrc">
-       <normaloff>:/new/iconsS/icons/window_fullscreen-64.png</normaloff>:/new/iconsS/icons/window_fullscreen-64.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </widget>
     <widget class="QPushButton" name="BtReset">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>81</width>
-       <height>23</height>
+       <x>11</x>
+       <y>123</y>
+       <width>80</width>
+       <height>30</height>
       </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>23</height>
+      </size>
      </property>
      <property name="toolTip">
       <string>Reset the simulation and clear all datasets loaded</string>
@@ -526,6 +500,38 @@ border-color: rgb(255, 255, 255);</string>
      <string>Previous</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="BtFullscreen">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>200</y>
+      <width>80</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Fullscreen</string>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="icons.qrc">
+      <normaloff>:/new/iconsS/icons/window_fullscreen-64.png</normaloff>:/new/iconsS/icons/window_fullscreen-64.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>20</width>
+      <height>20</height>
+     </size>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -614,25 +620,24 @@ border-color: rgb(255, 255, 255);</string>
     </widget>
     <addaction name="action2_D"/>
     <addaction name="action3_D"/>
+    <addaction name="menuCamera_View"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Agents"/>
+    <addaction name="actionShow_Captions"/>
     <addaction name="actionShow_Trajectories"/>
+    <addaction name="separator"/>
     <addaction name="actionShow_Geometry"/>
     <addaction name="actionShow_Exits"/>
     <addaction name="actionShow_Walls"/>
     <addaction name="actionShow_Legend"/>
-    <addaction name="actionShow_Captions"/>
     <addaction name="actionShow_Axis"/>
     <addaction name="actionShow_Wall_Caption"/>
     <addaction name="actionShow_Room_Caption"/>
     <addaction name="actionShow_Door_Caption"/>
     <addaction name="actionShow_Geometry_Captions"/>
-    <addaction name="separator"/>
     <addaction name="actionFirst_Group"/>
     <addaction name="actionSecond_Group"/>
     <addaction name="actionThird_Group"/>
-    <addaction name="separator"/>
-    <addaction name="menuCamera_View"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Onscreen_Infos"/>
     <addaction name="separator"/>
@@ -734,7 +739,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Network settings</string>
+    <string>Listening Port</string>
    </property>
   </action>
   <action name="actionOnline">
@@ -778,6 +783,9 @@ border-color: rgb(255, 255, 255);</string>
    <property name="text">
     <string>Fullscreen</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionRecord">
    <property name="enabled">
@@ -796,6 +804,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>Load Project</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="action2_D">
@@ -822,7 +833,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="actionAdd_Trajectories_File">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Add Trajectories File</string>
@@ -830,16 +841,22 @@ border-color: rgb(255, 255, 255);</string>
    <property name="shortcut">
     <string>Ctrl+A</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionClear_Trajectories_Files">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Clear Trajectories Files</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+C</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionLoad_Geometry">
@@ -855,7 +872,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Load File</string>
+    <string>Open File</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -885,6 +902,9 @@ border-color: rgb(255, 255, 255);</string>
    <property name="text">
     <string>First Group</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionSecond_Group">
    <property name="checkable">
@@ -895,6 +915,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>Second Group</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionThird_Group">
@@ -907,13 +930,16 @@ border-color: rgb(255, 255, 255);</string>
    <property name="text">
     <string>Third Group</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionShow_Legend">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Show Legend</string>
@@ -923,6 +949,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="shortcut">
     <string>S, L</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="action3_D">
@@ -1003,7 +1032,7 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Show Captions</string>
+    <string>Show Agents Captions</string>
    </property>
    <property name="shortcut">
     <string>S, C</string>
@@ -1040,6 +1069,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="shortcut">
     <string>S, A</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionCameraViewTop">
@@ -1081,6 +1113,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+,</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionSnapshot">
@@ -1222,6 +1257,11 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>Show Geometry Captions</string>
+   </property>
+  </action>
+  <action name="actionTest">
+   <property name="text">
+    <string>test</string>
    </property>
   </action>
  </widget>
