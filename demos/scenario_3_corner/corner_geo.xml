@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="corner" unit="m">
+<geometry version="0.5" caption="corner" unit="m"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 	<rooms>
 		<room id="0" caption="hall">
 			<subroom id="0" closed="0" class="subroom">
@@ -13,7 +15,7 @@
 					<vertex px="10.0" py="6.0" />
 				</polygon>
 			</subroom>
-			<subroom id="1" closed="0" class="corridor">
+			<subroom id="1" closed="0" class="subroom">
 				<polygon caption="wall">
 					<vertex px="10.0" py="6.0" />
 					<vertex px="17.0" py="6.0" />
@@ -25,7 +27,7 @@
 					<vertex px="10.0" py="4.0" />
 				</polygon>
 
-				<obstacle1 id="0" caption="table" height="1.0" closed="1">
+				<obstacle id="0" caption="table" height="1.0" closed="1">
 					<polygon>
 						<vertex px="12.0" py="5.9" />
 						<vertex px="13.0" py="5.9" />
@@ -33,8 +35,8 @@
 						<vertex px="12.0" py="5.4" />
 						<vertex px="12.0" py="5.9" />
 					</polygon>
-				</obstacle1>
-				<obstacle1 id="1" caption="table" height="1.0" closed="1">
+				</obstacle>
+				<obstacle id="1" caption="table" height="1.0" closed="1">
 					<polygon>
 						<vertex px="16.4" py="-2.0" />
 						<vertex px="16.9" py="-2.0" />
@@ -42,7 +44,7 @@
 						<vertex px="16.4" py="-3.0" />
 						<vertex px="16.4" py="-2.0" />
 					</polygon>
-				</obstacle1>
+				</obstacle>
 			</subroom>
 			<crossings>
 				<!-- virtual exits between subrooms -->

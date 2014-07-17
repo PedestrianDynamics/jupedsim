@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version ="0.5" caption="Projectname" gridSizeX="20.000000" gridSizeY="20.000000" unit="m">
+<geometry version ="0.5" caption="Projectname"  unit="m"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 	<rooms>
-		<room id="0" caption="1" zpos="0.000000">
+		<room id="0" caption="1" >
 			<subroom id="0" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="-1.370833" py="133.636490"/>
@@ -37,7 +39,7 @@
 				</crossing>
 			</crossings>
 		</room>
-		<room id="1" caption="2" zpos="0.000000">
+		<room id="1" caption="2" >
 
 			<subroom id="0" closed="0" class="subroom">
 				 <polygon caption="wall">
@@ -154,7 +156,7 @@
 				</crossing>
 			</crossings>
 		</room>
-		<room id="2" caption="3" zpos="0.000000">
+		<room id="2" caption="3" >
 			<subroom id="0" closed="0" class="subroom">
 				 <polygon caption="wall">
 					 <vertex px="-17.058630" py="133.474518"/>
