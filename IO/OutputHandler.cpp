@@ -155,21 +155,40 @@ FileHandler::~FileHandler()
 
 void FileHandler::Write(string str)
 {
-     if (this != NULL) {
-          _pfp << str << endl;
-          _pfp.flush();
-     }
+    if (this != NULL) {
+        _pfp << str << endl;
+        _pfp.flush();
+    }
+
+    if (str.find("ERROR") != string::npos)
+    {
+        incrementErrors();
+    }
+    else if (str.find("WARNING") != string::npos)
+    {
+        incrementWarnings();
+    }
 }
 
-void FileHandler::Write(const char* string,...)
+void FileHandler::Write(const char* str_msg,...)
 {
      char msg[CLENGTH];
      va_list ap;
-     va_start (ap, string);
-     vsprintf (msg,string ,ap);
+     va_start (ap, str_msg);
+     vsprintf (msg,str_msg ,ap);
      va_end (ap);
      _pfp<<msg<<endl;
      _pfp.flush();
+
+     string str(msg);
+     if (str.find("ERROR") != string::npos)
+     {
+         incrementErrors();
+     }
+     else if (str.find("WARNING") != string::npos)
+     {
+         incrementWarnings();
+     }
 }
 
 TraVisToHandler::TraVisToHandler(string host, int port)

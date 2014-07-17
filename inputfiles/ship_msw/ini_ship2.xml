@@ -1,29 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.5"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
     <!-- seed used for initialising random generator -->
     <seed>12542</seed>
     <!-- maximal simulation time -->
         <numCPU>4</numCPU>
-    <max_sim_time unit="sec">456</max_sim_time>
+    <max_sim_time >456</max_sim_time>
     <!-- geometry file -->
     <geometry>bateau_obst.xml</geometry>
     <!-- trajectories file and format -->
     <trajectories format="xml-plain" fps="8">
-         <file location="trajectories.xml" /> 
-         <!-- <socket hostname="127.0.0.1" port="8989"/>   -->
+         <file location="trajectories.xml" />
+          <socket hostname="127.0.0.1" port="8989"/> 
     </trajectories>
     <!-- where to store the logs -->
-    <!--<logfile>log.txt</logfile> -->
+<!--      <logfile>log.txt</logfile> -->
 
 
     <!-- traffic information: e.g closed doors or smoked rooms -->
     <traffic_constraints>
-        <!-- room states are: good or smoked -->
-        <rooms>
-            <room room_id="0" state="good" />
-        </rooms>
         <!-- doors states are: close or open -->
         <doors>
             <door trans_id="3" caption="" state="open" />
@@ -33,7 +31,7 @@
     </traffic_constraints>
 
     <routing>
-        <goals_>
+        <goals>
             <goal id="0" final="false" caption="goal 1">
                 <polygon>
                     <vertex px="-5.0" py="-5.0" />
@@ -61,11 +59,11 @@
                     <vertex px="20.0" py="17.0" />
                 </polygon>
             </goal>
-        </goals_>
+        </goals>
     </routing>
 
     <!--persons information and distribution -->
-    <agents operational_model_id="2">
+    <agents operational_model_id="1">
         <agents_distribution>
             <group1 group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
             <group1 group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
@@ -147,5 +145,4 @@
         </router>
 
     </route_choice_models>
-
 </JuPedSim>

@@ -359,7 +359,7 @@ void Building::LoadBuildingFromFile()
           exit(EXIT_FAILURE);
      }
      double version = xmltof(xRootNode->Attribute("version"), -1);
-     
+
      if (version != 0.5) { // @todo version number is hard coded
           Log->Write(" \tWrong goemetry version!");
           Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
@@ -1059,7 +1059,7 @@ void Building::Update()
      unsigned int nSize = _allPedestians.size();
      int nThreads = omp_get_max_threads();
 
-     
+
      int partSize = nSize / nThreads;
 
      #pragma omp parallel  default(shared) num_threads(nThreads)

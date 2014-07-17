@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="arena_section" unit="m">
+<geometry version="0.5" caption="arena_section" unit="m"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 	<rooms>
 		<room id="0" caption="060">
 			<subroom id="0" closed="0" class="subroom">
@@ -1246,8 +1248,8 @@
 					<vertex px="54.520233" py="50.669205" />
 					<vertex px="54.520206" py="50.436012" />
 				</polygon>
-				<up px="55.12" py="65.37" />
-				<down px="55.12" py="50.44" />
+				<up px="55.12" py="65" />
+				<down px="55.12" py="50" />
 			</subroom>
 			<subroom id="77" closed="0" class="stair">
 				<polygon caption="wall">
@@ -1406,8 +1408,8 @@
 					<vertex px="48.320885" py="50.669334" />
 					<vertex px="48.320885" py="50.554058" />
 				</polygon>
-				<up px="48.92" py="65.37" />
-				<down px="48.92" py="50.44" />
+				<up px="48.92" py="65" />
+				<down px="48.92" py="50" />
 			</subroom>
 			<subroom id="78" closed="0" class="stair">
 				<polygon caption="wall">
@@ -1471,8 +1473,8 @@
 					<vertex px="52.620750" py="49.069363" />
 					<vertex px="52.619759" py="49.369362" />
 				</polygon>
-				<up px="52.02" py="50.17" />
-				<down px="52.02" py="43.77" />
+				<up px="52.02" py="50" />
+				<down px="52.02" py="43" />
 			</subroom>
 			<subroom id="79" closed="0" class="stair">
 				<polygon caption="wall">
@@ -1483,8 +1485,8 @@
 					<vertex px="56.580273" py="50.169285" />
 					<vertex px="56.320286" py="50.169285" />
 				</polygon>
-				<up px="56.58" py="49.77" />
-				<down px="56.32" py="49.77" />
+				<up px="56.58" py="49" />
+				<down px="56.32" py="49" />
 			</subroom>
 			<subroom id="80" closed="0" class="stair">
 				<polygon caption="wall">
@@ -1495,8 +1497,8 @@
 					<vertex px="57.076584" py="52.569309" />
 					<vertex px="57.336582" py="52.569305" />
 				</polygon>
-				<up px="57.08" py="52.97" />
-				<down px="57.34" py="52.97" />
+				<up px="57.08" py="52" />
+				<down px="57.34" py="52" />
 			</subroom>
 			<crossings>
 				<crossing id="87" subroom1_id="0" subroom2_id="77">
