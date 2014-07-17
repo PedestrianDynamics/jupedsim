@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xs:schema attributeFormDefault="unqualified"
-elementFormDefault="qualified"
-xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
   <xs:element name="geometry">
     <xs:complexType>
       <xs:sequence>
@@ -21,14 +19,14 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
                                   <xs:complexType>
                                     <xs:simpleContent>
                                       <xs:extension base="xs:string">
-                                        <xs:attribute type="xs:float" name="px" use="required"/>
-                                        <xs:attribute type="xs:float" name="py" use="required"/>
+                                        <xs:attribute type="xs:float" name="px" use="required" />
+                                        <xs:attribute type="xs:float" name="py" use="required" />
                                       </xs:extension>
                                     </xs:simpleContent>
                                   </xs:complexType>
                                 </xs:element>
                               </xs:sequence>
-                              <xs:attribute type="xs:string" name="caption" use="required"/>
+                              <xs:attribute type="xs:string" name="caption" use="required" />
                             </xs:complexType>
                           </xs:element>
                           <xs:element name="obstacle" maxOccurs="unbounded" minOccurs="0">
@@ -41,29 +39,29 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
                                         <xs:complexType>
                                           <xs:simpleContent>
                                             <xs:extension base="xs:string">
-                                              <xs:attribute type="xs:float" name="px" use="required"/>
-                                              <xs:attribute type="xs:float" name="py" use="required"/>
+                                              <xs:attribute type="xs:float" name="px" use="required" />
+                                              <xs:attribute type="xs:float" name="py" use="required" />
                                             </xs:extension>
                                           </xs:simpleContent>
                                         </xs:complexType>
                                       </xs:element>
                                     </xs:sequence>
-                                    <xs:attribute type="xs:string" name="caption" use="optional"/>
+                                    <xs:attribute type="xs:string" name="caption" use="optional" />
                                   </xs:complexType>
                                 </xs:element>
                               </xs:sequence>
-                              <xs:attribute type="xs:int" name="id" use="required"/>
-                              <xs:attribute type="xs:string" name="caption" use="optional"/>
-                              <xs:attribute type="xs:float" name="height" use="optional"/>
-                              <xs:attribute type="xs:byte" name="closed" use="optional"/>
+                              <xs:attribute type="xs:int" name="id" use="required" />
+                              <xs:attribute type="xs:string" name="caption" use="optional" />
+                              <xs:attribute type="xs:float" name="height" use="optional" />
+                              <xs:attribute type="xs:int" name="closed" use="optional" />
                             </xs:complexType>
                           </xs:element>
-                           <xs:element name="up" minOccurs="0">
+                          <xs:element name="up" minOccurs="0">
                             <xs:complexType>
                               <xs:simpleContent>
                                 <xs:extension base="xs:string">
-                                  <xs:attribute type="xs:float" name="px" use="optional"/>
-                                  <xs:attribute type="xs:byte" name="py" use="optional"/>
+                                  <xs:attribute type="xs:float" name="px" use="required" />
+                                  <xs:attribute type="xs:byte" name="py" use="required" />
                                 </xs:extension>
                               </xs:simpleContent>
                             </xs:complexType>
@@ -72,30 +70,28 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
                             <xs:complexType>
                               <xs:simpleContent>
                                 <xs:extension base="xs:string">
-                                  <xs:attribute type="xs:float" name="px" use="optional"/>
-                                  <xs:attribute type="xs:byte" name="py" use="optional"/>
+                                  <xs:attribute type="xs:float" name="px" use="required" />
+                                  <xs:attribute type="xs:byte" name="py" use="required" />
                                 </xs:extension>
                               </xs:simpleContent>
                             </xs:complexType>
                           </xs:element>
-
                         </xs:sequence>
-                        <xs:attribute type="xs:int" name="id" use="required"/>
-                        <xs:attribute type="xs:int" name="closed" use="optional"/>
-                        <xs:attribute type="xs:float" name="A_x" use="optional"/>
-                        <xs:attribute type="xs:float" name="B_y" use="optional"/>
-                        <xs:attribute type="xs:float" name="C_z" use="optional"/>
+                        <xs:attribute type="xs:int" name="id" use="required" />
+                        <xs:attribute type="xs:int" name="closed" use="optional" />
+                        <xs:attribute type="xs:float" name="A_x" use="optional" />
+                        <xs:attribute type="xs:float" name="B_y" use="optional" />
+                        <xs:attribute type="xs:float" name="C_z" use="optional" />
                         <xs:attribute name="class" use="required">
-                                            <xs:simpleType>
-                      <xs:restriction base="xs:string">
-                        <xs:enumeration value="stair" />
-                        <xs:enumeration value="subroom" />
-                        <xs:enumeration value="floor" />
-                      </xs:restriction>
-                    </xs:simpleType>
+                          <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                              <xs:enumeration value="stair" />
+                              <xs:enumeration value="subroom" />
+                              <xs:enumeration value="floor" />
+                            </xs:restriction>
+                          </xs:simpleType>
                         </xs:attribute>
                       </xs:complexType>
-
                     </xs:element>
                     <xs:element name="crossings" minOccurs="0" maxOccurs="unbounded">
                       <xs:complexType>
@@ -107,24 +103,24 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
                                   <xs:complexType>
                                     <xs:simpleContent>
                                       <xs:extension base="xs:string">
-                                        <xs:attribute type="xs:float" name="px" use="required"/>
-                                        <xs:attribute type="xs:float" name="py" use="required"/>
+                                        <xs:attribute type="xs:float" name="px" use="required" />
+                                        <xs:attribute type="xs:float" name="py" use="required" />
                                       </xs:extension>
                                     </xs:simpleContent>
                                   </xs:complexType>
                                 </xs:element>
                               </xs:sequence>
-                              <xs:attribute type="xs:int" name="id" use="required"/>
-                              <xs:attribute type="xs:int" name="subroom1_id" use="required"/>
-                              <xs:attribute type="xs:int" name="subroom2_id" use="required"/>
+                              <xs:attribute type="xs:int" name="id" use="required" />
+                              <xs:attribute type="xs:int" name="subroom1_id" use="required" />
+                              <xs:attribute type="xs:int" name="subroom2_id" use="required" />
                             </xs:complexType>
                           </xs:element>
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
-                  <xs:attribute type="xs:int" name="id" use="required"/>
-                  <xs:attribute type="xs:string" name="caption" use="optional"/>
+                  <xs:attribute type="xs:int" name="id" use="required" />
+                  <xs:attribute type="xs:string" name="caption" use="optional" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -140,29 +136,42 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:string">
-                            <xs:attribute type="xs:float" name="px" use="required"/>
-                            <xs:attribute type="xs:float" name="py" use="required"/>
+                            <xs:attribute type="xs:float" name="px" use="required" />
+                            <xs:attribute type="xs:float" name="py" use="required" />
                           </xs:extension>
                         </xs:simpleContent>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
-                  <xs:attribute type="xs:int" name="id" use="required"/>
-                  <xs:attribute type="xs:string" name="caption" use="required"/>
-                  <xs:attribute type="xs:string" name="type" use="optional"/>
-                  <xs:attribute type="xs:int" name="room1_id" use="required"/>
-                  <xs:attribute type="xs:int" name="subroom1_id" use="required"/>
-                  <xs:attribute type="xs:int" name="room2_id" use="required"/>
-                  <xs:attribute type="xs:int" name="subroom2_id" use="required"/>
+                  <xs:attribute type="xs:int" name="id" use="required" />
+                  <xs:attribute type="xs:string" name="caption" use="required" />
+                  <xs:attribute type="xs:string" name="type" use="optional" />
+                  <xs:attribute type="xs:int" name="room1_id" use="required" />
+                  <xs:attribute type="xs:int" name="subroom1_id" use="required" />
+                  <xs:attribute type="xs:int" name="room2_id" use="required" />
+                  <xs:attribute type="xs:int" name="subroom2_id" use="required" />
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
-      <xs:attribute type="xs:float" name="version" use="required"/>
-      <xs:attribute type="xs:string" name="caption" use="required"/>
-      <xs:attribute type="xs:string" name="unit" use="required"/>
+      <xs:attribute type="xs:string" name="caption" use="required" />
+      <xs:attribute name="version" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:float">
+            <xs:enumeration value="0.5" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="unit" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="m" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 </xs:schema>
+

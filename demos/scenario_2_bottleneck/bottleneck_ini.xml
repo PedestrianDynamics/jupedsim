@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.5"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="http://medilabo.de/jps_ini_core.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
@@ -20,7 +22,7 @@
 			<door trans_id="2" caption="" state="open" />
 		</doors>
 	</traffic_constraints>
-	
+
 	<routing>
 		<goals>
 			<goal id="0" final="true" caption="goal 1">

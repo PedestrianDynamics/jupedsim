@@ -3,12 +3,12 @@
   <xs:element name="JuPedSim">
     <xs:complexType>
       <xs:sequence>
-        <xs:element type="xs:int" name="seed">
+        <xs:element type="xs:int" name="seed" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>seed used for initialising random generator</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element type="xs:int" name="numCPU">
+        <xs:element type="xs:int" name="num_cpus" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>maximal simulation time</xs:documentation>
           </xs:annotation>
@@ -64,7 +64,8 @@
         <xs:element name="traffic_constraints" minOccurs="1" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>traffic information: e.g closed doors or smoked
-                            rooms</xs:documentation>
+              rooms
+            </xs:documentation>
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
@@ -366,7 +367,14 @@
         </xs:element>
       </xs:sequence>
       <xs:attribute type="xs:string" name="project" />
-      <xs:attribute type="xs:float" name="version" />
+      <xs:attribute name="version" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:float">
+            <xs:enumeration value="0.5" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 </xs:schema>
+
