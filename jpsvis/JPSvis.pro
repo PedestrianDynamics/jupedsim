@@ -551,7 +551,7 @@ HEADERS += src/geometry/Building.h \
     src/ThreadDataTransfert.h \
     src/ThreadVisualisation.h \
     src/TimerCallback.h \
-    src/TrajectoryPoint.h \
+    src/FrameElement.h \
     src/extern_var.h \
     src/geometry/FacilityGeometry.h \
     src/geometry/LinePlotter.h \
@@ -593,7 +593,7 @@ SOURCES += src/geometry/Building.cpp \
     src/ThreadDataTransfert.cpp \
     src/ThreadVisualisation.cpp \
     src/TimerCallback.cpp \
-    src/TrajectoryPoint.cpp \
+    src/FrameElement.cpp \
     src/geometry/LinePlotter2D.cpp \
     src/geometry/PointPlotter2D.cpp \
     src/geometry/FacilityGeometry.cpp \

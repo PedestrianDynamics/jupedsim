@@ -1235,14 +1235,15 @@ vtkAssembly * Pedestrian::getTrailActor(){
 
 void Pedestrian::moveTo(TrajectoryPoint *point) {
 
-	double xNew = point->getX();
-	double yNew = point->getY();
-	double zNew = point->getZ();
+    double xNew ;//= point->getX();
+    double yNew ;//= point->getY();
+    double zNew ;//= point->getZ();
+
 	double ellipse[7];
 	double agentColorAngle[2];
 
-	point->getEllipse(ellipse);
-	point->getAgentInfo(agentColorAngle);
+    //point->getEllipse(ellipse);
+    //point->getAgentInfo(agentColorAngle);
 
 	// this are radius
 	double ellipseColor=1;	//red

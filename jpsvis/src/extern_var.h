@@ -81,8 +81,9 @@ Pedestrian** extern_pedestrians_secondSet=NULL;
 Pedestrian** extern_pedestrians_thirdSet=NULL;
 
 
-//VTK_CREATE (vtkGlyph3D, extern_glyphs_pedestrians);
 VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
+
+VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
 
 VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
 

@@ -51,7 +51,7 @@
 #include "ThreadDataTransfert.h"
 #include "SyncData.h"
 #include "Frame.h"
-#include "TrajectoryPoint.h"
+#include "FrameElement.h"
 
 #include "network/TraVisToServer.h"
 #include "geometry/FacilityGeometry.h"
@@ -310,13 +310,15 @@ void ThreadDataTransfer::parseDataNode(QDomNodeList frames){
 			double vel[3]={xVel,yPos,zPos};
 			double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
 			double para[2]={agent_color,el_angle};
+            double angle[3]={0,0,el_angle};
+            double radius[3]={dia_a,dia_b,30.0};
 
-			TrajectoryPoint * point = new TrajectoryPoint(id-1);
-			point->setEllipse(ellipse);
-			point->setPos(pos);
-			point->setVel(vel);
-			point->setAgentInfo(para);
-			newFrame->addElement(point);
+            FrameElement *element = new FrameElement(id-1);
+            element->SetPos(pos);
+            element->SetOrientation(angle);
+            element->SetRadius(radius);
+            element->SetColor(el_color);
+            newFrame->addElement(element);
 		}
 
 		//adding the new frame to the right dataset

@@ -32,7 +32,7 @@
 #ifndef Frame_H_
 #define Frame_H_
 
-class TrajectoryPoint;
+class FrameElement;
 class vtkPolyData;
 
 class Frame {
@@ -41,13 +41,19 @@ public:
 	virtual ~Frame();
 
 	/// add an element to the Frame
-	void addElement(TrajectoryPoint* point);
+	void addElement(FrameElement* point);
 
 	///clear all Points in the frame
 	void clear();
 
 	///return the next object in the frame
-	TrajectoryPoint* getNextElement();
+    FrameElement *getNextElement();
+
+    ///compute the polydata.
+    ///Call this after all elements have been added.
+    void ComputePolyData();
+    void ComputePolyData2D();
+    void ComputePolyData3D();
 
 	int getSize();
 
@@ -55,23 +61,22 @@ public:
 
 	void resetCursor();
 
-	vtkPolyData* GetPolyData();
+    //vtkPolyData *GetPolyData(bool is_ellipse=true);
 
-    vtkPolyData* GetPolyDataLabels();
+    vtkPolyData *GetSclarData();
 
-	vtkPolyData* GetSclarData();
+    vtkPolyData *GetPolyData3D();
+
+    vtkPolyData *GetPolyData2D();
 
 private:
-	std::vector <TrajectoryPoint *> framePoints;
-
-    /// ellipse parameters
-    vtkPolyData * _polydata;
-
-    /// pedestrians labels
-    vtkPolyData * _polydataLabels;
+    std::vector <FrameElement *> _framePoints;
+    //vtkPolyData * _polydata;
+    vtkPolyData * _polydata2D;
+    vtkPolyData * _polydata3D;
 
 	/// points to the actual element in the frame
-	unsigned int elementCursor;
+    unsigned int _elementCursor;
 };
 
 #endif /* Frame_H_ */

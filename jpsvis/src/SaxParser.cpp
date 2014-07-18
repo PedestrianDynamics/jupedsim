@@ -29,6 +29,7 @@
 
 #include "SaxParser.h"
 #include "TrajectoryPoint.h"
+#include "FrameElement.h"
 #include "Frame.h"
 #include "SyncData.h"
 #include "Debug.h"
@@ -472,17 +473,30 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         if(isnan(el_y)) el_y=yPos;
         if(isnan(el_z)) el_z=zPos;
 
-        double pos[3]={xPos,yPos,zPos};
+        //double pos[3]={xPos,yPos,zPos};
         double vel[3]={xVel,yPos,zPos};
         double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
         double para[2]={agent_color,el_angle};
 
-        TrajectoryPoint * point = new TrajectoryPoint(id-1);
-        point->setEllipse(ellipse);
-        point->setPos(pos);
-        point->setVel(vel);
-        point->setAgentInfo(para);
-        currentFrame.push_back(point);
+//        TrajectoryPoint * point = new TrajectoryPoint(id-1);
+//        point->setEllipse(ellipse);
+//        point->setPos(pos);
+//        point->setVel(vel);
+//        point->setAgentInfo(para);
+//        currentFrame.push_back(point);
+
+
+        double pos[3]={xPos,yPos,zPos};
+        double angle[3]={0,0,el_angle};
+        double radius[3]={dia_a,dia_b,30.0};
+
+        FrameElement *element = new FrameElement(id-1);
+        element->SetPos(pos);
+        element->SetOrientation(angle);
+        element->SetRadius(radius);
+        element->SetColor(el_color);
+        currentFrame.push_back(element);
+
     }
     else if (qName == "agentInfo")
     {
@@ -556,7 +570,10 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 			//cout<<"not adding"<<endl;
 		}
 
-		dataset->addFrame(frame);
+        //compute the polydata, might increase the runtime
+        frame->ComputePolyData();
+
+        dataset->addFrame(frame);
 		//to be on the safe side
 		currentFrame.clear();
 

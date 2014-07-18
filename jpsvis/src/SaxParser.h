@@ -40,6 +40,7 @@
 //forwarded classes
 class JPoint;
 class TrajectoryPoint;
+class FrameElement;
 class SyncData;
 class FacilityGeometry;
 
@@ -85,7 +86,8 @@ private:
     QStringList initialPedestriansColors;
     QStringList initialPedestriansHeights;
     std::vector<JPoint *> currentPointsList;
-    std::vector<TrajectoryPoint *> currentFrame;
+    std::vector<FrameElement *> currentFrame;
+    //std::vector<TrajectoryPoint *> currentFrame;
     bool parsingWalls;
 
     //wall and door parameters

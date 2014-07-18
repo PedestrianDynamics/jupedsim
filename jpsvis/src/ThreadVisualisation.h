@@ -66,6 +66,7 @@ extern Pedestrian** extern_pedestrians_thirdSet;
 
 //extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
 extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
+extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;
@@ -85,8 +86,6 @@ public:
 
 	/// set the camera to one of TOP/FRONT/SIDE
 	void setCameraPerspective(int mode);
-	/// load the data for the legend
-	//void setLegendValues();
 
 	/// load and display the geometry where
 	/// the pedestrians will move
@@ -156,7 +155,10 @@ private:
 	void init();
 
 	/// initialize the datasets
-	void initGlyphs();
+    void initGlyphs2D();
+
+    //initialize the 3D agents
+    void initGlyphs3D();
 
 	//finalize the datasets
 	void finalize();

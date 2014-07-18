@@ -67,6 +67,8 @@
 #include <vtkRegularPolygonSource.h>
 #include <vtkLabeledDataMapper.h>
 #include <vtkDiskSource.h>
+#include <vtkTriangleFilter.h>
+#include <vtkStripper.h>
 
 
 #include "geometry/FacilityGeometry.h"
@@ -158,7 +160,8 @@ void ThreadVisualisation::run(){
 
 	//initialize the datasets
 	init();
-	initGlyphs();
+	initGlyphs2D();
+    initGlyphs3D();
 
 	// add axis
     //axis= vtkAxesActor::New();
@@ -277,32 +280,7 @@ void ThreadVisualisation::run(){
 	renderWindow->SetInteractor( renderWinInteractor );
 	renderWinInteractor->Initialize();
 
-	//add at least three lights sources
-	{
-		vtkLight *light = vtkLight::New();
-		light->SetIntensity(0.1);
-		light->SetPosition(30,30 ,500);
-		light->SetLightTypeToSceneLight();
-		//renderer->AddLight(light);
-		light->Delete();
-	}
-	{
-		vtkLight *light = vtkLight::New();
-		light->SetIntensity(0.10);
-		light->SetPosition(2500,6500, 500);
-		light->SetLightTypeToSceneLight();
-		//renderer->AddLight(light);
-		light->Delete();
-	}
-	{
-		vtkLight *light = vtkLight::New();
-		light->SetIntensity(0.1);
-		light->SetPosition(30,30 ,500);
-		light->SetLightTypeToSceneLight();
-		//renderer->AddLight(light);
-		light->Delete();
-	}
-
+    //add a light kit
 
 
 	if(SystemSettings::get2D()){
@@ -310,6 +288,7 @@ void ThreadVisualisation::run(){
 		renderer->GetActiveCamera()->ParallelProjectionOn();
 		renderer->ResetCamera();
 	}
+
 	//renderer->GetActiveCamera()->Print(cout);
 	if(0){//save the actual camera settings
 		vtkCamera *Camera = renderer->GetActiveCamera();
@@ -359,7 +338,7 @@ void ThreadVisualisation::run(){
 	//renderer->GetActiveCamera()->SetRoll(90);
 	//renderer->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
 	Pedestrian::setCamera(renderer->GetActiveCamera());
-	renderer->ResetCamera();
+    renderer->ResetCamera();
 
 	// just a workaround
 
@@ -428,21 +407,77 @@ void ThreadVisualisation::showDoors(bool status){
 	}
 }
 
-void  ThreadVisualisation::initGlyphs(){
+void  ThreadVisualisation::initGlyphs2D()
+{
+    //    //VTK_CREATE (vtkSphereSource, agentShape);
+    //    //agentShape->SetRadius(30);
+    //    //agentShape->SetPhiResolution(20);
+    //    //agentShape->SetThetaResolution(20);
+
+    //    //now create the glyphs with ellipses
+    //    VTK_CREATE (vtkDiskSource, agentShape);
+    //    agentShape->SetCircumferentialResolution(20);
+    //    agentShape->SetInnerRadius(0);
+    //    agentShape->SetOuterRadius(30);
+
+    //    extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
+
+    //#if VTK_MAJOR_VERSION <= 5
+    //    extern_glyphs_pedestrians->SetSource(agentShape->GetOutput());
+    //#else
+    //    extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
+    //#endif
 
 
-    //VTK_CREATE (vtkSphereSource, agentShape);
-    //agentShape->SetRadius(30);
-    //agentShape->SetPhiResolution(20);
-    //agentShape->SetThetaResolution(20);
+    //    extern_glyphs_pedestrians->ThreeGlyphsOff();
+    //    extern_glyphs_pedestrians->ExtractEigenvaluesOff();
+
+    //    //extern_glyphs_pedestrians->SetColorModeToScalars();
+    //    //extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
+    //    //extern_glyphs_pedestrians->Update();
+
+
+    //	VTK_CREATE(vtkPolyDataMapper, mapper);
+    //	mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
+
+    //	VTK_CREATE(vtkLookupTable, lut);
+    //	lut->SetHueRange(0.0,0.470);
+    //	//lut->SetSaturationRange(0,0);
+    //	lut->SetValueRange(1.0,1.0);
+    //	lut->SetNanColor(0.2,0.2,0.2,0.5);
+    //	lut->SetNumberOfTableValues(256);
+    //	lut->Build();
+    //	mapper->SetLookupTable(lut);
+
+    //	VTK_CREATE(vtkActor, actor);
+    //	actor->SetMapper(mapper);
+    //	renderer->AddActor(actor);
+
+
+    //glyphs with ellipsoids
+    VTK_CREATE (vtkSphereSource, agentShape);
+    agentShape->SetRadius(30);
+    agentShape->SetPhiResolution(20);
+    agentShape->SetThetaResolution(20);
 
     //now create the glyphs with ellipses
-    VTK_CREATE (vtkDiskSource, agentShape);
-    agentShape->SetCircumferentialResolution(20);
-    agentShape->SetInnerRadius(0);
-    agentShape->SetOuterRadius(30);
+    //VTK_CREATE (vtkDiskSource, agentShape);
+    //agentShape->SetCircumferentialResolution(20);
+    //agentShape->SetInnerRadius(0);
+    //agentShape->SetOuterRadius(30);
 
-    extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
+    //speed the rendering using triangles stripers
+    vtkTriangleFilter *tris = vtkTriangleFilter::New();
+    tris->SetInputConnection(agentShape->GetOutputPort());
+    //tris->GetOutput()->ReleaseData();
+
+    vtkStripper *strip = vtkStripper::New();
+    strip->SetInputConnection(tris->GetOutputPort());
+    //strip->GetOutput()->ReleaseData();
+
+    extern_glyphs_pedestrians->SetSourceConnection(strip->GetOutputPort());
+    //_agents2D->SetSourceConnection(agentShape->GetOutputPort());
+
 
 #if VTK_MAJOR_VERSION <= 5
     extern_glyphs_pedestrians->SetSource(agentShape->GetOutput());
@@ -450,52 +485,30 @@ void  ThreadVisualisation::initGlyphs(){
     extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
 #endif
 
-
-/*
-    VTK_CREATE (vtkCylinderSource, agentShape);
-    agentShape->SetHeight(160);
-    agentShape->SetRadius(30);
-
-
-#if VTK_MAJOR_VERSION <= 5
-    extern_glyphs_pedestrians->SetSource(cylinderSource->GetOutput());
-#else
-    extern_glyphs_pedestrians->SetSourceConnection(cylinderSource->GetOutputPort());
-    extern_glyphs_pedestrians->SetInputConnection(cylinderSource->GetOutputPort());
-#endif
-
-*/
-
     extern_glyphs_pedestrians->ThreeGlyphsOff();
     extern_glyphs_pedestrians->ExtractEigenvaluesOff();
+    //_agents->SymmetricOn();
+    //_agents->Update();
 
-    //extern_glyphs_pedestrians->SetColorModeToScalars();
-    //extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
-    //extern_glyphs_pedestrians->Update();
+    VTK_CREATE(vtkPolyDataMapper, mapper);
+    mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
+    //improve the performance
+    mapper->GlobalImmediateModeRenderingOn();
 
 
-	VTK_CREATE(vtkPolyDataMapper, mapper);
-	mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
+    VTK_CREATE(vtkLookupTable, lut);
+    lut->SetHueRange(0.0,0.470);
+    //lut->SetSaturationRange(0,0);
+    lut->SetValueRange(1.0,1.0);
+    lut->SetNanColor(0.2,0.2,0.2,0.5);
+    lut->SetNumberOfTableValues(256);
+    lut->Build();
+    mapper->SetLookupTable(lut);
 
-    //mapper->SetScalarModeToUsePointData();
-    //mapper->ScalarVisibilityOn();
-	//mapper->SelectColorArray("color");
-    //mapper->ColorByArrayComponent("data", 0);
-    //mapper->SetColorModeToMapScalars();
-
-	VTK_CREATE(vtkLookupTable, lut);
-	lut->SetHueRange(0.0,0.470);
-	//lut->SetSaturationRange(0,0);
-	lut->SetValueRange(1.0,1.0);
-	lut->SetNanColor(0.2,0.2,0.2,0.5);
-	lut->SetNumberOfTableValues(256);
-	lut->Build();
-	mapper->SetLookupTable(lut);
-
-	VTK_CREATE(vtkActor, actor);
-	actor->SetMapper(mapper);
-	renderer->AddActor(actor);
-
+    VTK_CREATE(vtkActor, actor);
+    actor->SetMapper(mapper);
+    actor->GetProperty()->BackfaceCullingOn();
+    renderer->AddActor(actor);
 
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);
@@ -506,254 +519,317 @@ void  ThreadVisualisation::initGlyphs(){
     extern_pedestrians_labels->SetVisibility(false);
 }
 
+void ThreadVisualisation::initGlyphs3D()
+{
+    //now create the glyphs with zylinders
+    VTK_CREATE (vtkCylinderSource, agentShape);
+    agentShape->SetHeight(160);
+    agentShape->SetRadius(20);
+    //agentShape->SetCenter(0,0,80);
+    agentShape->SetResolution(20);
+    /*
+        //VTK_CREATE (vtkAssembly, agentShape);
+        vtk3DSImporter* importer = vtk3DSImporter::New();
+        importer->SetFileName("data/140404_charles.3ds");
+        importer->Read();
+        importer->Update();
+        //importer->GetRenderer()->GetLights();
+        //importer->GetRenderWindow()->GetInteractor()->Start();
+
+        ////collect all the elements from the 3ds
+        vtkActorCollection* collection=importer->GetRenderer()->GetActors();
+        vtkActor *actorCharlie= collection->GetLastActor();
+        actorCharlie->InitPathTraversal();
+        vtkMapper *mapperCharlie=actorCharlie->GetMapper();
+        mapperCharlie->Update();
+        //_agents3D->SetColorGlyphs(false);
+        vtkPolyData *dataCharlie=vtkPolyData::SafeDownCast(mapperCharlie->GetInput());
+
+        //strip the data, again
+        //speed the rendering using triangles stripers
+        VTK_CREATE(vtkTriangleFilter, tris);
+        tris->SetInputData(dataCharlie);
+        VTK_CREATE(vtkStripper, agentShape);
+        agentShape->SetInputConnection(tris->GetOutputPort());
+*/
+
+    extern_glyphs_pedestrians_3D->SetSourceConnection(agentShape->GetOutputPort());
+
+#if VTK_MAJOR_VERSION <= 5
+    extern_glyphs_pedestrians_3D->SetSource(agentShape->GetOutput());
+#else
+    extern_glyphs_pedestrians_3D->SetInputConnection(agentShape->GetOutputPort());
+#endif
+
+    extern_glyphs_pedestrians_3D->ThreeGlyphsOff();
+    extern_glyphs_pedestrians_3D->ExtractEigenvaluesOff();
+
+    VTK_CREATE(vtkPolyDataMapper, mapper);
+    mapper->SetInputConnection(extern_glyphs_pedestrians_3D->GetOutputPort());
+    mapper->GlobalImmediateModeRenderingOn();
+
+    VTK_CREATE(vtkLookupTable, lut);
+    lut->SetHueRange(0.0,0.470);
+    //lut->SetSaturationRange(0,0);
+    lut->SetValueRange(1.0,1.0);
+    lut->SetNanColor(0.2,0.2,0.2,0.5);
+    lut->SetNumberOfTableValues(256);
+    lut->Build();
+    mapper->SetLookupTable(lut);
+
+    VTK_CREATE(vtkActor, actor);
+    actor->SetMapper(mapper);
+    renderer->AddActor(actor);
+}
+
 void  ThreadVisualisation::init(){
-	//get the datasets parameters.
-	// CAUTION: the functions will return 0 if no datasets were initialized
-	int numOfAgents1=extern_trajectories_firstSet.getNumberOfAgents();
-	int numOfAgents2=extern_trajectories_secondSet.getNumberOfAgents();
-	int numOfAgents3=extern_trajectories_thirdSet.getNumberOfAgents();
+//	//get the datasets parameters.
+//	// CAUTION: the functions will return 0 if no datasets were initialized
+//	int numOfAgents1=extern_trajectories_firstSet.getNumberOfAgents();
+//	int numOfAgents2=extern_trajectories_secondSet.getNumberOfAgents();
+//	int numOfAgents3=extern_trajectories_thirdSet.getNumberOfAgents();
 
-	// super Pedestrians are declared extern
-	// CAUTION: the start ID is 1.
-	if(numOfAgents1>0){
-		//get the first frame from the trajectories and initialize pedes positions
-		Frame * frame = extern_trajectories_firstSet.getNextFrame();
-		// this is not usual, but may happen
-		//just get out if the frame is empty
-		if(frame==NULL) {
-			cerr<<"FATAL 1: Frame is null, the first dataset was not initialised"<<endl;
-			//exit(1);
+//	// super Pedestrians are declared extern
+//	// CAUTION: the start ID is 1.
+//	if(numOfAgents1>0){
+//		//get the first frame from the trajectories and initialize pedes positions
+//		Frame * frame = extern_trajectories_firstSet.getNextFrame();
+//		// this is not usual, but may happen
+//		//just get out if the frame is empty
+//		if(frame==NULL) {
+//			cerr<<"FATAL 1: Frame is null, the first dataset was not initialised"<<endl;
+//			//exit(1);
 
-		}
+//		}
 
-		//extern_pedestrians_firstSet = new Pedestrian*[numOfAgents1];
-		extern_pedestrians_firstSet =(Pedestrian **)malloc(numOfAgents1*sizeof(Pedestrian*));
+//		//extern_pedestrians_firstSet = new Pedestrian*[numOfAgents1];
+//		extern_pedestrians_firstSet =(Pedestrian **)malloc(numOfAgents1*sizeof(Pedestrian*));
 
-		//extern_pedestrians_firstSet =(Pedestrian **)malloc(numOfAgents1*sizeof(Pedestrian*));
-		if(extern_pedestrians_firstSet==NULL){
-			cerr<<"could not allocate memory"<<endl;
-			exit(1);
-		}
+//		//extern_pedestrians_firstSet =(Pedestrian **)malloc(numOfAgents1*sizeof(Pedestrian*));
+//		if(extern_pedestrians_firstSet==NULL){
+//			cerr<<"could not allocate memory"<<endl;
+//			exit(1);
+//		}
 
-		//The initialisation is just to avoid
-		// pedestrians having not defined (0,0,0) position at beginning.
+//		//The initialisation is just to avoid
+//		// pedestrians having not defined (0,0,0) position at beginning.
 
-		for(int i=0;i<numOfAgents1;i++){
+//		for(int i=0;i<numOfAgents1;i++){
 
-			TrajectoryPoint* point=NULL;
-			int color[3];
-			SystemSettings::getPedestrianColor(0,color);
+//			TrajectoryPoint* point=NULL;
+//			int color[3];
+//			SystemSettings::getPedestrianColor(0,color);
 
-			if( (NULL!=frame) && (NULL!=(point=frame->getNextElement()))){
-				extern_pedestrians_firstSet[i]=new Pedestrian(i,point->getX(),point->getY(),point->getZ());
-				// they are all of type 1 (belonging to the first sets)
-				//	extern_pedestrians_firstSet[i]->setType(1);
-				extern_pedestrians_firstSet[i]->setColor(color);
+//			if( (NULL!=frame) && (NULL!=(point=frame->getNextElement()))){
+//				extern_pedestrians_firstSet[i]=new Pedestrian(i,point->getX(),point->getY(),point->getZ());
+//				// they are all of type 1 (belonging to the first sets)
+//				//	extern_pedestrians_firstSet[i]->setType(1);
+//				extern_pedestrians_firstSet[i]->setColor(color);
 
-			}else{
+//			}else{
 
-				extern_pedestrians_firstSet[i]=new Pedestrian(i,0.0,0.0,0.0);
-				extern_pedestrians_firstSet[i]->setVisibility(false);
+//				extern_pedestrians_firstSet[i]=new Pedestrian(i,0.0,0.0,0.0);
+//				extern_pedestrians_firstSet[i]->setVisibility(false);
 
-				//extern_pedestrians_firstSet[i]->initVisibility(false);
-				//extern_pedestrians_firstSet[i]->setType(1);
-				extern_pedestrians_firstSet[i]->setColor(color);
-			}
+//				//extern_pedestrians_firstSet[i]->initVisibility(false);
+//				//extern_pedestrians_firstSet[i]->setType(1);
+//				extern_pedestrians_firstSet[i]->setColor(color);
+//			}
 
-		}
+//		}
 
-		//CAUTION: reset the fucking counter.
-		//TODO: include the reset cursor in the getnextFrame routine
-		// which shall be executed when null is returned
-		if (NULL!=frame)
-			frame->resetCursor();
+//		//CAUTION: reset the fucking counter.
+//		//TODO: include the reset cursor in the getnextFrame routine
+//		// which shall be executed when null is returned
+//		if (NULL!=frame)
+//			frame->resetCursor();
 
-		// init the pedestrians sizes
-		QStringList heights=extern_trajectories_firstSet.getInitialHeights();
-		for(int i=0;i<heights.size()-1;i+=2){
-			bool ok=false;
-			int id = heights[i].toInt(&ok);
-			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-			double size= heights[i+1].toDouble(&ok);
-			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-			//caution: id start with 0
-			extern_pedestrians_firstSet[id-1]->setSize(size);
-		}
+//		// init the pedestrians sizes
+//		QStringList heights=extern_trajectories_firstSet.getInitialHeights();
+//		for(int i=0;i<heights.size()-1;i+=2){
+//			bool ok=false;
+//			int id = heights[i].toInt(&ok);
+//			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
+//			double size= heights[i+1].toDouble(&ok);
+//			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
+//			//caution: id start with 0
+//			extern_pedestrians_firstSet[id-1]->setSize(size);
+//		}
 
-		//init the pedestrians colors,
-		// overwrite the previously set colors
-		if(SystemSettings::getPedestrianColorProfileFromFile()){
-			QStringList colors=extern_trajectories_firstSet.getInitialColors();
-			for(int i=0;i<colors.size()-1;i+=2){
-				bool ok=false;
-				int id = colors[i].toInt(&ok);
-				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
-				int color= colors[i+1].toInt(&ok);
-				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
-				//cout << id<< " :"<<size<<endl;
-				//caution: id start with 0
-				extern_pedestrians_firstSet[id-1]->setColor(color);
+//		//init the pedestrians colors,
+//		// overwrite the previously set colors
+//		if(SystemSettings::getPedestrianColorProfileFromFile()){
+//			QStringList colors=extern_trajectories_firstSet.getInitialColors();
+//			for(int i=0;i<colors.size()-1;i+=2){
+//				bool ok=false;
+//				int id = colors[i].toInt(&ok);
+//				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
+//				int color= colors[i+1].toInt(&ok);
+//				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
+//				//cout << id<< " :"<<size<<endl;
+//				//caution: id start with 0
+//				extern_pedestrians_firstSet[id-1]->setColor(color);
 
-			}
-		}
+//			}
+//		}
 
-		//all initialisations are done , now create the actors
-		for(int i=0;i<numOfAgents1;i++){
-			renderer->AddActor((vtkProp*)extern_pedestrians_firstSet[i]->getActor());
-			renderer->AddActor((vtkProp*)extern_pedestrians_firstSet[i]->getTrailActor());
+//		//all initialisations are done , now create the actors
+//		for(int i=0;i<numOfAgents1;i++){
+//			renderer->AddActor((vtkProp*)extern_pedestrians_firstSet[i]->getActor());
+//			renderer->AddActor((vtkProp*)extern_pedestrians_firstSet[i]->getTrailActor());
 
-		}
-	}
+//		}
+//	}
 
-	// initialize the second dataset
-	if(numOfAgents2>0){
-		Frame * frame = extern_trajectories_secondSet.getNextFrame();
-		extern_pedestrians_secondSet =(Pedestrian **)malloc(numOfAgents2*sizeof(Pedestrian*));
-		for(int i=0;i<numOfAgents2;i++){
+//	// initialize the second dataset
+//	if(numOfAgents2>0){
+//		Frame * frame = extern_trajectories_secondSet.getNextFrame();
+//		extern_pedestrians_secondSet =(Pedestrian **)malloc(numOfAgents2*sizeof(Pedestrian*));
+//		for(int i=0;i<numOfAgents2;i++){
 
-			// this is not usual, but may happen
-			//just get out if the frame is empty
-			if(frame==NULL) {
-				cerr<<"FATAL 2: Frame is null, the second dataset was not initialised"<<endl;
-				//exit(1);
-				//return;
-			}
+//			// this is not usual, but may happen
+//			//just get out if the frame is empty
+//			if(frame==NULL) {
+//				cerr<<"FATAL 2: Frame is null, the second dataset was not initialised"<<endl;
+//				//exit(1);
+//				//return;
+//			}
 
-			TrajectoryPoint* point=NULL;
-			int color[3];
-			SystemSettings::getPedestrianColor(1,color);
+//			TrajectoryPoint* point=NULL;
+//			int color[3];
+//			SystemSettings::getPedestrianColor(1,color);
 
-			if( (NULL!=frame) && (NULL!=(point=frame->getNextElement()))){
-				extern_pedestrians_secondSet[i]=new Pedestrian(i,point->getX(),point->getY(),point->getZ());
-				// they are all of type 1 (belonging to the first sets)
-				extern_pedestrians_secondSet[i]->setColor(color);
-				//extern_pedestrians_secondSet[i]->setType(2);
-				//extern_pedestrians_firstSet[i]->CreateActor();
-			}else{
-				extern_pedestrians_secondSet[i]=new Pedestrian(i,0.0,0.0,0.0);
-				extern_pedestrians_secondSet[i]->setColor(color);
-				//				extern_pedestrians_secondSet[i]->setType(2);
-				//extern_pedestrians_secondSet[i]->initVisibility(false);
-				extern_pedestrians_secondSet[i]->setVisibility(false);
-			}
+//			if( (NULL!=frame) && (NULL!=(point=frame->getNextElement()))){
+//				extern_pedestrians_secondSet[i]=new Pedestrian(i,point->getX(),point->getY(),point->getZ());
+//				// they are all of type 1 (belonging to the first sets)
+//				extern_pedestrians_secondSet[i]->setColor(color);
+//				//extern_pedestrians_secondSet[i]->setType(2);
+//				//extern_pedestrians_firstSet[i]->CreateActor();
+//			}else{
+//				extern_pedestrians_secondSet[i]=new Pedestrian(i,0.0,0.0,0.0);
+//				extern_pedestrians_secondSet[i]->setColor(color);
+//				//				extern_pedestrians_secondSet[i]->setType(2);
+//				//extern_pedestrians_secondSet[i]->initVisibility(false);
+//				extern_pedestrians_secondSet[i]->setVisibility(false);
+//			}
 
-			//renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getActor());
-			//renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getTrailActor());
-		}
-		//CAUTION: reset the fucking counter
-		// the frame objects are passed by reference, so the "cursor" stays
-		// at the last index used.
-		frame->resetCursor();
+//			//renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getActor());
+//			//renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getTrailActor());
+//		}
+//		//CAUTION: reset the fucking counter
+//		// the frame objects are passed by reference, so the "cursor" stays
+//		// at the last index used.
+//		frame->resetCursor();
 
-		// init the pedestians sizes
-		QStringList tokens=extern_trajectories_secondSet.getInitialHeights();
-		for(int i=0;i<tokens.size()-1;i+=2){
+//		// init the pedestians sizes
+//		QStringList tokens=extern_trajectories_secondSet.getInitialHeights();
+//		for(int i=0;i<tokens.size()-1;i+=2){
 
-			bool ok=false;
-			int id = tokens[i].toInt(&ok);
-			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-			double size= tokens[i+1].toDouble(&ok);
-			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-			extern_pedestrians_secondSet[id-1]->setSize(size);
-		}
+//			bool ok=false;
+//			int id = tokens[i].toInt(&ok);
+//			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
+//			double size= tokens[i+1].toDouble(&ok);
+//			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
+//			extern_pedestrians_secondSet[id-1]->setSize(size);
+//		}
 
-		//init the pedestrians colors,
-		// overwrite the previously set colors
-		if(SystemSettings::getPedestrianColorProfileFromFile()){
-			QStringList colors=extern_trajectories_secondSet.getInitialColors();
-			for(int i=0;i<colors.size()-1;i+=2){
-				bool ok=false;
-				int id = colors[i].toInt(&ok);
-				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
-				int color= colors[i+1].toInt(&ok);
-				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
-				//caution: id start with 0
-				extern_pedestrians_secondSet[id-1]->setColor(color);
+//		//init the pedestrians colors,
+//		// overwrite the previously set colors
+//		if(SystemSettings::getPedestrianColorProfileFromFile()){
+//			QStringList colors=extern_trajectories_secondSet.getInitialColors();
+//			for(int i=0;i<colors.size()-1;i+=2){
+//				bool ok=false;
+//				int id = colors[i].toInt(&ok);
+//				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
+//				int color= colors[i+1].toInt(&ok);
+//				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
+//				//caution: id start with 0
+//				extern_pedestrians_secondSet[id-1]->setColor(color);
 
-			}
-		}
+//			}
+//		}
 
-		//all initialisations are done , now create the actors
-		for(int i=0;i<numOfAgents2;i++){
-			renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getActor());
-			renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getTrailActor());
+//		//all initialisations are done , now create the actors
+//		for(int i=0;i<numOfAgents2;i++){
+//			renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getActor());
+//			renderer->AddActor((vtkProp*)extern_pedestrians_secondSet[i]->getTrailActor());
 
-		}
+//		}
 
-	}
+//	}
 
-	if(numOfAgents3>0){
+//	if(numOfAgents3>0){
 
-		Frame * frame = extern_trajectories_thirdSet.getNextFrame();
-		extern_pedestrians_thirdSet =(Pedestrian **)malloc(numOfAgents3*sizeof(Pedestrian*));
-		for(int i=0;i<numOfAgents3;i++){
+//		Frame * frame = extern_trajectories_thirdSet.getNextFrame();
+//		extern_pedestrians_thirdSet =(Pedestrian **)malloc(numOfAgents3*sizeof(Pedestrian*));
+//		for(int i=0;i<numOfAgents3;i++){
 
-			// this is not usual, but may happen
-			//just get out if the frame is empty
-			if(frame==NULL) {
-				cerr<<"FATAL 3: Frame is null, the third dataset was not initialised"<<endl;
-				//exit(1);
+//			// this is not usual, but may happen
+//			//just get out if the frame is empty
+//			if(frame==NULL) {
+//				cerr<<"FATAL 3: Frame is null, the third dataset was not initialised"<<endl;
+//				//exit(1);
 
-			}
+//			}
 
-			TrajectoryPoint* point=NULL;
-			int color[3];
-			SystemSettings::getPedestrianColor(2,color);
+//			TrajectoryPoint* point=NULL;
+//			int color[3];
+//			SystemSettings::getPedestrianColor(2,color);
 
-			if( (NULL!=frame) && (NULL!=(point=frame->getNextElement()))){
-				extern_pedestrians_thirdSet[i]=new Pedestrian(i,point->getX(),point->getY(),point->getZ());
-				// they are all of type 1 (belonging to the first sets)
-				//extern_pedestrians_thirdSet[i]->setType(3);
-				extern_pedestrians_thirdSet[i]->setColor(color);
-				//extern_pedestrians_firstSet[i]->CreateActor();
-			}else{
-				extern_pedestrians_thirdSet[i]=new Pedestrian(i,0.0,0.0,0.0);
-				//				extern_pedestrians_thirdSet[i]->setType(3);
-				extern_pedestrians_thirdSet[i]->setColor(color);
-				//extern_pedestrians_thirdSet[i]->initVisibility(false);
-				extern_pedestrians_thirdSet[i]->setVisibility(false);
-			}
+//			if( (NULL!=frame) && (NULL!=(point=frame->getNextElement()))){
+//				extern_pedestrians_thirdSet[i]=new Pedestrian(i,point->getX(),point->getY(),point->getZ());
+//				// they are all of type 1 (belonging to the first sets)
+//				//extern_pedestrians_thirdSet[i]->setType(3);
+//				extern_pedestrians_thirdSet[i]->setColor(color);
+//				//extern_pedestrians_firstSet[i]->CreateActor();
+//			}else{
+//				extern_pedestrians_thirdSet[i]=new Pedestrian(i,0.0,0.0,0.0);
+//				//				extern_pedestrians_thirdSet[i]->setType(3);
+//				extern_pedestrians_thirdSet[i]->setColor(color);
+//				//extern_pedestrians_thirdSet[i]->initVisibility(false);
+//				extern_pedestrians_thirdSet[i]->setVisibility(false);
+//			}
 
-			//renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getActor());
-			//renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getTrailActor());
-		}
-		//CAUTION: reset the fucking counter.
-		frame->resetCursor();
+//			//renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getActor());
+//			//renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getTrailActor());
+//		}
+//		//CAUTION: reset the fucking counter.
+//		frame->resetCursor();
 
-		// init the pedestians sizes
-		QStringList tokens=extern_trajectories_thirdSet.getInitialHeights();
-		for(int i=0;i<tokens.size()-1;i+=2){
-			bool ok=false;
-			int id = tokens[i].toInt(&ok);
-			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-			double size= tokens[i+1].toDouble(&ok);
-			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
-			//cout << id<< " :"<<size<<endl;
-			extern_pedestrians_thirdSet[id-1]->setSize(size);
-		}
-		//init the pedestrians colors,
-		// overwrite the previously set colors
-		if(SystemSettings::getPedestrianColorProfileFromFile()){
-			QStringList colors=extern_trajectories_thirdSet.getInitialColors();
-			for(int i=0;i<colors.size()-1;i+=2){
-				bool ok=false;
-				int id = colors[i].toInt(&ok);
-				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
-				int color= colors[i+1].toInt(&ok);
-				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
-				//caution: id start with 0
-				extern_pedestrians_thirdSet[id-1]->setColor(color);
-			}
-		}
+//		// init the pedestians sizes
+//		QStringList tokens=extern_trajectories_thirdSet.getInitialHeights();
+//		for(int i=0;i<tokens.size()-1;i+=2){
+//			bool ok=false;
+//			int id = tokens[i].toInt(&ok);
+//			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
+//			double size= tokens[i+1].toDouble(&ok);
+//			if(!ok) {cerr<<"skipping size arguments" <<endl;continue;}
+//			//cout << id<< " :"<<size<<endl;
+//			extern_pedestrians_thirdSet[id-1]->setSize(size);
+//		}
+//		//init the pedestrians colors,
+//		// overwrite the previously set colors
+//		if(SystemSettings::getPedestrianColorProfileFromFile()){
+//			QStringList colors=extern_trajectories_thirdSet.getInitialColors();
+//			for(int i=0;i<colors.size()-1;i+=2){
+//				bool ok=false;
+//				int id = colors[i].toInt(&ok);
+//				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
+//				int color= colors[i+1].toInt(&ok);
+//				if(!ok) {cerr<<"skipping color arguments" <<endl;continue;}
+//				//caution: id start with 0
+//				extern_pedestrians_thirdSet[id-1]->setColor(color);
+//			}
+//		}
 
-		//all initialisations are done , now create the actors
-		for(int i=0;i<numOfAgents3;i++){
-			renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getActor());
-			renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getTrailActor());
+//		//all initialisations are done , now create the actors
+//		for(int i=0;i<numOfAgents3;i++){
+//			renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getActor());
+//			renderer->AddActor((vtkProp*)extern_pedestrians_thirdSet[i]->getTrailActor());
 
-		}
+//		}
 
-	}
+//	}
 }
 
 
@@ -964,15 +1040,9 @@ void ThreadVisualisation::setAxisVisible(bool status){
 void ThreadVisualisation::setCameraPerspective(int mode){
 	if(renderer==NULL) return;
 	renderer->GetActiveCamera()->Print(cout);
-	//vtkMatrix4x4 *m = /* vtkMatrix4x4::New();*/
-	//	vtkHomogeneousTransform *m = /* vtkMatrix4x4::New();*/
-	//	renderer->GetActiveCamera()->GetViewTransformMatrix();
-	//renderer->GetActiveCamera()->GetUserTransform()->GetMatrix();
-	//m->Print(cout);
-
 
 	switch (mode) {
-	case 1: //TOP
+    case 1: //TOP oder RESET
 	{
 		vtkCamera *camera = renderer->GetActiveCamera();
 

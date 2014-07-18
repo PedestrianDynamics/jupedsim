@@ -328,12 +328,6 @@ void MainWindow::slotStartPlaying() {
         ui.BtRecord->setEnabled(true);
         labelCurrentAction->setText("   playing   ");
 
-        ui.action3_D->setEnabled(false);
-        ui.action2_D->setEnabled(false);
-
-        //disable legend
-        ui.actionShow_Legend->setEnabled(false);
-
         //change Icon to Pause
         QIcon icon1;
         icon1.addPixmap(QPixmap(QString::fromUtf8(
