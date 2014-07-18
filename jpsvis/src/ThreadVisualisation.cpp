@@ -139,11 +139,7 @@ void ThreadVisualisation::slotSetFrameRate(float fps){
 void ThreadVisualisation::run(){
 
     //deactivate the output windows
-    vtkObject::GlobalWarningDisplayOff();
-//    vtkOutputWindow *w = vtkFileOutputWindow::New();
-//    w->SetFileName("vtk_errors.txt");
-//    vtkOutputWindow::SetInstance(w);
-//    w->Delete(); // now SetInstance owns the reference
+//    vtkObject::GlobalWarningDisplayOff();
 
 	//emit signalStatusMessage("running");
 
@@ -159,7 +155,7 @@ void ThreadVisualisation::run(){
 
 
 	//initialize the datasets
-	init();
+    //init();
 	initGlyphs2D();
     initGlyphs3D();
 
@@ -244,8 +240,8 @@ void ThreadVisualisation::run(){
 	//renderWindow->SetSize(1280, 960);
 
 	// add the legend
-	if(SystemSettings::getShowLegend())
-		initLegend();
+    //if(SystemSettings::getShowLegend())
+    //	initLegend();
 
 	//add the running time frame
 	runningTime = vtkTextActor::New();
@@ -283,32 +279,13 @@ void ThreadVisualisation::run(){
     //add a light kit
 
 
-	if(SystemSettings::get2D()){
-		renderer->GetActiveCamera()->OrthogonalizeViewUp();
-		renderer->GetActiveCamera()->ParallelProjectionOn();
-		renderer->ResetCamera();
-	}
+//	if(SystemSettings::get2D()){
+//        renderer->GetActiveCamera()->OrthogonalizeViewUp();
+//        renderer->GetActiveCamera()->ParallelProjectionOn();
+//        renderer->ResetCamera();
+//	}
 
-	//renderer->GetActiveCamera()->Print(cout);
-	if(0){//save the actual camera settings
-		vtkCamera *Camera = renderer->GetActiveCamera();
 
-		Camera->GetPosition( camPosTop );
-		//fprintf( stdout, "Position=%lg,%lg,%lg\n", camPosTop[0], camPosTop[1], camPosTop[2] );
-		Camera->GetFocalPoint( camFocalPointTop );
-		//fprintf( stdout, "FocalPoint=%lg,%lg,%lg\n", camFocalPointTop[0], camFocalPointTop[1], camFocalPointTop[2] );
-		Camera->GetViewUp( camViewUpTop );
-		//fprintf( stdout, "ViewUp=%lg,%lg,%lg\n", camViewUpTop[0], camViewUpTop[1], camViewUpTop[2] );
-		camViewAngleTop = Camera->GetViewAngle();
-		//fprintf( stdout, "ViewAngle=%lg\n", camViewAngleTop );
-		camParallelScale = Camera->GetParallelScale();
-		//fprintf( stdout, "ParallelScale=%lg\n", camParallelScale );
-
-		renderer->GetActiveCamera()->GetPosition(camPosTop);
-		renderer->GetActiveCamera()->GetClippingRange(camClipTop);
-		//renderer->GetActiveCamera()->GetViewPlaneNormal(camViewPlan);
-		renderer->GetActiveCamera()->GetFocalPoint(camFocalPointTop);
-	}
 
 	//create a timer for rendering the window
 	TimerCallback *renderingTimer = new TimerCallback();
@@ -337,8 +314,9 @@ void ThreadVisualisation::run(){
 	//create special camera for the virtual reality feeling
 	//renderer->GetActiveCamera()->SetRoll(90);
 	//renderer->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
-	Pedestrian::setCamera(renderer->GetActiveCamera());
-    renderer->ResetCamera();
+
+    //Pedestrian::setCamera(renderer->GetActiveCamera());
+    //renderer->ResetCamera();
 
 	// just a workaround
 
@@ -357,14 +335,17 @@ void ThreadVisualisation::run(){
 	// should be called after the observer has been added
     //renderWindow->Modified();
 
+    //save the top view  camera
+    _topViewCamera=vtkCamera::New();
+    //renderer->GetActiveCamera()->Modified();
+    _topViewCamera->DeepCopy(renderer->GetActiveCamera());
+
     renderWinInteractor->Start();
 
 
 	//emit signalStatusMessage("Idle");
 	emit signal_controlSequences("CONTROL_RESET");
 
-	//renderWinInteractor->RemoveAllObservers();
-	//renderWinInteractor->DestroyTimer(timer);
 
 	//clear some stuffs
 	finalize();
@@ -372,11 +353,12 @@ void ThreadVisualisation::run(){
 	renderer->Delete();
 	renderWindow->Delete();
 	renderWinInteractor->Delete();
+    _topViewCamera->Delete();
 	renderer=NULL;
 }
 
 
-void ThreadVisualisation::slotControlSequence(const char* sex){
+void ThreadVisualisation::slotControlSequence(const char* para){
 
 	//cout <<"control sequence received: " <<sex<<endl;
 }
@@ -409,62 +391,18 @@ void ThreadVisualisation::showDoors(bool status){
 
 void  ThreadVisualisation::initGlyphs2D()
 {
-    //    //VTK_CREATE (vtkSphereSource, agentShape);
-    //    //agentShape->SetRadius(30);
-    //    //agentShape->SetPhiResolution(20);
-    //    //agentShape->SetThetaResolution(20);
-
-    //    //now create the glyphs with ellipses
-    //    VTK_CREATE (vtkDiskSource, agentShape);
-    //    agentShape->SetCircumferentialResolution(20);
-    //    agentShape->SetInnerRadius(0);
-    //    agentShape->SetOuterRadius(30);
-
-    //    extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
-
-    //#if VTK_MAJOR_VERSION <= 5
-    //    extern_glyphs_pedestrians->SetSource(agentShape->GetOutput());
-    //#else
-    //    extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
-    //#endif
-
-
-    //    extern_glyphs_pedestrians->ThreeGlyphsOff();
-    //    extern_glyphs_pedestrians->ExtractEigenvaluesOff();
-
-    //    //extern_glyphs_pedestrians->SetColorModeToScalars();
-    //    //extern_glyphs_pedestrians->SetScaleModeToDataScalingOff();
-    //    //extern_glyphs_pedestrians->Update();
-
-
-    //	VTK_CREATE(vtkPolyDataMapper, mapper);
-    //	mapper->SetInputConnection(extern_glyphs_pedestrians->GetOutputPort());
-
-    //	VTK_CREATE(vtkLookupTable, lut);
-    //	lut->SetHueRange(0.0,0.470);
-    //	//lut->SetSaturationRange(0,0);
-    //	lut->SetValueRange(1.0,1.0);
-    //	lut->SetNanColor(0.2,0.2,0.2,0.5);
-    //	lut->SetNumberOfTableValues(256);
-    //	lut->Build();
-    //	mapper->SetLookupTable(lut);
-
-    //	VTK_CREATE(vtkActor, actor);
-    //	actor->SetMapper(mapper);
-    //	renderer->AddActor(actor);
-
 
     //glyphs with ellipsoids
-    VTK_CREATE (vtkSphereSource, agentShape);
-    agentShape->SetRadius(30);
-    agentShape->SetPhiResolution(20);
-    agentShape->SetThetaResolution(20);
+    //    VTK_CREATE (vtkSphereSource, agentShape);
+    //    agentShape->SetRadius(30);
+    //    agentShape->SetPhiResolution(20);
+    //    agentShape->SetThetaResolution(20);
 
     //now create the glyphs with ellipses
-    //VTK_CREATE (vtkDiskSource, agentShape);
-    //agentShape->SetCircumferentialResolution(20);
-    //agentShape->SetInnerRadius(0);
-    //agentShape->SetOuterRadius(30);
+    VTK_CREATE (vtkDiskSource, agentShape);
+    agentShape->SetCircumferentialResolution(20);
+    agentShape->SetInnerRadius(0);
+    agentShape->SetOuterRadius(30);
 
     //speed the rendering using triangles stripers
     vtkTriangleFilter *tris = vtkTriangleFilter::New();
@@ -476,7 +414,7 @@ void  ThreadVisualisation::initGlyphs2D()
     //strip->GetOutput()->ReleaseData();
 
     extern_glyphs_pedestrians->SetSourceConnection(strip->GetOutputPort());
-    //_agents2D->SetSourceConnection(agentShape->GetOutputPort());
+    //extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
 
 
 #if VTK_MAJOR_VERSION <= 5
@@ -508,6 +446,7 @@ void  ThreadVisualisation::initGlyphs2D()
     VTK_CREATE(vtkActor, actor);
     actor->SetMapper(mapper);
     actor->GetProperty()->BackfaceCullingOn();
+    //actor->Modified();
     renderer->AddActor(actor);
 
     // structure for the labels
@@ -1039,23 +978,10 @@ void ThreadVisualisation::setAxisVisible(bool status){
 
 void ThreadVisualisation::setCameraPerspective(int mode){
 	if(renderer==NULL) return;
-	renderer->GetActiveCamera()->Print(cout);
 
 	switch (mode) {
     case 1: //TOP oder RESET
-	{
-		vtkCamera *camera = renderer->GetActiveCamera();
-
-		camera->SetPosition(camPosTop);
-		camera->SetFocalPoint(camFocalPointTop);
-		camera->SetViewUp(camViewUpTop);
-		camera->SetViewAngle(camViewAngleTop);
-		//camera->SetViewPlaneNormal(camViewPlanNormalTop);
-		camera->SetParallelScale(camParallelScale);
-		camera->Modified();
-		renderer->ResetCameraClippingRange();
-
-	}
+         renderer->GetActiveCamera()->DeepCopy(_topViewCamera);
 	break;
 
 	case 2://SIDE

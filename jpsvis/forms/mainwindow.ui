@@ -1095,6 +1095,9 @@ border-color: rgb(255, 255, 255);</string>
    <property name="text">
     <string>Side</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionCameraViewFront">
    <property name="checkable">
@@ -1105,6 +1108,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>Front</string>
+   </property>
+   <property name="visible">
+    <bool>false</bool>
    </property>
   </action>
   <action name="actionPedestrian_Shape">
@@ -1149,6 +1155,9 @@ border-color: rgb(255, 255, 255);</string>
    </property>
   </action>
   <action name="actionCameraViewAgent">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Agent View</string>
    </property>

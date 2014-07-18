@@ -136,14 +136,14 @@ public:
 
 public Q_SLOTS:
 	/**control sequence received*/
-	void slotControlSequence(const char* sex);
+    void slotControlSequence(const char* para);
 
 	/// set the frame rate in frames per second
 	void slotSetFrameRate( float fps);
 
 
 Q_SIGNALS:
-	void signal_controlSequences(const char* sex);
+    void signal_controlSequences(const char* para);
 
 private:
 
@@ -177,6 +177,7 @@ private:
 	vtkRenderWindowInteractor* renderWinInteractor;
 	vtkAxesActor* axis;
 	vtkTextActor* runningTime;
+    vtkCamera* _topViewCamera;
 	QString winTitle;
 
 	float framePerSecond;
