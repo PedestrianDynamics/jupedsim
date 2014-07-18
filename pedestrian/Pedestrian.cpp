@@ -400,15 +400,16 @@ const Point& Pedestrian::GetV0(const Point& target)
 
      // Molification around the targets makes little sense
      //new_v0 = delta.NormalizedMolified();
-     // printf("BEVOR new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      new_v0 = delta.Normalized();
+     //printf("BEVOR new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      // printf("AFTER new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
-     // printf("_v0=%f %f norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
      // -------------------------------------- Handover new target
      double t = _newOrientationDelay++ *_deltaT;
      // printf("t=%f, neworientation=%d\n", t, _newOrientationDelay);
-     // getc(stdin);
+     //getc(stdin);
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
+     //printf("_v0=%f %f norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+     //getc(stdin);
      // --------------------------------------
      return _V0;
 }
