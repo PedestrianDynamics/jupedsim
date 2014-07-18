@@ -128,7 +128,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
             if (iren && renderWindow && renderer)
             {
                 // very important
-                setAllPedestriansInvisible();
+                //setAllPedestriansInvisible();
 
                 //first pedestrian group
                 if(extern_first_dataset_loaded) {
@@ -324,6 +324,8 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow) {
     if(autoCaptionMode==false){ // tODO set the colour to auto mode
 
     }
+    extern_glyphs_pedestrians_actor_2D->SetVisibility(SystemSettings::get2D());
+    extern_glyphs_pedestrians_actor_3D->SetVisibility(!SystemSettings::get2D());
 
     if(extern_first_dataset_loaded){
         int pedColor[3];

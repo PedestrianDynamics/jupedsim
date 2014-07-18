@@ -114,35 +114,6 @@ void LinePlotter2D::SetScalarRange(double minval, double maxval)
 	m_scalarMax = maxval ;
 }
 
-//void LinePlotter2D::SetLookupTable(vtkLookupTable* table)
-//{
-//	m_lookupTable = table ;
-//}
-//void LinePlotter2D::PlotLine(double m[3], double n[3], double scalar)
-//{
-//
-//	m_lineScalars->SetNumberOfComponents(1);
-//	m_points->InsertNextPoint(m);
-//	m_lineScalars->InsertNextTuple1(scalar);
-//	m_points->InsertNextPoint(n);
-//	m_lineScalars->InsertNextTuple1(scalar);
-//
-//	m_lines->InsertNextCell(2);
-//	m_lines->InsertCellPoint(m_curPointID);
-//	m_lines->InsertCellPoint(m_curPointID+1);
-//
-//	m_curPointID+=2;
-//}
-//void LinePlotter2D::PlotLine(double x, double y, double z,
-//		double x2, double y2, double z2, double scalar)
-//{
-//	double m[3],n[3] ;
-//	m[0]=x; m[1]=y; m[2]=z;
-//	n[0]=x2; n[1]=y2; n[2]=z2;
-//	PlotLine(m,n,scalar);
-//
-//}
-
 
 void LinePlotter2D::SetAllLineWidth(int width)
 {

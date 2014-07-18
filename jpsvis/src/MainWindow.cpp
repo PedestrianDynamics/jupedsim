@@ -363,6 +363,7 @@ void MainWindow::slotStartPlaying() {
 
     //no matter what, the stop button should be enabled
     ui.BtStop->setEnabled(true);
+
 }
 
 void MainWindow::slotStopPlaying() {

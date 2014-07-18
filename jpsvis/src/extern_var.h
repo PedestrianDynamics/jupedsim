@@ -30,13 +30,18 @@
 #ifndef EXTERN_VAR_H_
 #define EXTERN_VAR_H_ 1
 
+#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
+#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
+
 #include "SyncData.h"
 #include "Pedestrian.h"
 
 #include <vtkActor2D.h>
+#include <vtkActor.h>
 #include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
+
 
 
 #define VTK_CREATE(type, name) \
@@ -82,10 +87,11 @@ Pedestrian** extern_pedestrians_thirdSet=NULL;
 
 
 VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
-
 VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
-
 VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
+
+VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_2D);
+VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_3D);
 
 
 // and here the corresponding dataset

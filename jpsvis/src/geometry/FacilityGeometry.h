@@ -66,7 +66,9 @@ public:
 	FacilityGeometry();
 	virtual ~FacilityGeometry();
 
-	vtkAssembly* getActor();
+    vtkAssembly* getActor2D();
+
+    vtkAssembly* getActor3D();
 
 	vtkActor2DCollection* getCaptions();
 
@@ -136,17 +138,13 @@ private:
 
 //	// 3-d parts
 //	vtkAssembly* assemblyObjects;
-//	vtkAssembly* assemblyWalls3D;
-//	vtkAssembly* assemblyDoors3D;
-//	vtkAssembly* assembly3D;
+    vtkAssembly* assemblyWalls3D;
+    vtkAssembly* assemblyDoors3D;
+    vtkAssembly* assembly3D;
 
 	// other parts
 	vtkAssembly* assemblyCaptions;
-
 	vtkActor2DCollection* captions;
-
-
-
 };
 
 #endif /* FACILITYGEOMETRY_H_ */

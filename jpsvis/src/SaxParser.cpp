@@ -478,14 +478,6 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
         double para[2]={agent_color,el_angle};
 
-//        TrajectoryPoint * point = new TrajectoryPoint(id-1);
-//        point->setEllipse(ellipse);
-//        point->setPos(pos);
-//        point->setVel(vel);
-//        point->setAgentInfo(para);
-//        currentFrame.push_back(point);
-
-
         double pos[3]={xPos,yPos,zPos};
         double angle[3]={0,0,el_angle};
         double radius[3]={dia_a,dia_b,30.0};
@@ -697,7 +689,7 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 	actor->GetProperty()->SetOpacity(0.5);
 	//actor->GetProperty()->SetLineWidth(5);
 
-	geometry->getActor()->AddPart(actor);
+    geometry->getActor2D()->AddPart(actor);
 
 	// free memory
 	delete building;

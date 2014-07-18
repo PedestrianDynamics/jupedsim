@@ -139,7 +139,7 @@ void ThreadVisualisation::slotSetFrameRate(float fps){
 void ThreadVisualisation::run(){
 
     //deactivate the output windows
-//    vtkObject::GlobalWarningDisplayOff();
+    vtkObject::GlobalWarningDisplayOff();
 
 	//emit signalStatusMessage("running");
 
@@ -148,11 +148,14 @@ void ThreadVisualisation::run(){
 	// set the background
 	//renderer->SetBackground(.00,.00,.00);
 	renderer->SetBackground(1.0,1.0,1.0);
-	//set the view port
-	//renderer->SetViewport(0,.5,1.0,1.0);
 	//add the geometry
-	renderer->AddActor(geometry->getActor());
+    renderer->AddActor(geometry->getActor2D());
+    renderer->AddActor(geometry->getActor3D());
 
+    if(SystemSettings::get2D()==true)
+    {
+        //Sh
+    }
 
 	//initialize the datasets
     //init();
@@ -340,6 +343,11 @@ void ThreadVisualisation::run(){
     //renderer->GetActiveCamera()->Modified();
     _topViewCamera->DeepCopy(renderer->GetActiveCamera());
 
+
+    //TODO: update all system settings
+    setGeometryVisibility2D(SystemSettings::get2D());
+    setGeometryVisibility3D(!SystemSettings::get2D());
+
     renderWinInteractor->Start();
 
 
@@ -443,11 +451,13 @@ void  ThreadVisualisation::initGlyphs2D()
     lut->Build();
     mapper->SetLookupTable(lut);
 
-    VTK_CREATE(vtkActor, actor);
-    actor->SetMapper(mapper);
-    actor->GetProperty()->BackfaceCullingOn();
-    //actor->Modified();
-    renderer->AddActor(actor);
+    extern_glyphs_pedestrians_actor_2D->SetMapper(mapper);
+    extern_glyphs_pedestrians_actor_2D->GetProperty()->BackfaceCullingOn();
+    renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
+
+    //VTK_CREATE(vtkActor, actor);
+    //actor->SetMapper(mapper);
+    //renderer->AddActor(actor);
 
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);
@@ -516,9 +526,13 @@ void ThreadVisualisation::initGlyphs3D()
     lut->Build();
     mapper->SetLookupTable(lut);
 
-    VTK_CREATE(vtkActor, actor);
-    actor->SetMapper(mapper);
-    renderer->AddActor(actor);
+    extern_glyphs_pedestrians_actor_3D->SetMapper(mapper);
+    extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
+    renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
+
+//    VTK_CREATE(vtkActor, actor);
+//    actor->SetMapper(mapper);
+//    renderer->AddActor(actor);
 }
 
 void  ThreadVisualisation::init(){
