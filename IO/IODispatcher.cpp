@@ -277,9 +277,8 @@ void IODispatcher::WriteFrame(int frameNr, Building* building)
      char tmp[CLENGTH] = "";
      vector<string> rooms_to_plot;
 
-     //promenade
-     //rooms_to_plot.push_back("010");
-
+     if( building->GetAllPedestrians().size() == 0)
+          return;
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 

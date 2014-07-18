@@ -8,8 +8,8 @@
   <!-- geometry file -->
   <geometry>geometry.xml</geometry>
   <!-- traectories file and format -->
-  <trajectories format="xml-plain" fps="40">
-    <file location="Traj_test_2.xml"/>
+  <trajectories format="xml-plain" embed_mesh="false" fps="33">
+    <file location="Traj_test_6.xml"/>
   </trajectories>
   <!-- where to store the logs -->
   <logfile>log</logfile>
@@ -29,11 +29,11 @@
     <goals>
       <goal id="0" final="true" caption="goal">
         <polygon>
-          <vertex px="6.364" py="12.021" />
-          <vertex px="7.071" py="12.728" />
-          <vertex px="9.899" py="9.899" />
-          <vertex px="9.192" py="9.192" />
-          <vertex px="6.364" py="12.021" />
+          <vertex px="14" py="4" />
+          <vertex px="14" py="0" />
+          <vertex px="13" py="0" />
+          <vertex px="13" py="4" />
+          <vertex px="14" py="4" />
         </polygon>
       </goal>
     </goals>
@@ -42,12 +42,12 @@
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="0" start_y="2.828"  goal_id="0" router_id="1" />
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="1" start_y="2"  goal_id="0" router_id="1" />
     </agents_distribution>
-
     <!-- frequency in persons/minute -->
     <agents_sources/>
   </agents>
+
 
 <operational_models >
     <model operational_model_id="1" description="gcfm">
@@ -75,8 +75,8 @@
         <stepsize>0.01</stepsize>
         <exitCrossingStrategy>3</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="3"  b="0.25" c="3.0"/>
-        <force_wall nu="10" b="0.70" c="3.0"/>
+        <force_ped nu="2"  b="0.25" c="3.0"/>
+        <force_wall nu="2" b="0.70" c="3.0"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
         <v0 mu="1" sigma="0.0" />
@@ -88,7 +88,6 @@
       </agent_parameters>
     </model>
   </operational_models>
-
 
   <route_choice_models>
     <router router_id="1" description="global_shortest">

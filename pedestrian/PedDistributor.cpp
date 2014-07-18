@@ -745,15 +745,25 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
         ped->SetRoomID(para->GetRoomId(),"");
         ped->SetSubRoomID(r->GetSubRoomID());
         ped->SetPatienceTime(para->GetPatience());
-        Point start_pos = para->GetStartPosition();
+        const Point& start_pos = para->GetStartPosition();
+
+
         if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
+            if(r->IsInSubRoom(start_pos)==false){
+                Log->Write("ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
+                                    *pid, para->GetRoomId(), start_pos.toString().c_str());
+                Log->Write("ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
+                exit(EXIT_FAILURE);
+            }
+
             ped->SetPos(start_pos);
             Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
-                    pid, para->GetRoomId(), start_pos.toString().c_str());
+                    *pid, para->GetRoomId(), start_pos.toString().c_str());
         }
 
         r->AddPedestrian(ped);
         (*pid)++;
+        printf("v0=%f\n", ped->GetV0Norm());
     }
 }
 

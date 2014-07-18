@@ -13,7 +13,7 @@ must_time = 10  # 10 m corridor with 1m/s
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_test_1.txt"
+logfile="log_test_6.txt"
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
@@ -22,19 +22,6 @@ TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
 #--------------------------------------------------------
     
-def get_maxtime(filename):
-    """
-    get max sim time
-    """
-    logging.info("parsing <%s>"%filename)
-    try:
-        xmldoc = minidom.parse(filename)
-    except:
-        logging.critical('could not parse file. exit')
-        exit(FAILURE)        
-    maxtime  = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
-    return maxtime
-
 def parse_file(filename):
     """
     parse trajectories in Travisto-format and output results
@@ -68,49 +55,44 @@ def parse_file(filename):
             data += [agent_id, frame_number, x, y]
     data = np.array(data).reshape((-1,4))
     return fps, N, data
-    
-
+           
 
 if __name__ == "__main__":
     
     geofile = "geometry.xml"
-    inifiles = glob.glob("inifiles/*.xml")
+    inifile = "ini_test_6.xml"
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
-        
+    if not path.exists(inifile):
+        logging.critical("inifile <%s> does not exist"%inifile)
+        exit(FAILURE)
+    #--------------------- SIMULATION ------------------------  
+    #os.chdir(TRUNK) #cd to the simulation directory
     executable = "%s/bin/jpscore"%TRUNK
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
         exit(FAILURE)
-        
-    for inifile in inifiles:
-        if not path.exists(inifile):
-            logging.critical("inifile <%s> does not exist"%inifile)
-            exit(FAILURE)
-        #--------------------- SIMULATION ------------------------  
-        #os.chdir(TRUNK) #cd to the simulation directory      
-        cmd = "%s --inifile=%s"%(executable, inifile)
-        logging.info('start simulating with exe=<%s>'%(cmd))
-        #------------------------------------------------------
-        subprocess.call([executable, "--inifile=%s"%inifile])
-        #------------------------------------------------------
-        logging.info('end simulation ...\n--------------\n')
-        trajfile = "trajectories/traj" + inifile.split("ini")[2]
-        logging.info('trajfile = <%s>'%trajfile)
-        #--------------------- PARSING & FLOW-MEASUREMENT --------
-        if not path.exists(trajfile):
-            logging.critical("trajfile <%s> does not exist"%trajfile)
-            exit(FAILURE)
-        maxtime = get_maxtime(inifile)
-        fps, N, traj = parse_file(trajfile)
-        evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
-        tolerance = 0.01
-        if (evac_time- must_time) > tolerance:
-            logging.info("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
-            exit(FAILURE)
-        else:
-            logging.info("evac_time = %f (!= %f)"%(evac_time, must_time))
-        
-    logging.info("%s exits with SUCCESS"%(argv[0]))
-    exit(SUCCESS)
+    cmd = "%s --inifile=%s"%(executable, inifile)
+    logging.info('start simulating with exe=<%s>'%(cmd))
+    #------------------------------------------------------
+    subprocess.call([executable, "--inifile=%s"%inifile])
+    #------------------------------------------------------
+    logging.info('end simulation ...\n--------------\n')
+    trajfile = "Traj_test_6.xml"
+    logging.info('trajfile = <%s>'%trajfile)
+    #--------------------- PARSING & FLOW-MEASUREMENT --------
+    if not path.exists(trajfile):
+        logging.critical("trajfile <%s> does not exist"%trajfile)
+        exit(FAILURE)
+    fps, N, traj = parse_file(trajfile)
+
+    evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
+    
+    tolerance = 0.1 
+    if abs((evac_time- must_time)) > tolerance:
+        logging.info("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
+        exit(FAILURE)
+    else:
+        logging.info("%s exits with SUCCESS evac_time = %f (= %f)"%(argv[0], evac_time, must_time))
+        exit(SUCCESS)

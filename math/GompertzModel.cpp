@@ -72,26 +72,28 @@ GompertzModel::~GompertzModel(void) { }
 
 Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
 {
+//      printf("GompertzModel::ForceDriv\n");
+     
      const Point& target = _direction->GetTarget(room, ped);
      Point F_driv;
-     Point v0;
+     Point e0;
      const Point& pos = ped->GetPos();
      double dist = ped->GetExitLine()->DistTo(pos);
 
      // check if the molified version works
      if (dist > J_EPS_GOAL) {
-          v0 = ped->GetV0(target);
-               // printf("1\n");
+          e0 = ped->GetV0(target);
+          //printf("1 e0 %f %f, target %f %f\n", e0.GetX(), e0.GetY(), target.GetX(), target.GetY());
      } else {
           ped->SetSmoothTurning(true);
-          // printf("2\n");
-          v0 = ped->GetV0();
+          e0 = ped->GetV0();
+          //   printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
      }
-     F_driv = ((v0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+     F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 
      // if (ped->GetID() == 2)
-     //      printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), v0.GetX(), v0.GetY(),v0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
-     
+     //   printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), e0.GetX(), e0.GetY(), e0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
+           // getc(stdin);
      
      return F_driv;
 }
@@ -418,7 +420,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                }
 //--------------------------------------------------------------------------------------------------
 
-                    // fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
+                    //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                ped->SetPos(pos_neu);
                ped->SetV(v_neu);
                ped->SetPhiPed();
@@ -429,7 +431,6 @@ string GompertzModel::writeParameter() const
 {
      string rueck;
      char tmp[CLENGTH];
-
      sprintf(tmp, "\t\tNu: \t\tPed: %f \tWall: %f\n", _nuPed, _nuWall);
      rueck.append(tmp);
      sprintf(tmp, "\t\ta: \t\tPed: %f \tWall: %f\n", _aPed, _aWall);

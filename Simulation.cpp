@@ -422,6 +422,9 @@ int Simulation::RunSimulation()
 {
      int frameNr = 1; // Frame Number
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     //double writeInterval =  ((1. / _fps) / _deltaT);
+     // printf("fps=%f, dt=%f, writein=%d\n", _fps, _deltaT, writeInterval);
+     //getc(stdin);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
      double t=0.0;
 
@@ -437,15 +440,20 @@ int Simulation::RunSimulation()
 
      // main program loop
      for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
+//          printf("frame=%d, writeframe=%f, t=%f\n", frameNr, writeInterval, t);
           t = 0 + (frameNr - 1) * _deltaT;
-          // solve ODE: berechnet Kräfte und setzt neue Werte für x und v
+          // solve ODE
           _solver->solveODE(t, t + _deltaT, _building);
-          // gucken ob Fußgänger in neuen Räumen/Unterräumen
+          // update and check if pedestrians changes rooms
           Update();
           _em->Update_Events(t,_deltaT);
-          // ggf. Ausgabe für TraVisTo
+          // trajectories output
           if (frameNr % writeInterval == 0) {
+          //if (fmod(t,writeInterval)< 0.1*_deltaT ) {
+               //printf("Write t=%f, frameNr=%d, mod=%f\n",t, frameNr, fmod(t, writeInterval));
+               //getc(stdin);
                _iod->WriteFrame(frameNr / writeInterval, _building);
+               //_iod->WriteFrame(frameNr, _building);
           }
 
      }

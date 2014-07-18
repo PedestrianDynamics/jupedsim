@@ -207,7 +207,8 @@ Point Line::ShortestPoint(const Point& p) const
 {
 
      const Point& t = _point1 - _point2;
-
+     if(_point1 == _point2)
+          return _point1;
      Point tmp = p - _point2;
      double lambda = tmp.ScalarP(t) / t.ScalarP(t);
      Point f = _point2 + t*lambda;

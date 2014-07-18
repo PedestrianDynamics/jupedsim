@@ -23,10 +23,10 @@ logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - 
 #JPSCORE = TRUNK + "bin/jpscore"
 #CURDIR = os.getcwd()
 # ============= some default dictionaries =============
-default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'numCPU':1, 'file':'', 'model_id':1, 'exitCrossingStrategy':3, 'cell_size':2.2}
-tags = ['tmax', 'seed', 'geometry', 'exitCrossingStrategy', 'numCPU'] # only these tags can be multiplied
-attributes = ['number', 'model_id', 'cell_size', 'router_id']
-
+default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'numCPU':1, 'file':'', 'model_id':1, 'exitCrossingStrategy':3, 'cell_size':2.2, 'operational_model_id':1}
+tags = ['tmax', 'seed', 'geometry', 'exitCrossingStrategy', 'numCPU']     # only these tags can be multiplied
+attributes = ['number', 'operational_model_id', 'cell_size', 'router_id'] # these attributes too, but
+tags2attributes = ['group', 'agents', 'linkedcells', 'router' ]           # only these corresponding to these tags
 input_tags = {}
 # =======================================================
 def getParserArgs():
@@ -88,7 +88,7 @@ def get_product(root):
         tag = node.tag        
         if tag in tags:   # ignore tags that are not of interest
             d = get_tag(node)
-        elif bool( set(node.attrib.keys()) & set(attributes)): # check our list of attributes
+        elif bool( set(node.attrib.keys() ) & set(attributes) ): # check our list of attributes
             d, attr = get_attribute(node)
         else:
             continue
@@ -123,7 +123,17 @@ def update_tag_value(root, tag, value):
         rank.text = str(value)
 # =======================================================
 def update_attrib_value(root, attr, value):
-    for r in root.iter():
+    
+    indexes = [i for i, j in enumerate(attributes) if j == attr]
+    if len(indexes) == 0:  # e.g. location
+        for r in root.iter():
+            if r.attrib.has_key(attr):
+                r.attrib[attr] = str(value)
+        return
+    
+    index = indexes[0]
+    cor_tag = tags2attributes[ index ]
+    for r in root.iter(cor_tag):
         if r.attrib.has_key(attr):
             r.attrib[attr] = str(value)
 # =======================================================

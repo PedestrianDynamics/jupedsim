@@ -194,7 +194,7 @@ double JEllipse::GetEA() const
 // ellipse semi-axis in the orthogonal direction of the velocity
 double JEllipse::GetEB() const
 {
-     double b_shoulder = 0.4; /// width of shoulder. todo: find out empricial value
+     double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
      double v_min = 0.11;
      double a = 0.49;
      double b = -1.17;
