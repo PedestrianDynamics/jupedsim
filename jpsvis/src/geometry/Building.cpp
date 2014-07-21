@@ -322,7 +322,7 @@ void Building::LoadBuildingFromFile(const std::string &filename) {
 	TiXmlDocument docGeo(geoFilename);
 	if (!docGeo.LoadFile()){
 		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the geometry file");
+        Log->Write("ERROR: \t could not parse the geometry file [%s]",geoFilename.c_str());
 		exit(EXIT_FAILURE);
 	}
 

@@ -40,7 +40,7 @@
 
 bool SystemSettings::showLegend=false;
 bool SystemSettings::pedColorProfileReadFromFile=true;
-bool SystemSettings::showCaption=false;
+bool SystemSettings::showAgentsCaptions=false;
 bool SystemSettings::is2D=false;
 bool SystemSettings::showAgents=true;
 bool SystemSettings::showGeometry=true;
@@ -63,6 +63,7 @@ bool SystemSettings::onScreenInfos=true;
 bool SystemSettings::recordPNGsequence=false;
 //QString SystemSettings::outputDir =QDir::currentPath()+"/";
 QString SystemSettings::outputDir  = QDir::homePath() +"/Desktop/TraVisTo_Files/";
+QString SystemSettings::workingDir  = QDir::currentPath();
 QString SystemSettings::filesPrefix="";
 
 
@@ -90,12 +91,12 @@ unsigned short   SystemSettings::getListeningPort(){
 }
 
 
-void  SystemSettings::setShowCaptions(bool caption){
-	showCaption=caption;
+void  SystemSettings::setShowAgentsCaptions(bool caption){
+    showAgentsCaptions=caption;
 }
 
-bool  SystemSettings::getShowCaption(){
-	return showCaption;
+bool  SystemSettings::getShowAgentsCaptions(){
+    return showAgentsCaptions;
 }
 
 void SystemSettings::set2D(bool lis2D){
@@ -124,6 +125,16 @@ void SystemSettings::setShowGeometry(bool status)
 bool SystemSettings::getShowGeometry()
 {
     return showGeometry;
+}
+
+void   SystemSettings::setWorkingDirectory(QString dir)
+{
+    workingDir=dir;
+}
+
+void   SystemSettings::getWorkingDirectory(QString& dir)
+{
+    dir=workingDir;
 }
 
 void  SystemSettings::getBackgroundColor(double* col){

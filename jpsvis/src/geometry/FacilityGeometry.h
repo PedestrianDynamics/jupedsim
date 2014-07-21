@@ -70,6 +70,8 @@ public:
 
     vtkAssembly* getActor3D();
 
+    vtkAssembly* getCaptionsActor();
+
 	vtkActor2DCollection* getCaptions();
 
 	///draw a wall

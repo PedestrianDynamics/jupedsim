@@ -123,12 +123,16 @@ vtkAssembly* FacilityGeometry::getActor2D(){
 	return assembly2D;
 }
 
+ vtkAssembly* FacilityGeometry::getCaptionsActor()
+ {
+     return assemblyCaptions;
+ }
+
  vtkAssembly* FacilityGeometry::getActor3D()
  {
      assembly3D->AddPart(assemblyDoors3D);
      assembly3D->AddPart(assemblyWalls3D);
-//    assembly3D->AddPart(assemblyObjects);
-//     assembly3D->AddPart(assemblyCaptions);
+     assembly3D->AddPart(assemblyCaptions);
      return assembly3D;
  }
 
@@ -667,6 +671,7 @@ void FacilityGeometry::addObjectLabel(double center[3], double orientation[3], s
 vtkActor2DCollection* FacilityGeometry::getCaptions(){
 	return captions;
 }
+
 // orientation and color ignored
 void FacilityGeometry::addNewElementText(double center[3], double orientation[3],
 string text, double color) {

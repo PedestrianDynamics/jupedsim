@@ -48,8 +48,8 @@ public:
 	bool static getShowLegend();
 
 	//set/get the caption status
-	void static setShowCaptions(bool caption);
-	bool static getShowCaption();
+    void static setShowAgentsCaptions(bool caption);
+    bool static getShowAgentsCaptions();
 
 	// set/get the listening port
 	void static setListningPort(unsigned short port);
@@ -66,6 +66,9 @@ public:
     // set/get the  geometry visibility
     void static setShowGeometry(bool status);
     bool static getShowGeometry();
+
+    void static setWorkingDirectory(QString dir);
+    void static getWorkingDirectory(QString& dir);
 
 	// set/get the bk color
 	// todo done directly in the travisto.cpp
@@ -151,13 +154,12 @@ private:
 	static bool recordPNGsequence;
 	static bool pedColorProfileReadFromFile;
 	static bool showLegend;
-	static bool showCaption;
+    static bool showAgentsCaptions;
 	static bool is2D; //   Toggle 2D/3D mode
     static bool showAgents;
     static bool showGeometry;
 	static unsigned short port;
 	static double bgColor[3];
-	//static double ellipseShape[2];
 	static int ellipseResolution;
 	static int pedestriansColor[3][3]; // 3 groups, and 3 color per groups
 	static int pedesShape;
@@ -166,6 +168,7 @@ private:
 	static int trailingType;
 	static int trailingGeometry;
 	static QString outputDir;
+    static QString workingDir;
 	static int captionSize;
 	static QColor captionColor;
 	static int captionOrientaton;

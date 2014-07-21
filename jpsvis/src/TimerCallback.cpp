@@ -183,7 +183,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                         {
                             const std::vector<FrameElement *> &elements=frame->GetFrameElements();
 
-                            for(int i=0;i<elements.size();i++)
+                            for(unsigned int i=0;i<elements.size();i++)
                             {
                                 FrameElement* el = elements[i];
                                 double pos[3];
@@ -333,6 +333,10 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow) {
     extern_glyphs_pedestrians_actor_3D->SetVisibility(SystemSettings::getShowAgents()&& !SystemSettings::get2D());
     extern_trail_plotter->SetVisibility(extern_tracking_enable);
 
+    //agents captions
+    extern_pedestrians_labels->SetVisibility(SystemSettings::getShowAgentsCaptions());
+
+    //geometry captions
 
     //enable / disable full screen
     if(fullscreen!=extern_fullscreen_enable){

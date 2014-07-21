@@ -37,6 +37,7 @@
 #include "geometry/JPoint.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Building.h"
+#include "SystemSettings.h"
 
 #include <QMessageBox>
 #include <QString>
@@ -617,8 +618,12 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
 	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
 
+    QString wd;
+    SystemSettings::getWorkingDirectory(wd);
+    fileName=wd+"/"+fileName;
+
 	Building* building = new Building();
-	string geometrypath = fileName.toStdString();
+    string geometrypath = fileName.toStdString();
 
 	// read the geometry
 	building->LoadBuildingFromFile(geometrypath);
@@ -890,12 +895,9 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	QDomDocument doc("");
 
 	QFile file(filename);
-    //int size =file.size()/(1024*1024);
 
-    //if(size>100){
-    //	cout<<"The file is too large: "<<filename.toStdString()<<endl;
-    //	return;
-    //}
+    //TODO: check if you can parse this with the building classes.
+    // This should be a fall back option
 
 	if (!file.open(QIODevice::ReadOnly)) {
 		qDebug()<<"could not open the file: "<<filename<<endl;

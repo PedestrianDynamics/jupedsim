@@ -547,13 +547,19 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
 
     if(fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,
-                                                "Select the file containing data to visualize",
+                                                "Select the file containing the data to visualize",
                                                 "F:\\workspace\\JPSvis\\data",
-                                                "Visualisation Files (*.dat *.trav *.xml *.pg3 *.jul);;All Files (*.*)");
+                                                "Visualisation Files (*.dat *.trav *.xml);;All Files (*.*)");
 
     if (fileName.isNull()) {
         return false;
     }
+
+    //get and set the working dir
+    QFileInfo fileInfo(fileName);
+    QString wd=fileInfo.absoluteDir().absolutePath();
+    SystemSettings::setWorkingDirectory(wd);
+
     //the geometry actor
     //FacilityGeometry* geometry=NULL;
     FacilityGeometry* geometry = visualisationThread->getGeometry();
@@ -1354,7 +1360,7 @@ void MainWindow::slotPreviousFrame(){
 
 void MainWindow::slotShowPedestrianCaption(){
 
-    SystemSettings::setShowCaptions(ui.actionShow_Captions->isChecked());
+    SystemSettings::setShowAgentsCaptions(ui.actionShow_Captions->isChecked());
     extern_force_system_update=true;
 }
 
@@ -1575,5 +1581,6 @@ void MainWindow::slotShowHideGeometryCaptions(){
 
     bool value=ui.actionShow_Geometry_Captions->isChecked();
     visualisationThread->setGeometryLabelsVisibility(value);
+    //SystemSettings::setShowCaptions(value);
     //SystemSettings::setOnScreenInfos(value);
 }

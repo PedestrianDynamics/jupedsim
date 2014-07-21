@@ -73,6 +73,7 @@
 #include <vtkCylinderSource.h>
 #include <vtkWindowToImageFilter.h>
 #include <vtkActor.h>
+#include <vtkLightKit.h>
 
 
 #include "geometry/FacilityGeometry.h"
@@ -279,9 +280,19 @@ void ThreadVisualisation::run(){
 	renderWinInteractor->Initialize();
 
     //add a light kit
+    {
+        VTK_CREATE(vtkLightKit, lightKit);
+        //lightKit->SetKeyLightIntensity(1);
+
+        //lightKit->SetKeyLightWarmth(5);
+        //lightKit->SetBackLightAngle(30,40);
+        //lightKit->SetKeyLightWarmth(2.0);
+        //lightKit->SetMaintainLuminance(true);
+        //lightKit->AddLightsToRenderer(renderer);
+    }
 
 
-    if(SystemSettings::get2D()){
+    if(true || SystemSettings::get2D()){
         renderer->GetActiveCamera()->OrthogonalizeViewUp();
         renderer->GetActiveCamera()->ParallelProjectionOn();
         renderer->ResetCamera();
@@ -1061,14 +1072,3 @@ void ThreadVisualisation::setOnscreenInformationVisibility(bool show){
 	runningTime->SetVisibility(show);
 }
 
-//void ThreadVisualisation::WindowModifiedCallback( vtkObject*
-//		caller, unsigned long eventId,void* clientData ,void* callData )
-//{
-//	vtkRenderWindow* window = static_cast<vtkRenderWindow*>(caller);
-//	int* windowSize = window->GetSize();
-//
-//
-//	int *pos=renderWindow->GetSize();
-//	runningTime->SetPosition(pos[1]/2,pos[0]);
-//
-//}
