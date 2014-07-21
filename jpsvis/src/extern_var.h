@@ -35,6 +35,7 @@
 
 #include "SyncData.h"
 #include "Pedestrian.h"
+#include "TrailPlotter.h"
 
 #include <vtkActor2D.h>
 #include <vtkActor.h>
@@ -72,6 +73,7 @@ bool extern_force_system_update=false;
 /// With this enable, moving pedestrians will leave a
 /// trail behind them
 bool extern_tracking_enable=false;
+PointPlotter* extern_trail_plotter=NULL;
 
 ///relative scale from pedestrian to the geometry (environment)
 double extern_scale=0.1;

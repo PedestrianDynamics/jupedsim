@@ -63,7 +63,6 @@ Frame::~Frame()
     }
     _framePoints.clear();
 
-    //_polydata->Delete();
     _polydata2D->Delete();
     _polydata3D->Delete();
 }
@@ -217,12 +216,16 @@ void Frame::ComputePolyData2D()
     VTK_CREATE (vtkPoints, points);
     VTK_CREATE (vtkFloatArray, colors);
     VTK_CREATE (vtkFloatArray, tensors);
+    VTK_CREATE (vtkIntArray, labels);
 
     colors->SetName("color");
     colors->SetNumberOfComponents(1);
 
     tensors->SetName("tensors");
     tensors->SetNumberOfComponents(9);
+
+    labels->SetName("labels");
+    labels->SetNumberOfComponents(1);
 
     for (unsigned int i=0;i<_framePoints.size();i++)
     {
@@ -234,6 +237,7 @@ void Frame::ComputePolyData2D()
         _framePoints[i]->GetOrientation(rot);
         _framePoints[i]->GetColor(&color);
         _framePoints[i]->GetRadius(rad);
+        labels->InsertNextValue(_framePoints[i]->GetId()+1);
 
         rad[0]/=30;rad[1]/=30;rad[2]/=120;
         points->InsertNextPoint(pos);
@@ -291,6 +295,9 @@ void Frame::ComputePolyData2D()
     // setting the scaling and rotation
     _polydata2D->GetPointData()->SetTensors(tensors);
     _polydata2D->GetPointData()->SetActiveTensors("tensors");
+
+    //setting the labels
+    _polydata2D->GetPointData()->AddArray(labels);
 }
 
 void Frame::ComputePolyData3D()
@@ -330,7 +337,7 @@ void Frame::ComputePolyData3D()
         //double max_height=350;
 
 
-        pos[2]=height_i/2.0; // slightly above ground
+        pos[2]+=height_i/2.0; // slightly above ground
         rad[0]/=20; rad[0]=1;
         rad[2]/=20; rad[2]=1;
         //?height default to 30 in SaxParser and 160 in Renderingengine
@@ -404,6 +411,11 @@ vtkPolyData* Frame::GetPolyData2D()
 vtkPolyData* Frame::GetPolyData3D()
 {
     return _polydata3D;
+}
+
+const std::vector<FrameElement *> &Frame::GetFrameElements() const
+{
+    return _framePoints;
 }
 
 unsigned int Frame::getElementCursor()

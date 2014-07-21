@@ -10,11 +10,14 @@
 #include <vtkPolyData.h>
 #include <vtkActor.h>
 #include <vtkDataArray.h>
+#include <vtkFloatArray.h>
 #include <vtkGlyph3D.h>
 #include <vtkDiskSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkPointData.h>
 #include <vtkSmartPointer.h>
+#include <vtkLookupTable.h>
+#include <vtkRegularPolygonSource.h>
 
 #include "JPoint.h"
 #include "PointPlotter.h"
@@ -26,7 +29,6 @@
 
 PointPlotter::PointPlotter()
 {
-
 	pts = vtkPoints::New();
 	//pts->Allocate(30);
 	//pts->SetNumberOfPoints(30);
@@ -35,46 +37,48 @@ PointPlotter::PointPlotter()
 	SetPointResolution();
 
 	scalars = vtkUnsignedCharArray::New();
-	//scalars->Allocate(30);
 	scalars->SetNumberOfComponents(3);
-	//scalars->setn
+    colors=vtkFloatArray::New();
 
-	//vtkDiskSource* src = vtkDiskSource::New();
-	VTK_CREATE(vtkDiskSource,src);
-	src->SetRadialResolution(5);
-	src->SetCircumferentialResolution(pt_res);
-	src->SetInnerRadius(0.00);
-	src->SetOuterRadius(pt_radius);
+//	VTK_CREATE(vtkDiskSource,src);
+//	src->SetRadialResolution(5);
+//	src->SetCircumferentialResolution(pt_res);
+//	src->SetInnerRadius(0.00);
+//	src->SetOuterRadius(pt_radius);
+
+    VTK_CREATE(vtkRegularPolygonSource,src);
+    src->SetRadius(2.0);
+    src->SetNumberOfSides(5);
 
 
-	//vtkPolyData* polyData = vtkPolyData::New();
 	VTK_CREATE(vtkPolyData,polyData);
 	polyData->SetPoints(pts);
-	polyData->GetPointData()->SetScalars(scalars);
+    //polyData->GetPointData()->SetScalars(scalars);
+    polyData->GetPointData()->SetScalars(colors);
 
-//	vtkGlyph3D* glyph = vtkGlyph3D::New();
 	VTK_CREATE(vtkGlyph3D,glyph);
 	glyph->SetSourceConnection(src->GetOutputPort());
+
 #if VTK_MAJOR_VERSION <= 5
     glyph->SetInput(polyData);
 #else
     glyph->SetInputData(polyData);
 #endif
-	//src->Delete();
-	//polyData->Delete();
-	glyph->SetColorModeToColorByScalar();
+
+    glyph->SetColorModeToColorByScalar();
 	glyph->SetScaleModeToDataScalingOff() ;
 
 
-	//vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
 	VTK_CREATE(vtkPolyDataMapper,mapper);
     mapper->SetInputConnection(glyph->GetOutputPort());
-	//glyph->Delete();
 
-	//vtkActor
+    //borrow the lookup table from the peds glyphs
+    mapper->SetLookupTable(
+    extern_glyphs_pedestrians_actor_2D->GetMapper()->GetLookupTable());
+
+    //vtkActor
 	pointActor = vtkActor::New();
 	pointActor->SetMapper(mapper);
-	//mapper->Delete();
 
 	/// initizliae the ID
 	nextPointID=0;
@@ -86,6 +90,8 @@ PointPlotter::~PointPlotter()
 		pts->Delete();
 	if (scalars)
 		scalars->Delete();
+    if (colors)
+        colors->Delete();
 	if (pointActor)
 		pointActor->Delete();
 }
@@ -106,6 +112,23 @@ void PointPlotter::PlotPoint(JPoint * point){
 	PlotPoint( x,  y,  z, r,   g,   b);
 }
 
+void PointPlotter::PlotPoint(double pos[3], double col)
+{
+    nextPointID++;
+    if(col==-1)
+    {
+        colors->InsertTuple1(nextPointID,NAN);
+    }
+    else
+    {
+        colors->InsertTuple1(nextPointID,col/255.0);
+    }
+
+    pts->InsertPoint(nextPointID,pos);
+    pts->Modified();
+    colors->Modified();
+}
+
 void PointPlotter::PlotPoint(double x, double y, double z,
 		unsigned char r, unsigned char g, unsigned char b)
 {
@@ -115,17 +138,21 @@ void PointPlotter::PlotPoint(double x, double y, double z,
 
 	SystemSettings::getTrailsInfo(&PointsCount,&dummy,&dummy1);
 
-	nextPointID=nextPointID%PointsCount;
+    //nextPointID=nextPointID%PointsCount;
 	pts->InsertPoint(nextPointID,x,y,z);
-	//pts->SetPoint(nextPointID,x,y,z);
-	//scalars->SetTuple3(nextPointID,r,g,b);
-	scalars->InsertTuple3(nextPointID,r,g,b);
-	//scalars->InsertNextTuple3(r,g,b);
+    //pts->SetPoint(nextPointID,x,y,z);
+    //scalars->SetTuple3(nextPointID,r,g,b);
+    scalars->InsertTuple3(nextPointID,r,g,b);
+    //scalars->InsertNextTuple3(r,g,b);
 
 	pts->Modified();
-	scalars->Modified();
+    scalars->Modified();
 
 }
 
+void PointPlotter::SetVisibility(bool status)
+{
+ pointActor->SetVisibility(status);
+}
 
 vtkActor *  PointPlotter::getActor(){ return pointActor;}

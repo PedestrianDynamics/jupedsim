@@ -679,12 +679,9 @@ QString MainWindow::getTagValueFromElement(QDomNode node,
 void MainWindow::slotFullScreen(bool status) {
 
     Debug::Messages("changing full screen status %d",status);
-
     extern_fullscreen_enable = true;
-    //cout<<"clicked "<< status <<endl;
     //dont forget this.
     extern_force_system_update=true;
-
 }
 
 void MainWindow::slotSetOfflineMode(bool status) {
@@ -989,21 +986,32 @@ bool MainWindow::anyDatasetLoaded(){
              extern_third_dataset_loaded);
 }
 
-void MainWindow::slotShowTrajectoryOnly(){
-    if(ui.actionShow_Trajectories->isChecked()){
-        //visualisationThread->setTrailVisibility(true);
+void MainWindow::slotShowTrajectoryOnly()
+{
+    if(ui.actionShow_Trajectories->isChecked())
+    {
         extern_tracking_enable=true;
-        //ui.actionShow_Trajectories->setEnabled(false);
-    }else{
-        extern_tracking_enable=false;
-        //visualisationThread->setTrailVisibility(false);
     }
+    else
+    {
+        extern_tracking_enable=false;
+    }
+     extern_force_system_update=true;
 }
 
 
-/// TODO: implement me
-void MainWindow::slotShowPedestrianOnly(){
-    Debug::Error("Not implemented");
+void MainWindow::slotShowPedestrianOnly()
+{
+
+    if(ui.actionShow_Agents->isChecked())
+    {
+        SystemSettings::setShowAgents(true);
+    }
+    else
+    {
+        SystemSettings::setShowAgents(false);
+    }
+    extern_force_system_update=true;
 }
 
 void MainWindow::slotShowGeometry(){
@@ -1012,13 +1020,17 @@ void MainWindow::slotShowGeometry(){
         visualisationThread->setGeometryVisibility(true);
         ui.actionShow_Exits->setEnabled(true);
         ui.actionShow_Walls->setEnabled(true);
+        ui.actionShow_Geometry_Captions->setEnabled(true);
+        SystemSettings::setShowGeometry(true);
     }
     else{
         visualisationThread->setGeometryVisibility(false);
         ui.actionShow_Exits->setEnabled(false);
         ui.actionShow_Walls->setEnabled(false);
+        ui.actionShow_Geometry_Captions->setEnabled(false);
+        SystemSettings::setShowGeometry(false);
     }
-
+    extern_force_system_update=true;
 }
 
 /// shows/hide geometry
@@ -1206,7 +1218,8 @@ void MainWindow::slotToogle2D(){
         ui.action3_D->setChecked(true);
         SystemSettings::set2D(false);
     }
-    visualisationThread->setGeometryVisibility2D(SystemSettings::get2D());
+    bool status=SystemSettings::get2D() && SystemSettings::getShowGeometry();
+    visualisationThread->setGeometryVisibility2D(status);
     extern_force_system_update=true;
 }
 
@@ -1222,7 +1235,8 @@ void MainWindow::slotToogle3D(){
         ui.action2_D->setChecked(true);
         SystemSettings::set2D(true);
     }
-    visualisationThread->setGeometryVisibility3D(!SystemSettings::get2D());
+    bool status= !SystemSettings::get2D() && SystemSettings::getShowGeometry();
+    visualisationThread->setGeometryVisibility3D(status);
     extern_force_system_update=true;
 }
 

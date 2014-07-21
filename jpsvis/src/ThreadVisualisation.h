@@ -59,10 +59,14 @@ class vtkObject;
 class Pedestrian;
 class SyncData;
 class FacilityGeometry;
+class TrailPlotter;
+class PointPlotter;
 
 extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
+
+extern PointPlotter* extern_trail_plotter;
 
 //extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
 extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
@@ -111,9 +115,6 @@ public:
 
 	/// enable/disable 3D
 	void setGeometryVisibility3D(bool status);
-
-	/// set trajectories/trail visibility
-	void setTrailVisibility(bool status);
 
 	/// change the background color of the rendering windows
 	void setBackgroundColor(double* color);

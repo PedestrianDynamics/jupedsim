@@ -69,6 +69,10 @@
 #include <vtkDiskSource.h>
 #include <vtkTriangleFilter.h>
 #include <vtkStripper.h>
+#include <vtkSphereSource.h>
+#include <vtkCylinderSource.h>
+#include <vtkWindowToImageFilter.h>
+#include <vtkActor.h>
 
 
 #include "geometry/FacilityGeometry.h"
@@ -82,11 +86,8 @@
 #include "SyncData.h"
 #include "InteractorStyle.h"
 #include "SystemSettings.h"
+#include "geometry/PointPlotter.h"
 #include "Debug.h"
-#include <vtkSphereSource.h>
-#include <vtkCylinderSource.h>
-#include <vtkWindowToImageFilter.h>
-#include <vtkActor.h>
 
 //#include <vector>
 
@@ -152,15 +153,13 @@ void ThreadVisualisation::run(){
     renderer->AddActor(geometry->getActor2D());
     renderer->AddActor(geometry->getActor3D());
 
-    if(SystemSettings::get2D()==true)
-    {
-        //Sh
-    }
-
 	//initialize the datasets
-    //init();
 	initGlyphs2D();
     initGlyphs3D();
+
+    //create the trails
+    extern_trail_plotter = new PointPlotter();
+    renderer->AddActor(extern_trail_plotter->getActor());
 
 	// add axis
     //axis= vtkAxesActor::New();
@@ -282,13 +281,11 @@ void ThreadVisualisation::run(){
     //add a light kit
 
 
-//	if(SystemSettings::get2D()){
-//        renderer->GetActiveCamera()->OrthogonalizeViewUp();
-//        renderer->GetActiveCamera()->ParallelProjectionOn();
-//        renderer->ResetCamera();
-//	}
-
-
+    if(SystemSettings::get2D()){
+        renderer->GetActiveCamera()->OrthogonalizeViewUp();
+        renderer->GetActiveCamera()->ParallelProjectionOn();
+        renderer->ResetCamera();
+    }
 
 	//create a timer for rendering the window
 	TimerCallback *renderingTimer = new TimerCallback();
@@ -356,6 +353,7 @@ void ThreadVisualisation::run(){
 
 
 	//clear some stuffs
+    delete extern_trail_plotter;
 	finalize();
 
 	renderer->Delete();
@@ -378,8 +376,6 @@ void ThreadVisualisation::setGeometryVisibility( bool status){
 		}else{
 			geometry->set3D(status);
 		}
-		//geometry->getActor()->SetVisibility(status);
-		//geometry->getActor()->Modified();
 	}
 }
 
@@ -455,10 +451,6 @@ void  ThreadVisualisation::initGlyphs2D()
     extern_glyphs_pedestrians_actor_2D->GetProperty()->BackfaceCullingOn();
     renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
 
-    //VTK_CREATE(vtkActor, actor);
-    //actor->SetMapper(mapper);
-    //renderer->AddActor(actor);
-
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);
     extern_pedestrians_labels->SetMapper(labelMapper);
@@ -530,9 +522,6 @@ void ThreadVisualisation::initGlyphs3D()
     extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
     renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
 
-//    VTK_CREATE(vtkActor, actor);
-//    actor->SetMapper(mapper);
-//    renderer->AddActor(actor);
 }
 
 void  ThreadVisualisation::init(){

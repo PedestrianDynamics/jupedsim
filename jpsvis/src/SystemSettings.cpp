@@ -42,10 +42,10 @@ bool SystemSettings::showLegend=false;
 bool SystemSettings::pedColorProfileReadFromFile=true;
 bool SystemSettings::showCaption=false;
 bool SystemSettings::is2D=false;
+bool SystemSettings::showAgents=true;
+bool SystemSettings::showGeometry=true;
 unsigned short SystemSettings::port=8989;
 double SystemSettings::bgColor[]={1.0,1.0,1.0};
-//double SystemSettings::ellipseShape[]={21.0,21.0};
-//int SystemSettings::pedestriansColor[3][3]={{255 , 0, 255},{122, 255, 122},{130, 130, 130}};
 int SystemSettings::pedestriansColor[3][3]={{255 , 17, 224},{122, 255, 122},{130, 130, 130}};
 int SystemSettings::pedesShape=Settings::PINGUINS;
 int SystemSettings::ellipseResolution=10;
@@ -105,6 +105,26 @@ bool SystemSettings::get2D(){
 	return is2D;
 }
 
+// set/get the  2D visio
+void SystemSettings::setShowAgents(bool status)
+{
+    showAgents=status;
+}
+
+bool SystemSettings::getShowAgents()
+{
+    return showAgents;
+}
+
+void SystemSettings::setShowGeometry(bool status)
+{
+    showGeometry=status;
+}
+
+bool SystemSettings::getShowGeometry()
+{
+    return showGeometry;
+}
 
 void  SystemSettings::getBackgroundColor(double* col){
 	col[0]=bgColor[0];

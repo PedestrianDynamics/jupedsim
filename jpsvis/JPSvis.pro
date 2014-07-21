@@ -559,7 +559,8 @@ HEADERS += src/geometry/Building.h \
     src/geometry/LinePlotter2D.h \
     src/geometry/PointPlotter2D.h \
     src/network/TraVisToServer.h \
-    src/MainWindow.h
+    src/MainWindow.h \
+    src/TrailPlotter.h
 
 SOURCES += src/geometry/Building.cpp \
     src/geometry/Crossing.cpp \
@@ -600,7 +601,9 @@ SOURCES += src/geometry/Building.cpp \
     src/geometry/LinePlotter.cpp \
     src/geometry/PointPlotter.cpp \
     src/network/TraVisToServer.cpp \
-    src/MainWindow.cpp
+    src/MainWindow.cpp \
+    src/TrailPlotter.cpp
+
 FORMS += forms/settings.ui \
     forms/mainwindow.ui
 RESOURCES += forms/icons.qrc

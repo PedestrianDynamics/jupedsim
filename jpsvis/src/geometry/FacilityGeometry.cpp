@@ -222,7 +222,7 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         src->SetXLength(doorThickness);
         src->SetZLength(doorHeight);
         //src->SetRadius(doorWidth);
-        actor->GetProperty()->SetOpacity(1.00);
+        actor->GetProperty()->SetOpacity(0.5);
         assemblyDoors3D->AddPart(actor);
     }
     break;

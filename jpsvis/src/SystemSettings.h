@@ -55,9 +55,17 @@ public:
 	void static setListningPort(unsigned short port);
 	unsigned short static getListeningPort();
 
-	// set/get the  visio
+    // set/get the  2D visio
 	void static set2D(bool is2D);
 	bool static get2D();
+
+    // set/get the  agents visio
+    void static setShowAgents(bool status);
+    bool static getShowAgents();
+
+    // set/get the  geometry visibility
+    void static setShowGeometry(bool status);
+    bool static getShowGeometry();
 
 	// set/get the bk color
 	// todo done directly in the travisto.cpp
@@ -145,6 +153,8 @@ private:
 	static bool showLegend;
 	static bool showCaption;
 	static bool is2D; //   Toggle 2D/3D mode
+    static bool showAgents;
+    static bool showGeometry;
 	static unsigned short port;
 	static double bgColor[3];
 	//static double ellipseShape[2];

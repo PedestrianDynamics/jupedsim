@@ -87,9 +87,12 @@
 
 #include "Pedestrian.h"
 #include "Frame.h"
+#include "FrameElement.h"
 #include "TrajectoryPoint.h"
 #include "SyncData.h"
 #include "SystemSettings.h"
+#include "TrailPlotter.h"
+#include "geometry/PointPlotter.h"
 #include "TimerCallback.h"
 
 #define VTK_CREATE(type, name) \
@@ -127,8 +130,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
             if (iren && renderWindow && renderer)
             {
-                // very important
-                //setAllPedestriansInvisible();
 
                 //first pedestrian group
                 if(extern_first_dataset_loaded) {
@@ -155,7 +156,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
                         if(SystemSettings::get2D()==true)
                         {
-                             vtkPolyData* pData=frame->GetPolyData2D();
+                            vtkPolyData* pData=frame->GetPolyData2D();
 #if VTK_MAJOR_VERSION <= 5
                             extern_glyphs_pedestrians->SetInput(pData);
                             ((vtkLabeledDataMapper*)extern_pedestrians_labels->GetMapper())->SetInput(pData);
@@ -176,6 +177,21 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                             extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
 #endif
                             extern_glyphs_pedestrians_3D->Update();
+                        }
+
+                        if(extern_tracking_enable)
+                        {
+                            const std::vector<FrameElement *> &elements=frame->GetFrameElements();
+
+                            for(int i=0;i<elements.size();i++)
+                            {
+                                FrameElement* el = elements[i];
+                                double pos[3];
+                                double color;
+                                el->GetPos(pos);
+                                el->GetColor(&color);
+                                extern_trail_plotter->PlotPoint(pos,color);
+                            }
                         }
                     }
                 }
@@ -313,70 +329,10 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow) {
 
     static bool fullscreen=false;
 
-    // check the caption colour mode
-    int captionSize, orientation;
-    bool automaticRotation, autoCaptionMode;
-    QColor captionColor;
-    SystemSettings::getCaptionsParameters(captionSize,captionColor,orientation,automaticRotation);
+    extern_glyphs_pedestrians_actor_2D->SetVisibility(SystemSettings::getShowAgents()&& SystemSettings::get2D());
+    extern_glyphs_pedestrians_actor_3D->SetVisibility(SystemSettings::getShowAgents()&& !SystemSettings::get2D());
+    extern_trail_plotter->SetVisibility(extern_tracking_enable);
 
-    autoCaptionMode= !(captionColor.isValid());
-
-    if(autoCaptionMode==false){ // tODO set the colour to auto mode
-
-    }
-    extern_glyphs_pedestrians_actor_2D->SetVisibility(SystemSettings::get2D());
-    extern_glyphs_pedestrians_actor_3D->SetVisibility(!SystemSettings::get2D());
-
-    if(extern_first_dataset_loaded){
-        int pedColor[3];
-        SystemSettings::getPedestrianColor(0,pedColor);
-        for(int i=0;i<extern_trajectories_firstSet.getNumberOfAgents();i++){
-            extern_pedestrians_firstSet[i]->enableCaption(SystemSettings::getShowCaption());
-            if(SystemSettings::getPedestrianColorProfileFromFile()==false){
-                extern_pedestrians_firstSet[i]->setColor(pedColor);
-            }
-            extern_pedestrians_firstSet[i]->setGroupVisibility(extern_first_dataset_visible);
-            extern_pedestrians_firstSet[i]->setCaptionSize(captionSize);
-            extern_pedestrians_firstSet[i]->setCaptionsColorModeToAuto(autoCaptionMode);
-            extern_pedestrians_firstSet[i]->setCaptionsColor(captionColor);
-            extern_pedestrians_firstSet[i]->setResolution(SystemSettings::getEllipseResolution());
-        }
-        extern_pedestrians_labels->SetVisibility(SystemSettings::getShowCaption());
-    }
-
-    if(extern_second_dataset_loaded){
-        int pedColor[3];
-        SystemSettings::getPedestrianColor(1,pedColor);
-        for(int i=0;i<extern_trajectories_secondSet.getNumberOfAgents();i++){
-            extern_pedestrians_secondSet[i]->enableCaption(SystemSettings::getShowCaption());
-            if(SystemSettings::getPedestrianColorProfileFromFile()==false){
-                extern_pedestrians_secondSet[i]->setColor(pedColor);
-            }
-            extern_pedestrians_secondSet[i]->setGroupVisibility(extern_second_dataset_visible);
-            extern_pedestrians_secondSet[i]->setCaptionSize(captionSize);
-            extern_pedestrians_secondSet[i]->setCaptionsColorModeToAuto(autoCaptionMode);
-            extern_pedestrians_secondSet[i]->setCaptionsColor(captionColor);
-            extern_pedestrians_secondSet[i]->setResolution(SystemSettings::getEllipseResolution());
-
-        }
-    }
-
-    if(extern_third_dataset_loaded){
-        int pedColor[3];
-        SystemSettings::getPedestrianColor(2,pedColor);
-        for(int i=0;i<extern_trajectories_thirdSet.getNumberOfAgents();i++){
-            extern_pedestrians_thirdSet[i]->enableCaption(SystemSettings::getShowCaption());
-
-            if(SystemSettings::getPedestrianColorProfileFromFile()==false){
-                extern_pedestrians_thirdSet[i]->setColor(pedColor);
-            }
-            extern_pedestrians_thirdSet[i]->setGroupVisibility(extern_third_dataset_visible);
-            extern_pedestrians_thirdSet[i]->setCaptionSize(captionSize);
-            extern_pedestrians_thirdSet[i]->setCaptionsColorModeToAuto(autoCaptionMode);
-            extern_pedestrians_thirdSet[i]->setCaptionsColor(captionColor);
-            extern_pedestrians_thirdSet[i]->setResolution(SystemSettings::getEllipseResolution());
-        }
-    }
 
     //enable / disable full screen
     if(fullscreen!=extern_fullscreen_enable){
@@ -388,26 +344,6 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow) {
     // take
     extern_force_system_update=false;
 }
-
-
-void TimerCallback::setAllPedestriansInvisible()
-{
-    if(extern_first_dataset_loaded){
-        for(int i=0;i<extern_trajectories_firstSet.getNumberOfAgents();i++)
-            extern_pedestrians_firstSet[i]->setVisibility(false);
-    }
-
-    if(extern_second_dataset_loaded){
-        for(int i=0;i<extern_trajectories_secondSet.getNumberOfAgents();i++)
-            extern_pedestrians_secondSet[i]->setVisibility(false);
-    }
-
-    if(extern_third_dataset_loaded){
-        for(int i=0;i<extern_trajectories_thirdSet.getNumberOfAgents();i++)
-            extern_pedestrians_thirdSet[i]->setVisibility(false);
-    }
-}
-
 
 
 void TimerCallback::getTrail(int datasetID, int frameNumber){
@@ -546,17 +482,3 @@ void TimerCallback::setTextActor(vtkTextActor* ra){
     runningTime=ra;
 }
 
-
-//
-//WindowCallback* WindowCallback::New()
-//{
-//	WindowCallback *cb = new WindowCallback;
-//	return cb;
-//}
-
-
-//void WindowCallback::Execute(vtkObject *caller, unsigned long eventId,
-//		void *callData){
-//
-//
-//}
