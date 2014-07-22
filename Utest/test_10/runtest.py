@@ -7,12 +7,11 @@ from sys import argv ,exit
 import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
-import re
 
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_testCPU.txt"
+logfile="log_testCELL.txt"
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
@@ -88,15 +87,13 @@ if __name__ == "__main__":
     time1 = time.time()
     i = 0
     flows = {}
-    MAX_CPU = multiprocessing.cpu_count()
-    
     geofile = "geometry.xml"
     inifiles = glob.glob("inifiles/*.xml")
-    logging.info("MAX CPU = %d"%MAX_CPU)
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
-
+    if path.exists("cell.png"):
+        subprocess.call(["rm", "cell.png"])
 
     timedic = {}
     for inifile in inifiles:
@@ -109,19 +106,19 @@ if __name__ == "__main__":
         if not path.exists(executable):
             logging.critical("executable <%s> does not exist yet."%executable)
             exit(FAILURE)
-        b = inifile.split("numCPU_")[1]
-        ncpu  = int( re.split("[.|_]", b)[0] )
+        cell_size = float(inifile.split("cell_size_")[1].split("_")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
-        logging.info('n CPU = <%d>'%(ncpu))
+        logging.info('cell_size = <%.2f>'%cell_size)
         #------------------------------------------------------
         t1_run = time.time()
         subprocess.call([executable, "--inifile=%s"%inifile])
         t2_run = time.time()
-        if not timedic.has_key(ncpu):
-            timedic[ncpu] = [t2_run - t1_run]
+        if not timedic.has_key(cell_size):
+            timedic[cell_size] = [t2_run - t1_run]
         else:
-            timedic[ncpu].append(t2_run - t1_run)
+            timedic[cell_size].append(t2_run - t1_run)
+        
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
         trajfile = "trajectories/traj" + inifile.split("ini")[2]
@@ -133,10 +130,10 @@ if __name__ == "__main__":
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 61)
         
-        if not flows.has_key(ncpu):
-            flows[ncpu] = [J]
+        if not flows.has_key(cell_size):
+            flows[cell_size] = [J]
         else:
-            flows[ncpu].append(J)
+            flows[cell_size].append(J)
         
     #------------------------------------------------------------------------------ 
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
@@ -145,7 +142,7 @@ if __name__ == "__main__":
     times_file = "times.txt"
     ff = open(flow_file, "w")
     tt = open(times_file, "w")
-    logging.info('write flow values in \"%s\" and times in \"%s\"'%(flow_file, times_file))
+    logging.info('write flow values in \"%s\"'%flow_file)
     for key, value in flows.items():
         print >>ff, key, ":", value
 
@@ -154,10 +151,10 @@ if __name__ == "__main__":
 
     time2 = time.time()
     M = np.array([np.mean(i) for i in flows.values()]) # std pro CPU
-    MT = np.array([np.mean(i) for i in timedic.values()]) # std pro CPU
-
     S = np.array([np.std(i) for i in flows.values()])   # std pro CPU
+    MT = np.array([np.mean(i) for i in timedic.values()]) # std pro CPU
     ST = np.array([np.std(i) for i in timedic.values()])   # std pro CPU
+    
     std_all = np.std(M)
    
     print >>ff, "==========================="
@@ -174,35 +171,43 @@ if __name__ == "__main__":
     print >>ff, "==========================="
    
     ff.close()
-    tt.close()
     #########################################################################
     ms = 8
     ax = plt.subplot(211)
-    ax.plot(flows.keys(), M, "o-", lw=2, label='Mean', color='blue')
-    ax.errorbar(flows.keys(), M, yerr=S, fmt='-o')
+    indexsort = np.argsort( flows.keys() )
+    F = np.array( flows.keys() )[indexsort]
+    ax.plot(F,  np.array(M)[indexsort], "o-", lw=2, label='Mean', color='blue')
+    ax.errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
+    #ax.errorbar(flows.keys(), M, yerr=S, fmt='-o')
     #ax.fill_between(flows.keys(), M+S, M-S, facecolor='blue', alpha=0.5)
     #axes().set_aspect(1./axes().get_data_ratio())  
     #ax.legend(loc='best')
     ax.grid()
-    ax.set_xlabel(r'# cores',fontsize=18)
+    ax.set_xlabel(r'$cell size\; [ m ]$',fontsize=18)
     ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    ax.set_xlim(0.5, MAX_CPU + 0.5)
+    ax.set_xlim( min(flows.keys() )- 0.5, max(flows.keys() ) + 0.5)
+    ax.set_ylim( min( M ) - max(S)-0.1 , max( M ) + max(S) +0.1)
     ax.set_xticks(flows.keys())
-    plt.title("# Simulations %d"%len(flows[ncpu]))
-    #------------------ plot times
+    plt.title("# Simulations %d"%len(flows[cell_size]))
+#------------------ plot times
     ax2 = plt.subplot(212)
-    ax2.plot(timedic.keys(), MT, "o-", lw=2, label='Mean', color='blue')
-    ax2.errorbar(timedic.keys(), MT, yerr=ST, fmt='-o')
-    ax2.set_xlabel(r'# cores',fontsize=18)
+    
+    indexsort = np.argsort( timedic.keys() )
+    T = np.array( timedic.keys() )[indexsort]
+    ax2.plot(T, np.array(MT)[indexsort], "o-", lw=2, label='Mean', color='blue')
+    ax2.errorbar(T , np.array(MT)[indexsort] , yerr=np.array(ST)[indexsort], fmt='-o')
+    ax2.set_xlabel(r'$cell size\; [ m ]$',fontsize=18)
     ax2.set_ylabel(r'$T\; [  s ]$',fontsize=18)
     ax2.set_xticks(timedic.keys())
-    ax2.set_xlim(0.5, MAX_CPU + 0.5)
+    ax2.set_xlim( min(flows.keys() )- 0.5, max(flows.keys() ) + 0.5 )
     ax2.set_ylim( min( MT ) - max(ST)-0.1 , max( MT ) + max(ST) +0.1)
+    ax2.set_xticks(flows.keys())
     #ax.legend(loc='best')
     ax2.grid()
     plt.tight_layout()
-    logging.info("save file in cpu.png")
-    plt.savefig("cpu.png")
+    
+    logging.info("save file in cell.png")
+    plt.savefig("cell.png")
     #plt.show()
     #########################################################################
     

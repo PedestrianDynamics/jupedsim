@@ -13,7 +13,9 @@ must_time = 10  # 10 m corridor with 1m/s
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_test_8.txt"
+logfile="log_test_11a.txt"
+f=open(logfile, "w")
+f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
@@ -73,8 +75,8 @@ def parse_file(filename):
 
 if __name__ == "__main__":
     
-    geofile = "geometry.xml"
-    inifiles = glob.glob("inifiles/*.xml")
+    geofile =  "geometry/geometry_test11_a.xml"
+    inifiles = glob.glob("inifiles_a/*.xml")
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
@@ -83,7 +85,7 @@ if __name__ == "__main__":
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
         exit(FAILURE)
-        
+    evac_time = []
     for inifile in inifiles:
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
@@ -104,13 +106,10 @@ if __name__ == "__main__":
             exit(FAILURE)
         maxtime = get_maxtime(inifile)
         fps, N, traj = parse_file(trajfile)
-        evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
+        etime =  ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
+        evac_time.append( etime )
 
-        if evac_time > maxtime*0.5:
-            logging.info("%s exits with FAILURE evac_time = %f (maxtime =  %f)"%(argv[0], evac_time, maxtime))
-            exit(FAILURE)
-        else:
-            logging.info("evac_time = %f (maxtime =  %f)"%(evac_time, maxtime))
-        
-    logging.info("%s exits with SUCCESS"%(argv[0]))
-    exit(SUCCESS)
+        logging.info("%s -- evac time %.2f"%(argv[0], etime))
+
+    logging.info("mean = %.2f ; std = %.2f "%(np.mean(evac_time), np.std(evac_time)))
+    exit(np.mean(evac_time))
