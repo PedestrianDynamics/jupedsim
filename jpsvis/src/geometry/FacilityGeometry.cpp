@@ -57,6 +57,7 @@
 #include <vtkTextActor3D.h>
 #include <vtkTextProperty.h>
 #include <vtkActor2DCollection.h>
+#include <vtkTriangleFilter.h>
 
 
 #define PI 3.1415926535
@@ -64,77 +65,80 @@
 using namespace std;
 
 #define VTK_CREATE(type, name) \
-		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+    vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
 FacilityGeometry::FacilityGeometry() {
 
-	assembly = vtkAssembly::New();
-	assembly2D = vtkAssembly::New();
-	assemblyCaptions= vtkAssembly::New();
+    assembly = vtkAssembly::New();
+    assembly2D = vtkAssembly::New();
+    assemblyCaptions= vtkAssembly::New();
 
     assemblyWalls3D = vtkAssembly::New();
     assemblyDoors3D = vtkAssembly::New();
     assembly3D = vtkAssembly::New();
 
-	captions=vtkActor2DCollection::New();
-	linesPlotter2D = new LinePlotter2D();
+    floorActor = vtkActor::New();
 
-	// initializing the lookup table for the colors
-	// rainbow colors ranging from red to blue
-	lookupTable =  vtkLookupTable::New();
-	lookupTable->SetTableRange(0,255);
-	//lookupTable->SetHueRange(0.0,0.566);
-	//lut->SetSaturationRange(0,0);
-	//lut->SetValueRange(0.0,1.0);
-	lookupTable->SetNumberOfTableValues(256);
-	lookupTable->Build();
+    captions=vtkActor2DCollection::New();
+    linesPlotter2D = new LinePlotter2D();
 
-	// geometry parameters all in cm
-	doorThickness = 3;
-	wallThickness = 3;
-	wallHeight=250;
-	doorHeight=250;
-	stepHeight = 40;
-	wallColor = 255;
-	stepColor = 130;
-	doorColor = 50;
+    // initializing the lookup table for the colors
+    // rainbow colors ranging from red to blue
+    lookupTable =  vtkLookupTable::New();
+    lookupTable->SetTableRange(0,255);
+    //lookupTable->SetHueRange(0.0,0.566);
+    //lut->SetSaturationRange(0,0);
+    //lut->SetValueRange(0.0,1.0);
+    lookupTable->SetNumberOfTableValues(256);
+    lookupTable->Build();
+
+    // geometry parameters all in cm
+    doorThickness = 3;
+    wallThickness = 3;
+    wallHeight=250;
+    doorHeight=250;
+    stepHeight = 40;
+    wallColor = 255;
+    stepColor = 130;
+    doorColor = 50;
     navlineColor=95;
 }
 
 FacilityGeometry::~FacilityGeometry() {
-	if(assembly)
-		assembly->Delete();
+    if(assembly)
+        assembly->Delete();
 
-	lookupTable->Delete();
+    lookupTable->Delete();
 
-	delete linesPlotter2D;
+    delete linesPlotter2D;
 }
 
-//todo:
-// each time this is called, the assemblies parts are added
-// very bad
 
-vtkAssembly* FacilityGeometry::getActor2D(){
-
-	assembly2D->AddPart(linesPlotter2D->createAssembly());
-	assembly2D->AddPart(assemblyCaptions);
-
-	return assembly2D;
+vtkAssembly* FacilityGeometry::getActor2D()
+{
+    return assembly2D;
 }
 
- vtkAssembly* FacilityGeometry::getCaptionsActor()
- {
-     return assemblyCaptions;
- }
+vtkAssembly* FacilityGeometry::getCaptionsActor()
+{
+    return assemblyCaptions;
+}
 
- vtkAssembly* FacilityGeometry::getActor3D()
- {
-     assembly3D->AddPart(assemblyDoors3D);
-     assembly3D->AddPart(assemblyWalls3D);
-     assembly3D->AddPart(assemblyCaptions);
-     return assembly3D;
- }
+vtkAssembly* FacilityGeometry::getActor3D()
+{
+    return assembly3D;
+}
+
+void FacilityGeometry::CreateActors()
+{
+    assembly2D->AddPart(linesPlotter2D->createAssembly());
+    assembly2D->AddPart(assemblyCaptions);
+
+    assembly3D->AddPart(assemblyDoors3D);
+    assembly3D->AddPart(assemblyWalls3D);
+    assembly3D->AddPart(assemblyCaptions);
+}
 
 //void FacilityGeometry::drawWall(Point *p1, Point *p2){
 //	double scale =1;
@@ -229,7 +233,7 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         actor->GetProperty()->SetOpacity(0.5);
         assemblyDoors3D->AddPart(actor);
     }
-    break;
+        break;
     case WALL:
     {
         double colorRGB[3];
@@ -244,7 +248,7 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         //src->SetRadius(wallWidth);
         assemblyWalls3D->AddPart(actor);
     }
-    break;
+        break;
     case STEP:
     {
         double colorRGB[3];
@@ -254,9 +258,9 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         src->SetZLength(stepHeight);
         assemblyDoors3D->AddPart(actor);
     }
-    break;
+        break;
 
-    //default behaviour not defined
+        //default behaviour not defined
     default:
         break;
     }
@@ -270,13 +274,13 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
 
 void FacilityGeometry::addWall(double x1, double y1, double z1, double x2, double y2, double z2,double thickness,double height,double color){
 
-	// all walls will have this parameters until changed
-	wallColor=color;
+    // all walls will have this parameters until changed
+    wallColor=color;
 
-	//	if(SystemSettings::get2D()){
-	double m[]={x1,y1,z1};
-	double n[]={x2,y2,z2};
-	linesPlotter2D->PlotWall(m,n,wallColor/255.0);
+    //	if(SystemSettings::get2D()){
+    double m[]={x1,y1,z1};
+    double n[]={x2,y2,z2};
+    linesPlotter2D->PlotWall(m,n,wallColor/255.0);
 
 
     JPoint *p1 = new JPoint(x1,y1,z1);
@@ -294,14 +298,14 @@ void FacilityGeometry::addWall(double x1, double y1, double z1, double x2, doubl
 
 void FacilityGeometry::addDoor(double x1, double y1, double z1, double x2, double y2, double z2,double thickness ,double height, double color){
 
-	// all doors will take this color upon changed
-	doorColor=color;
-	//constructing the 2D assembly
-	//	if(SystemSettings::get2D()){
-	double m[]={x1,y1,z1};
-	double n[]={x2,y2,z2};
+    // all doors will take this color upon changed
+    doorColor=color;
+    //constructing the 2D assembly
+    //	if(SystemSettings::get2D()){
+    double m[]={x1,y1,z1};
+    double n[]={x2,y2,z2};
 
-	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
+    linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 
     JPoint *p1 = new JPoint(x1,y1,z1);
     JPoint *p2 = new JPoint(x2,y2,z2);
@@ -327,24 +331,24 @@ void FacilityGeometry::addNavLine(double x1, double y1, double z1, double x2, do
 
     linesPlotter2D->PlotNavLine(m,n,navlineColor/255.0);
 
-//    JPoint *p1 = new JPoint(x1,y1,z1);
-//    JPoint *p2 = new JPoint(x2,y2,z2);
-//    double *center = p1->centreCoordinatesWith(*p2);
-//    double angle =p1->angleMadeWith(*p2);
-//    double length =p1->distanceTo(*p2)+wallThickness;
+    //    JPoint *p1 = new JPoint(x1,y1,z1);
+    //    JPoint *p2 = new JPoint(x2,y2,z2);
+    //    double *center = p1->centreCoordinatesWith(*p2);
+    //    double angle =p1->angleMadeWith(*p2);
+    //    double length =p1->distanceTo(*p2)+wallThickness;
 
-//    addNewElement(center, length, angle, DOOR);
+    //    addNewElement(center, length, angle, DOOR);
 
-//    delete p1;
-//    delete p2;
-//    delete center;
+    //    delete p1;
+    //    delete p2;
+    //    delete center;
 }
 
 void FacilityGeometry::addStep(double x1, double y1, double z1, double x2, double y2, double z2)
 {
-	double m[]={x1,y1,z1};
-	double n[]={x2,y2,z2};
-	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
+    double m[]={x1,y1,z1};
+    double n[]={x2,y2,z2};
+    linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 
     JPoint *p1 = new JPoint(x1,y1,z1);
     JPoint *p2 = new JPoint(x2,y2,z2);
@@ -361,18 +365,18 @@ void FacilityGeometry::addStep(double x1, double y1, double z1, double x2, doubl
 
 void FacilityGeometry::addStep(JPoint* p1, JPoint* p2){
 
-	double m[3];
-	double n[3];
-	double CHT[3];
+    double m[3];
+    double n[3];
+    double CHT[3];
 
-	p1->getXYZ(m);
-	p2->getXYZ(n);
-	p1->getColorHeightThicknes(CHT);
+    p1->getXYZ(m);
+    p2->getXYZ(n);
+    p1->getColorHeightThicknes(CHT);
 
-	stepHeight=CHT[1];
-	stepColor = CHT[0];
+    stepHeight=CHT[1];
+    stepColor = CHT[0];
 
-	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
+    linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 
     double *center = p1->centreCoordinatesWith(*p2);
     double angle =p1->angleMadeWith(*p2);
@@ -412,32 +416,32 @@ void FacilityGeometry::addWall(JPoint* p1, JPoint* p2, string caption){
 
 void FacilityGeometry::addDoor(JPoint* p1, JPoint* p2, string caption){
 
-	double m[3];
-	double n[3];
-	double CHT[3];
+    double m[3];
+    double n[3];
+    double CHT[3];
 
-	p1->getXYZ(m);
-	p2->getXYZ(n);
-	//to get the exits over the walls
-	//m[0]++;	m[1]++;	m[2]++;
-	//n[0]++;	n[1]++;	n[2]++;
-	p1->getColorHeightThicknes(CHT);
+    p1->getXYZ(m);
+    p2->getXYZ(n);
+    //to get the exits over the walls
+    //m[0]++;	m[1]++;	m[2]++;
+    //n[0]++;	n[1]++;	n[2]++;
+    p1->getColorHeightThicknes(CHT);
 
-	doorThickness = CHT[2];
-	doorHeight=CHT[1];
-	doorColor = CHT[0];
+    doorThickness = CHT[2];
+    doorHeight=CHT[1];
+    doorColor = CHT[0];
 
-	linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
+    linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 
-	if (caption.compare("") != 0){
+    if (caption.compare("") != 0){
 
-		double center[3];
-		center[0]=0.5*(m[0]+n[0]);
-		center[1]=0.5*(m[1]+n[1]);
-		center[2]=0.5*(m[2]+n[2]);
-		double orientation[3]={0,0,0};
-		addNewElementText(center,orientation,caption.c_str(),0);
-	}
+        double center[3];
+        center[0]=0.5*(m[0]+n[0]);
+        center[1]=0.5*(m[1]+n[1]);
+        center[2]=0.5*(m[2]+n[2]);
+        double orientation[3]={0,0,0};
+        addNewElementText(center,orientation,caption.c_str(),0);
+    }
 
     double *center = p1->centreCoordinatesWith(*p2);
     double angle =p1->angleMadeWith(*p2);
@@ -476,73 +480,71 @@ void FacilityGeometry::addNavLine(JPoint* p1, JPoint* p2, string caption){
 }
 
 
+void FacilityGeometry::addFloor(vtkPolyData* polygonPolyData )
+{
+    //triagulate everything
+    // Create a mapper and actor
+    VTK_CREATE(vtkTriangleFilter,filter);
+    VTK_CREATE(vtkPolyDataMapper,mapper);
+
+#if VTK_MAJOR_VERSION <= 5
+    filter->SetInput(polygonPolyData);
+    mapper->SetInput(filter->GetOutput());
+#else
+    filter->SetInputData(polygonPolyData);
+    mapper->SetInputConnection(filter->GetOutputPort());
+#endif
+
+    floorActor->SetMapper(mapper);
+    floorActor->GetProperty()->SetColor(0,0,1);
+    floorActor->GetProperty()->SetOpacity(0.5);
+
+    assembly2D->AddPart(floorActor);
+    assembly3D->AddPart(floorActor);
+}
+
+
 void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, double z){
-	//if(z!=1)return;
-	const double cellSize=40; //cm
-	//	const int dimX=(x2-x1)/cellSize+1;
-	//	const int dimY=(y2-y1)/cellSize+1;
-	const int dimX= (int)ceil((x2-x1)/cellSize) +1;
-	const int dimY= (int)ceil((y2-y1)/cellSize) +1;
+    //if(z!=1)return;
+    const double cellSize=40; //cm
+    //	const int dimX=(x2-x1)/cellSize+1;
+    //	const int dimY=(y2-y1)/cellSize+1;
+    const int dimX= (int)ceil((x2-x1)/cellSize) +1;
+    const int dimY= (int)ceil((y2-y1)/cellSize) +1;
 
 
-	const int dimZ=1;
-	//vtkDoubleArray *scalars = vtkDoubleArray::New();
-	vtkDataArray* pData = vtkUnsignedCharArray::New();
-	pData->SetNumberOfComponents(3);
+    const int dimZ=1;
+    //vtkDoubleArray *scalars = vtkDoubleArray::New();
+    vtkDataArray* pData = vtkUnsignedCharArray::New();
+    pData->SetNumberOfComponents(3);
 
-	double color[2][3]={{100, 100, 100},{150,150,150}};
-	bool idx=0;
-	bool firstIdx=1;
+    double color[2][3]={{100, 100, 100},{150,150,150}};
+    bool idx=0;
+    bool lastColorUsed=0;
+    for(int i=0;i<dimY-1;i++){
 
-	//	for(int i=0;i<dimX-1;i++){
-	//		firstIdx=!firstIdx;
-	//		idx=firstIdx;
-	//		for(int j=0;j<dimY-1;j++){
-	//			pData->InsertNextTuple3(color[idx][0],color[idx][1],color[idx][2]);
-	//			idx=!idx;
-	//		}
-	//	}
-	//	bool lastColorUsed=0;
-	//	for(int i=0;i<dimX-1;i++){
-	//
-	//			if(idx==lastColorUsed){
-	//				lastColorUsed= !lastColorUsed;
-	//				idx=lastColorUsed;
-	//			}else{
-	//				lastColorUsed=idx;
-	//			}
-	//
-	//			for(int j=0;j<dimY-1;j++){
-	//				pData->InsertNextTuple3(color[idx][0],color[idx][1],color[idx][2]);
-	//				idx=!idx;
-	//			}
-	//		}
+        if(idx==lastColorUsed){
+            lastColorUsed= !lastColorUsed;
+            idx=lastColorUsed;
+        }else{
+            lastColorUsed=idx;
+        }
 
-	bool lastColorUsed=0;
-	for(int i=0;i<dimY-1;i++){
+        for(int j=0;j<dimX-1;j++){
+            pData->InsertNextTuple3(color[idx][0],color[idx][1],color[idx][2]);
+            idx=!idx;
+        }
+    }
 
-		if(idx==lastColorUsed){
-			lastColorUsed= !lastColorUsed;
-			idx=lastColorUsed;
-		}else{
-			lastColorUsed=idx;
-		}
-
-		for(int j=0;j<dimX-1;j++){
-			pData->InsertNextTuple3(color[idx][0],color[idx][1],color[idx][2]);
-			idx=!idx;
-		}
-	}
-
-	// data as cellData of imageData
-	VTK_CREATE(vtkImageData, image);
-	image->SetDimensions(dimX, dimY, dimZ);
-	image->SetSpacing(cellSize, cellSize, cellSize);
-	image->GetCellData()->SetScalars(pData);
+    // data as cellData of imageData
+    VTK_CREATE(vtkImageData, image);
+    image->SetDimensions(dimX, dimY, dimZ);
+    image->SetSpacing(cellSize, cellSize, cellSize);
+    image->GetCellData()->SetScalars(pData);
 
 
-	VTK_CREATE(vtkActor, imageActor);
-	VTK_CREATE(vtkDataSetMapper, map);
+    VTK_CREATE(vtkActor, imageActor);
+    VTK_CREATE(vtkDataSetMapper, map);
 
 #if VTK_MAJOR_VERSION <= 5
     map->SetInput(image);
@@ -550,95 +552,95 @@ void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, doub
     map->SetInputData(image);
 #endif
 
-	//map->SetLookupTable(lookupTable);
-	imageActor->SetMapper(map);
-	imageActor->GetProperty()->SetAmbient(0.2);
-	//imageActor->GetProperty()->SetDiffuse(0.8);
+    //map->SetLookupTable(lookupTable);
+    imageActor->SetMapper(map);
+    imageActor->GetProperty()->SetAmbient(0.2);
+    //imageActor->GetProperty()->SetDiffuse(0.8);
 
-	// move the actor in x-direction
-	imageActor->SetPosition(x1, y1, z);
-	assembly2D->AddPart(imageActor);
+    // move the actor in x-direction
+    imageActor->SetPosition(x1, y1, z);
+    assembly2D->AddPart(imageActor);
 
 }
 
 
 void FacilityGeometry::addObjectSphere(double center[3], double radius,
-		double color) {
+double color) {
 
-	double colorRGB[3];
-	lookupTable->GetColor(color, colorRGB);
+    double colorRGB[3];
+    lookupTable->GetColor(color, colorRGB);
 
-	//create a disk for the 2D world
-	{
-		VTK_CREATE(vtkDiskSource, disk);
-		disk->SetCircumferentialResolution(10);
-		disk->SetInnerRadius(0);
-		disk->SetOuterRadius(radius);
+    //create a disk for the 2D world
+    {
+        VTK_CREATE(vtkDiskSource, disk);
+        disk->SetCircumferentialResolution(10);
+        disk->SetInnerRadius(0);
+        disk->SetOuterRadius(radius);
 
-		VTK_CREATE(vtkPolyDataMapper, mapper);
-		mapper->SetInputConnection(disk->GetOutputPort());
+        VTK_CREATE(vtkPolyDataMapper, mapper);
+        mapper->SetInputConnection(disk->GetOutputPort());
 
-		VTK_CREATE(vtkActor, actor);
-		actor->SetMapper(mapper);
-		actor->GetProperty()->SetColor(colorRGB);
+        VTK_CREATE(vtkActor, actor);
+        actor->SetMapper(mapper);
+        actor->GetProperty()->SetColor(colorRGB);
 
-		actor->SetPosition(center[0], center[1], center[2]);
-		assembly2D->AddPart(actor);
-	}
+        actor->SetPosition(center[0], center[1], center[2]);
+        assembly2D->AddPart(actor);
+    }
 }
 
 
 void FacilityGeometry::addObjectCylinder(double center[3], double radius,
-		double height, double orientation[3],double color) {
+double height, double orientation[3],double color) {
 
-	double colorRGB[3];
-	lookupTable->GetColor(color, colorRGB);
+    double colorRGB[3];
+    lookupTable->GetColor(color, colorRGB);
 
-	//create a disk for the 2D world
-	//TODO: this is of course a wrong projection
-	{
-		VTK_CREATE(vtkDiskSource, disk);
-		disk->SetCircumferentialResolution(10);
-		disk->SetInnerRadius(0);
-		disk->SetOuterRadius(radius);
+    //create a disk for the 2D world
+    //TODO: this is of course a wrong projection
+    {
+        VTK_CREATE(vtkDiskSource, disk);
+        disk->SetCircumferentialResolution(10);
+        disk->SetInnerRadius(0);
+        disk->SetOuterRadius(radius);
 
-		VTK_CREATE(vtkPolyDataMapper, mapper);
-		mapper->SetInputConnection(disk->GetOutputPort());
+        VTK_CREATE(vtkPolyDataMapper, mapper);
+        mapper->SetInputConnection(disk->GetOutputPort());
 
-		VTK_CREATE(vtkActor, actor);
-		actor->SetMapper(mapper);
-		actor->GetProperty()->SetColor(colorRGB);
+        VTK_CREATE(vtkActor, actor);
+        actor->SetMapper(mapper);
+        actor->GetProperty()->SetColor(colorRGB);
 
-		actor->SetPosition(center[0], center[1], center[2]);
-		assembly2D->AddPart(actor);
-	}
+        actor->SetPosition(center[0], center[1], center[2]);
+        assembly2D->AddPart(actor);
+    }
 }
 
 void FacilityGeometry::addObjectBox(double center[3], double height,
-		double width, double length, double color) {
+double width, double length, double color) {
 
-	double colorRGB[3];
-	lookupTable->GetColor(color, colorRGB);
+    double colorRGB[3];
+    lookupTable->GetColor(color, colorRGB);
 
-	{
-		VTK_CREATE(vtkCubeSource,src);
-		src->SetCenter(center[0], center[1], center[2]);
-		src->SetZLength(1); //todo: fake projection
-		src->SetYLength(length);
-		src->SetXLength(width);
+    {
+        VTK_CREATE(vtkCubeSource,src);
+        src->SetCenter(center[0], center[1], center[2]);
+        src->SetZLength(1); //todo: fake projection
+        src->SetYLength(length);
+        src->SetXLength(width);
 
-		VTK_CREATE(vtkPolyDataMapper,mapper);
-		mapper->SetInputConnection(src->GetOutputPort());
+        VTK_CREATE(vtkPolyDataMapper,mapper);
+        mapper->SetInputConnection(src->GetOutputPort());
 
-		VTK_CREATE(vtkActor,actor);
-		actor->GetProperty()->SetLighting(true);
-		actor->SetOrigin(center[0], center[1], 0);
-		actor->GetProperty()->SetColor(colorRGB);
-		actor->GetProperty()->SetAmbient(0.2);
-		actor->GetProperty()->SetDiffuse(0.8);
-		actor->SetMapper(mapper);
-		assembly2D->AddPart(actor);
-	}
+        VTK_CREATE(vtkActor,actor);
+        actor->GetProperty()->SetLighting(true);
+        actor->SetOrigin(center[0], center[1], 0);
+        actor->GetProperty()->SetColor(colorRGB);
+        actor->GetProperty()->SetAmbient(0.2);
+        actor->GetProperty()->SetDiffuse(0.8);
+        actor->SetMapper(mapper);
+        assembly2D->AddPart(actor);
+    }
 }
 
 void FacilityGeometry::changeWallsColor(double* color)
@@ -683,13 +685,18 @@ void FacilityGeometry::changeNavLinesColor(double *color)
     assembly2D->Modified();
 }
 
+void FacilityGeometry::changeFloorColor(double *color)
+{
+    floorActor->GetProperty()->SetColor(color);
+}
+
 void FacilityGeometry::set2D(bool status){
-	assembly2D->SetVisibility(status);
+    assembly2D->SetVisibility(status);
 }
 
 void FacilityGeometry::set3D(bool status){
     if(assembly3D!=NULL)
-            assembly3D->SetVisibility(status);
+        assembly3D->SetVisibility(status);
 }
 
 void FacilityGeometry::showDoors(bool status){
@@ -732,13 +739,19 @@ void FacilityGeometry::showNavLines(bool status)
     linesPlotter2D->showNavLines(status);
 }
 
+void FacilityGeometry::showFloor(bool status)
+{
+    floorActor->SetVisibility(status);
+}
+
 void FacilityGeometry::addObjectLabel(double center[3], double orientation[3], std::string caption, double color){
-	addNewElementText(center, orientation, caption, color);
+    addNewElementText(center, orientation, caption, color);
 }
 
 vtkActor2DCollection* FacilityGeometry::getCaptions(){
-	return captions;
+    return captions;
 }
+
 
 // orientation and color ignored
 void FacilityGeometry::addNewElementText(double center[3], double orientation[3],
@@ -772,14 +785,14 @@ string text, double color) {
 
 void FacilityGeometry::showGeometryLabels(int status){
 
-	vtkProp3DCollection* col=assemblyCaptions->GetParts();
-	assemblyCaptions->GetActors(col);
+    vtkProp3DCollection* col=assemblyCaptions->GetParts();
+    assemblyCaptions->GetActors(col);
 
-	int count = col->GetNumberOfItems();
-	for (int i=0;i<count;i++){
-		((vtkActor*)col->GetItemAsObject(i))->SetVisibility(status);
-	}
-	assemblyCaptions->Modified();
+    int count = col->GetNumberOfItems();
+    for (int i=0;i<count;i++){
+        ((vtkActor*)col->GetItemAsObject(i))->SetVisibility(status);
+    }
+    assemblyCaptions->Modified();
 
 }
 

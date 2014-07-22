@@ -44,6 +44,7 @@ bool SystemSettings::showAgentsCaptions=false;
 bool SystemSettings::is2D=false;
 bool SystemSettings::showAgents=true;
 bool SystemSettings::showGeometry=true;
+bool SystemSettings::showFloor=true;
 unsigned short SystemSettings::port=8989;
 double SystemSettings::bgColor[]={1.0,1.0,1.0};
 int SystemSettings::pedestriansColor[3][3]={{255 , 17, 224},{122, 255, 122},{130, 130, 130}};
@@ -125,6 +126,16 @@ void SystemSettings::setShowGeometry(bool status)
 bool SystemSettings::getShowGeometry()
 {
     return showGeometry;
+}
+
+void SystemSettings::setShowFloor(bool status)
+{
+    showFloor=status;
+}
+
+bool SystemSettings::getShowFloor()
+{
+    return showFloor;
 }
 
 void   SystemSettings::setWorkingDirectory(QString dir)

@@ -61,6 +61,9 @@
 #include <vtkProperty.h>
 #include <vtkTriangleFilter.h>
 
+#define VTK_CREATE(type, name) \
+    vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+
 
 using namespace std;
 
@@ -650,6 +653,8 @@ void SaxParser::clearPoints(){
 /// provided for convenience and will be removed in the next version
 void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
+    double captionsColor=0;//red
+
 	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
 
     QString wd;
@@ -665,12 +670,9 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
 	int currentID=0;
 	// Setup the points
-	vtkSmartPointer<vtkPoints> points =
-			vtkSmartPointer<vtkPoints>::New();
-
+    VTK_CREATE(vtkPoints,points);
 	// Add the polygon to a list of polygons
-	vtkSmartPointer<vtkCellArray> polygons =
-			vtkSmartPointer<vtkCellArray>::New();
+    VTK_CREATE(vtkCellArray,polygons);
 
     for (int i = 0; i < building->GetNumberOfRooms(); i++)
     {
@@ -688,8 +690,7 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
             }
 
 			// Create the polygon
-			vtkSmartPointer<vtkPolygon> polygon =
-					vtkSmartPointer<vtkPolygon>::New();
+            VTK_CREATE(vtkPolygon,polygon);
 			polygon->GetPointIds()->SetNumberOfIds(poly.size());
 
 			for (unsigned int s=0;s<poly.size();s++){
@@ -699,55 +700,83 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 			polygons->InsertNextCell(polygon);
 
             //plot the walls only for not stairs
-            if(sub->GetType()=="stair") continue;
-            const vector<Wall>& walls= sub->GetAllWalls();
-            for(unsigned int w=0;w<walls.size();w++){
-                Point p1 = walls[w].GetPoint1();
-                Point p2 = walls[w].GetPoint2();
-                double z1= sub->GetElevation(p1);
-                double z2= sub->GetElevation(p2);
-                geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+            if(sub->GetType()!="stair"){
+                const vector<Wall>& walls= sub->GetAllWalls();
+                for(unsigned int w=0;w<walls.size();w++){
+                    Point p1 = walls[w].GetPoint1();
+                    Point p2 = walls[w].GetPoint2();
+                    double z1= sub->GetElevation(p1);
+                    double z2= sub->GetElevation(p2);
+                    geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+                }
             }
 
+            //insert the subroom caption
+            string caption=r->GetCaption()+" ( " + QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
+            const Point& p=sub->GetCentroid();
+            double z= sub->GetElevation(p);
+            double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};
+            geometry->addObjectLabel(pos,pos,caption,captionsColor);
+
+            //plot the obstacles
+            const vector<Obstacle*>& obstacles = sub->GetAllObstacles();
+            for( unsigned int j=0; j<obstacles.size(); j++) {
+                Obstacle* obst= obstacles[j];
+                const vector<Wall>& walls= obst->GetAllWalls();
+                for(unsigned int w=0;w<walls.size();w++){
+                    Point p1 = walls[w].GetPoint1();
+                    Point p2 = walls[w].GetPoint2();
+                    double z1= sub->GetElevation(p1);
+                    double z2= sub->GetElevation(p2);
+                    geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+                }
+                //add the obstacle caption
+                const Point& p=obst->GetCentroid();
+                double z= sub->GetElevation(p);
+                double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};
+                geometry->addObjectLabel(pos,pos,obst->GetCaption(),captionsColor);
+            }
 		}
 	}
 
-	// Create a PolyData
-	vtkSmartPointer<vtkPolyData> polygonPolyData =
-			vtkSmartPointer<vtkPolyData>::New();
-	polygonPolyData->SetPoints(points);
+    // Create a PolyData to represent the floor
+    VTK_CREATE(vtkPolyData, polygonPolyData);
+    polygonPolyData->SetPoints(points);
 	polygonPolyData->SetPolys(polygons);
-
-    //triagulate everything
-    vtkSmartPointer<vtkTriangleFilter> filter=vtkSmartPointer<vtkTriangleFilter>::New();
-
-    // Create a mapper and actor
-    vtkSmartPointer<vtkPolyDataMapper> mapper =
-            vtkSmartPointer<vtkPolyDataMapper>::New();
-
-
-
-#if VTK_MAJOR_VERSION <= 5
-     filter->SetInput(polygonPolyData);
-    mapper->SetInput(filter->GetOutput());
-#else
-    filter->SetInputData(polygonPolyData);
-    mapper->SetInputConnection(filter->GetOutputPort());
-#endif
-
-	vtkSmartPointer<vtkActor> actor =
-			vtkSmartPointer<vtkActor>::New();
-	actor->SetMapper(mapper);
-	actor->GetProperty()->SetColor(0,0,1);
-	actor->GetProperty()->SetOpacity(0.5);
-	//actor->GetProperty()->SetLineWidth(5);
-
-    geometry->getActor2D()->AddPart(actor);
-    geometry->getActor3D()->AddPart(actor);
+    geometry->addFloor(polygonPolyData);
 
 
     // add the crossings
+    const map<int, Crossing*>& crossings=building->GetAllCrossings();
+    for (std::map<int, Crossing*>::const_iterator it=crossings.begin(); it!=crossings.end(); ++it)
+    {
+        Crossing* cr=it->second;
+        Point p1 = cr->GetPoint1();
+        Point p2 = cr->GetPoint2();
+        double z1= cr->GetSubRoom1()->GetElevation(p1);
+        double z2= cr->GetSubRoom1()->GetElevation(p2);
+        geometry->addNavLine(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+
+        const Point& p =cr->GetCentre();
+        double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
+        geometry->addObjectLabel(pos,pos,"nav_"+QString::number(cr->GetID()).toStdString(),captionsColor);
+    }
+
     // add the exits
+    const map<int, Transition*>& transitions=building->GetAllTransitions();
+    for (std::map<int, Transition*>::const_iterator it=transitions.begin(); it!=transitions.end(); ++it)
+    {
+        Transition* tr=it->second;
+        Point p1 = tr->GetPoint1();
+        Point p2 = tr->GetPoint2();
+        double z1= tr->GetSubRoom1()->GetElevation(p1);
+        double z2= tr->GetSubRoom1()->GetElevation(p2);
+        geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+
+        const Point& p =tr->GetCentre();
+        double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
+        geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
+    }
 
 	// free memory
 	delete building;

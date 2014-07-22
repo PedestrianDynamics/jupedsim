@@ -151,6 +151,7 @@ void ThreadVisualisation::run(){
 	//renderer->SetBackground(.00,.00,.00);
 	renderer->SetBackground(1.0,1.0,1.0);
 	//add the geometry
+    geometry->CreateActors();
     renderer->AddActor(geometry->getActor2D());
     renderer->AddActor(geometry->getActor3D());
 
@@ -1045,9 +1046,9 @@ void ThreadVisualisation::setGeometry(FacilityGeometry* geometry){
 }
 
 FacilityGeometry* ThreadVisualisation::getGeometry() {
-	//if(geometry==NULL){ //FIXME TODO restore me
+    if(geometry==NULL){
 	geometry=new FacilityGeometry();
-	//}
+    }
 	return geometry;
 }
 

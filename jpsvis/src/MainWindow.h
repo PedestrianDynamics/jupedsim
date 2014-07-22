@@ -175,18 +175,16 @@ public Q_SLOTS:
 	void slotShowHideWalls();
     /// shows/hide navigation lines
     void slotShowHideNavLines();
+    /// shows/hide navigation lines
+    void slotShowHideFloor();
 	/// shows/hide geometry captions
 	void slotShowHideGeometryCaptions();
 
 	/// show pedestrians only without trail
 	void slotShowPedestrianOnly();
 
-
 	/// update the playing speed
 	void slotUpdateSpeedSlider(int newValue);
-	//void slotSpeedSliderPressed();
-	//void slotSpeedSliderReleased();
-	//void slotSpeedSliderChanged();
 
 	/// update the position slider
 	void slotUpdateFrameSlider(int newValue);
@@ -245,6 +243,9 @@ public Q_SLOTS:
 
     /// change the navigation lines color
     void slotChangeNavLinesColor();
+
+    /// change the floor color
+    void slotChangeFloorColor();
 
 	/// show/hide onscreen information
 	/// information include Time and pedestrians left in the facility

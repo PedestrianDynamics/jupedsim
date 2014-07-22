@@ -1071,6 +1071,14 @@ void MainWindow::slotShowHideNavLines()
     }
 }
 
+//todo: add to the system settings
+void MainWindow::slotShowHideFloor()
+{
+    bool status = ui.actionShow_Floor->isChecked();
+    visualisationThread->getGeometry()->showFloor(status);
+    SystemSettings::setShowFloor(status);
+}
+
 
 /// update the playing speed
 void MainWindow::slotUpdateSpeedSlider(int newValue){
@@ -1466,6 +1474,22 @@ void MainWindow::slotChangeNavLinesColor(){
     double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
     visualisationThread->setNavLinesColor(color);
+
+    delete colorDialog;
+}
+
+void MainWindow::slotChangeFloorColor()
+{
+    QColorDialog* colorDialog = new QColorDialog(this);
+    colorDialog->setToolTip("Choose a new color for teh floor");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new floor color");
+
+    //the user may have cancelled the process
+    if(col.isValid()==false) return;
+
+    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+
+    visualisationThread->getGeometry()->changeFloorColor(color);
 
     delete colorDialog;
 }

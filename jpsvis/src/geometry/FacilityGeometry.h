@@ -74,6 +74,8 @@ public:
 
 	vtkActor2DCollection* getCaptions();
 
+    void CreateActors();
+
 	///draw a wall
 	void addWall(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=15, double height=250,double col=255);
 	//void addWall(double center[3], double width, double orientation);
@@ -96,6 +98,7 @@ public:
 
     /// draw a floor, divided in cells,
 	void addFloor(double x1, double y1, double x2, double y2, double z=0);
+    void addFloor(vtkPolyData* polygonPolyData);
 
 	/// draw other kinds of objects
 	void addObjectSphere(double center[3], double radius, double couleur=1);
@@ -107,6 +110,7 @@ public:
 	void changeWallsColor(double* color);
 	void changeExitsColor(double* color);
     void changeNavLinesColor(double* color);
+    void changeFloorColor(double* color);
 
 	void set2D(bool status);
 	void set3D(bool status);
@@ -115,7 +119,8 @@ public:
 	void showStairs(bool status);
 	void showWalls(bool status);
     void showNavLines(bool status);
-	void showGeometryLabels(int v);
+    void showFloor(bool status);
+    void showGeometryLabels(int status);
 
 
 private:
@@ -150,6 +155,8 @@ private:
     vtkAssembly* assemblyWalls3D;
     vtkAssembly* assemblyDoors3D;
     vtkAssembly* assembly3D;
+
+    vtkActor* floorActor;
 
 	// other parts
 	vtkAssembly* assemblyCaptions;

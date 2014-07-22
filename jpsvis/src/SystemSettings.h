@@ -67,6 +67,10 @@ public:
     void static setShowGeometry(bool status);
     bool static getShowGeometry();
 
+    // set/get the  geometry visibility
+    void static setShowFloor(bool status);
+    bool static getShowFloor();
+
     void static setWorkingDirectory(QString dir);
     void static getWorkingDirectory(QString& dir);
 
@@ -158,6 +162,7 @@ private:
 	static bool is2D; //   Toggle 2D/3D mode
     static bool showAgents;
     static bool showGeometry;
+    static bool showFloor;
 	static unsigned short port;
 	static double bgColor[3];
 	static int ellipseResolution;
