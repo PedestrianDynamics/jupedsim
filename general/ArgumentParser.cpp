@@ -479,7 +479,7 @@ void ArgumentParser::SetAgentsParameters(const std::map<int, AgentsParameters*>&
 void ArgumentParser::ParseIniFile(string inifile)
 {
 
-    Log->Write("INFO: \tLoading and parsing the project file file <%s>",
+    Log->Write("INFO: \tLoading and parsing the project file <%s>",
             inifile.c_str());
     _projectFile = inifile;
 
@@ -488,11 +488,11 @@ void ArgumentParser::ParseIniFile(string inifile)
     if (found != string::npos)
         _projectRootDir = inifile.substr(0, found) + "/";
 
-    //cout<<inifile<<endl;
-    //cout<<_projectRootDir<<endl; exit(0);
-    //char *real_path = _realpath(path, NULL);
+    // cout<<inifile<<endl;
+    // cout<<_projectRootDir<<endl; exit(0);
+    // char *real_path = _realpath(path, NULL);
     // use real_path
-    //free(real_path);
+    // free(real_path);
 
     TiXmlDocument doc(inifile);
     if (!doc.LoadFile())
