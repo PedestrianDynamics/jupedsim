@@ -89,6 +89,7 @@ private:
     std::vector<FrameElement *> currentFrame;
     //std::vector<TrajectoryPoint *> currentFrame;
     bool parsingWalls;
+    bool parsingCrossings;
 
     //wall and door parameters
     double thickness;

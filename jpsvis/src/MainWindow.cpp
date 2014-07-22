@@ -454,7 +454,7 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
 
     QDomNodeList agents = shapeNode.toElement().elementsByTagName("agentInfo");
 
-    for (unsigned int i = 0; i < agents.length(); i++) {
+    for (int i = 0; i < agents.length(); i++) {
 
         bool ok=false;
         int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
@@ -1027,6 +1027,7 @@ void MainWindow::slotShowGeometry(){
         ui.actionShow_Exits->setEnabled(true);
         ui.actionShow_Walls->setEnabled(true);
         ui.actionShow_Geometry_Captions->setEnabled(true);
+        ui.actionShow_Navigation_Lines->setEnabled(true);
         SystemSettings::setShowGeometry(true);
     }
     else{
@@ -1034,6 +1035,7 @@ void MainWindow::slotShowGeometry(){
         ui.actionShow_Exits->setEnabled(false);
         ui.actionShow_Walls->setEnabled(false);
         ui.actionShow_Geometry_Captions->setEnabled(false);
+        ui.actionShow_Navigation_Lines->setEnabled(false);
         SystemSettings::setShowGeometry(false);
     }
     extern_force_system_update=true;
@@ -1056,6 +1058,16 @@ void MainWindow::slotShowHideWalls(){
     }
     else{
         visualisationThread->showWalls(false);
+    }
+}
+
+void MainWindow::slotShowHideNavLines()
+{
+    if (ui.actionShow_Navigation_Lines->isChecked()){
+        visualisationThread->showNavLines(true);
+    }
+    else{
+        visualisationThread->showNavLines(false);
     }
 }
 
@@ -1429,15 +1441,31 @@ void MainWindow::slotChangeWallsColor(){
 /// change the exits color
 void MainWindow::slotChangeExitsColor(){
     QColorDialog* colorDialog = new QColorDialog(this);
-    colorDialog->setToolTip("Choose a new color for walls");
-    QColor col=colorDialog->getColor(Qt::white,this,"Select new wall color");
+    colorDialog->setToolTip("Choose a new color for the exits");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new exit color");
 
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  bkcolor[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
-    visualisationThread->setExitsColor(bkcolor);
+    visualisationThread->setExitsColor(color);
+
+    delete colorDialog;
+}
+
+/// change the navigation lines colors
+void MainWindow::slotChangeNavLinesColor(){
+    QColorDialog* colorDialog = new QColorDialog(this);
+    colorDialog->setToolTip("Choose a new color for walls");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new navigation lines color");
+
+    //the user may have cancelled the process
+    if(col.isValid()==false) return;
+
+    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+
+    visualisationThread->setNavLinesColor(color);
 
     delete colorDialog;
 }

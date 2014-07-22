@@ -37,6 +37,7 @@
 #include "geometry/JPoint.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Building.h"
+#include "geometry/Wall.h"
 #include "SystemSettings.h"
 
 #include <QMessageBox>
@@ -77,6 +78,7 @@ SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps){
 	dataset=data;
 	para=fps;
 	parsingWalls=false;
+    parsingCrossings=false;
 	color=0.0;
 
 	dataset->clearFrames();
@@ -345,6 +347,36 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         }
 
     }
+    //FIXME
+    else if (qName == "crossing")
+    {
+        parsingWalls=false;
+        parsingCrossings=true;
+        thickness=15;
+        height=250;
+        color=255;
+        caption="";
+
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="thickness")
+            {
+                thickness=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="caption")
+            {
+                caption=at.value(i);
+            }
+        }
+
+    }
     else if (qName == "timeFirstFrame")
     {
         unsigned long timeFirstFrame_us=0;
@@ -550,6 +582,11 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 			geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
 		}
 		clearPoints();
+    } else if (qName == "crossing") {
+        for(unsigned int i=0;i<currentPointsList.size()-1;i++){
+            geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        }
+        clearPoints();
 	} else if (qName == "step") {//FIXME
 		for(unsigned int i=0;i<currentPointsList.size()-1;i++){
 			geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
@@ -599,9 +636,6 @@ bool SaxParser::attributeDecl(const QString& eName, const QString& aName,
 }
 
 void SaxParser::clearPoints(){
-
-//	currentPointsList.clear();
-
 	while (!currentPointsList.empty()){
 		delete currentPointsList.back();
 		currentPointsList.pop_back();
@@ -638,12 +672,15 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 	vtkSmartPointer<vtkCellArray> polygons =
 			vtkSmartPointer<vtkCellArray>::New();
 
-	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+    for (int i = 0; i < building->GetNumberOfRooms(); i++)
+    {
 		Room* r = building->GetRoom(i);
         //string caption = r->GetCaption();
 
-		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+        for (int k = 0; k < r->GetNumberOfSubRooms(); k++)
+        {
 			SubRoom* sub = r->GetSubRoom(k);
+
             vector<Point> poly = sub->GetPolygon();
 
             if(sub->IsClockwise()==true){
@@ -659,8 +696,19 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
 				polygon->GetPointIds()->SetId(s, currentID++);
 			}
-
 			polygons->InsertNextCell(polygon);
+
+            //plot the walls only for not stairs
+            if(sub->GetType()=="stair") continue;
+            const vector<Wall>& walls= sub->GetAllWalls();
+            for(unsigned int w=0;w<walls.size();w++){
+                Point p1 = walls[w].GetPoint1();
+                Point p2 = walls[w].GetPoint2();
+                double z1= sub->GetElevation(p1);
+                double z2= sub->GetElevation(p2);
+                geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+            }
+
 		}
 	}
 
@@ -695,6 +743,11 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 	//actor->GetProperty()->SetLineWidth(5);
 
     geometry->getActor2D()->AddPart(actor);
+    geometry->getActor3D()->AddPart(actor);
+
+
+    // add the crossings
+    // add the exits
 
 	// free memory
 	delete building;
@@ -1004,6 +1057,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	}
 
 	QDomNodeList xCrossingsList=doc.elementsByTagName("crossing");
+
     for (int i = 0; i < xCrossingsList.length(); i++) {
 		QDomElement xCrossing = xCrossingsList.item(i).toElement();
 		QDomNodeList xVertices=xCrossing.elementsByTagName("vertex");
@@ -1013,7 +1067,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		//door height default to 250 cm
 		double height = xCrossing.attribute("height","250").toDouble();
 		//door color default to blue
-		double color = xCrossing.attribute("color","255").toDouble();
+        double color = xCrossing.attribute("color","120").toDouble();
 		QString id= xCrossing.attribute("id","-1");
 
 		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
@@ -1023,14 +1077,14 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
 		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
 		double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-		geo->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
+        geo->addNavLine(x1, y1, z1, x2, y2,z2,thickness,height,color);
 
 		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
 		geo->addObjectLabel(center,center,id.toStdString(),21);
 	}
 
 	QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
-    for (  int i = 0; i < xTransitionsList.length(); i++) {
+    for (int i = 0; i < xTransitionsList.length(); i++) {
 		QDomElement xTransition = xTransitionsList.item(i).toElement();
 		QDomNodeList xVertices=xTransition.elementsByTagName("vertex");
 

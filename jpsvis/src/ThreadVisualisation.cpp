@@ -337,8 +337,10 @@ void ThreadVisualisation::run(){
 		double col[3]={82.0/255,218.0 /255.0,255.0/255.0};
 		double wallcol[3]={180.0/255,180.0/255.0,180.0/255.0};
 		double exitcol[3]={175.0/255,175.0/255.0,255.0/255.0};
+        double navlinecol[3]={165.0/255,175.0/255.0,225.0/255.0};
 		setExitsColor(exitcol);
 		setWallsColor(wallcol);
+        //setNavLinesColor(navlinecol);
 		//showDoors(false);
 	}
 	//renderWinInteractor->Initialize();
@@ -401,7 +403,14 @@ void ThreadVisualisation::showWalls(bool status){
 void ThreadVisualisation::showDoors(bool status){
 	if(geometry){
 		geometry->showDoors(status);
-	}
+    }
+}
+
+void ThreadVisualisation::showNavLines(bool status)
+{
+    if(geometry){
+        geometry->showNavLines(status);
+    }
 }
 
 void  ThreadVisualisation::initGlyphs2D()
@@ -1051,7 +1060,12 @@ void ThreadVisualisation::setGeometryLabelsVisibility(int v){
 }
 
 void ThreadVisualisation::setExitsColor(double* color){
-	geometry->changeExitsColor(color);
+    geometry->changeExitsColor(color);
+}
+
+void ThreadVisualisation::setNavLinesColor(double *color)
+{
+    geometry->changeNavLinesColor(color);
 }
 
 /// enable/disable 2D

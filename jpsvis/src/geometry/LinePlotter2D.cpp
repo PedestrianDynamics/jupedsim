@@ -52,41 +52,46 @@
 bool LinePlotter2D::doorColorsToDefault=true;
 
 LinePlotter2D::LinePlotter2D()
-:m_scalarMin(0.0), m_scalarMax(1.0)
 {
 
-	assembly=vtkAssembly::New();
+    assembly=vtkAssembly::New();
 
-	door_mapper= vtkPolyDataMapper::New();
-	door_actor= vtkActor::New();
-	door_points = vtkPoints::New();
-	door_lines = vtkCellArray::New();
-	door_lineScalars = vtkFloatArray::New();
-	door_curPointID=0;
-	door_width=3.5;
+    door_mapper= vtkPolyDataMapper::New();
+    door_actor= vtkActor::New();
+    door_points = vtkPoints::New();
+    door_lines = vtkCellArray::New();
+    door_lineScalars = vtkFloatArray::New();
+    door_curPointID=0;
+    door_width=3.5;
 
-	wall_mapper= vtkPolyDataMapper::New();
-	wall_actor= vtkActor::New();
-	wall_points = vtkPoints::New();
-	wall_lines = vtkCellArray::New();
-	wall_lineScalars = vtkFloatArray::New();
-	wall_curPointID=0;
-	wall_width=2;
+    wall_mapper= vtkPolyDataMapper::New();
+    wall_actor= vtkActor::New();
+    wall_points = vtkPoints::New();
+    wall_lines = vtkCellArray::New();
+    wall_lineScalars = vtkFloatArray::New();
+    wall_curPointID=0;
+    wall_width=2;
 
+    navline_curPointID =0;
+    navline_width=2;
+    navline_points= vtkPoints::New();
+    navline_lines=vtkCellArray::New();
+    navline_lineScalars= vtkFloatArray::New();
+    navline_mapper=vtkPolyDataMapper::New();
+    navline_actor= vtkActor::New();
 
-	// create a color lookup table
-	m_lookupTable = vtkLookupTable::New();
-	m_lookupTable->SetTableRange(0,255);
-	m_lookupTable->SetNumberOfTableValues(256);
+    // create a color lookup table
+    m_lookupTable = vtkLookupTable::New();
+    m_lookupTable->SetTableRange(0,255);
+    m_lookupTable->SetNumberOfTableValues(256);
 
-	//	m_lookupTable->SetHueRange(0.0,0.566);
-	//	m_lookupTable->SetSaturationRange(0,0);
-	//	m_lookupTable->SetValueRange(0.0,1.0);
-
-	//m_lookupTable->SetHueRange(0.0,0.0);
-	//m_lookupTable->SetValueRange(0.0,1.0);
-	//m_lookupTable->SetSaturationRange(0.0,0.0);
-	m_lookupTable->Build();
+    //m_lookupTable->SetHueRange(0.0,0.566);
+    //m_lookupTable->SetSaturationRange(0,0);
+    //m_lookupTable->SetValueRange(0.0,1.0);
+    //m_lookupTable->SetHueRange(0.0,0.0);
+    //m_lookupTable->SetValueRange(0.0,1.0);
+    //m_lookupTable->SetSaturationRange(0.0,0.0);
+    m_lookupTable->Build();
 
 
 
@@ -107,13 +112,6 @@ LinePlotter2D::~LinePlotter2D(){
 	wall_mapper->Delete();
 	wall_actor->Delete();
 }
-
-void LinePlotter2D::SetScalarRange(double minval, double maxval)
-{
-	m_scalarMin = minval ;
-	m_scalarMax = maxval ;
-}
-
 
 void LinePlotter2D::SetAllLineWidth(int width)
 {
@@ -143,7 +141,29 @@ void LinePlotter2D::changeWallsColor(double *col)
 	//first switch off the automatic mapping
 	wall_mapper->SetScalarVisibility(0);
 	//then set the new color
-	wall_actor->GetProperty()->SetColor(col);
+    wall_actor->GetProperty()->SetColor(col);
+}
+
+void LinePlotter2D::PlotNavLine(double m[], double n[], double scalar)
+{
+    navline_points->InsertNextPoint(m);
+    navline_lineScalars->InsertNextTuple1(scalar);
+    navline_points->InsertNextPoint(n);
+    navline_lineScalars->InsertNextTuple1(scalar);
+
+    navline_lines->InsertNextCell(2);
+    navline_lines->InsertCellPoint(navline_curPointID);
+    navline_lines->InsertCellPoint(navline_curPointID+1);
+
+    navline_curPointID+=2;
+}
+
+void LinePlotter2D::changeNavLinesColor(double *col)
+{
+    //first switch off the automatic mapping
+    navline_mapper->SetScalarVisibility(0);
+    //then set the new color
+    navline_actor->GetProperty()->SetColor(col);
 }
 
 void LinePlotter2D::changeDoorsColor(double *col)
@@ -198,71 +218,97 @@ void LinePlotter2D::PlotWall(double m[3], double n[3], double scalar)
 //	return actor ;
 //}
 
-vtkAssembly* LinePlotter2D::createAssembly(){
-	//doors
-	{
-		// Create poly data
-		//vtkPolyData* polyData =vtkPolyData::New();
-		VTK_CREATE(vtkPolyData,polyData);
-		polyData->SetPoints(door_points);
-		polyData->SetLines(door_lines);
-		polyData->GetPointData()->SetScalars(door_lineScalars);
+vtkAssembly* LinePlotter2D::createAssembly()
+{
+    //doors
+    {
+        // Create poly data
+        //vtkPolyData* polyData =vtkPolyData::New();
+        VTK_CREATE(vtkPolyData,polyData);
+        polyData->SetPoints(door_points);
+        polyData->SetLines(door_lines);
+        polyData->GetPointData()->SetScalars(door_lineScalars);
 
-		// create mapper
+        // create mapper
 
 #if VTK_MAJOR_VERSION <= 5
         door_mapper->SetInput(polyData);
 #else
         door_mapper->SetInputData(polyData);
 #endif
-		door_mapper->SetLookupTable(m_lookupTable);
-		door_mapper->SetColorModeToMapScalars();
-		//mapper->SetScalarRange(m_scalarMin, m_scalarMax);
-		door_mapper->SetScalarModeToUsePointData();
-		// create actor
-		door_actor->SetMapper(door_mapper);
-		door_actor->GetProperty()->SetLineWidth(door_width);
-		assembly->AddPart(door_actor);
+        door_mapper->SetLookupTable(m_lookupTable);
+        door_mapper->SetColorModeToMapScalars();
+        door_mapper->SetScalarModeToUsePointData();
+        // create actor
+        door_actor->SetMapper(door_mapper);
+        door_actor->GetProperty()->SetLineWidth(door_width);
+        assembly->AddPart(door_actor);
 
-		//if default, then hide all doors
-		// fixme: not working
-		if(doorColorsToDefault){
-			double col[3]={1.0,1.0,1.0};
-			SystemSettings::getBackgroundColor(col);
-			door_actor->GetProperty()->SetColor(col);
-			door_actor->Modified();
-		}
-	}
+        //if default, then hide all doors
+        // fixme: not working
+        if(doorColorsToDefault){
+            double col[3]={1.0,1.0,1.0};
+            SystemSettings::getBackgroundColor(col);
+            door_actor->GetProperty()->SetColor(col);
+            door_actor->Modified();
+        }
+    }
 
-	//walls
-	{
-		// Create poly data
-		VTK_CREATE(vtkPolyData,polyData);
-		polyData->SetPoints(wall_points);
-		polyData->SetLines(wall_lines);
-		polyData->GetPointData()->SetScalars(wall_lineScalars);
+    //walls
+    {
+        // Create poly data
+        VTK_CREATE(vtkPolyData,polyData);
+        polyData->SetPoints(wall_points);
+        polyData->SetLines(wall_lines);
+        polyData->GetPointData()->SetScalars(wall_lineScalars);
         // create mapper
 #if VTK_MAJOR_VERSION <= 5
         wall_mapper->SetInput(polyData);
 #else
         wall_mapper->SetInputData(polyData);
 #endif
-		wall_mapper->SetLookupTable(m_lookupTable);
-		wall_mapper->SetColorModeToMapScalars();
-		//mapper->SetScalarRange(m_scalarMin, m_scalarMax);
-		wall_mapper->SetScalarModeToUsePointData();
-		// create actor
-		wall_actor->SetMapper(wall_mapper);
-		wall_actor->GetProperty()->SetLineWidth(wall_width);
-		assembly->AddPart(wall_actor);
-	}
+        wall_mapper->SetLookupTable(m_lookupTable);
+        wall_mapper->SetColorModeToMapScalars();
+        wall_mapper->SetScalarModeToUsePointData();
+        // create actor
+        wall_actor->SetMapper(wall_mapper);
+        wall_actor->GetProperty()->SetLineWidth(wall_width);
+        assembly->AddPart(wall_actor);
+    }
 
-	return assembly;
+    //navlines
+    {
+        // Create poly data
+        VTK_CREATE(vtkPolyData,polyData);
+        polyData->SetPoints(navline_points);
+        polyData->SetLines(navline_lines);
+        polyData->GetPointData()->SetScalars(navline_lineScalars);
+        // create mapper
+#if VTK_MAJOR_VERSION <= 5
+        navline_mapper->SetInput(polyData);
+#else
+        navline_mapper->SetInputData(polyData);
+#endif
+        navline_mapper->SetLookupTable(m_lookupTable);
+        navline_mapper->SetColorModeToMapScalars();
+        navline_mapper->SetScalarModeToUsePointData();
+        // create actor
+        navline_actor->SetMapper(navline_mapper);
+        navline_actor->GetProperty()->SetLineWidth(navline_width);
+        assembly->AddPart(navline_actor);
+    }
+
+    return assembly;
 }
 
 void LinePlotter2D::showDoors(bool status){
 	door_actor->SetVisibility(status);
 }
 void LinePlotter2D::showWalls(bool status){
-	wall_actor->SetVisibility(status);
+    wall_actor->SetVisibility(status);
+}
+
+void LinePlotter2D::showNavLines(bool status)
+{
+    navline_actor->SetVisibility(status);
 }

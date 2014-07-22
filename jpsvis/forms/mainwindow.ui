@@ -601,6 +601,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="menuCaption_Color"/>
     <addaction name="actionWalls_Color"/>
     <addaction name="actionExits_Color"/>
+    <addaction name="actionNavigation_Lines_Color"/>
     <addaction name="separator"/>
     <addaction name="actionPedestrian_Shape"/>
     <addaction name="actionNetwork_settings"/>
@@ -634,6 +635,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionShow_Wall_Caption"/>
     <addaction name="actionShow_Room_Caption"/>
     <addaction name="actionShow_Door_Caption"/>
+    <addaction name="actionShow_Navigation_Lines"/>
     <addaction name="actionShow_Geometry_Captions"/>
     <addaction name="actionFirst_Group"/>
     <addaction name="actionSecond_Group"/>
@@ -1268,9 +1270,20 @@ border-color: rgb(255, 255, 255);</string>
     <string>Show Geometry Captions</string>
    </property>
   </action>
-  <action name="actionTest">
+  <action name="actionShow_Navigation_Lines">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>test</string>
+    <string>Show Navigation Lines</string>
+   </property>
+  </action>
+  <action name="actionNavigation_Lines_Color">
+   <property name="text">
+    <string>Navigation Lines Color</string>
    </property>
   </action>
  </widget>
@@ -2078,6 +2091,38 @@ border-color: rgb(255, 255, 255);</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionNavigation_Lines_Color</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotChangeNavLinesColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShow_Navigation_Lines</sender>
+   <signal>changed()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotShowHideNavLines()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotHelpAbout()</slot>
@@ -2137,5 +2182,7 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotShowHideExits()</slot>
   <slot>slotShowHideWalls()</slot>
   <slot>slotShowHideGeometryCaptions()</slot>
+  <slot>slotShowHideNavLines()</slot>
+  <slot>slotChangeNavLinesColor()</slot>
  </slots>
 </ui>

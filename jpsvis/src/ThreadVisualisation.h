@@ -125,11 +125,17 @@ public:
 	/// change the exits color.
 	void setExitsColor(double* color);
 
+    /// change the exits color.
+    void setNavLinesColor(double* color);
+
 	/// show / hide the walls
 	void showWalls(bool status);
 
 	/// show/ hide the exits
 	void showDoors(bool status);
+
+    /// show/ hide the exits
+    void showNavLines(bool status);
 
 	/// show / hide stairs
 	///not implemented

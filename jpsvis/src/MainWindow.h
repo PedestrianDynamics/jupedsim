@@ -173,6 +173,8 @@ public Q_SLOTS:
 	void slotShowHideExits();
 	/// shows/hide geometry
 	void slotShowHideWalls();
+    /// shows/hide navigation lines
+    void slotShowHideNavLines();
 	/// shows/hide geometry captions
 	void slotShowHideGeometryCaptions();
 
@@ -241,6 +243,9 @@ public Q_SLOTS:
 	/// change the exits color
 	void slotChangeExitsColor();
 
+    /// change the navigation lines color
+    void slotChangeNavLinesColor();
+
 	/// show/hide onscreen information
 	/// information include Time and pedestrians left in the facility
 	void slotShowOnScreenInfos();
@@ -248,8 +253,6 @@ public Q_SLOTS:
 private:
 	Q_SIGNALS:
 	void signal_controlSequence(QString);
-
-
 
 protected:
 	virtual void closeEvent(QCloseEvent* event);

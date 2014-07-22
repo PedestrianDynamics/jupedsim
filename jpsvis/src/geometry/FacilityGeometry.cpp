@@ -99,7 +99,7 @@ FacilityGeometry::FacilityGeometry() {
 	wallColor = 255;
 	stepColor = 130;
 	doorColor = 50;
-
+    navlineColor=95;
 }
 
 FacilityGeometry::~FacilityGeometry() {
@@ -316,6 +316,30 @@ void FacilityGeometry::addDoor(double x1, double y1, double z1, double x2, doubl
     delete center;
 }
 
+void FacilityGeometry::addNavLine(double x1, double y1, double z1, double x2, double y2, double z2,double thickness ,double height, double color){
+
+    // all doors will take this color upon changed
+    navlineColor=color;
+    //constructing the 2D assembly
+    //	if(SystemSettings::get2D()){
+    double m[]={x1,y1,z1};
+    double n[]={x2,y2,z2};
+
+    linesPlotter2D->PlotNavLine(m,n,navlineColor/255.0);
+
+//    JPoint *p1 = new JPoint(x1,y1,z1);
+//    JPoint *p2 = new JPoint(x2,y2,z2);
+//    double *center = p1->centreCoordinatesWith(*p2);
+//    double angle =p1->angleMadeWith(*p2);
+//    double length =p1->distanceTo(*p2)+wallThickness;
+
+//    addNewElement(center, length, angle, DOOR);
+
+//    delete p1;
+//    delete p2;
+//    delete center;
+}
+
 void FacilityGeometry::addStep(double x1, double y1, double z1, double x2, double y2, double z2)
 {
 	double m[]={x1,y1,z1};
@@ -419,6 +443,36 @@ void FacilityGeometry::addDoor(JPoint* p1, JPoint* p2, string caption){
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
     addNewElement( center,  length, angle,  DOOR);
+}
+
+void FacilityGeometry::addNavLine(JPoint* p1, JPoint* p2, string caption){
+
+    double m[3];
+    double n[3];
+    double CHT[3];
+
+    p1->getXYZ(m);
+    p2->getXYZ(n);
+    //to get the exits over the walls
+    //m[0]++;	m[1]++;	m[2]++;
+    //n[0]++;	n[1]++;	n[2]++;
+    p1->getColorHeightThicknes(CHT);
+
+    doorThickness = CHT[2];
+    doorHeight=CHT[1];
+    doorColor = CHT[0];
+
+    linesPlotter2D->PlotNavLine(m,n,doorColor/255.0);
+
+    if (caption.compare("") != 0){
+
+        double center[3];
+        center[0]=0.5*(m[0]+n[0]);
+        center[1]=0.5*(m[1]+n[1]);
+        center[2]=0.5*(m[2]+n[2]);
+        double orientation[3]={0,0,0};
+        addNewElementText(center,orientation,caption.c_str(),0);
+    }
 }
 
 
@@ -622,6 +676,13 @@ void FacilityGeometry::changeExitsColor(double* color)
 
 }
 
+void FacilityGeometry::changeNavLinesColor(double *color)
+{
+    //2D part
+    linesPlotter2D->changeNavLinesColor(color);
+    assembly2D->Modified();
+}
+
 void FacilityGeometry::set2D(bool status){
 	assembly2D->SetVisibility(status);
 }
@@ -646,11 +707,13 @@ void FacilityGeometry::showDoors(bool status){
     assemblyDoors3D->Modified();
 }
 
-void FacilityGeometry::showStairs(bool status){
+void FacilityGeometry::showStairs(bool status)
+{
 
 }
 
-void FacilityGeometry::showWalls(bool status){
+void FacilityGeometry::showWalls(bool status)
+{
     linesPlotter2D->showWalls(status);
     assembly2D->Modified();
 
@@ -662,6 +725,11 @@ void FacilityGeometry::showWalls(bool status){
         ((vtkActor*)col->GetItemAsObject(i))->SetVisibility(status);
     }
     assemblyWalls3D->Modified();
+}
+
+void FacilityGeometry::showNavLines(bool status)
+{
+    linesPlotter2D->showNavLines(status);
 }
 
 void FacilityGeometry::addObjectLabel(double center[3], double orientation[3], std::string caption, double color){
