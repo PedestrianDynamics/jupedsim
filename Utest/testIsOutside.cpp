@@ -68,7 +68,7 @@ int testIsOutside()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(a);
-     E.SetBmax(b);
+     E.SetBmin(b);
      // P == E.center
      P.SetX(0);
      P.SetY(0);

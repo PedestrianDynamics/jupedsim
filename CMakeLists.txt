@@ -277,11 +277,13 @@ set (   header_files
 
 
 add_library ( core STATIC ${source_files} )
+#add_library ( core SHARED ${source_files} )
 
 #Target
 add_executable(
   jpscore main.cpp
   )
+
 target_link_libraries(jpscore  core)
 
 if(WIN32)

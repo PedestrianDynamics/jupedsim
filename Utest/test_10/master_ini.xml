@@ -3,7 +3,7 @@
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
   <!-- seed used for initialising random generator -->
-  <seed>linspace(1, 10000, 40)</seed>
+  <seed>linspace(1, 10000, 20)</seed>
   <numCPU>4</numCPU>
   <max_sim_time unit="sec">900</max_sim_time>
   <!-- geometry file -->
@@ -61,7 +61,7 @@
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exitCrossingStrategy>4</exitCrossingStrategy>
-        <linkedcells enabled="true" cell_size="arange(2.1, 4, 0.2)" />
+        <linkedcells enabled="true" cell_size="arange(2.1, 4, 0.3)" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
