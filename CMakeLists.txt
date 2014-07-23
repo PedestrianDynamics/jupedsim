@@ -120,7 +120,6 @@ if(BUILD_TESTING)
 endif(BUILD_TESTING)
 # add sources and headers
 set (   source_files
-  main.cpp
   Simulation.cpp
   general/ArgumentParser.cpp
 

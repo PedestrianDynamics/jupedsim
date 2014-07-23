@@ -60,7 +60,7 @@ int testIsOutside()
      f = fopen(fname, "w");
      fprintf (f, "The current working directory is %s\n\n", cCurrentPath);
      int ntests=0, res=0;
-     float a=2.0, b=5.0;
+     float a=2.0, b=10.0;
      JEllipse E;
      Point P;
      //double px, py;
@@ -105,14 +105,14 @@ int testIsOutside()
 
      // P ~ semi-axis
      P.SetX(0);
-     P.SetY(b);
+     P.SetY(b*0.5);
      res += ( E.IsOutside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
 
      // P ~ semi-axis
      P.SetX(0);
-     P.SetY(-b);
+     P.SetY(-b*0.5);
      res += ( E.IsOutside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
