@@ -33,10 +33,9 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
-
-
-
 using namespace std;
+
+OutputHandler* Log;
 
 Simulation::Simulation()
 {

@@ -33,7 +33,7 @@
 
 
 /// global unique log variable
-OutputHandler* Log;
+//extern OutputHandler* Log;
 
 int main(int argc, char **argv)
 {

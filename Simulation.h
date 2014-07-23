@@ -33,6 +33,7 @@
 #ifndef SIMULATION_H_
 #define SIMULATION_H_
 
+
 #include "general/ArgumentParser.h"
 #include "geometry/Building.h"
 #include "IO/OutputHandler.h"
@@ -52,8 +53,7 @@
 #include "events/EventManager.h"
 #include "routing/CognitiveMapRouter.h"
 
-extern OutputHandler* Log;
-
+//OutputHandler* Log;
 
 class Simulation {
 private:
