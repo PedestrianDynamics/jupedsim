@@ -123,7 +123,6 @@ if(BUILD_TESTING)
 endif(BUILD_TESTING)
 # add sources and headers
 set (   source_files
-  main.cpp
   Simulation.cpp
   general/ArgumentParser.cpp
 
@@ -280,11 +279,13 @@ set (   header_files
 
 
 add_library ( core STATIC ${source_files} )
+#add_library ( core SHARED ${source_files} )
 
 #Target
 add_executable(
   jpscore main.cpp
   )
+
 target_link_libraries(jpscore  core)
 
 if(WIN32)
