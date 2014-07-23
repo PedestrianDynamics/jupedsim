@@ -425,8 +425,6 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
         if (fileName.endsWith(".xml",Qt::CaseInsensitive))
         {
             //cout<<"good bye"<<endl; exit(0);
-            //should be a file name
-            //return parseGeometryPG3(fileName);
             //SaxParser::parseGeometryPG3(fileName,geometry);
         }
         else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
@@ -502,32 +500,36 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
 /// add a new dataset
 bool MainWindow::slotAddDataSet(){
 
-    if (numberOfDatasetLoaded>=3){
-        QMessageBox::information(this,"notice","You can load at most 3 datasets.\n In"
-                                 " Order to load other data, please first clear previously loaded data.");
-        return false;
-    }
-    // if at least one data set was loaded
-    if (numberOfDatasetLoaded>=1){
-        int res = QMessageBox::question(this, "action",
-                                        "adding a new dataset will reset the visualisation process. Continue?", QMessageBox::Discard
-                                        | QMessageBox::Yes, QMessageBox::Yes);
+//    if (numberOfDatasetLoaded>=3){
+//        QMessageBox::information(this,"notice","You can load at most 3 datasets.\n In"
+//                                 " Order to load other data, please first clear previously loaded data.");
+//        return false;
+//    }
 
-        if (res == QMessageBox::Discard) return false;
+//    // if at least one data set was loaded
+//    if (numberOfDatasetLoaded>=1){
+//        int res = QMessageBox::question(this, "action",
+//                                        "adding a new dataset will reset the visualisation process. Continue?", QMessageBox::Discard
+//                                        | QMessageBox::Yes, QMessageBox::Yes);
 
-    }
+//        if (res == QMessageBox::Discard) return false;
+//    }
 
     // just continue
-    numberOfDatasetLoaded++;
+    numberOfDatasetLoaded=1;
     if(addPedestrianGroup(numberOfDatasetLoaded)==false){
         numberOfDatasetLoaded--;
         return false;
     }
 
+    slotStartPlaying();
+
     QString stre(numberOfDatasetLoaded);
     stre.setNum(numberOfDatasetLoaded);
     stre.append(" dataset loaded");
     statusBar()->showMessage(stre);
+
+    slotStartPlaying();
 
     return true;
 }
@@ -542,9 +544,9 @@ void MainWindow::slotClearAllDataset(){
 }
 
 
-bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
+bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
+{
     statusBar()->showMessage(tr("Select a file"));
-
     if(fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,
                                                 "Select the file containing the data to visualize",
@@ -554,6 +556,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
     if (fileName.isNull()) {
         return false;
     }
+
+
 
     //get and set the working dir
     QFileInfo fileInfo(fileName);
@@ -566,9 +570,17 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
 
     // if xml is detected, just load and show the geometry then exit
     if(fileName.endsWith(".xml",Qt::CaseInsensitive)){
+
+        //try to parse the correct way
+        // fall back to this if it fails
+        //SaxParser::parseGeometryJPS(fileInfo.baseName(),geometry);
+
         SaxParser::parseGeometryXMLV04(fileName,geometry);
         //slotLoadParseShowGeometry(fileName);
         //return false;
+        //cout<<"here:"<<endl;
+        //cout<<"group:"<<groupID<<endl;
+        //exit(0);
     }
 
     QFile file(fileName);
@@ -576,6 +588,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
         Debug::Error("could not open the File: ",fileName.toStdString().c_str());
         return false;
     }
+
 
     SyncData* dataset=NULL;
 
@@ -614,9 +627,11 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
     default:
         Debug::Error("invalid pedestrian group: %d " ,groupID);
         Debug::Error("should be 1, 2 or 3");
-        return false;
+        //return false;
         break;
     }
+
+
 
     double frameRate=15; //default frame rate
     statusBar()->showMessage(tr("parsing the file"));
@@ -631,9 +646,9 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
     reader.parse(source);
     file.close();
 
-
     QString frameRateStr=QString::number(frameRate);
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
+
 
     // set the visualisation window title
     visualisationThread->setWindowTitle(fileName);
@@ -1028,6 +1043,7 @@ void MainWindow::slotShowGeometry(){
         ui.actionShow_Walls->setEnabled(true);
         ui.actionShow_Geometry_Captions->setEnabled(true);
         ui.actionShow_Navigation_Lines->setEnabled(true);
+        ui.actionShow_Floor->setEnabled(true);
         SystemSettings::setShowGeometry(true);
     }
     else{
@@ -1036,6 +1052,7 @@ void MainWindow::slotShowGeometry(){
         ui.actionShow_Walls->setEnabled(false);
         ui.actionShow_Geometry_Captions->setEnabled(false);
         ui.actionShow_Navigation_Lines->setEnabled(false);
+         ui.actionShow_Floor->setEnabled(false);
         SystemSettings::setShowGeometry(false);
     }
     extern_force_system_update=true;
@@ -1075,7 +1092,7 @@ void MainWindow::slotShowHideNavLines()
 void MainWindow::slotShowHideFloor()
 {
     bool status = ui.actionShow_Floor->isChecked();
-    visualisationThread->getGeometry()->showFloor(status);
+    visualisationThread->showFloor(status);
     SystemSettings::setShowFloor(status);
 }
 
@@ -1489,7 +1506,7 @@ void MainWindow::slotChangeFloorColor()
 
     double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
-    visualisationThread->getGeometry()->changeFloorColor(color);
+    visualisationThread->setFloorColor(color);
 
     delete colorDialog;
 }
@@ -1614,7 +1631,6 @@ void MainWindow::dropEvent(QDropEvent *event) {
             mayPlay = true;
         }
     }
-
     if (mayPlay) {
         slotStartPlaying();
     }

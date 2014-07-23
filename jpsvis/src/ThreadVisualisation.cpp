@@ -414,6 +414,11 @@ void ThreadVisualisation::showNavLines(bool status)
     }
 }
 
+void ThreadVisualisation::showFloor(bool status)
+{
+    geometry->showFloor(status);
+}
+
 void  ThreadVisualisation::initGlyphs2D()
 {
 
@@ -1046,14 +1051,19 @@ void ThreadVisualisation::setGeometry(FacilityGeometry* geometry){
 }
 
 FacilityGeometry* ThreadVisualisation::getGeometry() {
-    if(geometry==NULL){
+    //if(geometry==NULL){
 	geometry=new FacilityGeometry();
-    }
+    //}
 	return geometry;
 }
 
 void ThreadVisualisation::setWallsColor(double* color){
-	geometry->changeWallsColor(color);
+    geometry->changeWallsColor(color);
+}
+
+void ThreadVisualisation::setFloorColor(double *color)
+{
+    geometry->changeFloorColor(color);
 }
 
 void ThreadVisualisation::setGeometryLabelsVisibility(int v){

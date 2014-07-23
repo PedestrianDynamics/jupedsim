@@ -46,7 +46,6 @@
 #include <iostream>
 #include <cmath>
 
-
 #include <vtkVersion.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolygon.h>
@@ -78,13 +77,12 @@ using namespace std;
  */
 SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps){
 	geometry=geo;
-	dataset=data;
+    dataset=data;
 	para=fps;
 	parsingWalls=false;
     parsingCrossings=false;
 	color=0.0;
-
-	dataset->clearFrames();
+    dataset->clearFrames();
 }
 
 SaxParser::~SaxParser() {
@@ -101,6 +99,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             {
                 double version=at.value(i).toDouble();
                 InitHeader(version);
+                //cout<<"version found:"<<version<<endl;exit(0);
             }
         }
     }else if (qName == "file") {
@@ -576,6 +575,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 	} else if (qName == "frameRate") {
 		para[0]=currentText.toFloat();
 	} else if (qName == "wall") {
+        if(currentPointsList.size()>1)
 		for(unsigned int i=0;i<currentPointsList.size()-1;i++){
 			geometry->addWall(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
 		}
@@ -586,11 +586,18 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 		}
 		clearPoints();
     } else if (qName == "crossing") {
+        if(currentPointsList.size()>1) //hack
         for(unsigned int i=0;i<currentPointsList.size()-1;i++){
             geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
         }
         clearPoints();
-	} else if (qName == "step") {//FIXME
+    } else if (qName == "hline") {
+        if(currentPointsList.size()>1) //hack
+        for(unsigned int i=0;i<currentPointsList.size()-1;i++){
+            geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        }
+        clearPoints();
+    } else if (qName == "step") {//FIXME
 		for(unsigned int i=0;i<currentPointsList.size()-1;i++){
 			geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
 		}
@@ -681,7 +688,7 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
 
         for (int k = 0; k < r->GetNumberOfSubRooms(); k++)
         {
-			SubRoom* sub = r->GetSubRoom(k);
+            SubRoom* sub = r->GetSubRoom(k);
 
             vector<Point> poly = sub->GetPolygon();
 
@@ -689,24 +696,31 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
                 std::reverse(poly.begin(),poly.end());
             }
 
-			// Create the polygon
+            // Create the polygon
             VTK_CREATE(vtkPolygon,polygon);
-			polygon->GetPointIds()->SetNumberOfIds(poly.size());
+            polygon->GetPointIds()->SetNumberOfIds(poly.size());
 
-			for (unsigned int s=0;s<poly.size();s++){
-				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
-				polygon->GetPointIds()->SetId(s, currentID++);
-			}
-			polygons->InsertNextCell(polygon);
+            for (unsigned int s=0;s<poly.size();s++){
+                points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
+                polygon->GetPointIds()->SetId(s, currentID++);
+            }
+            polygons->InsertNextCell(polygon);
 
             //plot the walls only for not stairs
-            if(sub->GetType()!="stair"){
-                const vector<Wall>& walls= sub->GetAllWalls();
-                for(unsigned int w=0;w<walls.size();w++){
-                    Point p1 = walls[w].GetPoint1();
-                    Point p2 = walls[w].GetPoint2();
-                    double z1= sub->GetElevation(p1);
-                    double z2= sub->GetElevation(p2);
+
+            const vector<Wall>& walls= sub->GetAllWalls();
+            for(unsigned int w=0;w<walls.size();w++){
+                Point p1 = walls[w].GetPoint1();
+                Point p2 = walls[w].GetPoint2();
+                double z1= sub->GetElevation(p1);
+                double z2= sub->GetElevation(p2);
+
+                if(sub->GetType()=="stair")
+                {
+                    geometry->addStair(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+                }
+                else
+                {
                     geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
                 }
             }
@@ -736,7 +750,7 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
                 double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};
                 geometry->addObjectLabel(pos,pos,obst->GetCaption(),captionsColor);
             }
-		}
+        }
 	}
 
     // Create a PolyData to represent the floor
@@ -778,13 +792,17 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
         geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
     }
 
+    //TODO:dirty hack for parsing the Hlines
+
 	// free memory
 	delete building;
 }
 
 
 /// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo){
+
+void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo)
+{
 
 	cout<<"external geometry found"<<endl;
 	//creating am empty document
@@ -848,7 +866,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 
 		//parsing the walls
-		for (unsigned int i = 0; i < walls.length(); i++) {
+        for (  int i = 0; i < walls.length(); i++) {
 			QDomElement el = walls.item(i).toElement();
 
 			//wall thickness, default to 30 cm
@@ -861,7 +879,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			//get the points defining each wall
 			//not that a wall is not necessarily defined by two points, could be more...
 			QDomNodeList points = el.elementsByTagName("point");
-			for (unsigned int i = 0; i < points.length() - 1; i++) {
+            for (  int i = 0; i < points.length() - 1; i++) {
 
                 double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
                 double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
@@ -876,7 +894,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 		//parsing the doors
 		if(doors.length()>0)
-			for (unsigned int i = 0; i < doors.length(); i++) {
+            for (  int i = 0; i < doors.length(); i++) {
 				QDomElement el = doors.item(i).toElement();
 
 				//door thickness, default to 15 cm
@@ -890,7 +908,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 				//not that a wall is not necesarily defined by two points, could be more...
 				QDomNodeList points = el.elementsByTagName("point");
 				//Debug::Messages("found:  " << points.length() <<" for this wall" <<endl;
-				for (unsigned int i = 0; i < points.length() - 1; i++) {
+                for (  int i = 0; i < points.length() - 1; i++) {
 
                     double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
                     double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
@@ -904,7 +922,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			}
 
 		// parsing the objets
-		for (unsigned int i = 0; i < spheres.length(); i++) {
+        for (  int i = 0; i < spheres.length(); i++) {
 
 			double center[3];
             center[0] = spheres.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
@@ -918,7 +936,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			geometry->addObjectSphere(center,radius,color);
 		}
 		// cubic shapes
-		for (unsigned int i = 0; i < cuboids.length(); i++) {
+        for (  int i = 0; i < cuboids.length(); i++) {
 
 			double center[3];
             center[0] = cuboids.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
@@ -973,10 +991,21 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 	}
 }
 
-void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
+
+void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
+{
 	QDomDocument doc("");
 
 	QFile file(filename);
+
+    int size =file.size()/(1024*1024);
+
+    //avoid dom parsing a very large dataset
+    if(size>100){
+        //cout<<"The file is too large: "<<filename.toStdString()<<endl;
+        return;
+    }
+
 
     //TODO: check if you can parse this with the building classes.
     // This should be a fall back option

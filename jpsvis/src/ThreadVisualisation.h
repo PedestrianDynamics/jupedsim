@@ -122,6 +122,9 @@ public:
 	/// change the walls color
 	void setWallsColor(double* color);
 
+    /// change the floor color
+    void setFloorColor(double* color);
+
 	/// change the exits color.
 	void setExitsColor(double* color);
 
@@ -136,6 +139,9 @@ public:
 
     /// show/ hide the exits
     void showNavLines(bool status);
+
+    /// show/ hide the floor
+    void showFloor(bool status);
 
 	/// show / hide stairs
 	///not implemented
@@ -155,7 +161,6 @@ Q_SIGNALS:
     void signal_controlSequences(const char* para);
 
 private:
-
 
 	/// initialize the legend
 	void initLegend(/*std::vector scalars*/);

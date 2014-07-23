@@ -81,6 +81,12 @@ public:
 	//void addWall(double center[3], double width, double orientation);
 	void addWall(JPoint* p1, JPoint* p2, std::string caption="");
 
+    ///draw a stair
+    void addStair(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=15, double height=250,double col=255);
+    //void addWall(double center[3], double width, double orientation);
+    void addStair(JPoint* p1, JPoint* p2, std::string caption="");
+
+
 	///draw a door
 	void addDoor(double x1, double y1, double z1 ,double x2, double y2, double z2, double thickness=17, double height=250,double col=30);
 	//void addDoor(double center[3], double width, double orientation);

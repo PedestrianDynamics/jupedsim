@@ -296,6 +296,30 @@ void FacilityGeometry::addWall(double x1, double y1, double z1, double x2, doubl
     delete center;
 }
 
+void FacilityGeometry::addStair(double x1, double y1, double z1, double x2, double y2, double z2,double thickness,double height,double color){
+
+    // all walls will have this parameters until changed
+    wallColor=color;
+
+    //	if(SystemSettings::get2D()){
+    double m[]={x1,y1,z1};
+    double n[]={x2,y2,z2};
+    linesPlotter2D->PlotWall(m,n,wallColor/255.0);
+
+
+//    JPoint *p1 = new JPoint(x1,y1,z1);
+//    JPoint *p2 = new JPoint(x2,y2,z2);
+//    double *center = p1->centreCoordinatesWith(*p2);
+//    double angle =p1->angleMadeWith(*p2);
+//    double length =p1->distanceTo(*p2)+wallThickness;
+
+//    addNewElement(center, length, angle, WALL);
+
+//    delete p1;
+//    delete p2;
+//    delete center;
+}
+
 void FacilityGeometry::addDoor(double x1, double y1, double z1, double x2, double y2, double z2,double thickness ,double height, double color){
 
     // all doors will take this color upon changed
@@ -412,6 +436,35 @@ void FacilityGeometry::addWall(JPoint* p1, JPoint* p2, string caption){
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
     addNewElement( center,  length, angle,  WALL);
+}
+
+void FacilityGeometry::addStair(JPoint* p1, JPoint* p2, string caption){
+    double m[3];
+    double n[3];
+    double CHT[3];
+    p1->getXYZ(m);
+    p2->getXYZ(n);
+    p1->getColorHeightThicknes(CHT);
+
+    wallThickness = CHT[2];
+    wallHeight=CHT[1];
+    wallColor = CHT[0];
+    linesPlotter2D->PlotWall(m,n,wallColor/255.0);
+
+    if (caption.compare("") != 0){
+
+        double center[3];
+        center[0]=0.5*(m[0]+n[0]);
+        center[1]=0.5*(m[1]+n[1]);
+        center[2]=0.5*(m[2]+n[2]);
+        double orientation[3]={0,0,0};
+        addNewElementText(center,orientation,caption.c_str(),50);
+    }
+
+//    double *center = p1->centreCoordinatesWith(*p2);
+//    double angle =p1->angleMadeWith(*p2);
+//    double length =p1->distanceTo(*p2)+wallThickness;
+//    addNewElement( center,  length, angle,  WALL);
 }
 
 void FacilityGeometry::addDoor(JPoint* p1, JPoint* p2, string caption){

@@ -279,7 +279,6 @@ void ThreadDataTransfer::parseDataNode(QDomNodeList frames){
             double xPos=agents.item(i).toElement().attribute("xPos","0").toDouble()*FAKTOR;
             double yPos=agents.item(i).toElement().attribute("yPos","0").toDouble()*FAKTOR;
             double zPos=agents.item(i).toElement().attribute("zPos","0").toDouble()*FAKTOR;
-
 			double agent_color =std::numeric_limits<double>::quiet_NaN();
 
             double xVel=agents.item(i).toElement().attribute("xVel").toDouble(&ok)*FAKTOR;
@@ -322,6 +321,7 @@ void ThreadDataTransfer::parseDataNode(QDomNodeList frames){
 		}
 
 		//adding the new frame to the right dataset
+        newFrame->ComputePolyData();
 		extern_trajectories_firstSet.addFrame(newFrame);
 		//	frameNumbers++;
 	}
