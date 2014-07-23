@@ -763,7 +763,6 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
 
         r->AddPedestrian(ped);
         (*pid)++;
-        printf("v0=%f\n", ped->GetV0Norm());
     }
 }
 

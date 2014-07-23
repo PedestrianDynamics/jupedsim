@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
-
-  <max_sim_time>90</max_sim_time>
-  <!-- seed used for initialising random generator -->
+ 
   <seed>1</seed>
+  <max_sim_time>90</max_sim_time>
+  <numCPU>4</numCPU>
+
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
@@ -93,7 +94,7 @@
   <route_choice_models>
     <router router_id="1" description="quickest">
       <parameters>
-        <!--<navigation_lines file="routing.xml" />-->
+        <!-- <navigation_lines file="routing.xml" /> -->
       </parameters>
     </router>
     <router router_id="2" description="global_shortest">

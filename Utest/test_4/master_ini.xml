@@ -8,7 +8,7 @@
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="40">
+  <trajectories format="xml-plain" embed_mesh="false" fps="33">
     <file location="Traj_test_4.xml"/>
   </trajectories>
   <!-- where to store the logs -->

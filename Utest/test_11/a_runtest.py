@@ -9,11 +9,15 @@ import multiprocessing
 import matplotlib.pyplot as plt
 import re
 
+#=========================
+testnr = 11
+#========================
+
 must_time = 10  # 10 m corridor with 1m/s 
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_test_11a.txt"
+logfile="log_test_%da.txt"%testnr
 f=open(logfile, "w")
 f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -22,6 +26,7 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 HOME = path.expanduser("~")
 TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
+DIR= TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
 def get_maxtime(filename):
@@ -65,8 +70,8 @@ def parse_file(filename):
         frame_number = int(frame.attributes["ID"].value)
         for agent in frame.getElementsByTagName("agent"):
             agent_id = int(agent.attributes["ID"].value)
-            x = float(agent.attributes["xPos"].value)
-            y = float(agent.attributes["yPos"].value)
+            x = float(agent.attributes["xPos"].value) #x
+            y = float(agent.attributes["yPos"].value) #y
             data += [agent_id, frame_number, x, y]
     data = np.array(data).reshape((-1,4))
     return fps, N, data
@@ -75,7 +80,7 @@ def parse_file(filename):
 
 if __name__ == "__main__":
     
-    geofile =  "geometry/geometry_test11_a.xml"
+    geofile =  "%s/geometry/geometry_test%d_a.xml"%(DIR,testnr)
     inifiles = glob.glob("inifiles_a/*.xml")
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)

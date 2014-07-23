@@ -9,16 +9,25 @@ import multiprocessing
 import matplotlib.pyplot as plt
 import re
 
+#=========================
+testnr = 9
+#========================
+
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_testCPU.txt"
+logfile="log_test_%d.txt"%testnr
+f=open(logfile, "w")
+f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
+
+
 TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
+DIR= TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
 def parse_file(filename):
@@ -85,12 +94,21 @@ def flow(fps, N, data, x0):
 
 
 if __name__ == "__main__":
+    if CWD != DIR:
+        logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
+        os.chdir(DIR)
+    logging.info("change directory to ..")
+    os.chdir("..")
+    logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
+    subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
+    os.chdir(DIR)
+    logging.info("change directory back to %s"%DIR)
     time1 = time.time()
     i = 0
     flows = {}
     MAX_CPU = multiprocessing.cpu_count()
     
-    geofile = "geometry.xml"
+    geofile = "%s/geometry.xml"%DIR
     inifiles = glob.glob("inifiles/*.xml")
     logging.info("MAX CPU = %d"%MAX_CPU)
     if not path.exists(geofile):

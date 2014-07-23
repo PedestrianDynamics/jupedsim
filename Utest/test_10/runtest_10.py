@@ -8,16 +8,23 @@ import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
 
+#=========================
+testnr = 10
+#========================
+
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_testCELL.txt"
+logfile="log_test_%d.txt"%testnr
+f=open(logfile, "w")
+f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
 TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
+DIR= TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
 def parse_file(filename):
@@ -84,10 +91,19 @@ def flow(fps, N, data, x0):
 
 
 if __name__ == "__main__":
+    if CWD != DIR:
+        logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
+        os.chdir(DIR)
+    logging.info("change directory to ..")
+    os.chdir("..")
+    logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
+    subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
+    os.chdir(DIR)
+    logging.info("change directory back to %s"%DIR)
     time1 = time.time()
     i = 0
     flows = {}
-    geofile = "geometry.xml"
+    geofile = "%s/geometry.xml"%DIR
     inifiles = glob.glob("inifiles/*.xml")
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)

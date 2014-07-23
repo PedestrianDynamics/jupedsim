@@ -9,17 +9,24 @@ import multiprocessing
 import matplotlib.pyplot as plt
 import re
 
+#=========================
+testnr = 3
+#========================
+
 must_time = 10  # 10 m corridor with 1m/s 
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_test_3.txt"
+logfile="log_test_%d.txt"%testnr
+f=open(logfile, "w")
+f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
 TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
+DIR= TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
 def get_maxtime(filename):
@@ -72,8 +79,18 @@ def parse_file(filename):
 
 
 if __name__ == "__main__":
-    
-    geofile = "geometry.xml"
+    if CWD != DIR:
+        logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
+        os.chdir(DIR)
+
+    logging.info("change directory to ..")
+    os.chdir("..")
+    logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
+    subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
+    os.chdir(DIR)
+    logging.info("change directory back to %s"%DIR)
+
+    geofile = "%s/geometry.xml"%DIR
     inifiles = glob.glob("inifiles/*.xml")
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)

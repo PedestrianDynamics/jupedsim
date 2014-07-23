@@ -9,11 +9,15 @@ import multiprocessing
 import matplotlib.pyplot as plt
 import re
 
+#=========================
+testnr = 11
+#========================
+
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
 
-logfile="log_test_11.txt"
+logfile="log_test_%d.txt"%testnr
 f=open(logfile, "w")
 f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,30 +41,34 @@ def copyanything(src, dst):
 HOME = path.expanduser("~")
 TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
+DIR= TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
 if __name__ == "__main__":
+    if CWD != DIR:
+        logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
+        os.chdir(DIR)
     results = []
     for e in ["a", "b"]:
         os.chdir("..")
-        print "working dir: ", os.getcwd()
+        logging.info("Change directory to %s"%os.getcwd())
         Masterfile = "test_11/master_ini_%c.xml"%e
         logging.info('makeini files with = <%s>'%Masterfile)
         subprocess.call(["python", "makeini.py", "-f %s"%Masterfile])
-        os.chdir(CWD)
-        print "working dir: ", os.getcwd()
+        os.chdir(DIR)
+        logging.info("Change directory to %s"%DIR)
         logging.info('copy inifiles to  = inifiles_%c'%e)
         copyanything("inifiles", "inifiles_%c"%e)
         
-        logging.info('run runtest_%c.py'%e)
-        result  = subprocess.call(["python", "runtest_%c.py"%e])
+        logging.info('run %c_runtest.py'%e)
+        result  = subprocess.call(["python", "%c_runtest.py"%e])
         results.append(result)
         logging.info('copy trajectories to trajectories_%c'%e)
         copyanything("trajectories", "trajectories_%c"%e)
     logging.info('results [%.2f --- %.2f]'%(results[0], results[1]))
-    if fabs(results[0]-results[1] ) >0.01:
-        logging.critical('%s returns with FAILURE'%(argv[0])
+    if np.fabs(results[0]-results[1] ) >0.01:
+        logging.critical('%s returns with FAILURE'%(argv[0]))
         exit(FAULURE)
     else:
-        logging.info('%s returns with SUCCESS'%(argv[0])
+        logging.info('%s returns with SUCCESS'%(argv[0]))
         exit(SUCCESS)
