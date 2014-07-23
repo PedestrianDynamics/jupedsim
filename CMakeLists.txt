@@ -88,7 +88,7 @@ if(OPENMP_FOUND)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 else(OPENMP_FOUND)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
     # somehow find_package(openmp) does not work properly with clang
     else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message( STATUS "Disabling OpenMP support" )
@@ -272,7 +272,7 @@ set (   header_files
   )
 
 
-add_library ( core SHARED ${source_files} )
+add_library ( core STATIC ${source_files} )
 
 #Target
 add_executable(
