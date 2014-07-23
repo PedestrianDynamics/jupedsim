@@ -95,6 +95,9 @@ else(OPENMP_FOUND)
   endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif(OPENMP_FOUND)
 
+#statically link all gcc stuffs
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+
 # find and add the CGAL library
 #fixme: complete this section
 # FIND_PACKAGE(CGAL QUIET)
@@ -328,7 +331,7 @@ else(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Minform=inform")	
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
 endif()
 
 

@@ -111,7 +111,7 @@ string Hline::WriteElement() const
 {
      string geometry;
      char tmp[CLENGTH] = "";
-     sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
+     sprintf(tmp,"\t\t<hline ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
@@ -124,7 +124,7 @@ string Hline::WriteElement() const
              (GetPoint2().GetY()) * FAKTOR,
              _subRoom1->GetElevation(GetPoint2())*FAKTOR);
      geometry.append(tmp);
-     geometry.append("\t\t</door>\n");
+     geometry.append("\t\t</hline>\n");
      return geometry;
 }
 

@@ -29,8 +29,9 @@
 #include "IODispatcher.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/NavMesh.h"
-
+#include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -80,8 +81,8 @@ string IODispatcher::WritePed(Pedestrian* ped)
      int color=1; // red= very low velocity
 
      if (v0 != 0.0) {
-         double v = ped->GetV().Norm();
-         color = (int) (v / v0 * 255);
+          double v = ped->GetV().Norm();
+          color = (int) (v / v0 * 255);
      }
 
      if(ped->GetSpotlight()==false) color=-1;
@@ -90,13 +91,13 @@ string IODispatcher::WritePed(Pedestrian* ped)
      double b = ped->GetSmallerAxis();
      double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
      sprintf(tmp, "<agent ID=\"%d\"\t"
-             "xPos=\"%.2f\"\tyPos=\"%.2f\"\t"
-             "zPos=\"%.2f\"\t"
-             "radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
-             "ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
-             ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-             (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
-             phi * RAD2DEG, color);
+               "xPos=\"%.2f\"\tyPos=\"%.2f\"\t"
+               "zPos=\"%.2f\"\t"
+               "radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
+               "ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
+               ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+               (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+               phi * RAD2DEG, color);
      return tmp;
 }
 
@@ -106,7 +107,7 @@ void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int se
      nPeds = building->GetNumberOfPedestrians();
      string tmp;
      tmp =
-          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
+               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
      sprintf(agents, "\t<header version = \"%s\">\n", JPS_VERSION);
      tmp.append(agents);
@@ -186,7 +187,7 @@ void IODispatcher::WriteGeometry(Building* building)
                                    navLineWritten.push_back(uid1);
                                    if (rooms_to_plot.empty()
                                              || IsElementInVector(rooms_to_plot,
-                                                                  caption)) {
+                                                       caption)) {
                                         geometry.append(crossing->WriteElement());
                                    }
                               }
@@ -196,7 +197,7 @@ void IODispatcher::WriteGeometry(Building* building)
                     // the transitions
                     if (plotTransitions) {
                          const vector<Transition*>& transitions =
-                              s->GetAllTransitions();
+                                   s->GetAllTransitions();
                          for (unsigned int i = 0; i < transitions.size(); i++) {
                               Transition* transition = transitions[i];
                               int uid1 = transition->GetUniqueID();
@@ -214,15 +215,15 @@ void IODispatcher::WriteGeometry(Building* building)
                                         if (room2) {
                                              string caption2 = room2->GetCaption();
                                              if (IsElementInVector(rooms_to_plot,
-                                                                   caption1)
+                                                       caption1)
                                                        || IsElementInVector(rooms_to_plot,
-                                                                            caption2)) {
+                                                                 caption2)) {
                                                   geometry.append(transition->WriteElement());
                                              }
 
                                         } else {
                                              if (IsElementInVector(rooms_to_plot,
-                                                                   caption1)) {
+                                                       caption1)) {
                                                   geometry.append(transition->WriteElement());
                                              }
                                         }
@@ -313,24 +314,23 @@ void IODispatcher::WriteFooter()
  * FLAT format implementation
  */
 
-TrajectoriesFLAT::TrajectoriesFLAT() :
-     IODispatcher()
+TrajectoriesFLAT::TrajectoriesFLAT() : IODispatcher()
 {
 }
 
 void TrajectoriesFLAT::WriteHeader(int nPeds, double fps, Building* building, int seed)
 {
-    char tmp[CLENGTH] = "";
-    Write("#description: my super simulation");
-    sprintf(tmp, "#framerate: %0.2f",fps);
-    Write(tmp);
-    sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
-    Write(tmp);
-    Write("#ID: the agent ID");
-    Write("#FR: the current frame");
-    Write("#X,Y,Z: the agents coordinates (in metres)");
-    Write("\n");
-    Write("#ID\tFR\tX\tY\tZ");
+     char tmp[CLENGTH] = "";
+     Write("#description: my super simulation");
+     sprintf(tmp, "#framerate: %0.2f",fps);
+     Write(tmp);
+     sprintf(tmp,"#geometry: %s",building->GetGeometryFilename().c_str());
+     Write(tmp);
+     Write("#ID: the agent ID");
+     Write("#FR: the current frame");
+     Write("#X,Y,Z: the agents coordinates (in metres)");
+     Write("\n");
+     Write("#ID\tFR\tX\tY\tZ");
 }
 
 void TrajectoriesFLAT::WriteGeometry(Building* building)
@@ -352,7 +352,7 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
                     double y = ped->GetPos().GetY();
                     double z = ped->GetElevation();
                     sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x,
-                            y,z);
+                              y,z);
                     Write(tmp);
                }
           }
@@ -447,7 +447,7 @@ void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, 
      nPeds = building->GetNumberOfPedestrians();
      string tmp;
      tmp =
-          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
+               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
      sprintf(agents, "\t<header version = \"0.6\">\n");
      tmp.append(agents);
@@ -474,10 +474,65 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      char file_location[CLENGTH] = "";
      sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
      embed_geometry.append(file_location);
-     embed_geometry.append("\t</geometry>\n");
-     //Write(embed_geometry);
+     //embed_geometry.append("\t</geometry>\n");
 
-     IODispatcher::WriteGeometry(building);
+     const map<int, Hline*>& hlines=building->GetAllHlines();
+     if(hlines.size()>0){
+          //embed_geometry.append("\t<geometry>\n");
+          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+          {
+               embed_geometry.append(it->second->WriteElement());
+          }
+          //embed_geometry.append("\t</geometry>\n");
+     }
+     embed_geometry.append("\t</geometry>\n");
+     Write(embed_geometry);
+
+
+//     string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
+//     string embed_geometry;
+//     string tmp; //lines to drop
+//     std::ifstream t(fileName.c_str());
+//     std::getline(t,tmp); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
+//     std::stringstream buffer;
+//     buffer << t.rdbuf();
+//     embed_geometry=buffer.str();
+//     //Write(embed_geometry);
+//
+//
+//     //collecting the hlines
+//     std::stringstream hlines_buffer;
+//     // add the header
+//     hlines_buffer<<" <routing version=\"0.5\" "
+//               <<"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+//               <<"xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_routing.xsd\" >"<<endl
+//               <<"<Hlines> "<<endl;
+//
+//     const map<int, Hline*>& hlines=building->GetAllHlines();
+//     for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+//     {
+//          Hline* hl=it->second;
+//          hlines_buffer <<"\t<Hline id=\""<< hl->GetID()<<"\" room_id=\""<<hl->GetRoom1()->GetID()
+//                                        <<"\" subroom_id=\""<< hl->GetSubRoom1()->GetSubRoomID()<<"\">"<<endl;
+//          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint1()._x<<"\" py=\""<< hl->GetPoint1()._y<<"\" />"<<endl;
+//          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint2()._x<<"\" py=\""<< hl->GetPoint2()._y<<"\" />"<<endl;
+//          hlines_buffer <<"\t</Hline>"<<endl;
+//     }
+//     hlines_buffer<<"</Hlines> "<<endl;
+//     hlines_buffer<<"</routing> "<<endl;
+//
+//     string hline_string=hlines_buffer.str();
+//     string to_replace="</geometry>";
+//     hline_string.append(to_replace);
+//
+//     size_t start_pos = embed_geometry.find(to_replace);
+//     if(start_pos == std::string::npos)
+//     {
+//          Log->Write("WARNING:\t missing %s tag while writing the geometry in the trajectory file.",to_replace.c_str());
+//     }
+//
+//     embed_geometry.replace(start_pos, to_replace.length(), hline_string);
+//     Write(embed_geometry);
 
      Write("\t<AttributeDescription>");
      Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
@@ -516,30 +571,30 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
                SubRoom* s = r->GetSubRoom(k);
                for (int i = 0; i < s->GetNumberOfPedestrians(); ++i)
                {
-                   char tmp[CLENGTH] = "";
-                   Pedestrian* ped = s->GetPedestrian(i);
-                   double v0 = ped->GetV0Norm();
-                   int color=1; // red= very low velocity
+                    char tmp[CLENGTH] = "";
+                    Pedestrian* ped = s->GetPedestrian(i);
+                    double v0 = ped->GetV0Norm();
+                    int color=1; // red= very low velocity
 
-                   if (v0 != 0.0) {
-                       double v = ped->GetV().Norm();
-                       color = (int) (v / v0 * 255);
-                   }
-                   if(ped->GetSpotlight()==false) color=-1;
+                    if (v0 != 0.0) {
+                         double v = ped->GetV().Norm();
+                         color = (int) (v / v0 * 255);
+                    }
+                    if(ped->GetSpotlight()==false) color=-1;
 
 
-                   double a = ped->GetLargerAxis();
-                   double b = ped->GetSmallerAxis();
-                   double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-                   sprintf(tmp, "<agent ID=\"%d\"\t"
-                           "x=\"%.2f\"\ty=\"%.2f\"\t"
-                           "z=\"%.2f\"\t"
-                           "rA=\"%.2f\"\trB=\"%.2f\"\t"
-                           "eO=\"%.2f\" eC=\"%d\"/>\n",
-                           ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                           (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
-                           phi * RAD2DEG, color);
-                   data.append(tmp);
+                    double a = ped->GetLargerAxis();
+                    double b = ped->GetSmallerAxis();
+                    double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+                    sprintf(tmp, "<agent ID=\"%d\"\t"
+                              "x=\"%.2f\"\ty=\"%.2f\"\t"
+                              "z=\"%.2f\"\t"
+                              "rA=\"%.2f\"\trB=\"%.2f\"\t"
+                              "eO=\"%.2f\" eC=\"%d\"/>\n",
+                              ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+                              (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                              phi * RAD2DEG, color);
+                    data.append(tmp);
                }
           }
      }

@@ -37,6 +37,5 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_routing.xsd" >
             <vertex px="43.47" py="130.37" />
             <vertex px="43.47" py="128.98" />
         </Hline>
-
     </Hlines>
 </routing>

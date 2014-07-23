@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+<JuPedSim project="JPS-Project" version="0.5"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
     <!-- seed used for initialising random generator -->
     <seed>12542</seed>
     <!-- maximal simulation time -->
-    <num_cpus>4</num_cpus>
+        <num_cpus>4</num_cpus>
     <max_sim_time >456</max_sim_time>
     <!-- geometry file -->
     <geometry>bateau_obst.xml</geometry>
@@ -31,7 +31,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     </traffic_constraints>
 
     <routing>
-        <goals>
+        <goals_>
             <goal id="0" final="false" caption="goal 1">
                 <polygon>
                     <vertex px="-5.0" py="-5.0" />
@@ -59,17 +59,17 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
                     <vertex px="20.0" py="17.0" />
                 </polygon>
             </goal>
-        </goals>
+        </goals_>
     </routing>
 
     <!--persons information and distribution -->
     <agents operational_model_id="1">
         <agents_distribution>
-            <group1 group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/>
-            <group1 group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" />
-            <group1 group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/>
-            <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="1" number="1" start_x="40" start_y="130"  goal_id="-1" router_id="2" patience="44" x_min="6.52" x_max="41" y_min="" y_max=""/>
-            <group1 group_id="3" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="2"  patience="20"/>
+<!--             <group1 group_id="5" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id=""  motivation=""/> -->
+<!--             <group1 group_id="0" room_id="0" subroom_id="0" number="0" goal_id="" router_id="1" route_id="" /> -->
+<!--             <group1 group_id="1" room_id="0" subroom_id="1" number="0" goal_id="" router_id="2" route_id="" patience="5"/> -->
+            <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="1" number="100" start_x="40" start_y="130"  goal_id="-1" router_id="2" patience="44" x_min="6.52" x_max="41"/>
+<!--             <group1 group_id="3" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="2"  patience="20"/> -->
         </agents_distribution>
     </agents>
 

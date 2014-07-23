@@ -169,13 +169,12 @@ void Crossing::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-
 string Crossing::WriteElement() const
 {
      //return "";
      string geometry;
      char tmp[CLENGTH] = "";
-     sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
+     sprintf(tmp,"\t\t<crossing ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
@@ -188,6 +187,6 @@ string Crossing::WriteElement() const
              (GetPoint2().GetY()) * FAKTOR,
              _subRoom1->GetElevation(GetPoint2())*FAKTOR);
      geometry.append(tmp);
-     geometry.append("\t\t</door>\n");
+     geometry.append("\t\t</crossing>\n");
      return geometry;
 }
