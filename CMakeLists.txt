@@ -113,6 +113,10 @@ endif(OPENMP_FOUND)
 # test all cpp-files in Utest
 if(BUILD_TESTING)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+#  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
+  file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
+#string(REGEX REPLACE "CMakeFiles/[^;]+;?" "" SRCS "${test_py_files}")
+
 endif(BUILD_TESTING)
 # add sources and headers
 set (   source_files
@@ -351,11 +355,18 @@ if(BUILD_TESTING)
     add_test(NAME ${test} COMMAND ${test})
   endforeach(test_src ${test_files})
 
+
+
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
+    foreach (test_src ${test_py_files})
+      GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+#      message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
+      add_test(NAME ${test} COMMAND ${test_src})
+    endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
     message(STATUS "run: " ${CMAKE_SOURCE_DIR}/Utest/testflow.py)
-    set (test_parameters "${CMAKE_SOURCE_DIR}")
-    add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
+    # set (test_parameters "${CMAKE_SOURCE_DIR}")
+    # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
