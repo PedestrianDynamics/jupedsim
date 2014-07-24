@@ -22,9 +22,8 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
-TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
-DIR= TRUNK + "/Utest/test_%d"%testnr
+DIR= os.path.dirname(os.path.realpath(argv[0]))
 #--------------------------------------------------------
     
 def parse_file(filename):
@@ -94,6 +93,11 @@ if __name__ == "__main__":
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
         os.chdir(DIR)
+    #-------- get directory of the code TRUNK
+    os.chdir("../..")
+    TRUNK = os.getcwd()
+    os.chdir(DIR)
+    #----------------------------------------
     logging.info("change directory to ..")
     os.chdir("..")
     logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
