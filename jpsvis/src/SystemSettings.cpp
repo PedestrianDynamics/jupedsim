@@ -36,6 +36,9 @@
 
 #include "SystemSettings.h"
 #include "Debug.h"
+#include "qdebug.h"
+#include "QDateTime"
+#include "IO/OutputHandler.h"
 #include "./forms/Settings.h"
 
 bool SystemSettings::showLegend=false;
@@ -66,7 +69,10 @@ bool SystemSettings::recordPNGsequence=false;
 QString SystemSettings::outputDir  = QDir::homePath() +"/Desktop/TraVisTo_Files/";
 QString SystemSettings::workingDir  = QDir::currentPath();
 QString SystemSettings::filesPrefix="";
+QString SystemSettings::logfile="log.txt";
 
+//the log file is writting by a different module
+extern OutputHandler* Log;
 
 
 SystemSettings::SystemSettings() {}
@@ -218,14 +224,11 @@ void  SystemSettings::getPedestrianColor(int groupID, int color[3]){
 void  SystemSettings::setOutputDirectory(QString dir){
 	outputDir=dir;
 }
+
 void  SystemSettings::getOutputDirectory(QString& dir){
 	dir=QString(outputDir);
 }
 
-
-//void SystemSettings::setPedestrianCaptionSize( int size){
-//	captionSize =size;
-//}
 
 int SystemSettings::getPedestrianCaptionSize(){
 	return captionSize;
@@ -243,7 +246,35 @@ void SystemSettings::setFilenamePrefix(QString prefix){
 }
 
 QString SystemSettings::getFilenamePrefix() {
-	return filesPrefix;
+    return filesPrefix;
+}
+
+void SystemSettings::CreateLogfile()
+{
+    //create directory if not exits
+    if(!QDir(outputDir).exists()){
+        QDir dir;
+        if(!dir.mkpath (outputDir )){
+            qDebug()<<"could not create directory: "<< outputDir;
+            outputDir=""; // current
+        }
+    }
+
+    logfile = outputDir+"log_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm_").append(SystemSettings::getFilenamePrefix()).append(".txt");
+}
+
+ QString &SystemSettings::getLogfile()
+{
+    return logfile;
+}
+
+void SystemSettings::DeleteLogfile()
+{
+    //first close the opened file
+    delete Log;
+    if(! QFile::remove(logfile)){
+        qDebug()<<"he log file could not delete the file"<<endl;
+    }
 }
 
 void SystemSettings::setPedestrianColorProfileFromFile(bool readFromFile) {

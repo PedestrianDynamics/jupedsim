@@ -424,8 +424,7 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
     {
         if (fileName.endsWith(".xml",Qt::CaseInsensitive))
         {
-            //cout<<"good bye"<<endl; exit(0);
-            //SaxParser::parseGeometryPG3(fileName,geometry);
+            SaxParser::parseGeometryJPS(fileName,geometry);
         }
         else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
         {
@@ -563,22 +562,44 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     SystemSettings::setWorkingDirectory(wd);
 
     //the geometry actor
-    //FacilityGeometry* geometry=NULL;
     FacilityGeometry* geometry = visualisationThread->getGeometry();
 
+    //try to get a geometry filename
+    QString geometry_file=SaxParser::extractGeometryFilename(fileName);
+
+    //cout<<"geometry NaMe: "<<geometry_file.toStdString()<<endl;
+
     // if xml is detected, just load and show the geometry then exit
-    if(fileName.endsWith(".xml",Qt::CaseInsensitive)){
+    if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)){
 
         //try to parse the correct way
         // fall back to this if it fails
-        //SaxParser::parseGeometryJPS(fileInfo.baseName(),geometry);
+        SystemSettings::CreateLogfile();
 
-        SaxParser::parseGeometryXMLV04(fileName,geometry);
+        if(! SaxParser::parseGeometryJPS(geometry_file,geometry))
+        {
+            int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
+                                           "JuPedSim has detected an error in the supplied geometry.\n"
+                                           "The simulation will likely failed using that geometry.\n"
+                                           "Also make sure to validate your file.\n"
+                                           "More information are provided in the log file:\n"
+                                           +SystemSettings::getLogfile()+
+                                           "\n\nShould I try to parse and display what I can ?"
+                                           , QMessageBox::Yes
+                                           | QMessageBox::No, QMessageBox::No);
+            if (res == QMessageBox::No) {
+                return false;
+            }
+            SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);
+        }
+        else
+        { //everything was fine. Delete the log file
+            SystemSettings::DeleteLogfile();
+        }
+
+        //SaxParser::parseGeometryXMLV04(fileName,geometry);
         //slotLoadParseShowGeometry(fileName);
         //return false;
-        //cout<<"here:"<<endl;
-        //cout<<"group:"<<groupID<<endl;
-        //exit(0);
     }
 
     QFile file(fileName);

@@ -153,6 +153,10 @@ public:
 	/// This is just the name of the input file.
 	static QString  getFilenamePrefix();
 
+    static void CreateLogfile();
+    static QString &getLogfile();
+    static void DeleteLogfile();
+
 private:
 
 	static bool recordPNGsequence;
@@ -174,6 +178,7 @@ private:
 	static int trailingGeometry;
 	static QString outputDir;
     static QString workingDir;
+    static QString logfile;
 	static int captionSize;
 	static QColor captionColor;
 	static int captionOrientaton;

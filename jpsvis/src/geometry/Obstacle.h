@@ -111,7 +111,7 @@ public:
 	/**
 	 * Create the obstacles polygonal structure from the walls
 	 */
-	void ConvertLineToPoly();
+    bool ConvertLineToPoly();
 
 	/**
 	 * @return the obstacle as a polygon

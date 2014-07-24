@@ -111,7 +111,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 {
                     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
                     {
-                        SaxParser::parseGeometryJPS(fileName,geometry);
+                        //SaxParser::parseGeometryJPS(fileName,geometry);
                     }
                     else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
                     {
@@ -658,32 +658,33 @@ void SaxParser::clearPoints(){
 
 
 /// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
+bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
+{
 
     double captionsColor=0;//red
-
-	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
-
+    if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
     SystemSettings::getWorkingDirectory(wd);
     fileName=wd+"/"+fileName;
 
-	Building* building = new Building();
+    Building* building = new Building();
     string geometrypath = fileName.toStdString();
 
-	// read the geometry
-	building->LoadBuildingFromFile(geometrypath);
-	building->InitGeometry(); // create the polygons
+    // read the geometry
+    if(!building->LoadBuildingFromFile(geometrypath))
+        return false;
+    if(!building->InitGeometry())
+        return false; // create the polygons
 
-	int currentID=0;
-	// Setup the points
+    int currentID=0;
+    // Setup the points
     VTK_CREATE(vtkPoints,points);
-	// Add the polygon to a list of polygons
+    // Add the polygon to a list of polygons
     VTK_CREATE(vtkCellArray,polygons);
 
     for (int i = 0; i < building->GetNumberOfRooms(); i++)
     {
-		Room* r = building->GetRoom(i);
+        Room* r = building->GetRoom(i);
         //string caption = r->GetCaption();
 
         for (int k = 0; k < r->GetNumberOfSubRooms(); k++)
@@ -751,12 +752,12 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
                 geometry->addObjectLabel(pos,pos,obst->GetCaption(),captionsColor);
             }
         }
-	}
+    }
 
     // Create a PolyData to represent the floor
     VTK_CREATE(vtkPolyData, polygonPolyData);
     polygonPolyData->SetPoints(points);
-	polygonPolyData->SetPolys(polygons);
+    polygonPolyData->SetPolys(polygons);
     geometry->addFloor(polygonPolyData);
 
 
@@ -793,9 +794,10 @@ void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
     }
 
     //TODO:dirty hack for parsing the Hlines
+    // free memory
+    delete building;
 
-	// free memory
-	delete building;
+    return true;
 }
 
 
@@ -988,7 +990,58 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 		}
 		// you should normally have only one geometry node, but one never knows...
 		geoNode = geoNode.nextSiblingElement("geometry");
-	}
+    }
+}
+
+QString SaxParser::extractGeometryFilename(QString &filename)
+{
+    QString extracted_geo_name="";
+    //first try to look at a string <file location="filename.xml"/>
+    QFile file(filename);
+    QString line;
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            //look for a line with
+            line = in.readLine();
+            if(line.contains("location" ,Qt::CaseInsensitive))
+                if(line.contains("<file" ,Qt::CaseInsensitive))
+                {//try to extract what ever is inside the quotes
+
+                    QString begin="\"";
+                    QString end="\"";
+                    int startIndex = line.indexOf(begin)+begin.length();
+                    if(startIndex <= 0)continue; //false alarm
+                    int endIndex = line.indexOf(end,startIndex);
+                    if(endIndex <= 0)continue; // false alarm
+                    extracted_geo_name= line.mid(startIndex,endIndex - startIndex);
+                    return extracted_geo_name;
+                    //cout<<"geoName:"<<extracted_geo_name.toStdString()<<endl;
+                    //break;// we are done
+                }
+            if(line.contains("<geometry" ,Qt::CaseInsensitive))
+            if(!line.contains("version" ,Qt::CaseInsensitive))
+                {//old format
+                    return "";
+                }
+        }
+    }
+
+    //maybe this is already the geometry file itself ?
+    //do a rapid test
+    FacilityGeometry* geo = new FacilityGeometry();
+    QFileInfo fileInfoGeometry(filename);
+    extracted_geo_name=fileInfoGeometry.fileName();
+
+    //just check if it starts with geometry
+    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
+    //{
+        return extracted_geo_name;
+    //}
+    delete geo;
+
+    return "";
 }
 
 
@@ -1001,11 +1054,12 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
     int size =file.size()/(1024*1024);
 
     //avoid dom parsing a very large dataset
-    if(size>100){
+    if(size>500){
         //cout<<"The file is too large: "<<filename.toStdString()<<endl;
         return;
     }
 
+    //cout<<"filename: "<<filename.toStdString()<<endl;
 
     //TODO: check if you can parse this with the building classes.
     // This should be a fall back option

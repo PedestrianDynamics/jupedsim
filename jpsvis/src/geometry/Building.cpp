@@ -28,6 +28,10 @@
 #include "Building.h"
 #include "../tinyxml/tinyxml.h"
 
+//qt stuff
+#include <QString>
+#include "../SystemSettings.h"
+
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
@@ -43,7 +47,8 @@
 #define omp_get_max_threads()	1
 #endif
 
-OutputHandler* Log = new STDIOHandler();;
+//OutputHandler* Log = new STDIOHandler();
+OutputHandler* Log = NULL;
 
 using namespace std;
 
@@ -58,6 +63,7 @@ Building::Building() {
 	_routingEngine = NULL;
 	_linkedCellGrid = NULL;
 	_savePathway = false;
+    Log = new FileHandler(SystemSettings::getLogfile().toStdString().c_str());
 }
 
 
@@ -238,7 +244,7 @@ void Building::AddSurroundingRoom() {
 }
 
 
-void Building::InitGeometry() {
+bool Building::InitGeometry() {
 	Log->Write("INFO: \tInit Geometry");
 	for (int i = 0; i < GetNumberOfRooms(); i++) {
 		Room* room = GetRoom(i);
@@ -262,7 +268,8 @@ void Building::InitGeometry() {
 			}
 
 			// initialize the poly
-			s->ConvertLineToPoly(goals);
+            if(!s->ConvertLineToPoly(goals))
+                return false;
 			s->CalculateArea();
 			goals.clear();
 
@@ -270,11 +277,13 @@ void Building::InitGeometry() {
 			const vector<Obstacle*>& obstacles = s->GetAllObstacles();
 			for (unsigned int obs = 0; obs < obstacles.size(); ++obs) {
 				if (obstacles[obs]->GetClosed() == 1)
-					obstacles[obs]->ConvertLineToPoly();
+                    if(!obstacles[obs]->ConvertLineToPoly())
+                        return false;
 			}
 		}
 	}
 	Log->Write("INFO: \tInit Geometry successful!!!\n");
+    return true;
 }
 
 
@@ -297,7 +306,7 @@ const string& Building::GetProjectRootDir() const{
 }
 
 
-void Building::LoadBuildingFromFile(const std::string &filename) {
+bool Building::LoadBuildingFromFile(const std::string &filename) {
 
 	//get the geometry filename from the project file if none was supplied
 	string geoFilename=filename;
@@ -306,7 +315,7 @@ void Building::LoadBuildingFromFile(const std::string &filename) {
 		if (!doc.LoadFile()){
 			Log->Write("ERROR: \t%s", doc.ErrorDesc());
 			Log->Write("ERROR: \t could not parse the project file");
-			exit(EXIT_FAILURE);
+            return false;
 		}
 
 		Log->Write("INFO: \tParsing the geometry file");
@@ -323,30 +332,30 @@ void Building::LoadBuildingFromFile(const std::string &filename) {
 	if (!docGeo.LoadFile()){
 		Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
         Log->Write("ERROR: \t could not parse the geometry file [%s]",geoFilename.c_str());
-		exit(EXIT_FAILURE);
+        return false;
 	}
 
 	TiXmlElement* xRootNode = docGeo.RootElement();
 	if( ! xRootNode ) {
 		Log->Write("ERROR:\tRoot element does not exist");
-		exit(EXIT_FAILURE);
+         return false;
 	}
 
 	if( xRootNode->ValueStr () != "geometry" ) {
 		Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-		exit(EXIT_FAILURE);
+         return false;
 	}
 
 	if(string(xRootNode->Attribute("unit"))!="m") {
 		Log->Write("ERROR:\tOnly the unit m (metres) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-		exit(EXIT_FAILURE);
+         return false;
 	}
 
 	double version = xmltof(xRootNode->Attribute("version"), -1);
 	if (version < 0.4) {
         Log->Write("ERROR: \tOnly version > 0.4 supported. Your version is %f",version);
 		Log->Write("ERROR: \tparsing geometry file failed!");
-		exit(EXIT_FAILURE);
+         return false;
 	}
 	_caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
 
@@ -359,7 +368,7 @@ void Building::LoadBuildingFromFile(const std::string &filename) {
 	TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
 	if (!xRoomsNode){
 		Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
-		exit(EXIT_FAILURE);
+         return false;
 	}
 
 	for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;

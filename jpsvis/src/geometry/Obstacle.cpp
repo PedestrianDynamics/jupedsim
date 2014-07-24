@@ -193,13 +193,13 @@ bool Obstacle::Contains(const Point& ped) const {
 		return false;
 }
 
-void Obstacle::ConvertLineToPoly() {
+bool Obstacle::ConvertLineToPoly() {
 
 	if(_isClosed==0.0){
 		char tmp[CLENGTH];
 		sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
 		Log->Write(tmp);
-		return;
+        return true;
 	}
 	vector<Line*> copy;
 	vector<Point> tmpPoly;
@@ -235,9 +235,10 @@ void Obstacle::ConvertLineToPoly() {
 		char tmp[CLENGTH];
 		sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
 		Log->Write(tmp);
-		exit(0);
+        return false;
 	}
 	_poly = tmpPoly;
+    return true;
 }
 
 const Point Obstacle::GetCentroid() const{
