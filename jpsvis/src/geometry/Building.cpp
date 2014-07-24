@@ -344,7 +344,7 @@ void Building::LoadBuildingFromFile(const std::string &filename) {
 
 	double version = xmltof(xRootNode->Attribute("version"), -1);
 	if (version < 0.4) {
-		Log->Write("ERROR: \tOnly version > 0.4 supported");
+        Log->Write("ERROR: \tOnly version > 0.4 supported. Your version is %f",version);
 		Log->Write("ERROR: \tparsing geometry file failed!");
 		exit(EXIT_FAILURE);
 	}

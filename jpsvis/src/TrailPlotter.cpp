@@ -1,6 +1,6 @@
 #include "TrailPlotter.h"
 
-#include <VTKActor.h>
+#include <vtkActor.h>
 #include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
 #include <vtkCleanPolyData.h>

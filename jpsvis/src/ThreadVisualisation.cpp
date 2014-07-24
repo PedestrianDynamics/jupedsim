@@ -156,6 +156,10 @@ void ThreadVisualisation::run(){
     renderer->AddActor(geometry->getActor3D());
 
 	//initialize the datasets
+    //mem leak
+    extern_glyphs_pedestrians = vtkTensorGlyph::New();
+    extern_glyphs_pedestrians_3D = vtkTensorGlyph::New();
+
 	initGlyphs2D();
     initGlyphs3D();
 

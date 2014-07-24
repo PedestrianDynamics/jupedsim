@@ -522,8 +522,6 @@ bool MainWindow::slotAddDataSet(){
         return false;
     }
 
-    slotStartPlaying();
-
     QString stre(numberOfDatasetLoaded);
     stre.setNum(numberOfDatasetLoaded);
     stre.append(" dataset loaded");
@@ -591,7 +589,9 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
 
     SyncData* dataset=NULL;
-
+    extern_trajectories_firstSet.clearFrames();
+    extern_trajectories_secondSet.clearFrames();
+    extern_trajectories_thirdSet.clearFrames();
 
     switch(groupID){
     case 1:
