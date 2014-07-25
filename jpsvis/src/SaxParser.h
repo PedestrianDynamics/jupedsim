@@ -79,7 +79,7 @@ public:
 private:
     //clear the mo
     void clearPoints();
-    void InitHeader(double version);
+    void InitHeader(int major, int minor, int patch);
 
 private:
     FacilityGeometry* geometry;

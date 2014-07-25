@@ -550,7 +550,7 @@ void FacilityGeometry::addFloor(vtkPolyData* polygonPolyData )
 
     floorActor->SetMapper(mapper);
     floorActor->GetProperty()->SetColor(0,0,1);
-    floorActor->GetProperty()->SetOpacity(0.5);
+    floorActor->GetProperty()->SetOpacity(0.4);
 
     assembly2D->AddPart(floorActor);
     assembly3D->AddPart(floorActor);

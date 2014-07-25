@@ -74,6 +74,10 @@ public:
 	/// parse data node
 	void parseDataNode(QDomNodeList data);
 
+    //old and new geometry format
+    void InitHeader(int major, int minor, int patch);
+
+
 private:
 	QString getTagValueFromElement(QDomNode node,
 			const char * tagName);
@@ -107,8 +111,6 @@ public Q_SLOTS:
 	void slotProcessMessage(QString& data);
 	void slotConnectionClosed();
 	void slotDisplayError(QAbstractSocket::SocketError socketError);
-	//void slotConnected();
-	//void slotDisconnected();
 
 
 private:
@@ -121,6 +123,16 @@ private:
 	int numberOfAgents;
 	float frameRate;
 	bool finished;
+
+    // temp variables to be removed in the next versions
+    //header dependant variables
+    QString _jps_xPos;
+    QString _jps_yPos;
+    QString _jps_zPos;
+    QString _jps_radiusA;
+    QString _jps_radiusB;
+    QString _jps_ellipseOrientation;
+    QString _jps_ellipseColor;
 };
 
 #endif /* THREADDATATRANSFERT_H_ */

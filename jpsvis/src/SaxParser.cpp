@@ -97,9 +97,26 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         for(int i=0;i<at.length();i++){
             if(at.localName(i)=="version")
             {
-                double version=at.value(i).toDouble();
-                InitHeader(version);
-                //cout<<"version found:"<<version<<endl;exit(0);
+                QStringList query = at.value(i).split(".");
+                int major=0;
+                int minor=0;
+                int patch=0;
+                switch (query.size() ) {
+                case 1:
+                    major=query.at(0).toInt();
+                    break;
+                case 2:
+                     major=query.at(0).toInt();
+                     minor=query.at(1).toInt();
+                    break;
+                case 3:
+                    major=query.at(0).toInt();
+                    minor=query.at(1).toInt();
+                    patch=query.at(2).toInt();
+                    break;
+                }
+                InitHeader(major,minor,patch);
+                //cout<<"version found:"<<at.value(i).toStdString()<<endl;exit(0);
             }
         }
     }else if (qName == "file") {
@@ -1005,6 +1022,7 @@ QString SaxParser::extractGeometryFilename(QString &filename)
         while (!in.atEnd()) {
             //look for a line with
             line = in.readLine();
+            //cout<<"checking: "<<line.toStdString()<<endl;
             if(line.contains("location" ,Qt::CaseInsensitive))
                 if(line.contains("<file" ,Qt::CaseInsensitive))
                 {//try to extract what ever is inside the quotes
@@ -1016,30 +1034,32 @@ QString SaxParser::extractGeometryFilename(QString &filename)
                     int endIndex = line.indexOf(end,startIndex);
                     if(endIndex <= 0)continue; // false alarm
                     extracted_geo_name= line.mid(startIndex,endIndex - startIndex);
+                    cout<<"geoName:"<<extracted_geo_name.toStdString()<<endl;
                     return extracted_geo_name;
-                    //cout<<"geoName:"<<extracted_geo_name.toStdString()<<endl;
                     //break;// we are done
                 }
             if(line.contains("<geometry" ,Qt::CaseInsensitive))
-            if(!line.contains("version" ,Qt::CaseInsensitive))
-                {//old format
-                    return "";
+                if(line.contains("version" ,Qt::CaseInsensitive))
+                {//real geometry file
+                    QFileInfo fileInfoGeometry(filename);
+                    extracted_geo_name=fileInfoGeometry.fileName();
+                    return extracted_geo_name;
                 }
         }
     }
 
     //maybe this is already the geometry file itself ?
     //do a rapid test
-    FacilityGeometry* geo = new FacilityGeometry();
-    QFileInfo fileInfoGeometry(filename);
-    extracted_geo_name=fileInfoGeometry.fileName();
+//    FacilityGeometry* geo = new FacilityGeometry();
+//    QFileInfo fileInfoGeometry(filename);
+//    extracted_geo_name=fileInfoGeometry.fileName();
 
-    //just check if it starts with geometry
-    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
-    //{
-        return extracted_geo_name;
-    //}
-    delete geo;
+//    //just check if it starts with geometry
+//    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
+//    //{
+//        return extracted_geo_name;
+//    //}
+//    delete geo;
 
     return "";
 }
@@ -1095,7 +1115,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
 	//parsing the subrooms
 	QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
 	//parsing the walls
-	for (unsigned int i = 0; i < xSubRoomsNodeList.length(); i++) {
+    for (  int i = 0; i < xSubRoomsNodeList.length(); i++) {
 		QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
 		double position[3]={0,0,0};
 		double pos_count=1;
@@ -1222,10 +1242,10 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
 	}
 }
 
-void SaxParser::InitHeader(double version)
+void SaxParser::InitHeader(int major, int minor, int patch)
 {
     // set the parsing String map
-    if(version==0.5){
+    if(minor==5 && patch==0){
         _jps_xPos=QString("xPos");
         _jps_yPos=QString("yPos");
         _jps_zPos=QString("zPos");
@@ -1237,7 +1257,7 @@ void SaxParser::InitHeader(double version)
         _jps_ellipseOrientation=QString("ellipseOrientation");
         _jps_ellipseColor=QString("ellipseColor");
     }
-    else if (version==0.6){
+    else if ( (minor==6) || (minor==5 && patch==1) ){
         _jps_xPos=QString("x");
         _jps_yPos=QString("y");
         _jps_zPos=QString("z");
@@ -1251,8 +1271,8 @@ void SaxParser::InitHeader(double version)
     }
     else
     {
-        cout<<"unsupported header version: "<<version<<endl;
-        cout<<"Please use 0.5 or 0.6 "<<endl;
+        cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<endl;
+        cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
         exit(0);
     }
 }

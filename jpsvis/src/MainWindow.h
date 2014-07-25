@@ -278,7 +278,7 @@ private:
 	/// parse the geometry  Node and return a pointer to geometry object
 	/// used in online mode only
 	FacilityGeometry* parseGeometry(QDomNode geoNode);
-
+    FacilityGeometry* parseGeometry(QString geometryString);
 
 	/**
 	 * parse a shape node and get the initials heights and colors of pedestrians.

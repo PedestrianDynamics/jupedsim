@@ -61,6 +61,8 @@
 #include <QColorDialog>
 #include <QDebug>
 #include <QtXml>
+#include <QTemporaryFile>
+
 
 #include <iostream>
 #include <limits>
@@ -180,7 +182,7 @@ MainWindow::MainWindow(QWidget *parent) :
     int group=1; // there are max 3 groups of pedestrians
     bool mayPlay=false;
 
-    //	arguments.append("-online");
+    //    arguments.append("-online");
     //	arguments.append("-caption");
     arguments.append("-2D");
     // parse arguments list
@@ -424,6 +426,7 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
     {
         if (fileName.endsWith(".xml",Qt::CaseInsensitive))
         {
+            //parsing the file
             SaxParser::parseGeometryJPS(fileName,geometry);
         }
         else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
@@ -436,9 +439,91 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
     //which is the only one which can directly be inserted into a file
     else
     {
+        //cout<<"online geo: "<<geoNode.toDocument().toString().toStdString()<<endl; exit(0);
+        //geoNode.toText().toComment().toDocument().toString()
+        QDomDocument doc("");
+        QDomNode geoNode;
+        if(!geoNode.isNull()){
+            cout<<"online geo: "<<geoNode.toElement().toDocument().toString().toStdString()<<endl; exit(0);
+        }
+
         //must not be a file name
         SaxParser::parseGeometryTRAV(fileName,geometry,geoNode);
     }
+    return geometry;
+}
+
+// This function is only used in online Mode
+FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
+{
+
+//    QDomDocument doc("");
+//    data = "<travisto>\n" +data+ "\n</travisto>\n";
+
+//    QString errorMsg="";
+//    doc.setContent(data,&errorMsg);
+
+//    if(!errorMsg.isEmpty()){
+//        Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
+//        return;
+//    }
+
+//    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
+
+    //create a temporary file with the content geonode
+
+//    QTemporaryFile file;
+//    file.setFileName(file.fileName()+".xml");
+//    if (file.open()) {
+//        QTextStream stream(&file);
+//        stream << geoNode << endl;
+//    }
+
+    QFile file("_geometry_tmp_file.xml");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QTextStream stream(&file);
+        stream << geometryString << endl;
+    }
+
+    QString tmpFileName = file.fileName();
+
+    //check if there is a tag 'file' there in
+    QString geofileName = SaxParser::extractGeometryFilename(tmpFileName);
+
+    //cout<<"filename: "<<geofileName.toStdString()<<endl;exit(0);
+
+    FacilityGeometry* geometry = visualisationThread->getGeometry();
+
+    if(!geofileName.isEmpty())
+    {
+        if (geofileName.endsWith(".xml",Qt::CaseInsensitive))
+        {
+            //parsing the file
+            if(!SaxParser::parseGeometryJPS(geofileName,geometry))
+            {
+               SaxParser::parseGeometryXMLV04(geofileName,geometry);
+            }
+        }
+        else if (geofileName.endsWith(".trav",Qt::CaseInsensitive))
+        {
+            //must not be a file name
+            SaxParser::parseGeometryTRAV(geofileName,geometry);
+        }
+    }
+    // I assume it is a trav format node,
+    //which is the only one which can directly be inserted into a file
+    else
+    {
+        QDomDocument doc("");
+        QDomNode geoNode;
+
+        //must not be a file name
+        SaxParser::parseGeometryTRAV(geometryString,geometry,geoNode);
+    }
+
+    //delete the file
+    file.remove();
     return geometry;
 }
 
@@ -566,8 +651,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     //try to get a geometry filename
     QString geometry_file=SaxParser::extractGeometryFilename(fileName);
-
-    //cout<<"geometry NaMe: "<<geometry_file.toStdString()<<endl;
+    //cout<<"geometry name: "<<geometry_file.toStdString()<<endl;
 
     // if xml is detected, just load and show the geometry then exit
     if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)){
@@ -1336,7 +1420,7 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     slotToggleFirstPedestrianGroup();
 
     QDomDocument doc("");
-    data = "<travisto>\n" +data+ "\n</travisto>\n";
+    //data = "<travisto>\n" +data+ "\n</travisto>\n";
 
     QString errorMsg="";
     doc.setContent(data,&errorMsg);
@@ -1345,9 +1429,10 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
         Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
         return;
     }
+    //QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
 
-    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
-    FacilityGeometry *geo = parseGeometry(geoNode);
+    //FacilityGeometry *geo = parseGeometry(geoNode);
+    FacilityGeometry *geo = parseGeometry(data);
 
     visualisationThread->slotSetFrameRate(frameRate);
     visualisationThread->setGeometry(geo);
