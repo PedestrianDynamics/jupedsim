@@ -70,20 +70,18 @@ public:
      void Write(const char *string,...);
 };
 
-class TraVisToHandler : public OutputHandler {
+class SocketHandler : public OutputHandler {
 private:
      TraVisToClient* client;
 
 public:
-     TraVisToHandler(std::string host, int port);
-     virtual ~TraVisToHandler();
+     SocketHandler(std::string host, int port);
+     virtual ~SocketHandler();
      void Write(std::string str);
 
      //Some tags are broken
      std::vector<std::string> brokentags;
 };
-
-
 
 
 #endif /*OUTPUT_HANDLER_H_*/

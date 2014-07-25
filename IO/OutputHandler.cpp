@@ -191,7 +191,7 @@ void FileHandler::Write(const char* str_msg,...)
      }
 }
 
-TraVisToHandler::TraVisToHandler(string host, int port)
+SocketHandler::SocketHandler(string host, int port)
 {
      client = new TraVisToClient(host, port);
      brokentags.push_back("<trajectories>");
@@ -199,12 +199,12 @@ TraVisToHandler::TraVisToHandler(string host, int port)
      brokentags.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 }
 
-TraVisToHandler::~TraVisToHandler()
+SocketHandler::~SocketHandler()
 {
      delete client;
 }
 
-void TraVisToHandler::Write(string str)
+void SocketHandler::Write(string str)
 {
 
      vector<string>::iterator str_it;

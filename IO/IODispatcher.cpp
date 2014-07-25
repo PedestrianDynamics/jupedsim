@@ -41,38 +41,59 @@ using namespace std;
 
 IODispatcher::IODispatcher()
 {
-     pHandlers = vector<OutputHandler*>();
+     _outputHandlers = vector<Trajectories*>();
 }
 
 IODispatcher::~IODispatcher()
 {
-     for (int i = 0; i < (int) pHandlers.size(); i++)
-          delete pHandlers[i];
-     pHandlers.clear();
+     for (int i = 0; i < (int) _outputHandlers.size(); i++)
+          delete _outputHandlers[i];
+     _outputHandlers.clear();
 }
 
 
-void IODispatcher::AddIO(OutputHandler* ioh)
+void IODispatcher::AddIO(Trajectories* ioh)
 {
-     pHandlers.push_back(ioh);
+     _outputHandlers.push_back(ioh);
 }
 
 
-const vector<OutputHandler*>& IODispatcher::GetIOHandlers()
+const vector<Trajectories*>& IODispatcher::GetIOHandlers()
 {
-     return pHandlers;
+     return _outputHandlers;
 }
 
-void IODispatcher::Write(const std::string& str)
+void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int seed)
 {
-     for (vector<OutputHandler*>::iterator it = pHandlers.begin();
-               it != pHandlers.end(); ++it) {
-          (*it)->Write(str);
+     for (vector<Trajectories*>::iterator it = _outputHandlers.begin(); it != _outputHandlers.end(); ++it)
+     {
+          (*it)->WriteHeader(nPeds, fps, building, seed);
      }
-
+}
+void IODispatcher::WriteGeometry(Building* building)
+{
+     for (vector<Trajectories*>::iterator it = _outputHandlers.begin(); it != _outputHandlers.end(); ++it)
+     {
+          (*it)->WriteGeometry(building);
+     }
+}
+void IODispatcher::WriteFrame(int frameNr, Building* building)
+{
+     for (vector<Trajectories*>::iterator it = _outputHandlers.begin(); it != _outputHandlers.end(); ++it)
+     {
+          (*it)->WriteFrame(frameNr, building);
+     }
+}
+void IODispatcher::WriteFooter()
+{
+     for (vector<Trajectories*>::iterator it = _outputHandlers.begin(); it != _outputHandlers.end(); ++it)
+     {
+          (*it)->WriteFooter();
+     }
 }
 
-string IODispatcher::WritePed(Pedestrian* ped)
+
+string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 {
      double RAD2DEG = 180.0 / M_PI;
      char tmp[CLENGTH] = "";
@@ -101,7 +122,7 @@ string IODispatcher::WritePed(Pedestrian* ped)
      return tmp;
 }
 
-void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int seed      )
+void TrajectoriesJPSV04::WriteHeader(int nPeds, double fps, Building* building, int seed      )
 {
 
      nPeds = building->GetNumberOfPedestrians();
@@ -122,7 +143,7 @@ void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int se
 
 }
 
-void IODispatcher::WriteGeometry(Building* building)
+void TrajectoriesJPSV04::WriteGeometry(Building* building)
 {
      // just put a link to the geometry file
      string embed_geometry;
@@ -272,7 +293,7 @@ void IODispatcher::WriteGeometry(Building* building)
      Write(geometry);
 }
 
-void IODispatcher::WriteFrame(int frameNr, Building* building)
+void TrajectoriesJPSV04::WriteFrame(int frameNr, Building* building)
 {
      string data;
      char tmp[CLENGTH] = "";
@@ -304,7 +325,7 @@ void IODispatcher::WriteFrame(int frameNr, Building* building)
      Write(data);
 }
 
-void IODispatcher::WriteFooter()
+void TrajectoriesJPSV04::WriteFooter()
 {
      Write("</trajectories>\n");
 }
@@ -314,7 +335,7 @@ void IODispatcher::WriteFooter()
  * FLAT format implementation
  */
 
-TrajectoriesFLAT::TrajectoriesFLAT() : IODispatcher()
+TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 {
 }
 
@@ -438,10 +459,6 @@ void TrajectoriesVTK::WriteFooter()
 }
 
 
-
-
-
-
 void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, int seed)
 {
      nPeds = building->GetNumberOfPedestrians();
@@ -469,35 +486,35 @@ void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, 
 void TrajectoriesJPSV06::WriteGeometry(Building* building)
 {
      // just put a link to the geometry file
-     string embed_geometry;
-     embed_geometry.append("\t<geometry>\n");
-     char file_location[CLENGTH] = "";
-     sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
-     embed_geometry.append(file_location);
-     //embed_geometry.append("\t</geometry>\n");
-
-     const map<int, Hline*>& hlines=building->GetAllHlines();
-     if(hlines.size()>0){
-          //embed_geometry.append("\t<geometry>\n");
-          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
-          {
-               embed_geometry.append(it->second->WriteElement());
-          }
-          //embed_geometry.append("\t</geometry>\n");
-     }
-     embed_geometry.append("\t</geometry>\n");
-     Write(embed_geometry);
-
-
-//     string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
 //     string embed_geometry;
-//     string tmp; //lines to drop
-//     std::ifstream t(fileName.c_str());
-//     std::getline(t,tmp); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
-//     std::stringstream buffer;
-//     buffer << t.rdbuf();
-//     embed_geometry=buffer.str();
-//     //Write(embed_geometry);
+//     embed_geometry.append("\t<geometry>\n");
+//     char file_location[CLENGTH] = "";
+//     sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
+//     embed_geometry.append(file_location);
+//     //embed_geometry.append("\t</geometry>\n");
+//
+//     const map<int, Hline*>& hlines=building->GetAllHlines();
+//     if(hlines.size()>0){
+//          //embed_geometry.append("\t<geometry>\n");
+//          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+//          {
+//               embed_geometry.append(it->second->WriteElement());
+//          }
+//          //embed_geometry.append("\t</geometry>\n");
+//     }
+//     embed_geometry.append("\t</geometry>\n");
+//     Write(embed_geometry);
+
+     //set the content of the file
+     string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
+     string embed_geometry;
+     string tmp; //lines to drop
+     std::ifstream t(fileName.c_str());
+     std::getline(t,tmp); //drop the first line <?xml version="1.0" encoding="UTF-8"?>
+     std::stringstream buffer;
+     buffer << t.rdbuf();
+     embed_geometry=buffer.str();
+     Write(embed_geometry);
 //
 //
 //     //collecting the hlines
@@ -534,15 +551,15 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
 //     embed_geometry.replace(start_pos, to_replace.length(), hline_string);
 //     Write(embed_geometry);
 
-     Write("\t<AttributeDescription>");
-     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
-     Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
-     Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
-     Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
-     Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
-     Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
-     Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
-     Write("\t</AttributeDescription>\n");
+//     Write("\t<AttributeDescription>");
+//     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
+//     Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
+//     Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
+//     Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
+//     Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
+//     Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
+//     Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
+//     Write("\t</AttributeDescription>\n");
 }
 
 void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
@@ -551,9 +568,6 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
      char tmp[CLENGTH] = "";
      double RAD2DEG = 180.0 / M_PI;
      vector<string> rooms_to_plot;
-
-     //promenade
-     //rooms_to_plot.push_back("010");
 
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
@@ -621,3 +635,115 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
      nv->WriteToFile(building->GetProjectFilename()+".full.nav");
      delete nv;
 }
+
+
+void TrajectoriesJPSV05::WriteHeader(int nPeds, double fps, Building* building, int seed)
+{
+     nPeds = building->GetNumberOfPedestrians();
+     string tmp;
+     tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
+     char agents[CLENGTH] = "";
+     sprintf(agents, "\t<header version = \"0.5.1\">\n");
+     tmp.append(agents);
+     sprintf(agents, "\t\t<agents>%d</agents>\n", nPeds);
+     tmp.append(agents);
+     sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
+     tmp.append(agents);
+     sprintf(agents, "\t\t<frameRate>%0.2f</frameRate>\n", fps);
+     tmp.append(agents);
+     //tmp.append("\t\t<!-- Frame count HACK\n");
+     //tmp.append("replace me\n");
+     //tmp.append("\t\tFrame count HACK -->\n");
+     //tmp.append("<frameCount>xxxxxxx</frameCount>\n");
+     tmp.append("\t</header>\n");
+     _outputHandler->Write(tmp);
+}
+
+void TrajectoriesJPSV05::WriteGeometry(Building* building)
+{
+     // just put a link to the geometry file
+     string embed_geometry;
+     embed_geometry.append("\t<geometry>\n");
+     char file_location[CLENGTH] = "";
+     sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
+     embed_geometry.append(file_location);
+     //embed_geometry.append("\t</geometry>\n");
+
+     const map<int, Hline*>& hlines=building->GetAllHlines();
+     if(hlines.size()>0){
+          //embed_geometry.append("\t<geometry>\n");
+          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+          {
+               embed_geometry.append(it->second->WriteElement());
+          }
+          //embed_geometry.append("\t</geometry>\n");
+     }
+     embed_geometry.append("\t</geometry>\n");
+     _outputHandler->Write(embed_geometry);
+
+
+     _outputHandler->Write("\t<AttributeDescription>");
+     _outputHandler->Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
+     _outputHandler->Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
+     _outputHandler->Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
+     _outputHandler->Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
+     _outputHandler->Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
+     _outputHandler->Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
+     _outputHandler->Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
+     _outputHandler->Write("\t</AttributeDescription>\n");
+}
+
+void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
+{
+     string data;
+     char tmp[CLENGTH] = "";
+     double RAD2DEG = 180.0 / M_PI;
+
+     sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
+     data.append(tmp);
+
+     for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
+          Room* r = building->GetRoom(roomindex);
+          string caption = r->GetCaption();
+
+
+          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
+               SubRoom* s = r->GetSubRoom(k);
+               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i)
+               {
+                    char tmp[CLENGTH] = "";
+                    Pedestrian* ped = s->GetPedestrian(i);
+                    double v0 = ped->GetV0Norm();
+                    int color=1; // red= very low velocity
+
+                    if (v0 != 0.0) {
+                         double v = ped->GetV().Norm();
+                         color = (int) (v / v0 * 255);
+                    }
+                    if(ped->GetSpotlight()==false) color=-1;
+
+
+                    double a = ped->GetLargerAxis();
+                    double b = ped->GetSmallerAxis();
+                    double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+                    sprintf(tmp, "<agent ID=\"%d\"\t"
+                              "x=\"%.2f\"\ty=\"%.2f\"\t"
+                              "z=\"%.2f\"\t"
+                              "rA=\"%.2f\"\trB=\"%.2f\"\t"
+                              "eO=\"%.2f\" eC=\"%d\"/>\n",
+                              ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+                              (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                              phi * RAD2DEG, color);
+                    data.append(tmp);
+               }
+          }
+     }
+     data.append("</frame>\n");
+     _outputHandler->Write(data);
+}
+
+void TrajectoriesJPSV05::WriteFooter()
+{
+     _outputHandler->Write("</trajectories>\n");
+}
+

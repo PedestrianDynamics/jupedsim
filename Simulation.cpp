@@ -33,6 +33,7 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
+
 using namespace std;
 
 OutputHandler* Log;
@@ -123,11 +124,11 @@ void Simulation::InitArgs(ArgumentParser* args)
      if(args->GetPort()!=-1) {
           switch(args->GetFileFormat()) {
           case FORMAT_XML_PLAIN_WITH_MESH:
-          //case FORMAT_XML_BIN:
           case FORMAT_XML_PLAIN: {
-               OutputHandler* travisto = new TraVisToHandler(args->GetHostname(),
-                         args->GetPort());
-               _iod->AddIO(travisto);
+               OutputHandler* travisto = new SocketHandler(args->GetHostname(), args->GetPort());
+               Trajectories* output= new TrajectoriesJPSV06();
+               output->SetOutputHandler(travisto);
+               _iod->AddIO(output);
                break;
           }
           case FORMAT_XML_BIN: {
@@ -154,45 +155,42 @@ void Simulation::InitArgs(ArgumentParser* args)
           switch (args->GetFileFormat()) {
           case FORMAT_XML_PLAIN: {
                OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-               _iod->AddIO(tofile);
-               break;
-          }
-          case FORMAT_XML_PLAIN_WITH_MESH: {
-               OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-               if(_iod) delete _iod;
-               _iod = new TrajectoriesXML_MESH();
-               _iod->AddIO(tofile);
-               break;
-          }
-          //case FORMAT_XML_PLAIN:
-          case FORMAT_XML_BIN: {
-               OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-               if(_iod) delete _iod;
-               _iod = new TrajectoriesJPSV06();
-               _iod->AddIO(tofile);
-               //OutputHandler* travisto = new TraVisToHandler(args->GetHostname(), args->GetPort());
-               //_iod->AddIO(travisto);
+               Trajectories* output= new TrajectoriesJPSV05();
+               output->SetOutputHandler(tofile);
+               _iod->AddIO(output);
                break;
           }
           case FORMAT_PLAIN: {
                OutputHandler* file = new FileHandler(args->GetTrajectoriesFile().c_str());
-               if(_iod) delete _iod;
-               _iod = new TrajectoriesFLAT();
-               _iod->AddIO(file);
+               Trajectories* output= new  TrajectoriesFLAT();
+               output->SetOutputHandler(file);
+               _iod->AddIO(output);
                break;
           }
           case FORMAT_VTK: {
                Log->Write("INFO: \tFormat vtk not yet supported\n");
                OutputHandler* file = new FileHandler((args->GetTrajectoriesFile() +".vtk").c_str());
+               Trajectories* output= new  TrajectoriesVTK();
+               output->SetOutputHandler(file);
+               _iod->AddIO(output);
+               break;
+          }
 
-               if(_iod) delete _iod;
-               _iod = new TrajectoriesVTK();
-               _iod->AddIO(file);
-               //exit(0);
+          case FORMAT_XML_PLAIN_WITH_MESH: {
+               //OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
+               //if(_iod) delete _iod;
+               //_iod = new TrajectoriesXML_MESH();
+               //_iod->AddIO(tofile);
+               break;
+          }
+          case FORMAT_XML_BIN: {
+               // OutputHandler* travisto = new SocketHandler(args->GetHostname(), args->GetPort());
+               // Trajectories* output= new TrajectoriesJPSV06();
+               // output->SetOutputHandler(travisto);
+               // _iod->AddIO(output);
                break;
           }
           }
-
      }
 
      _distribution = new PedDistributor();
@@ -419,15 +417,11 @@ int Simulation::RunSimulation()
 {
      int frameNr = 1; // Frame Number
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
-     //double writeInterval =  ((1. / _fps) / _deltaT);
-     // printf("fps=%f, dt=%f, writein=%d\n", _fps, _deltaT, writeInterval);
-     //getc(stdin);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
      double t=0.0;
 
 
      // writing the header
-
      _iod->WriteHeader(_nPeds, _fps, _building,_seed);
      _iod->WriteGeometry(_building);
      _iod->WriteFrame(0,_building);
@@ -437,20 +431,15 @@ int Simulation::RunSimulation()
 
      // main program loop
      for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
-//          printf("frame=%d, writeframe=%f, t=%f\n", frameNr, writeInterval, t);
           t = 0 + (frameNr - 1) * _deltaT;
           // solve ODE
           _solver->solveODE(t, t + _deltaT, _building);
-          // update and check if pedestrians changes rooms
+          // update and check if pedestrians change rooms
           Update();
           _em->Update_Events(t,_deltaT);
           // trajectories output
           if (frameNr % writeInterval == 0) {
-          //if (fmod(t,writeInterval)< 0.1*_deltaT ) {
-               //printf("Write t=%f, frameNr=%d, mod=%f\n",t, frameNr, fmod(t, writeInterval));
-               //getc(stdin);
                _iod->WriteFrame(frameNr / writeInterval, _building);
-               //_iod->WriteFrame(frameNr, _building);
           }
 
      }
@@ -471,9 +460,6 @@ int Simulation::RunSimulation()
           char replace[CLENGTH];
           // open the file and replace the 8th line
           sprintf(replace,"sed -i '9s/.*/ %d /' %s", frameNr/ writeInterval, _argsParser->GetTrajectoriesFile().c_str());
-          //sprintf(replace,"sed -i '8s#.*#<%s>#' %s",  "glas", _argsParser->GetTrajectoriesFile().c_str());
-          //sprintf(replace,"sed -i '8s#.*#%s#' %s",  "\\<te\\>", _argsParser->GetTrajectoriesFile().c_str());
-
           system(replace);
      }
 
