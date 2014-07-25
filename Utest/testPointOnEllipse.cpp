@@ -66,7 +66,7 @@ int testPointOnEllipse()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(r);
-     E.SetBmax(r);
+     E.SetBmin(r*2);
 
      float sx, sy, l;
      Point S(0,0); //test point

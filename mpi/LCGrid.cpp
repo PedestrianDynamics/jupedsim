@@ -201,10 +201,11 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
                int p = pCellHead[j][i];
                // all peds in one cell
                while (p != LIST_EMPTY) {
-                    double x=pLocalPedsCopy[p]->GetPos().GetX();
-                    double y=pLocalPedsCopy[p]->GetPos().GetY();
-                    double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
-                    if((dist<pCellSize*pCellSize) && (p!=myID)) {
+                    // double x=pLocalPedsCopy[p]->GetPos().GetX();
+                    // double y=pLocalPedsCopy[p]->GetPos().GetY();
+                    // double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
+                    if(p!=myID) {
+                         // if((dist<pCellSize*pCellSize) && (p!=myID)) {
                          neighbourhood.push_back(pLocalPedsCopy[p]);
                     }
                     // next ped

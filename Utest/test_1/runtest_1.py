@@ -25,9 +25,8 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
-TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
+DIR= os.path.dirname(os.path.realpath(argv[0]))
 CWD = os.getcwd()
-DIR= TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
 def get_maxtime(filename):
@@ -84,11 +83,17 @@ if __name__ == "__main__":
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
         os.chdir(DIR)
 
+
     logging.info("change directory to ..")
     os.chdir("..")
     logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
     subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
     os.chdir(DIR)
+    #-------- get directory of the code TRUNK
+    os.chdir("../..")
+    TRUNK = os.getcwd()
+    os.chdir(DIR)
+    #----------------------------------------
     logging.info("change directory back to %s"%DIR)
 
     geofile = "%s/geometry.xml"%DIR

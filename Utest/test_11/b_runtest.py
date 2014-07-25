@@ -24,9 +24,8 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s -
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
-TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
-DIR= TRUNK + "/Utest/test_%d"%testnr
+DIR = os.path.dirname(os.path.realpath(argv[0]))
 #--------------------------------------------------------
     
 def get_maxtime(filename):
@@ -85,7 +84,13 @@ if __name__ == "__main__":
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
-        
+       
+    #-------- get directory of the code TRUNK
+    os.chdir(DIR)
+    os.chdir("../..")
+    TRUNK = os.getcwd()
+    os.chdir(DIR)
+    #---------------------------------------- 
     executable = "%s/bin/jpscore"%TRUNK
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
