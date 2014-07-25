@@ -239,7 +239,7 @@ void Simulation::InitArgs(ArgumentParser* args)
      }
      // ODE solver
      int solver = args->GetSolver();
-     sprintf(tmp, "\tODE Loeser: %d\n", solver);
+     sprintf(tmp, "\tODE Solver: %d\n", solver);
      s.append(tmp);
      switch (solver) {
      case 1:
@@ -400,7 +400,7 @@ void Simulation::InitArgs(ArgumentParser* args)
 
      // perform a general check to the .
      _building->SanityCheck();
-     //size of the cells/GCFM
+     //size of the cells/GCFM/Gompertz
      if(args->GetDistEffMaxPed()>args->GetLinkedCellSize()){
          Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",args->GetLinkedCellSize(),args->GetDistEffMaxPed());
          exit(EXIT_FAILURE);

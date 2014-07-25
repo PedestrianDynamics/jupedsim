@@ -39,9 +39,8 @@ def copyanything(src, dst):
                                     
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
-TRUNK = HOME + "/Workspace/peddynamics/JuPedSim/jpscore"
 CWD = os.getcwd()
-DIR= TRUNK + "/Utest/test_%d"%testnr
+DIR= os.path.dirname(os.path.realpath(argv[0]))
 #--------------------------------------------------------
     
 if __name__ == "__main__":
@@ -52,12 +51,16 @@ if __name__ == "__main__":
     for e in ["a", "b"]:
         os.chdir("..")
         logging.info("Change directory to %s"%os.getcwd())
-        Masterfile = "test_11/master_ini_%c.xml"%e
+        Masterfile = "%s/master_ini_%c.xml"%(DIR,e)
         logging.info('makeini files with = <%s>'%Masterfile)
-        subprocess.call(["python", "makeini.py", "-f %s"%Masterfile])
+        #subprocess.call(["python", "makeini.py", "-f %s"%Masterfile])
+        subprocess.call(["python", "makeini.py", "-f", "%s"%Masterfile])
         os.chdir(DIR)
         logging.info("Change directory to %s"%DIR)
         logging.info('copy inifiles to  = inifiles_%c'%e)
+        if not path.exists("inifiles"):
+            logging.critical("inifiles was not created")
+            exit(FAILURE)
         copyanything("inifiles", "inifiles_%c"%e)
         
         logging.info('run %c_runtest.py'%e)
@@ -68,7 +71,7 @@ if __name__ == "__main__":
     logging.info('results [%.2f --- %.2f]'%(results[0], results[1]))
     if np.fabs(results[0]-results[1] ) >0.01:
         logging.critical('%s returns with FAILURE'%(argv[0]))
-        exit(FAULURE)
+        exit(FAILURE)
     else:
         logging.info('%s returns with SUCCESS'%(argv[0]))
         exit(SUCCESS)

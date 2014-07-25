@@ -118,6 +118,8 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
      double r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
      double r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
+     //fprintf(stderr, "%f %f %f %f\n",  E1.GetEA(), E1.GetEB(), E2.GetEA(), E2.GetEB());
+     fprintf(stderr, "%f %f\n",  r1, r2);
      const double EPS = 0.001;
      double Distance = distp12.Norm() + EPS; // Molified See Koester2013
 
@@ -419,7 +421,6 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                     ped->UpdateTimeInJam();
                }
 //--------------------------------------------------------------------------------------------------
-
                     //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                ped->SetPos(pos_neu);
                ped->SetV(v_neu);

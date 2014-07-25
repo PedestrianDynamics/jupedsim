@@ -850,7 +850,7 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
                 "dist_max");
         string disteff_max =
                 xModelPara->FirstChildElement("force_ped")->Attribute(
-                        "disteff_max");
+                     "disteff_max"); // @todo: rename disteff_max to force_max
         string interpolation_width =
                 xModelPara->FirstChildElement("force_ped")->Attribute(
                         "interpolation_width");
@@ -1099,6 +1099,12 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
             agentParameters->InitAtau(mu,sigma);
             Log->Write("INFO: \ttAtau mu=%f , sigma=%f",mu,sigma);
         }
+        double beta_c = 2; /// @todo quick and dirty
+        double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau()*agentParameters->GetV0();
+        double max_Eb = 0.5*(agentParameters->GetBmin() + 0.49) ; /// @todo hard-coded value should be the same as in pedestrians GetEB
+        double max_Ea_Eb = (max_Ea>max_Eb)?max_Ea:max_Eb;
+        pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
+        pDistEffMaxWall  = pDistEffMaxPed;
     }
 }
 
