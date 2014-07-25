@@ -195,7 +195,7 @@ double JEllipse::GetEA() const
 double JEllipse::GetEB() const
 {
      double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
-     double v_min = 0.11;
+     double v_min = 0.01;
      double a = 0.49;
      double b = -1.17;
      double v = _vel.Norm();

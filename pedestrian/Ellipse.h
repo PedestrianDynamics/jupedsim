@@ -79,6 +79,8 @@ public:
 
      double GetEA()const;// ellipse semi-axis in the direction of the velocity
      double GetEB()const;// ellipse semi-axis in the orthogonal direction of the velocity
+     double GetMaxEA()const;
+     double GetMaxEB()const;
      double GetArea()const;
 
 
