@@ -1,10 +1,31 @@
 /**
- * @file   GraphVertex.h
- * @author David Haensel (d.haensel@fz-juelich.de)
- * @date   January, 2014
- * @brief  Vertex of a Graph.
+ * \file        GraphVertex.h
+ * \date        Jan 1, 2014
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- */
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * Vertex of a Graph.
+ *
+ *
+ **/
+
 
 #ifndef GRAPHVERTEX_H_
 #define GRAPHVERTEX_H_
@@ -29,40 +50,40 @@ class GraphEdge;
 class GraphVertex {
 
 public:
-typedef std::set<GraphEdge *> EdgesContainer;
-    /****************************
-     * Constructors & Destructors
-     ****************************/
+     typedef std::set<GraphEdge *> EdgesContainer;
+     /****************************
+      * Constructors & Destructors
+      ****************************/
 
-    GraphVertex(const SubRoom * const sub_room);
-    GraphVertex(GraphVertex const & gv);
+     GraphVertex(const SubRoom * const sub_room);
+     GraphVertex(GraphVertex const & gv);
 
-    virtual ~GraphVertex();
+     virtual ~GraphVertex();
 
-    const std::string GetCaption() const;
-    const SubRoom * GetSubRoom() const;
+     const std::string GetCaption() const;
+     const SubRoom * GetSubRoom() const;
 
-    // add and remove edge pointer from vertex
+     // add and remove edge pointer from vertex
 
-    void AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing);
-    int RemoveOutEdge(const GraphVertex * dest);
-    int RemoveOutEdge(GraphEdge * edge);
-    const EdgesContainer * GetAllOutEdges() const;
-    EdgesContainer * GetAllEdges();
+     void AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing);
+     int RemoveOutEdge(const GraphVertex * dest);
+     int RemoveOutEdge(GraphEdge * edge);
+     const EdgesContainer * GetAllOutEdges() const;
+     EdgesContainer * GetAllEdges();
 
 
-    void AddExit(const Transition * transition);
-    bool HasExit() const;
+     void AddExit(const Transition * transition);
+     bool HasExit() const;
 
-    std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
-    std::pair<const GraphEdge *, double> GetCheapestDestinationByEdges(const Point & position) const;
+     std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
+     std::pair<const GraphEdge *, double> GetCheapestDestinationByEdges(const Point & position) const;
 
 
 private:
-    // edges wich are "known" from this vertex
-    EdgesContainer out_edges;
-    std::set<GraphEdge *> exits;
-    const SubRoom * const sub_room;
+     // edges wich are "known" from this vertex
+     EdgesContainer out_edges;
+     std::set<GraphEdge *> exits;
+     const SubRoom * const sub_room;
 
 };
 

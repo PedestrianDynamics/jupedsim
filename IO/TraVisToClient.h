@@ -1,12 +1,14 @@
 /**
+ * \file        TraVisToClient.h
+ * \date        Jul 4, 2014
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Copyright (C) <2009-2010>  <Ulrich Kemloh>
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -15,14 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  *
  *
- *
- */
+ **/
+
 
 #ifndef TRAVISTOCLIENT_H_
 #define TRAVISTOCLIENT_H_
@@ -93,56 +95,56 @@ typedef int socket_t;
 class TraVisToClient {
 public:
 
-    /// create a client with specific parameters
-    TraVisToClient(std::string hostname = HOST, unsigned short port = PORT);
+     /// create a client with specific parameters
+     TraVisToClient(std::string hostname = HOST, unsigned short port = PORT);
 
-    /// Destructor
-    virtual ~TraVisToClient();
+     /// Destructor
+     virtual ~TraVisToClient();
 
-    /// send datablock to the server
-    /// this functions is still blocking unfortunately, so it may
-    /// influence the execution time of your program
-    void sendData(const char* data);
+     /// send datablock to the server
+     /// this functions is still blocking unfortunately, so it may
+     /// influence the execution time of your program
+     void sendData(const char* data);
 
-    /// close the client (end the connection)
-    void close();
+     /// close the client (end the connection)
+     void close();
 
-    /// send a datagram using the unreliable
-    /// udp protokoll
-    void sendDatagram(char *datagram);
+     /// send a datagram using the unreliable
+     /// udp protokoll
+     void sendDatagram(char *datagram);
 
 private:
-    void createConnection();
+     void createConnection();
 
-    unsigned long lookupHostAddress(const char *hostName);
+     unsigned long lookupHostAddress(const char *hostName);
 
-    socket_t createClientSocket(const char *serverName, unsigned short portNumber);
+     socket_t createClientSocket(const char *serverName, unsigned short portNumber);
 
-    socket_t createServerSocket(unsigned short portNumber);
+     socket_t createServerSocket(unsigned short portNumber);
 
-    bool shutdownAndCloseSocket(socket_t sock);
+     bool shutdownAndCloseSocket(socket_t sock);
 
-    bool sendMessage(socket_t sock, const void *msg, int msgSize);
+     bool sendMessage(socket_t sock, const void *msg, int msgSize);
 
-    bool receiveMessage(socket_t sock, void *msg, int msgSize);
+     bool receiveMessage(socket_t sock, void *msg, int msgSize);
 
-    void _printErrorMessage(void);
+     void _printErrorMessage(void);
 
 #ifdef _WIN32
-    bool _startWin32SocketSession(void);
-    void _stopWin32SocketSession(void);
+     bool _startWin32SocketSession(void);
+     void _stopWin32SocketSession(void);
 #else
-	#define closesocket          close
+#define closesocket          close
 #endif
 
 
 
 private:
-    bool _isConnected;
-    socket_t _tcpSocket;
-    std::string _hostname;
-    unsigned short _port;
-    std::vector<const char *> _msgQueue;
+     bool _isConnected;
+     socket_t _tcpSocket;
+     std::string _hostname;
+     unsigned short _port;
+     std::vector<const char *> _msgQueue;
 
 };
 

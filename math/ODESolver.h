@@ -1,13 +1,14 @@
 /**
- * File:   ODESolver.h
+ * \file        ODESolver.h
+ * \date        Aug 17, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Created on 17. August 2010, 15:31
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,17 +17,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  *
  *
- *
- */
+ **/
+
 
 #ifndef _ODESOLVER_H
-#define	_ODESOLVER_H
+#define _ODESOLVER_H
 
 
 //forward declarations
@@ -39,50 +40,25 @@ class Building;
  */
 class ODESolver {
 protected:
-    ForceModel *model;
+     ForceModel *model;
 public:
-    ODESolver(ForceModel* model);
-    virtual ~ODESolver(){};
-    virtual void solveODE(double t, double tp, Building* building) const = 0;
+     ODESolver(ForceModel* model);
+     virtual ~ODESolver() {};
+     virtual void solveODE(double t, double tp, Building* building) const = 0;
 };
 
 
 /**
  * Implementation of the explicit  Euler method for solving different equations.
  */
+
 class EulerSolver : public ODESolver {
 public:
-    EulerSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
-};
-
-
-/**
- * Implementation of the Velocity - Verlet method
- */
-class VelocityVerletSolver : public ODESolver {
-public:
-    VelocityVerletSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
-};
-
-/**
- * Implementation of the LeapFrog algorithm
- */
-class LeapfrogSolver : public ODESolver {
-public:
-    LeapfrogSolver(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
-};
-
-
-class EulerSolverLC : public ODESolver {
-public:
-    EulerSolverLC(ForceModel *model);
-    virtual void solveODE(double t, double tp, Building* building) const;
+     EulerSolver(ForceModel *model);
+     virtual void solveODE(double t, double tp, Building* building) const;
 };
 
 
 
-#endif	/* _ODESOLVER_H */
+#endif  /* _ODESOLVER_H */
 

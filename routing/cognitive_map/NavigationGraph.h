@@ -1,10 +1,31 @@
 /**
- * @file   NavigationGraph.h
- * @author David Haensel (d.haensel@fz-juelich.de)
- * @date   January, 2014
- * @brief  The Navigation Graph is the metric abstraction layer in the cognitive map.
+ * \file        NavigationGraph.h
+ * \date        Jan 1, 2014
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- */
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * The Navigation Graph is the metric abstraction layer in the cognitive map.
+ *
+ *
+ **/
+
 
 #ifndef NAVIGATIONGRAPH1_H_
 #define NAVIGATIONGRAPH1_H_
@@ -35,33 +56,33 @@ class Transition;
 
 class NavigationGraph {
 public:
-    typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
+     typedef std::unordered_map<const SubRoom * , GraphVertex *> VerticesContainer;
 
-    /****************************
-     * Constructors & Destructors
-     ****************************/
-    NavigationGraph(const Building * building);
-    NavigationGraph(const NavigationGraph & ng);
+     /****************************
+      * Constructors & Destructors
+      ****************************/
+     NavigationGraph(const Building * building);
+     NavigationGraph(const NavigationGraph & ng);
 
-    virtual ~NavigationGraph();
+     virtual ~NavigationGraph();
 
-    void AddVertex(const SubRoom * const sub_room);
-    void AddEdge(const Crossing * crossing);
-    void AddExit(const Transition * transition);
+     void AddVertex(const SubRoom * const sub_room);
+     void AddEdge(const Crossing * crossing);
+     void AddExit(const Transition * transition);
 
-    GraphVertex * operator[](const SubRoom * const sub_room);
+     GraphVertex * operator[](const SubRoom * const sub_room);
 
-    NavigationGraph::VerticesContainer * GetAllVertices();
+     NavigationGraph::VerticesContainer * GetAllVertices();
 
-    void WriteToDotFile(const std::string filepath) const;
+     void WriteToDotFile(const std::string filepath) const;
 
 
 private:
-    /**
-     * Vertices and Edges
-     */
-    NavigationGraph::VerticesContainer vertices;
-    const Building * const building;
+     /**
+      * Vertices and Edges
+      */
+     NavigationGraph::VerticesContainer vertices;
+     const Building * const building;
 
 
 };

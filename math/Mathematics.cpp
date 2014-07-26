@@ -1,13 +1,14 @@
 /**
- * File:   Mathematics.cpp
+ * \file        Mathematics.cpp
+ * \date        Dec 13, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Created on 13. December 2010, 15:05
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,15 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
+ * This class is used to define mathematical parameters, constants and functions.
  *
- *	This class is used to define mathematical parameters, constants and functions.
- *
- *
- */
+ **/
+
 
 #include "Mathematics.h"
 #include <cassert>
@@ -38,8 +38,9 @@ using namespace std;
  * Determines the sign of the number x.
  * Returns -1 if x is negativ else 1.
  */
-double sign(double x) {
-    return (x < 0) ? -1.0 : 1.0;
+double sign(double x)
+{
+     return (x < 0) ? -1.0 : 1.0;
 
 }
 
@@ -137,41 +138,43 @@ Y(x) = y1 +  dy1*(x-x1) +  [x1 x1 x2]y*(x-x1)^2 + [x1 x1 x2 x2]y*(x-x1)^2*(x-x2)
 
 
 // thanks to Sean Curtis
-double hermite_interp(double t, double x1, double x2, double y1, double y2, double dy1, double dy2) {
-	assert( t >= x1 && t <= x2 && "Can only interpolate values inside the range" );
-	assert( x2 > x1 && "Intervals must be defined as x1 < x2" );
+double hermite_interp(double t, double x1, double x2, double y1, double y2, double dy1, double dy2)
+{
+     assert( t >= x1 && t <= x2 && "Can only interpolate values inside the range" );
+     assert( x2 > x1 && "Intervals must be defined as x1 < x2" );
 
-	double scale = x2 - x1;
-	t = ( t - x1 ) / scale;
-	double t2 = t * t;
-	double t3 = t2 * t;
-	double h1 = 2 * t3 - 3 * t2 + 1;
-	double h2 = -2 * t3 + 3 * t2;
-	double h3 = t3 - 2 * t2 + t;
-	double h4 = t3 - t2;
-	double left = y1 * h1 + dy1 * h3 * scale;
-	double right = y2 * h2 + dy2 * h4 * scale;
-	return left + right;
+     double scale = x2 - x1;
+     t = ( t - x1 ) / scale;
+     double t2 = t * t;
+     double t3 = t2 * t;
+     double h1 = 2 * t3 - 3 * t2 + 1;
+     double h2 = -2 * t3 + 3 * t2;
+     double h3 = t3 - 2 * t2 + t;
+     double h4 = t3 - t2;
+     double left = y1 * h1 + dy1 * h3 * scale;
+     double right = y2 * h2 + dy2 * h4 * scale;
+     return left + right;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
 /* Principal cubic root of a complex number */
-complex<double> c_cbrt(complex<double> x) {
-    double a, b, r, phi, rn;
-    complex<double> I(0, 1);
-    double s;
-    a = real(x);
-    b = imag(x);
+complex<double> c_cbrt(complex<double> x)
+{
+     double a, b, r, phi, rn;
+     complex<double> I(0, 1);
+     double s;
+     a = real(x);
+     b = imag(x);
 
-    r = sqrt(a * a + b * b);
+     r = sqrt(a * a + b * b);
 
-    phi = atan2(b, a);
-    phi /= 3.0;
-    rn = cbrt(r);
-    s = sin(phi);
-    return rn * cos(phi) + I * rn*s;
+     phi = atan2(b, a);
+     phi /= 3.0;
+     rn = cbrt(r);
+     s = sin(phi);
+     return rn * cos(phi) + I * rn*s;
 }
 
 

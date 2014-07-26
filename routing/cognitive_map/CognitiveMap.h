@@ -1,10 +1,31 @@
 /**
- * @file   CognitiveMap.h
- * @author David Haensel (d.haensel@fz-juelich.de)
- * @date   January, 2014
- * @brief  Cognitive Map models the pedestrian knowledge of building space in simulation.
+ * \file        CognitiveMap.h
+ * \date        Jan 1, 2014
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- */
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * Cognitive Map models the pedestrian knowledge of building space in simulation.
+ *
+ *
+ **/
+
 
 #ifndef COGNITIVEMAP_H_
 #define COGNITIVEMAP_H_
@@ -31,27 +52,27 @@ class Pedestrian;
 class CognitiveMap {
 
 public:
-    /****************************
-     * Constructors & Destructors
-     ****************************/
-    CognitiveMap(const Building * building, const Pedestrian * pedestrian);
-    virtual ~CognitiveMap();
+     /****************************
+      * Constructors & Destructors
+      ****************************/
+     CognitiveMap(const Building * building, const Pedestrian * pedestrian);
+     virtual ~CognitiveMap();
 
-    void Add(const SubRoom * sub_room);
-    void Add(const Crossing * crossing);
-    void AddExit(const Transition * exit);
+     void Add(const SubRoom * sub_room);
+     void Add(const Crossing * crossing);
+     void AddExit(const Transition * exit);
 
-    NavigationGraph::VerticesContainer * GetAllVertices();
+     NavigationGraph::VerticesContainer * GetAllVertices();
 
-    const NavigationGraph * GetNavigationGraph() const;
+     const NavigationGraph * GetNavigationGraph() const;
 
-    const NavLine * GetDestination();
-    const NavLine * GetLocalDestination();
+     const NavLine * GetDestination();
+     const NavLine * GetLocalDestination();
 
 private:
-    NavigationGraph * navigation_graph;
-    const Building * const building;
-    const Pedestrian * const pedestrian;
+     NavigationGraph * navigation_graph;
+     const Building * const building;
+     const Pedestrian * const pedestrian;
 
 };
 
