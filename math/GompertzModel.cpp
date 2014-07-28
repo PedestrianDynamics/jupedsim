@@ -119,7 +119,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      double r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
      double r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
      //fprintf(stderr, "%f %f %f %f\n",  E1.GetEA(), E1.GetEB(), E2.GetEA(), E2.GetEB());
-     fprintf(stderr, "%f %f\n",  r1, r2);
+     //fprintf(stderr, "%f %f\n",  r1, r2);
      const double EPS = 0.001;
      double Distance = distp12.Norm() + EPS; // Molified See Koester2013
 

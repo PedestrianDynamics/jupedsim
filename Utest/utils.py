@@ -13,7 +13,7 @@ def get_maxtime(filename):
     try:
         xmldoc = minidom.parse(filename)
     except:
-        logging.critical('could not parse file. exit')
+        logging.critical('could not parse file %s. exit'%filename)
         exit(FAILURE)        
     maxtime  = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
@@ -52,3 +52,32 @@ def parse_file(filename):
             data += [agent_id, frame_number, x, y]
     data = np.array(data).reshape((-1,4))
     return fps, N, data
+
+
+def flow(fps, N, data, x0):
+    """
+    measure the flow at a vertical line given by <x0>
+    trajectories are given by <data> in the following format: id    frame    x    y
+    input: 
+    - fps: frame per second
+    - N: number of peds
+    - data: trajectories
+    - x0: x-coordinate of the vertical measurement line
+    output:
+    - flow
+    """
+    logging.info('measure flow')
+    if not isinstance(data, np.ndarray):
+        logging.critical("flow() accepts data of type <ndarray>. exit")
+        exit(FAILURE)
+    peds = np.unique(data[:,0]).astype(int)
+    times = []
+    for ped in peds:
+        d = data[ data[:,0] == ped ]
+        first = min( d[ d[:,2] >= x0 ][:,1] )
+        times.append( first )
+    if len(times) < 2:
+        logging.warning("Number of pedestrians passing the line is small. return 0")
+        return 0    
+    flow = fps * float(N-1) / ( max(times) - min(times) )
+    return flow

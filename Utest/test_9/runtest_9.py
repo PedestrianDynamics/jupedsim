@@ -7,7 +7,7 @@ from sys import argv ,exit
 import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
-import re
+import re, sys
 
 #=========================
 testnr = 9
@@ -31,69 +31,6 @@ DIR = os.path.dirname(os.path.realpath(argv[0]))
  #TRUNK + "/Utest/test_%d"%testnr
 #--------------------------------------------------------
     
-def parse_file(filename):
-    """
-    parse trajectories in Travisto-format and output results
-    in the following  format: id    frame    x    y
-    (no sorting of the data is performed)
-    returns
-    N: number of pedestrians
-    data: trajectories
-    """
-    logging.info("parsing <%s>"%filename)
-    try:
-        xmldoc = minidom.parse(filename)
-    except:
-        logging.critical('could not parse file. exit')
-        exit(FAILURE)
-    N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
-    fps= xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
-    fps = float(fps)
-    fps = int(fps)
-    print "fps=", fps
-    #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
-    logging.info ("Npeds = %d, fps = %d"%(N, fps))
-    frames = xmldoc.childNodes[0].getElementsByTagName('frame')
-    data = []
-    for frame in frames:
-        frame_number = int(frame.attributes["ID"].value)
-        for agent in frame.getElementsByTagName("agent"):
-            agent_id = int(agent.attributes["ID"].value)
-            x = float(agent.attributes["xPos"].value)
-            y = float(agent.attributes["yPos"].value)
-            data += [agent_id, frame_number, x, y]
-    data = np.array(data).reshape((-1,4))
-    return fps, N, data
-           
-def flow(fps, N, data, x0):
-    """
-    measure the flow at a vertical line given by <x0>
-    trajectories are given by <data> in the following format: id    frame    x    y
-    input: 
-    - fps: frame per second
-    - N: number of peds
-    - data: trajectories
-    - x0: x-coordinate of the vertical measurement line
-    output:
-    - flow
-    """
-    logging.info('measure flow')
-    if not isinstance(data, np.ndarray):
-        logging.critical("flow() accepts data of type <ndarray>. exit")
-        exit(FAILURE)
-    peds = np.unique(data[:,0]).astype(int)
-    times = []
-    for ped in peds:
-        d = data[ data[:,0] == ped ]
-        first = min( d[ d[:,2] >= x0 ][:,1] )
-        times.append( first )
-    if len(times) < 2:
-        logging.warning("Number of pedestrians passing the line is small. return 0")
-        return 0    
-    flow = fps * float(N-1) / ( max(times) - min(times) )
-    return flow
-
-
 if __name__ == "__main__":
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
@@ -108,6 +45,9 @@ if __name__ == "__main__":
     os.chdir("../..")
     TRUNK = os.getcwd()
     os.chdir(DIR)
+    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    sys.path.append(lib_path)
+    from utils import *
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
     time1 = time.time()
