@@ -7,9 +7,7 @@ import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
 import re
-lib_path = os.path.abspath('..')
-sys.path.append(lib_path)
-from utils import *
+
 #=========================
 testnr = 1
 #========================
@@ -46,6 +44,9 @@ if __name__ == "__main__":
     os.chdir("../..")
     TRUNK = os.getcwd()
     os.chdir(DIR)
+    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    sys.path.append(lib_path)
+    from utils import *
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
 

@@ -8,9 +8,7 @@ import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
 import re, sys
-lib_path = os.path.abspath('..')
-sys.path.append(lib_path)
-from utils import *
+
 #=========================
 testnr = 2
 #========================
@@ -44,6 +42,9 @@ if __name__ == "__main__":
     os.chdir("../..")
     TRUNK = os.getcwd()
     os.chdir(DIR)
+    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    sys.path.append(lib_path)
+    from utils import *
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
         exit(FAILURE)
-        
+
     for inifile in inifiles:
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
@@ -70,13 +71,14 @@ if __name__ == "__main__":
         subprocess.call([executable, "--inifile=%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
-        trajfile = "trajectories/traj" + inifile.split("ini")[2]
+        trajfile = "%s/trajectories/traj"%DIR + inifile.split("ini")[2]
+
         logging.info('trajfile = <%s>'%trajfile)
         #--------------------- PARSING & FLOW-MEASUREMENT --------
         if not path.exists(trajfile):
             logging.critical("trajfile <%s> does not exist"%trajfile)
             exit(FAILURE)
-        maxtime = get_maxtime(inifile)
+        maxtime = get_maxtime( "%s/"%DIR + inifile)
         fps, N, traj = parse_file(trajfile)
         evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
         tolerance = 0.01
