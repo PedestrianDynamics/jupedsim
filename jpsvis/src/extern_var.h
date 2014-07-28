@@ -87,9 +87,11 @@ Pedestrian** extern_pedestrians_secondSet=NULL;
 ///The third pedestrian group
 Pedestrian** extern_pedestrians_thirdSet=NULL;
 
+vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians=NULL;
+vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D=NULL;
 
-VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
-VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
+//VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
+//VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
 VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
 
 VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_2D);
