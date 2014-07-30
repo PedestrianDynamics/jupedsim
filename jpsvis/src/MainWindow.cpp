@@ -389,6 +389,7 @@ void MainWindow::slotStopPlaying() {
     // maybe this is a feature !
     extern_shutdown_visual_thread=true;
     waitForVisioThread();
+    //waitForDataThread();
 
     //reset all frames cursors
     resetAllFrameCursor();
@@ -1420,7 +1421,6 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     slotToggleFirstPedestrianGroup();
 
     QDomDocument doc("");
-    //data = "<travisto>\n" +data+ "\n</travisto>\n";
 
     QString errorMsg="";
     doc.setContent(data,&errorMsg);
@@ -1429,7 +1429,6 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
         Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
         return;
     }
-    //QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
 
     //FacilityGeometry *geo = parseGeometry(geoNode);
     FacilityGeometry *geo = parseGeometry(data);
@@ -1437,6 +1436,11 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     visualisationThread->slotSetFrameRate(frameRate);
     visualisationThread->setGeometry(geo);
     visualisationThread->start();
+
+    //enable some buttons
+    ui.BtRecord->setEnabled(true);
+    ui.BtStop->setEnabled(true);
+
 }
 
 /// this method is called by the data transfer thread

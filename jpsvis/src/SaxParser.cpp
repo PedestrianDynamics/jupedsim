@@ -83,6 +83,8 @@ SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps){
     parsingCrossings=false;
 	color=0.0;
     dataset->clearFrames();
+    //default header
+    InitHeader(0,0,0);
 }
 
 SaxParser::~SaxParser() {
@@ -475,9 +477,11 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             else if(at.localName(i)==_jps_xPos)
             {
                 xPos=at.value(i).toDouble()*FAKTOR;
+                //xPos=at.value(i).toDouble();
             }
             else if(at.localName(i)==_jps_yPos)
             {
+                //yPos=at.value(i).toDouble();
                 yPos=at.value(i).toDouble()*FAKTOR;
             }
             else if(at.localName(i)==_jps_zPos)
@@ -488,10 +492,12 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             else if(at.localName(i)==_jps_radiusA)
             {
                 dia_a=at.value(i).toDouble()*FAKTOR;
+                //dia_a=at.value(i).toDouble();
             }
             else if(at.localName(i)==_jps_radiusB)
             {
                 dia_b=at.value(i).toDouble()*FAKTOR;
+                //dia_b=at.value(i).toDouble();
             }
             else if(at.localName(i)==_jps_ellipseOrientation)
             {
@@ -624,7 +630,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 		while(!currentFrame.empty()){
 			frame->addElement(currentFrame.back());
 			currentFrame.pop_back();
-			//cout<<"not adding"<<endl;
+            //cout<<"not adding"<<endl;
 		}
 
         //compute the polydata, might increase the runtime
@@ -1244,20 +1250,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
 
 void SaxParser::InitHeader(int major, int minor, int patch)
 {
-    // set the parsing String map
-    if(minor==5 && patch==0){
-        _jps_xPos=QString("xPos");
-        _jps_yPos=QString("yPos");
-        _jps_zPos=QString("zPos");
-        _jps_xVel=QString("xVel");
-        _jps_yVel=QString("yVel");
-        _jps_zVel=QString("zVel");
-        _jps_radiusA=QString("radiusA");
-        _jps_radiusB=QString("radiusB");
-        _jps_ellipseOrientation=QString("ellipseOrientation");
-        _jps_ellipseColor=QString("ellipseColor");
-    }
-    else if ( (minor==6) || (minor==5 && patch==1) ){
+    if ( (minor==6) || (minor==5 && patch==1) ){
         _jps_xPos=QString("x");
         _jps_yPos=QString("y");
         _jps_zPos=QString("z");
@@ -1271,6 +1264,18 @@ void SaxParser::InitHeader(int major, int minor, int patch)
     }
     else
     {
+        _jps_xPos=QString("xPos");
+        _jps_yPos=QString("yPos");
+        _jps_zPos=QString("zPos");
+        _jps_xVel=QString("xVel");
+        _jps_yVel=QString("yVel");
+        _jps_zVel=QString("zVel");
+        _jps_radiusA=QString("radiusA");
+        _jps_radiusB=QString("radiusB");
+        _jps_ellipseOrientation=QString("ellipseOrientation");
+        _jps_ellipseColor=QString("ellipseColor");
+    }
+    if(major!=0){
         cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<endl;
         cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
         exit(0);

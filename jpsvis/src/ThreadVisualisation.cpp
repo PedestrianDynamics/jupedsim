@@ -141,7 +141,7 @@ void ThreadVisualisation::slotSetFrameRate(float fps){
 void ThreadVisualisation::run(){
 
     //deactivate the output windows
-    vtkObject::GlobalWarningDisplayOff();
+    //vtkObject::GlobalWarningDisplayOff();
 
 	//emit signalStatusMessage("running");
 
@@ -219,7 +219,6 @@ void ThreadVisualisation::run(){
 
 	// Create a real circle, not a sphere
 	{
-
 		VTK_CREATE(vtkRegularPolygonSource, polygonSource);
 		polygonSource->GeneratePolygonOff();
 		polygonSource->SetNumberOfSides(50);
@@ -297,11 +296,11 @@ void ThreadVisualisation::run(){
     }
 
 
-    if(true || SystemSettings::get2D()){
-        renderer->GetActiveCamera()->OrthogonalizeViewUp();
-        renderer->GetActiveCamera()->ParallelProjectionOn();
-        renderer->ResetCamera();
-    }
+//    if(true || SystemSettings::get2D()){
+//        renderer->GetActiveCamera()->OrthogonalizeViewUp();
+//        renderer->GetActiveCamera()->ParallelProjectionOn();
+//        renderer->ResetCamera();
+//    }
 
 	//create a timer for rendering the window
 	TimerCallback *renderingTimer = new TimerCallback();
@@ -353,11 +352,13 @@ void ThreadVisualisation::run(){
 	// should be called after the observer has been added
     //renderWindow->Modified();
 
+    //style->SetKeyPressActivationValue('R');
+    //style->SetKeyPressActivation(true);
+
     //save the top view  camera
     _topViewCamera=vtkCamera::New();
     //renderer->GetActiveCamera()->Modified();
     _topViewCamera->DeepCopy(renderer->GetActiveCamera());
-
 
     //TODO: update all system settings
     setGeometryVisibility2D(SystemSettings::get2D());
@@ -450,11 +451,17 @@ void  ThreadVisualisation::initGlyphs2D()
     extern_glyphs_pedestrians->SetSourceConnection(strip->GetOutputPort());
     //extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
 
+    //first frame
+    Frame * frame = extern_trajectories_firstSet.getFrame(0);
+    vtkPolyData* pData=NULL;
+    if(frame) pData=frame->GetPolyData2D();
 
 #if VTK_MAJOR_VERSION <= 5
     extern_glyphs_pedestrians->SetSource(agentShape->GetOutput());
+    if (frame )extern_glyphs_pedestrians->SetInput(pData);
 #else
     extern_glyphs_pedestrians->SetInputConnection(agentShape->GetOutputPort());
+    if (frame) extern_glyphs_pedestrians->SetInputData(pData);
 #endif
 
     extern_glyphs_pedestrians->ThreeGlyphsOff();
@@ -478,7 +485,7 @@ void  ThreadVisualisation::initGlyphs2D()
     mapper->SetLookupTable(lut);
 
     extern_glyphs_pedestrians_actor_2D->SetMapper(mapper);
-    extern_glyphs_pedestrians_actor_2D->GetProperty()->BackfaceCullingOn();
+    //extern_glyphs_pedestrians_actor_2D->GetProperty()->BackfaceCullingOn();
     renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
 
     // structure for the labels
@@ -526,10 +533,17 @@ void ThreadVisualisation::initGlyphs3D()
 
     extern_glyphs_pedestrians_3D->SetSourceConnection(agentShape->GetOutputPort());
 
+    //first frame
+    Frame * frame = extern_trajectories_firstSet.getFrame(0);
+    vtkPolyData* pData=NULL;
+    if(frame) pData=frame->GetPolyData2D();
+
 #if VTK_MAJOR_VERSION <= 5
     extern_glyphs_pedestrians_3D->SetSource(agentShape->GetOutput());
+     if (frame )extern_glyphs_pedestrians_3D->SetInput(pData);
 #else
     extern_glyphs_pedestrians_3D->SetInputConnection(agentShape->GetOutputPort());
+     if (frame )extern_glyphs_pedestrians_3D->SetInputData(pData);
 #endif
 
     extern_glyphs_pedestrians_3D->ThreeGlyphsOff();
@@ -549,7 +563,7 @@ void ThreadVisualisation::initGlyphs3D()
     mapper->SetLookupTable(lut);
 
     extern_glyphs_pedestrians_actor_3D->SetMapper(mapper);
-    extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
+    //extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
     renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
 
 }
