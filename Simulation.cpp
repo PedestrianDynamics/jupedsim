@@ -263,7 +263,7 @@ void Simulation::InitArgs(ArgumentParser* args)
      sprintf(tmp, "\tfps: %f\n", _fps);
      s.append(tmp);
 
-     // Routing
+     // Route choice
      vector< pair<int, RoutingStrategy> >  routers=  args->GetRoutingStrategy();
      RoutingEngine* routingEngine= new RoutingEngine();
 
@@ -359,6 +359,7 @@ void Simulation::InitArgs(ArgumentParser* args)
      //_building->AddSurroundingRoom();
      _building->InitGeometry(); // create the polygons
      _building->LoadTrafficInfo();
+
      // in the case the navigation mesh should be written to a file
      if(args->GetNavigationMesh()!="") {
           Log->Write("INFO: \tWriting the navigation mesh to: " + args->GetNavigationMesh());

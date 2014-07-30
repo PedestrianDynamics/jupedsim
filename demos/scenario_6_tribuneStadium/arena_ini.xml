@@ -65,7 +65,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 		<model_parameters>
 			<solver>euler</solver>
 			<stepsize>0.01</stepsize>
-			<exitCrossingStrategy>4</exitCrossingStrategy>
+			<exitCrossingStrategy>3</exitCrossingStrategy>
 			<linkedcells enabled="true" cell_size="2.2" />
 			<force_ped nu="0.3" dist_max="3" disteff_max="2"
 				interpolation_width="0.1" />
@@ -85,7 +85,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 		<model_parameters>
 			<solver>euler</solver>
 			<stepsize>0.01</stepsize>
-			<exitCrossingStrategy>4</exitCrossingStrategy>
+			<exitCrossingStrategy>5</exitCrossingStrategy>
 			<linkedcells enabled="true" cell_size="2.2" />
 			<force_ped nu="0.3" />
 			<force_wall nu="0.2" />

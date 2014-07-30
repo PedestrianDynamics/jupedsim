@@ -409,7 +409,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
 
                if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
 
-                    Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
+                    //Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
                     v_neu = v_neu*0.01;
                     pos_neu = ped->GetPos();
                }

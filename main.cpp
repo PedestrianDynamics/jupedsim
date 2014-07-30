@@ -32,8 +32,7 @@
 #include "./Simulation.h"
 
 
-/// global unique log variable
-//extern OutputHandler* Log;
+
 
 int main(int argc, char **argv)
 {

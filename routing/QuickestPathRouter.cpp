@@ -67,7 +67,11 @@ string QuickestPathRouter::GetRoutingInfoFile() const
                     nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
           }
      }
-     return _building->GetProjectRootDir()+nav_line_file;
+
+     if (nav_line_file == "")
+               return nav_line_file;
+          else
+               return _building->GetProjectRootDir()+nav_line_file;
 }
 
 int QuickestPathRouter::FindExit(Pedestrian* ped)
