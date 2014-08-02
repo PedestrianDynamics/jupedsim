@@ -1,19 +1,111 @@
 TEMPLATE = app
-TARGET = JPSvis
+TARGET = TraVisTo
 CONFIG += qt
+#CONFIG += static
 QT += xml network
+
+#avoid some annoying dependencies
+#QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
+#QMAKE_LFLAGS += -static-libstdc++
+#QMAKE_CXXFLAGS += -static -static -static-libstdc++
+#QMAKE_CXXFLAGS += -static
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
 win32 {
         INCLUDEPATH += C:/VTK/include/vtk-6.1
+
+        LIBS += -LC:/VTK/bin \
+        #LIBS += -LC:/VTK/bin_static/lib \
+        -lwsock32 \
+        -lvtkCommonCore-6.1    \
+        -lvtkRenderingOpenGL-6.1  \
+        -lvtkCommonDataModel-6.1    \
+        -lvtkCommonMath-6.1   \
+        -lvtkCommonMisc-6.1    \
+        -lvtkCommonSystem-6.1    \
+        -lvtkCommonTransforms-6.1   \
+        -lvtkCommonExecutionModel-6.1   \
+        -lvtkImagingHybrid-6.1   \
+        -lvtkIOImage-6.1   \
+        -lvtkDICOMParser-6.1   \
+        -lvtkjpeg-6.1   \
+        -lvtkmetaio-6.1   \
+        -lvtkzlib-6.1   \
+        -lvtkpng-6.1   \
+        -lvtktiff-6.1   \
+        -lvtkRenderingCore-6.1   \
+        -lvtkCommonComputationalGeometry-6.1   \
+        -lvtkFiltersCore-6.1   \
+        -lvtkFiltersExtraction-6.1   \
+        -lvtkFiltersGeneral-6.1   \
+        -lvtkFiltersStatistics-6.1   \
+        -lvtkalglib-6.1   \
+        -lvtkImagingFourier-6.1   \
+        -lvtkImagingCore-6.1   \
+        -lvtkFiltersGeometry-6.1   \
+        -lvtkFiltersSources-6.1   \
+        -lvtkRenderingLabel-6.1   \
+        -lvtkRenderingFreeType-6.1   \
+        -lvtkfreetype-6.1   \
+        -lvtkftgl-6.1   \
+        -lvtkRenderingFreeTypeOpenGL-6.1   \
+        -lvtkRenderingAnnotation-6.1   \
+        -lvtkIOMovie-6.1   \
+        -lvtkoggtheora-6.1   \
+        -lvtkInteractionStyle-6.1   \
+        -lvtkCommonCore-6.1    \
+        -lvtksys-6.1     \
+#second round
+#        -lvtksys-6.1     \
+#        -lvtkRenderingOpenGL-6.1  \
+#        -lvtkCommonCore-6.1    \
+#        -lvtkCommonDataModel-6.1    \
+#        -lvtkCommonMath-6.1   \
+#        -lvtkCommonMisc-6.1    \
+#        -lvtkCommonSystem-6.1    \
+#        -lvtkCommonTransforms-6.1   \
+#        -lvtkCommonExecutionModel-6.1   \
+#        -lvtkImagingHybrid-6.1   \
+#        -lvtkIOImage-6.1   \
+#        -lvtkDICOMParser-6.1   \
+#        -lvtkjpeg-6.1   \
+#        -lvtkmetaio-6.1   \
+#        -lvtkzlib-6.1   \
+#        -lvtkpng-6.1   \
+#        -lvtktiff-6.1   \
+#        -lvtkRenderingCore-6.1   \
+#        -lvtkCommonComputationalGeometry-6.1   \
+#        -lvtkFiltersCore-6.1   \
+#        -lvtkFiltersExtraction-6.1   \
+#        -lvtkFiltersGeneral-6.1   \
+#        -lvtkFiltersStatistics-6.1   \
+#        -lvtkalglib-6.1   \
+#        -lvtkImagingFourier-6.1   \
+#        -lvtkImagingCore-6.1   \
+#        -lvtkFiltersGeometry-6.1   \
+#        -lvtkFiltersSources-6.1   \
+#        -lvtkRenderingLabel-6.1   \
+#        -lvtkRenderingFreeType-6.1   \
+#        -lvtkfreetype-6.1   \
+#        -lvtkftgl-6.1   \
+#        -lvtkRenderingFreeTypeOpenGL-6.1   \
+#        -lvtkRenderingAnnotation-6.1   \
+#        -lvtkIOMovie-6.1   \
+#        -lvtkoggtheora-6.1   \
+#        -lvtkInteractionStyle-6.1   \
+        }
+
+win32_ {
+        INCLUDEPATH += C:/VTK/include/vtk-6.1
 	
-	LIBS += -LC:/VTK/bin \
+        LIBS += -LC:/VTK/bin \
+#        LIBS += -LC:/VTK/bin_static/lib \
+            -lvtkCommonCore-6.1  \
             -lvtkalglib-6.1  \
             -lvtkChartsCore-6.1  \
             -lvtkCommonColor-6.1  \
             -lvtkCommonComputationalGeometry-6.1  \
-            -lvtkCommonCore-6.1  \
             -lvtkCommonDataModel-6.1  \
             -lvtkCommonExecutionModel-6.1  \
             -lvtkCommonMath-6.1  \
@@ -279,26 +371,81 @@ unix_6 {
             -lvtkzlib-6.0  \
 }
    
-unix_5 {
+#dynamic linking with vtk5.10
+unix {
 INCLUDEPATH += /usr/include/vtk-5.8
-LIBS += -L/usr/lib/ \
-    -lvtkCommon \
-    -lvtkDICOMParser \
-    -lvtkFiltering \
-    -lvtkGenericFiltering \
-    -lvtkGraphics \
-    -lvtkHybrid \
-    -lvtkIO \
-    -lvtkImaging \
-    -lvtkRendering \
-    -lvtkVolumeRendering \
-    -lvtkWidgets \
-    -lvtkexoIIc \
-    -lvtkftgl \
-    -lvtksys \
-    -lvtkverdict \
-    -lvtkParallel \
-    -lvtkmetaio
+LIBS += -L/usr/lib \
+#INCLUDEPATH +=/usr/local/include/vtk-5.10
+#LIBS += -L/usr/local/lib/vtk-5.10 \
+#    -lvtkCommon \
+#    -lvtkDICOMParser \
+#    -lvtkFiltering \
+#    -lvtkGenericFiltering \
+#    -lvtkGraphics \
+#    -lvtkHybrid \
+#    -lvtkIO \
+#    -lvtkImaging \
+#    -lvtkRendering \
+#    -lvtkVolumeRendering \
+#    -lvtkWidgets \
+#    -lvtkexoIIc \
+#    -lvtkftgl \
+#    -lvtksys \
+#    -lvtkverdict \
+#    -lvtkParallel \
+#    -lvtkmetaio \
+#
+-lvtkRendering  \
+-lvtkCommon   \
+-lvtkHybrid   \
+-lvtkIO   \
+-lvtkGraphics   \
+-lvtkFiltering   \
+
+ }
+ 
+#Static compilation 
+unix_static {
+#INCLUDEPATH += /usr/include/vtk-5.8
+#LIBS += -L/usr/lib \
+INCLUDEPATH +=/usr/local/include/vtk-5.10
+LIBS += -L/usr/local/lib/vtk-5.10 \
+-lvtkRendering  \
+-lvtkCommon   \
+-lvtkHybrid   \
+-lvtkIO   \
+-lvtkGraphics   \
+-lvtkFiltering   \
+-lvtkCommon   \
+-lvtkverdict   \
+-lvtkParallel   \
+-lvtkexoIIc   \
+-lvtkImaging   \
+-lvtkDICOMParser   \
+-lvtkmetaio   \
+-lvtkftgl  \
+#-lLSDyna \ 
+-lvtkViews \
+-lvtksys   \
+-lvtkpng \
+-lvtktiff \
+-lvtkjpeg \
+-lvtklibxml2 \
+-lvtkzlib \
+-lvtkexpat \
+-lvtkfreetype \
+-lGL  \
+-lXt \
+-lX11 \
+-lXext \
+-ldl \
+#-lpng \
+#-ltiff \
+#-ljpeg \
+#-lxml2 \
+#-lz \
+#-lexpat \
+#-lfreetype \
  }
 
 macx {
