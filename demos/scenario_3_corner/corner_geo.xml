@@ -26,7 +26,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 					<vertex px="15.0" py="4.0" />
 					<vertex px="10.0" py="4.0" />
 				</polygon>
-
+<!-- 
 				<obstacle id="0" caption="table" height="1.0" closed="1">
 					<polygon>
 						<vertex px="12.0" py="5.9" />
@@ -45,6 +45,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 						<vertex px="16.4" py="-2.0" />
 					</polygon>
 				</obstacle>
+				-->
 			</subroom>
 			<crossings>
 				<!-- virtual exits between subrooms -->

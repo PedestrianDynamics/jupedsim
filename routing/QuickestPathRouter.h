@@ -53,6 +53,7 @@ public:
      virtual ~QuickestPathRouter();
 
      virtual int FindExit(Pedestrian* ped);
+
      virtual void Init(Building* building);
 
 private:
@@ -148,6 +149,10 @@ private:
      int redirect(int pedindex,int actualexit=-1);
 
 
+     /**
+      * return the JAM size at a specific exit
+      * NOT IMPLEMENTED
+      */
      double GetJamSizeAtExit(int exitID);
 
      /**
@@ -163,18 +168,18 @@ private:
      /**
       * extend the graph by connecting alternative routes.
       */
-     void ExpandGraph();
+    // void ExpandGraph();
 
      /**
       * reduce the graph, making it to a directed graph to the outside
       */
-     void ReduceGraph();
+     //void ReduceGraph();
 
 
      /**
       * check the nodes that are double self linked and remove the connection with the highest radian
       */
-     void CheckAndClearDoubleLinkedNodes();
+     //void CheckAndClearDoubleLinkedNodes();
 
      /**
       * return the number of common nodes the two aps are connected  with or pointing to.

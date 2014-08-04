@@ -654,7 +654,7 @@ void NavMesh::WriteToString(std::string& output)
      //writing the nodes
      //      int mynodes[] = {47, 30 ,38};
      //      int mynodes[] = {41, 1521};
-     int mynodes[] = {};
+     int mynodes[] = {0};
      //int mynodes[] = { 28, 27, 40};
      vector<int> nodes_to_plot (mynodes, mynodes + sizeof(mynodes) / sizeof(int) );
 

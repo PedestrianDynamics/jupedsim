@@ -33,7 +33,6 @@
 #include "../IO/OutputHandler.h"
 
 
-
 using namespace std;
 
 QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
@@ -91,7 +90,6 @@ int QuickestPathRouter::FindExit(Pedestrian* ped)
                ped->ResetTimeInJam();
                ped->SetSpotlight(true);
           }
-          //cout<<"I am feeling like in Jam next: "<<ped->GetID()<<endl;
           //ped->RerouteIn(2.50); // seconds
      } else if(ped->IsReadyForRerouting()) {
           Redirect(ped);
@@ -206,7 +204,6 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
      // get all AP connected to the nearest
      //const vector<AccessPoint*>& aps = nearestAP->GetConnectingAPs();
 
-     //TODO: should be get relevant destination
      //const vector<AccessPoint*>& aps = nearestAP->GetTransitAPsTo(ped->GetFinalDestination());
 
      vector <AccessPoint*> aps;
@@ -297,164 +294,21 @@ double QuickestPathRouter::gain(double time)
 }
 
 
-
-
-void QuickestPathRouter::ReduceGraph()
-{
-
-     for(unsigned int i=0; i<_accessPoints.size(); i++) {
-          vector<AccessPoint*>toBeDeleted;
-          AccessPoint* from_AP=_accessPoints[i];
-          int from_door=from_AP->GetID();
-
-          // get all AP connected to the nearest
-          const vector<AccessPoint*>& aps = from_AP->GetConnectingAPs();
-
-          //loop over all accesspoint connections and
-          //collect the connections to remove
-
-          for(unsigned int j=0; j<aps.size(); j++) {
-               AccessPoint* to_AP=aps[j];
-
-               /* TODO: check all final destinations
-               for( map<int, int>::iterator it = pMapIdToFinalDestination.begin();
-                               it != pMapIdToFinalDestination.end(); it++) {
-                       int fid=it->first;
-                */
-
-
-               //remove all AP which point to me
-               if(to_AP->GetNearestTransitAPTO(FINAL_DEST_OUT)==from_door) {
-                    toBeDeleted.push_back(to_AP);
-               }
-
-               //don't remove if that is the best destination
-               //TODO: if there are more suitable final destinations?
-               if(GetCommonDestinationCount(from_AP, to_AP)>0) {
-                    if(from_AP->GetNearestTransitAPTO(FINAL_DEST_OUT)!=to_AP->GetID())
-                         toBeDeleted.push_back(to_AP);
-               }
-
-               // remove all APs wich have at least one common destination with me
-               //                      if (to_AP->GetNextApTo(FINAL_DEST_OUT)==from_AP->GetNextApTo(FINAL_DEST_OUT)) {
-               //                              toBeDeleted.push_back(to_AP);
-               //
-               //                      }
-          }
-
-          // now remove the aps/connections
-          std::sort(toBeDeleted.begin(), toBeDeleted.end());
-          toBeDeleted.erase(std::unique(toBeDeleted.begin(), toBeDeleted.end()), toBeDeleted.end());
-          for(unsigned int k=0; k<toBeDeleted.size(); k++) {
-               from_AP->RemoveConnectingAP(toBeDeleted[k]);
-          }
-     }
-
-     //clear double links
-     CheckAndClearDoubleLinkedNodes();
-}
-
-void QuickestPathRouter::CheckAndClearDoubleLinkedNodes()
-{
-
-     for(unsigned int i=0; i<_accessPoints.size(); i++) {
-          vector<AccessPoint*>toBeDeleted;
-          AccessPoint* from_AP=_accessPoints[i];
-          const vector<AccessPoint*>& from_aps = from_AP->GetConnectingAPs();
-
-          for(unsigned int j=0; j<_accessPoints.size(); j++) {
-               AccessPoint* to_AP=_accessPoints[j];
-               const vector<AccessPoint*>& to_aps = to_AP->GetConnectingAPs();
-
-               // if one contains the other
-               if(IsElementInVector(from_aps,to_AP)&&IsElementInVector(to_aps,from_AP)) {
-                    //check the distances
-                    double dist1=from_AP->GetDistanceTo(to_AP) +to_AP->GetDistanceTo(FINAL_DEST_OUT);
-                    double dist2=to_AP->GetDistanceTo(from_AP) +from_AP->GetDistanceTo(FINAL_DEST_OUT);
-                    if(dist1<dist2) {
-                         to_AP->RemoveConnectingAP(from_AP);
-                    } else {
-                         from_AP->RemoveConnectingAP(to_AP);
-                    }
-               }
-          }
-     }
-}
-
-void QuickestPathRouter::ExpandGraph()
-{
-
-     for(unsigned int i=0; i<_accessPoints.size(); i++) {
-          vector<AccessPoint*>toBeDeleted;
-          AccessPoint* tmp=_accessPoints[i];
-
-          // get all AP connected to the nearest
-          const vector<AccessPoint*>& aps = tmp->GetConnectingAPs();
-
-          //loop over all accesspoint connections and
-          //collect the connections to remove
-
-          for(unsigned int j=0; j<aps.size(); j++) {
-               AccessPoint* tmp1=aps[j];
-
-               if(tmp->GetNearestTransitAPTO(FINAL_DEST_OUT)==tmp1->GetNearestTransitAPTO(FINAL_DEST_OUT))
-                    toBeDeleted.push_back(tmp1);
-               if(tmp->GetID()==tmp1->GetNearestTransitAPTO(FINAL_DEST_OUT))
-                    toBeDeleted.push_back(tmp1);
-               if(tmp1->GetDistanceTo(FINAL_DEST_OUT)>tmp->GetDistanceTo(FINAL_DEST_OUT))
-                    toBeDeleted.push_back(tmp1);
-
-               int bestID=tmp1->GetNearestTransitAPTO(FINAL_DEST_OUT);
-               double dist1=_accessPoints[bestID]->GetDistanceTo(tmp)+tmp->GetDistanceTo(tmp1);
-               double dist2=tmp->GetDistanceTo(tmp1);
-               if(dist1<dist2)
-                    toBeDeleted.push_back(tmp1);
-
-               //                      for(unsigned int l=0;l<aps.size();l++)
-               //                      {
-               //                              AccessPoint* tmp2=aps[l];
-               //                              if(tmp2->GetID()==tmp1->GetID())continue;
-               //
-               //                              const vector<AccessPoint*>& aps1 = tmp1->GetConnectingAPs();
-               //                              for(unsigned int k=0;k<aps1.size();k++)
-               //                              {
-               //                                      AccessPoint* tmp3=aps1[k];
-               //                                      if(tmp3->GetID()==tmp2->GetID()){
-               //                                              toBeDeleted.push_back(tmp1);
-               //                                      }
-               //                              }
-               //                      }
-          }
-
-          // now remove the aps/connections
-          for(unsigned int k=0; k<toBeDeleted.size(); k++) {
-               tmp->RemoveConnectingAP(toBeDeleted[k]);
-          }
-
-     }
-}
-
 void QuickestPathRouter::Init(Building* building)
 {
-
      Log->Write("INFO:\tInit Quickest Path Router Engine");
      GlobalRouter::Init(building);
 
      // activate the spotlight for tracking some pedestrians
      //Pedestrian::ActivateSpotlightSystem(true);
 
-     //      pBuilding=building;
-     //TODO: reduce graph is missbehaving
-     //ReduceGraph();
-     //ExpandGraph();
      //vector<string> rooms;
      //rooms.push_back("150");
      //rooms.push_back("outside");
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
      //DumpAccessPoints(1185);
-
-     //      exit(0);
+     //exit(0);
      Log->Write("INFO:\tDone with Quickest Path Router Engine!");
 }
 
@@ -464,7 +318,6 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
      *flag=FREE_EXIT; // assume free exit
 
      Hline* crossing=_building->GetTransOrCrossByUID(exitID);
-
 
      double radius=3.0;//start radius for looking at the reference in metres
      bool done=false;
@@ -516,45 +369,23 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
                     *myref=NULL;
                     *flag=UNREACHEABLE_EXIT;
                     done=true;
-
                     Log->Write("ERROR: reference ped cannot be found for ped %d within [%f] m  around the exit [%d]\n",myself->GetID(),radius,crossing->GetID());
                     exit(EXIT_FAILURE);
                }
           }
 
-          /////delete me after
-          //              if(done==true){
-          //                      //debug area
-          //                      if(*myref){
-          //
-          //                              if(myself->GetID()==488){
-          //                                      myself->SetSpotlight(true);
-          //                                      (*myref)->SetSpotlight(true);
-          //                                      (*myref)->Dump((*myref)->GetID());
-          //
-          //                                      //highlight the queue
-          //                                      for(unsigned int p=0;p<queue.size();p++){
-          //                                              Pedestrian* ped = queue[p];
-          //                                              ped->SetSpotlight(true);
-          //                                      }
-          //
-          //                              }
-          //                      }
-          //              }
-          //// delete me after
      } while (done==false);
 
 
      //debug area
      if(*myref) {
-
-          //              if(myself->GetID()==488){
-          //                      myself->SetSpotlight(true);
-          //                      (*myref)->SetSpotlight(true);
-          //                      (*myref)->Dump((*myref)->GetID());
+          // if(myself->GetID()==488){
+          //  myself->SetSpotlight(true);
+          //     (*myref)->SetSpotlight(true);
+          //     (*myref)->Dump((*myref)->GetID());
           //
           //
-          //              }
+          // }
 
      } else {
           //cout<<"no ref ped found: " <<endl;
@@ -751,6 +582,7 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
      const vector<Pedestrian*>& allPeds=sub->GetAllPedestrians();
 
      //in the case there are only few people in the room
+     //revise this condition
      if(allPeds.size()<=OBSTRUCTION) return false;
 
      double myDist=ped->GetDistanceToNextTarget();
@@ -778,59 +610,6 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
      if(ratio>0.8) return true;
 
      return false;
-
-     /*
-     //collect the pedestrians within 1 metre radius
-     vector<Pedestrian*> neighbourhood;
-     double range=1.0;//1m
-
-     _building->GetGrid()->GetNeighbourhood(ped,neighbourhood);
-
-     std::vector<int> conflictings;
-     std::vector<int>::iterator per;
-
-     //int congested=1;
-     int pedCrossing=0;
-
-     //Debug::Messages("congested ( %hd ): [ ",myID);
-
-     Point start=ped->GetPos();
-     //looping on a circle
-     for(double phi=0.0; phi<2*M_PI; phi+=0.1){
-
-             Point end= start+Point(range*cos(phi), range*sin(phi));//translation
-
-             Line line= Line(start, end);
-
-             for(unsigned int p=0;p<neighbourhood.size();p++){
-                     Pedestrian* ref = neighbourhood[p];
-
-                     //skipping those in other rooms
-                     if(ped->GetUniqueRoomID()!=ref->GetUniqueRoomID()) continue;
-
-                     if((ped->GetPos()-ref->GetPos()).NormSquare()>1.0) continue;
-                     // do not add a pedestrian twice
-                     vector<int>::iterator per = find(conflictings.begin(), conflictings.end(), ref->GetID());
-                     if (per != conflictings.end()) continue;
-
-                     if(line.IntersectionWithCircle(ref->GetPos())==false) continue;
-
-                     const Point& pos1=ref->GetPos();
-                     Point pos2= start-pos1;
-                     Point vel1=ped->GetV();
-
-                     // only those  behind me
-                     if(pos2.ScalarP(vel1)) pedCrossing++;
-
-                     conflictings.push_back(ref->GetID());
-
-             }
-
-     }
-
-     if(pedCrossing<OBSTRUCTION) return false;
-     return true;
-      */
 }
 
 
@@ -966,7 +745,6 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
      //compare it with my preferred/current (shortest nearest)
      if(quickest!=preferredExit) {
           double cba = CBA(gain(preferredExitTime),gain(minTime));
-          //cout<<"cba:" <<cba<<endl;
           if (cba>CBA_THRESHOLD) {
                ped->SetExitIndex(quickest);
                ped->SetExitLine(_accessPoints[quickest]->GetNavLine());

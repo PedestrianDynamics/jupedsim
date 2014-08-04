@@ -39,9 +39,6 @@ DirectionStrategy::DirectionStrategy()
 {
 }
 
-DirectionStrategy::DirectionStrategy(const DirectionStrategy& orig)
-{
-}
 
 DirectionStrategy::~DirectionStrategy()
 {
@@ -66,7 +63,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      if(p1 == p2) return p1;
 
      double length = (p1 - p2).Norm(); 
-     if(d >= 0.5*length) return (p1 - p2)*0.5; // return the middle point, since line is anyway toot short 
+     if(d >= 0.5*length) return (p1 + p2)*0.5; // return the middle point, since line is anyway too short
      double u = d/length; // d is supposed to be smaller than length, then u is in [0, 1]
      //Point diff = (p1 - p2).Normalized() * d;
      Line e_neu = Line(p1 + (p2-p1)*u, p1 + (p2-p1)*(1-u));

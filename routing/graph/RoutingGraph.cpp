@@ -50,19 +50,17 @@ RoutingGraph::RoutingGraph(Building * b) : building(b)
 {
      vertexes = map<int, Vertex>();
      BuildGraph();
-
-};
+}
 
 RoutingGraph::RoutingGraph()
 {
      vertexes = map<int, Vertex>();
      building=NULL;
-
 }
 RoutingGraph::~RoutingGraph()
 {
 
-};
+}
 
 RoutingGraph::RoutingGraph(RoutingGraph * orig)
 {

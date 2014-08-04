@@ -49,8 +49,6 @@ GraphRouter::~GraphRouter()
 
 int GraphRouter::FindExit(Pedestrian* p)
 {
-     //std::cout << p->Getdt() << "\n";
-
      set<int> closed_doors = p->GetKnownClosedDoors();
 
      if(p->GetLastDestination() == -1) {
@@ -146,7 +144,6 @@ int GraphRouter::FindExit(Pedestrian* p)
 void GraphRouter::Init(Building* b)
 {
      GlobalRouter::Init(b);
-
 
      Log->Write("ERROR: GRAPHROUTER  is not ready to use yet.");
      _building = b;

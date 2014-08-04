@@ -63,7 +63,7 @@ std::string Point::toString() const
      std::stringstream tmp;
      tmp<<"( "<<_x<<" : " <<_y<<" )";
      return tmp.str();
-};
+}
 
 void Point::SetX(double x)
 {

@@ -38,7 +38,6 @@ class DirectionStrategy {
 
 public:
      DirectionStrategy();
-     DirectionStrategy(const DirectionStrategy& orig);
      virtual ~DirectionStrategy();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const = 0;
 };

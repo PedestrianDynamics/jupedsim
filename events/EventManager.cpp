@@ -46,7 +46,7 @@ EventManager::EventManager(Building *_b)
      _dynamic=false;
      _file = fopen("../events/events.txt","r");
      if(!_file) {
-          Log->Write("INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich.");
+          //Log->Write("INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich.");
      } else {
           Log->Write("INFO:\tDatei events.txt gefunden. Dynamisches Eventhandling moeglich.");
           _dynamic=true;
@@ -68,7 +68,6 @@ void EventManager::SetProjectRootDir(const std::string &filename)
 
 void EventManager::readEventsXml()
 {
-     Log->Write("INFO: \tReading events\n ");
      //get the geometry filename from the project file
      TiXmlDocument doc(_projectFilename);
      if (!doc.LoadFile()) {
@@ -87,11 +86,12 @@ void EventManager::readEventsXml()
 
      TiXmlDocument docEvent(eventfile);
      if(!docEvent.LoadFile()) {
-          Log->Write("INFO: \t%s",docEvent.ErrorDesc());
-          Log->Write("INFO: \t could not parse the event file. So no Events are found.");
+          //Log->Write("INFO: \t%s",docEvent.ErrorDesc());
+          //Log->Write("INFO: \t could not parse the event file. So no Events are found.");
           //exit(EXIT_FAILURE);
           return;
      }
+     Log->Write("INFO: \tReading events\n ");
 
      TiXmlElement* xRootNode = docEvent.RootElement();
      if(!xRootNode) {
