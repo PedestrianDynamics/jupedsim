@@ -141,7 +141,7 @@ void ThreadVisualisation::slotSetFrameRate(float fps){
 void ThreadVisualisation::run(){
 
     //deactivate the output windows
-    //vtkObject::GlobalWarningDisplayOff();
+    vtkObject::GlobalWarningDisplayOff();
 
 	//emit signalStatusMessage("running");
 

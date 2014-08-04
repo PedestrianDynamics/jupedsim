@@ -150,7 +150,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     }
                     else
                     {
-
                         frameNumber=extern_trajectories_firstSet.getFrameCursor();
                         nPeds= frame->getSize();
 
