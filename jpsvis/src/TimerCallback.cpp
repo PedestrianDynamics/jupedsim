@@ -87,9 +87,12 @@
 
 #include "Pedestrian.h"
 #include "Frame.h"
+#include "FrameElement.h"
 #include "TrajectoryPoint.h"
 #include "SyncData.h"
 #include "SystemSettings.h"
+#include "TrailPlotter.h"
+#include "geometry/PointPlotter.h"
 #include "TimerCallback.h"
 
 #define VTK_CREATE(type, name) \
@@ -115,7 +118,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
         int nPeds=0;
         static bool isRecording =false;
         int tid = * static_cast<int *>(callData);
-        //double renderingTime=0;
 
         if (tid == this->RenderTimerId)
         {
@@ -128,8 +130,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
 
             if (iren && renderWindow && renderer)
             {
-                // very important
-                setAllPedestriansInvisible();
 
                 //first pedestrian group
                 if(extern_first_dataset_loaded) {
@@ -144,115 +144,57 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     else
                         frame = extern_trajectories_firstSet.getNextFrame();
 
-                    if(frame==NULL){
+                    if(frame==NULL)
+                    {
 
-                    }else{
-
+                    }
+                    else
+                    {
                         frameNumber=extern_trajectories_firstSet.getFrameCursor();
-                        vtkPolyData* pData=frame->GetPolyData();
-
-#if VTK_MAJOR_VERSION <= 5
-                        extern_glyphs_pedestrians->SetInput(pData);
-                        ((vtkLabeledDataMapper*)extern_pedestrians_labels->GetMapper())->SetInput(pData);
-#else
-                        extern_glyphs_pedestrians->SetInputData(pData);
-                        extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
-#endif
-
-                        extern_glyphs_pedestrians->Update();
-
                         nPeds= frame->getSize();
 
-                    }
-                }
-
-                // TODO: restore this if you want to use actors instead of glyphs
-                if(extern_first_dataset_loaded && false) {
-                    Frame * frame=NULL;
-
-                    // return the same frame if the system is paused
-                    // in fact you could just return, but in this case no update will be made
-                    // e.g showing captions/trails...
-
-                    if(extern_is_pause)
-                        frame=extern_trajectories_firstSet.getFrame(extern_trajectories_firstSet.getFrameCursor());
-                    else
-                        frame = extern_trajectories_firstSet.getNextFrame();
-
-                    if(frame==NULL){
-
-                    }else{
-
-                        // just take the frame number given by this dataset
-                        frameNumber=extern_trajectories_firstSet.getFrameCursor();
-                        if(extern_tracking_enable)
-                            getTrail(1,frameNumber);
-
-                        TrajectoryPoint* point=NULL;
-                        while(NULL!=(point=frame->getNextElement())){
-
-                            //point index start at 1. this  may needed to be fixed
-                            extern_pedestrians_firstSet[point->getIndex()]->moveTo(point);
-                            nPeds++;
+                        if(SystemSettings::get2D()==true)
+                        {
+                            vtkPolyData* pData=frame->GetPolyData2D();
+#if VTK_MAJOR_VERSION <= 5
+                            extern_glyphs_pedestrians->SetInput(pData);
+                            ((vtkLabeledDataMapper*)extern_pedestrians_labels->GetMapper())->SetInput(pData);
+#else
+                            extern_glyphs_pedestrians->SetInputData(pData);
+                            extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
+#endif
+                            extern_glyphs_pedestrians->Update();
                         }
-                        //CAUTION: reset the fucking counter
-                        frame->resetCursor();
-                    }
-                }
-
-                //second pedestrian group
-                if(extern_second_dataset_loaded){
-
-                    Frame * frame=NULL;
-                    if(extern_is_pause)
-                        frame=extern_trajectories_secondSet.getFrame(extern_trajectories_secondSet.getFrameCursor());
-                    else
-                        frame = extern_trajectories_secondSet.getNextFrame();
-
-                    if(frame==NULL){
-
-                    }else{
-                        // just take the frame number given by this dataset
-                        frameNumber=extern_trajectories_secondSet.getFrameCursor();
-                        if(extern_tracking_enable)
-                            getTrail(2,frameNumber);
-
-                        TrajectoryPoint* point=NULL;
-                        while(NULL!=(point=frame->getNextElement())){
-                            extern_pedestrians_secondSet[point->getIndex()]->moveTo(point);
+                        else
+                        {
+                            vtkPolyData* pData=frame->GetPolyData3D();
+#if VTK_MAJOR_VERSION <= 5
+                            extern_glyphs_pedestrians_3D->SetInput(pData);
+                            ((vtkLabeledDataMapper*)extern_pedestrians_labels->GetMapper())->SetInput(pData);
+#else
+                            extern_glyphs_pedestrians_3D->SetInputData(pData);
+                            extern_pedestrians_labels->GetMapper()->SetInputDataObject(pData);
+#endif
+                            extern_glyphs_pedestrians_3D->Update();
                         }
-                        //CAUTION: reset the fucking counter
-                        frame->resetCursor();
-                    }
-                }
 
-                //third pedestrian group
-                if(extern_third_dataset_loaded){
-
-                    Frame * frame=NULL;
-                    if(extern_is_pause)
-                        frame=extern_trajectories_thirdSet.getFrame(extern_trajectories_thirdSet.getFrameCursor());
-                    else
-                        frame = extern_trajectories_thirdSet.getNextFrame();
-
-                    if(frame==NULL){
-
-                    }else {
-                        // just take the frame number given by this dataset
-                        frameNumber=extern_trajectories_thirdSet.getFrameCursor();
                         if(extern_tracking_enable)
-                            getTrail(3,frameNumber);
+                        {
+                            const std::vector<FrameElement *> &elements=frame->GetFrameElements();
 
-                        TrajectoryPoint* point=NULL;
-                        while(NULL!=(point=frame->getNextElement())){
-                            //point index start at 1. this  may needed to be fixed
-                            extern_pedestrians_thirdSet[point->getIndex()]->moveTo(point);
-                            //set visible to true
+                            for(unsigned int i=0;i<elements.size();i++)
+                            {
+                                FrameElement* el = elements[i];
+                                double pos[3];
+                                double color;
+                                el->GetPos(pos);
+                                el->GetColor(&color);
+                                extern_trail_plotter->PlotPoint(pos,color);
+                            }
                         }
-                        //CAUTION: reset the fucking counter
-                        frame->resetCursor();
                     }
                 }
+
 
                 int* winSize=renderWindow->GetSize();
                 static int  lastWinX=winSize[0]+1; // +1 to trigger a first change
@@ -324,12 +266,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     pAVIWriter->SetQuality(2);
                     pAVIWriter->SetRate(1000.0/iren->GetTimerDuration(tid));
 
-                    //static int videoID=0;
-                    //char filename[20]={0};
-                    //sprintf(filename,"travisto_video_%d.avi",videoID++);
-                    //pAVIWriter->SetFileName(filename);
-
-
                     QString videoName;
                     SystemSettings::getOutputDirectory(videoName);
                     //create directory if not exits
@@ -382,8 +318,6 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     //exit if and only if the recording process is terminated
                     if(isRecording) extern_recording_enable=false;
                     else iren->ExitCallback();
-
-
                 }
             }
         }
@@ -394,68 +328,14 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow) {
 
     static bool fullscreen=false;
 
-    // check the caption colour mode
-    int captionSize, orientation;
-    bool automaticRotation, autoCaptionMode;
-    QColor captionColor;
-    SystemSettings::getCaptionsParameters(captionSize,captionColor,orientation,automaticRotation);
+    extern_glyphs_pedestrians_actor_2D->SetVisibility(SystemSettings::getShowAgents()&& SystemSettings::get2D());
+    extern_glyphs_pedestrians_actor_3D->SetVisibility(SystemSettings::getShowAgents()&& !SystemSettings::get2D());
+    extern_trail_plotter->SetVisibility(extern_tracking_enable);
 
-    autoCaptionMode= !(captionColor.isValid());
+    //agents captions
+    extern_pedestrians_labels->SetVisibility(SystemSettings::getShowAgentsCaptions());
 
-    if(autoCaptionMode==false){ // tODO set the colour to auto mode
-
-    }
-
-    if(extern_first_dataset_loaded){
-        int pedColor[3];
-        SystemSettings::getPedestrianColor(0,pedColor);
-        for(int i=0;i<extern_trajectories_firstSet.getNumberOfAgents();i++){
-            extern_pedestrians_firstSet[i]->enableCaption(SystemSettings::getShowCaption());
-            if(SystemSettings::getPedestrianColorProfileFromFile()==false){
-                extern_pedestrians_firstSet[i]->setColor(pedColor);
-            }
-            extern_pedestrians_firstSet[i]->setGroupVisibility(extern_first_dataset_visible);
-            extern_pedestrians_firstSet[i]->setCaptionSize(captionSize);
-            extern_pedestrians_firstSet[i]->setCaptionsColorModeToAuto(autoCaptionMode);
-            extern_pedestrians_firstSet[i]->setCaptionsColor(captionColor);
-            extern_pedestrians_firstSet[i]->setResolution(SystemSettings::getEllipseResolution());
-        }
-        extern_pedestrians_labels->SetVisibility(SystemSettings::getShowCaption());
-    }
-
-    if(extern_second_dataset_loaded){
-        int pedColor[3];
-        SystemSettings::getPedestrianColor(1,pedColor);
-        for(int i=0;i<extern_trajectories_secondSet.getNumberOfAgents();i++){
-            extern_pedestrians_secondSet[i]->enableCaption(SystemSettings::getShowCaption());
-            if(SystemSettings::getPedestrianColorProfileFromFile()==false){
-                extern_pedestrians_secondSet[i]->setColor(pedColor);
-            }
-            extern_pedestrians_secondSet[i]->setGroupVisibility(extern_second_dataset_visible);
-            extern_pedestrians_secondSet[i]->setCaptionSize(captionSize);
-            extern_pedestrians_secondSet[i]->setCaptionsColorModeToAuto(autoCaptionMode);
-            extern_pedestrians_secondSet[i]->setCaptionsColor(captionColor);
-            extern_pedestrians_secondSet[i]->setResolution(SystemSettings::getEllipseResolution());
-
-        }
-    }
-
-    if(extern_third_dataset_loaded){
-        int pedColor[3];
-        SystemSettings::getPedestrianColor(2,pedColor);
-        for(int i=0;i<extern_trajectories_thirdSet.getNumberOfAgents();i++){
-            extern_pedestrians_thirdSet[i]->enableCaption(SystemSettings::getShowCaption());
-
-            if(SystemSettings::getPedestrianColorProfileFromFile()==false){
-                extern_pedestrians_thirdSet[i]->setColor(pedColor);
-            }
-            extern_pedestrians_thirdSet[i]->setGroupVisibility(extern_third_dataset_visible);
-            extern_pedestrians_thirdSet[i]->setCaptionSize(captionSize);
-            extern_pedestrians_thirdSet[i]->setCaptionsColorModeToAuto(autoCaptionMode);
-            extern_pedestrians_thirdSet[i]->setCaptionsColor(captionColor);
-            extern_pedestrians_thirdSet[i]->setResolution(SystemSettings::getEllipseResolution());
-        }
-    }
+    //geometry captions
 
     //enable / disable full screen
     if(fullscreen!=extern_fullscreen_enable){
@@ -467,26 +347,6 @@ void TimerCallback::updateSettings(vtkRenderWindow* renderWindow) {
     // take
     extern_force_system_update=false;
 }
-
-
-void TimerCallback::setAllPedestriansInvisible()
-{
-    if(extern_first_dataset_loaded){
-        for(int i=0;i<extern_trajectories_firstSet.getNumberOfAgents();i++)
-            extern_pedestrians_firstSet[i]->setVisibility(false);
-    }
-
-    if(extern_second_dataset_loaded){
-        for(int i=0;i<extern_trajectories_secondSet.getNumberOfAgents();i++)
-            extern_pedestrians_secondSet[i]->setVisibility(false);
-    }
-
-    if(extern_third_dataset_loaded){
-        for(int i=0;i<extern_trajectories_thirdSet.getNumberOfAgents();i++)
-            extern_pedestrians_thirdSet[i]->setVisibility(false);
-    }
-}
-
 
 
 void TimerCallback::getTrail(int datasetID, int frameNumber){
@@ -518,65 +378,19 @@ void TimerCallback::getTrail(int datasetID, int frameNumber){
 
     }
 
-    switch(datasetID){
-    case 1:
-    {
-        for (int i=tcMin;i<tcMax;i++){
-            Frame* frame = extern_trajectories_firstSet.getFrame(i);
-            if(frame==NULL){
-                //		cerr<<"Trajectory not available in getTrail(), first data set"<<endl;
-            }else {
-                TrajectoryPoint* point=NULL;
-                while(NULL!=(point=frame->getNextElement())){
-                    extern_pedestrians_firstSet[point->getIndex()]->plotTrail(point->getX(),point->getY(),point->getZ());
-                    extern_pedestrians_firstSet[point->getIndex()]->setTrailGeometry(trailForm);
-                }
-                frame->resetCursor();
+
+    for (int i=tcMin;i<tcMax;i++){
+        Frame* frame = extern_trajectories_firstSet.getFrame(i);
+        if(frame==NULL){
+            //		cerr<<"Trajectory not available in getTrail(), first data set"<<endl;
+        }else {
+            FrameElement* point=NULL;
+            while(NULL!=(point=frame->getNextElement())){
+                //extern_pedestrians_firstSet[point->getIndex()]->plotTrail(point->getX(),point->getY(),point->getZ());
+                //extern_pedestrians_firstSet[point->getIndex()]->setTrailGeometry(trailForm);
             }
+            frame->resetCursor();
         }
-    }
-        break;
-
-    case 2:
-    {
-        for (int i=tcMin;i<tcMax;i++){
-            Frame* frame = extern_trajectories_secondSet.getFrame(i);
-            if(frame==NULL){
-                //			cerr<<"Trajectory not available in getTrail(), second data set"<<endl;
-            }else {
-
-                TrajectoryPoint* point=NULL;
-                while(NULL!=(point=frame->getNextElement())){
-                    extern_pedestrians_secondSet[point->getIndex()]->plotTrail(point->getX(),point->getY(),point->getZ());
-                    extern_pedestrians_secondSet[point->getIndex()]->setTrailGeometry(trailForm);
-                }
-                frame->resetCursor();
-            }
-        }
-    }
-
-        break;
-
-    case 3:
-    {
-        for (int i=tcMin;i<tcMax;i++){
-            Frame* frame = extern_trajectories_thirdSet.getFrame(i);
-            if(frame==NULL){
-                //			cerr<<"Trajectory not available in getTrail(), third data set"<<endl;
-            }else {
-
-                TrajectoryPoint* point=NULL;
-                while(NULL!=(point=frame->getNextElement())){
-                    extern_pedestrians_thirdSet[point->getIndex()]->plotTrail(point->getX(),point->getY(),point->getZ());
-                    extern_pedestrians_thirdSet[point->getIndex()]->setTrailGeometry(trailForm);
-                }
-                frame->resetCursor();
-            }
-        }
-    }
-
-        break;
-
     }
 }
 
@@ -671,17 +485,3 @@ void TimerCallback::setTextActor(vtkTextActor* ra){
     runningTime=ra;
 }
 
-
-//
-//WindowCallback* WindowCallback::New()
-//{
-//	WindowCallback *cb = new WindowCallback;
-//	return cb;
-//}
-
-
-//void WindowCallback::Execute(vtkObject *caller, unsigned long eventId,
-//		void *callData){
-//
-//
-//}

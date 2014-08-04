@@ -173,18 +173,18 @@ public Q_SLOTS:
 	void slotShowHideExits();
 	/// shows/hide geometry
 	void slotShowHideWalls();
+    /// shows/hide navigation lines
+    void slotShowHideNavLines();
+    /// shows/hide navigation lines
+    void slotShowHideFloor();
 	/// shows/hide geometry captions
 	void slotShowHideGeometryCaptions();
 
 	/// show pedestrians only without trail
 	void slotShowPedestrianOnly();
 
-
 	/// update the playing speed
 	void slotUpdateSpeedSlider(int newValue);
-	//void slotSpeedSliderPressed();
-	//void slotSpeedSliderReleased();
-	//void slotSpeedSliderChanged();
 
 	/// update the position slider
 	void slotUpdateFrameSlider(int newValue);
@@ -241,6 +241,12 @@ public Q_SLOTS:
 	/// change the exits color
 	void slotChangeExitsColor();
 
+    /// change the navigation lines color
+    void slotChangeNavLinesColor();
+
+    /// change the floor color
+    void slotChangeFloorColor();
+
 	/// show/hide onscreen information
 	/// information include Time and pedestrians left in the facility
 	void slotShowOnScreenInfos();
@@ -248,8 +254,6 @@ public Q_SLOTS:
 private:
 	Q_SIGNALS:
 	void signal_controlSequence(QString);
-
-
 
 protected:
 	virtual void closeEvent(QCloseEvent* event);
@@ -274,7 +278,7 @@ private:
 	/// parse the geometry  Node and return a pointer to geometry object
 	/// used in online mode only
 	FacilityGeometry* parseGeometry(QDomNode geoNode);
-
+    FacilityGeometry* parseGeometry(QString geometryString);
 
 	/**
 	 * parse a shape node and get the initials heights and colors of pedestrians.

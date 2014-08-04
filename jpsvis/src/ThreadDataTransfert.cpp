@@ -51,7 +51,7 @@
 #include "ThreadDataTransfert.h"
 #include "SyncData.h"
 #include "Frame.h"
-#include "TrajectoryPoint.h"
+#include "FrameElement.h"
 
 #include "network/TraVisToServer.h"
 #include "geometry/FacilityGeometry.h"
@@ -70,9 +70,8 @@ ThreadDataTransfer::ThreadDataTransfer(QObject *parent):
 	headerParsed=false;
 	errNr=0;
 	finished=false;
+    //Debug::setDebugLevel(Debug::ALL);
 }
-
-
 
 ThreadDataTransfer::~ThreadDataTransfer() {
 
@@ -159,17 +158,16 @@ void ThreadDataTransfer::slotReadMessage(){
 void ThreadDataTransfer::slotProcessMessage(QString& data){
 	QDomDocument doc("");
 
-	data = "<travisto>\n" +data+ "\n</travisto>\n";
-
-	//cout<<data.toStdString()<<endl;
+    //data = "<travisto>\n" +data+ "</travisto>";
+    //cout<<data.toStdString()<<endl;
 
 	QString errorMsg="";
 	doc.setContent(data,&errorMsg);
 
 	if(!errorMsg.isEmpty()){
 		errNr++;
-		Debug::Error(">> %s",(const char *)errorMsg.toStdString().c_str());
-		Debug::Error(">> %s",(const char *)data.toStdString().c_str());
+        //Debug::Error(">> %s",(const char *)errorMsg.toStdString().c_str());
+        //Debug::Error(">> %s",(const char *)data.toStdString().c_str());
 		return;
 	}
 
@@ -191,6 +189,7 @@ void ThreadDataTransfer::slotProcessMessage(QString& data){
 	if(!geometry.isNull()) {
 		//emit signal_loadGeometry(data);
 		geoData=data;
+        Debug::Messages("geometry received and parsed");
 		//parseGeometryNode(geometry);
 	}
 	if(!dataList.isEmpty()) {
@@ -227,11 +226,6 @@ void ThreadDataTransfer::parseHeaderNode(QDomNode header ){
 		emit signal_stopVisualisationThread(true);
 	}
 
-
-	// no need
-	//unsigned long timeFirstFrame_us = header.toElement().elementsByTagName("timeFirstFrame").item(0)
-	//unsigned long timeFirstFrame_s = header.toElement().elementsByTagName("timeFirstFrame").item(0)
-	//	.toElement().attribute("sec",0).toUInt();
 	QString frameRateStr=getTagValueFromElement(header, "frameRate");
 	frameRate =frameRateStr.toFloat(&ok);
 
@@ -245,8 +239,34 @@ void ThreadDataTransfer::parseHeaderNode(QDomNode header ){
 		msgBox.setIcon(QMessageBox::Critical);
 		msgBox.exec();
 		frameRate=25;
-
 	}
+
+    //get the header version
+    if(header.toElement().hasAttributes())
+    {
+        QString version=header.toElement().attribute("version");
+        QStringList query = version.split(".");
+        int major=0;
+        int minor=0;
+        int patch=0;
+        switch (query.size() ) {
+        case 1:
+            major=query.at(0).toInt();
+            break;
+        case 2:
+             major=query.at(0).toInt();
+             minor=query.at(1).toInt();
+            break;
+        case 3:
+            major=query.at(0).toInt();
+            minor=query.at(1).toInt();
+            patch=query.at(2).toInt();
+            break;
+        }
+        InitHeader(major,minor,patch);
+        //cout<<"version found:"<<at.value(i).toStdString()<<endl;exit(0);
+    }
+
 	headerParsed=true;
 }
 
@@ -259,80 +279,57 @@ QString ThreadDataTransfer::getTagValueFromElement(QDomNode node,
 }
 
 void ThreadDataTransfer::parseDataNode(QDomNodeList frames){
-	//static int frameNumbers=0;
-
-	//parsing the data
-	// TODO: i amybe a problem
-	//emit signal_CurrentAction("parsing data");
-
 
     for (int i = 0; i < frames.length(); i++) {
 		Frame *newFrame = new Frame();
 		QDomElement el = frames.item(i).toElement();
 		QDomNodeList agents = el.elementsByTagName("agent");
-		//cout << "found:  " << agents.length() <<" agents" <<endl;
-        for (int i = 0; i < agents.length(); i++) {
 
+        for (int i = 0; i < agents.length(); i++)
+        {
 			bool ok=false;
 			int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
 			if(!ok) continue; // invalid ID
-            double xPos=agents.item(i).toElement().attribute("xPos","0").toDouble()*FAKTOR;
-            double yPos=agents.item(i).toElement().attribute("yPos","0").toDouble()*FAKTOR;
-            double zPos=agents.item(i).toElement().attribute("zPos","0").toDouble()*FAKTOR;
+            double xPos=agents.item(i).toElement().attribute(_jps_xPos,"0").toDouble()*FAKTOR;
+            double yPos=agents.item(i).toElement().attribute(_jps_yPos,"0").toDouble()*FAKTOR;
+            double zPos=agents.item(i).toElement().attribute(_jps_zPos,"0").toDouble()*FAKTOR;
 
-			double agent_color =std::numeric_limits<double>::quiet_NaN();
-
-            double xVel=agents.item(i).toElement().attribute("xVel").toDouble(&ok)*FAKTOR;
-			if(!ok)xVel=std::numeric_limits<double>::quiet_NaN();
-            double yVel=agents.item(i).toElement().attribute("yVel").toDouble(&ok)*FAKTOR;
-			if(!ok)yVel=std::numeric_limits<double>::quiet_NaN();
-            double zVel=agents.item(i).toElement().attribute("zVel").toDouble(&ok)*FAKTOR;
-			if(!ok)zVel=std::numeric_limits<double>::quiet_NaN();
-
-			//coordinates of the ellipse, default to the head of the agent
-            double el_x=agents.item(i).toElement().attribute("xEll").toDouble(&ok)*FAKTOR;
-			if(!ok)	el_x=xPos;
-            double el_y=agents.item(i).toElement().attribute("yEll").toDouble(&ok)*FAKTOR;
-			if(!ok)	el_y=yPos;
-            double el_z=agents.item(i).toElement().attribute("zEll").toDouble(&ok)*FAKTOR;
-			if(!ok)	el_z=zPos;
-
-            double dia_a=agents.item(i).toElement().attribute("radiusA").toDouble(&ok)*FAKTOR;
+            double dia_a=agents.item(i).toElement().attribute(_jps_radiusA).toDouble(&ok)*FAKTOR;
 			if(!ok)dia_a=std::numeric_limits<double>::quiet_NaN();
-            double dia_b=agents.item(i).toElement().attribute("radiusB").toDouble(&ok)*FAKTOR;
+            double dia_b=agents.item(i).toElement().attribute(_jps_radiusB).toDouble(&ok)*FAKTOR;
 			if(!ok)dia_b=std::numeric_limits<double>::quiet_NaN();
-			double el_angle=agents.item(i).toElement().attribute("ellipseOrientation").toDouble(&ok);
+            double el_angle=agents.item(i).toElement().attribute(_jps_ellipseOrientation).toDouble(&ok);
 			if(!ok){el_angle=std::numeric_limits<double>::quiet_NaN(); }
-			double el_color=agents.item(i).toElement().attribute("ellipseColor").toDouble(&ok);
+            double el_color=agents.item(i).toElement().attribute(_jps_ellipseColor).toDouble(&ok);
 			if(!ok)el_color=std::numeric_limits<double>::quiet_NaN();
 
 			double pos[3]={xPos,yPos,zPos};
-			double vel[3]={xVel,yPos,zPos};
-			double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
-			double para[2]={agent_color,el_angle};
+            //double vel[3]={xVel,yPos,zPos};
+            //double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
+            //double para[2]={agent_color,el_angle};
+            double angle[3]={0,0,el_angle};
+            double radius[3]={dia_a,dia_b,30.0};
 
-			TrajectoryPoint * point = new TrajectoryPoint(id-1);
-			point->setEllipse(ellipse);
-			point->setPos(pos);
-			point->setVel(vel);
-			point->setAgentInfo(para);
-			newFrame->addElement(point);
+            FrameElement *element = new FrameElement(id-1);
+            element->SetPos(pos);
+            element->SetOrientation(angle);
+            element->SetRadius(radius);
+            element->SetColor(el_color);
+            newFrame->addElement(element);
 		}
 
 		//adding the new frame to the right dataset
+        newFrame->ComputePolyData();
 		extern_trajectories_firstSet.addFrame(newFrame);
 		//	frameNumbers++;
 	}
 
-	//	cout <<"frames size: "<<extern_trajectories_firstSet.getSize()<<endl;
-	//	cout <<"frames numbes: "<<frameNumbers<<endl;
 	if(headerParsed==true){
 		//		static int count=1;
 		//		count++;
 		//		if (count<100) return; // start after 100 frames
 		emit signal_startVisualisationThread(geoData,numberOfAgents,frameRate);
 		headerParsed=false;
-		//		count=0;
 	}
 }
 
@@ -384,8 +381,6 @@ void ThreadDataTransfer::parseShapeNode(QDomNode shape){
 	QDomNodeList agents = shape.toElement().elementsByTagName("agentInfo");
 	QStringList heights;
 	QStringList colors;
-
-
     for (int i = 0; i < agents.length(); i++) {
 
 		bool ok=false;
@@ -411,4 +406,32 @@ void ThreadDataTransfer::parseShapeNode(QDomNode shape){
 
 	extern_trajectories_firstSet.setInitialHeights(heights);
 	extern_trajectories_firstSet.setInitialColors(colors);
+}
+
+void ThreadDataTransfer::InitHeader(int major, int minor, int patch)
+{
+    // set the parsing String map
+    if(minor==5 && patch==0){
+        _jps_xPos=QString("xPos");
+        _jps_yPos=QString("yPos");
+        _jps_zPos=QString("zPos");
+        _jps_radiusA=QString("radiusA");
+        _jps_radiusB=QString("radiusB");
+        _jps_ellipseOrientation=QString("ellipseOrientation");
+        _jps_ellipseColor=QString("ellipseColor");
+    }
+    else if ( (minor==6) || (minor==5 && patch==1) ){
+        _jps_xPos=QString("x");
+        _jps_yPos=QString("y");
+        _jps_zPos=QString("z");
+        _jps_radiusA=QString("rA");
+        _jps_radiusB=QString("rB");
+        _jps_ellipseOrientation=QString("eO");
+        _jps_ellipseColor=QString("eC");
+    }
+    else
+    {
+        cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<endl;
+        cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
+    }
 }

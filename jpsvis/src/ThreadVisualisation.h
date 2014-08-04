@@ -59,13 +59,20 @@ class vtkObject;
 class Pedestrian;
 class SyncData;
 class FacilityGeometry;
+class TrailPlotter;
+class PointPlotter;
 
 extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
 
+extern PointPlotter* extern_trail_plotter;
+
 //extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
 extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
+extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D;
+extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_2D;
+extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_3D;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;
@@ -85,8 +92,6 @@ public:
 
 	/// set the camera to one of TOP/FRONT/SIDE
 	void setCameraPerspective(int mode);
-	/// load the data for the legend
-	//void setLegendValues();
 
 	/// load and display the geometry where
 	/// the pedestrians will move
@@ -111,23 +116,32 @@ public:
 	/// enable/disable 3D
 	void setGeometryVisibility3D(bool status);
 
-	/// set trajectories/trail visibility
-	void setTrailVisibility(bool status);
-
 	/// change the background color of the rendering windows
 	void setBackgroundColor(double* color);
 
 	/// change the walls color
 	void setWallsColor(double* color);
 
+    /// change the floor color
+    void setFloorColor(double* color);
+
 	/// change the exits color.
 	void setExitsColor(double* color);
+
+    /// change the exits color.
+    void setNavLinesColor(double* color);
 
 	/// show / hide the walls
 	void showWalls(bool status);
 
 	/// show/ hide the exits
 	void showDoors(bool status);
+
+    /// show/ hide the exits
+    void showNavLines(bool status);
+
+    /// show/ hide the floor
+    void showFloor(bool status);
 
 	/// show / hide stairs
 	///not implemented
@@ -137,17 +151,16 @@ public:
 
 public Q_SLOTS:
 	/**control sequence received*/
-	void slotControlSequence(const char* sex);
+    void slotControlSequence(const char* para);
 
 	/// set the frame rate in frames per second
 	void slotSetFrameRate( float fps);
 
 
 Q_SIGNALS:
-	void signal_controlSequences(const char* sex);
+    void signal_controlSequences(const char* para);
 
 private:
-
 
 	/// initialize the legend
 	void initLegend(/*std::vector scalars*/);
@@ -156,7 +169,10 @@ private:
 	void init();
 
 	/// initialize the datasets
-	void initGlyphs();
+    void initGlyphs2D();
+
+    //initialize the 3D agents
+    void initGlyphs3D();
 
 	//finalize the datasets
 	void finalize();
@@ -175,6 +191,7 @@ private:
 	vtkRenderWindowInteractor* renderWinInteractor;
 	vtkAxesActor* axis;
 	vtkTextActor* runningTime;
+    vtkCamera* _topViewCamera;
 	QString winTitle;
 
 	float framePerSecond;

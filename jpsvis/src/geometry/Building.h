@@ -148,7 +148,7 @@ public:
     LCGrid* GetGrid() const;
 
     // Sonstiges
-    void InitGeometry();
+    bool InitGeometry();
     void InitGrid(double cellSize);
     //void InitRoomsAndSubroomsMap();
     void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
@@ -174,7 +174,7 @@ public:
 	const std::string& GetProjectFilename() const;
 	void SetProjectFilename(const std::string &filename) ;
 	void SetProjectRootDir(const std::string &filename);
-    void LoadBuildingFromFile(const std::string &filename="");
+    bool LoadBuildingFromFile(const std::string &filename="");
     void LoadTrafficInfo();
     void LoadRoutingInfo(const std::string &filename);
     void WriteToErrorLog() const;

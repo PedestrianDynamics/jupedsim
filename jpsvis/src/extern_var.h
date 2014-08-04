@@ -30,13 +30,19 @@
 #ifndef EXTERN_VAR_H_
 #define EXTERN_VAR_H_ 1
 
+#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
+#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
+
 #include "SyncData.h"
 #include "Pedestrian.h"
+#include "TrailPlotter.h"
 
 #include <vtkActor2D.h>
+#include <vtkActor.h>
 #include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
+
 
 
 #define VTK_CREATE(type, name) \
@@ -67,6 +73,7 @@ bool extern_force_system_update=false;
 /// With this enable, moving pedestrians will leave a
 /// trail behind them
 bool extern_tracking_enable=false;
+PointPlotter* extern_trail_plotter=NULL;
 
 ///relative scale from pedestrian to the geometry (environment)
 double extern_scale=0.1;
@@ -80,11 +87,15 @@ Pedestrian** extern_pedestrians_secondSet=NULL;
 ///The third pedestrian group
 Pedestrian** extern_pedestrians_thirdSet=NULL;
 
+vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians=NULL;
+vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D=NULL;
 
-//VTK_CREATE (vtkGlyph3D, extern_glyphs_pedestrians);
-VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
-
+//VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
+//VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
 VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
+
+VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_2D);
+VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_3D);
 
 
 // and here the corresponding dataset

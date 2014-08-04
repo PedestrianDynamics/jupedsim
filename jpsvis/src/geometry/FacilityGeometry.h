@@ -66,14 +66,26 @@ public:
 	FacilityGeometry();
 	virtual ~FacilityGeometry();
 
-	vtkAssembly* getActor();
+    vtkAssembly* getActor2D();
+
+    vtkAssembly* getActor3D();
+
+    vtkAssembly* getCaptionsActor();
 
 	vtkActor2DCollection* getCaptions();
+
+    void CreateActors();
 
 	///draw a wall
 	void addWall(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=15, double height=250,double col=255);
 	//void addWall(double center[3], double width, double orientation);
 	void addWall(JPoint* p1, JPoint* p2, std::string caption="");
+
+    ///draw a stair
+    void addStair(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=15, double height=250,double col=255);
+    //void addWall(double center[3], double width, double orientation);
+    void addStair(JPoint* p1, JPoint* p2, std::string caption="");
+
 
 	///draw a door
 	void addDoor(double x1, double y1, double z1 ,double x2, double y2, double z2, double thickness=17, double height=250,double col=30);
@@ -86,8 +98,13 @@ public:
 	//void addStep(double center[3], double width, double orientation);
 	void addStep(JPoint* p1, JPoint* p2);
 
-	/// draw a floor, divided in cells,
+    /// draw a navigation line
+    void addNavLine(double x1, double y1, double z1, double x2, double y2, double z2, double thickness=2, double height=250, double color=95);
+    void addNavLine(JPoint* p1, JPoint* p2, std::string caption="");
+
+    /// draw a floor, divided in cells,
 	void addFloor(double x1, double y1, double x2, double y2, double z=0);
+    void addFloor(vtkPolyData* polygonPolyData);
 
 	/// draw other kinds of objects
 	void addObjectSphere(double center[3], double radius, double couleur=1);
@@ -98,6 +115,8 @@ public:
 
 	void changeWallsColor(double* color);
 	void changeExitsColor(double* color);
+    void changeNavLinesColor(double* color);
+    void changeFloorColor(double* color);
 
 	void set2D(bool status);
 	void set3D(bool status);
@@ -105,7 +124,9 @@ public:
 	void showDoors(bool status);
 	void showStairs(bool status);
 	void showWalls(bool status);
-	void showGeometryLabels(int v);
+    void showNavLines(bool status);
+    void showFloor(bool status);
+    void showGeometryLabels(int status);
 
 
 private:
@@ -126,6 +147,7 @@ private:
 	double wallColor;
 	double stepColor;
 	double doorColor;
+    double navlineColor;
 
 	// geometry assembly
 	vtkAssembly* assembly;
@@ -134,19 +156,17 @@ private:
 	LinePlotter2D* linesPlotter2D;
 	vtkAssembly* assembly2D;
 
-//	// 3-d parts
-//	vtkAssembly* assemblyObjects;
-//	vtkAssembly* assemblyWalls3D;
-//	vtkAssembly* assemblyDoors3D;
-//	vtkAssembly* assembly3D;
+    // 3-d parts
+    //vtkAssembly* assemblyObjects;
+    vtkAssembly* assemblyWalls3D;
+    vtkAssembly* assemblyDoors3D;
+    vtkAssembly* assembly3D;
+
+    vtkActor* floorActor;
 
 	// other parts
 	vtkAssembly* assemblyCaptions;
-
 	vtkActor2DCollection* captions;
-
-
-
 };
 
 #endif /* FACILITYGEOMETRY_H_ */

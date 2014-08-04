@@ -48,16 +48,31 @@ public:
 	bool static getShowLegend();
 
 	//set/get the caption status
-	void static setShowCaptions(bool caption);
-	bool static getShowCaption();
+    void static setShowAgentsCaptions(bool caption);
+    bool static getShowAgentsCaptions();
 
 	// set/get the listening port
 	void static setListningPort(unsigned short port);
 	unsigned short static getListeningPort();
 
-	// set/get the  visio
+    // set/get the  2D visio
 	void static set2D(bool is2D);
 	bool static get2D();
+
+    // set/get the  agents visio
+    void static setShowAgents(bool status);
+    bool static getShowAgents();
+
+    // set/get the  geometry visibility
+    void static setShowGeometry(bool status);
+    bool static getShowGeometry();
+
+    // set/get the  geometry visibility
+    void static setShowFloor(bool status);
+    bool static getShowFloor();
+
+    void static setWorkingDirectory(QString dir);
+    void static getWorkingDirectory(QString& dir);
 
 	// set/get the bk color
 	// todo done directly in the travisto.cpp
@@ -138,16 +153,22 @@ public:
 	/// This is just the name of the input file.
 	static QString  getFilenamePrefix();
 
+    static void CreateLogfile();
+    static QString &getLogfile();
+    static void DeleteLogfile();
+
 private:
 
 	static bool recordPNGsequence;
 	static bool pedColorProfileReadFromFile;
 	static bool showLegend;
-	static bool showCaption;
+    static bool showAgentsCaptions;
 	static bool is2D; //   Toggle 2D/3D mode
+    static bool showAgents;
+    static bool showGeometry;
+    static bool showFloor;
 	static unsigned short port;
 	static double bgColor[3];
-	//static double ellipseShape[2];
 	static int ellipseResolution;
 	static int pedestriansColor[3][3]; // 3 groups, and 3 color per groups
 	static int pedesShape;
@@ -156,6 +177,8 @@ private:
 	static int trailingType;
 	static int trailingGeometry;
 	static QString outputDir;
+    static QString workingDir;
+    static QString logfile;
 	static int captionSize;
 	static QColor captionColor;
 	static int captionOrientaton;

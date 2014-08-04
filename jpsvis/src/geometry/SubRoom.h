@@ -307,7 +307,7 @@ public:
 	virtual std::string WritePolyLine() const=0;
 
 	/// convert all walls and transitions(doors) into a polygon representing the subroom
-	virtual void ConvertLineToPoly(std::vector<Line*> goals) = 0;
+    virtual bool ConvertLineToPoly(std::vector<Line*> goals) = 0;
 
 	///check whether the pedestrians is still in the subroom
 	virtual bool IsInSubRoom(const Point& ped) const = 0;
@@ -352,8 +352,8 @@ public:
 	std::string WriteSubRoom() const;
 	std::string WritePolyLine() const;
 
-	void WriteToErrorLog() const;
-	void ConvertLineToPoly(std::vector<Line*> goals);
+    virtual void WriteToErrorLog() const;
+    virtual bool ConvertLineToPoly(std::vector<Line*> goals);
 	bool IsInSubRoom(const Point& ped) const;
 };
 
@@ -388,7 +388,7 @@ public:
 	std::string WriteSubRoom() const;
 	std::string WritePolyLine() const;
 	virtual void WriteToErrorLog() const;
-	virtual void ConvertLineToPoly(std::vector<Line*> goals);
+    virtual bool ConvertLineToPoly(std::vector<Line*> goals);
 	bool IsInSubRoom(const Point& ped) const;
 };
 

@@ -41,7 +41,11 @@ class vtkUnsignedCharArray ;
 class vtkPolyData ;
 class vtkActor ;
 class vtkDataArray ;
+class vtkFloatArray ;
 class JPoint;
+
+//for borrowing the lookup table
+extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_2D;
 
 class PointPlotter
 {
@@ -54,7 +58,8 @@ public:
 	void PlotPoint(double x, double y, double z,
 		unsigned char r='a', unsigned char g='b', unsigned char b='c');
 
-	void PlotPoint(JPoint* pt);
+    void PlotPoint(JPoint* pt);
+    void PlotPoint(double Position[3], double colour);
 	void SetPointRadius(double radius = 1.0) { pt_radius = radius ; }
 	void SetPointResolution(int res = 15) { pt_res = res ;}
 
@@ -62,11 +67,14 @@ public:
 	///return the actors
 	vtkActor* getActor();
 
+    void SetVisibility(bool status);
+
 private:
 
 	vtkActor* pointActor;
 	vtkPoints* pts ;
 	vtkDataArray* scalars ;
+    vtkFloatArray* colors;
  	vtkIdType nextPointID;
 	int scalar_mode ;
 	double pt_radius ;

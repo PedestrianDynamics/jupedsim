@@ -29,6 +29,7 @@
 
 #include "SaxParser.h"
 #include "TrajectoryPoint.h"
+#include "FrameElement.h"
 #include "Frame.h"
 #include "SyncData.h"
 #include "Debug.h"
@@ -36,13 +37,14 @@
 #include "geometry/JPoint.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Building.h"
+#include "geometry/Wall.h"
+#include "SystemSettings.h"
 
 #include <QMessageBox>
 #include <QString>
 #include <limits>
 #include <iostream>
 #include <cmath>
-
 
 #include <vtkVersion.h>
 #include <vtkSmartPointer.h>
@@ -58,6 +60,9 @@
 #include <vtkProperty.h>
 #include <vtkTriangleFilter.h>
 
+#define VTK_CREATE(type, name) \
+    vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+
 
 using namespace std;
 
@@ -72,12 +77,14 @@ using namespace std;
  */
 SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps){
 	geometry=geo;
-	dataset=data;
+    dataset=data;
 	para=fps;
 	parsingWalls=false;
+    parsingCrossings=false;
 	color=0.0;
-
-	dataset->clearFrames();
+    dataset->clearFrames();
+    //default header
+    InitHeader(0,0,0);
 }
 
 SaxParser::~SaxParser() {
@@ -92,8 +99,26 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         for(int i=0;i<at.length();i++){
             if(at.localName(i)=="version")
             {
-                double version=at.value(i).toDouble();
-                InitHeader(version);
+                QStringList query = at.value(i).split(".");
+                int major=0;
+                int minor=0;
+                int patch=0;
+                switch (query.size() ) {
+                case 1:
+                    major=query.at(0).toInt();
+                    break;
+                case 2:
+                     major=query.at(0).toInt();
+                     minor=query.at(1).toInt();
+                    break;
+                case 3:
+                    major=query.at(0).toInt();
+                    minor=query.at(1).toInt();
+                    patch=query.at(2).toInt();
+                    break;
+                }
+                InitHeader(major,minor,patch);
+                //cout<<"version found:"<<at.value(i).toStdString()<<endl;exit(0);
             }
         }
     }else if (qName == "file") {
@@ -105,7 +130,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 {
                     if(fileName.endsWith(".xml",Qt::CaseInsensitive))
                     {
-                        SaxParser::parseGeometryJPS(fileName,geometry);
+                        //SaxParser::parseGeometryJPS(fileName,geometry);
                     }
                     else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
                     {
@@ -343,6 +368,36 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         }
 
     }
+    //FIXME
+    else if (qName == "crossing")
+    {
+        parsingWalls=false;
+        parsingCrossings=true;
+        thickness=15;
+        height=250;
+        color=255;
+        caption="";
+
+        for(int i=0;i<at.length();i++){
+            if(at.localName(i)=="thickness")
+            {
+                thickness=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="height")
+            {
+                height=at.value(i).toDouble()*FAKTOR;
+            }
+            else if(at.localName(i)=="color")
+            {
+                color=at.value(i).toDouble();
+            }
+            else if(at.localName(i)=="caption")
+            {
+                caption=at.value(i);
+            }
+        }
+
+    }
     else if (qName == "timeFirstFrame")
     {
         unsigned long timeFirstFrame_us=0;
@@ -422,9 +477,11 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             else if(at.localName(i)==_jps_xPos)
             {
                 xPos=at.value(i).toDouble()*FAKTOR;
+                //xPos=at.value(i).toDouble();
             }
             else if(at.localName(i)==_jps_yPos)
             {
+                //yPos=at.value(i).toDouble();
                 yPos=at.value(i).toDouble()*FAKTOR;
             }
             else if(at.localName(i)==_jps_zPos)
@@ -435,10 +492,12 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             else if(at.localName(i)==_jps_radiusA)
             {
                 dia_a=at.value(i).toDouble()*FAKTOR;
+                //dia_a=at.value(i).toDouble();
             }
             else if(at.localName(i)==_jps_radiusB)
             {
                 dia_b=at.value(i).toDouble()*FAKTOR;
+                //dia_b=at.value(i).toDouble();
             }
             else if(at.localName(i)==_jps_ellipseOrientation)
             {
@@ -472,17 +531,22 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         if(isnan(el_y)) el_y=yPos;
         if(isnan(el_z)) el_z=zPos;
 
-        double pos[3]={xPos,yPos,zPos};
+        //double pos[3]={xPos,yPos,zPos};
         double vel[3]={xVel,yPos,zPos};
         double ellipse[7]={el_x,el_y,el_z,dia_a,dia_b,el_angle,el_color};
         double para[2]={agent_color,el_angle};
 
-        TrajectoryPoint * point = new TrajectoryPoint(id-1);
-        point->setEllipse(ellipse);
-        point->setPos(pos);
-        point->setVel(vel);
-        point->setAgentInfo(para);
-        currentFrame.push_back(point);
+        double pos[3]={xPos,yPos,zPos};
+        double angle[3]={0,0,el_angle};
+        double radius[3]={dia_a,dia_b,30.0};
+
+        FrameElement *element = new FrameElement(id-1);
+        element->SetPos(pos);
+        element->SetOrientation(angle);
+        element->SetRadius(radius);
+        element->SetColor(el_color);
+        currentFrame.push_back(element);
+
     }
     else if (qName == "agentInfo")
     {
@@ -534,6 +598,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 	} else if (qName == "frameRate") {
 		para[0]=currentText.toFloat();
 	} else if (qName == "wall") {
+        if(currentPointsList.size()>1)
 		for(unsigned int i=0;i<currentPointsList.size()-1;i++){
 			geometry->addWall(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
 		}
@@ -543,7 +608,19 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 			geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
 		}
 		clearPoints();
-	} else if (qName == "step") {//FIXME
+    } else if (qName == "crossing") {
+        if(currentPointsList.size()>1) //hack
+        for(unsigned int i=0;i<currentPointsList.size()-1;i++){
+            geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        }
+        clearPoints();
+    } else if (qName == "hline") {
+        if(currentPointsList.size()>1) //hack
+        for(unsigned int i=0;i<currentPointsList.size()-1;i++){
+            geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        }
+        clearPoints();
+    } else if (qName == "step") {//FIXME
 		for(unsigned int i=0;i<currentPointsList.size()-1;i++){
 			geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
 		}
@@ -553,10 +630,13 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
 		while(!currentFrame.empty()){
 			frame->addElement(currentFrame.back());
 			currentFrame.pop_back();
-			//cout<<"not adding"<<endl;
+            //cout<<"not adding"<<endl;
 		}
 
-		dataset->addFrame(frame);
+        //compute the polydata, might increase the runtime
+        frame->ComputePolyData();
+
+        dataset->addFrame(frame);
 		//to be on the safe side
 		currentFrame.clear();
 
@@ -589,9 +669,6 @@ bool SaxParser::attributeDecl(const QString& eName, const QString& aName,
 }
 
 void SaxParser::clearPoints(){
-
-//	currentPointsList.clear();
-
 	while (!currentPointsList.empty()){
 		delete currentPointsList.back();
 		currentPointsList.pop_back();
@@ -604,91 +681,153 @@ void SaxParser::clearPoints(){
 
 
 /// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry){
+bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
+{
 
-	if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return ;
+    double captionsColor=0;//red
+    if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
+    QString wd;
+    SystemSettings::getWorkingDirectory(wd);
+    fileName=wd+"/"+fileName;
 
-	Building* building = new Building();
-	string geometrypath = fileName.toStdString();
+    Building* building = new Building();
+    string geometrypath = fileName.toStdString();
 
-	// read the geometry
-	building->LoadBuildingFromFile(geometrypath);
-	building->InitGeometry(); // create the polygons
+    // read the geometry
+    if(!building->LoadBuildingFromFile(geometrypath))
+        return false;
+    if(!building->InitGeometry())
+        return false; // create the polygons
 
-	int currentID=0;
-	// Setup the points
-	vtkSmartPointer<vtkPoints> points =
-			vtkSmartPointer<vtkPoints>::New();
+    int currentID=0;
+    // Setup the points
+    VTK_CREATE(vtkPoints,points);
+    // Add the polygon to a list of polygons
+    VTK_CREATE(vtkCellArray,polygons);
 
-	// Add the polygon to a list of polygons
-	vtkSmartPointer<vtkCellArray> polygons =
-			vtkSmartPointer<vtkCellArray>::New();
-
-	for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-		Room* r = building->GetRoom(i);
+    for (int i = 0; i < building->GetNumberOfRooms(); i++)
+    {
+        Room* r = building->GetRoom(i);
         //string caption = r->GetCaption();
 
-		for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-			SubRoom* sub = r->GetSubRoom(k);
+        for (int k = 0; k < r->GetNumberOfSubRooms(); k++)
+        {
+            SubRoom* sub = r->GetSubRoom(k);
+
             vector<Point> poly = sub->GetPolygon();
 
             if(sub->IsClockwise()==true){
                 std::reverse(poly.begin(),poly.end());
             }
 
-			// Create the polygon
-			vtkSmartPointer<vtkPolygon> polygon =
-					vtkSmartPointer<vtkPolygon>::New();
-			polygon->GetPointIds()->SetNumberOfIds(poly.size());
+            // Create the polygon
+            VTK_CREATE(vtkPolygon,polygon);
+            polygon->GetPointIds()->SetNumberOfIds(poly.size());
 
-			for (unsigned int s=0;s<poly.size();s++){
-				points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
-				polygon->GetPointIds()->SetId(s, currentID++);
-			}
+            for (unsigned int s=0;s<poly.size();s++){
+                points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
+                polygon->GetPointIds()->SetId(s, currentID++);
+            }
+            polygons->InsertNextCell(polygon);
 
-			polygons->InsertNextCell(polygon);
-		}
-	}
+            //plot the walls only for not stairs
 
-	// Create a PolyData
-	vtkSmartPointer<vtkPolyData> polygonPolyData =
-			vtkSmartPointer<vtkPolyData>::New();
-	polygonPolyData->SetPoints(points);
-	polygonPolyData->SetPolys(polygons);
+            const vector<Wall>& walls= sub->GetAllWalls();
+            for(unsigned int w=0;w<walls.size();w++){
+                Point p1 = walls[w].GetPoint1();
+                Point p2 = walls[w].GetPoint2();
+                double z1= sub->GetElevation(p1);
+                double z2= sub->GetElevation(p2);
 
-    //triagulate everything
-    vtkSmartPointer<vtkTriangleFilter> filter=vtkSmartPointer<vtkTriangleFilter>::New();
+                if(sub->GetType()=="stair")
+                {
+                    geometry->addStair(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+                }
+                else
+                {
+                    geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+                }
+            }
 
-    // Create a mapper and actor
-    vtkSmartPointer<vtkPolyDataMapper> mapper =
-            vtkSmartPointer<vtkPolyDataMapper>::New();
+            //insert the subroom caption
+            string caption=r->GetCaption()+" ( " + QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
+            const Point& p=sub->GetCentroid();
+            double z= sub->GetElevation(p);
+            double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};
+            geometry->addObjectLabel(pos,pos,caption,captionsColor);
+
+            //plot the obstacles
+            const vector<Obstacle*>& obstacles = sub->GetAllObstacles();
+            for( unsigned int j=0; j<obstacles.size(); j++) {
+                Obstacle* obst= obstacles[j];
+                const vector<Wall>& walls= obst->GetAllWalls();
+                for(unsigned int w=0;w<walls.size();w++){
+                    Point p1 = walls[w].GetPoint1();
+                    Point p2 = walls[w].GetPoint2();
+                    double z1= sub->GetElevation(p1);
+                    double z2= sub->GetElevation(p2);
+                    geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+                }
+                //add the obstacle caption
+                const Point& p=obst->GetCentroid();
+                double z= sub->GetElevation(p);
+                double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};
+                geometry->addObjectLabel(pos,pos,obst->GetCaption(),captionsColor);
+            }
+        }
+    }
+
+    // Create a PolyData to represent the floor
+    VTK_CREATE(vtkPolyData, polygonPolyData);
+    polygonPolyData->SetPoints(points);
+    polygonPolyData->SetPolys(polygons);
+    geometry->addFloor(polygonPolyData);
 
 
+    // add the crossings
+    const map<int, Crossing*>& crossings=building->GetAllCrossings();
+    for (std::map<int, Crossing*>::const_iterator it=crossings.begin(); it!=crossings.end(); ++it)
+    {
+        Crossing* cr=it->second;
+        Point p1 = cr->GetPoint1();
+        Point p2 = cr->GetPoint2();
+        double z1= cr->GetSubRoom1()->GetElevation(p1);
+        double z2= cr->GetSubRoom1()->GetElevation(p2);
+        geometry->addNavLine(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
-#if VTK_MAJOR_VERSION <= 5
-     filter->SetInput(polygonPolyData);
-    mapper->SetInput(filter->GetOutput());
-#else
-    filter->SetInputData(polygonPolyData);
-    mapper->SetInputConnection(filter->GetOutputPort());
-#endif
+        const Point& p =cr->GetCentre();
+        double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
+        geometry->addObjectLabel(pos,pos,"nav_"+QString::number(cr->GetID()).toStdString(),captionsColor);
+    }
 
-	vtkSmartPointer<vtkActor> actor =
-			vtkSmartPointer<vtkActor>::New();
-	actor->SetMapper(mapper);
-	actor->GetProperty()->SetColor(0,0,1);
-	actor->GetProperty()->SetOpacity(0.5);
-	//actor->GetProperty()->SetLineWidth(5);
+    // add the exits
+    const map<int, Transition*>& transitions=building->GetAllTransitions();
+    for (std::map<int, Transition*>::const_iterator it=transitions.begin(); it!=transitions.end(); ++it)
+    {
+        Transition* tr=it->second;
+        Point p1 = tr->GetPoint1();
+        Point p2 = tr->GetPoint2();
+        double z1= tr->GetSubRoom1()->GetElevation(p1);
+        double z2= tr->GetSubRoom1()->GetElevation(p2);
+        geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
-	geometry->getActor()->AddPart(actor);
+        const Point& p =tr->GetCentre();
+        double pos[3]={p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
+        geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
+    }
 
-	// free memory
-	delete building;
+    //TODO:dirty hack for parsing the Hlines
+    // free memory
+    delete building;
+
+    return true;
 }
 
 
 /// provided for convenience and will be removed in the next version
-void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo){
+
+void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo)
+{
 
 	cout<<"external geometry found"<<endl;
 	//creating am empty document
@@ -752,7 +891,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 
 		//parsing the walls
-		for (unsigned int i = 0; i < walls.length(); i++) {
+        for (  int i = 0; i < walls.length(); i++) {
 			QDomElement el = walls.item(i).toElement();
 
 			//wall thickness, default to 30 cm
@@ -765,7 +904,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			//get the points defining each wall
 			//not that a wall is not necessarily defined by two points, could be more...
 			QDomNodeList points = el.elementsByTagName("point");
-			for (unsigned int i = 0; i < points.length() - 1; i++) {
+            for (  int i = 0; i < points.length() - 1; i++) {
 
                 double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
                 double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
@@ -780,7 +919,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 
 		//parsing the doors
 		if(doors.length()>0)
-			for (unsigned int i = 0; i < doors.length(); i++) {
+            for (  int i = 0; i < doors.length(); i++) {
 				QDomElement el = doors.item(i).toElement();
 
 				//door thickness, default to 15 cm
@@ -794,7 +933,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 				//not that a wall is not necesarily defined by two points, could be more...
 				QDomNodeList points = el.elementsByTagName("point");
 				//Debug::Messages("found:  " << points.length() <<" for this wall" <<endl;
-				for (unsigned int i = 0; i < points.length() - 1; i++) {
+                for (  int i = 0; i < points.length() - 1; i++) {
 
                     double x1=points.item(i).toElement().attribute("xPos", "0").toDouble()*FAKTOR;
                     double y1=points.item(i).toElement().attribute("yPos", "0").toDouble()*FAKTOR;
@@ -808,7 +947,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			}
 
 		// parsing the objets
-		for (unsigned int i = 0; i < spheres.length(); i++) {
+        for (  int i = 0; i < spheres.length(); i++) {
 
 			double center[3];
             center[0] = spheres.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
@@ -822,7 +961,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 			geometry->addObjectSphere(center,radius,color);
 		}
 		// cubic shapes
-		for (unsigned int i = 0; i < cuboids.length(); i++) {
+        for (  int i = 0; i < cuboids.length(); i++) {
 
 			double center[3];
             center[0] = cuboids.item(i).toElement().attribute("centerX", "0").toDouble()*FAKTOR;
@@ -874,19 +1013,82 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
 		}
 		// you should normally have only one geometry node, but one never knows...
 		geoNode = geoNode.nextSiblingElement("geometry");
-	}
+    }
 }
 
-void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
+QString SaxParser::extractGeometryFilename(QString &filename)
+{
+    QString extracted_geo_name="";
+    //first try to look at a string <file location="filename.xml"/>
+    QFile file(filename);
+    QString line;
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QTextStream in(&file);
+        while (!in.atEnd()) {
+            //look for a line with
+            line = in.readLine();
+            //cout<<"checking: "<<line.toStdString()<<endl;
+            if(line.contains("location" ,Qt::CaseInsensitive))
+                if(line.contains("<file" ,Qt::CaseInsensitive))
+                {//try to extract what ever is inside the quotes
+
+                    QString begin="\"";
+                    QString end="\"";
+                    int startIndex = line.indexOf(begin)+begin.length();
+                    if(startIndex <= 0)continue; //false alarm
+                    int endIndex = line.indexOf(end,startIndex);
+                    if(endIndex <= 0)continue; // false alarm
+                    extracted_geo_name= line.mid(startIndex,endIndex - startIndex);
+                    cout<<"geoName:"<<extracted_geo_name.toStdString()<<endl;
+                    return extracted_geo_name;
+                    //break;// we are done
+                }
+            if(line.contains("<geometry" ,Qt::CaseInsensitive))
+                if(line.contains("version" ,Qt::CaseInsensitive))
+                {//real geometry file
+                    QFileInfo fileInfoGeometry(filename);
+                    extracted_geo_name=fileInfoGeometry.fileName();
+                    return extracted_geo_name;
+                }
+        }
+    }
+
+    //maybe this is already the geometry file itself ?
+    //do a rapid test
+//    FacilityGeometry* geo = new FacilityGeometry();
+//    QFileInfo fileInfoGeometry(filename);
+//    extracted_geo_name=fileInfoGeometry.fileName();
+
+//    //just check if it starts with geometry
+//    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
+//    //{
+//        return extracted_geo_name;
+//    //}
+//    delete geo;
+
+    return "";
+}
+
+
+void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
+{
 	QDomDocument doc("");
 
 	QFile file(filename);
-    //int size =file.size()/(1024*1024);
 
-    //if(size>100){
-    //	cout<<"The file is too large: "<<filename.toStdString()<<endl;
-    //	return;
-    //}
+    int size =file.size()/(1024*1024);
+
+    //avoid dom parsing a very large dataset
+    if(size>500){
+        //cout<<"The file is too large: "<<filename.toStdString()<<endl;
+        return;
+    }
+
+    //cout<<"filename: "<<filename.toStdString()<<endl;
+
+    //TODO: check if you can parse this with the building classes.
+    // This should be a fall back option
 
 	if (!file.open(QIODevice::ReadOnly)) {
 		qDebug()<<"could not open the file: "<<filename<<endl;
@@ -919,7 +1121,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	//parsing the subrooms
 	QDomNodeList xSubRoomsNodeList=doc.elementsByTagName("subroom");
 	//parsing the walls
-	for (unsigned int i = 0; i < xSubRoomsNodeList.length(); i++) {
+    for (  int i = 0; i < xSubRoomsNodeList.length(); i++) {
 		QDomElement xPoly = xSubRoomsNodeList.item(i).firstChildElement("polygon");
 		double position[3]={0,0,0};
 		double pos_count=1;
@@ -993,6 +1195,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	}
 
 	QDomNodeList xCrossingsList=doc.elementsByTagName("crossing");
+
     for (int i = 0; i < xCrossingsList.length(); i++) {
 		QDomElement xCrossing = xCrossingsList.item(i).toElement();
 		QDomNodeList xVertices=xCrossing.elementsByTagName("vertex");
@@ -1002,7 +1205,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		//door height default to 250 cm
 		double height = xCrossing.attribute("height","250").toDouble();
 		//door color default to blue
-		double color = xCrossing.attribute("color","255").toDouble();
+        double color = xCrossing.attribute("color","120").toDouble();
 		QString id= xCrossing.attribute("id","-1");
 
 		double x1=xVertices.item(0).toElement().attribute("px", "0").toDouble()*xToCmfactor;
@@ -1012,14 +1215,14 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 		double x2=xVertices.item(1).toElement().attribute("px", "0").toDouble()*xToCmfactor;
 		double y2=xVertices.item(1).toElement().attribute("py", "0").toDouble()*xToCmfactor;
 		double z2=xVertices.item(1).toElement().attribute("pz", "0").toDouble()*xToCmfactor;
-		geo->addDoor(x1, y1, z1, x2, y2,z2,thickness,height,color);
+        geo->addNavLine(x1, y1, z1, x2, y2,z2,thickness,height,color);
 
 		double center[3]={(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
 		geo->addObjectLabel(center,center,id.toStdString(),21);
 	}
 
 	QDomNodeList xTransitionsList=doc.elementsByTagName("transition");
-    for (  int i = 0; i < xTransitionsList.length(); i++) {
+    for (int i = 0; i < xTransitionsList.length(); i++) {
 		QDomElement xTransition = xTransitionsList.item(i).toElement();
 		QDomNodeList xVertices=xTransition.elementsByTagName("vertex");
 
@@ -1045,22 +1248,9 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo){
 	}
 }
 
-void SaxParser::InitHeader(double version)
+void SaxParser::InitHeader(int major, int minor, int patch)
 {
-    // set the parsing String map
-    if(version==0.5){
-        _jps_xPos=QString("xPos");
-        _jps_yPos=QString("yPos");
-        _jps_zPos=QString("zPos");
-        _jps_xVel=QString("xVel");
-        _jps_yVel=QString("yVel");
-        _jps_zVel=QString("zVel");
-        _jps_radiusA=QString("radiusA");
-        _jps_radiusB=QString("radiusB");
-        _jps_ellipseOrientation=QString("ellipseOrientation");
-        _jps_ellipseColor=QString("ellipseColor");
-    }
-    else if (version==0.6){
+    if ( (minor==6) || (minor==5 && patch==1) ){
         _jps_xPos=QString("x");
         _jps_yPos=QString("y");
         _jps_zPos=QString("z");
@@ -1074,8 +1264,20 @@ void SaxParser::InitHeader(double version)
     }
     else
     {
-        cout<<"unsupported header version: "<<version<<endl;
-        cout<<"Please use 0.5 or 0.6 "<<endl;
+        _jps_xPos=QString("xPos");
+        _jps_yPos=QString("yPos");
+        _jps_zPos=QString("zPos");
+        _jps_xVel=QString("xVel");
+        _jps_yVel=QString("yVel");
+        _jps_zVel=QString("zVel");
+        _jps_radiusA=QString("radiusA");
+        _jps_radiusB=QString("radiusB");
+        _jps_ellipseOrientation=QString("ellipseOrientation");
+        _jps_ellipseColor=QString("ellipseColor");
+    }
+    if(major!=0){
+        cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<endl;
+        cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
         exit(0);
     }
 }

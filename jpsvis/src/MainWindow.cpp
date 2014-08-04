@@ -61,6 +61,8 @@
 #include <QColorDialog>
 #include <QDebug>
 #include <QtXml>
+#include <QTemporaryFile>
+
 
 #include <iostream>
 #include <limits>
@@ -139,6 +141,8 @@ MainWindow::MainWindow(QWidget *parent) :
     numberOfDatasetLoaded=0;
     frameSliderHold=false;
 
+    //some hand made stuffs
+    ui.BtFullscreen->setVisible(false);
 
     labelCurrentAction = new QLabel();
     labelCurrentAction->setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -178,7 +182,7 @@ MainWindow::MainWindow(QWidget *parent) :
     int group=1; // there are max 3 groups of pedestrians
     bool mayPlay=false;
 
-    //	arguments.append("-online");
+    //    arguments.append("-online");
     //	arguments.append("-caption");
     arguments.append("-2D");
     // parse arguments list
@@ -285,7 +289,7 @@ void MainWindow::slotNetworkSettings() {
     bool ok;
 
     int port = QInputDialog::getInt(this, tr("input a port "), tr(
-                                        "port(default to 8081):"), 8989, 5000, 65355, 1, &ok);
+                                        "port(default to 8989):"), 8989, 5000, 65355, 1, &ok);
 
     if (ok) {
         SystemSettings::setListningPort(port);
@@ -326,12 +330,6 @@ void MainWindow::slotStartPlaying() {
         ui.BtRecord->setEnabled(true);
         labelCurrentAction->setText("   playing   ");
 
-        ui.action3_D->setEnabled(false);
-        ui.action2_D->setEnabled(false);
-
-        //disable legend
-        ui.actionShow_Legend->setEnabled(false);
-
         //change Icon to Pause
         QIcon icon1;
         icon1.addPixmap(QPixmap(QString::fromUtf8(
@@ -367,6 +365,7 @@ void MainWindow::slotStartPlaying() {
 
     //no matter what, the stop button should be enabled
     ui.BtStop->setEnabled(true);
+
 }
 
 void MainWindow::slotStopPlaying() {
@@ -390,6 +389,7 @@ void MainWindow::slotStopPlaying() {
     // maybe this is a feature !
     extern_shutdown_visual_thread=true;
     waitForVisioThread();
+    //waitForDataThread();
 
     //reset all frames cursors
     resetAllFrameCursor();
@@ -427,10 +427,8 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
     {
         if (fileName.endsWith(".xml",Qt::CaseInsensitive))
         {
-            //cout<<"good bye"<<endl; exit(0);
-            //should be a file name
-            //return parseGeometryPG3(fileName);
-            //SaxParser::parseGeometryPG3(fileName,geometry);
+            //parsing the file
+            SaxParser::parseGeometryJPS(fileName,geometry);
         }
         else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
         {
@@ -442,9 +440,91 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
     //which is the only one which can directly be inserted into a file
     else
     {
+        //cout<<"online geo: "<<geoNode.toDocument().toString().toStdString()<<endl; exit(0);
+        //geoNode.toText().toComment().toDocument().toString()
+        QDomDocument doc("");
+        QDomNode geoNode;
+        if(!geoNode.isNull()){
+            cout<<"online geo: "<<geoNode.toElement().toDocument().toString().toStdString()<<endl; exit(0);
+        }
+
         //must not be a file name
         SaxParser::parseGeometryTRAV(fileName,geometry,geoNode);
     }
+    return geometry;
+}
+
+// This function is only used in online Mode
+FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
+{
+
+//    QDomDocument doc("");
+//    data = "<travisto>\n" +data+ "\n</travisto>\n";
+
+//    QString errorMsg="";
+//    doc.setContent(data,&errorMsg);
+
+//    if(!errorMsg.isEmpty()){
+//        Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
+//        return;
+//    }
+
+//    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
+
+    //create a temporary file with the content geonode
+
+//    QTemporaryFile file;
+//    file.setFileName(file.fileName()+".xml");
+//    if (file.open()) {
+//        QTextStream stream(&file);
+//        stream << geoNode << endl;
+//    }
+
+    QFile file("_geometry_tmp_file.xml");
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        QTextStream stream(&file);
+        stream << geometryString << endl;
+    }
+
+    QString tmpFileName = file.fileName();
+
+    //check if there is a tag 'file' there in
+    QString geofileName = SaxParser::extractGeometryFilename(tmpFileName);
+
+    //cout<<"filename: "<<geofileName.toStdString()<<endl;exit(0);
+
+    FacilityGeometry* geometry = visualisationThread->getGeometry();
+
+    if(!geofileName.isEmpty())
+    {
+        if (geofileName.endsWith(".xml",Qt::CaseInsensitive))
+        {
+            //parsing the file
+            if(!SaxParser::parseGeometryJPS(geofileName,geometry))
+            {
+               SaxParser::parseGeometryXMLV04(geofileName,geometry);
+            }
+        }
+        else if (geofileName.endsWith(".trav",Qt::CaseInsensitive))
+        {
+            //must not be a file name
+            SaxParser::parseGeometryTRAV(geofileName,geometry);
+        }
+    }
+    // I assume it is a trav format node,
+    //which is the only one which can directly be inserted into a file
+    else
+    {
+        QDomDocument doc("");
+        QDomNode geoNode;
+
+        //must not be a file name
+        SaxParser::parseGeometryTRAV(geometryString,geometry,geoNode);
+    }
+
+    //delete the file
+    file.remove();
     return geometry;
 }
 
@@ -457,7 +537,7 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
 
     QDomNodeList agents = shapeNode.toElement().elementsByTagName("agentInfo");
 
-    for (unsigned int i = 0; i < agents.length(); i++) {
+    for (int i = 0; i < agents.length(); i++) {
 
         bool ok=false;
         int id=agents.item(i).toElement().attribute("ID").toInt(&ok);
@@ -505,23 +585,23 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
 /// add a new dataset
 bool MainWindow::slotAddDataSet(){
 
-    if (numberOfDatasetLoaded>=3){
-        QMessageBox::information(this,"notice","You can load at most 3 datasets.\n In"
-                                 " Order to load other data, please first clear previously loaded data.");
-        return false;
-    }
-    // if at least one data set was loaded
-    if (numberOfDatasetLoaded>=1){
-        int res = QMessageBox::question(this, "action",
-                                        "adding a new dataset will reset the visualisation process. Continue?", QMessageBox::Discard
-                                        | QMessageBox::Yes, QMessageBox::Yes);
+//    if (numberOfDatasetLoaded>=3){
+//        QMessageBox::information(this,"notice","You can load at most 3 datasets.\n In"
+//                                 " Order to load other data, please first clear previously loaded data.");
+//        return false;
+//    }
 
-        if (res == QMessageBox::Discard) return false;
+//    // if at least one data set was loaded
+//    if (numberOfDatasetLoaded>=1){
+//        int res = QMessageBox::question(this, "action",
+//                                        "adding a new dataset will reset the visualisation process. Continue?", QMessageBox::Discard
+//                                        | QMessageBox::Yes, QMessageBox::Yes);
 
-    }
+//        if (res == QMessageBox::Discard) return false;
+//    }
 
     // just continue
-    numberOfDatasetLoaded++;
+    numberOfDatasetLoaded=1;
     if(addPedestrianGroup(numberOfDatasetLoaded)==false){
         numberOfDatasetLoaded--;
         return false;
@@ -531,6 +611,8 @@ bool MainWindow::slotAddDataSet(){
     stre.setNum(numberOfDatasetLoaded);
     stre.append(" dataset loaded");
     statusBar()->showMessage(stre);
+
+    slotStartPlaying();
 
     return true;
 }
@@ -545,25 +627,62 @@ void MainWindow::slotClearAllDataset(){
 }
 
 
-bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
+bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
+{
     statusBar()->showMessage(tr("Select a file"));
-
     if(fileName.isEmpty())
         fileName = QFileDialog::getOpenFileName(this,
-                                                "Select the file containing data to visualize",
+                                                "Select the file containing the data to visualize",
                                                 "F:\\workspace\\JPSvis\\data",
-                                                "Visualisation Files (*.dat *.trav *.xml *.pg3 *.jul);;All Files (*.*)");
+                                                "Visualisation Files (*.dat *.trav *.xml);;All Files (*.*)");
 
     if (fileName.isNull()) {
         return false;
     }
+
+
+
+    //get and set the working dir
+    QFileInfo fileInfo(fileName);
+    QString wd=fileInfo.absoluteDir().absolutePath();
+    SystemSettings::setWorkingDirectory(wd);
+
     //the geometry actor
-    //FacilityGeometry* geometry=NULL;
     FacilityGeometry* geometry = visualisationThread->getGeometry();
 
+    //try to get a geometry filename
+    QString geometry_file=SaxParser::extractGeometryFilename(fileName);
+    //cout<<"geometry name: "<<geometry_file.toStdString()<<endl;
+
     // if xml is detected, just load and show the geometry then exit
-    if(fileName.endsWith(".xml",Qt::CaseInsensitive)){
-        SaxParser::parseGeometryXMLV04(fileName,geometry);
+    if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)){
+
+        //try to parse the correct way
+        // fall back to this if it fails
+        SystemSettings::CreateLogfile();
+
+        if(! SaxParser::parseGeometryJPS(geometry_file,geometry))
+        {
+            int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
+                                           "JuPedSim has detected an error in the supplied geometry.\n"
+                                           "The simulation will likely failed using that geometry.\n"
+                                           "Also make sure to validate your file.\n"
+                                           "More information are provided in the log file:\n"
+                                           +SystemSettings::getLogfile()+
+                                           "\n\nShould I try to parse and display what I can ?"
+                                           , QMessageBox::Yes
+                                           | QMessageBox::No, QMessageBox::No);
+            if (res == QMessageBox::No) {
+                return false;
+            }
+            SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);
+        }
+        else
+        { //everything was fine. Delete the log file
+            SystemSettings::DeleteLogfile();
+        }
+
+        //SaxParser::parseGeometryXMLV04(fileName,geometry);
         //slotLoadParseShowGeometry(fileName);
         //return false;
     }
@@ -574,8 +693,11 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
         return false;
     }
 
-    SyncData* dataset=NULL;
 
+    SyncData* dataset=NULL;
+    extern_trajectories_firstSet.clearFrames();
+    extern_trajectories_secondSet.clearFrames();
+    extern_trajectories_thirdSet.clearFrames();
 
     switch(groupID){
     case 1:
@@ -611,9 +733,11 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
     default:
         Debug::Error("invalid pedestrian group: %d " ,groupID);
         Debug::Error("should be 1, 2 or 3");
-        return false;
+        //return false;
         break;
     }
+
+
 
     double frameRate=15; //default frame rate
     statusBar()->showMessage(tr("parsing the file"));
@@ -628,9 +752,9 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName){
     reader.parse(source);
     file.close();
 
-
     QString frameRateStr=QString::number(frameRate);
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
+
 
     // set the visualisation window title
     visualisationThread->setWindowTitle(fileName);
@@ -683,10 +807,8 @@ void MainWindow::slotFullScreen(bool status) {
 
     Debug::Messages("changing full screen status %d",status);
     extern_fullscreen_enable = true;
-
     //dont forget this.
     extern_force_system_update=true;
-
 }
 
 void MainWindow::slotSetOfflineMode(bool status) {
@@ -920,7 +1042,7 @@ void MainWindow::resetGraphicalElements(){
     ui.BtRecord->setEnabled(false);
 
     //disable fullscreen
-    ui.BtFullscreen->setEnabled(false);
+    //ui.BtFullscreen->setEnabled(false);
 
     //disable stop button
 
@@ -991,21 +1113,32 @@ bool MainWindow::anyDatasetLoaded(){
              extern_third_dataset_loaded);
 }
 
-void MainWindow::slotShowTrajectoryOnly(){
-    if(ui.actionShow_Trajectories->isChecked()){
-        //visualisationThread->setTrailVisibility(true);
+void MainWindow::slotShowTrajectoryOnly()
+{
+    if(ui.actionShow_Trajectories->isChecked())
+    {
         extern_tracking_enable=true;
-        //ui.actionShow_Trajectories->setEnabled(false);
-    }else{
-        extern_tracking_enable=false;
-        //visualisationThread->setTrailVisibility(false);
     }
+    else
+    {
+        extern_tracking_enable=false;
+    }
+     extern_force_system_update=true;
 }
 
 
-/// TODO: implement me
-void MainWindow::slotShowPedestrianOnly(){
-    Debug::Error("Not implemented");
+void MainWindow::slotShowPedestrianOnly()
+{
+
+    if(ui.actionShow_Agents->isChecked())
+    {
+        SystemSettings::setShowAgents(true);
+    }
+    else
+    {
+        SystemSettings::setShowAgents(false);
+    }
+    extern_force_system_update=true;
 }
 
 void MainWindow::slotShowGeometry(){
@@ -1014,13 +1147,21 @@ void MainWindow::slotShowGeometry(){
         visualisationThread->setGeometryVisibility(true);
         ui.actionShow_Exits->setEnabled(true);
         ui.actionShow_Walls->setEnabled(true);
+        ui.actionShow_Geometry_Captions->setEnabled(true);
+        ui.actionShow_Navigation_Lines->setEnabled(true);
+        ui.actionShow_Floor->setEnabled(true);
+        SystemSettings::setShowGeometry(true);
     }
     else{
         visualisationThread->setGeometryVisibility(false);
         ui.actionShow_Exits->setEnabled(false);
         ui.actionShow_Walls->setEnabled(false);
+        ui.actionShow_Geometry_Captions->setEnabled(false);
+        ui.actionShow_Navigation_Lines->setEnabled(false);
+         ui.actionShow_Floor->setEnabled(false);
+        SystemSettings::setShowGeometry(false);
     }
-
+    extern_force_system_update=true;
 }
 
 /// shows/hide geometry
@@ -1041,6 +1182,24 @@ void MainWindow::slotShowHideWalls(){
     else{
         visualisationThread->showWalls(false);
     }
+}
+
+void MainWindow::slotShowHideNavLines()
+{
+    if (ui.actionShow_Navigation_Lines->isChecked()){
+        visualisationThread->showNavLines(true);
+    }
+    else{
+        visualisationThread->showNavLines(false);
+    }
+}
+
+//todo: add to the system settings
+void MainWindow::slotShowHideFloor()
+{
+    bool status = ui.actionShow_Floor->isChecked();
+    visualisationThread->showFloor(status);
+    SystemSettings::setShowFloor(status);
 }
 
 
@@ -1208,7 +1367,8 @@ void MainWindow::slotToogle2D(){
         ui.action3_D->setChecked(true);
         SystemSettings::set2D(false);
     }
-    visualisationThread->setGeometryVisibility2D(SystemSettings::get2D());
+    bool status=SystemSettings::get2D() && SystemSettings::getShowGeometry();
+    visualisationThread->setGeometryVisibility2D(status);
     extern_force_system_update=true;
 }
 
@@ -1224,7 +1384,8 @@ void MainWindow::slotToogle3D(){
         ui.action2_D->setChecked(true);
         SystemSettings::set2D(true);
     }
-    visualisationThread->setGeometryVisibility3D(!SystemSettings::get2D());
+    bool status= !SystemSettings::get2D() && SystemSettings::getShowGeometry();
+    visualisationThread->setGeometryVisibility3D(status);
     extern_force_system_update=true;
 }
 
@@ -1260,7 +1421,6 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     slotToggleFirstPedestrianGroup();
 
     QDomDocument doc("");
-    data = "<travisto>\n" +data+ "\n</travisto>\n";
 
     QString errorMsg="";
     doc.setContent(data,&errorMsg);
@@ -1270,12 +1430,17 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
         return;
     }
 
-    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
-    FacilityGeometry *geo = parseGeometry(geoNode);
+    //FacilityGeometry *geo = parseGeometry(geoNode);
+    FacilityGeometry *geo = parseGeometry(data);
 
     visualisationThread->slotSetFrameRate(frameRate);
     visualisationThread->setGeometry(geo);
     visualisationThread->start();
+
+    //enable some buttons
+    ui.BtRecord->setEnabled(true);
+    ui.BtStop->setEnabled(true);
+
 }
 
 /// this method is called by the data transfer thread
@@ -1342,7 +1507,7 @@ void MainWindow::slotPreviousFrame(){
 
 void MainWindow::slotShowPedestrianCaption(){
 
-    SystemSettings::setShowCaptions(ui.actionShow_Captions->isChecked());
+    SystemSettings::setShowAgentsCaptions(ui.actionShow_Captions->isChecked());
     extern_force_system_update=true;
 }
 
@@ -1411,15 +1576,47 @@ void MainWindow::slotChangeWallsColor(){
 /// change the exits color
 void MainWindow::slotChangeExitsColor(){
     QColorDialog* colorDialog = new QColorDialog(this);
-    colorDialog->setToolTip("Choose a new color for walls");
-    QColor col=colorDialog->getColor(Qt::white,this,"Select new wall color");
+    colorDialog->setToolTip("Choose a new color for the exits");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new exit color");
 
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  bkcolor[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
-    visualisationThread->setExitsColor(bkcolor);
+    visualisationThread->setExitsColor(color);
+
+    delete colorDialog;
+}
+
+/// change the navigation lines colors
+void MainWindow::slotChangeNavLinesColor(){
+    QColorDialog* colorDialog = new QColorDialog(this);
+    colorDialog->setToolTip("Choose a new color for walls");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new navigation lines color");
+
+    //the user may have cancelled the process
+    if(col.isValid()==false) return;
+
+    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+
+    visualisationThread->setNavLinesColor(color);
+
+    delete colorDialog;
+}
+
+void MainWindow::slotChangeFloorColor()
+{
+    QColorDialog* colorDialog = new QColorDialog(this);
+    colorDialog->setToolTip("Choose a new color for teh floor");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new floor color");
+
+    //the user may have cancelled the process
+    if(col.isValid()==false) return;
+
+    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+
+    visualisationThread->setFloorColor(color);
 
     delete colorDialog;
 }
@@ -1544,7 +1741,6 @@ void MainWindow::dropEvent(QDropEvent *event) {
             mayPlay = true;
         }
     }
-
     if (mayPlay) {
         slotStartPlaying();
     }
@@ -1563,5 +1759,6 @@ void MainWindow::slotShowHideGeometryCaptions(){
 
     bool value=ui.actionShow_Geometry_Captions->isChecked();
     visualisationThread->setGeometryLabelsVisibility(value);
+    //SystemSettings::setShowCaptions(value);
     //SystemSettings::setOnScreenInfos(value);
 }

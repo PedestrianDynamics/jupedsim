@@ -36,16 +36,20 @@
 
 #include "SystemSettings.h"
 #include "Debug.h"
+#include "qdebug.h"
+#include "QDateTime"
+#include "IO/OutputHandler.h"
 #include "./forms/Settings.h"
 
 bool SystemSettings::showLegend=false;
 bool SystemSettings::pedColorProfileReadFromFile=true;
-bool SystemSettings::showCaption=false;
+bool SystemSettings::showAgentsCaptions=false;
 bool SystemSettings::is2D=false;
+bool SystemSettings::showAgents=true;
+bool SystemSettings::showGeometry=true;
+bool SystemSettings::showFloor=true;
 unsigned short SystemSettings::port=8989;
 double SystemSettings::bgColor[]={1.0,1.0,1.0};
-//double SystemSettings::ellipseShape[]={21.0,21.0};
-//int SystemSettings::pedestriansColor[3][3]={{255 , 0, 255},{122, 255, 122},{130, 130, 130}};
 int SystemSettings::pedestriansColor[3][3]={{255 , 17, 224},{122, 255, 122},{130, 130, 130}};
 int SystemSettings::pedesShape=Settings::PINGUINS;
 int SystemSettings::ellipseResolution=10;
@@ -63,8 +67,12 @@ bool SystemSettings::onScreenInfos=true;
 bool SystemSettings::recordPNGsequence=false;
 //QString SystemSettings::outputDir =QDir::currentPath()+"/";
 QString SystemSettings::outputDir  = QDir::homePath() +"/Desktop/TraVisTo_Files/";
+QString SystemSettings::workingDir  = QDir::currentPath();
 QString SystemSettings::filesPrefix="";
+QString SystemSettings::logfile="log.txt";
 
+//the log file is writting by a different module
+extern OutputHandler* Log;
 
 
 SystemSettings::SystemSettings() {}
@@ -90,12 +98,12 @@ unsigned short   SystemSettings::getListeningPort(){
 }
 
 
-void  SystemSettings::setShowCaptions(bool caption){
-	showCaption=caption;
+void  SystemSettings::setShowAgentsCaptions(bool caption){
+    showAgentsCaptions=caption;
 }
 
-bool  SystemSettings::getShowCaption(){
-	return showCaption;
+bool  SystemSettings::getShowAgentsCaptions(){
+    return showAgentsCaptions;
 }
 
 void SystemSettings::set2D(bool lis2D){
@@ -105,6 +113,46 @@ bool SystemSettings::get2D(){
 	return is2D;
 }
 
+// set/get the  2D visio
+void SystemSettings::setShowAgents(bool status)
+{
+    showAgents=status;
+}
+
+bool SystemSettings::getShowAgents()
+{
+    return showAgents;
+}
+
+void SystemSettings::setShowGeometry(bool status)
+{
+    showGeometry=status;
+}
+
+bool SystemSettings::getShowGeometry()
+{
+    return showGeometry;
+}
+
+void SystemSettings::setShowFloor(bool status)
+{
+    showFloor=status;
+}
+
+bool SystemSettings::getShowFloor()
+{
+    return showFloor;
+}
+
+void   SystemSettings::setWorkingDirectory(QString dir)
+{
+    workingDir=dir;
+}
+
+void   SystemSettings::getWorkingDirectory(QString& dir)
+{
+    dir=workingDir;
+}
 
 void  SystemSettings::getBackgroundColor(double* col){
 	col[0]=bgColor[0];
@@ -176,14 +224,11 @@ void  SystemSettings::getPedestrianColor(int groupID, int color[3]){
 void  SystemSettings::setOutputDirectory(QString dir){
 	outputDir=dir;
 }
+
 void  SystemSettings::getOutputDirectory(QString& dir){
 	dir=QString(outputDir);
 }
 
-
-//void SystemSettings::setPedestrianCaptionSize( int size){
-//	captionSize =size;
-//}
 
 int SystemSettings::getPedestrianCaptionSize(){
 	return captionSize;
@@ -201,7 +246,35 @@ void SystemSettings::setFilenamePrefix(QString prefix){
 }
 
 QString SystemSettings::getFilenamePrefix() {
-	return filesPrefix;
+    return filesPrefix;
+}
+
+void SystemSettings::CreateLogfile()
+{
+    //create directory if not exits
+    if(!QDir(outputDir).exists()){
+        QDir dir;
+        if(!dir.mkpath (outputDir )){
+            qDebug()<<"could not create directory: "<< outputDir;
+            outputDir=""; // current
+        }
+    }
+
+    logfile = outputDir+"log_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm_").append(SystemSettings::getFilenamePrefix()).append(".txt");
+}
+
+ QString &SystemSettings::getLogfile()
+{
+    return logfile;
+}
+
+void SystemSettings::DeleteLogfile()
+{
+    //first close the opened file
+    delete Log;
+    if(! QFile::remove(logfile)){
+        qDebug()<<"he log file could not delete the file"<<endl;
+    }
 }
 
 void SystemSettings::setPedestrianColorProfileFromFile(bool readFromFile) {

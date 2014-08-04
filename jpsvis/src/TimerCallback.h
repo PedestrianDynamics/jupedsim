@@ -57,7 +57,6 @@ class SyncData;
 class QObject;
 class QString;
 class Pedestrian;
-class Pedestrian;
 class vtkCommand;
 class vtkRenderWindow;
 class vtkWindowToImageFilter;
@@ -65,6 +64,8 @@ class Frame;
 class vtkPNGWriter;
 class vtkTextActor;
 class vtkActor2D;
+class TrailPlotter;
+class PointPlotter;
 
 //extern variables
 
@@ -76,6 +77,7 @@ extern bool extern_recording_enable;
 extern bool extern_launch_recording;
 extern bool extern_fullscreen_enable;
 extern bool extern_take_screenshot;
+extern bool extern_tracking_enable;
 
 extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
@@ -83,7 +85,10 @@ extern Pedestrian** extern_pedestrians_thirdSet;
 
 extern vtkSmartPointer<vtkActor2D> extern_pedestrians_labels;
 extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
-
+extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D;
+extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_2D;
+extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_3D;
+extern PointPlotter* extern_trail_plotter;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;
@@ -141,10 +146,6 @@ private:
 	/// take png screenshots sequence
 	void takeScreenshotSequence(vtkRenderWindow* renderWindow);
 
-	/// set all pedestrians invisible.
-	/// this is necessary for blending the peds
-	/// who are not longer in the system.
-	void setAllPedestriansInvisible();
 
 	/// create directory
 	//bool createDirectory( const std::string& ac_sPath );

@@ -1,21 +1,23 @@
 TEMPLATE = app
 TARGET = TraVisTo
 CONFIG += qt
-#CONFIG += static
+CONFIG += static
 QT += xml network
 
 #avoid some annoying dependencies
 #QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++
-#QMAKE_LFLAGS += -static-libstdc++
+#QMAKE_LFLAGS += -static-libstdc++ -lstdc++
 #QMAKE_CXXFLAGS += -static -static -static-libstdc++
 #QMAKE_CXXFLAGS += -static
+#QMAKE_LFLAGS_RELEASE += -static-libgcc
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
-win32 {
-        INCLUDEPATH += C:/VTK/include/vtk-6.1
-
-        LIBS += -LC:/VTK/bin \
+#Dynamic linking
+#Windows  VTK 6.1
+win32_te {
+        INCLUDEPATH += C:/VTK/VTK6.1/include
+        LIBS += -LC:/VTK/VTK6.1/bin_shared \
         #LIBS += -LC:/VTK/bin_static/lib \
         -lwsock32 \
         -lvtkCommonCore-6.1    \
@@ -56,51 +58,13 @@ win32 {
         -lvtkInteractionStyle-6.1   \
         -lvtkCommonCore-6.1    \
         -lvtksys-6.1     \
-#second round
-#        -lvtksys-6.1     \
-#        -lvtkRenderingOpenGL-6.1  \
-#        -lvtkCommonCore-6.1    \
-#        -lvtkCommonDataModel-6.1    \
-#        -lvtkCommonMath-6.1   \
-#        -lvtkCommonMisc-6.1    \
-#        -lvtkCommonSystem-6.1    \
-#        -lvtkCommonTransforms-6.1   \
-#        -lvtkCommonExecutionModel-6.1   \
-#        -lvtkImagingHybrid-6.1   \
-#        -lvtkIOImage-6.1   \
-#        -lvtkDICOMParser-6.1   \
-#        -lvtkjpeg-6.1   \
-#        -lvtkmetaio-6.1   \
-#        -lvtkzlib-6.1   \
-#        -lvtkpng-6.1   \
-#        -lvtktiff-6.1   \
-#        -lvtkRenderingCore-6.1   \
-#        -lvtkCommonComputationalGeometry-6.1   \
-#        -lvtkFiltersCore-6.1   \
-#        -lvtkFiltersExtraction-6.1   \
-#        -lvtkFiltersGeneral-6.1   \
-#        -lvtkFiltersStatistics-6.1   \
-#        -lvtkalglib-6.1   \
-#        -lvtkImagingFourier-6.1   \
-#        -lvtkImagingCore-6.1   \
-#        -lvtkFiltersGeometry-6.1   \
-#        -lvtkFiltersSources-6.1   \
-#        -lvtkRenderingLabel-6.1   \
-#        -lvtkRenderingFreeType-6.1   \
-#        -lvtkfreetype-6.1   \
-#        -lvtkftgl-6.1   \
-#        -lvtkRenderingFreeTypeOpenGL-6.1   \
-#        -lvtkRenderingAnnotation-6.1   \
-#        -lvtkIOMovie-6.1   \
-#        -lvtkoggtheora-6.1   \
-#        -lvtkInteractionStyle-6.1   \
         }
 
-win32_ {
-        INCLUDEPATH += C:/VTK/include/vtk-6.1
-	
-        LIBS += -LC:/VTK/bin \
-#        LIBS += -LC:/VTK/bin_static/lib \
+#Static linking
+#Windows  VTK 6.1
+win32_6.1 {
+        INCLUDEPATH += C:/VTK/VTK6.1/include
+        LIBS += -LC:/VTK/VTK6.1/bin_static \
             -lvtkCommonCore-6.1  \
             -lvtkalglib-6.1  \
             -lvtkChartsCore-6.1  \
@@ -217,11 +181,12 @@ win32_ {
             -lvtkzlib-6.1  \
             -lwsock32
         }
-
-win32_5 {
-        INCLUDEPATH += C:/VTK/include/vtk-5.10
-
-        LIBS += -LC:/VTK/bin_5 \
+	
+#Dynamic linking
+#Windows  VTK 5.10
+win32_dyn {
+        INCLUDEPATH += C:/VTK/VTK5.1/include
+        LIBS += -LC:/VTK/VTK5.1/bin_shared \
             -lvtksys \
             -lvtkzlib \
             -lvtkjpeg \
@@ -243,17 +208,65 @@ win32_5 {
             -lvtkGraphics \
             -lvtkIO \
             -lvtkRendering \
-            -lvtkParallel \
             -lvtkHybrid \
             -lvtkWidgets \
             -lvtkInfovis\
             -lvtkViews\
             -lwsock32\
 }
-        
+
+#Static compilation
+#VTK 5.10 Windows
+win32 {
+    INCLUDEPATH += C:/VTK/VTK5.1/static_2/include/vtk-5.10
+    LIBS += -LC:\VTK\VTK5.1\static_2\lib\vtk-5.10 \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkCharts.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkViews.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkInfovis.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkWidgets.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkHybrid.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkVolumeRendering.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkParallel.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkRendering.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkGraphics.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkverdict.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkImaging.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkIO.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkFiltering.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkDICOMParser.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkNetCDF_cxx.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkmetaio.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtksqlite.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkpng.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtktiff.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkjpeg.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkexpat.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libVPIC.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libCosmo.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkCommon.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libLSDyna.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtksys.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkexoIIc.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkNetCDF.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkhdf5_hl.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkhdf5.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtklibxml2.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkzlib.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkalglib.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkftgl.a \
+    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkfreetype.a       \
+    -lwsock32 -lglu32 -lvfw32 -lgdi32  -lopengl32  -lws2_32 -lgdi32 \
+    -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 \
+    -luuid -lcomdlg32 -ladvapi32\
+}
+
+#Static compilation 
+#VTK 5.10 Windows
+win32_old {
+    INCLUDEPATH += C:/VTK/VTK5.1/include
+    #LIBS += -LC:/VTK/VTK5.1/bin_static \
+    LIBS += -LC:\VTK\VTK5.1\static_2\lib\vtk-5.10 \
+         -lvtkCharts  -lvtkViews  -lvtkInfovis\
+         -lvtkWidgets  -lvtkHybrid\
+         -lvtkVolumeRendering  -lvtkParallel\
+         -lvtkRendering  -lvtkGraphics\
+         -lvtkverdict  -lvtkImaging  -lvtkIO\
+         -lvtkFiltering  -lvtkDICOMParser\
+         -lvtkNetCDF_cxx  -lvtkmetaio  -lvtksqlite\
+         -lvtkpng  -lvtktiff  -lvtkjpeg\
+         -lvtkexpat  -lVPIC  -lCosmo  -lvtkCommon\
+         -lLSDyna  -lvtksys  -lvtkexoIIc\
+         -lvtkNetCDF  -lvtkhdf5_hl  -lvtkhdf5\
+         -lvtklibxml2  -lvtkzlib  -lvtkalglib\
+         -lvtkftgl  -lvtkfreetype \
+         -lvfw32 -lwsock32\
+ }
+ 
 unix_6 {
     INCLUDEPATH += /usr/local/include/vtk-6.0
-    
     LIBS += -L/usr/local/lib/ \
             -lvtkalglib-6.0  \
             -lvtkChartsCore-6.0  \
@@ -404,7 +417,7 @@ LIBS += -L/usr/lib \
 
  }
  
-#Static compilation 
+#Static compilation linux
 unix_static {
 #INCLUDEPATH += /usr/include/vtk-5.8
 #LIBS += -L/usr/lib \
@@ -424,7 +437,7 @@ LIBS += -L/usr/local/lib/vtk-5.10 \
 -lvtkDICOMParser   \
 -lvtkmetaio   \
 -lvtkftgl  \
-#-lLSDyna \ 
+-lLSDyna \ 
 -lvtkViews \
 -lvtksys   \
 -lvtkpng \
@@ -439,13 +452,6 @@ LIBS += -L/usr/local/lib/vtk-5.10 \
 -lX11 \
 -lXext \
 -ldl \
-#-lpng \
-#-ltiff \
-#-ljpeg \
-#-lxml2 \
-#-lz \
-#-lexpat \
-#-lfreetype \
  }
 
 macx {
@@ -599,7 +605,7 @@ HEADERS += src/geometry/Building.h \
     src/ThreadDataTransfert.h \
     src/ThreadVisualisation.h \
     src/TimerCallback.h \
-    src/TrajectoryPoint.h \
+    src/FrameElement.h \
     src/extern_var.h \
     src/geometry/FacilityGeometry.h \
     src/geometry/LinePlotter.h \
@@ -607,7 +613,8 @@ HEADERS += src/geometry/Building.h \
     src/geometry/LinePlotter2D.h \
     src/geometry/PointPlotter2D.h \
     src/network/TraVisToServer.h \
-    src/MainWindow.h
+    src/MainWindow.h \
+    src/TrailPlotter.h
 
 SOURCES += src/geometry/Building.cpp \
     src/geometry/Crossing.cpp \
@@ -641,14 +648,16 @@ SOURCES += src/geometry/Building.cpp \
     src/ThreadDataTransfert.cpp \
     src/ThreadVisualisation.cpp \
     src/TimerCallback.cpp \
-    src/TrajectoryPoint.cpp \
+    src/FrameElement.cpp \
     src/geometry/LinePlotter2D.cpp \
     src/geometry/PointPlotter2D.cpp \
     src/geometry/FacilityGeometry.cpp \
     src/geometry/LinePlotter.cpp \
     src/geometry/PointPlotter.cpp \
     src/network/TraVisToServer.cpp \
-    src/MainWindow.cpp
+    src/MainWindow.cpp \
+    src/TrailPlotter.cpp
+
 FORMS += forms/settings.ui \
     forms/mainwindow.ui
 RESOURCES += forms/icons.qrc

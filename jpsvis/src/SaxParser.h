@@ -40,6 +40,7 @@
 //forwarded classes
 class JPoint;
 class TrajectoryPoint;
+class FrameElement;
 class SyncData;
 class FacilityGeometry;
 
@@ -64,7 +65,7 @@ public:
                        const QString& value);
 
     /// provided for convenience and will be removed in the next version
-    static void parseGeometryJPS(QString content, FacilityGeometry *geo);
+    static bool parseGeometryJPS(QString content, FacilityGeometry *geo);
 
     /// provided for convenience and will be removed in the next version
     static void parseGeometryXMLV04(QString content, FacilityGeometry *geo);
@@ -72,10 +73,13 @@ public:
     /// provided for convenience and will be removed in the next version
     static void parseGeometryTRAV(QString content, FacilityGeometry *geo,QDomNode geoNode=QDomNode());
 
+    /// take a large file and find the geometry file location.
+    static QString extractGeometryFilename(QString& filename);
+
 private:
     //clear the mo
     void clearPoints();
-    void InitHeader(double version);
+    void InitHeader(int major, int minor, int patch);
 
 private:
     FacilityGeometry* geometry;
@@ -85,8 +89,9 @@ private:
     QStringList initialPedestriansColors;
     QStringList initialPedestriansHeights;
     std::vector<JPoint *> currentPointsList;
-    std::vector<TrajectoryPoint *> currentFrame;
+    std::vector<FrameElement *> currentFrame;
     bool parsingWalls;
+    bool parsingCrossings;
 
     //wall and door parameters
     double thickness;
