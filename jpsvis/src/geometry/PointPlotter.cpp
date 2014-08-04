@@ -73,6 +73,7 @@ PointPlotter::PointPlotter()
     mapper->SetInputConnection(glyph->GetOutputPort());
 
     //borrow the lookup table from the peds glyphs
+    if(extern_glyphs_pedestrians_actor_2D->GetMapper())
     mapper->SetLookupTable(
     extern_glyphs_pedestrians_actor_2D->GetMapper()->GetLookupTable());
 

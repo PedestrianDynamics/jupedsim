@@ -1040,7 +1040,6 @@ QString SaxParser::extractGeometryFilename(QString &filename)
                     int endIndex = line.indexOf(end,startIndex);
                     if(endIndex <= 0)continue; // false alarm
                     extracted_geo_name= line.mid(startIndex,endIndex - startIndex);
-                    cout<<"geoName:"<<extracted_geo_name.toStdString()<<endl;
                     return extracted_geo_name;
                     //break;// we are done
                 }

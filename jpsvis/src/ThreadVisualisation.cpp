@@ -141,7 +141,7 @@ void ThreadVisualisation::slotSetFrameRate(float fps){
 void ThreadVisualisation::run(){
 
     //deactivate the output windows
-    vtkObject::GlobalWarningDisplayOff();
+    //vtkObject::GlobalWarningDisplayOff();
 
 	//emit signalStatusMessage("running");
 
@@ -157,10 +157,9 @@ void ThreadVisualisation::run(){
 
 	//initialize the datasets
     //mem leak
-    extern_glyphs_pedestrians = vtkTensorGlyph::New();
-    extern_glyphs_pedestrians_3D = vtkTensorGlyph::New();
 
-	initGlyphs2D();
+
+    initGlyphs2D();
     initGlyphs3D();
 
     //create the trails
@@ -296,11 +295,11 @@ void ThreadVisualisation::run(){
     }
 
 
-//    if(true || SystemSettings::get2D()){
-//        renderer->GetActiveCamera()->OrthogonalizeViewUp();
-//        renderer->GetActiveCamera()->ParallelProjectionOn();
-//        renderer->ResetCamera();
-//    }
+    if(true || SystemSettings::get2D()){
+        renderer->GetActiveCamera()->OrthogonalizeViewUp();
+        renderer->GetActiveCamera()->ParallelProjectionOn();
+        renderer->ResetCamera();
+    }
 
 	//create a timer for rendering the window
 	TimerCallback *renderingTimer = new TimerCallback();
@@ -427,6 +426,8 @@ void ThreadVisualisation::showFloor(bool status)
 void  ThreadVisualisation::initGlyphs2D()
 {
 
+    extern_glyphs_pedestrians = vtkTensorGlyph::New();
+
     //glyphs with ellipsoids
     //    VTK_CREATE (vtkSphereSource, agentShape);
     //    agentShape->SetRadius(30);
@@ -499,6 +500,9 @@ void  ThreadVisualisation::initGlyphs2D()
 
 void ThreadVisualisation::initGlyphs3D()
 {
+
+    extern_glyphs_pedestrians_3D = vtkTensorGlyph::New();
+
     //now create the glyphs with zylinders
     VTK_CREATE (vtkCylinderSource, agentShape);
     agentShape->SetHeight(160);

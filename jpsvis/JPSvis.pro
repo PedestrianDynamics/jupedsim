@@ -385,7 +385,7 @@ unix_6 {
 }
    
 #dynamic linking with vtk5.10
-unix {
+unix_dyn {
 INCLUDEPATH += /usr/include/vtk-5.8
 LIBS += -L/usr/lib \
 #INCLUDEPATH +=/usr/local/include/vtk-5.10
@@ -418,7 +418,7 @@ LIBS += -L/usr/lib \
  }
  
 #Static compilation linux
-unix_static {
+unix {
 #INCLUDEPATH += /usr/include/vtk-5.8
 #LIBS += -L/usr/lib \
 INCLUDEPATH +=/usr/local/include/vtk-5.10
