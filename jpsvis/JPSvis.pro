@@ -11,6 +11,8 @@ QT += xml network
 #QMAKE_CXXFLAGS += -static
 #QMAKE_LFLAGS_RELEASE += -static-libgcc
 
+QMAKE_CXXFLAGS += -Wno-deprecated -Wno-unused-parameter -Wno-unused-variable
+
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
 #Dynamic linking

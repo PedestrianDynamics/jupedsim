@@ -49,11 +49,13 @@ FrameElement::FrameElement(int id)
     _radius[2] = std::numeric_limits<double>::quiet_NaN();
 }
 
-FrameElement::~FrameElement() {
+FrameElement::~FrameElement()
+{
 
 }
 
-void FrameElement::SetId(int index) {
+void FrameElement::SetId(int index)
+{
     _id = index;
 }
 
@@ -87,9 +89,9 @@ void FrameElement::GetPos(double pos[3])
 
 void FrameElement::SetOrientation(double angle[])
 {
-  _orientation[0]=angle[0];
-  _orientation[1]=angle[1];
-  _orientation[2]=angle[2];
+    _orientation[0]=angle[0];
+    _orientation[1]=angle[1];
+    _orientation[2]=angle[2];
 }
 
 void FrameElement::GetOrientation(double angle[])

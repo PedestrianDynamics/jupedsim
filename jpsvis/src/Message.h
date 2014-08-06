@@ -35,13 +35,13 @@
 class Message {
 
 public :
-	 enum message {STACK_EMPTY=1,
-				   STACK_REACHS_BEGINNING,
-				   STACK_REACHS_END,
-				   RESET,
-				   VISUALISATION_TERMINATED
+    enum message {STACK_EMPTY=1,
+                  STACK_REACHS_BEGINNING,
+                  STACK_REACHS_END,
+                  RESET,
+                  VISUALISATION_TERMINATED
 
-	};
+                 };
 };
 
 #endif /* MESSAGE_H_ */

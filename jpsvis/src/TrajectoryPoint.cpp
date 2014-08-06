@@ -36,106 +36,122 @@
 
 
 
-TrajectoryPoint::TrajectoryPoint(int index){
-	this->index=index;
-	this->x = std::numeric_limits<double>::quiet_NaN();
-	this->y = std::numeric_limits<double>::quiet_NaN();
-	this->z = std::numeric_limits<double>::quiet_NaN();
-	this->xVel = std::numeric_limits<double>::quiet_NaN();
-	this->yVel = std::numeric_limits<double>::quiet_NaN();
-	this->zVel = std::numeric_limits<double>::quiet_NaN();
+TrajectoryPoint::TrajectoryPoint(int index)
+{
+    this->index=index;
+    this->x = std::numeric_limits<double>::quiet_NaN();
+    this->y = std::numeric_limits<double>::quiet_NaN();
+    this->z = std::numeric_limits<double>::quiet_NaN();
+    this->xVel = std::numeric_limits<double>::quiet_NaN();
+    this->yVel = std::numeric_limits<double>::quiet_NaN();
+    this->zVel = std::numeric_limits<double>::quiet_NaN();
 
-	this->agentOrientation = std::numeric_limits<double>::quiet_NaN();
-	this->ellipseRadiusA = std::numeric_limits<double>::quiet_NaN();
-	this->ellipseRadiusB = std::numeric_limits<double>::quiet_NaN();
-	this->ellipseColor = std::numeric_limits<double>::quiet_NaN();
-	this->agentHeight = std::numeric_limits<double>::quiet_NaN();
+    this->agentOrientation = std::numeric_limits<double>::quiet_NaN();
+    this->ellipseRadiusA = std::numeric_limits<double>::quiet_NaN();
+    this->ellipseRadiusB = std::numeric_limits<double>::quiet_NaN();
+    this->ellipseColor = std::numeric_limits<double>::quiet_NaN();
+    this->agentHeight = std::numeric_limits<double>::quiet_NaN();
 
 }
 
-TrajectoryPoint::TrajectoryPoint(int index,double x, double y, double z) {
-	this->index = index;
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->xVel = std::numeric_limits<double>::quiet_NaN();
-	this->yVel = std::numeric_limits<double>::quiet_NaN();
-	this->zVel = std::numeric_limits<double>::quiet_NaN();
+TrajectoryPoint::TrajectoryPoint(int index,double x, double y, double z)
+{
+    this->index = index;
+    this->x = x;
+    this->y = y;
+    this->z = z;
+    this->xVel = std::numeric_limits<double>::quiet_NaN();
+    this->yVel = std::numeric_limits<double>::quiet_NaN();
+    this->zVel = std::numeric_limits<double>::quiet_NaN();
 
-	this->agentOrientation = std::numeric_limits<double>::quiet_NaN();
-	this->ellipseRadiusA = std::numeric_limits<double>::quiet_NaN();
-	this->ellipseRadiusB = std::numeric_limits<double>::quiet_NaN();
-	this->ellipseColor = std::numeric_limits<double>::quiet_NaN();
-	this->agentHeight = std::numeric_limits<double>::quiet_NaN();
+    this->agentOrientation = std::numeric_limits<double>::quiet_NaN();
+    this->ellipseRadiusA = std::numeric_limits<double>::quiet_NaN();
+    this->ellipseRadiusB = std::numeric_limits<double>::quiet_NaN();
+    this->ellipseColor = std::numeric_limits<double>::quiet_NaN();
+    this->agentHeight = std::numeric_limits<double>::quiet_NaN();
 }
-TrajectoryPoint::~TrajectoryPoint() {
+TrajectoryPoint::~TrajectoryPoint()
+{
 
 }
 
 
 //setter
-void TrajectoryPoint::setIndex(int index) {
-	this->index = index;
+void TrajectoryPoint::setIndex(int index)
+{
+    this->index = index;
 }
-void TrajectoryPoint::setPos(double pos[3]) {
-	x = pos[0];
-	y = pos[1];
-	z = pos[2];
+void TrajectoryPoint::setPos(double pos[3])
+{
+    x = pos[0];
+    y = pos[1];
+    z = pos[2];
 }
-void TrajectoryPoint::setVel(double vel[3]) {
-	xVel = vel[0];
-	yVel = vel[1];
-	zVel = vel[2];
-}
-
-void TrajectoryPoint::setEllipse(double ellipse[7]) {
-	ellipseCenter[0] = ellipse[0];
-	ellipseCenter[1] = ellipse[1];
-	ellipseCenter[2] = ellipse[2];
-	ellipseRadiusA = ellipse[3];
-	ellipseRadiusB = ellipse[4];
-	agentOrientation = ellipse[5];
-	ellipseColor = ellipse[6];
+void TrajectoryPoint::setVel(double vel[3])
+{
+    xVel = vel[0];
+    yVel = vel[1];
+    zVel = vel[2];
 }
 
-int TrajectoryPoint::getIndex() {
-	return index;
+void TrajectoryPoint::setEllipse(double ellipse[7])
+{
+    ellipseCenter[0] = ellipse[0];
+    ellipseCenter[1] = ellipse[1];
+    ellipseCenter[2] = ellipse[2];
+    ellipseRadiusA = ellipse[3];
+    ellipseRadiusB = ellipse[4];
+    agentOrientation = ellipse[5];
+    ellipseColor = ellipse[6];
 }
-double TrajectoryPoint::getX() {
-	return x;
-}
-double TrajectoryPoint::getY() {
-	return y;
-}
-double TrajectoryPoint::getZ() {
-	return z;
-}
-void TrajectoryPoint::getPos(double pos[3]) {
-	pos[0] = x;
-	pos[1] = y;
-	pos[2] = z;
-}
-void TrajectoryPoint::getVel(double vel[3]) {
-	vel[0] = xVel;
-	vel[1] = yVel;
-	vel[2] = zVel;
-}
-void TrajectoryPoint::getEllipse(double ellipse[7]) {
-	ellipse[0] = ellipseCenter[0];
-	ellipse[1] = ellipseCenter[1];
-	ellipse[2] = ellipseCenter[2];
 
-	ellipse[3] = ellipseRadiusA;
-	ellipse[4] = ellipseRadiusB;
-	ellipse[5] = agentOrientation;
-	ellipse[6] = ellipseColor;
+int TrajectoryPoint::getIndex()
+{
+    return index;
 }
- void TrajectoryPoint::setAgentInfo(double para[2]){
-	 agentColor=para[0];
-	 agentOrientation=para[1];
- }
+double TrajectoryPoint::getX()
+{
+    return x;
+}
+double TrajectoryPoint::getY()
+{
+    return y;
+}
+double TrajectoryPoint::getZ()
+{
+    return z;
+}
+void TrajectoryPoint::getPos(double pos[3])
+{
+    pos[0] = x;
+    pos[1] = y;
+    pos[2] = z;
+}
+void TrajectoryPoint::getVel(double vel[3])
+{
+    vel[0] = xVel;
+    vel[1] = yVel;
+    vel[2] = zVel;
+}
+void TrajectoryPoint::getEllipse(double ellipse[7])
+{
+    ellipse[0] = ellipseCenter[0];
+    ellipse[1] = ellipseCenter[1];
+    ellipse[2] = ellipseCenter[2];
 
- void TrajectoryPoint::getAgentInfo(double para[2]){
-	 para[0]=agentColor;
-	 para[1]=agentOrientation;
- }
+    ellipse[3] = ellipseRadiusA;
+    ellipse[4] = ellipseRadiusB;
+    ellipse[5] = agentOrientation;
+    ellipse[6] = ellipseColor;
+}
+void TrajectoryPoint::setAgentInfo(double para[2])
+{
+    agentColor=para[0];
+    agentOrientation=para[1];
+}
+
+void TrajectoryPoint::getAgentInfo(double para[2])
+{
+    para[0]=agentColor;
+    para[1]=agentOrientation;
+}

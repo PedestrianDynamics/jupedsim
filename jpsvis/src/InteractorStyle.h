@@ -41,31 +41,31 @@ extern bool extern_force_system_update;
 class InteractorStyle: public vtkInteractorStyleTrackballCamera {
 
 public:
-	InteractorStyle();
-	virtual ~InteractorStyle();
+    InteractorStyle();
+    virtual ~InteractorStyle();
 
-	/// static constructor
-	static  InteractorStyle* New();
+    /// static constructor
+    static  InteractorStyle* New();
 
-	///set the actor
-	void SetActor(/*vtkActor* actor*/);
-	///set the source
-	void SetSource(/*some source*/);
+    ///set the actor
+    void SetActor(/*vtkActor* actor*/);
+    ///set the source
+    void SetSource(/*some source*/);
 
-	///override
-	virtual void OnChar();
-	virtual void Rotate();
-	virtual void Spin();
-	virtual void Pan();
-	virtual void Dolly();
-	virtual void OnLeftButtonUp();
+    ///override
+    virtual void OnChar();
+    virtual void Rotate();
+    virtual void Spin();
+    virtual void Pan();
+    virtual void Dolly();
+    virtual void OnLeftButtonUp();
 
 
 
 
 private:
-	//vtkActor* mActor ;
-	//vtkSphereSource* mSrc ;
+    //vtkActor* mActor ;
+    //vtkSphereSource* mSrc ;
 };
 
 #endif /* INTERACTORSTYLE_H_ */

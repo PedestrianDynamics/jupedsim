@@ -42,28 +42,32 @@
 #include "./geometry/LinePlotter.h"
 #include "./geometry/PointPlotter.h"
 
-SimpleVisualisationWindow::SimpleVisualisationWindow() {
-	assembly =NULL;
-	//actor=NULL;
+SimpleVisualisationWindow::SimpleVisualisationWindow()
+{
+    assembly =NULL;
+    //actor=NULL;
 
 }
 
-SimpleVisualisationWindow::~SimpleVisualisationWindow() {
+SimpleVisualisationWindow::~SimpleVisualisationWindow()
+{
 
 }
 
 
-void SimpleVisualisationWindow::setActor(vtkAssembly* actor){
-	assembly=actor;
+void SimpleVisualisationWindow::setActor(vtkAssembly* actor)
+{
+    assembly=actor;
 }
 
 
-void SimpleVisualisationWindow::start(){
+void SimpleVisualisationWindow::start()
+{
 
 
-	// Create the renderer with black bg
-	vtkRenderer* renderer = vtkRenderer::New();
-	renderer->SetBackground(0,0,0);
+    // Create the renderer with black bg
+    vtkRenderer* renderer = vtkRenderer::New();
+    renderer->SetBackground(0,0,0);
 
 //	//add the line actor
 //	LinePlotter * ln = new LinePlotter();
@@ -79,7 +83,7 @@ void SimpleVisualisationWindow::start(){
 //	ln->PlotLine(81,821,81,14,134,134,1);
 //	renderer->AddActor(ln->getActor());
 
-	//
+    //
 //	PointPlotter * pt = new PointPlotter();
 //	pt->PlotPoint(324,34,34);
 //	pt->PlotPoint(1,1,1);
@@ -89,54 +93,54 @@ void SimpleVisualisationWindow::start(){
 //	pt->PlotPoint(134,14,134);
 //	renderer->AddActor(pt->getActor());
 
-	//add the different actors
-	renderer->AddActor(assembly);
-	//renderer->AddActor(actor);
+    //add the different actors
+    renderer->AddActor(assembly);
+    //renderer->AddActor(actor);
 
 
-	// Set up the lighting.
-	vtkLight *light = vtkLight::New();
-	light->SetFocalPoint(1.875,0.6125,0);
-	light->SetPosition(3000,3000,10);
-	light->SetIntensity(1);
-	light->SetLightTypeToCameraLight();
-	//	renderer->AddLight(light);
+    // Set up the lighting.
+    vtkLight *light = vtkLight::New();
+    light->SetFocalPoint(1.875,0.6125,0);
+    light->SetPosition(3000,3000,10);
+    light->SetIntensity(1);
+    light->SetLightTypeToCameraLight();
+    //	renderer->AddLight(light);
 //	light->Delete();
 
-	// Create a render window
-	vtkRenderWindow *renderWindow = vtkRenderWindow::New();
-	renderWindow->AddRenderer( renderer );
-	renderWindow->SetSize(600, 800);
+    // Create a render window
+    vtkRenderWindow *renderWindow = vtkRenderWindow::New();
+    renderWindow->AddRenderer( renderer );
+    renderWindow->SetSize(600, 800);
 
-	//CAUTION: this is necessary for windows to update the window name after the first render
-	// but this will freeze your system on linux, strange....
+    //CAUTION: this is necessary for windows to update the window name after the first render
+    // but this will freeze your system on linux, strange....
 #ifdef WIN32
-	renderWindow->Render();
+    renderWindow->Render();
 #endif
-	renderWindow->SetWindowName("Visualizing a Geometry");
+    renderWindow->SetWindowName("Visualizing a Geometry");
 
 
-	// Create an interactor
-	vtkRenderWindowInteractor *renderWinInteractor = vtkRenderWindowInteractor::New();
-	renderWinInteractor = vtkRenderWindowInteractor::New();
-	renderWindow->SetInteractor( renderWinInteractor );
-	//set full screen and catch esc to restore defaults one
-	//renderWindow->SetFullScreen(1);
+    // Create an interactor
+    vtkRenderWindowInteractor *renderWinInteractor = vtkRenderWindowInteractor::New();
+    renderWinInteractor = vtkRenderWindowInteractor::New();
+    renderWindow->SetInteractor( renderWinInteractor );
+    //set full screen and catch esc to restore defaults one
+    //renderWindow->SetFullScreen(1);
 
-	// Create my interactor style
-	vtkInteractorStyleTrackballCamera* style = vtkInteractorStyleTrackballCamera::New();
-	renderWinInteractor->SetInteractorStyle( style );
-	style->Delete();
+    // Create my interactor style
+    vtkInteractorStyleTrackballCamera* style = vtkInteractorStyleTrackballCamera::New();
+    renderWinInteractor->SetInteractorStyle( style );
+    style->Delete();
 
-	// Initialize and enter interactive mode
-	renderWinInteractor->Initialize();
-	renderWinInteractor->Start();
+    // Initialize and enter interactive mode
+    renderWinInteractor->Initialize();
+    renderWinInteractor->Start();
 
-	//cleaning up
-	renderWindow->Delete();
-	renderWinInteractor->Delete();
-	if(assembly)
-		assembly->Delete();
+    //cleaning up
+    renderWindow->Delete();
+    renderWinInteractor->Delete();
+    if(assembly)
+        assembly->Delete();
 //	if(actor)
 //		actor->Delete();
 

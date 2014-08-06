@@ -38,7 +38,8 @@
 
 using namespace std;
 
-TraVisToClient::TraVisToClient(string hostname, unsigned short port) {
+TraVisToClient::TraVisToClient(string hostname, unsigned short port)
+{
     _hostname=hostname;
     _port = port;
     _isConnected = false;
@@ -47,14 +48,16 @@ TraVisToClient::TraVisToClient(string hostname, unsigned short port) {
 
 }
 
-TraVisToClient::~TraVisToClient() {
+TraVisToClient::~TraVisToClient()
+{
     if (_isConnected) close();
 }
 
 
 /// send datablock to the server
 
-void TraVisToClient::sendData(const char* data) {
+void TraVisToClient::sendData(const char* data)
+{
 
     // first create a new connection, in the case the last one was lost/close
 
@@ -103,7 +106,8 @@ void TraVisToClient::sendData(const char* data) {
 
 /// close the client (end the connection)
 
-void TraVisToClient::close() {
+void TraVisToClient::close()
+{
     if (_isConnected) {
         /* all things are done, so shutdown the connection */
         if (!shutdownAndCloseSocket(_tcpSocket)) {
@@ -119,7 +123,8 @@ void TraVisToClient::close() {
 
 }
 
-void TraVisToClient::createConnection() {
+void TraVisToClient::createConnection()
+{
 
     /* start the socket session */
     if (!startSocketSession()) {
@@ -151,7 +156,8 @@ void TraVisToClient::createConnection() {
  *           @c INADDR_NONE.
  */
 unsigned long
-TraVisToClient::lookupHostAddress(const char *hostName) {
+TraVisToClient::lookupHostAddress(const char *hostName)
+{
     unsigned long addr; /* inet address of hostname */
     struct hostent *host; /* host structure for DNS request */
 
@@ -192,7 +198,8 @@ TraVisToClient::lookupHostAddress(const char *hostName) {
  *           returns @c INVALID_SOCKET.
  */
 socket_t
-TraVisToClient::createClientSocket(const char *serverName, unsigned short portNumber) {
+TraVisToClient::createClientSocket(const char *serverName, unsigned short portNumber)
+{
     unsigned long ipAddress; /* internet address */
     struct sockaddr_in srvAddr; /* server's internet socket address */
     socket_t sock; /* file descriptor for client socket */
@@ -244,7 +251,8 @@ TraVisToClient::createClientSocket(const char *serverName, unsigned short portNu
  *           If an error occurs, the function returns @c INVALID_SOCKET.
  */
 socket_t
-TraVisToClient::createServerSocket(unsigned short portNumber) {
+TraVisToClient::createServerSocket(unsigned short portNumber)
+{
     struct sockaddr_in srvAddr; /* server's internet socket address */
     socket_t sock; /* file descriptor for server socket */
 
@@ -299,7 +307,8 @@ TraVisToClient::createServerSocket(unsigned short portNumber) {
  *           otherwise the function returns @c false.
  */
 bool
-TraVisToClient::sendMessage(socket_t sock, const void *msg, int msgSize) {
+TraVisToClient::sendMessage(socket_t sock, const void *msg, int msgSize)
+{
     dtrace("entering sendMessage()");
 
     /* check if parameters are valid */
@@ -343,7 +352,8 @@ TraVisToClient::sendMessage(socket_t sock, const void *msg, int msgSize) {
  *           the function returns @c false.
  */
 bool
-TraVisToClient::receiveMessage(socket_t sock, void *msg, int msgSize) {
+TraVisToClient::receiveMessage(socket_t sock, void *msg, int msgSize)
+{
     char *msgPart; /* pointer to the memory for receiving the message */
     int toReceive; /* number of bytes to receive */
     int received; /* number of bytes totally received */
@@ -374,19 +384,19 @@ TraVisToClient::receiveMessage(socket_t sock, void *msg, int msgSize) {
         toReceive = msgSize - received;
         nBytes = recv(sock, msgPart, toReceive, 0);
         switch (nBytes) {
-            case SOCKET_ERROR: /* error occurred */
-                derror("error during message receipt");
-                dtrace("leaving receiveMessage()");
-                return (false);
-            case 0: /* connection has been closed */
-                derror("remote host has closed the connection");
-                dtrace("leaving receiveMessage()");
-                return (false);
-            default: /* some bytes have been received */
-                dtrace("received %d bytes of message", nBytes);
-                received += nBytes;
-                msgPart += nBytes;
-                break;
+        case SOCKET_ERROR: /* error occurred */
+            derror("error during message receipt");
+            dtrace("leaving receiveMessage()");
+            return (false);
+        case 0: /* connection has been closed */
+            derror("remote host has closed the connection");
+            dtrace("leaving receiveMessage()");
+            return (false);
+        default: /* some bytes have been received */
+            dtrace("received %d bytes of message", nBytes);
+            received += nBytes;
+            msgPart += nBytes;
+            break;
         }
     } while (received != msgSize);
 
@@ -406,7 +416,8 @@ TraVisToClient::receiveMessage(socket_t sock, void *msg, int msgSize) {
  *           @c false
  */
 bool
-TraVisToClient::shutdownAndCloseSocket(socket_t sock) {
+TraVisToClient::shutdownAndCloseSocket(socket_t sock)
+{
     bool status = true;
 
     dtrace("entering shutdownAndCloseSocket()");
@@ -429,7 +440,8 @@ TraVisToClient::shutdownAndCloseSocket(socket_t sock) {
 /******** end of function shutdownAndCloseSocket *********************/
 
 void
-TraVisToClient::_printErrorMessage(void) {
+TraVisToClient::_printErrorMessage(void)
+{
 }
 
 
@@ -442,7 +454,8 @@ TraVisToClient::_printErrorMessage(void) {
  *           @c false
  */
 bool
-TraVisToClient::_startWin32SocketSession(void) {
+TraVisToClient::_startWin32SocketSession(void)
+{
     WORD requestedVersion;
     WSADATA wsaData;
 
@@ -482,7 +495,8 @@ TraVisToClient::_startWin32SocketSession(void) {
  *  No future API calls are allowed.
  */
 void
-TraVisToClient::_stopWin32SocketSession(void) {
+TraVisToClient::_stopWin32SocketSession(void)
+{
     dtrace("entering _stopWin32SocketSession()");
 
     if (SOCKET_ERROR == WSACleanup()) {

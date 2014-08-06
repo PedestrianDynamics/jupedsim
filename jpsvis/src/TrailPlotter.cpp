@@ -42,7 +42,7 @@ TrailPlotter::TrailPlotter()
 
     //Create a mapper and actor
     vtkSmartPointer<vtkPolyDataMapper> mapper =
-            vtkSmartPointer<vtkPolyDataMapper>::New();
+        vtkSmartPointer<vtkPolyDataMapper>::New();
     //mapper->SetInputConnection(_cleanFilter->GetOutputPort());
 
     _trailActor =  vtkSmartPointer<vtkActor>::New();
@@ -69,10 +69,10 @@ void TrailPlotter::AddDataSet(vtkPolyData *_polydata)
 
 vtkActor *TrailPlotter::getActor()
 {
-  return  _trailActor;
+    return  _trailActor;
 }
 
 void TrailPlotter::SetVisibility(bool status)
 {
- _trailActor->SetVisibility(status);
+    _trailActor->SetVisibility(status);
 }

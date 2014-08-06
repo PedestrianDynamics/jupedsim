@@ -35,21 +35,20 @@
 class FrameElement;
 class vtkPolyData;
 
-class Frame
-{
+class Frame {
 public:
     /// constructor
     Frame();
     /// destructor
-	virtual ~Frame();
+    virtual ~Frame();
 
-	/// add an element to the Frame
-	void addElement(FrameElement* point);
+    /// add an element to the Frame
+    void addElement(FrameElement* point);
 
-	///clear all Points in the frame
-	void clear();
+    ///clear all Points in the frame
+    void clear();
 
-	///return the next object in the frame
+    ///return the next object in the frame
     FrameElement *getNextElement();
 
     ///compute the polydata.
@@ -81,7 +80,7 @@ private:
     /// compute the 3D polydata
     void ComputePolyData3D();
 
-	unsigned int getElementCursor();
+    unsigned int getElementCursor();
 
 
 private:
@@ -90,7 +89,7 @@ private:
     vtkPolyData * _polydata2D;
     vtkPolyData * _polydata3D;
 
-	/// points to the actual element in the frame
+    /// points to the actual element in the frame
     unsigned int _elementCursor;
 };
 

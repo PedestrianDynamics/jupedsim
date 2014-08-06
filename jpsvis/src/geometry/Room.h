@@ -35,8 +35,8 @@
 class Room {
 private:
 
-	/// room ID and index
-	int _id;
+    /// room ID and index
+    int _id;
     /// room state
     RoomState _state;
     /// room caption
@@ -109,11 +109,11 @@ public:
     /**
      * @return a vector containing all transitions Ids
      */
-	const std::vector<int>& GetAllTransitionsIDs() const;
+    const std::vector<int>& GetAllTransitionsIDs() const;
 
-	/**
-	 * @return the Subroom with the corresponding index
-	 */
+    /**
+     * @return the Subroom with the corresponding index
+     */
     SubRoom* GetSubRoom(int index) const;
 
     /**
@@ -139,7 +139,7 @@ public:
     /**
      * Add a new transition id
      */
-	void AddTransitionID(int ID);
+    void AddTransitionID(int ID);
 
 
     /**

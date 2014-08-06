@@ -54,75 +54,75 @@ extern bool extern_shutdown_visual_thread;
 
 class ThreadDataTransfer: public QThread {
 
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	ThreadDataTransfer(QObject *parent = 0);
-	virtual ~ThreadDataTransfer();
-	void run();
-	void setListeningPort(int port);
+    ThreadDataTransfer(QObject *parent = 0);
+    virtual ~ThreadDataTransfer();
+    void run();
+    void setListeningPort(int port);
 
-	/// \brief force the thread to do some cleaning work and shutdown
-	void shutdown();
+    /// \brief force the thread to do some cleaning work and shutdown
+    void shutdown();
 
-	/// parse a shape node
-	void parseShapeNode(QDomNode shapes);
+    /// parse a shape node
+    void parseShapeNode(QDomNode shapes);
 
-	/// parse a geometry node
-	void parseHeaderNode(QDomNode header);
+    /// parse a geometry node
+    void parseHeaderNode(QDomNode header);
 
-	/// parse data node
-	void parseDataNode(QDomNodeList data);
+    /// parse data node
+    void parseDataNode(QDomNodeList data);
 
     //old and new geometry format
     void InitHeader(int major, int minor, int patch);
 
 
 private:
-	QString getTagValueFromElement(QDomNode node,
-			const char * tagName);
+    QString getTagValueFromElement(QDomNode node,
+                                   const char * tagName);
 
-	Q_SIGNALS:
-	void signal_start();
-	void signal_stop();
-	void signal_controlSequence(const char* sex);
+Q_SIGNALS:
+    void signal_start();
+    void signal_stop();
+    void signal_controlSequence(const char* sex);
 
-	void signal_CurrentAction(QString msg);
+    void signal_CurrentAction(QString msg);
 
-	/// connect to the setFrameRateSlot
-	/// of the visualisation Thread
-	//void signal_frameRate(float fps);
+    /// connect to the setFrameRateSlot
+    /// of the visualisation Thread
+    //void signal_frameRate(float fps);
 
-	/// start the visual thread,
-	/// once header has been received
-	void signal_startVisualisationThread(QString data, int numberOfAgents,float frameRate);
+    /// start the visual thread,
+    /// once header has been received
+    void signal_startVisualisationThread(QString data, int numberOfAgents,float frameRate);
 
-	/// shutdown the visio thread
-	void signal_stopVisualisationThread(bool clearAndStop);
+    /// shutdown the visio thread
+    void signal_stopVisualisationThread(bool clearAndStop);
 
-	void signal_errorMessage(QString geometry);
+    void signal_errorMessage(QString geometry);
 
 public Q_SLOTS:
-	//udp
-	void slotProcessPendingDatagrams();
-	//tcp
-	void slotHandleConnection();
-	void slotReadMessage();
-	void slotProcessMessage(QString& data);
-	void slotConnectionClosed();
-	void slotDisplayError(QAbstractSocket::SocketError socketError);
+    //udp
+    void slotProcessPendingDatagrams();
+    //tcp
+    void slotHandleConnection();
+    void slotReadMessage();
+    void slotProcessMessage(QString& data);
+    void slotConnectionClosed();
+    void slotDisplayError(QAbstractSocket::SocketError socketError);
 
 
 private:
-	int m_port;
-	QUdpSocket* udpSocket;
-	QTcpServer* tcpServer;
-	bool headerParsed;
-	long errNr;
-	QString geoData;
-	int numberOfAgents;
-	float frameRate;
-	bool finished;
+    int m_port;
+    QUdpSocket* udpSocket;
+    QTcpServer* tcpServer;
+    bool headerParsed;
+    long errNr;
+    QString geoData;
+    int numberOfAgents;
+    float frameRate;
+    bool finished;
 
     // temp variables to be removed in the next versions
     //header dependant variables

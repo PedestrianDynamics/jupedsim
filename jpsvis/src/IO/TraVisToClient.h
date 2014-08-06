@@ -132,7 +132,7 @@ private:
     bool _startWin32SocketSession(void);
     void _stopWin32SocketSession(void);
 #else
-	#define closesocket          close
+#define closesocket          close
 #endif
 
 

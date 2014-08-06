@@ -59,13 +59,13 @@
 
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
-	// To ensure that decimal numbers use a "point" instead of "colon" on some systems
+    QApplication a(argc, argv);
+    // To ensure that decimal numbers use a "point" instead of "colon" on some systems
     //setlocale(LC_NUMERIC, "en_US" );
     setlocale(LC_NUMERIC,"C");
 
     MainWindow w;
-	w.show();
+    w.show();
 
-	return a.exec();
+    return a.exec();
 }

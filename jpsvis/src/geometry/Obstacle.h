@@ -39,107 +39,107 @@
 class Obstacle {
 
 private:
-	double _isClosed;
-	double _height;
-	int _id;
-	std::string _caption;
-	std::vector<Wall> _walls;
-	std::vector<Point> _poly;
+    double _isClosed;
+    double _height;
+    int _id;
+    std::string _caption;
+    std::vector<Wall> _walls;
+    std::vector<Point> _poly;
 
 public:
-	Obstacle();
-	virtual ~Obstacle();
+    Obstacle();
+    virtual ~Obstacle();
 
-	/**
-	 * Set/Get the obstacles' caption
-	 */
-	std::string GetCaption() const;
+    /**
+     * Set/Get the obstacles' caption
+     */
+    std::string GetCaption() const;
 
-	/**
-	 * Set/Get the obstacles' caption
-	 */
-	void SetCaption(std::string caption);
+    /**
+     * Set/Get the obstacles' caption
+     */
+    void SetCaption(std::string caption);
 
-	/**
-	 * Set/Get the close state of the obstacle
-	 */
-	double GetClosed() const;
+    /**
+     * Set/Get the close state of the obstacle
+     */
+    double GetClosed() const;
 
-	/**
-	 * Set/Get the close state of the obstacle
-	 */
-	void SetClosed(double closed);
+    /**
+     * Set/Get the close state of the obstacle
+     */
+    void SetClosed(double closed);
 
-	/**
-	 * Set/Get the height of the obstacle.
-	 * Is used for computing visibility
-	 */
-	double GetHeight() const;
+    /**
+     * Set/Get the height of the obstacle.
+     * Is used for computing visibility
+     */
+    double GetHeight() const;
 
-	/**
-	 * Set/Get the height of the obstacle.
-	 * Is used for computing visibility
-	 */
-	void SetHeight(double height);
+    /**
+     * Set/Get the height of the obstacle.
+     * Is used for computing visibility
+     */
+    void SetHeight(double height);
 
-	/**
-	 * Set/Get the id of the obstacle
-	 */
-	int GetId() const;
+    /**
+     * Set/Get the id of the obstacle
+     */
+    int GetId() const;
 
-	/**
-	 * Set/Get the id of the obstacle
-	 */
-	void SetId(int id);
+    /**
+     * Set/Get the id of the obstacle
+     */
+    void SetId(int id);
 
-	/**
-	 * construct the obstacle by adding more walls
-	 */
-	void AddWall(const Wall& w);
+    /**
+     * construct the obstacle by adding more walls
+     */
+    void AddWall(const Wall& w);
 
-	/**
-	 * @return All walls that constitute the obstacle
-	 */
-	const std::vector<Wall>& GetAllWalls() const;
+    /**
+     * @return All walls that constitute the obstacle
+     */
+    const std::vector<Wall>& GetAllWalls() const;
 
-	/**
-	 * @return true if the point p is contained within the Closed Obstacle
-	 * @see Setclose
-	 */
-	bool Contains(const Point& p) const;
+    /**
+     * @return true if the point p is contained within the Closed Obstacle
+     * @see Setclose
+     */
+    bool Contains(const Point& p) const;
 
-	/**
-	 * Create the obstacles polygonal structure from the walls
-	 */
+    /**
+     * Create the obstacles polygonal structure from the walls
+     */
     bool ConvertLineToPoly();
 
-	/**
-	 * @return the obstacle as a polygon
-	 */
-	const std::vector<Point>&  GetPolygon() const;
+    /**
+     * @return the obstacle as a polygon
+     */
+    const std::vector<Point>&  GetPolygon() const;
 
-	/**
-	 * @return the centroid of the obstacle
-	 */
-	const Point GetCentroid() const;
+    /**
+     * @return the centroid of the obstacle
+     */
+    const Point GetCentroid() const;
 
-	/**
-	 * return true if the given line intersects
-	 * or share common vertex with the obstacle
-	 */
-	bool IntersectWithLine(const Line & line) const;
+    /**
+     * return true if the given line intersects
+     * or share common vertex with the obstacle
+     */
+    bool IntersectWithLine(const Line & line) const;
 
-	/**
-	 * @return a nicely formatted string representation of the obstacle
-	 */
-	std::string Write();
+    /**
+     * @return a nicely formatted string representation of the obstacle
+     */
+    std::string Write();
 
 private:
-	int WhichQuad(const Point& vertex, const Point& hitPos) const;
+    int WhichQuad(const Point& vertex, const Point& hitPos) const;
 
-	// x-Koordinate der Linie von einer Eccke zur nächsten
-		double Xintercept(const Point& point1, const Point& point2,
-				double hitY) const;
+    // x-Koordinate der Linie von einer Eccke zur nächsten
+    double Xintercept(const Point& point1, const Point& point2,
+                      double hitY) const;
 
 };
 

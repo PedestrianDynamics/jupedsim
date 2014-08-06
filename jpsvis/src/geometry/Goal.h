@@ -38,95 +38,95 @@ class Wall;
 class Goal {
 
 private:
-	int _isFinalGoal;
-	int _id;
-	Point _centroid;
-	std::string _caption;
-	std::vector<Wall> _walls;
-	std::vector<Point> _poly;
+    int _isFinalGoal;
+    int _id;
+    Point _centroid;
+    std::string _caption;
+    std::vector<Wall> _walls;
+    std::vector<Point> _poly;
 
 public:
-	Goal();
-	virtual ~Goal();
+    Goal();
+    virtual ~Goal();
 
-	/**
-	 * Set/Get the obstacles' caption
-	 */
-	std::string GetCaption() const;
+    /**
+     * Set/Get the obstacles' caption
+     */
+    std::string GetCaption() const;
 
-	/**
-	 * Set/Get the obstacles' caption
-	 */
-	void SetCaption(std::string caption);
+    /**
+     * Set/Get the obstacles' caption
+     */
+    void SetCaption(std::string caption);
 
-	/**
-	 * Set/Get the id of the Goal
-	 */
-	int GetId() const;
+    /**
+     * Set/Get the id of the Goal
+     */
+    int GetId() const;
 
-	/**
-	 * Set/Get the id of the Goal
-	 */
-	void SetId(int id);
+    /**
+     * Set/Get the id of the Goal
+     */
+    void SetId(int id);
 
-	/**
-	 * construct the Goal by adding more walls
-	 */
-	void AddWall(const Wall& w);
+    /**
+     * construct the Goal by adding more walls
+     */
+    void AddWall(const Wall& w);
 
-	/**
-	 * @return All walls that constitute the Goal
-	 */
-	const std::vector<Wall>& GetAllWalls() const;
+    /**
+     * @return All walls that constitute the Goal
+     */
+    const std::vector<Wall>& GetAllWalls() const;
 
-	/**
-	 * @return true if the point p is contained within the Closed Goal
-	 */
-	bool Contains(const Point& p) const;
+    /**
+     * @return true if the point p is contained within the Closed Goal
+     */
+    bool Contains(const Point& p) const;
 
-	/**
-	 * Create the obstacles polygonal structure from the walls
-	 */
-	void ConvertLineToPoly();
+    /**
+     * Create the obstacles polygonal structure from the walls
+     */
+    void ConvertLineToPoly();
 
-	/**
-	 * @return the Goal as a polygon
-	 */
-	const std::vector<Point>&  GetPolygon() const;
+    /**
+     * @return the Goal as a polygon
+     */
+    const std::vector<Point>&  GetPolygon() const;
 
-	/**
-	 * agents are remove from the simulation when they reached a final goal
-	 */
-	int GetIsFinalGoal() const;
+    /**
+     * agents are remove from the simulation when they reached a final goal
+     */
+    int GetIsFinalGoal() const;
 
-	/**
-	 * agents are remove from the simulation when they reached a final goal
-	 */
-	void SetIsFinalGoal(int isFinalGoal);
+    /**
+     * agents are remove from the simulation when they reached a final goal
+     */
+    void SetIsFinalGoal(int isFinalGoal);
 
-	/**
-	 * @return the centroid of the subroom
-	 * @see http://en.wikipedia.org/wiki/Centroid
-	 */
-	void ComputeControid() ;
+    /**
+     * @return the centroid of the subroom
+     * @see http://en.wikipedia.org/wiki/Centroid
+     */
+    void ComputeControid() ;
 
-	/**
-	 * @return the centroid of the goal
-	 * @see ComputeControid
-	 */
-	const Point& GetCentroid() const;
+    /**
+     * @return the centroid of the goal
+     * @see ComputeControid
+     */
+    const Point& GetCentroid() const;
 
-	/**
-	 * @return a nicely formatted string representation of the Goal
-	 */
-	std::string Write();
+    /**
+     * @return a nicely formatted string representation of the Goal
+     */
+    std::string Write();
 
 private:
-	int WhichQuad(const Point& vertex, const Point& hitPos) const;
+    int WhichQuad(const Point& vertex, const Point& hitPos) const;
 
-	// x-Koordinate der Linie von einer Eccke zur nächsten
-	double Xintercept(const Point& point1, const Point& point2,
-			double hitY) const;
+    // x-Koordinate der Linie von einer Eccke zur nächsten
+    double Xintercept(const Point& point1, const Point& point2,
+                      double hitY) const;
 
 };
 

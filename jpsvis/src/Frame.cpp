@@ -57,7 +57,7 @@ Frame::Frame()
 
 Frame::~Frame()
 {
-    while (!_framePoints.empty()){
+    while (!_framePoints.empty()) {
         delete _framePoints.back();
         _framePoints.pop_back();
     }
@@ -79,7 +79,7 @@ void Frame::addElement(FrameElement* point)
 
 void Frame::clear()
 {
-    while (!_framePoints.empty()){
+    while (!_framePoints.empty()) {
         delete _framePoints.back();
         _framePoints.pop_back();
     }
@@ -93,7 +93,7 @@ FrameElement* Frame::getNextElement()
     if(_elementCursor>=_framePoints.size()) {
         return NULL;
 
-    }else{
+    } else {
         return _framePoints.at(_elementCursor++);
     }
     //next test
@@ -227,10 +227,9 @@ void Frame::ComputePolyData2D()
     labels->SetName("labels");
     labels->SetNumberOfComponents(1);
 
-    for (unsigned int i=0;i<_framePoints.size();i++)
-    {
-        double pos[3]={0,0,0};
-        double rad[3]={1.0,1.0,1.0};
+    for (unsigned int i=0; i<_framePoints.size(); i++) {
+        double pos[3]= {0,0,0};
+        double rad[3]= {1.0,1.0,1.0};
         double rot[3];
         double color;
         _framePoints[i]->GetPos(pos); //pos[2]=90;
@@ -239,30 +238,36 @@ void Frame::ComputePolyData2D()
         _framePoints[i]->GetRadius(rad);
         labels->InsertNextValue(_framePoints[i]->GetId()+1);
 
-        rad[0]/=30;rad[1]/=30;rad[2]/=120;
+        rad[0]/=30;
+        rad[1]/=30;
+        rad[2]/=120;
         points->InsertNextPoint(pos);
         rot[2]=vtkMath::RadiansFromDegrees(rot[2]);
 
         //scaling matrix
         double sc[3][3] = {{rad[0],0,0},
-                           {0,rad[1],0},
-                           {0,0,rad[2]}};
+            {0,rad[1],0},
+            {0,0,rad[2]}
+        };
 
 
         //rotation matrix around x-axis
         double roX[3][3] = {{1, 0,                    0},
-                            {0, cos(rot[0]),-sin(rot[0])},
-                            {0, sin(rot[0]), cos(rot[0])}};
+            {0, cos(rot[0]),-sin(rot[0])},
+            {0, sin(rot[0]), cos(rot[0])}
+        };
 
         //rotation matrix around y-axis
         double roY[3][3] = {{cos(rot[1]), 0,sin(rot[1])},
-                            {0,           1,          0},
-                            {-sin(rot[1]),0,cos(rot[1])}};
+            {0,           1,          0},
+            {-sin(rot[1]),0,cos(rot[1])}
+        };
 
         //rotation matrix around z-axis
         double roZ[3][3] = {{cos(rot[2]),sin(rot[2]),0.0},
-                            {-sin(rot[2]),cos(rot[2]),0.0},
-                            {0.0,0.0,1.0}};
+            {-sin(rot[2]),cos(rot[2]),0.0},
+            {0.0,0.0,1.0}
+        };
 
 
         //final rotation matrix
@@ -275,14 +280,13 @@ void Frame::ComputePolyData2D()
         vtkMath::Multiply3x3(sc,ro,rs);
 
         tensors->InsertNextTuple9(rs[0][0],rs[0][1],rs[0][2],
-                rs[1][0],rs[1][1],rs[1][2],
-                rs[2][0],rs[2][1],rs[2][2]);
+                                  rs[1][0],rs[1][1],rs[1][2],
+                                  rs[2][0],rs[2][1],rs[2][2]);
 
 
-        if(color==-1){
+        if(color==-1) {
             colors->InsertNextValue(NAN);
-        }
-        else{
+        } else {
             colors->InsertNextValue(color/255.0);
         }
     }
@@ -312,9 +316,9 @@ void Frame::ComputePolyData3D()
     tensors->SetName("tensors");
     tensors->SetNumberOfComponents(9);
 
-    for (unsigned int i=0;i<_framePoints.size();i++){
-        double pos[3]={0,0,0};
-        double rad[3]={1.0,1.0,1.0};
+    for (unsigned int i=0; i<_framePoints.size(); i++) {
+        double pos[3]= {0,0,0};
+        double rad[3]= {1.0,1.0,1.0};
         double rot[3];
         double color;
         _framePoints[i]->GetPos(pos); //pos[2]=90;
@@ -338,8 +342,10 @@ void Frame::ComputePolyData3D()
 
 
         pos[2]+=height_i/2.0; // slightly above ground
-        rad[0]/=20; rad[0]=1;
-        rad[2]/=20; rad[2]=1;
+        rad[0]/=20;
+        rad[0]=1;
+        rad[2]/=20;
+        rad[2]=1;
         //?height default to 30 in SaxParser and 160 in Renderingengine
         //rad[1]=height_i/160.0;
         rad[1]=height_i/max_height;
@@ -350,24 +356,28 @@ void Frame::ComputePolyData3D()
 
         //scaling matrix
         double sc[3][3] = {{rad[0],0,0},
-                           {0,rad[1],0},
-                           {0,0,rad[2]}};
+            {0,rad[1],0},
+            {0,0,rad[2]}
+        };
 
 
         //rotation matrix around x-axis
         double roX[3][3] = {{1, 0,                    0},
-                            {0, cos(rot[0]),-sin(rot[0])},
-                            {0, sin(rot[0]), cos(rot[0])}};
+            {0, cos(rot[0]),-sin(rot[0])},
+            {0, sin(rot[0]), cos(rot[0])}
+        };
 
         //rotation matrix around y-axis
         double roY[3][3] = {{cos(rot[1]), 0,sin(rot[1])},
-                            {0,           1,          0},
-                            {-sin(rot[1]),0,cos(rot[1])}};
+            {0,           1,          0},
+            {-sin(rot[1]),0,cos(rot[1])}
+        };
 
         //rotation matrix around z-axis
         double roZ[3][3] = {{cos(rot[2]),sin(rot[2]),0.0},
-                            {-sin(rot[2]),cos(rot[2]),0.0},
-                            {0.0,0.0,1.0}};
+            {-sin(rot[2]),cos(rot[2]),0.0},
+            {0.0,0.0,1.0}
+        };
 
 
         //final rotation matrix
@@ -380,14 +390,13 @@ void Frame::ComputePolyData3D()
         vtkMath::Multiply3x3(sc,ro,rs);
 
         tensors->InsertNextTuple9(rs[0][0],rs[0][1],rs[0][2],
-                rs[1][0],rs[1][1],rs[1][2],
-                rs[2][0],rs[2][1],rs[2][2]);
+                                  rs[1][0],rs[1][1],rs[1][2],
+                                  rs[2][0],rs[2][1],rs[2][2]);
 
 
-        if(color==-1){
+        if(color==-1) {
             colors->InsertNextValue(NAN);
-        }
-        else{
+        } else {
             colors->InsertNextValue(color/255.0);
         }
     }

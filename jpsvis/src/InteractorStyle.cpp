@@ -48,237 +48,245 @@ using namespace std;
 #define VTK_CREATE(type, name) \
 		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-InteractorStyle::InteractorStyle() {
+InteractorStyle::InteractorStyle()
+{
 
 }
 
-InteractorStyle::~InteractorStyle() {
+InteractorStyle::~InteractorStyle()
+{
 
 }
 
 ///static constructor
-InteractorStyle* InteractorStyle::New() {
-	return new InteractorStyle();
+InteractorStyle* InteractorStyle::New()
+{
+    return new InteractorStyle();
 }
 
-void InteractorStyle::SetActor() {
+void InteractorStyle::SetActor()
+{
 }
 ;
 
-void InteractorStyle::SetSource() {
+void InteractorStyle::SetSource()
+{
 }
 ;
 
 //forward the event only if not in 2d mode
-void InteractorStyle::Rotate() {
-	//if(!SystemSettings::get2D())
-	vtkInteractorStyleTrackballCamera::Rotate();
+void InteractorStyle::Rotate()
+{
+    //if(!SystemSettings::get2D())
+    vtkInteractorStyleTrackballCamera::Rotate();
 }
 
-void InteractorStyle::Spin() {
-	vtkInteractorStyleTrackballCamera::Spin();
+void InteractorStyle::Spin()
+{
+    vtkInteractorStyleTrackballCamera::Spin();
 }
 
-void InteractorStyle::Pan() {
-	vtkInteractorStyleTrackballCamera::Pan();
+void InteractorStyle::Pan()
+{
+    vtkInteractorStyleTrackballCamera::Pan();
 }
 
-void InteractorStyle::Dolly() {
-	vtkInteractorStyleTrackballCamera::Dolly();
+void InteractorStyle::Dolly()
+{
+    vtkInteractorStyleTrackballCamera::Dolly();
 }
 
-void InteractorStyle::OnChar() {
+void InteractorStyle::OnChar()
+{
 
-	vtkRenderWindowInteractor *rwi = this->Interactor;
-	//this->Interactor->GetRenderWindow()->GetScreenSize();
-	//rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Print(std::cout);
+    vtkRenderWindowInteractor *rwi = this->Interactor;
+    //this->Interactor->GetRenderWindow()->GetScreenSize();
+    //rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Print(std::cout);
 
-	char ch = rwi->GetKeyCode();
-
-
-	switch (ch) {
-
-	case '+':
-	case '-':
-		rwi->Render(); // render - update the screen
-		break;
-
-		//escape
-	case 27:
-		extern_fullscreen_enable = false;
-		extern_force_system_update = true;
-		break;
-
-	case 'a': {
-		double para[3];
-		vtkCamera
-		* cam =
-				rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
-		cam->GetPosition(para);
-		//std::cout<<endl<<;
-		//cam->Roll(90-cam->GetRoll());
-		//cam->Yaw(0);
-		//cam->Pitch(0);
-		//cam->Roll(-90);
-		//cam->Elevation(0);
-		//cam->Azimuth(0);
-		//std::cout <<"roll       [ "<< cam->GetRoll()<<" ]"<<std::endl;
-		//std::cout <<"azimuth    [ "<< cam->GetRoll()<<" ]"<<std::endl;
-		//std::cout <<"elevation  [ "<< cam->GetRoll()<<" ]"<<std::endl;
-		//std::cout <<"roll       [ "<<para[0]<<" " <<para[1] <<" "<<para[2]<<" ]"<<std::endl;
-	}
-	break;
-
-	//zoom in
-	case 'n':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
-		break;
-		//zoom out
-	case 'N':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(0.95);
-		break;
-
-		//pan
-	case 'b':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Roll(5.0);
-		//Pan();
-		break;
-	case 'B':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Roll(-5.0);
-		break;
-
-		//rotate
-	case 'v':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Pitch(5);
-		break;
-	case 'V':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Pitch(-5);
-		break;
-
-		//dolly
-	case 'c':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Yaw(5);
-		break;
-	case 'C':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Yaw(-5);
-		break;
-
-		//Spin
-	case 'x':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Elevation(5);
-		rwi->GetRenderWindow()->Modified();
-		rwi->Render();
-		break;
-	case 'X':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Elevation(-5);
-		rwi->GetRenderWindow()->Modified();
-		rwi->Render();
-		break;
-
-		//Spin
-	case 'm':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Azimuth(5);
-		rwi->GetRenderWindow()->Modified();
-		break;
-	case 'M':
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Azimuth(-5);
-		rwi->GetRenderWindow()->Modified();
-		break;
+    char ch = rwi->GetKeyCode();
 
 
-	case 'h': // display camera settings
-	{
-		double para[3];
-		vtkCamera
-		* cam =
-				rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
-		cam->GetPosition(para);
-		std::cout << endl << endl;
-		std::cout << "position       [ " << para[0] << " " << para[1] << " "
-				<< para[2] << " ]" << std::endl;
-		cam->GetFocalPoint(para);
-		std::cout << "focal point    [ " << para[0] << " " << para[1] << " "
-				<< para[2] << " ]" << std::endl;
-		cam->GetClippingRange(para);
-		std::cout << "clipping range [ " << para[0] << " " << para[1] << " "
-				<< para[2] << " ]" << std::endl;
-		cam->GetViewPlaneNormal(para);
-		std::cout << "viewplan norm  [ " << para[0] << " " << para[1] << " "
-				<< para[2] << " ]" << std::endl;
+    switch (ch) {
 
-	}
-	break;
+    case '+':
+    case '-':
+        rwi->Render(); // render - update the screen
+        break;
 
-	default:
-	{
-		std::string key = rwi->GetKeySym();
-		int sensitivity=2;
-		double pos[3];
-		rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->GetPosition(pos);
+    //escape
+    case 27:
+        extern_fullscreen_enable = false;
+        extern_force_system_update = true;
+        break;
+
+    case 'a': {
+        double para[3];
+        vtkCamera
+        * cam =
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
+        cam->GetPosition(para);
+        //std::cout<<endl<<;
+        //cam->Roll(90-cam->GetRoll());
+        //cam->Yaw(0);
+        //cam->Pitch(0);
+        //cam->Roll(-90);
+        //cam->Elevation(0);
+        //cam->Azimuth(0);
+        //std::cout <<"roll       [ "<< cam->GetRoll()<<" ]"<<std::endl;
+        //std::cout <<"azimuth    [ "<< cam->GetRoll()<<" ]"<<std::endl;
+        //std::cout <<"elevation  [ "<< cam->GetRoll()<<" ]"<<std::endl;
+        //std::cout <<"roll       [ "<<para[0]<<" " <<para[1] <<" "<<para[2]<<" ]"<<std::endl;
+    }
+    break;
+
+    //zoom in
+    case 'n':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(1.05);
+        break;
+    //zoom out
+    case 'N':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Zoom(0.95);
+        break;
+
+    //pan
+    case 'b':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Roll(5.0);
+        //Pan();
+        break;
+    case 'B':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Roll(-5.0);
+        break;
+
+    //rotate
+    case 'v':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Pitch(5);
+        break;
+    case 'V':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Pitch(-5);
+        break;
+
+    //dolly
+    case 'c':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Yaw(5);
+        break;
+    case 'C':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Yaw(-5);
+        break;
+
+    //Spin
+    case 'x':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Elevation(5);
+        rwi->GetRenderWindow()->Modified();
+        rwi->Render();
+        break;
+    case 'X':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Elevation(-5);
+        rwi->GetRenderWindow()->Modified();
+        rwi->Render();
+        break;
+
+    //Spin
+    case 'm':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Azimuth(5);
+        rwi->GetRenderWindow()->Modified();
+        break;
+    case 'M':
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->Azimuth(-5);
+        rwi->GetRenderWindow()->Modified();
+        break;
+
+
+    case 'h': { // display camera settings
+        double para[3];
+        vtkCamera
+        * cam =
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera();
+        cam->GetPosition(para);
+        std::cout << endl << endl;
+        std::cout << "position       [ " << para[0] << " " << para[1] << " "
+                  << para[2] << " ]" << std::endl;
+        cam->GetFocalPoint(para);
+        std::cout << "focal point    [ " << para[0] << " " << para[1] << " "
+                  << para[2] << " ]" << std::endl;
+        cam->GetClippingRange(para);
+        std::cout << "clipping range [ " << para[0] << " " << para[1] << " "
+                  << para[2] << " ]" << std::endl;
+        cam->GetViewPlaneNormal(para);
+        std::cout << "viewplan norm  [ " << para[0] << " " << para[1] << " "
+                  << para[2] << " ]" << std::endl;
+
+    }
+    break;
+
+    default: {
+        std::string key = rwi->GetKeySym();
+        int sensitivity=2;
+        double pos[3];
+        rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->GetPosition(pos);
 //		printf("[%f,%f,%f]\n",pos[0],pos[1],pos[2]);
 
 
-		if(key=="Up"){
-			pos[1]=pos[1]-sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],1);
+        if(key=="Up") {
+            pos[1]=pos[1]-sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],1);
 
-		}
-		else if(key=="Down"){
-			pos[1]=pos[1]+sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],1);
+        } else if(key=="Down") {
+            pos[1]=pos[1]+sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],1);
 
-		}else if(key=="Left"){
-			pos[0]=pos[0]+sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
+        } else if(key=="Left") {
+            pos[0]=pos[0]+sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
 
-		}else if(key=="Right"){
-			pos[0]=pos[0]-sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
+        } else if(key=="Right") {
+            pos[0]=pos[0]-sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
 
-		}else if(key=="k"){
-			pos[0]=pos[0]-sensitivity*10;
-			pos[1]=pos[1]-sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
+        } else if(key=="k") {
+            pos[0]=pos[0]-sensitivity*10;
+            pos[1]=pos[1]-sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
 
-		}else if(key=="K"){
-			pos[0]=pos[0]+sensitivity*10;
-			pos[1]=pos[1]+sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
+        } else if(key=="K") {
+            pos[0]=pos[0]+sensitivity*10;
+            pos[1]=pos[1]+sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
 
-		}else if(key=="l"){
-			pos[0]=pos[0]-sensitivity*10;
-			pos[1]=pos[1]+sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
+        } else if(key=="l") {
+            pos[0]=pos[0]-sensitivity*10;
+            pos[1]=pos[1]+sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
 
-		}else if(key=="L"){
-			pos[0]=pos[0]+sensitivity*10;
-			pos[1]=pos[1]-sensitivity*10;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
-			rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
-		}
-	}
-	break;
+        } else if(key=="L") {
+            pos[0]=pos[0]+sensitivity*10;
+            pos[1]=pos[1]-sensitivity*10;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetPosition(pos);;
+            rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer()->GetActiveCamera()->SetFocalPoint(pos[0],pos[1],10);
+        }
+    }
+    break;
 
-	}
+    }
 
-	// forward events
-	vtkInteractorStyleTrackballCamera::OnChar();
+    // forward events
+    vtkInteractorStyleTrackballCamera::OnChar();
 }
 
 //http://vtk.1045678.n5.nabble.com/Coordinate-conversions-World-Display-td2808312.html
-void InteractorStyle::OnLeftButtonUp(){
+void InteractorStyle::OnLeftButtonUp()
+{
 
     vtkRenderWindowInteractor *rwi = this->Interactor;
 

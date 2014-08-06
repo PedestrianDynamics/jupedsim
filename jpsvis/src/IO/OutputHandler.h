@@ -39,8 +39,8 @@
 class OutputHandler {
 public:
     virtual void Write(std::string str);
-	virtual void Write(const char *string, ...);
-    virtual ~OutputHandler(){};
+    virtual void Write(const char *string, ...);
+    virtual ~OutputHandler() {};
 };
 
 class STDIOHandler : public OutputHandler {

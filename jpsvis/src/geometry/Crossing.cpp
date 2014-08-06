@@ -35,80 +35,97 @@
 using namespace std;
 
 
-Crossing::Crossing(){
+Crossing::Crossing()
+{
     _id = -1;
     _room1 = NULL;
     _subRoom1 = NULL;
     _subRoom2 = NULL;
-	_caption = "";
+    _caption = "";
 }
 
-Crossing::~Crossing() {
+Crossing::~Crossing()
+{
 }
 
 
-void Crossing::SetID(int ID) {
+void Crossing::SetID(int ID)
+{
     _id = ID;
 }
 
-void Crossing::SetRoom1(Room* r) {
+void Crossing::SetRoom1(Room* r)
+{
     _room1 = r;
 }
 
-void Crossing::SetSubRoom1(SubRoom* r1) {
+void Crossing::SetSubRoom1(SubRoom* r1)
+{
     _subRoom1 = r1;
 }
 
-void Crossing::SetSubRoom2(SubRoom* r2) {
+void Crossing::SetSubRoom2(SubRoom* r2)
+{
     _subRoom2 = r2;
 }
 
-void Crossing::SetCaption(string s) {
-	_caption = s;
+void Crossing::SetCaption(string s)
+{
+    _caption = s;
 }
 // Getter-Funktionen
 
-int Crossing::GetID() const {
+int Crossing::GetID() const
+{
     return _id;
 }
-string Crossing::GetCaption() const {
-	return _caption;
+string Crossing::GetCaption() const
+{
+    return _caption;
 }
-Room* Crossing::GetRoom1() const {
+Room* Crossing::GetRoom1() const
+{
     return _room1;
 }
 
 
-SubRoom* Crossing::GetSubRoom1() const {
+SubRoom* Crossing::GetSubRoom1() const
+{
     return _subRoom1;
 }
 
-SubRoom* Crossing::GetSubRoom2() const {
+SubRoom* Crossing::GetSubRoom2() const
+{
     return _subRoom2;
 }
 // Sonstiges
 
 
-bool Crossing::IsExit() const {
+bool Crossing::IsExit() const
+{
     return false;
 }
 
 
-bool Crossing::IsOpen() const {
+bool Crossing::IsOpen() const
+{
     return true;
 }
 
-bool Crossing::IsTransition() const {
-	return false;
+bool Crossing::IsTransition() const
+{
+    return false;
 }
 
 
-bool Crossing::IsInRoom(int roomID) const {
+bool Crossing::IsInRoom(int roomID) const
+{
     return _room1->GetID() == roomID;
 }
 
 
-bool Crossing::IsInSubRoom(int subroomID) const {
+bool Crossing::IsInSubRoom(int subroomID) const
+{
     bool r1, r2;
     if (_subRoom1 != NULL)
         r1 = _subRoom1->GetSubRoomID() == subroomID;
@@ -124,22 +141,24 @@ bool Crossing::IsInSubRoom(int subroomID) const {
 /* gibt den ANDEREN Subroom != subroomID zurück
  * roomID wird hier nicht benötigt, aber in Transition::GetOtherSubRoom()
  * (virtuelle Funktion) */
-SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const {
+SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
+{
     if (_subRoom1->GetSubRoomID() == subroomID)
         return _subRoom2;
     else if (_subRoom2->GetSubRoomID() == subroomID)
         return _subRoom1;
     else {
-    	 Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
-    	    		"on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
-       return NULL;
+        Log->Write("WARMING: \tCrossing::GetOtherSubRoom No exit found "
+                   "on the other side\n ID=%hd, roomID=%hd, subroomID=%hd\n",GetID(),roomID,subroomID);
+        return NULL;
     }
 }
 
 
 // Ausgabe
 
-void Crossing::WriteToErrorLog() const {
+void Crossing::WriteToErrorLog() const
+{
     string s;
     char tmp[CLENGTH];
     sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
@@ -153,8 +172,9 @@ void Crossing::WriteToErrorLog() const {
 
 // TraVisTo Ausgabe
 
-string Crossing::WriteElement() const {
-	//return "";
+string Crossing::WriteElement() const
+{
+    //return "";
     string geometry;
     char tmp[CLENGTH] = "";
     sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());

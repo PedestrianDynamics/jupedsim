@@ -1,6 +1,6 @@
 /**
  * File:   Room.cpp
- * 
+ *
  * Created on 30. September 2010, 11:58
  * @section LICENSE
  * This file is part of JuPedSim.
@@ -34,7 +34,8 @@ using namespace std;
   Konstruktoren
  ************************************************************/
 
-Room::Room() {
+Room::Room()
+{
     _id = -1;
     _state=ROOM_CLEAN; //smoke-free
     _caption = "no room caption";
@@ -43,7 +44,8 @@ Room::Room() {
     _outputFile=NULL;
 }
 
-Room::Room(const Room& orig) {
+Room::Room(const Room& orig)
+{
     _id = orig.GetID();
     _caption = orig.GetCaption();
     _zPos = orig.GetZPos();
@@ -52,7 +54,8 @@ Room::Room(const Room& orig) {
     _outputFile=orig.GetOutputHandler();
 }
 
-Room::~Room() {
+Room::~Room()
+{
     for (unsigned int i = 0; i < _subRooms.size(); i++)
         delete _subRooms[i];
 }
@@ -60,19 +63,23 @@ Room::~Room() {
 /*************************************************************
  Setter-Funktionen
  ************************************************************/
-void Room::SetID(int ID) {
+void Room::SetID(int ID)
+{
     _id = ID;
 }
 
-void Room::SetCaption(string s) {
+void Room::SetCaption(string s)
+{
     _caption = s;
 }
 
-void Room::SetZPos(double z) {
+void Room::SetZPos(double z)
+{
     _zPos = z;
 }
 
-void Room::SetSubRoom(SubRoom* subroom, int index) {
+void Room::SetSubRoom(SubRoom* subroom, int index)
+{
     if ((index >= 0) && (index < GetNumberOfSubRooms())) {
         _subRooms[index] = subroom;
     } else {
@@ -81,40 +88,47 @@ void Room::SetSubRoom(SubRoom* subroom, int index) {
     }
 }
 
-void Room::SetState(RoomState state) {
-	_state=state;
+void Room::SetState(RoomState state)
+{
+    _state=state;
 }
 
 
 /*************************************************************
  Getter-Functions
  ************************************************************/
-int Room::GetID() const {
+int Room::GetID() const
+{
     return _id;
 }
 
-string Room::GetCaption() const {
+string Room::GetCaption() const
+{
     return _caption;
 }
 
-double Room::GetZPos() const {
+double Room::GetZPos() const
+{
     //if(pCaption=="070") return pZPos+1.0;
-	return _zPos;
+    return _zPos;
 }
 
-int Room::GetNumberOfSubRooms() const {
+int Room::GetNumberOfSubRooms() const
+{
     return _subRooms.size();
 }
 
-const vector<SubRoom*>& Room::GetAllSubRooms() const {
+const vector<SubRoom*>& Room::GetAllSubRooms() const
+{
     return _subRooms;
 }
 
-SubRoom* Room::GetSubRoom(int index) const {
+SubRoom* Room::GetSubRoom(int index) const
+{
     if ((index >= 0) && (index < (int) _subRooms.size()))
         return _subRooms[index];
     else {
-    	char tmp[CLENGTH];
+        char tmp[CLENGTH];
         sprintf(tmp,"ERROR: Room::GetSubRoom() Wrong subroom index [%d] for room index [%d] ",index,_id);
         Log->Write(tmp);
         exit(0);
@@ -124,7 +138,8 @@ SubRoom* Room::GetSubRoom(int index) const {
 
 #ifdef _SIMULATOR
 
-int Room::GetNumberOfPedestrians() const {
+int Room::GetNumberOfPedestrians() const
+{
     int sum = 0;
     for (int i = 0; i < GetNumberOfSubRooms(); i++) {
         sum += GetSubRoom(i)->GetNumberOfPedestrians();
@@ -134,8 +149,9 @@ int Room::GetNumberOfPedestrians() const {
 
 #endif // _SIMULATOR
 
-RoomState Room::GetState() const {
-	return _state;
+RoomState Room::GetState() const
+{
+    return _state;
 }
 
 
@@ -143,11 +159,13 @@ RoomState Room::GetState() const {
 /*************************************************************
  Sonstige Funktionen
  ************************************************************/
-void Room::AddSubRoom(SubRoom* r) {
+void Room::AddSubRoom(SubRoom* r)
+{
     _subRooms.push_back(r);
 }
 
-void Room::DeleteSubRoom(int index) {
+void Room::DeleteSubRoom(int index)
+{
     if ((index >= 0) && (index < (int) _subRooms.size()))
         _subRooms.erase(_subRooms.begin() + index);
     else {
@@ -161,7 +179,8 @@ void Room::DeleteSubRoom(int index) {
  ************************************************************/
 
 
-void Room::WriteToErrorLog() const {
+void Room::WriteToErrorLog() const
+{
     char tmp[CLENGTH];
     string s;
     sprintf(tmp, "\tRaum: %d [%s]:\n", _id, _caption.c_str());
@@ -175,18 +194,22 @@ void Room::WriteToErrorLog() const {
 
 }
 
-const vector<int>& Room::GetAllTransitionsIDs() const {
-	return _transitionsIDs;
+const vector<int>& Room::GetAllTransitionsIDs() const
+{
+    return _transitionsIDs;
 }
 
-void Room::AddTransitionID(int ID){
-	_transitionsIDs.push_back(ID);
+void Room::AddTransitionID(int ID)
+{
+    _transitionsIDs.push_back(ID);
 }
 
-void Room::SetOutputHandler(OutputHandler* oh){
-	_outputFile=oh;
+void Room::SetOutputHandler(OutputHandler* oh)
+{
+    _outputFile=oh;
 }
 
-OutputHandler* Room::GetOutputHandler() const {
-	return _outputFile;
+OutputHandler* Room::GetOutputHandler() const
+{
+    return _outputFile;
 }

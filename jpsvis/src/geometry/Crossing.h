@@ -38,8 +38,8 @@ class SubRoom;
 class Crossing : public NavLine {
 private:
     /// ? unique between crossings and transitions ?
-	int _id;
-	/// only one room needed, since a crossing only separates 2 subrooms
+    int _id;
+    /// only one room needed, since a crossing only separates 2 subrooms
     Room* _room1;
     std::string _caption;
     SubRoom* _subRoom1;

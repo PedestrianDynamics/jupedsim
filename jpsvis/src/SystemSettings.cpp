@@ -49,8 +49,8 @@ bool SystemSettings::showAgents=true;
 bool SystemSettings::showGeometry=true;
 bool SystemSettings::showFloor=true;
 unsigned short SystemSettings::port=8989;
-double SystemSettings::bgColor[]={1.0,1.0,1.0};
-int SystemSettings::pedestriansColor[3][3]={{255 , 17, 224},{122, 255, 122},{130, 130, 130}};
+double SystemSettings::bgColor[]= {1.0,1.0,1.0};
+int SystemSettings::pedestriansColor[3][3]= {{255 , 17, 224},{122, 255, 122},{130, 130, 130}};
 int SystemSettings::pedesShape=Settings::PINGUINS;
 int SystemSettings::ellipseResolution=10;
 int SystemSettings::trailCount=50;
@@ -79,38 +79,46 @@ SystemSettings::SystemSettings() {}
 
 SystemSettings::~SystemSettings() {}
 
-void  SystemSettings::setShowLegend(bool legend){
-	showLegend=legend;
+void  SystemSettings::setShowLegend(bool legend)
+{
+    showLegend=legend;
 
 }
 
-bool  SystemSettings::getShowLegend(){
-	return showLegend;
+bool  SystemSettings::getShowLegend()
+{
+    return showLegend;
 }
 
 
-void SystemSettings::setListningPort(unsigned short porta){
-	port=porta;
+void SystemSettings::setListningPort(unsigned short porta)
+{
+    port=porta;
 }
 
-unsigned short   SystemSettings::getListeningPort(){
-	return port;
+unsigned short   SystemSettings::getListeningPort()
+{
+    return port;
 }
 
 
-void  SystemSettings::setShowAgentsCaptions(bool caption){
+void  SystemSettings::setShowAgentsCaptions(bool caption)
+{
     showAgentsCaptions=caption;
 }
 
-bool  SystemSettings::getShowAgentsCaptions(){
+bool  SystemSettings::getShowAgentsCaptions()
+{
     return showAgentsCaptions;
 }
 
-void SystemSettings::set2D(bool lis2D){
-	is2D=lis2D;
+void SystemSettings::set2D(bool lis2D)
+{
+    is2D=lis2D;
 }
-bool SystemSettings::get2D(){
-	return is2D;
+bool SystemSettings::get2D()
+{
+    return is2D;
 }
 
 // set/get the  2D visio
@@ -154,107 +162,124 @@ void   SystemSettings::getWorkingDirectory(QString& dir)
     dir=workingDir;
 }
 
-void  SystemSettings::getBackgroundColor(double* col){
-	col[0]=bgColor[0];
-	col[1]=bgColor[1];
-	col[2]=bgColor[2];
+void  SystemSettings::getBackgroundColor(double* col)
+{
+    col[0]=bgColor[0];
+    col[1]=bgColor[1];
+    col[2]=bgColor[2];
 }
 
-void  SystemSettings::setBackgroundColor(double* col){
-	bgColor[0]=col[0];
-	bgColor[1]=col[1];
-	bgColor[2]=col[2];
+void  SystemSettings::setBackgroundColor(double* col)
+{
+    bgColor[0]=col[0];
+    bgColor[1]=col[1];
+    bgColor[2]=col[2];
 }
 
 
 
 /// set/get pedestrian private sphere ellipse resolution
-int SystemSettings::getEllipseResolution(){
-	return ellipseResolution;
+int SystemSettings::getEllipseResolution()
+{
+    return ellipseResolution;
 }
 
-void SystemSettings::setEllipseResolution(int resolution){
-	ellipseResolution=resolution;
+void SystemSettings::setEllipseResolution(int resolution)
+{
+    ellipseResolution=resolution;
 }
 
 
 
 /// set/get the pedestrian shape
 /// 0 for default, 1 for Ellipse, 2 for pinguins
-void SystemSettings::setPedestrianShape(int shape){
-	pedesShape=shape;
+void SystemSettings::setPedestrianShape(int shape)
+{
+    pedesShape=shape;
 }
-int SystemSettings::getPedestrianShape(){
-	return pedesShape;
+int SystemSettings::getPedestrianShape()
+{
+    return pedesShape;
 }
-void  SystemSettings::setTrailsInfo(int count, int type, int geo){
-	trailCount=count;
-	trailingType=type;
-	trailingGeometry=geo;
-}
-
-void  SystemSettings::getTrailsInfo(int* count, int *type, int* geo){
-	*count=trailCount;
-	*type=trailingType;
-	*geo=trailingGeometry;
-}
-void  SystemSettings::setPedestrianColor(int groupID, int color[3]){
-	if((groupID<0) || (groupID>3)) {
-		Debug::Error(" wrong pedestrian group ID %d",groupID);
-		return;
-	}
-	pedestriansColor[groupID][0]=color[0];
-	pedestriansColor[groupID][1]=color[1];
-	pedestriansColor[groupID][2]=color[2];
-
+void  SystemSettings::setTrailsInfo(int count, int type, int geo)
+{
+    trailCount=count;
+    trailingType=type;
+    trailingGeometry=geo;
 }
 
-void  SystemSettings::getPedestrianColor(int groupID, int color[3]){
-	if((groupID<0) || (groupID>3)) {
-		Debug::Error(" wrong pedestrian group ID %d",groupID);
-		return;
-	}
-
-	color[0]=pedestriansColor[groupID][0];
-	color[1]=pedestriansColor[groupID][1];
-	color[2]=pedestriansColor[groupID][2];
+void  SystemSettings::getTrailsInfo(int* count, int *type, int* geo)
+{
+    *count=trailCount;
+    *type=trailingType;
+    *geo=trailingGeometry;
+}
+void  SystemSettings::setPedestrianColor(int groupID, int color[3])
+{
+    if((groupID<0) || (groupID>3)) {
+        Debug::Error(" wrong pedestrian group ID %d",groupID);
+        return;
+    }
+    pedestriansColor[groupID][0]=color[0];
+    pedestriansColor[groupID][1]=color[1];
+    pedestriansColor[groupID][2]=color[2];
 
 }
 
-void  SystemSettings::setOutputDirectory(QString dir){
-	outputDir=dir;
+void  SystemSettings::getPedestrianColor(int groupID, int color[3])
+{
+    if((groupID<0) || (groupID>3)) {
+        Debug::Error(" wrong pedestrian group ID %d",groupID);
+        return;
+    }
+
+    color[0]=pedestriansColor[groupID][0];
+    color[1]=pedestriansColor[groupID][1];
+    color[2]=pedestriansColor[groupID][2];
+
 }
 
-void  SystemSettings::getOutputDirectory(QString& dir){
-	dir=QString(outputDir);
+void  SystemSettings::setOutputDirectory(QString dir)
+{
+    outputDir=dir;
+}
+
+void  SystemSettings::getOutputDirectory(QString& dir)
+{
+    dir=QString(outputDir);
 }
 
 
-int SystemSettings::getPedestrianCaptionSize(){
-	return captionSize;
+int SystemSettings::getPedestrianCaptionSize()
+{
+    return captionSize;
 }
 
-void SystemSettings::setRecordPNGsequence(bool status){
-	recordPNGsequence=status;
+void SystemSettings::setRecordPNGsequence(bool status)
+{
+    recordPNGsequence=status;
 }
-bool SystemSettings::getRecordPNGsequence(){
-	return recordPNGsequence;
-}
-
-void SystemSettings::setFilenamePrefix(QString prefix){
-	filesPrefix=prefix;
+bool SystemSettings::getRecordPNGsequence()
+{
+    return recordPNGsequence;
 }
 
-QString SystemSettings::getFilenamePrefix() {
+void SystemSettings::setFilenamePrefix(QString prefix)
+{
+    filesPrefix=prefix;
+}
+
+QString SystemSettings::getFilenamePrefix()
+{
     return filesPrefix;
 }
 
 void SystemSettings::CreateLogfile()
 {
     //create directory if not exits
-    if(!QDir(outputDir).exists()){
+    if(!QDir(outputDir).exists()) {
         QDir dir;
-        if(!dir.mkpath (outputDir )){
+        if(!dir.mkpath (outputDir )) {
             qDebug()<<"could not create directory: "<< outputDir;
             outputDir=""; // current
         }
@@ -263,7 +288,7 @@ void SystemSettings::CreateLogfile()
     logfile = outputDir+"log_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm_").append(SystemSettings::getFilenamePrefix()).append(".txt");
 }
 
- QString &SystemSettings::getLogfile()
+QString &SystemSettings::getLogfile()
 {
     return logfile;
 }
@@ -272,48 +297,56 @@ void SystemSettings::DeleteLogfile()
 {
     //first close the opened file
     delete Log;
-    if(! QFile::remove(logfile)){
+    if(! QFile::remove(logfile)) {
         qDebug()<<"he log file could not delete the file"<<endl;
     }
 }
 
-void SystemSettings::setPedestrianColorProfileFromFile(bool readFromFile) {
-	pedColorProfileReadFromFile = readFromFile;
+void SystemSettings::setPedestrianColorProfileFromFile(bool readFromFile)
+{
+    pedColorProfileReadFromFile = readFromFile;
 }
 
-bool SystemSettings::getPedestrianColorProfileFromFile() {
-	return pedColorProfileReadFromFile;
+bool SystemSettings::getPedestrianColorProfileFromFile()
+{
+    return pedColorProfileReadFromFile;
 }
-void SystemSettings::setVirtualAgent(int agent){
-	virtualAgentID=agent;
+void SystemSettings::setVirtualAgent(int agent)
+{
+    virtualAgentID=agent;
 }
 
-int  SystemSettings::getVirtualAgent(){
-	return virtualAgentID;
+int  SystemSettings::getVirtualAgent()
+{
+    return virtualAgentID;
 }
 
 void SystemSettings::setCaptionsParameters(int size, const QColor& col, int orientation,
-		bool automaticRotation) {
-	captionSize=size;
-	captionColor=col;
-	captionOrientaton=orientation;
-	captionAutomaticRotation=automaticRotation;
+        bool automaticRotation)
+{
+    captionSize=size;
+    captionColor=col;
+    captionOrientaton=orientation;
+    captionAutomaticRotation=automaticRotation;
 
 }
 
 void SystemSettings::getCaptionsParameters(int &size, QColor& col, int &orientation,
-		bool &automaticRotation) {
-	size=captionSize;
-	col=captionColor;
-	orientation=captionOrientaton;
-	automaticRotation=captionAutomaticRotation;
+        bool &automaticRotation)
+{
+    size=captionSize;
+    col=captionColor;
+    orientation=captionOrientaton;
+    automaticRotation=captionAutomaticRotation;
 }
 
-void SystemSettings::setOnScreenInfos(bool status){
-	onScreenInfos=status;
+void SystemSettings::setOnScreenInfos(bool status)
+{
+    onScreenInfos=status;
 }
 
-bool SystemSettings::getOnScreenInfos(){
-	return onScreenInfos;
+bool SystemSettings::getOnScreenInfos()
+{
+    return onScreenInfos;
 }
 

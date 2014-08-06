@@ -9,8 +9,7 @@ class vtkAppendPolyData;
 class vtkCleanPolyData;
 
 
-class TrailPlotter
-{
+class TrailPlotter {
 public:
     /// constructor
     TrailPlotter();

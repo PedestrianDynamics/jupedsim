@@ -72,7 +72,8 @@
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent) {
+    QMainWindow(parent)
+{
     ui.setupUi(this);
     this->setWindowTitle("JPSvis");
 
@@ -91,25 +92,25 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_controlSequence(const char*)), this,
-                         SLOT(slotControlSequence(const char *)))){
+                         SLOT(slotControlSequence(const char *)))) {
         Debug::Error("dataTransferThread Thread: control sequence could not be connected");
     }
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_startVisualisationThread(QString,int,float )), this,
-                         SLOT(slotStartVisualisationThread(QString,int,float )))){
+                         SLOT(slotStartVisualisationThread(QString,int,float )))) {
         Debug::Error(" signal_startVisualisationThread not connected");
     }
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_stopVisualisationThread(bool )), this,
-                         SLOT(slotShutdownVisualisationThread(bool )))){
+                         SLOT(slotShutdownVisualisationThread(bool )))) {
         Debug::Error(" signal_stopVisualisationThread not connected ");
     }
 
     if(!QObject::connect(dataTransferThread,
                          SIGNAL(signal_errorMessage(QString)), this,
-                         SLOT(slotErrorOutput(QString)))){
+                         SLOT(slotErrorOutput(QString)))) {
         Debug::Error("signal_errorMessage  not connected ");
     }
 
@@ -120,15 +121,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(&extern_trajectories_firstSet,
                      SIGNAL(signal_controlSequences(const char*)), this,
                      SLOT(slotControlSequence(const char *)));
-
-    QObject::connect(&extern_trajectories_secondSet,
-                     SIGNAL(signal_controlSequences(const char*)), this,
-                     SLOT(slotControlSequence(const char *)));
-
-    QObject::connect(&extern_trajectories_thirdSet,
-                     SIGNAL(signal_controlSequences(const char*)), this,
-                     SLOT(slotControlSequence(const char *)));
-
 
     QObject::connect(dataTransferThread, SIGNAL(signal_CurrentAction(QString)),
                      this, SLOT(slotCurrentAction(QString)));
@@ -187,44 +179,43 @@ MainWindow::MainWindow(QWidget *parent) :
     arguments.append("-2D");
     // parse arguments list
     if(arguments.size()>1)
-        for(int argCount=1;argCount<arguments.size();argCount++){
+        for(int argCount=1; argCount<arguments.size(); argCount++) {
 
             QString argument=arguments[argCount];
 
             if(argument.compare("help")==0) {
                 Debug::Error("Usage: ./TraVisTo [file1] [file2] [file3] [-2D] [-caption] [-online [port]]");
-            }
-            else if(argument.compare("-2D")==0) {
+            } else if(argument.compare("-2D")==0) {
                 ui.action2_D->setChecked(true);
                 slotToogle2D();
-            }else if(argument.compare("-caption")==0) {
+            } else if(argument.compare("-caption")==0) {
                 ui.actionShow_Captions->setChecked(true);
                 slotShowPedestrianCaption();
 
-            }else if(argument.compare("-online")==0) {
+            } else if(argument.compare("-online")==0) {
                 slotSetOnlineMode(true);
 
                 // checking for other possible options [ port...]
-                if(argCount!=arguments.size()-1){
+                if(argCount!=arguments.size()-1) {
                     bool ok=false;
                     int port = arguments[++argCount].toInt(&ok);
                     Debug::
-                            Debug::Messages(" listening port: %d",port);
+                    Debug::Messages(" listening port: %d",port);
 
                     if (ok) {
                         SystemSettings::setListningPort(port);
-                    }else{ // maybe that wasnt the port
+                    } else { // maybe that wasnt the port
                         argCount--; // to ensure that the "option" will be checked
                     }
                 }
                 mayPlay=true;
 
-            }else if(argument.startsWith("-")) {
+            } else if(argument.startsWith("-")) {
                 const char* std=argument.toStdString().c_str();
                 Debug::Error(" unknown options: %s",std);
                 Debug::Error("Usage: ./TraVisTo [file1] [file2] [file3] [-2D] [-caption] [-online [port] ]");
 
-            }else if(addPedestrianGroup(group,argument)){
+            } else if(addPedestrianGroup(group,argument)) {
                 //slotHelpAbout();
                 group++;
                 mayPlay=true;
@@ -235,7 +226,8 @@ MainWindow::MainWindow(QWidget *parent) :
     if(mayPlay)slotStartPlaying();
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
 
     extern_shutdown_visual_thread=true;
     extern_recording_enable=false;
@@ -262,19 +254,20 @@ MainWindow::~MainWindow() {
 
 }
 
-void MainWindow::slotHelpAbout() {
+void MainWindow::slotHelpAbout()
+{
 
     QMessageBox::about(
-                this,
-                "About JPSVis",
-                "Version 0.5 built with  QT 4.8 and VTK 5.10\n\n"
-                "JPSVis is part of the Juelich Pedestrian Simulator (JuPdsim)"
-                "and stands for Trajectories Visualisation Tool. It is a tool for visualizing pedestrians motion\n"
-                "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
-                "Copyright 2009-2014.\n"
-                "Authors: Ulrich Kemloh\n\n"
-                "For questions, contact +49-40-246161-4193 \nor mail at \n"
-                "u.kemloh@fz-juelich.de\n");
+        this,
+        "About JPSVis",
+        "Version 0.5 built with  QT 4.8 and VTK 5.10\n\n"
+        "JPSVis is part of the Juelich Pedestrian Simulator (JuPdsim)"
+        "and stands for Trajectories Visualisation Tool. It is a tool for visualizing pedestrians motion\n"
+        "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
+        "Copyright 2009-2014.\n"
+        "Authors: Ulrich Kemloh\n\n"
+        "For questions, contact +49-40-246161-4193 \nor mail at \n"
+        "u.kemloh@fz-juelich.de\n");
 
 }
 
@@ -285,7 +278,8 @@ void MainWindow::slotHelpAbout() {
  *
  */
 
-void MainWindow::slotNetworkSettings() {
+void MainWindow::slotNetworkSettings()
+{
     bool ok;
 
     int port = QInputDialog::getInt(this, tr("input a port "), tr(
@@ -297,7 +291,8 @@ void MainWindow::slotNetworkSettings() {
 }
 
 
-void MainWindow::slotStartPlaying() {
+void MainWindow::slotStartPlaying()
+{
 
     //first reset this variable. just for the case
     // the thread was shutdown from the reset option
@@ -309,19 +304,17 @@ void MainWindow::slotStartPlaying() {
         //only start the visualisation thread if in offline modus
         // otherwise both threads should be started
         if (extern_offline_mode) {
-            if(anyDatasetLoaded()){ //at least one dataset was loaded, restarting the playback
+            if(anyDatasetLoaded()) { //at least one dataset was loaded, restarting the playback
 
                 // starting the playback from the beginning
                 extern_trajectories_firstSet.resetFrameCursor();
-                extern_trajectories_secondSet.resetFrameCursor();
-                extern_trajectories_thirdSet.resetFrameCursor();
 
             } else if (!slotAddDataSet()) { //else load a dataset
                 return;//could not read any data
             }
             visualisationThread->start();
 
-        } else /*if (extern_online_mode)*/ { //live visualisation
+        } else { /*if (extern_online_mode)*/  //live visualisation
             dataTransferThread->start();
             //visualisationThread->start();
         }
@@ -368,7 +361,8 @@ void MainWindow::slotStartPlaying() {
 
 }
 
-void MainWindow::slotStopPlaying() {
+void MainWindow::slotStopPlaying()
+{
 
     if (extern_recording_enable) {
         int res = QMessageBox::question(this, "action",
@@ -406,7 +400,8 @@ void MainWindow::slotStopPlaying() {
  * and initialize the visualization
  *
  */
-bool MainWindow::slotLoadFile() {
+bool MainWindow::slotLoadFile()
+{
 
     return slotAddDataSet();
 
@@ -414,7 +409,8 @@ bool MainWindow::slotLoadFile() {
 
 
 // This function is only used in online Mode
-FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
+FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode)
+{
 
     cout<<"parsing the geo"<<endl;
     if(geoNode.isNull()) return NULL;
@@ -423,29 +419,25 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode){
     QString fileName = geoNode.toElement().elementsByTagName("file").item(0).toElement().attribute("location");
     FacilityGeometry* geometry = visualisationThread->getGeometry();
 
-    if(!fileName.isEmpty())
-    {
-        if (fileName.endsWith(".xml",Qt::CaseInsensitive))
-        {
+    if(!fileName.isEmpty()) {
+        if (fileName.endsWith(".xml",Qt::CaseInsensitive)) {
             //parsing the file
             SaxParser::parseGeometryJPS(fileName,geometry);
-        }
-        else if (fileName.endsWith(".trav",Qt::CaseInsensitive))
-        {
+        } else if (fileName.endsWith(".trav",Qt::CaseInsensitive)) {
             //must not be a file name
             SaxParser::parseGeometryTRAV(fileName,geometry);
         }
     }
     // I assume it is a trav format node,
     //which is the only one which can directly be inserted into a file
-    else
-    {
+    else {
         //cout<<"online geo: "<<geoNode.toDocument().toString().toStdString()<<endl; exit(0);
         //geoNode.toText().toComment().toDocument().toString()
         QDomDocument doc("");
         QDomNode geoNode;
-        if(!geoNode.isNull()){
-            cout<<"online geo: "<<geoNode.toElement().toDocument().toString().toStdString()<<endl; exit(0);
+        if(!geoNode.isNull()) {
+            cout<<"online geo: "<<geoNode.toElement().toDocument().toString().toStdString()<<endl;
+            exit(0);
         }
 
         //must not be a file name
@@ -481,8 +473,7 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 //    }
 
     QFile file("_geometry_tmp_file.xml");
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream stream(&file);
         stream << geometryString << endl;
     }
@@ -496,26 +487,20 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 
     FacilityGeometry* geometry = visualisationThread->getGeometry();
 
-    if(!geofileName.isEmpty())
-    {
-        if (geofileName.endsWith(".xml",Qt::CaseInsensitive))
-        {
+    if(!geofileName.isEmpty()) {
+        if (geofileName.endsWith(".xml",Qt::CaseInsensitive)) {
             //parsing the file
-            if(!SaxParser::parseGeometryJPS(geofileName,geometry))
-            {
-               SaxParser::parseGeometryXMLV04(geofileName,geometry);
+            if(!SaxParser::parseGeometryJPS(geofileName,geometry)) {
+                SaxParser::parseGeometryXMLV04(geofileName,geometry);
             }
-        }
-        else if (geofileName.endsWith(".trav",Qt::CaseInsensitive))
-        {
+        } else if (geofileName.endsWith(".trav",Qt::CaseInsensitive)) {
             //must not be a file name
             SaxParser::parseGeometryTRAV(geofileName,geometry);
         }
     }
     // I assume it is a trav format node,
     //which is the only one which can directly be inserted into a file
-    else
-    {
+    else {
         QDomDocument doc("");
         QDomNode geoNode;
 
@@ -529,7 +514,8 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 }
 
 // TODO: still used?
-bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
+bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID)
+{
 
     if(shapeNode.isNull()) return false;
     QStringList heights;
@@ -549,31 +535,21 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
         if(!ok)color=std::numeric_limits<int>::quiet_NaN();
         Debug::Messages("id= %d height= %lf color =%d",id,height,color);
 
-        if(!isnan(height)){
+        if(!isnan(height)) {
             heights.append(QString::number(id));
             heights.append(QString::number(height));
         }
-        if(!isnan(color)){
+        if(!isnan(color)) {
             colors.append(QString::number(id));
             colors.append(QString::number(color));
         }
 
     }
-    switch (groupID){
+    switch (groupID) {
 
     case 1:
         extern_trajectories_firstSet.setInitialHeights(heights);
         extern_trajectories_firstSet.setInitialColors(colors);
-        break;
-
-    case 2:
-        extern_trajectories_secondSet.setInitialHeights(heights);
-        extern_trajectories_secondSet.setInitialColors(colors);
-        break;
-
-    case 3:
-        extern_trajectories_thirdSet.setInitialHeights(heights);
-        extern_trajectories_thirdSet.setInitialColors(colors);
         break;
     }
 
@@ -583,7 +559,8 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID){
 
 
 /// add a new dataset
-bool MainWindow::slotAddDataSet(){
+bool MainWindow::slotAddDataSet()
+{
 
 //    if (numberOfDatasetLoaded>=3){
 //        QMessageBox::information(this,"notice","You can load at most 3 datasets.\n In"
@@ -602,7 +579,7 @@ bool MainWindow::slotAddDataSet(){
 
     // just continue
     numberOfDatasetLoaded=1;
-    if(addPedestrianGroup(numberOfDatasetLoaded)==false){
+    if(addPedestrianGroup(numberOfDatasetLoaded)==false) {
         numberOfDatasetLoaded--;
         return false;
     }
@@ -618,7 +595,8 @@ bool MainWindow::slotAddDataSet(){
 }
 
 ///clear all datasets previously entered.
-void MainWindow::slotClearAllDataset(){
+void MainWindow::slotClearAllDataset()
+{
 
     clearDataSet(1);
     clearDataSet(2);
@@ -655,14 +633,13 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     //cout<<"geometry name: "<<geometry_file.toStdString()<<endl;
 
     // if xml is detected, just load and show the geometry then exit
-    if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)){
+    if(geometry_file.endsWith(".xml",Qt::CaseInsensitive)) {
 
         //try to parse the correct way
         // fall back to this if it fails
         SystemSettings::CreateLogfile();
 
-        if(! SaxParser::parseGeometryJPS(geometry_file,geometry))
-        {
+        if(! SaxParser::parseGeometryJPS(geometry_file,geometry)) {
             int res = QMessageBox::warning(this, "Errors in Geometry. Continue Parsing?",
                                            "JuPedSim has detected an error in the supplied geometry.\n"
                                            "The simulation will likely failed using that geometry.\n"
@@ -676,9 +653,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
                 return false;
             }
             SaxParser::parseGeometryXMLV04(wd+"/"+geometry_file,geometry);
-        }
-        else
-        { //everything was fine. Delete the log file
+        } else {
+            //everything was fine. Delete the log file
             SystemSettings::DeleteLogfile();
         }
 
@@ -696,10 +672,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     SyncData* dataset=NULL;
     extern_trajectories_firstSet.clearFrames();
-    extern_trajectories_secondSet.clearFrames();
-    extern_trajectories_thirdSet.clearFrames();
 
-    switch(groupID){
+    switch(groupID) {
     case 1:
         Debug::Messages("handling first set");
         dataset=&extern_trajectories_firstSet;
@@ -710,29 +684,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         slotToggleFirstPedestrianGroup();
         break;
 
-    case 2:
-        Debug::Messages("handling second set");
-        dataset=&extern_trajectories_secondSet;
-        extern_second_dataset_loaded=true;
-        extern_second_dataset_visible=true;
-        ui.actionSecond_Group->setEnabled(true);
-        ui.actionSecond_Group->setChecked(true);
-        slotToggleSecondPedestrianGroup();
-        break;
-
-    case 3:
-        Debug::Messages("handling third set");
-        dataset=&extern_trajectories_thirdSet;
-        extern_third_dataset_loaded=true;
-        extern_third_dataset_visible=true;
-        ui.actionThird_Group->setEnabled(true);
-        ui.actionThird_Group->setChecked(true);
-        slotToggleThirdPedestrianGroup();
-        break;
-
     default:
         Debug::Error("invalid pedestrian group: %d " ,groupID);
-        Debug::Error("should be 1, 2 or 3");
         //return false;
         break;
     }
@@ -773,7 +726,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 }
 
 
-void MainWindow::slotRecord() {
+void MainWindow::slotRecord()
+{
 
     if (extern_recording_enable) {
         int res = QMessageBox::warning(this, "action",
@@ -796,14 +750,16 @@ void MainWindow::slotRecord() {
 
 
 QString MainWindow::getTagValueFromElement(QDomNode node,
-                                           const char * tagName) {
+        const char * tagName)
+{
     if (node.isNull())
         return "";
     return node.toElement().namedItem(tagName).firstChild().nodeValue();
 
 }
 
-void MainWindow::slotFullScreen(bool status) {
+void MainWindow::slotFullScreen(bool status)
+{
 
     Debug::Messages("changing full screen status %d",status);
     extern_fullscreen_enable = true;
@@ -811,7 +767,8 @@ void MainWindow::slotFullScreen(bool status) {
     extern_force_system_update=true;
 }
 
-void MainWindow::slotSetOfflineMode(bool status) {
+void MainWindow::slotSetOfflineMode(bool status)
+{
 
     if (status) {
         ui.actionOnline->setChecked(false);
@@ -826,7 +783,8 @@ void MainWindow::slotSetOfflineMode(bool status) {
 
 }
 
-void MainWindow::slotSetOnlineMode(bool status) {
+void MainWindow::slotSetOnlineMode(bool status)
+{
     if (status) {
         ui.actionOffline->setChecked(false);
         extern_offline_mode = false;
@@ -839,7 +797,8 @@ void MainWindow::slotSetOnlineMode(bool status) {
     }
 }
 
-void MainWindow::slotReset() {
+void MainWindow::slotReset()
+{
 
     //stop any recording
     if (extern_recording_enable) {
@@ -849,13 +808,12 @@ void MainWindow::slotReset() {
         if (res == QMessageBox::Yes) {
             extern_recording_enable = false;
             labelCurrentAction->setText("   Playing   ");
-        }else{
+        } else {
             return;
         }
     }
 
-    if(anyDatasetLoaded())
-    {
+    if(anyDatasetLoaded()) {
         int res = QMessageBox::question(this, "action",
                                         "This will also clear any dataset if loaded.\n"
                                         "Do you wish to continue?", QMessageBox::Discard
@@ -881,14 +839,16 @@ void MainWindow::slotReset() {
 
 }
 
-void MainWindow::slotCurrentAction(QString msg) {
+void MainWindow::slotCurrentAction(QString msg)
+{
     msg = " " + msg + " ";
     //labelCurrentAction->setText(msg);
     statusBar()->showMessage(msg);
     //	labelMode->setText(msg);
 }
 
-void MainWindow::slotFrameNumber(unsigned long actualFrameCount) {
+void MainWindow::slotFrameNumber(unsigned long actualFrameCount)
+{
     QString msg;
     msg.setNum(actualFrameCount);
 
@@ -896,24 +856,17 @@ void MainWindow::slotFrameNumber(unsigned long actualFrameCount) {
 
     //compute the  mamixum framenumber
     int maxFrameCount=1;
-    if(extern_first_dataset_loaded){
+    if(extern_first_dataset_loaded) {
         maxFrameCount=extern_trajectories_firstSet.getFramesNumber();
 
     }
-    if(extern_second_dataset_loaded){
-        int frameCount=extern_trajectories_secondSet.getFramesNumber();
-        if(frameCount>maxFrameCount) maxFrameCount=frameCount;
 
-    }
-    if(extern_third_dataset_loaded){
-        int frameCount=extern_trajectories_thirdSet.getFramesNumber();
-        if(frameCount>maxFrameCount) maxFrameCount=frameCount;
-    }
     if(!frameSliderHold)if(maxFrameCount!=0)//TODO WTF, otherwise an arrymtic exeption arises
-        ui.framesIndicatorSlider->setValue((ui.framesIndicatorSlider->maximum()*actualFrameCount)/maxFrameCount);
+            ui.framesIndicatorSlider->setValue((ui.framesIndicatorSlider->maximum()*actualFrameCount)/maxFrameCount);
 }
 
-void MainWindow::slotRunningTime(unsigned long timems) {
+void MainWindow::slotRunningTime(unsigned long timems)
+{
     //	QString msg;
     //	msg.setNum(timems);
     //	msg.append(" milsec");
@@ -928,12 +881,14 @@ void MainWindow::slotRenderingTime(int fps)
 }
 
 
-void MainWindow::slotExit() {
+void MainWindow::slotExit()
+{
     cleanUp();
     qApp->exit();
 }
 
-void MainWindow::closeEvent(QCloseEvent* event) {
+void MainWindow::closeEvent(QCloseEvent* event)
+{
     hide();
     cleanUp();
     event->accept();
@@ -944,7 +899,8 @@ void MainWindow::closeEvent(QCloseEvent* event) {
  *  closing data
  *  stopping recording
  */
-void MainWindow::cleanUp() {
+void MainWindow::cleanUp()
+{
     //stop the recording process
     extern_recording_enable = false;
     extern_shutdown_visual_thread = true;
@@ -959,7 +915,8 @@ void MainWindow::cleanUp() {
 
 
 
-void MainWindow::slotControlSequence(const char * sex) {
+void MainWindow::slotControlSequence(const char * sex)
+{
 
     QString str(sex);
 
@@ -1012,14 +969,12 @@ void MainWindow::slotControlSequence(const char * sex) {
 
         //reset the frames cursor
         extern_trajectories_firstSet.resetFrameCursor();
-        extern_trajectories_secondSet.resetFrameCursor();
-        extern_trajectories_thirdSet.resetFrameCursor();
 
         resetGraphicalElements();
 
-    } else if (str.compare("STACK_REACHS_BEGINNING")==0){
+    } else if (str.compare("STACK_REACHS_BEGINNING")==0) {
         //return to normal speed
-        if(extern_update_step<0){
+        if(extern_update_step<0) {
             Debug::Messages("stack reaches beginning, resuming the playback with vel 1");
             extern_update_step=1;
             ui.speedSettingSlider->setValue(1);
@@ -1029,7 +984,8 @@ void MainWindow::slotControlSequence(const char * sex) {
 }
 
 
-void MainWindow::resetGraphicalElements(){
+void MainWindow::resetGraphicalElements()
+{
 
     //restore play button
     QIcon icon1;
@@ -1076,10 +1032,11 @@ void MainWindow::resetGraphicalElements(){
 }
 
 
-void MainWindow::slotToggleFirstPedestrianGroup(){
-    if(ui.actionFirst_Group->isChecked()){
+void MainWindow::slotToggleFirstPedestrianGroup()
+{
+    if(ui.actionFirst_Group->isChecked()) {
         extern_first_dataset_visible=true;
-    }else{
+    } else {
         extern_first_dataset_visible=false;
     }
     extern_force_system_update=true;
@@ -1087,63 +1044,59 @@ void MainWindow::slotToggleFirstPedestrianGroup(){
 }
 
 /// enable/disable the second pedestrian group
-void MainWindow::slotToggleSecondPedestrianGroup(){
-    if(ui.actionSecond_Group->isChecked()){
-        extern_second_dataset_visible=true;
-    }else{
-        extern_second_dataset_visible=false;
-    }
-    extern_force_system_update=true;
+void MainWindow::slotToggleSecondPedestrianGroup()
+{
+//    if(ui.actionSecond_Group->isChecked()){
+//        extern_second_dataset_visible=true;
+//    }else{
+//        extern_second_dataset_visible=false;
+//    }
+//    extern_force_system_update=true;
 }
 
 /// enable/disable the third pedestrian group
-void MainWindow::slotToggleThirdPedestrianGroup(){
-    if(ui.actionThird_Group->isChecked()){
-        extern_third_dataset_visible=true;
-    }else{
-        extern_third_dataset_visible=false;
-    }
-    extern_force_system_update=true;
+void MainWindow::slotToggleThirdPedestrianGroup()
+{
+//    if(ui.actionThird_Group->isChecked()){
+//        extern_third_dataset_visible=true;
+//    }else{
+//        extern_third_dataset_visible=false;
+//    }
+//    extern_force_system_update=true;
 }
 
-bool MainWindow::anyDatasetLoaded(){
+bool MainWindow::anyDatasetLoaded()
+{
     return
-            (extern_first_dataset_loaded||
-             extern_second_dataset_loaded||
-             extern_third_dataset_loaded);
+        extern_first_dataset_loaded;
 }
 
 void MainWindow::slotShowTrajectoryOnly()
 {
-    if(ui.actionShow_Trajectories->isChecked())
-    {
+    if(ui.actionShow_Trajectories->isChecked()) {
         extern_tracking_enable=true;
-    }
-    else
-    {
+    } else {
         extern_tracking_enable=false;
     }
-     extern_force_system_update=true;
+    extern_force_system_update=true;
 }
 
 
 void MainWindow::slotShowPedestrianOnly()
 {
 
-    if(ui.actionShow_Agents->isChecked())
-    {
+    if(ui.actionShow_Agents->isChecked()) {
         SystemSettings::setShowAgents(true);
-    }
-    else
-    {
+    } else {
         SystemSettings::setShowAgents(false);
     }
     extern_force_system_update=true;
 }
 
-void MainWindow::slotShowGeometry(){
+void MainWindow::slotShowGeometry()
+{
 
-    if (ui.actionShow_Geometry->isChecked()){
+    if (ui.actionShow_Geometry->isChecked()) {
         visualisationThread->setGeometryVisibility(true);
         ui.actionShow_Exits->setEnabled(true);
         ui.actionShow_Walls->setEnabled(true);
@@ -1151,45 +1104,43 @@ void MainWindow::slotShowGeometry(){
         ui.actionShow_Navigation_Lines->setEnabled(true);
         ui.actionShow_Floor->setEnabled(true);
         SystemSettings::setShowGeometry(true);
-    }
-    else{
+    } else {
         visualisationThread->setGeometryVisibility(false);
         ui.actionShow_Exits->setEnabled(false);
         ui.actionShow_Walls->setEnabled(false);
         ui.actionShow_Geometry_Captions->setEnabled(false);
         ui.actionShow_Navigation_Lines->setEnabled(false);
-         ui.actionShow_Floor->setEnabled(false);
+        ui.actionShow_Floor->setEnabled(false);
         SystemSettings::setShowGeometry(false);
     }
     extern_force_system_update=true;
 }
 
 /// shows/hide geometry
-void MainWindow::slotShowHideExits(){
-    if (ui.actionShow_Exits->isChecked()){
+void MainWindow::slotShowHideExits()
+{
+    if (ui.actionShow_Exits->isChecked()) {
         visualisationThread->showDoors(true);
-    }
-    else{
+    } else {
         visualisationThread->showDoors(false);
     }
 }
 
 /// shows/hide geometry
-void MainWindow::slotShowHideWalls(){
-    if (ui.actionShow_Walls->isChecked()){
+void MainWindow::slotShowHideWalls()
+{
+    if (ui.actionShow_Walls->isChecked()) {
         visualisationThread->showWalls(true);
-    }
-    else{
+    } else {
         visualisationThread->showWalls(false);
     }
 }
 
 void MainWindow::slotShowHideNavLines()
 {
-    if (ui.actionShow_Navigation_Lines->isChecked()){
+    if (ui.actionShow_Navigation_Lines->isChecked()) {
         visualisationThread->showNavLines(true);
-    }
-    else{
+    } else {
         visualisationThread->showNavLines(false);
     }
 }
@@ -1204,7 +1155,8 @@ void MainWindow::slotShowHideFloor()
 
 
 /// update the playing speed
-void MainWindow::slotUpdateSpeedSlider(int newValue){
+void MainWindow::slotUpdateSpeedSlider(int newValue)
+{
 
     QString msg;
     msg.setNum(newValue);
@@ -1216,48 +1168,30 @@ void MainWindow::slotUpdateSpeedSlider(int newValue){
 }
 
 /// update the position slider
-void MainWindow::slotUpdateFrameSlider(int newValue){
+void MainWindow::slotUpdateFrameSlider(int newValue)
+{
 
     // first get the correct position
     int maxFrameCount=1;
-    if(extern_first_dataset_loaded){
+    if(extern_first_dataset_loaded) {
         int t=extern_trajectories_firstSet.getFramesNumber();
-        if(maxFrameCount<t) maxFrameCount=t;
-    }
-    if(extern_second_dataset_loaded){
-        int t=extern_trajectories_secondSet.getFramesNumber();
-        if(maxFrameCount<t) maxFrameCount=t;
-
-    }
-    if(extern_third_dataset_loaded){
-        int t=extern_trajectories_thirdSet.getFramesNumber();
         if(maxFrameCount<t) maxFrameCount=t;
     }
 
     int update = ((maxFrameCount*newValue)/ui.framesIndicatorSlider->maximum());
 
     // then set the correct position
-    if(extern_first_dataset_loaded){
+    if(extern_first_dataset_loaded) {
         extern_trajectories_firstSet.setFrameCursorTo(update);
         //Debug::Error( " first dataset frames update to [1] : " <<update<<endl;
 
     }
-    if(extern_second_dataset_loaded){
-        extern_trajectories_secondSet.setFrameCursorTo(update);
-        //Debug::Error( " second dataset frames update to[2] : " <<update<<endl;
-
-    }
-    if(extern_third_dataset_loaded){
-        extern_trajectories_thirdSet.setFrameCursorTo(update);
-        //Debug::Error( " third dataset frames update to [3] : " <<update<<endl;
-    }
-
-
 }
 
 /// update the contrast
 /// TODO: now known as framePerScond slider
-void MainWindow::slotUpdateContrastSlider(int newValue){
+void MainWindow::slotUpdateContrastSlider(int newValue)
+{
 
     //	 extern_screen_contrast=ui.contrastSettingSlider->value();
     //extern_screen_contrast=newValue;
@@ -1270,9 +1204,10 @@ void MainWindow::slotUpdateContrastSlider(int newValue){
 
 
 ///clear the corresponding dataset;
-void MainWindow::clearDataSet(int ID){
+void MainWindow::clearDataSet(int ID)
+{
 
-    switch(ID){
+    switch(ID) {
     case 1:
         //extern_trajectories_firstSet.clear();
         extern_trajectories_firstSet.clearFrames();
@@ -1282,30 +1217,6 @@ void MainWindow::clearDataSet(int ID){
         ui.actionFirst_Group->setEnabled(false);
         ui.actionFirst_Group->setChecked(false);
         slotToggleFirstPedestrianGroup();
-        numberOfDatasetLoaded--;
-        break;
-
-    case 2:
-        extern_trajectories_secondSet.clearFrames();
-        //extern_trajectories_secondSet.clear();
-        extern_trajectories_secondSet.resetFrameCursor();
-        extern_second_dataset_visible=false;
-        extern_second_dataset_loaded=false;
-        ui.actionSecond_Group->setEnabled(false);
-        ui.actionSecond_Group->setChecked(false);
-        slotToggleSecondPedestrianGroup();
-        numberOfDatasetLoaded--;
-        break;
-
-    case 3:
-        extern_trajectories_thirdSet.clearFrames();
-        //extern_trajectories_thirdSet.clear();
-        extern_trajectories_thirdSet.resetFrameCursor();
-        extern_third_dataset_loaded=false;
-        extern_third_dataset_visible=false;
-        ui.actionThird_Group->setEnabled(false);
-        ui.actionThird_Group->setChecked(false);
-        slotToggleThirdPedestrianGroup();
         numberOfDatasetLoaded--;
         break;
 
@@ -1319,16 +1230,16 @@ void MainWindow::clearDataSet(int ID){
     slotClearGeometry();
 }
 
-void MainWindow::resetAllFrameCursor(){
-    extern_trajectories_thirdSet.resetFrameCursor();
-    extern_trajectories_secondSet.resetFrameCursor();
+void MainWindow::resetAllFrameCursor()
+{
     extern_trajectories_firstSet.resetFrameCursor();
 }
 
 /// wait for visualisation thread to shutdown
 ///@todo why two different threads shutdown procedure.
-void MainWindow::waitForVisioThread(){
-    while(visualisationThread->isRunning()){
+void MainWindow::waitForVisioThread()
+{
+    while(visualisationThread->isRunning()) {
         visualisationThread->wait(200);
         Debug::Messages("waiting for visualisation engine to terminate ...");
 #ifdef __linux__
@@ -1344,9 +1255,10 @@ void MainWindow::waitForVisioThread(){
 }
 
 /// wait for datatransfer thread to be ready
-void MainWindow::waitForDataThread(){
+void MainWindow::waitForDataThread()
+{
 
-    while(dataTransferThread->isRunning()){
+    while(dataTransferThread->isRunning()) {
         dataTransferThread->shutdown();
         Debug::Messages("Waiting for network engine to terminate ...");
         dataTransferThread->wait(500);
@@ -1356,13 +1268,14 @@ void MainWindow::waitForDataThread(){
 
 
 /// set visualisation mode to 2D
-void MainWindow::slotToogle2D(){
-    if(ui.action2_D->isChecked()){
+void MainWindow::slotToogle2D()
+{
+    if(ui.action2_D->isChecked()) {
         extern_is_3D=false;
         ui.action3_D->setChecked(false);
         SystemSettings::set2D(true);
 
-    }else{
+    } else {
         extern_is_3D=true;
         ui.action3_D->setChecked(true);
         SystemSettings::set2D(false);
@@ -1373,8 +1286,9 @@ void MainWindow::slotToogle2D(){
 }
 
 /// set visualisation mode to 3D
-void MainWindow::slotToogle3D(){
-    if(ui.action3_D->isChecked()){
+void MainWindow::slotToogle3D()
+{
+    if(ui.action3_D->isChecked()) {
         extern_is_3D=true;
         ui.action2_D->setChecked(false);
         SystemSettings::set2D(false);
@@ -1389,18 +1303,21 @@ void MainWindow::slotToogle3D(){
     extern_force_system_update=true;
 }
 
-void MainWindow::slotFrameSliderPressed(){
+void MainWindow::slotFrameSliderPressed()
+{
     frameSliderHold=true;
 }
 
-void MainWindow::slotFrameSliderReleased(){
+void MainWindow::slotFrameSliderReleased()
+{
     frameSliderHold=false;
 }
 
-void MainWindow::slotToogleShowLegend(){
-    if(ui.actionShow_Legend->isChecked()){
+void MainWindow::slotToogleShowLegend()
+{
+    if(ui.actionShow_Legend->isChecked()) {
         SystemSettings::setShowLegend(true);
-    }else{
+    } else {
         SystemSettings::setShowLegend(false);
     }
 }
@@ -1408,7 +1325,8 @@ void MainWindow::slotToogleShowLegend(){
  *
  * @param geodata the geometry data received from the data transfer thread
  */
-void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,float frameRate){
+void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,float frameRate)
+{
 
     extern_trajectories_firstSet.setNumberOfAgents(numberOfAgents);
 
@@ -1425,7 +1343,7 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     QString errorMsg="";
     doc.setContent(data,&errorMsg);
 
-    if(!errorMsg.isEmpty()){
+    if(!errorMsg.isEmpty()) {
         Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
         return;
     }
@@ -1445,81 +1363,65 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
 
 /// this method is called by the data transfer thread
 /// investigate if you should shutdown the thread
-void MainWindow::slotShutdownVisualisationThread( bool clearAndStop){
+void MainWindow::slotShutdownVisualisationThread( bool clearAndStop)
+{
     //FIXME: it could have some side effects.
     //you should close this threads
-    if(clearAndStop){
+    if(clearAndStop) {
         extern_shutdown_visual_thread=true;
         waitForVisioThread();
     }
     clearDataSet(1);
 }
 
-void MainWindow::slotFramesByFramesNavigation(){
-    if(ui.actionFrames_Navigation->isChecked()){
+void MainWindow::slotFramesByFramesNavigation()
+{
+    if(ui.actionFrames_Navigation->isChecked()) {
         ui.BtNextFrame->setVisible(true);
         ui.BtPreviousFrame->setVisible(true);
-    }
-    else{
+    } else {
         ui.BtNextFrame->setVisible(false);
         ui.BtPreviousFrame->setVisible(false);
     }
 }
 
-void MainWindow::slotNextFrame(){
+void MainWindow::slotNextFrame()
+{
 
-    if(extern_first_dataset_loaded){
+    if(extern_first_dataset_loaded) {
         int newValue=extern_trajectories_firstSet.getFrameCursor()+1;
         extern_trajectories_firstSet.setFrameCursorTo(newValue);
         //Debug::Error( " update to : " <<newValue<<endl;
     }
-    if(extern_second_dataset_loaded){
-        int newValue=extern_trajectories_secondSet.getFrameCursor()+1;
-        extern_trajectories_secondSet.setFrameCursorTo(newValue);
-        //Debug::Error( " update to : " <<newValue<<endl;
-    }
-    if(extern_third_dataset_loaded){
-        int newValue=extern_trajectories_thirdSet.getFrameCursor()+1;
-        extern_trajectories_thirdSet.setFrameCursorTo(newValue);
-        //Debug::Error( " update to : " <<newValue<<endl;
-
-    }
 }
 
-void MainWindow::slotPreviousFrame(){
-    if(extern_first_dataset_loaded){
+void MainWindow::slotPreviousFrame()
+{
+    if(extern_first_dataset_loaded) {
         int newValue=extern_trajectories_firstSet.getFrameCursor()-1;
         extern_trajectories_firstSet.setFrameCursorTo(newValue);
         //Debug::Error( " update to : " <<newValue<<endl;
     }
-    if(extern_second_dataset_loaded){
-        int newValue=extern_trajectories_secondSet.getFrameCursor()-1;
-        extern_trajectories_secondSet.setFrameCursorTo(newValue);
-        //Debug::Error( " update to : " <<newValue<<endl;
-    }
-    if(extern_third_dataset_loaded){
-        int newValue=extern_trajectories_thirdSet.getFrameCursor()-1;
-        extern_trajectories_thirdSet.setFrameCursorTo(newValue);
-        //Debug::Error( " update to : " <<newValue<<endl;
-
-    }
 }
 
-void MainWindow::slotShowPedestrianCaption(){
+void MainWindow::slotShowPedestrianCaption()
+{
 
     SystemSettings::setShowAgentsCaptions(ui.actionShow_Captions->isChecked());
     extern_force_system_update=true;
 }
 
 
-void MainWindow::slotToogleShowAxis(){
+void MainWindow::slotToogleShowAxis()
+{
 
     visualisationThread->setAxisVisible(ui.actionShow_Axis->isChecked());
 }
 
 
 //todo: rename this to slotChangeSettting
-void MainWindow::slotChangePedestrianShape(){
+void MainWindow::slotChangePedestrianShape()
+{
 
     //	Qt::WindowFlags flags = Qt::Window  | Qt::WindowCloseButtonHint;
     //
@@ -1532,15 +1434,18 @@ void MainWindow::slotChangePedestrianShape(){
 
 }
 
-void MainWindow::slotCaptionColorAuto(){
+void MainWindow::slotCaptionColorAuto()
+{
     emit signal_controlSequence("CAPTION_AUTO");
 }
 
-void MainWindow::slotCaptionColorCustom(){
+void MainWindow::slotCaptionColorCustom()
+{
     emit signal_controlSequence("CAPTION_CUSTOM");
 }
 
-void MainWindow::slotChangeBackgroundColor(){
+void MainWindow::slotChangeBackgroundColor()
+{
 
     QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for the background");
@@ -1549,14 +1454,15 @@ void MainWindow::slotChangeBackgroundColor(){
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  bkcolor[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
     visualisationThread->setBackgroundColor(bkcolor);
 
     delete colorDialog;
 
 }
 /// change the wall color
-void MainWindow::slotChangeWallsColor(){
+void MainWindow::slotChangeWallsColor()
+{
 
     QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for walls");
@@ -1565,7 +1471,7 @@ void MainWindow::slotChangeWallsColor(){
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  bkcolor[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
     visualisationThread->setWallsColor(bkcolor);
 
@@ -1574,7 +1480,8 @@ void MainWindow::slotChangeWallsColor(){
 }
 
 /// change the exits color
-void MainWindow::slotChangeExitsColor(){
+void MainWindow::slotChangeExitsColor()
+{
     QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for the exits");
     QColor col=colorDialog->getColor(Qt::white,this,"Select new exit color");
@@ -1582,7 +1489,7 @@ void MainWindow::slotChangeExitsColor(){
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  color[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
     visualisationThread->setExitsColor(color);
 
@@ -1590,7 +1497,8 @@ void MainWindow::slotChangeExitsColor(){
 }
 
 /// change the navigation lines colors
-void MainWindow::slotChangeNavLinesColor(){
+void MainWindow::slotChangeNavLinesColor()
+{
     QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for walls");
     QColor col=colorDialog->getColor(Qt::white,this,"Select new navigation lines color");
@@ -1598,7 +1506,7 @@ void MainWindow::slotChangeNavLinesColor(){
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  color[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
     visualisationThread->setNavLinesColor(color);
 
@@ -1614,14 +1522,15 @@ void MainWindow::slotChangeFloorColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  color[3]={(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    double  color[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
 
     visualisationThread->setFloorColor(color);
 
     delete colorDialog;
 }
 
-void MainWindow::slotSetCameraPerspectiveToTop(){
+void MainWindow::slotSetCameraPerspectiveToTop()
+{
     int p= 1; //TOP
 
     visualisationThread->setCameraPerspective(p);
@@ -1630,7 +1539,8 @@ void MainWindow::slotSetCameraPerspectiveToTop(){
     //cerr <<"Setting camera view to top"<<endl;
 }
 
-void MainWindow::slotSetCameraPerspectiveToFront(){
+void MainWindow::slotSetCameraPerspectiveToFront()
+{
     int p= 2; //FRONT
     visualisationThread->setCameraPerspective(p);
     //disable the virtual agent view
@@ -1638,7 +1548,8 @@ void MainWindow::slotSetCameraPerspectiveToFront(){
     //	cerr <<"Setting camera view to FRONT"<<endl;
 }
 
-void MainWindow::slotSetCameraPerspectiveToSide(){
+void MainWindow::slotSetCameraPerspectiveToSide()
+{
     int p= 3; //SIDE
     visualisationThread->setCameraPerspective(p);
     //disable the virtual agent view
@@ -1646,7 +1557,8 @@ void MainWindow::slotSetCameraPerspectiveToSide(){
     //cerr <<"Setting camera view to Side"<<endl;
 }
 
-void MainWindow::slotSetCameraPerspectiveToVirtualAgent(){
+void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
+{
 
     bool ok=false;
     int agent = QInputDialog::getInt(this, tr("choose the agent you want to see the scene through"), tr(
@@ -1662,11 +1574,13 @@ void MainWindow::slotSetCameraPerspectiveToVirtualAgent(){
 }
 
 /// @todo does it work? mem check?
-void MainWindow::slotClearGeometry(){
+void MainWindow::slotClearGeometry()
+{
     visualisationThread->setGeometry(NULL);
 }
 
-void MainWindow::slotErrorOutput(QString err) {
+void MainWindow::slotErrorOutput(QString err)
+{
     QMessageBox msgBox;
     msgBox.setText("Error");
     msgBox.setInformativeText(err);
@@ -1675,30 +1589,33 @@ void MainWindow::slotErrorOutput(QString err) {
     msgBox.exec();
 }
 
-void MainWindow::slotTakeScreenShot(){
+void MainWindow::slotTakeScreenShot()
+{
     //extern_take_screenshot=true;
     extern_take_screenshot=!extern_take_screenshot;
 }
 
 /// load settings, parsed from the project file
-void MainWindow::loadSettings(){
+void MainWindow::loadSettings()
+{
 
     Debug::Error("Not implemented");
 
 }
 
 /// start/stop the recording process als png images sequences
-void MainWindow::slotRecordPNGsequence(){
-    if(!isPlaying){
+void MainWindow::slotRecordPNGsequence()
+{
+    if(!isPlaying) {
         slotErrorOutput("Start a video first");
     }
 
     // get the status from the system settings and toogle it
     bool status =SystemSettings::getRecordPNGsequence();
 
-    if(status){
+    if(status) {
         ui.actionRecord_PNG_sequences->setText("Record PNG sequence");
-    }else{
+    } else {
         ui.actionRecord_PNG_sequences->setText("Stop PNG Recording");
     }
 
@@ -1708,17 +1625,20 @@ void MainWindow::slotRecordPNGsequence(){
 }
 
 /// render a PNG image sequence to an AVI video
-void MainWindow::slotRenderPNG2AVI(){
+void MainWindow::slotRenderPNG2AVI()
+{
     slotErrorOutput("Not Implemented yet, sorry !");
 
 }
 
-void MainWindow::dragEnterEvent(QDragEnterEvent *event){
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
     if (event->mimeData()->hasFormat("text/uri-list"))
         event->acceptProposedAction();
 }
 
-void MainWindow::dropEvent(QDropEvent *event) {
+void MainWindow::dropEvent(QDropEvent *event)
+{
 
     if (!extern_offline_mode) {
         slotErrorOutput("online mode, ignoring DnD !");
@@ -1748,14 +1668,16 @@ void MainWindow::dropEvent(QDropEvent *event) {
 
 /// show/hide onscreen information
 /// information include Time and pedestrians left in the facility
-void MainWindow::slotShowOnScreenInfos(){
+void MainWindow::slotShowOnScreenInfos()
+{
     bool value=ui.actionShow_Onscreen_Infos->isChecked();
     visualisationThread->setOnscreenInformationVisibility(value);
     SystemSettings::setOnScreenInfos(value);
 }
 
 /// show/hide the geometry captions
-void MainWindow::slotShowHideGeometryCaptions(){
+void MainWindow::slotShowHideGeometryCaptions()
+{
 
     bool value=ui.actionShow_Geometry_Captions->isChecked();
     visualisationThread->setGeometryLabelsVisibility(value);

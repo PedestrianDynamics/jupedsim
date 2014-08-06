@@ -43,24 +43,24 @@ class vtkActor;
 
 class SimpleVisualisationWindow {
 public:
-	///constructor
-	SimpleVisualisationWindow();
-	///destructor
-	virtual ~SimpleVisualisationWindow();
+    ///constructor
+    SimpleVisualisationWindow();
+    ///destructor
+    virtual ~SimpleVisualisationWindow();
 
-	///add an assembly actor
-	void setActor(vtkAssembly* actor);
+    ///add an assembly actor
+    void setActor(vtkAssembly* actor);
 
 //	///add a simple (single) actor
 //	void setActor(vtkActor* actor);
 
-	///start the visualisation
-	//with the defaults parameters
-	void start();
+    ///start the visualisation
+    //with the defaults parameters
+    void start();
 
 private:
-	vtkAssembly* assembly;
-	//vtkActor* actor;
+    vtkAssembly* assembly;
+    //vtkActor* actor;
 };
 
 #endif /* SIMPLEVISUALISATIONWINDOW_H_ */

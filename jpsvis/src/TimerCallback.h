@@ -83,11 +83,11 @@ extern Pedestrian** extern_pedestrians_firstSet;
 extern Pedestrian** extern_pedestrians_secondSet;
 extern Pedestrian** extern_pedestrians_thirdSet;
 
-extern vtkSmartPointer<vtkActor2D> extern_pedestrians_labels;
-extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
-extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D;
-extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_2D;
-extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_3D;
+extern vtkActor2D* extern_pedestrians_labels;
+extern vtkTensorGlyph* extern_glyphs_pedestrians;
+extern vtkTensorGlyph* extern_glyphs_pedestrians_3D;
+extern vtkActor* extern_glyphs_pedestrians_actor_2D;
+extern vtkActor* extern_glyphs_pedestrians_actor_3D;
 extern PointPlotter* extern_trail_plotter;
 
 extern SyncData extern_trajectories_firstSet;
@@ -106,66 +106,58 @@ extern bool extern_third_dataset_visible;
 
 
 
-class TimerCallback :public QObject, public vtkCommand{
+class TimerCallback :public QObject, public vtkCommand {
 
-	Q_OBJECT
+    Q_OBJECT
 
 private:
-	int RenderTimerId;
-	vtkWindowToImageFilter* windowToImageFilter;
-	vtkPNGWriter *pngWriter;
-	vtkTextActor* runningTime;
-	char runningTimeText[50];
+    int RenderTimerId;
+    vtkWindowToImageFilter* windowToImageFilter;
+    vtkPNGWriter *pngWriter;
+    vtkTextActor* runningTime;
+    char runningTimeText[50];
 
 #ifdef WIN32
-	vtkAVIWriter* pAVIWriter;
+    vtkAVIWriter* pAVIWriter;
 #endif
 
 #ifdef __linux__
-	vtkFFMPEGWriter* pAVIWriter;
+    vtkFFMPEGWriter* pAVIWriter;
 #endif
 
 
 
 public:
-	static TimerCallback *New();
+    static TimerCallback *New();
 
-	virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
+    virtual void Execute(vtkObject *caller, unsigned long eventId, void *callData);
 
-	void SetRenderTimerId(int tid);
+    void SetRenderTimerId(int tid);
 
-	void setTextActor(vtkTextActor* runningTime);
+    void setTextActor(vtkTextActor* runningTime);
 
 private:
-	///updates system global changes, like fullscreen, ffw and soone
-	void updateSettings(vtkRenderWindow* renderWindow);
+    ///updates system global changes, like fullscreen, ffw and soone
+    void updateSettings(vtkRenderWindow* renderWindow);
 
-	/// make a png screenshot of the renderwindows
-	void takeScreenshot(vtkRenderWindow* renderWindow);
+    /// make a png screenshot of the renderwindows
+    void takeScreenshot(vtkRenderWindow* renderWindow);
 
-	/// take png screenshots sequence
-	void takeScreenshotSequence(vtkRenderWindow* renderWindow);
+    /// take png screenshots sequence
+    void takeScreenshotSequence(vtkRenderWindow* renderWindow);
 
+    /// extract from the
+    void getTrail(int datasetID,int frameNumber);
 
-	/// create directory
-	//bool createDirectory( const std::string& ac_sPath );
-
-	/// mark pedestrians as out of the system
-	/// when they were present in the last frame
-	/// but not in the current
-	/// @param previous Frame current Frame datasetID (1, 2 or 3)
-	// void checkIfOutOfSystem(Frame* previous, Frame* current,int datasetID);
-
-	/// extract from the
-	//void getTrail(int datasetID,double* trailX, double*  trailY, double* trailZ, int frameNumber,int trailCount);
-	void getTrail(int datasetID,int frameNumber);
+    ///update the virtual camera
+    void updateVirtualCamera(Frame* frame, vtkRenderer *renderer);
 
 
-	Q_SIGNALS:
-	void signalStatusMessage(QString msg);
-	void signalFrameNumber(unsigned long timems);
-	void signalRunningTime(unsigned long timems);
-	void signalRenderingTime(int fps);
+Q_SIGNALS:
+    void signalStatusMessage(QString msg);
+    void signalFrameNumber(unsigned long timems);
+    void signalRunningTime(unsigned long timems);
+    void signalRenderingTime(int fps);
 
 };
 

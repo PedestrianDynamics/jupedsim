@@ -55,97 +55,101 @@ int LinePlotter::m_allLineWidth = 2;
 
 LinePlotter::LinePlotter()
 {
-	m_curPointID = 0;
+    m_curPointID = 0;
 
-	m_scalars = vtkUnsignedCharArray::New();
-	m_scalars->SetNumberOfComponents(3);
-	m_points = vtkPoints::New();
-	m_lines = vtkCellArray::New();
+    m_scalars = vtkUnsignedCharArray::New();
+    m_scalars->SetNumberOfComponents(3);
+    m_points = vtkPoints::New();
+    m_lines = vtkCellArray::New();
 
-	//m_lineScalars = vtkFloatArray::New();
-	// create a color lookup table
-	//m_lookupTable = vtkLookupTable::New();
+    //m_lineScalars = vtkFloatArray::New();
+    // create a color lookup table
+    //m_lookupTable = vtkLookupTable::New();
 
-	//create the poly data
+    //create the poly data
 //	vtkPolyData* polyData = vtkPolyData::New();
-	VTK_CREATE(vtkPolyData,polyData);
-	polyData->SetPoints(m_points);
-	polyData->SetLines(m_lines);
-	//polyData->SetVerts(m_lines);
-	polyData->GetPointData()->SetScalars(m_scalars);
+    VTK_CREATE(vtkPolyData,polyData);
+    polyData->SetPoints(m_points);
+    polyData->SetLines(m_lines);
+    //polyData->SetVerts(m_lines);
+    polyData->GetPointData()->SetScalars(m_scalars);
 
-	// create mapper
-	VTK_CREATE(vtkPolyDataMapper,mapper);
-	//vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
+    // create mapper
+    VTK_CREATE(vtkPolyDataMapper,mapper);
+    //vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
 #if VTK_MAJOR_VERSION <= 5
     mapper->SetInput(polyData);
 #else
     mapper->SetInputData(polyData);
 #endif
-	//polyData->Delete();
+    //polyData->Delete();
 
-	//	mapper->SetLookupTable(m_lookupTable);
-	//	mapper->SetColorModeToMapScalars();
-	//	mapper->SetScalarRange(m_scalarMin, m_scalarMax);
-	//	mapper->SetScalarModeToUsePointData();
+    //	mapper->SetLookupTable(m_lookupTable);
+    //	mapper->SetColorModeToMapScalars();
+    //	mapper->SetScalarRange(m_scalarMin, m_scalarMax);
+    //	mapper->SetScalarModeToUsePointData();
 
-	// create actor
-	m_lineActors = vtkActor::New();
-	m_lineActors->SetMapper(mapper);
-	//mapper->Delete();
-	m_lineActors->GetProperty()->SetLineWidth(m_allLineWidth);
+    // create actor
+    m_lineActors = vtkActor::New();
+    m_lineActors->SetMapper(mapper);
+    //mapper->Delete();
+    m_lineActors->GetProperty()->SetLineWidth(m_allLineWidth);
 }
 
 LinePlotter::~LinePlotter()
 {
-	m_points->Delete();
-	m_lineActors->Delete();
-	m_lines->Delete();
-	m_scalars->Delete();
+    m_points->Delete();
+    m_lineActors->Delete();
+    m_lines->Delete();
+    m_scalars->Delete();
 }
 
-void LinePlotter::setLineWidth(int width) {
-	m_allLineWidth = width;
+void LinePlotter::setLineWidth(int width)
+{
+    m_allLineWidth = width;
 }
 
-void LinePlotter::SetNumberOfPoints(int nPoints) {
-	//m_lines->InsertNextCell(nPoints);
-	m_lines->InsertNextCell(nPoints);
-}
-
-
-void LinePlotter::PlotLine(JPoint* pt1, JPoint* pt2) {
-
-	double m[3], n[3];
-	unsigned char col[3];
-
-	m[0] = pt1->getX();
-	m[1] = pt1->getY();
-	m[2] = pt1->getZ();
-
-	n[0] = pt2->getX();
-	n[1] = pt2->getY();
-	n[2] = pt2->getZ();
-
-	col[0] = pt1->getR();
-	col[1] = pt1->getG();
-	col[2] = pt1->getB();
-	PlotLine(m,n,col);
-
+void LinePlotter::SetNumberOfPoints(int nPoints)
+{
+    //m_lines->InsertNextCell(nPoints);
+    m_lines->InsertNextCell(nPoints);
 }
 
 
-void LinePlotter::addVertex(JPoint *pt1) {
-	double m[3];
-	unsigned char col[3];
+void LinePlotter::PlotLine(JPoint* pt1, JPoint* pt2)
+{
 
-	m[0] = pt1->getX();
-	m[1] = pt1->getY();
-	m[2] = pt1->getZ()+10;
+    double m[3], n[3];
+    unsigned char col[3];
 
-	col[0] = pt1->getR();
-	col[1] = pt1->getG();
-	col[2] = pt1->getB();
+    m[0] = pt1->getX();
+    m[1] = pt1->getY();
+    m[2] = pt1->getZ();
+
+    n[0] = pt2->getX();
+    n[1] = pt2->getY();
+    n[2] = pt2->getZ();
+
+    col[0] = pt1->getR();
+    col[1] = pt1->getG();
+    col[2] = pt1->getB();
+    PlotLine(m,n,col);
+
+}
+
+
+void LinePlotter::addVertex(JPoint *pt1)
+{
+    double m[3];
+    unsigned char col[3];
+
+    m[0] = pt1->getX();
+    m[1] = pt1->getY();
+    m[2] = pt1->getZ()+10;
+
+    col[0] = pt1->getR();
+    col[1] = pt1->getG();
+    col[2] = pt1->getB();
 
 //	//m_points->InsertNextPoint(m);
 //	m_points->InsertPoint(m_curPointID,m);
@@ -155,75 +159,80 @@ void LinePlotter::addVertex(JPoint *pt1) {
 //	m_points->Modified();
 //	m_lines->Modified();
 
-	//m_points->InsertNextPoint(m);
-	m_points->InsertNextPoint(m);
-	m_scalars->InsertTuple3(m_curPointID,col[0], col[1], col[2]);
-	m_lines->InsertCellPoint(m_curPointID++);
-	m_scalars->Modified();
-	m_points->Modified();
-	m_lines->Modified();
+    //m_points->InsertNextPoint(m);
+    m_points->InsertNextPoint(m);
+    m_scalars->InsertTuple3(m_curPointID,col[0], col[1], col[2]);
+    m_lines->InsertCellPoint(m_curPointID++);
+    m_scalars->Modified();
+    m_points->Modified();
+    m_lines->Modified();
 
 }
 
-void LinePlotter::addVertex(double vertex[3],double col[3]) {
+void LinePlotter::addVertex(double vertex[3],double col[3])
+{
 
-	JPoint *pts = new JPoint();
-	pts->setColorRGB(col[0],col[1],col[2]);
-	pts->setXYZ(vertex);
-	addVertex(pts);
+    JPoint *pts = new JPoint();
+    pts->setColorRGB(col[0],col[1],col[2]);
+    pts->setXYZ(vertex);
+    addVertex(pts);
 
-	delete pts;
+    delete pts;
 }
 
 // caution:
 // this work only for a line with 2 points. so for a line
 // not a polyline
-void LinePlotter::PlotLine(double m[3], double n[3], unsigned char col[3]) {
+void LinePlotter::PlotLine(double m[3], double n[3], unsigned char col[3])
+{
 
 
-	m_points->InsertNextPoint(m);
-	m_points->InsertNextPoint(n);
+    m_points->InsertNextPoint(m);
+    m_points->InsertNextPoint(n);
 
-	m_scalars->InsertNextTuple3(col[0], col[1], col[2]);
+    m_scalars->InsertNextTuple3(col[0], col[1], col[2]);
 
-	m_lines->InsertNextCell(2);
-	m_lines->InsertCellPoint(m_curPointID);
-	m_lines->InsertCellPoint(m_curPointID + 1);
+    m_lines->InsertNextCell(2);
+    m_lines->InsertCellPoint(m_curPointID);
+    m_lines->InsertCellPoint(m_curPointID + 1);
 
-	m_curPointID += 2;
+    m_curPointID += 2;
 
-	// force the update
-	m_scalars->Modified();
-	m_points->Modified();
-	m_lines->Modified();
+    // force the update
+    m_scalars->Modified();
+    m_points->Modified();
+    m_lines->Modified();
 
 }
 void LinePlotter::PlotLine(double x, double y, double z, double x2, double y2,
-		double z2, unsigned char color[3]) {
-	double m[3], n[3];
-	m[0] = x;
-	m[1] = y;
-	m[2] = z;
-	n[0] = x2;
-	n[1] = y2;
-	n[2] = z2;
-	PlotLine(m, n,color);
+                           double z2, unsigned char color[3])
+{
+    double m[3], n[3];
+    m[0] = x;
+    m[1] = y;
+    m[2] = z;
+    n[0] = x2;
+    n[1] = y2;
+    n[2] = z2;
+    PlotLine(m, n,color);
 
 }
 
-vtkActor* LinePlotter::getActor() {
+vtkActor* LinePlotter::getActor()
+{
 
-	return m_lineActors;
+    return m_lineActors;
 }
-void LinePlotter::clear() {
+void LinePlotter::clear()
+{
 
-	m_curPointID = 0;
-	m_points->Squeeze();
-	m_lines->Squeeze();
+    m_curPointID = 0;
+    m_points->Squeeze();
+    m_lines->Squeeze();
 
-	m_points->Reset();
-	m_lines->Reset();
+    m_points->Reset();
+    m_lines->Reset();
 
-	m_lineActors->GetProperty()->SetLineWidth(m_allLineWidth);
+    m_lineActors->GetProperty()->SetLineWidth(m_allLineWidth);
 
 }

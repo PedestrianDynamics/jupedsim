@@ -37,14 +37,14 @@ public:
     FrameElement(int _id);
     virtual ~FrameElement();
 
-	/// set/get the point ID
+    /// set/get the point ID
     void SetId(int _id);
-	/// set/get the point ID
+    /// set/get the point ID
     int GetId();
 
-	/// set/get the position of the point/agent
+    /// set/get the position of the point/agent
     void GetPos(double pos[3]);
-	/// set/get the position of the point/agent
+    /// set/get the position of the point/agent
     void SetPos(double pos[3]);
 
     ///Set/Get the agent scaling, semi axes of the ellipses

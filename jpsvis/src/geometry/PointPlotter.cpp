@@ -29,15 +29,15 @@
 
 PointPlotter::PointPlotter()
 {
-	pts = vtkPoints::New();
-	//pts->Allocate(30);
-	//pts->SetNumberOfPoints(30);
-	//pts->SetNumberOfPoints(MAX_POINTS);
-	SetPointRadius(2);
-	SetPointResolution();
+    pts = vtkPoints::New();
+    //pts->Allocate(30);
+    //pts->SetNumberOfPoints(30);
+    //pts->SetNumberOfPoints(MAX_POINTS);
+    SetPointRadius(2);
+    SetPointResolution();
 
-	scalars = vtkUnsignedCharArray::New();
-	scalars->SetNumberOfComponents(3);
+    scalars = vtkUnsignedCharArray::New();
+    scalars->SetNumberOfComponents(3);
     colors=vtkFloatArray::New();
 
 //	VTK_CREATE(vtkDiskSource,src);
@@ -51,13 +51,13 @@ PointPlotter::PointPlotter()
     src->SetNumberOfSides(5);
 
 
-	VTK_CREATE(vtkPolyData,polyData);
-	polyData->SetPoints(pts);
+    VTK_CREATE(vtkPolyData,polyData);
+    polyData->SetPoints(pts);
     //polyData->GetPointData()->SetScalars(scalars);
     polyData->GetPointData()->SetScalars(colors);
 
-	VTK_CREATE(vtkGlyph3D,glyph);
-	glyph->SetSourceConnection(src->GetOutputPort());
+    VTK_CREATE(vtkGlyph3D,glyph);
+    glyph->SetSourceConnection(src->GetOutputPort());
 
 #if VTK_MAJOR_VERSION <= 5
     glyph->SetInput(polyData);
@@ -66,35 +66,35 @@ PointPlotter::PointPlotter()
 #endif
 
     glyph->SetColorModeToColorByScalar();
-	glyph->SetScaleModeToDataScalingOff() ;
+    glyph->SetScaleModeToDataScalingOff() ;
 
 
-	VTK_CREATE(vtkPolyDataMapper,mapper);
+    VTK_CREATE(vtkPolyDataMapper,mapper);
     mapper->SetInputConnection(glyph->GetOutputPort());
 
     //borrow the lookup table from the peds glyphs
     if(extern_glyphs_pedestrians_actor_2D->GetMapper())
-    mapper->SetLookupTable(
-    extern_glyphs_pedestrians_actor_2D->GetMapper()->GetLookupTable());
+        mapper->SetLookupTable(
+            extern_glyphs_pedestrians_actor_2D->GetMapper()->GetLookupTable());
 
     //vtkActor
-	pointActor = vtkActor::New();
-	pointActor->SetMapper(mapper);
+    pointActor = vtkActor::New();
+    pointActor->SetMapper(mapper);
 
-	/// initizliae the ID
-	nextPointID=0;
+    /// initizliae the ID
+    nextPointID=0;
 }
 
 PointPlotter::~PointPlotter()
 {
-	if (pts)
-		pts->Delete();
-	if (scalars)
-		scalars->Delete();
+    if (pts)
+        pts->Delete();
+    if (scalars)
+        scalars->Delete();
     if (colors)
         colors->Delete();
-	if (pointActor)
-		pointActor->Delete();
+    if (pointActor)
+        pointActor->Delete();
 }
 
 
@@ -102,26 +102,24 @@ PointPlotter::~PointPlotter()
  * add a point to the plot
  */
 
-void PointPlotter::PlotPoint(JPoint * point){
-	double x=point->getX();
-	double y=point->getY();
-	double z=point->getZ();
+void PointPlotter::PlotPoint(JPoint * point)
+{
+    double x=point->getX();
+    double y=point->getY();
+    double z=point->getZ();
 
-	unsigned char r=point->getR();
-	unsigned char b=point->getB();
-	unsigned char g=point->getG();
-	PlotPoint( x,  y,  z, r,   g,   b);
+    unsigned char r=point->getR();
+    unsigned char b=point->getB();
+    unsigned char g=point->getG();
+    PlotPoint( x,  y,  z, r,   g,   b);
 }
 
 void PointPlotter::PlotPoint(double pos[3], double col)
 {
     nextPointID++;
-    if(col==-1)
-    {
+    if(col==-1) {
         colors->InsertTuple1(nextPointID,NAN);
-    }
-    else
-    {
+    } else {
         colors->InsertTuple1(nextPointID,col/255.0);
     }
 
@@ -131,29 +129,32 @@ void PointPlotter::PlotPoint(double pos[3], double col)
 }
 
 void PointPlotter::PlotPoint(double x, double y, double z,
-		unsigned char r, unsigned char g, unsigned char b)
+                             unsigned char r, unsigned char g, unsigned char b)
 {
 
-	nextPointID++;
-	int PointsCount=1, dummy=0,dummy1;;
+    nextPointID++;
+    int PointsCount=1, dummy=0,dummy1;;
 
-	SystemSettings::getTrailsInfo(&PointsCount,&dummy,&dummy1);
+    SystemSettings::getTrailsInfo(&PointsCount,&dummy,&dummy1);
 
     //nextPointID=nextPointID%PointsCount;
-	pts->InsertPoint(nextPointID,x,y,z);
+    pts->InsertPoint(nextPointID,x,y,z);
     //pts->SetPoint(nextPointID,x,y,z);
     //scalars->SetTuple3(nextPointID,r,g,b);
     scalars->InsertTuple3(nextPointID,r,g,b);
     //scalars->InsertNextTuple3(r,g,b);
 
-	pts->Modified();
+    pts->Modified();
     scalars->Modified();
 
 }
 
 void PointPlotter::SetVisibility(bool status)
 {
- pointActor->SetVisibility(status);
+    pointActor->SetVisibility(status);
 }
 
-vtkActor *  PointPlotter::getActor(){ return pointActor;}
+vtkActor *  PointPlotter::getActor()
+{
+    return pointActor;
+}

@@ -48,31 +48,34 @@
 
 using namespace std;
 
-SyncData::SyncData() {
-	frameCursor=0;
-	numberOfAgents=0;
-	delay_ms_rel=0; //absolute
-	delay_s_abs=0; //relative
-	delay_us_abs=0; //absolute
-	frameCursorOffset=0;
+SyncData::SyncData()
+{
+    frameCursor=0;
+    numberOfAgents=0;
+    delay_ms_rel=0; //absolute
+    delay_s_abs=0; //relative
+    delay_us_abs=0; //absolute
+    frameCursorOffset=0;
 
 }
 
-SyncData::~SyncData() {
-	//	trajectories.clear();
-	while (!frames.empty()){
-		delete frames.back();
-		frames.pop_back();
-	}
-	frames.clear();
+SyncData::~SyncData()
+{
+    //	trajectories.clear();
+    while (!frames.empty()) {
+        delete frames.back();
+        frames.pop_back();
+    }
+    frames.clear();
 }
 
 
 
-void SyncData::add(std::string newData){
-	//	mutex.lock();
-	//	trajectories.push_back(newData);
-	//	mutex.unlock();
+void SyncData::add(std::string newData)
+{
+    //	mutex.lock();
+    //	trajectories.push_back(newData);
+    //	mutex.unlock();
 }
 
 
@@ -85,85 +88,89 @@ void SyncData::add(std::string newData){
 //	//	mutex.unlock();
 //}
 
-std::string SyncData::get(){
-	std::string res;
-	//	mutex.lock();
-	//	if(trajectories.empty()) {
-	//		res="";
-	//		emit signal_controlSequences("CONTROL_STACK_EMPTY");
-	//	}
-	//	else{
-	//		res= trajectories.front();
-	//		trajectories.erase(trajectories.begin());
-	//	}
-	//#ifdef _DEBUG
-	//	std::cout<<"size: " <<trajectories.size()<<std::endl;
-	//#endif
-	//	mutex.unlock();
-	return res;
+std::string SyncData::get()
+{
+    std::string res;
+    //	mutex.lock();
+    //	if(trajectories.empty()) {
+    //		res="";
+    //		emit signal_controlSequences("CONTROL_STACK_EMPTY");
+    //	}
+    //	else{
+    //		res= trajectories.front();
+    //		trajectories.erase(trajectories.begin());
+    //	}
+    //#ifdef _DEBUG
+    //	std::cout<<"size: " <<trajectories.size()<<std::endl;
+    //#endif
+    //	mutex.unlock();
+    return res;
 }
 
-void SyncData::setFrameCursorOffset(int offset){
-	frameCursorOffset=offset;
+void SyncData::setFrameCursorOffset(int offset)
+{
+    frameCursorOffset=offset;
 }
 
-void SyncData::addFrame(Frame* frame){
-	mutex.lock();
-	frames.push_back(frame);
-	mutex.unlock();
+void SyncData::addFrame(Frame* frame)
+{
+    mutex.lock();
+    frames.push_back(frame);
+    mutex.unlock();
 }
 
-Frame* SyncData::getFrame(unsigned int i){
-	mutex.lock();
-	i+=frameCursorOffset;
+Frame* SyncData::getFrame( int i)
+{
+    mutex.lock();
+    i+=frameCursorOffset;
 
-	if((i<0) || (i>=frames.size())){
-		mutex.unlock();
-		return NULL;
-	}
-	else{
-		mutex.unlock();
-		return frames.at(i);
-	}
+    if((i<0) || (i>= (int)frames.size())) {
+        mutex.unlock();
+        return NULL;
+    } else {
+        mutex.unlock();
+        return frames.at(i);
+    }
 
 }
 
-Frame* SyncData::getNextFrame(){
+Frame* SyncData::getNextFrame()
+{
 
-	// this may be the case if the file only contains geometry, thus no trajectories available
-	if(frames.empty()) return NULL;
+    // this may be the case if the file only contains geometry, thus no trajectories available
+    if(frames.empty()) return NULL;
 
-	// Navigation  in the negative direction is also possible
-	//review
-	mutex.lock();
+    // Navigation  in the negative direction is also possible
+    //review
+    mutex.lock();
 
-	frameCursor+=extern_update_step;
+    frameCursor+=extern_update_step;
 
-	//FIXME: do I really need two variables to handle this?
-	int cursor =frameCursor+frameCursorOffset;
+    //FIXME: do I really need two variables to handle this?
+    int cursor =frameCursor+frameCursorOffset;
 
-	if (cursor<0) {
-		//frameCursor=0;
-		emit signal_controlSequences("STACK_REACHS_BEGINNING");
-		mutex.unlock();
-		return NULL;
+    if (cursor<0) {
+        //frameCursor=0;
+        emit signal_controlSequences("STACK_REACHS_BEGINNING");
+        mutex.unlock();
+        return NULL;
 
-	}else if ((unsigned)cursor>=frames.size()){
+    } else if ((unsigned)cursor>=frames.size()) {
 
-		//if(extern_offline_mode)
-		emit signal_controlSequences("CONTROL_STACK_EMPTY");
-		//frameCursor=frames.size()-1;
-		mutex.unlock();
-		// FIXME: check me, return the last frame, if in o
-		//return frames.at(frames.size()-1);
-		frameCursor-=extern_update_step;
-		return frames.back();
-		//return NULL;
-	}
+        //if(extern_offline_mode)
+        emit signal_controlSequences("CONTROL_STACK_EMPTY");
+        //frameCursor=frames.size()-1;
+        mutex.unlock();
+        // FIXME: check me, return the last frame, if in o
+        //return frames.at(frames.size()-1);
+        frameCursor-=extern_update_step;
+        return frames.back();
+        //return NULL;
+    }
 
-	Frame* res =frames.at(cursor);
-	mutex.unlock();
-	return res;
+    Frame* res =frames.at(cursor);
+    mutex.unlock();
+    return res;
 }
 
 /***
@@ -173,143 +180,154 @@ Frame* SyncData::getNextFrame(){
 * 		2. using the function getFrame(int frameNumber). one may first get
 * the current framecursor position using getFrameCursor()
 */
-Frame* SyncData::getPreviousFrame(){
+Frame* SyncData::getPreviousFrame()
+{
 
-	mutex.lock();
-	frameCursor--;
-	//FIXME: do I really need two variables to handle this?
-	int cursor =frameCursor+frameCursorOffset;
+    mutex.lock();
+    frameCursor--;
+    //FIXME: do I really need two variables to handle this?
+    int cursor =frameCursor+frameCursorOffset;
 
-	if(cursor<0) {
-		//emit signal_controlSequences("STACK_REACHS_BEGINNING");
-		//frameCursor=0;
-		mutex.unlock();
-		return NULL;
-	}else
-		if((unsigned)cursor>=frames.size() ) {
-			//emit signal_controlSequences("CONTROL_STACK_EMPTY");
-			mutex.unlock();
-			//frameCursor=frames.size()-1;
-			return NULL;
-		}
+    if(cursor<0) {
+        //emit signal_controlSequences("STACK_REACHS_BEGINNING");
+        //frameCursor=0;
+        mutex.unlock();
+        return NULL;
+    } else if((unsigned)cursor>=frames.size() ) {
+        //emit signal_controlSequences("CONTROL_STACK_EMPTY");
+        mutex.unlock();
+        //frameCursor=frames.size()-1;
+        return NULL;
+    }
 
-	Frame* res =frames.at(cursor);
+    Frame* res =frames.at(cursor);
 
-	mutex.unlock();
+    mutex.unlock();
 
-	return res;
+    return res;
 }
 
-void SyncData::clearFrames(){
-	mutex.lock();
+void SyncData::clearFrames()
+{
+    mutex.lock();
 
-	frameCursor=0;
-	numberOfAgents=0;
-	frameCursorOffset=0;
-	pedHeight.clear();
-	pedColor.clear();
+    frameCursor=0;
+    numberOfAgents=0;
+    frameCursorOffset=0;
+    pedHeight.clear();
+    pedColor.clear();
 
-	while (!frames.empty()){
-		delete frames.back();
-		frames.pop_back();
-	}
-	frames.clear();
+    while (!frames.empty()) {
+        delete frames.back();
+        frames.pop_back();
+    }
+    frames.clear();
 
-	mutex.unlock();
+    mutex.unlock();
 }
 
-int SyncData::getFramesNumber(){
-	//mutex.lock(); //FIXME
-	return frames.size();
-	//mutex.unlock();
+int SyncData::getFramesNumber()
+{
+    //mutex.lock(); //FIXME
+    return frames.size();
+    //mutex.unlock();
 }
 
-void SyncData::resetFrameCursor(){
-	mutex.lock();
-	frameCursor=0;
-	mutex.unlock();
+void SyncData::resetFrameCursor()
+{
+    mutex.lock();
+    frameCursor=0;
+    mutex.unlock();
 }
 
 
-int SyncData::getFrameCursor(){
+int SyncData::getFrameCursor()
+{
 
-	return frameCursor;
+    return frameCursor;
 }
 
-void SyncData::setFrameCursorTo(int position){
+void SyncData::setFrameCursorTo(int position)
+{
 
-	mutex.lock();
+    mutex.lock();
 
-	//TODO: check the unsigned
-	//if((unsigned)position>=frames.size())	frameCursor =frames.size()-1;
-	//else if (position<0) frameCursor =0;
-	//else
-	frameCursor=position;
+    //TODO: check the unsigned
+    //if((unsigned)position>=frames.size())	frameCursor =frames.size()-1;
+    //else if (position<0) frameCursor =0;
+    //else
+    frameCursor=position;
 
-	mutex.unlock();
+    mutex.unlock();
 }
 
 int SyncData::getNumberOfAgents()
 {
-	return 0;
-	return numberOfAgents;
+    return numberOfAgents;
 }
 
 void SyncData::setNumberOfAgents(int numberOfAgents)
 {
-	mutex.lock();
-	this->numberOfAgents = numberOfAgents;
-	mutex.unlock();
+    mutex.lock();
+    this->numberOfAgents = numberOfAgents;
+    mutex.unlock();
 }
 
-void SyncData::setDelayAbsolute(unsigned long second, unsigned long microsecond=0){
-	delay_s_abs=second;
-	delay_us_abs=microsecond;
+void SyncData::setDelayAbsolute(unsigned long second, unsigned long microsecond=0)
+{
+    delay_s_abs=second;
+    delay_us_abs=microsecond;
 
 }
 
 ///@warning only handle seconds, microseconds are ignored
-void SyncData::computeDelayRelative(unsigned long* delays){
-	unsigned long sec = delays[0];
-	unsigned long usec = delays[1];
-	long double delay_a = sec*1000 + (double)usec/1000.0;
-	long double delay_b = delay_s_abs*1000 + (double)delay_us_abs/1000.0;
+void SyncData::computeDelayRelative(unsigned long* delays)
+{
+    unsigned long sec = delays[0];
+    unsigned long usec = delays[1];
+    long double delay_a = sec*1000 + (double)usec/1000.0;
+    long double delay_b = delay_s_abs*1000 + (double)delay_us_abs/1000.0;
 
-	delay_ms_rel=delay_a-delay_b;
-	//std::cerr <<"the delay is: "  << delay_ms_rel<<std::endl;
-	//delay_ms_rel=(sec-delay_s_abs)*1000;
+    delay_ms_rel=delay_a-delay_b;
+    //std::cerr <<"the delay is: "  << delay_ms_rel<<std::endl;
+    //delay_ms_rel=(sec-delay_s_abs)*1000;
 
-	if (delay_ms_rel<0){
-		Debug::Warning("warning: negative delay found");
-	}
+    if (delay_ms_rel<0) {
+        Debug::Warning("warning: negative delay found");
+    }
 
 }
 
 /// @warning the old value obtained from computeDelayRelative is just overwritten
 //
-void SyncData::setDelayRelative(signed long milliseconds){
-	delay_ms_rel=milliseconds;
+void SyncData::setDelayRelative(signed long milliseconds)
+{
+    delay_ms_rel=milliseconds;
 
 }
 
 
-void SyncData::getDelayAbsolute(unsigned long* delays){
-	delays[0]=delay_s_abs;
-	delays[1]=delay_us_abs;
+void SyncData::getDelayAbsolute(unsigned long* delays)
+{
+    delays[0]=delay_s_abs;
+    delays[1]=delay_us_abs;
 }
 
-signed long SyncData::getDelayRelative(){
-	return delay_ms_rel;
+signed long SyncData::getDelayRelative()
+{
+    return delay_ms_rel;
 }
 
-void SyncData::setInitialHeights(const QStringList& pedHeight){
-	this->pedHeight.clear();
-	this->pedHeight=pedHeight;
+void SyncData::setInitialHeights(const QStringList& pedHeight)
+{
+    this->pedHeight.clear();
+    this->pedHeight=pedHeight;
 }
 
-unsigned int SyncData::getSize(){
-	if(frames.empty()) return 0;
-	else return frames.size();
+unsigned int SyncData::getSize()
+{
+    if(frames.empty()) return 0;
+    else return frames.size();
 }
 
 

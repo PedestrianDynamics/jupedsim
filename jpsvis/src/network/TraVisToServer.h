@@ -41,37 +41,40 @@
 
 class TraVisToServer:public QObject {
 
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	TraVisToServer(quint16 port=PORT);
-	virtual ~TraVisToServer();
+    TraVisToServer(quint16 port=PORT);
+    virtual ~TraVisToServer();
 
-	//void receiveMessage(char* data);
-	void receiveMessage(QString& msg);
-	void sendMessage(char* data);
-	bool isListening(){return listening;}
-	void close();
+    //void receiveMessage(char* data);
+    void receiveMessage(QString& msg);
+    void sendMessage(char* data);
+    bool isListening()
+    {
+        return listening;
+    }
+    void close();
 
 private:
-	void createConnection();
-	void closeConnection();
+    void createConnection();
+    void closeConnection();
 
 private Q_SLOTS:
-	void slotHandleConnection();
-	void slotReadMessage();
-	void slotConnectionClosed();
-	void slotDisplayError(QAbstractSocket::SocketError socketError);
-	//void slotConnected();
-	//void slotDisconnected();
+    void slotHandleConnection();
+    void slotReadMessage();
+    void slotConnectionClosed();
+    void slotDisplayError(QAbstractSocket::SocketError socketError);
+    //void slotConnected();
+    //void slotDisconnected();
 
 
 private:
-	bool isConnected;
-	bool listening;
-	//QTcpSocket *tcpSocket;
-	//QTcpSocket *clientConnection;
-	QTcpSocket *clientConnection;
+    bool isConnected;
+    bool listening;
+    //QTcpSocket *tcpSocket;
+    //QTcpSocket *clientConnection;
+    QTcpSocket *clientConnection;
     QTcpServer *tcpServer;
     QString currentFortune;
     int blockSize;

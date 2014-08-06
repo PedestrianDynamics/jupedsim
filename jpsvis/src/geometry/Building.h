@@ -160,36 +160,36 @@ public:
     void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
     void DumpSubRoomInRoom(int roomID, int subID);
 
-	const std::map<int, Crossing*>& GetAllCrossings() const;
-	const std::map<int, Transition*>& GetAllTransitions() const;
-	const std::map<int, Hline*>& GetAllHlines() const;
-	const std::map<int, Goal*>& GetAllGoals() const;
+    const std::map<int, Crossing*>& GetAllCrossings() const;
+    const std::map<int, Transition*>& GetAllTransitions() const;
+    const std::map<int, Hline*>& GetAllHlines() const;
+    const std::map<int, Goal*>& GetAllGoals() const;
 
-	void AddCrossing(Crossing* line);
-	void AddTransition(Transition* line);
-	void AddHline(Hline* line);
-	void AddGoal(Goal* goal);
+    void AddCrossing(Crossing* line);
+    void AddTransition(Transition* line);
+    void AddHline(Hline* line);
+    void AddGoal(Goal* goal);
 
-	const std::string& GetProjectRootDir() const;
-	const std::string& GetProjectFilename() const;
-	void SetProjectFilename(const std::string &filename) ;
-	void SetProjectRootDir(const std::string &filename);
+    const std::string& GetProjectRootDir() const;
+    const std::string& GetProjectFilename() const;
+    void SetProjectFilename(const std::string &filename) ;
+    void SetProjectRootDir(const std::string &filename);
     bool LoadBuildingFromFile(const std::string &filename="");
     void LoadTrafficInfo();
     void LoadRoutingInfo(const std::string &filename);
     void WriteToErrorLog() const;
 
-	void CleanUpTheScene();
+    void CleanUpTheScene();
 
-	/**
-	 * Check the scenario for possible errors and
-	 * output user specific informations.
-	 */
-	void SanityCheck();
+    /**
+     * Check the scenario for possible errors and
+     * output user specific informations.
+     */
+    void SanityCheck();
 
 
 private:
-	void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
+    void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);
 
 };
 

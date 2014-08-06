@@ -43,39 +43,38 @@ class vtkDataArray;
 class JPoint;
 
 
-class LinePlotter
-{
+class LinePlotter {
 public:
 
-	LinePlotter();
-	~LinePlotter();
+    LinePlotter();
+    ~LinePlotter();
 
-	//void SetScalarRange(double minval=0.0, double maxval=1.0);
-	//void SetLookupTable(vtkLookupTable* table = 0);
+    //void SetScalarRange(double minval=0.0, double maxval=1.0);
+    //void SetLookupTable(vtkLookupTable* table = 0);
 
-	void PlotLine(JPoint* pt1, JPoint* pt2);
-	void PlotLine(double m[3], double n[3], unsigned char scalar[3]);
-	void PlotLine(double x, double y, double z,
-		double x2, double y2, double z2, unsigned char scalar[3]);
-	void addVertex(double vertex[3],double scalar[3]);
-	void addVertex(JPoint* pt1);
-	void SetNumberOfPoints(int nPoints);
-	void clear();
-	static void setLineWidth(int width=1);
-	vtkActor* getActor();
+    void PlotLine(JPoint* pt1, JPoint* pt2);
+    void PlotLine(double m[3], double n[3], unsigned char scalar[3]);
+    void PlotLine(double x, double y, double z,
+                  double x2, double y2, double z2, unsigned char scalar[3]);
+    void addVertex(double vertex[3],double scalar[3]);
+    void addVertex(JPoint* pt1);
+    void SetNumberOfPoints(int nPoints);
+    void clear();
+    static void setLineWidth(int width=1);
+    vtkActor* getActor();
 
 private:
-	//double m_scalarMin, m_scalarMax ;
-	//vtkLookupTable* m_lookupTable ;
-	int m_curPointID ;
-	static int m_allLineWidth ;
-	//unsigned char colour[3];
+    //double m_scalarMin, m_scalarMax ;
+    //vtkLookupTable* m_lookupTable ;
+    int m_curPointID ;
+    static int m_allLineWidth ;
+    //unsigned char colour[3];
 
-	vtkPoints* m_points;
-	vtkActor* m_lineActors;
-	vtkCellArray* m_lines;
-	//vtkFloatArray* m_lineScalars ;
-	vtkDataArray* m_scalars ;
+    vtkPoints* m_points;
+    vtkActor* m_lineActors;
+    vtkCellArray* m_lines;
+    //vtkFloatArray* m_lineScalars ;
+    vtkDataArray* m_scalars ;
 
 };
 

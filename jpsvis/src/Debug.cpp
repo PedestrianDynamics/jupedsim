@@ -47,95 +47,99 @@ int Debug::MSG_Count=0;
 int Debug::ERR_Count=0;
 int Debug::WAR_Count=0;
 
-Debug::Debug() {
+Debug::Debug()
+{
 
 }
 
-Debug::~Debug() {
+Debug::~Debug()
+{
 
 }
 
 
-void Debug::setOutputStream(std::ostream &osl ){
-	os.rdbuf(osl.rdbuf());
+void Debug::setOutputStream(std::ostream &osl )
+{
+    os.rdbuf(osl.rdbuf());
 }
 
-void Debug::setDebugLevel(Debug::LEVEL level){
-	debugLevel=level;
+void Debug::setDebugLevel(Debug::LEVEL level)
+{
+    debugLevel=level;
 }
 
-void Debug::Messages(const char *format, ...){
+void Debug::Messages(const char *format, ...)
+{
 
-	switch (debugLevel){
+    switch (debugLevel) {
 
-		case ALL:
-		case INFO:
-		{
-			MSG_Count++;
-			char msg[256];
-			va_list ap;
-			va_start (ap, format);
-			vsprintf (msg,format ,ap);
-			va_end (ap);
+    case ALL:
+    case INFO: {
+        MSG_Count++;
+        char msg[256];
+        va_list ap;
+        va_start (ap, format);
+        vsprintf (msg,format ,ap);
+        va_end (ap);
 
-			os<<"Info["<<MSG_Count<<"]"<<msg<<endl;
-		}
-		break;
+        os<<"Info["<<MSG_Count<<"]"<<msg<<endl;
+    }
+    break;
 
-		case ERROR:
-		case WARNING:
-		case NONE:
-			break;
-	}
+    case ERROR:
+    case WARNING:
+    case NONE:
+        break;
+    }
 
 }
 
-void Debug::Warning(const char *format, ...){
+void Debug::Warning(const char *format, ...)
+{
 
-	switch (debugLevel){
+    switch (debugLevel) {
 
-	case WARNING:
-	case ALL:
-	{
-		WAR_Count++;
-		char msg[256];
-		va_list ap;
-		va_start (ap, format);
-		vsprintf (msg,format ,ap);
-		va_end (ap);
-		os<<"Warning["<<WAR_Count<<"]"<<msg<<endl;
-	}
-	break;
+    case WARNING:
+    case ALL: {
+        WAR_Count++;
+        char msg[256];
+        va_list ap;
+        va_start (ap, format);
+        vsprintf (msg,format ,ap);
+        va_end (ap);
+        os<<"Warning["<<WAR_Count<<"]"<<msg<<endl;
+    }
+    break;
 
-	case ERROR:
-	case INFO:
-	case NONE:
-		break;
-	}
+    case ERROR:
+    case INFO:
+    case NONE:
+        break;
+    }
 }
 
 
-void Debug::Error(const char *format, ...){
+void Debug::Error(const char *format, ...)
+{
 
-	switch (debugLevel){
+    switch (debugLevel) {
 
-		case WARNING:
-		case ERROR :
-		case ALL:
-		{
-			ERR_Count++;
-			char msg[256];
-			va_list ap;
-			va_start (ap, format);
-			vsprintf (msg,format ,ap);
-			va_end (ap);
-			os<<"Error["<<ERR_Count<<"]"<<msg<<endl;
-		}
-			break;
+    case WARNING:
+    case ERROR :
+    case ALL: {
+        ERR_Count++;
+        char msg[256];
+        va_list ap;
+        va_start (ap, format);
+        vsprintf (msg,format ,ap);
+        va_end (ap);
+        os<<"Error["<<ERR_Count<<"]"<<msg<<endl;
+    }
+    break;
 
-		case INFO:
-		case NONE:
-			break;
-		}
+    case INFO:
+    case NONE:
+        break;
+    }
 
 }

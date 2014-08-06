@@ -35,43 +35,43 @@
 
 class JPoint {
 private:
-	double x,y,z;
-	unsigned char r,g,b;
-	double thickness;
-	double height;
-	double color;
+    double x,y,z;
+    unsigned char r,g,b;
+    double thickness;
+    double height;
+    double color;
 
 public:
-	JPoint(); //default constructor
-	JPoint(double x, double y, double z, unsigned char r='a',  unsigned char g='b',unsigned char b='c');
-	JPoint(double xyz[3],  char col[]="abc");
-	virtual ~JPoint();
+    JPoint(); //default constructor
+    JPoint(double x, double y, double z, unsigned char r='a',  unsigned char g='b',unsigned char b='c');
+    JPoint(double xyz[3],  const char* col="abc");
+    virtual ~JPoint();
 
-	double getX();
-	double getY();
-	double getZ();
-	double distanceTo(JPoint& pt);
-	double angleMadeWith(JPoint &pt);
-	double* centreCoordinatesWith(JPoint &pt);
+    double getX();
+    double getY();
+    double getZ();
+    double distanceTo(JPoint& pt);
+    double angleMadeWith(JPoint &pt);
+    double* centreCoordinatesWith(JPoint &pt);
 
-	static double distanceBetween(JPoint& pt1, JPoint& pt2);
-	static double angleMadeBetween(JPoint& pt1, JPoint& pt2);
-	static double *centreCoordinatesBetween(JPoint& pt1, JPoint& pt2);
+    static double distanceBetween(JPoint& pt1, JPoint& pt2);
+    static double angleMadeBetween(JPoint& pt1, JPoint& pt2);
+    static double *centreCoordinatesBetween(JPoint& pt1, JPoint& pt2);
 
-	void setColorRGB(unsigned char r,  unsigned char g, unsigned char b);
-	void getColorRGB(unsigned char *rgb);
+    void setColorRGB(unsigned char r,  unsigned char g, unsigned char b);
+    void getColorRGB(unsigned char *rgb);
 
-	void setXYZ(double* xyz);
-	void getXYZ(double* xyz);
+    void setXYZ(double* xyz);
+    void getXYZ(double* xyz);
 
-	unsigned char getR();
-	unsigned char getG();
-	unsigned char getB();
+    unsigned char getR();
+    unsigned char getG();
+    unsigned char getB();
 
-	//methods for convenience in the case
-	//this is the end point of a door/wall for instance
-	void setColorHeightThicknes(double CHT[3]);
-	void getColorHeightThicknes(double *CHT);
+    //methods for convenience in the case
+    //this is the end point of a door/wall for instance
+    void setColorHeightThicknes(double CHT[3]);
+    void getColorHeightThicknes(double *CHT);
 };
 
 #endif /* POINT_H_ */

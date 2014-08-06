@@ -32,6 +32,7 @@
 #include <iostream>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QCloseEvent>
 #include <QColorDialog>
 
 #include "Settings.h"
@@ -42,19 +43,19 @@ using namespace std;
 QColor Settings::tmpCaptionColor=QColor();
 
 Settings::Settings(QWidget *parent)
-: QWidget(parent)
+    : QWidget(parent)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
 
-	// initialize the output directory
-	QString dir;
-	SystemSettings::getOutputDirectory(dir);
-	ui.LEditOutputDir->setText(dir);
+    // initialize the output directory
+    QString dir;
+    SystemSettings::getOutputDirectory(dir);
+    ui.LEditOutputDir->setText(dir);
 
-	//restore the caption color parameter
-	char bgcolor[50];
-	sprintf(bgcolor,"background-color: rgb(%d, %d, %d);",tmpCaptionColor.red(),tmpCaptionColor.green(),tmpCaptionColor.blue());
-	ui.frameCaptionColorPreview->setStyleSheet(bgcolor);
+    //restore the caption color parameter
+    char bgcolor[50];
+    sprintf(bgcolor,"background-color: rgb(%d, %d, %d);",tmpCaptionColor.red(),tmpCaptionColor.green(),tmpCaptionColor.blue());
+    ui.frameCaptionColorPreview->setStyleSheet(bgcolor);
 
 }
 
@@ -65,207 +66,220 @@ Settings::~Settings()
 
 void Settings::slotChangePedestrianShape()
 {
-	int resolution=ui.CbEllipseResolution->currentText().toInt();
-	SystemSettings::setEllipseResolution(resolution);
-	extern_force_system_update=true;
+    int resolution=ui.CbEllipseResolution->currentText().toInt();
+    SystemSettings::setEllipseResolution(resolution);
+    extern_force_system_update=true;
 }
 
 
 
-void Settings::slotUpdateTrailSettings(){
+void Settings::slotUpdateTrailSettings()
+{
 
 
-	bool ok=false;
-	int count=ui.CbTrailPointsCount->currentText().toInt(&ok);
-	if(ok==false){
-		//FIXME:
+    bool ok=false;
+    int count=ui.CbTrailPointsCount->currentText().toInt(&ok);
+    if(ok==false) {
+        //FIXME:
 //		ui.CbTrailPointsCount->removeItem(ui.CbEllipseRadiusA->currentIndex());
-		return;
-	}
-	int type=ui.CbTrailType->currentIndex();
-	int form=ui.CbTrailGeometry->currentIndex();
+        return;
+    }
+    int type=ui.CbTrailType->currentIndex();
+    int form=ui.CbTrailGeometry->currentIndex();
 
-	if(form==1)
-		ui.CbTrailPolygoneWidth->setEnabled(true);
-	else
-		ui.CbTrailPolygoneWidth->setEnabled(false);
-	SystemSettings::setTrailsInfo(count,type,form);
+    if(form==1)
+        ui.CbTrailPolygoneWidth->setEnabled(true);
+    else
+        ui.CbTrailPolygoneWidth->setEnabled(false);
+    SystemSettings::setTrailsInfo(count,type,form);
 }
 
 /// @todo use the QColorDialog instead
 /// @todo make the whole thing live by connecting signal
 
-void Settings::slotPickPedestrianColor(){
+void Settings::slotPickPedestrianColor()
+{
 
-	QColorDialog* colorDialog = new QColorDialog(this);
-	QColor col=colorDialog->getColor("choose the new pedestrian color");
+    QColorDialog* colorDialog = new QColorDialog(this);
+    QColor col=colorDialog->getColor("choose the new pedestrian color");
 
-	// the user may have cancelled the process
-	if(col.isValid()==false) return;
-	slotChangePedestrianColor(col);
+    // the user may have cancelled the process
+    if(col.isValid()==false) return;
+    slotChangePedestrianColor(col);
 
-	delete colorDialog;
+    delete colorDialog;
 
 }
-void Settings::slotChangePedestrianColor(const QColor & color){
-	int r=0.0,g=0.0,b=0.0;
-	color.getRgb(&r,&g,&b);
-	int  bkcolor[3]={r ,g,b};
+void Settings::slotChangePedestrianColor(const QColor & color)
+{
+    int r=0.0,g=0.0,b=0.0;
+    color.getRgb(&r,&g,&b);
+    int  bkcolor[3]= {r ,g,b};
 
-	SystemSettings::setPedestrianColor(ui.CbPedestrianGroup->currentIndex(),bkcolor);
-	extern_force_system_update=true;
+    SystemSettings::setPedestrianColor(ui.CbPedestrianGroup->currentIndex(),bkcolor);
+    extern_force_system_update=true;
 }
 
-void Settings::slotChangeVerticesWidth(){
-	bool ok=false;
+void Settings::slotChangeVerticesWidth()
+{
+    bool ok=false;
 
-	double width=ui.CbTrailPolygoneWidth->currentText().toDouble(&ok);
-	if(ok==false){
-		//fixme:
-		//ui.CbEllipseRadiusA->removeItem(ui.CbTrailPolygoneWidth->currentIndex());
-		return;
-	}
-	LinePlotter::setLineWidth((int)width);
+    double width=ui.CbTrailPolygoneWidth->currentText().toDouble(&ok);
+    if(ok==false) {
+        //fixme:
+        //ui.CbEllipseRadiusA->removeItem(ui.CbTrailPolygoneWidth->currentIndex());
+        return;
+    }
+    LinePlotter::setLineWidth((int)width);
 }
 
 
 
 
 /// choose a new directory
-void Settings::slotChangeOutputDir(){
+void Settings::slotChangeOutputDir()
+{
 
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Select a Directory for saving your files (screenshots, video,...)"),
-			"",
-			QFileDialog::ShowDirsOnly
-			| QFileDialog::DontResolveSymlinks);
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select a Directory for saving your files (screenshots, video,...)"),
+                  "",
+                  QFileDialog::ShowDirsOnly
+                  | QFileDialog::DontResolveSymlinks);
 
-	// in the case the selection was aborted
-	if(!QFileInfo(dir).isWritable()) {
-		slotErrorOutput("I cant write to that directory");
-		dir="";
-	}
-	if(dir.isEmpty()){
-		SystemSettings::getOutputDirectory(dir);
-		ui.LEditOutputDir->setText(dir);
-	}else{
-		ui.LEditOutputDir->setText(dir);
-		SystemSettings::setOutputDirectory(dir);
-	}
+    // in the case the selection was aborted
+    if(!QFileInfo(dir).isWritable()) {
+        slotErrorOutput("I cant write to that directory");
+        dir="";
+    }
+    if(dir.isEmpty()) {
+        SystemSettings::getOutputDirectory(dir);
+        ui.LEditOutputDir->setText(dir);
+    } else {
+        ui.LEditOutputDir->setText(dir);
+        SystemSettings::setOutputDirectory(dir);
+    }
 }
 
-void Settings::slotErrorOutput(QString err) {
-	QMessageBox msgBox;
-	msgBox.setText("Error");
-	msgBox.setInformativeText(err);
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setIcon(QMessageBox::Critical);
-	msgBox.exec();
+void Settings::slotErrorOutput(QString err)
+{
+    QMessageBox msgBox;
+    msgBox.setText("Error");
+    msgBox.setInformativeText(err);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.exec();
 }
 
-void Settings::slotChangePedestrianColorProfile(){
+void Settings::slotChangePedestrianColorProfile()
+{
 
-	if(!ui.chBpedestrianDefaultColor->isChecked()){
-		ui.CbPedestrianGroup->setEnabled(true);
-		ui.pushButtonChangePedestrianColor->setEnabled(true);
-		SystemSettings::setPedestrianColorProfileFromFile(false);
-	}else{
-		ui.CbPedestrianGroup->setEnabled(false);
-		ui.pushButtonChangePedestrianColor->setEnabled(false);
-		SystemSettings::setPedestrianColorProfileFromFile(true);
-	}
+    if(!ui.chBpedestrianDefaultColor->isChecked()) {
+        ui.CbPedestrianGroup->setEnabled(true);
+        ui.pushButtonChangePedestrianColor->setEnabled(true);
+        SystemSettings::setPedestrianColorProfileFromFile(false);
+    } else {
+        ui.CbPedestrianGroup->setEnabled(false);
+        ui.pushButtonChangePedestrianColor->setEnabled(false);
+        SystemSettings::setPedestrianColorProfileFromFile(true);
+    }
 }
 
-void Settings::slotChangeCaptionSize(){
-	bool ok=false;
+void Settings::slotChangeCaptionSize()
+{
+    bool ok=false;
 
-	int size =ui.CbCaptionSize->currentText().toInt(&ok);
-	if( (ok==false)|| (size >=200)){
-		ui.CbCaptionSize->removeItem(ui.CbCaptionSize->currentIndex());
-		return;
-	}
+    int size =ui.CbCaptionSize->currentText().toInt(&ok);
+    if( (ok==false)|| (size >=200)) {
+        ui.CbCaptionSize->removeItem(ui.CbCaptionSize->currentIndex());
+        return;
+    }
 
-	int orientation= ui.ComboCaptionOrientation->currentIndex();
-	bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
+    int orientation= ui.ComboCaptionOrientation->currentIndex();
+    bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
 
-	SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
+    SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
 
-	extern_force_system_update=true;
-}
-
-
-void Settings::slotPickCaptionColor(){
-
-	QColorDialog* colorDialog = new QColorDialog(this);
-
-	tmpCaptionColor=colorDialog->getColor();
-
-	// the user may have cancelled the process
-	if(tmpCaptionColor.isValid()==false) return;
-
-	int size =ui.CbCaptionSize->currentText().toInt();
-	int orientation= ui.ComboCaptionOrientation->currentText().toInt();
-	bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
-
-	SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
-
-	//update the color marker defined by a frame
-	char bgcolor[50];
-	sprintf(bgcolor,"background-color: rgb(%d, %d, %d);",tmpCaptionColor.red(),tmpCaptionColor.green(),tmpCaptionColor.blue());
-	ui.frameCaptionColorPreview->setStyleSheet(bgcolor);
-
-	extern_force_system_update=true;
-
-	delete colorDialog;
+    extern_force_system_update=true;
 }
 
 
-void Settings::slotChangeCaptionOrientation(){
-	int size =ui.CbCaptionSize->currentText().toInt();
-	int orientation= ui.ComboCaptionOrientation->currentIndex();
-	bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
+void Settings::slotPickCaptionColor()
+{
 
-	SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
-		extern_force_system_update=true;
+    QColorDialog* colorDialog = new QColorDialog(this);
+
+    tmpCaptionColor=colorDialog->getColor();
+
+    // the user may have cancelled the process
+    if(tmpCaptionColor.isValid()==false) return;
+
+    int size =ui.CbCaptionSize->currentText().toInt();
+    int orientation= ui.ComboCaptionOrientation->currentText().toInt();
+    bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
+
+    SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
+
+    //update the color marker defined by a frame
+    char bgcolor[50];
+    sprintf(bgcolor,"background-color: rgb(%d, %d, %d);",tmpCaptionColor.red(),tmpCaptionColor.green(),tmpCaptionColor.blue());
+    ui.frameCaptionColorPreview->setStyleSheet(bgcolor);
+
+    extern_force_system_update=true;
+
+    delete colorDialog;
 }
 
-void Settings::slotChangeCaptionAutoRotation(){
-	int size =ui.CbCaptionSize->currentText().toInt();
-	int orientation= ui.ComboCaptionOrientation->currentText().toInt();
-	bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
 
-	SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
-		extern_force_system_update=true;
+void Settings::slotChangeCaptionOrientation()
+{
+    int size =ui.CbCaptionSize->currentText().toInt();
+    int orientation= ui.ComboCaptionOrientation->currentIndex();
+    bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
+
+    SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
+    extern_force_system_update=true;
 }
 
-void Settings::slotChangeCaptionColorMode(){
+void Settings::slotChangeCaptionAutoRotation()
+{
+    int size =ui.CbCaptionSize->currentText().toInt();
+    int orientation= ui.ComboCaptionOrientation->currentText().toInt();
+    bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
 
-	if(ui.comboCaptionColorMode->currentText().compare("Auto")==0){
-		int size =ui.CbCaptionSize->currentText().toInt();
-		int orientation= ui.ComboCaptionOrientation->currentText().toInt();
-		bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
+    SystemSettings::setCaptionsParameters(size, tmpCaptionColor,orientation, automaticRotation);
+    extern_force_system_update=true;
+}
 
-		SystemSettings::setCaptionsParameters(size, QColor() ,orientation, automaticRotation);
-		extern_force_system_update=true;
+void Settings::slotChangeCaptionColorMode()
+{
 
-	}else if(ui.comboCaptionColorMode->currentText().compare("Custom")==0){
-		slotPickCaptionColor();
-	}
+    if(ui.comboCaptionColorMode->currentText().compare("Auto")==0) {
+        int size =ui.CbCaptionSize->currentText().toInt();
+        int orientation= ui.ComboCaptionOrientation->currentText().toInt();
+        bool automaticRotation=ui.checkBoxCaptionAutoRotate->isChecked();
+
+        SystemSettings::setCaptionsParameters(size, QColor() ,orientation, automaticRotation);
+        extern_force_system_update=true;
+
+    } else if(ui.comboCaptionColorMode->currentText().compare("Custom")==0) {
+        slotPickCaptionColor();
+    }
 }
 
 //ugly, I had no choice :)
-void Settings::closeEvent(QCloseEvent* event){
-	hide();
-	///@FIXME
-//	event->ignore();
+void Settings::closeEvent(QCloseEvent* event)
+{
+    hide();
+    ///@FIXME
+    event->ignore();
 }
 
-void Settings::slotControlSequence(QString msg){
+void Settings::slotControlSequence(QString msg)
+{
 
-	if(msg.compare("CAPTION_AUTO")==0){
-		ui.comboCaptionColorMode->setCurrentIndex(0); //should be auto
-	}else
-		if (msg.compare("CAPTION_CUSTOM")==0){
-			ui.comboCaptionColorMode->setCurrentIndex(1); //should be custom
-	}
-	slotChangeCaptionColorMode();
+    if(msg.compare("CAPTION_AUTO")==0) {
+        ui.comboCaptionColorMode->setCurrentIndex(0); //should be auto
+    } else if (msg.compare("CAPTION_CUSTOM")==0) {
+        ui.comboCaptionColorMode->setCurrentIndex(1); //should be custom
+    }
+    slotChangeCaptionColorMode();
 }

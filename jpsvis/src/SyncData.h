@@ -48,139 +48,145 @@ extern bool extern_offline_mode;
 
 class SyncData: public QObject {
 
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	SyncData();
-	virtual ~SyncData();
+    SyncData();
+    virtual ~SyncData();
 
-	void add(std::string newData);
-	std::string get();
-	//void clear();
-	void resetFrameCursor();
+    void add(std::string newData);
+    std::string get();
+    //void clear();
+    void resetFrameCursor();
 
 
-	/// get the size
-	unsigned int getSize();
+    /// get the size
+    unsigned int getSize();
 
-	/// add a frame to the synchronized data
-	void addFrame(Frame* frame);
+    /// add a frame to the synchronized data
+    void addFrame(Frame* frame);
 
-	/// clears all frames
-	void clearFrames();
+    /// clears all frames
+    void clearFrames();
 
-	/// returns the total number of frames
-	int getFramesNumber();
+    /// returns the total number of frames
+    int getFramesNumber();
 
-	/// return the position of the actual frame
-	int getFrameCursor();
+    /// return the position of the actual frame
+    int getFrameCursor();
 
-	/// set to cursor position
-	void setFrameCursorTo(int position);
+    /// set to cursor position
+    void setFrameCursorTo(int position);
 
-	/// return the frame at position i
-	Frame* getFrame(unsigned int i);
+    /// return the frame at position i
+    Frame* getFrame(int i);
 
-	/// return a pointer to the next frame
-	Frame* getNextFrame();
+    /// return a pointer to the next frame
+    Frame* getNextFrame();
 
-	/// return a poiner to the previous frame
-	Frame* getPreviousFrame();
+    /// return a poiner to the previous frame
+    Frame* getPreviousFrame();
 
-	/// return the number of pedestrians involved in this dataset
-	int getNumberOfAgents();
+    /// return the number of pedestrians involved in this dataset
+    int getNumberOfAgents();
 
-	/// set the number of pedestrians
-	void setNumberOfAgents(int numberOfAgents);
+    /// set the number of pedestrians
+    void setNumberOfAgents(int numberOfAgents);
 
-	/// set the absolute time (delay) after which, this dataset will start to play.
-	/// This is useful when loading several datasets, that needs to be synchronised.
-	/// @para second the number of seconds elapsed since midnight 1970
-	/// @para microsecond the number of microsecond(in addition to the seconds)
-	void setDelayAbsolute(unsigned long second, unsigned long microsecond/*=0*/);
+    /// set the absolute time (delay) after which, this dataset will start to play.
+    /// This is useful when loading several datasets, that needs to be synchronised.
+    /// @para second the number of seconds elapsed since midnight 1970
+    /// @para microsecond the number of microsecond(in addition to the seconds)
+    void setDelayAbsolute(unsigned long second, unsigned long microsecond/*=0*/);
 
-	/// returns the arguments given in setDelay.
-	void getDelayAbsolute(unsigned long *);
+    /// returns the arguments given in setDelay.
+    void getDelayAbsolute(unsigned long *);
 
-	/// get the relative delays between the dataset in millisecond.
-	/// the delay of the first dataset/group will typically have the delay 0 ms.
-	signed long getDelayRelative();
+    /// get the relative delays between the dataset in millisecond.
+    /// the delay of the first dataset/group will typically have the delay 0 ms.
+    signed long getDelayRelative();
 
-	/// set the relative delays
+    /// set the relative delays
 
-	void setDelayRelative(signed long milliseconds);
+    void setDelayRelative(signed long milliseconds);
 
-	/// compute the relative relative
-	/// @deprecated [should use setDelayRelative]
-	void computeDelayRelative(unsigned long* delays);
+    /// compute the relative relative
+    /// @deprecated [should use setDelayRelative]
+    void computeDelayRelative(unsigned long* delays);
 
-	/// set the offset.
-	/// this is useful when several datasets needed
-	/// to be synchronized
-	void setFrameCursorOffset(int offset);
+    /// set the offset.
+    /// this is useful when several datasets needed
+    /// to be synchronized
+    void setFrameCursorOffset(int offset);
 
-	/// \brief initialize the pedestrians height.
-	/// the initialiation is a list, where the even terms are the IDs
-	/// and the odd terms are the heights
-	void setInitialHeights(const QStringList& pedHeight);
+    /// \brief initialize the pedestrians height.
+    /// the initialiation is a list, where the even terms are the IDs
+    /// and the odd terms are the heights
+    void setInitialHeights(const QStringList& pedHeight);
 
-	///  \brief get initial heights
-	QStringList getInitialHeights() {
-		return pedHeight;
-	}
+    ///  \brief get initial heights
+    QStringList getInitialHeights()
+    {
+        return pedHeight;
+    }
 
-	/**
-	 * \brief Set the pedestrian initial colors.
-	 * the initialiation is a list, where the even terms are the IDs
-	 * and the odd terms are the Colors
-	 * @param pedColor
-	 */
-	void setInitialColors(const QStringList& pedColor){this->pedColor.clear();this->pedColor=pedColor;};
+    /**
+     * \brief Set the pedestrian initial colors.
+     * the initialiation is a list, where the even terms are the IDs
+     * and the odd terms are the Colors
+     * @param pedColor
+     */
+    void setInitialColors(const QStringList& pedColor)
+    {
+        this->pedColor.clear();
+        this->pedColor=pedColor;
+    };
 
-	/**
-	 * \brief return the  initial colors
-	 */
+    /**
+     * \brief return the  initial colors
+     */
 
-	QStringList getInitialColors() {
-		return pedColor;
-	}
+    QStringList getInitialColors()
+    {
+        return pedColor;
+    }
 
-	Q_SIGNALS:
-	/// send a control sequence to the main GUI.
-	/// a control sequence could be STACK_EMPTY.
-	void signal_controlSequences(const char* sex);
+Q_SIGNALS:
+    /// send a control sequence to the main GUI.
+    /// a control sequence could be STACK_EMPTY.
+    void signal_controlSequences(const char* sex);
 
 private:
 
-	//general information about this dataset
-	float frameRate;
-	char roomCaption[256];
+    //general information about this dataset
+    float frameRate;
+    char roomCaption[256];
 
-	// give the actual position of the frame beeing read, in the frame dataset
+    // give the actual position of the frame beeing read, in the frame dataset
 
-	// the actual position (real) of the frame
-	int frameCursor;
+    // the actual position (real) of the frame
+    int frameCursor;
 
-	// the offset. this is 0 when all dataets are synchronised
-	int frameCursorOffset;
+    // the offset. this is 0 when all dataets are synchronised
+    int frameCursorOffset;
 
-	// relative delay in milliseconds
-	signed long delay_ms_rel;
-	// ablotute time elapsed since 1970 in sec
-	unsigned long delay_s_abs;
-	// absolute additional time in microsecond
-	unsigned long delay_us_abs;
+    // relative delay in milliseconds
+    signed long delay_ms_rel;
+    // ablotute time elapsed since 1970 in sec
+    unsigned long delay_s_abs;
+    // absolute additional time in microsecond
+    unsigned long delay_us_abs;
 
-	// list containing the initial heights of pedestrians
-	QStringList pedHeight;
+    // list containing the initial heights of pedestrians
+    QStringList pedHeight;
 
-	/// list containing the initial colors of pedestrians
-	QStringList pedColor;
+    /// list containing the initial colors of pedestrians
+    QStringList pedColor;
 
-	/// the number of agents
-	int numberOfAgents;
-	QMutex mutex;
-	std::vector<Frame*> frames;
+    /// the number of agents
+    int numberOfAgents;
+    QMutex mutex;
+    std::vector<Frame*> frames;
 };
 
 #endif /* SYNCDATA_H_ */

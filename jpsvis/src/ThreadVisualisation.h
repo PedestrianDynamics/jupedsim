@@ -68,74 +68,73 @@ extern Pedestrian** extern_pedestrians_thirdSet;
 
 extern PointPlotter* extern_trail_plotter;
 
-//extern vtkSmartPointer<vtkGlyph3D> extern_glyphs_pedestrians;
-extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians;
-extern vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D;
-extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_2D;
-extern vtkSmartPointer<vtkActor> extern_glyphs_pedestrians_actor_3D;
+extern  vtkTensorGlyph* extern_glyphs_pedestrians;
+extern  vtkTensorGlyph* extern_glyphs_pedestrians_3D;
+extern  vtkActor* extern_glyphs_pedestrians_actor_2D;
+extern  vtkActor* extern_glyphs_pedestrians_actor_3D;
 
 extern SyncData extern_trajectories_firstSet;
 extern SyncData extern_trajectories_secondSet;
 extern SyncData extern_trajectories_thirdSet;
 
 class ThreadVisualisation :public QThread {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	ThreadVisualisation(QObject *parent = 0);
-	virtual ~ThreadVisualisation();
-	virtual void run();
+    ThreadVisualisation(QObject *parent = 0);
+    virtual ~ThreadVisualisation();
+    virtual void run();
 
-	void setAxisVisible(bool status);
+    void setAxisVisible(bool status);
 
-	void setFullsreen(bool status);
+    void setFullsreen(bool status);
 
-	/// set the camera to one of TOP/FRONT/SIDE
-	void setCameraPerspective(int mode);
+    /// set the camera to one of TOP/FRONT/SIDE
+    void setCameraPerspective(int mode);
 
-	/// load and display the geometry where
-	/// the pedestrians will move
-	void setGeometry(FacilityGeometry* geometry);
+    /// load and display the geometry where
+    /// the pedestrians will move
+    void setGeometry(FacilityGeometry* geometry);
 
-	FacilityGeometry* getGeometry();
+    FacilityGeometry* getGeometry();
 
-	///this is for convenience and will be delete later
-	void setWindowTitle(QString title);
+    ///this is for convenience and will be delete later
+    void setWindowTitle(QString title);
 
-	/// shutdown the thread
-	//void shutdown();
+    /// shutdown the thread
+    //void shutdown();
 
-	void setGeometryLabelsVisibility(int v);
+    void setGeometryLabelsVisibility(int v);
 
-	/// set geometry visibility
-	void setGeometryVisibility(bool status);
+    /// set geometry visibility
+    void setGeometryVisibility(bool status);
 
-	/// enable/disable 2D
-	void setGeometryVisibility2D(bool status);
+    /// enable/disable 2D
+    void setGeometryVisibility2D(bool status);
 
-	/// enable/disable 3D
-	void setGeometryVisibility3D(bool status);
+    /// enable/disable 3D
+    void setGeometryVisibility3D(bool status);
 
-	/// change the background color of the rendering windows
-	void setBackgroundColor(double* color);
+    /// change the background color of the rendering windows
+    void setBackgroundColor(double* color);
 
-	/// change the walls color
-	void setWallsColor(double* color);
+    /// change the walls color
+    void setWallsColor(double* color);
 
     /// change the floor color
     void setFloorColor(double* color);
 
-	/// change the exits color.
-	void setExitsColor(double* color);
+    /// change the exits color.
+    void setExitsColor(double* color);
 
     /// change the exits color.
     void setNavLinesColor(double* color);
 
-	/// show / hide the walls
-	void showWalls(bool status);
+    /// show / hide the walls
+    void showWalls(bool status);
 
-	/// show/ hide the exits
-	void showDoors(bool status);
+    /// show/ hide the exits
+    void showDoors(bool status);
 
     /// show/ hide the exits
     void showNavLines(bool status);
@@ -143,18 +142,18 @@ public:
     /// show/ hide the floor
     void showFloor(bool status);
 
-	/// show / hide stairs
-	///not implemented
-	void showStairs(bool status);
+    /// show / hide stairs
+    ///not implemented
+    void showStairs(bool status);
 
-	void setOnscreenInformationVisibility(bool show);
+    void setOnscreenInformationVisibility(bool show);
 
 public Q_SLOTS:
-	/**control sequence received*/
+    /**control sequence received*/
     void slotControlSequence(const char* para);
 
-	/// set the frame rate in frames per second
-	void slotSetFrameRate( float fps);
+    /// set the frame rate in frames per second
+    void slotSetFrameRate( float fps);
 
 
 Q_SIGNALS:
@@ -162,46 +161,39 @@ Q_SIGNALS:
 
 private:
 
-	/// initialize the legend
-	void initLegend(/*std::vector scalars*/);
+    /// initialize the legend
+    void initLegend(/*std::vector scalars*/);
 
-	/// initialize the datasets
-	void init();
+    /// initialize the datasets
+    void init();
 
-	/// initialize the datasets
+    /// initialize the datasets
     void initGlyphs2D();
 
     //initialize the 3D agents
     void initGlyphs3D();
 
-	//finalize the datasets
-	void finalize();
+    //finalize the datasets
+    void finalize();
 
-	/// compute the relative delays to the datasets
-	void computeDelays();
+    /// compute the relative delays to the datasets
+    void computeDelays();
 
-	/// window change events
-	//static void WindowModifiedCallback(vtkObject* caller, long unsigned int  eventId, void* clientData, void* callData );
+    /// window change events
+    //static void WindowModifiedCallback(vtkObject* caller, long unsigned int  eventId, void* clientData, void* callData );
 
 
 private:
-	FacilityGeometry* geometry;
-	vtkRenderer* renderer;
-	vtkRenderWindow* renderWindow;
-	vtkRenderWindowInteractor* renderWinInteractor;
-	vtkAxesActor* axis;
-	vtkTextActor* runningTime;
+    FacilityGeometry* geometry;
+    vtkRenderer* renderer;
+    vtkRenderWindow* renderWindow;
+    vtkRenderWindowInteractor* renderWinInteractor;
+    vtkAxesActor* axis;
+    vtkTextActor* runningTime;
     vtkCamera* _topViewCamera;
-	QString winTitle;
+    QString winTitle;
 
-	float framePerSecond;
-	double camPosTop[3];
-	double camClipTop[3];
-	double camFocalPointTop[3];
-	double camViewUpTop[3];
-	double camViewAngleTop;
-	double camParallelScale;
-	double camViewPlanNormalTop[3];
+    float framePerSecond;
 
 };
 

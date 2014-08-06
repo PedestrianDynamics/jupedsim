@@ -30,56 +30,69 @@
 
 using namespace std;
 
-Hline::Hline() {
-	_room=NULL;
-	_subRoom=NULL;
-	_id=-1;
+Hline::Hline()
+{
+    _room=NULL;
+    _subRoom=NULL;
+    _id=-1;
 }
 
-Hline::~Hline() {
+Hline::~Hline()
+{
 }
 
-void Hline::SetID(int ID) {
-	_id=ID;
+void Hline::SetID(int ID)
+{
+    _id=ID;
 }
 
-void Hline::SetRoom(Room* r) {
-	_room=r;
+void Hline::SetRoom(Room* r)
+{
+    _room=r;
 }
 
-void Hline::SetCaption(string s) {
-	_caption=s;
+void Hline::SetCaption(string s)
+{
+    _caption=s;
 }
 
-void Hline::SetSubRoom(SubRoom* s) {
-	_subRoom=s;
+void Hline::SetSubRoom(SubRoom* s)
+{
+    _subRoom=s;
 }
 
-int Hline::GetID() const {
-	return _id;
+int Hline::GetID() const
+{
+    return _id;
 }
 
-string Hline::GetCaption() const {
-	return _caption;
+string Hline::GetCaption() const
+{
+    return _caption;
 }
 
-Room* Hline::GetRoom() const {
-	return _room;
+Room* Hline::GetRoom() const
+{
+    return _room;
 }
 
-SubRoom* Hline::GetSubRoom() const {
-	return _subRoom;
+SubRoom* Hline::GetSubRoom() const
+{
+    return _subRoom;
 }
 
-bool Hline::IsInSubRoom(int subroomID) const {
-	return _subRoom->GetSubRoomID() == subroomID;
+bool Hline::IsInSubRoom(int subroomID) const
+{
+    return _subRoom->GetSubRoomID() == subroomID;
 }
 
-bool Hline::IsInRoom(int roomID) const {
-	 return _room->GetID() == roomID;
+bool Hline::IsInRoom(int roomID) const
+{
+    return _room->GetID() == roomID;
 }
 
-void Hline::WriteToErrorLog() const {
+void Hline::WriteToErrorLog() const
+{
     string s;
     char tmp[CLENGTH];
     sprintf(tmp, "\t\tHline: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
@@ -93,7 +106,8 @@ void Hline::WriteToErrorLog() const {
 
 // TraVisTo Ausgabe
 
-string Hline::WriteElement() const {
+string Hline::WriteElement() const
+{
     string geometry;
     char tmp[CLENGTH] = "";
     sprintf(tmp,"\t\t<door ID=\"%d\" color = \"250\" caption=\"%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());

@@ -66,7 +66,7 @@ public:
     double Norm() const;
     /// Norm square
     double NormSquare() const;
-     /// normalized vector
+    /// normalized vector
     Point Normalized() const;
     /// dot product
     double ScalarP(const Point& v) const;

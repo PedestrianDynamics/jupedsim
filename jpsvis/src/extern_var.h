@@ -82,40 +82,33 @@ double extern_scale_pedestrian=0.1;
 // At most three pedestrians groups can be loaded
 ///The first pedestrian group
 Pedestrian** extern_pedestrians_firstSet=NULL;
-///The second pedestrian group
-Pedestrian** extern_pedestrians_secondSet=NULL;
-///The third pedestrian group
-Pedestrian** extern_pedestrians_thirdSet=NULL;
 
-vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians=NULL;
-vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D=NULL;
+
+//vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians=NULL;
+//vtkSmartPointer<vtkTensorGlyph> extern_glyphs_pedestrians_3D=NULL;
+
+vtkTensorGlyph* extern_glyphs_pedestrians=NULL;
+vtkTensorGlyph* extern_glyphs_pedestrians_3D=NULL;
+vtkActor2D* extern_pedestrians_labels = NULL;
+vtkActor* extern_glyphs_pedestrians_actor_2D = NULL;
+vtkActor* extern_glyphs_pedestrians_actor_3D = NULL;
 
 //VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians);
 //VTK_CREATE (vtkTensorGlyph, extern_glyphs_pedestrians_3D);
-VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
-
-VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_2D);
-VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_3D);
+//VTK_CREATE (vtkActor2D, extern_pedestrians_labels);
+//VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_2D);
+//VTK_CREATE (vtkActor, extern_glyphs_pedestrians_actor_3D);
 
 
 // and here the corresponding dataset
 ///The first dataset
 SyncData extern_trajectories_firstSet;
-///The second dataset
-SyncData extern_trajectories_secondSet;
-///The third dataset
-SyncData extern_trajectories_thirdSet;
-
 
 //states if the datasets are loaded.
 bool extern_first_dataset_loaded=false;
-bool extern_second_dataset_loaded=false;
-bool extern_third_dataset_loaded=false;
 
 //states whether the loaded datasets are visible
 bool extern_first_dataset_visible=false;
-bool extern_second_dataset_visible=false;
-bool extern_third_dataset_visible=false;
 
 
 #endif /* EXTERN_VAR_H_ */

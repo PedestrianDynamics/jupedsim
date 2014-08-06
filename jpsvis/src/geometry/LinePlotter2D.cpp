@@ -97,50 +97,51 @@ LinePlotter2D::LinePlotter2D()
 
 }
 
-LinePlotter2D::~LinePlotter2D(){
+LinePlotter2D::~LinePlotter2D()
+{
 
-	m_lookupTable->Delete();
-	assembly->Delete();
-	door_points->Delete();
-	door_lines->Delete();
-	door_lineScalars->Delete();
-	door_mapper->Delete();
-	door_actor->Delete();
-	wall_points->Delete();
-	wall_lines->Delete();
-	wall_lineScalars->Delete();
-	wall_mapper->Delete();
-	wall_actor->Delete();
+    m_lookupTable->Delete();
+    assembly->Delete();
+    door_points->Delete();
+    door_lines->Delete();
+    door_lineScalars->Delete();
+    door_mapper->Delete();
+    door_actor->Delete();
+    wall_points->Delete();
+    wall_lines->Delete();
+    wall_lineScalars->Delete();
+    wall_mapper->Delete();
+    wall_actor->Delete();
 }
 
 void LinePlotter2D::SetAllLineWidth(int width)
 {
-	//m_allLineWidth = width ;
+    //m_allLineWidth = width ;
 }
 
 void LinePlotter2D::PlotDoor(double m[3], double n[3], double scalar)
 {
-	door_points->InsertNextPoint(m);
-	door_lineScalars->InsertNextTuple1(scalar);
-	door_points->InsertNextPoint(n);
-	door_lineScalars->InsertNextTuple1(scalar);
+    door_points->InsertNextPoint(m);
+    door_lineScalars->InsertNextTuple1(scalar);
+    door_points->InsertNextPoint(n);
+    door_lineScalars->InsertNextTuple1(scalar);
 
-	door_lines->InsertNextCell(2);
-	door_lines->InsertCellPoint(door_curPointID);
-	door_lines->InsertCellPoint(door_curPointID+1);
+    door_lines->InsertNextCell(2);
+    door_lines->InsertCellPoint(door_curPointID);
+    door_lines->InsertCellPoint(door_curPointID+1);
 
-	door_curPointID+=2;
+    door_curPointID+=2;
 
-	if(scalar!=1.0){
-		doorColorsToDefault=false;
-	}
+    if(scalar!=1.0) {
+        doorColorsToDefault=false;
+    }
 }
 
 void LinePlotter2D::changeWallsColor(double *col)
 {
-	//first switch off the automatic mapping
-	wall_mapper->SetScalarVisibility(0);
-	//then set the new color
+    //first switch off the automatic mapping
+    wall_mapper->SetScalarVisibility(0);
+    //then set the new color
     wall_actor->GetProperty()->SetColor(col);
 }
 
@@ -168,24 +169,24 @@ void LinePlotter2D::changeNavLinesColor(double *col)
 
 void LinePlotter2D::changeDoorsColor(double *col)
 {
-	//first switch off the automatic mapping
-	door_mapper->SetScalarVisibility(0);
-	//then set the new color
-	door_actor->GetProperty()->SetColor(col);
+    //first switch off the automatic mapping
+    door_mapper->SetScalarVisibility(0);
+    //then set the new color
+    door_actor->GetProperty()->SetColor(col);
 }
 
 void LinePlotter2D::PlotWall(double m[3], double n[3], double scalar)
 {
-	wall_points->InsertNextPoint(m);
-	wall_lineScalars->InsertNextTuple1(scalar);
-	wall_points->InsertNextPoint(n);
-	wall_lineScalars->InsertNextTuple1(scalar);
+    wall_points->InsertNextPoint(m);
+    wall_lineScalars->InsertNextTuple1(scalar);
+    wall_points->InsertNextPoint(n);
+    wall_lineScalars->InsertNextTuple1(scalar);
 
-	wall_lines->InsertNextCell(2);
-	wall_lines->InsertCellPoint(wall_curPointID);
-	wall_lines->InsertCellPoint(wall_curPointID+1);
+    wall_lines->InsertNextCell(2);
+    wall_lines->InsertCellPoint(wall_curPointID);
+    wall_lines->InsertCellPoint(wall_curPointID+1);
 
-	wall_curPointID+=2;
+    wall_curPointID+=2;
 }
 
 //vtkPolyData* LinePlotter2D::CreatePolyData()
@@ -246,8 +247,8 @@ vtkAssembly* LinePlotter2D::createAssembly()
 
         //if default, then hide all doors
         // fixme: not working
-        if(doorColorsToDefault){
-            double col[3]={1.0,1.0,1.0};
+        if(doorColorsToDefault) {
+            double col[3]= {1.0,1.0,1.0};
             SystemSettings::getBackgroundColor(col);
             door_actor->GetProperty()->SetColor(col);
             door_actor->Modified();
@@ -301,10 +302,12 @@ vtkAssembly* LinePlotter2D::createAssembly()
     return assembly;
 }
 
-void LinePlotter2D::showDoors(bool status){
-	door_actor->SetVisibility(status);
+void LinePlotter2D::showDoors(bool status)
+{
+    door_actor->SetVisibility(status);
 }
-void LinePlotter2D::showWalls(bool status){
+void LinePlotter2D::showWalls(bool status)
+{
     wall_actor->SetVisibility(status);
 }
 

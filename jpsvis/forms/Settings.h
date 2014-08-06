@@ -38,66 +38,65 @@
 
 extern bool extern_force_system_update;
 
-class Settings : public QWidget
-{
-	Q_OBJECT
+class Settings : public QWidget {
+    Q_OBJECT
 
 public:
-	enum Shape {DEFAULT=1,ELLIPSE,PINGUINS};
-	Settings(QWidget *parent = 0);
-	virtual ~Settings();
+    enum Shape {DEFAULT=1,ELLIPSE,PINGUINS};
+    Settings(QWidget *parent = 0);
+    virtual ~Settings();
 
-	public Q_SLOTS:
+public Q_SLOTS:
 
-	/// change the resolution of the ellipse representing the pedestrian
-	void slotChangePedestrianShape();
-
-
-	/// change the trails settings
-	void slotUpdateTrailSettings();
-
-	/// customize pedestrian color
-	void slotPickPedestrianColor();
-
-	void slotChangePedestrianColor(const QColor& color);
-
-	/// set the width of the lines defining the vertices
-	void slotChangeVerticesWidth();
-
-	/// change the output directory
-	void slotChangeOutputDir();
-
-	/// change the size of the pedestrian caption
-	/// The maximal size is limited to 200
-	void slotChangeCaptionSize();
+    /// change the resolution of the ellipse representing the pedestrian
+    void slotChangePedestrianShape();
 
 
-	///change the caption orientation
-	void slotChangeCaptionOrientation();
+    /// change the trails settings
+    void slotUpdateTrailSettings();
 
-	///change the caption auto rotation policy
-	void slotChangeCaptionAutoRotation();
+    /// customize pedestrian color
+    void slotPickPedestrianColor();
 
-	/// change pedestrian color profile
-	void slotChangePedestrianColorProfile();
+    void slotChangePedestrianColor(const QColor& color);
 
-	/// choose a new caption color
-	void slotPickCaptionColor();
+    /// set the width of the lines defining the vertices
+    void slotChangeVerticesWidth();
 
-	///change the caption color mode, auto or custom
-	void slotChangeCaptionColorMode();
+    /// change the output directory
+    void slotChangeOutputDir();
 
-	/// execute a control sequence
-	void slotControlSequence(QString msg);
+    /// change the size of the pedestrian caption
+    /// The maximal size is limited to 200
+    void slotChangeCaptionSize();
+
+
+    ///change the caption orientation
+    void slotChangeCaptionOrientation();
+
+    ///change the caption auto rotation policy
+    void slotChangeCaptionAutoRotation();
+
+    /// change pedestrian color profile
+    void slotChangePedestrianColorProfile();
+
+    /// choose a new caption color
+    void slotPickCaptionColor();
+
+    ///change the caption color mode, auto or custom
+    void slotChangeCaptionColorMode();
+
+    /// execute a control sequence
+    void slotControlSequence(QString msg);
 
 protected:
-		virtual void closeEvent(QCloseEvent* event);
+    virtual void closeEvent(QCloseEvent* event);
 
 private:
-	void updateCaptionSetting();
-	Ui::SettingsClass ui;
-	static QColor tmpCaptionColor;
-	void slotErrorOutput(QString err);
+    void updateCaptionSetting();
+    Ui::SettingsClass ui;
+    static QColor tmpCaptionColor;
+    void slotErrorOutput(QString err);
 };
 
 #endif // PEDESTRIANSHAPE_H

@@ -33,9 +33,9 @@
 class NavLine: public Line {
 
 public:
-	NavLine();
-	NavLine(Line l);
-	virtual ~NavLine();
+    NavLine();
+    NavLine(Line l);
+    virtual ~NavLine();
 
 };
 

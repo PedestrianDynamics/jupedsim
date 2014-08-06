@@ -79,9 +79,8 @@ extern bool extern_second_dataset_visible;
 extern bool extern_third_dataset_visible;
 
 
-class MainWindow : public QMainWindow
-{
-	Q_OBJECT
+class MainWindow : public QMainWindow {
+    Q_OBJECT
 
 public:
     MainWindow(QWidget *parent = 0);
@@ -90,156 +89,156 @@ public:
 
 public Q_SLOTS:
 
-	/// display the help modus
-	void slotHelpAbout();
+    /// display the help modus
+    void slotHelpAbout();
 
-	///quit the program
-	void slotExit();
+    ///quit the program
+    void slotExit();
 
-	/// load a file
-	bool slotLoadFile();
-	//void slotLoadProject();
+    /// load a file
+    bool slotLoadFile();
+    //void slotLoadProject();
 
-	/// output an Error
-	void slotErrorOutput(QString err);
+    /// output an Error
+    void slotErrorOutput(QString err);
 
-	/// output a warning
-	//void slotWarningOutput(QString warning);
+    /// output a warning
+    //void slotWarningOutput(QString warning);
 
-	/// start the visualisation thread
-	/// the signal is emitted when the
-	/// data transfer thread the header and at least one data set
-	void slotStartVisualisationThread(QString data="",int numberOfAgents=1000,float frameRate=25);
+    /// start the visualisation thread
+    /// the signal is emitted when the
+    /// data transfer thread the header and at least one data set
+    void slotStartVisualisationThread(QString data="",int numberOfAgents=1000,float frameRate=25);
 
-	/// shutdown the visualisation thread
-	void slotShutdownVisualisationThread(bool);
+    /// shutdown the visualisation thread
+    void slotShutdownVisualisationThread(bool);
 
-	/// add a new dataset to the store.
-	/// note that at most three (3) datasets can be loaded for a visualisation round
-	bool slotAddDataSet();
+    /// add a new dataset to the store.
+    /// note that at most three (3) datasets can be loaded for a visualisation round
+    bool slotAddDataSet();
 
-	/// clear all previously added/loaded datasets
-	void slotClearAllDataset();
+    /// clear all previously added/loaded datasets
+    void slotClearAllDataset();
 
-	/// set the camera view angle to  TOP/FRONT/SIDE
-	// TODO: high priority
-	void slotSetCameraPerspectiveToTop();
-	void slotSetCameraPerspectiveToFront();
-	void slotSetCameraPerspectiveToSide();
-	void slotSetCameraPerspectiveToVirtualAgent();
+    /// set the camera view angle to  TOP/FRONT/SIDE
+    // TODO: high priority
+    void slotSetCameraPerspectiveToTop();
+    void slotSetCameraPerspectiveToFront();
+    void slotSetCameraPerspectiveToSide();
+    void slotSetCameraPerspectiveToVirtualAgent();
 
-	//controls visualisation
-	void slotStartPlaying();
-	void slotStopPlaying();
-	void slotRecord();
-	void slotFullScreen(bool status);
-	void slotReset();
-	void slotNetworkSettings();
-	// void slotToggleVisualisationMode();
-	void slotSetOfflineMode(bool status);
-	void slotSetOnlineMode(bool status);
-	/// take a screenshot of the rendering window
-	void slotTakeScreenShot();
+    //controls visualisation
+    void slotStartPlaying();
+    void slotStopPlaying();
+    void slotRecord();
+    void slotFullScreen(bool status);
+    void slotReset();
+    void slotNetworkSettings();
+    // void slotToggleVisualisationMode();
+    void slotSetOfflineMode(bool status);
+    void slotSetOnlineMode(bool status);
+    /// take a screenshot of the rendering window
+    void slotTakeScreenShot();
 
-	/// update the status message
-	void slotCurrentAction(QString msg);
-	void slotFrameNumber(unsigned long timems);
-	void slotRunningTime(unsigned long timems);
-	void slotRenderingTime(int fps);
-	void slotControlSequence(const char *);
+    /// update the status message
+    void slotCurrentAction(QString msg);
+    void slotFrameNumber(unsigned long timems);
+    void slotRunningTime(unsigned long timems);
+    void slotRenderingTime(int fps);
+    void slotControlSequence(const char *);
 
-	/// load a geometry file and display it
-	//void slotLoadGeometry( );
-	void slotClearGeometry();
-	//void slotLoadParseShowGeometry(QString fileName);
+    /// load a geometry file and display it
+    //void slotLoadGeometry( );
+    void slotClearGeometry();
+    //void slotLoadParseShowGeometry(QString fileName);
 
-	/// load a geometry sent by the data transfer thread
-	//void slotLoadGeometryToThread(QString data);
+    /// load a geometry sent by the data transfer thread
+    //void slotLoadGeometryToThread(QString data);
 
 
-	/// enable/disable the first pedestrian group
-	void slotToggleFirstPedestrianGroup();
-	/// enable/disable the second pedestrian group
-	void slotToggleSecondPedestrianGroup();
-	/// enable/disable the third pedestrian group
-	void slotToggleThirdPedestrianGroup();
+    /// enable/disable the first pedestrian group
+    void slotToggleFirstPedestrianGroup();
+    /// enable/disable the second pedestrian group
+    void slotToggleSecondPedestrianGroup();
+    /// enable/disable the third pedestrian group
+    void slotToggleThirdPedestrianGroup();
 
-	/// show/hides trajectories (leaving a trail) only
-	void slotShowTrajectoryOnly();
+    /// show/hides trajectories (leaving a trail) only
+    void slotShowTrajectoryOnly();
 
-	/// shows/hide geometry
-	void slotShowGeometry();
-	/// shows/hide geometry
-	void slotShowHideExits();
-	/// shows/hide geometry
-	void slotShowHideWalls();
+    /// shows/hide geometry
+    void slotShowGeometry();
+    /// shows/hide geometry
+    void slotShowHideExits();
+    /// shows/hide geometry
+    void slotShowHideWalls();
     /// shows/hide navigation lines
     void slotShowHideNavLines();
     /// shows/hide navigation lines
     void slotShowHideFloor();
-	/// shows/hide geometry captions
-	void slotShowHideGeometryCaptions();
+    /// shows/hide geometry captions
+    void slotShowHideGeometryCaptions();
 
-	/// show pedestrians only without trail
-	void slotShowPedestrianOnly();
+    /// show pedestrians only without trail
+    void slotShowPedestrianOnly();
 
-	/// update the playing speed
-	void slotUpdateSpeedSlider(int newValue);
+    /// update the playing speed
+    void slotUpdateSpeedSlider(int newValue);
 
-	/// update the position slider
-	void slotUpdateFrameSlider(int newValue);
-	void slotFrameSliderPressed();
-	void slotFrameSliderReleased();
-	//void slotFrameSliderChanged();
+    /// update the position slider
+    void slotUpdateFrameSlider(int newValue);
+    void slotFrameSliderPressed();
+    void slotFrameSliderReleased();
+    //void slotFrameSliderChanged();
 
-	/// handle the frame by frame navigation
-	void slotFramesByFramesNavigation();
-	void slotNextFrame();
-	void slotPreviousFrame();
+    /// handle the frame by frame navigation
+    void slotFramesByFramesNavigation();
+    void slotNextFrame();
+    void slotPreviousFrame();
 
-	/// enable/disable the pedestrian captions
-	void slotShowPedestrianCaption();
+    /// enable/disable the pedestrian captions
+    void slotShowPedestrianCaption();
 
-	/// set the bg color
-	//void slotPickBackgroundColor();
+    /// set the bg color
+    //void slotPickBackgroundColor();
 
-	/// update the contrast
-	void slotUpdateContrastSlider(int newValue);
+    /// update the contrast
+    void slotUpdateContrastSlider(int newValue);
 
-	/// set visualisation mode to 2D
-	void slotToogle2D();
+    /// set visualisation mode to 2D
+    void slotToogle2D();
 
-	/// set visualisation mode to 3D
-	void slotToogle3D();
+    /// set visualisation mode to 3D
+    void slotToogle3D();
 
-	/// show / hide the legend
-	void slotToogleShowLegend();
+    /// show / hide the legend
+    void slotToogleShowLegend();
 
-	void slotToogleShowAxis();
+    void slotToogleShowAxis();
 
-	/// change, choose the pedestrian shape
-	void slotChangePedestrianShape();
+    /// change, choose the pedestrian shape
+    void slotChangePedestrianShape();
 
-	/// start/stop the recording process als png images sequences
-	void slotRecordPNGsequence();
+    /// start/stop the recording process als png images sequences
+    void slotRecordPNGsequence();
 
-	/// render a PNG image sequence to an AVI video
-	void slotRenderPNG2AVI();
+    /// render a PNG image sequence to an AVI video
+    void slotRenderPNG2AVI();
 
-	/// adjust the scene background color
-	void slotChangeBackgroundColor();
+    /// adjust the scene background color
+    void slotChangeBackgroundColor();
 
-	/// change the pedestrian caption mode to automatic
-	void slotCaptionColorAuto();
+    /// change the pedestrian caption mode to automatic
+    void slotCaptionColorAuto();
 
-	/// change he pedestrian caption color to manual
-	void slotCaptionColorCustom();
+    /// change he pedestrian caption color to manual
+    void slotCaptionColorCustom();
 
-	/// change the wall color
-	void slotChangeWallsColor();
+    /// change the wall color
+    void slotChangeWallsColor();
 
-	/// change the exits color
-	void slotChangeExitsColor();
+    /// change the exits color
+    void slotChangeExitsColor();
 
     /// change the navigation lines color
     void slotChangeNavLinesColor();
@@ -247,90 +246,90 @@ public Q_SLOTS:
     /// change the floor color
     void slotChangeFloorColor();
 
-	/// show/hide onscreen information
-	/// information include Time and pedestrians left in the facility
-	void slotShowOnScreenInfos();
+    /// show/hide onscreen information
+    /// information include Time and pedestrians left in the facility
+    void slotShowOnScreenInfos();
 
 private:
-	Q_SIGNALS:
-	void signal_controlSequence(QString);
+Q_SIGNALS:
+    void signal_controlSequence(QString);
 
 protected:
-	virtual void closeEvent(QCloseEvent* event);
-	void dragEnterEvent(QDragEnterEvent *event);
-	void dropEvent(QDropEvent *event);
+    virtual void closeEvent(QCloseEvent* event);
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
 
 private:
 
-	/// load settings, parsed from the project file
-	/// @todo not implemented
-	void  loadSettings();
+    /// load settings, parsed from the project file
+    /// @todo not implemented
+    void  loadSettings();
 
-	/// performs the necessary cleaning before shutting down the program.
-	void cleanUp();
+    /// performs the necessary cleaning before shutting down the program.
+    void cleanUp();
 
-	/// reset the system to the very initial state
-	//void reset();
+    /// reset the system to the very initial state
+    //void reset();
 
-	/// get the value of the tag <tagName> from a QDomNode
-	QString getTagValueFromElement(QDomNode node, const char * tagName);
+    /// get the value of the tag <tagName> from a QDomNode
+    QString getTagValueFromElement(QDomNode node, const char * tagName);
 
-	/// parse the geometry  Node and return a pointer to geometry object
-	/// used in online mode only
-	FacilityGeometry* parseGeometry(QDomNode geoNode);
+    /// parse the geometry  Node and return a pointer to geometry object
+    /// used in online mode only
+    FacilityGeometry* parseGeometry(QDomNode geoNode);
     FacilityGeometry* parseGeometry(QString geometryString);
 
-	/**
-	 * parse a shape node and get the initials heights and colors of pedestrians.
-	 *
-	 * @param shapeNode The node to be parsed
-	 * @param groupID 1, 2 or 3
-	 * @return true if success
-	 */
-	bool parsePedestrianShapes(QDomNode shapeNode, int groupID);
+    /**
+     * parse a shape node and get the initials heights and colors of pedestrians.
+     *
+     * @param shapeNode The node to be parsed
+     * @param groupID 1, 2 or 3
+     * @return true if success
+     */
+    bool parsePedestrianShapes(QDomNode shapeNode, int groupID);
 
-	/// reset all graphic element to their initial(default) state
-	void resetGraphicalElements();
+    /// reset all graphic element to their initial(default) state
+    void resetGraphicalElements();
 
-	/// add a second/third dataset to the visualization data
-	///  groupID may be 2 or 3
-	/// @return false if something went wrong.
+    /// add a second/third dataset to the visualization data
+    ///  groupID may be 2 or 3
+    /// @return false if something went wrong.
 
-	bool addPedestrianGroup_old(int groupID, QString fileName="");
-	bool addPedestrianGroup(int groupID, QString fileName="");
+    bool addPedestrianGroup_old(int groupID, QString fileName="");
+    bool addPedestrianGroup(int groupID, QString fileName="");
 
-	///return true if at least one dataset was loaded
-	bool anyDatasetLoaded();
+    ///return true if at least one dataset was loaded
+    bool anyDatasetLoaded();
 
-	/// clear the corresponding dataset if it exists
-	void clearDataSet(int ID);
+    /// clear the corresponding dataset if it exists
+    void clearDataSet(int ID);
 
-	/// reset all dataset, to the beginning
-	void resetAllFrameCursor();
+    /// reset all dataset, to the beginning
+    void resetAllFrameCursor();
 
-	/// wait for visualisation thread to terminate
-	void waitForVisioThread();
+    /// wait for visualisation thread to terminate
+    void waitForVisioThread();
 
-	/// wait for data transfer thread to terminate
-	void waitForDataThread();
+    /// wait for data transfer thread to terminate
+    void waitForDataThread();
 
 
 
 private:
     Ui::mainwindow ui;
 
-	bool isPlaying;
-	bool isPaused;
-	bool frameSliderHold;
-	int numberOfDatasetLoaded;
+    bool isPlaying;
+    bool isPaused;
+    bool frameSliderHold;
+    int numberOfDatasetLoaded;
 
-	Settings* travistoOptions;
-	ThreadDataTransfer* dataTransferThread;
-	ThreadVisualisation* visualisationThread;
-	QLabel *labelCurrentAction;
-	QLabel *labelFrameNumber;
-	QLabel *labelRecording;
-	QLabel *labelMode;
+    Settings* travistoOptions;
+    ThreadDataTransfer* dataTransferThread;
+    ThreadVisualisation* visualisationThread;
+    QLabel *labelCurrentAction;
+    QLabel *labelFrameNumber;
+    QLabel *labelRecording;
+    QLabel *labelMode;
 };
 
 #endif // TRAVISTO_H
