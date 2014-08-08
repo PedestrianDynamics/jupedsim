@@ -351,6 +351,7 @@ void ThreadVisualisation::run()
 
     //style->SetKeyPressActivationValue('R');
     //style->SetKeyPressActivation(true);
+    //renderWindow->SetCurrentCursor(VTK_CURSOR_CROSSHAIR);
 
     //save the top view  camera
     _topViewCamera=vtkCamera::New();

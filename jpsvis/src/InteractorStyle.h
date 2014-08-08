@@ -59,6 +59,7 @@ public:
     virtual void Pan();
     virtual void Dolly();
     virtual void OnLeftButtonUp();
+    virtual void OnMouseMove();
 
 
 

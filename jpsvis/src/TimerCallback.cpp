@@ -206,10 +206,10 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     winName.append(" [ ");
                     s=QString::number(winSize[0]).toStdString();
                     winName.append(s);
-                    winName.append("X");
+                    winName.append(" x ");
                     s=QString::number(winSize[1]).toStdString();
                     winName.append(s);
-                    winName.append(" ] ");
+                    winName.append(" ] -->");
 
                     int posY=winSize[1]*(1.0-30.0/536.0);
                     int posX=winSize[0]*(1.0-450.0/720.0);

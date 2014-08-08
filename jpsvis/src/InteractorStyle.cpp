@@ -42,6 +42,7 @@
 #include "InteractorStyle.h"
 
 #include <iostream>
+#include <QStringList>
 
 using namespace std;
 
@@ -94,6 +95,36 @@ void InteractorStyle::Pan()
 void InteractorStyle::Dolly()
 {
     vtkInteractorStyleTrackballCamera::Dolly();
+}
+
+void InteractorStyle::OnMouseMove()
+{
+    vtkRenderWindowInteractor *rwi = this->Interactor;
+    vtkRenderWindow  *renderWindow = rwi->GetRenderWindow();
+
+    int pos[2]={0,0};
+    rwi->GetEventPosition(pos);
+    int pos_x=pos[0];
+    int pos_y=pos[1];
+
+    VTK_CREATE(vtkCoordinate,coordinate);
+    coordinate->SetCoordinateSystemToDisplay();
+    coordinate->SetValue(pos_x,pos_y,0);
+    double* world = coordinate->GetComputedWorldValue(renderWindow->GetRenderers()->GetFirstRenderer());
+    //conversion in metre
+    world[0]/=100; world[1]/=100; world[2]/=100;
+
+    QString winName=renderWindow->GetWindowName();
+    QStringList query = winName.split(" -->") ;
+
+    if(query.size()>1)
+    {
+        char tmp[50];
+        sprintf(tmp,"--> [ %.2f x %.2f x %.2f ]",world[0],world[1],world[2]);
+        winName=query[0] +" -->"+QString(tmp);
+        renderWindow->SetWindowName(winName.toStdString().c_str());
+    }
+    vtkInteractorStyleTrackballCamera::OnMouseMove();
 }
 
 void InteractorStyle::OnChar()
@@ -290,13 +321,10 @@ void InteractorStyle::OnLeftButtonUp()
 
     vtkRenderWindowInteractor *rwi = this->Interactor;
 
-    int pos_x=0;
-    int pos_y=0;
-    //rwi->GetMousePosition(&pos_x, &pos_y);
-    int pos[2];
+    int pos[2] = {0,0};
     rwi->GetEventPosition(pos);
-    pos_x=pos[0];
-    pos_y=pos[1];
+    int pos_x=pos[0];
+    int pos_y=pos[1];
 
     VTK_CREATE(vtkCoordinate,coordinate);
     coordinate->SetCoordinateSystemToDisplay();
