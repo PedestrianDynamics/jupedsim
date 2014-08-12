@@ -187,8 +187,6 @@ private:
      int GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2);
 
 
-
-
      /**
       * return the queue at the specified exit within the specified radius
       * if subroomToConsider == -1 then the two side of the crossing will be considered
@@ -236,6 +234,14 @@ private:
       * @return the estimated travel time via the given exit
       */
      double GetEstimatedTravelTimeVia(Pedestrian* ped, int exitID);
+
+     /**
+      * compute the best default exit when there is no information
+      * @param ped
+      * @return
+      */
+     int GetBestDefaultRandomExit(Pedestrian* ped);
+
 };
 
 #endif /* QUICKESTPATHROUTER_H_ */

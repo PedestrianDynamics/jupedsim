@@ -297,6 +297,9 @@ double QuickestPathRouter::gain(double time)
 void QuickestPathRouter::Init(Building* building)
 {
      Log->Write("INFO:\tInit Quickest Path Router Engine");
+
+     // prefer path through corridors to path through rooms
+     SetEdgeCost(10.0);
      GlobalRouter::Init(building);
 
      // activate the spotlight for tracking some pedestrians
@@ -750,5 +753,122 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
                ped->SetExitLine(_accessPoints[quickest]->GetNavLine());
                //ped->SetSpotlight(false);
           }
+     }
+}
+
+int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
+{
+     // prob parameters
+     //double alpha=0.2000005;
+     //double normFactor=0.0;
+     //map <int, double> doorProb;
+
+     // get the opened exits
+     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
+                         ped->GetSubRoomID());
+
+
+     // get the relevant opened exits
+     vector <AccessPoint*> relevantAPs;
+     GetRelevantRoutesTofinalDestination(ped,relevantAPs);
+     cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+
+     int bestAPsID = -1;
+     double minDistGlobal = FLT_MAX;
+     double minDistLocal = FLT_MAX;
+
+     //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
+     //      int apID = accessPointsInSubRoom[i];
+     for(unsigned int g=0; g<relevantAPs.size(); g++) {
+          AccessPoint* ap=relevantAPs[g];
+          //int exitid=ap->GetID();
+          //AccessPoint* ap = _accessPoints[apID];
+
+          if (ap->isInRange(sub->GetUID()) == false)
+               continue;
+          //check if that exit is open.
+          if (ap->IsClosed())
+               continue;
+
+          //the line from the current position to the centre of the nav line.
+          // at least the line in that direction minus EPS
+          const Point& posA = ped->GetPos();
+          const Point& posB = ap->GetNavLine()->GetCentre();
+          const Point& posC = (posB - posA).Normalized()
+                              * ((posA - posB).Norm() - J_EPS) + posA;
+
+
+          //check if visible
+          if (sub->IsVisible(posA, posC, true) == false) {
+               ped->RerouteIn(10);
+               //ped->Dump(ped->GetID());
+               continue;
+          }
+
+          double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
+          double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
+          double dist=dist1+dist2;
+
+          //        doorProb[ap->GetID()]= exp(-alpha*dist);
+          //        normFactor += doorProb[ap->GetID()];
+
+
+//          if (dist < minDistGlobal) {
+//               bestAPsID = ap->GetID();
+//               minDistGlobal = dist;
+//          }
+
+          // normalize the probs
+      //    double randomVar = _rdDistribution(_rdGenerator);
+      //
+      //    for (auto it = doorProb.begin(); it!=doorProb.end(); ++it){
+      //        it->second =  it->second / normFactor;
+      //    }
+      //
+      //    double cumProb= doorProb.begin()->second;
+      //    auto it = doorProb.begin();
+      //    while(cumProb<randomVar) {
+      //        it++;
+      //        cumProb+=it->second;
+      //    }
+      //    bestAPsID=it->first;
+
+          //very useful for short term decisions
+          // if two doors are feasible to the final destination without much differences
+          // in the distances, then the nearest is preferred.
+          cout<<"CBA (---): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+          {
+              if (dist2 < minDistLocal) {
+              //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+                  bestAPsID = ap->GetID();
+                  minDistGlobal = dist;
+                  minDistLocal= dist2;
+              } else
+              {
+                   cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+              }
+
+          } else {
+
+              if (dist < minDistGlobal) {
+                  bestAPsID = ap->GetID();
+                  minDistGlobal = dist;
+                  minDistLocal=dist2;
+              }
+          }
+     }
+
+     if (bestAPsID != -1) {
+          ped->SetExitIndex(bestAPsID);
+          ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
+          return bestAPsID;
+     } else {
+          if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
+               Log->Write(
+                    "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
+                    ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
+                    ped->GetFinalDestination());
+          return -1;
      }
 }

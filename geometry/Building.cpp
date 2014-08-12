@@ -354,6 +354,7 @@ void Building::LoadBuildingFromFile()
           Log->Write("ERROR:\tRoot element value is not 'geometry'.");
           exit(EXIT_FAILURE);
      }
+     if(xRootNode->Attribute("unit"))
      if(string(xRootNode->Attribute("unit")) != "m") {
           Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
           exit(EXIT_FAILURE);
@@ -361,7 +362,7 @@ void Building::LoadBuildingFromFile()
      double version = xmltof(xRootNode->Attribute("version"), -1);
 
      if (version != 0.5) { // @todo version number is hard coded
-          Log->Write(" \tWrong goemetry version!");
+          Log->Write(" \tWrong geometry version!");
           Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
           Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
           exit(EXIT_FAILURE);
@@ -370,7 +371,6 @@ void Building::LoadBuildingFromFile()
      _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
      //The file has two main nodes
      //<rooms> and <transitions>
-
 
      //processing the rooms node
      TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");

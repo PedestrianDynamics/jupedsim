@@ -133,9 +133,10 @@ SubRoom* Room::GetSubRoom(int index) const
           return _subRooms[index];
      else {
           char tmp[CLENGTH];
-          sprintf(tmp,"ERROR: Room::GetSubRoom() Wrong subroom index [%d] for room index [%d] ",index,_id);
+          sprintf(tmp,"ERROR: Room::GetSubRoom() No subroom id [%d] present in room id [%d] ",index,_id);
           Log->Write(tmp);
-          exit(EXIT_FAILURE);
+          return NULL;
+          //exit(EXIT_FAILURE);
      }
 }
 

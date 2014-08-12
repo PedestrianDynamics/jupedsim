@@ -42,9 +42,6 @@
 #include <fstream>
 #include <iomanip>
 
-//penalty factors for distances outdoor
-#define PENALTY_FACTOR 1
-
 
 using namespace std;
 
@@ -57,6 +54,7 @@ GlobalRouter::GlobalRouter() :
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
+     _edgeCost=1;
 
 //     _rdDistribution = uniform_real_distribution<double> (0,1);
 //     _rdGenerator = default_random_engine(56);
@@ -250,7 +248,7 @@ void GlobalRouter::Init(Building* building)
                // The penalty factor should discourage pedestrians to evacuation through rooms.
                double  penalty=1.0;
                if((sub->GetType()!="floor") && (sub->GetType()!="dA") ) {
-                    penalty=PENALTY_FACTOR;
+                    penalty=_edgeCost;
                }
 
 
@@ -331,7 +329,7 @@ void GlobalRouter::Init(Building* building)
                int to_door= _map_id_to_index[to_AP->GetID()];
                // I assume a direct line connection between every exit connected to the outside and
                // any final goal also located outside
-               _distMatrix[from_door][to_door] = PENALTY_FACTOR*from_AP->GetNavLine()->DistTo(goal->GetCentroid());
+               _distMatrix[from_door][to_door] = _edgeCost*from_AP->GetNavLine()->DistTo(goal->GetCentroid());
 
                // add a penalty for goals outside due to the direct line assumption while computing the distances
                //if (_distMatrix[from_door][to_door] > 10.0)
@@ -466,10 +464,9 @@ void GlobalRouter::Init(Building* building)
      }
 
      //dumping the complete system
-     //DumpAccessPoints(592); exit(0);
+     //DumpAccessPoints(-1); exit(0);
      //vector<string> rooms;
      //rooms.push_back("hall");
-     //rooms.push_back("0");
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
      //WriteGraphGV("routing_graph.gv",1,rooms);
      Log->Write("INFO:\tDone with the Global Router Engine!");
@@ -498,6 +495,16 @@ void GlobalRouter::Reset(){
     _map_id_to_index.clear();
     _map_index_to_id.clear();
     _mapIdToFinalDestination.clear();
+}
+
+void GlobalRouter::SetEdgeCost(double cost)
+{
+     _edgeCost=cost;
+}
+
+double GlobalRouter::GetEdgeCost() const
+{
+     return _edgeCost;
 }
 
 void GlobalRouter::GetPath(int i, int j)
@@ -677,7 +684,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+     cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
@@ -739,13 +746,12 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
       //    }
       //    bestAPsID=it->first;
 
-          //very usefull for short term decisions
+          //very useful for short term decisions
           // if two doors are feasible to the final destination without much differences
-          // in the distances, then the nearest is prefered.
+          // in the distances, then the nearest is preferred.
           if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
           {
               if (dist2 < minDistLocal) {
-              //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
                   bestAPsID = ap->GetID();
                   minDistGlobal = dist;
                   minDistLocal= dist2;
@@ -779,11 +785,12 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<AccessPoint*>& relevantAPS)
 {
 
-
     Room* room=_building->GetRoom(ped->GetRoomID());
     SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
 
-
+    // This is best implemented by closing one door and checking if there is still a path to outside
+    // and itereating over the others.
+    // It might be time consuming, you many pre compute and cache the results.
     if(sub->GetAllHlines().size()==0)
     {
         const vector<int>& goals=sub->GetAllGoalIDs();

@@ -41,7 +41,7 @@ class Pedestrian;
 class Router {
 
 private:
-     /// routing strategy as defined in the Macros.h file
+     /// routing strategy ID as defined in the Macros.h file
      RoutingStrategy _strategy;
 
      /// the id as present in the persons.xml file
@@ -56,8 +56,15 @@ protected:
      std::vector<int> _finalDestinations;
 
 public:
+
+     /**
+      * Constructor
+      */
      Router();
 
+     /**
+      * Destructor
+      */
      virtual ~Router();
 
      /**
@@ -71,7 +78,6 @@ public:
       * @param id of an intermediate destination as presented in the geometry/routing files
       */
      void AddFinalDestinationID(int id);
-
 
      /**
       * TODO: investigate Trip for compatibility with ID starting with 0 or 1.

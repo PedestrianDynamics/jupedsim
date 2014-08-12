@@ -283,7 +283,6 @@ void Simulation::InitArgs(ArgumentParser* args)
                break;
           }
           case ROUTING_GLOBAL_SHORTEST: {
-
                Router* router=new GlobalRouter();
                router->SetID(routerID);
                router->SetStrategy(strategy);

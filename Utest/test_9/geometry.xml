@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="Projectname" gridSizeX="20.000000"
-	gridSizeY="20.000000" unit="m">
+<geometry version="0.5" caption="Test 9" unit="m" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geometry.xsd">
 	<rooms>
-		<room id="0" caption="botleneck" zpos="0.000000">
+		<room id="0" caption="bottleneck">
 			<subroom id="0" closed="0" class="subroom">
 				<polygon caption="oben">
 					<vertex px="65.000000" py="104.000000" />
@@ -49,7 +50,7 @@
 				</crossing>
 			</crossings>
 		</room>
-		<room id="1" caption="botleneckHolding" zpos="0.000000">
+		<room id="1" caption="botleneckHolding">
 			<subroom id="0" closed="0" class="subroom">
 				<polygon caption="wall">
 					<vertex px="56.000000" py="104.000000" />

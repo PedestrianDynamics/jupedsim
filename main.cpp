@@ -36,21 +36,24 @@
 
 int main(int argc, char **argv)
 {
+
+     //gathering some statistics about the runtime
      time_t starttime, endtime;
+
      // Log = new FileHandler("./Logfile.dat");
      Log = new STDIOHandler();
-     // Parsing the arguments
 
+     // Parsing the arguments
      ArgumentParser* args = new ArgumentParser();
      args->ParseArgs(argc, argv);
 
-     // create and init the simulation engine
+     // create and initialize the simulation engine
      // Simulation
      time(&starttime);
-     Log->Write("INFO: \tStart runSimulation()");
 
      Simulation sim = Simulation();
      sim.InitArgs(args);
+     Log->Write("INFO: \tStart runSimulation()");
      int evacTime = sim.RunSimulation();
      Log->Write("\nINFO: \tEnd runSimulation()");
      time(&endtime);

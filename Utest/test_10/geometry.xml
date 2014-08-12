@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<geometry version="0.5" caption="Projectname" gridSizeX="20.000000"
-	gridSizeY="20.000000" unit="m">
+<geometry version="0.5" caption="Test 10" unit="m">
 	<rooms>
 		<room id="0" caption="botleneck" zpos="0.000000">
 			<subroom id="0" closed="0" class="subroom">

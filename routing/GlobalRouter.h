@@ -52,7 +52,14 @@ extern OutputHandler* Log;
 class GlobalRouter: public Router {
 
 public:
+     /**
+      * Constructor
+      */
      GlobalRouter();
+
+     /**
+      * Destructor
+      */
      virtual ~GlobalRouter();
 
      virtual void Init(Building* building);
@@ -74,9 +81,21 @@ public:
                        const std::vector<std::string> rooms= std::vector<std::string>());
 
      /**
-      * Reset the routing engine
+      * Reset the routing engine and clear all pre-computed paths
       */
      void Reset();
+
+     /**
+      * Set/Get the edge cost for certain paths.
+      * prefer the use of paths through floors instead of rooms
+      */
+     void SetEdgeCost(double cost);
+
+     /**
+      * Set/Get the edge cost for certain paths.
+      * prefer the use of paths through floors instead of rooms
+      */
+     double GetEdgeCost() const;
 
 protected:
 
@@ -87,11 +106,6 @@ protected:
       * @note based on http://alienryderflex.com/intersect/
       */
      bool CanSeeEachother(const Point&pt1, const Point&pt2);
-
-     /**
-      * @return true if the two segments are in the visibility range of each other
-      */
-     //bool CanSeeEachOther(Crossing* c1, Crossing* c2);
 
      /**
       * @obsolete
@@ -147,7 +161,6 @@ protected:
       */
      void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
 
-
      /**
       * return the relevant aps that lead to the pedestrian final destination
       * @param ped
@@ -159,8 +172,6 @@ private:
       * Compute the intermediate paths between the two given transitions IDs
       */
      void GetPath(int transID1, int transID2);
-
-
 
      /**
       * Perform the FloydWahrshal algorithm
@@ -177,11 +188,10 @@ private:
       */
      virtual std::string GetRoutingInfoFile() const;
 
-
-
 private:
      int **_pathsMatrix;
      double **_distMatrix;
+     double _edgeCost;
      std::vector< int > _tmpPedPath;
      std::map<int,int> _map_id_to_index;
      std::map<int,int> _map_index_to_id;
