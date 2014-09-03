@@ -28,7 +28,7 @@
  */
 
 #include "Simulation.h"
-#include "math/GPU_GCFMModel.h"
+//#include "math/GPU_GCFMModel.h"
 #include "math/GCFMModel.h"
 
 //#include <omp.h>
@@ -247,19 +247,27 @@ void Simulation::InitArgs(ArgumentParser* args)
     switch (args->GetModel())
     {
     case MODEL_GFCM:
-        if(args->GetHPCFlag()){
-            _model = new GPU_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-                    args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-                    args->GetMaxFPed(), args->GetMaxFWall());
-            s.append("\tModel: GCFMModel\n");
-            s.append(_model->writeParameter());
-        } else {
+        if(args->GetHPCFlag()==0){
             _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
                     args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
                     args->GetMaxFPed(), args->GetMaxFWall());
             s.append("\tModel: GCFMModel\n");
             s.append(_model->writeParameter());
-        }
+        } 
+        //else if(args->GetHPCFlag()==2){
+	  //  _model = new GPU_acc_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+            //        args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+              //      args->GetMaxFPed(), args->GetMaxFWall());
+            //s.append("\tModel: GCFMModel\n");
+            //s.append(_model->writeParameter());
+	//}
+	//else {
+	  //  _model = new GPU_ocl_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+            //        args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+              //      args->GetMaxFPed(), args->GetMaxFWall());
+            //s.append("\tModel: GCFMModel\n");
+            //s.append(_model->writeParameter());
+        //}
         break;
 
     case MODEL_GOMPERTZ:
@@ -451,11 +459,11 @@ void Simulation::InitArgs(ArgumentParser* args)
     _profiling = args->GetProfileFlag();
     //which hpc-architecture?
     _hpc = args->GetHPCFlag();
-    //if architecture = gpu or xeonphi create buffer
-    if(_hpc!=0){
-        ((GPU_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
-        //initCL(_building->GetNumberOfPedestrians(),_hpc);
-    }
+    //if programming model = ocl create buffers and make the setup
+    //if(_hpc==1){
+        //((GPU_ocl_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
+        //((GPU_ocl_GCFMModel*) _model)->initCL(_building->GetNumberOfPedestrians());
+    //}
 }
 
 
@@ -544,6 +552,8 @@ int Simulation::RunSimulation() {
         cout << "\tLoop [s]: " << loopTime << endl;
         cout << "\tMessungen in der Loop: " << endl;
         cout << "\t\tSolve ODE [s]: " << solveODETime << endl;
+	//if(_hpc!=0)
+          //      ((GPU_ocl_GCFMModel*)_model)->kernelTime();
         cout << "\t\tUpdate [s]: " << loopUpdateTime << endl;
         cout << "\t\tMessungen in der Update(): " << endl;
         cout << "\t\t\tUpdate Building[s]: " << upBuilding << endl;
@@ -552,8 +562,8 @@ int Simulation::RunSimulation() {
         cout << "\t\t\tUpdate Grid[s]: " << upGrid << endl;
         cout << "\t\tEventUpdate [s]: " << eventUpdateTime << endl;
     }
-    if(_hpc!=0)
-        ((GPU_GCFMModel*) _model)->DeleteBuffers();
+    //if(_hpc==1)
+      //  ((GPU_GCFMModel*) _model)->DeleteBuffers();
     // writing the footer
     _iod->WriteFooter();
 

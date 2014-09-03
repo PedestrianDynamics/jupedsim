@@ -31,6 +31,7 @@ private:
      FILE *_file;
      bool _dynamic;
      int _eventCounter;
+     long int _lastUpdateTime;
 
 public:
      //Konstruktor

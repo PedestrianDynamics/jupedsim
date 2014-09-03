@@ -182,7 +182,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
 			{"help", 0, 0, 'h'},
 			{"inifile", optional_argument, 0, 'q'},
             {"profiling", optional_argument, 0, 'u'},
-            {"architecture", optional_argument,0, 'H'},
+            {"programming_model", optional_argument,0, 'H'},
 			{"generate-mesh", required_argument, 0, 'N'},
 			{0, 0, 0, 0}
 	};
@@ -444,11 +444,11 @@ void ArgumentParser::ParseArgs(int argc, char **argv) {
           break;
           case 'H':
           {
-        	  if(strcmp("cpu",optarg)==0)
+        	  if(strcmp("omp",optarg)==0)
         		  _hpcFlag = 0;
-        	  else if(strcmp("gpu",optarg)==0)
+        	  else if(strcmp("ocl",optarg)==0)
         		  _hpcFlag = 1;
-        	  else if(strcmp("xeonphi",optarg)==0)
+        	  else if(strcmp("acc",optarg)==0)
         		  _hpcFlag = 2;
         	  else{
         		  _hpcFlag = 0;

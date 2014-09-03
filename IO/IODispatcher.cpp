@@ -83,6 +83,7 @@ string IODispatcher::WritePed(Pedestrian* ped)
      double v = ped->GetV().Norm();
      int color = (int) (v / v0 * 255);
      if(ped->GetSpotlight()==false) color=-1;
+     if(ped->GetNewEventFlag()==false) color=-1;
 
      double a = ped->GetLargerAxis();
      double b = ped->GetSmallerAxis();
