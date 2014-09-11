@@ -81,13 +81,19 @@ if __name__ == "__main__":
             exit(FAILURE)
         maxtime = get_maxtime(inifile)
         fps, N, traj = parse_file(trajfile)
-        evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
-        tolerance = 0.01
-        if (evac_time- must_time) > tolerance:
-            logging.info("%s exits with FAILURE evac_time = %f (!= %f)"%(argv[0], evac_time, must_time))
+        y2 = traj[ traj[:,0] == 2 ][:,3]
+        y4 = traj[ traj[:,0] == 4 ][:,3]
+        dy2 = np.sum( np.abs( np.diff(y2[:10]) ) )
+        dy4 = np.sum( np.abs( np.diff(y4) ) ) 
+
+
+        # evac_time = ( max( traj[:,1] ) - min( traj[:,1] ) ) / float(fps)
+        tolerance = 0.0001
+        if dy2 > tolerance or dy4 >tolerance:
+            logging.info("%s exits with FAILURE dy2 = %f,  dy4 = %f"%(argv[0], dy2, dy4))
             exit(FAILURE)
         else:
-            logging.info("evac_time = %f (!= %f)"%(evac_time, must_time))
+            logging.info("dy2 = %f  dy4 = %f"%(argv[0], dy2, dy4))
         
     logging.info("%s exits with SUCCESS"%(argv[0]))
     exit(SUCCESS)
