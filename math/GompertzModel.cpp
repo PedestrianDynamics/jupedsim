@@ -29,6 +29,7 @@
  **/
 
 
+#include "../colors.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
@@ -288,7 +289,8 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
      int nThreads = omp_get_max_threads();
 
      int partSize = nSize / nThreads;
-
+     int debugPed = 8;
+     
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
           vector< Point > result_acc = vector<Point > ();
@@ -336,6 +338,11 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                // double B_ij=0;
                // int count_Bij=0;
 
+               if(debugPed == ped->GetID())
+               {
+                    printf("\n\n nsiZe=%d\n",nSize);
+               }
+
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     //-------------- TESTING ---------
@@ -348,6 +355,23 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                     //     count_Bij += 1;
                     //--------------------------------
                     //if they are in the same subroom
+                    Point p1 = ped->GetPos();
+                    Point p2 = ped1->GetPos();
+                    bool isVisible = building->IsVisible(p1, p2, false);
+                    if(debugPed == ped->GetID())
+                    {
+                         fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
+                         if (isVisible)
+                              printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", time, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
+                         else
+                         {
+                              RED_LINE;
+                              printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", time, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
+                              OFF_LINE;
+                              //getc(stdin);
+                         }
+                              
+                    }
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                          repPed = repPed + ForceRepPed(ped, ped1);
                     } else {

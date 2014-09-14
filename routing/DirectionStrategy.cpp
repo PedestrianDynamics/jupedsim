@@ -130,10 +130,10 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
      Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
 
      Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
+                   // it intersect a wall/obstacle.
+                   // check for intersection with walls
+                   // @todo: make a FUNCTION of this
      //printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
-//it intersect a wall/obstacle.
-// check for intersection with walls
-//todo: make a FUNCTION of this
      double dist;
      int inear = -1;
      int iObs = -1;

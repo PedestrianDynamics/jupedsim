@@ -177,9 +177,9 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           return F_rep;
      }
 
-     //          smax    dist_intpol_left      dist_intpol_right       dist_eff_max
+     //          smax    dist_intpol_left           dist_intpol_right       dist_eff_max
      //           ----|-------------|--------------------------|--------------|----
-     //       5   |     4       |            3             |      2       | 1
+     //           5   |     4       |            3             |      2       | 1
 
      if (dist_eff >= dist_intpol_right) { //2
           f = -ped1->GetMass() * K_ij * nom / dist_intpol_right; // abs(NR-Dv(i)+Sa)
@@ -201,8 +201,9 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
                   ped2->GetID(), F_rep.GetX(), F_rep.GetY());
           Log->Write(tmp);
           Log->Write("ERROR:\t fix this as soon as possible");
-          return Point(0,0); // FIXME: should never happen
-          exit(EXIT_FAILURE);
+          printf("K_ij=%f\n", K_ij);
+          //return Point(0,0); // FIXME: should never happen
+          //exit(EXIT_FAILURE);
      }
      return F_rep;
 }
@@ -510,18 +511,33 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                int nSize=neighbours.size();
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
-                    //if they are in the same subroom
+  
+               // if(ped->GetID() == 3){
+               //      printf("Neighbor = %d\n", ped1->GetID());
+               // }
+                  //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+
+                         // if(ped->GetID() == 3){
+                         //      printf("1. Neighbor = %d\n", ped1->GetID());
+                         // }
                          F_rep = F_rep + ForceRepPed(ped, ped1);
                     } else {
                          // or in neighbour subrooms
                          SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
                          if(subroom->IsDirectlyConnectedWith(sb2)) {
+                              
+                              // if(ped->GetID() == 3){
+                              //      printf("2. Neighbor = %d\n", ped1->GetID());
+                              // }
                               F_rep = F_rep + ForceRepPed(ped, ped1);
                          }
                     }
                }//for peds
 
+               // if(ped->GetID() == 3){
+               //      printf("F_rep=%f %f\n", F_rep.GetX(), F_rep.GetY());
+               // }
                //repulsive forces to the walls and transitions that are not my target
                Point repwall = ForceRepRoom(allPeds[p], subroom);
                Point fd = ForceDriv(ped, room);

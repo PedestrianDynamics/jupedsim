@@ -83,7 +83,7 @@ if __name__ == "__main__":
         fps, N, traj = parse_file(trajfile)
         y2 = traj[ traj[:,0] == 2 ][:,3]
         y4 = traj[ traj[:,0] == 4 ][:,3]
-        dy2 = np.sum( np.abs( np.diff(y2[:10]) ) )
+        dy2 = np.sum( np.abs( np.diff(y2) ) )
         dy4 = np.sum( np.abs( np.diff(y4) ) ) 
 
 
