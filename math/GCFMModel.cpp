@@ -505,6 +505,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                Point F_rep;
                vector<Pedestrian*> neighbours;
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
+               //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
 
                int nSize=neighbours.size();
                for (int i = 0; i < nSize; i++) {

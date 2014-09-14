@@ -330,6 +330,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                Point repPed = Point(0,0);
                vector<Pedestrian*> neighbours;
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
+               //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
 
                int nSize = neighbours.size();
                // double B_ij=0;

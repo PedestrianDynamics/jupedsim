@@ -684,7 +684,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;

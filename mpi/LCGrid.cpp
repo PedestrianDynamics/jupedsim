@@ -36,7 +36,7 @@
 
 #include"LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
-
+#include "../geometry/Building.h"
 
 using namespace std;
 
@@ -148,37 +148,22 @@ void LCGrid::ClearGrid()
      for(int i=0; i<pNpeds; i++) pList[i]=LIST_EMPTY;
 }
 
-void LCGrid::GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighbourhood, int* nSize)
+void LCGrid::HighlightNeighborhood(const Pedestrian* ped, Building* building)
 {
 
-     double xPed=ped->GetPos().GetX();
-     double yPed=ped->GetPos().GetY();
+     // force spotlight activation
+     Pedestrian::ActivateSpotlightSystem(true);
+     //darken all
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     for(int p=0;p<allPeds.size();p++){
+          allPeds[p]->SetSpotlight(false);
+     }
 
-
-     int l = (int) ((xPed - pGrid_xmin) / pCellSize) + 1; // +1 because of dummy cells
-     int k = (int) ((yPed - pGrid_ymin) / pCellSize) + 1;
-
-     //-1 to get  correct mapping in the array local
-     int myID=ped->GetID()-1;
-
-     *nSize=0;
-     // all neighbor cells
-     for (int i = l - 1; i <= l + 1; ++i) {
-          for (int j = k - 1; j <= k + 1; ++j) {
-               //printf(" i=%d j=%d k=%d l=%d\n",i,j,nx,ny);
-               int p = pCellHead[j][i];
-               // all peds in one cell
-               while (p != LIST_EMPTY) {
-                    double x=pLocalPedsCopy[p]->GetPos().GetX();
-                    double y=pLocalPedsCopy[p]->GetPos().GetY();
-                    double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
-                    if((dist<pCellSize*pCellSize) && (p!=myID)) {
-                         neighbourhood[(*nSize)++]=pLocalPedsCopy[p];
-                    }
-                    // next ped
-                    p = pList[p];
-               }
-          }
+     //get and highlight the neighborhood
+     vector<Pedestrian*> neighbours;
+     GetNeighbourhood(ped,neighbours);
+     for(int p=0;p<neighbours.size();p++){
+          neighbours[p]->SetSpotlight(true);
      }
 }
 
@@ -214,6 +199,7 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
           }
      }
 }
+
 void LCGrid::GetNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhood)
 {
      double xPed=pt.GetX();
