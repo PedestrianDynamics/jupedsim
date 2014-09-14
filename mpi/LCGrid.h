@@ -41,6 +41,7 @@
 
 //forwarded classes
 class Pedestrian;
+class Building;
 
 
 class LCGrid {
@@ -118,15 +119,6 @@ public:
      void dumpCellsOnly();
 
      /**
-      * Return a vector containing the neighbourhood of the pedestrians ped
-      * @param ped the considered pedestrian
-      * @param neighborhood an array containing the pedestrians
-      * @param nSize the number of returned pedestrians
-      */
-     void GetNeighbourhood(const Pedestrian* ped, Pedestrian** neighborhood, int* nSize);
-
-
-     /**
       * Return the pedestrians in the neighborhood of a specific location
       * @param position
       * @param neighbourhood
@@ -139,6 +131,12 @@ public:
       * @param neighbourhood
       */
      void GetNeighbourhood(const Pedestrian* ped, std::vector<Pedestrian*>& neighbourhood);
+
+     /**
+      * Highlight the neighborhood of the given pedestrian
+      * @param ped
+      */
+     void HighlightNeighborhood(const Pedestrian* ped, Building* building);
 
 };
 

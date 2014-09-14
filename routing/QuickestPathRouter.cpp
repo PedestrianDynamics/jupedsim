@@ -771,7 +771,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
@@ -836,7 +836,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //very useful for short term decisions
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
-          cout<<"CBA (---): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+          //cout<<"CBA (---): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
           if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
           {
               if (dist2 < minDistLocal) {
@@ -846,7 +846,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                   minDistLocal= dist2;
               } else
               {
-                   cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+                   //cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
               }
 
           } else {
