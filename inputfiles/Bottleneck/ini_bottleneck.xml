@@ -47,7 +47,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="2" agent_parameter_id="1" room_id="1" subroom_id="0" number="20" goal_id="0" router_id="1" />
+      <group group_id="2" agent_parameter_id="1" room_id="1" subroom_id="0" number="10" goal_id="0" router_id="1" />
       <!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
       <!-- <group group_id="1" room_id="1"  number="10" goal_id="0" router_id="1" route_id="" /> -->
     </agents_distribution>
@@ -81,7 +81,7 @@
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exitCrossingStrategy>5</exitCrossingStrategy>
-        <linkedcells enabled="true" cell_size="2" />
+        <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.5" a="1" b="0.0343" c="2.45"/>
         <force_wall nu="2" a="1" b="0.0343" c="2.45"/>
       </model_parameters>

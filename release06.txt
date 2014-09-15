@@ -1,0 +1,14 @@
+Release of JuPedSim v0.6
+========================
+
+*Introduction*
+
+*Bugs*
+- Visibility of pedestrians
+
+*New features*
+- Events: Anke
+- Cognitive Map: David
+- New validation tests
+- New software design? (Oliver)
+

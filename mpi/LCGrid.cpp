@@ -155,14 +155,14 @@ void LCGrid::HighlightNeighborhood(const Pedestrian* ped, Building* building)
      Pedestrian::ActivateSpotlightSystem(true);
      //darken all
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-     for(int p=0;p<allPeds.size();p++){
+     for(unsigned int p=0;p<allPeds.size();p++){
           allPeds[p]->SetSpotlight(false);
      }
 
      //get and highlight the neighborhood
      vector<Pedestrian*> neighbours;
      GetNeighbourhood(ped,neighbours);
-     for(int p=0;p<neighbours.size();p++){
+     for(unsigned int p=0;p<neighbours.size();p++){
           neighbours[p]->SetSpotlight(true);
      }
 }
@@ -200,34 +200,34 @@ void LCGrid::GetNeighbourhood(const Pedestrian* ped, vector<Pedestrian*>& neighb
      }
 }
 
-void LCGrid::GetNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhood)
-{
-     double xPed=pt.GetX();
-     double yPed=pt.GetY();
+// void LCGrid::GetNeighbourhood(const Point& pt, vector<Pedestrian*>& neighbourhood)
+// {
+//      double xPed=pt.GetX();
+//      double yPed=pt.GetY();
 
 
-     int l = (int) ((xPed - pGrid_xmin) / pCellSize) + 1; // +1 because of dummy cells
-     int k = (int) ((yPed - pGrid_ymin) / pCellSize) + 1;
+//      int l = (int) ((xPed - pGrid_xmin) / pCellSize) + 1; // +1 because of dummy cells
+//      int k = (int) ((yPed - pGrid_ymin) / pCellSize) + 1;
 
-     // all neighbor cells
-     for (int i = l - 1; i <= l + 1; ++i) {
-          for (int j = k - 1; j <= k + 1; ++j) {
-               //printf(" i=%d j=%d k=%d l=%d\n",i,j,nx,ny);
-               int p = pCellHead[j][i];
-               // all peds in one cell
-               while (p != LIST_EMPTY) {
-                    double x=pLocalPedsCopy[p]->GetPos().GetX();
-                    double y=pLocalPedsCopy[p]->GetPos().GetY();
-                    double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
-                    if((dist<pCellSize*pCellSize)) {
-                         neighbourhood.push_back(pLocalPedsCopy[p]);
-                    }
-                    // next ped
-                    p = pList[p];
-               }
-          }
-     }
-}
+//      // all neighbor cells
+//      for (int i = l - 1; i <= l + 1; ++i) {
+//           for (int j = k - 1; j <= k + 1; ++j) {
+//                //printf(" i=%d j=%d k=%d l=%d\n",i,j,nx,ny);
+//                int p = pCellHead[j][i];
+//                // all peds in one cell
+//                while (p != LIST_EMPTY) {
+//                     double x=pLocalPedsCopy[p]->GetPos().GetX();
+//                     double y=pLocalPedsCopy[p]->GetPos().GetY();
+//                     double dist=((x-xPed)*(x-xPed) + (y-yPed)*(y-yPed));
+//                     if((dist<pCellSize*pCellSize)) {
+//                          neighbourhood.push_back(pLocalPedsCopy[p]);
+//                     }
+//                     // next ped
+//                     p = pList[p];
+//                }
+//           }
+//      }
+// }
 
 
 void LCGrid::Dump()

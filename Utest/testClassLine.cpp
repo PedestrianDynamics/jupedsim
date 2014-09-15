@@ -109,6 +109,16 @@ int testIntersectionWith(FILE * f)
           res++;
      fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
 
+////////////////////////////////////////////////
+     L1=Line( Point(2, 0), Point(0, 2));
+     L2=Line( Point(131.966445, 3.963785), Point(134.481642, 0));
+     bres = L1.IntersectionWith(L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+
+
+
 
 ////////////////////////////////////////////////
      fprintf (f, "\t+++++ Leave testIntersectionWith() +++++\n\n");

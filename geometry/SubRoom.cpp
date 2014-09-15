@@ -339,11 +339,15 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
      // generate certain connection lines
      // connecting p1 with p2
      Line cl = Line(p1,p2);
+     Line L1=cl, L2;
      bool temp =  true;
      //check intersection with Walls
      for(unsigned int i = 0; i < _walls.size(); i++) {
-          if(temp  && cl.IntersectionWith(_walls[i]))
+          if(temp  && cl.IntersectionWith(_walls[i])){
+               L2 = _walls[i];
+               // fprintf (stdout, "INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
                temp = false;
+          }
      }
 
 
@@ -352,8 +356,12 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
           Obstacle * obs = _obstacles[i];
           for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++) {
                const Wall& w = obs->GetAllWalls()[k];
-               if(temp && cl.IntersectionWith(w))
+               if(temp && cl.IntersectionWith(w)){
+                    L2 = w;
+                    // fprintf (stdout, "INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
                     temp = false;
+                    
+               }
           }
      }
 
