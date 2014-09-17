@@ -43,7 +43,7 @@
 
   
   <!--persons information and distribution -->
-  <agents operational_model_id="[1, 2]">
+  <agents operational_model_id="[1,2]">
     <agents_distribution>
       <group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="58" start_y="103"/>
       <group group_id="1"  agent_parameter_id="0" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="57" start_y="102"/>
@@ -62,8 +62,8 @@
         <stepsize>0.001</stepsize>
         <exitCrossingStrategy>1</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="3" />
-        <force_ped nu="10.2" dist_max="3" disteff_max="3" interpolation_width="0.1" />
-        <force_wall nu="0.0" dist_max="3" disteff_max="3" interpolation_width="0.1" />
+        <force_ped nu="10.2" dist_max="0.1" disteff_max="0.1" interpolation_width="0.1" />
+        <force_wall nu="0.0" dist_max="0.1" disteff_max="0.1" interpolation_width="0.1" />
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
         <v0 mu="1" sigma="0.0" />
@@ -89,7 +89,7 @@
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
         <exitCrossingStrategy>3</exitCrossingStrategy>
-        <linkedcells enabled="true" cell_size="2.2" />
+        <linkedcells enabled="true" cell_size="3" />
         <force_ped nu="30"  b="0.25" c="3.0"/>
         <force_wall nu="0" b="0.70" c="3.0"/>
       </model_parameters>

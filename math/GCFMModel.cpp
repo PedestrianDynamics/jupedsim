@@ -511,38 +511,35 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                int nSize=neighbours.size();
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
+                    Point p1 = ped->GetPos();
+                    Point p2 = ped1->GetPos();
+                    bool isVisible = building->IsVisible(p1, p2, false);
+                    if (!isVisible)
+                         continue;;
   
-               // if(ped->GetID() == 3){
-               //      printf("Neighbor = %d\n", ped1->GetID());
-               // }
                   //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-
-                         // if(ped->GetID() == 3){
-                         //      printf("1. Neighbor = %d\n", ped1->GetID());
-                         // }
                          F_rep = F_rep + ForceRepPed(ped, ped1);
                     } else {
                          // or in neighbour subrooms
                          SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
                          if(subroom->IsDirectlyConnectedWith(sb2)) {
-                              
-                              // if(ped->GetID() == 3){
-                              //      printf("2. Neighbor = %d\n", ped1->GetID());
-                              // }
                               F_rep = F_rep + ForceRepPed(ped, ped1);
                          }
                     }
                }//for peds
 
-               // if(ped->GetID() == 3){
-               //      printf("F_rep=%f %f\n", F_rep.GetX(), F_rep.GetY());
-               // }
+
                //repulsive forces to the walls and transitions that are not my target
                Point repwall = ForceRepRoom(allPeds[p], subroom);
                Point fd = ForceDriv(ped, room);
                // Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
                Point acc = (fd + F_rep + repwall) / ped->GetMass();
+
+               if(ped->GetID() == -4){
+                    printf("%f   %f    %f    %f   %f   %f\n", fd.GetX(), fd.GetY(), F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY());
+
+               }
                result_acc.push_back(acc);
           }
 

@@ -4,96 +4,58 @@ from xml.dom import minidom
 import os, argparse, logging, time
 from os import path, system
 from sys import argv ,exit
-import subprocess
+import subprocess, sys
 
-#from matplotlib.pyplot import *
+from matplotlib.pyplot import *
 
 SUCCESS = 0
 FAILURE = 1
 
 #--------------------------------------------------------
-logfile="log_testflow.txt"
+logfile="log_test_EG.txt"
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 #-------------------- DIRS ------------------------------
 #HOME = path.expanduser("~")
-TRUNK = argv[1] #HOME + "/workspace/peddynamics/JuPedSim/JPScore/trunk/"
+TRUNK = "/home/chraibi/Workspace/peddynamics/JuPedSim/jpscore"
 GEODIR = TRUNK + "/inputfiles/Bottleneck/"
 TRAJDIR = GEODIR
 CWD = os.getcwd()
+#-------------------- DIRS ------------------------------
+HOME = path.expanduser("~")
+CWD = os.getcwd()
+DIR = os.path.dirname(os.path.realpath(argv[0]))
 #--------------------------------------------------------
 
-# def sh(script):
-#     # run bash command
-#     system("bash -c '%s'" % script)
-    
-def parse_file(filename):
-    """
-    parse trajectories in Travisto-format and output results
-    in the following  format: id    frame    x    y
-    (no sorting of the data is performed)
-    returns
-    N: number of pedestrians
-    data: trajectories
-    """
-    logging.info("parsing <%s>"%filename)
-    try:
-        xmldoc = minidom.parse(filename)
-    except:
-        logging.critical('could not parse file. exit')
-        exit(FAILURE)
-    N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
-    fps= xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
-    fps = float(fps)
-    fps = int(fps)
-    print "fps=", fps
-    #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
-    logging.info ("Npeds = %d, fps = %d"%(N, fps))
-    frames = xmldoc.childNodes[0].getElementsByTagName('frame')
-    data = []
-    for frame in frames:
-        frame_number = int(frame.attributes["ID"].value)
-        for agent in frame.getElementsByTagName("agent"):
-            agent_id = int(agent.attributes["ID"].value)
-            x = float(agent.attributes["xPos"].value)
-            y = float(agent.attributes["yPos"].value)
-            data += [agent_id, frame_number, x, y]
-    data = np.array(data).reshape((-1,4))
-    return fps, N, data
-           
-def flow(fps, N, data, x0):
-    """
-    measure the flow at a vertical line given by <x0>
-    trajectories are given by <data> in the following format: id    frame    x    y
-    input: 
-    - fps: frame per second
-    - N: number of peds
-    - data: trajectories
-    - x0: x-coordinate of the vertical measurement line
-    output:
-    - flow
-    """
-    logging.info('measure flow')
-    if not isinstance(data, np.ndarray):
-        logging.critical("flow() accepts data of type <ndarray>. exit")
-        exit(FAILURE)
-    peds = np.unique(data[:,0]).astype(int)
-    times = []
-    for ped in peds:
-        d = data[ data[:,0] == ped ]
-        first = min( d[ d[:,2] >= x0 ][:,1] )
-        times.append( first )
-    if len(times) < 2:
-        logging.warning("Number of pedestrians passing the line is small. return 0")
-        return 0    
-    flow = fps * float(N-1) / ( max(times) - min(times) )
-    return flow
+
+#--------------------------------------------------------
+
 
 
 if __name__ == "__main__":
+    if CWD != DIR:
+        logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
+        os.chdir(DIR)
+        
+    logging.info("change directory to ..")
+    os.chdir("..")
+    logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
+    subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
+    os.chdir(DIR)
+    #-------- get directory of the code TRUNK
+    os.chdir("../..")
+    TRUNK = os.getcwd()
+    os.chdir(DIR)
+    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    sys.path.append(lib_path)
+    from utils import *
+    #----------------------------------------
+    logging.info("change directory back to %s"%DIR)
+
     time1 = time.clock()
     widths = [0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5]
+    widths = [ 1.0, 1.4, 2.5]
     flows = []
 
     for w in widths:
@@ -117,7 +79,7 @@ if __name__ == "__main__":
 
         logging.info('start simulating wirh exe=<%s>'%cmd)
         #sh(cmd) #make simulation
-        subprocess.call([executable, "--inifile=%s"%inifile])
+        #subprocess.call([executable, "--inifile=%s"%inifile])
         logging.info('end simulation ...')
         #os.chdir(CWD) # cd back to the working directory
             
@@ -126,7 +88,7 @@ if __name__ == "__main__":
             logging.critical("trajfile <%s> does not exit"%trajfile)
             exit(FAILURE)
         fps, N, traj = parse_file(trajfile)
-        J = flow(fps, N, traj, 6100)
+        J = flow(fps, N, traj, 61)
         flows.append(J)
     #------------------------------------------------------------------------------ 
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))

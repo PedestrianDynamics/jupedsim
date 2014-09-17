@@ -351,10 +351,10 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                // double B_ij=0;
                // int count_Bij=0;
 
-               if(debugPed == ped->GetID())
-               {
-                    printf("\n\n nsiZe=%d\n",nSize);
-               }
+               // if(debugPed == ped->GetID())
+               // {
+               //      printf("\n\n nsiZe=%d\n",nSize);
+               // }
 
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
@@ -371,6 +371,8 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                     Point p1 = ped->GetPos();
                     Point p2 = ped1->GetPos();
                     bool isVisible = building->IsVisible(p1, p2, false);
+                    if (!isVisible)
+                         continue;
                     if(debugPed == ped->GetID())
                     {
                          fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());

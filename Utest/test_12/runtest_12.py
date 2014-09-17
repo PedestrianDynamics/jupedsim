@@ -93,7 +93,6 @@ if __name__ == "__main__":
             logging.info("%s exits with FAILURE dy2 = %f,  dy4 = %f"%(argv[0], dy2, dy4))
             exit(FAILURE)
         else:
-            logging.info("dy2 = %f  dy4 = %f"%(argv[0], dy2, dy4))
+            logging.info("%s exits with SUCCESS dy2 = %f  dy4 = %f"%(argv[0], dy2, dy4))
         
-    logging.info("%s exits with SUCCESS"%(argv[0]))
     exit(SUCCESS)
