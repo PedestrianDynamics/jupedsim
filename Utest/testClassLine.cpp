@@ -247,19 +247,19 @@ L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
 
 
 ////////////////////////////////////////////////
-     L1 = Line(  Point(8.0467, 6.9756), Point(10.08, 2.9578) );
-     L2 = Line(  Point(8.0467, 6.9756), Point(6.63, 2.733));
-     angle = L1.GetAngle(L2);
-     if (fabs(angle+pi/4)< 1)
-          res++;
-     fprintf (f, "%2d. res=%2d, A=%.2f |  \
-        L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-        L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-              ntests, res, angle*180/pi,                            \
-              L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),          \
-              L1.GetPoint2().GetX(),L1.GetPoint2().GetY(),          \
-              L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),          \
-              L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+     // L1 = Line(  Point(8.0467, 6.9756), Point(10.08, 2.9578) );
+     // L2 = Line(  Point(8.0467, 6.9756), Point(6.63, 2.733));
+     // angle = L1.GetAngle(L2);
+     // if (fabs(angle+pi/4)< 1)
+     //      res++;
+     // fprintf (f, "%2d. res=%2d, A=%.2f |  \
+     //    L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
+     //    L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
+     //          ntests, res, angle*180/pi,                            \
+     //          L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),          \
+     //          L1.GetPoint2().GetX(),L1.GetPoint2().GetY(),          \
+     //          L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),          \
+     //          L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
 
      int i;
      double phi=0, imax = 10; //rotation angle for tests

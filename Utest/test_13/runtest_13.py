@@ -1,43 +1,36 @@
 #! /usr/bin/env python
 import numpy as np
-from xml.dom import minidom
-import os, argparse, logging, time
+import os, argparse, logging, time, sys
 from os import path, system
 from sys import argv ,exit
-import subprocess, sys
+import subprocess, glob
+import multiprocessing
+import matplotlib.pyplot as plt
+import re
 
-from matplotlib.pyplot import *
+#=========================
+testnr = 13
+#========================
 
 SUCCESS = 0
 FAILURE = 1
 
 #--------------------------------------------------------
-logfile="log_test_EG.txt"
+logfile="log_test_%d.txt"%testnr
+f=open(logfile, "w")
+f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
-#-------------------- DIRS ------------------------------
-#HOME = path.expanduser("~")
-TRUNK = "/home/chraibi/Workspace/peddynamics/JuPedSim/jpscore"
-GEODIR = TRUNK + "/inputfiles/Bottleneck/"
-TRAJDIR = GEODIR
-CWD = os.getcwd()
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
+DIR= os.path.dirname(os.path.realpath(argv[0]))
 CWD = os.getcwd()
-DIR = os.path.dirname(os.path.realpath(argv[0]))
 #--------------------------------------------------------
-
-
-#--------------------------------------------------------
-widths = [ 1.0, 1.6, 2.5 ]
-
-
 if __name__ == "__main__":
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
         os.chdir(DIR)
-        
+
     logging.info("change directory to ..")
     os.chdir("..")
     logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
@@ -52,45 +45,46 @@ if __name__ == "__main__":
     from utils import *
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
-
-    time1 = time.clock()
-    widths = [0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.5]
-    widths = [ 1.0, 1.4, 2.5]
+    
+    widths = [ 1.0, 1.6, 2.5]    
     flows = []
+    time1 = time.clock()
 
-    for w in widths:
-    #------------------------------------------------------------------------------ 
-        geofile = GEODIR +  str(w) + "_" + "bottleneck.xml"
-        trajfile = GEODIR +  str(w) + "_" + "TrajBottleneck.xml"
-        inifile =  GEODIR +  str(w) + "_ini-Bottleneck.xml"
-        if not path.exists(geofile):
-            logging.critical("geofile <%s> does not exist"%geofile)
-            exit(FAILURE)
+    # geofile = "%s/geometry.xml"%DIR
+    inifiles = glob.glob("inifiles/*.xml")
+    # if not path.exists(geofile):
+    #     logging.critical("geofile <%s> does not exist"%geofile)
+    #     exit(FAILURE)
+        
+    executable = "%s/bin/jpscore"%TRUNK
+    if not path.exists(executable):
+        logging.critical("executable <%s> does not exist yet."%executable)
+        exit(FAILURE)
+        
+    for inifile in inifiles:
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
         #--------------------- SIMULATION ------------------------  
-        #os.chdir(TRUNK) #cd to the simulation directory
-        executable = "%s/bin/jpscore"%TRUNK
-        if not path.exists(executable):
-            logging.critical("executable <%s> does not exit yet."%executable)
-            exit(FAILURE)
+        #os.chdir(TRUNK) #cd to the simulation directory      
         cmd = "%s --inifile=%s"%(executable, inifile)
-
-        logging.info('start simulating wirh exe=<%s>'%cmd)
-        #sh(cmd) #make simulation
-        #subprocess.call([executable, "--inifile=%s"%inifile])
-        logging.info('end simulation ...')
-        #os.chdir(CWD) # cd back to the working directory
-            
+        logging.info('start simulating with exe=<%s>'%(cmd))
+        #------------------------------------------------------
+        subprocess.call([executable, "--inifile=%s"%inifile])
+        #------------------------------------------------------
+        logging.info('end simulation ...\n--------------\n')
+        trajfile = "trajectories/traj" + inifile.split("ini")[2]
+        logging.info('trajfile = <%s>'%trajfile)
         #--------------------- PARSING & FLOW-MEASUREMENT --------
         if not path.exists(trajfile):
-            logging.critical("trajfile <%s> does not exit"%trajfile)
+            logging.critical("trajfile <%s> does not exist"%trajfile)
             exit(FAILURE)
+        maxtime = get_maxtime(inifile)
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 61)
         flows.append(J)
-    #------------------------------------------------------------------------------ 
+        tolerance = 0.01
+        #------------------------------------------------------------------------------ 
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
     
     # ----------------------- PLOT RESULTS ----------------------
@@ -102,7 +96,8 @@ if __name__ == "__main__":
     # lid_w = lid[:,0]/100.0
     # lid_f = 150.0/(lid[:,4]-lid[:,1])
     lid_w = np.array([ 0.9,  1.,   1.1,  1.2,  1.4, 1.6,  1.8,  2.,   2.2,  2.5])
-    lid_f = np.array([ 1.70998632,  2.02483801,  2.19426565,  2.53207292,  2.91149068,  3.11461794, 3.90625,     3.91032325, 4.52352232,  5.54733728])
+    #lid_f = np.array([ 1.70998632,  2.02483801,  2.19426565,  2.53207292,  2.91149068,  3.11461794, 3.90625,     3.91032325, 4.52352232,  5.54733728])
+    lid_f = np.array([ 2.02483801,  3.11461794,  5.54733728])
     flows = np.array(flows)
 
     flow_file = "flow.txt"
@@ -119,7 +114,8 @@ if __name__ == "__main__":
     grid()
     xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
+    #xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
+    xticks([1.0, 1.6, 2.5])
     xlim([0.7, 2.6])
     ylim([1, 6])
     savefig("flow.png")

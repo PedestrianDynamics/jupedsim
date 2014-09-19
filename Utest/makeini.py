@@ -48,7 +48,13 @@ def make_dir(path):
 def get_tag(node):
     # geometry
     if node.tag == "geometry":
-        return  glob.glob("%s/*.xml"%node.text)
+        geometries = []
+        geom = glob.glob("%s/*.xml"%node.text)
+        for g in geom:
+            geometries.append('../geometries' + g.split(".xml")[0].split("geometries")[1])
+        # the geometries are relative to the inifiles directory
+        print geometries
+        return  geometries
     else:
         text = node.text
         
