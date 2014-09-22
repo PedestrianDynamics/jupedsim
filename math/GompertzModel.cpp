@@ -289,7 +289,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
      int nThreads = omp_get_max_threads();
 
      int partSize = nSize / nThreads;
-     int debugPed = 8;//10;
+     int debugPed = 6;//10;
      
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {

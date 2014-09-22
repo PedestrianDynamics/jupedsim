@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
-
-  <seed>1</seed>
+<!-- <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd"> -->
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://xsd.jupedsim.org/jps_ini_core.xsd" xsi:noNamespaceSchemaLocation="ini.xsd">
+  <!-- <seed>1</seed> [1, 10, 30, 55, 60] -->
+  <seed>1</seed> 
   <numCPU>4</numCPU>
   <max_sim_time unit="sec">100</max_sim_time>
   <!-- geometry file -->
   <geometry>test_13/geometries/</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" embed_mesh="false" fps="8">
-    <file location="Traj_test_1.xml" />
+    <file location="Traj_test_13.xml" />
   </trajectories>
   <!-- where to store the logs -->
   <!--logfile>log</logfile-->
@@ -45,7 +46,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="1">
     <agents_distribution>
-      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="2" start_y="2"/>	
+      <group group_id="0"  agent_parameter_id="0" room_id="1" subroom_id="0" number="60" goal_id="-1" router_id="1"/>	
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -57,18 +58,18 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exitCrossingStrategy>4</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+        <force_ped nu="0.2" dist_max="2" disteff_max="2" interpolation_width="0.1" />
+        <force_wall nu="0.2" dist_max="1" disteff_max="1" interpolation_width="0.1" />
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
-        <v0 mu="1.3" sigma="0.0" />
+        <v0 mu="1.34" sigma="0.26" />
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.20" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
         <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.16" sigma="0.001" />
+        <atau mu="0.43" sigma="0.001" />
       </agent_parameters>
     </model>
 
@@ -87,7 +88,7 @@
         <bmin mu="0.40" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
         <tau mu="0.01" sigma="0.001" />
-        <atau mu="0.2" sigma="0.001" />
+        <atau mu="0.53" sigma="0.001" />
       </agent_parameters>
     </model>
   </operational_models>

@@ -51,9 +51,9 @@ def get_tag(node):
         geometries = []
         geom = glob.glob("%s/*.xml"%node.text)
         for g in geom:
-            geometries.append('../geometries' + g.split(".xml")[0].split("geometries")[1])
+            geometries.append('../geometries' + g.split(".xml")[0].split("geometries")[1] + ".xml" ) 
         # the geometries are relative to the inifiles directory
-        print geometries
+        #print geometries
         return  geometries
     else:
         text = node.text
@@ -109,6 +109,7 @@ def get_product(root):
             # else: # should not happen
             #     sys.exit("Tag %s already exists! What the hell?"%tag)
     result = [dict(izip(input_tags, x)) for x in product(*input_tags.itervalues())]
+    #print "result", result
     return result
 # =======================================================
 def make_filename(directory, d):
@@ -119,9 +120,12 @@ def make_filename(directory, d):
             value = os.path.basename(value)
         name += "_" + key + "_" + str(value)
         traj += "_" + key + "_" + str(value)
-    name += ".xml"
-    traj += ".xml"
-    print (name)
+
+    if not name.endswith("xml"):
+        name += ".xml"
+    if not traj.endswith("xml"):
+        traj += ".xml"
+    #print "name", (name)
     return name, traj
 # =======================================================
 def update_tag_value(root, tag, value):

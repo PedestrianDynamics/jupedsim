@@ -466,6 +466,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
 
      
      int partSize = nSize / nThreads;
+     int debugPed = -6;//10;
 
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
@@ -483,7 +484,12 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                Pedestrian* ped = allPeds[p];
                Room* room = building->GetRoom(ped->GetRoomID());
                SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-               if(subroom->GetType()=="cellular") continue;
+               //if(subroom->GetType()=="cellular") continue;
+
+
+               if(debugPed == ped->GetID())
+                    building->GetGrid()->HighlightNeighborhood(ped, building);
+
 
                double normVi = ped->GetV().ScalarP(ped->GetV());
                double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
@@ -515,8 +521,11 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                     Point p2 = ped1->GetPos();
                     bool isVisible = building->IsVisible(p1, p2, false);
                     if (!isVisible)
-                         continue;;
-  
+                         continue;
+                    if(debugPed == ped->GetID())
+                    {
+                         fprintf(stdout, "t=%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
+                    }
                   //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                          F_rep = F_rep + ForceRepPed(ped, ped1);
@@ -536,10 +545,15 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                // Point acc = (ForceDriv(ped, room) + F_rep + repwall) / ped->GetMass();
                Point acc = (fd + F_rep + repwall) / ped->GetMass();
 
-               if(ped->GetID() == -4){
-                    printf("%f   %f    %f    %f   %f   %f\n", fd.GetX(), fd.GetY(), F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY());
+               // if(ped->GetID() ==  debugPed){
+               //      printf("%f   %f    %f    %f   %f   %f\n", fd.GetX(), fd.GetY(), F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY());
 
+               // }
+               if(ped->GetID() == debugPed ) {
+                    printf("t=%f, Pos1 =[%f, %f]\n", time,ped->GetPos().GetX(), ped->GetPos().GetY());
+                    printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY());
                }
+
                result_acc.push_back(acc);
           }
 
@@ -550,9 +564,9 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                Point v_neu = ped->GetV() + result_acc[p - start] * h;
                Point pos_neu = ped->GetPos() + v_neu * h;
 
-               Room* room = building->GetRoom(ped->GetRoomID());
-               SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-               if(subroom->GetType()=="cellular") continue;
+               //Room* room = building->GetRoom(ped->GetRoomID());
+               //SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+               //if(subroom->GetType()=="cellular") continue;
 
                //Jam is based on the current velocity
                if (v_neu.Norm() >= J_EPS_V) {
