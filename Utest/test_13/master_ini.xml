@@ -2,8 +2,8 @@
 
 <!-- <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd"> -->
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://xsd.jupedsim.org/jps_ini_core.xsd" xsi:noNamespaceSchemaLocation="ini.xsd">
-  <!-- <seed>1</seed> [1, 10, 30, 55, 60] -->
-  <seed>1</seed> 
+  <seed>linspace(1,10000,20)</seed> 
+  <!-- <seed>1</seed>  -->
   <numCPU>4</numCPU>
   <max_sim_time unit="sec">100</max_sim_time>
   <!-- geometry file -->
