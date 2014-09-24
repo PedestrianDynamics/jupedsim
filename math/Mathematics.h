@@ -35,6 +35,7 @@
 
 double sign(double x);
 
+double sigmoid(double a, double b, double x);
 double hermite_interp(double x, double x1, double x2, double y1, double y2,
                       double dy1, double dy2);
 

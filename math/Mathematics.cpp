@@ -136,7 +136,14 @@ Y(x) = y1 +  dy1*(x-x1) +  [x1 x1 x2]y*(x-x1)^2 + [x1 x1 x2 x2]y*(x-x1)^2*(x-x2)
     return px;
 }*/
 
+/// http://en.wikipedia.org/wiki/Sigmoid_function
+/// b is negative
+/// a is positive
 
+double sigmoid(double a, double b, double x)
+{     
+     return a/( 1+exp(b*x) );
+}
 // thanks to Sean Curtis
 double hermite_interp(double t, double x1, double x2, double y1, double y2, double dy1, double dy2)
 {

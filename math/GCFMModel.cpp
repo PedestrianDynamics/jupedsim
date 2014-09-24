@@ -223,6 +223,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 
      const vector<Wall>& walls = subroom->GetAllWalls();
      for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
+          
           f = f + ForceRepWall(ped, walls[i]);
      }
 
@@ -236,8 +237,8 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      }
 
      //eventually crossings
-     const vector<Crossing*>& crossings = subroom->GetAllCrossings();
-     for (unsigned int i = 0; i < crossings.size(); i++) {
+     // const vector<Crossing*>& crossings = subroom->GetAllCrossings();
+     // for (unsigned int i = 0; i < crossings.size(); i++) {
           //Crossing* goal=crossings[i];
           //int uid1= goal->GetUniqueID();
           //int uid2=ped->GetExitIndex();
@@ -245,7 +246,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           //if (uid1 != uid2) {
           //      f = f + ForceRepWall(ped,*((Wall*)goal));
           //}
-     }
+     // }
 
      // and finally the closed doors or doors that are not my destination
      const vector<Transition*>& transitions = subroom->GetAllTransitions();
@@ -282,7 +283,15 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      //double mind = ped->GetEllipse().MinimumDistanceToLine(w);
      double mind = 0.5; //for performance reasons this distance is assumed to be constant
      double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
-     return  ForceRepStatPoint(ped, pt, mind, vn); //line --> l != 0
+     F = ForceRepStatPoint(ped, pt, mind, vn);
+
+     if(ped->GetID() == -9 )
+     {
+          printf("wall = [%f, %f]--[%f, %f] F= [%f %f]\n", w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F.GetX(), F.GetY());
+     }
+
+     return  F; //line --> l != 0
+     
 }
 
 /* abstoßende Punktkraft zwischen ped und Punkt p
@@ -302,29 +311,40 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
      Point dist = p - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
      double d = dist.Norm(); // distance between the centre of ped and point p
      Point e_ij; // x- and y-coordinate of the normalized vector between ped and p
-     double K_ij;
+     
      double tmp;
      double bla;
      Point r;
      Point pinE; // vorher x1, y1
      const JEllipse& E = ped->GetEllipse();
 
-     if (d < J_EPS)
+     if (d < J_EPS * 0.1)
           return Point(0.0, 0.0);
      e_ij = dist / d;
      tmp = v.ScalarP(e_ij); // < v_i , e_ij >;
      bla = (tmp + fabs(tmp));
      if (!bla) // Fussgaenger nicht im Sichtfeld
           return Point(0.0, 0.0);
-     if (fabs(v.GetX()) < J_EPS && fabs(v.GetY()) < J_EPS) // v==0)
-          return Point(0.0, 0.0);
-     K_ij = 0.5 * bla / v.Norm(); // K_ij
+     // if (fabs(v.GetX()) < J_EPS && fabs(v.GetY()) < J_EPS) // v==0)
+     //      return Point(0.0, 0.0);
+     // double K_ij;
+     // K_ij= 0.5 * bla / v.Norm(); // K_ij
      // Punkt auf der Ellipse
      pinE = p.CoordTransToEllipse(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
      // Punkt auf der Ellipse
      r = E.PointOnEllipse(pinE);
      //interpolierte Kraft
-     F_rep = ForceInterpolation(ped->GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
+
+     double a = 6., b= 25.;
+     double dist_eff = d - (r - E.GetCenter()).Norm();     
+
+     // if(ped->GetID() == -9 )
+     //      printf("dist=%f\n", dist_eff);
+
+
+     F_rep = e_ij* (-sigmoid(a, b, dist_eff ));
+
+     //F_rep = ForceInterpolation(ped->GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
      return F_rep;
 }
 
@@ -466,7 +486,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
 
      
      int partSize = nSize / nThreads;
-     int debugPed = -6;//10;
+     int debugPed = -9;//10;
 
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
@@ -522,10 +542,10 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                     bool isVisible = building->IsVisible(p1, p2, false);
                     if (!isVisible)
                          continue;
-                    if(debugPed == ped->GetID())
-                    {
-                         fprintf(stdout, "t=%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
-                    }
+                    // if(debugPed == ped->GetID())
+                    // {
+                    //      fprintf(stdout, "t=%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
+                    // }
                   //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                          F_rep = F_rep + ForceRepPed(ped, ped1);

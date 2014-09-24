@@ -12,8 +12,8 @@ import re
 testnr = 13
 #========================
 
-SUCCESS = 0
-FAILURE = 1
+# SUCCESS = 0
+# FAILURE = 1
 
 #--------------------------------------------------------
 logfile="log_test_%d.txt"%testnr
