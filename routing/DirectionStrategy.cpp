@@ -49,11 +49,6 @@ Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
      return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 /// 2
-Point DirectionMinSeperation::GetTarget(Room* room, Pedestrian* ped) const
-{
-     return ped->GetExitLine()->ShortestPoint(ped->GetPos());
-}
-/// 3
 Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
 {
 
@@ -83,7 +78,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      return  target;
 
 }
-/// 4
+/// 3
 Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 {
      const Point& p1 = ped->GetExitLine()->GetPoint1();
@@ -122,7 +117,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 /**
  * this strategy is designed to work without Hlines for a general geometry.
  * First tested for bottlenecks and corners.
- * number 5
+ * number 4
  * @param room Pointer
  * @param ped Pointer to Pedestrians
  *

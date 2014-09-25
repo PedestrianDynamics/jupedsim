@@ -110,12 +110,6 @@ int testIntersectionWith(FILE * f)
      fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
 
 ////////////////////////////////////////////////
-     L1=Line( Point(2, 0), Point(0, 2));
-     L2=Line( Point(131.966445, 3.963785), Point(134.481642, 0));
-     bres = L1.IntersectionWith(L2);
-     if (!bres)
-          res++;
-     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
 
 
 
@@ -128,7 +122,7 @@ int testIntersectionWith(FILE * f)
 int testGetAngle(FILE * f)
 {
      fprintf (f, "\t+++++ Enter testGetAngle() +++++\n");
-     int ntests=9,
+     int ntests=8,
          res=0;
      double angle;
      Line L1 = Line( Point(1, 2), Point(3, 4));
@@ -247,45 +241,32 @@ L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
 
 
 ////////////////////////////////////////////////
-     // L1 = Line(  Point(8.0467, 6.9756), Point(10.08, 2.9578) );
-     // L2 = Line(  Point(8.0467, 6.9756), Point(6.63, 2.733));
-     // angle = L1.GetAngle(L2);
-     // if (fabs(angle+pi/4)< 1)
-     //      res++;
-     // fprintf (f, "%2d. res=%2d, A=%.2f |  \
-     //    L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f),   \
-     //    L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", \
-     //          ntests, res, angle*180/pi,                            \
-     //          L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),          \
-     //          L1.GetPoint2().GetX(),L1.GetPoint2().GetY(),          \
-     //          L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),          \
-     //          L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
 
-     int i;
-     double phi=0, imax = 10; //rotation angle for tests
-     Line L3; //the rotation of L1
-     L2 = Line(  Point(0, 0), Point( 3, 0));
-     L1 = Line(  Point(0, 0), Point(5, 0) );
-     Point P1, P2;
+//      int i;
+//      double phi=0, imax = 10; //rotation angle for tests
+//      Line L3; //the rotation of L1
+//      L2 = Line(  Point(0, 0), Point( 3, 0));
+//      L1 = Line(  Point(0, 0), Point(5, 0) );
+//      Point P1, P2;
 
-     for (i=1; i<= imax; i++) {
-          L3 = L1;
-          phi += pi/imax;
-          P1 =  L1.GetPoint2().Rotate(cos(phi), sin(phi)) ;
-          L3.SetPoint2( P1 );
-          angle = L3.GetAngle(L2);
-          P2 = P1.Rotate(cos(angle), sin(angle)) ;
+//      for (i=1; i<= imax; i++) {
+//           L3 = L1;
+//           phi += pi/imax;
+//           P1 =  L1.GetPoint2().Rotate(cos(phi), sin(phi)) ;
+//           L3.SetPoint2( P1 );
+//           angle = L3.GetAngle(L2);
+//           P2 = P1.Rotate(cos(angle), sin(angle)) ;
 
-// angle  L1_P1 L1_P2   L2_P1   L2_P2    L3_P1    L3_P2
-          fprintf (stderr, "%f %f\t %.2f %.2f %.2f %.2f \t %.2f %.2f %.2f %.2f\t %.2f %.2f %.2f %.2f\n",       \
-                   phi, angle,                                                \
-                   L3.GetPoint1().GetX(),L3.GetPoint1().GetY(),              \
-                   P1.GetX(), P1.GetY(),              \
-                   L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),              \
-                   L2.GetPoint2().GetX(),L2.GetPoint2().GetY(),              \
-                   L3.GetPoint1().GetX(),L3.GetPoint1().GetY(),              \
-                   P2.GetX(), P2.GetY());
-     }
+// // angle  L1_P1 L1_P2   L2_P1   L2_P2    L3_P1    L3_P2
+//           fprintf (stderr, "%f %f\t %.2f %.2f %.2f %.2f \t %.2f %.2f %.2f %.2f\t %.2f %.2f %.2f %.2f\n",       \
+//                    phi, angle,                                                \
+//                    L3.GetPoint1().GetX(),L3.GetPoint1().GetY(),              \
+//                    P1.GetX(), P1.GetY(),              \
+//                    L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),              \
+//                    L2.GetPoint2().GetX(),L2.GetPoint2().GetY(),              \
+//                    L3.GetPoint1().GetX(),L3.GetPoint1().GetY(),              \
+//                    P2.GetX(), P2.GetY());
+//      }
 
 
 ////////////////////////////////////////////////

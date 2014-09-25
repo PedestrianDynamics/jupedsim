@@ -318,33 +318,33 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
      Point pinE; // vorher x1, y1
      const JEllipse& E = ped->GetEllipse();
 
-     if (d < J_EPS * 0.1)
+     if (d < J_EPS )
           return Point(0.0, 0.0);
      e_ij = dist / d;
      tmp = v.ScalarP(e_ij); // < v_i , e_ij >;
      bla = (tmp + fabs(tmp));
      if (!bla) // Fussgaenger nicht im Sichtfeld
           return Point(0.0, 0.0);
-     // if (fabs(v.GetX()) < J_EPS && fabs(v.GetY()) < J_EPS) // v==0)
-     //      return Point(0.0, 0.0);
-     // double K_ij;
-     // K_ij= 0.5 * bla / v.Norm(); // K_ij
+     if (fabs(v.GetX()) < J_EPS && fabs(v.GetY()) < J_EPS) // v==0)
+          return Point(0.0, 0.0);
+     double K_ij;
+     K_ij= 0.5 * bla / v.Norm(); // K_ij
      // Punkt auf der Ellipse
      pinE = p.CoordTransToEllipse(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
      // Punkt auf der Ellipse
      r = E.PointOnEllipse(pinE);
      //interpolierte Kraft
 
-     double a = 6., b= 25.;
-     double dist_eff = d - (r - E.GetCenter()).Norm();     
+     // double a = 6., b= 25.;
+     // double dist_eff = d - (r - E.GetCenter()).Norm();     
 
      // if(ped->GetID() == -9 )
      //      printf("dist=%f\n", dist_eff);
 
 
-     F_rep = e_ij* (-sigmoid(a, b, dist_eff ));
+     // F_rep = e_ij* (-sigmoid(a, b, dist_eff ));
 
-     //F_rep = ForceInterpolation(ped->GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
+     F_rep = ForceInterpolation(ped->GetV0Norm(), K_ij, e_ij, vn, d, (r - E.GetCenter()).Norm(), l);
      return F_rep;
 }
 
@@ -486,7 +486,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
 
      
      int partSize = nSize / nThreads;
-     int debugPed = -9;//10;
+     int debugPed = 14;//10;
 
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {

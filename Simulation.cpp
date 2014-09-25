@@ -206,20 +206,18 @@ void Simulation::InitArgs(ArgumentParser* args)
           _direction = new DirectionMiddlePoint();
           break;
      case 2:
-          _direction = new DirectionMinSeperation();
-          break;
-     case 3:
           _direction = new DirectionMinSeperationShorterLine();
           break;
-     case 4:
+     case 3:
           _direction = new DirectionInRangeBottleneck();
           break;
-     case 5:
+     case 4:
           _direction = new DirectionGeneral();
           break;
      default:
-          cout<<"Direction strategy not available. Exit"<<endl;
-          exit(EXIT_FAILURE);
+          _direction = new DirectionMinSeperationShorterLine();
+          sprintf(tmp, "\t Warning Direction %d is not in [1,4]. Fall back to 2\n", direction);
+          s.append(tmp);
           break;
      }
      int model =  args->GetModel();

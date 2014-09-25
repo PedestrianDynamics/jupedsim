@@ -289,7 +289,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
      int nThreads = omp_get_max_threads();
 
      int partSize = nSize / nThreads;
-     int debugPed = 6;//10;
+     int debugPed = -6;//10;
      
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
@@ -311,12 +311,12 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                if(debugPed == ped->GetID())
                     building->GetGrid()->HighlightNeighborhood(ped, building);
 
-               if(debugPed != ped->GetID())
-               {
-                    Point p1 = ped->GetPos();
-                    Point p2 = ped->GetPos();
-                    fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), -1, ped->GetID(), ped->GetID());    
-               }
+               // if(debugPed != ped->GetID())
+               // {
+               //      Point p1 = ped->GetPos();
+               //      Point p2 = ped->GetPos();
+               //      fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), -1, ped->GetID(), ped->GetID());    
+               // }
 
 
                double normVi = ped->GetV().ScalarP(ped->GetV()); //squared
