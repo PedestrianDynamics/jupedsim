@@ -43,6 +43,7 @@ bool Pedestrian::_enableSpotlight = false;
 
 
 
+
 Pedestrian::Pedestrian()
 {
      _roomID = -1;
@@ -54,6 +55,7 @@ Pedestrian::Pedestrian()
      _mass = 1;
      _tau = 0.5;
      _newOrientationFlag = false;
+     _newEventFlag = false;
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
      _updateRate = 0;
@@ -483,9 +485,25 @@ bool Pedestrian::IsReadyForRerouting()
      return(_reroutingEnabled &&(_timeBeforeRerouting <= 0.0));
 }
 
+
+double Pedestrian::GetReroutingTime()
+{
+    return _timeBeforeRerouting;
+}
+
+bool Pedestrian::GetNewEventFlag()
+{
+    return _newEventFlag;
+}
+
+void Pedestrian::SetNewEventFlag(bool flag)
+{
+    _newEventFlag=flag;
+}
+
 double Pedestrian::GetAge() const
 {
-     return _age;
+	return _age;
 }
 
 void Pedestrian::SetAge(double age)

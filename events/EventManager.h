@@ -34,7 +34,9 @@
 #include <math.h>
 #include <stdio.h>
 #include "../geometry/Building.h"
+#include "../geometry/SubRoom.h"
 #include "../geometry/Transition.h"
+#include "../geometry/Point.h"
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 #include "../IO/IODispatcher.h"
@@ -56,6 +58,7 @@ private:
      FILE *_file;
      bool _dynamic;
      int _eventCounter;
+     long int _lastUpdateTime;
 
 public:
      //Konstruktor
