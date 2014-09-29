@@ -2,7 +2,7 @@
  * \file        LCGrid.h
  * \date        Nov 16, 2010
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum J�lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -86,8 +86,13 @@ public:
      /**
       *Update the cells occupation
       */
-
      void Update(Pedestrian** peds);
+
+     /**
+      *Get pCellSize
+      */
+     double GetCellSize();
+
      /**
       *Update the cells occupation
       */

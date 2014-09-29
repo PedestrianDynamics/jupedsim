@@ -53,6 +53,7 @@ using namespace std;
  Konstruktoren
  ************************************************************/
 
+
 Building::Building()
 {
      _caption = "no_caption";
@@ -120,6 +121,9 @@ void Building::SetRoom(Room* room, int index)
      }
 }
 
+//void Building::SetModel(ForceModel* m){
+  //     _model=m;
+//}
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
@@ -291,8 +295,6 @@ void Building::InitGeometry()
      }
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 }
-
-
 
 
 const string& Building::GetProjectFilename() const
@@ -948,6 +950,7 @@ void Building::UpdateVerySlow()
                }
           }
      }
+
 }
 
 void Building::Update()

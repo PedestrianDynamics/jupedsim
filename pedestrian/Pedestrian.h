@@ -47,6 +47,7 @@ class Router;
 
 class Pedestrian {
 private:
+
      /// starting with 1
      int _id;
      double _height;
@@ -108,6 +109,7 @@ private:
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
      bool _newOrientationFlag;
+     bool _newEventFlag;
 
      // the current time in the simulation
      static double _globalTime;
@@ -202,6 +204,10 @@ public:
      double GetDistanceToNextTarget() const;
      double GetDisTanceToPreviousTarget() const;
 
+     bool GetNewEventFlag();
+
+
+     void SetNewEventFlag(bool flag);
 
 
      bool ChangedSubRoom();
@@ -298,6 +304,7 @@ public:
      void UpdateTimeInJam();
      void UpdateJamData();
      void UpdateReroutingTime();
+     double GetReroutingTime();
      void RerouteIn(double time);
      bool IsReadyForRerouting();
 
@@ -350,6 +357,7 @@ public:
       * Set/Get the Building object
       */
      void SetBuilding(Building* building);
+
 };
 
 #endif  /* _PEDESTRIAN_H */

@@ -33,6 +33,7 @@
 #include <cstdlib>
 #include <vector>
 #include <string.h>
+#include <algorithm>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -53,11 +54,15 @@
 
 // precision error
 #define J_EPS 0.001
+#define J_EPS_EVENT 0.00001 //zum pruefen des aktuellen Zeitschrittes auf events
 #define J_EPS_DIST 0.05// [m]
 #define J_EPS_INFO_DIST 2.0 /// [m] abstand für Informationsaustausch (GraphRouter)
 #define J_EPS_GOAL 0.005 /// [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
+
+//TODO: why the limitation ?
+#define NR_PEDS 5000
 
 // routing macros
 #define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
@@ -65,6 +70,8 @@
 #define CBA_THRESHOLD 0.15
 #define OBSTRUCTION 4
 
+
+// Lenght of array
 // Length of array
 #define CLENGTH 1000
 
@@ -142,4 +149,14 @@ inline char xmltoc(const char * t,const char v='\0')
      return v;
 }
 
+template<typename A>
+     bool IsElementInVector(const std::vector<A> &vec, A& el) {
+          typename std::vector<A>::const_iterator it;
+          it = std::find (vec.begin(), vec.end(), el);
+          if(it==vec.end()) {
+               return false;
+          } else {
+               return true;
+          }
+     }
 #endif  /* _MACROS_H */

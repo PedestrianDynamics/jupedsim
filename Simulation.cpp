@@ -221,15 +221,34 @@ void Simulation::InitArgs(ArgumentParser* args)
           break;
      }
      int model =  args->GetModel();
-     if(model == 1) { //GCFM
+     if(model == 1)
+     { //GCFM
+          //if(args->GetHPCFlag()==0){
           _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-                                 args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-                                 args->GetMaxFPed(), args->GetMaxFWall());
+                    args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+                    args->GetMaxFPed(), args->GetMaxFWall());
           s.append("\tModel: GCFMModel\n");
           s.append(_model->writeParameter());
-     } else if (model == 2) { //Gompertz
+          //}
+          //else if(args->GetHPCFlag()==2){
+          //  _model = new GPU_acc_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+          //        args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+          //      args->GetMaxFPed(), args->GetMaxFWall());
+          //s.append("\tModel: GCFMModel\n");
+          //s.append(_model->writeParameter());
+          //}
+          //else {
+          //  _model = new GPU_ocl_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+          //        args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
+          //      args->GetMaxFPed(), args->GetMaxFWall());
+          //s.append("\tModel: GCFMModel\n");
+          //s.append(_model->writeParameter());
+          //}
+     }
+     else if (model == 2)
+     { //Gompertz
           _model = new GompertzModel(_direction, args->GetNuPed(), args->GetaPed(), args->GetbPed(), args->GetcPed(),
-                                     args->GetNuWall(), args->GetaWall(), args->GetbWall(), args->GetcWall() );
+                    args->GetNuWall(), args->GetaWall(), args->GetbWall(), args->GetcWall() );
           s.append("\tModel: GompertzModel\n");
           s.append(_model->writeParameter());
      }
@@ -241,12 +260,12 @@ void Simulation::InitArgs(ArgumentParser* args)
      case 1:
           _solver = new EulerSolver(_model);
           break;
-     //case 2:
-     //     _solver = new VelocityVerletSolver(_model);
-     //     break;
-     //case 3:
-     //     _solver = new LeapfrogSolver(_model);
-     //     break;
+          //case 2:
+          //     _solver = new VelocityVerletSolver(_model);
+          //     break;
+          //case 3:
+          //     _solver = new LeapfrogSolver(_model);
+          //     break;
      }
      sprintf(tmp, "\tnCPU: %d\n", args->GetMaxOpenMPThreads());
      s.append(tmp);
@@ -398,8 +417,8 @@ void Simulation::InitArgs(ArgumentParser* args)
      _building->SanityCheck();
      //size of the cells/GCFM/Gompertz
      if(args->GetDistEffMaxPed()>args->GetLinkedCellSize()){
-         Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",args->GetLinkedCellSize(),args->GetDistEffMaxPed());
-         exit(EXIT_FAILURE);
+          Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",args->GetLinkedCellSize(),args->GetDistEffMaxPed());
+          exit(EXIT_FAILURE);
      }
 
      //read the events
@@ -408,6 +427,14 @@ void Simulation::InitArgs(ArgumentParser* args)
      _em->SetProjectRootDir(args->GetProjectRootDir());
      _em->readEventsXml();
      _em->listEvents();
+
+     //which hpc-architecture?
+     _hpc = args->GetHPCFlag();
+     //if programming model = ocl create buffers and make the setup
+     //if(_hpc==1){
+     //((GPU_ocl_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
+     //((GPU_ocl_GCFMModel*) _model)->initCL(_building->GetNumberOfPedestrians());
+     //}
 }
 
 
@@ -444,16 +471,18 @@ int Simulation::RunSimulation()
      // writing the footer
      _iod->WriteFooter();
 
+     //if(_hpc==1)
+       //  ((GPU_GCFMModel*) _model)->DeleteBuffers();
 
      if(_argsParser->GetFileFormat()==FORMAT_XML_BIN) {
 
           delete _iod;
           _iod=NULL;
 
-//              char tmp[CLENGTH];
-//              int f= frameNr / writeInterval ;
-//              sprintf(tmp,"<frameCount>%07d</frameCount>",f);
-//              string frameCount (tmp);
+          //              char tmp[CLENGTH];
+          //              int f= frameNr / writeInterval ;
+          //              sprintf(tmp,"<frameCount>%07d</frameCount>",f);
+          //              string frameCount (tmp);
 
           char replace[CLENGTH];
           // open the file and replace the 8th line

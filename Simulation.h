@@ -2,7 +2,7 @@
  * \file        Simulation.h
  * \date        Dec 15, 2010
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum J�lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -55,88 +55,102 @@
 
 //OutputHandler* Log;
 
-class Simulation {
+class Simulation
+{
 private:
-     ///Number of pedestrians in the simulation
-     int _nPeds;
-     ///Maximum simulation time
-     double _tmax;
-     /// time step
-     double _deltaT;
-     /// frame rate for the trajectories
-     double _fps;
-     ///seed using for the random number generator
-     unsigned int _seed;
-     /// building object
-     Building* _building;
-     ///initial distribution of the pedestrians
-     PedDistributor* _distribution;
-     /// door crossing strategy for the pedestrians
-     DirectionStrategy* _direction;
-     /// Force model to use
-     ForceModel* _model;
-     /// differential equation solver
-     ODESolver* _solver;
-     /// writing the trajectories to file
-     IODispatcher* _iod;
-     ///new: EventManager
-     EventManager* _em;
-     /// argument parser
-     ArgumentParser* _argsParser;
 
+	///Number of pedestrians in the simulation
+    int _nPeds;
+    ///Maximum simulation time
+    double _tmax;
+    /// time step
+    double _deltaT;
+    /// frame rate for the trajectories
+    double _fps;
+    ///seed using for the random number generator
+    unsigned int _seed;
+    /// building object
+    Building* _building;
+    ///initial distribution of the pedestrians
+    PedDistributor* _distribution;
+    /// door crossing strategy for the pedestrians
+    DirectionStrategy* _direction;
+    /// Force model to use
+    ForceModel* _model;
+    /// differential equation solver
+    ODESolver* _solver;
+    /// writing the trajectories to file
+    IODispatcher* _iod;
+    ///new: EventManager
+    EventManager* _em;
+    /// argument parser
+    ArgumentParser* _argsParser;
+    /// profiling flag
+    bool _profiling;
+    /// architecture flag
+    int _hpc;
 
 public:
-     /**
-      * constructor
-      */
-     Simulation();
+    Simulation();
+    virtual ~Simulation();
 
-     /**
-      * Destructor
-      */
-     virtual ~Simulation();
+    /**
+     * Initialize the number of agents in the simulation
+     */
+    void SetPedsNumber(int i);
 
-     /**
-      * Initialize the number of agents in the simulation
-      */
-     void SetPedsNumber(int i);
+    /**
+     * Initialize the number of agents in the simulation
+     */
+    int GetPedsNumber() const;
 
-     /**
-      * Initialize the number of agents in the simulation
-      */
-     int GetPedsNumber() const;
+    /**
+     * Returns the number of agents when running on a distributed system (MPI)
+     * NOT IMPLEMENTED
+     */
+    int GetNPedsGlobal() const;
 
-     /**
-      * Returns the number of agents when running on a distributed system (MPI)
-      * NOT IMPLEMENTED
-      */
-     int GetNPedsGlobal() const;
+    /**
+     * @return the building object containing all geometry elements
+     */
+    Building* GetBuilding() const;
 
-     /**
-      * @return the building object containing all geometry elements
-      */
-     Building* GetBuilding() const;
+    /**
+     * Read parameters from the argument parser class.
+     */
+    void InitArgs(ArgumentParser *args);
 
-     /**
-      * Read parameters from the argument parser class.
-      */
-     void InitArgs(ArgumentParser *args);
+    /**
+     *
+     * @return the total simulated/evacuation time
+     */
+    int RunSimulation();
 
-     /**
-      *
-      * @return the total simulated/evacuation time
-      */
-     int RunSimulation();
+    /**
+     * Update the pedestrians states: positions, velocity, route
+     */
+    void Update();
+    //void Update(double &b, double &p, double &t, double &g);
 
-     /**
-      * Update the pedestrians states: positions, velocity, route
-      */
-     void Update();
+    /**
+     * Set the ProfilingFlag
+     */
+    void SetProfileFlag(bool flag);
 
-     /**
-      * print some statistics about the simulation
-      */
-     void PrintStatistics();
+    /**
+     * Get the ProfileFlag
+     */
+    bool GetProfileFlag();
+    /**
+     * Get the HPCFlag
+     */
+    int GetHPCFlag();
+
+    /**
+     * print some statistics about the simulation
+     */
+    void PrintStatistics();
+
 };
 
 #endif /*SIMULATION_H_*/

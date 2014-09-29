@@ -107,6 +107,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
      }
 
      if(ped->GetSpotlight()==false) color=-1;
+     if(ped->GetNewEventFlag()==false) color=-1;
 
      double a = ped->GetLargerAxis();
      double b = ped->GetSmallerAxis();

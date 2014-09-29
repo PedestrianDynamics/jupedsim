@@ -46,10 +46,12 @@ class RoutingEngine;
 class Pedestrian;
 class Transition;
 class LCGrid;
+class ForceModel;
 
 
 class Building {
 private:
+
      std::string _caption;
      std::string _projectFilename;
      std::string _projectRootDir;
