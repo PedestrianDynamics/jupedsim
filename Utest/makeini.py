@@ -186,7 +186,7 @@ if __name__ == "__main__":
     logging.info('master inifile = <%s>'%masterfile)
     make_dir( "%s/trajectories"%directory)
     make_dir( "%s/inifiles"%directory)
-    
+    print masterfile
     tree = ET.parse(masterfile)
     root = tree.getroot()
     result = get_product(root)

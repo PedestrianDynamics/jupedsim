@@ -8,6 +8,11 @@ import multiprocessing
 from matplotlib.pyplot import *
 import re
 
+widths = [ 1.0, 1.2, 1.4, 1.6, 2.0, 2.2, 2.5 ]
+#lid_w = np.array([ 0.9,  1.,   1.1,  1.2,  1.4, 1.6,  1.8,  2.,   2.2,  2.5])
+#lid_f = np.array([ 1.70998632,  2.02483801,  2.19426565,  2.53207292,  2.91149068,  3.11461794, 3.90625,     3.91032325, 4.52352232,  5.54733728])
+lid_w = widths
+lid_f = np.array([ 2.02483801,  2.19426565,  2.53207292, 3.11461794, 3.91032325, 4.52352232, 5.54733728])
 #=========================
 testnr = 13
 #========================
@@ -46,7 +51,6 @@ if __name__ == "__main__":
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
     
-    widths = [ 1.0, 1.6, 2.5 ]
     flows = {}
     tolerance = 0.5# todo: maybe too large
     time1 = time.clock()
@@ -109,10 +113,7 @@ if __name__ == "__main__":
     # lid = np.loadtxt("bck-b-scaling/Flow_vs_b_v2.dat")
     # lid_w = lid[:,0]/100.0
     # lid_f = 150.0/(lid[:,4]-lid[:,1])
-    #lid_w = np.array([ 0.9,  1.,   1.1,  1.2,  1.4, 1.6,  1.8,  2.,   2.2,  2.5])
-    #lid_f = np.array([ 1.70998632,  2.02483801,  2.19426565,  2.53207292,  2.91149068,  3.11461794, 3.90625,     3.91032325, 4.52352232,  5.54733728])
-    lid_w = np.array([ 1,  1.6,  2.5])
-    lid_f = np.array([ 2.02483801,  3.11461794,  5.54733728])
+
 #    flows = np.array(flows)
 
     flow_file = "flow.txt"
@@ -147,7 +148,7 @@ if __name__ == "__main__":
     xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     #xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
-    xticks([1.0, 1.6, 2.5])
+    xticks(widths)
     xlim([0.7, 2.6])
     ylim([1, 6])
     err = np.sqrt( sum((M-lid_f)**2) )
