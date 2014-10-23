@@ -72,7 +72,6 @@ bool extern_force_system_update=false;
 /// enables of disables tracking.
 /// With this enable, moving pedestrians will leave a
 /// trail behind them
-bool extern_tracking_enable=false;
 PointPlotter* extern_trail_plotter=NULL;
 
 ///relative scale from pedestrian to the geometry (environment)

@@ -587,18 +587,7 @@ border-color: rgb(255, 255, 255);</string>
     <property name="title">
      <string>Options</string>
     </property>
-    <widget class="QMenu" name="menuCaption_Color">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="title">
-      <string>Caption Color</string>
-     </property>
-     <addaction name="actionCaptionAuto"/>
-     <addaction name="actionCaptionCustom"/>
-    </widget>
     <addaction name="actionBackground_Color"/>
-    <addaction name="menuCaption_Color"/>
     <addaction name="actionFloor_Color"/>
     <addaction name="actionWalls_Color"/>
     <addaction name="actionExits_Color"/>
@@ -606,6 +595,8 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="separator"/>
     <addaction name="actionPedestrian_Shape"/>
     <addaction name="actionNetwork_settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemember_Settings"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -640,8 +631,6 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionShow_Navigation_Lines"/>
     <addaction name="actionShow_Geometry_Captions"/>
     <addaction name="actionFirst_Group"/>
-    <addaction name="actionSecond_Group"/>
-    <addaction name="actionThird_Group"/>
     <addaction name="separator"/>
     <addaction name="actionShow_Onscreen_Infos"/>
     <addaction name="separator"/>
@@ -921,7 +910,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>Second Group</string>
    </property>
    <property name="visible">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionThird_Group">
@@ -935,7 +924,7 @@ border-color: rgb(255, 255, 255);</string>
     <string>Third Group</string>
    </property>
    <property name="visible">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionShow_Legend">
@@ -1304,6 +1293,17 @@ border-color: rgb(255, 255, 255);</string>
     <string>Show Floor</string>
    </property>
   </action>
+  <action name="actionRemember_Settings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Remember Settings</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="icons.qrc"/>
@@ -1490,38 +1490,6 @@ border-color: rgb(255, 255, 255);</string>
    <signal>toggled(bool)</signal>
    <receiver>mainwindow</receiver>
    <slot>slotToggleFirstPedestrianGroup()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionSecond_Group</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotToggleSecondPedestrianGroup()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>318</x>
-     <y>264</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionThird_Group</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>mainwindow</receiver>
-   <slot>slotToggleThirdPedestrianGroup()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

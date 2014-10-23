@@ -69,29 +69,30 @@ void SimpleVisualisationWindow::start()
     vtkRenderer* renderer = vtkRenderer::New();
     renderer->SetBackground(0,0,0);
 
-//	//add the line actor
-//	LinePlotter * ln = new LinePlotter();
-//	ln->PlotPoint(324,34,34);
-//	ln->AddPoint(1,1,1);
-//	ln->AddPoint(11,11,171);
-//	ln->AddPoint(34,334,334);
-//	ln->AddPoint(81,821,81);
-//	ln->AddPoint(134,14,134);
+    //	//add the line actor
+    //	LinePlotter * ln = new LinePlotter();
+    //	ln->PlotPoint(324,34,34);
+    //	ln->AddPoint(1,1,1);
+    //	ln->AddPoint(11,11,171);
+    //	ln->AddPoint(34,334,334);
+    //	ln->AddPoint(81,821,81);
+    //	ln->AddPoint(134,14,134);
 
-//	ln->PlotLine(1,1,1,324,34,34,1);
-//	ln->PlotLine(11,11,171,34,334,334,1);
-//	ln->PlotLine(81,821,81,14,134,134,1);
-//	renderer->AddActor(ln->getActor());
+    //	ln->PlotLine(1,1,1,324,34,34,1);
+    //	ln->PlotLine(11,11,171,34,334,334,1);
+    //	ln->PlotLine(81,821,81,14,134,134,1);
+    //	renderer->AddActor(ln->getActor());
 
     //
-//	PointPlotter * pt = new PointPlotter();
-//	pt->PlotPoint(324,34,34);
-//	pt->PlotPoint(1,1,1);
-//	pt->PlotPoint(11,11,171);
-//	pt->PlotPoint(34,334,334);
-//	pt->PlotPoint(81,821,81);
-//	pt->PlotPoint(134,14,134);
-//	renderer->AddActor(pt->getActor());
+    //	PointPlotter * pt = new PointPlotter();
+    //	pt->PlotPoint(324,34,34);
+    //	pt->PlotPoint(1,1,1);
+    //	pt->PlotPoint(11,11,171);
+    //	pt->PlotPoint(34,334,334);
+    //	pt->PlotPoint(81,821,81);
+    //	pt->PlotPoint(134,14,134);
+    //	renderer->AddActor(pt->getActor());
+
 
     //add the different actors
     renderer->AddActor(assembly);
@@ -105,7 +106,7 @@ void SimpleVisualisationWindow::start()
     light->SetIntensity(1);
     light->SetLightTypeToCameraLight();
     //	renderer->AddLight(light);
-//	light->Delete();
+    //	light->Delete();
 
     // Create a render window
     vtkRenderWindow *renderWindow = vtkRenderWindow::New();
@@ -141,7 +142,7 @@ void SimpleVisualisationWindow::start()
     renderWinInteractor->Delete();
     if(assembly)
         assembly->Delete();
-//	if(actor)
-//		actor->Delete();
+    //	if(actor)
+    //		actor->Delete();
 
 }

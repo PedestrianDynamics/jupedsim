@@ -103,6 +103,7 @@ ThreadVisualisation::ThreadVisualisation(QObject *parent):
     renderer=NULL;
     renderWindow=NULL;
     renderWinInteractor=NULL;
+    runningTime=NULL;
     framePerSecond=25;
     axis=NULL;
     winTitle="header without room caption";
@@ -152,10 +153,6 @@ void ThreadVisualisation::run()
     geometry->CreateActors();
     renderer->AddActor(geometry->getActor2D());
     renderer->AddActor(geometry->getActor3D());
-
-    //initialize the datasets
-    //mem leak
-
 
     initGlyphs2D();
     initGlyphs3D();
@@ -231,17 +228,11 @@ void ThreadVisualisation::run()
         //renderer->AddActor(actor);
     }
 
-    //compute the relatives delays
-    // necessary in the case several dataset were loaded
-    computeDelays();
-
     // Create the render window
     renderWindow = vtkRenderWindow::New();
     renderWindow->AddRenderer( renderer );
     renderWindow->SetSize(960, 800);
     //renderWindow->SetSize(640, 480);
-    //renderWindow->SetSize(800, 586);
-    //renderWindow->SetSize(1280, 960);
 
     // add the legend
     //if(SystemSettings::getShowLegend())
@@ -282,7 +273,7 @@ void ThreadVisualisation::run()
 
     //add a light kit
     {
-        VTK_CREATE(vtkLightKit, lightKit);
+        //VTK_CREATE(vtkLightKit, lightKit);
         //lightKit->SetKeyLightIntensity(1);
 
         //lightKit->SetKeyLightWarmth(5);
@@ -305,7 +296,6 @@ void ThreadVisualisation::run()
     renderingTimer->SetRenderTimerId(timer);
     renderingTimer->setTextActor(runningTime);
     renderWinInteractor->AddObserver(vtkCommand::TimerEvent,renderingTimer);
-
 
     //create the necessary connections
     QObject::connect(renderingTimer, SIGNAL(signalRunningTime(unsigned long )),
@@ -330,20 +320,6 @@ void ThreadVisualisation::run()
     //Pedestrian::setCamera(renderer->GetActiveCamera());
     //renderer->ResetCamera();
 
-    // just a workaround
-
-    //if(LinePlotter2D::doorColorsToDefault)
-    {
-        //LinePlotter2D::doorColorsToDefault=false;
-        double col[3]= {82.0/255,218.0 /255.0,255.0/255.0};
-        double wallcol[3]= {180.0/255,180.0/255.0,180.0/255.0};
-        double exitcol[3]= {175.0/255,175.0/255.0,255.0/255.0};
-        double navlinecol[3]= {165.0/255,175.0/255.0,225.0/255.0};
-        setExitsColor(exitcol);
-        setWallsColor(wallcol);
-        //setNavLinesColor(navlinecol);
-        //showDoors(false);
-    }
     //renderWinInteractor->Initialize();
     // Initialize and enter interactive mode
     // should be called after the observer has been added
@@ -358,9 +334,22 @@ void ThreadVisualisation::run()
     //renderer->GetActiveCamera()->Modified();
     _topViewCamera->DeepCopy(renderer->GetActiveCamera());
 
-    //TODO: update all system settings
+    //update all (restored) system settings
     setGeometryVisibility2D(SystemSettings::get2D());
     setGeometryVisibility3D(!SystemSettings::get2D());
+    setGeometryVisibility(SystemSettings::getShowGeometry());
+    setOnscreenInformationVisibility(SystemSettings::getOnScreenInfos());
+    showFloor(SystemSettings::getShowFloor());
+    showWalls((SystemSettings::getShowWalls()));
+    showDoors((SystemSettings::getShowExits()));
+    showNavLines((SystemSettings::getShowNavLines()));
+    setGeometryLabelsVisibility(SystemSettings::getShowGeometryCaptions());
+    setBackgroundColor(SystemSettings::getBackgroundColor());
+    setWallsColor(SystemSettings::getWallsColor());
+    setFloorColor(SystemSettings::getFloorColor());
+    setExitsColor(SystemSettings::getExitsColor());
+    setNavLinesColor(SystemSettings::getNavLinesColor());
+
 
     renderWinInteractor->Start();
 
@@ -447,6 +436,35 @@ void  ThreadVisualisation::initGlyphs2D()
     agentShape->SetCircumferentialResolution(20);
     agentShape->SetInnerRadius(0);
     agentShape->SetOuterRadius(30);
+
+//    {
+//        //personal space
+//        VTK_CREATE (vtkDiskSource, perSpace);
+//        perSpace->SetCircumferentialResolution(20);
+//        perSpace->SetInnerRadius(0);
+//        perSpace->SetOuterRadius(30);
+//        //forehead
+//        perSpace->SetCircumferentialResolution(20);
+//        perSpace->SetInnerRadius(0);
+//        perSpace->SetOuterRadius(30);
+//        //backhead
+
+//        //Append the two meshes
+//        VTK_CREATE (vtkAppendPolyData, appendFilter);
+//#if VTK_MAJOR_VERSION <= 5
+//        appendFilter->AddInputConnection(perSpace->GetProducerPort());
+//        appendFilter->AddInputConnection(input2->GetProducerPort());
+//#else
+//        appendFilter->AddInputData(perSpace);
+//        appendFilter->AddInputData(input2);
+//#endif
+//        appendFilter->Update();
+
+//        // Remove any duplicate points.
+//        VTK_CREATE (vtkCleanPolyData, cleanFilter);
+//        cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
+//        cleanFilter->Update();
+//    }
 
     //speed the rendering using triangles stripers
     vtkTriangleFilter *tris = vtkTriangleFilter::New();
@@ -595,9 +613,14 @@ void ThreadVisualisation::finalize()
 {
 }
 
-/// compute the relative delays to the datasets
 
-void  ThreadVisualisation::computeDelays() {}
+
+void ThreadVisualisation::QcolorToDouble(const QColor &col, double *rgb)
+{
+    rgb[0]=(double)col.red()/255.0;
+    rgb[1]=(double)col.green()/255.0;
+    rgb[2]=(double)col.blue()/255.0;
+}
 
 void ThreadVisualisation::initLegend(/*std::vector scalars*/)
 {
@@ -690,10 +713,12 @@ void ThreadVisualisation::setCameraPerspective(int mode)
     }
 }
 
-void ThreadVisualisation::setBackgroundColor(double* color)
+void ThreadVisualisation::setBackgroundColor(const QColor& col)
 {
+    double  bgcolor[3];
+    QcolorToDouble(col,bgcolor);
     if (renderer!=NULL)
-        renderer->SetBackground(color);
+        renderer->SetBackground(bgcolor);
 }
 
 void ThreadVisualisation::setWindowTitle(QString title)
@@ -716,14 +741,18 @@ FacilityGeometry* ThreadVisualisation::getGeometry()
     return geometry;
 }
 
-void ThreadVisualisation::setWallsColor(double* color)
+void ThreadVisualisation::setWallsColor(const QColor &color)
 {
-    geometry->changeWallsColor(color);
+    double  rbgColor[3];
+    QcolorToDouble(color,rbgColor);
+    geometry->changeWallsColor(rbgColor);
 }
 
-void ThreadVisualisation::setFloorColor(double *color)
+void ThreadVisualisation::setFloorColor(const QColor &color)
 {
-    geometry->changeFloorColor(color);
+    double  rbgColor[3];
+    QcolorToDouble(color,rbgColor);
+    geometry->changeFloorColor(rbgColor);
 }
 
 void ThreadVisualisation::setGeometryLabelsVisibility(int v)
@@ -731,14 +760,18 @@ void ThreadVisualisation::setGeometryLabelsVisibility(int v)
     geometry->showGeometryLabels(v);
 }
 
-void ThreadVisualisation::setExitsColor(double* color)
+void ThreadVisualisation::setExitsColor(const QColor &color)
 {
-    geometry->changeExitsColor(color);
+    double  rbgColor[3];
+    QcolorToDouble(color,rbgColor);
+    geometry->changeExitsColor(rbgColor);
 }
 
-void ThreadVisualisation::setNavLinesColor(double *color)
+void ThreadVisualisation::setNavLinesColor(const QColor &color)
 {
-    geometry->changeNavLinesColor(color);
+    double  rbgColor[3];
+    QcolorToDouble(color,rbgColor);
+    geometry->changeNavLinesColor(rbgColor);
 }
 
 /// enable/disable 2D
@@ -759,6 +792,11 @@ void ThreadVisualisation::setGeometryVisibility3D(bool status)
 
 void ThreadVisualisation::setOnscreenInformationVisibility(bool show)
 {
+    if(runningTime)
     runningTime->SetVisibility(show);
 }
 
+void ThreadVisualisation::Create2dAgent()
+{
+
+}

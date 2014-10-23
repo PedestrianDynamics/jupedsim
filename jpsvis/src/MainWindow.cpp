@@ -64,6 +64,7 @@
 #include <QTemporaryFile>
 
 
+
 #include <iostream>
 #include <limits>
 #include <string>
@@ -78,7 +79,12 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowTitle("JPSvis");
 
     //disable the maximize Button
-    setWindowFlags( Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint );
+    setWindowFlags( Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
+
+    //used for saving the settings in a persistant way
+    QCoreApplication::setOrganizationName("Forschungszentrum Juelich GmbH");
+    QCoreApplication::setOrganizationDomain("jupedsim.org");
+    QCoreApplication::setApplicationName("jupedsim");
 
     //create the 2 threads and connect them
     dataTransferThread = new ThreadDataTransfer(this);
@@ -138,18 +144,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     labelCurrentAction = new QLabel();
     labelCurrentAction->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    //	currentAction->setLineWidth(5);
-    //	currentAction->setMargin(2);
-    //	currentAction->setMidLineWidth(2);
     labelCurrentAction->setText("   Idle   ");
     statusBar()->addPermanentWidget(labelCurrentAction);
 
     labelFrameNumber = new QLabel();
     labelFrameNumber->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    //	frameNumber->setLineWidth(5);
-    //	frameNumber->setFixedWidth(80);
-    //	frameNumber->setMargin(2);
-    //	frameNumber->setMidLineWidth(2);
     labelFrameNumber->setText("fps:");
     statusBar()->addPermanentWidget(labelFrameNumber);
 
@@ -174,8 +173,8 @@ MainWindow::MainWindow(QWidget *parent) :
     int group=1; // there are max 3 groups of pedestrians
     bool mayPlay=false;
 
-    //    arguments.append("-online");
-    //	arguments.append("-caption");
+    //arguments.append("-online");
+    //arguments.append("-caption");
     arguments.append("-2D");
     // parse arguments list
     if(arguments.size()>1)
@@ -184,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent) :
             QString argument=arguments[argCount];
 
             if(argument.compare("help")==0) {
-                Debug::Error("Usage: ./TraVisTo [file1] [file2] [file3] [-2D] [-caption] [-online [port]]");
+                Debug::Error("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port]]");
             } else if(argument.compare("-2D")==0) {
                 ui.action2_D->setChecked(true);
                 slotToogle2D();
@@ -203,7 +202,7 @@ MainWindow::MainWindow(QWidget *parent) :
                     Debug::Messages(" listening port: %d",port);
 
                     if (ok) {
-                        SystemSettings::setListningPort(port);
+                        SystemSettings::setListeningPort(port);
                     } else { // maybe that wasnt the port
                         argCount--; // to ensure that the "option" will be checked
                     }
@@ -213,7 +212,7 @@ MainWindow::MainWindow(QWidget *parent) :
             } else if(argument.startsWith("-")) {
                 const char* std=argument.toStdString().c_str();
                 Debug::Error(" unknown options: %s",std);
-                Debug::Error("Usage: ./TraVisTo [file1] [file2] [file3] [-2D] [-caption] [-online [port] ]");
+                Debug::Error("Usage: ./TraVisTo [file1] [-2D] [-caption] [-online [port] ]");
 
             } else if(addPedestrianGroup(group,argument)) {
                 //slotHelpAbout();
@@ -223,14 +222,32 @@ MainWindow::MainWindow(QWidget *parent) :
 
         }
 
+    //restore the settings
+    loadAllSettings();
+
     if(mayPlay)slotStartPlaying();
 }
 
 MainWindow::~MainWindow()
 {
-
     extern_shutdown_visual_thread=true;
     extern_recording_enable=false;
+
+    //save all settings for the next session
+     if(ui.actionRemember_Settings->isChecked())
+     {
+          saveAllSettings();
+           qDebug()<<"saving all settings";
+     }
+     else
+     {
+         //first clear everyting
+         QSettings settings;
+         settings.clear();
+         //then remember that we do not want any settings saved
+         settings.setValue("options/rememberSettings", false);
+         qDebug()<<"clearing all settings";
+     }
 
 
     if (visualisationThread->isRunning()) {
@@ -251,12 +268,10 @@ MainWindow::~MainWindow()
     delete labelFrameNumber;
     delete labelRecording;
     delete labelMode;
-
 }
 
 void MainWindow::slotHelpAbout()
 {
-
     QMessageBox::about(
         this,
         "About JPSVis",
@@ -268,28 +283,22 @@ void MainWindow::slotHelpAbout()
         "Authors: Ulrich Kemloh\n\n"
         "For questions, contact +49-40-246161-4193 \nor mail at \n"
         "u.kemloh@fz-juelich.de\n");
-
 }
-
 
 
 /**
  *setup the network port to bind
  *
  */
-
 void MainWindow::slotNetworkSettings()
 {
     bool ok;
-
     int port = QInputDialog::getInt(this, tr("input a port "), tr(
                                         "port(default to 8989):"), 8989, 5000, 65355, 1, &ok);
-
     if (ok) {
-        SystemSettings::setListningPort(port);
+        SystemSettings::setListeningPort(port);
     }
 }
-
 
 void MainWindow::slotStartPlaying()
 {
@@ -402,16 +411,12 @@ void MainWindow::slotStopPlaying()
  */
 bool MainWindow::slotLoadFile()
 {
-
     return slotAddDataSet();
-
 }
-
 
 // This function is only used in online Mode
 FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode)
 {
-
     cout<<"parsing the geo"<<endl;
     if(geoNode.isNull()) return NULL;
 
@@ -552,30 +557,12 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID)
         extern_trajectories_firstSet.setInitialColors(colors);
         break;
     }
-
     return true;
-
 }
-
 
 /// add a new dataset
 bool MainWindow::slotAddDataSet()
 {
-
-//    if (numberOfDatasetLoaded>=3){
-//        QMessageBox::information(this,"notice","You can load at most 3 datasets.\n In"
-//                                 " Order to load other data, please first clear previously loaded data.");
-//        return false;
-//    }
-
-//    // if at least one data set was loaded
-//    if (numberOfDatasetLoaded>=1){
-//        int res = QMessageBox::question(this, "action",
-//                                        "adding a new dataset will reset the visualisation process. Continue?", QMessageBox::Discard
-//                                        | QMessageBox::Yes, QMessageBox::Yes);
-
-//        if (res == QMessageBox::Discard) return false;
-//    }
 
     // just continue
     numberOfDatasetLoaded=1;
@@ -597,13 +584,11 @@ bool MainWindow::slotAddDataSet()
 ///clear all datasets previously entered.
 void MainWindow::slotClearAllDataset()
 {
-
     clearDataSet(1);
     clearDataSet(2);
     clearDataSet(3);
     numberOfDatasetLoaded=0;
 }
-
 
 bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 {
@@ -685,7 +670,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         break;
 
     default:
-        Debug::Error("invalid pedestrian group: %d " ,groupID);
+        Debug::Error("Only one dataset can be loaded at a time");
         //return false;
         break;
     }
@@ -725,7 +710,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     return true;
 }
 
-
 void MainWindow::slotRecord()
 {
 
@@ -747,7 +731,6 @@ void MainWindow::slotRecord()
     //labelCurrentAction->setText("   recording   ");
 
 }
-
 
 QString MainWindow::getTagValueFromElement(QDomNode node,
         const char * tagName)
@@ -880,7 +863,6 @@ void MainWindow::slotRenderingTime(int fps)
     labelFrameNumber->setText(msg);
 }
 
-
 void MainWindow::slotExit()
 {
     cleanUp();
@@ -894,11 +876,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     event->accept();
 }
 
-/**
- * performs the necessary cleaning such as:
- *  closing data
- *  stopping recording
- */
 void MainWindow::cleanUp()
 {
     //stop the recording process
@@ -913,11 +890,8 @@ void MainWindow::cleanUp()
 
 }
 
-
-
 void MainWindow::slotControlSequence(const char * sex)
 {
-
     QString str(sex);
 
     //todo: check wich stack is empty and disable
@@ -983,7 +957,6 @@ void MainWindow::slotControlSequence(const char * sex)
     }
 }
 
-
 void MainWindow::resetGraphicalElements()
 {
 
@@ -1031,7 +1004,6 @@ void MainWindow::resetGraphicalElements()
 
 }
 
-
 void MainWindow::slotToggleFirstPedestrianGroup()
 {
     if(ui.actionFirst_Group->isChecked()) {
@@ -1043,44 +1015,16 @@ void MainWindow::slotToggleFirstPedestrianGroup()
 
 }
 
-/// enable/disable the second pedestrian group
-void MainWindow::slotToggleSecondPedestrianGroup()
-{
-//    if(ui.actionSecond_Group->isChecked()){
-//        extern_second_dataset_visible=true;
-//    }else{
-//        extern_second_dataset_visible=false;
-//    }
-//    extern_force_system_update=true;
-}
-
-/// enable/disable the third pedestrian group
-void MainWindow::slotToggleThirdPedestrianGroup()
-{
-//    if(ui.actionThird_Group->isChecked()){
-//        extern_third_dataset_visible=true;
-//    }else{
-//        extern_third_dataset_visible=false;
-//    }
-//    extern_force_system_update=true;
-}
-
 bool MainWindow::anyDatasetLoaded()
 {
-    return
-        extern_first_dataset_loaded;
+    return extern_first_dataset_loaded;
 }
 
 void MainWindow::slotShowTrajectoryOnly()
 {
-    if(ui.actionShow_Trajectories->isChecked()) {
-        extern_tracking_enable=true;
-    } else {
-        extern_tracking_enable=false;
-    }
+    SystemSettings::setShowTrajectories(ui.actionShow_Trajectories->isChecked());
     extern_force_system_update=true;
 }
-
 
 void MainWindow::slotShowPedestrianOnly()
 {
@@ -1095,7 +1039,6 @@ void MainWindow::slotShowPedestrianOnly()
 
 void MainWindow::slotShowGeometry()
 {
-
     if (ui.actionShow_Geometry->isChecked()) {
         visualisationThread->setGeometryVisibility(true);
         ui.actionShow_Exits->setEnabled(true);
@@ -1119,30 +1062,24 @@ void MainWindow::slotShowGeometry()
 /// shows/hide geometry
 void MainWindow::slotShowHideExits()
 {
-    if (ui.actionShow_Exits->isChecked()) {
-        visualisationThread->showDoors(true);
-    } else {
-        visualisationThread->showDoors(false);
-    }
+    bool status = ui.actionShow_Exits->isChecked();
+    visualisationThread->showDoors(status);
+    SystemSettings::setShowExits(status);
 }
 
 /// shows/hide geometry
 void MainWindow::slotShowHideWalls()
 {
-    if (ui.actionShow_Walls->isChecked()) {
-        visualisationThread->showWalls(true);
-    } else {
-        visualisationThread->showWalls(false);
-    }
+    bool status = ui.actionShow_Walls->isChecked();
+    visualisationThread->showWalls(status);
+    SystemSettings::setShowWalls(status);
 }
 
 void MainWindow::slotShowHideNavLines()
 {
-    if (ui.actionShow_Navigation_Lines->isChecked()) {
-        visualisationThread->showNavLines(true);
-    } else {
-        visualisationThread->showNavLines(false);
-    }
+    bool status = ui.actionShow_Navigation_Lines->isChecked();
+    visualisationThread->showNavLines(status);
+    SystemSettings::setShowNavLines(status);
 }
 
 //todo: add to the system settings
@@ -1157,14 +1094,11 @@ void MainWindow::slotShowHideFloor()
 /// update the playing speed
 void MainWindow::slotUpdateSpeedSlider(int newValue)
 {
-
     QString msg;
     msg.setNum(newValue);
-
     extern_update_step=newValue;
     //Debug::Error( " speed updated to: %d", extern_update_step);
     ui.speedSliderLabel->setText("Speed: " + msg + " ");
-
 }
 
 /// update the position slider
@@ -1201,7 +1135,6 @@ void MainWindow::slotUpdateContrastSlider(int newValue)
     Debug::Error( " contrast updated to: %d",newValue);
 
 }
-
 
 ///clear the corresponding dataset;
 void MainWindow::clearDataSet(int ID)
@@ -1266,7 +1199,6 @@ void MainWindow::waitForDataThread()
     Debug::Messages("Network Engine shutdown successfully.");
 }
 
-
 /// set visualisation mode to 2D
 void MainWindow::slotToogle2D()
 {
@@ -1321,8 +1253,8 @@ void MainWindow::slotToogleShowLegend()
         SystemSettings::setShowLegend(false);
     }
 }
+
 /***
- *
  * @param geodata the geometry data received from the data transfer thread
  */
 void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,float frameRate)
@@ -1411,13 +1343,11 @@ void MainWindow::slotShowPedestrianCaption()
     extern_force_system_update=true;
 }
 
-
 void MainWindow::slotToogleShowAxis()
 {
 
     visualisationThread->setAxisVisible(ui.actionShow_Axis->isChecked());
 }
-
 
 //todo: rename this to slotChangeSettting
 void MainWindow::slotChangePedestrianShape()
@@ -1454,16 +1384,19 @@ void MainWindow::slotChangeBackgroundColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
-    visualisationThread->setBackgroundColor(bkcolor);
+    //double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    visualisationThread->setBackgroundColor(col);
+
+    QSettings settings;
+    settings.setValue("options/bgColor", col);
 
     delete colorDialog;
 
 }
+
 /// change the wall color
 void MainWindow::slotChangeWallsColor()
 {
-
     QColorDialog* colorDialog = new QColorDialog(this);
     colorDialog->setToolTip("Choose a new color for walls");
     QColor col=colorDialog->getColor(Qt::white,this,"Select new wall color");
@@ -1471,9 +1404,10 @@ void MainWindow::slotChangeWallsColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    visualisationThread->setWallsColor(col);
 
-    visualisationThread->setWallsColor(bkcolor);
+    QSettings settings;
+    settings.setValue("options/wallsColor", col);
 
     delete colorDialog;
 
@@ -1489,9 +1423,10 @@ void MainWindow::slotChangeExitsColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  color[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    visualisationThread->setExitsColor(col);
 
-    visualisationThread->setExitsColor(color);
+    QSettings settings;
+    settings.setValue("options/exitsColor", col);
 
     delete colorDialog;
 }
@@ -1506,9 +1441,10 @@ void MainWindow::slotChangeNavLinesColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  color[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    visualisationThread->setNavLinesColor(col);
 
-    visualisationThread->setNavLinesColor(color);
+    QSettings settings;
+    settings.setValue("options/navLinesColor", col);
 
     delete colorDialog;
 }
@@ -1516,15 +1452,16 @@ void MainWindow::slotChangeNavLinesColor()
 void MainWindow::slotChangeFloorColor()
 {
     QColorDialog* colorDialog = new QColorDialog(this);
-    colorDialog->setToolTip("Choose a new color for teh floor");
+    colorDialog->setToolTip("Choose a new color for the floor");
     QColor col=colorDialog->getColor(Qt::white,this,"Select new floor color");
 
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    double  color[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
+    visualisationThread->setFloorColor(col);
 
-    visualisationThread->setFloorColor(color);
+    QSettings settings;
+    settings.setValue("options/floorColor", col);
 
     delete colorDialog;
 }
@@ -1596,11 +1533,186 @@ void MainWindow::slotTakeScreenShot()
 }
 
 /// load settings, parsed from the project file
-void MainWindow::loadSettings()
+void MainWindow::loadAllSettings()
 {
+    qDebug()<<"restoring previous settings";
+    QSettings settings;
 
-    Debug::Error("Not implemented");
+    //visualisation
+    if (settings.contains("vis/offline"))
+    {
+        bool offline = settings.value("vis/offline").toBool();
+        slotSetOnlineMode(!offline);
+        slotSetOfflineMode(offline);
+        if(!offline){
+            int port = SystemSettings::getListeningPort();
+            if (settings.contains("options/listeningPort"))
+            {
+                port = settings.value("options/listeningPort").toInt();
+                SystemSettings::setListeningPort(port);
+            }
+            qDebug()<<"online listening on port: "<<port;
+        }
+        else
+        {
+            qDebug()<<"offline: "<<offline;
+        }
+    }
 
+    //view
+    if (settings.contains("view/2d"))
+    {
+        bool checked = settings.value("view/2d").toBool();
+        ui.action2_D->setChecked(checked);
+        ui.action3_D->setChecked(!checked);
+        SystemSettings::set2D(checked);
+        qDebug()<<"2D: "<<checked;
+    }
+    if (settings.contains("view/showAgents"))
+    {
+        bool checked = settings.value("view/showAgents").toBool();
+        ui.actionShow_Agents->setChecked(checked);
+        SystemSettings::setShowAgents(checked);
+        qDebug()<<"show Agents: "<<checked;
+    }
+    if (settings.contains("view/showCaptions"))
+    {
+        bool checked = settings.value("view/showCaptions").toBool();
+        ui.actionShow_Captions->setChecked(checked);
+        SystemSettings::setShowAgentsCaptions(checked);
+        qDebug()<<"show Captions: "<<checked;
+    }
+    if (settings.contains("view/showTrajectories"))
+    {
+        bool checked = settings.value("view/showTrajectories").toBool();
+        ui.actionShow_Trajectories->setChecked(checked);
+        SystemSettings::setShowTrajectories(checked);
+        qDebug()<<"show Trajectories: "<<checked;
+    }
+    if (settings.contains("view/showGeometry"))
+    {
+        bool checked = settings.value("view/showGeometry").toBool();
+        ui.actionShow_Geometry->setChecked(checked);
+        slotShowGeometry();//will take care of the others things like enabling options
+        qDebug()<<"show Geometry: "<<checked;
+    }
+    if (settings.contains("view/showFloor"))
+    {
+        bool checked = settings.value("view/showFloor").toBool();
+        ui.actionShow_Floor->setChecked(checked);
+        slotShowHideFloor();
+        qDebug()<<"show Floor: "<<checked;
+    }
+    if (settings.contains("view/showExits"))
+    {
+        bool checked = settings.value("view/showExits").toBool();
+        ui.actionShow_Exits->setChecked(checked);
+        slotShowHideExits();
+        qDebug()<<"show Exits: "<<checked;
+    }
+    if (settings.contains("view/showWalls"))
+    {
+        bool checked = settings.value("view/showWalls").toBool();
+        ui.actionShow_Walls->setChecked(checked);
+        slotShowHideWalls();
+        qDebug()<<"show Walls: "<<checked;
+    }
+    if (settings.contains("view/showGeoCaptions"))
+    {
+        bool checked = settings.value("view/showGeoCaptions").toBool();
+        ui.actionShow_Geometry_Captions->setChecked(checked);
+        slotShowHideGeometryCaptions();
+        qDebug()<<"show geometry Captions: "<<checked;
+    }
+    if (settings.contains("view/showNavLines"))
+    {
+        bool checked = settings.value("view/showNavLines").toBool();
+        ui.actionShow_Navigation_Lines->setChecked(checked);
+        slotShowHideNavLines();
+        qDebug()<<"show Navlines: "<<checked;
+    }
+    if (settings.contains("view/showOnScreensInfos"))
+    {
+        bool checked = settings.value("view/showOnScreensInfos").toBool();
+        ui.actionShow_Onscreen_Infos->setChecked(checked);
+        slotShowOnScreenInfos();
+        qDebug()<<"show OnScreensInfos: "<<checked;
+    }
+
+    //options
+    if (settings.contains("options/rememberSettings"))
+    {
+        bool checked = settings.value("options/rememberSettings").toBool();
+        ui.actionRemember_Settings->setChecked(checked);
+        qDebug()<<"remember settings: "<<checked;
+    }
+
+    if (settings.contains("options/bgColor"))
+    {
+        QColor color = settings.value("options/bgColor").value<QColor>();
+        SystemSettings::setBackgroundColor(color);
+        qDebug()<<"background color: "<<color;
+    }
+
+    if (settings.contains("options/exitsColor"))
+    {
+        QColor color = settings.value("options/bgColor").value<QColor>();
+        SystemSettings::setExitsColor(color);
+        qDebug()<<"Exits color: "<<color;
+    }
+
+    if (settings.contains("options/floorColor"))
+    {
+        QColor color = settings.value("options/floorColor").value<QColor>();
+        SystemSettings::setFloorColor(color);
+        qDebug()<<"Floor color: "<<color;
+    }
+
+    if (settings.contains("options/wallsColor"))
+    {
+        QColor color = settings.value("options/wallsColor").value<QColor>();
+        SystemSettings::setWallsColor(color);
+        qDebug()<<"Walls color: "<<color;
+    }
+
+    if (settings.contains("options/navLinesColor"))
+    {
+        QColor color = settings.value("options/navLinesColor").value<QColor>();
+        SystemSettings::setWallsColor(color);
+        qDebug()<<"Navlines color: "<<color;
+    }
+
+    extern_force_system_update=true;
+}
+
+void MainWindow::saveAllSettings()
+{
+    //visualiation
+    QSettings settings;
+    settings.setValue("vis/offline", ui.actionOffline->isChecked());
+
+    //view
+    settings.setValue("view/2d", ui.action2_D->isChecked());
+    settings.setValue("view/showAgents", ui.actionShow_Agents->isChecked());
+    settings.setValue("view/showCaptions", ui.actionShow_Captions->isChecked());
+    settings.setValue("view/showTrajectories", ui.actionShow_Trajectories->isChecked());
+    settings.setValue("view/showGeometry", ui.actionShow_Geometry->isChecked());
+    settings.setValue("view/showFloor", ui.actionShow_Floor->isChecked());
+    settings.setValue("view/showWalls", ui.actionShow_Walls->isChecked());
+    settings.setValue("view/showExits", ui.actionShow_Exits->isChecked());
+    settings.setValue("view/showGeoCaptions", ui.actionShow_Geometry_Captions->isChecked());
+    settings.setValue("view/showNavLines", ui.actionShow_Navigation_Lines->isChecked());
+    settings.setValue("view/showOnScreensInfos", ui.actionShow_Onscreen_Infos->isChecked());
+
+    //options: the color settings are saved in the methods where they are used.
+    settings.setValue("options/listeningPort", SystemSettings::getListeningPort());
+    settings.setValue("options/rememberSettings", ui.actionRemember_Settings->isChecked());
+
+    //settings.setValue("options/bgColor", ui.actionBackground_Color->isChecked());
+    // NOT USED: settings.setValue("options/captionColor", ui.action3_D->isChecked());
+    //settings.setValue("options/floorColor", ui.action3_D->isChecked());
+    //settings.setValue("options/wallsColor", ui.action3_D->isChecked());
+    //settings.setValue("options/navLinesColor", ui.action3_D->isChecked());
 }
 
 /// start/stop the recording process als png images sequences
@@ -1678,9 +1790,9 @@ void MainWindow::slotShowOnScreenInfos()
 /// show/hide the geometry captions
 void MainWindow::slotShowHideGeometryCaptions()
 {
-
     bool value=ui.actionShow_Geometry_Captions->isChecked();
     visualisationThread->setGeometryLabelsVisibility(value);
+    SystemSettings::setShowGeometryCaptions(value);
     //SystemSettings::setShowCaptions(value);
     //SystemSettings::setOnScreenInfos(value);
 }

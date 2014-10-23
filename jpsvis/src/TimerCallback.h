@@ -77,11 +77,8 @@ extern bool extern_recording_enable;
 extern bool extern_launch_recording;
 extern bool extern_fullscreen_enable;
 extern bool extern_take_screenshot;
-extern bool extern_tracking_enable;
 
 extern Pedestrian** extern_pedestrians_firstSet;
-extern Pedestrian** extern_pedestrians_secondSet;
-extern Pedestrian** extern_pedestrians_thirdSet;
 
 extern vtkActor2D* extern_pedestrians_labels;
 extern vtkTensorGlyph* extern_glyphs_pedestrians;
@@ -91,18 +88,12 @@ extern vtkActor* extern_glyphs_pedestrians_actor_3D;
 extern PointPlotter* extern_trail_plotter;
 
 extern SyncData extern_trajectories_firstSet;
-extern SyncData extern_trajectories_secondSet;
-extern SyncData extern_trajectories_thirdSet;
 
 //states if the datasets are loaded.
 extern bool extern_first_dataset_loaded;
-extern bool extern_second_dataset_loaded;
-extern bool extern_third_dataset_loaded;
 
 //states whether the loaded datasets are visible
 extern bool extern_first_dataset_visible;
-extern bool extern_second_dataset_visible;
-extern bool extern_third_dataset_visible;
 
 
 

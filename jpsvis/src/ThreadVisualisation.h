@@ -63,8 +63,6 @@ class TrailPlotter;
 class PointPlotter;
 
 extern Pedestrian** extern_pedestrians_firstSet;
-extern Pedestrian** extern_pedestrians_secondSet;
-extern Pedestrian** extern_pedestrians_thirdSet;
 
 extern PointPlotter* extern_trail_plotter;
 
@@ -74,8 +72,6 @@ extern  vtkActor* extern_glyphs_pedestrians_actor_2D;
 extern  vtkActor* extern_glyphs_pedestrians_actor_3D;
 
 extern SyncData extern_trajectories_firstSet;
-extern SyncData extern_trajectories_secondSet;
-extern SyncData extern_trajectories_thirdSet;
 
 class ThreadVisualisation :public QThread {
     Q_OBJECT
@@ -116,19 +112,19 @@ public:
     void setGeometryVisibility3D(bool status);
 
     /// change the background color of the rendering windows
-    void setBackgroundColor(double* color);
+    void setBackgroundColor(const QColor &col);
 
     /// change the walls color
-    void setWallsColor(double* color);
+    void setWallsColor(const QColor &color);
 
     /// change the floor color
-    void setFloorColor(double* color);
+    void setFloorColor(const QColor &color);
 
     /// change the exits color.
-    void setExitsColor(double* color);
+    void setExitsColor(const QColor &color);
 
     /// change the exits color.
-    void setNavLinesColor(double* color);
+    void setNavLinesColor(const QColor &color);
 
     /// show / hide the walls
     void showWalls(bool status);
@@ -176,12 +172,9 @@ private:
     //finalize the datasets
     void finalize();
 
-    /// compute the relative delays to the datasets
-    void computeDelays();
+    void QcolorToDouble(const QColor& col, double* rgb);
 
-    /// window change events
-    //static void WindowModifiedCallback(vtkObject* caller, long unsigned int  eventId, void* clientData, void* callData );
-
+    void Create2dAgent();
 
 private:
     FacilityGeometry* geometry;

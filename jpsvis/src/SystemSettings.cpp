@@ -47,9 +47,21 @@ bool SystemSettings::showAgentsCaptions=false;
 bool SystemSettings::is2D=false;
 bool SystemSettings::showAgents=true;
 bool SystemSettings::showGeometry=true;
+bool SystemSettings::showGeometryCaptions=true;
 bool SystemSettings::showFloor=true;
+bool SystemSettings::showWalls=true;
+bool SystemSettings::showExits=true;
+bool SystemSettings::showNavLines=true;
+bool SystemSettings::showTrajectories=false;
+
 unsigned short SystemSettings::port=8989;
-double SystemSettings::bgColor[]= {1.0,1.0,1.0};
+//double SystemSettings::bgColor[]= {1.0,1.0,1.0};
+QColor SystemSettings::bgColor = QColor(Qt::white);
+QColor SystemSettings::floorColor = QColor(0,0,255);
+QColor SystemSettings::wallsColor = QColor(180,180,180);//180.0/255,180.0/255.0,180.0/255.0
+QColor SystemSettings::exitsColor = QColor(175,175,255); //175.0/255,175.0/255.0,255.0/255.0
+QColor SystemSettings::navLinesColor = QColor(Qt::white);
+
 int SystemSettings::pedestriansColor[3][3]= {{255 , 17, 224},{122, 255, 122},{130, 130, 130}};
 int SystemSettings::pedesShape=Settings::PINGUINS;
 int SystemSettings::ellipseResolution=10;
@@ -82,7 +94,6 @@ SystemSettings::~SystemSettings() {}
 void  SystemSettings::setShowLegend(bool legend)
 {
     showLegend=legend;
-
 }
 
 bool  SystemSettings::getShowLegend()
@@ -91,23 +102,23 @@ bool  SystemSettings::getShowLegend()
 }
 
 
-void SystemSettings::setListningPort(unsigned short porta)
+void SystemSettings::setListeningPort(unsigned short porta)
 {
     port=porta;
 }
 
-unsigned short   SystemSettings::getListeningPort()
+unsigned short SystemSettings::getListeningPort()
 {
     return port;
 }
 
 
-void  SystemSettings::setShowAgentsCaptions(bool caption)
+void SystemSettings::setShowAgentsCaptions(bool caption)
 {
     showAgentsCaptions=caption;
 }
 
-bool  SystemSettings::getShowAgentsCaptions()
+bool SystemSettings::getShowAgentsCaptions()
 {
     return showAgentsCaptions;
 }
@@ -142,6 +153,16 @@ bool SystemSettings::getShowGeometry()
     return showGeometry;
 }
 
+void SystemSettings::setShowGeometryCaptions(bool status)
+{
+    showGeometryCaptions=status;
+}
+
+bool SystemSettings::getShowGeometryCaptions()
+{
+    return showGeometryCaptions;
+}
+
 void SystemSettings::setShowFloor(bool status)
 {
     showFloor=status;
@@ -152,31 +173,105 @@ bool SystemSettings::getShowFloor()
     return showFloor;
 }
 
-void   SystemSettings::setWorkingDirectory(QString dir)
+void SystemSettings::setShowExits(bool status)
+{
+    showExits=status;
+}
+
+bool SystemSettings::getShowExits()
+{
+    return showExits;
+}
+
+void SystemSettings::setShowWalls(bool status)
+{
+    showWalls=status;
+}
+
+bool SystemSettings::getShowWalls()
+{
+    return showWalls;
+}
+
+void SystemSettings::setShowNavLines(bool status)
+{
+    showNavLines=status;
+}
+
+bool SystemSettings::getShowNavLines()
+{
+    return showNavLines;
+}
+
+void SystemSettings::setShowTrajectories(bool status)
+{
+    showTrajectories=status;
+}
+
+bool SystemSettings::getShowTrajectories()
+{
+    return showTrajectories;
+}
+
+void SystemSettings::setWorkingDirectory(const QString& dir)
 {
     workingDir=dir;
 }
 
-void   SystemSettings::getWorkingDirectory(QString& dir)
+void SystemSettings::getWorkingDirectory(QString& dir)
 {
     dir=workingDir;
 }
 
-void  SystemSettings::getBackgroundColor(double* col)
+const QColor& SystemSettings::getBackgroundColor()
 {
-    col[0]=bgColor[0];
-    col[1]=bgColor[1];
-    col[2]=bgColor[2];
+    return bgColor;
 }
 
-void  SystemSettings::setBackgroundColor(double* col)
+void SystemSettings::setBackgroundColor(const QColor& col)
 {
-    bgColor[0]=col[0];
-    bgColor[1]=col[1];
-    bgColor[2]=col[2];
+    bgColor=col;
 }
 
+const QColor& SystemSettings::getFloorColor()
+{
+    return floorColor;
+}
 
+void SystemSettings::setFloorColor(const QColor &col)
+{
+    floorColor=col;
+}
+
+const QColor& SystemSettings::getWallsColor()
+{
+    return wallsColor;
+}
+
+void SystemSettings::setWallsColor(const QColor &col)
+{
+    wallsColor=col;
+}
+
+const QColor& SystemSettings::getExitsColor()
+{
+    return exitsColor;
+}
+
+void SystemSettings::setExitsColor(const QColor &col)
+{
+    exitsColor=col;
+}
+
+const QColor& SystemSettings::getNavLinesColor()
+{
+    return navLinesColor;
+}
+
+void SystemSettings::setNavLinesColor(const QColor &col)
+{
+    navLinesColor=col;
+}
 
 /// set/get pedestrian private sphere ellipse resolution
 int SystemSettings::getEllipseResolution()
@@ -189,18 +284,18 @@ void SystemSettings::setEllipseResolution(int resolution)
     ellipseResolution=resolution;
 }
 
-
-
 /// set/get the pedestrian shape
 /// 0 for default, 1 for Ellipse, 2 for pinguins
 void SystemSettings::setPedestrianShape(int shape)
 {
     pedesShape=shape;
 }
+
 int SystemSettings::getPedestrianShape()
 {
     return pedesShape;
 }
+
 void  SystemSettings::setTrailsInfo(int count, int type, int geo)
 {
     trailCount=count;
@@ -214,6 +309,7 @@ void  SystemSettings::getTrailsInfo(int* count, int *type, int* geo)
     *type=trailingType;
     *geo=trailingGeometry;
 }
+
 void  SystemSettings::setPedestrianColor(int groupID, int color[3])
 {
     if((groupID<0) || (groupID>3)) {
@@ -249,7 +345,6 @@ void  SystemSettings::getOutputDirectory(QString& dir)
     dir=QString(outputDir);
 }
 
-
 int SystemSettings::getPedestrianCaptionSize()
 {
     return captionSize;
@@ -259,6 +354,7 @@ void SystemSettings::setRecordPNGsequence(bool status)
 {
     recordPNGsequence=status;
 }
+
 bool SystemSettings::getRecordPNGsequence()
 {
     return recordPNGsequence;
@@ -322,7 +418,7 @@ int  SystemSettings::getVirtualAgent()
 }
 
 void SystemSettings::setCaptionsParameters(int size, const QColor& col, int orientation,
-        bool automaticRotation)
+                                           bool automaticRotation)
 {
     captionSize=size;
     captionColor=col;
@@ -332,7 +428,7 @@ void SystemSettings::setCaptionsParameters(int size, const QColor& col, int orie
 }
 
 void SystemSettings::getCaptionsParameters(int &size, QColor& col, int &orientation,
-        bool &automaticRotation)
+                                           bool &automaticRotation)
 {
     size=captionSize;
     col=captionColor;
@@ -349,4 +445,3 @@ bool SystemSettings::getOnScreenInfos()
 {
     return onScreenInfos;
 }
-

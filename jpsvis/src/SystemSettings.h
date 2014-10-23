@@ -52,7 +52,7 @@ public:
     bool static getShowAgentsCaptions();
 
     // set/get the listening port
-    void static setListningPort(unsigned short port);
+    void static setListeningPort(unsigned short port);
     unsigned short static getListeningPort();
 
     // set/get the  2D visio
@@ -67,17 +67,49 @@ public:
     void static setShowGeometry(bool status);
     bool static getShowGeometry();
 
-    // set/get the  geometry visibility
+    // set/get the  geometry captions visibility
+    void static setShowGeometryCaptions(bool status);
+    bool static getShowGeometryCaptions();
+
+    // set/get the  floor visibility
     void static setShowFloor(bool status);
     bool static getShowFloor();
 
-    void static setWorkingDirectory(QString dir);
+    // set/get the  doors visibility
+    void static setShowExits(bool status);
+    bool static getShowExits();
+
+    // set/get the  walls visibility
+    void static setShowWalls(bool status);
+    bool static getShowWalls();
+
+    // set/get the  navigation lines visibility
+    void static setShowNavLines(bool status);
+    bool static getShowNavLines();
+
+    // set/get the  trajectories visibility
+    void static setShowTrajectories(bool status);
+    bool static getShowTrajectories();
+
+    void static setWorkingDirectory(const QString &dir);
     void static getWorkingDirectory(QString& dir);
 
-    // set/get the bk color
+    // set/get the gk color
     // todo done directly in the travisto.cpp
-    void static getBackgroundColor(double* col);
-    void static setBackgroundColor(double* col);
+    static const QColor& getBackgroundColor();
+    void static setBackgroundColor(const QColor &col);
+
+    static const QColor& getFloorColor();
+    void static setFloorColor(const QColor &col);
+
+    static const QColor& getWallsColor();
+    void static setWallsColor(const QColor &col);
+
+    static const QColor& getExitsColor();
+    void static setExitsColor(const QColor &col);
+
+    static const QColor& getNavLinesColor();
+    void static setNavLinesColor(const QColor &col);
 
     /// set/get pedestrian private sphere ellipse resolution
     int static getEllipseResolution();
@@ -166,9 +198,18 @@ private:
     static bool is2D; //   Toggle 2D/3D mode
     static bool showAgents;
     static bool showGeometry;
+    static bool showGeometryCaptions;
     static bool showFloor;
+    static bool showWalls;
+    static bool showExits;
+    static bool showNavLines;
+    static bool showTrajectories;
     static unsigned short port;
-    static double bgColor[3];
+    static QColor bgColor;
+    static QColor floorColor;
+    static QColor wallsColor;
+    static QColor exitsColor;
+    static QColor navLinesColor;
     static int ellipseResolution;
     static int pedestriansColor[3][3]; // 3 groups, and 3 color per groups
     static int pedesShape;

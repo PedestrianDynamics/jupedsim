@@ -186,7 +186,7 @@ win32_6.1 {
 	
 #Dynamic linking
 #Windows  VTK 5.10
-win32_dyn {
+win32 {
         INCLUDEPATH += C:/VTK/VTK5.1/include
         LIBS += -LC:/VTK/VTK5.1/bin_shared \
             -lvtksys \
@@ -217,9 +217,9 @@ win32_dyn {
             -lwsock32\
 }
 
-#Static compilation
+#Static linking
 #VTK 5.10 Windows
-win32 {
+win32_static {
     INCLUDEPATH += C:/VTK/VTK5.1/static_2/include/vtk-5.10
     LIBS += -LC:\VTK\VTK5.1\static_2\lib\vtk-5.10 \
     C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkCharts.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkViews.a \
@@ -245,28 +245,6 @@ win32 {
     -luuid -lcomdlg32 -ladvapi32\
 }
 
-#Static compilation 
-#VTK 5.10 Windows
-win32_old {
-    INCLUDEPATH += C:/VTK/VTK5.1/include
-    #LIBS += -LC:/VTK/VTK5.1/bin_static \
-    LIBS += -LC:\VTK\VTK5.1\static_2\lib\vtk-5.10 \
-         -lvtkCharts  -lvtkViews  -lvtkInfovis\
-         -lvtkWidgets  -lvtkHybrid\
-         -lvtkVolumeRendering  -lvtkParallel\
-         -lvtkRendering  -lvtkGraphics\
-         -lvtkverdict  -lvtkImaging  -lvtkIO\
-         -lvtkFiltering  -lvtkDICOMParser\
-         -lvtkNetCDF_cxx  -lvtkmetaio  -lvtksqlite\
-         -lvtkpng  -lvtktiff  -lvtkjpeg\
-         -lvtkexpat  -lVPIC  -lCosmo  -lvtkCommon\
-         -lLSDyna  -lvtksys  -lvtkexoIIc\
-         -lvtkNetCDF  -lvtkhdf5_hl  -lvtkhdf5\
-         -lvtklibxml2  -lvtkzlib  -lvtkalglib\
-         -lvtkftgl  -lvtkfreetype \
-         -lvfw32 -lwsock32\
- }
- 
 unix_6 {
     INCLUDEPATH += /usr/local/include/vtk-6.0
     LIBS += -L/usr/local/lib/ \
@@ -390,26 +368,6 @@ unix_6 {
 unix_dyn {
 INCLUDEPATH += /usr/include/vtk-5.8
 LIBS += -L/usr/lib \
-#INCLUDEPATH +=/usr/local/include/vtk-5.10
-#LIBS += -L/usr/local/lib/vtk-5.10 \
-#    -lvtkCommon \
-#    -lvtkDICOMParser \
-#    -lvtkFiltering \
-#    -lvtkGenericFiltering \
-#    -lvtkGraphics \
-#    -lvtkHybrid \
-#    -lvtkIO \
-#    -lvtkImaging \
-#    -lvtkRendering \
-#    -lvtkVolumeRendering \
-#    -lvtkWidgets \
-#    -lvtkexoIIc \
-#    -lvtkftgl \
-#    -lvtksys \
-#    -lvtkverdict \
-#    -lvtkParallel \
-#    -lvtkmetaio \
-#
 -lvtkRendering  \
 -lvtkCommon   \
 -lvtkHybrid   \

@@ -1,18 +1,18 @@
 /**
 * @file main.h
 * @author   Ulrich Kemloh <kemlohulrich@gmail.com>
-* @version 0.1
+* @version 0.5
 * Copyright (C) <2009-2010>
 *
 * @section LICENSE
 * This file is part of OpenPedSim.
 *
-* OpenPedSim is free software: you can redistribute it and/or modify
+* JuPedSim is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
 * the Free Software Foundation, either version 3 of the License, or
 * any later version.
 *
-* OpenPedSim is distributed in the hope that it will be useful,
+* JuPedSim is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 * GNU General Public License for more details.
@@ -35,7 +35,8 @@
 *
 * \date 7.6.2010
 *
-* JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
+* JuPedSim stands for Jülich Pedestrians Simulator and is currently
+* developed at the Forschungszentrum Jülich in Germany.
 *
 * @image html travisto.png " "
 *

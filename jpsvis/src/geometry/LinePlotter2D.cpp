@@ -45,6 +45,7 @@
 #include <vtkAssembly.h>
 #include <vtkSmartPointer.h>
 
+#include <QColor>
 
 #define VTK_CREATE(type, name) \
 		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
@@ -248,8 +249,8 @@ vtkAssembly* LinePlotter2D::createAssembly()
         //if default, then hide all doors
         // fixme: not working
         if(doorColorsToDefault) {
-            double col[3]= {1.0,1.0,1.0};
-            SystemSettings::getBackgroundColor(col);
+            const QColor& bgcolor = SystemSettings::getBackgroundColor();
+            double  col[3]= {(double)bgcolor.red()/255.0 ,(double)bgcolor.green()/255.0 ,(double)bgcolor.blue()/255.0};
             door_actor->GetProperty()->SetColor(col);
             door_actor->Modified();
         }

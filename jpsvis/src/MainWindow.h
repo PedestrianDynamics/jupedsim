@@ -36,6 +36,7 @@
 
 #include "ui_mainwindow.h"
 #include <QMainWindow>
+#include <QSettings>
 
 #include <vector>
 
@@ -61,22 +62,14 @@ extern bool extern_shutdown_visual_thread;
 extern bool extern_fullscreen_enable;
 
 extern bool extern_pedestrians_firstSet_visible;
-extern bool extern_pedestrians_secondSet_visible;
-extern bool extern_pedestrians_thirdSet_visible;
 
 extern SyncData extern_trajectories_firstSet;
-extern SyncData extern_trajectories_secondSet;
-extern SyncData extern_trajectories_thirdSet;
 
 //states if the datasets are loaded.
 extern bool extern_first_dataset_loaded;
-extern bool extern_second_dataset_loaded;
-extern bool extern_third_dataset_loaded;
 
 //states whether the loaded datasets are visible
 extern bool extern_first_dataset_visible;
-extern bool extern_second_dataset_visible;
-extern bool extern_third_dataset_visible;
 
 
 class MainWindow : public QMainWindow {
@@ -97,7 +90,6 @@ public Q_SLOTS:
 
     /// load a file
     bool slotLoadFile();
-    //void slotLoadProject();
 
     /// output an Error
     void slotErrorOutput(QString err);
@@ -158,10 +150,7 @@ public Q_SLOTS:
 
     /// enable/disable the first pedestrian group
     void slotToggleFirstPedestrianGroup();
-    /// enable/disable the second pedestrian group
-    void slotToggleSecondPedestrianGroup();
-    /// enable/disable the third pedestrian group
-    void slotToggleThirdPedestrianGroup();
+
 
     /// show/hides trajectories (leaving a trail) only
     void slotShowTrajectoryOnly();
@@ -189,7 +178,6 @@ public Q_SLOTS:
     void slotUpdateFrameSlider(int newValue);
     void slotFrameSliderPressed();
     void slotFrameSliderReleased();
-    //void slotFrameSliderChanged();
 
     /// handle the frame by frame navigation
     void slotFramesByFramesNavigation();
@@ -199,8 +187,6 @@ public Q_SLOTS:
     /// enable/disable the pedestrian captions
     void slotShowPedestrianCaption();
 
-    /// set the bg color
-    //void slotPickBackgroundColor();
 
     /// update the contrast
     void slotUpdateContrastSlider(int newValue);
@@ -261,9 +247,11 @@ protected:
 
 private:
 
-    /// load settings, parsed from the project file
-    /// @todo not implemented
-    void  loadSettings();
+    /// load settings in the case the remember settings is checked.
+    void loadAllSettings();
+
+    /// save all system settings
+    void saveAllSettings();
 
     /// performs the necessary cleaning before shutting down the program.
     void cleanUp();
@@ -295,7 +283,6 @@ private:
     ///  groupID may be 2 or 3
     /// @return false if something went wrong.
 
-    bool addPedestrianGroup_old(int groupID, QString fileName="");
     bool addPedestrianGroup(int groupID, QString fileName="");
 
     ///return true if at least one dataset was loaded
