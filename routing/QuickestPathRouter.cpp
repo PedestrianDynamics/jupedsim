@@ -68,9 +68,9 @@ string QuickestPathRouter::GetRoutingInfoFile() const
      }
 
      if (nav_line_file == "")
-               return nav_line_file;
-          else
-               return _building->GetProjectRootDir()+nav_line_file;
+          return nav_line_file;
+     else
+          return _building->GetProjectRootDir()+nav_line_file;
 }
 
 int QuickestPathRouter::FindExit(Pedestrian* ped)
@@ -115,7 +115,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
      } else {
 
           SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
-                              ped->GetSubRoomID());
+                    ped->GetSubRoomID());
 
           const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
           for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
@@ -139,7 +139,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                } else {
                     //check that the next destination is in the actual room of the pedestrian
                     if (_accessPoints[nextDestination]->isInRange(
-                                   sub->GetUID())==false) {
+                              sub->GetUID())==false) {
                          //return the last destination if defined
                          int previousDestination = ped->GetNextDestination();
 
@@ -156,7 +156,7 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                     } else { // we have reached the new room
                          ped->SetExitIndex(nextDestination);
                          ped->SetExitLine(
-                              _accessPoints[nextDestination]->GetNavLine());
+                                   _accessPoints[nextDestination]->GetNavLine());
                          //ped->SetSmoothTurning(true);
                          return nextDestination;
                     }
@@ -427,7 +427,7 @@ int QuickestPathRouter::GetCommonDestinationCount(AccessPoint* ap1, AccessPoint*
 
 
 void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
-                                        double radius, vector<Pedestrian*>& queue,int subroomToConsider)
+          double radius, vector<Pedestrian*>& queue,int subroomToConsider)
 {
 
      SubRoom* sbr1 = hline->GetSubRoom1();
@@ -435,7 +435,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
      //tentative upgrade to Crossing for getting the second subroom
      SubRoom* sbr2 = NULL;
      if(Crossing* cros=dynamic_cast<Crossing*>(hline)){
-         sbr2=cros->GetSubRoom2();
+          sbr2=cros->GetSubRoom2();
      }
      //int exitID=crossing->GetID();
      int exitID=hline->GetUniqueID();
@@ -449,7 +449,10 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
 
      if (sbr1 && (sbr1->GetSubRoomID()==subroomToConsider)) {
           //double closestDistance=FLT_MAX;
-          const vector<Pedestrian*>& peds = sbr1->GetAllPedestrians();
+
+          vector<Pedestrian*> peds;
+          _building->GetPedestrians(sbr1->GetRoomID(),sbr1->GetSubRoomID(),peds);
+
           for (unsigned int p=0; p<peds.size(); p++) {
                Pedestrian* ped = peds[p];
                if(ped->GetExitIndex()==exitID) {
@@ -466,7 +469,8 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
 
      if (sbr2 && (sbr2->GetSubRoomID()==subroomToConsider)) {
           //double closestDistance=FLT_MAX;
-          const vector<Pedestrian*>& peds = sbr2->GetAllPedestrians();
+          vector<Pedestrian*> peds;
+          _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
           for (unsigned int p=0; p<peds.size(); p++) {
                Pedestrian* ped = peds[p];
                if(ped->GetExitIndex()==exitID) {
@@ -520,7 +524,7 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
      //tentative upgrade to Crossing for getting the second subroom
      SubRoom* sbr2 = NULL;
      if(Crossing* cros=dynamic_cast<Crossing*>(hline)){
-         sbr2=cros->GetSubRoom2();
+          sbr2=cros->GetSubRoom2();
      }
 
      Line visibilityLine = Line(p1,p2);
@@ -534,7 +538,10 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
      }
 
      if (sbr1) {
-          const vector<Pedestrian*>& peds = sbr1->GetAllPedestrians();
+
+          vector<Pedestrian*> peds;
+          _building->GetPedestrians(sbr1->GetRoomID(),sbr1->GetSubRoomID(),peds);
+
           for (unsigned int p=0; p<peds.size(); p++) {
                Pedestrian* ped = peds[p];
 
@@ -553,7 +560,9 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
      }
 
      if (sbr2) {
-          const vector<Pedestrian*>& peds = sbr2->GetAllPedestrians();
+          vector<Pedestrian*> peds;
+          _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
+
           for (unsigned int p=0; p<peds.size(); p++) {
                Pedestrian* ped = peds[p];
 
@@ -580,9 +589,12 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 {
      //define as the ratio of people in front of me and behind me
 
-     Room* room=_building->GetRoom(ped->GetRoomID());
-     SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
-     const vector<Pedestrian*>& allPeds=sub->GetAllPedestrians();
+     //Room* room=_building->GetRoom(ped->GetRoomID());
+     //SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
+     //const vector<Pedestrian*>& allPeds=sub->GetAllPedestrians();
+
+     vector<Pedestrian*> allPeds;
+     _building->GetPedestrians(ped->GetRoomID(),ped->GetSubRoomID(),allPeds);
 
      //in the case there are only few people in the room
      //revise this condition
@@ -670,8 +682,8 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      }
 
      if((myref==NULL) && (flag==REF_PED_FOUND)) {
-         Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
-         Log->Write(" reference pedestrians is NULL");
+          Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
+          Log->Write(" reference pedestrians is NULL");
           exit(EXIT_FAILURE);
      }
 
@@ -765,7 +777,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
      // get the opened exits
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
-                         ped->GetSubRoomID());
+               ped->GetSubRoomID());
 
 
      // get the relevant opened exits
@@ -795,7 +807,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           const Point& posA = ped->GetPos();
           const Point& posB = ap->GetNavLine()->GetCentre();
           const Point& posC = (posB - posA).Normalized()
-                              * ((posA - posB).Norm() - J_EPS) + posA;
+                                        * ((posA - posB).Norm() - J_EPS) + posA;
 
 
           //check if visible
@@ -813,25 +825,25 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //        normFactor += doorProb[ap->GetID()];
 
 
-//          if (dist < minDistGlobal) {
-//               bestAPsID = ap->GetID();
-//               minDistGlobal = dist;
-//          }
+          //          if (dist < minDistGlobal) {
+          //               bestAPsID = ap->GetID();
+          //               minDistGlobal = dist;
+          //          }
 
           // normalize the probs
-      //    double randomVar = _rdDistribution(_rdGenerator);
-      //
-      //    for (auto it = doorProb.begin(); it!=doorProb.end(); ++it){
-      //        it->second =  it->second / normFactor;
-      //    }
-      //
-      //    double cumProb= doorProb.begin()->second;
-      //    auto it = doorProb.begin();
-      //    while(cumProb<randomVar) {
-      //        it++;
-      //        cumProb+=it->second;
-      //    }
-      //    bestAPsID=it->first;
+          //    double randomVar = _rdDistribution(_rdGenerator);
+          //
+          //    for (auto it = doorProb.begin(); it!=doorProb.end(); ++it){
+          //        it->second =  it->second / normFactor;
+          //    }
+          //
+          //    double cumProb= doorProb.begin()->second;
+          //    auto it = doorProb.begin();
+          //    while(cumProb<randomVar) {
+          //        it++;
+          //        cumProb+=it->second;
+          //    }
+          //    bestAPsID=it->first;
 
           //very useful for short term decisions
           // if two doors are feasible to the final destination without much differences
@@ -839,23 +851,23 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //cout<<"CBA (---): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
           if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
           {
-              if (dist2 < minDistLocal) {
-              //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-                  bestAPsID = ap->GetID();
-                  minDistGlobal = dist;
-                  minDistLocal= dist2;
-              } else
-              {
-                   //cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-              }
+               if (dist2 < minDistLocal) {
+                    //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+                    bestAPsID = ap->GetID();
+                    minDistGlobal = dist;
+                    minDistLocal= dist2;
+               } else
+               {
+                    //cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
+               }
 
           } else {
 
-              if (dist < minDistGlobal) {
-                  bestAPsID = ap->GetID();
-                  minDistGlobal = dist;
-                  minDistLocal=dist2;
-              }
+               if (dist < minDistGlobal) {
+                    bestAPsID = ap->GetID();
+                    minDistGlobal = dist;
+                    minDistLocal=dist2;
+               }
           }
      }
 
@@ -866,9 +878,9 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      } else {
           if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
                Log->Write(
-                    "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
-                    ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
-                    ped->GetFinalDestination());
+                         "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
+                         ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
+                         ped->GetFinalDestination());
           return -1;
      }
 }

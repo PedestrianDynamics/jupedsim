@@ -128,9 +128,6 @@ private:
      std::string _projectFilename; // store the file for later user
      std::map<int, AgentsParameters*> _agentsParameters;
 
-     // find aped in a subroom and delete him
-     bool FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const;
-
 public:
      /**
       * constructor

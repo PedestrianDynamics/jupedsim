@@ -113,9 +113,10 @@ int GraphRouter::FindExit(Pedestrian* p)
           // share Information about closed Doors
           #pragma omp critical
           if(p->DoorKnowledgeCount() != 0) {
-               // std::cout << "ped" << p->GetPedIndex() << std::endl;
-               SubRoom * sub  = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
-               vector<Pedestrian*> ps = sub->GetAllPedestrians();
+
+               vector<Pedestrian*> ps;
+               _building->GetPedestrians(p->GetRoomID(),p->GetSubRoomID(),ps);
+
                for(unsigned int i = 0; i < ps.size(); i++) {
                     if((p->GetPos() - ps[i]->GetPos()).Norm() < J_EPS_INFO_DIST) {
                          if(ps[i]->GetKnownClosedDoors() != closed_doors) {
@@ -125,7 +126,7 @@ int GraphRouter::FindExit(Pedestrian* p)
                               if(!ed.GetDest()) {
                                    std::cout << "DELETE " << ps[i]->GetID() << std::endl;
 
-                                   _building->DeletePedFromSim(ps[i]);
+                                   _building->DeletePedestrian(ps[i]);
                               } else {
                                    // FIXME: ps[i] changedsubroom has to be called to avoid to give a new route twice!
                                    // sometimes the outher pedestrian changed the subroom and gets a new route here. after this he is looking for a new route but there is no need for.

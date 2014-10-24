@@ -80,11 +80,12 @@ public:
      void SetCaption(const std::string& s);
      void SetRoutingEngine(RoutingEngine* r);
      void SetRoom(Room* room, int index);
+
      /// delete the ped from the ped vector
      void DeletePedestrian(Pedestrian* &ped);
      /// delete the ped from the simulation
-     void DeletePedFromSim(Pedestrian* &ped);
      void AddPedestrian(Pedestrian* ped);
+     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds);
 
 
      std::string GetCaption() const;
@@ -170,10 +171,8 @@ public:
      void InitSavePedPathway(const std::string &filename);
      void AddRoom(Room* room);
      void Update();
-     void UpdateVerySlow();
      void UpdateGrid();
      void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
-     void DumpSubRoomInRoom(int roomID, int subID);
 
      const std::map<int, Crossing*>& GetAllCrossings() const;
      const std::map<int, Transition*>& GetAllTransitions() const;

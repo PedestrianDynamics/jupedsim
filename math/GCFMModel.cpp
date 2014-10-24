@@ -516,13 +516,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                             "is bigger than desired velocity (%f) at time: %fs\n",
                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
                     // remove the pedestrian and abort
-                    for(int p=0; p<subroom->GetNumberOfPedestrians(); p++) {
-                         if (subroom->GetPedestrian(p)->GetID()==ped->GetID()) {
-                              subroom->DeletePedestrian(p);
-                              break;
-                         }
-                    }
-                    building->DeletePedFromSim(ped);
+                    building->DeletePedestrian(ped);
                     Log->Write("\tERROR: one ped was removed due to high velocity");
                     exit(EXIT_FAILURE);
                }

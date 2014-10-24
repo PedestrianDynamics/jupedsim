@@ -20,6 +20,7 @@ EventManager::EventManager(Building *_b){
     _dynamic=false;
     _file = fopen("../events/events.txt","r");
     _lastUpdateTime=0;
+    _deltaT=0;
     if(!_file){
         Log->Write("INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich.");
     }
@@ -140,32 +141,38 @@ void EventManager::Update_Events(double time, double d){
      //   neues Routing) ansonsten fertig
 
      _deltaT=d;
-     vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
-     int nSize = _allPedestrians.size();
+     vector<Pedestrian*> _allPeds=_building->GetAllPedestrians();
 
      //zuerst muss geprueft werden, ob die Peds, die die neuen Infos schon haben sie an andere Peds weiter-
      //leiten muessen (wenn diese sich in der naechsten Umgebung befinden)
-     int currentTime = _allPedestrians[0]->GetGlobalTime();
+     int currentTime = _allPeds[0]->GetGlobalTime();
      if(currentTime!=_lastUpdateTime)
           if((currentTime%UPDATE_FREQUENCY)==0) {
-               for(int p=0;p<nSize;p++){
-                    if(_allPedestrians[p]->GetNewEventFlag()){
-                         int rID = _allPedestrians[p]->GetRoomID();
-                         int srID = _allPedestrians[p]->GetSubRoomID();
-                         Room* room = _building->GetRoom(rID);
-                         SubRoom* sub = room->GetSubRoom(srID);//Nur Infos an Leute im gleichen Raum weitergeben
-                         for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                              Pedestrian* ped = sub->GetPedestrian(k);
-                              if(!ped->GetNewEventFlag()&&ped->GetReroutingTime()>2.0){
-                                   //wenn der Pedestrian die neuen Infos noch nicht hat und eine Reroutingtime von > 2 Sekunden hat, pruefen ob er nah genug ist
-                                   Point pos1 = _allPedestrians[p]->GetPos();
-                                   Point pos2 = ped->GetPos();
-                                   double distX = pos1.GetX()-pos2.GetX();
-                                   double distY = pos1.GetY()-pos2.GetY();
-                                   double dist = sqrt(distX*distX+distY*distY);
-                                   if(dist<=J_EPS_INFO_DIST){// wenn er nah genug (weniger als 2m) ist, Info weitergeben (Reroutetime auf 2 Sek)
-                                        //ped->RerouteIn(2.0);
-                                        ped->RerouteIn(0.0);
+
+               for(unsigned int p1=0;p1<_allPeds.size();p1++)
+               {
+                    Pedestrian* ped1 = _allPeds[p1];
+                    if(ped1->GetNewEventFlag()){
+                         int rID = ped1->GetRoomID();
+                         int srID = ped1->GetSubRoomID();
+
+                         for(unsigned int p2=0;p2<_allPeds.size();p2++)
+                         {
+                              Pedestrian* ped2 = _allPeds[p2];
+                              //same room and subroom
+                              if(rID==ped2->GetRoomID() && srID==ped2->GetSubRoomID())
+                              {
+                                   if(!ped2->GetNewEventFlag()&&ped2->GetReroutingTime()>2.0){
+                                        //wenn der Pedestrian die neuen Infos noch nicht hat und eine Reroutingtime von > 2 Sekunden hat, pruefen ob er nah genug ist
+                                        Point pos1 = ped1->GetPos();
+                                        Point pos2 = ped2->GetPos();
+                                        double distX = pos1.GetX()-pos2.GetX();
+                                        double distY = pos1.GetY()-pos2.GetY();
+                                        double dist = sqrt(distX*distX+distY*distY);
+                                        if(dist<=J_EPS_INFO_DIST){// wenn er nah genug (weniger als 2m) ist, Info weitergeben (Reroutetime auf 2 Sek)
+                                             //ped->RerouteIn(2.0);
+                                             ped2->RerouteIn(0.0);
+                                        }
                                    }
                               }
                          }
@@ -176,15 +183,15 @@ void EventManager::Update_Events(double time, double d){
           }
 
      //dann muss die Reroutingzeit der Peds, die die neuen Infos noch nicht haben, aktualisiert werden:
-     for(int p=0;p<nSize;p++){
-          //if(!_allPedestrians[p]->GetNewEventFlag()){
-          _allPedestrians[p]->UpdateReroutingTime();
-          if(_allPedestrians[p]->IsReadyForRerouting()){
-               _allPedestrians[p]->ClearMentalMap();
-               _allPedestrians[p]->ResetRerouting();
-               _allPedestrians[p]->SetNewEventFlag(true);
+     for(unsigned int p1=0;p1<_allPeds.size();p1++)
+     {
+          Pedestrian* ped1 = _allPeds[p1];
+          ped1->UpdateReroutingTime();
+          if(ped1->IsReadyForRerouting()){
+               ped1->ClearMentalMap();
+               ped1->ResetRerouting();
+               ped1->SetNewEventFlag(true);
           }
-          //}
      }
 
      //Events finden
@@ -287,7 +294,7 @@ void EventManager::getTheEvent(char* c){
     string id = "";
     string state = "";
     for(int i=0;i<20;i++){
-        if(c[i]==NULL){
+        if(!c[i]){
             break;
         }
         else if(c[i]==' '){

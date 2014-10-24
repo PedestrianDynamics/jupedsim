@@ -155,10 +155,9 @@ void SafestPathRouter::Init(Building* building)
 
 int SafestPathRouter::FindExit(Pedestrian* p)
 {
-
-
-     if(ComputeSafestPath(p)==-1) {
-          //Log->Write(" sdfds");
+     int ret=ComputeSafestPath(p);
+     if(ret!=-1) {
+          return ret;
      }
      //handle over to the global router engine
      return GlobalRouter::FindExit(p);
@@ -176,7 +175,8 @@ void SafestPathRouter::UpdateMatrices()
           for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                SubRoom* sub = room->GetSubRoom(j);
                if(sub->GetType()=="floor") {
-                    peopleAtSection[index]=sub->GetNumberOfPedestrians();
+                    //add the number of people in this section
+                    //TODO: Implement peopleAtSection[index]=sub->GetNumberOfPedestrians();
                     index++;
                }
           }
@@ -194,6 +194,7 @@ void SafestPathRouter::UpdateMatrices()
                }
           }
      }
+
 
      // Printing a matrix
      //              for(int j = 0; j < numberOfSubroom; j++)
@@ -409,7 +410,9 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 
 int SafestPathRouter::GetAgentsCountInSubroom( int roomID, int subroomID)
 {
-     return _building->GetRoom(roomID)->GetSubRoom(subroomID)->GetAllPedestrians().size();
+     vector<Pedestrian*> allPeds;
+     _building->GetPedestrians(roomID,subroomID,allPeds);
+     return allPeds.size();
 }
 
 
@@ -738,7 +741,7 @@ void SafestPathRouter::ComputeAndUpdateDestinations(
           if (GlobalRouter::FindExit(pedestrians[p]) == -1) {
                //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
                //Log->Write("\tINFO: \tHe has reached the target cell");
-               _building->DeletePedFromSim(pedestrians[p]);
+               _building->DeletePedestrian(pedestrians[p]);
                //exit(EXIT_FAILURE);
           }
      }

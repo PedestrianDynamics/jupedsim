@@ -856,35 +856,30 @@ void Building::SanityCheck()
 #ifdef _SIMULATOR
 
 //TODO: merge this with Update and improve runtime
-void Building::UpdateVerySlow()
+void Building::Update()
 {
-
+     //pedestians to be deleted
      vector<Pedestrian*> nonConformPeds;
-     for (int i = 0; i < GetNumberOfRooms(); i++) {
-          Room* room = GetRoom(i);
+     for(unsigned int p=0;p<_allPedestians.size();p++)
+     {
+          Pedestrian* ped = _allPedestians[p];
+          Room* room = GetRoom(ped->GetRoomID());
+          SubRoom* sub = room->GetSubRoom(ped->GetSubRoomID());
 
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                    Pedestrian* ped = sub->GetPedestrian(k);
-                    //set the new room if needed
-                    if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                              && (GetRoom(ped->GetRoomID())->GetCaption() == "outside")) {
+          //set the new room if needed
+          if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+                    && (GetRoom(ped->GetRoomID())->GetCaption() == "outside")) {
 
-                         sub->DeletePedestrian(k--);
-                         DeletePedestrian(ped);
-                    } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
-                               && (_goals[ped->GetFinalDestination()]->Contains(
-                                        ped->GetPos()))) {
-                         sub->DeletePedestrian(k--);
-                         DeletePedestrian(ped);
-                    } else if (!sub->IsInSubRoom(ped)) {
-                         nonConformPeds.push_back(ped);
-                         sub->DeletePedestrian(k--);
-                    }
-               }
+               DeletePedestrian(ped);
+          } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
+                    && (_goals[ped->GetFinalDestination()]->Contains(
+                              ped->GetPos()))) {
+               DeletePedestrian(ped);
+          } else if (!sub->IsInSubRoom(ped)) {
+               nonConformPeds.push_back(ped);
           }
      }
+
 
      // reset that pedestrians who left their room not via the intended exit
      for (int p = 0; p < (int) nonConformPeds.size(); p++) {
@@ -901,7 +896,6 @@ void Building::UpdateVerySlow()
                          ped->SetSubRoomID(sub->GetSubRoomID());
                          ped->ClearMentalMap(); // reset the destination
                          //ped->FindRoute();
-                         sub->AddPedestrian(ped);
                          assigned = true;
                          break;
                     }
@@ -916,216 +910,76 @@ void Building::UpdateVerySlow()
 
      // find the new goals, the parallel way
 
-    //FIXME temporary fix for the safest path router
-    if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
-    {
-        SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
-        spr->ComputeAndUpdateDestinations(_allPedestians);
-    }
-    else
-    {
-         unsigned int nSize = _allPedestians.size();
-         int nThreads = omp_get_max_threads();
-         int partSize = nSize / nThreads;
-         //assert(partSize!=0);
+     //FIXME temporary fix for the safest path router
+     if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
+     {
+          SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
+          spr->ComputeAndUpdateDestinations(_allPedestians);
+     }
+     else
+     {
+          unsigned int nSize = _allPedestians.size();
+          int nThreads = omp_get_max_threads();
+          int partSize = nSize / nThreads;
+          //assert(partSize!=0);
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
-         {
-              const int threadID = omp_get_thread_num();
-              int start = threadID * partSize;
-              int end = (threadID + 1) * partSize - 1;
-              if ((threadID == nThreads - 1))
-                   end = nSize - 1;
+          {
+               const int threadID = omp_get_thread_num();
+               int start = threadID * partSize;
+               int end = (threadID + 1) * partSize - 1;
+               if ((threadID == nThreads - 1))
+                    end = nSize - 1;
 
-              for (int p = start; p <= end; ++p) {
-                   if (_allPedestians[p]->FindRoute() == -1) {
-                        //a destination could not be found for that pedestrian
-                        //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
-                        //Log->Write("\tINFO: \tHe has reached the target cell");
-                        DeletePedFromSim(_allPedestians[p]);
-                        //exit(EXIT_FAILURE);
-                   }
-              }
-         }
-    }
+               for (int p = start; p <= end; ++p) {
+                    if (_allPedestians[p]->FindRoute() == -1) {
+                         //a destination could not be found for that pedestrian
+                         //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+                         DeletePedestrian(_allPedestians[p]);
+                         //exit(EXIT_FAILURE);
+                    }
+               }
+          }
+     }
 
 }
-
-//void Building::Update()
-//{
-//     // some peds may change the room via another crossing than the primary intended one
-//     // in that case they are set in the wrong room.
-//     vector<Pedestrian*> nonConformPeds;
-//     for (int i = 0; i < GetNumberOfRooms(); i++) {
-//          Room* room = GetRoom(i);
-//
-//          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-//               SubRoom* sub = room->GetSubRoom(j);
-//               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-//                    Pedestrian* ped = sub->GetPedestrian(k);
-//                    //set the new room if needed
-//                    if (!sub->IsInSubRoom(ped)) {
-//                         // the peds has changed the room and is farther than 50 cm from
-//                         // the exit, thats a real problem.
-//                         if (ped->GetExitLine()->DistTo(ped->GetPos()) > 0.50) {
-//                              Log->Write(
-//                                   "WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
-//                                   "via unknown exit[??%d] \n Position: (%f, %f), distance to exit: (%f)",
-//                                   ped->GetID(),
-//                                   _rooms[ped->GetRoomID()]->GetCaption().c_str(),
-//                                   ped->GetRoomID(), ped->GetSubRoomID(),
-//                                   ped->GetExitIndex(), ped->GetPos().GetX(),
-//                                   ped->GetPos().GetY(),ped->GetExitLine()->DistTo(ped->GetPos()));
-//                              //ped->Dump(ped->GetPedIndex());
-//                              //std::cout << ped->GetLastDestination() << " "
-//                              //              << ped->GetNextDestination() << std::endl;
-//                              //exit(0);
-//                              nonConformPeds.push_back(ped);
-//                              sub->DeletePedestrian(k--);
-//                              continue; // next pedestrian
-//                         }
-//
-//                         //safely converting  (upcasting) the NavLine to a crossing.
-//                         Crossing* cross =
-//                              dynamic_cast<Crossing*>(ped->GetExitLine());
-//                         if (cross == NULL) {
-//                              Log->Write("ERROR: Building::update() type casting error for ped %d",ped->GetID());
-//                              Log->Write("ERROR: Fix Me !");
-//                              nonConformPeds.push_back(ped);
-//                              exit(EXIT_FAILURE);
-//                         }
-//
-//                         SubRoom* other_sub = cross->GetOtherSubRoom(
-//                                                   room->GetID(), j);
-//
-//                         if (other_sub) {
-//                              int nextSubRoom = other_sub->GetSubRoomID();
-//                              int nextRoom = other_sub->GetRoomID();
-//                              ped->SetSubRoomID(nextSubRoom);
-//                              ped->SetRoomID(nextRoom,
-//                                             GetRoom(nextRoom)->GetCaption());
-//                              other_sub->AddPedestrian(ped);
-//
-//                         } else {
-//                              DeletePedestrian(ped);
-//                              //continue;
-//                         }
-//                         // Lösche Fußgänger aus aktuellem SubRoom
-//                         sub->DeletePedestrian(k--); // k--;
-//                    }
-//                    // neues Ziel setzten
-//                    //pRouting->FindExit(ped);
-//               }
-//          }
-//     }
-//
-//     // reset that pedestrians who left their room not via the intended exit
-//     for (int p = 0; p < (int) nonConformPeds.size(); p++) {
-//          Pedestrian* ped = nonConformPeds[p];
-//          bool assigned = false;
-//          for (int i = 0; i < GetNumberOfRooms(); i++) {
-//               Room* room = GetRoom(i);
-//               for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-//                    SubRoom* sub = room->GetSubRoom(j);
-//                    //only relocate in the same room
-//                    // or only in neighbouring rooms
-//                    if (room->GetID() != ped->GetRoomID())
-//                         continue;
-//                    if (sub->IsInSubRoom(ped->GetPos())) {
-//                         //set in the new room
-//                         Log->Write("pedestrian %d relocated from room/subroom [%s] %d/%d to [%s] %d/%d ",
-//                                    ped->GetID(),
-//                                    GetRoom(ped->GetRoomID())->GetCaption().c_str(),
-//                                    ped->GetRoomID(), ped->GetSubRoomID(),
-//                                    room->GetCaption().c_str(), i, j);
-//                         ped->SetRoomID(room->GetID(), room->GetCaption());
-//                         ped->SetSubRoomID(sub->GetSubRoomID());
-//                         ped->ClearMentalMap(); // reset the destination
-//                         ped->FindRoute();
-//                         sub->AddPedestrian(ped);
-//                         assigned = true;
-//                         break;
-//                    }
-//               }
-//               if (assigned == true)
-//                    break; // stop the loop
-//          }
-//          if (assigned == false) {
-//               DeletePedestrian(ped);
-//          }
-//     }
-//
-//     // find the new goals, the parallel way
-//
-//     unsigned int nSize = _allPedestians.size();
-//     int nThreads = omp_get_max_threads();
-//
-//
-//     int partSize = nSize / nThreads;
-//
-//     #pragma omp parallel  default(shared) num_threads(nThreads)
-//     {
-//          const int threadID = omp_get_thread_num();
-//          int start = threadID * partSize;
-//          int end = (threadID + 1) * partSize - 1;
-//          if ((threadID == nThreads - 1))
-//               end = nSize - 1;
-//
-//          for (int p = start; p <= end; ++p) {
-//               if (_allPedestians[p]->FindRoute() == -1) {
-//                    //a destination could not be found for that pedestrian
-//                    //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
-//                    //Log->Write("\tINFO: \tHe has reached the target cell");
-//                    DeletePedFromSim(_allPedestians[p]);
-//                    exit(EXIT_FAILURE);
-//               }
-//          }
-//     }
-//
-//     //cleaning up
-//     //CleanUpTheScene();
-//}
 
 
 void Building::InitPhiAllPeds(double pDt)
 {
-     for (int i = 0; i < GetNumberOfRooms(); i++) {
-          Room* room = GetRoom(i);
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                    double cosPhi, sinPhi;
-                    Pedestrian* ped = sub->GetPedestrian(k);
-                    ped->Setdt(pDt); //set the simulation step
-                    ped->SetRoomID(room->GetID(), room->GetCaption());
-                    //a destination could not be found for that pedestrian
-                    if (ped->FindRoute() == -1) {
-                         DeletePedFromSim(ped);
-                         //sub->DeletePedestrian(k--);
-                         continue;
-                    }
-                    Line* e = ped->GetExitLine();
-                    const Point& e1 = e->GetPoint1();
-                    const Point& e2 = e->GetPoint2();
-                    Point target = (e1 + e2) * 0.5;
-                    Point d = target - ped->GetPos();
-                    double dist = d.Norm();
-                    if (dist != 0.0) {
-                         cosPhi = d.GetX() / dist;
-                         sinPhi = d.GetY() / dist;
-                    } else {
-                         Log->Write(
-                              "ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
-                              "dist to target ist 0\n");
-                         exit(0);
-                    }
+     for(unsigned int p=0;p<_allPedestians.size();p++)
+     {
+          Pedestrian* ped = _allPedestians[p];
 
-                    JEllipse E = ped->GetEllipse();
-                    E.SetCosPhi(cosPhi);
-                    E.SetSinPhi(sinPhi);
-                    ped->SetEllipse(E);
-               }
+          double cosPhi, sinPhi;
+          ped->Setdt(pDt); //set the simulation step
+          //a destination could not be found for that pedestrian
+          if (ped->FindRoute() == -1) {
+               DeletePedestrian(ped);
+               //sub->DeletePedestrian(k--);
+               continue;
           }
+
+          Line* e = ped->GetExitLine();
+          const Point& e1 = e->GetPoint1();
+          const Point& e2 = e->GetPoint2();
+          Point target = (e1 + e2) * 0.5;
+          Point d = target - ped->GetPos();
+          double dist = d.Norm();
+          if (dist != 0.0) {
+               cosPhi = d.GetX() / dist;
+               sinPhi = d.GetY() / dist;
+          } else {
+               Log->Write(
+                    "ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
+                    "dist to target is 0\n");
+               exit(0);
+          }
+
+          JEllipse E = ped->GetEllipse();
+          E.SetCosPhi(cosPhi);
+          E.SetSinPhi(sinPhi);
+          ped->SetEllipse(E);
      }
 }
 
@@ -1136,7 +990,6 @@ void Building::UpdateGrid()
 
 void Building::InitGrid(double cellSize)
 {
-
      // first look for the geometry boundaries
      double x_min = FLT_MAX;
      double x_max = FLT_MIN;
@@ -1170,17 +1023,6 @@ void Building::InitGrid(double cellSize)
           }
      }
 
-     for (unsigned int wa = 0; wa < _rooms.size(); wa++) {
-          Room* room = _rooms[wa];
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                    Pedestrian* ped = sub->GetPedestrian(k);
-                    _allPedestians.push_back(ped);
-               }
-          }
-     }
-
      //make the grid slightly larger.
      x_min = x_min - 1*cellSize;
      x_max = x_max + 1*cellSize;
@@ -1210,27 +1052,8 @@ void Building::InitGrid(double cellSize)
      Log->Write("INFO: \tDone with Initializing the grid ");
 }
 
-
-
-void Building::DumpSubRoomInRoom(int roomID, int subID)
-{
-     SubRoom* sub = GetRoom(roomID)->GetSubRoom(subID);
-     if (sub->GetNumberOfPedestrians() == 0)
-          return;
-     cout << "dumping room/subroom " << roomID << " / " << subID << endl;
-     for (int p = 0; p < sub->GetNumberOfPedestrians(); p++) {
-          Pedestrian* ped = sub->GetPedestrian(p);
-          cout << " ID: " << ped->GetID();
-          cout << " Index: " << p << endl;
-     }
-
-}
-
-
 void Building::LoadRoutingInfo(const string &filename)
 {
-
-
      Log->Write("INFO:\tLoading extra routing information");
      if (filename == "") {
           Log->Write("INFO:\t No file supplied !");
@@ -1396,7 +1219,7 @@ void Building::DeletePedestrian(Pedestrian* &ped)
                }
 
           }
-          cout << "rescued agent: " << (*it)->GetID()<<endl;
+          //cout << "rescued agent: " << (*it)->GetID()<<endl;
 
           static int totalPeds= _allPedestians.size();
           _allPedestians.erase(it);
@@ -1407,7 +1230,7 @@ void Building::DeletePedestrian(Pedestrian* &ped)
           //cout << "want to rescue agent: " << ped->GetID()<<endl<<endl;
           //     exit(0);
           // }
-          //Log->ProgressBar(TotalPeds, totalPeds-nowPeds+1);
+          Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
      Transition* trans =GetTransitionByUID(ped->GetExitIndex());
@@ -1417,18 +1240,6 @@ void Building::DeletePedestrian(Pedestrian* &ped)
      delete ped;
 }
 
-void Building::DeletePedFromSim(Pedestrian* &ped)
-{
-     SubRoom* sub = _rooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
-     for (int p = 0; p < sub->GetNumberOfPedestrians(); p++) {
-          if (sub->GetPedestrian(p)->GetID() == ped->GetID()) {
-               sub->DeletePedestrian(p);
-               DeletePedestrian(ped);
-               return;
-          }
-     }
-}
-
 const vector<Pedestrian*>& Building::GetAllPedestrians() const
 {
      return _allPedestians;
@@ -1436,17 +1247,26 @@ const vector<Pedestrian*>& Building::GetAllPedestrians() const
 
 void Building::AddPedestrian(Pedestrian* ped)
 {
-
-     //      for(unsigned int p = 0;p<pAllPedestians.size();p++){
-     //              Pedestrian* ped1=pAllPedestians[p];
-     //              if(ped->GetPedIndex()==ped1->GetPedIndex()){
-     //                      cout<<"Pedestrian already in the room ??? "<<ped->GetPedIndex()<<endl;
-     //                      return;
-     //              }
-     //      }
+     for(unsigned int p = 0;p<_allPedestians.size();p++){
+          Pedestrian* ped1=_allPedestians[p];
+          if(ped->GetID()==ped1->GetID()){
+               cout<<"Pedestrian already in the room ??? "<<ped->GetID()<<endl;
+               return;
+          }
+     }
      _allPedestians.push_back(ped);
 }
 
+void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds)
+{
+     for(unsigned int p = 0;p<_allPedestians.size();p++){
+          Pedestrian* ped=_allPedestians[p];
+          if(room==ped->GetRoomID() && subroom==ped->GetSubRoomID())
+          {
+               peds.push_back(ped);
+          }
+     }
+}
 
 //obsolete
 void Building::InitSavePedPathway(const string &filename)
@@ -1492,7 +1312,7 @@ void Building::CleanUpTheScene()
 
                if (ped->GetDistanceSinceLastRecord() < 0.1) {
                     //delete from the simulation
-                    DeletePedFromSim(ped);
+                    DeletePedestrian(ped);
 
                     totalSliced++;
                     char msg[CLENGTH];
@@ -1531,28 +1351,20 @@ void Building::StringExplode(string str, string separator,
 
 Pedestrian* Building::GetPedestrian(int pedID) const
 {
-     for (unsigned int i = 0; i < _rooms.size(); i++) {
-          Room* room = _rooms[i];
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                    Pedestrian* p = sub->GetPedestrian(k);
-                    if (p->GetID() == pedID) {
-                         return p;
-                    }
-               }
+     for(unsigned int p=0;p<_allPedestians.size();p++)
+     {
+          Pedestrian* ped = _allPedestians[p];
+          if (ped->GetID() == pedID) {
+               return ped;
           }
      }
+
      return NULL;
 }
 
 int Building::GetNumberOfPedestrians() const
 {
-     int sum = 0;
-     for (unsigned int wa = 0; wa < _rooms.size(); wa++) {
-          sum += _rooms[wa]->GetNumberOfPedestrians();
-     }
-     return sum;
+     return _allPedestians.size();
 }
 
 Transition* Building::GetTransitionByUID(int uid) const

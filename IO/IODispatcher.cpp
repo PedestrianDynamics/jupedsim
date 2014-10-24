@@ -303,26 +303,24 @@ void TrajectoriesJPSV04::WriteFrame(int frameNr, Building* building)
 
      if( building->GetAllPedestrians().size() == 0)
           return;
+
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 
-     for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
-          Room* r = building->GetRoom(roomindex);
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     for(unsigned int p=0;p<allPeds.size();p++)
+     {
+          Pedestrian* ped = allPeds[p];
+          Room* r = building->GetRoom(ped->GetRoomID());
           string caption = r->GetCaption();
 
           if ((rooms_to_plot.empty() == false)
-                    && (IsElementInVector(rooms_to_plot, caption) == false)) {
-               continue;
-          }
-
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k);
-               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i) {
-                    Pedestrian* ped = s->GetPedestrian(i);
-                    data.append(WritePed(ped));
-               }
-          }
+                              && (IsElementInVector(rooms_to_plot, caption) == false)) {
+                         continue;
+                    }
+          data.append(WritePed(ped));
      }
+
      data.append("</frame>\n");
      Write(data);
 }
@@ -365,21 +363,16 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
 {
      char tmp[CLENGTH] = "";
 
-     for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
-          Room* r = building->GetRoom(roomindex);
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k);
-               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i) {
-                    Pedestrian* ped = s->GetPedestrian(i);
-                    double x = ped->GetPos().GetX();
-                    double y = ped->GetPos().GetY();
-                    double z = ped->GetElevation();
-                    sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x,
-                              y,z);
-                    Write(tmp);
-               }
-          }
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     for(unsigned int p=0;p<allPeds.size();p++){
+          Pedestrian* ped = allPeds[p];
+          double x = ped->GetPos().GetX();
+          double y = ped->GetPos().GetY();
+          double z = ped->GetElevation();
+          sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y,z);
+          Write(tmp);
      }
+
 }
 
 void TrajectoriesFLAT::WriteFooter()
@@ -574,8 +567,12 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 
-     for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
-          Room* r = building->GetRoom(roomindex);
+
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     for(unsigned int p=0;p<allPeds.size();p++)
+     {
+          Pedestrian* ped = allPeds[p];
+          Room* r = building->GetRoom(ped->GetRoomID());
           string caption = r->GetCaption();
 
           if ((rooms_to_plot.empty() == false)
@@ -583,37 +580,31 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
                continue;
           }
 
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k);
-               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i)
-               {
-                    char tmp[CLENGTH] = "";
-                    Pedestrian* ped = s->GetPedestrian(i);
-                    double v0 = ped->GetV0Norm();
-                    int color=1; // red= very low velocity
+          char tmp[CLENGTH] = "";
+          double v0 = ped->GetV0Norm();
+          int color=1; // red= very low velocity
 
-                    if (v0 != 0.0) {
-                         double v = ped->GetV().Norm();
-                         color = (int) (v / v0 * 255);
-                    }
-                    if(ped->GetSpotlight()==false) color=-1;
-
-
-                    double a = ped->GetLargerAxis();
-                    double b = ped->GetSmallerAxis();
-                    double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-                    sprintf(tmp, "<agent ID=\"%d\"\t"
-                              "x=\"%.2f\"\ty=\"%.2f\"\t"
-                              "z=\"%.2f\"\t"
-                              "rA=\"%.2f\"\trB=\"%.2f\"\t"
-                              "eO=\"%.2f\" eC=\"%d\"/>\n",
-                              ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                              (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
-                              phi * RAD2DEG, color);
-                    data.append(tmp);
-               }
+          if (v0 != 0.0) {
+               double v = ped->GetV().Norm();
+               color = (int) (v / v0 * 255);
           }
+          if(ped->GetSpotlight()==false) color=-1;
+
+          double a = ped->GetLargerAxis();
+          double b = ped->GetSmallerAxis();
+          double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+          sprintf(tmp, "<agent ID=\"%d\"\t"
+                    "x=\"%.2f\"\ty=\"%.2f\"\t"
+                    "z=\"%.2f\"\t"
+                    "rA=\"%.2f\"\trB=\"%.2f\"\t"
+                    "eO=\"%.2f\" eC=\"%d\"/>\n",
+                    ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+                    (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    phi * RAD2DEG, color);
+          data.append(tmp);
+
      }
+
      data.append("</frame>\n");
      Write(data);
 }
@@ -707,42 +698,39 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
      sprintf(tmp, "<frame ID=\"%d\">\n", frameNr);
      data.append(tmp);
 
-     for (int roomindex = 0; roomindex < building->GetNumberOfRooms(); roomindex++) {
-          Room* r = building->GetRoom(roomindex);
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     for(unsigned int p=0;p<allPeds.size();p++)
+     {
+          Pedestrian* ped = allPeds[p];
+          Room* r = building->GetRoom(ped->GetRoomID());
           string caption = r->GetCaption();
 
+          char tmp[CLENGTH] = "";
+          double v0 = ped->GetV0Norm();
+          int color=1; // red= very low velocity
 
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k);
-               for (int i = 0; i < s->GetNumberOfPedestrians(); ++i)
-               {
-                    char tmp[CLENGTH] = "";
-                    Pedestrian* ped = s->GetPedestrian(i);
-                    double v0 = ped->GetV0Norm();
-                    int color=1; // red= very low velocity
-
-                    if (v0 != 0.0) {
-                         double v = ped->GetV().Norm();
-                         color = (int) (v / v0 * 255);
-                    }
-                    if(ped->GetSpotlight()==false) color=-1;
-
-
-                    double a = ped->GetLargerAxis();
-                    double b = ped->GetSmallerAxis();
-                    double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
-                    sprintf(tmp, "<agent ID=\"%d\"\t"
-                              "x=\"%.2f\"\ty=\"%.2f\"\t"
-                              "z=\"%.2f\"\t"
-                              "rA=\"%.2f\"\trB=\"%.2f\"\t"
-                              "eO=\"%.2f\" eC=\"%d\"/>\n",
-                              ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                              (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
-                              phi * RAD2DEG, color);
-                    data.append(tmp);
-               }
+          if (v0 != 0.0) {
+               double v = ped->GetV().Norm();
+               color = (int) (v / v0 * 255);
           }
+          if(ped->GetSpotlight()==false) color=-1;
+
+
+          double a = ped->GetLargerAxis();
+          double b = ped->GetSmallerAxis();
+          double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
+          sprintf(tmp, "<agent ID=\"%d\"\t"
+                    "x=\"%.2f\"\ty=\"%.2f\"\t"
+                    "z=\"%.2f\"\t"
+                    "rA=\"%.2f\"\trB=\"%.2f\"\t"
+                    "eO=\"%.2f\" eC=\"%d\"/>\n",
+                    ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
+                    (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    phi * RAD2DEG, color);
+          data.append(tmp);
+
      }
+
      data.append("</frame>\n");
      _outputHandler->Write(data);
 }

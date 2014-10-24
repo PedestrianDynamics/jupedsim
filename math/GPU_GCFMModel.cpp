@@ -886,15 +886,8 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 							sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);////time statt t
 
 					// remove the pedestrian and abort
-					for(int p=0;p<subroom->GetNumberOfPedestrians();p++){
-						if (subroom->GetPedestrian(p)->GetID()==ped->GetID()){
-							subroom->DeletePedestrian(p);
-							break;
-						}
-					}
-
 					building->DeletePedestrian(ped);
-					Log->Write("\tCRITICAL: one ped was removed due to high velocity");
+					Log->Write("\tERROR: one ped was removed due to high velocity");
 
 					//	continue;
 					exit(EXIT_FAILURE);

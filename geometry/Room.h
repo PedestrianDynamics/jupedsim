@@ -125,11 +125,6 @@ public:
      SubRoom* GetSubRoom(int index) const;
 
      /**
-      * @return the number of pedestrians in the rooms (all subrooms)
-      */
-     int GetNumberOfPedestrians() const;
-
-     /**
       * @return the state for this room
       */
      RoomState GetState()const;
@@ -148,7 +143,6 @@ public:
       * Add a new transition id
       */
      void AddTransitionID(int ID);
-
 
      /**
       * Debug output for this class

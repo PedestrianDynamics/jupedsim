@@ -290,7 +290,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
 
      int partSize = nSize / nThreads;
 
-     int debugPed = 69;//10;
+     int debugPed = -69;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 
      
@@ -328,13 +328,6 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
 
                     // remove the pedestrian and abort
-                    for(int p=0; p<subroom->GetNumberOfPedestrians(); p++) {
-                         if (subroom->GetPedestrian(p)->GetID() == ped->GetID()) {
-                              subroom->DeletePedestrian(p);
-                              break;
-                         }
-                    }
-                    printf("\tERROR: ped [%d] was removed due to high velocity\n",ped->GetID());
                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
                     building->DeletePedestrian(ped);
                     //continue;  //FIXME tolerate first

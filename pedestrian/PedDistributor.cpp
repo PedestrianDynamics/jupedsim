@@ -451,25 +451,6 @@ int PedDistributor::Distribute(Building* building) const
      return nPeds;
 }
 
-bool PedDistributor::FindPedAndDeleteFromRoom(Building* building,Pedestrian*ped) const
-{
-
-     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-          Room* room = building->GetRoom(i);
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                    Pedestrian* p=sub->GetPedestrian(k);
-                    if(p->GetID()==ped->GetID()) {
-                         sub->DeletePedestrian(k);
-                         return true;
-                    }
-               }
-          }
-     }
-     return false;
-}
-
 
 vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double min_y, double max_y,
           SubRoom* r, double bufx, double bufy, double dy) const
@@ -761,7 +742,8 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
                     *pid, para->GetRoomId(), start_pos.toString().c_str());
         }
 
-        r->AddPedestrian(ped);
+        //r->AddPedestrian(ped);
+        building->AddPedestrian(ped);
         (*pid)++;
     }
 }

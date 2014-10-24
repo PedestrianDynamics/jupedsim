@@ -70,28 +70,6 @@ SubRoom::SubRoom()
      _area = 0.0;
      _closed=false;
      _uid = _static_uid++;
-
-#ifdef _SIMULATOR
-     _peds = vector<Pedestrian* > ();
-#endif //_SIMULATOR
-
-}
-
-SubRoom::SubRoom(const SubRoom& orig)
-{
-     _id = orig.GetSubRoomID();
-     _walls = orig.GetAllWalls();
-     _poly = orig.GetPolygon();
-     _goalIDs = orig.GetAllGoalIDs();
-     _area = orig.GetArea();
-     _closed=orig.GetClosed();
-     _roomID=orig.GetRoomID();
-     _uid = orig.GetUID();
-     _cosAngleWithHorizontalPlane=orig.GetCosAngleWithHorizontal();
-
-#ifdef _SIMULATOR
-     _peds = orig.GetAllPedestrians();
-#endif //_SIMULATOR
 }
 
 SubRoom::~SubRoom()
@@ -102,13 +80,6 @@ SubRoom::~SubRoom()
           delete _obstacles[i];
      }
      _obstacles.clear();
-
-#ifdef _SIMULATOR
-     for (unsigned int i = 0; i < _peds.size(); i++) {
-          delete _peds[i];
-     }
-#endif //_SIMULATOR
-
 }
 
 // Setter -Funktionen
@@ -577,10 +548,6 @@ NormalSubRoom::NormalSubRoom() : SubRoom()
 
 }
 
-NormalSubRoom::NormalSubRoom(const NormalSubRoom& orig) : SubRoom(orig)
-{
-
-}
 
 NormalSubRoom::~NormalSubRoom()
 {
@@ -781,11 +748,6 @@ Stair::Stair() : NormalSubRoom()
      pDown = Point();
 }
 
-Stair::Stair(const Stair & orig) : NormalSubRoom(orig)
-{
-     pUp = orig.GetUp();
-     pDown = orig.GetDown();
-}
 
 Stair::~Stair()
 {
@@ -890,7 +852,6 @@ void Stair::WriteToErrorLog() const
  * */
 const Point* Stair::CheckCorner(const Point** otherPoint, const Point** aktPoint, const Point* nextPoint)
 {
-
      Point l1 = **otherPoint - **aktPoint;
      Point l2 = *nextPoint - **aktPoint;
      const Point* rueck = NULL;
@@ -1029,21 +990,6 @@ const std::string& SubRoom::GetType() const
 
 #ifdef _SIMULATOR
 
-void SubRoom::SetAllPedestrians(const vector<Pedestrian*>& peds)
-{
-     _peds = peds;
-}
-
-void SubRoom::SetPedestrian(Pedestrian* ped, int index)
-{
-     if ((index >= 0) && (index < GetNumberOfPedestrians())) {
-          _peds[index] = ped;
-     } else {
-          Log->Write("ERROR: Wrong Index in SubRoom::SetPedestrian()");
-          exit(0);
-     }
-}
-
 bool SubRoom::IsInSubRoom(Pedestrian* ped) const
 {
      const Point& pos = ped->GetPos();
@@ -1053,52 +999,5 @@ bool SubRoom::IsInSubRoom(Pedestrian* ped) const
           return IsInSubRoom(pos);
 }
 
-
-int SubRoom::GetNumberOfPedestrians() const
-{
-     return _peds.size();
-}
-
-const vector<Pedestrian*>& SubRoom::GetAllPedestrians() const
-{
-     return _peds;
-}
-
-Pedestrian* SubRoom::GetPedestrian(int index) const
-{
-     if ((index >= 0) && (index < (int) GetNumberOfPedestrians()))
-          return _peds[index];
-     else {
-          Log->Write("ERROR: Wrong 'index' in SubRoom::GetPedestrian()");
-          exit(0);
-     }
-}
-
-
-void SubRoom::AddPedestrian(Pedestrian* ped)
-{
-     _peds.push_back(ped);
-}
-
-
-void SubRoom::DeletePedestrian(int index)
-{
-     if ((index >= 0) && (index < (int) GetNumberOfPedestrians())) {
-          _peds.erase(_peds.begin() + index);
-
-     } else {
-          Log->Write("ERROR: Wrong Index in SubRoom::DeletePedestrian()");
-          exit(0);
-     }
-}
-
-
-void SubRoom::ClearAllPedestrians()
-{
-     for(unsigned int p=0; p<_peds.size(); p++) {
-          delete _peds[p];
-     }
-     _peds.clear();
-}
 
 #endif // _SIMULATOR

@@ -53,6 +53,8 @@ Simulation::Simulation()
      _fps=1;
      _em=NULL;
      _argsParser=NULL;
+     _hpc=-1;
+     _profiling=false;
 }
 
 Simulation::~Simulation()
@@ -509,7 +511,7 @@ int Simulation::RunSimulation()
 void Simulation::Update()
 {
      //_building->Update();
-     _building->UpdateVerySlow();
+     _building->Update();
      //someone might have leave the building
      _nPeds=_building->GetAllPedestrians().size();
      // update the global time

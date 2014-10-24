@@ -80,11 +80,6 @@ private:
      /// storing and incrementing the total number of subrooms
      static int _static_uid;
 
-
-#ifdef _SIMULATOR
-     std::vector<Pedestrian*> _peds; // pedestrians container
-#endif
-
 protected:
      std::vector<Wall> _walls;
      std::vector<Point> _poly; // Polygonal representation of the subroom
@@ -93,7 +88,6 @@ public:
 
      // constructors
      SubRoom();
-     SubRoom(const SubRoom& orig);
      virtual ~SubRoom();
 
      /**
@@ -257,7 +251,6 @@ public:
      const Transition* GetTransition(int i) const;
      const Hline* GetHline(int i) const;
 
-
      /**
       * Add a wall to the subroom
       */
@@ -269,11 +262,6 @@ public:
       */
      void AddObstacle(Obstacle* obs);
 
-     /**
-      * Remove the pedestrian from the subroom.
-      * @param index, the index of the peds in the vector (NOT THE ID !)
-      */
-     void DeletePedestrian(int index);
      void AddGoalID(int ID);
      void RemoveGoalID(int ID);
 
@@ -308,22 +296,12 @@ public:
      ///check whether the pedestrians is still in the subroom
      virtual bool IsInSubRoom(const Point& ped) const = 0;
 
-
      // MPI:
      void ClearAllPedestrians();
 
 #ifdef _SIMULATOR
 
-     /**
-      * @return the number of pedestrians in this subroom
-      */
-     int GetNumberOfPedestrians() const;
-     void AddPedestrian(Pedestrian* ped);
      virtual bool IsInSubRoom(Pedestrian* ped) const;
-     void SetAllPedestrians(const std::vector<Pedestrian*>& peds);
-     void SetPedestrian(Pedestrian* ped, int index);
-     const std::vector<Pedestrian*>& GetAllPedestrians() const;
-     Pedestrian* GetPedestrian(int index) const;
 
 #endif
 
