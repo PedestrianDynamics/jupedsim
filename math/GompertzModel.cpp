@@ -289,7 +289,10 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
      int nThreads = omp_get_max_threads();
 
      int partSize = nSize / nThreads;
-     int debugPed = -6;//10;
+
+     int debugPed = 69;//10;
+     //building->GetGrid()->HighlightNeighborhood(debugPed, building);
+
      
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
@@ -308,8 +311,6 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                Room* room = building->GetRoom(ped->GetRoomID());
                SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
 
-               if(debugPed == ped->GetID())
-                    building->GetGrid()->HighlightNeighborhood(ped, building);
 
                // if(debugPed != ped->GetID())
                // {
@@ -385,7 +386,7 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                               OFF_LINE;
                               //getc(stdin);
                          }
-                              
+
                     }
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                          repPed = repPed + ForceRepPed(ped, ped1);

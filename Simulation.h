@@ -53,7 +53,6 @@
 #include "events/EventManager.h"
 #include "routing/CognitiveMapRouter.h"
 
-//OutputHandler* Log;
 
 class Simulation
 {

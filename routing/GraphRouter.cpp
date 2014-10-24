@@ -115,7 +115,7 @@ int GraphRouter::FindExit(Pedestrian* p)
           if(p->DoorKnowledgeCount() != 0) {
                // std::cout << "ped" << p->GetPedIndex() << std::endl;
                SubRoom * sub  = _building->GetRoom(p->GetRoomID())->GetSubRoom(p->GetSubRoomID());
-               const vector<Pedestrian*> ps = sub->GetAllPedestrians();
+               vector<Pedestrian*> ps = sub->GetAllPedestrians();
                for(unsigned int i = 0; i < ps.size(); i++) {
                     if((p->GetPos() - ps[i]->GetPos()).Norm() < J_EPS_INFO_DIST) {
                          if(ps[i]->GetKnownClosedDoors() != closed_doors) {

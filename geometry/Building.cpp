@@ -924,169 +924,167 @@ void Building::UpdateVerySlow()
     }
     else
     {
-        unsigned int nSize = _allPedestians.size();
-          int nThreads = omp_get_max_threads();
+         unsigned int nSize = _allPedestians.size();
+         int nThreads = omp_get_max_threads();
+         int partSize = nSize / nThreads;
+         //assert(partSize!=0);
 
+#pragma omp parallel  default(shared) num_threads(nThreads)
+         {
+              const int threadID = omp_get_thread_num();
+              int start = threadID * partSize;
+              int end = (threadID + 1) * partSize - 1;
+              if ((threadID == nThreads - 1))
+                   end = nSize - 1;
 
-          int partSize = nSize / nThreads;
-          //assert(partSize!=0);
-
-          #pragma omp parallel  default(shared) num_threads(nThreads)
-          {
-               const int threadID = omp_get_thread_num();
-               int start = threadID * partSize;
-               int end = (threadID + 1) * partSize - 1;
-               if ((threadID == nThreads - 1))
-                    end = nSize - 1;
-
-               for (int p = start; p <= end; ++p) {
-                    if (_allPedestians[p]->FindRoute() == -1) {
-                         //a destination could not be found for that pedestrian
-                         //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
-                         //Log->Write("\tINFO: \tHe has reached the target cell");
-                         DeletePedFromSim(_allPedestians[p]);
-                         //exit(EXIT_FAILURE);
-                    }
-               }
-          }
-     }
+              for (int p = start; p <= end; ++p) {
+                   if (_allPedestians[p]->FindRoute() == -1) {
+                        //a destination could not be found for that pedestrian
+                        //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+                        //Log->Write("\tINFO: \tHe has reached the target cell");
+                        DeletePedFromSim(_allPedestians[p]);
+                        //exit(EXIT_FAILURE);
+                   }
+              }
+         }
+    }
 
 }
 
-void Building::Update()
-{
-     // some peds may change the room via another crossing than the primary intended one
-     // in that case they are set in the wrong room.
-     vector<Pedestrian*> nonConformPeds;
-     for (int i = 0; i < GetNumberOfRooms(); i++) {
-          Room* room = GetRoom(i);
-
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
-                    Pedestrian* ped = sub->GetPedestrian(k);
-                    //set the new room if needed
-                    if (!sub->IsInSubRoom(ped)) {
-                         // the peds has changed the room and is farther than 50 cm from
-                         // the exit, thats a real problem.
-                         if (ped->GetExitLine()->DistTo(ped->GetPos()) > 0.50) {
-                              Log->Write(
-                                   "WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
-                                   "via unknown exit[??%d] \n Position: (%f, %f), distance to exit: (%f)",
-                                   ped->GetID(),
-                                   _rooms[ped->GetRoomID()]->GetCaption().c_str(),
-                                   ped->GetRoomID(), ped->GetSubRoomID(),
-                                   ped->GetExitIndex(), ped->GetPos().GetX(),
-                                   ped->GetPos().GetY(),ped->GetExitLine()->DistTo(ped->GetPos()));
-                              //ped->Dump(ped->GetPedIndex());
-                              //std::cout << ped->GetLastDestination() << " "
-                              //              << ped->GetNextDestination() << std::endl;
-                              //exit(0);
-                              nonConformPeds.push_back(ped);
-                              sub->DeletePedestrian(k--);
-                              continue; // next pedestrian
-                         }
-
-                         //safely converting  (upcasting) the NavLine to a crossing.
-                         Crossing* cross =
-                              dynamic_cast<Crossing*>(ped->GetExitLine());
-                         if (cross == NULL) {
-                              Log->Write("ERROR: Building::update() type casting error for ped %d",ped->GetID());
-                              Log->Write("ERROR: Fix Me !");
-                              nonConformPeds.push_back(ped);
-                              exit(EXIT_FAILURE);
-                         }
-
-                         SubRoom* other_sub = cross->GetOtherSubRoom(
-                                                   room->GetID(), j);
-
-                         if (other_sub) {
-                              int nextSubRoom = other_sub->GetSubRoomID();
-                              int nextRoom = other_sub->GetRoomID();
-                              ped->SetSubRoomID(nextSubRoom);
-                              ped->SetRoomID(nextRoom,
-                                             GetRoom(nextRoom)->GetCaption());
-                              other_sub->AddPedestrian(ped);
-
-                         } else {
-                              DeletePedestrian(ped);
-                              //continue;
-                         }
-                         // Lösche Fußgänger aus aktuellem SubRoom
-                         sub->DeletePedestrian(k--); // k--;
-                    }
-                    // neues Ziel setzten
-                    //pRouting->FindExit(ped);
-               }
-          }
-     }
-
-     // reset that pedestrians who left their room not via the intended exit
-     for (int p = 0; p < (int) nonConformPeds.size(); p++) {
-          Pedestrian* ped = nonConformPeds[p];
-          bool assigned = false;
-          for (int i = 0; i < GetNumberOfRooms(); i++) {
-               Room* room = GetRoom(i);
-               for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-                    SubRoom* sub = room->GetSubRoom(j);
-                    //only relocate in the same room
-                    // or only in neighbouring rooms
-                    if (room->GetID() != ped->GetRoomID())
-                         continue;
-                    if (sub->IsInSubRoom(ped->GetPos())) {
-                         //set in the new room
-                         Log->Write("pedestrian %d relocated from room/subroom [%s] %d/%d to [%s] %d/%d ",
-                                    ped->GetID(),
-                                    GetRoom(ped->GetRoomID())->GetCaption().c_str(),
-                                    ped->GetRoomID(), ped->GetSubRoomID(),
-                                    room->GetCaption().c_str(), i, j);
-                         ped->SetRoomID(room->GetID(), room->GetCaption());
-                         ped->SetSubRoomID(sub->GetSubRoomID());
-                         ped->ClearMentalMap(); // reset the destination
-                         ped->FindRoute();
-                         sub->AddPedestrian(ped);
-                         assigned = true;
-                         break;
-                    }
-               }
-               if (assigned == true)
-                    break; // stop the loop
-          }
-          if (assigned == false) {
-               DeletePedestrian(ped);
-          }
-     }
-
-     // find the new goals, the parallel way
-
-     unsigned int nSize = _allPedestians.size();
-     int nThreads = omp_get_max_threads();
-
-
-     int partSize = nSize / nThreads;
-
-     #pragma omp parallel  default(shared) num_threads(nThreads)
-     {
-          const int threadID = omp_get_thread_num();
-          int start = threadID * partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1))
-               end = nSize - 1;
-
-          for (int p = start; p <= end; ++p) {
-               if (_allPedestians[p]->FindRoute() == -1) {
-                    //a destination could not be found for that pedestrian
-                    //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
-                    //Log->Write("\tINFO: \tHe has reached the target cell");
-                    DeletePedFromSim(_allPedestians[p]);
-                    exit(EXIT_FAILURE);
-               }
-          }
-     }
-
-     //cleaning up
-     //CleanUpTheScene();
-}
+//void Building::Update()
+//{
+//     // some peds may change the room via another crossing than the primary intended one
+//     // in that case they are set in the wrong room.
+//     vector<Pedestrian*> nonConformPeds;
+//     for (int i = 0; i < GetNumberOfRooms(); i++) {
+//          Room* room = GetRoom(i);
+//
+//          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+//               SubRoom* sub = room->GetSubRoom(j);
+//               for (int k = 0; k < sub->GetNumberOfPedestrians(); k++) {
+//                    Pedestrian* ped = sub->GetPedestrian(k);
+//                    //set the new room if needed
+//                    if (!sub->IsInSubRoom(ped)) {
+//                         // the peds has changed the room and is farther than 50 cm from
+//                         // the exit, thats a real problem.
+//                         if (ped->GetExitLine()->DistTo(ped->GetPos()) > 0.50) {
+//                              Log->Write(
+//                                   "WARNING: Building::update() pedestrian [%d] left the room/subroom [%s][%d/%d] "
+//                                   "via unknown exit[??%d] \n Position: (%f, %f), distance to exit: (%f)",
+//                                   ped->GetID(),
+//                                   _rooms[ped->GetRoomID()]->GetCaption().c_str(),
+//                                   ped->GetRoomID(), ped->GetSubRoomID(),
+//                                   ped->GetExitIndex(), ped->GetPos().GetX(),
+//                                   ped->GetPos().GetY(),ped->GetExitLine()->DistTo(ped->GetPos()));
+//                              //ped->Dump(ped->GetPedIndex());
+//                              //std::cout << ped->GetLastDestination() << " "
+//                              //              << ped->GetNextDestination() << std::endl;
+//                              //exit(0);
+//                              nonConformPeds.push_back(ped);
+//                              sub->DeletePedestrian(k--);
+//                              continue; // next pedestrian
+//                         }
+//
+//                         //safely converting  (upcasting) the NavLine to a crossing.
+//                         Crossing* cross =
+//                              dynamic_cast<Crossing*>(ped->GetExitLine());
+//                         if (cross == NULL) {
+//                              Log->Write("ERROR: Building::update() type casting error for ped %d",ped->GetID());
+//                              Log->Write("ERROR: Fix Me !");
+//                              nonConformPeds.push_back(ped);
+//                              exit(EXIT_FAILURE);
+//                         }
+//
+//                         SubRoom* other_sub = cross->GetOtherSubRoom(
+//                                                   room->GetID(), j);
+//
+//                         if (other_sub) {
+//                              int nextSubRoom = other_sub->GetSubRoomID();
+//                              int nextRoom = other_sub->GetRoomID();
+//                              ped->SetSubRoomID(nextSubRoom);
+//                              ped->SetRoomID(nextRoom,
+//                                             GetRoom(nextRoom)->GetCaption());
+//                              other_sub->AddPedestrian(ped);
+//
+//                         } else {
+//                              DeletePedestrian(ped);
+//                              //continue;
+//                         }
+//                         // Lösche Fußgänger aus aktuellem SubRoom
+//                         sub->DeletePedestrian(k--); // k--;
+//                    }
+//                    // neues Ziel setzten
+//                    //pRouting->FindExit(ped);
+//               }
+//          }
+//     }
+//
+//     // reset that pedestrians who left their room not via the intended exit
+//     for (int p = 0; p < (int) nonConformPeds.size(); p++) {
+//          Pedestrian* ped = nonConformPeds[p];
+//          bool assigned = false;
+//          for (int i = 0; i < GetNumberOfRooms(); i++) {
+//               Room* room = GetRoom(i);
+//               for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
+//                    SubRoom* sub = room->GetSubRoom(j);
+//                    //only relocate in the same room
+//                    // or only in neighbouring rooms
+//                    if (room->GetID() != ped->GetRoomID())
+//                         continue;
+//                    if (sub->IsInSubRoom(ped->GetPos())) {
+//                         //set in the new room
+//                         Log->Write("pedestrian %d relocated from room/subroom [%s] %d/%d to [%s] %d/%d ",
+//                                    ped->GetID(),
+//                                    GetRoom(ped->GetRoomID())->GetCaption().c_str(),
+//                                    ped->GetRoomID(), ped->GetSubRoomID(),
+//                                    room->GetCaption().c_str(), i, j);
+//                         ped->SetRoomID(room->GetID(), room->GetCaption());
+//                         ped->SetSubRoomID(sub->GetSubRoomID());
+//                         ped->ClearMentalMap(); // reset the destination
+//                         ped->FindRoute();
+//                         sub->AddPedestrian(ped);
+//                         assigned = true;
+//                         break;
+//                    }
+//               }
+//               if (assigned == true)
+//                    break; // stop the loop
+//          }
+//          if (assigned == false) {
+//               DeletePedestrian(ped);
+//          }
+//     }
+//
+//     // find the new goals, the parallel way
+//
+//     unsigned int nSize = _allPedestians.size();
+//     int nThreads = omp_get_max_threads();
+//
+//
+//     int partSize = nSize / nThreads;
+//
+//     #pragma omp parallel  default(shared) num_threads(nThreads)
+//     {
+//          const int threadID = omp_get_thread_num();
+//          int start = threadID * partSize;
+//          int end = (threadID + 1) * partSize - 1;
+//          if ((threadID == nThreads - 1))
+//               end = nSize - 1;
+//
+//          for (int p = start; p <= end; ++p) {
+//               if (_allPedestians[p]->FindRoute() == -1) {
+//                    //a destination could not be found for that pedestrian
+//                    //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+//                    //Log->Write("\tINFO: \tHe has reached the target cell");
+//                    DeletePedFromSim(_allPedestians[p]);
+//                    exit(EXIT_FAILURE);
+//               }
+//          }
+//     }
+//
+//     //cleaning up
+//     //CleanUpTheScene();
+//}
 
 
 void Building::InitPhiAllPeds(double pDt)
@@ -1184,16 +1182,16 @@ void Building::InitGrid(double cellSize)
      }
 
      //make the grid slightly larger.
-     x_min = x_min - 1.0;
-     x_max = x_max + 1.0;
-     y_min = y_min - 1.0;
-     y_max = y_max + 1.0;
+     x_min = x_min - 1*cellSize;
+     x_max = x_max + 1*cellSize;
+     y_min = y_min - 1*cellSize;
+     y_max = y_max + 1*cellSize;
 
-     double boundaries[] = { x_min, x_max, y_min, y_max };
+     double boundaries[4] = { x_min, x_max, y_min, y_max };
      int pedsCount = _allPedestians.size();
 
      //no algorithms
-     // the domain is made of a sigle cell
+     // the domain is made of a single cell
      if(cellSize==-1) {
           Log->Write("INFO: \tBrute Force will be used for neighborhoods query");
           if ( (x_max-x_min) < (y_max-y_min) ) {
@@ -1372,13 +1370,13 @@ void Building::LoadTrafficInfo()
 }
 
 
-void Building::DeletePedestrian(Pedestrian* ped)
+void Building::DeletePedestrian(Pedestrian* &ped)
 {
      vector<Pedestrian*>::iterator it;
      it = find(_allPedestians.begin(), _allPedestians.end(), ped);
      if (it == _allPedestians.end()) {
-          Log->Write ("\tINFO: \tPed not found with ID %d ",ped->GetID());
-          // FIXME: the pedestrians should always exist. check this in connection with the mesh router.
+          Log->Write ("\tERROR: \tPed not found with ID %d ",ped->GetID());
+          exit(EXIT_FAILURE);
           return;
      } else {
           // save the path history for this pedestrian before removing from the simulation
@@ -1398,11 +1396,18 @@ void Building::DeletePedestrian(Pedestrian* ped)
                }
 
           }
-          static int TotalPeds= _allPedestians.end()-_allPedestians.begin();
-           int NowPeds= _allPedestians.end()-_allPedestians.begin();
+          cout << "rescued agent: " << (*it)->GetID()<<endl;
+
+          static int totalPeds= _allPedestians.size();
           _allPedestians.erase(it);
-//          cout << "rescued agent: " << (*it)->GetID()<< "  Nowpeds "<< NowPeds << " max= "<<TotalPeds <<endl;
-          Log->ProgressBar(TotalPeds, TotalPeds-NowPeds+1);
+
+          int nowPeds= _allPedestians.size();
+          //if((*it)->GetID()==69){
+          //cout << "rescued agent: " << (*it)->GetID()<<endl;
+          //cout << "want to rescue agent: " << ped->GetID()<<endl<<endl;
+          //     exit(0);
+          // }
+          //Log->ProgressBar(TotalPeds, totalPeds-nowPeds+1);
      }
      //update the stats before deleting
      Transition* trans =GetTransitionByUID(ped->GetExitIndex());
@@ -1412,7 +1417,7 @@ void Building::DeletePedestrian(Pedestrian* ped)
      delete ped;
 }
 
-void Building::DeletePedFromSim(Pedestrian* ped)
+void Building::DeletePedFromSim(Pedestrian* &ped)
 {
      SubRoom* sub = _rooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
      for (int p = 0; p < sub->GetNumberOfPedestrians(); p++) {

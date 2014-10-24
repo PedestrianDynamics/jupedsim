@@ -105,10 +105,6 @@ public:
       * Set/Get the associated room id
       */
      void SetRoomID(int ID);
-     //void SetAllWalls(const std::vector<Wall>& walls);
-     //void SetWall(const Wall& wall, int index);
-     //void SetPolygon(const std::vector<Point>& poly);
-     //void SetArea(double a);
 
      void SetClosed(double c);
 
@@ -212,7 +208,6 @@ public:
       */
      double GetElevation(const Point & p1) const;
 
-
      /**
       * compute the cosine of the dihedral angle with the Horizontal plane Z=h
       * @return the cosine of the angle
@@ -236,7 +231,6 @@ public:
       * @see http://stackoverflow.com/questions/9473570/polygon-vertices-clockwise-or-counterclockwise/
       */
      bool IsClockwise();
-
 
      /**
       * check the subroom for some inconsistencies.
@@ -280,11 +274,8 @@ public:
       * @param index, the index of the peds in the vector (NOT THE ID !)
       */
      void DeletePedestrian(int index);
-     //void DeletePedestrian(Pedestrian* ped);
      void AddGoalID(int ID);
      void RemoveGoalID(int ID);
-
-
 
      /**
       * @return true if the two subrooms share a common walkable Edge (crossing or transition)
@@ -304,7 +295,6 @@ public:
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
      bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
-
 
 
      // virtual functions

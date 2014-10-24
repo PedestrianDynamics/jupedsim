@@ -31,6 +31,7 @@
 #include "../routing/NavMesh.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/SubRoom.h"
+#include "../mpi/LCGrid.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -679,9 +680,12 @@ void TrajectoriesJPSV05::WriteGeometry(Building* building)
           }
           //embed_geometry.append("\t</geometry>\n");
      }
+
+     //write the grid
+     embed_geometry.append(building->GetGrid()->ToXML());
+
      embed_geometry.append("\t</geometry>\n");
      _outputHandler->Write(embed_geometry);
-
 
      _outputHandler->Write("\t<AttributeDescription>");
      _outputHandler->Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");

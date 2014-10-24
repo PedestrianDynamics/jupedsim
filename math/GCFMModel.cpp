@@ -487,6 +487,8 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
      
      int partSize = nSize / nThreads;
      int debugPed = 14;//10;
+     //building->GetGrid()->HighlightNeighborhood(debugPed, building);
+
 
      #pragma omp parallel  default(shared) num_threads(nThreads)
      {
@@ -505,10 +507,6 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
                Room* room = building->GetRoom(ped->GetRoomID());
                SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
                //if(subroom->GetType()=="cellular") continue;
-
-
-               if(debugPed == ped->GetID())
-                    building->GetGrid()->HighlightNeighborhood(ped, building);
 
 
                double normVi = ped->GetV().ScalarP(ped->GetV());

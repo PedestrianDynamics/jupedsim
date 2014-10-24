@@ -37,6 +37,7 @@
 #define LCGRID_H_
 
 #include <vector>
+#include <string>
 #include "../geometry/Point.h"
 
 //forwarded classes
@@ -68,8 +69,6 @@ private:
 
 
 public:
-
-
      /**
       * Constructor
       * @param boundaries the boundaries of the grid [xmin xmax ymin ymax]
@@ -82,11 +81,6 @@ public:
       * Desctructor
       */
      ~LCGrid();
-
-     /**
-      *Update the cells occupation
-      */
-     void Update(Pedestrian** peds);
 
      /**
       *Get pCellSize
@@ -139,9 +133,14 @@ public:
 
      /**
       * Highlight the neighborhood of the given pedestrian
-      * @param ped
+      * @param pedID
       */
-     void HighlightNeighborhood(const Pedestrian* ped, Building* building);
+     void HighlightNeighborhood(int pedID, Building* building);
+
+     /**
+      * @return an xml representation of the grid, compatible with the geometry format
+      */
+     std::string ToXML();
 
 };
 

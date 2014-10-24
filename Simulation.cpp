@@ -454,6 +454,10 @@ int Simulation::RunSimulation()
      //first initialisation needed by the linked-cells
      Update();
 
+     //needed to control the execution time
+     time_t starttime, endtime;
+     time(&starttime);
+
      // main program loop
      for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
           t = 0 + (frameNr - 1) * _deltaT;
@@ -467,6 +471,12 @@ int Simulation::RunSimulation()
                _iod->WriteFrame(frameNr / writeInterval, _building);
           }
 
+          // in the case you want to run in no faster than realtime
+//          time(&endtime);
+//          double timeToWait=t-difftime(endtime, starttime);
+//          clock_t goal = timeToWait*1000 + clock();
+//          while (goal > clock());
+
      }
      // writing the footer
      _iod->WriteFooter();
@@ -479,10 +489,10 @@ int Simulation::RunSimulation()
           delete _iod;
           _iod=NULL;
 
-          //              char tmp[CLENGTH];
-          //              int f= frameNr / writeInterval ;
-          //              sprintf(tmp,"<frameCount>%07d</frameCount>",f);
-          //              string frameCount (tmp);
+          // char tmp[CLENGTH];
+          // int f= frameNr / writeInterval ;
+          // sprintf(tmp,"<frameCount>%07d</frameCount>",f);
+          // string frameCount (tmp);
 
           char replace[CLENGTH];
           // open the file and replace the 8th line

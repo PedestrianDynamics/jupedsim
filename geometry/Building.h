@@ -81,9 +81,9 @@ public:
      void SetRoutingEngine(RoutingEngine* r);
      void SetRoom(Room* room, int index);
      /// delete the ped from the ped vector
-     void DeletePedestrian(Pedestrian* ped);
+     void DeletePedestrian(Pedestrian* &ped);
      /// delete the ped from the simulation
-     void DeletePedFromSim(Pedestrian* ped);
+     void DeletePedFromSim(Pedestrian* &ped);
      void AddPedestrian(Pedestrian* ped);
 
 

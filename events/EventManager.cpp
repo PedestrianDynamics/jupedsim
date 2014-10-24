@@ -41,55 +41,59 @@ void EventManager::SetProjectRootDir(const std::string &filename){
 }
 
 void EventManager::readEventsXml(){
-    Log->Write("INFO: \tReading events\n ");
-    //get the geometry filename from the project file
-    TiXmlDocument doc(_projectFilename);
-    if (!doc.LoadFile()){
-        Log->Write("ERROR: \t%s", doc.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the project file. ");
-        exit(EXIT_FAILURE);
-    }
+     Log->Write("INFO: \tLooking for events");
+     //get the geometry filename from the project file
+     TiXmlDocument doc(_projectFilename);
+     if (!doc.LoadFile()){
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the project file.");
+          exit(EXIT_FAILURE);
+     }
 
-    Log->Write("INFO: \tParsing the event file");
-    TiXmlElement* xMainNode = doc.RootElement();
-    string eventfile="";
-    if(xMainNode->FirstChild("events")){
-        eventfile=_projectRootDir+xMainNode->FirstChild("events")->FirstChild()->Value();
-        Log->Write("INFO: \tevents <"+eventfile+">");
-    }
+     TiXmlElement* xMainNode = doc.RootElement();
+     string eventfile="";
+     if(xMainNode->FirstChild("events")){
+          eventfile=_projectRootDir+xMainNode->FirstChild("events")->FirstChild()->Value();
+          Log->Write("INFO: \tevents <"+eventfile+">");
+     }
+     else
+     {
+          Log->Write("INFO: \tNo events found");
+          return;
+     }
 
-    TiXmlDocument docEvent(eventfile);
-    if(!docEvent.LoadFile()){
-        Log->Write("EROOR: \t%s",docEvent.ErrorDesc());
-        Log->Write("ERROR: \t could not parse the event file. So no Events are found.");
-        //exit(EXIT_FAILURE);
-        return;
-    }
+     Log->Write("INFO: \tParsing the event file");
+     TiXmlDocument docEvent(eventfile);
+     if(!docEvent.LoadFile()){
+          Log->Write("ERROR: \t%s",docEvent.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the event file.");
+          return;
+     }
 
-    TiXmlElement* xRootNode = docEvent.RootElement();
-    if(!xRootNode){
-        Log->Write("ERROR:\tRoot element does not exist.");
-        exit(EXIT_FAILURE);
-    }
+     TiXmlElement* xRootNode = docEvent.RootElement();
+     if(!xRootNode){
+          Log->Write("ERROR:\tRoot element does not exist.");
+          exit(EXIT_FAILURE);
+     }
 
-    if( xRootNode->ValueStr () != "JPScore" ) {
-        Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
-        exit(EXIT_FAILURE);
-    }
+     if( xRootNode->ValueStr () != "JPScore" ) {
+          Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
+          exit(EXIT_FAILURE);
+     }
 
-    TiXmlNode* xEvents = xRootNode->FirstChild("events");
-    if(!xEvents){
-        Log->Write("ERROR:\tNo events found.");
-        exit(EXIT_FAILURE);
-    }
-    
-    for(TiXmlElement* e = xEvents->FirstChildElement("event"); e; e= e->NextSiblingElement("event")){
-        _event_times.push_back(atoi(e->Attribute("time")));
-        _event_types.push_back(e->Attribute("type"));
-        _event_states.push_back(e->Attribute("state"));
-        _event_ids.push_back(atoi(e->Attribute("id")));
-    }
-    Log->Write("INFO: \tEvents were read\n");
+     TiXmlNode* xEvents = xRootNode->FirstChild("events");
+     if(!xEvents){
+          Log->Write("ERROR:\tNo events found.");
+          exit(EXIT_FAILURE);
+     }
+
+     for(TiXmlElement* e = xEvents->FirstChildElement("event"); e; e= e->NextSiblingElement("event")){
+          _event_times.push_back(atoi(e->Attribute("time")));
+          _event_types.push_back(e->Attribute("type"));
+          _event_states.push_back(e->Attribute("state"));
+          _event_ids.push_back(atoi(e->Attribute("id")));
+     }
+     Log->Write("INFO: \tEvents were read\n");
 }
 
 void EventManager::listEvents(){
