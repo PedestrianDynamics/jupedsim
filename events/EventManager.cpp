@@ -141,7 +141,7 @@ void EventManager::Update_Events(double time, double d){
      //   neues Routing) ansonsten fertig
 
      _deltaT=d;
-     vector<Pedestrian*> _allPeds=_building->GetAllPedestrians();
+     const vector<Pedestrian*>& _allPeds=_building->GetAllPedestrians();
 
      //zuerst muss geprueft werden, ob die Peds, die die neuen Infos schon haben sie an andere Peds weiter-
      //leiten muessen (wenn diese sich in der naechsten Umgebung befinden)
@@ -245,7 +245,7 @@ void EventManager::changeRouting(int id, string state){
     RoutingEngine* routingEngine= _building->GetRoutingEngine();
     routingEngine->Init(_building);
     _building->InitPhiAllPeds(_deltaT);
-    vector<Pedestrian*> _allPedestrians=_building->GetAllPedestrians();
+    const vector<Pedestrian*>& _allPedestrians=_building->GetAllPedestrians();
     unsigned int nSize = _allPedestrians.size();
 
     //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter(abh. von der

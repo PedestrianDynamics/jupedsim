@@ -121,9 +121,7 @@ void Building::SetRoom(Room* room, int index)
      }
 }
 
-//void Building::SetModel(ForceModel* m){
-  //     _model=m;
-//}
+
 /*************************************************************
  Getter-Funktionen
  ************************************************************/
@@ -855,11 +853,16 @@ void Building::SanityCheck()
 
 #ifdef _SIMULATOR
 
-//TODO: merge this with Update and improve runtime
+
 void Building::Update()
 {
-     //pedestians to be deleted
-     vector<Pedestrian*> nonConformPeds;
+     //pedestrians to be deleted
+     //you should better create this in the constructor and allocate it once.
+     vector<Pedestrian*> pedsToReposition;
+     pedsToReposition.reserve(100);
+     vector<Pedestrian*> pedsToRemove;
+     pedsToRemove.reserve(100);
+
      for(unsigned int p=0;p<_allPedestians.size();p++)
      {
           Pedestrian* ped = _allPedestians[p];
@@ -868,22 +871,25 @@ void Building::Update()
 
           //set the new room if needed
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                    && (GetRoom(ped->GetRoomID())->GetCaption() == "outside")) {
+                    && (GetRoom(ped->GetRoomID())->GetCaption() == "outside"))
+          {
 
-               DeletePedestrian(ped);
+               pedsToRemove.push_back(ped);
+               //DeletePedestrian(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (_goals[ped->GetFinalDestination()]->Contains(
                               ped->GetPos()))) {
-               DeletePedestrian(ped);
+               //DeletePedestrian(ped);
+               pedsToRemove.push_back(ped);
           } else if (!sub->IsInSubRoom(ped)) {
-               nonConformPeds.push_back(ped);
+               pedsToReposition.push_back(ped);
           }
      }
 
 
      // reset that pedestrians who left their room not via the intended exit
-     for (int p = 0; p < (int) nonConformPeds.size(); p++) {
-          Pedestrian* ped = nonConformPeds[p];
+     for (unsigned int p = 0; p < pedsToReposition.size(); p++) {
+          Pedestrian* ped = pedsToReposition[p];
           bool assigned = false;
           for (int i = 0; i < GetNumberOfRooms(); i++) {
                Room* room = GetRoom(i);
@@ -904,8 +910,15 @@ void Building::Update()
                     break; // stop the loop
           }
           if (assigned == false) {
-               DeletePedestrian(ped);
+               //DeletePedestrian(ped);
+               pedsToRemove.push_back(ped);
           }
+     }
+
+     // remove the pedestrians that have left the facility
+     for (unsigned int p = 0; p < pedsToRemove.size(); p++)
+     {
+          DeletePedestrian(pedsToRemove[p]);
      }
 
      // find the new goals, the parallel way
@@ -934,7 +947,7 @@ void Building::Update()
                for (int p = start; p <= end; ++p) {
                     if (_allPedestians[p]->FindRoute() == -1) {
                          //a destination could not be found for that pedestrian
-                         //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
+                         Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
                          DeletePedestrian(_allPedestians[p]);
                          //exit(EXIT_FAILURE);
                     }
