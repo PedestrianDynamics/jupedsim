@@ -45,6 +45,7 @@
 // forwarded classes
 class QThread;
 class QObject;
+class QColor;
 
 class vtkRenderer;
 class vtkAssembly;
