@@ -30,6 +30,7 @@
 #define MESHROUTER_H_
 
 #include "Router.h"
+#include "NavMesh.h"
 #include "mesh/Mesh.h"
 
 class MeshRouter: public Router {
@@ -42,7 +43,9 @@ private:
      NavLine FunnelRad(Point&,Point&,std::vector<MeshEdge*>);
      MeshEdge* Visibility(Point&,Point&,std::vector<MeshEdge*>)const;
      std::string GetMeshFileName() const;
+     void WriteMeshToFile(const std::string& filename);
      void FixMeshEdges();
+
 public:
      MeshRouter();
      virtual ~MeshRouter();

@@ -107,30 +107,30 @@ public:
      virtual ~GompertzModel(void);
 
      DirectionStrategy* GetDirection() const;
+
      /**
       * Get the parameter for the strength of the ped-PED repulsive force
-      *
       *
       * @return double
       */
      double GetNuPed() const;
+
      /**
       * ToDO: What is this parameter doing?
-      *
       *
       * @return double
       */
      double GetaPed() const;
+
      /**
       * ToDO: What is this parameter doing?
-      *
       *
       * @return double
       */
      double GetbPed() const;
+
      /**
       * ToDO: What is this parameter doing?
-      *
       *
       * @return double
       */
@@ -139,38 +139,30 @@ public:
      /**
       * Get the parameter for the strength of the ped-WALL repulsive force
       *
-      *
       * @return
       */
      double GetNuWall() const;
+
      /**
       * ToDO: What is this parameter doing?
-      *
       *
       * @return double
       */
      double GetaWall() const;
+
      /**
       * ToDO: What is this parameter doing?
-      *
       *
       * @return double
       */
      double GetbWall() const;
+
      /**
       * ToDO: What is this parameter doing?
-      *
       *
       * @return double
       */
      double GetcWall() const;
-
-     /**
-      * Get the parameter for the strength of the ped-WALL repulsive force
-      *
-      * @return
-      */
-
 
      /**
       * Solve the differential equations and update the positions and velocities
@@ -179,10 +171,17 @@ public:
       * @param building the geometry object
       */
      virtual void CalculateForce(double t, double tp, Building* building) const;
+
      /**
       * @return all model parameters in a nicely formatted string
       */
      virtual std::string writeParameter() const;
+
+     /**
+      * initialize the phi angle
+      * @param building
+      */
+     virtual void Init (Building* building) const;
 };
 
 

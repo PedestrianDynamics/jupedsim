@@ -54,7 +54,7 @@ int OutputHandler::GetErrors()
      return _nErrors;
 }
 
-void OutputHandler::Write(string str)
+void OutputHandler::Write(const string& str)
 {
      if (this != NULL)
           cout << str << endl;
@@ -89,7 +89,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 
 void OutputHandler::Write(const char* message,...)
  {
-    char msg[CLENGTH];
+    char msg[CLENGTH]="";
     va_list ap;
     va_start(ap, message);
     vsprintf(msg, message, ap);
@@ -116,7 +116,7 @@ void OutputHandler::Write(const char* message,...)
     }
 }
 
-void STDIOHandler::Write(string str)
+void STDIOHandler::Write(const string& str)
 {
     if (str.find("ERROR") != string::npos)
        {
@@ -153,7 +153,7 @@ FileHandler::~FileHandler()
      _pfp.close();
 }
 
-void FileHandler::Write(string str)
+void FileHandler::Write(const string& str)
 {
     if (this != NULL) {
         _pfp << str << endl;
@@ -172,7 +172,7 @@ void FileHandler::Write(string str)
 
 void FileHandler::Write(const char* str_msg,...)
 {
-     char msg[CLENGTH];
+     char msg[CLENGTH]="";
      va_list ap;
      va_start (ap, str_msg);
      vsprintf (msg,str_msg ,ap);
@@ -191,7 +191,7 @@ void FileHandler::Write(const char* str_msg,...)
      }
 }
 
-SocketHandler::SocketHandler(string host, int port)
+SocketHandler::SocketHandler(const string& host, int port)
 {
      client = new TraVisToClient(host, port);
      brokentags.push_back("<trajectories>");
@@ -204,10 +204,11 @@ SocketHandler::~SocketHandler()
      delete client;
 }
 
-void SocketHandler::Write(string str)
+void SocketHandler::Write(const string& stringRef)
 {
 
      vector<string>::iterator str_it;
+     string str=stringRef;
 
      //There are a few broken tags which need to be checked for and removed.
      for (str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {

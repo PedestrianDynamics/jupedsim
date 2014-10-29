@@ -26,17 +26,13 @@
  *
  **/
 
-
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
 
 
-
-
 int main(int argc, char **argv)
 {
-
      //gathering some statistics about the runtime
      time_t starttime, endtime;
 

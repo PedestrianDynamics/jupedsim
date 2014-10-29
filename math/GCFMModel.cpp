@@ -68,6 +68,41 @@ GCFMModel::~GCFMModel(void)
 
 }
 
+void GCFMModel::Init (Building* building) const
+{
+    const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+    for(unsigned int p=0;p<allPeds.size();p++)
+    {
+         Pedestrian* ped = allPeds[p];
+         double cosPhi, sinPhi;
+         //a destination could not be found for that pedestrian
+         if (ped->FindRoute() == -1) {
+             building->DeletePedestrian(ped);
+              continue;
+         }
+
+         Line* e = ped->GetExitLine();
+         const Point& e1 = e->GetPoint1();
+         const Point& e2 = e->GetPoint2();
+         Point target = (e1 + e2) * 0.5;
+         Point d = target - ped->GetPos();
+         double dist = d.Norm();
+         if (dist != 0.0) {
+              cosPhi = d.GetX() / dist;
+              sinPhi = d.GetY() / dist;
+         } else {
+              Log->Write(
+                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "dist to target is 0\n");
+              exit(EXIT_FAILURE);
+         }
+
+         JEllipse E = ped->GetEllipse();
+         E.SetCosPhi(cosPhi);
+         E.SetSinPhi(sinPhi);
+         ped->SetEllipse(E);
+    }
+}
 inline  Point GCFMModel::ForceDriv(Pedestrian* ped, Room* room) const
 {
      const Point& target = _direction->GetTarget(room, ped);

@@ -167,7 +167,6 @@ public:
      void InitGeometry();
      void InitGrid(double cellSize);
      //void InitRoomsAndSubroomsMap();
-     void InitPhiAllPeds(double pDt); // initialize the direction of the ellipses
      void InitSavePedPathway(const std::string &filename);
      void AddRoom(Room* room);
      void Update();
@@ -193,8 +192,6 @@ public:
      void LoadTrafficInfo();
      void LoadRoutingInfo(const std::string &filename);
      void WriteToErrorLog() const;
-
-     void CleanUpTheScene();
 
      /**
       * Check the scenario for possible errors and

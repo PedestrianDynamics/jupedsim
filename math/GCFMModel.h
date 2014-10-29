@@ -70,6 +70,7 @@ public:
     // virtual function
     virtual void CalculateForce(double t, double tp, Building* building) const;
     virtual std::string writeParameter() const;
+    virtual void Init (Building* building) const;
 
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)

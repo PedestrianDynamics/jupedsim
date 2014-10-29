@@ -68,13 +68,49 @@ GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double aped, 
 }
 
 
-GompertzModel::~GompertzModel(void) { }
+GompertzModel::~GompertzModel() { }
+
+void GompertzModel::Init (Building* building) const
+{
+    const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
+    for(unsigned int p=0;p<allPeds.size();p++)
+    {
+         Pedestrian* ped = allPeds[p];
+         double cosPhi, sinPhi;
+         //a destination could not be found for that pedestrian
+         if (ped->FindRoute() == -1) {
+             building->DeletePedestrian(ped);
+              continue;
+         }
+
+         Line* e = ped->GetExitLine();
+         const Point& e1 = e->GetPoint1();
+         const Point& e2 = e->GetPoint2();
+         Point target = (e1 + e2) * 0.5;
+         Point d = target - ped->GetPos();
+         double dist = d.Norm();
+         if (dist != 0.0) {
+              cosPhi = d.GetX() / dist;
+              sinPhi = d.GetY() / dist;
+         } else {
+              Log->Write(
+                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "dist to target is 0\n");
+              exit(EXIT_FAILURE);
+         }
+
+         JEllipse E = ped->GetEllipse();
+         E.SetCosPhi(cosPhi);
+         E.SetSinPhi(sinPhi);
+         ped->SetEllipse(E);
+    }
+}
 
 
 Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
 {
-//      printf("GompertzModel::ForceDriv\n");
-     
+    // printf("GompertzModel::ForceDriv\n");
      const Point& target = _direction->GetTarget(room, ped);
      Point F_driv;
      Point e0;
@@ -202,6 +238,7 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 
      return f;
 }
+
 Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
 {
      Point F_wrep = Point(0.0, 0.0);
@@ -262,8 +299,6 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      }
 
 //-------------------------
-
-
 
      //TODO: Check later if other values are more appropriate
      //double b = 0.7, c = 3.0;
@@ -333,8 +368,6 @@ void GompertzModel::CalculateForce(double time, double tip1, Building* building)
                     //continue;  //FIXME tolerate first
                     exit(EXIT_FAILURE);
                }
-
-
 
                Point repPed = Point(0,0);
                vector<Pedestrian*> neighbours;

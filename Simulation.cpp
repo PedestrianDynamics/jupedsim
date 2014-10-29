@@ -68,22 +68,6 @@ Simulation::~Simulation()
      delete _em;
 }
 
-/************************************************
-// Setter-Funktionen
- ************************************************/
-
-
-void Simulation::SetPedsNumber(int i)
-{
-     _nPeds = i;
-}
-
-
-/************************************************
-// Getter-Funktionen
- ************************************************/
-
-
 int Simulation::GetPedsNumber() const
 {
      return _nPeds;
@@ -378,20 +362,6 @@ void Simulation::InitArgs(ArgumentParser* args)
      _building->InitGeometry(); // create the polygons
      _building->LoadTrafficInfo();
 
-     // in the case the navigation mesh should be written to a file
-     if(args->GetNavigationMesh()!="") {
-          Log->Write("INFO: \tWriting the navigation mesh to: " + args->GetNavigationMesh());
-          //Navigation mesh implementation
-          NavMesh* nv= new NavMesh(_building);
-          nv->BuildNavMesh();
-          //nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
-          nv->WriteToFile(args->GetNavigationMesh()+".nav");
-          nv->WriteToFileTraVisTo(args->GetNavigationMesh());
-          //nv->WriteScenario();
-          exit(EXIT_FAILURE);
-          //iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
-          //iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
-     }
 
      _nPeds=_distribution->Distribute(_building);
 
@@ -406,10 +376,17 @@ void Simulation::InitArgs(ArgumentParser* args)
      // initialize the routing engine before doing any other things
      routingEngine->Init(_building);
 
-     //this is very specific to the gcfm model
-     _building->InitPhiAllPeds(_deltaT);
+     //perform customs initialisation, like computing the phi for the gcfm
+     //this should be called after the routing engine has been initialised
+     // because a direction is needed for this initialisation.
+     _model->Init(_building);
 
-
+     //other initializations
+     const vector< Pedestrian* >& allPeds = _building->GetAllPedestrians();
+     for(Pedestrian *ped: allPeds)
+        {
+         ped->Setdt(_deltaT);
+        }
      //pBuilding->WriteToErrorLog();
 
      //get the seed
@@ -419,7 +396,8 @@ void Simulation::InitArgs(ArgumentParser* args)
      _building->SanityCheck();
      //size of the cells/GCFM/Gompertz
      if(args->GetDistEffMaxPed()>args->GetLinkedCellSize()){
-          Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",args->GetLinkedCellSize(),args->GetDistEffMaxPed());
+          Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",
+                  args->GetLinkedCellSize(),args->GetDistEffMaxPed());
           exit(EXIT_FAILURE);
      }
 
@@ -447,7 +425,6 @@ int Simulation::RunSimulation()
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
      double t=0.0;
 
-
      // writing the header
      _iod->WriteHeader(_nPeds, _fps, _building,_seed);
      _iod->WriteGeometry(_building);
@@ -456,9 +433,10 @@ int Simulation::RunSimulation()
      //first initialisation needed by the linked-cells
      Update();
 
-     //needed to control the execution time
-     time_t starttime, endtime;
-     time(&starttime);
+     //needed to control the execution time PART 1
+     //in the case you want to run in no faster than realtime
+     //time_t starttime, endtime;
+     //time(&starttime);
 
      // main program loop
      for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
@@ -473,11 +451,11 @@ int Simulation::RunSimulation()
                _iod->WriteFrame(frameNr / writeInterval, _building);
           }
 
-          // in the case you want to run in no faster than realtime
-//          time(&endtime);
-//          double timeToWait=t-difftime(endtime, starttime);
-//          clock_t goal = timeToWait*1000 + clock();
-//          while (goal > clock());
+          // needed to control the execution time PART 2
+          // time(&endtime);
+          // double timeToWait=t-difftime(endtime, starttime);
+          // clock_t goal = timeToWait*1000 + clock();
+          // while (goal > clock());
 
      }
      // writing the footer
@@ -486,10 +464,10 @@ int Simulation::RunSimulation()
      //if(_hpc==1)
        //  ((GPU_GCFMModel*) _model)->DeleteBuffers();
 
+     //temporary work around since the total number of frame is only available at the end of the simulation.
      if(_argsParser->GetFileFormat()==FORMAT_XML_BIN) {
 
-          delete _iod;
-          _iod=NULL;
+          delete _iod;   _iod=NULL;
 
           // char tmp[CLENGTH];
           // int f= frameNr / writeInterval ;
@@ -499,7 +477,8 @@ int Simulation::RunSimulation()
           char replace[CLENGTH];
           // open the file and replace the 8th line
           sprintf(replace,"sed -i '9s/.*/ %d /' %s", frameNr/ writeInterval, _argsParser->GetTrajectoriesFile().c_str());
-          system(replace);
+          int result=system(replace);
+          Log->Write("INFO:\t Updating the framenumber exits with code [%d]",result);
      }
 
      //return the evacuation time

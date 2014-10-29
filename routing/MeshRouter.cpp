@@ -957,6 +957,20 @@ void MeshRouter::Init(Building* b)
      FixMeshEdges();
 }
 
+void MeshRouter::WriteMeshToFile(const string& filename)
+{
+    // in the case the navigation mesh should be written to a file
+    Log->Write("INFO: \tWriting the navigation mesh to: " + filename);
+    //Navigation mesh implementation
+    NavMesh* nv= new NavMesh(_building);
+    nv->BuildNavMesh();
+    //nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
+    nv->WriteToFile(filename+".nav");
+    nv->WriteToFileTraVisTo(filename);
+    //nv->WriteScenario();
+    //iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
+    //iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
+}
 
 string MeshRouter::GetMeshFileName() const
 {

@@ -68,34 +68,39 @@ Building::Building()
 
 Building::~Building()
 {
-     for (int i = 0; i < GetNumberOfRooms(); i++)
-          delete _rooms[i];
+    for (int i = 0; i < GetNumberOfRooms(); i++)
+        delete _rooms[i];
 
 #ifdef _SIMULATOR
-     delete _routingEngine;
-     delete _linkedCellGrid;
+    for(unsigned int p=0;p<_allPedestians.size();p++)
+    {
+        //delete _allPedestians[p];
+    }
+    _allPedestians.clear();
+    delete _routingEngine;
+    delete _linkedCellGrid;
 #endif
 
-     if (_pathWayStream.is_open())
-          _pathWayStream.close();
+    if (_pathWayStream.is_open())
+        _pathWayStream.close();
 
 
-     for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
-               iter != _crossings.end(); ++iter) {
-          delete iter->second;
-     }
-     for (map<int, Transition*>::const_iterator iter = _transitions.begin();
-               iter != _transitions.end(); ++iter) {
-          delete iter->second;
-     }
-     for (map<int, Hline*>::const_iterator iter = _hLines.begin();
-               iter != _hLines.end(); ++iter) {
-          delete iter->second;
-     }
-     for (map<int, Goal*>::const_iterator iter = _goals.begin();
-               iter != _goals.end(); ++iter) {
-          delete iter->second;
-     }
+    for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
+            iter != _crossings.end(); ++iter) {
+        delete iter->second;
+    }
+    for (map<int, Transition*>::const_iterator iter = _transitions.begin();
+            iter != _transitions.end(); ++iter) {
+        delete iter->second;
+    }
+    for (map<int, Hline*>::const_iterator iter = _hLines.begin();
+            iter != _hLines.end(); ++iter) {
+        delete iter->second;
+    }
+    for (map<int, Goal*>::const_iterator iter = _goals.begin();
+            iter != _goals.end(); ++iter) {
+        delete iter->second;
+    }
 }
 
 /************************************************************
@@ -873,13 +878,10 @@ void Building::Update()
           if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
                     && (GetRoom(ped->GetRoomID())->GetCaption() == "outside"))
           {
-
                pedsToRemove.push_back(ped);
-               //DeletePedestrian(ped);
           } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                     && (_goals[ped->GetFinalDestination()]->Contains(
                               ped->GetPos()))) {
-               //DeletePedestrian(ped);
                pedsToRemove.push_back(ped);
           } else if (!sub->IsInSubRoom(ped)) {
                pedsToReposition.push_back(ped);
@@ -910,7 +912,6 @@ void Building::Update()
                     break; // stop the loop
           }
           if (assigned == false) {
-               //DeletePedestrian(ped);
                pedsToRemove.push_back(ped);
           }
      }
@@ -934,7 +935,6 @@ void Building::Update()
           unsigned int nSize = _allPedestians.size();
           int nThreads = omp_get_max_threads();
           int partSize = nSize / nThreads;
-          //assert(partSize!=0);
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
           {
@@ -954,47 +954,8 @@ void Building::Update()
                }
           }
      }
-
 }
 
-
-void Building::InitPhiAllPeds(double pDt)
-{
-     for(unsigned int p=0;p<_allPedestians.size();p++)
-     {
-          Pedestrian* ped = _allPedestians[p];
-
-          double cosPhi, sinPhi;
-          ped->Setdt(pDt); //set the simulation step
-          //a destination could not be found for that pedestrian
-          if (ped->FindRoute() == -1) {
-               DeletePedestrian(ped);
-               //sub->DeletePedestrian(k--);
-               continue;
-          }
-
-          Line* e = ped->GetExitLine();
-          const Point& e1 = e->GetPoint1();
-          const Point& e2 = e->GetPoint2();
-          Point target = (e1 + e2) * 0.5;
-          Point d = target - ped->GetPos();
-          double dist = d.Norm();
-          if (dist != 0.0) {
-               cosPhi = d.GetX() / dist;
-               sinPhi = d.GetY() / dist;
-          } else {
-               Log->Write(
-                    "ERROR: \tBuilding::InitPhiAllPeds() cannot initialise phi! "
-                    "dist to target is 0\n");
-               exit(0);
-          }
-
-          JEllipse E = ped->GetEllipse();
-          E.SetCosPhi(cosPhi);
-          E.SetSinPhi(sinPhi);
-          ped->SetEllipse(E);
-     }
-}
 
 void Building::UpdateGrid()
 {
@@ -1309,40 +1270,6 @@ void Building::InitSavePedPathway(const string &filename)
 
      }
 }
-
-void Building::CleanUpTheScene()
-{
-     //return;
-     static int counter = 0;
-     counter++;
-     static int totalSliced = 0;
-
-     int updateRate = 80.0 / 0.01; // 20 seconds/pDt
-
-     if (counter % updateRate == 0) {
-          for (unsigned int i = 0; i < _allPedestians.size(); i++) {
-               Pedestrian* ped = _allPedestians[i];
-
-               if (ped->GetDistanceSinceLastRecord() < 0.1) {
-                    //delete from the simulation
-                    DeletePedestrian(ped);
-
-                    totalSliced++;
-                    char msg[CLENGTH];
-                    sprintf(msg, "INFO:\t slicing Ped %d from room %s, total [%d]",
-                            ped->GetID(),
-                            _rooms[ped->GetRoomID()]->GetCaption().c_str(),
-                            totalSliced);
-                    Log->Write(msg);
-               } else {
-                    ped->RecordActualPosition();
-               }
-
-          }
-     }
-
-}
-
 
 
 void Building::StringExplode(string str, string separator,

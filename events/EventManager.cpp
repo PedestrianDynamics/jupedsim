@@ -117,7 +117,11 @@ void EventManager::readEventsTxt(double time){
     char cstring[256];
     int lines=0;
     do{
-        fgets(cstring,30,_file);
+        if(fgets(cstring,30,_file)==NULL)
+        {
+            Log->Write("WARNING: \tCould not read the event file");
+            return;
+        }
         if(cstring[0]!='#'){// keine Kommentarzeile
             lines++;
             if(lines>_eventCounter){
@@ -244,7 +248,7 @@ void EventManager::openDoor(int id){
 void EventManager::changeRouting(int id, string state){
     RoutingEngine* routingEngine= _building->GetRoutingEngine();
     routingEngine->Init(_building);
-    _building->InitPhiAllPeds(_deltaT);
+    //_building->InitPhiAllPeds(_deltaT);
     const vector<Pedestrian*>& _allPedestrians=_building->GetAllPedestrians();
     unsigned int nSize = _allPedestrians.size();
 

@@ -45,7 +45,6 @@
 #include "routing/DirectionStrategy.h"
 #include "routing/DummyRouter.h"
 #include "routing/GraphRouter.h"
-#include "routing/NavMesh.h"
 #include "routing/MeshRouter.h"
 #include "routing/RoutingEngine.h"
 #include "routing/SafestPathRouter.h"
@@ -96,18 +95,7 @@ public:
     /**
      * Initialize the number of agents in the simulation
      */
-    void SetPedsNumber(int i);
-
-    /**
-     * Initialize the number of agents in the simulation
-     */
     int GetPedsNumber() const;
-
-    /**
-     * Returns the number of agents when running on a distributed system (MPI)
-     * NOT IMPLEMENTED
-     */
-    int GetNPedsGlobal() const;
 
     /**
      * @return the building object containing all geometry elements
@@ -140,6 +128,7 @@ public:
      * Get the ProfileFlag
      */
     bool GetProfileFlag();
+
     /**
      * Get the HPCFlag
      */

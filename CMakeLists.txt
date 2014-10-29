@@ -96,7 +96,8 @@ else(OPENMP_FOUND)
 endif(OPENMP_FOUND)
 
 #statically link all gcc stuffs
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # find and add the CGAL library
 #fixme: complete this section

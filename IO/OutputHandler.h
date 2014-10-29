@@ -51,13 +51,13 @@ public:
      void incrementErrors();
      void ProgressBar(double TotalPeds, double NowPeds);
 
-     virtual void Write(std::string str);
+     virtual void Write(const std::string& str);
      virtual void Write(const char *string, ...);
 };
 
 class STDIOHandler : public OutputHandler {
 public:
-     void Write(std::string str);
+     void Write(const std::string& str);
 };
 
 class FileHandler : public OutputHandler {
@@ -66,7 +66,7 @@ private:
 public:
      FileHandler(const char *fn);
      virtual ~FileHandler();
-     void Write(std::string str);
+     void Write(const std::string& str);
      void Write(const char *string,...);
 };
 
@@ -75,9 +75,9 @@ private:
      TraVisToClient* client;
 
 public:
-     SocketHandler(std::string host, int port);
+     SocketHandler(const std::string& host, int port);
      virtual ~SocketHandler();
-     void Write(std::string str);
+     void Write(const std::string& str);
 
      //Some tags are broken
      std::vector<std::string> brokentags;
