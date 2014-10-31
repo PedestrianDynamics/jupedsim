@@ -14,6 +14,7 @@
 #include <boost/geometry/geometries/polygon.hpp>
 #include <boost/geometry/geometries/adapted/c_array.hpp>
 #include <boost/geometry/geometries/ring.hpp>
+//#include <boost/filesystem.hpp>
 
 using namespace boost::geometry;
 typedef model::d2::point_xy<double,  cs::cartesian> point_2d;
@@ -111,6 +112,7 @@ private:
 	void OutputVoronoiResults(std::vector<polygon_2d>  polygons, int frid);
 	void OutputFlow_NT(int frmId);
 	std::vector<polygon_2d> GetPolygons(int NrInFrm);
+	double GetVoronoiDensity2(const std::vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea);
 
 
 

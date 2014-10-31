@@ -603,6 +603,7 @@ void Analysis::OutputVoronoiResults(vector<polygon_2d>  polygons, int frid)
 {
 	double VoronoiVelocity = GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
 	double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
+	//double VoronoiDensity = GetVoronoiDensity2(polygons, XInFrame, YInFrame, _areaForMethod_D->_poly);
 	fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
 }
 /**
@@ -870,6 +871,28 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 	return density/(area(measureArea)*CMtoM*CMtoM);
 }
 
+double Analysis::GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea)
+{
+	double area_i=0;
+	int pedsinMeasureArea=0;
+	int temp=0;
+
+	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
+	{
+		if(within(make<point_2d>(XInFrame[temp], YInFrame[temp]), measureArea))
+		{
+			area_i += (area(*polygon_iterator)*CMtoM*CMtoM);
+			pedsinMeasureArea++;
+		}
+		temp++;
+	}
+	if(area_i==0)
+	{
+		return 0;
+	}
+	return pedsinMeasureArea/area_i;
+}
+
 //---------------------------------------------------------------------------------------------
 
 /*
@@ -1052,12 +1075,18 @@ void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
 
 void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame, const string& filename)
 {
-
+/* -------TODO-----------------------
+	string dir_path = "./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
+	boost::filesystem::path dir(dir_path.c_str());
+	if((boost::filesystem::create_directory(dir))==NULL)
+	{
+		Log->Write("cannot open the file <%s> to write the polygon data\n",dir_path.c_str());
+				exit(0);
+	}
+	//boost::filesystem::create_directories("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
+*/
+	mkdir("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
 	string polygon="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
-
-	//TODO: the method will fail if the directory does not not exits
-	//use the CREATE File instead combined with
-	//std::stringstream ss;
 
 	ofstream polys (polygon.c_str());
 
