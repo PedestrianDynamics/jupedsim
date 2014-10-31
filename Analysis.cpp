@@ -2,6 +2,7 @@
 
 #include "Analysis.h"
 #include "geometry/Room.h"
+#include "geometry/SubRoom.h"
 
 #include "VoronoiDiagram.h"
 
@@ -28,7 +29,6 @@ using namespace std;
 Analysis::Analysis() {
 
 	_building = NULL;
-	_iod = new IODispatcher();
 	_numFrames = 0;
 
 	_tIn = NULL;
@@ -82,7 +82,6 @@ Analysis::Analysis() {
 
 Analysis::~Analysis() {
 	delete _building;
-	delete _iod;
 	delete  [] _firstFrame;
 	delete  [] _lastFrame;
 	delete  [] _tIn;
@@ -185,7 +184,7 @@ void Analysis::InitArgs(ArgumentParser* args) {
 polygon_2d Analysis::ReadGeometry(const string& geometryFile){
 
 	_building = new Building();
-	_building->LoadBuilding(geometryFile);
+	_building->LoadGeometry(geometryFile);
 	// create the polygons
 	_building->InitGeometry();
 

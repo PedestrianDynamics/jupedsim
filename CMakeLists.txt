@@ -59,7 +59,6 @@ file(
 	VoronoiDiagram.cpp
 	VoronoiDiagramGenerator.cpp
 	VoronoiPolygons.cpp
-	IO/IODispatcher.cpp
 	IO/OutputHandler.cpp
 	general/ArgumentParser.cpp
 	tinyxml/tinystr.cpp
@@ -77,6 +76,7 @@ file(
 	geometry/Hline.cpp     
 	geometry/Obstacle.cpp  
 	geometry/SubRoom.cpp
+	geometry/Goal.cpp
 
 	header_files:
 	Analysis.h
@@ -84,7 +84,6 @@ file(
 	VoronoiDiagramGenerator.h  
 	VoronoiDiagram.h  
 	VoronoiPolygons.h
-	IO/IODispatcher.h
 	IO/OutputHandler.h
 	general/ArgumentParser.h
 	tinyxml/tinyxml.h
@@ -101,6 +100,7 @@ file(
 	geometry/Hline.h     
 	geometry/Obstacle.h  
 	geometry/SubRoom.h
+	geometry/Goal.h
 
 )
 

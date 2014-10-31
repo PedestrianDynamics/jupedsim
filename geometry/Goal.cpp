@@ -1,6 +1,6 @@
 /**
- * \file        Obstacle.cpp
- * \date        Jul 31, 2012
+ * \file        Goal.cpp
+ * \date        Spe 12, 2013
  * \version     v0.5
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
@@ -26,144 +26,117 @@
  **/
 
 
-#include "Obstacle.h"
-
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <iterator>
-#include <string>
-#include <vector>
-
-#include "../IO/OutputHandler.h"
-#include "Line.h"
 #include "Point.h"
+#include "Goal.h"
 #include "Wall.h"
 
 
 using namespace std;
 
 
-Obstacle::Obstacle()
+Goal::Goal()
 {
-     _isClosed=0.0;
-     _height=0.0;
      _id=-1;
-     _caption="obstacle";
+     _caption="Goal";
+     _isFinalGoal=0;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
 }
 
-Obstacle::~Obstacle() {}
+Goal::~Goal()
+{
 
+}
 
-void Obstacle::AddWall(const Wall& w)
+void Goal::AddWall(const Wall& w)
 {
      _walls.push_back(w);
 }
 
-string Obstacle::GetCaption() const
+string Goal::GetCaption() const
 {
      return _caption;
 }
 
-void Obstacle::SetCaption(string caption)
+void Goal::SetCaption(string caption)
 {
      _caption = caption;
 }
 
-double Obstacle::GetClosed() const
-{
-     return _isClosed;
-}
-
-void Obstacle::SetClosed(double closed)
-{
-     _isClosed = closed;
-}
-
-double Obstacle::GetHeight() const
-{
-     return _height;
-}
-
-void Obstacle::SetHeight(double height)
-{
-     _height = height;
-}
-
-int Obstacle::GetId() const
+int Goal::GetId() const
 {
      return _id;
 }
 
-void Obstacle::SetId(int id)
+void Goal::SetId(int id)
 {
      _id = id;
 }
 
-const vector<Point>& Obstacle::GetPolygon() const
+const vector<Point>& Goal::GetPolygon() const
 {
      return _poly;
 }
 
-string Obstacle::Write()
+string Goal::Write()
 {
      string s;
-     //Point pos;
+     Point pos;
 
      for (unsigned int j = 0; j < _walls.size(); j++) {
           const Wall& w = _walls[j];
           s.append(w.Write());
-          //pos = pos + w.GetPoint1() + w.GetPoint2();
+          pos = pos + w.GetPoint1() + w.GetPoint2();
      }
-     //pos = pos * (0.5 / _walls.size());
+     pos = pos * (0.5 / _walls.size());
 
-     Point pos = GetCentroid();
-
-     //add the obstacle caption
+     // add some fancy stuffs
+     if(_poly.size()>=4) {
+          s.append(Wall(_poly[0],_poly[2]).Write());
+          s.append(Wall(_poly[1],_poly[3]).Write());
+     }
+     //add the Goal caption
      char tmp[CLENGTH];
-     //sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
-     //              , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
-
-     sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
-             , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _id);
+     sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%s\" color=\"100\" />\n"
+             , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
      s.append(tmp);
 
      return s;
 }
 
-const vector<Wall>& Obstacle::GetAllWalls() const
+const vector<Wall>& Goal::GetAllWalls() const
 {
      return _walls;
 }
 
-int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const
+int Goal::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
      return (vertex.GetX() > hitPos.GetX()) ? ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
                  ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
 
 }
 
+int Goal::GetIsFinalGoal() const
+{
+     return _isFinalGoal;
+}
+
+void Goal::SetIsFinalGoal(int isFinalGoal)
+{
+     _isFinalGoal = isFinalGoal;
+}
+
 // x-Koordinate der Linie von einer Eccke zur nächsten
-double Obstacle::Xintercept(const Point& point1, const Point& point2, double hitY) const
+double Goal::Xintercept(const Point& point1, const Point& point2, double hitY) const
 {
      return (point2.GetX() - (((point2.GetY() - hitY) * (point1.GetX() - point2.GetX())) /
                               (point1.GetY() - point2.GetY())));
 }
 
 
-bool Obstacle::Contains(const Point& ped) const
+bool Goal::Contains(const Point& ped) const
 {
 
-     // in the case the obstacle is not a close surface, allow
-     // pedestrians distribution 'inside'
-     if(_isClosed==0.0) {
-          char tmp[CLENGTH];
-          sprintf(tmp, "ERROR: \tObstacle::Contains(): the obstacle [%d] is open!!!\n", _id);
-          Log->Write(tmp);
-          exit(EXIT_FAILURE);
-     }
 
      short edge, first, next;
      short quad, next_quad, delta, total;
@@ -209,15 +182,9 @@ bool Obstacle::Contains(const Point& ped) const
           return false;
 }
 
-void Obstacle::ConvertLineToPoly()
+void Goal::ConvertLineToPoly()
 {
 
-     if(_isClosed==0.0) {
-          char tmp[CLENGTH];
-          sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
-          Log->Write(tmp);
-          return;
-     }
      vector<Line*> copy;
      vector<Point> tmpPoly;
      Point point;
@@ -250,14 +217,21 @@ void Obstacle::ConvertLineToPoly()
      }
      if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
           char tmp[CLENGTH];
-          sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
+          sprintf(tmp, "ERROR: \tGoal::ConvertLineToPoly(): ID %d !!!\n", _id);
           Log->Write(tmp);
           exit(0);
      }
      _poly = tmpPoly;
+
+     ComputeControid();
 }
 
-const Point Obstacle::GetCentroid() const
+const Point& Goal::GetCentroid() const
+{
+     return _centroid;
+}
+
+void  Goal::ComputeControid()
 {
 
      double px=0,py=0;
@@ -295,17 +269,6 @@ const Point Obstacle::GetCentroid() const
      px /= (6*signedArea);
      py /= (6*signedArea);
 
-     return Point (px,py);
-}
-
-
-bool Obstacle::IntersectWithLine(const Line& line) const
-{
-
-     for (unsigned int i=0; i<_walls.size(); i++) {
-
-          if(_walls[i].IntersectionWith(line)) return true;
-     }
-
-     return false;
+     _centroid._x=px;
+     _centroid._y=py;
 }

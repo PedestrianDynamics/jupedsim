@@ -6,7 +6,6 @@
 #include "tinyxml/tinyxml.h"
 #include "geometry/Building.h"
 #include "IO/OutputHandler.h"
-#include "IO/IODispatcher.h"
 
 
 #include <boost/geometry/geometry.hpp>
@@ -34,7 +33,6 @@ private:
 	FILE *_fN_t;
 
 	Building* _building;
-	IODispatcher* _iod;
 	polygon_2d _geoPoly;
 
 	//polygon_2d _measureZone;

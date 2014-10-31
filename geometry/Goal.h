@@ -1,6 +1,6 @@
 /**
- * \file        Obstacle.h
- * \date        Jul 31, 2012
+ * \file        Goal.h
+ * \date        Sep 12, 2013
  * \version     v0.5
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
@@ -24,32 +24,33 @@
  *
  *
  **/
+ 
 
-
-#ifndef OBSTACLE_H_
-#define OBSTACLE_H_
+#ifndef GOAL_H_
+#define GOAL_H_
 
 #include <string>
 #include <vector>
 
-//forward declarations
-class Point;
-class Wall;
-class Line;
 
-class Obstacle {
+//forward declarations
+class Wall;
+class Point;
+
+
+class Goal {
 
 private:
-     double _isClosed;
-     double _height;
+     int _isFinalGoal;
      int _id;
+     Point _centroid;
      std::string _caption;
      std::vector<Wall> _walls;
      std::vector<Point> _poly;
 
 public:
-     Obstacle();
-     virtual ~Obstacle();
+     Goal();
+     virtual ~Goal();
 
      /**
       * Set/Get the obstacles' caption
@@ -62,50 +63,27 @@ public:
      void SetCaption(std::string caption);
 
      /**
-      * Set/Get the close state of the obstacle
-      */
-     double GetClosed() const;
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     void SetClosed(double closed);
-
-     /**
-      * Set/Get the height of the obstacle.
-      * Is used for computing visibility
-      */
-     double GetHeight() const;
-
-     /**
-      * Set/Get the height of the obstacle.
-      * Is used for computing visibility
-      */
-     void SetHeight(double height);
-
-     /**
-      * Set/Get the id of the obstacle
+      * Set/Get the id of the Goal
       */
      int GetId() const;
 
      /**
-      * Set/Get the id of the obstacle
+      * Set/Get the id of the Goal
       */
      void SetId(int id);
 
      /**
-      * construct the obstacle by adding more walls
+      * construct the Goal by adding more walls
       */
      void AddWall(const Wall& w);
 
      /**
-      * @return All walls that constitute the obstacle
+      * @return All walls that constitute the Goal
       */
      const std::vector<Wall>& GetAllWalls() const;
 
      /**
-      * @return true if the point p is contained within the Closed Obstacle
-      * @see Setclose
+      * @return true if the point p is contained within the Closed Goal
       */
      bool Contains(const Point& p) const;
 
@@ -115,23 +93,34 @@ public:
      void ConvertLineToPoly();
 
      /**
-      * @return the obstacle as a polygon
+      * @return the Goal as a polygon
       */
      const std::vector<Point>&  GetPolygon() const;
 
      /**
-      * @return the centroid of the obstacle
+      * agents are remove from the simulation when they reached a final goal
       */
-     const Point GetCentroid() const;
+     int GetIsFinalGoal() const;
 
      /**
-      * return true if the given line intersects
-      * or share common vertex with the obstacle
+      * agents are remove from the simulation when they reached a final goal
       */
-     bool IntersectWithLine(const Line & line) const;
+     void SetIsFinalGoal(int isFinalGoal);
 
      /**
-      * @return a nicely formatted string representation of the obstacle
+      * @return the centroid of the subroom
+      * @see http://en.wikipedia.org/wiki/Centroid
+      */
+     void ComputeControid() ;
+
+     /**
+      * @return the centroid of the goal
+      * @see ComputeControid
+      */
+     const Point& GetCentroid() const;
+
+     /**
+      * @return a nicely formatted string representation of the Goal
       */
      std::string Write();
 
@@ -144,4 +133,4 @@ private:
 
 };
 
-#endif /* OBSTACLE_H_ */
+#endif /* GOAL_H_ */

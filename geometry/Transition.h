@@ -1,13 +1,14 @@
 /**
- * File:   Transition.h
+ * \file        Transition.h
+ * \date        Nov 16, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Created on 16. November 2010, 12:57
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,16 +17,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  *
  *
- */
+ **/
+ 
 
 #ifndef _TRANSITION_H
-#define	_TRANSITION_H
+#define _TRANSITION_H
 
 #include "Crossing.h"
 #include <string>
@@ -35,67 +37,84 @@ class Subroom;
 
 class Transition : public Crossing {
 private:
-    Room* _room2;
-    bool _isOpen;
-    std::string _type;
+     Room* _room2;
+     bool _isOpen;
+     std::string _type;
+     // number of agents that passed that exit
+     int _doorUsage;
+     double _lastPassingTime;
 
 public:
 
-    Transition();
-    virtual ~Transition();
+     Transition();
+     virtual ~Transition();
 
-    /**
-     * Close the transition/door
-     */
-    void Close();
+     /**
+      * Close the transition/door
+      */
+     void Close();
 
-    /**
-     * Open the transition/door
-     */
-    void Open();
+     /**
+      * Open the transition/door
+      */
+     void Open();
 
-    /**
-     * Set/Get the type of the transition
-     * TODO: where is type defined?
-     */
-    void SetType(std::string s);
+     /**
+      * Set/Get the type of the transition
+      */
+     void SetType(std::string s);
 
-    /**
-     * Set/Get the second room associated with this transition.
-     * The first one is set in the crossing class.
-     */
-    void SetRoom2(Room* ID);
+     /**
+      * Set/Get the second room associated with this transition.
+      * The first one is set in the crossing class.
+      */
+     void SetRoom2(Room* ID);
+
+     /**
+      * Increment the number of persons that used that exit
+      * @param number, how many person have passed the door
+      * @param time, at which time
+      */
+     void IncreaseDoorUsage(int number, double time);
+
+     /**
+      * @return the number of pedestrians that used that exit.
+      */
+     int GetDoorUsage() const;
+
+     /**
+      * @return the last time this door was crossed
+      */
+     double GetLastPassingTime() const;
+
+     /**
+      * Set/Get the type of the transition
+      */
+     std::string GetType() const;
+
+     /**
+      * Set/Get the second room associated with this transition.
+      * The first one is set in the crossing class.
+      */
+     Room* GetRoom2() const;
 
 
-    /**
-     * Set/Get the type of the transition
-     * TODO: where is type defined?
-     */
-    std::string GetType() const;
+     /**
+      * @return the other room.
+      */
+     Room* GetOtherRoom(int room_id) const;
 
-    /**
-     * Set/Get the second room associated with this transition.
-     * The first one is set in the crossing class.
-     */
-    Room* GetRoom2() const;
-
-
-    /**
-     * @return the other room.
-     */
-    Room* GetOtherRoom(int room_id) const;
-
-    // virtual functions
-    virtual bool IsOpen() const;
-    virtual bool IsExit() const;
-    virtual bool IsTransition() const;
-    virtual bool IsInRoom(int roomID) const;
-    virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
+     // virtual functions
+     virtual bool IsOpen() const;
+     virtual bool IsExit() const;
+     virtual bool IsTransition() const;
+     virtual bool IsInRoom(int roomID) const;
+     virtual SubRoom* GetOtherSubRoom(int roomID, int subroomID) const;
 
 
-    virtual void WriteToErrorLog() const;
-    virtual std::string WriteElement() const; // TraVisTo Ausgabe
+     virtual void WriteToErrorLog() const;
+     virtual std::string WriteElement() const; // TraVisTo Ausgabe
 };
 
-#endif	/* _TRANSITION_H */
+#endif  /* _TRANSITION_H */
 
