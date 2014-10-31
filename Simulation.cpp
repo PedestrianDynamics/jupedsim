@@ -356,7 +356,7 @@ void Simulation::InitArgs(ArgumentParser* args)
      _building->SetProjectFilename(args->GetProjectFile());
      _building->SetProjectRootDir(args->GetProjectRootDir());
 
-     _building->LoadBuildingFromFile();
+     _building->LoadGeometry();
      _building->LoadRoutingInfo(args->GetProjectFile());
      //_building->AddSurroundingRoom();
      _building->InitGeometry(); // create the polygons

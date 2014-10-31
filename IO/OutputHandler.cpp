@@ -191,6 +191,8 @@ void FileHandler::Write(const char* str_msg,...)
      }
 }
 
+#ifdef _SIMULATOR
+
 SocketHandler::SocketHandler(const string& host, int port)
 {
      client = new TraVisToClient(host, port);
@@ -219,3 +221,5 @@ void SocketHandler::Write(const string& stringRef)
      }
      client->sendData(str.c_str());
 }
+
+#endif

@@ -521,7 +521,7 @@ void GCFMModel::CalculateForce(double time, double tip1, Building* building) con
 
      
      int partSize = nSize / nThreads;
-     int debugPed = 14;//10;
+     int debugPed = -14;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 
 

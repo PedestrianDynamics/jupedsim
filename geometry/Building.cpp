@@ -324,24 +324,30 @@ const std::string& Building::GetGeometryFilename() const
      return _geometryFilename;
 }
 
-void Building::LoadBuildingFromFile()
+void Building::LoadGeometry(const std::string &geometryfile)
 {
      //get the geometry filename from the project file
-     TiXmlDocument doc(_projectFilename);
-     if (!doc.LoadFile()) {
-          Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("\t could not parse the project file");
-          exit(EXIT_FAILURE);
+     string geoFilenameWithPath= _projectRootDir + geometryfile;
+
+     if(geometryfile=="")
+     {
+          TiXmlDocument doc(_projectFilename);
+          if (!doc.LoadFile()) {
+               Log->Write("ERROR: \t%s", doc.ErrorDesc());
+               Log->Write("\t could not parse the project file");
+               exit(EXIT_FAILURE);
+          }
+
+          Log->Write("INFO: \tParsing the geometry file");
+          TiXmlElement* xMainNode = doc.RootElement();
+
+          if(xMainNode->FirstChild("geometry")) {
+               _geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
+               geoFilenameWithPath=_projectRootDir+_geometryFilename;
+               Log->Write("INFO: \tgeometry <"+_geometryFilename+">");
+          }
      }
 
-     Log->Write("INFO: \tParsing the geometry file");
-     TiXmlElement* xMainNode = doc.RootElement();
-     string geoFilenameWithPath="";
-     if(xMainNode->FirstChild("geometry")) {
-          _geometryFilename=xMainNode->FirstChild("geometry")->FirstChild()->Value();
-          geoFilenameWithPath=_projectRootDir+_geometryFilename;
-          Log->Write("INFO: \tgeometry <"+_geometryFilename+">");
-     }
      TiXmlDocument docGeo(geoFilenameWithPath);
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
@@ -360,10 +366,10 @@ void Building::LoadBuildingFromFile()
           exit(EXIT_FAILURE);
      }
      if(xRootNode->Attribute("unit"))
-     if(string(xRootNode->Attribute("unit")) != "m") {
-          Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-          exit(EXIT_FAILURE);
-     }
+          if(string(xRootNode->Attribute("unit")) != "m") {
+               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
+               exit(EXIT_FAILURE);
+          }
      double version = xmltof(xRootNode->Attribute("version"), -1);
 
      if (version != 0.5) { // @todo version number is hard coded
@@ -394,7 +400,7 @@ void Building::LoadBuildingFromFile()
 
           string caption = "room " + room_id;
           room->SetCaption(
-               xmltoa(xRoom->Attribute("caption"), caption.c_str()));
+                    xmltoa(xRoom->Attribute("caption"), caption.c_str()));
 
           double position = xmltof(xRoom->Attribute("zpos"), 0.0);
 
@@ -443,12 +449,14 @@ void Building::LoadBuildingFromFile()
                subroom->SetRoomID(room->GetID());
                subroom->SetSubRoomID(xmltoi(subroom_id.c_str(), -1));
 
+               //static int p_id=1;
+               //cout<<endl<<"wall polygon: "<< p_id++<<endl;
                //looking for polygons (walls)
                for(TiXmlElement* xPolyVertices = xSubRoom->FirstChildElement("polygon"); xPolyVertices;
                          xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
                     for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                                                      "vertex");
+                              "vertex");
                               xVertex && xVertex != xPolyVertices->LastChild("vertex");
                               xVertex = xVertex->NextSiblingElement("vertex")) {
 
@@ -456,8 +464,8 @@ void Building::LoadBuildingFromFile()
                          double y1 = xmltof(xVertex->Attribute("py"));
                          double x2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("px"));
                          double y2 = xmltof(xVertex->NextSiblingElement("vertex")->Attribute("py"));
-
                          subroom->AddWall(Wall(Point(x1, y1), Point(x2, y2)));
+                         //printf("%0.2f %0.2f %0.2f %0.2f\n",x1,y1,x2,y2);
                     }
 
                }
@@ -482,7 +490,7 @@ void Building::LoadBuildingFromFile()
                               xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
                          for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                                                           "vertex");
+                                   "vertex");
                                    xVertex && xVertex != xPolyVertices->LastChild("vertex");
                                    xVertex = xVertex->NextSiblingElement("vertex")) {
 
@@ -529,7 +537,7 @@ void Building::LoadBuildingFromFile()
 
           AddRoom(room);
      }
-
+     //exit(0);
 
      // all rooms are read, now proceed with transitions
      TiXmlNode*  xTransNode = xRootNode->FirstChild("transitions");

@@ -33,9 +33,12 @@
 #include <fstream>
 #include <vector>
 
-
-#include "../IO/TraVisToClient.h"
 #include "../general/Macros.h"
+
+#ifdef _SIMULATOR
+#include "../IO/TraVisToClient.h"
+#endif
+
 
 class OutputHandler {
 protected:
@@ -70,6 +73,8 @@ public:
      void Write(const char *string,...);
 };
 
+#ifdef _SIMULATOR
+
 class SocketHandler : public OutputHandler {
 private:
      TraVisToClient* client;
@@ -83,5 +88,6 @@ public:
      std::vector<std::string> brokentags;
 };
 
+#endif
 
 #endif /*OUTPUT_HANDLER_H_*/

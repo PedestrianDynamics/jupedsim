@@ -188,7 +188,15 @@ public:
      const std::string& GetGeometryFilename() const;
      void SetProjectFilename(const std::string &filename) ;
      void SetProjectRootDir(const std::string &filename);
-     void LoadBuildingFromFile();
+
+     /**
+      * Load and parse the geometry file into the building object.
+      * If no geometry file is provided, one is searched in the the project file
+      *
+      * @param filename, the geometry file
+      */
+     void LoadGeometry(const std::string &geometryfile="");
+
      void LoadTrafficInfo();
      void LoadRoutingInfo(const std::string &filename);
      void WriteToErrorLog() const;
