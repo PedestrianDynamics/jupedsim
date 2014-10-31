@@ -53,32 +53,32 @@
 OutputHandler* Log;
 using namespace std;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
-	Log = new STDIOHandler();
+    Log = new STDIOHandler();
 
-	// Parsing the arguments
-	ArgumentParser* args = new ArgumentParser();
-	args->ParseArgs(argc, argv);
+    // Parsing the arguments
+    ArgumentParser* args = new ArgumentParser();
+    args->ParseArgs(argc, argv);
 
-	// get the number of file to analyse
-	const vector<string>& files=args->GetTrajectoriesFiles();
-	const string& path = args->GetTrajectoriesLocation();
+    // get the number of file to analyse
+    const vector<string>& files=args->GetTrajectoriesFiles();
+    const string& path = args->GetTrajectoriesLocation();
 
-		// create and initialize the analysis engine
-	for(unsigned int i=0;i<files.size();i++)
-	{
-		const string& file=files[i];
-		Analysis analysis = Analysis();
-		analysis.InitArgs(args);
-		Log->Write("INFO: \tStart Analysis for the file: " +file);
-		analysis.RunAnalysis(file, path);
-		Log->Write("INFO: \tEnd Analysis for the file: "+file);
-	}
+    // create and initialize the analysis engine
+    for(unsigned int i=0; i<files.size(); i++) {
+        const string& file=files[i];
+        Analysis analysis = Analysis();
+        analysis.InitArgs(args);
+        Log->Write("INFO: \tStart Analysis for the file: " +file);
+        analysis.RunAnalysis(file, path);
+        Log->Write("INFO: \tEnd Analysis for the file: "+file);
+    }
 
-	//do the last cleaning
-	delete args;
-	delete Log;
+    //do the last cleaning
+    delete args;
+    delete Log;
 
-	return (EXIT_SUCCESS);
+    return (EXIT_SUCCESS);
 }

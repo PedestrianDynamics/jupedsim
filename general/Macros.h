@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -86,29 +86,29 @@
 
 
 enum RoomState {
-     ROOM_CLEAN=0,
-     ROOM_SMOKED=1
+    ROOM_CLEAN=0,
+    ROOM_SMOKED=1
 };
 
 enum FileFormat {
-     FORMAT_XML_PLAIN,
-     FORMAT_XML_BIN,
-     FORMAT_PLAIN,
-     FORMAT_VTK,
-     FORMAT_XML_PLAIN_WITH_MESH
+    FORMAT_XML_PLAIN,
+    FORMAT_XML_BIN,
+    FORMAT_PLAIN,
+    FORMAT_VTK,
+    FORMAT_XML_PLAIN_WITH_MESH
 };
 
 enum RoutingStrategy {
-     ROUTING_LOCAL_SHORTEST=1,
-     ROUTING_GLOBAL_SHORTEST,
-     ROUTING_QUICKEST,
-     ROUTING_DYNAMIC,
-     ROUTING_FROM_FILE,
-     ROUTING_NAV_MESH,
-     ROUTING_DUMMY,
-     ROUTING_SAFEST,
-     ROUTING_COGNITIVEMAP,
-     ROUTING_UNDEFINED =-1
+    ROUTING_LOCAL_SHORTEST=1,
+    ROUTING_GLOBAL_SHORTEST,
+    ROUTING_QUICKEST,
+    ROUTING_DYNAMIC,
+    ROUTING_FROM_FILE,
+    ROUTING_NAV_MESH,
+    ROUTING_DUMMY,
+    ROUTING_SAFEST,
+    ROUTING_COGNITIVEMAP,
+    ROUTING_UNDEFINED =-1
 };
 
 enum OperativModels {
@@ -120,43 +120,44 @@ enum OperativModels {
 
 inline char    xmltob(const char * t,char    v=0)
 {
-     if (t&&(*t)) return (char)atoi(t);
-     return v;
+    if (t&&(*t)) return (char)atoi(t);
+    return v;
 }
 inline int     xmltoi(const char * t,int     v=0)
 {
-     if (t&&(*t)) return atoi(t);
-     return v;
+    if (t&&(*t)) return atoi(t);
+    return v;
 }
 inline long    xmltol(const char * t,long    v=0)
 {
-     if (t&&(*t)) return atol(t);
-     return v;
+    if (t&&(*t)) return atol(t);
+    return v;
 }
 inline double  xmltof(const char * t,double  v=0.0)
 {
-     if (t&&(*t)) return atof(t);
-     return v;
+    if (t&&(*t)) return atof(t);
+    return v;
 }
 inline const char * xmltoa(const char * t,      const char * v="")
 {
-     if (t)       return  t;
-     return v;
+    if (t)       return  t;
+    return v;
 }
 inline char xmltoc(const char * t,const char v='\0')
 {
-     if (t&&(*t)) return *t;
-     return v;
+    if (t&&(*t)) return *t;
+    return v;
 }
 
 template<typename A>
-     bool IsElementInVector(const std::vector<A> &vec, A& el) {
-          typename std::vector<A>::const_iterator it;
-          it = std::find (vec.begin(), vec.end(), el);
-          if(it==vec.end()) {
-               return false;
-          } else {
-               return true;
-          }
-     }
+bool IsElementInVector(const std::vector<A> &vec, A& el)
+{
+    typename std::vector<A>::const_iterator it;
+    it = std::find (vec.begin(), vec.end(), el);
+    if(it==vec.end()) {
+        return false;
+    } else {
+        return true;
+    }
+}
 #endif  /* _MACROS_H */

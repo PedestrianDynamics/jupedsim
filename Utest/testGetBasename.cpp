@@ -5,7 +5,7 @@ OutputHandler* Log;
 
 int testGetBasename()
 {
-    Analysis analysis = Analysis();    
+    Analysis analysis = Analysis();
     std::string strWin("winhelp.exe");
     std::string str;
     str = analysis.GetBasename(strWin);

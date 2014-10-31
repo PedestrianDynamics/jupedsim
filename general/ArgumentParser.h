@@ -52,83 +52,83 @@ extern OutputHandler* Log;
 class ArgumentParser {
 private:
 
-	std::string _geometryFileName;
-	std::string _errorLogFile;
-	std::string _trajectoriesLocation;
-	std::string _trajectoriesFilename;
-	std::vector<std::string> _trajectoriesFiles;
+    std::string _geometryFileName;
+    std::string _errorLogFile;
+    std::string _trajectoriesLocation;
+    std::string _trajectoriesFilename;
+    std::vector<std::string> _trajectoriesFiles;
 
-	char _vComponent;
-	bool _isMethodA;
-	bool _isMethodB;
-	bool _isMethodC;
-	bool _isMethodD;
-	bool _isCutByCircle;
-	bool _isOutputGraph;
-	bool _isIndividualFD;
-	bool _isGetProfile;
-	double _steadyStart;
-	double _steadyEnd;
-	int _delatTVInst;
-	int _timeIntervalA;
-	int _areaIDforMethodA;
-	int _areaIDforMethodB;
-	int _areaIDforMethodC;
-	int _areaIDforMethodD;
-	int _scaleX;
-	int _scaleY;
-	int _log;
+    char _vComponent;
+    bool _isMethodA;
+    bool _isMethodB;
+    bool _isMethodC;
+    bool _isMethodD;
+    bool _isCutByCircle;
+    bool _isOutputGraph;
+    bool _isIndividualFD;
+    bool _isGetProfile;
+    double _steadyStart;
+    double _steadyEnd;
+    int _delatTVInst;
+    int _timeIntervalA;
+    int _areaIDforMethodA;
+    int _areaIDforMethodB;
+    int _areaIDforMethodC;
+    int _areaIDforMethodD;
+    int _scaleX;
+    int _scaleY;
+    int _log;
 
-	std::map <int, MeasurementArea*> _measurementAreas;
-	void Usage();
+    std::map <int, MeasurementArea*> _measurementAreas;
+    void Usage();
 
 public:
-	// Konstruktor
-	ArgumentParser();
+    // Konstruktor
+    ArgumentParser();
 
-	const std::string& GetTrajectoriesFilename() const;
-	const std::vector<std::string>& GetTrajectoriesFiles() const;
-	const std::string& GetTrajectoriesLocation() const;
-	const FileFormat& GetFileFormat() const;
-	const std::string& GetGeometryFilename() const;
-	const std::string& GetErrorLogFile() const;
+    const std::string& GetTrajectoriesFilename() const;
+    const std::vector<std::string>& GetTrajectoriesFiles() const;
+    const std::string& GetTrajectoriesLocation() const;
+    const FileFormat& GetFileFormat() const;
+    const std::string& GetGeometryFilename() const;
+    const std::string& GetErrorLogFile() const;
 
-	double GetLengthMeasurementArea() const;
-	polygon_2d GetMeasureArea() const;
-	double GetLineStartX() const;
-	double GetLineStartY() const;
-	double GetLineEndX() const;
-	double GetLineEndY() const;
+    double GetLengthMeasurementArea() const;
+    polygon_2d GetMeasureArea() const;
+    double GetLineStartX() const;
+    double GetLineStartY() const;
+    double GetLineEndX() const;
+    double GetLineEndY() const;
 
-	char GetVComponent() const;
-	int GetDelatT_Vins() const;
-	int GetTimeIntervalA() const;
-	bool GetIsMethodA() const;
-	bool GetIsMethodB() const;
-	bool GetIsMethodC() const;
-	bool GetIsMethodD() const;
-	int GetAreaIDforMethodA() const;
-	int GetAreaIDforMethodB() const;
-	int GetAreaIDforMethodC() const;
-	int GetAreaIDforMethodD() const;
-	bool GetIsCutByCircle() const;
-	bool GetIsOutputGraph() const;
-	bool GetIsIndividualFD() const;
-	double GetSteadyStart() const;
-	double GetSteadyEnd() const;
-	bool GetIsGetProfile() const;
-	int GetScaleX() const;
-	int GetScaleY() const;
-	int GetLog() const;
-	void ParseArgs(int argc, char **argv);
+    char GetVComponent() const;
+    int GetDelatT_Vins() const;
+    int GetTimeIntervalA() const;
+    bool GetIsMethodA() const;
+    bool GetIsMethodB() const;
+    bool GetIsMethodC() const;
+    bool GetIsMethodD() const;
+    int GetAreaIDforMethodA() const;
+    int GetAreaIDforMethodB() const;
+    int GetAreaIDforMethodC() const;
+    int GetAreaIDforMethodD() const;
+    bool GetIsCutByCircle() const;
+    bool GetIsOutputGraph() const;
+    bool GetIsIndividualFD() const;
+    double GetSteadyStart() const;
+    double GetSteadyEnd() const;
+    bool GetIsGetProfile() const;
+    int GetScaleX() const;
+    int GetScaleY() const;
+    int GetLog() const;
+    void ParseArgs(int argc, char **argv);
 
-	MeasurementArea* GetMeasurementArea(int id);
+    MeasurementArea* GetMeasurementArea(int id);
 
-	/**
-	 * parse the initialization file
-	 * @param inifile
-	 */
-	void ParseIniFile(std::string inifile);
+    /**
+     * parse the initialization file
+     * @param inifile
+     */
+    void ParseIniFile(std::string inifile);
 };
 
 #endif /*ARGPARSER_H_*/

@@ -42,19 +42,19 @@ typedef VD::cell_type::source_index_type source_index_type;
 
 class VoronoiDiagram {
 private:
-	std::vector<point_type2> points;
-	point_type2 retrieve_point(const cell_type& cell);
-	point_type2 clip_infinite_edge( const edge_type& edge, double minX, double minY, double maxX, double maxY);
-	double area_triangle(point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
-	bool point_inside_triangle(point_type2 pt, point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
-	std::vector<point_type2> add_bounding_points(point_type2 pt1, point_type2 pt2, point_type2 pt, double minX, double minY, double maxX, double maxY);
+    std::vector<point_type2> points;
+    point_type2 retrieve_point(const cell_type& cell);
+    point_type2 clip_infinite_edge( const edge_type& edge, double minX, double minY, double maxX, double maxY);
+    double area_triangle(point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
+    bool point_inside_triangle(point_type2 pt, point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
+    std::vector<point_type2> add_bounding_points(point_type2 pt1, point_type2 pt2, point_type2 pt, double minX, double minY, double maxX, double maxY);
 
 public:
-	VoronoiDiagram();
-	virtual ~VoronoiDiagram();
-	std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame);
-	std::vector<polygon_2d> cutPolygonsWithGeometry(std::vector<polygon_2d> polygon, polygon_2d Geometry, double* xs, double* ys);
-	std::vector<polygon_2d> cutPolygonsWithCircle(std::vector<polygon_2d> polygon, double* xs, double* ys, double radius);
+    VoronoiDiagram();
+    virtual ~VoronoiDiagram();
+    std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame);
+    std::vector<polygon_2d> cutPolygonsWithGeometry(std::vector<polygon_2d> polygon, polygon_2d Geometry, double* xs, double* ys);
+    std::vector<polygon_2d> cutPolygonsWithCircle(std::vector<polygon_2d> polygon, double* xs, double* ys, double radius);
 };
 
 #endif /* VORONOIDIAGRAM_H_ */
