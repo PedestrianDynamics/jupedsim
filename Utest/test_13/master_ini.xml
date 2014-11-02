@@ -76,10 +76,10 @@
     <model operational_model_id="2" description="gompertz">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.01</stepsize>
+        <stepsize>0.001</stepsize>
         <exitCrossingStrategy>3</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="3" />
-        <force_ped nu="1"  b="0.06" c="3.45"/>
+        <force_ped nu="0.5"  b="0.06" c="3.45"/>
         <force_wall nu="5" b="0.4" c="10.0"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
