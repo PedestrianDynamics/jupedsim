@@ -54,6 +54,7 @@
 
 #include <QApplication>
 #include "MainWindow.h"
+#include <locale.h>
 
 
 #define vtkErrorMacro (x) ()
