@@ -342,6 +342,9 @@ endif()
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING)
+  SET(BUILD_TEST_TIMEOUT 10800   CACHE STRING "Global timeout on all tests (seconds).")
+  SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
+  message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s"  )
   enable_testing() # adds another build target, which is test for Makefile generators
   include(CTest) # adding Dart support
 
