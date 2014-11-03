@@ -27,23 +27,23 @@
  */
 
 /**
-* @mainpage
-*
-* \date 15.1.2013
-*
-* JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
-*
-* @image html logo.png " "
-*
-* Some useful links:
-*
-* 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
-* 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
-* 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
-* 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
-* 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
-*
-*/
+ * @mainpage
+ *
+ * \date 15.1.2013
+ *
+ * JuPedSim stands for Jülich Pedestrians Simulator and is currently developed at the Forschungszentrum Jülich in Germany.
+ *
+ * @image html logo.png " "
+ *
+ * Some useful links:
+ *
+ * 	1: <a href="http://www.openpedsim.org">www.openpedsim.org</a> <br>
+ * 	2: <a href="http://www.vtk.org">www.vtk.org</a> <br>
+ * 	3: <a href="http://www.trolltech.com">www.trolltech.com</a> <br>
+ * 	4: <a href="http://www.fz-juelich.de">www.fz-juelich.de</a> <br>
+ * 	4: <a href="http://www.jupedsim.org">www.fz-juelich.de</a> <br>
+ *
+ */
 
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
@@ -55,30 +55,30 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
+     Log = new STDIOHandler();
 
-    Log = new STDIOHandler();
+     // Parsing the arguments
+     ArgumentParser* args = new ArgumentParser();
+     args->ParseArgs(argc, argv);
 
-    // Parsing the arguments
-    ArgumentParser* args = new ArgumentParser();
-    args->ParseArgs(argc, argv);
+     // get the number of file to analyse
+     const vector<string>& files = args->GetTrajectoriesFiles();
+     const string& path = args->GetTrajectoriesLocation();
 
-    // get the number of file to analyse
-    const vector<string>& files=args->GetTrajectoriesFiles();
-    const string& path = args->GetTrajectoriesLocation();
+     // create and initialize the analysis engine
+     for (unsigned int i = 0; i < files.size(); i++)
+     {
+          const string& file = files[i];
+          Analysis analysis = Analysis();
+          analysis.InitArgs(args);
+          Log->Write("INFO: \tStart Analysis for the file: " + file);
+          analysis.RunAnalysis(file, path);
+          Log->Write("INFO: \tEnd Analysis for the file: " + file);
+     }
 
-    // create and initialize the analysis engine
-    for(unsigned int i=0; i<files.size(); i++) {
-        const string& file=files[i];
-        Analysis analysis = Analysis();
-        analysis.InitArgs(args);
-        Log->Write("INFO: \tStart Analysis for the file: " +file);
-        analysis.RunAnalysis(file, path);
-        Log->Write("INFO: \tEnd Analysis for the file: "+file);
-    }
+     //do the last cleaning
+     delete args;
+     delete Log;
 
-    //do the last cleaning
-    delete args;
-    delete Log;
-
-    return (EXIT_SUCCESS);
+     return (EXIT_SUCCESS);
 }

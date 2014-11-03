@@ -14,7 +14,6 @@
 
 #define PI 3.14159265
 
-//#include <boost/polygon/voronoi.hpp>
 #include <boost/polygon/voronoi.hpp>
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
@@ -45,8 +44,8 @@ private:
     std::vector<point_type2> points;
     point_type2 retrieve_point(const cell_type& cell);
     point_type2 clip_infinite_edge( const edge_type& edge, double minX, double minY, double maxX, double maxY);
-    double area_triangle(point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
-    bool point_inside_triangle(point_type2 pt, point_type2 tri_p1, point_type2 tri_p2, point_type2 tri_p3);
+    double area_triangle(const point_type2& tri_p1, const point_type2& tri_p2, const point_type2& tri_p3);
+    bool point_inside_triangle(const point_type2& pt, const point_type2& tri_p1, const point_type2& tri_p2, const point_type2& tri_p3);
     std::vector<point_type2> add_bounding_points(point_type2 pt1, point_type2 pt2, point_type2 pt, double minX, double minY, double maxX, double maxY);
 
 public:

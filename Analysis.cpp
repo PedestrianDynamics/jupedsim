@@ -28,7 +28,6 @@ using namespace std;
 
 Analysis::Analysis()
 {
-
      _building = NULL;
      _numFrames = 0;
 
@@ -389,7 +388,6 @@ int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in t
  */
 void Analysis::getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int frameNr)
 {
-
      IdInFrame = new int[PedNum];
      XInFrame = new double[PedNum];
      YInFrame = new double[PedNum];
@@ -430,6 +428,7 @@ void Analysis::getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int fr
           agentCnt++;
      }//agent
 }
+
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
      string fullTrajectoriesPathName= path+"/"+filename;
@@ -565,6 +564,7 @@ void Analysis::OutputVoronoiResults(vector<polygon_2d>  polygons, int frid)
      double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
      fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
 }
+
 /**
  * Output the time series of pedestrian number N passing the reference line.
  */
@@ -574,6 +574,7 @@ void Analysis::OutputFlow_NT(int frmId)
      _accumVPassLine.push_back(V_deltaT);
      fprintf(_fN_t,"%d\t%d\n",frmId, ClassicFlow);
 }
+
 /*
  *  according to the location of a pedestrian in adjacent frame (pt1_X,pt1_Y) and (pr2_X,pt2_Y), we
  *  adjust whether he pass the line from Line_start to Line_end
@@ -651,7 +652,6 @@ void Analysis::GetFundamentalTinTout(int *Tin, int *Tout, double *DensityPerFram
  * Calculate the Flow rate during a certain time interval DeltaT and the mean velocity passing a line.
  * Note: here the time interval in calculating the flow rate is modified. it is the actual time between the first person and last person
  * passing the line in DeltaT.
- * MC 15.08.2012
  * input: outputfile is given not anymore "datafile"
  */
 void Analysis::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPeds, const vector<double>& AccumVelocity, const string& ofile)
@@ -708,7 +708,8 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
           polygon_list v;
           intersection(measureArea, *polygon_iterator, v);
           if(!v.empty()) {
-               uniquedensity=1/(area(*polygon_iterator)*CMtoM*CMtoM);
+               //TODO: Check me
+               uniquedensity=1.0/(area(*polygon_iterator)*CMtoM*CMtoM);
                uniquevelocity=Velocity[temp];
                uniqueId=Id[temp];
                fprintf(_individualFD,"%d\t%d\t%.3f\t%.3f\n",frid, uniqueId, uniquedensity,uniquevelocity);
@@ -719,8 +720,10 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
 
 double Analysis::Distance(double x1, double y1, double x2, double y2)
 {
-     return sqrt(pow((x1-x2),2)+pow((y1-y2),2));
+     return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+     //return sqrt(pow((x1-x2),2)+pow((y1-y2),2));
 }
+
 ///---------------------------------------------------------------------------------------------------------------------
 /*this function is to obtain the frequency distribution of the pedestrian movement through a line from (Line_startX,Line_startY)
  * to (Line_endX, Line_endY) according to the coordination of a person in two adjacent frames (pt1_X,pt1_Y) and (pt2_X,pt2_Y)
