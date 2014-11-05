@@ -38,7 +38,7 @@
 #include "geometry/Building.h"
 #include "IO/OutputHandler.h"
 #include "IO/IODispatcher.h"
-#include "math/ForceModel.h"
+#include "math/OperationalModel.h"
 #include "math/ODESolver.h"
 #include "routing/GlobalRouter.h"
 #include "routing/QuickestPathRouter.h"
@@ -74,7 +74,7 @@ private:
     /// door crossing strategy for the pedestrians
     DirectionStrategy* _direction;
     /// Force model to use
-    ForceModel* _model;
+    OperationalModel* _operationalModel;
     /// differential equation solver
     ODESolver* _solver;
     /// writing the trajectories to file
@@ -98,25 +98,21 @@ public:
     int GetPedsNumber() const;
 
     /**
-     * @return the building object containing all geometry elements
-     */
-    Building* GetBuilding() const;
-
-    /**
      * Read parameters from the argument parser class.
      */
     void InitArgs(ArgumentParser *args);
 
     /**
-     *
      * @return the total simulated/evacuation time
      */
     int RunSimulation();
 
     /**
-     * Update the pedestrians states: positions, velocity, route
+     * Updathe route of the pedestrians and reassign rooms, in the case a room change happens
      */
-    void Update();
+    void UpdateRoutesAndLocations();
+
+
     //void Update(double &b, double &p, double &t, double &g);
 
     /**

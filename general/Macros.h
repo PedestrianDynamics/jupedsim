@@ -71,7 +71,6 @@
 #define OBSTRUCTION 4
 
 
-// Lenght of array
 // Length of array
 #define CLENGTH 1000
 
@@ -113,7 +112,11 @@ enum RoutingStrategy {
 
 enum OperativModels {
     MODEL_GFCM=1,
-    MODEL_GOMPERTZ
+    MODEL_GOMPERTZ,
+//    MODEL_ORCA,
+//    MODEL_CFM,
+//    MODEL_VELO
+//    MODEL_GNM
 };
 
 //global functions for convenience

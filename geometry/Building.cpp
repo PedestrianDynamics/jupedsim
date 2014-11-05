@@ -370,9 +370,10 @@ void Building::LoadGeometry(const std::string &geometryfile)
                Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
                exit(EXIT_FAILURE);
           }
+
      double version = xmltof(xRootNode->Attribute("version"), -1);
 
-     if (version != 0.5) { // @todo version number is hard coded
+     if (version != std::stod(JPS_VERSION)) {
           Log->Write(" \tWrong geometry version!");
           Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
           Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
@@ -864,105 +865,8 @@ void Building::SanityCheck()
      Log->Write("INFO: \t...Done!!!\n");
 }
 
+
 #ifdef _SIMULATOR
-
-
-void Building::Update()
-{
-     //pedestrians to be deleted
-     //you should better create this in the constructor and allocate it once.
-     vector<Pedestrian*> pedsToReposition;
-     pedsToReposition.reserve(100);
-     vector<Pedestrian*> pedsToRemove;
-     pedsToRemove.reserve(100);
-
-     for(unsigned int p=0;p<_allPedestians.size();p++)
-     {
-          Pedestrian* ped = _allPedestians[p];
-          Room* room = GetRoom(ped->GetRoomID());
-          SubRoom* sub = room->GetSubRoom(ped->GetSubRoomID());
-
-          //set the new room if needed
-          if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
-                    && (GetRoom(ped->GetRoomID())->GetCaption() == "outside"))
-          {
-               pedsToRemove.push_back(ped);
-          } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
-                    && (_goals[ped->GetFinalDestination()]->Contains(
-                              ped->GetPos()))) {
-               pedsToRemove.push_back(ped);
-          } else if (!sub->IsInSubRoom(ped)) {
-               pedsToReposition.push_back(ped);
-          }
-     }
-
-
-     // reset that pedestrians who left their room not via the intended exit
-     for (unsigned int p = 0; p < pedsToReposition.size(); p++) {
-          Pedestrian* ped = pedsToReposition[p];
-          bool assigned = false;
-          for (int i = 0; i < GetNumberOfRooms(); i++) {
-               Room* room = GetRoom(i);
-               //if(room->GetCaption()=="outside") continue;
-               for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-                    SubRoom* sub = room->GetSubRoom(j);
-                    SubRoom* old_sub= _rooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
-                    if ((sub->IsInSubRoom(ped->GetPos())) && (sub->IsDirectlyConnectedWith(old_sub))) {
-                         ped->SetRoomID(room->GetID(), room->GetCaption());
-                         ped->SetSubRoomID(sub->GetSubRoomID());
-                         ped->ClearMentalMap(); // reset the destination
-                         //ped->FindRoute();
-                         assigned = true;
-                         break;
-                    }
-               }
-               if (assigned == true)
-                    break; // stop the loop
-          }
-          if (assigned == false) {
-               pedsToRemove.push_back(ped);
-          }
-     }
-
-     // remove the pedestrians that have left the facility
-     for (unsigned int p = 0; p < pedsToRemove.size(); p++)
-     {
-          DeletePedestrian(pedsToRemove[p]);
-     }
-
-     // find the new goals, the parallel way
-
-     //FIXME temporary fix for the safest path router
-     if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
-     {
-          SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
-          spr->ComputeAndUpdateDestinations(_allPedestians);
-     }
-     else
-     {
-          unsigned int nSize = _allPedestians.size();
-          int nThreads = omp_get_max_threads();
-          int partSize = nSize / nThreads;
-
-#pragma omp parallel  default(shared) num_threads(nThreads)
-          {
-               const int threadID = omp_get_thread_num();
-               int start = threadID * partSize;
-               int end = (threadID + 1) * partSize - 1;
-               if ((threadID == nThreads - 1))
-                    end = nSize - 1;
-
-               for (int p = start; p <= end; ++p) {
-                    if (_allPedestians[p]->FindRoute() == -1) {
-                         //a destination could not be found for that pedestrian
-                         Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
-                         DeletePedestrian(_allPedestians[p]);
-                         //exit(EXIT_FAILURE);
-                    }
-               }
-          }
-     }
-}
 
 
 void Building::UpdateGrid()

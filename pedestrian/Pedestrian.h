@@ -131,7 +131,6 @@ public:
 
      // Setter-Funktionen
      void SetID(int i);
-     //TODO: use setRoom(Room*) and setSubRoom(SubRoom*)
      void SetRoomID(int i, std::string roomCaption);
      void SetSubRoomID(int i);
      void SetMass(double m);

@@ -35,8 +35,7 @@
 #include <vector>
 
 #include "../geometry/Building.h"
-#include "ForceModel.h"
-
+#include "OperationalModel.h"
 
 
 //forward declaration
@@ -44,7 +43,7 @@ class Pedestrian;
 class DirectionStrategy;
 
 
-class GompertzModel : public ForceModel {
+class GompertzModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
      DirectionStrategy* _direction;
@@ -175,13 +174,18 @@ public:
      /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string writeParameter() const;
+     virtual std::string GetDescription() const;
 
      /**
       * initialize the phi angle
       * @param building
       */
      virtual void Init (Building* building) const;
+
+     /**
+      * Compute the next simulation step
+      */
+     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
 };
 
 

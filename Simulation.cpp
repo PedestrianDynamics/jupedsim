@@ -33,6 +33,15 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
+#include "geometry/Goal.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
+#endif
+
 
 using namespace std;
 
@@ -47,7 +56,7 @@ Simulation::Simulation()
      _building = NULL;
      _distribution = NULL;
      _direction = NULL;
-     _model = NULL;
+     _operationalModel = NULL;
      _solver = NULL;
      _iod = new IODispatcher();
      _fps=1;
@@ -62,7 +71,7 @@ Simulation::~Simulation()
      delete _building;
      delete _distribution;
      delete _direction;
-     delete _model;
+     delete _operationalModel;
      delete _solver;
      delete _iod;
      delete _em;
@@ -72,12 +81,6 @@ int Simulation::GetPedsNumber() const
 {
      return _nPeds;
 }
-
-Building * Simulation::GetBuilding() const
-{
-     return _building;
-}
-
 
 void Simulation::InitArgs(ArgumentParser* args)
 {
@@ -207,14 +210,14 @@ void Simulation::InitArgs(ArgumentParser* args)
           break;
      }
      int model =  args->GetModel();
-     if(model == 1)
+     if(model == MODEL_GFCM)
      { //GCFM
           //if(args->GetHPCFlag()==0){
-          _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
+          _operationalModel = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
                     args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
                     args->GetMaxFPed(), args->GetMaxFWall());
           s.append("\tModel: GCFMModel\n");
-          s.append(_model->writeParameter());
+          s.append(_operationalModel->GetDescription());
           //}
           //else if(args->GetHPCFlag()==2){
           //  _model = new GPU_acc_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
@@ -231,28 +234,29 @@ void Simulation::InitArgs(ArgumentParser* args)
           //s.append(_model->writeParameter());
           //}
      }
-     else if (model == 2)
+     else if (model == MODEL_GOMPERTZ)
      { //Gompertz
-          _model = new GompertzModel(_direction, args->GetNuPed(), args->GetaPed(), args->GetbPed(), args->GetcPed(),
+          _operationalModel = new GompertzModel(_direction, args->GetNuPed(), args->GetaPed(), args->GetbPed(), args->GetcPed(),
                     args->GetNuWall(), args->GetaWall(), args->GetbWall(), args->GetcWall() );
           s.append("\tModel: GompertzModel\n");
-          s.append(_model->writeParameter());
+          s.append(_operationalModel->GetDescription());
      }
+
      // ODE solver
      int solver = args->GetSolver();
      sprintf(tmp, "\tODE Solver: %d\n", solver);
      s.append(tmp);
-     switch (solver) {
-     case 1:
-          _solver = new EulerSolver(_model);
-          break;
+     //switch (solver) {
+     //case 1:
+          //_solver = new EulerSolver(_model);
+          //break;
           //case 2:
           //     _solver = new VelocityVerletSolver(_model);
           //     break;
           //case 3:
           //     _solver = new LeapfrogSolver(_model);
           //     break;
-     }
+     //}
      sprintf(tmp, "\tnCPU: %d\n", args->GetMaxOpenMPThreads());
      s.append(tmp);
      _tmax = args->GetTmax();
@@ -379,7 +383,7 @@ void Simulation::InitArgs(ArgumentParser* args)
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
      // because a direction is needed for this initialisation.
-     _model->Init(_building);
+     _operationalModel->Init(_building);
 
      //other initializations
      const vector< Pedestrian* >& allPeds = _building->GetAllPedestrians();
@@ -431,7 +435,7 @@ int Simulation::RunSimulation()
      _iod->WriteFrame(0,_building);
 
      //first initialisation needed by the linked-cells
-     Update();
+     UpdateRoutesAndLocations();
 
      //needed to control the execution time PART 1
      //in the case you want to run in no faster than realtime
@@ -439,14 +443,31 @@ int Simulation::RunSimulation()
      //time(&starttime);
 
      // main program loop
-     for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
+     for (t = 0; t < _tmax && _nPeds > 0; ++frameNr)
+     {
           t = 0 + (frameNr - 1) * _deltaT;
-          // solve ODE
-          _solver->solveODE(t, t + _deltaT, _building);
-          // update and check if pedestrians change rooms
-          Update();
+
+          // update the positions
+          _operationalModel->ComputeNextTimeStep(t,_deltaT,_building);
+
+          // update the routes and locations
+          //Update();
+          UpdateRoutesAndLocations();
+
+          //update the events
           _em->Update_Events(t,_deltaT);
-          // trajectories output
+
+          //other updates
+          //someone might have leave the building
+          _nPeds=_building->GetAllPedestrians().size();
+
+          //update the linked cells
+          _building->UpdateGrid();
+
+          // update the global time
+           Pedestrian::SetGlobalTime(t);
+
+          // write the trajectories
           if (frameNr % writeInterval == 0) {
                _iod->WriteFrame(frameNr / writeInterval, _building);
           }
@@ -486,18 +507,106 @@ int Simulation::RunSimulation()
 }
 
 
-// TODO: make the building class more independent by moving the update routing here.
-void Simulation::Update()
+void Simulation::UpdateRoutesAndLocations()
 {
-     //_building->Update();
-     _building->Update();
-     //someone might have leave the building
-     _nPeds=_building->GetAllPedestrians().size();
-     // update the global time
-     Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+_deltaT);
-     //update the cells position
-     _building->UpdateGrid();
+     //pedestrians to be deleted
+     //you should better create this in the constructor and allocate it once.
+     vector<Pedestrian*> pedsToRemove;
+     pedsToRemove.reserve(100); //just reserve some space
 
+     // collect all pedestrians in the simulation.
+     const vector< Pedestrian* >& allPeds = _building->GetAllPedestrians();
+     const map<int, Goal*>& goals=_building->GetAllGoals();
+
+     unsigned int nSize = allPeds.size();
+     int nThreads = omp_get_max_threads();
+     int partSize = nSize / nThreads;
+
+#pragma omp parallel  default(shared) num_threads(nThreads)
+     {
+          const int threadID = omp_get_thread_num();
+          int start = threadID * partSize;
+          int end = (threadID + 1) * partSize - 1;
+          if ((threadID == nThreads - 1))
+               end = nSize - 1;
+
+          for (int p = start; p <= end; ++p)
+          {
+               Pedestrian* ped = allPeds[p];
+               Room* room = _building->GetRoom(ped->GetRoomID());
+               SubRoom* sub = room->GetSubRoom(ped->GetSubRoomID());
+
+               //set the new room if needed
+               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+                         && (room->GetCaption() == "outside"))
+               {
+#pragma omp critical
+                    pedsToRemove.push_back(ped);
+               }
+               else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
+                         && (goals.at(ped->GetFinalDestination())->Contains(ped->GetPos())))
+               {
+#pragma omp critical
+                    pedsToRemove.push_back(ped);
+               }
+
+               // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+               // That may happen if the forces are too high for instance
+               // the ped is removed from the simulation, if it could not be reassigned
+               else if (!sub->IsInSubRoom(ped))
+               {
+                    bool assigned = false;
+                    const std::vector<Room*>& allRooms=_building->GetAllRooms();
+                    for (Room* room : allRooms)
+                    {
+                         const vector<SubRoom*>& allSubs=room->GetAllSubRooms();
+                         for(SubRoom* sub : allSubs)
+                         {
+                              SubRoom* old_sub= allRooms[ped->GetRoomID()]->GetSubRoom(ped->GetSubRoomID());
+                              if ((sub->IsInSubRoom(ped->GetPos())) && (sub->IsDirectlyConnectedWith(old_sub))) {
+                                   ped->SetRoomID(room->GetID(), room->GetCaption());
+                                   ped->SetSubRoomID(sub->GetSubRoomID());
+                                   ped->ClearMentalMap(); // reset the destination
+                                   //ped->FindRoute();
+                                   assigned = true;
+                                   break;
+                              }
+                         }
+                         if (assigned == true)
+                              break; // stop the loop
+                    }
+
+                    if (assigned == false)
+                    {
+#pragma omp critical
+                         pedsToRemove.push_back(ped);
+                    }
+               }
+
+               //finally actualize the route
+               if (ped->FindRoute() == -1) {
+                    //a destination could not be found for that pedestrian
+                    Log->Write("\tINFO: \tCould not found a route for pedestrian %d",ped->GetID());
+#pragma omp critical
+                    pedsToRemove.push_back(ped);
+               }
+          }
+     }
+
+
+     // remove the pedestrians that have left the building
+     for (unsigned int p = 0; p < pedsToRemove.size(); p++)
+     {
+          _building->DeletePedestrian(pedsToRemove[p]);
+     }
+
+
+     //    temporary fix for the safest path router
+     //    if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
+     //    {
+     //         SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
+     //         spr->ComputeAndUpdateDestinations(_allPedestians);
+     //    }
 }
 
 void Simulation::PrintStatistics()

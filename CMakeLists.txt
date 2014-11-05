@@ -156,6 +156,7 @@ set (   source_files
   math/GPU_GCFMModel.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
+  math/OperationalModel.cpp
 
   mpi/LCGrid.cpp
 
@@ -270,6 +271,7 @@ set (   header_files
   math/GPU_GCFMModel.cpp
   math/GCFMModel.h
   math/GompertzModel.h
+  math/OperationalModel.h   
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h

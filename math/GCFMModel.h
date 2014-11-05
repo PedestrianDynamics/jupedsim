@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "../geometry/Building.h"
-#include "ForceModel.h"
+#include "OperationalModel.h"
 
 
 
@@ -44,8 +44,8 @@ class Pedestrian;
 class DirectionStrategy;
 
 
-class GCFMModel : public ForceModel {
-
+class GCFMModel : public OperationalModel
+{
 public:
 
     GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
@@ -64,12 +64,9 @@ public:
     double GetDistEffMaxPed() const;
     double GetDistEffMaxWall() const;
 
-
-    //void UpdateCellularModel(Building* building) const;
-
     // virtual function
-    virtual void CalculateForce(double t, double tp, Building* building) const;
-    virtual std::string writeParameter() const;
+    virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
+    virtual std::string GetDescription() const;
     virtual void Init (Building* building) const;
 
 private:
@@ -118,6 +115,15 @@ private:
     Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
+
+    /**
+     * Calculate the forces and update the pedestrians position and velocities
+     * @param t
+     * @param tp
+     * @param building
+     */
+    void CalculateForce(double t, double tp, Building* building) const;
+
 
 };
 

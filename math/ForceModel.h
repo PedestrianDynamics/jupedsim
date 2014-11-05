@@ -40,13 +40,6 @@
 class Building;
 
 
-/**
- * @date   Fri Apr 18 16:40:39 2014
- *
- * @brief The operative model. Definition of several force-based models
- *         for ped pedestrians dynamics
- *
- */
 class ForceModel {
 
 public:
@@ -55,7 +48,7 @@ public:
      virtual ~ForceModel();
 
      /**
-      * Solve the differential equations and update the positions and veloities
+      * Solve the differential equations and update the positions and velocities
       * @param t the actual time
       * @param tp the next timestep
       * @param building the geometry object

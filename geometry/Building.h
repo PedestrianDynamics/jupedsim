@@ -169,7 +169,6 @@ public:
      //void InitRoomsAndSubroomsMap();
      void InitSavePedPathway(const std::string &filename);
      void AddRoom(Room* room);
-     void Update();
      void UpdateGrid();
      void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
 

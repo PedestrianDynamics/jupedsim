@@ -673,7 +673,7 @@ void TrajectoriesJPSV05::WriteGeometry(Building* building)
      }
 
      //write the grid
-     embed_geometry.append(building->GetGrid()->ToXML());
+     //embed_geometry.append(building->GetGrid()->ToXML());
 
      embed_geometry.append("\t</geometry>\n");
      _outputHandler->Write(embed_geometry);

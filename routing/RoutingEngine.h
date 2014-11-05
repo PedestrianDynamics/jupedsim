@@ -76,7 +76,6 @@ public:
       */
      void FindRoute(Pedestrian* ped);
 
-
      /**
       * Add a new router to the routing system
       *
