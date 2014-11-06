@@ -284,6 +284,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 } else {
                      ped->UpdateTimeInJam();
                 }
+                
  //--------------------------------------------------------------------------------------------------
                      //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                 ped->SetPos(pos_neu);
@@ -316,6 +317,7 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      // if (ped->GetID() == 2)
      //   printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), e0.GetX(), e0.GetY(), e0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
            // getc(stdin);
+     fprintf(stderr, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
      
      return F_driv;
 }

@@ -6,11 +6,11 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
-	<max_sim_time> 20</max_sim_time>
+	<max_sim_time>1</max_sim_time>
 	<!-- geometry file -->
 	<geometry>geo.xml</geometry>
 	<!-- trajectories file and format -->
-	<trajectories format="xml-plain" fps="8">
+	<trajectories format="plain" fps="8">
 		<file location="trajectories.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
@@ -30,7 +30,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	<!--persons information and distribution -->
 	<agents operational_model_id="2">
 		<agents_distribution>
-			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="1"  />
+			<group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="2000" goal_id="-1" router_id="1"  />
 		</agents_distribution>
 
 	</agents>
