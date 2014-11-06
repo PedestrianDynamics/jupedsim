@@ -436,7 +436,7 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
 }
 
-const double* SubRoom::GetPlanEquation() const
+const double* SubRoom::GetPlaneEquation() const
 {
      return _planeEquation;
 }

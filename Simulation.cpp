@@ -419,6 +419,7 @@ void Simulation::InitArgs(ArgumentParser* args)
      //((GPU_ocl_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
      //((GPU_ocl_GCFMModel*) _model)->initCL(_building->GetNumberOfPedestrians());
      //}
+     //_building->SaveGeometry("test.sav.xml");
 }
 
 

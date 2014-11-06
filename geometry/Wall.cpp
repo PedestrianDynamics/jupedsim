@@ -38,13 +38,13 @@ Wall::Wall() : Line()
 {
 }
 
-Wall::Wall(const Point& p1, const Point& p2) : Line(p1, p2)
+Wall::Wall(const Point& p1, const Point& p2, const std::string& type) : Line(p1, p2), _type(type)
 {
-
 }
 
 Wall::Wall(const Wall& orig) : Line(orig)
 {
+     _type=orig.GetType();
 }
 
 void Wall::WriteToErrorLog() const
@@ -70,4 +70,14 @@ string Wall::Write() const
      geometry.append(wall);
      geometry.append("\t\t</wall>\n");
      return geometry;
+}
+
+const std::string& Wall::GetType() const
+{
+     return _type;
+}
+
+void Wall::SetType(const std::string& type)
+{
+     _type=type;
 }

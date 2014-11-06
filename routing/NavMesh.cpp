@@ -101,7 +101,7 @@ void NavMesh::BuildNavMesh()
                node->pGroup = r->GetCaption();
                node->pCentroid = s->GetCentroid();
                //setting the node equation. important for real 3D informations
-               const double* ABC = s->GetPlanEquation();
+               const double* ABC = s->GetPlaneEquation();
                node->pNormalVec[0]=ABC[0];
                node->pNormalVec[1]=ABC[1];
                node->pNormalVec[2]=ABC[2];

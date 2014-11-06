@@ -111,7 +111,6 @@ public:
       */
      Hline* GetHline(int id);
 
-
      /**
       * return the subroom with the corresponding unique identifier
       * @param uid ,the unique identifier
@@ -195,6 +194,14 @@ public:
       * @param filename, the geometry file
       */
      void LoadGeometry(const std::string &geometryfile="");
+
+     /**
+      * Write the geometry to the given file.
+      * That will be useful in the geometry editor.
+      * @param filename the relative location of the file
+      * @return true if everything went fine.
+      */
+     bool SaveGeometry(const std::string &filename);
 
      void LoadTrafficInfo();
      void LoadRoutingInfo(const std::string &filename);

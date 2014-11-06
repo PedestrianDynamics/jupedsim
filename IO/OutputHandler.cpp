@@ -140,7 +140,8 @@ void STDIOHandler::Write(const string& str)
 FileHandler::FileHandler(const char *fn)
 {
      _pfp.open(fn);
-     if (!fn) {
+     if (!_pfp.is_open())
+     {
           char tmp[CLENGTH];
           sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
           cerr << tmp << endl;

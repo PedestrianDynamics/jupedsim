@@ -194,7 +194,7 @@ public:
       * @return the three coefficients of the plane equation.
       * defined by: Z = Ax + By + C
       */
-     const double * GetPlanEquation () const;
+     const double * GetPlaneEquation () const;
 
      /**
       * @return the elevation of a 2Dimensional point using the plane equation.
