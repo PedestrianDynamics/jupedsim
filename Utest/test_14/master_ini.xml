@@ -4,7 +4,7 @@
 
   <seed>linspace(1, 10000, 1000)</seed>
   <numCPU>4</numCPU>
-  <max_sim_time unit="sec">1</max_sim_time>
+  <max_sim_time unit="sec">0</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
@@ -56,7 +56,7 @@
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>1</stepsize>
+        <stepsize>2</stepsize>
         <exitCrossingStrategy>1</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />

@@ -28,7 +28,9 @@ DIR= os.path.dirname(os.path.realpath(argv[0]))
 CWD = os.getcwd()
 #--------------------------------------------------------
     
-
+OK = 1
+PX = []  #p-value for x
+PY = []  #p-value for y
 if __name__ == "__main__":
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
@@ -92,13 +94,23 @@ if __name__ == "__main__":
         px = scipy.stats.chisquare(nx)[1]
         py = scipy.stats.chisquare(ny)[1]
 
+        PX.append(px)
+        PY.append(py)
 
 
-        if px < 0.1 or py < 0.1:
-            logging.info("%s exits with FAILURE px = %f   py = %f"%(argv[0], px, py))
-            exit(FAILURE)
-        else:
-            logging.info("px = %f  py = %f"%(px, py))
+    plt.subplot(211)
+    plt.plot(PX, label="PX")
+    plt.ylabel("px")
+    plt.subplot(212)
+    plt.plot(PY, label="PY")
+    plt.ylabel("py")
+    plt.savefig("px_py.png")
+
         
-    logging.info("%s exits with SUCCESS"%(argv[0]))
-    exit(SUCCESS)
+    if np.mean(PX) < 0.1 or np.mean(PY)< 0.1:
+        logging.info("%s exits with FAILURE PX = %f   PY = %f"%(argv[0], np.mean(px), np.mean(py)))
+        OK = 0
+        exit(FAILURE)
+        
+    else:
+        logging.info("PX = %f  PY = %f"%( np.mean(px), np.mean(py)))
