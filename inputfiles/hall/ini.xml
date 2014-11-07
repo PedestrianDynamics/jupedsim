@@ -2,15 +2,15 @@
 
 <JuPedSim project="JPS-Project" version="0.5" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_ini_core.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
-	<max_sim_time>1</max_sim_time>
+	<max_sim_time>10000</max_sim_time>
 	<!-- geometry file -->
 	<geometry>geo.xml</geometry>
 	<!-- trajectories file and format -->
-	<trajectories format="plain" fps="8">
+	<trajectories format="xml-plain" fps="8">
 		<file location="trajectories.xml" />
 		<!--<socket hostname="127.0.0.1" port="8989"/> -->
 	</trajectories>
@@ -40,7 +40,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.01</stepsize>
+        <stepsize>0.001</stepsize>
         <exitCrossingStrategy>4</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />

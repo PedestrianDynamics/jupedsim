@@ -199,12 +199,12 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      bool isVisible = building->IsVisible(p1, p2, false);
                      if (!isVisible)
                           continue;
-                     if(debugPed == ped->GetID())
-                     {
-                          fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", current,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
-                          printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
+                     // if(debugPed == ped->GetID())
+                     // {
+                     //      fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", current,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
+                     //      printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
 
-                     }
+                     // }
                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                           repPed = repPed + ForceRepPed(ped, ped1);
                      } else {
@@ -229,7 +229,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // = fd ; //+ ped->GetV0()*correction;
 
                 Point acc = (fd + repPed + repWall) / ped->GetMass();
-                // if(ped->GetID() == 2 ) {
+                // if(ped->GetID() == 976 ) {
                 //      printf("Pos1 =[%f, %f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
                 //      printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
                 //      getc(stdin);
@@ -244,35 +244,22 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point vToAdd = result_acc[p - start] * deltaT;
                 //----------------- update new pos and new vel -----------------
-
-                     // printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
+                
                 Point v_neu = ped->GetV() + vToAdd;
                 // if(ped->GetID() == 2 )
                 //      v_neu = Point(0,0);
                 Point pos_neu = ped->GetPos() + v_neu * deltaT;
                 //---------------------------------------------------------------
 
-                // Point e0 = ped->GetV0();
-                // double isBackwards;
-                // isBackwards = v_neu.GetX()*e0.GetX() + v_neu.GetY()*e0.GetY();
-                // if (ped->GetV().Norm()>J_EPS_V) {
-                //      isBackwards = isBackwards/(v_neu.Norm() * e0.Norm()); //normalize
-                //      if(isBackwards <= J_EPS_V) { // Pedestrian is moving in the wrong direction
-                //           v_neu = v_neu*0.01;
-                //           pos_neu = ped->GetPos() + v_neu *h ;
-
-                //           printf("wrong direction\n");
-                //      }
-                // }
-
+               
                 if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
 
-                     //Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
+                     Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
                      v_neu = v_neu*0.01;
                      pos_neu = ped->GetPos();
                 }
- //--------------------------------------------------------------------------------------------------
-                //Jam is based on the current velocity
+ // //--------------------------------------------------------------------------------------------------
+ //                //Jam is based on the current velocity
                 if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
                      ped->ResetTimeInJam();
                 } else {
@@ -284,6 +271,10 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetPos(pos_neu);
                 ped->SetV(v_neu);
                 ped->SetPhiPed();
+                // if(ped->GetID() == 976 ) {
+                //      printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
+                //      printf("pos_neu= %f %f  v_neu %f %f\n", pos_neu.GetX(), pos_neu.GetY(), v_neu.GetX(),  v_neu.GetY());
+                // }
            }
       }//end parallel
 }
@@ -308,10 +299,8 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      }
      F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 
-     // if (ped->GetID() == 2)
-     //   printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), e0.GetX(), e0.GetY(), e0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
-           // getc(stdin);
-     fprintf(stderr, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
+  
+   // fprintf(stderr, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
      
      return F_driv;
 }
