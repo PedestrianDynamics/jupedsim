@@ -35,7 +35,6 @@
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
 
 #include "GompertzModel.h"
 
@@ -116,11 +115,13 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
       // collect all pedestrians in the simulation.
       const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-      unsigned int nSize = allPeds.size();
+     unsigned long nSize;
+     nSize = allPeds.size();
 
       int nThreads = omp_get_max_threads();
 
-      int partSize = nSize / nThreads;
+     int partSize;
+     partSize = (int) (nSize / nThreads);
 
       int debugPed = -69;//10;
       //building->GetGrid()->HighlightNeighborhood(debugPed, building);
@@ -134,8 +135,9 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
            const int threadID = omp_get_thread_num();
 
            int start = threadID*partSize;
-           int end = (threadID + 1) * partSize - 1;
-           if ((threadID == nThreads - 1)) end = nSize - 1;
+           int end;
+           end = (threadID + 1) * partSize - 1;
+           if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
 
            for (int p = start; p <= end; ++p) {
 
@@ -171,16 +173,16 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
                 //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
 
-                int nSize = neighbours.size();
+                int size = (int) neighbours.size();
                 // double B_ij=0;
                 // int count_Bij=0;
 
                 // if(debugPed == ped->GetID())
                 // {
-                //      printf("\n\n nsiZe=%d\n",nSize);
+                //      printf("\n\n nsiZe=%d\n",size);
                 // }
 
-                for (int i = 0; i < nSize; i++) {
+                for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
                      //-------------- TESTING ---------
                      // Point distp12 = ped1->GetPos() - ped->GetPos();
@@ -200,15 +202,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      if(debugPed == ped->GetID())
                      {
                           fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", current,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
-                          if (isVisible)
-                               printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
-                          else
-                          {
-                               RED_LINE;
-                               printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
-                               OFF_LINE;
-                               //getc(stdin);
-                          }
+                          printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
 
                      }
                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
@@ -409,16 +403,16 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      //then the obstacles
      const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
      for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < walls.size(); i++) {
-               f = f + ForceRepWall(ped, walls[i]);
+          const vector<Wall>&getAllWalls = obstacles[obs]->GetAllWalls();
+          for (unsigned int i = 0; i < getAllWalls.size(); i++) {
+               f = f + ForceRepWall(ped, getAllWalls[i]);
           }
      }
      // and finally the closed doors
      const vector<Transition*>& transitions = subroom->GetAllTransitions();
      for (unsigned int i = 0; i < transitions.size(); i++) {
           Transition* goal=transitions[i];
-          if( goal->IsOpen() == false ) {
+          if(! goal->IsOpen()) {
                f = f + ForceRepWall(ped,*((Wall*)goal));
           }
      }
@@ -481,7 +475,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
           return F_wrep;
 
      Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
-     if(Distance>Radius && direction.IntersectionWith(w) == false ) {
+     if(Distance>Radius && !direction.IntersectionWith(w)) {
           return F_wrep;
      }
 
