@@ -1,0 +1,8 @@
+0. find out the number of the last existing test. For example test_100 (in general n)
+1. copy the directory template_test into a directory, e.g. test_101
+2. rename the file script.py into runtest_101 (101 beeing the number of the test as in point 1.)
+3. git add your directory test_101 after writing some smart tests. The test will automaticaly be considered for the next nightly buid. 
+    Let's see if JPScore can pass it.. ;-)
+
+
+
