@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import re
 
 #=========================
-testnr = int(argv[0].split("_")[1].split(".")[0])
+testnr = int(argv[0].split("_")[-1].split(".")[0])
 #========================
 
 must_time = 10  # 10 m corridor with 1m/s 
