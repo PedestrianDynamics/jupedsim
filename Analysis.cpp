@@ -1015,7 +1015,15 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 	}
 	//boost::filesystem::create_directories("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
 */
-	mkdir("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
+
+
+#if defined(_WIN32)
+     mkdir("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
+#else 
+     mkdir("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/", 0777);
+#endif
+
+
      string polygon="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
 
      //TODO: the method will fail if the directory does not not exits
