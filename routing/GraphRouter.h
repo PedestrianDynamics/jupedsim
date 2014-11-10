@@ -40,7 +40,7 @@ public:
      virtual ~GraphRouter();
 
      virtual int FindExit(Pedestrian* p);
-     virtual void Init(Building* b);
+     virtual bool Init(Building* b);
 
 private:
      RoutingGraphStorage g;

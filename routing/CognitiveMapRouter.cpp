@@ -107,7 +107,7 @@ void CognitiveMapRouter::CheckAndInitPedestrian(Pedestrian * p)
 }
 
 
-void CognitiveMapRouter::Init(Building * b)
+bool CognitiveMapRouter::Init(Building * b)
 {
      Log->Write("INFO:\tInit the Cognitive Map  Router Engine");
      building = b;
@@ -118,4 +118,5 @@ void CognitiveMapRouter::Init(Building * b)
      //Init Sensor Manager
      sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
      Log->Write("INFO:\tInitialized SensorManager");
+     return true;
 }

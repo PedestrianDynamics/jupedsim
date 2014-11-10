@@ -199,7 +199,7 @@ RoutingGraph * RoutingGraph::BuildGraph()
      }
      //print();
      return this;
-};
+}
 
 /**
  * RoutingGraph::addVertex(NavLine * nav_line)
@@ -316,7 +316,7 @@ void RoutingGraph::addEdge(Vertex * v1, Vertex * v2, SubRoom* sub)
           v1->edges[v2->id] = new_edge;
      }
 
-};
+}
 
 bool RoutingGraph::checkVisibility(Line* l1, Line* l2, SubRoom* sub)
 {
@@ -479,7 +479,7 @@ void RoutingGraph::print()
 map <int, Vertex> * RoutingGraph::GetAllVertexes()
 {
      return  &vertexes;
-};
+}
 
 
 Vertex * RoutingGraph::GetVertex(int id)
@@ -491,7 +491,7 @@ Vertex * RoutingGraph::GetVertex(int id)
      } else {
           return NULL;
      }
-};
+}
 
 /****************************************
  * Class Vertex

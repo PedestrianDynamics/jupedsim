@@ -162,4 +162,7 @@ template<typename A>
                return true;
           }
      }
+
+//another useful macro
+//#define UNUSED(expr) (void)(expr)
 #endif  /* _MACROS_H */

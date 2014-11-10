@@ -46,8 +46,7 @@ public:
       * Load the fds simulation file and preprocess the input,
       * before calling the Init from the Global RouterEngine
       */
-     virtual void Init(Building* building);
-
+     virtual bool Init(Building* building);
 
      /**
       * Bypass using

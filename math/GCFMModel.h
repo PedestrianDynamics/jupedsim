@@ -64,10 +64,16 @@ public:
     double GetDistEffMaxPed() const;
     double GetDistEffMaxWall() const;
 
-    // virtual function
+    /**
+     * Compute the next simulation step
+     * Solve the differential equations and update the positions and velocities
+     * @param current the actual time
+     * @param deltaT the next timestep
+     * @param building the geometry object
+     */
     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
     virtual std::string GetDescription() const;
-    virtual void Init (Building* building) const;
+    virtual bool Init (Building* building) const;
 
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
@@ -115,15 +121,6 @@ private:
     Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
-
-    /**
-     * Calculate the forces and update the pedestrians position and velocities
-     * @param t
-     * @param tp
-     * @param building
-     */
-    void CalculateForce(double t, double tp, Building* building) const;
-
 
 };
 

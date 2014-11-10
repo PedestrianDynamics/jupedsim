@@ -845,7 +845,7 @@ void MeshRouter::FixMeshEdges()
      }
 }
 
-void MeshRouter::Init(Building* b)
+bool MeshRouter::Init(Building* b)
 {
      _building=b;
      //Log->Write("WARNING: \tdo not use this  <<Mesh>>  router !!");
@@ -955,6 +955,7 @@ void MeshRouter::Init(Building* b)
      }
      _meshdata=new MeshData(nodes,edges,outedges,mCellGroups);
      FixMeshEdges();
+     return true;
 }
 
 void MeshRouter::WriteMeshToFile(const string& filename)

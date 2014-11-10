@@ -69,7 +69,7 @@ GCFMModel::~GCFMModel(void)
 }
 
 
-void GCFMModel::Init (Building* building) const
+bool GCFMModel::Init (Building* building) const
 {
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     for(unsigned int p=0;p<allPeds.size();p++)
@@ -95,7 +95,7 @@ void GCFMModel::Init (Building* building) const
               Log->Write(
                    "ERROR: \allPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
-              exit(EXIT_FAILURE);
+              return false;
          }
 
          JEllipse E = ped->GetEllipse();
@@ -103,6 +103,7 @@ void GCFMModel::Init (Building* building) const
          E.SetSinPhi(sinPhi);
          ped->SetEllipse(E);
     }
+    return true;
 }
 
 void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
@@ -627,15 +628,4 @@ string GCFMModel::GetDescription() const
      rueck.append(tmp);
 
      return rueck;
-}
-
-
-
-/**
- * implementation of Linked-cell combined with openMP
- */
-
-void GCFMModel::CalculateForce(double time, double tip1, Building* building) const
-{
-     
 }

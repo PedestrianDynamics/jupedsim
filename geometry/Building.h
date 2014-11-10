@@ -163,7 +163,7 @@ public:
      LCGrid* GetGrid() const;
 
      // convenience methods
-     void InitGeometry();
+     bool InitGeometry();
      void InitGrid(double cellSize);
      //void InitRoomsAndSubroomsMap();
      void InitSavePedPathway(const std::string &filename);
@@ -193,7 +193,7 @@ public:
       *
       * @param filename, the geometry file
       */
-     void LoadGeometry(const std::string &geometryfile="");
+     bool LoadGeometry(const std::string &geometryfile="");
 
      /**
       * Write the geometry to the given file.
@@ -203,15 +203,15 @@ public:
       */
      bool SaveGeometry(const std::string &filename);
 
-     void LoadTrafficInfo();
-     void LoadRoutingInfo(const std::string &filename);
+     bool LoadTrafficInfo();
+     bool LoadRoutingInfo(const std::string &filename);
      void WriteToErrorLog() const;
 
      /**
       * Check the scenario for possible errors and
       * output user specific informations.
       */
-     void SanityCheck();
+     bool SanityCheck();
 
 
 private:

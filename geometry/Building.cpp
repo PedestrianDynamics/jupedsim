@@ -259,7 +259,7 @@ void Building::AddSurroundingRoom()
 }
 
 
-void Building::InitGeometry()
+bool Building::InitGeometry()
 {
      Log->Write("INFO: \tInit Geometry");
      for (int i = 0; i < GetNumberOfRooms(); i++) {
@@ -284,7 +284,8 @@ void Building::InitGeometry()
                }
 
                // initialize the poly
-               s->ConvertLineToPoly(goals);
+               if(! s->ConvertLineToPoly(goals))
+                   return false;
                s->CalculateArea();
                goals.clear();
 
@@ -292,11 +293,14 @@ void Building::InitGeometry()
                const vector<Obstacle*>& obstacles = s->GetAllObstacles();
                for (unsigned int obs = 0; obs < obstacles.size(); ++obs) {
                     if (obstacles[obs]->GetClosed() == 1)
-                         obstacles[obs]->ConvertLineToPoly();
+                         if(!obstacles[obs]->ConvertLineToPoly())
+                             return false;
                }
           }
      }
      Log->Write("INFO: \tInit Geometry successful!!!\n");
+
+     return true;
 }
 
 
@@ -324,7 +328,7 @@ const std::string& Building::GetGeometryFilename() const
      return _geometryFilename;
 }
 
-void Building::LoadGeometry(const std::string &geometryfile)
+bool Building::LoadGeometry(const std::string &geometryfile)
 {
      //get the geometry filename from the project file
      string geoFilenameWithPath= _projectRootDir + geometryfile;
@@ -335,7 +339,7 @@ void Building::LoadGeometry(const std::string &geometryfile)
           if (!doc.LoadFile()) {
                Log->Write("ERROR: \t%s", doc.ErrorDesc());
                Log->Write("\t could not parse the project file");
-               exit(EXIT_FAILURE);
+               return false;
           }
 
           Log->Write("INFO: \tParsing the geometry file");
@@ -352,23 +356,23 @@ void Building::LoadGeometry(const std::string &geometryfile)
      if (!docGeo.LoadFile()) {
           Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
           Log->Write("\t could not parse the geometry file");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      TiXmlElement* xRootNode = docGeo.RootElement();
      if( ! xRootNode ) {
           Log->Write("ERROR:\tRoot element does not exist");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      if( xRootNode->ValueStr () != "geometry" ) {
           Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-          exit(EXIT_FAILURE);
+          return false;
      }
      if(xRootNode->Attribute("unit"))
           if(string(xRootNode->Attribute("unit")) != "m") {
                Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
-               exit(EXIT_FAILURE);
+               return false;
           }
 
      double version = xmltof(xRootNode->Attribute("version"), -1);
@@ -377,7 +381,7 @@ void Building::LoadGeometry(const std::string &geometryfile)
           Log->Write(" \tWrong geometry version!");
           Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
           Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      _caption = xmltoa(xRootNode->Attribute("caption"), "virtual building");
@@ -388,7 +392,7 @@ void Building::LoadGeometry(const std::string &geometryfile)
      TiXmlNode*  xRoomsNode = xRootNode->FirstChild("rooms");
      if (!xRoomsNode) {
           Log->Write("ERROR: \tThe geometry should have at least one room and one subroom");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      for(TiXmlElement* xRoom = xRoomsNode->FirstChildElement("room"); xRoom;
@@ -431,7 +435,7 @@ void Building::LoadGeometry(const std::string &geometryfile)
                     if(xSubRoom->FirstChildElement("up")==NULL) {
                          Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
                          Log->Write("ERROR:\t check your geometry file");
-                         exit(EXIT_FAILURE);
+                         return false;
                     }
                     double up_x = xmltof( xSubRoom->FirstChildElement("up")->Attribute("px"), 0.0);
                     double up_y = xmltof( xSubRoom->FirstChildElement("up")->Attribute("py"), 0.0);
@@ -601,8 +605,10 @@ void Building::LoadGeometry(const std::string &geometryfile)
                AddTransition(t);
           }
 
-
      Log->Write("INFO: \tLoading building file successful!!!\n");
+
+     //everything went fine
+     return true;
 }
 
 
@@ -851,18 +857,21 @@ bool Building::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
      return true;
 }
 
-void Building::SanityCheck()
+bool Building::SanityCheck()
 {
      Log->Write("INFO: \tChecking the geometry for artifacts");
+     bool status = true;
      for (unsigned int i = 0; i < _rooms.size(); i++) {
           Room* room = _rooms[i];
 
           for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                SubRoom* sub = room->GetSubRoom(j);
-               sub->SanityCheck();
+               if (!sub->SanityCheck())
+                    status = false;
           }
      }
      Log->Write("INFO: \t...Done!!!\n");
+     return status;
 }
 
 
@@ -938,25 +947,25 @@ void Building::InitGrid(double cellSize)
      Log->Write("INFO: \tDone with Initializing the grid ");
 }
 
-void Building::LoadRoutingInfo(const string &filename)
+bool Building::LoadRoutingInfo(const string &filename)
 {
      Log->Write("INFO:\tLoading extra routing information");
      if (filename == "") {
           Log->Write("INFO:\t No file supplied !");
           Log->Write("INFO:\t done with loading extra routing information");
-          return;
+          return true;
      }
      TiXmlDocument docRouting(filename);
      if (!docRouting.LoadFile()) {
           Log->Write("ERROR: \t%s", docRouting.ErrorDesc());
           Log->Write("ERROR: \t could not parse the routing file");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      TiXmlElement* xRootNode = docRouting.RootElement();
      if( ! xRootNode ) {
           Log->Write("ERROR:\tRoot element does not exist");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      //load goals and routes
@@ -993,7 +1002,9 @@ void Building::LoadRoutingInfo(const string &filename)
                     }
                }
 
-               goal->ConvertLineToPoly();
+               if(!goal->ConvertLineToPoly())
+                   return false;
+
                AddGoal(goal);
                _routingEngine->AddFinalDestinationID(goal->GetId());
           }
@@ -1008,7 +1019,7 @@ void Building::LoadRoutingInfo(const string &filename)
                double id = xmltof(trip->Attribute("id"), -1);
                if (id == -1) {
                     Log->Write("ERROR:\t id missing for trip");
-                    exit(EXIT_FAILURE);
+                    return false;
                }
                string sTrip = trip->FirstChild()->ValueStr();
                vector<string> vTrip;
@@ -1023,9 +1034,10 @@ void Building::LoadRoutingInfo(const string &filename)
                _routingEngine->AddTrip(vTrip);
           }
      Log->Write("INFO:\tdone with loading extra routing information");
+     return true;
 }
 
-void Building::LoadTrafficInfo()
+bool Building::LoadTrafficInfo()
 {
 
      Log->Write("INFO:\tLoading  the traffic info file");
@@ -1035,14 +1047,13 @@ void Building::LoadTrafficInfo()
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      TiXmlNode* xRootNode = doc.RootElement()->FirstChild("traffic_constraints");
      if( ! xRootNode ) {
           Log->Write("WARNING:\tcould not find any traffic information");
-          return;
-          //exit(EXIT_FAILURE);
+          return true;
      }
 
      //processing the rooms node
@@ -1076,6 +1087,7 @@ void Building::LoadTrafficInfo()
                }
           }
      Log->Write("INFO:\tDone with loading traffic info file");
+     return true;
 }
 
 

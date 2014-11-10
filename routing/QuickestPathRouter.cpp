@@ -294,13 +294,14 @@ double QuickestPathRouter::gain(double time)
 }
 
 
-void QuickestPathRouter::Init(Building* building)
+bool QuickestPathRouter::Init(Building* building)
 {
      Log->Write("INFO:\tInit Quickest Path Router Engine");
 
      // prefer path through corridors to path through rooms
      SetEdgeCost(10.0);
-     GlobalRouter::Init(building);
+     if (GlobalRouter::Init(building) == false)
+          return false;
 
      // activate the spotlight for tracking some pedestrians
      //Pedestrian::ActivateSpotlightSystem(true);
@@ -313,6 +314,7 @@ void QuickestPathRouter::Init(Building* building)
      //DumpAccessPoints(1185);
      //exit(0);
      Log->Write("INFO:\tDone with Quickest Path Router Engine!");
+     return true;
 }
 
 void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestrian** myref, double jamThreshold, int exitID, int* flag)

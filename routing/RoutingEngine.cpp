@@ -107,9 +107,12 @@ void RoutingEngine::AddTrip(vector<string> trip)
      _tripsCollection.push_back(trip);
 }
 
-void RoutingEngine::Init(Building* building)
+bool RoutingEngine::Init(Building* building)
 {
+     bool status=true;
      for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          _routersCollection[r]->Init(building);
+          if(_routersCollection[r]->Init(building)==false)
+               status=false;
      }
+     return status;
 }

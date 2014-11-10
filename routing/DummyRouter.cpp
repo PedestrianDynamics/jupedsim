@@ -47,7 +47,7 @@ int DummyRouter::FindExit(Pedestrian* p)
      return 1;
 }
 
-void DummyRouter::Init(Building* b)
+bool DummyRouter::Init(Building* b)
 {
      _building=b;
      Log->Write("ERROR: \tdo not use this  <<Dummy>> router !!");
@@ -68,6 +68,7 @@ void DummyRouter::Init(Building* b)
 //              iter->second->WriteToErrorLog();
 //      }
 //      exit(EXIT_FAILURE);
+     return true;
 }
 
 

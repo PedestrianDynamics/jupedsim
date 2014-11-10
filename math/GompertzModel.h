@@ -164,14 +164,6 @@ public:
      double GetcWall() const;
 
      /**
-      * Solve the differential equations and update the positions and velocities
-      * @param t the actual time
-      * @param tp the next timestep
-      * @param building the geometry object
-      */
-     virtual void CalculateForce(double t, double tp, Building* building) const;
-
-     /**
       * @return all model parameters in a nicely formatted string
       */
      virtual std::string GetDescription() const;
@@ -180,10 +172,14 @@ public:
       * initialize the phi angle
       * @param building
       */
-     virtual void Init (Building* building) const;
+     virtual bool Init (Building* building) const;
 
      /**
       * Compute the next simulation step
+      * Solve the differential equations and update the positions and velocities
+      * @param current the actual time
+      * @param deltaT the next timestep
+      * @param building the geometry object
       */
      virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
 };

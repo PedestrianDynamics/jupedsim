@@ -48,36 +48,38 @@ int main(int argc, char **argv)
      time(&starttime);
 
      Simulation sim = Simulation();
-     sim.InitArgs(args);
-     Log->Write("INFO: \tStart runSimulation()");
-     int evacTime = sim.RunSimulation();
-     Log->Write("\nINFO: \tEnd runSimulation()");
-     time(&endtime);
+     if(sim.InitArgs(args))
+     {
+          Log->Write("INFO: \tStart runSimulation()");
+          int evacTime = sim.RunSimulation();
+          Log->Write("\nINFO: \tEnd runSimulation()");
+          time(&endtime);
 
-     // some output
-     double execTime = difftime(endtime, starttime);
+          // some output
+          double execTime = difftime(endtime, starttime);
 
-     if (sim.GetPedsNumber())
-          Log->Write("\nPedestrians not evacuated [%d] using [%d] threads",
-                     sim.GetPedsNumber(),
-                     args->GetMaxOpenMPThreads());
+          if (sim.GetPedsNumber()) {
+               Log->Write("\nPedestrians not evacuated [%d] using [%d] threads",
+                         sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
+          }
 
-     Log->Write("\nExec Time [s]   : %.2f", execTime);
-     Log->Write("Evac Time [s]     : %d", evacTime);
-     Log->Write("Realtime Factor   : %.2f X", evacTime / execTime);
-     Log->Write("Number of Threads : %d", args->GetMaxOpenMPThreads());
-     Log->Write("Warnings          : %d", Log->GetWarnings() );
-     Log->Write("Errors            : %d", Log->GetErrors() );
-     // sim.PrintStatistics();
-     if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
-          printf("\nExec Time [s]     : %4.2f\n", execTime);
-          printf("Evac Time [s]       : %d\n", evacTime);
-          printf("Realtime Factor     : %.2f (X)\n", evacTime / execTime);
-          printf("Number of Threads   : %d\n", args->GetMaxOpenMPThreads());
-          printf("Warnings            : %d\n", Log->GetWarnings() );
-          printf("Errors              : %d\n", Log->GetErrors() );
+          Log->Write("\nExec Time [s]   : %.2f", execTime);
+          Log->Write("Evac Time [s]     : %d", evacTime);
+          Log->Write("Realtime Factor   : %.2f X", evacTime / execTime);
+          Log->Write("Number of Threads : %d", args->GetMaxOpenMPThreads());
+          Log->Write("Warnings          : %d", Log->GetWarnings());
+          Log->Write("Errors            : %d", Log->GetErrors());
+
+          // sim.PrintStatistics();
+          if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
+               printf("\nExec Time [s]     : %4.2f\n", execTime);
+               printf("Evac Time [s]       : %d\n", evacTime);
+               printf("Realtime Factor     : %.2f (X)\n", evacTime / execTime);
+               printf("Number of Threads   : %d\n", args->GetMaxOpenMPThreads());
+               printf("Warnings            : %d\n", Log->GetWarnings());
+               printf("Errors              : %d\n", Log->GetErrors());
+          }
      }
-
      // do the last cleaning
      delete args;
      delete Log;

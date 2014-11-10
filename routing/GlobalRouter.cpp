@@ -82,7 +82,7 @@ GlobalRouter::~GlobalRouter()
      _accessPoints.clear();
 }
 
-void GlobalRouter::Init(Building* building)
+bool GlobalRouter::Init(Building* building)
 {
 
     //necessary if the init is called several times during the simulation
@@ -471,6 +471,8 @@ void GlobalRouter::Init(Building* building)
      //WriteGraphGV("routing_graph.gv",1,rooms);
      Log->Write("INFO:\tDone with the Global Router Engine!");
      //exit(0);
+
+     return true;
 }
 
 void GlobalRouter::Reset(){

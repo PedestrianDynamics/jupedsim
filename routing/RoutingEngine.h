@@ -95,8 +95,9 @@ public:
      /**
       * Initialize all routers with the current building object
       * @param building
+      * @return the status of the initialisation
       */
-     void Init(Building* building);
+     bool Init(Building* building);
 
 private:
      /// collections of all routers used

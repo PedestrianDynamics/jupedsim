@@ -54,7 +54,7 @@ public:
 
      virtual int FindExit(Pedestrian* ped);
 
-     virtual void Init(Building* building);
+     virtual bool Init(Building* building);
 
 private:
 

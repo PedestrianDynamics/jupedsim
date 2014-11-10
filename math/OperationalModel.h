@@ -52,8 +52,9 @@ public:
       * Performs whatever initialization is needed/required.
       * This function is called at the beginning the simulation once.
       * @param building, the building object
+      * return the status of the initialisation
       */
-     virtual void Init (Building* building) const = 0;
+     virtual bool Init (Building* building) const = 0;
 
      /**
       * @return a description of the model possibly with all model parameters in a nicely formatted string

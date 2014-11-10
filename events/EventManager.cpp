@@ -22,10 +22,10 @@ EventManager::EventManager(Building *_b){
     _lastUpdateTime=0;
     _deltaT=0;
     if(!_file){
-        Log->Write("INFO:\tDatei events.txt nicht gefunden. Dynamisches Eventhandling nicht moeglich.");
+        Log->Write("INFO:\tFiles 'events.txt' missing. Realtime interaction with the simulation not possible.");
     }
     else{
-        Log->Write("INFO:\tDatei events.txt gefunden. Dynamisches Eventhandling moeglich.");
+        Log->Write("INFO:\tFile 'events.txt' will be monitored for new events.");
         _dynamic=true;
     }
 }
@@ -42,7 +42,7 @@ void EventManager::SetProjectRootDir(const std::string &filename){
 }
 
 void EventManager::readEventsXml(){
-     Log->Write("INFO: \tLooking for events");
+     Log->Write("INFO: \tLooking for pre-defined events in other files");
      //get the geometry filename from the project file
      TiXmlDocument doc(_projectFilename);
      if (!doc.LoadFile()){
@@ -97,16 +97,19 @@ void EventManager::readEventsXml(){
      Log->Write("INFO: \tEvents were read\n");
 }
 
-void EventManager::listEvents(){
-    if(_event_times.size()==0){
-        Log->Write("INFO: \tNo events in the events.xml");
-    }
-    else{
-        char buf[10],buf2[10];
-        for(unsigned int i=0;i<_event_times.size();i++){
-            sprintf(buf,"%f",_event_times[i]);
-            sprintf(buf2,"%d",_event_ids[i]);
-            Log->Write("INFO: \tAfter "+string(buf)+" sec: "+_event_types[i]+" "+string(buf2)+" "+_event_states[i]);
+void EventManager::listEvents()
+{
+    if (_event_times.size() == 0) {
+        //this notification was already printed ealier
+        //Log->Write("INFO: \tNo events in the events.xml");
+    } else {
+        char buf[10], buf2[10];
+        for (unsigned int i = 0; i < _event_times.size(); i++) {
+            sprintf(buf, "%f", _event_times[i]);
+            sprintf(buf2, "%d", _event_ids[i]);
+            Log->Write(
+                    "INFO: \tAfter " + string(buf) + " sec: " + _event_types[i]
+                            + " " + string(buf2) + " " + _event_states[i]);
         }
     }
 

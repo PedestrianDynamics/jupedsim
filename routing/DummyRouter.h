@@ -42,7 +42,7 @@ public:
      virtual ~DummyRouter();
 
      virtual int FindExit(Pedestrian* p);
-     virtual void Init(Building* b);
+     virtual bool Init(Building* b);
 
 };
 

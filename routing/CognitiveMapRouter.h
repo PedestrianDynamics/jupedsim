@@ -51,7 +51,7 @@ public:
      virtual ~CognitiveMapRouter();
 
      virtual int FindExit(Pedestrian* p);
-     virtual void Init(Building* b);
+     virtual bool Init(Building* b);
 
 protected:
      void CheckAndInitPedestrian(Pedestrian *);

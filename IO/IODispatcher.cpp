@@ -315,9 +315,9 @@ void TrajectoriesJPSV04::WriteFrame(int frameNr, Building* building)
           string caption = r->GetCaption();
 
           if ((rooms_to_plot.empty() == false)
-                              && (IsElementInVector(rooms_to_plot, caption) == false)) {
-                         continue;
-                    }
+                    && (IsElementInVector(rooms_to_plot, caption) == false)) {
+               continue;
+          }
           data.append(WritePed(ped));
      }
 
@@ -341,6 +341,7 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 
 void TrajectoriesFLAT::WriteHeader(int nPeds, double fps, Building* building, int seed)
 {
+     (void) seed; (void) nPeds;
      char tmp[CLENGTH] = "";
      Write("#description: my super simulation");
      sprintf(tmp, "#framerate: %0.2f",fps);
@@ -356,7 +357,7 @@ void TrajectoriesFLAT::WriteHeader(int nPeds, double fps, Building* building, in
 
 void TrajectoriesFLAT::WriteGeometry(Building* building)
 {
-
+     (void) building;
 }
 
 void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
@@ -392,6 +393,8 @@ TrajectoriesVTK::TrajectoriesVTK()
 
 void TrajectoriesVTK::WriteHeader(int nPeds, double fps, Building* building, int seed)
 {
+     //suppress unused warnings
+     (void) nPeds; (void) fps ; (void) seed;
      Write("# vtk DataFile Version 4.0");
      Write(building->GetCaption());
      Write("ASCII");
@@ -447,6 +450,7 @@ void TrajectoriesVTK::WriteGeometry(Building* building)
 
 void TrajectoriesVTK::WriteFrame(int frameNr, Building* building)
 {
+     (void) frameNr; (void)building;
 }
 
 void TrajectoriesVTK::WriteFooter()
@@ -481,24 +485,24 @@ void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, 
 void TrajectoriesJPSV06::WriteGeometry(Building* building)
 {
      // just put a link to the geometry file
-//     string embed_geometry;
-//     embed_geometry.append("\t<geometry>\n");
-//     char file_location[CLENGTH] = "";
-//     sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
-//     embed_geometry.append(file_location);
-//     //embed_geometry.append("\t</geometry>\n");
-//
-//     const map<int, Hline*>& hlines=building->GetAllHlines();
-//     if(hlines.size()>0){
-//          //embed_geometry.append("\t<geometry>\n");
-//          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
-//          {
-//               embed_geometry.append(it->second->WriteElement());
-//          }
-//          //embed_geometry.append("\t</geometry>\n");
-//     }
-//     embed_geometry.append("\t</geometry>\n");
-//     Write(embed_geometry);
+     //     string embed_geometry;
+     //     embed_geometry.append("\t<geometry>\n");
+     //     char file_location[CLENGTH] = "";
+     //     sprintf(file_location, "\t<file location= \"%s\"/>\n", building->GetGeometryFilename().c_str());
+     //     embed_geometry.append(file_location);
+     //     //embed_geometry.append("\t</geometry>\n");
+     //
+     //     const map<int, Hline*>& hlines=building->GetAllHlines();
+     //     if(hlines.size()>0){
+     //          //embed_geometry.append("\t<geometry>\n");
+     //          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+     //          {
+     //               embed_geometry.append(it->second->WriteElement());
+     //          }
+     //          //embed_geometry.append("\t</geometry>\n");
+     //     }
+     //     embed_geometry.append("\t</geometry>\n");
+     //     Write(embed_geometry);
 
      //set the content of the file
      string fileName=building->GetProjectRootDir()+"/"+building->GetGeometryFilename().c_str();
@@ -510,51 +514,51 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      buffer << t.rdbuf();
      embed_geometry=buffer.str();
      Write(embed_geometry);
-//
-//
-//     //collecting the hlines
-//     std::stringstream hlines_buffer;
-//     // add the header
-//     hlines_buffer<<" <routing version=\"0.5\" "
-//               <<"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-//               <<"xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_routing.xsd\" >"<<endl
-//               <<"<Hlines> "<<endl;
-//
-//     const map<int, Hline*>& hlines=building->GetAllHlines();
-//     for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
-//     {
-//          Hline* hl=it->second;
-//          hlines_buffer <<"\t<Hline id=\""<< hl->GetID()<<"\" room_id=\""<<hl->GetRoom1()->GetID()
-//                                        <<"\" subroom_id=\""<< hl->GetSubRoom1()->GetSubRoomID()<<"\">"<<endl;
-//          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint1()._x<<"\" py=\""<< hl->GetPoint1()._y<<"\" />"<<endl;
-//          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint2()._x<<"\" py=\""<< hl->GetPoint2()._y<<"\" />"<<endl;
-//          hlines_buffer <<"\t</Hline>"<<endl;
-//     }
-//     hlines_buffer<<"</Hlines> "<<endl;
-//     hlines_buffer<<"</routing> "<<endl;
-//
-//     string hline_string=hlines_buffer.str();
-//     string to_replace="</geometry>";
-//     hline_string.append(to_replace);
-//
-//     size_t start_pos = embed_geometry.find(to_replace);
-//     if(start_pos == std::string::npos)
-//     {
-//          Log->Write("WARNING:\t missing %s tag while writing the geometry in the trajectory file.",to_replace.c_str());
-//     }
-//
-//     embed_geometry.replace(start_pos, to_replace.length(), hline_string);
-//     Write(embed_geometry);
+     //
+     //
+     //     //collecting the hlines
+     //     std::stringstream hlines_buffer;
+     //     // add the header
+     //     hlines_buffer<<" <routing version=\"0.5\" "
+     //               <<"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+     //               <<"xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_routing.xsd\" >"<<endl
+     //               <<"<Hlines> "<<endl;
+     //
+     //     const map<int, Hline*>& hlines=building->GetAllHlines();
+     //     for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
+     //     {
+     //          Hline* hl=it->second;
+     //          hlines_buffer <<"\t<Hline id=\""<< hl->GetID()<<"\" room_id=\""<<hl->GetRoom1()->GetID()
+     //                                        <<"\" subroom_id=\""<< hl->GetSubRoom1()->GetSubRoomID()<<"\">"<<endl;
+     //          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint1()._x<<"\" py=\""<< hl->GetPoint1()._y<<"\" />"<<endl;
+     //          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint2()._x<<"\" py=\""<< hl->GetPoint2()._y<<"\" />"<<endl;
+     //          hlines_buffer <<"\t</Hline>"<<endl;
+     //     }
+     //     hlines_buffer<<"</Hlines> "<<endl;
+     //     hlines_buffer<<"</routing> "<<endl;
+     //
+     //     string hline_string=hlines_buffer.str();
+     //     string to_replace="</geometry>";
+     //     hline_string.append(to_replace);
+     //
+     //     size_t start_pos = embed_geometry.find(to_replace);
+     //     if(start_pos == std::string::npos)
+     //     {
+     //          Log->Write("WARNING:\t missing %s tag while writing the geometry in the trajectory file.",to_replace.c_str());
+     //     }
+     //
+     //     embed_geometry.replace(start_pos, to_replace.length(), hline_string);
+     //     Write(embed_geometry);
 
-//     Write("\t<AttributeDescription>");
-//     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
-//     Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
-//     Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
-//     Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
-//     Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
-//     Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
-//     Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
-//     Write("\t</AttributeDescription>\n");
+     //     Write("\t<AttributeDescription>");
+     //     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
+     //     Write("\t\t<property tag=\"y\" description=\"yPosition\"/>");
+     //     Write("\t\t<property tag=\"z\" description=\"zPosition\"/>");
+     //     Write("\t\t<property tag=\"rA\" description=\"radiusA\"/>");
+     //     Write("\t\t<property tag=\"rB\" description=\"radiusB\"/>");
+     //     Write("\t\t<property tag=\"eC\" description=\"ellipseColor\"/>");
+     //     Write("\t\t<property tag=\"eO\" description=\"ellipseOrientation\"/>");
+     //     Write("\t</AttributeDescription>\n");
 }
 
 void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)

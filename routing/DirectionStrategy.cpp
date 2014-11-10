@@ -46,11 +46,13 @@ DirectionStrategy::~DirectionStrategy()
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
 {
-     return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
+    (void)room; // suppress the unused warning
+    return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 /// 2
 Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
 {
+    (void)room; // suppress the unused warning
 
      double d = ped->GetEllipse().GetBmin() + 0.1 ; // shoulder//0.5;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
@@ -81,35 +83,37 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
 /// 3
 Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 {
-     const Point& p1 = ped->GetExitLine()->GetPoint1();
-     const Point& p2 = ped->GetExitLine()->GetPoint2();
-     Line ExitLine = Line(p1, p2);
-     Point Lot = ExitLine.LotPoint( ped->GetPos() );
-     Point ExitMiddle = (p1+p2)*0.5;
-     double d = 0.2;
-     Point diff = (p1 - p2).Normalized() * d;
-     Line e_neu = Line(p1 - diff, p2 + diff);
+   (void)room; // suppress the unused warning
 
-     if(ped->GetID() == -10)
-     {
-      printf("=======\nX=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
-          printf("p1=[%.2f, %.2f], p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY());
-          printf("e_neu=[%.2f, %.2f]===[%.2f, %.2f]\n", e_neu.GetPoint1().GetX(), e_neu.GetPoint1().GetY(), e_neu.GetPoint2().GetX(), e_neu.GetPoint2().GetY() );
-     }
+    const Point& p1 = ped->GetExitLine()->GetPoint1();
+    const Point& p2 = ped->GetExitLine()->GetPoint2();
+    Line ExitLine = Line(p1, p2);
+    Point Lot = ExitLine.LotPoint( ped->GetPos() );
+    Point ExitMiddle = (p1+p2)*0.5;
+    double d = 0.2;
+    Point diff = (p1 - p2).Normalized() * d;
+    Line e_neu = Line(p1 - diff, p2 + diff);
 
-     if ( e_neu.IsInLineSegment(Lot) ) {
-          if(ped->GetID() == -10){
-          printf("Return Lot=[%.2f, %.2f]\n", Lot.GetX(), Lot.GetY() );
-          if(0 && ped->GetPos().GetX() > 56)
-               getc(stdin);}
-          return Lot;
-     } else {
-          if(ped->GetID() == -10){
-          printf("Return Middle=[%.2f, %.2f]\n", ExitMiddle.GetX(), ExitMiddle.GetY() );
-          if(0 && ped->GetPos().GetX() > 56)
-               getc(stdin);}
-          return ExitMiddle;
-     }
+    if(ped->GetID() == -10)
+    {
+        printf("=======\nX=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
+        printf("p1=[%.2f, %.2f], p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY());
+        printf("e_neu=[%.2f, %.2f]===[%.2f, %.2f]\n", e_neu.GetPoint1().GetX(), e_neu.GetPoint1().GetY(), e_neu.GetPoint2().GetX(), e_neu.GetPoint2().GetY() );
+    }
+
+    if ( e_neu.IsInLineSegment(Lot) ) {
+        if(ped->GetID() == -10){
+            printf("Return Lot=[%.2f, %.2f]\n", Lot.GetX(), Lot.GetY() );
+            if(0 && ped->GetPos().GetX() > 56)
+                getc(stdin);}
+        return Lot;
+    } else {
+        if(ped->GetID() == -10){
+            printf("Return Middle=[%.2f, %.2f]\n", ExitMiddle.GetX(), ExitMiddle.GetY() );
+            if(0 && ped->GetPos().GetX() > 56)
+                getc(stdin);}
+        return ExitMiddle;
+    }
 
 }
 

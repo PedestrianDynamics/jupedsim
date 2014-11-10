@@ -100,7 +100,7 @@ public:
     /**
      * Read parameters from the argument parser class.
      */
-    void InitArgs(ArgumentParser *args);
+    bool InitArgs(ArgumentParser *args);
 
     /**
      * @return the total simulated/evacuation time

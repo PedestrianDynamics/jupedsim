@@ -87,11 +87,12 @@ SafestPathRouter::~SafestPathRouter()
      delete dFinalLineEvac;
 }
 
-void SafestPathRouter::Init(Building* building)
+bool SafestPathRouter::Init(Building* building)
 {
      //Load the FDS file info
      //handle over to the global router engine
-     GlobalRouter::Init(building);
+     if(GlobalRouter::Init(building)==false)
+          return false;
 
 
      for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
@@ -150,6 +151,8 @@ void SafestPathRouter::Init(Building* building)
      //cout << rR[i] << " ";
 
      //}
+
+     return true;
 }
 
 
@@ -493,7 +496,8 @@ void SafestPathRouter::ReadMatrixFromFDS()
 
 void SafestPathRouter::GetHline(Building* building)
 {
-
+    //suppress the unused warning
+(void)building;
      /*
 
      //              cout << dFinalLineEvac[j]<< " ";

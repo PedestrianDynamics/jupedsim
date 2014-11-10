@@ -129,7 +129,7 @@ public:
       * its Routing engine using the supplied building object.
       * @param b the building object
       */
-     virtual void Init(Building* b) = 0;
+     virtual bool Init(Building* b) = 0;
 
 
 };

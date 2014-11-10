@@ -142,9 +142,10 @@ int GraphRouter::FindExit(Pedestrian* p)
      }
 }
 
-void GraphRouter::Init(Building* b)
+bool GraphRouter::Init(Building* b)
 {
-     GlobalRouter::Init(b);
+     if(GlobalRouter::Init(b)==false)
+          return false;
 
      Log->Write("ERROR: GRAPHROUTER  is not ready to use yet.");
      _building = b;
@@ -154,4 +155,5 @@ void GraphRouter::Init(Building* b)
      //        b->GetTransition("200E Normal Exit E3")->Close();
 
      //std::cout <<  b->GetTransition("200E Normal Exit E3")->IsOpen() << std::endl;
+     return true;
 }

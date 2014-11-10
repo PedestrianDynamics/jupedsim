@@ -182,9 +182,8 @@ bool Goal::Contains(const Point& ped) const
           return false;
 }
 
-void Goal::ConvertLineToPoly()
+bool Goal::ConvertLineToPoly()
 {
-
      vector<Line*> copy;
      vector<Point> tmpPoly;
      Point point;
@@ -219,11 +218,11 @@ void Goal::ConvertLineToPoly()
           char tmp[CLENGTH];
           sprintf(tmp, "ERROR: \tGoal::ConvertLineToPoly(): ID %d !!!\n", _id);
           Log->Write(tmp);
-          exit(0);
+          return false;
      }
      _poly = tmpPoly;
-
      ComputeControid();
+     return true;
 }
 
 const Point& Goal::GetCentroid() const
