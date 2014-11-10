@@ -6,16 +6,16 @@ from scipy.misc import comb
 import logging, types, argparse
 
 def getParserArgs():
-	parser = argparse.ArgumentParser(description='Convert the experimental data to TraVisTo-format. Optionally smooth the trajectories')
-	parser.add_argument("-s", "--smoth", action='store_const', const=1, default=0 , help='smooth the trajectories. Takes a bit longer')
+    parser = argparse.ArgumentParser(description='Convert the experimental data to TraVisTo-format. Optionally smooth the trajectories')
+    parser.add_argument("-s", "--smoth", action='store_const', const=1, default=0 , help='smooth the trajectories. Takes a bit longer')
     # action='store_const', const=1, default=0
-	parser.add_argument("-f", "--fps", type=int , default=10, help='frames per seconds (default 10)')
-	parser.add_argument("-m", "--m", action='store_const', const=0, default=1, help='trajectories are in m (default cm)')
-	parser.add_argument("-d", "--df", type=int , default=10, help='Delta (frames) to calculate velocity  (default 10)')
-	parser.add_argument("-l", "--log" , type=argparse.FileType('w'), default='log.dat', help="log file (default log.dat)")
-	parser.add_argument("-p", "--path", default="UO/300", help='give the directory of the trjectory files')
-	args = parser.parse_args()
-	return args
+    parser.add_argument("-f", "--fps", type=int , default=10, help='frames per seconds (default 10)')
+    parser.add_argument("-m", "--m", action='store_const', const=0, default=1, help='trajectories are in m (default cm)')
+    parser.add_argument("-d", "--df", type=int , default=10, help='Delta (frames) to calculate velocity  (default 10)')
+    parser.add_argument("-l", "--log" , type=argparse.FileType('w'), default='log.dat', help="log file (default log.dat)")
+    parser.add_argument("-p", "--path", default=".", help='give the directory of the trjectory files')
+    args = parser.parse_args()
+    return args
 
 
 def Projection(a, b, c):
