@@ -1,15 +1,14 @@
 /**
- * @file    main.cpp
- * @author  U.Kemloh, A.Portz
- * @version 0.4
- * Created on: Apr 20, 2019
- * Copyright (C) <2009-2012>
+ * \file        ArgumentParser.cpp
+ * \date        Oct 10, 2014
+ * \version     v0.6
+ * \copyright   <2009-2014> Forschungszentrum J¨¹lich GmbH. All rights reserved.
  *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -18,14 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
+ * The ArgumentParser class define functions reading the input parameters from initial files.
  *
  *
- *
- */
+ **/
 #ifndef ARGUMENTPARSER_H_
 #define ARGUMENTPARSER_H_
 
