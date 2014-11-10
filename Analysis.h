@@ -2,7 +2,7 @@
  * \file        Analysis.h
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J¨¹lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -65,6 +65,20 @@ public:
 
      polygon_2d ReadGeometry(const std::string& geometryFile);
      int RunAnalysis(const std::string& file, const std::string& path);
+
+     /**
+      * return the base name from the string.
+      * // file.txt ---> file
+      * @param str
+      */
+     std::string GetBasename(const std::string& str);
+
+     /**
+      * extract the filename from the path
+      * // c:\\windows\\winhelp.exe ---> winhelp.exe
+      * @param str
+      */
+     std::string GetFilename(const std::string& str);
 
 
 private:
@@ -307,20 +321,6 @@ private:
       * @return
       */
      std::vector<polygon_2d> GetPolygons(int NrInFrm);
-
-     /**
-      * return the base name from the string.
-      * // file.txt ---> file
-      * @param str
-      */
-     std::string GetBasename(const std::string& str);
-
-     /**
-      * extract the filename from the path
-      * // c:\\windows\\winhelp.exe ---> winhelp.exe
-      * @param str
-      */
-     std::string GetFilename(const std::string& str);
 
      /**
       * create a directory depending on the platform
