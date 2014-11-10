@@ -10,13 +10,13 @@ import matplotlib.pyplot as plt
 import re, sys
 
 #=========================
-testnr = 7
+testnr = 7.2
 #========================
 
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_test_%d.txt"%testnr
+logfile="log_test_%1.1f.txt"%testnr
 f=open(logfile, "w")
 f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -44,8 +44,6 @@ def PassedLineY(p, exit):
     return any(p[:,3] <= y) & any(p[:,3] >= y) & any(p[:,2] >= x1) & any(p[:,2] <= x2)
     
     
-
-failure = 0
 if __name__ == "__main__":
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
@@ -76,6 +74,10 @@ if __name__ == "__main__":
     if not path.exists(executable):
         logging.critical("executable <%s> does not exist yet."%executable)
         exit(FAILURE)
+
+    # Exits
+    e1 = [26, 1, 2] # y, x1, x2
+    e2 = [18, 1, 2] # x, y1, y2
         
     for inifile in inifiles:
         if not path.exists(inifile):
@@ -97,36 +99,19 @@ if __name__ == "__main__":
             exit(FAILURE)
   
         fps, N, traj = parse_file(trajfile)
-        group_1 = [1, 2, 3]
-        group_2 = [4, 6, 5]
-        e1 = [26, 1, 2] # y, x1, x2
-        e2 = [18, 1, 2] # x, y1, y2
-        for ped in group_1:
+        peds = np.unique(traj[:,0]).astype(int)
+        logging.info("Checking the exits of pedestrians ...")
+        
+        for ped in peds:
             traj1 = traj[ traj[:,0] == ped ]
             x = traj1[:,2]
             y = traj1[:,3]
-            if not PassedLineY(traj1, e1):
-                logging.critical("ped %d did not exit from Exit (%1.2f, %1.2f) | (%1.2f, %1.2f)"%(ped, e1[1], e1[0], e1[2], e1[0]))
-                failure = 1
-            else:
-                logging.info("ped %d  exits from Exit (%1.2f, %1.2f) | (%1.2f, %1.2f)"%(ped, e1[1], e1[0], e1[2], e1[0]))
-
-        for ped in group_2:
-            traj1 = traj[ traj[:,0] == ped ]
-            x = traj1[:,2]
-            y = traj1[:,3]
-            if not PassedLineX(traj1, e2):
-                logging.critical("ped %d did not exit from Exit (%1.2f, %1.2f) | (%1.2f, %1.2f)"%(ped, e2[0], e2[1], e2[0], e2[2]))
-                failure = 1
-            else:
-                logging.info("ped %d  exits from Exit (%1.2f, %1.2f) | (%1.2f, %1.2f)"%(ped, e2[0], e2[1], e2[0], e2[2]))
-
-         
-        if failure:
-            logging.critical("%s exists with failure!"%argv[0]) 
-            exit(FAILURE)
-
-#----- for inifiles    
-    logging.info("%s exists with success!"%argv[0]) 
-    exit(SUCCESS)
+            if PassedLineX(traj1, e2):
+                logging.info("ped %d exits from Exit (%1.2f, %1.2f) | (%1.2f, %1.2f)"%(ped, e2[0], e2[1], e2[0], e2[2]))
+                logging.info("%s exists with success!"%argv[0]) 
+                exit(SUCCESS)
+            
+    #----- for inifiles    
+    logging.info("%s exists with failure!"%argv[0]) 
+    exit(FAILURE)
 

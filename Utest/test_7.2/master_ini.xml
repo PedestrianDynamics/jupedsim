@@ -3,7 +3,7 @@
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
  
   <seed>1</seed>
-  <max_sim_time>90</max_sim_time>
+  <max_sim_time>200</max_sim_time>
   <numCPU>4</numCPU>
 
   <!-- geometry file -->
@@ -43,8 +43,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="[1,2]">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="3" goal_id="-1" router_id="2" x_min="0" x_max="17" y_min="23" y_max="25"/>	
-      <group group_id="1" agent_parameter_id="0" room_id="0" subroom_id="0" number="3" goal_id="-1" router_id="1" x_min="0" x_max="17" y_min="0" y_max="9"/>
+      <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="1"/>	
     </agents_distribution>
     <!-- frequency in persons/minute -->
     <agents_sources/>
@@ -55,8 +54,8 @@
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>range(1,6)</exitCrossingStrategy>
+        <stepsize>0.01</stepsize>
+        <exitCrossingStrategy>3</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.8" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
