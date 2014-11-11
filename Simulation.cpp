@@ -32,10 +32,11 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
-#include "geometry/Goal.h"
+//#include "geometry/Goal.h"
 
 #ifdef _OPENMP
 #include <omp.h>
+
 #else
 #define omp_get_thread_num() 0
 #define omp_get_max_threads()  1
@@ -53,7 +54,7 @@ Simulation::Simulation()
      _deltaT = 0;
      _building = NULL;
      _distribution = NULL;
-     _direction = NULL;
+     //_direction = NULL;
      _operationalModel = NULL;
      _solver = NULL;
      _iod = new IODispatcher();
@@ -68,7 +69,7 @@ Simulation::~Simulation()
 {
      delete _building;
      delete _distribution;
-     delete _direction;
+     //delete _direction;
      delete _operationalModel;
      delete _solver;
      delete _iod;
@@ -196,35 +197,14 @@ bool Simulation::InitArgs(ArgumentParser* args)
      //s.append(_distribution->writeParameter());
 
      // define how the navigation line is crossed
-     int direction = args->GetExitStrategy();
-     sprintf(tmp, "\tDirection to the exit: %d\n", direction);
-     s.append(tmp);
-     switch (direction)
-     {
-     case 1:
-          _direction = new DirectionMiddlePoint();
-          break;
-     case 2:
-          _direction = new DirectionMinSeperationShorterLine();
-          break;
-     case 3:
-          _direction = new DirectionInRangeBottleneck();
-          break;
-     case 4:
-          _direction = new DirectionGeneral();
-          break;
-     default:
-          _direction = new DirectionMinSeperationShorterLine();
-          sprintf(tmp,
-                    "\t Warning Direction %d is not in [1,4]. Fall back to 2\n",
-                    direction);
-          s.append(tmp);
-          break;
-     }
+     auto direction = args->GetExitStrategy();
+     //sprintf(tmp, "\tDirection to the exit: %d\n", direction);
+     //s.append(tmp);
+
      int model = args->GetModel();
      if (model == MODEL_GFCM) { //GCFM
                                 //if(args->GetHPCFlag()==0){
-          _operationalModel = new GCFMModel(_direction, args->GetNuPed(),
+          _operationalModel = new GCFMModel(direction.get(), args->GetNuPed(),
                     args->GetNuWall(), args->GetDistEffMaxPed(),
                     args->GetDistEffMaxWall(), args->GetIntPWidthPed(),
                     args->GetIntPWidthWall(), args->GetMaxFPed(),
@@ -247,7 +227,7 @@ bool Simulation::InitArgs(ArgumentParser* args)
           //s.append(_model->writeParameter());
           //}
      } else if (model == MODEL_GOMPERTZ) { //Gompertz
-          _operationalModel = new GompertzModel(_direction, args->GetNuPed(),
+          _operationalModel = new GompertzModel(direction.get(), args->GetNuPed(),
                     args->GetaPed(), args->GetbPed(), args->GetcPed(),
                     args->GetNuWall(), args->GetaWall(), args->GetbWall(),
                     args->GetcWall());

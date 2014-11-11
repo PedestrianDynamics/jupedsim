@@ -51,7 +51,7 @@
 #include "pedestrian/PedDistributor.h"
 #include "events/EventManager.h"
 #include "routing/CognitiveMapRouter.h"
-
+#include <memory>
 
 class Simulation
 {
@@ -72,7 +72,7 @@ private:
     ///initial distribution of the pedestrians
     PedDistributor* _distribution;
     /// door crossing strategy for the pedestrians
-    DirectionStrategy* _direction;
+    //DirectionStrategy* _direction;
     /// Force model to use
     OperationalModel* _operationalModel;
     /// differential equation solver

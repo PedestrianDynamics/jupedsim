@@ -34,14 +34,18 @@
 #include <map>
 #include <cstdlib>
 #include "Macros.h"
+#include "../routing/DirectionStrategy.h"
+#include <memory>
 using std::string;
 using std::vector;
 using std::pair;
 
 class OutputHandler;
 class TiXmlElement;
+class TiXmlNode;
 class AgentsParameters;
 extern OutputHandler* Log;
+
 
 class ArgumentParser {
 private:
@@ -97,11 +101,19 @@ private:
     int _hpcFlag; //Flag fuer die HPC-Archtitektur (0=CPU, 1=GPU, 2=XeonPhi)
     std::map<int, AgentsParameters*> _agentsParameters;
 
+    /*
+     * return objects for other classes as shared pointers
+     */
+    std::shared_ptr<DirectionStrategy> pexit_strategy;
+
+
+
 private:
     void ParseGCFMModel(TiXmlElement* xGCFM);
     void ParseGompertzModel(TiXmlElement* xGompertz);
     void ParseAgentParameters(TiXmlElement* operativModel);
     void Usage();
+    void parseStrategyToObject(const TiXmlNode& strategyNode);
 
 public:
     // Konstruktor
@@ -112,7 +124,7 @@ public:
     bool GetLinkedCells() const;
 
     int GetSolver() const;
-    int GetExitStrategy() const;
+    std::shared_ptr<DirectionStrategy> GetExitStrategy() const;
     int GetRandomize() const;
     int GetMaxOpenMPThreads() const;
     int GetLog() const;

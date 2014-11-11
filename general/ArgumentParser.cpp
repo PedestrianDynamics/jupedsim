@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Apr 20, 2009
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -813,11 +813,7 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     //exit crossing strategy
     if (xModelPara->FirstChild("exitCrossingStrategy"))
     {
-        const char* tmp =
-                xModelPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
-        if (tmp)
-            pExitStrategy = atoi(tmp);
-        Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
+        parseStrategyToObject(*xModelPara);
     }
 
     //linked-cells
@@ -944,11 +940,7 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
     //exit crossing strategy
     if (xModelPara->FirstChild("exitCrossingStrategy"))
     {
-        const char* tmp =
-                xModelPara->FirstChild("exitCrossingStrategy")->FirstChild()->Value();
-        if (tmp)
-            pExitStrategy = atoi(tmp);
-        Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
+        parseStrategyToObject(*xModelPara);
     }
 
     //linked-cells
@@ -1110,6 +1102,34 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
     }
 }
 
+void ArgumentParser::parseStrategyToObject(const TiXmlNode& strategyNode)
+{
+    const char* tmp =
+            strategyNode.FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+    if (tmp) {
+        pExitStrategy = atoi(tmp);
+        switch (pExitStrategy)
+        {
+            case 1:
+                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
+                break;
+            case 2:
+                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                break;
+            case 3:
+                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
+                break;
+            case 4:
+                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
+                break;
+            default:
+                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                break;
+        }
+    }
+    Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
+}
+
 int ArgumentParser::GetModel() const
 {
     return pModel;
@@ -1165,9 +1185,8 @@ const string& ArgumentParser::GetNavigationMesh() const
     return pNavMeshFilename;
 }
 
-int ArgumentParser::GetExitStrategy() const
-{
-    return pExitStrategy;
+std::shared_ptr<DirectionStrategy> ArgumentParser::GetExitStrategy() const{
+    return pexit_strategy;
 }
 
 bool ArgumentParser::GetLinkedCells() const
