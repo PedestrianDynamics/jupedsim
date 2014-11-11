@@ -1,0 +1,4 @@
+Debian 7.7
+sudo apt-get install libmgl-qt5
+sudo apt-get install libvtk5-dev
+sudo apt-get install libvtk5.8-qt4
