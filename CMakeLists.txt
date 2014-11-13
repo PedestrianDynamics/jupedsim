@@ -23,7 +23,7 @@ endif(NOT BUILD_TESTING)
 message( STATUS "BUILD_TESTING: " ${BUILD_TESTING} )
 
 if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-# To generate a compilation database "compilation_commands.json" for clang_check
+  # To generate a compilation database "compilation_commands.json" for clang_check
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
 
@@ -62,8 +62,8 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 set(LIBRARY_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/lib/${CMAKE_BUILD_TYPE})
 set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 # Debug messages
-# message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
-# message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
+message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
+message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
 # message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 # message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
@@ -90,7 +90,7 @@ else(OPENMP_FOUND)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
     # somehow find_package(openmp) does not work properly with clang
-    else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message( STATUS "Disabling OpenMP support" )
   endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif(OPENMP_FOUND)
@@ -117,10 +117,10 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 # test all cpp-files in Utest
 if(BUILD_TESTING)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
-#  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
+  #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
 
-#string(REGEX REPLACE "CMakeFiles/[^;]+;?" "" SRCS "${test_py_files}")
+  #string(REGEX REPLACE "CMakeFiles/[^;]+;?" "" SRCS "${test_py_files}")
 
 endif(BUILD_TESTING)
 # add sources and headers
@@ -202,7 +202,7 @@ set (   source_files
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
   )
-  
+
 set (   header_files
   routing/NavMesh.h
   routing/DirectionStrategy.h
@@ -299,7 +299,7 @@ if(WIN32)
 endif(WIN32)
 
 if(CGAL_FOUND)
-   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+  target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
 endif(CGAL_FOUND)
 #----------------------------------------------------------------------
 # enable as many warnings as possible
@@ -307,9 +307,9 @@ set(warning_flags "-Wall -Wextra")
 # issue all the warnings demanded by strict iso c and iso c++
 set(warning_flags "${warning_flags} -pedantic")
 # treat warnings as errors
-set(warning_flags "${warning_flags} -Werror")
+#set(warning_flags "${warning_flags} -Werror")
 # definition shadows another
-set(warning_flags "${warning_flags} -Wshadow")
+#set(warning_flags "${warning_flags} -Wshadow")
 # do not issue warnings for system headers
 set(warning_flags "${warning_flags} -Wno-system-headers")
 # overloaded virtual function has a different signature
@@ -317,22 +317,12 @@ set(warning_flags "${warning_flags} -Woverloaded-virtual")
 # make string constants const char*
 set(warning_flags "${warning_flags} -Wwrite-strings")
 #----------------------------------------------------------------------
-# enable RTTI
-set(other_flags "-frtti")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${optimisation_flags}")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warning_flags}")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${profiling_flags}")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags}")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc++")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-
 #---------------------------- compiler -------------------------------
 # Initialize CXXFLAGS.
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic")
-    set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wunused")
-    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+  set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} ${warning_flags}")
+  set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused")
+  #    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
 endif()
 # check c++-11
 if((CMAKE_COMPILER_IS_GNUCXX AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.6) OR
@@ -360,10 +350,10 @@ endif()
 #---------------------
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  message(STATUS "Using Clang" )
+  message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 if(CMAKE_COMPILER_IS_GNUCXX)
-  message( STATUS "Using g++" )
+  message( STATUS "Using g++ " ${CMAKE_CXX_COMPILER_VERSION})
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -371,11 +361,11 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
 else(CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
- endif(CMAKE_BUILD_TYPE MATCHES Debug)
+endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
 endif()
 
 
@@ -411,8 +401,8 @@ if(BUILD_TESTING)
   if(PYTHONINTERP_FOUND)
     foreach (test_src ${test_py_files})
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-     message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
-       add_test(NAME ${test} COMMAND ${test_src})
+      message (STATUS "Add python test: " ${test} " | test_src: " ${test_src})
+      add_test(NAME ${test} COMMAND ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
     # set (test_parameters "${CMAKE_SOURCE_DIR}")
