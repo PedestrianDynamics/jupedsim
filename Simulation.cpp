@@ -236,7 +236,7 @@ bool Simulation::InitArgs(ArgumentParser* args)
      }
 
      // ODE solver
-     int solver = args->GetSolver();
+     auto solver = args->GetSolver();
      sprintf(tmp, "\tODE Solver: %d\n", solver);
      s.append(tmp);
      //switch (solver) {

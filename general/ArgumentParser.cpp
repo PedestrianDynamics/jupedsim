@@ -783,22 +783,7 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     }
 
     //solver
-    if (xModelPara->FirstChild("solver"))
-    {
-        string solver = xModelPara->FirstChild("solver")->FirstChild()->Value();
-        if (solver == "euler")
-            pSolver = 1;
-        else if (solver == "verlet")
-            pSolver = 2;
-        else if (solver == "leapfrog")
-            pSolver = 3;
-        else
-        {
-            Log->Write("ERROR: \twrong value for solver type!!!\n");
-            exit(EXIT_FAILURE);
-        }
-        Log->Write("INFO: \tpSolver <" + string(solver) + ">");
-    }
+    parseNodeToSolver(*xModelPara);
 
     //stepsize
     if (xModelPara->FirstChild("stepsize"))
@@ -811,10 +796,7 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     }
 
     //exit crossing strategy
-    if (xModelPara->FirstChild("exitCrossingStrategy"))
-    {
-        parseStrategyToObject(*xModelPara);
-    }
+    parseStrategyNodeToObject(*xModelPara);
 
     //linked-cells
     if (xModelPara->FirstChild("linkedcells"))
@@ -911,22 +893,7 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
     }
 
     //solver
-    if (xModelPara->FirstChild("solver"))
-    {
-        string solver = xModelPara->FirstChild("solver")->FirstChild()->Value();
-        if (solver == "euler")
-            pSolver = 1;
-        else if (solver == "verlet")
-            pSolver = 2;
-        else if (solver == "leapfrog")
-            pSolver = 3;
-        else
-        {
-            Log->Write("ERROR: \twrong value for solver type!!!\n");
-            exit(EXIT_FAILURE);
-        }
-        Log->Write("INFO: \tpSolver <" + string(solver) + ">");
-    }
+    parseNodeToSolver(*xModelPara);
 
     //stepsize
     if (xModelPara->FirstChild("stepsize"))
@@ -938,10 +905,8 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
     }
 
     //exit crossing strategy
-    if (xModelPara->FirstChild("exitCrossingStrategy"))
-    {
-        parseStrategyToObject(*xModelPara);
-    }
+    parseStrategyNodeToObject(*xModelPara);
+
 
     //linked-cells
     if (xModelPara->FirstChild("linkedcells"))
@@ -1102,32 +1067,58 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
     }
 }
 
-void ArgumentParser::parseStrategyToObject(const TiXmlNode& strategyNode)
+/**
+* Parses an exitCrossingStrategy Node to an Object
+*/
+void ArgumentParser::parseStrategyNodeToObject(const TiXmlNode &strategyNode)
 {
-    const char* tmp =
-            strategyNode.FirstChild("exitCrossingStrategy")->FirstChild()->Value();
-    if (tmp) {
-        pExitStrategy = atoi(tmp);
-        switch (pExitStrategy)
-        {
-            case 1:
-                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
-                break;
-            case 2:
-                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                break;
-            case 3:
-                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
-                break;
-            case 4:
-                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
-                break;
-            default:
-                pexit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                break;
+    if (strategyNode.FirstChild("exitCrossingStrategy")) {
+        const char *tmp =
+                strategyNode.FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+        if (tmp) {
+            pExitStrategy = atoi(tmp);
+            switch (pExitStrategy) {
+                case 1:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMiddlePoint());
+                    break;
+                case 2:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    break;
+                case 3:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionInRangeBottleneck());
+                    break;
+                case 4:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
+                    break;
+                default:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    break;
+            }
         }
+        Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
     }
-    Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
+}
+
+void ArgumentParser::parseNodeToSolver(const TiXmlNode &solverNode)
+{
+    if (solverNode.FirstChild("solver"))
+    {
+        string solver = solverNode.FirstChild("solver")->FirstChild()->Value();
+        if (solver == "euler")
+        {
+            pSolver = 1;
+        }
+        else if (solver == "verlet")
+            pSolver = 2;
+        else if (solver == "leapfrog")
+            pSolver = 3;
+        else
+        {
+            Log->Write("ERROR: \twrong value for solver type!!!\n");
+            exit(EXIT_FAILURE);
+        }
+        Log->Write("INFO: \tpSolver <" + string(solver) + ">");
+    }
 }
 
 int ArgumentParser::GetModel() const
@@ -1186,7 +1177,7 @@ const string& ArgumentParser::GetNavigationMesh() const
 }
 
 std::shared_ptr<DirectionStrategy> ArgumentParser::GetExitStrategy() const{
-    return pexit_strategy;
+    return p_exit_strategy;
 }
 
 bool ArgumentParser::GetLinkedCells() const

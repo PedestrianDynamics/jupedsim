@@ -35,6 +35,8 @@
 #include <cstdlib>
 #include "Macros.h"
 #include "../routing/DirectionStrategy.h"
+#include "../math/OperationalModel.h"
+#include "../math/ODESolver.h"
 #include <memory>
 using std::string;
 using std::vector;
@@ -101,11 +103,13 @@ private:
     int _hpcFlag; //Flag fuer die HPC-Archtitektur (0=CPU, 1=GPU, 2=XeonPhi)
     std::map<int, AgentsParameters*> _agentsParameters;
 
+
     /*
      * return objects for other classes as shared pointers
      */
-    std::shared_ptr<DirectionStrategy> pexit_strategy;
-
+    std::shared_ptr<DirectionStrategy> p_exit_strategy;
+    std::shared_ptr<OperationalModel> p_op_model;
+    std::shared_ptr<ODESolver> p_solver;
 
 
 private:
@@ -113,7 +117,12 @@ private:
     void ParseGompertzModel(TiXmlElement* xGompertz);
     void ParseAgentParameters(TiXmlElement* operativModel);
     void Usage();
-    void parseStrategyToObject(const TiXmlNode& strategyNode);
+
+    /**
+    * @input a TiXmlNode which the first child "exitCrossingStrategy"
+    */
+    void parseStrategyNodeToObject(const TiXmlNode &strategyNode);
+    void parseNodeToSolver(const TiXmlNode &solverNode);
 
 public:
     // Konstruktor
