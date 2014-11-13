@@ -35,6 +35,11 @@ set(JPSVIS_VERSION
   ${JPSVIS_MAJOR_VERSION}.${JPSVIS_MINOR_VERSION}.${JPSVIS_PATCH_VERSION})
 message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
 
+# we need this to be able to include headers produced by uic in our code
+# (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
+INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR} )
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
 set( SAMPLE_SRCS
   src/geometry/Building.cpp 
   src/geometry/Crossing.cpp 
@@ -171,7 +176,7 @@ message(STATUS "DESIRED_QT_VERSION " ${DESIRED_QT_VERSION})
 
 
 FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake  REQUIRED)
-FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK REQUIRED)
+FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK QtXmlPatterns REQUIRED)
 message(STATUS "QT5_INSTALLED " ${QT3_INSTALLED})
 message(STATUS "QT4_INSTALLED " ${QT4_INSTALLED})
 message(STATUS "QT3_INSTALLED " ${QT3_INSTALLED})
@@ -179,37 +184,27 @@ message(STATUS "QT3_INSTALLED " ${QT3_INSTALLED})
 
 # by default only QtCore and QtGui modules are enabled
 # other modules must be enabled like this:
-set( QT_USE_QTXML TRUE ) # needed!
+set(QT_USE_QTXML TRUE)  # needed!
 set(QT_USE_QTNETWORK TRUE)
-
-# add some useful macros and variables
-# (QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to CMake script)
-include( ${QT_USE_FILE} )
 
 # this command will generate rules that will run rcc on all files from SAMPLE_RCS
 # in result SAMPLE_RC_SRCS variable will contain paths to files produced by rcc
 if( ${QT4_INSTALLED} )
+  message(STATUS "Working with Qt4")
   QT4_ADD_RESOURCES( SAMPLE_RC_SRCS ${SAMPLE_RCS} )
   # and finally this will run moc:
   QT4_WRAP_CPP( SAMPLE_MOC_HDRS ${SAMPLE_MOC_HDRS} )
   # this will run uic on .ui files:
   QT4_WRAP_UI( SAMPLE_UI_HDRS ${SAMPLE_UIS} )
   QT4_ADD_RESOURCES(SAMPLE_RESOURCES_RCS ${SAMPLE_RCS})
+  # add some useful macros and variables
+  # (QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to CMake script)
+  include( ${QT_USE_FILE} )
 elseif( ${QT5_INSTALLED} )
+  message(STATUS "Working with Qt5")	
   find_package(Qt5Widgets REQUIRED)
-endif()
-
-
-if(${VTK_VERSION} VERSION_GREATER "6") #  AND VTK_QT_VERSION VERSION_GREATER "4"
-  message(WARNING "JPSvis is not tested with vtk " ${VTK_VERSION})
-endif()
-
-
-
-# we need this to be able to include headers produced by uic in our code
-# (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
-INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR} )
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+  qt5_wrap_ui(SAMPLE_UI_HDRS ${SAMPLE_UIS})
+endif() 
 
 # here we instruct CMake to build JPSvis executable from all of the source files
 ADD_EXECUTABLE( JPSvis ${SAMPLE_SRCS} 
@@ -224,10 +219,14 @@ set(VTK_USE_GUISUPPORT  ON)
 set(VTK_USE_QT  ON)
 #set(VTK_USE_QVTK_QTOPENGL ON )
 
-#TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK) # QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
-
-if(${VTK_VERSION} VERSION_LESS "6")
-  TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK)
+# QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
+if(VTK_LIBRARIES)
+	if(${VTK_VERSION} VERSION_LESS "6")
+  		TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK)
+	else()	
+  		TARGET_LINK_LIBRARIES( JPSvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
+	endif()
 else()
-  TARGET_LINK_LIBRARIES( JPSvis  ${VTK_LIBRARIES})
-endif()
+    target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
+endif()	
+			     
