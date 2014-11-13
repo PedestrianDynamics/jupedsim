@@ -48,6 +48,13 @@ CognitiveMapRouter::CognitiveMapRouter()
     sensor_manager=NULL;
 }
 
+CognitiveMapRouter::CognitiveMapRouter(int id, RoutingStrategy s) : Router(id, s)
+{
+    building=NULL;
+    cm_storage=NULL;
+    sensor_manager=NULL;
+}
+
 CognitiveMapRouter::~CognitiveMapRouter()
 {
      delete cm_storage;

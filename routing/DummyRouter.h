@@ -39,6 +39,7 @@ private:
      Building* _building;
 public:
      DummyRouter();
+     DummyRouter(int id, RoutingStrategy s);
      virtual ~DummyRouter();
 
      virtual int FindExit(Pedestrian* p);

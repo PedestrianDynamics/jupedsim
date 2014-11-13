@@ -72,6 +72,33 @@ SafestPathRouter::SafestPathRouter()
     //_finalLineEvac = new double [numberOfSection];
 }
 
+SafestPathRouter::SafestPathRouter(int id, RoutingStrategy s) : GlobalRouter(id, s)
+{
+    numberOfSubroom=0;
+    _lastUpdateTime=0;
+    a=1;
+    c=1;
+    b=0;
+    _lastUpdateTime=-1;
+    maximalSquare=0;
+
+    flo =NULL;
+    rR=NULL;
+    peopleAtSection=NULL;
+    squareOfSection=NULL;
+    dFinalLength=NULL;
+    dPeopleDensity=NULL;
+    dPreOFP=NULL;
+    dFinalLineOFP=NULL;
+    dFinalLineEvac=NULL;
+
+    // Output to files
+    _phiFile = new FileHandler("Phi_file.csv");
+    // _finalLineEvac = new FileHandler("Evac_File.csv");
+    // Output to files
+    //_finalLineEvac = new double [numberOfSection];
+}
+
 SafestPathRouter::~SafestPathRouter()
 {
      // Output to files

@@ -50,7 +50,10 @@ class QuickestPathRouter: public GlobalRouter {
 
 public:
      QuickestPathRouter();
-     virtual ~QuickestPathRouter();
+
+    QuickestPathRouter(int id, RoutingStrategy s):GlobalRouter(id, s) { };
+
+    virtual ~QuickestPathRouter();
 
      virtual int FindExit(Pedestrian* ped);
 

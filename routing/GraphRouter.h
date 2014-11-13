@@ -37,6 +37,7 @@
 class GraphRouter: public GlobalRouter {
 public:
      GraphRouter();
+     GraphRouter(int id, RoutingStrategy s);
      virtual ~GraphRouter();
 
      virtual int FindExit(Pedestrian* p);

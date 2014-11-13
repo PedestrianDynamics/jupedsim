@@ -264,93 +264,14 @@ bool Simulation::InitArgs(ArgumentParser* args)
      s.append(tmp);
 
      // Route choice
-     vector<pair<int, RoutingStrategy> > routers = args->GetRoutingStrategy();
-     RoutingEngine* routingEngine = new RoutingEngine();
 
-     for (unsigned int r = 0; r < routers.size(); r++) {
+     auto routingEngine = args->GetRoutingEngine();
 
-          RoutingStrategy strategy = routers[r].second;
 
-          int routerID = routers[r].first;
-
-          switch (strategy)
-          {
-          case ROUTING_LOCAL_SHORTEST: {
-               Router* router = new GlobalRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy local shortest added\n");
-               break;
-          }
-          case ROUTING_GLOBAL_SHORTEST: {
-               Router* router = new GlobalRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy global shortest added\n");
-               break;
-          }
-          case ROUTING_QUICKEST: {
-               Router* router = new QuickestPathRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy quickest path added\n");
-               break;
-          }
-          case ROUTING_DYNAMIC: {
-               Router* router = new GraphRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy graph router added\n");
-               break;
-          }
-          case ROUTING_NAV_MESH: {
-               Router* router = new MeshRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy nav_mesh  router added\n");
-               break;
-          }
-          case ROUTING_DUMMY: {
-               Router* router = new DummyRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy dummy router added\n");
-               break;
-          }
-          case ROUTING_SAFEST: {
-               Router * router = new SafestPathRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy cognitive map router added\n");
-               break;
-          }
-          case ROUTING_COGNITIVEMAP: {
-               Router* router = new CognitiveMapRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy dummy router added\n");
-               break;
-          }
-          case ROUTING_UNDEFINED:
-          default:
-               cout << "router not available" << endl;
-               return false;
-               break;
-          }
-     }
-     s.append("\n");
 
      // IMPORTANT: do not change the order in the following..
      _building = new Building();
-     _building->SetRoutingEngine(routingEngine);
+     _building->SetRoutingEngine(routingEngine.get());
      _building->SetProjectFilename(args->GetProjectFile());
      _building->SetProjectRootDir(args->GetProjectRootDir());
 

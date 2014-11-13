@@ -56,7 +56,7 @@ public:
       * Constructor
       */
      GlobalRouter();
-
+     GlobalRouter(int id, RoutingStrategy s);
      /**
       * Destructor
       */

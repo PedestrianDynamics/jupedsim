@@ -47,6 +47,13 @@
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
 #include "../pedestrian/AgentsParameters.h"
+#include "../routing/GlobalRouter.h"
+#include "../routing/QuickestPathRouter.h"
+#include "../routing/GraphRouter.h"
+#include "../routing/MeshRouter.h"
+#include "../routing/DummyRouter.h"
+#include "../routing/SafestPathRouter.h"
+#include "../routing/CognitiveMapRouter.h"
 
 using namespace std;
 
@@ -160,6 +167,7 @@ ArgumentParser::ArgumentParser()
     _profilingFlag = false;
     _hpcFlag = 0;
     _agentsParameters= std::map<int, AgentsParameters*>();
+    p_routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
 }
 
 void ArgumentParser::ParseArgs(int argc, char **argv)
@@ -718,44 +726,7 @@ void ArgumentParser::ParseIniFile(string inifile)
 
     //route choice strategy
     TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
-
-    if (!xRouters)
-    {
-        Log->Write("ERROR:\tNo routers found.");
-        exit(EXIT_FAILURE);
-    }
-
-    for (TiXmlElement* e = xRouters->FirstChildElement("router"); e;
-            e = e->NextSiblingElement("router"))
-    {
-
-        string strategy = e->Attribute("description");
-        int id = atoi(e->Attribute("router_id"));
-
-        if (strategy == "local_shortest")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
-        else if (strategy == "global_shortest")
-            pRoutingStrategies.push_back(
-                    make_pair(id, ROUTING_GLOBAL_SHORTEST));
-        else if (strategy == "quickest")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
-        else if (strategy == "dynamic")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_DYNAMIC));
-        else if (strategy == "nav_mesh")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
-        else if (strategy == "dummy")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
-        else if (strategy == "global_safest")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
-        else if (strategy == "cognitive_map")
-            pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
-        else
-        {
-            Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
-                    strategy.c_str());
-            exit(EXIT_FAILURE);
-        }
-    }
+    parseRoutingStrategies(xRouters);
 
     Log->Write("INFO: \tParsing the project file completed");
 }
@@ -1067,9 +1038,67 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
     }
 }
 
-/**
-* Parses an exitCrossingStrategy Node to an Object
-*/
+void ArgumentParser::parseRoutingStrategies(TiXmlNode *routingNode)
+{
+    if (!routingNode)
+    {
+        Log->Write("ERROR:\tNo routers found.");
+        exit(EXIT_FAILURE);
+    }
+    for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
+         e = e->NextSiblingElement("router")) {
+
+        string strategy = e->Attribute("description");
+        int id = atoi(e->Attribute("router_id"));
+
+        if (strategy == "local_shortest") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
+            Router *r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "global_shortest") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
+            Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "quickest") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
+            Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "dynamic") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_DYNAMIC));
+            Router *r = new GraphRouter(id, ROUTING_DYNAMIC);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "nav_mesh") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
+            Router *r = new MeshRouter(id, ROUTING_NAV_MESH);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "dummy") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
+            Router *r = new DummyRouter(id, ROUTING_DUMMY);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "global_safest") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
+            Router *r = new SafestPathRouter(id, ROUTING_SAFEST);
+            p_routingengine->AddRouter(r);
+        }
+        else if (strategy == "cognitive_map") {
+            pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
+            Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
+            p_routingengine->AddRouter(r);
+        }
+        else {
+            Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
+                    strategy.c_str());
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+
 void ArgumentParser::parseStrategyNodeToObject(const TiXmlNode &strategyNode)
 {
     if (strategyNode.FirstChild("exitCrossingStrategy")) {
@@ -1176,13 +1205,19 @@ const string& ArgumentParser::GetNavigationMesh() const
     return pNavMeshFilename;
 }
 
-std::shared_ptr<DirectionStrategy> ArgumentParser::GetExitStrategy() const{
+std::shared_ptr<DirectionStrategy> ArgumentParser::GetExitStrategy() const
+{
     return p_exit_strategy;
 }
 
 bool ArgumentParser::GetLinkedCells() const
 {
     return pLinkedCells;
+}
+
+std::shared_ptr<RoutingEngine> ArgumentParser::GetRoutingEngine() const
+{
+    return p_routingengine;
 }
 
 vector<pair<int, RoutingStrategy> > ArgumentParser::GetRoutingStrategy() const

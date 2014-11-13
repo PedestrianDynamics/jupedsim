@@ -35,6 +35,7 @@
 class SafestPathRouter: public GlobalRouter {
 public:
      SafestPathRouter();
+     SafestPathRouter(int id, RoutingStrategy s);
      virtual ~SafestPathRouter();
 
      /**

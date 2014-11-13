@@ -42,6 +42,11 @@ GraphRouter::GraphRouter()
      _building=NULL;
 }
 
+GraphRouter::GraphRouter(int id, RoutingStrategy s) : GlobalRouter(id , s)
+{
+    _building = NULL;
+}
+
 GraphRouter::~GraphRouter()
 {
 

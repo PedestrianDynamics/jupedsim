@@ -48,6 +48,7 @@ private:
 
 public:
      MeshRouter();
+     MeshRouter(int id, RoutingStrategy s);
      virtual ~MeshRouter();
 
      virtual int FindExit(Pedestrian* p);

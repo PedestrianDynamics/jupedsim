@@ -61,6 +61,7 @@ public:
       * Constructor
       */
      Router();
+     Router(int id, RoutingStrategy s);
 
      /**
       * Destructor

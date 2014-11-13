@@ -61,6 +61,21 @@ GlobalRouter::GlobalRouter() :
 
 }
 
+GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
+{
+    _accessPoints = map<int, AccessPoint*>();
+    _map_id_to_index = std::map<int, int>();
+    _map_index_to_id = std::map<int, int>();
+    _distMatrix = NULL;
+    _pathsMatrix = NULL;
+    _building = NULL;
+    _edgeCost=1;
+
+//     _rdDistribution = uniform_real_distribution<double> (0,1);
+//     _rdGenerator = default_random_engine(56);
+
+}
+
 GlobalRouter::~GlobalRouter()
 {
 

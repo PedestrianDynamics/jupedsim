@@ -37,7 +37,10 @@
 #include "../routing/DirectionStrategy.h"
 #include "../math/OperationalModel.h"
 #include "../math/ODESolver.h"
+#include "../routing/RoutingEngine.h"
 #include <memory>
+
+
 using std::string;
 using std::vector;
 using std::pair;
@@ -109,7 +112,7 @@ private:
      */
     std::shared_ptr<DirectionStrategy> p_exit_strategy;
     std::shared_ptr<OperationalModel> p_op_model;
-    std::shared_ptr<ODESolver> p_solver;
+    std::shared_ptr<RoutingEngine> p_routingengine;
 
 
 private:
@@ -119,10 +122,22 @@ private:
     void Usage();
 
     /**
-    * @input a TiXmlNode which the first child "exitCrossingStrategy"
+    * @input a TiXmlNode with the first child "exitCrossingStrategy";
+    * sets pExitStrategy and p_exit_strategy
     */
     void parseStrategyNodeToObject(const TiXmlNode &strategyNode);
+
+    /**
+    * @input a TiXmlNode with the first child "solver"
+    * sets pSolver
+    */
     void parseNodeToSolver(const TiXmlNode &solverNode);
+
+    /**
+    * @input a TiXmlNode with the first child "route_choice_models"
+    * fails if no router given or NULL
+    */
+    void parseRoutingStrategies(TiXmlNode* routingNode);
 
 public:
     // Konstruktor
@@ -133,6 +148,7 @@ public:
     bool GetLinkedCells() const;
 
     int GetSolver() const;
+    std::shared_ptr<RoutingEngine> GetRoutingEngine() const;
     std::shared_ptr<DirectionStrategy> GetExitStrategy() const;
     int GetRandomize() const;
     int GetMaxOpenMPThreads() const;

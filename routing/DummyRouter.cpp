@@ -35,6 +35,10 @@ DummyRouter::DummyRouter()
      _building=NULL;
 }
 
+DummyRouter::DummyRouter(int id, RoutingStrategy s) : Router(id, s) {
+    _building = NULL;
+}
+
 DummyRouter::~DummyRouter()
 {
 

@@ -42,6 +42,12 @@ MeshRouter::MeshRouter()
      _meshdata=NULL;
 }
 
+MeshRouter::MeshRouter(int id, RoutingStrategy s) : Router(id, s)
+{
+    _building=NULL;
+    _meshdata=NULL;
+}
+
 MeshRouter::~MeshRouter()
 {
      delete _meshdata;

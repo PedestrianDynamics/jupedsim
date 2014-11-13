@@ -48,6 +48,7 @@ class SensorManager;
 class CognitiveMapRouter: public Router {
 public:
      CognitiveMapRouter();
+     CognitiveMapRouter(int id, RoutingStrategy s);
      virtual ~CognitiveMapRouter();
 
      virtual int FindExit(Pedestrian* p);

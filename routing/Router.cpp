@@ -42,6 +42,12 @@ Router::Router()
      _strategy=ROUTING_UNDEFINED;
 }
 
+Router::Router(int id, RoutingStrategy s)
+{
+    _id = id;
+    _strategy = s;
+}
+
 Router::~Router()
 {
 }
