@@ -44,6 +44,7 @@
 #include "../tinyxml/tinyxml.h"
 #include "../IO/OutputHandler.h"
 #include "ArgumentParser.h"
+#include "../Analysis.h"
 
 using namespace std;
 
@@ -323,14 +324,14 @@ void ArgumentParser::ParseIniFile(string inifile)
             areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
             areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
 
-            double box_p1x = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("x"));
-            double box_p1y = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("y"));
-            double box_p2x = xmltof(xMeasurementArea_B->FirstChildElement("p2")->Attribute("x"));
-            double box_p2y = xmltof(xMeasurementArea_B->FirstChildElement("p2")->Attribute("y"));
-            double box_p3x = xmltof(xMeasurementArea_B->FirstChildElement("p3")->Attribute("x"));
-            double box_p3y = xmltof(xMeasurementArea_B->FirstChildElement("p3")->Attribute("y"));
-            double box_p4x = xmltof(xMeasurementArea_B->FirstChildElement("p4")->Attribute("x"));
-            double box_p4y = xmltof(xMeasurementArea_B->FirstChildElement("p4")->Attribute("y"));
+            double box_p1x = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("x"))*M2CM;
+            double box_p1y = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("y"))*M2CM;
+            double box_p2x = xmltof(xMeasurementArea_B->FirstChildElement("p2")->Attribute("x"))*M2CM;
+            double box_p2y = xmltof(xMeasurementArea_B->FirstChildElement("p2")->Attribute("y"))*M2CM;
+            double box_p3x = xmltof(xMeasurementArea_B->FirstChildElement("p3")->Attribute("x"))*M2CM;
+            double box_p3y = xmltof(xMeasurementArea_B->FirstChildElement("p3")->Attribute("y"))*M2CM;
+            double box_p4x = xmltof(xMeasurementArea_B->FirstChildElement("p4")->Attribute("x"))*M2CM;
+            double box_p4y = xmltof(xMeasurementArea_B->FirstChildElement("p4")->Attribute("y"))*M2CM;
 
             //-------------the following codes define measurement area---------------------------
             // Polygons should be closed, and directed clockwise.
@@ -348,10 +349,10 @@ void ArgumentParser::ParseIniFile(string inifile)
 
             string MovingDire_start = xMeasurementArea_B->FirstChildElement("movingDirection")->Attribute("start");
             string MovingDire_end   = xMeasurementArea_B->FirstChildElement("movingDirection")->Attribute("end");
-            double start_x = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_start.c_str())->Attribute("x"));
-            double start_y = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_start.c_str())->Attribute("y"));
-            double end_x   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("x"));
-            double end_y   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("y"));
+            double start_x = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_start.c_str())->Attribute("x"))*M2CM;
+            double start_y = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_start.c_str())->Attribute("y"))*M2CM;
+            double end_x   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("x"))*M2CM;
+            double end_y   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("y"))*M2CM;
 
             areaB->_length=sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
 
@@ -369,10 +370,10 @@ void ArgumentParser::ParseIniFile(string inifile)
             areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
             areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
 
-            areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"));
-            areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"));
-            areaL->_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"));
-            areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"));
+            areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"))*M2CM;
+            areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"))*M2CM;
+            areaL->_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"))*M2CM;
+            areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"))*M2CM;
 
             _measurementAreas[areaL->_id]=areaL;
             Log->Write("INFO: \tmeasure area id  <%d> with \ttype <%s>",areaL->_id,areaL->_type.c_str());
