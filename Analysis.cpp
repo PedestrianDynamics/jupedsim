@@ -2,7 +2,7 @@
  * \file        Analysis.cpp
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J¨¹lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -39,6 +39,9 @@
 #include <sstream>
 
 #ifdef __linux__
+#include <sys/stat.h>
+#include <dirent.h>
+#elif   __APPLE__
 #include <sys/stat.h>
 #include <dirent.h>
 #else
@@ -1092,29 +1095,7 @@ FILE* Analysis::CreateFile(const string& filename)
      return fopen(filename.c_str(),"w");
 }
 
-
-#ifdef __linux__
-
-int Analysis::mkpath(char* file_path, mode_t mode)
-{
-     assert(file_path && *file_path);
-     char* p;
-     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
-          *p='\0';
-
-          if (mkdir(file_path, mode)==-1) {
-
-               if (errno!=EEXIST) {
-                    *p='/';
-                    return -1;
-               }
-          }
-          *p='/';
-     }
-     return 0;
-}
-
-#else
+#if defined(_WIN32)
 
 int Analysis::mkpath(char* file_path)
 {
@@ -1135,7 +1116,29 @@ int Analysis::mkpath(char* file_path)
      return 0;
 }
 
+#else
+
+int Analysis::mkpath(char* file_path, mode_t mode)
+{
+     assert(file_path && *file_path);
+     char* p;
+     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
+          *p='\0';
+
+          if (mkdir(file_path, mode)==-1) {
+
+               if (errno!=EEXIST) {
+                    *p='/';
+                    return -1;
+               }
+          }
+          *p='/';
+     }
+     return 0;
+}
+
 #endif
+
 
 
 

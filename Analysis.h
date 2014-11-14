@@ -2,7 +2,7 @@
  * \file        Analysis.h
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -327,12 +327,14 @@ private:
       * @param file_path
       * @return
       */
+
 #ifdef __linux__
      int mkpath(char* file_path, mode_t mode=0755);
-#else
+#elif __APPLE__
+     int mkpath(char* file_path, mode_t mode=0755);
+#else //windows
      int mkpath(char* file_path);
 #endif
-
 
 private:
      FILE *_fClassicRhoV;
