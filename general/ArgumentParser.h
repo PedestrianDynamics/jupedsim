@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J¨¹lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -55,6 +55,8 @@ private:
     std::string _errorLogFile;
     std::string _trajectoriesLocation;
     std::string _trajectoriesFilename;
+    std::string _projectRootDir;
+    FileFormat _fileFormat;
     std::vector<std::string> _trajectoriesFiles;
 
     char _vComponent;
@@ -91,6 +93,7 @@ public:
     const FileFormat& GetFileFormat() const;
     const std::string& GetGeometryFilename() const;
     const std::string& GetErrorLogFile() const;
+    const std::string& GetProjectRootDir() const;
 
     double GetLengthMeasurementArea() const;
     polygon_2d GetMeasureArea() const;

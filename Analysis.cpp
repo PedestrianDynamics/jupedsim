@@ -65,7 +65,8 @@ Analysis::Analysis()
      _tIn = NULL;
      _tOut = NULL;
      _maxNumofPed =0;  //the maximum index of the pedestrian in the trajectory data
-     _deltaF=5;											// half of the time interval that used to calculate instantaneous velocity of ped i.
+     _deltaF=5;
+     // half of the time interval that used to calculate instantaneous velocity of ped i.
      // here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF).   X is location.
      _xCor = NULL;
      _yCor = NULL;
@@ -97,6 +98,8 @@ Analysis::Analysis()
      _lowVertexY = 0; //  LOWest vertex of the geometry (y coordinate)
      _highVertexX = 10; // Highest vertex of the geometry
      _highVertexY = 10;
+
+     _projectRootDir="";
 
      _areaForMethod_A=NULL;
      _areaForMethod_B=NULL;
@@ -203,6 +206,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _scaleX = args->GetScaleX();
      _scaleY = args->GetScaleY();
      _geoPoly = ReadGeometry(args->GetGeometryFilename());
+     _projectRootDir=args->GetProjectRootDir();
 
      Log->Write("INFO: \tGeometrie file: [%s]\n", args->GetGeometryFilename().c_str());
 
@@ -366,7 +370,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
 void Analysis::InitializeFiles(const string& trajectoriesFilename)
 {
      if(_classicMethod) {
-          string results_C= "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+trajectoriesFilename+".dat";
+          string results_C= _projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Classic_"+trajectoriesFilename+".dat";
           if((_fClassicRhoV=CreateFile(results_C))==NULL) {
                Log->Write("cannot open file %s to write classical density and velocity\n", results_C.c_str());
                exit(EXIT_FAILURE);
@@ -374,7 +378,7 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
           fprintf(_fClassicRhoV,"#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n");
      }
      if(_voronoiMethod) {
-          string results_V=  "Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+trajectoriesFilename+".dat";
+          string results_V=  _projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+trajectoriesFilename+".dat";
           if((_fVoronoiRhoV=CreateFile(results_V))==NULL) {
                Log->Write("cannot open the file to write Voronoi density and velocity\n");
                exit(EXIT_FAILURE);
@@ -383,7 +387,7 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
      }
 
      if(_calcIndividualFD) {
-          string Individualfundment="Output/Fundamental_Diagram/Individual_FD/IndividualFD"+trajectoriesFilename+".dat";
+          string Individualfundment=_projectRootDir+"./Output/Fundamental_Diagram/Individual_FD/IndividualFD"+trajectoriesFilename+".dat";
           if((_individualFD=CreateFile(Individualfundment))==NULL) {
                Log->Write("cannot open the file individual\n");
                exit(EXIT_FAILURE);
@@ -392,7 +396,7 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
      }
 
      if(_flowVelocity) {
-          string N_t= "Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+trajectoriesFilename+"_Out.dat";
+          string N_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+trajectoriesFilename+"_Out.dat";
           if((_fN_t=CreateFile(N_t))==NULL) {
                Log->Write("cannot open the file %s  t\n", N_t.c_str() );
                exit(EXIT_FAILURE);
@@ -536,13 +540,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      //--------------------Fundamental diagram based on Tin and Tout----------------------------------------------------------------------
      if(_fundamentalTinTout) {
-          string FD_TinTout=  "Output/Fundamental_Diagram/TinTout/FDTinTout_"+filename+".dat";
+          string FD_TinTout=  _projectRootDir+"./Output/Fundamental_Diagram/TinTout/FDTinTout_"+filename+".dat";
           Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
           GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _areaForMethod_B->_length,_maxNumofPed, FD_TinTout);
      }
      //-----------------------------------------------------------------------------------------------------------------------------------
      if(_flowVelocity) {
-          string FD_FlowVelocity=  "Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+filename+".dat";
+          string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+filename+".dat";
           FlowRate_Velocity(_deltaT,_fps, _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
      }
 
@@ -966,8 +970,10 @@ double Analysis::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirs
 
 void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, double * velocity, const string& filename)
 {
-     string Prfvelocity="./Output/Fundamental_Diagram/Classical_Voronoi/field/velocity/Prf_v_"+filename+"_"+frameId+".dat";
-     string Prfdensity="./Output/Fundamental_Diagram/Classical_Voronoi/field/density/Prf_d_"+filename+"_"+frameId+".dat";
+     string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/field/";
+
+     string Prfvelocity=voronoiLocation+"/velocity/Prf_v_"+filename+"_"+frameId+".dat";
+     string Prfdensity=voronoiLocation+"/density/Prf_d_"+filename+"_"+frameId+".dat";
 
      FILE *Prf_velocity;
      if((Prf_velocity=CreateFile(Prfvelocity))==NULL) {
@@ -1019,15 +1025,16 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 	//boost::filesystem::create_directories("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
 */
 
+     string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
 
 #if defined(_WIN32)
-     mkdir("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
+     mkdir(voronoiLocation.c_str());
 #else 
-     mkdir("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/", 0777);
+     mkdir(voronoiLocation.c_str(), 0777);
 #endif
 
 
-     string polygon="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/polygon"+filename+"_"+frameId+".dat";
+     string polygon=voronoiLocation+"/polygon"+filename+"_"+frameId+".dat";
 
      //TODO: the method will fail if the directory does not not exits
      //use the CREATE File instead combined with
@@ -1045,7 +1052,7 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
      }
 
 
-     string v_individual="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/speed"+filename+"_"+frameId+".dat";
+     string v_individual=voronoiLocation+"/speed"+filename+"_"+frameId+".dat";
      ofstream velo (v_individual.c_str());
 
      if(velo.is_open()) {
@@ -1058,7 +1065,7 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
      }
 
 
-     string point="./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/points"+filename+"_"+frameId+".dat";
+     string point=voronoiLocation+"/points"+filename+"_"+frameId+".dat";
      ofstream points (point.c_str());
      if( points.is_open())  {
           for(int pts=0; pts<numPedsInFrame; pts++) {

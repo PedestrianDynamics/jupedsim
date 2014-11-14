@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<geometry version ="0.4" caption="second life" gridSizeX="20" gridSizeY="20" unit="cm">
+<geometry version ="0.5" caption="second life" unit="m">
 	<rooms>
 		<room id="0" caption="hall" zpos="0.00">
 			<subroom id="0" closed="0" class="subroom">

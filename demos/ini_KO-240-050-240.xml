@@ -6,15 +6,15 @@
 	<geometry file = "./geometry_KO-240-050-240.xml" />
 	<!-- trajectories file and format -->
 	<!-- either a file name or a path location. In the latter case all files in the directory will be used-->
-	<trajectories>
-		<file name="Trajectory_KO-240-050-240.xml" />
+	<trajectories format="xml" unit="m">
+		<file name="trajectory_KO-240-050-240.xml" />
 		<!--<file name="U2_ptrkallord.xml" />
 		<file name="l2.xml" /> -->
-		<path location="./" />  
+		<path location="./data/" />  
 	</trajectories>
 	<!-- all files in the directories will be used -->
 
-	<measurementAreas unit="cm">
+	<measurementAreas unit="m">
 		<area_B id="1" type="BoundingBox">
 			<p1 x="-240" y="100" /> <!-- Clockwise -->
 			<p2 x="-240" y="300" />

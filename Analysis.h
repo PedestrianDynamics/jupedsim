@@ -388,6 +388,7 @@ private:
      std::vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
 
      TiXmlElement* xRootNode;
+     std::string _projectRootDir;
 
      int *IdInFrame;     // save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
      double *XInFrame;   // save the X coordinates of pedestrian in the geometry in this frame

@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J¨¹lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -179,6 +179,8 @@ ArgumentParser::ArgumentParser()
     _log=1; //no output wanted
     _trajectoriesLocation="./";
     _trajectoriesFilename="";
+    _projectRootDir="";
+    _fileFormat=FORMAT_XML_PLAIN;
 }
 
 
@@ -228,11 +230,22 @@ const vector<string>& ArgumentParser::GetTrajectoriesFiles() const
     return _trajectoriesFiles;
 }
 
+const string& ArgumentParser::ArgumentParser::GetProjectRootDir() const
+{
+    return _projectRootDir;
+}
+
+
 void ArgumentParser::ParseIniFile(string inifile)
 {
 
     Log->Write("INFO: \tParsing the ini file");
-    //I just assume all parameters are present
+
+    //extract and set the project root dir
+    size_t found = inifile.find_last_of("/\\");
+    if (found != string::npos)
+        _projectRootDir = inifile.substr(0, found) + "/";
+
 
     TiXmlDocument doc(inifile);
     if (!doc.LoadFile()) {
@@ -255,29 +268,47 @@ void ArgumentParser::ParseIniFile(string inifile)
 
     //geometry
     if(xMainNode->FirstChild("geometry")) {
-        _geometryFileName=xMainNode->FirstChildElement("geometry")->Attribute("file");
+        _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
         Log->Write("INFO: \tgeometry <"+_geometryFileName+">");
     }
 
-    //trajectories
-    TiXmlNode* xTrajectories=xMainNode->FirstChild("trajectories");
-    if(xTrajectories) {
-    	 string fmt = xMainNode ->FirstChildElement("trajectories")->Attribute("fmt");
-    	 string unit = xMainNode ->FirstChildElement("trajectories")->Attribute("unit");
-		 if(unit!="m") {
-			 Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
-			 exit(EXIT_FAILURE);
-		 }
-        //a file descriptor was given
-        for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file"); xFile;
-                xFile = xFile->NextSiblingElement("file")) {
-            //collect all the files given
-            _trajectoriesFilename =	xFile->Attribute("name")+fmt;
-            _trajectoriesFiles.push_back(_trajectoriesFilename);
-        }
+     //trajectories
+     TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
+     if (xTrajectories)
+     {
+          //add the extension point
+          string fmt = "."+string (xmltoa(
+                    xMainNode->FirstChildElement("trajectories")->Attribute(
+                              "format"), "xml"));
 
-        if(xTrajectories->FirstChildElement("path")) {
-            _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
+          if (fmt == "xml") {
+               _fileFormat = FORMAT_XML_PLAIN;
+          } else if (fmt == "txt") {
+               _fileFormat = FORMAT_PLAIN;
+          }
+
+
+          string unit = xmltoa(
+                    xMainNode->FirstChildElement("trajectories")->Attribute(
+                              "unit"), "m");
+          if (unit != "m") {
+               Log->Write(
+                         "WARNING: \tonly <m> unit is supported. Convert your units.");
+               exit(EXIT_FAILURE);
+          }
+          //a file descriptor was given
+          for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file");
+                    xFile; xFile = xFile->NextSiblingElement("file")) {
+               //collect all the files given
+               _trajectoriesFilename =
+                         + xFile->Attribute("name");
+               _trajectoriesFiles.push_back(_trajectoriesFilename);
+          }
+
+          if (xTrajectories->FirstChildElement("path")) {
+               _trajectoriesLocation =_projectRootDir+
+                         xTrajectories->FirstChildElement("path")->Attribute(
+                                   "location");
 
             // in the case no file was specified, collect all xml files in the specified directory
             if(_trajectoriesFiles.empty()) {
@@ -291,7 +322,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                         //if (filename.find(".xml")!=std::string::npos)
                         if (filename.find(fmt)!=std::string::npos)
                         {
-                            _trajectoriesFiles.push_back(filename);
+                            _trajectoriesFiles.push_back(_projectRootDir+filename);
                         }
                     }
                     closedir (dir);

@@ -2,7 +2,7 @@
  * \file        main.cpp
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J¨¹lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -52,6 +52,7 @@ int main(int argc, char **argv)
      // get the number of file to analyse
      const vector<string>& files = args->GetTrajectoriesFiles();
      const string& path = args->GetTrajectoriesLocation();
+     //path="";
 
      // create and initialize the analysis engine
      for (unsigned int i = 0; i < files.size(); i++)

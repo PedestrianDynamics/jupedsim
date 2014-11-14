@@ -367,7 +367,7 @@ void Building::LoadGeometry(const std::string &geometryfile)
      }
      if(xRootNode->Attribute("unit"))
           if(string(xRootNode->Attribute("unit")) != "m") {
-               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
+               Log->Write("ERROR:\tOnly the unit m (meters) is supported for the geometry. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
                exit(EXIT_FAILURE);
           }
      double version = xmltof(xRootNode->Attribute("version"), -1);
