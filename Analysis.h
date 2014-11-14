@@ -50,6 +50,7 @@ typedef model::polygon<point_2d> polygon_2d;
 typedef model::ring<point_2d> ring;
 
 #define CMtoM 0.01
+#define M2CM 100
 
 extern OutputHandler* Log;
 

@@ -176,7 +176,7 @@ ArgumentParser::ArgumentParser()
     _scaleY = 10;
     _errorLogFile="./Logfile.dat";
     _log=1; //no output wanted
-    _trajectoriesLocation="";
+    _trajectoriesLocation="./";
     _trajectoriesFilename="";
 }
 
@@ -261,12 +261,17 @@ void ArgumentParser::ParseIniFile(string inifile)
     //trajectories
     TiXmlNode* xTrajectories=xMainNode->FirstChild("trajectories");
     if(xTrajectories) {
-
+    	 string fmt = xMainNode ->FirstChildElement("trajectories")->Attribute("fmt");
+    	 string unit = xMainNode ->FirstChildElement("trajectories")->Attribute("unit");
+		 if(unit!="m") {
+			 Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
+			 exit(EXIT_FAILURE);
+		 }
         //a file descriptor was given
         for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file"); xFile;
                 xFile = xFile->NextSiblingElement("file")) {
             //collect all the files given
-            _trajectoriesFilename =	xFile->Attribute("name");
+            _trajectoriesFilename =	xFile->Attribute("name")+fmt;
             _trajectoriesFiles.push_back(_trajectoriesFilename);
         }
 
@@ -282,8 +287,11 @@ void ArgumentParser::ParseIniFile(string inifile)
                     /* print all the files and directories within directory */
                     while ((ent = readdir (dir)) != NULL) {
                         string filename=ent->d_name;
-                        if (filename.find(".xml")!=std::string::npos)
+                        //if (filename.find(".xml")!=std::string::npos)
+                        if (filename.find(fmt)!=std::string::npos)
+                        {
                             _trajectoriesFiles.push_back(filename);
+                        }
                     }
                     closedir (dir);
                 } else {
@@ -303,8 +311,8 @@ void ArgumentParser::ParseIniFile(string inifile)
 
         string unit = xMainNode->FirstChildElement("measurementAreas")->Attribute("unit");
 
-        if(unit!="cm") {
-            Log->Write("WARNING: \tonly <cm> unit is supported. Convert your units.");
+        if(unit!="m") {
+            Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
             exit(EXIT_FAILURE);
         }
 

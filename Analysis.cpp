@@ -227,11 +227,11 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile)
                SubRoom* subroom = room->GetSubRoom(i);
                const vector<Point>& temp_GeoPoly = subroom->GetPolygon();
                for (unsigned int j = 0; j< temp_GeoPoly.size(); j++) {
-                    append(geoPoly, make<point_2d>(temp_GeoPoly[j]._x, temp_GeoPoly[j]._y));
-                    geo_minX = (temp_GeoPoly[j]._x<=geo_minX) ? temp_GeoPoly[j]._x : geo_minX;
-                    geo_minY = (temp_GeoPoly[j]._y<=geo_minY) ? temp_GeoPoly[j]._y : geo_minY;
-                    geo_maxX = (temp_GeoPoly[j]._x>=geo_maxX) ? temp_GeoPoly[j]._x : geo_maxX;
-                    geo_maxY = (temp_GeoPoly[j]._y>=geo_maxY) ? temp_GeoPoly[j]._y : geo_maxY;
+                    append(geoPoly, make<point_2d>(temp_GeoPoly[j]._x*M2CM, temp_GeoPoly[j]._y*M2CM));
+                    geo_minX = (temp_GeoPoly[j]._x*M2CM<=geo_minX) ? (temp_GeoPoly[j]._x*M2CM) : geo_minX;
+                    geo_minY = (temp_GeoPoly[j]._y*M2CM<=geo_minY) ? (temp_GeoPoly[j]._y*M2CM) : geo_minY;
+                    geo_maxX = (temp_GeoPoly[j]._x*M2CM>=geo_maxX) ? (temp_GeoPoly[j]._x*M2CM) : geo_maxX;
+                    geo_maxY = (temp_GeoPoly[j]._y*M2CM>=geo_maxY) ? (temp_GeoPoly[j]._y*M2CM) : geo_maxY;
 
                }
                correct(geoPoly);
@@ -244,7 +244,7 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile)
                geoPoly.inners().back();
                model::ring<point_2d>& inner = geoPoly.inners().back();
                for (unsigned int j = 0; j< temp_obst.size(); j++) {
-                    append(inner, make<point_2d>(temp_obst[j]._x, temp_obst[j]._y));
+                    append(inner, make<point_2d>(temp_obst[j]._x*M2CM, temp_obst[j]._y*M2CM));
                }
                correct(geoPoly);
           }
@@ -327,8 +327,8 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
                double y= atof(xAgent->Attribute("yPos"));
                int ID= atoi(xAgent->Attribute("ID"))-1;
 
-               _xCor[ID][frameNr] =  x;
-               _yCor[ID][frameNr] =  y;
+               _xCor[ID][frameNr] =  x*M2CM;
+               _yCor[ID][frameNr] =  y*M2CM;
                if(frameNr < _firstFrame[ID]) {
                     _firstFrame[ID] = frameNr;
                }
@@ -430,8 +430,8 @@ void Analysis::getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int fr
           double y= atof(xAgent->Attribute("yPos"));
           int ID= atoi(xAgent->Attribute("ID"))-1;
 
-          XInFrame[agentCnt] = x;
-          YInFrame[agentCnt] = y;
+          XInFrame[agentCnt] = x*M2CM;
+          YInFrame[agentCnt] = y*M2CM;
           int Tpast = frameNr - _deltaF;
           int Tfuture = frameNr + _deltaF;
           VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
