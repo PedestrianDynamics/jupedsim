@@ -77,7 +77,6 @@ Building::~Building()
         //delete _allPedestians[p];
     }
     _allPedestians.clear();
-    delete _routingEngine;
     delete _linkedCellGrid;
 #endif
 
