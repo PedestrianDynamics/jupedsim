@@ -606,19 +606,20 @@ void SafestPathRouter::CalculatePhi()
           dFinalLength[j]= squareOfSection[j]/maximalSquare;
      }
 
-
-     double iNt1[numberOfSubroom];
-     double iNt2[numberOfSubroom];
-     double iNt3[numberOfSubroom];
-     double iNt4[numberOfSubroom];
-     double iNt5[numberOfSubroom];
-     double iNt6[numberOfSubroom];
-     double iNt7[numberOfSubroom];
+//     double iNt1[numberOfSubroom];
+     vector<double> iNt1;
+     vector<double> iNt2;
+     vector<double> iNt3;
+     vector<double> iNt4;
+     vector<double> iNt5;
+     vector<double> iNt6;
+     vector<double> iNt7;
 
      for (int j=0; j<numberOfSubroom; j++) {
-          iNt1[j]= dFinalLineEvac[j] * a;
-          iNt2[j]= dFinalLineOFP[j] * b;
-          iNt3[j]= dFinalLength[j] * c;
+//          iNt1[j]= dFinalLineEvac[j] * a;
+          iNt1.push_back(dFinalLineEvac[j] * a);
+          iNt2.push_back(dFinalLineOFP[j] * b);
+          iNt3.push_back(dFinalLength[j] * c);
      }
 
      // Printing a matrix
@@ -628,14 +629,14 @@ void SafestPathRouter::CalculatePhi()
 
 
      for (int j=0; j<numberOfSubroom; j++) {
-          iNt4[j]= iNt1[j] * iNt1[j];
-          iNt5[j]= iNt2[j] * iNt2[j];
-          iNt6[j]= iNt3[j] * iNt3[j];
+          iNt4.push_back(iNt1[j] * iNt1[j]);
+          iNt5.push_back(iNt2[j] * iNt2[j]);
+          iNt6.push_back(iNt3[j] * iNt3[j]);
      }
 
 
      for (int j=0; j<numberOfSubroom; j++) {
-          iNt7[j]=iNt4[j] + iNt5[j] + iNt6[j];
+          iNt7.push_back(iNt4[j] + iNt5[j] + iNt6[j]);
      }
 
      //double xX[numberOfSubroom];
