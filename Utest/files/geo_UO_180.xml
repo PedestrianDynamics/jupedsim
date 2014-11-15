@@ -4,18 +4,18 @@
     <room id="0" caption="hall" zpos="0.00">
       <subroom id="0" closed="0" class="subroom">
         <polygon caption="wall">
-          <vertex px="-800.0" py="-50.0"/>
-          <vertex px="-800.0" py="250.0"/>
-          <vertex px="-400.0" py="180.0"/>
-          <vertex px="400.0" py="180.0"/>	
-          <vertex px="400.0" py="250.0"/>					
-          <vertex px="600.0" py="250.0"/>
-          <vertex px="600.0" py="-50.0"/>
-          <vertex px="400.0" py="-50.0"/>
-          <vertex px="400.0" py="0.0"/>
-          <vertex px="-400.0" py="0.0"/>
-          <vertex px="-400.0" py="-50.0"/>
-          <vertex px="-800.0" py="-50.0"/>
+          <vertex px="-8.00" py="-0.50"/>
+          <vertex px="-8.00" py="2.50"/>
+          <vertex px="-4.00" py="1.80"/>
+          <vertex px="4.00" py="1.80"/>	
+          <vertex px="4.00" py="2.50"/>					
+          <vertex px="6.00" py="2.50"/>
+          <vertex px="6.00" py="-0.50"/>
+          <vertex px="4.00" py="-0.50"/>
+          <vertex px="4.00" py="0.00"/>
+          <vertex px="-4.00" py="0.00"/>
+          <vertex px="-4.00" py="-0.50"/>
+          <vertex px="-8.00" py="-0.50"/>
         </polygon>
       </subroom>
     </room>

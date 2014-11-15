@@ -4,23 +4,23 @@
   <geometry file = "Utest/files/geo_UO_180.xml" />
   <!-- trajectories file and format -->
   <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
-  <trajectories>
+  <trajectories format="xml" unit="m">
     <file name="uo-180-180-180.xml" />
     <path location="Utest/files" />
   </trajectories>
   <!-- all files in the directories will be used -->
 
-  <measurementAreas unit="cm">
+  <measurementAreas unit="m">
     <area_B id="1" type="BoundingBox">
-      <p1 x="400" y="-50" /> <!-- Clockwise -->
-      <p2 x="400" y="250" />
-      <p3 x="500" y="250" />
-      <p4 x="500" y="-50" />
+      <p1 x="4.00" y="-0.50" /> <!-- Clockwise -->
+      <p2 x="4.00" y="2.50" />
+      <p3 x="5.00" y="2.50" />
+      <p4 x="5.00" y="-0.50" />
       <movingDirection start="p1" end="p2" />
     </area_B>
     <area_L id="2" type="Line">
-      <start x="-700" y="-50" />
-      <end x="-700" y="250" />
+      <start x="-7.00" y="-0.50" />
+      <end x="-7.00" y="2.50" />
     </area_L>
   </measurementAreas>
 
@@ -57,7 +57,6 @@
   <method_D enabled="true" cutByCircle="false" outputGraph="false"
             individualFDdata="false">
     <measurementArea id="1" />
-    <steadyState start="500" end="1500" /> <!-- //the begin of stationary state //the end of stationary state -->
     <getProfile enabled="false" scale_x="10" scale_y="10"/>
 
 
