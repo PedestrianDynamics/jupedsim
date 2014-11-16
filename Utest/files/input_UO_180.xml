@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JPSreport project="JPS-Project" version="0.4">
   <!-- geometry file -->
-  <geometry file = "Utest/files/geo_UO_180.xml" />
+  <geometry file = "geo_UO_180.xml" />
   <!-- trajectories file and format -->
   <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
   <trajectories format="xml" unit="m">
     <file name="uo-180-180-180.xml" />
-    <path location="Utest/files" />
+    <path location="./" />
   </trajectories>
   <!-- all files in the directories will be used -->
 
