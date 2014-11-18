@@ -479,7 +479,7 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(std::vector<poly
 }
 
 std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(std::vector<polygon_2d> polygon,
-          double* xs, double* ys, double radius)
+          double* xs, double* ys, double radius, int edges)
 {
      std::vector<polygon_2d> intersetionpolygons;
      std::vector<polygon_2d>::iterator polygon_iterator;
@@ -488,14 +488,13 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(std::vector<polygo
      {
           polygon_2d circle;
           {
-               double Cpoint[7][2];  //361 for circle
-               for (int angle = 0; angle < 7; angle++)
+               for (int angle = 0; angle <=edges; angle++)
                {
-                    Cpoint[angle][0] = xs[temp] + radius * cos(angle * PI / 3);
-                    Cpoint[angle][1] = ys[temp] + radius * sin(angle * PI / 3); //3 for hexegon for circle 180
+                    double ptx= xs[temp] + radius * cos(angle * 2*PI / edges);
+                    double pty= ys[temp] + radius * sin(angle * 2*PI / edges);
+                    boost::geometry::append(circle, boost::geometry::make<point_2d>(ptx, pty));
+                    //cout<<ptx<<"\t"<<pty<<"\t"<<xs[temp]<<"\t"<<ys[temp]<<"\t"<<radius<<endl;
                }
-               boost::geometry::append(circle, Cpoint);
-               //assign_points(circle, Cpoint);
           }
           boost::geometry::correct(circle);
           typedef std::vector<polygon_2d> polygon_list;

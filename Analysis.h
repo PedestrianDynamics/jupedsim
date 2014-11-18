@@ -398,6 +398,8 @@ private:
      MeasurementArea_B* _areaForMethod_D;
 
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
+     double _cutRadius;
+     int _circleEdges;
      bool _getProfile;        // Whether make field analysis or not
      bool _outputGraph;       // Whether output the data for plot the fundamental diagram each frame
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)

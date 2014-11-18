@@ -117,6 +117,8 @@ Analysis::Analysis()
      V_deltaT = 0;
      min_ID = INT_MAX;
      min_Frame = INT_MAX;
+     _cutRadius=1.0;
+     _circleEdges=6;
 }
 
 Analysis::~Analysis()
@@ -213,7 +215,8 @@ void Analysis::InitArgs(ArgumentParser* args)
      _geoPoly = ReadGeometry(args->GetGeometryFilename());
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
-
+     _cutRadius=args->GetCutRadius()*M2CM;
+     _circleEdges=args->GetCircleEdges();
      Log->Write("INFO: \tGeometrie file: [%s]\n", args->GetGeometryFilename().c_str());
 
 }
@@ -556,16 +559,6 @@ void Analysis::CreatGlobeVaribles(int numPeds, int numFrames)
 	     }
 }
 
-int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in the frame
-{
-     int numPedsInFrame=0;
-     for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-               xAgent = xAgent->NextSiblingElement("agent")) {
-          numPedsInFrame++;
-     }
-     return numPedsInFrame;
-}
-
 void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<int> > pdt)
 {
 	std::vector<int> ids=pdt[frame];
@@ -604,6 +597,17 @@ void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<in
         }
     }
 }
+
+int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in the frame
+{
+     int numPedsInFrame=0;
+     for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
+               xAgent = xAgent->NextSiblingElement("agent")) {
+          numPedsInFrame++;
+     }
+     return numPedsInFrame;
+}
+
 /**
  * From this function, Some pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
  * as well as the corresponding PedID will be determined.
@@ -718,8 +722,6 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     cout<<" the number of the pedestrians is less than 2 !!"<< endl;
                }
           }
-
-          //frameNr++;
           delete []XInFrame;
           delete []YInFrame;
           delete []VInFrame;
@@ -738,7 +740,6 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+filename+".dat";
           FlowRate_Velocity(_deltaT,_fps, _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
      }
-
 
      if(_classicMethod)
           fclose(_fClassicRhoV);
@@ -762,8 +763,9 @@ vector<polygon_2d> Analysis::GetPolygons(int NrInFrm)
      VoronoiDiagram vd;
      vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm);
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
-     if(_cutByCircle) {
-          polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, 100);
+     if(_cutByCircle)
+     {
+          polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
      }
      return polygons;
 }
@@ -1174,7 +1176,8 @@ void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
           Log->Write("cannot open the file to write the field density\n");
           exit(0);
      }
-
+     _scaleX*=M2CM;
+     _scaleY*=M2CM;
      int NRow = (int)ceil((_highVertexY-_lowVertexY)/_scaleY); // the number of rows that the geometry will be discretized for field analysis
      int NColumn = (int)ceil((_highVertexX-_lowVertexX)/_scaleX); //the number of columns that the geometry will be discretized for field analysis
      for(int row_i=0; row_i<NRow; row_i++) { //

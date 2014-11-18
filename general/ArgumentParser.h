@@ -65,6 +65,8 @@ private:
     bool _isMethodC;
     bool _isMethodD;
     bool _isCutByCircle;
+    double _cutRadius;
+    int _circleEdges;
     bool _isOutputGraph;
     bool _isIndividualFD;
     bool _isGetProfile;
@@ -114,6 +116,8 @@ public:
     int GetAreaIDforMethodC() const;
     int GetAreaIDforMethodD() const;
     bool GetIsCutByCircle() const;
+    double GetCutRadius() const;
+    int GetCircleEdges() const;
     bool GetIsOutputGraph() const;
     bool GetIsIndividualFD() const;
     double GetSteadyStart() const;

@@ -181,6 +181,8 @@ ArgumentParser::ArgumentParser()
     _trajectoriesFilename="";
     _projectRootDir="";
     _fileFormat=FORMAT_XML_PLAIN;
+    _cutRadius =1.0;
+    _circleEdges=6;
 }
 
 
@@ -466,9 +468,9 @@ void ArgumentParser::ParseIniFile(string inifile)
     // method D
     TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
     if(xMethod_D) {
-        if(string(xMethod_D->Attribute("enabled"))=="true") {
+        if(string(xMethod_D->Attribute("enabled"))=="true")
+        {
             _isMethodD = true;
-            _isCutByCircle = (string(xMethod_D->Attribute("cutByCircle")) == "true");
             _isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
             if(_isOutputGraph) {
                 Log->Write("INFO: \tVoronoi graph is asked to output!" );
@@ -476,7 +478,20 @@ void ArgumentParser::ParseIniFile(string inifile)
             _isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
             _areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
 
-            if ( xMethod_D->FirstChildElement("steadyState")) {
+            if ( xMethod_D->FirstChildElement("cutByCircle"))
+            {
+            	 if ( string(xMethod_D->FirstChildElement("cutByCircle")->Attribute("enabled"))=="true")
+            	 {
+            		 _isCutByCircle=true;
+            		 _cutRadius=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("radius"));
+            		 _circleEdges=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("edges"));
+            		 Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius);
+            		 Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
+            	 }
+            }
+
+            if ( xMethod_D->FirstChildElement("steadyState"))
+            {
                 _steadyStart =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
                 _steadyEnd =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("end"));
                 Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
@@ -485,10 +500,10 @@ void ArgumentParser::ParseIniFile(string inifile)
             if(xMethod_D->FirstChildElement("getProfile"))
                 if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true") {
                     _isGetProfile = true;
-                    _scaleX =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
-                    _scaleY =xmltoi(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
+                    _scaleX =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
+                    _scaleY =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
                     Log->Write("INFO: \tprofiles will be calculated" );
-                    Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %d > and < %d >",_scaleX, _scaleY);
+                    Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX, _scaleY);
                 }
 
             Log->Write("INFO: \tMethod D is selected" );
@@ -570,6 +585,15 @@ bool ArgumentParser::GetIsCutByCircle() const
     return _isCutByCircle;
 }
 
+double ArgumentParser::GetCutRadius() const
+{
+	return _cutRadius;
+}
+
+int ArgumentParser::GetCircleEdges() const
+{
+	return _circleEdges;
+}
 bool ArgumentParser::GetIsOutputGraph() const
 {
     return _isOutputGraph;

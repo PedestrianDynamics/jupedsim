@@ -54,11 +54,10 @@
   </method_C>
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
-  <method_D enabled="true" cutByCircle="false" outputGraph="false"
-            individualFDdata="false">
+  <method_D enabled="true" outputGraph="false" individualFDdata="false">
     <measurementArea id="1" />
-    <getProfile enabled="false" scale_x="10" scale_y="10"/>
-
+	<cutByCircle enabled="false" radius= "0.5" edges = "6"/> <!-- edges represent the precision of discretization of the circle --->
+    <getProfile enabled="false" scale_x="0.10" scale_y="0.10"/>
 
     <!-- // Adjust whether cut each original Voronoi cell by a circle (for 
          bottleneck exp is necessary) // Whether output the data to plot the Voronoi 
