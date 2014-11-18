@@ -279,12 +279,13 @@ void ArgumentParser::ParseIniFile(string inifile)
           //add the extension point
           string fmt = "."+string (xmltoa(
                     xMainNode->FirstChildElement("trajectories")->Attribute(
-                              "format"), "xml"));
-
-          if (fmt == "xml") {
+                              "format")));
+          cout<<"The trajectory is "<<fmt<<endl;
+          if (fmt == ".xml") {
                _fileFormat = FORMAT_XML_PLAIN;
-          } else if (fmt == "txt") {
+          } else if (fmt == ".txt") {
                _fileFormat = FORMAT_PLAIN;
+
           }
 
 
@@ -511,6 +512,11 @@ int ArgumentParser::GetLog() const
 const string& ArgumentParser::GetGeometryFilename() const
 {
     return _geometryFileName;
+}
+
+const FileFormat& ArgumentParser::GetFileFormat() const
+{
+	return _fileFormat;
 }
 
 const string& ArgumentParser::GetTrajectoriesLocation() const

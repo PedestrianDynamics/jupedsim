@@ -51,6 +51,8 @@ typedef model::ring<point_2d> ring;
 
 #define CMtoM 0.01
 #define M2CM 100
+#include <map>
+#include <vector>
 
 extern OutputHandler* Log;
 
@@ -99,6 +101,7 @@ private:
       * @param VComponent
       * @return
       */
+     void CreatGlobeVaribles(int numPeds, int numFrames);
      double GetVinFrame(int Tnow, int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast,
                double **Xcor, double **Ycor, char VComponent);
 
@@ -264,6 +267,12 @@ private:
      /**
       * @return the total number of pedestrians in that frame
       */
+
+     void InitializeVariables(const std::string& filename);
+     /**
+      * read globe variables from .txt format trajectory files
+      */
+
      int getPedsNumInFrame(TiXmlElement* xFrame);
 
      /**
@@ -328,6 +337,12 @@ private:
       * @param file_path
       * @return
       */
+     void getIDinFrame(int Frame);
+
+     /**
+      * get the ids in a certain Frame
+      */
+     void getPedsParametersInFrame(int frm, std::map< int, std::vector<int> > pdt);
 
 #ifdef __linux__
      int mkpath(char* file_path, mode_t mode=0755);
@@ -344,6 +359,9 @@ private:
      FILE *_fN_t;
      Building* _building;
      polygon_2d _geoPoly;
+
+	 std::vector<int> _IdsTXT;   // the Id data from txt format trajectory data
+	 std::vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
 
      double _scaleX;      // the size of the grid
      double _scaleY;
@@ -387,7 +405,6 @@ private:
      std::vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
      std::vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
 
-     TiXmlElement* xRootNode;
      std::string _projectRootDir;
 
      int *IdInFrame;     // save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
@@ -396,9 +413,11 @@ private:
      double *VInFrame;   // save the instantaneous velocity of pedestrians in the geometry in this frame
      int ClassicFlow;    // the number of pedestrians pass a line in a certain time
      double V_deltaT;    // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
+     FileFormat _trajFormat;  // format of the trajectory file
 
-
-
+     int min_ID;
+     int min_Frame;
+     std::map<int , std::vector<int> > peds_t;
 };
 
 #endif /*ANALYSIS_H_*/
