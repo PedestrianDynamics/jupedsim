@@ -64,7 +64,7 @@ const vector<Trajectories*>& IODispatcher::GetIOHandlers()
      return _outputHandlers;
 }
 
-void IODispatcher::WriteHeader(int nPeds, double fps, Building* building, int seed)
+void IODispatcher::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
      for (auto const & it : _outputHandlers)
      {
@@ -125,7 +125,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
      return agentText;
 }
 
-void TrajectoriesJPSV04::WriteHeader(int nPeds, double fps, Building* building, int seed      )
+void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed      )
 {
 
      nPeds = building->GetNumberOfPedestrians();
@@ -339,7 +339,7 @@ TrajectoriesFLAT::TrajectoriesFLAT() : Trajectories()
 {
 }
 
-void TrajectoriesFLAT::WriteHeader(int nPeds, double fps, Building* building, int seed)
+void TrajectoriesFLAT::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
      (void) seed; (void) nPeds;
      char tmp[CLENGTH] = "";
@@ -391,7 +391,7 @@ TrajectoriesVTK::TrajectoriesVTK()
 {
 }
 
-void TrajectoriesVTK::WriteHeader(int nPeds, double fps, Building* building, int seed)
+void TrajectoriesVTK::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
      //suppress unused warnings
      (void) nPeds; (void) fps ; (void) seed;
@@ -458,7 +458,7 @@ void TrajectoriesVTK::WriteFooter()
 }
 
 
-void TrajectoriesJPSV06::WriteHeader(int nPeds, double fps, Building* building, int seed)
+void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
      nPeds = building->GetNumberOfPedestrians();
      string tmp;
@@ -635,7 +635,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 }
 
 
-void TrajectoriesJPSV05::WriteHeader(int nPeds, double fps, Building* building, int seed)
+void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
      nPeds = building->GetNumberOfPedestrians();
      string tmp;

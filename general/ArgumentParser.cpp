@@ -54,6 +54,8 @@
 #include "../routing/DummyRouter.h"
 #include "../routing/SafestPathRouter.h"
 #include "../routing/CognitiveMapRouter.h"
+#include "../math/GompertzModel.h"
+#include "../math/GCFMModel.h"
 
 using namespace std;
 
@@ -838,6 +840,11 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
 
     //Parsing the agent parameters
     ParseAgentParameters(xGCFM);
+    p_op_model = std::shared_ptr<OperationalModel>(new GCFMModel(p_exit_strategy.get(), this->GetNuPed(),
+            this->GetNuWall(), this->GetDistEffMaxPed(),
+            this->GetDistEffMaxWall(), this->GetIntPWidthPed(),
+            this->GetIntPWidthWall(), this->GetMaxFPed(),
+            this->GetMaxFWall()));
 }
 
 
@@ -961,6 +968,10 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
 
     //Parsing the agent parameters
     ParseAgentParameters(xGompertz);
+    p_op_model = std::shared_ptr<OperationalModel>(new GompertzModel(p_exit_strategy.get(), this->GetNuPed(),
+            this->GetaPed(), this->GetbPed(), this->GetcPed(),
+            this->GetNuWall(), this->GetaWall(), this->GetbWall(),
+            this->GetcWall()));
 }
 
 void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
@@ -1150,9 +1161,8 @@ void ArgumentParser::parseNodeToSolver(const TiXmlNode &solverNode)
     }
 }
 
-int ArgumentParser::GetModel() const
-{
-    return pModel;
+shared_ptr<OperationalModel> ArgumentParser::GetModel() const {
+    return p_op_model;
 }
 const FileFormat& ArgumentParser::GetFileFormat() const
 {

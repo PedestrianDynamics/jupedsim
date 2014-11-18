@@ -58,7 +58,7 @@ class Simulation
 private:
 
 	///Number of pedestrians in the simulation
-    int _nPeds;
+    long _nPeds;
     ///Maximum simulation time
     double _tmax;
     /// time step
@@ -74,7 +74,7 @@ private:
     /// door crossing strategy for the pedestrians
     //DirectionStrategy* _direction;
     /// Force model to use
-    OperationalModel* _operationalModel;
+    std::shared_ptr<OperationalModel> _operationalModel;
     /// differential equation solver
     ODESolver* _solver;
     /// writing the trajectories to file

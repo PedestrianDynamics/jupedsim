@@ -161,7 +161,7 @@ public:
 
     double Getfps() const;
     double GetLinkedCellSize() const;
-    int GetModel() const;
+    std::shared_ptr<OperationalModel> GetModel() const;
     double GetTmax() const;
     double Getdt() const;
     double GetV0Mu() const;

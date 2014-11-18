@@ -69,8 +69,6 @@ Simulation::~Simulation()
 {
      delete _building;
      delete _distribution;
-     //delete _direction;
-     delete _operationalModel;
      delete _solver;
      delete _iod;
      delete _em;
@@ -133,14 +131,15 @@ bool Simulation::InitArgs(ArgumentParser* args)
                Log->Write(
                          "INFO: \tFormat plain not yet supported in streaming\n");
                return false;
-               break;
           }
           case FORMAT_VTK: {
                Log->Write(
                          "INFO: \tFormat vtk not yet supported in streaming\n");
                return false;
-               break;
           }
+              default: {
+                  return false;
+              }
           }
 
           s.append("\tonline streaming enabled \n");
@@ -189,6 +188,9 @@ bool Simulation::InitArgs(ArgumentParser* args)
                // _iod->AddIO(output);
                break;
           }
+              default: {
+                  break;
+              }
           }
      }
 
@@ -196,60 +198,14 @@ bool Simulation::InitArgs(ArgumentParser* args)
      _distribution->InitDistributor(_argsParser);
      //s.append(_distribution->writeParameter());
 
-     // define how the navigation line is crossed
-     auto direction = args->GetExitStrategy();
-     //sprintf(tmp, "\tDirection to the exit: %d\n", direction);
-     //s.append(tmp);
+     _operationalModel = args->GetModel();
+     s.append(_operationalModel->GetDescription());
 
-     int model = args->GetModel();
-     if (model == MODEL_GFCM) { //GCFM
-                                //if(args->GetHPCFlag()==0){
-          _operationalModel = new GCFMModel(direction.get(), args->GetNuPed(),
-                    args->GetNuWall(), args->GetDistEffMaxPed(),
-                    args->GetDistEffMaxWall(), args->GetIntPWidthPed(),
-                    args->GetIntPWidthWall(), args->GetMaxFPed(),
-                    args->GetMaxFWall());
-          s.append("\tModel: GCFMModel\n");
-          s.append(_operationalModel->GetDescription());
-          //}
-          //else if(args->GetHPCFlag()==2){
-          //  _model = new GPU_acc_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-          //        args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-          //      args->GetMaxFPed(), args->GetMaxFWall());
-          //s.append("\tModel: GCFMModel\n");
-          //s.append(_model->writeParameter());
-          //}
-          //else {
-          //  _model = new GPU_ocl_GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-          //        args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-          //      args->GetMaxFPed(), args->GetMaxFWall());
-          //s.append("\tModel: GCFMModel\n");
-          //s.append(_model->writeParameter());
-          //}
-     } else if (model == MODEL_GOMPERTZ) { //Gompertz
-          _operationalModel = new GompertzModel(direction.get(), args->GetNuPed(),
-                    args->GetaPed(), args->GetbPed(), args->GetcPed(),
-                    args->GetNuWall(), args->GetaWall(), args->GetbWall(),
-                    args->GetcWall());
-          s.append("\tModel: GompertzModel\n");
-          s.append(_operationalModel->GetDescription());
-     }
-
-     // ODE solver
+     // ODE solver which is never used!
      auto solver = args->GetSolver();
      sprintf(tmp, "\tODE Solver: %d\n", solver);
      s.append(tmp);
-     //switch (solver) {
-     //case 1:
-     //_solver = new EulerSolver(_model);
-     //break;
-     //case 2:
-     //     _solver = new VelocityVerletSolver(_model);
-     //     break;
-     //case 3:
-     //     _solver = new LeapfrogSolver(_model);
-     //     break;
-     //}
+
      sprintf(tmp, "\tnCPU: %d\n", args->GetMaxOpenMPThreads());
      s.append(tmp);
      _tmax = args->GetTmax();
@@ -449,7 +405,7 @@ void Simulation::UpdateRoutesAndLocations()
      const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
      const map<int, Goal*>& goals = _building->GetAllGoals();
 
-     unsigned int nSize = allPeds.size();
+     unsigned long nSize = allPeds.size();
      int nThreads = omp_get_max_threads();
      int partSize = nSize / nThreads;
 
@@ -504,11 +460,11 @@ void Simulation::UpdateRoutesAndLocations()
                                    break;
                               }
                          }
-                         if (assigned == true)
+                         if (assigned)
                               break; // stop the loop
                     }
 
-                    if (assigned == false) {
+                    if (!assigned) {
 #pragma omp critical
                          pedsToRemove.push_back(ped);
                     }
