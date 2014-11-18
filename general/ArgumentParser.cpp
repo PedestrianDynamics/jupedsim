@@ -759,39 +759,13 @@ void ArgumentParser::ParseGCFMModel(TiXmlElement* xGCFM)
     parseNodeToSolver(*xModelPara);
 
     //stepsize
-    if (xModelPara->FirstChild("stepsize"))
-    {
-        const char* stepsize =
-                xModelPara->FirstChild("stepsize")->FirstChild()->Value();
-        if (stepsize)
-            pdt = atof(stepsize);
-        Log->Write("INFO: \tstepsize <%f>", pdt);
-    }
+    parseStepSize(*xModelPara);
 
     //exit crossing strategy
     parseStrategyNodeToObject(*xModelPara);
 
     //linked-cells
-    if (xModelPara->FirstChild("linkedcells"))
-    {
-        string linkedcells = xModelPara->FirstChildElement("linkedcells")->Attribute(
-                "enabled");
-        string cell_size = xModelPara->FirstChildElement("linkedcells")->Attribute(
-                "cell_size");
-
-        if (linkedcells == "true")
-        {
-            pLinkedCells = true;
-            pLinkedCellSize = atof(cell_size.c_str());
-            Log->Write(
-                    "INFO: \tlinked cells enabled with size  <" + cell_size
-                    + ">");
-        }
-        else
-        {
-            Log->Write("WARNING: \tinvalid parameters for linkedcells");
-        }
-    }
+    parseLinkedCells(*xModelPara);
 
     //force_ped
     if (xModelPara->FirstChild("force_ped"))
@@ -874,38 +848,14 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
     parseNodeToSolver(*xModelPara);
 
     //stepsize
-    if (xModelPara->FirstChild("stepsize"))
-    {
-        const char* stepsize = xModelPara->FirstChild("stepsize")->FirstChild()->Value();
-        if (stepsize)
-            pdt = atof(stepsize);
-        Log->Write("INFO: \tstepsize <%f>", pdt);
-    }
+    parseStepSize(*xModelPara);
 
     //exit crossing strategy
     parseStrategyNodeToObject(*xModelPara);
 
 
     //linked-cells
-    if (xModelPara->FirstChild("linkedcells"))
-    {
-        string linkedcells = xModelPara->FirstChildElement("linkedcells")->Attribute(
-                "enabled");
-        string cell_size = xModelPara->FirstChildElement("linkedcells")->Attribute(
-                "cell_size");
-
-        if (linkedcells == "true")
-        {
-            pLinkedCells = true;
-            pLinkedCellSize = atof(cell_size.c_str());
-            Log->Write(
-                    "INFO: \tlinked cells enabled with size  <" + cell_size + ">");
-        }
-        else
-        {
-            Log->Write("WARNING: \tinvalid parameters for linkedcells");
-        }
-    }
+    parseLinkedCells(*xModelPara);
 
     //force_ped
     if (xModelPara->FirstChild("force_ped"))
@@ -1417,4 +1367,36 @@ bool ArgumentParser::GetProfileFlag()
 int ArgumentParser::GetHPCFlag()
 {
     return _hpcFlag;
+}
+
+void ArgumentParser::parseLinkedCells(const TiXmlNode &linkedCellNode) {
+    if (linkedCellNode.FirstChild("linkedcells"))
+    {
+        string linkedcells = linkedCellNode.FirstChildElement("linkedcells")->Attribute(
+                "enabled");
+        string cell_size = linkedCellNode.FirstChildElement("linkedcells")->Attribute(
+                "cell_size");
+
+        if (linkedcells == "true")
+        {
+            pLinkedCells = true;
+            pLinkedCellSize = atof(cell_size.c_str());
+            Log->Write(
+                    "INFO: \tlinked cells enabled with size  <" + cell_size + ">");
+        }
+        else
+        {
+            Log->Write("WARNING: \tinvalid parameters for linkedcells");
+        }
+    }
+}
+
+void ArgumentParser::parseStepSize(TiXmlNode &stepNode) {
+    if (stepNode.FirstChild("stepsize"))
+    {
+        const char* stepsize = stepNode.FirstChild("stepsize")->FirstChild()->Value();
+        if (stepsize)
+            pdt = atof(stepsize);
+        Log->Write("INFO: \tstepsize <%f>", pdt);
+    }
 }

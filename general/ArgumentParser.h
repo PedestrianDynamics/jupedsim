@@ -139,6 +139,10 @@ private:
     */
     void parseRoutingStrategies(TiXmlNode* routingNode);
 
+    void parseLinkedCells(const TiXmlNode &linkedCellNode);
+
+    void parseStepSize(TiXmlNode &stepNode);
+
 public:
     // Konstruktor
     ArgumentParser(); // gibt die Programmoptionen aus
