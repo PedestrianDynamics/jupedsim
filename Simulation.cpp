@@ -371,7 +371,8 @@ int Simulation::RunSimulation()
      //time(&starttime);
 
      // main program loop
-     for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
+     while (_nPeds > 0 && t < _tmax)
+     {
           t = 0 + (frameNr - 1) * _deltaT;
 
           // update the positions
@@ -404,6 +405,7 @@ int Simulation::RunSimulation()
           // double timeToWait=t-difftime(endtime, starttime);
           // clock_t goal = timeToWait*1000 + clock();
           // while (goal > clock());
+         ++frameNr;
 
      }
      // writing the footer
