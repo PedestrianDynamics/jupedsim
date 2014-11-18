@@ -2,6 +2,7 @@ TEMPLATE = app
 TARGET = TraVisTo
 CONFIG += qt
 CONFIG += static
+CONFIG += c++11
 QT += xml network
 
 #avoid some annoying dependencies
@@ -11,7 +12,9 @@ QT += xml network
 #QMAKE_CXXFLAGS += -static
 #QMAKE_LFLAGS_RELEASE += -static-libgcc
 
-QMAKE_CXXFLAGS += -Wno-deprecated -Wno-unused-parameter -Wno-unused-variable
+QMAKE_CXXFLAGS += -std=c++11
+
+QMAKE_CXXFLAGS += -Wno-deprecated -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
@@ -365,93 +368,74 @@ unix_6 {
 }
    
 #dynamic linking with vtk5.10
-unix_dyn {
+unix{
 INCLUDEPATH += /usr/include/vtk-5.8
 LIBS += -L/usr/lib \
--lvtkRendering  \
--lvtkCommon   \
--lvtkHybrid   \
--lvtkIO   \
--lvtkGraphics   \
--lvtkFiltering   \
-
+    -lvtkRendering  \
+    -lvtkCommon   \
+    -lvtkHybrid   \
+    -lvtkIO   \
+    -lvtkGraphics   \
+    -lvtkFiltering   \
+    -lvtkCommon   \
+    -lvtkverdict   \
+    -lvtkParallel   \
+    -lvtkexoIIc   \
+    -lvtkImaging   \
+    -lvtkDICOMParser   \
+    -lvtkmetaio   \
+    -lvtkftgl  \
+    #-lLSDyna \
+    -lvtkViews \
+    -lvtksys   \
+    #-lvtkpng \
+    #-lvtktiff \
+    #-lvtkjpeg \
+    #-lvtklibxml2 \
+    #-lvtkzlib \
+    #-lvtkexpat \
+    #-lvtkfreetype \
  }
  
 #Static compilation linux
-unix:!macx {
+unix_static {
 #INCLUDEPATH += /usr/include/vtk-5.8
 #LIBS += -L/usr/lib \
-INCLUDEPATH +=/usr/local/include/vtk-5.10
-LIBS += -L/usr/local/lib/vtk-5.10 \
--lvtkRendering  \
--lvtkCommon   \
--lvtkHybrid   \
--lvtkIO   \
--lvtkGraphics   \
--lvtkFiltering   \
--lvtkCommon   \
--lvtkverdict   \
--lvtkParallel   \
--lvtkexoIIc   \
--lvtkImaging   \
--lvtkDICOMParser   \
--lvtkmetaio   \
--lvtkftgl  \
--lLSDyna \ 
--lvtkViews \
--lvtksys   \
--lvtkpng \
--lvtktiff \
--lvtkjpeg \
--lvtklibxml2 \
--lvtkzlib \
--lvtkexpat \
--lvtkfreetype \
--lGL  \
--lXt \
--lX11 \
--lXext \
--ldl \
+    INCLUDEPATH +=/usr/local/include/vtk-5.10
+    LIBS += -L/usr/local/lib/vtk-5.10 \
+    -lvtkRendering  \
+    -lvtkCommon   \
+    -lvtkHybrid   \
+    -lvtkIO   \
+    -lvtkGraphics   \
+    -lvtkFiltering   \
+    -lvtkCommon   \
+    -lvtkverdict   \
+    -lvtkParallel   \
+    -lvtkexoIIc   \
+    -lvtkImaging   \
+    -lvtkDICOMParser   \
+    -lvtkmetaio   \
+    -lvtkftgl  \
+    -lLSDyna \
+    -lvtkViews \
+    -lvtksys   \
+    -lvtkpng \
+    -lvtktiff \
+    -lvtkjpeg \
+    -lvtklibxml2 \
+    -lvtkzlib \
+    -lvtkexpat \
+    -lvtkfreetype \
+    -lGL  \
+    -lXt \
+    -lX11 \
+    -lXext \
+    -ldl \
  }
 
 macx {
-        INCLUDEPATH += /Users/piccolo/VTK6/include/vtk-6.1
-        LIBS += -L/Users/piccolo/VTK6/lib \
-            /Users/piccolo/VTK6/lib/libvtkFiltersGeometry-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersCore-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonExecutionModel-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonDataModel-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonMath-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonCore-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtksys-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonMisc-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonSystem-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonTransforms-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkFiltersModeling-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersGeneral-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonComputationalGeometry-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersSources-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkIOImage-6.1.a /Users/piccolo/VTK6/lib/libvtkDICOMParser-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkIOCore-6.1.a /Users/piccolo/VTK6/lib/libvtkzlib-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkmetaio-6.1.a /Users/piccolo/VTK6/lib/libvtkjpeg-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkpng-6.1.a /Users/piccolo/VTK6/lib/libvtktiff-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkIOXML-6.1.a /Users/piccolo/VTK6/lib/libvtkIOGeometry-6.1.a /Users/piccolo/VTK6/lib/libvtkjsoncpp-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkIOXMLParser-6.1.a /Users/piccolo/VTK6/lib/libvtkexpat-6.1.a /Users/piccolo/VTK6/lib/libvtkImagingStatistics-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkImagingCore-6.1.a /Users/piccolo/VTK6/lib/libvtkInteractionStyle-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersExtraction-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkFiltersStatistics-6.1.a /Users/piccolo/VTK6/lib/libvtkImagingFourier-6.1.a /Users/piccolo/VTK6/lib/libvtkalglib-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkRenderingCore-6.1.a /Users/piccolo/VTK6/lib/libvtkRenderingVolumeOpenGL-6.1.a /Users/piccolo/VTK6/lib/libvtkRenderingOpenGL-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkImagingHybrid-6.1.a /Users/piccolo/VTK6/lib/libvtkRenderingVolume-6.1.a /Users/piccolo/VTK6/lib/libvtkTestingRendering-6.1.a \
-            -framework AGL -framework OpenGL -framework ApplicationServices -framework IOKit -framework Cocoa /Users/piccolo/VTK6/lib/libvtkIOImage-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkDICOMParser-6.1.a /Users/piccolo/VTK6/lib/libvtkIOCore-6.1.a /Users/piccolo/VTK6/lib/libvtkmetaio-6.1.a /Users/piccolo/VTK6/lib/libvtkpng-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtktiff-6.1.a /Users/piccolo/VTK6/lib/libvtkzlib-6.1.a /Users/piccolo/VTK6/lib/libvtkjpeg-6.1.a -lm /Users/piccolo/VTK6/lib/libvtkRenderingCore-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkFiltersGeometry-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersSources-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersExtraction-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkFiltersGeneral-6.1.a /Users/piccolo/VTK6/lib/libvtkFiltersCore-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonComputationalGeometry-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkFiltersStatistics-6.1.a /Users/piccolo/VTK6/lib/libvtkImagingFourier-6.1.a /Users/piccolo/VTK6/lib/libvtkImagingCore-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonExecutionModel-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonDataModel-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonMisc-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonSystem-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonTransforms-6.1.a /Users/piccolo/VTK6/lib/libvtkCommonMath-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkCommonCore-6.1.a /Users/piccolo/VTK6/lib/libvtksys-6.1.a /Users/piccolo/VTK6/lib/libvtkalglib-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkRenderingAnnotation-6.1.a  /Users/piccolo/VTK6/lib/libvtkRenderingLabel-6.1.a       \
-            /Users/piccolo/VTK6/lib/libvtkRenderingFreeType-6.1.a /Users/piccolo/VTK6/lib/libvtkfreetype-6.1.a /Users/piccolo/VTK6/lib/libvtkftgl-6.1.a \
-            /Users/piccolo/VTK6/lib/libvtkRenderingCore-6.1.a  /Users/piccolo/VTK6/lib/libvtkRenderingFreeTypeOpenGL-6.1.a \
-
-}
-
-macx_dyn {
         INCLUDEPATH += /Users/piccolo/VTK/include/vtk-6.1
-
         LIBS += -L/Users/piccolo/VTK/lib \
             -lvtkalglib-6.1  \
             -lvtkChartsCore-6.1  \

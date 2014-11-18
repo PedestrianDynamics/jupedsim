@@ -406,11 +406,11 @@ void ThreadDataTransfer::parseShapeNode(QDomNode shape)
         if(!ok)color=std::numeric_limits<int>::quiet_NaN();
         //cout <<"id= " <<id <<" height= "<<height<<" color= "<<color<<endl;
 
-        if(!isnan(height)) {
+        if(!std::isnan(height)) {
             heights.append(QString::number(id));
             heights.append(QString::number(height));
         }
-        if(!isnan(color)) {
+        if(!std::isnan(color)) {
             colors.append(QString::number(id));
             colors.append(QString::number(color));
         }

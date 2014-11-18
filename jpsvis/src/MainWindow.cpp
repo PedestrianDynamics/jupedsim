@@ -540,11 +540,11 @@ bool MainWindow::parsePedestrianShapes(QDomNode shapeNode, int groupID)
         if(!ok)color=std::numeric_limits<int>::quiet_NaN();
         Debug::Messages("id= %d height= %lf color =%d",id,height,color);
 
-        if(!isnan(height)) {
+        if(!std::isnan(height)) {
             heights.append(QString::number(id));
             heights.append(QString::number(height));
         }
-        if(!isnan(color)) {
+        if(!std::isnan(color)) {
             colors.append(QString::number(id));
             colors.append(QString::number(color));
         }

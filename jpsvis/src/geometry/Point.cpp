@@ -1,12 +1,14 @@
 /**
- * File:   Point.cpp
+ * \file        Point.cpp
+ * \date        Sep 30, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Created on 30. September 2010, 09:21
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -15,14 +17,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  *
  *
- *
- */
+ **/
+
 
 #include "Point.h"
 #include "../general/Macros.h"
@@ -40,78 +42,93 @@
  ************************************************************/
 Point::Point()
 {
-    _x = 0.0;
-    _y = 0.0;
+     _x = 0.0;
+     _y = 0.0;
 }
 
 Point::Point(double x, double y)
 {
-    _x = x;
-    _y = y;
+     _x = x;
+     _y = y;
 }
 
 Point::Point(const Point& orig)
 {
-    _x = orig.GetX();
-    _y = orig.GetY();
+     _x = orig.GetX();
+     _y = orig.GetY();
 }
 
 std::string Point::toString() const
 {
-    std::stringstream tmp;
-    tmp<<"( "<<_x<<" : " <<_y<<" )";
-    return tmp.str();
-};
+     std::stringstream tmp;
+     tmp<<"( "<<_x<<" : " <<_y<<" )";
+     return tmp.str();
+}
 
 void Point::SetX(double x)
 {
-    _x = x;
+     _x = x;
 }
 
 void Point::SetY(double y)
 {
-    _y = y;
+     _y = y;
 }
 
 double Point::GetX() const
 {
-    return _x;
+     return _x;
 }
 
 double Point::GetY() const
 {
-    return _y;
+     return _y;
 }
 
 double Point::Norm() const
 {
-    return sqrt(_x * _x + _y * _y);
+     return sqrt(_x * _x + _y * _y);
+}
+
+double Point::NormMolified() const
+{
+     double const eps_sq = 0.1;
+     return sqrt(_x * _x + _y * _y + eps_sq);
 }
 
 double Point::NormSquare() const
 {
-    return (_x * _x + _y * _y);
+     return (_x * _x + _y * _y);
 }
+
+Point Point::NormalizedMolified() const
+{
+     double norm = NormMolified();
+     if (norm > J_EPS_GOAL)
+          return ( Point(_x, _y) / norm );
+     else return Point(0.0, 0.0);
+}
+
 
 Point Point::Normalized() const
 {
-    double norm=Norm();
-    if (norm > J_EPS*J_EPS)
-        return ( Point(_x, _y) / norm );
-    else return Point(0.0, 0.0);
+     double norm = Norm();
+     if (norm > J_EPS)
+          return ( Point(_x, _y) / norm );
+     else return Point(0.0, 0.0);
 }
 
 // scalar product
 double Point::ScalarP(const Point& v) const
 {
-    //return _x * v.GetX() + _y * v.GetY();
-    return _x * v._x + _y * v._y;
+     //return _x * v.GetX() + _y * v.GetY();
+     return _x * v._x + _y * v._y;
 }
 
 /// determinant of the square matrix formed by the vectors [ this, v]
 double Point::Det(const Point& v) const
 {
-    return _x * v._y - _y * v._x;
+     return _x * v._y - _y * v._x;
 }
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
@@ -175,8 +192,8 @@ xnew = -xc + x
 */
 Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) const
 {
-    Point p = Point(_x, _y);
-    return (p - center).Rotate(cphi, -sphi);
+     Point p = Point(_x, _y);
+     return (p - center).Rotate(cphi, -sphi);
 }
 
 /*
@@ -200,8 +217,8 @@ where the coord. of a point are transformated to cart. coord.
 
 Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const
 {
-    Point p = Point(_x, _y);
-    return (p.Rotate(cphi, sphi) + center);
+     Point p = Point(_x, _y);
+     return (p.Rotate(cphi, sphi) + center);
 }
 
 /*rotate a two-dimensional vector by an angle of theta
@@ -212,53 +229,53 @@ Rotation-matrix=[cos(theta)  -sin(theta)]
 */
 Point Point::Rotate(double ctheta, double stheta) const
 {
-    return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
+     return Point(_x * ctheta - _y*stheta, _x * stheta + _y * ctheta);
 }
 
 //  sum
 const Point Point::operator+(const Point& p) const
 {
-    //return Point(_x + p.GetX(), _y + p.GetY());
-    return Point(_x + p._x, _y + p._y);
+     //return Point(_x + p.GetX(), _y + p.GetY());
+     return Point(_x + p._x, _y + p._y);
 }
 
 // sub
 const Point Point::operator-(const Point& p) const
 {
-    // return Point(_x - p.GetX(), _y - p.GetY());
-    return Point(_x - p._x, _y - p._y);
+     // return Point(_x - p.GetX(), _y - p.GetY());
+     return Point(_x - p._x, _y - p._y);
 }
 
 // equal
 bool Point::operator==(const Point& p) const
 {
 //    return (fabs(_x - p.GetX()) < J_EPS && fabs(_y - p.GetY()) < J_EPS);
-    return (fabs(_x - p._x) < J_EPS && fabs(_y - p._y) < J_EPS);
+     return (fabs(_x - p._x) < J_EPS && fabs(_y - p._y) < J_EPS);
 }
 
 // not equal
 bool Point::operator!=(const Point& p) const
 {
-    //return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
-    return (fabs(_x - p._x) > J_EPS || fabs(_y - p._y) > J_EPS);
+     //return (fabs(_x - p.GetX()) > J_EPS || fabs(_y - p.GetY()) > J_EPS);
+     return (fabs(_x - p._x) > J_EPS || fabs(_y - p._y) > J_EPS);
 }
 
 
 // multiplication with scalar
 const Point operator*(const Point& p, double f)
 {
-    //return Point(p.GetX() * f, p.GetY() * f);
-    return Point(p._x * f, p._y * f);
+     //return Point(p.GetX() * f, p.GetY() * f);
+     return Point(p._x * f, p._y * f);
 }
 
 // divition with scalar
 const Point operator/(const Point& p, double f)
 {
-    if (f>J_EPS*J_EPS)
-        return Point(p._x / f, p._y / f);
-    else {
-        std::cout << "Warning: Point::/operator. dividand "<<f<< " is to small. Set it to 1 instead"<<std::endl;
-        return Point(p._x, p._y);
-    }
-    //return Point(p.GetX() / f, p.GetY() / f);
+     if (f>J_EPS*J_EPS)
+          return Point(p._x / f, p._y / f);
+     else {
+          std::cout << "Warning: Point::/operator. dividand "<<f<< " is to small. Set it to 1 instead"<<std::endl;
+          return Point(p._x, p._y);
+     }
+     //return Point(p.GetX() / f, p.GetY() / f);
 }
