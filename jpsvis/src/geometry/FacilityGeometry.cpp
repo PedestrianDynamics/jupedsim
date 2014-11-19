@@ -108,10 +108,20 @@ FacilityGeometry::FacilityGeometry()
 
 FacilityGeometry::~FacilityGeometry()
 {
-    if(assembly)
-        assembly->Delete();
+    //if(assembly)
+    //    assembly->Delete();
 
     lookupTable->Delete();
+    captions->Delete();
+
+    assembly->Delete();
+    assembly2D->Delete();
+    assemblyCaptions->Delete();
+
+    assemblyWalls3D->Delete();
+    assemblyDoors3D->Delete();
+    assembly3D->Delete();
+    floorActor->Delete();
 
     delete linesPlotter2D;
 }
@@ -285,15 +295,15 @@ void FacilityGeometry::addWall(double x1, double y1, double z1, double x2, doubl
 
     JPoint *p1 = new JPoint(x1,y1,z1);
     JPoint *p2 = new JPoint(x2,y2,z2);
-    double *center = p1->centreCoordinatesWith(*p2);
+    JPoint p3 =p1->centreCoordinatesWith(*p2);
+    double centre[3]; p3.getXYZ(centre);
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
 
-    addNewElement(center, length, angle, WALL);
+    addNewElement(centre, length, angle, WALL);
 
     delete p1;
     delete p2;
-    delete center;
 }
 
 void FacilityGeometry::addStair(double x1, double y1, double z1, double x2, double y2, double z2,double thickness,double height,double color)
@@ -335,15 +345,16 @@ void FacilityGeometry::addDoor(double x1, double y1, double z1, double x2, doubl
 
     JPoint *p1 = new JPoint(x1,y1,z1);
     JPoint *p2 = new JPoint(x2,y2,z2);
-    double *center = p1->centreCoordinatesWith(*p2);
+    JPoint p3 =p1->centreCoordinatesWith(*p2);
+    double centre[3]; p3.getXYZ(centre);
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
 
-    addNewElement(center, length, angle, DOOR);
+    addNewElement(centre, length, angle, DOOR);
 
     delete p1;
     delete p2;
-    delete center;
+
 }
 
 void FacilityGeometry::addNavLine(double x1, double y1, double z1, double x2, double y2, double z2,double thickness ,double height, double color)
@@ -379,15 +390,16 @@ void FacilityGeometry::addStep(double x1, double y1, double z1, double x2, doubl
 
     JPoint *p1 = new JPoint(x1,y1,z1);
     JPoint *p2 = new JPoint(x2,y2,z2);
-    double *center = p1->centreCoordinatesWith(*p2);
+    JPoint p3 =p1->centreCoordinatesWith(*p2);
+    double centre[3]; p3.getXYZ(centre);
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
 
-    addNewElement(center, length, angle, STEP);
+    addNewElement(centre, length, angle, STEP);
 
     delete p1;
     delete p2;
-    delete center;
+
 }
 
 void FacilityGeometry::addStep(JPoint* p1, JPoint* p2)
@@ -406,10 +418,11 @@ void FacilityGeometry::addStep(JPoint* p1, JPoint* p2)
 
     linesPlotter2D->PlotDoor(m,n,doorColor/255.0);
 
-    double *center = p1->centreCoordinatesWith(*p2);
+    JPoint p3 =p1->centreCoordinatesWith(*p2);
+    double centre[3]; p3.getXYZ(centre);
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
-    addNewElement( center,  length, angle,  STEP);
+    addNewElement(centre,  length, angle,  STEP);
 
 }
 
@@ -437,10 +450,11 @@ void FacilityGeometry::addWall(JPoint* p1, JPoint* p2, string caption)
         addNewElementText(center,orientation,caption.c_str(),50);
     }
 
-    double *center = p1->centreCoordinatesWith(*p2);
+    JPoint p3 =p1->centreCoordinatesWith(*p2);
+    double centre[3]; p3.getXYZ(centre);
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
-    addNewElement( center,  length, angle,  WALL);
+    addNewElement( centre,  length, angle,  WALL);
 }
 
 void FacilityGeometry::addStair(JPoint* p1, JPoint* p2, string caption)
@@ -503,10 +517,11 @@ void FacilityGeometry::addDoor(JPoint* p1, JPoint* p2, string caption)
         addNewElementText(center,orientation,caption.c_str(),0);
     }
 
-    double *center = p1->centreCoordinatesWith(*p2);
+    JPoint p3 =p1->centreCoordinatesWith(*p2);
+    double centre[3]; p3.getXYZ(centre);
     double angle =p1->angleMadeWith(*p2);
     double length =p1->distanceTo(*p2)+wallThickness;
-    addNewElement( center,  length, angle,  DOOR);
+    addNewElement( centre,  length, angle,  DOOR);
 }
 
 void FacilityGeometry::addNavLine(JPoint* p1, JPoint* p2, string caption)
@@ -832,7 +847,7 @@ void FacilityGeometry::addNewElementText(double center[3], double orientation[3]
 
     //caption
     VTK_CREATE(vtkTextActor3D,caption);
-    caption = vtkTextActor3D ::New();
+    //caption = vtkTextActor3D ::New();
 
     //caption->SetVisibility(false);
     caption->SetInput(text.c_str());

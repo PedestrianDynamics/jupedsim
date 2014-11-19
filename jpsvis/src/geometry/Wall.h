@@ -1,13 +1,14 @@
 /**
- * File:   Wall.h
+ * \file        Wall.h
+ * \date        Nov 16, 2010
+ * \version     v0.5
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- * Created on 16. November 2010, 12:55
- *
- * @section LICENSE
+ * \section License
  * This file is part of JuPedSim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
@@ -16,38 +17,51 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * @section DESCRIPTION
+ * \section Description
  *
  *
- *
- */
+ **/
+ 
 
 #ifndef _WALL_H
-#define	_WALL_H
+#define _WALL_H
 
 #include "Line.h"
 
 class Wall : public Line {
 
 public:
-    Wall();
-    Wall(const Point& p1, const Point& p2);
-    Wall(const Wall& orig);
+     Wall();
+     Wall(const Point& p1, const Point& p2, const std::string& type="internal");
+     Wall(const Wall& orig);
 
-    /**
-     *  Debug output from the object
-     */
-    void WriteToErrorLog() const;
+     /**
+      * set/get the wall type. Values are external and internal
+      */
+     const std::string& GetType() const;
 
-    /**
-     * @return a nicely formated string of the object
-     */
-    virtual std::string Write() const;
+     /**
+      * set/get the wall type. Values are external and internal
+      */
+     void SetType(const std::string& type);
+
+     /**
+      *  Debug output from the object
+      */
+     void WriteToErrorLog() const;
+
+     /**
+      * @return a nicely formated string of the object
+      */
+     virtual std::string Write() const;
+
+private:
+     std::string _type;
 };
 
 
-#endif	/* _WALL_H */
+#endif  /* _WALL_H */
 

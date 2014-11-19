@@ -63,8 +63,8 @@ Frame::~Frame()
     }
     _framePoints.clear();
 
-    //_polydata2D->Delete();
-    //_polydata3D->Delete();
+    _polydata2D->Delete();
+    _polydata3D->Delete();
 }
 
 int Frame::getSize()

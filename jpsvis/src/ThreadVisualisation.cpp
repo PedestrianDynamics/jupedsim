@@ -103,7 +103,7 @@ ThreadVisualisation::ThreadVisualisation(QObject *parent):
     renderer=NULL;
     renderWindow=NULL;
     renderWinInteractor=NULL;
-    runningTime=NULL;
+    runningTime=vtkTextActor::New();;
     framePerSecond=25;
     axis=NULL;
     winTitle="header without room caption";
@@ -123,6 +123,9 @@ ThreadVisualisation::~ThreadVisualisation()
     if(extern_glyphs_pedestrians) extern_glyphs_pedestrians->Delete();
     if(extern_glyphs_pedestrians_actor_2D) extern_glyphs_pedestrians_actor_2D->Delete();
     if(extern_pedestrians_labels) extern_pedestrians_labels->Delete();
+
+    runningTime->Delete();
+
 }
 
 void ThreadVisualisation::setFullsreen(bool status)
@@ -140,7 +143,7 @@ void ThreadVisualisation::run()
 {
 
     //deactivate the output windows
-    //vtkObject::GlobalWarningDisplayOff();
+    vtkObject::GlobalWarningDisplayOff();
 
     //emit signalStatusMessage("running");
 
@@ -189,6 +192,7 @@ void ThreadVisualisation::run()
         actor->SetMapper(mapper);
         mapper->Delete();
         actor->GetProperty()->SetColor(.90,.90,0.0);
+        actor->Delete();
         //renderer->AddActor(actor);
     }
     //add another big circle at null point
@@ -207,6 +211,7 @@ void ThreadVisualisation::run()
         mapper->Delete();
         actor->GetProperty()->SetColor(.90,.90,0.0);
         actor->SetPosition(5000,8000,0);
+        actor->Delete();
         //renderer->AddActor(actor);
     }
 
@@ -239,7 +244,6 @@ void ThreadVisualisation::run()
     //	initLegend();
 
     //add the running time frame
-    runningTime = vtkTextActor::New();
     runningTime->SetTextScaleModeToViewport();
     //runningTime->SetTextScaleModeToProp();
     //runningTime->SetMinimumSize(10,10);
@@ -367,6 +371,9 @@ void ThreadVisualisation::run()
     renderWinInteractor->Delete();
     _topViewCamera->Delete();
     renderer=NULL;
+
+    delete renderingTimer;
+
 }
 
 
@@ -467,11 +474,13 @@ void  ThreadVisualisation::initGlyphs2D()
 //    }
 
     //speed the rendering using triangles stripers
-    vtkTriangleFilter *tris = vtkTriangleFilter::New();
+    //vtkTriangleFilter *tris = vtkTriangleFilter::New();
+    VTK_CREATE(vtkTriangleFilter, tris);
     tris->SetInputConnection(agentShape->GetOutputPort());
     //tris->GetOutput()->ReleaseData();
 
-    vtkStripper *strip = vtkStripper::New();
+    //vtkStripper *strip = vtkStripper::New();
+    VTK_CREATE(vtkStripper, strip);
     strip->SetInputConnection(tris->GetOutputPort());
     //strip->GetOutput()->ReleaseData();
 
@@ -736,6 +745,8 @@ void ThreadVisualisation::setGeometry(FacilityGeometry* geometry)
 FacilityGeometry* ThreadVisualisation::getGeometry()
 {
     //if(geometry==NULL){
+    //delete the old object
+    delete geometry;
     geometry=new FacilityGeometry();
     //}
     return geometry;
@@ -792,7 +803,7 @@ void ThreadVisualisation::setGeometryVisibility3D(bool status)
 
 void ThreadVisualisation::setOnscreenInformationVisibility(bool show)
 {
-    if(runningTime)
+    //if(runningTime)
     runningTime->SetVisibility(show);
 }
 

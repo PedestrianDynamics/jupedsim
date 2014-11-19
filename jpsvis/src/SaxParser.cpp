@@ -38,6 +38,8 @@
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Building.h"
 #include "geometry/Wall.h"
+#include "geometry/SubRoom.h"
+
 #include "SystemSettings.h"
 
 #include <QMessageBox>
@@ -65,6 +67,9 @@
 
 
 using namespace std;
+
+OutputHandler* Log=NULL;
+
 
 /**
  * constructor
@@ -399,9 +404,9 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         }
 
         //coordinates of the ellipse, default to the head of the agent
-        if(isnan(el_x)) el_x=xPos;
-        if(isnan(el_y)) el_y=yPos;
-        if(isnan(el_z)) el_z=zPos;
+        if(std::isnan(el_x)) el_x=xPos;
+        if(std::isnan(el_y)) el_y=yPos;
+        if(std::isnan(el_z)) el_z=zPos;
 
         //double pos[3]={xPos,yPos,zPos};
         //double vel[3]={xVel,yPos,zPos};
@@ -435,13 +440,13 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 color=at.value(i).toDouble();
             }
         }
-        if(isnan(id)) return true;
+        if(std::isnan(id)) return true;
 
-        if(!isnan(height)) {
+        if(!std::isnan(height)) {
             initialPedestriansHeights.append(QString::number(id));
             initialPedestriansHeights.append(QString::number(height));
         }
-        if(!isnan(color)) {
+        if(!std::isnan(color)) {
             initialPedestriansColors.append(QString::number(id));
             initialPedestriansColors.append(QString::number(color));
         }
@@ -554,6 +559,9 @@ void SaxParser::clearPoints()
 bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
 {
 
+    //    if(Log) delete Log;
+    Log = new FileHandler(SystemSettings::getLogfile().toStdString().c_str());
+
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
@@ -564,7 +572,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
     string geometrypath = fileName.toStdString();
 
     // read the geometry
-    if(!building->LoadBuildingFromFile(geometrypath))
+    if(!building->LoadGeometry(geometrypath))
         return false;
     if(!building->InitGeometry())
         return false; // create the polygons
