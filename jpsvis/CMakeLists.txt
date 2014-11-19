@@ -1,7 +1,5 @@
 # ------------------------- Begin Generic CMake Variable Logging ------------------
 
-# SET(DESIRED_QT_VERSION "3")
-
 # the short system name, e.g. "Linux", "FreeBSD" or "Windows"
 MESSAGE( STATUS "CMAKE_SYSTEM_NAME: " ${CMAKE_SYSTEM_NAME} )
 
@@ -21,12 +19,24 @@ cmake_minimum_required(VERSION 2.8)
 
 #set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/" ${CMAKE_MODULE_PATH})
 
- # set project's name
+# set project's name
 project( JPSvis )
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
-message (STATUS "MODULE_PATH" ${CMAKE_MODULE_PATH})
+
+#------------------ set important directories --------------------
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
+# Debug messages
+message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
+message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
+message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
+message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
+message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
+message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
+
+message (STATUS "MODULE_PATH: " ${CMAKE_MODULE_PATH})
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSVIS_MAJOR_VERSION 0)
 set(JPSVIS_MINOR_VERSION 5)
@@ -84,65 +94,65 @@ set( SAMPLE_SRCS
   src/TrailPlotter.cpp
   forms/jpsvis.rc
   )  
-  # all header files that should be treated with moc
-  set( SAMPLE_HDR
-    src/geometry/Building.h
-    src/geometry/Crossing.h
-    src/geometry/Goal.h
-    src/geometry/Hline.h
-    src/geometry/Line.h
-    src/geometry/NavLine.h
-    src/geometry/Obstacle.h
-    src/geometry/Point.h
-    src/geometry/Room.h
-    src/geometry/SubRoom.h
-    src/geometry/Transition.h
-    src/geometry/Wall.h
-    src/geometry/JPoint.h
-    src/tinyxml/tinystr.h
-    src/tinyxml/tinyxml.h
-    src/general/Macros.h
-    src/IO/OutputHandler.h
-    src/IO/TraVisToClient.h
-    forms/Settings.h
-    src/SaxParser.h
-    src/Debug.h
-    src/Frame.h
-    src/InteractorStyle.h
-    src/Message.h
-    src/Pedestrian.h
-    src/SimpleVisualisationWindow.h
-    src/SyncData.h
-    src/SystemSettings.h
-    src/ThreadDataTransfert.h
-    src/ThreadVisualisation.h
-    src/TimerCallback.h
-    src/FrameElement.h
-    src/extern_var.h
-    src/geometry/FacilityGeometry.h
-    src/geometry/LinePlotter.h
-    src/geometry/PointPlotter.h
-    src/geometry/LinePlotter2D.h
-    src/geometry/PointPlotter2D.h
-    src/network/TraVisToServer.h
-    src/MainWindow.h
-    src/TrailPlotter.h
-)
-  
-  # *.ui files
-  set( SAMPLE_UIS
-    forms/settings.ui
-    forms/mainwindow.ui  
+# all header files that should be treated with moc
+set( SAMPLE_HDR
+  src/geometry/Building.h
+  src/geometry/Crossing.h
+  src/geometry/Goal.h
+  src/geometry/Hline.h
+  src/geometry/Line.h
+  src/geometry/NavLine.h
+  src/geometry/Obstacle.h
+  src/geometry/Point.h
+  src/geometry/Room.h
+  src/geometry/SubRoom.h
+  src/geometry/Transition.h
+  src/geometry/Wall.h
+  src/geometry/JPoint.h
+  src/tinyxml/tinystr.h
+  src/tinyxml/tinyxml.h
+  src/general/Macros.h
+  src/IO/OutputHandler.h
+  src/IO/TraVisToClient.h
+  forms/Settings.h
+  src/SaxParser.h
+  src/Debug.h
+  src/Frame.h
+  src/InteractorStyle.h
+  src/Message.h
+  src/Pedestrian.h
+  src/SimpleVisualisationWindow.h
+  src/SyncData.h
+  src/SystemSettings.h
+  src/ThreadDataTransfert.h
+  src/ThreadVisualisation.h
+  src/TimerCallback.h
+  src/FrameElement.h
+  src/extern_var.h
+  src/geometry/FacilityGeometry.h
+  src/geometry/LinePlotter.h
+  src/geometry/PointPlotter.h
+  src/geometry/LinePlotter2D.h
+  src/geometry/PointPlotter2D.h
+  src/network/TraVisToServer.h
+  src/MainWindow.h
+  src/TrailPlotter.h
   )
-  
+
+# *.ui files
+set( SAMPLE_UIS
+  forms/settings.ui
+  forms/mainwindow.ui  
+  )
+
 # and finally a resource file
 set( SAMPLE_RCS
   forms/icons.qrc
   )
-  
+
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-  
+
 #set(VTK_USE_HYBRID ON CACHE BOOL "doc" FORCE)
 find_package(VTK REQUIRED)
 
@@ -164,23 +174,21 @@ set(CMAKE_AUTOMOC ON)
 #FIND_PACKAGE( Qt4 REQUIRED )
 #FIND_PACKAGE(QT REQUIRED)
 
+FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake  REQUIRED)
+FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK QtXmlPatterns REQUIRED)
+
 if("${DESIRED_QT_VERSION}" STREQUAL "")
   set(DESIRED_QT_VERSION "4")
 endif()
 
 if( ${DESIRED_QT_VERSION} VERSION_GREATER "4" OR ${DESIRED_QT_VERSION} VERSION_LESS "3")
-  message(FATAL_ERROR "QT version " ${DESIRED_QT_VERSION} " not supported")
+  message(WARNING "QT version: " ${DESIRED_QT_VERSION} " not supported")
 endif()
 
 message(STATUS "DESIRED_QT_VERSION " ${DESIRED_QT_VERSION})
-
-
-FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake  REQUIRED)
-FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK QtXmlPatterns REQUIRED)
-message(STATUS "QT5_INSTALLED " ${QT3_INSTALLED})
-message(STATUS "QT4_INSTALLED " ${QT4_INSTALLED})
-message(STATUS "QT3_INSTALLED " ${QT3_INSTALLED})
-
+message(STATUS "QT5_INSTALLED: " ${QT3_INSTALLED})
+message(STATUS "QT4_INSTALLED: " ${QT4_INSTALLED})
+message(STATUS "QT3_INSTALLED: " ${QT3_INSTALLED})
 
 # by default only QtCore and QtGui modules are enabled
 # other modules must be enabled like this:
@@ -208,25 +216,25 @@ endif()
 
 # here we instruct CMake to build JPSvis executable from all of the source files
 ADD_EXECUTABLE( JPSvis ${SAMPLE_SRCS} 
-    ${SAMPLE_MOC_HDRS}
-    ${SAMPLE_UI_HDRS} 
-    ${SAMPLE_RESOURCES_RCS}
-    )
-  
-  # last thing we have to do is to tell CMake what libraries our executable needs,
-  # luckily FIND_PACKAGE prepared QT_LIBRARIES variable for us:
+  ${SAMPLE_MOC_HDRS}
+  ${SAMPLE_UI_HDRS} 
+  ${SAMPLE_RESOURCES_RCS}
+  )
+
+# last thing we have to do is to tell CMake what libraries our executable needs,
+# luckily FIND_PACKAGE prepared QT_LIBRARIES variable for us:
 set(VTK_USE_GUISUPPORT  ON) 
 set(VTK_USE_QT  ON)
 #set(VTK_USE_QVTK_QTOPENGL ON )
 
 # QVTK is for VTK 5.x. For VTK 6, use ${VTK_LIBRARIES} instead
 if(VTK_LIBRARIES)
-	if(${VTK_VERSION} VERSION_LESS "6")
-  		TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK)
-	else()	
-  		TARGET_LINK_LIBRARIES( JPSvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
-	endif()
-else()
-    target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
+  if(${VTK_VERSION} VERSION_LESS "6")
+    TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK)
+  else()	
+    TARGET_LINK_LIBRARIES( JPSvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
+  endif()
+else() # this else is not yet tested
+  target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
 endif()	
-			     
+
