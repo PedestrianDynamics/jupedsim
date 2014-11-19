@@ -238,3 +238,49 @@ else() # this else is not yet tested
   target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
 endif()	
 
+#----------------------------------------------------------------------
+# enable as many warnings as possible
+set(warning_flags "-Wall -Wextra")
+# issue all the warnings demanded by strict iso c and iso c++
+set(warning_flags "${warning_flags} -pedantic")
+#---------------------------- compiler -------------------------------
+# Initialize CXXFLAGS.
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} ${warning_flags}")
+  set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused")
+  #    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
+endif()
+
+#--------------------
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+else()
+  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+message(STATUS "Checking for C++11 compiler - available")
+
+#---------------------
+
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CMAKE_COMPILER_IS_GNUCXX)
+  message( STATUS "Using g++ " ${CMAKE_CXX_COMPILER_VERSION})
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+  message(STATUS "Debug flags: "  ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_DEBUG} )
+else(CMAKE_BUILD_TYPE MATCHES Debug)
+  message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
+endif(CMAKE_BUILD_TYPE MATCHES Debug)
+
+# PGI ++ Flags
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+endif()
