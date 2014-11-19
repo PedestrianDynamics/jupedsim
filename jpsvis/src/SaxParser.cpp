@@ -68,7 +68,8 @@
 
 using namespace std;
 
-OutputHandler* Log;
+OutputHandler* Log=NULL;
+
 
 /**
  * constructor
@@ -558,11 +559,8 @@ void SaxParser::clearPoints()
 bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
 {
 
-    //if(Log)
-    //{
-    delete Log;
+    //    if(Log) delete Log;
     Log = new FileHandler(SystemSettings::getLogfile().toStdString().c_str());
-    //}
 
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;

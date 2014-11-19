@@ -47,16 +47,16 @@ public:
     JPoint(double xyz[3],  const char* col="abc");
     virtual ~JPoint();
 
-    double getX();
-    double getY();
-    double getZ();
-    double distanceTo(JPoint& pt);
-    double angleMadeWith(JPoint &pt);
-    double* centreCoordinatesWith(JPoint &pt);
+    double getX() const;
+    double getY()const;
+    double getZ()const;
+    double distanceTo(JPoint& pt)const;
+    double angleMadeWith(JPoint &pt)const;
+    JPoint centreCoordinatesWith(JPoint &pt) const;
 
     static double distanceBetween(JPoint& pt1, JPoint& pt2);
     static double angleMadeBetween(JPoint& pt1, JPoint& pt2);
-    static double *centreCoordinatesBetween(JPoint& pt1, JPoint& pt2);
+    static JPoint centreCoordinatesBetween(JPoint& pt1, JPoint& pt2);
 
     void setColorRGB(unsigned char r,  unsigned char g, unsigned char b);
     void getColorRGB(unsigned char *rgb);
@@ -72,6 +72,18 @@ public:
     //this is the end point of a door/wall for instance
     void setColorHeightThicknes(double CHT[3]);
     void getColorHeightThicknes(double *CHT);
+
+    // operators
+    /// addition
+    const JPoint operator+(const JPoint& p) const;
+    /// substraction
+    const JPoint operator-(const JPoint& p) const;
+
 };
+
+/// multiplication
+JPoint operator*(const JPoint& p, const double f);
+/// division
+JPoint operator/(const JPoint& p, const double f);
 
 #endif /* POINT_H_ */

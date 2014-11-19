@@ -93,15 +93,15 @@ void JPoint::getXYZ(double*xyz)
 /*
  * return the coordinates
  */
-double JPoint::getX()
+double JPoint::getX() const
 {
     return x;
 }
-double JPoint::getY()
+double JPoint::getY() const
 {
     return y;
 }
-double JPoint::getZ()
+double JPoint::getZ() const
 {
     return z;
 }
@@ -111,7 +111,7 @@ double JPoint::getZ()
  * @return the angle in degree
  * FIXME: why +90??
  */
-double JPoint::angleMadeWith(JPoint& pt)
+double JPoint::angleMadeWith(JPoint& pt) const
 {
     double dx=x-pt.x;
     double dy=y-pt.y;
@@ -128,7 +128,7 @@ double JPoint::angleMadeWith(JPoint& pt)
     return vtkMath::DegreesFromRadians(atan2(dy,dx))+90 ;
 }
 
-double JPoint::distanceTo(JPoint& pt)
+double JPoint::distanceTo(JPoint& pt) const
 {
     double dx=x-pt.x;
     dx*=dx;
@@ -139,24 +139,27 @@ double JPoint::distanceTo(JPoint& pt)
     return sqrt(dx+dy+dz);
 
 }
-double * JPoint::centreCoordinatesWith(JPoint &pt)
+
+JPoint  JPoint::centreCoordinatesWith(JPoint &pt) const
 {
-    double *res= new double[3];
-    res[0]=(x+pt.getX())/2;
-    res[1]=(y+pt.getY())/2;
-    res[2]=(z+pt.getZ())/2;
-    return res;
+
+    //centre[0]=(x+pt.getX())/2;
+    //centre[1]=(y+pt.getY())/2;
+    //centre[2]=(z+pt.getZ())/2;
+    return (*this +pt)*0.5;
 }
 
 double JPoint::distanceBetween(JPoint& pt1, JPoint& pt2)
 {
     return pt1.distanceTo(pt2);
 }
+
 double JPoint::angleMadeBetween(JPoint& pt1, JPoint& pt2)
 {
     return pt1.angleMadeWith(pt2);
 }
-double *JPoint::centreCoordinatesBetween(JPoint& pt1, JPoint& pt2)
+
+JPoint JPoint::centreCoordinatesBetween(JPoint& pt1, JPoint& pt2)
 {
     return pt1.centreCoordinatesWith(pt2);
 }
@@ -190,4 +193,37 @@ void JPoint::getColorHeightThicknes(double *CHT)
     CHT[0]=color;
     CHT[1]=height;
     CHT[2]=thickness;
+}
+
+//  sum
+const JPoint JPoint::operator+(const JPoint& p) const
+{
+     //return Point(_x + p.GetX(), _y + p.GetY());
+     return JPoint(x + p.x, y + p.y, z+p.z);
+}
+
+// sub
+const JPoint JPoint::operator-(const JPoint& p) const
+{
+     // return Point(_x - p.GetX(), _y - p.GetY());
+     return JPoint(x - p.x, y - p.y, z-p.z);
+}
+
+
+// multiplication with scalar
+JPoint operator*(const JPoint& p, double f)
+{
+    return JPoint(p.getX() * f, p.getY() * f, p.getZ() * f);
+}
+
+// divition with scalar
+JPoint operator/(const JPoint& p, double f)
+{
+//     if (f>J_EPS*J_EPS)
+//          return JPoint(p._x / f, p._y / f);
+//     else {
+//          std::cout << "Warning: Point::/operator. dividand "<<f<< " is to small. Set it to 1 instead"<<std::endl;
+//          return JPoint(p._x, p._y);
+//     }
+     return JPoint(p.getX() / f, p.getY() / f, p.getZ()/f);
 }

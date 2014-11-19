@@ -100,7 +100,6 @@ LinePlotter2D::LinePlotter2D()
 
 LinePlotter2D::~LinePlotter2D()
 {
-
     m_lookupTable->Delete();
     assembly->Delete();
     door_points->Delete();
@@ -113,6 +112,11 @@ LinePlotter2D::~LinePlotter2D()
     wall_lineScalars->Delete();
     wall_mapper->Delete();
     wall_actor->Delete();
+    navline_points->Delete();
+    navline_lines->Delete();
+    navline_lineScalars->Delete();
+    navline_mapper->Delete();
+    navline_actor->Delete();
 }
 
 void LinePlotter2D::SetAllLineWidth(int width)
