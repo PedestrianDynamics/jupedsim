@@ -315,130 +315,138 @@ void Analysis::InitializeFiles(const string& trajectoriesFilename)
 
 void Analysis::InitializeVariables(const string& filename)
 {
-		vector<double> xs;
-		vector<double> ys;
-		ifstream  fdata;
-		fdata.open(filename.c_str());
-		if (fdata == NULL)
-		{
-			Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
-			exit(EXIT_FAILURE);
-		}
-		else
-		{
-			string line;
-			while ( getline(fdata,line) )
-			{
-				if(line[0] == '#')
-				{
-					istringstream iss(line);
-					string fps;
-					getline(iss, fps, ':');
-					if(fps=="#framerate")
-					{
-						getline(iss, fps, ':');
-				         _fps=atoi(fps.c_str());
-				          Log->Write("INFO:\tFrame rate fps=%d", _fps);
-					}
-				}
-				else if ( line[0] != '#' && !(line.empty()) )
-				{
-						string id, frm, xc, yc;
-						istringstream iss(line);
-						 getline(iss, id, '\t');
-						 getline(iss, frm, '\t');
-						 getline(iss, xc, '\t');
-						 getline(iss, yc, '\t');
-						 _IdsTXT.push_back(atoi(id.c_str()));
-						 _FramesTXT.push_back(atoi(frm.c_str()));
-						 xs.push_back(atof(xc.c_str()));
-						 ys.push_back(atof(yc.c_str()));
-				}
-			}
-		}
-		fdata.close();
+     vector<double> xs;
+     vector<double> ys;
+     ifstream  fdata;
+     fdata.open(filename.c_str());
+     if (fdata == NULL)
+     {
+          Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
+          exit(EXIT_FAILURE);
+     }
+     else
+     {
+          string line;
+          int lineNr=1;
+          while ( getline(fdata,line) )
+          {
+               //looking for the framerate which is suppposed to be at the second position
+               if(line[0] == '#')
+               {
+                    std::vector<std::string> strs;
+                    boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
 
-		min_ID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
-		min_Frame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
+                    if(strs[0]=="#framerate" && strs.size()==2)
+                    {
+                         _fps= atof(strs[1].c_str());
+                         Log->Write("INFO:\tFrame rate fps=%d", _fps);
+                    }
 
-		//Total number of frames
-		_numFrames = *max_element(_FramesTXT.begin(),_FramesTXT.end()) - min_Frame+1;
+               }
+               else if ( line[0] != '#' && !(line.empty()) )
+               {
 
-		//Total number of agents
-		_maxNumofPed = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - min_ID+1;
-		CreatGlobeVaribles(_maxNumofPed, _numFrames);
+                    std::vector<std::string> strs;
+                    boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
 
-		std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
-		std::vector<int> lastFrameIndex;	 //The last frame index of each pedestrian
-		int prevValue = _IdsTXT[0] - 1;
-		for (size_t i = 0; i < _IdsTXT.size(); i++)
-		{
-			if (prevValue != _IdsTXT[i])
-			{
-				firstFrameIndex.push_back(i);
-				prevValue = _IdsTXT[i];
-			}
-		}
-		for (size_t  i = 1; i < firstFrameIndex.size(); i++)
-		{
-		    lastFrameIndex.push_back(firstFrameIndex[i] - 1);
-		}
-		lastFrameIndex.push_back(_IdsTXT.size() - 1);
-		for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
-		{
-			_firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - min_Frame;
-			_lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - min_Frame;
-		}
+                    if(strs.size() <4)
+                    {
+                         Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
+                         exit(EXIT_FAILURE);
+                    }
 
-		bool IsinMeasurezone[_maxNumofPed];  // Record whether pedestrian i is in measurement area or not
-		for(unsigned int i = 0; i < _IdsTXT.size(); i++)
-		{
-			int ID = _IdsTXT[i] - min_ID;
-			int frm = _FramesTXT[i] - min_Frame;
-			double x = xs[i]*M2CM;
-			double y = ys[i]*M2CM;
-			_xCor[ID][frm] = x;
-			_yCor[ID][frm] = y;
-	        if(_fundamentalTinTout==true)
-	        {
-	             if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID])) {
-	                  _tIn[ID]=frm;
-	                  IsinMeasurezone[ID] = true;
-	             }
-	             if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID]) {
-	                  _tOut[ID]=frm;
-	                  IsinMeasurezone[ID] = false;
-	             }
-	        }
-		}
+                    _IdsTXT.push_back(atoi(strs[0].c_str()));
+                    _FramesTXT.push_back(atoi(strs[1].c_str()));
 
-		//save the data for each frame
-		for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
-		{
-			int id = _IdsTXT[i]-min_ID;
-			int t =_FramesTXT[i]-min_Frame;
-			peds_t[t].push_back(id);
-		}
+                    xs.push_back(atof(strs[2].c_str()));
+                    ys.push_back(atof(strs[3].c_str()));
+               }
+               lineNr++;
+          }
+     }
+     fdata.close();
+
+     min_ID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
+     min_Frame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
+
+     //Total number of frames
+     _numFrames = *max_element(_FramesTXT.begin(),_FramesTXT.end()) - min_Frame+1;
+
+     //Total number of agents
+     _maxNumofPed = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - min_ID+1;
+     CreatGlobeVaribles(_maxNumofPed, _numFrames);
+
+     std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
+     std::vector<int> lastFrameIndex;	 //The last frame index of each pedestrian
+     int prevValue = _IdsTXT[0] - 1;
+     for (size_t i = 0; i < _IdsTXT.size(); i++)
+     {
+          if (prevValue != _IdsTXT[i])
+          {
+               firstFrameIndex.push_back(i);
+               prevValue = _IdsTXT[i];
+          }
+     }
+     for (size_t  i = 1; i < firstFrameIndex.size(); i++)
+     {
+          lastFrameIndex.push_back(firstFrameIndex[i] - 1);
+     }
+     lastFrameIndex.push_back(_IdsTXT.size() - 1);
+     for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
+     {
+          _firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - min_Frame;
+          _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - min_Frame;
+     }
+
+     bool IsinMeasurezone[_maxNumofPed];  // Record whether pedestrian i is in measurement area or not
+     for(unsigned int i = 0; i < _IdsTXT.size(); i++)
+     {
+          int ID = _IdsTXT[i] - min_ID;
+          int frm = _FramesTXT[i] - min_Frame;
+          double x = xs[i]*M2CM;
+          double y = ys[i]*M2CM;
+          _xCor[ID][frm] = x;
+          _yCor[ID][frm] = y;
+          if(_fundamentalTinTout==true)
+          {
+               if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID])) {
+                    _tIn[ID]=frm;
+                    IsinMeasurezone[ID] = true;
+               }
+               if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID]) {
+                    _tOut[ID]=frm;
+                    IsinMeasurezone[ID] = false;
+               }
+          }
+     }
+
+     //save the data for each frame
+     for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
+     {
+          int id = _IdsTXT[i]-min_ID;
+          int t =_FramesTXT[i]-min_Frame;
+          peds_t[t].push_back(id);
+     }
 
 }
 
 // initialize the global variables variables
 void Analysis::InitializeVariables(TiXmlElement* xRootNode)
 {
-	 if( ! xRootNode ) {
-		  Log->Write("ERROR:\tRoot element does not exist");
-		  exit(EXIT_FAILURE);
-	 }
-	 if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
-		  Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-		  exit(EXIT_FAILURE);
-	 }
+     if( ! xRootNode ) {
+          Log->Write("ERROR:\tRoot element does not exist");
+          exit(EXIT_FAILURE);
+     }
+     if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
+          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+          exit(EXIT_FAILURE);
+     }
 
      //counting the number of frames
      int frames = 0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame")) {
-    	 frames++;
+          frames++;
      }
      _numFrames = frames;
      Log->Write("INFO:\tnum Frames = %d",_numFrames);
@@ -470,19 +478,19 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame"))
      {
-         int frm = atoi(xFrame->Attribute("ID"));
-         if(frm < min_Frame)
-         {
-        	 min_Frame = frm;
-         }
-    	 for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
+          int frm = atoi(xFrame->Attribute("ID"));
+          if(frm < min_Frame)
+          {
+               min_Frame = frm;
+          }
+          for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
                     xAgent = xAgent->NextSiblingElement("agent"))
           {
-        	  int id= atoi(xAgent->Attribute("ID"));
-        	  if(id < min_ID)
-        	  {
-        		  min_ID = id;
-        	  }
+               int id= atoi(xAgent->Attribute("ID"));
+               if(id < min_ID)
+               {
+                    min_ID = id;
+               }
           }
      }
      int frameNr=0;
@@ -526,76 +534,76 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
 
 void Analysis::CreatGlobeVaribles(int numPeds, int numFrames)
 {
-	 	 _xCor = new double* [numPeds];
-	     _yCor = new double* [numPeds];
-	     for (int i=0; i<numPeds; i++) {
-	          _xCor[i] = new double [numFrames];
-	          _yCor[i] = new double [numFrames];
-	     }
-	     _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
-	     _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
-	     _tIn = new int[numPeds];				// Record the time of each pedestrian entering measurement area
-	     _tOut = new int[numPeds];				// Record the time of each pedestrian exiting measurement area
+     _xCor = new double* [numPeds];
+     _yCor = new double* [numPeds];
+     for (int i=0; i<numPeds; i++) {
+          _xCor[i] = new double [numFrames];
+          _yCor[i] = new double [numFrames];
+     }
+     _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
+     _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
+     _tIn = new int[numPeds];				// Record the time of each pedestrian entering measurement area
+     _tOut = new int[numPeds];				// Record the time of each pedestrian exiting measurement area
 
 
-	     for(int i = 0; i <numPeds; i++) {
-	          for (int j = 0; j < numFrames; j++) {
-	               _xCor[i][j] = 0;
-	               _yCor[i][j] = 0;
-	          }
-	          _firstFrame[i] = INT_MAX;
-	          _lastFrame[i] = INT_MIN;
-	          _tIn[i] = 0;
-	          _tOut[i] = 0;
-	     }
+     for(int i = 0; i <numPeds; i++) {
+          for (int j = 0; j < numFrames; j++) {
+               _xCor[i][j] = 0;
+               _yCor[i][j] = 0;
+          }
+          _firstFrame[i] = INT_MAX;
+          _lastFrame[i] = INT_MIN;
+          _tIn[i] = 0;
+          _tOut[i] = 0;
+     }
 
-	     DensityPerFrame = new double[numFrames];
-	     for(int i=0; i<numFrames; i++) {
-	          DensityPerFrame[i]=0;
-	     }
-	     PassLine = new bool[numPeds];
-	     for(int i=0; i<numPeds; i++) {
-	          PassLine[i] = false;
-	     }
+     DensityPerFrame = new double[numFrames];
+     for(int i=0; i<numFrames; i++) {
+          DensityPerFrame[i]=0;
+     }
+     PassLine = new bool[numPeds];
+     for(int i=0; i<numPeds; i++) {
+          PassLine[i] = false;
+     }
 }
 
 void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<int> > pdt)
 {
-	std::vector<int> ids=pdt[frame];
-	int PedNum = ids.size();
-    IdInFrame = new int[PedNum];
-    XInFrame = new double[PedNum];
-    YInFrame = new double[PedNum];
-    VInFrame = new double[PedNum];
+     std::vector<int> ids=pdt[frame];
+     int PedNum = ids.size();
+     IdInFrame = new int[PedNum];
+     XInFrame = new double[PedNum];
+     YInFrame = new double[PedNum];
+     VInFrame = new double[PedNum];
 
-    for(int i=0; i<PedNum;i++)
-    {
-    	int id = ids[i];
-    	XInFrame[i] = _xCor[id][frame];
-    	YInFrame[i] = _yCor[id][frame];
-        int Tpast = frame - _deltaF;
-        int Tfuture = frame + _deltaF;
-        VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
-        IdInFrame[i] = id+min_ID;
-        if(_flowVelocity)
-        {
-                bool IspassLine=false;
-                if(frame >_firstFrame[id]&&!PassLine[id])
-                {
-                     IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
-                               _areaForMethod_A->_lineStartY,
-                               _areaForMethod_A->_lineEndX,
-                               _areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
-                               _yCor[id][frame], _xCor[id][frame],
-                               _yCor[id][frame]);
-                }
-                if(IspassLine==true) {
-                     PassLine[id] = true;
-                     ClassicFlow++;
-                     V_deltaT+=VInFrame[i];
-                }
-        }
-    }
+     for(int i=0; i<PedNum;i++)
+     {
+          int id = ids[i];
+          XInFrame[i] = _xCor[id][frame];
+          YInFrame[i] = _yCor[id][frame];
+          int Tpast = frame - _deltaF;
+          int Tfuture = frame + _deltaF;
+          VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
+          IdInFrame[i] = id+min_ID;
+          if(_flowVelocity)
+          {
+               bool IspassLine=false;
+               if(frame >_firstFrame[id]&&!PassLine[id])
+               {
+                    IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+                              _areaForMethod_A->_lineStartY,
+                              _areaForMethod_A->_lineEndX,
+                              _areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
+                              _yCor[id][frame], _xCor[id][frame],
+                              _yCor[id][frame]);
+               }
+               if(IspassLine==true) {
+                    PassLine[id] = true;
+                    ClassicFlow++;
+                    V_deltaT+=VInFrame[i];
+               }
+          }
+     }
 }
 
 int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in the frame
@@ -659,21 +667,21 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 {
      string fullTrajectoriesPathName= path+"/"+filename;
      cout<<"the format of the trajectory is:"<<_trajFormat<<endl;
-    if(_trajFormat == FORMAT_XML_PLAIN) // read traje
-    {
-		 TiXmlDocument docGeo(fullTrajectoriesPathName);
-		 if (!docGeo.LoadFile()) {
-			  Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-			  Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
-			  exit(EXIT_FAILURE);
-		 }
-		 TiXmlElement* xRootNode = docGeo.RootElement();
-		 InitializeVariables(xRootNode);	//initialize some global variables
-    }
-    else if(_trajFormat == FORMAT_PLAIN)
-    {
-    	 InitializeVariables(fullTrajectoriesPathName);
-    }
+     if(_trajFormat == FORMAT_XML_PLAIN) // read traje
+     {
+          TiXmlDocument docGeo(fullTrajectoriesPathName);
+          if (!docGeo.LoadFile()) {
+               Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
+               Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
+               exit(EXIT_FAILURE);
+          }
+          TiXmlElement* xRootNode = docGeo.RootElement();
+          InitializeVariables(xRootNode);	//initialize some global variables
+     }
+     else if(_trajFormat == FORMAT_PLAIN)
+     {
+          InitializeVariables(fullTrajectoriesPathName);
+     }
 
      InitializeFiles(filename);   //initialize the files
      ClassicFlow=0; // the number of pedestrians pass a line in a certain time
@@ -681,7 +689,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      for(int frameNr = 0; frameNr < _numFrames; frameNr++ )
      {
-    	  int frid =  frameNr + min_Frame;
+          int frid =  frameNr + min_Frame;
 
           if(!(frid%100))
           {
@@ -934,7 +942,6 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
           polygon_list v;
           intersection(measureArea, *polygon_iterator, v);
           if(!v.empty()) {
-               //TODO: Check me
                uniquedensity=1.0/(area(*polygon_iterator)*CMtoM*CMtoM);
                uniquevelocity=Velocity[temp];
                uniqueId=Id[temp];
@@ -977,10 +984,10 @@ void Analysis::DistributionOnLine(int *frequency,int fraction, double Line_start
           double x4=pt2_X;
           double y4=pt2_Y;
           double x =((x1 - x2) * (x3 * y4 - x4 * y3) - (x3 - x4) * (x1 * y2 - x2 * y1))
-                            /((x3 - x4) * (y1 - y2) - (x1 - x2) * (y3 - y4));
+                                      /((x3 - x4) * (y1 - y2) - (x1 - x2) * (y3 - y4));
 
           double y =((y1 - y2) * (x3 * y4 - x4 * y3) - (x1 * y2 - x2 * y1) * (y3 - y4))
-                            /((y1 - y2) * (x3 - x4) - (x1 - x2) * (y3 - y4));
+                                      /((y1 - y2) * (x3 - x4) - (x1 - x2) * (y3 - y4));
           int index=(int)floor(Distance(x,y,x1,y1)*fraction/sumdistance);
           frequency[index]++;
      } else if(d1*d2==0) {
@@ -1033,24 +1040,24 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 
 double Analysis::GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea)
 {
-	double area_i=0;
-	int pedsinMeasureArea=0;
-	int temp=0;
+     double area_i=0;
+     int pedsinMeasureArea=0;
+     int temp=0;
 
-	for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
-	{
-		if(within(make<point_2d>(XInFrame[temp], YInFrame[temp]), measureArea))
-		{
-			area_i += (area(*polygon_iterator)*CMtoM*CMtoM);
-			pedsinMeasureArea++;
-		}
-		temp++;
-	}
-	if(area_i==0)
-	{
-		return 0;
-	}
-	return pedsinMeasureArea/area_i;
+     for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end();polygon_iterator++)
+     {
+          if(within(make<point_2d>(XInFrame[temp], YInFrame[temp]), measureArea))
+          {
+               area_i += (area(*polygon_iterator)*CMtoM*CMtoM);
+               pedsinMeasureArea++;
+          }
+          temp++;
+     }
+     if(area_i==0)
+     {
+          return 0;
+     }
+     return pedsinMeasureArea/area_i;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1206,7 +1213,7 @@ void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
 
 void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, double* XInFrame, double* YInFrame,double* VInFrame, const string& filename)
 {
-/* -------TODO-----------------------
+     /* -------TODO-----------------------
 	string dir_path = "./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
 	boost::filesystem::path dir(dir_path.c_str());
 	if((boost::filesystem::create_directory(dir))==NULL)
@@ -1215,7 +1222,7 @@ void Analysis::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
 				exit(0);
 	}
 	//boost::filesystem::create_directories("./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/");
-*/
+      */
 
      string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
 

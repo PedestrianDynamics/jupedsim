@@ -4,8 +4,8 @@
   <geometry file = "geo_UO_180.xml" />
   <!-- trajectories file and format -->
   <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
-  <trajectories format="xml" unit="m">
-    <file name="uo-180-180-180.xml" />
+  <trajectories format="txt" unit="m">
+    <file name="uo-180-180-180_space.txt" />
     <path location="" />
   </trajectories>
   <!-- all files in the directories will be used -->
