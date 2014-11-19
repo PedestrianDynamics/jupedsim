@@ -103,7 +103,7 @@ ThreadVisualisation::ThreadVisualisation(QObject *parent):
     renderer=NULL;
     renderWindow=NULL;
     renderWinInteractor=NULL;
-    runningTime=NULL;
+    runningTime=vtkTextActor::New();;
     framePerSecond=25;
     axis=NULL;
     winTitle="header without room caption";
@@ -123,6 +123,8 @@ ThreadVisualisation::~ThreadVisualisation()
     if(extern_glyphs_pedestrians) extern_glyphs_pedestrians->Delete();
     if(extern_glyphs_pedestrians_actor_2D) extern_glyphs_pedestrians_actor_2D->Delete();
     if(extern_pedestrians_labels) extern_pedestrians_labels->Delete();
+
+    runningTime->Delete();
 
 }
 
@@ -242,7 +244,6 @@ void ThreadVisualisation::run()
     //	initLegend();
 
     //add the running time frame
-    runningTime = vtkTextActor::New();
     runningTime->SetTextScaleModeToViewport();
     //runningTime->SetTextScaleModeToProp();
     //runningTime->SetMinimumSize(10,10);
@@ -369,7 +370,6 @@ void ThreadVisualisation::run()
     renderWindow->Delete();
     renderWinInteractor->Delete();
     _topViewCamera->Delete();
-     runningTime->Delete();
     renderer=NULL;
 
     delete renderingTimer;
@@ -803,7 +803,7 @@ void ThreadVisualisation::setGeometryVisibility3D(bool status)
 
 void ThreadVisualisation::setOnscreenInformationVisibility(bool show)
 {
-    if(runningTime)
+    //if(runningTime)
     runningTime->SetVisibility(show);
 }
 

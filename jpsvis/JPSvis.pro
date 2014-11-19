@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET = TraVisTo
+TARGET = JPSvis
 CONFIG += qt
 CONFIG += static
 CONFIG += c++11
@@ -13,7 +13,6 @@ QT += xml network
 #QMAKE_LFLAGS_RELEASE += -static-libgcc
 
 QMAKE_CXXFLAGS += -std=c++11
-
 QMAKE_CXXFLAGS += -Wno-deprecated -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
@@ -385,7 +384,6 @@ LIBS += -L/usr/lib \
     -lvtkDICOMParser   \
     -lvtkmetaio   \
     -lvtkftgl  \
-    #-lLSDyna \
     -lvtkViews \
     -lvtksys   \
     #-lvtkpng \
@@ -434,7 +432,7 @@ unix_static {
     -ldl \
  }
 
-macx {
+macx{
         INCLUDEPATH += /Users/piccolo/VTK/include/vtk-6.1
         LIBS += -L/Users/piccolo/VTK/lib \
             -lvtkalglib-6.1  \
