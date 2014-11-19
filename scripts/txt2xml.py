@@ -4,7 +4,7 @@
 
 import numpy as np
 import time
-import pandas as pd
+#import pandas as pd
 import os, sys, glob, math
 from matplotlib.pyplot import *
 from scipy import interpolate
@@ -66,8 +66,8 @@ if not files:
 	exit(logging.critical("found no files. exit.."))
 for inputfile in files:
 	outputfile  = os.path.split(inputfile)[0] + "/" + os.path.basename(inputfile).split(".")[0] + ".xml"
-	#data = np.loadtxt(inputfile)
-	data = np.array( pd.read_csv(inputfile, sep="\s+", header=None) )
+	data = np.loadtxt(inputfile)
+	#data = np.array( pd.read_csv(inputfile, sep="\s+", header=None) )
 	if len(data[0,:]) < 4: #experiment data have exactly 5 columns
 		continue
 	logging.info("|----> inputfile=%s"%inputfile)

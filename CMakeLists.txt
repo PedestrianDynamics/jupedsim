@@ -77,8 +77,6 @@ if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
 endif(BUILD_TESTING)
 
-
-
 set(source_files
   Analysis.cpp
   VoronoiDiagram.cpp
