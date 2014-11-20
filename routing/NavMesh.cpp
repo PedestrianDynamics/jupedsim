@@ -2170,7 +2170,6 @@ void NavMesh::WriteStartPositions()
 
      //get the available positions:
 
-     PedDistributor* pDistribution = new PedDistributor();
 
      vector< vector<Point > >  availablePos = vector< vector<Point> >();
 
@@ -2180,7 +2179,7 @@ void NavMesh::WriteStartPositions()
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
                SubRoom* subr = room->GetSubRoom(s);
-               vector<Point > pos = pDistribution->PossiblePositions(subr);
+               vector<Point > pos = PedDistributor::PossiblePositions(*subr);
                freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
           }
           availablePos.push_back(freePosRoom);

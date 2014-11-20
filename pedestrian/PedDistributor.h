@@ -127,12 +127,17 @@ private:
      std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
      std::string _projectFilename; // store the file for later user
      std::map<int, AgentsParameters*> _agentsParameters;
+     void InitDistributor(const ArgumentParser& argsParser);
+     static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
+            const SubRoom& r, double bufx, double bufy, double dy);
+     static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
+            const SubRoom& r, double bufx, double bufy, double dx);
 
 public:
      /**
       * constructor
       */
-     PedDistributor();
+     PedDistributor(const ArgumentParser& argsParser);
 
      /**
       * desctructor
@@ -140,14 +145,11 @@ public:
      virtual ~PedDistributor();
 
      // sonstige Funktionen
-     std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
-                                        SubRoom* r, double bufx, double bufy, double dy) const;
-     std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
-                                        SubRoom* r, double bufx, double bufy, double dx) const;
-     std::vector<Point> PossiblePositions(SubRoom* r) const;
+
+     static std::vector<Point> PossiblePositions(const SubRoom& r);
      void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionSubroom* parameters,Building* building) const;
 
-     void InitDistributor(ArgumentParser* argsParser);
+
      int Distribute(Building* building) const;
 };
 

@@ -70,7 +70,7 @@ private:
     /// building object
     Building* _building;
     ///initial distribution of the pedestrians
-    PedDistributor* _distribution;
+    std::unique_ptr<PedDistributor> _distribution;
     /// door crossing strategy for the pedestrians
     //DirectionStrategy* _direction;
     /// Force model to use
@@ -82,14 +82,14 @@ private:
     ///new: EventManager
     EventManager* _em;
     /// argument parser
-    ArgumentParser* _argsParser;
+    ArgumentParser _argsParser;
     /// profiling flag
     bool _profiling;
     /// architecture flag
     int _hpc;
 
 public:
-    Simulation();
+    Simulation(const ArgumentParser& args);
     virtual ~Simulation();
 
     /**
@@ -100,7 +100,7 @@ public:
     /**
      * Read parameters from the argument parser class.
      */
-    bool InitArgs(ArgumentParser *args);
+    bool InitArgs(const ArgumentParser& args);
 
     /**
      * @return the total simulated/evacuation time

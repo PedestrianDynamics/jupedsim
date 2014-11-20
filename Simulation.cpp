@@ -46,29 +46,27 @@ using namespace std;
 
 OutputHandler* Log;
 
-Simulation::Simulation()
+Simulation::Simulation(const ArgumentParser& args)
 {
      _nPeds = 0;
      _tmax = 0;
      _seed = 8091983;
      _deltaT = 0;
      _building = NULL;
-     _distribution = NULL;
      //_direction = NULL;
      _operationalModel = NULL;
      _solver = NULL;
      _iod = new IODispatcher();
      _fps = 1;
      _em = NULL;
-     _argsParser = NULL;
      _hpc = -1;
      _profiling = false;
+     _argsParser = args;
 }
 
 Simulation::~Simulation()
 {
      delete _building;
-     delete _distribution;
      delete _solver;
      delete _iod;
      delete _em;
@@ -79,13 +77,12 @@ int Simulation::GetPedsNumber() const
      return _nPeds;
 }
 
-bool Simulation::InitArgs(ArgumentParser* args)
+bool Simulation::InitArgs(const ArgumentParser& args)
 {
      char tmp[CLENGTH];
      string s = "Parameter:\n";
 
-     _argsParser = args;
-     switch (args->GetLog())
+     switch (args.GetLog())
      {
      case 0:
           // no log file
@@ -98,7 +95,7 @@ bool Simulation::InitArgs(ArgumentParser* args)
           break;
      case 2: {
           char name[CLENGTH] = "";
-          sprintf(name, "%s.P0.dat", args->GetErrorLogFile().c_str());
+          sprintf(name, "%s.P0.dat", args.GetErrorLogFile().c_str());
           if (Log)
                delete Log;
           Log = new FileHandler(name);
@@ -109,13 +106,13 @@ bool Simulation::InitArgs(ArgumentParser* args)
           return false;
      }
 
-     if (args->GetPort() != -1) {
-          switch (args->GetFileFormat())
+     if (args.GetPort() != -1) {
+          switch (args.GetFileFormat())
           {
           case FORMAT_XML_PLAIN_WITH_MESH:
           case FORMAT_XML_PLAIN: {
-               OutputHandler* travisto = new SocketHandler(args->GetHostname(),
-                         args->GetPort());
+               OutputHandler* travisto = new SocketHandler(args.GetHostname(),
+                         args.GetPort());
                Trajectories* output = new TrajectoriesJPSV06();
                output->SetOutputHandler(travisto);
                _iod->AddIO(output);
@@ -145,12 +142,12 @@ bool Simulation::InitArgs(ArgumentParser* args)
           s.append("\tonline streaming enabled \n");
      }
 
-     if (args->GetTrajectoriesFile().empty() == false) {
-          switch (args->GetFileFormat())
+     if (args.GetTrajectoriesFile().empty() == false) {
+          switch (args.GetFileFormat())
           {
           case FORMAT_XML_PLAIN: {
                OutputHandler* tofile = new FileHandler(
-                         args->GetTrajectoriesFile().c_str());
+                         args.GetTrajectoriesFile().c_str());
                Trajectories* output = new TrajectoriesJPSV05();
                output->SetOutputHandler(tofile);
                _iod->AddIO(output);
@@ -158,7 +155,7 @@ bool Simulation::InitArgs(ArgumentParser* args)
           }
           case FORMAT_PLAIN: {
                OutputHandler* file = new FileHandler(
-                         args->GetTrajectoriesFile().c_str());
+                         args.GetTrajectoriesFile().c_str());
                Trajectories* output = new TrajectoriesFLAT();
                output->SetOutputHandler(file);
                _iod->AddIO(output);
@@ -167,7 +164,7 @@ bool Simulation::InitArgs(ArgumentParser* args)
           case FORMAT_VTK: {
                Log->Write("INFO: \tFormat vtk not yet supported\n");
                OutputHandler* file = new FileHandler(
-                         (args->GetTrajectoriesFile() + ".vtk").c_str());
+                         (args.GetTrajectoriesFile() + ".vtk").c_str());
                Trajectories* output = new TrajectoriesVTK();
                output->SetOutputHandler(file);
                _iod->AddIO(output);
@@ -194,47 +191,45 @@ bool Simulation::InitArgs(ArgumentParser* args)
           }
      }
 
-     _distribution = new PedDistributor();
-     _distribution->InitDistributor(_argsParser);
-     //s.append(_distribution->writeParameter());
+     _distribution = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser));
 
-     _operationalModel = args->GetModel();
+     _operationalModel = args.GetModel();
      s.append(_operationalModel->GetDescription());
 
      // ODE solver which is never used!
-     auto solver = args->GetSolver();
+     auto solver = args.GetSolver();
      sprintf(tmp, "\tODE Solver: %d\n", solver);
      s.append(tmp);
 
-     sprintf(tmp, "\tnCPU: %d\n", args->GetMaxOpenMPThreads());
+     sprintf(tmp, "\tnCPU: %d\n", args.GetMaxOpenMPThreads());
      s.append(tmp);
-     _tmax = args->GetTmax();
+     _tmax = args.GetTmax();
      sprintf(tmp, "\tt_max: %f\n", _tmax);
      s.append(tmp);
-     _deltaT = args->Getdt();
+     _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
      s.append(tmp);
 
-     _fps = args->Getfps();
+     _fps = args.Getfps();
      sprintf(tmp, "\tfps: %f\n", _fps);
      s.append(tmp);
 
      // Route choice
 
-     auto routingEngine = args->GetRoutingEngine();
+     auto routingEngine = args.GetRoutingEngine();
 
 
 
      // IMPORTANT: do not change the order in the following..
      _building = new Building();
      _building->SetRoutingEngine(routingEngine.get());
-     _building->SetProjectFilename(args->GetProjectFile());
-     _building->SetProjectRootDir(args->GetProjectRootDir());
+     _building->SetProjectFilename(args.GetProjectFile());
+     _building->SetProjectRootDir(args.GetProjectRootDir());
 
      if (!_building->LoadGeometry())
           return false;
 
-     if (!_building->LoadRoutingInfo(args->GetProjectFile()))
+     if (!_building->LoadRoutingInfo(args.GetProjectFile()))
           return false;
      //_building->AddSurroundingRoom();
 
@@ -247,9 +242,9 @@ bool Simulation::InitArgs(ArgumentParser* args)
      _nPeds = _distribution->Distribute(_building);
 
      //using linkedcells
-     if (args->GetLinkedCells()) {
+     if (args.GetLinkedCells()) {
           s.append("\tusing Linked-Cells for spatial queries\n");
-          _building->InitGrid(args->GetLinkedCellSize());
+          _building->InitGrid(args.GetLinkedCellSize());
      } else {
           _building->InitGrid(-1);
      }
@@ -272,29 +267,29 @@ bool Simulation::InitArgs(ArgumentParser* args)
      //pBuilding->WriteToErrorLog();
 
      //get the seed
-     _seed = args->GetSeed();
+     _seed = args.GetSeed();
 
      // perform a general check to the .
      if(_building->SanityCheck()==false)
           return false;
 
      //size of the cells/GCFM/Gompertz
-     if (args->GetDistEffMaxPed() > args->GetLinkedCellSize()) {
+     if (args.GetDistEffMaxPed() > args.GetLinkedCellSize()) {
           Log->Write(
                     "ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",
-                    args->GetLinkedCellSize(), args->GetDistEffMaxPed());
+                    args.GetLinkedCellSize(), args.GetDistEffMaxPed());
           return false;
      }
 
      //read the events
      _em = new EventManager(_building);
-     _em->SetProjectFilename(args->GetProjectFile());
-     _em->SetProjectRootDir(args->GetProjectRootDir());
+     _em->SetProjectFilename(args.GetProjectFile());
+     _em->SetProjectRootDir(args.GetProjectRootDir());
      _em->readEventsXml();
      _em->listEvents();
 
      //which hpc-architecture?
-     _hpc = args->GetHPCFlag();
+     _hpc = args.GetHPCFlag();
      //if programming model = ocl create buffers and make the setup
      //if(_hpc==1){
      //((GPU_ocl_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
@@ -371,7 +366,7 @@ int Simulation::RunSimulation()
      //  ((GPU_GCFMModel*) _model)->DeleteBuffers();
 
      //temporary work around since the total number of frame is only available at the end of the simulation.
-     if (_argsParser->GetFileFormat() == FORMAT_XML_BIN) {
+     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN) {
 
           delete _iod;
           _iod = NULL;
@@ -384,7 +379,7 @@ int Simulation::RunSimulation()
           char replace[CLENGTH];
           // open the file and replace the 8th line
           sprintf(replace, "sed -i '9s/.*/ %d /' %s", frameNr / writeInterval,
-                    _argsParser->GetTrajectoriesFile().c_str());
+                    _argsParser.GetTrajectoriesFile().c_str());
           int result = system(replace);
           Log->Write("INFO:\t Updating the framenumber exits with code [%d]",
                     result);

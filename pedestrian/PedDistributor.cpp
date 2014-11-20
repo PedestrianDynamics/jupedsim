@@ -198,11 +198,12 @@ void StartDistributionSubroom::SetSubroomID(int i)
  PedDistributor
  ************************************************************/
 
-PedDistributor::PedDistributor()
+PedDistributor::PedDistributor(const ArgumentParser& argsParser)
 {
      _start_dis = vector<StartDistributionRoom* > ();
      _start_dis_sub = vector<StartDistributionSubroom* > ();
      _agentsParameters=std::map<int, AgentsParameters*> ();
+    this->InitDistributor(argsParser);
 }
 
 
@@ -221,9 +222,9 @@ PedDistributor::~PedDistributor()
      //empty the parameters maps
 }
 
-void PedDistributor::InitDistributor(ArgumentParser* argsParser)
+void PedDistributor::InitDistributor(const ArgumentParser& argsParser)
 {
-     _projectFilename=argsParser->GetProjectFile();
+     _projectFilename=argsParser.GetProjectFile();
      Log->Write("INFO: \tLoading and parsing the persons attributes");
 
      TiXmlDocument doc(_projectFilename);
@@ -294,7 +295,7 @@ void PedDistributor::InitDistributor(ArgumentParser* argsParser)
           dis->SetRouterId(router_id);
           dis->SetHeight(height);
           dis->SetPatience(patience);
-          std::map<int, AgentsParameters*> agentsParameters=argsParser->GetAgentsParameters();
+          std::map<int, AgentsParameters*> agentsParameters=argsParser.GetAgentsParameters();
 
           if(agentsParameters.count(agent_para_id)==0)
           {
@@ -339,7 +340,7 @@ int PedDistributor::Distribute(Building* building) const
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
                SubRoom* subr = room->GetSubRoom(s);
-               allFreePosRoom.push_back(PossiblePositions(subr));
+               allFreePosRoom.push_back(PedDistributor::PossiblePositions(*subr));
           }
           allFreePos.push_back(allFreePosRoom);
      }
@@ -453,7 +454,7 @@ int PedDistributor::Distribute(Building* building) const
 
 
 vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double min_y, double max_y,
-          SubRoom* r, double bufx, double bufy, double dy) const
+          const SubRoom& r, double bufx, double bufy, double dy)
 {
      vector<Point> positions;
      double x = (max_x + min_x)*0.5;
@@ -463,16 +464,16 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
           Point pos = Point(x, y);
           // Abstand zu allen Wänden prüfen
           int k;
-          for (k = 0; k < r->GetNumberOfWalls(); k++) {
-               if (r->GetWall(k).DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
+          for (k = 0; k < r.GetNumberOfWalls(); k++) {
+               if (r.GetWall(k).DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
                     break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
                }
           }
-          if (k == r->GetNumberOfWalls()) {
+          if (k == r.GetNumberOfWalls()) {
                //check all transitions
                bool tooNear=false;
-               for(unsigned int t=0; t<r->GetAllTransitions().size(); t++) {
-                    if(r->GetTransition(t)->DistTo(pos)<J_EPS_GOAL) {
+               for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
+                    if(r.GetTransition(t)->DistTo(pos)<J_EPS_GOAL) {
                          //too close
                          tooNear=true;
                          break;
@@ -480,8 +481,8 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
                }
 
 
-               for(unsigned int c=0; c<r->GetAllCrossings().size(); c++) {
-                    if(r->GetCrossing(c)->DistTo(pos)<J_EPS_GOAL) {
+               for(unsigned int c=0; c<r.GetAllCrossings().size(); c++) {
+                    if(r.GetCrossing(c)->DistTo(pos)<J_EPS_GOAL) {
                          //too close
                          tooNear=true;
                          break;
@@ -496,7 +497,7 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
 }
 
 vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double min_y, double max_y,
-          SubRoom* r, double bufx, double bufy, double dx) const
+          const SubRoom& r, double bufx, double bufy, double dx)
 {
      vector<Point> positions;
      double y = (max_y + min_y)*0.5;
@@ -506,24 +507,24 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
           Point pos = Point(x, y);
           // check distance to wall
           int k;
-          for (k = 0; k < r->GetNumberOfWalls(); k++) {
-               if (r->GetWall(k).DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
+          for (k = 0; k < r.GetNumberOfWalls(); k++) {
+               if (r.GetWall(k).DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
                     break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
                }
           }
-          if (k == r->GetNumberOfWalls()) {
+          if (k == r.GetNumberOfWalls()) {
                //check all transitions
                bool tooNear=false;
-               for(unsigned int t=0; t<r->GetAllTransitions().size(); t++) {
-                    if(r->GetTransition(t)->DistTo(pos)<J_EPS_GOAL) {
+               for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
+                    if(r.GetTransition(t)->DistTo(pos)<J_EPS_GOAL) {
                          //too close
                          tooNear=true;
                          break;
                     }
                }
 
-               for(unsigned int c=0; c<r->GetAllCrossings().size(); c++) {
-                    if(r->GetCrossing(c)->DistTo(pos)<J_EPS_GOAL) {
+               for(unsigned int c=0; c<r.GetAllCrossings().size(); c++) {
+                    if(r.GetCrossing(c)->DistTo(pos)<J_EPS_GOAL) {
                          //too close
                          tooNear=true;
                          break;
@@ -536,8 +537,7 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
      return positions;
 }
 
-//TODO: this can be speeded up by passing position as reference
-vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
+vector<Point> PedDistributor::PossiblePositions(const SubRoom& r)
 {
      double uni = 0.7; // wenn ein Raum in x oder y -Richtung schmaler ist als 0.7 wird in der Mitte verteilt
      double bufx = 0.12;
@@ -554,7 +554,7 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
      double dy = bmax + bufy;
 
      vector<double>::iterator min_x, max_x, min_y, max_y;
-     vector<Point> poly = r->GetPolygon();
+     vector<Point> poly = r.GetPolygon();
      vector<Point> positions;
      vector<double> xs;
      vector<double> ys;
@@ -584,9 +584,9 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
                     bool tooNear=false;
 
                     // check the distance to all Wall
-                    for (int k = 0; k < r->GetNumberOfWalls(); k++) {
-                         const Wall& w = r->GetWall(k);
-                         if (w.DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
+                    for (int k = 0; k < r.GetNumberOfWalls(); k++) {
+                         const Wall& w = r.GetWall(k);
+                         if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
                               tooNear=true;
                               break; // too close
                          }
@@ -594,8 +594,8 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
 
                     //check all transitions
                     if(tooNear==true) continue;
-                    for(unsigned int t=0; t<r->GetAllTransitions().size(); t++) {
-                         if(r->GetTransition(t)->DistTo(pos)<max(bufx, bufy)) {
+                    for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
+                         if(r.GetTransition(t)->DistTo(pos)<max(bufx, bufy)) {
                               //too close
                               tooNear=true;
                               break;
@@ -604,8 +604,8 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
 
                     //  and check all crossings
                     if(tooNear==true) continue;
-                    for(unsigned int c=0; c<r->GetAllCrossings().size(); c++) {
-                         if(r->GetCrossing(c)->DistTo(pos)<max(bufx, bufy)) {
+                    for(unsigned int c=0; c<r.GetAllCrossings().size(); c++) {
+                         if(r.GetCrossing(c)->DistTo(pos)<max(bufx, bufy)) {
                               //too close
                               tooNear=true;
                               break;
@@ -615,12 +615,12 @@ vector<Point> PedDistributor::PossiblePositions(SubRoom* r) const
                     // and finally all opened obstacles
                     if(tooNear==true) continue;
 
-                    const vector<Obstacle*>& obstacles = r->GetAllObstacles();
+                    const vector<Obstacle*>& obstacles = r.GetAllObstacles();
                     for (unsigned int obs = 0; obs < obstacles.size(); ++obs) {
                          Obstacle *obst =obstacles[obs];
                          const vector<Wall>& walls = obst->GetAllWalls();
                          for (unsigned int i = 0; i < walls.size(); i++) {
-                              if (walls[i].DistTo(pos) < max(bufx, bufy) || !r->IsInSubRoom(pos)) {
+                              if (walls[i].DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
                                    tooNear=true;
                                    break; // too close
                               }

@@ -47,8 +47,8 @@ int main(int argc, char **argv)
      // Simulation
      time(&starttime);
 
-     Simulation sim = Simulation();
-     if(sim.InitArgs(args))
+     Simulation sim(*args);
+     if(sim.InitArgs(*args))
      {
           Log->Write("ww");
           Log->Write("INFO: \tStart runSimulation()");

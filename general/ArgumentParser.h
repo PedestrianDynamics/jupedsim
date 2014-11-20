@@ -210,7 +210,7 @@ public:
     const string& GetProjectFile() const;
     const string& GetProjectRootDir() const;
     bool GetProfileFlag();
-    int GetHPCFlag();
+    int GetHPCFlag() const;
 
     vector< pair<int, RoutingStrategy> > GetRoutingStrategy() const;
     const FileFormat& GetFileFormat() const;

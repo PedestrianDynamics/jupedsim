@@ -1364,7 +1364,7 @@ bool ArgumentParser::GetProfileFlag()
     return _profilingFlag;
 }
 
-int ArgumentParser::GetHPCFlag()
+int ArgumentParser::GetHPCFlag() const
 {
     return _hpcFlag;
 }
