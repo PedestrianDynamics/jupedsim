@@ -311,7 +311,28 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             }
         }
 
-    } else if (qName == "timeFirstFrame") {
+    }else if (qName == "hline") {
+        parsingWalls=false;
+        parsingCrossings=true;
+        thickness=15;
+        height=250;
+        color=255;
+        caption="";
+
+        for(int i=0; i<at.length(); i++) {
+            if(at.localName(i)=="thickness") {
+                thickness=at.value(i).toDouble()*FAKTOR;
+            } else if(at.localName(i)=="height") {
+                height=at.value(i).toDouble()*FAKTOR;
+            } else if(at.localName(i)=="color") {
+                color=at.value(i).toDouble();
+            } else if(at.localName(i)=="caption") {
+                caption=at.value(i);
+            }
+        }
+
+    }
+    else if (qName == "timeFirstFrame") {
         unsigned long timeFirstFrame_us=0;
         unsigned long timeFirstFrame_s=0;
 
