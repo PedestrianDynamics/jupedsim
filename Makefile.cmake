@@ -10,7 +10,7 @@ $(DIRS):
 
 
 release:
-	( cd bin/release && cmake -DCMAKE_BUILD_TYPE=release ../.. && $(MAKE) --no-print-directory )
+	( cd bin/release && cmake -DCMAKE_BUILD_TYPE=release ../.. && $(MAKE) --no-print-directory && ctest )
 #	ctags -R  --language-force=c++ *.*
 #	ctags -eR  --language-force=c++ *.*
 

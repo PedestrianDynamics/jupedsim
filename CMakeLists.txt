@@ -35,7 +35,7 @@ message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
 if(NOT BUILD_TESTING)
-  set(BUILD_TESTING OFF) # test units are not generated.
+  set(BUILD_TESTING ON) # test units are generated.
 endif(NOT BUILD_TESTING)
 message( STATUS "BUILD_TESTING: " ${BUILD_TESTING} )
 
@@ -135,8 +135,8 @@ endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   message( STATUS "Set compiler flags (g++)" )
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-unused-local-typedefs")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-local-typedefs")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 message(STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
 message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
