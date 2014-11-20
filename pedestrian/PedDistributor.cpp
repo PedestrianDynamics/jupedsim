@@ -198,12 +198,11 @@ void StartDistributionSubroom::SetSubroomID(int i)
  PedDistributor
  ************************************************************/
 
-PedDistributor::PedDistributor(const ArgumentParser& argsParser)
+PedDistributor::PedDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars)
 {
      _start_dis = vector<StartDistributionRoom* > ();
      _start_dis_sub = vector<StartDistributionSubroom* > ();
-     _agentsParameters=std::map<int, AgentsParameters*> ();
-    this->InitDistributor(argsParser);
+    this->InitDistributor(fileName, agentPars);
 }
 
 
@@ -222,12 +221,11 @@ PedDistributor::~PedDistributor()
      //empty the parameters maps
 }
 
-void PedDistributor::InitDistributor(const ArgumentParser& argsParser)
+void PedDistributor::InitDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars)
 {
-     _projectFilename=argsParser.GetProjectFile();
      Log->Write("INFO: \tLoading and parsing the persons attributes");
 
-     TiXmlDocument doc(_projectFilename);
+     TiXmlDocument doc(fileName);
 
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
@@ -295,15 +293,14 @@ void PedDistributor::InitDistributor(const ArgumentParser& argsParser)
           dis->SetRouterId(router_id);
           dis->SetHeight(height);
           dis->SetPatience(patience);
-          std::map<int, AgentsParameters*> agentsParameters=argsParser.GetAgentsParameters();
 
-          if(agentsParameters.count(agent_para_id)==0)
+          if(agentPars.count(agent_para_id)==0)
           {
               Log->Write("WARNING:\t Please specify which set of agents parameters (agent_parameter_id) to use for the group [%d]!",group_id);
               Log->Write("WARNING:\t Default values are not implemented yet");
               exit(EXIT_FAILURE);
           }
-          dis->SetGroupParameters(agentsParameters[agent_para_id]);
+          dis->SetGroupParameters(agentPars.at(agent_para_id));
 
           if(e->Attribute("start_x") && e->Attribute("start_y")) {
                double startX = xmltof(e->Attribute("start_x"),NAN);
