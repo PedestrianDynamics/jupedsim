@@ -231,7 +231,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
 
      if (!_building->LoadRoutingInfo(args.GetProjectFile()))
           return false;
-     //_building->AddSurroundingRoom();
+     _building->AddSurroundingRoom();
 
      if(!_building->InitGeometry())
           return false; // create the polygons

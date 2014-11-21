@@ -274,7 +274,7 @@ void NavMesh::BuildNavMesh()
      //Finalize();
      FinalizeAlphaShape();
      //WriteToFileTraVisTo("promenade.nav.xml", pNodes[364]); exit(0);
-     //WriteToFileTraVisTo("promenade.nav.xml");
+     WriteToFileTraVisTo("promenade.nav.test.xml");
      //cout<<"groupe:"<<pNodes[365]->pGroup<<endl;
      //cout<<"obst:"<<pNodes[1409]->pObstacles.size()<<endl;
      //DumpObstacle(pNodes[1409]->pObstacles[0]);

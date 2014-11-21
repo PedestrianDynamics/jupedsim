@@ -567,7 +567,7 @@ void ArgumentParser::ParseIniFile(string inifile)
                 xMainNode->FirstChildElement("max_sim_time")->FirstChild()->Value();
         //const char* unit=xMainNode->FirstChildElement("max_sim_time")->Attribute("unit");
         pTmax = atof(tmax);
-        Log->Write("INFO: \t Maxmimal simulation time <%.2f> seconds",pTmax);
+        Log->Write("INFO: \tMaxmimal simulation time <%.2f> seconds",pTmax);
     }
     int max_cpus = 1; 
 #ifdef _OPENMP

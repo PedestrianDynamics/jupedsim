@@ -37,6 +37,7 @@
 #include <vector>
 #include "Router.h"
 #include "../geometry/Building.h"
+#include <bits/random.h>
 
 // forwarded classes
 class Pedestrian;
@@ -49,7 +50,8 @@ extern OutputHandler* Log;
 
 #include <random>
 
-class GlobalRouter: public Router {
+class GlobalRouter: public Router
+{
 
 public:
      /**
@@ -97,6 +99,7 @@ public:
       */
      double GetEdgeCost() const;
 
+
 protected:
 
      void DumpAccessPoints(int p=-1);
@@ -120,44 +123,21 @@ protected:
      SubRoom* GetCommonSubRoom(Crossing* c1, Crossing* c2);
 
      /**
-      * @return true if the element is present in the vector
+      * Generate a navigation mesh based on delauney triangulation
       */
-     template<typename A>
-     bool IsElementInVector(const std::vector<A> &vec, A& el) {
-          typename std::vector<A>::const_iterator it;
-          it = std::find (vec.begin(), vec.end(), el);
-          if(it==vec.end()) {
-               return false;
-          } else {
-               return true;
-          }
-     }
+     void GenerateNavigationMesh();
+
 
      /**
-      * Implementation of a map with a default value.
-      * @return the default value if the element was not found in the map
+      * Triangulate the geometry and generate the navigation lines
       */
-     template <typename K, typename V>
-     V GetWithDef(const  std::map <K,V> & m, const K & key, const V & defval ) {
-          typename std::map<K,V>::const_iterator it = m.find( key );
-          if ( it == m.end() ) {
-               return defval;
-          } else {
-               return it->second;
-          }
-     }
-
-     std::string concatenate(std::string const& name, int i) {
-          std::stringstream s;
-          s << name << i;
-          return s.str();
-     }
+     void TriangulateGeometry();
 
      /**
       *
       * @param ped the pedestrian
       * @param goalID, the goal ID.
-      * @param path where to store the intermediate destination
+      * @param path vector to store the intermediate destination
       */
      void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
 
@@ -185,13 +165,38 @@ private:
 
      /**
       * Each router is responsible of getting the correct filename
+      * and doing other initializations
       */
-     virtual std::string GetRoutingInfoFile() const;
+     virtual std::string GetRoutingInfoFile();
+
+     /**
+      * @return true if the supplied line is a wall.
+      */
+     bool IsWall(const Line& line) const;
+
+     /**
+      * @return true if the supplied line is a Crossing.
+      */
+     bool IsCrossing(const Line& line) const;
+
+     /**
+      * @return true if the supplied line is a Transition.
+      */
+     bool IsTransition(const Line& line) const;
+
+     /**
+      * @return true if the supplied line is a navigation line.
+      */
+     bool IsHline(const Line& line) const;
 
 private:
      int **_pathsMatrix;
      double **_distMatrix;
      double _edgeCost;
+     //if false, the router will only return the exits and not the navigations line created through the mesh or inserted
+     //via the routing file. The mesh will only be used for computing the distance.
+     bool _useMeshForLocalNavigation=true;
+     bool _generateNavigationMesh=false;
      std::vector< int > _tmpPedPath;
      std::map<int,int> _map_id_to_index;
      std::map<int,int> _map_index_to_id;

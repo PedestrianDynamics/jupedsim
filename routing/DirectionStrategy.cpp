@@ -173,7 +173,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
           const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
           for (unsigned int i = 0; i < owalls.size(); i++) {
                dist = tmpDirection.GetIntersectionDistance(owalls[i]);
-               printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
+               //printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
                if (dist < minDist) {
                     inear = i;
                     minDist = dist;

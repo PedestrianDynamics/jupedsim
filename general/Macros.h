@@ -32,8 +32,11 @@
 
 #include <cstdlib>
 #include <vector>
+#include <map>
 #include <string.h>
 #include <algorithm>
+#include <sstream>
+
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -152,16 +155,39 @@ inline char xmltoc(const char * t,const char v='\0')
      return v;
 }
 
+/**
+ * @return true if the element is present in the vector
+ */
 template<typename A>
-     bool IsElementInVector(const std::vector<A> &vec, A& el) {
-          typename std::vector<A>::const_iterator it;
-          it = std::find (vec.begin(), vec.end(), el);
-          if(it==vec.end()) {
-               return false;
-          } else {
-               return true;
-          }
+inline bool IsElementInVector(const std::vector<A> &vec, A& el) {
+     typename std::vector<A>::const_iterator it;
+     it = std::find (vec.begin(), vec.end(), el);
+     if(it==vec.end()) {
+          return false;
+     } else {
+          return true;
      }
+}
+
+/**
+ * Implementation of a map with a default value.
+ * @return the default value if the element was not found in the map
+ */
+template <typename K, typename V>
+inline V GetWithDef(const  std::map <K,V> & m, const K & key, const V & defval ) {
+     typename std::map<K,V>::const_iterator it = m.find( key );
+     if ( it == m.end() ) {
+          return defval;
+     } else {
+          return it->second;
+     }
+}
+
+inline std::string concatenate(std::string const& name, int i) {
+     std::stringstream s;
+     s << name << i;
+     return s.str();
+}
 
 //another useful macro
 //#define UNUSED(expr) (void)(expr)

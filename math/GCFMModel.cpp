@@ -109,8 +109,6 @@ bool GCFMModel::Init (Building* building) const
 void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
 {
      double delta = 0.5;
-     //double h = tip1 - time;
-     //double h=deltaT;
 
      // collect all pedestrians in the simulation.
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
@@ -152,7 +150,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                     // remove the pedestrian and abort
                     building->DeletePedestrian(ped);
                     Log->Write("\tERROR: one ped was removed due to high velocity");
-                    exit(EXIT_FAILURE);
+                    //exit(EXIT_FAILURE);
                }
 
                Point F_rep;

@@ -135,6 +135,11 @@ public:
       */
      std::string Write();
 
+     /**
+      * @return true if the polygon is clockwise oriented
+      */
+     bool IsClockwise() const;
+
 private:
      int WhichQuad(const Point& vertex, const Point& hitPos) const;
 

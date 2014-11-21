@@ -514,6 +514,15 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      buffer << t.rdbuf();
      embed_geometry=buffer.str();
      Write(embed_geometry);
+
+     //write the hlines
+
+     // write the goals
+//     for (map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
+//               itr != building->GetAllGoals().end(); ++itr) {
+//          geometry.append(itr->second->Write());
+//     }
+
      //
      //
      //     //collecting the hlines
@@ -667,14 +676,13 @@ void TrajectoriesJPSV05::WriteGeometry(Building* building)
      embed_geometry.append(file_location);
      //embed_geometry.append("\t</geometry>\n");
 
-     const map<int, Hline*>& hlines=building->GetAllHlines();
-     if(hlines.size()>0){
-          //embed_geometry.append("\t<geometry>\n");
-          for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
-          {
-               embed_geometry.append(it->second->WriteElement());
-          }
-          //embed_geometry.append("\t</geometry>\n");
+     for (auto hline: building->GetAllHlines())
+     {
+          embed_geometry.append(hline.second->WriteElement());
+     }
+
+     for (auto goal: building->GetAllGoals()) {
+          embed_geometry.append(goal.second->Write());
      }
 
      //write the grid

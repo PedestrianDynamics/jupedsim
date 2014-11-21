@@ -306,12 +306,15 @@ bool Line::operator==(const Line& l) const
 }
 
 /* Zwei Linien sind ungleich, wenn ihre beiden Punkte
- * ungleich sind
+ * ungleich sind.
+ * TODO: check this
  * */
 bool Line::operator!=(const Line& l) const
 {
-     return ((_point1 != l.GetPoint1() && _point2 != l.GetPoint2()) &&
-             (_point2 != l.GetPoint1() && _point1 != l.GetPoint2()));
+     return (! this->operator ==(l) );
+
+     //return ((_point1 != l.GetPoint1() && _point2 != l.GetPoint2()) &&
+     //        (_point2 != l.GetPoint1() && _point1 != l.GetPoint2()));
 }
 
 double Line::Length() const

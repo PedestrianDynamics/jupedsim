@@ -4,11 +4,12 @@ Release of JuPedSim v0.6
 *Introduction*
 
 *Bugs*
-- Visibility of pedestrians
+- Visibility of pedestrians (solved use triangulation)
 
 *New features*
 - Events: Anke
 - Cognitive Map: David
 - New validation tests
 - New software design? (Oliver)
+- New option <navigation_mesh method="triangulation" use_for_local_planning="true"/> for the routing
 
