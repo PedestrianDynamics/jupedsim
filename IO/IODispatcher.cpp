@@ -128,14 +128,14 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed      )
 {
 
-     nPeds = building->GetNumberOfPedestrians();
+     nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
      sprintf(agents, "\t<header version = \"%s\">\n", JPS_VERSION);
      tmp.append(agents);
-     sprintf(agents, "\t\t<agents>%d</agents>\n", nPeds);
+     sprintf(agents, "\t\t<agents>%ld</agents>\n", nPeds);
      tmp.append(agents);
      sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
      tmp.append(agents);
@@ -460,14 +460,14 @@ void TrajectoriesVTK::WriteFooter()
 
 void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds = building->GetNumberOfPedestrians();
+     nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
      sprintf(agents, "\t<header version = \"0.6\">\n");
      tmp.append(agents);
-     sprintf(agents, "\t\t<agents>%d</agents>\n", nPeds);
+     sprintf(agents, "\t\t<agents>%ld</agents>\n", nPeds);
      tmp.append(agents);
      sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
      tmp.append(agents);
@@ -646,13 +646,13 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds = building->GetNumberOfPedestrians();
+     nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
      sprintf(agents, "\t<header version = \"0.5.1\">\n");
      tmp.append(agents);
-     sprintf(agents, "\t\t<agents>%d</agents>\n", nPeds);
+     sprintf(agents, "\t\t<agents>%ld</agents>\n", nPeds);
      tmp.append(agents);
      sprintf(agents, "\t\t<seed>%d</seed>\n", seed);
      tmp.append(agents);

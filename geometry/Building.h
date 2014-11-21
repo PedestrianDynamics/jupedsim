@@ -155,8 +155,6 @@ public:
      //TOD0: rename later to GetGoal
      Goal* GetFinalGoal(int id);
 
-     int GetNumberOfPedestrians() const;
-
      /**
       * @return the linked-cell grid used for spatial query
       */

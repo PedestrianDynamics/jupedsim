@@ -1225,11 +1225,6 @@ Pedestrian* Building::GetPedestrian(int pedID) const
      return NULL;
 }
 
-int Building::GetNumberOfPedestrians() const
-{
-     return _allPedestians.size();
-}
-
 Transition* Building::GetTransitionByUID(int uid) const
 {
      //eventually
