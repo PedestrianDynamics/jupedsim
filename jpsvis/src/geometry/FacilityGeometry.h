@@ -106,6 +106,9 @@ public:
     void addFloor(double x1, double y1, double x2, double y2, double z=0);
     void addFloor(vtkPolyData* polygonPolyData);
 
+    ///draw obstacles
+    void addObstacles(vtkPolyData* polygonPolyData);
+
     /// draw other kinds of objects
     void addObjectSphere(double center[3], double radius, double couleur=1);
     void addObjectCone(double center[3], double height, double radius, double couleur=2);
@@ -117,6 +120,7 @@ public:
     void changeExitsColor(double* color);
     void changeNavLinesColor(double* color);
     void changeFloorColor(double* color);
+    void changeObstaclesColor(double* color);
 
     void set2D(bool status);
     void set3D(bool status);
@@ -163,6 +167,7 @@ private:
     vtkAssembly* assembly3D;
 
     vtkActor* floorActor;
+    vtkActor* obstaclesActor;
 
     // other parts
     vtkAssembly* assemblyCaptions;

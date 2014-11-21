@@ -80,6 +80,7 @@ FacilityGeometry::FacilityGeometry()
     assembly3D = vtkAssembly::New();
 
     floorActor = vtkActor::New();
+    obstaclesActor = vtkActor::New();
 
     captions=vtkActor2DCollection::New();
     linesPlotter2D = new LinePlotter2D();
@@ -122,6 +123,7 @@ FacilityGeometry::~FacilityGeometry()
     assemblyDoors3D->Delete();
     assembly3D->Delete();
     floorActor->Delete();
+    obstaclesActor->Delete();
 
     delete linesPlotter2D;
 }
@@ -579,6 +581,28 @@ void FacilityGeometry::addFloor(vtkPolyData* polygonPolyData )
     assembly3D->AddPart(floorActor);
 }
 
+void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
+{
+    //triagulate everything
+    // Create a mapper and actor
+    VTK_CREATE(vtkTriangleFilter,filter);
+    VTK_CREATE(vtkPolyDataMapper,mapper);
+
+#if VTK_MAJOR_VERSION <= 5
+    filter->SetInput(polygonPolyData);
+    mapper->SetInput(filter->GetOutput());
+#else
+    filter->SetInputData(polygonPolyData);
+    mapper->SetInputConnection(filter->GetOutputPort());
+#endif
+
+    obstaclesActor->SetMapper(mapper);
+    obstaclesActor->GetProperty()->SetColor(0.4,0.4,0.4);
+    obstaclesActor->GetProperty()->SetOpacity(0.5);
+
+    assembly2D->AddPart(obstaclesActor);
+    assembly3D->AddPart(obstaclesActor);
+}
 
 void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, double z)
 {
@@ -768,6 +792,11 @@ void FacilityGeometry::changeNavLinesColor(double *color)
 void FacilityGeometry::changeFloorColor(double *color)
 {
     floorActor->GetProperty()->SetColor(color);
+}
+
+void FacilityGeometry::changeObstaclesColor(double *color)
+{
+    obstaclesActor->GetProperty()->SetColor(color);
 }
 
 void FacilityGeometry::set2D(bool status)

@@ -591,11 +591,15 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
     if(!building->InitGeometry())
         return false; // create the polygons
 
-    int currentID=0;
+    int currentFloorPolyID=0;
+    int currentObstPolyID=0;
+
     // Setup the points
-    VTK_CREATE(vtkPoints,points);
+    VTK_CREATE(vtkPoints,floor_points);
+    VTK_CREATE(vtkPoints,obstacles_points);
     // Add the polygon to a list of polygons
-    VTK_CREATE(vtkCellArray,polygons);
+    VTK_CREATE(vtkCellArray,floor_polygons);
+    VTK_CREATE(vtkCellArray,obstacles_polygons);
 
     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
         Room* r = building->GetRoom(i);
@@ -605,7 +609,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
             SubRoom* sub = r->GetSubRoom(k);
 
             vector<Point> poly = sub->GetPolygon();
-
             if(sub->IsClockwise()==true) {
                 std::reverse(poly.begin(),poly.end());
             }
@@ -615,10 +618,10 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
             polygon->GetPointIds()->SetNumberOfIds(poly.size());
 
             for (unsigned int s=0; s<poly.size(); s++) {
-                points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
-                polygon->GetPointIds()->SetId(s, currentID++);
+                floor_points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
+                polygon->GetPointIds()->SetId(s, currentFloorPolyID++);
             }
-            polygons->InsertNextCell(polygon);
+            floor_polygons->InsertNextCell(polygon);
 
             //plot the walls only for not stairs
             const vector<Wall>& walls= sub->GetAllWalls();
@@ -643,13 +646,12 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
             geometry->addObjectLabel(pos,pos,caption,captionsColor);
 
             //plot the obstacles
-            const vector<Obstacle*>& obstacles = sub->GetAllObstacles();
-            for( unsigned int j=0; j<obstacles.size(); j++) {
-                Obstacle* obst= obstacles[j];
-                const vector<Wall>& walls= obst->GetAllWalls();
-                for(unsigned int w=0; w<walls.size(); w++) {
-                    Point p1 = walls[w].GetPoint1();
-                    Point p2 = walls[w].GetPoint2();
+            for(auto obst:sub->GetAllObstacles())
+            {
+                for(auto wall: obst->GetAllWalls())
+                {
+                    Point p1 = wall.GetPoint1();
+                    Point p2 = wall.GetPoint2();
                     double z1= sub->GetElevation(p1);
                     double z2= sub->GetElevation(p2);
                     geometry->addWall(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
@@ -659,22 +661,38 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
                 double z= sub->GetElevation(p);
                 double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};
                 geometry->addObjectLabel(pos,pos,obst->GetCaption(),captionsColor);
+
+                //add a special texture to the obstacles
+                auto poly = obst->GetPolygon();
+                //if(obst->IsClockwise()==true) {
+                //  std::reverse(poly.begin(),poly.end());
+                //}
+
+                // Create the polygon
+                VTK_CREATE(vtkPolygon,polygon);
+                polygon->GetPointIds()->SetNumberOfIds(poly.size());
+
+                for (unsigned int s=0; s<poly.size(); s++) {
+                    obstacles_points->InsertNextPoint(poly[s]._x*FAKTOR,poly[s]._y*FAKTOR,sub->GetElevation(poly[s])*FAKTOR);
+                    polygon->GetPointIds()->SetId(s, currentObstPolyID++);
+                }
+                obstacles_polygons->InsertNextCell(polygon);
             }
         }
     }
 
     // Create a PolyData to represent the floor
-    VTK_CREATE(vtkPolyData, polygonPolyData);
-    polygonPolyData->SetPoints(points);
-    polygonPolyData->SetPolys(polygons);
-    geometry->addFloor(polygonPolyData);
+    VTK_CREATE(vtkPolyData, floorPolygonPolyData);
+    floorPolygonPolyData->SetPoints(floor_points);
+    floorPolygonPolyData->SetPolys(floor_polygons);
+    geometry->addFloor(floorPolygonPolyData);
 
     // Create a PolyData to represen the obstacles
     //TODO:
-    //VTK_CREATE(vtkPolyData, polygonPolyData);
-    //polygonPolyData->SetPoints(points);
-    //polygonPolyData->SetPolys(polygons);
-    //geometry->addFloor(polygonPolyData);
+    VTK_CREATE(vtkPolyData, obstPolygonPolyData);
+    obstPolygonPolyData->SetPoints(obstacles_points);
+    obstPolygonPolyData->SetPolys(obstacles_polygons);
+    geometry->addObstacles(obstPolygonPolyData);
 
 
     // add the crossings
