@@ -84,7 +84,7 @@ QString SystemSettings::filesPrefix="";
 QString SystemSettings::logfile="log.txt";
 
 //the log file is writting by a different module
-extern OutputHandler* Log;
+OutputHandler* Log=NULL;
 
 
 SystemSettings::SystemSettings() {}
@@ -382,6 +382,7 @@ void SystemSettings::CreateLogfile()
     }
 
     logfile = outputDir+"log_"+QDateTime::currentDateTime().toString("yyMMdd_hh_mm_").append(SystemSettings::getFilenamePrefix()).append(".txt");
+    Log = new FileHandler(logfile.toStdString().c_str());
 }
 
 QString &SystemSettings::getLogfile()

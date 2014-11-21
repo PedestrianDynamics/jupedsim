@@ -359,7 +359,7 @@ void ThreadVisualisation::run()
 
 
     //emit signalStatusMessage("Idle");
-    emit signal_controlSequences("CONTROL_RESET");
+    //emit signal_controlSequences("CONTROL_RESET");
 
 
     //clear some stuffs

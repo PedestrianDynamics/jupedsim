@@ -307,7 +307,6 @@ void MainWindow::slotStartPlaying()
     // the thread was shutdown from the reset option
     extern_shutdown_visual_thread = false;
 
-
     if (!isPlaying) {
         statusBar()->showMessage(QString::fromUtf8("waiting for data"));
         //only start the visualisation thread if in offline modus
@@ -367,7 +366,6 @@ void MainWindow::slotStartPlaying()
 
     //no matter what, the stop button should be enabled
     ui.BtStop->setEnabled(true);
-
 }
 
 void MainWindow::slotStopPlaying()
@@ -959,7 +957,6 @@ void MainWindow::slotControlSequence(const char * sex)
 
 void MainWindow::resetGraphicalElements()
 {
-
     //restore play button
     QIcon icon1;
     icon1.addPixmap(QPixmap(
@@ -994,7 +991,7 @@ void MainWindow::resetGraphicalElements()
     ui.action3_D->setEnabled(true);
     ui.action2_D->setEnabled(true);
 
-    labelRecording->setText("rec: OFF");
+    labelRecording->setText("rec: off");
     statusBar()->showMessage(tr("select a File"));
 
     //resetting the start/stop recording action

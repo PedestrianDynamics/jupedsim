@@ -68,9 +68,6 @@
 
 using namespace std;
 
-OutputHandler* Log=NULL;
-
-
 /**
  * constructor
  *
@@ -579,10 +576,6 @@ void SaxParser::clearPoints()
 /// provided for convenience and will be removed in the next version
 bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
 {
-
-    //    if(Log) delete Log;
-    Log = new FileHandler(SystemSettings::getLogfile().toStdString().c_str());
-
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
@@ -628,7 +621,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
             polygons->InsertNextCell(polygon);
 
             //plot the walls only for not stairs
-
             const vector<Wall>& walls= sub->GetAllWalls();
             for(unsigned int w=0; w<walls.size(); w++) {
                 Point p1 = walls[w].GetPoint1();
@@ -676,6 +668,13 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
     polygonPolyData->SetPoints(points);
     polygonPolyData->SetPolys(polygons);
     geometry->addFloor(polygonPolyData);
+
+    // Create a PolyData to represen the obstacles
+    //TODO:
+    //VTK_CREATE(vtkPolyData, polygonPolyData);
+    //polygonPolyData->SetPoints(points);
+    //polygonPolyData->SetPolys(polygons);
+    //geometry->addFloor(polygonPolyData);
 
 
     // add the crossings
