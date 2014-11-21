@@ -319,7 +319,7 @@ void Analysis::InitializeVariables(const string& filename)
      vector<double> ys;
      ifstream  fdata;
      fdata.open(filename.c_str());
-     if (fdata == NULL)
+     if (fdata.is_open() == false)
      {
           Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
           exit(EXIT_FAILURE);

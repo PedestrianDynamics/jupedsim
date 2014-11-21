@@ -27,9 +27,14 @@
  *
  **/
 
-using namespace std;
 
+
+
+#include <iostream>
 #include "VoronoiDiagram.h"
+
+
+using namespace std;
 
 VoronoiDiagram::VoronoiDiagram()
 {

@@ -1,6 +1,7 @@
-# -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
-# -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
-# -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
+# some options
+# -DCMAKE_CXX_COMPILER=clang++   -DCMAKE_C_COMPILER:STRING=clang
+# -DCMAKE_BUILD_TYPE=Debug (default Release)
+# -DCMAKE_VERBOSE_MAKEFILE=ON (default OFF)
 # -DBUILD_TESTING=ON (default OFF)
 
 cmake_minimum_required(VERSION 2.8)
@@ -127,11 +128,26 @@ set (  header_files
   )
 
 
+#--------------------
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  message(STATUS "Checking for C++11 compiler - available")
+elseif(COMPILER_SUPPORTS_CXX0X)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  message(STATUS "Checking for C++0x compiler - available")
+else()
+  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no c++11 support. Please use a different C++ compiler.")
+endif()
+#---------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  message(STATUS "Using CLANG++" )
+  message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-
-
+if(CMAKE_COMPILER_IS_GNUCXX)
+  message( STATUS "Using g++ " ${CMAKE_CXX_COMPILER_VERSION})
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
   message( STATUS "Set compiler flags (g++)" )
@@ -148,18 +164,6 @@ if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
   set(CMAKE_CXX_LDFLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
   message(STATUS "Debug flags for coverage: " ${CMAKE_CXX_FLAGS_DEBUG} )
 endif(CMAKE_COMPILER_IS_GNUCXX  AND CMAKE_BUILD_TYPE MATCHES Debug)
-
-
-if((CMAKE_COMPILER_IS_GNUCXX AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.6) OR
-    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1))
-  message(STATUS "Checking for C++11 compiler - available")
-else()
-  message(STATUS "Checking for C++11 compiler - unavailable")
-endif()
-# c++-11 flags
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-endif()
 
 
 set(Boost_INCLUDE_DIR ${CMAKE_SOURCE_DIR})
@@ -222,33 +226,5 @@ if(BUILD_TESTING)
        add_test(NAME ${test} COMMAND ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
-    # set (test_parameters "${CMAKE_SOURCE_DIR}")
-    # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
-
-
-# add_library ( report ${source_files} )
-# #----------------------------- ADD TESTS HERE --------------------------
-# add_executable(
-# 	testGetFilename
-# 	Utest/testGetFilename.cpp
-# )
-# target_link_libraries (testGetFilename report)
-
-
-# add_executable(
-# 	testGetBasename
-# 	Utest/testGetBasename.cpp
-# )
-# target_link_libraries (testGetBasename report)
-
-# # todo: make list of tests and iterate over 
-# # add_executable(testSignPos math/Mathematics.cpp Utest/testSign.cpp)
-# # #----------------- append to this list more tests ... but first add_executable() ---------------
-# set (tests testGetFilename testGetBasename)  #list of tests
-# # #--------------------------------------------------------------------
-# foreach (test ${tests})
-#   add_test(NAME ${test} COMMAND ${test})
-# endforeach(test)
-
