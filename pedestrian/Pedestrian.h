@@ -48,20 +48,28 @@ class Router;
 class Pedestrian {
 private:
 
-     /// starting with 1
-     int _id;
+     //generic parameters, independent from models
+     int _id; //starting with 1
+     int _exitIndex; // current exit
+     int _group;
+     int _desiredFinalDestination;
      double _height;
      double _age;
+     double _premovement = 0;
+     std::string _gender;
+
+     //gcfm specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
      double _deltaT; // step size
-     std::string _gender;
+     JEllipse _ellipse;// the shape of this pedestrian
 
+     //location parameters
      std::string _roomCaption;
      int _roomID;
      int _subRoomID;
-     int _exitIndex; // current exit
-     int _group;
+     int _oldRoomID;
+     int _oldSubRoomID;
 
 
      NavLine* _navLine; // current exit line
@@ -79,9 +87,7 @@ private:
       */
      std::map<int, NavLineState> _knownDoors;
 
-
      //routing parameters
-
      /// new orientation after 10 seconds
      double _reroutingThreshold;
      /// a new orientation starts after this time
@@ -97,11 +103,7 @@ private:
      /// store the last velocities
      std::queue <Point> _lastVelocites;
 
-     int _desiredFinalDestination;
-     int _oldRoomID;
-     int _oldSubRoomID;
      int _newOrientationDelay; //2 seconds, in steps
-
 
      /// necessary for smooth turning at sharp bend
      int _updateRate;
@@ -120,9 +122,6 @@ private:
      Router* _router;
      /// a pointer to the complete building
      Building * _building;
-     /// the shape of this pedestrian
-     JEllipse _ellipse;
-
 
 public:
      // Konstruktoren
@@ -143,7 +142,7 @@ public:
 
 
      // Eigenschaften der Ellipse
-     void SetPos(const Point& pos); // setzt x und y-Koordinaten
+     void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
      void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
      void SetV0Norm(double v0);
@@ -178,7 +177,6 @@ public:
       */
      double GetV0Norm() const;
 
-
      ///get axis in the walking direction
      double GetLargerAxis() const;
      ///get axis in the shoulder direction = orthogonal to the walking direction
@@ -194,8 +192,6 @@ public:
      std::map<int, NavLineState> * GetKnownDoors();
      int DoorKnowledgeCount() const;
 
-
-
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();
@@ -204,13 +200,8 @@ public:
      double GetDisTanceToPreviousTarget() const;
 
      bool GetNewEventFlag();
-
-
      void SetNewEventFlag(bool flag);
-
-
      bool ChangedSubRoom();
-
      void RecordActualPosition();
      double GetDistanceSinceLastRecord();
 
@@ -290,7 +281,6 @@ public:
       */
      void SetSpotlight(bool spotlight);
 
-
      /**
       * Set/Get the spotlight value. If true,
       * this pedestrians will be coloured and all other grey out.
@@ -298,6 +288,15 @@ public:
       */
      bool GetSpotlight();
 
+     /***
+      * Set/Get the time after which this pedestrian will start taking actions.
+      */
+     void SetPremovementTime(double time);
+
+     /***
+      * Set/Get the time after which this pedestrian will start taking actions.
+      */
+     double GetPremovementTime();
 
      void ResetTimeInJam();
      void UpdateTimeInJam();
@@ -324,10 +323,10 @@ public:
       */
      double GetRecordingTime() const;
 
-    /**
-     * @return the average velocity over the recording period
-     */
-    double GetMeanVelOverRecTime() const;
+     /**
+      * @return the average velocity over the recording period
+      */
+     double GetMeanVelOverRecTime() const;
 
      double GetAge() const;
      void SetAge(double age);

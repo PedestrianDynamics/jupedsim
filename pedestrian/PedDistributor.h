@@ -50,10 +50,12 @@ private:
      int _routerID;
      int _routeID;
      //demographic parameters
-     int _age;
+     //TODO: should also follow a distribution, see _premovement
      std::string _gender;
+     int _age;
      int _height;
      double _patience;
+
      //force model parameters
      AgentsParameters* _groupParameters;
 
@@ -68,13 +70,16 @@ private:
      double _yMin;
      double _yMax;
 
+     //pre movement time distribution
+     std::normal_distribution<double> _premovementTime;
+     std::default_random_engine _generator;
+
 
 public:
-    StartDistributionRoom();
+    StartDistributionRoom(int seed);
     virtual ~StartDistributionRoom();
 
     int GetAgentsNumber() const;
-
     void SetRoomID(int id);
     void SetAgentsNumber(int N);
     int GetAge() const;
@@ -102,6 +107,8 @@ public:
     void Setbounds(double bounds[4]);
     AgentsParameters* GetGroupParameters();
     void SetGroupParameters(AgentsParameters* groupParameters);
+    void InitPremovementTime(double mean, double stv);
+    double GetPremovementTime();
 };
 
 //TODO merge the two classes and set the _subRoomID=-1
@@ -110,7 +117,7 @@ private:
      int _subroomID;
 
 public:
-     StartDistributionSubroom();
+     StartDistributionSubroom(unsigned int seed);
      virtual ~StartDistributionSubroom();
 
      int GetSubroomID() const;
@@ -127,7 +134,7 @@ private:
      std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
      //std::string _projectFilename; // store the file for later user
      //std::map<int, AgentsParameters*> _agentsParameters;
-     void InitDistributor(const string&, const std::map<int, AgentsParameters*>&);
+     void InitDistributor(const string&, const std::map<int, AgentsParameters*>&, unsigned int);
      static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
             const SubRoom& r, double bufx, double bufy, double dy);
      static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
@@ -137,7 +144,7 @@ public:
      /**
       * constructor
       */
-     PedDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars);
+     PedDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed);
 
      /**
       * desctructor

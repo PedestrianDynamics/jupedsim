@@ -40,10 +40,6 @@ using namespace std;
 double Pedestrian::_globalTime = 0.0;
 bool Pedestrian::_enableSpotlight = false;
 
-
-
-
-
 Pedestrian::Pedestrian()
 {
      _roomID = -1;
@@ -77,9 +73,7 @@ Pedestrian::Pedestrian()
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
      _recordingTime = 5; //seconds
-
      _knownDoors = map<int, NavLineState>();
-
      _height = 160;
      _age = 30;
      _gender = "male";
@@ -141,15 +135,17 @@ void Pedestrian::SetExitLine(const NavLine* l)
      _navLine->SetPoint2(l->GetPoint2());
 }
 
-void Pedestrian::SetPos(const Point& pos)
+void Pedestrian::SetPos(const Point& pos, bool initial)
 {
-     _ellipse.SetCenter(pos);
-
-     //save the last values for the records
-     _lastPositions.push(pos);
-     unsigned int max_size = _recordingTime/_deltaT;
-     if(_lastPositions.size() > max_size)
-          _lastPositions.pop();
+     if((_globalTime>=_premovement) || (initial==true))
+     {
+          _ellipse.SetCenter(pos);
+          //save the last values for the records
+          _lastPositions.push(pos);
+          unsigned int max_size = _recordingTime/_deltaT;
+          if(_lastPositions.size() > max_size)
+               _lastPositions.pop();
+     }
 }
 
 void Pedestrian::SetCellPos(int cp)
@@ -159,13 +155,15 @@ void Pedestrian::SetCellPos(int cp)
 
 void Pedestrian::SetV(const Point& v)
 {
-     _ellipse.SetV(v);
-
-     //save the last values for the records
-     _lastVelocites.push(v);
-     unsigned int max_size = _recordingTime/_deltaT;
-     if(_lastVelocites.size()> max_size)
-          _lastVelocites.pop();
+     if (_globalTime >= _premovement)
+     {
+          _ellipse.SetV(v);
+          //save the last values for the records
+          _lastVelocites.push(v);
+          unsigned int max_size = _recordingTime / _deltaT;
+          if (_lastVelocites.size() > max_size)
+               _lastVelocites.pop();
+     }
 }
 
 void Pedestrian::SetV0Norm(double v0)
@@ -336,8 +334,6 @@ void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
      }
      return;
 }
-
-
 
 const Point& Pedestrian::GetPos() const
 {
@@ -722,6 +718,16 @@ double Pedestrian::GetPatienceTime() const
 void Pedestrian::SetPatienceTime(double patienceTime)
 {
      _patienceTime = patienceTime;
+}
+
+void Pedestrian::SetPremovementTime(double pretime)
+{
+     _premovement=pretime;
+}
+
+double Pedestrian::GetPremovementTime()
+{
+     return _premovement;
 }
 
 const Building* Pedestrian::GetBuilding()

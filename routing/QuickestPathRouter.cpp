@@ -105,7 +105,6 @@ int QuickestPathRouter::FindExit(Pedestrian* ped)
 int QuickestPathRouter::FindNextExit(Pedestrian* ped)
 {
 
-
      int nextDestination = ped->GetNextDestination();
      //ped->Dump(1);
 
@@ -208,6 +207,7 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
 
      vector <AccessPoint*> aps;
      GetRelevantRoutesTofinalDestination(ped,aps);
+
 
      //special case where there is only one alternative
      //cout<<"app size: "<<aps.size()<<endl;

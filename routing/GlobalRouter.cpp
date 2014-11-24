@@ -373,7 +373,8 @@ bool GlobalRouter::Init(Building* building)
           AccessPoint* from_AP = itr->second;
           int from_door = _map_id_to_index[itr->first];
           if(from_AP->GetFinalGoalOutside()) continue;
-          //TODO: maybe put the distance to FLT_MAX
+
+          //maybe put the distance to FLT_MAX
           if(from_AP->IsClosed()) continue;
 
           double tmpMinDist = FLT_MAX;
@@ -897,6 +898,12 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
             }
         }
     }
+//    if(relevantAPS.size()==2){
+//         cout<<"alternative wege: "<<relevantAPS.size()<<endl;
+//         cout<<"ap1: "<<relevantAPS[0]->GetID()<<endl;
+//         cout<<"ap2: "<<relevantAPS[1]->GetID()<<endl;
+//         getc(stdin);
+//    }
 }
 
 SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2)
@@ -1122,7 +1129,6 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 void GlobalRouter::TriangulateGeometry()
 {
-     //look for the room/subroom containing the new edge
      auto rooms=_building->GetAllRooms();
      for(auto room: rooms)
      {
@@ -1131,7 +1137,8 @@ void GlobalRouter::TriangulateGeometry()
           {
                auto obstacles=subroom->GetAllObstacles();
 
-               //Triangulate if obstacle or concave rooms
+               //Triangulate if obstacle or concave and no hlines ?
+               //if(subroom->GetAllHlines().size()==0)
                if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
                {
                     DTriangulation* tri= new DTriangulation();
@@ -1178,7 +1185,6 @@ void GlobalRouter::TriangulateGeometry()
                                    h->SetSubRoom1(subroom);
                                    subroom->AddHline(h);
                                    _building->AddHline(h);
-                                   cout<<"adding hline with ID: "<<id<<endl;
                               }
                          }
                     }
@@ -1285,9 +1291,9 @@ void GlobalRouter::GenerateNavigationMesh()
      //Write("</geometry>");
      //nv->WriteToFile(building->GetProjectFilename()+".full.nav");
 
-     cout<<"bye"<<endl;
+     //cout<<"bye"<<endl;
      delete nv;
-     exit(0);
+     //exit(0);
 }
 
 string GlobalRouter::GetRoutingInfoFile()
@@ -1331,6 +1337,10 @@ string GlobalRouter::GetRoutingInfoFile()
                     {
                          _generateNavigationMesh=true;
                     }
+                    else
+                    {
+                         Log->Write("WARNING:\t only triangulation is supported for the mesh. You supplied [%s]",method.c_str());
+                    }
 
                }
 
@@ -1356,7 +1366,6 @@ string GlobalRouter::GetRoutingInfoFile()
 
 void GlobalRouter::LoadRoutingInfos(const std::string &filename)
 {
-
      if(filename=="") return;
 
      Log->Write("INFO:\tLoading extra routing information for the global/quickest path router");

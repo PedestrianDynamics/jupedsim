@@ -42,7 +42,7 @@ using namespace std;
 /************************************************************
  StartDistributionRoom
  ************************************************************/
-StartDistributionRoom::StartDistributionRoom()
+StartDistributionRoom::StartDistributionRoom(int seed)
 {
     _roomID = -1;
     _nPeds = -1;
@@ -62,6 +62,7 @@ StartDistributionRoom::StartDistributionRoom()
     _yMin=-FLT_MAX;
     _yMax=FLT_MAX;
     _groupParameters=NULL;
+    _generator = std::default_random_engine(seed);
 }
 
 StartDistributionRoom::~StartDistributionRoom()
@@ -171,7 +172,7 @@ void StartDistributionRoom::SetAgentsNumber(int N)
 /************************************************************
  StartDistributionSubRoom
  ************************************************************/
-StartDistributionSubroom::StartDistributionSubroom() : StartDistributionRoom()
+StartDistributionSubroom::StartDistributionSubroom(unsigned int seed) : StartDistributionRoom(seed)
 {
      _subroomID = -1;
 }
@@ -198,11 +199,11 @@ void StartDistributionSubroom::SetSubroomID(int i)
  PedDistributor
  ************************************************************/
 
-PedDistributor::PedDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars)
+PedDistributor::PedDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed)
 {
      _start_dis = vector<StartDistributionRoom* > ();
      _start_dis_sub = vector<StartDistributionSubroom* > ();
-    this->InitDistributor(fileName, agentPars);
+     InitDistributor(fileName, agentPars, seed);
 }
 
 
@@ -221,7 +222,7 @@ PedDistributor::~PedDistributor()
      //empty the parameters maps
 }
 
-void PedDistributor::InitDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars)
+void PedDistributor::InitDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed)
 {
      Log->Write("INFO: \tLoading and parsing the persons attributes");
 
@@ -258,6 +259,8 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           string gender = xmltoa(e->Attribute("gender"), "male");
           double height = xmltof(e->Attribute("height"), -1);
           double patience=  xmltof(e->Attribute("patience"), 5);
+          double premovement_mean= xmltof(e->Attribute("pre_movement_mean"), 0);
+          double premovement_sigma= xmltof(e->Attribute("pre_movement_sigma"), 0);
 
           double x_min=xmltof(e->Attribute("x_min"), -FLT_MAX);
           double x_max=xmltof(e->Attribute("x_max"), FLT_MAX);
@@ -275,10 +278,10 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           StartDistributionRoom* dis=NULL;
 
           if(subroom_id==-1) {
-               dis = new StartDistributionRoom();
+               dis = new StartDistributionRoom(seed);
                _start_dis.push_back(dis);
           } else {
-               dis = new StartDistributionSubroom();
+               dis = new StartDistributionSubroom(seed);
                dynamic_cast<StartDistributionSubroom*>(dis)->SetSubroomID(subroom_id);
                _start_dis_sub.push_back(dynamic_cast<StartDistributionSubroom*>(dis));
           }
@@ -293,6 +296,7 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           dis->SetRouterId(router_id);
           dis->SetHeight(height);
           dis->SetPatience(patience);
+          dis->InitPremovementTime(premovement_mean,premovement_sigma);
 
           if(agentPars.count(agent_para_id)==0)
           {
@@ -717,12 +721,13 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
         }
 
         Point pos = positions[index];
-        ped->SetPos(pos);
+        ped->SetPos(pos,true); //true for the initial position
         ped->SetBuilding(building);
         positions.erase(positions.begin() + index);
         ped->SetRoomID(para->GetRoomId(),"");
         ped->SetSubRoomID(r->GetSubRoomID());
         ped->SetPatienceTime(para->GetPatience());
+        ped->SetPremovementTime(para->GetPremovementTime());
         const Point& start_pos = para->GetStartPosition();
 
 
@@ -734,7 +739,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
                 exit(EXIT_FAILURE);
             }
 
-            ped->SetPos(start_pos);
+            ped->SetPos(start_pos,true); //true for the initial position
             Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
                     *pid, para->GetRoomId(), start_pos.toString().c_str());
         }
@@ -797,4 +802,14 @@ void StartDistributionRoom::Setbounds(double bounds[4])
     _xMax=bounds[1];
     _yMin=bounds[2];
     _yMax=bounds[3];
+}
+
+void StartDistributionRoom::InitPremovementTime(double mean, double stdv)
+{
+     _premovementTime = std::normal_distribution<double>(mean,stdv);
+}
+
+double StartDistributionRoom::GetPremovementTime()
+{
+     return _premovementTime(_generator);
 }

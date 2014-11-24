@@ -191,7 +191,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           }
      }
 
-     _distribution = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters()));
+     _distribution = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
 
      _operationalModel = args.GetModel();
      s.append(_operationalModel->GetDescription());
