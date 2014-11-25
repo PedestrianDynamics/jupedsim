@@ -66,7 +66,6 @@ public:
 
      virtual bool Init(Building* building);
 
-
      virtual int FindExit(Pedestrian* p);
 
      /**
@@ -140,6 +139,13 @@ protected:
       * @param path vector to store the intermediate destination
       */
      void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+
+     /**
+      * Populates the navigations line to cross in the vector path
+      * @param ped the pedestrian
+      * @param path, the vector to store
+      */
+     void GetPath(Pedestrian* ped, std::vector<NavLine*>& path);
 
      /**
       * return the relevant aps that lead to the pedestrian final destination

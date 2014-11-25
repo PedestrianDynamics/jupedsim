@@ -178,7 +178,7 @@ void Transition::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Transition::WriteElement() const
+string Transition::GetDescription() const
 {
      string geometry;
      char tmp[CLENGTH] = "";

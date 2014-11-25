@@ -169,7 +169,7 @@ void Crossing::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Crossing::WriteElement() const
+string Crossing::GetDescription() const
 {
      //return "";
      string geometry;

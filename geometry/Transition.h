@@ -113,7 +113,7 @@ public:
 
 
      virtual void WriteToErrorLog() const;
-     virtual std::string WriteElement() const; // TraVisTo Ausgabe
+     virtual std::string GetDescription() const; // TraVisTo Ausgabe
 };
 
 #endif  /* _TRANSITION_H */

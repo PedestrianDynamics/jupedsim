@@ -434,7 +434,7 @@ bool GlobalRouter::Init(Building* building)
                               "ERROR: GlobalRouter: There is no visibility path from [%s] to the outside 2\n",
                               from_AP->GetFriendlyName().c_str());
                     from_AP->Dump();
-                    //exit(EXIT_FAILURE);
+                    exit(EXIT_FAILURE);
                }
           }
           _tmpPedPath.clear();
@@ -543,6 +543,110 @@ void GlobalRouter::GetPath(int i, int j)
      _tmpPedPath.push_back(j);
 }
 
+void GlobalRouter::GetPath(Pedestrian* ped, std::vector<NavLine*>& path)
+{
+     std::vector<AccessPoint*> aps_path;
+
+     bool done=false;
+     int currentNavLine = ped->GetNextDestination();
+     if (currentNavLine == -1)
+     {
+          currentNavLine= GetBestDefaultRandomExit(ped);
+     }
+     aps_path.push_back(_accessPoints[currentNavLine]);
+
+     int loop_count=1;
+     do
+     {
+          auto ap=aps_path.back();
+          int next_dest = ap->GetNearestTransitAPTO(ped->GetFinalDestination());
+
+          if(next_dest==-1) break; //we are done
+
+          auto next_ap= _accessPoints[next_dest];
+
+          if(next_ap->GetFinalExitToOutside())
+          {
+               done =true;
+          }
+
+          if (! IsElementInVector(aps_path,next_ap))
+          {
+               aps_path.push_back(next_ap);
+          }
+          else
+          {
+               Log->Write("WARNING:\t the line [%d] is already included in the path.");
+          }
+
+          //work arround to detect a potential infinte loop.
+          if(loop_count++>1000)
+          {
+               Log->Write("ERROR:\t A path could not be found for pedestrian [%d] going to destination [%d]",ped->GetID(),ped->GetFinalDestination());
+               Log->Write("      \t Stuck in an infinite loop [%d].",loop_count);
+          }
+
+
+     } while (!done);
+
+
+     for(auto aps: aps_path)
+          path.push_back(aps->GetNavLine());
+
+     //collect and return the navigation lines
+
+     //     do
+     //     {
+     //          SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
+     //                    ped->GetSubRoomID());
+     //
+     //          const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
+     //          for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
+     //
+     //               int apID = accessPointsInSubRoom[i];
+     //               AccessPoint* ap = _accessPoints[apID];
+     //
+     //               const Point& pt3 = ped->GetPos();
+     //               double distToExit = ap->GetNavLine()->DistTo(pt3);
+     //
+     //               if (distToExit > J_EPS_DIST)
+     //                    continue;
+     //
+     //               //one AP is near actualize destination:
+     //               nextDestination = ap->GetNearestTransitAPTO(
+     //                         ped->GetFinalDestination());
+     //
+     //
+     //               if (nextDestination == -1) { // we are almost at the exit
+     //                    return ped->GetNextDestination();
+     //               } else {
+     //                    //check that the next destination is in the actual room of the pedestrian
+     //                    if (_accessPoints[nextDestination]->isInRange(
+     //                              sub->GetUID())==false) {
+     //                         //return the last destination if defined
+     //                         int previousDestination = ped->GetNextDestination();
+     //
+     //                         //we are still somewhere in the initialization phase
+     //                         if (previousDestination == -1) {
+     //                              ped->SetExitIndex(apID);
+     //                              ped->SetExitLine(_accessPoints[apID]->GetNavLine());
+     //                              return apID;
+     //                         } else { // we are still having a valid destination, don't change
+     //                              return previousDestination;
+     //                         }
+     //                    } else { // we have reached the new room
+     //                         ped->SetExitIndex(nextDestination);
+     //                         ped->SetExitLine(
+     //                                   _accessPoints[nextDestination]->GetNavLine());
+     //                         return nextDestination;
+     //                    }
+     //               }
+     //          }
+     //
+     //          // still have a valid destination, so return it
+     //          return nextDestination;
+     //     }while (!done);
+}
 
 void GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& path)
 {
@@ -633,6 +737,33 @@ void GlobalRouter::DumpAccessPoints(int p)
 
 int GlobalRouter::FindExit(Pedestrian* ped)
 {
+     if(_useMeshForLocalNavigation==false)
+     {
+          std::vector<NavLine*> path;
+          GetPath(ped,path);
+
+          //return the next path which is an exit
+          for(auto navLine: path)
+          {
+               if(IsCrossing(*navLine) || IsTransition(*navLine))
+               {
+                    int nav_id= navLine->GetUniqueID();
+                    ped->SetExitIndex(nav_id);
+                    ped->SetExitLine(navLine);
+                    return nav_id;
+               }
+          }
+
+          //something bad happens
+          Log->Write(
+                    "ERROR:\t Cannot find a valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
+                    ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
+                    ped->GetFinalDestination());
+          return -1;
+
+     }
+
+     // else proceed as usual and return the closest navigation line
 
      int nextDestination = ped->GetNextDestination();
 //      if(ped->GetGlobalTime()>80){
@@ -801,7 +932,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      } else {
           if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
                Log->Write(
-                    "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
+                    "ERROR:\t GetBestDefaultRandomExit() \nCannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
                     ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
                     ped->GetFinalDestination());
           return -1;
@@ -1129,6 +1260,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 void GlobalRouter::TriangulateGeometry()
 {
+     Log->Write("INFO:\tTriangulating the geometry");
      auto rooms=_building->GetAllRooms();
      for(auto room: rooms)
      {
@@ -1192,6 +1324,7 @@ void GlobalRouter::TriangulateGeometry()
                }
           }
      }
+     Log->Write("INFO:\tDone...");
 }
 
 void GlobalRouter::GenerateNavigationMesh()
@@ -1331,7 +1464,14 @@ string GlobalRouter::GetRoutingInfoFile()
                TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
                if (para)
                {
-                    _useMeshForLocalNavigation = xmltoi(para->Attribute("use_for_local_planning"),0);
+                    string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
+                    if(local_planing=="true") {
+                         _useMeshForLocalNavigation = 1;
+                    }
+                    else {
+                         _useMeshForLocalNavigation = 0;
+                    }
+
                     string method = xmltoa(para->Attribute("method"),"");
                     if(method=="triangulation")
                     {

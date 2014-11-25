@@ -468,9 +468,7 @@ void Simulation::UpdateRoutesAndLocations()
                //finally actualize the route
                if (ped->FindRoute() == -1) {
                     //a destination could not be found for that pedestrian
-                    Log->Write(
-                              "\tINFO: \tCould not found a route for pedestrian %d",
-                              ped->GetID());
+                    Log->Write("INFO: \tCould not find a route for pedestrian %d",ped->GetID());
                     //exit(EXIT_FAILURE);
 #pragma omp critical
                     pedsToRemove.push_back(ped);
