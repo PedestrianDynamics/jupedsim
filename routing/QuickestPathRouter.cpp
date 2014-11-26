@@ -42,12 +42,11 @@ QuickestPathRouter::~QuickestPathRouter() { }
 
 string QuickestPathRouter::GetRoutingInfoFile() const
 {
-
      TiXmlDocument doc(_building->GetProjectFilename());
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not open/parse the project file");
-          exit(EXIT_FAILURE);
+          return "";
      }
 
      // everything is fine. proceed with parsing
@@ -75,12 +74,10 @@ string QuickestPathRouter::GetRoutingInfoFile() const
 
 int QuickestPathRouter::FindExit(Pedestrian* ped)
 {
-
      int next=FindNextExit(ped);
 
      // that ped will be deleted
      if(next==-1) return next;
-
 
      if(ped->IsFeelingLikeInJam()) {
           //ped->SetSpotlight(true);
@@ -104,11 +101,11 @@ int QuickestPathRouter::FindExit(Pedestrian* ped)
 
 int QuickestPathRouter::FindNextExit(Pedestrian* ped)
 {
-
      int nextDestination = ped->GetNextDestination();
      //ped->Dump(1);
 
-     if (nextDestination == -1) {
+     if (nextDestination == -1)
+     {
           return GetBestDefaultRandomExit(ped);
 
      } else {
@@ -116,10 +113,8 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
           SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
                     ped->GetSubRoomID());
 
-          const vector<int>& accessPointsInSubRoom = sub->GetAllGoalIDs();
-          for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-
-               int apID = accessPointsInSubRoom[i];
+          for(const auto& apID: sub->GetAllGoalIDs())
+          {
                AccessPoint* ap = _accessPoints[apID];
 
                const Point& pt3 = ped->GetPos();
@@ -262,7 +257,7 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
           if((myref==NULL) && (flag==REF_PED_FOUND)) {
                Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
                Log->Write("ERROR:\t reference pedestrians is NULL");
-               exit(EXIT_FAILURE);
+               return -1;
           }
 
           if(time<minTime) {
@@ -317,9 +312,8 @@ bool QuickestPathRouter::Init(Building* building)
      return true;
 }
 
-void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestrian** myref, double jamThreshold, int exitID, int* flag)
+bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestrian** myref, double jamThreshold, int exitID, int* flag)
 {
-
      *flag=FREE_EXIT; // assume free exit
 
      Hline* crossing=_building->GetTransOrCrossByUID(exitID);
@@ -374,8 +368,9 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
                     *myref=NULL;
                     *flag=UNREACHEABLE_EXIT;
                     done=true;
-                    Log->Write("ERROR: reference ped cannot be found for ped %d within [%f] m  around the exit [%d]\n",myself->GetID(),radius,crossing->GetID());
-                    exit(EXIT_FAILURE);
+                    Log->Write("ERROR: reference ped cannot be found for ped %d within [%f] "
+                              "m  around the exit [%d]\n",myself->GetID(),radius,crossing->GetID());
+                    return false;
                }
           }
 
@@ -384,18 +379,18 @@ void QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 
      //debug area
      if(*myref) {
-          // if(myself->GetID()==488){
+          // if(myself->GetID()==-488){
           //  myself->SetSpotlight(true);
           //     (*myref)->SetSpotlight(true);
           //     (*myref)->Dump((*myref)->GetID());
-          //
-          //
           // }
 
      } else {
           //cout<<"no ref ped found: " <<endl;
           //getc(stdin);
      }
+
+     return true;
 }
 
 int QuickestPathRouter::GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2)
@@ -426,8 +421,6 @@ int QuickestPathRouter::GetCommonDestinationCount(AccessPoint* ap1, AccessPoint*
      return common.size();
 }
 
-
-
 void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
           double radius, vector<Pedestrian*>& queue,int subroomToConsider)
 {
@@ -449,14 +442,14 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
           sbr2=NULL;
      }
 
-     if (sbr1 && (sbr1->GetSubRoomID()==subroomToConsider)) {
+     if (sbr1 && (sbr1->GetSubRoomID()==subroomToConsider))
+     {
           //double closestDistance=FLT_MAX;
-
           vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr1->GetRoomID(),sbr1->GetSubRoomID(),peds);
 
-          for (unsigned int p=0; p<peds.size(); p++) {
-               Pedestrian* ped = peds[p];
+          for(const auto& ped:peds)
+          {
                if(ped->GetExitIndex()==exitID) {
                     if(ped->GetV().NormSquare()<minVel2) {
                          double dist= (ped->GetPos()-hline->GetCentre()).NormSquare();
@@ -469,12 +462,13 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
           }
      }
 
-     if (sbr2 && (sbr2->GetSubRoomID()==subroomToConsider)) {
+     if (sbr2 && (sbr2->GetSubRoomID()==subroomToConsider))
+     {
           //double closestDistance=FLT_MAX;
           vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
-          for (unsigned int p=0; p<peds.size(); p++) {
-               Pedestrian* ped = peds[p];
+          for(const auto& ped:peds)
+          {
                if(ped->GetExitIndex()==exitID) {
                     if(ped->GetV().NormSquare()<minVel2) {
                          double dist= (ped->GetPos()-hline->GetCentre()).NormSquare();
@@ -493,28 +487,29 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
 
 bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* ref)
 {
+     int ignore_ped1 = ped->GetID();
+     int ignore_ped2 = ref->GetID();
+     Hline* ignore_hline = _building->GetTransOrCrossByUID(ref->GetExitIndex());
+     int obstacles = GetObstaclesCountBetween(ped->GetPos(), ref->GetPos(),
+               ignore_hline, ignore_ped1, ignore_ped2);
 
-     int ignore_ped1=ped->GetID();
-     int ignore_ped2=ref->GetID();
-     Hline* ignore_hline=_building->GetTransOrCrossByUID(ref->GetExitIndex());
-
-     int obstacles=GetObstaclesCountBetween(ped->GetPos(),ref->GetPos(),ignore_hline,ignore_ped1,ignore_ped2);
-
-     if(obstacles>OBSTRUCTION) return false;
+     if (obstacles > OBSTRUCTION) {
+          return false;
+     }
      return true;
 }
 
 bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hline)
 {
+     int ignore_ped1 = myself->GetID();
+     int ignore_ped2 = -1;     //there is no second ped to ignore
+     int obstacles = GetObstaclesCountBetween(myself->GetPos(),
+               hline->GetCentre(), hline, ignore_ped1, ignore_ped2);
 
-     int ignore_ped1=myself->GetID();
-     int ignore_ped2=-1;//there is no second ped to ignore
-
-     int obstacles=GetObstaclesCountBetween(myself->GetPos(),hline->GetCentre(),hline,ignore_ped1,ignore_ped2);
-
-     if(obstacles>OBSTRUCTION) return false;
+     if (obstacles > OBSTRUCTION) {
+          return false;
+     }
      return true;
-
 }
 
 int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p2, Hline* hline,
@@ -544,9 +539,8 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
           vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr1->GetRoomID(),sbr1->GetSubRoomID(),peds);
 
-          for (unsigned int p=0; p<peds.size(); p++) {
-               Pedestrian* ped = peds[p];
-
+          for(const auto& ped:peds)
+          {
                //avoiding myself
                if(ped->GetID()==ignore_ped1) continue;
                if(ped->GetID()==ignore_ped2) continue;
@@ -565,9 +559,8 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
           vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
 
-          for (unsigned int p=0; p<peds.size(); p++) {
-               Pedestrian* ped = peds[p];
-
+          for(const auto& ped:peds)
+          {
                //avoiging myself
                if(ped->GetID()==ignore_ped1) continue;
                if(ped->GetID()==ignore_ped2) continue;
@@ -578,10 +571,8 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
                     obstacles++;
                     if(obstacles>OBSTRUCTION) return obstacles;
                }
-
           }
      }
-
 
      return obstacles;
 }
@@ -590,11 +581,6 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
 int QuickestPathRouter::isCongested(Pedestrian* ped)
 {
      //define as the ratio of people in front of me and behind me
-
-     //Room* room=_building->GetRoom(ped->GetRoomID());
-     //SubRoom* sub=room->GetSubRoom(ped->GetSubRoomID());
-     //const vector<Pedestrian*>& allPeds=sub->GetAllPedestrians();
-
      vector<Pedestrian*> allPeds;
      _building->GetPedestrians(ped->GetRoomID(),ped->GetSubRoomID(),allPeds);
 
@@ -606,8 +592,8 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
      double inFrontofMe=0;
      double behindMe=0;
 
-     for (unsigned int p=0; p<allPeds.size(); p++) {
-          Pedestrian* ped2 = allPeds[p];
+     for(const auto& ped2:allPeds)
+     {
           //only consider  pedestrians that are going in my direction
           // caution this will not work with hlines
           if(ped2->GetExitIndex()!=ped->GetExitIndex()) continue;
@@ -621,10 +607,10 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
           }
      }
 
+     double ratio = inFrontofMe / (inFrontofMe + behindMe);
 
-     double ratio=inFrontofMe/(inFrontofMe+behindMe);
-
-     if(ratio>0.8) return true;
+     if (ratio > 0.8)
+          return true;
 
      return false;
 }
@@ -632,7 +618,6 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 
 double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid)
 {
-
      //select a reference pedestrian
      Pedestrian* myref=NULL;
      int flag=FREE_EXIT; //assume free exit
@@ -685,8 +670,9 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
 
      if((myref==NULL) && (flag==REF_PED_FOUND)) {
           Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
-          Log->Write(" reference pedestrians is NULL");
-          exit(EXIT_FAILURE);
+          Log->Write("      \t reference pedestrians is NULL");
+          return FLT_MAX;
+          //exit(EXIT_FAILURE);
      }
 
      return time;
@@ -694,9 +680,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
 
 void QuickestPathRouter::Redirect(Pedestrian* ped)
 {
-
      int preferredExit=ped->GetExitIndex();
-
      double preferredExitTime=FLT_MAX;
      int quickest=-1;
      double minTime=FLT_MAX;
@@ -715,8 +699,9 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
 
-     for(unsigned int g=0; g<relevantAPs.size(); g++) {
-          AccessPoint* ap=relevantAPs[g];
+
+     for(const auto& ap:relevantAPs)
+     {
           int exitid=ap->GetID();
           //              }
           //
@@ -734,11 +719,10 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
           Line segment = Line(p1,p2);
 
           bool isVisible=true;
-          //first walls
-          const vector<Wall>& walls= sub->GetAllWalls();
 
-          for(unsigned int b=0; b<walls.size(); b++) {
-               if(segment.IntersectionWith(walls[b])==true) {
+          for(const auto& wall: sub->GetAllWalls())
+          {
+               if(segment.IntersectionWith(wall)==true) {
                     isVisible=false;
                     break;
                }

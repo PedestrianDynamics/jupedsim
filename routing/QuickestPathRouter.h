@@ -140,7 +140,7 @@ private:
 
 
      /// select the references pedestrians for this one
-     void selectReferencePeds(int pedIndex, int myCurrentDoor=-1);
+     bool selectReferencePeds(int pedIndex, int myCurrentDoor=-1);
 
      /**
       * redirect a pedestrian based on the actual jamming conditions
@@ -166,7 +166,7 @@ private:
       * flag=1: the exit is free, no reference
       * flag=2: I can't see the exit, nor references, too crowded, too many crossing pedes
       */
-     void SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
+     bool SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
 
      /**
       * extend the graph by connecting alternative routes.
