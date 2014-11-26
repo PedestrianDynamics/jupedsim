@@ -2,7 +2,7 @@
  * \file        GlobalRouter.h
  * \date        Dec 15, 2010
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum J���lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
