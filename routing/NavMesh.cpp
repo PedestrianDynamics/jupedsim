@@ -2464,46 +2464,48 @@ void NavMesh::ComputePlanesEquation()
                          Room* r = _building->GetRoom(i);
                          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
                               SubRoom* s = r->GetSubRoom(k);
-                              Stair* st=dynamic_cast<Stair*>(s);
+                              if(s){
+                                   Stair* st=dynamic_cast<Stair*>(s);
                               //if ((st!=NULL) && (s->GetSubRoomID()!=sub->GetSubRoomID()) ){
-                              if (st!=NULL) {
-                                   //if(st->GetAllCrossings().size()==2) continue;
-                                   if(sub->IsDirectlyConnectedWith(st)) {
-                                        //get the middle point of the crossing
-                                        //check the crossings
-                                        const vector<Crossing*>& crossings1 = sub->GetAllCrossings();
-                                        const vector<Crossing*>& crossings2 = st->GetAllCrossings();
-                                        for (unsigned int c1 = 0; c1 < crossings1.size(); c1++) {
-                                             for (unsigned int c2 = 0; c2 < crossings2.size(); c2++) {
-                                                  int uid1 = crossings1[c1]->GetUniqueID();
-                                                  int uid2 = crossings2[c2]->GetUniqueID();
-                                                  // ignore my transition
-                                                  if (uid1 == uid2) {
-                                                       Point center=crossings1[c1]->GetCentre();
-                                                       double elevation = st->GetElevation(center);
-                                                       sub->SetPlanEquation(0.0,0.0,elevation);
-                                                       connection=true;
-                                                       goto DONE; // just out of this ugly loop
+                                   if (st) {
+                                        //if(st->GetAllCrossings().size()==2) continue;
+                                        if(sub->IsDirectlyConnectedWith(st)) {
+                                             //get the middle point of the crossing
+                                             //check the crossings
+                                             const vector<Crossing*>& crossings1 = sub->GetAllCrossings();
+                                             const vector<Crossing*>& crossings2 = st->GetAllCrossings();
+                                             for (unsigned int c1 = 0; c1 < crossings1.size(); c1++) {
+                                                  for (unsigned int c2 = 0; c2 < crossings2.size(); c2++) {
+                                                       int uid1 = crossings1[c1]->GetUniqueID();
+                                                       int uid2 = crossings2[c2]->GetUniqueID();
+                                                       // ignore my transition
+                                                       if (uid1 == uid2) {
+                                                            Point center=crossings1[c1]->GetCentre();
+                                                            double elevation = st->GetElevation(center);
+                                                            sub->SetPlanEquation(0.0,0.0,elevation);
+                                                            connection=true;
+                                                            goto DONE; // just out of this ugly loop
+                                                       }
+                                                  }
+                                             }
+                                             const vector<Transition*>& transitions1 = sub->GetAllTransitions();
+                                             const vector<Transition*>& transitions2 = st->GetAllTransitions();
+                                             for (unsigned int t1 = 0; t1 < transitions1.size(); t1++) {
+                                                  for (unsigned int t2 = 0; t2 < transitions2.size(); t2++) {
+                                                       int uid1 = transitions1[t1]->GetUniqueID();
+                                                       int uid2 = transitions2[t2]->GetUniqueID();
+                                                       // ignore my transition
+                                                       if (uid1 == uid2) {
+                                                            Point center=transitions1[t1]->GetCentre();
+                                                            double elevation = st->GetElevation(center);
+                                                            sub->SetPlanEquation(0.0,0.0,elevation);
+                                                            connection=true;
+                                                            goto DONE; // just out of this ugly loop
+                                                       }
                                                   }
                                              }
                                         }
-                                        const vector<Transition*>& transitions1 = sub->GetAllTransitions();
-                                        const vector<Transition*>& transitions2 = st->GetAllTransitions();
-                                        for (unsigned int t1 = 0; t1 < transitions1.size(); t1++) {
-                                             for (unsigned int t2 = 0; t2 < transitions2.size(); t2++) {
-                                                  int uid1 = transitions1[t1]->GetUniqueID();
-                                                  int uid2 = transitions2[t2]->GetUniqueID();
-                                                  // ignore my transition
-                                                  if (uid1 == uid2) {
-                                                       Point center=transitions1[t1]->GetCentre();
-                                                       double elevation = st->GetElevation(center);
-                                                       sub->SetPlanEquation(0.0,0.0,elevation);
-                                                       connection=true;
-                                                       goto DONE; // just out of this ugly loop
-                                                  }
-                                             }
-                                        }
-                                   }
+                                   } //std::
                               }
                          }
                     }

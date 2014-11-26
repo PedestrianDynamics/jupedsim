@@ -233,16 +233,16 @@ public:
     /**
      * convert a non null string to int.
      */
-    void Str2Int(const char* str, int* value){
-        if(!str) *value=atoi(str);
-    };
+    // void Str2Int(const char* str, int* value){
+    //     if(!str) *value=atoi(str);
+    // };
 
-    /**
-     * convert a non null string to double.
-     */
-    void Str2double(const char* str, double* value){
-        if(!str) *value=atof(str);
-    }
+    // /**
+    //  * convert a non null string to double.
+    //  */
+    // void Str2double(const char* str, double* value){
+    //     if(!str) *value=atof(str);
+    // }
 
 
 };
