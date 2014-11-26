@@ -406,7 +406,7 @@ if(BUILD_TESTING)
 
   # test if code compiles and runs default setting. Takes about 30 seconds
   add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
-    --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+    --build-and-test "${CMAKE_SOURCE_DIR}"  "${CMAKE_SOURCE_DIR}" #"${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
     --build-two-config
