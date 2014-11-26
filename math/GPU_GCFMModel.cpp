@@ -543,7 +543,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 		{
 			//Buffer fuellen
 #pragma omp for
-			for(int p=0;p<nSize;p++){
+			for(int p=0; p<(int)nSize; p++){
 				Pedestrian* ped=allPeds[p];
 				pedGetV_x[p]=ped->GetV().GetX();
 				pedGetV_y[p]=ped->GetV().GetY();
@@ -585,7 +585,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 				pedTau[p]=ped->GetTau();
 			}
 #pragma omp for
-			for(int p=0;p<nSize;p++){
+			for(int p=0; p<(int)nSize; p++){
 				double pedV_x=pedGetV_x[p];
 				double pedV_y=pedGetV_y[p];
 				double pedV0Norm=pedGetV0Norm[p];
@@ -602,8 +602,8 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 
 				//Kraefte der Fussgaenger untereinander
 				//Nachbarn finden
-				for(unsigned int n=0;n<nSize;n++){
-					if(n!=p){
+				for(unsigned int n=0; n<nSize; n++){
+					if((int)n != p){
 						if(pedGetUniqueRoomID[p]==pedGetUniqueRoomID[n]){
 							//Pedestrian* ped1=allPeds[n];
 							//F_rep = F_rep + ForceRepPed(ped, ped1);
@@ -819,7 +819,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 				//result_acc[p]=acc;
 			}
 #pragma omp for
-			for(int p=0;p<nSize;p++){
+			for(int p=0; p<(int)nSize; p++){
 				Pedestrian* ped = allPeds[p];
 				Room* room = building->GetRoom(ped->GetRoomID());
 				SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
@@ -834,7 +834,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 			// update
 			//for (int p = start; p <= end; ++p) {
 #pragma omp for
-			for (p = 0; p < nSize; p++) {
+			for (int p = 0; p < (int)nSize; p++) {
 				Pedestrian* ped = allPeds[p];
 				Point F_rep=Point(force_x[p],force_y[p]);
 				Point F_driv=Point(forceDriv_x[p],forceDriv_y[p]);
@@ -874,7 +874,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 			//for (int p = start; p <= end; ++p) {
 
 #pragma omp for
-			for(p=0;p<nSize;p++){
+			for(int p=0; p<(int)nSize; p++){
 				Pedestrian* ped = allPeds[p];
 				Room* room = building->GetRoom(ped->GetRoomID());
 				SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
@@ -925,7 +925,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 			// update
 			//for (int p = start; p <= end; ++p) {
 #pragma omp for
-			for (p = 0; p < nSize; p++) {
+			for (int p = 0; p < (int)nSize; p++) {
 				Pedestrian* ped = allPeds[p];
 				//Point v_neu = ped->GetV() + result_acc[p - start] * h;
 				Point v_neu = ped->GetV() + result_acc[p] * h;
