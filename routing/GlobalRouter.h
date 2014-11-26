@@ -37,7 +37,6 @@
 #include <vector>
 #include "Router.h"
 #include "../geometry/Building.h"
-#include <bits/random.h>
 
 // forwarded classes
 class Pedestrian;
