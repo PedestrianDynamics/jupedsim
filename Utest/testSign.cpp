@@ -1,7 +1,7 @@
 /**
  * \file        testSign.cpp
  * \date        Jul 4, 2014
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
