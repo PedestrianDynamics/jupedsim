@@ -153,6 +153,7 @@ set (   source_files
   math/ODESolver.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
+  math/GradientModel.cpp
 
   mpi/LCGrid.cpp
 
@@ -266,6 +267,7 @@ set (   header_files
   math/ODESolver.h
   math/GCFMModel.h
   math/GompertzModel.h
+  math/GradientModel.h
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
