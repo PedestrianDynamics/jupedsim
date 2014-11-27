@@ -17,4 +17,3 @@ Release of JuPedSim v0.6
 
 *Changes*
 - jpscore only allows -h as help other options are removed
-- --inifile and --ini are needed for jpscore to find the inifile
