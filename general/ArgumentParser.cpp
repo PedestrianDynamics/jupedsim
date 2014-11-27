@@ -196,11 +196,21 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
 
 
     // other special case where a single configuration file is submitted
-    //ToDo: check if it is a configuration file
+    //check if inifile options are given
     if (argc == 2)
     {
-        ParseIniFile(argv[1]);
-        return;
+        string prefix1 = "--ini=";
+        string prefix2 = "--inifile=";
+
+        if (!argument.compare(0, prefix2.size(), prefix2)) {
+            argument.erase(0, prefix2.size());
+            ParseIniFile(argument);
+            return;
+        } else if (!argument.compare(0, prefix1.size(), prefix1)) {
+            argument.erase(0, prefix1.size());
+            ParseIniFile(argument);
+        }
+
     }
 }
 
