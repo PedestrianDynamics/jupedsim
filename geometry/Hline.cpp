@@ -106,8 +106,7 @@ void Hline::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-
-string Hline::WriteElement() const
+string Hline::GetDescription() const
 {
      string geometry;
      char tmp[CLENGTH] = "";
@@ -127,5 +126,3 @@ string Hline::WriteElement() const
      geometry.append("\t\t</hline>\n");
      return geometry;
 }
-
-

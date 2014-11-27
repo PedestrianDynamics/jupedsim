@@ -575,8 +575,10 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
      while(act_id!=c_goal_id) {
           act_cost=costlist[act_id];
           //astar_print(closedlist,inopenlist,predlist,c_totalcount,act_id);
-          if (act_cell==NULL)
-               cout<<"act_cell=NULL !!"<<endl;
+          if (act_cell==NULL){
+               Log->Write("Error:\tact_cell=NULL");
+               //should exit here?
+          }
 
           for(unsigned int i=0; i<act_cell->GetEdges().size(); i++) {
                int act_edge_id=act_cell->GetEdges().at(i);

@@ -64,6 +64,28 @@ set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 # Debug messages
 message( STATUS "CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR} )
 message( STATUS "CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR} )
+
+# ========================== build platform ==========================
+message(STATUS "")
+message(STATUS "Platform: ")
+message(STATUS "    Host: "             ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION} ${CMAKE_HOST_SYSTEM_PROCESSOR})
+if(CMAKE_CROSSCOMPILING)
+  message(STATUS "    Target: "         ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+message(STATUS "    CMake: "            ${CMAKE_VERSION})
+message(STATUS "    CMake generator: "  ${CMAKE_GENERATOR})
+message(STATUS "    CMake build tool: " ${CMAKE_BUILD_TOOL})
+if(MSVC)
+  message(STATUS "    MSVC: "           ${MSVC_VERSION})
+endif()
+if(CMAKE_GENERATOR MATCHES Xcode)
+  message(STATUS "    Xcode: "          ${XCODE_VERSION})
+endif()
+if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
+  message(STATUS "    Configuration: "  ${CMAKE_BUILD_TYPE})
+endif()
+message(STATUS "")
+
 # message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 # message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
@@ -201,6 +223,8 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
+
+  general/wingetopt.c
   )
 
 set (   header_files
@@ -281,6 +305,8 @@ set (   header_files
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
   events/EventManager.h
+
+  general/wingetopt.h
   )
 
 
@@ -324,31 +350,32 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${warning_flags} -O0 -g -Wunused-variable -Wunused-parameter -Wunused-function -Wshadow -Wunused")
   #    set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG")
 endif()
-# check c++-11
-if((CMAKE_COMPILER_IS_GNUCXX AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 4.6) OR
-    (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1))
-  message(STATUS "Checking for C++11 compiler - available")
-else()
-  message(STATUS "Checking for C++11 compiler - unavailable")
-endif()
-# c++-11 flags
-# if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-# endif()
+
 #--------------------
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if(COMPILER_SUPPORTS_CXX11)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif(COMPILER_SUPPORTS_CXX0X)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-else()
-  message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
+  include(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+  if( COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  else()
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+  endif()
 endif()
+message(STATUS "MSVC: " ${MSVC})
+message(STATUS "MSVC_IDE: " ${MSVC_IDE})
+message(STATUS "MSVC60: " ${MSVC60})
+message(STATUS "MSVC71: " ${MSVC71})
+message(STATUS "MSVC80: " ${MSVC80})
+message(STATUS "MSVC90: " ${MSVC90})
+message(STATUS "MSVC10: " ${MSVC10})
+message(STATUS "MSVC12: " ${MSVC12})
+message(STATUS "MSVC13: " ${MSVC13})
 
 #---------------------
-
+message(STATUS "C++ Compiler: "           ${CMAKE_CXX_COMPILER})
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -379,7 +406,7 @@ if(BUILD_TESTING)
 
   # test if code compiles and runs default setting. Takes about 30 seconds
   add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
-    --build-and-test "${CMAKE_SOURCE_DIR}" "${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+    --build-and-test "${CMAKE_SOURCE_DIR}"  "${CMAKE_SOURCE_DIR}" #"${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
     --build-generator ${CMAKE_GENERATOR}
     --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
     --build-two-config

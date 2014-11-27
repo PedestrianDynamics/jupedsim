@@ -108,7 +108,7 @@ public:
      /**
       * @return a nicely formatted string representation of the object
       */
-     virtual std::string WriteElement() const;
+     virtual std::string GetDescription() const;
 };
 
 #endif /* HLINE_H_ */

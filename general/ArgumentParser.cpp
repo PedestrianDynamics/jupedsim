@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Apr 20, 2009
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum J�lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -24,9 +24,11 @@
  *
  *
  **/
-
-#include <getopt.h>
-#include <unistd.h>
+// #ifndef _MSC_VER
+// #include <getopt.h>
+// #endif
+#include "wingetopt.h"
+//#include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>

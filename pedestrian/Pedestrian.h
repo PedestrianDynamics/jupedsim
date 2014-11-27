@@ -135,8 +135,11 @@ public:
      void SetMass(double m);
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
+
+     //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
+
      void Setdt(double dt);
      double Getdt();
 

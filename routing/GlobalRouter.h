@@ -2,7 +2,7 @@
  * \file        GlobalRouter.h
  * \date        Dec 15, 2010
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum J���lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -37,7 +37,6 @@
 #include <vector>
 #include "Router.h"
 #include "../geometry/Building.h"
-#include <bits/random.h>
 
 // forwarded classes
 class Pedestrian;
@@ -65,7 +64,6 @@ public:
      virtual ~GlobalRouter();
 
      virtual bool Init(Building* building);
-
 
      virtual int FindExit(Pedestrian* p);
 
@@ -125,7 +123,7 @@ protected:
      /**
       * Generate a navigation mesh based on delauney triangulation
       */
-     void GenerateNavigationMesh();
+     bool GenerateNavigationMesh();
 
 
      /**
@@ -139,7 +137,14 @@ protected:
       * @param goalID, the goal ID.
       * @param path vector to store the intermediate destination
       */
-     void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+     bool GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+
+     /**
+      * Populates the navigations line to cross in the vector path
+      * @param ped the pedestrian
+      * @param path, the vector to store
+      */
+     bool GetPath(Pedestrian* ped, std::vector<NavLine*>& path);
 
      /**
       * return the relevant aps that lead to the pedestrian final destination
@@ -161,7 +166,7 @@ private:
      /**
       * Load extra routing information e.g navigation lines
       */
-     void LoadRoutingInfos(const std::string &filename);
+     bool LoadRoutingInfos(const std::string &filename);
 
      /**
       * Each router is responsible of getting the correct filename

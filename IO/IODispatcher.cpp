@@ -195,7 +195,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                               navLineWritten.push_back(uid1);
                               if (rooms_to_plot.empty()
                                         || IsElementInVector(rooms_to_plot, caption)) {
-                                   geometry.append(hline->WriteElement());
+                                   geometry.append(hline->GetDescription());
                               }
                          }
                     }
@@ -211,7 +211,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                                    if (rooms_to_plot.empty()
                                              || IsElementInVector(rooms_to_plot,
                                                        caption)) {
-                                        geometry.append(crossing->WriteElement());
+                                        geometry.append(crossing->GetDescription());
                                    }
                               }
                          }
@@ -228,7 +228,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                                    navLineWritten.push_back(uid1);
 
                                    if (rooms_to_plot.empty()) {
-                                        geometry.append(transition->WriteElement());
+                                        geometry.append(transition->GetDescription());
 
                                    } else {
 
@@ -241,13 +241,13 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                                                        caption1)
                                                        || IsElementInVector(rooms_to_plot,
                                                                  caption2)) {
-                                                  geometry.append(transition->WriteElement());
+                                                  geometry.append(transition->GetDescription());
                                              }
 
                                         } else {
                                              if (IsElementInVector(rooms_to_plot,
                                                        caption1)) {
-                                                  geometry.append(transition->WriteElement());
+                                                  geometry.append(transition->GetDescription());
                                              }
                                         }
 
@@ -678,7 +678,7 @@ void TrajectoriesJPSV05::WriteGeometry(Building* building)
 
      for (auto hline: building->GetAllHlines())
      {
-          embed_geometry.append(hline.second->WriteElement());
+          embed_geometry.append(hline.second->GetDescription());
      }
 
      for (auto goal: building->GetAllGoals()) {

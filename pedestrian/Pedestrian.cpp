@@ -663,7 +663,7 @@ void Pedestrian::Dump(int ID, int pa)
 
      }
      fflush(stdout);
-     getc(stdin);
+     // getc(stdin);
 }
 
 void Pedestrian::RecordActualPosition()
