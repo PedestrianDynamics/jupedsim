@@ -21,6 +21,8 @@ EventManager::EventManager(Building *_b){
     _file = fopen("../events/events.txt","r");
     _lastUpdateTime=0;
     _deltaT=0;
+    this->SetProjectFilename(_building->GetProjectFilename());
+    this->SetProjectRootDir(_building->GetProjectRootDir());
     if(!_file){
         Log->Write("INFO:\tFiles 'events.txt' missing. Realtime interaction with the simulation not possible.");
     }

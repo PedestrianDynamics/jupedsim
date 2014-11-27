@@ -283,8 +283,6 @@ bool Simulation::InitArgs(const ArgumentParser& args)
 
      //read the events
      _em = new EventManager(_building);
-     _em->SetProjectFilename(args.GetProjectFile());
-     _em->SetProjectRootDir(args.GetProjectRootDir());
      _em->readEventsXml();
      _em->listEvents();
 
