@@ -224,7 +224,6 @@ set (   source_files
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
 
-  general/wingetopt.c
   )
 
 set (   header_files
@@ -306,7 +305,6 @@ set (   header_files
   poly2tri/sweep/sweep.h
   events/EventManager.h
 
-  general/wingetopt.h
   )
 
 

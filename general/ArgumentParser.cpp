@@ -27,8 +27,6 @@
 // #ifndef _MSC_VER
 // #include <getopt.h>
 // #endif
-#include "wingetopt.h"
-//#include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
