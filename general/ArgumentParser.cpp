@@ -203,12 +203,14 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
         if (!argument.compare(0, prefix2.size(), prefix2)) {
             argument.erase(0, prefix2.size());
             ParseIniFile(argument);
-            return;
         } else if (!argument.compare(0, prefix1.size(), prefix1)) {
             argument.erase(0, prefix1.size());
             ParseIniFile(argument);
         }
-
+        else
+        {//assume the file was dragged and dropped
+             ParseIniFile(argument);
+        }
     }
 }
 
