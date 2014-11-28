@@ -706,11 +706,26 @@ void ArgumentParser::ParseIniFile(string inifile)
             parsingModelSuccessful=true;
             break;
         }
+        else if ((pModel == MODEL_GRADIENT) && (model_id==MODEL_GRADIENT))
+        {
+            Log->Write("Entering Gradient Model Parse Case, DEBUG INFO");
+            if (modelName != "gradient")
+            {
+                Log->Write("ERROR: \t mismatch model ID and description. Did you mean gradient ?");
+                exit(EXIT_FAILURE);
+            }
+            //only parsing one model @todo: parse gradient model ar.graf
+            pModel = MODEL_GOMPERTZ;
+            model_id = MODEL_GOMPERTZ;
+            ParseGompertzModel(xModel);
+            parsingModelSuccessful=true;
+            break;
+        }
     }
 
     if( parsingModelSuccessful==false)
     {
-        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz)", pModel);
+        Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM),  2 (Gompertz) or 3 (Gradient)", pModel);
         Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
         Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
         exit(EXIT_FAILURE);
@@ -1033,6 +1048,11 @@ void ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
 
     //Parsing the agent parameters
     ParseAgentParameters(xGompertz);
+}
+
+void ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: change to real model ar.graf
+{
+    ParseGompertzModel(xGradient);
 }
 
 void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)

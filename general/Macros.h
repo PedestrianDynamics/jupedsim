@@ -106,7 +106,8 @@ enum RoutingStrategy {
 
 enum OperativModels {
     MODEL_GFCM=1,
-    MODEL_GOMPERTZ
+    MODEL_GOMPERTZ,
+    MODEL_GRADIENT
 };
 
 //global functions for convenience

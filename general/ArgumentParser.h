@@ -100,6 +100,7 @@ private:
 private:
     void ParseGCFMModel(TiXmlElement* xGCFM);
     void ParseGompertzModel(TiXmlElement* xGompertz);
+    void ParseGradientModel(TiXmlElement* xGradient);
     void ParseAgentParameters(TiXmlElement* operativModel);
     void Usage();
 
