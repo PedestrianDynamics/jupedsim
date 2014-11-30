@@ -57,7 +57,15 @@
 
 
 #ifdef _WIN32
-#include <winsock.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <iphlpapi.h>
+#pragma comment(lib, "Ws2_32.lib")
 #define WS_MAJOR_VERSION   1        ///< major version of Winsock API
 #define WS_MINOR_VERSION   1        ///< minor version of Winsock API
 #define SHUT_RDWR          2  ///< @c SHUT_RDWR is POSIX standard

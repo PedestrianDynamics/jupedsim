@@ -31,7 +31,7 @@
 #include "../geometry/Line.h"
 #include<math.h>
 
-#ifdef WINDOWS
+#if defined(_WIN64) || defined(_WIN32)
 #include <direct.h>
 #define GetCurrentDir _getcwd
 #else
