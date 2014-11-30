@@ -92,6 +92,13 @@ enum RoomState {
      ROOM_SMOKED=1
 };
 
+enum AgentType {
+     MALE=0,
+     FEMALE,
+     CHILD,
+     ELDERLY
+};
+
 enum FileFormat {
      FORMAT_XML_PLAIN,
      FORMAT_XML_BIN,

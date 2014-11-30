@@ -72,7 +72,7 @@ Pedestrian::Pedestrian()
      _V0 = Point(0,0);
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
-     _recordingTime = 5; //seconds
+     _recordingTime = 20; //seconds
      _knownDoors = map<int, NavLineState>();
      _height = 160;
      _age = 30;
@@ -445,9 +445,11 @@ bool Pedestrian::IsFeelingLikeInJam()
      return (_patienceTime < _timeInJam);
 }
 
+//reduce the felt time in Jam by half
 void Pedestrian::ResetTimeInJam()
 {
      _timeInJam = 0.0;
+     //_timeInJam /= 2.0;
 }
 
 void Pedestrian::UpdateTimeInJam()
