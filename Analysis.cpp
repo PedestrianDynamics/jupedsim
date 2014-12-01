@@ -95,8 +95,8 @@ Analysis::Analysis()
      DensityPerFrame = NULL; // the measured density in each frame
      PassLine = NULL;
 
-     _scaleX = 10;   // the size of the grid
-     _scaleY = 10;
+     _scaleX = 0.10;   // the size of the grid
+     _scaleY = 0.10;
      _lowVertexX = 0;// LOWest vertex of the geometry (x coordinate)
      _lowVertexY = 0; //  LOWest vertex of the geometry (y coordinate)
      _highVertexX = 10; // Highest vertex of the geometry
@@ -210,8 +210,8 @@ void Analysis::InitArgs(ArgumentParser* args)
      _outputGraph = args->GetIsOutputGraph();
      _calcIndividualFD = args->GetIsIndividualFD();
      _vComponent = args->GetVComponent();
-     _scaleX = args->GetScaleX();
-     _scaleY = args->GetScaleY();
+     _scaleX = int(args->GetScaleX()*M2CM);
+     _scaleY = int(args->GetScaleY()*M2CM);
      _geoPoly = ReadGeometry(args->GetGeometryFilename());
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
@@ -594,7 +594,7 @@ void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<in
                               _areaForMethod_A->_lineStartY,
                               _areaForMethod_A->_lineEndX,
                               _areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
-                              _yCor[id][frame], _xCor[id][frame],
+                              _yCor[id][frame - 1], _xCor[id][frame],
                               _yCor[id][frame]);
                }
                if(IspassLine==true) {
@@ -614,53 +614,6 @@ int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in t
           numPedsInFrame++;
      }
      return numPedsInFrame;
-}
-
-/**
- * From this function, Some pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
- * as well as the corresponding PedID will be determined.
- */
-void Analysis::getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int frameNr)
-{
-     IdInFrame = new int[PedNum];
-     XInFrame = new double[PedNum];
-     YInFrame = new double[PedNum];
-     VInFrame = new double[PedNum];
-
-     int agentCnt=0;
-     for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-               xAgent = xAgent->NextSiblingElement("agent")) {
-
-          //get agent id, x, y
-          double x= atof(xAgent->Attribute("xPos"));
-          double y= atof(xAgent->Attribute("yPos"));
-          int ID= atoi(xAgent->Attribute("ID"))-1;
-
-          XInFrame[agentCnt] = x*M2CM;
-          YInFrame[agentCnt] = y*M2CM;
-          int Tpast = frameNr - _deltaF;
-          int Tfuture = frameNr + _deltaF;
-          VInFrame[agentCnt] = GetVinFrame(frameNr, Tpast, Tfuture, ID, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
-          IdInFrame[agentCnt] = ID+1;
-
-          if(_flowVelocity) {
-               bool IspassLine=false;
-               if(frameNr >_firstFrame[ID]&&!PassLine[ID]) {
-                    IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
-                              _areaForMethod_A->_lineStartY,
-                              _areaForMethod_A->_lineEndX,
-                              _areaForMethod_A->_lineEndY, _xCor[ID][frameNr - 1],
-                              _yCor[ID][frameNr - 1], _xCor[ID][frameNr],
-                              _yCor[ID][frameNr]);
-               }
-               if(IspassLine==true) {
-                    PassLine[ID] = true;
-                    ClassicFlow++;
-                    V_deltaT+=VInFrame[agentCnt];
-               }
-          }
-          agentCnt++;
-     }//agent
 }
 
 int Analysis::RunAnalysis(const string& filename, const string& path)
@@ -684,13 +637,10 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      }
 
      InitializeFiles(filename);   //initialize the files
-     ClassicFlow=0; // the number of pedestrians pass a line in a certain time
-     V_deltaT=0;   // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
 
      for(int frameNr = 0; frameNr < _numFrames; frameNr++ )
      {
           int frid =  frameNr + min_Frame;
-
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
@@ -699,11 +649,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           int numPedsInFrame = ids.size();
           getPedsParametersInFrame(frameNr, peds_t);
 
-          if(_flowVelocity) {
+          if(_flowVelocity)
+          {
                OutputFlow_NT(frid);
           }
 
-          if(_classicMethod) {
+          if(_classicMethod)
+          {
                OutputClassicalResults(frameNr, frid, numPedsInFrame);
           }
 
@@ -730,22 +682,24 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     cout<<" the number of the pedestrians is less than 2 !!"<< endl;
                }
           }
+
           delete []XInFrame;
           delete []YInFrame;
           delete []VInFrame;
           delete []IdInFrame;
-
      }// getFrame number j
 
      //--------------------Fundamental diagram based on Tin and Tout----------------------------------------------------------------------
-     if(_fundamentalTinTout) {
+     if(_fundamentalTinTout)
+     {
           string FD_TinTout=  _projectRootDir+"./Output/Fundamental_Diagram/TinTout/FDTinTout_"+filename+".dat";
           Log->Write("Fundamental diagram based on Tin and Tout will be calculated!");
           GetFundamentalTinTout(_tIn,_tOut,DensityPerFrame, _fps, _areaForMethod_B->_length,_maxNumofPed, FD_TinTout);
      }
      //-----------------------------------------------------------------------------------------------------------------------------------
-     if(_flowVelocity) {
-          string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+filename+".dat";
+     if(_flowVelocity)
+     {
+    	 string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+filename+".dat";
           FlowRate_Velocity(_deltaT,_fps, _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
      }
 
@@ -848,7 +802,8 @@ bool Analysis::IsPassLine(double Line_startX,double Line_startY, double Line_end
           }
           if(temp1<=0.0&&temp2<=0.0&&temp3<=0.0&&temp4<=0.0) {
                return true;
-          } else {
+          }
+          else {
                return false;
           }
      }
@@ -900,28 +855,45 @@ void Analysis::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPe
      fprintf(fFD_FlowVelocity,"#Flow rate(1/s)	Mean velocity(m/s)\n");
      int TotalTime=AccumPeds.size();  // the total Frame of in the data file
      int TotalPeds=AccumPeds[TotalTime-1];  //the total pedestrians in the data file
-     int firstPassT=-1;  // the first time that there are pedestrians pass the line
-     int *pedspassT=new int[TotalPeds+1]; // the time for certain pedestrian passing the line
-     for(int i=0; i<=TotalPeds; i++) {
-          pedspassT[i]=-1;
-     }
+     if(TotalPeds>0)
+     {
+		 int firstPassT=-1;  // the first time that there are pedestrians pass the line
+		 int *pedspassT=new int[TotalPeds+1]; // the time for certain pedestrian passing the line
+		 for(int i=0; i<=TotalPeds; i++)
+		 {
+			  pedspassT[i]=-1;
+		 }
 
-     for(int ix=0; ix<TotalTime; ix++) {
-          if(AccumPeds[ix]>0 && firstPassT<0) {
-               firstPassT=ix;
-          }
-          if(pedspassT[AccumPeds[ix]]<0) {
-               pedspassT[AccumPeds[ix]]=ix;
-          }
+		 for(int ix=0; ix<TotalTime; ix++)
+		 {
+			  if(AccumPeds[ix]>0 && firstPassT<0)
+			  {
+				   firstPassT=ix;
+			  }
+			  if(pedspassT[AccumPeds[ix]]<0)
+			  {
+				   pedspassT[AccumPeds[ix]]=ix;
+			  }
+		 }
+		 for(int i=firstPassT+DeltaT; i<TotalTime; i+=DeltaT) {
+			 int N1 = AccumPeds[i-DeltaT];  // the total number of pedestrians pass the line at this time
+			 int N2 = AccumPeds[i];
+			 int t_N1 = pedspassT[N1];
+			 int t_N2 = pedspassT[N2];
+			 if(N1!=N2)
+			 {
+				 double flow_rate=fps*(N2-N1)*1.00/(t_N2-t_N1);
+				 double MeanV=(AccumVelocity[i]-AccumVelocity[i-DeltaT])/(AccumPeds[i]-AccumPeds[i-DeltaT]);
+				 fprintf(fFD_FlowVelocity,"%.3f\t%.3f\n",flow_rate,MeanV);
+			 }
+		 }
+		 fclose(fFD_FlowVelocity);
+		 delete []pedspassT;
      }
-     for(int i=firstPassT+DeltaT; i<TotalTime; i+=DeltaT) {
-          double flow_rate=fps*(AccumPeds[i]-AccumPeds[i-DeltaT])*1.00/(pedspassT[AccumPeds[i]]-pedspassT[AccumPeds[i-DeltaT]]);
-          double MeanV=(AccumVelocity[i]-AccumVelocity[i-DeltaT])/(AccumPeds[i]-AccumPeds[i-DeltaT]);
-          fprintf(fFD_FlowVelocity,"%.3f\t%.3f\n",flow_rate,MeanV);
-
+     else
+     {
+    	 Log->Write("INFO:\tNo person passing the reference line given by Method A!\n");
      }
-     fclose(fFD_FlowVelocity);
-     delete []pedspassT;
 }
 
 //-----------------------------------------------------------------------------------------------------------------
@@ -1183,8 +1155,7 @@ void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
           Log->Write("cannot open the file to write the field density\n");
           exit(0);
      }
-     _scaleX*=M2CM;
-     _scaleY*=M2CM;
+
      int NRow = (int)ceil((_highVertexY-_lowVertexY)/_scaleY); // the number of rows that the geometry will be discretized for field analysis
      int NColumn = (int)ceil((_highVertexX-_lowVertexX)/_scaleX); //the number of columns that the geometry will be discretized for field analysis
      for(int row_i=0; row_i<NRow; row_i++) { //

@@ -275,14 +275,6 @@ private:
 
      int getPedsNumInFrame(TiXmlElement* xFrame);
 
-     /**
-      * In this function, pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
-      * as well as the corresponding PedID will be determined.
-      * @param PedNum
-      * @param xFrame
-      * @param frameNr
-      */
-     void getPedsParametersInFrame(int PedNum, TiXmlElement* xFrame, int frameNr);
 
      /**
       * create a file and the directory structure if needed.
@@ -343,7 +335,13 @@ private:
       * get the ids in a certain Frame
       */
      void getPedsParametersInFrame(int frm, std::map< int, std::vector<int> > pdt);
-
+     /**
+      * In this function, pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
+      * as well as the corresponding PedID will be determined.
+      * @param PedNum
+      * @param xFrame
+      * @param frameNr
+      */
 #ifdef __linux__
      int mkpath(char* file_path, mode_t mode=0755);
 #elif __APPLE__

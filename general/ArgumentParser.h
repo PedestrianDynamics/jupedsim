@@ -78,8 +78,8 @@ private:
     int _areaIDforMethodB;
     int _areaIDforMethodC;
     int _areaIDforMethodD;
-    int _scaleX;
-    int _scaleY;
+    float _scaleX;
+    float _scaleY;
     int _log;
 
     std::map <int, MeasurementArea*> _measurementAreas;
@@ -123,8 +123,8 @@ public:
     double GetSteadyStart() const;
     double GetSteadyEnd() const;
     bool GetIsGetProfile() const;
-    int GetScaleX() const;
-    int GetScaleY() const;
+    float GetScaleX() const;
+    float GetScaleY() const;
     int GetLog() const;
     void ParseArgs(int argc, char **argv);
 

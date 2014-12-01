@@ -620,12 +620,12 @@ double ArgumentParser::GetSteadyEnd() const
 }
 
 
-int ArgumentParser::GetScaleX() const
+float ArgumentParser::GetScaleX() const
 {
     return _scaleX;
 }
 
-int ArgumentParser::GetScaleY() const
+float ArgumentParser::GetScaleY() const
 {
     return _scaleY;
 }
