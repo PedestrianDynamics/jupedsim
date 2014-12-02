@@ -75,7 +75,8 @@ if __name__ == "__main__":
             matches = ((os.stat(path), path) for path in matches)
             matches = ((stat[ST_MTIME], path) for stat, path in matches if S_ISREG(stat[ST_MODE]))
             matches = sorted(matches)
-        executable = matches[0][1]
+        print matches
+        executable = matches[0]
     print executable
     for inifile in inifiles:
         if not path.exists(inifile):
@@ -86,6 +87,8 @@ if __name__ == "__main__":
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
         #------------------------------------------------------
+        print executable
+        print inifile
         subprocess.call([executable, "--inifile=%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
