@@ -1,7 +1,7 @@
 /**
  * \file        QuickestPathRouter.cpp
  * \date        Apr 20, 2011
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -85,7 +85,7 @@ int QuickestPathRouter::FindExit(Pedestrian* ped)
           if(isCongested(ped)==true) {
                Redirect(ped);
                ped->ResetTimeInJam();
-               ped->SetSpotlight(true);
+               //ped->SetSpotlight(true);
           }
           //ped->RerouteIn(2.50); // seconds
      } else if(ped->IsReadyForRerouting()) {
@@ -209,56 +209,60 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
      if(aps.size()==1) return preferredExit;
 
      //select the optimal time
-     for(unsigned int ap=0; ap<aps.size(); ap++) {
-
-          // select the reference and
-          int flag=0;
+     for(unsigned int ap=0; ap<aps.size(); ap++)
+     {
           int exitid=aps[ap]->GetID();
-          Pedestrian* myref=NULL;
-          SelectReferencePedestrian(ped,&myref,J_QUEUE_VEL_THRESHOLD_NEW_ROOM,exitid,&flag);
 
-          // compute the time
-          double time=FLT_MAX;
-
-          // case of free exit
-          if((myref==NULL)&& (flag==FREE_EXIT)) {
-               //time= (ped->GetPos()- aps[ap]->GetCentre()).Norm()/ped->GetV0Norm();
-               // time to reach the AP
-               double t1 = (ped->GetPos()- aps[ap]->GetCentre()).Norm()/ped->GetV().Norm();
-
-               //guess time from the Ap to the outside
-               double t2 = (aps[ap]->GetDistanceTo(ped->GetFinalDestination()))/ped->GetV().Norm();
-
-               time=t1+t2;
-               //cout<<"time = "<<time<<endl;
-          }
-
-          // case of unreachable exit
-          if((myref==NULL)&& (flag==UNREACHEABLE_EXIT)) {
-               time= FLT_MAX;
-          }
-
-          // case of ref ped
-          if((myref!=NULL) && (flag==REF_PED_FOUND)) {
-
-               //time to reach the reference
-               double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV().Norm();
-               //double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV0Norm();
-
-               //time for the reference to get out
-               double t2=(myref->GetPos()- aps[ap]->GetCentre()).Norm()/myref->GetV().Norm();
-
-               //guess time from the Ap to the outside
-               double t3 = (aps[ap]->GetDistanceTo(ped->GetFinalDestination()))/ped->GetV().Norm();
-
-               time=t1+t2+t3;
-          }
-
-          if((myref==NULL) && (flag==REF_PED_FOUND)) {
-               Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
-               Log->Write("ERROR:\t reference pedestrians is NULL");
-               return -1;
-          }
+          //FIXME: remove redundant codes
+          double time= GetEstimatedTravelTimeVia(ped,exitid);
+//          // select the reference and
+//          int flag=FREE_EXIT;
+//          int exitid=aps[ap]->GetID();
+//          Pedestrian* myref=NULL;
+//          SelectReferencePedestrian(ped,&myref,J_QUEUE_VEL_THRESHOLD_NEW_ROOM,exitid,&flag);
+//
+//          // compute the time
+//          double time=FLT_MAX;
+//
+//          // case of free exit
+//          if((myref==NULL)&& (flag==FREE_EXIT)) {
+//               //time= (ped->GetPos()- aps[ap]->GetCentre()).Norm()/ped->GetV0Norm();
+//               // time to reach the AP
+//               double t1 = (ped->GetPos()- aps[ap]->GetCentre()).Norm()/ped->GetV().Norm();
+//
+//               //guess time from the Ap to the outside
+//               double t2 = (aps[ap]->GetDistanceTo(ped->GetFinalDestination()))/ped->GetV().Norm();
+//
+//               time=t1+t2;
+//               //cout<<"time = "<<time<<endl;
+//          }
+//
+//          // case of unreachable exit
+//          if((myref==NULL)&& (flag==UNREACHEABLE_EXIT)) {
+//               time= FLT_MAX;
+//          }
+//
+//          // case of ref ped
+//          if((myref!=NULL) && (flag==REF_PED_FOUND)) {
+//
+//               //time to reach the reference
+//               double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV().Norm();
+//               //double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV0Norm();
+//
+//               //time for the reference to get out
+//               double t2=(myref->GetPos()- aps[ap]->GetCentre()).Norm()/myref->GetV().Norm();
+//
+//               //guess time from the Ap to the outside
+//               double t3 = (aps[ap]->GetDistanceTo(ped->GetFinalDestination()))/ped->GetV().Norm();
+//
+//               time=t1+t2+t3;
+//          }
+//
+//          if((myref==NULL) && (flag==REF_PED_FOUND)) {
+//               Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
+//               Log->Write("ERROR:\t reference pedestrians is NULL");
+//               return -1;
+//          }
 
           if(time<minTime) {
                minTime=time;
@@ -317,6 +321,7 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
      *flag=FREE_EXIT; // assume free exit
 
      Hline* crossing=_building->GetTransOrCrossByUID(exitID);
+     if(!crossing) return false;
 
      double radius=3.0;//start radius for looking at the reference in metres
      bool done=false;
@@ -325,6 +330,12 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
           vector<Pedestrian*> queue;
           queue.reserve(250);
           GetQueueAtExit(crossing,jamThreshold,radius,queue,myself->GetSubRoomID());
+
+//          if(myself->GetID()==37)
+//          {
+//               for (auto ped: queue)
+//                    ped->SetSpotlight(true);
+//          }
           if(queue.size()==0) {
                //check if I can see/reach the exit without much effort
                if(IsDirectVisibilityBetween(myself,crossing)) {
@@ -378,18 +389,17 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 
 
      //debug area
-     if(*myref) {
-          // if(myself->GetID()==-488){
-          //  myself->SetSpotlight(true);
-          //     (*myref)->SetSpotlight(true);
-          //     (*myref)->Dump((*myref)->GetID());
-          // }
-
-     } else {
-          //cout<<"no ref ped found: " <<endl;
-          //getc(stdin);
-     }
-
+//     if(*myref) {
+//           if(myself->GetID()==-488){
+//            myself->SetSpotlight(true);
+//               (*myref)->SetSpotlight(true);
+//               (*myref)->Dump((*myref)->GetID());
+//           }
+//
+//     } else {
+//          cout<<"no ref ped found: " <<endl;
+//          getc(stdin);
+//     }
      return true;
 }
 
@@ -467,6 +477,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
           //double closestDistance=FLT_MAX;
           vector<Pedestrian*> peds;
           _building->GetPedestrians(sbr2->GetRoomID(),sbr2->GetSubRoomID(),peds);
+
           for(const auto& ped:peds)
           {
                if(ped->GetExitIndex()==exitID) {
@@ -481,6 +492,7 @@ void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
                }
           }
      }
+
      //cout<<"queue size:"<<queue.size()<<endl;
      //cout<<"mean val:"<<minVel2<<endl;
 }
@@ -609,12 +621,18 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 
      double ratio = inFrontofMe / (inFrontofMe + behindMe);
 
-     if (ratio > 0.8)
+     // the threshold is defined by the middle of the queue
+     if (ratio > 0.5)
           return true;
 
      return false;
 }
 
+
+double QuickestPathRouter::GetTravelTime(Pedestrian* ref, int flag)
+{
+
+}
 
 double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid)
 {
@@ -629,7 +647,8 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      double time=FLT_MAX;
 
      // case of free exit
-     if((myref==NULL)&& (flag==FREE_EXIT)) {
+     if((myref==NULL)&& (flag==FREE_EXIT))
+     {
           double t1 = (ped->GetPos()- ap->GetCentre()).Norm()/ped->GetV0Norm();
           // time to reach the AP
           //double t1 = (ped->GetPos()- ap->GetCentre()).Norm()/ped->GetV().Norm();
@@ -641,12 +660,14 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      }
 
      // case of unreachable exit
-     if((myref==NULL)&& (flag==UNREACHEABLE_EXIT)) {
+     if((myref==NULL)&& (flag==UNREACHEABLE_EXIT))
+     {
           time= FLT_MAX;
      }
 
      // case of ref ped
-     if((myref!=NULL) && (flag==REF_PED_FOUND)) {
+     if((myref!=NULL) && (flag==REF_PED_FOUND))
+     {
 
           //time to reach the reference
           double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetMeanVelOverRecTime();
@@ -671,8 +692,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      if((myref==NULL) && (flag==REF_PED_FOUND)) {
           Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
           Log->Write("      \t reference pedestrians is NULL");
-          return FLT_MAX;
-          //exit(EXIT_FAILURE);
+          time= FLT_MAX;
      }
 
      return time;
@@ -684,6 +704,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
      double preferredExitTime=FLT_MAX;
      int quickest=-1;
      double minTime=FLT_MAX;
+     //ped->SetSpotlight(true);
 
      //only redirect to other final exits in the actual room.
      // if there is no final exit in the sight range,
@@ -698,7 +719,6 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
 
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-
 
      for(const auto& ap:relevantAPs)
      {
@@ -741,17 +761,20 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
           if (exitid==preferredExit) {
                preferredExitTime=time;
           }
-
      }
+
      //compare it with my preferred/current (shortest nearest)
-     if(quickest!=preferredExit) {
+     if(quickest!=preferredExit)
+     {
           double cba = CBA(gain(preferredExitTime),gain(minTime));
-          if (cba>CBA_THRESHOLD) {
+          if (cba>CBA_THRESHOLD)
+          {
                ped->SetExitIndex(quickest);
                ped->SetExitLine(_accessPoints[quickest]->GetNavLine());
                //ped->SetSpotlight(false);
           }
      }
+     //exit(0);
 }
 
 int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)

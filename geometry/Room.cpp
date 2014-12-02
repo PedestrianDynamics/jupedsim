@@ -1,7 +1,7 @@
 /**
  * \file        Room.cpp
  * \date        Sep 30, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -42,6 +42,7 @@ Room::Room()
 {
      _id = -1;
      _state=ROOM_CLEAN; //smoke-free
+     _egressTime=0;
      _caption = "no room caption";
      _zPos = -1.0;
      _subRooms = vector<SubRoom* > ();
@@ -55,6 +56,7 @@ Room::Room(const Room& orig)
      _zPos = orig.GetZPos();
      _subRooms = orig.GetAllSubRooms();
      _state=orig.GetState();
+     _egressTime=orig.GetEgressTime();
      _outputFile=orig.GetOutputHandler();
 }
 
@@ -72,7 +74,7 @@ void Room::SetID(int ID)
      _id = ID;
 }
 
-void Room::SetCaption(string s)
+void Room::SetCaption(const string& s)
 {
      _caption = s;
 }
@@ -106,7 +108,7 @@ int Room::GetID() const
      return _id;
 }
 
-string Room::GetCaption() const
+const string& Room::GetCaption() const
 {
      return _caption;
 }
@@ -116,6 +118,20 @@ double Room::GetZPos() const
      //if(pCaption=="070") return pZPos+1.0;
      return _zPos;
 }
+
+double Room::GetEgressTime() const
+{
+     return _egressTime;
+}
+
+/**
+ * Set/Get the egress time for this room
+ */
+double Room::SetEgressTime(double time)
+{
+     _egressTime=time;
+}
+
 
 int Room::GetNumberOfSubRooms() const
 {
@@ -145,7 +161,7 @@ SubRoom* Room::GetSubRoom(int index) const
 
 #endif // _SIMULATOR
 
-RoomState Room::GetState() const
+const RoomState& Room::GetState() const
 {
      return _state;
 }
@@ -158,16 +174,6 @@ RoomState Room::GetState() const
 void Room::AddSubRoom(SubRoom* r)
 {
      _subRooms.push_back(r);
-}
-
-void Room::DeleteSubRoom(int index)
-{
-     if ((index >= 0) && (index < (int) _subRooms.size()))
-          _subRooms.erase(_subRooms.begin() + index);
-     else {
-          Log->Write("ERROR: Wrong Index in Room::DeleteSubRoom()");
-          exit(0);
-     }
 }
 
 /*************************************************************

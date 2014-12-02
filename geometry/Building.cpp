@@ -1,7 +1,7 @@
 /**
  * \file        Building.cpp
  * \date        Oct 1, 2014
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -815,7 +815,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
                     return itr->second;
           }
      }
-     Log->Write("WARNING: No Transition or Crossing or hline with ID %d: " ,id);
+     Log->Write("ERROR: No Transition or Crossing or hline with ID %d: " ,id);
      return NULL;
 }
 

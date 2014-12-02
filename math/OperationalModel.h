@@ -1,7 +1,7 @@
 /**
  * \file        OperationalModel.h
  * \date        Nov. 11, 2014
- * \version     v0.5
+ * \version     v0.6
  * \author      Ulrich Kemloh
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *

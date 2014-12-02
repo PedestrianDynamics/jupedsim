@@ -1,7 +1,7 @@
 /**
  * \file        TraVisToClient.h
  * \date        Jul 4, 2014
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -57,7 +57,15 @@
 
 
 #ifdef _WIN32
-#include <winsock.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <iphlpapi.h>
+#pragma comment(lib, "Ws2_32.lib")
 #define WS_MAJOR_VERSION   1        ///< major version of Winsock API
 #define WS_MINOR_VERSION   1        ///< minor version of Winsock API
 #define SHUT_RDWR          2  ///< @c SHUT_RDWR is POSIX standard

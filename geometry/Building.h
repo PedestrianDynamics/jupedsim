@@ -1,7 +1,7 @@
 /**
  * \file        Building.h
  * \date        Oct 1, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -58,6 +58,7 @@ private:
      std::string _geometryFilename;
      RoutingEngine* _routingEngine;
      LCGrid* _linkedCellGrid;
+     //TODO: change the type to (unorder) map <int , Room*>
      std::vector<Room*> _rooms;
      std::vector<Pedestrian*> _allPedestians;
 

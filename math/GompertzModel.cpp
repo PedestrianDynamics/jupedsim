@@ -1,7 +1,7 @@
 /**
  * \file        GompertzModel.cpp
  * \date        Apr 15, 2014
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -255,7 +255,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                
                 if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
 
-                     Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
+                     Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
                      v_neu = v_neu*0.01;
                      pos_neu = ped->GetPos();
                 }

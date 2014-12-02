@@ -1,7 +1,7 @@
 /**
  * \file        Room.h
  * \date        Sep 30, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -52,17 +52,20 @@ private:
      /// room elevation
      double _zPos;
      /// all subrooms/partitions of the room
+     /// TODO: Change the type to (unorder)map <int, SubRoom*>
      std::vector<SubRoom*> _subRooms;
      /// all transitions ids
      std::vector<int> _transitionsIDs;
      /// needed if the trajectories for this room are to be write in a special way
      OutputHandler* _outputFile;
+     /// eggress time for this room
+     double _egressTime;
 
 public:
      Room();
      Room(const Room& orig);
-     virtual ~Room();
 
+     virtual ~Room();
 
      /**
       * Set/Get the id of the room which is also used as index
@@ -72,7 +75,7 @@ public:
      /**
       * Set/Get the caption of the room
       */
-     void SetCaption(std::string s);
+     void SetCaption(const std::string& s);
 
      /**
       * Set/Get the elevation of the room
@@ -97,12 +100,22 @@ public:
      /**
       * Set/Get the caption of the room
       */
-     std::string GetCaption() const;
+     const std::string& GetCaption() const;
 
      /**
       * Set/Get the elevation of the room
       */
      double GetZPos() const;
+
+     /**
+      * Set/Get the egress time for this room
+      */
+     double GetEgressTime() const;
+
+     /**
+      * Set/Get the egress time for this room
+      */
+     double SetEgressTime(double time);
 
      /**
       * @return the number of subrooms
@@ -127,17 +140,12 @@ public:
      /**
       * @return the state for this room
       */
-     RoomState GetState()const;
+     const RoomState& GetState()const;
 
      /**
       * Push a new subroom in the vector
       */
      void AddSubRoom(SubRoom* r);
-
-     /**
-      * Delete the subroom at the specified index
-      */
-     void DeleteSubRoom(int index);
 
      /**
       * Add a new transition id

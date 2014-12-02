@@ -108,7 +108,7 @@
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
-            <navigation_meshs method="triangulation" use_for_local_planning="false" />
+            <navigation_mesh method="triangulation" use_for_local_planning="false" />
         <!-- <navigation_lines file="../routing.xml" /> -->
       </parameters>
     </router>

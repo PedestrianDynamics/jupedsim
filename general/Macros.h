@@ -1,7 +1,7 @@
 /**
  * \file        Macros.h
  * \date        Jun 16, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -90,6 +90,13 @@
 enum RoomState {
      ROOM_CLEAN=0,
      ROOM_SMOKED=1
+};
+
+enum AgentType {
+     MALE=0,
+     FEMALE,
+     CHILD,
+     ELDERLY
 };
 
 enum FileFormat {
