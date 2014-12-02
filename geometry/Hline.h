@@ -68,7 +68,6 @@ public:
       */
      void SetSubRoom1(SubRoom* r);
 
-
      /**
       * Set/Get the id of the line
       */
@@ -77,7 +76,7 @@ public:
      /**
       * Set/Get the line caption
       */
-     std::string GetCaption() const;
+     virtual std::string GetCaption() const;
 
      /**
       * Set/Get the Room containing this line
@@ -89,16 +88,15 @@ public:
       */
      SubRoom* GetSubRoom1() const;
 
-
      /**
       * @return true if the line is in the given subroom
       */
-     bool IsInSubRoom(int subroomID) const;
+     virtual bool IsInSubRoom(int subroomID) const;
 
      /**
       * @return true if the line is in the given room
       */
-     bool IsInRoom(int roomID) const;
+     virtual bool IsInRoom(int roomID) const;
 
      /**
       * Debug output

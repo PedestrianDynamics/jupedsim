@@ -38,11 +38,10 @@ class SubRoom;
 
 class Crossing : public Hline {
 private:
-     /// ? unique between crossings and transitions ?
+     /// TODO ? unique between crossings and transitions ?
      int _id;
      /// only one room needed, since a crossing only separates 2 subrooms
      Room* _room1;
-     std::string _caption;
      SubRoom* _subRoom1;
      SubRoom* _subRoom2;
 
@@ -61,39 +60,9 @@ public:
      int GetID () const;
 
      /**
-      * Set/Get the first room
-      */
-     void SetRoom1(Room* r);
-
-     /**
-      * Set/Get the crossing caption
-      */
-     void SetCaption(std::string s);
-
-     /**
-      * Set/Get the first subroom
-      */
-     void SetSubRoom1(SubRoom* r1);
-
-     /**
       * Set/Get the second subroom
       */
      void SetSubRoom2(SubRoom* r2);
-
-     /**
-      * Set/Get the crossing caption
-      */
-     std::string GetCaption() const;
-
-     /**
-      * Set/Get the first room
-      */
-     Room* GetRoom1() const;
-
-     /**
-      * Set/Get the first subroom
-      */
-     SubRoom* GetSubRoom1() const;
 
      /**
       * Set/Get the second subroom
@@ -104,7 +73,6 @@ public:
       * \return true if the subroomID is associated with the current crossing
       */
      bool IsInSubRoom(int subroomID) const;
-
 
      /**
       * @return true if the crossing is open = passable
@@ -122,11 +90,6 @@ public:
       * @return true if it is a transition
       */
      virtual bool IsTransition() const;
-
-     /**
-      * @return true if the crossing/transintion/hline is associated with the room
-      */
-     virtual bool IsInRoom(int roomID) const;
 
      /**
       * @return the other subroom not matching the data

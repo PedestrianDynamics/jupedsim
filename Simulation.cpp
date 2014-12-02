@@ -430,25 +430,34 @@ void Simulation::UpdateRoutesAndLocations()
                // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
                // That may happen if the forces are too high for instance
                // the ped is removed from the simulation, if it could not be reassigned
-               else if (!sub->IsInSubRoom(ped)) {
+               else if (!sub->IsInSubRoom(ped))
+               {
                     bool assigned = false;
                     const std::vector<Room*>& allRooms =
                               _building->GetAllRooms();
-                    for (Room* room : allRooms) {
+                    for (Room* room : allRooms)
+                    {
                          const vector<SubRoom*>& allSubs =
                                    room->GetAllSubRooms();
-                         for (SubRoom* sub : allSubs) {
-                              SubRoom* old_sub =
-                                        allRooms[ped->GetRoomID()]->GetSubRoom(
-                                                  ped->GetSubRoomID());
+                         for (SubRoom* sub : allSubs)
+                         {
+                              Room* old_room =allRooms[ped->GetRoomID()];
+                              SubRoom* old_sub =old_room->GetSubRoom(
+                                        ped->GetSubRoomID());
                               if ((sub->IsInSubRoom(ped->GetPos()))
                                         && (sub->IsDirectlyConnectedWith(
-                                                  old_sub))) {
+                                                  old_sub)))
+                              {
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
                                    ped->SetSubRoomID(sub->GetSubRoomID());
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
+
+                                   //the agent left the old room
+                                   //actualize the egress time for that room
+                                   old_room->SetEgressTime(ped->GetGlobalTime());
+
                                    assigned = true;
                                    break;
                               }
@@ -460,13 +469,17 @@ void Simulation::UpdateRoutesAndLocations()
                     if (!assigned) {
 #pragma omp critical
                          pedsToRemove.push_back(ped);
+                         //the agent left the old room
+                         //actualize the egress time for that room
+                         allRooms[ped->GetRoomID()]->SetEgressTime(ped->GetGlobalTime());
+
                     }
                }
 
                //finally actualize the route
                if (ped->FindRoute() == -1) {
                     //a destination could not be found for that pedestrian
-                    Log->Write("INFO: \tCould not find a route for pedestrian %d",ped->GetID());
+                    Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
                     //exit(EXIT_FAILURE);
 #pragma omp critical
                     pedsToRemove.push_back(ped);
@@ -489,9 +502,16 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::PrintStatistics()
 {
+     Log->Write("\nROOMS EGRESS TIME:");
+     Log->Write("id\tcaption\tegress time (s)");
+
+     for(const auto& room:_building->GetAllRooms())
+     {
+          Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
+     }
+
      Log->Write("\nEXIT USAGE:");
-     auto transitions = _building->GetAllTransitions();
-          for (auto& itr : transitions) {
+     for (const auto& itr : _building->GetAllTransitions()) {
           Transition* goal = itr.second;
           if (goal->IsExit()) {
                Log->Write(

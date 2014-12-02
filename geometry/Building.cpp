@@ -815,7 +815,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
                     return itr->second;
           }
      }
-     Log->Write("WARNING: No Transition or Crossing or hline with ID %d: " ,id);
+     Log->Write("ERROR: No Transition or Crossing or hline with ID %d: " ,id);
      return NULL;
 }
 

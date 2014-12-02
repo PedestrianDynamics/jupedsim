@@ -58,6 +58,7 @@ private:
      std::string _geometryFilename;
      RoutingEngine* _routingEngine;
      LCGrid* _linkedCellGrid;
+     //TODO: change the type to (unorder) map <int , Room*>
      std::vector<Room*> _rooms;
      std::vector<Pedestrian*> _allPedestians;
 
