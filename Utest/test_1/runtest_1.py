@@ -7,60 +7,76 @@ import subprocess, glob
 import multiprocessing
 import matplotlib.pyplot as plt
 import re
+import fnmatch
+from stat import S_ISREG, ST_MODE, ST_MTIME
 
-#=========================
+# =========================
 testnr = 1
-#========================
+# ========================
 
 must_time = 10  # 10 m corridor with 1m/s 
 SUCCESS = 0
 FAILURE = 1
 
-#--------------------------------------------------------
+# --------------------------------------------------------
 logfile="log_test_%d.txt"%testnr
 f=open(logfile, "w")
 f.close()
 logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-#-------------------- DIRS ------------------------------
+# -------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
-DIR= os.path.dirname(os.path.realpath(argv[0]))
+DIR = os.path.dirname(os.path.realpath(argv[0]))
 CWD = os.getcwd()
-#--------------------------------------------------------
+FILE = os.path.join(DIR, "master_ini.xml")
+# --------------------------------------------------------
     
 
 if __name__ == "__main__":
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
         os.chdir(DIR)
-
-
     logging.info("change directory to ..")
     os.chdir("..")
-    logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
-    subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
+    logging.info("call makeini.py with -f %s" %FILE)
+    subprocess.call(["python", "makeini.py", "-f", "%s" %FILE])
     os.chdir(DIR)
-    #-------- get directory of the code TRUNK
+    # -------- get directory of the code TRUNK
     os.chdir("../..")
     TRUNK = os.getcwd()
     os.chdir(DIR)
-    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    lib_path = os.path.abspath(os.path.join(TRUNK, "Utest"))
     sys.path.append(lib_path)
     from utils import *
-    #----------------------------------------
-    logging.info("change directory back to %s"%DIR)
+    # ----------------------------------------
+    logging.info("change directory back to %s" %DIR)
 
-    geofile = "%s/geometry.xml"%DIR
-    inifiles = glob.glob("inifiles/*.xml")
+    geofile = os.path.join(DIR, "geometry.xml")
+    inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
+    print geofile
+    print inifiles
     if not path.exists(geofile):
         logging.critical("geofile <%s> does not exist"%geofile)
         exit(FAILURE)
         
-    executable = "%s/bin/jpscore"%TRUNK
+    executable = os.path.join(TRUNK, "bin", "jpscore")
+
+
+    print executable
     if not path.exists(executable):
-        logging.critical("executable <%s> does not exist yet."%executable)
-        exit(FAILURE)
-        
+        matches = []
+        for root, dirname, filenames in os.walk(os.path.join(TRUNK, 'bin')):
+            for filename in fnmatch.filter(filenames, 'jpscore.exe'):
+                matches.append(os.path.join(root, filename))
+        if len(matches) == 0:
+            logging.critical("executable <%s> or jpscore.exe does not exist yet."%executable)
+            exit(FAILURE)
+        elif len(matches) > 1:
+            matches = ((os.stat(path), path) for path in matches)
+            matches = ((stat[ST_MTIME], path) for stat, path in matches if S_ISREG(stat[ST_MODE]))
+            matches = sorted(matches)
+        executable = matches[0][1]
+    print executable
     for inifile in inifiles:
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
@@ -73,7 +89,7 @@ if __name__ == "__main__":
         subprocess.call([executable, "--inifile=%s"%inifile])
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
-        trajfile = "trajectories/traj" + inifile.split("ini")[2]
+        trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
         logging.info('trajfile = <%s>'%trajfile)
         #--------------------- PARSING & FLOW-MEASUREMENT --------
         if not path.exists(trajfile):
