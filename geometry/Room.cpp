@@ -124,14 +124,10 @@ double Room::GetEgressTime() const
      return _egressTime;
 }
 
-/**
- * Set/Get the egress time for this room
- */
-double Room::SetEgressTime(double time)
+void Room::SetEgressTime(double time)
 {
      _egressTime=time;
 }
-
 
 int Room::GetNumberOfSubRooms() const
 {

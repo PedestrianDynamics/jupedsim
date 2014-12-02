@@ -58,7 +58,7 @@ private:
      std::vector<int> _transitionsIDs;
      /// needed if the trajectories for this room are to be write in a special way
      OutputHandler* _outputFile;
-     /// eggress time for this room
+     /// egress time for this room
      double _egressTime;
 
 public:
@@ -115,7 +115,7 @@ public:
      /**
       * Set/Get the egress time for this room
       */
-     double SetEgressTime(double time);
+     void SetEgressTime(double time);
 
      /**
       * @return the number of subrooms

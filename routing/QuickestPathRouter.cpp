@@ -629,11 +629,6 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 }
 
 
-double QuickestPathRouter::GetTravelTime(Pedestrian* ref, int flag)
-{
-
-}
-
 double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid)
 {
      //select a reference pedestrian

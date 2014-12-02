@@ -238,15 +238,6 @@ private:
       */
      double GetEstimatedTravelTimeVia(Pedestrian* ped, int exitID);
 
-
-     /**
-      * Compute the travel time using that reference pedestrian
-      * @param ref
-      * @param flag
-      * @return
-      */
-     double GetTravelTime(Pedestrian* ref, int flag);
-
      /**
       * compute the best default exit when there is no information
       * @param ped
