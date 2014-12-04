@@ -273,7 +273,7 @@ TraVisToClient::createServerSocket(unsigned short portNumber)
     srvAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     /* try to bind socket to the specified server port */
-    if (SOCKET_ERROR == bind(sock, (struct sockaddr *) & srvAddr, sizeof (srvAddr))) {
+    if (SOCKET_ERROR == ::bind(sock, (struct sockaddr *) & srvAddr, sizeof (srvAddr))) {
         derror("bind() failed!");
         //FIXME:
         //closesocket(tcpSocket);

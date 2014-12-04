@@ -59,7 +59,7 @@
 #include "Debug.h"
 
 
-using namespace std;
+//using namespace std;
 
 
 ThreadDataTransfer::ThreadDataTransfer(QObject *parent):
@@ -406,11 +406,12 @@ void ThreadDataTransfer::parseShapeNode(QDomNode shape)
         if(!ok)color=std::numeric_limits<int>::quiet_NaN();
         //cout <<"id= " <<id <<" height= "<<height<<" color= "<<color<<endl;
 
-        if(!std::isnan(height)) {
+        //if(!std::isnan(height)) {
+	if(height!=height) {
             heights.append(QString::number(id));
             heights.append(QString::number(height));
         }
-        if(!std::isnan(color)) {
+        if(color!=color) {
             colors.append(QString::number(id));
             colors.append(QString::number(color));
         }
@@ -441,7 +442,7 @@ void ThreadDataTransfer::InitHeader(int major, int minor, int patch)
         _jps_ellipseOrientation=QString("eO");
         _jps_ellipseColor=QString("eC");
     } else {
-        cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<endl;
-        cout<<"Please use 0.5 0.5.1 or 0.6 "<<endl;
+      std::cout<<"unsupported header version: "<<major<<"."<<minor<<"."<<patch<<std::endl;
+      std::cout<<"Please use 0.5 0.5.1 or 0.6 "<<std::endl;
     }
 }
