@@ -724,11 +724,11 @@ vector<polygon_2d> Analysis::GetPolygons(int NrInFrm)
 {
      VoronoiDiagram vd;
      vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm);
-     polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
      if(_cutByCircle)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
      }
+     //polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
      return polygons;
 }
 
@@ -984,30 +984,30 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
      for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end(); polygon_iterator++) {
           typedef std::vector<polygon_2d > polygon_list;
           polygon_list v;
+          if(!v.empty())
+          {
+        	  v.clear();
+          }
           // double areaPolygon = area(*polygon_iterator);
           intersection(measureArea, *polygon_iterator, v);
-          polygon_2d a,b;
-          a = measureArea;
-          b = *polygon_iterator;
-          polygon_list v1;
+
+
           if(!v.empty()) {
+        	  //std::cout<<"Original polygon:\t"<<dsv(v[0])<<"\n";
                density+=area(v[0])/area(*polygon_iterator);
                if((area(v[0])/area(*polygon_iterator))>1.00001) {
-                    std::cout<<dsv(v[0])<<"\n";
-                    std::cout<<dsv(measureArea)<<"\n";
-                    std::cout<<dsv(*polygon_iterator)<<"\n";
-                    std::cout<<"this is a wrong result "<<area(v[0])<<'\t'<<area(*polygon_iterator)<<"\n";
-                    correct(a);
-                    correct(b);
-                    intersection(a,b,v1);
-                    std::cout<<dsv(v1[0])<<"\n";
-                    std::cout<<dsv(a)<<"\n";
-                    std::cout<<dsv(b)<<"\n";
+            	   std::cout<<"The num of intersections is: "<< v.size()<<'\t'<<polygon.size()<<std::endl;
+            	   std::cout<<"----------------------Now calculating density!!!-----------------\n ";
+                    std::cout<<"measure area: \t"<<dsv(measureArea)<<"\n";
+                    std::cout<<"Original polygon:\t"<<dsv(*polygon_iterator)<<"\n";
+                    std::cout<<"intersected polygon: \t"<<dsv(v[0])<<"\n";
+                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(*polygon_iterator)<<"\n";
                     //exit(EXIT_FAILURE);
                }
           }
      }
-     return density/(area(measureArea)*CMtoM*CMtoM);
+     density = density/(area(measureArea)*CMtoM*CMtoM);
+     return density;
 }
 
 double Analysis::GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea)
@@ -1089,8 +1089,9 @@ double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* V
           intersection(measureArea, *polygon_iterator, v);
           if(!v.empty()) {
                meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
-               if((area(v[0])/area(*polygon_iterator))>1.00001) {
-                    std::cout<<"this is a wrong result"<<area(v[0])<<'\t'<<area(*polygon_iterator);;
+               if((area(v[0])/area(*polygon_iterator))>1.00001)
+               {
+                    std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(*polygon_iterator)<<std::endl;;
                }
           }
           temp++;

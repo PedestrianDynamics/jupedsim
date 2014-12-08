@@ -68,7 +68,7 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
      int result = 0;
      int Ncell = 0;
      std::vector<polygon_2d> polygons;
-     double Bound_Max = 10.0E10;
+     double Bound_Max = 10.0E4;
      bool OverBound = false;
      do
      {
@@ -76,6 +76,21 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
           double Bd_Box_minY = -Bound_Max;
           double Bd_Box_maxX = Bound_Max;
           double Bd_Box_maxY = Bound_Max;
+          polygon_2d boundingbox;
+          boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(-Bound_Max, -Bound_Max));
+          boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(-Bound_Max, Bound_Max));
+          boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(Bound_Max, Bound_Max));
+          boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(Bound_Max, -Bound_Max));
+          boost::geometry::correct(boundingbox);
+          if(!polygons.empty())
+          {
+        	  polygons.clear();
+        	  OverBound = false;
+        	  Ncell=0;
+        	  result=0;
+          }
+          //std::cout<<"Please start to work!!"<<polygons.size()<<std::endl;
+          //cout << "Bound_Max:\t" << Bound_Max << endl;
           for (voronoi_diagram<double>::const_cell_iterator it = vd.cells().begin();
                     it != vd.cells().end(); ++it)
           {
@@ -103,53 +118,77 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
                bool infinite_s = false;
                bool infinite_e = false;
                // This is convenient way to iterate edges around Voronoi cell.
+               //std::cout<<"THIS IS The CELL:\t"<<Ncell<<std::endl;
                do
                {
                     if (edge->is_primary())
                          ++result;
                     if (edge->vertex0())
                     {
-                         polypts.push_back(point_type2(edge->vertex0()->x(), edge->vertex0()->y()));
-                         pt_temp = point_type2(edge->vertex0()->x(), edge->vertex0()->y());
-                         if (fabs(edge->vertex0()->x()) > Bound_Max)
+                         if(edge->vertex1())
                          {
-                              Bound_Max = 10 * fabs(edge->vertex0()->x());
-                              OverBound = true;
-                              cout << "Bound_Max:\t" << Bound_Max << endl;
+							 if(fabs(edge->vertex0()->x()) < Bound_Max && (fabs(edge->vertex0()->y()) < Bound_Max)
+									 &&fabs(edge->vertex1()->x()) < Bound_Max && (fabs(edge->vertex1()->y()) < Bound_Max))
+							 {
+								 polypts.push_back(point_type2(edge->vertex0()->x(), edge->vertex0()->y()));
+								 pt_temp = point_type2(edge->vertex0()->x(), edge->vertex0()->y());
+								 NumVertex++;
+							 }
+							 else if((fabs(edge->vertex0()->x()) > Bound_Max || (fabs(edge->vertex0()->y()) > Bound_Max))
+									 &&fabs(edge->vertex1()->x()) < Bound_Max && (fabs(edge->vertex1()->y()) < Bound_Max))
+							 {
+								 pt_s = getIntersectionPoint(point_2d(edge->vertex0()->x(), edge->vertex0()->y()), point_2d(edge->vertex1()->x(), edge->vertex1()->y()), boundingbox);
+								 polypts.push_back(point_type2(pt_s.x(), pt_s.y()));
+								 NumVertex++;
+								 infinite_s = true;
+							 }
+							 else if((fabs(edge->vertex0()->x()) < Bound_Max && (fabs(edge->vertex0()->y()) < Bound_Max))
+							 		&&(fabs(edge->vertex1()->x()) > Bound_Max || (fabs(edge->vertex1()->y()) > Bound_Max)))
+							 {
+								 polypts.push_back(point_type2(edge->vertex0()->x(), edge->vertex0()->y()));
+								 pt_e = getIntersectionPoint(point_2d(edge->vertex0()->x(), edge->vertex0()->y()), point_2d(edge->vertex1()->x(), edge->vertex1()->y()), boundingbox);
+								 polypts.push_back(point_type2(pt_e.x(), pt_e.y()));
+								 NumVertex+=2;
+								 index_end = NumVertex;
+								 infinite_e = true;
+							 }
                          }
-                         if (fabs(edge->vertex0()->y()) > Bound_Max)
+                         else
                          {
-                              Bound_Max = 10 * fabs(edge->vertex0()->y());
-                              OverBound = true;
-                              cout << "Bound_Max:\t" << Bound_Max << endl;
+                        	 if(fabs(edge->vertex0()->x()) < Bound_Max && (fabs(edge->vertex0()->y()) < Bound_Max))
+                        	{
+                        		 polypts.push_back(point_type2(edge->vertex0()->x(), edge->vertex0()->y()));
+                        		 pt_e = clip_infinite_edge(*edge, Bd_Box_minX, Bd_Box_minY, Bd_Box_maxX,
+                        		                                    Bd_Box_maxY);
+                        		 polypts.push_back(point_type2(pt_e.x(), pt_e.y()));
+								 NumVertex+=2;
+								 index_end = NumVertex;
+								 //std::cout<<"This is a test program 444444!"<<std::endl;
+								 infinite_e = true;
+                        	}
                          }
-                         NumVertex++;
                     }
                     else
                     {
-                         pt_s = clip_infinite_edge(*edge, Bd_Box_minX, Bd_Box_minY, Bd_Box_maxX,
-                                   Bd_Box_maxY);
-                         polypts.push_back(point_type2(pt_s.x(), pt_s.y()));
-                         NumVertex++;
-                         infinite_s = true;
+                    	 if(edge->vertex1()&&fabs(edge->vertex1()->x()) < Bound_Max && (fabs(edge->vertex1()->y()) < Bound_Max))
+                    	 {
+							pt_s = clip_infinite_edge(*edge, Bd_Box_minX, Bd_Box_minY, Bd_Box_maxX,
+									   Bd_Box_maxY);
+							 polypts.push_back(point_type2(pt_s.x(), pt_s.y()));
+							 NumVertex++;
+							 infinite_s = true;
+							 //std::cout<<"This is a test program 555555!"<<std::endl;
+                    	 }
                     }
-                    if (!edge->vertex1())
-                    {
-                         pt_e = clip_infinite_edge(*edge, Bd_Box_minX, Bd_Box_minY, Bd_Box_maxX,
-                                   Bd_Box_maxY);
-                         polypts.push_back(point_type2(pt_e.x(), pt_e.y()));
-                         NumVertex++;
-                         index_end = NumVertex;
-                         infinite_e = true;
-                    }
-
                     edge = edge->next();
 
                } while (edge != cell.incident_edge());
                Ncell++;
+
                if (infinite_s && infinite_e)
                {
-                    vector<point_type2> vertexes = add_bounding_points(pt_s, pt_e, pt_temp,
+
+            	   vector<point_type2> vertexes = add_bounding_points(pt_s, pt_e, pt_temp,
                               Bd_Box_minX, Bd_Box_minY, Bd_Box_maxX, Bd_Box_maxY);
                     //cout<<"size"<<vertexes.size()<<endl;
                     if (!vertexes.empty())
@@ -170,7 +209,7 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
                //std::cout<<"This cell include the point <"<<thispoint.x()<<", "<<thispoint.y()<< ">"<<std::endl;
           }
      } while (OverBound);
-
+     //std::cout<<"Please come work!!"<<polygons.size()<<std::endl;
      return polygons;
 }
 
@@ -215,6 +254,24 @@ point_type2 VoronoiDiagram::clip_infinite_edge(const edge_type& edge, double min
           pt.y(origin.y() + direction.y() * koef);
      }
 
+     polygon_2d boundingbox;
+     boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(minX, minY));
+     boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(minX, maxY));
+     boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(maxX, maxY));
+     boost::geometry::append(boundingbox, boost::geometry::make<point_2d>(maxX, minY));
+     boost::geometry::correct(boundingbox);
+
+     pt = getIntersectionPoint(point_2d(pt.x(), pt.y()), point_2d(origin.x(), origin.y()), boundingbox);
+     /*if(direction.x()==0)
+     {
+
+    	 std::cout<<"There is vertical line!"<<std::endl;
+     }
+     if(direction.y()==0)
+          {
+
+         	 std::cout<<"There is horizontal line!"<<std::endl;
+          }
      double k = direction.y() / direction.x();
      double b = origin.y() - k * origin.x();
 
@@ -277,7 +334,7 @@ point_type2 VoronoiDiagram::clip_infinite_edge(const edge_type& edge, double min
                pt.x(x_temp);
                pt.y(minY);
           }
-     }
+     }*/
      return pt;
 
 }
@@ -442,23 +499,61 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
      return bounding_vertex;
 }
 
+
+//-----------In getIntersectionPoint() the edges of the square is  vertical or horizontal segment--------------
+point_type2 VoronoiDiagram::getIntersectionPoint(point_2d pt0, point_2d pt1, polygon_2d square)
+{
+	std::vector<point_2d> pt;
+	segment edge0(pt0, pt1);
+	std::vector<point_2d> const& points = square.outer();
+	//std::cout<<"the number of points is:" <<points.size()<<std::endl;
+	for (std::vector<point_2d>::size_type i = 1; i < points.size(); ++i)
+	{
+		segment edge1(points[i], points[i-1]);
+		if(boost::geometry::intersects(edge0, edge1))
+		{
+			boost::geometry::intersection(edge0, edge1, pt);
+			break;
+		}
+	}
+	if(pt.empty())
+	{
+		segment edge1(points[3], points[0]);
+		boost::geometry::intersection(edge0, edge1, pt);
+	}
+	point_type2 interpts(pt[0].x(), pt[0].y());
+	return interpts;
+}
+
 std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(std::vector<polygon_2d> polygon,
           polygon_2d Geometry, double* xs, double* ys)
 {
-     std::vector<polygon_2d> intersetionpolygons;
+	 std::vector<polygon_2d> intersetionpolygons;
      std::vector<polygon_2d>::iterator polygon_iterator;
      int temp = 0;
+    // std::cout<<"the number of polygons is:"<<polygon.size()<<std::endl;
      for (polygon_iterator = polygon.begin(); polygon_iterator != polygon.end(); polygon_iterator++)
      {
           typedef std::vector<polygon_2d> polygon_list;
           polygon_list v;
           boost::geometry::intersection(Geometry, *polygon_iterator, v);
+          if(v.size()==0)
+          {
+        	  //std::cout<<"the number of cut polygon is:"<<v.size()<<std::endl;
+        	  //std::cout<<"The polygon is:"<<boost::geometry::dsv(*polygon_iterator)<<std::endl;
+        	  //std::cout<<"The geometry is:"<<boost::geometry::dsv(Geometry)<<std::endl;
+          }
           //judge whether the polygon is cut into two separate parts,if so delete the part without including the point
           if (v.size() == 1)
           {
                if (boost::geometry::within(point_2d(xs[temp], ys[temp]), v[0]))
                {
                     intersetionpolygons.push_back(v[0]);
+                    if(boost::geometry::area(v[0])>boost::geometry::area(*polygon_iterator)+10)
+                    {
+                  	  std::cout<<"The error cut polygon is:"<<boost::geometry::dsv(*polygon_iterator)<<std::endl;
+                  	  //std::cout<<"The geometry is:"<<boost::geometry::dsv(Geometry)<<std::endl;
+                    }
                }
           }
           else
@@ -468,6 +563,11 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(std::vector<poly
                     if (boost::geometry::within(point_2d(xs[temp], ys[temp]), *it))
                     {
                          intersetionpolygons.push_back(*it);
+                         if(boost::geometry::area(*it)>10000000)
+                         {
+                       	  std::cout<<"The polygon from IT is:"<<boost::geometry::dsv(*polygon_iterator)<<std::endl;
+                       	  std::cout<<"The geometry from IT is:"<<boost::geometry::dsv(Geometry)<<std::endl;
+                         }
                     }
                }
           }
@@ -478,8 +578,8 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(std::vector<poly
      {
           boost::geometry::correct(poly);
           //std::cout<<boost::geometry::dsv(poly)<<std::endl;
-
      }
+
      return intersetionpolygons;
 }
 
