@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowFlags( Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
 
     //used for saving the settings in a persistant way
-    QCoreApplication::setOrganizationName("Forschungszentrum Juelich GmbH");
+    QCoreApplication::setOrganizationName("Forschungszentrum_Juelich_GmbH");
     QCoreApplication::setOrganizationDomain("jupedsim.org");
     QCoreApplication::setApplicationName("jupedsim");
 
