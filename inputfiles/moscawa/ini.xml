@@ -10,9 +10,9 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	<!-- geometry file -->
 	<geometry>geometry.xml</geometry>
 
-	<!-- traectories file and format -->
+	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="16">
-		<file location="trajectorie.xml" />
+		<file location="trajectories.xml" />
 	</trajectories>
 	<!-- where to store the logs -->
 	<!--logfile>log</logfile -->
@@ -103,7 +103,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
 
 			<group group_id="0" agent_parameter_id="1"  room_id="0" subroom_id="11" number="30"
-				goal_id="-1" router_id="0" />
+				goal_id="-1" router_id="1" />
 
 
 
@@ -155,12 +155,12 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="0" description="global_shortest">
+		<router router_id="1" description="global_shortest">
 			<parameters>
 				<navigation_lines file="routing.xml" />
 			</parameters>
 		</router>
-		<router router_id="1" description="global_shortest">
+		<router router_id="2" description="quickest">
 			<parameters>
 				<navigation_lines file="routing.xml" />
 			</parameters>

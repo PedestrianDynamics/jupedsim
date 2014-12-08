@@ -11,9 +11,9 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	<geometry>geometry-mall.xml</geometry>
 	<events>events-mall.xml</events>
 	
-	<!-- traectories file and format -->
+	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="8">
-		<file location="trajectorie.xml" />
+		<file location="trajectories.xml" />
 		<!-- <socket hostname="127.0.0.1" port="8989"/>  -->
 	</trajectories>
 	<!-- where to store the logs -->
@@ -266,7 +266,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="2" description="global_safest">
+		<router router_id="2" description="global_shortest">
 			<parameters>
 				<navigation_lines file="routing-mall.xml" />
 			</parameters>
