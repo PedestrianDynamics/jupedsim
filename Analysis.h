@@ -36,6 +36,7 @@
 #include "tinyxml/tinyxml.h"
 #include "geometry/Building.h"
 #include "IO/OutputHandler.h"
+#include "general/Macros.h"
 
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -48,6 +49,7 @@ using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 typedef model::ring<point_2d> ring;
+typedef std::vector<polygon_2d > polygon_list;
 
 #define CMtoM 0.01
 #define M2CM 100
@@ -101,7 +103,7 @@ private:
       * @param VComponent
       * @return
       */
-     void CreatGlobeVaribles(int numPeds, int numFrames);
+     void CreateGlobalVariables(int numPeds, int numFrames);
      double GetVinFrame(int Tnow, int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast,
                double **Xcor, double **Ycor, char VComponent);
 
@@ -296,7 +298,7 @@ private:
       * @param polygons
       * @param frid
       */
-     void OutputVoronoiResults(std::vector<polygon_2d> polygons, int frid);
+     void OutputVoronoiResults(const std::vector<polygon_2d>& polygons, int frid);
 
      /**
       * Output the time series of pedestrian number N passing the reference line.
@@ -334,7 +336,7 @@ private:
      /**
       * get the ids in a certain Frame
       */
-     void getPedsParametersInFrame(int frm, std::map< int, std::vector<int> > pdt);
+     void getPedsParametersInFrame(int frm, std::map< int, std::vector<int> > &pdt);
      /**
       * In this function, pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
       * as well as the corresponding PedID will be determined.

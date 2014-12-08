@@ -35,6 +35,7 @@
 
 
 using namespace std;
+using namespace boost::geometry;
 
 VoronoiDiagram::VoronoiDiagram()
 {
@@ -203,6 +204,7 @@ std::vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(double *XInFrame, dou
                     boost::geometry::append(poly, point_2d(polypts[i].x(), polypts[i].y()));
                }
 
+               //TODO: check and remove duplicate
                boost::geometry::correct(poly);
                polygons.push_back(poly);
                //std::cout<<boost::geometry::dsv(poly)<<std::endl;
@@ -364,15 +366,15 @@ bool VoronoiDiagram::point_inside_triangle(const point_type2& pt, const point_ty
      return true;
 }
 
-vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_type2 pt2,
-          point_type2 pt, double minX, double minY, double maxX, double maxY)
+vector<point_type2> VoronoiDiagram::add_bounding_points(const point_type2& pt1, const point_type2& pt2, const point_type2& pt,
+          double minX, double minY, double maxX, double maxY)
 {
-     double eps = 10E-16;
+
      vector<point_type2> bounding_vertex;
-     if (fabs(pt1.x() - pt2.x()) > eps && fabs(pt1.y() - pt2.y()) > eps)
+     if (fabs(pt1.x() - pt2.x()) > J_EPS && fabs(pt1.y() - pt2.y()) > J_EPS)
      {
-          if ((fabs(pt1.y() - maxY) < eps && fabs(pt2.x() - maxX) < eps)
-                    || (fabs(pt2.y() - maxY) < eps && fabs(pt1.x() - maxX) < eps))
+          if ((fabs(pt1.y() - maxY) < J_EPS && fabs(pt2.x() - maxX) < J_EPS)
+                    || (fabs(pt2.y() - maxY) < J_EPS && fabs(pt1.x() - maxX) < J_EPS))
           {
                point_type2 vertex(maxX, maxY);
                if (point_inside_triangle(pt, vertex, pt1, pt2))
@@ -386,8 +388,8 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
                     bounding_vertex.push_back(point_type2(maxX, maxY));
                }
           }
-          else if ((fabs(pt1.y() - maxY) < eps && fabs(pt2.x() - minX) < eps)
-                    || (fabs(pt2.y() - maxY) < eps && fabs(pt1.x() - minX) < eps))
+          else if ((fabs(pt1.y() - maxY) < J_EPS && fabs(pt2.x() - minX) < J_EPS)
+                    || (fabs(pt2.y() - maxY) < J_EPS && fabs(pt1.x() - minX) < J_EPS))
           {
                point_type2 vertex(minX, maxY);
                if (point_inside_triangle(pt, vertex, pt1, pt2))
@@ -401,8 +403,8 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
                     bounding_vertex.push_back(point_type2(minX, maxY));
                }
           }
-          else if ((fabs(pt1.y() - minY) < eps && fabs(pt2.x() - minX) < eps)
-                    || (fabs(pt2.y() - minY) < eps && fabs(pt1.x() - minX) < eps))
+          else if ((fabs(pt1.y() - minY) < J_EPS && fabs(pt2.x() - minX) < J_EPS)
+                    || (fabs(pt2.y() - minY) < J_EPS && fabs(pt1.x() - minX) < J_EPS))
           {
                point_type2 vertex(minX, minY);
                if (point_inside_triangle(pt, vertex, pt1, pt2))
@@ -416,8 +418,8 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
                     bounding_vertex.push_back(point_type2(minX, minY));
                }
           }
-          else if ((fabs(pt1.y() - minY) < eps && fabs(pt2.x() - maxX) < eps)
-                    || (fabs(pt2.y() - minY) < eps && fabs(pt1.x() - maxX) < eps))
+          else if ((fabs(pt1.y() - minY) < J_EPS && fabs(pt2.x() - maxX) < J_EPS)
+                    || (fabs(pt2.y() - minY) < J_EPS && fabs(pt1.x() - maxX) < J_EPS))
           {
                point_type2 vertex(minX, minY);
                if (point_inside_triangle(pt, vertex, pt1, pt2))
@@ -431,10 +433,10 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
                     bounding_vertex.push_back(point_type2(maxX, minY));
                }
           }
-          else if ((fabs(pt1.y() - minY) < eps && fabs(pt2.y() - maxY) < eps)
-                    || (fabs(pt2.y() - minY) < eps && fabs(pt1.y() - maxY) < eps))
+          else if ((fabs(pt1.y() - minY) < J_EPS && fabs(pt2.y() - maxY) < J_EPS)
+                    || (fabs(pt2.y() - minY) < J_EPS && fabs(pt1.y() - maxY) < J_EPS))
           {
-               if (fabs(pt1.x() - pt2.x()) < eps)
+               if (fabs(pt1.x() - pt2.x()) < J_EPS)
                {
                     if (pt1.x() < pt.x())
                     {
@@ -463,10 +465,10 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
                     }
                }
           }
-          else if ((fabs(pt1.x() - minX) < eps && fabs(pt2.x() - maxX) < eps)
-                    || (fabs(pt2.x() - minX) < eps && fabs(pt1.x() - maxX) < eps))
+          else if ((fabs(pt1.x() - minX) < J_EPS && fabs(pt2.x() - maxX) < J_EPS)
+                    || (fabs(pt2.x() - minX) < J_EPS && fabs(pt1.x() - maxX) < J_EPS))
           {
-               if (fabs(pt1.y() - pt2.y()) < eps)
+               if (fabs(pt1.y() - pt2.y()) < J_EPS)
                {
                     if (pt1.y() < pt.y())
                     {
@@ -501,7 +503,7 @@ vector<point_type2> VoronoiDiagram::add_bounding_points(point_type2 pt1, point_t
 
 
 //-----------In getIntersectionPoint() the edges of the square is  vertical or horizontal segment--------------
-point_type2 VoronoiDiagram::getIntersectionPoint(point_2d pt0, point_2d pt1, polygon_2d square)
+point_type2 VoronoiDiagram::getIntersectionPoint(const point_2d& pt0, const point_2d& pt1, const polygon_2d& square)
 {
 	std::vector<point_2d> pt;
 	segment edge0(pt0, pt1);
@@ -525,71 +527,57 @@ point_type2 VoronoiDiagram::getIntersectionPoint(point_2d pt0, point_2d pt1, pol
 	return interpts;
 }
 
-std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(std::vector<polygon_2d> polygon,
-          polygon_2d Geometry, double* xs, double* ys)
+std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon,
+          const polygon_2d& Geometry, double* xs, double* ys)
 {
-	 std::vector<polygon_2d> intersetionpolygons;
-     std::vector<polygon_2d>::iterator polygon_iterator;
+     std::vector<polygon_2d> intersetionpolygons;
      int temp = 0;
-    // std::cout<<"the number of polygons is:"<<polygon.size()<<std::endl;
-     for (polygon_iterator = polygon.begin(); polygon_iterator != polygon.end(); polygon_iterator++)
-     {
-          typedef std::vector<polygon_2d> polygon_list;
-          polygon_list v;
-          boost::geometry::intersection(Geometry, *polygon_iterator, v);
-          if(v.size()==0)
-          {
-        	  //std::cout<<"the number of cut polygon is:"<<v.size()<<std::endl;
-        	  //std::cout<<"The polygon is:"<<boost::geometry::dsv(*polygon_iterator)<<std::endl;
-        	  //std::cout<<"The geometry is:"<<boost::geometry::dsv(Geometry)<<std::endl;
-          }
-          //judge whether the polygon is cut into two separate parts,if so delete the part without including the point
-          if (v.size() == 1)
-          {
-               if (boost::geometry::within(point_2d(xs[temp], ys[temp]), v[0]))
-               {
-                    intersetionpolygons.push_back(v[0]);
-                    if(boost::geometry::area(v[0])>boost::geometry::area(*polygon_iterator)+10)
-                    {
-                  	  std::cout<<"The error cut polygon is:"<<boost::geometry::dsv(*polygon_iterator)<<std::endl;
-                  	  //std::cout<<"The geometry is:"<<boost::geometry::dsv(Geometry)<<std::endl;
-                    }
-               }
-          }
-          else
-          {
-               for (polygon_list::const_iterator it = v.begin(); it != v.end(); ++it)
-               {
-                    if (boost::geometry::within(point_2d(xs[temp], ys[temp]), *it))
-                    {
-                         intersetionpolygons.push_back(*it);
-                         if(boost::geometry::area(*it)>10000000)
-                         {
-                       	  std::cout<<"The polygon from IT is:"<<boost::geometry::dsv(*polygon_iterator)<<std::endl;
-                       	  std::cout<<"The geometry from IT is:"<<boost::geometry::dsv(Geometry)<<std::endl;
-                         }
-                    }
-               }
-          }
-          temp++;
-     }
+     // std::cout<<"the number of polygons is:"<<polygon.size()<<std::endl;
 
-     BOOST_FOREACH(polygon_2d &poly, intersetionpolygons)
+     BOOST_FOREACH(const auto& polygon_iterator, polygon)
      {
-          boost::geometry::correct(poly);
-          //std::cout<<boost::geometry::dsv(poly)<<std::endl;
+          polygon_list v;
+          boost::geometry::intersection(Geometry, polygon_iterator, v);
+          //judge whether the polygon is cut into two separate parts,if so delete the part without including the point
+
+          BOOST_FOREACH(auto & it, v)
+          {
+               if (boost::geometry::within(point_2d(xs[temp], ys[temp]), it))
+               {
+                    //check and remove duplicates
+                    //dispatch::unique (it);
+                    polygon_2d simplified;
+                    boost::geometry::simplify(it,simplified,J_EPS);
+
+                    //if(simplified.outer().size()!=it.outer().size()){
+                    //     //cout<<"the polygon was reduced";
+                    //     //exit(0);
+                    //}
+
+                    boost::geometry::correct(simplified);
+                    intersetionpolygons.push_back(simplified);
+                    if(boost::geometry::area(it)>10000000)
+                    {
+                         std::cout<<"The polygon from IT is:"<<boost::geometry::dsv(polygon_iterator)<<std::endl;
+                         std::cout<<"The geometry from IT is:"<<boost::geometry::dsv(Geometry)<<std::endl;
+                    }
+               }
+          }
+
+          temp++;
      }
 
      return intersetionpolygons;
 }
 
-std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(std::vector<polygon_2d> polygon,
+
+std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon,
           double* xs, double* ys, double radius, int edges)
 {
      std::vector<polygon_2d> intersetionpolygons;
      std::vector<polygon_2d>::iterator polygon_iterator;
      int temp = 0;
-     for (polygon_iterator = polygon.begin(); polygon_iterator != polygon.end(); polygon_iterator++)
+     for (const auto & polygon_iterator:polygon)
      {
           polygon_2d circle;
           {
@@ -604,7 +592,7 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(std::vector<polygo
           boost::geometry::correct(circle);
           typedef std::vector<polygon_2d> polygon_list;
           polygon_list v;
-          boost::geometry::intersection(circle, *polygon_iterator, v);
+          boost::geometry::intersection(circle, polygon_iterator, v);
 
           //judge whether the polygon is cut into two separate parts,if so delete the part without including the point
           if (v.size() == 1)

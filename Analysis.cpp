@@ -54,7 +54,7 @@
 
 
 using namespace std;
-
+OutputHandler* Log;
 
 /************************************************
  // Konstruktoren
@@ -119,6 +119,7 @@ Analysis::Analysis()
      min_Frame = INT_MAX;
      _cutRadius=1.0;
      _circleEdges=6;
+     _trajFormat=FileFormat::FORMAT_PLAIN;
 }
 
 Analysis::~Analysis()
@@ -374,7 +375,7 @@ void Analysis::InitializeVariables(const string& filename)
 
      //Total number of agents
      _maxNumofPed = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - min_ID+1;
-     CreatGlobeVaribles(_maxNumofPed, _numFrames);
+     CreateGlobalVariables(_maxNumofPed, _numFrames);
 
      std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
      std::vector<int> lastFrameIndex;	 //The last frame index of each pedestrian
@@ -465,7 +466,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
           Log->Write("INFO:\tFrame rate fps=%d", _fps);
      }
 
-     CreatGlobeVaribles(_maxNumofPed, _numFrames);
+     CreateGlobalVariables(_maxNumofPed, _numFrames);
      bool IsinMeasurezone[_maxNumofPed];  // Record whether pedestrian i is in measurement area or not
      //processing the frames node
      TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
@@ -532,7 +533,7 @@ void Analysis::InitializeVariables(TiXmlElement* xRootNode)
 
 }
 
-void Analysis::CreatGlobeVaribles(int numPeds, int numFrames)
+void Analysis::CreateGlobalVariables(int numPeds, int numFrames)
 {
      _xCor = new double* [numPeds];
      _yCor = new double* [numPeds];
@@ -567,9 +568,10 @@ void Analysis::CreatGlobeVaribles(int numPeds, int numFrames)
      }
 }
 
-void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<int> > pdt)
+void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<int> > &pdt)
 {
-     std::vector<int> ids=pdt[frame];
+     const std::vector<int>& ids=pdt[frame];
+
      int PedNum = ids.size();
      IdInFrame = new int[PedNum];
      XInFrame = new double[PedNum];
@@ -619,7 +621,7 @@ int Analysis::getPedsNumInFrame(TiXmlElement* xFrame) //counting the agents in t
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
      string fullTrajectoriesPathName= path+"/"+filename;
-     cout<<"the format of the trajectory is:"<<_trajFormat<<endl;
+     Log->Write("INFO:\tthe format of the trajectory is ",_trajFormat);
      if(_trajFormat == FORMAT_XML_PLAIN) // read traje
      {
           TiXmlDocument docGeo(fullTrajectoriesPathName);
@@ -728,7 +730,7 @@ vector<polygon_2d> Analysis::GetPolygons(int NrInFrm)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
      }
-     //polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
+     polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
      return polygons;
 }
 
@@ -746,7 +748,7 @@ void Analysis::OutputClassicalResults(int frmNr, int frmId, int numPedsInFrame)
 /**
  * Output the Voronoi density and velocity in the corresponding file
  */
-void Analysis::OutputVoronoiResults(vector<polygon_2d>  polygons, int frid)
+void Analysis::OutputVoronoiResults(const vector<polygon_2d>&  polygons, int frid)
 {
      double VoronoiVelocity = GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
      double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
@@ -979,35 +981,32 @@ void Analysis::DistributionOnLine(int *frequency,int fraction, double Line_start
  */
 double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d& measureArea)
 {
-
+     //cout.precision(15);
      double density=0;
-     for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end(); polygon_iterator++) {
-          typedef std::vector<polygon_2d > polygon_list;
+     BOOST_FOREACH(const auto& polygon_iterator, polygon)
+     {
           polygon_list v;
+          intersection(measureArea, polygon_iterator, v);
+
           if(!v.empty())
           {
-        	  v.clear();
-          }
-          // double areaPolygon = area(*polygon_iterator);
-          intersection(measureArea, *polygon_iterator, v);
-
-
-          if(!v.empty()) {
-        	  //std::cout<<"Original polygon:\t"<<dsv(v[0])<<"\n";
-               density+=area(v[0])/area(*polygon_iterator);
-               if((area(v[0])/area(*polygon_iterator))>1.00001) {
-            	   std::cout<<"The num of intersections is: "<< v.size()<<'\t'<<polygon.size()<<std::endl;
-            	   std::cout<<"----------------------Now calculating density!!!-----------------\n ";
+               //std::cout<<"Original polygon:\t"<<dsv(v[0])<<"\n";
+               density+=area(v[0])/area(polygon_iterator);
+               if((area(v[0]) - area(polygon_iterator))>J_EPS)
+               {
+                    std::cout<<"The num of intersections is: "<< v.size()<<'\t'<<polygon.size()<<std::endl;
+                    std::cout<<"----------------------Now calculating density!!!-----------------\n ";
                     std::cout<<"measure area: \t"<<dsv(measureArea)<<"\n";
-                    std::cout<<"Original polygon:\t"<<dsv(*polygon_iterator)<<"\n";
+                    std::cout<<"Original polygon:\t"<<dsv(polygon_iterator)<<"\n";
                     std::cout<<"intersected polygon: \t"<<dsv(v[0])<<"\n";
-                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(*polygon_iterator)<<"\n";
+                    std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<"\n";
                     //exit(EXIT_FAILURE);
                }
           }
      }
-     density = density/(area(measureArea)*CMtoM*CMtoM);
-     return density;
+              density = density/(area(measureArea)*CMtoM*CMtoM);
+              return density;
+
 }
 
 double Analysis::GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea)
