@@ -34,8 +34,8 @@
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
-#include "../routing/RoutingEngine.h"
 #include "../routing/SafestPathRouter.h"
+
 #endif
 
 //#undef _OPENMP
@@ -60,11 +60,27 @@ Building::Building()
      _projectFilename = "";
      _geometryFilename= "";
      _rooms = vector<Room*>();
-     _routingEngine = NULL;
-     _linkedCellGrid = NULL;
+     _routingEngine = nullptr;
+     _linkedCellGrid = nullptr;
      _savePathway = false;
 }
 
+Building::Building(const std::string& filename, const std::string& rootDir, RoutingEngine& engine, PedDistributor& distributor, double linkedCellSize)
+        :_projectFilename{filename}, _projectRootDir{rootDir}, _routingEngine{&engine}
+{
+     _caption = "no_caption";
+     _rooms = vector<Room*>();
+     _savePathway = false;
+     this->LoadGeometry();
+     this->LoadRoutingInfo(filename);
+     this->AddSurroundingRoom();
+     this->InitGeometry();
+     this->LoadTrafficInfo();
+     distributor.Distribute(this);
+     this->InitGrid(linkedCellSize);
+     _routingEngine->Init(this);
+     this->SanityCheck();
+}
 
 Building::~Building()
 {
@@ -1364,3 +1380,5 @@ bool Building::SaveGeometry(const std::string &filename)
 }
 
 #endif // _SIMULATOR
+
+

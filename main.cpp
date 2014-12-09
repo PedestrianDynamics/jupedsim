@@ -81,6 +81,8 @@ int main(int argc, char **argv)
                printf("Errors              : %d\n", Log->GetErrors());
           }
      }
+     else
+          Log->Write("error occured while parsing");
      // do the last cleaning
      delete args;
      delete Log;

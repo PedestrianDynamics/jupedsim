@@ -41,12 +41,15 @@
 #include "Hline.h"
 #include "Obstacle.h"
 #include "Goal.h"
+#include "../routing/RoutingEngine.h"
+#include "../pedestrian/PedDistributor.h"
 
 class RoutingEngine;
 class Pedestrian;
 class Transition;
 class LCGrid;
 class ForceModel;
+class PedDistributor;
 
 
 class Building {
@@ -74,6 +77,7 @@ private:
 public:
      /// constructor
      Building();
+     Building(const std::string&, const std::string&, RoutingEngine&, PedDistributor&, double);
      /// destructor
      virtual ~Building();
 

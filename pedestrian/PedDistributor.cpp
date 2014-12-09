@@ -218,7 +218,6 @@ PedDistributor::~PedDistributor()
      }
      _start_dis_sub.clear();
      _start_dis.clear();
-
      //empty the parameters maps
 }
 

@@ -52,13 +52,13 @@ Simulation::Simulation(const ArgumentParser& args)
      _tmax = 0;
      _seed = 8091983;
      _deltaT = 0;
-     _building = NULL;
+     _building = nullptr;
      //_direction = NULL;
-     _operationalModel = NULL;
-     _solver = NULL;
+     _operationalModel = nullptr;
+     _solver = nullptr;
      _iod = new IODispatcher();
      _fps = 1;
-     _em = NULL;
+     _em = nullptr;
      _hpc = -1;
      _profiling = false;
      _argsParser = args;
@@ -66,13 +66,12 @@ Simulation::Simulation(const ArgumentParser& args)
 
 Simulation::~Simulation()
 {
-     delete _building;
      delete _solver;
      delete _iod;
      delete _em;
 }
 
-int Simulation::GetPedsNumber() const
+long Simulation::GetPedsNumber() const
 {
      return _nPeds;
 }
@@ -191,7 +190,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           }
      }
 
-     _distribution = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
+
 
      _operationalModel = args.GetModel();
      s.append(_operationalModel->GetDescription());
@@ -214,49 +213,15 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      sprintf(tmp, "\tfps: %f\n", _fps);
      s.append(tmp);
 
-     // Route choice
-
-     auto routingEngine = args.GetRoutingEngine();
-
-
-
+     _routingEngine = args.GetRoutingEngine();
+     auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
      // IMPORTANT: do not change the order in the following..
-     _building = new Building();
-     _building->SetRoutingEngine(routingEngine.get());
-     _building->SetProjectFilename(args.GetProjectFile());
-     _building->SetProjectRootDir(args.GetProjectRootDir());
-
-     if (!_building->LoadGeometry())
-          return false;
-
-     if (!_building->LoadRoutingInfo(args.GetProjectFile()))
-          return false;
-     _building->AddSurroundingRoom();
-
-     if(!_building->InitGeometry())
-          return false; // create the polygons
-
-     if(!_building->LoadTrafficInfo())
-          return false;
-
-     _nPeds = _distribution->Distribute(_building);
-
-     //using linkedcells
-     if (args.GetLinkedCells()) {
-          s.append("\tusing Linked-Cells for spatial queries\n");
-          _building->InitGrid(args.GetLinkedCellSize());
-     } else {
-          _building->InitGrid(-1);
-     }
-
-     // initialize the routing engine before doing any other things
-     if(routingEngine->Init(_building)==false)
-          return false;
+     _building = std::unique_ptr<Building>(new Building(args.GetProjectFile(), args.GetProjectRootDir(), *_routingEngine, *distributor, args.GetLinkedCellSize()));
 
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
      // because a direction is needed for this initialisation.
-     if(_operationalModel->Init(_building)==false)
+     if(_operationalModel->Init(_building.get())==false)
           return false;
 
      //other initializations
@@ -264,14 +229,11 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      for (Pedestrian *ped : allPeds) {
           ped->Setdt(_deltaT);
      }
+     _nPeds = allPeds.size();
      //pBuilding->WriteToErrorLog();
 
      //get the seed
      _seed = args.GetSeed();
-
-     // perform a general check to the .
-     if(_building->SanityCheck()==false)
-          return false;
 
      //size of the cells/GCFM/Gompertz
      if (args.GetDistEffMaxPed() > args.GetLinkedCellSize()) {
@@ -282,7 +244,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
 
      //read the events
-     _em = new EventManager(_building);
+     _em = new EventManager(_building.get());
      _em->readEventsXml();
      _em->listEvents();
 
@@ -307,9 +269,9 @@ int Simulation::RunSimulation()
      double t = 0.0;
 
      // writing the header
-     _iod->WriteHeader(_nPeds, _fps, _building, _seed);
-     _iod->WriteGeometry(_building);
-     _iod->WriteFrame(0, _building);
+     _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed);
+     _iod->WriteGeometry(_building.get());
+     _iod->WriteFrame(0, _building.get());
 
      //first initialisation needed by the linked-cells
      UpdateRoutesAndLocations();
@@ -325,7 +287,7 @@ int Simulation::RunSimulation()
           t = 0 + (frameNr - 1) * _deltaT;
 
           // update the positions
-          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building);
+          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
 
           // update the routes and locations
           //Update();
@@ -346,7 +308,7 @@ int Simulation::RunSimulation()
 
           // write the trajectories
           if (frameNr % writeInterval == 0) {
-               _iod->WriteFrame(frameNr / writeInterval, _building);
+               _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
 
           // needed to control the execution time PART 2

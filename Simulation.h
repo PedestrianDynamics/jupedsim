@@ -68,14 +68,11 @@ private:
     ///seed using for the random number generator
     unsigned int _seed;
     /// building object
-    Building* _building;
-    ///initial distribution of the pedestrians
-    std::unique_ptr<PedDistributor> _distribution;
-    /// door crossing strategy for the pedestrians
-    //DirectionStrategy* _direction;
+    std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
     /// differential equation solver
+    std::shared_ptr<RoutingEngine> _routingEngine;
     ODESolver* _solver;
     /// writing the trajectories to file
     IODispatcher* _iod;
@@ -95,7 +92,7 @@ public:
     /**
      * Initialize the number of agents in the simulation
      */
-    int GetPedsNumber() const;
+    long GetPedsNumber() const;
 
     /**
      * Read parameters from the argument parser class.

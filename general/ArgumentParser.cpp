@@ -1056,7 +1056,9 @@ int ArgumentParser::GetLog() const
 
 double ArgumentParser::GetLinkedCellSize() const
 {
-    return pLinkedCellSize;
+    if (pLinkedCells)
+        return pLinkedCellSize;
+    return -1;
 }
 
 unsigned int ArgumentParser::GetSeed() const
