@@ -50,6 +50,7 @@ typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 typedef model::ring<point_2d> ring;
 typedef std::vector<polygon_2d > polygon_list;
+typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
 
 #define CMtoM 0.01
 #define M2CM 100

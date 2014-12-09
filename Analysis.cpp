@@ -271,7 +271,7 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile)
      _highVertexY = geo_maxY;
      _lowVertexX = geo_minX;
      _lowVertexY = geo_minY;
-     std::cout<<dsv(geoPoly)<<"\n";
+     cout<<dsv(geoPoly)<<endl;
      return geoPoly;
 }
 
@@ -725,7 +725,9 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 vector<polygon_2d> Analysis::GetPolygons(int NrInFrm)
 {
      VoronoiDiagram vd;
-     vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm);
+     double boundpoint =10*max(max(fabs(_lowVertexX),fabs(_lowVertexY)), max(fabs(_highVertexX), fabs(_highVertexY)));
+
+     vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm,boundpoint);
      if(_cutByCircle)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
@@ -771,44 +773,15 @@ void Analysis::OutputFlow_NT(int frmId)
  */
 bool Analysis::IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y)
 {
-     double x1=Line_startX;
-     double y1=Line_startY;
-     double x2=Line_endX;
-     double y2=Line_endY;
-     double x3=pt1_X;
-     double y3=pt1_Y;
-     double x4=pt2_X;
-     double y4=pt2_Y;
+     point_2d Line_pt0(Line_startX, Line_startY);
+     point_2d Line_pt1(Line_endX, Line_endY);
+     segment edge0(Line_pt0, Line_pt1);
 
-     double d=(y2-y1)*(x4-x3)-(y4-y3)*(x2-x1);
-     if(d==0.0) {
-          return false;
-     } else {
-          double x0=((x2-x1)*(x4-x3)*(y3-y1)+(y2-y1)*(x4-x3)*x1-(y4-y3)*(x2-x1)*x3)/d;
-          double y0=((y2-y1)*(y4-y3)*(x3-x1)+(x2-x1)*(y4-y3)*y1-(x4-x3)*(y2-y1)*y3)/(-1.0*d);
-          double temp1=(x0-x1)*(x0-x2);
-          double temp2=(x0-x3)*(x0-x4);
-          double temp3=(y0-y1)*(y0-y2);
-          double temp4=(y0-y3)*(y0-y4);
-          if(temp1<10.0E-16) {
-               temp1=0.0;
-          }
-          if(temp2<10.0E-16) {
-               temp2=0.0;
-          }
-          if(temp3<10.0E-16) {
-               temp3=0.0;
-          }
-          if(temp4<10.0E-16) {
-               temp4=0.0;
-          }
-          if(temp1<=0.0&&temp2<=0.0&&temp3<=0.0&&temp4<=0.0) {
-               return true;
-          }
-          else {
-               return false;
-          }
-     }
+     point_2d Traj_pt0(pt1_X, pt1_Y);
+     point_2d Traj_pt1(pt2_X, pt2_Y);
+     segment edge1(Traj_pt0, Traj_pt1);
+
+     return(intersects(edge0, edge1));
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------
@@ -911,12 +884,12 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
      int uniqueId=0;
      int temp=0;
 
-     for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end(); polygon_iterator++) {
-          typedef std::vector<polygon_2d> polygon_list;
+     for (const auto & polygon_iterator:polygon)
+     {
           polygon_list v;
-          intersection(measureArea, *polygon_iterator, v);
+          intersection(measureArea, polygon_iterator, v);
           if(!v.empty()) {
-               uniquedensity=1.0/(area(*polygon_iterator)*CMtoM*CMtoM);
+               uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
                uniquevelocity=Velocity[temp];
                uniqueId=Id[temp];
                fprintf(_individualFD,"%d\t%d\t%.3f\t%.3f\n",frid, uniqueId, uniquedensity,uniquevelocity);
@@ -928,7 +901,6 @@ void Analysis::GetIndividualFD(const vector<polygon_2d>& polygon, double* Veloci
 double Analysis::Distance(double x1, double y1, double x2, double y2)
 {
      return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-     //return sqrt(pow((x1-x2),2)+pow((y1-y2),2));
 }
 
 ///---------------------------------------------------------------------------------------------------------------------
@@ -983,18 +955,15 @@ double Analysis::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
 {
      //cout.precision(15);
      double density=0;
-     BOOST_FOREACH(const auto& polygon_iterator, polygon)
+     for (const auto & polygon_iterator:polygon)
      {
           polygon_list v;
           intersection(measureArea, polygon_iterator, v);
-
           if(!v.empty())
           {
-               //std::cout<<"Original polygon:\t"<<dsv(v[0])<<"\n";
                density+=area(v[0])/area(polygon_iterator);
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
-                    std::cout<<"The num of intersections is: "<< v.size()<<'\t'<<polygon.size()<<std::endl;
                     std::cout<<"----------------------Now calculating density!!!-----------------\n ";
                     std::cout<<"measure area: \t"<<dsv(measureArea)<<"\n";
                     std::cout<<"Original polygon:\t"<<dsv(polygon_iterator)<<"\n";
@@ -1082,15 +1051,17 @@ double Analysis::GetVoronoiVelocity(const vector<polygon_2d>& polygon, double* V
 {
      double meanV=0;
      int temp=0;
-     for(vector<polygon_2d>::const_iterator polygon_iterator = polygon.begin(); polygon_iterator!=polygon.end(); polygon_iterator++) {
-          typedef std::vector<polygon_2d > polygon_list;
+     for (const auto & polygon_iterator:polygon)
+     {
           polygon_list v;
-          intersection(measureArea, *polygon_iterator, v);
-          if(!v.empty()) {
+          intersection(measureArea, polygon_iterator, v);
+
+          if(!v.empty())
+          {
                meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
-               if((area(v[0])/area(*polygon_iterator))>1.00001)
+               if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
-                    std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(*polygon_iterator)<<std::endl;;
+                    std::cout<<"this is a wrong result in calculating velocity\t"<<area(v[0])<<'\t'<<area(polygon_iterator)<<std::endl;
                }
           }
           temp++;

@@ -60,7 +60,7 @@
 #define J_EPS_GOAL 0.005 /// [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
-#define J_EPS_VORONOI 10E-16;
+#define J_EPS_Pass 1E-10;  //
 
 //TODO: why the limitation ?
 #define NR_PEDS 5000
