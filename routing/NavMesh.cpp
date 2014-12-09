@@ -105,7 +105,7 @@ void NavMesh::BuildNavMesh()
                node->pNormalVec[0]=ABC[0];
                node->pNormalVec[1]=ABC[1];
                node->pNormalVec[2]=ABC[2];
-               //                      ComputePlaneEquation(s,node->pNormalVec);
+               //ComputePlaneEquation(s,node->pNormalVec);
 
                for (unsigned int p = 0; p < pol.size(); p++) {
                     node->pHull.push_back(*(GetVertex(pol[p])));
@@ -271,8 +271,8 @@ void NavMesh::BuildNavMesh()
      //Triangulate(pNodes[pBuilding->GetRoom("030")->GetSubRoom(0)->GetUID()]);
      //Triangulate(pNodes[pBuilding->GetRoom("040a")->GetSubRoom(0)->GetUID()]);
      //Triangulate(pNodes[pBuilding->GetRoom("030a")->GetSubRoom(0)->GetUID()]);
-     //Finalize();
-     FinalizeAlphaShape();
+     Finalize();
+     //FinalizeAlphaShape();
      //WriteToFileTraVisTo("promenade.nav.xml", pNodes[364]); exit(0);
      WriteToFileTraVisTo("promenade.nav.test.xml");
      //cout<<"groupe:"<<pNodes[365]->pGroup<<endl;

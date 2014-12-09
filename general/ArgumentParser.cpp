@@ -677,7 +677,25 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
             double mu = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("mu"),pV0Mu);
             double sigma = xmltof(xAgentPara->FirstChildElement("v0")->Attribute("sigma"),pV0Sigma);
             agentParameters->InitV0(mu,sigma);
+            agentParameters->InitV0DownStairs(mu,sigma);
+            agentParameters->InitV0UpStairs(mu,sigma);
             Log->Write("INFO: \tdesired velocity mu=%f , sigma=%f",mu,sigma);
+        }
+
+        if (xAgentPara->FirstChild("v0_upstairs"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"),pV0Mu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"),pV0Sigma);
+            agentParameters->InitV0DownStairs(mu,sigma);
+            Log->Write("INFO: \tdesired velocity upstairs mu=%f , sigma=%f",mu,sigma);
+        }
+
+        if (xAgentPara->FirstChild("v0_downstairs"))
+        {
+            double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"),pV0Mu);
+            double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"),pV0Sigma);
+            agentParameters->InitV0UpStairs(mu,sigma);
+            Log->Write("INFO: \tdesired velocity downstairs mu=%f , sigma=%f",mu,sigma);
         }
 
         //bmax

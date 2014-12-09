@@ -63,6 +63,11 @@ private:
      double _tau; // Reaction time: 0.5
      double _deltaT; // step size
      JEllipse _ellipse;// the shape of this pedestrian
+     Point _V0; //vector V0
+
+     //double _V0;
+     double _V0UpStairs;
+     double _V0DownStairs;
 
      //location parameters
      std::string _roomCaption;
@@ -76,7 +81,7 @@ private:
      std::map<int, int>_mentalMap; // map the actual room to a destination
      std::vector<int> _destHistory;
      std::vector<int> _trip;
-     Point _V0; //vector V0
+
      Point _lastPosition;
      int _lastCellPosition;
 
@@ -148,7 +153,7 @@ public:
      void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
      void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
-     void SetV0Norm(double v0);
+     void SetV0Norm(double v0,double v0UpStairs, double v0DownStairs);
      void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
      void SetPhiPed();
      void SetFinalDestination(int UID);

@@ -1369,6 +1369,7 @@ bool Building::SaveGeometry(const std::string &filename)
      if(geofile.is_open())
      {
           geofile<<geometry.str();
+          Log->Write("INFO:\tfile saved to %s",filename.c_str());
      }
      else
      {

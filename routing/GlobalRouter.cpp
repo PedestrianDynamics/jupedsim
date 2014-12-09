@@ -49,7 +49,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-                                                                 Router()
+Router()
 {
      _accessPoints = map<int, AccessPoint*>();
      _map_id_to_index = std::map<int, int>();

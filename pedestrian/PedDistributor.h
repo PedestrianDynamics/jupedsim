@@ -134,7 +134,7 @@ private:
      std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
      //std::string _projectFilename; // store the file for later user
      //std::map<int, AgentsParameters*> _agentsParameters;
-     void InitDistributor(const string&, const std::map<int, AgentsParameters*>&, unsigned int);
+     bool InitDistributor(const string&, const std::map<int, AgentsParameters*>&, unsigned int);
      static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
             const SubRoom& r, double bufx, double bufy, double dy);
      static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,

@@ -221,7 +221,7 @@ PedDistributor::~PedDistributor()
      //empty the parameters maps
 }
 
-void PedDistributor::InitDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed)
+bool PedDistributor::InitDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed)
 {
      Log->Write("INFO: \tLoading and parsing the persons attributes");
 
@@ -230,14 +230,14 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
 
      TiXmlNode* xRootNode = doc.RootElement()->FirstChild("agents");
      if( ! xRootNode ) {
           Log->Write("ERROR:\tcould not load persons attributes");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
 
@@ -270,8 +270,7 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           //sanity check
           if((x_max<x_min) || (y_max<y_min) ){
               Log->Write("ERROR:\tinvalid bounds [%0.2f,%0.2f,%0.2f,%0.2f] of the group [%d]. Max and Min values mismatched?",group_id,x_min,x_max,y_min,y_max);
-              exit(EXIT_FAILURE);
-
+              return false;
           }
 
           StartDistributionRoom* dis=NULL;
@@ -301,7 +300,7 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           {
               Log->Write("WARNING:\t Please specify which set of agents parameters (agent_parameter_id) to use for the group [%d]!",group_id);
               Log->Write("WARNING:\t Default values are not implemented yet");
-              exit(EXIT_FAILURE);
+              return false;
           }
           dis->SetGroupParameters(agentPars.at(agent_para_id));
 
@@ -323,6 +322,7 @@ void PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           }
 
      Log->Write("INFO: \t...Done");
+     return true;
 }
 
 int PedDistributor::Distribute(Building* building) const
@@ -692,7 +692,9 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
         E.SetBmin(agents_para->GetBmin());
         ped->SetEllipse(E);
         ped->SetTau(agents_para->GetTau());
-        ped->SetV0Norm(agents_para->GetV0());
+        ped->SetV0Norm(agents_para->GetV0(),
+                  agents_para->GetV0DownStairs(),
+                  agents_para->GetV0UpStairs());
         //ped->SetV(Point(0.0,0.0));
 
         // first default Position

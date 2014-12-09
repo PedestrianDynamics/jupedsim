@@ -80,6 +80,8 @@ Pedestrian::Pedestrian()
      _trip = vector<int> ();
      _group = -1;
      _spotlight = false;
+     _V0UpStairs=0.0;
+     _V0DownStairs=0.0;
 }
 
 
@@ -166,9 +168,11 @@ void Pedestrian::SetV(const Point& v)
      }
 }
 
-void Pedestrian::SetV0Norm(double v0)
+void Pedestrian::SetV0Norm(double v0,double v0UpStairs, double v0DownStairs)
 {
      _ellipse.SetV0(v0);
+     _V0DownStairs=v0DownStairs;
+     _V0UpStairs=v0UpStairs;
 }
 
 void Pedestrian::Setdt(double dt)
@@ -178,7 +182,6 @@ void Pedestrian::Setdt(double dt)
 double Pedestrian::Getdt()
 {
      return _deltaT;
-
 }
 
 void Pedestrian::SetTrip(const vector<int>& trip)
@@ -296,7 +299,6 @@ int Pedestrian::DoorKnowledgeCount() const
 }
 
 
-
 set<int>  Pedestrian::GetKnownClosedDoors()
 {
      map<int, NavLineState>::iterator it;
@@ -358,7 +360,31 @@ const Point& Pedestrian::GetV0() const
 
 double Pedestrian::GetV0Norm() const
 {
-     return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
+     //detect the walking direction based on the elevation
+     SubRoom* sub=_building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
+     double delta = sub->GetElevation(_navLine->GetCentre())-
+               sub->GetElevation(_ellipse.GetCenter());
+
+     //TODO: The stairs should be detect before (1m in front)
+     //and the velocity reduced accordingly
+
+     // we are walking on an even plane
+     //TODO: move _ellipse.GetV0() to _V0Plane
+     if(fabs(delta)<J_EPS)
+          return _ellipse.GetV0();
+
+     // we are walking downstairs
+     if(delta<0)
+     {
+          return _V0DownStairs;
+     }
+     //we are walking upstairs
+     else
+     {
+          return _V0UpStairs;
+     }
+     // orthogonal projection on the stair
+     //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
@@ -399,7 +425,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      // Molification around the targets makes little sense
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
-     //printf("BEVOR new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
+     //printf("BEFORE new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      // printf("AFTER new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      // -------------------------------------- Handover new target
      double t = _newOrientationDelay++ *_deltaT;
@@ -697,7 +723,7 @@ int Pedestrian::FindRoute()
 {
      if( ! _router) {
           Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
-          exit(EXIT_FAILURE);
+          return -1;
      }
      return _router->FindExit(this);
 }
