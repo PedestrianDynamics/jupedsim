@@ -490,7 +490,10 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 
     FacilityGeometry* geometry = visualisationThread->getGeometry();
 
+
+
     if(!geofileName.isEmpty()) {
+        SystemSettings::CreateLogfile();
         if (geofileName.endsWith(".xml",Qt::CaseInsensitive)) {
             //parsing the file
             if(!SaxParser::parseGeometryJPS(geofileName,geometry)) {
@@ -500,6 +503,7 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
             //must not be a file name
             SaxParser::parseGeometryTRAV(geofileName,geometry);
         }
+        SystemSettings::DeleteLogfile();
     }
     // I assume it is a trav format node,
     //which is the only one which can directly be inserted into a file
