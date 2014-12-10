@@ -1134,10 +1134,10 @@ void Analysis::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
                polygon_2d measurezoneXY;
                {
                     const double coor[][2] = {
-                              {_lowVertexX+colum_j*_scaleX,_lowVertexY+row_i*_scaleY}, {_lowVertexX+colum_j*_scaleX+_scaleX,_lowVertexY+row_i*_scaleY}, {_lowVertexX+colum_j*_scaleX+_scaleX, _lowVertexY+row_i*_scaleY+_scaleY},
-                              {_lowVertexX+colum_j*_scaleX, _lowVertexY+row_i*_scaleY+_scaleY},
-                              {_lowVertexX+colum_j*_scaleX,_lowVertexY+row_i*_scaleY} // closing point is opening point
-                    };
+                                                  {_lowVertexX+colum_j*_scaleX,_highVertexY-row_i*_scaleY}, {_lowVertexX+colum_j*_scaleX+_scaleX,_highVertexY-row_i*_scaleY}, {_lowVertexX+colum_j*_scaleX+_scaleX, _highVertexY-row_i*_scaleY-_scaleY},
+                                                  {_lowVertexX+colum_j*_scaleX, _highVertexY-row_i*_scaleY-_scaleY},
+                                                  {_lowVertexX+colum_j*_scaleX,_highVertexY-row_i*_scaleY} // closing point is opening point
+                                        };
                     assign_points(measurezoneXY, coor);
                }
                correct(measurezoneXY);     // Polygons should be closed, and directed clockwise. If you're not sure if that is the case, call this function
