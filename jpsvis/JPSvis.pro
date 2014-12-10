@@ -366,7 +366,7 @@ unix_6 {
             -lvtkzlib-6.0  \
 }
    
-#dynamic linking with vtk5.10
+#dynamic linking with vtk5.8
 unix{
 INCLUDEPATH += /usr/include/vtk-5.8
 LIBS += -L/usr/lib \

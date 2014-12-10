@@ -1657,7 +1657,7 @@ void MainWindow::loadAllSettings()
 
     if (settings.contains("options/exitsColor"))
     {
-        QColor color = settings.value("options/bgColor").value<QColor>();
+        QColor color = settings.value("options/exitsColor").value<QColor>();
         SystemSettings::setExitsColor(color);
         qDebug()<<"Exits color: "<<color;
     }
@@ -1679,7 +1679,7 @@ void MainWindow::loadAllSettings()
     if (settings.contains("options/navLinesColor"))
     {
         QColor color = settings.value("options/navLinesColor").value<QColor>();
-        SystemSettings::setWallsColor(color);
+        SystemSettings::setNavLinesColor(color);
         qDebug()<<"Navlines color: "<<color;
     }
 
