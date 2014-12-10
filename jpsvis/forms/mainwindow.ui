@@ -539,7 +539,7 @@ border-color: rgb(255, 255, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>450</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -710,7 +710,7 @@ border-color: rgb(255, 255, 255);</string>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About TraVisTo</string>
+    <string>About JPSvis</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
