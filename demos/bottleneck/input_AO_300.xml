@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?> 
-<JPSreport project="JPS-Project" version="0.5"> 
+<JPSreport project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd"> 
     <!-- geometry file --> 
-    <geometry file = "geo_AO_300.xml" /> 
+    <geometry1 file = "geo_AO_300.xml" /> 
     <!-- trajectories file and format --> 
     <!-- either a file name or a path location. In the latter case all files in the directory will be used--> 
     <trajectories format="txt" unit="m"> 
@@ -55,7 +56,7 @@
     <method_D enabled="true" outputGraph="true" individualFDdata="false"> 
         <measurementArea id="1" /> 
         <cutByCircle enabled="true" radius= "1" edges = "10"/> 
-        <!-- edges represent the precision of discretization of the circle ---> 
+        <!-- edges represent the precision of discretization of the circle --> 
         <getProfile enabled="false" scale_x="0.10" scale_y="0.10"/> 
     </method_D> 
 

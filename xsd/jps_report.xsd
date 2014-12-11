@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+         <!-- XML Schema Generated from XML Document on Thu Dec 11 2014 15:35:09 GMT+0100 (CET) -->
+         <!-- with XmlGrid.net Free Online Service http://xmlgrid.net -->
+         <xs:element name="JPSreport">
+               <xs:complexType>
+                     <xs:sequence>
+                           <xs:element name="geometry">
+                                 <xs:complexType>
+                                       <xs:attribute name="file" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="trajectories">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="file">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="name" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                             <xs:element name="path">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="location" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="format" type="xs:string"></xs:attribute>
+                                       <xs:attribute name="unit" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="measurementAreas">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="area_B">
+                                                   <xs:complexType>
+                                                         <xs:sequence>
+                                                               <xs:element name="p1">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="x" type="xs:double"></xs:attribute>
+                                                                           <xs:attribute name="y" type="xs:double"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="p2">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="x" type="xs:double"></xs:attribute>
+                                                                           <xs:attribute name="y" type="xs:double"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="p3">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="x" type="xs:double"></xs:attribute>
+                                                                           <xs:attribute name="y" type="xs:double"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="p4">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="x" type="xs:double"></xs:attribute>
+                                                                           <xs:attribute name="y" type="xs:double"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="movingDirection">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="start" type="xs:string"></xs:attribute>
+                                                                           <xs:attribute name="end" type="xs:string"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                         </xs:sequence>
+                                                         <xs:attribute name="id" type="xs:int"></xs:attribute>
+                                                         <xs:attribute name="type" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                             <xs:element name="area_L">
+                                                   <xs:complexType>
+                                                         <xs:sequence>
+                                                               <xs:element name="start">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="x" type="xs:double"></xs:attribute>
+                                                                           <xs:attribute name="y" type="xs:int"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                               <xs:element name="end">
+                                                                     <xs:complexType>
+                                                                           <xs:attribute name="x" type="xs:int"></xs:attribute>
+                                                                           <xs:attribute name="y" type="xs:int"></xs:attribute>
+                                                                     </xs:complexType>
+                                                               </xs:element>
+                                                         </xs:sequence>
+                                                         <xs:attribute name="id" type="xs:int"></xs:attribute>
+                                                         <xs:attribute name="type" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="unit" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="velocity">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="useXComponent" type="xs:string"></xs:element>
+                                             <xs:element name="useYComponent" type="xs:string"></xs:element>
+                                             <xs:element name="halfFrameNumberToUse" type="xs:int"></xs:element>
+                                       </xs:sequence>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="method_A">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="timeInterval" type="xs:int">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="unit" type="xs:string"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                             <xs:element name="measurementArea">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="id" type="xs:int"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="enabled" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="method_B">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="measurementArea">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="id" type="xs:int"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="enabled" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="method_C">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="measurementArea">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="id" type="xs:int"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="enabled" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                           <xs:element name="method_D">
+                                 <xs:complexType>
+                                       <xs:sequence>
+                                             <xs:element name="measurementArea">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="id" type="xs:int"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                             <xs:element name="cutByCircle">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="enabled" type="xs:string"></xs:attribute>
+                                                         <xs:attribute name="radius" type="xs:int"></xs:attribute>
+                                                         <xs:attribute name="edges" type="xs:int"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                             <xs:element name="getProfile">
+                                                   <xs:complexType>
+                                                         <xs:attribute name="enabled" type="xs:string"></xs:attribute>
+                                                         <xs:attribute name="scale_x" type="xs:double"></xs:attribute>
+                                                         <xs:attribute name="scale_y" type="xs:double"></xs:attribute>
+                                                   </xs:complexType>
+                                             </xs:element>
+                                       </xs:sequence>
+                                       <xs:attribute name="enabled" type="xs:string"></xs:attribute>
+                                       <xs:attribute name="outputGraph" type="xs:string"></xs:attribute>
+                                       <xs:attribute name="individualFDdata" type="xs:string"></xs:attribute>
+                                 </xs:complexType>
+                           </xs:element>
+                     </xs:sequence>
+                     <xs:attribute name="project" type="xs:string"></xs:attribute>
+                     <xs:attribute name="version" type="xs:double"></xs:attribute>
+               </xs:complexType>
+         </xs:element>
+   </xs:schema>
+ 
