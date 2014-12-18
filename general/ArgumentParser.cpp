@@ -358,41 +358,25 @@ void ArgumentParser::ParseIniFile(string inifile)
             areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
             areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
 
-            double box_p1x = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("x"))*M2CM;
-            double box_p1y = xmltof(xMeasurementArea_B->FirstChildElement("p1")->Attribute("y"))*M2CM;
-            double box_p2x = xmltof(xMeasurementArea_B->FirstChildElement("p2")->Attribute("x"))*M2CM;
-            double box_p2y = xmltof(xMeasurementArea_B->FirstChildElement("p2")->Attribute("y"))*M2CM;
-            double box_p3x = xmltof(xMeasurementArea_B->FirstChildElement("p3")->Attribute("x"))*M2CM;
-            double box_p3y = xmltof(xMeasurementArea_B->FirstChildElement("p3")->Attribute("y"))*M2CM;
-            double box_p4x = xmltof(xMeasurementArea_B->FirstChildElement("p4")->Attribute("x"))*M2CM;
-            double box_p4y = xmltof(xMeasurementArea_B->FirstChildElement("p4")->Attribute("y"))*M2CM;
-
-            //-------------the following codes define measurement area---------------------------
-            // Polygons should be closed, and directed clockwise.
-            // If you're not sure if that is the case, call the function correct
-            const double coor[][2] = {
-                {box_p1x,box_p1y}, {box_p2x,box_p2y}, {box_p3x,box_p3y}, {box_p4x,box_p4y},
-                {box_p1x,box_p1y} // closing point is opening point
-            };
-
             polygon_2d poly;
-            assign_points(poly, coor);
+            for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
+            {
+				double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
+				double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
+				boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+				Log->Write("INFO: \tmeasure area points  < %.3f, %.3f>",box_px,box_py);
+            }
             correct(poly); // in the case the Polygone is not closed
-
             areaB->_poly=poly;
 
-            string MovingDire_start = xMeasurementArea_B->FirstChildElement("movingDirection")->Attribute("start");
-            string MovingDire_end   = xMeasurementArea_B->FirstChildElement("movingDirection")->Attribute("end");
-            double start_x = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_start.c_str())->Attribute("x"))*M2CM;
-            double start_y = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_start.c_str())->Attribute("y"))*M2CM;
-            double end_x   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("x"))*M2CM;
-            double end_y   = xmltof(xMeasurementArea_B->FirstChildElement(MovingDire_end.c_str())->Attribute("y"))*M2CM;
-
-            areaB->_length=sqrt(pow((start_x-end_x),2)+pow((start_y-end_y),2));
+            TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("Length_in_movement_direction");
+            if(xLength)
+			{
+				areaB->_length=xmltof(xLength->Attribute("distance"));
+			}
 
             Log->Write("INFO: \tmeasure area id  < %d>",areaB->_id);
             Log->Write("INFO: \tmeasure area type  <"+areaB->_type+">");
-            Log->Write("INFO: \tp1 of Box  < %f, %f>",box_p1x,box_p1y);
             Log->Write("INFO: \tlength of measurement area is:  < %f>", areaB->_length);
             //add the area to the collection
             _measurementAreas[areaB->_id]=areaB;

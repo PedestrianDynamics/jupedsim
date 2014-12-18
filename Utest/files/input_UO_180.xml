@@ -12,11 +12,11 @@
 
   <measurementAreas unit="m">
     <area_B id="1" type="BoundingBox">
-      <p1 x="4.00" y="-0.50" /> <!-- Clockwise -->
-      <p2 x="4.00" y="2.50" />
-      <p3 x="5.00" y="2.50" />
-      <p4 x="5.00" y="-0.50" />
-      <movingDirection start="p1" end="p2" />
+      <vertex x="4.00" y="-0.50" /> <!-- Clockwise -->
+      <vertex x="4.00" y="2.50" />
+      <vertex x="5.00" y="2.50" />
+      <vertex x="5.00" y="-0.50" />
+      <Length_in_movement_direction distance="1.0" />
     </area_B>
     <area_L id="2" type="Line">
       <start x="-7.00" y="-0.50" />
