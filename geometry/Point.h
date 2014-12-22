@@ -96,7 +96,8 @@ public:
      bool operator==(const Point& p) const;
      /// not equal
      bool operator!=(const Point& p) const;
-
+     /// Assignement
+     Point& operator+=(const Point& p);
      /// nice formating of the point
      std::string toString() const;
 };

@@ -118,7 +118,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
 
 
      int partSize = nSize / nThreads;
-     int debugPed = -14;//10;
+     int debugPed = 18;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 
 
@@ -163,8 +163,8 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                     Pedestrian* ped1 = neighbours[i];
                     Point p1 = ped->GetPos();
                     Point p2 = ped1->GetPos();
-                    bool isVisible = building->IsVisible(p1, p2, false);
-                    if (!isVisible)
+                    bool ped_is_visible = building->IsVisible(p1, p2, false);
+                    if (!ped_is_visible)
                          continue;
                     // if(debugPed == ped->GetID())
                     // {
@@ -382,10 +382,14 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      Point f = Point(0., 0.);
      //first the walls
 
-     const vector<Wall>& walls = subroom->GetAllWalls();
-     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-          
-          f = f + ForceRepWall(ped, walls[i]);
+     const vector<Wall>& walls = subroom->GetVisibleWalls(ped->GetPos());
+     if(ped->GetID()==18)
+     {
+          printf("Ped = %d, visible walls = %d\n",ped->GetID(),walls.size());
+     getc(stdin);
+}
+     for (unsigned int i = 0; i < walls.size(); i++) {
+          f += ForceRepWall(ped, walls[i]);
      }
 
      //then the obstacles
@@ -393,7 +397,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
           const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
           for (unsigned int i = 0; i < walls.size(); i++) {
-               f = f + ForceRepWall(ped, walls[i]);
+               f += ForceRepWall(ped, walls[i]);
           }
      }
 
@@ -419,7 +423,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           //closed doors are considered as wall
 
           if((uid1 != uid2) || (goal->IsOpen()==false )) {
-               f = f + ForceRepWall(ped,*((Wall*)goal));
+               f += ForceRepWall(ped,*((Wall*)goal));
           }
      }
 
@@ -446,7 +450,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
      F = ForceRepStatPoint(ped, pt, mind, vn);
 
-     if(ped->GetID() == -9 )
+     if(ped->GetID() == 18 )
      {
           printf("wall = [%f, %f]--[%f, %f] F= [%f %f]\n", w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F.GetX(), F.GetY());
      }

@@ -63,7 +63,7 @@
         <exitCrossingStrategy>4</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="arange(2, 4, 0.3)" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+        <force_wall nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
         <v0 mu="1.34" sigma="0.001" />

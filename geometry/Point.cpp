@@ -268,6 +268,16 @@ const Point operator*(const Point& p, double f)
      return Point(p._x * f, p._y * f);
 }
 
+
+// Assignment
+Point& Point::operator+=(const Point& p)
+{
+     _x += p._x;
+     _y += p._y;
+     return *this;
+}
+
+
 // divition with scalar
 const Point operator/(const Point& p, double f)
 {

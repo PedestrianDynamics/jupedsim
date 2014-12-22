@@ -305,6 +305,21 @@ Point SubRoom::GetCentroid() const
      return Point(px,py);
 }
 
+std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position){
+     std::vector<Wall> visible_walls; 
+     bool wall_is_visible;
+     Point nearest_point;
+     for (auto w:_walls){
+          nearest_point = w.ShortestPoint(position);
+          wall_is_visible = IsVisible(nearest_point, position, false);
+          printf("position (%f, %f) nearest (%f, %f)\n",position.GetX(), position.GetY(), nearest_point.GetX(), nearest_point.GetY());
+          printf("wall is visible = %d\n",wall_is_visible);
+          if(wall_is_visible)
+               visible_walls.push_back(w);
+     }
+     return visible_walls;
+}
+
 bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
      // generate certain connection lines

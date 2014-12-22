@@ -124,6 +124,11 @@ public:
      const std::vector<Wall>& GetAllWalls() const;
 
      /**
+      * @return visible walls from position of pedestrians (considering the direction of motion)
+      */
+     std::vector<Wall> GetVisibleWalls(const Point & position);
+
+     /**
       * @return a reference to the wall at position index
       */
      const Wall& GetWall(int index) const;
@@ -273,7 +278,7 @@ public:
      /**
       * @return true if the two segments are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real, can can be considered transparent
+      * The use of hlines is optional, because they are not real and can be considered transparent
       */
      bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
