@@ -313,8 +313,6 @@ bool Line::operator!=(const Line& l) const
 {
      return (! this->operator ==(l) );
 
-     //return ((_point1 != l.GetPoint1() && _point2 != l.GetPoint2()) &&
-     //        (_point2 != l.GetPoint1() && _point1 != l.GetPoint2()));
 }
 
 double Line::Length() const
@@ -707,3 +705,4 @@ double Line::GetAngle(const Line & l) const
 // return angle
 
 // }
+

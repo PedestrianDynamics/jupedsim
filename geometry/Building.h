@@ -135,7 +135,7 @@ public:
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
-     bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+     bool ped_is_visible(const Point& p1, const Point& p2, bool considerHlines=false);
 
 
      /**

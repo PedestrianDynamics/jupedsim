@@ -326,7 +326,7 @@ bool RoutingGraph::checkVisibility(Line* l1, Line* l2, SubRoom* sub)
 
 bool RoutingGraph::checkVisibility(Point& p1, Point& p2, SubRoom* sub)
 {
-     return sub->IsVisible(p1,p2,true);
+     return sub->ped_is_visible(p1,p2,true);
 }
 
 

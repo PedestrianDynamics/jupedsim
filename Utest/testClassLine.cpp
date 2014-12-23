@@ -25,7 +25,6 @@
  *
  **/
  
- 
 #include <cstdlib>
 #include <stdio.h>
 #include "../geometry/Line.h"
@@ -41,6 +40,90 @@
 
 const double eps = 0.00001;
 const double pi= atan(1)*4;
+
+int testOperatorEqual(FILE * f)
+{
+     fprintf (f, "\t+++++ Enter testOperatorEqual() +++++\n");
+     int ntests=10,
+         res=0;
+
+     bool bres;
+
+     Line L1 = Line( Point(1, 1), Point(2, 3));
+     Line L2 = Line( Point(1, 0), Point(2, 3));//no
+     Line L3 = Line( Point(1, 1), Point(2, 2));//no
+     Line L4 = Line( Point(1, 1), Point(2, 3));//yes
+     Line L5 = Line( Point(2, 3), Point(1, 1));//yes
+     Line L6 = Line( Point(2, 3), Point(0, 5));//no
+     Line L7 = Line( Point(6, 0), Point(2, 3));//no
+     Line L8 = Line( Point(1, 1), Point(3, 3));//no
+     Line L9 = Line( Point(2, -1), Point(1, 1));//no
+     Line L10 = Line( Point(1, 1), Point(2.1, 3));//no
+     Line L11 = Line( Point(1, 1), Point(2.01, 3));//no
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L3;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L4;
+     bres = (L1==L2);
+     if (bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L5;
+     bres = (L1==L2);
+     if (bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L6;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L7;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L8;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L9;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L10;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+     L2=L11;
+     bres = (L1==L2);
+     if (!bres)
+          res++;
+     fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
+////////////////////////////////////////////////
+
+////////////////////////////////////////////////
+     fprintf (f, "\t+++++ Leave testOperatorEqual() +++++\n\n");
+     return (res==ntests)?1:0;
+} 
 
 
 int testIntersectionWith(FILE * f)
@@ -110,9 +193,6 @@ int testIntersectionWith(FILE * f)
      fprintf (f, "%2d. res=%2d, L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", ntests, res, L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
 
 ////////////////////////////////////////////////
-
-
-
 
 ////////////////////////////////////////////////
      fprintf (f, "\t+++++ Leave testIntersectionWith() +++++\n\n");
@@ -293,6 +373,9 @@ int main()
      ntests++;
 
      res += testGetAngle(f);
+     ntests++;
+
+     res += testOperatorEqual(f);
      ntests++;
 
      fclose(f);

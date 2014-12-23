@@ -297,7 +297,7 @@ bool GlobalRouter::Init(Building* building)
                          if (nav1->operator ==(*nav2))
                               continue;
 
-                         if (sub->IsVisible(nav1->GetCentre(), nav2->GetCentre(), true)) {
+                         if (sub->ped_is_visible(nav1->GetCentre(), nav2->GetCentre(), true)) {
                               int to_door = _map_id_to_index[nav2->GetUniqueID()];
                               _distMatrix[from_door][to_door] = penalty*(nav1->GetCentre()
                                         - nav2->GetCentre()).Norm();
@@ -855,7 +855,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           const Point& posC = (posB - posA).Normalized() * ((posA - posB).Norm() - J_EPS) + posA;
 
           //check if visible
-          if (sub->IsVisible(posA, posC, true) == false) {
+          if (sub->ped_is_visible(posA, posC, true) == false) {
                ped->RerouteIn(10);
                //ped->Dump(ped->GetID());
                continue;
@@ -977,7 +977,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                const Point& posC = (posB - posA).Normalized() * ((posA - posB).Norm() - J_EPS) + posA;
 
                //check if visible
-               if (sub->IsVisible(posA, posC, true) == false)
+               if (sub->ped_is_visible(posA, posC, true) == false)
                {
                     continue;
                }
@@ -998,7 +998,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                          const Point& posC = (posB - posA).Normalized()* ((posA - posB).Norm() - J_EPS) + posA;
 
                          //it points to a destination that I can see anyway
-                         if (sub->IsVisible(posA, posC, true) == true)
+                         if (sub->ped_is_visible(posA, posC, true) == true)
                          {
                               relevant=false;
                          }
