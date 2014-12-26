@@ -46,9 +46,9 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="2">
+  <agents operational_model_id="1">
     <agents_distribution>
-      <group group_id="2" agent_parameter_id="1" room_id="1" subroom_id="0" number="10" goal_id="0" router_id="1"/>
+      <group group_id="2" agent_parameter_id="1" room_id="1" subroom_id="0" number="5" goal_id="0" router_id="1"/>
       <!-- <group group_id="0" room_id="1" subroom_id="0" number="4" goal_id="0" router_id="1" route_id="" /> -->
       <!-- <group group_id="1" room_id="1"  number="10" goal_id="0" router_id="1" route_id="" /> -->
     </agents_distribution>
@@ -63,7 +63,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>5</exitCrossingStrategy>
+        <exitCrossingStrategy>4</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0." dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -110,8 +110,8 @@
   <route_choice_models>
   <router router_id="1" description="global_shortest">
     <parameters>
-      <navigation_meshs method="triangulation" use_for_local_planning="true" />
-      <navigation_lines file="routing.xml" />
+      <navigation_mesh method="triangulation" use_for_local_planning="false" />
+      <!-- <navigation_lines file="routing.xml" /> -->
     </parameters>
   </router>
 </route_choice_models>

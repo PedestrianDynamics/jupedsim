@@ -118,7 +118,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
 
 
      int partSize = nSize / nThreads;
-     int debugPed = -18;//10;
+     int debugPed = -33;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
 
 
@@ -383,7 +383,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      //first the walls
 
      const std::vector<Wall>& walls = subroom->GetVisibleWalls(ped->GetPos());
-     if(ped->GetID()==-18)
+     if(ped->GetID()==-33)
      {
           printf("Ped = %d, visible walls = %d\n",ped->GetID(),walls.size());
           getc(stdin);
@@ -419,7 +419,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           Transition* goal=transitions[i];
           int uid1= goal->GetUniqueID();
           int uid2=ped->GetExitIndex();
-          // ignore my transition consider closed doors
+          // ignore my tranition consider closed doors
           //closed doors are considered as wall
 
           if((uid1 != uid2) || (goal->IsOpen()==false )) {
@@ -450,7 +450,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
      F = ForceRepStatPoint(ped, pt, mind, vn);
 
-     if(ped->GetID() == -18 )
+     if(ped->GetID() == -33 )
      {
           printf("wall = [%f, %f]--[%f, %f] F= [%f %f]\n", w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F.GetX(), F.GetY());
      }

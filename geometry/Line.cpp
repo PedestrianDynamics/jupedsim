@@ -374,6 +374,15 @@ bool Line::IntersectionWith(const Line& l) const
      return true;
 }
 
+Line Line::enlarge(double d) const
+{
+     const Point& p1 = _point1;
+     const Point& p2 = _point2;
+     Point diff = (p1 - p2).Normalized() * d;
+
+     return Line(p1 + diff, p2 - diff);
+}
+
 bool Line::IsHorizontal()
 {
      return fabs (_point1._y-_point2._y ) <= J_EPS;
@@ -516,7 +525,7 @@ std::string Line::toString() const
 //insteed of a boolian
 double Line::GetIntersectionDistance(const Line & l) const
 {
-
+#define DEBUG 0
      double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
      double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
      double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
@@ -556,153 +565,79 @@ double Line::GetIntersectionDistance(const Line & l) const
      }
 
      Point PointF = Point ((float) (_point1._x + r * deltaBAx), (float) (_point1._y + r * deltaBAy));
+     if(!IsInLineSegment(PointF)) //is point on the line?
+          return infinity; 
      double dist = (_point1-PointF).NormSquare();
-     //cout<< " MC Line.cpp 516" << l.toString() << " intersects with " << toString() <<endl;
-     //cout<<" at point " << PointF.toString()<<endl;
-     //cout <<  "distance is "<< sqrt(dist)<< "... return "<< dist<<endl;
+#if DEBUG
+     printf("Enter GetIntersection\n");
+     cout<< "\t" << l.toString() << " intersects with " << toString() <<endl;
+     cout<<"\t at point " << PointF.toString()<<endl;
+     cout <<  "\t\t --> distance is "<< sqrt(dist)<< "... return "<< dist<<endl;
+     printf("Leave GetIntersection\n");
+#endif
      return dist;
 
 }
 //sign of the angle depends on the direction of the wall (l).
 //the second point of l should be the nearest to the goal.
 //the goal in the intended use case is the second point of
-//the calling line
-//
+//the calling line: P->Q, Q is the crossing point
+// 
+//                 o P 
+//                / 
+//               /  
+//   F          /              L 
+//   o --------x---------------o  
+//            / Q
+//           /
+//          o Goal
+
 double Line::GetAngle(const Line & l) const
 {
-     const double pi= atan(1)*4;
-     double ax = _point1.GetX();
-     double ay = _point1.GetY();
-     double bx = _point2.GetX();
-     double by = _point2.GetY();
-     //printf("ax=%f, ay=%f --- bx=%f, by=%f\n", ax, ay, bx, by);
-     double diff_x1 = bx - ax;
-     double diff_y1 = by - ay;
-     // printf("diff_x1=%f, diff_y1=%f\n", diff_x1, diff_y1);
-     double cx =l.GetPoint1().GetX();
-     double cy =l.GetPoint1().GetY();
-     double dx =l.GetPoint2().GetX();
-     double dy =l.GetPoint2().GetY();
-     //printf("cx=%f, cy=%f --- dx=%f, dy=%f\n", cx, cy, dx, dy);
+     // const double PI = 3.14159258;
+#define DEBUG 0
+     Point P = _point1;
+     Point Goal = _point2;
 
-     double diff_x2 = dx - cx;
-     double diff_y2 = dy - cy;
-     //  printf("diff_x2=%f, diff_y2=%f\n", diff_x2, diff_y2);
+     Point L = l._point1;
+     Point R = l._point2;
+     
+     double dist_Goal_L = (Goal-L).NormSquare();
+     double dist_Goal_R = (Goal-R).NormSquare();
+     
+     double angle, angleL, angleR;
+     // we don't need to calculate both angles, but for debugging purposes we do it.
+     angleL = atan((Goal-P).CrossP(L-P)/(Goal-P).ScalarP(L-P));
+     angleR = atan((Goal-P).CrossP(R-P)/(Goal-P).ScalarP(R-P));
 
-     double atanA = atan2( diff_y1, diff_x1 );
-     double atanB = atan2( diff_y2, diff_x2);
-
-//    printf("atanA %f atanB %f\n", atanA*180/pi, atanB*180/pi);
-     double angle = atanA - atanB;
-
-
-     double absAngle= fabs(angle);
-     double sign = (angle <0)? -1.0 : 1.0;
-
-
-     // if (angle>pi)
-     //     printf( "NORMALIZE --> %.2f\n", (2*pi-angle)*180/pi);
-     angle = (angle>pi)? -(2*pi-absAngle): angle;
-     //printf("angle=%.2f, absAngle=%.2f, sign=%.1f\n", angle*180/pi, absAngle, sign);
-
-     absAngle= fabs(angle);
-     double  tmp = (absAngle<pi/2)? (-angle) : (pi-absAngle)*sign;
-
-     //printf("tmp=%.2f exp=%.2f\n", tmp, (pi-absAngle)*sign);
-
-     // 3pi/4  ---->  pi/4 (sign=1)
-     // -3pi/4 ----> -pi/4 (sign=-1)
-     // pi/4   ----> -pi/4
-     // -pi/4   ----> pi/4
-
-     return tmp;
-
-
-
-     //  double distPoint2ToGoalSq = (dx-bx)*(dx-bx) + (dy-by)*(dy-by);
-     //  double distPoint1ToGoalSq = (cx-bx)*(cx-bx) + (cy-by)*(cy-by);
-     //  if(distPoint1ToGoalSq < distPoint2ToGoalSq) //invert the line
-     //  {
-     //      double tx = dx, ty = dy;
-     //      dx = cx; dy = cy;
-     //      cx = tx; cy = ty;
-     //  }
-
-     //  double dotp = (bx-ax)*(dx-cx)+(by-ay)*(dy-cy);
-     //  double len, len1;
-
-     //  len = l.Length();
-     //  if (len < J_EPS)
-     //      return 0;
-
-     //  len1 = this->Length();
-
-     // if (len1 < J_EPS)
-     //      return 0;
-
-
-     //  double angle = acos( dotp / (len * len1) );
-     //  double crossp = (bx-ax)*(dy-cy) - (by-ay)*(dx-cx);
-     //  double sign = (crossp <0)? -1.0 : 1.0;
-
-
-
-     //  angle = (angle<pi/2)?angle:pi-angle;
-     //  return  angle*sign;
-
+     angle = (dist_Goal_L<dist_Goal_R)?angleL:angleR;
+#if DEBUG
+     printf("Enter GetAngel()\n");
+     printf("\tP=[%f,%f]\n",P.GetX(), P.GetY());
+     printf("\tGoal=[%f,%f]\n",Goal.GetX(), Goal.GetY());
+     printf("\tL=[%f,%f]\n",L.GetX(), L.GetY());
+     printf("\tR=[%f,%f]\n",R.GetX(), R.GetY());
+     printf("\t\tdist_Goal_L=%f\n",dist_Goal_L);
+     printf("\t\tdist_Goal_R=%f\n",dist_Goal_R);
+     printf("\t\t --> angleL=%f\n",angleL);
+     printf("\t\t --> angleR=%f\n",angleR);
+     printf("\t\t --> angle=%f\n",angle);
+     printf("Leave GetAngel()\n");
+#endif
+     return angle;
 }
 
-// get the angle that is needed to turn a line, so that it
-// doen not intersect the nearest Wall in subroom
-// double Line::GetAngle(SubRoom * subroom) const{
-//     double dist;
-//     int inear = -1;
-//     int iObs = -1;
-//     double minDist = 20001;
-//     //============================ WALLS ===========================
-//     const vector<Wall>& walls = subroom->GetAllWalls();
-//     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-//         dist = tmpDirection.GetIntersectionDistance(walls[i]);
-//         printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
-//         if (dist < minDist)
-//         {
-//             inear = i;
-//             minDist = dist;
-//         }
-//     }//walls
-//     //============================ WALLS ===========================
-
-//     //============================ OBST ===========================
-//     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-//     for(unsigned int obs=0; obs<obstacles.size(); ++obs){
-//         const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
-//         for (unsigned int i = 0; i < owalls.size(); i++) {
-//             dist = tmpDirection.GetIntersectionDistance(owalls[i]);
-//             printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
-//             if (dist < minDist)
-//             {
-//                 inear = i;
-//                 minDist = dist;
-//                 iObs = obs;
-//             }
-//         }//walls of obstacle
-//     }// obstacles
-//     //============================ OBST ===========================
-// //------------------------------------------------------------------------
-
-//     double angle = 0;
-//     if (inear >= 0)
-//         if(iObs >= 0)
-//         {
-//             const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
-//             angle =  tmpDirection.GetAngle(owalls[inear]);
-//         }
-//         else
-//             angle =  tmpDirection.GetAngle(walls[inear]);
 
 
 
-// return angle
 
-// }
+
+
+
+
+
+
+
+
+
 

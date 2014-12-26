@@ -77,6 +77,7 @@ public:
      Point NormalizedMolified() const;
      /// dot product
      double ScalarP(const Point& v) const;
+     double CrossP(const Point& p) const;
      /// determinant of the square matrix formed by the vectors [ this, v]
      double Det(const Point& v) const;
      /// translation and rotation in Ellipse coordinate system

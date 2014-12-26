@@ -235,8 +235,19 @@ public:
       */
      double GetAngle(const Line& l) const;
      //    double GetAngle(SubRoom s) const;
+     Line enlarge(double d) const; 
 
 };
 
 #endif  /* _LINE_H */
+
+
+
+
+
+
+
+
+
+
 
