@@ -233,7 +233,7 @@ public:
      /**
       * @return the angle between two lines
       */
-     double GetAngle(const Line& l) const;
+     double GetDeviationAngle(const Line& l) const;
      //    double GetAngle(SubRoom s) const;
      Line enlarge(double d) const; 
 

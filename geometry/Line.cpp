@@ -578,9 +578,9 @@ double Line::GetIntersectionDistance(const Line & l) const
      return dist;
 
 }
-//sign of the angle depends on the direction of the wall (l).
-//the second point of l should be the nearest to the goal.
-//the goal in the intended use case is the second point of
+
+// calculates the angles QPF and QPL 
+// return the snagle of the point (F or L) which is nearer to the Goal 
 //the calling line: P->Q, Q is the crossing point
 // 
 //                 o P 
@@ -592,7 +592,7 @@ double Line::GetIntersectionDistance(const Line & l) const
 //           /
 //          o Goal
 
-double Line::GetAngle(const Line & l) const
+double Line::GetDeviationAngle(const Line & l) const
 {
      // const double PI = 3.14159258;
 #define DEBUG 0

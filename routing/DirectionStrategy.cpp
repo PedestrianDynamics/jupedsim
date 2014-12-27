@@ -208,14 +208,14 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
      if (inear >= 0) {
           if(iObs >= 0) {
                const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
-               angle =  tmpDirection.GetAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
+               angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 #if DEBUG
                     printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
                
 #endif 
 
           } else{
-               angle =  tmpDirection.GetAngle(walls[inear].enlarge(2*ped->GetLargerAxis()));
+               angle =  tmpDirection.GetDeviationAngle(walls[inear].enlarge(2*ped->GetLargerAxis()));
 #if DEBUG
                     printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
 #endif
@@ -241,7 +241,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
 #endif
 
-fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
+// fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
 // this stderr output can be used with plot_desired_velocity.py
 
      return G;
