@@ -417,24 +417,29 @@ void Pedestrian::SetPhiPed()
 
 const Point& Pedestrian::GetV0(const Point& target)
 {
-
+#define DEBUG 0
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
-
+     double t;
      // Molification around the targets makes little sense
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
-     //printf("BEFORE new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
+#if DEBUG
+     printf("BEFORE new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
+#endif
      // printf("AFTER new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      // -------------------------------------- Handover new target
-     double t = _newOrientationDelay++ *_deltaT;
-     // printf("t=%f, neworientation=%d\n", t, _newOrientationDelay);
-     //getc(stdin);
+     t = _newOrientationDelay++ *_deltaT/(1.0+ _DistToBlockade); 
+
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
-     //printf("_v0=%f %f norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
-     //getc(stdin);
+#if DEBUG
+     printf("t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", t, _newOrientationFlag, _newOrientationDelay, _DistToBlockade);
+     printf("_v0=[%f, %f] norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+     // getc(stdin);
+#endif
      // --------------------------------------
+
      return _V0;
 }
 
@@ -518,6 +523,26 @@ double Pedestrian::GetReroutingTime()
 bool Pedestrian::GetNewEventFlag()
 {
     return _newEventFlag;
+}
+
+bool  Pedestrian::GetNewOrientationFlag()
+{
+    return _newOrientationFlag;
+}
+
+void Pedestrian::SetDistToBlockade(double dist)
+{
+     _DistToBlockade = dist;
+}
+double Pedestrian::GetDistToBlockade()
+{
+     return _DistToBlockade;
+}
+    
+
+void Pedestrian::SetNewOrientationFlag(bool flag)
+{
+    _newOrientationFlag=flag;
 }
 
 void Pedestrian::SetNewEventFlag(bool flag)

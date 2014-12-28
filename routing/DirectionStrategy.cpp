@@ -141,15 +141,6 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
      double d = 0.2; //shorten the line by  20 cm
      Point diff = (p1 - p2).Normalized() * d;
      Line e_neu = Line(p1 - diff, p2 + diff);
-     // Point diff2 = (p2 - p1).Normalized() * d;
-     // Line e_large = Line(p1 + diff, p2 - diff);
-     // printf("-------------------------------");
-     // printf("\n ped %d\n",ped->GetID());
-     // printf("line [%f, %f]-[%f, %f]\n", ped->GetExitLine()->GetPoint1().GetX(), ped->GetExitLine()->GetPoint1().GetY(), ped->GetExitLine()->GetPoint2().GetX(), ped->GetExitLine()->GetPoint2().GetY());
-     // printf("shorten line [%f, %f]-[%f, %f]\n", e_neu.GetPoint1().GetX(), e_neu.GetPoint1().GetY(), e_neu.GetPoint2().GetX(), e_neu.GetPoint2().GetY());
-     // printf("line [%f, %f]-[%f, %f]\n", e_large.GetPoint1().GetX(), e_large.GetPoint1().GetY(), e_large.GetPoint2().GetX(), e_large.GetPoint2().GetY());
-     // printf("-------------------------------");
-     // getc(stdin);
      Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
 
      Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
@@ -206,6 +197,8 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
      double angle = 0;
      if (inear >= 0) {
+          ped->SetNewOrientationFlag(true); //Mark this pedestrian for next target calculation
+          ped->SetDistToBlockade(minDist);
           if(iObs >= 0) {
                const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
                angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
@@ -220,6 +213,14 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
                     printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
 #endif
           }
+     }//inear
+     else{
+
+          if(ped->GetNewOrientationFlag()){ //this pedestrian could not see the target and now he can see it clearly.
+                         // printf("ped->GetNewOrientationFlag()=%d\n",ped->GetNewOrientationFlag());getc(stdin);
+               ped->SetSmoothTurning(true); // so the turning should be adapted accordingly.
+               ped->SetNewOrientationFlag(false);
+          }
      }
 ////////////////////////////////////////////////////////////
     
@@ -227,10 +228,12 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
      if (fabs(angle) > J_EPS)
           //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
           G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle))+ped->GetPos() ;
-     else
-          //G  =  tmpDirection.GetPoint2();
+     else {
+          if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
+               ped->SetSmoothTurning(true); // so the turning should be adapted accordingly.
+          
           G  =  NextPointOnLine;
-
+     }
 #if DEBUG
           printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
           printf("PED=%d\n",  ped->GetID());
@@ -246,3 +249,6 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
      return G;
 }
+
+
+

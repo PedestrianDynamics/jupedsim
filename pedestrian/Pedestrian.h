@@ -92,6 +92,8 @@ private:
       */
      std::map<int, NavLineState> _knownDoors;
 
+
+     double _DistToBlockade; // distance to nearest obstacle that blocks the sight of ped.
      //routing parameters
      /// new orientation after 10 seconds
      double _reroutingThreshold;
@@ -115,7 +117,7 @@ private:
      double _turninAngle;
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
-     bool _newOrientationFlag;
+     bool _newOrientationFlag; //this is used in the DirectionGeneral::GetTarget()
      bool _newEventFlag;
 
      // the current time in the simulation
@@ -148,7 +150,9 @@ public:
      void Setdt(double dt);
      double Getdt();
 
-
+     void SetDistToBlockade(double dist);
+     double GetDistToBlockade();
+     
      // Eigenschaften der Ellipse
      void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
@@ -206,7 +210,8 @@ public:
      int GetDestinationCount();
      double GetDistanceToNextTarget() const;
      double GetDisTanceToPreviousTarget() const;
-
+     void SetNewOrientationFlag(bool flag);
+     bool GetNewOrientationFlag();
      bool GetNewEventFlag();
      void SetNewEventFlag(bool flag);
      bool ChangedSubRoom();

@@ -30,6 +30,7 @@
 #define _DIRECTIONSTRATEGY_H
 
 
+
 class Room;
 class Pedestrian;
 class Point;
