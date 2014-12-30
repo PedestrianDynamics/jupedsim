@@ -24,8 +24,7 @@
  *
  *
  **/
-
-
+#include <cmath>
 #include "PedDistributor.h"
 #include "../tinyxml/tinyxml.h"
 #include "../geometry/Obstacle.h"
@@ -33,9 +32,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
-
-#include <cmath>
-
+#include "../logging.h"
 using namespace std;
 
 
@@ -333,9 +330,11 @@ int PedDistributor::Distribute(Building* building) const
      int nPeds = 0;
 
      //first compute all possible positions in the geometry
-     vector<vector< vector<Point > > > allFreePos = vector<vector< vector<Point > > >();
+     // @todo that is not necessary, especially when N is small. It is then not worth the work
+     vector< PointGrid > allFreePos = vector< PointGrid >();
      for (int r = 0; r < building->GetNumberOfRooms(); r++) {
-          vector< vector<Point > >  allFreePosRoom = vector< vector<Point > > ();
+          // vector< vector<Point > >  allFreePosRoom = vector< vector<Point > > ();
+          PointGrid  allFreePosRoom = PointGrid ();
           Room* room = building->GetRoom(r);
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
@@ -344,26 +343,32 @@ int PedDistributor::Distribute(Building* building) const
           }
           allFreePos.push_back(allFreePosRoom);
      }
-
+  
      // first perform the distribution according to the  subrooms (if any)
 
+     int  max_rooms_id = allFreePos.size();
+     int  max_subrooms_id;
+     if(max_rooms_id>0)
+          max_subrooms_id = allFreePos[0].size();
      int pid = 1; // the pedID is being increased throughout...
      for (int i = 0; i < (int) _start_dis_sub.size(); i++) {
 
           int room_id = _start_dis_sub[i]->GetRoomId();
           Room* r = building->GetRoom(room_id);
           if(!r) continue;
-
           int roomID = r->GetID();
-
           int subroomID = _start_dis_sub[i]->GetSubroomID();
           int N = _start_dis_sub[i]->GetAgentsNumber();
+
           if (N < 0) {
-               Log->Write("ERROR: \t negative  (or null ) number of pedestrians!");
+               Log->Write("ERROR: \t negative  number of pedestrians!");
                exit(EXIT_FAILURE);
           }
-
-          vector<Point> &allpos = allFreePos[roomID][subroomID];
+          if(roomID>=max_rooms_id || subroomID>=max_subrooms_id){
+               Log->Write("ERROR: \t max_room_id = %d, Got roomID = %d | max_subroom_id = %d, Got subroomID = %d",max_rooms_id, roomID, max_subrooms_id, subroomID);
+               exit(EXIT_FAILURE);
+          }
+          _Points &allpos = allFreePos[roomID][subroomID];
           int max_pos = allpos.size();
           if (max_pos < N) {
                Log->Write("ERROR: \tCannot distribute %d agents in Room %d . Maximum allowed: %d\n",
@@ -398,7 +403,7 @@ int PedDistributor::Distribute(Building* building) const
           vector<int> max_anz = vector<int>();
           vector<int> akt_anz = vector<int>();
 
-          vector< vector<Point > >&  allFreePosInRoom=allFreePos[room_id];
+          PointGrid&  allFreePosInRoom=allFreePos[room_id];
           for (int is = 0; is < r->GetNumberOfSubRooms(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
                double area = sr->GetArea();
@@ -640,7 +645,9 @@ vector<Point> PedDistributor::PossiblePositions(const SubRoom& r)
                x += dx;
           }
      }
-
+     // for (auto i:positions)
+     //      std::cout << "x="<< i.GetX()<<"  y="<< i.GetY() << std::endl
+               ;
      //shuffle the array
      std::random_shuffle(positions.begin(), positions.end());
      return positions;

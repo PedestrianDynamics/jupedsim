@@ -82,6 +82,8 @@ bool GompertzModel::Init (Building* building) const
          double cosPhi, sinPhi;
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
+              Log->Write(
+                   "WARNING: \allPeds::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
              building->DeletePedestrian(ped);
               continue;
          }
@@ -101,6 +103,8 @@ bool GompertzModel::Init (Building* building) const
                    "dist to target is 0\n");
               return false;
          }
+
+         ped->InitV0(target); 
 
          JEllipse E = ped->GetEllipse();
          E.SetCosPhi(cosPhi);

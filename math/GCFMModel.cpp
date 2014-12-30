@@ -97,7 +97,7 @@ bool GCFMModel::Init (Building* building) const
                    "dist to target is 0\n");
               return false;
          }
-
+         ped->InitV0(target); 
          JEllipse E = ped->GetEllipse();
          E.SetCosPhi(cosPhi);
          E.SetSinPhi(sinPhi);

@@ -82,6 +82,7 @@ Pedestrian::Pedestrian()
      _spotlight = false;
      _V0UpStairs=0.0;
      _V0DownStairs=0.0;
+     _DistToBlockade=0.0;
 }
 
 
@@ -415,8 +416,25 @@ void Pedestrian::SetPhiPed()
      _ellipse.SetSinPhi(sinPhi);
 }
 
+
+void Pedestrian::InitV0(const Point& target)
+{
+
+#define DEBUG 0
+     const Point& pos = GetPos();
+     Point delta = target - pos;
+
+     _V0 = delta.Normalized();
+
+#if DEBUG
+     printf("Ped=%d : _v0=[%f, %f] \n", _id, _v0.GetX(), _V0.GetY());
+#endif
+}
+
+
 const Point& Pedestrian::GetV0(const Point& target)
 {
+
 #define DEBUG 0
      const Point& pos = GetPos();
      Point delta = target - pos;
@@ -425,17 +443,16 @@ const Point& Pedestrian::GetV0(const Point& target)
      // Molification around the targets makes little sense
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
-#if DEBUG
-     printf("BEFORE new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
-#endif
-     // printf("AFTER new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      // -------------------------------------- Handover new target
-     t = _newOrientationDelay++ *_deltaT/(1.0+ _DistToBlockade); 
+     t = _newOrientationDelay++ *_deltaT/(1.0+1000* _DistToBlockade); 
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 #if DEBUG
-     printf("t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", t, _newOrientationFlag, _newOrientationDelay, _DistToBlockade);
-     printf("_v0=[%f, %f] norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+     if(_id==3){
+          printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
+          printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _DistToBlockade);
+          printf("_v0=[%f, %f] norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+     }
      // getc(stdin);
 #endif
      // --------------------------------------

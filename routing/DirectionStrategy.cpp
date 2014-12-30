@@ -244,11 +244,22 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
 #endif
 
-// fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
+          // if( ped->GetID() == 3)
+          // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with plot_desired_velocity.py
 
      return G;
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -93,7 +93,7 @@ private:
      std::map<int, NavLineState> _knownDoors;
 
 
-     double _DistToBlockade; // distance to nearest obstacle that blocks the sight of ped.
+     double _DistToBlockade=0; // distance to nearest obstacle that blocks the sight of ped.
      //routing parameters
      /// new orientation after 10 seconds
      double _reroutingThreshold;
@@ -182,7 +182,7 @@ public:
      const Point& GetV() const;
      const Point& GetV0() const;
      const Point& GetV0(const Point& target);
-
+     void InitV0(const Point& target);
      /**
       * the desired speed is the projection of the speed on the horizontal plane.
       * @return the norm of the desired speed.
