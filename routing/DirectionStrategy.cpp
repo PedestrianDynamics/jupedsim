@@ -218,7 +218,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
           if(ped->GetNewOrientationFlag()){ //this pedestrian could not see the target and now he can see it clearly.
                          // printf("ped->GetNewOrientationFlag()=%d\n",ped->GetNewOrientationFlag());getc(stdin);
-               ped->SetSmoothTurning(true); // so the turning should be adapted accordingly.
+               ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
                ped->SetNewOrientationFlag(false);
           }
      }
@@ -230,7 +230,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
           G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle))+ped->GetPos() ;
      else {
           if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
-               ped->SetSmoothTurning(true); // so the turning should be adapted accordingly.
+               ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
           
           G  =  NextPointOnLine;
      }
@@ -244,8 +244,8 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
 #endif
 
-          // if( ped->GetID() == 3)
-          // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
+          if( ped->GetID() == 12)
+          fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with plot_desired_velocity.py
 
      return G;

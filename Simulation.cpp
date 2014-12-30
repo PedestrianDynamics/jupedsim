@@ -307,7 +307,7 @@ int Simulation::RunSimulation()
           Pedestrian::SetGlobalTime(t);
 
           // write the trajectories
-          if (frameNr % writeInterval == 0) {
+          if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
 
@@ -397,27 +397,27 @@ void Simulation::UpdateRoutesAndLocations()
                     bool assigned = false;
                     const std::vector<Room*>& allRooms =
                               _building->GetAllRooms();
-                    for (Room* room : allRooms)
+                    for (Room*iroom : allRooms)
                     {
                          const vector<SubRoom*>& allSubs =
-                                   room->GetAllSubRooms();
-                         for (SubRoom* sub : allSubs)
+                                   iroom->GetAllSubRooms();
+                         for (SubRoom*isub : allSubs)
                          {
                               Room* old_room =allRooms[ped->GetRoomID()];
                               SubRoom* old_sub =old_room->GetSubRoom(
                                         ped->GetSubRoomID());
-                              if ((sub->IsInSubRoom(ped->GetPos()))
-                                        && (sub->IsDirectlyConnectedWith(
+                              if ((isub->IsInSubRoom(ped->GetPos()))
+                                        && (isub->IsDirectlyConnectedWith(
                                                   old_sub)))
                               {
-                                   ped->SetRoomID(room->GetID(),
-                                             room->GetCaption());
-                                   ped->SetSubRoomID(sub->GetSubRoomID());
+                                   ped->SetRoomID(iroom->GetID(),
+                                             iroom->GetCaption());
+                                   ped->SetSubRoomID(isub->GetSubRoomID());
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
 
-                                   //the agent left the old room
-                                   //actualize the egress time for that room
+                                   //the agent left the old iroom
+                                   //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
                                    assigned = true;

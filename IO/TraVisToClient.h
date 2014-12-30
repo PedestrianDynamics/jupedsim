@@ -35,25 +35,45 @@
 #include <string.h>
 #include <stdbool.h>
 
-#ifdef _WIN32
+// #ifdef _WIN32
 
-#endif
+// #endif
 
 #define QUEUE_LENGTH       5        ///< max queue length of pending connections
 
-/******** macro definitions ******************************************/
+// inline
+// void
+// _printDebugLine(const char *fileName, int lineNumber)
+// {
+//   fprintf(stderr, "%-15s|%03d| ", fileName, lineNumber);
+// }
 
-#ifdef TRACE_LOGGING
 
-#define dtrace(...)   _printDebugLine(__FILE__, __LINE__, false, __VA_ARGS__)
-#define derror(...)   _printDebugLine(__FILE__, __LINE__, true, __VA_ARGS__)
+// #ifdef TRACE_LOGGING
 
-#else
+// /******** macro definitions ******************************************/
+// #define dtrace(...)                         \
+//     (_printDebugLine(__FILE__, __LINE__),   \
+//     fprintf(stderr, __VA_ARGS__),           \
+//     (void) fprintf(stderr, "\n"))
 
-#define dtrace(...)   ((void) 0)
-#define derror(...)   (fprintf(stderr, __VA_ARGS__), _printErrorMessage())
+// #define derror(...)                         \
+//     (_printDebugLine(__FILE__, __LINE__),   \
+//     fprintf(stderr, "ERROR: "),             \
+//     fprintf(stderr, __VA_ARGS__),           \
+//     _printErrorMessage())
 
-#endif /* TRACE_LOGGING */
+
+
+// // #define dtrace(...)   _printDebugLine(__FILE__, __LINE__, false, __VA_ARGS__)
+// // #define derror(...)   _printDebugLine(__FILE__, __LINE__, true, __VA_ARGS__)
+
+// #else
+
+// #define dtrace(...)   ((void) 0)
+// #define derror(...)   (fprintf(stderr, __VA_ARGS__), _printErrorMessage())
+
+// #endif /* TRACE_LOGGING */
 
 
 #ifdef _WIN32
@@ -65,6 +85,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iphlpapi.h>
+
 #pragma comment(lib, "Ws2_32.lib")
 #define WS_MAJOR_VERSION   1        ///< major version of Winsock API
 #define WS_MINOR_VERSION   1        ///< minor version of Winsock API

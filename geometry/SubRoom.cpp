@@ -82,7 +82,6 @@ SubRoom::~SubRoom()
      _obstacles.clear();
 }
 
-// Setter -Funktionen
 
 void SubRoom::SetSubRoomID(int ID)
 {
@@ -127,7 +126,7 @@ int SubRoom::GetRoomID() const
 
 int SubRoom::GetNumberOfWalls() const
 {
-     return _walls.size();
+     return (int)_walls.size();
 }
 
 const vector<Wall>& SubRoom::GetAllWalls() const
@@ -157,7 +156,7 @@ const vector<Obstacle*>& SubRoom::GetAllObstacles() const
 
 int SubRoom::GetNumberOfGoalIDs() const
 {
-     return _goalIDs.size();
+     return (int)_goalIDs.size();
 }
 
 const vector<int>& SubRoom::GetAllGoalIDs() const
@@ -165,8 +164,6 @@ const vector<int>& SubRoom::GetAllGoalIDs() const
      return _goalIDs;
 }
 
-
-// Sonstiges
 
 void SubRoom::AddWall(const Wall& w)
 {
@@ -306,27 +303,34 @@ Point SubRoom::GetCentroid() const
 }
 
 std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position){
-     std::vector<Wall> visible_walls; 
+#define DEBUG 0
+     std::vector<Wall> visible_walls;
      bool wall_is_vis;
      Point nearest_point;
-     // printf("\n---------------------------\nEnter GetVisiblewalls\n");
+#if DEBUG
+     printf("\n---------------------------\nEnter GetVisiblewalls\n");
+#endif
      for (auto w:_walls){
           // nearest_point = w.ShortestPoint(position);
-          wall_is_vis = wall_is_visible(w, position, false);
+          wall_is_vis = wall_is_visible(w, position);
           if(wall_is_vis){
-               // printf("  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",w.GetPoint1().GetX(), w.GetPoint1().GetY(),w.GetPoint2().GetX(), w.GetPoint2().GetY() );
-               // printf("  GetVisibleWalls: Ped position (%f, %f)\n",position.GetX(), position.GetY());
-               // printf("  GetVisibleWalls: wall is visible? = %d\n",wall_is_vis);
+#if DEBUG
+               printf("  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",w.GetPoint1().GetX(), w.GetPoint1().GetY(),w.GetPoint2().GetX(), w.GetPoint2().GetY() );
+               printf("  GetVisibleWalls: Ped position (%f, %f)\n",position.GetX(), position.GetY());
+               printf("  GetVisibleWalls: wall is visible? = %d\n",wall_is_vis);
+#endif
                visible_walls.push_back(w);
           }
      }
-     // printf("Leave GetVisiblewalls with %d visible walls\n------------------------------\n",visible_walls.size());
+#if DEBUG
+     printf("Leave GetVisiblewalls with %d visible walls\n------------------------------\n",visible_walls.size());
+ #endif
      return visible_walls;
 }
 
 // like ped_is_visible() but here we can exclude checking intersection
 // with the same wall. This function should check if <position> can see the <Wall>
-bool SubRoom::wall_is_visible(const Wall& wall, const Point& position, bool considerHlines)
+bool SubRoom::wall_is_visible(const Wall &wall, const Point &position)
 {
      // printf("\tEnter wall_is_visible\n");
      // printf(" \t  Wall (%f, %f)--(%f, %f)\n",wall.GetPoint1().GetX(), wall.GetPoint1().GetY(),wall.GetPoint2().GetX(), wall.GetPoint2().GetY() );
@@ -552,7 +556,7 @@ bool SubRoom::SanityCheck()
 ///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
 bool SubRoom::IsConvex()
 {
-     unsigned int hsize=_poly.size();
+     unsigned int hsize=(unsigned int)_poly.size();
      unsigned int pos=0;
      unsigned int neg=0;
 
@@ -764,7 +768,7 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 
      /////////////////////////////////////////////////////////////
      edge = first = 0;
-     quad = WhichQuad(_poly[edge], ped);
+     quad = (short) WhichQuad(_poly[edge], ped);
      total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
      /* LOOP THROUGH THE VERTICES IN A SECTOR */
      do {
@@ -789,6 +793,7 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const
           case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
                delta = 1;
                break;
+               default:break;
           }
           /* ADD IN THE DELTA */
           total += delta;
@@ -1002,9 +1007,9 @@ bool Stair::ConvertLineToPoly(vector<Line*> goals)
      // ganz kleine Treppen (nur eine Stufe) nicht
      if ((neuPoly[0] - neuPoly[1]).Norm() > 0.9 && (neuPoly[1] - neuPoly[2]).Norm() > 0.9) {
           for (int i1 = 0; i1 < (int) orgPoly.size(); i1++) {
-               int i2 = (i1 + 1) % orgPoly.size();
-               int i3 = (i2 + 1) % orgPoly.size();
-               int i4 = (i3 + 1) % orgPoly.size();
+               unsigned long i2 = (i1 + 1) % orgPoly.size();
+               unsigned long i3 = (i2 + 1) % orgPoly.size();
+               unsigned long i4 = (i3 + 1) % orgPoly.size();
                Point p1 = neuPoly[i1];
                Point p2 = neuPoly[i2];
                Point p3 = neuPoly[i3];

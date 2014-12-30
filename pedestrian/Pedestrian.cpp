@@ -481,7 +481,7 @@ double Pedestrian::GetTimeInJam() const
 
 // }
 
-void Pedestrian::SetSmoothTurning(bool smt)
+void Pedestrian::SetSmoothTurning()
 {
     _newOrientationDelay = 0;
 }

@@ -194,10 +194,10 @@ Point GPU_GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 		F_rep = ep12 * px;
 	}
 	if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
-		char tmp[CLENGTH];
-		sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
+		char msg[CLENGTH];
+		sprintf(msg, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
 				ped2->GetID(), F_rep.GetX(), F_rep.GetY());
-		Log->Write(tmp);
+		Log->Write(msg);
 		Log->Write("ERROR:\t fix this as soon as possible");
 		return Point(0,0); // FIXME: should never happen
 		exit(EXIT_FAILURE);
@@ -215,26 +215,27 @@ Point GPU_GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 inline Point GPU_GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
+	 unsigned int i;
 	Point f = Point(0., 0.);
 	//first the walls
 
 	const vector<Wall>& walls = subroom->GetAllWalls();
-	for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-		f = f + ForceRepWall(ped, walls[i]);
+	for (i = 0; i < subroom->GetNumberOfWalls(); i++) {
+		f += ForceRepWall(ped, walls[i]);
 	}
 
 	//then the obstacles
 	const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
 	for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-		const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
-		for (unsigned int i = 0; i < walls.size(); i++) {
-			f = f + ForceRepWall(ped, walls[i]);
+		const vector<Wall>&owalls = obstacles[obs]->GetAllWalls();
+		for (i = 0; i < owalls.size(); i++) {
+			f += ForceRepWall(ped, owalls[i]);
 		}
 	}
 
 	//eventually crossings
 	const vector<Crossing*>& crossings = subroom->GetAllCrossings();
-	for (unsigned int i = 0; i < crossings.size(); i++) {
+	for (i = 0; i < crossings.size(); i++) {
 		//Crossing* goal=crossings[i];
 		//int uid1= goal->GetUniqueID();
 		//int uid2=ped->GetExitIndex();
@@ -246,15 +247,15 @@ inline Point GPU_GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) cons
 
 	// and finally the closed doors or doors that are not my destination
 	const vector<Transition*>& transitions = subroom->GetAllTransitions();
-	for (unsigned int i = 0; i < transitions.size(); i++) {
+	for (i = 0; i < transitions.size(); i++) {
 		Transition* goal=transitions[i];
 		int uid1= goal->GetUniqueID();
 		int uid2=ped->GetExitIndex();
 		// ignore my transition consider closed doors
 		//closed doors are considered as wall
 
-		if((uid1 != uid2) || (goal->IsOpen()==false )) {
-			f = f + ForceRepWall(ped,*((Wall*)goal));
+		if((uid1 != uid2) || !goal->IsOpen()) {
+			f += ForceRepWall(ped,*((Wall*)goal));
 		}
 	}
 
@@ -448,40 +449,40 @@ void GPU_GCFMModel::SetHPC(int f){
 	hpc=f;
 }
 
-void GPU_GCFMModel::CreateBuffer(int nrPeds){
+void GPU_GCFMModel::CreateBuffer(int numPeds){
 	//Buffer anlegen
-	std::cout << nrPeds << std::endl;
+	std::cout << numPeds << std::endl;
 	//Buffer fuer die Krafteinwirkung der Fussgaenger untereinander
-	pedGetV_x=(double*)malloc(nrPeds*sizeof(double));
-	pedGetV_y=(double*)malloc(nrPeds*sizeof(double));
-	pedGetV0Norm=(double*)malloc(nrPeds*sizeof(double));
-	pedGetID=(int*)malloc(nrPeds*sizeof(int));
-	pedGetPos_x=(double*)malloc(nrPeds*sizeof(double));
-	pedGetPos_y=(double*)malloc(nrPeds*sizeof(double));
-	pedGetUniqueRoomID=(int*)malloc(nrPeds*sizeof(int));
-	force_x=(double*)malloc(nrPeds*sizeof(double));
-	force_y=(double*)malloc(nrPeds*sizeof(double));
-	nearDoor=(int*)malloc(nrPeds*sizeof(int));
-	elCenter_x=(double*)malloc(nrPeds*sizeof(double));
-	elCenter_y=(double*)malloc(nrPeds*sizeof(double));
-	sinPhi=(double*)malloc(nrPeds*sizeof(double));
-	cosPhi=(double*)malloc(nrPeds*sizeof(double));
-	elEA=(double*)malloc(nrPeds*sizeof(double));
-	elEB=(double*)malloc(nrPeds*sizeof(double));
-	elXp=(double*)malloc(nrPeds*sizeof(double));
-	pedMass=(double*)malloc(nrPeds*sizeof(double));
+	pedGetV_x=(double*)malloc(numPeds *sizeof(double));
+	pedGetV_y=(double*)malloc(numPeds *sizeof(double));
+	pedGetV0Norm=(double*)malloc(numPeds *sizeof(double));
+	pedGetID=(int*)malloc(numPeds *sizeof(int));
+	pedGetPos_x=(double*)malloc(numPeds *sizeof(double));
+	pedGetPos_y=(double*)malloc(numPeds *sizeof(double));
+	pedGetUniqueRoomID=(int*)malloc(numPeds *sizeof(int));
+	force_x=(double*)malloc(numPeds *sizeof(double));
+	force_y=(double*)malloc(numPeds *sizeof(double));
+	nearDoor=(int*)malloc(numPeds *sizeof(int));
+	elCenter_x=(double*)malloc(numPeds *sizeof(double));
+	elCenter_y=(double*)malloc(numPeds *sizeof(double));
+	sinPhi=(double*)malloc(numPeds *sizeof(double));
+	cosPhi=(double*)malloc(numPeds *sizeof(double));
+	elEA=(double*)malloc(numPeds *sizeof(double));
+	elEB=(double*)malloc(numPeds *sizeof(double));
+	elXp=(double*)malloc(numPeds *sizeof(double));
+	pedMass=(double*)malloc(numPeds *sizeof(double));
 	//zusaetzliche Buffer fuer die anziehende Kraft des Ziels
-	forceDriv_x=(double*)malloc(nrPeds*sizeof(double));
-	forceDriv_y=(double*)malloc(nrPeds*sizeof(double));
-	distToExitLine=(double*)malloc(nrPeds*sizeof(double));
-	targetV0_x=(double*)malloc(nrPeds*sizeof(double));
-	targetV0_y=(double*)malloc(nrPeds*sizeof(double));
-	pedTau=(double*)malloc(nrPeds*sizeof(double));
-	pedV0_x=(double*)malloc(nrPeds*sizeof(double));
-	pedV0_y=(double*)malloc(nrPeds*sizeof(double));
+	forceDriv_x=(double*)malloc(numPeds *sizeof(double));
+	forceDriv_y=(double*)malloc(numPeds *sizeof(double));
+	distToExitLine=(double*)malloc(numPeds *sizeof(double));
+	targetV0_x=(double*)malloc(numPeds *sizeof(double));
+	targetV0_y=(double*)malloc(numPeds *sizeof(double));
+	pedTau=(double*)malloc(numPeds *sizeof(double));
+	pedV0_x=(double*)malloc(numPeds *sizeof(double));
+	pedV0_y=(double*)malloc(numPeds *sizeof(double));
 	//Buffer fuer repwall
-	forceWall_x=(double*)malloc(nrPeds*sizeof(double));
-	forceWall_y=(double*)malloc(nrPeds*sizeof(double));
+	forceWall_x=(double*)malloc(numPeds *sizeof(double));
+	forceWall_y=(double*)malloc(numPeds *sizeof(double));
 	//Buffer anlegen fertig
 }
 
@@ -592,8 +593,8 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 				double xPed=elCenter_x[p];
 				double yPed=elCenter_y[p];
 				double normVi = pedV_x*pedV_x + pedV_y*pedV_y;
-				double tmp = (pedV0Norm+delta) * (pedV0Norm+delta);
-				if(normVi>tmp && pedV0Norm>0){
+				double v0Threshold = (pedV0Norm+delta) * (pedV0Norm+delta);
+				if(normVi> v0Threshold && pedV0Norm>0){
 					fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "
 							"is bigger than desired velocity (%f) at time: %fs\n",
 							sqrt(normVi), pedGetID[p], pedV0Norm, time);

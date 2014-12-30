@@ -37,8 +37,8 @@
 #include "AgentsParameters.h"
 #include "../general/ArgumentParser.h"
 
-typedef vector< Point > _Points;
-typedef vector< _Points >  PointGrid;
+typedef vector< Point > tPoints;
+typedef vector< tPoints >  GridPoints;
 
 /************************************************************
  StartDistributionRoom

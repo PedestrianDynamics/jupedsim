@@ -166,16 +166,12 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      bool plotTransitions = true;
      bool plotPlayingField=false;
      vector<string> rooms_to_plot;
-
-     //Promenade
-     //rooms_to_plot.push_back("outside");
-     //rooms_to_plot.push_back("010");
-
+     unsigned int i;
      // first the rooms
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
 
-     for (int i = 0; i < building->GetNumberOfRooms(); i++) {
+     for (i = 0; i < building->GetNumberOfRooms(); i++) {
           Room* r = building->GetRoom(i);
           string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
@@ -188,7 +184,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                // the hlines
                if (plotHlines) {
                     const vector<Hline*>& hlines = s->GetAllHlines();
-                    for (unsigned int i = 0; i < hlines.size(); i++) {
+                    for (i = 0; i < hlines.size(); i++) {
                          Hline* hline = hlines[i];
                          int uid1 = hline->GetUniqueID();
                          if (!IsElementInVector(navLineWritten, uid1)) {
@@ -203,7 +199,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                     // the crossings
                     if (plotCrossings) {
                          const vector<Crossing*>& crossings = s->GetAllCrossings();
-                         for (unsigned int i = 0; i < crossings.size(); i++) {
+                         for (i = 0; i < crossings.size(); i++) {
                               Crossing* crossing = crossings[i];
                               int uid1 = crossing->GetUniqueID();
                               if (!IsElementInVector(navLineWritten, uid1)) {
@@ -221,7 +217,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                     if (plotTransitions) {
                          const vector<Transition*>& transitions =
                                    s->GetAllTransitions();
-                         for (unsigned int i = 0; i < transitions.size(); i++) {
+                         for (i = 0; i < transitions.size(); i++) {
                               Transition* transition = transitions[i];
                               int uid1 = transition->GetUniqueID();
                               if (!IsElementInVector(navLineWritten, uid1)) {

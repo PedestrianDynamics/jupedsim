@@ -29,7 +29,7 @@
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
-#include "logging.h"
+// #include "logging.h"
 
 int main(int argc, char **argv)
 {

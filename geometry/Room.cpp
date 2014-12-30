@@ -186,8 +186,8 @@ void Room::WriteToErrorLog() const
      Log->Write(s);
      // SubRooms
      for (int i = 0; i < GetNumberOfSubRooms(); i++) {
-          SubRoom* s = GetSubRoom(i);
-          s->WriteToErrorLog();
+          SubRoom*sub = GetSubRoom(i);
+          sub->WriteToErrorLog();
      }
 
 }

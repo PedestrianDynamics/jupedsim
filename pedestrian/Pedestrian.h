@@ -158,7 +158,7 @@ public:
      void SetCellPos(int cp);
      void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
      void SetV0Norm(double v0,double v0UpStairs, double v0DownStairs);
-     void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
+     void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
      void SetPhiPed();
      void SetFinalDestination(int UID);
      void SetTrip(const std::vector<int>& trip);

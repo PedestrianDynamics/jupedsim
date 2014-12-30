@@ -70,7 +70,7 @@ public:
 	/**
 	 *Create and fill Buffers for accelerators
 	 **/
-	void CreateBuffer(int n);
+	void CreateBuffer(int numPeds);
 	void DeleteBuffers();
 	void deletePed(int id);
 	void SetHPC(int f);

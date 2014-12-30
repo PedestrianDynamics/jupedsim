@@ -298,7 +298,7 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
           e0 = ped->GetV0(target);
           //printf("1 e0 %f %f, target %f %f\n", e0.GetX(), e0.GetY(), target.GetX(), target.GetY());
      } else {
-          ped->SetSmoothTurning(true);
+          ped->SetSmoothTurning();
           e0 = ped->GetV0();
           //   printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
      }

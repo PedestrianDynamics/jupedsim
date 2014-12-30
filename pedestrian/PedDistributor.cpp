@@ -32,7 +32,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
-#include "../logging.h"
+// #include "../logging.h"
 using namespace std;
 
 
@@ -331,10 +331,10 @@ int PedDistributor::Distribute(Building* building) const
 
      //first compute all possible positions in the geometry
      // @todo that is not necessary, especially when N is small. It is then not worth the work
-     vector< PointGrid > allFreePos = vector< PointGrid >();
+     vector< GridPoints > allFreePos = vector< GridPoints >();
      for (int r = 0; r < building->GetNumberOfRooms(); r++) {
           // vector< vector<Point > >  allFreePosRoom = vector< vector<Point > > ();
-          PointGrid  allFreePosRoom = PointGrid ();
+          GridPoints  allFreePosRoom = GridPoints ();
           Room* room = building->GetRoom(r);
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
@@ -368,7 +368,7 @@ int PedDistributor::Distribute(Building* building) const
                Log->Write("ERROR: \t max_room_id = %d, Got roomID = %d | max_subroom_id = %d, Got subroomID = %d",max_rooms_id, roomID, max_subrooms_id, subroomID);
                exit(EXIT_FAILURE);
           }
-          _Points &allpos = allFreePos[roomID][subroomID];
+          tPoints &allpos = allFreePos[roomID][subroomID];
           int max_pos = allpos.size();
           if (max_pos < N) {
                Log->Write("ERROR: \tCannot distribute %d agents in Room %d . Maximum allowed: %d\n",
@@ -403,7 +403,7 @@ int PedDistributor::Distribute(Building* building) const
           vector<int> max_anz = vector<int>();
           vector<int> akt_anz = vector<int>();
 
-          PointGrid&  allFreePosInRoom=allFreePos[room_id];
+          GridPoints&  allFreePosInRoom=allFreePos[room_id];
           for (int is = 0; is < r->GetNumberOfSubRooms(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
                double area = sr->GetArea();

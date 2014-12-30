@@ -14,7 +14,8 @@
 *.lo
 *.o
 *.obj
-
+*.gch
+*_flymake
 # Compiled Dynamic libraries
 *.so
 *.dylib
