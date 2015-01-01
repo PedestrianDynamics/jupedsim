@@ -276,9 +276,11 @@ void Building::AddSurroundingRoom()
 
 bool Building::InitGeometry()
 {
+     int r;
+     unsigned int i;
      Log->Write("INFO: \tInit Geometry");
-     for (int i = 0; i < GetNumberOfRooms(); i++) {
-          Room* room = GetRoom(i);
+     for (r = 0; r < GetNumberOfRooms(); r++) {
+          Room* room = GetRoom(r);
           // Polygone berechnen
           for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                SubRoom* s = room->GetSubRoom(j);
@@ -288,13 +290,13 @@ bool Building::InitGeometry()
 
                //  crossings
                const vector<Crossing*>& crossings = s->GetAllCrossings();
-               for (unsigned int i = 0; i < crossings.size(); i++) {
+               for (i = 0; i < crossings.size(); i++) {
                     goals.push_back(crossings[i]);
                }
 
                // and  transitions
                const vector<Transition*>& transitions = s->GetAllTransitions();
-               for (unsigned int i = 0; i < transitions.size(); i++) {
+               for (i = 0; i < transitions.size(); i++) {
                     goals.push_back(transitions[i]);
                }
 
@@ -436,7 +438,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
 
                string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
-               string closed = xmltoa(xSubRoom->Attribute("closed"), "0");
+               string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
                string type = xmltoa(xSubRoom->Attribute("class"),"subroom");
 
                //get the equation of the plane if any
@@ -496,13 +498,13 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                     int id = xmltof(xObstacle->Attribute("id"), -1);
                     int height = xmltof(xObstacle->Attribute("height"), 0);
-                    double closed = xmltof(xObstacle->Attribute("closed"), 0);
-                    string caption = xmltoa(xObstacle->Attribute("caption"),"-1");
+                    double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                    string ObstCaption = xmltoa(xObstacle->Attribute("caption"),"-1");
 
                     Obstacle* obstacle = new Obstacle();
                     obstacle->SetId(id);
-                    obstacle->SetCaption(caption);
-                    obstacle->SetClosed(closed);
+                    obstacle->SetCaption(ObstCaption);
+                    obstacle->SetClosed(ObstClosed);
                     obstacle->SetHeight(height);
 
                     //looking for polygons (walls)
