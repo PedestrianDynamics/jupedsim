@@ -39,7 +39,7 @@
 
 using namespace std;
 
-int main(int argc, char **argv)
+int main_1(int argc, char **argv)
 {
      Log = new STDIOHandler();
 
