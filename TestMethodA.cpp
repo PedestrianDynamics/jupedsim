@@ -12,8 +12,12 @@ int main(int argc, char **argv)
 {
 
      std::string trajectoryfile="asdfasdf.txt";
+     FileFormat trajFormat=FORMAT_XML_PLAIN;
      std::string outputfile="basvas";
-
+     int deltaF=5;
+     char vComponent='X';
+     int deltaT=100;
+     string projectRootDir="";
      MeasurementArea_L  area;
      area._id=1;
      area._lineStartX= 1;
@@ -26,7 +30,7 @@ int main(int argc, char **argv)
      //method_A.SetTrajectoryFile(trajectoryfile);
      //method_A.SetMeasurementArea(area);
 
-     bool result=method_A.Process(trajectoryfile, outputfile, area);
+     bool result=method_A.Process(projectRootDir, trajectoryfile, trajFormat, outputfile, area, deltaF, vComponent, deltaT);
 
      if(result)
      {
