@@ -34,6 +34,7 @@ public:
 
      bool Process(const string& projectRootDir, const string& trajectoryfile, const FileFormat& _trajFormat,  const string& outputfile, const MeasurementArea_L& area, int deltaF, char vComponent, int deltaT);
 
+     bool Process (const PedData& peddata);
 private:
      string _trajectoryfile;
      MeasurementArea_L  _area;
@@ -93,6 +94,7 @@ private:
           void CreateGlobalVariables(int numPeds, int numFrames);
 
           void GetPedsParametersInFrame(int frame, std::map< int, std::vector<int> > &pdt);
+
           bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 
           double GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor, char VComponent);

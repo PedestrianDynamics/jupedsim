@@ -20,13 +20,11 @@
 
 Method_A::Method_A()
 {
-     // TODO Auto-generated constructor stub
 
 }
 
 Method_A::~Method_A()
 {
-     // TODO Auto-generated destructor stub
     delete  [] _firstFrame;
     delete  [] _lastFrame;
 
@@ -36,6 +34,13 @@ Method_A::~Method_A()
     }
     delete [] _xCor;
     delete [] _yCor;
+}
+
+bool Method_A::Process (const PedData& peddata)
+{
+     peddata.GetMinID();
+
+     return true;
 }
 
 bool Method_A::Process(const string& projectRootDir, const string& trajectoryfile, const FileFormat& _trajFormat,const string& outputfile, const MeasurementArea_L& area, int deltaF, char vComponent, int deltaT)
