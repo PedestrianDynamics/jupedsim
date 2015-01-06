@@ -19,24 +19,24 @@ PedData::~PedData()
 
 bool PedData::ReadData(const string& filename, const FileFormat& trajformat)
 {
-    Log->Write("INFO:\tthe format of the trajectory is ",trajformat);
-    if(trajformat == FORMAT_XML_PLAIN) // read traje
-    {
-         TiXmlDocument docGeo(filename);
-         if (!docGeo.LoadFile()) {
-              Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-              Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
-              exit(EXIT_FAILURE);
-         }
-         TiXmlElement* xRootNode = docGeo.RootElement();
-         InitializeVariables(xRootNode);	//initialize some global variables
-    }
+     Log->Write("INFO:\tthe format of the trajectory is ",trajformat);
+     if(trajformat == FORMAT_XML_PLAIN) // read traje
+     {
+          TiXmlDocument docGeo(filename);
+          if (!docGeo.LoadFile()) {
+               Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
+               Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
+               return false;
+          }
+          TiXmlElement* xRootNode = docGeo.RootElement();
+          InitializeVariables(xRootNode);	//initialize some global variables
+     }
 
-    else if(trajformat == FORMAT_PLAIN)
-    {
-         InitializeVariables(filename);
-    }
-	return true;
+     else if(trajformat == FORMAT_PLAIN)
+     {
+          InitializeVariables(filename);
+     }
+     return true;
 }
 
 void PedData::InitializeVariables(const string& filename)
@@ -258,6 +258,39 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
 
 }
 
+void PedData::GetPedsParametersInFrame(int frame, std::map< int, std::vector<int> > &pdt)
+{
+     const std::vector<int>& ids=pdt[frame];
+
+     for(int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          XInFrame[i] = _xCor[id][frame];
+          YInFrame[i] = _yCor[id][frame];
+          int Tpast = frame - _deltaF;
+          int Tfuture = frame + _deltaF;
+          VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
+          IdInFrame[i] = id+_minID;
+
+          bool IspassLine=false;
+          if(frame >_firstFrame[id]&&!PassLine[id])
+          {
+               IspassLine = IsPassLine(_areaForMethod_A._lineStartX,
+                         _areaForMethod_A._lineStartY,
+                         _areaForMethod_A._lineEndX,
+                         _areaForMethod_A._lineEndY, _xCor[id][frame - 1],
+                         _yCor[id][frame - 1], _xCor[id][frame],
+                         _yCor[id][frame]);
+          }
+          if(IspassLine==true)
+          {
+               PassLine[id] = true;
+               ClassicFlow++;
+               V_deltaT+=VInFrame[i];
+          }
+     }
+}
+
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
      _xCor = new double* [numPeds];
@@ -306,20 +339,20 @@ int PedData::GetMinID() const
 
 int PedData::GetNumFrames() const
 {
-	return _numFrames;
+     return _numFrames;
 }
 
 int PedData::GetFps() const
 {
-	return _fps;
+     return _fps;
 }
 
 string PedData::GetTrajName() const
 {
-	return _trajName;
+     return _trajName;
 }
 
 map<int , vector<int> > PedData::GetPedsFrame() const
 {
-	return _peds_t;
+     return _peds_t;
 }

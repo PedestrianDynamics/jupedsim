@@ -6,6 +6,7 @@
  */
 
 #include <Method_A.h>
+#include <Analysis.h>
 #include <iostream>
 
 
@@ -26,18 +27,23 @@ bool Method_A::Process (const PedData& peddata, const string& projectRootDir, co
      OpenFile_N_t(_fN_t, projectRootDir, trajName);
      _peds_t = peddata.GetPedsFrame();
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
-     	{
-     		int frid =  frameNr + peddata.GetMinFrame();
-            GetPedsParametersInFrame(frameNr, _peds_t);
-     		_accumPedsPassLine.push_back(ClassicFlow);
-     		_accumVPassLine.push_back(V_deltaT);
-     		fprintf(_fN_t,"%d\t%d\n",frid, ClassicFlow);
-     	}
+     {
+          int frid =  frameNr + peddata.GetMinFrame();
+          int* IdInFrame = new int[PedNum];
+          double* XInFrame = new double[PedNum];
+          double* YInFrame = new double[PedNum];
+          double* VInFrame = new double[PedNum];
 
-     	string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+trajName+".dat";
-     	FlowRate_Velocity(deltaT,peddata.GetFps(), _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
+          peddata.GetPedsParametersInFrame(frameNr, _peds_t,IdInFrame,XInFrame,YInFrame,VInFrame);
+          _accumPedsPassLine.push_back(ClassicFlow);
+          _accumVPassLine.push_back(V_deltaT);
+          fprintf(_fN_t,"%d\t%d\n",frid, ClassicFlow);
+     }
 
-     	//delete [] PassLine;
+     string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+trajName+".dat";
+     FlowRate_Velocity(deltaT,peddata.GetFps(), _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
+
+     //delete [] PassLine;
      fclose(_fN_t);
      return true;
 }
@@ -45,7 +51,7 @@ bool Method_A::Process (const PedData& peddata, const string& projectRootDir, co
 void Method_A::OpenFile_N_t(FILE *& file, const string& projectRootDir, const string& filename)
 {
 	string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+filename+"_Out.dat";
-	if((file=CreateFile(fN_t))==NULL)
+	if((file=Analysis::CreateFile(fN_t))==NULL)
 	{
 		Log->Write("cannot open the file %s  t\n", fN_t.c_str() );
 		exit(EXIT_FAILURE);
@@ -110,13 +116,7 @@ void Method_A::GetPedsParametersInFrame(int frame, std::map< int, std::vector<in
 {
      const std::vector<int>& ids=pdt[frame];
 
-     int PedNum = ids.size();
-     IdInFrame = new int[PedNum];
-     XInFrame = new double[PedNum];
-     YInFrame = new double[PedNum];
-     VInFrame = new double[PedNum];
-
-     for(int i=0; i<PedNum;i++)
+     for(int i=0; i<ids.size();i++)
      {
           int id = ids[i];
           XInFrame[i] = _xCor[id][frame];

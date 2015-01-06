@@ -86,6 +86,21 @@ public:
       */
      std::string GetFilename(const std::string& str);
 
+     /**
+         * create a file and the directory structure if needed.
+         * @param filename
+         * @return
+         */
+        static FILE* CreateFile(const std::string& filename);
+
+#ifdef __linux__
+     static int mkpath(char* file_path, mode_t mode=0755);
+#elif __APPLE__
+     static int mkpath(char* file_path, mode_t mode=0755);
+#else //windows
+     static int mkpath(char* file_path);
+#endif
+
 
 private:
 
@@ -279,12 +294,7 @@ private:
      int getPedsNumInFrame(TiXmlElement* xFrame);
 
 
-     /**
-      * create a file and the directory structure if needed.
-      * @param filename
-      * @return
-      */
-     FILE* CreateFile(const std::string& filename);
+
 
      /**
       * Output the classical density and velocity in the corresponding file
@@ -337,7 +347,6 @@ private:
      /**
       * get the ids in a certain Frame
       */
-     void getPedsParametersInFrame(int frm, std::map< int, std::vector<int> > &pdt);
      /**
       * In this function, pedestrian parameters in this frame including the instantaneous velocity, x and y coordinates,
       * as well as the corresponding PedID will be determined.
@@ -345,13 +354,9 @@ private:
       * @param xFrame
       * @param frameNr
       */
-#ifdef __linux__
-     int mkpath(char* file_path, mode_t mode=0755);
-#elif __APPLE__
-     int mkpath(char* file_path, mode_t mode=0755);
-#else //windows
-     int mkpath(char* file_path);
-#endif
+     void getPedsParametersInFrame(int frm, std::map< int, std::vector<int> > &pdt);
+
+
 
 private:
      FILE *_fClassicRhoV;
