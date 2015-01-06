@@ -10,6 +10,7 @@
 
 #include <string>
 #include "MeasurementArea.h"
+#include "PedData.h"
 #include <vector>
 #include "general/Macros.h"
 #include "tinyxml/tinyxml.h"
@@ -34,27 +35,17 @@ public:
 
      bool Process(const string& projectRootDir, const string& trajectoryfile, const FileFormat& _trajFormat,  const string& outputfile, const MeasurementArea_L& area, int deltaF, char vComponent, int deltaT);
 
-     bool Process (const PedData& peddata);
+     bool Process (const PedData& peddata, const string& projectRootDir, const MeasurementArea_L& area, int deltaF, char vComponent, int deltaT);
 private:
      string _trajectoryfile;
      MeasurementArea_L  _area;
      string _outputfile;
      vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
      vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
+     map<int , vector<int> > _peds_t;
 
-     int min_ID;
-     int min_Frame;
-     map<int , vector<int> > peds_t;
-     vector<int> _IdsTXT;   // the Id data from txt format trajectory data
-     vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
-     int _fps;            // Frame rate of data
-     int _numFrames;      // Total number of frames
-     int _maxNumofPed;    //the maximum index of the pedestrian in the trajectory data
-     int *_firstFrame;   // Record the first frame of each pedestrian
-     int *_lastFrame;    // Record the last frame of each pedestrian
 
-     double **_xCor;
-     double **_yCor;
+
      bool *PassLine;
 
      int *IdInFrame;     // save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
@@ -82,14 +73,11 @@ private:
            * @param AccumVelocity
            * @param ofile
            */
+     	  void OpenFile_N_t(FILE *& file, const string& projectRootDir, const string& filename);
+
           void FlowRate_Velocity(int DeltaT, int fps, const std::vector<int>& AccumPeds,
                     const std::vector<double>& AccumVelocity, const std::string& ofile);
 
-          void LoadTrajectory(const string& trajectoryfile, const FileFormat& _trajFormat);
-
-          void InitializeVariables(const string& filename);
-
-          void InitializeVariables(TiXmlElement* xRootNode);
 
           void CreateGlobalVariables(int numPeds, int numFrames);
 
@@ -99,14 +87,6 @@ private:
 
           double GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor, char VComponent);
 
-          FILE* CreateFile(const string& filename);
-#ifdef __linux__
-          int mkpath(char* file_path, mode_t mode=0755);
-#elif __APPLE__
-          int mkpath(char* file_path, mode_t mode=0755);
-#else //windows
-          int mkpath(char* file_path);
-#endif
 };
 
 #endif /* METHOD_A_H_ */

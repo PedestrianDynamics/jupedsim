@@ -8,15 +8,6 @@
 #include <Method_A.h>
 #include <iostream>
 
-#ifdef __linux__
-#include <sys/stat.h>
-#include <dirent.h>
-#elif   __APPLE__
-#include <sys/stat.h>
-#include <dirent.h>
-#else
-#include <direct.h>
-#endif
 
 Method_A::Method_A()
 {
@@ -25,24 +16,42 @@ Method_A::Method_A()
 
 Method_A::~Method_A()
 {
-    delete  [] _firstFrame;
-    delete  [] _lastFrame;
 
-    for (int i=0; i<_maxNumofPed; i++) {
-         delete [] _xCor[i];
-         delete [] _yCor[i];
-    }
-    delete [] _xCor;
-    delete [] _yCor;
 }
 
-bool Method_A::Process (const PedData& peddata)
+bool Method_A::Process (const PedData& peddata, const string& projectRootDir, const MeasurementArea_L& area, int deltaF, char vComponent, int deltaT)
 {
-     peddata.GetMinID();
+     FILE *_fN_t;
+     string trajName = peddata.GetTrajName();
+     OpenFile_N_t(_fN_t, projectRootDir, trajName);
+     _peds_t = peddata.GetPedsFrame();
+     for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     	{
+     		int frid =  frameNr + peddata.GetMinFrame();
+            GetPedsParametersInFrame(frameNr, _peds_t);
+     		_accumPedsPassLine.push_back(ClassicFlow);
+     		_accumVPassLine.push_back(V_deltaT);
+     		fprintf(_fN_t,"%d\t%d\n",frid, ClassicFlow);
+     	}
 
+     	string FD_FlowVelocity=  _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/FDFlowVelocity_"+trajName+".dat";
+     	FlowRate_Velocity(deltaT,peddata.GetFps(), _accumPedsPassLine,_accumVPassLine,FD_FlowVelocity);
+
+     	//delete [] PassLine;
+     fclose(_fN_t);
      return true;
 }
 
+void Method_A::OpenFile_N_t(FILE *& file, const string& projectRootDir, const string& filename)
+{
+	string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+filename+"_Out.dat";
+	if((file=CreateFile(fN_t))==NULL)
+	{
+		Log->Write("cannot open the file %s  t\n", fN_t.c_str() );
+		exit(EXIT_FAILURE);
+	}
+	fprintf(file,"#Frame\t	Cumulative pedestrians\n");
+}
 bool Method_A::Process(const string& projectRootDir, const string& trajectoryfile, const FileFormat& _trajFormat,const string& outputfile, const MeasurementArea_L& area, int deltaF, char vComponent, int deltaT)
 {
 
@@ -50,16 +59,7 @@ bool Method_A::Process(const string& projectRootDir, const string& trajectoryfil
 	_vComponent = vComponent;
 	_areaForMethod_A = area;
 	_projectRootDir = projectRootDir;
-	LoadTrajectory(trajectoryfile, _trajFormat);
 
-	string N_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+trajectoryfile+"_Out.dat";
-	FILE *_fN_t;
-	if((_fN_t=CreateFile(N_t))==NULL)
-	{
-		Log->Write("cannot open the file %s  t\n", N_t.c_str() );
-		exit(EXIT_FAILURE);
-	}
-	fprintf(_fN_t,"#Frame\t	Cumulative pedestrians\n");
 	for(int frameNr = 0; frameNr < _numFrames; frameNr++ )
 	{
 		int frid =  frameNr + min_Frame;
@@ -82,243 +82,28 @@ bool Method_A::Process(const string& projectRootDir, const string& trajectoryfil
 
 void Method_A::CreateGlobalVariables(int numPeds, int numFrames)
 {
-     _xCor = new double* [numPeds];
-     _yCor = new double* [numPeds];
-     for (int i=0; i<numPeds; i++) {
-          _xCor[i] = new double [numFrames];
-          _yCor[i] = new double [numFrames];
-     }
-     _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
-     _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
-
-     for(int i = 0; i <numPeds; i++) {
-          for (int j = 0; j < numFrames; j++) {
-               _xCor[i][j] = 0;
-               _yCor[i][j] = 0;
-          }
-          _firstFrame[i] = INT_MAX;
-          _lastFrame[i] = INT_MIN;
-     }
-
      PassLine = new bool[numPeds];
      for(int i=0; i<numPeds; i++) {
           PassLine[i] = false;
      }
 }
 
-void Method_A::InitializeVariables(const string& filename)
+
+
+
+
+
+bool Method_A::IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y)
 {
-     vector<double> xs;
-     vector<double> ys;
-     ifstream  fdata;
-     fdata.open(filename.c_str());
-     if (fdata.is_open() == false)
-     {
-          Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
-          exit(EXIT_FAILURE);
-     }
-     else
-     {
-          string line;
-          int lineNr=1;
-          while ( getline(fdata,line) )
-          {
-               //looking for the framerate which is suppposed to be at the second position
-               if(line[0] == '#')
-               {
-                    std::vector<std::string> strs;
-                    boost::split(strs, line , boost::is_any_of(":"),boost::token_compress_on);
+     point_2d Line_pt0(Line_startX, Line_startY);
+     point_2d Line_pt1(Line_endX, Line_endY);
+     segment edge0(Line_pt0, Line_pt1);
 
-                    if(strs[0]=="#framerate" && strs.size()==2)
-                    {
-                         _fps= atof(strs[1].c_str());
-                         Log->Write("INFO:\tFrame rate fps=%d", _fps);
-                    }
+     point_2d Traj_pt0(pt1_X, pt1_Y);
+     point_2d Traj_pt1(pt2_X, pt2_Y);
+     segment edge1(Traj_pt0, Traj_pt1);
 
-               }
-               else if ( line[0] != '#' && !(line.empty()) )
-               {
-
-                    std::vector<std::string> strs;
-                    boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
-
-                    if(strs.size() <4)
-                    {
-                         Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
-                         exit(EXIT_FAILURE);
-                    }
-
-                    _IdsTXT.push_back(atoi(strs[0].c_str()));
-                    _FramesTXT.push_back(atoi(strs[1].c_str()));
-
-                    xs.push_back(atof(strs[2].c_str()));
-                    ys.push_back(atof(strs[3].c_str()));
-               }
-               lineNr++;
-          }
-     }
-     fdata.close();
-
-     min_ID = *min_element(_IdsTXT.begin(),_IdsTXT.end());
-     min_Frame = *min_element(_FramesTXT.begin(),_FramesTXT.end());
-
-     //Total number of frames
-     _numFrames = *max_element(_FramesTXT.begin(),_FramesTXT.end()) - min_Frame+1;
-
-     //Total number of agents
-     _maxNumofPed = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - min_ID+1;
-     CreateGlobalVariables(_maxNumofPed, _numFrames);
-
-     std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
-     std::vector<int> lastFrameIndex;	 //The last frame index of each pedestrian
-     int prevValue = _IdsTXT[0] - 1;
-     for (size_t i = 0; i < _IdsTXT.size(); i++)
-     {
-          if (prevValue != _IdsTXT[i])
-          {
-               firstFrameIndex.push_back(i);
-               prevValue = _IdsTXT[i];
-          }
-     }
-     for (size_t  i = 1; i < firstFrameIndex.size(); i++)
-     {
-          lastFrameIndex.push_back(firstFrameIndex[i] - 1);
-     }
-     lastFrameIndex.push_back(_IdsTXT.size() - 1);
-     for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
-     {
-          _firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - min_Frame;
-          _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - min_Frame;
-     }
-     for(unsigned int i = 0; i < _IdsTXT.size(); i++)
-     {
-          int ID = _IdsTXT[i] - min_ID;
-          int frm = _FramesTXT[i] - min_Frame;
-          double x = xs[i]*M2CM;
-          double y = ys[i]*M2CM;
-          _xCor[ID][frm] = x;
-          _yCor[ID][frm] = y;
-     }
-
-     //save the data for each frame
-     for (unsigned int i = 0; i < _FramesTXT.size(); i++ )
-     {
-          int id = _IdsTXT[i]-min_ID;
-          int t =_FramesTXT[i]-min_Frame;
-          peds_t[t].push_back(id);
-     }
-
-}
-
-// initialize the global variables variables
-void Method_A::InitializeVariables(TiXmlElement* xRootNode)
-{
-     if( ! xRootNode ) {
-          Log->Write("ERROR:\tRoot element does not exist");
-          exit(EXIT_FAILURE);
-     }
-     if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
-          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-          exit(EXIT_FAILURE);
-     }
-
-     //counting the number of frames
-     int frames = 0;
-     for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-               xFrame = xFrame->NextSiblingElement("frame")) {
-          frames++;
-     }
-     _numFrames = frames;
-     Log->Write("INFO:\tnum Frames = %d",_numFrames);
-
-     //Number of agents
-
-     TiXmlNode*  xHeader = xRootNode->FirstChild("header"); // header
-     if(xHeader->FirstChild("agents")) {
-          _maxNumofPed=atoi(xHeader->FirstChild("agents")->FirstChild()->Value());
-          Log->Write("INFO:\tmax num of peds N=%d", _maxNumofPed);
-     }
-
-     //framerate
-     if(xHeader->FirstChild("frameRate")) {
-          _fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-          Log->Write("INFO:\tFrame rate fps=%d", _fps);
-     }
-
-     CreateGlobalVariables(_maxNumofPed, _numFrames);
-     //processing the frames node
-     TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
-     if (!xFramesNode) {
-          Log->Write("ERROR: \tThe geometry should have at least one frame");
-          exit(EXIT_FAILURE);
-     }
-
-     // obtaining the minimum id and minimum frame
-     for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-               xFrame = xFrame->NextSiblingElement("frame"))
-     {
-          int frm = atoi(xFrame->Attribute("ID"));
-          if(frm < min_Frame)
-          {
-               min_Frame = frm;
-          }
-          for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-                    xAgent = xAgent->NextSiblingElement("agent"))
-          {
-               int id= atoi(xAgent->Attribute("ID"));
-               if(id < min_ID)
-               {
-                    min_ID = id;
-               }
-          }
-     }
-     int frameNr=0;
-     for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-               xFrame = xFrame->NextSiblingElement("frame")) {
-
-          //todo: can be parallelized with OpenMP
-          for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
-                    xAgent = xAgent->NextSiblingElement("agent")) {
-
-               //get agent id, x, y
-               double x= atof(xAgent->Attribute("xPos"));
-               double y= atof(xAgent->Attribute("yPos"));
-               int ID= atoi(xAgent->Attribute("ID"))-min_ID;
-
-               peds_t[frameNr].push_back(ID);
-               _xCor[ID][frameNr] =  x*M2CM;
-               _yCor[ID][frameNr] =  y*M2CM;
-               if(frameNr < _firstFrame[ID]) {
-                    _firstFrame[ID] = frameNr;
-               }
-               if(frameNr > _lastFrame[ID]) {
-                    _lastFrame[ID] = frameNr;
-               }
-          }
-          frameNr++;
-     }
-
-}
-
-void Method_A::LoadTrajectory(const string& trajectoryfile, const FileFormat& _trajFormat)
-{
-    Log->Write("INFO:\tthe format of the trajectory is ",_trajFormat);
-    if(_trajFormat == FORMAT_XML_PLAIN) // read traje
-    {
-         TiXmlDocument docGeo(trajectoryfile);
-         if (!docGeo.LoadFile()) {
-              Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-              Log->Write("ERROR: \t could not parse the trajectories file <%s>",trajectoryfile.c_str());
-              exit(EXIT_FAILURE);
-         }
-         TiXmlElement* xRootNode = docGeo.RootElement();
-         InitializeVariables(xRootNode);	//initialize some global variables
-    }
-
-    else if(_trajFormat == FORMAT_PLAIN)
-    {
-         InitializeVariables(trajectoryfile);
-    }
+     return(intersects(edge0, edge1));
 }
 
 void Method_A::GetPedsParametersInFrame(int frame, std::map< int, std::vector<int> > &pdt)
@@ -339,7 +124,7 @@ void Method_A::GetPedsParametersInFrame(int frame, std::map< int, std::vector<in
           int Tpast = frame - _deltaF;
           int Tfuture = frame + _deltaF;
           VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
-          IdInFrame[i] = id+min_ID;
+          IdInFrame[i] = id+_minID;
 
           bool IspassLine=false;
           if(frame >_firstFrame[id]&&!PassLine[id])
@@ -358,19 +143,6 @@ void Method_A::GetPedsParametersInFrame(int frame, std::map< int, std::vector<in
         	  V_deltaT+=VInFrame[i];
           }
      }
-}
-
-bool Method_A::IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y)
-{
-     point_2d Line_pt0(Line_startX, Line_startY);
-     point_2d Line_pt1(Line_endX, Line_endY);
-     segment edge0(Line_pt0, Line_pt1);
-
-     point_2d Traj_pt0(pt1_X, pt1_Y);
-     point_2d Traj_pt1(pt2_X, pt2_Y);
-     segment edge1(Traj_pt0, Traj_pt1);
-
-     return(intersects(edge0, edge1));
 }
 
 double Method_A::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor, char VComponent)
@@ -408,7 +180,6 @@ double Method_A::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirs
 
      return fabs(v);
 }
-
 void Method_A::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPeds, const vector<double>& AccumVelocity, const string& ofile)
 {
 
@@ -461,66 +232,3 @@ void Method_A::FlowRate_Velocity(int DeltaT, int fps, const vector<int>& AccumPe
     	 Log->Write("INFO:\tNo person passing the reference line given by Method A!\n");
      }
 }
-
-FILE* Method_A::CreateFile(const string& filename)
-{
-     //first try to create the file
-     FILE* fHandle= fopen(filename.c_str(),"w");
-     if(fHandle) return fHandle;
-
-     unsigned int found=filename.find_last_of("/\\");
-     string dir = filename.substr(0,found)+"/";
-     //string file= filename.substr(found+1);
-
-     // the directories are probably missing, create it
-     if (mkpath((char*)dir.c_str())==-1) {
-          Log->Write("ERROR:\tcannot create the directory <%s>",dir.c_str());
-          return NULL;
-     }
-     //second and last attempt
-     return fopen(filename.c_str(),"w");
-}
-
-#if defined(_WIN32)
-
-int Method_A::mkpath(char* file_path)
-{
-     assert(file_path && *file_path);
-     char* p;
-     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
-          *p='\0';
-
-          if (_mkdir(file_path)==-1) {
-
-               if (errno!=EEXIST) {
-                    *p='/';
-                    return -1;
-               }
-          }
-          *p='/';
-     }
-     return 0;
-}
-
-#else
-
-int Method_A::mkpath(char* file_path, mode_t mode)
-{
-     assert(file_path && *file_path);
-     char* p;
-     for (p=strchr(file_path+1, '/'); p; p=strchr(p+1, '/')) {
-          *p='\0';
-
-          if (mkdir(file_path, mode)==-1) {
-
-               if (errno!=EEXIST) {
-                    *p='/';
-                    return -1;
-               }
-          }
-          *p='/';
-     }
-     return 0;
-}
-
-#endif

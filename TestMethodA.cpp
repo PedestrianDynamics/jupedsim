@@ -26,13 +26,13 @@ int main(int argc, char **argv)
      area._lineStartX= 2;
      area._lineStartX= 3;
 
-     PedData data(trajectoryfile);
+     PedData data(trajectoryfile, trajFormat);
      Method_A method_A ;
      //method_A.SetOutputFileName(outputfile);
      //method_A.SetTrajectoryFile(trajectoryfile);
      //method_A.SetMeasurementArea(area);
 
-     bool result=method_A.Process(projectRootDir, trajectoryfile, trajFormat, outputfile, area, deltaF, vComponent, deltaT);
+     //bool result=method_A.Process(projectRootDir, trajectoryfile, trajFormat, outputfile, area, deltaF, vComponent, deltaT);
 
      bool result=method_A.Process(data);
 
