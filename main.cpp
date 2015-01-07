@@ -59,7 +59,7 @@ int main(int argc, char **argv)
           double execTime = difftime(endtime, starttime);
 
           if (sim.GetPedsNumber()) {
-               Log->Write("\nPedestrians not evacuated [%d] using [%d] threads",
+               Log->Write("WARNING: \nPedestrians not evacuated [%d] using [%d] threads",
                          sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
           }
 

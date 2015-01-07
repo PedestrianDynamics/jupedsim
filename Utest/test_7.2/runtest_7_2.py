@@ -94,6 +94,7 @@ if __name__ == "__main__":
         trajfile = "trajectories/traj" + inifile.split("ini")[2]
         logging.info('trajfile = <%s>'%trajfile)
         #--------------------- PARSING & TEST LOGIC --------
+        # this tests quickest router. Check if someone exists from e2
         if not path.exists(trajfile):
             logging.critical("trajfile <%s> does not exist"%trajfile)
             exit(FAILURE)

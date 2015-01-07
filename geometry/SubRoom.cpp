@@ -199,7 +199,7 @@ void SubRoom::AddHline(Hline* line)
 {
     for(unsigned int i=0;i<_hlines.size();i++){
         if (line->GetID()==_hlines[i]->GetID()){
-            Log->Write("INFO:\tskipping duplicate hline [%d] in subroom [%d]",_id,line->GetID());
+            Log->Write("INFO:\tskipping duplicate hline [%d] with id [%d]",_id,line->GetID());
             return;
         }
     }
