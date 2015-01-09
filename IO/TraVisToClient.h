@@ -51,18 +51,18 @@
 
 // #ifdef TRACE_LOGGING
 
-// /******** macro definitions ******************************************/
-// #define dtrace(...)                         \
-//     (_printDebugLine(__FILE__, __LINE__),   \
-//     fprintf(stderr, __VA_ARGS__),           \
-//     (void) fprintf(stderr, "\n"))
+/*
+ #define dtrace(...)                         \
+     (_printDebugLine(__FILE__, __LINE__),   \
+     fprintf(stderr, __VA_ARGS__),           \
+     (void) fprintf(stderr, "\n"))
 
-// #define derror(...)                         \
-//     (_printDebugLine(__FILE__, __LINE__),   \
-//     fprintf(stderr, "ERROR: "),             \
-//     fprintf(stderr, __VA_ARGS__),           \
-//     _printErrorMessage())
-
+ #define derror(...)                         \
+     (_printDebugLine(__FILE__, __LINE__),   \
+     fprintf(stderr, "ERROR: "),             \
+     fprintf(stderr, __VA_ARGS__),           \
+     _printErrorMessage())
+*/
 
 
 // // #define dtrace(...)   _printDebugLine(__FILE__, __LINE__, false, __VA_ARGS__)

@@ -1317,6 +1317,9 @@ bool GlobalRouter::GenerateNavigationMesh()
      //Navigation mesh implementation
      NavMesh* nv= new NavMesh(_building);
      nv->BuildNavMesh();
+     _building->SaveGeometry("test_geometry.xml");
+     exit(0);
+     //nv->WriteToFileTraVisTo()
 
      const std::vector<NavMesh::JEdge*>& edges = nv->GetEdges();
 

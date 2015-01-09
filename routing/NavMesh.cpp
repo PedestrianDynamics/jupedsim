@@ -281,6 +281,7 @@ void NavMesh::BuildNavMesh()
      //DumpNode(2341);
      //DumpEdge(9);
      UpdateNodes();
+     return;
      Test();
 
      std::sort(_nodes.begin(), _nodes.end(),JNode());
@@ -666,9 +667,9 @@ void NavMesh::WriteToString(std::string& output)
           JNode* node=_nodes[n];
 
           int node_id=node->id; //cout<<"node id: "<<node_id<<endl;
-          if(nodes_to_plot.size()!=0)
-               if (IsElementInVector(nodes_to_plot, node_id) == false)
-                    continue;
+          //if(nodes_to_plot.size()!=0)
+          //     if (IsElementInVector(nodes_to_plot, node_id) == false)
+          //          continue;
           //              if(problem_nodes.size()!=0)
           //                      if (IsElementInVector(problem_nodes, node_id) == false)
           //                              continue;
@@ -678,7 +679,7 @@ void NavMesh::WriteToString(std::string& output)
           //if(node->IsConvex()==true) continue;
           //if(node->IsClockwise()==true) continue;
 
-          file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.GetX()<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.GetY()<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+          //file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.GetX()<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.GetY()<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
           //              cout<<"size: "<< node->pHull.size()<<endl;
           //              std::sort(node->pHull.begin(), node->pHull.end());
           //              node->pHull.erase(std::unique(node->pHull.begin(), node->pHull.end()), node->pHull.end());
@@ -736,7 +737,7 @@ void NavMesh::WriteToString(std::string& output)
                     double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
                     double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
 
-                    file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
+                    //file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
                     file<<"\t\t<door id = \""<<i<<"\">"<<endl;
                     file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
                     file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -772,8 +773,8 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName)
 
      //writing the header
      file<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<endl
-         <<"<trajectoriesDataset>"<<endl
-         <<"\t<header formatVersion = \"1.0\">"<<endl
+         <<"<trajectories>"<<endl
+         <<"\t<header version = \"0.5\">"<<endl
          <<"\t\t<agents>3</agents>"<<endl
          <<"\t\t<seed>0</seed>"<<endl
          <<"\t\t<frameRate>10</frameRate>"<<endl
@@ -2179,8 +2180,9 @@ void NavMesh::WriteStartPositions()
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
                SubRoom* subr = room->GetSubRoom(s);
-               vector<Point > pos = PedDistributor::PossiblePositions(*subr);
-               freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
+               // TODO
+               //vector<Point > pos = PedDistributor::PossiblePositions(*subr);
+               //freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
           }
           availablePos.push_back(freePosRoom);
      }

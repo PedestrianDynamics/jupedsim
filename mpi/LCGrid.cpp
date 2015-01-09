@@ -50,7 +50,7 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
      pCellSize=cellsize;
      pNpeds=nPeds;
 
-     // add 1 to ensure that the whole area is covered by cells if not divisable without remainder
+     // add 1 to ensure that the whole area is covered by cells if not divisible without remainder
      pGridSizeX = (int) ((pGrid_xmax - pGrid_xmin) / pCellSize) + 1 + 2; // 1 dummy cell on each side
      pGridSizeY = (int) ((pGrid_ymax - pGrid_ymin) / pCellSize) + 1 + 2; // 1 dummy cell on each side
 

@@ -71,6 +71,8 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _caption = "no_caption";
      _rooms = vector<Room*>();
      _savePathway = false;
+
+     //todo: what happens if any of these  methods failed (return false)? throw exception ?
      this->LoadGeometry();
      this->LoadRoutingInfo(filename);
      this->AddSurroundingRoom();
@@ -178,10 +180,10 @@ Room* Building::GetRoom(int index) const
      } else {
           Log->Write("ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",index, _rooms.size());
           Log->Write("\tControl your rooms ID and make sure they are in the order 0, 1, 2,.. ");
-          exit(EXIT_FAILURE);
+          //exit(EXIT_FAILURE);
+          return NULL;
      }
 }
-
 
 
 LCGrid* Building::GetGrid() const

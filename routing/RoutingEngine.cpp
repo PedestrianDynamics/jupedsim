@@ -114,6 +114,5 @@ bool RoutingEngine::Init(Building* building)
           if(_routersCollection[r]->Init(building)==false)
                status=false;
      }
-     Log->Write("bad status" + status);
      return status;
 }

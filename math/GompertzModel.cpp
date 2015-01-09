@@ -129,7 +129,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
      partSize = (int) (nSize / nThreads);
 
       //int debugPed = -69;//10;
-      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
+      //building->GetGrid()->HighlightNeighborhood(-9, building);
 
 
       #pragma omp parallel  default(shared) num_threads(nThreads)

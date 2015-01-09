@@ -154,12 +154,11 @@ public:
      virtual ~PedDistributor();
 
      // sonstige Funktionen
-
-     static std::vector<Point> PossiblePositions(const SubRoom& r);
+     static vector<Point >  PossiblePositions(const SubRoom& r);
      void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionSubroom* parameters,Building* building) const;
 
 
-     int Distribute(Building* building) const;
+     bool Distribute(Building* building) const;
 };
 
 #endif  /* _PEDDISTRIBUTOR_H */
