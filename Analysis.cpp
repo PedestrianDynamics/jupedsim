@@ -54,7 +54,7 @@
 
 
 using namespace std;
-OutputHandler* Log;
+OutputHandler* Log = new STDIOHandler();;
 
 /************************************************
  // Konstruktoren
@@ -571,8 +571,8 @@ void Analysis::CreateGlobalVariables(int numPeds, int numFrames)
 void Analysis::getPedsParametersInFrame(int frame, std::map< int, std::vector<int> > &pdt)
 {
      const std::vector<int>& ids=pdt[frame];
-
      int PedNum = ids.size();
+
      IdInFrame = new int[PedNum];
      XInFrame = new double[PedNum];
      YInFrame = new double[PedNum];

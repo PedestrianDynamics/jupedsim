@@ -7,9 +7,11 @@
 
 #include <PedData.h>
 
-PedData::PedData(const string& filename, const FileFormat& trajformat)
+PedData::PedData(const string& projectRootDir, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
 {
-     ReadData(filename, trajformat);
+    _minID = INT_MAX;
+    _minFrame = INT_MAX;
+	ReadData(projectRootDir, filename, trajformat, deltaF, vComponent);
 }
 
 PedData::~PedData()
@@ -17,15 +19,20 @@ PedData::~PedData()
 
 }
 
-bool PedData::ReadData(const string& filename, const FileFormat& trajformat)
+bool PedData::ReadData(const string& projectRootDir, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
 {
-     Log->Write("INFO:\tthe format of the trajectory is ",trajformat);
+	 _deltaF = deltaF;
+	 _vComponent = vComponent;
+	 _projectRootDir = projectRootDir;
+	 _trajName = filename;
+	 string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
+	 Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
      if(trajformat == FORMAT_XML_PLAIN) // read traje
      {
-          TiXmlDocument docGeo(filename);
+          TiXmlDocument docGeo(fullTrajectoriesPathName);
           if (!docGeo.LoadFile()) {
                Log->Write("ERROR: \t%s", docGeo.ErrorDesc());
-               Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
+               Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
                return false;
           }
           TiXmlElement* xRootNode = docGeo.RootElement();
@@ -34,20 +41,23 @@ bool PedData::ReadData(const string& filename, const FileFormat& trajformat)
 
      else if(trajformat == FORMAT_PLAIN)
      {
-          InitializeVariables(filename);
+    	 InitializeVariables();
      }
      return true;
 }
 
-void PedData::InitializeVariables(const string& filename)
+void PedData::InitializeVariables()
 {
      vector<double> xs;
      vector<double> ys;
+	 vector<int> _IdsTXT;   // the Id data from txt format trajectory data
+	 vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
+	 string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
      ifstream  fdata;
-     fdata.open(filename.c_str());
+     fdata.open(fullTrajectoriesPathName.c_str());
      if (fdata.is_open() == false)
      {
-          Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
+          Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
           exit(EXIT_FAILURE);
      }
      else
@@ -65,7 +75,7 @@ void PedData::InitializeVariables(const string& filename)
                     if(strs[0]=="#framerate" && strs.size()==2)
                     {
                          _fps= atof(strs[1].c_str());
-                         Log->Write("INFO:\tFrame rate fps=%d", _fps);
+                         Log->Write("INFO:\tFrame rate fps: <%d>", _fps);
                     }
 
                }
@@ -83,7 +93,6 @@ void PedData::InitializeVariables(const string& filename)
 
                     _IdsTXT.push_back(atoi(strs[0].c_str()));
                     _FramesTXT.push_back(atoi(strs[1].c_str()));
-
                     xs.push_back(atof(strs[2].c_str()));
                     ys.push_back(atof(strs[3].c_str()));
                }
@@ -124,7 +133,6 @@ void PedData::InitializeVariables(const string& filename)
           _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - _minFrame;
      }
 
-     bool IsinMeasurezone[_numPeds];  // Record whether pedestrian i is in measurement area or not
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
      {
           int ID = _IdsTXT[i] - _minID;
@@ -133,17 +141,6 @@ void PedData::InitializeVariables(const string& filename)
           double y = ys[i]*M2CM;
           _xCor[ID][frm] = x;
           _yCor[ID][frm] = y;
-          if(_fundamentalTinTout==true)
-          {
-               if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID])) {
-                    _tIn[ID]=frm;
-                    IsinMeasurezone[ID] = true;
-               }
-               if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID]) {
-                    _tOut[ID]=frm;
-                    IsinMeasurezone[ID] = false;
-               }
-          }
      }
 
      //save the data for each frame
@@ -151,7 +148,7 @@ void PedData::InitializeVariables(const string& filename)
      {
           int id = _IdsTXT[i]-_minID;
           int t =_FramesTXT[i]- _minFrame;
-          peds_t[t].push_back(id);
+          _peds_t[t].push_back(id);
      }
 
 }
@@ -188,11 +185,11 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
      //framerate
      if(xHeader->FirstChild("frameRate")) {
           _fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-          Log->Write("INFO:\tFrame rate fps=%d", _fps);
+          Log->Write("INFO:\tFrame rate fps: <%d>", _fps);
      }
 
      CreateGlobalVariables(_numPeds, _numFrames);
-     bool IsinMeasurezone[_numPeds];  // Record whether pedestrian i is in measurement area or not
+
      //processing the frames node
      TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
      if (!xFramesNode) {
@@ -232,7 +229,7 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
                double y= atof(xAgent->Attribute("yPos"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
 
-               peds_t[frameNr].push_back(ID);
+               _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
                _yCor[ID][frameNr] =  y*M2CM;
                if(frameNr < _firstFrame[ID]) {
@@ -241,54 +238,60 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
                if(frameNr > _lastFrame[ID]) {
                     _lastFrame[ID] = frameNr;
                }
-               if(_fundamentalTinTout==true)
-               {
-                    if(within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly)&&!(IsinMeasurezone[ID])) {
-                         _tIn[ID]=frameNr;
-                         IsinMeasurezone[ID] = true;
-                    }
-                    if((!within(make<point_2d>( (x), (y)), _areaForMethod_B->_poly))&&IsinMeasurezone[ID]) {
-                         _tOut[ID]=frameNr;
-                         IsinMeasurezone[ID] = false;
-                    }
-               }
           }
           frameNr++;
      }
-
 }
 
-void PedData::GetPedsParametersInFrame(int frame, std::map< int, std::vector<int> > &pdt)
+void PedData::GetPedsParametersInFrame(int frame, const vector<int>& ids, int* IdInFrame, double* XInFrame,double* YInFrame,double* VInFrame) const
 {
-     const std::vector<int>& ids=pdt[frame];
 
-     for(int i=0; i<ids.size();i++)
+     for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
           XInFrame[i] = _xCor[id][frame];
           YInFrame[i] = _yCor[id][frame];
           int Tpast = frame - _deltaF;
           int Tfuture = frame + _deltaF;
-          VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor, _vComponent);
+          VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
           IdInFrame[i] = id+_minID;
+     }
+}
 
-          bool IspassLine=false;
-          if(frame >_firstFrame[id]&&!PassLine[id])
-          {
-               IspassLine = IsPassLine(_areaForMethod_A._lineStartX,
-                         _areaForMethod_A._lineStartY,
-                         _areaForMethod_A._lineEndX,
-                         _areaForMethod_A._lineEndY, _xCor[id][frame - 1],
-                         _yCor[id][frame - 1], _xCor[id][frame],
-                         _yCor[id][frame]);
-          }
-          if(IspassLine==true)
-          {
-               PassLine[id] = true;
-               ClassicFlow++;
-               V_deltaT+=VInFrame[i];
+double PedData::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
+{
+
+     double v=0.0;
+
+     if(_vComponent == 'X') {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+               v = _fps*CMtoM*(Xcor[ID][Tfuture] - Xcor[ID][Tpast])/(2.0 * _deltaF);  //one dimensional velocity
+          } else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+               v = _fps*CMtoM*(Xcor[ID][Tfuture] - Xcor[ID][Tnow])/(_deltaF);  //one dimensional velocity
+          } else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID])) {
+               v = _fps*CMtoM*(Xcor[ID][Tnow] - Xcor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
      }
+     if(_vComponent == 'Y') {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+               v = _fps*CMtoM*(Ycor[ID][Tfuture] - Ycor[ID][Tpast])/(2.0 * _deltaF);  //one dimensional velocity
+          } else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+               v = _fps*CMtoM*(Ycor[ID][Tfuture] - Ycor[ID][Tnow])/(_deltaF);  //one dimensional velocity
+          } else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID])) {
+               v = _fps*CMtoM*(Ycor[ID][Tnow] - Ycor[ID][Tpast])/( _deltaF);  //one dimensional velocity
+          }
+     }
+     if(_vComponent == 'B') {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
+          } else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tnow]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tnow]),2))/(_deltaF);
+          } else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID])) {
+               v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tnow] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tnow] - Ycor[ID][Tpast]),2))/(_deltaF);  //two dimensional velocity
+          }
+     }
+
+     return fabs(v);
 }
 
 void PedData::CreateGlobalVariables(int numPeds, int numFrames)
@@ -301,9 +304,6 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
      }
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
-     _tIn = new int[numPeds];				// Record the time of each pedestrian entering measurement area
-     _tOut = new int[numPeds];				// Record the time of each pedestrian exiting measurement area
-
 
      for(int i = 0; i <numPeds; i++) {
           for (int j = 0; j < numFrames; j++) {
@@ -312,18 +312,8 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
           }
           _firstFrame[i] = INT_MAX;
           _lastFrame[i] = INT_MIN;
-          _tIn[i] = 0;
-          _tOut[i] = 0;
      }
 
-     DensityPerFrame = new double[numFrames];
-     for(int i=0; i<numFrames; i++) {
-          DensityPerFrame[i]=0;
-     }
-     PassLine = new bool[numPeds];
-     for(int i=0; i<numPeds; i++) {
-          PassLine[i] = false;
-     }
 }
 
 
@@ -342,6 +332,11 @@ int PedData::GetNumFrames() const
      return _numFrames;
 }
 
+int PedData::GetNumPeds() const
+{
+	return _numPeds;
+}
+
 int PedData::GetFps() const
 {
      return _fps;
@@ -355,4 +350,27 @@ string PedData::GetTrajName() const
 map<int , vector<int> > PedData::GetPedsFrame() const
 {
      return _peds_t;
+}
+
+double** PedData::GetXCor() const
+{
+	return _xCor;
+}
+double** PedData::GetYCor() const
+{
+	return _yCor;
+}
+
+int* PedData::GetFirstFrame() const
+{
+	return _firstFrame;
+}
+int* PedData::GetLastFrame() const
+{
+	return _lastFrame;
+}
+
+string PedData::GetProjectRootDir() const
+{
+	return _projectRootDir;
 }

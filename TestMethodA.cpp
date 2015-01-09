@@ -12,28 +12,25 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-     std::string trajectoryfile="asdfasdf.txt";
+     std::string trajectoryfile="AO_240.xml";
+     //FileFormat trajFormat=FORMAT_PLAIN;
      FileFormat trajFormat=FORMAT_XML_PLAIN;
-     std::string outputfile="basvas";
      int deltaF=5;
-     char vComponent='X';
+     char vComponent='Y';
      int deltaT=100;
-     string projectRootDir="";
+     string projectRootDir="./";
      MeasurementArea_L  area;
      area._id=1;
-     area._lineStartX= 1;
-     area._lineStartX= 2;
-     area._lineStartX= 2;
-     area._lineStartX= 3;
+     area._lineStartX= -225;
+     area._lineStartY= 0;
+     area._lineEndX= 400;
+     area._lineEndY= 0;
 
-     PedData data(trajectoryfile, trajFormat);
+     PedData data(projectRootDir, trajectoryfile, trajFormat, deltaF, vComponent);
      Method_A method_A ;
-     //method_A.SetOutputFileName(outputfile);
-     //method_A.SetTrajectoryFile(trajectoryfile);
-     //method_A.SetMeasurementArea(area);
-
-     //bool result=method_A.Process(projectRootDir, trajectoryfile, trajFormat, outputfile, area, deltaF, vComponent, deltaT);
-
+     method_A.SetMeasurementArea(area);
+     method_A.SetMeasurementAreaId(area._id);
+     method_A.SetTimeInterval(deltaT);
      bool result=method_A.Process(data);
 
 
