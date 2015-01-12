@@ -51,9 +51,9 @@ class QuickestPathRouter: public GlobalRouter {
 public:
      QuickestPathRouter();
 
-    QuickestPathRouter(int id, RoutingStrategy s):GlobalRouter(id, s) { };
+     QuickestPathRouter(int id, RoutingStrategy s):GlobalRouter(id, s) { };
 
-    virtual ~QuickestPathRouter();
+     virtual ~QuickestPathRouter();
 
      virtual int FindExit(Pedestrian* ped);
 
@@ -91,7 +91,6 @@ private:
       */
      double CBA (double ref_g1, double comp_g2);
 
-
      /**
       * compute the gain related to this travelling time
       */
@@ -114,7 +113,6 @@ private:
       */
      double TAP (double alpha);
 
-
      /**
       * \brief determines if a pedestrian is within (in a centre) of a jam.
       *
@@ -128,7 +126,6 @@ private:
       */
      int isCongested(Pedestrian* ped);
 
-
      /**
       * redirect a pedestrian based on the actual traffic conditions:
       * i.e if IsCongested returned false
@@ -137,7 +134,6 @@ private:
       * @param ped the pedestrian to be redirected
       */
      virtual void Redirect(Pedestrian* ped);
-
 
      /// select the references pedestrians for this one
      bool selectReferencePeds(int pedIndex, int myCurrentDoor=-1);
@@ -150,7 +146,6 @@ private:
       * @return
       */
      int redirect(int pedindex,int actualexit=-1);
-
 
      /**
       * return the JAM size at a specific exit
@@ -169,26 +164,9 @@ private:
      bool SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
 
      /**
-      * extend the graph by connecting alternative routes.
-      */
-    // void ExpandGraph();
-
-     /**
-      * reduce the graph, making it to a directed graph to the outside
-      */
-     //void ReduceGraph();
-
-
-     /**
-      * check the nodes that are double self linked and remove the connection with the highest radian
-      */
-     //void CheckAndClearDoubleLinkedNodes();
-
-     /**
       * return the number of common nodes the two aps are connected  with or pointing to.
       */
      int GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2);
-
 
      /**
       * return the queue at the specified exit within the specified radius
@@ -196,8 +174,7 @@ private:
       *
       */
      void GetQueueAtExit(Hline* hline, double minVel,
-                         double radius, std::vector<Pedestrian*>& queue, int subroomToConsider=-1);
-
+               double radius, std::vector<Pedestrian*>& queue, int subroomToConsider=-1);
 
      /**
       * Check if two pedestrian can see each other
