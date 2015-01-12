@@ -49,15 +49,13 @@
 #include "routing/RoutingEngine.h"
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
-#include "events/EventManager.h"
 #include "routing/CognitiveMapRouter.h"
-#include <memory>
+#include "events/EventManager.h" //neuer Header fuer die Events
 
 class Simulation
 {
 private:
-
-	///Number of pedestrians in the simulation
+     ///Number of pedestrians in the simulation
     long _nPeds;
     ///Maximum simulation time
     double _tmax;

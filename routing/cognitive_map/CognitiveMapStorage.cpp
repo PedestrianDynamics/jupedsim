@@ -40,7 +40,7 @@ CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
      : building(b)
 {
      //creator = new EmptyCognitiveMapCreator(b);
-     creator = new CompleteCognitiveMapCreator(b);
+    creator = new CompleteCognitiveMapCreator(b);
 }
 
 CognitiveMapStorage::~CognitiveMapStorage()

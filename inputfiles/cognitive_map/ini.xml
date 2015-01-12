@@ -94,11 +94,15 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
-	<!-- extra routing information -->
-	<navigation_lines file="routing.xml" />
+
+        <navigation_lines file="routing.xml" />
       </parameters>
     </router>
-
+    <router router_id="7" description="cognitive_map">
+      <parameters>
+        <navigation_lines file="routing.xml" />
+      </parameters>
+    </router>
   </route_choice_models>
 
 </JuPedSim>

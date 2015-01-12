@@ -39,7 +39,7 @@
 #include "../../../geometry/SubRoom.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Transition.h"
-
+#include <algorithm>
 
 using namespace std;
 
@@ -65,16 +65,37 @@ GraphVertex::~GraphVertex()
 
 void GraphVertex::AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing)
 {
-     out_edges.insert(new GraphEdge(this, dest, crossing));
-     return;
+    //check if an edge through the same crossing already exists.
+    for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        //if we find an edge with the same crossing we could jump out here!
+        if((*it)->GetCrossing() == crossing) return;
+    }
+    //no edge found, so add it.
+    out_edges.insert(new GraphEdge(this, dest, crossing));
 }
 
 
 void GraphVertex::AddExit(const Transition * transition)
 {
-     out_edges.insert(new GraphEdge(this, NULL, transition));
-     return;
+    //check if an edge through the same crossing already exists.
+    for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        //if we find an edge with the same crossing we could jump out here!
+        if((*it)->GetCrossing() == transition) return;
+    }
+    out_edges.insert(new GraphEdge(this, NULL, transition));
+    return;
 }
+
+GraphEdge * GraphVertex::operator[](const Crossing * crossing)
+{
+    for(EdgesContainer::iterator it = out_edges.begin(); it != out_edges.end(); ++it) {
+        if((*it)->GetDest() != NULL && (*it)->GetCrossing() == crossing) {
+            return (*it);
+        }
+    }
+    return NULL;
+}
+
 
 int GraphVertex::RemoveOutEdge(GraphEdge * edge)
 {
@@ -130,147 +151,110 @@ bool GraphVertex::HasExit() const
  * for this vertices and edges are exchanged in dijkstra algorithm structure.
  * we do not visit vertices, but edges. after that we identify the edge.destination with the corresponding vertex.
  */
-std::pair<const GraphEdge *, double> GraphVertex::GetCheapestDestinationByEdges(const Point & position) const
+const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & position) const
 {
-     std::set<const GraphEdge *> visited;
-     // map with GrapEdges and their predecessors and distances
-     std::map<const GraphEdge *,  std::pair<const GraphEdge *, double>> destinations;
-     // priority queue with discovered Edges and their distance.
-     std::priority_queue<
-     std::pair<double, const GraphEdge *>,
-         vector<std::pair<double, const GraphEdge *>>,
-         std::greater<std::pair<double, const GraphEdge *>>
-         > queue;
-     const GraphEdge * exit_edge = NULL;
+    std::set<const GraphEdge *> visited;
+    // map with GrapEdges and their predecessors and distances
+    std::map<const GraphEdge *,  std::pair<const GraphEdge *, double>> destinations;
+    // priority queue with discovered Edges and their distance.
+    std::priority_queue<
+        std::pair<double, const GraphEdge *>,
+        vector<std::pair<double, const GraphEdge *>>,
+        std::greater<std::pair<double, const GraphEdge *>>
+        > queue;
+    const GraphEdge * exit_edge = NULL;
 
 
-     // add all out edges from this vertex to priority queue and destinations.
-     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
-          double new_distance = (*it)->GetWeight(position);
+    // add all out edges from this vertex to priority queue and destinations.
+    for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
+        double new_distance = (*it)->GetWeight(position);
 
-          destinations[(*it)] = std::make_pair((const GraphEdge*) NULL, new_distance);
-          queue.push(std::make_pair(new_distance, (*it)));
-     }
+        destinations[(*it)] = std::make_pair((const GraphEdge*) NULL, new_distance);
+        queue.push(std::make_pair(new_distance, (*it)));
+    }
 
-     while(!queue.empty()) {
-          const GraphEdge * act_edge = queue.top().second;
-          double act_distance  = queue.top().first;
-          queue.pop();
+    while(!queue.empty()) {
+        const GraphEdge * act_edge = queue.top().second;
+        double act_distance  = queue.top().first;
+        queue.pop();
 
-          //if we discovered an exit edge we are finished (queue is distance ordered)
-          if(act_edge->IsExit()) {
-               exit_edge = act_edge;
-               break;
-          }
+        //if we discovered an exit edge we are finished (queue is distance ordered)
+        if(act_edge->IsExit()) {
+            exit_edge = act_edge;
+            break;
+        }
 
-          //discover new edges or shorter paths to old edges
-          const EdgesContainer * new_edges = act_edge->GetDest()->GetAllOutEdges();
+        //discover new edges or shorter paths to old edges
+        const EdgesContainer * new_edges = act_edge->GetDest()->GetAllOutEdges();
 
-          for(EdgesContainer::const_iterator it = new_edges->begin(); it != new_edges->end(); ++it) {
-               // if the destination edges was visited we already have the shortest path to this destination.
-               if(visited.find((*it)) != visited.end()) continue;
+        for(EdgesContainer::const_iterator it = new_edges->begin(); it != new_edges->end(); ++it) {
+            // if the destination edges was visited we already have the shortest path to this destination.
+            if(visited.find((*it)) != visited.end() || (*it)->GetDest() == act_edge->GetSrc()) continue;
 
-               double new_distance = act_distance + (*it)->GetWeight(act_edge->GetCrossing()->GetCentre());
-               //check if the destination edge was discovered before.
-               if(destinations.find((*it)) == destinations.end()) {
-                    //initialize the new discovered vertex with distance inifity and push it to the queue
-                    destinations[(*it)] = std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
-                    queue.push(std::make_pair(new_distance, (*it)));
-               }
-               //check if we found a shorter path to the dest vertex
-               if(destinations[(*it)].second > new_distance) {
-                    destinations[(*it)].second = new_distance;
-                    destinations[(*it)].first = act_edge;
-               }
-          }
-          visited.insert(act_edge);
-     }
-     //did we found an exits?
-     if(exit_edge != NULL) {
-          const GraphEdge * act_edge = destinations[exit_edge].first;
-          if(act_edge == NULL) {
-               return std::make_pair(exit_edge, destinations[exit_edge].second);
-          } else {
-               while(this != act_edge->GetSrc()) {
-                    act_edge = destinations[act_edge].first;
-               }
-               return std::make_pair(act_edge, destinations[exit_edge].second);
-          }
-     } else {
-          return std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
-     }
+            double new_distance = act_distance + (*it)->GetWeight(act_edge->GetCrossing()->GetCentre());
+            //check if the destination edge was discovered before.
+            if(destinations.find((*it)) == destinations.end()) {
+                //initialize the new discovered vertex with distance inifity and push it to the queue
+                destinations[(*it)] = std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
+                queue.push(std::make_pair(new_distance, (*it)));
+            }
+            //check if we found a shorter path to the dest vertex
+            if(destinations[(*it)].second > new_distance) {
+                destinations[(*it)].second = new_distance;
+                destinations[(*it)].first = act_edge;
+            }
+        }
+        visited.insert(act_edge);
+    }
+    //did we found an exits?
+    if(exit_edge != NULL) {
+        const GraphEdge * act_edge = destinations[exit_edge].first;
+        if(act_edge == NULL) {
+            return exit_edge;
+        } else {
+            while(this != act_edge->GetSrc()) {
+                act_edge = destinations[act_edge].first;
+            }
+            return act_edge;
+        }
+    } else {
+        return NULL;
+    }
 
 }
 
-
-std::pair<const GraphEdge *, double> GraphVertex::GetCheapestDestination(const Point & position) const
+const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & position) const
 {
-     std::set<const GraphVertex *> visited;
-     std::map<const GraphVertex *,  std::pair<const GraphEdge *, double>> destinations;
-     std::priority_queue<std::pair<double, const GraphVertex *>, vector<std::pair<double, const GraphVertex *>>, std::greater<std::pair<double, const GraphVertex *>>> queue;
+    int maximum_factor_distance = 1;
 
-     destinations[this] = std::make_pair<const GraphEdge *, double>(NULL, 0.0);
+    std::priority_queue<
+        std::pair<double, const GraphEdge *>,
+        vector<std::pair<double, const GraphEdge *>>,
+        std::greater<std::pair<double, const GraphEdge *>>
+        > edges;
+    for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
+        edges.push(std::make_pair((*it)->GetFactor(), (*it)));
+    }
+
+    if(edges.size() == 1) return edges.top().second;
+    if(edges.size() > 1) {
+        double best_factor = edges.top().first;
+        const GraphEdge * act_edge = NULL;
+        //take the best  edges and choose the nearest
+        while(!edges.empty()) {
+
+            //Log->Write("Best factor: %f ; act edge factor: %f", best_factor, edges.top().first);
+
+            //if the factor is worse than maximum_factor_distance times the best_factor the edges are rejected
+            if(edges.top().first > maximum_factor_distance * best_factor) break;
+
+            if(act_edge == NULL || act_edge->GetWeight(position) > edges.top().second->GetWeight(position)) {
+                act_edge = edges.top().second;
+            }
+            edges.pop();
+        }
+        return act_edge;
+    }
 
 
-     //first edges should be handled separated to recalculate edge weight
-     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
-          double new_distance = (*it)->GetWeight(position);
-          //check if the destination vertex was discovered before.
-          if(destinations.find((*it)->GetDest()) == destinations.end()) {
-               //initialize the new discovered vertex with distance inifity and push it to the queue
-               destinations[(*it)->GetDest()] = std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
-               queue.push(std::make_pair(new_distance, (*it)->GetDest()));
-          }
-
-          //check if we found a shorter path to the dest vertex
-          if(destinations[(*it)->GetDest()].second > new_distance) {
-               destinations[(*it)->GetDest()].second = new_distance;
-               destinations[(*it)->GetDest()].first = (*it);
-          }
-     }
-     visited.insert(this);
-
-     while(!queue.empty()) {
-          const GraphVertex * act_vertex = queue.top().second;
-          double act_distance = queue.top().first;
-          queue.pop();
-          const EdgesContainer * act_edges = act_vertex->GetAllOutEdges();
-
-          // NULL Pointer is used for exit node
-          // this only works if the priority queue is sorted with lowest weight.
-          // so if we have null pointer as act. vertex there is no shorter path to the exit
-          if(act_vertex == NULL) {
-               break;
-          }
-
-          for(EdgesContainer::const_iterator it = act_edges->begin(); it != act_edges->end(); ++it) {
-               // if the dest vertex was visited we already have the shortest path to this dest.
-               if(visited.find((*it)->GetDest()) != visited.end()) continue;
-
-               double new_distance = act_distance + (*it)->GetWeight((*it)->GetSrc()->GetSubRoom()->GetCentroid());
-               //check if the destination vertex was discovered before.
-               if(destinations.find((*it)->GetDest()) == destinations.end()) {
-                    //initialize the new discovered vertex with distance inifity and push it to the queue
-                    destinations[(*it)->GetDest()] = std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
-                    queue.push(std::make_pair(new_distance, (*it)->GetDest()));
-               }
-
-               //check if we found a shorter path to the dest vertex
-               if(destinations[(*it)->GetDest()].second > new_distance) {
-                    destinations[(*it)->GetDest()].second = new_distance;
-                    destinations[(*it)->GetDest()].first = (*it);
-               }
-          }
-          visited.insert(act_vertex);
-     }
-     //NULL Pointer is outside the building, so the edge is the Exit
-     if(destinations.find(NULL) != destinations.end()) {
-          const GraphEdge * act_edge = destinations[NULL].first;
-          while(this != act_edge->GetSrc()) {
-               act_edge = destinations[act_edge->GetSrc()].first;
-          }
-          return std::make_pair(act_edge, destinations[NULL].second);
-     } else {
-          return std::make_pair<const GraphEdge*, double>(NULL, INFINITY);
-     }
 }

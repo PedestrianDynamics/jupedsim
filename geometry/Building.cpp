@@ -1178,7 +1178,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      _allPedestians.push_back(ped);
 }
 
-void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds)
+void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const
 {
      for(unsigned int p = 0;p<_allPedestians.size();p++){
           Pedestrian* ped=_allPedestians[p];
