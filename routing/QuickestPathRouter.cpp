@@ -374,7 +374,6 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
                }
                // we should return here as there is no queue
                done=true;
-
           }
           else
           {

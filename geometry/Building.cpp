@@ -788,11 +788,11 @@ Goal* Building::GetFinalGoal(int ID)
 
 Crossing* Building::GetTransOrCrossByName(string caption) const
 {
-
      {
           //eventually
           map<int, Transition*>::const_iterator itr;
-          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
+          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr)
+          {
                if (itr->second->GetCaption() == caption)
                     return itr->second;
           }
@@ -800,7 +800,8 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
      {
           //finally the  crossings
           map<int, Crossing*>::const_iterator itr;
-          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
+          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr)
+          {
                if (itr->second->GetCaption() == caption)
                     return itr->second;
           }
@@ -815,7 +816,8 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      {
           //eventually transitions
           map<int, Transition*>::const_iterator itr;
-          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
+          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr)
+          {
                if (itr->second->GetUniqueID()== id)
                     return itr->second;
           }
@@ -823,14 +825,16 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      {
           //then the  crossings
           map<int, Crossing*>::const_iterator itr;
-          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
+          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr)
+          {
                if (itr->second->GetUniqueID() == id)
                     return itr->second;
           }
      }
      {
           //finally the  hlines
-          for(auto itr = _hLines.begin(); itr != _hLines.end(); ++itr) {
+          for(auto itr = _hLines.begin(); itr != _hLines.end(); ++itr)
+          {
                if (itr->second->GetUniqueID() == id)
                     return itr->second;
           }

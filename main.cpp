@@ -41,14 +41,15 @@ int main(int argc, char **argv)
 
      // Parsing the arguments
      ArgumentParser* args = new ArgumentParser();
-     args->ParseArgs(argc, argv);
+     bool status=args->ParseArgs(argc, argv);
 
      // create and initialize the simulation engine
      // Simulation
      time(&starttime);
 
      Simulation sim(*args);
-     if(sim.InitArgs(*args))
+
+     if(status&&sim.InitArgs(*args))
      {
           Log->Write("INFO: \tStart runSimulation()");
           int evacTime = sim.RunSimulation();
@@ -58,7 +59,8 @@ int main(int argc, char **argv)
           // some output
           double execTime = difftime(endtime, starttime);
 
-          if (sim.GetPedsNumber()) {
+          if (sim.GetPedsNumber())
+          {
                Log->Write("WARNING: \nPedestrians not evacuated [%d] using [%d] threads",
                          sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
           }
@@ -71,7 +73,8 @@ int main(int argc, char **argv)
           Log->Write("Errors            : %d", Log->GetErrors());
 
           // sim.PrintStatistics();
-          if (NULL == dynamic_cast<STDIOHandler*>(Log)) {
+          if (NULL == dynamic_cast<STDIOHandler*>(Log))
+          {
                printf("\nExec Time [s]     : %4.2f\n", execTime);
                printf("Evac Time [s]       : %d\n", evacTime);
                printf("Realtime Factor     : %.2f (X)\n", evacTime / execTime);
@@ -81,7 +84,9 @@ int main(int argc, char **argv)
           }
      }
      else
-          Log->Write("error occured while parsing");
+     {
+          Log->Write("INFO:\tFinishing...");
+     }
      // do the last cleaning
      delete args;
      delete Log;
