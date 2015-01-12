@@ -63,55 +63,62 @@ CognitiveMapRouter::~CognitiveMapRouter()
 
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
-     //Checks if the Pedestrian once got a destination and calls init functions if needed (if no dest before)
-     CheckAndInitPedestrian(p);
+    //check for former goal.
+    if((*cm_storage)[p]->HadNoDestination()) {
+        sensor_manager->execute(p, SensorManager::INIT);
+    }
 
-     //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
-     if(p->GetNextDestination() == -1 || p->ChangedSubRoom()) {
-          //execute periodical sensors
-          sensor_manager->execute(p, SensorManager::PERIODIC);
+    //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
+    if((*cm_storage)[p]->ChangedSubRoom()) {
+        //execute periodical sensors
+        sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
 
-          //check if there is a way to the outside the pedestrian knows (in the cognitive map)
-          const NavLine * destination = NULL;
-          destination = (*cm_storage)[p]->GetDestination();
-          if(destination == NULL) {
-               //no destination was found, now we could start the discovery!
-               //1. run the no_way sensors for room discovery.
-               sensor_manager->execute(p, SensorManager::NO_WAY);
+        int status = FindDestination(p);
 
-               //check if this was enough for finding a global path to the exit
-               destination = (*cm_storage)[p]->GetDestination();
+        (*cm_storage)[p]->UpdateSubRoom();
 
-               if(destination == NULL) {
-                    //we still do not have a way. lets take the "best" local edge
-                    //for this we don't calculate the cost to exit but calculte the cost for the edges at the actual vertex.
-                    destination = (*cm_storage)[p]->GetLocalDestination();
-               }
-          }
+        return status;
 
-          //if we still could not found any destination we are lost! Pedestrian will be deleted
-          //no destination should just appear in bug case or closed rooms.
-          if(destination == NULL) {
-               Log->Write("ERROR: \t One Pedestrian (ID: %i) was not able to find any destination", p->GetID());
-               return -1;
-          }
-
-          p->SetExitLine(destination);
-          p->SetExitIndex(destination->GetUniqueID());
-     }
-     return 1;
+    }
+    return 1;
 }
 
-void CognitiveMapRouter::CheckAndInitPedestrian(Pedestrian * p)
+int CognitiveMapRouter::FindDestination(Pedestrian * p)
 {
-     //check for former goal.
-     if(p->GetLastDestination() == -1) {
-          //no former goal. so initial route has to be choosen
-          //this is needed for initialisation
-          p->ChangedSubRoom();
-          sensor_manager->execute(p, SensorManager::INIT);
-     }
+        //check if there is a way to the outside the pedestrian knows (in the cognitive map)
+        const GraphEdge * destination = NULL;
+        destination = (*cm_storage)[p]->GetDestination();
+        if(destination == NULL) {
+            //no destination was found, now we could start the discovery!
+            //1. run the no_way sensors for room discovery.
+            sensor_manager->execute(p, SensorManager::NO_WAY);
+
+            //check if this was enough for finding a global path to the exit
+            destination = (*cm_storage)[p]->GetDestination();
+
+            if(destination == NULL) {
+                //we still do not have a way. lets take the "best" local edge
+                //for this we don't calculate the cost to exit but calculte the cost for the edges at the actual vertex.
+                destination = (*cm_storage)[p]->GetLocalDestination();
+            }
+        }
+
+        //if we still could not found any destination we are lost! Pedestrian will be deleted
+        //no destination should just appear in bug case or closed rooms.
+        if(destination == NULL) {
+            Log->Write("ERROR: \t One Pedestrian (ID: %i) was not able to find any destination", p->GetID());
+            return -1;
+        }
+
+        (*cm_storage)[p]->AddDestination(destination);
+        sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
+
+
+        p->SetExitLine(destination->GetCrossing());
+        p->SetExitIndex(destination->GetCrossing()->GetUniqueID());
+        return 1;
 }
+
 
 
 bool CognitiveMapRouter::Init(Building * b)

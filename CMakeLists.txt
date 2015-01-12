@@ -217,6 +217,11 @@ set (   source_files
   routing/cognitive_map/sensor/RoomToFloorSensor.cpp
   routing/cognitive_map/sensor/SensorManager.cpp
   routing/cognitive_map/sensor/AbstractSensor.cpp
+  routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp
+  routing/cognitive_map/sensor/JamSensor.cpp
+  routing/cognitive_map/sensor/LastDestinationsSensor.cpp
+  routing/cognitive_map/sensor/SmokeSensor.cpp
+
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
   poly2tri/sweep/advancing_front.cpp
@@ -257,7 +262,10 @@ set (   header_files
   routing/cognitive_map/sensor/AbstractSensor.h
   routing/cognitive_map/sensor/RoomToFloorSensor.h
   routing/cognitive_map/sensor/SensorManager.h
-
+  routing/cognitive_map/sensor/DiscoverDoorsSensor.h
+  routing/cognitive_map/sensor/JamSensor.h
+  routing/cognitive_map/sensor/LastDestinationsSensor.h
+  routing/cognitive_map/sensor/SmokeSensor.h
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h

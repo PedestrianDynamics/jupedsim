@@ -90,7 +90,7 @@ public:
      void DeletePedestrian(Pedestrian* &ped);
      /// delete the ped from the simulation
      void AddPedestrian(Pedestrian* ped);
-     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds);
+     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const;
 
 
      std::string GetCaption() const;

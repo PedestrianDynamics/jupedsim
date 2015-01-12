@@ -71,6 +71,8 @@ public:
 
      double GetRoomToFloorFactor() const;
 
+    double GetFactor() const;
+    double GetFactorWithDistance(double distance) const;
 
      double GetWeight(const Point &) const;
 
