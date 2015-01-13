@@ -811,6 +811,7 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                     break;
                default:
                     //p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    Log->Write("ERROR:\t unknown exitCrossingStrategy < %d >", pExitStrategy);
                     return false;
                     break;
                }
@@ -839,7 +840,7 @@ bool ArgumentParser::ParseNodeToSolver(const TiXmlNode &solverNode)
                pSolver = 3;
           else
           {
-               Log->Write("ERROR: \twrong value for solver type!!!\n");
+               Log->Write("ERROR: \twrong value [%s] for solver type\n",solver.c_str());
                return false;
           }
           Log->Write("INFO: \tpSolver <" + string(solver) + ">");
