@@ -171,8 +171,8 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
 
-     for (i = 0; i < building->GetNumberOfRooms(); i++) {
-          Room* r = building->GetRoom(i);
+     for (const auto& r:building->GetAllRooms())
+     {
           string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
                continue;
@@ -325,7 +325,6 @@ void TrajectoriesJPSV04::WriteFooter()
 {
      Write("</trajectories>\n");
 }
-
 
 /**
  * FLAT format implementation

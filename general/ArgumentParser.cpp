@@ -810,9 +810,10 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
                     break;
                default:
-                    //p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     Log->Write("ERROR:\t unknown exitCrossingStrategy < %d >", pExitStrategy);
-                    return false;
+                    Log->Write("     :\t the default < %d > will be used", 2);
+                    return true;
                     break;
                }
           }
