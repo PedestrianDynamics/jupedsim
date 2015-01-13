@@ -81,7 +81,6 @@ public:
      /// destructor
      virtual ~Building();
 
-
      void SetCaption(const std::string& s);
      void SetRoutingEngine(RoutingEngine* r);
      void SetRoom(Room* room, int index);
@@ -91,7 +90,6 @@ public:
      /// delete the ped from the simulation
      void AddPedestrian(Pedestrian* ped);
      void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const;
-
 
      std::string GetCaption() const;
      RoutingEngine* GetRoutingEngine() const;
@@ -137,20 +135,17 @@ public:
       */
      bool ped_is_visible(const Point& p1, const Point& p2, bool considerHlines=false);
 
-
      /**
       * @return a crossing or a transition matching the given caption.
       * Return NULL if none is found
       */
      Crossing* GetTransOrCrossByName(std::string caption) const;
 
-
      /**
       * @return a crossing or a transition or a hline matching the given uid.
       * Return NULL if none is found
       */
      Hline* GetTransOrCrossByUID(int uid) const;
-
 
      /**
       * @return the transition matching the uid

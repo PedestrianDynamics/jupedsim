@@ -287,13 +287,14 @@ public:
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
-     bool ped_is_visible(const Point& p1, const Point& p2, bool considerHlines=false);
- /**
+     bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+
+     /**
       * @return true if the two points are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
-     bool wall_is_visible(const Wall &wall, const Point &p2);
+     bool IsVisible(const Line &wall, const Point &p2);
 
      // virtual functions
      virtual std::string WriteSubRoom() const = 0;

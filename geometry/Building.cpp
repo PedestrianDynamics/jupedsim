@@ -874,7 +874,7 @@ bool Building::ped_is_visible(const Point& p1, const Point& p2, bool considerHli
           Room* room = _rooms[i];
           for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                SubRoom* sub = room->GetSubRoom(j);
-               if(sub->ped_is_visible(p1,p2,considerHlines)==false) return false;
+               if(sub->IsVisible(p1,p2,considerHlines)==false) return false;
           }
      }
      return true;

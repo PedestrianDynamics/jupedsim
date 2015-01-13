@@ -312,7 +312,7 @@ std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position){
 #endif
      for (auto w:_walls){
           // nearest_point = w.ShortestPoint(position);
-          wall_is_vis = wall_is_visible(w, position);
+          wall_is_vis = IsVisible(w, position);
           if(wall_is_vis){
 #if DEBUG
                printf("  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",w.GetPoint1().GetX(), w.GetPoint1().GetY(),w.GetPoint2().GetX(), w.GetPoint2().GetY() );
@@ -330,7 +330,7 @@ std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position){
 
 // like ped_is_visible() but here we can exclude checking intersection
 // with the same wall. This function should check if <position> can see the <Wall>
-bool SubRoom::wall_is_visible(const Wall &wall, const Point &position)
+bool SubRoom::IsVisible(const Line &wall, const Point &position)
 {
      // printf("\tEnter wall_is_visible\n");
      // printf(" \t  Wall (%f, %f)--(%f, %f)\n",wall.GetPoint1().GetX(), wall.GetPoint1().GetY(),wall.GetPoint2().GetX(), wall.GetPoint2().GetY() );
@@ -371,7 +371,7 @@ bool SubRoom::wall_is_visible(const Wall &wall, const Point &position)
 // p1 and p2 are supposed to be pedestrian's positions. This function does not work properly 
 // for visibility checks with walls, since the line connecting the pedestrian's position 
 // with the nearest point on the wall IS intersecting with the wall.
-bool SubRoom::ped_is_visible(const Point& p1, const Point& p2, bool considerHlines)
+bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
      // printf("\t\tEnter ped_is_visible\n");
      // generate certain connection lines
@@ -460,9 +460,6 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
           }
      return temp[0] || temp[1] || temp[2] || temp[3] || temp[4];
 }
-
-
-
 
 // this is the case if they share a transition or crossing
 bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const

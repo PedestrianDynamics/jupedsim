@@ -876,7 +876,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 
           //check if visible
-          if (sub->ped_is_visible(posA, posC, true) == false)
+          if (sub->IsVisible(posA, posC, true) == false)
           {
                ped->RerouteIn(10);
                //ped->Dump(ped->GetID());
