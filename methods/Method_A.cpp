@@ -5,8 +5,8 @@
  *      Author: piccolo
  */
 
-#include <Method_A.h>
-#include <Analysis.h>
+#include "Method_A.h"
+#include "../Analysis.h"
 #include <iostream>
 
 
@@ -43,7 +43,7 @@ bool Method_A::Process (const PedData& peddata)
      {
           _passLine[i] = false;
      }
-     Log->Write("----------------Analyzing with Method A-------------------");
+     Log->Write("------------------------Analyzing with Method A-----------------------------");
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      {
           int frid =  frameNr + peddata.GetMinFrame();

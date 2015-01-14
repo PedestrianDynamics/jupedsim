@@ -32,12 +32,12 @@
 #include "geometry/Room.h"
 #include "geometry/SubRoom.h"
 
-#include "VoronoiDiagram.h"
-#include "Method_A.h"
-#include "Method_B.h"
-#include "Method_C.h"
-#include "Method_D.h"
-#include "PedData.h"
+#include "methods/VoronoiDiagram.h"
+#include "methods/Method_A.h"
+#include "methods/Method_B.h"
+#include "methods/Method_C.h"
+#include "methods/Method_D.h"
+#include "methods/PedData.h"
 
 #include <iostream>
 #include <fstream>
@@ -154,7 +154,7 @@ void Analysis::InitArgs(ArgumentParser* args)
 
      if(args->GetIsMethodB()) {
           _DoesUseMethodB = true;
-          _DoesUseMethodC = true;
+          //_DoesUseMethodC = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodB();
           for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
           {
@@ -265,11 +265,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			bool result_A=method_A.Process(data);
 			if(result_A)
 			{
-				 cout<<"success with Method A with measurement id "<<_areaForMethod_A[i]->_id<<endl;
+				Log->Write("INFO:\tSuccess with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
 			}
 			else
 			{
-				 cout<<"failure"<<endl;
+				Log->Write("INFO:\tFailed with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
 			}
 	    }
 	}
@@ -283,11 +283,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			bool result_B = method_B.Process(data);
 			if(result_B)
 			{
-				cout<<"success with Method B with measurement id "<<_areaForMethod_B[i]->_id<<endl;
+				Log->Write("INFO:\tSuccess with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
 			}
 			else
 			{
-				cout<<"failure"<<endl;
+				Log->Write("INFO:\tFailed with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
 			}
 		}
 	}
@@ -301,11 +301,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 	    	bool result_C =method_C.Process(data);
 	    	if(result_C)
 	    	{
-	    		cout<<"success with Method C with measurement id "<<_areaForMethod_C[i]->_id<<endl;
+	    		Log->Write("INFO:\tSuccess with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
 	    	}
 	    	else
 	    	{
-	    		cout<<"failure"<<endl;
+	    		Log->Write("INFO:\tFailed with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
 	    	}
 	    }
 	}
@@ -332,11 +332,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 			bool result_D = method_D.Process(data);
 			if(result_D)
 			{
-				cout<<"success with Method D with measurement id "<<_areaForMethod_D[i]->_id<<endl;
+				Log->Write("INFO:\tSuccess with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
 			}
 			else
 			{
-				cout<<"failure"<<endl;
+				Log->Write("INFO:\tFailed with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
 			}
 		}
 	}

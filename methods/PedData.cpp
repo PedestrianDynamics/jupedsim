@@ -5,7 +5,7 @@
  *      Author: piccolo
  */
 
-#include <PedData.h>
+#include "PedData.h"
 
 PedData::PedData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
 {

@@ -54,7 +54,7 @@ class MeasurementArea_B: public MeasurementArea
 {
 public:
      polygon_2d _poly;
-     double _length;
+     double _length = -1.0;
 };
 
 class MeasurementArea_L: public MeasurementArea
