@@ -24,7 +24,7 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
      _vComponent = vComponent;
      _projectRootDir = projectRootDir;
      _trajName = filename;
-     //string fullTrajectoriesPathName= _projectRootDir+"./"+path+"./"+_trajName;
+
      string fullTrajectoriesPathName= path+"./"+_trajName;
      Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
 
@@ -43,12 +43,12 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
 
      else if(trajformat == FORMAT_PLAIN)
      {
-          result=InitializeVariables();
+          result=InitializeVariables(fullTrajectoriesPathName);
      }
      return result;
 }
 
-bool PedData::InitializeVariables()
+bool PedData::InitializeVariables(const string& filename)
 {
      vector<double> xs;
      vector<double> ys;
@@ -56,10 +56,10 @@ bool PedData::InitializeVariables()
      vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
      //string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
      ifstream  fdata;
-     fdata.open(_trajName.c_str());
+     fdata.open(filename.c_str());
      if (fdata.is_open() == false)
      {
-          Log->Write("ERROR: \t could not parse the trajectories file <%s>",_trajName.c_str());
+          Log->Write("ERROR: \t could not parse the trajectories file <%s>",filename.c_str());
           return false;
      }
      else

@@ -47,7 +47,7 @@ public:
 
 
 private:
-     bool InitializeVariables();
+     bool InitializeVariables(const string& filename);
      bool InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
      double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;

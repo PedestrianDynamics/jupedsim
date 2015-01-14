@@ -5,9 +5,9 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd">
     <geometry file = "geo_AO_300.xml" /> 
     <!-- trajectories file and format --> 
     <!-- either a file name or a path location. In the latter case all files in the directory will be used--> 
-    <trajectories format="txt" unit="m"> 
-        <file name="AO_300.txt" /> 
-        <path location="" /> 
+    <trajectories format="xml" unit="m"> 
+        <file name="AO_300_2.xml" /> 
+        <path location="./" /> 
     </trajectories> 
     <!-- all files in the directories will be used --> 
 

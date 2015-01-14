@@ -51,9 +51,9 @@ using namespace std;
 void ArgumentParser::Usage()
 {
 
-    Log->Write("Usage: \n");
-    Log->Write("\tJPSreport.exe --inifile=input.xml\n");
-    /*
+     Log->Write("Usage: \n");
+     Log->Write("\tJPSreport.exe --inifile=input.xml\n");
+     /*
     fprintf(stderr,
     		"Usage: program options\n\n"
     		"With the following options (default values in parenthesis):\n\n"
@@ -61,7 +61,7 @@ void ArgumentParser::Usage()
     		"  	[-I/--input path <filepath>]    				path of the input file(./Inputfiles/)\n"
     		"  	[-O/--output path <filepath>]   				path of the input file(./Outputfiles/)\n"
     		"	[-g/--geometry <string>]        				path to the geometry file (./Inputfiles/geo.xml)\n"
-    		"	[-m/--measurment area <int>]    			type of measurement area(1)\n"
+    		"	[-m/--measurement area <int>]    			type of measurement area(1)\n"
     		"                                   							1: Bounding box\n"
     		"                                       						2: Line\n"
     		"	[-b/--bounding box  <double>]				p1.x p1.y p2.x p2.y p3.x p3.y p4.x p4.y (in clockwise)\n"
@@ -146,534 +146,546 @@ void ArgumentParser::Usage()
     		"\n");
 
 
-     */
-    exit(EXIT_SUCCESS);
+      */
+     exit(EXIT_SUCCESS);
 }
 
 ArgumentParser::ArgumentParser()
 {
-    // Default parameter values
-    _geometryFileName = "geo.xml";
+     // Default parameter values
+     _geometryFileName = "geo.xml";
 
-    _vComponent = 'B';
-    _isMethodA = false;
-    _timeIntervalA = 160;
-    _delatTVInst = 5;
-    _isMethodB = false;
-    _isMethodC =false;
-    _isMethodD = false;
-    _isCutByCircle = false;
-    _isOutputGraph= false;
-    _isIndividualFD = false;
-    _isGetProfile =false;
-    _steadyStart =100;
-    _steadyEnd = 1000;
-    _scaleX = 10;
-    _scaleY = 10;
-    _errorLogFile="./Logfile.dat";
-    _log=1; //no output wanted
-    _trajectoriesLocation="./";
-    _trajectoriesFilename="";
-    _projectRootDir="./";
-    _fileFormat=FORMAT_XML_PLAIN;
-    _cutRadius =1.0;
-    _circleEdges=6;
+     _vComponent = 'B';
+     _isMethodA = false;
+     _timeIntervalA = 160;
+     _delatTVInst = 5;
+     _isMethodB = false;
+     _isMethodC =false;
+     _isMethodD = false;
+     _isCutByCircle = false;
+     _isOutputGraph= false;
+     _isIndividualFD = false;
+     _isGetProfile =false;
+     _steadyStart =100;
+     _steadyEnd = 1000;
+     _scaleX = 10;
+     _scaleY = 10;
+     _errorLogFile="./Logfile.dat";
+     _log=1; //no output wanted
+     _trajectoriesLocation="./";
+     _trajectoriesFilename="";
+     _projectRootDir="./";
+     _fileFormat=FORMAT_XML_PLAIN;
+     _cutRadius =1.0;
+     _circleEdges=6;
 }
 
 
 void ArgumentParser::ParseArgs(int argc, char **argv)
 {
-    int c;
-    int option_index = 0;
+     int c;
+     int option_index = 0;
 
-    static struct option long_options[] = {
-        {"help", 0, 0, 'h'},
-        {"inifile", optional_argument, 0, 'q'},
-        {0, 0, 0, 0}
-    };
+     static struct option long_options[] = {
+               {"help", 0, 0, 'h'},
+               {"inifile", optional_argument, 0, 'q'},
+               {0, 0, 0, 0}
+     };
 
-    if(argc==1) {
-        Usage();
-    }
-    while ((c = getopt_long_only(argc, argv,
-                                 "q:h",
-                                 long_options, &option_index)) != -1) {
+     if(argc==1) {
+          Usage();
+     }
+     while ((c = getopt_long_only(argc, argv,
+               "q:h",
+               long_options, &option_index)) != -1) {
 
-        switch (c) {
+          switch (c) {
 
-        case 'q': {
-            string inifile="input.xml";
-            if (optarg)
-                inifile=optarg;
-            Log->Write("INFO: \t Loading initialization file <"+inifile+">");
-            bool parsing = ParseIniFile(inifile);
-            if(!parsing)
-            {
-            	Log->Write("INFO: \t Failed loading initialization file <"+inifile+">");
-            }
-        }
-        break;
+          case 'q': {
+               string inifile="input.xml";
+               if (optarg)
+                    inifile=optarg;
+               Log->Write("INFO: \t Loading initialization file <"+inifile+">");
+               bool parsing = ParseIniFile(inifile);
+               if(!parsing)
+               {
+                    Log->Write("INFO: \t Failed loading initialization file <"+inifile+">");
+               }
+          }
+          break;
 
-        case 'h':
-            Usage();
-            break;
-        default: {
-            Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                       "wrong program options!!!\n");
-            Usage();
-        }
-        }
-    }
+          case 'h':
+               Usage();
+               break;
+          default: {
+               Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
+                         "wrong program options!!!\n");
+               Usage();
+          }
+          }
+     }
 }
 
 const vector<string>& ArgumentParser::GetTrajectoriesFiles() const
 {
-    return _trajectoriesFiles;
+     return _trajectoriesFiles;
 }
 
 const string& ArgumentParser::ArgumentParser::GetProjectRootDir() const
 {
-    return _projectRootDir;
+     return _projectRootDir;
 }
 
 
 bool ArgumentParser::ParseIniFile(string inifile)
 {
 
-	Log->Write("INFO: \tParsing the ini file");
+     Log->Write("INFO: \tParsing the ini file");
 
-	//extract and set the project root dir
-	size_t found = inifile.find_last_of("/\\");
-	if (found != string::npos)
-		_projectRootDir = inifile.substr(0, found) + "/";
-
-
-	TiXmlDocument doc(inifile);
-	if (!doc.LoadFile()) {
-		Log->Write("ERROR: \t%s", doc.ErrorDesc());
-		Log->Write("ERROR: \t could not parse the ini file");
-		return false;
-	}
+     //extract and set the project root dir
+     size_t found = inifile.find_last_of("/\\");
+     if (found != string::npos)
+          _projectRootDir = inifile.substr(0, found) + "/";
 
 
-	TiXmlElement* xMainNode = doc.RootElement();
-	if( ! xMainNode ) {
-		Log->Write("ERROR:\tRoot element does not exist");
-		return false;
-	}
+     TiXmlDocument doc(inifile);
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \t could not parse the ini file");
+          return false;
+     }
 
-	if( xMainNode->ValueStr () != "JPSreport" )
-	{
-		Log->Write("ERROR:\tRoot element value is not 'JPSreport'.");
-		return false;
-	}
 
-    //geometry
-	if(xMainNode->FirstChild("geometry"))
-	{
-		_geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-		Log->Write("INFO: \tGeometry <"+_geometryFileName+">");
-	}
+     TiXmlElement* xMainNode = doc.RootElement();
+     if( ! xMainNode ) {
+          Log->Write("ERROR:\tRoot element does not exist");
+          return false;
+     }
+
+     if( xMainNode->ValueStr () != "JPSreport" )
+     {
+          Log->Write("ERROR:\tRoot element value is not 'JPSreport'.");
+          return false;
+     }
+
+     //geometry
+     if(xMainNode->FirstChild("geometry"))
+     {
+          _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
+          Log->Write("INFO: \tGeometry <"+_geometryFileName+">");
+     }
 
      //trajectories
-	TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
-	if (xTrajectories)
-	{
-		//add the extension point
-		string fmt = "."+string (xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("format")));
-		Log->Write("INFO: \tThe format of the trajectory file is:\t<%s>", fmt.c_str());
-		if (fmt == ".xml")
-		{
-			_fileFormat = FORMAT_XML_PLAIN;
-		}
-		else if (fmt == ".txt")
-		{
-			_fileFormat = FORMAT_PLAIN;
-		}
+     TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
+     if (xTrajectories)
+     {
+          //add the extension point
+          string fmt = "."+string (xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("format")));
+          Log->Write("INFO: \tThe format of the trajectory file is:\t<%s>", fmt.c_str());
+          if (fmt == ".xml")
+          {
+               _fileFormat = FORMAT_XML_PLAIN;
+          }
+          else if (fmt == ".txt")
+          {
+               _fileFormat = FORMAT_PLAIN;
+          }
 
-		string unit = xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("unit"), "m");
-		if (unit != "m")
-		{
-			Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
-			return false;
-		}
-		//a file descriptor was given
-		for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file");
-				xFile; xFile = xFile->NextSiblingElement("file"))
-		{
-			//collect all the files given
-			_trajectoriesFilename =
-					+ xFile->Attribute("name");
-			_trajectoriesFiles.push_back(_trajectoriesFilename);
-			Log->Write("INFO: \tInput trajectory file  <"+ (_trajectoriesFilename)+">");
-		}
+          string unit = xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("unit"), "m");
+          if (unit != "m")
+          {
+               Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
+               return false;
+          }
+          //a file descriptor was given
+          for (TiXmlElement* xFile = xTrajectories->FirstChildElement("file");
+                    xFile; xFile = xFile->NextSiblingElement("file"))
+          {
+               //collect all the files given
+               _trajectoriesFilename =
+                         + xFile->Attribute("name");
+               _trajectoriesFiles.push_back(_trajectoriesFilename);
+               Log->Write("INFO: \tInput trajectory file  <"+ (_trajectoriesFilename)+">");
+          }
 
-		if (xTrajectories->FirstChildElement("path"))
-		{
-			_trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
-			if(_trajectoriesLocation.empty())
-			     _trajectoriesLocation="./";
-
-			// in the case no file was specified, collect all xml files in the specified directory
-			if(_trajectoriesFiles.empty()) {
-
-				DIR *dir;
-				struct dirent *ent;
-				if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
-				{
-					/* print all the files and directories within directory */
-					while ((ent = readdir (dir)) != NULL) {
-						string filename=ent->d_name;
-						//if (filename.find(".xml")!=std::string::npos)
-						if (filename.find(fmt)!=std::string::npos)
-						{
-							//_trajectoriesFiles.push_back(_projectRootDir+filename);
-                                   _trajectoriesFiles.push_back(filename);
-							Log->Write("INFO: \tInput trajectory file  <"+ (filename)+">");
-						}
-					}
-					closedir (dir);
-				}
-				else
-				{
-					/* could not open directory */
-					Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
-					return false;
-				}
-			}
-		}
-		Log->Write("INFO: \tInput dir  <"+ (_trajectoriesLocation)+">");
-	}
-
-    //measurement area
-    if(xMainNode->FirstChild("measurementAreas")) {
-
-        string unit = xMainNode->FirstChildElement("measurementAreas")->Attribute("unit");
-        if(unit!="m")
-        {
-            Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
-            return false;
-        }
-
-        for(TiXmlNode* xMeasurementArea_B=xMainNode->FirstChild("measurementAreas")->FirstChild("area_B");
-        		xMeasurementArea_B; xMeasurementArea_B=xMeasurementArea_B->NextSibling("area_B"))
-        {
-        	MeasurementArea_B* areaB = new MeasurementArea_B();
-        	areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
-        	areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
-
-        	polygon_2d poly;
-        	for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
-        	{
-        		double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
-        		double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
-        		boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-        		Log->Write("INFO: \tmeasure area points  < %.3f, %.3f>",box_px,box_py);
-        	}
-        	correct(poly); // in the case the Polygone is not closed
-        	areaB->_poly=poly;
-
-        	TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("Length_in_movement_direction");
-        	if(xLength)
-        	{
-        		areaB->_length=xmltof(xLength->Attribute("distance"));
-        	}
-        	Log->Write("INFO: \tmeasure area id  < %d>",areaB->_id);
-        	Log->Write("INFO: \tmeasure area type  <"+areaB->_type+">");
-        	_measurementAreas[areaB->_id]=areaB;
-        }
+          if (xTrajectories->FirstChildElement("path"))
+          {
+               _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
+               if(_trajectoriesLocation.empty())
+                    _trajectoriesLocation="./";
 
 
-        for(TiXmlNode* xMeasurementArea_L=xMainNode->FirstChild("measurementAreas")->FirstChild("area_L");
-        		xMeasurementArea_L; xMeasurementArea_L=xMeasurementArea_L->NextSibling("area_L"))
-        {
-        	MeasurementArea_L* areaL = new MeasurementArea_L();
-        	areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
-        	areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
+               //hack to find if it is an absolute path
+               // ignore the project root in this case
+               if ( (boost::algorithm::contains(_trajectoriesLocation,":")==false) && //windows
+                         (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
+                // &&() osx
+               {
+                      _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
+               }
 
-        	areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"))*M2CM;
-        	areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"))*M2CM;
-        	areaL->_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"))*M2CM;
-        	areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"))*M2CM;
+               // in the case no file was specified, collect all xml files in the specified directory
+               if(_trajectoriesFiles.empty())
+               {
+                    DIR *dir;
+                    struct dirent *ent;
+                    if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
+                    {
+                         /* print all the files and directories within directory */
+                         while ((ent = readdir (dir)) != NULL)
+                         {
+                              string filename=ent->d_name;
 
-        	_measurementAreas[areaL->_id]=areaL;
-        	Log->Write("INFO: \tmeasure area id  <%d> with \ttype <%s>",areaL->_id,areaL->_type.c_str());
-        	Log->Write("INFO: \treference line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX,areaL->_lineStartY,areaL->_lineEndX,areaL->_lineEndY);
-        }
-    }
+                              if (boost::algorithm::ends_with(filename, fmt))
+                                   //if (filename.find(fmt)!=std::string::npos)
+                                   {
+                                        //_trajectoriesFiles.push_back(_projectRootDir+filename);
+                                        _trajectoriesFiles.push_back(filename);
+                                        Log->Write("INFO: \tInput trajectory file  <"+ (filename)+">");
+                                   }
+                         }
+                         closedir (dir);
+                    }
+                    else
+                    {
+                         /* could not open directory */
+                         Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
+                         return false;
+                    }
+               }
+          }
+          Log->Write("INFO: \tInput dir  <"+ (_trajectoriesLocation)+">");
+     }
 
-    //instantaneous velocity
-    TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
-    if(xVelocity) {
-        string UseXComponent = xVelocity->FirstChildElement("useXComponent")->GetText();
-        string UseYComponent = xVelocity->FirstChildElement("useYComponent")->GetText();
-        string HalfFrameNumberToUse = xVelocity->FirstChildElement("halfFrameNumberToUse")->GetText();
+     //measurement area
+     if(xMainNode->FirstChild("measurementAreas")) {
 
-        _delatTVInst = atof(HalfFrameNumberToUse.c_str());
-        if(UseXComponent == "true"&&UseYComponent == "false")
-        {
-            _vComponent = 'X';
-            Log->Write("INFO: \tonly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
-        }
-        else if(UseXComponent == "false"&&UseYComponent == "true")
-        {
-            _vComponent = 'Y';
-            Log->Write("INFO: \tonly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
-        }
-        else if(UseXComponent == "true"&&UseYComponent == "true")
-        {
-            _vComponent = 'B';  // both components
-            Log->Write("INFO: \tx and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
-        }
-        else
-        {
-            Log->Write("INFO: \ttype of velocity is not selected, please check it !!! " );
-            return false;
-        }
-    }
+          string unit = xMainNode->FirstChildElement("measurementAreas")->Attribute("unit");
+          if(unit!="m")
+          {
+               Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
+               return false;
+          }
 
-    // method A
-    TiXmlElement* xMethod_A=xMainNode->FirstChildElement("method_A");
-    if(xMethod_A)
-    {
-        if(string(xMethod_A->Attribute("enabled"))=="true")
-        {
-        	_isMethodA = true;
-        	Log->Write("INFO: \tMethod A is selected" );
-        }
-        _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
-        for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
-                                		xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
-        {
-        	_areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-        }
-        //_areaIDforMethodA = xmltoi(xMethod_A->FirstChildElement("measurementArea")->Attribute("id"));
-        Log->Write("INFO: \ttime interval used in Method A is < %d>",_timeIntervalA);
-    }
-    // method B
-    TiXmlElement* xMethod_B=xMainNode->FirstChildElement("method_B");
-    if(xMethod_B)
+          for(TiXmlNode* xMeasurementArea_B=xMainNode->FirstChild("measurementAreas")->FirstChild("area_B");
+                    xMeasurementArea_B; xMeasurementArea_B=xMeasurementArea_B->NextSibling("area_B"))
+          {
+               MeasurementArea_B* areaB = new MeasurementArea_B();
+               areaB->_id=xmltoi(xMeasurementArea_B->ToElement()->Attribute("id"));
+               areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
 
-        if(string(xMethod_B->Attribute("enabled"))=="true")
-        {
-            _isMethodB = true;
-            for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_B")->FirstChildElement("measurementArea");
-            		xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
-            {
-            	_areaIDforMethodB.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-            }
-            //_areaIDforMethodB = xmltoi(xMethod_B->FirstChildElement("measurementArea")->Attribute("id"));
-            Log->Write("INFO: \tMethod B is selected" );
-        }
-    // method C
-    TiXmlElement* xMethod_C=xMainNode->FirstChildElement("method_C");
-    if(xMethod_C)
-        if(string(xMethod_C->Attribute("enabled"))=="true")
-        {
-            _isMethodC = true;
-            for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_C")->FirstChildElement("measurementArea");
-                                    		xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
-            {
-            	_areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-            }
-            Log->Write("INFO: \tMethod C is selected" );
-        }
-    // method D
-    TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
-    if(xMethod_D) {
-        if(string(xMethod_D->Attribute("enabled"))=="true")
-        {
-            _isMethodD = true;
-            _isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
-            if(_isOutputGraph)
-            {
-                Log->Write("INFO: \tVoronoi graph is asked to output!" );
-            }
-            _isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
-            for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurementArea");
-                        		xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
-            {
-            	_areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-            }
-            //_areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
+               polygon_2d poly;
+               for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
+               {
+                    double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
+                    double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
+                    boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
+                    Log->Write("INFO: \tmeasure area points  < %.3f, %.3f>",box_px,box_py);
+               }
+               correct(poly); // in the case the Polygone is not closed
+               areaB->_poly=poly;
 
-            if ( xMethod_D->FirstChildElement("cutByCircle"))
-            {
-            	 if ( string(xMethod_D->FirstChildElement("cutByCircle")->Attribute("enabled"))=="true")
-            	 {
-            		 _isCutByCircle=true;
-            		 _cutRadius=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("radius"));
-            		 _circleEdges=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("edges"));
-            		 Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius);
-            		 Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
-            	 }
-            }
+               TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("Length_in_movement_direction");
+               if(xLength)
+               {
+                    areaB->_length=xmltof(xLength->Attribute("distance"));
+               }
+               Log->Write("INFO: \tmeasure area id  < %d>",areaB->_id);
+               Log->Write("INFO: \tmeasure area type  <"+areaB->_type+">");
+               _measurementAreas[areaB->_id]=areaB;
+          }
 
-            if ( xMethod_D->FirstChildElement("steadyState"))
-            {
-                _steadyStart =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
-                _steadyEnd =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("end"));
-                Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
-            }
 
-            if(xMethod_D->FirstChildElement("getProfile"))
-                if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true") {
-                    _isGetProfile = true;
-                    _scaleX =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
-                    _scaleY =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
-                    Log->Write("INFO: \tprofiles will be calculated" );
-                    Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX, _scaleY);
-                }
+          for(TiXmlNode* xMeasurementArea_L=xMainNode->FirstChild("measurementAreas")->FirstChild("area_L");
+                    xMeasurementArea_L; xMeasurementArea_L=xMeasurementArea_L->NextSibling("area_L"))
+          {
+               MeasurementArea_L* areaL = new MeasurementArea_L();
+               areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
+               areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
 
-            Log->Write("INFO: \tMethod D is selected" );
-        }
-    }
+               areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"))*M2CM;
+               areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"))*M2CM;
+               areaL->_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"))*M2CM;
+               areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"))*M2CM;
 
-    Log->Write("INFO: \tdone parsing ini");
-    return true;
+               _measurementAreas[areaL->_id]=areaL;
+               Log->Write("INFO: \tmeasure area id  <%d> with \ttype <%s>",areaL->_id,areaL->_type.c_str());
+               Log->Write("INFO: \treference line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX,areaL->_lineStartY,areaL->_lineEndX,areaL->_lineEndY);
+          }
+     }
+
+     //instantaneous velocity
+     TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
+     if(xVelocity) {
+          string UseXComponent = xVelocity->FirstChildElement("useXComponent")->GetText();
+          string UseYComponent = xVelocity->FirstChildElement("useYComponent")->GetText();
+          string HalfFrameNumberToUse = xVelocity->FirstChildElement("halfFrameNumberToUse")->GetText();
+
+          _delatTVInst = atof(HalfFrameNumberToUse.c_str());
+          if(UseXComponent == "true"&&UseYComponent == "false")
+          {
+               _vComponent = 'X';
+               Log->Write("INFO: \tonly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+          }
+          else if(UseXComponent == "false"&&UseYComponent == "true")
+          {
+               _vComponent = 'Y';
+               Log->Write("INFO: \tonly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+          }
+          else if(UseXComponent == "true"&&UseYComponent == "true")
+          {
+               _vComponent = 'B';  // both components
+               Log->Write("INFO: \tx and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+          }
+          else
+          {
+               Log->Write("INFO: \ttype of velocity is not selected, please check it !!! " );
+               return false;
+          }
+     }
+
+     // method A
+     TiXmlElement* xMethod_A=xMainNode->FirstChildElement("method_A");
+     if(xMethod_A)
+     {
+          if(string(xMethod_A->Attribute("enabled"))=="true")
+          {
+               _isMethodA = true;
+               Log->Write("INFO: \tMethod A is selected" );
+          }
+          _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
+          for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
+                    xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+          {
+               _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+          }
+          //_areaIDforMethodA = xmltoi(xMethod_A->FirstChildElement("measurementArea")->Attribute("id"));
+          Log->Write("INFO: \ttime interval used in Method A is < %d>",_timeIntervalA);
+     }
+     // method B
+     TiXmlElement* xMethod_B=xMainNode->FirstChildElement("method_B");
+     if(xMethod_B)
+
+          if(string(xMethod_B->Attribute("enabled"))=="true")
+          {
+               _isMethodB = true;
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_B")->FirstChildElement("measurementArea");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               {
+                    _areaIDforMethodB.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+               }
+               //_areaIDforMethodB = xmltoi(xMethod_B->FirstChildElement("measurementArea")->Attribute("id"));
+               Log->Write("INFO: \tMethod B is selected" );
+          }
+     // method C
+     TiXmlElement* xMethod_C=xMainNode->FirstChildElement("method_C");
+     if(xMethod_C)
+          if(string(xMethod_C->Attribute("enabled"))=="true")
+          {
+               _isMethodC = true;
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_C")->FirstChildElement("measurementArea");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               {
+                    _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+               }
+               Log->Write("INFO: \tMethod C is selected" );
+          }
+     // method D
+     TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
+     if(xMethod_D) {
+          if(string(xMethod_D->Attribute("enabled"))=="true")
+          {
+               _isMethodD = true;
+               _isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
+               if(_isOutputGraph)
+               {
+                    Log->Write("INFO: \tVoronoi graph is asked to output!" );
+               }
+               _isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurementArea");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               {
+                    _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+               }
+               //_areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
+
+               if ( xMethod_D->FirstChildElement("cutByCircle"))
+               {
+                    if ( string(xMethod_D->FirstChildElement("cutByCircle")->Attribute("enabled"))=="true")
+                    {
+                         _isCutByCircle=true;
+                         _cutRadius=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("radius"));
+                         _circleEdges=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("edges"));
+                         Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius);
+                         Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
+                    }
+               }
+
+               if ( xMethod_D->FirstChildElement("steadyState"))
+               {
+                    _steadyStart =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("start"));
+                    _steadyEnd =xmltof(xMethod_D->FirstChildElement("steadyState")->Attribute("end"));
+                    Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
+               }
+
+               if(xMethod_D->FirstChildElement("getProfile"))
+                    if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true") {
+                         _isGetProfile = true;
+                         _scaleX =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
+                         _scaleY =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
+                         Log->Write("INFO: \tprofiles will be calculated" );
+                         Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX, _scaleY);
+                    }
+
+               Log->Write("INFO: \tMethod D is selected" );
+          }
+     }
+
+     Log->Write("INFO: \tdone parsing ini");
+     return true;
 }
 
 
 const string& ArgumentParser::GetErrorLogFile() const
 {
-    return _errorLogFile;
+     return _errorLogFile;
 }
 
 int ArgumentParser::GetLog() const
 {
-    return _log;
+     return _log;
 }
 
 const string& ArgumentParser::GetGeometryFilename() const
 {
-    return _geometryFileName;
+     return _geometryFileName;
 }
 
 const FileFormat& ArgumentParser::GetFileFormat() const
 {
-	return _fileFormat;
+     return _fileFormat;
 }
 
 const string& ArgumentParser::GetTrajectoriesLocation() const
 {
-    return _trajectoriesLocation;
+     return _trajectoriesLocation;
 }
 
 const string& ArgumentParser::GetTrajectoriesFilename() const
 {
-    return _trajectoriesFilename;
+     return _trajectoriesFilename;
 }
 
 char	ArgumentParser::GetVComponent() const
 {
-    return _vComponent;
+     return _vComponent;
 }
 
 int ArgumentParser::GetDelatT_Vins() const
 {
-    return _delatTVInst;
+     return _delatTVInst;
 }
 
 
 bool ArgumentParser::GetIsMethodA() const
 {
-    return _isMethodA;
+     return _isMethodA;
 }
 
 int ArgumentParser::GetTimeIntervalA() const
 {
-    return _timeIntervalA;
+     return _timeIntervalA;
 }
 
 bool ArgumentParser::GetIsMethodB() const
 {
-    return _isMethodB;
+     return _isMethodB;
 }
 
 bool ArgumentParser::GetIsMethodC() const
 {
-    return _isMethodC;
+     return _isMethodC;
 }
 
 bool ArgumentParser::GetIsMethodD() const
 {
-    return _isMethodD;
+     return _isMethodD;
 }
 
 bool ArgumentParser::GetIsCutByCircle() const
 {
-    return _isCutByCircle;
+     return _isCutByCircle;
 }
 
 double ArgumentParser::GetCutRadius() const
 {
-	return _cutRadius;
+     return _cutRadius;
 }
 
 int ArgumentParser::GetCircleEdges() const
 {
-	return _circleEdges;
+     return _circleEdges;
 }
 bool ArgumentParser::GetIsOutputGraph() const
 {
-    return _isOutputGraph;
+     return _isOutputGraph;
 }
 
 bool ArgumentParser::GetIsIndividualFD() const
 {
-    return _isIndividualFD;
+     return _isIndividualFD;
 }
 
 bool ArgumentParser::GetIsGetProfile() const
 {
-    return _isGetProfile;
+     return _isGetProfile;
 }
 
 double ArgumentParser::GetSteadyStart() const
 {
-    return _steadyStart;
+     return _steadyStart;
 }
 
 double ArgumentParser::GetSteadyEnd() const
 {
-    return _steadyEnd;
+     return _steadyEnd;
 }
 
 
 float ArgumentParser::GetScaleX() const
 {
-    return _scaleX;
+     return _scaleX;
 }
 
 float ArgumentParser::GetScaleY() const
 {
-    return _scaleY;
+     return _scaleY;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodA() const
 {
-    return _areaIDforMethodA;
+     return _areaIDforMethodA;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodB() const
 {
-    return _areaIDforMethodB;
+     return _areaIDforMethodB;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodC() const
 {
-    return _areaIDforMethodC;
+     return _areaIDforMethodC;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodD() const
 {
-    return _areaIDforMethodD;
+     return _areaIDforMethodD;
 }
 
 MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
 {
-    if (_measurementAreas.count(id) == 0)
-        return NULL;
-    return _measurementAreas[id];
+     if (_measurementAreas.count(id) == 0)
+          return NULL;
+     return _measurementAreas[id];
 
 }
