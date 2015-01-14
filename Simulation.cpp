@@ -464,15 +464,18 @@ void Simulation::UpdateRoutesAndLocations()
 
 void Simulation::PrintStatistics()
 {
-     Log->Write("\nROOMS EGRESS TIME:");
+     Log->Write("\nRooms Egress Time:");
+     Log->Write("==================");
      Log->Write("id\tcaption\tegress time (s)");
 
      for(const auto& room:_building->GetAllRooms())
      {
+          if(room->GetCaption()!="outside")
           Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
      }
 
-     Log->Write("\nEXIT USAGE:");
+     Log->Write("\nUsage of Exits");
+     Log->Write("==========");
      for (const auto& itr : _building->GetAllTransitions()) {
           Transition* goal = itr.second;
           if (goal->IsExit()) {
@@ -482,4 +485,6 @@ void Simulation::PrintStatistics()
                          goal->GetLastPassingTime());
           }
      }
+
+     Log->Write("\n");
 }

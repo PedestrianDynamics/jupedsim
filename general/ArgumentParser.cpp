@@ -124,12 +124,12 @@ ArgumentParser::ArgumentParser()
      _hpcFlag = 0;
      _agentsParameters= std::map<int, AgentsParameters*>();
      p_routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
+     _showStatistics=false;
 }
 
 bool ArgumentParser::ParseArgs(int argc, char **argv)
 {
      //special case of the default configuration ini.xml
-
      if (argc == 1)
      {
           Log->Write(
@@ -303,7 +303,14 @@ bool ArgumentParser::ParseIniFile(string inifile)
           pLog = 2;
           Log->Write("INFO: \tlogfile <" + (pErrorLogFile) + ">");
      }
-
+     //display statistics
+     if (xMainNode->FirstChild("show_statistics"))
+     {
+          string value = xMainNode->FirstChild("show_statistics")->FirstChild()->Value();
+         if(value=="true")
+              _showStatistics=true;
+          Log->Write("INFO: \tShow statistics: %s",value.c_str());
+     }
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
      if (xTrajectories)
@@ -1108,6 +1115,10 @@ bool ArgumentParser::GetProfileFlag()
 int ArgumentParser::GetHPCFlag() const
 {
      return _hpcFlag;
+}
+bool ArgumentParser::ShowStatistics()const
+{
+     return _showStatistics;
 }
 
 bool ArgumentParser::ParseLinkedCells(const TiXmlNode &linkedCellNode)

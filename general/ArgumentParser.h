@@ -101,6 +101,7 @@ private:
      FileFormat pFormat;
      vector<pair<int, RoutingStrategy> > pRoutingStrategies;
      bool _profilingFlag;
+     bool _showStatistics;
      int _hpcFlag; //Flag fuer die HPC-Archtitektur (0=CPU, 1=GPU, 2=XeonPhi)
      std::map<int, AgentsParameters*> _agentsParameters;
 
@@ -207,6 +208,7 @@ public:
      const string& GetProjectRootDir() const;
      bool GetProfileFlag();
      int GetHPCFlag() const;
+     bool ShowStatistics()const;
 
      vector<pair<int, RoutingStrategy> > GetRoutingStrategy() const;
      const FileFormat& GetFileFormat() const;

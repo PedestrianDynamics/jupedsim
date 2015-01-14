@@ -57,7 +57,10 @@ int main(int argc, char **argv)
           time(&endtime);
 
           // some output
-          double execTime = difftime(endtime, starttime);
+          if(args->ShowStatistics())
+          {
+               sim.PrintStatistics();
+          }
 
           if (sim.GetPedsNumber())
           {
@@ -65,6 +68,7 @@ int main(int argc, char **argv)
                          sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
           }
 
+          double execTime = difftime(endtime, starttime);
           Log->Write("\nExec Time [s]   : %.2f", execTime);
           Log->Write("Evac Time [s]     : %d", evacTime);
           Log->Write("Realtime Factor   : %.2f X", evacTime / execTime);
@@ -72,7 +76,6 @@ int main(int argc, char **argv)
           Log->Write("Warnings          : %d", Log->GetWarnings());
           Log->Write("Errors            : %d", Log->GetErrors());
 
-          // sim.PrintStatistics();
           if (NULL == dynamic_cast<STDIOHandler*>(Log))
           {
                printf("\nExec Time [s]     : %4.2f\n", execTime);

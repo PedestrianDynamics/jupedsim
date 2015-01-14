@@ -73,7 +73,6 @@
 #define CBA_THRESHOLD 0.15
 #define OBSTRUCTION 4
 
-
 // Length of array
 #define CLENGTH 1000
 
