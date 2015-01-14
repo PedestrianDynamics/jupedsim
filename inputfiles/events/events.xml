@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<JPScore>
+<JPScore project="JPS-Project" version="0.5" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="../../xsd/jps_events.xsd">
 	<events>
-		<event time="2" type="door" state="close" id="0" caption="exit" />
+		<event time="2" type="door" state="close" id="0"/>
 		<event time="10" type="door" state="close" id="1" caption="roomdoor" />
 		<event time="15" type="door" state="open" id="0" caption="exit" />
 	</events>

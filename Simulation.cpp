@@ -245,8 +245,8 @@ bool Simulation::InitArgs(const ArgumentParser& args)
 
      //read the events
      _em = new EventManager(_building.get());
-     _em->readEventsXml();
-     _em->listEvents();
+     _em->ReadEventsXml();
+     _em->ListEvents();
 
      //which hpc-architecture?
      _hpc = args.GetHPCFlag();

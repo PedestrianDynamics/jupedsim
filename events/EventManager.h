@@ -66,14 +66,14 @@ public:
      //Dateien einlesen
      void SetProjectFilename(const std::string &filename) ;
      void SetProjectRootDir(const std::string &filename);
-     void readEventsXml();
-     void listEvents();
-     void readEventsTxt(double time);
+     void ReadEventsXml();
+     void ListEvents();
+     void ReadEventsTxt(double time);
      //Update
      void Update_Events(double time, double d);
      //Eventhandling
-     void closeDoor(int id);
-     void openDoor(int id);
-     void changeRouting(int id, std::string state);
-     void getTheEvent(char* c);
+     void CloseDoor(int id);
+     void OpenDoor(int id);
+     void ChangeRouting(int id, const std::string& state);
+     void GetEvent(char* c);
 };
