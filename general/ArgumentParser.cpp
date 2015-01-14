@@ -68,8 +68,6 @@ void ArgumentParser::Usage()
     		"	[-d/--moving direction <double>]			p1.x p1.y p2.x p2.y \n"
     		"	[-l/--line <double>]								p1.x p1.y p2.x p2.y \n"
 
-
-
     fprintf(stderr, "-c --> set cutbycircle=true (false)\n");
     fprintf(stderr, "-a --> set fieldAnalysis=true (false)\n");
     fprintf(stderr, "-g --> set IsOutputGraph=true (false)\n");
@@ -94,57 +92,6 @@ void ArgumentParser::Usage()
     fprintf(stderr, "-k --> set use_Vx true (false)\n");
     fprintf(stderr, "-p fps (10)\n");
     fprintf(stderr, "-G cor_x cor_y length width (corridor)\n");
-
-
-    		"  [-n/--number <filepath>]         file with the pedestrian distribution in room(./Inputfiles/persons.xml)\n"
-    		"  [-t/--tmax <double>]             maximal simulation time (500)\n"
-    		"  [-d/--dt <double>]               time step (0.001)\n"
-    		"  [--fps <double>]                 framerate (1.0 fps)\n"
-    		"  [-s/--solver <int>]              type of solver, if needed (euler)\n"
-    		"                                       1: euler\n"
-    		"                                       2: verlet\n"
-    		"                                       3: leapfrog\n"
-    		"  [-g/--geometry <string>]         path to the geometry file (./Inputfiles/geo.xml)\n"
-    		"  [-e/--exitstrategy <int>]        strategy how the direction to the exit is computed (3).\n"
-    		"                                       1: Middlepoint of the exit line\n"
-    		"                                       2: Shortest distance point of the exit line\n"
-    		"                                       3: Shortest distance point of the exit line, but exit is 20 cm  shorter\n"
-    		"  [-l/--linkedcells [<double>]]    use of linked-cells with optional cell size (default cellsize = 2.2m)\n"
-    		"  [-R/--routing <int> [<string>]]             routing strategy (1):\n"
-    		"                                       1: local shortest path\n"
-    		"                                       2: global shortest path\n"
-    		"                                       3: quickest path\n"
-    		"  [-v/--v0mu <double>]             mu for normal distribution of v0, desired velocity (1.24)\n"
-    		"  [-V/--v0sigma <double>]          sigma for normal distribution of v0, desired velocity (0.26)\n"
-    		"  [-a/--ataumu <double>]           mu for normal distribution of a_tau, factor for velocity 1st axis (0.53)\n"
-    		"  [-A/--atausigma <double>]        sigma for normal distribution of a_tau, factor for velocity 1st axis (0.001)\n"
-    		"  [-z/--aminmu <double>]           mu for normal distribution of a_min, minimal size 1st axis (0.18)\n"
-    		"  [-Z/--aminsigma <double>]        sigma for normal distribution of a_min, minimal size 1st axis (0.001)\n"
-    		"  [-b/--bmaxmu <double>]           mu for normal distribution of b_max, maximal size 2nd axis (0.25)\n"
-    		"  [-B/--bmaxsigma <double>]        sigma for normal distribution of b_max, maximal size 2nd axis (0.001)\n"
-    		"  [-y/--bminmu <double>]           mu for normal distribution of b_min, minimal size 2nd axis (0.2)\n"
-    		"  [-Y/--bminsigma <double>]        sigma for normal distribution of b_min, minimal size 2nd axis (0.001)\n"
-    		"  [-c/--taumu <double>]            mu for normal distribution of tau, reaction time (0.5)\n"
-    		"  [-C/--tausigma <double>]         sigma for normal distribution of tau, reaction time (0.001)\n"
-    		"  [-x/--nuped <double>]            strength of forces between pedestrians, factor (0.3)\n"
-    		"  [-X/--nuwall <double>]           strength of wall forces, factor (0.2)\n"
-    		"  [-i/--intpwidthped <double>]     interpolation width of pedestrian forces (0.1)\n"
-    		"  [-I/--intpwidthwall <double>]    interpolation width of wall forces (0.1)\n"
-    		"  [-m/--maxfped <double>]          interpolation parameter of pedestrian forces (3)\n"
-    		"  [-M/--maxfwall <double>]         interpolation parameter of wall forces (3)\n"
-    		"  [-f/--disteffmaxped  <double>]   maximal effective distance to pedestrians (2)\n"
-    		"  [-F/--disteffmaxwall <double>]   maximal effective distance to walls (2)\n"
-    		"  [--pathway <filepath>]           file for saving pedestrians path\n"
-    		"  [-L/--log <int>]                 log output (0):\n"
-    		"                                       0: no output\n"
-    		"                                       1: log output to stdout\n"
-    		"                                       2: log output to file ./outputfiles/log.txt\n"
-    		"  [-T/--output-file <string>]      file to write the trajectories ( no trajectories are written if omited0):\n"
-    		"  [-P/--streaming-port <int>]      stream the ouput to the specified address/port\n"
-    		"  [-O/--streaming-ip <string>]     stream the ouput to the specified address/port\n"
-    		"  [-h/--help]                      this manual output\n"
-    		"\n");
-
 
       */
      exit(EXIT_SUCCESS);

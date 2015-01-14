@@ -318,7 +318,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      if(_DoesUseMethodD) //method_D
      {
           Method_D method_D;
-          method_D.DoesCutByCircle(_cutByCircle);
+          method_D.SetCutByCircle(_cutByCircle);
           method_D.SetCuttingCircleRadius(_cutRadius);
           method_D.SetCuttingCircleEdges(_circleEdges);
           method_D.SetGeometryPolygon(_geoPoly);
@@ -328,9 +328,9 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           method_D.SetGeometryMaxY(_highVertexY);
           method_D.SetScalex(_scaleX);
           method_D.SetScaley(_scaleX);
-          method_D.DoesOutputVoronoiCellData(_outputGraph);
-          method_D.DoseCalculateIndividualFD(_calcIndividualFD);
-          method_D.DoseCalculateProfiles(_getProfile);
+          method_D.SetOutputVoronoiCellData(_outputGraph);
+          method_D.SetCalculateIndividualFD(_calcIndividualFD);
+          method_D.SetCalculateProfiles(_getProfile);
           for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
           {
                method_D.SetMeasurementArea(_areaForMethod_D[i]);

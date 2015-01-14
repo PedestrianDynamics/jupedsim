@@ -16,23 +16,23 @@ using namespace std;
 class Method_C
 {
 public:
-	Method_C();
-	virtual ~Method_C();
-	bool Process (const PedData& peddata);
-    void SetMeasurementArea (MeasurementArea_B* area);
+     Method_C();
+     virtual ~Method_C();
+     bool Process (const PedData& peddata);
+     void SetMeasurementArea (MeasurementArea_B* area);
 
 private:
-	map<int , vector<int> > _peds_t;
-	int _minFrame;
-	string _measureAreaId;
-	MeasurementArea_B* _areaForMethod_C;
-    string _trajName;
-    string _projectRootDir;
-    FILE *_fClassicRhoV;
-	void OpenFileMethodC();
-	void OutputClassicalResults(int frmNr, int numPedsInFrame, const vector<double>& XInFrame,const vector<double>& YInFrame, const vector<double>& VInFrame) const;
-	double GetClassicalVelocity(const vector<double>& xs, const vector<double>& ys,  const vector<double>& VInFrame, int pednum) const;
-	double GetClassicalDensity(const vector<double>& xs, const vector<double>& ys, int pednum, polygon_2d measurearea) const;
+     map<int , vector<int> > _peds_t;
+     int _minFrame;
+     string _measureAreaId;
+     MeasurementArea_B* _areaForMethod_C;
+     string _trajName;
+     string _projectRootDir;
+     FILE *_fClassicRhoV;
+     void OpenFileMethodC();
+     void OutputClassicalResults(int frmNr, int numPedsInFrame, const vector<double>& XInFrame,const vector<double>& YInFrame, const vector<double>& VInFrame) const;
+     double GetClassicalVelocity(const vector<double>& xs, const vector<double>& ys,  const vector<double>& VInFrame, int pednum) const;
+     double GetClassicalDensity(const vector<double>& xs, const vector<double>& ys, int pednum, polygon_2d measurearea) const;
 
 };
 

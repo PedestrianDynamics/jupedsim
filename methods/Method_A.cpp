@@ -12,14 +12,14 @@
 
 Method_A::Method_A()
 {
-	_classicFlow = 0;
-	_vDeltaT = 0;
-	_xCor = NULL;
-	_yCor = NULL;
-	_firstFrame = NULL;
-	_passLine = NULL;
-	_deltaT = 100;
-	_areaForMethod_A = NULL;
+     _classicFlow = 0;
+     _vDeltaT = 0;
+     _xCor = NULL;
+     _yCor = NULL;
+     _firstFrame = NULL;
+     _passLine = NULL;
+     _deltaT = 100;
+     _areaForMethod_A = NULL;
 }
 
 Method_A::~Method_A()
@@ -68,34 +68,34 @@ bool Method_A::Process (const PedData& peddata)
 
 void Method_A::WriteFile_N_t(string data)
 {
-	string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
-	ofstream file(fN_t);
-	file<<data;
+     string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+     ofstream file(fN_t);
+     file<<data;
 }
 
 void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame)
 {
-	for(unsigned int i=0; i<ids.size();i++)
-	{
-		int id = ids[i];
-		bool IspassLine=false;
-		if(frame >_firstFrame[id]&&!_passLine[id])
-		{
-			IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
-					_areaForMethod_A->_lineStartY,
-					_areaForMethod_A->_lineEndX,
-					_areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
-					_yCor[id][frame - 1], _xCor[id][frame], _yCor[id][frame]);
-		}
-		if(IspassLine==true)
-		{
-			_passLine[id] = true;
-			_classicFlow++;
-			_vDeltaT+=VInFrame[i];
-		}
-	}
-	_accumPedsPassLine.push_back(_classicFlow);
-	_accumVPassLine.push_back(_vDeltaT);
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          bool IspassLine=false;
+          if(frame >_firstFrame[id]&&!_passLine[id])
+          {
+               IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+                         _areaForMethod_A->_lineStartY,
+                         _areaForMethod_A->_lineEndX,
+                         _areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
+                         _yCor[id][frame - 1], _xCor[id][frame], _yCor[id][frame]);
+          }
+          if(IspassLine==true)
+          {
+               _passLine[id] = true;
+               _classicFlow++;
+               _vDeltaT+=VInFrame[i];
+          }
+     }
+     _accumPedsPassLine.push_back(_classicFlow);
+     _accumVPassLine.push_back(_vDeltaT);
 }
 
 bool Method_A::IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y)
@@ -125,51 +125,51 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
      int TotalPeds=AccumPeds[TotalTime-1];  //the total pedestrians in the data file
      if(TotalPeds>0)
      {
-		 int firstPassT=-1;  // the first time that there are pedestrians pass the line
-		 int *pedspassT=new int[TotalPeds+1]; // the time for certain pedestrian passing the line
-		 for(int i=0; i<=TotalPeds; i++)
-		 {
-			  pedspassT[i]=-1;
-		 }
+          int firstPassT=-1;  // the first time that there are pedestrians pass the line
+          int *pedspassT=new int[TotalPeds+1]; // the time for certain pedestrian passing the line
+          for(int i=0; i<=TotalPeds; i++)
+          {
+               pedspassT[i]=-1;
+          }
 
-		 for(int ix=0; ix<TotalTime; ix++)
-		 {
-			  if(AccumPeds[ix]>0 && firstPassT<0)
-			  {
-				   firstPassT=ix;
-			  }
-			  if(pedspassT[AccumPeds[ix]]<0)
-			  {
-				   pedspassT[AccumPeds[ix]]=ix;
-			  }
-		 }
-		 for(int i=firstPassT+_deltaT; i<TotalTime; i+=_deltaT) {
-			 int N1 = AccumPeds[i-_deltaT];  // the total number of pedestrians pass the line at this time
-			 int N2 = AccumPeds[i];
-			 int t_N1 = pedspassT[N1];
-			 int t_N2 = pedspassT[N2];
-			 if(N1!=N2)
-			 {
-				 double flow_rate=fps*(N2-N1)*1.00/(t_N2-t_N1);
-				 double MeanV=(AccumVelocity[i]-AccumVelocity[i-_deltaT])/(AccumPeds[i]-AccumPeds[i-_deltaT]);
-				 fprintf(fFD_FlowVelocity,"%.3f\t%.3f\n",flow_rate,MeanV);
-			 }
-		 }
-		 fclose(fFD_FlowVelocity);
-		 delete []pedspassT;
+          for(int ix=0; ix<TotalTime; ix++)
+          {
+               if(AccumPeds[ix]>0 && firstPassT<0)
+               {
+                    firstPassT=ix;
+               }
+               if(pedspassT[AccumPeds[ix]]<0)
+               {
+                    pedspassT[AccumPeds[ix]]=ix;
+               }
+          }
+          for(int i=firstPassT+_deltaT; i<TotalTime; i+=_deltaT) {
+               int N1 = AccumPeds[i-_deltaT];  // the total number of pedestrians pass the line at this time
+               int N2 = AccumPeds[i];
+               int t_N1 = pedspassT[N1];
+               int t_N2 = pedspassT[N2];
+               if(N1!=N2)
+               {
+                    double flow_rate=fps*(N2-N1)*1.00/(t_N2-t_N1);
+                    double MeanV=(AccumVelocity[i]-AccumVelocity[i-_deltaT])/(AccumPeds[i]-AccumPeds[i-_deltaT]);
+                    fprintf(fFD_FlowVelocity,"%.3f\t%.3f\n",flow_rate,MeanV);
+               }
+          }
+          fclose(fFD_FlowVelocity);
+          delete []pedspassT;
      }
      else
      {
-    	 Log->Write("INFO:\tNo person passing the reference line given by Method A!\n");
+          Log->Write("INFO:\tNo person passing the reference line given by Method A!\n");
      }
 }
 
 void Method_A::SetMeasurementArea (MeasurementArea_L* area)
 {
-	_areaForMethod_A = area;
+     _areaForMethod_A = area;
 }
 
 void Method_A::SetTimeInterval(const int& deltaT)
 {
-	_deltaT = deltaT;
+     _deltaT = deltaT;
 }
