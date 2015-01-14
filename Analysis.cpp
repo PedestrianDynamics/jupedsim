@@ -252,96 +252,101 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile)
 
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
+     PedData data;
+     if(data.ReadData(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent)==false)
+     {
+          Log->Write("ERROR:\tCould not parse the file");
+          return -1;
+     }
 
-	PedData data(_projectRootDir, path, filename, _trajFormat, _deltaF, _vComponent);
 
-	if(_DoesUseMethodA) //Method A
-	{
-	    Method_A method_A ;
-	    for(unsigned int i=0; i<_areaForMethod_A.size(); i++)
-	    {
-			method_A.SetMeasurementArea(_areaForMethod_A[i]);
-			method_A.SetTimeInterval(_deltaT);
-			bool result_A=method_A.Process(data);
-			if(result_A)
-			{
-				Log->Write("INFO:\tSuccess with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
-			}
-			else
-			{
-				Log->Write("INFO:\tFailed with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
-			}
-	    }
-	}
+     if(_DoesUseMethodA) //Method A
+     {
+          Method_A method_A ;
+          for(unsigned int i=0; i<_areaForMethod_A.size(); i++)
+          {
+               method_A.SetMeasurementArea(_areaForMethod_A[i]);
+               method_A.SetTimeInterval(_deltaT);
+               bool result_A=method_A.Process(data);
+               if(result_A)
+               {
+                    Log->Write("INFO:\tSuccess with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
+               }
+               else
+               {
+                    Log->Write("INFO:\tFailed with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
+               }
+          }
+     }
 
-	if(_DoesUseMethodB) //Method_B
-	{
-		Method_B method_B;
-		for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
-		{
-			method_B.SetMeasurementArea(_areaForMethod_B[i]);
-			bool result_B = method_B.Process(data);
-			if(result_B)
-			{
-				Log->Write("INFO:\tSuccess with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
-			}
-			else
-			{
-				Log->Write("INFO:\tFailed with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
-			}
-		}
-	}
+     if(_DoesUseMethodB) //Method_B
+     {
+          Method_B method_B;
+          for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
+          {
+               method_B.SetMeasurementArea(_areaForMethod_B[i]);
+               bool result_B = method_B.Process(data);
+               if(result_B)
+               {
+                    Log->Write("INFO:\tSuccess with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
+               }
+               else
+               {
+                    Log->Write("INFO:\tFailed with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
+               }
+          }
+     }
 
-	if(_DoesUseMethodC) //Method C
-	{
-	    Method_C method_C;
-	    for(unsigned int i=0; i<_areaForMethod_C.size(); i++)
-	    {
-	    	method_C.SetMeasurementArea(_areaForMethod_C[i]);
-	    	bool result_C =method_C.Process(data);
-	    	if(result_C)
-	    	{
-	    		Log->Write("INFO:\tSuccess with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
-	    	}
-	    	else
-	    	{
-	    		Log->Write("INFO:\tFailed with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
-	    	}
-	    }
-	}
+     if(_DoesUseMethodC) //Method C
+     {
+          Method_C method_C;
+          for(unsigned int i=0; i<_areaForMethod_C.size(); i++)
+          {
+               method_C.SetMeasurementArea(_areaForMethod_C[i]);
+               bool result_C =method_C.Process(data);
+               if(result_C)
+               {
+                    Log->Write("INFO:\tSuccess with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
+               }
+               else
+               {
+                    Log->Write("INFO:\tFailed with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
+               }
+          }
+     }
 
-	if(_DoesUseMethodD) //method_D
-	{
-		Method_D method_D;
-		method_D.DoesCutByCircle(_cutByCircle);
-		method_D.SetCuttingCircleRadius(_cutRadius);
-		method_D.SetCuttingCircleEdges(_circleEdges);
-		method_D.SetGeometryPolygon(_geoPoly);
-		method_D.SetGeometryMinX(_lowVertexX);
-		method_D.SetGeometryMinY(_lowVertexY);
-		method_D.SetGeometryMaxX(_highVertexX);
-		method_D.SetGeometryMaxY(_highVertexY);
-		method_D.SetScalex(_scaleX);
-		method_D.SetScaley(_scaleX);
-		method_D.DoesOutputVoronoiCellData(_outputGraph);
-		method_D.DoseCalculateIndividualFD(_calcIndividualFD);
-		method_D.DoseCalculateProfiles(_getProfile);
-		for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
-		{
-			method_D.SetMeasurementArea(_areaForMethod_D[i]);
-			bool result_D = method_D.Process(data);
-			if(result_D)
-			{
-				Log->Write("INFO:\tSuccess with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
-			}
-			else
-			{
-				Log->Write("INFO:\tFailed with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
-			}
-		}
-	}
+     if(_DoesUseMethodD) //method_D
+     {
+          Method_D method_D;
+          method_D.DoesCutByCircle(_cutByCircle);
+          method_D.SetCuttingCircleRadius(_cutRadius);
+          method_D.SetCuttingCircleEdges(_circleEdges);
+          method_D.SetGeometryPolygon(_geoPoly);
+          method_D.SetGeometryMinX(_lowVertexX);
+          method_D.SetGeometryMinY(_lowVertexY);
+          method_D.SetGeometryMaxX(_highVertexX);
+          method_D.SetGeometryMaxY(_highVertexY);
+          method_D.SetScalex(_scaleX);
+          method_D.SetScaley(_scaleX);
+          method_D.DoesOutputVoronoiCellData(_outputGraph);
+          method_D.DoseCalculateIndividualFD(_calcIndividualFD);
+          method_D.DoseCalculateProfiles(_getProfile);
+          for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
+          {
+               method_D.SetMeasurementArea(_areaForMethod_D[i]);
+               bool result_D = method_D.Process(data);
+               if(result_D)
+               {
+                    Log->Write("INFO:\tSuccess with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
+               }
+               else
+               {
+                    Log->Write("INFO:\tFailed with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
+               }
+          }
+     }
 
-	return 0;
+     return 0;
 }
 
 FILE* Analysis::CreateFile(const string& filename)

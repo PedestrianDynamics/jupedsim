@@ -7,11 +7,8 @@
 
 #include "PedData.h"
 
-PedData::PedData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
+PedData::PedData()
 {
-    _minID = INT_MAX;
-    _minFrame = INT_MAX;
-	ReadData(projectRootDir, path, filename, trajformat, deltaF, vComponent);
 }
 
 PedData::~PedData()
@@ -21,13 +18,18 @@ PedData::~PedData()
 
 bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
 {
-	 _deltaF = deltaF;
-	 _vComponent = vComponent;
-	 _projectRootDir = projectRootDir;
-	 _trajName = filename;
-	 string fullTrajectoriesPathName= _projectRootDir+"./"+path+"./"+_trajName;
-	 Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
-     if(trajformat == FORMAT_XML_PLAIN) // read traje
+     _minID = INT_MAX;
+     _minFrame = INT_MAX;
+     _deltaF = deltaF;
+     _vComponent = vComponent;
+     _projectRootDir = projectRootDir;
+     _trajName = filename;
+     //string fullTrajectoriesPathName= _projectRootDir+"./"+path+"./"+_trajName;
+     string fullTrajectoriesPathName= path+"./"+_trajName;
+     Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
+
+     bool result=true;
+     if(trajformat == FORMAT_XML_PLAIN)
      {
           TiXmlDocument docGeo(fullTrajectoriesPathName);
           if (!docGeo.LoadFile()) {
@@ -36,29 +38,29 @@ bool PedData::ReadData(const string& projectRootDir, const string& path, const s
                return false;
           }
           TiXmlElement* xRootNode = docGeo.RootElement();
-          InitializeVariables(xRootNode);	//initialize some global variables
+          result=InitializeVariables(xRootNode);	//initialize some global variables
      }
 
      else if(trajformat == FORMAT_PLAIN)
      {
-    	 InitializeVariables();
+          result=InitializeVariables();
      }
-     return true;
+     return result;
 }
 
-void PedData::InitializeVariables()
+bool PedData::InitializeVariables()
 {
      vector<double> xs;
      vector<double> ys;
-	 vector<int> _IdsTXT;   // the Id data from txt format trajectory data
-	 vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
-	 string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
+     vector<int> _IdsTXT;   // the Id data from txt format trajectory data
+     vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
+     //string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
      ifstream  fdata;
-     fdata.open(fullTrajectoriesPathName.c_str());
+     fdata.open(_trajName.c_str());
      if (fdata.is_open() == false)
      {
-          Log->Write("ERROR: \t could not parse the trajectories file <%s>",fullTrajectoriesPathName.c_str());
-          exit(EXIT_FAILURE);
+          Log->Write("ERROR: \t could not parse the trajectories file <%s>",_trajName.c_str());
+          return false;
      }
      else
      {
@@ -88,7 +90,7 @@ void PedData::InitializeVariables()
                     if(strs.size() <4)
                     {
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
-                         exit(EXIT_FAILURE);
+                         return false;
                     }
 
                     _IdsTXT.push_back(atoi(strs[0].c_str()));
@@ -151,18 +153,19 @@ void PedData::InitializeVariables()
           _peds_t[t].push_back(id);
      }
 
+     return true;
 }
 
 // initialize the global variables variables
-void PedData::InitializeVariables(TiXmlElement* xRootNode)
+bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 {
      if( ! xRootNode ) {
           Log->Write("ERROR:\tRoot element does not exist");
-          exit(EXIT_FAILURE);
+          return false;
      }
      if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
           Log->Write("ERROR:\tRoot element value is not 'geometry'.");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      //counting the number of frames
@@ -194,7 +197,7 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
      TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
      if (!xFramesNode) {
           Log->Write("ERROR: \tThe geometry should have at least one frame");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      // obtaining the minimum id and minimum frame
@@ -243,6 +246,7 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
           }
           frameNr++;
      }
+     return true;
 }
 
 vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids) const

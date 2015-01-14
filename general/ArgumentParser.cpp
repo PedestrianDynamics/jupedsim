@@ -174,7 +174,7 @@ ArgumentParser::ArgumentParser()
     _log=1; //no output wanted
     _trajectoriesLocation="./";
     _trajectoriesFilename="";
-    _projectRootDir="";
+    _projectRootDir="./";
     _fileFormat=FORMAT_XML_PLAIN;
     _cutRadius =1.0;
     _circleEdges=6;
@@ -245,7 +245,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
 	//extract and set the project root dir
 	size_t found = inifile.find_last_of("/\\");
 	if (found != string::npos)
-		_projectRootDir = inifile.substr(0, found) + "./";
+		_projectRootDir = inifile.substr(0, found) + "/";
 
 
 	TiXmlDocument doc(inifile);
@@ -311,6 +311,8 @@ bool ArgumentParser::ParseIniFile(string inifile)
 		if (xTrajectories->FirstChildElement("path"))
 		{
 			_trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
+			if(_trajectoriesLocation.empty())
+			     _trajectoriesLocation="./";
 
 			// in the case no file was specified, collect all xml files in the specified directory
 			if(_trajectoriesFiles.empty()) {
@@ -325,7 +327,8 @@ bool ArgumentParser::ParseIniFile(string inifile)
 						//if (filename.find(".xml")!=std::string::npos)
 						if (filename.find(fmt)!=std::string::npos)
 						{
-							_trajectoriesFiles.push_back(_projectRootDir+filename);
+							//_trajectoriesFiles.push_back(_projectRootDir+filename);
+                                   _trajectoriesFiles.push_back(filename);
 							Log->Write("INFO: \tInput trajectory file  <"+ (filename)+">");
 						}
 					}

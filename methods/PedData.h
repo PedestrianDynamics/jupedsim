@@ -25,7 +25,7 @@ extern OutputHandler* Log;
 class PedData
 {
 public:
-     PedData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
+     PedData();
      virtual ~PedData();
      int GetMinFrame() const;
      int GetMinID() const;
@@ -43,33 +43,34 @@ public:
      vector<double> GetXInFrame(int frame, const vector<int>& ids) const;
      vector<double> GetYInFrame(int frame, const vector<int>& ids) const;
      vector<double> GetVInFrame(int frame, const vector<int>& ids) const;
+     bool ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
+
 
 private:
-     bool ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
-     void InitializeVariables();
-     void InitializeVariables(TiXmlElement* xRootNode);
+     bool InitializeVariables();
+     bool InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
      double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
 
 
 private:
 
-     string _trajName;
-     string _projectRootDir;
-     int _minFrame;
-     int _minID;
-     int _numFrames;  // total number of frames
-     int _numPeds; // total number of pedestrians
-     int _fps;
+     string _trajName="";
+     string _projectRootDir="";
+     int _minFrame=0;
+     int _minID=1;
+     int _numFrames=0;  // total number of frames
+     int _numPeds=0; // total number of pedestrians
+     int _fps=16;
      map<int , vector<int>> _peds_t;
 
-     int _deltaF;
-     char _vComponent;
+     int _deltaF=5;
+     char _vComponent='X';
 
-	 int *_firstFrame;   // Record the first frame of each pedestrian
-	 int *_lastFrame;    // Record the last frame of each pedestrian
-	 double **_xCor;
-	 double **_yCor;
+     int *_firstFrame=NULL;   // Record the first frame of each pedestrian
+     int *_lastFrame=NULL;    // Record the last frame of each pedestrian
+     double **_xCor=NULL;
+     double **_yCor=NULL;
 
 };
 
