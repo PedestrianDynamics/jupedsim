@@ -28,19 +28,14 @@ class Method_A
 public:
      Method_A();
      virtual ~Method_A();
-
-     //void SetTrajectoryFile(const std::string& file);
-     void SetMeasurementArea (const MeasurementArea_L& area);
-     void SetMeasurementAreaId (const int& id);
+     void SetMeasurementArea (MeasurementArea_L* area);
      void SetTimeInterval(const int& deltaT);
-     //void SetOutputFileName (const std::string& file);
-
      bool Process (const PedData& peddata);
-private:
 
+private:
      string _trajName;
      string _measureAreaId;
-     MeasurementArea_L _areaForMethod_A;
+     MeasurementArea_L* _areaForMethod_A;
      string _projectRootDir;
 
      vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
@@ -56,24 +51,24 @@ private:
      double _vDeltaT;    // define this is to measure cumulative velocity each pedestrian pass a measure line each time step to calculate the <v>delat T=sum<vi>/N
      int _deltaT;
      /**
-           * Calculate the Flow rate during a certain time interval DeltaT and the mean velocity passing a line.
-           * Note: here the time interval in calculating the flow rate is modified.
-           * it is the actual time between the first person and last person
-           * passing the line in DeltaT.
-           *
-           * @param DeltaT
-           * @param fps
-           * @param AccumPeds
-           * @param AccumVelocity
-           * @param ofile
-           */
-     	  void OpenFile_N_t(FILE *& file);
+      * Calculate the Flow rate during a certain time interval DeltaT and the mean velocity passing a line.
+      * Note: here the time interval in calculating the flow rate is modified.
+      * it is the actual time between the first person and last person
+      * passing the line in DeltaT.
+      *
+      * @param DeltaT
+      * @param fps
+      * @param AccumPeds
+      * @param AccumVelocity
+      * @param ofile
+      */
+     void WriteFile_N_t(string data);
 
-          void FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const std::vector<double>& AccumVelocity);
+     void FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const std::vector<double>& AccumVelocity);
 
-          bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
+     bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 
-          void GetAccumFlowVelocity(int frame, const vector<int>& ids, double* VInFrame);
+     void GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame);
 };
 
 #endif /* METHOD_A_H_ */

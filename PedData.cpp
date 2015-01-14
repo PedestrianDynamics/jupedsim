@@ -7,11 +7,11 @@
 
 #include <PedData.h>
 
-PedData::PedData(const string& projectRootDir, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
+PedData::PedData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
 {
     _minID = INT_MAX;
     _minFrame = INT_MAX;
-	ReadData(projectRootDir, filename, trajformat, deltaF, vComponent);
+	ReadData(projectRootDir, path, filename, trajformat, deltaF, vComponent);
 }
 
 PedData::~PedData()
@@ -19,13 +19,13 @@ PedData::~PedData()
 
 }
 
-bool PedData::ReadData(const string& projectRootDir, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
+bool PedData::ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& trajformat, int deltaF, char vComponent)
 {
 	 _deltaF = deltaF;
 	 _vComponent = vComponent;
 	 _projectRootDir = projectRootDir;
 	 _trajName = filename;
-	 string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
+	 string fullTrajectoriesPathName= _projectRootDir+"./"+path+"./"+_trajName;
 	 Log->Write("INFO:\tthe name of the trajectory is: <%s>",_trajName.c_str());
      if(trajformat == FORMAT_XML_PLAIN) // read traje
      {
@@ -232,10 +232,12 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
                _yCor[ID][frameNr] =  y*M2CM;
-               if(frameNr < _firstFrame[ID]) {
+               if(frameNr < _firstFrame[ID])
+               {
                     _firstFrame[ID] = frameNr;
                }
-               if(frameNr > _lastFrame[ID]) {
+               if(frameNr > _lastFrame[ID])
+               {
                     _lastFrame[ID] = frameNr;
                }
           }
@@ -243,22 +245,53 @@ void PedData::InitializeVariables(TiXmlElement* xRootNode)
      }
 }
 
-void PedData::GetPedsParametersInFrame(int frame, const vector<int>& ids, int* IdInFrame, double* XInFrame,double* YInFrame,double* VInFrame) const
+vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids) const
 {
-
+	vector<double> VInFrame;
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
-          XInFrame[i] = _xCor[id][frame];
-          YInFrame[i] = _yCor[id][frame];
           int Tpast = frame - _deltaF;
           int Tfuture = frame + _deltaF;
-          VInFrame[i] = GetVinFrame(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
-          IdInFrame[i] = id+_minID;
+          double v = GetInstantaneousVelocity(frame, Tpast, Tfuture, id, _firstFrame, _lastFrame, _xCor, _yCor);
+          VInFrame.push_back(v);
      }
+     return VInFrame;
 }
 
-double PedData::GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
+vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
+{
+	vector<double> XInFrame;
+	for(int id:ids)
+	{
+		XInFrame.push_back(_xCor[id][frame]);
+	}
+     return XInFrame;
+}
+
+vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
+{
+	vector<double> YInFrame;
+     for(unsigned int i=0; i<ids.size();i++)
+     {
+          int id = ids[i];
+          YInFrame.push_back(_yCor[id][frame]);
+     }
+     return YInFrame;
+}
+
+vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
+{
+	vector<int> IdInFrame;
+     for(int id:ids)
+     {
+    	 id = id +_minID;
+    	 IdInFrame.push_back(id);
+     }
+     return IdInFrame;
+}
+
+double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
 {
 
      double v=0.0;

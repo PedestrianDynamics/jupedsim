@@ -25,7 +25,7 @@ extern OutputHandler* Log;
 class PedData
 {
 public:
-     PedData(const string& projectRootDir, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
+     PedData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
      virtual ~PedData();
      int GetMinFrame() const;
      int GetMinID() const;
@@ -34,19 +34,22 @@ public:
      int GetFps() const;
      string GetTrajName() const;
      string GetProjectRootDir() const;
-     void GetPedsParametersInFrame(int frame, const vector<int>& ids, int* IdInFrame, double* XInFrame,double* YInFrame,double* VInFrame) const;
      map<int , vector<int>> GetPedsFrame() const;
      double** GetXCor() const;
      double** GetYCor() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
+     vector<int> GetIdInFrame(const vector<int>& ids) const;
+     vector<double> GetXInFrame(int frame, const vector<int>& ids) const;
+     vector<double> GetYInFrame(int frame, const vector<int>& ids) const;
+     vector<double> GetVInFrame(int frame, const vector<int>& ids) const;
 
 private:
-     bool ReadData(const string& projectRootDir, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
+     bool ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
      void InitializeVariables();
      void InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
-     double GetVinFrame(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
+     double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
 
 
 private:
@@ -60,10 +63,6 @@ private:
      int _fps;
      map<int , vector<int>> _peds_t;
 
-     int *IdInFrame;     // save the ped ID in the geometry in this frame, which is the same order with VInFrame and only used for outputting individual density and velocity.
-     double *XInFrame;   // save the X coordinates of pedestrian in the geometry in this frame
-     double *YInFrame;   // save the Y coordinates of pedestrian in the geometry in this frame
-     double *VInFrame;   // save the instantaneous velocity of pedestrians in the geometry in this frame
      int _deltaF;
      char _vComponent;
 

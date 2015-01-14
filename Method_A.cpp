@@ -19,6 +19,7 @@ Method_A::Method_A()
 	_firstFrame = NULL;
 	_passLine = NULL;
 	_deltaT = 100;
+	_areaForMethod_A = NULL;
 }
 
 Method_A::~Method_A()
@@ -28,15 +29,16 @@ Method_A::~Method_A()
 
 bool Method_A::Process (const PedData& peddata)
 {
-     FILE *_fN_t;
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _peds_t = peddata.GetPedsFrame();
      _xCor = peddata.GetXCor();
      _yCor = peddata.GetYCor();
      _firstFrame = peddata.GetFirstFrame();
-     OpenFile_N_t(_fN_t);
+     _measureAreaId = boost::lexical_cast<string>(_areaForMethod_A->_id);
      _passLine = new bool[peddata.GetNumPeds()];
+     string outputRhoV;
+     outputRhoV.append("#Frame\t	Cumulative pedestrians\n");
      for(int i=0; i<peddata.GetNumPeds(); i++)
      {
           _passLine[i] = false;
@@ -50,44 +52,28 @@ bool Method_A::Process (const PedData& peddata)
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          int PedNum = ids.size();
-
-          int* IdInFrame = new int[PedNum];
-          double* XInFrame = new double[PedNum];
-          double* YInFrame = new double[PedNum];
-          double* VInFrame = new double[PedNum];
-
-          peddata.GetPedsParametersInFrame(frameNr, ids,IdInFrame,XInFrame,YInFrame,VInFrame);
-
+          const vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
+          const vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
+          const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
           GetAccumFlowVelocity(frameNr, ids, VInFrame);
-
-          fprintf(_fN_t,"%d\t%d\n",frid, _classicFlow);
-
-          delete []XInFrame;
-          delete []YInFrame;
-          delete []VInFrame;
-          delete []IdInFrame;
+          char tmp[30];
+          sprintf(tmp, "%d\t%d\n", frid, _classicFlow);
+          outputRhoV.append(tmp);
      }
-
      FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
-
-     delete [] _passLine;
-     fclose(_fN_t);
+     WriteFile_N_t(outputRhoV);
+     delete []_passLine;
      return true;
 }
 
-void Method_A::OpenFile_N_t(FILE *& file)
+void Method_A::WriteFile_N_t(string data)
 {
 	string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
-	if((file=Analysis::CreateFile(fN_t))==NULL)
-	{
-		Log->Write("cannot open the file %s  t\n", fN_t.c_str() );
-		exit(EXIT_FAILURE);
-	}
-	fprintf(file,"#Frame\t	Cumulative pedestrians\n");
+	ofstream file(fN_t);
+	file<<data;
 }
 
-void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, double* VInFrame)
+void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame)
 {
 	for(unsigned int i=0; i<ids.size();i++)
 	{
@@ -95,10 +81,10 @@ void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, double* V
 		bool IspassLine=false;
 		if(frame >_firstFrame[id]&&!_passLine[id])
 		{
-			IspassLine = IsPassLine(_areaForMethod_A._lineStartX,
-					_areaForMethod_A._lineStartY,
-					_areaForMethod_A._lineEndX,
-					_areaForMethod_A._lineEndY, _xCor[id][frame - 1],
+			IspassLine = IsPassLine(_areaForMethod_A->_lineStartX,
+					_areaForMethod_A->_lineStartY,
+					_areaForMethod_A->_lineEndX,
+					_areaForMethod_A->_lineEndY, _xCor[id][frame - 1],
 					_yCor[id][frame - 1], _xCor[id][frame], _yCor[id][frame]);
 		}
 		if(IspassLine==true)
@@ -178,14 +164,9 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
      }
 }
 
-void Method_A::SetMeasurementArea (const MeasurementArea_L& area)
+void Method_A::SetMeasurementArea (MeasurementArea_L* area)
 {
 	_areaForMethod_A = area;
-}
-
-void Method_A::SetMeasurementAreaId (const int& id)
-{
-	_measureAreaId = boost::lexical_cast<string>(id);
 }
 
 void Method_A::SetTimeInterval(const int& deltaT)

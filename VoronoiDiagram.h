@@ -33,6 +33,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+using namespace std;
 
 #define PI 3.14159265
 
@@ -70,14 +71,18 @@ private:
     point_type2 clip_infinite_edge( const edge_type& edge, double minX, double minY, double maxX, double maxY);
     double area_triangle(const point_type2& tri_p1, const point_type2& tri_p2, const point_type2& tri_p3);
     bool point_inside_triangle(const point_type2& pt, const point_type2& tri_p1, const point_type2& tri_p2, const point_type2& tri_p3);
-    std::vector<point_type2> add_bounding_points(const point_type2& pt1, const point_type2& pt2, const point_type2& pt, double minX, double minY, double maxX, double maxY);
+    std::vector<point_type2> add_bounding_points(const point_type2& pt1, const point_type2& pt2, const point_type2& pt, double minX,
+    		double minY, double maxX, double maxY);
     point_type2 getIntersectionPoint(const point_2d& pt0, const point_2d& pt1, const polygon_2d& square);
 public:
     VoronoiDiagram();
     virtual ~VoronoiDiagram();
-    std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame, double Bound_Max);
-    std::vector<polygon_2d> cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon, const polygon_2d& Geometry, double* xs, double* ys);
-    std::vector<polygon_2d> cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon, double* xs, double* ys, double radius, int edges);
+
+	vector<polygon_2d> getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame,
+			vector<int>& IdInFrame, int numPedsInFrame, double Bound_Max);
+    //std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame, double Bound_Max);
+    std::vector<polygon_2d> cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon, const polygon_2d& Geometry, const vector<double>& xs, const vector<double>& ys);
+    std::vector<polygon_2d> cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon, const vector<double>& xs, const vector<double>& ys, double radius, int edges);
 };
 
 #endif /* VORONOIDIAGRAM_H_ */

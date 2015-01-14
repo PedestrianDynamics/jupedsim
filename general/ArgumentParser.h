@@ -41,9 +41,7 @@ using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 
-//using std::string;
-//using std::vector;
-//using std::map;
+using namespace std;
 
 class OutputHandler;
 extern OutputHandler* Log;
@@ -74,10 +72,10 @@ private:
     double _steadyEnd;
     int _delatTVInst;
     int _timeIntervalA;
-    int _areaIDforMethodA;
-    int _areaIDforMethodB;
-    int _areaIDforMethodC;
-    int _areaIDforMethodD;
+    vector<int> _areaIDforMethodA;
+    vector<int> _areaIDforMethodB;
+    vector<int> _areaIDforMethodC;
+    vector<int> _areaIDforMethodD;
     float _scaleX;
     float _scaleY;
     int _log;
@@ -111,10 +109,10 @@ public:
     bool GetIsMethodB() const;
     bool GetIsMethodC() const;
     bool GetIsMethodD() const;
-    int GetAreaIDforMethodA() const;
-    int GetAreaIDforMethodB() const;
-    int GetAreaIDforMethodC() const;
-    int GetAreaIDforMethodD() const;
+    vector<int> GetAreaIDforMethodA() const;
+    vector<int> GetAreaIDforMethodB() const;
+    vector<int> GetAreaIDforMethodC() const;
+    vector<int> GetAreaIDforMethodD() const;
     bool GetIsCutByCircle() const;
     double GetCutRadius() const;
     int GetCircleEdges() const;
@@ -134,7 +132,7 @@ public:
      * parse the initialization file
      * @param inifile
      */
-    void ParseIniFile(std::string inifile);
+    bool ParseIniFile(std::string inifile);
 };
 
 #endif /*ARGPARSER_H_*/
