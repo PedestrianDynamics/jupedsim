@@ -152,7 +152,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                string inifile="input.xml";
                if (optarg)
                     inifile=optarg;
-               Log->Write("INFO: \t Loading initialization file <"+inifile+">");
+               Log->Write("INFO: \tLoading initialization file <"+inifile+">");
                bool parsing = ParseIniFile(inifile);
                if(!parsing)
                {
@@ -198,7 +198,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      TiXmlDocument doc(inifile);
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("ERROR: \t could not parse the ini file");
+          Log->Write("ERROR: \tCould not parse the ini file");
           return false;
      }
 
@@ -219,7 +219,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      if(xMainNode->FirstChild("geometry"))
      {
           _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-          Log->Write("INFO: \tGeometry <"+_geometryFileName+">");
+          Log->Write("INFO: \tGeometry File is:\t <"+_geometryFileName+">");
      }
 
      //trajectories
@@ -228,7 +228,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      {
           //add the extension point
           string fmt = "."+string (xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("format")));
-          Log->Write("INFO: \tThe format of the trajectory file is:\t<%s>", fmt.c_str());
+          Log->Write("INFO: \tFormat of the trajectory file is:\t<%s>", fmt.c_str());
           if (fmt == ".xml")
           {
                _fileFormat = FORMAT_XML_PLAIN;
@@ -236,6 +236,11 @@ bool ArgumentParser::ParseIniFile(string inifile)
           else if (fmt == ".txt")
           {
                _fileFormat = FORMAT_PLAIN;
+          }
+          else
+          {
+        	  Log->Write("Error: \tthe given trajectory format is not supported. Supply '.xml' or '.txt' format!");
+        	  return false;
           }
 
           string unit = xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("unit"), "m");
@@ -252,7 +257,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                _trajectoriesFilename =
                          + xFile->Attribute("name");
                _trajectoriesFiles.push_back(_trajectoriesFilename);
-               Log->Write("INFO: \tInput trajectory file  <"+ (_trajectoriesFilename)+">");
+               Log->Write("INFO: \tInput trajectory file is\t<"+ (_trajectoriesFilename)+">");
           }
 
           if (xTrajectories->FirstChildElement("path"))
@@ -288,7 +293,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                                    {
                                         //_trajectoriesFiles.push_back(_projectRootDir+filename);
                                         _trajectoriesFiles.push_back(filename);
-                                        Log->Write("INFO: \tInput trajectory file  <"+ (filename)+">");
+                                        Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
                                    }
                          }
                          closedir (dir);
@@ -301,7 +306,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     }
                }
           }
-          Log->Write("INFO: \tInput dir  <"+ (_trajectoriesLocation)+">");
+          Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
      }
 
      //measurement area
@@ -322,12 +327,13 @@ bool ArgumentParser::ParseIniFile(string inifile)
                areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
 
                polygon_2d poly;
+               Log->Write("INFO: \tMeasure area id  < %d> with type <%s>",areaB->_id, areaB->_type.c_str());
                for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
                {
                     double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
                     double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
                     boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                    Log->Write("INFO: \tmeasure area points  < %.3f, %.3f>",box_px,box_py);
+                    Log->Write("INFO: \tMeasure area points  < %.3f, %.3f>",box_px*CMtoM,box_py*CMtoM);
                }
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
@@ -337,8 +343,6 @@ bool ArgumentParser::ParseIniFile(string inifile)
                {
                     areaB->_length=xmltof(xLength->Attribute("distance"));
                }
-               Log->Write("INFO: \tmeasure area id  < %d>",areaB->_id);
-               Log->Write("INFO: \tmeasure area type  <"+areaB->_type+">");
                _measurementAreas[areaB->_id]=areaB;
           }
 
@@ -349,15 +353,14 @@ bool ArgumentParser::ParseIniFile(string inifile)
                MeasurementArea_L* areaL = new MeasurementArea_L();
                areaL->_id=xmltoi(xMeasurementArea_L->ToElement()->Attribute("id"));
                areaL->_type=xMeasurementArea_L->ToElement()->Attribute("type");
-
+               Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaL->_id,areaL->_type.c_str());
                areaL->_lineStartX = xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("x"))*M2CM;
                areaL->_lineStartY =xmltof(xMeasurementArea_L->FirstChildElement("start")->Attribute("y"))*M2CM;
                areaL->_lineEndX = xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("x"))*M2CM;
                areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"))*M2CM;
 
                _measurementAreas[areaL->_id]=areaL;
-               Log->Write("INFO: \tmeasure area id  <%d> with \ttype <%s>",areaL->_id,areaL->_type.c_str());
-               Log->Write("INFO: \treference line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX,areaL->_lineStartY,areaL->_lineEndX,areaL->_lineEndY);
+               Log->Write("INFO: \tMeasurement line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX,areaL->_lineStartY,areaL->_lineEndX,areaL->_lineEndY);
           }
      }
 
@@ -372,21 +375,21 @@ bool ArgumentParser::ParseIniFile(string inifile)
           if(UseXComponent == "true"&&UseYComponent == "false")
           {
                _vComponent = 'X';
-               Log->Write("INFO: \tonly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+               Log->Write("INFO: \tOnly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
           }
           else if(UseXComponent == "false"&&UseYComponent == "true")
           {
                _vComponent = 'Y';
-               Log->Write("INFO: \tonly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+               Log->Write("INFO: \tOnly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
           }
           else if(UseXComponent == "true"&&UseYComponent == "true")
           {
                _vComponent = 'B';  // both components
-               Log->Write("INFO: \tx and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+               Log->Write("INFO: \tBoth x and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
           }
           else
           {
-               Log->Write("INFO: \ttype of velocity is not selected, please check it !!! " );
+               Log->Write("Error: \tType of velocity is not selected, please check it !!! " );
                return false;
           }
      }
@@ -401,13 +404,13 @@ bool ArgumentParser::ParseIniFile(string inifile)
                Log->Write("INFO: \tMethod A is selected" );
           }
           _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
+          Log->Write("INFO: \ttime interval used in Method A is <%d> frame",_timeIntervalA);
           for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
                     xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
           {
                _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+               Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
           }
-          //_areaIDforMethodA = xmltoi(xMethod_A->FirstChildElement("measurementArea")->Attribute("id"));
-          Log->Write("INFO: \ttime interval used in Method A is < %d>",_timeIntervalA);
      }
      // method B
      TiXmlElement* xMethod_B=xMainNode->FirstChildElement("method_B");
@@ -416,13 +419,13 @@ bool ArgumentParser::ParseIniFile(string inifile)
           if(string(xMethod_B->Attribute("enabled"))=="true")
           {
                _isMethodB = true;
+               Log->Write("INFO: \tMethod B is selected" );
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_B")->FirstChildElement("measurementArea");
                          xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
                {
                     _areaIDforMethodB.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
-               //_areaIDforMethodB = xmltoi(xMethod_B->FirstChildElement("measurementArea")->Attribute("id"));
-               Log->Write("INFO: \tMethod B is selected" );
           }
      // method C
      TiXmlElement* xMethod_C=xMainNode->FirstChildElement("method_C");
@@ -430,12 +433,13 @@ bool ArgumentParser::ParseIniFile(string inifile)
           if(string(xMethod_C->Attribute("enabled"))=="true")
           {
                _isMethodC = true;
+               Log->Write("INFO: \tMethod C is selected" );
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_C")->FirstChildElement("measurementArea");
                          xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
                {
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
-               Log->Write("INFO: \tMethod C is selected" );
           }
      // method D
      TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
@@ -443,27 +447,31 @@ bool ArgumentParser::ParseIniFile(string inifile)
           if(string(xMethod_D->Attribute("enabled"))=="true")
           {
                _isMethodD = true;
+               Log->Write("INFO: \tMethod D is selected" );
                _isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
                if(_isOutputGraph)
                {
-                    Log->Write("INFO: \tVoronoi graph is asked to output!" );
+                    Log->Write("INFO: \tVoronoi graph is asked to output" );
                }
                _isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
+               if(_isIndividualFD)
+               {
+                    Log->Write("INFO: \tIndividual fundamental diagram data will be calculated" );
+               }
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurementArea");
                          xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
-               //_areaIDforMethodD = xmltoi(xMethod_D->FirstChildElement("measurementArea")->Attribute("id"));
-
                if ( xMethod_D->FirstChildElement("cutByCircle"))
                {
                     if ( string(xMethod_D->FirstChildElement("cutByCircle")->Attribute("enabled"))=="true")
                     {
                          _isCutByCircle=true;
-                         _cutRadius=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("radius"));
-                         _circleEdges=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("edges"));
-                         Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius);
+                         _cutRadius=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("radius"))*M2CM;
+                         _circleEdges=xmltoi(xMethod_D->FirstChildElement("cutByCircle")->Attribute("edges"));
+                         Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
                          Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
                     }
                }
@@ -476,19 +484,17 @@ bool ArgumentParser::ParseIniFile(string inifile)
                }
 
                if(xMethod_D->FirstChildElement("getProfile"))
-                    if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true") {
+                    if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true")
+                    {
                          _isGetProfile = true;
-                         _scaleX =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"));
-                         _scaleY =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"));
-                         Log->Write("INFO: \tprofiles will be calculated" );
-                         Log->Write("INFO: \tthe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX, _scaleY);
+                         _scaleX =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"))*M2CM;
+                         _scaleY =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"))*M2CM;
+                         Log->Write("INFO: \tProfiles will be calculated" );
+                         Log->Write("INFO: \tThe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX*CMtoM, _scaleY*CMtoM);
                     }
-
-               Log->Write("INFO: \tMethod D is selected" );
           }
      }
-
-     Log->Write("INFO: \tdone parsing ini");
+     Log->Write("INFO: \tFinish parsing inifile");
      return true;
 }
 

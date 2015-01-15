@@ -33,16 +33,8 @@ public:
      const void SetCuttingCircleEdges(int edges);
 
      const void SetGeometryPolygon(polygon_2d geometryPolygon);
-
-     //TODo: Combine the four methods SetGeometryBoundaries(min_X, max_x,min_y,max_y)
-     const void SetGeometryMinX(double x);
-     const void SetGeometryMinY(double y);
-     const void SetGeometryMaxX(double x);
-     const void SetGeometryMaxY(double y);
-
-     //tODO: combine the two methods SetScale(x,y)
-     const void SetScalex(double x);
-     const void SetScaley(double y);
+     const void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
+     const void SetScale(double x, double y);
 
      const void SetCalculateProfiles(bool calcProfile);
      const void SetOutputVoronoiCellData(bool outputCellData);
@@ -50,7 +42,6 @@ public:
 
 private:
      map<int , vector<int> > _peds_t;
-     int _minFrame;
      string _measureAreaId;
      MeasurementArea_B* _areaForMethod_D;
      string _trajName;

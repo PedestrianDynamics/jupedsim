@@ -11,7 +11,6 @@ Method_D::Method_D()
 {
      _scaleX = 10;
      _scaleY = 10;
-     _minFrame = 0;
      _outputVoronoiCellData = false;
      _getProfile = false;
      _geoMinX = 0;
@@ -35,10 +34,10 @@ Method_D::~Method_D()
 bool Method_D::Process (const PedData& peddata)
 {
      _peds_t = peddata.GetPedsFrame();
-     _minFrame = peddata.GetMinFrame();
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
+     int minFrame = peddata.GetMinFrame();
      OpenFileMethodD();
      if(_calcIndividualFD)
      {
@@ -47,7 +46,7 @@ bool Method_D::Process (const PedData& peddata)
      Log->Write("------------------------Analyzing with Method D-----------------------------");
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      {
-          int frid =  frameNr + _minFrame;
+          int frid =  frameNr + minFrame;
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
@@ -370,32 +369,17 @@ const void Method_D::SetGeometryPolygon(polygon_2d geometryPolygon)
      _geoPoly = geometryPolygon;
 }
 
-const void Method_D::SetGeometryMinX(double x)
+const void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, double maxY)
 {
-     _geoMinX = x;
+	_geoMinX = minX;
+	_geoMinY = minY;
+	_geoMaxX = maxX;
+	_geoMaxY = maxY;
 }
 
-const void Method_D::SetGeometryMinY(double y)
-{
-     _geoMinY = y;
-}
-const void Method_D::SetGeometryMaxX(double x)
-{
-     _geoMaxX = x;
-}
-
-const void Method_D::SetGeometryMaxY(double y)
-{
-     _geoMaxY = y;
-}
-
-const void Method_D::SetScalex(double x)
+const void Method_D::SetScale(double x, double y)
 {
      _scaleX = x;
-}
-
-const void Method_D::SetScaley(double y)
-{
      _scaleY = y;
 }
 

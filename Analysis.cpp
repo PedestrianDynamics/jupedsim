@@ -134,12 +134,9 @@ void Analysis::InitArgs(ArgumentParser* args)
      }
      break;
      default:
-          printf("Wrong option for Logfile!\n\n");
+          Log->Write("Wrong option for Log file!");
           exit(0);
      }
-
-     Log->Write("INFO: \tOptionen an Simulation geben\n");
-
 
      if(args->GetIsMethodA()) {
           _DoesUseMethodA = true;
@@ -147,14 +144,11 @@ void Analysis::InitArgs(ArgumentParser* args)
 		  for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
 		  {
           	 _areaForMethod_A.push_back(dynamic_cast<MeasurementArea_L*>( args->GetMeasurementArea(Measurement_Area_IDs[i])));
-
 		  }
-          //_areaForMethod_A = dynamic_cast<MeasurementArea_L*>( args->GetMeasurementArea(args->GetAreaIDforMethodA()) );
      }
 
      if(args->GetIsMethodB()) {
           _DoesUseMethodB = true;
-          //_DoesUseMethodC = true;
           vector<int> Measurement_Area_IDs = args->GetAreaIDforMethodB();
           for(unsigned int i=0; i<Measurement_Area_IDs.size(); i++)
           {
@@ -187,15 +181,13 @@ void Analysis::InitArgs(ArgumentParser* args)
      _outputGraph = args->GetIsOutputGraph();
      _calcIndividualFD = args->GetIsIndividualFD();
      _vComponent = args->GetVComponent();
-     _scaleX = int(args->GetScaleX()*M2CM);
-     _scaleY = int(args->GetScaleY()*M2CM);
+     _scaleX = int(args->GetScaleX());
+     _scaleY = int(args->GetScaleY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename());
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
-     _cutRadius=args->GetCutRadius()*M2CM;
+     _cutRadius=args->GetCutRadius();
      _circleEdges=args->GetCircleEdges();
-     Log->Write("INFO: \tGeometrie file: [%s]\n", args->GetGeometryFilename().c_str());
-
 }
 
 polygon_2d Analysis::ReadGeometry(const string& geometryFile)
@@ -246,7 +238,7 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile)
      _highVertexY = geo_maxY;
      _lowVertexX = geo_minX;
      _lowVertexY = geo_minY;
-     cout<<"INFO: \tGeometry polygon is:\t"<<dsv(geoPoly)<<endl;
+     //cout<<"INFO: \tGeometry polygon is:\t"<<dsv(geoPoly)<<endl;
      return geoPoly;
 }
 
@@ -270,11 +262,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_A=method_A.Process(data);
                if(result_A)
                {
-                    Log->Write("INFO:\tSuccess with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method A using measurement area id %d!",_areaForMethod_A[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method A with measurement id %d!",_areaForMethod_A[i]->_id);
+                    Log->Write("INFO:\tFailed with Method A using measurement area id %d!",_areaForMethod_A[i]->_id);
                }
           }
      }
@@ -288,11 +280,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_B = method_B.Process(data);
                if(result_B)
                {
-                    Log->Write("INFO:\tSuccess with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method B using measurement area id %d!",_areaForMethod_B[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method B with measurement id %d!",_areaForMethod_B[i]->_id);
+                    Log->Write("INFO:\tFailed with Method B using measurement area id %d!",_areaForMethod_B[i]->_id);
                }
           }
      }
@@ -306,11 +298,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_C =method_C.Process(data);
                if(result_C)
                {
-                    Log->Write("INFO:\tSuccess with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method C using measurement area id %d!",_areaForMethod_C[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method C with measurement id %d!",_areaForMethod_C[i]->_id);
+                    Log->Write("INFO:\tFailed with Method C using measurement area id %d!",_areaForMethod_C[i]->_id);
                }
           }
      }
@@ -318,30 +310,27 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      if(_DoesUseMethodD) //method_D
      {
           Method_D method_D;
-          method_D.SetCutByCircle(_cutByCircle);
-          method_D.SetCuttingCircleRadius(_cutRadius);
-          method_D.SetCuttingCircleEdges(_circleEdges);
           method_D.SetGeometryPolygon(_geoPoly);
-          method_D.SetGeometryMinX(_lowVertexX);
-          method_D.SetGeometryMinY(_lowVertexY);
-          method_D.SetGeometryMaxX(_highVertexX);
-          method_D.SetGeometryMaxY(_highVertexY);
-          method_D.SetScalex(_scaleX);
-          method_D.SetScaley(_scaleX);
+          method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
+          method_D.SetScale(_scaleX, _scaleY);
           method_D.SetOutputVoronoiCellData(_outputGraph);
           method_D.SetCalculateIndividualFD(_calcIndividualFD);
           method_D.SetCalculateProfiles(_getProfile);
+          method_D.SetCutByCircle(_cutByCircle);
+          method_D.SetCuttingCircleRadius(_cutRadius);
+          method_D.SetCuttingCircleEdges(_circleEdges);
+
           for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
           {
                method_D.SetMeasurementArea(_areaForMethod_D[i]);
                bool result_D = method_D.Process(data);
                if(result_D)
                {
-                    Log->Write("INFO:\tSuccess with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method D using measurement area id %d!",_areaForMethod_D[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method D with measurement id %d!",_areaForMethod_D[i]->_id);
+                    Log->Write("INFO:\tFailed with Method D using measurement area id %d!",_areaForMethod_D[i]->_id);
                }
           }
      }
