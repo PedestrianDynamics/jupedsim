@@ -351,17 +351,11 @@ const void Method_D::SetCalculateIndividualFD(bool individualFD)
      _calcIndividualFD = individualFD;
 }
 
-const void Method_D::SetCutByCircle(bool iscut)
+const void Method_D::Setcutbycircle(double radius,int edges)
 {
-     _cutByCircle = iscut;       //Adjust whether cut each original voronoi cell by a circle
-}
-const void Method_D::SetCuttingCircleRadius(double radius)
-{
-     _cutRadius = radius;
-}
-const void Method_D::SetCuttingCircleEdges(int edges)
-{
-     _circleEdges = edges;
+	_cutByCircle=true;
+	_cutRadius = radius;
+	_circleEdges = edges;
 }
 
 const void Method_D::SetGeometryPolygon(polygon_2d geometryPolygon)

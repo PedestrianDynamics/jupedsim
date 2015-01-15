@@ -316,11 +316,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           method_D.SetOutputVoronoiCellData(_outputGraph);
           method_D.SetCalculateIndividualFD(_calcIndividualFD);
           method_D.SetCalculateProfiles(_getProfile);
-          method_D.SetCutByCircle(_cutByCircle);
-          method_D.SetCuttingCircleRadius(_cutRadius);
-          method_D.SetCuttingCircleEdges(_circleEdges);
-
-          for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
+          if(_cutByCircle)
+          {
+        	  method_D.Setcutbycircle(_cutRadius, _circleEdges);
+          }
+          for(unsigned int i=0; i<_areaForMethod_D.size(); i++)
           {
                method_D.SetMeasurementArea(_areaForMethod_D[i]);
                bool result_D = method_D.Process(data);

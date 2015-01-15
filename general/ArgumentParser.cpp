@@ -123,7 +123,7 @@ ArgumentParser::ArgumentParser()
      _trajectoriesFilename="";
      _projectRootDir="./";
      _fileFormat=FORMAT_XML_PLAIN;
-     _cutRadius =1.0;
+     _cutRadius =50;
      _circleEdges=6;
 }
 

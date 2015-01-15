@@ -26,16 +26,10 @@ public:
      virtual ~Method_D();
      bool Process (const PedData& peddata);
      const void SetCalculateIndividualFD(bool individualFD);
-
-     //TODO: combine the three methods Setcutbycircle(radius,edge)
-     const void SetCutByCircle(bool iscut);
-     const void SetCuttingCircleRadius(double radius);
-     const void SetCuttingCircleEdges(int edges);
-
+     const void Setcutbycircle(double radius,int edges);
      const void SetGeometryPolygon(polygon_2d geometryPolygon);
      const void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
      const void SetScale(double x, double y);
-
      const void SetCalculateProfiles(bool calcProfile);
      const void SetOutputVoronoiCellData(bool outputCellData);
      void SetMeasurementArea (MeasurementArea_B* area);
