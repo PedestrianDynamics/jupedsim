@@ -296,7 +296,7 @@ void Building::InitGeometry()
                }
           }
      }
-     Log->Write("INFO: \tInit Geometry successful!!!\n");
+     Log->Write("INFO: \tInit Geometry successful!!!");
 }
 
 

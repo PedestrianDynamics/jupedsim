@@ -79,7 +79,7 @@ bool Method_D::Process (const PedData& peddata)
           }
           else
           {
-               Log->Write("INFO: \tThe number of the pedestrians is less than 2 !!");
+               //Log->Write("INFO: \tThe number of the pedestrians is less than 2 !!");
           }
      }
      fclose(_fVoronoiRhoV);
@@ -131,7 +131,6 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
      }
-
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
      return polygons;
 }

@@ -57,9 +57,11 @@ int main(int argc, char **argv)
      {
           const string& file = files[i];
           Analysis analysis = Analysis();
+          Log->Write("\nINFO: \tStart Analysis for the file: %s",file.c_str());
+          Log->Write("**********************************************************************");
           analysis.InitArgs(args);
-          Log->Write("INFO: \tStart Analysis for the file: %s",file.c_str());
           analysis.RunAnalysis(file, path);
+          Log->Write("**********************************************************************");
           Log->Write("INFO: \tEnd Analysis for the file: %s\n",file.c_str());
      }
 
