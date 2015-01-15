@@ -1,9 +1,54 @@
+/**
+ * \file        EventManager.cpp
+ * \date        Jul 4, 2014
+ * \version     v0.6
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ *
+ *
+ **/
+
+
+#include <string>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include "../geometry/Building.h"
+#include "../geometry/SubRoom.h"
+#include "../geometry/Transition.h"
+#include "../geometry/Point.h"
+#include "../tinyxml/tinyxml.h"
+#include "../IO/OutputHandler.h"
+#include "../IO/IODispatcher.h"
+#include "../routing/RoutingEngine.h"
+#include "../pedestrian/Pedestrian.h"
 #include "EventManager.h"
 
 using namespace std;
 
 /*******************
- Konstruktoren
+ constructors
  ******************/
 
 #define UPDATE_FREQUENCY 1 // in seconds
@@ -33,9 +78,7 @@ EventManager::EventManager(Building *_b)
      }
 }
 
-/*******************
- Dateien einlesen
- ******************/
+
 void EventManager::SetProjectFilename(const std::string &filename)
 {
      _projectFilename = filename;
@@ -46,7 +89,7 @@ void EventManager::SetProjectRootDir(const std::string &filename)
      _projectRootDir = filename;
 }
 
-void EventManager::ReadEventsXml()
+bool EventManager::ReadEventsXml()
 {
      Log->Write("INFO: \tLooking for pre-defined events in other files");
      //get the geometry filename from the project file
@@ -54,7 +97,7 @@ void EventManager::ReadEventsXml()
      if (!doc.LoadFile()) {
           Log->Write("ERROR: \t%s", doc.ErrorDesc());
           Log->Write("ERROR: \t could not parse the project file.");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      TiXmlElement* xMainNode = doc.RootElement();
@@ -65,7 +108,7 @@ void EventManager::ReadEventsXml()
           Log->Write("INFO: \tevents <" + eventfile + ">");
      } else {
           Log->Write("INFO: \tNo events found");
-          return;
+          return true;
      }
 
      Log->Write("INFO: \tParsing the event file");
@@ -73,24 +116,24 @@ void EventManager::ReadEventsXml()
      if (!docEvent.LoadFile()) {
           Log->Write("ERROR: \t%s", docEvent.ErrorDesc());
           Log->Write("ERROR: \t could not parse the event file.");
-          return;
+          return false;
      }
 
      TiXmlElement* xRootNode = docEvent.RootElement();
      if (!xRootNode) {
           Log->Write("ERROR:\tRoot element does not exist.");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      if (xRootNode->ValueStr() != "JPScore") {
           Log->Write("ERROR:\tRoot element value is not 'JPScore'.");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      TiXmlNode* xEvents = xRootNode->FirstChild("events");
      if (!xEvents) {
           Log->Write("ERROR:\tNo events found.");
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;
@@ -100,7 +143,8 @@ void EventManager::ReadEventsXml()
           _event_states.push_back(e->Attribute("state"));
           _event_ids.push_back(atoi(e->Attribute("id")));
      }
-     Log->Write("INFO: \tEvents were read\n");
+     Log->Write("INFO: \tEvents were initialized\n");
+     return true;
 }
 
 void EventManager::ListEvents()
@@ -231,30 +275,32 @@ void EventManager::Update_Events(double time, double d)
 /***************
  Eventhandling
  **************/
+
+//close the door if it was open and relaunch the routing procedure
 void EventManager::CloseDoor(int id)
 {
-     //pruefen ob entsprechende Tuer schon zu ist, wenn nicht dann schliessen und neues Routing berechnen
+
      Transition *t = _building->GetTransition(id);
      if (t->IsOpen()) {
           t->Close();
-          Log->Write("\tDoor %d closed.", id);
+          Log->Write("INFO:\tClosing door %d ", id);
           ChangeRouting(id, "close");
      } else {
-          Log->Write("Door %d is already close yet.", id);
+          Log->Write("WARNING: \tdoor %d is already close", id);
      }
 
 }
 
+//open the door if it was open and relaunch the routing procedure
 void EventManager::OpenDoor(int id)
 {
-     //pruefen ob entsprechende Tuer schon offen ist, wenn nicht dann oeffnen und neues Routing berechnen
      Transition *t = _building->GetTransition(id);
      if (!t->IsOpen()) {
           t->Open();
-          Log->Write("\tDoor %d opened.", id);
+          Log->Write("INFO:\tOpening door %d ", id);
           ChangeRouting(id, "open");
      } else {
-          Log->Write("Door %d is already open yet.", id);
+          Log->Write("WARNING: \tdoor %d is already open", id);
      }
 }
 
@@ -328,7 +374,6 @@ void EventManager::GetEvent(char* c)
                     state += c[i];
                }
           }
-
      }
      if (state.compare("close") == 0) {
           CloseDoor(atoi(id.c_str()));

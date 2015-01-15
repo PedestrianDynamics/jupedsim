@@ -71,6 +71,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _caption = "no_caption";
      _rooms = vector<Room*>();
      _savePathway = false;
+     _linkedCellGrid = nullptr;
 
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
      this->LoadGeometry();

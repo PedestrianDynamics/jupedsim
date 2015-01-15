@@ -36,6 +36,7 @@
 
 #include "general/ArgumentParser.h"
 #include "geometry/Building.h"
+#include "geometry/SubRoom.h"
 #include "IO/OutputHandler.h"
 #include "IO/IODispatcher.h"
 #include "math/OperationalModel.h"

@@ -243,9 +243,12 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           return false;
      }
 
-     //read the events
+     //read and initialize events
      _em = new EventManager(_building.get());
-     _em->ReadEventsXml();
+     if(_em->ReadEventsXml()==false)
+     {
+          Log->Write("ERROR: \tCould not initialize events handling");
+     }
      _em->ListEvents();
 
      //which hpc-architecture?

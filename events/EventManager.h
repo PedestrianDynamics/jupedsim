@@ -24,28 +24,16 @@
  *
  *
  **/
- 
-#include <string>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
+
 #include <vector>
-#include <math.h>
-#include <stdio.h>
-#include "../geometry/Building.h"
-#include "../geometry/SubRoom.h"
-#include "../geometry/Transition.h"
-#include "../geometry/Point.h"
-#include "../tinyxml/tinyxml.h"
-#include "../IO/OutputHandler.h"
-#include "../IO/IODispatcher.h"
-#include "../routing/RoutingEngine.h"
-#include "../pedestrian/Pedestrian.h"
+#include <string>
+
+class Building;
 
 extern OutputHandler* Log;
 
-class EventManager {
+class EventManager
+{
 private:
      std::vector<double> _event_times;
      std::vector<std::string> _event_types;
@@ -61,12 +49,11 @@ private:
      long int _lastUpdateTime;
 
 public:
-     //Konstruktor
+     //constructor
      EventManager(Building *_b);
-     //Dateien einlesen
-     void SetProjectFilename(const std::string &filename) ;
+     void SetProjectFilename(const std::string &filename);
      void SetProjectRootDir(const std::string &filename);
-     void ReadEventsXml();
+     bool ReadEventsXml();
      void ListEvents();
      void ReadEventsTxt(double time);
      //Update
