@@ -18,8 +18,8 @@ Method_D::Method_D()
      _geoMaxX = 0;
      _geoMaxY = 0;
      _cutByCircle = false;
-     _cutRadius = 50;
-     _circleEdges = 6;
+     _cutRadius = -1;
+     _circleEdges = -1;
      _fIndividualFD = NULL;
      _calcIndividualFD = false;
      _fVoronoiRhoV = NULL;
@@ -126,10 +126,12 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
      int NrInFrm = ids.size();
      double boundpoint =10*max(max(fabs(_geoMinX),fabs(_geoMinY)), max(fabs(_geoMaxX), fabs(_geoMaxY)));
      vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm,boundpoint);
+
      if(_cutByCircle)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
      }
+
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
      return polygons;
 }

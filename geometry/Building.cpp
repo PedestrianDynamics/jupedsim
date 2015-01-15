@@ -601,7 +601,7 @@ void Building::LoadGeometry(const std::string &geometryfile)
           }
 
 
-     Log->Write("INFO: \tLoading building file successful!!!\n");
+     Log->Write("INFO: \tLoading building file successful");
 }
 
 

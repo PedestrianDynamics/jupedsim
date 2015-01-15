@@ -58,9 +58,9 @@ int main(int argc, char **argv)
           const string& file = files[i];
           Analysis analysis = Analysis();
           analysis.InitArgs(args);
-          Log->Write("INFO: \tStart Analysis for the file: " + file);
+          Log->Write("INFO: \tStart Analysis for the file: %s",file.c_str());
           analysis.RunAnalysis(file, path);
-          Log->Write("INFO: \tEnd Analysis for the file: " + file);
+          Log->Write("INFO: \tEnd Analysis for the file: %s\n",file.c_str());
      }
 
      //do the last cleaning

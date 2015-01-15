@@ -262,11 +262,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_A=method_A.Process(data);
                if(result_A)
                {
-                    Log->Write("INFO:\tSuccess with Method A using measurement area id %d!",_areaForMethod_A[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method A using measurement area id %d!",_areaForMethod_A[i]->_id);
+                    Log->Write("INFO:\tFailed with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
                }
           }
      }
@@ -280,11 +280,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_B = method_B.Process(data);
                if(result_B)
                {
-                    Log->Write("INFO:\tSuccess with Method B using measurement area id %d!",_areaForMethod_B[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method B using measurement area id %d!\n",_areaForMethod_B[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method B using measurement area id %d!",_areaForMethod_B[i]->_id);
+                    Log->Write("INFO:\tFailed with Method B using measurement area id %d!\n",_areaForMethod_B[i]->_id);
                }
           }
      }
@@ -298,11 +298,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_C =method_C.Process(data);
                if(result_C)
                {
-                    Log->Write("INFO:\tSuccess with Method C using measurement area id %d!",_areaForMethod_C[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method C using measurement area id %d!",_areaForMethod_C[i]->_id);
+                    Log->Write("INFO:\tFailed with Method C using measurement area id %d!\n",_areaForMethod_C[i]->_id);
                }
           }
      }
@@ -326,11 +326,11 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                bool result_D = method_D.Process(data);
                if(result_D)
                {
-                    Log->Write("INFO:\tSuccess with Method D using measurement area id %d!",_areaForMethod_D[i]->_id);
+                    Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
                }
                else
                {
-                    Log->Write("INFO:\tFailed with Method D using measurement area id %d!",_areaForMethod_D[i]->_id);
+                    Log->Write("INFO:\tFailed with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
                }
           }
      }
