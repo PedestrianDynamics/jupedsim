@@ -155,12 +155,12 @@ const GraphEdge * GraphVertex::GetCheapestDestinationByEdges(const Point & posit
 {
     std::set<const GraphEdge *> visited;
     // map with GrapEdges and their predecessors and distances
-    std::map<const GraphEdge *,  std::pair<const GraphEdge *, double>> destinations;
+    std::map<const GraphEdge *,  std::pair<const GraphEdge *, double> > destinations;
     // priority queue with discovered Edges and their distance.
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
-        vector<std::pair<double, const GraphEdge *>>,
-        std::greater<std::pair<double, const GraphEdge *>>
+        vector<std::pair<double, const GraphEdge *> >,
+        std::greater<std::pair<double, const GraphEdge *> >
         > queue;
     const GraphEdge * exit_edge = NULL;
 
@@ -229,8 +229,8 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
 
     std::priority_queue<
         std::pair<double, const GraphEdge *>,
-        vector<std::pair<double, const GraphEdge *>>,
-        std::greater<std::pair<double, const GraphEdge *>>
+        vector<std::pair<double, const GraphEdge *> >,
+        std::greater<std::pair<double, const GraphEdge *> >
         > edges;
     for(EdgesContainer::const_iterator it = this->GetAllOutEdges()->begin(); it != this->GetAllOutEdges()->end(); ++it) {
         edges.push(std::make_pair((*it)->GetFactor(), (*it)));

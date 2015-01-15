@@ -328,7 +328,7 @@ bool PedDistributor::Distribute(Building* building) const
      int nPeds = 0;
 
      // store the position in a map since we are not computing for all rooms/subrooms.
-     std::map <int, std::map <int, vector <Point>>> allFreePos;
+     std::map <int, std::map <int, vector <Point> > > allFreePos;
 
      //collect the available positions for that subroom
      for(const auto& dist: _start_dis_sub)

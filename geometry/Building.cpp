@@ -66,7 +66,7 @@ Building::Building()
 }
 
 Building::Building(const std::string& filename, const std::string& rootDir, RoutingEngine& engine, PedDistributor& distributor, double linkedCellSize)
-        :_projectFilename{filename}, _projectRootDir{rootDir}, _routingEngine{&engine}
+        :_projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
 {
      _caption = "no_caption";
      _rooms = vector<Room*>();

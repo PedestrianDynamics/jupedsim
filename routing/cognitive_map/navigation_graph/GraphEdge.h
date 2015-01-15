@@ -45,7 +45,7 @@ class Crossing;
 class GraphEdge {
 
 public:
-     typedef std::map<std::string, std::pair<double, double>> FactorContainer;
+     typedef std::map<std::string, std::pair<double, double> > FactorContainer;
 
      /****************************
       * Constructors & Destructors

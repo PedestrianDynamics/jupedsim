@@ -49,8 +49,8 @@ public:
     static const EventType CHANGED_ROOM = 8;
     static const EventType NEW_DESTINATION = 16;
 
-
-     typedef std::vector<std::pair<AbstractSensor *, EventType>> SensorContainer;
+ 
+     typedef std::vector<std::pair<AbstractSensor *, EventType> > SensorContainer;
 
      /****************************
       * Constructors & Destructors
