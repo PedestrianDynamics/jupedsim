@@ -47,7 +47,7 @@ const double pi= atan(1)*4;
 bool  almostEqual (double a, double b)
 {
      // std::cout<< "a=" << a << "  b=" << b<< "diff= "<<std::fabs(a-b)<<std::endl;
-     return std::fabs(a - b) <  0.01;//std::numeric_limits<double>::epsilon();
+     return fabs(a - b) <  0.01;//std::numeric_limits<double>::epsilon();
 }
 
 int testOperatorEqual(FILE * f)
