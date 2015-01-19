@@ -292,15 +292,15 @@ int Simulation::RunSimulation()
           // update the positions
           _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
 
-          // update the routes and locations
-          //Update();
+          //update the routes and locations
           UpdateRoutesAndLocations();
 
           //update the events
-          _em->Update_Events(t, _deltaT);
+          _em->Update_Events(t);
+          //_em->ProcessEvent();
 
           //other updates
-          //someone might have leave the building
+          //someone might have left the building
           _nPeds = _building->GetAllPedestrians().size();
 
           //update the linked cells

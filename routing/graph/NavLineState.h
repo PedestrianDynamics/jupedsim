@@ -25,10 +25,8 @@
  *
  **/
 
-
 #ifndef NAVLINESTATE_H_
 #define NAVLINESTATE_H_
-
 
 #include <time.h>
 #include <iostream>
@@ -36,7 +34,8 @@
 //time between a pedestrian got the information and uses the information
 #define INFO_OFFSET 1.5
 
-class NavLineState {
+class NavLineState
+{
 
 public:
      NavLineState();
@@ -48,10 +47,22 @@ public:
      bool mergeDoor(NavLineState & orig, double time);
      void print();
 
+     void SetState(bool is_closed, double time);
+     bool GetState() const;
+     int GetQuality() const;
+     int GetTime() const;
+
 private:
      bool open; // aka state
      int timeFirstSeen; // number of clocks till the door was seen changed the first time
      int timeOfInformation; // number of clocks when i got the information. should be set to zero after a period of time is over (to
+
+     // information quality in [0..1]. 1 is very reliable information
+     int _quality; //
+     // last time the state was recorded.
+     int _time;
+     // state 0=open, 1=close
+     bool _isClosed;
 
 };
 #endif /* ROUTINGGRAPHSTORAGE_H_ */

@@ -29,6 +29,10 @@
 #include <string>
 
 class Building;
+class Router;
+class GlobalRouter;
+class QuickestPathRouter;
+class RoutingEngine;
 
 extern OutputHandler* Log;
 
@@ -42,22 +46,83 @@ private:
      std::string _projectFilename;
      std::string _projectRootDir;
      Building *_building;
-     double _deltaT;
      FILE *_file;
      bool _dynamic;
      int _eventCounter;
      long int _lastUpdateTime;
+     //save the router corresponding to the actual state of the building
+     std::map<std::string, RoutingEngine*> _eventEngineStorage;
+     //save the available routers defined in the simulation
+     std::vector<RoutingStrategy> _availableRouters;
+
+private:
+     /**
+      * collect the close doors and generate a new graph
+      * @param _building
+      */
+     bool CreateRoutingEngine(Building* _b, int first_engine=false);
+
+     /**
+      * Create a router corresponding to the given strategy
+      * @param strategy
+      * @return a router/NULL for invalid strategies
+      */
+     Router * CreateRouter(const RoutingStrategy& strategy);
+
+     /**
+      * Update the knowledge about closed doors.
+      * Each pedestrian who is xx metres from a closed door,
+      * will save that information
+      * @param _b, the building object
+      */
+     bool UpdateAgentKnowledge(Building* _b);
+
+     /**
+      * Merge the knowledge of the two pedestrians.
+      * The information with the newest timestamp
+      * is always accepted with a probability of one.
+      * @param p1, first pedestrian
+      * @param p2, second pedestrian
+      */
+     void MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
+
+     /**
+      * Update the pedestrian route based on the new information
+      * @param p1
+      * @return
+      */
+     bool UpdateRoute(Pedestrian* p1);
 
 public:
-     //constructor
+     ///constructor
      EventManager(Building *_b);
-     void SetProjectFilename(const std::string &filename);
-     void SetProjectRootDir(const std::string &filename);
+
+     /**
+      * Read and parse the events
+      * @return false if an error occured
+      */
      bool ReadEventsXml();
+
+     /**
+      * Print the parsed events
+      */
      void ListEvents();
+
+     /**
+      * Read and parse events from a text file
+      * @param time
+      */
      void ReadEventsTxt(double time);
-     //Update
-     void Update_Events(double time, double d);
+
+     /**
+      * Process the events at runtime
+      * @param time
+      */
+     void Update_Events(double time);
+
+     //process the event using the current time stamp
+     //from the pedestrian class
+     void ProcessEvent();
      //Eventhandling
      void CloseDoor(int id);
      void OpenDoor(int id);

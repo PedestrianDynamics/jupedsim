@@ -45,9 +45,9 @@ class NavLine;
 class Router;
 
 
-class Pedestrian {
+class Pedestrian
+{
 private:
-
      //generic parameters, independent from models
      int _id; //starting with 1
      int _exitIndex; // current exit
@@ -85,15 +85,11 @@ private:
      Point _lastPosition;
      int _lastCellPosition;
 
-     /**
-      * A set with UniqueIDs of closed crossings,
-      * transitions or hlines (hlines doesnt make that much sense,
-      * just that they are removed from the routing graph)
-      */
+     ///state of doors with time stamps
      std::map<int, NavLineState> _knownDoors;
 
-
-     double _DistToBlockade=0; // distance to nearest obstacle that blocks the sight of ped.
+     /// distance to nearest obstacle that blocks the sight of ped.
+     double _distToBlockade;
      //routing parameters
      /// new orientation after 10 seconds
      double _reroutingThreshold;
@@ -109,6 +105,8 @@ private:
      std::queue <Point> _lastPositions;
      /// store the last velocities
      std::queue <Point> _lastVelocites;
+     /// routing strategy followed
+     RoutingStrategy _routingStrategy;
 
      int _newOrientationDelay; //2 seconds, in steps
 
@@ -183,6 +181,7 @@ public:
      const Point& GetV0() const;
      const Point& GetV0(const Point& target);
      void InitV0(const Point& target);
+
      /**
       * the desired speed is the projection of the speed on the horizontal plane.
       * @return the norm of the desired speed.
@@ -198,12 +197,20 @@ public:
      void ClearMentalMap(); // erase the peds memory
 
      // functions for known closed Doors (needed for the Graphrouting and Rerouting)
-     void AddKnownClosedDoor(int door);
+     void AddKnownClosedDoor(int door, double time=0);//TODo: refactor and remove =0
      std::set<int>  GetKnownClosedDoors();
      void MergeKnownClosedDoors(std::map<int, NavLineState> * input);
      std::map<int, NavLineState> * GetKnownDoors();
      int DoorKnowledgeCount() const;
+     // needed for information sharing
+     const std::map<int, NavLineState>& GetKnownledge() const;
 
+     /**
+      * clear all information related to the knowledge about closed doors
+      */
+     void ClearKnowledge();
+
+     RoutingStrategy GetRoutingStrategy() const;
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();

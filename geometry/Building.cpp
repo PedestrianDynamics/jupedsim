@@ -699,7 +699,7 @@ void Building::AddHline(Hline* line)
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
-               Log->Write("INFO: Skipping identical hlines with ID [%d]",line->GetID());
+               Log->Write("INFO: \tSkipping identical hlines with ID [%d]",line->GetID());
                return;
           } else {
                Log->Write(
@@ -869,7 +869,7 @@ bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
      return true;
 }
 
-bool Building::ped_is_visible(const Point& p1, const Point& p2, bool considerHlines)
+bool Building::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
      for (unsigned int i = 0; i < _rooms.size(); i++) {
           Room* room = _rooms[i];

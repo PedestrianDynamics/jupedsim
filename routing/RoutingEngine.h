@@ -64,11 +64,16 @@ public:
 
      /**
       * Return a trip/route with the particular id
-      * FIXME referenz?
-      * @param id
-      * @return
+      * @param id, the trip id
+      * @return the corresponding trip
       */
-     const std::vector<std::string> GetTrip(int id) const;
+     const std::vector<std::string>& GetTrip(int id) const;
+
+     /**
+      * @return all available routers
+      *
+      */
+     const std::vector<Router*> GetAvailableRouters() const;
 
      /**
       * Find the next destination using the appropriate router from
@@ -89,6 +94,8 @@ public:
 
      /**
       * Return the router with the specified  id
+      * TODO: Remove this method
+      * Should prefer etRouter(RoutingStrategy strategy)
       */
      Router* GetRouter(int id) const;
 

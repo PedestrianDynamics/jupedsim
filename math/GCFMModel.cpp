@@ -163,7 +163,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                     Pedestrian* ped1 = neighbours[i];
                     Point p1 = ped->GetPos();
                     Point p2 = ped1->GetPos();
-                    bool ped_is_visible = building->ped_is_visible(p1, p2, false);
+                    bool ped_is_visible = building->IsVisible(p1, p2, false);
                     if (!ped_is_visible)
                          continue;
                     // if(debugPed == ped->GetID())

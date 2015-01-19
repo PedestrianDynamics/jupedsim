@@ -82,3 +82,24 @@ void NavLineState::print()
 {
      std::cout << open << " - "<< timeFirstSeen << " - " << timeOfInformation << std::endl;
 }
+
+void NavLineState::SetState(bool is_closed, double time)
+{
+     _isClosed=is_closed;
+     _time=time;
+}
+
+bool NavLineState::GetState() const
+{
+     return _isClosed;
+}
+
+int NavLineState::GetQuality() const
+{
+     return _quality;
+}
+
+int NavLineState::GetTime() const
+{
+     return _time;
+}

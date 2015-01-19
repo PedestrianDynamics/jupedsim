@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
-<JPScore project="JPS-Project" version="0.5" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="../../xsd/jps_events.xsd">
-	<events>
-		<event time="1" type="door" state="close" id="8" caption="left_exit" />
-		<event time="10" type="door" state="open" id="8" caption="left_exit" />
-		<event time="25" type="door" state="close" id="4" caption="main_exit" />
-		<event time="40" type="door" state="open" id="4" caption="main_exit" />
-	</events>
+<JPScore project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_events.xsd">
+  <events>
+    <event time="1" type="door" state="close" id="8" caption="left_exit" />
+    <event time="10" type="door" state="open" id="8" caption="left_exit" />
+    <event time="25" type="door" state="close" id="4" caption="main_exit" />
+    <event time="40" type="door" state="open" id="4" caption="main_exit" />
+    <event time="70" type="door" state="close" id="8" caption="main_exit" />
+  </events>
 </JPScore>

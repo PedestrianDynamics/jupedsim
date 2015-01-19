@@ -69,7 +69,7 @@ void RoutingEngine::AddRouter(Router* router)
      _routersCollection.push_back(router);
 }
 
-const vector<string> RoutingEngine::GetTrip(int index) const
+const vector<string>& RoutingEngine::GetTrip(int index) const
 {
      if ((index >= 0) && (index < (int) _tripsCollection.size()))
           return _tripsCollection[index];
@@ -82,23 +82,31 @@ const vector<string> RoutingEngine::GetTrip(int index) const
      }
 }
 
+const std::vector<Router*> RoutingEngine::GetAvailableRouters() const
+{
+     return _routersCollection;
+}
+
+
 Router* RoutingEngine::GetRouter(RoutingStrategy strategy) const
 {
-     for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          if(_routersCollection[r]->GetStrategy()==strategy)
-               return _routersCollection[r];
+     for(Router* router:_routersCollection)
+     {
+          if(router->GetStrategy()==strategy)
+               return router;
      }
-     //Log->Write("ERROR: \t Could not Find any router with ID:  [%d].",strategy);
-     //exit(EXIT_FAILURE);
+     Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
      return (Router*) NULL;
 }
 
 Router* RoutingEngine::GetRouter(int id) const
 {
-     for(unsigned int r=0; r<_routersCollection.size(); r++) {
-          if(_routersCollection[r]->GetID()==id)
-               return _routersCollection[r];
+     for(Router* router:_routersCollection)
+     {
+          if(router->GetID()==id)
+               return router;
      }
+     Log->Write("ERROR: \t Could not Find any router with ID:  [%d].",id);
      return (Router*) NULL;
 }
 
