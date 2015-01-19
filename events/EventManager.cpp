@@ -313,8 +313,6 @@ void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
 
 void EventManager::ProcessEvent()
 {
-     //const vector<Pedestrian*>& _allPeds = _building->GetAllPedestrians();
-
      if (_event_times.size() == 0) return;
 
      int current_time = Pedestrian::GetGlobalTime();

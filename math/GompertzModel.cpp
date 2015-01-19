@@ -29,7 +29,6 @@
  **/
 
 
-#include "../colors.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
@@ -45,10 +44,8 @@
 #define omp_get_max_threads()  1
 #endif
 
-
 using std::vector;
 using std::string;
-
 
 GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall)

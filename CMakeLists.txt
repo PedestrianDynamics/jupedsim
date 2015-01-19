@@ -228,8 +228,6 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
-  logging.cpp
-
   )
 
 set (   header_files
@@ -313,7 +311,6 @@ set (   header_files
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
   events/EventManager.h
-  logging.h
   )
 
 
