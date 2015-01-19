@@ -59,7 +59,7 @@
 
 
 using namespace std;
-OutputHandler* Log = new STDIOHandler();;
+OutputHandler* Log = new STDIOHandler();
 
 /************************************************
  // Konstruktoren
