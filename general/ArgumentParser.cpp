@@ -156,7 +156,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
                bool parsing = ParseIniFile(inifile);
                if(!parsing)
                {
-                    Log->Write("INFO: \t Failed loading initialization file <"+inifile+">");
+                    Log->Write("INFO: \tFailed loading initialization file <"+inifile+">");
                }
           }
           break;
@@ -219,7 +219,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      if(xMainNode->FirstChild("geometry"))
      {
           _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-          Log->Write("INFO: \tGeometry File is:\t <"+_geometryFileName+">");
+          Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
      }
 
      //trajectories
@@ -228,7 +228,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      {
           //add the extension point
           string fmt = "."+string (xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("format")));
-          Log->Write("INFO: \tFormat of the trajectory file is:\t<%s>", fmt.c_str());
+          Log->Write("INFO: \tFormat of the trajectory file is: <%s>", fmt.c_str());
           if (fmt == ".xml")
           {
                _fileFormat = FORMAT_XML_PLAIN;
@@ -257,7 +257,17 @@ bool ArgumentParser::ParseIniFile(string inifile)
                _trajectoriesFilename =
                          + xFile->Attribute("name");
                _trajectoriesFiles.push_back(_trajectoriesFilename);
-               Log->Write("INFO: \tInput trajectory file is\t<"+ (_trajectoriesFilename)+">");
+
+               //check if the given file match the format
+               if(boost::algorithm::ends_with(_trajectoriesFilename,fmt))
+               {
+                    Log->Write("INFO: \tInput trajectory file is\t<"+ (_trajectoriesFilename)+">");
+               }
+               else
+               {
+                    Log->Write("ERROR: \tWrong file extension\t<%s> for file <%s>",fmt.c_str(),_trajectoriesFilename.c_str());
+                    return false;
+               }
           }
 
           if (xTrajectories->FirstChildElement("path"))
