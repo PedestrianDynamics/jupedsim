@@ -79,7 +79,7 @@ public:
     virtual ~VoronoiDiagram();
 
 	vector<polygon_2d> getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame,
-			vector<int>& IdInFrame, int numPedsInFrame, double Bound_Max);
+			vector<int>& IdInFrame, const int numPedsInFrame, const double Bound_Max);
     //std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame, double Bound_Max);
     std::vector<polygon_2d> cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon, const polygon_2d& Geometry, const vector<double>& xs, const vector<double>& ys);
     std::vector<polygon_2d> cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon, const vector<double>& xs, const vector<double>& ys, double radius, int edges);

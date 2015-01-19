@@ -368,24 +368,24 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
      }
 }
 
-const void Method_D::SetCalculateIndividualFD(bool individualFD)
+void Method_D::SetCalculateIndividualFD(bool individualFD)
 {
      _calcIndividualFD = individualFD;
 }
 
-const void Method_D::Setcutbycircle(double radius,int edges)
+void Method_D::Setcutbycircle(double radius,int edges)
 {
 	_cutByCircle=true;
 	_cutRadius = radius;
 	_circleEdges = edges;
 }
 
-const void Method_D::SetGeometryPolygon(polygon_2d geometryPolygon)
+void Method_D::SetGeometryPolygon(polygon_2d geometryPolygon)
 {
      _geoPoly = geometryPolygon;
 }
 
-const void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, double maxY)
+void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, double maxY)
 {
 	_geoMinX = minX;
 	_geoMinY = minY;
@@ -393,18 +393,18 @@ const void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX
 	_geoMaxY = maxY;
 }
 
-const void Method_D::SetScale(double x, double y)
+void Method_D::SetScale(double x, double y)
 {
      _scaleX = x;
      _scaleY = y;
 }
 
-const void Method_D::SetCalculateProfiles(bool calcProfile)
+void Method_D::SetCalculateProfiles(bool calcProfile)
 {
      _getProfile =calcProfile;
 }
 
-const void Method_D::SetOutputVoronoiCellData(bool outputCellData)
+void Method_D::SetOutputVoronoiCellData(bool outputCellData)
 {
      _outputVoronoiCellData = outputCellData;
 }

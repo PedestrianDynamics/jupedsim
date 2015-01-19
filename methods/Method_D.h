@@ -45,13 +45,13 @@ public:
      Method_D();
      virtual ~Method_D();
      bool Process (const PedData& peddata);
-     const void SetCalculateIndividualFD(bool individualFD);
-     const void Setcutbycircle(double radius,int edges);
-     const void SetGeometryPolygon(polygon_2d geometryPolygon);
-     const void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
-     const void SetScale(double x, double y);
-     const void SetCalculateProfiles(bool calcProfile);
-     const void SetOutputVoronoiCellData(bool outputCellData);
+     void SetCalculateIndividualFD(bool individualFD);
+     void Setcutbycircle(double radius,int edges);
+     void SetGeometryPolygon(polygon_2d geometryPolygon);
+     void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
+     void SetScale(double x, double y);
+     void SetCalculateProfiles(bool calcProfile);
+     void SetOutputVoronoiCellData(bool outputCellData);
      void SetMeasurementArea (MeasurementArea_B* area);
 
 private:
