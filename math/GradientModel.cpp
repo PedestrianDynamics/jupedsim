@@ -2,7 +2,7 @@
  * \file        GradientModel.cpp
  * \date        Nov 27, 2014
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum JÃ¼lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -25,7 +25,7 @@
  *
  *
  **/
-
+#define _ARNEDEBUG
 
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
@@ -70,8 +70,10 @@ GradientModel::~GradientModel(void) { }
 
 Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
 {
-//      printf("GompertzModel::ForceDriv\n");
-     
+#ifdef _ARNEDEBUG
+     printf("GradientModel::ForceDriv\n");
+#endif // _ARNEBEBUG
+
      const Point& target = _direction->GetTarget(room, ped);
      Point F_driv;
      Point e0;
@@ -92,9 +94,28 @@ Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
      // if (ped->GetID() == 2)
      //   printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), e0.GetX(), e0.GetY(), e0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
            // getc(stdin);
-     
+
      return F_driv;
 }
+
+#ifdef _ARNEDEBUG
+
+Point GradientModel::getDirectionFloorfield(Pedestrian* ped, Room* Room) const
+{
+    return *(new Point(1., 0.)); // @todo ar.graf : berechne sigma (Bodenfeld-Richtung) und ggf. skaliere mit g(...)
+}
+
+Point GradientModel::getDirectionRepPeds(const Pedestrian* ped, Pedestrian const currentPed) const
+{
+    return *(new Point(1., 0.)); // @todo ar.graf : berechne sigma (Bodenfeld-Richtung) und ggf. skaliere mit g(...)
+}
+
+Point GradientModel::getDirectionRepWalls(const Wall& wall, Pedestrian const currentPed) const
+{
+    return *(new Point(1., 0.)); // @todo ar.graf : berechne sigma (Bodenfeld-Richtung) und ggf. skaliere mit g(...)
+}
+
+#endif // _ARNEDEBUG
 
 Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 {
@@ -151,7 +172,7 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      B_ij = exp(-b*exp(-c*B_ij));
      //TODO: check if we need K_ij in the  f
      //f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * K_ij * B_ij;
-    
+
      f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * B_ij;
 
      F_rep = ep12 * f;

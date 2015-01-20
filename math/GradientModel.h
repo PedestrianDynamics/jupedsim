@@ -2,7 +2,7 @@
  * \file        GradientModel.h
  * \date        Nov 27, 2014
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum JÃ¼lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -35,7 +35,7 @@
 #include "../geometry/Building.h"
 #include "ForceModel.h"
 
-
+#define _ARNEDEBUG
 
 //forward declaration
 class Pedestrian;
@@ -169,6 +169,18 @@ public:
       * @return
       */
 
+#ifdef _ARNEDEBUG
+     /**
+      * Get the direction of the floorfield (direction is scaled to be in [0, 1]
+      * @param ped all pedestrians
+      * @param room all rooms
+      * @return direction vector of floorfield
+      */
+     Point getDirectionFloorfield(const Pedestrian* ped, Room* Room) const;
+     Point getDirectionRepPeds(const Pedestrian* ped, Pedestrian const currentPed) const;
+     Point getDirectionRepWalls(const Wall& wall, Pedestrian const currentPed) const;
+
+#endif // _ARNEDEBUG
 
      /**
       * Solve the differential equations and update the positions and velocities

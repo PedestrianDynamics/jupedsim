@@ -154,6 +154,7 @@ set (   source_files
   math/GCFMModel.cpp
   math/GompertzModel.cpp
   math/GradientModel.cpp
+  math/FastMarching.cpp
 
   mpi/LCGrid.cpp
 
@@ -268,6 +269,7 @@ set (   header_files
   math/GCFMModel.h
   math/GompertzModel.h
   math/GradientModel.h
+  math/FastMarching.h
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
