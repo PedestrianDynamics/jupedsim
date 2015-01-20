@@ -30,6 +30,8 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 
+#define J_EPS_INFO_DIST 2.0 /// [m] abstand für Informationsaustausch (GraphRouter)
+
 using namespace std;
 
 /******************************

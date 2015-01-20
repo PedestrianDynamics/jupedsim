@@ -96,7 +96,7 @@ Router* RoutingEngine::GetRouter(RoutingStrategy strategy) const
                return router;
      }
      Log->Write("ERROR: \t Could not Find any router with Strategy:  [%d].",strategy);
-     return (Router*) NULL;
+     return /*(Router*)*/ nullptr;
 }
 
 Router* RoutingEngine::GetRouter(int id) const
@@ -107,7 +107,7 @@ Router* RoutingEngine::GetRouter(int id) const
                return router;
      }
      Log->Write("ERROR: \t Could not Find any router with ID:  [%d].",id);
-     return (Router*) NULL;
+     return /*(Router*)*/ nullptr;
 }
 
 void RoutingEngine::AddTrip(vector<string> trip)

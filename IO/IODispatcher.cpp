@@ -98,18 +98,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 {
      double RAD2DEG = 180.0 / M_PI;
      char tmp[CLENGTH] = "";
-     string agentText;
-
-     double v0 = ped->GetV0Norm();
-     int color = 1; // red= very low velocity
-
-     if (v0 > 0.0001) {
-          double v = ped->GetV().Norm();
-          color = (int) (v / v0 * 255);
-     }
-
-     if(!ped->GetSpotlight() || !ped->GetNewEventFlag()) color = -1;
-
+     int color=ped->GetColor();
      double a = ped->GetLargerAxis();
      double b = ped->GetSmallerAxis();
      double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
@@ -121,13 +110,12 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
                ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
                (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                phi * RAD2DEG, color);
-     agentText = tmp;
-     return agentText;
+
+     return string(tmp);
 }
 
-void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed      )
+void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-
      nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
@@ -590,15 +578,9 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
           }
 
           char tmp1[CLENGTH] = "";
-          double v0 = ped->GetV0Norm();
-          int color=1; // red= very low velocity
 
-          if (v0 != 0.0) {
-               double v = ped->GetV().Norm();
-               color = (int) (v / v0 * 255);
-          }
-          if(!ped->GetSpotlight()) color=-1;
 
+          double color=ped->GetColor();
           double a = ped->GetLargerAxis();
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
@@ -712,18 +694,8 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
           Pedestrian* ped = allPeds[p];
           Room* r = building->GetRoom(ped->GetRoomID());
           string caption = r->GetCaption();
-
           char s[CLENGTH] = "";
-          double v0 = ped->GetV0Norm();
-          int color=1; // red= very low velocity
-
-          if (v0 != 0.0) {
-               double v = ped->GetV().Norm();
-               color = (int) (v / v0 * 255);
-          }
-          if(!ped->GetSpotlight()) color = -1;
-
-
+          int color=ped->GetColor();
           double a = ped->GetLargerAxis();
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
@@ -736,9 +708,7 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
                     (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(s);
-
      }
-
      data.append("</frame>\n");
      _outputHandler->Write(data);
 }

@@ -49,8 +49,8 @@ public:
 
      void SetState(bool is_closed, double time);
      bool GetState() const;
-     int GetQuality() const;
-     int GetTime() const;
+     double GetQuality() const;
+     double GetTime() const;
 
 private:
      bool open; // aka state
@@ -58,9 +58,9 @@ private:
      int timeOfInformation; // number of clocks when i got the information. should be set to zero after a period of time is over (to
 
      // information quality in [0..1]. 1 is very reliable information
-     int _quality; //
+     double _quality; //
      // last time the state was recorded.
-     int _time;
+     double _time;
      // state 0=open, 1=close
      bool _isClosed;
 

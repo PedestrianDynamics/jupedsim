@@ -50,6 +50,10 @@ private:
      bool _dynamic;
      int _eventCounter;
      long int _lastUpdateTime;
+     //information propagation time in seconds
+     int _updateFrequency;
+     //information propagation range in meters
+     int _updateRadius;
      //save the router corresponding to the actual state of the building
      std::map<std::string, RoutingEngine*> _eventEngineStorage;
      //save the available routers defined in the simulation

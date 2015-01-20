@@ -61,8 +61,6 @@ using namespace std;
  constructors
  ******************/
 
-#define UPDATE_FREQUENCY 1 // in seconds
-
 EventManager::EventManager(Building *_b)
 {
      _event_times = vector<double>();
@@ -77,7 +75,8 @@ EventManager::EventManager(Building *_b)
      //_deltaT = 0;
      _projectFilename=_building->GetProjectFilename();
      _projectRootDir=_building->GetProjectRootDir();
-
+     _updateFrequency =1 ;//seconds
+     _updateRadius =2;//meters
      _file = fopen("../events/events.txt", "r");
      if (!_file) {
           Log->Write("INFO:\tFiles 'events.txt' missing. "
@@ -137,6 +136,14 @@ bool EventManager::ReadEventsXml()
           Log->Write("ERROR:\tNo events found.");
           return false;
      }
+     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_frequency"), 1);
+     _updateRadius = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
+
+     string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
+     if(color=="true")
+          Pedestrian::SetColorMode(BY_KNOWLEDGE);
+
+     //Pedestrian::SetColorMode(BY_SPOTLIGHT);
 
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;
                e = e->NextSiblingElement("event")) {
@@ -172,7 +179,7 @@ void EventManager::ReadEventsTxt(double time)
           if (cstring[0] != '#') {// skip comments
                lines++;
                if (lines > _eventCounter) {
-                    Log->Write("INFO:\tEvent: after %f sec: ", time);
+                    Log->Write("INFO:\tEvent: after %.2f sec: ", time);
                     GetEvent(cstring);
                     _eventCounter++;
                }
@@ -186,16 +193,19 @@ void EventManager::ReadEventsTxt(double time)
 
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
-#pragma omp parallel
+//#pragma omp parallel
      for(auto&& ped:_b->GetAllPedestrians())
      {
           for (auto&& door: _b->GetAllTransitions())
           {
-               if(door.second->DistTo(ped->GetPos())<0.2) //TODO: put 0.c metre in macro
+               if(door.second->DistTo(ped->GetPos())<0.5) //TODO: put 0.c metre in macro
                {
                     //actualize the information about the newly closed door
                     if(door.second->IsOpen()==false)
+                    {
                          ped->AddKnownClosedDoor(door.first, Pedestrian::GetGlobalTime());
+                         ped->SetSpotlight(true);
+                    }
                }
           }
      }
@@ -206,11 +216,11 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
           _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
           for(auto&& ped2:neighbourhood)
           {
-               if( (ped1->GetPos()-ped2->GetPos()).Norm()<J_EPS_INFO_DIST)
+               if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
                {
                     //maybe same room and subroom ?
                     //if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
-                    MergeKnowledge(ped1, ped2);
+                    MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
                }
           }
      }
@@ -239,16 +249,7 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
 {
      //create the key as string.
      //map are sorted by default
-     string key="";
-     for(auto&& knowledge:ped->GetKnownledge())
-     {
-          int door=knowledge.first;
-          if(key.empty())
-               key.append(std::to_string(door));
-          else
-               key.append(":"+std::to_string(door));
-     }
-
+     string key= ped->GetKnowledgeAsString();
      //get the router engine corresponding to the actual configuration
      bool status=true;
      if (_eventEngineStorage.count(key)>0)
@@ -318,12 +319,12 @@ void EventManager::ProcessEvent()
      int current_time = Pedestrian::GetGlobalTime();
 
      if ( (current_time != _lastUpdateTime) &&
-               ((current_time % UPDATE_FREQUENCY) == 0))
+               ((current_time % _updateFrequency) == 0))
      {
           //update knowledge about closed doors
           //share the information between the pedestrians
           UpdateAgentKnowledge(_building);
-
+          //cout<<"updating buildling..."<<endl;
           //actualize based on the new knowledge
           _lastUpdateTime = current_time;
           //cout<<"updating..."<<currentTime<<endl<<endl;
@@ -336,7 +337,7 @@ void EventManager::ProcessEvent()
      {
           if (fabs(_event_times[i] - current_time_d) < J_EPS_EVENT) {
                //Event with current time stamp detected
-               Log->Write("INFO:\tEvent: after %f sec: ", current_time_d);
+               Log->Write("INFO:\tEvent: after %.2f sec: ", current_time_d);
                if (_event_states[i].compare("close") == 0) {
                     CloseDoor(_event_ids[i]);
                } else {
@@ -366,9 +367,8 @@ void EventManager::Update_Events(double time )
      //int currentTime = _allPeds[0]->GetGlobalTime();
      int currentTime = Pedestrian::GetGlobalTime();
 
-
      if ( (currentTime != _lastUpdateTime) &&
-               ((currentTime % UPDATE_FREQUENCY) == 0))
+               ((currentTime % _updateFrequency) == 0))
      {
           for (unsigned int p1 = 0; p1 < _allPeds.size(); p1++) {
                Pedestrian* ped1 = _allPeds[p1];
@@ -387,7 +387,7 @@ void EventManager::Update_Events(double time )
                                    //wenn der Pedestrian die neuen Infos noch nicht hat und eine Reroutingtime von > 2 Sekunden hat, pruefen ob er nah genug ist
                                    double dist= (ped1->GetPos()-ped2->GetPos()).Norm();
 
-                                   if (dist <= J_EPS_INFO_DIST) { // wenn er nah genug (weniger als 2m) ist, Info weitergeben (Reroutetime auf 2 Sek)
+                                   if (dist <= _updateRadius) { // wenn er nah genug (weniger als 2m) ist, Info weitergeben (Reroutetime auf 2 Sek)
                                         //ped->RerouteIn(2.0);
                                         ped2->RerouteIn(0.0);
                                    }
@@ -408,6 +408,7 @@ void EventManager::Update_Events(double time )
                ped1->ClearMentalMap();
                ped1->ResetRerouting();
                ped1->SetNewEventFlag(true);
+               ped1->SetSpotlight(true);
           }
      }
 
@@ -415,7 +416,7 @@ void EventManager::Update_Events(double time )
      for (unsigned int i = 0; i < _event_times.size(); i++) {
           if (fabs(_event_times[i] - time) < J_EPS_EVENT) {
                //Event with current time stamp detected
-               Log->Write("INFO:\tEvent: after %f sec: ", time);
+               Log->Write("INFO:\tEvent: after %.2f sec: ", time);
                if (_event_states[i].compare("close") == 0) {
                     CloseDoor(_event_ids[i]);
                } else {
@@ -431,7 +432,6 @@ void EventManager::Update_Events(double time )
 /***************
  Event handling
  **************/
-
 //close the door if it was open and relaunch the routing procedure
 void EventManager::CloseDoor(int id)
 {

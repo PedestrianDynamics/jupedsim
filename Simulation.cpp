@@ -296,8 +296,8 @@ int Simulation::RunSimulation()
           UpdateRoutesAndLocations();
 
           //update the events
-          _em->Update_Events(t);
-          //_em->ProcessEvent();
+          //_em->Update_Events(t);
+          _em->ProcessEvent();
 
           //other updates
           //someone might have left the building

@@ -121,6 +121,7 @@ private:
      // the current time in the simulation
      static double _globalTime;
      static bool _enableSpotlight;
+     static AgentColorMode _colorMode;
      bool _spotlight;
 
      /// the router responsible for this pedestrian
@@ -206,6 +207,13 @@ public:
      const std::map<int, NavLineState>& GetKnownledge() const;
 
      /**
+      * For convenience
+      * Return a string representation of the knowledge
+      * @return
+      */
+     const std::string GetKnowledgeAsString() const;
+
+     /**
       * clear all information related to the knowledge about closed doors
       */
      void ClearKnowledge();
@@ -226,7 +234,8 @@ public:
      double GetDistanceSinceLastRecord();
 
      /**
-      * The elevation is computed using the plane equation given in the subroom.
+      * The elevation is computed using the plane
+      * equation given in the subroom.
       * @return the z coordinate of the pedestrian.
       */
 
@@ -249,8 +258,12 @@ public:
      /// in the format room1:exit1>room2:exit2
      std::string GetPath();
 
-     //debug
-     void Dump(int ID, int pa = 0); // dump pedestrians parameter, 0 for all parameters
+     /**
+      * Dump the parameters of this pedestrians.
+      * @param ID, the id of the pedestrian
+      * @param pa, the parameter to display (0 for all parameters)
+      */
+     void Dump(int ID, int pa = 0);
 
      /**
       * observe the reference pedestrians and collect some data, e.g distance to exit
@@ -262,7 +275,8 @@ public:
      bool Observe(double maxObservationTime=-1);
 
      /**
-      * @return true, if reference pedestrian have been selected and the observation process has started
+      * @return true, if reference pedestrian have been selected
+      * and the observation process has started
       */
      bool IsObserving();
 
@@ -318,6 +332,13 @@ public:
       */
      double GetPremovementTime();
 
+     /**
+      * return the pedestrian color used for visualiation.
+      * Default mode is coded by velocity.
+      * @return a value in [-1 255]
+      */
+     int GetColor();
+
      void ResetTimeInJam();
      void UpdateTimeInJam();
      void UpdateJamData();
@@ -365,6 +386,12 @@ public:
       * @param status true for activating, false for deactivating
       */
      static void ActivateSpotlightSystem(bool status);
+
+     /**
+      * Set the color mode for the pedestrians
+      * @param mode
+      */
+     static void SetColorMode(AgentColorMode mode);
 
      /**
       * Set/Get the Building object

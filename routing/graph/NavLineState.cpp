@@ -94,12 +94,12 @@ bool NavLineState::GetState() const
      return _isClosed;
 }
 
-int NavLineState::GetQuality() const
+double NavLineState::GetQuality() const
 {
      return _quality;
 }
 
-int NavLineState::GetTime() const
+double NavLineState::GetTime() const
 {
      return _time;
 }

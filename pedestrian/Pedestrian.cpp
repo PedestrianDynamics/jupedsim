@@ -38,6 +38,7 @@ using namespace std;
 
 /// initialize the static variables
 double Pedestrian::_globalTime = 0.0;
+AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 bool Pedestrian::_enableSpotlight = false;
 
 Pedestrian::Pedestrian()
@@ -337,6 +338,20 @@ void Pedestrian::ClearKnowledge()
 const map<int, NavLineState>&  Pedestrian::GetKnownledge() const
 {
      return _knownDoors;
+}
+
+const std::string Pedestrian::GetKnowledgeAsString() const
+{
+     string key="";
+     for(auto&& knowledge:_knownDoors)
+     {
+          int door=knowledge.first;
+          if(key.empty())
+               key.append(std::to_string(door));
+          else
+               key.append(":"+std::to_string(door));
+     }
+     return key;
 }
 
 void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
@@ -750,7 +765,7 @@ void Pedestrian::Dump(int ID, int pa)
 
      case 7:
           for(auto&& item:_knownDoors)
-               printf("\t door [%d] closed since [%lf] sec\n", item.first, item.second.GetTime());
+               printf("\t door [%d] closed since [%lf] sec\n",item.first, item.second.GetTime());
           break;
 
      default:
@@ -850,4 +865,54 @@ bool Pedestrian::GetSpotlight()
 void Pedestrian::ActivateSpotlightSystem(bool status)
 {
      _enableSpotlight = status;
+}
+
+int Pedestrian::GetColor()
+{
+     //default color is by velocity
+     int color = -1;
+     double v0 = GetV0Norm();
+     if (v0 != 0.0) {
+          double v = GetV().Norm();
+          color = (int) (v / v0 * 255);
+     }
+
+     switch (_colorMode)
+     {
+     case BY_SPOTLIGHT:
+          if (_spotlight==false)
+               color=-1;
+          break;
+
+     case BY_VELOCITY:
+          break;
+
+          // Hash the knowledge represented as String
+     case BY_KNOWLEDGE:
+     {
+          string key=GetKnowledgeAsString();
+          std::hash<std::string> hash_fn;
+          color =hash_fn(key)%255;
+          //cout<<"color: "<<hash_fn(key)<<endl;
+     }
+     break;
+
+     case BY_ROUTE:
+     {
+          string key=std::to_string(_routingStrategy);
+          std::hash<std::string> hash_fn;
+          color =hash_fn(key)%255;
+     }
+     break;
+
+     default:
+          break;
+     }
+
+     return color;
+}
+
+void Pedestrian::SetColorMode(AgentColorMode mode)
+{
+     _colorMode=mode;
 }
