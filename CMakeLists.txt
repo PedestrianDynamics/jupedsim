@@ -186,12 +186,12 @@ set (   source_files
   pedestrian/PedDistributor.cpp
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
+  pedestrian/Knowledge.cpp
 
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
   routing/GlobalRouter.cpp
-  routing/GraphRouter.cpp
   routing/QuickestPathRouter.cpp
   routing/SafestPathRouter.cpp
   routing/Router.cpp
@@ -200,10 +200,6 @@ set (   source_files
   routing/DTriangulation.cpp
   routing/MeshRouter.cpp
   routing/mesh/Mesh.cpp
-
-  routing/graph/NavLineState.cpp
-  routing/graph/RoutingGraph.cpp
-  routing/graph/RoutingGraphStorage.cpp
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/CognitiveMap.cpp
@@ -235,7 +231,6 @@ set (   header_files
   routing/DirectionStrategy.h
   routing/DummyRouter.h
   routing/GlobalRouter.h
-  routing/GraphRouter.h
   routing/QuickestPathRouter.h
   routing/SafestPathRouter.h
   routing/Router.h
@@ -244,9 +239,6 @@ set (   header_files
   routing/DTriangulation.h
   routing/MeshRouter.h
   routing/mesh/Mesh.h
-  routing/graph/RoutingGraphStorage.h
-  routing/graph/RoutingGraph.h
-  routing/graph/NavLineState.h
 
   routing/CognitiveMapRouter.h
   routing/cognitive_map/CognitiveMap.h
@@ -269,6 +261,7 @@ set (   header_files
   pedestrian/PedDistributor.h
   pedestrian/Ellipse.h
   pedestrian/AgentsParameters.h
+  pedestrian/Knowledge.h
 
   mpi/LCGrid.h
 

@@ -192,7 +192,7 @@ void EventManager::ReadEventsTxt(double time)
 
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
-#pragma omp parallel
+//#pragma omp parallel
      for(auto&& ped:_b->GetAllPedestrians())
      {
           for (auto&& door: _b->GetAllTransitions())
@@ -216,7 +216,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      {
           if (ped->GetNewEventFlag())informant.push_back(ped);
      }
-     //TODO: what happen when they all have the new event flag ? reset maybe?
+
 
      for(auto&& ped1:informant)
      {
@@ -232,6 +232,13 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     ped2->SetNewEventFlag(true);
                }
           }
+     }
+
+     //TODO: what happen when they all have the new event flag ? reset maybe?
+     if(informant.size()==_b->GetAllPedestrians().size())
+     {
+          for(auto&& ped:_b->GetAllPedestrians())
+               ped->SetNewEventFlag(false);
      }
 
      // information speed to fast
@@ -621,7 +628,7 @@ bool EventManager::CreateRoutingEngine(Building* _b, int first_engine)
 
 Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
 {
-     Router * rout=NULL;
+     Router * rout=nullptr;
 
      switch(strategy)
      {
