@@ -26,20 +26,20 @@
  **/
 
 
-#include "Pedestrian.h"
+#include <cassert>
 #include "../geometry/Building.h"
 #include "../geometry/NavLine.h"
 #include "../routing/Router.h"
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
-#include <cassert>
+#include "Knowledge.h"
+#include "Pedestrian.h"
 
 using namespace std;
 
-/// initialize the static variables
+// initialize the static variables
 double Pedestrian::_globalTime = 0.0;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
-bool Pedestrian::_enableSpotlight = false;
 
 Pedestrian::Pedestrian()
 {
@@ -58,7 +58,7 @@ Pedestrian::Pedestrian()
      _updateRate = 0;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
-     _navLine = new NavLine(); //FIXME this is not released
+     _navLine = new NavLine();
      _router = NULL;
      _building = NULL;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
@@ -296,38 +296,8 @@ void Pedestrian::ClearMentalMap()
 
 void Pedestrian::AddKnownClosedDoor(int door, double time)
 {
-     //     if(_knownDoors.find(door) == _knownDoors.end()) {
-     //          _knownDoors[door].close(GetGlobalTime());
-     //     }
-     //     return;
      if(time==0) time=_globalTime;
-     _knownDoors[door].SetState(true,time);
-}
-
-int Pedestrian::DoorKnowledgeCount() const
-{
-     return _knownDoors.size();
-}
-
-
-set<int>  Pedestrian::GetKnownClosedDoors()
-{
-     map<int, NavLineState>::iterator it;
-     set<int> doors_closed;
-     for(it = _knownDoors.begin(); it != _knownDoors.end(); it++) {
-
-          if(it->second.closed()) {
-               doors_closed.insert(it->first);
-          }
-     }
-
-     return doors_closed;
-}
-
-//TODO: remove
-map<int, NavLineState> *  Pedestrian::GetKnownDoors()
-{
-     return & _knownDoors;
+     _knownDoors[door].SetState(door,true,time);
 }
 
 void Pedestrian::ClearKnowledge()
@@ -335,7 +305,7 @@ void Pedestrian::ClearKnowledge()
      _knownDoors.clear();
 }
 
-const map<int, NavLineState>&  Pedestrian::GetKnownledge() const
+const map<int, Knowledge>&  Pedestrian::GetKnownledge() const
 {
      return _knownDoors;
 }
@@ -352,25 +322,6 @@ const std::string Pedestrian::GetKnowledgeAsString() const
                key.append(":"+std::to_string(door));
      }
      return key;
-}
-
-void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
-{
-     map<int, NavLineState>::iterator it;
-     for(it = input->begin(); it != input->end(); it++) {
-          //it->second.print();
-          if(it->second.isShareable(GetGlobalTime())) {
-               if(_knownDoors.find(it->first) == _knownDoors.end()) {
-                    _knownDoors[it->first] = NavLineState();
-                    if(!_knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
-                         _knownDoors.erase(it->first);
-                    }
-               } else {
-                    _knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
-               }
-          }
-     }
-     return;
 }
 
 const Point& Pedestrian::GetPos() const
@@ -773,7 +724,7 @@ void Pedestrian::Dump(int ID, int pa)
           break;
 
      }
-     fflush(stdout);
+     //fflush(stdout);
      // getc(stdin);
 }
 
@@ -857,15 +808,9 @@ void Pedestrian::SetSpotlight(bool spotlight)
      _spotlight = spotlight;
 }
 
-
-bool Pedestrian::GetSpotlight()
+void Pedestrian::SetColorMode(AgentColorMode mode)
 {
-     return !_enableSpotlight || _spotlight;
-}
-
-void Pedestrian::ActivateSpotlightSystem(bool status)
-{
-     _enableSpotlight = status;
+     _colorMode=mode;
 }
 
 int Pedestrian::GetColor()
@@ -913,7 +858,3 @@ int Pedestrian::GetColor()
      return color;
 }
 
-void Pedestrian::SetColorMode(AgentColorMode mode)
-{
-     _colorMode=mode;
-}

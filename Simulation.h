@@ -45,13 +45,12 @@
 #include "routing/QuickestPathRouter.h"
 #include "routing/DirectionStrategy.h"
 #include "routing/DummyRouter.h"
-#include "routing/GraphRouter.h"
 #include "routing/MeshRouter.h"
 #include "routing/RoutingEngine.h"
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
 #include "routing/CognitiveMapRouter.h"
-#include "events/EventManager.h" //neuer Header fuer die Events
+#include "events/EventManager.h"
 
 class Simulation
 {

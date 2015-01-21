@@ -580,7 +580,7 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
           char tmp1[CLENGTH] = "";
 
 
-          double color=ped->GetColor();
+          int color=ped->GetColor();
           double a = ped->GetLargerAxis();
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());

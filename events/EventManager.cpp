@@ -36,6 +36,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "../pedestrian/Pedestrian.h"
+#include "../pedestrian/Knowledge.h"
 #include "../mpi/LCGrid.h"
 #include "../geometry/Building.h"
 #include "../geometry/SubRoom.h"
@@ -45,10 +46,8 @@
 #include "../IO/OutputHandler.h"
 #include "../IO/IODispatcher.h"
 #include "../routing/RoutingEngine.h"
-#include "../pedestrian/Pedestrian.h"
 #include "../routing/GlobalRouter.h"
 #include "../routing/QuickestPathRouter.h"
-#include "../routing/GraphRouter.h"
 #include "../routing/MeshRouter.h"
 #include "../routing/DummyRouter.h"
 #include "../routing/SafestPathRouter.h"
@@ -193,7 +192,7 @@ void EventManager::ReadEventsTxt(double time)
 
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
-//#pragma omp parallel
+#pragma omp parallel
      for(auto&& ped:_b->GetAllPedestrians())
      {
           for (auto&& door: _b->GetAllTransitions())
@@ -304,10 +303,9 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
 
 void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
 {
-     const map<int, NavLineState>&  old_info1=p1->GetKnownledge();
-     const map<int, NavLineState>&  old_info2=p2->GetKnownledge();
-     map<int, NavLineState> merge_info;
-     //map<int, double> merge_info;
+     auto const &  old_info1=p1->GetKnownledge();
+     auto const &   old_info2=p2->GetKnownledge();
+     map<int, Knowledge> merge_info;
 
      //collect the most recent knowledge
      for (auto&& info1 : old_info1)
@@ -637,10 +635,6 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
 
      case ROUTING_QUICKEST:
           rout = new QuickestPathRouter(ROUTING_QUICKEST, ROUTING_QUICKEST);
-          break;
-
-     case ROUTING_DYNAMIC:
-          rout = new GraphRouter(ROUTING_DYNAMIC, ROUTING_DYNAMIC);
           break;
 
      case ROUTING_NAV_MESH:

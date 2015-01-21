@@ -35,15 +35,14 @@
 #include <set>
 #include <time.h>
 
-#include "../pedestrian/Ellipse.h"
+#include "Ellipse.h"
 #include "../general/Macros.h"
-#include "../routing/graph/NavLineState.h"
 #include "../geometry/NavLine.h"
 
 class Building;
 class NavLine;
 class Router;
-
+class Knowledge;
 
 class Pedestrian
 {
@@ -86,7 +85,7 @@ private:
      int _lastCellPosition;
 
      ///state of doors with time stamps
-     std::map<int, NavLineState> _knownDoors;
+     std::map<int, Knowledge> _knownDoors;
 
      /// distance to nearest obstacle that blocks the sight of ped.
      double _distToBlockade;
@@ -120,7 +119,6 @@ private:
 
      // the current time in the simulation
      static double _globalTime;
-     static bool _enableSpotlight;
      static AgentColorMode _colorMode;
      bool _spotlight;
 
@@ -198,18 +196,13 @@ public:
      void ClearMentalMap(); // erase the peds memory
 
      // functions for known closed Doors (needed for the Graphrouting and Rerouting)
-     void AddKnownClosedDoor(int door, double time=0);//TODo: refactor and remove =0
-     std::set<int>  GetKnownClosedDoors();
-     void MergeKnownClosedDoors(std::map<int, NavLineState> * input);
-     std::map<int, NavLineState> * GetKnownDoors();
-     int DoorKnowledgeCount() const;
+     void AddKnownClosedDoor(int door, double time);
      // needed for information sharing
-     const std::map<int, NavLineState>& GetKnownledge() const;
+     const std::map<int, Knowledge>& GetKnownledge() const;
 
      /**
       * For convenience
-      * Return a string representation of the knowledge
-      * @return
+      * @return a string representation of the knowledge
       */
      const std::string GetKnowledgeAsString() const;
 
@@ -381,11 +374,6 @@ public:
      static double GetGlobalTime();
      static void SetGlobalTime(double time);
 
-     /**
-      * activate/deactivate the spotlight system
-      * @param status true for activating, false for deactivating
-      */
-     static void ActivateSpotlightSystem(bool status);
 
      /**
       * Set the color mode for the pedestrians

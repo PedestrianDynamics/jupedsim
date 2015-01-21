@@ -1,6 +1,6 @@
 /**
- * \file        GraphRouter.h
- * \date        Aug 20, 2012
+ * \file        Knowledge.cpp
+ * \date        Sep 18, 2012
  * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
@@ -26,28 +26,45 @@
  **/
 
 
-#ifndef GRAPHROUTER_H_
-#define GRAPHROUTER_H_
+#include "Knowledge.h"
+#include "../IO/OutputHandler.h"
+extern OutputHandler* Log;
 
-#include "Router.h"
-#include "GlobalRouter.h"
-#include "graph/RoutingGraphStorage.h"
-#include "../geometry/Building.h"
+Knowledge::Knowledge()
+{
+     _isClosed = false;
+     _time = 0;
+     _quality=1;
+     _id=-1;
+}
 
-class GraphRouter: public GlobalRouter {
-public:
-     GraphRouter();
-     GraphRouter(int id, RoutingStrategy s);
-     virtual ~GraphRouter();
+Knowledge::~Knowledge()
+{
+}
 
-     virtual int FindExit(Pedestrian* p);
-     virtual bool Init(Building* b);
+void Knowledge::Dump()
+{
+     Log->Write("INFO: \tdoor [%d] state [%d]  since [%f]",_id,_isClosed,_time);
+}
 
-private:
-     RoutingGraphStorage g;
-     Building * _building;
-     const std::set<int> empty_set;
+void Knowledge::SetState(int id, bool is_closed, double time)
+{
+     _isClosed=is_closed;
+     _time=time;
+     _id=id;
+}
 
-};
+bool Knowledge::GetState() const
+{
+     return _isClosed;
+}
 
-#endif /* GRAPHROUTER_H_ */
+double Knowledge::GetQuality() const
+{
+     return _quality;
+}
+
+double Knowledge::GetTime() const
+{
+     return _time;
+}

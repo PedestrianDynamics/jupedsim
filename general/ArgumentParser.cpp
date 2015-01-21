@@ -51,7 +51,6 @@
 #include "../pedestrian/AgentsParameters.h"
 #include "../routing/GlobalRouter.h"
 #include "../routing/QuickestPathRouter.h"
-#include "../routing/GraphRouter.h"
 #include "../routing/MeshRouter.h"
 #include "../routing/DummyRouter.h"
 #include "../routing/SafestPathRouter.h"
@@ -758,11 +757,6 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
           else if (strategy == "quickest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
-               p_routingengine->AddRouter(r);
-          }
-          else if (strategy == "dynamic") {
-               pRoutingStrategies.push_back(make_pair(id, ROUTING_DYNAMIC));
-               Router *r = new GraphRouter(id, ROUTING_DYNAMIC);
                p_routingengine->AddRouter(r);
           }
           else if (strategy == "nav_mesh") {
