@@ -764,8 +764,9 @@ void Pedestrian::Dump(int ID, int pa)
           break;
 
      case 7:
+          printf(">> knowledge\n");
           for(auto&& item:_knownDoors)
-               printf("\t door [%d] closed since [%lf] sec\n",item.first, item.second.GetTime());
+               printf("\t door [%d] closed since [%.2f] sec\n",item.first, _globalTime-item.second.GetTime());
           break;
 
      default:

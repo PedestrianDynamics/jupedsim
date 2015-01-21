@@ -198,19 +198,28 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      {
           for (auto&& door: _b->GetAllTransitions())
           {
-               if(door.second->DistTo(ped->GetPos())<0.5) //TODO: put 0.c metre in macro
+               if(door.second->DistTo(ped->GetPos())<0.5)//distance to door to register its state
                {
                     //actualize the information about the newly closed door
                     if(door.second->IsOpen()==false)
                     {
                          ped->AddKnownClosedDoor(door.first, Pedestrian::GetGlobalTime());
-                         ped->SetSpotlight(true);
+                         ped->SetNewEventFlag(true);
+
                     }
                }
           }
      }
 
-     for(auto&& ped1:_b->GetAllPedestrians())
+     //collect the peds that are allowed to forward the information.
+     vector<Pedestrian*> informant;
+     for(auto&& ped:_b->GetAllPedestrians())
+     {
+          if (ped->GetNewEventFlag())informant.push_back(ped);
+     }
+     //TODO: what happen when they all have the new event flag ? reset maybe?
+
+     for(auto&& ped1:informant)
      {
           vector<Pedestrian*> neighbourhood;
           _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
@@ -219,11 +228,28 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
                {
                     //maybe same room and subroom ?
-                    //if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
+                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
                     MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
+                    ped2->SetNewEventFlag(true);
                }
           }
      }
+
+     // information speed to fast
+//     for(auto&& ped1:_b->GetAllPedestrians())
+//     {
+//          vector<Pedestrian*> neighbourhood;
+//          _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
+//          for(auto&& ped2:neighbourhood)
+//          {
+//               if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
+//               {
+//                    //maybe same room and subroom ?
+//                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
+//                    MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
+//               }
+//          }
+//     }
 
      //update the routers based on the configurations
      //#pragma omp parallel
@@ -234,6 +260,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                //Clear the memory and attempt to reroute
                //this can happen if all doors are known to be closed
                ped->ClearKnowledge();
+               Log->Write("ERROR: \t clearing ped knowledge");
                if(UpdateRoute(ped)==false)
                {
                     Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
@@ -261,6 +288,8 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
           Router*rout =engine->GetRouter(strategy);
           //check for validity
           ped->SetRouter(rout);
+          //clear all previous routes
+          ped->ClearMentalMap();
           //overwrite/update the pedestrian router
           if(!rout) status= false;
      }
@@ -296,7 +325,7 @@ void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
                     merge_info[info2.first]=info2.second;
                }
           }
-          else //just add
+          else //the info was not present, just add
           {
                merge_info[info2.first]=info2.second;
           }
