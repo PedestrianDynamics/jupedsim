@@ -180,8 +180,8 @@ double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
                     std::cout<<"----------------------Now calculating density!!!-----------------\n ";
-                    std::cout<<"measure area: \t"<<dsv(measureArea)<<"\n";
-                    std::cout<<"Original polygon:\t"<<dsv(polygon_iterator)<<"\n";
+                    std::cout<<"measure area: \t"<<std::setprecision(20)<<dsv(measureArea)<<"\n";
+                    std::cout<<"Original polygon:\t"<<std::setprecision(20)<<dsv(polygon_iterator)<<"\n";
                     std::cout<<"intersected polygon: \t"<<dsv(v[0])<<"\n";
                     std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<"\n";
                     //exit(EXIT_FAILURE);
@@ -342,6 +342,10 @@ void Method_D::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
+     //string parameters="python ./scripts/_Plot_cell_rho.py --f "+ voronoiLocation+" --n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId;
+     //cout<<parameters<<endl;
+     //system(parameters.c_str());
+     //system("python ../scripts/_Plot_cell_v.py ");
      points.close();
      polys.close();
      velo.close();
