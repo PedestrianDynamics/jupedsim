@@ -1,7 +1,7 @@
 /**
  * \file        SubRoom.h
  * \date        Oct 8, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -122,6 +122,11 @@ public:
       * @return all walls
       */
      const std::vector<Wall>& GetAllWalls() const;
+
+     /**
+      * @return visible walls from position of pedestrians (considering the direction of motion)
+      */
+     std::vector<Wall> GetVisibleWalls(const Point & position);
 
      /**
       * @return a reference to the wall at position index
@@ -273,7 +278,7 @@ public:
      /**
       * @return true if the two segments are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real, can can be considered transparent
+      * The use of hlines is optional, because they are not real and can be considered transparent
       */
      bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
@@ -284,6 +289,12 @@ public:
       */
      bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
+     /**
+      * @return true if the two points are visible from each other.
+      * Alls walls and transitions and crossings are used in this check.
+      * The use of hlines is optional, because they are not real, can be considered transparent
+      */
+     bool IsVisible(const Line &wall, const Point &p2);
 
      // virtual functions
      virtual std::string WriteSubRoom() const = 0;

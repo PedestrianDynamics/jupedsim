@@ -199,7 +199,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                 runningTime->SetInput(runningTimeText);
                 runningTime->Modified();
 
-                if((lastWinX!=winSize[0]) || (lastWinY!=winSize[1]) || (frameNumber<10)) {
+                if((lastWinX!=winSize[0]) || (lastWinY!=winSize[1]) /*|| (frameNumber<10)*/) {
                     static std::string winBaseName(renderWindow->GetWindowName());
                     std::string winName=winBaseName;
                     std::string s;

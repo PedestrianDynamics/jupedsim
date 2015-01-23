@@ -1,7 +1,7 @@
 /**
  * \file        Line.h
  * \date        Sep 30, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -233,10 +233,21 @@ public:
      /**
       * @return the angle between two lines
       */
-     double GetAngle(const Line& l) const;
+     double GetDeviationAngle(const Line& l) const;
      //    double GetAngle(SubRoom s) const;
+     Line enlarge(double d) const; 
 
 };
 
 #endif  /* _LINE_H */
+
+
+
+
+
+
+
+
+
+
 

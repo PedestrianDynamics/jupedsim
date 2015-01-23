@@ -1,7 +1,7 @@
 /**
  * \file        Obstacle.cpp
  * \date        Jul 31, 2012
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -300,6 +300,22 @@ const Point Obstacle::GetCentroid() const
      return Point (px,py);
 }
 
+bool Obstacle::IsClockwise() const
+{
+     if(_poly.size()<3) {
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          return false;
+          //exit(EXIT_FAILURE);
+     }
+
+     Point vecAB= _poly[1]-_poly[0];
+     Point vecBC= _poly[2]-_poly[1];
+
+     double det=vecAB.Det(vecBC);
+     if(fabs(det)<J_EPS) det=0.0;
+
+     return ( det<=0.0 );
+}
 
 bool Obstacle::IntersectWithLine(const Line& line) const
 {

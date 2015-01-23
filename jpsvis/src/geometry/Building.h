@@ -1,7 +1,7 @@
 /**
  * \file        Building.h
  * \date        Oct 1, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -47,17 +47,19 @@ class Pedestrian;
 class Transition;
 class LCGrid;
 class ForceModel;
+class PedDistributor;
 
 
-class Building {
+class Building
+{
 private:
-
      std::string _caption;
      std::string _projectFilename;
      std::string _projectRootDir;
      std::string _geometryFilename;
      RoutingEngine* _routingEngine;
      LCGrid* _linkedCellGrid;
+     //TODO: change the type to (unorder) map <int , Room*>
      std::vector<Room*> _rooms;
      std::vector<Pedestrian*> _allPedestians;
 
@@ -73,9 +75,9 @@ private:
 public:
      /// constructor
      Building();
+     Building(const std::string&, const std::string&, RoutingEngine&, PedDistributor&, double);
      /// destructor
      virtual ~Building();
-
 
      void SetCaption(const std::string& s);
      void SetRoutingEngine(RoutingEngine* r);
@@ -85,8 +87,7 @@ public:
      void DeletePedestrian(Pedestrian* &ped);
      /// delete the ped from the simulation
      void AddPedestrian(Pedestrian* ped);
-     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds);
-
+     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const;
 
      std::string GetCaption() const;
      RoutingEngine* GetRoutingEngine() const;
@@ -132,20 +133,17 @@ public:
       */
      bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
-
      /**
       * @return a crossing or a transition matching the given caption.
       * Return NULL if none is found
       */
      Crossing* GetTransOrCrossByName(std::string caption) const;
 
-
      /**
       * @return a crossing or a transition or a hline matching the given uid.
       * Return NULL if none is found
       */
      Hline* GetTransOrCrossByUID(int uid) const;
-
 
      /**
       * @return the transition matching the uid
@@ -154,8 +152,6 @@ public:
 
      //TOD0: rename later to GetGoal
      Goal* GetFinalGoal(int id);
-
-     int GetNumberOfPedestrians() const;
 
      /**
       * @return the linked-cell grid used for spatial query

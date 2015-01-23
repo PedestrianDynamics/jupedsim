@@ -1,7 +1,7 @@
 /**
  * \file        Obstacle.h
  * \date        Jul 31, 2012
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -134,6 +134,11 @@ public:
       * @return a nicely formatted string representation of the obstacle
       */
      std::string Write();
+
+     /**
+      * @return true if the polygon is clockwise oriented
+      */
+     bool IsClockwise() const;
 
 private:
      int WhichQuad(const Point& vertex, const Point& hitPos) const;

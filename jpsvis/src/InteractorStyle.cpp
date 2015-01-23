@@ -333,7 +333,7 @@ void InteractorStyle::OnLeftButtonUp()
     world[0]/=100;
     world[1]/=100;
     world[2]/=100;
-
+    cout.precision(2);
     std::cout<<"mouse position: " <<endl;
     std::cout<<"\t screen: " <<pos_x<<" "<<pos_y<<endl;
     std::cout<<"\t world : " <<world[0] << " " << world[1] << " " << world[2] << std::endl;

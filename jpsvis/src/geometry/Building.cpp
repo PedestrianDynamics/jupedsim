@@ -1,7 +1,7 @@
 /**
  * \file        Building.cpp
  * \date        Oct 1, 2014
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -34,8 +34,9 @@
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
 #include "../mpi/LCGrid.h"
-#include "../routing/RoutingEngine.h"
 #include "../routing/SafestPathRouter.h"
+#include "../routing/RoutingEngine.h"
+#include "../pedestrian/PedDistributor.h"
 #endif
 
 //#undef _OPENMP
@@ -49,10 +50,6 @@
 
 using namespace std;
 
-/************************************************************
- Konstruktoren
- ************************************************************/
-
 
 Building::Building()
 {
@@ -60,11 +57,32 @@ Building::Building()
      _projectFilename = "";
      _geometryFilename= "";
      _rooms = vector<Room*>();
-     _routingEngine = NULL;
-     _linkedCellGrid = NULL;
+     _routingEngine = nullptr;
+     _linkedCellGrid = nullptr;
      _savePathway = false;
 }
 
+#ifdef _SIMULATOR
+Building::Building(const std::string& filename, const std::string& rootDir, RoutingEngine& engine, PedDistributor& distributor, double linkedCellSize)
+        :_projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
+{
+     _caption = "no_caption";
+     _rooms = vector<Room*>();
+     _savePathway = false;
+     _linkedCellGrid = nullptr;
+
+     //todo: what happens if any of these  methods failed (return false)? throw exception ?
+     this->LoadGeometry();
+     this->LoadRoutingInfo(filename);
+     this->AddSurroundingRoom();
+     this->InitGeometry();
+     this->LoadTrafficInfo();
+     distributor.Distribute(this);
+     this->InitGrid(linkedCellSize);
+     _routingEngine->Init(this);
+     this->SanityCheck();
+}
+#endif //Simulator
 
 Building::~Building()
 {
@@ -162,10 +180,10 @@ Room* Building::GetRoom(int index) const
      } else {
           Log->Write("ERROR: Wrong 'index' in CBuiling::GetRoom() Room ID: %d size: %d",index, _rooms.size());
           Log->Write("\tControl your rooms ID and make sure they are in the order 0, 1, 2,.. ");
-          exit(EXIT_FAILURE);
+          //exit(EXIT_FAILURE);
+          return NULL;
      }
 }
-
 
 
 LCGrid* Building::GetGrid() const
@@ -260,9 +278,11 @@ void Building::AddSurroundingRoom()
 
 bool Building::InitGeometry()
 {
+     int r;
+     unsigned int i;
      Log->Write("INFO: \tInit Geometry");
-     for (int i = 0; i < GetNumberOfRooms(); i++) {
-          Room* room = GetRoom(i);
+     for (r = 0; r < GetNumberOfRooms(); r++) {
+          Room* room = GetRoom(r);
           // Polygone berechnen
           for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                SubRoom* s = room->GetSubRoom(j);
@@ -272,13 +292,13 @@ bool Building::InitGeometry()
 
                //  crossings
                const vector<Crossing*>& crossings = s->GetAllCrossings();
-               for (unsigned int i = 0; i < crossings.size(); i++) {
+               for (i = 0; i < crossings.size(); i++) {
                     goals.push_back(crossings[i]);
                }
 
                // and  transitions
                const vector<Transition*>& transitions = s->GetAllTransitions();
-               for (unsigned int i = 0; i < transitions.size(); i++) {
+               for (i = 0; i < transitions.size(); i++) {
                     goals.push_back(transitions[i]);
                }
 
@@ -420,13 +440,16 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
 
                string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
-               string closed = xmltoa(xSubRoom->Attribute("closed"), "0");
+               string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
                string type = xmltoa(xSubRoom->Attribute("class"),"subroom");
 
                //get the equation of the plane if any
                double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
                double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
+
+               // assume either the old "C_z" or the new "C"
                double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
+               C_z = xmltof(xSubRoom->Attribute("C"), C_z);
 
                SubRoom* subroom = NULL;
 
@@ -480,13 +503,13 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                     int id = xmltof(xObstacle->Attribute("id"), -1);
                     int height = xmltof(xObstacle->Attribute("height"), 0);
-                    double closed = xmltof(xObstacle->Attribute("closed"), 0);
-                    string caption = xmltoa(xObstacle->Attribute("caption"),"-1");
+                    double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                    string ObstCaption = xmltoa(xObstacle->Attribute("caption"),"-1");
 
                     Obstacle* obstacle = new Obstacle();
                     obstacle->SetId(id);
-                    obstacle->SetCaption(caption);
-                    obstacle->SetClosed(closed);
+                    obstacle->SetCaption(ObstCaption);
+                    obstacle->SetClosed(ObstClosed);
                     obstacle->SetHeight(height);
 
                     //looking for polygons (walls)
@@ -678,7 +701,7 @@ void Building::AddHline(Hline* line)
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
-               Log->Write("INFO: Skipping identical hlines with ID [%d]",line->GetID());
+               Log->Write("INFO: \tSkipping identical hlines with ID [%d]",line->GetID());
                return;
           } else {
                Log->Write(
@@ -768,11 +791,11 @@ Goal* Building::GetFinalGoal(int ID)
 
 Crossing* Building::GetTransOrCrossByName(string caption) const
 {
-
      {
           //eventually
           map<int, Transition*>::const_iterator itr;
-          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
+          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr)
+          {
                if (itr->second->GetCaption() == caption)
                     return itr->second;
           }
@@ -780,7 +803,8 @@ Crossing* Building::GetTransOrCrossByName(string caption) const
      {
           //finally the  crossings
           map<int, Crossing*>::const_iterator itr;
-          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
+          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr)
+          {
                if (itr->second->GetCaption() == caption)
                     return itr->second;
           }
@@ -795,7 +819,8 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      {
           //eventually transitions
           map<int, Transition*>::const_iterator itr;
-          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
+          for(itr = _transitions.begin(); itr != _transitions.end(); ++itr)
+          {
                if (itr->second->GetUniqueID()== id)
                     return itr->second;
           }
@@ -803,19 +828,21 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      {
           //then the  crossings
           map<int, Crossing*>::const_iterator itr;
-          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr) {
+          for(itr = _crossings.begin(); itr != _crossings.end(); ++itr)
+          {
                if (itr->second->GetUniqueID() == id)
                     return itr->second;
           }
      }
      {
           //finally the  hlines
-          for(auto itr = _hLines.begin(); itr != _hLines.end(); ++itr) {
+          for(auto itr = _hLines.begin(); itr != _hLines.end(); ++itr)
+          {
                if (itr->second->GetUniqueID() == id)
                     return itr->second;
           }
      }
-     Log->Write("WARNING: No Transition or Crossing or hline with ID %d: " ,id);
+     Log->Write("ERROR: No Transition or Crossing or hline with ID %d: " ,id);
      return NULL;
 }
 
@@ -1154,7 +1181,7 @@ void Building::AddPedestrian(Pedestrian* ped)
      _allPedestians.push_back(ped);
 }
 
-void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds)
+void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const
 {
      for(unsigned int p = 0;p<_allPedestians.size();p++){
           Pedestrian* ped=_allPedestians[p];
@@ -1223,11 +1250,6 @@ Pedestrian* Building::GetPedestrian(int pedID) const
      }
 
      return NULL;
-}
-
-int Building::GetNumberOfPedestrians() const
-{
-     return _allPedestians.size();
 }
 
 Transition* Building::GetTransitionByUID(int uid) const
@@ -1358,6 +1380,7 @@ bool Building::SaveGeometry(const std::string &filename)
      if(geofile.is_open())
      {
           geofile<<geometry.str();
+          Log->Write("INFO:\tfile saved to %s",filename.c_str());
      }
      else
      {
@@ -1369,3 +1392,5 @@ bool Building::SaveGeometry(const std::string &filename)
 }
 
 #endif // _SIMULATOR
+
+
