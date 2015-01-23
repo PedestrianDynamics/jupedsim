@@ -27,6 +27,7 @@
  **/
 
 #include "Method_D.h"
+#include <cmath>
 
 Method_D::Method_D()
 {
@@ -153,6 +154,11 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
      }
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
+
+     for(auto && p:polygons)
+     {
+          ReducePrecision(p);
+     }
      return polygons;
 }
 /**
@@ -414,3 +420,11 @@ void Method_D::SetMeasurementArea (MeasurementArea_B* area)
      _areaForMethod_D = area;
 }
 
+void Method_D::ReducePrecision(polygon_2d& polygon)
+{
+     for(auto&& point:polygon.outer())
+     {
+          point.x(round(point.x() * 100) / 100);
+          point.y(round(point.y() * 100) / 100);
+     }
+}
