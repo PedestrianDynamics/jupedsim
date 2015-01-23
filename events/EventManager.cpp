@@ -189,7 +189,6 @@ void EventManager::ReadEventsTxt(double time)
 /***********
  Update
  **********/
-
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
 //#pragma omp parallel
