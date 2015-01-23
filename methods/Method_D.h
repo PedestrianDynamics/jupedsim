@@ -40,6 +40,9 @@
 #else
 #include <direct.h>
 #endif
+
+
+
 class Method_D {
 public:
      Method_D();
@@ -77,7 +80,7 @@ private:
      double _scaleY;
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
-     vector<polygon_2d> GetPolygons(int NrInFrm);
+
      vector<polygon_2d> GetPolygons(vector<int> ids, vector<double>& XInFrame, vector<double>& YInFrame,
                vector<double>& VInFrame, vector<int>& IdInFrame);
      void OutputVoronoiResults(const vector<polygon_2d>&  polygons, int frid, const vector<double>& VInFrame);
@@ -88,6 +91,12 @@ private:
      void OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, const vector<double>& XInFrame,
                const vector<double>& YInFrame,const vector<double>& VInFrame);
      void GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, int frid);
+
+     /**
+      * Reduce the precision of the points to two digits
+      * @param polygon
+      */
+     void ReducePrecision(polygon_2d& polygon);
 
 };
 
