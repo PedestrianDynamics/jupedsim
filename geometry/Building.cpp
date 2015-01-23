@@ -447,7 +447,10 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                //get the equation of the plane if any
                double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
                double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
+
+               // assume either the old "C_z" or the new "C"
                double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
+               C_z = xmltof(xSubRoom->Attribute("C"), C_z);
 
                SubRoom* subroom = NULL;
 

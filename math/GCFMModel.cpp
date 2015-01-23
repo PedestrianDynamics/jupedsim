@@ -385,7 +385,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      const std::vector<Wall>& walls = subroom->GetVisibleWalls(ped->GetPos());
      if(ped->GetID()==-33)
      {
-          printf("Ped = %d, visible walls = %d\n",ped->GetID(),walls.size());
+          printf("Ped = %d, visible walls = %d\n",ped->GetID(),(int)walls.size());
           getc(stdin);
      }
      for (unsigned int i = 0; i < walls.size(); i++) {
