@@ -1,5 +1,10 @@
 #include "Fastmarchtest.h"
 
+#include "../geometry/Point.h"
+#include "../math/FastMarching.h"
+#include "../IO/OutputHandler.h"
+
+
 Fastmarchtest::Fastmarchtest()
 {
     fastmarcher = new FastMarcher();
@@ -25,7 +30,7 @@ Fastmarchtest::Fastmarchtest()
     for (int i = 0; i < grid.getNumOfElements(); ++i) {
         cost[i] = -2. // negative value to indicate a not calculated value
         speedvalue[i] = 1.;
-        gradientT[i].SetX(0.);
+        gradientT[i].SetX(0.); // (0, 0) indicate a not calculated value
         gradientT[i].SetY(0.);
     }
 
@@ -59,8 +64,11 @@ void Fastmarchtest::run(char* outputfile) {
     RectGrid* g = fastmarcher->getGrid();
     Log.Write("\nPosX, PosY, cost, gradientT_x, gradientT_y, speedvalue")
     for (int i = 0; i < g->getNumOfElements(); ++i) {
-        Log->Write("\n" + g->getPointFromKey(i)->GetX() + ", " + g->getPointFromKey(i)->GetY() + ", ");
-        Log->Write(fastmarcher->)
+        Point iPoint = g->getPointFromKey(i);
+        Log->Write("\n" + iPoint->GetX() + ", " + iPoint->GetY() + ", ");
+        Log->Write(fastmarcher->getTimecostAt( iPoint ) + ", ");
+        Log->Write((fastmarcher->getFloorfieldAt(iPoint)).GetX() + ", " + (fastmarcher->getFloorfieldAt(iPoint)).GetY()  + ", ");
+        Log->Write(fastmarcher->getSpeedAt(iPoint) + ", ");
     }
     delete Log;
 }

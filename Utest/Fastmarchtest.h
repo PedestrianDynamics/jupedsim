@@ -10,12 +10,18 @@ class Fastmarchtest
     public:
         Fastmarchtest();
         virtual ~Fastmarchtest();
-        RectGrid Getgrid() { return grid; }
-        void Setgrid(RectGrid val) { grid = val; }
-        int * Getspeedvalue() { return speedvalue; }
-        void Setspeedvalue(int * val) { speedvalue = val; }
-        Point * GetgradientT() { return gradientT; }
-        void SetgradientT(Point * val) { gradientT = val; }
+
+        RectGrid* getGrid() { return grid; }
+        void setGrid(RectGrid val) { grid = val; }
+
+        int * getSpeedvalue() { return speedvalue; }
+        void setSpeedvalue(int * val) { speedvalue = val; }
+
+        Point * getGradientT() { return gradientT; }
+        void setGradientT(Point * val) { gradientT = val; }
+
+        double * getCost() { return cost;}
+        void setCost(double * val) {cost = val;}
 
         void run(char* outputfile);
     protected:

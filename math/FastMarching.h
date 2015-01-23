@@ -39,7 +39,7 @@
 //          x (3)
 
 typedef struct directNeighbor_t {
-    int id[4];
+    int key[4];
 } directNeighbor;
 
 
@@ -50,22 +50,23 @@ class RectGrid
         RectGrid();
         virtual ~RectGrid()
 
-        int setBoundaries(const double xMin, const double yMin,
-                          const double xMax, const double yMax);
+        int setBoundaries(const double xMinA, const double yMinA,
+                          const double xMaxA, const double yMaxA);
         int setBoundaries(const Point xy_min, const Point xy_max);
         int setSpacing(const double h_y, const double h_x);
+        int createGrid();
 
-        int getKeyAtXY(const int x, const int y) const;     //key = indef in (extern managed) array
+        int getKeyAtXY(const double x, const double y) const;     //key = indef in (extern managed) array
         int getKeyAtIndex(const int i, const int j) const;  //key = index in 1D array by giving indices of 2D array
                                                             //      zB um schnell die Nachbarpunkte-keys zu finden
 
         Point getPointFromKey(const int key) const;
         Point getNearestGridPoint(const Point& currPoint) const;
         int getNearestGridPointsKey(const Point& currPoint) const;  //key = index in array
-        Point getNearestGridPoint2Dindices (const Point& currPoint) const;
+        //Point getNearestGridPoint2Dindices (const Point& currPoint) const;
 
         int isInnerPoint(const Point& testPoint) const;
-        int isInnerGridPoint(const Point& testPoint) const;
+        int isGridPoint(const Point& testPoint) const;
 
         int setAsInner(const Point& innerP); //input in xy world coordinates
         int setAsOuter(const Point& outerP); //input in xy world coordinates
@@ -82,9 +83,10 @@ class RectGrid
         int gridID;
         int* isInner;
         int nGridpoints;
-
-        int getIndex
-
+        double xMin, xMax;
+        double yMin, yMax;
+        double hx, hy;
+        int iMax, jMax;
     private:
 
 };
