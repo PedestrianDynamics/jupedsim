@@ -55,7 +55,12 @@ Method_D::~Method_D()
 
 bool Method_D::Process (const PedData& peddata)
 {
-     _peds_t = peddata.GetPedsFrame();
+	if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor()))
+	{
+		Log->Write("Error:\tSome pedestrians are outside geometry. Please check the geometry or trajectory file!");
+		return false;
+	}
+	 _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
@@ -148,7 +153,6 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
      int NrInFrm = ids.size();
      double boundpoint =10*max(max(fabs(_geoMinX),fabs(_geoMinY)), max(fabs(_geoMaxX), fabs(_geoMaxY)));
      vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm,boundpoint);
-
      if(_cutByCircle)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
@@ -186,8 +190,8 @@ double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
                     std::cout<<"----------------------Now calculating density!!!-----------------\n ";
-                    std::cout<<"measure area: \t"<<std::setprecision(20)<<dsv(measureArea)<<"\n";
-                    std::cout<<"Original polygon:\t"<<std::setprecision(20)<<dsv(polygon_iterator)<<"\n";
+                    std::cout<<"measure area: \t"<<dsv(measureArea)<<"\n";
+                    std::cout<<"Original polygon:\t"<<dsv(polygon_iterator)<<"\n";
                     std::cout<<"intersected polygon: \t"<<dsv(v[0])<<"\n";
                     std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<"\n";
                     //exit(EXIT_FAILURE);
@@ -348,9 +352,9 @@ void Method_D::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
-     //string parameters="python ./scripts/_Plot_cell_rho.py --f "+ voronoiLocation+" --n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId;
-     //cout<<parameters<<endl;
-     //system(parameters.c_str());
+     string parameters="python ./scripts/_Plot_cell_rho.py --f "+ voronoiLocation+" --n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId;
+     cout<<parameters<<endl;
+     system(parameters.c_str());
      //system("python ../scripts/_Plot_cell_v.py ");
      points.close();
      polys.close();
@@ -431,4 +435,17 @@ void Method_D::ReducePrecision(polygon_2d& polygon)
           point.x(round(point.x() * 100) / 100);
           point.y(round(point.y() * 100) / 100);
      }
+}
+
+bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor)
+{
+	for(int i=0; i<frames; i++)
+		for(int j =0; j<peds; j++)
+		{
+			if(Xcor[i][j]<_geoMinX || Xcor[i][j]>_geoMaxX || Ycor[i][j]<_geoMinY || Ycor[i][j]>_geoMaxY)
+			{
+				return false;
+			}
+		}
+	return true;
 }

@@ -65,7 +65,6 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
 
 	VD voronoidiagram;
 	construct_voronoi(points.begin(), points.end(), &voronoidiagram);
-
 	int Ncell = 0;
 	std::vector<polygon_2d> polygons;
 
