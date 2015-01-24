@@ -13,26 +13,27 @@ __author__ = 'Oliver Schmidts'
 
 class JPSRunTestDriver(object):
 
-    def __init__(self, testnumber, argv0):
+    def __init__(self, testnumber, argv0, testdir):
         self.SUCCESS = 0
         self.FAILURE = 1
-
         # check if testnumber is an int
-        assert isinstance(testnumber, float)
+        assert isinstance(testnumber, float) or isinstance(testnumber, int)
+        # only allow path and strings as path directory name
+        assert path.exists(argv0)
+        assert path.exists(testdir)
+        assert isinstance(argv0, str)
         self.testno = testnumber
         self.logfile = "log_test_%d.txt" % self.testno
+        self.logfile = os.path.join(testdir, self.logfile)
 
         # touch file if not already there
-        f = open(self.logfile)
+        f = open(self.logfile, 'a')
         f.close()
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG,
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.HOME = path.expanduser("~")
 
-        # only allow path and strings as path directory name
-        assert path.exists(argv0)
-        assert isinstance(argv0, str)
-        self.DIR = os.path.dirname(os.path.realpath(argv0))
+        self.DIR = testdir
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
 
