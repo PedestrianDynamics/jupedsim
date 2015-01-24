@@ -132,7 +132,6 @@ public:
       */
      virtual bool Init(Building* b) = 0;
 
-
 };
 
 #endif  /* _ROUTING_H */

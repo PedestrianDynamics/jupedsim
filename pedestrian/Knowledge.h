@@ -1,5 +1,5 @@
 /**
- * \file        NavLineState.h
+ * \file        Knowledge.h
  * \date        Sep 18, 2012
  * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -25,34 +25,40 @@
  *
  **/
 
+#ifndef KNOWLEDGE_H_
+#define KNOWLEDGE_H_
 
-#ifndef NAVLINESTATE_H_
-#define NAVLINESTATE_H_
-
-
-#include <time.h>
 #include <iostream>
 
-//time between a pedestrian got the information and uses the information
-#define INFO_OFFSET 1.5
-
-class NavLineState {
-
+class Knowledge
+{
 public:
-     NavLineState();
-     ~NavLineState();
+     /**
+      * Constructor
+      */
+     Knowledge();
 
-     bool closed();
-     bool isShareable(double time);
-     void close(double time);
-     bool mergeDoor(NavLineState & orig, double time);
-     void print();
+     /**
+      * Destructor
+      */
+     ~Knowledge();
+
+     void Dump();
+     void SetState(int id, bool is_closed, double time);
+     bool GetState() const;
+     double GetQuality() const;
+     double GetTime() const;
 
 private:
-     bool open; // aka state
-     int timeFirstSeen; // number of clocks till the door was seen changed the first time
-     int timeOfInformation; // number of clocks when i got the information. should be set to zero after a period of time is over (to
+     /// information quality in [0..1]. 1 is very reliable information
+     double _quality; //
+     /// last time the state was recorded.
+     double _time;
+     /// state 0=open, 1=close
+     bool _isClosed;
+     /// id of the door
+     int _id;
 
 };
-#endif /* ROUTINGGRAPHSTORAGE_H_ */
+#endif /* KNOWLEDGE_H_ */
 

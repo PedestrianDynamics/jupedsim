@@ -9,9 +9,9 @@
   <max_sim_time>900</max_sim_time>
   <events>events.xml</events>
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" embed_mesh="false" fps="8">
+  <trajectories format="xml-plain" fps="8">
     <file location="testSchulTrajectories.xml" />
-    <!-- <socket hostname="127.0.0.1" port="8989"/> -->
+<!--     <socket hostname="127.0.0.1" port="8989"/> -->
   </trajectories>
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->

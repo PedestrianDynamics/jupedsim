@@ -296,7 +296,7 @@ bool GlobalRouter::Init(Building* building)
                          if (nav1->operator ==(*nav2))
                               continue;
 
-                         if (building->ped_is_visible(nav1->GetCentre(), nav2->GetCentre(), true)) {
+                         if (building->IsVisible(nav1->GetCentre(), nav2->GetCentre(), true)) {
                               int to_door = _map_id_to_index[nav2->GetUniqueID()];
                               _distMatrix[from_door][to_door] = penalty*(nav1->GetCentre()
                                         - nav2->GetCentre()).Norm();

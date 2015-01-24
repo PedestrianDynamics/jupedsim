@@ -35,19 +35,18 @@
 #include <set>
 #include <time.h>
 
-#include "../pedestrian/Ellipse.h"
+#include "Ellipse.h"
 #include "../general/Macros.h"
-#include "../routing/graph/NavLineState.h"
 #include "../geometry/NavLine.h"
 
 class Building;
 class NavLine;
 class Router;
+class Knowledge;
 
-
-class Pedestrian {
+class Pedestrian
+{
 private:
-
      //generic parameters, independent from models
      int _id; //starting with 1
      int _exitIndex; // current exit
@@ -85,15 +84,11 @@ private:
      Point _lastPosition;
      int _lastCellPosition;
 
-     /**
-      * A set with UniqueIDs of closed crossings,
-      * transitions or hlines (hlines doesnt make that much sense,
-      * just that they are removed from the routing graph)
-      */
-     std::map<int, NavLineState> _knownDoors;
+     ///state of doors with time stamps
+     std::map<int, Knowledge> _knownDoors;
 
-
-     double _DistToBlockade=0; // distance to nearest obstacle that blocks the sight of ped.
+     /// distance to nearest obstacle that blocks the sight of ped.
+     double _distToBlockade;
      //routing parameters
      /// new orientation after 10 seconds
      double _reroutingThreshold;
@@ -109,6 +104,8 @@ private:
      std::queue <Point> _lastPositions;
      /// store the last velocities
      std::queue <Point> _lastVelocites;
+     /// routing strategy followed
+     RoutingStrategy _routingStrategy;
 
      int _newOrientationDelay; //2 seconds, in steps
 
@@ -122,7 +119,7 @@ private:
 
      // the current time in the simulation
      static double _globalTime;
-     static bool _enableSpotlight;
+     static AgentColorMode _colorMode;
      bool _spotlight;
 
      /// the router responsible for this pedestrian
@@ -183,6 +180,7 @@ public:
      const Point& GetV0() const;
      const Point& GetV0(const Point& target);
      void InitV0(const Point& target);
+
      /**
       * the desired speed is the projection of the speed on the horizontal plane.
       * @return the norm of the desired speed.
@@ -198,12 +196,22 @@ public:
      void ClearMentalMap(); // erase the peds memory
 
      // functions for known closed Doors (needed for the Graphrouting and Rerouting)
-     void AddKnownClosedDoor(int door);
-     std::set<int>  GetKnownClosedDoors();
-     void MergeKnownClosedDoors(std::map<int, NavLineState> * input);
-     std::map<int, NavLineState> * GetKnownDoors();
-     int DoorKnowledgeCount() const;
+     void AddKnownClosedDoor(int door, double time);
+     // needed for information sharing
+     const std::map<int, Knowledge>& GetKnownledge() const;
 
+     /**
+      * For convenience
+      * @return a string representation of the knowledge
+      */
+     const std::string GetKnowledgeAsString() const;
+
+     /**
+      * clear all information related to the knowledge about closed doors
+      */
+     void ClearKnowledge();
+
+     RoutingStrategy GetRoutingStrategy() const;
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();
@@ -219,7 +227,8 @@ public:
      double GetDistanceSinceLastRecord();
 
      /**
-      * The elevation is computed using the plane equation given in the subroom.
+      * The elevation is computed using the plane
+      * equation given in the subroom.
       * @return the z coordinate of the pedestrian.
       */
 
@@ -242,8 +251,12 @@ public:
      /// in the format room1:exit1>room2:exit2
      std::string GetPath();
 
-     //debug
-     void Dump(int ID, int pa = 0); // dump pedestrians parameter, 0 for all parameters
+     /**
+      * Dump the parameters of this pedestrians.
+      * @param ID, the id of the pedestrian
+      * @param pa, the parameter to display (0 for all parameters)
+      */
+     void Dump(int ID, int pa = 0);
 
      /**
       * observe the reference pedestrians and collect some data, e.g distance to exit
@@ -255,7 +268,8 @@ public:
      bool Observe(double maxObservationTime=-1);
 
      /**
-      * @return true, if reference pedestrian have been selected and the observation process has started
+      * @return true, if reference pedestrian have been selected
+      * and the observation process has started
       */
      bool IsObserving();
 
@@ -311,6 +325,13 @@ public:
       */
      double GetPremovementTime();
 
+     /**
+      * return the pedestrian color used for visualiation.
+      * Default mode is coded by velocity.
+      * @return a value in [-1 255]
+      */
+     int GetColor();
+
      void ResetTimeInJam();
      void UpdateTimeInJam();
      void UpdateJamData();
@@ -353,11 +374,12 @@ public:
      static double GetGlobalTime();
      static void SetGlobalTime(double time);
 
+
      /**
-      * activate/deactivate the spotlight system
-      * @param status true for activating, false for deactivating
+      * Set the color mode for the pedestrians
+      * @param mode
       */
-     static void ActivateSpotlightSystem(bool status);
+     static void SetColorMode(AgentColorMode mode);
 
      /**
       * Set/Get the Building object

@@ -32,8 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "../logging.h"
 #include "TraVisToClient.h"
+#include "../general/Macros.h"
 
 
 //using namespace std;
@@ -46,15 +46,12 @@ TraVisToClient::TraVisToClient(string hostname, unsigned short port)
      _port = port;
      _isConnected = false;
      createConnection();
-
-
 }
 
 TraVisToClient::~TraVisToClient()
 {
      if (_isConnected) close();
 }
-
 
 /// send datablock to the server
 

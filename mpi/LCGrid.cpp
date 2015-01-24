@@ -152,7 +152,7 @@ void LCGrid::ClearGrid()
 void LCGrid::HighlightNeighborhood(int pedID, Building* building)
 {
      // force spotlight activation
-     Pedestrian::ActivateSpotlightSystem(true);
+     Pedestrian::SetColorMode(BY_SPOTLIGHT);
      //darken all
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++){

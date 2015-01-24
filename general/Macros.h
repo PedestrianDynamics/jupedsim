@@ -59,13 +59,10 @@
 #define J_EPS 0.001
 #define J_EPS_EVENT 0.00001 //zum pruefen des aktuellen Zeitschrittes auf events
 #define J_EPS_DIST 0.05// [m]
-#define J_EPS_INFO_DIST 2.0 /// [m] abstand für Informationsaustausch (GraphRouter)
+
 #define J_EPS_GOAL 0.005 /// [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
-
-//TODO: why the limitation ?
-#define NR_PEDS 5000
 
 // routing macros
 #define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
@@ -110,7 +107,6 @@ enum RoutingStrategy {
      ROUTING_LOCAL_SHORTEST=1,
      ROUTING_GLOBAL_SHORTEST,
      ROUTING_QUICKEST,
-     ROUTING_DYNAMIC,
      ROUTING_FROM_FILE,
      ROUTING_NAV_MESH,
      ROUTING_DUMMY,
@@ -128,36 +124,42 @@ enum OperativModels {
 //    MODEL_GNM
 };
 
+enum AgentColorMode {
+     BY_VELOCITY=1,
+     BY_KNOWLEDGE,
+     BY_ROUTE,
+     BY_SPOTLIGHT
+};
 //global functions for convenience
 
-inline char    xmltob(const char * t,char    v=0)
+inline char xmltob(const char * t, char v = 0)
 {
-     if (t&&(*t)) return (char)atoi(t);
+     if (t && (*t)) return (char) atoi(t);
      return v;
 }
-inline int     xmltoi(const char * t,int     v=0)
+inline int xmltoi(const char * t, int v = 0)
 {
-     if (t&&(*t)) return atoi(t);
+     if (t && (*t)) return atoi(t);
      return v;
 }
-inline long    xmltol(const char * t,long    v=0)
+inline long xmltol(const char * t, long v = 0)
 {
-     if (t&&(*t)) return atol(t);
+     if (t && (*t)) return atol(t);
      return v;
 }
-inline double  xmltof(const char * t,double  v=0.0)
+inline double xmltof(const char * t, double v = 0.0)
 {
-     if (t&&(*t)) return atof(t);
+     if (t && (*t)) return atof(t);
      return v;
 }
-inline const char * xmltoa(const char * t,      const char * v="")
+inline const char * xmltoa(const char * t, const char * v = "")
 {
-     if (t)       return  t;
+     if (t) return t;
      return v;
 }
-inline char xmltoc(const char * t,const char v='\0')
+inline char xmltoc(const char * t, const char v = '\0')
 {
-     if (t&&(*t)) return *t;
+     if (t && (*t)) return *t;
      return v;
 }
 
@@ -195,6 +197,75 @@ inline std::string concatenate(std::string const& name, int i) {
      return s.str();
 }
 
-//another useful macro
-//#define UNUSED(expr) (void)(expr)
+//**************************************************************
+//useful colors attributes for debugging
+//**************************************************************
+
+//Text attributes
+#define OFF       0     //All attributes off
+#define BRIGHT      1    //Bold on
+//       4    Underscore (on monochrome display adapter only)
+#define BLINK       5    //Blink on
+//       7    Reverse video on
+//      8    Concealed on
+
+//   Foreground colors
+#define BLACK     30
+#define CYAN      36
+#define WHITE     37
+#define RED       31
+#define GREEN     32
+#define YELLOW    33
+#define BLUE      34
+#define MAGENTA   35
+
+//    Background colors
+#define BG_BLACK  40
+#define BG_RED    41
+#define BG_GREEN  42
+#define BG_YELLOW 43
+#define BG_BLUE   44
+#define BG_CYAN   47
+#define BG_WHITE  47
+
+// Special caracters
+#define HOME  printf("\033[1;1H");  // cursor up left
+#define CLEAR   printf(" \033[2J"); //clear screen
+#define RED_LINE  printf("%c[%d;%d;%dm\n",0x1B, BRIGHT,RED,BG_BLACK);
+#define GREEN_LINE  printf("\t%c[%d;%d;%dm",0x1B, BRIGHT,GREEN,BG_BLACK);
+#define BLUE_LINE  printf("\t%c[%d;%d;%dm",0x1B, BRIGHT,BLUE,BG_BLACK);
+#define MAGENTA_LINE  printf("\t%c[%d;%d;%dm",0x1B, BRIGHT,MAGENTA,BG_BLACK);
+#define YELLOW_LINE  printf("\t%c[%d;%d;%dm",0x1B, BRIGHT,YELLOW,BG_BLACK);
+#define OFF_LINE printf("%c[%dm\n", 0x1B, OFF);
+
+
+//**************************************************************
+//useful macros  for debugging
+//**************************************************************
+#ifdef TRACE_LOGGING
+
+inline void _printDebugLine(const std::string& fileName, int lineNumber)
+{
+unsigned found = fileName.find_last_of("/\\");
+std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<<std::endl;
+}
+
+#define dtrace(...)                         \
+    (_printDebugLine(__FILE__, __LINE__),   \
+    fprintf(stderr, __VA_ARGS__),           \
+    (void) fprintf(stderr, "\n"))
+
+#define derror(...)                         \
+    (_printDebugLine(__FILE__, __LINE__),   \
+    fprintf(stderr, "ERROR: "),             \
+    fprintf(stderr, __VA_ARGS__)            \
+    )
+#else
+
+#define dtrace(...)    ((void) 0)
+#define derror(...)                         \
+    (fprintf(stderr, __VA_ARGS__)           \
+    )
+#endif /* TRACE_LOGGING */
+
 #endif  /* _MACROS_H */

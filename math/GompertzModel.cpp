@@ -29,7 +29,6 @@
  **/
 
 
-#include "../colors.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
@@ -45,10 +44,8 @@
 #define omp_get_max_threads()  1
 #endif
 
-
 using std::vector;
 using std::string;
-
 
 GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall)
@@ -201,7 +198,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
-                     bool isVisible = building->ped_is_visible(p1, p2, false);
+                     bool isVisible = building->IsVisible(p1, p2, false);
                      if (!isVisible)
                           continue;
                      // if(debugPed == ped->GetID())
