@@ -307,8 +307,8 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      }
       F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
   
-      double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
-      double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
+      //double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
+      //double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
 
 #if DEBUG
       printf( "pos %f %f target %f %f\n", pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
@@ -323,7 +323,7 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
 
 Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 {
-     Point F_rep = Point(0.0, 0.0);;
+     Point F_rep(0.0, 0.0);
      // x- and y-coordinate of the distance between p1 and p2
      Point distp12 = ped2->GetPos() - ped1->GetPos();
      //const Point& vp1 = ped1->GetV(); // v Ped1
@@ -398,7 +398,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
-     Point f = Point(0., 0.);
+     Point f(0., 0.);
      //first the walls
      const vector<Wall>& walls = subroom->GetAllWalls();
      for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {

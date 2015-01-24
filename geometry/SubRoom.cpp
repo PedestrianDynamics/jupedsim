@@ -376,39 +376,32 @@ bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
      // printf("\t\tEnter ped_is_visible\n");
      // generate certain connection lines
      // connecting p1 with p2
-     Line cl = Line(p1,p2);
-     Line L1=cl, L2;
+     //Line cl(p1,p2);
+     //Line L2;
      bool temp =  true;
      //check intersection with Walls
-     for(unsigned int i = 0; i < _walls.size(); i++) {
-          if(temp  && cl.IntersectionWith(_walls[i])){
-               L2 = _walls[i];
-               // fprintf (stdout, "\t\t INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
-               temp = false;
-          }
-     }
+    for(const auto& wall : _walls) {
+        if (wall.IntersectionWith(p1, p2)) {
+            return false;
+        }
+    }
 
      // printf("\t\t -- ped_is_visible; check obstacles\n");
      //check intersection with obstacles
-     for(unsigned int i = 0; i < _obstacles.size(); i++) {
-          Obstacle * obs = _obstacles[i];
-          for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++) {
-               const Wall& w = obs->GetAllWalls()[k];
-               if(temp && cl.IntersectionWith(w)){
-                    L2 = w;
-                    // fprintf (stdout, "\t\t INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
-                    temp = false;
-                    
-               }
-          }
-     }
+    for ( const auto obstacle : _obstacles) {
+        for ( const auto& wall : obstacle->GetAllWalls()) {
+            if (wall.IntersectionWith(p1, p2)) {
+                return false;
+            }
+        }
+    }
 
 
      // check intersection with other hlines in room
      if(considerHlines)
           for(unsigned int i = 0; i < _hlines.size(); i++) {
                if(_hlines[i]->IsInLineSegment(p1)|| _hlines[i]->IsInLineSegment(p2)) continue;
-               if(temp && cl.IntersectionWith(*(Line*)_hlines[i]))
+               if(temp && (Line*)_hlines[i]->IntersectionWith(p1, p2))
                     temp = false;
           }
 

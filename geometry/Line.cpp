@@ -325,53 +325,50 @@ double Line::LengthSquare() const
      return (_point1 - _point2).NormSquare();
 }
 
+bool Line::IntersectionWith(const Point &p1, const Point &p2) const
+{
+    double deltaACy = _point1.GetY() - p1.GetY();
+    double deltaDCx = p2.GetX() - p1.GetX();
+    double deltaACx = _point1.GetX() - p1.GetX();
+    double deltaDCy = p2.GetY() - p1.GetY();
+    double deltaBAx = _point2.GetX() - _point1.GetX();
+    double deltaBAy = _point2.GetY() - _point1.GetY();
+    double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
+    double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
+    
+    double r = numerator / denominator;
+    if (r < 0.0 || r > 1.0) {
+        return false;
+    }
+    
+    double s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
+    if (s < 0.0 || s > 1.0) {
+        return false;
+    }
+    
+    if (denominator == 0.0) {
+        
+        // the lines are superposed
+        if (numerator == 0.0) {
+            
+            // the segment are superposed
+            if(IsInLineSegment(p1) ||
+               IsInLineSegment(p2) ) return true;
+            else return false;
+            
+        } else { // the lines are just parallel and do not share a common point
+            
+            return false;
+        }
+    }
+    
+    return true;
+    
+}
+
 bool Line::IntersectionWith(const Line& l) const
 {
-
-     //if(ShareCommonPointWith(l)) return true;
-
-     double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
-     double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
-     double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
-     double deltaDCy = l.GetPoint2().GetY() - l.GetPoint1().GetY();
-     double deltaBAx = _point2.GetX() - _point1.GetX();
-     double deltaBAy = _point2.GetY() - _point1.GetY();
-
-     double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
-     double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
-
-     // the lines are parallel
-     if (denominator == 0.0) {
-
-          // the lines are superposed
-          if (numerator == 0.0) {
-
-               // the segment are superposed
-               if(IsInLineSegment(l.GetPoint1()) ||
-                         IsInLineSegment(l.GetPoint2()) ) return true;
-               else return false;
-
-          } else { // the lines are just parallel and do not share a common point
-
-               return false;
-          }
-     }
-
-     // the lines intersect
-     double r = numerator / denominator;
-     if (r < 0.0 || r > 1.0) {
-          return false;
-     }
-
-     double s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
-     if (s < 0.0 || s > 1.0) {
-          return false;
-     }
-
-     //Point PointF = Point ((float) (_point1._x + r * deltaBAx), (float) (_point1._y + r * deltaBAy));
-     //cout<< l.toString() << " intersects with " << toString() <<endl;
-     //cout<<" at point " << PointF.toString()<<endl;
-     return true;
+    return this->IntersectionWith(l._point1, l._point2);
 }
 
 Line Line::enlarge(double d) const
