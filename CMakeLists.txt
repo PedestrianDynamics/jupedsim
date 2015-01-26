@@ -155,7 +155,6 @@ set (   source_files
   math/GompertzModel.cpp
   math/GradientModel.cpp
   math/FastMarching.cpp
-  math/HeapTree.cpp
 
   mpi/LCGrid.cpp
 
