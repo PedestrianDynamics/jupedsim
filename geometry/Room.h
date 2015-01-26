@@ -30,6 +30,7 @@
 
 #include <string>
 #include <algorithm>
+#include <memory>
 #include "../general/Macros.h"
 
 //forward declarations
@@ -53,7 +54,8 @@ private:
      double _zPos;
      /// all subrooms/partitions of the room
      /// TODO: Change the type to (unorder)map <int, SubRoom*>
-     std::vector<SubRoom*> _subRooms;
+     //std::vector<SubRoom*> _subRooms;
+     std::map<int, std::unique_ptr<SubRoom>> _subRooms;
      /// all transitions ids
      std::vector<int> _transitionsIDs;
      /// needed if the trajectories for this room are to be write in a special way
@@ -81,11 +83,6 @@ public:
       * Set/Get the elevation of the room
       */
      void SetZPos(double z);
-
-     /**
-      * Add a SubRoom at the given index
-      */
-     void SetSubRoom(SubRoom* subroom, int index);
 
      /**
       * Set/Get the state of the room as defined in the macro.h file
@@ -125,7 +122,7 @@ public:
      /**
       * @return a vector containing all subrooms
       */
-     const std::vector<SubRoom*>& GetAllSubRooms() const;
+     const std::map<int, std::unique_ptr<SubRoom>>& GetAllSubRooms() const;
 
      /**
       * @return a vector containing all transitions Ids

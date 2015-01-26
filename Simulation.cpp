@@ -329,10 +329,11 @@ int Simulation::RunSimulation()
      //  ((GPU_GCFMModel*) _model)->DeleteBuffers();
 
      //temporary work around since the total number of frame is only available at the end of the simulation.
-     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN) {
-
+     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN)
+     {
           delete _iod;
           _iod = NULL;
+          //reopen the file and write the missing information
 
           // char tmp[CLENGTH];
           // int f= frameNr / writeInterval ;
@@ -398,24 +399,24 @@ void Simulation::UpdateRoutesAndLocations()
                else if (!sub->IsInSubRoom(ped))
                {
                     bool assigned = false;
-                    const std::vector<Room*>& allRooms =
-                              _building->GetAllRooms();
-                    for (Room*iroom : allRooms)
+                    auto& allRooms = _building->GetAllRooms();
+
+                    for (auto&& it_room : allRooms)
                     {
-                         const vector<SubRoom*>& allSubs =
-                                   iroom->GetAllSubRooms();
-                         for (SubRoom*isub : allSubs)
+                         auto&& room=it_room.second;
+                         for (auto&& it_sub : room->GetAllSubRooms())
                          {
-                              Room* old_room =allRooms[ped->GetRoomID()];
-                              SubRoom* old_sub =old_room->GetSubRoom(
+                              auto&& sub=it_sub.second;
+                              auto&& old_room =allRooms.at(ped->GetRoomID());
+                              auto&& old_sub =old_room->GetSubRoom(
                                         ped->GetSubRoomID());
-                              if ((isub->IsInSubRoom(ped->GetPos()))
-                                        && (isub->IsDirectlyConnectedWith(
+                              if ((sub->IsInSubRoom(ped->GetPos()))
+                                        && (sub->IsDirectlyConnectedWith(
                                                   old_sub)))
                               {
-                                   ped->SetRoomID(iroom->GetID(),
-                                             iroom->GetCaption());
-                                   ped->SetSubRoomID(isub->GetSubRoomID());
+                                   ped->SetRoomID(room->GetID(),
+                                             room->GetCaption());
+                                   ped->SetSubRoomID(sub->GetSubRoomID());
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
 
@@ -436,7 +437,7 @@ void Simulation::UpdateRoutesAndLocations()
                          pedsToRemove.push_back(ped);
                          //the agent left the old room
                          //actualize the egress time for that room
-                         allRooms[ped->GetRoomID()]->SetEgressTime(ped->GetGlobalTime());
+                         allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
 
                     }
                }
@@ -471,8 +472,9 @@ void Simulation::PrintStatistics()
      Log->Write("==================");
      Log->Write("id\tcaption\tegress time (s)");
 
-     for(const auto& room:_building->GetAllRooms())
+     for(const auto& it:_building->GetAllRooms())
      {
+          auto&& room=it.second;
           if(room->GetCaption()!="outside")
           Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
      }
