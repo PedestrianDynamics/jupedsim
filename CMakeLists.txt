@@ -155,6 +155,7 @@ set (   source_files
   math/GompertzModel.cpp
   math/GradientModel.cpp
   math/FastMarching.cpp
+  math/HeapTree.cpp
 
   mpi/LCGrid.cpp
 
@@ -270,6 +271,7 @@ set (   header_files
   math/GompertzModel.h
   math/GradientModel.h
   math/FastMarching.h
+  math/HeapTree.h
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
