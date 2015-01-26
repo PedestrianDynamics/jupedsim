@@ -61,6 +61,7 @@ Building::Building()
      _savePathway = false;
 }
 
+#ifdef _SIMULATOR
 Building::Building(const std::string& filename, const std::string& rootDir, RoutingEngine& engine, PedDistributor& distributor, double linkedCellSize)
         :_projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
 {
@@ -79,6 +80,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _routingEngine->Init(this);
      this->SanityCheck();
 }
+#endif
 
 Building::~Building()
 {

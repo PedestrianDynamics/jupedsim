@@ -50,7 +50,6 @@ class LCGrid;
 class ForceModel;
 class PedDistributor;
 
-
 class Building
 {
 private:

@@ -263,7 +263,6 @@ void SubRoom::CalculateArea()
 
 Point SubRoom::GetCentroid() const
 {
-
      double px=0,py=0;
      double signedArea = 0.0;
      double x0 = 0.0; // Current vertex X
@@ -272,6 +271,7 @@ Point SubRoom::GetCentroid() const
      double y1 = 0.0; // Next vertex Y
      double a = 0.0;  // Partial signed area
 
+     if(_poly.size()==0) return Point(0,0);
      // For all vertices except last
      unsigned int i=0;
      for (i=0; i<_poly.size()-1; ++i) {
