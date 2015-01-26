@@ -307,7 +307,6 @@ bool Line::operator==(const Line& l) const
 
 /* Zwei Linien sind ungleich, wenn ihre beiden Punkte
  * ungleich sind.
- * TODO: check this
  * */
 bool Line::operator!=(const Line& l) const
 {

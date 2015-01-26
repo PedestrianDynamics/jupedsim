@@ -81,7 +81,6 @@ public:
      void AddFinalDestinationID(int id);
 
      /**
-      * TODO: investigate Trip for compatibility with ID starting with 0 or 1.
       * @return a vector containing the IDs of the intermediate destinations
       */
      const std::vector<int> GetTrip(int id) const;
@@ -112,11 +111,6 @@ public:
       * person file.
       */
      RoutingStrategy GetStrategy() const;
-
-     /**
-      * Debug output for this class
-      */
-     void WriteToErrorLog() const;
 
      /**
       * Find the next suitable target for Pedestrian p

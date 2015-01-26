@@ -1248,71 +1248,70 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 void GlobalRouter::TriangulateGeometry()
 {
-     //TODO> FIXME
-//     Log->Write("INFO:\tTriangulating the geometry");
-//     for(const auto & itroom: _building->GetAllRooms())
-//     {
-//          auto&& room=itroom.second;
-//          const auto & subrooms= room->GetAllSubRooms();
-//          for(const auto & subroom: subrooms)
-//          {
-//               const auto & obstacles=subroom->GetAllObstacles();
-//
-//               //Triangulate if obstacle or concave and no hlines ?
-//               //if(subroom->GetAllHlines().size()==0)
-//               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
-//               {
-//                    DTriangulation* tri= new DTriangulation();
-//
-//                    auto outerhull=subroom->GetPolygon();
-//                    if(subroom->IsClockwise())
-//                         std::reverse(outerhull.begin(), outerhull.end());
-//
-//                    tri->SetOuterPolygone(outerhull);
-//
-//                    for (const auto & obst: obstacles)
-//                    {
-//                         auto outerhullObst=obst->GetPolygon();
-//                         if(obst->IsClockwise())
-//                              std::reverse(outerhullObst.begin(), outerhullObst.end());
-//                         tri->AddHole(outerhullObst);
-//                    }
-//
-//                    tri->Triangulate();
-//                    vector<p2t::Triangle*> triangles=tri->GetTriangles();
-//
-//                    for (const auto & tr: triangles)
-//                    {
-//                         Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
-//                         Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
-//                         Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
-//                         vector<Line> edges;
-//                         edges.push_back(Line(P0,P1));
-//                         edges.push_back(Line(P1,P2));
-//                         edges.push_back(Line(P2,P0));
-//
-//                         for (const auto & line: edges)
-//                         {
-//                              if((IsWall(line)==false) && (IsCrossing(line)==false)
-//                                        && (IsTransition(line)==false) && (IsHline(line)==false))
-//                              {
-//                                   //add as a Hline
-//                                   int id=_building->GetAllHlines().size();
-//                                   Hline* h = new Hline();
-//                                   h->SetID(id);
-//                                   h->SetPoint1(line.GetPoint1());
-//                                   h->SetPoint2(line.GetPoint2());
-//                                   h->SetRoom1(room);
-//                                   h->SetSubRoom1(subroom);
-//                                   subroom->AddHline(h);
-//                                   _building->AddHline(h);
-//                              }
-//                         }
-//                    }
-//                    delete tri;
-//               }
-//          }
-//     }
+     Log->Write("INFO:\tTriangulating the geometry");
+     for(auto&& itr_room: _building->GetAllRooms())
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               auto&& subroom=itr_subroom.second;
+               auto&& room=itr_room.second;
+               auto&& obstacles=subroom->GetAllObstacles();
+
+               //Triangulate if obstacle or concave and no hlines ?
+               //if(subroom->GetAllHlines().size()==0)
+               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
+               {
+                    DTriangulation* tri= new DTriangulation();
+
+                    auto outerhull=subroom->GetPolygon();
+                    if(subroom->IsClockwise())
+                         std::reverse(outerhull.begin(), outerhull.end());
+
+                    tri->SetOuterPolygone(outerhull);
+
+                    for (const auto & obst: obstacles)
+                    {
+                         auto outerhullObst=obst->GetPolygon();
+                         if(obst->IsClockwise())
+                              std::reverse(outerhullObst.begin(), outerhullObst.end());
+                         tri->AddHole(outerhullObst);
+                    }
+
+                    tri->Triangulate();
+                    vector<p2t::Triangle*> triangles=tri->GetTriangles();
+
+                    for (const auto & tr: triangles)
+                    {
+                         Point P0  = Point (tr->GetPoint(0)->x,tr->GetPoint(0)->y);
+                         Point P1  = Point (tr->GetPoint(1)->x,tr->GetPoint(1)->y);
+                         Point P2  = Point (tr->GetPoint(2)->x,tr->GetPoint(2)->y);
+                         vector<Line> edges;
+                         edges.push_back(Line(P0,P1));
+                         edges.push_back(Line(P1,P2));
+                         edges.push_back(Line(P2,P0));
+
+                         for (const auto & line: edges)
+                         {
+                              if((IsWall(line)==false) && (IsCrossing(line)==false)
+                                        && (IsTransition(line)==false) && (IsHline(line)==false))
+                              {
+                                   //add as a Hline
+                                   int id=_building->GetAllHlines().size();
+                                   Hline* h = new Hline();
+                                   h->SetID(id);
+                                   h->SetPoint1(line.GetPoint1());
+                                   h->SetPoint2(line.GetPoint2());
+                                   h->SetRoom1(room.get());
+                                   h->SetSubRoom1(subroom.get());
+                                   subroom->AddHline(h);
+                                   _building->AddHline(h);
+                              }
+                         }
+                    }
+                    delete tri;
+               }
+          }
+     }
      Log->Write("INFO:\tDone...");
 }
 
@@ -1565,32 +1564,25 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
 
 bool GlobalRouter::IsWall(const Line& line) const
 {
-     //FIXME:TODO:
-//     const auto & rooms=_building->GetAllRooms();
-//     for(const auto & room: rooms)
-//     {
-//          const auto & subrooms= room->GetAllSubRooms();
-//          for(const auto & subroom: subrooms)
-//          {
-//               const auto & obstacles=subroom->GetAllObstacles();
-//               for (const auto & obst: obstacles)
-//               {
-//                    const auto & walls = obst->GetAllWalls();
-//                    for (const auto & wall:walls)
-//                    {
-//                         if(line.operator ==(wall))
-//                              return true;
-//                    }
-//               }
-//               const auto & walls = subroom->GetAllWalls();
-//               for (const auto & wall:walls)
-//               {
-//                    if(line.operator ==(wall))
-//                         return true;
-//               }
-//
-//          }
-//     }
+     for(auto&& itr_room: _building->GetAllRooms())
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               for (auto&& obst: itr_subroom.second->GetAllObstacles())
+               {
+                    for (auto&& wall:obst->GetAllWalls())
+                    {
+                         if(line.operator ==(wall))
+                              return true;
+                    }
+               }
+               for (auto&& wall:itr_subroom.second->GetAllWalls())
+               {
+                    if(line.operator ==(wall))
+                         return true;
+               }
+          }
+     }
 
      return false;
 }

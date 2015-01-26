@@ -53,8 +53,6 @@ private:
      /// room elevation
      double _zPos;
      /// all subrooms/partitions of the room
-     /// TODO: Change the type to (unorder)map <int, SubRoom*>
-     //std::vector<SubRoom*> _subRooms;
      std::map<int, std::unique_ptr<SubRoom>> _subRooms;
      /// all transitions ids
      std::vector<int> _transitionsIDs;

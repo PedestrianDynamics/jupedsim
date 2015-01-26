@@ -57,9 +57,7 @@ TraVisToClient::~TraVisToClient()
 
 void TraVisToClient::sendData(const char* data)
 {
-
      // first create a new connection, in the case the last one was lost/close
-
      if (!_isConnected) {
           createConnection();
           //FIXME: queue messsage in a vector

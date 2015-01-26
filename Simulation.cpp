@@ -260,6 +260,9 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      //}
      //_building->SaveGeometry("test.sav.xml");
 
+     //if(_building->SanityCheck()==false)
+     //     return false;
+
      //everything went fine
      return true;
 }
@@ -379,7 +382,7 @@ void Simulation::UpdateRoutesAndLocations()
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];
                Room* room = _building->GetRoom(ped->GetRoomID());
-               SubRoom* sub = room->GetSubRoom(ped->GetSubRoomID());
+               SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
 
                //set the new room if needed
                if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
@@ -396,7 +399,7 @@ void Simulation::UpdateRoutesAndLocations()
                // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
                // That may happen if the forces are too high for instance
                // the ped is removed from the simulation, if it could not be reassigned
-               else if (!sub->IsInSubRoom(ped))
+               else if (!sub0->IsInSubRoom(ped))
                {
                     bool assigned = false;
                     auto& allRooms = _building->GetAllRooms();
