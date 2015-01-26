@@ -48,7 +48,7 @@ template <class Elem>
 class HeapTree
 {
   public:
-    HeapTree(int MaxSize=500*600, double* costs);
+    HeapTree(double* costs, int MaxSize=500*600);
     HeapTree(const HeapTree<Elem> &OtherTree);
     HeapTree(Elem *Array, int ElemNum, int MaxSize, double* costs);
     Elem *Sort(void); // Built-in HeapSort Algorithm
@@ -78,7 +78,7 @@ class HeapTree
 
 // HeapTree constructor function
 template <class Elem>
-HeapTree<Elem>::HeapTree(int MaxSize, double* costs)
+HeapTree<Elem>::HeapTree(double* costs, int MaxSize)
     : MAX_SIZE(MaxSize),
       costArray(costs)
 {

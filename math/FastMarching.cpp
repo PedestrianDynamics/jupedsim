@@ -138,14 +138,14 @@ directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
     int i = (int)(((nearest.GetX()-xMin)/hx)+.5);
     int j = (int)(((nearest.GetY()-yMin)/hy)+.5);
 
-    //upper
-    neighbors.key[0] = ((j+1)*iMax+i);
+    //upper                        //-2 marks invalid neighbor
+    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i); //bei oberen Rand => out of Bound
     //lower
-    neighbors.key[1] = ((j-1)*iMax+i);
+    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i); //bei unterem Rand => negative
     //left
-    neighbors.key[2] = (j*iMax+i-1);
+    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1); // @todo: ar.graf Fehler falls Point am linken Rand
     //right
-    neighbors.key[3] = (j*iMax+i+1);
+    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1); // @todo: ar.graf Fehler falls Point am rechten Rand
 
     return neighbors;
 }
@@ -194,7 +194,7 @@ int FastMarcher::setGeometry(const Building* const building) {
     return 0;   // @todo: ar.graf
 }
 
-// @todo: ar.graf : get all access methods with key parameter (do not calc key for each get-meth
+// @todo: ar.graf : get all access methods with key parameter (do not calc key for each get-meth)
 
 Point FastMarcher::getFloorfieldAt(const Point currPos) const {
     int key = myGrid->getKeyAtXY(currPos.GetX(), currPos.GetY());
@@ -223,5 +223,23 @@ double FastMarcher::getSpeedAt(const int x, const int y) const {
 
 int FastMarcher::calculateFloorfield() {
     // @todo: ar.graf
+    //definiere max heap //dyn heap??
+    HeapTree narrowband = new HeapTree(myGrid->getNumOfElements(), myCost);
+
+    //suche alle Punkte mit cost = 0
+    for (int iKey = 0; iKey < myGrid->getNumOfElements(); ++iKey) {
+        //alle nachbarn eines jeden dieser punkte wird (falls cost = -2.) dem narrowband zugefuegt
+        //(evtl mit cost = -1., um es als zugefuegt zu markieren)
+        Neighbors
+    }
+    //jetzt habe ich das erste narrowband
+    //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
+    //das minimum wird in dem cost array gespeichert, das neu berechnete element muss an die richtige stelle im baum
+    //suche im narrowband das cost-minimum (heap root) und
+        //fuege seine nachbarn dem narrowband hinzu, falls nachbar = -2.
+        //fuege nun das minimum den bekannten hinzu (indem es aus dem narrowband rausgenommen wird)
+
+
+
     return 0;
 }
