@@ -439,8 +439,8 @@ void Method_D::ReducePrecision(polygon_2d& polygon)
 
 bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor)
 {
-	for(int i=0; i<frames; i++)
-		for(int j =0; j<peds; j++)
+	for(int i=0; i<peds; i++)
+		for(int j =0; j<frames; j++)
 		{
 			if(Xcor[i][j]<_geoMinX || Xcor[i][j]>_geoMaxX || Ycor[i][j]<_geoMinY || Ycor[i][j]>_geoMaxY)
 			{
