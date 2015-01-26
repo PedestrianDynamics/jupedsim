@@ -34,6 +34,7 @@
 #include <fstream>
 #include <cfloat>
 #include <map>
+#include <memory>
 
 #include "Room.h"
 #include "NavLine.h"
@@ -49,7 +50,6 @@ class LCGrid;
 class ForceModel;
 class PedDistributor;
 
-
 class Building
 {
 private:
@@ -59,10 +59,9 @@ private:
      std::string _geometryFilename;
      RoutingEngine* _routingEngine;
      LCGrid* _linkedCellGrid;
-     //TODO: change the type to (unorder) map <int , Room*>
-     std::vector<Room*> _rooms;
      std::vector<Pedestrian*> _allPedestians;
 
+     std::map<int, std::unique_ptr<Room> > _rooms;
      std::map<int, Crossing*> _crossings;
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
@@ -81,7 +80,6 @@ public:
 
      void SetCaption(const std::string& s);
      void SetRoutingEngine(RoutingEngine* r);
-     void SetRoom(Room* room, int index);
 
      /// delete the ped from the ped vector
      void DeletePedestrian(Pedestrian* &ped);
@@ -91,7 +89,7 @@ public:
 
      std::string GetCaption() const;
      RoutingEngine* GetRoutingEngine() const;
-     const std::vector<Room*>& GetAllRooms() const;
+     const std::map<int, std::unique_ptr<Room>>& GetAllRooms() const;
      const std::vector<Pedestrian*>& GetAllPedestrians() const;
      Pedestrian* GetPedestrian( int pedID) const;
      int GetNumberOfRooms() const;

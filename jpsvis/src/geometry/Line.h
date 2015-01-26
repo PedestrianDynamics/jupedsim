@@ -164,7 +164,8 @@ public:
       * @return true if both segments intersect
       */
      bool IntersectionWith(const Line& l) const; // check two segments for intersections
-
+     bool IntersectionWith(const Point& p1, const Point&p2) const;
+    
      /**
       * @return the distance squared between the first point and the intersection
       * point with line l. This is exactly the same function

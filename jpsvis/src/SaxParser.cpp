@@ -601,12 +601,13 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
     VTK_CREATE(vtkCellArray,floor_polygons);
     VTK_CREATE(vtkCellArray,obstacles_polygons);
 
-    for (int i = 0; i < building->GetNumberOfRooms(); i++) {
-        Room* r = building->GetRoom(i);
-        //string caption = r->GetCaption();
+    for(auto&& itr_room: building->GetAllRooms())
+    {
+        for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+        {
 
-        for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-            SubRoom* sub = r->GetSubRoom(k);
+            //string caption = r->GetCaption();
+            SubRoom* sub = itr_subroom.second.get();
 
             vector<Point> poly = sub->GetPolygon();
             if(sub->IsClockwise()==true) {
@@ -639,7 +640,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
             }
 
             //insert the subroom caption
-            string caption=r->GetCaption()+" ( " + QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
+            string caption=itr_room.second->GetCaption()+" ( " + QString::number(sub->GetSubRoomID()).toStdString() + " ) ";
             const Point& p=sub->GetCentroid();
             double z= sub->GetElevation(p);
             double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z*FAKTOR};

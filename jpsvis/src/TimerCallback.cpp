@@ -45,7 +45,6 @@
 #define TRAVISTO_FFMPEG
 #endif
 
-
 #ifdef __linux__
 #ifdef __vtkFFMPEGWriter_h
 #include <vtkFFMPEGWriter.h>
