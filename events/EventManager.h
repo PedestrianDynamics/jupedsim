@@ -102,6 +102,12 @@ public:
      EventManager(Building *_b);
 
      /**
+      *
+      * destructor
+      */
+     ~EventManager();
+
+     /**
       * Read and parse the events
       * @return false if an error occured
       */
