@@ -63,7 +63,7 @@ Building::Building()
 
 #ifdef _SIMULATOR
 Building::Building(const std::string& filename, const std::string& rootDir, RoutingEngine& engine, PedDistributor& distributor, double linkedCellSize)
-        :_projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
+:_projectFilename(filename), _projectRootDir(rootDir), _routingEngine(&engine)
 {
      _caption = "no_caption";
      _savePathway = false;
@@ -84,39 +84,39 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
 
 Building::~Building()
 {
-    //
-    // for (int i = 0; i < GetNumberOfRooms(); i++)
-    //    delete _rooms[i];
+     //
+     // for (int i = 0; i < GetNumberOfRooms(); i++)
+     //    delete _rooms[i];
 
 #ifdef _SIMULATOR
-    for(unsigned int p=0;p<_allPedestians.size();p++)
-    {
-        //delete _allPedestians[p];
-    }
-    _allPedestians.clear();
-    delete _linkedCellGrid;
+     for(unsigned int p=0;p<_allPedestians.size();p++)
+     {
+          //delete _allPedestians[p];
+     }
+     _allPedestians.clear();
+     delete _linkedCellGrid;
 #endif
 
-    if (_pathWayStream.is_open())
-        _pathWayStream.close();
+     if (_pathWayStream.is_open())
+          _pathWayStream.close();
 
 
-    for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
-            iter != _crossings.end(); ++iter) {
-        delete iter->second;
-    }
-    for (map<int, Transition*>::const_iterator iter = _transitions.begin();
-            iter != _transitions.end(); ++iter) {
-        delete iter->second;
-    }
-    for (map<int, Hline*>::const_iterator iter = _hLines.begin();
-            iter != _hLines.end(); ++iter) {
-        delete iter->second;
-    }
-    for (map<int, Goal*>::const_iterator iter = _goals.begin();
-            iter != _goals.end(); ++iter) {
-        delete iter->second;
-    }
+     for (map<int, Crossing*>::const_iterator iter = _crossings.begin();
+               iter != _crossings.end(); ++iter) {
+          delete iter->second;
+     }
+     for (map<int, Transition*>::const_iterator iter = _transitions.begin();
+               iter != _transitions.end(); ++iter) {
+          delete iter->second;
+     }
+     for (map<int, Hline*>::const_iterator iter = _hLines.begin();
+               iter != _hLines.end(); ++iter) {
+          delete iter->second;
+     }
+     for (map<int, Goal*>::const_iterator iter = _goals.begin();
+               iter != _goals.end(); ++iter) {
+          delete iter->second;
+     }
 }
 
 /************************************************************
@@ -264,45 +264,40 @@ void Building::AddSurroundingRoom()
 
 bool Building::InitGeometry()
 {
-     int r;
-     unsigned int i;
      Log->Write("INFO: \tInit Geometry");
-     for (r = 0; r < GetNumberOfRooms(); r++) {
-          Room* room = GetRoom(r);
-          // Polygone berechnen
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* s = room->GetSubRoom(j);
-               // Alle Übergänge in diesem Raum bestimmen
-               // Übergänge müssen zu Wänden ergänzt werden
+
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               //create a close polyline out of everything
                vector<Line*> goals = vector<Line*>();
 
-               //  crossings
-               const vector<Crossing*>& crossings = s->GetAllCrossings();
-               for (i = 0; i < crossings.size(); i++) {
-                    goals.push_back(crossings[i]);
+               //  collect all crossings
+               for(auto&& cros:itr_subroom.second->GetAllCrossings())
+               {
+                    goals.push_back(cros);
                }
-
-               // and  transitions
-               const vector<Transition*>& transitions = s->GetAllTransitions();
-               for (i = 0; i < transitions.size(); i++) {
-                    goals.push_back(transitions[i]);
+               //collect all transitions
+               for(auto&& trans:itr_subroom.second->GetAllTransitions())
+               {
+                    goals.push_back(trans);
                }
-
                // initialize the poly
-               if(! s->ConvertLineToPoly(goals))
-                   return false;
-               s->CalculateArea();
-               goals.clear();
+               if(! itr_subroom.second->ConvertLineToPoly(goals))
+                    return false;
+               itr_subroom.second->CalculateArea();
 
                //do the same for the obstacles that are closed
-               const vector<Obstacle*>& obstacles = s->GetAllObstacles();
-               for (unsigned int obs = 0; obs < obstacles.size(); ++obs) {
-                    if (obstacles[obs]->GetClosed() == 1)
-                         if(!obstacles[obs]->ConvertLineToPoly())
-                             return false;
+               for(auto&& obst:itr_subroom.second->GetAllObstacles())
+               {
+                    if (obst->GetClosed() == 1)
+                         if(!obst->ConvertLineToPoly())
+                              return false;
                }
           }
      }
+
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
      return true;
@@ -662,8 +657,8 @@ void Building::AddCrossing(Crossing* line)
      if (_crossings.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
           sprintf(tmp,
-                  "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
-                  line->GetID());
+                    "ERROR: Duplicate index for crossing found [%d] in Routing::AddCrossing()",
+                    line->GetID());
           Log->Write(tmp);
           exit(EXIT_FAILURE);
      }
@@ -675,8 +670,8 @@ void Building::AddTransition(Transition* line)
      if (_transitions.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
           sprintf(tmp,
-                  "ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
-                  line->GetID());
+                    "ERROR: Duplicate index for transition found [%d] in Routing::AddTransition()",
+                    line->GetID());
           Log->Write(tmp);
           exit(EXIT_FAILURE);
      }
@@ -693,8 +688,8 @@ void Building::AddHline(Hline* line)
                return;
           } else {
                Log->Write(
-                    "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
-                    line->GetID(), _hLines.size());
+                         "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
+                         line->GetID(), _hLines.size());
                exit(EXIT_FAILURE);
           }
      }
@@ -705,8 +700,8 @@ void Building::AddGoal(Goal* goal)
 {
      if (_goals.count(goal->GetId()) != 0) {
           Log->Write(
-               "ERROR: Duplicate index for goal found [%d] in Routing::AddGoal()",
-               goal->GetId());
+                    "ERROR: Duplicate index for goal found [%d] in Routing::AddGoal()",
+                    goal->GetId());
           exit(EXIT_FAILURE);
      }
      _goals[goal->GetId()] = goal;
@@ -754,8 +749,8 @@ Transition* Building::GetTransition(int ID)
                return NULL;
           else {
                Log->Write(
-                    "ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
-                    ID, _transitions.size());
+                         "ERROR: I could not find any transition with the 'ID' [%d]. You have defined [%d] transitions",
+                         ID, _transitions.size());
                exit(EXIT_FAILURE);
           }
      }
@@ -770,8 +765,8 @@ Goal* Building::GetFinalGoal(int ID)
                return NULL;
           else {
                Log->Write(
-                    "ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
-                    ID, _goals.size());
+                         "ERROR: I could not find any goal with the 'ID' [%d]. You have defined [%d] goals",
+                         ID, _goals.size());
                exit(EXIT_FAILURE);
           }
      }
@@ -836,11 +831,12 @@ Hline* Building::GetTransOrCrossByUID(int id) const
 
 SubRoom* Building::GetSubRoomByUID( int uid)
 {
-     for (unsigned int i = 0; i < _rooms.size(); i++) {
-          Room* room = _rooms[i].get();
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               if (sub->GetUID()==uid) return sub;;
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               if(itr_subroom.second->GetUID()==uid)
+                    return itr_subroom.second.get();
           }
      }
      Log->Write("ERROR:\t No subroom exits with the unique id %d",uid);
@@ -849,11 +845,12 @@ SubRoom* Building::GetSubRoomByUID( int uid)
 
 bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
 {
-     for (unsigned int i = 0; i < _rooms.size(); i++) {
-          auto&& room = _rooms[i];
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               if(sub->IsVisible(l1,l2,considerHlines)==false) return false;
+
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
           }
      }
      return true;
@@ -861,13 +858,14 @@ bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
 
 bool Building::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
-     for (unsigned int i = 0; i < _rooms.size(); i++) {
-          auto&& room = _rooms[i];
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               if(sub->IsVisible(p1,p2,considerHlines)==false) return false;
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               if(itr_subroom.second->IsVisible(p1,p2,considerHlines)==false) return false;
           }
      }
+
      return true;
 }
 
@@ -875,14 +873,16 @@ bool Building::SanityCheck()
 {
      Log->Write("INFO: \tChecking the geometry for artifacts");
      bool status = true;
-     for (unsigned int i = 0; i < _rooms.size(); i++) {
-          auto&& room = _rooms[i];
-          for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
-               SubRoom* sub = room->GetSubRoom(j);
-               if (!sub->SanityCheck())
+
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               if (!itr_subroom.second->SanityCheck())
                     status = false;
           }
      }
+
      Log->Write("INFO: \t...Done!!!\n");
      return status;
 }
@@ -1002,7 +1002,7 @@ bool Building::LoadRoutingInfo(const string &filename)
                          xPolyVertices = xPolyVertices->NextSiblingElement("polygon")) {
 
                     for (TiXmlElement* xVertex = xPolyVertices->FirstChildElement(
-                                                      "vertex");
+                              "vertex");
                               xVertex && xVertex != xPolyVertices->LastChild("vertex");
                               xVertex = xVertex->NextSiblingElement("vertex")) {
 
@@ -1015,7 +1015,7 @@ bool Building::LoadRoutingInfo(const string &filename)
                }
 
                if(!goal->ConvertLineToPoly())
-                   return false;
+                    return false;
 
                AddGoal(goal);
                _routingEngine->AddFinalDestinationID(goal->GetId());
@@ -1209,7 +1209,7 @@ void Building::InitSavePedPathway(const string &filename)
 
 
 void Building::StringExplode(string str, string separator,
-                             vector<string>* results)
+          vector<string>* results)
 {
      size_t found;
      found = str.find_first_of(separator);
@@ -1271,11 +1271,11 @@ bool Building::SaveGeometry(const std::string &filename)
                auto&& sub=itr_sub.second;
                const double* plane=sub->GetPlaneEquation();
                geometry<<"\t\t<subroom id =\""<<sub->GetSubRoomID()
-                        <<"\" closed=\""<<sub->GetClosed()
-                        <<"\" class=\""<<sub->GetType()
-                        <<"\" A_x=\""<<plane[0]
-                        <<"\" B_y=\""<<plane[1]
-                        <<"\" C_z=\""<<plane[2]<<"\">"<<endl;
+                                  <<"\" closed=\""<<sub->GetClosed()
+                                  <<"\" class=\""<<sub->GetType()
+                                  <<"\" A_x=\""<<plane[0]
+                                                       <<"\" B_y=\""<<plane[1]
+                                                                            <<"\" C_z=\""<<plane[2]<<"\">"<<endl;
 
 
                for (auto&& wall : sub->GetAllWalls())
@@ -1284,9 +1284,9 @@ bool Building::SaveGeometry(const std::string &filename)
                     const Point& p2=wall.GetPoint2();
 
                     geometry<<"\t\t\t<polygon caption=\"wall\" type=\""<<wall.GetType()<<"\">"<<endl
-                            <<"\t\t\t\t<vertex px=\""<<p1._x<<"\" py=\""<<p1._y<<"\"/>"<<endl
-                            <<"\t\t\t\t<vertex px=\""<<p2._x<<"\" py=\""<<p2._y<<"\"/>"<<endl
-                            <<"\t\t\t</polygon>"<<endl;
+                              <<"\t\t\t\t<vertex px=\""<<p1._x<<"\" py=\""<<p1._y<<"\"/>"<<endl
+                              <<"\t\t\t\t<vertex px=\""<<p2._x<<"\" py=\""<<p2._y<<"\"/>"<<endl
+                              <<"\t\t\t</polygon>"<<endl;
                }
 
                if(sub->GetType()=="stair")
@@ -1303,23 +1303,23 @@ bool Building::SaveGeometry(const std::string &filename)
           //write the crossings
           geometry<<"\t\t<crossings>"<<endl;
           for (auto const& mapcross : _crossings)
-           {
-                Crossing* cross=mapcross.second;
+          {
+               Crossing* cross=mapcross.second;
 
-                //only write the crossings in this rooms
-                if(cross->GetRoom1()->GetID()!=room->GetID()) continue;
+               //only write the crossings in this rooms
+               if(cross->GetRoom1()->GetID()!=room->GetID()) continue;
 
-                const Point& p1=cross->GetPoint1();
-                const Point& p2=cross->GetPoint2();
+               const Point& p1=cross->GetPoint1();
+               const Point& p2=cross->GetPoint2();
 
-                geometry<<"\t<crossing id =\""<<cross->GetID()
-                        <<"\" subroom1_id=\""<<cross->GetSubRoom1()->GetSubRoomID()
-                        <<"\" subroom2_id=\""<<cross->GetSubRoom2()->GetSubRoomID()<<"\">"<<endl;
+               geometry<<"\t<crossing id =\""<<cross->GetID()
+                                  <<"\" subroom1_id=\""<<cross->GetSubRoom1()->GetSubRoomID()
+                                  <<"\" subroom2_id=\""<<cross->GetSubRoom2()->GetSubRoomID()<<"\">"<<endl;
 
-                geometry<<"\t\t<vertex px=\""<<p1._x<<"\" py=\""<<p1._y<<"\"/>"<<endl
-                        <<"\t\t<vertex px=\""<<p2._x<<"\" py=\""<<p2._y<<"\"/>"<<endl
-                        <<"\t</crossing>"<<endl;
-           }
+               geometry<<"\t\t<vertex px=\""<<p1._x<<"\" py=\""<<p1._y<<"\"/>"<<endl
+                         <<"\t\t<vertex px=\""<<p2._x<<"\" py=\""<<p2._y<<"\"/>"<<endl
+                         <<"\t</crossing>"<<endl;
+          }
           geometry<<"\t\t</crossings>"<<endl;
           geometry<<"\t</room>"<<endl;
      }
@@ -1343,16 +1343,16 @@ bool Building::SaveGeometry(const std::string &filename)
           }
 
           geometry<<"\t<transition id =\""<<trans->GetID()
-                   <<"\" caption=\""<<trans->GetCaption()
-                   <<"\" type=\""<<trans->GetType()
-                   <<"\" room1_id=\""<<trans->GetRoom1()->GetID()
-                   <<"\" subroom1_id=\""<<trans->GetSubRoom1()->GetSubRoomID()
-                   <<"\" room2_id=\""<<room2_id
-                   <<"\" subroom2_id=\""<<subroom2_id<<"\">"<<endl;
+                             <<"\" caption=\""<<trans->GetCaption()
+                             <<"\" type=\""<<trans->GetType()
+                             <<"\" room1_id=\""<<trans->GetRoom1()->GetID()
+                             <<"\" subroom1_id=\""<<trans->GetSubRoom1()->GetSubRoomID()
+                             <<"\" room2_id=\""<<room2_id
+                             <<"\" subroom2_id=\""<<subroom2_id<<"\">"<<endl;
 
           geometry<<"\t\t<vertex px=\""<<p1._x<<"\" py=\""<<p1._y<<"\"/>"<<endl
-                   <<"\t\t<vertex px=\""<<p2._x<<"\" py=\""<<p2._y<<"\"/>"<<endl
-                   <<"\t</transition>"<<endl;
+                    <<"\t\t<vertex px=\""<<p2._x<<"\" py=\""<<p2._y<<"\"/>"<<endl
+                    <<"\t</transition>"<<endl;
 
      }
 
