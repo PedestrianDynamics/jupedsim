@@ -56,9 +56,9 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
 
 	for (int i = 0; i < numPedsInFrame; i++)
 	{
-		points.push_back(point_type2((int) (XInFrame[i] + 0.5), (int) (YInFrame[i] + 0.5)));
-		XInFrame_temp[i] = (int) (XInFrame[i] + 0.5);
-		YInFrame_temp[i] = (int) (YInFrame[i] + 0.5);
+		points.push_back(point_type2(round(XInFrame[i]), round(YInFrame[i])));
+		XInFrame_temp[i] = round(XInFrame[i]);
+		YInFrame_temp[i] = round(YInFrame[i]);
 		VInFrame_temp[i] = VInFrame[i];
 		IdInFrame_temp[i] = IdInFrame[i];
 	}

@@ -352,9 +352,9 @@ void Method_D::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
-     string parameters="python ./scripts/_Plot_cell_rho.py --f "+ voronoiLocation+" --n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId;
-     cout<<parameters<<endl;
-     system(parameters.c_str());
+     //string parameters="python ./scripts/_Plot_cell_rho.py --f "+ voronoiLocation+" --n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId;
+     //cout<<parameters<<endl;
+     //system(parameters.c_str());
      //system("python ../scripts/_Plot_cell_v.py ");
      points.close();
      polys.close();
@@ -442,8 +442,9 @@ bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Yco
 	for(int i=0; i<peds; i++)
 		for(int j =0; j<frames; j++)
 		{
-			if(Xcor[i][j]<_geoMinX || Xcor[i][j]>_geoMaxX || Ycor[i][j]<_geoMinY || Ycor[i][j]>_geoMaxY)
+			if(round(Xcor[i][j])<_geoMinX || round(Xcor[i][j])>_geoMaxX || round(Ycor[i][j])<_geoMinY || round(Ycor[i][j])>_geoMaxY)
 			{
+				//cout<<round(Xcor[i][j])<<'\t'<<_geoMinX<<'\t'<<_geoMaxX<<endl;
 				return false;
 			}
 		}
