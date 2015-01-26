@@ -44,7 +44,9 @@ RectGrid::RectGrid():
     //Konstruktor
 }
 
-RectGrid::~RectGrid(){};
+RectGrid::~RectGrid(){
+    if (isInner) delete[] isInner;
+};
 
 int RectGrid::setBoundaries(const double xMinA, const double yMinA,
                         const double xMaxA, const double yMaxA) {
@@ -75,7 +77,7 @@ int RectGrid::createGrid(){
     nGridpoints = iMax * jMax;
     isInner = new int[nGridpoints];
     for (int i = 0; i < nGridpoints; ++i) {
-        isInner[i] = 0;
+        isInner[i] = 1;
     }
     return 1;
 }
@@ -147,13 +149,18 @@ directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
 
     return neighbors;
 }
+
+int RectGrid::setAsInner(const Point& innerP) {
+    return 0; // @todo: ar.graf
+}
+
+int RectGrid::setAsOuter(const Point& outerP) {
+    return 0; // @todo: ar.graf
+}
 //        int setAsInner(const Point& innerP); //input in xy world coordinates
 //        int setAsOuter(const Point& outerP); //input in xy world coordinates
 //
 //        int getGridID() const;
-//        directNeighbor getNeighbors(const Point currPoint) const;
-//
-
 
 
 
@@ -165,4 +172,56 @@ FastMarching::FastMarcher()
 FastMarching::~FastMarcher()
 {
     //dtor
+}
+
+int FastMarcher::setCostArray(double* givenCost) {
+    myCost = cost;
+}
+
+int FastMarcher::setGradientArray(Point* givenGradient) {
+    myGradient = givenGradientArray;
+}
+
+int FastMarcher::setSpeedArray(double* givenSpeed) {
+    mySpeed = givenSpeed;
+}
+
+int FastMarcher::setGrid(RectGrid* givenGrid) {
+    myGrid = givenGrid;
+}
+
+int FastMarcher::setGeometry(const Building* const building) {
+    return 0;   // @todo: ar.graf
+}
+
+// @todo: ar.graf : get all access methods with key parameter (do not calc key for each get-meth
+
+Point FastMarcher::getFloorfieldAt(const Point currPos) const {
+    int key = myGrid->getKeyAtXY(currPos.GetX(), currPos.GetY());
+    return myGradient[key];
+}
+
+double FastMarcher::getTimecostAt(const Point currPos) const {
+    int key = myGrid->getKeyAtXY(currPos.GetX(), currPos.GetY());
+    return myCost[key];
+}
+
+double FastMarcher::getTimecostAt(const int x, const int y) const {
+    int key = myGrid->getKeyAtXY(x, y);
+    return myCost[key];
+}
+
+double FastMarcher::getSpeedAt(const Point currPos) const {
+    int key = myGrid->getKeyAtXY(currPos.GetX(), currPos.GetY());
+    return mySpeed[key];
+}
+
+double FastMarcher::getSpeedAt(const int x, const int y) const {
+    int key = myGrid->getKeyAtXY(x, y);
+    return mySpeed[key];
+}
+
+int FastMarcher::calculateFloorfield() {
+    // @todo: ar.graf
+    return 0;
 }

@@ -41,11 +41,11 @@ class Fastmarchtest
 #ifndef MAIN
 #def MAIN
 
-int public main(int argc, char** argv) {
+int main(int argc, char** argv) {
 
-ftest = new Fastmarchtest();
-ftest.run("./outputFMTest.txt");
-delete ftest;
+    ftest = new Fastmarchtest();
+    ftest.run("./outputFMTest.txt");
+    delete ftest;
 
 }
 

@@ -25,6 +25,7 @@ Fastmarchtest::Fastmarchtest()
     //init grid
     grid.setBoundaries(0., 0., x_max, y_max);
     grid.setSpacing(stepsize, stepsize);
+    grid.createGrid();
 
     //init value tables using grid information
     for (int i = 0; i < grid.getNumOfElements(); ++i) {
