@@ -633,20 +633,20 @@ int Pedestrian::GetFinalDestination() const
 }
 
 ///@deprecated
-void Pedestrian::WritePath(ofstream& file, Building* building)
-{
-     map<int, int>::iterator iter;
-
-     if(building) {
-          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-               file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
-          }
-     } else {
-          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-               file<<iter->first/1000<<" "<<iter->second<<endl;
-          }
-     }
-}
+//void Pedestrian::WritePath(ofstream& file, Building* building)
+//{
+//     map<int, int>::iterator iter;
+//
+//     if(building) {
+//          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
+//               file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
+//          }
+//     } else {
+//          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
+//               file<<iter->first/1000<<" "<<iter->second<<endl;
+//          }
+//     }
+//}
 
 string Pedestrian::GetPath()
 {

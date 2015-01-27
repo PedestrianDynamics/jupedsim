@@ -256,11 +256,13 @@ bool GlobalRouter::Init(Building* building)
      // get the transitions in the subrooms
      // and compute the distances
 
-     for(const auto & room:_building->GetAllRooms())
+     for(auto && itroom:_building->GetAllRooms())
      {
-          for(const auto & sub:room->GetAllSubRooms())
+          auto&& room=itroom.second;
+          for(const auto & it_sub:room->GetAllSubRooms())
           {
-               // The penalty factor should discourage pedestrians to evacuation through rooms.
+               // The penalty factor should discourage pedestrians to evacuation through rooms
+               auto&& sub=it_sub.second;
                double  penalty=1.0;
                if((sub->GetType()!="floor") && (sub->GetType()!="dA") ) {
                     penalty=_edgeCost;
@@ -1247,12 +1249,13 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 void GlobalRouter::TriangulateGeometry()
 {
      Log->Write("INFO:\tTriangulating the geometry");
-     for(const auto & room: _building->GetAllRooms())
+     for(auto&& itr_room: _building->GetAllRooms())
      {
-          const auto & subrooms= room->GetAllSubRooms();
-          for(const auto & subroom: subrooms)
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
           {
-               const auto & obstacles=subroom->GetAllObstacles();
+               auto&& subroom=itr_subroom.second;
+               auto&& room=itr_room.second;
+               auto&& obstacles=subroom->GetAllObstacles();
 
                //Triangulate if obstacle or concave and no hlines ?
                //if(subroom->GetAllHlines().size()==0)
@@ -1298,8 +1301,8 @@ void GlobalRouter::TriangulateGeometry()
                                    h->SetID(id);
                                    h->SetPoint1(line.GetPoint1());
                                    h->SetPoint2(line.GetPoint2());
-                                   h->SetRoom1(room);
-                                   h->SetSubRoom1(subroom);
+                                   h->SetRoom1(room.get());
+                                   h->SetSubRoom1(subroom.get());
                                    subroom->AddHline(h);
                                    _building->AddHline(h);
                               }
@@ -1314,106 +1317,106 @@ void GlobalRouter::TriangulateGeometry()
 
 bool GlobalRouter::GenerateNavigationMesh()
 {
-     //Navigation mesh implementation
-     NavMesh* nv= new NavMesh(_building);
-     nv->BuildNavMesh();
-     _building->SaveGeometry("test_geometry.xml");
-     exit(0);
-     //nv->WriteToFileTraVisTo()
-
-     const std::vector<NavMesh::JEdge*>& edges = nv->GetEdges();
-
-     for(const auto & edge: edges)
-     {
-          //construct and add a new navigation line if non existing
-          Line line(edge->pStart.pPos,edge->pEnd.pPos);
-          bool isEdge=false;
-
-          //check if it is already a crossing
-          const map<int, Crossing*>& crossings = _building->GetAllCrossings();
-          for (const auto & crossing: crossings)
-          {
-               Crossing* cross=crossing.second;
-               if(line.operator ==(*cross))
-               {
-                    isEdge=true;
-                    break;
-               }
-          }
-          if(isEdge) continue;
-
-
-          //check if it is already a transition
-          const map<int, Transition*>& transitions = _building->GetAllTransitions();
-          for (const auto & transition: transitions)
-          {
-               Transition* trans=transition.second;
-               if(line.operator ==(*trans))
-               {
-                    isEdge=true;
-                    break;
-               }
-          }
-          if(isEdge) continue;
-
-          //check if it is already a
-          const map<int, Hline*>& hlines = _building->GetAllHlines();
-          for (const auto & hline: hlines)
-          {
-               Hline* navLine=hline.second;
-               if(line.operator ==(*navLine))
-               {
-                    isEdge=true;
-                    break;
-               }
-          }
-          if(isEdge) continue;
-
-
-          Hline* h = new Hline();
-          h->SetID(hlines.size());
-          int assigned=0;
-
-          //look for the room/subroom containing the new edge
-          const vector<Room*>& rooms=_building->GetAllRooms();
-          for(const auto & room: rooms)
-          {
-               const vector<SubRoom*>& subrooms= room->GetAllSubRooms();
-
-               for(const auto & subroom: subrooms)
-               {
-                    if(subroom->IsInSubRoom(line.GetCentre()))
-                    {
-                         h->SetRoom1(room);
-                         h->SetSubRoom1(subroom);
-                         assigned++;
-                    }
-               }
-          }
-
-          if(assigned!=1)
-          {
-               Log->Write("WARNING:\t a navigation line from the mesh was not correctly assigned");
-               return false;
-          }
-          //add the new edge as navigation line
-
-          h->SetPoint1(edge->pStart.pPos);
-          h->SetPoint2(edge->pEnd.pPos);
-          h->GetSubRoom1()->AddHline(h); //double linked ??
-          _building->AddHline(h);
-
-     }
-
-     //string geometry;
-     //nv->WriteToString(geometry);
-     //Write("<geometry>");
-     //Write(geometry);
-     //Write("</geometry>");
-     //nv->WriteToFile(building->GetProjectFilename()+".full.nav");
-
-     //cout<<"bye"<<endl;
-     delete nv;
+//     //Navigation mesh implementation
+//     NavMesh* nv= new NavMesh(_building);
+//     nv->BuildNavMesh();
+//     _building->SaveGeometry("test_geometry.xml");
+//     exit(0);
+//     //nv->WriteToFileTraVisTo()
+//
+//     const std::vector<NavMesh::JEdge*>& edges = nv->GetEdges();
+//
+//     for(const auto & edge: edges)
+//     {
+//          //construct and add a new navigation line if non existing
+//          Line line(edge->pStart.pPos,edge->pEnd.pPos);
+//          bool isEdge=false;
+//
+//          //check if it is already a crossing
+//          const map<int, Crossing*>& crossings = _building->GetAllCrossings();
+//          for (const auto & crossing: crossings)
+//          {
+//               Crossing* cross=crossing.second;
+//               if(line.operator ==(*cross))
+//               {
+//                    isEdge=true;
+//                    break;
+//               }
+//          }
+//          if(isEdge) continue;
+//
+//
+//          //check if it is already a transition
+//          const map<int, Transition*>& transitions = _building->GetAllTransitions();
+//          for (const auto & transition: transitions)
+//          {
+//               Transition* trans=transition.second;
+//               if(line.operator ==(*trans))
+//               {
+//                    isEdge=true;
+//                    break;
+//               }
+//          }
+//          if(isEdge) continue;
+//
+//          //check if it is already a
+//          const map<int, Hline*>& hlines = _building->GetAllHlines();
+//          for (const auto & hline: hlines)
+//          {
+//               Hline* navLine=hline.second;
+//               if(line.operator ==(*navLine))
+//               {
+//                    isEdge=true;
+//                    break;
+//               }
+//          }
+//          if(isEdge) continue;
+//
+//
+//          Hline* h = new Hline();
+//          h->SetID(hlines.size());
+//          int assigned=0;
+//
+//          //look for the room/subroom containing the new edge
+//          const vector<Room*>& rooms=_building->GetAllRooms();
+//          for(const auto & room: rooms)
+//          {
+//               const vector<SubRoom*>& subrooms= room->GetAllSubRooms();
+//
+//               for(const auto & subroom: subrooms)
+//               {
+//                    if(subroom->IsInSubRoom(line.GetCentre()))
+//                    {
+//                         h->SetRoom1(room);
+//                         h->SetSubRoom1(subroom);
+//                         assigned++;
+//                    }
+//               }
+//          }
+//
+//          if(assigned!=1)
+//          {
+//               Log->Write("WARNING:\t a navigation line from the mesh was not correctly assigned");
+//               return false;
+//          }
+//          //add the new edge as navigation line
+//
+//          h->SetPoint1(edge->pStart.pPos);
+//          h->SetPoint2(edge->pEnd.pPos);
+//          h->GetSubRoom1()->AddHline(h); //double linked ??
+//          _building->AddHline(h);
+//
+//     }
+//
+//     //string geometry;
+//     //nv->WriteToString(geometry);
+//     //Write("<geometry>");
+//     //Write(geometry);
+//     //Write("</geometry>");
+//     //nv->WriteToFile(building->GetProjectFilename()+".full.nav");
+//
+//     //cout<<"bye"<<endl;
+//     delete nv;
      return true;
 }
 
@@ -1561,29 +1564,23 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
 
 bool GlobalRouter::IsWall(const Line& line) const
 {
-     const auto & rooms=_building->GetAllRooms();
-     for(const auto & room: rooms)
+     for(auto&& itr_room: _building->GetAllRooms())
      {
-          const auto & subrooms= room->GetAllSubRooms();
-          for(const auto & subroom: subrooms)
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
           {
-               const auto & obstacles=subroom->GetAllObstacles();
-               for (const auto & obst: obstacles)
+               for (auto&& obst: itr_subroom.second->GetAllObstacles())
                {
-                    const auto & walls = obst->GetAllWalls();
-                    for (const auto & wall:walls)
+                    for (auto&& wall:obst->GetAllWalls())
                     {
                          if(line.operator ==(wall))
                               return true;
                     }
                }
-               const auto & walls = subroom->GetAllWalls();
-               for (const auto & wall:walls)
+               for (auto&& wall:itr_subroom.second->GetAllWalls())
                {
                     if(line.operator ==(wall))
                          return true;
                }
-
           }
      }
 

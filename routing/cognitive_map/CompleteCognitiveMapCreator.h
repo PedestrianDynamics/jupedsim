@@ -33,9 +33,6 @@
 
 class Building;
 
-
-
-
 class CompleteCognitiveMapCreator : public AbstractCognitiveMapCreator {
 
 public:

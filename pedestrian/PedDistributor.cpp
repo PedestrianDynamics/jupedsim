@@ -357,15 +357,15 @@ bool PedDistributor::Distribute(Building* building) const
           if(!r) return false;
 
           //compute all subrooms since no specific one is given
-          for (const auto& sr: r->GetAllSubRooms())
+          for (const auto& it_sr: r->GetAllSubRooms())
           {
-               int subroomID=sr->GetSubRoomID();
+               int subroomID=it_sr.second->GetSubRoomID();
                auto&  allFreePosRoom=allFreePos[roomID];
                // the positions were already computed
                if(allFreePosRoom.count(subroomID)>0)
                     continue;
 
-               allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*sr);
+               allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*it_sr.second);
           }
      }
 

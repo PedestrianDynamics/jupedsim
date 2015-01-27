@@ -100,20 +100,3 @@ RoutingStrategy Router::GetStrategy() const
      return _strategy;
 }
 
-void Router::WriteToErrorLog() const
-{
-     //TODO
-//      for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
-//                      iter != pCrossings.end(); ++iter) {
-//              iter->second->WriteToErrorLog();
-//      }
-//      for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
-//                      iter != pTransitions.end(); ++iter) {
-//              iter->second->WriteToErrorLog();
-//      }
-//      for (map<int, Hline*>::const_iterator iter = pHlines.begin();
-//                      iter != pHlines.end(); ++iter) {
-//              iter->second->WriteToErrorLog();
-//      }
-}
-

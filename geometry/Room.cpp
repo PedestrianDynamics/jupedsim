@@ -31,6 +31,7 @@
 #include "../IO/OutputHandler.h"
 
 #include <sstream>
+#include <memory>
 
 using namespace std;
 
@@ -45,7 +46,6 @@ Room::Room()
      _egressTime=0;
      _caption = "no room caption";
      _zPos = -1.0;
-     _subRooms = vector<SubRoom* > ();
      _outputFile=NULL;
 }
 
@@ -54,7 +54,6 @@ Room::Room(const Room& orig)
      _id = orig.GetID();
      _caption = orig.GetCaption();
      _zPos = orig.GetZPos();
-     _subRooms = orig.GetAllSubRooms();
      _state=orig.GetState();
      _egressTime=orig.GetEgressTime();
      _outputFile=orig.GetOutputHandler();
@@ -62,8 +61,8 @@ Room::Room(const Room& orig)
 
 Room::~Room()
 {
-     for (unsigned int i = 0; i < _subRooms.size(); i++)
-          delete _subRooms[i];
+     //for (unsigned int i = 0; i < _subRooms.size(); i++)
+          //delete _subRooms[i];
 }
 
 /*************************************************************
@@ -82,16 +81,6 @@ void Room::SetCaption(const string& s)
 void Room::SetZPos(double z)
 {
      _zPos = z;
-}
-
-void Room::SetSubRoom(SubRoom* subroom, int index)
-{
-     if ((index >= 0) && (index < GetNumberOfSubRooms())) {
-          _subRooms[index] = subroom;
-     } else {
-          Log->Write("ERROR: Wrong Index in Room::SetSubRoom()");
-          exit(0);
-     }
 }
 
 void Room::SetState(RoomState state)
@@ -134,22 +123,20 @@ int Room::GetNumberOfSubRooms() const
      return _subRooms.size();
 }
 
-const vector<SubRoom*>& Room::GetAllSubRooms() const
+const std::map<int, std::unique_ptr<SubRoom>>& Room::GetAllSubRooms() const
 {
      return _subRooms;
 }
 
 SubRoom* Room::GetSubRoom(int index) const
 {
-     if ((index >= 0) && (index < (int) _subRooms.size()))
-          return _subRooms[index];
-     else {
-          char tmp[CLENGTH];
-          sprintf(tmp,"ERROR: Room::GetSubRoom() No subroom id [%d] present in room id [%d] ",index,_id);
-          Log->Write(tmp);
-          return NULL;
-          //exit(EXIT_FAILURE);
+     //todo: the check is done in _subRooms.at(index);
+     if(_subRooms.count(index)==0)
+     {
+          Log->Write("ERROR: Room::GetSubRoom() No subroom id [%d] present in room id [%d] ",index,_id);
+          return nullptr;
      }
+     return _subRooms.at(index).get();
 }
 
 
@@ -169,7 +156,8 @@ const RoomState& Room::GetState() const
  ************************************************************/
 void Room::AddSubRoom(SubRoom* r)
 {
-     _subRooms.push_back(r);
+     //_subRooms.push_back(r);
+     _subRooms[r->GetSubRoomID()]=std::unique_ptr<SubRoom>(r);
 }
 
 /*************************************************************

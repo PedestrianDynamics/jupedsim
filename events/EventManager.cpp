@@ -69,7 +69,6 @@ EventManager::EventManager(Building *_b)
      _building = _b;
      _eventCounter = 0;
      _dynamic = false;
-     _file = fopen("../events/events.txt", "r");
      _lastUpdateTime = 0;
      //_deltaT = 0;
      _projectFilename=_building->GetProjectFilename();
@@ -87,6 +86,12 @@ EventManager::EventManager(Building *_b)
 
      //save the first graph
      CreateRoutingEngine(_b, true);
+}
+
+EventManager::~EventManager()
+{
+     if(_file)
+          fclose(_file);
 }
 
 bool EventManager::ReadEventsXml()
@@ -666,3 +671,5 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
      }
      return rout;
 }
+
+

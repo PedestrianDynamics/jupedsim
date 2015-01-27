@@ -159,8 +159,9 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
 
-     for (const auto& r:building->GetAllRooms())
+     for (const auto& it:building->GetAllRooms())
      {
+          auto&& r = it.second;
           string caption = r->GetCaption(); //if(r->GetID()!=1) continue;
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
                continue;

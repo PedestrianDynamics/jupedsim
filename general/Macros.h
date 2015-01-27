@@ -36,6 +36,7 @@
 #include <string.h>
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
 
 #define _USE_MATH_DEFINES
