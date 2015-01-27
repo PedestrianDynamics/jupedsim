@@ -156,7 +156,7 @@ int Building::GetNumberOfGoals() const
      return _transitions.size() + _hLines.size() + _crossings.size();
 }
 
-const std::map<int, std::unique_ptr<Room>>& Building::GetAllRooms() const
+const std::map<int, std::unique_ptr<Room> >& Building::GetAllRooms() const
 {
      return _rooms;
 }

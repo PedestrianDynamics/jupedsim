@@ -123,7 +123,7 @@ int Room::GetNumberOfSubRooms() const
      return _subRooms.size();
 }
 
-const std::map<int, std::unique_ptr<SubRoom>>& Room::GetAllSubRooms() const
+const std::map<int, std::unique_ptr<SubRoom> >& Room::GetAllSubRooms() const
 {
      return _subRooms;
 }
