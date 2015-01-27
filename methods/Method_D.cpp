@@ -57,7 +57,6 @@ bool Method_D::Process (const PedData& peddata)
 {
 	if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor()))
 	{
-		Log->Write("Error:\tSome pedestrians are outside geometry. Please check the geometry or trajectory file!");
 		return false;
 	}
 	 _peds_t = peddata.GetPedsFrame();
@@ -159,10 +158,10 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
      }
      polygons = vd.cutPolygonsWithGeometry(polygons, _geoPoly, XInFrame, YInFrame);
 
-     for(auto && p:polygons)
+/*     for(auto && p:polygons)
      {
           ReducePrecision(p);
-     }
+     }*/
      return polygons;
 }
 /**
@@ -176,9 +175,8 @@ void Method_D::OutputVoronoiResults(const vector<polygon_2d>&  polygons, int fri
 }
 
 
-double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d& measureArea)
+double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d & measureArea)
 {
-     //cout.precision(15);
      double density=0;
      for (const auto & polygon_iterator:polygon)
      {
@@ -190,9 +188,9 @@ double Method_D::GetVoronoiDensity(const vector<polygon_2d>& polygon, const poly
                if((area(v[0]) - area(polygon_iterator))>J_EPS)
                {
                     std::cout<<"----------------------Now calculating density!!!-----------------\n ";
-                    std::cout<<"measure area: \t"<<dsv(measureArea)<<"\n";
-                    std::cout<<"Original polygon:\t"<<dsv(polygon_iterator)<<"\n";
-                    std::cout<<"intersected polygon: \t"<<dsv(v[0])<<"\n";
+                    std::cout<<"measure area: \t"<<std::setprecision(16)<<dsv(measureArea)<<"\n";
+                    std::cout<<"Original polygon:\t"<<std::setprecision(16)<<dsv(polygon_iterator)<<"\n";
+                    std::cout<<"intersected polygon: \t"<<std::setprecision(16)<<dsv(v[0])<<"\n";
                     std::cout<<"this is a wrong result in density calculation\t "<<area(v[0])<<'\t'<<area(polygon_iterator)<<"\n";
                     //exit(EXIT_FAILURE);
                }
@@ -230,15 +228,14 @@ double Method_D::GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* X
  * input: voronoi cell and velocity of each pedestrian and the measurement area
  * output: the voronoi velocity in the measurement area
  */
-double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d& measureArea)
+double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d & measureArea)
 {
      double meanV=0;
      int temp=0;
-     for (const auto & polygon_iterator:polygon)
+     for (auto && polygon_iterator:polygon)
      {
           polygon_list v;
           intersection(measureArea, polygon_iterator, v);
-
           if(!v.empty())
           {
                meanV+=(Velocity[temp]*area(v[0])/area(measureArea));
@@ -430,10 +427,10 @@ void Method_D::SetMeasurementArea (MeasurementArea_B* area)
 
 void Method_D::ReducePrecision(polygon_2d& polygon)
 {
-     for(auto&& point:polygon.outer())
+	for(auto&& point:polygon.outer())
      {
-          point.x(round(point.x() * 100) / 100);
-          point.y(round(point.y() * 100) / 100);
+          point.x(round(point.x() * 100.0) / 100.0);
+          point.y(round(point.y() * 100.0) / 100.0);
      }
 }
 
@@ -442,9 +439,9 @@ bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Yco
 	for(int i=0; i<peds; i++)
 		for(int j =0; j<frames; j++)
 		{
-			if(round(Xcor[i][j])<_geoMinX || round(Xcor[i][j])>_geoMaxX || round(Ycor[i][j])<_geoMinY || round(Ycor[i][j])>_geoMaxY)
+			if (false==within(point_2d(round(Xcor[i][j]), round(Xcor[i][j])), _geoPoly))
 			{
-				//cout<<round(Xcor[i][j])<<'\t'<<_geoMinX<<'\t'<<_geoMaxX<<endl;
+				Log->Write("Error:\tPedestrian at the position <x=%.4f, y=%.4f> is outside geometry. Please check the geometry or trajectory file!", Xcor[i][j]*CMtoM, Ycor[i][j]*CMtoM );
 				return false;
 			}
 		}

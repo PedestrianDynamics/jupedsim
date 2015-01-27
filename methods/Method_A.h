@@ -35,8 +35,6 @@
 #include "general/Macros.h"
 #include "tinyxml/tinyxml.h"
 #include "IO/OutputHandler.h"
-#define M2CM 100
-#define CMtoM 0.01
 
 using namespace boost::geometry;
 typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;

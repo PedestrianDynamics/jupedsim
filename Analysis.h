@@ -37,6 +37,7 @@
 #include "geometry/Building.h"
 #include "IO/OutputHandler.h"
 #include "general/Macros.h"
+#include "methods/PedData.h"
 
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/geometries/point_xy.hpp>
@@ -52,8 +53,6 @@ typedef model::ring<point_2d> ring;
 typedef std::vector<polygon_2d > polygon_list;
 typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
 
-#define CMtoM 0.01
-#define M2CM 100
 #include <map>
 #include <vector>
 using namespace std;

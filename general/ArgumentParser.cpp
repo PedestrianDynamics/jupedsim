@@ -343,7 +343,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
                     double box_py = xmltof(xVertex->Attribute("y"))*M2CM;
                     boost::geometry::append(poly, boost::geometry::make<point_2d>(box_px, box_py));
-                    Log->Write("INFO: \tMeasure area points  < %.3f, %.3f>",box_px*CMtoM,box_py*CMtoM);
+                    Log->Write("\t\tMeasure area points  < %.3f, %.3f>",box_px*CMtoM,box_py*CMtoM);
                }
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
@@ -370,7 +370,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"))*M2CM;
 
                _measurementAreas[areaL->_id]=areaL;
-               Log->Write("INFO: \tMeasurement line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX,areaL->_lineStartY,areaL->_lineEndX,areaL->_lineEndY);
+               Log->Write("\t\tMeasurement line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX*CMtoM,areaL->_lineStartY*CMtoM,areaL->_lineEndX*CMtoM,areaL->_lineEndY*CMtoM);
           }
      }
 
@@ -412,14 +412,14 @@ bool ArgumentParser::ParseIniFile(string inifile)
           {
                _isMethodA = true;
                Log->Write("INFO: \tMethod A is selected" );
-          }
-          _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
-          Log->Write("INFO: \ttime interval used in Method A is <%d> frame",_timeIntervalA);
-          for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
-                    xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
-          {
-               _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-               Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
+               Log->Write("INFO: \ttime interval used in Method A is <%d> frame",_timeIntervalA);
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
+            		   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               {
+            	   _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+            	   Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+               }
           }
      }
      // method B

@@ -40,8 +40,8 @@
 using namespace  std;
 extern OutputHandler* Log;
 
-#define M2CM 100
-#define CMtoM 0.01
+#define CMtoM 0.0001
+#define M2CM 10000
 
 class PedData
 {
