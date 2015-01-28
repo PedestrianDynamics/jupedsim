@@ -199,6 +199,8 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
+  
+  Utest/Fastmarchtest.cpp
   )
   
 set (   header_files
@@ -287,9 +289,13 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
+#add_executable(
+#  jpscore main.cpp
+#)
+
 add_executable(
-  jpscore main.cpp
-  )
+  jpscore Utest/Fastmarchtest.h
+)
 
 target_link_libraries(jpscore  core)
 

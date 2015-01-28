@@ -90,7 +90,7 @@ HeapTree<Elem>::HeapTree(double* costs, int MaxSize)
 template <class Elem>
 HeapTree<Elem>::HeapTree(const HeapTree<Elem> &OtherTree)
     : MAX_SIZE(OtherTree.MAX_SIZE),
-      costArray(costs)
+      costArray(OtherTree.costArray)
 {
   Data       = new Elem[MAX_SIZE];
   CurrentNum = OtherTree.CurrentNum;

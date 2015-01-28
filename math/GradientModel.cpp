@@ -100,7 +100,7 @@ Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
 
 #ifdef _ARNEDEBUG
 
-Point GradientModel::getDirectionFloorfield(Pedestrian* ped, Room* Room) const
+Point GradientModel::getDirectionFloorfield(const Pedestrian* ped, Room* Room) const
 {
     return *(new Point(1., 0.)); // @todo ar.graf : berechne sigma (Bodenfeld-Richtung) und ggf. skaliere mit g(...)
 }

@@ -12,16 +12,16 @@ class Fastmarchtest
         virtual ~Fastmarchtest();
 
         RectGrid* getGrid() { return grid; }
-        void setGrid(RectGrid val) { grid = val; }
+        void setGrid(RectGrid* val) { grid = val; }
 
-        int * getSpeedvalue() { return speedvalue; }
-        void setSpeedvalue(int * val) { speedvalue = val; }
+        double* getSpeedvalue() { return speedvalue; }
+        void setSpeedvalue(double* val) { speedvalue = val; }
 
-        Point * getGradientT() { return gradientT; }
-        void setGradientT(Point * val) { gradientT = val; }
+        Point* getGradientT() { return gradientT; }
+        void setGradientT(Point* val) { gradientT = val; }
 
-        double * getCost() { return cost;}
-        void setCost(double * val) {cost = val;}
+        double* getCost() { return cost;}
+        void setCost(double* val) {cost = val;}
 
         void run(char* outputfile);
     protected:
@@ -39,12 +39,12 @@ class Fastmarchtest
 #endif // FASTMARCHTEST_H
 
 #ifndef MAIN
-#def MAIN
+#define MAIN
 
 int main(int argc, char** argv) {
 
-    ftest = new Fastmarchtest();
-    ftest.run("./outputFMTest.txt");
+    Fastmarchtest* ftest = new Fastmarchtest();
+    ftest->run("./outputFMTest.txt");
     delete ftest;
 
 }

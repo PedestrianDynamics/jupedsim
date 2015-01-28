@@ -18,25 +18,25 @@ Fastmarchtest::Fastmarchtest()
     gradientT = new Point[(int)(x_max/stepsize+1)*(int)(y_max/stepsize+1)];
     cost = new double[(int)(x_max/stepsize+1)*(int)(y_max/stepsize+1)];
     if ((speedvalue == 0) || (gradientT == 0) || (cost == 0)) {
-        cerr << "\nzu wenig Speicher fuer Value-Tables\n");
+        std::cerr << "\nzu wenig Speicher fuer Value-Tables\n";
         exit(1);
     }
 
     //init grid
-    grid.setBoundaries(0., 0., x_max, y_max);
-    grid.setSpacing(stepsize, stepsize);
-    grid.createGrid();
+    grid->setBoundaries(0., 0., x_max, y_max);
+    grid->setSpacing(stepsize, stepsize);
+    grid->createGrid();
 
     //init value tables using grid information
-    for (int i = 0; i < grid.getNumOfElements(); ++i) {
-        cost[i] = -2. // negative value to indicate a not calculated value
+    for (int i = 0; i < grid->getNumOfElements(); ++i) {
+        cost[i] = -2.; // negative value to indicate a not calculated value
         speedvalue[i] = 1.;
         gradientT[i].SetX(0.); // (0, 0) indicate a not calculated value
         gradientT[i].SetY(0.);
     }
 
     //setting target bound
-    cost[grid.getKeyAtXY(0., 0.)] = 0.;
+    cost[grid->getKeyAtXY(0., 0.)] = 0.;
 
     //give fastmarcher the arrays
     fastmarcher->setSpeedArray(speedvalue);
@@ -56,20 +56,20 @@ Fastmarchtest::~Fastmarchtest()
 void Fastmarchtest::run(char* outputfile) {
     //Log = new STDIOHandler();
     OutputHandler* Log;
-    if (outputfile != 0) }
+    if (outputfile != 0) {
         Log = new FileHandler(outputfile);
     } else {
         Log = new FileHandler("./outputFMTest");
     };
     fastmarcher->calculateFloorfield();
     RectGrid* g = fastmarcher->getGrid();
-    Log.Write("\nPosX, PosY, cost, gradientT_x, gradientT_y, speedvalue")
+    Log->Write("\nPosX, PosY, cost, gradientT_x, gradientT_y, speedvalue");
     for (int i = 0; i < g->getNumOfElements(); ++i) {
         Point iPoint = g->getPointFromKey(i);
-        Log->Write("\n" + iPoint->GetX() + ", " + iPoint->GetY() + ", ");
-        Log->Write(fastmarcher->getTimecostAt( iPoint ) + ", ");
-        Log->Write((fastmarcher->getFloorfieldAt(iPoint)).GetX() + ", " + (fastmarcher->getFloorfieldAt(iPoint)).GetY()  + ", ");
-        Log->Write(fastmarcher->getSpeedAt(iPoint) + ", ");
+        Log->Write("\n" + std::to_string(iPoint.GetX()) + ", " + std::to_string(iPoint.GetY()) + ", ");
+        Log->Write(std::to_string(fastmarcher->getTimecostAt(iPoint)) + ", ");
+        Log->Write(std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetX()) + ", " + std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetY())  + ", ");
+        Log->Write(std::to_string(fastmarcher->getSpeedAt(iPoint)) + ", ");
     }
     delete Log;
 }

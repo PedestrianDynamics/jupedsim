@@ -48,7 +48,7 @@ class RectGrid
 {
     public:
         RectGrid();
-        virtual ~RectGrid()
+        virtual ~RectGrid();
 
         int setBoundaries(const double xMinA, const double yMinA,
                           const double xMaxA, const double yMaxA);
@@ -73,7 +73,8 @@ class RectGrid
 
         int getGridID() const;
         int getNumOfElements() const;
-        directNeighbor getNeighbors(const Point currPoint) const;
+        directNeighbor getNeighbors(const Point& currPoint) const;
+        directNeighbor getNeighbors(const int key) const;
 
 #ifdef LINKEDGRIDS
         RectGrid* next;

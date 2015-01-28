@@ -27,6 +27,7 @@
 
 #include "FastMarching.h"
 #include "../geometry/Building.h"
+#include "../math/HeapTree.h"
 
 RectGrid::RectGrid():
     gridID(NULL),
@@ -135,8 +136,8 @@ int RectGrid::getNumOfElements() const {
 
 directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
     directNeighbor neighbors = {{-1, -1, -1, -1}};
-    int i = (int)(((nearest.GetX()-xMin)/hx)+.5);
-    int j = (int)(((nearest.GetY()-yMin)/hy)+.5);
+    int i = (int)(((currPoint.GetX()-xMin)/hx)+.5);
+    int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
 
     //upper                        //-2 marks invalid neighbor
     neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i); //bei oberen Rand => out of Bound
@@ -148,6 +149,24 @@ directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
     neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1); // @todo: ar.graf Fehler falls Point am rechten Rand
 
     return neighbors;
+}
+
+directNeighbor RectGrid::getNeighbors(const int key) const {
+    directNeighbor neighbors = {{-1, -1, -1, -1}};
+    int i = key%iMax;
+    int j = key/iMax;
+
+    //upper                        //-2 marks invalid neighbor
+    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i); //bei oberen Rand => out of Bound
+    //lower
+    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i); //bei unterem Rand => negative
+    //left
+    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1); // @todo: ar.graf Fehler falls Point am linken Rand
+    //right
+    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1); // @todo: ar.graf Fehler falls Point am rechten Rand
+
+    return neighbors;
+
 }
 
 int RectGrid::setAsInner(const Point& innerP) {
@@ -164,30 +183,34 @@ int RectGrid::setAsOuter(const Point& outerP) {
 
 
 
-FastMarching::FastMarcher()
+FastMarcher::FastMarcher()
 {
     //ctor
 }
 
-FastMarching::~FastMarcher()
+FastMarcher::~FastMarcher()
 {
     //dtor
 }
 
 int FastMarcher::setCostArray(double* givenCost) {
-    myCost = cost;
+    myCost = givenCost;
+    return 1;
 }
 
 int FastMarcher::setGradientArray(Point* givenGradient) {
-    myGradient = givenGradientArray;
+    myGradient = givenGradient;
+    return 1;
 }
 
 int FastMarcher::setSpeedArray(double* givenSpeed) {
     mySpeed = givenSpeed;
+    return 1;
 }
 
 int FastMarcher::setGrid(RectGrid* givenGrid) {
     myGrid = givenGrid;
+    return 1;
 }
 
 int FastMarcher::setGeometry(const Building* const building) {
@@ -224,13 +247,16 @@ double FastMarcher::getSpeedAt(const int x, const int y) const {
 int FastMarcher::calculateFloorfield() {
     // @todo: ar.graf
     //definiere max heap //dyn heap??
-    HeapTree narrowband = new HeapTree(myGrid->getNumOfElements(), myCost);
+    HeapTree<int>* narrowband = new HeapTree<int> (myCost, myGrid->getNumOfElements());
 
     //suche alle Punkte mit cost = 0
     for (int iKey = 0; iKey < myGrid->getNumOfElements(); ++iKey) {
         //alle nachbarn eines jeden dieser punkte wird (falls cost = -2.) dem narrowband zugefuegt
         //(evtl mit cost = -1., um es als zugefuegt zu markieren)
-        Neighbors
+        if (myCost[iKey] == 0.) {
+            narrowband->Add(iKey);
+        }
+        directNeighbor neighbor = myGrid->getNeighbors(iKey);
     }
     //jetzt habe ich das erste narrowband
     //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
