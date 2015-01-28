@@ -132,7 +132,10 @@ bool PedData::InitializeVariables(const string& filename)
 
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
-     if(_numPeds!=_IdsTXT.size())
+     vector<int> Ids_temp=_IdsTXT;
+     sort (Ids_temp.begin(), Ids_temp.end());
+     Ids_temp.erase(unique(Ids_temp.begin(), Ids_temp.end()), Ids_temp.end());
+     if((unsigned)_numPeds!=Ids_temp.size())
      {
     	 Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
     	 return false;

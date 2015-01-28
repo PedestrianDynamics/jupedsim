@@ -253,6 +253,16 @@ def write_geometry(out, walls):
 
 
 def write_frames(out, frames, data, mTocm ):
+	extract_id = unique(data[:,0])
+    if len(extract_id) != (max(data[:,0])-min(data[:,0])+1):
+        data1 = array([[0, 0, 0, 0]])        
+        id = 1
+        for i in extract_id:
+            data_id = data[ data[:,0] == i ]
+            data_id[:,0] = id
+            data1 = append(data1, data_id, axis=0)
+            id = id + 1
+        data = delete(data1, (0), axis=0)
     for frame in frames:
         # if frame%100 == 0:
         #     logging.info("++ frame:\t %d"%frame)
