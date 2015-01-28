@@ -132,6 +132,11 @@ bool PedData::InitializeVariables(const string& filename)
 
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
+     if(_numPeds!=_IdsTXT.size())
+     {
+    	 Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
+    	 return false;
+     }
      CreateGlobalVariables(_numPeds, _numFrames);
 
      std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
@@ -321,30 +326,48 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
 
      double v=0.0;
 
-     if(_vComponent == 'X') {
-          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+     if(_vComponent == 'X')
+     {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
                v = _fps*CMtoM*(Xcor[ID][Tfuture] - Xcor[ID][Tpast])/(2.0 * _deltaF);  //one dimensional velocity
-          } else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+          }
+          else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
                v = _fps*CMtoM*(Xcor[ID][Tfuture] - Xcor[ID][Tnow])/(_deltaF);  //one dimensional velocity
-          } else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID])) {
+          }
+          else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+          {
                v = _fps*CMtoM*(Xcor[ID][Tnow] - Xcor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
      }
-     if(_vComponent == 'Y') {
-          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+     if(_vComponent == 'Y')
+     {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
                v = _fps*CMtoM*(Ycor[ID][Tfuture] - Ycor[ID][Tpast])/(2.0 * _deltaF);  //one dimensional velocity
-          } else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+          }
+          else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
                v = _fps*CMtoM*(Ycor[ID][Tfuture] - Ycor[ID][Tnow])/(_deltaF);  //one dimensional velocity
-          } else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID])) {
+          }
+          else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+          {
                v = _fps*CMtoM*(Ycor[ID][Tnow] - Ycor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
      }
-     if(_vComponent == 'B') {
-          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+     if(_vComponent == 'B')
+     {
+          if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
                v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tpast]),2))/(2.0 * _deltaF);  //two dimensional velocity
-          } else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID])) {
+          }
+          else if((Tpast <Tfirst[ID])&&(Tfuture <= Tlast[ID]))
+          {
                v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tfuture] - Xcor[ID][Tnow]),2)+pow((Ycor[ID][Tfuture] - Ycor[ID][Tnow]),2))/(_deltaF);
-          } else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID])) {
+          }
+          else if((Tpast >=Tfirst[ID])&&(Tfuture > Tlast[ID]))
+          {
                v = _fps*CMtoM*sqrt(pow((Xcor[ID][Tnow] - Xcor[ID][Tpast]),2)+pow((Ycor[ID][Tnow] - Ycor[ID][Tpast]),2))/(_deltaF);  //two dimensional velocity
           }
      }

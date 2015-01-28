@@ -88,8 +88,8 @@ private:
      double GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea);
      double GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d & measureArea);
      void GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, const vector<double>& velocity);
-     void OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, const vector<double>& XInFrame,
-               const vector<double>& YInFrame,const vector<double>& VInFrame);
+     void OutputVoroGraph(const string & frameId, vector<polygon_2d>& polygons, int numPedsInFrame, vector<double>& XInFrame,
+               vector<double>& YInFrame,const vector<double>& VInFrame);
      void GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, int frid);
 
      /**

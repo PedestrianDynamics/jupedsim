@@ -293,7 +293,7 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
      fclose(Prf_density);
 }
 
-void Method_D::OutputVoroGraph(const string & frameId, const vector<polygon_2d>& polygons, int numPedsInFrame, const vector<double>& XInFrame, const vector<double>& YInFrame,const vector<double>& VInFrame)
+void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polygons, int numPedsInFrame, vector<double>& XInFrame, vector<double>& YInFrame,const vector<double>& VInFrame)
 {
      string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
 
@@ -308,9 +308,15 @@ void Method_D::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
      ofstream polys (polygon.c_str());
      if(polys.is_open())
      {
-          for(vector<polygon_2d>::const_iterator polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end(); polygon_iterator++)
+          //for(vector<polygon_2d> polygon_iterator=polygons.begin(); polygon_iterator!=polygons.end(); polygon_iterator++)
+    	  for(auto && poly:polygons)
           {
-               polys << dsv(*polygon_iterator) << endl;
+        	  for(auto&& point:poly.outer())
+        	  {
+        		  point.x(point.x()*CMtoM);
+        		  point.y(point.y()*CMtoM);
+        	  }
+        	  polys << dsv(poly) << endl;
           }
      }
      else
@@ -341,7 +347,7 @@ void Method_D::OutputVoroGraph(const string & frameId, const vector<polygon_2d>&
      {
           for(int pts=0; pts<numPedsInFrame; pts++)
           {
-               points << XInFrame[pts] << "\t" << YInFrame[pts] << endl;
+               points << XInFrame[pts]*CMtoM << "\t" << YInFrame[pts]*CMtoM << endl;
           }
      }
      else
@@ -439,7 +445,7 @@ bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Yco
 	for(int i=0; i<peds; i++)
 		for(int j =0; j<frames; j++)
 		{
-			if (false==within(point_2d(round(Xcor[i][j]), round(Xcor[i][j])), _geoPoly))
+			if (false==within(point_2d(round(Xcor[i][j]), round(Ycor[i][j])), _geoPoly))
 			{
 				Log->Write("Error:\tPedestrian at the position <x=%.4f, y=%.4f> is outside geometry. Please check the geometry or trajectory file!", Xcor[i][j]*CMtoM, Ycor[i][j]*CMtoM );
 				return false;
