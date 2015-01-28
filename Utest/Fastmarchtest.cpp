@@ -3,6 +3,7 @@
 #include "../geometry/Point.h"
 #include "../math/FastMarching.h"
 #include "../IO/OutputHandler.h"
+#include <limits>
 
 
 Fastmarchtest::Fastmarchtest()
@@ -29,7 +30,7 @@ Fastmarchtest::Fastmarchtest()
 
     //init value tables using grid information
     for (int i = 0; i < grid->getNumOfElements(); ++i) {
-        cost[i] = -2.; // negative value to indicate a not calculated value
+        cost[i] = -2.; // neg. value to indicate a not calculated value
         speedvalue[i] = 1.;
         gradientT[i].SetX(0.); // (0, 0) indicate a not calculated value
         gradientT[i].SetY(0.);

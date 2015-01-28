@@ -28,6 +28,7 @@
 #include "FastMarching.h"
 #include "../geometry/Building.h"
 #include "../math/HeapTree.h"
+#include <limits>
 
 RectGrid::RectGrid():
     gridID(NULL),
@@ -140,13 +141,13 @@ directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
     int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
 
     //upper                        //-2 marks invalid neighbor
-    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i); //bei oberen Rand => out of Bound
+    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i);
     //lower
-    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i); //bei unterem Rand => negative
+    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i);
     //left
-    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1); // @todo: ar.graf Fehler falls Point am linken Rand
+    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
     //right
-    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1); // @todo: ar.graf Fehler falls Point am rechten Rand
+    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1);
 
     return neighbors;
 }
@@ -157,13 +158,13 @@ directNeighbor RectGrid::getNeighbors(const int key) const {
     int j = key/iMax;
 
     //upper                        //-2 marks invalid neighbor
-    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i); //bei oberen Rand => out of Bound
+    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i);
     //lower
-    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i); //bei unterem Rand => negative
+    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i);
     //left
-    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1); // @todo: ar.graf Fehler falls Point am linken Rand
+    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
     //right
-    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1); // @todo: ar.graf Fehler falls Point am rechten Rand
+    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1);
 
     return neighbors;
 
@@ -254,13 +255,21 @@ int FastMarcher::calculateFloorfield() {
         //alle nachbarn eines jeden dieser punkte wird (falls cost = -2.) dem narrowband zugefuegt
         //(evtl mit cost = -1., um es als zugefuegt zu markieren)
         if (myCost[iKey] == 0.) {
-            narrowband->Add(iKey);
+            directNeighbor neighbor = myGrid->getNeighbors(iKey);
+            for (int neighKey = 0; neighKey < 4; ++neighKey) {
+                if (neighbor.key[neighKey] > -1) { //valid neighbor
+                    if (myCost[neighbor.key[neighKey]] == -2.) { //indicating a non calculated cost (as it is calc below, no point gets in twice
+                                                                 //thus not yet in narrow band
+                        myCost[neighbor.key[neighKey]] = calcCostAt(neighbor.key[neighKey]); //now calc @todo: ar.graf : darf ich jetzt schon berechnen?
+                        narrowband->Add(neighbor.key[neighKey]); //getting added into correct heap pos. (lowest is root)
+                    }
+                }
+
+            }
         }
-        directNeighbor neighbor = myGrid->getNeighbors(iKey);
     }
     //jetzt habe ich das erste narrowband
-    //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
-    //das minimum wird in dem cost array gespeichert, das neu berechnete element muss an die richtige stelle im baum
+
     //suche im narrowband das cost-minimum (heap root) und
         //fuege seine nachbarn dem narrowband hinzu, falls nachbar = -2.
         //fuege nun das minimum den bekannten hinzu (indem es aus dem narrowband rausgenommen wird)
@@ -268,4 +277,21 @@ int FastMarcher::calculateFloorfield() {
 
 
     return 0;
+}
+
+double FastMarcher::calcCostAt(int key) {
+    directNeighbor neighbor = myGrid->getNeighbors(key);
+    double* neighCost = new double[4];
+    for (int i = 0; i < 4; ++i) {
+        if (neighbor.key[i] > -1) { //valid neighbor
+            //save cost values of neighbors, set uncalculated (<- negative) neighbor costs to max
+            //bei der berechnung sollen alle negativen cost werte als std::numeric_limits<double>::max() genutzt werden
+            neighCost[i] = (myCost[neighbor.key[i]] >= 0.) ? myCost[neighbor.key[i]] : std::numeric_limits<double>::max();
+        } else {                    //invalid neighbor
+            neighCost[i] = std::numeric_limits<double>::max();
+        }
+    }
+    //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
+    //das minimum wird in dem cost array gespeichert, das neu berechnete element muss an die richtige stelle im baum
+    return 0.;
 }

@@ -114,6 +114,7 @@ class FastMarcher
 
         //calculate floor field
         int calculateFloorfield();
+        double calcCostAt(int key);
 
         //access floorfield data
         Point getFloorfieldAt(const Point currPos) const;
