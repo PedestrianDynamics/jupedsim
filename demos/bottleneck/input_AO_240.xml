@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <JPSreport project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd"> 
+xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd" > 
     <!-- geometry file -->
     <geometry file = "geo_AO_240.xml" />
     <!-- trajectories file and format -->
