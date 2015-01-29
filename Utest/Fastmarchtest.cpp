@@ -14,19 +14,20 @@ Fastmarchtest::Fastmarchtest()
     y_max = 100.;
     stepsize = .2;
 
-    //value tables (later using the keys given by grid as index)
-    speedvalue = new double[(int)(x_max/stepsize+1)*(int)(y_max/stepsize+1)];
-    gradientT = new Point[(int)(x_max/stepsize+1)*(int)(y_max/stepsize+1)];
-    cost = new double[(int)(x_max/stepsize+1)*(int)(y_max/stepsize+1)];
-    if ((speedvalue == 0) || (gradientT == 0) || (cost == 0)) {
-        std::cerr << "\nzu wenig Speicher fuer Value-Tables\n";
-        exit(1);
-    }
-
     //init grid
     grid->setBoundaries(0., 0., x_max, y_max);
     grid->setSpacing(stepsize, stepsize);
     grid->createGrid();
+
+    //value tables (later using the keys given by grid as index)
+    int nGridpoints = grid->getNumOfElements();
+    speedvalue = new double[nGridpoints];
+    gradientT = new Point[nGridpoints];
+    cost = new double[nGridpoints];
+    if ((speedvalue == 0) || (gradientT == 0) || (cost == 0)) {
+        std::cerr << "\nzu wenig Speicher fuer Value-Tables\n";
+        exit(1);
+    }
 
     //init value tables using grid information
     for (int i = 0; i < grid->getNumOfElements(); ++i) {
