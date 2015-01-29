@@ -6,11 +6,31 @@ import matplotlib.cm as cm
 import pylab
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib
+import argparse
+import sys
 
 
-t_start = 700
-t_end = 701
-for i in range(t_start,t_end):
+def getParserArgs():
+	parser = argparse.ArgumentParser(description='Combine French data to one file')
+	parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
+	parser.add_argument("-n", "--namefile", help='give the name of the source file')
+	parser.add_argument("-x1", "--geominx", type=float, help='give the minmum x of the geometry')
+	parser.add_argument("-x2", "--geomaxx", type=float, help='give the maxmum x of the geometry')
+	parser.add_argument("-y1", "--geominy", type=float, help='give the minmum y of the geometry')
+	parser.add_argument("-y2", "--geomaxy", type=float, help='give the maxmum y of the geometry')
+	args = parser.parse_args()
+	return args
+
+
+if __name__ == '__main__':
+   args = getParserArgs()
+   filepath = args.filepath
+   sys.path.append(filepath)
+   namefile = args.namefile
+   geominX = args.geominx
+   geomaxX = args.geomaxx
+   geominY = args.geominy
+   geomaxY = args.geomaxy
    fig = plt.figure(figsize=(16, 12), dpi=300)
    ax1 = fig.add_subplot(111,aspect='equal')
    plt.rc("font", size=30)
@@ -22,9 +42,8 @@ for i in range(t_start,t_end):
       tick.set_markersize(6)
    ax1.set_aspect("equal") 
    velocity=array([])
-   polysfile = open("./polygonko-240-240-240_"+str(i)+".dat")
-   polys=polysfile.readlines()
-   velocity=loadtxt("./speedko-240-240-240_"+str(i)+".dat")
+   polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
+   velocity=loadtxt("%s/speed%s.dat"%(filepath,namefile))
    sm = cm.ScalarMappable(cmap=cm.jet)
    sm.set_array(velocity)
    sm.autoscale_None()
@@ -32,30 +51,23 @@ for i in range(t_start,t_end):
    index=0
    for poly in polys:
       exec("p = %s"%poly)
-      p=tuple(tuple(i/100.0 for i in inner) for inner in p)
+      #p=tuple(tuple(i/100.0 for i in inner) for inner in p)
       xx = velocity[index]
       index += 1
       ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
-   points = loadtxt("./pointsko-240-240-240_"+str(i)+"_left.dat")
+   points = loadtxt("%s/points%s.dat"%(filepath,namefile))
    ax1.plot(points[:,0]/100.,points[:,1]/100.,"bo",markersize = 20,markeredgewidth=2)
-   points = loadtxt("./pointsko-240-240-240_"+str(i)+"_right.dat")
-   ax1.plot(points[:,0]/100.,points[:,1]/100.,"ro",markersize = 20,markeredgewidth=2)
-   ax1.set_xlim(-4.50,4.00)
-   ax1.set_ylim(-2.60,4.00)
+   ax1.set_xlim(geominX,geomaxX)
+   ax1.set_ylim(geominY,geomaxY)
    plt.xlabel("x [m]")
    plt.ylabel("y [m]")
-   #print density
+   plt.title("%s"%namefile)
    divider = make_axes_locatable(ax1)
    cax = divider.append_axes("right", size="2.5%", pad=0.2)
    cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
    cb.set_label('Velocity [$m/s$]') 
-   #plt.title('Frame '+ str(i))
-   #plt.xlabel('X [cm]')
-   #plt.ylabel('Y [cm]')
-   plt.savefig(str(i)+"_v.png")
-   plt.gcf().clear()
-   polysfile.close()
-#      plt.show()
+   plt.savefig("%s/v_%s.png"%(filepath,namefile))
+   plt.close()
 
 
 

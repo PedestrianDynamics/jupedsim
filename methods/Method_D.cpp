@@ -355,10 +355,15 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
-     //string parameters="python ./scripts/_Plot_cell_rho.py --f "+ voronoiLocation+" --n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId;
-     //cout<<parameters<<endl;
-     //system(parameters.c_str());
-     //system("python ../scripts/_Plot_cell_v.py ");
+     string parameters_rho="python ./scripts/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+    		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
+			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
+     string parameters_v="python ./scripts/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+         		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
+     			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
+     cout<<parameters_rho<<endl;
+     system(parameters_rho.c_str());
+     system(parameters_v.c_str());
      points.close();
      polys.close();
      velo.close();

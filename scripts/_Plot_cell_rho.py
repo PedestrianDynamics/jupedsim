@@ -11,11 +11,15 @@ import sys
 
 
 def getParserArgs():
-    parser = argparse.ArgumentParser(description='Combine French data to one file')
-    parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
-    parser.add_argument("-n", "--namefile", help='give the name of the source file')
-    args = parser.parse_args()
-    return args
+	parser = argparse.ArgumentParser(description='Combine French data to one file')
+	parser.add_argument("-f", "--filepath", default="./", help='give the path of source file')
+	parser.add_argument("-n", "--namefile", help='give the name of the source file')
+	parser.add_argument("-x1", "--geominx", type=float, help='give the minmum x of the geometry')
+	parser.add_argument("-x2", "--geomaxx", type=float, help='give the maxmum x of the geometry')
+	parser.add_argument("-y1", "--geominy", type=float, help='give the minmum y of the geometry')
+	parser.add_argument("-y2", "--geomaxy", type=float, help='give the maxmum y of the geometry')
+	args = parser.parse_args()
+	return args
 
 
 if __name__ == '__main__':
@@ -24,6 +28,10 @@ if __name__ == '__main__':
    filepath = args.filepath
    sys.path.append(filepath)
    namefile = args.namefile
+   geominX = args.geominx
+   geomaxX = args.geomaxx
+   geominY = args.geominy
+   geomaxY = args.geomaxy
    fig = plt.figure(figsize=(16, 12), dpi=100)
    ax1 = fig.add_subplot(111,aspect='equal')
    plt.rc("font", size=30)
@@ -39,7 +47,7 @@ if __name__ == '__main__':
    polys = open("%s/polygon%s.dat"%(filepath,namefile)).readlines()
    for poly in polys:
       exec("p = %s"%poly)
-      p=tuple(tuple(i/100.0 for i in inner) for inner in p)
+      #p=tuple(tuple(i/100.0 for i in inner) for inner in p)
       xx=1.0/Polygon(p).area()
       if xx>rho_max:
          xx=rho_max
@@ -54,26 +62,25 @@ if __name__ == '__main__':
    sm.set_clim(vmin=0,vmax=5)
    for poly in polys:
       exec("p = %s"%poly)
-      p=tuple(tuple(i/100.0 for i in inner) for inner in p)
+      #p=tuple(tuple(i/100.0 for i in inner) for inner in p)
       xx=1.0/Polygon(p).area()
 		#print xx
       if xx>rho_max:
          xx=rho_max
       ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
    points = loadtxt("%s/points%s.dat"%(filepath,namefile))
-   ax1.plot(points[:,0]/100.,points[:,1]/100.,"bo",markersize = 20,markeredgewidth=2)
-   #ax1.set_xlim(-4.50,4.00)
-   #ax1.set_ylim(-2.60,4.00)
+   ax1.plot(points[:,0],points[:,1],"bo",markersize = 20,markeredgewidth=2)
+   ax1.set_xlim(geominX,geomaxX)
+   ax1.set_ylim(geominY,geomaxY)
    plt.xlabel("x [m]")
    plt.ylabel("y [m]")
    #print density
+   plt.title("%s"%namefile)
    divider = make_axes_locatable(ax1)
    cax = divider.append_axes("right", size="2.5%", pad=0.2)
    cb=fig.colorbar(sm,ax=ax1,cax=cax,format='%.1f')
    cb.set_label('Density [$m^{-2}$]') 
-   plt.title("%s"%namefile)
    plt.savefig("%s/rho_%s.png"%(filepath,namefile))
    plt.close()
-#      plt.show()
 
 
