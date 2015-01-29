@@ -29,6 +29,7 @@
 #include "../geometry/Building.h"
 #include "../math/HeapTree.h"
 #include <limits>
+#include <math.h>
 
 RectGrid::RectGrid():
     gridID(NULL),
@@ -277,6 +278,24 @@ int FastMarcher::calculateFloorfield() {
 
 
     return 0;
+}
+
+inline double quadrSolutionMax (double c1, double c2, double h1, double h2, double speed) {
+    //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
+    double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
+    if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
+    double rooteval = sqrt(discriminant);
+
+    double ret = (c1+c2)/2. + rooteval;
+}
+
+inline double quadrSolutionMin (double c1, double c2, double h1, double h2, double speed) {
+    //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
+    double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
+    if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
+    double rooteval = sqrt(discriminant);
+
+    double ret = (c1+c2)/2. - rooteval;
 }
 
 double FastMarcher::calcCostAt(int key) {
