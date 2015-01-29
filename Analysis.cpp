@@ -191,6 +191,7 @@ void Analysis::InitArgs(ArgumentParser* args)
 	_circleEdges=args->GetCircleEdges();
 }
 
+/*
 polygon_2d Analysis::ReadGeometry(const string& geometryFile)
 {
 
@@ -242,7 +243,64 @@ polygon_2d Analysis::ReadGeometry(const string& geometryFile)
 	//cout<<"INFO: \tGeometry polygon is:\t"<<dsv(geoPoly)<<endl;
 	return geoPoly;
 }
+*/
 
+polygon_2d Analysis::ReadGeometry(const string& geometryFile)
+{
+
+	_building = new Building();
+	_building->LoadGeometry(geometryFile);
+	// create the polygons
+	_building->InitGeometry();
+
+	double geo_minX  = FLT_MAX;
+	double geo_minY  = FLT_MAX;
+	double geo_maxX  = -FLT_MAX;
+	double geo_maxY  = -FLT_MAX;
+
+	polygon_2d geoPoly;
+	vector<Obstacle*> GeoObst;
+
+    for (auto&& it_room : _building->GetAllRooms())
+    {
+    	for (auto&& it_sub : it_room.second->GetAllSubRooms())
+    	{
+    		SubRoom* subroom = it_sub.second.get();
+    		for(auto&& tmp_point:subroom->GetPolygon())
+    		{
+    			append(geoPoly, make<point_2d>(tmp_point._x*M2CM, tmp_point._y*M2CM));
+    			geo_minX = (tmp_point._x*M2CM<=geo_minX) ? (tmp_point._x*M2CM) : geo_minX;
+    			geo_minY = (tmp_point._y*M2CM<=geo_minY) ? (tmp_point._y*M2CM) : geo_minY;
+    			geo_maxX = (tmp_point._x*M2CM>=geo_maxX) ? (tmp_point._x*M2CM) : geo_maxX;
+    			geo_maxY = (tmp_point._y*M2CM>=geo_maxY) ? (tmp_point._y*M2CM) : geo_maxY;
+    		}
+    		correct(geoPoly);
+    		GeoObst = subroom->GetAllObstacles();
+
+    	}
+
+    	int k=0;
+    	for(auto&& obst: GeoObst)
+    	{
+    		geoPoly.inners().resize(k++);
+    		geoPoly.inners().back();
+    		model::ring<point_2d>& inner = geoPoly.inners().back();
+
+    		for(auto&& tmp_point:obst->GetPolygon())
+    		{
+    			append(inner, make<point_2d>(tmp_point._x*M2CM, tmp_point._y*M2CM));
+    		}
+    		correct(geoPoly);
+    	}
+
+    }
+	_highVertexX = geo_maxX;
+	_highVertexY = geo_maxY;
+	_lowVertexX = geo_minX;
+	_lowVertexY = geo_minY;
+	//cout<<"INFO: \tGeometry polygon is:\t"<<dsv(geoPoly)<<endl;
+	return geoPoly;
+}
 int Analysis::RunAnalysis(const string& filename, const string& path)
 {
 	PedData data;

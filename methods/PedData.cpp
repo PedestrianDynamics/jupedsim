@@ -27,6 +27,7 @@
  **/
 
 #include "PedData.h"
+#include  <cmath>
 
 using std::string;
 using std::map;

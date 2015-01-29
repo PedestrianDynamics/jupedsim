@@ -1,7 +1,7 @@
 /**
  * \file        SubRoom.cpp
  * \date        Oct 8, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -82,7 +82,6 @@ SubRoom::~SubRoom()
      _obstacles.clear();
 }
 
-// Setter -Funktionen
 
 void SubRoom::SetSubRoomID(int ID)
 {
@@ -127,7 +126,7 @@ int SubRoom::GetRoomID() const
 
 int SubRoom::GetNumberOfWalls() const
 {
-     return _walls.size();
+     return (int)_walls.size();
 }
 
 const vector<Wall>& SubRoom::GetAllWalls() const
@@ -157,7 +156,7 @@ const vector<Obstacle*>& SubRoom::GetAllObstacles() const
 
 int SubRoom::GetNumberOfGoalIDs() const
 {
-     return _goalIDs.size();
+     return (int)_goalIDs.size();
 }
 
 const vector<int>& SubRoom::GetAllGoalIDs() const
@@ -165,8 +164,6 @@ const vector<int>& SubRoom::GetAllGoalIDs() const
      return _goalIDs;
 }
 
-
-// Sonstiges
 
 void SubRoom::AddWall(const Wall& w)
 {
@@ -202,7 +199,7 @@ void SubRoom::AddHline(Hline* line)
 {
     for(unsigned int i=0;i<_hlines.size();i++){
         if (line->GetID()==_hlines[i]->GetID()){
-            Log->Write("INFO:\tskipping duplicate hline [%d] in subroom [%d]",_id,line->GetID());
+            Log->Write("INFO:\tskipping duplicate hline [%d] with id [%d]",_id,line->GetID());
             return;
         }
     }
@@ -266,7 +263,6 @@ void SubRoom::CalculateArea()
 
 Point SubRoom::GetCentroid() const
 {
-
      double px=0,py=0;
      double signedArea = 0.0;
      double x0 = 0.0; // Current vertex X
@@ -275,6 +271,7 @@ Point SubRoom::GetCentroid() const
      double y1 = 0.0; // Next vertex Y
      double a = 0.0;  // Partial signed area
 
+     if(_poly.size()==0) return Point(0,0);
      // For all vertices except last
      unsigned int i=0;
      for (i=0; i<_poly.size()-1; ++i) {
@@ -305,46 +302,110 @@ Point SubRoom::GetCentroid() const
      return Point(px,py);
 }
 
-bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
-{
-     // generate certain connection lines
-     // connecting p1 with p2
-     Line cl = Line(p1,p2);
-     Line L1=cl, L2;
-     bool temp =  true;
-     //check intersection with Walls
-     for(unsigned int i = 0; i < _walls.size(); i++) {
-          if(temp  && cl.IntersectionWith(_walls[i])){
-               L2 = _walls[i];
-               // fprintf (stdout, "INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
-               temp = false;
+std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position){
+#define DEBUG 0
+     std::vector<Wall> visible_walls;
+     bool wall_is_vis;
+     Point nearest_point;
+#if DEBUG
+     printf("\n---------------------------\nEnter GetVisiblewalls\n");
+#endif
+     for (auto w:_walls){
+          // nearest_point = w.ShortestPoint(position);
+          wall_is_vis = IsVisible(w, position);
+          if(wall_is_vis){
+#if DEBUG
+               printf("  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",w.GetPoint1().GetX(), w.GetPoint1().GetY(),w.GetPoint2().GetX(), w.GetPoint2().GetY() );
+               printf("  GetVisibleWalls: Ped position (%f, %f)\n",position.GetX(), position.GetY());
+               printf("  GetVisibleWalls: wall is visible? = %d\n",wall_is_vis);
+#endif
+               visible_walls.push_back(w);
           }
      }
+#if DEBUG
+     printf("Leave GetVisiblewalls with %d visible walls\n------------------------------\n",visible_walls.size());
+ #endif
+     return visible_walls;
+}
 
+// like ped_is_visible() but here we can exclude checking intersection
+// with the same wall. This function should check if <position> can see the <Wall>
+bool SubRoom::IsVisible(const Line &wall, const Point &position)
+{
+     // printf("\tEnter wall_is_visible\n");
+     // printf(" \t  Wall (%f, %f)--(%f, %f)\n",wall.GetPoint1().GetX(), wall.GetPoint1().GetY(),wall.GetPoint2().GetX(), wall.GetPoint2().GetY() );
+
+     bool wall_is_vis = true;
+     // Point nearest_point =  wall.ShortestPoint(position);
+     // in cases where nearest_point is endPoint of Wall, the wall becomes visible even if it is not..
+     //  try with the center. If it is not visible then the wall is definitly not.
+     Point nearest_point =  wall.GetCentre();
+     // printf("\t\t center of wall %f, %f\n",nearest_point.GetX(), nearest_point.GetY());
+     Line ped_wall = Line(position, nearest_point);
+     for (auto w:_walls){
+          if(w == wall) //ignore wall
+               continue;
+          if(wall_is_vis  && ped_wall.IntersectionWith(w)){
+               // fprintf (stdout, "\t\t Wall_is_visible: INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), WALL(%.2f, %.2f)---(%.2f, %.2f)\n", ped_wall.GetPoint1().GetX(),ped_wall.GetPoint1().GetY(), ped_wall.GetPoint2().GetX(), ped_wall.GetPoint2().GetY(), w.GetPoint1().GetX(),w.GetPoint1().GetY(),w.GetPoint2().GetX(),w.GetPoint2().GetY());
+               wall_is_vis = false;
+          }
+     }
 
      //check intersection with obstacles
      for(unsigned int i = 0; i < _obstacles.size(); i++) {
           Obstacle * obs = _obstacles[i];
           for(unsigned int k = 0; k<obs->GetAllWalls().size(); k++) {
                const Wall& w = obs->GetAllWalls()[k];
-               if(temp && cl.IntersectionWith(w)){
-                    L2 = w;
-                    // fprintf (stdout, "INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", L1.GetPoint1().GetX(),L1.GetPoint1().GetY(),L1.GetPoint2().GetX(),L1.GetPoint2().GetY(), L2.GetPoint1().GetX(),L2.GetPoint1().GetY(),L2.GetPoint2().GetX(),L2.GetPoint2().GetY());
-                    temp = false;
+               if(wall_is_vis && ped_wall.IntersectionWith(w)){
+                    // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), ped_wall.GetPoint1().GetX(), ped_wall.GetPoint1().GetY(), ped_wall.GetPoint2().GetX(), ped_wall.GetPoint2().GetY());
+                    wall_is_vis = false;
                     
                }
           }
      }
+
+     // printf("\tLeave wall_is_visible with %d\n", wall_is_vis);
+     return wall_is_vis;
+}
+
+// p1 and p2 are supposed to be pedestrian's positions. This function does not work properly 
+// for visibility checks with walls, since the line connecting the pedestrian's position 
+// with the nearest point on the wall IS intersecting with the wall.
+bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
+{
+     // printf("\t\tEnter ped_is_visible\n");
+     // generate certain connection lines
+     // connecting p1 with p2
+     //Line cl(p1,p2);
+     //Line L2;
+     bool temp =  true;
+     //check intersection with Walls
+    for(const auto& wall : _walls) {
+        if (wall.IntersectionWith(p1, p2)) {
+            return false;
+        }
+    }
+
+     // printf("\t\t -- ped_is_visible; check obstacles\n");
+     //check intersection with obstacles
+    for ( const auto obstacle : _obstacles) {
+        for ( const auto& wall : obstacle->GetAllWalls()) {
+            if (wall.IntersectionWith(p1, p2)) {
+                return false;
+            }
+        }
+    }
 
 
      // check intersection with other hlines in room
      if(considerHlines)
           for(unsigned int i = 0; i < _hlines.size(); i++) {
                if(_hlines[i]->IsInLineSegment(p1)|| _hlines[i]->IsInLineSegment(p2)) continue;
-               if(temp && cl.IntersectionWith(*(Line*)_hlines[i]))
+               if(temp && (Line*)_hlines[i]->IntersectionWith(p1, p2))
                     temp = false;
           }
 
+     // printf("\t\tLeave ped_is_visible with %d\n",temp);
      return temp;
 }
 
@@ -393,9 +454,6 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
      return temp[0] || temp[1] || temp[2] || temp[3] || temp[4];
 }
 
-
-
-
 // this is the case if they share a transition or crossing
 bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const
 {
@@ -436,7 +494,7 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
 }
 
-const double* SubRoom::GetPlanEquation() const
+const double* SubRoom::GetPlaneEquation() const
 {
      return _planeEquation;
 }
@@ -465,7 +523,7 @@ void SubRoom::CheckObstacles()
      }
 }
 
-void SubRoom::SanityCheck()
+bool SubRoom::SanityCheck()
 {
      if(_obstacles.size()==0) {
           if((IsConvex()==false) && (_hlines.size()==0)) {
@@ -482,13 +540,13 @@ void SubRoom::SanityCheck()
                // everything is fine
           }
      }
-
+     return true;
 }
 
 ///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
 bool SubRoom::IsConvex()
 {
-     unsigned int hsize=_poly.size();
+     unsigned int hsize=(unsigned int)_poly.size();
      unsigned int pos=0;
      unsigned int neg=0;
 
@@ -622,7 +680,7 @@ void NormalSubRoom::WriteToErrorLog() const
      }
 }
 
-void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals)
+bool NormalSubRoom::ConvertLineToPoly(vector<Line*> goals)
 {
      vector<Line*> copy;
      vector<Point> tmpPoly;
@@ -664,9 +722,10 @@ void NormalSubRoom::ConvertLineToPoly(vector<Line*> goals)
           Log->Write(tmp);
           sprintf(tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
           Log->Write(tmp);
-          exit(EXIT_FAILURE);
+          return false;
      }
      _poly = tmpPoly;
+     return true;
 }
 
 
@@ -699,7 +758,7 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 
      /////////////////////////////////////////////////////////////
      edge = first = 0;
-     quad = WhichQuad(_poly[edge], ped);
+     quad = (short) WhichQuad(_poly[edge], ped);
      total = 0; // COUNT OF ABSOLUTE SECTORS CROSSED
      /* LOOP THROUGH THE VERTICES IN A SECTOR */
      do {
@@ -724,6 +783,7 @@ bool NormalSubRoom::IsInSubRoom(const Point& ped) const
           case -3: // MOVING BACK 3 IS LIKE MOVING FORWARD 1
                delta = 1;
                break;
+               default:break;
           }
           /* ADD IN THE DELTA */
           total += delta;
@@ -866,11 +926,10 @@ const Point* Stair::CheckCorner(const Point** otherPoint, const Point** aktPoint
      return rueck;
 }
 
-void Stair::ConvertLineToPoly(vector<Line*> goals)
+bool Stair::ConvertLineToPoly(vector<Line*> goals)
 {
 
      //return NormalSubRoom::ConvertLineToPoly(goals);
-
      vector<Line*> copy;
      vector<Point> orgPoly = vector<Point > ();
      const Point* aktPoint;
@@ -924,7 +983,7 @@ void Stair::ConvertLineToPoly(vector<Line*> goals)
           sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
                   "\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), x1, y1, x2, y2);
           Log->Write(tmp);
-          exit(EXIT_FAILURE);
+          return false;
      }
 
      if (orgPoly.size() != 4) {
@@ -932,15 +991,15 @@ void Stair::ConvertLineToPoly(vector<Line*> goals)
           sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): Stair %d Room %d ist kein Viereck!!!\n"
                   "Anzahl Ecken: %d\n", GetSubRoomID(), (int)GetRoomID(), (int)orgPoly.size());
           Log->Write(tmp);
-          exit(EXIT_FAILURE);
+          return false;
      }
      vector<Point> neuPoly = (orgPoly);
      // ganz kleine Treppen (nur eine Stufe) nicht
      if ((neuPoly[0] - neuPoly[1]).Norm() > 0.9 && (neuPoly[1] - neuPoly[2]).Norm() > 0.9) {
           for (int i1 = 0; i1 < (int) orgPoly.size(); i1++) {
-               int i2 = (i1 + 1) % orgPoly.size();
-               int i3 = (i2 + 1) % orgPoly.size();
-               int i4 = (i3 + 1) % orgPoly.size();
+               unsigned long i2 = (i1 + 1) % orgPoly.size();
+               unsigned long i3 = (i2 + 1) % orgPoly.size();
+               unsigned long i4 = (i3 + 1) % orgPoly.size();
                Point p1 = neuPoly[i1];
                Point p2 = neuPoly[i2];
                Point p3 = neuPoly[i3];
@@ -957,6 +1016,8 @@ void Stair::ConvertLineToPoly(vector<Line*> goals)
           }
      }
      _poly = neuPoly;
+
+     return true;
 }
 
 bool Stair::IsInSubRoom(const Point& ped) const

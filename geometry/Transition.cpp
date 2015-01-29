@@ -1,7 +1,7 @@
 /**
  * \file        Transition.cpp
  * \date        Nov 16, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -178,7 +178,7 @@ void Transition::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Transition::WriteElement() const
+string Transition::GetDescription() const
 {
      string geometry;
      char tmp[CLENGTH] = "";

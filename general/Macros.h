@@ -37,9 +37,8 @@
 #include <algorithm>
 #include <sstream>
 
+
 #ifndef M_PI
-#define _USE_MATH_DEFINES
-#include <math.h>
 #define M_PI   3.14159265358979323846
 #endif
 
@@ -48,8 +47,8 @@
 //#define _SIMULATOR 1
 
 
-#define JPS_VERSION "0.5"
-#define JPS_VERSION_MINOR 5
+#define JPS_VERSION "0.6"
+#define JPS_VERSION_MINOR 6
 #define JPS_VERSION_MAJOR 0
 
 // disable openmp in debug mode
