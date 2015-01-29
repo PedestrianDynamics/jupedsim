@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
+<JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
   <geometry>geo.xml</geometry>
   <max_sim_time>900</max_sim_time>
-  <events>events.xml</events>
+  <events_file>events.xml</events_file>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="testSchulTrajectories.xml" />
@@ -18,12 +19,6 @@
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
-    <!-- room states are: good or smoked -->
-    <rooms>
-      <room room_id="0" state="good" />
-      <room room_id="1" state="good" />
-      <room room_id="2" state="good" />
-    </rooms>
     <!-- doors states are: close or open -->
     <doors>
       <door trans_id="0" caption="roomdoor0" state="open" />
@@ -36,7 +31,6 @@
       <door trans_id="7" caption="roomdoor7" state="open" />
       <door trans_id="8" caption="left_exit" state="open" />
     </doors>
-
   </traffic_constraints>
 
   <routing>
@@ -60,11 +54,6 @@
         </polygon>
       </goal>
     </goals>
-
-    <routes>
-      <route id="1">0</route>
-      <route id="2">1</route>
-    </routes>
   </routing>
 
   <!--persons information and distribution -->
