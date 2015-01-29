@@ -29,6 +29,12 @@
 #include "Method_D.h"
 #include <cmath>
 
+//using std::string;
+//using std::vector;
+//using std::ofstream;
+using namespace std;
+
+
 Method_D::Method_D()
 {
      _scaleX = 10;

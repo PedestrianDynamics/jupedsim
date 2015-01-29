@@ -31,6 +31,8 @@
 #include "PedData.h"
 #include "Analysis.h"
 #include "VoronoiDiagram.h"
+
+
 #ifdef __linux__
 #include <sys/stat.h>
 #include <dirent.h>
@@ -43,7 +45,8 @@
 
 
 
-class Method_D {
+class Method_D
+{
 public:
      Method_D();
      virtual ~Method_D();
@@ -58,11 +61,11 @@ public:
      void SetMeasurementArea (MeasurementArea_B* area);
 
 private:
-     map<int , vector<int> > _peds_t;
-     string _measureAreaId;
+     std::map<int , std::vector<int> > _peds_t;
+     std::string _measureAreaId;
      MeasurementArea_B* _areaForMethod_D;
-     string _trajName;
-     string _projectRootDir;
+     std::string _trajName;
+     std::string _projectRootDir;
      bool _calcIndividualFD;
      bool _getProfile;
      bool _outputVoronoiCellData;
@@ -81,16 +84,16 @@ private:
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
 
-     vector<polygon_2d> GetPolygons(vector<int> ids, vector<double>& XInFrame, vector<double>& YInFrame,
-               vector<double>& VInFrame, vector<int>& IdInFrame);
-     void OutputVoronoiResults(const vector<polygon_2d>&  polygons, int frid, const vector<double>& VInFrame);
-     double GetVoronoiDensity(const vector<polygon_2d>& polygon, const polygon_2d & measureArea);
-     double GetVoronoiDensity2(const vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea);
-     double GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const polygon_2d & measureArea);
-     void GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, const vector<double>& velocity);
-     void OutputVoroGraph(const string & frameId, vector<polygon_2d>& polygons, int numPedsInFrame, vector<double>& XInFrame,
-               vector<double>& YInFrame,const vector<double>& VInFrame);
-     void GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, int frid);
+     std::vector<polygon_2d> GetPolygons(std::vector<int> ids, std::vector<double>& XInFrame, std::vector<double>& YInFrame,
+    		 std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
+     void OutputVoronoiResults(const std::vector<polygon_2d>&  polygons, int frid, const std::vector<double>& VInFrame);
+     double GetVoronoiDensity(const std::vector<polygon_2d>& polygon, const polygon_2d & measureArea);
+     double GetVoronoiDensity2(const std::vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea);
+     double GetVoronoiVelocity(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const polygon_2d & measureArea);
+     void GetProfiles(const std::string& frameId, const std::vector<polygon_2d>& polygons, const std::vector<double>& velocity);
+     void OutputVoroGraph(const std::string & frameId, std::vector<polygon_2d>& polygons, int numPedsInFrame,std::vector<double>& XInFrame,
+    		 std::vector<double>& YInFrame,const std::vector<double>& VInFrame);
+     void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const polygon_2d& measureArea, int frid);
 
      /**
       * Reduce the precision of the points to two digits

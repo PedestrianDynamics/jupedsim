@@ -28,6 +28,10 @@
 
 #include "Method_B.h"
 
+using std::string;
+using std::vector;
+
+
 Method_B::Method_B()
 {
 	_xCor = NULL;

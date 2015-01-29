@@ -43,6 +43,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <cfloat>
 #include <stdlib.h>
 #include <algorithm>    // std::min_element, std::max_element
 

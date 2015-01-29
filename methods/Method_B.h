@@ -28,13 +28,13 @@
 #ifndef METHOD_B_H_
 #define METHOD_B_H_
 
-using namespace std;
 #include "PedData.h"
 #include "MeasurementArea.h"
 #include "Method_C.h"
 #include "Analysis.h"
 
-class Method_B {
+class Method_B
+{
 public:
      Method_B();
      virtual ~Method_B();
@@ -42,10 +42,10 @@ public:
      void SetMeasurementArea (MeasurementArea_B* area);
 
 private:
-     string _trajName;
-     string _projectRootDir;
-     string _measureAreaId;
-     map<int , vector<int> > _peds_t;
+     std::string _trajName;
+     std::string _projectRootDir;
+     std::string _measureAreaId;
+     std::map<int , std::vector<int> > _peds_t;
      MeasurementArea_B* _areaForMethod_B;
      int _NumPeds;
      int _fps;

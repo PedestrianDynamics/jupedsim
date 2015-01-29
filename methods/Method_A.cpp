@@ -30,6 +30,9 @@
 #include "../Analysis.h"
 #include <iostream>
 
+using std::string;
+using std::vector;
+using std::ofstream;
 
 Method_A::Method_A()
 {

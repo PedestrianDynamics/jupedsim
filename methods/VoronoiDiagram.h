@@ -33,7 +33,6 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
-using namespace std;
 
 #define PI 3.14159265
 
@@ -64,7 +63,8 @@ typedef VD::edge_type edge_type;
 typedef VD::cell_type cell_type;
 typedef VD::cell_type::source_index_type source_index_type;
 
-class VoronoiDiagram {
+class VoronoiDiagram
+{
 private:
     std::vector<point_type2> points;
     point_type2 retrieve_point(const cell_type& cell);
@@ -74,15 +74,15 @@ private:
     std::vector<point_type2> add_bounding_points(const point_type2& pt1, const point_type2& pt2, const point_type2& pt, double minX,
     		double minY, double maxX, double maxY);
     point_type2 getIntersectionPoint(const point_2d& pt0, const point_2d& pt1, const polygon_2d& square);
+
 public:
     VoronoiDiagram();
     virtual ~VoronoiDiagram();
 
-	vector<polygon_2d> getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame,
-			vector<int>& IdInFrame, const int numPedsInFrame, const double Bound_Max);
-    //std::vector<polygon_2d> getVoronoiPolygons(double *XInFrame, double *YInFrame, double *VInFrame,int *IdInFrame, int numPedsInFrame, double Bound_Max);
-    std::vector<polygon_2d> cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon, const polygon_2d& Geometry, const vector<double>& xs, const vector<double>& ys);
-    std::vector<polygon_2d> cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon, const vector<double>& xs, const vector<double>& ys, double radius, int edges);
+    std::vector<polygon_2d> getVoronoiPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame, std::vector<double>& VInFrame,
+    		std::vector<int>& IdInFrame, const int numPedsInFrame, const double Bound_Max);
+    std::vector<polygon_2d> cutPolygonsWithGeometry(const std::vector<polygon_2d>& polygon, const polygon_2d& Geometry, const std::vector<double>& xs, const std::vector<double>& ys);
+    std::vector<polygon_2d> cutPolygonsWithCircle(const std::vector<polygon_2d>& polygon, const std::vector<double>& xs, const std::vector<double>& ys, double radius, int edges);
 };
 
 #endif /* VORONOIDIAGRAM_H_ */

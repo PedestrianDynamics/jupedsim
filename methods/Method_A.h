@@ -39,7 +39,6 @@
 using namespace boost::geometry;
 typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
 
-using namespace std;
 
 class Method_A
 {
@@ -51,14 +50,14 @@ public:
      bool Process (const PedData& peddata);
 
 private:
-     string _trajName;
-     string _measureAreaId;
+     std::string _trajName;
+     std::string _measureAreaId;
      MeasurementArea_L* _areaForMethod_A;
-     string _projectRootDir;
+     std::string _projectRootDir;
 
-     vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
-     vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
-     map<int , vector<int> > _peds_t;
+     std::vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
+     std::vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
+     std::map<int , std::vector<int> > _peds_t;
 
      double** _xCor;
      double** _yCor;
@@ -80,13 +79,13 @@ private:
       * @param AccumVelocity
       * @param ofile
       */
-     void WriteFile_N_t(string data);
+     void WriteFile_N_t(std::string data);
 
-     void FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const std::vector<double>& AccumVelocity);
+     void FlowRate_Velocity(int fps, const std::vector<int>& AccumPeds, const std::vector<double>& AccumVelocity);
 
      bool IsPassLine(double Line_startX,double Line_startY, double Line_endX, double Line_endY,double pt1_X, double pt1_Y,double pt2_X, double pt2_Y);
 
-     void GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame);
+     void GetAccumFlowVelocity(int frame, const std::vector<int>& ids, const std::vector<double>& VInFrame);
 };
 
 #endif /* METHOD_A_H_ */

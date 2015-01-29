@@ -55,7 +55,6 @@ typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<dou
 
 #include <map>
 #include <vector>
-using namespace std;
 extern OutputHandler* Log;
 
 class Analysis
@@ -124,13 +123,13 @@ private:
      bool _outputGraph;       // Whether output the data for plot the fundamental diagram each frame
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
-     string _projectRootDir;
+     std::string _projectRootDir;
      FileFormat _trajFormat;  // format of the trajectory file
 
-     vector<MeasurementArea_L*> _areaForMethod_A;
-     vector<MeasurementArea_B*> _areaForMethod_B;
-     vector<MeasurementArea_B*> _areaForMethod_C;
-     vector<MeasurementArea_B*> _areaForMethod_D;
+     std::vector<MeasurementArea_L*> _areaForMethod_A;
+     std::vector<MeasurementArea_B*> _areaForMethod_B;
+     std::vector<MeasurementArea_B*> _areaForMethod_C;
+     std::vector<MeasurementArea_B*> _areaForMethod_D;
 };
 
 #endif /*ANALYSIS_H_*/
