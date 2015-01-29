@@ -1,7 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="JPSreport">
     <xs:complexType>
-      <xs:sequence>
+      <xs:all>
         <xs:element name="geometry">
           <xs:annotation>
             <xs:documentation>geometry file</xs:documentation>
@@ -204,7 +205,7 @@
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
-                      <xs:attribute type="xs:byte" name="id"  use="required"/>
+                      <xs:attribute type="xs:int" name="id"  use="required"/>
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
@@ -237,9 +238,15 @@
             <xs:attribute type="xs:string" name="individualFDdata"  use="required"/>
           </xs:complexType>
         </xs:element>
-      </xs:sequence>
+      </xs:all>
       <xs:attribute type="xs:string" name="project"  use="required"/>
-      <xs:attribute type="xs:float" name="version"  use="required"/>
+      <xs:attribute name="version" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:float">
+            <xs:enumeration value="0.6" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 </xs:schema>
