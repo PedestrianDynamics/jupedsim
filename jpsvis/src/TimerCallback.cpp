@@ -52,6 +52,8 @@
 #endif
 #endif
 
+#include "general/Macros.h"
+
 #include <QObject>
 #include <QString>
 #include <QTime>

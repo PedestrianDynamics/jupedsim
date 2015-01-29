@@ -33,6 +33,7 @@
 #include <vector>
 #include <iostream>
 
+#include "general/Macros.h"
 #include "FrameElement.h"
 #include "Frame.h"
 #include <vtkPolyData.h>

@@ -52,8 +52,10 @@
 
 #undef VTK_USE_FFMPEG
 
-#include <QApplication>
 #include "MainWindow.h"
+
+#include <QApplication>
+#include <QDir>
 #include <locale.h>
 
 
@@ -66,8 +68,12 @@ int main(int argc, char *argv[])
     //setlocale(LC_NUMERIC, "en_US" );
     setlocale(LC_NUMERIC,"C");
 
+    //force the application to first looks for privated libs
+    a.addLibraryPath(QApplication::applicationDirPath()
+                     + QDir::separator()
+                     + "lib");
+
     MainWindow w;
     w.show();
-
     return a.exec();
 }

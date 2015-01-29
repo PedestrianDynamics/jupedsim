@@ -13,16 +13,15 @@ QT += xml network
 #QMAKE_LFLAGS_RELEASE += -static-libgcc
 
 QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXXFLAGS += -Wno-deprecated -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare
+QMAKE_CXXFLAGS += -Wno-deprecated -Wno-unused-parameter -Wno-unused-variable -Wno-sign-compare -Wno-unknown-pragmas
 
 greaterThan(QT_MAJOR_VERSION, 4):QT += widgets
 
 #Dynamic linking
 #Windows  VTK 6.1
-win32_te {
+win32_old {
         INCLUDEPATH += C:/VTK/VTK6.1/include
         LIBS += -LC:/VTK/VTK6.1/bin_shared \
-        #LIBS += -LC:/VTK/bin_static/lib \
         -lwsock32 \
         -lvtkCommonCore-6.1    \
         -lvtkRenderingOpenGL-6.1  \
@@ -66,7 +65,7 @@ win32_te {
 
 #Static linking
 #Windows  VTK 6.1
-win32_6.1 {
+win32_old {
         INCLUDEPATH += C:/VTK/VTK6.1/include
         LIBS += -LC:/VTK/VTK6.1/bin_static \
             -lvtkCommonCore-6.1  \
@@ -183,14 +182,16 @@ win32_6.1 {
             -lvtkViewsInfovis-6.1  \
             -lvtkViewsQt-6.1  \
             -lvtkzlib-6.1  \
-            -lwsock32
+            -lwsock32 -lglu32 -lvfw32 -lgdi32  -lopengl32  -lws2_32 -lgdi32 \
+            -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 \
+            -luuid -lcomdlg32 -ladvapi32\
         }
 	
 #Dynamic linking
 #Windows  VTK 5.10
-win32 {
-        INCLUDEPATH += C:/VTK/VTK5.1/include
-        LIBS += -LC:/VTK/VTK5.1/bin_shared \
+win32_old {
+        INCLUDEPATH += D:/VTK/VTK5.1/include
+        LIBS += -LD:/VTK/VTK5.1/bin_shared \
             -lvtksys \
             -lvtkzlib \
             -lvtkjpeg \
@@ -216,32 +217,34 @@ win32 {
             -lvtkWidgets \
             -lvtkInfovis\
             -lvtkViews\
-            -lwsock32\
+            -lwsock32 -lglu32 -lvfw32 -lgdi32  -lopengl32  -lws2_32 -lgdi32 \
+            -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 \
+            -luuid -lcomdlg32 -ladvapi32\
 }
 
 #Static linking
 #VTK 5.10 Windows
-win32_static {
-    INCLUDEPATH += C:/VTK/VTK5.1/static_2/include/vtk-5.10
-    LIBS += -LC:\VTK\VTK5.1\static_2\lib\vtk-5.10 \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkCharts.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkViews.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkInfovis.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkWidgets.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkHybrid.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkVolumeRendering.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkParallel.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkRendering.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkGraphics.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkverdict.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkImaging.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkIO.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkFiltering.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkDICOMParser.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkNetCDF_cxx.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkmetaio.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtksqlite.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkpng.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtktiff.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkjpeg.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkexpat.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libVPIC.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libCosmo.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkCommon.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libLSDyna.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtksys.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkexoIIc.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkNetCDF.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkhdf5_hl.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkhdf5.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtklibxml2.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkzlib.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkalglib.a C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkftgl.a \
-    C:\VTK\VTK5.1\static_2\lib\vtk-5.10/libvtkfreetype.a       \
+win32 {
+    INCLUDEPATH += C:/VTK/VTK5.1/static/include
+    LIBS += -LC:\VTK\VTK5.1\static\lib \
+    C:\VTK\VTK5.1\static\bin/libvtkCharts.a C:\VTK\VTK5.1\static\bin/libvtkViews.a \
+    C:\VTK\VTK5.1\static\bin/libvtkInfovis.a C:\VTK\VTK5.1\static\bin/libvtkWidgets.a \
+    C:\VTK\VTK5.1\static\bin/libvtkHybrid.a C:\VTK\VTK5.1\static\bin/libvtkVolumeRendering.a \
+    C:\VTK\VTK5.1\static\bin/libvtkRendering.a \
+    C:\VTK\VTK5.1\static\bin/libvtkGraphics.a C:\VTK\VTK5.1\static\bin/libvtkverdict.a \
+    C:\VTK\VTK5.1\static\bin/libvtkImaging.a C:\VTK\VTK5.1\static\bin/libvtkIO.a \
+    C:\VTK\VTK5.1\static\bin/libvtkFiltering.a C:\VTK\VTK5.1\static\bin/libvtkDICOMParser.a \
+    C:\VTK\VTK5.1\static\bin/libvtkNetCDF_cxx.a C:\VTK\VTK5.1\static\bin/libvtkmetaio.a \
+    C:\VTK\VTK5.1\static\bin/libvtksqlite.a C:\VTK\VTK5.1\static\bin/libvtkpng.a \
+    C:\VTK\VTK5.1\static\bin/libvtktiff.a C:\VTK\VTK5.1\static\bin/libvtkjpeg.a \
+    C:\VTK\VTK5.1\static\bin/libvtkexpat.a  \
+    C:\VTK\VTK5.1\static\bin/libvtkCommon.a \
+    C:\VTK\VTK5.1\static\bin/libLSDyna.a C:\VTK\VTK5.1\static\bin/libvtksys.a \
+    C:\VTK\VTK5.1\static\bin/libvtkexoIIc.a C:\VTK\VTK5.1\static\bin/libvtkNetCDF.a \
+    C:\VTK\VTK5.1\static\bin/libvtkhdf5_hl.a C:\VTK\VTK5.1\static\bin/libvtkhdf5.a \
+    C:\VTK\VTK5.1\static\bin/libvtklibxml2.a C:\VTK\VTK5.1\static\bin/libvtkzlib.a \
+    C:\VTK\VTK5.1\static\bin/libvtkalglib.a C:\VTK\VTK5.1\static\bin/libvtkftgl.a \
+    C:\VTK\VTK5.1\static\bin/libvtkfreetype.a       \
     -lwsock32 -lglu32 -lvfw32 -lgdi32  -lopengl32  -lws2_32 -lgdi32 \
     -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 \
     -luuid -lcomdlg32 -ladvapi32\

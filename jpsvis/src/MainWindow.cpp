@@ -275,9 +275,9 @@ void MainWindow::slotHelpAbout()
     QMessageBox::about(
         this,
         "About JPSVis",
-        "Version 0.6-alpha built with  QT 4.8 and VTK 5.10\n\n"
-        "JPSVis is part of the Juelich Pedestrian Simulator (JuPdsim)"
-        "and stands for Trajectories Visualisation Tool. It is a tool for visualizing pedestrians motion\n"
+        "Version 0.6 built with  QT 4.8 and VTK 5.10\n\n"
+        "JPSvis is part of the Juelich Pedestrian Simulator (JuPedsim)"
+        "It is a tool for visualizing pedestrians motion\n"
         "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
         "Copyright 2009-2014.\n"
         "Authors: Ulrich Kemloh\n\n"

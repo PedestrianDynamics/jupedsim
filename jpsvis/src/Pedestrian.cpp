@@ -38,7 +38,7 @@
 #include "forms/Settings.h"
 #include "SystemSettings.h"
 #include "TrajectoryPoint.h"
-
+#include "general/Macros.h"
 
 #include <vtkActor.h>
 #include <vtkCylinderSource.h>

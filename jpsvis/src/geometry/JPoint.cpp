@@ -32,8 +32,10 @@
 #include "JPoint.h"
 #include "../Debug.h"
 
-#include <vtkMath.h>
+#include "../general/Macros.h"
 #include <math.h>
+#include <vtkMath.h>
+
 
 #include <cstdio>
 #include <cstdlib>
