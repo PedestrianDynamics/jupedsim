@@ -230,7 +230,7 @@ def getSpeed(data, agent, frame, fps=16, df=10, cm=0.01):
 #========================================================================================================
 def write_header(out, Nagents, fps):
     out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-    out.write("<trajectoriesDataset>")
+    out.write("<trajectories>")
     # write header
     out.write("<header formatVersion = \"1.0\">")
     out.write("\t<agents>%d</agents>"%Nagents)
@@ -268,11 +268,11 @@ def write_frames(out, frames, data, mTocm ):
         #     logging.info("++ frame:\t %d"%frame)
         d = data [ data[:,1] == frame ] # get data framewise
 #================== begin write frame ==============
-        out.write("<frame ID=\"%d\">"%frame)
+        out.write("<frame ID=\"%d\">\n"%frame)
         
         for (agent, x, y) in zip(d[:,0].astype(int), d[:,2], d[:,3]):        
 
-            text = "\t<agent ID=\"%d\" \txPos=\"%.2f\"\tyPos=\"%.2f\"\tradiusA=\"%.2f\"\tradiusB=\"%.2f\"\t ellipseOrientation=\"%.2f\"\tellipseColor=\"%d\"/>"%(agent, x*mTocm, y*mTocm, 20, 20, 0, 200)
+            text = "\t<agent ID=\"%d\" \tx=\"%.2f\"\ty=\"%.2f\"\trA=\"%.2f\"\trB=\"%.2f\"\t eO=\"%.2f\"\teC=\"%d\"/>\n"%(agent, x*mTocm, y*mTocm, 20, 20, 0, 200)
             out.write(text)
             
         out.write("</frame>\n")

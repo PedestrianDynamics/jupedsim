@@ -101,7 +101,7 @@ for inputfile in files:
 
  
 	write_frames(out, frames, data, mTocm)
-	out.write("</trajectoriesDataset>")
+	out.write("</trajectories>")
         
 
 
