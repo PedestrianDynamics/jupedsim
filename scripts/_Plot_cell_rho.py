@@ -32,7 +32,7 @@ if __name__ == '__main__':
    geomaxX = args.geomaxx
    geominY = args.geominy
    geomaxY = args.geomaxy
-   fig = plt.figure(figsize=(16, 12), dpi=100)
+   fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
    ax1 = fig.add_subplot(111,aspect='equal')
    plt.rc("font", size=30)
    plt.rc('pdf',fonttype = 42)

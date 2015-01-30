@@ -31,7 +31,7 @@ if __name__ == '__main__':
    geomaxX = args.geomaxx
    geominY = args.geominy
    geomaxY = args.geomaxy
-   fig = plt.figure(figsize=(16, 12), dpi=300)
+   fig = plt.figure(figsize=(16*(geomaxX-geominX)/(geomaxY-geominY)+2, 16), dpi=100)
    ax1 = fig.add_subplot(111,aspect='equal')
    plt.rc("font", size=30)
    ax1.set_yticks([int(1.00*j) for j in range(-2,5)])
