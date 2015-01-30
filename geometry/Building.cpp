@@ -377,7 +377,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
      double version = xmltof(xRootNode->Attribute("version"), -1);
 
-     if (version != std::stod(JPS_VERSION)) {
+     if (version != std::stod(JPS_VERSION) && version != std::stod(JPS_OLD_VERSION)) {
           Log->Write(" \tWrong geometry version!");
           Log->Write(" \tOnly version >= %s supported",JPS_VERSION);
           Log->Write(" \tPlease update the version of your geometry file to %s",JPS_VERSION);

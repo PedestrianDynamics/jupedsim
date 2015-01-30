@@ -2,7 +2,7 @@
  * \file        Macros.h
  * \date        Jun 16, 2010
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -41,15 +41,22 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#define M_PI   3.14159265358979323846
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif 
+
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
 
 
-#define JPS_VERSION "0.5"
-#define JPS_VERSION_MINOR 5
-#define JPS_VERSION_MAJOR 0
+
+#define JPS_OLD_VERSION "0.5" // this version is still supported
+#define JPS_VERSION_MINOR "6"
+#define JPS_VERSION_MAJOR "0"
+
+#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
 
 // disable openmp in debug mode
 #ifdef _NDEBUG
