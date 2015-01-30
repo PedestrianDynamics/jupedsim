@@ -109,7 +109,7 @@ bool EventManager::ReadEventsXml()
      string eventfile = "";
      if (xMainNode->FirstChild("events")) {
           eventfile = _projectRootDir
-                    + xMainNode->FirstChild("events")->FirstChild()->Value();
+                    + xMainNode->FirstChild("events_file")->FirstChild()->Value();
           Log->Write("INFO: \tevents <" + eventfile + ">");
      } else {
           Log->Write("INFO: \tNo events found");
@@ -140,7 +140,7 @@ bool EventManager::ReadEventsXml()
           Log->Write("ERROR:\tNo events found.");
           return false;
      }
-     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_frequency"), 1);
+     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_time"), 1);
      _updateRadius = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
 
      string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
