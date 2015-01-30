@@ -67,7 +67,14 @@ public:
      void InitArgs(ArgumentParser *args);
      void InitializeFiles(const std::string& file);
 
-     polygon_2d ReadGeometry(const std::string& geometryFile);
+     std::map<int, polygon_2d> ReadGeometry(const std::string& geometryFile, const std::vector<MeasurementArea_B*>& areas);
+
+     /**
+      * Run the analysis for different files.
+      * @param file
+      * @param path
+      * @return
+      */
      int RunAnalysis(const std::string& file, const std::string& path);
 
      /**
@@ -85,12 +92,13 @@ public:
      std::string GetFilename(const std::string& str);
 
      /**
-         * create a file and the directory structure if needed.
-         * @param filename
-         * @return
-         */
-        static FILE* CreateFile(const std::string& filename);
+      * create a file and the directory structure if needed.
+      * @param filename
+      * @return
+      */
+     static FILE* CreateFile(const std::string& filename);
 
+     //TODO: merge apple and linux
 #ifdef __linux__
      static int mkpath(char* file_path, mode_t mode=0755);
 #elif __APPLE__
@@ -102,7 +110,8 @@ public:
 private:
 
      Building* _building;
-     polygon_2d _geoPoly;
+     //polygon_2d _geoPoly;
+     std::map<int, polygon_2d> _geoPoly;
 
      double _scaleX;      // the size of the grid
      double _scaleY;

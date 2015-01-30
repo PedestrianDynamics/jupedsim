@@ -80,7 +80,7 @@ private:
     int _log;
 
     std::map <int, MeasurementArea*> _measurementAreas;
-    void Usage();
+    void Usage(const std::string file);
 
 public:
     // Konstruktor
@@ -123,7 +123,7 @@ public:
     float GetScaleX() const;
     float GetScaleY() const;
     int GetLog() const;
-    void ParseArgs(int argc, char **argv);
+    bool ParseArgs(int argc, char **argv);
 
     MeasurementArea* GetMeasurementArea(int id);
 
@@ -131,7 +131,7 @@ public:
      * parse the initialization file
      * @param inifile
      */
-    bool ParseIniFile(std::string inifile);
+    bool ParseIniFile(const std::string& inifile);
 };
 
 #endif /*ARGPARSER_H_*/
