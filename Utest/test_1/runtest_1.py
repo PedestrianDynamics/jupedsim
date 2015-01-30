@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 import os
 import sys
 from sys import *
-sys.path.append("../")
+sys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
@@ -23,7 +24,7 @@ def runtest1(inifile, trajfile):
 
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(1, argv0=argv[0], testdir=os.path.abspath("."))
+    test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0])
     test.run_test(testfunction=runtest1)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
