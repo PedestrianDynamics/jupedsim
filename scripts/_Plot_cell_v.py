@@ -56,7 +56,7 @@ if __name__ == '__main__':
       index += 1
       ax1.add_patch(pgon(p,facecolor=sm.to_rgba(xx), edgecolor='white',linewidth=2))
    points = loadtxt("%s/points%s.dat"%(filepath,namefile))
-   ax1.plot(points[:,0]/100.,points[:,1]/100.,"bo",markersize = 20,markeredgewidth=2)
+   ax1.plot(points[:,0],points[:,1],"bo",markersize = 20,markeredgewidth=2)
    ax1.set_xlim(geominX,geomaxX)
    ax1.set_ylim(geominY,geomaxY)
    plt.xlabel("x [m]")

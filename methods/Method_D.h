@@ -100,7 +100,7 @@ private:
       * @param polygon
       */
      void ReducePrecision(polygon_2d& polygon);
-     bool IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor); //check whether all the pedestrians are in the geometry
+     bool IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor, int  *firstFrame, int *lastFrame); //check whether all the pedestrians are in the geometry
 };
 
 #endif /* METHOD_D_H_ */

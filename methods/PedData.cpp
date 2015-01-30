@@ -199,7 +199,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           Log->Write("ERROR:\tRoot element does not exist");
           return false;
      }
-     if( xRootNode->ValueStr () != "trajectoriesDataset" ) {
+     if( xRootNode->ValueStr () != "trajectories" ) {
           Log->Write("ERROR:\tRoot element value is not 'geometry'.");
           return false;
      }
@@ -264,8 +264,8 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                     xAgent = xAgent->NextSiblingElement("agent")) {
 
                //get agent id, x, y
-               double x= atof(xAgent->Attribute("xPos"));
-               double y= atof(xAgent->Attribute("yPos"));
+               double x= atof(xAgent->Attribute("x"));
+               double y= atof(xAgent->Attribute("y"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
 
                _peds_t[frameNr].push_back(ID);

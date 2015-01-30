@@ -61,7 +61,7 @@ Method_D::~Method_D()
 
 bool Method_D::Process (const PedData& peddata)
 {
-	if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor()))
+	if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
 	{
 		return false;
 	}
@@ -451,12 +451,12 @@ void Method_D::ReducePrecision(polygon_2d& polygon)
      }
 }
 
-bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor)
+bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor, int  *firstFrame, int *lastFrame)
 {
 	for(int i=0; i<peds; i++)
 		for(int j =0; j<frames; j++)
 		{
-			if (false==within(point_2d(round(Xcor[i][j]), round(Ycor[i][j])), _geoPoly))
+			if (j>firstFrame[i] && j< lastFrame[i] && (false==within(point_2d(round(Xcor[i][j]), round(Ycor[i][j])), _geoPoly)))
 			{
 				Log->Write("Error:\tPedestrian at the position <x=%.4f, y=%.4f> is outside geometry. Please check the geometry or trajectory file!", Xcor[i][j]*CMtoM, Ycor[i][j]*CMtoM );
 				return false;
