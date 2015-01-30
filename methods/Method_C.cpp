@@ -28,6 +28,11 @@
 
 #include "Method_C.h"
 
+
+using std::string;
+using std::vector;
+
+
 Method_C::Method_C()
 {
      _minFrame = 0;

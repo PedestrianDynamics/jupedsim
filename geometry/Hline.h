@@ -1,7 +1,7 @@
 /**
  * \file        Hline.h
  * \date        Aug 1, 2012
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -68,7 +68,6 @@ public:
       */
      void SetSubRoom1(SubRoom* r);
 
-
      /**
       * Set/Get the id of the line
       */
@@ -77,7 +76,7 @@ public:
      /**
       * Set/Get the line caption
       */
-     std::string GetCaption() const;
+     virtual std::string GetCaption() const;
 
      /**
       * Set/Get the Room containing this line
@@ -89,16 +88,15 @@ public:
       */
      SubRoom* GetSubRoom1() const;
 
-
      /**
       * @return true if the line is in the given subroom
       */
-     bool IsInSubRoom(int subroomID) const;
+     virtual bool IsInSubRoom(int subroomID) const;
 
      /**
       * @return true if the line is in the given room
       */
-     bool IsInRoom(int roomID) const;
+     virtual bool IsInRoom(int roomID) const;
 
      /**
       * Debug output
@@ -108,7 +106,7 @@ public:
      /**
       * @return a nicely formatted string representation of the object
       */
-     virtual std::string WriteElement() const;
+     virtual std::string GetDescription() const;
 };
 
 #endif /* HLINE_H_ */

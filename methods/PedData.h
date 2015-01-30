@@ -37,7 +37,8 @@
 #include "IO/OutputHandler.h"
 #include <algorithm>    // std::min_element, std::max_element
 #include <boost/algorithm/string.hpp>
-using namespace  std;
+
+
 extern OutputHandler* Log;
 
 #define CMtoM 0.0001
@@ -53,22 +54,22 @@ public:
      int GetNumFrames() const;
      int GetNumPeds() const;
      int GetFps() const;
-     string GetTrajName() const;
-     string GetProjectRootDir() const;
-     map<int , vector<int>> GetPedsFrame() const;
+     std::string GetTrajName() const;
+     std::string GetProjectRootDir() const;
+     std::map<int , std::vector<int>> GetPedsFrame() const;
      double** GetXCor() const;
      double** GetYCor() const;
      int* GetFirstFrame() const;
      int* GetLastFrame() const;
-     vector<int> GetIdInFrame(const vector<int>& ids) const;
-     vector<double> GetXInFrame(int frame, const vector<int>& ids) const;
-     vector<double> GetYInFrame(int frame, const vector<int>& ids) const;
-     vector<double> GetVInFrame(int frame, const vector<int>& ids) const;
-     bool ReadData(const string& projectRootDir, const string& path, const string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
+     std::vector<int> GetIdInFrame(const std::vector<int>& ids) const;
+     std::vector<double> GetXInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetYInFrame(int frame, const std::vector<int>& ids) const;
+     std::vector<double> GetVInFrame(int frame, const std::vector<int>& ids) const;
+     bool ReadData(const std::string& projectRootDir, const std::string& path, const std::string& filename, const FileFormat& _trajformat, int deltaF, char vComponent);
 
 
 private:
-     bool InitializeVariables(const string& filename);
+     bool InitializeVariables(const std::string& filename);
      bool InitializeVariables(TiXmlElement* xRootNode);
      void CreateGlobalVariables(int numPeds, int numFrames);
      double GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const;
@@ -76,14 +77,14 @@ private:
 
 private:
 
-     string _trajName="";
-     string _projectRootDir="";
+     std::string _trajName="";
+     std::string _projectRootDir="";
      int _minFrame=0;
      int _minID=1;
      int _numFrames=0;  // total number of frames
      int _numPeds=0; // total number of pedestrians
      int _fps=16;
-     map<int , vector<int>> _peds_t;
+     std::map<int , std::vector<int>> _peds_t;
 
      int _deltaF=5;
      char _vComponent='X';

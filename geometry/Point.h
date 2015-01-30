@@ -1,7 +1,7 @@
 /**
  * \file        Point.h
  * \date        Sep 30, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -77,6 +77,7 @@ public:
      Point NormalizedMolified() const;
      /// dot product
      double ScalarP(const Point& v) const;
+     double CrossP(const Point& p) const;
      /// determinant of the square matrix formed by the vectors [ this, v]
      double Det(const Point& v) const;
      /// translation and rotation in Ellipse coordinate system
@@ -96,7 +97,8 @@ public:
      bool operator==(const Point& p) const;
      /// not equal
      bool operator!=(const Point& p) const;
-
+     /// Assignement
+     Point& operator+=(const Point& p);
      /// nice formating of the point
      std::string toString() const;
 };

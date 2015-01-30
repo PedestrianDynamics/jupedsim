@@ -48,11 +48,11 @@
 
 using namespace std;
 
-void ArgumentParser::Usage()
+void ArgumentParser::Usage(const std::string file)
 {
 
      Log->Write("Usage: \n");
-     Log->Write("\tJPSreport.exe --inifile=input.xml\n");
+     Log->Write("\t%s input.xml\n",file.c_str());
      /*
     fprintf(stderr,
     		"Usage: program options\n\n"
@@ -128,49 +128,51 @@ ArgumentParser::ArgumentParser()
 }
 
 
-void ArgumentParser::ParseArgs(int argc, char **argv)
+
+ bool ArgumentParser::ParseArgs(int argc, char **argv)
 {
-     int c;
-     int option_index = 0;
-
-     static struct option long_options[] = {
-               {"help", 0, 0, 'h'},
-               {"inifile", optional_argument, 0, 'q'},
-               {0, 0, 0, 0}
-     };
-
-     if(argc==1) {
-          Usage();
+     //special case of the default configuration ini.xml
+     if (argc == 1)
+     {
+          Log->Write(
+                    "INFO: \tTrying to load the default configuration from the file <ini.xml>");
+          if(ParseIniFile("ini.xml")==false)
+          {
+               Usage(argv[0]);
+          }
+          return true;
      }
-     while ((c = getopt_long_only(argc, argv,
-               "q:h",
-               long_options, &option_index)) != -1) {
 
-          switch (c) {
-
-          case 'q': {
-               string inifile="input.xml";
-               if (optarg)
-                    inifile=optarg;
-               Log->Write("INFO: \tLoading initialization file <"+inifile+">");
-               bool parsing = ParseIniFile(inifile);
-               if(!parsing)
-               {
-                    Log->Write("INFO: \tFailed loading initialization file <"+inifile+">");
-               }
-          }
-          break;
-
-          case 'h':
-               Usage();
-               break;
-          default: {
-               Log->Write("ERROR: \tin ArgumentParser::ParseArgs() "
-                         "wrong program options!!!\n");
-               Usage();
-          }
-          }
+     string argument = argv[1];
+     if (argument == "-h" || argument == "--help")
+     {
+          Usage(argv[0]);
+          return false;
      }
+     else if(argument == "-v" || argument == "--version")
+     {
+          fprintf(stderr,"You are actually using JuPedsim (jpsreport) version %s  \n\n",JPS_VERSION);
+          return false;
+     }
+
+     // other special case where a single configuration file is submitted
+     //check if inifile options are given
+     if (argc == 2)
+     {
+          string prefix1 = "--ini=";
+          string prefix2 = "--inifile=";
+
+          if (!argument.compare(0, prefix2.size(), prefix2)) {
+               argument.erase(0, prefix2.size());
+          } else if (!argument.compare(0, prefix1.size(), prefix1)) {
+               argument.erase(0, prefix1.size());
+          }
+          return ParseIniFile(argument);
+     }
+
+     //more than one argument was supplied
+     Usage(argv[0]);
+     return false;
 }
 
 const vector<string>& ArgumentParser::GetTrajectoriesFiles() const
@@ -184,10 +186,10 @@ const string& ArgumentParser::ArgumentParser::GetProjectRootDir() const
 }
 
 
-bool ArgumentParser::ParseIniFile(string inifile)
+bool ArgumentParser::ParseIniFile(const string& inifile)
 {
 
-     Log->Write("INFO: \tParsing the ini file");
+     Log->Write("INFO: \tParsing the ini file <%s>",inifile.c_str());
 
      //extract and set the project root dir
      size_t found = inifile.find_last_of("/\\");

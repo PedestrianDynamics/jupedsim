@@ -1,7 +1,7 @@
 /**
  * \file        Obstacle.cpp
  * \date        Jul 31, 2012
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -209,15 +209,16 @@ bool Obstacle::Contains(const Point& ped) const
           return false;
 }
 
-void Obstacle::ConvertLineToPoly()
+bool Obstacle::ConvertLineToPoly()
 {
-
-     if(_isClosed==0.0) {
+     if(_isClosed==0.0)
+     {
           char tmp[CLENGTH];
           sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
           Log->Write(tmp);
-          return;
+          return true;
      }
+
      vector<Line*> copy;
      vector<Point> tmpPoly;
      Point point;
@@ -252,9 +253,10 @@ void Obstacle::ConvertLineToPoly()
           char tmp[CLENGTH];
           sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
           Log->Write(tmp);
-          exit(0);
+          return false;
      }
      _poly = tmpPoly;
+     return true;
 }
 
 const Point Obstacle::GetCentroid() const
@@ -298,6 +300,22 @@ const Point Obstacle::GetCentroid() const
      return Point (px,py);
 }
 
+bool Obstacle::IsClockwise() const
+{
+     if(_poly.size()<3) {
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          return false;
+          //exit(EXIT_FAILURE);
+     }
+
+     Point vecAB= _poly[1]-_poly[0];
+     Point vecBC= _poly[2]-_poly[1];
+
+     double det=vecAB.Det(vecBC);
+     if(fabs(det)<J_EPS) det=0.0;
+
+     return ( det<=0.0 );
+}
 
 bool Obstacle::IntersectWithLine(const Line& line) const
 {

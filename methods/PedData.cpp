@@ -27,6 +27,13 @@
  **/
 
 #include "PedData.h"
+#include  <cmath>
+
+using std::string;
+using std::map;
+using std::vector;
+using std::ifstream;
+
 
 PedData::PedData()
 {

@@ -41,7 +41,6 @@ using namespace boost::geometry;
 typedef model::d2::point_xy<double, cs::cartesian> point_2d;
 typedef model::polygon<point_2d> polygon_2d;
 
-using namespace std;
 
 class OutputHandler;
 extern OutputHandler* Log;
@@ -72,16 +71,16 @@ private:
     double _steadyEnd;
     int _delatTVInst;
     int _timeIntervalA;
-    vector<int> _areaIDforMethodA;
-    vector<int> _areaIDforMethodB;
-    vector<int> _areaIDforMethodC;
-    vector<int> _areaIDforMethodD;
+    std::vector<int> _areaIDforMethodA;
+    std::vector<int> _areaIDforMethodB;
+    std::vector<int> _areaIDforMethodC;
+    std::vector<int> _areaIDforMethodD;
     float _scaleX;
     float _scaleY;
     int _log;
 
     std::map <int, MeasurementArea*> _measurementAreas;
-    void Usage();
+    void Usage(const std::string file);
 
 public:
     // Konstruktor
@@ -109,10 +108,10 @@ public:
     bool GetIsMethodB() const;
     bool GetIsMethodC() const;
     bool GetIsMethodD() const;
-    vector<int> GetAreaIDforMethodA() const;
-    vector<int> GetAreaIDforMethodB() const;
-    vector<int> GetAreaIDforMethodC() const;
-    vector<int> GetAreaIDforMethodD() const;
+    std::vector<int> GetAreaIDforMethodA() const;
+    std::vector<int> GetAreaIDforMethodB() const;
+    std::vector<int> GetAreaIDforMethodC() const;
+    std::vector<int> GetAreaIDforMethodD() const;
     bool GetIsCutByCircle() const;
     double GetCutRadius() const;
     int GetCircleEdges() const;
@@ -124,7 +123,7 @@ public:
     float GetScaleX() const;
     float GetScaleY() const;
     int GetLog() const;
-    void ParseArgs(int argc, char **argv);
+    bool ParseArgs(int argc, char **argv);
 
     MeasurementArea* GetMeasurementArea(int id);
 
@@ -132,7 +131,7 @@ public:
      * parse the initialization file
      * @param inifile
      */
-    bool ParseIniFile(std::string inifile);
+    bool ParseIniFile(const std::string& inifile);
 };
 
 #endif /*ARGPARSER_H_*/

@@ -55,7 +55,6 @@ typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<dou
 
 #include <map>
 #include <vector>
-using namespace std;
 extern OutputHandler* Log;
 
 class Analysis
@@ -68,7 +67,14 @@ public:
      void InitArgs(ArgumentParser *args);
      void InitializeFiles(const std::string& file);
 
-     polygon_2d ReadGeometry(const std::string& geometryFile);
+     std::map<int, polygon_2d> ReadGeometry(const std::string& geometryFile, const std::vector<MeasurementArea_B*>& areas);
+
+     /**
+      * Run the analysis for different files.
+      * @param file
+      * @param path
+      * @return
+      */
      int RunAnalysis(const std::string& file, const std::string& path);
 
      /**
@@ -86,12 +92,13 @@ public:
      std::string GetFilename(const std::string& str);
 
      /**
-         * create a file and the directory structure if needed.
-         * @param filename
-         * @return
-         */
-        static FILE* CreateFile(const std::string& filename);
+      * create a file and the directory structure if needed.
+      * @param filename
+      * @return
+      */
+     static FILE* CreateFile(const std::string& filename);
 
+     //TODO: merge apple and linux
 #ifdef __linux__
      static int mkpath(char* file_path, mode_t mode=0755);
 #elif __APPLE__
@@ -103,7 +110,8 @@ public:
 private:
 
      Building* _building;
-     polygon_2d _geoPoly;
+     //polygon_2d _geoPoly;
+     std::map<int, polygon_2d> _geoPoly;
 
      double _scaleX;      // the size of the grid
      double _scaleY;
@@ -124,13 +132,13 @@ private:
      bool _outputGraph;       // Whether output the data for plot the fundamental diagram each frame
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
-     string _projectRootDir;
+     std::string _projectRootDir;
      FileFormat _trajFormat;  // format of the trajectory file
 
-     vector<MeasurementArea_L*> _areaForMethod_A;
-     vector<MeasurementArea_B*> _areaForMethod_B;
-     vector<MeasurementArea_B*> _areaForMethod_C;
-     vector<MeasurementArea_B*> _areaForMethod_D;
+     std::vector<MeasurementArea_L*> _areaForMethod_A;
+     std::vector<MeasurementArea_B*> _areaForMethod_B;
+     std::vector<MeasurementArea_B*> _areaForMethod_C;
+     std::vector<MeasurementArea_B*> _areaForMethod_D;
 };
 
 #endif /*ANALYSIS_H_*/

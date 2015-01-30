@@ -1,7 +1,7 @@
 /**
  * \file        Crossing.cpp
  * \date        Nov 16, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -39,27 +39,15 @@ Crossing::Crossing()
      _room1 = NULL;
      _subRoom1 = NULL;
      _subRoom2 = NULL;
-     _caption = "";
 }
 
 Crossing::~Crossing()
 {
 }
 
-
 void Crossing::SetID(int ID)
 {
      _id = ID;
-}
-
-void Crossing::SetRoom1(Room* r)
-{
-     _room1 = r;
-}
-
-void Crossing::SetSubRoom1(SubRoom* r1)
-{
-     _subRoom1 = r1;
 }
 
 void Crossing::SetSubRoom2(SubRoom* r2)
@@ -67,29 +55,11 @@ void Crossing::SetSubRoom2(SubRoom* r2)
      _subRoom2 = r2;
 }
 
-void Crossing::SetCaption(string s)
-{
-     _caption = s;
-}
 // Getter-Funktionen
 
 int Crossing::GetID() const
 {
      return _id;
-}
-string Crossing::GetCaption() const
-{
-     return _caption;
-}
-Room* Crossing::GetRoom1() const
-{
-     return _room1;
-}
-
-
-SubRoom* Crossing::GetSubRoom1() const
-{
-     return _subRoom1;
 }
 
 SubRoom* Crossing::GetSubRoom2() const
@@ -114,13 +84,6 @@ bool Crossing::IsTransition() const
 {
      return false;
 }
-
-
-bool Crossing::IsInRoom(int roomID) const
-{
-     return _room1->GetID() == roomID;
-}
-
 
 bool Crossing::IsInSubRoom(int subroomID) const
 {
@@ -154,7 +117,6 @@ SubRoom* Crossing::GetOtherSubRoom(int roomID, int subroomID) const
 
 
 // Ausgabe
-
 void Crossing::WriteToErrorLog() const
 {
      string s;
@@ -169,7 +131,7 @@ void Crossing::WriteToErrorLog() const
 }
 
 // TraVisTo Ausgabe
-string Crossing::WriteElement() const
+string Crossing::GetDescription() const
 {
      //return "";
      string geometry;

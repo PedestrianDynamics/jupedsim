@@ -6,8 +6,8 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd" >
     <geometry file = "geo_AO_300.xml" /> 
     <!-- trajectories file and format --> 
     <!-- either a file name or a path location. In the latter case all files in the directory will be used--> 
-    <trajectories format="xml" unit="m"> 
-        <file name="AO_300.xml" /> 
+    <trajectories format="txt" unit="m"> 
+        <file name="AO_300.txt" /> 
         <path location="./" /> 
     </trajectories> 
     <!-- all files in the directories will be used --> 

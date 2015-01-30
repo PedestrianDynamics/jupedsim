@@ -1,7 +1,7 @@
 #include<cstdlib>
 #include "../Analysis.h"
 
-OutputHandler* Log;
+extern OutputHandler* Log;
 
 int testGetBasename()
 {

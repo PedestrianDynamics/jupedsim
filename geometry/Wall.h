@@ -1,7 +1,7 @@
 /**
  * \file        Wall.h
  * \date        Nov 16, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -35,8 +35,18 @@ class Wall : public Line {
 
 public:
      Wall();
-     Wall(const Point& p1, const Point& p2);
+     Wall(const Point& p1, const Point& p2, const std::string& type="internal");
      Wall(const Wall& orig);
+
+     /**
+      * set/get the wall type. Values are external and internal
+      */
+     const std::string& GetType() const;
+
+     /**
+      * set/get the wall type. Values are external and internal
+      */
+     void SetType(const std::string& type);
 
      /**
       *  Debug output from the object
@@ -47,6 +57,9 @@ public:
       * @return a nicely formated string of the object
       */
      virtual std::string Write() const;
+
+private:
+     std::string _type;
 };
 
 
