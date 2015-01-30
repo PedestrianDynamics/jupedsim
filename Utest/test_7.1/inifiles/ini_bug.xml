@@ -2,7 +2,7 @@
  
   <seed>1</seed>
   <max_sim_time>200</max_sim_time>
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
 
   
   <geometry>../geometry.xml</geometry>

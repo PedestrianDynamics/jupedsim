@@ -269,8 +269,8 @@ bool ArgumentParser::ParseIniFile(string inifile)
      max_cpus = omp_get_max_threads();
 #endif
      //max CPU
-     if(xMainNode->FirstChild("numCPU")) {
-          TiXmlNode* seedNode = xMainNode->FirstChild("numCPU")->FirstChild();
+     if(xMainNode->FirstChild("num_threads")) {
+          TiXmlNode* seedNode = xMainNode->FirstChild("num_threads")->FirstChild();
           int n = 1;
           if(seedNode){
                const char* cpuValue = seedNode->Value();
@@ -281,18 +281,18 @@ bool ArgumentParser::ParseIniFile(string inifile)
                n = max_cpus;
           }
           pMaxOpenMPThreads = n;
-          Log->Write("INFO: \tnumCPU <%d>", pMaxOpenMPThreads);
+          Log->Write("INFO: \tnum_threads <%d>", pMaxOpenMPThreads);
 #ifdef _OPENMP
           if(n < omp_get_max_threads() )
                omp_set_num_threads(pMaxOpenMPThreads);
 #endif
      }
-     else { // no numCPU tag
+     else { // no num_threads tag
           pMaxOpenMPThreads = max_cpus;
 #ifdef _OPENMP
           omp_set_num_threads(pMaxOpenMPThreads);
 #endif
-          Log->Write("INFO: \t Default numCPU <%d>", pMaxOpenMPThreads);
+          Log->Write("INFO: \t Default num_threads <%d>", pMaxOpenMPThreads);
      }
      //logfile
      if (xMainNode->FirstChild("logfile"))
@@ -369,7 +369,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      //pick up which model to use
      //get the wanted ped model id
      pModel=xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"),-1);
-     if( (pModel==-1) /*|| ( (pModel!=MODEL_GFCM) && pModel!=MODEL_GOMPERTZ) */)
+     if( pModel==-1  /*|| ( (pModel!=MODEL_GFCM) && pModel!=MODEL_GOMPERTZ) */)
      {
           Log->Write("ERROR: \tmissing operational_model_id attribute in the agent section. ");
           Log->Write("ERROR: \tplease specify the model id to use");

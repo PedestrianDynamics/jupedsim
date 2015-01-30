@@ -74,7 +74,7 @@ if __name__ == "__main__":
         if not path.exists(executable):
             logging.critical("executable <%s> does not exist yet."%executable)
             exit(FAILURE)
-        b = inifile.split("numCPU_")[1]
+        b = inifile.split("num_threads_")[1]
         ncpu  = int( re.split("[.|_]", b)[0] )
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))

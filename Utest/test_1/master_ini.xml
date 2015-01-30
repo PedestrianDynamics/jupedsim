@@ -3,7 +3,7 @@
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
   <seed>1</seed>
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
   <max_sim_time unit="sec">100</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
@@ -57,7 +57,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>range(1,6)</exitCrossingStrategy>
+        <exitCrossingStrategy>range(1,5)</exitCrossingStrategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />

@@ -4,7 +4,7 @@
 
   <!-- seed used for initialising random generator -->
   <seed>linspace(1, 10000, 10)</seed>
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
   <max_sim_time unit="sec">900</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>

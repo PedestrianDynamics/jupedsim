@@ -4,7 +4,7 @@
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://xsd.jupedsim.org/jps_ini_core.xsd" xsi:noNamespaceSchemaLocation="ini.xsd">
   <seed>linspace(1,10000,3)</seed>
   <!-- <seed>1</seed> -->
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
   <max_sim_time unit="sec">100</max_sim_time>
   <!-- geometry file -->
   <geometry>test_13/geometries/</geometry>

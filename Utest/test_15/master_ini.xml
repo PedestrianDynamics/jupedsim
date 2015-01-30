@@ -3,7 +3,7 @@
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd">
 
   <seed>linspace(1,1000,1)</seed>
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
   <max_sim_time unit="sec">2000</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>

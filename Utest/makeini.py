@@ -23,8 +23,8 @@ logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - 
 #JPSCORE = TRUNK + "bin/jpscore"
 #CURDIR = os.getcwd()
 # ============= some default dictionaries =============
-default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'numCPU':1, 'file':'', 'model_id':1, 'exitCrossingStrategy':3, 'cell_size':2.2, 'operational_model_id':1}
-tags = ['tmax', 'seed', 'geometry', 'exitCrossingStrategy', 'numCPU']     # only these tags can be multiplied
+default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'num_threads':1, 'file':'', 'model_id':1, 'exitCrossingStrategy':3, 'cell_size':2.2, 'operational_model_id':1}
+tags = ['tmax', 'seed', 'geometry', 'exitCrossingStrategy', 'num_threads']     # only these tags can be multiplied
 attributes = ['number', 'operational_model_id', 'cell_size', 'router_id'] # these attributes too, but
 tags2attributes = ['group', 'agents', 'linkedcells', 'router' ]           # only these corresponding to these tags
 input_tags = {}
@@ -82,7 +82,7 @@ def get_product(root):
     dics composed of the cartesian product of these lists.
     example:
     we read from the file (xml --> root) the following
-    {'numCPU': [5, 1, 2], 'tmax': [1, 2]}
+    {'num_threads': [5, 1, 2], 'tmax': [1, 2]}
     return is:
     [
     {'numCPU': 5, 'tmax': 1}, {'numCPU': 5, 'tmax': 2},
@@ -118,6 +118,8 @@ def make_filename(directory, d):
     for key, value in d.iteritems():
         if key == "geometry":
             value = os.path.basename(value)
+        # if key == "num_threads":
+            # value = "numCPU"
         name += "_" + key + "_" + str(value)
         traj += "_" + key + "_" + str(value)
 
