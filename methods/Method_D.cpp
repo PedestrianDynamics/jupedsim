@@ -361,7 +361,7 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
      string parameters_v="python ./scripts/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
          		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
      			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     cout<<parameters_rho<<endl;
+     Log->Write("INFO:\t%s",parameters_rho.c_str());
      system(parameters_rho.c_str());
      system(parameters_v.c_str());
      points.close();
