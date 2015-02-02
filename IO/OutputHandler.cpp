@@ -89,53 +89,53 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 }
 
 void OutputHandler::Write(const char* message,...)
- {
-    char msg[CLENGTH]="";
-    va_list ap;
-    va_start(ap, message);
-    vsprintf(msg, message, ap);
-    va_end(ap);
+{
+     char msg[CLENGTH]="";
+     va_list ap;
+     va_start(ap, message);
+     vsprintf(msg, message, ap);
+     va_end(ap);
 
-    string str(msg);
+     string str(msg);
 
-    if (str.find("ERROR") != string::npos)
-    {
-        cerr << msg << endl;
-        cerr.flush();
-        incrementErrors();
-    }
-    else if (str.find("WARNING") != string::npos)
-    {
-        cerr << msg << endl;
-        cerr.flush();
-        incrementWarnings();
-    }
-    else
-    { // infos
-        cout << msg << endl;
-        cout.flush();
-    }
+     if (str.find("ERROR") != string::npos)
+     {
+          cerr << msg << endl;
+          cerr.flush();
+          incrementErrors();
+     }
+     else if (str.find("WARNING") != string::npos)
+     {
+          cerr << msg << endl;
+          cerr.flush();
+          incrementWarnings();
+     }
+     else
+     { // infos
+          cout << msg << endl;
+          cout.flush();
+     }
 }
 
 void STDIOHandler::Write(const string& str)
 {
-    if (str.find("ERROR") != string::npos)
-       {
-           cerr << str << endl;
-           cerr.flush();
-           incrementErrors();
-       }
-       else if (str.find("WARNING") != string::npos)
-       {
-           cerr << str << endl;
-           cerr.flush();
-           incrementWarnings();
-       }
-       else
-       { // infos
-           cout << str << endl;
-           cout.flush();
-       }
+     if (str.find("ERROR") != string::npos)
+     {
+          cerr << str << endl;
+          cerr.flush();
+          incrementErrors();
+     }
+     else if (str.find("WARNING") != string::npos)
+     {
+          cerr << str << endl;
+          cerr.flush();
+          incrementWarnings();
+     }
+     else
+     { // infos
+          cout << str << endl;
+          cout.flush();
+     }
 }
 
 FileHandler::FileHandler(const char *fn)
@@ -156,19 +156,19 @@ FileHandler::~FileHandler()
 
 void FileHandler::Write(const string& str)
 {
-    if (this != NULL) {
-        _pfp << str << endl;
-        _pfp.flush();
-    }
+     if (this != NULL) {
+          _pfp << str << endl;
+          _pfp.flush();
+     }
 
-    if (str.find("ERROR") != string::npos)
-    {
-        incrementErrors();
-    }
-    else if (str.find("WARNING") != string::npos)
-    {
-        incrementWarnings();
-    }
+     if (str.find("ERROR") != string::npos)
+     {
+          incrementErrors();
+     }
+     else if (str.find("WARNING") != string::npos)
+     {
+          incrementWarnings();
+     }
 }
 
 void FileHandler::Write(const char* str_msg,...)
@@ -184,11 +184,11 @@ void FileHandler::Write(const char* str_msg,...)
      string str(msg);
      if (str.find("ERROR") != string::npos)
      {
-         incrementErrors();
+          incrementErrors();
      }
      else if (str.find("WARNING") != string::npos)
      {
-         incrementWarnings();
+          incrementWarnings();
      }
 }
 

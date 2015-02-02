@@ -85,14 +85,14 @@ private:
      bool OpenFileIndividualFD();
 
      std::vector<polygon_2d> GetPolygons(std::vector<int> ids, std::vector<double>& XInFrame, std::vector<double>& YInFrame,
-    		 std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
+               std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
      void OutputVoronoiResults(const std::vector<polygon_2d>&  polygons, int frid, const std::vector<double>& VInFrame);
      double GetVoronoiDensity(const std::vector<polygon_2d>& polygon, const polygon_2d & measureArea);
      double GetVoronoiDensity2(const std::vector<polygon_2d>& polygon, double* XInFrame, double* YInFrame, const polygon_2d& measureArea);
      double GetVoronoiVelocity(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const polygon_2d & measureArea);
      void GetProfiles(const std::string& frameId, const std::vector<polygon_2d>& polygons, const std::vector<double>& velocity);
      void OutputVoroGraph(const std::string & frameId, std::vector<polygon_2d>& polygons, int numPedsInFrame,std::vector<double>& XInFrame,
-    		 std::vector<double>& YInFrame,const std::vector<double>& VInFrame);
+               std::vector<double>& YInFrame,const std::vector<double>& VInFrame);
      void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const polygon_2d& measureArea, int frid);
 
      /**
