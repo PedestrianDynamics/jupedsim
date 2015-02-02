@@ -6,7 +6,8 @@
 /doc/html
 /figs
 /figs_bot
-/inputfiles
+/Utest/*/inifiles*/
+/Utest/*/trajectories
 *~
 
 # Compiled Object files

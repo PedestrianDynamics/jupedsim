@@ -4,7 +4,7 @@ Release of JuPedSim v0.6
 *Introduction*
 
 *Bugs*
-- Visibility of pedestrians (solved use triangulation)
+- Enhanced visibility of pedestrians (solved using triangulation)
 
 *New features*
 - Compiles with Visual Studio 2013 and cmake (tutorial in wiki): Oliver
