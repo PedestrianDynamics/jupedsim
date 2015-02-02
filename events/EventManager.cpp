@@ -241,6 +241,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      //TODO: what happen when they all have the new event flag ? reset maybe?
      if(informant.size()==_b->GetAllPedestrians().size())
      {
+
           for(auto&& ped:_b->GetAllPedestrians())
                ped->SetNewEventFlag(false);
      }
@@ -270,7 +271,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                //Clear the memory and attempt to reroute
                //this can happen if all doors are known to be closed
                ped->ClearKnowledge();
-               Log->Write("ERROR: \t clearing ped knowledge");
+               //Log->Write("ERROR: \t clearing ped knowledge");
                if(UpdateRoute(ped)==false)
                {
                     Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
@@ -300,13 +301,16 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
           ped->SetRouter(rout);
           //clear all previous routes
           ped->ClearMentalMap();
+          //ped->ClearKnowledge();
           //overwrite/update the pedestrian router
           if(!rout) status= false;
      }
      else
      {
-          //Log->Write("ERROR: \t unknown configuration %s", key.c_str());
-          //Log->Write("ERROR: \t  [%d] router available", _eventEngineStorage.size());
+          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+          //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
+          //Log->Write("       : \t trying to create");
+          //CreateRoutingEngine(_building);
           status= false;
      }
      return status;
