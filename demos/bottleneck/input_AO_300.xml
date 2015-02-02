@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?> 
-<JPSreport project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd"> 
+
+<JPSreport project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd" > 
     <!-- geometry file --> 
-    <geometry1 file = "geo_AO_300.xml" /> 
+    <geometry file = "geo_AO_300.xml" /> 
     <!-- trajectories file and format --> 
     <!-- either a file name or a path location. In the latter case all files in the directory will be used--> 
     <trajectories format="txt" unit="m"> 
         <file name="AO_300.txt" /> 
-        <path location="" /> 
+        <path location="./" /> 
     </trajectories> 
     <!-- all files in the directories will be used --> 
 
     <measurementAreas unit="m"> 
         <area_B id="1" type="BoundingBox"> 
-            <p1 x="2.40" y="0.53" /> 
-            <p2 x="2.40" y="-0.53" /> 
-            <p3 x="-0.60" y="-0.53" /> 
-            <p4 x="-0.60" y="0.53" /> 
-            <movingDirection start="p1" end="p2" /> 
+            <vertex x="2.40" y="0.53" /> 
+            <vertex x="2.40" y="-0.53" /> 
+            <vertex x="-0.60" y="-0.53" /> 
+            <vertex x="-0.60" y="0.53" /> 
+            <Length_in_movement_direction distance="1.06" /> 
         </area_B> 
         <area_L id="2" type="Line"> 
             <start x="-2.25" y="0.00" /> 

@@ -45,24 +45,33 @@ int main(int argc, char **argv)
 
      // Parsing the arguments
      ArgumentParser* args = new ArgumentParser();
-     args->ParseArgs(argc, argv);
 
-     // get the number of file to analyse
-     const vector<string>& files = args->GetTrajectoriesFiles();
-     const string& path = args->GetTrajectoriesLocation();
-     //path="";
 
-     // create and initialize the analysis engine
-     for (unsigned int i = 0; i < files.size(); i++)
+     if(args->ParseArgs(argc, argv))
      {
-          const string& file = files[i];
-          Analysis analysis = Analysis();
-          analysis.InitArgs(args);
-          Log->Write("INFO: \tStart Analysis for the file: " + file);
-          analysis.RunAnalysis(file, path);
-          Log->Write("INFO: \tEnd Analysis for the file: " + file);
-     }
+          // get the number of file to analyse
+          const vector<string>& files = args->GetTrajectoriesFiles();
+          const string& path = args->GetTrajectoriesLocation();
+          //path="";
 
+          // create and initialize the analysis engine
+          for (unsigned int i = 0; i < files.size(); i++)
+          {
+               const string& file = files[i];
+               Analysis analysis = Analysis();
+               Log->Write("\nINFO: \tStart Analysis for the file: %s",file.c_str());
+               Log->Write("**********************************************************************");
+               analysis.InitArgs(args);
+               analysis.RunAnalysis(file, path);
+               Log->Write("**********************************************************************");
+               Log->Write("INFO: \tEnd Analysis for the file: %s\n",file.c_str());
+          }
+     }
+     else
+     {
+          //Log->Write("INFO:\tFail to parse the ini file");
+          Log->Write("INFO:\tFinishing...");
+     }
      //do the last cleaning
      delete args;
      delete Log;

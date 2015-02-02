@@ -20,7 +20,7 @@ message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 
 set(JPSREPORT_MAJOR_VERSION 0)
-set(JPSREPORT_MINOR_VERSION 5)
+set(JPSREPORT_MINOR_VERSION 6)
 set(JPSREPORT_PATCH_VERSION 0)
 set(JPSREPORT_VERSION
   ${JPSREPORT_MAJOR_VERSION}.${JPSREPORT_MINOR_VERSION}.${JPSREPORT_PATCH_VERSION})
@@ -80,15 +80,18 @@ endif(BUILD_TESTING)
 
 set(source_files
   Analysis.cpp
-  VoronoiDiagram.cpp
-  # VoronoiDiagramGenerator.cpp
-  # VoronoiPolygons.cpp
   IO/OutputHandler.cpp
   general/ArgumentParser.cpp
   tinyxml/tinystr.cpp
   tinyxml/tinyxml.cpp
   tinyxml/tinyxmlerror.cpp
   tinyxml/tinyxmlparser.cpp
+  methods/VoronoiDiagram.cpp
+  methods/PedData.cpp
+  methods/Method_A.cpp
+  methods/Method_B.cpp
+  methods/Method_C.cpp
+  methods/Method_D.cpp
   geometry/Building.cpp  
   geometry/Line.cpp      
   geometry/Point.cpp    
@@ -104,15 +107,18 @@ set(source_files
 )  
 set (  header_files
   Analysis.h
-  MeasurementArea.h  
-  # VoronoiDiagramGenerator.h  
-  VoronoiDiagram.h  
-  # VoronoiPolygons.h
+  methods/MeasurementArea.h   
+  methods/VoronoiDiagram.h
+  methods/PedData.h
+  methods/Method_A.h
+  methods/Method_B.h
+  methods/Method_C.h
+  methods/Method_D.h  
   IO/OutputHandler.h
   general/ArgumentParser.h
+  general/Macros.h
   tinyxml/tinyxml.h
   tinyxml/tinystr.h
-  general/Macros.h
   geometry/Building.h  
   geometry/Line.h      
   geometry/Point.h    

@@ -1,7 +1,7 @@
 /**
  * \file        Point.cpp
  * \date        Sep 30, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -124,6 +124,15 @@ double Point::ScalarP(const Point& v) const
      //return _x * v.GetX() + _y * v.GetY();
      return _x * v._x + _y * v._y;
 }
+
+// since we have only 2D vectors (may be changed in the future), this function returns a scalar
+// (basically the third component of the vector (0,0,z) )
+double Point::CrossP(const Point& p) const
+{
+     return _x*p.GetY() - _y*p.GetX();
+}
+
+
 
 /// determinant of the square matrix formed by the vectors [ this, v]
 double Point::Det(const Point& v) const
@@ -267,6 +276,16 @@ const Point operator*(const Point& p, double f)
      //return Point(p.GetX() * f, p.GetY() * f);
      return Point(p._x * f, p._y * f);
 }
+
+
+// Assignment
+Point& Point::operator+=(const Point& p)
+{
+     _x += p._x;
+     _y += p._y;
+     return *this;
+}
+
 
 // divition with scalar
 const Point operator/(const Point& p, double f)

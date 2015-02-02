@@ -1,7 +1,7 @@
 /**
  * \file        SubRoom.h
  * \date        Oct 8, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -124,6 +124,11 @@ public:
      const std::vector<Wall>& GetAllWalls() const;
 
      /**
+      * @return visible walls from position of pedestrians (considering the direction of motion)
+      */
+     std::vector<Wall> GetVisibleWalls(const Point & position);
+
+     /**
       * @return a reference to the wall at position index
       */
      const Wall& GetWall(int index) const;
@@ -194,7 +199,7 @@ public:
       * @return the three coefficients of the plane equation.
       * defined by: Z = Ax + By + C
       */
-     const double * GetPlanEquation () const;
+     const double * GetPlaneEquation () const;
 
      /**
       * @return the elevation of a 2Dimensional point using the plane equation.
@@ -237,7 +242,7 @@ public:
       * Check the subroom for possible errors and
       * output user specific informations.
       */
-     void SanityCheck();
+     bool SanityCheck();
 
      //navigation
      void AddCrossing(Crossing* line);
@@ -273,7 +278,7 @@ public:
      /**
       * @return true if the two segments are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real, can can be considered transparent
+      * The use of hlines is optional, because they are not real and can be considered transparent
       */
      bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
@@ -284,6 +289,12 @@ public:
       */
      bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
+     /**
+      * @return true if the two points are visible from each other.
+      * Alls walls and transitions and crossings are used in this check.
+      * The use of hlines is optional, because they are not real, can be considered transparent
+      */
+     bool IsVisible(const Line &wall, const Point &p2);
 
      // virtual functions
      virtual std::string WriteSubRoom() const = 0;
@@ -291,7 +302,7 @@ public:
      virtual std::string WritePolyLine() const=0;
 
      /// convert all walls and transitions(doors) into a polygon representing the subroom
-     virtual void ConvertLineToPoly(std::vector<Line*> goals) = 0;
+     virtual bool ConvertLineToPoly(std::vector<Line*> goals) = 0;
 
      ///check whether the pedestrians is still in the subroom
      virtual bool IsInSubRoom(const Point& ped) const = 0;
@@ -327,7 +338,7 @@ public:
      std::string WritePolyLine() const;
 
      void WriteToErrorLog() const;
-     void ConvertLineToPoly(std::vector<Line*> goals);
+     bool ConvertLineToPoly(std::vector<Line*> goals);
      bool IsInSubRoom(const Point& ped) const;
 };
 
@@ -362,7 +373,7 @@ public:
      std::string WriteSubRoom() const;
      std::string WritePolyLine() const;
      virtual void WriteToErrorLog() const;
-     virtual void ConvertLineToPoly(std::vector<Line*> goals);
+     virtual bool ConvertLineToPoly(std::vector<Line*> goals);
      bool IsInSubRoom(const Point& ped) const;
 };
 

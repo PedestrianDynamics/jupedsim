@@ -1,7 +1,7 @@
 /**
  * \file        Building.h
  * \date        Oct 1, 2010
- * \version     v0.5
+ * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -34,6 +34,7 @@
 #include <fstream>
 #include <cfloat>
 #include <map>
+#include <memory>
 
 #include "Room.h"
 #include "NavLine.h"
@@ -47,20 +48,20 @@ class Pedestrian;
 class Transition;
 class LCGrid;
 class ForceModel;
+class PedDistributor;
 
-
-class Building {
+class Building
+{
 private:
-
      std::string _caption;
      std::string _projectFilename;
      std::string _projectRootDir;
      std::string _geometryFilename;
      RoutingEngine* _routingEngine;
      LCGrid* _linkedCellGrid;
-     std::vector<Room*> _rooms;
      std::vector<Pedestrian*> _allPedestians;
 
+     std::map<int, std::unique_ptr<Room> > _rooms;
      std::map<int, Crossing*> _crossings;
      std::map<int, Transition*> _transitions;
      std::map<int, Hline*> _hLines;
@@ -73,24 +74,22 @@ private:
 public:
      /// constructor
      Building();
+     Building(const std::string&, const std::string&, RoutingEngine&, PedDistributor&, double);
      /// destructor
      virtual ~Building();
 
-
      void SetCaption(const std::string& s);
      void SetRoutingEngine(RoutingEngine* r);
-     void SetRoom(Room* room, int index);
 
      /// delete the ped from the ped vector
      void DeletePedestrian(Pedestrian* &ped);
      /// delete the ped from the simulation
      void AddPedestrian(Pedestrian* ped);
-     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds);
-
+     void GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const;
 
      std::string GetCaption() const;
      RoutingEngine* GetRoutingEngine() const;
-     const std::vector<Room*>& GetAllRooms() const;
+     const std::map<int, std::unique_ptr<Room> >& GetAllRooms() const;
      const std::vector<Pedestrian*>& GetAllPedestrians() const;
      Pedestrian* GetPedestrian( int pedID) const;
      int GetNumberOfRooms() const;
@@ -110,7 +109,6 @@ public:
       * Not implemented
       */
      Hline* GetHline(int id);
-
 
      /**
       * return the subroom with the corresponding unique identifier
@@ -133,20 +131,17 @@ public:
       */
      bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
-
      /**
       * @return a crossing or a transition matching the given caption.
       * Return NULL if none is found
       */
      Crossing* GetTransOrCrossByName(std::string caption) const;
 
-
      /**
       * @return a crossing or a transition or a hline matching the given uid.
       * Return NULL if none is found
       */
      Hline* GetTransOrCrossByUID(int uid) const;
-
 
      /**
       * @return the transition matching the uid
@@ -156,20 +151,17 @@ public:
      //TOD0: rename later to GetGoal
      Goal* GetFinalGoal(int id);
 
-     int GetNumberOfPedestrians() const;
-
      /**
       * @return the linked-cell grid used for spatial query
       */
      LCGrid* GetGrid() const;
 
      // convenience methods
-     void InitGeometry();
+     bool InitGeometry();
      void InitGrid(double cellSize);
      //void InitRoomsAndSubroomsMap();
      void InitSavePedPathway(const std::string &filename);
      void AddRoom(Room* room);
-     void Update();
      void UpdateGrid();
      void AddSurroundingRoom(); // add a final room (outside or world), that encompasses the complete geometry
 
@@ -195,17 +187,25 @@ public:
       *
       * @param filename, the geometry file
       */
-     void LoadGeometry(const std::string &geometryfile="");
+     bool LoadGeometry(const std::string &geometryfile="");
 
-     void LoadTrafficInfo();
-     void LoadRoutingInfo(const std::string &filename);
+     /**
+      * Write the geometry to the given file.
+      * That will be useful in the geometry editor.
+      * @param filename the relative location of the file
+      * @return true if everything went fine.
+      */
+     bool SaveGeometry(const std::string &filename);
+
+     bool LoadTrafficInfo();
+     bool LoadRoutingInfo(const std::string &filename);
      void WriteToErrorLog() const;
 
      /**
       * Check the scenario for possible errors and
       * output user specific informations.
       */
-     void SanityCheck();
+     bool SanityCheck();
 
 
 private:
