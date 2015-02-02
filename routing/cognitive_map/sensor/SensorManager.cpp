@@ -77,5 +77,32 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveM
     sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
     sensor_manager->Register(new JamSensor(b), PERIODIC | NO_WAY | CHANGED_ROOM );
 
-     return sensor_manager;
+    return sensor_manager;
+}
+
+SensorManager *SensorManager::InitWithCertainSensors(const Building * b, CognitiveMapStorage * cm_storage, std::vector<std::string> sensors)
+{
+    SensorManager * sensor_manager = new SensorManager(b, cm_storage);
+
+    sensor_manager->Register(new DiscoverDoorsSensor(b),  NO_WAY );
+    sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
+
+    for (auto &it : sensors )
+    {
+        if (it =="Room2Corridor")
+        {
+            sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+        }
+        else if (it == "Jam")
+        {
+            sensor_manager->Register(new JamSensor(b), PERIODIC | NO_WAY | CHANGED_ROOM );
+        }
+        else if (it == "Smoke")
+        {
+            sensor_manager->Register(new SmokeSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+        }
+    }
+
+
+    return sensor_manager;
 }

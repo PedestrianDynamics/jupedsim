@@ -228,7 +228,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
           Log->Write("WARNING:\t There is no header version. I am assuming %s",
                     JPS_VERSION);
      }
-     else if (string(xMainNode->Attribute("version")) != JPS_VERSION && string(xMainNode->Attribute("version")) != JPS_OLD_VERSION) 
+     else if (string(xMainNode->Attribute("version")) != JPS_VERSION)
      {
           Log->Write(
                     "ERROR:\t Wrong header version. Only version %s is supported.",
@@ -269,8 +269,8 @@ bool ArgumentParser::ParseIniFile(string inifile)
      max_cpus = omp_get_max_threads();
 #endif
      //max CPU
-     if(xMainNode->FirstChild("num_threads")) {
-          TiXmlNode* seedNode = xMainNode->FirstChild("num_threads")->FirstChild();
+     if(xMainNode->FirstChild("numCPU")) {
+          TiXmlNode* seedNode = xMainNode->FirstChild("numCPU")->FirstChild();
           int n = 1;
           if(seedNode){
                const char* cpuValue = seedNode->Value();
@@ -281,18 +281,18 @@ bool ArgumentParser::ParseIniFile(string inifile)
                n = max_cpus;
           }
           pMaxOpenMPThreads = n;
-          Log->Write("INFO: \tnum_threads <%d>", pMaxOpenMPThreads);
+          Log->Write("INFO: \tnumCPU <%d>", pMaxOpenMPThreads);
 #ifdef _OPENMP
           if(n < omp_get_max_threads() )
                omp_set_num_threads(pMaxOpenMPThreads);
 #endif
      }
-     else { // no num_threads tag
+     else { // no numCPU tag
           pMaxOpenMPThreads = max_cpus;
 #ifdef _OPENMP
           omp_set_num_threads(pMaxOpenMPThreads);
 #endif
-          Log->Write("INFO: \t Default num_threads <%d>", pMaxOpenMPThreads);
+          Log->Write("INFO: \t Default numCPU <%d>", pMaxOpenMPThreads);
      }
      //logfile
      if (xMainNode->FirstChild("logfile"))
@@ -369,7 +369,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
      //pick up which model to use
      //get the wanted ped model id
      pModel=xmltoi(xMainNode->FirstChildElement("agents")->Attribute("operational_model_id"),-1);
-     if( pModel==-1  /*|| ( (pModel!=MODEL_GFCM) && pModel!=MODEL_GOMPERTZ) */)
+     if( (pModel==-1) /*|| ( (pModel!=MODEL_GFCM) && pModel!=MODEL_GOMPERTZ) */)
      {
           Log->Write("ERROR: \tmissing operational_model_id attribute in the agent section. ");
           Log->Write("ERROR: \tplease specify the model id to use");
@@ -778,6 +778,10 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
                pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
                Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
                p_routingengine->AddRouter(r);
+
+               Log->Write("\nINFO: \tUsing CognitiveMapRouter");
+               if (ParseCogMapOpts(e))
+                   return false;
           }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -788,18 +792,59 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
      return true;
 }
 
+bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
+{
+
+    TiXmlNode* sensorNode=routerNode->FirstChild();
+
+    if (!sensorNode)
+    {
+         Log->Write("ERROR:\tNo sensors found.\n");
+         return false;
+    }
+    std::vector<std::string> sensorVec;
+    for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
+              e = e->NextSiblingElement("sensor"))
+    {
+        string sensor = e->Attribute("description");
+        string status = e->Attribute("status");
+        //int id = atoi(e->Attribute("sensor_id"));
+
+        if (status=="activated")
+        {
+            sensorVec.push_back(sensor);
+        }
+
+        Log->Write("INFO: \tSensor "+ sensor + " added");
+    }
+
+    // static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(p_routingengine->GetAvailableRouters().back());
+    r->addOption("Sensors",sensorVec);
+
+    TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
+
+    if (!cogMap)
+    {
+         Log->Write("ERROR:\tCognitive Map not specified.\n");
+         return false;
+    }
+
+    std::vector<std::string> cogMapStatus;
+    cogMapStatus.push_back(cogMap->Attribute("status"));
+    Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+    r->addOption("CognitiveMap",cogMapStatus);
+
+
+    return true;
+
+}
+
 bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
 {
-     string query="exit_crossing_strategy";
-     if( ! strategyNode.FirstChild(query.c_str()))
-     {
-          query="exitCrossingStrategy";
-          Log->Write("WARNING:\t exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" ");
-     }
-
-     if (strategyNode.FirstChild(query.c_str())) {
+     if (strategyNode.FirstChild("exitCrossingStrategy")) {
           const char *tmp =
-                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
+                    strategyNode.FirstChild("exitCrossingStrategy")->FirstChild()->Value();
           if (tmp)
           {
                pExitStrategy = atoi(tmp);
@@ -819,7 +864,7 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                     break;
                default:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    Log->Write("ERROR:\t unknown exit_crossing_strategy < %d >", pExitStrategy);
+                    Log->Write("ERROR:\t unknown exitCrossingStrategy < %d >", pExitStrategy);
                     Log->Write("     :\t the default < %d > will be used", 2);
                     return true;
                     break;
@@ -829,7 +874,7 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
           {
                return false;
           }
-          Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
+          Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
      }
      return true;
 }

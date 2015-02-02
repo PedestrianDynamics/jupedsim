@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5" 
+<JuPedSim project="JPS-Project" version="0.6" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
@@ -27,7 +27,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     <!-- doors states are: close or open -->
     <doors>
       <door trans_id="1" caption="" state="open" />
-      <door trans_id="2" caption="" state="close" />
+      <door trans_id="2" caption="" state="open" />
     </doors>
   </traffic_constraints>
 
@@ -74,7 +74,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     <model_parameters>
 	<solver>euler</solver>
 	<stepsize>0.01</stepsize>
-	<exit_crossing_strategy>3</exit_crossing_strategy>
+	<exitCrossingStrategy>3</exitCrossingStrategy>
 	<linkedcells enabled="true" cell_size="2.2" />
 	<force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
 	<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -99,9 +99,14 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
       </parameters>
     </router>
     <router router_id="7" description="cognitive_map">
-      <parameters>
+	  <sensors>
+	  <sensor sensor_id="1" description="Room2Corridor" status="activated"/>
+	  <sensor sensor_id="2" description="Jam" status="activated"/>
+	  </sensors>
+	  <cognitive_map status="empty"/>
+      <!--parameters>
         <navigation_lines file="routing.xml" />
-      </parameters>
+      </parameters-->
     </router>
   </route_choice_models>
 

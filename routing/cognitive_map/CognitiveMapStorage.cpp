@@ -36,10 +36,12 @@
 #include "NavigationGraph.h"
 
 
-CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
+CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string cogMapStatus)
      : building(b)
 {
-     //creator = new EmptyCognitiveMapCreator(b);
+    if (cogMapStatus == "empty")
+    creator = new EmptyCognitiveMapCreator(b);
+    else
     creator = new CompleteCognitiveMapCreator(b);
 }
 

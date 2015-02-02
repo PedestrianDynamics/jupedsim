@@ -52,7 +52,7 @@ typedef std::unordered_map<CMStorageKeyType, CMStorageValueType> CMStorageType;
  */
 class CognitiveMapStorage {
 public:
-     CognitiveMapStorage(const Building * const b);
+     CognitiveMapStorage(const Building * const b, std::string cogMapStatus);
      virtual ~CognitiveMapStorage();
 
 

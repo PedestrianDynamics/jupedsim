@@ -38,6 +38,7 @@ class Pedestrian;
 
 #include <vector>
 #include <set>
+#include <string>
 
 class SensorManager {
 public:
@@ -62,6 +63,7 @@ public:
      void execute(const Pedestrian *, EventType);
 
      static SensorManager * InitWithAllSensors(const Building *, CognitiveMapStorage *);
+     static SensorManager * InitWithCertainSensors(const Building*, CognitiveMapStorage*, std::vector<std::string> sensors);
 
 private:
      const Building * const building;

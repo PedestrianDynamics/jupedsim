@@ -32,6 +32,7 @@
 
 #include "Router.h"
 #include <string>
+#include <unordered_map>
 
 class Building;
 class Router;
@@ -46,14 +47,29 @@ class NavLine;
  *
  */
 
+
+//c++11 alias: Container to store options for the router (i. a. sensors)
+using optStorage = std::unordered_map<std::string,std::vector<std::string>>;
+
 class CognitiveMapRouter: public Router {
 public:
      CognitiveMapRouter();
      CognitiveMapRouter(int id, RoutingStrategy s);
      virtual ~CognitiveMapRouter();
 
+
      virtual int FindExit(Pedestrian* p);
      virtual bool Init(Building* b);
+
+     /**
+      * @return options involved in the routing algorithm
+      */
+     const optStorage &getOptions() const;
+
+     /**
+      * Adds further options (key,value) to the optionContainer
+      */
+     void addOption(const std::string &key, const std::vector<std::string> &value);
 
 protected:
 
@@ -64,6 +80,9 @@ private:
      Building * building;
      CognitiveMapStorage * cm_storage;
      SensorManager * sensor_manager;
+
+     /// Optional options which are supposed to be used
+     optStorage options;
 
 };
 

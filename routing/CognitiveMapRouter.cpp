@@ -43,16 +43,17 @@
 
 CognitiveMapRouter::CognitiveMapRouter()
 {
-    building=NULL;
-    cm_storage=NULL;
-    sensor_manager=NULL;
+    building=nullptr;
+    cm_storage=nullptr;
+    sensor_manager=nullptr;
+
 }
 
 CognitiveMapRouter::CognitiveMapRouter(int id, RoutingStrategy s) : Router(id, s)
 {
-    building=NULL;
-    cm_storage=NULL;
-    sensor_manager=NULL;
+    building=nullptr;
+    cm_storage=nullptr;
+    sensor_manager=nullptr;
 }
 
 CognitiveMapRouter::~CognitiveMapRouter()
@@ -60,6 +61,10 @@ CognitiveMapRouter::~CognitiveMapRouter()
      delete cm_storage;
 
 }
+
+
+
+
 
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
@@ -86,9 +91,9 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 int CognitiveMapRouter::FindDestination(Pedestrian * p)
 {
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
-        const GraphEdge * destination = NULL;
+        const GraphEdge * destination = nullptr;
         destination = (*cm_storage)[p]->GetDestination();
-        if(destination == NULL) {
+        if(destination == nullptr) {
             //no destination was found, now we could start the discovery!
             //1. run the no_way sensors for room discovery.
             sensor_manager->execute(p, SensorManager::NO_WAY);
@@ -96,7 +101,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             //check if this was enough for finding a global path to the exit
             destination = (*cm_storage)[p]->GetDestination();
 
-            if(destination == NULL) {
+            if(destination == nullptr) {
                 //we still do not have a way. lets take the "best" local edge
                 //for this we don't calculate the cost to exit but calculte the cost for the edges at the actual vertex.
                 destination = (*cm_storage)[p]->GetLocalDestination();
@@ -105,7 +110,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
         //if we still could not found any destination we are lost! Pedestrian will be deleted
         //no destination should just appear in bug case or closed rooms.
-        if(destination == NULL) {
+        if(destination == nullptr) {
             Log->Write("ERROR: \t One Pedestrian (ID: %i) was not able to find any destination", p->GetID());
             return -1;
         }
@@ -126,11 +131,24 @@ bool CognitiveMapRouter::Init(Building * b)
      Log->Write("INFO:\tInit the Cognitive Map  Router Engine");
      building = b;
 
-     //Init Cognitive Map Storage
-     cm_storage = new CognitiveMapStorage(building);
+     //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
+     cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMap")[0]);
      Log->Write("INFO:\tInitialized CognitiveMapStorage");
      //Init Sensor Manager
-     sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
+     //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
+     sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions().at("Sensors"));
      Log->Write("INFO:\tInitialized SensorManager");
      return true;
 }
+
+
+const optStorage &CognitiveMapRouter::getOptions() const
+{
+    return options;
+}
+
+void CognitiveMapRouter::addOption(const std::string &key, const std::vector<std::string> &value)
+{
+    options.emplace(key,value);
+}
+
