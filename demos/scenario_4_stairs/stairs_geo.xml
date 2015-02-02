@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <geometry version="0.5" caption="Projectname" unit="m"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
+xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_geometry.xsd">
 	<rooms>
 		<room id="0" caption="subway">
-			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="0">
+			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C="0">
 				<polygon caption="wall">
 					<vertex px="0.0" py="1.0" />
 					<vertex px="0.0" py="0.0" />
@@ -18,7 +18,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 					<vertex px="0.0" py="3.0" />
 				</polygon>
 			</subroom>
-			<subroom id="1" closed="0" class="stair" A_x="-1.2" B_y="0" C_z="0">
+			<subroom id="1" closed="0" class="stair" A_x="-1.2" B_y="0" C="0">
 				<polygon caption="wall">
 					<vertex px="0.0" py="1.0" />
 					<vertex px="-5.0" py="1.0" />
@@ -30,7 +30,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 				<up px="-5.0" py="2" />
 				<down px="0.0" py="2" />
 			</subroom>
-			<subroom id="2" closed="0" class="stair" A_x="1.2" B_y="0" C_z="-24">
+			<subroom id="2" closed="0" class="stair" A_x="1.2" B_y="0" C="-24">
 				<polygon caption="wall">
 					<vertex px="20.0" py="1.0" />
 					<vertex px="25.0" py="1.0" />
@@ -54,7 +54,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 			</crossings>
 		</room>
 		<room id="1" caption="Hall">
-			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C_z="6">
+			<subroom id="0" closed="0" class="subroom" A_x="0" B_y="0" C="6">
 				<polygon caption="wall">
 					<vertex px="-5.0" py="7.0" />
 					<vertex px="25.0" py="7.0" />
@@ -84,7 +84,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 					<vertex px="-5.0" py="3.0" />
 				</polygon>
 			</subroom>
-			<subroom id="1" closed="0" class="subroom" A_x="0" B_y="0" C_z="6">
+			<subroom id="1" closed="0" class="subroom" A_x="0" B_y="0" C="6">
 				<polygon caption="wall">
 					<vertex px="-5.0" py="-3.0" />
 					<vertex px="-7.0" py="-3.0" />
@@ -92,7 +92,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 					<vertex px="-5.0" py="7.0" />
 				</polygon>
 			</subroom>
-			<subroom id="2" closed="0" class="subroom" A_x="0" B_y="0" C_z="6">
+			<subroom id="2" closed="0" class="subroom" A_x="0" B_y="0" C="6">
 				<polygon caption="wall">
 					<vertex px="25.0" py="-3.0" />
 					<vertex px="27.0" py="-3.0" />

@@ -790,9 +790,16 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
 
 bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
 {
-     if (strategyNode.FirstChild("exitCrossingStrategy")) {
+     string query="exit_crossing_strategy";
+     if( ! strategyNode.FirstChild(query.c_str()))
+     {
+          query="exitCrossingStrategy";
+          Log->Write("WARNING:\t exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" ");
+     }
+
+     if (strategyNode.FirstChild(query.c_str())) {
           const char *tmp =
-                    strategyNode.FirstChild("exitCrossingStrategy")->FirstChild()->Value();
+                    strategyNode.FirstChild(query.c_str())->FirstChild()->Value();
           if (tmp)
           {
                pExitStrategy = atoi(tmp);
@@ -812,7 +819,7 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                     break;
                default:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    Log->Write("ERROR:\t unknown exitCrossingStrategy < %d >", pExitStrategy);
+                    Log->Write("ERROR:\t unknown exit_crossing_strategy < %d >", pExitStrategy);
                     Log->Write("     :\t the default < %d > will be used", 2);
                     return true;
                     break;
@@ -822,7 +829,7 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
           {
                return false;
           }
-          Log->Write("INFO: \texitCrossingStrategy < %d >", pExitStrategy);
+          Log->Write("INFO: \texit_crossing_strategy < %d >", pExitStrategy);
      }
      return true;
 }

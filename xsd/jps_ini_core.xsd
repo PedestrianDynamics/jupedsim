@@ -191,7 +191,7 @@
                         <xs:sequence>
                           <xs:element type="xs:string" name="solver" />
                           <xs:element type="xs:float" name="stepsize" />
-                          <xs:element name="exitCrossingStrategy">
+                          <xs:element name="exit_crossing_strategy">
                             <xs:simpleType>
                               <xs:restriction base="xs:int">
                                 <xs:minInclusive value="1" />

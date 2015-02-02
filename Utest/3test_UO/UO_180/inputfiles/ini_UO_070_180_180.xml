@@ -54,7 +54,7 @@
 				<tmax unit="sec">900</tmax>
 				<solver>euler</solver>
 				<stepsize>0.001</stepsize>
-				<exitCrossingStrategy>3</exitCrossingStrategy>
+				<exit_crossing_strategy>3</exit_crossing_strategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<v0 mu="1.24" sigma="0.001" />
 				<bmax mu="0.25" sigma="0.001" />

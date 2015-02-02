@@ -107,7 +107,7 @@ bool EventManager::ReadEventsXml()
 
      TiXmlElement* xMainNode = doc.RootElement();
      string eventfile = "";
-     if (xMainNode->FirstChild("events")) {
+     if (xMainNode->FirstChild("events_file")) {
           eventfile = _projectRootDir
                     + xMainNode->FirstChild("events_file")->FirstChild()->Value();
           Log->Write("INFO: \tevents <" + eventfile + ">");
@@ -305,8 +305,8 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          Log->Write("ERROR: \t unknown configuration %s", key.c_str());
-          Log->Write("ERROR: \t  [%d] router available", _eventEngineStorage.size());
+          //Log->Write("ERROR: \t unknown configuration %s", key.c_str());
+          //Log->Write("ERROR: \t  [%d] router available", _eventEngineStorage.size());
           status= false;
      }
      return status;

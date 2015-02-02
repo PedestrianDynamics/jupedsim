@@ -161,6 +161,7 @@
         <xs:simpleType>
           <xs:restriction base="xs:float">
             <xs:enumeration value="0.5" />
+            <xs:enumeration value="0.6" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
