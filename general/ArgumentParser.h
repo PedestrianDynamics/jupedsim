@@ -119,7 +119,7 @@ private:
      void Usage(const std::string file);
 
      /**
-      * @input a TiXmlNode with the first child "exitCrossingStrategy";
+      * @input a TiXmlNode with the first child "exit_crossing_strategy";
       * sets pExitStrategy and p_exit_strategy
       */
      bool ParseStrategyNodeToObject(const TiXmlNode &strategyNode);
@@ -135,8 +135,6 @@ private:
       * fails if no router given or NULL
       */
      bool ParseRoutingStrategies(TiXmlNode* routingNode);
-
-     bool ParseCogMapOpts(TiXmlNode* routingNode);
 
      bool ParseLinkedCells(const TiXmlNode &linkedCellNode);
 
