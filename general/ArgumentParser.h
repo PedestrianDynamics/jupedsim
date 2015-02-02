@@ -119,7 +119,7 @@ private:
      void Usage(const std::string file);
 
      /**
-      * @input a TiXmlNode with the first child "exitCrossingStrategy";
+      * @input a TiXmlNode with the first child "exit_crossing_strategy";
       * sets pExitStrategy and p_exit_strategy
       */
      bool ParseStrategyNodeToObject(const TiXmlNode &strategyNode);

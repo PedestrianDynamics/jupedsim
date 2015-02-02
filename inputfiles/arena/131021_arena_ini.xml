@@ -2,7 +2,7 @@
 
 <JuPedSim project="arena-Project" version="0.5" 
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd ">
+xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
@@ -145,7 +145,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd ">
 			<model_parameters>
 				<solver>euler</solver>
 				<stepsize>0.1</stepsize>
-				<exitCrossingStrategy>3</exitCrossingStrategy>
+				<exit_crossing_strategy>3</exit_crossing_strategy>
 				<linkedcells enabled="true" cell_size="2.2" />
 				<force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
 				<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -162,7 +162,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd ">
 	</operational_models>
 
 	<route_choice_models>
-		<router router_id="1" description="global_shortest">
+		<router router_id="2" description="quickest">
 			<parameters></parameters>
 		</router>
 

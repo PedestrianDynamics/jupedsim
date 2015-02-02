@@ -7,10 +7,10 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- max simulation time in seconds-->
-	<max_sim_time>500</max_sim_time>
+	<max_sim_time>0.1</max_sim_time>
 	<!-- geometry file -->
 	<geometry>2014_12_19_Einkaufsebene_geo.xml</geometry>
-	<!-- traectories file and format -->
+	<!-- trajectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="2014_12_19_Einkaufsebene_traj.xml" />
 	</trajectories>
@@ -43,7 +43,8 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
 	<!--persons information and distribution -->
 	<agents operational_model_id="2">
 		<agents_distribution>
-		<group group_id="1" agent_parameter_id="1"  room_id="15" subroom_id="0" number="20" router_id="1"/>
+		<group group_id="1" agent_parameter_id="1"  room_id="15" subroom_id="0" number="2" router_id="1"/>
+          <group group_id="10" agent_parameter_id="1"  room_id="15" subroom_id="0" number="2" router_id="1"/>
 		</agents_distribution>
 	</agents>
 
@@ -54,7 +55,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>4</exitCrossingStrategy>
+        <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -81,7 +82,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="3"  b="0.25" c="3.0"/>
         <force_wall nu="10" b="0.70" c="3.0"/>

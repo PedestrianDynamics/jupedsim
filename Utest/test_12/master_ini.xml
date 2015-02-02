@@ -60,7 +60,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>1</exitCrossingStrategy>
+        <exit_crossing_strategy>1</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="3" />
         <force_ped nu="10.2" dist_max="0.1" disteff_max="0.1" interpolation_width="0.1" />
         <force_wall nu="0.0" dist_max="0.1" disteff_max="0.1" interpolation_width="0.1" />
@@ -88,7 +88,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="3" />
         <force_ped nu="30"  b="0.25" c="3.0"/>
         <force_wall nu="0" b="0.70" c="3.0"/>

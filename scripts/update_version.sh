@@ -3,7 +3,10 @@
 old_version='v0.5'
 new_version='v0.6'
 
-for f in $(find ./ -name '*.cpp' -or -name '*.h'); 
+#old_version='http://134.94.2.137/jps_ini_core.xsd'
+#new_version='http://xsd.jupedsim.org/0.6/jps_ini_core.xsd'
+
+for f in $(find ../ -name '*.cpp' -or -name '*.h' -or -name '*.xml' -or -name '*.py'); 
 do 
 
 #file uptodate
