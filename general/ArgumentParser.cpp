@@ -780,7 +780,8 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
                p_routingengine->AddRouter(r);
 
                Log->Write("\nINFO: \tUsing CognitiveMapRouter");
-               if (ParseCogMapOpts(e))
+               //Parsing additional options
+               if (!ParseCogMapOpts(e))
                    return false;
           }
           else {
