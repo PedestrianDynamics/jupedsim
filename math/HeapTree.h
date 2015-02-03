@@ -57,6 +57,9 @@ class HeapTree
     bool Add(const Elem &Item);  // Add the Item to Heap
     Elem Remove(void);           // Remove and return Item from Heap
 
+    Elem* GetArray();             // get Array of keys
+    int  GetNunOfElem();         // get number of elements;
+
     inline int GetSize(void);    // Returns the number of nodes in the Heap
 
   protected:
@@ -238,6 +241,16 @@ template <class Elem>
 inline int HeapTree<Elem>::LeftChildOf(int Node)
 {
   return (Node * 2) + 1;
+}
+
+template <class Elem>
+Elem* HeapTree<Elem>::GetArray() {             // get Array of keys
+    return Data;
+}
+
+template <class Elem>
+int  HeapTree<Elem>::GetNunOfElem() {         // get number of elements;
+    return CurrentNum;
 }
 
 #endif // HEAPTREE_H

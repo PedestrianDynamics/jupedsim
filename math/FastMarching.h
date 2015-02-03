@@ -76,6 +76,9 @@ class RectGrid
         directNeighbor getNeighbors(const Point& currPoint) const;
         directNeighbor getNeighbors(const int key) const;
 
+        double getHx() const { return hx; }
+        double getHy() const { return hy; }
+
 #ifdef LINKEDGRIDS
         RectGrid* next;
 #endif // LINKEDGRIDS

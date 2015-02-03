@@ -281,21 +281,27 @@ int FastMarcher::calculateFloorfield() {
 }
 
 inline double quadrSolutionMax (double c1, double c2, double h1, double h2, double speed) {
+    if ((c1 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
+    if ((c2 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
     double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
     if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
     double rooteval = sqrt(discriminant);
 
     double ret = (c1+c2)/2. + rooteval;
+    return ret;
 }
 
 inline double quadrSolutionMin (double c1, double c2, double h1, double h2, double speed) {
+    if ((c1 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
+    if ((c2 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
     double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
     if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
     double rooteval = sqrt(discriminant);
 
     double ret = (c1+c2)/2. - rooteval;
+    return ret;
 }
 
 double FastMarcher::calcCostAt(int key) {
@@ -310,7 +316,77 @@ double FastMarcher::calcCostAt(int key) {
             neighCost[i] = std::numeric_limits<double>::max();
         }
     }
+
     //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
+    //Problem: ich kann nicht double::max * double::max rechnen, ich muss richtigen gradient abspeichern
+    double hx = myGrid->getHx();
+    double hy = myGrid->getHy();
+    double minCost = std::numeric_limits<double>::max();
+    double oneOfFour = quadrSolutionMax(neighCost[0], neighCost[1], hx, hy, mySpeed[key]);
+    if (oneOfFour < minCost) {
+        minCost = oneOfFour;
+        myGradient[key].SetX((neighCost[0] - minCost)/hx);
+        myGradient[key].SetY((neighCost[1] - minCost)/hy);
+    }
+
+    oneOfFour = quadrSolutionMax(neighCost[2], neighCost[1], hx, hy, mySpeed[key]);
+    if (oneOfFour < minCost) {
+        minCost = oneOfFour;
+        myGradient[key].SetX((minCost - neighCost[2])/hx);
+        myGradient[key].SetY((neighCost[1] - minCost)/hy);
+    }
+
+    oneOfFour = quadrSolutionMax(neighCost[2], neighCost[3], hx, hy, mySpeed[key]);
+    if (oneOfFour < minCost) {
+        minCost = oneOfFour;
+        myGradient[key].SetX((minCost - neighCost[2])/hx);
+        myGradient[key].SetY((minCost - neighCost[3])/hy);
+    }
+
+    oneOfFour = quadrSolutionMax(neighCost[0], neighCost[3], hx, hy, mySpeed[key]);
+    if (oneOfFour < minCost) {
+        minCost = oneOfFour;
+        myGradient[key].SetX((neighCost[0] - minCost)/hx);
+        myGradient[key].SetY((minCost - neighCost[3])/hy);
+    }
+
+    if ((minCost - std::numeric_limits<double>::max()) <= .1) { // try to update by one-sided update
+        if ((neighCost[0] - std::numeric_limits<double>::max()) <= .1) {
+            oneOfFour = neighCost[0] + hx/mySpeed[key];
+            if (oneOfFour < minCost) {
+                minCost = oneOfFour;
+                myGradient[key].SetX(-1./mySpeed[key]);
+                myGradient[key].SetY(0.);
+            }
+        }
+
+        if ((neighCost[1] - std::numeric_limits<double>::max()) <= .1) {
+            oneOfFour = neighCost[1] + hy/mySpeed[key];
+            if (oneOfFour < minCost) {
+                minCost = oneOfFour;
+                myGradient[key].SetX(0);
+                myGradient[key].SetY(-1./mySpeed[key]);
+            }
+        }
+
+        if ((neighCost[2] - std::numeric_limits<double>::max()) <= .1) {
+            oneOfFour = neighCost[2] + hx/mySpeed[key];
+            if (oneOfFour < minCost) {
+                minCost = oneOfFour;
+                myGradient[key].SetX(0);
+                myGradient[key].SetY(1./mySpeed[key]);
+            }
+        }
+
+        if ((neighCost[3] - std::numeric_limits<double>::max()) <= .1) {
+            oneOfFour = neighCost[3] + hy/mySpeed[key];
+            if (oneOfFour < minCost) {
+                minCost = oneOfFour;
+                myGradient[key].SetX(0);
+                myGradient[key].SetY(1./mySpeed[key]);
+            }
+        }
+    }
     //das minimum wird in dem cost array gespeichert, das neu berechnete element muss an die richtige stelle im baum
     return 0.;
 }
