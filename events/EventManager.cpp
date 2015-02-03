@@ -218,7 +218,8 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      vector<Pedestrian*> informant;
      for(auto&& ped:_b->GetAllPedestrians())
      {
-          if (ped->GetNewEventFlag())informant.push_back(ped);
+          if (ped->GetNewEventFlag())
+               informant.push_back(ped);
      }
 
 
@@ -232,8 +233,10 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                {
                     //maybe same room and subroom ?
                     if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
-                    MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
-                    ped2->SetNewEventFlag(true);
+                    {
+                         MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
+                         ped2->SetNewEventFlag(true);
+                    }
                }
           }
      }
@@ -271,7 +274,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                //Clear the memory and attempt to reroute
                //this can happen if all doors are known to be closed
                ped->ClearKnowledge();
-               //Log->Write("ERROR: \t clearing ped knowledge");
+               Log->Write("ERROR: \t clearing ped knowledge");
                if(UpdateRoute(ped)==false)
                {
                     Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
@@ -307,8 +310,8 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
-          //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
+          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+          Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
           //Log->Write("       : \t trying to create");
           //CreateRoutingEngine(_building);
           status= false;

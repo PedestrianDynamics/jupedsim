@@ -838,16 +838,17 @@ int Pedestrian::GetColor()
      {
           string key=GetKnowledgeAsString();
           std::hash<std::string> hash_fn;
-          color =hash_fn(key)%255;
+          color = hash_fn(key) % 255;
           //cout<<"color: "<<hash_fn(key)<<endl;
+          //cout<<" key : "<<key<<endl;
      }
      break;
 
      case BY_ROUTE:
      {
-          string key=std::to_string(_routingStrategy);
+          string key = std::to_string(_routingStrategy);
           std::hash<std::string> hash_fn;
-          color =hash_fn(key)%255;
+          color = hash_fn(key) % 255;
      }
      break;
 
