@@ -778,6 +778,11 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
                pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
                Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
                p_routingengine->AddRouter(r);
+
+               Log->Write("\nINFO: \tUsing CognitiveMapRouter");
+               ///Parsing additional options
+               if (!ParseCogMapOpts(e))
+                   return false;
           }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -787,6 +792,50 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
      }
      return true;
 }
+
+
+bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
+{
+    TiXmlNode* sensorNode=routerNode->FirstChild();
+
+    if (!sensorNode)
+    {
+         Log->Write("ERROR:\tNo sensors found.\n");
+         return false;
+    }
+    std::vector<std::string> sensorVec;
+    for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
+              e = e->NextSiblingElement("sensor"))
+    {
+        string sensor = e->Attribute("description");
+        sensorVec.push_back(sensor);
+
+        Log->Write("INFO: \tSensor "+ sensor + " added");
+    }
+
+    /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(p_routingengine->GetAvailableRouters().back());
+    r->addOption("Sensors",sensorVec);
+
+    TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
+
+    if (!cogMap)
+    {
+         Log->Write("ERROR:\tCognitive Map not specified.\n");
+         return false;
+    }
+
+    std::vector<std::string> cogMapStatus;
+    cogMapStatus.push_back(cogMap->Attribute("status"));
+    Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+    r->addOption("CognitiveMap",cogMapStatus);
+
+
+    return true;
+
+}
+
+
 
 bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
 {

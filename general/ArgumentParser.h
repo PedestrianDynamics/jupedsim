@@ -136,6 +136,13 @@ private:
       */
      bool ParseRoutingStrategies(TiXmlNode* routingNode);
 
+     /**
+      * @brief ParseCogMapOpts (parsing additional options for the cognitiveMapRouter)
+      * @param routingNode. First Child is sensorNode
+      * @return false if sensor node and/or cognitiveMapElement doesn't exist
+      */
+     bool ParseCogMapOpts(TiXmlNode* routingNode);
+
      bool ParseLinkedCells(const TiXmlNode &linkedCellNode);
 
      bool ParseStepSize(TiXmlNode &stepNode);
