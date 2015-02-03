@@ -196,7 +196,7 @@ void StartDistributionSubroom::SetSubroomID(int i)
  PedDistributor
  ************************************************************/
 
-PedDistributor::PedDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed)
+PedDistributor::PedDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
 {
      _start_dis = vector<StartDistributionRoom* > ();
      _start_dis_sub = vector<StartDistributionSubroom* > ();
@@ -218,7 +218,7 @@ PedDistributor::~PedDistributor()
      //empty the parameters maps
 }
 
-bool PedDistributor::InitDistributor(const string& fileName, const std::map<int, AgentsParameters*>& agentPars, unsigned int seed)
+bool PedDistributor::InitDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
 {
      Log->Write("INFO: \tLoading and parsing the persons attributes");
 
@@ -299,7 +299,7 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
               Log->Write("ERROR:\t Default values are not implemented yet");
               return false;
           }
-          dis->SetGroupParameters(agentPars.at(agent_para_id));
+          dis->SetGroupParameters(agentPars.at(agent_para_id).get());
 
           if(e->Attribute("start_x") && e->Attribute("start_y")) {
                double startX = xmltof(e->Attribute("start_x"),NAN);

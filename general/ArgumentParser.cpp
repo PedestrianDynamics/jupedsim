@@ -121,10 +121,11 @@ ArgumentParser::ArgumentParser()
      pMaxOpenMPThreads = omp_get_thread_num();
      _profilingFlag = false;
      _hpcFlag = 0;
-     _agentsParameters= std::map<int, AgentsParameters*>();
+     _agentsParameters= std::map<int, std::shared_ptr<AgentsParameters> >();
      p_routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
      _showStatistics=false;
 }
+
 
 bool ArgumentParser::ParseArgs(int argc, char **argv)
 {
@@ -172,14 +173,9 @@ bool ArgumentParser::ParseArgs(int argc, char **argv)
      return false;
 }
 
-const std::map<int, AgentsParameters*>& ArgumentParser::GetAgentsParameters() const
+const std::map<int, std::shared_ptr<AgentsParameters> >& ArgumentParser::GetAgentsParameters() const
 {
      return _agentsParameters;
-}
-
-void ArgumentParser::SetAgentsParameters(const std::map<int, AgentsParameters*>& agentsParameters)
-{
-     _agentsParameters = agentsParameters;
 }
 
 bool ArgumentParser::ParseIniFile(string inifile)
@@ -648,7 +644,8 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
           //get the group ID
           int para_id= xmltoi(xAgentPara->Attribute("agent_parameter_id"),-1);
           Log->Write("INFO: \tParsing the group parameter id [%d]",para_id);
-          AgentsParameters* agentParameters = new AgentsParameters(para_id,pSeed);
+
+          auto agentParameters=std::shared_ptr<AgentsParameters>(new AgentsParameters(para_id,pSeed));
           _agentsParameters[para_id]=agentParameters;
 
           //desired speed
@@ -1209,3 +1206,5 @@ bool ArgumentParser::ParseStepSize(TiXmlNode &stepNode)
      }
      return false;
 }
+
+

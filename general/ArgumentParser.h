@@ -103,7 +103,7 @@ private:
      bool _profilingFlag;
      bool _showStatistics;
      int _hpcFlag; //Flag fuer die HPC-Archtitektur (0=CPU, 1=GPU, 2=XeonPhi)
-     std::map<int, AgentsParameters*> _agentsParameters;
+     std::map<int, std::shared_ptr<AgentsParameters> > _agentsParameters;
 
      /*
       * return objects for other classes as shared pointers
@@ -148,8 +148,8 @@ private:
      bool ParseStepSize(TiXmlNode &stepNode);
 
 public:
-     // Konstruktor
-     ArgumentParser(); // gibt die Programmoptionen aus
+     // constructor
+     ArgumentParser();
 
      // Getter-Funktionen
      bool IsOnline() const;
@@ -220,9 +220,7 @@ public:
      vector<pair<int, RoutingStrategy> > GetRoutingStrategy() const;
      const FileFormat& GetFileFormat() const;
 
-     const std::map<int, AgentsParameters*>& GetAgentsParameters() const;
-     void SetAgentsParameters(
-               const std::map<int, AgentsParameters*>& agentsParameters);
+     const std::map<int, std::shared_ptr<AgentsParameters> >& GetAgentsParameters() const;
 
      /**
       * Parse the commands passed to the command line

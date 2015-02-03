@@ -201,7 +201,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      {
           for (auto&& door: _b->GetAllTransitions())
           {
-               if(door.second->DistTo(ped->GetPos())<0.5)//distance to door to register its state
+               if(door.second->DistTo(ped->GetPos())<1)//distance to door to register its state
                {
                     //actualize the information about the newly closed door
                     if(door.second->IsOpen()==false)
@@ -274,7 +274,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                //Clear the memory and attempt to reroute
                //this can happen if all doors are known to be closed
                ped->ClearKnowledge();
-               Log->Write("ERROR: \t clearing ped knowledge");
+               //Log->Write("ERROR: \t clearing ped knowledge");
                if(UpdateRoute(ped)==false)
                {
                     Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
@@ -310,8 +310,8 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
-          Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
+          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+          //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
           //Log->Write("       : \t trying to create");
           //CreateRoutingEngine(_building);
           status= false;
@@ -321,8 +321,8 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
 
 void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
 {
-     auto const &  old_info1=p1->GetKnownledge();
-     auto const &   old_info2=p2->GetKnownledge();
+     auto const & old_info1 = p1->GetKnownledge();
+     auto const & old_info2 = p2->GetKnownledge();
      map<int, Knowledge> merge_info;
 
      //collect the most recent knowledge
@@ -331,19 +331,19 @@ void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
           merge_info[info1.first] = info1.second;
      }
 
-     for (auto&& info2:old_info2)
+     for (auto&& info2 : old_info2)
      {
           //update infos according to a newest time
-          if(merge_info.count(info2.first)>0)
+          if (merge_info.count(info2.first) > 0)
           {
-               if(info2.second.GetTime()>merge_info[info2.first].GetTime())
+               if (info2.second.GetTime() > merge_info[info2.first].GetTime())
                {
-                    merge_info[info2.first]=info2.second;
+                    merge_info[info2.first] = info2.second;
                }
           }
           else //the info was not present, just add
           {
-               merge_info[info2.first]=info2.second;
+               merge_info[info2.first] = info2.second;
           }
      }
 
@@ -352,8 +352,8 @@ void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
      p2->ClearKnowledge();
      for (auto&& info : merge_info)
      {
-          p1->AddKnownClosedDoor(info.first,info.second.GetTime());
-          p2->AddKnownClosedDoor(info.first,info.second.GetTime());
+          p1->AddKnownClosedDoor(info.first, info.second.GetTime());
+          p2->AddKnownClosedDoor(info.first, info.second.GetTime());
      }
 }
 
@@ -509,29 +509,29 @@ void EventManager::ChangeRouting(int id, const std::string& state)
 
      //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter(abh. von der
      //Entfernung zur Tuer) merken, dass sich Tueren aendern. Oder sie bekommen die Info von anderen Pedestrians
-     Transition *t = _building->GetTransition(id);
      //Abstand der aktuellen Position des Pedestrians zur entsprechenden Tuer: Tuer als Linie sehen und mit
      //DistTo(ped.GetPos()) den Abstand messen. Reroutezeit dann aus Entfernung und Geschwindigkeit berechnen.
 
-     for(auto&& ped:_building->GetAllPedestrians())
-     {
-          //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
-          ped->SetNewEventFlag(false);
-          double dist = t->DistTo(ped->GetPos());
-          const Point& v = ped->GetV();
-          double norm = v.Norm();
-          if (norm == 0.0) {
-               norm = 0.01;
-          }
-          double time = dist / norm;
-          if (time < 1.0) {
-               ped->ClearMentalMap();
-               ped->ResetRerouting();
-               ped->SetNewEventFlag(true);
-          } else {
-               ped->RerouteIn(time);
-          }
-     }
+     //Transition *t = _building->GetTransition(id);
+//     for(auto&& ped:_building->GetAllPedestrians())
+//     {
+//          //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
+//          ped->SetNewEventFlag(false);
+//          double dist = t->DistTo(ped->GetPos());
+//          const Point& v = ped->GetV();
+//          double norm = v.Norm();
+//          if (norm == 0.0) {
+//               norm = 0.01;
+//          }
+//          double time = dist / norm;
+//          if (time < 1.0) {
+//               ped->ClearMentalMap();
+//               ped->ResetRerouting();
+//               ped->SetNewEventFlag(true);
+//          } else {
+//               ped->RerouteIn(time);
+//          }
+//     }
 
      //Create and save a graph corresponding to the actual state of the building.
      if(CreateRoutingEngine(_building)==false)
@@ -573,6 +573,7 @@ void EventManager::GetEvent(char* c)
 bool EventManager::CreateRoutingEngine(Building* _b, int first_engine)
 {
      std::vector<int> closed_doors;
+     closed_doors.clear();
 
      for(auto&& t:_b->GetAllTransitions())
      {
