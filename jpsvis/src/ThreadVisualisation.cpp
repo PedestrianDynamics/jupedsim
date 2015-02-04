@@ -264,7 +264,7 @@ void ThreadVisualisation::run()
 
     //CAUTION: this is necessary for WIN32 to update the window name
     // but his will freeze your system on linux
-#ifdef WIN32
+#ifdef _WIN32
     renderWindow->Render();
 #endif
 

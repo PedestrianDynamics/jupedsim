@@ -39,7 +39,7 @@
 #include <iostream>
 
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <vtkAVIWriter.h>
 #include <windows.h>
 #define TRAVISTO_FFMPEG
@@ -250,7 +250,7 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     extern_launch_recording=false; //reset
 
                     windowToImageFilter=vtkWindowToImageFilter::New();
-#ifdef WIN32
+#ifdef _WIN32
                     pAVIWriter=vtkAVIWriter::New();
 #endif
 
