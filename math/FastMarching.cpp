@@ -303,8 +303,8 @@ int FastMarcher::calculateFloorfield() {
 
 //falls Rueckgabewert -1 -> schwerer fehler (diskriminante negativ)
 inline double quadrSolutionMax (double c1, double c2, double h1, double h2, double speed) {
-    if ((c1 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
-    if ((c2 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
+    if (c1 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
+    if (c2 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
     double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
     if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);} (sollte nicht vorkommen)
@@ -315,8 +315,8 @@ inline double quadrSolutionMax (double c1, double c2, double h1, double h2, doub
 }
 
 inline double quadrSolutionMin (double c1, double c2, double h1, double h2, double speed) {
-    if ((c1 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
-    if ((c2 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
+    if (c1 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
+    if (c2 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
     double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
     if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
@@ -389,8 +389,8 @@ double FastMarcher::calcCostAt(int key) {
     }
 
     // try to update by one-sided update if minCost noch <double>::max()
-    if (abs(minCost - std::numeric_limits<double>::max()) <= .1) {
-        if (abs(neighCost[0] - std::numeric_limits<double>::max()) > .1) {
+    if (minCost == std::numeric_limits<double>::max()) {
+        if (neighCost[0] != std::numeric_limits<double>::max()) {
             oneOfFour = neighCost[0] + hx/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -399,7 +399,7 @@ double FastMarcher::calcCostAt(int key) {
             }
         }
 
-        if (abs(neighCost[1] - std::numeric_limits<double>::max()) > .1) {
+        if (neighCost[1] != std::numeric_limits<double>::max()) {
             oneOfFour = neighCost[1] + hy/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -408,7 +408,7 @@ double FastMarcher::calcCostAt(int key) {
             }
         }
 
-        if (abs(neighCost[2] - std::numeric_limits<double>::max()) > .1) {
+        if (neighCost[2] != std::numeric_limits<double>::max()) {
             oneOfFour = neighCost[2] + hx/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -417,7 +417,7 @@ double FastMarcher::calcCostAt(int key) {
             }
         }
 
-        if (abs(neighCost[3] - std::numeric_limits<double>::max()) > .1) {
+        if (neighCost[3] != std::numeric_limits<double>::max()) {
             oneOfFour = neighCost[3] + hy/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -427,7 +427,7 @@ double FastMarcher::calcCostAt(int key) {
         }
     }
     //das minimum wird in dem cost array gespeichert, das neu berechnete element muss an die richtige stelle im baum
-    if (abs(minCost - std::numeric_limits<double>::max()) < .1) {
+    if (minCost == std::numeric_limits<double>::max()) {
         //minCost noch immer unendlich: dieser fall darf nicht eintreten, da min. ein Nachbar einen myCost Wert hat und
         //spaetestens das oneSided Update mit diesem Nachbarn einen gueltigen Costwert in minCost ablegen sollte!
         std::cerr<< "kein gueltiges update in calcCostAt()";
