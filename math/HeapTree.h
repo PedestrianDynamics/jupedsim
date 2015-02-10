@@ -158,7 +158,9 @@ bool HeapTree<Elem>::Add(const Elem &Item)
   if (CurrentNum >= MAX_SIZE)    // If we have reached our maximum capacity
     return false;
   Data[ CurrentNum ] = Item;
-  ShiftUp(CurrentNum++);
+  if (CurrentNum != 0) {
+    ShiftUp(CurrentNum++);
+  }
   return true;
 }
 
