@@ -53,7 +53,7 @@ class RectGrid
         int setBoundaries(const double xMinA, const double yMinA,
                           const double xMaxA, const double yMaxA);
         int setBoundaries(const Point xy_min, const Point xy_max);
-        int setSpacing(const double h_y, const double h_x);
+        int setSpacing(const double h_x, const double h_y);
         int createGrid();
 
         int getKeyAtXY(const double x, const double y) const;     //key = indef in (extern managed) array

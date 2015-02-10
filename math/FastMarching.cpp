@@ -32,12 +32,12 @@
 #include <math.h>
 
 RectGrid::RectGrid():
-    gridID(NULL),
-    isInner(NULL),
+    gridID(0),
+    isInner(nullptr),
     nGridpoints(0),
     xMin(0.),
-    yMin(0.),
     xMax(1.),
+    yMin(0.),
     yMax(1.),
     hx(1.),
     hy(1.),
@@ -68,7 +68,7 @@ int RectGrid::setBoundaries(const Point xy_min, const Point xy_max) {
     return 1;
 }
 
-int RectGrid::setSpacing(const double h_y, const double h_x) {
+int RectGrid::setSpacing(const double h_x, const double h_y) {
     hy = h_y;
     hx = h_x;
     return 1;
@@ -128,12 +128,12 @@ Point RectGrid::getPointFromKey(const int key) const {
     int i = key%iMax;
     int j = key/iMax; //integer division
 
-    return Point(i*hx, j*hy);
+    return Point(i*hx+xMin, j*hy+yMin);
 }
 
 
 int RectGrid::getNumOfElements() const {
-    return nGridpoints;
+    return this->nGridpoints;
 }
 
 directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
@@ -141,31 +141,32 @@ directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
     int i = (int)(((currPoint.GetX()-xMin)/hx)+.5);
     int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
 
-    //upper                        //-2 marks invalid neighbor
-    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i);
-    //lower
-    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i);
+    //right                       //-2 marks invalid neighbor
+    neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
+    //upper
+    neighbors.key[1] = (j == (jMax-1)) ? -2 : ((j+1)*iMax+i);
     //left
     neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
-    //right
-    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1);
+    //lower
+    neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
 
     return neighbors;
 }
 
 directNeighbor RectGrid::getNeighbors(const int key) const {
-    directNeighbor neighbors = {{-1, -1, -1, -1}};
+    directNeighbor neighbors = {{-1, -1, -1, -1}}; //curleybrackets for struct, then for int[4]
     int i = key%iMax;
     int j = key/iMax;
 
-    //upper                        //-2 marks invalid neighbor
-    neighbors.key[0] = (j == jMax) ? -2 : ((j+1)*iMax+i);
-    //lower
-    neighbors.key[1] = (j == 0) ? -2 : ((j-1)*iMax+i);
+    //right                       //-2 marks invalid neighbor
+    neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
+    //upper
+    neighbors.key[1] = (j == (jMax-1)) ? -2 : ((j+1)*iMax+i);
     //left
     neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
-    //right
-    neighbors.key[3] = (i == iMax) ? -2 : (j*iMax+i+1);
+    //lower
+    neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
+
 
     return neighbors;
 
@@ -188,6 +189,11 @@ int RectGrid::setAsOuter(const Point& outerP) {
 FastMarcher::FastMarcher()
 {
     //ctor
+    myGrid = 0;
+    myCost = 0;
+    myGradient = 0;
+    mySpeed = 0;
+
 }
 
 FastMarcher::~FastMarcher()
@@ -249,10 +255,11 @@ double FastMarcher::getSpeedAt(const int x, const int y) const {
 int FastMarcher::calculateFloorfield() {
     // @todo: ar.graf
     //definiere max heap //dyn heap??
-    HeapTree<int>* narrowband = new HeapTree<int> (myCost, myGrid->getNumOfElements());
+    int numElem = myGrid->getNumOfElements();
+    HeapTree<int>* narrowband = new HeapTree<int> (myCost, numElem);//myGrid->getNumOfElements());
 
     //suche alle Punkte mit cost = 0
-    for (int iKey = 0; iKey < myGrid->getNumOfElements(); ++iKey) {
+    for (int iKey = 0; iKey < numElem; ++iKey) {
         //alle nachbarn eines jeden dieser punkte wird (falls cost = -2.) dem narrowband zugefuegt
         //(evtl mit cost = -1., um es als zugefuegt zu markieren)
         if (myCost[iKey] == 0.) {
@@ -261,31 +268,46 @@ int FastMarcher::calculateFloorfield() {
                 if (neighbor.key[neighKey] > -1) { //valid neighbor
                     if (myCost[neighbor.key[neighKey]] == -2.) { //indicating a non calculated cost (as it is calc below, no point gets in twice
                                                                  //thus not yet in narrow band
-                        myCost[neighbor.key[neighKey]] = calcCostAt(neighbor.key[neighKey]); //now calc @todo: ar.graf : darf ich jetzt schon berechnen?
+                        /*myCost[neighbor.key[neighKey]] =*/ calcCostAt(neighbor.key[neighKey]);
                         narrowband->Add(neighbor.key[neighKey]); //getting added into correct heap pos. (lowest is root)
                     }
                 }
-
             }
         }
     }
-    //jetzt habe ich das erste narrowband
+    //jetzt habe ich das erste narrowband mit minimum im root knoten
 
-    //suche im narrowband das cost-minimum (heap root) und
+    while (narrowband->GetNumOfElem() > 0) {
+        //suche im narrowband das cost-minimum (heap root) und
         //fuege seine nachbarn dem narrowband hinzu, falls nachbar = -2.
         //fuege nun das minimum den bekannten hinzu (indem es aus dem narrowband rausgenommen wird)
+        int currentMinimum = narrowband->Remove();
+        std::cerr << myGrid->getNumOfElements();
+        std::cerr << "\n";
+        directNeighbor neighbor = myGrid->getNeighbors(currentMinimum);
+        for (int neighKey = 0; neighKey < 4; ++neighKey) {
+            if (neighbor.key[neighKey] > -1) { //valid neighbor
+                if (myCost[neighbor.key[neighKey]] == -2.) { //indicating a non calculated cost (as it is calc below, no point gets in twice
+                                                             //thus not yet in narrow band
+                    calcCostAt(neighbor.key[neighKey]);
+                    narrowband->Add(neighbor.key[neighKey]); //getting added into correct heap pos. (lowest is root)
+                }
+            }
+        }
+    }
 
-
+    std::cerr<<"calcFloorfield done\n";
 
     return 0;
 }
 
+//falls Rueckgabewert -1 -> schwerer fehler (diskriminante negativ)
 inline double quadrSolutionMax (double c1, double c2, double h1, double h2, double speed) {
     if ((c1 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
     if ((c2 - std::numeric_limits<double>::max()) <= .1 ) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
     double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
-    if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
+    if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);} (sollte nicht vorkommen)
     double rooteval = sqrt(discriminant);
 
     double ret = (c1+c2)/2. + rooteval;
@@ -318,11 +340,15 @@ double FastMarcher::calcCostAt(int key) {
     }
 
     //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
-    //Problem: ich kann nicht double::max * double::max rechnen, ich muss richtigen gradient abspeichern
+    //Problem: ich kann nicht double::max * double::max rechnen (geloest), ich muss richtigen gradient abspeichern
     double hx = myGrid->getHx();
     double hy = myGrid->getHy();
     double minCost = std::numeric_limits<double>::max();
     double oneOfFour = quadrSolutionMax(neighCost[0], neighCost[1], hx, hy, mySpeed[key]);
+    if (oneOfFour == -1.) {
+        //diskriminate bei quadrSolutionMax war negativ
+        oneOfFour = std::numeric_limits<double>::max();
+    }
     if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((neighCost[0] - minCost)/hx);
@@ -330,6 +356,10 @@ double FastMarcher::calcCostAt(int key) {
     }
 
     oneOfFour = quadrSolutionMax(neighCost[2], neighCost[1], hx, hy, mySpeed[key]);
+    if (oneOfFour == -1.) {
+        //diskriminate bei quadrSolutionMax war negativ
+        oneOfFour = std::numeric_limits<double>::max();
+    }
     if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((minCost - neighCost[2])/hx);
@@ -337,6 +367,10 @@ double FastMarcher::calcCostAt(int key) {
     }
 
     oneOfFour = quadrSolutionMax(neighCost[2], neighCost[3], hx, hy, mySpeed[key]);
+    if (oneOfFour == -1.) {
+        //diskriminate bei quadrSolutionMax war negativ
+        oneOfFour = std::numeric_limits<double>::max();
+    }
     if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((minCost - neighCost[2])/hx);
@@ -344,14 +378,19 @@ double FastMarcher::calcCostAt(int key) {
     }
 
     oneOfFour = quadrSolutionMax(neighCost[0], neighCost[3], hx, hy, mySpeed[key]);
+    if (oneOfFour == -1.) {
+        //diskriminate bei quadrSolutionMax war negativ
+        oneOfFour = std::numeric_limits<double>::max();
+    }
     if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((neighCost[0] - minCost)/hx);
         myGradient[key].SetY((minCost - neighCost[3])/hy);
     }
 
-    if ((minCost - std::numeric_limits<double>::max()) <= .1) { // try to update by one-sided update
-        if ((neighCost[0] - std::numeric_limits<double>::max()) <= .1) {
+    // try to update by one-sided update if minCost noch <double>::max()
+    if (abs(minCost - std::numeric_limits<double>::max()) <= .1) {
+        if (abs(neighCost[0] - std::numeric_limits<double>::max()) > .1) {
             oneOfFour = neighCost[0] + hx/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -360,7 +399,7 @@ double FastMarcher::calcCostAt(int key) {
             }
         }
 
-        if ((neighCost[1] - std::numeric_limits<double>::max()) <= .1) {
+        if (abs(neighCost[1] - std::numeric_limits<double>::max()) > .1) {
             oneOfFour = neighCost[1] + hy/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -369,7 +408,7 @@ double FastMarcher::calcCostAt(int key) {
             }
         }
 
-        if ((neighCost[2] - std::numeric_limits<double>::max()) <= .1) {
+        if (abs(neighCost[2] - std::numeric_limits<double>::max()) > .1) {
             oneOfFour = neighCost[2] + hx/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -378,7 +417,7 @@ double FastMarcher::calcCostAt(int key) {
             }
         }
 
-        if ((neighCost[3] - std::numeric_limits<double>::max()) <= .1) {
+        if (abs(neighCost[3] - std::numeric_limits<double>::max()) > .1) {
             oneOfFour = neighCost[3] + hy/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
@@ -388,7 +427,13 @@ double FastMarcher::calcCostAt(int key) {
         }
     }
     //das minimum wird in dem cost array gespeichert, das neu berechnete element muss an die richtige stelle im baum
-    return 0.;
+    if (abs(minCost - std::numeric_limits<double>::max()) < .1) {
+        //minCost noch immer unendlich: dieser fall darf nicht eintreten, da min. ein Nachbar einen myCost Wert hat und
+        //spaetestens das oneSided Update mit diesem Nachbarn einen gueltigen Costwert in minCost ablegen sollte!
+        std::cerr<< "kein gueltiges update in calcCostAt()";
+    }
+    myCost[key] = minCost;
+    return minCost;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

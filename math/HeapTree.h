@@ -50,7 +50,7 @@ class HeapTree
   public:
     HeapTree(double* costs, int MaxSize=500*600);
     HeapTree(const HeapTree<Elem> &OtherTree);
-    HeapTree(Elem *Array, int ElemNum, int MaxSize, double* costs);
+    HeapTree(Elem *Array, int ElemNum, double* costs, int MaxSize);
     Elem *Sort(void); // Built-in HeapSort Algorithm
     ~HeapTree(void);
 
@@ -58,15 +58,15 @@ class HeapTree
     Elem Remove(void);           // Remove and return Item from Heap
 
     Elem* GetArray();             // get Array of keys
-    int  GetNunOfElem();         // get number of elements;
+    int  GetNumOfElem();         // get number of elements;
 
     inline int GetSize(void);    // Returns the number of nodes in the Heap
 
   protected:
-    Elem     *Data;              // Actual Data array
-    double   *costArray;         // used for comparison
-    int       CurrentNum;        // Current number of elements
+    double *costArray;           // used for comparison
     const int MAX_SIZE;          // The maximum number of elements
+    Elem     *Data;              // Actual Data array
+    int       CurrentNum;        // Current number of elements
 
     void ShiftUp(int Node);      // Shift Node up into place
     void ShiftDown(int Node);    // Shift Node down into place
@@ -82,18 +82,20 @@ class HeapTree
 // HeapTree constructor function
 template <class Elem>
 HeapTree<Elem>::HeapTree(double* costs, int MaxSize)
-    : MAX_SIZE(MaxSize),
-      costArray(costs)
+    : costArray(costs),
+      MAX_SIZE(MaxSize)
+
 {
-  Data       = new Elem[MAX_SIZE];
-  CurrentNum = 0;
+    Data       = new Elem[MAX_SIZE];
+    CurrentNum = 0;
 }
 
 // HeapTree copy constructor function
 template <class Elem>
 HeapTree<Elem>::HeapTree(const HeapTree<Elem> &OtherTree)
-    : MAX_SIZE(OtherTree.MAX_SIZE),
-      costArray(OtherTree.costArray)
+    : costArray(OtherTree.costArray),
+      MAX_SIZE(OtherTree.MAX_SIZE)
+
 {
   Data       = new Elem[MAX_SIZE];
   CurrentNum = OtherTree.CurrentNum;
@@ -105,9 +107,10 @@ HeapTree<Elem>::HeapTree(const HeapTree<Elem> &OtherTree)
 
 // HeapTree array constructor
 template <class Elem>
-HeapTree<Elem>::HeapTree(Elem *Array, int ElemNum, int MaxSize, double* costs)
-    : MAX_SIZE(MaxSize),
-      costArray(costs)
+HeapTree<Elem>::HeapTree(Elem *Array, int ElemNum, double* costs, int MaxSize)
+    : costArray(costs),
+      MAX_SIZE(MaxSize)
+
 {
   Data       = new Elem[MAX_SIZE];
   CurrentNum = ElemNum;
@@ -249,7 +252,7 @@ Elem* HeapTree<Elem>::GetArray() {             // get Array of keys
 }
 
 template <class Elem>
-int  HeapTree<Elem>::GetNunOfElem() {         // get number of elements;
+int  HeapTree<Elem>::GetNumOfElem() {         // get number of elements;
     return CurrentNum;
 }
 

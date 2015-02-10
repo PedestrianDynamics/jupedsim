@@ -10,8 +10,8 @@ Fastmarchtest::Fastmarchtest()
 {
     fastmarcher = new FastMarcher();
     grid = new RectGrid();
-    x_max = 100.;
-    y_max = 100.;
+    x_max = 10.;
+    y_max = 10.;
     stepsize = .2;
 
     //init grid
@@ -39,11 +39,14 @@ Fastmarchtest::Fastmarchtest()
 
     //setting target bound
     cost[grid->getKeyAtXY(0., 0.)] = 0.;
+    cost[0] = 0.; //just to make sure.... ;)
 
     //give fastmarcher the arrays
     fastmarcher->setSpeedArray(speedvalue);
     fastmarcher->setGradientArray(gradientT);
     fastmarcher->setCostArray(cost);
+    fastmarcher->setGrid(grid);
+    //std::cerr << fastmarcher->getGrid()->getNumOfElements();
 }
 
 Fastmarchtest::~Fastmarchtest()
