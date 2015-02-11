@@ -159,8 +159,9 @@ bool HeapTree<Elem>::Add(const Elem &Item)
     return false;
   Data[ CurrentNum ] = Item;
   if (CurrentNum != 0) {
-    ShiftUp(CurrentNum++);
+    ShiftUp(CurrentNum);
   }
+  ++CurrentNum;
   return true;
 }
 
@@ -235,7 +236,7 @@ void HeapTree<Elem>::ShiftDown(int Node)
 template <class Elem>
 inline int HeapTree<Elem>::ParentOf(int Node)
 {
-  assert(Node > 0);
+  //assert(Node > 0);
   // This uses the fact that decimals are truncated during
   // the division of integers. Thus, (12 - 1) / 2 == 5
   return (Node - 1) / 2;

@@ -268,7 +268,7 @@ int FastMarcher::calculateFloorfield() {
                 if (neighbor.key[neighKey] > -1) { //valid neighbor
                     if (myCost[neighbor.key[neighKey]] == -2.) { //indicating a non calculated cost (as it is calc below, no point gets in twice
                                                                  //thus not yet in narrow band
-                        /*myCost[neighbor.key[neighKey]] =*/ calcCostAt(neighbor.key[neighKey]);
+                        calcCostAt(neighbor.key[neighKey]);      //saves result in myCost[]
                         narrowband->Add(neighbor.key[neighKey]); //getting added into correct heap pos. (lowest is root)
                     }
                 }
@@ -278,15 +278,68 @@ int FastMarcher::calculateFloorfield() {
     //jetzt habe ich das erste narrowband mit minimum im root knoten
 
     while (narrowband->GetNumOfElem() > 0) {
+        //berechne alle Werte neu:
+        int token = 0; //token ist die aktuelle Berechnungsposition im Feld
+        int* narrowbandField = narrowband->GetArray();
+        int lastField = narrowband->GetNumOfElem();
+        while(token < lastField) {
+            bool isNewCellunderToken = false;
+            calcCostAt(narrowbandField[token]);
+            if ((token > 0) && (myCost[narrowbandField[token]] < myCost[narrowbandField[(token-1)/2]])) { //only if token is not root
+                //shiftUp
+                int Item    = narrowbandField[token];
+                int Current = token;
+                int Parent  = (token-1)/2;
+                while (Current > 0) { // While Current is not the RootNode
+                    if (myCost[narrowbandField[Parent]] > myCost[Item]) {//smaller values move up
+                        narrowbandField[Current] = narrowbandField[Parent];
+                        Current = Parent;
+                        Parent = (Current-1)/2;
+                    } else
+                        break;
+                }
+                narrowbandField[Current] = Item;
+            } else {
+                if (
+                    ( ((token*2 + 1) < lastField) && (myCost[narrowbandField[token]] > myCost[narrowbandField[token*2 + 1]]) )
+                        ||
+                    ( ((token*2 + 2) < lastField) && (myCost[narrowbandField[token]] > myCost[narrowbandField[token*2 + 2]]) )
+                ) { //shiftDown
+                    int Current = token;
+                    int Child   = Current*2 + 1;
+                    int Item   = narrowbandField[Current];    // Used to compare values
+
+                    while (Child < lastField) {
+                        if (Child < (lastField - 1))
+                            if (myCost[narrowbandField[Child]] > myCost[narrowbandField[Child+1]])  // Set Child to smalest Child node
+                                ++Child;
+
+                        if (myCost[Item] > myCost[narrowbandField[Child]]) {    // larger values travel down
+                            // Switch the Current node and the Child node
+                            isNewCellunderToken = true;
+                            narrowbandField[Current] = narrowbandField[Child];
+                            Current       = Child;
+                            Child         = Current*2 + 1;
+                        } else
+                            break;
+                    }
+                    narrowbandField[Current] = Item;
+                }
+            }
+            //last loop-command
+            if (!isNewCellunderToken) {
+                ++token;
+            }
+        }
         //suche im narrowband das cost-minimum (heap root) und
-        //fuege seine nachbarn dem narrowband hinzu, falls nachbar = -2.
         //fuege nun das minimum den bekannten hinzu (indem es aus dem narrowband rausgenommen wird)
         int currentMinimum = narrowband->Remove();
-        std::cerr << myGrid->getNumOfElements();
+        std::cerr << currentMinimum << " ist berechnet.";
         std::cerr << "\n";
         directNeighbor neighbor = myGrid->getNeighbors(currentMinimum);
         for (int neighKey = 0; neighKey < 4; ++neighKey) {
             if (neighbor.key[neighKey] > -1) { //valid neighbor
+                //fuege seine nachbarn dem narrowband hinzu, falls nachbar = -2.
                 if (myCost[neighbor.key[neighKey]] == -2.) { //indicating a non calculated cost (as it is calc below, no point gets in twice
                                                              //thus not yet in narrow band
                     calcCostAt(neighbor.key[neighKey]);
@@ -306,8 +359,9 @@ inline double quadrSolutionMax (double c1, double c2, double h1, double h2, doub
     if (c1 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
     if (c2 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
-    double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
+    double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - ((h1*h1)/(speed*speed))) / 2.;
     if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);} (sollte nicht vorkommen)
+    if (h1 != h2) return -1.; //not yet with different h in x and y
     double rooteval = sqrt(discriminant);
 
     double ret = (c1+c2)/2. + rooteval;
@@ -318,8 +372,9 @@ inline double quadrSolutionMin (double c1, double c2, double h1, double h2, doub
     if (c1 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
     if (c2 == std::numeric_limits<double>::max()) return std::numeric_limits<double>::max();
     //berechne ausdruck unter der wurzel, dann fallunterscheidung < 0?
-    double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - (1./(speed*speed))) / 2.;
+    double discriminant = (c1+c2)*(c1+c2) / 4.  -  (c1*c1 + c2*c2 - ((h1*h1)/(speed*speed))) / 2.;
     if (discriminant < 0.) return -1.; //negative values indicate error //alternative: {std::cerr << "exit"; exit(1);}
+    if (h1 != h2) return -1.; //not yet with different h in x and y
     double rooteval = sqrt(discriminant);
 
     double ret = (c1+c2)/2. - rooteval;
@@ -348,8 +403,7 @@ double FastMarcher::calcCostAt(int key) {
     if (oneOfFour == -1.) {
         //diskriminate bei quadrSolutionMax war negativ
         oneOfFour = std::numeric_limits<double>::max();
-    }
-    if (oneOfFour < minCost) {
+    } else if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((neighCost[0] - minCost)/hx);
         myGradient[key].SetY((neighCost[1] - minCost)/hy);
@@ -359,8 +413,7 @@ double FastMarcher::calcCostAt(int key) {
     if (oneOfFour == -1.) {
         //diskriminate bei quadrSolutionMax war negativ
         oneOfFour = std::numeric_limits<double>::max();
-    }
-    if (oneOfFour < minCost) {
+    } else if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((minCost - neighCost[2])/hx);
         myGradient[key].SetY((neighCost[1] - minCost)/hy);
@@ -370,8 +423,7 @@ double FastMarcher::calcCostAt(int key) {
     if (oneOfFour == -1.) {
         //diskriminate bei quadrSolutionMax war negativ
         oneOfFour = std::numeric_limits<double>::max();
-    }
-    if (oneOfFour < minCost) {
+    } else if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((minCost - neighCost[2])/hx);
         myGradient[key].SetY((minCost - neighCost[3])/hy);
@@ -381,8 +433,7 @@ double FastMarcher::calcCostAt(int key) {
     if (oneOfFour == -1.) {
         //diskriminate bei quadrSolutionMax war negativ
         oneOfFour = std::numeric_limits<double>::max();
-    }
-    if (oneOfFour < minCost) {
+    } else if (oneOfFour < minCost) {
         minCost = oneOfFour;
         myGradient[key].SetX((neighCost[0] - minCost)/hx);
         myGradient[key].SetY((minCost - neighCost[3])/hy);
@@ -412,8 +463,8 @@ double FastMarcher::calcCostAt(int key) {
             oneOfFour = neighCost[2] + hx/mySpeed[key];
             if (oneOfFour < minCost) {
                 minCost = oneOfFour;
-                myGradient[key].SetX(0);
-                myGradient[key].SetY(1./mySpeed[key]);
+                myGradient[key].SetY(0);
+                myGradient[key].SetX(1./mySpeed[key]);
             }
         }
 
