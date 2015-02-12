@@ -37,9 +37,26 @@ Fastmarchtest::Fastmarchtest()
         gradientT[i].SetY(0.);
     }
 
+    for (int yi = 0; yi < 30; ++yi) {
+        for (int xi = 25; xi < 30; ++xi) {
+            speedvalue[(51*yi + xi)] = .001;
+        }
+    }
+    for (int yi = 10; yi < 15; ++yi) {
+        for (int xi = 0; xi < 20; ++xi) {
+            speedvalue[(51*yi + xi)] = .001;
+        }
+    }
+    for (int yi = 35; yi < 40; ++yi) {
+        for (int xi = 0; xi < 40; ++xi) {
+            speedvalue[(51*yi + xi)] = .001;
+        }
+    }
+
     //setting target bound
-    cost[grid->getKeyAtXY(0., 0.)] = 0.;
-    cost[0] = 0.; //just to make sure.... ;)
+    //cost[grid->getKeyAtXY(0., 0.)] = 0.;
+    //cost[550] = 0.; //just to make sure.... ;)
+    cost[0] = 0.;
 
     //give fastmarcher the arrays
     fastmarcher->setSpeedArray(speedvalue);
@@ -64,17 +81,37 @@ void Fastmarchtest::run(char* outputfile) {
     if (outputfile != 0) {
         Log = new FileHandler(outputfile);
     } else {
-        Log = new FileHandler("./outputFMTest");
+        Log = new FileHandler("./outputFMTestMC");
     };
     fastmarcher->calculateFloorfield();
     RectGrid* g = fastmarcher->getGrid();
-    Log->Write("\nPosX, PosY, cost, gradientT_x, gradientT_y, speedvalue");
+    //Log->Write("PosX, PosY, cost,"); //gradientT_x, gradientT_y, speedvalue");
+    Log->Write("# vtk DataFile Version 3.0");
+    Log->Write("Testdata: Fast Marching: Test: ");
+    Log->Write("ASCII");
+    Log->Write("DATASET STRUCTURED_POINTS");
+    Log->Write("DIMENSIONS 51 51 1");
+    Log->Write("ORIGIN 0 0 0");
+    Log->Write("SPACING 0.2 0.2 1");
+    Log->Write("POINT_DATA 2601");
+    Log->Write("SCALARS Cost float 1");
+    Log->Write("LOOKUP_TABLE default");
     for (int i = 0; i < g->getNumOfElements(); ++i) {
         Point iPoint = g->getPointFromKey(i);
-        Log->Write("\n" + std::to_string(iPoint.GetX()) + ", " + std::to_string(iPoint.GetY()) + ", ");
-        Log->Write(std::to_string(fastmarcher->getTimecostAt(iPoint)) + ", ");
-        Log->Write(std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetX()) + ", " + std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetY())  + ", ");
-        Log->Write(std::to_string(fastmarcher->getSpeedAt(iPoint)) + ", ");
+        Log->Write(std::to_string(fastmarcher->getTimecostAt(iPoint)));
     }
+    Log->Write("VECTORS Gradient float");
+    for (int i = 0; i < g->getNumOfElements(); ++i) {
+        Point iPoint = g->getPointFromKey(i);
+        Log->Write(std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetX()) + " " + std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetY()) + " 0.0");
+    }
+
+//    for (int i = 0; i < g->getNumOfElements(); ++i) {
+//        Point iPoint = g->getPointFromKey(i);
+//        Log->Write(std::to_string(iPoint.GetX()) + " " + std::to_string(iPoint.GetY()) + " " + std::to_string(fastmarcher->getTimecostAt(iPoint)));
+//        Log->Write(std::to_string(fastmarcher->getTimecostAt(iPoint)) + ", ");
+//        Log->Write(std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetX()) + ", " + std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetY())  + ", ");
+//        Log->Write(std::to_string(fastmarcher->getSpeedAt(iPoint)) + ", ");
+//    }
     delete Log;
 }

@@ -44,7 +44,7 @@ class Fastmarchtest
 int main(int argc, char** argv) {
 
     Fastmarchtest* ftest = new Fastmarchtest();
-    ftest->run("./outputFMTest.txt");
+    ftest->run("./outputFMTestMC.txt");
     delete ftest;
 
 }

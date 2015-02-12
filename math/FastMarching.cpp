@@ -334,8 +334,8 @@ int FastMarcher::calculateFloorfield() {
         //suche im narrowband das cost-minimum (heap root) und
         //fuege nun das minimum den bekannten hinzu (indem es aus dem narrowband rausgenommen wird)
         int currentMinimum = narrowband->Remove();
-        std::cerr << currentMinimum << " ist berechnet.";
-        std::cerr << "\n";
+        //std::cerr << currentMinimum << " ist berechnet.";
+        //std::cerr << "\n";
         directNeighbor neighbor = myGrid->getNeighbors(currentMinimum);
         for (int neighKey = 0; neighKey < 4; ++neighKey) {
             if (neighbor.key[neighKey] > -1) { //valid neighbor
