@@ -149,6 +149,6 @@ const optStorage &CognitiveMapRouter::getOptions() const
 
 void CognitiveMapRouter::addOption(const std::string &key, const std::vector<std::string> &value)
 {
-    options.emplace(key,value);
+    options.insert(std::make_pair(key, value));
 }
 
