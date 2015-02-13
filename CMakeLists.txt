@@ -121,21 +121,6 @@ endif(OPENMP_FOUND)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
-# find and add the CGAL library
-#fixme: complete this section
-# FIND_PACKAGE(CGAL QUIET)
-# if(CGAL_FOUND)
-#   include (${CGAL_USE_FILE})
-#   INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
-#   add_definitions(-D_CGAL=1)
-#   message (STATUS "${CGAL_FOUND}")
-#   message (STATUS "${CGAL_CORE_INCLUDE_DIR}")
-#   message (STATUS " Erreur: ${CGAL_FOUND}")
-#   message (STATUS " Erreur: ${CGAL_USE_FILE}")
-# else(CGAL_FOUND)
-#   message( STATUS "CGAL not found." )
-# endif(CGAL_FOUND)
-
 # test all cpp-files in Utest
 if(BUILD_TESTING)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
