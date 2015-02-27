@@ -12,7 +12,7 @@ Fastmarchtest::Fastmarchtest()
     grid = new RectGrid();
     x_max = 10.;
     y_max = 10.;
-    stepsize = .2;
+    stepsize = .02;
 
     //init grid
     grid->setBoundaries(0., 0., x_max, y_max);
@@ -37,19 +37,19 @@ Fastmarchtest::Fastmarchtest()
         gradientT[i].SetY(0.);
     }
 
-    for (int yi = 0; yi < 30; ++yi) {
-        for (int xi = 25; xi < 30; ++xi) {
-            speedvalue[(51*yi + xi)] = .001;
+    for (int yi = 0; yi < 300; ++yi) {
+        for (int xi = 250; xi < 300; ++xi) {
+            speedvalue[(501*yi + xi)] = .001;
         }
     }
-    for (int yi = 10; yi < 15; ++yi) {
-        for (int xi = 0; xi < 20; ++xi) {
-            speedvalue[(51*yi + xi)] = .001;
+    for (int yi = 100; yi < 150; ++yi) {
+        for (int xi = 0; xi < 200; ++xi) {
+            speedvalue[(501*yi + xi)] = .001;
         }
     }
-    for (int yi = 35; yi < 40; ++yi) {
-        for (int xi = 0; xi < 40; ++xi) {
-            speedvalue[(51*yi + xi)] = .001;
+    for (int yi = 350; yi < 400; ++yi) {
+        for (int xi = 0; xi < 400; ++xi) {
+            speedvalue[(501*yi + xi)] = .001;
         }
     }
 
@@ -90,10 +90,10 @@ void Fastmarchtest::run(char* outputfile) {
     Log->Write("Testdata: Fast Marching: Test: ");
     Log->Write("ASCII");
     Log->Write("DATASET STRUCTURED_POINTS");
-    Log->Write("DIMENSIONS 51 51 1");
+    Log->Write("DIMENSIONS 501 501 1");
     Log->Write("ORIGIN 0 0 0");
-    Log->Write("SPACING 0.2 0.2 1");
-    Log->Write("POINT_DATA 2601");
+    Log->Write("SPACING 0.02 0.02 1");
+    Log->Write("POINT_DATA 251001");
     Log->Write("SCALARS Cost float 1");
     Log->Write("LOOKUP_TABLE default");
     for (int i = 0; i < g->getNumOfElements(); ++i) {

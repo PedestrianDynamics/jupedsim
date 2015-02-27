@@ -200,10 +200,10 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
-  
+
   Utest/Fastmarchtest.cpp
   )
-  
+
 set (   header_files
   routing/NavMesh.h
   routing/DirectionStrategy.h
@@ -344,7 +344,7 @@ else(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
 endif()
 
 
