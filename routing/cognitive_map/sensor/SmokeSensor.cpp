@@ -31,7 +31,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
 
     for (auto &item : *edges)
     {
-        double smokeFactor = item->getSmokeFactor(pedestrian->GetPos());
+        double smokeFactor = item->GetSmokeFactor(pedestrian->GetPos());
         //std::cout << smokeFactor << std::endl;
         item->SetFactor(smokeFactor,GetName());
         //std::cout << item->GetFactor() << std::endl;

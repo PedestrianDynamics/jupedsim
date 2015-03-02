@@ -32,11 +32,13 @@
 #include <vector>
 #include <string>
 #include "knot.h"
-
+#include "../../../IO/OutputHandler.h"
 //using Matrix = std::array<std::array<T, COL>, ROW>;
 
+//log output
+extern OutputHandler* Log;
 
-using Matrix = std::vector<std::vector<knot>>;
+using Matrix = std::vector<std::vector<Knot>>;
 
 class FireMesh
 {
@@ -46,14 +48,13 @@ public:
     FireMesh(const std::string &filename);
     ~FireMesh();
 
-    void setUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize);
-    const Matrix &getMesh() const;
+    void GetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize);
+    const Matrix &GetMesh() const;
 
-    double getKnotValue(const double &x, const double &y) const;
-    void setKnotValuesFromFile(const std::string &filename);
+    double GetKnotValue(const double &x, const double &y) const;
+    void SetKnotValuesFromFile(const std::string &filename);
 
     bool statusMesh() const;
-
 
 private:
     Matrix _matrix;
@@ -62,9 +63,7 @@ private:
     double _xmax;
     double _ymin;
     double _ymax;
-
-    //bool statHeaderRead;
-    bool statMesh;
+    bool _statMesh;
 
 };
 

@@ -47,21 +47,21 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 FireMesh::FireMesh()
 {
     //statHeaderRead=false;
-    statMesh=false;
+    _statMesh=false;
 }
 
 FireMesh::FireMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize)
 {
-    setUpMesh(xmin,ymin,xmax,ymax,cellsize);
+    GetUpMesh(xmin,ymin,xmax,ymax,cellsize);
     //statHeaderRead=false;
-    statMesh=false;
+    _statMesh=false;
 }
 
 FireMesh::FireMesh(const std::string &filename)
 {
-    setKnotValuesFromFile(filename);
+    SetKnotValuesFromFile(filename);
     //statHeaderRead=false;
-    statMesh=false;
+    _statMesh=false;
 
 }
 
@@ -70,7 +70,7 @@ FireMesh::~FireMesh()
 
 }
 
-void FireMesh::setUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize)
+void FireMesh::GetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize)
 {
     _cellsize=cellsize;
 
@@ -95,7 +95,7 @@ void FireMesh::setUpMesh(const double &xmin, const double &ymin, const double &x
     {
         for (int j=0; j<_matrix[0].size(); ++j)
         {
-             knot k(xmin+i*cellsize, j*cellsize);
+             Knot k(xmin+i*cellsize, j*cellsize);
              _matrix[i][j]=k;
         }
     }
@@ -104,13 +104,13 @@ void FireMesh::setUpMesh(const double &xmin, const double &ymin, const double &x
 
 }
 
-const Matrix &FireMesh::getMesh() const
+const Matrix &FireMesh::GetMesh() const
 {
     return _matrix;
 
 }
 
-double FireMesh::getKnotValue(const double &x, const double &y) const
+double FireMesh::GetKnotValue(const double &x, const double &y) const
 {
     double restx;
     double resty;
@@ -163,11 +163,11 @@ double FireMesh::getKnotValue(const double &x, const double &y) const
         row=0;
     }
 
-    return _matrix[row][col].getValue();
+    return _matrix[row][col].GetValue();
 
 }
 
-void FireMesh::setKnotValuesFromFile(const std::string &filename)
+void FireMesh::SetKnotValuesFromFile(const std::string &filename)
 {
     ///open File (reading)
     std::ifstream pFile(filename);
@@ -195,7 +195,7 @@ void FireMesh::setKnotValuesFromFile(const std::string &filename)
 
         strVec.clear();
         //std::cout << xmin << ymin << xmax << ymax << std::endl;
-        setUpMesh(xmin,ymin,xmax,ymax,cellsize);
+        GetUpMesh(xmin,ymin,xmax,ymax,cellsize);
 
             //statHeaderRead=true;
         //}
@@ -209,7 +209,7 @@ void FireMesh::setKnotValuesFromFile(const std::string &filename)
             for (auto &elem : strVec)
             {
                 //std::cout << elem << std::endl;
-                _matrix[m][n].setValue(std::stod(elem));
+                _matrix[m][n].SetValue(std::stod(elem));
                 ++n;
             }
             strVec.clear();
@@ -217,18 +217,20 @@ void FireMesh::setKnotValuesFromFile(const std::string &filename)
         }
 
         pFile.close();
-        statMesh=true;
+        _statMesh=true;
     }
     else
-        std::cout << "Unable to open file";
-
-
+    {
+       Log->Write("ERROR:\Could not open potential file: %s",filename.c_str());
+       //return false;
+       exit(EXIT_FAILURE);
+    }
 
 }
 
 bool FireMesh::statusMesh() const
 {
-    return statMesh;
+    return _statMesh;
 }
 
 

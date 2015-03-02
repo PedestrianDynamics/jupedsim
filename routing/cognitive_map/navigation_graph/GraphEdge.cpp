@@ -49,14 +49,14 @@ GraphEdge::~GraphEdge()
 }
 
 GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, const Crossing * const crossing)
-     : src(s), dest(d), crossing(crossing)
+     : _src(s), _dest(d), _crossing(crossing)
 {
      CalcApproximateDistance();
-     setUpFireMesh();
+     SetUpFireMesh();
 }
 
 GraphEdge::GraphEdge(GraphEdge const &ge)
-     : src(ge.src), dest(ge.dest), crossing(ge.crossing), approximate_distance(ge.approximate_distance), fireMesh(ge.fireMesh)
+     : _src(ge._src), _dest(ge._dest), _crossing(ge._crossing), _approximate_distance(ge._approximate_distance), _fireMesh(ge._fireMesh)
 {
 }
 
@@ -64,21 +64,21 @@ void GraphEdge::CalcApproximateDistance()
 {
      double distance = 0.0;
      int count = 0;
-     for(std::vector<Crossing*>::const_iterator it = src->GetSubRoom()->GetAllCrossings().begin(); it != src->GetSubRoom()->GetAllCrossings().end(); ++it) {
-          if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+     for(std::vector<Crossing*>::const_iterator it = _src->GetSubRoom()->GetAllCrossings().begin(); it != _src->GetSubRoom()->GetAllCrossings().end(); ++it) {
+          if(_crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
           if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
           count++;
-          distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
+          distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
      }
 
-     for(std::vector<Transition*>::const_iterator it = src->GetSubRoom()->GetAllTransitions().begin(); it != src->GetSubRoom()->GetAllTransitions().end(); ++it) {
-          if(crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
+     for(std::vector<Transition*>::const_iterator it = _src->GetSubRoom()->GetAllTransitions().begin(); it != _src->GetSubRoom()->GetAllTransitions().end(); ++it) {
+          if(_crossing->GetUniqueID() == (*it)->GetUniqueID()) continue;
           if(GetDest() != NULL && ((*it)->GetSubRoom1() == GetDest()->GetSubRoom() || (*it)->GetSubRoom2() == GetDest()->GetSubRoom())) continue;
           count++;
-          distance = distance + (((*it)->GetCentre() - crossing->GetCentre()).Norm());
+          distance = distance + (((*it)->GetCentre() - _crossing->GetCentre()).Norm());
      }
-     if(count == 0) approximate_distance = 0;
-     else approximate_distance = distance/count;
+     if(count == 0) _approximate_distance = 0;
+     else _approximate_distance = distance/count;
 }
 
 
@@ -131,44 +131,50 @@ double GraphEdge::GetRoomToFloorFactor() const
 
 double GraphEdge::GetApproximateDistance(const Point & position) const
 {
-     return (crossing->GetCentre()-position).Norm();
+     return (_crossing->GetCentre()-position).Norm();
 }
 
 double GraphEdge::GetApproximateDistance() const
 {
-     return approximate_distance;
+     return _approximate_distance;
 }
 
 const GraphVertex * GraphEdge::GetDest() const
 {
-     return dest;
+     return _dest;
 }
 const GraphVertex * GraphEdge::GetSrc() const
 {
-     return src;
+     return _src;
 }
 
 const Crossing * GraphEdge::GetCrossing() const
 {
-    return crossing;
+    return _crossing;
 }
 
-const FireMesh &GraphEdge::getFireMesh() const
+const FireMesh &GraphEdge::GetFireMesh() const
 {
-    return this->fireMesh;
+    return _fireMesh;
 }
 
-void GraphEdge::setUpFireMesh()
+void GraphEdge::SetUpFireMesh()
 {
 
-    std::string filename = "D:/JuPedSim/jpscore/inputfiles/cognitive_map/Door_X_"+std::to_string(crossing->GetCentre().GetX())+"_Y_"+std::to_string(crossing->GetCentre().GetY())+".csv";
-    fireMesh.setKnotValuesFromFile(filename);
+     //TODO: read this prefix from the ini file
+     // std::string filename = "D:/workspace/JuPedSim/jpscore/inputfiles/cognitive_map";
+     std::string prefix = "D:/workspace/JPS/JPScore/inputfiles/cognitive_map";
+
+
+     std::string filename = prefix + "/Door_X_" + std::to_string(_crossing->GetCentre().GetX())
+               + "_Y_" + std::to_string(_crossing->GetCentre().GetY()) + ".csv";
+     _fireMesh.SetKnotValuesFromFile(filename);
 }
 
-double GraphEdge::getSmokeFactor(const Point &pointPed) const
+double GraphEdge::GetSmokeFactor(const Point &pointPed) const
 {   //std::cout << pointPed.GetX() << " " << pointPed.GetY() << std::endl;
-    if (fireMesh.statusMesh()==true)
-        return fireMesh.getKnotValue(pointPed.GetX(),pointPed.GetY());
+    if (_fireMesh.statusMesh()==true)
+        return _fireMesh.GetKnotValue(pointPed.GetX(),pointPed.GetY());
     else
         return 1.0;
 
@@ -176,5 +182,5 @@ double GraphEdge::getSmokeFactor(const Point &pointPed) const
 
 bool GraphEdge::IsExit() const
 {
-     return crossing->IsExit();
+     return _crossing->IsExit();
 }
