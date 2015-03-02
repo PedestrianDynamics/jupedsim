@@ -138,6 +138,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
 if(BUILD_TESTING)
+  find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
@@ -411,11 +412,11 @@ if(BUILD_TESTING)
     --build-project JPScore
     --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
     )
-
+  link_directories(${Boost_LIBRARY_DIRS})
   foreach (test_src ${test_files})
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
     add_executable( ${test} ${test_src})
-    target_link_libraries (${test} core)
+    target_link_libraries (${test} core ${Boost_LIBRARIES})
     add_test(NAME ${test} COMMAND ${test})
   endforeach(test_src ${test_files})
 
