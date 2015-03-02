@@ -100,7 +100,11 @@ SensorManager *SensorManager::InitWithCertainSensors(const Building * b, Cogniti
         else if (it == "Smoke")
         {
             sensor_manager->Register(new SmokeSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+
+
+
         }
+
     }
 
 

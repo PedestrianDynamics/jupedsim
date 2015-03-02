@@ -218,6 +218,8 @@ set (   source_files
   routing/cognitive_map/sensor/JamSensor.cpp
   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
   routing/cognitive_map/sensor/SmokeSensor.cpp
+  routing/cognitive_map/fire_mesh/firemesh.cpp
+  routing/cognitive_map/fire_mesh/knot.cpp
 
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp

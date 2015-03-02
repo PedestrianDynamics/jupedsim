@@ -31,6 +31,7 @@
 #define GRAPHEDGE_H_
 
 #include "../../../geometry/Line.h"
+#include "../fire_mesh/firemesh.h"
 #include <map>
 
 class SubRoom;
@@ -62,6 +63,12 @@ public:
      const GraphVertex * GetSrc() const;
      const Crossing * GetCrossing() const;
 
+     ///FireMesh
+     const FireMesh& getFireMesh() const;
+     void setUpFireMesh();
+
+     double getSmokeFactor(const Point &pointPed) const;
+
      double GetApproximateDistance() const;
      double GetApproximateDistance(const Point &) const;
 
@@ -84,6 +91,7 @@ private:
      const GraphVertex  * const src;
      const GraphVertex  * const dest;
      const Crossing  * const crossing;
+     FireMesh fireMesh;
 
      /**
       * Factor Bag

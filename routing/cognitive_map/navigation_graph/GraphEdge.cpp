@@ -52,10 +52,11 @@ GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, 
      : src(s), dest(d), crossing(crossing)
 {
      CalcApproximateDistance();
+     setUpFireMesh();
 }
 
 GraphEdge::GraphEdge(GraphEdge const &ge)
-     : src(ge.src), dest(ge.dest), crossing(ge.crossing), approximate_distance(ge.approximate_distance)
+     : src(ge.src), dest(ge.dest), crossing(ge.crossing), approximate_distance(ge.approximate_distance), fireMesh(ge.fireMesh)
 {
 }
 
@@ -149,7 +150,28 @@ const GraphVertex * GraphEdge::GetSrc() const
 
 const Crossing * GraphEdge::GetCrossing() const
 {
-     return crossing;
+    return crossing;
+}
+
+const FireMesh &GraphEdge::getFireMesh() const
+{
+    return this->fireMesh;
+}
+
+void GraphEdge::setUpFireMesh()
+{
+
+    std::string filename = "D:/JuPedSim/jpscore/inputfiles/cognitive_map/Door_X_"+std::to_string(crossing->GetCentre().GetX())+"_Y_"+std::to_string(crossing->GetCentre().GetY())+".csv";
+    fireMesh.setKnotValuesFromFile(filename);
+}
+
+double GraphEdge::getSmokeFactor(const Point &pointPed) const
+{   //std::cout << pointPed.GetX() << " " << pointPed.GetY() << std::endl;
+    if (fireMesh.statusMesh()==true)
+        return fireMesh.getKnotValue(pointPed.GetX(),pointPed.GetY());
+    else
+        return 1.0;
+
 }
 
 bool GraphEdge::IsExit() const

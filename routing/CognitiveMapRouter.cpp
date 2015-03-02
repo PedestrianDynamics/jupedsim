@@ -84,6 +84,12 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
         return status;
 
+
+    }
+    if (std::fmod(p->GetGlobalTime(),1)==0)
+    {
+        sensor_manager->execute(p, SensorManager::PERIODIC);
+        //std::cout << p->GetGlobalTime() << std::endl;
     }
     return 1;
 }
@@ -149,6 +155,6 @@ const optStorage &CognitiveMapRouter::getOptions() const
 
 void CognitiveMapRouter::addOption(const std::string &key, const std::vector<std::string> &value)
 {
-    options.insert(std::make_pair(key, value));
+    options.emplace(key,value);
 }
 

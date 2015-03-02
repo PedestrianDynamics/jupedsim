@@ -11,6 +11,7 @@
 
 #include "AbstractSensor.h"
 
+class Point;
 
 class SmokeSensor : public AbstractSensor
 {
@@ -22,6 +23,8 @@ public:
 
     std::string GetName() const;
     void execute(const Pedestrian *, CognitiveMap *) const;
+
+
 private:
 
 };
