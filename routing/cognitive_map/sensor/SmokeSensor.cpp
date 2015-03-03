@@ -11,7 +11,7 @@
 #include "../CognitiveMap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
-#include "../fire_mesh/firemesh.h"
+#include "../fire_mesh/FireMesh.h"
 #include <set>
 
 SmokeSensor::~SmokeSensor()

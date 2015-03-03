@@ -1,4 +1,4 @@
-#include "knot.h"
+#include "Knot.h"
 
 Knot::Knot()
 {

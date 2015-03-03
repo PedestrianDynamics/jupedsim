@@ -26,7 +26,7 @@
  *
  **/
 
-#include "firemesh.h"
+#include "FireMesh.h"
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -221,7 +221,7 @@ void FireMesh::SetKnotValuesFromFile(const std::string &filename)
     }
     else
     {
-       Log->Write("ERROR:\Could not open potential file: %s",filename.c_str());
+       Log->Write("ERROR:\tCould not open potential file: %s",filename.c_str());
        //return false;
        exit(EXIT_FAILURE);
     }
