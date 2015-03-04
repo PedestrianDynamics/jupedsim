@@ -305,6 +305,7 @@ int FastMarcher::calculateFloorfield() {
                         ||
                     ( ((token*2 + 2) < lastField) && (myCost[narrowbandField[token]] > myCost[narrowbandField[token*2 + 2]]) )
                 ) { //shiftDown
+                    std::cerr << "#################################################\n";
                     int Current = token;
                     int Child   = Current*2 + 1;
                     int Item   = narrowbandField[Current];    // Used to compare values
@@ -483,7 +484,8 @@ double FastMarcher::calcCostAt(int key) {
         //spaetestens das oneSided Update mit diesem Nachbarn einen gueltigen Costwert in minCost ablegen sollte!
         std::cerr<< "kein gueltiges update in calcCostAt()";
     }
-    myCost[key] = minCost;
+    if ((myCost[key]== -2) || (minCost < myCost[key]))
+        myCost[key] = minCost;
     delete[] neighCost;
     return minCost;
 }

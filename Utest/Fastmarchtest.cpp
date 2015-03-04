@@ -37,21 +37,21 @@ Fastmarchtest::Fastmarchtest()
         gradientT[i].SetY(0.);
     }
 
-//    for (int yi = 0; yi < (6/stepsize); ++yi) {
-//        for (int xi = (5/stepsize); xi < (6/stepsize); ++xi) {
-//            speedvalue[(int)(((10/stepsize)+1)*yi + xi)] = .001; // (10/stepsize) + 1 = stride
-//        }
-//    }
-//    for (int yi = (2/stepsize); yi < (3/stepsize); ++yi) {
-//        for (int xi = 0; xi < (4/stepsize); ++xi) {
-//            speedvalue[(int)(((10/stepsize)+1)*yi + xi)] = .001;
-//        }
-//    }
-//    for (int yi = (7/stepsize); yi < (8/stepsize); ++yi) {
-//        for (int xi = 0; xi < (8/stepsize); ++xi) {
-//            speedvalue[(int)(((10/stepsize)+1)*yi + xi)] = .001;
-//        }
-//    }
+    for (int yi = 0; yi < (6/stepsize); ++yi) {
+        for (int xi = (5/stepsize); xi < (6/stepsize); ++xi) {
+            speedvalue[(int)(((10/stepsize)+1)*yi + xi)] = .001; // (10/stepsize) + 1 = stride
+        }
+    }
+    for (int yi = (2/stepsize); yi < (3/stepsize); ++yi) {
+        for (int xi = 0; xi < (4/stepsize); ++xi) {
+            speedvalue[(int)(((10/stepsize)+1)*yi + xi)] = .001;
+        }
+    }
+    for (int yi = (7/stepsize); yi < (8/stepsize); ++yi) {
+        for (int xi = 0; xi < (8/stepsize); ++xi) {
+            speedvalue[(int)(((10/stepsize)+1)*yi + xi)] = .001;
+        }
+    }
 
     //setting target bound
     //cost[grid->getKeyAtXY(0., 0.)] = 0.;

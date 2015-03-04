@@ -35,6 +35,8 @@
 #include "../IO/OutputHandler.h"
 
 #include "GradientModel.h"
+#include "FastMarching.h"
+
 
 #ifdef _OPENMP
 #include <omp.h>
