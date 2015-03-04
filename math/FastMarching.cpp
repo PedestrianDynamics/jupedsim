@@ -256,7 +256,7 @@ int FastMarcher::calculateFloorfield() {
     // @todo: ar.graf
     //definiere max heap //dyn heap??
     int numElem = myGrid->getNumOfElements();
-    HeapTree<int>* narrowband = new HeapTree<int> (myCost, numElem);//myGrid->getNumOfElements());
+    HeapTree<int>* narrowband = new HeapTree<int> (myCost, numElem);
 
     //suche alle Punkte mit cost = 0
     for (int iKey = 0; iKey < numElem; ++iKey) {
