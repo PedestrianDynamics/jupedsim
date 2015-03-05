@@ -164,6 +164,7 @@ set (   source_files
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
 
+  routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
@@ -205,6 +206,7 @@ set (   source_files
   )
 
 set (   header_files
+  routing/FloorfieldViaFM.h
   routing/NavMesh.h
   routing/DirectionStrategy.h
   routing/DummyRouter.h
@@ -218,6 +220,7 @@ set (   header_files
   routing/DTriangulation.h
   routing/MeshRouter.h
   routing/mesh/Mesh.h
+  routing/mesh/RectGrid.h
   routing/graph/RoutingGraphStorage.h
   routing/graph/RoutingGraph.h
   routing/graph/NavLineState.h

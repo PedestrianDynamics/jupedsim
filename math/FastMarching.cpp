@@ -384,7 +384,7 @@ inline double quadrSolutionMin (double c1, double c2, double h1, double h2, doub
 
 double FastMarcher::calcCostAt(int key) {
     directNeighbor neighbor = myGrid->getNeighbors(key);
-    double* neighCost = new double[4];
+    double neighCost [4];
     for (int i = 0; i < 4; ++i) {
         if (neighbor.key[i] > -1) { //valid neighbor
             //save cost values of neighbors, set uncalculated (<- negative) neighbor costs to max
@@ -486,7 +486,6 @@ double FastMarcher::calcCostAt(int key) {
     }
     if ((myCost[key]== -2) || (minCost < myCost[key]))
         myCost[key] = minCost;
-    delete[] neighCost;
     return minCost;
 }
 
