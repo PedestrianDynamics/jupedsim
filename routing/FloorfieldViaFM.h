@@ -29,16 +29,42 @@
 #ifndef FLOORFIELDVIAFM_H
 #define FLOORFIELDVIAFM_H
 
+#include <vector>
+#include "mesh/RectGrid.h"
+#include "../geometry/Wall.h"
+#include "../geometry/Point.h"
+
+//maybe put following in macros.h
+#define LOWSPEED 0.001
 
 class FloorfieldViaFM
 {
     public:
         FloorfieldViaFM();
+        FloorfieldViaFM(Building* buildingArg, double hxArg, double hyArg);
         virtual ~FloorfieldViaFM();
         FloorfieldViaFM(const FloorfieldViaFM& other);
         FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
+
+
     protected:
     private:
+        RectGrid* grid;
+        std::vector<Wall*> wall;
+        unsigned long int nWalls; //wall.size() yields the same
+
+        //stuff to handle wrapper grid
+        double offsetX;
+        double offsetY;
+
+        //GridPoint Data in independant arrays (shared primary key)
+        int* flag;
+        double* dist2Wall;
+        double* speedInital;
+        double* cost;
+        unsigned long int* secKey;
+        Point* grad;
+
 };
 
 #endif // FLOORFIELDVIAFM_H

@@ -63,29 +63,29 @@ class RectGrid
             isInitialized = other.isInitialized;
         }
 
-        unsigned long int GetnPoints() { return nPoints; }
+        unsigned long int GetnPoints() const { return nPoints; }
         //void SetnPoints(unsigned long int val) { nPoints = val; }
-        double GetxMin() { return xMin; }
+        double GetxMin() const { return xMin; }
         void SetxMin(double val) { if (!isInitialized) xMin = val; }
-        double GetyMin() { return yMin; }
+        double GetyMin() const { return yMin; }
         void SetyMin(double val) { if (!isInitialized) yMin = val; }
-        double GetxMax() { return xMax; }
+        double GetxMax() const { return xMax; }
         void SetxMax(double val) { if (!isInitialized) xMax = val; }
-        double GetyMax() { return yMax; }
+        double GetyMax() const { return yMax; }
         void SetyMax(double val) { if (!isInitialized) yMax = val; }
-        unsigned long int GetiMax() { return iMax; }
+        unsigned long int GetiMax() const { return iMax; }
         //void SetiMax(unsigned long int val) { iMax = val; }
-        unsigned long int GetjMax() { return jMax; }
+        unsigned long int GetjMax() const { return jMax; }
         //void SetjMax(unsigned long int val) { jMax = val; }
-        double Gethx() { return hx; }
+        double Gethx() const { return hx; }
         //void Sethx(double val) { hx = val; }
-        double Gethy() { return hy; }
+        double Gethy() const { return hy; }
         //void Sethy(double val) { hy = val; }
 
-        double get_x_fromKey (unsigned long int key) { return (key%iMax)*hx+xMin}
-        double get_y_fromKey (unsigned long int key) { return (key/iMax)*hy+yMin}
-        double get_i_fromKey (unsigned long int key) { return (key%iMax) }
-        double get_j_fromKey (unsigned long int key) { return (key/iMax) }
+        double get_x_fromKey (unsigned long int key) const { return (key%iMax)*hx+xMin}
+        double get_y_fromKey (unsigned long int key) const { return (key/iMax)*hy+yMin}
+        double get_i_fromKey (unsigned long int key) const { return (key%iMax) }
+        double get_j_fromKey (unsigned long int key) const { return (key/iMax) }
 
         void setBoundaries(const double xMinA, const double yMinA,
                            const double xMaxA, const double yMaxA) {
