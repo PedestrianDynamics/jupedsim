@@ -289,10 +289,12 @@ QString ThreadDataTransfer::getTagValueFromElement(QDomNode node,
 void ThreadDataTransfer::parseDataNode(QDomNodeList frames)
 {
 
-    for (int i = 0; i < frames.length(); i++) {
-        Frame *newFrame = new Frame();
+    for (int i = 0; i < frames.length(); i++)
+    {
         QDomElement el = frames.item(i).toElement();
         QDomNodeList agents = el.elementsByTagName("agent");
+        int frame_id=el.attribute("ID").toInt();
+        Frame *newFrame = new Frame(frame_id); // TODO: get the right frame id
 
         for (int i = 0; i < agents.length(); i++) {
             bool ok=false;

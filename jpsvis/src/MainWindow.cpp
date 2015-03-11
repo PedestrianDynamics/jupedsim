@@ -601,16 +601,16 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
                                                 "F:\\workspace\\JPSvis\\data",
                                                 "Visualisation Files (*.dat *.trav *.xml);;All Files (*.*)");
 
+    //the action was cancelled
     if (fileName.isNull()) {
         return false;
     }
-
-
 
     //get and set the working dir
     QFileInfo fileInfo(fileName);
     QString wd=fileInfo.absoluteDir().absolutePath();
     SystemSettings::setWorkingDirectory(wd);
+    SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
     //the geometry actor
     FacilityGeometry* geometry = visualisationThread->getGeometry();
@@ -656,7 +656,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         return false;
     }
 
-
     SyncData* dataset=NULL;
     extern_trajectories_firstSet.clearFrames();
 
@@ -677,25 +676,34 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         break;
     }
 
-
-
-    double frameRate=15; //default frame rate
-    statusBar()->showMessage(tr("parsing the file"));
-    QXmlInputSource source(&file);
-    QXmlSimpleReader reader;
-
     //no other geometry format was detected
     if(geometry==NULL)
         geometry=new FacilityGeometry();
-    SaxParser handler(geometry,dataset,&frameRate);
-    reader.setContentHandler(&handler);
-    reader.parse(source);
-    file.close();
+
+    double frameRate=15; //default frame rate
+    statusBar()->showMessage(tr("parsing the file"));
+
+
+    //parsing the xml file
+    if(fileName.endsWith(".xml",Qt::CaseInsensitive))
+    {
+        QXmlInputSource source(&file);
+        QXmlSimpleReader reader;
+
+        SaxParser handler(geometry,dataset,&frameRate);
+        reader.setContentHandler(&handler);
+        reader.parse(source);
+        file.close();
+    }
+    // try to parse the txt file
+    else
+    {
+        if(false==SaxParser::ParseTxtFormat(fileName, dataset,&frameRate))
+            return false;
+    }
+
 
     QString frameRateStr=QString::number(frameRate);
-    SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
-
-
     // set the visualisation window title
     visualisationThread->setWindowTitle(fileName);
     visualisationThread->slotSetFrameRate(frameRate);

@@ -93,7 +93,7 @@
 //#include <vector>
 
 #define VTK_CREATE(type, name) \
-		vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
+    vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
 
@@ -143,7 +143,7 @@ void ThreadVisualisation::run()
 {
 
     //deactivate the output windows
-    vtkObject::GlobalWarningDisplayOff();
+    //vtkObject::GlobalWarningDisplayOff();
 
     //emit signalStatusMessage("running");
 
@@ -359,7 +359,7 @@ void ThreadVisualisation::run()
 
 
     //emit signalStatusMessage("Idle");
-    //emit signal_controlSequences("CONTROL_RESET");
+    emit signal_controlSequences("CONTROL_RESET");
 
 
     //clear some stuffs
@@ -444,34 +444,34 @@ void  ThreadVisualisation::initGlyphs2D()
     agentShape->SetInnerRadius(0);
     agentShape->SetOuterRadius(30);
 
-//    {
-//        //personal space
-//        VTK_CREATE (vtkDiskSource, perSpace);
-//        perSpace->SetCircumferentialResolution(20);
-//        perSpace->SetInnerRadius(0);
-//        perSpace->SetOuterRadius(30);
-//        //forehead
-//        perSpace->SetCircumferentialResolution(20);
-//        perSpace->SetInnerRadius(0);
-//        perSpace->SetOuterRadius(30);
-//        //backhead
+    //    {
+    //        //personal space
+    //        VTK_CREATE (vtkDiskSource, perSpace);
+    //        perSpace->SetCircumferentialResolution(20);
+    //        perSpace->SetInnerRadius(0);
+    //        perSpace->SetOuterRadius(30);
+    //        //forehead
+    //        perSpace->SetCircumferentialResolution(20);
+    //        perSpace->SetInnerRadius(0);
+    //        perSpace->SetOuterRadius(30);
+    //        //backhead
 
-//        //Append the two meshes
-//        VTK_CREATE (vtkAppendPolyData, appendFilter);
-//#if VTK_MAJOR_VERSION <= 5
-//        appendFilter->AddInputConnection(perSpace->GetProducerPort());
-//        appendFilter->AddInputConnection(input2->GetProducerPort());
-//#else
-//        appendFilter->AddInputData(perSpace);
-//        appendFilter->AddInputData(input2);
-//#endif
-//        appendFilter->Update();
+    //        //Append the two meshes
+    //        VTK_CREATE (vtkAppendPolyData, appendFilter);
+    //#if VTK_MAJOR_VERSION <= 5
+    //        appendFilter->AddInputConnection(perSpace->GetProducerPort());
+    //        appendFilter->AddInputConnection(input2->GetProducerPort());
+    //#else
+    //        appendFilter->AddInputData(perSpace);
+    //        appendFilter->AddInputData(input2);
+    //#endif
+    //        appendFilter->Update();
 
-//        // Remove any duplicate points.
-//        VTK_CREATE (vtkCleanPolyData, cleanFilter);
-//        cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
-//        cleanFilter->Update();
-//    }
+    //        // Remove any duplicate points.
+    //        VTK_CREATE (vtkCleanPolyData, cleanFilter);
+    //        cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
+    //        cleanFilter->Update();
+    //    }
 
     //speed the rendering using triangles stripers
     //vtkTriangleFilter *tris = vtkTriangleFilter::New();
@@ -488,7 +488,8 @@ void  ThreadVisualisation::initGlyphs2D()
     //extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
 
     //first frame
-    Frame * frame = extern_trajectories_firstSet.getFrame(0);
+    Frame * frame = extern_trajectories_firstSet.GetFrames().begin()->second;
+
     vtkPolyData* pData=NULL;
     if(frame) pData=frame->GetPolyData2D();
 
@@ -523,8 +524,8 @@ void  ThreadVisualisation::initGlyphs2D()
     extern_glyphs_pedestrians_actor_2D->SetMapper(mapper);
     //extern_glyphs_pedestrians_actor_2D->GetProperty()->BackfaceCullingOn();
 
-    if(extern_trajectories_firstSet.getNumberOfAgents()>0)
-        renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
+    //if(extern_trajectories_firstSet.getNumberOfAgents()>0)
+    renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
 
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);
@@ -579,7 +580,7 @@ void ThreadVisualisation::initGlyphs3D()
     extern_glyphs_pedestrians_3D->SetSourceConnection(agentShape->GetOutputPort());
 
     //first frame
-    Frame * frame = extern_trajectories_firstSet.getFrame(0);
+    Frame * frame = extern_trajectories_firstSet.GetFrames().begin()->second;
     vtkPolyData* pData=NULL;
     if(frame) pData=frame->GetPolyData2D();
 
@@ -609,8 +610,8 @@ void ThreadVisualisation::initGlyphs3D()
 
     extern_glyphs_pedestrians_actor_3D->SetMapper(mapper);
     //extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
-    if(extern_trajectories_firstSet.getNumberOfAgents()>0)
-        renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
+    //if(extern_trajectories_firstSet.getNumberOfAgents()>0)
+    renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
 
     extern_glyphs_pedestrians_actor_3D->SetVisibility(false);
 }
@@ -718,7 +719,7 @@ void ThreadVisualisation::setCameraPerspective(int mode)
         //camera->Modified();
     }
 
-    break;
+        break;
     }
 }
 

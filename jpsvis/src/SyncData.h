@@ -35,9 +35,14 @@
 #define SYNCDATA_H_
 
 #include <QMutex>
-#include <vector>
+
 #include <QObject>
 #include <QStringList>
+
+#include <memory>
+#include <vector>
+#include <map>
+
 
 class QObject;
 class QStringList;
@@ -56,9 +61,8 @@ public:
 
     void add(std::string newData);
     std::string get();
-    //void clear();
-    void resetFrameCursor();
 
+    void resetFrameCursor();
 
     /// get the size
     unsigned int getSize();
@@ -90,29 +94,10 @@ public:
     /// return the number of pedestrians involved in this dataset
     int getNumberOfAgents();
 
+    std::map <int, Frame*>& GetFrames() {return _frames;}
+
     /// set the number of pedestrians
-    void setNumberOfAgents(int numberOfAgents);
-
-    /// set the absolute time (delay) after which, this dataset will start to play.
-    /// This is useful when loading several datasets, that needs to be synchronised.
-    /// @para second the number of seconds elapsed since midnight 1970
-    /// @para microsecond the number of microsecond(in addition to the seconds)
-    void setDelayAbsolute(unsigned long second, unsigned long microsecond/*=0*/);
-
-    /// returns the arguments given in setDelay.
-    void getDelayAbsolute(unsigned long *);
-
-    /// get the relative delays between the dataset in millisecond.
-    /// the delay of the first dataset/group will typically have the delay 0 ms.
-    signed long getDelayRelative();
-
-    /// set the relative delays
-
-    void setDelayRelative(signed long milliseconds);
-
-    /// compute the relative relative
-    /// @deprecated [should use setDelayRelative]
-    void computeDelayRelative(unsigned long* delays);
+    void setNumberOfAgents(int _numberOfAgents);
 
     /// set the offset.
     /// this is useful when several datasets needed
@@ -122,12 +107,12 @@ public:
     /// \brief initialize the pedestrians height.
     /// the initialiation is a list, where the even terms are the IDs
     /// and the odd terms are the heights
-    void setInitialHeights(const QStringList& pedHeight);
+    void setInitialHeights(const QStringList& _pedHeight);
 
     ///  \brief get initial heights
     QStringList getInitialHeights()
     {
-        return pedHeight;
+        return _pedHeight;
     }
 
     /**
@@ -138,8 +123,8 @@ public:
      */
     void setInitialColors(const QStringList& pedColor)
     {
-        this->pedColor.clear();
-        this->pedColor=pedColor;
+        _pedColor.clear();
+        _pedColor=pedColor;
     };
 
     /**
@@ -148,7 +133,7 @@ public:
 
     QStringList getInitialColors()
     {
-        return pedColor;
+        return _pedColor;
     }
 
 Q_SIGNALS:
@@ -158,35 +143,29 @@ Q_SIGNALS:
 
 private:
 
-    //general information about this dataset
-    float frameRate;
-    char roomCaption[256];
-
-    // give the actual position of the frame beeing read, in the frame dataset
+    double _frameRate;
+    char _roomCaption[256];
 
     // the actual position (real) of the frame
-    int frameCursor;
+    int _frameCursor;
 
-    // the offset. this is 0 when all dataets are synchronised
-    int frameCursorOffset;
-
-    // relative delay in milliseconds
-    signed long delay_ms_rel;
-    // ablotute time elapsed since 1970 in sec
-    unsigned long delay_s_abs;
-    // absolute additional time in microsecond
-    unsigned long delay_us_abs;
+    // the offset. this is 0 when all datasets are synchronised
+    int _frameCursorOffset;
 
     // list containing the initial heights of pedestrians
-    QStringList pedHeight;
+    QStringList _pedHeight;
 
     /// list containing the initial colors of pedestrians
-    QStringList pedColor;
+    QStringList _pedColor;
 
     /// the number of agents
-    int numberOfAgents;
-    QMutex mutex;
-    std::vector<Frame*> frames;
+    int _numberOfAgents;
+
+    ///used in online mode for syncronizing
+    QMutex _mutex;
+    //std::vector<Frame*> _frames;
+    std::map <int, Frame*> _frames;
+    //std::map<int, std::unique_ptr<Frame> > _frames;
 };
 
 #endif /* SYNCDATA_H_ */

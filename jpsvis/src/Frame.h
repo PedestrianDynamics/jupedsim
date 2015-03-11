@@ -38,7 +38,7 @@ class vtkPolyData;
 class Frame {
 public:
     /// constructor
-    Frame();
+    Frame(int id);
     /// destructor
     virtual ~Frame();
 
@@ -57,6 +57,8 @@ public:
 
     /// return the number of element in this frame
     int getSize();
+
+    int GetID(){ return _id;}
 
     /// reset the position of the cursor for reading the data
     void resetCursor();
@@ -91,6 +93,8 @@ private:
 
     /// points to the actual element in the frame
     unsigned int _elementCursor;
+    //the frame id
+    int _id;
 };
 
 #endif /* Frame_H_ */

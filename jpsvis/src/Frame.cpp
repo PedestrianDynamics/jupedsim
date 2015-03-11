@@ -47,9 +47,10 @@
 #define VTK_CREATE(type, name) \
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
-Frame::Frame()
+Frame::Frame(int id)
 {
     _elementCursor=0;
+    _id=id;
     //_polydata = vtkPolyData::New();
     _polydata2D = vtkPolyData::New();
     _polydata3D = vtkPolyData::New();
@@ -78,16 +79,16 @@ void Frame::addElement(FrameElement* point)
     _framePoints.push_back(point);
 }
 
-void Frame::clear()
-{
-    while (!_framePoints.empty()) {
-        delete _framePoints.back();
-        _framePoints.pop_back();
-    }
-    _framePoints.clear();
+//void Frame::clear()
+//{
+//    while (!_framePoints.empty()) {
+//        delete _framePoints.back();
+//        _framePoints.pop_back();
+//    }
+//    _framePoints.clear();
 
-    _elementCursor=0;
-}
+//    _elementCursor=0;
+//}
 
 FrameElement* Frame::getNextElement()
 {
@@ -95,7 +96,8 @@ FrameElement* Frame::getNextElement()
         return NULL;
 
     } else {
-        return _framePoints.at(_elementCursor++);
+        //return _framePoints.at(_elementCursor++);
+        return _framePoints[_elementCursor++];
     }
     //next test
 }
