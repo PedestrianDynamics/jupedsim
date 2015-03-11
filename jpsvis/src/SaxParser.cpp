@@ -44,6 +44,8 @@
 
 #include <QMessageBox>
 #include <QString>
+#include <QProgressDialog>
+#include <QPushButton>
 #include <limits>
 #include <iostream>
 #include <cmath>
@@ -79,13 +81,13 @@ using namespace std;
  */
 SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps)
 {
-    geometry=geo;
-    dataset=data;
-    para=fps;
-    parsingWalls=false;
-    parsingCrossings=false;
-    color=0.0;
-    dataset->clearFrames();
+    _geometry=geo;
+    _dataset=data;
+    _para=fps;
+    _parsingWalls=false;
+    _parsingCrossings=false;
+    _color=0.0;
+    _dataset->clearFrames();
     //default header
     InitHeader(0,0,0);
 }
@@ -132,7 +134,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                     if(fileName.endsWith(".xml",Qt::CaseInsensitive)) {
                         //SaxParser::parseGeometryJPS(fileName,geometry);
                     } else if (fileName.endsWith(".trav",Qt::CaseInsensitive)) {
-                        SaxParser::parseGeometryTRAV(fileName,geometry);
+                        SaxParser::parseGeometryTRAV(fileName,_geometry);
                     }
                 }
             }
@@ -155,7 +157,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             }
 
         }
-        geometry->addFloor(xMin,yMin,xMax,yMax);
+        _geometry->addFloor(xMin,yMin,xMax,yMax);
     } else if (qName == "cuboid") {
         double length=0, height=0,
                width=0, color=0;
@@ -178,7 +180,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 color=at.value(i).toDouble()*FAKTOR;
             }
         }
-        geometry->addObjectBox(center,height,width,length,color);
+        _geometry->addObjectBox(center,height,width,length,color);
 
     } else if (qName == "sphere") {
         double radius=0, color=0;
@@ -197,7 +199,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 color=at.value(i).toDouble();
             }
         }
-        geometry->addObjectSphere(center,radius,color);
+        _geometry->addObjectSphere(center,radius,color);
     } else if (qName == "label") {
         double  color=0;
         double center[3]= {0,0,0};
@@ -216,7 +218,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 color=at.value(i).toDouble();
             }
         }
-        geometry->addObjectLabel(center,center,text.toStdString(),color);
+        _geometry->addObjectLabel(center,center,text.toStdString(),color);
     } else if (qName == "cylinder") {
         double height=0, radius=0, color=0;
         double center[3]= {0,0,0};
@@ -243,94 +245,94 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 rotation[2]=at.value(i).toDouble();
             }
         }
-        geometry->addObjectCylinder(center,radius,height,rotation,color);
+        _geometry->addObjectCylinder(center,radius,height,rotation,color);
     } else if (qName == "agents") {
     } else if (qName == "roomCaption") {
     } else if (qName == "frameRate") {
     } else if (qName == "geometry") {
     } else if (qName == "wall") {
-        parsingWalls=true;
-        thickness=15;
-        height=250;
-        color=0;
-        caption="";
+        _parsingWalls=true;
+        _thickness=15;
+        _height=250;
+        _color=0;
+        _caption="";
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="thickness") {
-                thickness=at.value(i).toDouble()*FAKTOR;
+                _thickness=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="height") {
-                height=at.value(i).toDouble()*FAKTOR;
+                _height=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="color") {
-                color=at.value(i).toDouble();
+                _color=at.value(i).toDouble();
             } else if(at.localName(i)=="caption") {
-                caption=at.value(i);
+                _caption=at.value(i);
             }
         }
 
     } else if (qName == "door") {
-        parsingWalls=false;
-        thickness=15;
-        height=250;
-        color=255;
-        caption="";
+        _parsingWalls=false;
+        _thickness=15;
+        _height=250;
+        _color=255;
+        _caption="";
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="thickness") {
-                thickness=at.value(i).toDouble()*FAKTOR;
+                _thickness=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="height") {
-                height=at.value(i).toDouble()*FAKTOR;
+                _height=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="color") {
-                color=at.value(i).toDouble();
+                _color=at.value(i).toDouble();
             } else if(at.localName(i)=="caption") {
-                caption=at.value(i);
+                _caption=at.value(i);
             }
         }
 
     }
     //FIXME
     else if (qName == "crossing") {
-        parsingWalls=false;
-        parsingCrossings=true;
-        thickness=15;
-        height=250;
-        color=255;
-        caption="";
+        _parsingWalls=false;
+        _parsingCrossings=true;
+        _thickness=15;
+        _height=250;
+        _color=255;
+        _caption="";
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="thickness") {
-                thickness=at.value(i).toDouble()*FAKTOR;
+                _thickness=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="height") {
-                height=at.value(i).toDouble()*FAKTOR;
+                _height=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="color") {
-                color=at.value(i).toDouble();
+                _color=at.value(i).toDouble();
             } else if(at.localName(i)=="caption") {
-                caption=at.value(i);
+                _caption=at.value(i);
             }
         }
 
     }else if (qName == "hline") {
-        parsingWalls=false;
-        parsingCrossings=true;
-        thickness=15;
-        height=250;
-        color=255;
-        caption="";
+        _parsingWalls=false;
+        _parsingCrossings=true;
+        _thickness=15;
+        _height=250;
+        _color=255;
+        _caption="";
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="thickness") {
-                thickness=at.value(i).toDouble()*FAKTOR;
+                _thickness=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="height") {
-                height=at.value(i).toDouble()*FAKTOR;
+                _height=at.value(i).toDouble()*FAKTOR;
             } else if(at.localName(i)=="color") {
-                color=at.value(i).toDouble();
+                _color=at.value(i).toDouble();
             } else if(at.localName(i)=="caption") {
-                caption=at.value(i);
+                _caption=at.value(i);
             }
         }
 
     }
     else if (qName == "timeFirstFrame") {
-        unsigned long timeFirstFrame_us=0;
+        /*unsigned long timeFirstFrame_us=0;
         unsigned long timeFirstFrame_s=0;
 
         for(int i=0; i<at.length(); i++) {
@@ -341,6 +343,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
             }
         }
         dataset->setDelayAbsolute(timeFirstFrame_s,timeFirstFrame_us);
+        */
     } else if (qName == "point") {
         double xPos=0;
         double yPos=0;
@@ -355,15 +358,23 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 zPos=at.value(i).toDouble()*FAKTOR;
             }
         }
-        double CHT[3]= {color,height,thickness};
-
+        double CHT[3]= {_color,_height,_thickness};
         JPoint* pt= new JPoint(xPos,yPos,zPos);
         pt->setColorHeightThicknes(CHT);
-        currentPointsList.push_back(pt);
+        _currentPointsList.push_back(pt);
 
-    }  else if (qName == "frame") {
+    }
+    else if (qName == "frame")
+    {
+        for(int i=0; i<at.length(); i++) {
+            if(at.localName(i)=="ID") {
+                _currentFrameID=at.value(i).toInt();
+                //cout<<"frame id: " <<_currentFrameID<<endl;
+            }
+        }
 
-    }  else if (qName == "agent") {
+    }
+    else if (qName == "agent") {
 
         int id=0;
         double xPos=0;
@@ -440,7 +451,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         element->SetOrientation(angle);
         element->SetRadius(radius);
         element->SetColor(el_color);
-        currentFrame.push_back(element);
+        _currentFrame.push_back(element);
 
     } else if (qName == "agentInfo") {
         double height=std::numeric_limits<double>::quiet_NaN();
@@ -461,12 +472,12 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         if(std::isnan(id)) return true;
 
         if(!std::isnan(height)) {
-            initialPedestriansHeights.append(QString::number(id));
-            initialPedestriansHeights.append(QString::number(height));
+            _initialPedestriansHeights.append(QString::number(id));
+            _initialPedestriansHeights.append(QString::number(height));
         }
         if(!std::isnan(color)) {
-            initialPedestriansColors.append(QString::number(id));
-            initialPedestriansColors.append(QString::number(color));
+            _initialPedestriansColors.append(QString::number(id));
+            _initialPedestriansColors.append(QString::number(color));
         }
     }
     return true;
@@ -474,7 +485,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
 
 bool SaxParser::characters(const QString &str)
 {
-    currentText.append(str);
+    _currentText.append(str);
     return true;
 }
 
@@ -484,60 +495,60 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
     if (qName == "header") {
 
     } else if (qName == "agents") {
-        dataset->setNumberOfAgents(currentText.toInt());
+        _dataset->setNumberOfAgents(_currentText.toInt());
     } else if (qName == "frameRate") {
-        para[0]=currentText.toFloat();
+        _para[0]=_currentText.toFloat();
     } else if (qName == "wall") {
-        if(currentPointsList.size()>1)
-            for(unsigned int i=0; i<currentPointsList.size()-1; i++) {
-                geometry->addWall(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        if(_currentPointsList.size()>1)
+            for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
+                _geometry->addWall(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
             }
         clearPoints();
     } else if (qName == "door") {
-        for(unsigned int i=0; i<currentPointsList.size()-1; i++) {
-            geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
+            _geometry->addDoor(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
         }
         clearPoints();
     } else if (qName == "crossing") {
-        if(currentPointsList.size()>1) //hack
-            for(unsigned int i=0; i<currentPointsList.size()-1; i++) {
-                geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        if(_currentPointsList.size()>1) //hack
+            for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
+                _geometry->addNavLine(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
             }
         clearPoints();
     } else if (qName == "hline") {
-        if(currentPointsList.size()>1) //hack
-            for(unsigned int i=0; i<currentPointsList.size()-1; i++) {
-                geometry->addNavLine(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        if(_currentPointsList.size()>1) //hack
+            for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
+                _geometry->addNavLine(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
             }
         clearPoints();
     } else if (qName == "step") {//FIXME
-        for(unsigned int i=0; i<currentPointsList.size()-1; i++) {
-            geometry->addDoor(currentPointsList[i],currentPointsList[i+1],caption.toStdString());
+        for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
+            _geometry->addDoor(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
         }
         clearPoints();
     } else if (qName == "frame") {
-        Frame* frame = new Frame();
-        while(!currentFrame.empty()) {
-            frame->addElement(currentFrame.back());
-            currentFrame.pop_back();
+        Frame* frame = new Frame(_currentFrameID);
+        while(!_currentFrame.empty()) {
+            frame->addElement(_currentFrame.back());
+            _currentFrame.pop_back();
             //cout<<"not adding"<<endl;
         }
 
         //compute the polydata, might increase the runtime
         frame->ComputePolyData();
 
-        dataset->addFrame(frame);
+        _dataset->addFrame(frame);
         //to be on the safe side
-        currentFrame.clear();
+        _currentFrame.clear();
 
     } else if (qName == "agent") {
-    } else if (qName == "geometry") {
+    } else if (qName == "geometr dataset->addFrame(frame);y") {
     } else if (qName == "point") {
     } else if (qName == "shape") {
-        dataset->setInitialHeights(initialPedestriansHeights);
-        dataset->setInitialColors(initialPedestriansColors);
+        _dataset->setInitialHeights(_initialPedestriansHeights);
+        _dataset->setInitialColors(_initialPedestriansColors);
     }
-    currentText.clear();
+    _currentText.clear();
     return true;
 }
 
@@ -562,16 +573,13 @@ bool SaxParser::attributeDecl(const QString& eName, const QString& aName,
 
 void SaxParser::clearPoints()
 {
-    while (!currentPointsList.empty()) {
-        delete currentPointsList.back();
-        currentPointsList.pop_back();
+    while (!_currentPointsList.empty()) {
+        delete _currentPointsList.back();
+        _currentPointsList.pop_back();
     }
-    currentPointsList.clear();
+    _currentPointsList.clear();
     return;
 }
-
-
-
 
 /// provided for convenience and will be removed in the next version
 bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
@@ -975,7 +983,6 @@ QString SaxParser::extractGeometryFilename(QString &filename)
     return "";
 }
 
-
 void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
 {
     QDomDocument doc("");
@@ -1151,6 +1158,161 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
         double center[3]= {(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
         geo->addObjectLabel(center,center,id,21);
     }
+}
+
+bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps)
+{
+    //fileName="data/trajectories/1000_1_0_0_1_1.txt";
+    //fileName="data/trajectories/50_3_0_1_1_2.txt";
+    qDebug()<<"parsing the text file: "<<fileName<<endl;
+    QFile inputFile(fileName);
+    if (inputFile.open(QIODevice::ReadOnly))
+    {
+        QTextStream in(&inputFile);
+        int lastFrameID=-1;
+
+
+        //skip the first line
+        in.readLine();
+        //the second line contains the framerate
+        QString line = in.readLine();
+        if(line.split(":").size()==2)
+        {
+            bool ok;
+            *fps=line.split(":")[1].toDouble(&ok);
+            if(!ok) *fps=16;//default value
+            //cout<<"frame rate: "<<*fps<<endl; //exit(0);
+        }
+
+        line = in.readLine();
+        int maxFrame=1000;
+        if(line.split(":").size()==2)
+        {
+            bool ok;
+            maxFrame=line.split(":")[1].toDouble(&ok);
+            if(!ok) maxFrame=1000;//default value
+             //cout<<"frame: "<<maxFrame<<endl; exit(0);
+        }
+
+        //initialize the process dialog
+        QProgressDialog progressDialog ("Simulation","Abbrechen",1, maxFrame,NULL);
+        progressDialog.setModal(true);
+        //_progressDialog->setStyleSheet(stylesheet);
+        progressDialog.setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
+        //_progressDialog->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::WindowTitleHint|Qt::WindowStaysOnTopHint);
+        progressDialog.setFixedSize(400,100);
+        progressDialog.setLabelText("<h3>Loading...</h3>");
+        QList<QPushButton *> buttons=progressDialog.findChildren<QPushButton *>();
+        buttons.at(0)->hide(); // that is the cancel button
+        progressDialog.setValue(1);
+        progressDialog.show();
+
+        double unitFactor=1;// I assume meter
+
+        while ( !in.atEnd() )
+        {
+            QString line = in.readLine();
+            QStringList pieces = line.split( " ");
+
+            double pos[3];
+            double angle[3]={0,0,30};
+            double radius[3]={0.3,0.3,0.3};
+
+            int agentID=-1 ;
+            int frameID=-1;
+            double color=155 ;
+
+            switch(pieces.size())
+            {
+            case 5:
+                agentID=pieces[0].toInt();
+                frameID=pieces[1].toInt();
+                pos[0]=pieces[2].toDouble()*unitFactor;
+                pos[1]=pieces[3].toDouble()*unitFactor;
+                pos[2]=pieces[4].toDouble()*unitFactor;
+                break;
+
+            case 9:
+                agentID=pieces[0].toInt();
+                frameID=pieces[1].toInt();
+                color=pieces[8].toDouble();
+                pos[0]=pieces[2].toDouble()*unitFactor;
+                pos[1]=pieces[3].toDouble()*unitFactor;
+                pos[2]=pieces[4].toDouble()*unitFactor;
+                radius[0]=pieces[5].toDouble()*unitFactor;
+                radius[1]=pieces[6].toDouble()*unitFactor;
+                angle[2]=pieces[7].toDouble();
+                break;
+
+            default:
+                //try to scan the line for the unit
+                if(line.contains("centimeter", Qt::CaseInsensitive)||
+                        line.contains("centimetre", Qt::CaseInsensitive))
+                {
+                    unitFactor=0.01;
+                    qDebug()<<"unit centimetre detected";
+                }
+                else
+                    if(line.contains("meter", Qt::CaseInsensitive)||
+                            line.contains("metre", Qt::CaseInsensitive))
+                    {
+                        unitFactor=1;
+                        qDebug()<<"unit metre detected";
+                    }
+                    else
+                    {
+                        qDebug()<<"Ignoring line: "<<line;
+                    }
+                continue;//next line
+                break;
+            }
+
+            FrameElement *element = new FrameElement(agentID-1);
+            element->SetPos(pos);
+            element->SetOrientation(angle);
+            element->SetRadius(radius);
+            element->SetColor(color);
+
+            if(dataset->GetFrames().count(frameID)<1)
+            {
+                Frame* frame = new Frame(frameID);
+                frame->addElement(element);
+                dataset->addFrame(frame);
+                //cout<<"adding frame: "<<frameID<<endl;
+            }
+            else
+            {
+                dataset->GetFrames()[frameID]->addElement(element);
+            }
+
+            //a new frame is starting.
+            // not longer necessary if you are using maps and frameid
+            if(frameID!=lastFrameID)
+            {
+                progressDialog.setValue(dataset->getSize());
+                lastFrameID=frameID;
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+        }
+
+        inputFile.close();
+        qDebug()<<dataset->GetFrames().size()<<" frames added";
+        //construct the polydata
+        for( const auto & frame:dataset->GetFrames())
+        {
+            frame.second->ComputePolyData();
+            //cout<<"computing polydata"<<endl;
+        }
+        //dataset->setNumberOfAgents(50);
+
+    }
+    else
+    {
+        qDebug()<<"could not open the file: "<<fileName<<endl;
+        return false;
+    }
+
+    return true;
 }
 
 void SaxParser::InitHeader(int major, int minor, int patch)

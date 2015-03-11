@@ -45,9 +45,10 @@ class SyncData;
 class FacilityGeometry;
 
 
-class SaxParser: public QXmlDefaultHandler {
+class SaxParser: public QXmlDefaultHandler
+{
 public:
-    SaxParser(FacilityGeometry* geometry,SyncData* dataset, double * fps);
+    SaxParser(FacilityGeometry* _geometry,SyncData* _dataset, double * fps);
     virtual ~SaxParser();
     bool startElement(const QString &namespaceURI,
                       const QString &localName,
@@ -76,30 +77,34 @@ public:
     /// take a large file and find the geometry file location.
     static QString extractGeometryFilename(QString& filename);
 
+    /// parse the txt file format
+    static bool ParseTxtFormat(QString fileName, SyncData* dataset, double * fps);
+
 private:
     //clear the mo
     void clearPoints();
     void InitHeader(int major, int minor, int patch);
 
 private:
-    FacilityGeometry* geometry;
-    SyncData* dataset;
-    double*para;
-    QString currentText;
-    QStringList initialPedestriansColors;
-    QStringList initialPedestriansHeights;
-    std::vector<JPoint *> currentPointsList;
-    std::vector<FrameElement *> currentFrame;
-    bool parsingWalls;
-    bool parsingCrossings;
+    FacilityGeometry* _geometry;
+    SyncData* _dataset;
+    double* _para;
+    QString _currentText;
+    int _currentFrameID=-1;
+    QStringList _initialPedestriansColors;
+    QStringList _initialPedestriansHeights;
+    std::vector<JPoint *> _currentPointsList;
+    std::vector<FrameElement *> _currentFrame;
+    bool _parsingWalls;
+    bool _parsingCrossings;
 
     //wall and door parameters
-    double thickness;
-    double height;
-    double color;
+    double _thickness;
+    double _height;
+    double _color;
 
     //actual caption of door/wall
-    QString caption;
+    QString _caption;
 
     //header dependant variables
     QString _jps_xPos;
@@ -112,7 +117,6 @@ private:
     QString _jps_radiusB;
     QString _jps_ellipseOrientation;
     QString _jps_ellipseColor;
-
 };
 
 #endif /* SAXPARSER_H_ */
