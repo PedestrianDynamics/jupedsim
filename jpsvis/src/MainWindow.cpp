@@ -63,14 +63,31 @@
 #include <QtXml>
 #include <QTemporaryFile>
 
-
-
 #include <iostream>
 #include <limits>
 #include <string>
 #include <vector>
 
 using namespace std;
+
+
+#ifdef __APPLE__
+#include <thread>
+#include <dispatch/dispatch.h>
+#include "fix/osx_thread_fix.h"
+
+std::thread::id main_thread_id = std::this_thread::get_id();
+dispatch_queue_t main_q = dispatch_get_main_queue();
+
+void is_main_thread() {
+
+    if ( main_thread_id == std::this_thread::get_id() )
+        std::cout << "This is the main thread.\n";
+    else
+        std::cout << "This is not the main thread.\n";
+}
+#endif
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -199,7 +216,7 @@ MainWindow::MainWindow(QWidget *parent) :
                     bool ok=false;
                     int port = arguments[++argCount].toInt(&ok);
                     Debug::
-                    Debug::Messages(" listening port: %d",port);
+                            Debug::Messages(" listening port: %d",port);
 
                     if (ok) {
                         SystemSettings::setListeningPort(port);
@@ -234,20 +251,20 @@ MainWindow::~MainWindow()
     extern_recording_enable=false;
 
     //save all settings for the next session
-     if(ui.actionRemember_Settings->isChecked())
-     {
-          saveAllSettings();
-           qDebug()<<"saving all settings";
-     }
-     else
-     {
-         //first clear everyting
-         QSettings settings;
-         settings.clear();
-         //then remember that we do not want any settings saved
-         settings.setValue("options/rememberSettings", false);
-         qDebug()<<"clearing all settings";
-     }
+    if(ui.actionRemember_Settings->isChecked())
+    {
+        saveAllSettings();
+        qDebug()<<"saving all settings";
+    }
+    else
+    {
+        //first clear everyting
+        QSettings settings;
+        settings.clear();
+        //then remember that we do not want any settings saved
+        settings.setValue("options/rememberSettings", false);
+        qDebug()<<"clearing all settings";
+    }
 
 
     if (visualisationThread->isRunning()) {
@@ -273,16 +290,16 @@ MainWindow::~MainWindow()
 void MainWindow::slotHelpAbout()
 {
     QMessageBox::about(
-        this,
-        "About JPSVis",
-        "Version 0.6 built with  QT 4.8 and VTK 5.10\n\n"
-        "JPSvis is part of the Juelich Pedestrian Simulator (JuPedsim)"
-        "It is a tool for visualizing pedestrians motion\n"
-        "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
-        "Copyright 2009-2014.\n"
-        "Authors: Ulrich Kemloh\n\n"
-        "For questions, contact +49-40-246161-4193 \nor mail at \n"
-        "u.kemloh@fz-juelich.de\n");
+                this,
+                "About JPSVis",
+                "Version 0.6 built with  QT 4.8 and VTK 5.10\n\n"
+                "JPSvis is part of the Juelich Pedestrian Simulator (JuPedsim)"
+                "It is a tool for visualizing pedestrians motion\n"
+                "developped at the Forschungszentrum Juelich GmbH, Germany\n\n"
+                "Copyright 2009-2014.\n"
+                "Authors: Ulrich Kemloh\n\n"
+                "For questions, contact +49-40-246161-4193 \nor mail at \n"
+                "u.kemloh@fz-juelich.de\n");
 }
 
 
@@ -320,10 +337,29 @@ void MainWindow::slotStartPlaying()
             } else if (!slotAddDataSet()) { //else load a dataset
                 return;//could not read any data
             }
+#ifdef __APPLE__
+            //std::thread::id main_thread_id = std::this_thread::get_id();
+            dispatch_queue_t main_q = dispatch_get_main_queue();
+            dispatch_async(main_q, ^(void){
+                               //visualisationThread->moveToThread(QApplication::instance()->thread());
+                               visualisationThread->run();
+                           });
+#elif
             visualisationThread->start();
 
+#endif
+
         } else { /*if (extern_online_mode)*/  //live visualisation
+
+#ifdef __APPLE__
+            dispatch_async(main_q, ^(void){
+                               dataTransferThread->run();
+                           });
+#elif
             dataTransferThread->start();
+
+#endif
+            //dataTransferThread->start();
             //visualisationThread->start();
         }
 
@@ -453,27 +489,27 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode)
 FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 {
 
-//    QDomDocument doc("");
-//    data = "<travisto>\n" +data+ "\n</travisto>\n";
+    //    QDomDocument doc("");
+    //    data = "<travisto>\n" +data+ "\n</travisto>\n";
 
-//    QString errorMsg="";
-//    doc.setContent(data,&errorMsg);
+    //    QString errorMsg="";
+    //    doc.setContent(data,&errorMsg);
 
-//    if(!errorMsg.isEmpty()){
-//        Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
-//        return;
-//    }
+    //    if(!errorMsg.isEmpty()){
+    //        Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
+    //        return;
+    //    }
 
-//    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
+    //    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
 
     //create a temporary file with the content geonode
 
-//    QTemporaryFile file;
-//    file.setFileName(file.fileName()+".xml");
-//    if (file.open()) {
-//        QTextStream stream(&file);
-//        stream << geoNode << endl;
-//    }
+    //    QTemporaryFile file;
+    //    file.setFileName(file.fileName()+".xml");
+    //    if (file.open()) {
+    //        QTextStream stream(&file);
+    //        stream << geoNode << endl;
+    //    }
 
     QFile file("_geometry_tmp_file.xml");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -743,7 +779,7 @@ void MainWindow::slotRecord()
 }
 
 QString MainWindow::getTagValueFromElement(QDomNode node,
-        const char * tagName)
+                                           const char * tagName)
 {
     if (node.isNull())
         return "";
@@ -855,7 +891,7 @@ void MainWindow::slotFrameNumber(unsigned long actualFrameCount)
     }
 
     if(!frameSliderHold)if(maxFrameCount!=0)//TODO WTF, otherwise an arrymtic exeption arises
-            ui.framesIndicatorSlider->setValue((ui.framesIndicatorSlider->maximum()*actualFrameCount)/maxFrameCount);
+        ui.framesIndicatorSlider->setValue((ui.framesIndicatorSlider->maximum()*actualFrameCount)/maxFrameCount);
 }
 
 void MainWindow::slotRunningTime(unsigned long timems)

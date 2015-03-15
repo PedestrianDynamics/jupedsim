@@ -370,7 +370,7 @@ unix_6 {
 }
    
 #dynamic linking with vtk5.8
-unix{
+unix: !macx{
 INCLUDEPATH += /usr/include/vtk-5.8
 LIBS += -L/usr/lib \
     -lvtkRendering  \
@@ -435,7 +435,11 @@ unix_static {
     -ldl \
  }
 
-macx{
+macx {
+#CONFIG += objective_c
+LIBS += -framework Cocoa
+QMAKE_MAC_SDK = macosx10.9
+        QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.8
         INCLUDEPATH += /Users/piccolo/VTK/include/vtk-6.1
         LIBS += -L/Users/piccolo/VTK/lib \
             -lvtkalglib-6.1  \
@@ -554,6 +558,8 @@ macx{
             -lvtkzlib-6.1  \
 }
 
+OBJECTIVE_SOURCES += src/fix/osx_thread_fix.mm
+
 HEADERS += src/geometry/Building.h \
     src/geometry/Crossing.h \
     src/geometry/Goal.h \
@@ -594,7 +600,8 @@ HEADERS += src/geometry/Building.h \
     src/geometry/PointPlotter2D.h \
     src/network/TraVisToServer.h \
     src/MainWindow.h \
-    src/TrailPlotter.h
+    src/TrailPlotter.h  \
+    src/fix/osx_thread_fix.mm
 
 SOURCES += src/geometry/Building.cpp \
     src/geometry/Crossing.cpp \

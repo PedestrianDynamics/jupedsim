@@ -53,6 +53,7 @@
 #undef VTK_USE_FFMPEG
 
 #include "MainWindow.h"
+#include "fix/osx_thread_fix.h"
 
 #include <QApplication>
 #include <QDir>
@@ -63,6 +64,9 @@
 
 int main(int argc, char *argv[])
 {
+
+    InitMultiThreading();
+
     QApplication a(argc, argv);
     // To ensure that decimal numbers use a "point" instead of "colon" on some systems
     //setlocale(LC_NUMERIC, "en_US" );
@@ -72,6 +76,8 @@ int main(int argc, char *argv[])
     a.addLibraryPath(QApplication::applicationDirPath()
                      + QDir::separator()
                      + "lib");
+
+
 
     MainWindow w;
     w.show();

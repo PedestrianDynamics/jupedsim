@@ -68,12 +68,11 @@ InteractorStyle* InteractorStyle::New()
 void InteractorStyle::SetActor()
 {
 }
-;
+
 
 void InteractorStyle::SetSource()
 {
 }
-;
 
 //forward the event only if not in 2d mode
 void InteractorStyle::Rotate()

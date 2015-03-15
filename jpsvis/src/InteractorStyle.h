@@ -62,8 +62,6 @@ public:
     virtual void OnMouseMove();
 
 
-
-
 private:
     //vtkActor* mActor ;
     //vtkSphereSource* mSrc ;

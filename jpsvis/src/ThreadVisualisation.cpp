@@ -90,7 +90,22 @@
 #include "geometry/PointPlotter.h"
 #include "Debug.h"
 
-//#include <vector>
+#ifndef __APPLE__
+#include <thread>
+#include <dispatch/dispatch.h>
+#include "fix/osx_thread_fix.h"
+
+std::thread::id main_thread_id = std::this_thread::get_id();
+dispatch_queue_t main_q = dispatch_get_main_queue();
+
+void is_main_thread() {
+    if ( main_thread_id == std::this_thread::get_id() )
+        std::cout << "This is the main thread.\n";
+    else
+        std::cout << "This is not the main thread.\n";
+}
+
+#endif
 
 #define VTK_CREATE(type, name) \
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
@@ -146,6 +161,7 @@ void ThreadVisualisation::run()
     //vtkObject::GlobalWarningDisplayOff();
 
     //emit signalStatusMessage("running");
+
 
     // Create the renderer
     renderer = vtkRenderer::New();
@@ -264,7 +280,7 @@ void ThreadVisualisation::run()
 
     //CAUTION: this is necessary for WIN32 to update the window name
     // but his will freeze your system on linux
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
     renderWindow->Render();
 #endif
 
@@ -288,7 +304,7 @@ void ThreadVisualisation::run()
     }
 
 
-    if(true || SystemSettings::get2D()) {
+    if(false || SystemSettings::get2D()) {
         renderer->GetActiveCamera()->OrthogonalizeViewUp();
         renderer->GetActiveCamera()->ParallelProjectionOn();
         renderer->ResetCamera();
@@ -355,24 +371,38 @@ void ThreadVisualisation::run()
     setNavLinesColor(SystemSettings::getNavLinesColor());
 
 
-    renderWinInteractor->Start();
 
 
+
+#ifdef __APPLE__
+//InitMultiThreading();
+
+//dispatch_async(main_q, ^(void){
+//          is_main_thread(); //Unfortunately not
+//          std::cout << "now spinning the visualizer" << std::endl;
+                  renderWinInteractor->Start();
+
+//});
+    //[[NSThread new] start];
+    //#include <objc/objc.h>
+    //NSThread* myThread = [[NSThread alloc] initWithTarget:self selector:@selector(workerThreadFunction:) object:nil];
+    //[myThread start];
+#endif
     //emit signalStatusMessage("Idle");
     emit signal_controlSequences("CONTROL_RESET");
 
 
     //clear some stuffs
-    delete extern_trail_plotter;
-    finalize();
+    //delete extern_trail_plotter;
+    //finalize();
 
-    renderer->Delete();
-    renderWindow->Delete();
-    renderWinInteractor->Delete();
-    _topViewCamera->Delete();
-    renderer=NULL;
+    //renderer->Delete();
+    //renderWindow->Delete();
+    //renderWinInteractor->Delete();
+    //_topViewCamera->Delete();
+    //renderer=NULL;
 
-    delete renderingTimer;
+    //delete renderingTimer;
 
 }
 
