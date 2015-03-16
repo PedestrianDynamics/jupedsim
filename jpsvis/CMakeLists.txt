@@ -1,3 +1,11 @@
+# Documentation: Some useful options:
+# -DCMAKE_CXX_COMPILER:STRING=clang++   -DCMAKE_C_COMPILER:STRING=clang .
+# -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
+# -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
+# -DBUILD_TESTING=ON (default OFF)
+#--------------------------------------------------------------------------
+
+
 # ------------------------- Begin Generic CMake Variable Logging ------------------
 
 # the short system name, e.g. "Linux", "FreeBSD" or "Windows"
@@ -49,8 +57,19 @@ message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
 # (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
 INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR} )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+# For Apple set the icns file containing icons
+IF(APPLE)
+  # set how it shows up in the Info.plist file
+  SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns) 
+  # set where in the bundle to put the icns file
+  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  # include the icns file in the target
+  SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns)
+ENDIF(APPLE)
+
 
 set( SAMPLE_SRCS
+  src/fix/osx_thread_fix.mm
   src/geometry/Building.cpp 
   src/geometry/Crossing.cpp 
   src/geometry/Goal.cpp
@@ -96,6 +115,7 @@ set( SAMPLE_SRCS
   )  
 # all header files that should be treated with moc
 set( SAMPLE_HDR
+  src/fix/osx_thread_fix.h
   src/geometry/Building.h
   src/geometry/Crossing.h
   src/geometry/Goal.h
@@ -169,8 +189,17 @@ include(${VTK_USE_FILE})
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-#--------------- here comes QT. Version problem (4 or 5?)
 
+
+# This sets the windows build that will need the special winmain@16 call. Qt provides
+#  this for us in the qtmain.lib file. Using this cmake code will ensure we have it
+#  linked into our build. Not needed on Unix/OS X/Linux which is why we have the 
+#  IF(WIN32) conditional.
+IF (WIN32)
+  SET (QT_USE_QTMAIN TRUE)
+ENDIF (WIN32)
+
+#--------------- here comes QT. Version problem (4 or 5?)
 #FIND_PACKAGE( Qt4 REQUIRED )
 #FIND_PACKAGE(QT REQUIRED)
 
@@ -209,13 +238,14 @@ if( ${QT4_INSTALLED} )
   # (QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to CMake script)
   include( ${QT_USE_FILE} )
 elseif( ${QT5_INSTALLED} )
-  message(STATUS "Working with Qt5")	
+  message(STATUS "Working with Qt5")    
   find_package(Qt5Widgets REQUIRED)
   qt5_wrap_ui(SAMPLE_UI_HDRS ${SAMPLE_UIS})
 endif() 
 
 # here we instruct CMake to build JPSvis executable from all of the source files
-ADD_EXECUTABLE( JPSvis ${SAMPLE_SRCS} 
+ADD_EXECUTABLE( JPSvis  MACOSX_BUNDLE WIN32
+  ${SAMPLE_SRCS}
   ${SAMPLE_MOC_HDRS}
   ${SAMPLE_UI_HDRS} 
   ${SAMPLE_RESOURCES_RCS}
@@ -231,12 +261,12 @@ set(VTK_USE_QT  ON)
 if(VTK_LIBRARIES)
   if(${VTK_VERSION} VERSION_LESS "6")
     TARGET_LINK_LIBRARIES( JPSvis ${QT_LIBRARIES} QVTK)
-  else()	
+  else()        
     TARGET_LINK_LIBRARIES( JPSvis  ${VTK_LIBRARIES} ${QT_LIBRARIES})
   endif()
 else() # this else is not yet tested
   target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
-endif()	
+endif() 
 
 #----------------------------------------------------------------------
 # enable as many warnings as possible
@@ -282,5 +312,74 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")     
 endif()
+
+
+
+
+
+
+#--------------------------------------------------------------------------------
+# Now the installation stuff below
+#--------------------------------------------------------------------------------
+SET(plugin_dest_dir bin)
+SET(qtconf_dest_dir bin)
+SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis")
+IF(APPLE)
+  SET(plugin_dest_dir JPSvis.app/Contents/MacOS)
+  SET(qtconf_dest_dir JPSvis.app/Contents/Resources)
+  SET(APPS "\${CMAKE_INSTALL_PREFIX}/JPSvis.app")
+ENDIF(APPLE)
+IF(WIN32)
+  SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis.exe")
+ENDIF(WIN32)
+
+#--------------------------------------------------------------------------------
+# Install the QtTest application, on Apple, the bundle is at the root of the
+# install tree, and on other platforms it'll go into the bin directory.
+INSTALL(TARGETS JPSvis
+  BUNDLE DESTINATION . COMPONENT Runtime
+  RUNTIME DESTINATION bin COMPONENT Runtime
+  )
+
+#--------------------------------------------------------------------------------
+# Install needed Qt plugins by copying directories from the qt installation
+# One can cull what gets copied by using 'REGEX "..." EXCLUDE'
+INSTALL(DIRECTORY "${QT_PLUGINS_DIR}/imageformats" DESTINATION ${plugin_dest_dir}/plugins COMPONENT Runtime)
+
+#--------------------------------------------------------------------------------
+# install a qt.conf file
+# this inserts some cmake code into the install script to write the file
+INSTALL(CODE "
+    file(WRITE \"\${CMAKE_INSTALL_PREFIX}/${qtconf_dest_dir}/qt.conf\" \"\")
+    " COMPONENT Runtime)
+
+
+#--------------------------------------------------------------------------------
+# Use BundleUtilities to get all other dependencies for the application to work.
+# It takes a bundle or executable along with possible plugins and inspects it
+# for dependencies.  If they are not system dependencies, they are copied.
+
+# directories to look for dependencies
+SET(DIRS ${QT_LIBRARY_DIRS})
+
+# Now the work of copying dependencies into the bundle/package
+# The quotes are escaped and variables to use at install time have their $ escaped
+# An alternative is the do a configure_file() on a script and use install(SCRIPT  ...).
+# Note that the image plugins depend on QtSvg and QtXml, and it got those copied
+# over.
+INSTALL(CODE "
+    file(GLOB_RECURSE QTPLUGINS
+      \"\${CMAKE_INSTALL_PREFIX}/${plugin_dest_dir}/plugins/*${CMAKE_SHARED_LIBRARY_SUFFIX}\")
+    include(BundleUtilities)
+    fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
+    " COMPONENT Runtime)
+
+
+# To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
+# where CPackConfig.cmake is created by including CPack
+# And then there's ways to customize this as well
+set(CPACK_BINARY_DRAGNDROP ON)
+include(CPack)
+
