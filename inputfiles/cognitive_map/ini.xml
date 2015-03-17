@@ -99,7 +99,8 @@
     </router>
     <router router_id="7" description="cognitive_map">
       <sensors>
-        <sensor sensor_id="1" description="Smoke" status="activated" potentialfile="./"/>
+	  <!--sensor sensor_id="2" description="Room2Corridor"/-->
+        <sensor sensor_id="1" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/>
       </sensors>
       <cognitive_map status="complete" />
       <!--parameters>

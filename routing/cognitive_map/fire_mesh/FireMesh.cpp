@@ -52,7 +52,7 @@ FireMesh::FireMesh()
 
 FireMesh::FireMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize)
 {
-    GetUpMesh(xmin,ymin,xmax,ymax,cellsize);
+    SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
     //statHeaderRead=false;
     _statMesh=false;
 }
@@ -70,7 +70,7 @@ FireMesh::~FireMesh()
 
 }
 
-void FireMesh::GetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize)
+void FireMesh::SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize)
 {
     _cellsize=cellsize;
 
@@ -195,7 +195,7 @@ void FireMesh::SetKnotValuesFromFile(const std::string &filename)
 
         strVec.clear();
         //std::cout << xmin << ymin << xmax << ymax << std::endl;
-        GetUpMesh(xmin,ymin,xmax,ymax,cellsize);
+        SetUpMesh(xmin,ymin,xmax,ymax,cellsize);
 
             //statHeaderRead=true;
         //}

@@ -48,11 +48,12 @@ public:
     FireMesh(const std::string &filename);
     ~FireMesh();
 
-    void GetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize);
+    void SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize);
     const Matrix &GetMesh() const;
 
     double GetKnotValue(const double &x, const double &y) const;
     void SetKnotValuesFromFile(const std::string &filename);
+
 
     bool statusMesh() const;
 

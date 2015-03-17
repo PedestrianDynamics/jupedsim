@@ -7,7 +7,7 @@
 
 
 // Container to store all fireMeshs. Sorted first by coordinates of the corresponding door, secondly by simulation's global time
-using fireMeshContainer = std::unordered_map<std::pair<Point,double>,FireMesh>;
+using fireMeshContainer = std::unordered_map<std::string,FireMesh>;
 
 class FireMeshStorage
 {
@@ -17,14 +17,15 @@ public:
     void CreateTimeList(const double &updateIntervall, const double &finalTime, const double &startTime=0);
     void IdentifyDoors();
     void CreateFireMeshes();
-    const FireMesh& get_FireMesh(const Point &doorCentre, const double &simTime);
+    const FireMesh& get_FireMesh(const Point &doorCentre, const double &simTime) const;
 
 private:
-    Building *_building;
+    const Building *_building;
     fireMeshContainer _fMContainer;
     std::string _filepath;
+    double _updateIntervall;
     std::vector<double> _timelist;
-    std::vector<Door> _doors;
+    std::vector<Crossing> _doors;
 
 
 };

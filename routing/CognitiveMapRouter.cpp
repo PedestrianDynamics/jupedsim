@@ -86,10 +86,10 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
 
     }
-    if (std::fmod(p->GetGlobalTime(),10)==0)
+    if (std::fmod(p->GetGlobalTime(),30)==0.0)
     {
         sensor_manager->execute(p, SensorManager::PERIODIC);
-        //std::cout << p->GetGlobalTime() << std::endl;
+
     }
     return 1;
 }
@@ -142,7 +142,7 @@ bool CognitiveMapRouter::Init(Building * b)
      Log->Write("INFO:\tInitialized CognitiveMapStorage");
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
-     sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions().at("Sensors"));
+     sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions());
      Log->Write("INFO:\tInitialized SensorManager");
      return true;
 }

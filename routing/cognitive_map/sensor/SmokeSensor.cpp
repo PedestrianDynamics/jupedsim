@@ -15,10 +15,13 @@
 #include "../fire_mesh/FireMeshStorage.h"
 #include <set>
 
-SmokeSensor::SmokeSensor(const Building *b, const &filepath, const &updateintervall, const &finalTime) : AbstractSensor(b)
+SmokeSensor::SmokeSensor(const Building *b, const std::string &filepath, const double &updateintervall, const double &finalTime) : AbstractSensor(b)
 {
 
-    _FMStorage= new FireMeshStorage(b,filepath,updateintervall,finalTime);
+    std::shared_ptr<FireMeshStorage> FMS(new FireMeshStorage(b,filepath,updateintervall,finalTime));
+    Log->Write("INFO:\tInitialized FireMeshStorage (Smoke Sensor)");
+    _FMStorage=FMS;
+
 }
 
 SmokeSensor::~SmokeSensor()
@@ -38,8 +41,12 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
 
     for (auto &item : *edges)
     {
-        double smokeFactor = item->GetSmokeFactor(pedestrian->GetPos());
-        //std::cout << smokeFactor << std::endl;
+        /// first: find Mesh corresponding to current edge and current simTime. Secondly get knotvalue from that mesh depending
+        /// on the current position of the pedestrian
+        double smokeFactor = _FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
+                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(),
+                                                                                                pedestrian->GetPos().GetY());
+        std::cout << smokeFactor << std::endl;
         item->SetFactor(smokeFactor,GetName());
         //std::cout << item->GetFactor() << std::endl;
     }
@@ -75,13 +82,13 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
 
 }
 
-void SmokeSensor::set_FMStorage(const&fmStorage)
+void SmokeSensor::set_FMStorage(const std::shared_ptr<FireMeshStorage> fmStorage)
 {
     _FMStorage=fmStorage;
 
 }
 
-const FireMeshStorage *SmokeSensor::get_FMStorage()
+const std::shared_ptr<FireMeshStorage> SmokeSensor::get_FMStorage()
 {
     return _FMStorage;
 

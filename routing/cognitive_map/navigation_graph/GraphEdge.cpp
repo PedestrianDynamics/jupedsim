@@ -52,11 +52,11 @@ GraphEdge::GraphEdge(const GraphVertex * const s, const GraphVertex  * const d, 
      : _src(s), _dest(d), _crossing(crossing)
 {
      CalcApproximateDistance();
-     SetUpFireMesh();
+
 }
 
 GraphEdge::GraphEdge(GraphEdge const &ge)
-     : _src(ge._src), _dest(ge._dest), _crossing(ge._crossing), _approximate_distance(ge._approximate_distance), _fireMesh(ge._fireMesh)
+     : _src(ge._src), _dest(ge._dest), _crossing(ge._crossing), _approximate_distance(ge._approximate_distance)
 {
 }
 

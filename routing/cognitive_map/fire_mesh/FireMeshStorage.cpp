@@ -4,6 +4,7 @@ FireMeshStorage::FireMeshStorage(const Building * const b, const std::string &fi
 {
     _building=b;
     _filepath=filepath;
+    _updateIntervall=updateintervall;
 
     CreateTimeList(updateintervall,finalTime);
     IdentifyDoors();
@@ -23,39 +24,59 @@ void FireMeshStorage::CreateTimeList(const double &updateIntervall, const double
     {
         _timelist.push_back(i);
         i+=updateIntervall;
+
     }
 }
 
 void FireMeshStorage::IdentifyDoors()
 {
-    const std::map<int,std::unique_ptr<Door>> doors = _building->GetAllRooms();
+
+    const std::map<int,Crossing*> doors = _building->GetAllCrossings();
+
     for (auto it=doors.begin(); it!= doors.end(); ++it)
     {
-        _doors.push_back(it.second);
+        _doors.push_back(*it->second);
+    }
+
+    const std::map<int,Transition*> exits = _building->GetAllTransitions();
+
+    for (auto it=exits.begin(); it!= exits.end(); ++it)
+    {
+        _doors.push_back(*it->second);
     }
 
 }
 
 void FireMeshStorage::CreateFireMeshes()
 {
+    _fMContainer.clear();
     for (auto &door:_doors)
     {
         for (auto &i:_timelist)
         {
-            std::string filename = _filepath + "/Door_X_" + std::to_string(door->GetCentre().GetX())
-                      + "_Y_" + std::to_string(door->GetCentre().GetY()) + "/t_"+std::to_string(i)+".csv";
-            FireMesh mesh(filename);
-            _fMContainer.emplace(std::make_pair(door->GetCentre(),i),mesh);
+            std::string suffix = "Door_X_" + std::to_string(door.GetCentre().GetX())
+                      + "_Y_" + std::to_string(door.GetCentre().GetY()) + "\\t_"+std::to_string(i)+".csv";
+            FireMesh mesh(_filepath+suffix);
+            std::string str = "Door_X_"+ std::to_string(door.GetCentre().GetX())
+                    + "_Y_" + std::to_string(door.GetCentre().GetY()) + "_t_"+std::to_string(i);
+
+
+            _fMContainer.emplace(str,mesh);
 
         }
-
 
     }
 
 }
 
-const FireMesh &FireMeshStorage::get_FireMesh(const Point &doorCentre, const double &simTime)
+const FireMesh &FireMeshStorage::get_FireMesh(const Point &doorCentre, const double &simTime) const
 {
-    return _fMContainer.at(std::make_pair(doorCentre,simTime));
+    int simT=simTime/_updateIntervall;
+    simT*=_updateIntervall;
+    //std::cout << simT << std::endl;
+    std::string str = "Door_X_"+ std::to_string(doorCentre.GetX())
+            + "_Y_" + std::to_string(doorCentre.GetY()) + "_t_"+std::to_string(simT)+".000000";
+    //std::cout << str << std::endl;
+    return _fMContainer.at(str);
 }
 

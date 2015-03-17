@@ -800,18 +800,32 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
          Log->Write("ERROR:\tNo sensors found.\n");
          return false;
     }
+
+    /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(p_routingengine->GetAvailableRouters().back());
+
     std::vector<std::string> sensorVec;
     for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
               e = e->NextSiblingElement("sensor"))
     {
         string sensor = e->Attribute("description");
+        ///adding Smoke Sensor specific parameters
+        if (sensor=="Smoke")
+        {
+            std::vector<std::string> smokeOptVec;
+
+            smokeOptVec.push_back(e->Attribute("p_field_path"));
+            smokeOptVec.push_back(e->Attribute("update_time"));
+            smokeOptVec.push_back(e->Attribute("final_time"));
+            r->addOption("smokeOptions",smokeOptVec);
+
+        }
         sensorVec.push_back(sensor);
 
         Log->Write("INFO: \tSensor "+ sensor + " added");
     }
 
-    /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
-    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(p_routingengine->GetAvailableRouters().back());
+
     r->addOption("Sensors",sensorVec);
 
     TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
