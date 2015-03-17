@@ -144,6 +144,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
+  
   find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
@@ -426,15 +427,15 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if(BUILD_TESTING)
-  add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
-  --build-and-test "${CMAKE_SOURCE_DIR}"  "${CMAKE_SOURCE_DIR}" #"${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-  --build-generator ${CMAKE_GENERATOR}
-  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-  --build-two-config
-  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  --build-project JPScore
-  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-  )
+#  add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
+#  --build-and-test "${CMAKE_SOURCE_DIR}"  "${CMAKE_SOURCE_DIR}" #"${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+#  --build-generator ${CMAKE_GENERATOR}
+#  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
+#  --build-two-config
+#  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#  --build-project JPScore
+#  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+#  )
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
     foreach (test_src ${test_py_files})
