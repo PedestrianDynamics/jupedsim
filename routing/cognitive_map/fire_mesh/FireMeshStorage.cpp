@@ -5,6 +5,7 @@ FireMeshStorage::FireMeshStorage(const Building * const b, const std::string &fi
     _building=b;
     _filepath=filepath;
     _updateIntervall=updateintervall;
+    _finalTime=finalTime;
 
     CreateTimeList(updateintervall,finalTime);
     IdentifyDoors();
@@ -73,10 +74,13 @@ const FireMesh &FireMeshStorage::get_FireMesh(const Point &doorCentre, const dou
 {
     int simT=simTime/_updateIntervall;
     simT*=_updateIntervall;
-    //std::cout << simT << std::endl;
+
+    if (simT>=_finalTime)
+        simT=_finalTime;
+
     std::string str = "Door_X_"+ std::to_string(doorCentre.GetX())
             + "_Y_" + std::to_string(doorCentre.GetY()) + "_t_"+std::to_string(simT)+".000000";
-    //std::cout << str << std::endl;
+
     return _fMContainer.at(str);
 }
 

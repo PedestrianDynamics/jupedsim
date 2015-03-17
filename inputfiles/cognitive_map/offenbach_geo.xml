@@ -33,7 +33,7 @@
 										
 			</subroom>
 			
-			<subroom id="1" >
+			<subroom id="1" class="floor">
 			
 				<polygon caption="wall">
 					<vertex px="0" py="-10"/>

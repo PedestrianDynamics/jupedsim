@@ -24,6 +24,7 @@ private:
     fireMeshContainer _fMContainer;
     std::string _filepath;
     double _updateIntervall;
+    double _finalTime;
     std::vector<double> _timelist;
     std::vector<Crossing> _doors;
 

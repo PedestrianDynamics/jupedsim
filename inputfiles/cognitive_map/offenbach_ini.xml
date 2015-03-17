@@ -54,7 +54,7 @@
 
 <agents operational_model_id="2">
 	<agents_distribution>
-		<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="100" router_id="7" pre_movement_mean="60" pre_movement_sigma="60"/>		
+		<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="200" router_id="7" pre_movement_mean="60" pre_movement_sigma="60"/>		
 		<!--group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="1" number="10" router_id="7" pre_movement_mean="30" pre_movement_sigma="30"/>/
 		<group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="2" number="10" router_id="7" pre_movement_mean="30" pre_movement_sigma="30"/-->
 	</agents_distribution>
@@ -96,8 +96,8 @@
     
     <router router_id="7" description="cognitive_map">
       <sensors>
-	      <!--sensor sensor_id="1" description="Room2Corridor"/-->
-	      <sensor sensor_id="2" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/>
+	      <sensor sensor_id="1" description="Room2Corridor"/>
+	      <sensor sensor_id="2" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="300"/>
       </sensors>
       <cognitive_map status="complete" />
       <!--parameters>
