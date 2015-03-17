@@ -14,7 +14,7 @@ __author__ = 'Oliver Schmidts'
 
 def runtest15(inifile, trajfile):
     logsim = "inifiles/log.P0.dat"
-    if not path.exists(logsim):
+    if not os.path.exists(logsim):
         logging.critical("logsim <%s> does not exist"%logsim)
         exit(FAILURE)
     logging.info("open  <%s> "%logsim)
