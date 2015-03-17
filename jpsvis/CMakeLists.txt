@@ -60,11 +60,18 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 # For Apple set the icns file containing icons
 IF(APPLE)
   # set how it shows up in the Info.plist file
-  SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns) 
+  SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png) 
   # set where in the bundle to put the icns file
-  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  set(MACOSX_BUNDLE_BUNDLE_NAME "JPSvis")
+  set(MACOSX_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}")
+  set(MACOSX_BUNDLE_LONG_VERSION_STRING "${JPSVIS_VERSION}")
+  set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${JPSVIS_VERSION}")
+  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER "www.jupedsim.org")
+
   # include the icns file in the target
-  SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns)
+  SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png)
 ENDIF(APPLE)
 
 
@@ -249,7 +256,10 @@ ADD_EXECUTABLE( JPSvis  MACOSX_BUNDLE WIN32
   ${SAMPLE_MOC_HDRS}
   ${SAMPLE_UI_HDRS} 
   ${SAMPLE_RESOURCES_RCS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png
   )
+
+
 
 # last thing we have to do is to tell CMake what libraries our executable needs,
 # luckily FIND_PACKAGE prepared QT_LIBRARIES variable for us:
@@ -330,10 +340,17 @@ IF(APPLE)
   SET(plugin_dest_dir JPSvis.app/Contents/MacOS)
   SET(qtconf_dest_dir JPSvis.app/Contents/Resources)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/JPSvis.app")
+  
 ENDIF(APPLE)
 IF(WIN32)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis.exe")
 ENDIF(WIN32)
+
+
+if (APPLE)
+  set_target_properties(JPSvis PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+endif ()
+
 
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
@@ -341,6 +358,7 @@ ENDIF(WIN32)
 INSTALL(TARGETS JPSvis
   BUNDLE DESTINATION . COMPONENT Runtime
   RUNTIME DESTINATION bin COMPONENT Runtime
+  
   )
 
 #--------------------------------------------------------------------------------
