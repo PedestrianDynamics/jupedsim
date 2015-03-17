@@ -12,7 +12,14 @@
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 #include "../fire_mesh/FireMesh.h"
+#include "../fire_mesh/FireMeshStorage.h"
 #include <set>
+
+SmokeSensor::SmokeSensor(const Building *b, const &filepath, const &updateintervall, const &finalTime) : AbstractSensor(b)
+{
+
+    _FMStorage= new FireMeshStorage(b,filepath,updateintervall,finalTime);
+}
 
 SmokeSensor::~SmokeSensor()
 {
@@ -65,6 +72,18 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
 //            }
 //        }
 //    }
+
+}
+
+void SmokeSensor::set_FMStorage(const&fmStorage)
+{
+    _FMStorage=fmStorage;
+
+}
+
+const FireMeshStorage *SmokeSensor::get_FMStorage()
+{
+    return _FMStorage;
 
 }
 

@@ -86,7 +86,7 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
 
     }
-    if (std::fmod(p->GetGlobalTime(),1)==0)
+    if (std::fmod(p->GetGlobalTime(),10)==0)
     {
         sensor_manager->execute(p, SensorManager::PERIODIC);
         //std::cout << p->GetGlobalTime() << std::endl;
