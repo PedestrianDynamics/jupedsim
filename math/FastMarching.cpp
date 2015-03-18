@@ -31,159 +31,159 @@
 #include <limits>
 #include <math.h>
 
-RectGrid::RectGrid():
-    gridID(0),
-    isInner(nullptr),
-    nGridpoints(0),
-    xMin(0.),
-    xMax(1.),
-    yMin(0.),
-    yMax(1.),
-    hx(1.),
-    hy(1.),
-    iMax(-1),
-    jMax(-1)
-{
-    //Konstruktor
-}
-
-RectGrid::~RectGrid(){
-    if (isInner) delete[] isInner;
-};
-
-int RectGrid::setBoundaries(const double xMinA, const double yMinA,
-                        const double xMaxA, const double yMaxA) {
-    xMin = xMinA;
-    xMax = xMaxA;
-    yMin = yMinA;
-    yMax = yMaxA;
-    return 1;
-}
-
-int RectGrid::setBoundaries(const Point xy_min, const Point xy_max) {
-    xMin = xy_min.GetX();
-    xMax = xy_max.GetX();
-    yMin = xy_min.GetY();
-    yMax = xy_max.GetY();
-    return 1;
-}
-
-int RectGrid::setSpacing(const double h_x, const double h_y) {
-    hy = h_y;
-    hx = h_x;
-    return 1;
-}
-
-int RectGrid::createGrid(){
-    iMax = (int)((xMax-xMin)/hx) + 1;
-    jMax = (int)((yMax-yMin)/hy) + 1;
-    nGridpoints = iMax * jMax;
-    isInner = new int[nGridpoints];
-    for (int i = 0; i < nGridpoints; ++i) {
-        isInner[i] = 1;
-    }
-    return 1;
-}
-
-int RectGrid::isGridPoint(const Point& testPoint) const {
-    Point nearest = getNearestGridPoint(testPoint);
-    if ( (abs( nearest.GetX() - testPoint.GetX() ) <= .01) && (abs( nearest.GetY() - testPoint.GetY() ) <= .01) )
-        return 1;
-    return 0;
-}
-
-int RectGrid::isInnerPoint(const Point& testPoint) const {
-    Point nearest = getNearestGridPoint(testPoint);
-    return isInner[getKeyAtXY(nearest.GetX(), nearest.GetY())];
-}
-
-Point RectGrid::getNearestGridPoint(const Point& currPoint) const {
-    if ((currPoint.GetX() > xMax) || (currPoint.GetY() > yMax))
-        return Point(-7, -7); // @todo: ar.graf : find good false indicator
-    int i = (int)(((currPoint.GetX()-xMin)/hx)+.5);
-    int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
-    return Point(i*hx+xMin, j*hy+yMin);
-}
-
-int RectGrid::getNearestGridPointsKey(const Point& currPoint) const {
-    return getKeyAtXY(currPoint.GetX(), currPoint.GetY());
-}
-
-int RectGrid::getKeyAtIndex(const int i, const int j) const {//key = index in 1D array by giving indices of 2D array
-    if ((i <= iMax) && (j <= jMax))                         //      zB um schnell die Nachbarpunkte-keys zu finden
-        return (j*iMax+i); // 0-based
-    return -1; // invalid indices
-}
-
-int RectGrid::getKeyAtXY(const double x, const double y) const {//key = index in (extern managed) array
-    Point nearest = getNearestGridPoint(Point(x,y));
-    int i = (int)(((nearest.GetX()-xMin)/hx)+.5);
-    int j = (int)(((nearest.GetY()-yMin)/hy)+.5);
-    if ((i <= iMax) && (j <= jMax))
-        return (j*iMax+i); // 0-based
-    return -1; // invalid indices
-}
-
-Point RectGrid::getPointFromKey(const int key) const {
-    int i = key%iMax;
-    int j = key/iMax; //integer division
-
-    return Point(i*hx+xMin, j*hy+yMin);
-}
-
-
-int RectGrid::getNumOfElements() const {
-    return this->nGridpoints;
-}
-
-directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
-    directNeighbor neighbors = {{-1, -1, -1, -1}};
-    int i = (int)(((currPoint.GetX()-xMin)/hx)+.5);
-    int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
-
-    //right                       //-2 marks invalid neighbor
-    neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
-    //upper
-    neighbors.key[1] = (j == (jMax-1)) ? -2 : ((j+1)*iMax+i);
-    //left
-    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
-    //lower
-    neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
-
-    return neighbors;
-}
-
-directNeighbor RectGrid::getNeighbors(const int key) const {
-    directNeighbor neighbors = {{-1, -1, -1, -1}}; //curleybrackets for struct, then for int[4]
-    int i = key%iMax;
-    int j = key/iMax;
-
-    //right                       //-2 marks invalid neighbor
-    neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
-    //upper
-    neighbors.key[1] = (j == (jMax-1)) ? -2 : ((j+1)*iMax+i);
-    //left
-    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
-    //lower
-    neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
-
-
-    return neighbors;
-
-}
-
-int RectGrid::setAsInner(const Point& innerP) {
-    return 0; // @todo: ar.graf
-}
-
-int RectGrid::setAsOuter(const Point& outerP) {
-    return 0; // @todo: ar.graf
-}
-//        int setAsInner(const Point& innerP); //input in xy world coordinates
-//        int setAsOuter(const Point& outerP); //input in xy world coordinates
+//RectGrid::RectGrid():
+//    gridID(0),
+//    isInner(nullptr),
+//    nGridpoints(0),
+//    xMin(0.),
+//    xMax(1.),
+//    yMin(0.),
+//    yMax(1.),
+//    hx(1.),
+//    hy(1.),
+//    iMax(-1),
+//    jMax(-1)
+//{
+//    //Konstruktor
+//}
 //
-//        int getGridID() const;
-
+//RectGrid::~RectGrid(){
+//    if (isInner) delete[] isInner;
+//};
+//
+//int RectGrid::setBoundaries(const double xMinA, const double yMinA,
+//                        const double xMaxA, const double yMaxA) {
+//    xMin = xMinA;
+//    xMax = xMaxA;
+//    yMin = yMinA;
+//    yMax = yMaxA;
+//    return 1;
+//}
+//
+//int RectGrid::setBoundaries(const Point xy_min, const Point xy_max) {
+//    xMin = xy_min.GetX();
+//    xMax = xy_max.GetX();
+//    yMin = xy_min.GetY();
+//    yMax = xy_max.GetY();
+//    return 1;
+//}
+//
+//int RectGrid::setSpacing(const double h_x, const double h_y) {
+//    hy = h_y;
+//    hx = h_x;
+//    return 1;
+//}
+//
+//int RectGrid::createGrid(){
+//    iMax = (int)((xMax-xMin)/hx) + 1;
+//    jMax = (int)((yMax-yMin)/hy) + 1;
+//    nGridpoints = iMax * jMax;
+//    isInner = new int[nGridpoints];
+//    for (int i = 0; i < nGridpoints; ++i) {
+//        isInner[i] = 1;
+//    }
+//    return 1;
+//}
+//
+//int RectGrid::isGridPoint(const Point& testPoint) const {
+//    Point nearest = getNearestGridPoint(testPoint);
+//    if ( (abs( nearest.GetX() - testPoint.GetX() ) <= .01) && (abs( nearest.GetY() - testPoint.GetY() ) <= .01) )
+//        return 1;
+//    return 0;
+//}
+//
+//int RectGrid::isInnerPoint(const Point& testPoint) const {
+//    Point nearest = getNearestGridPoint(testPoint);
+//    return isInner[getKeyAtXY(nearest.GetX(), nearest.GetY())];
+//}
+//
+//Point RectGrid::getNearestGridPoint(const Point& currPoint) const {
+//    if ((currPoint.GetX() > xMax) || (currPoint.GetY() > yMax))
+//        return Point(-7, -7); // @todo: ar.graf : find good false indicator
+//    int i = (int)(((currPoint.GetX()-xMin)/hx)+.5);
+//    int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
+//    return Point(i*hx+xMin, j*hy+yMin);
+//}
+//
+//int RectGrid::getNearestGridPointsKey(const Point& currPoint) const {
+//    return getKeyAtXY(currPoint.GetX(), currPoint.GetY());
+//}
+//
+//int RectGrid::getKeyAtIndex(const int i, const int j) const {//key = index in 1D array by giving indices of 2D array
+//    if ((i <= iMax) && (j <= jMax))                         //      zB um schnell die Nachbarpunkte-keys zu finden
+//        return (j*iMax+i); // 0-based
+//    return -1; // invalid indices
+//}
+//
+//int RectGrid::getKeyAtXY(const double x, const double y) const {//key = index in (extern managed) array
+//    Point nearest = getNearestGridPoint(Point(x,y));
+//    int i = (int)(((nearest.GetX()-xMin)/hx)+.5);
+//    int j = (int)(((nearest.GetY()-yMin)/hy)+.5);
+//    if ((i <= iMax) && (j <= jMax))
+//        return (j*iMax+i); // 0-based
+//    return -1; // invalid indices
+//}
+//
+//Point RectGrid::getPointFromKey(const int key) const {
+//    int i = key%iMax;
+//    int j = key/iMax; //integer division
+//
+//    return Point(i*hx+xMin, j*hy+yMin);
+//}
+//
+//
+//int RectGrid::getNumOfElements() const {
+//    return this->nGridpoints;
+//}
+//
+//directNeighbor RectGrid::getNeighbors(const Point& currPoint) const{
+//    directNeighbor neighbors = {{-1, -1, -1, -1}};
+//    int i = (int)(((currPoint.GetX()-xMin)/hx)+.5);
+//    int j = (int)(((currPoint.GetY()-yMin)/hy)+.5);
+//
+//    //right                       //-2 marks invalid neighbor
+//    neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
+//    //upper
+//    neighbors.key[1] = (j == (jMax-1)) ? -2 : ((j+1)*iMax+i);
+//    //left
+//    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
+//    //lower
+//    neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
+//
+//    return neighbors;
+//}
+//
+//directNeighbor RectGrid::getNeighbors(const int key) const {
+//    directNeighbor neighbors = {{-1, -1, -1, -1}}; //curleybrackets for struct, then for int[4]
+//    int i = key%iMax;
+//    int j = key/iMax;
+//
+//    //right                       //-2 marks invalid neighbor
+//    neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
+//    //upper
+//    neighbors.key[1] = (j == (jMax-1)) ? -2 : ((j+1)*iMax+i);
+//    //left
+//    neighbors.key[2] = (i == 0) ? -2 : (j*iMax+i-1);
+//    //lower
+//    neighbors.key[3] = (j == 0) ? -2 : ((j-1)*iMax+i);
+//
+//
+//    return neighbors;
+//
+//}
+//
+//int RectGrid::setAsInner(const Point& innerP) {
+//    return 0; // @todo: ar.graf
+//}
+//
+//int RectGrid::setAsOuter(const Point& outerP) {
+//    return 0; // @todo: ar.graf
+//}
+////        int setAsInner(const Point& innerP); //input in xy world coordinates
+////        int setAsOuter(const Point& outerP); //input in xy world coordinates
+////
+////        int getGridID() const;
+//
 
 
 FastMarcher::FastMarcher()
@@ -255,7 +255,7 @@ double FastMarcher::getSpeedAt(const int x, const int y) const {
 int FastMarcher::calculateFloorfield() {
     // @todo: ar.graf
     //definiere max heap //dyn heap??
-    int numElem = myGrid->getNumOfElements();
+    int numElem = myGrid->GetnPoints();
     HeapTree<int>* narrowband = new HeapTree<int> (myCost, numElem);
 
     //suche alle Punkte mit cost = 0
@@ -397,8 +397,8 @@ double FastMarcher::calcCostAt(int key) {
 
     //berechne pro punkt alle vier kost-werte und waehle zu jedem punkt das minimum der vier
     //Problem: ich kann nicht double::max * double::max rechnen (geloest), ich muss richtigen gradient abspeichern
-    double hx = myGrid->getHx();
-    double hy = myGrid->getHy();
+    double hx = myGrid->Gethx();
+    double hy = myGrid->Gethy();
     double minCost = std::numeric_limits<double>::max();
     double oneOfFour = quadrSolutionMax(neighCost[0], neighCost[1], hx, hy, mySpeed[key]);
     if (oneOfFour == -1.) {

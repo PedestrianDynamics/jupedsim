@@ -30,70 +30,70 @@
 #define FASTMARCHING_H
 
 #include "../geometry/Building.h"
-
-// geometric interpretation of index in "directNeighbor"
-//          x (1)              ^ y
-//          |                  |
-// (2) x----0----x (0)         o---> x
-//          |
-//          x (3)
-
-typedef struct directNeighbor_t {
-    int key[4];
-} directNeighbor;
-
-
+#include "../routing/mesh/RectGrid.h"
+//// geometric interpretation of index in "directNeighbor"
+////          x (1)              ^ y
+////          |                  |
+//// (2) x----0----x (0)         o---> x
+////          |
+////          x (3)
 //
-class RectGrid
-{
-    public:
-        RectGrid();
-        virtual ~RectGrid();
-
-        int setBoundaries(const double xMinA, const double yMinA,
-                          const double xMaxA, const double yMaxA);
-        int setBoundaries(const Point xy_min, const Point xy_max);
-        int setSpacing(const double h_x, const double h_y);
-        int createGrid();
-
-        int getKeyAtXY(const double x, const double y) const;     //key = indef in (extern managed) array
-        int getKeyAtIndex(const int i, const int j) const;  //key = index in 1D array by giving indices of 2D array
-                                                            //      zB um schnell die Nachbarpunkte-keys zu finden
-
-        Point getPointFromKey(const int key) const;
-        Point getNearestGridPoint(const Point& currPoint) const;
-        int getNearestGridPointsKey(const Point& currPoint) const;  //key = index in array
-        //Point getNearestGridPoint2Dindices (const Point& currPoint) const;
-
-        int isInnerPoint(const Point& testPoint) const;
-        int isGridPoint(const Point& testPoint) const;
-
-        int setAsInner(const Point& innerP); //input in xy world coordinates
-        int setAsOuter(const Point& outerP); //input in xy world coordinates
-
-        int getGridID() const;
-        int getNumOfElements() const;
-        directNeighbor getNeighbors(const Point& currPoint) const;
-        directNeighbor getNeighbors(const int key) const;
-
-        double getHx() const { return hx; }
-        double getHy() const { return hy; }
-
-#ifdef LINKEDGRIDS
-        RectGrid* next;
-#endif // LINKEDGRIDS
-
-    protected:
-        int gridID;
-        int* isInner;
-        int nGridpoints;
-        double xMin, xMax;
-        double yMin, yMax;
-        double hx, hy;
-        int iMax, jMax;
-    private:
-
-};
+//typedef struct directNeighbor_t {
+//    int key[4];
+//} directNeighbor;
+//
+//
+////
+//class RectGrid
+//{
+//    public:
+//        RectGrid();
+//        virtual ~RectGrid();
+//
+//        int setBoundaries(const double xMinA, const double yMinA,
+//                          const double xMaxA, const double yMaxA);
+//        int setBoundaries(const Point xy_min, const Point xy_max);
+//        int setSpacing(const double h_x, const double h_y);
+//        int createGrid();
+//
+//        int getKeyAtXY(const double x, const double y) const;     //key = indef in (extern managed) array
+//        int getKeyAtIndex(const int i, const int j) const;  //key = index in 1D array by giving indices of 2D array
+//                                                            //      zB um schnell die Nachbarpunkte-keys zu finden
+//
+//        Point getPointFromKey(const int key) const;
+//        Point getNearestGridPoint(const Point& currPoint) const;
+//        int getNearestGridPointsKey(const Point& currPoint) const;  //key = index in array
+//        //Point getNearestGridPoint2Dindices (const Point& currPoint) const;
+//
+//        int isInnerPoint(const Point& testPoint) const;
+//        int isGridPoint(const Point& testPoint) const;
+//
+//        int setAsInner(const Point& innerP); //input in xy world coordinates
+//        int setAsOuter(const Point& outerP); //input in xy world coordinates
+//
+//        int getGridID() const;
+//        int getNumOfElements() const;
+//        directNeighbor getNeighbors(const Point& currPoint) const;
+//        directNeighbor getNeighbors(const int key) const;
+//
+//        double getHx() const { return hx; }
+//        double getHy() const { return hy; }
+//
+//#ifdef LINKEDGRIDS
+//        RectGrid* next;
+//#endif // LINKEDGRIDS
+//
+//    protected:
+//        int gridID;
+//        int* isInner;
+//        int nGridpoints;
+//        double xMin, xMax;
+//        double yMin, yMax;
+//        double hx, hy;
+//        int iMax, jMax;
+//    private:
+//
+//};
 
 
 class FastMarcher

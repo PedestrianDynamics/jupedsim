@@ -20,7 +20,7 @@ Fastmarchtest::Fastmarchtest()
     grid->createGrid();
 
     //value tables (later using the keys given by grid as index)
-    int nGridpoints = grid->getNumOfElements();
+    int nGridpoints = grid->GetnPoints();
     speedvalue = new double[nGridpoints];
     gradientT = new Point[nGridpoints];
     cost = new double[nGridpoints];
@@ -30,7 +30,7 @@ Fastmarchtest::Fastmarchtest()
     }
 
     //init value tables using grid information
-    for (int i = 0; i < grid->getNumOfElements(); ++i) {
+    for (int i = 0; i < grid->GetnPoints(); ++i) {
         cost[i] = -2.; // neg. value to indicate a not calculated value
         speedvalue[i] = 1.;
         gradientT[i].SetX(0.); // (0, 0) indicate a not calculated value
@@ -103,12 +103,12 @@ void Fastmarchtest::run(char* outputfile) {
     Log->Write(("POINT_DATA " + std::to_string(numTotal) ));
     Log->Write("SCALARS Cost float 1");
     Log->Write("LOOKUP_TABLE default");
-    for (int i = 0; i < g->getNumOfElements(); ++i) {
+    for (int i = 0; i < g->GetnPoints(); ++i) {
         Point iPoint = g->getPointFromKey(i);
         Log->Write(std::to_string(fastmarcher->getTimecostAt(iPoint)));
     }
     Log->Write("VECTORS Gradient float");
-    for (int i = 0; i < g->getNumOfElements(); ++i) {
+    for (int i = 0; i < g->GetnPoints(); ++i) {
         Point iPoint = g->getPointFromKey(i);
         Log->Write(std::to_string((fastmarcher->getFloorfieldAt(iPoint)).GetX())
                     + " "
@@ -119,7 +119,7 @@ void Fastmarchtest::run(char* outputfile) {
     OutputHandler* Log2;
     Log2 = new FileHandler("./forpython.txt");
 
-    for (int i = 0; i < g->getNumOfElements(); ++i) {
+    for (int i = 0; i < g->GetnPoints(); ++i) {
         Point iPoint = g->getPointFromKey(i);
         Log2->Write(std::to_string(iPoint.GetX()) + " " + std::to_string(iPoint.GetY()) + " " + std::to_string(fastmarcher->getTimecostAt(iPoint)));
         //Log2->Write(std::to_string(fastmarcher->getTimecostAt(iPoint)) + ", ");

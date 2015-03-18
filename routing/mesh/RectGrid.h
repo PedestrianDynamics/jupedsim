@@ -29,7 +29,7 @@
 #ifndef RECTGRID_H
 #define RECTGRID_H
 
-#include "../geometry/Point.h"
+#include "../../geometry/Point.h"
 
 // geometric interpretation of index in "directNeighbor"
 //          x (1)              ^ y
@@ -47,9 +47,11 @@ class RectGrid
 {
     public:
         RectGrid() {
-            isInitialized = false;
+            this->isInitialized = false;
         }
-        virtual ~RectGrid();
+        virtual ~RectGrid() {
+
+        }
         RectGrid(const RectGrid& other) {
             nPoints = other.nPoints;
             xMin = other.xMin;
@@ -82,10 +84,19 @@ class RectGrid
         double Gethy() const { return hy; }
         //void Sethy(double val) { hy = val; }
 
-        double get_x_fromKey (unsigned long int key) const { return (key%iMax)*hx+xMin}
-        double get_y_fromKey (unsigned long int key) const { return (key/iMax)*hy+yMin}
-        double get_i_fromKey (unsigned long int key) const { return (key%iMax) }
-        double get_j_fromKey (unsigned long int key) const { return (key/iMax) }
+        double get_x_fromKey (unsigned long int key) const { return (key%iMax)*hx+xMin; }
+        double get_y_fromKey (unsigned long int key) const { return (key/iMax)*hy+yMin; }
+        double get_i_fromKey (unsigned long int key) const { return (key%iMax); }
+        double get_j_fromKey (unsigned long int key) const { return (key/iMax); }
+
+        unsigned long int getKeyAtXY(const double x, const double y) const {//key = index in (extern managed) array
+            //Point nearest = getNearestGridPoint(Point(x,y));
+            unsigned long int i = (unsigned long int)(((x-xMin)/hx)+.5);
+            unsigned long int j = (unsigned long int)(((y-yMin)/hy)+.5);
+            if ((i <= iMax) && (j <= jMax))
+                return (j*iMax+i); // 0-based; index of (closest gridpoint)
+            return -1; // invalid indices
+        }
 
         void setBoundaries(const double xMinA, const double yMinA,
                            const double xMaxA, const double yMaxA) {
@@ -127,6 +138,13 @@ class RectGrid
                 return Point(-7, -7); // @todo: ar.graf : find good false indicator
             unsigned long int i = (unsigned long int)(((currPoint.GetX()-xMin)/hx)+.5);
             unsigned long int j = (unsigned long int)(((currPoint.GetY()-yMin)/hy)+.5);
+            return Point(i*hx+xMin, j*hy+yMin);
+        }
+
+        Point getPointFromKey(const unsigned long int key) const {
+            unsigned long int i = key%iMax;
+            unsigned long int j = key/iMax; //integer division
+
             return Point(i*hx+xMin, j*hy+yMin);
         }
 

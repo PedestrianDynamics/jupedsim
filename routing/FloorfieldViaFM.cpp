@@ -38,7 +38,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     //dtor
 }
 
-FloorfieldViaFM::FloorfieldViaFM(Building* buildingArg, double hxArg, double hyArg) {
+FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg) {
     //ctor
 
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -62,35 +62,82 @@ FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
 
 FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
 {
-    if (this == &rhs) return *this; // handle self assignment
+    if (this == &rhs) return *this; // handle self assignment     //@todo: ar.graf change this pasted code to proper code
     //assignment operator
     return *this;
 }
 
-void FloorfieldViaFM::parseBuilding(Building* const buildingArg) {
+void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
     //create a list of walls
-    std::vector<Room*>& allRooms = buildingArg->GetAllRooms();
+    std::vector<Room*> allRooms = buildingArg->GetAllRooms();
     for (std::vector<Room*>::iterator itRoom = allRooms.begin(); itRoom != allRooms.end(); ++itRoom) {
 
-        std::vector<SubRoom*>& allSubrooms = (*itRoom)->GetAllSubRooms();
+        std::vector<SubRoom*> allSubrooms = (*itRoom)->GetAllSubRooms();
         for (std::vector<SubRoom*>::iterator itSubroom = allSubrooms.begin(); itSubroom != allSubrooms.end(); ++itSubroom) {
 
-            std::vector<Obstacle*>& allObstacles = (*itSubroom)->GetAllObstacles();
+            std::vector<Obstacle*> allObstacles = (*itSubroom)->GetAllObstacles();
             for (std::vector<Obstacle*>::iterator itObstacles = allObstacles.begin(); itObstacles != allObstacles.end(); ++itObstacles) {
 
-                std::vector<Wall>& allObsWalls = (*itObstacles)->GetAllWalls();
+                std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
                     wall.push_back(&(*itObsWall));
                 }
             }
 
-            std::vector<Wall>& allWalls = (*itSubroom)->GetAllWalls();
+            std::vector<Wall> allWalls = (*itSubroom)->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                 wall.push_back(&(*itWall));
             }
         }
     }
-    //std::vector<Room*> _rooms
+    //create Rect Grid
+    //linescan using (std::vector<Wall*>)
+}
+
+void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
+/* this fkt shall set all Costdata to unknown and the goal points to 0
+   we have to watch how to calc indices as goal only knows coords from input file
+*/
+
+// set all cost data to "unknown" (remember to change flag accordingly)
+// get lines/walls from goals
+// use linescan to ititialize cost grid
+
+}
+
+void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const target, const double outside, const double inside) {
+// use RectGrid to go thru lines and check intersection with any wall
+// if intersection is found, then change (outside to inside) or (inside to outside)
+// and keep setting values
+// maybe calc and save intersections for each line and then init target array
+// (*)
+// take line x: calc intersection with wall y: if intersects then store intersectionpoint in a vector<int key>
+// now sort vector<int key> and go thru targetline and set values
+// empty vector<int key> and continue with line x+1 at (*)
+
+    //grid handeling local vars:
+    unsigned long int iMax  = grid->GetiMax();
+    unsigned long int jMax  = grid->GetjMax();
+    double xMin             = grid->GetxMin();
+    double yMin             = grid->GetyMin();
+    double xMax             = grid->GetxMax();
+    double yMax             = grid->GetyMax();
+    double hx               = grid->Gethx();
+    double hy               = grid->Gethy();
+    std::vector<double> xIntersection;
+
+    Point linestart(xMin,j*hy+yMin);
+    Point lineend  (xMax,j*hy+yMin);
+    Line currLine = currLine(linestart, lineend);
+    for(std::vector<Wall*>.iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
+        double distance = currLine.GetIntersectionDistance( *(*itWall) );
+        if ( (distance >= 0.) && (distance < 100000) ) {
+            xIntersection.push_back(distance);
+        }
+    }
+    // how to calc (i,j) from x/y coord:
+    //unsigned long int i = (unsigned long int)(((currPoint.GetX()-xMin)/hx)+.5);
+    //unsigned long int j = (unsigned long int)(((currPoint.GetY()-yMin)/hy)+.5);
 }
 
 void FloorfieldViaFM::calculateDistanceField() {
