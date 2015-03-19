@@ -60,12 +60,12 @@ FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
     //copy ctor
 }
 
-FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
-{
-    if (this == &rhs) return *this; // handle self assignment     //@todo: ar.graf change this pasted code to proper code
-    //assignment operator
-    return *this;
-}
+//FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
+//{
+//    if (this == &rhs) return *this; // handle self assignment     //@todo: ar.graf change this pasted code to proper code
+//    //assignment operator
+//    return *this;
+//}
 
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
     //create a list of walls
@@ -107,8 +107,7 @@ void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
 
 void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const target, const double outside, const double inside) {
 // use RectGrid to go thru lines and check intersection with any wall
-// if intersection is found, then change (outside to inside) or (inside to outside)
-// and keep setting values
+
 // maybe calc and save intersections for each line and then init target array
 // (*)
 // take line x: calc intersection with wall y: if intersects then store intersectionpoint in a vector<int key>
@@ -126,18 +125,73 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
     double hy               = grid->Gethy();
     std::vector<double> xIntersection;
 
-    Point linestart(xMin,j*hy+yMin);
-    Point lineend  (xMax,j*hy+yMin);
-    Line currLine = currLine(linestart, lineend);
-    for(std::vector<Wall*>.iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
-        double distance = currLine.GetIntersectionDistance( *(*itWall) );
-        if ( (distance >= 0.) && (distance < 100000) ) {
-            xIntersection.push_back(distance);
+    for(unsigned long int j = 0; j < jMax; ++j) { // @todo ar.graf if segfault during writing, check if j < jMax
+
+        //init line with "(outside+inside)/2"
+        for (unsigned long int initp = 0; initp < iMax; ++initp) {
+            target[j*iMax+initp] = (outside + inside) / 2;
+        } //init done
+        xIntersection.clear();
+
+        Point linestart(xMin,j*hy+yMin);
+        Point lineend  (xMax,j*hy+yMin);
+        Line currLine = Line(linestart, lineend);
+        for(std::vector<Wall*>::const_iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
+            //if wall is horizontal, we must deal with it by setting wall value all along
+            //note: if wall is horizontal, then adjacent walls should yield intersectionpoints and make
+            //      linescan fill the points under the horizontal wall anyway. lets check that. \____/
+            if (    ((**itWall).GetPoint1().GetY() == (linestart.GetY()))  &&  ((**itWall).IsHorizontal())   ) {
+                unsigned long int istart, iend;
+                istart = ((**itWall).GetPoint1().GetX() - xMin)/hx + .5;
+                iend   = ((**itWall).GetPoint2().GetX() - xMin)/hx + .5;
+                if (istart > iend) {
+                    unsigned long int temp = istart;
+                    istart = iend;
+                    iend = temp;
+                }
+                for (unsigned long int i = istart; i <= iend; ++i) {
+                    target[j*iMax+i] = outside;
+                }
+            } else {
+                double distance = currLine.GetIntersectionDistance( *(*itWall) );
+                if ( (distance >= 0.) && (distance < 100000) ) {        //check if Line.cpp can be changed (infinity == 100000) seems quite finite
+                    xIntersection.push_back(sqrt(distance));
+                }
+            }
+        } //all walls intersected with currLine
+        //now init the line using the intersections
+        std::unique(xIntersection.begin(), xIntersection.end());
+        std::sort(xIntersection.begin(), xIntersection.end());
+        unsigned long int old = 0;
+        unsigned long int upTo = 0;
+        target[j*iMax+0] = outside;
+        double filler = outside;
+        for (unsigned int ithCross = 0; ithCross < xIntersection.size(); ++ithCross) {
+            upTo = (xIntersection[ithCross] - xMin)/hx + .5;
+            for (unsigned long int iCurrSegment = old+1; iCurrSegment < upTo; ++iCurrSegment) {
+                if (target[j*iMax+iCurrSegment] == (outside + inside) / 2) {
+                    target[j*iMax+iCurrSegment] = filler;
+                }
+            }
+            if (filler == outside) {
+                filler = inside;
+            } else {
+                filler = outside;
+            }
+            target[j*iMax+upTo]=outside; //intersections always walls or obstacles
+            old = upTo;
         }
-    }
-    // how to calc (i,j) from x/y coord:
-    //unsigned long int i = (unsigned long int)(((currPoint.GetX()-xMin)/hx)+.5);
-    //unsigned long int j = (unsigned long int)(((currPoint.GetY()-yMin)/hy)+.5);
+        for (unsigned long int rest = old+1; rest < iMax; ++rest) {
+            target[j*iMax+rest] = outside;
+        }
+        //secure check if all gridpoints got set
+        for (unsigned long int initp = 0; initp < iMax; ++initp) {
+            if (  target[j*iMax+initp] == ((outside + inside)/2)  ) {
+                //sth went wrong
+                std::cerr << "Error in Linescan\n";
+            };
+        } //sec check done
+    } //loop over all lines
 }
 
 void FloorfieldViaFM::calculateDistanceField() {

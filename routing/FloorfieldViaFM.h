@@ -30,6 +30,7 @@
 #define FLOORFIELDVIAFM_H
 
 #include <vector>
+#include <cmath>
 #include "mesh/RectGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/Point.h"
@@ -46,13 +47,16 @@ class FloorfieldViaFM
         FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg);
         virtual ~FloorfieldViaFM();
         FloorfieldViaFM(const FloorfieldViaFM& other);
-        FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
+        //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
         void parseBuilding(const Building* const buildingArg);
         void resetGoalAndCosts(const Goal* const goalArg);
         void lineScan(const std::vector<Wall*>& wallArg, double* const target, const double outside, const double inside);
         void calculateDistanceField();
 
+#ifdef TESTING
+        void setGrid(RectGrid* gridArg) {grid = gridArg;}
+#endif //TESTING
 
     protected:
     private:
@@ -70,7 +74,7 @@ class FloorfieldViaFM
         double* speedInital;
         double* cost;
         unsigned long int* secKey;  //secondary key to address ... not used yet
-        Point* grad;
+        Point* grad; //gradients
 
 };
 

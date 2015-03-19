@@ -93,7 +93,7 @@ class RectGrid
             //Point nearest = getNearestGridPoint(Point(x,y));
             unsigned long int i = (unsigned long int)(((x-xMin)/hx)+.5);
             unsigned long int j = (unsigned long int)(((y-yMin)/hy)+.5);
-            if ((i <= iMax) && (j <= jMax))
+            if ((i < iMax) && (j < jMax))
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
             return -1; // invalid indices
         }
@@ -174,8 +174,8 @@ class RectGrid
         double yMax;
         double hx;
         double hy;
-        unsigned long int iMax;
-        unsigned long int jMax;
+        unsigned long int iMax; // indices must be smaller than iMax
+        unsigned long int jMax; // indices must be smaller than jMax
         bool isInitialized;
 };
 
