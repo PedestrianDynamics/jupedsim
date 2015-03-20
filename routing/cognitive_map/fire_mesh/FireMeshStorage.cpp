@@ -56,7 +56,7 @@ void FireMeshStorage::CreateFireMeshes()
         for (auto &i:_timelist)
         {
             std::string suffix = "Door_X_" + std::to_string(door.GetCentre().GetX())
-                      + "_Y_" + std::to_string(door.GetCentre().GetY()) + "\\t_"+std::to_string(i)+".csv";
+                      + "_Y_" + std::to_string(door.GetCentre().GetY()) + "/t_"+std::to_string(i)+".csv";
             FireMesh mesh(_filepath+suffix);
             std::string str = "Door_X_"+ std::to_string(door.GetCentre().GetX())
                     + "_Y_" + std::to_string(door.GetCentre().GetY()) + "_t_"+std::to_string(i);

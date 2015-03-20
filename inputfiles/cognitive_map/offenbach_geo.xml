@@ -6,7 +6,7 @@
 	
 		<room id="0" caption="hall_offenbach">
 		
-			<subroom id="0" class="subroom">
+			<subroom id="0" caption="hall" class="subroom">
 			
 				<polygon caption="wall">
 					<vertex px="0" py="1"/>
@@ -33,7 +33,7 @@
 										
 			</subroom>
 			
-			<subroom id="1" class="floor">
+			<subroom id="1" caption="Corridor" class="floor">
 			
 				<polygon caption="wall">
 					<vertex px="0" py="-10"/>
@@ -114,7 +114,7 @@
 				
 			</subroom>
 			
-			<subroom id="2" class="subroom">
+			<subroom id="2" caption="wardrobe" class="subroom">
 			
 				<polygon caption="wall">
 					<vertex px="0" py="30"/>

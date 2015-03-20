@@ -86,9 +86,17 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
 
     }
+
+    //std::cout << p->GetGlobalTime() << std::endl;
     if (std::fmod(p->GetGlobalTime(),30)==0.0)
     {
         sensor_manager->execute(p, SensorManager::PERIODIC);
+
+        int status = FindDestination(p);
+
+        //(*cm_storage)[p]->UpdateSubRoom();
+
+        return status;
 
     }
     return 1;
