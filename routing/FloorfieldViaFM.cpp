@@ -36,6 +36,12 @@ FloorfieldViaFM::FloorfieldViaFM()
 FloorfieldViaFM::~FloorfieldViaFM()
 {
     //dtor
+    delete grid
+    delete[] flag;
+    delete[] dist2Wall;
+    delete[] speedInitial;
+    delete[] cost;
+
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg) {
@@ -47,8 +53,10 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     //'grid->GetnPoints()' and create all data fields: cost, gradient, speed, dis2wall, flag, secondaryKey
 
-    //call fkt: init Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed
+    //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed
     //this step includes Linescanalgorithmus? (maybe included in parsing above)
+
+    // @continue
 
     //call fkt: calculateDistanzefield
 
@@ -68,6 +76,11 @@ FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
 //}
 
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
+    //init min/max before parsing
+    double xMin = 100000.;
+    double xMax = -100000.;
+    double yMin = xMin;
+    double yMax = xMax;
     //create a list of walls
     std::vector<Room*> allRooms = buildingArg->GetAllRooms();
     for (std::vector<Room*>::iterator itRoom = allRooms.begin(); itRoom != allRooms.end(); ++itRoom) {
@@ -81,17 +94,63 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
                     wall.push_back(&(*itObsWall));
+                    // xMin xMax
+                    if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
+                    if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
+                    if ((*itObsWall).GetPoint1().GetX() > xMax) xMax = (*itObsWall).GetPoint1().GetX();
+                    if ((*itObsWall).GetPoint2().GetX() > xMax) xMax = (*itObsWall).GetPoint2().GetX();
+
+                    // yMin yMax
+                    if ((*itObsWall).GetPoint1().GetY() < yMin) yMin = (*itObsWall).GetPoint1().GetY();
+                    if ((*itObsWall).GetPoint2().GetY() < yMin) yMin = (*itObsWall).GetPoint2().GetY();
+                    if ((*itObsWall).GetPoint1().GetY() > yMax) yMax = (*itObsWall).GetPoint1().GetY();
+                    if ((*itObsWall).GetPoint2().GetY() > yMax) yMax = (*itObsWall).GetPoint2().GetY();
                 }
             }
 
             std::vector<Wall> allWalls = (*itSubroom)->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                 wall.push_back(&(*itWall));
+                // xMin xMax
+                if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
+                if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
+                if ((*itWall).GetPoint1().GetX() > xMax) xMax = (*itWall).GetPoint1().GetX();
+                if ((*itWall).GetPoint2().GetX() > xMax) xMax = (*itWall).GetPoint2().GetX();
+
+                // yMin yMax
+                if ((*itWall).GetPoint1().GetY() < yMin) yMin = (*itWall).GetPoint1().GetY();
+                if ((*itWall).GetPoint2().GetY() < yMin) yMin = (*itWall).GetPoint2().GetY();
+                if ((*itWall).GetPoint1().GetY() > yMax) yMax = (*itWall).GetPoint1().GetY();
+                if ((*itWall).GetPoint2().GetY() > yMax) yMax = (*itWall).GetPoint2().GetY();
             }
         }
     }
     //create Rect Grid
+    grid = new RectGrid();
+    grid->setBoundaries(xMin, yMin, xMax, yMax);
+    grid->setSpacing( .05, .05);
+    grid->createGrid();
+
+    //create arrays
+    flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final)
+    dist2Wall = new double[grid->GetnPoints()];
+    speedInitial = new double[grid->GetnPoints()];
+    cost = new double[grid->GetnPoints];
+
     //linescan using (std::vector<Wall*>)
+    lineScan(allWalls, dist2Wall, 0., -2.);
+    for (unsigned long int i = 0; i < grid->GetnPoints(); ++i) {
+        if (dist2Wall[i] == 0.) {               //outside
+            speedInitial[i] = .001;
+            cost[i]         = -7.; // @todo: ar.graf
+            flag[i]         = -7;
+        } else {                                //inside
+            speedInitial[i] = 1.;
+            cost[i]         = -2.;
+            flag[i]         = 0;
+        }
+    }
+
 }
 
 void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {

@@ -64,14 +64,14 @@ class FloorfieldViaFM
         std::vector<Wall*> wall;
 
 
-        //stuff to handle wrapper grid
+        //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
         double offsetX;
         double offsetY;
 
         //GridPoint Data in independant arrays (shared primary key)
         int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final)
         double* dist2Wall;
-        double* speedInital;
+        double* speedInitial;
         double* cost;
         unsigned long int* secKey;  //secondary key to address ... not used yet
         Point* grad; //gradients
