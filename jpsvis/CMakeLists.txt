@@ -57,22 +57,6 @@ message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
 # (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
 INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR} )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-# For Apple set the icns file containing icons
-IF(APPLE)
-  # set how it shows up in the Info.plist file
-  SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png) 
-  # set where in the bundle to put the icns file
-  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-  set(MACOSX_BUNDLE_BUNDLE_NAME "JPSvis")
-  set(MACOSX_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}")
-  set(MACOSX_BUNDLE_LONG_VERSION_STRING "${JPSVIS_VERSION}")
-  set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${JPSVIS_VERSION}")
-  set(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER "www.jupedsim.org")
-
-  # include the icns file in the target
-  SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png)
-ENDIF(APPLE)
 
 
 set( SAMPLE_SRCS
@@ -250,13 +234,27 @@ elseif( ${QT5_INSTALLED} )
   qt5_wrap_ui(SAMPLE_UI_HDRS ${SAMPLE_UIS})
 endif() 
 
+# For Apple set the icns file containing icons
+
+IF(APPLE)
+  # set how it shows up in the Info.plist file
+  SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns) 
+  # set where in the bundle to put the icns file
+  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+  # include the icns file in the target
+  SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns)
+ENDIF(APPLE)
+
+
+
 # here we instruct CMake to build JPSvis executable from all of the source files
 ADD_EXECUTABLE( JPSvis  MACOSX_BUNDLE WIN32
   ${SAMPLE_SRCS}
   ${SAMPLE_MOC_HDRS}
   ${SAMPLE_UI_HDRS} 
   ${SAMPLE_RESOURCES_RCS}
-  ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png
+  # ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png
+#  JPSvis.icns
   )
 
 
@@ -278,6 +276,8 @@ else() # this else is not yet tested
   target_link_libraries(JPSvis vtkHybrid QVTK vtkViews ${QT_LIBRARIES})
 endif() 
 
+
+#=================================================== Compiler flags =================================================
 #----------------------------------------------------------------------
 # enable as many warnings as possible
 set(warning_flags "-Wall -Wextra")
@@ -324,11 +324,7 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")     
 endif()
-
-
-
-
-
+#======================================================================================================================================
 
 #--------------------------------------------------------------------------------
 # Now the installation stuff below
@@ -339,17 +335,25 @@ SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis")
 IF(APPLE)
   SET(plugin_dest_dir JPSvis.app/Contents/MacOS)
   SET(qtconf_dest_dir JPSvis.app/Contents/Resources)
-  SET(APPS "\${CMAKE_INSTALL_PREFIX}/JPSvis.app")
-  
+  SET(APPS "\${CMAKE_INSTALL_PREFIX}/JPSvis.app")  
 ENDIF(APPLE)
+
 IF(WIN32)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis.exe")
 ENDIF(WIN32)
 
 
-if (APPLE)
-  set_target_properties(JPSvis PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
-endif ()
+# if (APPLE)
+#   set_target_properties(JPSvis PROPERTIES
+#     # APPLE_BUNDLE_BUNDLE_NAME "JPSvis"
+#     # APPLE_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}"
+#     # APPLE_BUNDLE_LONG_VERSION_STRING "version ${JPSVIS_VERSION}"
+#     # APPLE_BUNDLE_SHORT_VERSION_STRING "${JPSVIS_VERSION}"
+#     # APPLE_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved."
+#     # APPLE_GUI_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved."
+#     # APPLE_BUNDLE_GUI_IDENTIFIER "www.jupedsim.org"
+#     APPLE_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
+# endif ()
 
 
 #--------------------------------------------------------------------------------
@@ -393,6 +397,23 @@ INSTALL(CODE "
     include(BundleUtilities)
     fixup_bundle(\"${APPS}\" \"\${QTPLUGINS}\" \"${DIRS}\")
     " COMPONENT Runtime)
+
+
+IF(APPLE)
+  # set how it shows up in the Info.plist file
+  # SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png)
+  SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns)
+  SET(MACOSX_GUI_ICON JPSvis.icns)
+  SET(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
+  SET(MACOSX_BUNDLE_BUNDLE_NAME "JPSvis")
+  SET(MACOSX_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}")
+  SET(MACOSX_BUNDLE_LONG_VERSION_STRING "version ${JPSVIS_VERSION}")
+  SET(MACOSX_BUNDLE_SHORT_VERSION_STRING "${JPSVIS_VERSION}")
+  SET(MACOSX_GUI_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
+  SET(MACOSX_BUNDLE_GUI_IDENTIFIER "www.jupedsim.org")
+
+ENDIF(APPLE)
+
 
 
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X

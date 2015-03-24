@@ -21,8 +21,6 @@
 
 # look for signs of qt3 installations
 
-message(STATUS "Hi there")
-
 FILE(GLOB GLOB_TEMP_VAR /usr/lib/qt-3*/bin/qmake)
 IF(GLOB_TEMP_VAR)
   SET(QT3_INSTALLED TRUE)
