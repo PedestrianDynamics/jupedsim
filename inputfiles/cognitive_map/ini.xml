@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.6" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <max_sim_time>900</max_sim_time>
   <!-- geometry file -->
-  <geometry>geo.xml</geometry>
+  <geometry>smokesensortest.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="trajectories.xml" />
@@ -26,32 +24,32 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
     <!-- </rooms> -->
     <!-- doors states are: close or open -->
     <doors>
-      <door trans_id="1" caption="" state="open" />
-      <door trans_id="2" caption="" state="open" />
+      <!--door trans_id="1" caption="" state="open" />
+        <door trans_id="2" caption="" state="open" / -->
     </doors>
   </traffic_constraints>
 
   <routing>
-    <goals>
+    <!--goals>
       <goal id="0" final="false" caption="goal 1">
-        <polygon>
-          <vertex px="-1.0" py="5.0" />
-          <vertex px="-1.0" py="6.5" />
-          <vertex px="-2.0" py="6.5" />
-          <vertex px="-2.0" py="5.0" />
-          <vertex px="-1.0" py="5.0" />
-        </polygon>
+      <polygon>
+      <vertex px="-1.0" py="5.0" />
+      <vertex px="-1.0" py="6.5" />
+      <vertex px="-2.0" py="6.5" />
+      <vertex px="-2.0" py="5.0" />
+      <vertex px="-1.0" py="5.0" />
+      </polygon>
       </goal>
       <goal id="1" final="false" caption="goal 2">
-        <polygon>
-          <vertex px="24.0" py="6.5" />
-          <vertex px="23.0" py="6.5" />
-          <vertex px="23.0" py="5.0" />
-          <vertex px="24.0" py="5.0" />
-          <vertex px="24.0" py="6.5" />
-        </polygon>
+      <polygon>
+      <vertex px="24.0" py="6.5" />
+      <vertex px="23.0" py="6.5" />
+      <vertex px="23.0" py="5.0" />
+      <vertex px="24.0" py="5.0" />
+      <vertex px="24.0" py="6.5" />
+      </polygon>
       </goal>
-    </goals>
+      </goals -->
 
     <!-- in the form goal_id1:goal_id2:goal_id3:..:goal_idn -->
     <!-- <routes> -->
@@ -73,8 +71,9 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
     <model operational_model_id="1" description="gcfm">
       <model_parameters>
         <solver>euler</solver>
+        
         <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
+        <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -94,15 +93,19 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
+
         <navigation_lines file="routing.xml" />
       </parameters>
     </router>
     <router router_id="7" description="cognitive_map">
       <sensors>
-        <sensor sensor_id="1" description="Room2Corridor" status="activated" />
-        <sensor sensor_id="2" description="Jam" status="activated" />
+	  <!--sensor sensor_id="2" description="Room2Corridor"/-->
+        <sensor sensor_id="1" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/>
       </sensors>
-      <cognitive_map status="empty" />
+      <cognitive_map status="complete" />
+      <!--parameters>
+        <navigation_lines file="routing.xml" />
+        </parameters -->
     </router>
   </route_choice_models>
 

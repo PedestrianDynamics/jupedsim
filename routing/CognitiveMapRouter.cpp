@@ -84,6 +84,20 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
         return status;
 
+
+    }
+
+    //std::cout << p->GetGlobalTime() << std::endl;
+    if (std::fmod(p->GetGlobalTime(),30)==0.0)
+    {
+        sensor_manager->execute(p, SensorManager::PERIODIC);
+
+        int status = FindDestination(p);
+
+        //(*cm_storage)[p]->UpdateSubRoom();
+
+        return status;
+
     }
     return 1;
 }
@@ -136,7 +150,7 @@ bool CognitiveMapRouter::Init(Building * b)
      Log->Write("INFO:\tInitialized CognitiveMapStorage");
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
-     sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions().at("Sensors"));
+     sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions());
      Log->Write("INFO:\tInitialized SensorManager");
      return true;
 }
@@ -149,6 +163,6 @@ const optStorage &CognitiveMapRouter::getOptions() const
 
 void CognitiveMapRouter::addOption(const std::string &key, const std::vector<std::string> &value)
 {
-    options.insert(std::make_pair(key, value));
+    options.emplace(key,value);
 }
 

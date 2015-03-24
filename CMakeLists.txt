@@ -3,6 +3,7 @@
 # -DCMAKE_BUILD_TYPE:STRING=Debug (default Release)
 # -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON (default OFF)
 # -DBUILD_TESTING=ON (default OFF)
+# -DBUILD_CPPUNIT_TEST=ON (default OFF)
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
@@ -18,9 +19,14 @@ set(JPSCORE_VERSION
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
 
 if(NOT BUILD_TESTING)
-  set(BUILD_TESTING OFF) # test units are not generated.
+  set(BUILD_TESTING OFF) # test units & python tests are not generated.
 endif(NOT BUILD_TESTING)
 message( STATUS "BUILD_TESTING: " ${BUILD_TESTING} )
+
+if(NOT BUILD_CPPUNIT_TEST)
+  set(BUILD_CPPUNIT_TEST OFF)
+endif(NOT BUILD_CPPUNIT_TEST)
+message( STATUS "BUILD_CPPUNIT_TEST: " ${BUILD_CPPUNIT_TEST} )
 
 if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
   # To generate a compilation database "compilation_commands.json" for clang_check
@@ -122,13 +128,18 @@ endif(OPENMP_FOUND)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
-if(BUILD_TESTING)
+if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
+  
+  find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+  IF(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
+  endif(CMAKE_COMPILER_IS_GNUCXX)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
+endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
+
+if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
-
-  #string(REGEX REPLACE "CMakeFiles/[^;]+;?" "" SRCS "${test_py_files}")
-
 endif(BUILD_TESTING)
 # add sources and headers
 set (   source_files
@@ -202,6 +213,9 @@ set (   source_files
   routing/cognitive_map/sensor/JamSensor.cpp
   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
   routing/cognitive_map/sensor/SmokeSensor.cpp
+  routing/cognitive_map/fire_mesh/FireMesh.cpp
+  routing/cognitive_map/fire_mesh/Knot.cpp
+  routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
 
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
@@ -241,6 +255,9 @@ set (   header_files
   routing/cognitive_map/sensor/JamSensor.h
   routing/cognitive_map/sensor/LastDestinationsSensor.h
   routing/cognitive_map/sensor/SmokeSensor.h
+  routing/cognitive_map/fire_mesh/FireMesh.h
+  routing/cognitive_map/fire_mesh/Knot.h
+  routing/cognitive_map/fire_mesh/FireMeshStorage.h
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
@@ -379,7 +396,7 @@ endif()
 
 
 # ----------------------------- cTest ------------------------------------------
-if(BUILD_TESTING)
+if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   SET(BUILD_TEST_TIMEOUT 10800   CACHE STRING "Global timeout on all tests (seconds).")
   SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
   message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s"  )
@@ -387,25 +404,26 @@ if(BUILD_TESTING)
   include(CTest) # adding Dart support
 
   # test if code compiles and runs default setting. Takes about 30 seconds
-  add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
-    --build-and-test "${CMAKE_SOURCE_DIR}"  "${CMAKE_SOURCE_DIR}" #"${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
-    --build-generator ${CMAKE_GENERATOR}
-    --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
-    --build-two-config
-    --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    --build-project JPScore
-    --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
-    )
 
+  link_directories(${Boost_LIBRARY_DIRS})
   foreach (test_src ${test_files})
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
     add_executable( ${test} ${test_src})
-    target_link_libraries (${test} core)
+    target_link_libraries (${test} core ${Boost_LIBRARIES})
     add_test(NAME ${test} COMMAND ${test})
   endforeach(test_src ${test_files})
+endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
-
-
+if(BUILD_TESTING)
+#  add_test (jpscore_compile ${CMAKE_CTEST_COMMAND}
+#  --build-and-test "${CMAKE_SOURCE_DIR}"  "${CMAKE_SOURCE_DIR}" #"${EXECUTABLE_OUTPUT_PATH}" #"${CMAKE_BINARY_DIR}"
+#  --build-generator ${CMAKE_GENERATOR}
+#  --build-makeprogram ${CMAKE_MAKE_PROGRAM} -j${PROCESSOR_COUNT}
+#  --build-two-config
+#  --build-exe-dir ${EXECUTABLE_OUTPUT_PATH}  # todo wo soll der exe hin?: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+#  --build-project JPScore
+#  --test-command jpscore --ini=${CMAKE_SOURCE_DIR}/inputfiles/Default/ini.xml
+#  )
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
     foreach (test_src ${test_py_files})
@@ -418,3 +436,5 @@ if(BUILD_TESTING)
     # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
+
+install (TARGETS jpscore DESTINATION bin)

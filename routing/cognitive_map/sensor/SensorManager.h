@@ -35,6 +35,10 @@ class CognitiveMapStorage;
 class AbstractSensor;
 class Pedestrian;
 
+#include<unordered_map>
+#include<vector>
+//c++11 alias: Container to store options for the router (i. a. sensors)
+using optStorage = std::unordered_map<std::string,std::vector<std::string>>;
 
 #include <vector>
 #include <set>
@@ -63,7 +67,7 @@ public:
      void execute(const Pedestrian *, EventType);
 
      static SensorManager * InitWithAllSensors(const Building *, CognitiveMapStorage *);
-     static SensorManager * InitWithCertainSensors(const Building*, CognitiveMapStorage*, std::vector<std::string> sensors);
+     static SensorManager * InitWithCertainSensors(const Building*, CognitiveMapStorage*, const optStorage& optSto);
 
 private:
      const Building * const building;
