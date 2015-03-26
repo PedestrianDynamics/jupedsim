@@ -49,10 +49,10 @@ class FloorfieldViaFM
         FloorfieldViaFM(const FloorfieldViaFM& other);
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
-        void parseBuilding(const Building* const buildingArg);
+        void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
         void resetGoalAndCosts(const Goal* const goalArg);
         void lineScan(const std::vector<Wall*>& wallArg, double* const target, const double outside, const double inside);
-        void calculateDistanceField();
+        void calculateDistanceField(const double threshold);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}

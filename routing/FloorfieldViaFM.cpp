@@ -41,6 +41,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     delete[] dist2Wall;
     delete[] speedInitial;
     delete[] cost;
+    delete[] grad;
 
 }
 
@@ -48,15 +49,14 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     //ctor
 
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
+    parseBuilding(buildingArg, hxArg, hyArg);
 
-    //create rectgrid (grid->createGrid())
+    //create rectgrid (grid->createGrid())                                                                      <- DONE in parseBuilding
 
-    //'grid->GetnPoints()' and create all data fields: cost, gradient, speed, dis2wall, flag, secondaryKey
+    //'grid->GetnPoints()' and create all data fields: cost, gradient, speed, dis2wall, flag, secondaryKey      <- DONE in parseBuilding
 
-    //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed
+    //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed                   <- DONE in parseBuilding
     //this step includes Linescanalgorithmus? (maybe included in parsing above)
-
-    // @continue
 
     //call fkt: calculateDistanzefield
 
@@ -75,7 +75,7 @@ FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
 //    return *this;
 //}
 
-void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
+void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
     //init min/max before parsing
     double xMin = 100000.;
     double xMax = -100000.;
@@ -128,7 +128,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
     //create Rect Grid
     grid = new RectGrid();
     grid->setBoundaries(xMin, yMin, xMax, yMax);
-    grid->setSpacing( .05, .05);
+    grid->setSpacing(stepSizeX, stepSizeY);
     grid->createGrid();
 
     //create arrays
@@ -136,6 +136,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg) {
     dist2Wall = new double[grid->GetnPoints()];
     speedInitial = new double[grid->GetnPoints()];
     cost = new double[grid->GetnPoints];
+    grad = new Point[grid->GetnPoints];                  //created with other arrays, but not initialized yet
 
     //linescan using (std::vector<Wall*>)
     lineScan(allWalls, dist2Wall, 0., -2.);
@@ -253,7 +254,20 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
     } //loop over all lines
 }
 
-void FloorfieldViaFM::calculateDistanceField() {
+void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if threshold negative, then ignore it
+
+#ifdef TESTING
     //sanity check (fields <> 0)
+    if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final)
+    if (dist2Wall == 0) return;
+    if (speedInitial == 0) return;
+    if (cost == 0) return;
+    if (grad == 0) return;
+#endif //TESTING
+
+    //using dist2Wall for results, (pseudo)"speedfunction" 1 all around
+    //stop if smallest value in narrowband is >= threshold
+
+
 
 }
