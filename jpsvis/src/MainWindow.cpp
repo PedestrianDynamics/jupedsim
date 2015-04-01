@@ -344,7 +344,7 @@ void MainWindow::slotStartPlaying()
                                //visualisationThread->moveToThread(QApplication::instance()->thread());
                                visualisationThread->run();
                            });
-#elif
+#else
             visualisationThread->start();
 
 #endif
@@ -355,7 +355,7 @@ void MainWindow::slotStartPlaying()
             dispatch_async(main_q, ^(void){
                                dataTransferThread->run();
                            });
-#elif
+#else
             dataTransferThread->start();
 
 #endif

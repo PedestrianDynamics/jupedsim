@@ -344,7 +344,7 @@ void Frame::ComputePolyData3D()
         //double max_height=350;
 
 
-        pos[2]+=height_i/2.0; // slightly above ground
+        pos[2]+=height_i/2.0 - 30; // slightly above ground
         rad[0]/=20;
         rad[0]=1;
         rad[2]/=20;
@@ -365,7 +365,7 @@ void Frame::ComputePolyData3D()
 
 
         //rotation matrix around x-axis
-        double roX[3][3] = {{1, 0,                    0},
+        double roX[3][3] = {{1, 0, 0},
             {0, cos(rot[0]),-sin(rot[0])},
             {0, sin(rot[0]), cos(rot[0])}
         };

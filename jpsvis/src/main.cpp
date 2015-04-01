@@ -65,7 +65,9 @@
 int main(int argc, char *argv[])
 {
 
+#ifdef __APPLE__
     InitMultiThreading();
+#endif
 
     QApplication a(argc, argv);
     // To ensure that decimal numbers use a "point" instead of "colon" on some systems

@@ -90,26 +90,9 @@
 #include "geometry/PointPlotter.h"
 #include "Debug.h"
 
-#ifndef __APPLE__
-#include <thread>
-#include <dispatch/dispatch.h>
-#include "fix/osx_thread_fix.h"
-
-std::thread::id main_thread_id = std::this_thread::get_id();
-dispatch_queue_t main_q = dispatch_get_main_queue();
-
-void is_main_thread() {
-    if ( main_thread_id == std::this_thread::get_id() )
-        std::cout << "This is the main thread.\n";
-    else
-        std::cout << "This is not the main thread.\n";
-}
-
-#endif
 
 #define VTK_CREATE(type, name) \
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
-
 
 
 ThreadVisualisation::ThreadVisualisation(QObject *parent):
@@ -158,7 +141,7 @@ void ThreadVisualisation::run()
 {
 
     //deactivate the output windows
-    //vtkObject::GlobalWarningDisplayOff();
+    vtkObject::GlobalWarningDisplayOff();
 
     //emit signalStatusMessage("running");
 
@@ -371,7 +354,7 @@ void ThreadVisualisation::run()
     setNavLinesColor(SystemSettings::getNavLinesColor());
 
 
-
+    renderWinInteractor->Start();
 
 
 #ifdef __APPLE__
@@ -380,7 +363,7 @@ void ThreadVisualisation::run()
 //dispatch_async(main_q, ^(void){
 //          is_main_thread(); //Unfortunately not
 //          std::cout << "now spinning the visualizer" << std::endl;
-                  renderWinInteractor->Start();
+//                  renderWinInteractor->Start();
 
 //});
     //[[NSThread new] start];
@@ -392,17 +375,19 @@ void ThreadVisualisation::run()
     emit signal_controlSequences("CONTROL_RESET");
 
 
+// still debugging. TODO, check the source of the leak while using cocoa
+#ifndef __APPLE__
     //clear some stuffs
     //delete extern_trail_plotter;
-    //finalize();
+    finalize();
 
-    //renderer->Delete();
-    //renderWindow->Delete();
-    //renderWinInteractor->Delete();
-    //_topViewCamera->Delete();
-    //renderer=NULL;
-
-    //delete renderingTimer;
+    renderer->Delete();
+    renderWindow->Delete();
+    renderWinInteractor->Delete();
+    _topViewCamera->Delete();
+    renderer=NULL;
+    delete renderingTimer;
+#endif
 
 }
 
@@ -607,7 +592,18 @@ void ThreadVisualisation::initGlyphs3D()
         agentShape->SetInputConnection(tris->GetOutputPort());
     */
 
-    extern_glyphs_pedestrians_3D->SetSourceConnection(agentShape->GetOutputPort());
+    //speed the rendering using triangles stripers
+    //vtkTriangleFilter *tris = vtkTriangleFilter::New();
+    VTK_CREATE(vtkTriangleFilter, tris);
+    tris->SetInputConnection(agentShape->GetOutputPort());
+    //tris->GetOutput()->ReleaseData();
+
+    //vtkStripper *strip = vtkStripper::New();
+    VTK_CREATE(vtkStripper, strip);
+    strip->SetInputConnection(tris->GetOutputPort());
+    //strip->GetOutput()->ReleaseData();
+
+    extern_glyphs_pedestrians_3D->SetSourceConnection(strip->GetOutputPort());
 
     //first frame
     Frame * frame = extern_trajectories_firstSet.GetFrames().begin()->second;
@@ -615,10 +611,10 @@ void ThreadVisualisation::initGlyphs3D()
     if(frame) pData=frame->GetPolyData2D();
 
 #if VTK_MAJOR_VERSION <= 5
-    extern_glyphs_pedestrians_3D->SetSource(agentShape->GetOutput());
+    extern_glyphs_pedestrians_3D->SetSource(strip->GetOutput());
     if (frame )extern_glyphs_pedestrians_3D->SetInput(pData);
 #else
-    extern_glyphs_pedestrians_3D->SetInputConnection(agentShape->GetOutputPort());
+    extern_glyphs_pedestrians_3D->SetInputConnection(strip->GetOutputPort());
     if (frame )extern_glyphs_pedestrians_3D->SetInputData(pData);
 #endif
 
@@ -639,21 +635,20 @@ void ThreadVisualisation::initGlyphs3D()
     mapper->SetLookupTable(lut);
 
     extern_glyphs_pedestrians_actor_3D->SetMapper(mapper);
-    //extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
+    extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
     //if(extern_trajectories_firstSet.getNumberOfAgents()>0)
     renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
 
     extern_glyphs_pedestrians_actor_3D->SetVisibility(false);
 }
 
-void  ThreadVisualisation::init() {}
-
+void  ThreadVisualisation::init()
+{
+}
 
 void ThreadVisualisation::finalize()
 {
 }
-
-
 
 void ThreadVisualisation::QcolorToDouble(const QColor &col, double *rgb)
 {
@@ -664,7 +659,6 @@ void ThreadVisualisation::QcolorToDouble(const QColor &col, double *rgb)
 
 void ThreadVisualisation::initLegend(/*std::vector scalars*/)
 {
-
     //lookup table
     vtkLookupTable* lut =  vtkLookupTable::New();
     lut->SetHueRange(0.0,0.566);
