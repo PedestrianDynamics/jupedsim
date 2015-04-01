@@ -58,9 +58,11 @@ message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
 INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR} )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 
+# these files compile need Cocoa (evtl. Mac specific)
+SET(MAC_FIX_SRC src/fix/osx_thread_fix.mm)
+SET(MAC_FIX_HDR src/fix/osx_thread_fix.h)
 
 set( SAMPLE_SRCS
-  src/fix/osx_thread_fix.mm
   src/geometry/Building.cpp 
   src/geometry/Crossing.cpp 
   src/geometry/Goal.cpp
@@ -106,7 +108,6 @@ set( SAMPLE_SRCS
   )  
 # all header files that should be treated with moc
 set( SAMPLE_HDR
-  src/fix/osx_thread_fix.h
   src/geometry/Building.h
   src/geometry/Crossing.h
   src/geometry/Goal.h
@@ -149,6 +150,11 @@ set( SAMPLE_HDR
   src/MainWindow.h
   src/TrailPlotter.h
   )
+IF(APPLE)
+  SET(SAMPLE_SRCS "${SAMPLE_SRCS} ${MAC_FIX_SRC}")
+  SET(SAMPLE_HDR "${SAMPLE_HDR} ${MAC_FIX_HDR}")
+ENDIF(APPLE)
+
 
 # *.ui files
 set( SAMPLE_UIS
