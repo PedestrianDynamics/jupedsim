@@ -542,7 +542,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
         _currentFrame.clear();
 
     } else if (qName == "agent") {
-    } else if (qName == "geometr dataset->addFrame(frame);y") {
+    } else if (qName == "geometry") {
     } else if (qName == "point") {
     } else if (qName == "shape") {
         _dataset->setInitialHeights(_initialPedestriansHeights);
@@ -737,7 +737,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
     //TODO:dirty hack for parsing the Hlines
     // free memory
     delete building;
-
     return true;
 }
 
