@@ -60,7 +60,8 @@ BOOST_AUTO_TEST_CASE(POINT_TO_STRING_Test)
     {
         p1.SetX(i);
         p1.SetY(i+10);
-        BOOST_CHECK( p1.toString() == "( " + xpt[int(i)] + " : " + ypt[int(i)] + " )" );
+        BOOST_CHECK( p1.toString() == "( " + xpt[int(i)] +
+                                     " : " + ypt[int(i)] + " )" );
     }
     
     Point p2(-2,-0.5);
@@ -100,6 +101,7 @@ BOOST_AUTO_TEST_CASE(POINT_NORMALIZE_TEST)
     Point p1(0.0001,0.0001);
     Point p2(10,10);
     p2 = p1.Normalized();
+    BOOST_MESSAGE(" check for norm < J_EPS ");
     BOOST_REQUIRE( p2.GetX() == 0.0 && p2.GetY() == 0.0 );
     
     for (double i = 0, j = -10; i < 5; ++i, ++j)
@@ -107,14 +109,116 @@ BOOST_AUTO_TEST_CASE(POINT_NORMALIZE_TEST)
         p1.SetX(i);
         p1.SetY(j);
         p2 = p1.Normalized();
-        BOOST_REQUIRE( p2.GetX() == i / p1.Norm() && p2.GetY() == j / p1.Norm() );
+        BOOST_MESSAGE(" check for norm > J_EPS ");
+        BOOST_REQUIRE( p2.GetX() == i / p1.Norm() && 
+                       p2.GetY() == j / p1.Norm() );
         
         p2 = p1.NormalizedMolified();
+        BOOST_MESSAGE(" check for norm > J_EPS_GOAL ");
         BOOST_REQUIRE( p2.GetX() == i / p1.NormMolified() && 
                        p2.GetY() == j / p1.NormMolified() );
         
     }
-    
-    
+    BOOST_MESSAGE("Leaving normalize test");
 }
+
+BOOST_AUTO_TEST_CASE(POINT_DET_TEST)
+{
+    BOOST_MESSAGE("starting determinant test");
+    const double PI = 3.14159265358979323846;
+    Point p1(10,5);
+    Point p2;
+    for (int i = 1; i < 5; ++i)
+    {
+        p2.SetX( cos(PI / -i) );
+        p2.SetY( sin(PI / i) );
+        BOOST_CHECK( p1.Det(p2) == 10 * sin(PI/i) - 5 * cos(PI/i));
+        //BOOST_CHECK( p1.Det(p2) == p1.CrossP(p2));
+    }
+    BOOST_MESSAGE("Leaving determinant test");
+}
+
+BOOST_AUTO_TEST_CASE(POINT_SCALARPRODUCT_TEST)
+{
+    BOOST_MESSAGE("starting scalar product test");
+    const double PI = 3.14159265358979323846;
+    Point p1(10,5);
+    Point p2;
+    for (int i = 1; i < 5; ++i)
+    {
+        p2.SetX( cos(PI /  i) );
+        p2.SetY( sin(PI / -i) );
+        BOOST_CHECK( p1.ScalarP(p2) == 10 * p2.GetX() + 5 * p2.GetY() );
+    }
+    BOOST_MESSAGE("Leaving scalar product test");
+}
+
+BOOST_AUTO_TEST_CASE(POINT_OPEROVERLOADING_TEST)
+{
+    BOOST_MESSAGE("starting operator overload test");
+    const double PI = 3.14159265358979323846;
+    for (int i = 1; i < 10; ++i)
+    {
+        Point p1(i, -i*10);
+        Point p2( cos(PI/i), sin(PI/i) );
+        
+        Point sum = p1 + p2;
+        BOOST_REQUIRE( sum.GetX() == i + cos(PI/i) &&
+                       sum.GetY() == -i*10 + sin(PI/i) );
+        Point sub = p1 - p2;
+        BOOST_REQUIRE( sub.GetX() == i - cos(PI/i) &&
+                       sub.GetY() == -i*10 - sin(PI/i) );
+        Point mul = p2 * i;
+        BOOST_REQUIRE( mul.GetX() == i * cos(PI/i) &&
+                       mul.GetY() == i * sin(PI/i) );
+        Point pluseq(i, i);
+        pluseq += p1;
+        BOOST_REQUIRE( pluseq.GetX() == i + i &&
+                       pluseq.GetY() == -i*10 + i );
+        Point div = p2 / 1E-7;
+        BOOST_REQUIRE( div.GetX() == p2.GetX() &&
+                       div.GetY() == p2.GetY() );
+        div = p2 / 2;
+        BOOST_REQUIRE( div.GetX() == p2.GetX() / 2 &&
+                       div.GetY() == p2.GetY() / 2 );
+        
+        BOOST_CHECK( p1 != p2 );
+        p1.SetX( p2.GetX() );
+        p1.SetY( p2.GetY() );
+        BOOST_CHECK( p1 == p2 );
+    }
+    BOOST_MESSAGE("Leaving operator overload test");
+}
+
+BOOST_AUTO_TEST_CASE(POINT_COORDTRANS_TO_ELLIPSE_TEST)
+{
+    BOOST_MESSAGE("starting coord transform to ellipse");
+    const double PI = 3.14159265358979323846;
+    for (int i = 1; i < 5; ++i)
+    {
+        Point p1(i*10, i/10);
+        Point center(i, -i);
+        Point check = (p1 - center).Rotate( cos(PI/i), -sin(PI/i) );
+        Point transform = p1.CoordTransToEllipse( center, cos(PI/i), sin(PI/i) );
+        BOOST_CHECK( transform == check );
+    }
+    BOOST_MESSAGE("Leaving coord transform to ellipse");
+}
+
+BOOST_AUTO_TEST_CASE(POINT_COORDTRANS_TO_CART_TEST)
+{
+    BOOST_MESSAGE("starting coord transform to cartesian");
+    const double PI = 3.14159265358979323846;
+    for (int i = 1; i < 5; ++i)
+    {
+        Point p1(i*10, i/10);
+        Point center(-i, i);
+        Point transform = p1.CoordTransToCart( center, cos(PI/i), sin(PI/i) );
+        Point check = p1.Rotate( cos(PI/i), sin(PI/i) );
+        BOOST_REQUIRE( transform.GetX() == check.GetX() - i &&
+                       transform.GetY() == check.GetY() + i );
+    }
+    BOOST_MESSAGE("starting coord transform to cartesian");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
