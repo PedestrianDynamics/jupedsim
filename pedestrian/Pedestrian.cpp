@@ -793,6 +793,18 @@ double Pedestrian::GetPremovementTime()
      return _premovement;
 }
 
+void Pedestrian::SetRiskTolerance(double tol)
+{
+     if (tol>1) tol=1;
+     if(tol<0) tol=0;
+     _riskTolerance=tol;
+}
+
+double Pedestrian::GetRiskTolerance() const
+{
+     return _riskTolerance;
+}
+
 const Building* Pedestrian::GetBuilding()
 {
      return _building;

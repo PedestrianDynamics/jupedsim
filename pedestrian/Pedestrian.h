@@ -55,6 +55,7 @@ private:
      double _height;
      double _age;
      double _premovement = 0;
+     double _riskTolerance=0;
      std::string _gender;
 
      //gcfm specific parameters
@@ -128,7 +129,7 @@ private:
      Building * _building;
 
 public:
-     // Konstruktoren
+     // constructors
      Pedestrian();
      virtual ~Pedestrian();
 
@@ -324,6 +325,20 @@ public:
       * Set/Get the time after which this pedestrian will start taking actions.
       */
      double GetPremovementTime();
+
+     /**
+      * Set/Get the risk tolerance of a pedestrians.
+      * The value should be in the interval [0 1].
+      * It will be truncated accordingly if not in that interval.
+      */
+     void SetRiskTolerance(double tol);
+
+     /**
+      * Set/Get the risk tolerance of a pedestrians.
+      * The value should be in the interval [0 1].
+      * It will be truncated accordingly if not in that interval.
+      */
+     double GetRiskTolerance() const;
 
      /**
       * return the pedestrian color used for visualiation.

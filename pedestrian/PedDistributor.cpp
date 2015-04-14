@@ -257,6 +257,8 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           double patience=  xmltof(e->Attribute("patience"), 5);
           double premovement_mean= xmltof(e->Attribute("pre_movement_mean"), 0);
           double premovement_sigma= xmltof(e->Attribute("pre_movement_sigma"), 0);
+          double risk_tolerance_mean= xmltof(e->Attribute("risk_tolerance_mean"), 0);
+          double risk_tolerance_sigma= xmltof(e->Attribute("risk_tolerance_sigma"), 0);
 
           double x_min=xmltof(e->Attribute("x_min"), -FLT_MAX);
           double x_max=xmltof(e->Attribute("x_max"), FLT_MAX);
@@ -292,6 +294,7 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           dis->SetHeight(height);
           dis->SetPatience(patience);
           dis->InitPremovementTime(premovement_mean,premovement_sigma);
+          dis->InitRiskTolerance(risk_tolerance_mean,risk_tolerance_sigma);
 
           if(agentPars.count(agent_para_id)==0)
           {
@@ -759,6 +762,7 @@ void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>&
         ped->SetSubRoomID(r->GetSubRoomID());
         ped->SetPatienceTime(para->GetPatience());
         ped->SetPremovementTime(para->GetPremovementTime());
+        ped->SetRiskTolerance(para->GetRiskTolerance());
         const Point& start_pos = para->GetStartPosition();
 
 
@@ -843,4 +847,14 @@ void StartDistributionRoom::InitPremovementTime(double mean, double stdv)
 double StartDistributionRoom::GetPremovementTime()
 {
      return _premovementTime(_generator);
+}
+
+void StartDistributionRoom::InitRiskTolerance(double mean, double stdv)
+{
+     _riskTolerance = std::normal_distribution<double>(mean,stdv);
+}
+
+double StartDistributionRoom::GetRiskTolerance()
+{
+     return _riskTolerance(_generator);
 }
