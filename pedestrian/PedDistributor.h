@@ -51,6 +51,7 @@ private:
      int _goalID;
      int _routerID;
      int _routeID;
+     int _subroomID;
      //demographic parameters
      //TODO: should also follow a distribution, see _premovement
      std::string _gender;
@@ -101,6 +102,8 @@ public:
     void SetHeight(int height);
     int GetRoomId() const;
     void SetRoomId(int roomId);
+    int GetSubroomID() const;
+    void SetSubroomID(int subroomID);
     int GetRouteId() const;
     void SetRouteId(int routeId);
     int GetRouterId() const;
@@ -118,19 +121,8 @@ public:
     double GetPremovementTime();
     void InitRiskTolerance(double mean, double stdv);
     double GetRiskTolerance();
-};
 
-//TODO merge the two classes and set the _subRoomID=-1
-class StartDistributionSubroom : public StartDistributionRoom {
-private:
-     int _subroomID;
-
-public:
-     StartDistributionSubroom(unsigned int seed);
-     virtual ~StartDistributionSubroom();
-
-     int GetSubroomID() const;
-     void SetSubroomID(int i);
+    Pedestrian* GenerateAgent();
 };
 
 
@@ -140,7 +132,7 @@ public:
 class PedDistributor {
 private:
      std::vector<StartDistributionRoom*> _start_dis; // ID startraum, subroom und Anz
-     std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
+     std::vector<StartDistributionRoom*> _start_dis_sub; // ID startraum, subroom und Anz
      //std::string _projectFilename; // store the file for later user
      //std::map<int, AgentsParameters*> _agentsParameters;
      bool InitDistributor(const string&, const std::map<int, std::shared_ptr<AgentsParameters> >& , unsigned int);
@@ -162,7 +154,7 @@ public:
 
      // sonstige Funktionen
      static vector<Point >  PossiblePositions(const SubRoom& r);
-     void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionSubroom* parameters,Building* building) const;
+     void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionRoom* parameters,Building* building) const;
 
 
      bool Distribute(Building* building) const;
