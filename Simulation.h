@@ -51,6 +51,11 @@
 #include "pedestrian/PedDistributor.h"
 #include "routing/CognitiveMapRouter.h"
 #include "events/EventManager.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+//Forward declarations TO DO
+//class AgentsSourcesManager;
+class EventManager;
 
 class Simulation
 {
@@ -78,13 +83,23 @@ private:
     EventManager* _em;
     /// argument parser
     ArgumentParser _argsParser;
+    /// Agents sources manager
+    AgentsSourcesManager _agentSrcManager;
     /// profiling flag
     bool _profiling;
     /// architecture flag
     int _hpc;
 
 public:
+
+    /**
+     * Constructor
+     */
     Simulation(const ArgumentParser& args);
+
+    /**
+     * Destructor
+     */
     virtual ~Simulation();
 
     /**
@@ -107,9 +122,6 @@ public:
      */
     void UpdateRoutesAndLocations();
 
-
-    //void Update(double &b, double &p, double &t, double &g);
-
     /**
      * Set the ProfilingFlag
      */
@@ -129,6 +141,16 @@ public:
      * print some statistics about the simulation
      */
     void PrintStatistics();
+
+    /**
+     * @return the agents source manager
+     */
+    const AgentsSourcesManager& GetAgentSrcManager();
+
+    /**
+     * Check if any agents are waiting to enter the simulation
+     */
+    void ProcessAgentsQueue();
 
 };
 

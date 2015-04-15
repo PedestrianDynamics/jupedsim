@@ -29,7 +29,11 @@
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
-// #include "logging.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+#include <thread>
+#include <functional>
+//#include <boost/version.hpp>
 
 int main(int argc, char **argv)
 {
@@ -51,10 +55,23 @@ int main(int argc, char **argv)
 
      if(status&&sim.InitArgs(*args))
      {
+          //Start the threads for managing the sources of agents
+          //AgentsSourcesManager sManager;
+          std::thread t1(sim.GetAgentSrcManager(),21);
+          //Start the thread for managing incoming messages from MatSim
+
+          //Start the thread for managing outgoing messages to MatSim
+
+          //main thread for the simulation
           Log->Write("INFO: \tStart runSimulation()");
           int evacTime = sim.RunSimulation();
           Log->Write("\nINFO: \tEnd runSimulation()");
           time(&endtime);
+
+          //the execution is finished at this time
+          //so join the other threads
+          t1.join();
+
 
           // some output
           if(args->ShowStatistics())
@@ -85,6 +102,7 @@ int main(int argc, char **argv)
                printf("Warnings            : %d\n", Log->GetWarnings());
                printf("Errors              : %d\n", Log->GetErrors());
           }
+
      }
      else
      {

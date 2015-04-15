@@ -32,7 +32,8 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
-//#include "geometry/Goal.h"
+#include "pedestrian/AgentsSourcesManager.h"
+#include "pedestrian/AgentsQueue.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -99,7 +100,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
                delete Log;
           Log = new FileHandler(name);
      }
-          break;
+     break;
      default:
           printf("Wrong option for Logfile!\n\n");
           return false;
@@ -133,9 +134,9 @@ bool Simulation::InitArgs(const ArgumentParser& args)
                          "INFO: \tFormat vtk not yet supported in streaming\n");
                return false;
           }
-              default: {
-                  return false;
-              }
+          default: {
+               return false;
+          }
           }
 
           s.append("\tonline streaming enabled \n");
@@ -184,9 +185,9 @@ bool Simulation::InitArgs(const ArgumentParser& args)
                // _iod->AddIO(output);
                break;
           }
-              default: {
-                  break;
-              }
+          default: {
+               break;
+          }
           }
      }
 
@@ -217,6 +218,13 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
      // IMPORTANT: do not change the order in the following..
      _building = std::unique_ptr<Building>(new Building(args.GetProjectFile(), args.GetProjectRootDir(), *_routingEngine, *distributor, args.GetLinkedCellSize()));
+
+     // Initialize the agents sources that have been collected in the pedestrians distributor
+     for (const auto& src: distributor->GetAgentsSources())
+     {
+          _agentSrcManager.AddSource(src);
+          src->Dump();
+     }
 
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
@@ -281,6 +289,7 @@ int Simulation::RunSimulation()
 
      //first initialisation needed by the linked-cells
      UpdateRoutesAndLocations();
+     ProcessAgentsQueue();
 
      //needed to control the execution time PART 1
      //in the case you want to run in no faster than realtime
@@ -291,6 +300,9 @@ int Simulation::RunSimulation()
      while (_nPeds > 0 && t < _tmax)
      {
           t = 0 + (frameNr - 1) * _deltaT;
+
+          //process the queue for incomming pedestrians
+          ProcessAgentsQueue();
 
           // update the positions
           _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
@@ -322,7 +334,7 @@ int Simulation::RunSimulation()
           // double timeToWait=t-difftime(endtime, starttime);
           // clock_t goal = timeToWait*1000 + clock();
           // while (goal > clock());
-         ++frameNr;
+          ++frameNr;
 
      }
      // writing the footer
@@ -479,7 +491,7 @@ void Simulation::PrintStatistics()
      {
           auto&& room=it.second;
           if(room->GetCaption()!="outside")
-          Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
+               Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
      }
 
      Log->Write("\nUsage of Exits");
@@ -495,4 +507,21 @@ void Simulation::PrintStatistics()
      }
 
      Log->Write("\n");
+}
+
+
+const AgentsSourcesManager& Simulation::GetAgentSrcManager()
+{
+     return _agentSrcManager;
+}
+
+void Simulation::ProcessAgentsQueue()
+{
+     vector<Pedestrian*> peds;
+     AgentsQueue::GetandClear(peds);
+
+     for(auto&& ped: peds)
+     {
+          _building->AddPedestrian(ped);
+     }
 }

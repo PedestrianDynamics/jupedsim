@@ -24,6 +24,8 @@
  *
  *
  **/
+
+
 #include <cmath>
 #include "PedDistributor.h"
 #include "../tinyxml/tinyxml.h"
@@ -32,175 +34,8 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
-// #include "../logging.h"
+
 using namespace std;
-
-
-/************************************************************
- StartDistributionRoom
- ************************************************************/
-StartDistributionRoom::StartDistributionRoom(int seed)
-{
-    _roomID = -1;
-    _subroomID=-1;
-    _nPeds = -1;
-    _groupID = -1;
-    _goalID = -1;
-    _routerID = -1;
-    _routeID = -1;
-    _age = -1;
-    _height = -1;
-    _startX = NAN;
-    _startY = NAN;
-    _startZ = NAN;
-    _gender = "male";
-    _patience=5;
-    _xMin=-FLT_MAX;
-    _xMax=FLT_MAX;
-    _yMin=-FLT_MAX;
-    _yMax=FLT_MAX;
-    _groupParameters=NULL;
-    _generator = std::default_random_engine(seed);
-}
-
-StartDistributionRoom::~StartDistributionRoom()
-{
-}
-
-
-int StartDistributionRoom::GetAgentsNumber() const
-{
-     return _nPeds;
-}
-
-
-// Setter-Funktionen
-
-void StartDistributionRoom::SetRoomID(int id)
-{
-     _roomID = id;
-}
-
-int StartDistributionRoom::GetAge() const
-{
-     return _age;
-}
-
-void StartDistributionRoom::SetAge(int age)
-{
-     _age = age;
-}
-
-const std::string& StartDistributionRoom::GetGender() const
-{
-     return _gender;
-}
-
-void StartDistributionRoom::SetGender(const std::string& gender)
-{
-     _gender = gender;
-}
-
-int StartDistributionRoom::GetGoalId() const
-{
-     return _goalID;
-}
-
-void StartDistributionRoom::SetGoalId(int goalId)
-{
-     _goalID = goalId;
-}
-
-int StartDistributionRoom::GetGroupId() const
-{
-     return _groupID;
-}
-
-void StartDistributionRoom::SetGroupId(int groupId)
-{
-     _groupID = groupId;
-}
-
-int StartDistributionRoom::GetHeight() const
-{
-     return _height;
-}
-
-void StartDistributionRoom::SetHeight(int height)
-{
-     _height = height;
-}
-
-int StartDistributionRoom::GetRoomId() const
-{
-     return _roomID;
-}
-
-void StartDistributionRoom::SetRoomId(int roomId)
-{
-     _roomID = roomId;
-}
-
-int StartDistributionRoom::GetSubroomID() const
-{
-     return _subroomID;
-}
-
-void StartDistributionRoom::SetSubroomID(int subroomId)
-{
-     _subroomID = subroomId;
-}
-int StartDistributionRoom::GetRouteId() const
-{
-     return _routeID;
-}
-
-void StartDistributionRoom::SetRouteId(int routeId)
-{
-     _routeID = routeId;
-}
-
-int StartDistributionRoom::GetRouterId() const
-{
-     return _routerID;
-}
-
-void StartDistributionRoom::SetRouterId(int routerId)
-{
-     _routerID = routerId;
-}
-
-void StartDistributionRoom::SetAgentsNumber(int N)
-{
-     _nPeds = N;
-}
-
-
-/************************************************************
- StartDistributionSubRoom
- ************************************************************/
-//StartDistributionSubroom::StartDistributionSubroom(unsigned int seed) : StartDistributionRoom(seed)
-//{
-//     _subroomID = -1;
-//}
-//
-//
-//StartDistributionSubroom::~StartDistributionSubroom()
-//{
-//}
-//
-//int StartDistributionSubroom::GetSubroomID() const
-//{
-//     return _subroomID;
-//}
-//
-//// Setter-Funktionen
-//
-//void StartDistributionSubroom::SetSubroomID(int i)
-//{
-//     _subroomID = i;
-//}
-
 
 /************************************************************
  PedDistributor
@@ -208,15 +43,14 @@ void StartDistributionRoom::SetAgentsNumber(int N)
 
 PedDistributor::PedDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
 {
-     _start_dis = vector<StartDistributionRoom* > ();
-     _start_dis_sub = vector<StartDistributionRoom* > ();
+     _start_dis = vector<StartDistribution* > ();
+     _start_dis_sub = vector<StartDistribution* > ();
      InitDistributor(fileName, agentPars, seed);
 }
 
 
 PedDistributor::~PedDistributor()
 {
-
      for (unsigned int i = 0; i < _start_dis.size(); i++)
      {
           delete _start_dis[i];
@@ -225,9 +59,14 @@ PedDistributor::~PedDistributor()
      {
           delete _start_dis_sub[i];
      }
+
      _start_dis_sub.clear();
      _start_dis.clear();
-     //empty the parameters maps
+}
+
+const vector<std::shared_ptr<AgentsSource> >& PedDistributor::GetAgentsSources() const
+{
+     return _start_dis_sources;
 }
 
 bool PedDistributor::InitDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
@@ -284,7 +123,7 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
               return false;
           }
 
-          StartDistributionRoom* dis=new StartDistributionRoom(seed);
+          StartDistribution* dis=new StartDistribution(seed);
           dis->SetRoomID(room_id);
           dis->SetSubroomID(subroom_id);
           dis->SetGroupId(group_id);
@@ -326,9 +165,22 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
      TiXmlNode* xSources=xRootNode->FirstChild("agents_sources");
      if(xSources)
           for(TiXmlElement* e = xSources->FirstChildElement("source"); e;
-                    e = e->NextSiblingElement("source")) {
-               Log->Write("INFO:\tSource with id %s will not be parsed !",e->Attribute("id"));
+                    e = e->NextSiblingElement("source"))
+          {
 
+               int id = xmltoi(e->Attribute("id"),-1);
+               int frequency = xmltoi(e->Attribute("frequency"),-1);
+               int agents_max = xmltoi(e->Attribute("agents_max"),-1);
+               int group_id = xmltoi(e->Attribute("group_id"),-1);
+               string caption = xmltoa(e->Attribute("caption"),"no caption");
+
+               //shared_ptr<AgentsSource> my_ptr(new classA);
+               auto source= shared_ptr<AgentsSource>(new AgentsSource(id,caption,agents_max,group_id,frequency));
+               _start_dis_sources.push_back(source);
+
+               //look for the start distribution and populate the source
+
+               Log->Write("INFO:\tSource with id %s will not be parsed !",e->Attribute("id"));
           }
 
      Log->Write("INFO: \t...Done");
@@ -483,12 +335,46 @@ bool PedDistributor::Distribute(Building* building) const
           // distributing
           for (unsigned int is = 0; is < akt_anz.size(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
+               //workaround, the subroom will be changing at each run.
+               //so the last subroom ID is not necessarily the 'real' one
+               // might conflicts with sources
+               dist->SetSubroomID(sr->GetSubRoomID());
                if (akt_anz[is] > 0)
+               {
                     DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist,building);
+               }
           }
           nPeds += N;
      }
 
+     //now populate the sources
+     vector<Point> emptyPositions;
+     for(const auto& source: _start_dis_sources)
+     {
+          for(const auto& dist: _start_dis_sub)
+          {
+               if(source->GetGroupId()==dist->GetGroupId())
+               {
+                    for(int i=0;i<source->GetMaxAgents();i++)
+                    {
+                         source->Add(dist->GenerateAgent(building, &pid,emptyPositions));
+                    }
+               }
+               //cout<<"ID sub: "<<dist->GetGroupId()<<endl;
+          }
+
+          for(const auto& dist: _start_dis)
+          {
+               if(source->GetGroupId()==dist->GetGroupId())
+               {
+                    for(int i=0;i<source->GetMaxAgents();i++)
+                    {
+                         source->Add(dist->GenerateAgent(building, &pid,emptyPositions));
+                    }
+               }
+               //cout<<"ID room: "<<dist->GetGroupId()<<endl;
+          }
+     }
      return nPeds;
 }
 
@@ -704,258 +590,108 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
  *   - routing: wird benötigt um die Zielline der Fußgänger zu initialisieren
  * */
 void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>& positions, int* pid,
-          StartDistributionRoom* para, Building* building) const
+          StartDistribution* para, Building* building) const
 {
-
-    //in the case a range was specified
-    double distArea[4];
-    para->Getbounds(distArea);
-    AgentsParameters* agents_para=para->GetGroupParameters();
 
     // set the pedestrians
     for (int i = 0; i < nAgents; ++i) {
 
-        Pedestrian* ped = new Pedestrian();
-        // PedIndex
-        ped->SetID(*pid);
-        ped->SetAge(para->GetAge());
-        ped->SetGender(para->GetGender());
-        ped->SetHeight(para->GetHeight());
-        ped->SetFinalDestination(para->GetGoalId());
-        ped->SetGroup(para->GetGroupId());
-        ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
-        //ped->SetTrip(); // not implemented
+        Pedestrian* ped = para->GenerateAgent(building,pid,positions);
 
-        // a und b setzen muss vor v0 gesetzt werden,
-        // da sonst v0 mit Null überschrieben wird
-        JEllipse E = JEllipse();
-        E.SetAv(agents_para->GetAtau());
-        E.SetAmin(agents_para->GetAmin());
-        E.SetBmax(agents_para->GetBmax());
-        E.SetBmin(agents_para->GetBmin());
-        ped->SetEllipse(E);
-        ped->SetTau(agents_para->GetTau());
-        ped->SetV0Norm(agents_para->GetV0(),
-                  agents_para->GetV0DownStairs(),
-                  agents_para->GetV0UpStairs());
-        //ped->SetV(Point(0.0,0.0));
-
-        // first default Position
-        int index = -1;
-        //int index = rand() % positions.size();
-
-        //in the case a range was specified
-        for (unsigned int a=0;a<positions.size();a++)
-        {
-            Point pos=positions[a];
-            if((distArea[0]<=pos._x) &&
-                    (pos._x <= distArea[1])&&
-                    (distArea[2]<=pos._y) &&
-                    (pos._y < distArea[3]))
-            {
-                index=a;
-                break;
-            }
-        }
-        if(index==-1)
-        {
-            Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
-                    distArea[0],distArea[1],distArea[2],distArea[3]);
-            Log->Write("ERROR:\t Specifying a subroom_id might help");
-        }
-
-        Point pos = positions[index];
-        ped->SetPos(pos,true); //true for the initial position
-        ped->SetBuilding(building);
-        positions.erase(positions.begin() + index);
-        ped->SetRoomID(para->GetRoomId(),"");
-        ped->SetSubRoomID(r->GetSubRoomID());
-        ped->SetPatienceTime(para->GetPatience());
-        ped->SetPremovementTime(para->GetPremovementTime());
-        ped->SetRiskTolerance(para->GetRiskTolerance());
-        const Point& start_pos = para->GetStartPosition();
-
-
-        if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
-            if(r->IsInSubRoom(start_pos)==false){
-                Log->Write("ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
-                                    *pid, para->GetRoomId(), start_pos.toString().c_str());
-                Log->Write("ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
-                exit(EXIT_FAILURE);
-            }
-
-            ped->SetPos(start_pos,true); //true for the initial position
-            Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
-                    *pid, para->GetRoomId(), start_pos.toString().c_str());
-        }
-
-        //r->AddPedestrian(ped);
         building->AddPedestrian(ped);
-        (*pid)++;
     }
 }
+//void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>& positions, int* pid,
+//          StartDistributionRoom* para, Building* building) const
+//{
+//
+//    //in the case a range was specified
+//    double distArea[4];
+//    para->Getbounds(distArea);
+//    AgentsParameters* agents_para=para->GetGroupParameters();
+//
+//    // set the pedestrians
+//    for (int i = 0; i < nAgents; ++i) {
+//
+//        Pedestrian* ped = new Pedestrian();
+//        // PedIndex
+//        ped->SetID(*pid);
+//        ped->SetAge(para->GetAge());
+//        ped->SetGender(para->GetGender());
+//        ped->SetHeight(para->GetHeight());
+//        ped->SetFinalDestination(para->GetGoalId());
+//        ped->SetGroup(para->GetGroupId());
+//        ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
+//        //ped->SetTrip(); // not implemented
+//
+//        // a und b setzen muss vor v0 gesetzt werden,
+//        // da sonst v0 mit Null überschrieben wird
+//        JEllipse E = JEllipse();
+//        E.SetAv(agents_para->GetAtau());
+//        E.SetAmin(agents_para->GetAmin());
+//        E.SetBmax(agents_para->GetBmax());
+//        E.SetBmin(agents_para->GetBmin());
+//        ped->SetEllipse(E);
+//        ped->SetTau(agents_para->GetTau());
+//        ped->SetV0Norm(agents_para->GetV0(),
+//                  agents_para->GetV0DownStairs(),
+//                  agents_para->GetV0UpStairs());
+//        //ped->SetV(Point(0.0,0.0));
+//
+//        // first default Position
+//        int index = -1;
+//        //int index = rand() % positions.size();
+//
+//        //in the case a range was specified
+//        for (unsigned int a=0;a<positions.size();a++)
+//        {
+//            Point pos=positions[a];
+//            if((distArea[0]<=pos._x) &&
+//                    (pos._x <= distArea[1])&&
+//                    (distArea[2]<=pos._y) &&
+//                    (pos._y < distArea[3]))
+//            {
+//                index=a;
+//                break;
+//            }
+//        }
+//        if(index==-1)
+//        {
+//            Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
+//                    distArea[0],distArea[1],distArea[2],distArea[3]);
+//            Log->Write("ERROR:\t Specifying a subroom_id might help");
+//        }
+//
+//        Point pos = positions[index];
+//        ped->SetPos(pos,true); //true for the initial position
+//        ped->SetBuilding(building);
+//        positions.erase(positions.begin() + index);
+//        ped->SetRoomID(para->GetRoomId(),"");
+//        ped->SetSubRoomID(r->GetSubRoomID());
+//        ped->SetPatienceTime(para->GetPatience());
+//        ped->SetPremovementTime(para->GetPremovementTime());
+//        ped->SetRiskTolerance(para->GetRiskTolerance());
+//        const Point& start_pos = para->GetStartPosition();
+//
+//
+//        if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
+//            if(r->IsInSubRoom(start_pos)==false){
+//                Log->Write("ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
+//                                    *pid, para->GetRoomId(), start_pos.toString().c_str());
+//                Log->Write("ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
+//                exit(EXIT_FAILURE);
+//            }
+//
+//            ped->SetPos(start_pos,true); //true for the initial position
+//            Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
+//                    *pid, para->GetRoomId(), start_pos.toString().c_str());
+//        }
+//
+//        //r->AddPedestrian(ped);
+//        building->AddPedestrian(ped);
+//        (*pid)++;
+//    }
+//}
+//SubRoom* r,int nAgents , vector<Point>& positions, int* pid,
+//          StartDistributionRoom* para, Building* building
 
-/*
-Pedestrian* StartDistributionRoom::GenerateAgent()
-{
-     int nAgents=15;
-     //in the case a range was specified
-     double distArea[4];
-     Getbounds(distArea);
-     AgentsParameters* agents_para=GetGroupParameters();
-
-     // set the pedestrians
-     for (int i = 0; i < nAgents; ++i) {
-
-         Pedestrian* ped = new Pedestrian();
-         // PedIndex
-         ped->SetID(*pid);
-         ped->SetAge(GetAge());
-         ped->SetGender(GetGender());
-         ped->SetHeight(GetHeight());
-         ped->SetFinalDestination(GetGoalId());
-         ped->SetGroup(GetGroupId());
-         ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
-         //ped->SetTrip(); // not implemented
-
-         // a und b setzen muss vor v0 gesetzt werden,
-         // da sonst v0 mit Null überschrieben wird
-         JEllipse E = JEllipse();
-         E.SetAv(_groupParameters->GetAtau());
-         E.SetAmin(_groupParameters->GetAmin());
-         E.SetBmax(_groupParameters->GetBmax());
-         E.SetBmin(_groupParameters->GetBmin());
-         ped->SetEllipse(E);
-         ped->SetTau(_groupParameters->GetTau());
-         ped->SetV0Norm(_groupParameters->GetV0(),
-                   _groupParameters->GetV0DownStairs(),
-                   _groupParameters->GetV0UpStairs());
-
-         // first default Position
-         int index = -1;
-         //int index = rand() % positions.size();
-
-         //in the case a range was specified
-         for (unsigned int a=0;a<positions.size();a++)
-         {
-             Point pos=positions[a];
-             if((distArea[0]<=pos._x) &&
-                     (pos._x <= distArea[1])&&
-                     (distArea[2]<=pos._y) &&
-                     (pos._y < distArea[3]))
-             {
-                 index=a;
-                 break;
-             }
-         }
-         if(index==-1)
-         {
-             Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
-                     distArea[0],distArea[1],distArea[2],distArea[3]);
-             Log->Write("ERROR:\t Specifying a subroom_id might help");
-         }
-
-         Point pos = positions[index];
-         ped->SetPos(pos,true); //true for the initial position
-         ped->SetBuilding(building);
-         positions.erase(positions.begin() + index);
-         ped->SetRoomID(GetRoomId(),"");
-         ped->SetSubRoomID(GetSubroomID());
-         ped->SetPatienceTime(GetPatience());
-         ped->SetPremovementTime(GetPremovementTime());
-         ped->SetRiskTolerance(GetRiskTolerance());
-         const Point& start_pos = para->GetStartPosition();
-
-
-         if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
-             if(r->IsInSubRoom(start_pos)==false){
-                 Log->Write("ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
-                                     *pid, GetRoomId(), start_pos.toString().c_str());
-                 Log->Write("ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
-                 exit(EXIT_FAILURE);
-             }
-
-             ped->SetPos(start_pos,true); //true for the initial position
-             Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
-                     *pid, GetRoomId(), start_pos.toString().c_str());
-         }
-
-         //r->AddPedestrian(ped);
-         building->AddPedestrian(ped);
-         (*pid)++;
-     }
-
-}
-*/
-void StartDistributionRoom::SetStartPosition(double x, double y, double z)
-{
-     if(_nPeds!=1) {
-          Log->Write("INFO:\t you cannot specify the same start position for many agents");
-          Log->Write("INFO:\t Ignoring the start position");
-          return;
-     }
-     _startX=x;
-     _startY=y;
-     _startZ=z;
-}
-
-Point StartDistributionRoom::GetStartPosition() const
-{
-     return Point(_startX, _startY);
-}
-
-double StartDistributionRoom::GetPatience() const
-{
-     return _patience;
-}
-
-void StartDistributionRoom::SetPatience(double patience)
-{
-     _patience = patience;
-}
-
-AgentsParameters* StartDistributionRoom::GetGroupParameters()
-{
-    return _groupParameters;
-}
-
-void StartDistributionRoom::SetGroupParameters(AgentsParameters* groupParameters)
-{
-    _groupParameters = groupParameters;
-}
-
-void StartDistributionRoom::Getbounds(double bounds[4])
-{
-    bounds[0]=_xMin;
-    bounds[1]=_xMax;
-    bounds[2]=_yMin;
-    bounds[3]=_yMax;
-}
-
-void StartDistributionRoom::Setbounds(double bounds[4])
-{
-    _xMin=bounds[0];
-    _xMax=bounds[1];
-    _yMin=bounds[2];
-    _yMax=bounds[3];
-}
-
-void StartDistributionRoom::InitPremovementTime(double mean, double stdv)
-{
-     _premovementTime = std::normal_distribution<double>(mean,stdv);
-}
-
-double StartDistributionRoom::GetPremovementTime()
-{
-     return _premovementTime(_generator);
-}
-
-void StartDistributionRoom::InitRiskTolerance(double mean, double stdv)
-{
-     _riskTolerance = std::normal_distribution<double>(mean,stdv);
-}
-
-double StartDistributionRoom::GetRiskTolerance()
-{
-     return _riskTolerance(_generator);
-}

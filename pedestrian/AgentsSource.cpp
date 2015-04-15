@@ -1,0 +1,99 @@
+/*
+ * AgentSource.cpp
+ *
+ *  Created on: 14.04.2015
+ *      Author: piccolo
+ */
+
+#include "AgentsSource.h"
+#include "Pedestrian.h"
+#include "../IO/OutputHandler.h"
+
+#include <iostream>
+
+AgentsSource::AgentsSource(int id,std::string caption,int max_agents,int group_id,int frequency)
+{
+    _id=id;
+    _caption=caption;
+    _maxAgents=max_agents;
+    _groupID=group_id;
+    _frequency=frequency;
+    _agents.clear();
+}
+
+AgentsSource::~AgentsSource()
+{
+}
+
+void AgentsSource::GenerateByFrequency(std::vector<Pedestrian*>& ped)
+{
+     if((int)_agents.size()>=_frequency)
+     {
+          ped.insert(ped.begin(),_agents.begin(),_agents.begin()+_frequency);
+          _agents.erase(_agents.begin(),_agents.begin()+_frequency);
+     }
+     else
+     {
+          ped.insert(ped.begin(),_agents.begin(),_agents.end());
+          _agents.clear();
+     }
+}
+
+int AgentsSource::GetPoolSize() const
+{
+     return _agents.size();
+}
+
+void AgentsSource::Add(Pedestrian* ped)
+{
+     _agents.push_back(ped);
+}
+
+int AgentsSource::GetAgentsGenerated() const
+{
+     return _agentsGenerated;
+}
+
+void AgentsSource::SetAgentsGenerated(int agentsGenerated)
+{
+     _agentsGenerated = agentsGenerated;
+}
+
+const double* AgentsSource::GetBoundaries() const
+{
+     return _boundaries;
+}
+
+const std::string& AgentsSource::GetCaption() const
+{
+     return _caption;
+}
+
+int AgentsSource::GetFrequency() const
+{
+     return _frequency;
+}
+
+int AgentsSource::GetGroupId() const
+{
+     return _groupID;
+}
+
+int AgentsSource::GetId() const
+{
+     return _id;
+}
+
+int AgentsSource::GetMaxAgents() const
+{
+     return _maxAgents;
+}
+void AgentsSource::Dump() const
+{
+     Log->Write("\n--------------------------");
+     Log->Write("Dumping Source");
+     Log->Write("ID: %d", _id);
+     Log->Write("Group ID: %d", _groupID);
+     Log->Write("Frequency: %d", _frequency);
+     Log->Write("Agents Max: %d", _maxAgents);
+}

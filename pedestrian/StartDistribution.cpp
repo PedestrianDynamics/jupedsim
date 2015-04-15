@@ -41,26 +41,26 @@ using namespace std;
 
 StartDistribution::StartDistribution(int seed)
 {
-    _roomID = -1;
-    _subroomID=-1;
-    _nPeds = -1;
-    _groupID = -1;
-    _goalID = -1;
-    _routerID = -1;
-    _routeID = -1;
-    _age = -1;
-    _height = -1;
-    _startX = NAN;
-    _startY = NAN;
-    _startZ = NAN;
-    _gender = "male";
-    _patience=5;
-    _xMin=-FLT_MAX;
-    _xMax=FLT_MAX;
-    _yMin=-FLT_MAX;
-    _yMax=FLT_MAX;
-    _groupParameters=NULL;
-    _generator = std::default_random_engine(seed);
+     _roomID = -1;
+     _subroomID=-1;
+     _nPeds = -1;
+     _groupID = -1;
+     _goalID = -1;
+     _routerID = -1;
+     _routeID = -1;
+     _age = -1;
+     _height = -1;
+     _startX = NAN;
+     _startY = NAN;
+     _startZ = NAN;
+     _gender = "male";
+     _patience=5;
+     _xMin=-FLT_MAX;
+     _xMax=FLT_MAX;
+     _yMin=-FLT_MAX;
+     _yMax=FLT_MAX;
+     _groupParameters=NULL;
+     _generator = std::default_random_engine(seed);
 }
 
 StartDistribution::~StartDistribution()
@@ -224,9 +224,12 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      }
      if(index==-1)
      {
-          Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
-                    _xMin,_xMax,_yMin,_yMax);
-          Log->Write("ERROR:\t Specifying a subroom_id might help");
+          if(positions.size())
+          {
+               Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
+                         _xMin,_xMax,_yMin,_yMax);
+               Log->Write("ERROR:\t Specifying a subroom_id might help");
+          }
      }
      else
      {
@@ -290,28 +293,28 @@ void StartDistribution::SetPatience(double patience)
 
 AgentsParameters* StartDistribution::GetGroupParameters()
 {
-    return _groupParameters;
+     return _groupParameters;
 }
 
 void StartDistribution::SetGroupParameters(AgentsParameters* groupParameters)
 {
-    _groupParameters = groupParameters;
+     _groupParameters = groupParameters;
 }
 
 void StartDistribution::Getbounds(double bounds[4])
 {
-    bounds[0]=_xMin;
-    bounds[1]=_xMax;
-    bounds[2]=_yMin;
-    bounds[3]=_yMax;
+     bounds[0]=_xMin;
+     bounds[1]=_xMax;
+     bounds[2]=_yMin;
+     bounds[3]=_yMax;
 }
 
 void StartDistribution::Setbounds(double bounds[4])
 {
-    _xMin=bounds[0];
-    _xMax=bounds[1];
-    _yMin=bounds[2];
-    _yMax=bounds[3];
+     _xMin=bounds[0];
+     _xMax=bounds[1];
+     _yMin=bounds[2];
+     _yMax=bounds[3];
 }
 
 void StartDistribution::InitPremovementTime(double mean, double stdv)
