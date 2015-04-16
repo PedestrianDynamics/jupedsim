@@ -43,25 +43,25 @@ using namespace std;
 
 PedDistributor::PedDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
 {
-     _start_dis = vector<StartDistribution* > ();
-     _start_dis_sub = vector<StartDistribution* > ();
+     _start_dis = vector<std::shared_ptr<StartDistribution> > ();
+     _start_dis_sub = vector<std::shared_ptr<StartDistribution> > ();
      InitDistributor(fileName, agentPars, seed);
 }
 
 
 PedDistributor::~PedDistributor()
 {
-     for (unsigned int i = 0; i < _start_dis.size(); i++)
-     {
-          delete _start_dis[i];
-     }
-     for (unsigned int i = 0; i < _start_dis_sub.size(); i++)
-     {
-          delete _start_dis_sub[i];
-     }
+//     for (unsigned int i = 0; i < _start_dis.size(); i++)
+//     {
+//          delete _start_dis[i];
+//     }
+//     for (unsigned int i = 0; i < _start_dis_sub.size(); i++)
+//     {
+//          delete _start_dis_sub[i];
+//     }
 
-     _start_dis_sub.clear();
-     _start_dis.clear();
+//     _start_dis_sub.clear();
+//     _start_dis.clear();
 }
 
 const vector<std::shared_ptr<AgentsSource> >& PedDistributor::GetAgentsSources() const
@@ -123,7 +123,7 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
               return false;
           }
 
-          StartDistribution* dis=new StartDistribution(seed);
+          auto dis=std::shared_ptr<StartDistribution> (new StartDistribution(seed) );
           dis->SetRoomID(room_id);
           dis->SetSubroomID(subroom_id);
           dis->SetGroupId(group_id);
@@ -266,7 +266,7 @@ bool PedDistributor::Distribute(Building* building) const
 
           // Distributing
           Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID, max_pos);
-          DistributeInSubRoom(sr, N, allpos, &pid,dist,building);
+          DistributeInSubRoom(sr, N, allpos, &pid,dist.get(),building);
           Log->Write("\t...Done");
           nPeds += N;
      }
@@ -341,7 +341,7 @@ bool PedDistributor::Distribute(Building* building) const
                dist->SetSubroomID(sr->GetSubRoomID());
                if (akt_anz[is] > 0)
                {
-                    DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist,building);
+                    DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist.get(),building);
                }
           }
           nPeds += N;
@@ -355,6 +355,7 @@ bool PedDistributor::Distribute(Building* building) const
           {
                if(source->GetGroupId()==dist->GetGroupId())
                {
+                    source->SetStartDistribution(dist);
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          source->Add(dist->GenerateAgent(building, &pid,emptyPositions));
@@ -367,6 +368,7 @@ bool PedDistributor::Distribute(Building* building) const
           {
                if(source->GetGroupId()==dist->GetGroupId())
                {
+                    source->SetStartDistribution(dist);
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          source->Add(dist->GenerateAgent(building, &pid,emptyPositions));

@@ -46,8 +46,8 @@
 class PedDistributor
 {
 private:
-     std::vector<StartDistribution*> _start_dis; // ID startraum, subroom und Anz
-     std::vector<StartDistribution*> _start_dis_sub; // ID startraum, subroom und Anz
+     std::vector<std::shared_ptr<StartDistribution> > _start_dis; // ID startraum, subroom und Anz
+     std::vector<std::shared_ptr<StartDistribution> > _start_dis_sub; // ID startraum, subroom und Anz
      std::vector<std::shared_ptr<AgentsSource> > _start_dis_sources; // contain the sources
      //std::string _projectFilename; // store the file for later user
      //std::map<int, AgentsParameters*> _agentsParameters;

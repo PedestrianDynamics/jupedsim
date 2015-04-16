@@ -10,9 +10,11 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 class Pedestrian;
 class OutputHandler;
+class StartDistribution;
 
 // external variables
 extern OutputHandler* Log;
@@ -59,11 +61,13 @@ public:
      int GetAgentsGenerated() const;
      void SetAgentsGenerated(int agentsGenerated);
      const double* GetBoundaries() const;
+     void Setboundaries(double * bounds);
      const std::string& GetCaption() const;
      int GetFrequency() const;
      int GetGroupId() const;
      int GetId() const;
      int GetMaxAgents() const;
+     void SetStartDistribution(std::shared_ptr<StartDistribution>);
 
 
 private:
@@ -75,6 +79,7 @@ private:
      double _boundaries [4] = {0,0,0,0};
      std::string _caption="no caption";
      std::vector<Pedestrian*> _agents;
+     std::shared_ptr<StartDistribution> _startDistribution;
 
 };
 

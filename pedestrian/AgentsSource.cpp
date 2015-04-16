@@ -7,6 +7,7 @@
 
 #include "AgentsSource.h"
 #include "Pedestrian.h"
+#include "StartDistribution.h"
 #include "../IO/OutputHandler.h"
 
 #include <iostream>
@@ -64,6 +65,14 @@ const double* AgentsSource::GetBoundaries() const
      return _boundaries;
 }
 
+void AgentsSource::Setboundaries(double * bounds)
+{
+     _boundaries[0]=bounds[0];
+     _boundaries[1]=bounds[1];
+     _boundaries[2]=bounds[2];
+     _boundaries[3]=bounds[3];
+}
+
 const std::string& AgentsSource::GetCaption() const
 {
      return _caption;
@@ -88,6 +97,12 @@ int AgentsSource::GetMaxAgents() const
 {
      return _maxAgents;
 }
+
+void AgentsSource::SetStartDistribution(std::shared_ptr<StartDistribution> startDistribution)
+{
+     _startDistribution=startDistribution;
+}
+
 void AgentsSource::Dump() const
 {
      Log->Write("\n--------------------------");

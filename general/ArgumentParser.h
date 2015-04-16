@@ -53,7 +53,7 @@ class ArgumentParser
 {
 private:
 
-     string pHostname;
+     string _hostname;
      string pTrajectoriesFile;
      string pErrorLogFile;
      string pNavMeshFilename;
@@ -96,7 +96,7 @@ private:
      int pLog;
      int pPort;
      int _embedMesh;
-     int pMaxOpenMPThreads;
+     int _maxOpenMPThreads;
      int pModel;
      FileFormat pFormat;
      vector<pair<int, RoutingStrategy> > pRoutingStrategies;
@@ -110,7 +110,7 @@ private:
       */
      std::shared_ptr<DirectionStrategy> p_exit_strategy;
      std::shared_ptr<OperationalModel> p_op_model;
-     std::shared_ptr<RoutingEngine> p_routingengine;
+     std::shared_ptr<RoutingEngine> _routingengine;
 
 private:
      bool ParseGCFMModel(TiXmlElement* xGCFM);

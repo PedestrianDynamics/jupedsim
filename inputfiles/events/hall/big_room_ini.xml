@@ -75,7 +75,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
     </agents_distribution>
     
      <agents_sources><!-- frequency in persons/minute -->
-      <source id="1" frequency="1" agents_max="10" group_id="0" caption="source 1">
+      <source id="1" frequency="1" agents_max="100" group_id="0" caption="source 1">
        
       </source>
     </agents_sources>

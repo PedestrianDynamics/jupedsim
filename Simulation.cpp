@@ -213,6 +213,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      _fps = args.Getfps();
      sprintf(tmp, "\tfps: %f\n", _fps);
      s.append(tmp);
+     //Log->Write(s.c_str());
 
      _routingEngine = args.GetRoutingEngine();
      auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
@@ -220,6 +221,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      _building = std::unique_ptr<Building>(new Building(args.GetProjectFile(), args.GetProjectRootDir(), *_routingEngine, *distributor, args.GetLinkedCellSize()));
 
      // Initialize the agents sources that have been collected in the pedestrians distributor
+     _agentSrcManager.SetBuilding(_building.get());
      for (const auto& src: distributor->GetAgentsSources())
      {
           _agentSrcManager.AddSource(src);

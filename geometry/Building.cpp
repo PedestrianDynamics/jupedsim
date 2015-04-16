@@ -937,7 +937,6 @@ void Building::InitGrid(double cellSize)
      y_max = y_max + 1*cellSize;
 
      double boundaries[4] = { x_min, x_max, y_min, y_max };
-     int pedsCount = _allPedestians.size();
 
      //no algorithms
      // the domain is made of a single cell
@@ -953,7 +952,8 @@ void Building::InitGrid(double cellSize)
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
 
-     _linkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
+     //_linkedCellGrid = new LCGrid(boundaries, cellSize, _allPedestians.size());
+     _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
 
      Log->Write("INFO: \tDone with Initializing the grid ");
@@ -1169,9 +1169,12 @@ void Building::AddPedestrian(Pedestrian* ped)
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const
 {
-     for(unsigned int p = 0;p<_allPedestians.size();p++){
-          Pedestrian* ped=_allPedestians[p];
-          if(room==ped->GetRoomID() && subroom==ped->GetSubRoomID())
+     //for(unsigned int p = 0;p<_allPedestians.size();p++){
+     //     Pedestrian* ped=_allPedestians[p];
+
+     for (auto&& ped : _allPedestians)
+     {
+          if ((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID()))
           {
                peds.push_back(ped);
           }

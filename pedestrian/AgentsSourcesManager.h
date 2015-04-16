@@ -13,6 +13,7 @@
 
 //Forward declarations
 class AgentsSource;
+class Building;
 
 class AgentsSourcesManager
 {
@@ -43,11 +44,24 @@ public:
       */
      const std::vector<std::shared_ptr<AgentsSource> >& GetSources() const;
 
+     /**
+      * Set the building object
+      */
+     void SetBuilding(Building* building);
+
      //void operator()();
 
 private:
      /// contain the sources
-     std::vector<std::shared_ptr<AgentsSource>> _sources;
+     std::vector<std::shared_ptr<AgentsSource> > _sources;
+
+     ///to control the trigger of the events
+     long int _lastUpdateTime = 0;
+
+     Building* _building=nullptr;
+
+private:
+     void ComputeBestPosition(AgentsSource* src);
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */

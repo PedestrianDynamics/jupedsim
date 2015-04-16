@@ -77,7 +77,7 @@ ArgumentParser::ArgumentParser()
      //pNumberFilename = "inputfiles/persons.xml";
      pSolver = 1;
      _projectFile = "";
-     pTmax = 500;
+     pTmax = 900;
      pfps = 1.0;
      pdt = 0.01;
      pExitStrategy = 2;
@@ -116,13 +116,13 @@ ArgumentParser::ArgumentParser()
      pSeed = 0;
      pFormat = FORMAT_XML_PLAIN;
      pPort = -1;
-     pHostname = "localhost";
+     _hostname = "localhost";
      _embedMesh = 0;
-     pMaxOpenMPThreads = omp_get_thread_num();
+     _maxOpenMPThreads = omp_get_thread_num();
      _profilingFlag = false;
      _hpcFlag = 0;
      _agentsParameters= std::map<int, std::shared_ptr<AgentsParameters> >();
-     p_routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
+     _routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
      _showStatistics=false;
 }
 
@@ -276,19 +276,19 @@ bool ArgumentParser::ParseIniFile(string inifile)
           else {
                n = max_cpus;
           }
-          pMaxOpenMPThreads = n;
-          Log->Write("INFO: \tnum_threads <%d>", pMaxOpenMPThreads);
+          _maxOpenMPThreads = n;
+          Log->Write("INFO: \tnum_threads <%d>", _maxOpenMPThreads);
 #ifdef _OPENMP
           if(n < omp_get_max_threads() )
-               omp_set_num_threads(pMaxOpenMPThreads);
+               omp_set_num_threads(_maxOpenMPThreads);
 #endif
      }
      else { // no num_threads tag
-          pMaxOpenMPThreads = max_cpus;
+          _maxOpenMPThreads = max_cpus;
 #ifdef _OPENMP
-          omp_set_num_threads(pMaxOpenMPThreads);
+          omp_set_num_threads(_maxOpenMPThreads);
 #endif
-          Log->Write("INFO: \t Default num_threads <%d>", pMaxOpenMPThreads);
+          Log->Write("INFO: \t Default num_threads <%d>", _maxOpenMPThreads);
      }
      //logfile
      if (xMainNode->FirstChild("logfile"))
@@ -355,10 +355,10 @@ bool ArgumentParser::ParseIniFile(string inifile)
                const char* tmp =
                          xTrajectories->FirstChildElement("socket")->Attribute("hostname");
                if (tmp)
-                    pHostname = tmp;
+                    _hostname = tmp;
                xTrajectories->FirstChildElement("socket")->Attribute("port", &pPort);
                Log->Write("INFO: \tStreaming results to output [%s:%d] ",
-                         pHostname.c_str(), pPort);
+                         _hostname.c_str(), pPort);
           }
      }
 
@@ -744,37 +744,37 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
           if (strategy == "local_shortest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
                Router *r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "global_shortest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
                Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "quickest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "nav_mesh") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
                Router *r = new MeshRouter(id, ROUTING_NAV_MESH);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "dummy") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
                Router *r = new DummyRouter(id, ROUTING_DUMMY);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "global_safest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
                Router *r = new SafestPathRouter(id, ROUTING_SAFEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "cognitive_map") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
                Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
 
                Log->Write("\nINFO: \tUsing CognitiveMapRouter");
                ///Parsing additional options
@@ -802,7 +802,7 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
     }
 
     /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
-    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(p_routingengine->GetAvailableRouters().back());
+    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_routingengine->GetAvailableRouters().back());
 
     std::vector<std::string> sensorVec;
     for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
@@ -927,11 +927,11 @@ const FileFormat& ArgumentParser::GetFileFormat() const
 }
 const string& ArgumentParser::GetHostname() const
 {
-     return pHostname;
+     return _hostname;
 }
 void ArgumentParser::SetHostname(const string& hostname)
 {
-     pHostname = hostname;
+     _hostname = hostname;
 }
 int ArgumentParser::GetPort() const
 {
@@ -984,7 +984,7 @@ bool ArgumentParser::GetLinkedCells() const
 
 std::shared_ptr<RoutingEngine> ArgumentParser::GetRoutingEngine() const
 {
-     return p_routingengine;
+     return _routingengine;
 }
 
 vector<pair<int, RoutingStrategy> > ArgumentParser::GetRoutingStrategy() const
@@ -1151,7 +1151,7 @@ const string& ArgumentParser::GetErrorLogFile() const
 
 int ArgumentParser::GetMaxOpenMPThreads() const
 {
-     return pMaxOpenMPThreads;
+     return _maxOpenMPThreads;
 }
 const string& ArgumentParser::GetTrajectoriesFile() const
 {

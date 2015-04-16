@@ -39,6 +39,7 @@ using namespace std;
 
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
+int Pedestrian::_agentsCreated=0;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
@@ -74,7 +75,7 @@ Pedestrian::Pedestrian()
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
      _recordingTime = 20; //seconds
-     //     _knownDoors = map<int, NavLineState>();
+     //_knownDoors = map<int, NavLineState>();
      _knownDoors.clear();
      _height = 170;
      _age = 30;
@@ -86,6 +87,8 @@ Pedestrian::Pedestrian()
      _V0DownStairs=0.0;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
+
+     _agentsCreated++;//increase the number of object created
 }
 
 
@@ -823,6 +826,11 @@ void Pedestrian::SetSpotlight(bool spotlight)
 void Pedestrian::SetColorMode(AgentColorMode mode)
 {
      _colorMode=mode;
+}
+
+int Pedestrian::GetAgentsCreated()
+{
+     return _agentsCreated;
 }
 
 int Pedestrian::GetColor()
