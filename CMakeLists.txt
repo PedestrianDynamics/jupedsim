@@ -198,6 +198,13 @@ set (   source_files
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
   pedestrian/Knowledge.cpp
+  pedestrian/AgentsQueue.cpp		
+  pedestrian/AgentsSource.cpp		
+  pedestrian/Pedestrian.cpp
+  pedestrian/AgentsSourcesManager.cpp	
+  pedestrian/StartDistribution.cpp
+
+  voronoi/VoronoiDiagramGenerator.cpp
 
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
@@ -279,6 +286,12 @@ set (   header_files
   pedestrian/Ellipse.h
   pedestrian/AgentsParameters.h
   pedestrian/Knowledge.h
+  pedestrian/AgentsQueue.h		
+  pedestrian/AgentsSource.h		
+  pedestrian/Pedestrian.h
+  pedestrian/AgentsSourcesManager.h	
+  pedestrian/StartDistribution.h
+  voronoi/VoronoiDiagramGenerator.h
 
   mpi/LCGrid.h
 
