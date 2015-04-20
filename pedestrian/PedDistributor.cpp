@@ -359,6 +359,7 @@ bool PedDistributor::Distribute(Building* building) const
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          source->Add(dist->GenerateAgent(building, &pid,emptyPositions));
+                         nPeds++;
                     }
                }
                //cout<<"ID sub: "<<dist->GetGroupId()<<endl;
@@ -372,6 +373,7 @@ bool PedDistributor::Distribute(Building* building) const
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          source->Add(dist->GenerateAgent(building, &pid,emptyPositions));
+                         nPeds++;
                     }
                }
                //cout<<"ID room: "<<dist->GetGroupId()<<endl;

@@ -225,7 +225,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      for (const auto& src: distributor->GetAgentsSources())
      {
           _agentSrcManager.AddSource(src);
-          src->Dump();
+          //src->Dump();
      }
 
      //perform customs initialisation, like computing the phi for the gcfm
@@ -299,11 +299,11 @@ int Simulation::RunSimulation()
      //time(&starttime);
 
      // main program loop
-     while (_nPeds > 0 && t < _tmax)
+     while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < _tmax)
      {
           t = 0 + (frameNr - 1) * _deltaT;
 
-          //process the queue for incomming pedestrians
+          //process the queue for incoming pedestrians
           ProcessAgentsQueue();
 
           // update the positions
@@ -337,7 +337,6 @@ int Simulation::RunSimulation()
           // clock_t goal = timeToWait*1000 + clock();
           // while (goal > clock());
           ++frameNr;
-
      }
      // writing the footer
      _iod->WriteFooter();

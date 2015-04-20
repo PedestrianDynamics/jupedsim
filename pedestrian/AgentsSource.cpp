@@ -116,4 +116,7 @@ void AgentsSource::Dump() const
      Log->Write("Group ID: %d", _groupID);
      Log->Write("Frequency: %d", _frequency);
      Log->Write("Agents Max: %d", _maxAgents);
+     Log->Write("Agents Pool: %d", _agents.size());
+     //getc(stdin);
+
 }

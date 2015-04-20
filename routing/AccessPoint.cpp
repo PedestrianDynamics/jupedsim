@@ -52,7 +52,7 @@ AccessPoint::AccessPoint(int id, double center[2],double radius)
 
 AccessPoint::~AccessPoint()
 {
-     //if(_navLine) delete _navLine;
+     if(_navLine) delete _navLine;
 }
 
 int AccessPoint::GetID()
@@ -218,7 +218,9 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
 
 void AccessPoint::SetNavLine(NavLine* line)
 {
-     _navLine=line;
+     //todo: check this
+     //_navLine= line;
+     _navLine= new NavLine(*line);
 }
 
 NavLine* AccessPoint::GetNavLine() const

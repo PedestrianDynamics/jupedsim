@@ -81,7 +81,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
 GlobalRouter::~GlobalRouter()
 {
      if (_distMatrix && _pathsMatrix) {
-          const int exitsCnt = _building->GetNumberOfGoals();
+          const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
           for (int p = 0; p < exitsCnt; ++p) {
                delete[] _distMatrix[p];
                delete[] _pathsMatrix[p];
@@ -321,7 +321,11 @@ bool GlobalRouter::Init(Building* building)
 
           AccessPoint* to_AP = new AccessPoint(line.GetUniqueID(), center);
           to_AP->SetFinalGoalOutside(true);
-          to_AP->SetNavLine(new NavLine(line));
+          //NavLine* tmpline=new NavLine(line);
+          NavLine tmpline(line);
+          to_AP->SetNavLine(&tmpline);
+          //delete tmpline;
+
           char friendlyName[CLENGTH];
           sprintf(friendlyName, "finalGoal_%d_located_outside", goal->GetId());
           to_AP->SetFriendlyName(friendlyName);

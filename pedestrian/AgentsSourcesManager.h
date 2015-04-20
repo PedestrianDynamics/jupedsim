@@ -51,15 +51,21 @@ public:
      void SetBuilding(Building* building);
 
      //void operator()();
+     /**
+      * @return true if all agents have been generated
+      * and the class is ready to leave
+      */
+     bool IsCompleted() const;
 
 private:
      /// contain the sources
      std::vector<std::shared_ptr<AgentsSource> > _sources;
-
      ///to control the trigger of the events
      long int _lastUpdateTime = 0;
-
+     /// building object
      Building* _building=nullptr;
+     /// whether all agents have been dispatched
+     bool _isCompleted=true;
 
 private:
      void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent);

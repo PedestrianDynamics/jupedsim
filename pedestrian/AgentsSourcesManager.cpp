@@ -31,18 +31,20 @@ AgentsSourcesManager::~AgentsSourcesManager()
 
 void AgentsSourcesManager::operator()(int value)
 {
+     //cout<<"starting thread"<<endl;
      //the loop is updated each second.
      //it might be better to use a timer
+     _isCompleted=false;
      bool finished = false;
      long updateFrequency = 5;     // 1 second
      do
      {
-
           int current_time = Pedestrian::GetGlobalTime();
 
           if ((current_time != _lastUpdateTime) && ((current_time % updateFrequency) == 0))
           {
 
+               //cout<<"TIME:"<<current_time<<endl;
                finished = true;
                for (const auto& src : _sources)
                {
@@ -51,25 +53,28 @@ void AgentsSourcesManager::operator()(int value)
 
                          vector<Pedestrian*> peds;
                          src->GenerateByFrequency(peds);
-                         AgentsQueue::Add(peds);
-                         //ComputeBestPositionRandom(src.get(), peds);
+                         ComputeBestPositionRandom(src.get(), peds);
                          // compute the optimal position for insertion
                          for (auto&& ped : peds)
                          {
-                              //ComputeBestPosition(src.get(), ped);
-                              ped->SetPos(Point(15,15),true);
+                              //ComputeBestPositionVoronoi(src.get(), ped);
+                              //ped->SetPos(Point(15,15),true);
                               //ped->Dump(ped->GetID());
                          }
+                         AgentsQueue::Add(peds);
                          finished = false;
-                         //cout<<"Agents generated: "<<peds.size()<<endl;
+                         cout<<"Agents generated: "<<peds.size()<<endl;
                     }
-                    //src->Dump();exit(0);
+                    //src->Dump();//exit(0);
                }
                _lastUpdateTime = current_time;
+          //cout<<"size: "<<_sources.size()<<endl;
           }
           //wait some time
           std::this_thread::sleep_for(std::chrono::milliseconds(10));
      } while (!finished);
+
+     _isCompleted=true;
 }
 
 void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent)
@@ -104,13 +109,16 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src, Pedestr
      //special case with 1, 2 or only three pedestrians in the area
      if (peds.size() < 3)
      {
-          //random position in the area
+          //TODO/random position in the area
+          return;
 
      }
      // compute the cells and cut with the bounds
      const int count = peds.size();
-     float xValues[count];
-     float yValues[count];
+     float* xValues= new float[count];
+     float* yValues= new float[count];
+     //float xValues[count];
+     //float yValues[count];
 
      for (int i = 0; i < count; i++)
      {
@@ -171,6 +179,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src, Pedestr
      {
           cout << "position not set:" << endl;
           cout << "size: " << map_dist_to_position.size() << endl;
+          cout <<" for " <<peds.size()<<" pedestrians"<<endl;
           exit(0);
      }
      //exit(0);
@@ -191,7 +200,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src, std::vec
      auto dist=src->GetStartDistribution();
      auto subroom=_building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
      vector<Point> positions=PedDistributor::PossiblePositions(*subroom);
-     double bounds[4];
+     double bounds[4]={0,0,0,0};
      dist->Getbounds(bounds);
      //int roomID = dist->GetRoomId();
      //int subroomID = dist->GetSubroomID();
@@ -199,7 +208,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src, std::vec
 
      for(const auto& ped: peds)
      {
-ped->Dump(ped->GetID()); continue;
+          //ped->Dump(ped->GetID()); continue;
           int index = -1;
 
           //in the case a range was specified
@@ -230,24 +239,24 @@ ped->Dump(ped->GetID()); continue;
                ped->SetPos(pos,true); //true for the initial position
                positions.erase(positions.begin() + index);
 
-//               const Point& start_pos =  Point(_startX, _startY);
-//               if ((std::isnan(start_pos._x) == 0) && (std::isnan(start_pos._y) == 0))
-//               {
-//                    if (_building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID())->IsInSubRoom(
-//                              start_pos) == false)
-//                    {
-//                         Log->Write(
-//                                   "ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
-//                                   *pid, GetRoomId(), start_pos.toString().c_str());
-//                         Log->Write(
-//                                   "ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
-//                         exit(EXIT_FAILURE);
-//                    }
-//
-//                    ped->SetPos(start_pos, true); //true for the initial position
-//                    Log->Write("INFO: \t fixed position for ped %d in Room %d %s", *pid, GetRoomId(),
-//                              start_pos.toString().c_str());
-//               }
+               //               const Point& start_pos =  Point(_startX, _startY);
+               //               if ((std::isnan(start_pos._x) == 0) && (std::isnan(start_pos._y) == 0))
+               //               {
+               //                    if (_building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID())->IsInSubRoom(
+               //                              start_pos) == false)
+               //                    {
+               //                         Log->Write(
+               //                                   "ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
+               //                                   *pid, GetRoomId(), start_pos.toString().c_str());
+               //                         Log->Write(
+               //                                   "ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
+               //                         exit(EXIT_FAILURE);
+               //                    }
+               //
+               //                    ped->SetPos(start_pos, true); //true for the initial position
+               //                    Log->Write("INFO: \t fixed position for ped %d in Room %d %s", *pid, GetRoomId(),
+               //                              start_pos.toString().c_str());
+               //               }
           }
      }
 
@@ -265,4 +274,9 @@ const std::vector<std::shared_ptr<AgentsSource> >& AgentsSourcesManager::GetSour
 void AgentsSourcesManager::SetBuilding(Building* building)
 {
      _building = building;
+}
+
+bool AgentsSourcesManager::IsCompleted() const
+{
+    return _isCompleted;
 }

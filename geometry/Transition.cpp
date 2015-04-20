@@ -49,7 +49,6 @@ Transition::~Transition()
 {
 }
 
-// Setter-Funktionen
 
 void Transition::Close()
 {
@@ -71,7 +70,7 @@ void Transition::SetRoom2(Room* r)
      _room2 = r;
 }
 
-// Getter-Funktionen
+
 
 bool Transition::IsOpen() const
 {
