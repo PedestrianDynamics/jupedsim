@@ -25,7 +25,6 @@
  *
  **/
 
-
 #ifndef TRAVISTOCLIENT_H_
 #define TRAVISTOCLIENT_H_
 
@@ -48,7 +47,6 @@
 //   fprintf(stderr, "%-15s|%03d| ", fileName, lineNumber);
 // }
 
-
 // #ifdef TRACE_LOGGING
 
 /*
@@ -62,19 +60,14 @@
      fprintf(stderr, "ERROR: "),             \
      fprintf(stderr, __VA_ARGS__),           \
      _printErrorMessage())
-*/
-
+ */
 
 // // #define dtrace(...)   _printDebugLine(__FILE__, __LINE__, false, __VA_ARGS__)
 // // #define derror(...)   _printDebugLine(__FILE__, __LINE__, true, __VA_ARGS__)
-
 // #else
-
 // #define dtrace(...)   ((void) 0)
 // #define derror(...)   (fprintf(stderr, __VA_ARGS__), _printErrorMessage())
-
 // #endif /* TRACE_LOGGING */
-
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -95,7 +88,6 @@ typedef int socklen_t;
 #define startSocketSession() _startWin32SocketSession()
 #define stopSocketSession()  _stopWin32SocketSession()
 
-
 #else
 #include <unistd.h>
 #include <netinet/in.h>
@@ -111,17 +103,15 @@ typedef int socket_t;
 #define SOCKET_ERROR         (-1)
 #endif
 
-
 #ifndef IPPORT_USERRESERVED
 #define IPPORT_USERRESERVED  (5000)  ///< up to this number, ports are reserved and should not be used
 #endif
 
-
-
 #define PORT 8989
 #define HOST "localhost"
 
-class TraVisToClient {
+class TraVisToClient
+{
 public:
 
      /// create a client with specific parameters
@@ -147,7 +137,8 @@ private:
 
      unsigned long lookupHostAddress(const char *hostName);
 
-     socket_t createClientSocket(const char *serverName, unsigned short portNumber);
+     socket_t createClientSocket(const char *serverName,
+               unsigned short portNumber);
 
      socket_t createServerSocket(unsigned short portNumber);
 
@@ -165,8 +156,6 @@ private:
 #else
 #define closesocket          close
 #endif
-
-
 
 private:
      bool _isConnected;

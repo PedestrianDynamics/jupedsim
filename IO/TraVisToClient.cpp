@@ -286,7 +286,6 @@ TraVisToClient::createServerSocket(unsigned short portNumber)
      }
 
      dtrace("server started at port %hu", portNumber);
-
      dtrace("leaving createServerSocket()");
      return (sock);
 }
