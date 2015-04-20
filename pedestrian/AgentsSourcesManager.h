@@ -14,6 +14,7 @@
 //Forward declarations
 class AgentsSource;
 class Building;
+class Pedestrian;
 
 class AgentsSourcesManager
 {
@@ -61,7 +62,8 @@ private:
      Building* _building=nullptr;
 
 private:
-     void ComputeBestPosition(AgentsSource* src);
+     void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent);
+     void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds);
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */

@@ -103,6 +103,11 @@ void AgentsSource::SetStartDistribution(std::shared_ptr<StartDistribution> start
      _startDistribution=startDistribution;
 }
 
+const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() const
+{
+     return _startDistribution;
+}
+
 void AgentsSource::Dump() const
 {
      Log->Write("\n--------------------------");

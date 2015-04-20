@@ -8,6 +8,8 @@
 #include "AgentsSourcesManager.h"
 #include "Pedestrian.h"
 #include "AgentsQueue.h"
+#include "StartDistribution.h"
+#include "PedDistributor.h"
 #include "AgentsSource.h"
 #include "../voronoi/VoronoiDiagramGenerator.h"
 #include "../geometry/Building.h"
@@ -31,79 +33,146 @@ void AgentsSourcesManager::operator()(int value)
 {
      //the loop is updated each second.
      //it might be better to use a timer
-     bool finished=false;
-     long updateFrequency=5;// 1 second
+     bool finished = false;
+     long updateFrequency = 5;     // 1 second
      do
      {
 
           int current_time = Pedestrian::GetGlobalTime();
 
-          if ( (current_time != _lastUpdateTime) &&
-                    ((current_time % updateFrequency) == 0))
+          if ((current_time != _lastUpdateTime) && ((current_time % updateFrequency) == 0))
           {
 
-               finished=true;
-               for (const auto& src: _sources)
+               finished = true;
+               for (const auto& src : _sources)
                {
-                    if(src->GetPoolSize())
+                    if (src->GetPoolSize())
                     {
+
                          vector<Pedestrian*> peds;
                          src->GenerateByFrequency(peds);
                          AgentsQueue::Add(peds);
-
-                         ComputeBestPosition(src.get());
-
+                         //ComputeBestPositionRandom(src.get(), peds);
                          // compute the optimal position for insertion
-                         for (auto&& ped: peds)
+                         for (auto&& ped : peds)
                          {
+                              //ComputeBestPosition(src.get(), ped);
                               ped->SetPos(Point(15,15),true);
+                              //ped->Dump(ped->GetID());
                          }
-                         finished=false;
+                         finished = false;
                          //cout<<"Agents generated: "<<peds.size()<<endl;
                     }
-                    //src->Dump();
+                    //src->Dump();exit(0);
                }
                _lastUpdateTime = current_time;
           }
           //wait some time
           std::this_thread::sleep_for(std::chrono::milliseconds(10));
-     }while (!finished);
+     } while (!finished);
 }
 
-void AgentsSourcesManager::ComputeBestPosition(AgentsSource* src)
+void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent)
 {
-     int roomID=0;
-     int subroomID=0;
+     auto dist = src->GetStartDistribution();
+     double bounds[4];
+     dist->Getbounds(bounds);
+     int roomID = dist->GetRoomId();
+     int subroomID = dist->GetSubroomID();
 
      //Get all pedestrians in that location
      vector<Pedestrian*> peds;
-     _building->GetPedestrians(roomID,subroomID,peds);
+     _building->GetPedestrians(roomID, subroomID, peds);
 
+     //filter the points that are not in the boundaries
+     for (auto&& iter = peds.begin(); iter != peds.end();)
+     {
+          const Point& pos = (*iter)->GetPos();
+          if ((bounds[0] <= pos._x && pos._x <= bounds[1])
+                    && (bounds[1] <= pos._y && pos._y <= bounds[2]))
+          {
+               iter = peds.erase(iter);
+               cout << "removing..." << endl;
+               exit(0);
+          }
+          else
+          {
+               ++iter;
+          }
+     }
+
+     //special case with 1, 2 or only three pedestrians in the area
+     if (peds.size() < 3)
+     {
+          //random position in the area
+
+     }
      // compute the cells and cut with the bounds
-     const int count=peds.size();
+     const int count = peds.size();
      float xValues[count];
      float yValues[count];
 
-     for(int i=0;i<count;i++)
+     for (int i = 0; i < count; i++)
      {
-          xValues[i]=peds[i]->GetPos()._x;
-          yValues[i]=peds[i]->GetPos()._y;
+          xValues[i] = peds[i]->GetPos()._x;
+          yValues[i] = peds[i]->GetPos()._y;
      }
 
      VoronoiDiagramGenerator vdg;
-     vdg.generateVoronoi(xValues,yValues,count, -100,100,-100,100,3);
+     vdg.generateVoronoi(xValues, yValues, count, bounds[0], bounds[1], bounds[2], bounds[3], 3);
      vdg.resetIterator();
      vdg.resetVerticesIterator();
 
-     float x1,y1;
-
      printf("\n------vertices---------\n");
-     while(vdg.getNextVertex(x1,y1))
+     //collect the positions
+     vector<Point> positions;
+     float x1, y1;
+     while (vdg.getNextVertex(x1, y1))
      {
-          printf("GOT Point (%f,%f)\n",x1,y1);
+          printf("GOT Point (%f,%f)\n", x1, y1);
+          positions.push_back(Point(x1, y1));
      }
 
+     //look for the biggest spot
+     map<double, Point> map_dist_to_position;
 
+     for (auto&& pos : positions)
+     {
+          double min_dist = FLT_MAX;
+
+          for (auto&& ped : peds)
+          {
+               double dist = (pos - ped->GetPos()).NormSquare();
+               if (dist < min_dist)
+               {
+                    min_dist = dist;
+               }
+          }
+          map_dist_to_position[min_dist] = pos;
+     }
+
+     //list the result
+     for (auto&& mp : map_dist_to_position)
+     {
+          cout << "dist: " << mp.first << " pos: " << mp.second.toString() << endl;
+          //agent->SetPos(mp.second, true);
+     }
+
+     //the elements are ordered.
+     // so the last one has the largest distance
+     if (!map_dist_to_position.empty())
+     {
+          agent->SetPos(map_dist_to_position.rbegin()->second, true);
+          cout << "position:" << agent->GetPos().toString() << endl;
+          //exit(0);
+
+     }
+     else
+     {
+          cout << "position not set:" << endl;
+          cout << "size: " << map_dist_to_position.size() << endl;
+          exit(0);
+     }
      //exit(0);
      // float x1,y1,x2,y2;
      //while(vdg.getNext(x1,y1,x2,y2))
@@ -112,9 +181,77 @@ void AgentsSourcesManager::ComputeBestPosition(AgentsSource* src)
      //
      //}
      //compute the best position
-     exit(0);
+     //exit(0);
 }
 
+void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds)
+{
+
+     //generate the agents with default positions
+     auto dist=src->GetStartDistribution();
+     auto subroom=_building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
+     vector<Point> positions=PedDistributor::PossiblePositions(*subroom);
+     double bounds[4];
+     dist->Getbounds(bounds);
+     //int roomID = dist->GetRoomId();
+     //int subroomID = dist->GetSubroomID();
+     // first default Position
+
+     for(const auto& ped: peds)
+     {
+ped->Dump(ped->GetID()); continue;
+          int index = -1;
+
+          //in the case a range was specified
+          for (unsigned int a=0;a<positions.size();a++)
+          {
+               Point pos=positions[a];
+               if((bounds[0]<=pos._x) &&
+                         (pos._x <= bounds[1])&&
+                         (bounds[2]<=pos._y) &&
+                         (pos._y < bounds[3]))
+               {
+                    index=a;
+                    break;
+               }
+          }
+          if(index==-1)
+          {
+               if(positions.size())
+               {
+                    Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
+                              bounds[0],bounds[1],bounds[2],bounds[3]);
+                    Log->Write("ERROR:\t Specifying a subroom_id might help");
+               }
+          }
+          else
+          {
+               const Point& pos = positions[index];
+               ped->SetPos(pos,true); //true for the initial position
+               positions.erase(positions.begin() + index);
+
+//               const Point& start_pos =  Point(_startX, _startY);
+//               if ((std::isnan(start_pos._x) == 0) && (std::isnan(start_pos._y) == 0))
+//               {
+//                    if (_building->GetRoom(ped->GetRoomID())->GetSubRoom(ped->GetSubRoomID())->IsInSubRoom(
+//                              start_pos) == false)
+//                    {
+//                         Log->Write(
+//                                   "ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
+//                                   *pid, GetRoomId(), start_pos.toString().c_str());
+//                         Log->Write(
+//                                   "ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
+//                         exit(EXIT_FAILURE);
+//                    }
+//
+//                    ped->SetPos(start_pos, true); //true for the initial position
+//                    Log->Write("INFO: \t fixed position for ped %d in Room %d %s", *pid, GetRoomId(),
+//                              start_pos.toString().c_str());
+//               }
+          }
+     }
+
+}
 void AgentsSourcesManager::AddSource(std::shared_ptr<AgentsSource> src)
 {
      _sources.push_back(src);
@@ -127,5 +264,5 @@ const std::vector<std::shared_ptr<AgentsSource> >& AgentsSourcesManager::GetSour
 
 void AgentsSourcesManager::SetBuilding(Building* building)
 {
-   _building=building;
+     _building = building;
 }

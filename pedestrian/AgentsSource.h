@@ -68,6 +68,8 @@ public:
      int GetId() const;
      int GetMaxAgents() const;
      void SetStartDistribution(std::shared_ptr<StartDistribution>);
+     const std::shared_ptr<StartDistribution> GetStartDistribution() const;
+
 
 
 private:
