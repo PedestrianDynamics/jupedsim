@@ -44,11 +44,11 @@ class FireMesh
 {
 public:
     FireMesh();
-    FireMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize);
+    FireMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize);
     FireMesh(const std::string &filename);
     ~FireMesh();
 
-    void SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const int &cellsize);
+    void SetUpMesh(const double &xmin, const double &ymin, const double &xmax, const double &ymax, const double &cellsize);
     const Matrix &GetMesh() const;
 
     double GetKnotValue(const double &x, const double &y) const;
@@ -59,7 +59,7 @@ public:
 
 private:
     Matrix _matrix;
-    int _cellsize;
+    double _cellsize;
     double _xmin;
     double _xmax;
     double _ymin;
