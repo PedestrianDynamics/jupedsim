@@ -48,90 +48,90 @@ extern OutputHandler* Log;
 class ArgumentParser {
 private:
 
-    std::string _geometryFileName;
-    std::string _errorLogFile;
-    std::string _trajectoriesLocation;
-    std::string _trajectoriesFilename;
-    std::string _projectRootDir;
-    FileFormat _fileFormat;
-    std::vector<std::string> _trajectoriesFiles;
+     std::string _geometryFileName;
+     std::string _errorLogFile;
+     std::string _trajectoriesLocation;
+     std::string _trajectoriesFilename;
+     std::string _projectRootDir;
+     FileFormat _fileFormat;
+     std::vector<std::string> _trajectoriesFiles;
 
-    char _vComponent;
-    bool _isMethodA;
-    bool _isMethodB;
-    bool _isMethodC;
-    bool _isMethodD;
-    bool _isCutByCircle;
-    double _cutRadius;
-    int _circleEdges;
-    bool _isOutputGraph;
-    bool _isIndividualFD;
-    bool _isGetProfile;
-    double _steadyStart;
-    double _steadyEnd;
-    int _delatTVInst;
-    int _timeIntervalA;
-    std::vector<int> _areaIDforMethodA;
-    std::vector<int> _areaIDforMethodB;
-    std::vector<int> _areaIDforMethodC;
-    std::vector<int> _areaIDforMethodD;
-    float _scaleX;
-    float _scaleY;
-    int _log;
+     char _vComponent;
+     bool _isMethodA;
+     bool _isMethodB;
+     bool _isMethodC;
+     bool _isMethodD;
+     bool _isCutByCircle;
+     double _cutRadius;
+     int _circleEdges;
+     bool _isOutputGraph;
+     bool _isIndividualFD;
+     bool _isGetProfile;
+     double _steadyStart;
+     double _steadyEnd;
+     int _delatTVInst;
+     int _timeIntervalA;
+     std::vector<int> _areaIDforMethodA;
+     std::vector<int> _areaIDforMethodB;
+     std::vector<int> _areaIDforMethodC;
+     std::vector<int> _areaIDforMethodD;
+     float _scaleX;
+     float _scaleY;
+     int _log;
 
-    std::map <int, MeasurementArea*> _measurementAreas;
-    void Usage(const std::string file);
+     std::map <int, MeasurementArea*> _measurementAreas;
+     void Usage(const std::string file);
 
 public:
-    // Konstruktor
-    ArgumentParser();
+     // Konstruktor
+     ArgumentParser();
 
-    const std::string& GetTrajectoriesFilename() const;
-    const std::vector<std::string>& GetTrajectoriesFiles() const;
-    const std::string& GetTrajectoriesLocation() const;
-    const FileFormat& GetFileFormat() const;
-    const std::string& GetGeometryFilename() const;
-    const std::string& GetErrorLogFile() const;
-    const std::string& GetProjectRootDir() const;
+     const std::string& GetTrajectoriesFilename() const;
+     const std::vector<std::string>& GetTrajectoriesFiles() const;
+     const std::string& GetTrajectoriesLocation() const;
+     const FileFormat& GetFileFormat() const;
+     const std::string& GetGeometryFilename() const;
+     const std::string& GetErrorLogFile() const;
+     const std::string& GetProjectRootDir() const;
 
-    double GetLengthMeasurementArea() const;
-    polygon_2d GetMeasureArea() const;
-    double GetLineStartX() const;
-    double GetLineStartY() const;
-    double GetLineEndX() const;
-    double GetLineEndY() const;
+     double GetLengthMeasurementArea() const;
+     polygon_2d GetMeasureArea() const;
+     double GetLineStartX() const;
+     double GetLineStartY() const;
+     double GetLineEndX() const;
+     double GetLineEndY() const;
 
-    char GetVComponent() const;
-    int GetDelatT_Vins() const;
-    int GetTimeIntervalA() const;
-    bool GetIsMethodA() const;
-    bool GetIsMethodB() const;
-    bool GetIsMethodC() const;
-    bool GetIsMethodD() const;
-    std::vector<int> GetAreaIDforMethodA() const;
-    std::vector<int> GetAreaIDforMethodB() const;
-    std::vector<int> GetAreaIDforMethodC() const;
-    std::vector<int> GetAreaIDforMethodD() const;
-    bool GetIsCutByCircle() const;
-    double GetCutRadius() const;
-    int GetCircleEdges() const;
-    bool GetIsOutputGraph() const;
-    bool GetIsIndividualFD() const;
-    double GetSteadyStart() const;
-    double GetSteadyEnd() const;
-    bool GetIsGetProfile() const;
-    float GetScaleX() const;
-    float GetScaleY() const;
-    int GetLog() const;
-    bool ParseArgs(int argc, char **argv);
+     char GetVComponent() const;
+     int GetDelatT_Vins() const;
+     int GetTimeIntervalA() const;
+     bool GetIsMethodA() const;
+     bool GetIsMethodB() const;
+     bool GetIsMethodC() const;
+     bool GetIsMethodD() const;
+     std::vector<int> GetAreaIDforMethodA() const;
+     std::vector<int> GetAreaIDforMethodB() const;
+     std::vector<int> GetAreaIDforMethodC() const;
+     std::vector<int> GetAreaIDforMethodD() const;
+     bool GetIsCutByCircle() const;
+     double GetCutRadius() const;
+     int GetCircleEdges() const;
+     bool GetIsOutputGraph() const;
+     bool GetIsIndividualFD() const;
+     double GetSteadyStart() const;
+     double GetSteadyEnd() const;
+     bool GetIsGetProfile() const;
+     float GetScaleX() const;
+     float GetScaleY() const;
+     int GetLog() const;
+     bool ParseArgs(int argc, char **argv);
 
-    MeasurementArea* GetMeasurementArea(int id);
+     MeasurementArea* GetMeasurementArea(int id);
 
-    /**
-     * parse the initialization file
-     * @param inifile
-     */
-    bool ParseIniFile(const std::string& inifile);
+     /**
+      * parse the initialization file
+      * @param inifile
+      */
+     bool ParseIniFile(const std::string& inifile);
 };
 
 #endif /*ARGPARSER_H_*/

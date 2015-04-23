@@ -2,7 +2,7 @@
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
  * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -129,7 +129,7 @@ ArgumentParser::ArgumentParser()
 
 
 
- bool ArgumentParser::ParseArgs(int argc, char **argv)
+bool ArgumentParser::ParseArgs(int argc, char **argv)
 {
      //special case of the default configuration ini.xml
      if (argc == 1)
@@ -241,8 +241,8 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
           else
           {
-        	  Log->Write("Error: \tthe given trajectory format is not supported. Supply '.xml' or '.txt' format!");
-        	  return false;
+               Log->Write("Error: \tthe given trajectory format is not supported. Supply '.xml' or '.txt' format!");
+               return false;
           }
 
           string unit = xmltoa(xMainNode->FirstChildElement("trajectories")->Attribute("unit"), "m");
@@ -283,9 +283,9 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                // ignore the project root in this case
                if ( (boost::algorithm::contains(_trajectoriesLocation,":")==false) && //windows
                          (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
-                // &&() osx
+                    // &&() osx
                {
-                      _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
+                    _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
                }
 
                // in the case no file was specified, collect all xml files in the specified directory
@@ -302,11 +302,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
                               if (boost::algorithm::ends_with(filename, fmt))
                                    //if (filename.find(fmt)!=std::string::npos)
-                                   {
-                                        //_trajectoriesFiles.push_back(_projectRootDir+filename);
-                                        _trajectoriesFiles.push_back(filename);
-                                        Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
-                                   }
+                              {
+                                   //_trajectoriesFiles.push_back(_projectRootDir+filename);
+                                   _trajectoriesFiles.push_back(filename);
+                                   Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
+                              }
                          }
                          closedir (dir);
                     }
@@ -417,10 +417,10 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
                Log->Write("INFO: \ttime interval used in Method A is <%d> frame",_timeIntervalA);
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
-            		   xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
                {
-            	   _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
-            	   Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+                    _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
+                    Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
           }
      }

@@ -210,7 +210,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
      //loop over all areas
      for(auto&& area: areas)
      {
-          //search for the subroom that containst that area
+    	 //search for the subroom that containst that area
           for (auto&& it_room : _building->GetAllRooms())
           {
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
@@ -336,8 +336,6 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      {
           for(unsigned int i=0; i<_areaForMethod_D.size(); i++)
           {
-
-
                Method_D method_D;
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);

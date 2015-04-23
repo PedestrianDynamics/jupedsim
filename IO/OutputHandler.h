@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef OUTPUT_HANDLER_H_
 #define OUTPUT_HANDLER_H_

@@ -144,8 +144,8 @@ bool PedData::InitializeVariables(const string& filename)
      Ids_temp.erase(unique(Ids_temp.begin(), Ids_temp.end()), Ids_temp.end());
      if((unsigned)_numPeds!=Ids_temp.size())
      {
-    	 Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
-    	 return false;
+          Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
+          return false;
      }
      CreateGlobalVariables(_numPeds, _numFrames);
 
@@ -287,7 +287,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 
 vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids) const
 {
-	vector<double> VInFrame;
+     vector<double> VInFrame;
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
@@ -301,17 +301,17 @@ vector<double> PedData::GetVInFrame(int frame, const vector<int>& ids) const
 
 vector<double> PedData::GetXInFrame(int frame, const vector<int>& ids) const
 {
-	vector<double> XInFrame;
-	for(int id:ids)
-	{
-		XInFrame.push_back(_xCor[id][frame]);
-	}
+     vector<double> XInFrame;
+     for(int id:ids)
+     {
+          XInFrame.push_back(_xCor[id][frame]);
+     }
      return XInFrame;
 }
 
 vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
 {
-	vector<double> YInFrame;
+     vector<double> YInFrame;
      for(unsigned int i=0; i<ids.size();i++)
      {
           int id = ids[i];
@@ -322,11 +322,11 @@ vector<double> PedData::GetYInFrame(int frame, const vector<int>& ids) const
 
 vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
 {
-	vector<int> IdInFrame;
+     vector<int> IdInFrame;
      for(int id:ids)
      {
-    	 id = id +_minID;
-    	 IdInFrame.push_back(id);
+          id = id +_minID;
+          IdInFrame.push_back(id);
      }
      return IdInFrame;
 }
@@ -425,7 +425,7 @@ int PedData::GetNumFrames() const
 
 int PedData::GetNumPeds() const
 {
-	return _numPeds;
+     return _numPeds;
 }
 
 int PedData::GetFps() const
@@ -445,23 +445,23 @@ map<int , vector<int> > PedData::GetPedsFrame() const
 
 double** PedData::GetXCor() const
 {
-	return _xCor;
+     return _xCor;
 }
 double** PedData::GetYCor() const
 {
-	return _yCor;
+     return _yCor;
 }
 
 int* PedData::GetFirstFrame() const
 {
-	return _firstFrame;
+     return _firstFrame;
 }
 int* PedData::GetLastFrame() const
 {
-	return _lastFrame;
+     return _lastFrame;
 }
 
 string PedData::GetProjectRootDir() const
 {
-	return _projectRootDir;
+     return _projectRootDir;
 }

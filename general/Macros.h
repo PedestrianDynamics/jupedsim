@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -117,12 +117,12 @@ enum RoutingStrategy {
 };
 
 enum OperativModels {
-    MODEL_GFCM=1,
-    MODEL_GOMPERTZ,
-//    MODEL_ORCA,
-//    MODEL_CFM,
-//    MODEL_VELO
-//    MODEL_GNM
+     MODEL_GFCM=1,
+     MODEL_GOMPERTZ,
+     //    MODEL_ORCA,
+     //    MODEL_CFM,
+     //    MODEL_VELO
+     //    MODEL_GNM
 };
 
 enum AgentColorMode {
@@ -247,26 +247,26 @@ inline std::string concatenate(std::string const& name, int i) {
 
 inline void _printDebugLine(const std::string& fileName, int lineNumber)
 {
-unsigned found = fileName.find_last_of("/\\");
-std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<<std::endl;
+     unsigned found = fileName.find_last_of("/\\");
+     std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<<std::endl;
 }
 
 #define dtrace(...)                         \
-    (_printDebugLine(__FILE__, __LINE__),   \
-    fprintf(stderr, __VA_ARGS__),           \
-    (void) fprintf(stderr, "\n"))
+          (_printDebugLine(__FILE__, __LINE__),   \
+                    fprintf(stderr, __VA_ARGS__),           \
+                    (void) fprintf(stderr, "\n"))
 
 #define derror(...)                         \
-    (_printDebugLine(__FILE__, __LINE__),   \
-    fprintf(stderr, "ERROR: "),             \
-    fprintf(stderr, __VA_ARGS__)            \
-    )
+          (_printDebugLine(__FILE__, __LINE__),   \
+                    fprintf(stderr, "ERROR: "),             \
+                    fprintf(stderr, __VA_ARGS__)            \
+          )
 #else
 
 #define dtrace(...)    ((void) 0)
 #define derror(...)                         \
-    (fprintf(stderr, __VA_ARGS__)           \
-    )
+          (fprintf(stderr, __VA_ARGS__)           \
+          )
 #endif /* TRACE_LOGGING */
 
 #endif  /* _MACROS_H */
