@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 ## v0.7.0 [Unreleased]
 ### Added
 - Changelog file
-- Rimea testcases 
+- Rimea testcases
+- risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks. 
 
 ### Changed
 -  

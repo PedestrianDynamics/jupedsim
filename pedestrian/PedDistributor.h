@@ -74,6 +74,11 @@ private:
 
      //pre movement time distribution
      std::normal_distribution<double> _premovementTime;
+
+     //risk tolerance distribution
+     std::normal_distribution<double> _riskTolerance;
+
+     //random number generator engine
      std::default_random_engine _generator;
 
 
@@ -109,8 +114,10 @@ public:
     void Setbounds(double bounds[4]);
     AgentsParameters* GetGroupParameters();
     void SetGroupParameters(AgentsParameters* groupParameters);
-    void InitPremovementTime(double mean, double stv);
+    void InitPremovementTime(double mean, double stdv);
     double GetPremovementTime();
+    void InitRiskTolerance(double mean, double stdv);
+    double GetRiskTolerance();
 };
 
 //TODO merge the two classes and set the _subRoomID=-1

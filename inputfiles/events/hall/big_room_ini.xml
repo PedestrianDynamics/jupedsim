@@ -12,7 +12,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="big_room_trrajectories.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
+    <socket hostname="127.0.0.1" port="8989"/> 
   </trajectories>
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->
@@ -70,7 +70,8 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="500" router_id="1" agent_parameter_id="1" />
+      <group group_id="0" room_id="0" subroom_id="0" number="50" router_id="1" agent_parameter_id="1" 
+          risk_tolerance_mean="0.8" risk_tolerance_sigma="0.01"/>
     </agents_distribution>
   </agents>
 

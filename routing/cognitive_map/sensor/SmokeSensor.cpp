@@ -46,6 +46,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
         double smokeFactor = _FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
                                                       pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(),
                                                                                                 pedestrian->GetPos().GetY());
+        //double smokeFactor = 1;
         //std::cout << smokeFactor << std::endl;
         item->SetFactor(smokeFactor,GetName());
         //std::cout << item->GetFactor() << std::endl;
