@@ -10,7 +10,16 @@
                     <vertex px="6.00" py="1.50"/> 
                     <vertex px="6.00" py="0.00"/> 
                     <vertex px="-6.50" py="0.00"/> 
-                </polygon> 
+                </polygon>
+				<obstacle id="1" caption="table" height="1.0" closed="1">
+					<polygon>
+						<vertex px="5.5" py="0.500"/>
+						<vertex px="5.50" py="1.0"/>
+						<vertex px="5.800" py="1.00"/>
+						<vertex px="5.800" py="0.50"/>
+						<vertex px="5.50" py="0.50"/>
+					</polygon>
+				</obstacle>				
             </subroom> 
         </room> 
     </rooms> 
