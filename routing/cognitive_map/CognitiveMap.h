@@ -31,6 +31,7 @@
 #define COGNITIVEMAP_H_
 
 #include "NavigationGraph.h"
+#include "./map_knowlegde/routeknowlegde.h"
 #include <vector>
 
 class SubRoom;
@@ -73,6 +74,8 @@ public:
     bool HadNoDestination() const;
     void AddDestination(const GraphEdge *);
     std::vector<const GraphEdge *> & GetDestinations();
+    /// Route knowlegde will be created using memory (depending on probabilites) of shortest path
+    void CreateRouteKnowlegde(const Pedestrian * pedestrian);
 
     bool ChangedSubRoom() const;
     void UpdateSubRoom();
@@ -83,6 +86,8 @@ private:
     const Pedestrian * const pedestrian;
     const SubRoom * current_subroom = NULL;
     std::vector<const GraphEdge *> destinations;
+    RouteKnowlegde _RKnowlegde;
+
 
 };
 

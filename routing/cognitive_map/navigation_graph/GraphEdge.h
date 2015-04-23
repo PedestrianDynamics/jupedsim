@@ -62,11 +62,6 @@ public:
      const GraphVertex * GetSrc() const;
      const Crossing * GetCrossing() const;
 
-     ///FireMesh
-     //const FireMesh * GetFireMesh() const;
-     //void SetUpFireMesh();
-
-     //double GetSmokeFactor(const Point &pointPed) const;
      double GetApproximateDistance() const;
      double GetApproximateDistance(const Point &) const;
      void SetFactor(double factor, std::string name);
@@ -80,7 +75,6 @@ private:
      const GraphVertex  * const _src;
      const GraphVertex  * const _dest;
      const Crossing  * const _crossing;
-     //FireMesh * _fireMesh;
 
      /**
       * Factor Bag
