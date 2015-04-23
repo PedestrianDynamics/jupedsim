@@ -62,10 +62,6 @@ CognitiveMapRouter::~CognitiveMapRouter()
 
 }
 
-
-
-
-
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
     //check for former goal.
@@ -83,8 +79,6 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
         (*cm_storage)[p]->UpdateSubRoom();
 
         return status;
-
-
     }
 
     //std::cout << p->GetGlobalTime() << std::endl;

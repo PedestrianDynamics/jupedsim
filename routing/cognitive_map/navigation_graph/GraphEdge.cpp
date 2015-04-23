@@ -153,33 +153,6 @@ const Crossing * GraphEdge::GetCrossing() const
     return _crossing;
 }
 
-//const FireMesh *GraphEdge::GetFireMesh() const
-//{
-//    return _fireMesh;
-//}
-
-//void GraphEdge::SetUpFireMesh()
-//{
-
-//     //TODO: read this prefix from the ini file
-//     // std::string filename = "D:/workspace/JuPedSim/jpscore/inputfiles/cognitive_map";
-//     std::string prefix = "D:/workspace/JPS/JPScore/inputfiles/cognitive_map";
-
-
-//     std::string filename = prefix + "/Door_X_" + std::to_string(_crossing->GetCentre().GetX())
-//               + "_Y_" + std::to_string(_crossing->GetCentre().GetY()) + ".csv";
-//     _fireMesh.SetKnotValuesFromFile(filename);
-//}
-
-//double GraphEdge::GetSmokeFactor(const Point &pointPed) const
-//{   //std::cout << pointPed.GetX() << " " << pointPed.GetY() << std::endl;
-//    if (_fireMesh.statusMesh()==true)
-//        return _fireMesh.GetKnotValue(pointPed.GetX(),pointPed.GetY());
-//    else
-//        return 1.0;
-
-//}
-
 bool GraphEdge::IsExit() const
 {
      return _crossing->IsExit();

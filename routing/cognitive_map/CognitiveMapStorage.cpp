@@ -64,7 +64,6 @@ void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
      //todo: the possibility to have more then one creator.
      cognitive_maps.insert(std::make_pair(ped, creator->CreateCognitiveMap(ped)));
-    
 
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());

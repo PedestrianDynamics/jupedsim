@@ -42,6 +42,10 @@ class NavLine;
 class Crossing;
 class Transition;
 class GraphEdge;
+class GraphVertex;
+
+
+using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
 
 /**
  * @brief Graph Vertex.
@@ -51,6 +55,7 @@ class GraphVertex {
 
 public:
      typedef std::set<GraphEdge *> EdgesContainer;
+
      /****************************
       * Constructors & Destructors
       ****************************/
@@ -79,6 +84,9 @@ public:
 
     const GraphEdge * GetCheapestDestinationByEdges(const Point & position) const;
     const GraphEdge * GetLocalCheapestDestination(const Point & position) const;
+
+    NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
+
 
 
 private:

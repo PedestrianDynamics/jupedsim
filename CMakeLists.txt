@@ -216,6 +216,7 @@ set (   source_files
   routing/cognitive_map/fire_mesh/FireMesh.cpp
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
+  routing/cognitive_map/map_knowlegde/routeknowlegde.cpp
 
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
@@ -258,6 +259,7 @@ set (   header_files
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
+routing/cognitive_map/map_knowlegde/routeknowlegde.h
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
