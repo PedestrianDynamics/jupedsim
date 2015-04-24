@@ -30,6 +30,7 @@
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
 #include "pedestrian/AgentsSourcesManager.h"
+#include "matsim/HybridSimulationManager.h"
 
 #include <thread>
 #include <functional>
@@ -56,11 +57,14 @@ int main(int argc, char **argv)
      if(status&&sim.InitArgs(*args))
      {
           //Start the threads for managing the sources of agents
-          //AgentsSourcesManager sManager;
           std::thread t1(sim.GetAgentSrcManager(),21);
-          //Start the thread for managing incoming messages from MatSim
 
-          //Start the thread for managing outgoing messages to MatSim
+          //Start the thread for managing incoming messages from MatSim
+          std::thread t2;
+          auto hybrid=args->GetHybridSimManager();
+          if(hybrid)
+               t2 = std::thread(*hybrid);
+
 
           //main thread for the simulation
           Log->Write("INFO: \tStart runSimulation()");
@@ -72,8 +76,14 @@ int main(int argc, char **argv)
           //so join the other threads
           t1.join();
 
+          //only if in hybrid mode
+          if(hybrid)
+          {
+               hybrid->Shutdown();
+               t2.join();
+          }
 
-          // some output
+          // some statistics output
           if(args->ShowStatistics())
           {
                sim.PrintStatistics();

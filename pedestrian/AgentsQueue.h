@@ -15,6 +15,9 @@
 //forward declaration
 class Pedestrian;
 
+/**
+ * Queue for incoming agents
+ */
 class AgentsQueue
 {
 public:
@@ -30,4 +33,21 @@ private:
      static std::mutex _queueMutex;
 };
 
+/**
+ * Queue for outgoing agents
+ */
+class AgentsQueueOut
+{
+public:
+     static void Add(std::vector<Pedestrian*>& ped);
+     static void Add(Pedestrian* ped);
+     static void GetandClear(std::vector<Pedestrian*>& peds);
+     static bool IsEmpty();
+
+private:
+     AgentsQueueOut(){};
+     virtual ~AgentsQueueOut(){};
+     static std::vector<Pedestrian*> _agentsQueue;
+     static std::mutex _queueMutex;
+};
 #endif /* AGENTSQUEUE_H_ */

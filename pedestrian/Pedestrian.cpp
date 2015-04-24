@@ -49,7 +49,7 @@ Pedestrian::Pedestrian()
      _oldRoomID = -1;
      _oldSubRoomID = -1;
      _exitIndex = -1;
-     _id = 0;
+     _id = _agentsCreated;//default id
      _mass = 1;
      _tau = 0.5;
      _newOrientationFlag = false;
