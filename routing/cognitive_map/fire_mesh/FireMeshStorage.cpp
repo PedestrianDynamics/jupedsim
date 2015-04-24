@@ -2,6 +2,11 @@
 
 #include "../../../geometry/Building.h"
 
+FireMeshStorage::FireMeshStorage()
+{
+
+}
+
 FireMeshStorage::FireMeshStorage(const Building * const b, const std::string &filepath, const double &updateintervall, const double &finalTime)
 {
     _building=b;

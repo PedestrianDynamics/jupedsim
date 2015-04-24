@@ -50,9 +50,6 @@ CognitiveMap::CognitiveMap(const Building * building, const Pedestrian * pedestr
 {
      navigation_graph = new NavigationGraph(building);
 
-
-
-
 }
 
 CognitiveMap::~CognitiveMap()
@@ -89,23 +86,23 @@ const GraphEdge * CognitiveMap::GetDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
-    ///Route Knowlegde
+//    ///Route Knowlegde
 
-    if (!_RKnowlegde.GetRememberedRooms().empty())
-    {
-        ///Room seems to be familiar?
-        if (!_RKnowlegde.RoomIsFamiliar((*navigation_graph)[sub_room]))
-        {
-            /// not familiar (go back or use other tactics)
-            return nullptr;
-        }
-        else
-        {
-            return _RKnowlegde.NextDoorOnRoute((*navigation_graph)[sub_room]);
-        }
-    }
+//    if (!_RKnowlegde.GetRememberedRooms().empty())
+//    {
+//        ///Room seems to be familiar?
+//        if (!_RKnowlegde.RoomIsFamiliar((*navigation_graph)[sub_room]))
+//        {
+//            /// not familiar (go back or use other tactics)
+//            return nullptr;
+//        }
+//        else
+//        {
+//            return _RKnowlegde.NextDoorOnRoute((*navigation_graph)[sub_room]);
+//        }
+//    }
 
-    return nullptr;
+//    return nullptr;
     return (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 }
 
@@ -132,14 +129,14 @@ std::vector<const GraphEdge *>& CognitiveMap::GetDestinations()
     return destinations;
 }
 
-void CognitiveMap::CreateRouteKnowlegde(const Pedestrian *pedestrian)
-{
-    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    NextDoorKnowlegde ndknowlegde = (*navigation_graph)[sub_room]->GetShortestPathFromHere(pedestrian->GetPos());
+//void CognitiveMap::CreateRouteKnowlegde(const Pedestrian *pedestrian)
+//{
+//    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+//    NextDoorKnowlegde ndknowlegde = (*navigation_graph)[sub_room]->GetShortestPathFromHere(pedestrian->GetPos());
 
-    _RKnowlegde = RouteKnowlegde(ndknowlegde);
+//    _RKnowlegde = RouteKnowlegde(ndknowlegde);
 
-}
+//}
 
 bool CognitiveMap::ChangedSubRoom() const
 {

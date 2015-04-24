@@ -73,7 +73,7 @@ CognitiveMap * CompleteCognitiveMapCreator::CreateCognitiveMap(const Pedestrian 
      }
      ///RouteKnowlegde
      /// Remembered routes and assoziations between rooms and doors
-     cm->CreateRouteKnowlegde(ped);
+     //cm->CreateRouteKnowlegde(ped);
 
      return cm;
 }
