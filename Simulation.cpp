@@ -34,6 +34,7 @@
 #include "math/GompertzModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/AgentsQueue.h"
+#include "matsim/HybridSimulationManager.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -60,8 +61,6 @@ Simulation::Simulation(const ArgumentParser& args)
      _iod = new IODispatcher();
      _fps = 1;
      _em = nullptr;
-     _hpc = -1;
-     _profiling = false;
      _argsParser = args;
 }
 
@@ -228,6 +227,12 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           //src->Dump();
      }
 
+     //iniitalize the hybridmode if defined
+     if(nullptr!=(_hybridSimManager=args.GetHybridSimManager()))
+     {
+          _hybridSimManager->Init(_building.get());
+     };
+
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
      // because a direction is needed for this initialisation.
@@ -261,13 +266,6 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
      _em->ListEvents();
 
-     //which hpc-architecture?
-     _hpc = args.GetHPCFlag();
-     //if programming model = ocl create buffers and make the setup
-     //if(_hpc==1){
-     //((GPU_ocl_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
-     //((GPU_ocl_GCFMModel*) _model)->initCL(_building->GetNumberOfPedestrians());
-     //}
      //_building->SaveGeometry("test.sav.xml");
 
      //if(_building->SanityCheck()==false)
@@ -469,9 +467,19 @@ void Simulation::UpdateRoutesAndLocations()
           }
      }
 
-     // remove the pedestrians that have left the building
-     for (unsigned int p = 0; p < pedsToRemove.size(); p++) {
-          _building->DeletePedestrian(pedsToRemove[p]);
+
+     if (_hybridSimManager)
+     {
+          AgentsQueueOut::Add(pedsToRemove);
+     }
+     else
+     {
+          // remove the pedestrians that have left the building
+          for (unsigned int p = 0; p < pedsToRemove.size(); p++)
+          {
+               _building->DeletePedestrian(pedsToRemove[p]);
+          }
+
      }
 
      //    temporary fix for the safest path router

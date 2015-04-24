@@ -57,6 +57,7 @@
 #include "../routing/CognitiveMapRouter.h"
 #include "../math/GompertzModel.h"
 #include "../math/GCFMModel.h"
+#include "../matsim/HybridSimulationManager.h"
 
 using namespace std;
 
@@ -302,8 +303,8 @@ bool ArgumentParser::ParseIniFile(string inifile)
      if (xMainNode->FirstChild("show_statistics"))
      {
           string value = xMainNode->FirstChild("show_statistics")->FirstChild()->Value();
-         if(value=="true")
-              _showStatistics=true;
+          if(value=="true")
+               _showStatistics=true;
           Log->Write("INFO: \tShow statistics: %s",value.c_str());
      }
      //trajectories
@@ -360,6 +361,17 @@ bool ArgumentParser::ParseIniFile(string inifile)
                Log->Write("INFO: \tStreaming results to output [%s:%d] ",
                          _hostname.c_str(), pPort);
           }
+     }
+
+     //check the simulation mode
+     //trajectories
+     TiXmlNode* xSimMode = xMainNode->FirstChild("hybrid_simulation");
+     if (xSimMode)
+     {
+          int port=std::stoi(xMainNode->FirstChildElement("hybrid_simulation")->Attribute("port"));
+          string server=xMainNode->FirstChildElement("hybrid_simulation")->Attribute("server");
+          _hybridSimManager=std::shared_ptr<HybridSimulationManager>(new HybridSimulationManager(server,port));
+          Log->Write(_hybridSimManager->ToString());
      }
 
      //pick up which model to use
@@ -779,7 +791,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
                Log->Write("\nINFO: \tUsing CognitiveMapRouter");
                ///Parsing additional options
                if (!ParseCogMapOpts(e))
-                   return false;
+                    return false;
           }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -793,56 +805,56 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
 
 bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
 {
-    TiXmlNode* sensorNode=routerNode->FirstChild();
+     TiXmlNode* sensorNode=routerNode->FirstChild();
 
-    if (!sensorNode)
-    {
-         Log->Write("ERROR:\tNo sensors found.\n");
-         return false;
-    }
+     if (!sensorNode)
+     {
+          Log->Write("ERROR:\tNo sensors found.\n");
+          return false;
+     }
 
-    /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
-    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_routingengine->GetAvailableRouters().back());
+     /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+     CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_routingengine->GetAvailableRouters().back());
 
-    std::vector<std::string> sensorVec;
-    for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
-              e = e->NextSiblingElement("sensor"))
-    {
-        string sensor = e->Attribute("description");
-        ///adding Smoke Sensor specific parameters
-        if (sensor=="Smoke")
-        {
-            std::vector<std::string> smokeOptVec;
+     std::vector<std::string> sensorVec;
+     for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
+               e = e->NextSiblingElement("sensor"))
+     {
+          string sensor = e->Attribute("description");
+          ///adding Smoke Sensor specific parameters
+          if (sensor=="Smoke")
+          {
+               std::vector<std::string> smokeOptVec;
 
-            smokeOptVec.push_back(e->Attribute("p_field_path"));
-            smokeOptVec.push_back(e->Attribute("update_time"));
-            smokeOptVec.push_back(e->Attribute("final_time"));
-            r->addOption("smokeOptions",smokeOptVec);
+               smokeOptVec.push_back(e->Attribute("p_field_path"));
+               smokeOptVec.push_back(e->Attribute("update_time"));
+               smokeOptVec.push_back(e->Attribute("final_time"));
+               r->addOption("smokeOptions",smokeOptVec);
 
-        }
-        sensorVec.push_back(sensor);
+          }
+          sensorVec.push_back(sensor);
 
-        Log->Write("INFO: \tSensor "+ sensor + " added");
-    }
-
-
-    r->addOption("Sensors",sensorVec);
-
-    TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
-
-    if (!cogMap)
-    {
-         Log->Write("ERROR:\tCognitive Map not specified.\n");
-         return false;
-    }
-
-    std::vector<std::string> cogMapStatus;
-    cogMapStatus.push_back(cogMap->Attribute("status"));
-    Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
-    r->addOption("CognitiveMap",cogMapStatus);
+          Log->Write("INFO: \tSensor "+ sensor + " added");
+     }
 
 
-    return true;
+     r->addOption("Sensors",sensorVec);
+
+     TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
+
+     if (!cogMap)
+     {
+          Log->Write("ERROR:\tCognitive Map not specified.\n");
+          return false;
+     }
+
+     std::vector<std::string> cogMapStatus;
+     cogMapStatus.push_back(cogMap->Attribute("status"));
+     Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+     r->addOption("CognitiveMap",cogMapStatus);
+
+
+     return true;
 
 }
 
@@ -990,6 +1002,10 @@ std::shared_ptr<RoutingEngine> ArgumentParser::GetRoutingEngine() const
 vector<pair<int, RoutingStrategy> > ArgumentParser::GetRoutingStrategy() const
 {
      return pRoutingStrategies;
+}
+std::shared_ptr<HybridSimulationManager> ArgumentParser::GetHybridSimManager() const
+{
+     return _hybridSimManager;
 }
 
 double ArgumentParser::GetV0Mu() const

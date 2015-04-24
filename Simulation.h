@@ -56,6 +56,7 @@
 //Forward declarations TO DO
 //class AgentsSourcesManager;
 class EventManager;
+class HybridSimulationManager;
 
 class Simulation
 {
@@ -85,10 +86,9 @@ private:
     ArgumentParser _argsParser;
     /// Agents sources manager
     AgentsSourcesManager _agentSrcManager;
-    /// profiling flag
-    bool _profiling;
-    /// architecture flag
-    int _hpc;
+    /// hybrid simulation manager
+    //HybridSimulationManager
+    std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
 
 public:
 
