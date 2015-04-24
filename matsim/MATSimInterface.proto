@@ -1,7 +1,14 @@
 syntax = "proto2";
 option java_generic_services = true;
+//option cc_generic_services = true;
 option java_outer_classname="ProtoMATSimInterface";
 option java_package = "playground.gregor.proto";
+
+package hybrid;
+//for compilation
+// protoc  --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` MATSimInterface.proto
+// protoc  --cpp_out="./"  MATSimInterface.proto
+// protoc -I ../../protos/ --cpp_out=. ../../protos/helloworld.proto
 
 message MATSim2ExternPutAgent {
 	message Agent {

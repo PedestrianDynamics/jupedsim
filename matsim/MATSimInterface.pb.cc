@@ -16,6 +16,8 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 
+namespace hybrid {
+
 namespace {
 
 const ::google::protobuf::Descriptor* MATSim2ExternPutAgent_descriptor_ = NULL;
@@ -93,16 +95,16 @@ void protobuf_AssignDesc_MATSimInterface_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent, agent_),
   };
   MATSim2ExternPutAgent_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       MATSim2ExternPutAgent_descriptor_,
       MATSim2ExternPutAgent::default_instance_,
       MATSim2ExternPutAgent_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(MATSim2ExternPutAgent));
+      -1,
+      sizeof(MATSim2ExternPutAgent),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent, _internal_metadata_),
+      -1);
   MATSim2ExternPutAgent_Agent_descriptor_ = MATSim2ExternPutAgent_descriptor_->nested_type(0);
   static const int MATSim2ExternPutAgent_Agent_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent_Agent, id_),
@@ -110,278 +112,278 @@ void protobuf_AssignDesc_MATSimInterface_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent_Agent, nodes_),
   };
   MATSim2ExternPutAgent_Agent_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       MATSim2ExternPutAgent_Agent_descriptor_,
       MATSim2ExternPutAgent_Agent::default_instance_,
       MATSim2ExternPutAgent_Agent_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent_Agent, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent_Agent, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(MATSim2ExternPutAgent_Agent));
+      -1,
+      sizeof(MATSim2ExternPutAgent_Agent),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgent_Agent, _internal_metadata_),
+      -1);
   MATSim2ExternHasSpace_descriptor_ = file->message_type(1);
   static const int MATSim2ExternHasSpace_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpace, nodeid_),
   };
   MATSim2ExternHasSpace_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       MATSim2ExternHasSpace_descriptor_,
       MATSim2ExternHasSpace::default_instance_,
       MATSim2ExternHasSpace_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpace, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpace, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(MATSim2ExternHasSpace));
+      -1,
+      sizeof(MATSim2ExternHasSpace),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpace, _internal_metadata_),
+      -1);
   MATSim2ExternHasSpaceConfirmed_descriptor_ = file->message_type(2);
   static const int MATSim2ExternHasSpaceConfirmed_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpaceConfirmed, hasspace_),
   };
   MATSim2ExternHasSpaceConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       MATSim2ExternHasSpaceConfirmed_descriptor_,
       MATSim2ExternHasSpaceConfirmed::default_instance_,
       MATSim2ExternHasSpaceConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpaceConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpaceConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(MATSim2ExternHasSpaceConfirmed));
+      -1,
+      sizeof(MATSim2ExternHasSpaceConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternHasSpaceConfirmed, _internal_metadata_),
+      -1);
   MATSim2ExternPutAgentConfirmed_descriptor_ = file->message_type(3);
   static const int MATSim2ExternPutAgentConfirmed_offsets_[1] = {
   };
   MATSim2ExternPutAgentConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       MATSim2ExternPutAgentConfirmed_descriptor_,
       MATSim2ExternPutAgentConfirmed::default_instance_,
       MATSim2ExternPutAgentConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgentConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgentConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(MATSim2ExternPutAgentConfirmed));
+      -1,
+      sizeof(MATSim2ExternPutAgentConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MATSim2ExternPutAgentConfirmed, _internal_metadata_),
+      -1);
   Extern2MATSim_descriptor_ = file->message_type(4);
   static const int Extern2MATSim_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim, agent_),
   };
   Extern2MATSim_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       Extern2MATSim_descriptor_,
       Extern2MATSim::default_instance_,
       Extern2MATSim_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Extern2MATSim));
+      -1,
+      sizeof(Extern2MATSim),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim, _internal_metadata_),
+      -1);
   Extern2MATSim_Agent_descriptor_ = Extern2MATSim_descriptor_->nested_type(0);
   static const int Extern2MATSim_Agent_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim_Agent, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim_Agent, leavenode_),
   };
   Extern2MATSim_Agent_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       Extern2MATSim_Agent_descriptor_,
       Extern2MATSim_Agent::default_instance_,
       Extern2MATSim_Agent_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim_Agent, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim_Agent, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Extern2MATSim_Agent));
+      -1,
+      sizeof(Extern2MATSim_Agent),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSim_Agent, _internal_metadata_),
+      -1);
   Extern2MATSimConfirmed_descriptor_ = file->message_type(5);
   static const int Extern2MATSimConfirmed_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSimConfirmed, accepted_),
   };
   Extern2MATSimConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       Extern2MATSimConfirmed_descriptor_,
       Extern2MATSimConfirmed::default_instance_,
       Extern2MATSimConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSimConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSimConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(Extern2MATSimConfirmed));
+      -1,
+      sizeof(Extern2MATSimConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Extern2MATSimConfirmed, _internal_metadata_),
+      -1);
   ExternSimStepFinished_descriptor_ = file->message_type(6);
   static const int ExternSimStepFinished_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinished, time_),
   };
   ExternSimStepFinished_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternSimStepFinished_descriptor_,
       ExternSimStepFinished::default_instance_,
       ExternSimStepFinished_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinished, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinished, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternSimStepFinished));
+      -1,
+      sizeof(ExternSimStepFinished),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinished, _internal_metadata_),
+      -1);
   ExternSimStepFinishedReceived_descriptor_ = file->message_type(7);
   static const int ExternSimStepFinishedReceived_offsets_[1] = {
   };
   ExternSimStepFinishedReceived_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternSimStepFinishedReceived_descriptor_,
       ExternSimStepFinishedReceived::default_instance_,
       ExternSimStepFinishedReceived_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinishedReceived, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinishedReceived, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternSimStepFinishedReceived));
+      -1,
+      sizeof(ExternSimStepFinishedReceived),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternSimStepFinishedReceived, _internal_metadata_),
+      -1);
   ExternDoSimStep_descriptor_ = file->message_type(8);
   static const int ExternDoSimStep_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStep, fromtime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStep, totime_),
   };
   ExternDoSimStep_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternDoSimStep_descriptor_,
       ExternDoSimStep::default_instance_,
       ExternDoSimStep_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStep, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStep, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternDoSimStep));
+      -1,
+      sizeof(ExternDoSimStep),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStep, _internal_metadata_),
+      -1);
   ExternDoSimStepReceived_descriptor_ = file->message_type(9);
   static const int ExternDoSimStepReceived_offsets_[1] = {
   };
   ExternDoSimStepReceived_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternDoSimStepReceived_descriptor_,
       ExternDoSimStepReceived::default_instance_,
       ExternDoSimStepReceived_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStepReceived, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStepReceived, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternDoSimStepReceived));
+      -1,
+      sizeof(ExternDoSimStepReceived),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternDoSimStepReceived, _internal_metadata_),
+      -1);
   ExternalConnect_descriptor_ = file->message_type(10);
   static const int ExternalConnect_offsets_[1] = {
   };
   ExternalConnect_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternalConnect_descriptor_,
       ExternalConnect::default_instance_,
       ExternalConnect_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnect, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnect, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternalConnect));
+      -1,
+      sizeof(ExternalConnect),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnect, _internal_metadata_),
+      -1);
   ExternalConnectConfirmed_descriptor_ = file->message_type(11);
   static const int ExternalConnectConfirmed_offsets_[1] = {
   };
   ExternalConnectConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternalConnectConfirmed_descriptor_,
       ExternalConnectConfirmed::default_instance_,
       ExternalConnectConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnectConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnectConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternalConnectConfirmed));
+      -1,
+      sizeof(ExternalConnectConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnectConfirmed, _internal_metadata_),
+      -1);
   ExternOnPrepareSim_descriptor_ = file->message_type(12);
   static const int ExternOnPrepareSim_offsets_[1] = {
   };
   ExternOnPrepareSim_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternOnPrepareSim_descriptor_,
       ExternOnPrepareSim::default_instance_,
       ExternOnPrepareSim_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternOnPrepareSim, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternOnPrepareSim, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternOnPrepareSim));
+      -1,
+      sizeof(ExternOnPrepareSim),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternOnPrepareSim, _internal_metadata_),
+      -1);
   ExternOnPrepareSimConfirmed_descriptor_ = file->message_type(13);
   static const int ExternOnPrepareSimConfirmed_offsets_[1] = {
   };
   ExternOnPrepareSimConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternOnPrepareSimConfirmed_descriptor_,
       ExternOnPrepareSimConfirmed::default_instance_,
       ExternOnPrepareSimConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternOnPrepareSimConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternOnPrepareSimConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternOnPrepareSimConfirmed));
+      -1,
+      sizeof(ExternOnPrepareSimConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternOnPrepareSimConfirmed, _internal_metadata_),
+      -1);
   ExternAfterSim_descriptor_ = file->message_type(14);
   static const int ExternAfterSim_offsets_[1] = {
   };
   ExternAfterSim_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternAfterSim_descriptor_,
       ExternAfterSim::default_instance_,
       ExternAfterSim_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternAfterSim, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternAfterSim, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternAfterSim));
+      -1,
+      sizeof(ExternAfterSim),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternAfterSim, _internal_metadata_),
+      -1);
   ExternAfterSimConfirmed_descriptor_ = file->message_type(15);
   static const int ExternAfterSimConfirmed_offsets_[1] = {
   };
   ExternAfterSimConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       ExternAfterSimConfirmed_descriptor_,
       ExternAfterSimConfirmed::default_instance_,
       ExternAfterSimConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternAfterSimConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternAfterSimConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(ExternAfterSimConfirmed));
+      -1,
+      sizeof(ExternAfterSimConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternAfterSimConfirmed, _internal_metadata_),
+      -1);
   AgentsStuck_descriptor_ = file->message_type(16);
   static const int AgentsStuck_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuck, agentid_),
   };
   AgentsStuck_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       AgentsStuck_descriptor_,
       AgentsStuck::default_instance_,
       AgentsStuck_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuck, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuck, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(AgentsStuck));
+      -1,
+      sizeof(AgentsStuck),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuck, _internal_metadata_),
+      -1);
   AgentsStuckConfirmed_descriptor_ = file->message_type(17);
   static const int AgentsStuckConfirmed_offsets_[1] = {
   };
   AgentsStuckConfirmed_reflection_ =
-    new ::google::protobuf::internal::GeneratedMessageReflection(
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
       AgentsStuckConfirmed_descriptor_,
       AgentsStuckConfirmed::default_instance_,
       AgentsStuckConfirmed_offsets_,
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuckConfirmed, _has_bits_[0]),
-      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuckConfirmed, _unknown_fields_),
       -1,
-      ::google::protobuf::DescriptorPool::generated_pool(),
-      ::google::protobuf::MessageFactory::generated_factory(),
-      sizeof(AgentsStuckConfirmed));
+      -1,
+      sizeof(AgentsStuckConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AgentsStuckConfirmed, _internal_metadata_),
+      -1);
 }
 
 namespace {
@@ -395,45 +397,45 @@ inline void protobuf_AssignDescriptorsOnce() {
 void protobuf_RegisterTypes(const ::std::string&) {
   protobuf_AssignDescriptorsOnce();
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    MATSim2ExternPutAgent_descriptor_, &MATSim2ExternPutAgent::default_instance());
+      MATSim2ExternPutAgent_descriptor_, &MATSim2ExternPutAgent::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    MATSim2ExternPutAgent_Agent_descriptor_, &MATSim2ExternPutAgent_Agent::default_instance());
+      MATSim2ExternPutAgent_Agent_descriptor_, &MATSim2ExternPutAgent_Agent::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    MATSim2ExternHasSpace_descriptor_, &MATSim2ExternHasSpace::default_instance());
+      MATSim2ExternHasSpace_descriptor_, &MATSim2ExternHasSpace::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    MATSim2ExternHasSpaceConfirmed_descriptor_, &MATSim2ExternHasSpaceConfirmed::default_instance());
+      MATSim2ExternHasSpaceConfirmed_descriptor_, &MATSim2ExternHasSpaceConfirmed::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    MATSim2ExternPutAgentConfirmed_descriptor_, &MATSim2ExternPutAgentConfirmed::default_instance());
+      MATSim2ExternPutAgentConfirmed_descriptor_, &MATSim2ExternPutAgentConfirmed::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    Extern2MATSim_descriptor_, &Extern2MATSim::default_instance());
+      Extern2MATSim_descriptor_, &Extern2MATSim::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    Extern2MATSim_Agent_descriptor_, &Extern2MATSim_Agent::default_instance());
+      Extern2MATSim_Agent_descriptor_, &Extern2MATSim_Agent::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    Extern2MATSimConfirmed_descriptor_, &Extern2MATSimConfirmed::default_instance());
+      Extern2MATSimConfirmed_descriptor_, &Extern2MATSimConfirmed::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternSimStepFinished_descriptor_, &ExternSimStepFinished::default_instance());
+      ExternSimStepFinished_descriptor_, &ExternSimStepFinished::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternSimStepFinishedReceived_descriptor_, &ExternSimStepFinishedReceived::default_instance());
+      ExternSimStepFinishedReceived_descriptor_, &ExternSimStepFinishedReceived::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternDoSimStep_descriptor_, &ExternDoSimStep::default_instance());
+      ExternDoSimStep_descriptor_, &ExternDoSimStep::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternDoSimStepReceived_descriptor_, &ExternDoSimStepReceived::default_instance());
+      ExternDoSimStepReceived_descriptor_, &ExternDoSimStepReceived::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternalConnect_descriptor_, &ExternalConnect::default_instance());
+      ExternalConnect_descriptor_, &ExternalConnect::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternalConnectConfirmed_descriptor_, &ExternalConnectConfirmed::default_instance());
+      ExternalConnectConfirmed_descriptor_, &ExternalConnectConfirmed::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternOnPrepareSim_descriptor_, &ExternOnPrepareSim::default_instance());
+      ExternOnPrepareSim_descriptor_, &ExternOnPrepareSim::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternOnPrepareSimConfirmed_descriptor_, &ExternOnPrepareSimConfirmed::default_instance());
+      ExternOnPrepareSimConfirmed_descriptor_, &ExternOnPrepareSimConfirmed::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternAfterSim_descriptor_, &ExternAfterSim::default_instance());
+      ExternAfterSim_descriptor_, &ExternAfterSim::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    ExternAfterSimConfirmed_descriptor_, &ExternAfterSimConfirmed::default_instance());
+      ExternAfterSimConfirmed_descriptor_, &ExternAfterSimConfirmed::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    AgentsStuck_descriptor_, &AgentsStuck::default_instance());
+      AgentsStuck_descriptor_, &AgentsStuck::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
-    AgentsStuckConfirmed_descriptor_, &AgentsStuckConfirmed::default_instance());
+      AgentsStuckConfirmed_descriptor_, &AgentsStuckConfirmed::default_instance());
 }
 
 }  // namespace
@@ -488,44 +490,48 @@ void protobuf_AddDesc_MATSimInterface_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\025MATSimInterface.proto\"{\n\025MATSim2Extern"
-    "PutAgent\022+\n\005agent\030\001 \002(\0132\034.MATSim2ExternP"
-    "utAgent.Agent\0325\n\005Agent\022\n\n\002id\030\001 \002(\t\022\021\n\ten"
-    "terNode\030\002 \002(\t\022\r\n\005nodes\030\003 \003(\t\"\'\n\025MATSim2E"
-    "xternHasSpace\022\016\n\006nodeId\030\001 \002(\t\"2\n\036MATSim2"
-    "ExternHasSpaceConfirmed\022\020\n\010hasSpace\030\001 \002("
-    "\010\" \n\036MATSim2ExternPutAgentConfirmed\"\\\n\rE"
-    "xtern2MATSim\022#\n\005agent\030\017 \002(\0132\024.Extern2MAT"
-    "Sim.Agent\032&\n\005Agent\022\n\n\002id\030\001 \002(\t\022\021\n\tleaveN"
-    "ode\030\002 \002(\t\"*\n\026Extern2MATSimConfirmed\022\020\n\010a"
-    "ccepted\030\001 \002(\010\"%\n\025ExternSimStepFinished\022\014"
-    "\n\004time\030\001 \002(\001\"\037\n\035ExternSimStepFinishedRec"
-    "eived\"3\n\017ExternDoSimStep\022\020\n\010fromTime\030\001 \002"
-    "(\001\022\016\n\006toTime\030\002 \002(\001\"\031\n\027ExternDoSimStepRec"
-    "eived\"\021\n\017ExternalConnect\"\032\n\030ExternalConn"
-    "ectConfirmed\"\024\n\022ExternOnPrepareSim\"\035\n\033Ex"
-    "ternOnPrepareSimConfirmed\"\020\n\016ExternAfter"
-    "Sim\"\031\n\027ExternAfterSimConfirmed\"\036\n\013Agents"
-    "Stuck\022\017\n\007agentId\030\001 \003(\t\"\026\n\024AgentsStuckCon"
-    "firmed2\242\002\n\026MATSimInterfaceService\022;\n\020req"
-    "Extern2MATSim\022\016.Extern2MATSim\032\027.Extern2M"
-    "ATSimConfirmed\0224\n\rreqAgentStuck\022\014.Agents"
-    "Stuck\032\025.AgentsStuckConfirmed\022A\n\022reqExter"
-    "nalConnect\022\020.ExternalConnect\032\031.ExternalC"
-    "onnectConfirmed\022R\n\030reqExternSimStepFinis"
-    "hed\022\026.ExternSimStepFinished\032\036.ExternSimS"
-    "tepFinishedReceived2\220\003\n\026ExternInterfaceS"
-    "ervice\022S\n\030reqMATSim2ExternHasSpace\022\026.MAT"
-    "Sim2ExternHasSpace\032\037.MATSim2ExternHasSpa"
-    "ceConfirmed\022S\n\030reqMATSim2ExternPutAgent\022"
-    "\026.MATSim2ExternPutAgent\032\037.MATSim2ExternP"
-    "utAgentConfirmed\022@\n\022reqExternDoSimStep\022\020"
-    ".ExternDoSimStep\032\030.ExternDoSimStepReceiv"
-    "ed\022J\n\025reqExternOnPrepareSim\022\023.ExternOnPr"
-    "epareSim\032\034.ExternOnPrepareSimConfirmed\022>"
-    "\n\021reqExternAfterSim\022\017.ExternAfterSim\032\030.E"
-    "xternAfterSimConfirmedB2\n\027playground.gre"
-    "gor.protoB\024ProtoMATSimInterface\210\001\001", 1514);
+    "\n\025MATSimInterface.proto\022\006hybrid\"\202\001\n\025MATS"
+    "im2ExternPutAgent\0222\n\005agent\030\001 \002(\0132#.hybri"
+    "d.MATSim2ExternPutAgent.Agent\0325\n\005Agent\022\n"
+    "\n\002id\030\001 \002(\t\022\021\n\tenterNode\030\002 \002(\t\022\r\n\005nodes\030\003"
+    " \003(\t\"\'\n\025MATSim2ExternHasSpace\022\016\n\006nodeId\030"
+    "\001 \002(\t\"2\n\036MATSim2ExternHasSpaceConfirmed\022"
+    "\020\n\010hasSpace\030\001 \002(\010\" \n\036MATSim2ExternPutAge"
+    "ntConfirmed\"c\n\rExtern2MATSim\022*\n\005agent\030\017 "
+    "\002(\0132\033.hybrid.Extern2MATSim.Agent\032&\n\005Agen"
+    "t\022\n\n\002id\030\001 \002(\t\022\021\n\tleaveNode\030\002 \002(\t\"*\n\026Exte"
+    "rn2MATSimConfirmed\022\020\n\010accepted\030\001 \002(\010\"%\n\025"
+    "ExternSimStepFinished\022\014\n\004time\030\001 \002(\001\"\037\n\035E"
+    "xternSimStepFinishedReceived\"3\n\017ExternDo"
+    "SimStep\022\020\n\010fromTime\030\001 \002(\001\022\016\n\006toTime\030\002 \002("
+    "\001\"\031\n\027ExternDoSimStepReceived\"\021\n\017External"
+    "Connect\"\032\n\030ExternalConnectConfirmed\"\024\n\022E"
+    "xternOnPrepareSim\"\035\n\033ExternOnPrepareSimC"
+    "onfirmed\"\020\n\016ExternAfterSim\"\031\n\027ExternAfte"
+    "rSimConfirmed\"\036\n\013AgentsStuck\022\017\n\007agentId\030"
+    "\001 \003(\t\"\026\n\024AgentsStuckConfirmed2\332\002\n\026MATSim"
+    "InterfaceService\022I\n\020reqExtern2MATSim\022\025.h"
+    "ybrid.Extern2MATSim\032\036.hybrid.Extern2MATS"
+    "imConfirmed\022B\n\rreqAgentStuck\022\023.hybrid.Ag"
+    "entsStuck\032\034.hybrid.AgentsStuckConfirmed\022"
+    "O\n\022reqExternalConnect\022\027.hybrid.ExternalC"
+    "onnect\032 .hybrid.ExternalConnectConfirmed"
+    "\022`\n\030reqExternSimStepFinished\022\035.hybrid.Ex"
+    "ternSimStepFinished\032%.hybrid.ExternSimSt"
+    "epFinishedReceived2\326\003\n\026ExternInterfaceSe"
+    "rvice\022a\n\030reqMATSim2ExternHasSpace\022\035.hybr"
+    "id.MATSim2ExternHasSpace\032&.hybrid.MATSim"
+    "2ExternHasSpaceConfirmed\022a\n\030reqMATSim2Ex"
+    "ternPutAgent\022\035.hybrid.MATSim2ExternPutAg"
+    "ent\032&.hybrid.MATSim2ExternPutAgentConfir"
+    "med\022N\n\022reqExternDoSimStep\022\027.hybrid.Exter"
+    "nDoSimStep\032\037.hybrid.ExternDoSimStepRecei"
+    "ved\022X\n\025reqExternOnPrepareSim\022\032.hybrid.Ex"
+    "ternOnPrepareSim\032#.hybrid.ExternOnPrepar"
+    "eSimConfirmed\022L\n\021reqExternAfterSim\022\026.hyb"
+    "rid.ExternAfterSim\032\037.hybrid.ExternAfterS"
+    "imConfirmedB2\n\027playground.gregor.protoB\024"
+    "ProtoMATSimInterface\210\001\001", 1663);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "MATSimInterface.proto", &protobuf_RegisterTypes);
   MATSim2ExternPutAgent::default_instance_ = new MATSim2ExternPutAgent();
@@ -578,6 +584,16 @@ struct StaticDescriptorInitializer_MATSimInterface_2eproto {
   }
 } static_descriptor_initializer_MATSimInterface_2eproto_;
 
+namespace {
+
+static void MergeFromFail(int line) GOOGLE_ATTRIBUTE_COLD;
+static void MergeFromFail(int line) {
+  GOOGLE_CHECK(false) << __FILE__ << ":" << line;
+}
+
+}  // namespace
+
+
 // ===================================================================
 
 #ifndef _MSC_VER
@@ -587,37 +603,38 @@ const int MATSim2ExternPutAgent_Agent::kNodesFieldNumber;
 #endif  // !_MSC_VER
 
 MATSim2ExternPutAgent_Agent::MATSim2ExternPutAgent_Agent()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.MATSim2ExternPutAgent.Agent)
 }
 
 void MATSim2ExternPutAgent_Agent::InitAsDefaultInstance() {
 }
 
 MATSim2ExternPutAgent_Agent::MATSim2ExternPutAgent_Agent(const MATSim2ExternPutAgent_Agent& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.MATSim2ExternPutAgent.Agent)
 }
 
 void MATSim2ExternPutAgent_Agent::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  id_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  enternode_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  enternode_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 MATSim2ExternPutAgent_Agent::~MATSim2ExternPutAgent_Agent() {
+  // @@protoc_insertion_point(destructor:hybrid.MATSim2ExternPutAgent.Agent)
   SharedDtor();
 }
 
 void MATSim2ExternPutAgent_Agent::SharedDtor() {
-  if (id_ != &::google::protobuf::internal::kEmptyString) {
-    delete id_;
-  }
-  if (enternode_ != &::google::protobuf::internal::kEmptyString) {
-    delete enternode_;
-  }
+  id_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  enternode_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
@@ -639,45 +656,51 @@ const MATSim2ExternPutAgent_Agent& MATSim2ExternPutAgent_Agent::default_instance
 
 MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent_Agent::default_instance_ = NULL;
 
-MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent_Agent::New() const {
-  return new MATSim2ExternPutAgent_Agent;
+MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent_Agent::New(::google::protobuf::Arena* arena) const {
+  MATSim2ExternPutAgent_Agent* n = new MATSim2ExternPutAgent_Agent;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void MATSim2ExternPutAgent_Agent::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     if (has_id()) {
-      if (id_ != &::google::protobuf::internal::kEmptyString) {
-        id_->clear();
-      }
+      id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
     if (has_enternode()) {
-      if (enternode_ != &::google::protobuf::internal::kEmptyString) {
-        enternode_->clear();
-      }
+      enternode_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
   }
   nodes_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool MATSim2ExternPutAgent_Agent::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.MATSim2ExternPutAgent.Agent)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required string id = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_id()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->id().data(), this->id().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.MATSim2ExternPutAgent.Agent.id");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_enterNode;
         break;
@@ -685,16 +708,16 @@ bool MATSim2ExternPutAgent_Agent::MergePartialFromCodedStream(
 
       // required string enterNode = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_enterNode:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_enternode()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->enternode().data(), this->enternode().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.MATSim2ExternPutAgent.Agent.enterNode");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_nodes;
         break;
@@ -702,28 +725,29 @@ bool MATSim2ExternPutAgent_Agent::MergePartialFromCodedStream(
 
       // repeated string nodes = 3;
       case 3: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 26) {
          parse_nodes:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->add_nodes()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->nodes(this->nodes_size() - 1).data(),
             this->nodes(this->nodes_size() - 1).length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.MATSim2ExternPutAgent.Agent.nodes");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(26)) goto parse_nodes;
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -731,52 +755,64 @@ bool MATSim2ExternPutAgent_Agent::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.MATSim2ExternPutAgent.Agent)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.MATSim2ExternPutAgent.Agent)
+  return false;
 #undef DO_
 }
 
 void MATSim2ExternPutAgent_Agent::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.MATSim2ExternPutAgent.Agent)
   // required string id = 1;
   if (has_id()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->id().data(), this->id().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternPutAgent.Agent.id");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       1, this->id(), output);
   }
 
   // required string enterNode = 2;
   if (has_enternode()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->enternode().data(), this->enternode().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternPutAgent.Agent.enterNode");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       2, this->enternode(), output);
   }
 
   // repeated string nodes = 3;
   for (int i = 0; i < this->nodes_size(); i++) {
-  ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+  ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
     this->nodes(i).data(), this->nodes(i).length(),
-    ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormat::SERIALIZE,
+    "hybrid.MATSim2ExternPutAgent.Agent.nodes");
     ::google::protobuf::internal::WireFormatLite::WriteString(
       3, this->nodes(i), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.MATSim2ExternPutAgent.Agent)
 }
 
 ::google::protobuf::uint8* MATSim2ExternPutAgent_Agent::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.MATSim2ExternPutAgent.Agent)
   // required string id = 1;
   if (has_id()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->id().data(), this->id().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternPutAgent.Agent.id");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         1, this->id(), target);
@@ -784,9 +820,10 @@ void MATSim2ExternPutAgent_Agent::SerializeWithCachedSizes(
 
   // required string enterNode = 2;
   if (has_enternode()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->enternode().data(), this->enternode().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternPutAgent.Agent.enterNode");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         2, this->enternode(), target);
@@ -794,38 +831,57 @@ void MATSim2ExternPutAgent_Agent::SerializeWithCachedSizes(
 
   // repeated string nodes = 3;
   for (int i = 0; i < this->nodes_size(); i++) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->nodes(i).data(), this->nodes(i).length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternPutAgent.Agent.nodes");
     target = ::google::protobuf::internal::WireFormatLite::
       WriteStringToArray(3, this->nodes(i), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.MATSim2ExternPutAgent.Agent)
   return target;
 }
 
+int MATSim2ExternPutAgent_Agent::RequiredFieldsByteSizeFallback() const {
+  int total_size = 0;
+
+  if (has_id()) {
+    // required string id = 1;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->id());
+  }
+
+  if (has_enternode()) {
+    // required string enterNode = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->enternode());
+  }
+
+  return total_size;
+}
 int MATSim2ExternPutAgent_Agent::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
     // required string id = 1;
-    if (has_id()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->id());
-    }
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->id());
 
     // required string enterNode = 2;
-    if (has_enternode()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->enternode());
-    }
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->enternode());
 
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
   }
   // repeated string nodes = 3;
   total_size += 1 * this->nodes_size();
@@ -834,7 +890,7 @@ int MATSim2ExternPutAgent_Agent::ByteSize() const {
       this->nodes(i));
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -846,7 +902,7 @@ int MATSim2ExternPutAgent_Agent::ByteSize() const {
 }
 
 void MATSim2ExternPutAgent_Agent::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const MATSim2ExternPutAgent_Agent* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const MATSim2ExternPutAgent_Agent*>(
       &from);
@@ -858,17 +914,21 @@ void MATSim2ExternPutAgent_Agent::MergeFrom(const ::google::protobuf::Message& f
 }
 
 void MATSim2ExternPutAgent_Agent::MergeFrom(const MATSim2ExternPutAgent_Agent& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   nodes_.MergeFrom(from.nodes_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_id()) {
-      set_id(from.id());
+      set_has_id();
+      id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.id_);
     }
     if (from.has_enternode()) {
-      set_enternode(from.enternode());
+      set_has_enternode();
+      enternode_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.enternode_);
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void MATSim2ExternPutAgent_Agent::CopyFrom(const ::google::protobuf::Message& from) {
@@ -890,14 +950,16 @@ bool MATSim2ExternPutAgent_Agent::IsInitialized() const {
 }
 
 void MATSim2ExternPutAgent_Agent::Swap(MATSim2ExternPutAgent_Agent* other) {
-  if (other != this) {
-    std::swap(id_, other->id_);
-    std::swap(enternode_, other->enternode_);
-    nodes_.Swap(&other->nodes_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MATSim2ExternPutAgent_Agent::InternalSwap(MATSim2ExternPutAgent_Agent* other) {
+  id_.Swap(&other->id_);
+  enternode_.Swap(&other->enternode_);
+  nodes_.UnsafeArenaSwap(&other->nodes_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata MATSim2ExternPutAgent_Agent::GetMetadata() const {
@@ -916,18 +978,21 @@ const int MATSim2ExternPutAgent::kAgentFieldNumber;
 #endif  // !_MSC_VER
 
 MATSim2ExternPutAgent::MATSim2ExternPutAgent()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.MATSim2ExternPutAgent)
 }
 
 void MATSim2ExternPutAgent::InitAsDefaultInstance() {
-  agent_ = const_cast< ::MATSim2ExternPutAgent_Agent*>(&::MATSim2ExternPutAgent_Agent::default_instance());
+  agent_ = const_cast< ::hybrid::MATSim2ExternPutAgent_Agent*>(&::hybrid::MATSim2ExternPutAgent_Agent::default_instance());
 }
 
 MATSim2ExternPutAgent::MATSim2ExternPutAgent(const MATSim2ExternPutAgent& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.MATSim2ExternPutAgent)
 }
 
 void MATSim2ExternPutAgent::SharedCtor() {
@@ -937,6 +1002,7 @@ void MATSim2ExternPutAgent::SharedCtor() {
 }
 
 MATSim2ExternPutAgent::~MATSim2ExternPutAgent() {
+  // @@protoc_insertion_point(destructor:hybrid.MATSim2ExternPutAgent)
   SharedDtor();
 }
 
@@ -963,44 +1029,52 @@ const MATSim2ExternPutAgent& MATSim2ExternPutAgent::default_instance() {
 
 MATSim2ExternPutAgent* MATSim2ExternPutAgent::default_instance_ = NULL;
 
-MATSim2ExternPutAgent* MATSim2ExternPutAgent::New() const {
-  return new MATSim2ExternPutAgent;
+MATSim2ExternPutAgent* MATSim2ExternPutAgent::New(::google::protobuf::Arena* arena) const {
+  MATSim2ExternPutAgent* n = new MATSim2ExternPutAgent;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void MATSim2ExternPutAgent::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_agent()) {
-      if (agent_ != NULL) agent_->::MATSim2ExternPutAgent_Agent::Clear();
-    }
+  if (has_agent()) {
+    if (agent_ != NULL) agent_->::hybrid::MATSim2ExternPutAgent_Agent::Clear();
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool MATSim2ExternPutAgent::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.MATSim2ExternPutAgent)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required .MATSim2ExternPutAgent.Agent agent = 1;
+      // required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_agent()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1008,53 +1082,59 @@ bool MATSim2ExternPutAgent::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.MATSim2ExternPutAgent)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.MATSim2ExternPutAgent)
+  return false;
 #undef DO_
 }
 
 void MATSim2ExternPutAgent::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required .MATSim2ExternPutAgent.Agent agent = 1;
+  // @@protoc_insertion_point(serialize_start:hybrid.MATSim2ExternPutAgent)
+  // required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
   if (has_agent()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->agent(), output);
+      1, *this->agent_, output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.MATSim2ExternPutAgent)
 }
 
 ::google::protobuf::uint8* MATSim2ExternPutAgent::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required .MATSim2ExternPutAgent.Agent agent = 1;
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.MATSim2ExternPutAgent)
+  // required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
   if (has_agent()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->agent(), target);
+        1, *this->agent_, target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.MATSim2ExternPutAgent)
   return target;
 }
 
 int MATSim2ExternPutAgent::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required .MATSim2ExternPutAgent.Agent agent = 1;
-    if (has_agent()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->agent());
-    }
-
+  // required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
+  if (has_agent()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->agent_);
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -1066,7 +1146,7 @@ int MATSim2ExternPutAgent::ByteSize() const {
 }
 
 void MATSim2ExternPutAgent::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const MATSim2ExternPutAgent* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const MATSim2ExternPutAgent*>(
       &from);
@@ -1078,13 +1158,15 @@ void MATSim2ExternPutAgent::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void MATSim2ExternPutAgent::MergeFrom(const MATSim2ExternPutAgent& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_agent()) {
-      mutable_agent()->::MATSim2ExternPutAgent_Agent::MergeFrom(from.agent());
+      mutable_agent()->::hybrid::MATSim2ExternPutAgent_Agent::MergeFrom(from.agent());
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void MATSim2ExternPutAgent::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1103,18 +1185,20 @@ bool MATSim2ExternPutAgent::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
   if (has_agent()) {
-    if (!this->agent().IsInitialized()) return false;
+    if (!this->agent_->IsInitialized()) return false;
   }
   return true;
 }
 
 void MATSim2ExternPutAgent::Swap(MATSim2ExternPutAgent* other) {
-  if (other != this) {
-    std::swap(agent_, other->agent_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MATSim2ExternPutAgent::InternalSwap(MATSim2ExternPutAgent* other) {
+  std::swap(agent_, other->agent_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata MATSim2ExternPutAgent::GetMetadata() const {
@@ -1125,6 +1209,217 @@ void MATSim2ExternPutAgent::Swap(MATSim2ExternPutAgent* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MATSim2ExternPutAgent_Agent
+
+// required string id = 1;
+ bool MATSim2ExternPutAgent_Agent::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void MATSim2ExternPutAgent_Agent::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void MATSim2ExternPutAgent_Agent::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void MATSim2ExternPutAgent_Agent::clear_id() {
+  id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_id();
+}
+ const ::std::string& MATSim2ExternPutAgent_Agent::id() const {
+  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.Agent.id)
+  return id_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MATSim2ExternPutAgent_Agent::set_id(const ::std::string& value) {
+  set_has_id();
+  id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternPutAgent.Agent.id)
+}
+ void MATSim2ExternPutAgent_Agent::set_id(const char* value) {
+  set_has_id();
+  id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternPutAgent.Agent.id)
+}
+ void MATSim2ExternPutAgent_Agent::set_id(const char* value, size_t size) {
+  set_has_id();
+  id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternPutAgent.Agent.id)
+}
+ ::std::string* MATSim2ExternPutAgent_Agent::mutable_id() {
+  set_has_id();
+  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.Agent.id)
+  return id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MATSim2ExternPutAgent_Agent::release_id() {
+  clear_has_id();
+  return id_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MATSim2ExternPutAgent_Agent::set_allocated_id(::std::string* id) {
+  if (id != NULL) {
+    set_has_id();
+  } else {
+    clear_has_id();
+  }
+  id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), id);
+  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternPutAgent.Agent.id)
+}
+
+// required string enterNode = 2;
+ bool MATSim2ExternPutAgent_Agent::has_enternode() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void MATSim2ExternPutAgent_Agent::set_has_enternode() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void MATSim2ExternPutAgent_Agent::clear_has_enternode() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void MATSim2ExternPutAgent_Agent::clear_enternode() {
+  enternode_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_enternode();
+}
+ const ::std::string& MATSim2ExternPutAgent_Agent::enternode() const {
+  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  return enternode_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MATSim2ExternPutAgent_Agent::set_enternode(const ::std::string& value) {
+  set_has_enternode();
+  enternode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+}
+ void MATSim2ExternPutAgent_Agent::set_enternode(const char* value) {
+  set_has_enternode();
+  enternode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+}
+ void MATSim2ExternPutAgent_Agent::set_enternode(const char* value, size_t size) {
+  set_has_enternode();
+  enternode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+}
+ ::std::string* MATSim2ExternPutAgent_Agent::mutable_enternode() {
+  set_has_enternode();
+  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  return enternode_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MATSim2ExternPutAgent_Agent::release_enternode() {
+  clear_has_enternode();
+  return enternode_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MATSim2ExternPutAgent_Agent::set_allocated_enternode(::std::string* enternode) {
+  if (enternode != NULL) {
+    set_has_enternode();
+  } else {
+    clear_has_enternode();
+  }
+  enternode_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), enternode);
+  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+}
+
+// repeated string nodes = 3;
+ int MATSim2ExternPutAgent_Agent::nodes_size() const {
+  return nodes_.size();
+}
+ void MATSim2ExternPutAgent_Agent::clear_nodes() {
+  nodes_.Clear();
+}
+ const ::std::string& MATSim2ExternPutAgent_Agent::nodes(int index) const {
+  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  return nodes_.Get(index);
+}
+ ::std::string* MATSim2ExternPutAgent_Agent::mutable_nodes(int index) {
+  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  return nodes_.Mutable(index);
+}
+ void MATSim2ExternPutAgent_Agent::set_nodes(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  nodes_.Mutable(index)->assign(value);
+}
+ void MATSim2ExternPutAgent_Agent::set_nodes(int index, const char* value) {
+  nodes_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+}
+ void MATSim2ExternPutAgent_Agent::set_nodes(int index, const char* value, size_t size) {
+  nodes_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+}
+ ::std::string* MATSim2ExternPutAgent_Agent::add_nodes() {
+  return nodes_.Add();
+}
+ void MATSim2ExternPutAgent_Agent::add_nodes(const ::std::string& value) {
+  nodes_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+}
+ void MATSim2ExternPutAgent_Agent::add_nodes(const char* value) {
+  nodes_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+}
+ void MATSim2ExternPutAgent_Agent::add_nodes(const char* value, size_t size) {
+  nodes_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+}
+ const ::google::protobuf::RepeatedPtrField< ::std::string>&
+MATSim2ExternPutAgent_Agent::nodes() const {
+  // @@protoc_insertion_point(field_list:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  return nodes_;
+}
+ ::google::protobuf::RepeatedPtrField< ::std::string>*
+MATSim2ExternPutAgent_Agent::mutable_nodes() {
+  // @@protoc_insertion_point(field_mutable_list:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  return &nodes_;
+}
+
+// -------------------------------------------------------------------
+
+// MATSim2ExternPutAgent
+
+// required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
+ bool MATSim2ExternPutAgent::has_agent() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void MATSim2ExternPutAgent::set_has_agent() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void MATSim2ExternPutAgent::clear_has_agent() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void MATSim2ExternPutAgent::clear_agent() {
+  if (agent_ != NULL) agent_->::hybrid::MATSim2ExternPutAgent_Agent::Clear();
+  clear_has_agent();
+}
+ const ::hybrid::MATSim2ExternPutAgent_Agent& MATSim2ExternPutAgent::agent() const {
+  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.agent)
+  return agent_ != NULL ? *agent_ : *default_instance_->agent_;
+}
+ ::hybrid::MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent::mutable_agent() {
+  set_has_agent();
+  if (agent_ == NULL) {
+    agent_ = new ::hybrid::MATSim2ExternPutAgent_Agent;
+  }
+  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.agent)
+  return agent_;
+}
+ ::hybrid::MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent::release_agent() {
+  clear_has_agent();
+  ::hybrid::MATSim2ExternPutAgent_Agent* temp = agent_;
+  agent_ = NULL;
+  return temp;
+}
+ void MATSim2ExternPutAgent::set_allocated_agent(::hybrid::MATSim2ExternPutAgent_Agent* agent) {
+  delete agent_;
+  agent_ = agent;
+  if (agent) {
+    set_has_agent();
+  } else {
+    clear_has_agent();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternPutAgent.agent)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -1133,33 +1428,36 @@ const int MATSim2ExternHasSpace::kNodeIdFieldNumber;
 #endif  // !_MSC_VER
 
 MATSim2ExternHasSpace::MATSim2ExternHasSpace()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.MATSim2ExternHasSpace)
 }
 
 void MATSim2ExternHasSpace::InitAsDefaultInstance() {
 }
 
 MATSim2ExternHasSpace::MATSim2ExternHasSpace(const MATSim2ExternHasSpace& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.MATSim2ExternHasSpace)
 }
 
 void MATSim2ExternHasSpace::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  nodeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  nodeid_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 MATSim2ExternHasSpace::~MATSim2ExternHasSpace() {
+  // @@protoc_insertion_point(destructor:hybrid.MATSim2ExternHasSpace)
   SharedDtor();
 }
 
 void MATSim2ExternHasSpace::SharedDtor() {
-  if (nodeid_ != &::google::protobuf::internal::kEmptyString) {
-    delete nodeid_;
-  }
+  nodeid_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
@@ -1181,49 +1479,56 @@ const MATSim2ExternHasSpace& MATSim2ExternHasSpace::default_instance() {
 
 MATSim2ExternHasSpace* MATSim2ExternHasSpace::default_instance_ = NULL;
 
-MATSim2ExternHasSpace* MATSim2ExternHasSpace::New() const {
-  return new MATSim2ExternHasSpace;
+MATSim2ExternHasSpace* MATSim2ExternHasSpace::New(::google::protobuf::Arena* arena) const {
+  MATSim2ExternHasSpace* n = new MATSim2ExternHasSpace;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void MATSim2ExternHasSpace::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_nodeid()) {
-      if (nodeid_ != &::google::protobuf::internal::kEmptyString) {
-        nodeid_->clear();
-      }
-    }
+  if (has_nodeid()) {
+    nodeid_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool MATSim2ExternHasSpace::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.MATSim2ExternHasSpace)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required string nodeId = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_nodeid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->nodeid().data(), this->nodeid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.MATSim2ExternHasSpace.nodeId");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1231,59 +1536,67 @@ bool MATSim2ExternHasSpace::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.MATSim2ExternHasSpace)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.MATSim2ExternHasSpace)
+  return false;
 #undef DO_
 }
 
 void MATSim2ExternHasSpace::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.MATSim2ExternHasSpace)
   // required string nodeId = 1;
   if (has_nodeid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->nodeid().data(), this->nodeid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternHasSpace.nodeId");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       1, this->nodeid(), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.MATSim2ExternHasSpace)
 }
 
 ::google::protobuf::uint8* MATSim2ExternHasSpace::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.MATSim2ExternHasSpace)
   // required string nodeId = 1;
   if (has_nodeid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->nodeid().data(), this->nodeid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.MATSim2ExternHasSpace.nodeId");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         1, this->nodeid(), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.MATSim2ExternHasSpace)
   return target;
 }
 
 int MATSim2ExternHasSpace::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required string nodeId = 1;
-    if (has_nodeid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->nodeid());
-    }
-
+  // required string nodeId = 1;
+  if (has_nodeid()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->nodeid());
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -1295,7 +1608,7 @@ int MATSim2ExternHasSpace::ByteSize() const {
 }
 
 void MATSim2ExternHasSpace::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const MATSim2ExternHasSpace* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const MATSim2ExternHasSpace*>(
       &from);
@@ -1307,13 +1620,16 @@ void MATSim2ExternHasSpace::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void MATSim2ExternHasSpace::MergeFrom(const MATSim2ExternHasSpace& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_nodeid()) {
-      set_nodeid(from.nodeid());
+      set_has_nodeid();
+      nodeid_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.nodeid_);
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void MATSim2ExternHasSpace::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1335,12 +1651,14 @@ bool MATSim2ExternHasSpace::IsInitialized() const {
 }
 
 void MATSim2ExternHasSpace::Swap(MATSim2ExternHasSpace* other) {
-  if (other != this) {
-    std::swap(nodeid_, other->nodeid_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MATSim2ExternHasSpace::InternalSwap(MATSim2ExternHasSpace* other) {
+  nodeid_.Swap(&other->nodeid_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata MATSim2ExternHasSpace::GetMetadata() const {
@@ -1351,6 +1669,63 @@ void MATSim2ExternHasSpace::Swap(MATSim2ExternHasSpace* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MATSim2ExternHasSpace
+
+// required string nodeId = 1;
+ bool MATSim2ExternHasSpace::has_nodeid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void MATSim2ExternHasSpace::set_has_nodeid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void MATSim2ExternHasSpace::clear_has_nodeid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void MATSim2ExternHasSpace::clear_nodeid() {
+  nodeid_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_nodeid();
+}
+ const ::std::string& MATSim2ExternHasSpace::nodeid() const {
+  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternHasSpace.nodeId)
+  return nodeid_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MATSim2ExternHasSpace::set_nodeid(const ::std::string& value) {
+  set_has_nodeid();
+  nodeid_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternHasSpace.nodeId)
+}
+ void MATSim2ExternHasSpace::set_nodeid(const char* value) {
+  set_has_nodeid();
+  nodeid_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternHasSpace.nodeId)
+}
+ void MATSim2ExternHasSpace::set_nodeid(const char* value, size_t size) {
+  set_has_nodeid();
+  nodeid_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternHasSpace.nodeId)
+}
+ ::std::string* MATSim2ExternHasSpace::mutable_nodeid() {
+  set_has_nodeid();
+  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternHasSpace.nodeId)
+  return nodeid_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MATSim2ExternHasSpace::release_nodeid() {
+  clear_has_nodeid();
+  return nodeid_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MATSim2ExternHasSpace::set_allocated_nodeid(::std::string* nodeid) {
+  if (nodeid != NULL) {
+    set_has_nodeid();
+  } else {
+    clear_has_nodeid();
+  }
+  nodeid_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), nodeid);
+  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternHasSpace.nodeId)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -1359,17 +1734,20 @@ const int MATSim2ExternHasSpaceConfirmed::kHasSpaceFieldNumber;
 #endif  // !_MSC_VER
 
 MATSim2ExternHasSpaceConfirmed::MATSim2ExternHasSpaceConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.MATSim2ExternHasSpaceConfirmed)
 }
 
 void MATSim2ExternHasSpaceConfirmed::InitAsDefaultInstance() {
 }
 
 MATSim2ExternHasSpaceConfirmed::MATSim2ExternHasSpaceConfirmed(const MATSim2ExternHasSpaceConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.MATSim2ExternHasSpaceConfirmed)
 }
 
 void MATSim2ExternHasSpaceConfirmed::SharedCtor() {
@@ -1379,6 +1757,7 @@ void MATSim2ExternHasSpaceConfirmed::SharedCtor() {
 }
 
 MATSim2ExternHasSpaceConfirmed::~MATSim2ExternHasSpaceConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.MATSim2ExternHasSpaceConfirmed)
   SharedDtor();
 }
 
@@ -1404,44 +1783,52 @@ const MATSim2ExternHasSpaceConfirmed& MATSim2ExternHasSpaceConfirmed::default_in
 
 MATSim2ExternHasSpaceConfirmed* MATSim2ExternHasSpaceConfirmed::default_instance_ = NULL;
 
-MATSim2ExternHasSpaceConfirmed* MATSim2ExternHasSpaceConfirmed::New() const {
-  return new MATSim2ExternHasSpaceConfirmed;
+MATSim2ExternHasSpaceConfirmed* MATSim2ExternHasSpaceConfirmed::New(::google::protobuf::Arena* arena) const {
+  MATSim2ExternHasSpaceConfirmed* n = new MATSim2ExternHasSpaceConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void MATSim2ExternHasSpaceConfirmed::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    hasspace_ = false;
-  }
+  hasspace_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool MATSim2ExternHasSpaceConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.MATSim2ExternHasSpaceConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required bool hasSpace = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &hasspace_)));
           set_has_hasspace();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1449,48 +1836,54 @@ bool MATSim2ExternHasSpaceConfirmed::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.MATSim2ExternHasSpaceConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.MATSim2ExternHasSpaceConfirmed)
+  return false;
 #undef DO_
 }
 
 void MATSim2ExternHasSpaceConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.MATSim2ExternHasSpaceConfirmed)
   // required bool hasSpace = 1;
   if (has_hasspace()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->hasspace(), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.MATSim2ExternHasSpaceConfirmed)
 }
 
 ::google::protobuf::uint8* MATSim2ExternHasSpaceConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.MATSim2ExternHasSpaceConfirmed)
   // required bool hasSpace = 1;
   if (has_hasspace()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->hasspace(), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.MATSim2ExternHasSpaceConfirmed)
   return target;
 }
 
 int MATSim2ExternHasSpaceConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required bool hasSpace = 1;
-    if (has_hasspace()) {
-      total_size += 1 + 1;
-    }
-
+  // required bool hasSpace = 1;
+  if (has_hasspace()) {
+    total_size += 1 + 1;
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -1502,7 +1895,7 @@ int MATSim2ExternHasSpaceConfirmed::ByteSize() const {
 }
 
 void MATSim2ExternHasSpaceConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const MATSim2ExternHasSpaceConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const MATSim2ExternHasSpaceConfirmed*>(
       &from);
@@ -1514,13 +1907,15 @@ void MATSim2ExternHasSpaceConfirmed::MergeFrom(const ::google::protobuf::Message
 }
 
 void MATSim2ExternHasSpaceConfirmed::MergeFrom(const MATSim2ExternHasSpaceConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_hasspace()) {
       set_hasspace(from.hasspace());
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void MATSim2ExternHasSpaceConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1542,12 +1937,14 @@ bool MATSim2ExternHasSpaceConfirmed::IsInitialized() const {
 }
 
 void MATSim2ExternHasSpaceConfirmed::Swap(MATSim2ExternHasSpaceConfirmed* other) {
-  if (other != this) {
-    std::swap(hasspace_, other->hasspace_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MATSim2ExternHasSpaceConfirmed::InternalSwap(MATSim2ExternHasSpaceConfirmed* other) {
+  std::swap(hasspace_, other->hasspace_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata MATSim2ExternHasSpaceConfirmed::GetMetadata() const {
@@ -1558,6 +1955,34 @@ void MATSim2ExternHasSpaceConfirmed::Swap(MATSim2ExternHasSpaceConfirmed* other)
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MATSim2ExternHasSpaceConfirmed
+
+// required bool hasSpace = 1;
+ bool MATSim2ExternHasSpaceConfirmed::has_hasspace() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void MATSim2ExternHasSpaceConfirmed::set_has_hasspace() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void MATSim2ExternHasSpaceConfirmed::clear_has_hasspace() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void MATSim2ExternHasSpaceConfirmed::clear_hasspace() {
+  hasspace_ = false;
+  clear_has_hasspace();
+}
+ bool MATSim2ExternHasSpaceConfirmed::hasspace() const {
+  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternHasSpaceConfirmed.hasSpace)
+  return hasspace_;
+}
+ void MATSim2ExternHasSpaceConfirmed::set_hasspace(bool value) {
+  set_has_hasspace();
+  hasspace_ = value;
+  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternHasSpaceConfirmed.hasSpace)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -1565,17 +1990,20 @@ void MATSim2ExternHasSpaceConfirmed::Swap(MATSim2ExternHasSpaceConfirmed* other)
 #endif  // !_MSC_VER
 
 MATSim2ExternPutAgentConfirmed::MATSim2ExternPutAgentConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.MATSim2ExternPutAgentConfirmed)
 }
 
 void MATSim2ExternPutAgentConfirmed::InitAsDefaultInstance() {
 }
 
 MATSim2ExternPutAgentConfirmed::MATSim2ExternPutAgentConfirmed(const MATSim2ExternPutAgentConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.MATSim2ExternPutAgentConfirmed)
 }
 
 void MATSim2ExternPutAgentConfirmed::SharedCtor() {
@@ -1584,6 +2012,7 @@ void MATSim2ExternPutAgentConfirmed::SharedCtor() {
 }
 
 MATSim2ExternPutAgentConfirmed::~MATSim2ExternPutAgentConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.MATSim2ExternPutAgentConfirmed)
   SharedDtor();
 }
 
@@ -1609,52 +2038,73 @@ const MATSim2ExternPutAgentConfirmed& MATSim2ExternPutAgentConfirmed::default_in
 
 MATSim2ExternPutAgentConfirmed* MATSim2ExternPutAgentConfirmed::default_instance_ = NULL;
 
-MATSim2ExternPutAgentConfirmed* MATSim2ExternPutAgentConfirmed::New() const {
-  return new MATSim2ExternPutAgentConfirmed;
+MATSim2ExternPutAgentConfirmed* MATSim2ExternPutAgentConfirmed::New(::google::protobuf::Arena* arena) const {
+  MATSim2ExternPutAgentConfirmed* n = new MATSim2ExternPutAgentConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void MATSim2ExternPutAgentConfirmed::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool MATSim2ExternPutAgentConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.MATSim2ExternPutAgentConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.MATSim2ExternPutAgentConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.MATSim2ExternPutAgentConfirmed)
+  return false;
 #undef DO_
 }
 
 void MATSim2ExternPutAgentConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.MATSim2ExternPutAgentConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.MATSim2ExternPutAgentConfirmed)
 }
 
 ::google::protobuf::uint8* MATSim2ExternPutAgentConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.MATSim2ExternPutAgentConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.MATSim2ExternPutAgentConfirmed)
   return target;
 }
 
 int MATSim2ExternPutAgentConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -1666,7 +2116,7 @@ int MATSim2ExternPutAgentConfirmed::ByteSize() const {
 }
 
 void MATSim2ExternPutAgentConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const MATSim2ExternPutAgentConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const MATSim2ExternPutAgentConfirmed*>(
       &from);
@@ -1678,8 +2128,10 @@ void MATSim2ExternPutAgentConfirmed::MergeFrom(const ::google::protobuf::Message
 }
 
 void MATSim2ExternPutAgentConfirmed::MergeFrom(const MATSim2ExternPutAgentConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void MATSim2ExternPutAgentConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1700,10 +2152,12 @@ bool MATSim2ExternPutAgentConfirmed::IsInitialized() const {
 }
 
 void MATSim2ExternPutAgentConfirmed::Swap(MATSim2ExternPutAgentConfirmed* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MATSim2ExternPutAgentConfirmed::InternalSwap(MATSim2ExternPutAgentConfirmed* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata MATSim2ExternPutAgentConfirmed::GetMetadata() const {
@@ -1714,6 +2168,10 @@ void MATSim2ExternPutAgentConfirmed::Swap(MATSim2ExternPutAgentConfirmed* other)
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MATSim2ExternPutAgentConfirmed
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -1723,37 +2181,38 @@ const int Extern2MATSim_Agent::kLeaveNodeFieldNumber;
 #endif  // !_MSC_VER
 
 Extern2MATSim_Agent::Extern2MATSim_Agent()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.Extern2MATSim.Agent)
 }
 
 void Extern2MATSim_Agent::InitAsDefaultInstance() {
 }
 
 Extern2MATSim_Agent::Extern2MATSim_Agent(const Extern2MATSim_Agent& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.Extern2MATSim.Agent)
 }
 
 void Extern2MATSim_Agent::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  id_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  leavenode_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  leavenode_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 Extern2MATSim_Agent::~Extern2MATSim_Agent() {
+  // @@protoc_insertion_point(destructor:hybrid.Extern2MATSim.Agent)
   SharedDtor();
 }
 
 void Extern2MATSim_Agent::SharedDtor() {
-  if (id_ != &::google::protobuf::internal::kEmptyString) {
-    delete id_;
-  }
-  if (leavenode_ != &::google::protobuf::internal::kEmptyString) {
-    delete leavenode_;
-  }
+  id_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  leavenode_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
 }
@@ -1775,44 +2234,50 @@ const Extern2MATSim_Agent& Extern2MATSim_Agent::default_instance() {
 
 Extern2MATSim_Agent* Extern2MATSim_Agent::default_instance_ = NULL;
 
-Extern2MATSim_Agent* Extern2MATSim_Agent::New() const {
-  return new Extern2MATSim_Agent;
+Extern2MATSim_Agent* Extern2MATSim_Agent::New(::google::protobuf::Arena* arena) const {
+  Extern2MATSim_Agent* n = new Extern2MATSim_Agent;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void Extern2MATSim_Agent::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (_has_bits_[0 / 32] & 3) {
     if (has_id()) {
-      if (id_ != &::google::protobuf::internal::kEmptyString) {
-        id_->clear();
-      }
+      id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
     if (has_leavenode()) {
-      if (leavenode_ != &::google::protobuf::internal::kEmptyString) {
-        leavenode_->clear();
-      }
+      leavenode_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool Extern2MATSim_Agent::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.Extern2MATSim.Agent)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required string id = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_id()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->id().data(), this->id().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.Extern2MATSim.Agent.id");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(18)) goto parse_leaveNode;
         break;
@@ -1820,26 +2285,27 @@ bool Extern2MATSim_Agent::MergePartialFromCodedStream(
 
       // required string leaveNode = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 18) {
          parse_leaveNode:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_leavenode()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->leavenode().data(), this->leavenode().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.Extern2MATSim.Agent.leaveNode");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -1847,43 +2313,54 @@ bool Extern2MATSim_Agent::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.Extern2MATSim.Agent)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.Extern2MATSim.Agent)
+  return false;
 #undef DO_
 }
 
 void Extern2MATSim_Agent::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.Extern2MATSim.Agent)
   // required string id = 1;
   if (has_id()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->id().data(), this->id().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.Extern2MATSim.Agent.id");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       1, this->id(), output);
   }
 
   // required string leaveNode = 2;
   if (has_leavenode()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->leavenode().data(), this->leavenode().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.Extern2MATSim.Agent.leaveNode");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       2, this->leavenode(), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.Extern2MATSim.Agent)
 }
 
 ::google::protobuf::uint8* Extern2MATSim_Agent::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.Extern2MATSim.Agent)
   // required string id = 1;
   if (has_id()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->id().data(), this->id().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.Extern2MATSim.Agent.id");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         1, this->id(), target);
@@ -1891,41 +2368,60 @@ void Extern2MATSim_Agent::SerializeWithCachedSizes(
 
   // required string leaveNode = 2;
   if (has_leavenode()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->leavenode().data(), this->leavenode().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.Extern2MATSim.Agent.leaveNode");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         2, this->leavenode(), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.Extern2MATSim.Agent)
   return target;
 }
 
+int Extern2MATSim_Agent::RequiredFieldsByteSizeFallback() const {
+  int total_size = 0;
+
+  if (has_id()) {
+    // required string id = 1;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->id());
+  }
+
+  if (has_leavenode()) {
+    // required string leaveNode = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->leavenode());
+  }
+
+  return total_size;
+}
 int Extern2MATSim_Agent::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
     // required string id = 1;
-    if (has_id()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->id());
-    }
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->id());
 
     // required string leaveNode = 2;
-    if (has_leavenode()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->leavenode());
-    }
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->leavenode());
 
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -1937,7 +2433,7 @@ int Extern2MATSim_Agent::ByteSize() const {
 }
 
 void Extern2MATSim_Agent::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const Extern2MATSim_Agent* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const Extern2MATSim_Agent*>(
       &from);
@@ -1949,16 +2445,20 @@ void Extern2MATSim_Agent::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void Extern2MATSim_Agent::MergeFrom(const Extern2MATSim_Agent& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_id()) {
-      set_id(from.id());
+      set_has_id();
+      id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.id_);
     }
     if (from.has_leavenode()) {
-      set_leavenode(from.leavenode());
+      set_has_leavenode();
+      leavenode_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.leavenode_);
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void Extern2MATSim_Agent::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1980,13 +2480,15 @@ bool Extern2MATSim_Agent::IsInitialized() const {
 }
 
 void Extern2MATSim_Agent::Swap(Extern2MATSim_Agent* other) {
-  if (other != this) {
-    std::swap(id_, other->id_);
-    std::swap(leavenode_, other->leavenode_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void Extern2MATSim_Agent::InternalSwap(Extern2MATSim_Agent* other) {
+  id_.Swap(&other->id_);
+  leavenode_.Swap(&other->leavenode_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata Extern2MATSim_Agent::GetMetadata() const {
@@ -2005,18 +2507,21 @@ const int Extern2MATSim::kAgentFieldNumber;
 #endif  // !_MSC_VER
 
 Extern2MATSim::Extern2MATSim()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.Extern2MATSim)
 }
 
 void Extern2MATSim::InitAsDefaultInstance() {
-  agent_ = const_cast< ::Extern2MATSim_Agent*>(&::Extern2MATSim_Agent::default_instance());
+  agent_ = const_cast< ::hybrid::Extern2MATSim_Agent*>(&::hybrid::Extern2MATSim_Agent::default_instance());
 }
 
 Extern2MATSim::Extern2MATSim(const Extern2MATSim& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.Extern2MATSim)
 }
 
 void Extern2MATSim::SharedCtor() {
@@ -2026,6 +2531,7 @@ void Extern2MATSim::SharedCtor() {
 }
 
 Extern2MATSim::~Extern2MATSim() {
+  // @@protoc_insertion_point(destructor:hybrid.Extern2MATSim)
   SharedDtor();
 }
 
@@ -2052,44 +2558,52 @@ const Extern2MATSim& Extern2MATSim::default_instance() {
 
 Extern2MATSim* Extern2MATSim::default_instance_ = NULL;
 
-Extern2MATSim* Extern2MATSim::New() const {
-  return new Extern2MATSim;
+Extern2MATSim* Extern2MATSim::New(::google::protobuf::Arena* arena) const {
+  Extern2MATSim* n = new Extern2MATSim;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void Extern2MATSim::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (has_agent()) {
-      if (agent_ != NULL) agent_->::Extern2MATSim_Agent::Clear();
-    }
+  if (has_agent()) {
+    if (agent_ != NULL) agent_->::hybrid::Extern2MATSim_Agent::Clear();
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool Extern2MATSim::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.Extern2MATSim)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required .Extern2MATSim.Agent agent = 15;
+      // required .hybrid.Extern2MATSim.Agent agent = 15;
       case 15: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 122) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_agent()));
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2097,53 +2611,59 @@ bool Extern2MATSim::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.Extern2MATSim)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.Extern2MATSim)
+  return false;
 #undef DO_
 }
 
 void Extern2MATSim::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required .Extern2MATSim.Agent agent = 15;
+  // @@protoc_insertion_point(serialize_start:hybrid.Extern2MATSim)
+  // required .hybrid.Extern2MATSim.Agent agent = 15;
   if (has_agent()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      15, this->agent(), output);
+      15, *this->agent_, output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.Extern2MATSim)
 }
 
 ::google::protobuf::uint8* Extern2MATSim::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required .Extern2MATSim.Agent agent = 15;
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.Extern2MATSim)
+  // required .hybrid.Extern2MATSim.Agent agent = 15;
   if (has_agent()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        15, this->agent(), target);
+        15, *this->agent_, target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.Extern2MATSim)
   return target;
 }
 
 int Extern2MATSim::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required .Extern2MATSim.Agent agent = 15;
-    if (has_agent()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-          this->agent());
-    }
-
+  // required .hybrid.Extern2MATSim.Agent agent = 15;
+  if (has_agent()) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        *this->agent_);
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -2155,7 +2675,7 @@ int Extern2MATSim::ByteSize() const {
 }
 
 void Extern2MATSim::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const Extern2MATSim* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const Extern2MATSim*>(
       &from);
@@ -2167,13 +2687,15 @@ void Extern2MATSim::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void Extern2MATSim::MergeFrom(const Extern2MATSim& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_agent()) {
-      mutable_agent()->::Extern2MATSim_Agent::MergeFrom(from.agent());
+      mutable_agent()->::hybrid::Extern2MATSim_Agent::MergeFrom(from.agent());
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void Extern2MATSim::CopyFrom(const ::google::protobuf::Message& from) {
@@ -2192,18 +2714,20 @@ bool Extern2MATSim::IsInitialized() const {
   if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
 
   if (has_agent()) {
-    if (!this->agent().IsInitialized()) return false;
+    if (!this->agent_->IsInitialized()) return false;
   }
   return true;
 }
 
 void Extern2MATSim::Swap(Extern2MATSim* other) {
-  if (other != this) {
-    std::swap(agent_, other->agent_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void Extern2MATSim::InternalSwap(Extern2MATSim* other) {
+  std::swap(agent_, other->agent_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata Extern2MATSim::GetMetadata() const {
@@ -2214,6 +2738,163 @@ void Extern2MATSim::Swap(Extern2MATSim* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// Extern2MATSim_Agent
+
+// required string id = 1;
+ bool Extern2MATSim_Agent::has_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void Extern2MATSim_Agent::set_has_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void Extern2MATSim_Agent::clear_has_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void Extern2MATSim_Agent::clear_id() {
+  id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_id();
+}
+ const ::std::string& Extern2MATSim_Agent::id() const {
+  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSim.Agent.id)
+  return id_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void Extern2MATSim_Agent::set_id(const ::std::string& value) {
+  set_has_id();
+  id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:hybrid.Extern2MATSim.Agent.id)
+}
+ void Extern2MATSim_Agent::set_id(const char* value) {
+  set_has_id();
+  id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:hybrid.Extern2MATSim.Agent.id)
+}
+ void Extern2MATSim_Agent::set_id(const char* value, size_t size) {
+  set_has_id();
+  id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:hybrid.Extern2MATSim.Agent.id)
+}
+ ::std::string* Extern2MATSim_Agent::mutable_id() {
+  set_has_id();
+  // @@protoc_insertion_point(field_mutable:hybrid.Extern2MATSim.Agent.id)
+  return id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* Extern2MATSim_Agent::release_id() {
+  clear_has_id();
+  return id_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void Extern2MATSim_Agent::set_allocated_id(::std::string* id) {
+  if (id != NULL) {
+    set_has_id();
+  } else {
+    clear_has_id();
+  }
+  id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), id);
+  // @@protoc_insertion_point(field_set_allocated:hybrid.Extern2MATSim.Agent.id)
+}
+
+// required string leaveNode = 2;
+ bool Extern2MATSim_Agent::has_leavenode() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void Extern2MATSim_Agent::set_has_leavenode() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void Extern2MATSim_Agent::clear_has_leavenode() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void Extern2MATSim_Agent::clear_leavenode() {
+  leavenode_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_leavenode();
+}
+ const ::std::string& Extern2MATSim_Agent::leavenode() const {
+  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSim.Agent.leaveNode)
+  return leavenode_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void Extern2MATSim_Agent::set_leavenode(const ::std::string& value) {
+  set_has_leavenode();
+  leavenode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:hybrid.Extern2MATSim.Agent.leaveNode)
+}
+ void Extern2MATSim_Agent::set_leavenode(const char* value) {
+  set_has_leavenode();
+  leavenode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:hybrid.Extern2MATSim.Agent.leaveNode)
+}
+ void Extern2MATSim_Agent::set_leavenode(const char* value, size_t size) {
+  set_has_leavenode();
+  leavenode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:hybrid.Extern2MATSim.Agent.leaveNode)
+}
+ ::std::string* Extern2MATSim_Agent::mutable_leavenode() {
+  set_has_leavenode();
+  // @@protoc_insertion_point(field_mutable:hybrid.Extern2MATSim.Agent.leaveNode)
+  return leavenode_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* Extern2MATSim_Agent::release_leavenode() {
+  clear_has_leavenode();
+  return leavenode_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void Extern2MATSim_Agent::set_allocated_leavenode(::std::string* leavenode) {
+  if (leavenode != NULL) {
+    set_has_leavenode();
+  } else {
+    clear_has_leavenode();
+  }
+  leavenode_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), leavenode);
+  // @@protoc_insertion_point(field_set_allocated:hybrid.Extern2MATSim.Agent.leaveNode)
+}
+
+// -------------------------------------------------------------------
+
+// Extern2MATSim
+
+// required .hybrid.Extern2MATSim.Agent agent = 15;
+ bool Extern2MATSim::has_agent() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void Extern2MATSim::set_has_agent() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void Extern2MATSim::clear_has_agent() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void Extern2MATSim::clear_agent() {
+  if (agent_ != NULL) agent_->::hybrid::Extern2MATSim_Agent::Clear();
+  clear_has_agent();
+}
+ const ::hybrid::Extern2MATSim_Agent& Extern2MATSim::agent() const {
+  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSim.agent)
+  return agent_ != NULL ? *agent_ : *default_instance_->agent_;
+}
+ ::hybrid::Extern2MATSim_Agent* Extern2MATSim::mutable_agent() {
+  set_has_agent();
+  if (agent_ == NULL) {
+    agent_ = new ::hybrid::Extern2MATSim_Agent;
+  }
+  // @@protoc_insertion_point(field_mutable:hybrid.Extern2MATSim.agent)
+  return agent_;
+}
+ ::hybrid::Extern2MATSim_Agent* Extern2MATSim::release_agent() {
+  clear_has_agent();
+  ::hybrid::Extern2MATSim_Agent* temp = agent_;
+  agent_ = NULL;
+  return temp;
+}
+ void Extern2MATSim::set_allocated_agent(::hybrid::Extern2MATSim_Agent* agent) {
+  delete agent_;
+  agent_ = agent;
+  if (agent) {
+    set_has_agent();
+  } else {
+    clear_has_agent();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hybrid.Extern2MATSim.agent)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -2222,17 +2903,20 @@ const int Extern2MATSimConfirmed::kAcceptedFieldNumber;
 #endif  // !_MSC_VER
 
 Extern2MATSimConfirmed::Extern2MATSimConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.Extern2MATSimConfirmed)
 }
 
 void Extern2MATSimConfirmed::InitAsDefaultInstance() {
 }
 
 Extern2MATSimConfirmed::Extern2MATSimConfirmed(const Extern2MATSimConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.Extern2MATSimConfirmed)
 }
 
 void Extern2MATSimConfirmed::SharedCtor() {
@@ -2242,6 +2926,7 @@ void Extern2MATSimConfirmed::SharedCtor() {
 }
 
 Extern2MATSimConfirmed::~Extern2MATSimConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.Extern2MATSimConfirmed)
   SharedDtor();
 }
 
@@ -2267,44 +2952,52 @@ const Extern2MATSimConfirmed& Extern2MATSimConfirmed::default_instance() {
 
 Extern2MATSimConfirmed* Extern2MATSimConfirmed::default_instance_ = NULL;
 
-Extern2MATSimConfirmed* Extern2MATSimConfirmed::New() const {
-  return new Extern2MATSimConfirmed;
+Extern2MATSimConfirmed* Extern2MATSimConfirmed::New(::google::protobuf::Arena* arena) const {
+  Extern2MATSimConfirmed* n = new Extern2MATSimConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void Extern2MATSimConfirmed::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    accepted_ = false;
-  }
+  accepted_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool Extern2MATSimConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.Extern2MATSimConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required bool accepted = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+        if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &accepted_)));
           set_has_accepted();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2312,48 +3005,54 @@ bool Extern2MATSimConfirmed::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.Extern2MATSimConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.Extern2MATSimConfirmed)
+  return false;
 #undef DO_
 }
 
 void Extern2MATSimConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.Extern2MATSimConfirmed)
   // required bool accepted = 1;
   if (has_accepted()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->accepted(), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.Extern2MATSimConfirmed)
 }
 
 ::google::protobuf::uint8* Extern2MATSimConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.Extern2MATSimConfirmed)
   // required bool accepted = 1;
   if (has_accepted()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->accepted(), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.Extern2MATSimConfirmed)
   return target;
 }
 
 int Extern2MATSimConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required bool accepted = 1;
-    if (has_accepted()) {
-      total_size += 1 + 1;
-    }
-
+  // required bool accepted = 1;
+  if (has_accepted()) {
+    total_size += 1 + 1;
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -2365,7 +3064,7 @@ int Extern2MATSimConfirmed::ByteSize() const {
 }
 
 void Extern2MATSimConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const Extern2MATSimConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const Extern2MATSimConfirmed*>(
       &from);
@@ -2377,13 +3076,15 @@ void Extern2MATSimConfirmed::MergeFrom(const ::google::protobuf::Message& from) 
 }
 
 void Extern2MATSimConfirmed::MergeFrom(const Extern2MATSimConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_accepted()) {
       set_accepted(from.accepted());
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void Extern2MATSimConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -2405,12 +3106,14 @@ bool Extern2MATSimConfirmed::IsInitialized() const {
 }
 
 void Extern2MATSimConfirmed::Swap(Extern2MATSimConfirmed* other) {
-  if (other != this) {
-    std::swap(accepted_, other->accepted_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void Extern2MATSimConfirmed::InternalSwap(Extern2MATSimConfirmed* other) {
+  std::swap(accepted_, other->accepted_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata Extern2MATSimConfirmed::GetMetadata() const {
@@ -2421,6 +3124,34 @@ void Extern2MATSimConfirmed::Swap(Extern2MATSimConfirmed* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// Extern2MATSimConfirmed
+
+// required bool accepted = 1;
+ bool Extern2MATSimConfirmed::has_accepted() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void Extern2MATSimConfirmed::set_has_accepted() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void Extern2MATSimConfirmed::clear_has_accepted() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void Extern2MATSimConfirmed::clear_accepted() {
+  accepted_ = false;
+  clear_has_accepted();
+}
+ bool Extern2MATSimConfirmed::accepted() const {
+  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSimConfirmed.accepted)
+  return accepted_;
+}
+ void Extern2MATSimConfirmed::set_accepted(bool value) {
+  set_has_accepted();
+  accepted_ = value;
+  // @@protoc_insertion_point(field_set:hybrid.Extern2MATSimConfirmed.accepted)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -2429,17 +3160,20 @@ const int ExternSimStepFinished::kTimeFieldNumber;
 #endif  // !_MSC_VER
 
 ExternSimStepFinished::ExternSimStepFinished()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternSimStepFinished)
 }
 
 void ExternSimStepFinished::InitAsDefaultInstance() {
 }
 
 ExternSimStepFinished::ExternSimStepFinished(const ExternSimStepFinished& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternSimStepFinished)
 }
 
 void ExternSimStepFinished::SharedCtor() {
@@ -2449,6 +3183,7 @@ void ExternSimStepFinished::SharedCtor() {
 }
 
 ExternSimStepFinished::~ExternSimStepFinished() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternSimStepFinished)
   SharedDtor();
 }
 
@@ -2474,44 +3209,52 @@ const ExternSimStepFinished& ExternSimStepFinished::default_instance() {
 
 ExternSimStepFinished* ExternSimStepFinished::default_instance_ = NULL;
 
-ExternSimStepFinished* ExternSimStepFinished::New() const {
-  return new ExternSimStepFinished;
+ExternSimStepFinished* ExternSimStepFinished::New(::google::protobuf::Arena* arena) const {
+  ExternSimStepFinished* n = new ExternSimStepFinished;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternSimStepFinished::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    time_ = 0;
-  }
+  time_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternSimStepFinished::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.ExternSimStepFinished)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required double time = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+        if (tag == 9) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
                  input, &time_)));
           set_has_time();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2519,48 +3262,54 @@ bool ExternSimStepFinished::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternSimStepFinished)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternSimStepFinished)
+  return false;
 #undef DO_
 }
 
 void ExternSimStepFinished::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternSimStepFinished)
   // required double time = 1;
   if (has_time()) {
     ::google::protobuf::internal::WireFormatLite::WriteDouble(1, this->time(), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternSimStepFinished)
 }
 
 ::google::protobuf::uint8* ExternSimStepFinished::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternSimStepFinished)
   // required double time = 1;
   if (has_time()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(1, this->time(), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternSimStepFinished)
   return target;
 }
 
 int ExternSimStepFinished::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required double time = 1;
-    if (has_time()) {
-      total_size += 1 + 8;
-    }
-
+  // required double time = 1;
+  if (has_time()) {
+    total_size += 1 + 8;
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -2572,7 +3321,7 @@ int ExternSimStepFinished::ByteSize() const {
 }
 
 void ExternSimStepFinished::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternSimStepFinished* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternSimStepFinished*>(
       &from);
@@ -2584,13 +3333,15 @@ void ExternSimStepFinished::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void ExternSimStepFinished::MergeFrom(const ExternSimStepFinished& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_time()) {
       set_time(from.time());
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternSimStepFinished::CopyFrom(const ::google::protobuf::Message& from) {
@@ -2612,12 +3363,14 @@ bool ExternSimStepFinished::IsInitialized() const {
 }
 
 void ExternSimStepFinished::Swap(ExternSimStepFinished* other) {
-  if (other != this) {
-    std::swap(time_, other->time_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternSimStepFinished::InternalSwap(ExternSimStepFinished* other) {
+  std::swap(time_, other->time_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternSimStepFinished::GetMetadata() const {
@@ -2628,6 +3381,34 @@ void ExternSimStepFinished::Swap(ExternSimStepFinished* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternSimStepFinished
+
+// required double time = 1;
+ bool ExternSimStepFinished::has_time() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void ExternSimStepFinished::set_has_time() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void ExternSimStepFinished::clear_has_time() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void ExternSimStepFinished::clear_time() {
+  time_ = 0;
+  clear_has_time();
+}
+ double ExternSimStepFinished::time() const {
+  // @@protoc_insertion_point(field_get:hybrid.ExternSimStepFinished.time)
+  return time_;
+}
+ void ExternSimStepFinished::set_time(double value) {
+  set_has_time();
+  time_ = value;
+  // @@protoc_insertion_point(field_set:hybrid.ExternSimStepFinished.time)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -2635,17 +3416,20 @@ void ExternSimStepFinished::Swap(ExternSimStepFinished* other) {
 #endif  // !_MSC_VER
 
 ExternSimStepFinishedReceived::ExternSimStepFinishedReceived()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternSimStepFinishedReceived)
 }
 
 void ExternSimStepFinishedReceived::InitAsDefaultInstance() {
 }
 
 ExternSimStepFinishedReceived::ExternSimStepFinishedReceived(const ExternSimStepFinishedReceived& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternSimStepFinishedReceived)
 }
 
 void ExternSimStepFinishedReceived::SharedCtor() {
@@ -2654,6 +3438,7 @@ void ExternSimStepFinishedReceived::SharedCtor() {
 }
 
 ExternSimStepFinishedReceived::~ExternSimStepFinishedReceived() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternSimStepFinishedReceived)
   SharedDtor();
 }
 
@@ -2679,52 +3464,73 @@ const ExternSimStepFinishedReceived& ExternSimStepFinishedReceived::default_inst
 
 ExternSimStepFinishedReceived* ExternSimStepFinishedReceived::default_instance_ = NULL;
 
-ExternSimStepFinishedReceived* ExternSimStepFinishedReceived::New() const {
-  return new ExternSimStepFinishedReceived;
+ExternSimStepFinishedReceived* ExternSimStepFinishedReceived::New(::google::protobuf::Arena* arena) const {
+  ExternSimStepFinishedReceived* n = new ExternSimStepFinishedReceived;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternSimStepFinishedReceived::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternSimStepFinishedReceived::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternSimStepFinishedReceived)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternSimStepFinishedReceived)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternSimStepFinishedReceived)
+  return false;
 #undef DO_
 }
 
 void ExternSimStepFinishedReceived::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternSimStepFinishedReceived)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternSimStepFinishedReceived)
 }
 
 ::google::protobuf::uint8* ExternSimStepFinishedReceived::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternSimStepFinishedReceived)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternSimStepFinishedReceived)
   return target;
 }
 
 int ExternSimStepFinishedReceived::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -2736,7 +3542,7 @@ int ExternSimStepFinishedReceived::ByteSize() const {
 }
 
 void ExternSimStepFinishedReceived::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternSimStepFinishedReceived* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternSimStepFinishedReceived*>(
       &from);
@@ -2748,8 +3554,10 @@ void ExternSimStepFinishedReceived::MergeFrom(const ::google::protobuf::Message&
 }
 
 void ExternSimStepFinishedReceived::MergeFrom(const ExternSimStepFinishedReceived& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternSimStepFinishedReceived::CopyFrom(const ::google::protobuf::Message& from) {
@@ -2770,10 +3578,12 @@ bool ExternSimStepFinishedReceived::IsInitialized() const {
 }
 
 void ExternSimStepFinishedReceived::Swap(ExternSimStepFinishedReceived* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternSimStepFinishedReceived::InternalSwap(ExternSimStepFinishedReceived* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternSimStepFinishedReceived::GetMetadata() const {
@@ -2784,6 +3594,10 @@ void ExternSimStepFinishedReceived::Swap(ExternSimStepFinishedReceived* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternSimStepFinishedReceived
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -2793,17 +3607,20 @@ const int ExternDoSimStep::kToTimeFieldNumber;
 #endif  // !_MSC_VER
 
 ExternDoSimStep::ExternDoSimStep()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternDoSimStep)
 }
 
 void ExternDoSimStep::InitAsDefaultInstance() {
 }
 
 ExternDoSimStep::ExternDoSimStep(const ExternDoSimStep& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternDoSimStep)
 }
 
 void ExternDoSimStep::SharedCtor() {
@@ -2814,6 +3631,7 @@ void ExternDoSimStep::SharedCtor() {
 }
 
 ExternDoSimStep::~ExternDoSimStep() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternDoSimStep)
   SharedDtor();
 }
 
@@ -2839,35 +3657,53 @@ const ExternDoSimStep& ExternDoSimStep::default_instance() {
 
 ExternDoSimStep* ExternDoSimStep::default_instance_ = NULL;
 
-ExternDoSimStep* ExternDoSimStep::New() const {
-  return new ExternDoSimStep;
+ExternDoSimStep* ExternDoSimStep::New(::google::protobuf::Arena* arena) const {
+  ExternDoSimStep* n = new ExternDoSimStep;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternDoSimStep::Clear() {
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    fromtime_ = 0;
-    totime_ = 0;
-  }
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<ExternDoSimStep*>(16)->f)
+
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
+
+  ZR_(fromtime_, totime_);
+
+#undef ZR_HELPER_
+#undef ZR_
+
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternDoSimStep::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.ExternDoSimStep)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // required double fromTime = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+        if (tag == 9) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
                  input, &fromtime_)));
           set_has_fromtime();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(17)) goto parse_toTime;
         break;
@@ -2875,25 +3711,25 @@ bool ExternDoSimStep::MergePartialFromCodedStream(
 
       // required double toTime = 2;
       case 2: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+        if (tag == 17) {
          parse_toTime:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
                  input, &totime_)));
           set_has_totime();
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -2901,12 +3737,18 @@ bool ExternDoSimStep::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternDoSimStep)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternDoSimStep)
+  return false;
 #undef DO_
 }
 
 void ExternDoSimStep::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternDoSimStep)
   // required double fromTime = 1;
   if (has_fromtime()) {
     ::google::protobuf::internal::WireFormatLite::WriteDouble(1, this->fromtime(), output);
@@ -2917,14 +3759,16 @@ void ExternDoSimStep::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->totime(), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternDoSimStep)
 }
 
 ::google::protobuf::uint8* ExternDoSimStep::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternDoSimStep)
   // required double fromTime = 1;
   if (has_fromtime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(1, this->fromtime(), target);
@@ -2935,29 +3779,43 @@ void ExternDoSimStep::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->totime(), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternDoSimStep)
   return target;
 }
 
+int ExternDoSimStep::RequiredFieldsByteSizeFallback() const {
+  int total_size = 0;
+
+  if (has_fromtime()) {
+    // required double fromTime = 1;
+    total_size += 1 + 8;
+  }
+
+  if (has_totime()) {
+    // required double toTime = 2;
+    total_size += 1 + 8;
+  }
+
+  return total_size;
+}
 int ExternDoSimStep::ByteSize() const {
   int total_size = 0;
 
-  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
     // required double fromTime = 1;
-    if (has_fromtime()) {
-      total_size += 1 + 8;
-    }
+    total_size += 1 + 8;
 
     // required double toTime = 2;
-    if (has_totime()) {
-      total_size += 1 + 8;
-    }
+    total_size += 1 + 8;
 
+  } else {
+    total_size += RequiredFieldsByteSizeFallback();
   }
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -2969,7 +3827,7 @@ int ExternDoSimStep::ByteSize() const {
 }
 
 void ExternDoSimStep::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternDoSimStep* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternDoSimStep*>(
       &from);
@@ -2981,7 +3839,7 @@ void ExternDoSimStep::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void ExternDoSimStep::MergeFrom(const ExternDoSimStep& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_fromtime()) {
       set_fromtime(from.fromtime());
@@ -2990,7 +3848,9 @@ void ExternDoSimStep::MergeFrom(const ExternDoSimStep& from) {
       set_totime(from.totime());
     }
   }
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternDoSimStep::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3012,13 +3872,15 @@ bool ExternDoSimStep::IsInitialized() const {
 }
 
 void ExternDoSimStep::Swap(ExternDoSimStep* other) {
-  if (other != this) {
-    std::swap(fromtime_, other->fromtime_);
-    std::swap(totime_, other->totime_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternDoSimStep::InternalSwap(ExternDoSimStep* other) {
+  std::swap(fromtime_, other->fromtime_);
+  std::swap(totime_, other->totime_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternDoSimStep::GetMetadata() const {
@@ -3029,6 +3891,58 @@ void ExternDoSimStep::Swap(ExternDoSimStep* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternDoSimStep
+
+// required double fromTime = 1;
+ bool ExternDoSimStep::has_fromtime() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+ void ExternDoSimStep::set_has_fromtime() {
+  _has_bits_[0] |= 0x00000001u;
+}
+ void ExternDoSimStep::clear_has_fromtime() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+ void ExternDoSimStep::clear_fromtime() {
+  fromtime_ = 0;
+  clear_has_fromtime();
+}
+ double ExternDoSimStep::fromtime() const {
+  // @@protoc_insertion_point(field_get:hybrid.ExternDoSimStep.fromTime)
+  return fromtime_;
+}
+ void ExternDoSimStep::set_fromtime(double value) {
+  set_has_fromtime();
+  fromtime_ = value;
+  // @@protoc_insertion_point(field_set:hybrid.ExternDoSimStep.fromTime)
+}
+
+// required double toTime = 2;
+ bool ExternDoSimStep::has_totime() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+ void ExternDoSimStep::set_has_totime() {
+  _has_bits_[0] |= 0x00000002u;
+}
+ void ExternDoSimStep::clear_has_totime() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+ void ExternDoSimStep::clear_totime() {
+  totime_ = 0;
+  clear_has_totime();
+}
+ double ExternDoSimStep::totime() const {
+  // @@protoc_insertion_point(field_get:hybrid.ExternDoSimStep.toTime)
+  return totime_;
+}
+ void ExternDoSimStep::set_totime(double value) {
+  set_has_totime();
+  totime_ = value;
+  // @@protoc_insertion_point(field_set:hybrid.ExternDoSimStep.toTime)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3036,17 +3950,20 @@ void ExternDoSimStep::Swap(ExternDoSimStep* other) {
 #endif  // !_MSC_VER
 
 ExternDoSimStepReceived::ExternDoSimStepReceived()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternDoSimStepReceived)
 }
 
 void ExternDoSimStepReceived::InitAsDefaultInstance() {
 }
 
 ExternDoSimStepReceived::ExternDoSimStepReceived(const ExternDoSimStepReceived& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternDoSimStepReceived)
 }
 
 void ExternDoSimStepReceived::SharedCtor() {
@@ -3055,6 +3972,7 @@ void ExternDoSimStepReceived::SharedCtor() {
 }
 
 ExternDoSimStepReceived::~ExternDoSimStepReceived() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternDoSimStepReceived)
   SharedDtor();
 }
 
@@ -3080,52 +3998,73 @@ const ExternDoSimStepReceived& ExternDoSimStepReceived::default_instance() {
 
 ExternDoSimStepReceived* ExternDoSimStepReceived::default_instance_ = NULL;
 
-ExternDoSimStepReceived* ExternDoSimStepReceived::New() const {
-  return new ExternDoSimStepReceived;
+ExternDoSimStepReceived* ExternDoSimStepReceived::New(::google::protobuf::Arena* arena) const {
+  ExternDoSimStepReceived* n = new ExternDoSimStepReceived;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternDoSimStepReceived::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternDoSimStepReceived::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternDoSimStepReceived)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternDoSimStepReceived)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternDoSimStepReceived)
+  return false;
 #undef DO_
 }
 
 void ExternDoSimStepReceived::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternDoSimStepReceived)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternDoSimStepReceived)
 }
 
 ::google::protobuf::uint8* ExternDoSimStepReceived::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternDoSimStepReceived)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternDoSimStepReceived)
   return target;
 }
 
 int ExternDoSimStepReceived::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -3137,7 +4076,7 @@ int ExternDoSimStepReceived::ByteSize() const {
 }
 
 void ExternDoSimStepReceived::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternDoSimStepReceived* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternDoSimStepReceived*>(
       &from);
@@ -3149,8 +4088,10 @@ void ExternDoSimStepReceived::MergeFrom(const ::google::protobuf::Message& from)
 }
 
 void ExternDoSimStepReceived::MergeFrom(const ExternDoSimStepReceived& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternDoSimStepReceived::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3171,10 +4112,12 @@ bool ExternDoSimStepReceived::IsInitialized() const {
 }
 
 void ExternDoSimStepReceived::Swap(ExternDoSimStepReceived* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternDoSimStepReceived::InternalSwap(ExternDoSimStepReceived* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternDoSimStepReceived::GetMetadata() const {
@@ -3185,6 +4128,10 @@ void ExternDoSimStepReceived::Swap(ExternDoSimStepReceived* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternDoSimStepReceived
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3192,17 +4139,20 @@ void ExternDoSimStepReceived::Swap(ExternDoSimStepReceived* other) {
 #endif  // !_MSC_VER
 
 ExternalConnect::ExternalConnect()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternalConnect)
 }
 
 void ExternalConnect::InitAsDefaultInstance() {
 }
 
 ExternalConnect::ExternalConnect(const ExternalConnect& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternalConnect)
 }
 
 void ExternalConnect::SharedCtor() {
@@ -3211,6 +4161,7 @@ void ExternalConnect::SharedCtor() {
 }
 
 ExternalConnect::~ExternalConnect() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternalConnect)
   SharedDtor();
 }
 
@@ -3236,52 +4187,73 @@ const ExternalConnect& ExternalConnect::default_instance() {
 
 ExternalConnect* ExternalConnect::default_instance_ = NULL;
 
-ExternalConnect* ExternalConnect::New() const {
-  return new ExternalConnect;
+ExternalConnect* ExternalConnect::New(::google::protobuf::Arena* arena) const {
+  ExternalConnect* n = new ExternalConnect;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternalConnect::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternalConnect::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternalConnect)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternalConnect)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternalConnect)
+  return false;
 #undef DO_
 }
 
 void ExternalConnect::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternalConnect)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternalConnect)
 }
 
 ::google::protobuf::uint8* ExternalConnect::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternalConnect)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternalConnect)
   return target;
 }
 
 int ExternalConnect::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -3293,7 +4265,7 @@ int ExternalConnect::ByteSize() const {
 }
 
 void ExternalConnect::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternalConnect* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternalConnect*>(
       &from);
@@ -3305,8 +4277,10 @@ void ExternalConnect::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void ExternalConnect::MergeFrom(const ExternalConnect& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternalConnect::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3327,10 +4301,12 @@ bool ExternalConnect::IsInitialized() const {
 }
 
 void ExternalConnect::Swap(ExternalConnect* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternalConnect::InternalSwap(ExternalConnect* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternalConnect::GetMetadata() const {
@@ -3341,6 +4317,10 @@ void ExternalConnect::Swap(ExternalConnect* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternalConnect
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3348,17 +4328,20 @@ void ExternalConnect::Swap(ExternalConnect* other) {
 #endif  // !_MSC_VER
 
 ExternalConnectConfirmed::ExternalConnectConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternalConnectConfirmed)
 }
 
 void ExternalConnectConfirmed::InitAsDefaultInstance() {
 }
 
 ExternalConnectConfirmed::ExternalConnectConfirmed(const ExternalConnectConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternalConnectConfirmed)
 }
 
 void ExternalConnectConfirmed::SharedCtor() {
@@ -3367,6 +4350,7 @@ void ExternalConnectConfirmed::SharedCtor() {
 }
 
 ExternalConnectConfirmed::~ExternalConnectConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternalConnectConfirmed)
   SharedDtor();
 }
 
@@ -3392,52 +4376,73 @@ const ExternalConnectConfirmed& ExternalConnectConfirmed::default_instance() {
 
 ExternalConnectConfirmed* ExternalConnectConfirmed::default_instance_ = NULL;
 
-ExternalConnectConfirmed* ExternalConnectConfirmed::New() const {
-  return new ExternalConnectConfirmed;
+ExternalConnectConfirmed* ExternalConnectConfirmed::New(::google::protobuf::Arena* arena) const {
+  ExternalConnectConfirmed* n = new ExternalConnectConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternalConnectConfirmed::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternalConnectConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternalConnectConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternalConnectConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternalConnectConfirmed)
+  return false;
 #undef DO_
 }
 
 void ExternalConnectConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternalConnectConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternalConnectConfirmed)
 }
 
 ::google::protobuf::uint8* ExternalConnectConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternalConnectConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternalConnectConfirmed)
   return target;
 }
 
 int ExternalConnectConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -3449,7 +4454,7 @@ int ExternalConnectConfirmed::ByteSize() const {
 }
 
 void ExternalConnectConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternalConnectConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternalConnectConfirmed*>(
       &from);
@@ -3461,8 +4466,10 @@ void ExternalConnectConfirmed::MergeFrom(const ::google::protobuf::Message& from
 }
 
 void ExternalConnectConfirmed::MergeFrom(const ExternalConnectConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternalConnectConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3483,10 +4490,12 @@ bool ExternalConnectConfirmed::IsInitialized() const {
 }
 
 void ExternalConnectConfirmed::Swap(ExternalConnectConfirmed* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternalConnectConfirmed::InternalSwap(ExternalConnectConfirmed* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternalConnectConfirmed::GetMetadata() const {
@@ -3497,6 +4506,10 @@ void ExternalConnectConfirmed::Swap(ExternalConnectConfirmed* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternalConnectConfirmed
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3504,17 +4517,20 @@ void ExternalConnectConfirmed::Swap(ExternalConnectConfirmed* other) {
 #endif  // !_MSC_VER
 
 ExternOnPrepareSim::ExternOnPrepareSim()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternOnPrepareSim)
 }
 
 void ExternOnPrepareSim::InitAsDefaultInstance() {
 }
 
 ExternOnPrepareSim::ExternOnPrepareSim(const ExternOnPrepareSim& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternOnPrepareSim)
 }
 
 void ExternOnPrepareSim::SharedCtor() {
@@ -3523,6 +4539,7 @@ void ExternOnPrepareSim::SharedCtor() {
 }
 
 ExternOnPrepareSim::~ExternOnPrepareSim() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternOnPrepareSim)
   SharedDtor();
 }
 
@@ -3548,52 +4565,73 @@ const ExternOnPrepareSim& ExternOnPrepareSim::default_instance() {
 
 ExternOnPrepareSim* ExternOnPrepareSim::default_instance_ = NULL;
 
-ExternOnPrepareSim* ExternOnPrepareSim::New() const {
-  return new ExternOnPrepareSim;
+ExternOnPrepareSim* ExternOnPrepareSim::New(::google::protobuf::Arena* arena) const {
+  ExternOnPrepareSim* n = new ExternOnPrepareSim;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternOnPrepareSim::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternOnPrepareSim::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternOnPrepareSim)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternOnPrepareSim)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternOnPrepareSim)
+  return false;
 #undef DO_
 }
 
 void ExternOnPrepareSim::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternOnPrepareSim)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternOnPrepareSim)
 }
 
 ::google::protobuf::uint8* ExternOnPrepareSim::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternOnPrepareSim)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternOnPrepareSim)
   return target;
 }
 
 int ExternOnPrepareSim::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -3605,7 +4643,7 @@ int ExternOnPrepareSim::ByteSize() const {
 }
 
 void ExternOnPrepareSim::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternOnPrepareSim* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternOnPrepareSim*>(
       &from);
@@ -3617,8 +4655,10 @@ void ExternOnPrepareSim::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void ExternOnPrepareSim::MergeFrom(const ExternOnPrepareSim& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternOnPrepareSim::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3639,10 +4679,12 @@ bool ExternOnPrepareSim::IsInitialized() const {
 }
 
 void ExternOnPrepareSim::Swap(ExternOnPrepareSim* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternOnPrepareSim::InternalSwap(ExternOnPrepareSim* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternOnPrepareSim::GetMetadata() const {
@@ -3653,6 +4695,10 @@ void ExternOnPrepareSim::Swap(ExternOnPrepareSim* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternOnPrepareSim
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3660,17 +4706,20 @@ void ExternOnPrepareSim::Swap(ExternOnPrepareSim* other) {
 #endif  // !_MSC_VER
 
 ExternOnPrepareSimConfirmed::ExternOnPrepareSimConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternOnPrepareSimConfirmed)
 }
 
 void ExternOnPrepareSimConfirmed::InitAsDefaultInstance() {
 }
 
 ExternOnPrepareSimConfirmed::ExternOnPrepareSimConfirmed(const ExternOnPrepareSimConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternOnPrepareSimConfirmed)
 }
 
 void ExternOnPrepareSimConfirmed::SharedCtor() {
@@ -3679,6 +4728,7 @@ void ExternOnPrepareSimConfirmed::SharedCtor() {
 }
 
 ExternOnPrepareSimConfirmed::~ExternOnPrepareSimConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternOnPrepareSimConfirmed)
   SharedDtor();
 }
 
@@ -3704,52 +4754,73 @@ const ExternOnPrepareSimConfirmed& ExternOnPrepareSimConfirmed::default_instance
 
 ExternOnPrepareSimConfirmed* ExternOnPrepareSimConfirmed::default_instance_ = NULL;
 
-ExternOnPrepareSimConfirmed* ExternOnPrepareSimConfirmed::New() const {
-  return new ExternOnPrepareSimConfirmed;
+ExternOnPrepareSimConfirmed* ExternOnPrepareSimConfirmed::New(::google::protobuf::Arena* arena) const {
+  ExternOnPrepareSimConfirmed* n = new ExternOnPrepareSimConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternOnPrepareSimConfirmed::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternOnPrepareSimConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternOnPrepareSimConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternOnPrepareSimConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternOnPrepareSimConfirmed)
+  return false;
 #undef DO_
 }
 
 void ExternOnPrepareSimConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternOnPrepareSimConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternOnPrepareSimConfirmed)
 }
 
 ::google::protobuf::uint8* ExternOnPrepareSimConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternOnPrepareSimConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternOnPrepareSimConfirmed)
   return target;
 }
 
 int ExternOnPrepareSimConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -3761,7 +4832,7 @@ int ExternOnPrepareSimConfirmed::ByteSize() const {
 }
 
 void ExternOnPrepareSimConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternOnPrepareSimConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternOnPrepareSimConfirmed*>(
       &from);
@@ -3773,8 +4844,10 @@ void ExternOnPrepareSimConfirmed::MergeFrom(const ::google::protobuf::Message& f
 }
 
 void ExternOnPrepareSimConfirmed::MergeFrom(const ExternOnPrepareSimConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternOnPrepareSimConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3795,10 +4868,12 @@ bool ExternOnPrepareSimConfirmed::IsInitialized() const {
 }
 
 void ExternOnPrepareSimConfirmed::Swap(ExternOnPrepareSimConfirmed* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternOnPrepareSimConfirmed::InternalSwap(ExternOnPrepareSimConfirmed* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternOnPrepareSimConfirmed::GetMetadata() const {
@@ -3809,6 +4884,10 @@ void ExternOnPrepareSimConfirmed::Swap(ExternOnPrepareSimConfirmed* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternOnPrepareSimConfirmed
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3816,17 +4895,20 @@ void ExternOnPrepareSimConfirmed::Swap(ExternOnPrepareSimConfirmed* other) {
 #endif  // !_MSC_VER
 
 ExternAfterSim::ExternAfterSim()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternAfterSim)
 }
 
 void ExternAfterSim::InitAsDefaultInstance() {
 }
 
 ExternAfterSim::ExternAfterSim(const ExternAfterSim& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternAfterSim)
 }
 
 void ExternAfterSim::SharedCtor() {
@@ -3835,6 +4917,7 @@ void ExternAfterSim::SharedCtor() {
 }
 
 ExternAfterSim::~ExternAfterSim() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternAfterSim)
   SharedDtor();
 }
 
@@ -3860,52 +4943,73 @@ const ExternAfterSim& ExternAfterSim::default_instance() {
 
 ExternAfterSim* ExternAfterSim::default_instance_ = NULL;
 
-ExternAfterSim* ExternAfterSim::New() const {
-  return new ExternAfterSim;
+ExternAfterSim* ExternAfterSim::New(::google::protobuf::Arena* arena) const {
+  ExternAfterSim* n = new ExternAfterSim;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternAfterSim::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternAfterSim::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternAfterSim)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternAfterSim)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternAfterSim)
+  return false;
 #undef DO_
 }
 
 void ExternAfterSim::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternAfterSim)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternAfterSim)
 }
 
 ::google::protobuf::uint8* ExternAfterSim::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternAfterSim)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternAfterSim)
   return target;
 }
 
 int ExternAfterSim::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -3917,7 +5021,7 @@ int ExternAfterSim::ByteSize() const {
 }
 
 void ExternAfterSim::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternAfterSim* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternAfterSim*>(
       &from);
@@ -3929,8 +5033,10 @@ void ExternAfterSim::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void ExternAfterSim::MergeFrom(const ExternAfterSim& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternAfterSim::CopyFrom(const ::google::protobuf::Message& from) {
@@ -3951,10 +5057,12 @@ bool ExternAfterSim::IsInitialized() const {
 }
 
 void ExternAfterSim::Swap(ExternAfterSim* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternAfterSim::InternalSwap(ExternAfterSim* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternAfterSim::GetMetadata() const {
@@ -3965,6 +5073,10 @@ void ExternAfterSim::Swap(ExternAfterSim* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternAfterSim
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -3972,17 +5084,20 @@ void ExternAfterSim::Swap(ExternAfterSim* other) {
 #endif  // !_MSC_VER
 
 ExternAfterSimConfirmed::ExternAfterSimConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.ExternAfterSimConfirmed)
 }
 
 void ExternAfterSimConfirmed::InitAsDefaultInstance() {
 }
 
 ExternAfterSimConfirmed::ExternAfterSimConfirmed(const ExternAfterSimConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.ExternAfterSimConfirmed)
 }
 
 void ExternAfterSimConfirmed::SharedCtor() {
@@ -3991,6 +5106,7 @@ void ExternAfterSimConfirmed::SharedCtor() {
 }
 
 ExternAfterSimConfirmed::~ExternAfterSimConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.ExternAfterSimConfirmed)
   SharedDtor();
 }
 
@@ -4016,52 +5132,73 @@ const ExternAfterSimConfirmed& ExternAfterSimConfirmed::default_instance() {
 
 ExternAfterSimConfirmed* ExternAfterSimConfirmed::default_instance_ = NULL;
 
-ExternAfterSimConfirmed* ExternAfterSimConfirmed::New() const {
-  return new ExternAfterSimConfirmed;
+ExternAfterSimConfirmed* ExternAfterSimConfirmed::New(::google::protobuf::Arena* arena) const {
+  ExternAfterSimConfirmed* n = new ExternAfterSimConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void ExternAfterSimConfirmed::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool ExternAfterSimConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.ExternAfterSimConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.ExternAfterSimConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.ExternAfterSimConfirmed)
+  return false;
 #undef DO_
 }
 
 void ExternAfterSimConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.ExternAfterSimConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.ExternAfterSimConfirmed)
 }
 
 ::google::protobuf::uint8* ExternAfterSimConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.ExternAfterSimConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.ExternAfterSimConfirmed)
   return target;
 }
 
 int ExternAfterSimConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -4073,7 +5210,7 @@ int ExternAfterSimConfirmed::ByteSize() const {
 }
 
 void ExternAfterSimConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const ExternAfterSimConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const ExternAfterSimConfirmed*>(
       &from);
@@ -4085,8 +5222,10 @@ void ExternAfterSimConfirmed::MergeFrom(const ::google::protobuf::Message& from)
 }
 
 void ExternAfterSimConfirmed::MergeFrom(const ExternAfterSimConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void ExternAfterSimConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -4107,10 +5246,12 @@ bool ExternAfterSimConfirmed::IsInitialized() const {
 }
 
 void ExternAfterSimConfirmed::Swap(ExternAfterSimConfirmed* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void ExternAfterSimConfirmed::InternalSwap(ExternAfterSimConfirmed* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata ExternAfterSimConfirmed::GetMetadata() const {
@@ -4121,6 +5262,10 @@ void ExternAfterSimConfirmed::Swap(ExternAfterSimConfirmed* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// ExternAfterSimConfirmed
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -4129,25 +5274,30 @@ const int AgentsStuck::kAgentIdFieldNumber;
 #endif  // !_MSC_VER
 
 AgentsStuck::AgentsStuck()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.AgentsStuck)
 }
 
 void AgentsStuck::InitAsDefaultInstance() {
 }
 
 AgentsStuck::AgentsStuck(const AgentsStuck& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.AgentsStuck)
 }
 
 void AgentsStuck::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
 AgentsStuck::~AgentsStuck() {
+  // @@protoc_insertion_point(destructor:hybrid.AgentsStuck)
   SharedDtor();
 }
 
@@ -4173,46 +5323,57 @@ const AgentsStuck& AgentsStuck::default_instance() {
 
 AgentsStuck* AgentsStuck::default_instance_ = NULL;
 
-AgentsStuck* AgentsStuck::New() const {
-  return new AgentsStuck;
+AgentsStuck* AgentsStuck::New(::google::protobuf::Arena* arena) const {
+  AgentsStuck* n = new AgentsStuck;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void AgentsStuck::Clear() {
   agentid_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool AgentsStuck::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
+  // @@protoc_insertion_point(parse_start:hybrid.AgentsStuck)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
       // repeated string agentId = 1;
       case 1: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+        if (tag == 10) {
          parse_agentId:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->add_agentid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
             this->agentid(this->agentid_size() - 1).data(),
             this->agentid(this->agentid_size() - 1).length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "hybrid.AgentsStuck.agentId");
         } else {
-          goto handle_uninterpreted;
+          goto handle_unusual;
         }
         if (input->ExpectTag(10)) goto parse_agentId;
-        if (input->ExpectAtEnd()) return true;
+        if (input->ExpectAtEnd()) goto success;
         break;
       }
 
       default: {
-      handle_uninterpreted:
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-          return true;
+          goto success;
         }
         DO_(::google::protobuf::internal::WireFormat::SkipField(
               input, tag, mutable_unknown_fields()));
@@ -4220,42 +5381,53 @@ bool AgentsStuck::MergePartialFromCodedStream(
       }
     }
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.AgentsStuck)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.AgentsStuck)
+  return false;
 #undef DO_
 }
 
 void AgentsStuck::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:hybrid.AgentsStuck)
   // repeated string agentId = 1;
   for (int i = 0; i < this->agentid_size(); i++) {
-  ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+  ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
     this->agentid(i).data(), this->agentid(i).length(),
-    ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormat::SERIALIZE,
+    "hybrid.AgentsStuck.agentId");
     ::google::protobuf::internal::WireFormatLite::WriteString(
       1, this->agentid(i), output);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.AgentsStuck)
 }
 
 ::google::protobuf::uint8* AgentsStuck::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.AgentsStuck)
   // repeated string agentId = 1;
   for (int i = 0; i < this->agentid_size(); i++) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->agentid(i).data(), this->agentid(i).length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "hybrid.AgentsStuck.agentId");
     target = ::google::protobuf::internal::WireFormatLite::
       WriteStringToArray(1, this->agentid(i), target);
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.AgentsStuck)
   return target;
 }
 
@@ -4269,7 +5441,7 @@ int AgentsStuck::ByteSize() const {
       this->agentid(i));
   }
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -4281,7 +5453,7 @@ int AgentsStuck::ByteSize() const {
 }
 
 void AgentsStuck::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const AgentsStuck* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const AgentsStuck*>(
       &from);
@@ -4293,9 +5465,11 @@ void AgentsStuck::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void AgentsStuck::MergeFrom(const AgentsStuck& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   agentid_.MergeFrom(from.agentid_);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void AgentsStuck::CopyFrom(const ::google::protobuf::Message& from) {
@@ -4316,12 +5490,14 @@ bool AgentsStuck::IsInitialized() const {
 }
 
 void AgentsStuck::Swap(AgentsStuck* other) {
-  if (other != this) {
-    agentid_.Swap(&other->agentid_);
-    std::swap(_has_bits_[0], other->_has_bits_[0]);
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void AgentsStuck::InternalSwap(AgentsStuck* other) {
+  agentid_.UnsafeArenaSwap(&other->agentid_);
+  std::swap(_has_bits_[0], other->_has_bits_[0]);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata AgentsStuck::GetMetadata() const {
@@ -4332,6 +5508,64 @@ void AgentsStuck::Swap(AgentsStuck* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// AgentsStuck
+
+// repeated string agentId = 1;
+ int AgentsStuck::agentid_size() const {
+  return agentid_.size();
+}
+ void AgentsStuck::clear_agentid() {
+  agentid_.Clear();
+}
+ const ::std::string& AgentsStuck::agentid(int index) const {
+  // @@protoc_insertion_point(field_get:hybrid.AgentsStuck.agentId)
+  return agentid_.Get(index);
+}
+ ::std::string* AgentsStuck::mutable_agentid(int index) {
+  // @@protoc_insertion_point(field_mutable:hybrid.AgentsStuck.agentId)
+  return agentid_.Mutable(index);
+}
+ void AgentsStuck::set_agentid(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:hybrid.AgentsStuck.agentId)
+  agentid_.Mutable(index)->assign(value);
+}
+ void AgentsStuck::set_agentid(int index, const char* value) {
+  agentid_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:hybrid.AgentsStuck.agentId)
+}
+ void AgentsStuck::set_agentid(int index, const char* value, size_t size) {
+  agentid_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hybrid.AgentsStuck.agentId)
+}
+ ::std::string* AgentsStuck::add_agentid() {
+  return agentid_.Add();
+}
+ void AgentsStuck::add_agentid(const ::std::string& value) {
+  agentid_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:hybrid.AgentsStuck.agentId)
+}
+ void AgentsStuck::add_agentid(const char* value) {
+  agentid_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:hybrid.AgentsStuck.agentId)
+}
+ void AgentsStuck::add_agentid(const char* value, size_t size) {
+  agentid_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:hybrid.AgentsStuck.agentId)
+}
+ const ::google::protobuf::RepeatedPtrField< ::std::string>&
+AgentsStuck::agentid() const {
+  // @@protoc_insertion_point(field_list:hybrid.AgentsStuck.agentId)
+  return agentid_;
+}
+ ::google::protobuf::RepeatedPtrField< ::std::string>*
+AgentsStuck::mutable_agentid() {
+  // @@protoc_insertion_point(field_mutable_list:hybrid.AgentsStuck.agentId)
+  return &agentid_;
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // ===================================================================
 
@@ -4339,17 +5573,20 @@ void AgentsStuck::Swap(AgentsStuck* other) {
 #endif  // !_MSC_VER
 
 AgentsStuckConfirmed::AgentsStuckConfirmed()
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
   SharedCtor();
+  // @@protoc_insertion_point(constructor:hybrid.AgentsStuckConfirmed)
 }
 
 void AgentsStuckConfirmed::InitAsDefaultInstance() {
 }
 
 AgentsStuckConfirmed::AgentsStuckConfirmed(const AgentsStuckConfirmed& from)
-  : ::google::protobuf::Message() {
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
   SharedCtor();
   MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:hybrid.AgentsStuckConfirmed)
 }
 
 void AgentsStuckConfirmed::SharedCtor() {
@@ -4358,6 +5595,7 @@ void AgentsStuckConfirmed::SharedCtor() {
 }
 
 AgentsStuckConfirmed::~AgentsStuckConfirmed() {
+  // @@protoc_insertion_point(destructor:hybrid.AgentsStuckConfirmed)
   SharedDtor();
 }
 
@@ -4383,52 +5621,73 @@ const AgentsStuckConfirmed& AgentsStuckConfirmed::default_instance() {
 
 AgentsStuckConfirmed* AgentsStuckConfirmed::default_instance_ = NULL;
 
-AgentsStuckConfirmed* AgentsStuckConfirmed::New() const {
-  return new AgentsStuckConfirmed;
+AgentsStuckConfirmed* AgentsStuckConfirmed::New(::google::protobuf::Arena* arena) const {
+  AgentsStuckConfirmed* n = new AgentsStuckConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
 }
 
 void AgentsStuckConfirmed::Clear() {
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
-  mutable_unknown_fields()->Clear();
+  if (_internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->Clear();
+  }
 }
 
 bool AgentsStuckConfirmed::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
-#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  while ((tag = input->ReadTag()) != 0) {
-    if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+  // @@protoc_insertion_point(parse_start:hybrid.AgentsStuckConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
         ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
-      return true;
+      goto success;
     }
     DO_(::google::protobuf::internal::WireFormat::SkipField(
           input, tag, mutable_unknown_fields()));
   }
+success:
+  // @@protoc_insertion_point(parse_success:hybrid.AgentsStuckConfirmed)
   return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:hybrid.AgentsStuckConfirmed)
+  return false;
 #undef DO_
 }
 
 void AgentsStuckConfirmed::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_start:hybrid.AgentsStuckConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
+  // @@protoc_insertion_point(serialize_end:hybrid.AgentsStuckConfirmed)
 }
 
 ::google::protobuf::uint8* AgentsStuckConfirmed::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  if (!unknown_fields().empty()) {
+  // @@protoc_insertion_point(serialize_to_array_start:hybrid.AgentsStuckConfirmed)
+  if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
+  // @@protoc_insertion_point(serialize_to_array_end:hybrid.AgentsStuckConfirmed)
   return target;
 }
 
 int AgentsStuckConfirmed::ByteSize() const {
   int total_size = 0;
 
-  if (!unknown_fields().empty()) {
+  if (_internal_metadata_.have_unknown_fields()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         unknown_fields());
@@ -4440,7 +5699,7 @@ int AgentsStuckConfirmed::ByteSize() const {
 }
 
 void AgentsStuckConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
-  GOOGLE_CHECK_NE(&from, this);
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
   const AgentsStuckConfirmed* source =
     ::google::protobuf::internal::dynamic_cast_if_available<const AgentsStuckConfirmed*>(
       &from);
@@ -4452,8 +5711,10 @@ void AgentsStuckConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
 }
 
 void AgentsStuckConfirmed::MergeFrom(const AgentsStuckConfirmed& from) {
-  GOOGLE_CHECK_NE(&from, this);
-  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from._internal_metadata_.have_unknown_fields()) {
+    mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+  }
 }
 
 void AgentsStuckConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
@@ -4474,10 +5735,12 @@ bool AgentsStuckConfirmed::IsInitialized() const {
 }
 
 void AgentsStuckConfirmed::Swap(AgentsStuckConfirmed* other) {
-  if (other != this) {
-    _unknown_fields_.Swap(&other->_unknown_fields_);
-    std::swap(_cached_size_, other->_cached_size_);
-  }
+  if (other == this) return;
+  InternalSwap(other);
+}
+void AgentsStuckConfirmed::InternalSwap(AgentsStuckConfirmed* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
 }
 
 ::google::protobuf::Metadata AgentsStuckConfirmed::GetMetadata() const {
@@ -4488,7 +5751,13 @@ void AgentsStuckConfirmed::Swap(AgentsStuckConfirmed* other) {
   return metadata;
 }
 
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// AgentsStuckConfirmed
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 
 // @@protoc_insertion_point(namespace_scope)
+
+}  // namespace hybrid
 
 // @@protoc_insertion_point(global_scope)
