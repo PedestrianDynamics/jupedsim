@@ -1,3 +1,9 @@
+# coding:utf-8
+"""
+Class for benchmarking of jpscore
+See template_test/How_to_make_new_test.txt
+"""
+
 import fnmatch
 import glob
 import logging
@@ -9,14 +15,19 @@ import sys
 
 
 __author__ = 'Oliver Schmidts'
-
+__email__ = 'dev@jupedsim.org'
+__credits__ = ['Oliver Schmidts', 'Mohcine Chraibi']
+__copyright__ = '<2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.'
+__license__ = 'GNU Lesser General Public License'
+__version__ = '0.1'
+__status__ = 'Production'
 
 class JPSRunTestDriver(object):
 
     def __init__(self, testnumber, argv0, testdir):
         self.SUCCESS = 0
         self.FAILURE = 1
-        # check if testnumber is an int
+        # check if testnumber is digit
         assert isinstance(testnumber, float) or isinstance(testnumber, int)
         # only allow path and strings as path directory name
         assert path.exists(argv0)
@@ -27,8 +38,7 @@ class JPSRunTestDriver(object):
         self.logfile = os.path.join(testdir, self.logfile)
 
         # touch file if not already there
-        f = open(self.logfile, 'a')
-        f.close()
+        open(self.logfile, 'a').close()
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG,
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.HOME = path.expanduser("~")
@@ -47,11 +57,11 @@ class JPSRunTestDriver(object):
 
     def __configure(self):
         if self.CWD != self.DIR:
-            logging.info("working dir is %s. Change to %s" % (os.getcwd(), self.DIR))
+            logging.info("working dir is %s. Change to %s", os.getcwd(), self.DIR)
             os.chdir(self.DIR)
         logging.info("change directory to ..")
         os.chdir("..")
-        logging.info("call makeini.py with -f %s" % self.FILE)
+        logging.info("call makeini.py with -f %s", self.FILE)
         subprocess.call(["python", "makeini.py", "-f", "%s" % self.FILE])
         os.chdir(self.DIR)
         # -------- get directory of the code TRUNK
@@ -60,17 +70,17 @@ class JPSRunTestDriver(object):
         os.chdir(self.DIR)
         lib_path = os.path.abspath(os.path.join(self.trunk, "Utest"))
         sys.path.append(lib_path)
-        logging.info("change directory back to %s" % self.DIR)
+        logging.info("change directory back to %s", self.DIR)
 
         # initialise the inputfiles for jpscore
         self.geofile = os.path.join(self.DIR, "geometry.xml")
         self.inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
         if not path.exists(self.geofile):
-            logging.critical("geofile <%s> does not exist" % self.geofile)
+            logging.critical("geofile <%s> does not exist", self.geofile)
             exit(self.FAILURE)
         for inifile in self.inifiles:
             if not path.exists(inifile):
-                logging.critical("inifile <%s> does not exist" % inifile)
+                logging.critical("inifile <%s> does not exist", inifile)
                 exit(self.FAILURE)
         return
 
@@ -84,11 +94,12 @@ class JPSRunTestDriver(object):
                 for filename in fnmatch.filter(filenames, 'jpscore.exe'):
                     matches.append(os.path.join(root, filename))
             if len(matches) == 0:
-                logging.critical("executable <%s> or jpscore.exe does not exist yet." % executable)
+                logging.critical("executable <%s> or jpscore.exe does not exist yet.", executable)
                 exit(self.FAILURE)
             elif len(matches) > 1:
                 matches = ((os.stat(file_path), file_path) for file_path in matches)
-                matches = ((stat[ST_MTIME], file_path) for stat, file_path in matches if S_ISREG(stat[ST_MODE]))
+                matches = ((stat[ST_MTIME], file_path)
+                           for stat, file_path in matches if S_ISREG(stat[ST_MODE]))
                 matches = sorted(matches)
             executable = matches[0]
         # end fix for windows
@@ -97,13 +108,14 @@ class JPSRunTestDriver(object):
 
     def __execute_test(self, executable, inifile, testfunction, *args):
         cmd = "%s --inifile=%s"%(executable, inifile)
-        logging.info('start simulating with exe=<%s>' % cmd)
+        logging.info('start simulating with exe=<%s>', cmd)
         subprocess.call([executable, "--inifile=%s" % inifile])
         logging.info('end simulation ...\n--------------\n')
         trajfile = os.path.join("trajectories", "traj" + inifile.split("ini")[2])
-        logging.info('trajfile = <%s>' % trajfile)
+        logging.info('trajfile = <%s>', trajfile)
         if not path.exists(trajfile):
-            logging.critical("trajfile <%s> does not exist" % trajfile)
+            logging.critical("trajfile <%s> does not exist", trajfile)
             exit(self.FAILURE)
         testfunction(inifile, trajfile, *args)
         return
+
