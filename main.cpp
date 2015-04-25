@@ -57,14 +57,15 @@ int main(int argc, char **argv)
      if(status&&sim.InitArgs(*args))
      {
           //Start the threads for managing the sources of agents
-          std::thread t1(sim.GetAgentSrcManager(),21);
+          std::thread t1(sim.GetAgentSrcManager());
 
           //Start the thread for managing incoming messages from MatSim
           std::thread t2;
           auto hybrid=args->GetHybridSimManager();
           if(hybrid)
                t2 = std::thread(*hybrid);
-
+//t1.detach();
+//t2.detach();
 
           //main thread for the simulation
           Log->Write("INFO: \tStart runSimulation()");

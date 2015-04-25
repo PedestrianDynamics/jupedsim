@@ -33,7 +33,7 @@ public:
       * Make the class "runnable" by overloading the operator
       * @param value
       */
-     void operator()(int value);
+     void operator()();
 
      /**
       *  Add a new agent source
@@ -50,12 +50,17 @@ public:
       */
      void SetBuilding(Building* building);
 
-     //void operator()();
      /**
       * @return true if all agents have been generated
       * and the class is ready to leave
       */
      bool IsCompleted() const;
+
+     /**
+      *
+      * @return true if all source are empty
+      */
+     bool ProcessAllSources();
 
 private:
      /// contain the sources

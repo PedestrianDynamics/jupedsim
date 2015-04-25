@@ -80,7 +80,7 @@ bool GompertzModel::Init (Building* building) const
          //a destination could not be found for that pedestrian
          if (ped->FindRoute() == -1) {
               Log->Write(
-                   "WARNING: \allPeds::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
+                   "ERROR:\tGompertzModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
              building->DeletePedestrian(ped);
               continue;
          }

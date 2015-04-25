@@ -71,7 +71,6 @@ public:
      const std::shared_ptr<StartDistribution> GetStartDistribution() const;
 
 
-
 private:
      int _id=-1;
      int _frequency=0;

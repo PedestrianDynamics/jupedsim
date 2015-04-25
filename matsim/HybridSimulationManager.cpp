@@ -18,22 +18,32 @@
 #include <functional>
 
 //google stuff
-#include <grpc/grpc.h>
+//server stuff
 #include <grpc/grpc.h>
 #include <grpc++/server.h>
 #include <grpc++/server_builder.h>
 #include <grpc++/server_context.h>
 #include <grpc++/server_credentials.h>
 #include <grpc++/status.h>
+//client stuff
+#include <grpc++/channel_arguments.h>
+#include <grpc++/channel_interface.h>
+#include <grpc++/client_context.h>
+#include <grpc++/create_channel.h>
+#include <grpc++/credentials.h>
 
-bool HybridSimulationManager::_shutdown = false;
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-
+using grpc::ChannelArguments;
+using grpc::ChannelInterface;
+using grpc::ClientContext;
+using grpc::Status;
 using namespace std;
+
+bool HybridSimulationManager::_shutdown = false;
 
 HybridSimulationManager::HybridSimulationManager(const std::string& server,
           int port)
@@ -80,12 +90,16 @@ bool HybridSimulationManager::RunClient()
      do
      {
           //check the message queue and send
+          JPSclient client(
+                    grpc::CreateChannel("localhost:9999",
+                              grpc::InsecureCredentials(), ChannelArguments()));
 
           //check if agents enter/left a link and fire event
+          client.ProcessAgentQueue(_building);
 
           //wait some time, before a new attempt
           cout << "waiting for input:" << _shutdown << endl;
-          ProcessOutgoingAgent();
+          //ProcessOutgoingAgent();
           std::this_thread::sleep_for(std::chrono::milliseconds(1000));
      } while (!_shutdown);
 
