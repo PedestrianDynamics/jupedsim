@@ -15,6 +15,7 @@
 
 //forward classes
 class Building;
+class AgentsSourcesManager;
 //class grpc::Server;
 
 class HybridSimulationManager
@@ -35,6 +36,11 @@ public:
       * @param value
       */
      void operator()();
+
+     /**
+      *
+      */
+     void AttachSourceManager(const AgentsSourcesManager& src);
 
 private:
      void ProcessIncomingAgent();

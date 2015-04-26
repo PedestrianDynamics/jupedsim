@@ -10,6 +10,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Building.h"
 #include "../pedestrian/AgentsQueue.h"
+#include "../pedestrian/AgentsSourcesManager.h"
 #include "JPSserver.h"
 #include "JPSclient.h"
 
@@ -46,10 +47,10 @@ using namespace std;
 bool HybridSimulationManager::_shutdown = false;
 
 HybridSimulationManager::HybridSimulationManager(const std::string& server,
-          int port)
+		int port)
 {
-     _serverName = server;
-     _port = port;
+	_serverName = server;
+	_port = port;
 }
 
 HybridSimulationManager::~HybridSimulationManager()
@@ -58,89 +59,98 @@ HybridSimulationManager::~HybridSimulationManager()
 
 bool HybridSimulationManager::Init(Building* building)
 {
-     //     GOOGLE_PROTOBUF_VERIFY_VERSION;
+	//     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-     _building = building;
-     return true;
+	_building = building;
+	return true;
+}
+void HybridSimulationManager::AttachSourceManager(const AgentsSourcesManager& src)
+{
+//create a source manager and copy
+
 }
 
 bool HybridSimulationManager::Run()
 {
-     //perform some initialisation stuff
-     GOOGLE_PROTOBUF_VERIFY_VERSION;
-     grpc_init();
+	//perform some initialisation stuff
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+	grpc_init();
 
-     //create a socket and use it for the serveur and the client
-     std::thread t1(&HybridSimulationManager::RunClient, this);
-     std::thread t2(&HybridSimulationManager::RunServer, this);
-     t1.join();
-     t2.join();
+	//create a socket and use it for the serveur and the client
+	std::thread t1(&HybridSimulationManager::RunClient, this);
+	std::thread t2(&HybridSimulationManager::RunServer, this);
+	t1.join();
+	t2.join();
 
-     //clean up everything
-     grpc_shutdown();
-     google::protobuf::ShutdownProtobufLibrary();
-     return true;
+	//clean up everything
+	grpc_shutdown();
+	google::protobuf::ShutdownProtobufLibrary();
+	return true;
 }
 void HybridSimulationManager::operator()()
 {
-     Run();
+	Run();
 }
 bool HybridSimulationManager::RunClient()
 {
-     do
-     {
-          //check the message queue and send
-          JPSclient client(
-                    grpc::CreateChannel("localhost:9999",
-                              grpc::InsecureCredentials(), ChannelArguments()));
 
-          //check if agents enter/left a link and fire event
-          client.ProcessAgentQueue(_building);
+			//check the message queue and send
+		JPSclient client(
+				grpc::CreateChannel("localhost:9999",
+						grpc::InsecureCredentials(), ChannelArguments()));
 
-          //wait some time, before a new attempt
-          cout << "waiting for input:" << _shutdown << endl;
-          //ProcessOutgoingAgent();
-          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-     } while (!_shutdown);
+		//client.SetSourceManager();
 
-     return true;
+	do
+	{
+
+		//check if agents enter/left a link and fire event
+		client.ProcessAgentQueue(_building);
+
+		//wait some time, before a new attempt
+		cout << "waiting for input:" << _shutdown << endl;
+		//ProcessOutgoingAgent();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	} while (!_shutdown);
+
+	return true;
 }
 
 bool HybridSimulationManager::RunServer()
 {
-     //check the message queue and send
-     do
-     {
-          std::string server_address(_serverName + ":" + std::to_string(_port));
-          JPSserver service;
+	//check the message queue and send
+	do
+	{
+		std::string server_address(_serverName + ":" + std::to_string(_port));
+		JPSserver service;
 
-          ServerBuilder builder;
-          builder.AddListeningPort(server_address,
-                    grpc::InsecureServerCredentials());
-          builder.RegisterService(&service);
-          _rpcServer= builder.BuildAndStart();
-          Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
-          _rpcServer->Wait();
+		ServerBuilder builder;
+		builder.AddListeningPort(server_address,
+				grpc::InsecureServerCredentials());
+		builder.RegisterService(&service);
+		_rpcServer= builder.BuildAndStart();
+		Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
+		//_rpcServer->Wait();
 
-          //wait for incoming connection
-          //receive and parse message
-          //process message
-          //can insert pedestrian ?
-          //accept pedestrian and feed to the queue
+		//wait for incoming connection
+		//receive and parse message
+		//process message
+		//can insert pedestrian ?
+		//accept pedestrian and feed to the queue
 
-          //wait some time, before a new attempt
-          cout << "waiting for output:" << _shutdown << endl;
-          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-     } while (!_shutdown);
+		//wait some time, before a new attempt
+		cout << "waiting for output:" << _shutdown << endl;
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	} while (!_shutdown);
 
-     return true;
+	return true;
 }
 
 void HybridSimulationManager::Shutdown()
 {
-     _shutdown = true;
-     if (_rpcServer) _rpcServer->Shutdown();
-     //cout<<"shutting down: "<<_shutdown<<endl;
+	_shutdown = true;
+	if (_rpcServer) _rpcServer->Shutdown();
+	//cout<<"shutting down: "<<_shutdown<<endl;
 }
 
 void HybridSimulationManager::ProcessIncomingAgent()
@@ -150,29 +160,29 @@ void HybridSimulationManager::ProcessIncomingAgent()
 
 void HybridSimulationManager::ProcessOutgoingAgent()
 {
-     std::vector<Pedestrian*> peds;
-     AgentsQueueOut::GetandClear(peds);
+	std::vector<Pedestrian*> peds;
+	AgentsQueueOut::GetandClear(peds);
 
-     for (auto && ped:peds)
-     {
-          //pick the agent from the queue
-          hybrid::Extern2MATSim msg;
-          msg.mutable_agent()->set_id(std::to_string(ped->GetID()));
-          msg.mutable_agent()->set_leavenode(std::to_string(ped->GetExitIndex()));
+	for (auto && ped:peds)
+	{
+		//pick the agent from the queue
+		hybrid::Extern2MATSim msg;
+		msg.mutable_agent()->set_id(std::to_string(ped->GetID()));
+		msg.mutable_agent()->set_leavenode(std::to_string(ped->GetExitIndex()));
 
-          //write to the disk or send to hell
-          //std::fstream output("test.buf", ios::out | ios::trunc | ios::binary);
-          //if (!msg.SerializeToOstream(&output))
-          //{
-          //    cerr << "Failed to write address book." << endl;
-          //}
-          cout<<"deleting:"<<endl;
-          _building->DeletePedestrian(ped);
-     }
+		//write to the disk or send to hell
+		//std::fstream output("test.buf", ios::out | ios::trunc | ios::binary);
+		//if (!msg.SerializeToOstream(&output))
+		//{
+		//    cerr << "Failed to write address book." << endl;
+		//}
+		cout<<"deleting:"<<endl;
+		_building->DeletePedestrian(ped);
+	}
 }
 
 std::string HybridSimulationManager::ToString()
 {
-     return "INFO:\tHybrid Simulation working on [" + _serverName + ":"
-               + std::to_string(_port) + "]\n";
+	return "INFO:\tHybrid Simulation working on [" + _serverName + ":"
+			+ std::to_string(_port) + "]\n";
 }

@@ -76,6 +76,8 @@ public:
           _stub.reset();
      }
 
+     //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
+
 private:
      bool HasSpaceOnMatsim(int nodeID);
      bool SendAgentToMatsim(Pedestrian* ped);
@@ -85,6 +87,7 @@ private:
 private:
      std::unique_ptr<ExternInterfaceService::Stub> _stub;
      std::unique_ptr<MATSimInterfaceService::Stub> _stub_matsim;
+     //AgentsSourcesManager _agentSrcMng;
 };
 
 #endif /* MATSIM_JPSCLIENT_H_ */

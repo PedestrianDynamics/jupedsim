@@ -39,6 +39,14 @@ public:
      virtual Status reqExternDoSimStep(ServerContext* context, const ExternDoSimStep* request, ExternDoSimStepReceived* response);
      virtual Status reqExternOnPrepareSim(ServerContext* context, const ExternOnPrepareSim* request, ExternOnPrepareSimConfirmed* response);
      virtual Status reqExternAfterSim(ServerContext* context, const ExternAfterSim* request, ExternAfterSimConfirmed* response);
+
+     /**
+      *
+      */
+     //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
+
+private:
+
 };
 
 #endif /* MATSIM_JPSSERVER_H_ */
