@@ -154,7 +154,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID)
           return possibleDest[0]->GetID();
      } else {
           AccessPoint* best_ap=possibleDest[0];
-          double min_dist=GetDistanceTo(best_ap);// + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
+          double min_dist=GetDistanceTo(best_ap) + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
 
           for (unsigned int i=0; i<possibleDest.size(); i++) {
                double tmp= GetDistanceTo(possibleDest[i]);

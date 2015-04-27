@@ -81,7 +81,7 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="5" agents_max="15" group_id="0" caption="source 1" />
+      <sources id="1" frequency="5" agents_max="15" group_id="0" caption="source 1" />
       <sources id="1" frequency="5" agents_max="15" group_id="0" caption="source 1" />
     </agents_sources>
 

@@ -57,6 +57,11 @@ public:
      bool IsCompleted() const;
 
      /**
+      * Return a pointer to the building object
+      */
+     Building* GetBuilding() const;
+
+     /**
       *
       * @return true if all source are empty
       */

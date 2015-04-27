@@ -62,10 +62,12 @@ int main(int argc, char **argv)
           //Start the thread for managing incoming messages from MatSim
           std::thread t2;
           auto hybrid=args->GetHybridSimManager();
-          if(hybrid)
+          if(hybrid){
+               hybrid->AttachSourceManager(sim.GetAgentSrcManager());
                t2 = std::thread(*hybrid);
-//t1.detach();
-//t2.detach();
+          }
+          //t1.detach();
+          //t2.detach();
 
           //main thread for the simulation
           Log->Write("INFO: \tStart runSimulation()");
@@ -104,7 +106,7 @@ int main(int argc, char **argv)
           Log->Write("Warnings          : %d", Log->GetWarnings());
           Log->Write("Errors            : %d", Log->GetErrors());
 
-          if (NULL == dynamic_cast<STDIOHandler*>(Log))
+          if (nullptr == dynamic_cast<STDIOHandler*>(Log))
           {
                printf("\nExec Time [s]     : %4.2f\n", execTime);
                printf("Evac Time [s]       : %d\n", evacTime);

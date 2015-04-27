@@ -526,11 +526,18 @@ const AgentsSourcesManager& Simulation::GetAgentSrcManager()
 
 void Simulation::ProcessAgentsQueue()
 {
+
+     //incoming pedestrians
      vector<Pedestrian*> peds;
      AgentsQueue::GetandClear(peds);
-
      for(auto&& ped: peds)
      {
           _building->AddPedestrian(ped);
+     }
+
+     //outgoing pedestrians
+     if (_hybridSimManager)
+     {
+          _hybridSimManager->ProcessOutgoingAgent();
      }
 }

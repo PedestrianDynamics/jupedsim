@@ -20,20 +20,27 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-//using helloworld::HelloRequest;
-//using helloworld::HelloReply;
-//using helloworld::Greeter;
 using namespace hybrid;
 
-
+//forward declarations
+class AgentsSourcesManager;
 
 
 
 class JPSserver final : public ExternInterfaceService::Service
 {
 public:
-     JPSserver();
+     /**
+      * constructor with an agent source manager, which will be
+      * responsible for positioning the agents.
+      */
+     JPSserver(AgentsSourcesManager& src);
+
+     /**
+      * Destructor
+      */
      virtual ~JPSserver();
+
      virtual Status reqMATSim2ExternHasSpace(ServerContext* context, const MATSim2ExternHasSpace* request, MATSim2ExternHasSpaceConfirmed* response);
      virtual Status reqMATSim2ExternPutAgent(ServerContext* context, const MATSim2ExternPutAgent* request, MATSim2ExternPutAgentConfirmed* response);
      virtual Status reqExternDoSimStep(ServerContext* context, const ExternDoSimStep* request, ExternDoSimStepReceived* response);
@@ -46,7 +53,7 @@ public:
      //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
 
 private:
-
+    AgentsSourcesManager& _agentSrcMng;
 };
 
 #endif /* MATSIM_JPSSERVER_H_ */

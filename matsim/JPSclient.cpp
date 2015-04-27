@@ -12,6 +12,7 @@
 
 #include "MATSimInterface.pb.h"
 
+using namespace std;
 
 JPSclient::JPSclient(std::shared_ptr<ChannelInterface> channel) :
                _stub(ExternInterfaceService::NewStub(channel))
@@ -32,7 +33,7 @@ void JPSclient::ProcessAgentQueue(Building* building)
      for (auto && ped:peds)
      {
 
-          if(HasSpaceOnJuPedSim(ped->GetExitIndex())==true)
+          if(HasSpaceOnJuPedSim(ped->GetFinalDestination())==true)
           {
                if(SendAgentToJuPedSim(ped)==false)
                {
@@ -45,7 +46,7 @@ void JPSclient::ProcessAgentQueue(Building* building)
           }
 
 
-          if(HasSpaceOnMatsim(ped->GetExitIndex())==true)
+          if(HasSpaceOnMatsim(ped->GetFinalDestination())==true)
           {
                SendAgentToMatsim(ped);
           }
@@ -56,6 +57,7 @@ void JPSclient::ProcessAgentQueue(Building* building)
 
 bool JPSclient::HasSpaceOnMatsim(int nodeID)
 {
+     return false;
 }
 
 bool JPSclient::SendAgentToMatsim(Pedestrian* ped)
@@ -64,6 +66,7 @@ bool JPSclient::SendAgentToMatsim(Pedestrian* ped)
      //hybrid::Extern2MATSim msg;
      //msg.mutable_agent()->set_id(std::to_string(ped->GetID()));
      //msg.mutable_agent()->set_leavenode(std::to_string(ped->GetExitIndex()));
+     return false;
 
 }
 
@@ -89,12 +92,17 @@ bool JPSclient::SendAgentToJuPedSim(Pedestrian* ped)
      ClientContext context;
      MATSim2ExternPutAgent request;
      MATSim2ExternPutAgentConfirmed reply;
+     string leave_node_id=std::to_string(ped->GetFinalDestination());
+     string enter_node_id="-1";
+     if(leave_node_id=="3") enter_node_id="1";
+     if(leave_node_id=="4") enter_node_id="2";
+
 
      request.mutable_agent()->set_id(std::to_string(ped->GetID()));
-     request.mutable_agent()->set_enternode(std::to_string(ped->GetExitIndex()));
+     request.mutable_agent()->set_enternode(enter_node_id);
      //only one final destination is supported
-     request.mutable_agent()->add_nodes("-1");
-     request.mutable_agent()->add_nodes("0");
+     request.mutable_agent()->add_nodes(leave_node_id);
+     //request.mutable_agent()->add_nodes("0");
 
      Status status =_stub->reqMATSim2ExternPutAgent(&context, request, &reply);
      return status.IsOk();

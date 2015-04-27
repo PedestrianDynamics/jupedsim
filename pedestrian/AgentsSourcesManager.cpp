@@ -65,7 +65,7 @@ bool AgentsSourcesManager::ProcessAllSources()
           if (src->GetPoolSize())
           {
                vector<Pedestrian*> peds;
-               src->GenerateByFrequency(peds);
+               src->RemoveAgentsFromPool(peds,src->GetFrequency());
                ComputeBestPositionRandom(src.get(), peds);
                // compute the optimal position for insertion
                for (auto&& ped : peds)
@@ -286,4 +286,10 @@ void AgentsSourcesManager::SetBuilding(Building* building)
 bool AgentsSourcesManager::IsCompleted() const
 {
      return _isCompleted;
+}
+
+
+Building* AgentsSourcesManager::GetBuilding() const
+{
+     return _building;
 }

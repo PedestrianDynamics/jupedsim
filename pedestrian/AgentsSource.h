@@ -15,6 +15,7 @@
 class Pedestrian;
 class OutputHandler;
 class StartDistribution;
+class Building;
 
 // external variables
 extern OutputHandler* Log;
@@ -26,7 +27,7 @@ public:
      /**
       * Constructor
       */
-     AgentsSource(int id,std::string caption,int max_agents,int group_id,int frequency);
+     AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency);
 
      /**
       * Destructor
@@ -37,7 +38,7 @@ public:
       * Add a new agent to this source
       * @param ped
       */
-     void Add(Pedestrian* ped);
+     void AddToPool(Pedestrian* ped);
 
      /**
       * Generate a number of agents, based on the frequency given in the constructor.
@@ -45,7 +46,22 @@ public:
       * @see _maxAgents
       * @param ped
       */
-     void GenerateByFrequency(std::vector<Pedestrian*>& ped);
+     void GenerateAgentsAndAddToPool(int count, Building* building);
+
+     /**
+      * Generate agents, but do not add them to the pool
+      * @param ped, the container for the agents
+      * @param count, the number of agents to generate
+      * @param building, a pointer to the building object
+      */
+     void GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building);
+
+     /**
+      * Generate count agents and save them in the vector
+      * @param ped, the container for the agents
+      * @param count, the number of agents to generate
+      */
+     void RemoveAgentsFromPool(std::vector<Pedestrian*>& peds, int count);
 
      /**
       * @return the number of agents remaining

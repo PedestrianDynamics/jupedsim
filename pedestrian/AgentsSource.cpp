@@ -12,13 +12,14 @@
 
 #include <iostream>
 
-AgentsSource::AgentsSource(int id,std::string caption,int max_agents,int group_id,int frequency)
+AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int group_id,int frequency)
 {
     _id=id;
     _caption=caption;
     _maxAgents=max_agents;
     _groupID=group_id;
     _frequency=frequency;
+    _agentsGenerated=0;
     _agents.clear();
 }
 
@@ -26,12 +27,20 @@ AgentsSource::~AgentsSource()
 {
 }
 
-void AgentsSource::GenerateByFrequency(std::vector<Pedestrian*>& ped)
+void AgentsSource::GenerateAgentsAndAddToPool(int count, Building* building)
 {
-     if((int)_agents.size()>=_frequency)
+     std::vector<Pedestrian*> peds;
+     GenerateAgents(peds, count, building);
+     _agents.insert(_agents.begin(),peds.begin(),peds.end());
+     _agentsGenerated+=count;
+}
+
+void AgentsSource::RemoveAgentsFromPool(std::vector<Pedestrian*>& ped, int count)
+{
+     if((int)_agents.size()>=count)
      {
-          ped.insert(ped.begin(),_agents.begin(),_agents.begin()+_frequency);
-          _agents.erase(_agents.begin(),_agents.begin()+_frequency);
+          ped.insert(ped.begin(),_agents.begin(),_agents.begin()+count);
+          _agents.erase(_agents.begin(),_agents.begin()+count);
      }
      else
      {
@@ -45,7 +54,7 @@ int AgentsSource::GetPoolSize() const
      return _agents.size();
 }
 
-void AgentsSource::Add(Pedestrian* ped)
+void AgentsSource::AddToPool(Pedestrian* ped)
 {
      _agents.push_back(ped);
 }
@@ -103,10 +112,26 @@ void AgentsSource::SetStartDistribution(std::shared_ptr<StartDistribution> start
      _startDistribution=startDistribution;
 }
 
+int AgentsSource::GetGroupID() const
+{
+     return _groupID;
+}
+
 const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() const
 {
      return _startDistribution;
 }
+
+void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building)
+{
+     std::vector<Point> emptyPositions;
+     int pid=1; // will be discarded
+     for(int i=0;i<count;i++)
+     {
+          peds.push_back(_startDistribution->GenerateAgent(building, &pid,emptyPositions));
+     }
+}
+
 
 void AgentsSource::Dump() const
 {

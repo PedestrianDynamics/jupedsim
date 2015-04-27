@@ -13,10 +13,11 @@
 #include <memory>
 #include <grpc++/server.h>
 
+#include "../pedestrian/AgentsSourcesManager.h"
 //forward classes
 class Building;
 class AgentsSourcesManager;
-//class grpc::Server;
+class JPSclient;
 
 class HybridSimulationManager
 {
@@ -38,13 +39,14 @@ public:
      void operator()();
 
      /**
-      *
+      * Create another source manager
       */
      void AttachSourceManager(const AgentsSourcesManager& src);
 
+     void ProcessOutgoingAgent();
+
 private:
      void ProcessIncomingAgent();
-     void ProcessOutgoingAgent();
 
 private:
      //std::atomic<bool> _shutdown=false;
@@ -52,10 +54,11 @@ private:
      int _port=-1;
      std::string _serverName="localhost";
      Building* _building=nullptr;
-     //grpc::Server* _rpcServer_;
      //TODO: the method should be passed bz reference in the main function
      //std::unique_ptr<grpc::Server> _rpcServer;
      std::shared_ptr<grpc::Server> _rpcServer;
+     AgentsSourcesManager _agentSrcMng;
+     std::shared_ptr<JPSclient> _rpcClient;
 };
 
 #endif /* HYBRIDSIMULATIONMANAGER_H_ */

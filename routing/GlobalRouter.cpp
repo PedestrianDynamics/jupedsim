@@ -57,7 +57,7 @@ Router()
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
-     _edgeCost=1;
+     _edgeCost=10;
      //     _rdDistribution = uniform_real_distribution<double> (0,1);
      //     _rdGenerator = default_random_engine(56);
 
@@ -71,7 +71,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
-     _edgeCost=1;
+     _edgeCost=10;
 
      //     _rdDistribution = uniform_real_distribution<double> (0,1);
      //     _rdGenerator = default_random_engine(56);
@@ -760,7 +760,7 @@ int GlobalRouter::FindExit(Pedestrian* ped)
      }
 
      // else proceed as usual and return the closest navigation line
-
+     //ped->Dump(9);//ped->Dump(9);
      int nextDestination = ped->GetNextDestination();
      //      if(ped->GetGlobalTime()>80){
      //              ped->Dump(2);
@@ -788,6 +788,7 @@ int GlobalRouter::FindExit(Pedestrian* ped)
                nextDestination = ap->GetNearestTransitAPTO(
                          ped->GetFinalDestination());
 
+               //if(ped->GetID()==6) {ap->Dump();getc(stdin);}
 
                if (nextDestination == -1) { // we are almost at the exit
                     return ped->GetNextDestination();
@@ -830,7 +831,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the opened exits
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
                ped->GetSubRoomID());
-
 
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;

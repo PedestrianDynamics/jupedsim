@@ -40,6 +40,7 @@
 
 using namespace std;
 
+#define MAX_AGENT_COUNT 1000
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {
@@ -48,8 +49,7 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
      _gridYmin=boundaries[2];
      _gridYmax=boundaries[3];
      _cellSize=cellsize;
-     _nPeds=nPeds;
-
+     _nPeds = nPeds + MAX_AGENT_COUNT;
 
      // add 1 to ensure that the whole area is covered by cells if not divisible without remainder
      _gridSizeX = (int) ((_gridXmax - _gridXmin) / _cellSize) + 1 + 2; // 1 dummy cell on each side
@@ -67,12 +67,12 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
      }
 
      // creating and resetting the pedestrians list
-     _list = new int[nPeds];
-     for(int i=0; i<nPeds; i++) _list[i]=0;
+     _list = new int[_nPeds];
+     for(int i=0; i<_nPeds; i++) _list[i]=0;
 
      //allocating the place for the peds copy
-     _localPedsCopy=new Pedestrian*[nPeds];
-     for(int i=0; i<nPeds; i++) _localPedsCopy[i]=NULL;
+     _localPedsCopy=new Pedestrian*[_nPeds];
+     for(int i=0; i<_nPeds; i++) _localPedsCopy[i]=nullptr;
 
 }
 
@@ -90,8 +90,8 @@ LCGrid::~LCGrid()
 
 void LCGrid::ShallowCopy(const vector<Pedestrian*>& peds)
 {
-
-     for(unsigned int p=0; p<peds.size(); p++) {
+     for(unsigned int p=0; p<peds.size(); p++)
+     {
           int id= peds[p]->GetID()-1;
           _localPedsCopy[id]=peds[p];
      }
@@ -99,12 +99,11 @@ void LCGrid::ShallowCopy(const vector<Pedestrian*>& peds)
 
 void LCGrid::Update(const vector<Pedestrian*>& peds)
 {
-     int nSize=peds.size();
-
      ClearGrid();
 
-     for (int p = 0; p < nSize; p++) {
-          Pedestrian* ped = peds[p];
+     for (auto& ped: peds)
+     {
+          //Pedestrian* ped = peds[p];
           int id=ped->GetID()-1;
           // determine the cell coordinates of pedestrian i
           int ix = (int) ((ped->GetPos().GetX() - _gridXmin) / _cellSize) + 1; // +1 because of dummy cells
@@ -146,7 +145,7 @@ void LCGrid::ClearGrid()
 
      for(int i=0; i<_nPeds; i++) {
           _list[i]=LIST_EMPTY;
-          _localPedsCopy[i]=NULL;
+          _localPedsCopy[i]=nullptr;
      }
 }
 
