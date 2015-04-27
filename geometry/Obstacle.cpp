@@ -46,7 +46,7 @@ using namespace std;
 
 Obstacle::Obstacle()
 {
-     _isClosed=0.0;
+     _isClosed=0;
      _height=0.0;
      _id=-1;
      _caption="obstacle";
@@ -72,12 +72,12 @@ void Obstacle::SetCaption(string caption)
      _caption = caption;
 }
 
-double Obstacle::GetClosed() const
+int Obstacle::GetClosed() const
 {
      return _isClosed;
 }
 
-void Obstacle::SetClosed(double closed)
+void Obstacle::SetClosed(int closed)
 {
      _isClosed = closed;
 }
