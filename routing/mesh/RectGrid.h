@@ -39,7 +39,7 @@
 //          x (3)
 
 typedef struct directNeighbor_t {
-    int key[4];
+    long int key[4];
 } directNeighbor;
 
 
@@ -65,8 +65,8 @@ class RectGrid
             isInitialized = other.isInitialized;
         }
 
-        unsigned long int GetnPoints() const { return nPoints; }
-        //void SetnPoints(unsigned long int val) { nPoints = val; }
+        long int GetnPoints() const { return nPoints; }
+        //void SetnPoints(long int val) { nPoints = val; }
         double GetxMin() const { return xMin; }
         void SetxMin(double val) { if (!isInitialized) xMin = val; }
         double GetyMin() const { return yMin; }
@@ -75,24 +75,24 @@ class RectGrid
         void SetxMax(double val) { if (!isInitialized) xMax = val; }
         double GetyMax() const { return yMax; }
         void SetyMax(double val) { if (!isInitialized) yMax = val; }
-        unsigned long int GetiMax() const { return iMax; }
-        //void SetiMax(unsigned long int val) { iMax = val; }
-        unsigned long int GetjMax() const { return jMax; }
-        //void SetjMax(unsigned long int val) { jMax = val; }
+        long int GetiMax() const { return iMax; }
+        //void SetiMax(long int val) { iMax = val; }
+        long int GetjMax() const { return jMax; }
+        //void SetjMax(long int val) { jMax = val; }
         double Gethx() const { return hx; }
         //void Sethx(double val) { hx = val; }
         double Gethy() const { return hy; }
         //void Sethy(double val) { hy = val; }
 
-        double get_x_fromKey (unsigned long int key) const { return (key%iMax)*hx+xMin; }
-        double get_y_fromKey (unsigned long int key) const { return (key/iMax)*hy+yMin; }
-        double get_i_fromKey (unsigned long int key) const { return (key%iMax); }
-        double get_j_fromKey (unsigned long int key) const { return (key/iMax); }
+        double get_x_fromKey (long int key) const { return (key%iMax)*hx+xMin; }
+        double get_y_fromKey (long int key) const { return (key/iMax)*hy+yMin; }
+        double get_i_fromKey (long int key) const { return (key%iMax); }
+        double get_j_fromKey (long int key) const { return (key/iMax); }
 
-        unsigned long int getKeyAtXY(const double x, const double y) const {//key = index in (extern managed) array
+        long int getKeyAtXY(const double x, const double y) const {//key = index in (extern managed) array
             //Point nearest = getNearestGridPoint(Point(x,y));
-            unsigned long int i = (unsigned long int)(((x-xMin)/hx)+.5);
-            unsigned long int j = (unsigned long int)(((y-yMin)/hy)+.5);
+            long int i = (long int)(((x-xMin)/hx)+.5);
+            long int j = (long int)(((y-yMin)/hy)+.5);
             if ((i < iMax) && (j < jMax))
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
             return -1; // invalid indices
@@ -126,9 +126,12 @@ class RectGrid
 
         void createGrid(){ // @todo ar.graf : what if cast chops off float, if any changes: get_x_fromKey still correct?
             if (!isInitialized) {
-                iMax = (unsigned long int)((xMax-xMin)/hx) + 1;
-                jMax = (unsigned long int)((yMax-yMin)/hy) + 1;
+                iMax = (long int)((xMax-xMin)/hx) + 1;
+                jMax = (long int)((yMax-yMin)/hy) + 1;
                 nPoints = iMax * jMax;
+                //@todo: see if necessary to align xMax/yMax
+                xMax = xMin + iMax*hx;
+                yMax = yMin + jMax*hy;
                 isInitialized = true;
             }
         }
@@ -136,22 +139,22 @@ class RectGrid
         Point getNearestGridPoint(const Point& currPoint) const {
             if ((currPoint.GetX() > xMax) || (currPoint.GetY() > yMax))
                 return Point(-7, -7); // @todo: ar.graf : find good false indicator
-            unsigned long int i = (unsigned long int)(((currPoint.GetX()-xMin)/hx)+.5);
-            unsigned long int j = (unsigned long int)(((currPoint.GetY()-yMin)/hy)+.5);
+            long int i = (long int)(((currPoint.GetX()-xMin)/hx)+.5);
+            long int j = (long int)(((currPoint.GetY()-yMin)/hy)+.5);
             return Point(i*hx+xMin, j*hy+yMin);
         }
 
-        Point getPointFromKey(const unsigned long int key) const {
-            unsigned long int i = key%iMax;
-            unsigned long int j = key/iMax; //integer division
+        Point getPointFromKey(const long int key) const {
+            long int i = key%iMax;
+            long int j = key/iMax; //integer division
 
             return Point(i*hx+xMin, j*hy+yMin);
         }
 
-        directNeighbor getNeighbors(const unsigned long int key) const {
+        directNeighbor getNeighbors(const long int key) const {
             directNeighbor neighbors = {{-1, -1, -1, -1}}; //curleybrackets for struct, then for int[4]
-            unsigned long int i = get_i_fromKey(key);
-            unsigned long int j = get_j_fromKey(key);
+            long int i = get_i_fromKey(key);
+            long int j = get_j_fromKey(key);
 
             //right                       //-2 marks invalid neighbor
             neighbors.key[0] = (i == (iMax-1)) ? -2 : (j*iMax+i+1);
@@ -167,15 +170,15 @@ class RectGrid
 
     protected:
     private:
-        unsigned long int nPoints;
+        long int nPoints;
         double xMin;
         double yMin;
         double xMax;
         double yMax;
         double hx;
         double hy;
-        unsigned long int iMax; // indices must be smaller than iMax
-        unsigned long int jMax; // indices must be smaller than jMax
+        long int iMax; // indices must be smaller than iMax
+        long int jMax; // indices must be smaller than jMax
         bool isInitialized;
 };
 

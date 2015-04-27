@@ -25,23 +25,25 @@
  *
  *
  **/
-
+#define TESTING
 #include "FloorfieldViaFM.h"
 
 FloorfieldViaFM::FloorfieldViaFM()
 {
-    //ctor
+    //ctor (very ugly)
+    std::cerr << "The defaultconsturctor FloorfieldViaFM should not be called!" << std::endl;
 }
 
 FloorfieldViaFM::~FloorfieldViaFM()
 {
     //dtor
-    delete grid
-    delete[] flag;
-    delete[] dist2Wall;
-    delete[] speedInitial;
-    delete[] cost;
-    delete[] grad;
+    delete grid;
+    if (flag) delete[] flag;
+    if (dist2Wall) delete[] dist2Wall;
+    if (speedInitial) delete[] speedInitial;
+    if (cost) delete[] cost;
+    if (grad) delete[] grad;
+    if (trialfield) delete[] trialfield;
 
 }
 
@@ -93,7 +95,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    wall.push_back(&(*itObsWall));
+                    //wall.push_back(&(*itObsWall));
+                    wall.push_back(*(new Wall(*itObsWall)));
                     // xMin xMax
                     if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
                     if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
@@ -110,7 +113,10 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
             std::vector<Wall> allWalls = (*itSubroom)->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
-                wall.push_back(&(*itWall));
+            //for (auto& itWall : allWalls) {
+                wall.push_back(*(new Wall(*itWall)));
+              //std::cout << wall[0].GetPoint1().GetX() << std::endl;
+
                 // xMin xMax
                 if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
                 if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
@@ -132,15 +138,16 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     grid->createGrid();
 
     //create arrays
-    flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final)
+    flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
     dist2Wall = new double[grid->GetnPoints()];
     speedInitial = new double[grid->GetnPoints()];
-    cost = new double[grid->GetnPoints];
-    grad = new Point[grid->GetnPoints];                  //created with other arrays, but not initialized yet
+    cost = new double[grid->GetnPoints()];
+    grad = new Point[grid->GetnPoints()];
+    trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
     //linescan using (std::vector<Wall*>)
-    lineScan(allWalls, dist2Wall, 0., -2.);
-    for (unsigned long int i = 0; i < grid->GetnPoints(); ++i) {
+    lineScan(wall, dist2Wall, 0., -3.);
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0.) {               //outside
             speedInitial[i] = .001;
             cost[i]         = -7.; // @todo: ar.graf
@@ -150,6 +157,13 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             cost[i]         = -2.;
             flag[i]         = 0;
         }
+        //set Trialptr to fieldelements
+        trialfield[i].key = i;
+        trialfield[i].flag = flag + i;
+        trialfield[i].cost = dist2Wall + i;
+        trialfield[i].speed = speedInitial + i;
+        trialfield[i].father = nullptr;
+        trialfield[i].child = nullptr;
     }
 
 }
@@ -165,7 +179,7 @@ void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
 
 }
 
-void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const target, const double outside, const double inside) {
+void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside) {
 // use RectGrid to go thru lines and check intersection with any wall
 
 // maybe calc and save intersections for each line and then init target array
@@ -175,8 +189,8 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
 // empty vector<int key> and continue with line x+1 at (*)
 
     //grid handeling local vars:
-    unsigned long int iMax  = grid->GetiMax();
-    unsigned long int jMax  = grid->GetjMax();
+    long int iMax  = grid->GetiMax();
+    long int jMax  = grid->GetjMax();
     double xMin             = grid->GetxMin();
     double yMin             = grid->GetyMin();
     double xMax             = grid->GetxMax();
@@ -185,10 +199,10 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
     double hy               = grid->Gethy();
     std::vector<double> xIntersection;
 
-    for(unsigned long int j = 0; j < jMax; ++j) { // @todo ar.graf if segfault during writing, check if j < jMax
+    for(long int j = 0; j < jMax; ++j) { // @todo ar.graf if segfault during writing, check if j < jMax
 
         //init line with "(outside+inside)/2"
-        for (unsigned long int initp = 0; initp < iMax; ++initp) {
+        for (long int initp = 0; initp < iMax; ++initp) {
             target[j*iMax+initp] = (outside + inside) / 2;
         } //init done
         xIntersection.clear();
@@ -196,24 +210,24 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
         Point linestart(xMin,j*hy+yMin);
         Point lineend  (xMax,j*hy+yMin);
         Line currLine = Line(linestart, lineend);
-        for(std::vector<Wall*>::const_iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
+        for(std::vector<Wall>::iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
             //if wall is horizontal, we must deal with it by setting wall value all along
             //note: if wall is horizontal, then adjacent walls should yield intersectionpoints and make
             //      linescan fill the points under the horizontal wall anyway. lets check that. \____/
-            if (    ((**itWall).GetPoint1().GetY() == (linestart.GetY()))  &&  ((**itWall).IsHorizontal())   ) {
-                unsigned long int istart, iend;
-                istart = ((**itWall).GetPoint1().GetX() - xMin)/hx + .5;
-                iend   = ((**itWall).GetPoint2().GetX() - xMin)/hx + .5;
+            if (    ((*itWall).GetPoint1().GetY() == (linestart.GetY()))  &&  ((*itWall).IsHorizontal())   ) {
+                long int istart, iend;
+                istart = ((*itWall).GetPoint1().GetX() - xMin)/hx + .5;
+                iend   = ((*itWall).GetPoint2().GetX() - xMin)/hx + .5;
                 if (istart > iend) {
-                    unsigned long int temp = istart;
+                    long int temp = istart;
                     istart = iend;
                     iend = temp;
                 }
-                for (unsigned long int i = istart; i <= iend; ++i) {
+                for (long int i = istart; i <= iend; ++i) {
                     target[j*iMax+i] = outside;
                 }
             } else {
-                double distance = currLine.GetIntersectionDistance( *(*itWall) );
+                double distance = currLine.GetIntersectionDistance(*itWall);
                 if ( (distance >= 0.) && (distance < 100000) ) {        //check if Line.cpp can be changed (infinity == 100000) seems quite finite
                     xIntersection.push_back(sqrt(distance));
                 }
@@ -222,13 +236,13 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
         //now init the line using the intersections
         std::unique(xIntersection.begin(), xIntersection.end());
         std::sort(xIntersection.begin(), xIntersection.end());
-        unsigned long int old = 0;
-        unsigned long int upTo = 0;
+        long int old = 0;
+        long int upTo = 0;
         target[j*iMax+0] = outside;
         double filler = outside;
         for (unsigned int ithCross = 0; ithCross < xIntersection.size(); ++ithCross) {
-            upTo = (xIntersection[ithCross] - xMin)/hx + .5;
-            for (unsigned long int iCurrSegment = old+1; iCurrSegment < upTo; ++iCurrSegment) {
+            upTo = (xIntersection[ithCross])/hx + .5;
+            for (long int iCurrSegment = old+1; iCurrSegment < upTo; ++iCurrSegment) {
                 if (target[j*iMax+iCurrSegment] == (outside + inside) / 2) {
                     target[j*iMax+iCurrSegment] = filler;
                 }
@@ -241,11 +255,11 @@ void FloorfieldViaFM::lineScan(const std::vector<Wall*>& wallArg, double* const 
             target[j*iMax+upTo]=outside; //intersections always walls or obstacles
             old = upTo;
         }
-        for (unsigned long int rest = old+1; rest < iMax; ++rest) {
+        for (long int rest = old+1; rest < iMax; ++rest) {
             target[j*iMax+rest] = outside;
         }
         //secure check if all gridpoints got set
-        for (unsigned long int initp = 0; initp < iMax; ++initp) {
+        for (long int initp = 0; initp < iMax; ++initp) {
             if (  target[j*iMax+initp] == ((outside + inside)/2)  ) {
                 //sth went wrong
                 std::cerr << "Error in Linescan\n";
@@ -258,16 +272,71 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
 
 #ifdef TESTING
     //sanity check (fields <> 0)
-    if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final)
+    if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated)
     if (dist2Wall == 0) return;
     if (speedInitial == 0) return;
     if (cost == 0) return;
     if (grad == 0) return;
+    if (trialfield == 0) return;
 #endif //TESTING
 
-    //using dist2Wall for results, (pseudo)"speedfunction" 1 all around
+    //using dist2Wall-array to store this-function's results, (pseudo)"speedfunction" 1 all around
     //stop if smallest value in narrowband is >= threshold
 
+    //  setting goal (dist2Wall = 0) is done in "parseBuilding"
 
+    //  go thru dist2Wall and add every neighbor of "0"s (only if their dist2Wall is -3 and therefore "inside")
+    Trial* smallest = nullptr;
+    Trial* biggest = nullptr;
+    directNeighbor dNeigh;
+    long int aux;
+
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        if (dist2Wall[i] == 0) {
+            dNeigh = grid->getNeighbors(i);
+            //check for valid neigh
+            aux = dNeigh.key[0];
+            if ((aux != -2) && (flag[aux] == 0)) {
+                flag[aux] = 4;      //4 = added to trial but not calculated
+                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
+                trialfield[aux].insert(smallest, biggest, trialfield + aux);
+            }
+            aux = dNeigh.key[1];
+            if ((aux != -2) && (flag[aux] == 0)) {
+                flag[aux] = 4;      //4 = added to trial but not calculated
+                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
+                trialfield[aux].insert(smallest, biggest, trialfield + aux);
+            }
+            aux = dNeigh.key[2];
+            if ((aux != -2) && (flag[aux] == 0)) {
+                flag[aux] = 4;      //4 = added to trial but not calculated
+                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
+                trialfield[aux].insert(smallest, biggest, trialfield + aux);
+            }
+            aux = dNeigh.key[3];
+            if ((aux != -2) && (flag[aux] == 0)) {
+                flag[aux] = 4;      //4 = added to trial but not calculated
+                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
+                trialfield[aux].insert(smallest, biggest, trialfield + aux);
+            }
+        }
+    }
+
+    #ifdef TESTING
+    std::cout << "smallest: " << smallest[0].cost[0] << std::endl;
+    std::cout << "biggest: " << biggest[0].cost[0] << std::endl;
+    int cnt = 0;
+    Trial* iter = smallest;
+    while (iter != nullptr) {
+        ++cnt;
+        std::cout << iter[0].cost[0] << std::endl;
+        iter = iter->child;
+    }
+    std::cout << "Counter: " << cnt << std::endl;
+    #endif // TESTING
+
+    //inital narrowband done, now loop (while not empty: remove smallest, add neighbors of removed)
+    //frage: wo plaziere ich das "update nachbarschaft"? beim adden eines elements? lieber nicht beim calc, da sonst eine rekursion startet
+    //bei verbesserung von single to doublesided update ... soll hier auch die nachbarschaft aktualisiert werden?
 
 }

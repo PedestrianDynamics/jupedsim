@@ -36,6 +36,7 @@
 #include "../geometry/Point.h"
 #include "../geometry/Building.h"
 #include "../geometry/SubRoom.h" //check: should Room.h include SubRoom.h??
+#include "../routing/mesh/Trial.h"
 
 //maybe put following in macros.h
 #define LOWSPEED 0.001
@@ -51,17 +52,18 @@ class FloorfieldViaFM
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
         void resetGoalAndCosts(const Goal* const goalArg);
-        void lineScan(const std::vector<Wall*>& wallArg, double* const target, const double outside, const double inside);
+        void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
         void calculateDistanceField(const double threshold);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
+        Trial* getTrial() {return trialfield;}
 #endif //TESTING
 
     protected:
     private:
         RectGrid* grid;
-        std::vector<Wall*> wall;
+        std::vector<Wall> wall;
 
 
         //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
@@ -73,8 +75,9 @@ class FloorfieldViaFM
         double* dist2Wall;
         double* speedInitial;
         double* cost;
-        unsigned long int* secKey;  //secondary key to address ... not used yet
+        long int* secKey;  //secondary key to address ... not used yet
         Point* grad; //gradients
+        Trial* trialfield;
 
 };
 

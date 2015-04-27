@@ -21,7 +21,11 @@
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- * Implementation of classes for ...
+ * Implementation of classes for a double linked list with smallest at start
+ * and biggest element at the end (biggest) and father < child relation.
+ * As updates can break relations, the function lift assures smallest elem at
+ * top of linked list (smallest). A true sort could be extended - keep this for
+ * later.
  *
  *
  **/
@@ -33,7 +37,7 @@
 class Trial // father := smaller; child := bigger (in terms of cost); cost/speed := ptr to its cost/speed
 {
     public:
-        unsigned long int key;
+        long int key;
         int* flag;
         Trial* child;
         Trial* father;
@@ -49,7 +53,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
             speed = nullptr;
         }
 
-        Trial(unsigned long int keyArg, Trial* fatherArg, Trial* childArg, double* t, double* f, int* flagArg) {
+        Trial(long int keyArg, Trial* fatherArg, Trial* childArg, double* t, double* f, int* flagArg) {
             key = keyArg;
             father = fatherArg;
             child = childArg;
@@ -63,7 +67,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
         // insertion (in order)
         void insert(Trial* &smallest, Trial* &biggest, Trial* add) {
             if(smallest != nullptr) {
-                //unsigned long int key_curr = smallest->key;
+                //long int key_curr = smallest->key;
                 if (smallest->cost[0] > add->cost[0]) {
                     add->child = smallest;
                     add->father = smallest->father;
@@ -73,7 +77,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
                     insert(smallest->child, biggest, add);
                 }
             } else { //wenn add der groesste wert ist, wird er durchgereich und muss korr am ende eingebunden werden.
-                smallest = add; //wird anstelle des nullptr eingefuegt (smallest ist nicht der global smallest sondern das rekursionsargument)
+                smallest = add; //wird anstelle des nullptr eingefuegt (smallest ist nicht immer der global smallest sondern auch das rekursionsargument)
                 if (biggest == nullptr) { //indicator, dass keine liste existierte, also setze smallest und biggest auf add
                     add->father = nullptr;
                 } else {                  //es gab eine liste und das vorher letzte (biggest) wird nun vorletzter
@@ -85,7 +89,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
             }
         }
 
-//        void sort(Trial* &smallest, Trial* &biggest) { //only asserts that biggest is at end
+//        void sink(Trial* &smallest, Trial* &biggest) { //only asserts that biggest is at end
 //            if (smallest != nullptr) {
 //                Trial* aux;
 //                aux = smallest->child;
@@ -104,7 +108,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
 //                        smallest->father = aux;
 //                        aux->child = smallest;
 //                    }
-//                    sort(aux, biggest);
+//                    sink(aux, biggest);
 //                }
 //            }
 //        }
@@ -133,7 +137,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
             }
         }
 
-        void remove(Trial* &smallest, Trial* &biggest, Trial* curr) {
+        void removecurr(Trial* &smallest, Trial* &biggest, Trial* curr) {
             if (smallest == curr && biggest == curr) {
                 smallest = nullptr;
                 biggest = nullptr;
@@ -151,6 +155,8 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
                     }
                 }
             }
+            curr->father = nullptr;
+            curr->child = nullptr;
         }
 
 
