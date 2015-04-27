@@ -134,7 +134,7 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
   endif(CMAKE_COMPILER_IS_GNUCXX)
-  file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+  file(GLOB test_files "${CMAKE_TEST_DIR}/test_geometry/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
 endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
