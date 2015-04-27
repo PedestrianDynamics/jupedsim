@@ -211,7 +211,7 @@ bool Obstacle::Contains(const Point& ped) const
 
 bool Obstacle::ConvertLineToPoly()
 {
-     if(_isClosed==0.0)
+     if(_isClosed==0)
      {
           char tmp[CLENGTH];
           sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
