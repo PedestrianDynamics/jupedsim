@@ -488,6 +488,5 @@ int main()
      ntests++;
 
      fclose(f);
-     //returns
      return (res==ntests)?EXIT_SUCCESS:EXIT_FAILURE;
 }
