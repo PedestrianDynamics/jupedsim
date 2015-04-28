@@ -55,6 +55,8 @@ class FloorfieldViaFM
         void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
         void calculateDistanceField(const double threshold);
 
+        void update(const long int key, double* target, double* speedlocal);
+
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
         Trial* getTrial() {return trialfield;}
