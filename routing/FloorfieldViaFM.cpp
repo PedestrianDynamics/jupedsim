@@ -322,21 +322,27 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
         }
     }
 
-    #ifdef TESTING
-    std::cout << "smallest: " << smallest[0].cost[0] << std::endl;
-    std::cout << "biggest: " << biggest[0].cost[0] << std::endl;
-    int cnt = 0;
-    Trial* iter = smallest;
-    while (iter != nullptr) {
-        ++cnt;
-        std::cout << iter[0].cost[0] << std::endl;
-        iter = iter->child;
-    }
-    std::cout << "Counter: " << cnt << std::endl;
-    #endif // TESTING
+//    #ifdef TESTING
+//    std::cout << "smallest: " << smallest[0].cost[0] << std::endl;
+//    std::cout << "biggest: " << biggest[0].cost[0] << std::endl;
+//    int cnt = 0;
+//    Trial* iter = smallest;
+//    while (iter != nullptr) {
+//        ++cnt;
+//        std::cout << iter[0].cost[0] << std::endl;
+//        iter = iter->child;
+//    }
+//    std::cout << "Counter: " << cnt << std::endl;
+//    #endif // TESTING
 
     //inital narrowband done, now loop (while not empty: remove smallest, add neighbors of removed)
+
+
     //frage: wo plaziere ich das "update nachbarschaft"? beim adden eines elements? lieber nicht beim calc, da sonst eine rekursion startet
     //bei verbesserung von single to doublesided update ... soll hier auch die nachbarschaft aktualisiert werden?
 
-}
+} //calculateDistancField
+
+void update(const long int key, double* target, double* speedlocal) {
+
+} //update
