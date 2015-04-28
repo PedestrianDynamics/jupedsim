@@ -56,34 +56,31 @@ int main(int argc, char **argv)
 
      if(status&&sim.InitArgs(*args))
      {
-          //Start the threads for managing the sources of agents
-          std::thread t1(sim.GetAgentSrcManager());
-
+          //evacuation time
+          int evacTime = 0;
           //Start the thread for managing incoming messages from MatSim
-          std::thread t2;
           auto hybrid=args->GetHybridSimManager();
-          if(hybrid){
-               hybrid->AttachSourceManager(sim.GetAgentSrcManager());
-               t2 = std::thread(*hybrid);
-          }
-          //t1.detach();
-          //t2.detach();
-
-          //main thread for the simulation
-          Log->Write("INFO: \tStart runSimulation()");
-          int evacTime = sim.RunSimulation();
-          Log->Write("\nINFO: \tEnd runSimulation()");
-          time(&endtime);
-
-          //the execution is finished at this time
-          //so join the other threads
-          t1.join();
-
-          //only if in hybrid mode
+          //process the hybrid simulation
           if(hybrid)
           {
-               hybrid->Shutdown();
-               t2.join();
+               evacTime=hybrid->Run(sim);
+          }
+          //process the normal simulation
+          else
+          {
+               //Start the threads for managing the sources of agents if any
+               std::thread t1(sim.GetAgentSrcManager());
+
+               //main thread for the simulation
+               Log->Write("INFO: \tStart runSimulation()");
+               evacTime = sim.RunSimulation(args->GetTmax());
+               Log->Write("\nINFO: \tEnd runSimulation()");
+               time(&endtime);
+
+               //the execution is finished at this time
+               //so join the main thread
+               t1.join();
+
           }
 
           // some statistics output

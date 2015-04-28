@@ -55,7 +55,7 @@ HybridSimulationManager::HybridSimulationManager(const std::string& server,
      GOOGLE_PROTOBUF_VERIFY_VERSION;
      grpc_init();
 
-     _rpcClient = std::shared_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
+     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
                grpc::InsecureCredentials(), ChannelArguments())));
 
 
@@ -84,12 +84,12 @@ bool HybridSimulationManager::Init(Building* building)
      return true;
 }
 
-bool HybridSimulationManager::Run()
+bool HybridSimulationManager::Run(Simulation& sim)
 {
      //perform some initialisation stuff
      GOOGLE_PROTOBUF_VERIFY_VERSION;
      grpc_init();
-     _rpcClient = std::shared_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
+     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
                          grpc::InsecureCredentials(), ChannelArguments())));
 
      //create a socket and use it for the serveur and the client
@@ -105,7 +105,7 @@ bool HybridSimulationManager::Run()
 }
 void HybridSimulationManager::operator()()
 {
-     Run();
+     //Run();
 }
 bool HybridSimulationManager::RunClient()
 {

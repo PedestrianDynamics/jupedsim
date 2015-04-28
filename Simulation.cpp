@@ -51,7 +51,6 @@ OutputHandler* Log;
 Simulation::Simulation(const ArgumentParser& args)
 {
      _nPeds = 0;
-     _tmax = 0;
      _seed = 8091983;
      _deltaT = 0;
      _building = nullptr;
@@ -202,8 +201,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
 
      sprintf(tmp, "\tnCPU: %d\n", args.GetMaxOpenMPThreads());
      s.append(tmp);
-     _tmax = args.GetTmax();
-     sprintf(tmp, "\tt_max: %f\n", _tmax);
+     sprintf(tmp, "\tt_max: %f\n", args.GetTmax());
      s.append(tmp);
      _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
@@ -231,7 +229,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      if(nullptr!=(_hybridSimManager=args.GetHybridSimManager()))
      {
           _hybridSimManager->Init(_building.get());
-     };
+     }
 
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
@@ -275,7 +273,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      return true;
 }
 
-int Simulation::RunSimulation()
+int Simulation::RunSimulation(double maxSimTime)
 {
      int frameNr = 1; // Frame Number
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
@@ -297,7 +295,7 @@ int Simulation::RunSimulation()
      //time(&starttime);
 
      // main program loop
-     while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < _tmax)
+     while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
           t = 0 + (frameNr - 1) * _deltaT;
 

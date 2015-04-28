@@ -64,7 +64,7 @@ private:
      ///Number of pedestrians in the simulation
     long _nPeds;
     ///Maximum simulation time
-    double _tmax;
+    //double _tmax;
     /// time step
     double _deltaT;
     /// frame rate for the trajectories
@@ -113,9 +113,10 @@ public:
     bool InitArgs(const ArgumentParser& args);
 
     /**
+     * @param simtime, the maximal simulation time
      * @return the total simulated/evacuation time
      */
-    int RunSimulation();
+    int RunSimulation(double maxSimTime);
 
     /**
      * Updathe route of the pedestrians and reassign rooms, in the case a room change happens

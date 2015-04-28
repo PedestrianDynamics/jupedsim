@@ -18,6 +18,7 @@
 class Building;
 class AgentsSourcesManager;
 class JPSclient;
+class Simulation;
 
 class HybridSimulationManager
 {
@@ -26,7 +27,7 @@ public:
      virtual ~HybridSimulationManager();
 
      bool Init(Building* building);
-     bool Run();
+     bool Run(Simulation& sim);
      bool RunClient();
      bool RunServer();
      void Shutdown();
@@ -58,7 +59,7 @@ private:
      //std::unique_ptr<grpc::Server> _rpcServer;
      std::shared_ptr<grpc::Server> _rpcServer;
      AgentsSourcesManager _agentSrcMng;
-     std::shared_ptr<JPSclient> _rpcClient;
+     std::unique_ptr<JPSclient> _rpcClient;
 };
 
 #endif /* HYBRIDSIMULATIONMANAGER_H_ */
