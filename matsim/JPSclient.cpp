@@ -50,7 +50,7 @@ void JPSclient::ProcessAgentQueue(Building* building)
           {
                SendAgentToMatsim(ped);
           }
-          std::cout<<"deleting from the client:"<<std::endl;
+          //std::cout<<"deleting from the client:"<<std::endl;
           building->DeletePedestrian(ped);
      }
 }

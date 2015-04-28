@@ -76,7 +76,7 @@ bool AgentsSourcesManager::ProcessAllSources()
                }
                AgentsQueue::Add(peds);
                empty = false;
-               cout << "Agents generated: " << peds.size() << endl;
+               //cout << "Agents generated: " << peds.size() << endl;
           }
           //src->Dump();//exit(0);
      }

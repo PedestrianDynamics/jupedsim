@@ -50,14 +50,14 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
      string agent_id=request->agent().id();
      string leave_node=request->agent().nodes(0);//just the first node
      string enter_node=request->agent().enternode();
-     std::cout << "I am taking the agent: " << agent_id<< " going to "<<leave_node<<std::endl;
+     Log->Write("INFO:\tRPC::JPSserver I am taking agent %s going to node %s ",agent_id.c_str(),leave_node.c_str());
 
      auto srcs=_agentSrcMng.GetSources();
-     cout<<"There are: "<<srcs.size()<<" options"<<endl;
+     //cout<<"There are: "<<srcs.size()<<" options"<<endl;
 
      for(auto&& src:srcs)
      {
-          cout<<"size: "<<src->GetPoolSize()<<endl;
+          //cout<<"size: "<<src->GetPoolSize()<<endl;
           if(src->GetId()==std::stoi(enter_node))
           {
                std::vector<Pedestrian*> peds;
