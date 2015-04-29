@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(POINT_DET_TEST)
         p2.SetX( cos(PI / -i) );
         p2.SetY( sin(PI / i) );
         BOOST_CHECK(p1.Determinant(p2) == 10 * sin(PI/i) - 5 * cos(PI/i));
-        //BOOST_CHECK( p1.Det(p2) == p1.CrossProcuct(p2));
+        //BOOST_CHECK( p1.Det(p2) == p1.CrossProduct(p2));
     }
     BOOST_MESSAGE("Leaving determinant test");
 }

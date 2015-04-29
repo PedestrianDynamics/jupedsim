@@ -603,8 +603,8 @@ double Line::GetDeviationAngle(const Line & l) const
      
      double angle, angleL, angleR;
      // we don't need to calculate both angles, but for debugging purposes we do it.
-     angleL = atan((Goal - P).CrossProcuct(L - P)/ (Goal - P).ScalarProduct(L - P));
-     angleR = atan((Goal - P).CrossProcuct(R - P)/ (Goal - P).ScalarProduct(R - P));
+     angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+     angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
 
      angle = (dist_Goal_L<dist_Goal_R)?angleL:angleR;
 #if DEBUG

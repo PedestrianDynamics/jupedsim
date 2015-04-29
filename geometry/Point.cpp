@@ -118,7 +118,7 @@ double Point::ScalarProduct(const Point &v) const
 
 // since we have only 2D vectors (may be changed in the future), this function returns a scalar
 // (basically the third component of the vector (0,0,z) )
-double Point::CrossProcuct(const Point &p) const
+double Point::CrossProduct(const Point &p) const
 {
      return _x*p._y - _y*p._x;
 }
