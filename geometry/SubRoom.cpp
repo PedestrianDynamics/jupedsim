@@ -559,7 +559,7 @@ bool SubRoom::IsConvex()
      for(unsigned int i=0; i<hsize; i++) {
           Point vecAB= _poly[(i+1)%hsize]-_poly[i%hsize];
           Point vecBC= _poly[(i+2)%hsize]-_poly[(i+1)%hsize];
-          double det= vecAB.Det(vecBC);
+          double det= vecAB.Determinant(vecBC);
           if(fabs(det)<J_EPS) det=0.0;
 
           if(det<0.0) {
@@ -591,7 +591,7 @@ bool SubRoom::IsClockwise()
      Point vecAB= _poly[1]-_poly[0];
      Point vecBC= _poly[2]-_poly[1];
 
-     double det=vecAB.Det(vecBC);
+     double det= vecAB.Determinant(vecBC);
      if(fabs(det)<J_EPS) det=0.0;
 
      return ( det<=0.0 );
@@ -916,7 +916,7 @@ const Point* Stair::CheckCorner(const Point** otherPoint, const Point** aktPoint
      Point l2 = *nextPoint - **aktPoint;
      const Point* rueck = NULL;
      // Punkte bilden eine Linie
-     if (fabs(fabs(l1.ScalarP(l2) / (l1.Norm() * l2.Norm())) - 1) < 0.1) {
+     if (fabs(fabs(l1.ScalarProduct(l2) / (l1.Norm() * l2.Norm())) - 1) < 0.1) {
           *aktPoint = nextPoint;
      } else { // aktPoint/p2 ist eine Ecke
           rueck = *aktPoint;

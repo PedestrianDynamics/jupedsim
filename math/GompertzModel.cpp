@@ -156,7 +156,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // }
 
 
-                double normVi = ped->GetV().ScalarP(ped->GetV()); //squared
+                double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
                 if (normVi > HighVel && ped->GetV0Norm() > 0) {
                      fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
@@ -333,9 +333,9 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      Point AP1inE1 = E1.GetCenter();
      Point AP2inE2 = E2.GetCenter();
      // ActionPoint von E1 in Koordinaten von E2 (transformieren)
-     Point AP1inE2 = AP1inE1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+     Point AP1inE2 = AP1inE1.TransformToEllipseCoordinates(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
      // ActionPoint von E2 in Koordinaten von E1 (transformieren)
-     Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
+     Point AP2inE1 = AP2inE2.TransformToEllipseCoordinates(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
      double r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
      double r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
      //fprintf(stderr, "%f %f %f %f\n",  E1.GetEA(), E1.GetEB(), E2.GetEA(), E2.GetEB());
@@ -358,7 +358,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           exit(EXIT_FAILURE);
      }
 //------------------------- check if others are behind using v0 instead of v
-     double tmpv = ped1->GetV().ScalarP(ep12); // < v^0_i , e_ij >
+     double tmpv = ped1->GetV().ScalarProduct(ep12); // < v^0_i , e_ij >
      double ped2IsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
      if (ped2IsBehindv < J_EPS) {
           return F_rep; // ignore ped2
@@ -456,8 +456,8 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      }
      e_iw = dist / Distance;
 //------------------------- check if others are behind using v0 instead of v
-     // tmp = ped->GetV0().ScalarP(e_iw); // < v^0_i , e_iw >
-     double tmpv = v.ScalarP(e_iw);
+     // tmp = ped->GetV0().ScalarProduct(e_iw); // < v^0_i , e_iw >
+     double tmpv = v.ScalarProduct(e_iw);
      //double wallIsBehind = exp(-exp(-5*tmp)); //step function: continuous version
      // double wallIsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
      double wallIsBehindv = (tmpv<=0)?0:1;
@@ -476,7 +476,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      }
 //------------------------------------------------------------------------
      // pt in coordinate system of Ellipse
-     pinE = pt.CoordTransToEllipse(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
+     pinE = pt.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
      // Punkt auf der Ellipse
      r = E.PointOnEllipse(pinE);
      Radius  = (r - E.GetCenter()).Norm();

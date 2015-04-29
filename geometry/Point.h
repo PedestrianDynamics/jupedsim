@@ -76,14 +76,14 @@ public:
      /// normalized vector usinf NormMolified
      Point NormalizedMolified() const;
      /// dot product
-     double ScalarP(const Point& v) const;
-     double CrossP(const Point& p) const;
+     double ScalarProduct(const Point &v) const;
+     double CrossProcuct(const Point &p) const;
      /// determinant of the square matrix formed by the vectors [ this, v]
-     double Det(const Point& v) const;
+     double Determinant(const Point &v) const;
      /// translation and rotation in Ellipse coordinate system
-     Point CoordTransToEllipse(const Point& center, double cphi, double sphi) const;
+     Point TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const;
      /// translation and rotation in cartesian system
-     Point CoordTransToCart(const Point& center, double cphi, double sphi) const;
+     Point TransformToCartesianCoordinates(const Point &center, double cphi, double sphi) const;
      /// rotate the vector by theta
      Point Rotate(double ctheta, double stheta) const;
 

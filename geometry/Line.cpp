@@ -194,7 +194,7 @@ Point Line::LotPoint(const Point& p) const
      double lambda;
 
      tmp = p - s;
-     lambda = tmp.ScalarP(t) / t.ScalarP(t);
+     lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
      Point f = s + t*lambda;
      return f;
 }
@@ -210,7 +210,7 @@ Point Line::ShortestPoint(const Point& p) const
      if(_point1 == _point2)
           return _point1;
      Point tmp = p - _point2;
-     double lambda = tmp.ScalarP(t) / t.ScalarP(t);
+     double lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
      Point f = _point2 + t*lambda;
 
      /* Prüfen ob Punkt in der Linie,sonst entsprechenden Eckpunkt zurückgeben */
@@ -603,8 +603,8 @@ double Line::GetDeviationAngle(const Line & l) const
      
      double angle, angleL, angleR;
      // we don't need to calculate both angles, but for debugging purposes we do it.
-     angleL = atan((Goal-P).CrossP(L-P)/(Goal-P).ScalarP(L-P));
-     angleR = atan((Goal-P).CrossP(R-P)/(Goal-P).ScalarP(R-P));
+     angleL = atan((Goal - P).CrossProcuct(L - P)/ (Goal - P).ScalarProduct(L - P));
+     angleR = atan((Goal - P).CrossProcuct(R - P)/ (Goal - P).ScalarProduct(R - P));
 
      angle = (dist_Goal_L<dist_Goal_R)?angleL:angleR;
 #if DEBUG

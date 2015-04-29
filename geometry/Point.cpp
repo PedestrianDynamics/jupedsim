@@ -40,16 +40,12 @@
 /************************************************************
   Konstruktoren
  ************************************************************/
-Point::Point()
+Point::Point() : _x(0), _y(0)
 {
-     _x = 0.0;
-     _y = 0.0;
 }
 
-Point::Point(double x, double y)
+Point::Point(double x, double y) : _x(x), _y(y)
 {
-     _x = x;
-     _y = y;
 }
 
 Point::Point(const Point& orig)
@@ -87,13 +83,13 @@ double Point::GetY() const
 
 double Point::Norm() const
 {
-     return sqrt(_x * _x + _y * _y);
+     return sqrt(NormSquare());
 }
 
 double Point::NormMolified() const
 {
      double const eps_sq = 0.1;
-     return sqrt(_x * _x + _y * _y + eps_sq);
+     return sqrt(NormSquare() + eps_sq);
 }
 
 double Point::NormSquare() const
@@ -119,7 +115,7 @@ Point Point::Normalized() const
 }
 
 // scalar product
-double Point::ScalarP(const Point& v) const
+double Point::ScalarProduct(const Point &v) const
 {
      //return _x * v.GetX() + _y * v.GetY();
      return _x * v._x + _y * v._y;
@@ -127,7 +123,7 @@ double Point::ScalarP(const Point& v) const
 
 // since we have only 2D vectors (may be changed in the future), this function returns a scalar
 // (basically the third component of the vector (0,0,z) )
-double Point::CrossP(const Point& p) const
+double Point::CrossProcuct(const Point &p) const
 {
      return _x*p.GetY() - _y*p.GetX();
 }
@@ -135,7 +131,7 @@ double Point::CrossP(const Point& p) const
 
 
 /// determinant of the square matrix formed by the vectors [ this, v]
-double Point::Det(const Point& v) const
+double Point::Determinant(const Point &v) const
 {
      return _x * v._y - _y * v._x;
 }
@@ -199,14 +195,14 @@ OC  = -O1O +O1C
 xnew = -xc + x
 
 */
-Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) const
+Point Point::TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const
 {
      Point p = Point(_x, _y);
      return (p - center).Rotate(cphi, -sphi);
 }
 
 /*
-This is the reverse funktion of CoordTransToEllipse(),
+This is the reverse funktion of TransformToEllipseCoordinates(),
 where the coord. of a point are transformated to cart. coord.
 
  input:
@@ -224,7 +220,7 @@ where the coord. of a point are transformated to cart. coord.
 
 */
 
-Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const
+Point Point::TransformToCartesianCoordinates(const Point &center, double cphi, double sphi) const
 {
      Point p = Point(_x, _y);
      return (p.Rotate(cphi, sphi) + center);
