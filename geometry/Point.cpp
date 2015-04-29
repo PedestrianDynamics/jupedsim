@@ -50,8 +50,8 @@ Point::Point(double x, double y) : _x(x), _y(y)
 
 Point::Point(const Point& orig)
 {
-     _x = orig.GetX();
-     _y = orig.GetY();
+     _x = orig._x;
+     _y = orig._y;
 }
 
 std::string Point::toString() const
@@ -120,7 +120,7 @@ double Point::ScalarProduct(const Point &v) const
 // (basically the third component of the vector (0,0,z) )
 double Point::CrossProcuct(const Point &p) const
 {
-     return _x*p.GetY() - _y*p.GetX();
+     return _x*p._y - _y*p._x;
 }
 
 
