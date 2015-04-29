@@ -92,11 +92,6 @@ double Point::NormMolified() const
      return sqrt(NormSquare() + eps_sq);
 }
 
-double Point::NormSquare() const
-{
-     return (_x * _x + _y * _y);
-}
-
 Point Point::NormalizedMolified() const
 {
      double norm = NormMolified();

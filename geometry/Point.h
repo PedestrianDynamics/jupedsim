@@ -70,7 +70,10 @@ public:
      double NormMolified() const;
 
      /// Norm square
-     double NormSquare() const;
+     inline double NormSquare() const
+     {
+          return (_x * _x + _y * _y);
+     }
      /// normalized vector
      Point Normalized() const;
      /// normalized vector usinf NormMolified
