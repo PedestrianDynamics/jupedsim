@@ -40,7 +40,7 @@ class Line;
 class Obstacle {
 
 private:
-     double _isClosed;
+     int _isClosed;
      double _height;
      int _id;
      std::string _caption;
@@ -64,12 +64,12 @@ public:
      /**
       * Set/Get the close state of the obstacle
       */
-     double GetClosed() const;
+     int GetClosed() const;
 
      /**
       * Set/Get the close state of the obstacle
       */
-     void SetClosed(double closed);
+     void SetClosed(int closed);
 
      /**
       * Set/Get the height of the obstacle.

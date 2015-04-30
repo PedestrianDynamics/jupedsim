@@ -134,7 +134,7 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
   endif(CMAKE_COMPILER_IS_GNUCXX)
-  file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+  file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
 endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
@@ -216,7 +216,7 @@ set (   source_files
   routing/cognitive_map/fire_mesh/FireMesh.cpp
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
-  routing/cognitive_map/map_knowlegde/routeknowlegde.cpp
+
 
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
@@ -259,7 +259,7 @@ set (   header_files
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
-routing/cognitive_map/map_knowlegde/routeknowlegde.h
+
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h

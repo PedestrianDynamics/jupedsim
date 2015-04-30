@@ -16,6 +16,7 @@ using fireMeshContainer = std::unordered_map<std::string, FireMesh>;
 class FireMeshStorage
 {
 public:
+    FireMeshStorage();
     FireMeshStorage(const Building * const b, const std::string &filepath, const double &updateintervall, const double &finalTime);
     ~FireMeshStorage();
     void CreateTimeList(const double &updateIntervall, const double &finalTime, const double &startTime=0);

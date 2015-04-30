@@ -1,7 +1,35 @@
+/**
+ * \file        testClassLine.cpp
+ * \date        April 18, 2015
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ *
+ *
+ **/
+
+
 #define BOOST_TEST_MODULE PointTest
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include "../geometry/Point.h"
+#include "../../geometry/Point.h"
 #include <cmath>
 
 BOOST_AUTO_TEST_SUITE(PointTest)
@@ -132,8 +160,8 @@ BOOST_AUTO_TEST_CASE(POINT_DET_TEST)
     {
         p2.SetX( cos(PI / -i) );
         p2.SetY( sin(PI / i) );
-        BOOST_CHECK( p1.Det(p2) == 10 * sin(PI/i) - 5 * cos(PI/i));
-        //BOOST_CHECK( p1.Det(p2) == p1.CrossP(p2));
+        BOOST_CHECK(p1.Determinant(p2) == 10 * sin(PI/i) - 5 * cos(PI/i));
+        //BOOST_CHECK( p1.Det(p2) == p1.CrossProduct(p2));
     }
     BOOST_MESSAGE("Leaving determinant test");
 }
@@ -148,7 +176,7 @@ BOOST_AUTO_TEST_CASE(POINT_SCALARPRODUCT_TEST)
     {
         p2.SetX( cos(PI /  i) );
         p2.SetY( sin(PI / -i) );
-        BOOST_CHECK( p1.ScalarP(p2) == 10 * p2.GetX() + 5 * p2.GetY() );
+        BOOST_CHECK(p1.ScalarProduct(p2) == 10 * p2.GetX() + 5 * p2.GetY() );
     }
     BOOST_MESSAGE("Leaving scalar product test");
 }
@@ -199,7 +227,7 @@ BOOST_AUTO_TEST_CASE(POINT_COORDTRANS_TO_ELLIPSE_TEST)
         Point p1(i*10, i/10);
         Point center(i, -i);
         Point check = (p1 - center).Rotate( cos(PI/i), -sin(PI/i) );
-        Point transform = p1.CoordTransToEllipse( center, cos(PI/i), sin(PI/i) );
+        Point transform = p1.TransformToEllipseCoordinates(center, cos(PI / i), sin(PI / i));
         BOOST_CHECK( transform == check );
     }
     BOOST_MESSAGE("Leaving coord transform to ellipse");
@@ -213,7 +241,7 @@ BOOST_AUTO_TEST_CASE(POINT_COORDTRANS_TO_CART_TEST)
     {
         Point p1(i*10, i/10);
         Point center(-i, i);
-        Point transform = p1.CoordTransToCart( center, cos(PI/i), sin(PI/i) );
+        Point transform = p1.TransformToCartesianCoordinates(center, cos(PI / i), sin(PI / i));
         Point check = p1.Rotate( cos(PI/i), sin(PI/i) );
         BOOST_REQUIRE( transform.GetX() == check.GetX() - i &&
                        transform.GetY() == check.GetY() + i );
