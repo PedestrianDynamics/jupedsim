@@ -57,7 +57,7 @@ private:
      int _externalServerPort=9999;
      int _internalServerPort=9998;
      std::string _externalServerName="localhost";
-     std::string _internalServerName="0.0.0.0";
+     std::string _internalServerName="localhost";
      Building* _building=nullptr;
      //TODO: the method should be passed bz reference in the main function
      //std::unique_ptr<grpc::Server> _rpcServer;

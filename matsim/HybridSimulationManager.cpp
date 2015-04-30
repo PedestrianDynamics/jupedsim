@@ -54,9 +54,9 @@ HybridSimulationManager::HybridSimulationManager(const std::string& server,
      _externalServerPort = port;
 
      //get the canonical hostname
-     char hostname[1024];
-     gethostname(hostname, 1024);
-     _internalServerName=std::string(hostname);
+     //char hostname[1024];
+     //gethostname(hostname, 1024);
+     //_internalServerName=std::string(hostname);
 
      //GOOGLE_PROTOBUF_VERIFY_VERSION;
      //grpc_init();
