@@ -1,30 +1,30 @@
 syntax = "proto2";
-option java_generic_services = true;
+//option java_generic_services = true;
 //option cc_generic_services = true;
 option java_outer_classname="ProtoMATSimInterface";
-option java_package = "playground.gregor.proto";
+option java_package = "org.matsim.hybrid";
 
-package hybrid;
+package org.matsim.hybrid;
 //for compilation
 // protoc  --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` MATSimInterface.proto
-// protoc  --cpp_out="./"  MATSimInterface.proto
+// protoc  --cpp_out=.  MATSimInterface.proto
 // protoc -I ../../protos/ --cpp_out=. ../../protos/helloworld.proto
 
 message MATSim2ExternPutAgent {
 	message Agent {
-		required string id = 1;
-		required string enterNode = 2;
+		optional string id = 1;
+		optional string enterNode = 2;
 		repeated string nodes = 3;
 	}
 
-	required Agent agent = 1;
+	optional Agent agent = 1;
 }
 
 message MATSim2ExternHasSpace {
-	required string nodeId = 1;
+	optional string nodeId = 1;
 }
 message MATSim2ExternHasSpaceConfirmed {
-	required bool hasSpace = 1;
+	optional bool hasSpace = 1;
 }
 
 message MATSim2ExternPutAgentConfirmed {
@@ -32,38 +32,29 @@ message MATSim2ExternPutAgentConfirmed {
 
 message Extern2MATSim {
 	message Agent {
-		required string id = 1;
-		required string leaveNode = 2;
+		optional string id = 1;
+		optional string leaveNode = 2;
 	}
 
-	required Agent agent = 15;
-
+	optional Agent agent = 1;
 }
 
 message Extern2MATSimConfirmed {
-	required bool accepted = 1;
+	optional bool accepted = 1;
 }
 
 message ExternSimStepFinished {
-	required double time = 1;
+	optional double time = 1;
 }
 message ExternSimStepFinishedReceived {
 }
 
 message ExternDoSimStep {
-	required double fromTime = 1;
-	required double toTime = 2;
+	optional double fromTime = 1;
+	optional double toTime = 2;
 }
 
 message ExternDoSimStepReceived {
-
-}
-
-message ExternalConnect {
-
-}
-
-message ExternalConnectConfirmed {
 
 }
 
@@ -81,6 +72,7 @@ message ExternAfterSim {
 message ExternAfterSimConfirmed {
 
 }
+
 message AgentsStuck {
 	repeated string agentId = 1;
 }
@@ -89,20 +81,24 @@ message AgentsStuckConfirmed{
 
 }
 
-
 service MATSimInterfaceService {
+     // Sending Agents to MATsim
 	rpc reqExtern2MATSim(Extern2MATSim) returns (Extern2MATSimConfirmed);
 	rpc reqAgentStuck(AgentsStuck) returns (AgentsStuckConfirmed);
-	rpc reqExternalConnect(ExternalConnect) returns (ExternalConnectConfirmed);
+	// Notifying Matsim about the end of the simulation
 	rpc reqExternSimStepFinished(ExternSimStepFinished) returns (ExternSimStepFinishedReceived);
 }
 
 service ExternInterfaceService {
+     // Checking if there is space on JuPedSim
 	rpc reqMATSim2ExternHasSpace(MATSim2ExternHasSpace) returns (MATSim2ExternHasSpaceConfirmed);
+	// Incoming Agent from MATsim
 	rpc reqMATSim2ExternPutAgent(MATSim2ExternPutAgent) returns (MATSim2ExternPutAgentConfirmed);
+	// Order to perform a simulation step
 	rpc reqExternDoSimStep(ExternDoSimStep) returns (ExternDoSimStepReceived);
+	// Tells JuPedSim to get ready for a simulation
 	rpc reqExternOnPrepareSim(ExternOnPrepareSim) returns (ExternOnPrepareSimConfirmed);
+	// Tells JuPedSim to shutdown
 	rpc reqExternAfterSim(ExternAfterSim) returns (ExternAfterSimConfirmed);
-
 }
 

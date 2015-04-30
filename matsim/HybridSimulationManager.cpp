@@ -11,6 +11,7 @@
 #include "../geometry/Building.h"
 #include "../pedestrian/AgentsQueue.h"
 #include "../pedestrian/AgentsSourcesManager.h"
+#include "../Simulation.h"
 #include "JPSserver.h"
 #include "JPSclient.h"
 
@@ -52,22 +53,22 @@ HybridSimulationManager::HybridSimulationManager(const std::string& server,
      _serverName = server;
      _port = port;
 
-     GOOGLE_PROTOBUF_VERIFY_VERSION;
-     grpc_init();
+     //GOOGLE_PROTOBUF_VERIFY_VERSION;
+     //grpc_init();
 
-     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
-               grpc::InsecureCredentials(), ChannelArguments())));
+     //_rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
+     //          grpc::InsecureCredentials(), ChannelArguments())));
 
 
-//     std::string server_address(_serverName + ":" + std::to_string(_port));
-//     JPSserver service(_agentSrcMng);
-//
-//     ServerBuilder builder;
-//     builder.AddListeningPort(server_address,
-//               grpc::InsecureServerCredentials());
-//     builder.RegisterService(&service);
-//     _rpcServer= builder.BuildAndStart();
-//     Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
+     //     std::string server_address(_serverName + ":" + std::to_string(_port));
+     //     JPSserver service(_agentSrcMng);
+     //
+     //     ServerBuilder builder;
+     //     builder.AddListeningPort(server_address,
+     //               grpc::InsecureServerCredentials());
+     //     builder.RegisterService(&service);
+     //     _rpcServer= builder.BuildAndStart();
+     //     Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
 
 
 }
@@ -88,28 +89,114 @@ bool HybridSimulationManager::Run(Simulation& sim)
 {
      //perform some initialisation stuff
      GOOGLE_PROTOBUF_VERIFY_VERSION;
-     grpc_init();
-     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
-                         grpc::InsecureCredentials(), ChannelArguments())));
 
+     grpc_init();
+
+     //string extern_service_address("zam597:9999");
+     string extern_service_address("localhost:9999");
+
+     string jupedsim_service_address("localhost:9999")/*_serverName + ":" + std::to_string(_port)*/;
+     //string jupedsim_service_address("0.0.0.0:9999")/*_serverName + ":" + std::to_string(_port)*/;
+
+
+     //create the client that will be running on its own thread
+     //_rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(extern_service_address,
+     //          grpc::InsecureCredentials(), ChannelArguments())));
+
+     //_rpcClient->NotifyExternalService();
+
+     //create the server
+     std::string server_address(_serverName + ":" + std::to_string(_port));
+
+     JPSserver jupedsimService(sim,extern_service_address);
+     //MATSIMserver jupedsimService;
+
+     ServerBuilder builder;
+     builder.AddListeningPort(jupedsim_service_address,
+               grpc::InsecureServerCredentials());
+     builder.RegisterService(&jupedsimService);
+
+     _rpcServer= builder.BuildAndStart();
+     //builder.
+     Log->Write("INFO:\tJuPedSim Server is up and running on " + jupedsim_service_address);
+
+     //_rpcServer->Wait();
+
+     //_rpcClient->NotifyExternalService();
+
+
+     //notify the external service
+
+     if(jupedsimService.NotifyExternalService())
+     {
+          cout<<"Failure"<<endl;
+          //exit(0);
+     }
+     //else
+     {
+          cout<<"Success"<<endl;
+     }
+
+
+     //starting the simulation thread and waiting
+     //std::thread t2(&JPSserver::RunSimulation, &jupedsimService);
+
+     //TestWorkflow();
+     //t2.join();
+     //_rpcServer->Wait();
      //create a socket and use it for the serveur and the client
      //std::thread t1(&HybridSimulationManager::RunClient, this);
-     std::thread t2(&HybridSimulationManager::RunServer, this);
+     //std::thread t2(&HybridSimulationManager::RunServer, this);
      //t1.join();
-     t2.join();
+     //t2.join();
 
      //clean up everything
      grpc_shutdown();
      google::protobuf::ShutdownProtobufLibrary();
      return true;
 }
+
+//bool HybridSimulationManager::Run(Simulation& sim)
+//{
+//     //perform some initialisation stuff
+//     GOOGLE_PROTOBUF_VERIFY_VERSION;
+//
+//     grpc_init();
+//
+//     //create the client that will be running on its own thread
+//     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel("localhost:9999",
+//                         grpc::InsecureCredentials(), ChannelArguments())));
+//
+//     //create the server
+//     std::string server_address(_serverName + ":" + std::to_string(_port));
+//               JPSserver service(_agentSrcMng);
+//
+//               ServerBuilder builder;
+//               builder.AddListeningPort(server_address,
+//                         grpc::InsecureServerCredentials());
+//               builder.RegisterService(&service);
+//
+//               _rpcServer= builder.BuildAndStart();
+//               Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
+//
+//               _rpcServer->Wait();
+//     //create a socket and use it for the serveur and the client
+//     //std::thread t1(&HybridSimulationManager::RunClient, this);
+//     std::thread t2(&HybridSimulationManager::RunServer, this);
+//     //t1.join();
+//     t2.join();
+//
+//     //clean up everything
+//     grpc_shutdown();
+//     google::protobuf::ShutdownProtobufLibrary();
+//     return true;
+//}
 void HybridSimulationManager::operator()()
 {
      //Run();
 }
 bool HybridSimulationManager::RunClient()
 {
-
      //check the message queue and send
      JPSclient client(
                grpc::CreateChannel("localhost:9999",
@@ -122,7 +209,7 @@ bool HybridSimulationManager::RunClient()
           client.ProcessAgentQueue(_building);
 
           //wait some time, before a new attempt
-          cout << "waiting for input:" << _shutdown << endl;
+          cout << "processing Requests for input:" << _shutdown << endl;
           //ProcessOutgoingAgent();
           std::this_thread::sleep_for(std::chrono::milliseconds(1000));
      } while (!_shutdown);
@@ -132,36 +219,34 @@ bool HybridSimulationManager::RunClient()
 
 bool HybridSimulationManager::RunServer()
 {
-     //check the message queue and send
-     //TODO: move this to the constructor
-
-     do
-     {
-          std::string server_address(_serverName + ":" + std::to_string(_port));
-          JPSserver service(_agentSrcMng);
-
-          ServerBuilder builder;
-          builder.AddListeningPort(server_address,
-                    grpc::InsecureServerCredentials());
-          builder.RegisterService(&service);
-
-          _rpcServer= builder.BuildAndStart();
-          Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
-
-          _rpcServer->Wait();
-
-          //wait for incoming connection
-          //receive and parse message
-          //process message
-          //can insert pedestrian ?
-          //accept pedestrian and feed to the queue
-
-          //wait some time, before a new attempt
-          cout << "waiting for output:" << _shutdown << endl;
-          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-     } while (!_shutdown);
-
-     return true;
+     //
+     //     do
+     //     {
+     //          std::string server_address(_serverName + ":" + std::to_string(_port));
+     //          JPSserver service(_agentSrcMng);
+     //
+     //          ServerBuilder builder;
+     //          builder.AddListeningPort(server_address,
+     //                    grpc::InsecureServerCredentials());
+     //          builder.RegisterService(&service);
+     //
+     //          _rpcServer= builder.BuildAndStart();
+     //          Log->Write("INFO:\tJuPedSim Server listening on " + server_address);
+     //
+     //          _rpcServer->Wait();
+     //
+     //          //wait for incoming connection
+     //          //receive and parse message
+     //          //process message
+     //          //can insert pedestrian ?
+     //          //accept pedestrian and feed to the queue
+     //
+     //          //wait some time, before a new attempt
+     //          cout << "waiting for output:" << _shutdown << endl;
+     //          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+     //     } while (!_shutdown);
+     //
+    return true;
 }
 
 void HybridSimulationManager::Shutdown()
@@ -176,32 +261,17 @@ void HybridSimulationManager::ProcessIncomingAgent()
 
 }
 
+void HybridSimulationManager::TestWorkflow()
+{
+     // notify the external service that I am awake
+     _rpcClient->NotifyExternalService();
+}
+
+
+//call after each simulation step
 void HybridSimulationManager::ProcessOutgoingAgent()
 {
-
      _rpcClient->ProcessAgentQueue(_building);
-/*
-     std::vector<Pedestrian*> peds;
-     AgentsQueueOut::GetandClear(peds);
-
-     for (auto && ped:peds)
-     {
-          //pick the agent from the queue
-          hybrid::Extern2MATSim msg;
-          msg.mutable_agent()->set_id(std::to_string(ped->GetID()));
-          msg.mutable_agent()->set_leavenode(std::to_string(ped->GetExitIndex()));
-
-          //write to the disk or send to hell
-          //std::fstream output("test.buf", ios::out | ios::trunc | ios::binary);
-          //if (!msg.SerializeToOstream(&output))
-          //{
-          //    cerr << "Failed to write address book." << endl;
-          //}
-          cout<<"deleting:"<<endl;
-          _building->DeletePedestrian(ped);
-     }
-
-     */
 }
 
 std::string HybridSimulationManager::ToString()

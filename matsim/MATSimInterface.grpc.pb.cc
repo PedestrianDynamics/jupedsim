@@ -11,6 +11,7 @@
 #include <grpc++/impl/rpc_service_method.h>
 #include <grpc++/impl/service_type.h>
 #include <grpc++/stream.h>
+
 namespace hybrid {
 
 static const char* MATSimInterfaceService_method_names[] = {

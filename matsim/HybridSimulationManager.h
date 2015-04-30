@@ -49,6 +49,8 @@ public:
 private:
      void ProcessIncomingAgent();
 
+     void TestWorkflow();
+
 private:
      //std::atomic<bool> _shutdown=false;
      static bool _shutdown;

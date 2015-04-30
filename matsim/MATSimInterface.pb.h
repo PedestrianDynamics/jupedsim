@@ -29,6 +29,8 @@
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
+namespace org {
+namespace matsim {
 namespace hybrid {
 
 // Internal implementation detail -- do not call these.
@@ -48,8 +50,6 @@ class ExternSimStepFinished;
 class ExternSimStepFinishedReceived;
 class ExternDoSimStep;
 class ExternDoSimStepReceived;
-class ExternalConnect;
-class ExternalConnectConfirmed;
 class ExternOnPrepareSim;
 class ExternOnPrepareSimConfirmed;
 class ExternAfterSim;
@@ -123,7 +123,7 @@ class MATSim2ExternPutAgent_Agent : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required string id = 1;
+  // optional string id = 1;
   bool has_id() const;
   void clear_id();
   static const int kIdFieldNumber = 1;
@@ -135,7 +135,7 @@ class MATSim2ExternPutAgent_Agent : public ::google::protobuf::Message {
   ::std::string* release_id();
   void set_allocated_id(::std::string* id);
 
-  // required string enterNode = 2;
+  // optional string enterNode = 2;
   bool has_enternode() const;
   void clear_enternode();
   static const int kEnterNodeFieldNumber = 2;
@@ -163,15 +163,12 @@ class MATSim2ExternPutAgent_Agent : public ::google::protobuf::Message {
   const ::google::protobuf::RepeatedPtrField< ::std::string>& nodes() const;
   ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_nodes();
 
-  // @@protoc_insertion_point(class_scope:hybrid.MATSim2ExternPutAgent.Agent)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MATSim2ExternPutAgent.Agent)
  private:
   inline void set_has_id();
   inline void clear_has_id();
   inline void set_has_enternode();
   inline void clear_has_enternode();
-
-  // helper for ByteSize()
-  int RequiredFieldsByteSizeFallback() const;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
@@ -254,16 +251,16 @@ class MATSim2ExternPutAgent : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
+  // optional .org.matsim.hybrid.MATSim2ExternPutAgent.Agent agent = 1;
   bool has_agent() const;
   void clear_agent();
   static const int kAgentFieldNumber = 1;
-  const ::hybrid::MATSim2ExternPutAgent_Agent& agent() const;
-  ::hybrid::MATSim2ExternPutAgent_Agent* mutable_agent();
-  ::hybrid::MATSim2ExternPutAgent_Agent* release_agent();
-  void set_allocated_agent(::hybrid::MATSim2ExternPutAgent_Agent* agent);
+  const ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent& agent() const;
+  ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* mutable_agent();
+  ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* release_agent();
+  void set_allocated_agent(::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* agent);
 
-  // @@protoc_insertion_point(class_scope:hybrid.MATSim2ExternPutAgent)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MATSim2ExternPutAgent)
  private:
   inline void set_has_agent();
   inline void clear_has_agent();
@@ -271,7 +268,7 @@ class MATSim2ExternPutAgent : public ::google::protobuf::Message {
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::hybrid::MATSim2ExternPutAgent_Agent* agent_;
+  ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* agent_;
   friend void  protobuf_AddDesc_MATSimInterface_2eproto();
   friend void protobuf_AssignDesc_MATSimInterface_2eproto();
   friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
@@ -345,7 +342,7 @@ class MATSim2ExternHasSpace : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required string nodeId = 1;
+  // optional string nodeId = 1;
   bool has_nodeid() const;
   void clear_nodeid();
   static const int kNodeIdFieldNumber = 1;
@@ -357,7 +354,7 @@ class MATSim2ExternHasSpace : public ::google::protobuf::Message {
   ::std::string* release_nodeid();
   void set_allocated_nodeid(::std::string* nodeid);
 
-  // @@protoc_insertion_point(class_scope:hybrid.MATSim2ExternHasSpace)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MATSim2ExternHasSpace)
  private:
   inline void set_has_nodeid();
   inline void clear_has_nodeid();
@@ -439,14 +436,14 @@ class MATSim2ExternHasSpaceConfirmed : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required bool hasSpace = 1;
+  // optional bool hasSpace = 1;
   bool has_hasspace() const;
   void clear_hasspace();
   static const int kHasSpaceFieldNumber = 1;
   bool hasspace() const;
   void set_hasspace(bool value);
 
-  // @@protoc_insertion_point(class_scope:hybrid.MATSim2ExternHasSpaceConfirmed)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MATSim2ExternHasSpaceConfirmed)
  private:
   inline void set_has_hasspace();
   inline void clear_has_hasspace();
@@ -528,7 +525,7 @@ class MATSim2ExternPutAgentConfirmed : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.MATSim2ExternPutAgentConfirmed)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MATSim2ExternPutAgentConfirmed)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -607,7 +604,7 @@ class Extern2MATSim_Agent : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required string id = 1;
+  // optional string id = 1;
   bool has_id() const;
   void clear_id();
   static const int kIdFieldNumber = 1;
@@ -619,7 +616,7 @@ class Extern2MATSim_Agent : public ::google::protobuf::Message {
   ::std::string* release_id();
   void set_allocated_id(::std::string* id);
 
-  // required string leaveNode = 2;
+  // optional string leaveNode = 2;
   bool has_leavenode() const;
   void clear_leavenode();
   static const int kLeaveNodeFieldNumber = 2;
@@ -631,15 +628,12 @@ class Extern2MATSim_Agent : public ::google::protobuf::Message {
   ::std::string* release_leavenode();
   void set_allocated_leavenode(::std::string* leavenode);
 
-  // @@protoc_insertion_point(class_scope:hybrid.Extern2MATSim.Agent)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.Extern2MATSim.Agent)
  private:
   inline void set_has_id();
   inline void clear_has_id();
   inline void set_has_leavenode();
   inline void clear_has_leavenode();
-
-  // helper for ByteSize()
-  int RequiredFieldsByteSizeFallback() const;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
@@ -721,16 +715,16 @@ class Extern2MATSim : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required .hybrid.Extern2MATSim.Agent agent = 15;
+  // optional .org.matsim.hybrid.Extern2MATSim.Agent agent = 1;
   bool has_agent() const;
   void clear_agent();
-  static const int kAgentFieldNumber = 15;
-  const ::hybrid::Extern2MATSim_Agent& agent() const;
-  ::hybrid::Extern2MATSim_Agent* mutable_agent();
-  ::hybrid::Extern2MATSim_Agent* release_agent();
-  void set_allocated_agent(::hybrid::Extern2MATSim_Agent* agent);
+  static const int kAgentFieldNumber = 1;
+  const ::org::matsim::hybrid::Extern2MATSim_Agent& agent() const;
+  ::org::matsim::hybrid::Extern2MATSim_Agent* mutable_agent();
+  ::org::matsim::hybrid::Extern2MATSim_Agent* release_agent();
+  void set_allocated_agent(::org::matsim::hybrid::Extern2MATSim_Agent* agent);
 
-  // @@protoc_insertion_point(class_scope:hybrid.Extern2MATSim)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.Extern2MATSim)
  private:
   inline void set_has_agent();
   inline void clear_has_agent();
@@ -738,7 +732,7 @@ class Extern2MATSim : public ::google::protobuf::Message {
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::hybrid::Extern2MATSim_Agent* agent_;
+  ::org::matsim::hybrid::Extern2MATSim_Agent* agent_;
   friend void  protobuf_AddDesc_MATSimInterface_2eproto();
   friend void protobuf_AssignDesc_MATSimInterface_2eproto();
   friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
@@ -812,14 +806,14 @@ class Extern2MATSimConfirmed : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required bool accepted = 1;
+  // optional bool accepted = 1;
   bool has_accepted() const;
   void clear_accepted();
   static const int kAcceptedFieldNumber = 1;
   bool accepted() const;
   void set_accepted(bool value);
 
-  // @@protoc_insertion_point(class_scope:hybrid.Extern2MATSimConfirmed)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.Extern2MATSimConfirmed)
  private:
   inline void set_has_accepted();
   inline void clear_has_accepted();
@@ -901,14 +895,14 @@ class ExternSimStepFinished : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required double time = 1;
+  // optional double time = 1;
   bool has_time() const;
   void clear_time();
   static const int kTimeFieldNumber = 1;
   double time() const;
   void set_time(double value);
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternSimStepFinished)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternSimStepFinished)
  private:
   inline void set_has_time();
   inline void clear_has_time();
@@ -990,7 +984,7 @@ class ExternSimStepFinishedReceived : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternSimStepFinishedReceived)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternSimStepFinishedReceived)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1069,29 +1063,26 @@ class ExternDoSimStep : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required double fromTime = 1;
+  // optional double fromTime = 1;
   bool has_fromtime() const;
   void clear_fromtime();
   static const int kFromTimeFieldNumber = 1;
   double fromtime() const;
   void set_fromtime(double value);
 
-  // required double toTime = 2;
+  // optional double toTime = 2;
   bool has_totime() const;
   void clear_totime();
   static const int kToTimeFieldNumber = 2;
   double totime() const;
   void set_totime(double value);
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternDoSimStep)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternDoSimStep)
  private:
   inline void set_has_fromtime();
   inline void clear_has_fromtime();
   inline void set_has_totime();
   inline void clear_has_totime();
-
-  // helper for ByteSize()
-  int RequiredFieldsByteSizeFallback() const;
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::uint32 _has_bits_[1];
@@ -1171,7 +1162,7 @@ class ExternDoSimStepReceived : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternDoSimStepReceived)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternDoSimStepReceived)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1183,164 +1174,6 @@ class ExternDoSimStepReceived : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static ExternDoSimStepReceived* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class ExternalConnect : public ::google::protobuf::Message {
- public:
-  ExternalConnect();
-  virtual ~ExternalConnect();
-
-  ExternalConnect(const ExternalConnect& from);
-
-  inline ExternalConnect& operator=(const ExternalConnect& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields();
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const ExternalConnect& default_instance();
-
-  void Swap(ExternalConnect* other);
-
-  // implements Message ----------------------------------------------
-
-  inline ExternalConnect* New() const { return New(NULL); }
-
-  ExternalConnect* New(::google::protobuf::Arena* arena) const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ExternalConnect& from);
-  void MergeFrom(const ExternalConnect& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  void InternalSwap(ExternalConnect* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return _internal_metadata_.arena();
-  }
-  inline void* MaybeArenaPtr() const {
-    return _internal_metadata_.raw_arena_ptr();
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // @@protoc_insertion_point(class_scope:hybrid.ExternalConnect)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
-  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
-  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
-
-  void InitAsDefaultInstance();
-  static ExternalConnect* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class ExternalConnectConfirmed : public ::google::protobuf::Message {
- public:
-  ExternalConnectConfirmed();
-  virtual ~ExternalConnectConfirmed();
-
-  ExternalConnectConfirmed(const ExternalConnectConfirmed& from);
-
-  inline ExternalConnectConfirmed& operator=(const ExternalConnectConfirmed& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _internal_metadata_.unknown_fields();
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return _internal_metadata_.mutable_unknown_fields();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const ExternalConnectConfirmed& default_instance();
-
-  void Swap(ExternalConnectConfirmed* other);
-
-  // implements Message ----------------------------------------------
-
-  inline ExternalConnectConfirmed* New() const { return New(NULL); }
-
-  ExternalConnectConfirmed* New(::google::protobuf::Arena* arena) const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const ExternalConnectConfirmed& from);
-  void MergeFrom(const ExternalConnectConfirmed& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  void InternalSwap(ExternalConnectConfirmed* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return _internal_metadata_.arena();
-  }
-  inline void* MaybeArenaPtr() const {
-    return _internal_metadata_.raw_arena_ptr();
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // @@protoc_insertion_point(class_scope:hybrid.ExternalConnectConfirmed)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  ::google::protobuf::uint32 _has_bits_[1];
-  mutable int _cached_size_;
-  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
-  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
-  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
-
-  void InitAsDefaultInstance();
-  static ExternalConnectConfirmed* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -1408,7 +1241,7 @@ class ExternOnPrepareSim : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternOnPrepareSim)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternOnPrepareSim)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1487,7 +1320,7 @@ class ExternOnPrepareSimConfirmed : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternOnPrepareSimConfirmed)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternOnPrepareSimConfirmed)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1566,7 +1399,7 @@ class ExternAfterSim : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternAfterSim)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternAfterSim)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1645,7 +1478,7 @@ class ExternAfterSimConfirmed : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.ExternAfterSimConfirmed)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.ExternAfterSimConfirmed)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1740,7 +1573,7 @@ class AgentsStuck : public ::google::protobuf::Message {
   const ::google::protobuf::RepeatedPtrField< ::std::string>& agentid() const;
   ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_agentid();
 
-  // @@protoc_insertion_point(class_scope:hybrid.AgentsStuck)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.AgentsStuck)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1820,7 +1653,7 @@ class AgentsStuckConfirmed : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:hybrid.AgentsStuckConfirmed)
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.AgentsStuckConfirmed)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
@@ -1841,7 +1674,7 @@ class AgentsStuckConfirmed : public ::google::protobuf::Message {
 #if !PROTOBUF_INLINE_NOT_IN_HEADERS
 // MATSim2ExternPutAgent_Agent
 
-// required string id = 1;
+// optional string id = 1;
 inline bool MATSim2ExternPutAgent_Agent::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1856,28 +1689,28 @@ inline void MATSim2ExternPutAgent_Agent::clear_id() {
   clear_has_id();
 }
 inline const ::std::string& MATSim2ExternPutAgent_Agent::id() const {
-  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.Agent.id)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.id)
   return id_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline void MATSim2ExternPutAgent_Agent::set_id(const ::std::string& value) {
   set_has_id();
   id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternPutAgent.Agent.id)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.id)
 }
 inline void MATSim2ExternPutAgent_Agent::set_id(const char* value) {
   set_has_id();
   id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternPutAgent.Agent.id)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.id)
 }
 inline void MATSim2ExternPutAgent_Agent::set_id(const char* value, size_t size) {
   set_has_id();
   id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternPutAgent.Agent.id)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.id)
 }
 inline ::std::string* MATSim2ExternPutAgent_Agent::mutable_id() {
   set_has_id();
-  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.Agent.id)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.id)
   return id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* MATSim2ExternPutAgent_Agent::release_id() {
@@ -1891,10 +1724,10 @@ inline void MATSim2ExternPutAgent_Agent::set_allocated_id(::std::string* id) {
     clear_has_id();
   }
   id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), id);
-  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternPutAgent.Agent.id)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.id)
 }
 
-// required string enterNode = 2;
+// optional string enterNode = 2;
 inline bool MATSim2ExternPutAgent_Agent::has_enternode() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -1909,28 +1742,28 @@ inline void MATSim2ExternPutAgent_Agent::clear_enternode() {
   clear_has_enternode();
 }
 inline const ::std::string& MATSim2ExternPutAgent_Agent::enternode() const {
-  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.enterNode)
   return enternode_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline void MATSim2ExternPutAgent_Agent::set_enternode(const ::std::string& value) {
   set_has_enternode();
   enternode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.enterNode)
 }
 inline void MATSim2ExternPutAgent_Agent::set_enternode(const char* value) {
   set_has_enternode();
   enternode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.enterNode)
 }
 inline void MATSim2ExternPutAgent_Agent::set_enternode(const char* value, size_t size) {
   set_has_enternode();
   enternode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.enterNode)
 }
 inline ::std::string* MATSim2ExternPutAgent_Agent::mutable_enternode() {
   set_has_enternode();
-  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.enterNode)
   return enternode_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* MATSim2ExternPutAgent_Agent::release_enternode() {
@@ -1944,7 +1777,7 @@ inline void MATSim2ExternPutAgent_Agent::set_allocated_enternode(::std::string* 
     clear_has_enternode();
   }
   enternode_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), enternode);
-  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternPutAgent.Agent.enterNode)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.enterNode)
 }
 
 // repeated string nodes = 3;
@@ -1955,49 +1788,49 @@ inline void MATSim2ExternPutAgent_Agent::clear_nodes() {
   nodes_.Clear();
 }
 inline const ::std::string& MATSim2ExternPutAgent_Agent::nodes(int index) const {
-  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
   return nodes_.Get(index);
 }
 inline ::std::string* MATSim2ExternPutAgent_Agent::mutable_nodes(int index) {
-  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
   return nodes_.Mutable(index);
 }
 inline void MATSim2ExternPutAgent_Agent::set_nodes(int index, const ::std::string& value) {
-  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
   nodes_.Mutable(index)->assign(value);
 }
 inline void MATSim2ExternPutAgent_Agent::set_nodes(int index, const char* value) {
   nodes_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
 }
 inline void MATSim2ExternPutAgent_Agent::set_nodes(int index, const char* value, size_t size) {
   nodes_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
 }
 inline ::std::string* MATSim2ExternPutAgent_Agent::add_nodes() {
   return nodes_.Add();
 }
 inline void MATSim2ExternPutAgent_Agent::add_nodes(const ::std::string& value) {
   nodes_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_add:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
 }
 inline void MATSim2ExternPutAgent_Agent::add_nodes(const char* value) {
   nodes_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_add_char:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
 }
 inline void MATSim2ExternPutAgent_Agent::add_nodes(const char* value, size_t size) {
   nodes_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_add_pointer:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
 }
 inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
 MATSim2ExternPutAgent_Agent::nodes() const {
-  // @@protoc_insertion_point(field_list:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_list:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
   return nodes_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 MATSim2ExternPutAgent_Agent::mutable_nodes() {
-  // @@protoc_insertion_point(field_mutable_list:hybrid.MATSim2ExternPutAgent.Agent.nodes)
+  // @@protoc_insertion_point(field_mutable_list:org.matsim.hybrid.MATSim2ExternPutAgent.Agent.nodes)
   return &nodes_;
 }
 
@@ -2005,7 +1838,7 @@ MATSim2ExternPutAgent_Agent::mutable_nodes() {
 
 // MATSim2ExternPutAgent
 
-// required .hybrid.MATSim2ExternPutAgent.Agent agent = 1;
+// optional .org.matsim.hybrid.MATSim2ExternPutAgent.Agent agent = 1;
 inline bool MATSim2ExternPutAgent::has_agent() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2016,28 +1849,28 @@ inline void MATSim2ExternPutAgent::clear_has_agent() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void MATSim2ExternPutAgent::clear_agent() {
-  if (agent_ != NULL) agent_->::hybrid::MATSim2ExternPutAgent_Agent::Clear();
+  if (agent_ != NULL) agent_->::org::matsim::hybrid::MATSim2ExternPutAgent_Agent::Clear();
   clear_has_agent();
 }
-inline const ::hybrid::MATSim2ExternPutAgent_Agent& MATSim2ExternPutAgent::agent() const {
-  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternPutAgent.agent)
+inline const ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent& MATSim2ExternPutAgent::agent() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MATSim2ExternPutAgent.agent)
   return agent_ != NULL ? *agent_ : *default_instance_->agent_;
 }
-inline ::hybrid::MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent::mutable_agent() {
+inline ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent::mutable_agent() {
   set_has_agent();
   if (agent_ == NULL) {
-    agent_ = new ::hybrid::MATSim2ExternPutAgent_Agent;
+    agent_ = new ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent;
   }
-  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternPutAgent.agent)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.MATSim2ExternPutAgent.agent)
   return agent_;
 }
-inline ::hybrid::MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent::release_agent() {
+inline ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* MATSim2ExternPutAgent::release_agent() {
   clear_has_agent();
-  ::hybrid::MATSim2ExternPutAgent_Agent* temp = agent_;
+  ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* temp = agent_;
   agent_ = NULL;
   return temp;
 }
-inline void MATSim2ExternPutAgent::set_allocated_agent(::hybrid::MATSim2ExternPutAgent_Agent* agent) {
+inline void MATSim2ExternPutAgent::set_allocated_agent(::org::matsim::hybrid::MATSim2ExternPutAgent_Agent* agent) {
   delete agent_;
   agent_ = agent;
   if (agent) {
@@ -2045,14 +1878,14 @@ inline void MATSim2ExternPutAgent::set_allocated_agent(::hybrid::MATSim2ExternPu
   } else {
     clear_has_agent();
   }
-  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternPutAgent.agent)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.MATSim2ExternPutAgent.agent)
 }
 
 // -------------------------------------------------------------------
 
 // MATSim2ExternHasSpace
 
-// required string nodeId = 1;
+// optional string nodeId = 1;
 inline bool MATSim2ExternHasSpace::has_nodeid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2067,28 +1900,28 @@ inline void MATSim2ExternHasSpace::clear_nodeid() {
   clear_has_nodeid();
 }
 inline const ::std::string& MATSim2ExternHasSpace::nodeid() const {
-  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternHasSpace.nodeId)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MATSim2ExternHasSpace.nodeId)
   return nodeid_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline void MATSim2ExternHasSpace::set_nodeid(const ::std::string& value) {
   set_has_nodeid();
   nodeid_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternHasSpace.nodeId)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MATSim2ExternHasSpace.nodeId)
 }
 inline void MATSim2ExternHasSpace::set_nodeid(const char* value) {
   set_has_nodeid();
   nodeid_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:hybrid.MATSim2ExternHasSpace.nodeId)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.MATSim2ExternHasSpace.nodeId)
 }
 inline void MATSim2ExternHasSpace::set_nodeid(const char* value, size_t size) {
   set_has_nodeid();
   nodeid_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:hybrid.MATSim2ExternHasSpace.nodeId)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.MATSim2ExternHasSpace.nodeId)
 }
 inline ::std::string* MATSim2ExternHasSpace::mutable_nodeid() {
   set_has_nodeid();
-  // @@protoc_insertion_point(field_mutable:hybrid.MATSim2ExternHasSpace.nodeId)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.MATSim2ExternHasSpace.nodeId)
   return nodeid_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* MATSim2ExternHasSpace::release_nodeid() {
@@ -2102,14 +1935,14 @@ inline void MATSim2ExternHasSpace::set_allocated_nodeid(::std::string* nodeid) {
     clear_has_nodeid();
   }
   nodeid_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), nodeid);
-  // @@protoc_insertion_point(field_set_allocated:hybrid.MATSim2ExternHasSpace.nodeId)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.MATSim2ExternHasSpace.nodeId)
 }
 
 // -------------------------------------------------------------------
 
 // MATSim2ExternHasSpaceConfirmed
 
-// required bool hasSpace = 1;
+// optional bool hasSpace = 1;
 inline bool MATSim2ExternHasSpaceConfirmed::has_hasspace() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2124,13 +1957,13 @@ inline void MATSim2ExternHasSpaceConfirmed::clear_hasspace() {
   clear_has_hasspace();
 }
 inline bool MATSim2ExternHasSpaceConfirmed::hasspace() const {
-  // @@protoc_insertion_point(field_get:hybrid.MATSim2ExternHasSpaceConfirmed.hasSpace)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MATSim2ExternHasSpaceConfirmed.hasSpace)
   return hasspace_;
 }
 inline void MATSim2ExternHasSpaceConfirmed::set_hasspace(bool value) {
   set_has_hasspace();
   hasspace_ = value;
-  // @@protoc_insertion_point(field_set:hybrid.MATSim2ExternHasSpaceConfirmed.hasSpace)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MATSim2ExternHasSpaceConfirmed.hasSpace)
 }
 
 // -------------------------------------------------------------------
@@ -2141,7 +1974,7 @@ inline void MATSim2ExternHasSpaceConfirmed::set_hasspace(bool value) {
 
 // Extern2MATSim_Agent
 
-// required string id = 1;
+// optional string id = 1;
 inline bool Extern2MATSim_Agent::has_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2156,28 +1989,28 @@ inline void Extern2MATSim_Agent::clear_id() {
   clear_has_id();
 }
 inline const ::std::string& Extern2MATSim_Agent::id() const {
-  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSim.Agent.id)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSim.Agent.id)
   return id_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline void Extern2MATSim_Agent::set_id(const ::std::string& value) {
   set_has_id();
   id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:hybrid.Extern2MATSim.Agent.id)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSim.Agent.id)
 }
 inline void Extern2MATSim_Agent::set_id(const char* value) {
   set_has_id();
   id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:hybrid.Extern2MATSim.Agent.id)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.Extern2MATSim.Agent.id)
 }
 inline void Extern2MATSim_Agent::set_id(const char* value, size_t size) {
   set_has_id();
   id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:hybrid.Extern2MATSim.Agent.id)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.Extern2MATSim.Agent.id)
 }
 inline ::std::string* Extern2MATSim_Agent::mutable_id() {
   set_has_id();
-  // @@protoc_insertion_point(field_mutable:hybrid.Extern2MATSim.Agent.id)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.Extern2MATSim.Agent.id)
   return id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* Extern2MATSim_Agent::release_id() {
@@ -2191,10 +2024,10 @@ inline void Extern2MATSim_Agent::set_allocated_id(::std::string* id) {
     clear_has_id();
   }
   id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), id);
-  // @@protoc_insertion_point(field_set_allocated:hybrid.Extern2MATSim.Agent.id)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.Extern2MATSim.Agent.id)
 }
 
-// required string leaveNode = 2;
+// optional string leaveNode = 2;
 inline bool Extern2MATSim_Agent::has_leavenode() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -2209,28 +2042,28 @@ inline void Extern2MATSim_Agent::clear_leavenode() {
   clear_has_leavenode();
 }
 inline const ::std::string& Extern2MATSim_Agent::leavenode() const {
-  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSim.Agent.leaveNode)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSim.Agent.leaveNode)
   return leavenode_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline void Extern2MATSim_Agent::set_leavenode(const ::std::string& value) {
   set_has_leavenode();
   leavenode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:hybrid.Extern2MATSim.Agent.leaveNode)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSim.Agent.leaveNode)
 }
 inline void Extern2MATSim_Agent::set_leavenode(const char* value) {
   set_has_leavenode();
   leavenode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:hybrid.Extern2MATSim.Agent.leaveNode)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.Extern2MATSim.Agent.leaveNode)
 }
 inline void Extern2MATSim_Agent::set_leavenode(const char* value, size_t size) {
   set_has_leavenode();
   leavenode_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:hybrid.Extern2MATSim.Agent.leaveNode)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.Extern2MATSim.Agent.leaveNode)
 }
 inline ::std::string* Extern2MATSim_Agent::mutable_leavenode() {
   set_has_leavenode();
-  // @@protoc_insertion_point(field_mutable:hybrid.Extern2MATSim.Agent.leaveNode)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.Extern2MATSim.Agent.leaveNode)
   return leavenode_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 inline ::std::string* Extern2MATSim_Agent::release_leavenode() {
@@ -2244,14 +2077,14 @@ inline void Extern2MATSim_Agent::set_allocated_leavenode(::std::string* leavenod
     clear_has_leavenode();
   }
   leavenode_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), leavenode);
-  // @@protoc_insertion_point(field_set_allocated:hybrid.Extern2MATSim.Agent.leaveNode)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.Extern2MATSim.Agent.leaveNode)
 }
 
 // -------------------------------------------------------------------
 
 // Extern2MATSim
 
-// required .hybrid.Extern2MATSim.Agent agent = 15;
+// optional .org.matsim.hybrid.Extern2MATSim.Agent agent = 1;
 inline bool Extern2MATSim::has_agent() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2262,28 +2095,28 @@ inline void Extern2MATSim::clear_has_agent() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void Extern2MATSim::clear_agent() {
-  if (agent_ != NULL) agent_->::hybrid::Extern2MATSim_Agent::Clear();
+  if (agent_ != NULL) agent_->::org::matsim::hybrid::Extern2MATSim_Agent::Clear();
   clear_has_agent();
 }
-inline const ::hybrid::Extern2MATSim_Agent& Extern2MATSim::agent() const {
-  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSim.agent)
+inline const ::org::matsim::hybrid::Extern2MATSim_Agent& Extern2MATSim::agent() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSim.agent)
   return agent_ != NULL ? *agent_ : *default_instance_->agent_;
 }
-inline ::hybrid::Extern2MATSim_Agent* Extern2MATSim::mutable_agent() {
+inline ::org::matsim::hybrid::Extern2MATSim_Agent* Extern2MATSim::mutable_agent() {
   set_has_agent();
   if (agent_ == NULL) {
-    agent_ = new ::hybrid::Extern2MATSim_Agent;
+    agent_ = new ::org::matsim::hybrid::Extern2MATSim_Agent;
   }
-  // @@protoc_insertion_point(field_mutable:hybrid.Extern2MATSim.agent)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.Extern2MATSim.agent)
   return agent_;
 }
-inline ::hybrid::Extern2MATSim_Agent* Extern2MATSim::release_agent() {
+inline ::org::matsim::hybrid::Extern2MATSim_Agent* Extern2MATSim::release_agent() {
   clear_has_agent();
-  ::hybrid::Extern2MATSim_Agent* temp = agent_;
+  ::org::matsim::hybrid::Extern2MATSim_Agent* temp = agent_;
   agent_ = NULL;
   return temp;
 }
-inline void Extern2MATSim::set_allocated_agent(::hybrid::Extern2MATSim_Agent* agent) {
+inline void Extern2MATSim::set_allocated_agent(::org::matsim::hybrid::Extern2MATSim_Agent* agent) {
   delete agent_;
   agent_ = agent;
   if (agent) {
@@ -2291,14 +2124,14 @@ inline void Extern2MATSim::set_allocated_agent(::hybrid::Extern2MATSim_Agent* ag
   } else {
     clear_has_agent();
   }
-  // @@protoc_insertion_point(field_set_allocated:hybrid.Extern2MATSim.agent)
+  // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.Extern2MATSim.agent)
 }
 
 // -------------------------------------------------------------------
 
 // Extern2MATSimConfirmed
 
-// required bool accepted = 1;
+// optional bool accepted = 1;
 inline bool Extern2MATSimConfirmed::has_accepted() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2313,20 +2146,20 @@ inline void Extern2MATSimConfirmed::clear_accepted() {
   clear_has_accepted();
 }
 inline bool Extern2MATSimConfirmed::accepted() const {
-  // @@protoc_insertion_point(field_get:hybrid.Extern2MATSimConfirmed.accepted)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimConfirmed.accepted)
   return accepted_;
 }
 inline void Extern2MATSimConfirmed::set_accepted(bool value) {
   set_has_accepted();
   accepted_ = value;
-  // @@protoc_insertion_point(field_set:hybrid.Extern2MATSimConfirmed.accepted)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimConfirmed.accepted)
 }
 
 // -------------------------------------------------------------------
 
 // ExternSimStepFinished
 
-// required double time = 1;
+// optional double time = 1;
 inline bool ExternSimStepFinished::has_time() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2341,13 +2174,13 @@ inline void ExternSimStepFinished::clear_time() {
   clear_has_time();
 }
 inline double ExternSimStepFinished::time() const {
-  // @@protoc_insertion_point(field_get:hybrid.ExternSimStepFinished.time)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.ExternSimStepFinished.time)
   return time_;
 }
 inline void ExternSimStepFinished::set_time(double value) {
   set_has_time();
   time_ = value;
-  // @@protoc_insertion_point(field_set:hybrid.ExternSimStepFinished.time)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.ExternSimStepFinished.time)
 }
 
 // -------------------------------------------------------------------
@@ -2358,7 +2191,7 @@ inline void ExternSimStepFinished::set_time(double value) {
 
 // ExternDoSimStep
 
-// required double fromTime = 1;
+// optional double fromTime = 1;
 inline bool ExternDoSimStep::has_fromtime() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -2373,16 +2206,16 @@ inline void ExternDoSimStep::clear_fromtime() {
   clear_has_fromtime();
 }
 inline double ExternDoSimStep::fromtime() const {
-  // @@protoc_insertion_point(field_get:hybrid.ExternDoSimStep.fromTime)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.ExternDoSimStep.fromTime)
   return fromtime_;
 }
 inline void ExternDoSimStep::set_fromtime(double value) {
   set_has_fromtime();
   fromtime_ = value;
-  // @@protoc_insertion_point(field_set:hybrid.ExternDoSimStep.fromTime)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.ExternDoSimStep.fromTime)
 }
 
-// required double toTime = 2;
+// optional double toTime = 2;
 inline bool ExternDoSimStep::has_totime() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -2397,26 +2230,18 @@ inline void ExternDoSimStep::clear_totime() {
   clear_has_totime();
 }
 inline double ExternDoSimStep::totime() const {
-  // @@protoc_insertion_point(field_get:hybrid.ExternDoSimStep.toTime)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.ExternDoSimStep.toTime)
   return totime_;
 }
 inline void ExternDoSimStep::set_totime(double value) {
   set_has_totime();
   totime_ = value;
-  // @@protoc_insertion_point(field_set:hybrid.ExternDoSimStep.toTime)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.ExternDoSimStep.toTime)
 }
 
 // -------------------------------------------------------------------
 
 // ExternDoSimStepReceived
-
-// -------------------------------------------------------------------
-
-// ExternalConnect
-
-// -------------------------------------------------------------------
-
-// ExternalConnectConfirmed
 
 // -------------------------------------------------------------------
 
@@ -2446,49 +2271,49 @@ inline void AgentsStuck::clear_agentid() {
   agentid_.Clear();
 }
 inline const ::std::string& AgentsStuck::agentid(int index) const {
-  // @@protoc_insertion_point(field_get:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.AgentsStuck.agentId)
   return agentid_.Get(index);
 }
 inline ::std::string* AgentsStuck::mutable_agentid(int index) {
-  // @@protoc_insertion_point(field_mutable:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.AgentsStuck.agentId)
   return agentid_.Mutable(index);
 }
 inline void AgentsStuck::set_agentid(int index, const ::std::string& value) {
-  // @@protoc_insertion_point(field_set:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.AgentsStuck.agentId)
   agentid_.Mutable(index)->assign(value);
 }
 inline void AgentsStuck::set_agentid(int index, const char* value) {
   agentid_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_set_char:org.matsim.hybrid.AgentsStuck.agentId)
 }
 inline void AgentsStuck::set_agentid(int index, const char* value, size_t size) {
   agentid_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_set_pointer:org.matsim.hybrid.AgentsStuck.agentId)
 }
 inline ::std::string* AgentsStuck::add_agentid() {
   return agentid_.Add();
 }
 inline void AgentsStuck::add_agentid(const ::std::string& value) {
   agentid_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_add:org.matsim.hybrid.AgentsStuck.agentId)
 }
 inline void AgentsStuck::add_agentid(const char* value) {
   agentid_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_add_char:org.matsim.hybrid.AgentsStuck.agentId)
 }
 inline void AgentsStuck::add_agentid(const char* value, size_t size) {
   agentid_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_add_pointer:org.matsim.hybrid.AgentsStuck.agentId)
 }
 inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
 AgentsStuck::agentid() const {
-  // @@protoc_insertion_point(field_list:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_list:org.matsim.hybrid.AgentsStuck.agentId)
   return agentid_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 AgentsStuck::mutable_agentid() {
-  // @@protoc_insertion_point(field_mutable_list:hybrid.AgentsStuck.agentId)
+  // @@protoc_insertion_point(field_mutable_list:org.matsim.hybrid.AgentsStuck.agentId)
   return &agentid_;
 }
 
@@ -2501,6 +2326,8 @@ AgentsStuck::mutable_agentid() {
 // @@protoc_insertion_point(namespace_scope)
 
 }  // namespace hybrid
+}  // namespace matsim
+}  // namespace org
 
 // @@protoc_insertion_point(global_scope)
 

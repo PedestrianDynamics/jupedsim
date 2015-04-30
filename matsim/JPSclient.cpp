@@ -15,10 +15,10 @@
 using namespace std;
 
 JPSclient::JPSclient(std::shared_ptr<ChannelInterface> channel) :
-               _stub(ExternInterfaceService::NewStub(channel))
+               _jupedsimChannel(ExternInterfaceService::NewStub(channel))
      {
      //stub for testing and to be removed in the final version
-     _stub_matsim=MATSimInterfaceService::NewStub(channel);
+     _matsimChannel=MATSimInterfaceService::NewStub(channel);
      }
 
 JPSclient::~JPSclient()
@@ -57,17 +57,29 @@ void JPSclient::ProcessAgentQueue(Building* building)
 
 bool JPSclient::HasSpaceOnMatsim(int nodeID)
 {
-     return false;
+     //Status status =_matsimChannel->reqExtern2MATSim(&context, request, &reply);
+     //if(status.IsOk())
+     //{
+//
+  //   }
+     return true;
 }
 
 bool JPSclient::SendAgentToMatsim(Pedestrian* ped)
 {
-     //pick the agent from the queue
-     //hybrid::Extern2MATSim msg;
-     //msg.mutable_agent()->set_id(std::to_string(ped->GetID()));
-     //msg.mutable_agent()->set_leavenode(std::to_string(ped->GetExitIndex()));
-     return false;
+     ClientContext context;
+     Extern2MATSim request;
+     Extern2MATSimConfirmed reply;
 
+     string leave_node=std::to_string(ped->GetFinalDestination());
+     string agent_id=std::to_string(ped->GetID());
+
+     request.mutable_agent()->set_id(agent_id);
+     request.mutable_agent()->set_leavenode(leave_node);
+
+     Status status =_matsimChannel->reqExtern2MATSim(&context, request, &reply);
+
+     return status.IsOk();
 }
 
 bool JPSclient::HasSpaceOnJuPedSim(int nodeID)
@@ -77,14 +89,20 @@ bool JPSclient::HasSpaceOnJuPedSim(int nodeID)
      MATSim2ExternHasSpaceConfirmed reply;
      ClientContext context;
 
-     Status status = _stub->reqMATSim2ExternHasSpace(&context, request, &reply);
+     Status status = _jupedsimChannel->reqMATSim2ExternHasSpace(&context, request, &reply);
      return status.IsOk();
+}
 
-//     if (status.IsOk()) {
-//          return true;
-//     } else {
-//          return "Rpc failed";
-//     }
+bool JPSclient::NotifyExternalService()
+{
+     ClientContext context;
+     ExternalConnect request;
+     ExternalConnectConfirmed reply;
+     request.set_accepted(true);
+     //reply.
+     Status status =_matsimChannel->reqExternalConnect(&context, request, &reply);
+     std::cout<<"Details: "<<status.details()<<endl;
+     return status.IsOk();
 }
 
 bool JPSclient::SendAgentToJuPedSim(Pedestrian* ped)
@@ -104,7 +122,7 @@ bool JPSclient::SendAgentToJuPedSim(Pedestrian* ped)
      request.mutable_agent()->add_nodes(leave_node_id);
      //request.mutable_agent()->add_nodes("0");
 
-     Status status =_stub->reqMATSim2ExternPutAgent(&context, request, &reply);
+     Status status =_jupedsimChannel->reqMATSim2ExternPutAgent(&context, request, &reply);
      return status.IsOk();
 
 }

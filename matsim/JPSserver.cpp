@@ -6,29 +6,61 @@
  */
 
 #include "JPSserver.h"
+#include "JPSclient.h"
 #include "../IO/OutputHandler.h"
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../pedestrian/AgentsSource.h"
 #include "../pedestrian/AgentsQueue.h"
 #include "../pedestrian/Pedestrian.h"
-
+#include "../Simulation.h"
 
 #include <iostream>
+#include <thread>
+
+
+//client stuff
+#include <grpc++/channel_arguments.h>
+//#include <grpc++/channel_interface.h>
+//#include <grpc++/client_context.h>
+#include <grpc++/create_channel.h>
+//#include <grpc++/credentials.h>
 
 // external variables
 extern OutputHandler* Log;
 
-
 using namespace std;
 
-
-JPSserver::JPSserver(AgentsSourcesManager& src): _agentSrcMng(src)
+JPSserver::JPSserver(Simulation& src, const std::string& connection): _SimManager(src)
 {
+     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(connection,
+                   grpc::InsecureCredentials(), grpc::ChannelArguments())));
 }
 
 JPSserver::~JPSserver()
 {
+}
 
+bool JPSserver::NotifyExternalService()
+{
+     return _rpcClient->NotifyExternalService();
+}
+
+void JPSserver::RunSimulation()
+{
+     while(true)
+     {
+          if(_doSimulation)
+          {
+               Log->Write("INFO:\tRPC::JPSserver starting a new simulation");
+               _SimManager.RunSimulation(20);
+               _doSimulation=false;
+               //TODO: notify simulation finished
+               exit(0);
+          }
+
+          Log->Write("INFO:\tRPC::JPSserver idle for 3 second");
+          std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+     }
 }
 
 Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context,
@@ -52,7 +84,8 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
      string enter_node=request->agent().enternode();
      Log->Write("INFO:\tRPC::JPSserver I am taking agent %s going to node %s ",agent_id.c_str(),leave_node.c_str());
 
-     auto srcs=_agentSrcMng.GetSources();
+     auto agentSrcMng=_SimManager.GetAgentSrcManager();
+     auto srcs=agentSrcMng.GetSources();
      //cout<<"There are: "<<srcs.size()<<" options"<<endl;
 
      for(auto&& src:srcs)
@@ -61,7 +94,7 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
           if(src->GetId()==std::stoi(enter_node))
           {
                std::vector<Pedestrian*> peds;
-               src->GenerateAgents(peds,1,_agentSrcMng.GetBuilding());
+               src->GenerateAgents(peds,1,agentSrcMng.GetBuilding());
                //there should be only one agent in this vector
                for(auto&& ped:peds)
                {
@@ -70,15 +103,11 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
                     //schedule the agent
                     src->AddToPool(ped);
                }
-               _agentSrcMng.ProcessAllSources();
+               agentSrcMng.ProcessAllSources();
                //AgentsQueue::Add(peds);
           }
      }
 
-     //take the nodeID and the destination ID
-     //find the corresponding source
-     //generate a new agent and add to the source
-     //call processAllSource on the AgentsoursceManager
      return Status::OK;
 }
 
@@ -86,6 +115,8 @@ Status JPSserver::reqExternDoSimStep(ServerContext* context,
           const ExternDoSimStep* request, ExternDoSimStepReceived* response)
 {
      std::cout << "Performing simulation step" << std::endl;
+     _doSimulation=true;
+
      return Status::OK;
 }
 
@@ -93,13 +124,14 @@ Status JPSserver::reqExternOnPrepareSim(ServerContext* context,
           const ExternOnPrepareSim* request,
           ExternOnPrepareSimConfirmed* response)
 {
-     std::cout << "I am preparing the simulation" << std::endl;
+     Log->Write("INFO:\tRPC::JPSserver  I am ready for doing the simulation");
+     //response->
      return Status::OK;
 }
 
 Status JPSserver::reqExternAfterSim(ServerContext* context,
           const ExternAfterSim* request, ExternAfterSimConfirmed* response)
 {
-     std::cout << "Simulation step completed" << std::endl;
+     Log->Write("INFO:\tRPC::JPSserver I received shutdown order. But can I do that ?");
      return Status::OK;
 }

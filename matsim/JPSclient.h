@@ -73,10 +73,11 @@ public:
       */
      void Shutdown()
      {
-          _stub.reset();
+          _jupedsimChannel.reset();
+          _matsimChannel.reset();
      }
 
-     //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
+     bool NotifyExternalService();
 
 private:
      bool HasSpaceOnMatsim(int nodeID);
@@ -85,9 +86,8 @@ private:
      bool SendAgentToJuPedSim(Pedestrian* ped);
 
 private:
-     std::unique_ptr<ExternInterfaceService::Stub> _stub;
-     std::unique_ptr<MATSimInterfaceService::Stub> _stub_matsim;
-     //AgentsSourcesManager _agentSrcMng;
+     std::unique_ptr<ExternInterfaceService::Stub> _jupedsimChannel;
+     std::unique_ptr<MATSimInterfaceService::Stub> _matsimChannel;
 };
 
 #endif /* MATSIM_JPSCLIENT_H_ */
