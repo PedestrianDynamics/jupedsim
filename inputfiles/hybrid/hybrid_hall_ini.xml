@@ -14,7 +14,7 @@
     <socket hostname="127.0.0.1" port="8989" />
   </trajectories>
 
-  <!-- Parameters for the hybrid mode -->
+  <!-- Parameters for the hybrid (matsim) server mode -->
   <hybrid_simulation server="localhost" port="9999" />
 
   <!-- where to store the logs -->

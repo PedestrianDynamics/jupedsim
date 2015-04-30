@@ -50,8 +50,13 @@ bool HybridSimulationManager::_shutdown = false;
 HybridSimulationManager::HybridSimulationManager(const std::string& server,
           int port)
 {
-     _serverName = server;
-     _port = port;
+     _externalServerName = server;
+     _externalServerPort = port;
+
+     //get the canonical hostname
+     char hostname[1024];
+     gethostname(hostname, 1024);
+     _internalServerName=std::string(hostname);
 
      //GOOGLE_PROTOBUF_VERIFY_VERSION;
      //grpc_init();
@@ -79,8 +84,6 @@ HybridSimulationManager::~HybridSimulationManager()
 
 bool HybridSimulationManager::Init(Building* building)
 {
-     //     GOOGLE_PROTOBUF_VERIFY_VERSION;
-
      _building = building;
      return true;
 }
@@ -93,22 +96,21 @@ bool HybridSimulationManager::Run(Simulation& sim)
      grpc_init();
 
      //string extern_service_address("zam597:9999");
-     string extern_service_address("localhost:9999");
+     string extern_service_address(_externalServerName + ":" + std::to_string(_externalServerPort));
 
-     string jupedsim_service_address("localhost:9999")/*_serverName + ":" + std::to_string(_port)*/;
+     string jupedsim_service_address(_internalServerName + ":" + std::to_string(_internalServerPort));
      //string jupedsim_service_address("0.0.0.0:9999")/*_serverName + ":" + std::to_string(_port)*/;
 
 
      //create the client that will be running on its own thread
-     //_rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(extern_service_address,
-     //          grpc::InsecureCredentials(), ChannelArguments())));
-
-     //_rpcClient->NotifyExternalService();
+     _rpcClient = std::shared_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(extern_service_address,
+               grpc::InsecureCredentials(), ChannelArguments())));
 
      //create the server
-     std::string server_address(_serverName + ":" + std::to_string(_port));
+     std::string server_address(_externalServerName + ":" + std::to_string(_externalServerPort));
 
      JPSserver jupedsimService(sim,extern_service_address);
+     jupedsimService.SetDuplexClient(_rpcClient);
      //MATSIMserver jupedsimService;
 
      ServerBuilder builder;
@@ -117,33 +119,32 @@ bool HybridSimulationManager::Run(Simulation& sim)
      builder.RegisterService(&jupedsimService);
 
      _rpcServer= builder.BuildAndStart();
-     //builder.
-     Log->Write("INFO:\tJuPedSim Server is up and running on " + jupedsim_service_address);
 
-     //_rpcServer->Wait();
+     Log->Write("INFO:\tJuPedSim is up and running on " + jupedsim_service_address);
+     Log->Write("INFO:\tNotifying Matsim at " + extern_service_address);
 
-     //_rpcClient->NotifyExternalService();
-
-
-     //notify the external service
-
-     if(jupedsimService.NotifyExternalService())
+     if(false==_rpcClient->NotifyExternalService(_internalServerName,_internalServerPort))
      {
-          cout<<"Failure"<<endl;
-          //exit(0);
+          Log->Write("ERROR:\tNotification failed");
      }
-     //else
-     {
-          cout<<"Success"<<endl;
-     }
+
+     //     Pedestrian ped;
+     //     ped.SetID(14);
+     //     ped.SetFinalDestination(4);
+     //     _rpcClient->SendAgentToMatsim(&ped);
+     //     _rpcClient->NotifyExternalService();
+
 
 
      //starting the simulation thread and waiting
-     //std::thread t2(&JPSserver::RunSimulation, &jupedsimService);
+     std::thread t2(&JPSserver::RunSimulation, &jupedsimService);
+
+     _rpcServer->Wait();
 
      //TestWorkflow();
-     //t2.join();
-     //_rpcServer->Wait();
+     t2.join();
+
+
      //create a socket and use it for the serveur and the client
      //std::thread t1(&HybridSimulationManager::RunClient, this);
      //std::thread t2(&HybridSimulationManager::RunServer, this);
@@ -246,7 +247,7 @@ bool HybridSimulationManager::RunServer()
      //          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
      //     } while (!_shutdown);
      //
-    return true;
+     return true;
 }
 
 void HybridSimulationManager::Shutdown()
@@ -264,7 +265,7 @@ void HybridSimulationManager::ProcessIncomingAgent()
 void HybridSimulationManager::TestWorkflow()
 {
      // notify the external service that I am awake
-     _rpcClient->NotifyExternalService();
+     //_rpcClient->NotifyExternalService();
 }
 
 
@@ -276,8 +277,8 @@ void HybridSimulationManager::ProcessOutgoingAgent()
 
 std::string HybridSimulationManager::ToString()
 {
-     return "INFO:\tHybrid Simulation working on [" + _serverName + ":"
-               + std::to_string(_port) + "]\n";
+     return "INFO:\tHybrid Simulation working on [" + _externalServerName + ":"
+               + std::to_string(_externalServerPort) + "]\n";
 }
 
 void HybridSimulationManager::AttachSourceManager(const AgentsSourcesManager& src)

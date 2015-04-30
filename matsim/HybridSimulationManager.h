@@ -54,14 +54,16 @@ private:
 private:
      //std::atomic<bool> _shutdown=false;
      static bool _shutdown;
-     int _port=-1;
-     std::string _serverName="localhost";
+     int _externalServerPort=9999;
+     int _internalServerPort=9998;
+     std::string _externalServerName="localhost";
+     std::string _internalServerName="0.0.0.0";
      Building* _building=nullptr;
      //TODO: the method should be passed bz reference in the main function
      //std::unique_ptr<grpc::Server> _rpcServer;
-     std::shared_ptr<grpc::Server> _rpcServer;
+     std::unique_ptr<grpc::Server> _rpcServer;
      AgentsSourcesManager _agentSrcMng;
-     std::unique_ptr<JPSclient> _rpcClient;
+     std::shared_ptr<JPSclient> _rpcClient;
 };
 
 #endif /* HYBRIDSIMULATIONMANAGER_H_ */

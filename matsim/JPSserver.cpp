@@ -32,33 +32,31 @@ using namespace std;
 
 JPSserver::JPSserver(Simulation& src, const std::string& connection): _SimManager(src)
 {
-     _rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(connection,
-                   grpc::InsecureCredentials(), grpc::ChannelArguments())));
+     //_rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(connection,
+     //              grpc::InsecureCredentials(), grpc::ChannelArguments())));
+
+     _doSimulation=false;
 }
 
 JPSserver::~JPSserver()
 {
 }
 
-bool JPSserver::NotifyExternalService()
-{
-     return _rpcClient->NotifyExternalService();
-}
-
 void JPSserver::RunSimulation()
 {
      while(true)
      {
-          if(_doSimulation)
+          if(!_doSimulation)
           {
                Log->Write("INFO:\tRPC::JPSserver starting a new simulation");
                _SimManager.RunSimulation(20);
                _doSimulation=false;
                //TODO: notify simulation finished
-               exit(0);
+               _jpsClient->NotifyEndOfSimulation();
+               //exit(0);
           }
 
-          Log->Write("INFO:\tRPC::JPSserver idle for 3 second");
+          Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");
           std::this_thread::sleep_for(std::chrono::milliseconds(3000));
      }
 }
@@ -71,6 +69,7 @@ Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context,
      Log->Write("INFO:\tRPC::JPSserver I have space on node " + nodeID);
 
      response->set_hasspace(true);
+
      return Status::OK;
 }
 
@@ -114,9 +113,10 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
 Status JPSserver::reqExternDoSimStep(ServerContext* context,
           const ExternDoSimStep* request, ExternDoSimStepReceived* response)
 {
-     std::cout << "Performing simulation step" << std::endl;
+     double from =request->fromtime();
+     double to=request->totime();
+     Log->Write("INFO:\tRPC::JPSserver I will perform a simulation step from %f to %f seconds",from,to);
      _doSimulation=true;
-
      return Status::OK;
 }
 
@@ -125,7 +125,7 @@ Status JPSserver::reqExternOnPrepareSim(ServerContext* context,
           ExternOnPrepareSimConfirmed* response)
 {
      Log->Write("INFO:\tRPC::JPSserver  I am ready for doing the simulation");
-     //response->
+
      return Status::OK;
 }
 
@@ -134,4 +134,9 @@ Status JPSserver::reqExternAfterSim(ServerContext* context,
 {
      Log->Write("INFO:\tRPC::JPSserver I received shutdown order. But can I do that ?");
      return Status::OK;
+}
+
+void JPSserver::SetDuplexClient(std::shared_ptr<JPSclient>& client)
+{
+     _jpsClient=client;
 }

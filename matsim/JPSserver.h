@@ -9,6 +9,7 @@
 #define MATSIM_JPSSERVER_H_
 
 #include <iostream>
+#include <atomic>
 
 #include <grpc/grpc.h>
 #include <grpc++/server.h>
@@ -22,7 +23,7 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-using namespace hybrid;
+using namespace org::matsim::hybrid;
 
 //forward declarations
 class Simulation;
@@ -49,31 +50,16 @@ public:
      virtual Status reqExternOnPrepareSim(ServerContext* context, const ExternOnPrepareSim* request, ExternOnPrepareSimConfirmed* response);
      virtual Status reqExternAfterSim(ServerContext* context, const ExternAfterSim* request, ExternAfterSimConfirmed* response);
 
-
-     bool NotifyExternalService();
-
      void RunSimulation();
 
-
-     //void SetDuplexClient(std::unique_ptr<JPSclient>& client);
+     void SetDuplexClient(std::shared_ptr<JPSclient>& client);
      //void SetAgentsSourcesManager(const AgentsSourcesManager& src) const;
 
 private:
     Simulation& _SimManager;
-    bool _doSimulation=false;
-    std::unique_ptr<JPSclient> _rpcClient;
-};
-
-
-class MATSIMserver final : public MATSimInterfaceService::Service
-{
-    virtual Status reqExternalConnect(::grpc::ClientContext* context, const ::hybrid::ExternalConnect& request, ::hybrid::ExternalConnectConfirmed* response)
-    {
-         std::cout<<"INFO:\tRPC::JPSserver I have space on node "<<std::endl;
-
-         return Status::OK;
-    }
-
+    //bool _doSimulation=false;
+    std::atomic<bool> _doSimulation;
+    std::shared_ptr<JPSclient> _jpsClient;
 };
 
 #endif /* MATSIM_JPSSERVER_H_ */

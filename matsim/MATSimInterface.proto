@@ -1,4 +1,4 @@
-syntax = "proto2";
+syntax = "proto3";
 //option java_generic_services = true;
 //option cc_generic_services = true;
 option java_outer_classname="ProtoMATSimInterface";
@@ -81,9 +81,21 @@ message AgentsStuckConfirmed{
 
 }
 
+message ExternalConnect {
+     optional string host =1;
+     optional int32 port=2;
+}
+
+message ExternalConnectConfirmed {
+
+}
+
 service MATSimInterfaceService {
+     // Send JuPedSim connection parameter
+     rpc reqExternalConnect(ExternalConnect) returns (ExternalConnectConfirmed);
      // Sending Agents to MATsim
 	rpc reqExtern2MATSim(Extern2MATSim) returns (Extern2MATSimConfirmed);
+	// ?
 	rpc reqAgentStuck(AgentsStuck) returns (AgentsStuckConfirmed);
 	// Notifying Matsim about the end of the simulation
 	rpc reqExternSimStepFinished(ExternSimStepFinished) returns (ExternSimStepFinishedReceived);

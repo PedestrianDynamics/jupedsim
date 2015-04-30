@@ -40,10 +40,10 @@ using grpc::ServerContext;
 using grpc::Status;
 using grpc::ChannelInterface;
 using grpc::ClientContext;
-using hybrid::MATSim2ExternHasSpace;
-using hybrid::MATSim2ExternHasSpaceConfirmed;
+using org::matsim::hybrid::MATSim2ExternHasSpace;
+using org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed;
 
-using namespace hybrid;
+using namespace org::matsim::hybrid;
 
 class Building;
 class Pedestrian;
@@ -77,11 +77,14 @@ public:
           _matsimChannel.reset();
      }
 
-     bool NotifyExternalService();
+     bool NotifyExternalService(const std::string& host, int port);
+
+     bool SendAgentToMatsim(Pedestrian* ped);
+
+     bool NotifyEndOfSimulation();
 
 private:
      bool HasSpaceOnMatsim(int nodeID);
-     bool SendAgentToMatsim(Pedestrian* ped);
      bool HasSpaceOnJuPedSim(int nodeID);
      bool SendAgentToJuPedSim(Pedestrian* ped);
 
