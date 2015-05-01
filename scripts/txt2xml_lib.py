@@ -253,7 +253,7 @@ def write_geometry(out, walls):
 
 
 def write_frames(out, frames, data, mTocm ):
-	extract_id = unique(data[:,0])
+    extract_id = np.unique(data[:,0])
     if len(extract_id) != (max(data[:,0])-min(data[:,0])+1):
         data1 = array([[0, 0, 0, 0]])        
         id = 1
