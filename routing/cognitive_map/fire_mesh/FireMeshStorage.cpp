@@ -69,7 +69,7 @@ void FireMeshStorage::CreateFireMeshes()
                     + "_Y_" + std::to_string(door.GetCentre().GetY()) + "_t_"+std::to_string(i);
 
 
-            _fMContainer.emplace(str,mesh);
+            _fMContainer.insert(std::make_pair(str, mesh));
 
         }
 

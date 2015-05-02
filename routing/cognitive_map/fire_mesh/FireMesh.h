@@ -38,7 +38,7 @@
 //log output
 extern OutputHandler* Log;
 
-using Matrix = std::vector<std::vector<Knot>>;
+using Matrix = std::vector<std::vector<Knot> >;
 
 class FireMesh
 {

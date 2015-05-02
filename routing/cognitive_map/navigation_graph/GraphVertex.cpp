@@ -322,14 +322,14 @@ NextDoorKnowlegde GraphVertex::GetShortestPathFromHere(const Point &position) co
     NextDoorKnowlegde rknowlegde;
 
     if(exit_edge != nullptr) {
-        rknowlegde.emplace(exit_edge->GetSrc(),exit_edge);
+        rknowlegde.insert(std::make_pair(exit_edge->GetSrc(), exit_edge));
 
         const GraphEdge * act_edge = destinations[exit_edge].first;
         if(act_edge == nullptr) {
             return rknowlegde;
         } else {
             while(this != act_edge->GetSrc()) {
-                rknowlegde.emplace(act_edge->GetSrc(),act_edge);
+                rknowlegde.insert(std::make_pair(act_edge->GetSrc(), act_edge));
 
                 act_edge = destinations[act_edge].first;
             }

@@ -49,7 +49,7 @@ class NavLine;
 
 
 //c++11 alias: Container to store options for the router (i. a. sensors)
-using optStorage = std::unordered_map<std::string,std::vector<std::string>>;
+using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
 
 class CognitiveMapRouter: public Router {
 public:

@@ -72,14 +72,17 @@ public:
      /// Norm square
      inline double NormSquare() const
      {
-          return (_x * _x + _y * _y);
+          return ScalarProduct(*this);
      }
      /// normalized vector
      Point Normalized() const;
      /// normalized vector usinf NormMolified
      Point NormalizedMolified() const;
      /// dot product
-     double ScalarProduct(const Point &v) const;
+     inline double ScalarProduct(const Point &v) const
+     {
+          return _x * v._x + _y * v._y;
+     }
      double CrossProduct(const Point &p) const;
      /// determinant of the square matrix formed by the vectors [ this, v]
      double Determinant(const Point &v) const;

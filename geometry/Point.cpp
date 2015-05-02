@@ -109,18 +109,11 @@ Point Point::Normalized() const
      else return Point(0.0, 0.0);
 }
 
-// scalar product
-double Point::ScalarProduct(const Point &v) const
-{
-     //return _x * v.GetX() + _y * v.GetY();
-     return _x * v._x + _y * v._y;
-}
-
 // since we have only 2D vectors (may be changed in the future), this function returns a scalar
 // (basically the third component of the vector (0,0,z) )
 double Point::CrossProduct(const Point &p) const
 {
-     return _x*p._y - _y*p._x;
+     return Determinant(p);
 }
 
 
@@ -128,7 +121,7 @@ double Point::CrossProduct(const Point &p) const
 /// determinant of the square matrix formed by the vectors [ this, v]
 double Point::Determinant(const Point &v) const
 {
-     return _x * v._y - _y * v._x;
+     return _x*v._y - _y*v._x;
 }
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
