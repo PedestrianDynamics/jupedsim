@@ -127,21 +127,6 @@ endif(OPENMP_FOUND)
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
-# find and add the CGAL library
-#fixme: complete this section
-# FIND_PACKAGE(CGAL QUIET)
-# if(CGAL_FOUND)
-#   include (${CGAL_USE_FILE})
-#   INCLUDE_DIRECTORIES(${CGAL_CORE_INCLUDE_DIR})
-#   add_definitions(-D_CGAL=1)
-#   message (STATUS "${CGAL_FOUND}")
-#   message (STATUS "${CGAL_CORE_INCLUDE_DIR}")
-#   message (STATUS " Erreur: ${CGAL_FOUND}")
-#   message (STATUS " Erreur: ${CGAL_USE_FILE}")
-# else(CGAL_FOUND)
-#   message( STATUS "CGAL not found." )
-# endif(CGAL_FOUND)
-
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   
@@ -149,7 +134,7 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
   endif(CMAKE_COMPILER_IS_GNUCXX)
-  file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")
+  file(GLOB test_files "${CMAKE_TEST_DIR}/test_geometry/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
 endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
@@ -239,6 +224,7 @@ set (   source_files
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
 
+
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
   poly2tri/sweep/advancing_front.cpp
@@ -280,6 +266,7 @@ set (   header_files
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
+
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h

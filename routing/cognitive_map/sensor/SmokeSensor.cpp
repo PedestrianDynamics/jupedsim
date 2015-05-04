@@ -20,7 +20,7 @@ SmokeSensor::SmokeSensor(const Building *b, const std::string &filepath, const d
 
     std::shared_ptr<FireMeshStorage> FMS(new FireMeshStorage(b,filepath,updateintervall,finalTime));
     Log->Write("INFO:\tInitialized FireMeshStorage (Smoke Sensor)");
-    _FMStorage=FMS;
+
 
 }
 
@@ -38,7 +38,7 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
     GraphVertex * vertex = (*cognitive_map->GetNavigationGraph())[sub_room];
     const GraphVertex::EdgesContainer * edges = vertex->GetAllEdges();
-
+    /// for every egde connected to the pedestrian's current vertex (room)
     for (auto &item : *edges)
     {
         /// first: find Mesh corresponding to current edge and current simTime. Secondly get knotvalue from that mesh depending
@@ -46,10 +46,12 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
         double smokeFactor = _FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
                                                       pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(),
                                                                                                 pedestrian->GetPos().GetY());
-        //std::cout << smokeFactor << std::endl;
+        /// Set egde factor
         item->SetFactor(smokeFactor,GetName());
-        //std::cout << item->GetFactor() << std::endl;
     }
+
+
+
 
 //    const GraphVertex * smoked_room = NULL;
 

@@ -33,6 +33,7 @@ public:
 private:
 
     std::shared_ptr<FireMeshStorage> _FMStorage;
+
 };
 
 #endif // SMOKESENSOR_H

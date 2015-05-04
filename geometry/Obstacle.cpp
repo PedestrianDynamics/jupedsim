@@ -46,7 +46,7 @@ using namespace std;
 
 Obstacle::Obstacle()
 {
-     _isClosed=0.0;
+     _isClosed=0;
      _height=0.0;
      _id=-1;
      _caption="obstacle";
@@ -72,12 +72,12 @@ void Obstacle::SetCaption(string caption)
      _caption = caption;
 }
 
-double Obstacle::GetClosed() const
+int Obstacle::GetClosed() const
 {
      return _isClosed;
 }
 
-void Obstacle::SetClosed(double closed)
+void Obstacle::SetClosed(int closed)
 {
      _isClosed = closed;
 }
@@ -211,7 +211,7 @@ bool Obstacle::Contains(const Point& ped) const
 
 bool Obstacle::ConvertLineToPoly()
 {
-     if(_isClosed==0.0)
+     if(_isClosed==0)
      {
           char tmp[CLENGTH];
           sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
