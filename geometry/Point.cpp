@@ -109,20 +109,7 @@ Point Point::Normalized() const
      else return Point(0.0, 0.0);
 }
 
-// since we have only 2D vectors (may be changed in the future), this function returns a scalar
-// (basically the third component of the vector (0,0,z) )
-double Point::CrossProduct(const Point &p) const
-{
-     return Determinant(p);
-}
 
-
-
-/// determinant of the square matrix formed by the vectors [ this, v]
-double Point::Determinant(const Point &v) const
-{
-     return _x*v._y - _y*v._x;
-}
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
  * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
