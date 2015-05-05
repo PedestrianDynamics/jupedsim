@@ -229,12 +229,13 @@ def getSpeed(data, agent, frame, fps=16, df=10, cm=0.01):
     return v
 #========================================================================================================
 def write_header(out, Nagents, fps):
-    out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
-    out.write("<trajectories>")
+    out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+    out.write("<trajectories>\n\n")
     # write header
-    out.write("<header formatVersion = \"1.0\">")
-    out.write("\t<agents>%d</agents>"%Nagents)
-    out.write("\t<frameRate>%d</frameRate>"%fps)
+    out.write("<header version = \"0.6\">\n")
+    out.write("\t<agents>%d</agents>\n"%Nagents)
+    out.write("\t<seed>12542</seed>\n")
+    out.write("\t<frameRate>%d</frameRate>\n"%fps)
     out.write("</header>\n") 
 
 def write_geometry(out, walls):
@@ -272,7 +273,7 @@ def write_frames(out, frames, data, mTocm ):
         
         for (agent, x, y) in zip(d[:,0].astype(int), d[:,2], d[:,3]):        
 
-            text = "\t<agent ID=\"%d\" \tx=\"%.2f\"\ty=\"%.2f\"\trA=\"%.2f\"\trB=\"%.2f\"\t eO=\"%.2f\"\teC=\"%d\"/>\n"%(agent, x*mTocm, y*mTocm, 20, 20, 0, 200)
+            text = "\t<agent ID=\"%d\" \tx=\"%.2f\"\ty=\"%.2f\"\trA=\"%.2f\"\trB=\"%.2f\"\t eO=\"%.2f\"\teC=\"%d\"/>\n"%(agent, x*mTocm*0.01, y*mTocm*0.01, 0.20, 0.20, 0, 200)
             out.write(text)
             
         out.write("</frame>\n")
