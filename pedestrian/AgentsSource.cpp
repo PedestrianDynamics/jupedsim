@@ -125,7 +125,7 @@ const std::shared_ptr<StartDistribution> AgentsSource::GetStartDistribution() co
 void AgentsSource::GenerateAgents(std::vector<Pedestrian*>& peds, int count, Building* building)
 {
      std::vector<Point> emptyPositions;
-     int pid=1; // will be discarded
+     int pid=Pedestrian::GetAgentsCreated(); // will be discarded
      for(int i=0;i<count;i++)
      {
           peds.push_back(_startDistribution->GenerateAgent(building, &pid,emptyPositions));

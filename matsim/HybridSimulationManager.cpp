@@ -135,11 +135,10 @@ bool HybridSimulationManager::Run(Simulation& sim)
      //     _rpcClient->NotifyExternalService();
 
 
-
      //starting the simulation thread and waiting
      std::thread t2(&JPSserver::RunSimulation, &jupedsimService);
 
-     _rpcServer->Wait();
+     //_rpcServer->Wait();
 
      //TestWorkflow();
      t2.join();

@@ -10,7 +10,7 @@
 
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <file location="big_room_trajectories.xml" />
+    <file location="hybrid_trajectories.xml" />
     <socket hostname="127.0.0.1" port="8989" />
   </trajectories>
 
@@ -77,8 +77,8 @@
       <group group_id="3" room_id="3" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
       <group group_id="4" room_id="4" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
       <!-- real start group -->
-      <group group_id="5" room_id="1" subroom_id="0" number="5" router_id="1" agent_parameter_id="1" goal_id="3" />
-      <group group_id="6" room_id="2" subroom_id="0" number="5" router_id="1" agent_parameter_id="1" goal_id="4" />
+      <group group_id="5" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="3" />
+      <group group_id="6" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="4" />
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->

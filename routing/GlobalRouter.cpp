@@ -428,7 +428,7 @@ bool GlobalRouter::Init(Building* building)
                               "       \tYou can solve this by enabling triangulation.",
                               from_AP->GetFriendlyName().c_str());
                     from_AP->Dump();
-                    return false;
+                    //return false;
                }
           }
           _tmpPedPath.clear();
