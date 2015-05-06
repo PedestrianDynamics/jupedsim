@@ -90,6 +90,14 @@ message ExternalConnectConfirmed {
 
 }
 
+message MaximumNumberOfAgents {
+     optional int32 number = 1;
+}
+
+message MaximumNumberOfAgentsConfirmed {
+
+}
+
 service MATSimInterfaceService {
      // Send JuPedSim connection parameter
      rpc reqExternalConnect(ExternalConnect) returns (ExternalConnectConfirmed);
@@ -99,6 +107,8 @@ service MATSimInterfaceService {
 	rpc reqAgentStuck(AgentsStuck) returns (AgentsStuckConfirmed);
 	// Notifying Matsim about the end of the simulation
 	rpc reqExternSimStepFinished(ExternSimStepFinished) returns (ExternSimStepFinishedReceived);
+	// request the maximal number of agents
+	rpc reqMaximumNumberOfAgents(MaximumNumberOfAgentsConfirmed) returns (MaximumNumberOfAgents);
 }
 
 service ExternInterfaceService {

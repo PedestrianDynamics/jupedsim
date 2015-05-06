@@ -20,6 +20,7 @@ static const char* MATSimInterfaceService_method_names[] = {
   "/org.matsim.hybrid.MATSimInterfaceService/reqExtern2MATSim",
   "/org.matsim.hybrid.MATSimInterfaceService/reqAgentStuck",
   "/org.matsim.hybrid.MATSimInterfaceService/reqExternSimStepFinished",
+  "/org.matsim.hybrid.MATSimInterfaceService/reqMaximumNumberOfAgents",
 };
 
 std::unique_ptr< MATSimInterfaceService::Stub> MATSimInterfaceService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel) {
@@ -32,6 +33,7 @@ MATSimInterfaceService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterfa
   , rpcmethod_reqExtern2MATSim_(MATSimInterfaceService_method_names[1], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[1]))
   , rpcmethod_reqAgentStuck_(MATSimInterfaceService_method_names[2], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[2]))
   , rpcmethod_reqExternSimStepFinished_(MATSimInterfaceService_method_names[3], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[3]))
+  , rpcmethod_reqMaximumNumberOfAgents_(MATSimInterfaceService_method_names[4], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[4]))
   {}
 
 ::grpc::Status MATSimInterfaceService::Stub::reqExternalConnect(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternalConnect& request, ::org::matsim::hybrid::ExternalConnectConfirmed* response) {
@@ -66,7 +68,15 @@ std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Exter
   return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>(channel(), cq, rpcmethod_reqExternSimStepFinished_, context, request, tag));
 }
 
-MATSimInterfaceService::AsyncService::AsyncService(::grpc::CompletionQueue* cq) : ::grpc::AsynchronousService(cq, MATSimInterfaceService_method_names, 4) {}
+::grpc::Status MATSimInterfaceService::Stub::reqMaximumNumberOfAgents(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::org::matsim::hybrid::MaximumNumberOfAgents* response) {
+  return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqMaximumNumberOfAgents_, context, request, response);
+}
+
+std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>> MATSimInterfaceService::Stub::AsyncreqMaximumNumberOfAgents(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::grpc::CompletionQueue* cq, void* tag) {
+  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>(channel(), cq, rpcmethod_reqMaximumNumberOfAgents_, context, request, tag));
+}
+
+MATSimInterfaceService::AsyncService::AsyncService(::grpc::CompletionQueue* cq) : ::grpc::AsynchronousService(cq, MATSimInterfaceService_method_names, 5) {}
 
 MATSimInterfaceService::Service::~Service() {
   delete service_;
@@ -104,6 +114,14 @@ void MATSimInterfaceService::AsyncService::RequestreqExternSimStepFinished(::grp
   AsynchronousService::RequestAsyncUnary(3, context, request, response, cq, tag);
 }
 
+::grpc::Status MATSimInterfaceService::Service::reqMaximumNumberOfAgents(::grpc::ServerContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::org::matsim::hybrid::MaximumNumberOfAgents* response) {
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
+}
+
+void MATSimInterfaceService::AsyncService::RequestreqMaximumNumberOfAgents(::grpc::ServerContext* context, ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MaximumNumberOfAgents>* response, ::grpc::CompletionQueue* cq, void* tag) {
+  AsynchronousService::RequestAsyncUnary(4, context, request, response, cq, tag);
+}
+
 ::grpc::RpcService* MATSimInterfaceService::Service::service() {
   if (service_ != nullptr) {
     return service_;
@@ -113,26 +131,32 @@ void MATSimInterfaceService::AsyncService::RequestreqExternSimStepFinished(::grp
       MATSimInterfaceService_method_names[0],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::ExternalConnect, ::org::matsim::hybrid::ExternalConnectConfirmed>(
-          std::function< ::grpc::Status(MATSimInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::ExternalConnect*, ::org::matsim::hybrid::ExternalConnectConfirmed*)>(&MATSimInterfaceService::Service::reqExternalConnect), this),
+          std::mem_fn(&MATSimInterfaceService::Service::reqExternalConnect), this),
       new ::org::matsim::hybrid::ExternalConnect, new ::org::matsim::hybrid::ExternalConnectConfirmed));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       MATSimInterfaceService_method_names[1],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::Extern2MATSim, ::org::matsim::hybrid::Extern2MATSimConfirmed>(
-          std::function< ::grpc::Status(MATSimInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::Extern2MATSim*, ::org::matsim::hybrid::Extern2MATSimConfirmed*)>(&MATSimInterfaceService::Service::reqExtern2MATSim), this),
+          std::mem_fn(&MATSimInterfaceService::Service::reqExtern2MATSim), this),
       new ::org::matsim::hybrid::Extern2MATSim, new ::org::matsim::hybrid::Extern2MATSimConfirmed));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       MATSimInterfaceService_method_names[2],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::AgentsStuck, ::org::matsim::hybrid::AgentsStuckConfirmed>(
-          std::function< ::grpc::Status(MATSimInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::AgentsStuck*, ::org::matsim::hybrid::AgentsStuckConfirmed*)>(&MATSimInterfaceService::Service::reqAgentStuck), this),
+          std::mem_fn(&MATSimInterfaceService::Service::reqAgentStuck), this),
       new ::org::matsim::hybrid::AgentsStuck, new ::org::matsim::hybrid::AgentsStuckConfirmed));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       MATSimInterfaceService_method_names[3],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::ExternSimStepFinished, ::org::matsim::hybrid::ExternSimStepFinishedReceived>(
-          std::function< ::grpc::Status(MATSimInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::ExternSimStepFinished*, ::org::matsim::hybrid::ExternSimStepFinishedReceived*)>(&MATSimInterfaceService::Service::reqExternSimStepFinished), this),
+          std::mem_fn(&MATSimInterfaceService::Service::reqExternSimStepFinished), this),
       new ::org::matsim::hybrid::ExternSimStepFinished, new ::org::matsim::hybrid::ExternSimStepFinishedReceived));
+  service_->AddMethod(new ::grpc::RpcServiceMethod(
+      MATSimInterfaceService_method_names[4],
+      ::grpc::RpcMethod::NORMAL_RPC,
+      new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed, ::org::matsim::hybrid::MaximumNumberOfAgents>(
+          std::mem_fn(&MATSimInterfaceService::Service::reqMaximumNumberOfAgents), this),
+      new ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed, new ::org::matsim::hybrid::MaximumNumberOfAgents));
   return service_;
 }
 
@@ -253,31 +277,31 @@ void ExternInterfaceService::AsyncService::RequestreqExternAfterSim(::grpc::Serv
       ExternInterfaceService_method_names[0],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ExternInterfaceService::Service, ::org::matsim::hybrid::MATSim2ExternHasSpace, ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>(
-          std::function< ::grpc::Status(ExternInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::MATSim2ExternHasSpace*, ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed*)>(&ExternInterfaceService::Service::reqMATSim2ExternHasSpace), this),
+          std::mem_fn(&ExternInterfaceService::Service::reqMATSim2ExternHasSpace), this),
       new ::org::matsim::hybrid::MATSim2ExternHasSpace, new ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       ExternInterfaceService_method_names[1],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ExternInterfaceService::Service, ::org::matsim::hybrid::MATSim2ExternPutAgent, ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>(
-          std::function< ::grpc::Status(ExternInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::MATSim2ExternPutAgent*, ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed*)>(&ExternInterfaceService::Service::reqMATSim2ExternPutAgent), this),
+          std::mem_fn(&ExternInterfaceService::Service::reqMATSim2ExternPutAgent), this),
       new ::org::matsim::hybrid::MATSim2ExternPutAgent, new ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       ExternInterfaceService_method_names[2],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ExternInterfaceService::Service, ::org::matsim::hybrid::ExternDoSimStep, ::org::matsim::hybrid::ExternDoSimStepReceived>(
-          std::function< ::grpc::Status(ExternInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::ExternDoSimStep*, ::org::matsim::hybrid::ExternDoSimStepReceived*)>(&ExternInterfaceService::Service::reqExternDoSimStep), this),
+          std::mem_fn(&ExternInterfaceService::Service::reqExternDoSimStep), this),
       new ::org::matsim::hybrid::ExternDoSimStep, new ::org::matsim::hybrid::ExternDoSimStepReceived));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       ExternInterfaceService_method_names[3],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ExternInterfaceService::Service, ::org::matsim::hybrid::ExternOnPrepareSim, ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>(
-          std::function< ::grpc::Status(ExternInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::ExternOnPrepareSim*, ::org::matsim::hybrid::ExternOnPrepareSimConfirmed*)>(&ExternInterfaceService::Service::reqExternOnPrepareSim), this),
+          std::mem_fn(&ExternInterfaceService::Service::reqExternOnPrepareSim), this),
       new ::org::matsim::hybrid::ExternOnPrepareSim, new ::org::matsim::hybrid::ExternOnPrepareSimConfirmed));
   service_->AddMethod(new ::grpc::RpcServiceMethod(
       ExternInterfaceService_method_names[4],
       ::grpc::RpcMethod::NORMAL_RPC,
       new ::grpc::RpcMethodHandler< ExternInterfaceService::Service, ::org::matsim::hybrid::ExternAfterSim, ::org::matsim::hybrid::ExternAfterSimConfirmed>(
-          std::function< ::grpc::Status(ExternInterfaceService::Service*, ::grpc::ServerContext*, const ::org::matsim::hybrid::ExternAfterSim*, ::org::matsim::hybrid::ExternAfterSimConfirmed*)>(&ExternInterfaceService::Service::reqExternAfterSim), this),
+          std::mem_fn(&ExternInterfaceService::Service::reqExternAfterSim), this),
       new ::org::matsim::hybrid::ExternAfterSim, new ::org::matsim::hybrid::ExternAfterSimConfirmed));
   return service_;
 }

@@ -82,6 +82,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* ExternalConnectConfirmed_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ExternalConnectConfirmed_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MaximumNumberOfAgents_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MaximumNumberOfAgents_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MaximumNumberOfAgentsConfirmed_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MaximumNumberOfAgentsConfirmed_reflection_ = NULL;
 
 }  // namespace
 
@@ -388,6 +394,35 @@ void protobuf_AssignDesc_MATSimInterface_2eproto() {
       sizeof(ExternalConnectConfirmed),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnectConfirmed, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ExternalConnectConfirmed, _is_default_instance_));
+  MaximumNumberOfAgents_descriptor_ = file->message_type(18);
+  static const int MaximumNumberOfAgents_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MaximumNumberOfAgents, number_),
+  };
+  MaximumNumberOfAgents_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      MaximumNumberOfAgents_descriptor_,
+      MaximumNumberOfAgents::default_instance_,
+      MaximumNumberOfAgents_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(MaximumNumberOfAgents),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MaximumNumberOfAgents, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MaximumNumberOfAgents, _is_default_instance_));
+  MaximumNumberOfAgentsConfirmed_descriptor_ = file->message_type(19);
+  static const int MaximumNumberOfAgentsConfirmed_offsets_[1] = {
+  };
+  MaximumNumberOfAgentsConfirmed_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      MaximumNumberOfAgentsConfirmed_descriptor_,
+      MaximumNumberOfAgentsConfirmed::default_instance_,
+      MaximumNumberOfAgentsConfirmed_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(MaximumNumberOfAgentsConfirmed),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MaximumNumberOfAgentsConfirmed, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MaximumNumberOfAgentsConfirmed, _is_default_instance_));
 }
 
 namespace {
@@ -440,6 +475,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
       ExternalConnect_descriptor_, &ExternalConnect::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       ExternalConnectConfirmed_descriptor_, &ExternalConnectConfirmed::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      MaximumNumberOfAgents_descriptor_, &MaximumNumberOfAgents::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      MaximumNumberOfAgentsConfirmed_descriptor_, &MaximumNumberOfAgentsConfirmed::default_instance());
 }
 
 }  // namespace
@@ -485,6 +524,10 @@ void protobuf_ShutdownFile_MATSimInterface_2eproto() {
   delete ExternalConnect_reflection_;
   delete ExternalConnectConfirmed::default_instance_;
   delete ExternalConnectConfirmed_reflection_;
+  delete MaximumNumberOfAgents::default_instance_;
+  delete MaximumNumberOfAgents_reflection_;
+  delete MaximumNumberOfAgentsConfirmed::default_instance_;
+  delete MaximumNumberOfAgentsConfirmed_reflection_;
 }
 
 void protobuf_AddDesc_MATSimInterface_2eproto() {
@@ -515,34 +558,38 @@ void protobuf_AddDesc_MATSimInterface_2eproto() {
     "\036\n\013AgentsStuck\022\017\n\007agentId\030\001 \003(\t\"\026\n\024Agent"
     "sStuckConfirmed\"-\n\017ExternalConnect\022\014\n\004ho"
     "st\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\"\032\n\030ExternalConnec"
-    "tConfirmed2\262\003\n\026MATSimInterfaceService\022e\n"
-    "\022reqExternalConnect\022\".org.matsim.hybrid."
-    "ExternalConnect\032+.org.matsim.hybrid.Exte"
-    "rnalConnectConfirmed\022_\n\020reqExtern2MATSim"
-    "\022 .org.matsim.hybrid.Extern2MATSim\032).org"
-    ".matsim.hybrid.Extern2MATSimConfirmed\022X\n"
-    "\rreqAgentStuck\022\036.org.matsim.hybrid.Agent"
-    "sStuck\032\'.org.matsim.hybrid.AgentsStuckCo"
-    "nfirmed\022v\n\030reqExternSimStepFinished\022(.or"
-    "g.matsim.hybrid.ExternSimStepFinished\0320."
-    "org.matsim.hybrid.ExternSimStepFinishedR"
-    "eceived2\304\004\n\026ExternInterfaceService\022w\n\030re"
-    "qMATSim2ExternHasSpace\022(.org.matsim.hybr"
-    "id.MATSim2ExternHasSpace\0321.org.matsim.hy"
-    "brid.MATSim2ExternHasSpaceConfirmed\022w\n\030r"
-    "eqMATSim2ExternPutAgent\022(.org.matsim.hyb"
-    "rid.MATSim2ExternPutAgent\0321.org.matsim.h"
-    "ybrid.MATSim2ExternPutAgentConfirmed\022d\n\022"
-    "reqExternDoSimStep\022\".org.matsim.hybrid.E"
-    "xternDoSimStep\032*.org.matsim.hybrid.Exter"
-    "nDoSimStepReceived\022n\n\025reqExternOnPrepare"
-    "Sim\022%.org.matsim.hybrid.ExternOnPrepareS"
-    "im\032..org.matsim.hybrid.ExternOnPrepareSi"
-    "mConfirmed\022b\n\021reqExternAfterSim\022!.org.ma"
-    "tsim.hybrid.ExternAfterSim\032*.org.matsim."
-    "hybrid.ExternAfterSimConfirmedB)\n\021org.ma"
-    "tsim.hybridB\024ProtoMATSimInterfaceb\006proto"
-    "3", 1921);
+    "tConfirmed\"\'\n\025MaximumNumberOfAgents\022\016\n\006n"
+    "umber\030\001 \001(\005\" \n\036MaximumNumberOfAgentsConf"
+    "irmed2\253\004\n\026MATSimInterfaceService\022e\n\022reqE"
+    "xternalConnect\022\".org.matsim.hybrid.Exter"
+    "nalConnect\032+.org.matsim.hybrid.ExternalC"
+    "onnectConfirmed\022_\n\020reqExtern2MATSim\022 .or"
+    "g.matsim.hybrid.Extern2MATSim\032).org.mats"
+    "im.hybrid.Extern2MATSimConfirmed\022X\n\rreqA"
+    "gentStuck\022\036.org.matsim.hybrid.AgentsStuc"
+    "k\032\'.org.matsim.hybrid.AgentsStuckConfirm"
+    "ed\022v\n\030reqExternSimStepFinished\022(.org.mat"
+    "sim.hybrid.ExternSimStepFinished\0320.org.m"
+    "atsim.hybrid.ExternSimStepFinishedReceiv"
+    "ed\022w\n\030reqMaximumNumberOfAgents\0221.org.mat"
+    "sim.hybrid.MaximumNumberOfAgentsConfirme"
+    "d\032(.org.matsim.hybrid.MaximumNumberOfAge"
+    "nts2\304\004\n\026ExternInterfaceService\022w\n\030reqMAT"
+    "Sim2ExternHasSpace\022(.org.matsim.hybrid.M"
+    "ATSim2ExternHasSpace\0321.org.matsim.hybrid"
+    ".MATSim2ExternHasSpaceConfirmed\022w\n\030reqMA"
+    "TSim2ExternPutAgent\022(.org.matsim.hybrid."
+    "MATSim2ExternPutAgent\0321.org.matsim.hybri"
+    "d.MATSim2ExternPutAgentConfirmed\022d\n\022reqE"
+    "xternDoSimStep\022\".org.matsim.hybrid.Exter"
+    "nDoSimStep\032*.org.matsim.hybrid.ExternDoS"
+    "imStepReceived\022n\n\025reqExternOnPrepareSim\022"
+    "%.org.matsim.hybrid.ExternOnPrepareSim\032."
+    ".org.matsim.hybrid.ExternOnPrepareSimCon"
+    "firmed\022b\n\021reqExternAfterSim\022!.org.matsim"
+    ".hybrid.ExternAfterSim\032*.org.matsim.hybr"
+    "id.ExternAfterSimConfirmedB)\n\021org.matsim"
+    ".hybridB\024ProtoMATSimInterfaceb\006proto3", 2117);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "MATSimInterface.proto", &protobuf_RegisterTypes);
   MATSim2ExternPutAgent::default_instance_ = new MATSim2ExternPutAgent();
@@ -565,6 +612,8 @@ void protobuf_AddDesc_MATSimInterface_2eproto() {
   AgentsStuckConfirmed::default_instance_ = new AgentsStuckConfirmed();
   ExternalConnect::default_instance_ = new ExternalConnect();
   ExternalConnectConfirmed::default_instance_ = new ExternalConnectConfirmed();
+  MaximumNumberOfAgents::default_instance_ = new MaximumNumberOfAgents();
+  MaximumNumberOfAgentsConfirmed::default_instance_ = new MaximumNumberOfAgentsConfirmed();
   MATSim2ExternPutAgent::default_instance_->InitAsDefaultInstance();
   MATSim2ExternPutAgent_Agent::default_instance_->InitAsDefaultInstance();
   MATSim2ExternHasSpace::default_instance_->InitAsDefaultInstance();
@@ -585,6 +634,8 @@ void protobuf_AddDesc_MATSimInterface_2eproto() {
   AgentsStuckConfirmed::default_instance_->InitAsDefaultInstance();
   ExternalConnect::default_instance_->InitAsDefaultInstance();
   ExternalConnectConfirmed::default_instance_->InitAsDefaultInstance();
+  MaximumNumberOfAgents::default_instance_->InitAsDefaultInstance();
+  MaximumNumberOfAgentsConfirmed::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_MATSimInterface_2eproto);
 }
 
@@ -5301,6 +5352,401 @@ void ExternalConnectConfirmed::InternalSwap(ExternalConnectConfirmed* other) {
 
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // ExternalConnectConfirmed
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int MaximumNumberOfAgents::kNumberFieldNumber;
+#endif  // !_MSC_VER
+
+MaximumNumberOfAgents::MaximumNumberOfAgents()
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:org.matsim.hybrid.MaximumNumberOfAgents)
+}
+
+void MaximumNumberOfAgents::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+MaximumNumberOfAgents::MaximumNumberOfAgents(const MaximumNumberOfAgents& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:org.matsim.hybrid.MaximumNumberOfAgents)
+}
+
+void MaximumNumberOfAgents::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+  number_ = 0;
+}
+
+MaximumNumberOfAgents::~MaximumNumberOfAgents() {
+  // @@protoc_insertion_point(destructor:org.matsim.hybrid.MaximumNumberOfAgents)
+  SharedDtor();
+}
+
+void MaximumNumberOfAgents::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void MaximumNumberOfAgents::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MaximumNumberOfAgents::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MaximumNumberOfAgents_descriptor_;
+}
+
+const MaximumNumberOfAgents& MaximumNumberOfAgents::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_MATSimInterface_2eproto();
+  return *default_instance_;
+}
+
+MaximumNumberOfAgents* MaximumNumberOfAgents::default_instance_ = NULL;
+
+MaximumNumberOfAgents* MaximumNumberOfAgents::New(::google::protobuf::Arena* arena) const {
+  MaximumNumberOfAgents* n = new MaximumNumberOfAgents;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void MaximumNumberOfAgents::Clear() {
+  number_ = 0;
+}
+
+bool MaximumNumberOfAgents::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:org.matsim.hybrid.MaximumNumberOfAgents)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 number = 1;
+      case 1: {
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &number_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:org.matsim.hybrid.MaximumNumberOfAgents)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:org.matsim.hybrid.MaximumNumberOfAgents)
+  return false;
+#undef DO_
+}
+
+void MaximumNumberOfAgents::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:org.matsim.hybrid.MaximumNumberOfAgents)
+  // optional int32 number = 1;
+  if (this->number() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->number(), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:org.matsim.hybrid.MaximumNumberOfAgents)
+}
+
+::google::protobuf::uint8* MaximumNumberOfAgents::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:org.matsim.hybrid.MaximumNumberOfAgents)
+  // optional int32 number = 1;
+  if (this->number() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->number(), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:org.matsim.hybrid.MaximumNumberOfAgents)
+  return target;
+}
+
+int MaximumNumberOfAgents::ByteSize() const {
+  int total_size = 0;
+
+  // optional int32 number = 1;
+  if (this->number() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->number());
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MaximumNumberOfAgents::MergeFrom(const ::google::protobuf::Message& from) {
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  const MaximumNumberOfAgents* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const MaximumNumberOfAgents*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void MaximumNumberOfAgents::MergeFrom(const MaximumNumberOfAgents& from) {
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  if (from.number() != 0) {
+    set_number(from.number());
+  }
+}
+
+void MaximumNumberOfAgents::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MaximumNumberOfAgents::CopyFrom(const MaximumNumberOfAgents& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MaximumNumberOfAgents::IsInitialized() const {
+
+  return true;
+}
+
+void MaximumNumberOfAgents::Swap(MaximumNumberOfAgents* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MaximumNumberOfAgents::InternalSwap(MaximumNumberOfAgents* other) {
+  std::swap(number_, other->number_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata MaximumNumberOfAgents::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MaximumNumberOfAgents_descriptor_;
+  metadata.reflection = MaximumNumberOfAgents_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MaximumNumberOfAgents
+
+// optional int32 number = 1;
+ void MaximumNumberOfAgents::clear_number() {
+  number_ = 0;
+}
+ ::google::protobuf::int32 MaximumNumberOfAgents::number() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MaximumNumberOfAgents.number)
+  return number_;
+}
+ void MaximumNumberOfAgents::set_number(::google::protobuf::int32 value) {
+  
+  number_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MaximumNumberOfAgents.number)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#ifndef _MSC_VER
+#endif  // !_MSC_VER
+
+MaximumNumberOfAgentsConfirmed::MaximumNumberOfAgentsConfirmed()
+  : ::google::protobuf::Message() , _internal_metadata_(NULL)  {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+}
+
+void MaximumNumberOfAgentsConfirmed::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+MaximumNumberOfAgentsConfirmed::MaximumNumberOfAgentsConfirmed(const MaximumNumberOfAgentsConfirmed& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+}
+
+void MaximumNumberOfAgentsConfirmed::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+}
+
+MaximumNumberOfAgentsConfirmed::~MaximumNumberOfAgentsConfirmed() {
+  // @@protoc_insertion_point(destructor:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  SharedDtor();
+}
+
+void MaximumNumberOfAgentsConfirmed::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void MaximumNumberOfAgentsConfirmed::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MaximumNumberOfAgentsConfirmed::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MaximumNumberOfAgentsConfirmed_descriptor_;
+}
+
+const MaximumNumberOfAgentsConfirmed& MaximumNumberOfAgentsConfirmed::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_MATSimInterface_2eproto();
+  return *default_instance_;
+}
+
+MaximumNumberOfAgentsConfirmed* MaximumNumberOfAgentsConfirmed::default_instance_ = NULL;
+
+MaximumNumberOfAgentsConfirmed* MaximumNumberOfAgentsConfirmed::New(::google::protobuf::Arena* arena) const {
+  MaximumNumberOfAgentsConfirmed* n = new MaximumNumberOfAgentsConfirmed;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void MaximumNumberOfAgentsConfirmed::Clear() {
+}
+
+bool MaximumNumberOfAgentsConfirmed::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+  handle_unusual:
+    if (tag == 0 ||
+        ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+        ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+      goto success;
+    }
+    DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+  }
+success:
+  // @@protoc_insertion_point(parse_success:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  return false;
+#undef DO_
+}
+
+void MaximumNumberOfAgentsConfirmed::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  // @@protoc_insertion_point(serialize_end:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+}
+
+::google::protobuf::uint8* MaximumNumberOfAgentsConfirmed::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  // @@protoc_insertion_point(serialize_to_array_end:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+  return target;
+}
+
+int MaximumNumberOfAgentsConfirmed::ByteSize() const {
+  int total_size = 0;
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MaximumNumberOfAgentsConfirmed::MergeFrom(const ::google::protobuf::Message& from) {
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+  const MaximumNumberOfAgentsConfirmed* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const MaximumNumberOfAgentsConfirmed*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void MaximumNumberOfAgentsConfirmed::MergeFrom(const MaximumNumberOfAgentsConfirmed& from) {
+  if (GOOGLE_PREDICT_FALSE(&from == this)) MergeFromFail(__LINE__);
+}
+
+void MaximumNumberOfAgentsConfirmed::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MaximumNumberOfAgentsConfirmed::CopyFrom(const MaximumNumberOfAgentsConfirmed& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MaximumNumberOfAgentsConfirmed::IsInitialized() const {
+
+  return true;
+}
+
+void MaximumNumberOfAgentsConfirmed::Swap(MaximumNumberOfAgentsConfirmed* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MaximumNumberOfAgentsConfirmed::InternalSwap(MaximumNumberOfAgentsConfirmed* other) {
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata MaximumNumberOfAgentsConfirmed::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MaximumNumberOfAgentsConfirmed_descriptor_;
+  metadata.reflection = MaximumNumberOfAgentsConfirmed_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MaximumNumberOfAgentsConfirmed
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
 

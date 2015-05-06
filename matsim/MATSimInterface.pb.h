@@ -58,6 +58,8 @@ class AgentsStuck;
 class AgentsStuckConfirmed;
 class ExternalConnect;
 class ExternalConnectConfirmed;
+class MaximumNumberOfAgents;
+class MaximumNumberOfAgentsConfirmed;
 
 // ===================================================================
 
@@ -1651,6 +1653,155 @@ class ExternalConnectConfirmed : public ::google::protobuf::Message {
   void InitAsDefaultInstance();
   static ExternalConnectConfirmed* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class MaximumNumberOfAgents : public ::google::protobuf::Message {
+ public:
+  MaximumNumberOfAgents();
+  virtual ~MaximumNumberOfAgents();
+
+  MaximumNumberOfAgents(const MaximumNumberOfAgents& from);
+
+  inline MaximumNumberOfAgents& operator=(const MaximumNumberOfAgents& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MaximumNumberOfAgents& default_instance();
+
+  void Swap(MaximumNumberOfAgents* other);
+
+  // implements Message ----------------------------------------------
+
+  inline MaximumNumberOfAgents* New() const { return New(NULL); }
+
+  MaximumNumberOfAgents* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MaximumNumberOfAgents& from);
+  void MergeFrom(const MaximumNumberOfAgents& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(MaximumNumberOfAgents* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 number = 1;
+  void clear_number();
+  static const int kNumberFieldNumber = 1;
+  ::google::protobuf::int32 number() const;
+  void set_number(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MaximumNumberOfAgents)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::int32 number_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
+  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
+  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
+
+  void InitAsDefaultInstance();
+  static MaximumNumberOfAgents* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MaximumNumberOfAgentsConfirmed : public ::google::protobuf::Message {
+ public:
+  MaximumNumberOfAgentsConfirmed();
+  virtual ~MaximumNumberOfAgentsConfirmed();
+
+  MaximumNumberOfAgentsConfirmed(const MaximumNumberOfAgentsConfirmed& from);
+
+  inline MaximumNumberOfAgentsConfirmed& operator=(const MaximumNumberOfAgentsConfirmed& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MaximumNumberOfAgentsConfirmed& default_instance();
+
+  void Swap(MaximumNumberOfAgentsConfirmed* other);
+
+  // implements Message ----------------------------------------------
+
+  inline MaximumNumberOfAgentsConfirmed* New() const { return New(NULL); }
+
+  MaximumNumberOfAgentsConfirmed* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MaximumNumberOfAgentsConfirmed& from);
+  void MergeFrom(const MaximumNumberOfAgentsConfirmed& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(MaximumNumberOfAgentsConfirmed* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MaximumNumberOfAgentsConfirmed)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
+  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
+  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
+
+  void InitAsDefaultInstance();
+  static MaximumNumberOfAgentsConfirmed* default_instance_;
+};
 // ===================================================================
 
 
@@ -2258,6 +2409,28 @@ inline void ExternalConnect::set_port(::google::protobuf::int32 value) {
 // -------------------------------------------------------------------
 
 // ExternalConnectConfirmed
+
+// -------------------------------------------------------------------
+
+// MaximumNumberOfAgents
+
+// optional int32 number = 1;
+inline void MaximumNumberOfAgents::clear_number() {
+  number_ = 0;
+}
+inline ::google::protobuf::int32 MaximumNumberOfAgents::number() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.MaximumNumberOfAgents.number)
+  return number_;
+}
+inline void MaximumNumberOfAgents::set_number(::google::protobuf::int32 value) {
+  
+  number_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.MaximumNumberOfAgents.number)
+}
+
+// -------------------------------------------------------------------
+
+// MaximumNumberOfAgentsConfirmed
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
 

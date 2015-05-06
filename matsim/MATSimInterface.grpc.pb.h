@@ -37,11 +37,14 @@ class MATSimInterfaceService GRPC_FINAL {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::AgentsStuckConfirmed>> AsyncreqAgentStuck(::grpc::ClientContext* context, const ::org::matsim::hybrid::AgentsStuck& request, ::grpc::CompletionQueue* cq, void* tag);
     ::grpc::Status reqExternSimStepFinished(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternSimStepFinished& request, ::org::matsim::hybrid::ExternSimStepFinishedReceived* response);
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>> AsyncreqExternSimStepFinished(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternSimStepFinished& request, ::grpc::CompletionQueue* cq, void* tag);
+    ::grpc::Status reqMaximumNumberOfAgents(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::org::matsim::hybrid::MaximumNumberOfAgents* response);
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>> AsyncreqMaximumNumberOfAgents(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::grpc::CompletionQueue* cq, void* tag);
    private:
     const ::grpc::RpcMethod rpcmethod_reqExternalConnect_;
     const ::grpc::RpcMethod rpcmethod_reqExtern2MATSim_;
     const ::grpc::RpcMethod rpcmethod_reqAgentStuck_;
     const ::grpc::RpcMethod rpcmethod_reqExternSimStepFinished_;
+    const ::grpc::RpcMethod rpcmethod_reqMaximumNumberOfAgents_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
 
@@ -53,6 +56,7 @@ class MATSimInterfaceService GRPC_FINAL {
     virtual ::grpc::Status reqExtern2MATSim(::grpc::ServerContext* context, const ::org::matsim::hybrid::Extern2MATSim* request, ::org::matsim::hybrid::Extern2MATSimConfirmed* response);
     virtual ::grpc::Status reqAgentStuck(::grpc::ServerContext* context, const ::org::matsim::hybrid::AgentsStuck* request, ::org::matsim::hybrid::AgentsStuckConfirmed* response);
     virtual ::grpc::Status reqExternSimStepFinished(::grpc::ServerContext* context, const ::org::matsim::hybrid::ExternSimStepFinished* request, ::org::matsim::hybrid::ExternSimStepFinishedReceived* response);
+    virtual ::grpc::Status reqMaximumNumberOfAgents(::grpc::ServerContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::org::matsim::hybrid::MaximumNumberOfAgents* response);
     ::grpc::RpcService* service() GRPC_OVERRIDE GRPC_FINAL;
    private:
     ::grpc::RpcService* service_;
@@ -65,6 +69,7 @@ class MATSimInterfaceService GRPC_FINAL {
     void RequestreqExtern2MATSim(::grpc::ServerContext* context, ::org::matsim::hybrid::Extern2MATSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::Extern2MATSimConfirmed>* response, ::grpc::CompletionQueue* cq, void *tag);
     void RequestreqAgentStuck(::grpc::ServerContext* context, ::org::matsim::hybrid::AgentsStuck* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::AgentsStuckConfirmed>* response, ::grpc::CompletionQueue* cq, void *tag);
     void RequestreqExternSimStepFinished(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternSimStepFinished* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternSimStepFinishedReceived>* response, ::grpc::CompletionQueue* cq, void *tag);
+    void RequestreqMaximumNumberOfAgents(::grpc::ServerContext* context, ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MaximumNumberOfAgents>* response, ::grpc::CompletionQueue* cq, void *tag);
   };
 };
 
