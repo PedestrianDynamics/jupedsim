@@ -30,7 +30,7 @@ extern OutputHandler* Log;
 
 using namespace std;
 
-JPSserver::JPSserver(Simulation& src, const std::string& connection): _SimManager(src)
+JPSserver::JPSserver(Simulation& src): _SimManager(src)
 {
      //_rpcClient = std::unique_ptr<JPSclient>(new JPSclient( grpc::CreateChannel(connection,
      //              grpc::InsecureCredentials(), grpc::ChannelArguments())));
@@ -64,7 +64,7 @@ void JPSserver::RunSimulation()
      _SimManager.RunFooter();
 }
 
-Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context,
+Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context __attribute__((unused)),
           const MATSim2ExternHasSpace* request,
           MATSim2ExternHasSpaceConfirmed* response)
 {
@@ -76,9 +76,9 @@ Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context,
      return Status::OK;
 }
 
-Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
+Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context  __attribute__((unused)),
           const MATSim2ExternPutAgent* request,
-          MATSim2ExternPutAgentConfirmed* response)
+          MATSim2ExternPutAgentConfirmed* response __attribute__((unused)))
 {
      //Log->Write("INFO:\tRPC::JPSserver I have space on node " + nodeID);
      string agent_id=request->agent().id();
@@ -136,8 +136,10 @@ Status JPSserver::reqExternOnPrepareSim(ServerContext* context __attribute__((un
      return Status::OK;
 }
 
-Status JPSserver::reqExternAfterSim(ServerContext* context,
-          const ExternAfterSim* request, ExternAfterSimConfirmed* response)
+Status JPSserver::reqExternAfterSim(
+          ServerContext* context __attribute__((unused)),
+          const ExternAfterSim* request __attribute__((unused)),
+          ExternAfterSimConfirmed* response __attribute__((unused)))
 {
      Log->Write("INFO:\tRPC::JPSserver I received shutdown order. But can I do that ?");
      _shutdown=true;

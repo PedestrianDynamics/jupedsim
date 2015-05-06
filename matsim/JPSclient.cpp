@@ -151,7 +151,7 @@ bool JPSclient::NotifyEndOfSimulation()
      ExternSimStepFinishedReceived reply;
 
      Status status =_matsimChannel->reqExternSimStepFinished(&context, request, &reply);
-     Log->Write("INFO:\tRPC::JPSserver simulation step finished");
+     //Log->Write("INFO:\tRPC::JPSserver simulation step finished");
      //std::cout<<"Details: "<<status.details()<<endl;
      return status.IsOk();
 }

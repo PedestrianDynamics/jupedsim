@@ -109,7 +109,7 @@ bool HybridSimulationManager::Run(Simulation& sim)
      //create the server
      std::string server_address(_externalServerName + ":" + std::to_string(_externalServerPort));
 
-     JPSserver jupedsimService(sim,extern_service_address);
+     JPSserver jupedsimService(sim);
      jupedsimService.SetDuplexClient(_rpcClient);
      //MATSIMserver jupedsimService;
 

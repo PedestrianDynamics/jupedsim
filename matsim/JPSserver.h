@@ -37,7 +37,7 @@ public:
       * constructor with an agent source manager, which will be
       * responsible for positioning the agents.
       */
-     JPSserver(Simulation& src, const std::string& connection);
+     JPSserver(Simulation& src);
 
      /**
       * Destructor

@@ -14,6 +14,7 @@
 #include <grpc++/server.h>
 
 #include "../pedestrian/AgentsSourcesManager.h"
+
 //forward classes
 class Building;
 class AgentsSourcesManager;
@@ -23,7 +24,16 @@ class Simulation;
 class HybridSimulationManager
 {
 public:
+     /**
+      * Constructor
+      * @param server, the server name to listen
+      * @param port, the server port to listen
+      */
      HybridSimulationManager(const std::string& server,int port);
+
+     /**
+      * Destructor
+      */
      virtual ~HybridSimulationManager();
 
      bool Init(Building* building);
