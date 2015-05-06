@@ -83,6 +83,22 @@ public:
 
      bool NotifyEndOfSimulation();
 
+     /**
+      * Request the maximal number of agents
+      * @return
+      */
+     int RequestMaxNumberAgents();
+
+     /**
+      * JuPedsim uses integer for the agent ID, MATSim uses string.
+      * @param jpsID, the jupedsim internal ID
+      * @param matsimID, the matsim string id
+      */
+     void MapMatsimAgentToJPSagent(int jpsID, std::string matsimID)
+     {
+          _mapMatsimID2JPSID[jpsID]=matsimID;
+     }
+
 private:
      bool HasSpaceOnMatsim(int nodeID);
      bool HasSpaceOnJuPedSim(int nodeID);
@@ -91,6 +107,8 @@ private:
 private:
      std::unique_ptr<ExternInterfaceService::Stub> _jupedsimChannel;
      std::unique_ptr<MATSimInterfaceService::Stub> _matsimChannel;
+     //map the matsim agent id to the jupedsim agent id
+     std::map<int,std::string> _mapMatsimID2JPSID;
 };
 
 #endif /* MATSIM_JPSCLIENT_H_ */

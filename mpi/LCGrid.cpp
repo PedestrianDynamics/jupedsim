@@ -40,7 +40,7 @@
 
 using namespace std;
 
-#define MAX_AGENT_COUNT 1000
+#define MAX_AGENT_COUNT 100000
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {

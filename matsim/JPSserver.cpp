@@ -44,21 +44,24 @@ JPSserver::~JPSserver()
 
 void JPSserver::RunSimulation()
 {
-     while(true)
+     //get the maximum number of agents
+     _SimManager.RunHeader(_jpsClient->RequestMaxNumberAgents());
+     do
      {
-          if(!_doSimulation)
+          if(_doSimulation)
           {
                Log->Write("INFO:\tRPC::JPSserver starting a new simulation");
-               _SimManager.RunSimulation(20);
+               _SimManager.RunBody(_maxSimTime);
                _doSimulation=false;
-               //TODO: notify simulation finished
                _jpsClient->NotifyEndOfSimulation();
                //exit(0);
           }
 
-          Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");
-          std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-     }
+          //Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");
+          //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+     }while(!_shutdown);
+
+     _SimManager.RunFooter();
 }
 
 Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context,
@@ -97,7 +100,10 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
                //there should be only one agent in this vector
                for(auto&& ped:peds)
                {
-                    ped->SetID(std::stoi(agent_id));
+                    //ped->SetID(std::stoi(agent_id));
+                    //_mapMatsimID2JPSID[agent_id]=ped->GetID();
+                    //TODO: there might be a race condition here if the client is sending agents out
+                    _jpsClient->MapMatsimAgentToJPSagent(ped->GetID(),agent_id);
                     ped->SetFinalDestination(std::stoi(leave_node));
                     //schedule the agent
                     src->AddToPool(ped);
@@ -110,21 +116,22 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context,
      return Status::OK;
 }
 
-Status JPSserver::reqExternDoSimStep(ServerContext* context,
-          const ExternDoSimStep* request, ExternDoSimStepReceived* response)
+Status JPSserver::reqExternDoSimStep(ServerContext* context __attribute__((unused)),
+          const ExternDoSimStep* request, ExternDoSimStepReceived* response __attribute__((unused)))
 {
      double from =request->fromtime();
      double to=request->totime();
      Log->Write("INFO:\tRPC::JPSserver I will perform a simulation step from %f to %f seconds",from,to);
      _doSimulation=true;
+     _maxSimTime=to;
      return Status::OK;
 }
 
-Status JPSserver::reqExternOnPrepareSim(ServerContext* context,
-          const ExternOnPrepareSim* request,
-          ExternOnPrepareSimConfirmed* response)
+Status JPSserver::reqExternOnPrepareSim(ServerContext* context __attribute__((unused)),
+          const ExternOnPrepareSim* request __attribute__((unused)),
+          ExternOnPrepareSimConfirmed* response __attribute__((unused)))
 {
-     Log->Write("INFO:\tRPC::JPSserver  I am ready for doing the simulation");
+     Log->Write("INFO:\tRPC::JPSserver I am ready for doing the simulation");
 
      return Status::OK;
 }
@@ -133,6 +140,7 @@ Status JPSserver::reqExternAfterSim(ServerContext* context,
           const ExternAfterSim* request, ExternAfterSimConfirmed* response)
 {
      Log->Write("INFO:\tRPC::JPSserver I received shutdown order. But can I do that ?");
+     _shutdown=true;
      return Status::OK;
 }
 

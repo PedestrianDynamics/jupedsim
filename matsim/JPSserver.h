@@ -57,9 +57,12 @@ public:
 
 private:
     Simulation& _SimManager;
-    //bool _doSimulation=false;
+    bool _shutdown=false;
     std::atomic<bool> _doSimulation;
+    std::atomic<double> _maxSimTime;
     std::shared_ptr<JPSclient> _jpsClient;
+    int _maxAgents=0;
+    //std::map<std::string, int> _mapMatsimID2JPSID;
 };
 
 #endif /* MATSIM_JPSSERVER_H_ */

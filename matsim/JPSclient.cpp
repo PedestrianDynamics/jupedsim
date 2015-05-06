@@ -78,13 +78,13 @@ bool JPSclient::SendAgentToMatsim(Pedestrian* ped)
      Extern2MATSimConfirmed reply;
 
      string leave_node=std::to_string(ped->GetFinalDestination());
-     string agent_id=std::to_string(ped->GetID());
+     //string agent_id=std::to_string(ped->GetID());
+     string agent_id=_mapMatsimID2JPSID[ped->GetID()];
 
      request.mutable_agent()->set_id(agent_id);
      request.mutable_agent()->set_leavenode(leave_node);
 
      Status status =_matsimChannel->reqExtern2MATSim(&context, request, &reply);
-     std::cout<<"Details: "<<status.details()<<endl;
 
      return status.IsOk();
 }
@@ -151,7 +151,22 @@ bool JPSclient::NotifyEndOfSimulation()
      ExternSimStepFinishedReceived reply;
 
      Status status =_matsimChannel->reqExternSimStepFinished(&context, request, &reply);
-     Log->Write("INFO:\t Simulation step finished");
+     Log->Write("INFO:\tRPC::JPSserver simulation step finished");
      //std::cout<<"Details: "<<status.details()<<endl;
      return status.IsOk();
+}
+
+int JPSclient::RequestMaxNumberAgents()
+{
+     ClientContext context;
+     MaximumNumberOfAgentsConfirmed request;
+     MaximumNumberOfAgents reply;
+     Status status =_matsimChannel->reqMaximumNumberOfAgents(&context, request, &reply);
+
+     if(status.IsOk())
+     {
+          return reply.number();
+     }
+     Log->Write("ERROR:\t RPC JPSClient call failed <RequestMaxNumberAgents>");
+     return -1;
 }
