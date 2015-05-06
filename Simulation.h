@@ -75,12 +75,13 @@ private:
     std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
-    /// differential equation solver
+    /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
+    /// differential equation solver
     ODESolver* _solver;
     /// writing the trajectories to file
     IODispatcher* _iod;
-    ///new: EventManager
+    /// EventManager
     EventManager* _em;
     /// argument parser
     ArgumentParser _argsParser;
@@ -91,7 +92,6 @@ private:
     std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
 
 public:
-
     /**
      * Constructor
      */
@@ -119,24 +119,33 @@ public:
     int RunSimulation(double maxSimTime);
 
     /**
-     * Updathe route of the pedestrians and reassign rooms, in the case a room change happens
+     * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateRoutesAndLocations();
 
     /**
-     * Set the ProfilingFlag
+     * Perform some initialisation for the simulation.
+     * such as writing the headers for the trajectories.
+     * @param the maximal number of pedestrian
      */
-    void SetProfileFlag(bool flag);
+    void RunHeader(long nPed=-1);
 
     /**
-     * Get the ProfileFlag
+     * Run the main part of the simulation
      */
-    bool GetProfileFlag();
+    int RunBody(double maxSimTime);
 
     /**
-     * Get the HPCFlag
+     * Perform some finalization like writing the
+     * footers for the trajectories.
      */
-    int GetHPCFlag();
+    void RunFooter();
+
+    /**
+     * Run a standard simulation
+     * @return the total simulated/evacuation time
+     */
+    int RunStandardSimulation(double maxSimTime);
 
     /**
      * print some statistics about the simulation

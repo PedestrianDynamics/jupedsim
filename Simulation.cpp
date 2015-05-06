@@ -273,6 +273,15 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      return true;
 }
 
+int Simulation::RunStandardSimulation(double maxSimTime)
+{
+     RunHeader(_nPeds);
+     double t=RunBody(maxSimTime);
+     RunFooter();
+     return (int)t;
+
+}
+//TODO: use RunHeader, RunBody and RunFooter
 int Simulation::RunSimulation(double maxSimTime)
 {
      int frameNr = 1; // Frame Number
@@ -516,11 +525,110 @@ void Simulation::PrintStatistics()
      Log->Write("\n");
 }
 
-
-const AgentsSourcesManager& Simulation::GetAgentSrcManager()
+void Simulation::RunHeader(long nPed)
 {
-     return _agentSrcManager;
+     // writing the header
+     if(nPed==-1) nPed=_nPeds;
+     _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
+     _iod->WriteGeometry(_building.get());
+     _iod->WriteFrame(0, _building.get());
+
+     //first initialisation needed by the linked-cells
+      UpdateRoutesAndLocations();
+      ProcessAgentsQueue();
 }
+
+int Simulation::RunBody(double maxSimTime)
+{
+     //needed to control the execution time PART 1
+     //in the case you want to run in no faster than realtime
+     //time_t starttime, endtime;
+     //time(&starttime);
+
+     //frame number. This function can be called many times,
+     static int frameNr = 1; // Frame Number
+     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
+
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
+
+     //process the queue for incoming pedestrians
+     //important since the number of peds is used
+     //to break the main simulation loop
+     ProcessAgentsQueue();
+     _nPeds = _building->GetAllPedestrians().size();
+
+     // main program loop
+     while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
+     {
+          t = 0 + (frameNr - 1) * _deltaT;
+
+          //process the queue for incoming pedestrians
+          ProcessAgentsQueue();
+
+          // update the positions
+          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+
+          //update the routes and locations
+          UpdateRoutesAndLocations();
+
+          //update the events
+          //_em->Update_Events(t);
+          _em->ProcessEvent();
+
+          //other updates
+          //someone might have left the building
+          _nPeds = _building->GetAllPedestrians().size();
+
+          //update the linked cells
+          _building->UpdateGrid();
+
+          // update the global time
+          Pedestrian::SetGlobalTime(t);
+
+          // write the trajectories
+          if (0 == frameNr % writeInterval) {
+               _iod->WriteFrame(frameNr / writeInterval, _building.get());
+          }
+
+          // needed to control the execution time PART 2
+          // time(&endtime);
+          // double timeToWait=t-difftime(endtime, starttime);
+          // clock_t goal = timeToWait*1000 + clock();
+          // while (goal > clock());
+          ++frameNr;
+     }
+     return (int) t;
+}
+
+void Simulation::RunFooter()
+{
+     // writing the footer
+     _iod->WriteFooter();
+
+     //temporary work around since the total number of frame is only available at the end of the simulation.
+     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN)
+     {
+          delete _iod;
+          _iod = NULL;
+          //reopen the file and write the missing information
+
+          // char tmp[CLENGTH];
+          // int f= frameNr / writeInterval ;
+          // sprintf(tmp,"<frameCount>%07d</frameCount>",f);
+          // string frameCount (tmp);
+
+          //char replace[CLENGTH];
+          // open the file and replace the 8th line
+          //sprintf(replace, "sed -i '9s/.*/ %d /' %s", frameNr / writeInterval,
+          //          _argsParser.GetTrajectoriesFile().c_str());
+          //int result = system(replace);
+          //Log->Write("INFO:\t Updating the framenumber exits with code [%d]", result);
+     }
+}
+
+
 
 void Simulation::ProcessAgentsQueue()
 {
@@ -538,4 +646,9 @@ void Simulation::ProcessAgentsQueue()
      {
           _hybridSimManager->ProcessOutgoingAgent();
      }
+}
+
+const AgentsSourcesManager& Simulation::GetAgentSrcManager()
+{
+     return _agentSrcManager;
 }
