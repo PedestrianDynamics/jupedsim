@@ -303,6 +303,11 @@ int Simulation::RunSimulation(double maxSimTime)
      //time_t starttime, endtime;
      //time(&starttime);
 
+     cout<<"nPeds: "<<_nPeds<<endl;
+     cout<<"manager: "<<_agentSrcManager.IsCompleted()<<endl;
+     cout<<"tmax: "<<maxSimTime<<endl;
+     cout<<"t: "<<t<<endl;
+
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
@@ -310,6 +315,9 @@ int Simulation::RunSimulation(double maxSimTime)
 
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
+
+          //cout<<"nPeds: "<<_nPeds<<endl;
+          //cout<<"manager: "<<_agentSrcManager.IsCompleted()<<endl;
 
           // update the positions
           _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
@@ -648,7 +656,7 @@ void Simulation::ProcessAgentsQueue()
      }
 }
 
-const AgentsSourcesManager& Simulation::GetAgentSrcManager()
+AgentsSourcesManager& Simulation::GetAgentSrcManager()
 {
      return _agentSrcManager;
 }

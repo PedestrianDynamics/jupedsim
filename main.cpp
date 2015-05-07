@@ -69,7 +69,9 @@ int main(int argc, char **argv)
           else
           {
                //Start the threads for managing the sources of agents if any
-               std::thread t1(sim.GetAgentSrcManager());
+               //std::thread t1(sim.GetAgentSrcManager());
+
+               std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
 
                //main thread for the simulation
                Log->Write("INFO: \tStart runSimulation()");

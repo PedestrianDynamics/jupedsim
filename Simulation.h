@@ -155,7 +155,7 @@ public:
     /**
      * @return the agents source manager
      */
-    const AgentsSourcesManager& GetAgentSrcManager();
+    AgentsSourcesManager& GetAgentSrcManager();
 
     /**
      * Check if any agents are waiting to enter the simulation

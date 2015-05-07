@@ -128,12 +128,6 @@ bool HybridSimulationManager::Run(Simulation& sim)
           Log->Write("ERROR:\tNotification failed");
      }
 
-     //     Pedestrian ped;
-     //     ped.SetID(14);
-     //     ped.SetFinalDestination(4);
-     //     _rpcClient->SendAgentToMatsim(&ped);
-     //     _rpcClient->NotifyExternalService();
-
 
      //starting the simulation thread and waiting
      std::thread t2(&JPSserver::RunSimulation, &jupedsimService);
@@ -280,9 +274,9 @@ std::string HybridSimulationManager::ToString()
                + std::to_string(_externalServerPort) + "]\n";
 }
 
-void HybridSimulationManager::AttachSourceManager(const AgentsSourcesManager& src)
-{
-     //TODO create a deep copy of the manager
-     // and copy the sources without copying the generated pedestrian
-     _agentSrcMng=src;
-}
+//void HybridSimulationManager::AttachSourceManager(const AgentsSourcesManager& src)
+//{
+//     //TODO create a deep copy of the manager
+//     // and copy the sources without copying the generated pedestrian
+//     _agentSrcMng=src;
+//}

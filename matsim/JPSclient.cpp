@@ -51,24 +51,12 @@ void JPSclient::ProcessAgentQueue(Building* building)
           }
            */
 
-          if(HasSpaceOnMatsim(ped->GetFinalDestination())==true)
+          //remove the pedestrian only if successfully sent
+          if(SendAgentToMatsim(ped)==true)
           {
-               SendAgentToMatsim(ped);
+               building->DeletePedestrian(ped);
           }
-          //std::cout<<"deleting from the client:"<<std::endl;
-          building->DeletePedestrian(ped);
      }
-}
-
-bool JPSclient::HasSpaceOnMatsim(int nodeID)
-{
-     //Status status =_matsimChannel->reqExtern2MATSim(&context, request, &reply);
-     //if(status.IsOk())
-     //{
-     //
-     //}
-
-     return (nodeID>0);
 }
 
 bool JPSclient::SendAgentToMatsim(Pedestrian* ped)
@@ -86,7 +74,11 @@ bool JPSclient::SendAgentToMatsim(Pedestrian* ped)
 
      Status status =_matsimChannel->reqExtern2MATSim(&context, request, &reply);
 
-     return status.IsOk();
+     if(status.IsOk())
+     {
+          return reply.accepted();
+     }
+     return false;
 }
 
 bool JPSclient::HasSpaceOnJuPedSim(int nodeID)

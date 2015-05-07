@@ -79,7 +79,7 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 LCGrid::~LCGrid()
 {
      for(int i=0; i<_nPeds; i++) {
-          if(!_localPedsCopy[i])
+          if(_localPedsCopy[i])
                delete _localPedsCopy[i];
      }
      delete [] _list;

@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <memory>
+#include <atomic>
 
 //Forward declarations
 class AgentsSource;
@@ -24,6 +25,9 @@ public:
       */
      AgentsSourcesManager();
 
+     ///disable copying
+     AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
+
      /**
       * Destructor
       */
@@ -34,6 +38,8 @@ public:
       * @param value
       */
      void operator()();
+
+     void Run();
 
      /**
       *  Add a new agent source
@@ -62,10 +68,16 @@ public:
      Building* GetBuilding() const;
 
      /**
-      *
+      *Schedule the pedestrians for the simulation
       * @return true if all source are empty
       */
-     bool ProcessAllSources();
+     bool ProcessAllSources() const;
+
+     /**
+      * Trigger the sources to generate the specified
+      * number of agents for this frequency
+      */
+     void GenerateAgents();
 
 private:
      /// contain the sources
@@ -75,11 +87,12 @@ private:
      /// building object
      Building* _building=nullptr;
      /// whether all agents have been dispatched
-     bool _isCompleted=true;
+     static bool _isCompleted;
+     //std::atomic<bool>_isCompleted=false;
 
 private:
      void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent);
-     void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds);
+     void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */

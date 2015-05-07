@@ -100,7 +100,6 @@ public:
      }
 
 private:
-     bool HasSpaceOnMatsim(int nodeID);
      bool HasSpaceOnJuPedSim(int nodeID);
      bool SendAgentToJuPedSim(Pedestrian* ped);
 

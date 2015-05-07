@@ -20,9 +20,10 @@
 
 using namespace std;
 
+bool AgentsSourcesManager::_isCompleted=false;
+
 AgentsSourcesManager::AgentsSourcesManager()
 {
-
 }
 
 AgentsSourcesManager::~AgentsSourcesManager()
@@ -32,7 +33,19 @@ AgentsSourcesManager::~AgentsSourcesManager()
 void AgentsSourcesManager::operator()()
 {
      Log->Write("INFO:\tStarting agent manager thread");
-     //the loop is updated each second.
+
+     //Generate all agents required for the complete simulation
+     //It might be more efficient to generate at each frequency step
+     for (const auto& src : _sources)
+     {
+          src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
+          cout<<"generation: "<<src->GetPoolSize()<<endl;
+     }
+
+     //first call ignoring the return value
+     ProcessAllSources();
+
+     //the loop is updated each x second.
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
@@ -41,6 +54,12 @@ void AgentsSourcesManager::operator()()
      {
           int current_time = Pedestrian::GetGlobalTime();
 
+          //first step
+          //if(current_time==0){
+               //finished=ProcessAllSources();
+          //     ProcessAllSources();
+          //     //cout<<"here:"<<endl; exit(0);
+          //}
           if ((current_time != _lastUpdateTime)
                     && ((current_time % updateFrequency) == 0))
           {
@@ -54,18 +73,68 @@ void AgentsSourcesManager::operator()()
           //std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
-     _isCompleted = true;
+     _isCompleted = true;exit(0);
 }
 
-bool AgentsSourcesManager::ProcessAllSources()
+void AgentsSourcesManager::Run()
 {
-     bool empty=true;
+     Log->Write("INFO:\tStarting agent manager thread");
+
+
+     //Generate all agents required for the complete simulation
+     //It might be more efficient to generate at each frequency step
      for (const auto& src : _sources)
      {
+          src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
+          cout<<"generation: "<<src->GetPoolSize()<<endl;
+     }
+
+     //first call ignoring the return value
+     ProcessAllSources();
+
+     //the loop is updated each x second.
+     //it might be better to use a timer
+     _isCompleted = false;
+     bool finished = false;
+     long updateFrequency = 5;     // 1 second
+     do
+     {
+          int current_time = Pedestrian::GetGlobalTime();
+
+          //first step
+          //if(current_time==0){
+               //finished=ProcessAllSources();
+          //     ProcessAllSources();
+          //     //cout<<"here:"<<endl; exit(0);
+          //}
+          if ((current_time != _lastUpdateTime)
+                    && ((current_time % updateFrequency) == 0))
+          {
+               //cout<<"TIME:"<<current_time<<endl;
+               finished=ProcessAllSources();
+               _lastUpdateTime = current_time;
+               cout << "source size: " << _sources.size() << endl;
+          }
+          //wait some time
+          //cout<<"sleepinp..."<<endl;
+          //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+     } while (!finished);
+     Log->Write("INFO:\tTerminating agent manager thread");
+     _isCompleted = true;exit(0);
+}
+
+bool AgentsSourcesManager::ProcessAllSources() const
+{
+     bool empty=true;
+     //cout<<"src size: "<<_sources.size()<<endl;
+     for (const auto& src : _sources)
+     {
+          //cout<<"size: "<<src->GetPoolSize()<<endl;//exit(0);
           if (src->GetPoolSize())
           {
                vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
+               //cout<<"removing: "<<peds.size()<<" agents from the sources"<<endl;//getc(stdin);exit(0);
                ComputeBestPositionRandom(src.get(), peds);
                // compute the optimal position for insertion
                for (auto&& ped : peds)
@@ -201,7 +270,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
 }
 
 void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
-          std::vector<Pedestrian*>& peds)
+          std::vector<Pedestrian*>& peds) const
 {
 
      //generate the agents with default positions
@@ -268,6 +337,17 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
      }
 
 }
+
+
+void AgentsSourcesManager::GenerateAgents()
+{
+
+     for (const auto& src : _sources)
+     {
+          src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
+     }
+}
+
 void AgentsSourcesManager::AddSource(std::shared_ptr<AgentsSource> src)
 {
      _sources.push_back(src);
