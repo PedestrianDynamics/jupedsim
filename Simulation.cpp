@@ -303,11 +303,6 @@ int Simulation::RunSimulation(double maxSimTime)
      //time_t starttime, endtime;
      //time(&starttime);
 
-     cout<<"nPeds: "<<_nPeds<<endl;
-     cout<<"manager: "<<_agentSrcManager.IsCompleted()<<endl;
-     cout<<"tmax: "<<maxSimTime<<endl;
-     cout<<"t: "<<t<<endl;
-
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
@@ -465,7 +460,7 @@ void Simulation::UpdateRoutesAndLocations()
 #pragma omp critical
                          pedsToRemove.push_back(ped);
                          //the agent left the old room
-                         //actualize the egress time for that room
+                         //actualize the eggress time for that room
                          allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
 
                     }

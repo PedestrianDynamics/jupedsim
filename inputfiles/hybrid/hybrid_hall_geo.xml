@@ -2,8 +2,8 @@
 
 <geometry version="0.5" caption="hybrid test" unit="m" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_geometry.xsd">
   <rooms>
-    <room id="0" caption="hall">
-      <subroom id="0" closed="0" class="subroom">
+    <room id="0" caption="hall0">
+      <subroom id="0" closed="0" class="floor">
         <polygon caption="wall">
           <vertex px="0.0" py="2.8" />
           <vertex px="0.0" py="0.0" />
@@ -26,8 +26,8 @@
         </polygon>
       </subroom>
     </room>
-    <room id="1" caption="hall">
-      <subroom id="0" closed="0" class="subroom">
+    <room id="1" caption="hall1">
+      <subroom id="0" closed="0" class="floor">
         <polygon caption="wall">
           <vertex px="3.6" py="-2.0" />
           <vertex px="3.6" py="0.0" />
@@ -38,8 +38,8 @@
         </polygon>
       </subroom>
     </room>
-    <room id="2" caption="hall">
-      <subroom id="0" closed="0" class="subroom">
+    <room id="2" caption="hall2">
+      <subroom id="0" closed="0" class="floor">
         <polygon caption="wall">
           <vertex px="9.2" py="2.8" />
           <vertex px="11.2" py="2.8" />
@@ -50,8 +50,8 @@
         </polygon>
       </subroom>
     </room>
-    <room id="3" caption="hall">
-      <subroom id="0" closed="0" class="subroom">
+    <room id="3" caption="hall3">
+      <subroom id="0" closed="0" class="floor">
         <polygon caption="wall">
           <vertex px="3.2" py="9.2" />
           <vertex px="3.2" py="11.2" />
@@ -62,8 +62,8 @@
         </polygon>
       </subroom>
     </room>
-    <room id="4" caption="hall">
-      <subroom id="0" closed="0" class="subroom">
+    <room id="4" caption="hall4">
+      <subroom id="0" closed="0" class="floor">
         <polygon caption="wall">
           <vertex px="0.0" py="2.8" />
           <vertex px="-2.0" py="2.8" />

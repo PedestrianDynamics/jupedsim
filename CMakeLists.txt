@@ -191,6 +191,12 @@ set (   source_files
 
   voronoi/VoronoiDiagramGenerator.cpp
 
+  matsim/HybridSimulationManager.cpp
+  matsim/JPSserver.cpp
+  matsim/JPSclient.cpp                
+  matsim/MATSimInterface.pb.cc
+  matsim/MATSimInterface.grpc.pb.cc  
+  
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
@@ -267,6 +273,12 @@ set (   header_files
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
 
+  matsim/JPSclient.h  
+  matsim/MATSimInterface.grpc.pb.h  
+  matsim/MATSimInterface.proto
+  matsim/HybridSimulationManager.h    
+  matsim/JPSserver.h                 
+  matsim/MATSimInterface.pb.h
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
@@ -332,7 +344,7 @@ add_executable(
   jpscore main.cpp
   )
 
-target_link_libraries(jpscore  core)
+target_link_libraries(jpscore  core grpc++_unsecure grpc gpr protobuf dl)
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)

@@ -120,7 +120,7 @@ void AgentsSourcesManager::Run()
           //std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
-     _isCompleted = true;exit(0);
+     _isCompleted = true;//exit(0);
 }
 
 bool AgentsSourcesManager::ProcessAllSources() const

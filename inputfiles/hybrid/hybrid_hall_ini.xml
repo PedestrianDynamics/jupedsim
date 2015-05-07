@@ -15,7 +15,7 @@
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->
-  <hybrid_simulation server="localhost" port="9999" />
+  <hybrid_simulation server="zam597" port="9999" />
 
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->
@@ -79,6 +79,7 @@
       <!-- real start group -->
       <group group_id="5" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="3" />
       <group group_id="6" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="4" />
+      <group group_id="7" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" start_x="4.5" start_y="-1.63" goal_id="4" />
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->

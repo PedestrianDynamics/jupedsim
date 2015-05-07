@@ -246,10 +246,11 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
                          start_pos) == false)
                {
                     Log->Write(
-                              "ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
-                              *pid, GetRoomId(), start_pos.toString().c_str());
+                              "ERROR: \tStartDistribution::GenerateAgent cannot distribute pedestrian %d in Room %d /Subroom %d at fixed position %s",
+                              *pid, GetRoomId(), GetSubroomID(), start_pos.toString().c_str());
                     Log->Write(
-                              "ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
+                              "ERROR: \t Make sure that the position is inside the geometry "
+                              "and belongs to the specified room %d/subroom %d",ped->GetRoomID(),ped->GetSubRoomID());
                     exit(EXIT_FAILURE);
                }
 

@@ -123,7 +123,8 @@ bool HybridSimulationManager::Run(Simulation& sim)
      Log->Write("INFO:\tJuPedSim is up and running on " + jupedsim_service_address);
      Log->Write("INFO:\tNotifying Matsim at " + extern_service_address);
 
-     if(false==_rpcClient->NotifyExternalService(_internalServerName,_internalServerPort))
+     //if(false==_rpcClient->NotifyExternalService(_exinternalServerName,_internalServerPort))
+     if(false==_rpcClient->NotifyExternalService("zam763",_internalServerPort))
      {
           Log->Write("ERROR:\tNotification failed");
      }
