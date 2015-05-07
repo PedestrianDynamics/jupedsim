@@ -56,6 +56,10 @@ void JPSclient::ProcessAgentQueue(Building* building)
           {
                building->DeletePedestrian(ped);
           }
+          else
+          {
+               AgentsQueueOut::Add(ped);
+          }
      }
 }
 

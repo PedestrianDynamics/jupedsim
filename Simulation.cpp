@@ -570,6 +570,9 @@ int Simulation::RunBody(double maxSimTime)
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
 
+          //update the linked cells
+          _building->UpdateGrid();
+
           // update the positions
           _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
 
@@ -584,8 +587,6 @@ int Simulation::RunBody(double maxSimTime)
           //someone might have left the building
           _nPeds = _building->GetAllPedestrians().size();
 
-          //update the linked cells
-          _building->UpdateGrid();
 
           // update the global time
           Pedestrian::SetGlobalTime(t);

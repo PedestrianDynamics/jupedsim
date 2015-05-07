@@ -39,7 +39,7 @@ using namespace std;
 
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
-int Pedestrian::_agentsCreated=0;
+int Pedestrian::_agentsCreated=1;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
@@ -101,6 +101,10 @@ Pedestrian::~Pedestrian()
 void Pedestrian::SetID(int i)
 {
      _id = i;
+     if(i<=0)
+     {
+     cout<<"invalid ID"<<i<<endl;exit(0);
+     }
 }
 
 void Pedestrian::SetRoomID(int i, string roomCaption)
