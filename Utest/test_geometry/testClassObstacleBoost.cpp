@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           Wall w2(P2, P3);
           Wall w3(P3, P4);
           Wall w4(P4, P1);
-          Wall w5(P3, P5);
+          Wall w5(P2, P5);
           
           obs1.SetId(i-1);
           obs1.AddWall(w1);
@@ -141,5 +141,35 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
      }
      BOOST_MESSAGE("Leaving obstacle ConvertLineToPoly test");
+}
+
+BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
+{
+     BOOST_MESSAGE("starting obstacle GetCentroid & intersectWithLine test");
+     for (int i = 0; i < 10; ++i) {
+          Point P1(i, i);
+          Point P2(i+10, i);
+          Point P3(i+5, i+5);
+          Point P4(i+5, i-5);
+                    
+          Wall w1(P1, P2);
+          Wall w2(P2, P3);
+          Wall w3(P3, P1);
+          
+          Obstacle obs1;
+          obs1.SetId(i-1);
+          
+          obs1.AddWall(w1);
+          obs1.AddWall(w2);
+          obs1.AddWall(w3);
+          
+          obs1.SetClosed(1);
+          obs1.ConvertLineToPoly();
+          BOOST_CHECK(obs1.GetCentroid() == (P1 + P2 + P3) / 3);  
+          
+          Line L1(P3, P4);
+          BOOST_CHECK(obs1.IntersectWithLine(L1) == true);
+     }
+     BOOST_MESSAGE("starting obstacle GetCentroid test");
 }
 BOOST_AUTO_TEST_SUITE_END()
