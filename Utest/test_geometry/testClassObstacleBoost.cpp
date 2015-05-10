@@ -168,8 +168,8 @@ BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
           BOOST_CHECK(obs1.GetCentroid() == (P1 + P2 + P3) / 3);  
           
           Line L1(P3, P4);
-          BOOST_CHECK(obs1.IntersectWithLine(L1) == true);
+          BOOST_CHECK(obs1.IntersectWithLine(L1) == true);          
      }
-     BOOST_MESSAGE("starting obstacle GetCentroid test");
+     BOOST_MESSAGE("Leaving obstacle GetCentroid & IntersectWithLine test");
 }
 BOOST_AUTO_TEST_SUITE_END()
