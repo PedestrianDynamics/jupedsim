@@ -54,9 +54,9 @@ HybridSimulationManager::HybridSimulationManager(const std::string& server,
      _externalServerPort = port;
 
      //get the canonical hostname
-     //char hostname[1024];
-     //gethostname(hostname, 1024);
-     //_internalServerName=std::string(hostname);
+     char hostname[1024];
+     gethostname(hostname, 1024);
+     _internalServerName=std::string(hostname);
 
      //GOOGLE_PROTOBUF_VERIFY_VERSION;
      //grpc_init();
@@ -98,8 +98,10 @@ bool HybridSimulationManager::Run(Simulation& sim)
      //string extern_service_address("zam597:9999");
      string extern_service_address(_externalServerName + ":" + std::to_string(_externalServerPort));
 
-     string jupedsim_service_address(_internalServerName + ":" + std::to_string(_internalServerPort));
-     //string jupedsim_service_address("0.0.0.0:9999")/*_serverName + ":" + std::to_string(_port)*/;
+     ///0.0.0.0 means to listen on all devices
+     string jupedsim_service_address("0.0.0.0:" + std::to_string(_internalServerPort));
+     //string jupedsim_service_address(_internalServerName + ":" + std::to_string(_internalServerPort));
+     //string jupedsim_service_address("0.0.0.0:9998")/*_serverName + ":" + std::to_string(_port)*/;
 
 
      //create the client that will be running on its own thread
@@ -124,7 +126,7 @@ bool HybridSimulationManager::Run(Simulation& sim)
      Log->Write("INFO:\tNotifying Matsim at " + extern_service_address);
 
      //if(false==_rpcClient->NotifyExternalService(_exinternalServerName,_internalServerPort))
-     if(false==_rpcClient->NotifyExternalService("zam763",_internalServerPort))
+     if(false==_rpcClient->NotifyExternalService(_internalServerName,_internalServerPort))
      {
           Log->Write("ERROR:\tNotification failed");
      }

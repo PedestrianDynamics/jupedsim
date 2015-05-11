@@ -14,6 +14,7 @@
 #include "../voronoi/VoronoiDiagramGenerator.h"
 #include "../geometry/Building.h"
 
+#include "../mpi/LCGrid.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -284,10 +285,12 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
      //int subroomID = dist->GetSubroomID();
      // first default Position
 
-     for (const auto& ped : peds)
+     for (auto& ped : peds)
      {
           //ped->Dump(ped->GetID()); continue;
           int index = -1;
+
+          AdjustVelocityUsingWeidmann(ped);
 
           //in the case a range was specified
           for (unsigned int a = 0; a < positions.size(); a++)
@@ -336,6 +339,32 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           }
      }
 
+}
+void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian* ped) const
+{
+     //get the density
+     vector<Pedestrian*> neighbours;
+     _building->GetGrid()->GetNeighbourhood(ped,neighbours);
+
+     //pers per m2
+     double density = 1.0;
+     //radius corresponding to a surface of 1m2
+     double radius_square=0.564*0.564;
+     for(const auto& p: neighbours)
+     {
+          if( (ped->GetPos()-p->GetPos()).NormSquare()<radius_square)
+               density+=1.0;
+     }
+
+     //get the velocity
+     double density_max=5.4;
+     double speed=1.34*(1 - exp(-1.913*(1.0/density-1.0/density_max)));
+
+     //set the velocity vector
+     if(ped->FindRoute()!=-1)
+          {
+
+          }
 }
 
 

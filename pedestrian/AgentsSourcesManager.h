@@ -93,6 +93,11 @@ private:
 private:
      void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent);
      void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
+     /**
+      * Adjust the velocity of the pedestrian using the weidmann fundamental diagram
+      */
+     void AdjustVelocityUsingWeidmann(Pedestrian* ped) const;
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */
