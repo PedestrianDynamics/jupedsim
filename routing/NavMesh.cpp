@@ -190,7 +190,7 @@ void NavMesh::BuildNavMesh()
                          Point P1 = transitions[t]->GetPoint2();
                          Point D0 = P1 - P0;
                          Point D1 = centroid0-P0;
-                         if (D0.Det(D1) < 0) {
+                         if (D0.Determinant(D1) < 0) {
                               //o->pDisp=D0;
                               o->pEnd=*GetVertex(P1);
                               o->pStart= *GetVertex(P0);
@@ -237,7 +237,7 @@ void NavMesh::BuildNavMesh()
                     Point P1 = walls[w].GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          //o->pDisp=D0;
                          o->pEnd=*GetVertex(P1);
                          o->pStart= *GetVertex(P0);
@@ -1244,7 +1244,7 @@ void NavMesh::FinalizeAlphaShape()
                     Point P1 = walls[w].GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1271,7 +1271,7 @@ void NavMesh::FinalizeAlphaShape()
                     Point P1 = transitions[t]->GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1519,7 +1519,7 @@ void NavMesh::Finalize()
                     Point P1 = walls[w].GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1543,7 +1543,7 @@ void NavMesh::Finalize()
                     Point P1 = transitions[t]->GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1915,7 +1915,7 @@ void NavMesh::Triangulate(JNode* node)
                Point P1 = walls[w].GetPoint2();
                Point D0 = P1 - P0;
                Point D1 = centroid0-P0;
-               if (D0.Det(D1) < 0) {
+               if (D0.Determinant(D1) < 0) {
                     //o->pDisp=D0;
                     o->pEnd=*GetVertex(P1);
                     o->pStart= *GetVertex(P0);
@@ -2592,7 +2592,7 @@ void NavMesh::ComputeStairsEquation()
                          Point vecAB= poly[1]-poly[0];
                          Point vecBC= poly[2]-poly[1];
 
-                         double det=vecAB.Det(vecBC);
+                         double det= vecAB.Determinant(vecBC);
                          if(fabs(det)>J_EPS) {
                               std::reverse(poly.begin(), poly.end());
                               //cout<<"stair is ccw:"<<endl;
@@ -2619,7 +2619,7 @@ void NavMesh::ComputeStairsEquation()
                                         Point D0 = p2 - p1;
                                         Point D1 = Point(0.0,0.0)-p1;
                                         //Point D1 = p1 - Point(0,0);
-                                        if (D0.Det(D1) > 0) {
+                                        if (D0.Determinant(D1) > 0) {
                                              D=p1;
                                              A=p2;
                                              B=p3;

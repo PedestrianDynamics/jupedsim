@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(LINE_NORMAL_VEC_TEST)
           Line L1 (P1, P2);
           Point normal = L1.NormalVec();
           Point diff = P2 - P1;
-          BOOST_CHECK_MESSAGE(normal.ScalarP(diff) < 1E-12, 
-                              "normal.ScalarP(diff) = " << normal.ScalarP(diff) );
+          BOOST_CHECK_MESSAGE(normal.ScalarProduct(diff) < 1E-12,
+                              "normal.ScalarProduct(diff) = " << normal.ScalarProduct(diff) );
      }
      BOOST_MESSAGE("Leaving normal vector test");
 }
@@ -72,13 +72,13 @@ BOOST_AUTO_TEST_CASE(LINE_SHORTEST_POINT_TEST)
           i = (i == 0)? 0.5 : i;
           Point P1 (i, sin(PI / i));
           Point P2 = L1.ShortestPoint(P1);
-          lambda = (P1 - PB).ScalarP(DPAB) / DPAB.ScalarP(DPAB);
+          lambda = (P1 - PB).ScalarProduct(DPAB) / DPAB.ScalarProduct(DPAB);
           if (lambda > 1)
                BOOST_CHECK_MESSAGE(P2 == PA, " P2 = ( " << P2.GetX() << ", " << P2.GetY() << ")");
           else if(lambda < 0)
                BOOST_CHECK_MESSAGE(P2 == PB, " P2 = ( " << P2.GetX() << ", " << P2.GetY() << ")");
           else
-               BOOST_CHECK_MESSAGE((P2 - P1).ScalarP(DPAB) < 1E-12, 
+               BOOST_CHECK_MESSAGE((P2 - P1).ScalarProduct(DPAB) < 1E-12,
                                    " P2 = ( " << P2.GetX() << ", " << P2.GetY() << ")");
        
      }

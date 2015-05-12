@@ -117,7 +117,7 @@ public:
                               - pHull[i % hsize].pPos;
                     Point vecBC = pHull[(i + 2) % hsize].pPos
                               - pHull[(i + 1) % hsize].pPos;
-                    double det = vecAB.Det(vecBC);
+                    double det = vecAB.Determinant(vecBC);
                     if (fabs(det) < J_EPS)
                          det = 0.0;
 
@@ -150,7 +150,7 @@ public:
                Point vecAB = pHull[1].pPos - pHull[0].pPos;
                Point vecBC = pHull[2].pPos - pHull[1].pPos;
 
-               double det = vecAB.Det(vecBC);
+               double det = vecAB.Determinant(vecBC);
                if (fabs(det) < J_EPS)
                     det = 0.0;
 

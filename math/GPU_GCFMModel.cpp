@@ -116,9 +116,9 @@ Point GPU_GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 	//Point AP1inE1 = Point(E1.GetXp(), 0); // ActionPoint von E1 in Koordinaten von E1
 	//Point AP2inE2 = Point(E2.GetXp(), 0); // ActionPoint von E2 in Koordinaten von E2
 	// ActionPoint von E1 in Koordinaten von E2 (transformieren)
-	//Point AP1inE2 = AP1inE1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+	//Point AP1inE2 = AP1inE1.TransformToEllipseCoordinates(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
 	// ActionPoint von E2 in Koordinaten von E1 (transformieren)
-	//Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
+	//Point AP2inE1 = AP2inE2.TransformToEllipseCoordinates(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
 	//r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
 	//r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
 
@@ -127,8 +127,8 @@ Point GPU_GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 	double mindist;
 
 
-	p1 = Point(E1.GetXp(), 0).CoordTransToCart(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
-	p2 = Point(E2.GetXp(), 0).CoordTransToCart(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+	p1 = Point(E1.GetXp(), 0).TransformToCartesianCoordinates(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
+	p2 = Point(E2.GetXp(), 0).TransformToCartesianCoordinates(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
 	distp12 = p2 - p1;
 	//mindist = E1.MinimumDistanceToEllipse(E2); //ONE
 	mindist = 0.5; //for performance reasons, it is assumed that this distance is about 50 cm
@@ -149,16 +149,16 @@ Point GPU_GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 	}
 	// calculate the parameter (whatever dist is)
-	tmp = (vp1 - vp2).ScalarP(ep12); // < v_ij , e_ij >
+	tmp = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
 	v_ij = 0.5 * (tmp + fabs(tmp));
-	tmp2 = vp1.ScalarP(ep12); // < v_i , e_ij >
+	tmp2 = vp1.ScalarProduct(ep12); // < v_i , e_ij >
 
 	//todo: runtime normsquare?
 	if (vp1.Norm() < J_EPS) { // if(norm(v_i)==0)
 		K_ij = 0;
 	} else {
 		double bla = tmp2 + fabs(tmp2);
-		K_ij = 0.25 * bla * bla / vp1.ScalarP(vp1); //squared
+		K_ij = 0.25 * bla * bla / vp1.ScalarProduct(vp1); //squared
 
 		if (K_ij < J_EPS * J_EPS) {
 			F_rep = Point(0.0, 0.0);
@@ -274,7 +274,7 @@ inline Point GPU_GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
 	}
 	// Kraft soll nur orthgonal wirken
 	// ???
-	if (fabs((w.GetPoint1() - w.GetPoint2()).ScalarP(ped->GetPos() - pt)) > J_EPS) {
+	if (fabs((w.GetPoint1() - w.GetPoint2()).ScalarProduct(ped->GetPos() - pt)) > J_EPS) {
 		return F;
 	}
 	//double mind = ped->GetEllipse().MinimumDistanceToLine(w);
@@ -310,7 +310,7 @@ Point GPU_GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l
 	if (d < J_EPS)
 		return Point(0.0, 0.0);
 	e_ij = dist / d;
-	tmp = v.ScalarP(e_ij); // < v_i , e_ij >;
+	tmp = v.ScalarProduct(e_ij); // < v_i , e_ij >;
 	bla = (tmp + fabs(tmp));
 	if (!bla) // Fussgaenger nicht im Sichtfeld
 		return Point(0.0, 0.0);
@@ -318,7 +318,7 @@ Point GPU_GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l
 		return Point(0.0, 0.0);
 	K_ij = 0.5 * bla / v.Norm(); // K_ij
 	// Punkt auf der Ellipse
-	pinE = p.CoordTransToEllipse(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
+	pinE = p.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
 	// Punkt auf der Ellipse
 	r = E.PointOnEllipse(pinE);
 	//interpolierte Kraft
@@ -642,7 +642,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 								if(r<0.001*0.001){
 									double cp_x=elEA[p];
 									double cp_y=0.0;
-									//cp.CoordTransToCart
+									//cp.TransformToCartesianCoordinates
 									R1_x=cp_x*cosPhi[p]-cp_y*sinPhi[p]+elCenter_x[p];
 									R1_y=cp_x*sinPhi[p]+cp_y*cosPhi[p]+elCenter_y[p];
 								}
@@ -654,7 +654,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 									double b=elEB[p];
 									double s_x=a*cosTheta;
 									double s_y=b*sinTheta;
-									//s.CoordTransToCart
+									//s.TransformToCartesianCoordinates
 									R1_x=s_x*cosPhi[p]-s_y*sinPhi[p]+elCenter_x[p];
 									R1_y=s_x*sinPhi[p]+s_y*cosPhi[p]+elCenter_y[p];
 								}
@@ -663,7 +663,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 								if(r<0.001*0.001){
 									double cp_x=elEA[n];
 									double cp_y=0.0;
-									//cp.CoordTransToCart
+									//cp.TransformToCartesianCoordinates
 									R2_x=cp_x*cosPhi[n]-cp_y*sinPhi[n]+elCenter_x[n];
 									R2_y=cp_x*sinPhi[n]+cp_y*cosPhi[n]+elCenter_y[n];
 								}
@@ -675,7 +675,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 									double b=elEB[n];
 									double s_x=a*cosTheta;
 									double s_y=b*sinTheta;
-									//s.CoordTransToCart
+									//s.TransformToCartesianCoordinates
 									R2_x=s_x*cosPhi[n]-s_y*sinPhi[n]+elCenter_x[n];
 									R2_y=s_x*sinPhi[n]+s_y*cosPhi[n]+elCenter_y[n];
 								}
@@ -879,7 +879,7 @@ void GPU_GCFMModel::CalculateForce(double time, double tip1, Building* building)
 				Pedestrian* ped = allPeds[p];
 				Room* room = building->GetRoom(ped->GetRoomID());
 				SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-				double normVi = ped->GetV().ScalarP(ped->GetV());
+				double normVi = ped->GetV().ScalarProduct(ped->GetV());
 				double tmp = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta);
 				if (normVi > tmp && ped->GetV0Norm() > 0) {
 					fprintf(stderr, "GCFMModel::calculateForce() WARNING: actual velocity (%f) of iped %d "

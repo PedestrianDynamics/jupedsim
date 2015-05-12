@@ -311,7 +311,7 @@ bool Obstacle::IsClockwise() const
      Point vecAB= _poly[1]-_poly[0];
      Point vecBC= _poly[2]-_poly[1];
 
-     double det=vecAB.Det(vecBC);
+     double det= vecAB.Determinant(vecBC);
      if(fabs(det)<J_EPS) det=0.0;
 
      return ( det<=0.0 );
