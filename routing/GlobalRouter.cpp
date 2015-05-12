@@ -828,25 +828,33 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      //double normFactor=0.0;
      //map <int, double> doorProb;
 
-     // get the opened exits
-     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
-               ped->GetSubRoomID());
-
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
      //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
 
+     //in the case there is only one alternative
+     //save some computation
+     if(relevantAPs.size()==1)
+     {
+          auto&& ap=relevantAPs[0];
+          ped->SetExitIndex(ap->GetID());
+          ped->SetExitLine(ap->GetNavLine());
+          return ap->GetID();
+     }
+
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
      double minDistLocal = FLT_MAX;
+     // get the opened exits
+     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
+               ped->GetSubRoomID());
 
      //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
      //      int apID = accessPointsInSubRoom[i];
-     for(unsigned int g=0; g<relevantAPs.size(); g++) {
+     for(unsigned int g=0; g<relevantAPs.size(); g++)
+     {
           AccessPoint* ap=relevantAPs[g];
-          //int exitid=ap->GetID();
-          //AccessPoint* ap = _accessPoints[apID];
 
           if (ap->isInRange(sub->GetUID()) == false)
                continue;
@@ -863,7 +871,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //check if visible
           if (sub->IsVisible(posA, posC, true) == false) {
                ped->RerouteIn(10);
-               //ped->Dump(ped->GetID());
                continue;
           }
 
