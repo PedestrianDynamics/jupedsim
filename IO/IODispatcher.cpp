@@ -116,7 +116,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 
 void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -444,7 +444,7 @@ void TrajectoriesVTK::WriteFooter()
 
 void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -624,7 +624,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
