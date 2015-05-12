@@ -35,48 +35,7 @@ AgentsSourcesManager::~AgentsSourcesManager()
 
 void AgentsSourcesManager::operator()()
 {
-     Log->Write("INFO:\tStarting agent manager thread");
-
-     //Generate all agents required for the complete simulation
-     //It might be more efficient to generate at each frequency step
-     for (const auto& src : _sources)
-     {
-          src->GenerateAgentsAndAddToPool(src->GetMaxAgents(), _building);
-          cout<<"generation: "<<src->GetPoolSize()<<endl;
-     }
-
-     //first call ignoring the return value
-     ProcessAllSources();
-
-     //the loop is updated each x second.
-     //it might be better to use a timer
-     _isCompleted = false;
-     bool finished = false;
-     long updateFrequency = 5;     // 1 second
-     do
-     {
-          int current_time = Pedestrian::GetGlobalTime();
-
-          //first step
-          //if(current_time==0){
-          //finished=ProcessAllSources();
-          //     ProcessAllSources();
-          //     //cout<<"here:"<<endl; exit(0);
-          //}
-          if ((current_time != _lastUpdateTime)
-                    && ((current_time % updateFrequency) == 0))
-          {
-               //cout<<"TIME:"<<current_time<<endl;
-               finished=ProcessAllSources();
-               _lastUpdateTime = current_time;
-               cout << "source size: " << _sources.size() << endl;
-          }
-          //wait some time
-          //cout<<"sleepinp..."<<endl;
-          //std::this_thread::sleep_for(std::chrono::milliseconds(1));
-     } while (!finished);
-     Log->Write("INFO:\tTerminating agent manager thread");
-     _isCompleted = true;
+     Run();
 }
 
 void AgentsSourcesManager::Run()
@@ -142,8 +101,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
                //todo: compute the optimal position for insertion using voronoi
                //for (auto&& ped : peds)
                //{
-                    //ComputeBestPositionVoronoi(src.get(), ped);
-                    //ped->Dump(ped->GetID());
+               //ComputeBestPositionVoronoi(src.get(), ped);
+               //ped->Dump(ped->GetID());
                //}
                AgentsQueue::Add(peds);
                empty = false;
@@ -240,7 +199,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
      for (auto&& mp : map_dist_to_position)
      {
           cout << "dist: " << mp.first << " pos: " << mp.second.toString()
-                              << endl;
+                                        << endl;
           //agent->SetPos(mp.second, true);
      }
 
@@ -507,4 +466,14 @@ bool AgentsSourcesManager::IsCompleted() const
 Building* AgentsSourcesManager::GetBuilding() const
 {
      return _building;
+}
+
+long AgentsSourcesManager::GetMaxAgentNumber() const
+{
+     long pop=0;
+     for (const auto& src : _sources)
+     {
+          pop+=src->GetMaxAgents();
+     }
+     return pop;
 }

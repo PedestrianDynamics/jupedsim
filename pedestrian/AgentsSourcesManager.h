@@ -29,7 +29,7 @@ public:
      /**
       * disable copying
       */
-     AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
+     //AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
 
      /**
       * Destructor
@@ -84,6 +84,12 @@ public:
       * number of agents for this frequency
       */
      void GenerateAgents();
+
+     /**
+      * Return the total number of agents that will be generated.
+      * used by visualisation to allocate space
+      */
+     long GetMaxAgentNumber() const;
 
 
 private:

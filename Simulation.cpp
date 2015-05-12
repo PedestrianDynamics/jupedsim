@@ -275,7 +275,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
 
 int Simulation::RunStandardSimulation(double maxSimTime)
 {
-     RunHeader(_nPeds);
+     RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
      double t=RunBody(maxSimTime);
      RunFooter();
      return (int)t;
