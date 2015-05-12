@@ -13,6 +13,8 @@
 #include "AgentsSource.h"
 #include "../voronoi/VoronoiDiagramGenerator.h"
 #include "../geometry/Building.h"
+#include "../geometry/Point.h"
+
 
 #include "../mpi/LCGrid.h"
 #include <iostream>
@@ -57,7 +59,7 @@ void AgentsSourcesManager::operator()()
 
           //first step
           //if(current_time==0){
-               //finished=ProcessAllSources();
+          //finished=ProcessAllSources();
           //     ProcessAllSources();
           //     //cout<<"here:"<<endl; exit(0);
           //}
@@ -74,7 +76,7 @@ void AgentsSourcesManager::operator()()
           //std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
-     _isCompleted = true;exit(0);
+     _isCompleted = true;
 }
 
 void AgentsSourcesManager::Run()
@@ -104,7 +106,7 @@ void AgentsSourcesManager::Run()
 
           //first step
           //if(current_time==0){
-               //finished=ProcessAllSources();
+          //finished=ProcessAllSources();
           //     ProcessAllSources();
           //     //cout<<"here:"<<endl; exit(0);
           //}
@@ -135,18 +137,16 @@ bool AgentsSourcesManager::ProcessAllSources() const
           {
                vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
-               //cout<<"removing: "<<peds.size()<<" agents from the sources"<<endl;//getc(stdin);exit(0);
+
                ComputeBestPositionRandom(src.get(), peds);
-               // compute the optimal position for insertion
-               for (auto&& ped : peds)
-               {
+               //todo: compute the optimal position for insertion using voronoi
+               //for (auto&& ped : peds)
+               //{
                     //ComputeBestPositionVoronoi(src.get(), ped);
-                    //ped->SetPos(Point(15,15),true);
                     //ped->Dump(ped->GetID());
-               }
+               //}
                AgentsQueue::Add(peds);
                empty = false;
-               //cout << "Agents generated: " << peds.size() << endl;
           }
           //src->Dump();//exit(0);
      }
@@ -154,7 +154,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 }
 
 void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
-          Pedestrian* agent)
+          Pedestrian* agent) const
 {
      auto dist = src->GetStartDistribution();
      double bounds[4];
@@ -240,7 +240,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
      for (auto&& mp : map_dist_to_position)
      {
           cout << "dist: " << mp.first << " pos: " << mp.second.toString()
-                    << endl;
+                              << endl;
           //agent->SetPos(mp.second, true);
      }
 
@@ -282,11 +282,17 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
      double bounds[4] = { 0, 0, 0, 0 };
      dist->Getbounds(bounds);
 
+     vector<Point> extra_positions;
+
      for (auto& ped : peds)
      {
+          //need to be called at each iteration
+          SortPositionByDensity(positions, extra_positions);
+
           int index = -1;
 
           //in the case a range was specified
+          //just take the first element
           for (unsigned int a = 0; a < positions.size(); a++)
           {
                Point pos = positions[a];
@@ -302,7 +308,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
                if (positions.size())
                {
                     Log->Write(
-                              "ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
+                              "ERROR:\t AgentSourceManager Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
                               bounds[0], bounds[1], bounds[2], bounds[3]);
                     Log->Write("ERROR:\t Specifying a subroom_id might help");
                }
@@ -310,13 +316,72 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           else
           {
                const Point& pos = positions[index];
+               extra_positions.push_back(pos);
                ped->SetPos(pos, true); //true for the initial position
                positions.erase(positions.begin() + index);
 
                //at this point we have a position
-               AdjustVelocityUsingWeidmann(ped);
+               //so we can adjust the velocity
+               //AdjustVelocityUsingWeidmann(ped);
+               AdjustVelocityByNeighbour(ped);
           }
      }
+}
+
+void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian* ped) const
+{
+     //get the density
+     vector<Pedestrian*> neighbours;
+     _building->GetGrid()->GetNeighbourhood(ped,neighbours);
+
+     double speed=0.0;
+     double radius_square=0.56*0.56;//corresponding to an area of 1m3
+     int count=0;
+
+     for(const auto& p: neighbours)
+     {
+          //only pedes in a sepcific rance
+          if( (ped->GetPos()-p->GetPos()).NormSquare()<=radius_square)
+          {
+               //only peds with the same destination
+               if(ped->GetExitIndex()==p->GetExitIndex())
+               {
+                    double dist1=ped->GetDistanceToNextTarget();
+                    double dist2=p->GetDistanceToNextTarget();
+                    //only peds in front of me
+                    if(dist2<dist1)
+                    {
+                         speed+=p->GetV().Norm();
+                         count++;
+                    }
+               }
+          }
+
+     }
+     //mean speed
+     if(count==0)
+     {
+          speed=ped->GetV0Norm();
+     }
+     else
+     {
+          speed=speed/count;
+     }
+
+     if(ped->FindRoute()!=-1)
+     {
+          //get the next destination point
+          Point v =(ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+          v=v*speed;
+          ped->SetV(v);
+     }
+     else
+     {
+          Log->Write("ERROR:\t no route could be found for agent [%d] going to [%d]",ped->GetID(),ped->GetFinalDestination());
+          //that will be most probably be fixed in the next computation step.
+          // so do not abort
+     }
+
 }
 
 void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian* ped) const
@@ -329,21 +394,25 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian* ped) const
      double density = 1.0;
      //radius corresponding to a surface of 1m2
      //double radius_square=0.564*0.564;
+     double radius_square=1.0;
 
      for(const auto& p: neighbours)
      {
-          if( (ped->GetPos()-p->GetPos()).NormSquare()<=1.0)
+          if( (ped->GetPos()-p->GetPos()).NormSquare()<=radius_square)
                density+=1.0;
      }
-     density=density/M_PI;
+     density=density/(radius_square*M_PI);
+
      //get the velocity
      double density_max=5.4;
+
      //speed from taken from weidmann FD
      double speed=1.34*(1-exp(-1.913*(1.0/density-1.0/density_max)));
      if(speed>=ped->GetV0Norm())
      {
           speed=ped->GetV0Norm();
      }
+
      //set the velocity vector
      if(ped->FindRoute()!=-1)
      {
@@ -351,15 +420,55 @@ void AgentsSourcesManager::AdjustVelocityUsingWeidmann(Pedestrian* ped) const
           Point v =(ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
           v=v*speed;
           ped->SetV(v);
-          cout<<"density: "<<density<<endl;
+          //cout<<"density: "<<density<<endl;
      }
      else
      {
           Log->Write("ERROR:\t no route could be found for agent [%d] going to [%d]",ped->GetID(),ped->GetFinalDestination());
-         //cout<<"density: "<<density<<endl;
-         //cout<<"find:route"<<ped->FindRoute()<<endl;
-         //that will be most probably be fixed in the next computation step.
-         // so do not abort
+          //that will be most probably be fixed in the next computation step.
+          // so do not abort
+     }
+
+}
+
+void AgentsSourcesManager::SortPositionByDensity(std::vector<Point>& positions, std::vector<Point>& extra_positions) const
+{
+     std::multimap<double,Point> density2pt;
+     //std::map<double,Point> density2pt;
+
+     for(auto&& pt:positions)
+     {
+          vector<Pedestrian*> neighbours;
+          _building->GetGrid()->GetNeighbourhood(pt,neighbours);
+          //density in pers per m2
+          double density = 0.0;
+          //double radius_square=0.56*0.56;
+          double radius_square=0.40*0.40;
+
+          for(const auto& p: neighbours)
+          {
+               if( (pt-p->GetPos()).NormSquare()<=radius_square)
+                    density+=1.0;
+          }
+
+          //consider the extra positions
+          for(const auto& ptx: extra_positions)
+          {
+               if( (ptx-pt).NormSquare()<=radius_square)
+                    density+=1.0;
+          }
+          density=density/(radius_square*M_PI);
+
+          density2pt.insert(std::pair<double,Point>(density,pt));
+
+     }
+
+     //cout<<"------------------"<<positions.size()<<"-------"<<endl;
+     positions.clear();
+     for(auto&& d: density2pt)
+     {
+          positions.push_back(d.second);
+          //     printf("density [%lf, %s]\n",d.first, d.second.toString().c_str());
      }
 
 }

@@ -16,6 +16,7 @@
 class AgentsSource;
 class Building;
 class Pedestrian;
+class Point;
 
 class AgentsSourcesManager
 {
@@ -25,7 +26,9 @@ public:
       */
      AgentsSourcesManager();
 
-     ///disable copying
+     /**
+      * disable copying
+      */
      AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
 
      /**
@@ -39,6 +42,9 @@ public:
       */
      void operator()();
 
+     /**
+      *
+      */
      void Run();
 
      /**
@@ -79,6 +85,42 @@ public:
       */
      void GenerateAgents();
 
+
+private:
+
+     /**
+      * Position incoming pedestrian using voronoi methods
+      * @param src
+      * @param agent
+      */
+     void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent) const;
+
+     /**
+      * Position incoming pedestrians randomly
+      * @param src
+      * @param peds
+      */
+     void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
+     /**
+      * Adjust the velocity of the pedestrian using the weidmann fundamental diagram
+      */
+     void AdjustVelocityUsingWeidmann(Pedestrian* ped) const;
+
+     /**
+      *
+      * @param ped adjust the velocity by using the mean velocity of the neighbor in front of me
+      */
+     void AdjustVelocityByNeighbour(Pedestrian* ped) const;
+
+     /**
+      * Sort the given position vector by decreasing density
+      * @param positions,
+      * @param extra_position, an additional vector containing position to be considered in the density calculation
+      */
+     void SortPositionByDensity(std::vector<Point>& positions, std::vector<Point>& extra_positions) const;
+
+
 private:
      /// contain the sources
      std::vector<std::shared_ptr<AgentsSource> > _sources;
@@ -89,15 +131,6 @@ private:
      /// whether all agents have been dispatched
      static bool _isCompleted;
      //std::atomic<bool>_isCompleted=false;
-
-private:
-     void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent);
-     void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
-
-     /**
-      * Adjust the velocity of the pedestrian using the weidmann fundamental diagram
-      */
-     void AdjustVelocityUsingWeidmann(Pedestrian* ped) const;
 };
 
 #endif /* AGENTSSOURCESMANAGER_H_ */

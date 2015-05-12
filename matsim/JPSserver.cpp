@@ -97,6 +97,7 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context  __attribute__
                for(auto&& ped:peds)
                {
                     //TODO: there might be a race condition here if the client is sending agents out
+                    //TODO map the agents back, not necessary if jupedsim is reset after each iteration
                     _jpsClient->MapMatsimAgentToJPSagent(ped->GetID(),agent_id);
                     ped->SetFinalDestination(std::stoi(leave_node));
                     //schedule the agent
