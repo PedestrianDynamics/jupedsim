@@ -10,12 +10,13 @@
 
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <file location="hybrid_trajectories.xml" />
+    <file location="hybrid_hall_trajectories.xml" />
     <socket hostname="127.0.0.1" port="8989" />
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->
-  <hybrid_simulation server="zam597" port="9999" />
+  <hybrid_simulation server="zam763" port="9999" />
+  <!--<hybrid_simulation server="zam597" port="9999" />-->
 
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->
