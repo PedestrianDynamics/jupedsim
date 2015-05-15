@@ -56,6 +56,7 @@ class FloorfieldViaFM
         void calculateDistanceField(const double threshold);
 
         void update(const long int key, double* target, double* speedlocal);
+        double twosidedCalc(double x, double y, double hDivF);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}

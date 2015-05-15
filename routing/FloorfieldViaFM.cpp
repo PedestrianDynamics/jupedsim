@@ -49,7 +49,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg) {
     //ctor
-
+    if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
     parseBuilding(buildingArg, hxArg, hyArg);
 
@@ -95,8 +95,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    //wall.push_back(&(*itObsWall));
-                    wall.push_back(*(new Wall(*itObsWall)));
+                    wall.emplace_back(*itObsWall);
+
                     // xMin xMax
                     if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
                     if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
@@ -113,9 +113,9 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
             std::vector<Wall> allWalls = (*itSubroom)->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
-            //for (auto& itWall : allWalls) {
-                wall.push_back(*(new Wall(*itWall)));
-              //std::cout << wall[0].GetPoint1().GetX() << std::endl;
+                wall.emplace_back(*itWall);
+                //std::cout << &(*itWall) << std::endl;
+                //std::cout << wall[0].GetPoint1().GetX() << std::endl;
 
                 // xMin xMax
                 if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
@@ -272,7 +272,7 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
 
 #ifdef TESTING
     //sanity check (fields <> 0)
-    if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated)
+    if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if (dist2Wall == 0) return;
     if (speedInitial == 0) return;
     if (cost == 0) return;
@@ -283,9 +283,9 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
     //using dist2Wall-array to store this-function's results, (pseudo)"speedfunction" 1 all around
     //stop if smallest value in narrowband is >= threshold
 
-    //  setting goal (dist2Wall = 0) is done in "parseBuilding"
+    //  setting startingpoints of wave (dist2Wall = 0) is done in "parseBuilding"
 
-    //  go thru dist2Wall and add every neighbor of "0"s (only if their dist2Wall is -3 and therefore "inside")
+    //  go thru dist2Wall and add every neighbor of "0"s (only if their flag is 0 and therefore "inside")
     Trial* smallest = nullptr;
     Trial* biggest = nullptr;
     directNeighbor dNeigh;
@@ -296,6 +296,7 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
             dNeigh = grid->getNeighbors(i);
             //check for valid neigh
             aux = dNeigh.key[0];
+            //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
             if ((aux != -2) && (flag[aux] == 0)) {
                 flag[aux] = 4;      //4 = added to trial but not calculated
                 trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
@@ -346,3 +347,13 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
 void update(const long int key, double* target, double* speedlocal) {
 
 } //update
+
+double twosidedCalc(double x, double y, double hDivF) {
+    double determinante = (2*hDivF*hDivF - (x-y)*(x-y));
+    if (determinante >= 0) {
+        return (x + y + sqrt(determinante))/2;
+    } else {
+        return -2.;
+    }
+    return -2.; //this line should never execute
+} //twosidedCalc
