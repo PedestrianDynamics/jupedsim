@@ -61,11 +61,11 @@ Method_D::~Method_D()
 
 bool Method_D::Process (const PedData& peddata)
 {
-	if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
-	{
-		return false;
-	}
-	 _peds_t = peddata.GetPedsFrame();
+     if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
+     {
+          return false;
+     }
+     _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
@@ -79,6 +79,12 @@ bool Method_D::Process (const PedData& peddata)
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      {
           int frid =  frameNr + minFrame;
+
+          //padd the frameid with 0
+          std::ostringstream ss;
+          ss << std::setw(5) << std::setfill('0') << frid;
+          const std::string str_frid = ss.str();
+
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
@@ -92,21 +98,21 @@ bool Method_D::Process (const PedData& peddata)
           if(NumPeds>2)
           {
                vector<polygon_2d> polygons = GetPolygons(ids, XInFrame, YInFrame, VInFrame, IdInFrame);
-               OutputVoronoiResults(polygons, frid, VInFrame);
+               OutputVoronoiResults(polygons, str_frid, VInFrame);
                if(_calcIndividualFD)
                {
                     // if(i>beginstationary&&i<endstationary)
                     {
-                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, frid);
+                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
                     }
                }
                if(_getProfile)
                { //	field analysis
-                    GetProfiles(boost::lexical_cast<string>(frid), polygons, VInFrame);
+                    GetProfiles(str_frid, polygons, VInFrame);
                }
                if(_outputVoronoiCellData)
                { // output the Voronoi polygons of a frame
-                    OutputVoroGraph(boost::lexical_cast<string>(frid), polygons, NumPeds, XInFrame, YInFrame,VInFrame);
+                    OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
                }
           }
           else
@@ -173,11 +179,11 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
 /**
  * Output the Voronoi density and velocity in the corresponding file
  */
-void Method_D::OutputVoronoiResults(const vector<polygon_2d>&  polygons, int frid, const vector<double>& VInFrame)
+void Method_D::OutputVoronoiResults(const vector<polygon_2d>&  polygons, const string& frid, const vector<double>& VInFrame)
 {
      double VoronoiVelocity = GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
      double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
-     fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
+     fprintf(_fVoronoiRhoV,"%s\t%.3f\t%.3f\n",frid.c_str(),VoronoiDensity, VoronoiVelocity);
 }
 
 
@@ -301,7 +307,9 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
 
 void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polygons, int numPedsInFrame, vector<double>& XInFrame, vector<double>& YInFrame,const vector<double>& VInFrame)
 {
+     //string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/id_"+_measureAreaId;
      string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
+
 
 #if defined(_WIN32)
      mkdir(voronoiLocation.c_str());
@@ -385,7 +393,7 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
 }
 
 
-void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, int frid)
+void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
 {
      double uniquedensity=0;
      double uniquevelocity=0;
@@ -399,7 +407,7 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
                uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
                uniquevelocity=Velocity[temp];
                uniqueId=Id[temp];
-               fprintf(_fIndividualFD,"%d\t%d\t%.3f\t%.3f\n",frid, uniqueId, uniquedensity,uniquevelocity);
+               fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity);
           }
           temp++;
      }
