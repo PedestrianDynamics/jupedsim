@@ -322,6 +322,14 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
         		  point.x(point.x()*CMtoM);
         		  point.y(point.y()*CMtoM);
         	  }
+        	  for(auto&& innerpoly:poly.inners())
+			  {
+        		  for(auto&& point:innerpoly)
+				  {
+					  point.x(point.x()*CMtoM);
+					  point.y(point.y()*CMtoM);
+				  }
+			  }
         	  polys << dsv(poly) << endl;
           }
      }
