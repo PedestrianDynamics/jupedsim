@@ -232,7 +232,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
                               geo_maxY = (tmp_point._y*M2CM>=geo_maxY) ? (tmp_point._y*M2CM) : geo_maxY;
                          }
                          correct(geoPoly[area->_id]);
-
+                         cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
                          //appen the holes/obstacles if any
                          int k=0;
                          for(auto&& obst: subroom->GetAllObstacles())

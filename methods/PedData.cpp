@@ -200,7 +200,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           return false;
      }
      if( xRootNode->ValueStr () != "trajectories" ) {
-          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+          Log->Write("ERROR:\tRoot element value is not 'trajectories'.");
           return false;
      }
 
