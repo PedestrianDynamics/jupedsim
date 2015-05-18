@@ -94,7 +94,14 @@ void Method_A::WriteFile_N_t(string data)
 {
      string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
      ofstream file(fN_t);
-     file<<data;
+     if(file.is_open())
+     {
+          file<<data;
+     }
+     else
+     {
+          Log->Write("ERROR: could not create the file "+fN_t);
+     }
 }
 
 void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame)
@@ -144,7 +151,7 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
           Log->Write("cannot open the file to write the Flow-Velocity data\n");
           exit(0);
      }
-     fprintf(fFD_FlowVelocity,"#Flow rate(1/s)	Mean velocity(m/s)\n");
+     fprintf(fFD_FlowVelocity,"#Flow rate(1/s)	\t Mean velocity(m/s)\n");
      int TotalTime=AccumPeds.size();  // the total Frame of in the data file
      int TotalPeds=AccumPeds[TotalTime-1];  //the total pedestrians in the data file
      if(TotalPeds>0)
@@ -167,7 +174,8 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
                     pedspassT[AccumPeds[ix]]=ix;
                }
           }
-          for(int i=firstPassT+_deltaT; i<TotalTime; i+=_deltaT) {
+          for(int i=firstPassT+_deltaT; i<TotalTime; i+=_deltaT)
+          {
                int N1 = AccumPeds[i-_deltaT];  // the total number of pedestrians pass the line at this time
                int N2 = AccumPeds[i];
                int t_N1 = pedspassT[N1];
