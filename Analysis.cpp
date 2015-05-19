@@ -234,7 +234,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
                          correct(geoPoly[area->_id]);
                          cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
                          //appen the holes/obstacles if any
-                         int k=0;
+                         int k=1;
                          for(auto&& obst: subroom->GetAllObstacles())
                          {
                               geoPoly[area->_id].inners().resize(k++);
