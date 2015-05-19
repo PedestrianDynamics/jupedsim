@@ -113,12 +113,6 @@ public:
     bool InitArgs(const ArgumentParser& args);
 
     /**
-     * @param simtime, the maximal simulation time
-     * @return the total simulated/evacuation time
-     */
-    int RunSimulation(double maxSimTime);
-
-    /**
      * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateRoutesAndLocations();
