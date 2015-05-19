@@ -49,6 +49,7 @@ class TiXmlNode;
 class AgentsParameters;
 class HybridSimulationManager;
 
+
 extern OutputHandler* Log;
 
 class ArgumentParser

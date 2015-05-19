@@ -49,6 +49,7 @@
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
+//#define _USE_PROTOCOL_BUFFER 1
 
 
 

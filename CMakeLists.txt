@@ -141,6 +141,7 @@ endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
 endif(BUILD_TESTING)
+
 # add sources and headers
 set (   source_files
   Simulation.cpp
@@ -191,12 +192,6 @@ set (   source_files
 
   voronoi/VoronoiDiagramGenerator.cpp
 
-  matsim/HybridSimulationManager.cpp
-  matsim/JPSserver.cpp
-  matsim/JPSclient.cpp                
-  matsim/MATSimInterface.pb.cc
-  matsim/MATSimInterface.grpc.pb.cc  
-  
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
@@ -273,13 +268,6 @@ set (   header_files
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
 
-  matsim/JPSclient.h  
-  matsim/MATSimInterface.grpc.pb.h  
-  matsim/MATSimInterface.proto
-  matsim/HybridSimulationManager.h    
-  matsim/JPSserver.h                 
-  matsim/MATSimInterface.pb.h
-
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
   pedestrian/Ellipse.h
@@ -340,10 +328,9 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
-add_executable( jpscore main.cpp )
+add_executable( jpscore  main.cpp )
 
-target_link_libraries(jpscore  core grpc++_unsecure grpc gpr dl)
-#target_link_libraries(jpscore  core grpc++_unsecure grpc gpr protobuf dl)
+target_link_libraries(jpscore core )
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)
@@ -354,10 +341,31 @@ if(CGAL_FOUND)
 endif(CGAL_FOUND)
 
 #protocol buffer
-find_package(Protobuf REQUIRED)
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+find_package(Protobuf OPTIONAL)
 if(PROTOBUF_FOUND)
-	target_link_libraries (jpscore ${PROTOBUF_LIBRARY})
+message(STATUS "Protocol buffer library found")
+
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+
+set (hybrid_source_files
+  matsim/HybridSimulationManager.cpp
+  matsim/JPSserver.cpp
+  matsim/JPSclient.cpp                
+  matsim/MATSimInterface.pb.cc
+  matsim/MATSimInterface.grpc.pb.cc 
+)
+
+set (hybrid_header_files
+  matsim/JPSclient.h  
+  matsim/MATSimInterface.grpc.pb.h  
+  matsim/MATSimInterface.proto
+  matsim/HybridSimulationManager.h    
+  matsim/JPSserver.h                 
+  matsim/MATSimInterface.pb.h
+)
+    add_library (hybrid STATIC ${hybrid_source_files} )
+    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
+ 	
 	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
 	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
 endif(PROTOBUF_FOUND)

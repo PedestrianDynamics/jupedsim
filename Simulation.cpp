@@ -34,7 +34,10 @@
 #include "math/GompertzModel.h"
 #include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/AgentsQueue.h"
+
+#ifdef _USE_PROTOCOL_BUFFER
 #include "matsim/HybridSimulationManager.h"
+#endif
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -225,11 +228,13 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           //src->Dump();
      }
 
+#ifdef _USE_PROTOCOL_BUFFER
      //iniitalize the hybridmode if defined
      if(nullptr!=(_hybridSimManager=args.GetHybridSimManager()))
      {
           _hybridSimManager->Init(_building.get());
      }
+#endif
 
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
@@ -549,12 +554,13 @@ void Simulation::ProcessAgentsQueue()
      {
           _building->AddPedestrian(ped);
      }
-
+#ifdef _USE_PROTOCOL_BUFFER
      //outgoing pedestrians
      if (_hybridSimManager)
      {
           _hybridSimManager->ProcessOutgoingAgent();
      }
+#endif
 }
 
 AgentsSourcesManager& Simulation::GetAgentSrcManager()

@@ -57,7 +57,10 @@
 #include "../routing/CognitiveMapRouter.h"
 #include "../math/GompertzModel.h"
 #include "../math/GCFMModel.h"
+
+#ifdef _USE_PROTOCOL_BUFFER
 #include "../matsim/HybridSimulationManager.h"
+#endif
 
 using namespace std;
 
@@ -363,6 +366,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
           }
      }
 
+#ifdef _USE_PROTOCOL_BUFFER
      //check the simulation mode
      //trajectories
      TiXmlNode* xSimMode = xMainNode->FirstChild("hybrid_simulation");
@@ -373,6 +377,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
           _hybridSimManager=std::shared_ptr<HybridSimulationManager>(new HybridSimulationManager(server,port));
           Log->Write(_hybridSimManager->ToString());
      }
+#endif
 
      //pick up which model to use
      //get the wanted ped model id

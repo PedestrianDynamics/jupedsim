@@ -30,11 +30,13 @@
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
 #include "pedestrian/AgentsSourcesManager.h"
+
+#ifdef _USE_PROTOCOL_BUFFER
 #include "matsim/HybridSimulationManager.h"
+#endif
 
 #include <thread>
 #include <functional>
-//#include <boost/version.hpp>
 
 int main(int argc, char **argv)
 {
@@ -58,6 +60,8 @@ int main(int argc, char **argv)
      {
           //evacuation time
           int evacTime = 0;
+
+#ifdef _USE_PROTOCOL_BUFFER
           //Start the thread for managing incoming messages from MatSim
           auto hybrid=args->GetHybridSimManager();
           //process the hybrid simulation
@@ -67,6 +71,7 @@ int main(int argc, char **argv)
           }
           //process the normal simulation
           else
+#endif
           {
                //Start the threads for managing the sources of agents if any
                std::thread t1(sim.GetAgentSrcManager());
