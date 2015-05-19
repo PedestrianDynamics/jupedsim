@@ -34,6 +34,7 @@
 //using std::ofstream;
 using namespace std;
 
+#define VORO_LOCATION "./Output/Fundamental_Diagram/Classical_Voronoi/field/"
 
 Method_D::Method_D()
 {
