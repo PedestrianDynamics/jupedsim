@@ -340,11 +340,10 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
-add_executable(
-  jpscore main.cpp
-  )
+add_executable( jpscore main.cpp )
 
-target_link_libraries(jpscore  core grpc++_unsecure grpc gpr protobuf dl)
+target_link_libraries(jpscore  core grpc++_unsecure grpc gpr dl)
+#target_link_libraries(jpscore  core grpc++_unsecure grpc gpr protobuf dl)
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)
@@ -353,6 +352,16 @@ endif(WIN32)
 if(CGAL_FOUND)
   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
 endif(CGAL_FOUND)
+
+#protocol buffer
+find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+if(PROTOBUF_FOUND)
+	target_link_libraries (jpscore ${PROTOBUF_LIBRARY})
+	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
+	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
+endif(PROTOBUF_FOUND)
+
 #----------------------------------------------------------------------
 # enable as many warnings as possible
 # set(warning_flags "-Wall -Wextra")
