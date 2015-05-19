@@ -341,7 +341,7 @@ if(CGAL_FOUND)
 endif(CGAL_FOUND)
 
 #protocol buffer
-find_package(Protobuf OPTIONAL)
+find_package(Protobuf)
 if(PROTOBUF_FOUND)
 message(STATUS "Protocol buffer library found")
 
