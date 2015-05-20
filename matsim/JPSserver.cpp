@@ -10,7 +10,6 @@
 #include "../IO/OutputHandler.h"
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../pedestrian/AgentsSource.h"
-#include "../pedestrian/AgentsQueue.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../Simulation.h"
 
@@ -19,10 +18,10 @@
 
 //client stuff
 #include <grpc++/channel_arguments.h>
-//#include <grpc++/channel_interface.h>
-//#include <grpc++/client_context.h>
 #include <grpc++/create_channel.h>
-//#include <grpc++/credentials.h>
+
+#include "../pedestrian/AgentsQueue.h"
+
 // external variables
 extern OutputHandler* Log;
 
@@ -46,11 +45,9 @@ void JPSserver::RunSimulation()
      {
           if(_doSimulation)
           {
-               //Log->Write("INFO:\tRPC::JPSserver starting a new simulation");
                _SimManager.RunBody(_maxSimTime);
                _doSimulation=false;
                _jpsClient->NotifyEndOfSimulation();
-               //exit(0);
           }
 
           //Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");
@@ -66,9 +63,7 @@ Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context __attribute__(
 {
      string nodeID=request->nodeid();
      //Log->Write("INFO:\tRPC::JPSserver I have space on node " + nodeID);
-
      response->set_hasspace(true);
-
      return Status::OK;
 }
 
@@ -84,11 +79,9 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context  __attribute__
 
      auto& agentSrcMng=_SimManager.GetAgentSrcManager();
      auto srcs=agentSrcMng.GetSources();
-     //cout<<"There are: "<<srcs.size()<<" options"<<endl;
 
      for(auto&& src:srcs)
      {
-          //cout<<"size: "<<src->GetPoolSize()<<endl;
           if(src->GetId()==std::stoi(enter_node))
           {
                std::vector<Pedestrian*> peds;
@@ -104,7 +97,6 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context  __attribute__
                     src->AddToPool(ped);
                }
                agentSrcMng.ProcessAllSources();
-               //AgentsQueue::Add(peds);
           }
      }
 

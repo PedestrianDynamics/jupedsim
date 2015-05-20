@@ -7,7 +7,6 @@
 
 #include "AgentsSourcesManager.h"
 #include "Pedestrian.h"
-#include "AgentsQueue.h"
 #include "StartDistribution.h"
 #include "PedDistributor.h"
 #include "AgentsSource.h"
@@ -20,6 +19,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include "AgentsQueue.h"
 
 using namespace std;
 
@@ -104,7 +104,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
                //ComputeBestPositionVoronoi(src.get(), ped);
                //ped->Dump(ped->GetID());
                //}
-               AgentsQueue::Add(peds);
+               AgentsQueueIn::Add(peds);
                empty = false;
           }
           //src->Dump();//exit(0);

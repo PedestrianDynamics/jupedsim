@@ -6,25 +6,26 @@
  */
 
 #include "AgentsQueue.h"
+
 #include "Pedestrian.h"
 
 using namespace std;
 
-vector<Pedestrian*> AgentsQueue::_agentsQueue;
+vector<Pedestrian*> AgentsQueueIn::_agentsQueue;
 vector<Pedestrian*> AgentsQueueOut::_agentsQueue;
 
-mutex AgentsQueue::_queueMutex;
+mutex AgentsQueueIn::_queueMutex;
 mutex AgentsQueueOut::_queueMutex;
 
 
-void AgentsQueue::Add(vector<Pedestrian*>& peds)
+void AgentsQueueIn::Add(vector<Pedestrian*>& peds)
 {
      _queueMutex.lock();
      _agentsQueue.insert(_agentsQueue.end(),peds.begin(),peds.end());
      _queueMutex.unlock();
 }
 
-void AgentsQueue::GetandClear(std::vector<Pedestrian*>& peds)
+void AgentsQueueIn::GetandClear(std::vector<Pedestrian*>& peds)
 {
      _queueMutex.lock();
 
@@ -37,11 +38,15 @@ void AgentsQueue::GetandClear(std::vector<Pedestrian*>& peds)
      _queueMutex.unlock();
 }
 
-bool AgentsQueue::IsEmpty()
+bool AgentsQueueIn::IsEmpty()
 {
      return (_agentsQueue.size()==0);
 }
 
+int AgentsQueueIn::Size()
+{
+     return _agentsQueue.size();
+}
 
 /////////////////////////////////////////////////////
 ////////////////////////////////////////////////////
@@ -51,11 +56,10 @@ void AgentsQueueOut::Add(vector<Pedestrian*>& peds)
      _queueMutex.lock();
      _agentsQueue.insert(_agentsQueue.end(),peds.begin(),peds.end());
 
-     //todo: avoid this by using a map
+     //todo: Can save time using a map
      std::sort( _agentsQueue.begin(), _agentsQueue.end() );
-     _agentsQueue.erase( unique( _agentsQueue.begin(), _agentsQueue.end() ), _agentsQueue.end() );
-     //std::cout<<"queue size:"<<_agentsQueue.size()<<endl;
-     ///
+     _agentsQueue.erase( std::unique( _agentsQueue.begin(), _agentsQueue.end() ), _agentsQueue.end() );
+
      _queueMutex.unlock();
 }
 
@@ -82,4 +86,9 @@ void AgentsQueueOut::GetandClear(std::vector<Pedestrian*>& peds)
 bool AgentsQueueOut::IsEmpty()
 {
      return (_agentsQueue.size()==0);
+}
+
+int AgentsQueueOut::Size()
+{
+     return _agentsQueue.size();
 }

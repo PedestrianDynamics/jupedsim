@@ -32,8 +32,8 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
-#include "pedestrian/AgentsSourcesManager.h"
 #include "pedestrian/AgentsQueue.h"
+#include "pedestrian/AgentsSourcesManager.h"
 
 #ifdef _USE_PROTOCOL_BUFFER
 #include "matsim/HybridSimulationManager.h"
@@ -292,7 +292,7 @@ void Simulation::UpdateRoutesAndLocations()
      //pedestrians to be deleted
      //you should better create this in the constructor and allocate it once.
      vector<Pedestrian*> pedsToRemove;
-     pedsToRemove.reserve(100); //just reserve some space
+     pedsToRemove.reserve(500); //just reserve some space
 
      // collect all pedestrians in the simulation.
      const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
@@ -549,7 +549,7 @@ void Simulation::ProcessAgentsQueue()
 
      //incoming pedestrians
      vector<Pedestrian*> peds;
-     AgentsQueue::GetandClear(peds);
+     AgentsQueueIn::GetandClear(peds);
      for(auto&& ped: peds)
      {
           _building->AddPedestrian(ped);

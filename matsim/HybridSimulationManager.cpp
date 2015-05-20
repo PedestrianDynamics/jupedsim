@@ -9,7 +9,6 @@
 #include "MATSimInterface.pb.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Building.h"
-#include "../pedestrian/AgentsQueue.h"
 #include "../pedestrian/AgentsSourcesManager.h"
 #include "../Simulation.h"
 #include "JPSserver.h"
@@ -33,6 +32,7 @@
 #include <grpc++/client_context.h>
 #include <grpc++/create_channel.h>
 #include <grpc++/credentials.h>
+#include "../pedestrian/AgentsQueue.h"
 
 
 using grpc::Server;

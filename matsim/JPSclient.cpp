@@ -7,15 +7,14 @@
 
 #include "JPSclient.h"
 #include "../pedestrian/Pedestrian.h"
-#include "../pedestrian/AgentsQueue.h"
 #include "../geometry/Building.h"
+#include "../pedestrian/AgentsQueueIn.h"
 
 #include "MATSimInterface.pb.h"
 
 using namespace std;
 
 JPSclient::JPSclient(std::shared_ptr<ChannelInterface> channel)
-          //:_jupedsimChannel(ExternInterfaceService::NewStub(channel))
 {
      //communication channel to matsim
      _matsimChannel = MATSimInterfaceService::NewStub(channel);
@@ -32,33 +31,29 @@ JPSclient::~JPSclient()
 void JPSclient::ProcessAgentQueue(Building* building)
 {
      std::vector<Pedestrian*> peds;
+     //cout<<"size:"<<AgentsQueueOut::Size()<<endl;
      AgentsQueueOut::GetandClear(peds);
-
      for (auto && ped:peds)
      {
-
-          /* for testing only, the agent is send back to jupedsim
-          if(HasSpaceOnJuPedSim(ped->GetFinalDestination())==true)
+          //if the agent has waited enough
+          if (_counter[ped->GetID()]<=0)
           {
-               if(SendAgentToJuPedSim(ped)==false)
+               //remove the pedestrian only if successfully sent
+               if(SendAgentToMatsim(ped)==true)
                {
-                    Log->Write("ERROR:\t RPC:JPSclient request failed (send agent to jupedsim)");
+                    building->DeletePedestrian(ped);
+               }
+               else
+               {
+                    AgentsQueueOut::Add(ped);
+                    //reschedule after 100 timesteps
+                    _counter[ped->GetID()]=100;
                }
           }
           else
           {
-               Log->Write("ERROR:\t RPC:JPSclient request failed (space on jupedsim)");
-          }
-           */
-
-          //remove the pedestrian only if successfully sent
-          if(SendAgentToMatsim(ped)==true)
-          {
-               building->DeletePedestrian(ped);
-          }
-          else
-          {
                AgentsQueueOut::Add(ped);
+               _counter[ped->GetID()]--;
           }
      }
 }
@@ -114,7 +109,6 @@ bool JPSclient::NotifyExternalService(const std::string& host, int port)
      request.set_host(host);
      request.set_port(port);
      Status status =_matsimChannel->reqExternalConnect(&context, request, &reply);
-     //std::cout<<"Details: "<<status.details()<<endl;
      return status.IsOk();
 }
 
@@ -145,7 +139,6 @@ bool JPSclient::NotifyEndOfSimulation()
      ClientContext context;
      ExternSimStepFinished request;
      ExternSimStepFinishedReceived reply;
-
      Status status =_matsimChannel->reqExternSimStepFinished(&context, request, &reply);
      //Log->Write("INFO:\tRPC::JPSserver simulation step finished");
      //std::cout<<"Details: "<<status.details()<<endl;

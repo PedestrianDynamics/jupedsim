@@ -8,21 +8,6 @@
 #ifndef MATSIM_JPSCLIENT_H_
 #define MATSIM_JPSCLIENT_H_
 
-//#include <grpc++/status.h>
-//client stuff
-//#include <grpc++/channel_arguments.h>
-//#include <grpc++/create_channel.h>
-//#include <grpc++/credentials.h>
-
-//using grpc::Server;
-//using grpc::ServerBuilder;
-//using grpc::ServerContext;
-//using grpc::Status;
-//using grpc::ChannelArguments;
-
-//using grpc::ClientContext;
-//using grpc::Status;
-
 #include <grpc/grpc.h>
 #include <grpc++/server.h>
 #include <grpc++/server_builder.h>
@@ -109,6 +94,9 @@ private:
      std::unique_ptr<MATSimInterfaceService::Stub> _matsimChannel;
      //map the matsim agent id to the jupedsim agent id
      std::map<int,std::string> _mapMatsimID2JPSID;
+     //map the pedestrian id, to a time which is set
+     // if the pedestrian could not be transfered to matsim
+     std::map <int,int>_counter;
 };
 
 #endif /* MATSIM_JPSCLIENT_H_ */

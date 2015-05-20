@@ -18,17 +18,18 @@ class Pedestrian;
 /**
  * Queue for incoming agents
  */
-class AgentsQueue
+class AgentsQueueIn
 {
 public:
      static void Add(std::vector<Pedestrian*>& ped);
      static void GetandClear(std::vector<Pedestrian*>& peds);
      static bool IsEmpty();
+     static int Size();
      //static std::vector<Pedestrian*> GetandClear();
 
 private:
-     AgentsQueue(){};
-     virtual ~AgentsQueue(){};
+     AgentsQueueIn(){};
+     virtual ~AgentsQueueIn(){};
      static std::vector<Pedestrian*> _agentsQueue;
      static std::mutex _queueMutex;
 };
@@ -43,6 +44,7 @@ public:
      static void Add(Pedestrian* ped);
      static void GetandClear(std::vector<Pedestrian*>& peds);
      static bool IsEmpty();
+     static int Size();
 
 private:
      AgentsQueueOut(){};
@@ -50,4 +52,5 @@ private:
      static std::vector<Pedestrian*> _agentsQueue;
      static std::mutex _queueMutex;
 };
+
 #endif /* AGENTSQUEUE_H_ */
