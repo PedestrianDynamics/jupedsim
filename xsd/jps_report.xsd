@@ -44,7 +44,7 @@
             <xs:attribute type="xs:string" name="unit" use="required"/>
           </xs:complexType>
         </xs:element>
-        <xs:element name="measurementAreas">
+        <xs:element name="measurement_areas">
           <xs:annotation>
             <xs:documentation>all files in the directories will be used</xs:documentation>
           </xs:annotation>
@@ -63,7 +63,7 @@
                         </xs:simpleContent>
                       </xs:complexType>
                     </xs:element>
-                    <xs:element name="Length_in_movement_direction" maxOccurs="1" minOccurs="0">
+                    <xs:element name="length_in_movement_direction" maxOccurs="1" minOccurs="0">
                       <xs:complexType>
                         <xs:simpleContent>
                           <xs:extension base="xs:string">
@@ -112,9 +112,9 @@
         <xs:element name="velocity">
           <xs:complexType>
             <xs:sequence>
-              <xs:element type="xs:string" name="useXComponent"/>
-              <xs:element type="xs:string" name="useYComponent"/>
-              <xs:element type="xs:int" name="halfFrameNumberToUse">
+              <xs:element type="xs:string" name="use_x_component"/>
+              <xs:element type="xs:string" name="use_y_component"/>
+              <xs:element type="xs:int" name="frame_step">
                 <xs:annotation>
                   <xs:documentation>half of the time interval that used to calculate instantaneous velocity 
          of ped i [fr] here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF). X is location.</xs:documentation>
@@ -129,7 +129,7 @@
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="timeInterval" >
+              <xs:element name="frame_interval" >
                 <xs:annotation>
                   <xs:documentation>Time interval used to count the flow [fr]</xs:documentation>
                 </xs:annotation>
@@ -141,7 +141,7 @@
                   </xs:simpleContent>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="measurementArea" maxOccurs="unbounded" minOccurs="1">
+              <xs:element name="measurement_area" maxOccurs="unbounded" minOccurs="1">
                 <xs:annotation>
                   <xs:documentation>The coordinate of the line used to calculate the flow and velocity</xs:documentation>
                 </xs:annotation>
@@ -163,7 +163,7 @@
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="measurementArea" maxOccurs="unbounded" minOccurs="1">
+              <xs:element name="measurement_area" maxOccurs="unbounded" minOccurs="1">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
@@ -182,7 +182,7 @@
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="measurementArea" maxOccurs="unbounded" minOccurs="1">
+              <xs:element name="measurement_area" maxOccurs="unbounded" minOccurs="1">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
@@ -201,7 +201,7 @@
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="measurementArea" maxOccurs="unbounded" minOccurs="1">
+              <xs:element name="measurement_area" maxOccurs="unbounded" minOccurs="1">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
@@ -210,7 +210,7 @@
                   </xs:simpleContent>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="cutByCircle">
+              <xs:element name="cut_by_circle">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
@@ -221,7 +221,7 @@
                   </xs:simpleContent>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="getProfile">
+              <xs:element name="profiles">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
@@ -234,8 +234,8 @@
               </xs:element>
             </xs:sequence>
             <xs:attribute type="xs:string" name="enabled"  use="required"/>
-            <xs:attribute type="xs:string" name="outputGraph"  use="required"/>
-            <xs:attribute type="xs:string" name="individualFDdata"  use="required"/>
+            <xs:attribute type="xs:string" name="output_graph"  use="required"/>
+            <xs:attribute type="xs:string" name="individual_FD"  use="required"/>
           </xs:complexType>
         </xs:element>
       </xs:all>
