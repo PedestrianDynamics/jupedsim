@@ -21,6 +21,7 @@ static const char* MATSimInterfaceService_method_names[] = {
   "/org.matsim.hybrid.MATSimInterfaceService/reqAgentStuck",
   "/org.matsim.hybrid.MATSimInterfaceService/reqExternSimStepFinished",
   "/org.matsim.hybrid.MATSimInterfaceService/reqMaximumNumberOfAgents",
+  "/org.matsim.hybrid.MATSimInterfaceService/reqSendTrajectories",
 };
 
 std::unique_ptr< MATSimInterfaceService::Stub> MATSimInterfaceService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel) {
@@ -34,6 +35,7 @@ MATSimInterfaceService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterfa
   , rpcmethod_reqAgentStuck_(MATSimInterfaceService_method_names[2], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[2]))
   , rpcmethod_reqExternSimStepFinished_(MATSimInterfaceService_method_names[3], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[3]))
   , rpcmethod_reqMaximumNumberOfAgents_(MATSimInterfaceService_method_names[4], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[4]))
+  , rpcmethod_reqSendTrajectories_(MATSimInterfaceService_method_names[5], ::grpc::RpcMethod::NORMAL_RPC, channel->RegisterMethod(MATSimInterfaceService_method_names[5]))
   {}
 
 ::grpc::Status MATSimInterfaceService::Stub::reqExternalConnect(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternalConnect& request, ::org::matsim::hybrid::ExternalConnectConfirmed* response) {
@@ -76,7 +78,15 @@ std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Maxim
   return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>(channel(), cq, rpcmethod_reqMaximumNumberOfAgents_, context, request, tag));
 }
 
-MATSimInterfaceService::AsyncService::AsyncService(::grpc::CompletionQueue* cq) : ::grpc::AsynchronousService(cq, MATSimInterfaceService_method_names, 5) {}
+::grpc::Status MATSimInterfaceService::Stub::reqSendTrajectories(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories& request, ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived* response) {
+  return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqSendTrajectories_, context, request, response);
+}
+
+std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>> MATSimInterfaceService::Stub::AsyncreqSendTrajectories(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories& request, ::grpc::CompletionQueue* cq, void* tag) {
+  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>(channel(), cq, rpcmethod_reqSendTrajectories_, context, request, tag));
+}
+
+MATSimInterfaceService::AsyncService::AsyncService(::grpc::CompletionQueue* cq) : ::grpc::AsynchronousService(cq, MATSimInterfaceService_method_names, 6) {}
 
 MATSimInterfaceService::Service::~Service() {
   delete service_;
@@ -122,6 +132,14 @@ void MATSimInterfaceService::AsyncService::RequestreqMaximumNumberOfAgents(::grp
   AsynchronousService::RequestAsyncUnary(4, context, request, response, cq, tag);
 }
 
+::grpc::Status MATSimInterfaceService::Service::reqSendTrajectories(::grpc::ServerContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories* request, ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived* response) {
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
+}
+
+void MATSimInterfaceService::AsyncService::RequestreqSendTrajectories(::grpc::ServerContext* context, ::org::matsim::hybrid::Extern2MATSimTrajectories* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>* response, ::grpc::CompletionQueue* cq, void* tag) {
+  AsynchronousService::RequestAsyncUnary(5, context, request, response, cq, tag);
+}
+
 ::grpc::RpcService* MATSimInterfaceService::Service::service() {
   if (service_ != nullptr) {
     return service_;
@@ -157,6 +175,12 @@ void MATSimInterfaceService::AsyncService::RequestreqMaximumNumberOfAgents(::grp
       new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed, ::org::matsim::hybrid::MaximumNumberOfAgents>(
           std::mem_fn(&MATSimInterfaceService::Service::reqMaximumNumberOfAgents), this),
       new ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed, new ::org::matsim::hybrid::MaximumNumberOfAgents));
+  service_->AddMethod(new ::grpc::RpcServiceMethod(
+      MATSimInterfaceService_method_names[5],
+      ::grpc::RpcMethod::NORMAL_RPC,
+      new ::grpc::RpcMethodHandler< MATSimInterfaceService::Service, ::org::matsim::hybrid::Extern2MATSimTrajectories, ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>(
+          std::mem_fn(&MATSimInterfaceService::Service::reqSendTrajectories), this),
+      new ::org::matsim::hybrid::Extern2MATSimTrajectories, new ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived));
   return service_;
 }
 

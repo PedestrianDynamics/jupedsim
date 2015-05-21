@@ -39,6 +39,23 @@ message Extern2MATSim {
 	optional Agent agent = 1;
 }
 
+message Extern2MATSimTrajectories {
+     message Agent {
+          optional int32 id = 1;
+          optional double x = 2;
+          optional double y = 3;
+          optional double z = 4;
+          optional int32 color = 5;
+          optional double angle = 6;
+     }
+
+     optional double time = 1;
+     repeated Agent agent = 2;
+}
+
+message MATSim2ExternTrajectoriesReceived {
+}
+
 message Extern2MATSimConfirmed {
 	optional bool accepted = 1;
 }
@@ -109,6 +126,8 @@ service MATSimInterfaceService {
 	rpc reqExternSimStepFinished(ExternSimStepFinished) returns (ExternSimStepFinishedReceived);
 	// request the maximal number of agents
 	rpc reqMaximumNumberOfAgents(MaximumNumberOfAgentsConfirmed) returns (MaximumNumberOfAgents);
+	// sent the trajectories
+	rpc reqSendTrajectories(Extern2MATSimTrajectories) returns (MATSim2ExternTrajectoriesReceived);
 }
 
 service ExternInterfaceService {

@@ -45,6 +45,9 @@ class MATSim2ExternHasSpaceConfirmed;
 class MATSim2ExternPutAgentConfirmed;
 class Extern2MATSim;
 class Extern2MATSim_Agent;
+class Extern2MATSimTrajectories;
+class Extern2MATSimTrajectories_Agent;
+class MATSim2ExternTrajectoriesReceived;
 class Extern2MATSimConfirmed;
 class ExternSimStepFinished;
 class ExternSimStepFinishedReceived;
@@ -665,6 +668,283 @@ class Extern2MATSim : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Extern2MATSim* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Extern2MATSimTrajectories_Agent : public ::google::protobuf::Message {
+ public:
+  Extern2MATSimTrajectories_Agent();
+  virtual ~Extern2MATSimTrajectories_Agent();
+
+  Extern2MATSimTrajectories_Agent(const Extern2MATSimTrajectories_Agent& from);
+
+  inline Extern2MATSimTrajectories_Agent& operator=(const Extern2MATSimTrajectories_Agent& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Extern2MATSimTrajectories_Agent& default_instance();
+
+  void Swap(Extern2MATSimTrajectories_Agent* other);
+
+  // implements Message ----------------------------------------------
+
+  inline Extern2MATSimTrajectories_Agent* New() const { return New(NULL); }
+
+  Extern2MATSimTrajectories_Agent* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Extern2MATSimTrajectories_Agent& from);
+  void MergeFrom(const Extern2MATSimTrajectories_Agent& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(Extern2MATSimTrajectories_Agent* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 id = 1;
+  void clear_id();
+  static const int kIdFieldNumber = 1;
+  ::google::protobuf::int32 id() const;
+  void set_id(::google::protobuf::int32 value);
+
+  // optional double x = 2;
+  void clear_x();
+  static const int kXFieldNumber = 2;
+  double x() const;
+  void set_x(double value);
+
+  // optional double y = 3;
+  void clear_y();
+  static const int kYFieldNumber = 3;
+  double y() const;
+  void set_y(double value);
+
+  // optional double z = 4;
+  void clear_z();
+  static const int kZFieldNumber = 4;
+  double z() const;
+  void set_z(double value);
+
+  // optional int32 color = 5;
+  void clear_color();
+  static const int kColorFieldNumber = 5;
+  ::google::protobuf::int32 color() const;
+  void set_color(::google::protobuf::int32 value);
+
+  // optional double angle = 6;
+  void clear_angle();
+  static const int kAngleFieldNumber = 6;
+  double angle() const;
+  void set_angle(double value);
+
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.Extern2MATSimTrajectories.Agent)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  double x_;
+  double y_;
+  ::google::protobuf::int32 id_;
+  ::google::protobuf::int32 color_;
+  double z_;
+  double angle_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
+  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
+  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
+
+  void InitAsDefaultInstance();
+  static Extern2MATSimTrajectories_Agent* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Extern2MATSimTrajectories : public ::google::protobuf::Message {
+ public:
+  Extern2MATSimTrajectories();
+  virtual ~Extern2MATSimTrajectories();
+
+  Extern2MATSimTrajectories(const Extern2MATSimTrajectories& from);
+
+  inline Extern2MATSimTrajectories& operator=(const Extern2MATSimTrajectories& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Extern2MATSimTrajectories& default_instance();
+
+  void Swap(Extern2MATSimTrajectories* other);
+
+  // implements Message ----------------------------------------------
+
+  inline Extern2MATSimTrajectories* New() const { return New(NULL); }
+
+  Extern2MATSimTrajectories* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Extern2MATSimTrajectories& from);
+  void MergeFrom(const Extern2MATSimTrajectories& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(Extern2MATSimTrajectories* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  typedef Extern2MATSimTrajectories_Agent Agent;
+
+  // accessors -------------------------------------------------------
+
+  // optional double time = 1;
+  void clear_time();
+  static const int kTimeFieldNumber = 1;
+  double time() const;
+  void set_time(double value);
+
+  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+  int agent_size() const;
+  void clear_agent();
+  static const int kAgentFieldNumber = 2;
+  const ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent& agent(int index) const;
+  ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* mutable_agent(int index);
+  ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* add_agent();
+  const ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >&
+      agent() const;
+  ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >*
+      mutable_agent();
+
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.Extern2MATSimTrajectories)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  double time_;
+  ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent > agent_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
+  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
+  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
+
+  void InitAsDefaultInstance();
+  static Extern2MATSimTrajectories* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MATSim2ExternTrajectoriesReceived : public ::google::protobuf::Message {
+ public:
+  MATSim2ExternTrajectoriesReceived();
+  virtual ~MATSim2ExternTrajectoriesReceived();
+
+  MATSim2ExternTrajectoriesReceived(const MATSim2ExternTrajectoriesReceived& from);
+
+  inline MATSim2ExternTrajectoriesReceived& operator=(const MATSim2ExternTrajectoriesReceived& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MATSim2ExternTrajectoriesReceived& default_instance();
+
+  void Swap(MATSim2ExternTrajectoriesReceived* other);
+
+  // implements Message ----------------------------------------------
+
+  inline MATSim2ExternTrajectoriesReceived* New() const { return New(NULL); }
+
+  MATSim2ExternTrajectoriesReceived* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MATSim2ExternTrajectoriesReceived& from);
+  void MergeFrom(const MATSim2ExternTrajectoriesReceived& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(MATSim2ExternTrajectoriesReceived* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:org.matsim.hybrid.MATSim2ExternTrajectoriesReceived)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_MATSimInterface_2eproto();
+  friend void protobuf_AssignDesc_MATSimInterface_2eproto();
+  friend void protobuf_ShutdownFile_MATSimInterface_2eproto();
+
+  void InitAsDefaultInstance();
+  static MATSim2ExternTrajectoriesReceived* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2190,6 +2470,146 @@ inline void Extern2MATSim::set_allocated_agent(::org::matsim::hybrid::Extern2MAT
   }
   // @@protoc_insertion_point(field_set_allocated:org.matsim.hybrid.Extern2MATSim.agent)
 }
+
+// -------------------------------------------------------------------
+
+// Extern2MATSimTrajectories_Agent
+
+// optional int32 id = 1;
+inline void Extern2MATSimTrajectories_Agent::clear_id() {
+  id_ = 0;
+}
+inline ::google::protobuf::int32 Extern2MATSimTrajectories_Agent::id() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.id)
+  return id_;
+}
+inline void Extern2MATSimTrajectories_Agent::set_id(::google::protobuf::int32 value) {
+  
+  id_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.id)
+}
+
+// optional double x = 2;
+inline void Extern2MATSimTrajectories_Agent::clear_x() {
+  x_ = 0;
+}
+inline double Extern2MATSimTrajectories_Agent::x() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.x)
+  return x_;
+}
+inline void Extern2MATSimTrajectories_Agent::set_x(double value) {
+  
+  x_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.x)
+}
+
+// optional double y = 3;
+inline void Extern2MATSimTrajectories_Agent::clear_y() {
+  y_ = 0;
+}
+inline double Extern2MATSimTrajectories_Agent::y() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.y)
+  return y_;
+}
+inline void Extern2MATSimTrajectories_Agent::set_y(double value) {
+  
+  y_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.y)
+}
+
+// optional double z = 4;
+inline void Extern2MATSimTrajectories_Agent::clear_z() {
+  z_ = 0;
+}
+inline double Extern2MATSimTrajectories_Agent::z() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.z)
+  return z_;
+}
+inline void Extern2MATSimTrajectories_Agent::set_z(double value) {
+  
+  z_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.z)
+}
+
+// optional int32 color = 5;
+inline void Extern2MATSimTrajectories_Agent::clear_color() {
+  color_ = 0;
+}
+inline ::google::protobuf::int32 Extern2MATSimTrajectories_Agent::color() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.color)
+  return color_;
+}
+inline void Extern2MATSimTrajectories_Agent::set_color(::google::protobuf::int32 value) {
+  
+  color_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.color)
+}
+
+// optional double angle = 6;
+inline void Extern2MATSimTrajectories_Agent::clear_angle() {
+  angle_ = 0;
+}
+inline double Extern2MATSimTrajectories_Agent::angle() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.angle)
+  return angle_;
+}
+inline void Extern2MATSimTrajectories_Agent::set_angle(double value) {
+  
+  angle_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.Agent.angle)
+}
+
+// -------------------------------------------------------------------
+
+// Extern2MATSimTrajectories
+
+// optional double time = 1;
+inline void Extern2MATSimTrajectories::clear_time() {
+  time_ = 0;
+}
+inline double Extern2MATSimTrajectories::time() const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.time)
+  return time_;
+}
+inline void Extern2MATSimTrajectories::set_time(double value) {
+  
+  time_ = value;
+  // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.time)
+}
+
+// repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+inline int Extern2MATSimTrajectories::agent_size() const {
+  return agent_.size();
+}
+inline void Extern2MATSimTrajectories::clear_agent() {
+  agent_.Clear();
+}
+inline const ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent& Extern2MATSimTrajectories::agent(int index) const {
+  // @@protoc_insertion_point(field_get:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
+  return agent_.Get(index);
+}
+inline ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* Extern2MATSimTrajectories::mutable_agent(int index) {
+  // @@protoc_insertion_point(field_mutable:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
+  return agent_.Mutable(index);
+}
+inline ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* Extern2MATSimTrajectories::add_agent() {
+  // @@protoc_insertion_point(field_add:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
+  return agent_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >&
+Extern2MATSimTrajectories::agent() const {
+  // @@protoc_insertion_point(field_list:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
+  return agent_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >*
+Extern2MATSimTrajectories::mutable_agent() {
+  // @@protoc_insertion_point(field_mutable_list:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
+  return &agent_;
+}
+
+// -------------------------------------------------------------------
+
+// MATSim2ExternTrajectoriesReceived
 
 // -------------------------------------------------------------------
 
