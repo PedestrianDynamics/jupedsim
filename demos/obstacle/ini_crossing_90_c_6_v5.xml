@@ -47,12 +47,12 @@
     </method_B> 
 
     <!-- Method C (Zhang2011a) Classical density and Vel --> 
-    <method_C enabled="false"> 
+    <method_C enabled="true"> 
         <measurement_area id="1" /> 
     </method_C> 
 
     <!-- Method D (Zhang2011a) Voronoi density and Vel --> 
-    <method_D enabled="true" output_graph="true" individual_FD="false"> 
+    <method_D enabled="false" output_graph="false" individual_FD="false"> 
         <measurement_area id="1" /> 
         <cut_by_circle enabled="false" radius= "1" edges = "10"/> 
         <!-- edges represent the precision of discretization of the circle ---> 
