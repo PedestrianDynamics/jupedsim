@@ -34,7 +34,6 @@ JPSserver::JPSserver(Simulation& src): _SimManager(src)
 
 JPSserver::~JPSserver()
 {
-
 }
 
 void JPSserver::RunSimulation()
@@ -46,9 +45,10 @@ void JPSserver::RunSimulation()
           if(_doSimulation)
           {
                _SimManager.RunBody(_maxSimTime);
+               //important: _doSimulation should be set to false before doing any other things
+               _doSimulation=false;
                _jpsClient->SendTrajectories(_SimManager.GetBuilding());
                _jpsClient->NotifyEndOfSimulation();
-               _doSimulation=false;
           }
 
           //Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");

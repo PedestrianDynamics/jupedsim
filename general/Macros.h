@@ -89,7 +89,7 @@
 #define FINAL_DEST_OUT -1
 
 // Linked cells
-#define LIST_EMPTY      -1
+#define LIST_EMPTY  -1
 
 
 enum RoomState {

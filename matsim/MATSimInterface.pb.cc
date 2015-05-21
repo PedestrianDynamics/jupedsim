@@ -619,7 +619,7 @@ void protobuf_AddDesc_MATSimInterface_2eproto() {
     "ern2MATSim\0225\n\005agent\030\001 \001(\0132&.org.matsim.h"
     "ybrid.Extern2MATSim.Agent\032&\n\005Agent\022\n\n\002id"
     "\030\001 \001(\t\022\021\n\tleaveNode\030\002 \001(\t\"\300\001\n\031Extern2MAT"
-    "SimTrajectories\022\014\n\004time\030\001 \001(\001\022A\n\005agent\030\002"
+    "SimTrajectories\022\014\n\004time\030\001 \001(\001\022A\n\005agent\030\017"
     " \003(\01322.org.matsim.hybrid.Extern2MATSimTr"
     "ajectories.Agent\032R\n\005Agent\022\n\n\002id\030\001 \001(\005\022\t\n"
     "\001x\030\002 \001(\001\022\t\n\001y\030\003 \001(\001\022\t\n\001z\030\004 \001(\001\022\r\n\005color\030"
@@ -3245,20 +3245,20 @@ bool Extern2MATSimTrajectories::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_agent;
+        if (input->ExpectTag(122)) goto parse_agent;
         break;
       }
 
-      // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
-      case 2: {
-        if (tag == 18) {
+      // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
+      case 15: {
+        if (tag == 122) {
          parse_agent:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                 input, add_agent()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_agent;
+        if (input->ExpectTag(122)) goto parse_agent;
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -3292,10 +3292,10 @@ void Extern2MATSimTrajectories::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(1, this->time(), output);
   }
 
-  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
   for (unsigned int i = 0, n = this->agent_size(); i < n; i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->agent(i), output);
+      15, this->agent(i), output);
   }
 
   // @@protoc_insertion_point(serialize_end:org.matsim.hybrid.Extern2MATSimTrajectories)
@@ -3309,11 +3309,11 @@ void Extern2MATSimTrajectories::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(1, this->time(), target);
   }
 
-  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
   for (unsigned int i = 0, n = this->agent_size(); i < n; i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->agent(i), target);
+        15, this->agent(i), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:org.matsim.hybrid.Extern2MATSimTrajectories)
@@ -3328,7 +3328,7 @@ int Extern2MATSimTrajectories::ByteSize() const {
     total_size += 1 + 8;
   }
 
-  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
   total_size += 1 * this->agent_size();
   for (int i = 0; i < this->agent_size(); i++) {
     total_size +=
@@ -3503,7 +3503,7 @@ void Extern2MATSimTrajectories::InternalSwap(Extern2MATSimTrajectories* other) {
   // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.time)
 }
 
-// repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+// repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
  int Extern2MATSimTrajectories::agent_size() const {
   return agent_.size();
 }

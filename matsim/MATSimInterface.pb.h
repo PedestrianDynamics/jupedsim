@@ -848,10 +848,10 @@ class Extern2MATSimTrajectories : public ::google::protobuf::Message {
   double time() const;
   void set_time(double value);
 
-  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+  // repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
   int agent_size() const;
   void clear_agent();
-  static const int kAgentFieldNumber = 2;
+  static const int kAgentFieldNumber = 15;
   const ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent& agent(int index) const;
   ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* mutable_agent(int index);
   ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* add_agent();
@@ -2577,7 +2577,7 @@ inline void Extern2MATSimTrajectories::set_time(double value) {
   // @@protoc_insertion_point(field_set:org.matsim.hybrid.Extern2MATSimTrajectories.time)
 }
 
-// repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 2;
+// repeated .org.matsim.hybrid.Extern2MATSimTrajectories.Agent agent = 15;
 inline int Extern2MATSimTrajectories::agent_size() const {
   return agent_.size();
 }

@@ -547,6 +547,7 @@ void Simulation::ProcessAgentsQueue()
      {
           _building->AddPedestrian(ped);
      }
+
 #ifdef _USE_PROTOCOL_BUFFER
      //outgoing pedestrians
      if (_hybridSimManager)

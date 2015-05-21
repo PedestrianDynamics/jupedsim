@@ -21,7 +21,7 @@ JPSclient::JPSclient(std::shared_ptr<ChannelInterface> channel)
 
      //communication channel to JuPedsim
      // stub for testing and to be removed in the final version
-     _jupedsimChannel= ExternInterfaceService::NewStub(channel);
+     _jupedsimChannel = ExternInterfaceService::NewStub(channel);
 }
 
 JPSclient::~JPSclient()
@@ -183,6 +183,11 @@ bool JPSclient::SendTrajectories(Building* building)
      }
 
      Status status =_matsimChannel->reqSendTrajectories(&context, request, &reply);
+
+     // if(!status.IsOk())
+     // {
+     //    Log->Write("ERROR:\t RPC JPSClient call failed <reqSendTrajectories>");
+     // }
      return status.IsOk();
      //Log->Write("ERROR:\t RPC JPSClient call failed <reqSendTrajectories>");
 }
