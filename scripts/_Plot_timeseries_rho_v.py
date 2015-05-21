@@ -10,7 +10,7 @@ import sys, glob,os
 
 def getParserArgs():
 	parser = argparse.ArgumentParser(description='Plot N-t graph measured from method A')
-	parser.add_argument("-p", "--pathtraj", default="./", help='give the path of trajectory file')
+	parser.add_argument("-p", "--pathfile", default="./", help='give the path of source file')
 	parser.add_argument("-n", "--nametraj", help='give the name of the trajectory')
 	parser.add_argument("-f", "--fps", default="16", type=int, help='give the frame rate of data')
 	args = parser.parse_args()
@@ -19,11 +19,10 @@ def getParserArgs():
 
 if __name__ == '__main__':
    args = getParserArgs()
-   pathtraj = args.pathtraj
-   sys.path.append(pathtraj)
+   pathfile = args.pathfile
+   sys.path.append(pathfile)
    nametraj = args.nametraj
    fps = args.fps
-   pathfile = "%s/Output/Fundamental_Diagram/Classical_Voronoi"%(pathtraj)
 
    f_Voronoi = glob.glob("%s/*_Voronoi*%s*.dat"%(pathfile,nametraj))
    f_Classic = glob.glob("%s/*_Classic*%s*.dat"%(pathfile,nametraj))
