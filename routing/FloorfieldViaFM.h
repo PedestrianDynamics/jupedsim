@@ -26,6 +26,12 @@
  *
  **/
 
+ //remark:
+ //refac the code to use enums instead of integer values where integer values code sth
+ //was considered, but enum classes do not implicitly cast to int
+ //rather use makros/masks like in plain C? or just makros (defines)?
+ //this would make it easier to read
+
 #ifndef FLOORFIELDVIAFM_H
 #define FLOORFIELDVIAFM_H
 
@@ -56,7 +62,10 @@ class FloorfieldViaFM
         void calculateDistanceField(const double threshold);
 
         void update(const long int key, double* target, double* speedlocal);
-        double twosidedCalc(double x, double y, double hDivF);
+        void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key);
+        void checkNeighborsAndCalc(const long int key);
+        inline double onesidedCalc(double xy, double hDivF);
+        inline double twosidedCalc(double x, double y, double hDivF);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}

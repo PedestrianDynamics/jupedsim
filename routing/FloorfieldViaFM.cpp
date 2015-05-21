@@ -60,7 +60,14 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed                   <- DONE in parseBuilding
     //this step includes Linescanalgorithmus? (maybe included in parsing above)
 
-    //call fkt: calculateDistanzefield
+    calculateDistanceField(-1.); //negative threshold is ignored
+
+    //security debug check
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        if (dist2Wall[i] < 0.) {
+            std::cerr << "dist2Wall holds negative value at key: " << i << std::endl;
+        }
+    }
 
     //call fkt: calculateFloorfield(bool useDis2Wall)
 }
@@ -150,8 +157,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0.) {               //outside
             speedInitial[i] = .001;
-            cost[i]         = -7.; // @todo: ar.graf
-            flag[i]         = -7;
+            cost[i]         = -7.;  // @todo: ar.graf
+            flag[i]         = 2;    // meaning dist2Wall = 0 is best accuracy
         } else {                                //inside
             speedInitial[i] = 1.;
             cost[i]         = -2.;
@@ -288,38 +295,10 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
     //  go thru dist2Wall and add every neighbor of "0"s (only if their flag is 0 and therefore "inside")
     Trial* smallest = nullptr;
     Trial* biggest = nullptr;
-    directNeighbor dNeigh;
-    long int aux;
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0) {
-            dNeigh = grid->getNeighbors(i);
-            //check for valid neigh
-            aux = dNeigh.key[0];
-            //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
-            if ((aux != -2) && (flag[aux] == 0)) {
-                flag[aux] = 4;      //4 = added to trial but not calculated
-                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
-                trialfield[aux].insert(smallest, biggest, trialfield + aux);
-            }
-            aux = dNeigh.key[1];
-            if ((aux != -2) && (flag[aux] == 0)) {
-                flag[aux] = 4;      //4 = added to trial but not calculated
-                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
-                trialfield[aux].insert(smallest, biggest, trialfield + aux);
-            }
-            aux = dNeigh.key[2];
-            if ((aux != -2) && (flag[aux] == 0)) {
-                flag[aux] = 4;      //4 = added to trial but not calculated
-                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
-                trialfield[aux].insert(smallest, biggest, trialfield + aux);
-            }
-            aux = dNeigh.key[3];
-            if ((aux != -2) && (flag[aux] == 0)) {
-                flag[aux] = 4;      //4 = added to trial but not calculated
-                trialfield[aux].cost[0] = -3.3 - i; // todo: ar.graf @todo: calculate cost fkt call here with args
-                trialfield[aux].insert(smallest, biggest, trialfield + aux);
-            }
+            checkNeighborsAndAddToNarrowband(smallest, biggest, i);
         }
     }
 
@@ -337,18 +316,151 @@ void FloorfieldViaFM::calculateDistanceField(const double threshold) {  //if thr
 //    #endif // TESTING
 
     //inital narrowband done, now loop (while not empty: remove smallest, add neighbors of removed)
+    while (smallest != nullptr) {
+        long int keyOfSmallest = smallest->key;
+        flag[keyOfSmallest] = 3;
+        if ((threshold > 0) && (trialfield[keyOfSmallest].cost[0] > threshold)) {    //set rest of nearfield and rest of unknown to this max value:
 
+            //rest of nearfield
+            Trial* iter = smallest->child;
+            while (iter != nullptr) {
+                iter[0].cost[0] = trialfield[keyOfSmallest].cost[0];
+                iter[0].flag[0] = 3;
+                iter = iter->child;
+            }
+
+            //rest of unknown
+            for (long int i = 0; i < grid->GetnPoints(); ++i) {
+                if (flag[i] == 0) {
+                    flag[i] = 3;
+                    dist2Wall[i] = dist2Wall[keyOfSmallest];
+                }
+            }
+            smallest = nullptr;
+        } else {
+            trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
+            checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest);
+        }
+    }
 
     //frage: wo plaziere ich das "update nachbarschaft"? beim adden eines elements? lieber nicht beim calc, da sonst eine rekursion startet
     //bei verbesserung von single to doublesided update ... soll hier auch die nachbarschaft aktualisiert werden?
 
 } //calculateDistancField
 
-void update(const long int key, double* target, double* speedlocal) {
+void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key) {
+    long int aux = -1;
+
+    directNeighbor dNeigh = grid->getNeighbors(key);
+
+    //check for valid neigh
+    aux = dNeigh.key[0];
+    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
+    if ((aux != -2) && (flag[aux] == 0)) {
+        flag[aux] = 4;      //4 = added to trial but not calculated
+        checkNeighborsAndCalc(aux);
+        trialfield[aux].insert(smallest, biggest, trialfield + aux);
+    }
+    aux = dNeigh.key[1];
+    if ((aux != -2) && (flag[aux] == 0)) {
+        flag[aux] = 4;      //4 = added to trial but not calculated
+        checkNeighborsAndCalc(aux);
+        trialfield[aux].insert(smallest, biggest, trialfield + aux);
+    }
+    aux = dNeigh.key[2];
+    if ((aux != -2) && (flag[aux] == 0)) {
+        flag[aux] = 4;      //4 = added to trial but not calculated
+        checkNeighborsAndCalc(aux);
+        trialfield[aux].insert(smallest, biggest, trialfield + aux);
+    }
+    aux = dNeigh.key[3];
+    if ((aux != -2) && (flag[aux] == 0)) {
+        flag[aux] = 4;      //4 = added to trial but not calculated
+        checkNeighborsAndCalc(aux);
+        trialfield[aux].insert(smallest, biggest, trialfield + aux);
+    }
+}
+
+void FloorfieldViaFM::checkNeighborsAndCalc(const long int key) {
+    double row = -3.;
+    double col = -3.;
+    long int aux = -1;
+
+    directNeighbor dNeigh = grid->getNeighbors(key);
+
+    aux = dNeigh.key[0];
+    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
+    if  ((aux != -2) &&                                     //neighbor is a gridpoint
+        ((flag[aux] == 1) || (flag[aux] == 2)))             //gridpoint holds a calculated value
+    {
+        row = trialfield[aux].cost[0];
+        //todo: add directioninfo to calc gradient later OR recheck neighbor later again
+    }
+    aux = dNeigh.key[2];
+    if  ((aux != -2) &&                                     //neighbor is a gridpoint
+        ((flag[aux] == 1) || (flag[aux] == 2)) &&           //gridpoint holds a calculated value
+        (trialfield[aux].cost[0] < row))                    //calculated value promises smaller cost
+    {
+        row = trialfield[aux].cost[0];
+        //todo: add directioninfo to calc gradient later OR recheck neighbor later again
+    }
+
+    aux = dNeigh.key[1];
+    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
+    if  ((aux != -2) &&                                     //neighbor is a gridpoint
+        ((flag[aux] == 1) || (flag[aux] == 2)))             //gridpoint holds a calculated value
+    {
+        col = trialfield[aux].cost[0];
+        //todo: add directioninfo to calc gradient later OR recheck neighbor later again
+    }
+    aux = dNeigh.key[3];
+    if  ((aux != -2) &&                                     //neighbor is a gridpoint
+        ((flag[aux] == 1) || (flag[aux] == 2)) &&           //gridpoint holds a calculated value
+        (trialfield[aux].cost[0] < row))                    //calculated value promises smaller cost
+    {
+        col = trialfield[aux].cost[0];
+        //todo: add directioninfo to calc gradient later OR recheck neighbor later again
+    }
+    if (col == -3.) { //one sided update with row
+        trialfield[key].cost[0] = onesidedCalc(row, grid->Gethx());
+        trialfield[key].flag[0] = 1;
+        return;
+    }
+
+    if (row == -3.) { //one sided update with col
+        trialfield[key].cost[0] = onesidedCalc(col, grid->Gethy());
+        trialfield[key].flag[0] = 1;
+        return;
+    }
+
+    //two sided update
+    trialfield[key].cost[0] = twosidedCalc(row, col, grid->Gethx());
+    trialfield[key].flag[0] = 2;
+}
+
+void FloorfieldViaFM::update(const long int key, double* target, double* speedlocal) {
+    //wenn ein wert berechnet wurde bei (key), dann schaue in seiner nachbarschaft
+    //ob ein singlecalc'ed value (flag == 1) ist. dieser kann ggf. verbessert werden.
+    directNeighbor dNeigh = grid->getNeighbors(key);
+    //keine schleife, sondern jeden nachbarn separat behandeln
+    //bei singled diagonal nach berechnetem wert absuchen und mit ihm zusammen den nachbarn verbessern
+    //bei         zweitem in der linie und mit ihm zentralen diff-quotienten bilden um (nachbarn oder self) zu verbessern
+    // ich glaube: self
+    long int aux = dNeigh.key[0];
+    if ( (aux != -2) && (flag[aux] == 1) ) {
+
+    }
 
 } //update
 
-double twosidedCalc(double x, double y, double hDivF) {
+inline double FloorfieldViaFM::onesidedCalc(double xy, double hDivF) {
+    return xy + hDivF;
+}
+
+inline double FloorfieldViaFM::twosidedCalc(double x, double y, double hDivF) { //on error return -2
     double determinante = (2*hDivF*hDivF - (x-y)*(x-y));
     if (determinante >= 0) {
         return (x + y + sqrt(determinante))/2;
