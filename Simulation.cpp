@@ -143,7 +143,8 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           s.append("\tonline streaming enabled \n");
      }
 
-     if (args.GetTrajectoriesFile().empty() == false) {
+     if (args.GetTrajectoriesFile().empty() == false)
+     {
           switch (args.GetFileFormat())
           {
           case FORMAT_XML_PLAIN: {
@@ -192,8 +193,6 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           }
      }
 
-
-
      _operationalModel = args.GetModel();
      s.append(_operationalModel->GetDescription());
 
@@ -229,10 +228,10 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
 
 #ifdef _USE_PROTOCOL_BUFFER
-     //iniitalize the hybridmode if defined
+     //initialize the hybrid mode if defined
      if(nullptr!=(_hybridSimManager=args.GetHybridSimManager()))
      {
-          _hybridSimManager->Init(_building.get());
+          Log->Write("INFO:\t performing hybrid simulation");
      }
 #endif
 
@@ -248,7 +247,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           ped->Setdt(_deltaT);
      }
      _nPeds = allPeds.size();
-     //pBuilding->WriteToErrorLog();
+     //_building->WriteToErrorLog();
 
      //get the seed
      _seed = args.GetSeed();
@@ -284,7 +283,6 @@ int Simulation::RunStandardSimulation(double maxSimTime)
      double t=RunBody(maxSimTime);
      RunFooter();
      return (int)t;
-
 }
 
 void Simulation::UpdateRoutesAndLocations()
@@ -387,19 +385,19 @@ void Simulation::UpdateRoutesAndLocations()
           }
      }
 
-
+#ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
      {
           AgentsQueueOut::Add(pedsToRemove);
      }
      else
+#endif
      {
           // remove the pedestrians that have left the building
           for (unsigned int p = 0; p < pedsToRemove.size(); p++)
           {
                _building->DeletePedestrian(pedsToRemove[p]);
           }
-
      }
 
      //    temporary fix for the safest path router
@@ -434,7 +432,6 @@ void Simulation::PrintStatistics()
                          goal->GetLastPassingTime());
           }
      }
-
      Log->Write("\n");
 }
 
@@ -497,7 +494,6 @@ int Simulation::RunBody(double maxSimTime)
           //someone might have left the building
           _nPeds = _building->GetAllPedestrians().size();
 
-
           // update the global time
           Pedestrian::SetGlobalTime(t);
 
@@ -542,11 +538,8 @@ void Simulation::RunFooter()
      }
 }
 
-
-
 void Simulation::ProcessAgentsQueue()
 {
-
      //incoming pedestrians
      vector<Pedestrian*> peds;
      AgentsQueueIn::GetandClear(peds);
@@ -566,4 +559,9 @@ void Simulation::ProcessAgentsQueue()
 AgentsSourcesManager& Simulation::GetAgentSrcManager()
 {
      return _agentSrcManager;
+}
+
+Building* Simulation::GetBuilding()
+{
+    return _building.get();
 }

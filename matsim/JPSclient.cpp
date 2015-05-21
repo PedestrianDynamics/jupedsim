@@ -8,7 +8,7 @@
 #include "JPSclient.h"
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/Building.h"
-#include "../pedestrian/AgentsQueueIn.h"
+#include "../pedestrian/AgentsQueue.h"
 
 #include "MATSimInterface.pb.h"
 
@@ -158,4 +158,31 @@ int JPSclient::RequestMaxNumberAgents()
      }
      Log->Write("ERROR:\t RPC JPSClient call failed <RequestMaxNumberAgents>");
      return -1;
+}
+
+bool JPSclient::SendTrajectories(Building* building)
+{
+     ClientContext context;
+     Extern2MATSimTrajectories request;
+     MATSim2ExternTrajectoriesReceived reply;
+
+     //set the time
+     request.set_time(Pedestrian::GetGlobalTime());
+
+     auto&& allPeds = building->GetAllPedestrians();
+     for(const auto& ped:allPeds)
+     {
+          auto&& agent = request.add_agent();
+          double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi())*180/M_PI;
+          agent->set_angle(phi);
+          agent->set_color(ped->GetColor());
+          agent->set_id(ped->GetID());
+          agent->set_x(ped->GetPos()._x);
+          agent->set_y(ped->GetPos()._y);
+          agent->set_z(ped->GetElevation());
+     }
+
+     Status status =_matsimChannel->reqSendTrajectories(&context, request, &reply);
+     return status.IsOk();
+     //Log->Write("ERROR:\t RPC JPSClient call failed <reqSendTrajectories>");
 }

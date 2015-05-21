@@ -36,29 +36,41 @@ public:
       */
      virtual ~HybridSimulationManager();
 
-     bool Init(Building* building);
+     /**
+      * Start the hybrid simulation
+      * @param sim, a reference to the simulation object
+      * @return true if everything went fine
+      */
      bool Run(Simulation& sim);
      bool RunClient();
      bool RunServer();
+
+     /**
+      * Shutdown the rpc server and client
+      * this is not actually used.
+      */
      void Shutdown();
+
+     /**
+      * @return a string description of the hybrid simulator
+      */
      std::string ToString();
 
      /**
       * Make the class "runnable" by overloading the operator
       * @param value
       */
-     void operator()();
+     //void operator()();
 
      /**
-      * Create another source manager
+      * send outgoing agents to the external server
       */
-     void AttachSourceManager(const AgentsSourcesManager& src);
-
      void ProcessOutgoingAgent();
 
 private:
-     void ProcessIncomingAgent();
-
+     /**
+      * Testing the system
+      */
      void TestWorkflow();
 
 private:
@@ -69,8 +81,6 @@ private:
      std::string _externalServerName="localhost";
      std::string _internalServerName="localhost";
      Building* _building=nullptr;
-     //TODO: the method should be passed bz reference in the main function
-     //std::unique_ptr<grpc::Server> _rpcServer;
      std::unique_ptr<grpc::Server> _rpcServer;
      AgentsSourcesManager _agentSrcMng;
      std::shared_ptr<JPSclient> _rpcClient;

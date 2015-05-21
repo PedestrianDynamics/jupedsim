@@ -46,8 +46,9 @@ void JPSserver::RunSimulation()
           if(_doSimulation)
           {
                _SimManager.RunBody(_maxSimTime);
-               _doSimulation=false;
+               _jpsClient->SendTrajectories(_SimManager.GetBuilding());
                _jpsClient->NotifyEndOfSimulation();
+               _doSimulation=false;
           }
 
           //Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");
@@ -89,8 +90,9 @@ Status JPSserver::reqMATSim2ExternPutAgent(ServerContext* context  __attribute__
                //there should be only one agent in this vector
                for(auto&& ped:peds)
                {
-                    //TODO: there might be a race condition here if the client is sending agents out
-                    //TODO map the agents back, not necessary if jupedsim is reset after each iteration
+                    //TODO: there might be a race condition here if the client is sending agents out at the same time
+                    //TODO: map the agents back, not necessary if jupedsim is reset after each iteration
+                    // because each incoming agent has an id and an agent will get two
                     _jpsClient->MapMatsimAgentToJPSagent(ped->GetID(),agent_id);
                     ped->SetFinalDestination(std::stoi(leave_node));
                     //schedule the agent

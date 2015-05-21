@@ -53,7 +53,7 @@
 #include "events/EventManager.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
-//Forward declarations TO DO
+//Forward declarations
 //class AgentsSourcesManager;
 class EventManager;
 class HybridSimulationManager;
@@ -156,6 +156,10 @@ public:
      */
     void ProcessAgentsQueue();
 
+    /**
+     * @return a pointer to the building object
+     */
+    Building* GetBuilding();
 };
 
 #endif /*SIMULATION_H_*/

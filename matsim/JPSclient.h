@@ -27,6 +27,7 @@ using grpc::ChannelInterface;
 using grpc::ClientContext;
 using org::matsim::hybrid::MATSim2ExternHasSpace;
 using org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed;
+using org::matsim::hybrid::Extern2MATSimTrajectories_Agent;
 
 using namespace org::matsim::hybrid;
 
@@ -49,12 +50,13 @@ public:
      virtual ~JPSclient();
 
      /**
-      * Process the finished agents queue
+      * Process the finished agents queue and send them to the
+      * external server
       */
      void ProcessAgentQueue(Building* building);
 
      /**
-      * Shutdown the channel
+      * Shutdown the channels
       */
      void Shutdown()
      {
@@ -62,10 +64,26 @@ public:
           _matsimChannel.reset();
      }
 
+     /**
+      * Notify the external service that JuPedsim is up, running
+      * and waiting for order.
+      * @param host, the hostname where jupedsim can be reached
+      * @param port, the port where jupedsim can be reached
+      * @return true if everything went fine
+      */
      bool NotifyExternalService(const std::string& host, int port);
 
+     /**
+      * Send a pedestrian to the external server
+      * @return true in the case of success
+      */
      bool SendAgentToMatsim(Pedestrian* ped);
 
+     /**
+      * Notify the external server about the end of the simulation.
+      * This can also be the end of the simulation step as requested by the
+      * @return true in case of success
+      */
      bool NotifyEndOfSimulation();
 
      /**
@@ -85,18 +103,32 @@ public:
           _mapMatsimID2JPSID[jpsID]=matsimID;
      }
 
+     /**
+      * Send trajectories after a simulation has been completed.
+      * return true if everything went fine
+      */
+     bool SendTrajectories(Building* building);
+
+     //void SetBuilding(Building)
+
 private:
+     // for testing the functionalities when there is no matsim server present
      bool HasSpaceOnJuPedSim(int nodeID);
+     // for testing the functionalities when there is no matsim server present
      bool SendAgentToJuPedSim(Pedestrian* ped);
 
 private:
+     //call the remote methods on Jupedsim
      std::unique_ptr<ExternInterfaceService::Stub> _jupedsimChannel;
+     //call the remote methods on matsim
      std::unique_ptr<MATSimInterfaceService::Stub> _matsimChannel;
      //map the matsim agent id to the jupedsim agent id
      std::map<int,std::string> _mapMatsimID2JPSID;
      //map the pedestrian id, to a time which is set
      // if the pedestrian could not be transfered to matsim
      std::map <int,int>_counter;
+     //building object
+     //Building* _building=nullptr;
 };
 
 #endif /* MATSIM_JPSCLIENT_H_ */
