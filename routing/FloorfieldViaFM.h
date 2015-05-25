@@ -59,13 +59,16 @@ class FloorfieldViaFM
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
         void resetGoalAndCosts(const Goal* const goalArg);
         void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
-        void calculateDistanceField(const double threshold);
+        void calculateFloorfield(bool useDistance2Wall);     //make private
+        void calculateDistanceField(const double threshold); //make private
 
         void update(const long int key, double* target, double* speedlocal);
         void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key);
         void checkNeighborsAndCalc(const long int key);
         inline double onesidedCalc(double xy, double hDivF);
         inline double twosidedCalc(double x, double y, double hDivF);
+
+        void testoutput();
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
