@@ -32,6 +32,7 @@
 #include "../../geometry/Obstacle.h"
 #include "../../geometry/Point.h"
 #include "../../geometry/Wall.h"
+#include "../../IO/OutputHandler.h"
 
 #include <cstdlib>
 #include <ctime>
@@ -102,7 +103,42 @@ BOOST_FIXTURE_TEST_CASE(Obstacle_whichQuad_test, Obstacle)
 BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
 {
      BOOST_MESSAGE("starting obstacle contains test");
-     // test
+     Point P1(0, 0);
+     Point P2(0, 10);
+     Point P3(10, 10);
+     Point P4(10, 0);
+     
+     Obstacle obs1;
+     
+     Wall w1(P1, P2);
+     Wall w2(P2, P3);
+     Wall w3(P3, P4);
+     Wall w4(P4, P1);
+     
+     obs1.AddWall(w1);
+     obs1.AddWall(w2);
+     obs1.AddWall(w3);
+     obs1.AddWall(w4);
+     
+     obs1.SetClosed(1);
+     obs1.ConvertLineToPoly();
+     
+     // inside the obstacle check
+     for (int i = 1; i < 10; ++i)
+          BOOST_CHECK(obs1.Contains(Point(i, static_cast<float>(i) / 100)) == true);
+     
+     // on the edge check
+     for (int i = 0; i <11; ++i) {
+          BOOST_CHECK_MESSAGE(obs1.Contains(Point(0, i)) == true, " ( " << 0 <<", "<< i << ")");
+          BOOST_CHECK_MESSAGE(obs1.Contains(Point(i, 0)) == true, " ( " << i <<", "<< 0 << ")");
+          BOOST_CHECK_MESSAGE(obs1.Contains(Point(10, i)) == true, " ( " << 10 <<", "<< i << ")");
+          BOOST_CHECK_MESSAGE(obs1.Contains(Point(i, 10)) == true, " ( " << i <<", "<< 10 << ")");
+     }
+     
+     // outside the obstacle check
+     for (int i = 1; i < 10; ++i)
+          BOOST_CHECK(obs1.Contains(Point(-i, i*i)) == false);
+     
      BOOST_MESSAGE("Leaving obstacle contains test");
 }
 
@@ -110,6 +146,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
 {
      BOOST_MESSAGE("starting obstacle ConvertLineToPoly test");
      const double PI = 3.14159265358979323846;
+     
      for (int i = 1; i < 10; ++i)
      {
           Point P1 (cos(PI/i), sin(PI/i));  
@@ -117,6 +154,14 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           Point P3 (2*i, i);
           Point P4 (-i, -i*i);
           Point P5 (100, 100);
+          
+          std::vector<Point> added_pts;
+          added_pts.emplace_back(P1);
+          added_pts.emplace_back(P2);
+          added_pts.emplace_back(P3);
+          added_pts.emplace_back(P4);
+          added_pts.emplace_back(P5);
+          const unsigned temp = added_pts.size();
           
           Obstacle obs1;
           
@@ -139,6 +184,21 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           
           obs1.AddWall(w5);
           BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
+          
+          // GetPolygon test
+          int flag = 0;
+          const std::vector<Point> poly_pts = obs1.GetPolygon();
+          for (unsigned j = 0; j < poly_pts.size(); j++)
+               for (unsigned k = 0; k < temp; ++k) 
+                    if (poly_pts[j] == added_pts[k]) {
+                         ++flag;
+                         added_pts.erase(added_pts.begin() + k);
+                         k = temp;
+                    }  
+       
+          BOOST_CHECK_MESSAGE(flag == temp, poly_pts.size() << " == " << temp);
+          //BOOST_CHECK_EQUAL_COLLECTIONS(poly_pts.begin(), poly_pts.end(), 
+                                        //added_pts.begin(), added_pts.end());
      }
      BOOST_MESSAGE("Leaving obstacle ConvertLineToPoly test");
 }
@@ -172,4 +232,5 @@ BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
      }
      BOOST_MESSAGE("Leaving obstacle GetCentroid & IntersectWithLine test");
 }
+
 BOOST_AUTO_TEST_SUITE_END()
