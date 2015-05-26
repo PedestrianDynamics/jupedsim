@@ -165,9 +165,29 @@ const vector<int>& SubRoom::GetAllGoalIDs() const
 }
 
 
-void SubRoom::AddWall(const Wall& w)
+bool SubRoom::AddWall(const Wall& w)
 {
+     //check for duplicated walls
+     for(auto&& w1: _walls)
+     {
+          if(w==w1)
+          {
+               Log->Write("ERROR:\t Duplicate wall found in Room/Subroom %d/%d  %s",_roomID,_id ,w.toString().c_str());
+               Log->Write("ERROR:\t will not be added");
+               exit(EXIT_FAILURE);
+               //return false;
+          }
+     }
+     //checking for wall chunks.
+     if(w.Length()<J_TOLERANZ)
+     {
+          Log->Write("ERROR:\t Wall too small (length = %lf) found in Room/Subroom %d/%d  %s",w.Length(),_roomID,_id ,w.toString().c_str());
+          Log->Write("ERROR:\t will not be added");
+          exit(EXIT_FAILURE);
+          //return false;
+     }
      _walls.push_back(w);
+     return true;
 }
 
 
@@ -459,6 +479,7 @@ bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)
 }
 
 // this is the case if they share a transition or crossing
+//TODO collect and store the neighbors
 bool SubRoom::IsDirectlyConnectedWith(const SubRoom* sub) const
 {
 
@@ -542,6 +563,23 @@ bool SubRoom::SanityCheck()
                Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
+          }
+     }
+     //check if there are overlapping walls
+     for (auto&& w1: _walls)
+     {
+          for (auto&& w2: _walls)
+          {
+               if (w1==w2) continue;
+
+               //only checking the colinear case at the moment.
+               Point vecAB=w1.GetPoint2()-w1.GetPoint1();
+               Point vecDC=w2.GetPoint2()-w2.GetPoint1();
+               if(vecAB.Determinant(vecDC)<J_EPS)
+               {
+
+               //if(w1.IsInLineSegment(w2.GetPoint1()))
+               }
           }
      }
      return true;

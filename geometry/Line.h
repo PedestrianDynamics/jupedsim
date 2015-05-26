@@ -164,6 +164,12 @@ public:
       * @return true if both segments intersect
       */
      bool IntersectionWith(const Line& l) const; // check two segments for intersections
+
+     /**
+      * @see http://alienryderflex.com/intersect/
+      * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
+      * @return true if both segments intersect
+      */
      bool IntersectionWith(const Point& p1, const Point&p2) const;
     
      /**
@@ -235,8 +241,13 @@ public:
       * @return the angle between two lines
       */
      double GetDeviationAngle(const Line& l) const;
-     //    double GetAngle(SubRoom s) const;
-     Line enlarge(double d) const; 
+
+     /**
+      * ???
+      * @param d
+      * @return
+      */
+     Line Enlarge(double d) const;
 
 };
 

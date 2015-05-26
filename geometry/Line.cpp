@@ -329,10 +329,10 @@ bool Line::IntersectionWith(const Point &p1, const Point &p2) const {
 }
 
 bool Line::IntersectionWith(const Line &l) const {
-    return this->IntersectionWith(l._point1, l._point2);
+    return IntersectionWith(l._point1, l._point2);
 }
 
-Line Line::enlarge(double d) const {
+Line Line::Enlarge(double d) const {
     const Point &p1 = _point1;
     const Point &p2 = _point2;
     Point diff = (p1 - p2).Normalized() * d;
