@@ -157,13 +157,14 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                vector<Pedestrian*> neighbours;
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
                //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
+               vector<SubRoom*> emptyVector;
 
                int nSize=neighbours.size();
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     Point p1 = ped->GetPos();
                     Point p2 = ped1->GetPos();
-                    bool ped_is_visible = building->IsVisible(p1, p2, false);
+                    bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
                     if (!ped_is_visible)
                          continue;
                     // if(debugPed == ped->GetID())

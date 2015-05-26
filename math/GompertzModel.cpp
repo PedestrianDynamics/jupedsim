@@ -198,7 +198,8 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
-                     bool isVisible = building->IsVisible(p1, p2, false);
+                     vector<SubRoom*> emptyVector;
+                     bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
                      if (!isVisible)
                           continue;
                      // if(debugPed == ped->GetID())

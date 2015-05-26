@@ -150,7 +150,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           case FORMAT_XML_PLAIN: {
                OutputHandler* tofile = new FileHandler(
                          args.GetTrajectoriesFile().c_str());
-               Trajectories* output = new TrajectoriesJPSV05();
+               Trajectories* output = new TrajectoriesJPSV04();
                output->SetOutputHandler(tofile);
                _iod->AddIO(output);
                break;

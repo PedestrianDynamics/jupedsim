@@ -269,7 +269,7 @@ bool GlobalRouter::Init(Building* building)
                }
 
                //collect all navigation objects
-               vector<NavLine*> allGoals;
+               vector<Hline*> allGoals;
                const auto & crossings = sub->GetAllCrossings();
                allGoals.insert(allGoals.end(), crossings.begin(), crossings.end());
                const auto & transitions = sub->GetAllTransitions();
@@ -283,13 +283,13 @@ bool GlobalRouter::Init(Building* building)
                //process the transitions
                for (unsigned int n1 = 0; n1 < allGoals.size(); n1++)
                {
-                    NavLine* nav1 = allGoals[n1];
+                    Hline* nav1 = allGoals[n1];
                     AccessPoint* from_AP = _accessPoints[nav1->GetUniqueID()];
                     int from_door = _map_id_to_index[nav1->GetUniqueID()];
                     if(from_AP->IsClosed()) continue;
 
                     for (unsigned int n2 = 0; n2 < allGoals.size(); n2++) {
-                         NavLine* nav2 = allGoals[n2];
+                         Hline* nav2 = allGoals[n2];
                          AccessPoint* to_AP = _accessPoints[nav2->GetUniqueID()];
                          if(to_AP->IsClosed()) continue;
 
@@ -298,7 +298,15 @@ bool GlobalRouter::Init(Building* building)
                          if (nav1->operator ==(*nav2))
                               continue;
 
-                         if (building->IsVisible(nav1->GetCentre(), nav2->GetCentre(), true)) {
+                         vector<SubRoom*> emptyVector;
+                         emptyVector.push_back(nav1->GetSubRoom1());
+                         emptyVector.push_back(nav1->GetSubRoom2());
+                         emptyVector.push_back(nav2->GetSubRoom1());
+                         emptyVector.push_back(nav2->GetSubRoom2());
+
+
+                         if (building->IsVisible(nav1->GetCentre(), nav2->GetCentre(), emptyVector,true))
+                         {
                               int to_door = _map_id_to_index[nav2->GetUniqueID()];
                               _distMatrix[from_door][to_door] = penalty*(nav1->GetCentre()
                                         - nav2->GetCentre()).Norm();
@@ -428,7 +436,7 @@ bool GlobalRouter::Init(Building* building)
                               "       \tYou can solve this by enabling triangulation.",
                               from_AP->GetFriendlyName().c_str());
                     from_AP->Dump();
-                    //return false;
+                    return false;
                }
           }
           _tmpPedPath.clear();
@@ -485,7 +493,7 @@ bool GlobalRouter::Init(Building* building)
      //DumpAccessPoints(20); //exit(0);
      //DumpAccessPoints(-1); exit(0);
      //vector<string> rooms;
-     //rooms.push_back("hall1");
+     //rooms.push_back("Verteilerebene_001");
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms); exit(0);
      //WriteGraphGV("routing_graph.gv",4,rooms);exit(0);
      Log->Write("INFO:\tDone with the Global Router Engine!");

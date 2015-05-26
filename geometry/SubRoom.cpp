@@ -330,6 +330,7 @@ std::vector<Wall> SubRoom::GetVisibleWalls(const Point & position){
 
 // like ped_is_visible() but here we can exclude checking intersection
 // with the same wall. This function should check if <position> can see the <Wall>
+//TODO: optimize
 bool SubRoom::IsVisible(const Line &wall, const Point &position)
 {
      // printf("\tEnter wall_is_visible\n");
@@ -373,40 +374,43 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
 // with the nearest point on the wall IS intersecting with the wall.
 bool SubRoom::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
 {
-     // printf("\t\tEnter ped_is_visible\n");
-     // generate certain connection lines
-     // connecting p1 with p2
-     //Line cl(p1,p2);
-     //Line L2;
-     bool temp =  true;
      //check intersection with Walls
-    for(const auto& wall : _walls) {
-        if (wall.IntersectionWith(p1, p2)) {
+    for(const auto& wall : _walls)
+    {
+        if (wall.IntersectionWith(p1, p2))
+        {
             return false;
         }
     }
 
      // printf("\t\t -- ped_is_visible; check obstacles\n");
      //check intersection with obstacles
-    for ( const auto obstacle : _obstacles) {
-        for ( const auto& wall : obstacle->GetAllWalls()) {
-            if (wall.IntersectionWith(p1, p2)) {
+    for ( const auto& obstacle : _obstacles)
+    {
+        for ( const auto& wall : obstacle->GetAllWalls())
+        {
+            if (wall.IntersectionWith(p1, p2))
+            {
                 return false;
             }
         }
     }
 
-
-     // check intersection with other hlines in room
      if(considerHlines)
-          for(unsigned int i = 0; i < _hlines.size(); i++) {
-               if(_hlines[i]->IsInLineSegment(p1)|| _hlines[i]->IsInLineSegment(p2)) continue;
-               if(temp && (Line*)_hlines[i]->IntersectionWith(p1, p2))
-                    temp = false;
+     {
+          for(const auto& hline: _hlines)
+          {
+
+               if(hline->IsInLineSegment(p1)|| hline->IsInLineSegment(p2)) continue;
+               if(hline->IntersectionWith(p1, p2))
+               {
+                    return false;
+               }
           }
+     }
 
      // printf("\t\tLeave ped_is_visible with %d\n",temp);
-     return temp;
+     return true;
 }
 
 bool SubRoom::IsVisible(Line* l1, Line* l2, bool considerHlines)

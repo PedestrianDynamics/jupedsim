@@ -72,7 +72,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
      this->LoadGeometry();
      this->LoadRoutingInfo(filename);
-     this->AddSurroundingRoom();
+     //this->AddSurroundingRoom();
      this->InitGeometry();
      this->LoadTrafficInfo();
      distributor.Distribute(this);
@@ -843,26 +843,37 @@ SubRoom* Building::GetSubRoomByUID( int uid)
      return NULL;
 }
 
-bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
-{
+//bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
+//{
+//
+//     for(auto&& itr_room: _rooms)
+//     {
+//          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+//          {
+//               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
+//          }
+//     }
+//     return true;
+//}
 
-     for(auto&& itr_room: _rooms)
+bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<SubRoom*>& subrooms, bool considerHlines)
+{
+     //loop over all subrooms if none is provided
+     if (subrooms.empty())
      {
-          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          for(auto&& itr_room: _rooms)
           {
-               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
+               for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+               {
+                    if(itr_subroom.second->IsVisible(p1,p2,considerHlines)==false) return false;
+               }
           }
      }
-     return true;
-}
-
-bool Building::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
-{
-     for(auto&& itr_room: _rooms)
+     else
      {
-          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          for(auto&& sub: subrooms)
           {
-               if(itr_subroom.second->IsVisible(p1,p2,considerHlines)==false) return false;
+               if(sub and sub->IsVisible(p1,p2,considerHlines)==false) return false;
           }
      }
 
