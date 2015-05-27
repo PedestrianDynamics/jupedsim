@@ -2,14 +2,14 @@
 
 Association::Association()
 {
-    _waypoint1=nullptr;
-    _waypoint2=nullptr;
+    _waypoint=nullptr;
+    _associatedWaypoint=nullptr;
 
 }
 
 Association::Association(ptrWaypoint waypoint, ptrWaypoint associated_waypoint)
 {
-    _waypoint=waypoint1;
+    _waypoint=waypoint;
     _associatedWaypoint=associated_waypoint;
 
 }

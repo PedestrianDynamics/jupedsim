@@ -7,7 +7,7 @@
 #include "landmark.h"
 
 #include <queue>
-#include<memory>
+#include <memory>
 #include <vector>
 
 class Pedestrian;
@@ -15,24 +15,24 @@ class Building;
 class JEllipse;
 
 
-//class priorityCheck
-//{
-//public:
-//  priorityCheck(){}
-//  bool operator() (const Waypoint& lhs, const Waypoint& rhs) const
-//  {
-//    if (lhs.getPriority <= rhs.getPriority)
-//      return true;
-//    else
-//        return false;
-//  }
-//};
+class priorityCheck
+{
+public:
+  priorityCheck(){}
+  bool operator() (const Waypoint& lhs, const Waypoint& rhs) const
+  {
+    if (lhs.GetPriority() <= rhs.GetPriority())
+      return true;
+    else
+        return false;
+  }
+};
 
 
 
 
 
-//using Waypoints = std::priority_queue<Waypoint,std::vector<Waypoint>,priorityCheck>;
+using Waypoints = std::priority_queue<Waypoint,std::vector<Waypoint>,priorityCheck>;
 using ptrBuilding = std::shared_ptr<const Building>;
 using ptrPed = std::shared_ptr<const Pedestrian>;
 using ptrLandmark = std::shared_ptr<Landmark>;
@@ -55,7 +55,7 @@ private:
     // Navigation graph
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarks;
-    //Waypoints _waypContainer;
+    Waypoints _waypContainer;
 
 
 };

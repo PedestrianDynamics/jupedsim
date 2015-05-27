@@ -115,7 +115,7 @@ public:
       * @param uid ,the unique identifier
       * @return NULL if no exists with that identifier.
       */
-     SubRoom* GetSubRoomByUID( int uid);
+     SubRoom* GetSubRoomByUID( int uid) const;
 
      /**
       * @return true if the two segments are visible from each other.

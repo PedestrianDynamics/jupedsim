@@ -829,7 +829,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      return NULL;
 }
 
-SubRoom* Building::GetSubRoomByUID( int uid)
+SubRoom* Building::GetSubRoomByUID( int uid) const
 {
      for(auto&& itr_room: _rooms)
      {

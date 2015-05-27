@@ -40,6 +40,11 @@ void Waypoint::SetCaption(const std::string &string)
     _caption=string;
 }
 
+void Waypoint::SetPriority(int priority)
+{
+    _priority=priority;
+}
+
 const int &Waypoint::GetId()
 {
     return _id;
@@ -71,11 +76,16 @@ const std::string &Waypoint::GetCaption()
     return _caption;
 }
 
-void Waypoint::AddAssociation(Association asso)
+const int &Waypoint::GetPriority() const
 {
-    if (std::find(Associations.begin(), Associations.end(), asso)!=Associations.end())
+    return _priority;
+}
+
+void Waypoint::AddAssociation(ptrAssociation asso)
+{
+    if (std::find(_assoContainer.begin(), _assoContainer.end(), asso)!=_assoContainer.end())
         return;
     else
-        Associations.push_back(asso);
+        _assoContainer.push_back(asso);
 }
 

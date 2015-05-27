@@ -1,7 +1,7 @@
 #include "cognitivemap.h"
 #include "../../../geometry/Point.h"
 #include "../../../geometry/Building.h"
-#include "../../../pedestrian/Ellipse.h"
+
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../tinyxml/tinyxml.h"
 
@@ -58,7 +58,7 @@ void CognitiveMap::ParseLandmarks(const std::string &geometryfile)
          return;
     }
     if(xRootNode->Attribute("unit"))
-         if(string(xRootNode->Attribute("unit")) != "m") {
+         if(std::string(xRootNode->Attribute("unit")) != "m") {
               Log->Write("ERROR:\tOnly the unit m (meters) is supported. \n\tYou supplied [%s]",xRootNode->Attribute("unit"));
               Log->Write("No waypoints specified");
               return;
@@ -77,7 +77,7 @@ void CognitiveMap::ParseLandmarks(const std::string &geometryfile)
 
     //processing the rooms node
     TiXmlNode*  xLandmarksNode = xRootNode->FirstChild("landmarks");
-    if (!xRoomsNode) {
+    if (!xLandmarksNode) {
          Log->Write("ERROR: \tGeometry file without landmark definition!");
          Log->Write("No waypoints specified");
          return;
@@ -93,7 +93,7 @@ void CognitiveMap::ParseLandmarks(const std::string &geometryfile)
         std::string lx = xmltoa(xLandmark->Attribute("px"),"-1");
         std::string ly = xmltoa(xLandmark->Attribute("py"),"-1");
 
-        ptrLandmark landmark = new Landmark(Point(std::stod(lx),std::stod(ly)));
+        ptrLandmark landmark (new Landmark(Point(std::stod(lx),std::stod(ly))));
 
         landmark->SetId(std::stoi(id));
         landmark->SetCaption(caption);
@@ -112,12 +112,14 @@ void CognitiveMap::ParseLandmarks(const std::string &geometryfile)
             std::string asso_a = xmltoa(xAsso->Attribute("a"),"-1");
             std::string asso_b = xmltoa(xAsso->Attribute("b"),"-1");
 
-            ptrWaypoint waypoint = new Waypoint(Point((std::stod(asso_x),std::stod(asso_y))),
-                                                std::stod(asso_a),std::stod(asso_b));
+            ptrWaypoint waypoint (new Waypoint(Point(std::stod(asso_x),std::stod(asso_y)),
+                                                std::stod(asso_a),std::stod(asso_b)));
             waypoint->SetId(std::stod(asso_id));
             waypoint->SetCaption(asso_caption);
 
-            landmark->AddAssociation(new Association(landmark,waypoint));
+            landmark->AddAssociation(std::make_shared<Association>(landmark,waypoint));
+
+            this->AddLandmark(landmark);
 
 
         }

@@ -12,7 +12,7 @@ class Association;
 using ptrAssociation = std::shared_ptr<Association>;
 using Associations = std::vector<ptrAssociation>;
 
-using ptrRoom = std::shared_ptr<const Room>;
+using ptrRoom = SubRoom*;
 
 class Waypoint
 {
@@ -28,6 +28,7 @@ public:
     void SetPos(const Point& point);
     void SetRoom(ptrRoom room);
     void SetCaption(const std::string& string);
+    void SetPriority(int priority);
     ///Getter
     const int& GetId();
     const Point& GetPos();
@@ -35,8 +36,9 @@ public:
     const double& GetB();
     ptrRoom GetRoom();
     const std::string& GetCaption();
+    const int& GetPriority() const;
     /// Associations
-    void AddAssociation(Association asso);
+    void AddAssociation(ptrAssociation asso);
 
 private:
     int _id;
@@ -44,7 +46,8 @@ private:
     Point _exactPos;
     double _a;
     double _b;
-    Room _room;
+    ptrRoom _room;
+    int _priority;
     Associations _assoContainer;
 };
 
