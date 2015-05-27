@@ -22,6 +22,17 @@ CognitiveMap::~CognitiveMap()
 
 }
 
+void CognitiveMap::AddLandmark(ptrLandmark landmark)
+{
+    if (std::find(_landmarks.begin(), _landmarks.end(), landmark)!=_landmarks.end())
+    {
+        return;
+    }
+    else
+        _landmarks.push_back(landmark);
+}
+
+
 void CognitiveMap::ParseLandmarks(const std::string &geometryfile)
 {
     std::string geoFilenameWithPath = _building->GetProjectRootDir() + geometryfile;
@@ -73,43 +84,47 @@ void CognitiveMap::ParseLandmarks(const std::string &geometryfile)
     }
 
     for(TiXmlElement* xLandmark = xLandmarksNode->FirstChildElement("landmark"); xLandmark;
-              xLandmark = xLandmark->NextSiblingElement("landmark")) {
+              xLandmark = xLandmark->NextSiblingElement("landmark"))
+    {
 
-         ptrLandmark = new Landmark();
-         //make_unique<Song>
+        std::string id = xmltoa(xLandmark->Attribute("id"), "-1");
+        std::string caption = xmltoa(xLandmark->Attribute("caption"));
+        std::string roomId = xmltoa(xLandmark->Attribute("subroom1_id"),"-1");
+        std::string lx = xmltoa(xLandmark->Attribute("px"),"-1");
+        std::string ly = xmltoa(xLandmark->Attribute("py"),"-1");
 
-         std::string id = xmltoa(xLandmark->Attribute("id"), "-1");
-         //room->SetID(xmltoi(room_id.c_str(), -1));
+        ptrLandmark landmark = new Landmark(Point(std::stod(lx),std::stod(ly)));
 
-         //std::string caption = "room " + room_id;
-         Landmark->SetCaption(xmltoa(xRoom->Attribute("caption")); //, caption.c_str()));
-
-         //double position = xmltof(xRoom->Attribute("zpos"), 0.0);
-
-         //if(position>6.0) position+=50;
-         //room->SetZPos(position);
-
-         //parsing the subrooms
-         //processing the rooms node
-         //TiXmlNode*  xSubroomsNode = xRoom->FirstChild("subroom");
-
-         for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
-                   xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
+        landmark->SetId(std::stoi(id));
+        landmark->SetCaption(caption);
+        landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
 
 
-              string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
-              string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
-              string type = xmltoa(xSubRoom->Attribute("class"),"subroom");
+        for(TiXmlElement* xAsso = xAsso->FirstChildElement("association"); xAsso;
+           xAsso = xAsso->NextSiblingElement("association"))
+        {
 
-              //get the equation of the plane if any
-              double A_x = xmltof(xSubRoom->Attribute("A_x"), 0.0);
-              double B_y = xmltof(xSubRoom->Attribute("B_y"), 0.0);
+            std::string asso_id = xmltoa(xAsso->Attribute("id"), "-1");
+            std::string asso_caption = xmltoa(xAsso->Attribute("caption"), "0");
+            //std::string asso_type = xmltoa(xAsso->Attribute("type"),"-1");
+            std::string asso_x = xmltoa(xAsso->Attribute("px"),"-1");
+            std::string asso_y = xmltoa(xAsso->Attribute("py"),"-1");
+            std::string asso_a = xmltoa(xAsso->Attribute("a"),"-1");
+            std::string asso_b = xmltoa(xAsso->Attribute("b"),"-1");
 
-              // assume either the old "C_z" or the new "C"
-              double C_z = xmltof(xSubRoom->Attribute("C_z"), 0.0);
-              C_z = xmltof(xSubRoom->Attribute("C"), C_z);
+            ptrWaypoint waypoint = new Waypoint(Point((std::stod(asso_x),std::stod(asso_y))),
+                                                std::stod(asso_a),std::stod(asso_b));
+            waypoint->SetId(std::stod(asso_id));
+            waypoint->SetCaption(asso_caption);
 
-              SubRoom* subroom = NULL;
+            landmark->AddAssociation(new Association(landmark,waypoint));
+
+
+        }
+
+
+
+    }
 
 }
 

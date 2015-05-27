@@ -9,33 +9,41 @@
 //
 
 class Association;
-using Associations = std::vector<Association*>;
+using ptrAssociation = std::shared_ptr<Association>;
+using Associations = std::vector<ptrAssociation>;
+
 using ptrRoom = std::shared_ptr<const Room>;
 
 class Waypoint
 {
 public:
-    Waypoint(Point pos, JEllipse ellipse, ptrRoom room);
+    Waypoint(Point pos, ptrRoom room=nullptr);
+    Waypoint(Point pos, double a, double b, ptrRoom room=nullptr);
     ~Waypoint();
 
     ///Setter
-    void SetId(const int id);
+    void SetId(int id);
+    void SetA(double a);
+    void SetB(double b);
     void SetPos(const Point& point);
-    void SetEllipse(const JEllipse& ellipse);
     void SetRoom(ptrRoom room);
     void SetCaption(const std::string& string);
     ///Getter
     const int& GetId();
     const Point& GetPos();
-    const JEllipse& GetEllipse();
+    const double& GetA();
+    const double& GetB();
     ptrRoom GetRoom();
     const std::string& GetCaption();
+    /// Associations
+    void AddAssociation(Association asso);
 
 private:
     int _id;
     std::string _caption;
     Point _exactPos;
-    JEllipse _catchmentArea;
+    double _a;
+    double _b;
     Room _room;
     Associations _assoContainer;
 };

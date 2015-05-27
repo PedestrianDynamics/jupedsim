@@ -5,7 +5,7 @@
 class Landmark : public Waypoint
 {
 public:
-    Landmark(Point pos, JEllipse ellipse, ptrRoom room);
+    Landmark(Point pos, ptrRoom room=nullptr);
     ~Landmark();
 };
 

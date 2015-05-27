@@ -3,15 +3,18 @@
 
 #include<memory>
 class Waypoint;
+using ptrWaypoint = std::shared_ptr<Waypoint>;
 
 class Association
 {
 public:
     Association();
+    Association(ptrWaypoint waypoint, ptrWaypoint associated_waypoint);
     ~Association();
+    ptrWaypoint GetAssociation(ptrWaypoint waypoint);
 private:
-    std::shared_ptr<Waypoint> _waypoint1;
-    std::shared_ptr<Waypoint> _waypoint2;
+    ptrWaypoint _waypoint;
+    ptrWaypoint _associatedWaypoint;
 };
 
 #endif // ASSOCIATIONS_H

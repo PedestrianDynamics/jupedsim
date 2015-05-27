@@ -4,6 +4,7 @@
 
 #include "associations.h"
 #include "waypoints.h"
+#include "landmark.h"
 
 #include <queue>
 #include<memory>
@@ -43,15 +44,17 @@ public:
     CognitiveMap();
     CognitiveMap(ptrBuilding b, ptrPed ped);
     ~CognitiveMap();
+    void AddLandmark(ptrLandmark landmark);
 private:
-    void ParseLandmarks();
+    void ParseLandmarks(const std::string &geometryfile);
 
 
 private:
-    ptrBuilding _ped;
-    ptrPed _building;
+    ptrBuilding _building;
+    ptrPed _ped;
     // Navigation graph
     Associations _assoContainer;
+    std::vector<ptrLandmark> _landmarks;
     //Waypoints _waypContainer;
 
 

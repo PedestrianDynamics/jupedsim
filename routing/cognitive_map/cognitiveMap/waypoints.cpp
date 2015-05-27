@@ -1,8 +1,17 @@
 #include "waypoints.h"
 
-Waypoint::Waypoint(Point pos, JEllipse ellipse, ptrRoom room)
+Waypoint::Waypoint(Point pos, ptrRoom room)
 {
+    _exactPos=pos;
+    _room=room;
+}
 
+Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
+{
+    _exactPos=pos;
+    _a=a;
+    _b=b;
+    _room=room;
 }
 
 Waypoint::~Waypoint()
@@ -10,20 +19,16 @@ Waypoint::~Waypoint()
 
 }
 
-void Waypoint::SetId(const int id)
+void Waypoint::SetId(int id)
 {
     _id=id;
 }
 
 void Waypoint::SetPos(const Point &point)
 {
-    _point=point;
+    _exactPos=point;
 }
 
-void Waypoint::SetEllipse(const JEllipse &ellipse)
-{
-    _catchmentArea=ellipse;
-}
 
 void Waypoint::SetRoom(ptrRoom room)
 {
@@ -42,13 +47,19 @@ const int &Waypoint::GetId()
 
 const Point &Waypoint::GetPos()
 {
-    return _pos;
+    return _exactPos;
 }
 
-const JEllipse &Waypoint::GetEllipse()
+const double &Waypoint::GetA()
 {
-    return _catchmentArea;
+    return _a;
 }
+
+const double &Waypoint::GetB()
+{
+    return _b;
+}
+
 
 ptrRoom Waypoint::GetRoom()
 {
@@ -58,5 +69,13 @@ ptrRoom Waypoint::GetRoom()
 const std::string &Waypoint::GetCaption()
 {
     return _caption;
+}
+
+void Waypoint::AddAssociation(Association asso)
+{
+    if (std::find(Associations.begin(), Associations.end(), asso)!=Associations.end())
+        return;
+    else
+        Associations.push_back(asso);
 }
 
