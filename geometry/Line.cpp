@@ -236,6 +236,8 @@ Point Line::ShortestPoint(const Point &p) const {
  *  Prüft, ob Punkt p im Liniensegment enthalten ist
  * algorithm from:
  * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+ *
+ * TODO: Failing with test ( 30.1379 : 124.485 )--( 41.4647 : 124.485 ) and ( 38.4046 : 104.715 )--( 33.7146 : 104.715 )
  * */
 bool Line::IsInLineSegment(const Point &p) const {
     Point differenceTwoAndOne = _point2 - _point1;
@@ -248,6 +250,8 @@ bool Line::IsInLineSegment(const Point &p) const {
     // dotproduct and distSquared to check if point is in segment and not just in line
     double dotp = differencePAndOne.ScalarProduct(differenceTwoAndOne);
     return !(dotp < 0 || (differenceTwoAndOne).NormSquare() < dotp);
+
+    //return fabs( (_point1-p ).Norm() + (_point2-p ).Norm() - (_point2-_point1 ).Norm() )<J_EPS;
 }
 
 /* Berechnet direkt den Abstand von p zum Segment l
@@ -290,6 +294,30 @@ double Line::Length() const {
 
 double Line::LengthSquare() const {
     return (_point1 - _point2).NormSquare();
+}
+
+//TODO unit  test
+bool Line::Overlapp(const Line& l) const
+{
+     //first check if they are colinear
+     Point vecAB=l.GetPoint2()-l.GetPoint1();
+     Point vecDC=_point1-_point2;
+     if(fabs(vecAB.Determinant(vecDC))<J_EPS)
+     {
+
+          if( IsInLineSegment(l.GetPoint1()) and  not  HasEndPoint(l.GetPoint1()))
+          {
+               //Log->Write("ERROR: 1. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
+               return true;
+          }
+
+          if( IsInLineSegment(l.GetPoint2()) and not HasEndPoint(l.GetPoint2()))
+          {
+               //Log->Write("ERROR: 2. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
+               return true;
+          }
+     }
+     return false;
 }
 
 //FIXME no equals check with == on double or float bring in an epsilon

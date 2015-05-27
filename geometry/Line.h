@@ -142,9 +142,11 @@ public:
       */
      double LengthSquare() const;
 
-     //
-     //   @return dot product of two lines
-     //   bool operator*(const Line& l) const;
+     /**
+      *
+      * @return true if both lines overlapp
+      */
+     bool Overlapp(const Line& l) const;
 
      /**
       * @return true if both segments are equal. The end points must be in the range of J_EPS.

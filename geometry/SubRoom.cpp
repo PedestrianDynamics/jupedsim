@@ -183,7 +183,7 @@ bool SubRoom::AddWall(const Wall& w)
      {
           Log->Write("ERROR:\t Wall too small (length = %lf) found in Room/Subroom %d/%d  %s",w.Length(),_roomID,_id ,w.toString().c_str());
           Log->Write("ERROR:\t will not be added");
-          exit(EXIT_FAILURE);
+          //exit(EXIT_FAILURE);
           //return false;
      }
      _walls.push_back(w);
@@ -572,14 +572,13 @@ bool SubRoom::SanityCheck()
           {
                if (w1==w2) continue;
 
-               //only checking the colinear case at the moment.
-               Point vecAB=w1.GetPoint2()-w1.GetPoint1();
-               Point vecDC=w2.GetPoint2()-w2.GetPoint1();
-               if(vecAB.Determinant(vecDC)<J_EPS)
+               if(w1.Overlapp(w2))
                {
-
-               //if(w1.IsInLineSegment(w2.GetPoint1()))
+                    Log->Write("ERROR: Overlapping walls %s and %s ",w1.toString().c_str(),w2.toString().c_str());
+                    exit(EXIT_FAILURE);
+                    //return false;
                }
+
           }
      }
      return true;
