@@ -183,7 +183,7 @@ public:
 
      /**
       * Load and parse the geometry file into the building object.
-      * If no geometry file is provided, one is searched in the the project file
+      * If no geometry file is provided, one is searched in the project file
       *
       * @param filename, the geometry file
       */
