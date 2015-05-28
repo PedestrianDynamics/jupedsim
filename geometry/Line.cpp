@@ -330,16 +330,6 @@ bool Line::IntersectionWith(const Point &p1, const Point &p2) const {
     double denominator = BA.CrossProduct(DC);
     double numerator = DC.CrossProduct(AC);
 
-    double r = numerator / denominator;
-    if (r < 0.0 || r > 1.0) {
-        return false;
-    }
-
-    double s = (BA.CrossProduct(AC)) / denominator;
-    if (s < 0.0 || s > 1.0) {
-        return false;
-    }
-
     if (denominator == 0.0) {
 
         // the lines are superposed
@@ -352,6 +342,16 @@ bool Line::IntersectionWith(const Point &p1, const Point &p2) const {
 
             return false;
         }
+    }
+
+    double r = numerator / denominator;
+    if (r < 0.0 || r > 1.0) {
+        return false;
+    }
+
+    double s = (BA.CrossProduct(AC)) / denominator;
+    if (s < 0.0 || s > 1.0) {
+        return false;
     }
 
     return true;
