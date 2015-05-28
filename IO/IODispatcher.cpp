@@ -158,7 +158,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      // first the rooms
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
-     //rooms_to_plot.push_back("Verteilerebene_001");
+     rooms_to_plot.push_back("U9");
 
      for (const auto& it:building->GetAllRooms())
      {
@@ -168,7 +168,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                continue;
 
           for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=25) continue;
+               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=7) continue;
                geometry.append(s->WriteSubRoom());
 
                // the hlines

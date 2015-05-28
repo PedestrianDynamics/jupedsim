@@ -51,15 +51,15 @@
 using namespace std;
 
 
-Building::Building()
-{
-     _caption = "no_caption";
-     _projectFilename = "";
-     _geometryFilename= "";
-     _routingEngine = nullptr;
-     _linkedCellGrid = nullptr;
-     _savePathway = false;
-}
+//Building::Building()
+//{
+//     _caption = "no_caption";
+//     _projectFilename = "";
+//     _geometryFilename= "";
+//     _routingEngine = nullptr;
+//     _linkedCellGrid = nullptr;
+//     _savePathway = false;
+//}
 
 #ifdef _SIMULATOR
 Building::Building(const std::string& filename, const std::string& rootDir, RoutingEngine& engine, PedDistributor& distributor, double linkedCellSize)

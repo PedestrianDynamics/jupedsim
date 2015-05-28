@@ -73,7 +73,7 @@ private:
 
 public:
      /// constructor
-     Building();
+     //Building();
      Building(const std::string&, const std::string&, RoutingEngine&, PedDistributor&, double);
      /// destructor
      virtual ~Building();
