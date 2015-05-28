@@ -60,7 +60,7 @@ class FloorfieldViaFM
         void resetGoalAndCosts(const Goal* const goalArg);
         void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
         void calculateFloorfield(bool useDistance2Wall);     //make private
-        void calculateDistanceField(const double threshold); //make private
+        void calculateDistanceField(const double thresholdArg); //make private
 
         void update(const long int key, double* target, double* speedlocal);
         void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key);
@@ -68,7 +68,7 @@ class FloorfieldViaFM
         inline double onesidedCalc(double xy, double hDivF);
         inline double twosidedCalc(double x, double y, double hDivF);
 
-        void testoutput();
+        void testoutput(const char*, const char*);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
@@ -93,6 +93,8 @@ class FloorfieldViaFM
         long int* secKey;  //secondary key to address ... not used yet
         Point* grad; //gradients
         Trial* trialfield;
+
+        double threshold;
 
 };
 
