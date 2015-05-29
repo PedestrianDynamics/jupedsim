@@ -62,7 +62,7 @@ public:
      {
           _outputHandler = NULL;
      };
-     virtual ~Trajectories(){};
+     virtual ~Trajectories(){delete _outputHandler;};
      virtual void WriteHeader(long nPeds, double fps, Building* building, int seed)=0;
      virtual void WriteGeometry(Building* building)=0;
      virtual void WriteFrame(int frameNr, Building* building)=0;

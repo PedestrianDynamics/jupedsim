@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.6" 
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+<JuPedSim project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
   <geometry>big_room_geo.xml</geometry>
-  <events_file>big_room_events.xml</events_file>
+  <events_files>big_room_events.xml</events_files>
+  <max_sim_time>300</max_sim_time>
+
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="big_room_trrajectories.xml" />
-    <socket hostname="127.0.0.1" port="8989"/> 
+    <socket hostname="127.0.0.1" port="8989" />
   </trajectories>
+
+  
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->
 
@@ -70,9 +72,17 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="0" room_id="0" subroom_id="0" number="50" router_id="1" agent_parameter_id="1" 
-          risk_tolerance_mean="0.8" risk_tolerance_sigma="0.01"/>
+      <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" risk_tolerance_mean="0.8"
+        risk_tolerance_sigma="0.01" x_min="14" x_max="16" y_min="14" y_max="16" />
+
+      <group group_id="1" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
     </agents_distribution>
+
+    <agents_sources><!-- frequency in persons/seconds -->
+      <source id="0" frequency="1" agents_max="5" group_id="0" caption="source 1" />
+      <source id="1" frequency="1" agents_max="5" group_id="1" caption="source 1" />
+    </agents_sources>
+
   </agents>
 
   <operational_models>
@@ -107,7 +117,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>3</exit_crossing_strategy>
+        <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="3.4" />
         <force_ped nu="3" b="0.25" c="3.0" />
         <force_wall nu="10" b="0.70" c="3.0" />

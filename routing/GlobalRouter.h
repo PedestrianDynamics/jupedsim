@@ -78,7 +78,7 @@ public:
       * @param filename
       */
      void WriteGraphGV(std::string filename, int finalDestination,
-                       const std::vector<std::string> rooms= std::vector<std::string>());
+               const std::vector<std::string> rooms= std::vector<std::string>());
 
      /**
       * Reset the routing engine and clear all pre-computed paths
@@ -208,9 +208,9 @@ private:
      ///map the internal crossings/transition id to
      ///the global ID (description) for that final destination
      std::map<int, int> _mapIdToFinalDestination;
-    // normalize the probs
-    std::default_random_engine _rdGenerator;
-    std::uniform_real_distribution<double> _rdDistribution;
+     // normalize the probs
+     std::default_random_engine _rdGenerator;
+     std::uniform_real_distribution<double> _rdDistribution;
 
 protected:
      std::map <int, AccessPoint*> _accessPoints;

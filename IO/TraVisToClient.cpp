@@ -125,8 +125,8 @@ void TraVisToClient::createConnection()
 
      /* start the socket session */
      if (!startSocketSession()) {
-          fprintf(stderr, "startSocketSession() failed!");
-          fprintf(stderr, "socket creation failed for host [%s] on port [%d]!",_hostname.c_str(),_port);
+          fprintf(stderr, "startSocketSession() failed!\n");
+          fprintf(stderr, "socket creation failed for host [%s] on port [%d]!\n",_hostname.c_str(),_port);
           exit(EXIT_FAILURE);
      }
 
@@ -286,7 +286,6 @@ TraVisToClient::createServerSocket(unsigned short portNumber)
      }
 
      dtrace("server started at port %hu", portNumber);
-
      dtrace("leaving createServerSocket()");
      return (sock);
 }

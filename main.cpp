@@ -29,7 +29,14 @@
 #include "geometry/Building.h"
 #include "general/ArgumentParser.h"
 #include "./Simulation.h"
-// #include "logging.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+#ifdef _USE_PROTOCOL_BUFFER
+#include "matsim/HybridSimulationManager.h"
+#endif
+
+#include <thread>
+#include <functional>
 
 int main(int argc, char **argv)
 {
@@ -51,12 +58,40 @@ int main(int argc, char **argv)
 
      if(status&&sim.InitArgs(*args))
      {
-          Log->Write("INFO: \tStart runSimulation()");
-          int evacTime = sim.RunSimulation();
-          Log->Write("\nINFO: \tEnd runSimulation()");
-          time(&endtime);
+          //evacuation time
+          int evacTime = 0;
 
-          // some output
+#ifdef _USE_PROTOCOL_BUFFER
+          //Start the thread for managing incoming messages from MatSim
+          auto hybrid=args->GetHybridSimManager();
+          //process the hybrid simulation
+          if(hybrid)
+          {
+               evacTime=hybrid->Run(sim);
+          }
+          //process the normal simulation
+          else
+#endif
+          {
+               //Start the threads for managing the sources of agents if any
+               std::thread t1(sim.GetAgentSrcManager());
+
+               //std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+
+               //main thread for the simulation
+               Log->Write("INFO: \tStart runSimulation()");
+               //evacTime = sim.RunSimulation(args->GetTmax());
+               evacTime = sim.RunStandardSimulation(args->GetTmax());
+               Log->Write("\nINFO: \tEnd runSimulation()");
+               time(&endtime);
+
+               //the execution is finished at this time
+               //so join the main thread
+               t1.join();
+
+          }
+
+          // some statistics output
           if(args->ShowStatistics())
           {
                sim.PrintStatistics();
@@ -76,7 +111,7 @@ int main(int argc, char **argv)
           Log->Write("Warnings          : %d", Log->GetWarnings());
           Log->Write("Errors            : %d", Log->GetErrors());
 
-          if (NULL == dynamic_cast<STDIOHandler*>(Log))
+          if (nullptr == dynamic_cast<STDIOHandler*>(Log))
           {
                printf("\nExec Time [s]     : %4.2f\n", execTime);
                printf("Evac Time [s]       : %d\n", evacTime);
@@ -85,6 +120,7 @@ int main(int argc, char **argv)
                printf("Warnings            : %d\n", Log->GetWarnings());
                printf("Errors              : %d\n", Log->GetErrors());
           }
+
      }
      else
      {

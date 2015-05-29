@@ -32,7 +32,6 @@
  *
  **/
 
-
 #ifndef LCGRID_H_
 #define LCGRID_H_
 
@@ -44,29 +43,27 @@
 class Pedestrian;
 class Building;
 
-
-class LCGrid {
+class LCGrid
+{
 
 private:
 
      /// the 'first' pedestrian in each cell
-     int **pCellHead;
+     int **_cellHead;
      ///  the next pedestrians. more efficient than the double linked- list
-     int *pList;
+     int *_list;
      /// number of cells in x- and y-direction respectively.
      /// Also to be interpreted as cell coordinates in the grid
-     int pGridSizeX, pGridSizeY;
+     int _gridSizeX, _gridSizeY;
      /// the cell size default to 2.2 metres
-     double pCellSize;
+     double _cellSize;
      /// rectangular area for linked cells which covers the whole geometry
-     double pGrid_xmin, pGrid_xmax, pGrid_ymin, pGrid_ymax;
+     double _gridXmin, _gridXmax, _gridYmin, _gridYmax;
      /// for convenience
      /// will be delete in next versions
-     Pedestrian** pLocalPedsCopy;
-
+     Pedestrian** _localPedsCopy;
      ///total number of pedestrians
-     int pNpeds;
-
+     int _nPeds;
 
 public:
      /**

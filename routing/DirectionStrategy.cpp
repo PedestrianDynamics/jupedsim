@@ -201,14 +201,14 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
           ped->SetDistToBlockade(minDist);
           if(iObs >= 0) {
                const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
-               angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
+               angle =  tmpDirection.GetDeviationAngle(owalls[inear].Enlarge(2*ped->GetLargerAxis()));
 #if DEBUG
                     printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
                
 #endif 
 
           } else{
-               angle =  tmpDirection.GetDeviationAngle(walls[inear].enlarge(2*ped->GetLargerAxis()));
+               angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
 #if DEBUG
                     printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
 #endif

@@ -116,7 +116,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 
 void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -158,6 +158,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      // first the rooms
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
+     rooms_to_plot.push_back("U9");
 
      for (const auto& it:building->GetAllRooms())
      {
@@ -167,7 +168,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
                continue;
 
           for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=0) continue;
+               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=7) continue;
                geometry.append(s->WriteSubRoom());
 
                // the hlines
@@ -444,7 +445,7 @@ void TrajectoriesVTK::WriteFooter()
 
 void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -624,7 +625,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
