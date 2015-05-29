@@ -38,6 +38,8 @@
 #include "Ellipse.h"
 #include "../general/Macros.h"
 #include "../geometry/NavLine.h"
+#include "AgentsParameters.h"
+#include "PedDistributor.h"
 
 class Building;
 class NavLine;
@@ -131,6 +133,7 @@ private:
 public:
      // constructors
      Pedestrian();
+     explicit Pedestrian(const StartDistributionSubroom& agentsParameters, const Building& building);
      virtual ~Pedestrian();
 
      // Setter-Funktionen

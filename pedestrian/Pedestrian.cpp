@@ -88,6 +88,23 @@ Pedestrian::Pedestrian()
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
 }
 
+Pedestrian::Pedestrian(const StartDistributionSubroom& agentsParameters, const Building& building)
+:    _age(agentsParameters.GetAge()),
+     _gender(agentsParameters.GetGender()),
+     _height(agentsParameters.GetHeight()),
+     _desiredFinalDestination(agentsParameters.GetGoalId()),
+     _group(agentsParameters.GetGroupId()),
+     _building(&building),
+     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
+     _lastPosition(),
+     _roomID(agentsParameters.GetRoomId()),
+     _subRoomID(agentsParameters.GetSubroomID())
+
+{
+
+
+}
+
 
 Pedestrian::~Pedestrian()
 {
@@ -870,4 +887,6 @@ int Pedestrian::GetColor()
 
      return color;
 }
+
+
 
