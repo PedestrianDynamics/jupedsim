@@ -29,7 +29,7 @@ public:
      /**
       * disable copying
       */
-     //AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
+     AgentsSourcesManager(const AgentsSourcesManager& ) = delete;
 
      /**
       * Destructor
