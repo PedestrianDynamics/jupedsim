@@ -94,7 +94,17 @@ BOOST_AUTO_TEST_CASE(LINE_ISINLINESEGMENT_TEST)
      
      for (int i = 0; i < 20; ++i)
           BOOST_CHECK(!L1.IsInLineSegment(Point(i, i)));
-  
+
+     Point P1 (30.1379, 124.485);
+     Point P2 (41.4647, 124.485);
+     Point P3 (38.4046,104.715);
+     Point P4 (33.7146,104.715);
+     Line L2(P1,P2);
+     Line L3(P3,P4);
+     BOOST_CHECK(L2.IsInLineSegment(P3)==false);
+     BOOST_CHECK(L2.IsInLineSegment(P4)==false);
+     BOOST_CHECK(L3.IsInLineSegment(P1)==false);
+     BOOST_CHECK(L3.IsInLineSegment(P2)==false);
      BOOST_MESSAGE("Leaving is_in_linesegment test");
 }
 
