@@ -503,7 +503,10 @@ void  ThreadVisualisation::initGlyphs2D()
     //extern_glyphs_pedestrians->SetSourceConnection(agentShape->GetOutputPort());
 
     //first frame
-    Frame * frame = extern_trajectories_firstSet.GetFrames().begin()->second;
+    auto&& frames=extern_trajectories_firstSet.GetFrames();
+    if(frames.empty()) return;
+
+    Frame * frame = frames.begin()->second;
 
     vtkPolyData* pData=NULL;
     if(frame) pData=frame->GetPolyData2D();
@@ -606,7 +609,11 @@ void ThreadVisualisation::initGlyphs3D()
     extern_glyphs_pedestrians_3D->SetSourceConnection(strip->GetOutputPort());
 
     //first frame
-    Frame * frame = extern_trajectories_firstSet.GetFrames().begin()->second;
+    auto&& frames=extern_trajectories_firstSet.GetFrames();
+    if(frames.empty()) return;
+
+    Frame * frame = frames.begin()->second;
+
     vtkPolyData* pData=NULL;
     if(frame) pData=frame->GetPolyData2D();
 
