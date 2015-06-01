@@ -72,24 +72,29 @@ int main(int argc, char **argv)
           //process the normal simulation
           else
 #endif
-          {
-               //Start the threads for managing the sources of agents if any
-               std::thread t1(sim.GetAgentSrcManager());
+               if(sim.GetAgentSrcManager().GetMaxAgentNumber())
+               {
+                    //Start the thread for managing the sources of agents if any
+                    //std::thread t1(sim.GetAgentSrcManager());
+                    std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
 
-               //std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+                    //main thread for the simulation
+                    Log->Write("INFO: \tStart runSimulation()");
+                    evacTime = sim.RunStandardSimulation(args->GetTmax());
+                    Log->Write("\nINFO: \tEnd runSimulation()");
+                    time(&endtime);
 
-               //main thread for the simulation
-               Log->Write("INFO: \tStart runSimulation()");
-               //evacTime = sim.RunSimulation(args->GetTmax());
-               evacTime = sim.RunStandardSimulation(args->GetTmax());
-               Log->Write("\nINFO: \tEnd runSimulation()");
-               time(&endtime);
-
-               //the execution is finished at this time
-               //so join the main thread
-               t1.join();
-
-          }
+                    //Join the main thread
+                    t1.join();
+               }
+               else
+               {
+                    //main thread for the simulation
+                    Log->Write("INFO: \tStart runSimulation()");
+                    evacTime = sim.RunStandardSimulation(args->GetTmax());
+                    Log->Write("\nINFO: \tEnd runSimulation()");
+                    time(&endtime);
+               }
 
           // some statistics output
           if(args->ShowStatistics())
