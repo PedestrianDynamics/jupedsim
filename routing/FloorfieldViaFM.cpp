@@ -72,7 +72,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
 
-    calculateFloorfield(false); //use distance2Wall
+    calculateFloorfield(true); //use distance2Wall
 
     testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
 }
@@ -295,7 +295,7 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
     Trial* smallest = nullptr;
     Trial* biggest = nullptr;
 
-    double modifiedspeed[grid->GetnPoints()];
+    double* modifiedspeed = new double[grid->GetnPoints()];
     if (useDistance2Wall && (threshold > 0)) {
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             modifiedspeed[i] = 0.001 + 0.999 * (dist2Wall[i]/threshold); //linear ramp from wall (0.001) to thresholddistance (1.000)
@@ -358,7 +358,7 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
         trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
         checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcFloorfield(key);} );
     }
-
+    delete[] modifiedspeed;
 }
 
 void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if threshold negative, then ignore it
