@@ -135,6 +135,8 @@ public:
     void showFloor(bool status);
     void showGeometryLabels(int status);
 
+    void setVisibility(bool status);
+
 
 private:
     // TODO Check if this function is really necessary

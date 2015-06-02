@@ -111,7 +111,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //create the 2 threads and connect them
     dataTransferThread = new ThreadDataTransfer(this);
-    visualisationThread = new ThreadVisualisation(this);
+    _visualisationThread = new ThreadVisualisation(this);
 
 
     travistoOptions = new Settings(this);
@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent) :
         Debug::Error("signal_errorMessage  not connected ");
     }
 
-    QObject::connect(visualisationThread,
+    QObject::connect(_visualisationThread,
                      SIGNAL(signal_controlSequences(const char*)), this,
                      SLOT(slotControlSequence(const char *)));
 
@@ -158,7 +158,7 @@ MainWindow::MainWindow(QWidget *parent) :
                      travistoOptions, SLOT(slotControlSequence(QString)));
 
 
-    QObject::connect(&visualisationThread->getGeometry().GetModel(),
+    QObject::connect(&_visualisationThread->getGeometry().GetModel(),
                      SIGNAL(itemChanged(QStandardItem*)),this,SLOT(slotOnGeometryItemChanged(QStandardItem*)));
 
     isPlaying = false;
@@ -277,7 +277,7 @@ MainWindow::~MainWindow()
     }
 
 
-    if (visualisationThread->isRunning()) {
+    if (_visualisationThread->isRunning()) {
         //std::Debug::Messages("Thread  visualisation is still running" << std::endl;
         waitForVisioThread();
     }
@@ -289,7 +289,7 @@ MainWindow::~MainWindow()
     }
 
     delete dataTransferThread;
-    delete visualisationThread;
+    delete _visualisationThread;
     delete travistoOptions;
     delete labelCurrentAction;
     delete labelFrameNumber;
@@ -355,7 +355,7 @@ void MainWindow::slotStartPlaying()
                                visualisationThread->run();
                            });
 #else
-            visualisationThread->start();
+            _visualisationThread->start();
 
 #endif
 
@@ -466,7 +466,7 @@ void MainWindow::parseGeometry(const QDomNode &geoNode)
 
     //check if there is a tag 'file' there in
     QString fileName = geoNode.toElement().elementsByTagName("file").item(0).toElement().attribute("location");
-    auto&& geometry = visualisationThread->getGeometry();
+    auto&& geometry = _visualisationThread->getGeometry();
 
     if(!fileName.isEmpty()) {
         if (fileName.endsWith(".xml",Qt::CaseInsensitive)) {
@@ -534,7 +534,7 @@ void MainWindow::parseGeometry(const QString& geometryString)
 
     //cout<<"filename: "<<geofileName.toStdString()<<endl;exit(0);
 
-    auto&& geometry = visualisationThread->getGeometry();
+    auto&& geometry = _visualisationThread->getGeometry();
 
 
 
@@ -659,7 +659,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
     //the geometry actor
-    auto&& geometry = visualisationThread->getGeometry();
+    auto&& geometry = _visualisationThread->getGeometry();
 
     //try to get a geometry filename
     QString geometry_file=SaxParser::extractGeometryFilename(fileName);
@@ -748,8 +748,8 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
 
     QString frameRateStr=QString::number(frameRate);
     // set the visualisation window title
-    visualisationThread->setWindowTitle(fileName);
-    visualisationThread->slotSetFrameRate(frameRate);
+    _visualisationThread->setWindowTitle(fileName);
+    _visualisationThread->slotSetFrameRate(frameRate);
     //visualisationThread->setGeometry(geometry);
     //visualisationThread->setWindowTitle(caption);
     labelFrameNumber->setText("fps: " + frameRateStr+"/"+frameRateStr);
@@ -1090,7 +1090,7 @@ void MainWindow::slotShowPedestrianOnly()
 void MainWindow::slotShowGeometry()
 {
     if (ui.actionShow_Geometry->isChecked()) {
-        visualisationThread->setGeometryVisibility(true);
+        _visualisationThread->setGeometryVisibility(true);
         ui.actionShow_Exits->setEnabled(true);
         ui.actionShow_Walls->setEnabled(true);
         ui.actionShow_Geometry_Captions->setEnabled(true);
@@ -1098,7 +1098,7 @@ void MainWindow::slotShowGeometry()
         ui.actionShow_Floor->setEnabled(true);
         SystemSettings::setShowGeometry(true);
     } else {
-        visualisationThread->setGeometryVisibility(false);
+        _visualisationThread->setGeometryVisibility(false);
         ui.actionShow_Exits->setEnabled(false);
         ui.actionShow_Walls->setEnabled(false);
         ui.actionShow_Geometry_Captions->setEnabled(false);
@@ -1113,7 +1113,7 @@ void MainWindow::slotShowGeometry()
 void MainWindow::slotShowHideExits()
 {
     bool status = ui.actionShow_Exits->isChecked();
-    visualisationThread->showDoors(status);
+    _visualisationThread->showDoors(status);
     SystemSettings::setShowExits(status);
 }
 
@@ -1121,14 +1121,14 @@ void MainWindow::slotShowHideExits()
 void MainWindow::slotShowHideWalls()
 {
     bool status = ui.actionShow_Walls->isChecked();
-    visualisationThread->showWalls(status);
+    _visualisationThread->showWalls(status);
     SystemSettings::setShowWalls(status);
 }
 
 void MainWindow::slotShowHideNavLines()
 {
     bool status = ui.actionShow_Navigation_Lines->isChecked();
-    visualisationThread->showNavLines(status);
+    _visualisationThread->showNavLines(status);
     SystemSettings::setShowNavLines(status);
 }
 
@@ -1136,7 +1136,7 @@ void MainWindow::slotShowHideNavLines()
 void MainWindow::slotShowHideFloor()
 {
     bool status = ui.actionShow_Floor->isChecked();
-    visualisationThread->showFloor(status);
+    _visualisationThread->showFloor(status);
     SystemSettings::setShowFloor(status);
 }
 
@@ -1222,11 +1222,11 @@ void MainWindow::resetAllFrameCursor()
 ///@todo why two different threads shutdown procedure.
 void MainWindow::waitForVisioThread()
 {
-    while(visualisationThread->isRunning()) {
-        visualisationThread->wait(200);
+    while(_visualisationThread->isRunning()) {
+        _visualisationThread->wait(200);
         Debug::Messages("waiting for visualisation engine to terminate ...");
 #ifdef __linux__
-        visualisationThread->quit();
+        _visualisationThread->quit();
 #else
         visualisationThread->terminate();
 #endif
@@ -1263,7 +1263,7 @@ void MainWindow::slotToogle2D()
         SystemSettings::set2D(false);
     }
     bool status=SystemSettings::get2D() && SystemSettings::getShowGeometry();
-    visualisationThread->setGeometryVisibility2D(status);
+    _visualisationThread->setGeometryVisibility2D(status);
     extern_force_system_update=true;
 }
 
@@ -1281,7 +1281,7 @@ void MainWindow::slotToogle3D()
         SystemSettings::set2D(true);
     }
     bool status= !SystemSettings::get2D() && SystemSettings::getShowGeometry();
-    visualisationThread->setGeometryVisibility3D(status);
+    _visualisationThread->setGeometryVisibility3D(status);
     extern_force_system_update=true;
 }
 
@@ -1332,9 +1332,9 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
 
     //FacilityGeometry *geo = parseGeometry(geoNode);
     parseGeometry(data);
-    visualisationThread->slotSetFrameRate(frameRate);
+    _visualisationThread->slotSetFrameRate(frameRate);
     //visualisationThread->setGeometry(geo);
-    visualisationThread->start();
+    _visualisationThread->start();
 
     //enable some buttons
     ui.BtRecord->setEnabled(true);
@@ -1395,7 +1395,7 @@ void MainWindow::slotShowPedestrianCaption()
 void MainWindow::slotToogleShowAxis()
 {
 
-    visualisationThread->setAxisVisible(ui.actionShow_Axis->isChecked());
+    _visualisationThread->setAxisVisible(ui.actionShow_Axis->isChecked());
 }
 
 //todo: rename this to slotChangeSettting
@@ -1434,7 +1434,7 @@ void MainWindow::slotChangeBackgroundColor()
     if(col.isValid()==false) return;
 
     //double  bkcolor[3]= {(double)col.red()/255.0 ,(double)col.green()/255.0 ,(double)col.blue()/255.0};
-    visualisationThread->setBackgroundColor(col);
+    _visualisationThread->setBackgroundColor(col);
 
     QSettings settings;
     settings.setValue("options/bgColor", col);
@@ -1453,7 +1453,7 @@ void MainWindow::slotChangeWallsColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    visualisationThread->setWallsColor(col);
+    _visualisationThread->setWallsColor(col);
 
     QSettings settings;
     settings.setValue("options/wallsColor", col);
@@ -1472,7 +1472,7 @@ void MainWindow::slotChangeExitsColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    visualisationThread->setExitsColor(col);
+    _visualisationThread->setExitsColor(col);
 
     QSettings settings;
     settings.setValue("options/exitsColor", col);
@@ -1490,7 +1490,7 @@ void MainWindow::slotChangeNavLinesColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    visualisationThread->setNavLinesColor(col);
+    _visualisationThread->setNavLinesColor(col);
 
     QSettings settings;
     settings.setValue("options/navLinesColor", col);
@@ -1507,7 +1507,7 @@ void MainWindow::slotChangeFloorColor()
     //the user may have cancelled the process
     if(col.isValid()==false) return;
 
-    visualisationThread->setFloorColor(col);
+    _visualisationThread->setFloorColor(col);
 
     QSettings settings;
     settings.setValue("options/floorColor", col);
@@ -1519,7 +1519,7 @@ void MainWindow::slotSetCameraPerspectiveToTop()
 {
     int p= 1; //TOP
 
-    visualisationThread->setCameraPerspective(p);
+    _visualisationThread->setCameraPerspective(p);
     //disable the virtual agent view
     SystemSettings::setVirtualAgent(-1);
     //cerr <<"Setting camera view to top"<<endl;
@@ -1528,7 +1528,7 @@ void MainWindow::slotSetCameraPerspectiveToTop()
 void MainWindow::slotSetCameraPerspectiveToFront()
 {
     int p= 2; //FRONT
-    visualisationThread->setCameraPerspective(p);
+    _visualisationThread->setCameraPerspective(p);
     //disable the virtual agent view
     SystemSettings::setVirtualAgent(-1);
     //	cerr <<"Setting camera view to FRONT"<<endl;
@@ -1537,7 +1537,7 @@ void MainWindow::slotSetCameraPerspectiveToFront()
 void MainWindow::slotSetCameraPerspectiveToSide()
 {
     int p= 3; //SIDE
-    visualisationThread->setCameraPerspective(p);
+    _visualisationThread->setCameraPerspective(p);
     //disable the virtual agent view
     SystemSettings::setVirtualAgent(-1);
     //cerr <<"Setting camera view to Side"<<endl;
@@ -1552,7 +1552,7 @@ void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
 
     if (ok) {
         int p= 4; //virtual agent
-        visualisationThread->setCameraPerspective(p);
+        _visualisationThread->setCameraPerspective(p);
 
         //get the virtual agent ID
         SystemSettings::setVirtualAgent(agent);
@@ -1562,7 +1562,7 @@ void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
 /// @todo does it work? mem check?
 void MainWindow::slotClearGeometry()
 {
-    visualisationThread->setGeometry(NULL);
+    _visualisationThread->setGeometry(NULL);
 }
 
 void MainWindow::slotErrorOutput(QString err)
@@ -1832,7 +1832,7 @@ void MainWindow::dropEvent(QDropEvent *event)
 void MainWindow::slotShowOnScreenInfos()
 {
     bool value=ui.actionShow_Onscreen_Infos->isChecked();
-    visualisationThread->setOnscreenInformationVisibility(value);
+    _visualisationThread->setOnscreenInformationVisibility(value);
     SystemSettings::setOnScreenInfos(value);
 }
 
@@ -1840,7 +1840,7 @@ void MainWindow::slotShowOnScreenInfos()
 void MainWindow::slotShowHideGeometryCaptions()
 {
     bool value=ui.actionShow_Geometry_Captions->isChecked();
-    visualisationThread->setGeometryLabelsVisibility(value);
+    _visualisationThread->setGeometryLabelsVisibility(value);
     SystemSettings::setShowGeometryCaptions(value);
     //SystemSettings::setShowCaptions(value);
     //SystemSettings::setOnScreenInfos(value);
@@ -1851,68 +1851,20 @@ void MainWindow::slotShowGeometryStructure()
     //QListView list;
     _geoStructure.setWindowTitle("Geometry structure");
     _geoStructure.setVisible(! _geoStructure.isVisible());
+    //_geoStructure.showColumn(0);
     _geoStructure.show();
-    visualisationThread->getGeometry().RefreshView();
-    _geoStructure.setModel(&visualisationThread->getGeometry().GetModel());
-    cout<<"showing the list"<<endl;
-
-
-    /*
-     QFileSystemModel *model = new QFileSystemModel;
-     model->setRootPath(QDir::currentPath());
-     QTreeView *tree = new QTreeView(&_splitter);
-     tree->setModel(model);
-     _splitter.show();
-*/
-
-    /*
-     QTreeView *tree = new QTreeView(&_splitter);
-     QListView *list = new QListView();
-     QTableView *table = new QTableView();
-
-
-     _splitter.addWidget( tree );
-     _splitter.addWidget( list );
-     _splitter.addWidget( table );
-
-     QStandardItemModel* model = new QStandardItemModel( 5, 2 );
-
-     for( int r=0; r<5; r++ )
-         for( int c=0; c<2; c++)
-         {
-             QStandardItem *item = new QStandardItem( QString("Row:%0, Column:%1").arg(r).arg(c) );
-             item->setCheckable(true);
-
-             if( c == 0 )
-                 for( int i=0; i<3; i++ )
-                 {
-                     QStandardItem *child = new QStandardItem( QString("Item %0").arg(i) );
-                     child->setEditable( false );
-                     child->setCheckable(true);
-                     item->appendRow( child );
-                     cout<<"adding"<<endl;
-                 }
-
-             model->setItem(r, c, item);
-         }
-
-     model->setHorizontalHeaderItem( 0, new QStandardItem( "Foo" ) );
-     model->setHorizontalHeaderItem( 1, new QStandardItem( "Bar-Baz" ) );
-
-     tree->setModel( model );
-     list->setModel( model );
-     table->setModel( model );
-
-     list->setSelectionModel( tree->selectionModel() );
-     table->setSelectionModel( tree->selectionModel() );
-
-     table->setSelectionBehavior( QAbstractItemView::SelectRows );
-     table->setSelectionMode( QAbstractItemView::SingleSelection );
-     _splitter.show();
-*/
+    _visualisationThread->getGeometry().RefreshView();
+    _geoStructure.setModel(&_visualisationThread->getGeometry().GetModel());
 }
 
 void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)
 {
-    cout<<"triggered"<<endl;
+    QStringList l=item->data().toString().split(":");
+    if(l.length()>1)
+    {
+        int room=l[0].toInt();
+        int subr=l[1].toInt();
+        bool state=item->checkState();
+        _visualisationThread->getGeometry().UpdateVisibility(room,subr,state);
+    }
 }

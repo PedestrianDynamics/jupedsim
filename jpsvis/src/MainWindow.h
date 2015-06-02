@@ -322,7 +322,7 @@ private:
 
     Settings* travistoOptions;
     ThreadDataTransfer* dataTransferThread;
-    ThreadVisualisation* visualisationThread;
+    ThreadVisualisation* _visualisationThread;
     QLabel *labelCurrentAction;
     QLabel *labelFrameNumber;
     QLabel *labelRecording;

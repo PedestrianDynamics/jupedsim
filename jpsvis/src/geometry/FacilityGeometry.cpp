@@ -151,6 +151,12 @@ void FacilityGeometry::CreateActors()
     assembly3D->AddPart(assemblyCaptions);
 }
 
+ void FacilityGeometry::setVisibility(bool status)
+ {
+     assembly2D->SetVisibility(status);
+     assembly3D->SetVisibility(status);
+ }
+
 //void FacilityGeometry::drawWall(Point *p1, Point *p2){
 //	double scale =1;
 //
