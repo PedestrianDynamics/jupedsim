@@ -31,6 +31,7 @@ void GeometryFactory::Set2D(bool status)
             subroom.second->set2D(status);
         }
     }
+    //Set3D(!status);
 }
 
 void GeometryFactory::Set3D(bool status)
@@ -42,6 +43,7 @@ void GeometryFactory::Set3D(bool status)
             subroom.second->set3D(status);
         }
     }
+    //Set2D(!status);
 }
 
 void GeometryFactory::Clear()
@@ -176,7 +178,7 @@ void GeometryFactory::ShowGeometryLabels(int status)
 void GeometryFactory::RefreshView()
 {
     _model.setHorizontalHeaderItem( 0, new QStandardItem( "Entity" ) );
-    _model.setHorizontalHeaderItem( 1, new QStandardItem( "Description" ) );
+    //_model.setHorizontalHeaderItem( 1, new QStandardItem( "Description" ) );
 
     for (auto&& room: _geometryFactory)
     {
@@ -186,13 +188,18 @@ void GeometryFactory::RefreshView()
         //_model.setItem(room.first, 1, roomcaption);
 
         QStandardItem *item = new QStandardItem( QString("Room:%0").arg(room.first));
-        item->setCheckable(false);
+        item->setCheckable(true);
         item->setCheckState(Qt::Checked);
 
         for(auto&& subroom:room.second)
         {
-            QStandardItem *child = new QStandardItem( QString("Subroom: %0").arg(subroom.first));
-            child->setEditable( false );
+            QStandardItem *child = new QStandardItem(
+                        QString("%0: (%1)")
+                         .arg(QString::fromStdString(subroom.second->GetDescription()))
+                         .arg(subroom.first)
+                        );
+
+            child->setEditable(false);
             child->setCheckable(true);
             child->setCheckState(Qt::Checked);
             item->appendRow( child );

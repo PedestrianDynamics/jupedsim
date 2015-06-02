@@ -1867,4 +1867,14 @@ void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)
         bool state=item->checkState();
         _visualisationThread->getGeometry().UpdateVisibility(room,subr,state);
     }
+    else
+    {
+        for(int i=0;i<item->rowCount();i++)
+        {
+                 QStandardItem *child=   item->child(i);
+                 child->setCheckState(item->checkState());
+                 slotOnGeometryItemChanged(child);
+        }
+
+    }
 }
