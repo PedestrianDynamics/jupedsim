@@ -174,7 +174,7 @@ void Pedestrian::SetV(const Point& v)
 
 void Pedestrian::SetV0Norm(double v0,double v0UpStairs, double v0DownStairs)
 {
-     _ellipse.SetV0(v0);
+  _ellipse.SetV0(v0);
      _V0DownStairs=v0DownStairs;
      _V0UpStairs=v0UpStairs;
 }
@@ -430,7 +430,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
      // -------------------------------------- Handover new target
-     t = _newOrientationDelay++ *_deltaT/(1.0+1000* _distToBlockade); 
+     t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade); 
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 #if DEBUG

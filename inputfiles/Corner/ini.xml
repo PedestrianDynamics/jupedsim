@@ -63,7 +63,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
+        <exit_crossing_strategy>1</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0." dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -110,8 +110,8 @@
   <route_choice_models>
   <router router_id="1" description="global_shortest">
     <parameters>
-      <navigation_mesh method="triangulation" use_for_local_planning="false" />
-      <navigation_lines file="routing.xml" />
+      <navigation_mesh method="triangulation" use_for_local_planning="true" />
+      <!-- <navigation_lines file="routing.xml" /> -->
     </parameters>
   </router>
 </route_choice_models>

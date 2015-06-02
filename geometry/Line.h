@@ -37,6 +37,7 @@
 
 //forward declarations
 class OutputHandler;
+class Wall;
 
 // external variables
 extern OutputHandler* Log;
@@ -235,6 +236,8 @@ public:
       * @return the angle between two lines
       */
      double GetDeviationAngle(const Line& l) const;
+  double GetAngle(const Line & l) const;
+  double GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const; 
      //    double GetAngle(SubRoom s) const;
      Line enlarge(double d) const; 
 

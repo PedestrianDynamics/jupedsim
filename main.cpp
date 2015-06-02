@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 
           if (sim.GetPedsNumber())
           {
-               Log->Write("WARNING: \nPedestrians not evacuated [%d] using [%d] threads",
+               Log->Write("WARNING: Pedestrians not evacuated [%d] using [%d] threads",
                          sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
           }
 
