@@ -51,12 +51,10 @@ Frame::Frame(int id)
 {
     _elementCursor=0;
     _id=id;
-    //_polydata = vtkPolyData::New();
     _polydata2D = vtkPolyData::New();
     _polydata3D = vtkPolyData::New();
     _framePoints.reserve(1500);
 }
-
 Frame::~Frame()
 {
     while (!_framePoints.empty()) {

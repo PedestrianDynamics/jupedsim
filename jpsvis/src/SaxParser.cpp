@@ -37,6 +37,8 @@
 #include "geometry/JPoint.h"
 #include "geometry/FacilityGeometry.h"
 #include "geometry/Building.h"
+#include "geometry/GeometryFactory.h"
+
 #include "geometry/Wall.h"
 #include "geometry/SubRoom.h"
 
@@ -79,15 +81,17 @@ using namespace std;
  * @param roomCaption
  * @return
  */
-SaxParser::SaxParser(FacilityGeometry* geo, SyncData* data, double* fps)
+SaxParser::SaxParser(GeometryFactory& geoFac, SyncData& dataset, double * fps):_geoFactory(geoFac),_dataset(dataset)
 {
-    _geometry=geo;
-    _dataset=data;
     _para=fps;
     _parsingWalls=false;
     _parsingCrossings=false;
     _color=0.0;
-    _dataset->clearFrames();
+    _dataset.clearFrames();
+
+    _geometry = std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name"));
+    _geoFactory.AddElement(-1,-1,_geometry);
+
     //default header
     InitHeader(0,0,0);
 }
@@ -134,16 +138,16 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                     if(fileName.endsWith(".xml",Qt::CaseInsensitive)) {
                         //SaxParser::parseGeometryJPS(fileName,geometry);
                     } else if (fileName.endsWith(".trav",Qt::CaseInsensitive)) {
-                        SaxParser::parseGeometryTRAV(fileName,_geometry);
+                        SaxParser::parseGeometryTRAV(fileName,_geoFactory);
                     }
                 }
             }
         }
     } else if (qName == "floor") {
         double xMin=0,
-               xMax=0,
-               yMin=0,
-               yMax=0;
+                xMax=0,
+                yMin=0,
+                yMax=0;
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="xMin") {
@@ -160,7 +164,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         _geometry->addFloor(xMin,yMin,xMax,yMax);
     } else if (qName == "cuboid") {
         double length=0, height=0,
-               width=0, color=0;
+                width=0, color=0;
         double center[3]= {0,0,0};
 
         for(int i=0; i<at.length(); i++) {
@@ -249,8 +253,14 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
     } else if (qName == "agents") {
     } else if (qName == "roomCaption") {
     } else if (qName == "frameRate") {
-    } else if (qName == "geometry") {
-    } else if (qName == "wall") {
+    } else if (qName == "geometry")
+    {
+        //cout<<"geo tag found"<<endl;
+        //_geometry = std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name"));
+        //_geoFactory.AddElement(0,0,_geometry);
+
+    }
+    else if (qName == "wall") {
         _parsingWalls=true;
         _thickness=15;
         _height=250;
@@ -495,7 +505,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
     if (qName == "header") {
 
     } else if (qName == "agents") {
-        _dataset->setNumberOfAgents(_currentText.toInt());
+        _dataset.setNumberOfAgents(_currentText.toInt());
     } else if (qName == "frameRate") {
         _para[0]=_currentText.toFloat();
     } else if (qName == "wall") {
@@ -537,7 +547,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
         //compute the polydata, might increase the runtime
         frame->ComputePolyData();
 
-        _dataset->addFrame(frame);
+        _dataset.addFrame(frame);
         //to be on the safe side
         _currentFrame.clear();
 
@@ -545,8 +555,8 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
     } else if (qName == "geometry") {
     } else if (qName == "point") {
     } else if (qName == "shape") {
-        _dataset->setInitialHeights(_initialPedestriansHeights);
-        _dataset->setInitialColors(_initialPedestriansColors);
+        _dataset.setInitialHeights(_initialPedestriansHeights);
+        _dataset.setInitialColors(_initialPedestriansColors);
     }
     _currentText.clear();
     return true;
@@ -582,8 +592,10 @@ void SaxParser::clearPoints()
 }
 
 /// provided for convenience and will be removed in the next version
-bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
+bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 {
+    auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry("test"));
+
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
@@ -734,6 +746,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
         geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
     }
 
+    geoFac.AddElement(0,0,geometry);
     //TODO:dirty hack for parsing the Hlines
     // free memory
     delete building;
@@ -743,7 +756,7 @@ bool SaxParser::parseGeometryJPS(QString fileName, FacilityGeometry *geometry)
 
 /// provided for convenience and will be removed in the next version
 
-void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QDomNode geo)
+void SaxParser::parseGeometryTRAV(QString content, GeometryFactory& geoFac,QDomNode geo)
 {
 
     cout<<"external geometry found"<<endl;
@@ -751,6 +764,7 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
     // to be filled
     QDomDocument doc("");
     QDomNode geoNode;
+    auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry("no mame"));
 
     //first try to open the file
     if(content.endsWith(".trav",Qt::CaseInsensitive) ) {
@@ -928,6 +942,8 @@ void SaxParser::parseGeometryTRAV(QString content, FacilityGeometry *geometry,QD
         // you should normally have only one geometry node, but one never knows...
         geoNode = geoNode.nextSiblingElement("geometry");
     }
+
+    geoFac.AddElement(0,0,geometry);
 }
 
 QString SaxParser::extractGeometryFilename(QString &filename)
@@ -968,24 +984,23 @@ QString SaxParser::extractGeometryFilename(QString &filename)
 
     //maybe this is already the geometry file itself ?
     //do a rapid test
-//    FacilityGeometry* geo = new FacilityGeometry();
-//    QFileInfo fileInfoGeometry(filename);
-//    extracted_geo_name=fileInfoGeometry.fileName();
+    //    FacilityGeometry* geo = new FacilityGeometry();
+    //    QFileInfo fileInfoGeometry(filename);
+    //    extracted_geo_name=fileInfoGeometry.fileName();
 
-//    //just check if it starts with geometry
-//    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
-//    //{
-//        return extracted_geo_name;
-//    //}
-//    delete geo;
+    //    //just check if it starts with geometry
+    //    //if(parseGeometryJPS(extracted_geo_name,geo)==true)
+    //    //{
+    //        return extracted_geo_name;
+    //    //}
+    //    delete geo;
 
     return "";
 }
 
-void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
+void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
 {
     QDomDocument doc("");
-
     QFile file(filename);
 
     int size =file.size()/(1024*1024);
@@ -995,7 +1010,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
         //cout<<"The file is too large: "<<filename.toStdString()<<endl;
         return;
     }
-
+    auto geo= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name"));
     //cout<<"filename: "<<filename.toStdString()<<endl;
 
     //TODO: check if you can parse this with the building classes.
@@ -1157,6 +1172,9 @@ void SaxParser::parseGeometryXMLV04(QString filename, FacilityGeometry *geo)
         double center[3]= {(x1+x2)/2.0, (y1+y2)/2.0, (z2+z1)/2.0};
         geo->addObjectLabel(center,center,id,21);
     }
+
+    //room 0, subroom 0
+    geoFac.AddElement(0,0,geo);
 }
 
 bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps)
@@ -1190,7 +1208,7 @@ bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps
             bool ok;
             maxFrame=line.split(":")[1].toDouble(&ok);
             if(!ok) maxFrame=1000;//default value
-             //cout<<"frame: "<<maxFrame<<endl; exit(0);
+            //cout<<"frame: "<<maxFrame<<endl; exit(0);
         }
 
         //initialize the process dialog

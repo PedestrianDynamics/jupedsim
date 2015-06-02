@@ -63,7 +63,8 @@ public:
         BOX      //!< BOX defined by centre, length, width and height
     };
 
-    FacilityGeometry();
+    FacilityGeometry(const std::string & description);
+
     virtual ~FacilityGeometry();
 
     vtkAssembly* getActor2D();
@@ -108,6 +109,8 @@ public:
 
     ///draw obstacles
     void addObstacles(vtkPolyData* polygonPolyData);
+
+    const std::string & GetDescription() const ;
 
     /// draw other kinds of objects
     void addObjectSphere(double center[3], double radius, double couleur=1);
@@ -172,6 +175,8 @@ private:
     // other parts
     vtkAssembly* assemblyCaptions;
     vtkActor2DCollection* captions;
+
+    std::string _description;
 };
 
 #endif /* FACILITYGEOMETRY_H_ */

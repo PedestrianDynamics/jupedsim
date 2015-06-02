@@ -68,7 +68,7 @@ using namespace std;
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
-FacilityGeometry::FacilityGeometry()
+FacilityGeometry::FacilityGeometry(const string &description)
 {
 
     assembly = vtkAssembly::New();
@@ -105,13 +105,11 @@ FacilityGeometry::FacilityGeometry()
     stepColor = 130;
     doorColor = 50;
     navlineColor=95;
+    _description=description;
 }
 
 FacilityGeometry::~FacilityGeometry()
 {
-    //if(assembly)
-    //    assembly->Delete();
-
     lookupTable->Delete();
     captions->Delete();
 
@@ -127,7 +125,6 @@ FacilityGeometry::~FacilityGeometry()
 
     delete linesPlotter2D;
 }
-
 
 vtkAssembly* FacilityGeometry::getActor2D()
 {
@@ -246,7 +243,7 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         actor->GetProperty()->SetOpacity(0.5);
         assemblyDoors3D->AddPart(actor);
     }
-    break;
+        break;
     case WALL: {
         double colorRGB[3];
         lookupTable->GetColor(wallColor, colorRGB);
@@ -260,7 +257,7 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         //src->SetRadius(wallWidth);
         assemblyWalls3D->AddPart(actor);
     }
-    break;
+        break;
     case STEP: {
         double colorRGB[3];
         lookupTable->GetColor(stepColor, colorRGB);
@@ -269,9 +266,9 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
         src->SetZLength(stepHeight);
         assemblyDoors3D->AddPart(actor);
     }
-    break;
+        break;
 
-    //default behaviour not defined
+        //default behaviour not defined
     default:
         break;
     }
@@ -320,17 +317,17 @@ void FacilityGeometry::addStair(double x1, double y1, double z1, double x2, doub
     linesPlotter2D->PlotWall(m,n,wallColor/255.0);
 
 
-//    JPoint *p1 = new JPoint(x1,y1,z1);
-//    JPoint *p2 = new JPoint(x2,y2,z2);
-//    double *center = p1->centreCoordinatesWith(*p2);
-//    double angle =p1->angleMadeWith(*p2);
-//    double length =p1->distanceTo(*p2)+wallThickness;
+    //    JPoint *p1 = new JPoint(x1,y1,z1);
+    //    JPoint *p2 = new JPoint(x2,y2,z2);
+    //    double *center = p1->centreCoordinatesWith(*p2);
+    //    double angle =p1->angleMadeWith(*p2);
+    //    double length =p1->distanceTo(*p2)+wallThickness;
 
-//    addNewElement(center, length, angle, WALL);
+    //    addNewElement(center, length, angle, WALL);
 
-//    delete p1;
-//    delete p2;
-//    delete center;
+    //    delete p1;
+    //    delete p2;
+    //    delete center;
 }
 
 void FacilityGeometry::addDoor(double x1, double y1, double z1, double x2, double y2, double z2,double thickness ,double height, double color)
@@ -483,10 +480,10 @@ void FacilityGeometry::addStair(JPoint* p1, JPoint* p2, string caption)
         addNewElementText(center,orientation,caption.c_str(),50);
     }
 
-//    double *center = p1->centreCoordinatesWith(*p2);
-//    double angle =p1->angleMadeWith(*p2);
-//    double length =p1->distanceTo(*p2)+wallThickness;
-//    addNewElement( center,  length, angle,  WALL);
+    //    double *center = p1->centreCoordinatesWith(*p2);
+    //    double angle =p1->angleMadeWith(*p2);
+    //    double length =p1->distanceTo(*p2)+wallThickness;
+    //    addNewElement( center,  length, angle,  WALL);
 }
 
 void FacilityGeometry::addDoor(JPoint* p1, JPoint* p2, string caption)
@@ -666,7 +663,7 @@ void FacilityGeometry::addFloor(double x1, double y1, double x2, double y2, doub
 
 
 void FacilityGeometry::addObjectSphere(double center[3], double radius,
-                                       double color)
+double color)
 {
 
     double colorRGB[3];
@@ -693,7 +690,7 @@ void FacilityGeometry::addObjectSphere(double center[3], double radius,
 
 
 void FacilityGeometry::addObjectCylinder(double center[3], double radius,
-        double height, double orientation[3],double color)
+double height, double orientation[3],double color)
 {
 
     double colorRGB[3];
@@ -720,7 +717,7 @@ void FacilityGeometry::addObjectCylinder(double center[3], double radius,
 }
 
 void FacilityGeometry::addObjectBox(double center[3], double height,
-                                    double width, double length, double color)
+double width, double length, double color)
 {
 
     double colorRGB[3];
@@ -869,7 +866,7 @@ vtkActor2DCollection* FacilityGeometry::getCaptions()
 
 // orientation and color ignored
 void FacilityGeometry::addNewElementText(double center[3], double orientation[3],
-        string text, double color)
+string text, double color)
 {
 
     //return ;
@@ -912,3 +909,7 @@ void FacilityGeometry::showGeometryLabels(int status)
 
 }
 
+const std::string & FacilityGeometry::GetDescription() const
+{
+    return _description;
+}

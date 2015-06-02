@@ -601,7 +601,8 @@ HEADERS += src/geometry/Building.h \
     src/network/TraVisToServer.h \
     src/MainWindow.h \
     src/TrailPlotter.h  \
-    src/fix/osx_thread_fix.mm
+    src/fix/osx_thread_fix.mm \
+    src/geometry/GeometryFactory.h
 
 SOURCES += src/geometry/Building.cpp \
     src/geometry/Crossing.cpp \
@@ -643,7 +644,8 @@ SOURCES += src/geometry/Building.cpp \
     src/geometry/PointPlotter.cpp \
     src/network/TraVisToServer.cpp \
     src/MainWindow.cpp \
-    src/TrailPlotter.cpp
+    src/TrailPlotter.cpp \
+    src/geometry/GeometryFactory.cpp
 
 FORMS += forms/settings.ui \
     forms/mainwindow.ui

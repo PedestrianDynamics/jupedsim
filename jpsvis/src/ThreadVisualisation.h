@@ -41,6 +41,7 @@
 #include <vtkTensorGlyph.h>
 #include <vtkSmartPointer.h>
 #include <vtkPolyDataMapper.h>
+#include "geometry/GeometryFactory.h"
 
 // forwarded classes
 class QThread;
@@ -91,9 +92,9 @@ public:
 
     /// load and display the geometry where
     /// the pedestrians will move
-    void setGeometry(FacilityGeometry* geometry);
+    void setGeometry(FacilityGeometry* _geometry);
 
-    FacilityGeometry* getGeometry();
+    GeometryFactory& getGeometry();
 
     ///this is for convenience and will be delete later
     void setWindowTitle(QString title);
@@ -178,16 +179,17 @@ private:
     void Create2dAgent();
 
 private:
-    FacilityGeometry* geometry;
-    vtkRenderer* renderer;
-    vtkRenderWindow* renderWindow;
-    vtkRenderWindowInteractor* renderWinInteractor;
-    vtkAxesActor* axis;
-    vtkTextActor* runningTime;
+    //FacilityGeometry* _geometry;
+    GeometryFactory _geometry;
+    vtkRenderer* _renderer;
+    vtkRenderWindow* _renderWindow;
+    vtkRenderWindowInteractor* _renderWinInteractor;
+    vtkAxesActor* _axis;
+    vtkTextActor* _runningTime;
     vtkCamera* _topViewCamera;
-    QString winTitle;
+    QString _winTitle;
 
-    float framePerSecond;
+    float _framePerSecond;
 
 };
 

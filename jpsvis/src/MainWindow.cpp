@@ -7,12 +7,12 @@
  * @section LICENSE
  * This file is part of OpenPedSim.
  *
- * OpenPedSim is free software: you can redistribute it and/or modify
+ * JuPedSim is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * OpenPedSim is distributed in the hope that it will be useful,
+ * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
@@ -62,6 +62,12 @@
 #include <QDebug>
 #include <QtXml>
 #include <QTemporaryFile>
+#include <QListView>
+#include <QFileSystemModel>
+#include <QTableView>
+#include <QSplitter>
+#include <QStandardItemModel>
+
 
 #include <iostream>
 #include <limits>
@@ -150,6 +156,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(this, SIGNAL(signal_controlSequence(QString)),
                      travistoOptions, SLOT(slotControlSequence(QString)));
+
+
+    QObject::connect(&visualisationThread->getGeometry().GetModel(),
+                     SIGNAL(itemChanged(QStandardItem*)),this,SLOT(slotOnGeometryItemChanged(QStandardItem*)));
 
     isPlaying = false;
     isPaused = false;
@@ -449,14 +459,14 @@ bool MainWindow::slotLoadFile()
 }
 
 // This function is only used in online Mode
-FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode)
+void MainWindow::parseGeometry(const QDomNode &geoNode)
 {
     cout<<"parsing the geo"<<endl;
-    if(geoNode.isNull()) return NULL;
+    if(geoNode.isNull()) return ;
 
     //check if there is a tag 'file' there in
     QString fileName = geoNode.toElement().elementsByTagName("file").item(0).toElement().attribute("location");
-    FacilityGeometry* geometry = visualisationThread->getGeometry();
+    auto&& geometry = visualisationThread->getGeometry();
 
     if(!fileName.isEmpty()) {
         if (fileName.endsWith(".xml",Qt::CaseInsensitive)) {
@@ -482,11 +492,11 @@ FacilityGeometry* MainWindow::parseGeometry(QDomNode geoNode)
         //must not be a file name
         SaxParser::parseGeometryTRAV(fileName,geometry,geoNode);
     }
-    return geometry;
+    //return geometry;
 }
 
 // This function is only used in online Mode
-FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
+void MainWindow::parseGeometry(const QString& geometryString)
 {
 
     //    QDomDocument doc("");
@@ -524,7 +534,7 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 
     //cout<<"filename: "<<geofileName.toStdString()<<endl;exit(0);
 
-    FacilityGeometry* geometry = visualisationThread->getGeometry();
+    auto&& geometry = visualisationThread->getGeometry();
 
 
 
@@ -553,7 +563,7 @@ FacilityGeometry* MainWindow::parseGeometry(QString geometryString)
 
     //delete the file
     file.remove();
-    return geometry;
+
 }
 
 // TODO: still used?
@@ -649,7 +659,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     SystemSettings::setFilenamePrefix(QFileInfo ( fileName ).baseName()+"_");
 
     //the geometry actor
-    FacilityGeometry* geometry = visualisationThread->getGeometry();
+    auto&& geometry = visualisationThread->getGeometry();
 
     //try to get a geometry filename
     QString geometry_file=SaxParser::extractGeometryFilename(fileName);
@@ -713,9 +723,6 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     }
 
     //no other geometry format was detected
-    if(geometry==NULL)
-        geometry=new FacilityGeometry();
-
     double frameRate=15; //default frame rate
     statusBar()->showMessage(tr("parsing the file"));
 
@@ -726,7 +733,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         QXmlInputSource source(&file);
         QXmlSimpleReader reader;
 
-        SaxParser handler(geometry,dataset,&frameRate);
+        SaxParser handler(geometry,*dataset,&frameRate);
         reader.setContentHandler(&handler);
         reader.parse(source);
         file.close();
@@ -743,7 +750,7 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
     // set the visualisation window title
     visualisationThread->setWindowTitle(fileName);
     visualisationThread->slotSetFrameRate(frameRate);
-    visualisationThread->setGeometry(geometry);
+    //visualisationThread->setGeometry(geometry);
     //visualisationThread->setWindowTitle(caption);
     labelFrameNumber->setText("fps: " + frameRateStr+"/"+frameRateStr);
 
@@ -807,9 +814,7 @@ void MainWindow::slotSetOfflineMode(bool status)
         ui.actionOnline->setChecked(true);
         extern_offline_mode = false;
         labelMode->setText(" Online ");
-
     }
-
 }
 
 void MainWindow::slotSetOnlineMode(bool status)
@@ -1326,10 +1331,9 @@ void MainWindow::slotStartVisualisationThread(QString data,int numberOfAgents,fl
     }
 
     //FacilityGeometry *geo = parseGeometry(geoNode);
-    FacilityGeometry *geo = parseGeometry(data);
-
+    parseGeometry(data);
     visualisationThread->slotSetFrameRate(frameRate);
-    visualisationThread->setGeometry(geo);
+    //visualisationThread->setGeometry(geo);
     visualisationThread->start();
 
     //enable some buttons
@@ -1840,4 +1844,75 @@ void MainWindow::slotShowHideGeometryCaptions()
     SystemSettings::setShowGeometryCaptions(value);
     //SystemSettings::setShowCaptions(value);
     //SystemSettings::setOnScreenInfos(value);
+}
+
+void MainWindow::slotShowGeometryStructure()
+{
+    //QListView list;
+    _geoStructure.setWindowTitle("Geometry structure");
+    _geoStructure.setVisible(! _geoStructure.isVisible());
+    _geoStructure.show();
+    visualisationThread->getGeometry().RefreshView();
+    _geoStructure.setModel(&visualisationThread->getGeometry().GetModel());
+    cout<<"showing the list"<<endl;
+
+
+    /*
+     QFileSystemModel *model = new QFileSystemModel;
+     model->setRootPath(QDir::currentPath());
+     QTreeView *tree = new QTreeView(&_splitter);
+     tree->setModel(model);
+     _splitter.show();
+*/
+
+    /*
+     QTreeView *tree = new QTreeView(&_splitter);
+     QListView *list = new QListView();
+     QTableView *table = new QTableView();
+
+
+     _splitter.addWidget( tree );
+     _splitter.addWidget( list );
+     _splitter.addWidget( table );
+
+     QStandardItemModel* model = new QStandardItemModel( 5, 2 );
+
+     for( int r=0; r<5; r++ )
+         for( int c=0; c<2; c++)
+         {
+             QStandardItem *item = new QStandardItem( QString("Row:%0, Column:%1").arg(r).arg(c) );
+             item->setCheckable(true);
+
+             if( c == 0 )
+                 for( int i=0; i<3; i++ )
+                 {
+                     QStandardItem *child = new QStandardItem( QString("Item %0").arg(i) );
+                     child->setEditable( false );
+                     child->setCheckable(true);
+                     item->appendRow( child );
+                     cout<<"adding"<<endl;
+                 }
+
+             model->setItem(r, c, item);
+         }
+
+     model->setHorizontalHeaderItem( 0, new QStandardItem( "Foo" ) );
+     model->setHorizontalHeaderItem( 1, new QStandardItem( "Bar-Baz" ) );
+
+     tree->setModel( model );
+     list->setModel( model );
+     table->setModel( model );
+
+     list->setSelectionModel( tree->selectionModel() );
+     table->setSelectionModel( tree->selectionModel() );
+
+     table->setSelectionBehavior( QAbstractItemView::SelectRows );
+     table->setSelectionMode( QAbstractItemView::SingleSelection );
+     _splitter.show();
+*/
+}
+
+void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)
+{
+    cout<<"triggered"<<endl;
 }

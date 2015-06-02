@@ -634,6 +634,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="separator"/>
     <addaction name="actionShow_Onscreen_Infos"/>
     <addaction name="separator"/>
+    <addaction name="actionShowGeometry_Structure"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1304,6 +1305,20 @@ border-color: rgb(255, 255, 255);</string>
     <string>Remember Settings</string>
    </property>
   </action>
+  <action name="actionShowGeometry_Structure">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Geometry Structure</string>
+   </property>
+   <property name="toolTip">
+    <string>Display the structure of the geometry </string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="icons.qrc"/>
@@ -1359,7 +1374,7 @@ border-color: rgb(255, 255, 255);</string>
   </connection>
   <connection>
    <sender>BtFullscreen</sender>
-   <signal>clicked(bool)</signal>
+   <signal>toggled(bool)</signal>
    <receiver>mainwindow</receiver>
    <slot>slotFullScreen(bool)</slot>
    <hints>
@@ -2141,6 +2156,22 @@ border-color: rgb(255, 255, 255);</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShowGeometry_Structure</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotShowGeometryStructure()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotHelpAbout()</slot>
@@ -2204,5 +2235,6 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotChangeNavLinesColor()</slot>
   <slot>slotShowHideFloor()</slot>
   <slot>slotChangeFloorColor()</slot>
+  <slot>slotShowGeometryStructure()</slot>
  </slots>
 </ui>

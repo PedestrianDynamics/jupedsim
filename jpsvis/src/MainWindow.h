@@ -37,6 +37,10 @@
 #include "ui_mainwindow.h"
 #include <QMainWindow>
 #include <QSettings>
+#include <QSplitter>
+#include <QTreeView>
+#include <QStandardItem>
+#include <QTreeWidget>
 
 #include <vector>
 
@@ -47,6 +51,7 @@ class ThreadVisualisation;
 class QString;
 class QDomNode;
 class FacilityGeometry;
+class GeometryFactory;
 class Building;
 class Message;
 class Settings;
@@ -236,6 +241,11 @@ public Q_SLOTS:
     /// information include Time and pedestrians left in the facility
     void slotShowOnScreenInfos();
 
+    ///show the detailed structure of the geometry
+    void slotShowGeometryStructure();
+
+    void slotOnGeometryItemChanged(QStandardItem *item);
+
 private:
 Q_SIGNALS:
     void signal_controlSequence(QString);
@@ -264,8 +274,8 @@ private:
 
     /// parse the geometry  Node and return a pointer to geometry object
     /// used in online mode only
-    FacilityGeometry* parseGeometry(QDomNode geoNode);
-    FacilityGeometry* parseGeometry(QString geometryString);
+    void parseGeometry(const QDomNode& geoNode);
+    void parseGeometry(const QString &geometryString);
 
     /**
      * parse a shape node and get the initials heights and colors of pedestrians.
@@ -317,6 +327,10 @@ private:
     QLabel *labelFrameNumber;
     QLabel *labelRecording;
     QLabel *labelMode;
+    QSplitter _splitter;
+    //QTreeWidget _geoStructure;
+    QTreeView _geoStructure;
+
 };
 
 #endif // TRAVISTO_H

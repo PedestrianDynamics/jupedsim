@@ -34,6 +34,7 @@
 #include <QTreeWidget>
 #include <vector>
 #include "SyncData.h"
+#include"geometry/GeometryFactory.h"
 
 
 
@@ -42,13 +43,13 @@ class JPoint;
 class TrajectoryPoint;
 class FrameElement;
 class SyncData;
-class FacilityGeometry;
+class GeometryFactory;
 
 
 class SaxParser: public QXmlDefaultHandler
 {
 public:
-    SaxParser(FacilityGeometry* _geometry,SyncData* _dataset, double * fps);
+    SaxParser(GeometryFactory& geoFac, SyncData& _dataset, double * fps);
     virtual ~SaxParser();
     bool startElement(const QString &namespaceURI,
                       const QString &localName,
@@ -66,13 +67,13 @@ public:
                        const QString& value);
 
     /// provided for convenience and will be removed in the next version
-    static bool parseGeometryJPS(QString content, FacilityGeometry *geo);
+    static bool parseGeometryJPS(QString content, GeometryFactory& geo);
 
     /// provided for convenience and will be removed in the next version
-    static void parseGeometryXMLV04(QString content, FacilityGeometry *geo);
+    static void parseGeometryXMLV04(QString content, GeometryFactory& geo);
 
     /// provided for convenience and will be removed in the next version
-    static void parseGeometryTRAV(QString content, FacilityGeometry *geo,QDomNode geoNode=QDomNode());
+    static void parseGeometryTRAV(QString fileName, GeometryFactory& geoFac, QDomNode geoNode=QDomNode());
 
     /// take a large file and find the geometry file location.
     static QString extractGeometryFilename(QString& filename);
@@ -86,8 +87,9 @@ private:
     void InitHeader(int major, int minor, int patch);
 
 private:
-    FacilityGeometry* _geometry;
-    SyncData* _dataset;
+    GeometryFactory& _geoFactory;
+    std::shared_ptr<FacilityGeometry> _geometry;
+    SyncData& _dataset;
     double* _para;
     QString _currentText;
     int _currentFrameID=-1;

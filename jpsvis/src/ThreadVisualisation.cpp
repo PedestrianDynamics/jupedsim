@@ -77,6 +77,7 @@
 
 
 #include "geometry/FacilityGeometry.h"
+#include "geometry/GeometryFactory.h"
 #include "geometry/LinePlotter2D.h"
 
 #include "ThreadVisualisation.h"
@@ -98,23 +99,21 @@
 ThreadVisualisation::ThreadVisualisation(QObject *parent):
     QThread(parent)
 {
-    renderer=NULL;
-    renderWindow=NULL;
-    renderWinInteractor=NULL;
-    runningTime=vtkTextActor::New();;
-    framePerSecond=25;
-    axis=NULL;
-    winTitle="header without room caption";
-    geometry=new FacilityGeometry();
-
+    _renderer=NULL;
+    _renderWindow=NULL;
+    _renderWinInteractor=NULL;
+    _runningTime=vtkTextActor::New();;
+    _framePerSecond=25;
+    _axis=NULL;
+    _winTitle="header without room caption";
+    //_geometry=new FacilityGeometry();
 }
 
 ThreadVisualisation::~ThreadVisualisation()
 {
 
-    if(axis)
-        axis->Delete();
-    delete geometry;
+    if(_axis)
+        _axis->Delete();
 
     if(extern_glyphs_pedestrians_3D) extern_glyphs_pedestrians_3D->Delete();
     if(extern_glyphs_pedestrians_actor_3D) extern_glyphs_pedestrians_actor_3D->Delete();
@@ -122,18 +121,18 @@ ThreadVisualisation::~ThreadVisualisation()
     if(extern_glyphs_pedestrians_actor_2D) extern_glyphs_pedestrians_actor_2D->Delete();
     if(extern_pedestrians_labels) extern_pedestrians_labels->Delete();
 
-    runningTime->Delete();
+    _runningTime->Delete();
 
 }
 
 void ThreadVisualisation::setFullsreen(bool status)
 {
-    renderWindow->SetFullScreen(status);
+    _renderWindow->SetFullScreen(status);
 }
 
 void ThreadVisualisation::slotSetFrameRate(float fps)
 {
-    framePerSecond=fps;
+    _framePerSecond=fps;
 }
 
 
@@ -141,27 +140,28 @@ void ThreadVisualisation::run()
 {
 
     //deactivate the output windows
-    vtkObject::GlobalWarningDisplayOff();
+    //vtkObject::GlobalWarningDisplayOff();
 
     //emit signalStatusMessage("running");
 
 
     // Create the renderer
-    renderer = vtkRenderer::New();
+    _renderer = vtkRenderer::New();
     // set the background
     //renderer->SetBackground(.00,.00,.00);
-    renderer->SetBackground(1.0,1.0,1.0);
+    _renderer->SetBackground(1.0,1.0,1.0);
     //add the geometry
-    geometry->CreateActors();
-    renderer->AddActor(geometry->getActor2D());
-    renderer->AddActor(geometry->getActor3D());
+    _geometry.Init(_renderer);
+    //_geometry->CreateActors();
+    //_renderer->AddActor(_geometry->getActor2D());
+    //_renderer->AddActor(_geometry->getActor3D());
 
     initGlyphs2D();
     initGlyphs3D();
 
     //create the trails
     extern_trail_plotter = new PointPlotter();
-    renderer->AddActor(extern_trail_plotter->getActor());
+    _renderer->AddActor(extern_trail_plotter->getActor());
 
     // add axis
     //axis= vtkAxesActor::New();
@@ -233,9 +233,9 @@ void ThreadVisualisation::run()
     }
 
     // Create the render window
-    renderWindow = vtkRenderWindow::New();
-    renderWindow->AddRenderer( renderer );
-    renderWindow->SetSize(960, 800);
+    _renderWindow = vtkRenderWindow::New();
+    _renderWindow->AddRenderer( _renderer );
+    _renderWindow->SetSize(960, 800);
     //renderWindow->SetSize(640, 480);
 
     // add the legend
@@ -243,23 +243,23 @@ void ThreadVisualisation::run()
     //	initLegend();
 
     //add the running time frame
-    runningTime->SetTextScaleModeToViewport();
+    _runningTime->SetTextScaleModeToViewport();
     //runningTime->SetTextScaleModeToProp();
     //runningTime->SetMinimumSize(10,10);
     //runningTime->SetMinimumSize(180,80);
     //runningTime->SetInput(txt);
     //runningTime->SetDisplayPosition(500,700);
-    runningTime->SetVisibility(SystemSettings::getOnScreenInfos());
+    _runningTime->SetVisibility(SystemSettings::getOnScreenInfos());
 
     // set the properties of the caption
-    vtkTextProperty* tprop = runningTime->GetTextProperty();
+    vtkTextProperty* tprop = _runningTime->GetTextProperty();
     //tprop->SetFontFamilyToArial();
     //tprop->BoldOn();
     //tprop->SetLineSpacing(1.0);
     tprop->SetFontSize(10);
     tprop->SetColor(1.0,0.0,0.0);
 
-    renderer->AddActor2D(runningTime);
+    _renderer->AddActor2D(_runningTime);
 
     //CAUTION: this is necessary for WIN32 to update the window name
     // but his will freeze your system on linux
@@ -267,12 +267,12 @@ void ThreadVisualisation::run()
     renderWindow->Render();
 #endif
 
-    renderWindow->SetWindowName(winTitle.toStdString().c_str());
+    _renderWindow->SetWindowName(_winTitle.toStdString().c_str());
 
     // Create an interactor
-    renderWinInteractor = vtkRenderWindowInteractor::New();
-    renderWindow->SetInteractor( renderWinInteractor );
-    renderWinInteractor->Initialize();
+    _renderWinInteractor = vtkRenderWindowInteractor::New();
+    _renderWindow->SetInteractor( _renderWinInteractor );
+    _renderWinInteractor->Initialize();
 
     //add a light kit
     {
@@ -288,17 +288,17 @@ void ThreadVisualisation::run()
 
 
     if(false || SystemSettings::get2D()) {
-        renderer->GetActiveCamera()->OrthogonalizeViewUp();
-        renderer->GetActiveCamera()->ParallelProjectionOn();
-        renderer->ResetCamera();
+        _renderer->GetActiveCamera()->OrthogonalizeViewUp();
+        _renderer->GetActiveCamera()->ParallelProjectionOn();
+        _renderer->ResetCamera();
     }
 
     //create a timer for rendering the window
     TimerCallback *renderingTimer = new TimerCallback();
-    int timer= renderWinInteractor->CreateRepeatingTimer(1000.0/framePerSecond);
+    int timer= _renderWinInteractor->CreateRepeatingTimer(1000.0/_framePerSecond);
     renderingTimer->SetRenderTimerId(timer);
-    renderingTimer->setTextActor(runningTime);
-    renderWinInteractor->AddObserver(vtkCommand::TimerEvent,renderingTimer);
+    renderingTimer->setTextActor(_runningTime);
+    _renderWinInteractor->AddObserver(vtkCommand::TimerEvent,renderingTimer);
 
     //create the necessary connections
     QObject::connect(renderingTimer, SIGNAL(signalRunningTime(unsigned long )),
@@ -312,7 +312,7 @@ void ThreadVisualisation::run()
 
     // Create my interactor style
     InteractorStyle* style = InteractorStyle::New();
-    renderWinInteractor->SetInteractorStyle( style );
+    _renderWinInteractor->SetInteractorStyle( style );
     style->Delete();
 
 
@@ -335,7 +335,7 @@ void ThreadVisualisation::run()
     //save the top view  camera
     _topViewCamera=vtkCamera::New();
     //renderer->GetActiveCamera()->Modified();
-    _topViewCamera->DeepCopy(renderer->GetActiveCamera());
+    _topViewCamera->DeepCopy(_renderer->GetActiveCamera());
 
     //update all (restored) system settings
     setGeometryVisibility2D(SystemSettings::get2D());
@@ -354,18 +354,18 @@ void ThreadVisualisation::run()
     setNavLinesColor(SystemSettings::getNavLinesColor());
 
 
-    renderWinInteractor->Start();
+    _renderWinInteractor->Start();
 
 
 #ifdef __APPLE__
-//InitMultiThreading();
+    //InitMultiThreading();
 
-//dispatch_async(main_q, ^(void){
-//          is_main_thread(); //Unfortunately not
-//          std::cout << "now spinning the visualizer" << std::endl;
-//                  renderWinInteractor->Start();
+    //dispatch_async(main_q, ^(void){
+    //          is_main_thread(); //Unfortunately not
+    //          std::cout << "now spinning the visualizer" << std::endl;
+    //                  renderWinInteractor->Start();
 
-//});
+    //});
     //[[NSThread new] start];
     //#include <objc/objc.h>
     //NSThread* myThread = [[NSThread alloc] initWithTarget:self selector:@selector(workerThreadFunction:) object:nil];
@@ -375,17 +375,17 @@ void ThreadVisualisation::run()
     emit signal_controlSequences("CONTROL_RESET");
 
 
-// still debugging. TODO, check the source of the leak while using cocoa
+    // still debugging. TODO, check the source of the leak while using cocoa
 #ifndef __APPLE__
     //clear some stuffs
     //delete extern_trail_plotter;
     finalize();
 
-    renderer->Delete();
-    renderWindow->Delete();
-    renderWinInteractor->Delete();
+    _renderer->Delete();
+    _renderWindow->Delete();
+    _renderWinInteractor->Delete();
     _topViewCamera->Delete();
-    renderer=NULL;
+    _renderer=NULL;
     delete renderingTimer;
 #endif
 
@@ -400,41 +400,36 @@ void ThreadVisualisation::slotControlSequence(const char* para)
 
 void ThreadVisualisation::setGeometryVisibility( bool status)
 {
-    if(geometry) {
-        if(SystemSettings::get2D()) {
-            geometry->set2D(status);
-        } else {
-            geometry->set3D(status);
-        }
+
+    if(SystemSettings::get2D())
+    {
+        _geometry.Set2D(status);
+    } else
+    {
+        _geometry.Set3D(status);
     }
 }
 
 /// show / hide the walls
 void ThreadVisualisation::showWalls(bool status)
 {
-    if(geometry) {
-        geometry->showWalls(status);
-    }
+    _geometry.ShowWalls(status);
 }
 
 /// show/ hide the exits
 void ThreadVisualisation::showDoors(bool status)
 {
-    if(geometry) {
-        geometry->showDoors(status);
-    }
+    _geometry.ShowDoors(status);
 }
 
 void ThreadVisualisation::showNavLines(bool status)
 {
-    if(geometry) {
-        geometry->showNavLines(status);
-    }
+    _geometry.ShowNavLines(status);
 }
 
 void ThreadVisualisation::showFloor(bool status)
 {
-    geometry->showFloor(status);
+    _geometry.ShowFloor(status);
 }
 
 void  ThreadVisualisation::initGlyphs2D()
@@ -543,14 +538,14 @@ void  ThreadVisualisation::initGlyphs2D()
     //extern_glyphs_pedestrians_actor_2D->GetProperty()->BackfaceCullingOn();
 
     //if(extern_trajectories_firstSet.getNumberOfAgents()>0)
-    renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
+    _renderer->AddActor(extern_glyphs_pedestrians_actor_2D);
 
     // structure for the labels
     VTK_CREATE(vtkLabeledDataMapper, labelMapper);
     extern_pedestrians_labels->SetMapper(labelMapper);
     labelMapper->SetFieldDataName("labels");
     labelMapper->SetLabelModeToLabelFieldData();
-    renderer->AddActor2D(extern_pedestrians_labels);
+    _renderer->AddActor2D(extern_pedestrians_labels);
     extern_pedestrians_labels->SetVisibility(false);
 }
 
@@ -644,7 +639,7 @@ void ThreadVisualisation::initGlyphs3D()
     extern_glyphs_pedestrians_actor_3D->SetMapper(mapper);
     extern_glyphs_pedestrians_actor_3D->GetProperty()->BackfaceCullingOn();
     //if(extern_trajectories_firstSet.getNumberOfAgents()>0)
-    renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
+    _renderer->AddActor(extern_glyphs_pedestrians_actor_3D);
 
     extern_glyphs_pedestrians_actor_3D->SetVisibility(false);
 }
@@ -713,24 +708,24 @@ void ThreadVisualisation::initLegend(/*std::vector scalars*/)
     //scalarBar->SetPickable(1);
     //scalarBar->SetTextPositionToPrecedeScalarBar();
     //scalarBar->SetLabelFormat("%-#5.1f");
-    renderer->AddActor2D(scalarBar);
-    renderer->Render();
+    _renderer->AddActor2D(scalarBar);
+    _renderer->Render();
 
 }
 
 
 void ThreadVisualisation::setAxisVisible(bool status)
 {
-    axis->SetVisibility(status);
+    _axis->SetVisibility(status);
 }
 
 void ThreadVisualisation::setCameraPerspective(int mode)
 {
-    if(renderer==NULL) return;
+    if(_renderer==NULL) return;
 
     switch (mode) {
     case 1: //TOP oder RESET
-        renderer->GetActiveCamera()->DeepCopy(_topViewCamera);
+        _renderer->GetActiveCamera()->DeepCopy(_topViewCamera);
         break;
 
     case 2://SIDE
@@ -758,85 +753,82 @@ void ThreadVisualisation::setBackgroundColor(const QColor& col)
 {
     double  bgcolor[3];
     QcolorToDouble(col,bgcolor);
-    if (renderer!=NULL)
-        renderer->SetBackground(bgcolor);
+    if (_renderer!=NULL)
+        _renderer->SetBackground(bgcolor);
 }
 
 void ThreadVisualisation::setWindowTitle(QString title)
 {
     if(title.isEmpty())return;
-    winTitle=title;
+    _winTitle=title;
 }
 
 /// @todo check this construct
 void ThreadVisualisation::setGeometry(FacilityGeometry* geometry)
 {
-    this->geometry=geometry;
+    //this->_geometry=geometry;
+    cout<<"dont call me"<<endl;
+    exit(0);
 }
 
-FacilityGeometry* ThreadVisualisation::getGeometry()
+GeometryFactory &ThreadVisualisation::getGeometry()
 {
-    //if(geometry==NULL){
     //delete the old object
-    delete geometry;
-    geometry=new FacilityGeometry();
-    //}
-    return geometry;
+    //delete _geometry;
+    //_geometry=new FacilityGeometry();
+    return _geometry;
 }
 
 void ThreadVisualisation::setWallsColor(const QColor &color)
 {
     double  rbgColor[3];
     QcolorToDouble(color,rbgColor);
-    geometry->changeWallsColor(rbgColor);
+    _geometry.ChangeWallsColor(rbgColor);
 }
 
 void ThreadVisualisation::setFloorColor(const QColor &color)
 {
     double  rbgColor[3];
     QcolorToDouble(color,rbgColor);
-    geometry->changeFloorColor(rbgColor);
+    _geometry.ChangeFloorColor(rbgColor);
 }
 
 void ThreadVisualisation::setGeometryLabelsVisibility(int v)
 {
-    geometry->showGeometryLabels(v);
+    _geometry.ShowGeometryLabels(v);
 }
 
 void ThreadVisualisation::setExitsColor(const QColor &color)
 {
     double  rbgColor[3];
     QcolorToDouble(color,rbgColor);
-    geometry->changeExitsColor(rbgColor);
+    _geometry.ChangeExitsColor(rbgColor);
 }
 
 void ThreadVisualisation::setNavLinesColor(const QColor &color)
 {
     double  rbgColor[3];
     QcolorToDouble(color,rbgColor);
-    geometry->changeNavLinesColor(rbgColor);
+    _geometry.ChangeNavLinesColor(rbgColor);
 }
 
 /// enable/disable 2D
 /// todo: consider disabling the 2d option in the 3d, and vice-versa
 void ThreadVisualisation::setGeometryVisibility2D(bool status)
 {
-    if(geometry!=NULL) //FIXME this should never happens
-        geometry->set2D(status);
+    _geometry.Set2D(status);
 }
 
 /// enable/disable 3D
 /// todo: consider disabling the 2d option in the 3d, and vice-versa
 void ThreadVisualisation::setGeometryVisibility3D(bool status)
 {
-    if(geometry!=NULL) //FIXME this should never happens, seems to be called by slotReset() !
-        geometry->set3D(status);
+    _geometry.Set3D(status);
 }
 
 void ThreadVisualisation::setOnscreenInformationVisibility(bool show)
 {
-    //if(runningTime)
-    runningTime->SetVisibility(show);
+    _runningTime->SetVisibility(show);
 }
 
 void ThreadVisualisation::Create2dAgent()
