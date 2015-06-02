@@ -63,12 +63,16 @@ class FloorfieldViaFM
         void calculateDistanceField(const double thresholdArg); //make private
 
         void update(const long int key, double* target, double* speedlocal);
-        void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key);
-        void checkNeighborsAndCalc(const long int key);
+        void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc);
+
+        void checkNeighborsAndCalcDist2Wall(const long int key);
+        void checkNeighborsAndCalcFloorfield(const long int key);
+        //void (*checkNeighborsAndCalc)(const long int key);
+
         inline double onesidedCalc(double xy, double hDivF);
         inline double twosidedCalc(double x, double y, double hDivF);
 
-        void testoutput(const char*, const char*);
+        void testoutput(const char*, const char*, const double*);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
@@ -91,11 +95,10 @@ class FloorfieldViaFM
         double* speedInitial;
         double* cost;
         long int* secKey;  //secondary key to address ... not used yet
-        Point* grad; //gradients
+        Point* neggrad; //gradients
         Trial* trialfield;
 
         double threshold;
-
 };
 
 #endif // FLOORFIELDVIAFM_H
