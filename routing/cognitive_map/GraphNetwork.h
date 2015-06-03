@@ -1,5 +1,5 @@
 /**
- * \file        CognitiveMap.h
+ * \file        GraphNetwork.h
  * \date        Jan 1, 2014
  * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -27,8 +27,8 @@
  **/
 
 
-#ifndef COGNITIVEMAP_H_
-#define COGNITIVEMAP_H_
+#ifndef GRAPHNETWORK_H_
+#define GRAPHNETWORK_H_
 
 #include "NavigationGraph.h"
 //#include "./map_knowlegde/routeknowlegde.h"
@@ -44,21 +44,21 @@ class Pedestrian;
 
 
 /**
- * @brief Cognitive Map
+ * @brief Graph Network
  *
- * The CognitiveMap is a simplified representation of human knowledge of building space.
+ * The GraphNetwork is a simplified representation of human knowledge of building space.
  * It takes the different quantity and certainty of knowledge into account.
  * It is the basis for further developments like individual behavior and information sharing algorithms.
  *
  */
-class CognitiveMap {
+class GraphNetwork {
 
 public:
      /****************************
       * Constructors & Destructors
       ****************************/
-     CognitiveMap(const Building * building, const Pedestrian * pedestrian);
-     virtual ~CognitiveMap();
+     GraphNetwork(const Building * building, const Pedestrian * pedestrian);
+     virtual ~GraphNetwork();
 
      void Add(const SubRoom * sub_room);
      void Add(const Crossing * crossing);
@@ -68,7 +68,7 @@ public:
 
     NavigationGraph * GetNavigationGraph() const;
 
-    const GraphEdge * GetDestination();
+    const GraphEdge * GetDestination() const;
     const GraphEdge * GetLocalDestination();
 
     bool HadNoDestination() const;
@@ -92,4 +92,4 @@ private:
 };
 
 
-#endif /* COGNITIVEMAP_H_ */
+#endif /* GRAPH_NETWORK_H_ */

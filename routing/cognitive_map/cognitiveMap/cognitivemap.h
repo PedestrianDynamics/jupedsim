@@ -5,6 +5,7 @@
 #include "associations.h"
 #include "waypoints.h"
 #include "landmark.h"
+#include "../GraphNetwork.h"
 
 #include <queue>
 #include <memory>
@@ -15,27 +16,26 @@ class Building;
 class JEllipse;
 
 
-class priorityCheck
-{
-public:
-  priorityCheck(){}
-  bool operator() (const Waypoint& lhs, const Waypoint& rhs) const
-  {
-    if (lhs.GetPriority() <= rhs.GetPriority())
-      return true;
-    else
-        return false;
-  }
-};
+
+//class priorityCheck
+//{
+//public:
+//  priorityCheck(){}
+//  bool operator() (const Waypoint& lhs, const Waypoint& rhs) const
+//  {
+//    if (lhs.GetPriority() <= rhs.GetPriority())
+//      return true;
+//    else
+//        return false;
+//  }
+//};
 
 
-
-
-
-using Waypoints = std::priority_queue<Waypoint,std::vector<Waypoint>,priorityCheck>;
-using ptrBuilding = std::shared_ptr<const Building>;
-using ptrPed = std::shared_ptr<const Pedestrian>;
+using Waypoints = std::vector<ptrWaypoint>;// std::priority_queue<Waypoint,std::vector<Waypoint>,priorityCheck>;
+using ptrBuilding = const Building*;
+using ptrPed = const Pedestrian*;
 using ptrLandmark = std::shared_ptr<Landmark>;
+using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
 
 
 class CognitiveMap
@@ -44,15 +44,15 @@ public:
     CognitiveMap();
     CognitiveMap(ptrBuilding b, ptrPed ped);
     ~CognitiveMap();
-    void AddLandmark(ptrLandmark landmark);
-private:
-    void ParseLandmarks(const std::string &geometryfile);
-
+    void AddLandmarks(std::vector<ptrLandmark> landmarks);
+    void AssessDoors();
+    bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
+    ptrGraphNetwork GetGraphNetwork() const;
 
 private:
     ptrBuilding _building;
     ptrPed _ped;
-    // Navigation graph
+    ptrGraphNetwork _network;
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarks;
     Waypoints _waypContainer;

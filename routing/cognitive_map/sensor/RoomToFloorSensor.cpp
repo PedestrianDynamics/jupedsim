@@ -29,7 +29,7 @@
 #include "RoomToFloorSensor.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 
@@ -64,7 +64,7 @@ void RoomToFloorSensor::execute(const Pedestrian * pedestrian, CognitiveMap * co
     // }
 
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = (*cognitive_map->GetNavigationGraph())[sub_room];
+    GraphVertex * vertex = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph())[sub_room];
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
    for(GraphVertex::EdgesContainer::iterator it_edges = edges->begin(); it_edges != edges->end(); ++it_edges) {
         if((*it_edges)->GetDest() == NULL || (*it_edges)->GetDest()->GetSubRoom()->GetType() == (*it_edges)->GetSrc()->GetSubRoom()->GetType()) {

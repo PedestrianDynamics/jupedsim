@@ -34,8 +34,6 @@
 class Building;
 
 
-
-
 class EmptyCognitiveMapCreator : public AbstractCognitiveMapCreator {
 
 public:

@@ -30,7 +30,7 @@
 #include "Router.h"
 
 #include "cognitive_map/CognitiveMapStorage.h"
-#include "cognitive_map/CognitiveMap.h"
+#include "cognitive_map/cognitiveMap/cognitivemap.h"
 #include "cognitive_map/NavigationGraph.h"
 #include "cognitive_map/sensor/SensorManager.h"
 
@@ -65,18 +65,18 @@ CognitiveMapRouter::~CognitiveMapRouter()
 int CognitiveMapRouter::FindExit(Pedestrian * p)
 {
     //check for former goal.
-    if((*cm_storage)[p]->HadNoDestination()) {
+    if((*cm_storage)[p]->GetGraphNetwork()->HadNoDestination()) {
         sensor_manager->execute(p, SensorManager::INIT);
     }
 
     //Check if the Pedestrian already has a Dest. or changed subroom and needs a new one.
-    if((*cm_storage)[p]->ChangedSubRoom()) {
+    if((*cm_storage)[p]->GetGraphNetwork()->ChangedSubRoom()) {
         //execute periodical sensors
         sensor_manager->execute(p, SensorManager::CHANGED_ROOM);
 
         int status = FindDestination(p);
 
-        (*cm_storage)[p]->UpdateSubRoom();
+        (*cm_storage)[p]->GetGraphNetwork()->UpdateSubRoom();
 
         return status;
     }
@@ -100,19 +100,19 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 {
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
         const GraphEdge * destination = nullptr;
-        destination = (*cm_storage)[p]->GetDestination();
+        destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
         if(destination == nullptr) {
             //no destination was found, now we could start the discovery!
             //1. run the no_way sensors for room discovery.
             sensor_manager->execute(p, SensorManager::NO_WAY);
 
             //check if this was enough for finding a global path to the exit
-            destination = (*cm_storage)[p]->GetDestination();
+            destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
 
             if(destination == nullptr) {
                 //we still do not have a way. lets take the "best" local edge
                 //for this we don't calculate the cost to exit but calculte the cost for the edges at the actual vertex.
-                destination = (*cm_storage)[p]->GetLocalDestination();
+                destination = (*cm_storage)[p]->GetGraphNetwork()->GetLocalDestination();
             }
         }
 
@@ -123,7 +123,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             return -1;
         }
 
-        (*cm_storage)[p]->AddDestination(destination);
+        (*cm_storage)[p]->GetGraphNetwork()->AddDestination(destination);
         sensor_manager->execute(p, SensorManager::NEW_DESTINATION);
 
 
@@ -141,6 +141,7 @@ bool CognitiveMapRouter::Init(Building * b)
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
      cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMap")[0]);
+     cm_storage->ParseLandmarks();
      Log->Write("INFO:\tInitialized CognitiveMapStorage");
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);

@@ -28,15 +28,15 @@ public:
     void SetPos(const Point& point);
     void SetRoom(ptrRoom room);
     void SetCaption(const std::string& string);
-    void SetPriority(int priority);
+    void SetPriority(double priority);
     ///Getter
-    const int& GetId();
-    const Point& GetPos();
-    const double& GetA();
-    const double& GetB();
-    ptrRoom GetRoom();
-    const std::string& GetCaption();
-    const int& GetPriority() const;
+    const int& GetId() const;
+    const Point& GetPos() const;
+    const double& GetA() const;
+    const double& GetB() const;
+    ptrRoom GetRoom() const;
+    const std::string& GetCaption() const;
+    const double &GetPriority() const;
     /// Associations
     void AddAssociation(ptrAssociation asso);
 
@@ -47,7 +47,7 @@ private:
     double _a;
     double _b;
     ptrRoom _room;
-    int _priority;
+    double _priority;
     Associations _assoContainer;
 };
 

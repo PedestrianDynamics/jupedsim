@@ -1,5 +1,5 @@
 /**
- * \file        CognitiveMap.cpp
+ * \file        GraphNetwork.cpp
  * \date        Jan 1, 2014
  * \version     v0.6
  * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
@@ -27,7 +27,7 @@
  **/
 
 
-#include "CognitiveMap.h"
+#include "GraphNetwork.h"
 #include "NavigationGraph.h"
 
 #include "navigation_graph/GraphVertex.h"
@@ -45,44 +45,44 @@ using namespace std;
  * Constructors & Destructors
  */
 
-CognitiveMap::CognitiveMap(const Building * building, const Pedestrian * pedestrian)
+GraphNetwork::GraphNetwork(const Building * building, const Pedestrian * pedestrian)
      : building(building), pedestrian(pedestrian)
 {
      navigation_graph = new NavigationGraph(building);
 
 }
 
-CognitiveMap::~CognitiveMap()
+GraphNetwork::~GraphNetwork()
 {
      delete navigation_graph;
 }
 
-void CognitiveMap::Add(const SubRoom * sub_room)
+void GraphNetwork::Add(const SubRoom * sub_room)
 {
      navigation_graph->AddVertex(sub_room);
 }
 
-void CognitiveMap::Add(const Crossing * crossing)
+void GraphNetwork::Add(const Crossing * crossing)
 {
      navigation_graph->AddEdge(crossing);
 }
 
-void CognitiveMap::AddExit(const Transition * exit)
+void GraphNetwork::AddExit(const Transition * exit)
 {
      navigation_graph->AddExit(exit);
 }
 
-NavigationGraph::VerticesContainer * CognitiveMap::GetAllVertices()
+NavigationGraph::VerticesContainer * GraphNetwork::GetAllVertices()
 {
      return navigation_graph->GetAllVertices();
 }
 
 
-NavigationGraph * CognitiveMap::GetNavigationGraph() const
+NavigationGraph * GraphNetwork::GetNavigationGraph() const
 {
      return navigation_graph;
 }
-const GraphEdge * CognitiveMap::GetDestination()
+const GraphEdge * GraphNetwork::GetDestination() const
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
@@ -106,7 +106,7 @@ const GraphEdge * CognitiveMap::GetDestination()
     return (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 }
 
-const GraphEdge * CognitiveMap::GetLocalDestination()
+const GraphEdge * GraphNetwork::GetLocalDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 //    if(pedestrian->GetID() == 4) navigation_graph->WriteToDotFile("/home/david/graph.dot");
@@ -114,22 +114,22 @@ const GraphEdge * CognitiveMap::GetLocalDestination()
     return (*navigation_graph)[sub_room]->GetLocalCheapestDestination(pedestrian->GetPos());
 }
 
-bool CognitiveMap::HadNoDestination() const
+bool GraphNetwork::HadNoDestination() const
 {
     return destinations.empty();
 }
 
-void CognitiveMap::AddDestination(const GraphEdge* destination)
+void GraphNetwork::AddDestination(const GraphEdge* destination)
 {
     destinations.push_back(destination);
 }
 
-std::vector<const GraphEdge *>& CognitiveMap::GetDestinations()
+std::vector<const GraphEdge *>& GraphNetwork::GetDestinations()
 {
     return destinations;
 }
 
-//void CognitiveMap::CreateRouteKnowlegde(const Pedestrian *pedestrian)
+//void GraphNetwork::CreateRouteKnowlegde(const Pedestrian *pedestrian)
 //{
 //    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 //    NextDoorKnowlegde ndknowlegde = (*navigation_graph)[sub_room]->GetShortestPathFromHere(pedestrian->GetPos());
@@ -138,12 +138,12 @@ std::vector<const GraphEdge *>& CognitiveMap::GetDestinations()
 
 //}
 
-bool CognitiveMap::ChangedSubRoom() const
+bool GraphNetwork::ChangedSubRoom() const
 {
     return current_subroom != building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 }
 
-void CognitiveMap::UpdateSubRoom()
+void GraphNetwork::UpdateSubRoom()
 {
     current_subroom = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 }

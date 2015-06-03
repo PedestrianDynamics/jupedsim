@@ -198,7 +198,7 @@ set (   source_files
   routing/mesh/Mesh.cpp
 
   routing/CognitiveMapRouter.cpp
-  routing/cognitive_map/CognitiveMap.cpp
+  routing/cognitive_map/GraphNetwork.cpp
   routing/cognitive_map/NavigationGraph.cpp
   routing/cognitive_map/CognitiveMapStorage.cpp
   routing/cognitive_map/AbstractCognitiveMapCreator.cpp
@@ -220,6 +220,7 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/cognitivemap.cpp
   routing/cognitive_map/cognitiveMap/waypoints.cpp
   routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/Tools/triangle.cpp
 
 
   poly2tri/common/shapes.cpp
@@ -245,7 +246,7 @@ set (   header_files
   routing/mesh/Mesh.h
 
   routing/CognitiveMapRouter.h
-  routing/cognitive_map/CognitiveMap.h
+  routing/cognitive_map/GraphNetwork.h
   routing/cognitive_map/NavigationGraph.h
   routing/cognitive_map/CognitiveMapStorage.h
   routing/cognitive_map/AbstractCognitiveMapCreator.h
@@ -267,6 +268,7 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/cognitivemap.h
   routing/cognitive_map/cognitiveMap/waypoints.h
   routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/Tools/triangle.h
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h

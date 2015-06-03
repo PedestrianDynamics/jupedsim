@@ -10,7 +10,7 @@
 
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 #include <vector>
@@ -31,16 +31,16 @@ void DiscoverDoorsSensor::execute(const Pedestrian * pedestrian, CognitiveMap * 
     const std::vector<Crossing *>& crossings = sub_room->GetAllCrossings();
     for(std::vector<Crossing*>::const_iterator it = crossings.begin(); it != crossings.end(); ++it)
     {
-        cognitive_map->Add((*it));
+        cognitive_map->GetGraphNetwork()->Add((*it));
     }
     //Add transitions as edges
     const std::vector<Transition *>& transitions = sub_room->GetAllTransitions();
     for(std::vector<Transition *>::const_iterator it = transitions.begin(); it != transitions.end(); ++it)
     {
         if((*it)->IsExit()) {
-            cognitive_map->AddExit((*it));
+            cognitive_map->GetGraphNetwork()->AddExit((*it));
         } else {
-            cognitive_map->Add((*it));
+            cognitive_map->GetGraphNetwork()->Add((*it));
         }
     }
 }

@@ -12,6 +12,7 @@ Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
     _a=a;
     _b=b;
     _room=room;
+    _priority=1.5;
 }
 
 Waypoint::~Waypoint()
@@ -40,43 +41,43 @@ void Waypoint::SetCaption(const std::string &string)
     _caption=string;
 }
 
-void Waypoint::SetPriority(int priority)
+void Waypoint::SetPriority(double priority)
 {
     _priority=priority;
 }
 
-const int &Waypoint::GetId()
+const int &Waypoint::GetId() const
 {
     return _id;
 }
 
-const Point &Waypoint::GetPos()
+const Point &Waypoint::GetPos() const
 {
     return _exactPos;
 }
 
-const double &Waypoint::GetA()
+const double &Waypoint::GetA() const
 {
     return _a;
 }
 
-const double &Waypoint::GetB()
+const double &Waypoint::GetB() const
 {
     return _b;
 }
 
 
-ptrRoom Waypoint::GetRoom()
+ptrRoom Waypoint::GetRoom() const
 {
     return _room;
 }
 
-const std::string &Waypoint::GetCaption()
+const std::string &Waypoint::GetCaption() const
 {
     return _caption;
 }
 
-const int &Waypoint::GetPriority() const
+const double &Waypoint::GetPriority() const
 {
     return _priority;
 }

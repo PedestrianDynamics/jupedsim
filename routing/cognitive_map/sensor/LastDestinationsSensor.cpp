@@ -10,7 +10,7 @@
 
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include <vector>
 #include <set>
@@ -26,8 +26,8 @@ std::string LastDestinationsSensor::GetName() const
 
 void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
 {
-    NavigationGraph & ng = (*cognitive_map->GetNavigationGraph());
-    std::vector<const GraphEdge *> & destinations = cognitive_map->GetDestinations();
+    NavigationGraph & ng = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph());
+    std::vector<const GraphEdge *> & destinations = cognitive_map->GetGraphNetwork()->GetDestinations();
     int i = 1;
 
     std::set<const GraphEdge *> rated;

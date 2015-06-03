@@ -39,7 +39,7 @@
 #include "../CognitiveMapStorage.h"
 #include "../navigation_graph/GraphVertex.h"
 #include "../NavigationGraph.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 
 SensorManager::SensorManager(const Building * b, CognitiveMapStorage * cms)
      : building(b), cm_storage(cms)

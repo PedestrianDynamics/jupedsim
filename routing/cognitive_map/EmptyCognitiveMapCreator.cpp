@@ -27,7 +27,7 @@
 
 
 #include "EmptyCognitiveMapCreator.h"
-#include "CognitiveMap.h"
+#include "./cognitiveMap/cognitivemap.h"
 #include <vector>
 #include <map>
 #include "../../geometry/Room.h"
@@ -44,6 +44,8 @@ EmptyCognitiveMapCreator::~EmptyCognitiveMapCreator()
 CognitiveMap * EmptyCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * ped)
 {
      CognitiveMap * cm = new CognitiveMap(_building, ped);
+
+     //cm->AddLandmarks();
 
      return cm;
 }
