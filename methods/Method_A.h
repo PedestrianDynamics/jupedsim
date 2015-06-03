@@ -62,6 +62,7 @@ private:
      double** _xCor;
      double** _yCor;
      int* _firstFrame;
+     float _fps;
 
      bool *_passLine;
      int _classicFlow;    // the number of pedestrians pass a line in a certain time

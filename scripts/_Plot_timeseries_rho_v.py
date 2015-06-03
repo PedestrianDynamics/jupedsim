@@ -12,7 +12,7 @@ def getParserArgs():
 	parser = argparse.ArgumentParser(description='Plot N-t graph measured from method A')
 	parser.add_argument("-p", "--pathfile", default="./", help='give the path of source file')
 	parser.add_argument("-n", "--nametraj", help='give the name of the trajectory')
-	parser.add_argument("-f", "--fps", default="16", type=int, help='give the frame rate of data')
+	parser.add_argument("-f", "--fps", default="16", type=float, help='give the frame rate of data')
 	args = parser.parse_args()
 	return args
 

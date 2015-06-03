@@ -43,6 +43,7 @@ Method_A::Method_A()
      _firstFrame = NULL;
      _passLine = NULL;
      _deltaT = 100;
+     _fps=16;
      _areaForMethod_A = NULL;
 }
 
@@ -59,6 +60,7 @@ bool Method_A::Process (const PedData& peddata)
      _xCor = peddata.GetXCor();
      _yCor = peddata.GetYCor();
      _firstFrame = peddata.GetFirstFrame();
+     _fps =peddata.GetFps();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_A->_id);
      _passLine = new bool[peddata.GetNumPeds()];
      string outputRhoV;
@@ -97,6 +99,12 @@ void Method_A::WriteFile_N_t(string data)
      if(file.is_open())
      {
           file<<data;
+          string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
+          string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+          string parameters_N_t="python ./scripts/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t+
+                   		 " -f "+boost::lexical_cast<std::string>(_fps);
+          system(parameters_N_t.c_str());
+          Log->Write("INFO:\tPlotting N-t diagram!");
      }
      else
      {
