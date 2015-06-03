@@ -48,7 +48,7 @@ private:
      std::map<int , std::vector<int> > _peds_t;
      MeasurementArea_B* _areaForMethod_B;
      int _NumPeds;
-     int _fps;
+     float _fps;
      double** _xCor;
      double** _yCor;
      int *_tIn;           //the time for each pedestrian enter the measurement area
