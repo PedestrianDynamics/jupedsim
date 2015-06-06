@@ -352,7 +352,7 @@ void MainWindow::slotStartPlaying()
             dispatch_queue_t main_q = dispatch_get_main_queue();
             dispatch_async(main_q, ^(void){
                                //visualisationThread->moveToThread(QApplication::instance()->thread());
-                               visualisationThread->run();
+                               _visualisationThread->run();
                            });
 #else
             _visualisationThread->start();
@@ -1228,7 +1228,7 @@ void MainWindow::waitForVisioThread()
 #ifdef __linux__
         _visualisationThread->quit();
 #else
-        visualisationThread->terminate();
+        _visualisationThread->terminate();
 #endif
     }
     Debug::Messages("Visualisation Engine shutdown successfully");

@@ -140,7 +140,7 @@ void ThreadVisualisation::run()
 {
 
     //deactivate the output windows
-    //vtkObject::GlobalWarningDisplayOff();
+    vtkObject::GlobalWarningDisplayOff();
 
     //emit signalStatusMessage("running");
 
@@ -264,7 +264,7 @@ void ThreadVisualisation::run()
     //CAUTION: this is necessary for WIN32 to update the window name
     // but his will freeze your system on linux
 #if defined(_WIN32) || defined(__APPLE__)
-    renderWindow->Render();
+    _renderWindow->Render();
 #endif
 
     _renderWindow->SetWindowName(_winTitle.toStdString().c_str());
