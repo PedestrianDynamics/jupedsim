@@ -31,32 +31,138 @@
 #include <boost/test/unit_test.hpp>
 #include "../../geometry/SubRoom.h" 
 
+#include <vector>
 
 BOOST_AUTO_TEST_SUITE(SubRoomTest)
 
-BOOST_AUTO_TEST_CASE(Line_test)
+BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
 {
-    BOOST_MESSAGE("starting small wall test");
-    SubRoom sub1;
+    BOOST_MESSAGE("starting small gap between wall test");
+    
+    NormalSubRoom sub1;
     sub1.SetSubRoomID(1);
+    sub1.SetRoomID(1);
     
-    sub1.AddWall(Wall(Point(0, 0), Point(0, 10)));
-    sub1.AddWall(Wall(Point(0, 10), Point(5, 10)));
-    sub1.AddWall(Wall(Point(5, 10), Point(5.25, 10)));
-    sub1.AddWall(Wall(Point(5.28, 10), Point(5.30, 10)));
-    sub1.AddWall(Wall(Point(5.33, 10), Point(5.36, 10)));
-    sub1.AddWall(Wall(Point(5.38, 10), Point(5.40, 10)));
-    sub1.AddWall(Wall(Point(5.43, 10), Point(10, 10)));
-    sub1.AddWall(Wall(Point(10, 10), Point(10, 5)));
-    sub1.AddWall(Wall(Point(10, 0), Point(0, 0)));
+    Point P1 (00.0, 00);
+    Point P2 (00.0, 10);
+    Point P3 (05.0, 10);
+    Point P4 (5.25, 10);
+    Point P5 (5.27, 10);
+    Point P6 (5.31, 10);
+    Point P7 (5.32, 10);
+    Point P8 (5.36, 10);
+    Point P9 (5.38, 10);
+    Point P10(5.50, 10);
+    Point P11(5.52, 10);
+    Point P12(10.0, 10);
+    Point P13(10.0, 05);
+    Point P14(10.0, 00);
     
-    vector<Line> goal (Point(10, 5), Point(10, 0));
-    bool temp = sub1.ConvertLineToPoly(&goal);
-    vector<Point> poly (sub1.GetPolygon());
-    for (auto it:poly)
-      BOOST_WARN("x = " << it->GetX() << ", y = " << it->GetY());
+    // Walls with gap less than 0.03 were created
+    sub1.AddWall(Wall(P1, P2));
+    sub1.AddWall(Wall(P2, P3));
+    sub1.AddWall(Wall(P3, P4));
+    sub1.AddWall(Wall(P5, P6));
+    sub1.AddWall(Wall(P7, P8));
+    sub1.AddWall(Wall(P9, P10));
+    sub1.AddWall(Wall(P11, P12));
+    sub1.AddWall(Wall(P12, P13));
+    sub1.AddWall(Wall(P14, P1));
+    
+    Line exit(P14, P13);
+    
+    std::vector<Line*> goal; // (Line(Point(10, 5), Point(10, 0)));
+    goal.push_back(&exit);
+    
+    sub1.SetClosed(1);
+   
+    if (sub1.ConvertLineToPoly(goal) == true) {
+        std::vector<Point> poly = sub1.GetPolygon();
+        for (auto it:poly)
+            BOOST_CHECK_MESSAGE(poly.size() == 10, "x = " << it.GetX() << ", y = " << it.GetY());
+    }
+    else
+        BOOST_CHECK(false);
     
     BOOST_MESSAGE("Leaving small wall test");
 }
 
+BOOST_AUTO_TEST_CASE(small_Wall_test)
+{
+    BOOST_MESSAGE("starting small wall test");
+    
+    NormalSubRoom sub;
+    sub.SetSubRoomID(1);
+    sub.SetRoomID(1);
+    
+    Point P1 (0, 0);
+    Point P2 (0, 10);
+    Point P3 (5.0, 10);
+    Point P4 (5.029, 10);
+    Point P5 (10, 10);
+    Point P6 (10, 5);
+    Point P7 (10, 0);
+    
+    sub.AddWall(Wall(P1, P2));
+    sub.AddWall(Wall(P2, P3));
+    sub.AddWall(Wall(P3, P4));
+    sub.AddWall(Wall(P4, P5));
+    sub.AddWall(Wall(P5, P6));
+    sub.AddWall(Wall(P1, P7));
+    
+    Line exit(P6, P7);
+    
+    std::vector<Line*> door; // (Line(Point(10, 5), Point(10, 0)));
+    door.push_back(&exit);
+    
+    sub.SetClosed(1);
+    if (sub.ConvertLineToPoly(door) == true) {
+        std::vector<Point> poly = sub.GetPolygon();
+        for (auto it:poly)
+            BOOST_CHECK_MESSAGE(poly.size() == 7, "x = " << it.GetX() << ", y = " << it.GetY());
+    }
+    else
+        BOOST_CHECK(false);
+    
+    BOOST_MESSAGE("Leaving small wall test");
+}
+
+BOOST_AUTO_TEST_CASE(overlap_Wall_test)
+{
+    BOOST_MESSAGE("starting overlap wall test");
+    NormalSubRoom sub;
+    sub.SetSubRoomID(1);
+    sub.SetRoomID(1);
+    
+    Point P1 (0, 0);
+    Point P2 (0, 10);
+    Point P3 (10, 10);
+    Point P4 (10, 2);
+    Point P5 (10, 0);
+    Point P6 (10, 5);
+    
+    sub.AddWall(Wall(P1, P2));
+    sub.AddWall(Wall(P5, P1));
+    sub.AddWall(Wall(P3, P6));
+    sub.AddWall(Wall(P2, P3));
+    sub.AddWall(Wall(P5, P6));
+
+    
+    Line exit(P6, P4);
+    std::vector<Line*> door; // door overlaps with the wall
+    door.push_back(&exit);
+    
+    sub.SetClosed(1);
+    if (sub.ConvertLineToPoly(door) == true) {
+        std::vector<Point> poly = sub.GetPolygon();
+        for (auto it:poly)
+            BOOST_CHECK_MESSAGE(poly.size() == 6, "x = " << it.GetX() << ", y = " << it.GetY());
+            // needed result:: overlapping wall with exit to be split
+    }
+    else
+        BOOST_CHECK(false);
+    
+    BOOST_MESSAGE("Leaving overlap wall test");
+    
+}
 BOOST_AUTO_TEST_SUITE_END()
