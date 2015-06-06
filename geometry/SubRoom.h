@@ -259,7 +259,7 @@ public:
      /**
       * Add a wall to the subroom
       */
-     void AddWall(const Wall& w);
+     bool AddWall(const Wall& w);
 
      /**
       * Adds an obstacle to the subroom.

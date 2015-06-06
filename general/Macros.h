@@ -49,6 +49,7 @@
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
+//#define _USE_PROTOCOL_BUFFER 1
 
 
 
@@ -88,7 +89,7 @@
 #define FINAL_DEST_OUT -1
 
 // Linked cells
-#define LIST_EMPTY      -1
+#define LIST_EMPTY  -1
 
 
 enum RoomState {
