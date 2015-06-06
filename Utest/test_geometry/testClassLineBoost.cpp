@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(LINE_OPERATOR_TEST)
 
 BOOST_AUTO_TEST_CASE(LINE_LENGTH_TEST)
 {
-     BOOST_MESSAGE("starting line length test");
+     BOOST_MESSAGE("starting line length and length square test");
      Point P1;
      const double PI = 3.14159265358979323846;
      for (int i = -5; i < 5; ++i)
@@ -146,6 +146,7 @@ BOOST_AUTO_TEST_CASE(LINE_LENGTH_TEST)
           double normSq = P2.NormSquare();
           BOOST_CHECK(L1.LengthSquare() == normSq);      
      }
+     BOOST_MESSAGE("Leaving line length and length square test");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
