@@ -37,6 +37,7 @@
 
 #include <thread>
 #include <functional>
+#include <iomanip>
 
 int main(int argc, char **argv)
 {
@@ -107,6 +108,7 @@ int main(int argc, char **argv)
           double execTime = difftime(endtime, starttime);
 
           std::stringstream summary;
+          summary << std::setprecision(2)<<std::fixed;
           summary<<"\nExec Time [s]     : "<< execTime<<std::endl;
           summary<<"Evac Time [s]     : "<< evacTime<<std::endl;
           summary<<"Realtime Factor   : "<< evacTime / execTime<<" X " <<std::endl;
