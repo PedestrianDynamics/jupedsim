@@ -23,7 +23,7 @@
 
 using namespace std;
 
-bool AgentsSourcesManager::_isCompleted=false;
+bool AgentsSourcesManager::_isCompleted=true;
 
 AgentsSourcesManager::AgentsSourcesManager()
 {
@@ -41,7 +41,6 @@ void AgentsSourcesManager::operator()()
 void AgentsSourcesManager::Run()
 {
      Log->Write("INFO:\tStarting agent manager thread");
-
 
      //Generate all agents required for the complete simulation
      //It might be more efficient to generate at each frequency step
@@ -62,25 +61,17 @@ void AgentsSourcesManager::Run()
      {
           int current_time = Pedestrian::GetGlobalTime();
 
-          //first step
-          //if(current_time==0){
-          //finished=ProcessAllSources();
-          //     ProcessAllSources();
-          //     //cout<<"here:"<<endl; exit(0);
-          //}
           if ((current_time != _lastUpdateTime)
                     && ((current_time % updateFrequency) == 0))
           {
-               //cout<<"TIME:"<<current_time<<endl;
                finished=ProcessAllSources();
                _lastUpdateTime = current_time;
-               //cout << "source size: " << _sources.size() << endl;
           }
           //wait some time
           //std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
-     _isCompleted = true;//exit(0);
+     _isCompleted = true;
 }
 
 bool AgentsSourcesManager::ProcessAllSources() const
@@ -442,6 +433,7 @@ void AgentsSourcesManager::GenerateAgents()
 void AgentsSourcesManager::AddSource(std::shared_ptr<AgentsSource> src)
 {
      _sources.push_back(src);
+     _isCompleted=false;//at least one source was provided
 }
 
 const std::vector<std::shared_ptr<AgentsSource> >& AgentsSourcesManager::GetSources() const

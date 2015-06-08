@@ -158,7 +158,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      // first the rooms
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
-     rooms_to_plot.push_back("U9");
+     //rooms_to_plot.push_back("U9");
 
      for (const auto& it:building->GetAllRooms())
      {

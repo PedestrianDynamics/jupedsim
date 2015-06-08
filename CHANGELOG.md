@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - Visiblity in 3D
-- 
+- Numerous geometrical operations
 
 ### Fixed
 - 
