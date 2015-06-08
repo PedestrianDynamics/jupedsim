@@ -43,7 +43,7 @@ message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 message( STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
 message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
-
+message( STATUS "PROJECT_SOURCE_DIR points to " ${PROJECT_SOURCE_DIR})
 message (STATUS "MODULE_PATH: " ${CMAKE_MODULE_PATH})
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSVIS_MAJOR_VERSION 0)
@@ -57,12 +57,13 @@ message( STATUS "JPSVIS_VERSION: " ${JPSVIS_VERSION} )
 # (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
 INCLUDE_DIRECTORIES( ${CMAKE_BINARY_DIR} )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # these files compile need Cocoa (evtl. Mac specific)
-SET(MAC_FIX_SRC src/fix/osx_thread_fix.mm)
-SET(MAC_FIX_HDR src/fix/osx_thread_fix.h)
-
+SET(MAC_FIX_SRC src/fix/osx_thread_fix.mm) #.mm
+SET(MAC_FIX_HDR src/fix/osx_thread_fix.h) #.h
 set( SAMPLE_SRCS
+  # src/fix/osx_thread_fix.mm
   src/geometry/Building.cpp 
   src/geometry/Crossing.cpp 
   src/geometry/Goal.cpp
@@ -101,6 +102,7 @@ set( SAMPLE_SRCS
   src/geometry/FacilityGeometry.cpp
   src/geometry/LinePlotter.cpp
   src/geometry/PointPlotter.cpp
+  src/geometry/GeometryFactory.cpp
   src/network/TraVisToServer.cpp
   src/MainWindow.cpp
   src/TrailPlotter.cpp
@@ -108,6 +110,7 @@ set( SAMPLE_SRCS
   )  
 # all header files that should be treated with moc
 set( SAMPLE_HDR
+  # src/fix/osx_thread_fix.h
   src/geometry/Building.h
   src/geometry/Crossing.h
   src/geometry/Goal.h
@@ -121,6 +124,7 @@ set( SAMPLE_HDR
   src/geometry/Transition.h
   src/geometry/Wall.h
   src/geometry/JPoint.h
+  src/geometry/GeometryFactory.h
   src/tinyxml/tinystr.h
   src/tinyxml/tinyxml.h
   src/general/Macros.h
@@ -149,11 +153,12 @@ set( SAMPLE_HDR
   src/network/TraVisToServer.h
   src/MainWindow.h
   src/TrailPlotter.h
-  )
-IF(APPLE)
-  SET(SAMPLE_SRCS "${SAMPLE_SRCS} ${MAC_FIX_SRC}")
-  SET(SAMPLE_HDR "${SAMPLE_HDR} ${MAC_FIX_HDR}")
+  ) 
+ IF(APPLE)
+  SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${MAC_FIX_SRC})
+  SET(SAMPLE_HDR ${SAMPLE_HDR} ${MAC_FIX_HDR})
 ENDIF(APPLE)
+
 
 
 # *.ui files
@@ -166,9 +171,6 @@ set( SAMPLE_UIS
 set( SAMPLE_RCS
   forms/icons.qrc
   )
-
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 #set(VTK_USE_HYBRID ON CACHE BOOL "doc" FORCE)
 find_package(VTK REQUIRED)
@@ -251,8 +253,6 @@ IF(APPLE)
   SET(SAMPLE_SRCS ${SAMPLE_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.icns)
 ENDIF(APPLE)
 
-
-
 # here we instruct CMake to build JPSvis executable from all of the source files
 ADD_EXECUTABLE( JPSvis  MACOSX_BUNDLE WIN32
   ${SAMPLE_SRCS}
@@ -264,6 +264,10 @@ ADD_EXECUTABLE( JPSvis  MACOSX_BUNDLE WIN32
   )
 
 
+
+
+SET_TARGET_PROPERTIES(JPSvis PROPERTIES LINKER_LANGUAGE CXX)
+set_property(TARGET JPSvis PROPERTY CXX_STANDARD 11)
 
 # last thing we have to do is to tell CMake what libraries our executable needs,
 # luckily FIND_PACKAGE prepared QT_LIBRARIES variable for us:
@@ -309,9 +313,7 @@ else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 message(STATUS "Checking for C++11 compiler - available")
-
 #---------------------
-
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   message(STATUS "Using Clang " ${CMAKE_CXX_COMPILER_VERSION})
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
