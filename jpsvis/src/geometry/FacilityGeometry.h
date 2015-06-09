@@ -133,9 +133,11 @@ public:
     void showWalls(bool status);
     void showNavLines(bool status);
     void showFloor(bool status);
+    void showObstacles(bool status);
     void showGeometryLabels(int status);
 
     void setVisibility(bool status);
+    bool getVisibility() const;
 
 
 private:
@@ -179,6 +181,7 @@ private:
     vtkActor2DCollection* captions;
 
     std::string _description;
+    bool _visibility=true;
 };
 
 #endif /* FACILITYGEOMETRY_H_ */

@@ -28,10 +28,10 @@ void GeometryFactory::Set2D(bool status)
     {
         for(auto&& subroom:room.second)
         {
-            subroom.second->set2D(status);
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
+                subroom.second->set2D(status);
         }
     }
-    //Set3D(!status);
 }
 
 void GeometryFactory::Set3D(bool status)
@@ -40,10 +40,10 @@ void GeometryFactory::Set3D(bool status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->set3D(status);
         }
     }
-    //Set2D(!status);
 }
 
 void GeometryFactory::Clear()
@@ -60,6 +60,7 @@ void GeometryFactory::ChangeWallsColor(double* color)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->changeWallsColor(color);
         }
     }
@@ -71,6 +72,7 @@ void GeometryFactory::ChangeExitsColor(double* color)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->changeExitsColor(color);
         }
     }
@@ -82,6 +84,7 @@ void GeometryFactory::ChangeNavLinesColor(double* color)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->changeNavLinesColor(color);
         }
     }
@@ -93,7 +96,8 @@ void GeometryFactory::ChangeFloorColor(double* color)
     {
         for(auto&& subroom:room.second)
         {
-            subroom.second->changeFloorColor(color);
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
+                subroom.second->changeFloorColor(color);
         }
     }
 }
@@ -104,6 +108,7 @@ void GeometryFactory::ChangeObstaclesColor(double* color)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->changeObstaclesColor(color);
         }
     }
@@ -115,6 +120,7 @@ void GeometryFactory::ShowDoors(bool status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->showDoors(status);
         }
     }
@@ -126,6 +132,7 @@ void GeometryFactory::ShowStairs(bool status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->showStairs(status);
         }
     }
@@ -137,6 +144,7 @@ void GeometryFactory::ShowWalls(bool status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->showWalls(status);
         }
     }
@@ -148,6 +156,7 @@ void GeometryFactory::ShowNavLines(bool status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->showNavLines(status);
         }
     }
@@ -159,7 +168,19 @@ void GeometryFactory::ShowFloor(bool status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->showFloor(status);
+        }
+    }
+}
+void GeometryFactory::ShowObstacles(bool status)
+{
+    for (auto&& room: _geometryFactory)
+    {
+        for(auto&& subroom:room.second)
+        {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
+            subroom.second->showObstacles(status);
         }
     }
 }
@@ -170,6 +191,7 @@ void GeometryFactory::ShowGeometryLabels(int status)
     {
         for(auto&& subroom:room.second)
         {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
             subroom.second->showGeometryLabels(status);
         }
     }
@@ -228,7 +250,6 @@ const std::map<int , std::map<int, std::shared_ptr<FacilityGeometry> > > & Geome
 
 void GeometryFactory::AddElement(int room, int subroom, std::shared_ptr<FacilityGeometry> geo)
 {
-    //_geometryFactory.insert({room,{subroom,geo}});
     _geometryFactory[room][subroom]=geo;
 }
 

@@ -161,8 +161,13 @@ void FacilityGeometry::CreateActors()
      {
          assembly3D->SetVisibility(status);
      }
+     _visibility=status;
  }
 
+     bool FacilityGeometry::getVisibility() const
+     {
+         return _visibility;
+     }
 /***
  * This is the main build method and should be called by all functions
  * drawing a wall or a door. Important
@@ -812,6 +817,10 @@ void FacilityGeometry::showFloor(bool status)
     floorActor->SetVisibility(status);
 }
 
+void FacilityGeometry::showObstacles(bool status)
+{
+    obstaclesActor->SetVisibility(status);
+}
 void FacilityGeometry::addObjectLabel(double center[3], double orientation[3], std::string caption, double color)
 {
     addNewElementText(center, orientation, caption, color);
