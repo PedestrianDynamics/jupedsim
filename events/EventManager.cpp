@@ -143,10 +143,9 @@ bool EventManager::ReadEventsXml()
      _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_time"), 1);
      _updateRadius = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
 
-     string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
-     if(color=="true")
-          Pedestrian::SetColorMode(BY_KNOWLEDGE);
-
+     //string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
+     //if(color=="true")
+     //     Pedestrian::SetColorMode(BY_KNOWLEDGE);
      //Pedestrian::SetColorMode(BY_SPOTLIGHT);
 
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;

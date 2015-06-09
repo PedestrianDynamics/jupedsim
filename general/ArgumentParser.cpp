@@ -340,6 +340,25 @@ bool ArgumentParser::ParseIniFile(string inifile)
           if (format == "vtk")
                pFormat = FORMAT_VTK;
 
+          //color mode
+          string color_mode =
+                              xMainNode->FirstChildElement("trajectories")->Attribute(
+                                        "color_mode") ?
+                                                  xMainNode->FirstChildElement("trajectories")->Attribute(
+                                                            "color_mode") :
+                                                           "velocity";
+
+          if(color_mode=="velocity") Pedestrian::SetColorMode(AgentColorMode::BY_VELOCITY);
+          if(color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+          if(color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
+          if(color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
+          if(color_mode=="router") Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
+          if(color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
+          if(color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
+
+
+
+
           //a file descriptor was given
           if (xTrajectories->FirstChild("file"))
           {

@@ -121,7 +121,7 @@ void Pedestrian::SetID(int i)
      _id = i;
      if(i<=0)
      {
-     cout<<"invalid ID"<<i<<endl;exit(0);
+          cout<<"invalid ID"<<i<<endl;exit(0);
      }
 }
 
@@ -858,39 +858,58 @@ int Pedestrian::GetAgentsCreated()
 int Pedestrian::GetColor()
 {
      //default color is by velocity
-     int color = -1;
-     double v0 = GetV0Norm();
-     if (v0 != 0.0) {
-          double v = GetV().Norm();
-          color = (int) (v / v0 * 255);
-     }
+     string key;
 
      switch (_colorMode)
      {
      case BY_SPOTLIGHT:
+     {
           if (_spotlight==false)
-               color=-1;
+               return -1;
           break;
+     }
 
      case BY_VELOCITY:
-          break;
-
-          // Hash the knowledge represented as String
-     case BY_KNOWLEDGE:
      {
-          string key=GetKnowledgeAsString();
-          std::hash<std::string> hash_fn;
-          color = hash_fn(key) % 255;
-          //cout<<"color: "<<hash_fn(key)<<endl;
-          //cout<<" key : "<<key<<endl;
+          int color = -1;
+          double v0 = GetV0Norm();
+          if (v0 != 0.0) {
+               double v = GetV().Norm();
+               color = (int) (v / v0 * 255);
+          }
+          return color;
      }
      break;
 
+     // Hash the knowledge represented as String
+     case BY_KNOWLEDGE:
+     {
+          key=GetKnowledgeAsString();
+     }
+     break;
+
+     case BY_ROUTER:
      case BY_ROUTE:
      {
-          string key = std::to_string(_routingStrategy);
-          std::hash<std::string> hash_fn;
-          color = hash_fn(key) % 255;
+          key = std::to_string(_routingStrategy);
+     }
+     break;
+
+     case BY_GROUP:
+     {
+          key = std::to_string(_group);
+     }
+     break;
+
+     case BY_FINAL_GOAL:
+     {
+          key=std::to_string(_desiredFinalDestination);
+     }
+     break;
+
+     case BY_INTERMEDIATE_GOAL:
+     {
+          key=std::to_string(_exitIndex);
      }
      break;
 
@@ -898,7 +917,8 @@ int Pedestrian::GetColor()
           break;
      }
 
-     return color;
+     std::hash<std::string> hash_fn;
+     return  hash_fn(key) % 255;
 }
 
 

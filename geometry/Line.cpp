@@ -206,53 +206,14 @@ Point Line::ShortestPoint(const Point &p) const {
     return f;
 }
 
-/* Prüft, ob Punkt p im Liniensegment enthalten ist
- * Verfahren wie bei Line::ShortestPoint(), d. h,
- * lambda berechnen und prüfen ob zwischen 0 und 1
- * */
-//bool Line::IsInLine(const Point& p) const {
-//      double ax, ay, bx, by, px, py;
-//      const Point& a = GetPoint1();
-//      const Point& b = GetPoint2();
-//      double lambda;
-//      ax = a.GetX();
-//      ay = a.GetY();
-//      bx = b.GetX();
-//      by = b.GetY();
-//      px = p.GetX();
-//      py = p.GetY();
-//      if (fabs(ax - bx) > J_EPS_DIST) {
-//              lambda = (px - ax) / (bx - ax);
-//      } else if (fabs(ay - by) > J_EPS_DIST) {
-//              lambda = (py - ay) / (by - ay);
-//      } else {
-//              Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
-//              exit(0);
-//      }
-//      return (0 <= lambda) && (lambda <= 1);
-//}
-
 /*
  *  Prüft, ob Punkt p im Liniensegment enthalten ist
  * algorithm from:
  * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
  *
- * TODO: FIXME Failing with test ( 30.1379 : 124.485 )--( 41.4647 : 124.485 ) and ( 38.4046 : 104.715 )--( 33.7146 : 104.715 )
  * */
 bool Line::IsInLineSegment(const Point &p) const
 {
-/*
-     Point differenceTwoAndOne = _point2 - _point1;
-     Point differencePAndOne = p - _point1;
-
-     // cross product to check if point i colinear
-     if ((differenceTwoAndOne).CrossProduct(differencePAndOne) > J_EPS)
-          return false;
-
-     // dotproduct and distSquared to check if point is in segment and not just in line
-     double dotp = differencePAndOne.ScalarProduct(differenceTwoAndOne);
-     return !(dotp < 0 || (differenceTwoAndOne).NormSquare() < dotp);
-*/
      return fabs( (_point1-p ).Norm() + (_point2-p ).Norm() - (_point2-_point1 ).Norm() )<J_EPS;
 }
 
