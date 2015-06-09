@@ -91,7 +91,7 @@ Pedestrian::Pedestrian()
      _agentsCreated++;//increase the number of object created
 }
 
-Pedestrian::Pedestrian(const StartDistributionSubroom& agentsParameters, const Building& building)
+Pedestrian::Pedestrian(const StartDistribution& agentsParameters, const Building& building)
 :    _age(agentsParameters.GetAge()),
      _gender(agentsParameters.GetGender()),
      _height(agentsParameters.GetHeight()),
@@ -101,10 +101,11 @@ Pedestrian::Pedestrian(const StartDistributionSubroom& agentsParameters, const B
      _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
      _lastPosition(),
      _roomID(agentsParameters.GetRoomId()),
-     _subRoomID(agentsParameters.GetSubroomID())
-
+     _roomCaption(""),
+     _subRoomID(agentsParameters.GetSubroomID()),
+     _patienceTime(agentsParameters.GetPatience()),
+     _premovement(agentsParameters.GetPremovementTime())
 {
-
 
 }
 

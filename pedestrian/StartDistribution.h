@@ -114,7 +114,7 @@ public:
      AgentsParameters* GetGroupParameters();
      void SetGroupParameters(AgentsParameters* groupParameters);
      void InitPremovementTime(double mean, double stdv);
-     double GetPremovementTime();
+     double GetPremovementTime() const;
      void InitRiskTolerance(double mean, double stdv);
      double GetRiskTolerance();
 

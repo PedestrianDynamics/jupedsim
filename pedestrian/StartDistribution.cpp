@@ -323,7 +323,7 @@ void StartDistribution::InitPremovementTime(double mean, double stdv)
      _premovementTime = std::normal_distribution<double>(mean,stdv);
 }
 
-double StartDistribution::GetPremovementTime()
+double StartDistribution::GetPremovementTime() const
 {
      return _premovementTime(_generator);
 }
