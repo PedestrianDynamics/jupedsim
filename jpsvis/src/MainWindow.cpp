@@ -1849,12 +1849,15 @@ void MainWindow::slotShowHideGeometryCaptions()
 void MainWindow::slotShowGeometryStructure()
 {
     //QListView list;
-    _geoStructure.setWindowTitle("Geometry structure");
-    _geoStructure.setVisible(! _geoStructure.isVisible());
+    //_geoStructure.setVisible(! _geoStructure.isVisible());
     //_geoStructure.showColumn(0);
-    _geoStructure.show();
-    _visualisationThread->getGeometry().RefreshView();
-    _geoStructure.setModel(&_visualisationThread->getGeometry().GetModel());
+    //_geoStructure.show();
+    _geoStructure.setHidden(not ui.actionShowGeometry_Structure->isChecked());
+    if(_visualisationThread->getGeometry().RefreshView())
+    {
+        _geoStructure.setWindowTitle("Geometry structure");
+        _geoStructure.setModel(&_visualisationThread->getGeometry().GetModel());
+    }
 }
 
 void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)

@@ -153,62 +153,15 @@ void FacilityGeometry::CreateActors()
 
  void FacilityGeometry::setVisibility(bool status)
  {
-     assembly2D->SetVisibility(status);
-     assembly3D->SetVisibility(status);
+     if(SystemSettings::get2D())
+     {
+         assembly2D->SetVisibility(status);
+     }
+     else
+     {
+         assembly3D->SetVisibility(status);
+     }
  }
-
-//void FacilityGeometry::drawWall(Point *p1, Point *p2){
-//	double scale =1;
-//
-//	double *center = p1->centreCoordinatesWith(*p2);
-//	double angle =p1->angleMadeWith(*p2);
-//
-//	vtkCylinderSource* src = vtkCylinderSource::New();
-//	src->SetResolution(10);
-//	src->SetCenter(center[0],center[1],center[2]);
-//	src->SetRadius(scale*3);
-//	src->SetHeight(p1->distanceTo(*p2));
-//	vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
-//	mapper->SetInputConnection(src->GetOutputPort());
-//	vtkActor* actor = vtkActor::New();
-//	actor->SetMapper(mapper);
-//	actor->GetProperty()->SetLighting(true);
-//	actor->SetOrigin(center[0],center[1],center[2]);
-//	//actor->SetOrientation(0,0,90);
-//	//actor->RotateZ(90);
-//	actor->RotateZ(angle);
-//	actor->GetProperty()->SetColor(0.0,0.0,1.0);
-//	actor->GetProperty()->SetAmbient(0.2);
-//	actor->GetProperty()->SetDiffuse(0.8);
-//
-//	assembly->AddPart(actor);
-//
-//}
-
-//void FacilityGeometry::drawDoor(Point *p1, Point *p2){
-//	double *center = p1->centreCoordinatesWith(*p2);
-//	double angle =p1->angleMadeWith(*p2);
-//
-//	vtkCylinderSource* src = vtkCylinderSource::New();
-//	src->SetResolution(40);
-//	src->SetCenter(center[0],center[1],center[2]);
-//	src->SetRadius(4);
-//	src->SetHeight(p1->distanceTo(*p2));
-//	vtkPolyDataMapper* mapper = vtkPolyDataMapper::New();
-//	mapper->SetInputConnection(src->GetOutputPort());
-//	vtkActor* actor = vtkActor::New();
-//	actor->SetMapper(mapper);
-//	actor->GetProperty()->SetLighting(true);
-//	actor->SetOrigin(center[0],center[1],center[2]);
-//	//actor->SetOrientation(0,0,90);
-//	//actor->RotateZ(90);
-//	actor->RotateZ(angle);
-//	//actor->GetProperty()->SetColor(0.0,0.1,0.0);
-//	actor->GetProperty()->SetColor(1.0,0.41,0.72);
-//	//actor->GetProperty()->SetColor(0.0,0.0,0.0);
-//	assembly->AddPart(actor);
-//
-//}
 
 /***
  * This is the main build method and should be called by all functions
@@ -907,8 +860,8 @@ void FacilityGeometry::showGeometryLabels(int status)
     vtkProp3DCollection* col=assemblyCaptions->GetParts();
     assemblyCaptions->GetActors(col);
 
-    int count = col->GetNumberOfItems();
-    for (int i=0; i<count; i++) {
+    for (int i=0; i<col->GetNumberOfItems(); i++)
+    {
         ((vtkActor*)col->GetItemAsObject(i))->SetVisibility(status);
     }
     assemblyCaptions->Modified();

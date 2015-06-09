@@ -31,11 +31,12 @@ public:
     void ShowNavLines(bool status);
     void ShowFloor(bool status);
     void ShowGeometryLabels(int status);
-    void RefreshView();
+    bool RefreshView();
     void Clear();
 
     const std::map<int , std::map<int, std::shared_ptr<FacilityGeometry> > > & GetGeometry() const;
     void AddElement(int room, int subroom, std::shared_ptr<FacilityGeometry> geo);
+    std::shared_ptr<FacilityGeometry> GetElement(int room, int subroom);
     void UpdateVisibility(int room,int subroom,bool status);
     QStandardItemModel& GetModel();
 

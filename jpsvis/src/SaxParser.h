@@ -100,12 +100,12 @@ private:
     bool _parsingWalls;
     bool _parsingCrossings;
 
-    //wall and door parameters
+    //wall and door and hlines parameters
     double _thickness;
     double _height;
     double _color;
 
-    //actual caption of door/wall
+    //actual caption of door/wall/hlines
     QString _caption;
 
     //header dependant variables

@@ -327,6 +327,7 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         _height=250;
         _color=255;
         _caption="";
+        QString room_id, subroom_id;
 
         for(int i=0; i<at.length(); i++) {
             if(at.localName(i)=="thickness") {
@@ -337,8 +338,13 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
                 _color=at.value(i).toDouble();
             } else if(at.localName(i)=="caption") {
                 _caption=at.value(i);
+            }else if(at.localName(i)=="room_id") {
+                room_id=at.value(i);
+            }else if(at.localName(i)=="subroom_id") {
+                subroom_id=at.value(i);
             }
         }
+        _caption=room_id+":"+subroom_id+":"+_caption;
 
     }
     else if (qName == "timeFirstFrame") {
@@ -526,10 +532,30 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
             }
         clearPoints();
     } else if (qName == "hline") {
-        if(_currentPointsList.size()>1) //hack
-            for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
-                _geometry->addNavLine(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
+        if(_currentPointsList.size()>1)
+        {
+            for(unsigned int i=0; i<_currentPointsList.size()-1; i++)
+            {
+                int room_id=-1;
+                int subroom_id=-1;
+                QStringList lst = _caption.split(":");
+                if(lst.length()>2)
+                {
+                    room_id=lst[0].toInt();
+                    subroom_id=lst[1].toInt();
+                    _caption=lst[2];
+                }
+                auto&& geo=_geoFactory.GetElement(room_id,subroom_id);
+                if(geo!=nullptr)
+                {
+                    geo->addNavLine(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
+                }
+                else
+                {
+                    _geometry->addNavLine(_currentPointsList[i],_currentPointsList[i+1],_caption.toStdString());
+                }
             }
+        }
         clearPoints();
     } else if (qName == "step") {//FIXME
         for(unsigned int i=0; i<_currentPointsList.size()-1; i++) {
@@ -715,35 +741,35 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
             geometry->addObstacles(obstPolygonPolyData);
 
             // add the crossings
-                for(auto&& cr: itr_subroom.second->GetAllCrossings())
-                {
-                    Point p1 = cr->GetPoint1();
-                    Point p2 = cr->GetPoint2();
-                    double z1= cr->GetSubRoom1()->GetElevation(p1);
-                    double z2= cr->GetSubRoom1()->GetElevation(p2);
-                    geometry->addNavLine(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+            for(auto&& cr: itr_subroom.second->GetAllCrossings())
+            {
+                Point p1 = cr->GetPoint1();
+                Point p2 = cr->GetPoint2();
+                double z1= cr->GetSubRoom1()->GetElevation(p1);
+                double z2= cr->GetSubRoom1()->GetElevation(p2);
+                geometry->addNavLine(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
-                    const Point& p =cr->GetCentre();
-                    double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
-                    geometry->addObjectLabel(pos,pos,"nav_"+QString::number(cr->GetID()).toStdString(),captionsColor);
-                }
+                const Point& p =cr->GetCentre();
+                double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
+                geometry->addObjectLabel(pos,pos,"nav_"+QString::number(cr->GetID()).toStdString(),captionsColor);
+            }
 
-                // add the exits
-                for(auto&& tr: itr_subroom.second->GetAllTransitions())
-                {
-                    Point p1 = tr->GetPoint1();
-                    Point p2 = tr->GetPoint2();
-                    double z1= tr->GetSubRoom1()->GetElevation(p1);
-                    double z2= tr->GetSubRoom1()->GetElevation(p2);
-                    geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
+            // add the exits
+            for(auto&& tr: itr_subroom.second->GetAllTransitions())
+            {
+                Point p1 = tr->GetPoint1();
+                Point p2 = tr->GetPoint2();
+                double z1= tr->GetSubRoom1()->GetElevation(p1);
+                double z2= tr->GetSubRoom1()->GetElevation(p2);
+                geometry->addDoor(p1._x*FAKTOR, p1._y*FAKTOR, z1*FAKTOR, p2._x*FAKTOR, p2._y*FAKTOR,z2*FAKTOR);
 
-                    const Point& p =tr->GetCentre();
-                    double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
-                    geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
-                }
+                const Point& p =tr->GetCentre();
+                double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
+                geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
+            }
 
-                geoFac.AddElement(itr_subroom.second->GetRoomID(),itr_subroom.second->GetSubRoomID(),geometry);
-                //TODO: parsing the Hlines
+            geoFac.AddElement(itr_subroom.second->GetRoomID(),itr_subroom.second->GetSubRoomID(),geometry);
+            //TODO: parsing the Hlines
         }
     }
 
