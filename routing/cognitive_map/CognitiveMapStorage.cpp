@@ -130,11 +130,17 @@ void CognitiveMapStorage::ParseLandmarks()
         landmark->SetCaption(caption);
         landmark->SetRoom(_building->GetSubRoomByUID(std::stoi(roomId)));
 
+        //processing the rooms node
+        TiXmlNode*  xAssociationsNode = xLandmark->FirstChild("associations");
+        if (!xAssociationsNode) {
+             Log->Write("Landmark with no association!");
+             continue;
+        }
 
-        for(TiXmlElement* xAsso = xAsso->FirstChildElement("association"); xAsso;
+        for(TiXmlElement* xAsso = xAssociationsNode->FirstChildElement("association"); xAsso;
            xAsso = xAsso->NextSiblingElement("association"))
         {
-
+            Log->Write("Tag");
             std::string asso_id = xmltoa(xAsso->Attribute("id"), "-1");
             std::string asso_caption = xmltoa(xAsso->Attribute("caption"), "0");
             //std::string asso_type = xmltoa(xAsso->Attribute("type"),"-1");

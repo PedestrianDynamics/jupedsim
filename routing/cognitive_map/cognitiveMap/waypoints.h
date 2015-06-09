@@ -6,11 +6,6 @@
 #include "../../../geometry/Building.h"
 #include "../../../pedestrian/Ellipse.h"
 
-//
-
-class Association;
-using ptrAssociation = std::shared_ptr<Association>;
-using Associations = std::vector<ptrAssociation>;
 
 using ptrRoom = SubRoom*;
 
@@ -37,8 +32,7 @@ public:
     ptrRoom GetRoom() const;
     const std::string& GetCaption() const;
     const double &GetPriority() const;
-    /// Associations
-    void AddAssociation(ptrAssociation asso);
+
 
 private:
     int _id;
@@ -48,7 +42,6 @@ private:
     double _b;
     ptrRoom _room;
     double _priority;
-    Associations _assoContainer;
 };
 
 #endif // WAYPOINTS_H

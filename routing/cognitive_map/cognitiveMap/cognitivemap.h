@@ -45,6 +45,9 @@ public:
     CognitiveMap(ptrBuilding b, ptrPed ped);
     ~CognitiveMap();
     void AddLandmarks(std::vector<ptrLandmark> landmarks);
+    std::vector<ptrLandmark> LookForLandmarks();
+    Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const;
+    void AddWaypoints(Waypoints waypoints);
     void AssessDoors();
     bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;

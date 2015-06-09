@@ -33,7 +33,49 @@ void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
             continue;
         }
         else
+        {
             _landmarks.push_back(landmark);
+
+        }
+    }
+}
+
+std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
+{
+    SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
+
+    std::vector<ptrLandmark> landmarks_found;
+
+    for (ptrLandmark landmark:_landmarks)
+    {
+        if (landmark->GetRoom()==sub_room)
+        {
+           landmarks_found.push_back(landmark);
+        }
+    }
+
+    return landmarks_found;
+}
+
+Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const
+{
+    Waypoints waypoints;
+    for (ptrLandmark landmark:landmarks)
+    {
+        Associations associations = landmark->GetAssociations();
+        for (ptrAssociation association:associations)
+        {
+            waypoints.push_back(association->GetAssociation(landmark));
+        }
+    }
+    return waypoints;
+}
+
+void CognitiveMap::AddWaypoints(Waypoints waypoints)
+{
+    for (ptrWaypoint waypoint:waypoints)
+    {
+        _waypContainer.push_back(waypoint);
     }
 }
 
@@ -42,13 +84,16 @@ void CognitiveMap::AssessDoors()
     SubRoom * sub_room = _building->GetRoom(_ped->GetRoomID())->GetSubRoom(_ped->GetSubRoomID());
     GraphVertex * vertex = (*_network->GetNavigationGraph())[sub_room];
     const GraphVertex::EdgesContainer edges = *(vertex->GetAllEdges());
+
     for (GraphEdge* edge:edges)
     {
+
         for (ptrWaypoint waypoint:_waypContainer)
         {
             if (IsAroundWaypoint(*waypoint,edge))
             {
                 edge->SetFactor(1/waypoint->GetPriority(),"SpatialKnowlegde");
+                Log->Write("INFO: Door assessed!");
             }
         }
 

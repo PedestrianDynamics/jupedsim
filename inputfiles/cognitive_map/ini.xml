@@ -6,11 +6,11 @@
   <seed>12542</seed>
   <max_sim_time>900</max_sim_time>
   <!-- geometry file -->
-  <geometry>landmarktest3.xml</geometry>
+  <geometry>landmarktest4.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <file location="trajectories.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
+    <!--file location="trajectories.xml" /-->
+    <socket hostname="127.0.0.1" port="8989"/>
   </trajectories>
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->
@@ -102,7 +102,7 @@
 	  <!--sensor sensor_id="2" description="Room2Corridor"/-->
         <!--sensor sensor_id="1" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/-->
       </sensors>
-      <cognitive_map status="empty" />
+      <cognitive_map status="empty"/>
       <!--parameters>
         <navigation_lines file="routing.xml" />
         </parameters -->

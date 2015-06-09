@@ -44,21 +44,21 @@
 CognitiveMapRouter::CognitiveMapRouter()
 {
     building=nullptr;
-    cm_storage=nullptr;
-    sensor_manager=nullptr;
+//    cm_storage=nullptr;
+//    sensor_manager=nullptr;
 
 }
 
 CognitiveMapRouter::CognitiveMapRouter(int id, RoutingStrategy s) : Router(id, s)
 {
     building=nullptr;
-    cm_storage=nullptr;
-    sensor_manager=nullptr;
+//    cm_storage=nullptr;
+//    sensor_manager=nullptr;
 }
 
 CognitiveMapRouter::~CognitiveMapRouter()
 {
-     delete cm_storage;
+//     delete cm_storage;
 
 }
 
@@ -107,6 +107,11 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             sensor_manager->execute(p, SensorManager::NO_WAY);
 
             //check if this was enough for finding a global path to the exit
+            ///Cognitive Map /Associations/ Waypoints/ landmarks
+            (*cm_storage)[p]->AddWaypoints(
+                        (*cm_storage)[p]->TriggerAssoziations(
+                            (*cm_storage)[p]->LookForLandmarks()));
+            (*cm_storage)[p]->AssessDoors();
             destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
 
             if(destination == nullptr) {
@@ -136,13 +141,14 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
 bool CognitiveMapRouter::Init(Building * b)
 {
-     Log->Write("INFO:\tInit the Cognitive Map  Router Engine");
+     Log->Write("INFO:\tInit the Cognitive Map Router Engine");
      building = b;
 
      //Init Cognitive Map Storage, second parameter: decides whether cognitive Map is empty or complete
      cm_storage = new CognitiveMapStorage(building,getOptions().at("CognitiveMap")[0]);
-     cm_storage->ParseLandmarks();
      Log->Write("INFO:\tInitialized CognitiveMapStorage");
+     cm_storage->ParseLandmarks();
+
      //Init Sensor Manager
      //sensor_manager = SensorManager::InitWithAllSensors(b, cm_storage);
      sensor_manager = SensorManager::InitWithCertainSensors(b, cm_storage, getOptions());

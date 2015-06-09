@@ -82,11 +82,4 @@ const double &Waypoint::GetPriority() const
     return _priority;
 }
 
-void Waypoint::AddAssociation(ptrAssociation asso)
-{
-    if (std::find(_assoContainer.begin(), _assoContainer.end(), asso)!=_assoContainer.end())
-        return;
-    else
-        _assoContainer.push_back(asso);
-}
 
