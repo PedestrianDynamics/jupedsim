@@ -539,7 +539,7 @@ border-color: rgb(255, 255, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>450</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -591,6 +591,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionFloor_Color"/>
     <addaction name="actionWalls_Color"/>
     <addaction name="actionExits_Color"/>
+    <addaction name="actionObstacles_Color"/>
     <addaction name="actionNavigation_Lines_Color"/>
     <addaction name="separator"/>
     <addaction name="actionPedestrian_Shape"/>
@@ -628,6 +629,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionShow_Wall_Caption"/>
     <addaction name="actionShow_Room_Caption"/>
     <addaction name="actionShow_Door_Caption"/>
+    <addaction name="actionShow_Obstacles"/>
     <addaction name="actionShow_Navigation_Lines"/>
     <addaction name="actionShow_Geometry_Captions"/>
     <addaction name="actionFirst_Group"/>
@@ -1317,6 +1319,22 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionShow_Obstacles">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Obstacles</string>
+   </property>
+  </action>
+  <action name="actionObstacles_Color">
+   <property name="text">
+    <string>Obstacles Color</string>
    </property>
   </action>
  </widget>
@@ -2172,6 +2190,38 @@ border-color: rgb(255, 255, 255);</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShow_Obstacles</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotShowHideObstacles()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionObstacles_Color</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotChangeObstacleColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotHelpAbout()</slot>
@@ -2236,5 +2286,7 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotShowHideFloor()</slot>
   <slot>slotChangeFloorColor()</slot>
   <slot>slotShowGeometryStructure()</slot>
+  <slot>slotChangeObstacleColor()</slot>
+  <slot>slotShowHideObstacles()</slot>
  </slots>
 </ui>

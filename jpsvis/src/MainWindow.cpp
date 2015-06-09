@@ -1515,6 +1515,23 @@ void MainWindow::slotChangeFloorColor()
     delete colorDialog;
 }
 
+void MainWindow::slotChangeObstacleColor()
+{
+    QColorDialog* colorDialog = new QColorDialog(this);
+    colorDialog->setToolTip("Choose a new color for the obstacles");
+    QColor col=colorDialog->getColor(Qt::white,this,"Select new obstalce color");
+
+    //the user may have cancelled the process
+    if(col.isValid()==false) return;
+
+    _visualisationThread->setObstacleColor(col);
+
+    QSettings settings;
+    settings.setValue("options/obstacle", col);
+
+    delete colorDialog;
+}
+
 void MainWindow::slotSetCameraPerspectiveToTop()
 {
     int p= 1; //TOP
@@ -1680,6 +1697,13 @@ void MainWindow::loadAllSettings()
         slotShowHideNavLines();
         qDebug()<<"show Navlines: "<<checked;
     }
+    if (settings.contains("view/showObstacles"))
+    {
+        bool checked = settings.value("view/showObstacles").toBool();
+        ui.actionShow_Obstacles->setChecked(checked);
+        slotShowHideObstacles();
+        qDebug()<<"show showObstacles: "<<checked;
+    }
     if (settings.contains("view/showOnScreensInfos"))
     {
         bool checked = settings.value("view/showOnScreensInfos").toBool();
@@ -1730,6 +1754,12 @@ void MainWindow::loadAllSettings()
         SystemSettings::setNavLinesColor(color);
         qDebug()<<"Navlines color: "<<color;
     }
+    if (settings.contains("options/obstaclesColor"))
+    {
+        QColor color = settings.value("options/obstaclesColor").value<QColor>();
+        SystemSettings::setObstacleColor(color);
+        qDebug()<<"Obstacles color: "<<color;
+    }
 
     extern_force_system_update=true;
 }
@@ -1752,6 +1782,7 @@ void MainWindow::saveAllSettings()
     settings.setValue("view/showGeoCaptions", ui.actionShow_Geometry_Captions->isChecked());
     settings.setValue("view/showNavLines", ui.actionShow_Navigation_Lines->isChecked());
     settings.setValue("view/showOnScreensInfos", ui.actionShow_Onscreen_Infos->isChecked());
+     settings.setValue("view/showObstacles", ui.actionShow_Obstacles->isChecked());
 
     //options: the color settings are saved in the methods where they are used.
     settings.setValue("options/listeningPort", SystemSettings::getListeningPort());
@@ -1845,7 +1876,12 @@ void MainWindow::slotShowHideGeometryCaptions()
     //SystemSettings::setShowCaptions(value);
     //SystemSettings::setOnScreenInfos(value);
 }
-
+void MainWindow::slotShowHideObstacles()
+{
+    bool value=ui.actionShow_Obstacles->isChecked();
+    _visualisationThread->showObstacle(value);
+    SystemSettings::setShowObstacles(value);
+}
 void MainWindow::slotShowGeometryStructure()
 {
     //QListView list;

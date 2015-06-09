@@ -30,6 +30,7 @@ public:
     void ShowWalls(bool status);
     void ShowNavLines(bool status);
     void ShowFloor(bool status);
+    void ShowObstacles(bool status);
     void ShowGeometryLabels(int status);
     bool RefreshView();
     void Clear();

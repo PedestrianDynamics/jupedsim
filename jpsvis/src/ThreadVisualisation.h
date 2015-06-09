@@ -122,6 +122,9 @@ public:
     /// change the floor color
     void setFloorColor(const QColor &color);
 
+    /// change the obstacle color
+    void setObstacleColor(const QColor &color);
+
     /// change the exits color.
     void setExitsColor(const QColor &color);
 
@@ -139,6 +142,10 @@ public:
 
     /// show/ hide the floor
     void showFloor(bool status);
+
+    /// show/ hide the obstacles
+    void showObstacle(bool status);
+
 
     /// show / hide stairs
     ///not implemented

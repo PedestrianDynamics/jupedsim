@@ -83,6 +83,10 @@ public:
     void static setShowWalls(bool status);
     bool static getShowWalls();
 
+    //set/get the obstacles visibility
+    void static setShowObstacles(bool status);
+    bool static getShowObstacles();
+
     // set/get the  navigation lines visibility
     void static setShowNavLines(bool status);
     bool static getShowNavLines();
@@ -111,10 +115,12 @@ public:
     static const QColor& getNavLinesColor();
     void static setNavLinesColor(const QColor &col);
 
+    static const QColor& getObstacleColor();
+    void static setObstacleColor(const QColor &col);
+
     /// set/get pedestrian private sphere ellipse resolution
     int static getEllipseResolution();
     void static setEllipseResolution(int resolution);
-
 
     /// set/get the pedestrian shape
     /// 0 for default, 1 for Ellipse, 2 for pinguins
@@ -200,6 +206,7 @@ private:
     static bool showGeometry;
     static bool showGeometryCaptions;
     static bool showFloor;
+    static bool showObstacle;
     static bool showWalls;
     static bool showExits;
     static bool showNavLines;
@@ -209,6 +216,7 @@ private:
     static QColor floorColor;
     static QColor wallsColor;
     static QColor exitsColor;
+    static QColor obstacleColor;
     static QColor navLinesColor;
     static int ellipseResolution;
     static int pedestriansColor[3][3]; // 3 groups, and 3 color per groups

@@ -172,6 +172,8 @@ public Q_SLOTS:
     void slotShowHideFloor();
     /// shows/hide geometry captions
     void slotShowHideGeometryCaptions();
+    /// show hide the obstacles
+    void slotShowHideObstacles();
 
     /// show pedestrians only without trail
     void slotShowPedestrianOnly();
@@ -191,7 +193,6 @@ public Q_SLOTS:
 
     /// enable/disable the pedestrian captions
     void slotShowPedestrianCaption();
-
 
     /// update the contrast
     void slotUpdateContrastSlider(int newValue);
@@ -237,8 +238,11 @@ public Q_SLOTS:
     /// change the floor color
     void slotChangeFloorColor();
 
+    /// change the obstacle color
+    void slotChangeObstacleColor();
+
     /// show/hide onscreen information
-    /// information include Time and pedestrians left in the facility
+    /// information include Time and number pedestrians left in the facility
     void slotShowOnScreenInfos();
 
     ///show the detailed structure of the geometry

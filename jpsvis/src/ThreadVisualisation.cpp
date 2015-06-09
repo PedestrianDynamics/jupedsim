@@ -343,16 +343,17 @@ void ThreadVisualisation::run()
     setGeometryVisibility(SystemSettings::getShowGeometry());
     setOnscreenInformationVisibility(SystemSettings::getOnScreenInfos());
     showFloor(SystemSettings::getShowFloor());
-    showWalls((SystemSettings::getShowWalls()));
-    showDoors((SystemSettings::getShowExits()));
-    showNavLines((SystemSettings::getShowNavLines()));
+    showWalls(SystemSettings::getShowWalls());
+    showObstacle(SystemSettings::getShowObstacles());
+    showDoors(SystemSettings::getShowExits());
+    showNavLines(SystemSettings::getShowNavLines());
     setGeometryLabelsVisibility(SystemSettings::getShowGeometryCaptions());
     setBackgroundColor(SystemSettings::getBackgroundColor());
     setWallsColor(SystemSettings::getWallsColor());
+    setObstacleColor(SystemSettings::getObstacleColor());
     setFloorColor(SystemSettings::getFloorColor());
     setExitsColor(SystemSettings::getExitsColor());
     setNavLinesColor(SystemSettings::getNavLinesColor());
-
 
     _renderWinInteractor->Start();
 
@@ -430,6 +431,10 @@ void ThreadVisualisation::showNavLines(bool status)
 void ThreadVisualisation::showFloor(bool status)
 {
     _geometry.ShowFloor(status);
+}
+void ThreadVisualisation::showObstacle(bool status)
+{
+    _geometry.ShowObstacles(status);
 }
 
 void  ThreadVisualisation::initGlyphs2D()
@@ -791,6 +796,13 @@ void ThreadVisualisation::setFloorColor(const QColor &color)
     double  rbgColor[3];
     QcolorToDouble(color,rbgColor);
     _geometry.ChangeFloorColor(rbgColor);
+}
+
+void ThreadVisualisation::setObstacleColor(const QColor &color)
+{
+    double  rbgColor[3];
+    QcolorToDouble(color,rbgColor);
+    _geometry.ChangeObstaclesColor(rbgColor);
 }
 
 void ThreadVisualisation::setGeometryLabelsVisibility(int v)

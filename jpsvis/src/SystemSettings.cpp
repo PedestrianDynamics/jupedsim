@@ -53,12 +53,14 @@ bool SystemSettings::showWalls=true;
 bool SystemSettings::showExits=true;
 bool SystemSettings::showNavLines=true;
 bool SystemSettings::showTrajectories=false;
+bool SystemSettings::showObstacle=true;
 
 unsigned short SystemSettings::port=8989;
 //double SystemSettings::bgColor[]= {1.0,1.0,1.0};
 QColor SystemSettings::bgColor = QColor(Qt::white);
 QColor SystemSettings::floorColor = QColor(0,0,255);
 QColor SystemSettings::wallsColor = QColor(180,180,180);//180.0/255,180.0/255.0,180.0/255.0
+QColor SystemSettings::obstacleColor = QColor(180,180,180);//180.0/255,180.0/255.0,180.0/255.0
 QColor SystemSettings::exitsColor = QColor(175,175,255); //175.0/255,175.0/255.0,255.0/255.0
 QColor SystemSettings::navLinesColor = QColor(Qt::white);
 
@@ -193,6 +195,16 @@ bool SystemSettings::getShowWalls()
     return showWalls;
 }
 
+void SystemSettings::setShowObstacles(bool status)
+{
+    showObstacle=status;
+}
+
+bool SystemSettings::getShowObstacles()
+{
+    return showObstacle;
+}
+
 void SystemSettings::setShowNavLines(bool status)
 {
     showNavLines=status;
@@ -266,6 +278,16 @@ void SystemSettings::setExitsColor(const QColor &col)
 const QColor& SystemSettings::getNavLinesColor()
 {
     return navLinesColor;
+}
+
+const QColor& SystemSettings::getObstacleColor()
+{
+    return obstacleColor;
+}
+
+void SystemSettings::setObstacleColor(const QColor &col)
+{
+    obstacleColor=col;
 }
 
 void SystemSettings::setNavLinesColor(const QColor &col)
