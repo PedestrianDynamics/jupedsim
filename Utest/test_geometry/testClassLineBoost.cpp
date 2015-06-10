@@ -228,20 +228,28 @@ BOOST_AUTO_TEST_CASE(Line_hor_vert_test)
 BOOST_AUTO_TEST_CASE(Line_whichSide_test)
 {
 	BOOST_MESSAGE("starting line which side test");
-	Point Pleft(-10, 2);
-	Point Pright(10, 2);
+	Point Pleft(-20, 2);
+	Point Pright(20, 2);
 	const double Pi = 3.14159265358979323846;
 
-//	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).WichSide(Pleft) == 0);
-//	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).WichSide(Pright) == 1);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).WichSide(Pleft) == 0);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).IsLeft(Pleft) == true);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).WichSide(Pright) == 1);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).IsLeft(Pright) == false);
 
-	for (int i = 0; i <=12; ++i) {
-		Line L1(Point(0, -2), Point(cos(i*Pi/6), sin(i*Pi/6)));
-        BOOST_CHECK_MESSAGE(L1.WichSide(Pleft) == 0, L1.WichSide(Pleft) << " Pt:(-10,2), LINE: (0,-2), (" <<
+	for (int i = 0; i <= 6; ++i) {    // including horizontal lines
+		Line L1(Point(0, 0), Point(cos(i*Pi/6), sin(i*Pi/6)));
+
+		BOOST_CHECK_MESSAGE(L1.WichSide(Pleft) == 0, L1.WichSide(Pleft) << " Pt:(-20,2), LINE: (0,0), (" <<
         		cos(i*Pi/6) << "," << sin(i*Pi/6) << ")");
-        BOOST_CHECK_MESSAGE(L1.WichSide(Pright) == 1, L1.WichSide(Pright)<< " Pt:(10,2), LINE: (0,-2), (" <<
+        BOOST_CHECK(L1.IsLeft(Pleft) == true);
+
+        BOOST_CHECK_MESSAGE(L1.WichSide(Pright) == 1, L1.WichSide(Pright)<< " Pt:(20,2), LINE: (0,0), (" <<
 	            cos(i*Pi/6) << "," << sin(i*Pi/6) << ")");
+        BOOST_CHECK(L1.IsLeft(Pright) == false);
 	}
+
+	// fails for horizontal and nearly horizontal lines
 
 	BOOST_MESSAGE("starting line which side test");
 }
