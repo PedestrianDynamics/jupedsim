@@ -775,12 +775,13 @@ void MainWindow::slotRecord()
             extern_recording_enable = false;
             ui.BtRecord->setToolTip("Start Recording");
             labelCurrentAction->setText("   Playing   ");
+            labelRecording->setText(" rec: off ");
             return;
         }
     }
     extern_launch_recording = true;
     ui.BtRecord->setToolTip("Stop Recording");
-    labelRecording->setText("recording");
+    labelRecording->setText(" rec: on ");
     //labelCurrentAction->setText("   recording   ");
 
 }

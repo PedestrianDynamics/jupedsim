@@ -39,16 +39,12 @@
 #include <iostream>
 
 
+#ifdef TRAVISTO_FFMPEG
 #ifdef _WIN32
 #include <vtkAVIWriter.h>
 #include <windows.h>
-#define TRAVISTO_FFMPEG
-#endif
-
-#ifdef __linux__
-#ifdef __vtkFFMPEGWriter_h
+#else
 #include <vtkFFMPEGWriter.h>
-#define TRAVISTO_FFMPEG
 #endif
 #endif
 

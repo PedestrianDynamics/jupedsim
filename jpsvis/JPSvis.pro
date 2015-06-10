@@ -647,6 +647,18 @@ SOURCES += src/geometry/Building.cpp \
     src/TrailPlotter.cpp \
     src/geometry/GeometryFactory.cpp
 
+
+#enable video remdering *nix and osx
+exists("$$INCLUDEPATH/vtkFFMPEGWriter.h") {
+      message( "enabling direct video rendering (linux and osx)")
+      DEFINES += TRAVISTO_FFMPEG
+}
+#enable video remdering *dos
+exists("$$INCLUDEPATH/vtkAVIWriter.h") {
+      message( "enabling direct video rendering (windows)")
+      DEFINES += TRAVISTO_FFMPEG
+}
+
 FORMS += forms/settings.ui \
     forms/mainwindow.ui
 RESOURCES += forms/icons.qrc
