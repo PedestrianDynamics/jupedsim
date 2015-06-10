@@ -10,7 +10,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <max_sim_time>900</max_sim_time>
   <events_file>events.xml</events_file>
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="8" color_mode="group">
     <file location="testSchulTrajectories.xml" />
      <socket hostname="127.0.0.1" port="8989"/>
   </trajectories>
@@ -69,16 +69,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/minute -->
-      <source id="1" frequency="60" agents_max="150" router_id="1" goal_id="" route_id="" caption="source 1">
-        <polygon>
-          <vertex px="6.0" py="2.0" />
-          <vertex px="6.0" py="0.0" />
-          <vertex px="0.0" py="0.0" />
-          <vertex px="0.0" py="6.0" />
-          <vertex px="6.0" py="6.0" />
-          <vertex px="6.0" py="4.0" />
-        </polygon>
-      </source>
+      <source id="1" group_id="0" frequency="60" agents_max="150" router_id="1" goal_id="" route_id="" caption="source 1"/>
     </agents_sources>
   </agents>
 

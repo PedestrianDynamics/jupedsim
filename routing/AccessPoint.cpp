@@ -112,6 +112,7 @@ double AccessPoint::GetDistanceTo(int UID)
           Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
           Log->Write("ERROR:\tCheck your configuration file");
           Dump();
+          //return 0;
           exit(EXIT_FAILURE);
      }
      return _mapDestToDist[UID];

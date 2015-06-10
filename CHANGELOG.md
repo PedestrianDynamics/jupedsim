@@ -11,6 +11,10 @@ All notable changes to this project will be documented in this file.
 - Sources for generating agents at runtime. Parameter are frequency(agents per seconds) and maximum number
 - Option to color the pedestrians by group,spotlight,velocity,group,knowledge,router,final_goal,intermediate_goal (  <trajectories format="xml-plain" fps="8" color_mode="group">)
 
+#### JPSVIS
+- Display the geometry structure individual room/subroom
+- Now build on OSX 
+
 ### Changed
 -  
 -  

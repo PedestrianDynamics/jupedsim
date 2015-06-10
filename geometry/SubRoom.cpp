@@ -535,14 +535,14 @@ double SubRoom::GetCosAngleWithHorizontal() const
 
 }
 
-void SubRoom::CheckObstacles()
+bool SubRoom::CheckObstacles()
 {
      for(unsigned int i = 0; i<_walls.size(); i++) {
           for(unsigned int j = 0; j<_obstacles.size(); j++) {
                if(_obstacles[j]->IntersectWithLine(_walls[i])) {
-                    Log->Write("INFO: \tthe obstacle id [%d] is intersection with subroom [%d]",_obstacles[j]->GetId(),_id);
-                    Log->Write("INFO: \tthe triangulation will not work.");
-                    exit(EXIT_FAILURE);
+                    Log->Write("ERROR: \tthe obstacle id [%d] is intersection with subroom [%d]",_obstacles[j]->GetId(),_id);
+                    Log->Write("     : \tthe triangulation will not work.");
+                    return false;
                }
           }
      }

@@ -890,7 +890,8 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
      if( ! strategyNode.FirstChild(query.c_str()))
      {
           query="exitCrossingStrategy";
-          Log->Write("WARNING:\t exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" ");
+          Log->Write("ERROR:\t the keyword exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" in the ini file");
+          return false;
      }
 
      if (strategyNode.FirstChild(query.c_str())) {
