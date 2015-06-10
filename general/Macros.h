@@ -39,9 +39,6 @@
 #include <iostream>
 
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif 
@@ -137,8 +134,11 @@ enum AgentColorMode {
      BY_VELOCITY=1,
      BY_KNOWLEDGE,
      BY_ROUTE,
+     BY_ROUTER,
      BY_SPOTLIGHT,
-     //BY_GROUP
+     BY_GROUP,
+     BY_FINAL_GOAL,
+     BY_INTERMEDIATE_GOAL
 };
 //global functions for convenience
 
