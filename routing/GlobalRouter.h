@@ -194,6 +194,17 @@ private:
       */
      bool IsHline(const Line& line) const;
 
+     /**
+      * @return the minimum distance between the point and any line in the subroom.
+      * This include walls,hline,crossings,transitions,obstacles
+      */
+     double MinDistanceToHlines(const Point& point, const SubRoom& sub);
+
+     /**
+      * @return the minimal angle in the the triangle formed by the three points
+      */
+     double MinAngle(const Point& p1, const Point& p2, const Point& p3);
+
 private:
      int **_pathsMatrix;
      double **_distMatrix;

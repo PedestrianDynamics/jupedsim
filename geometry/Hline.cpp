@@ -119,7 +119,7 @@ string Hline::GetDescription() const
 {
      string geometry;
      char tmp[CLENGTH] = "";
-     sprintf(tmp,"\t\t<hline ID=\"%d\" color = \"250\" caption=\"h_%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
+     sprintf(tmp,"\t\t<hline ID=\"%d\" room_id=\"%d\" subroom_id=\"%d\" color = \"250\" caption=\"h_%d_%d\">\n",GetUniqueID(),_room1->GetID(),_subRoom1->GetSubRoomID(),GetID(),GetUniqueID());
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",

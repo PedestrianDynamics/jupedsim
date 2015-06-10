@@ -236,7 +236,7 @@ public:
       * e.g. simple polygons
       * no intersection between the walls and the obstacles.
       */
-     void CheckObstacles();
+     bool CheckObstacles();
 
      /**
       * Check the subroom for possible errors and
