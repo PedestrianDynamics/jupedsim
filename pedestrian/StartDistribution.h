@@ -71,13 +71,13 @@ private:
      double _yMax;
 
      //pre movement time distribution
-     std::normal_distribution<double> _premovementTime;
+     mutable std::normal_distribution<double> _premovementTime;
 
      //risk tolerance distribution
-     std::normal_distribution<double> _riskTolerance;
+     mutable std::normal_distribution<double> _riskTolerance;
 
      //random number generator engine
-     std::default_random_engine _generator;
+     mutable std::default_random_engine _generator;
 
 public:
      StartDistribution(int seed);

@@ -33,7 +33,16 @@
 
 #include <vector>
 
+OutputHandler* Log;
+
 BOOST_AUTO_TEST_SUITE(SubRoomTest)
+
+    struct Handler {
+        Handler() {Log = new STDIOHandler();}
+        ~ Handler() {delete Log;}
+    };
+
+    BOOST_GLOBAL_FIXTURE(Handler)
 
 BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
 {

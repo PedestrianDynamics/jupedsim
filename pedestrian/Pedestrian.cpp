@@ -91,7 +91,7 @@ Pedestrian::Pedestrian()
      _agentsCreated++;//increase the number of object created
 }
 
-Pedestrian::Pedestrian(const StartDistribution& agentsParameters, const Building& building)
+Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :    _age(agentsParameters.GetAge()),
      _gender(agentsParameters.GetGender()),
      _height(agentsParameters.GetHeight()),

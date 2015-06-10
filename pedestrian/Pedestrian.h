@@ -135,7 +135,7 @@ private:
 public:
      // constructors
      Pedestrian();
-     explicit Pedestrian(const StartDistributionSubroom& agentsParameters, const Building& building);
+     explicit Pedestrian(const StartDistribution& agentsParameters, Building& building);
      virtual ~Pedestrian();
 
      // Setter-Funktionen
