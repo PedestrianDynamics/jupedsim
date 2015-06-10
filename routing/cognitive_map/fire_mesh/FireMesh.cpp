@@ -91,9 +91,9 @@ void FireMesh::SetUpMesh(const double &xmin, const double &ymin, const double &x
         elem.resize(cols);
     }
 
-    for (int i=0; i<_matrix.size(); ++i)
+    for (unsigned int i=0; i<_matrix.size(); ++i)
     {
-        for (int j=0; j<_matrix[0].size(); ++j)
+        for (unsigned int j=0; j<_matrix[0].size(); ++j)
         {
              Knot k(xmin+i*cellsize, j*cellsize);
              _matrix[i][j]=k;

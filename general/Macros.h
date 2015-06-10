@@ -39,9 +39,6 @@
 #include <iostream>
 
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif 
@@ -49,6 +46,7 @@
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
+//#define _USE_PROTOCOL_BUFFER 1
 
 
 
@@ -88,7 +86,7 @@
 #define FINAL_DEST_OUT -1
 
 // Linked cells
-#define LIST_EMPTY      -1
+#define LIST_EMPTY  -1
 
 
 enum RoomState {
@@ -136,8 +134,11 @@ enum AgentColorMode {
      BY_VELOCITY=1,
      BY_KNOWLEDGE,
      BY_ROUTE,
+     BY_ROUTER,
      BY_SPOTLIGHT,
-     //BY_GROUP
+     BY_GROUP,
+     BY_FINAL_GOAL,
+     BY_INTERMEDIATE_GOAL
 };
 //global functions for convenience
 

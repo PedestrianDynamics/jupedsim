@@ -33,8 +33,6 @@ using namespace std;
 
 Hline::Hline()
 {
-     _room1=NULL;
-     _subRoom1=NULL;
      _id=-1;
 }
 
@@ -80,6 +78,17 @@ Room* Hline::GetRoom1() const
 SubRoom* Hline::GetSubRoom1() const
 {
      return _subRoom1;
+}
+
+void Hline::SetSubRoom2(SubRoom* r2)
+{
+     _subRoom2 = r2;
+}
+
+
+SubRoom* Hline::GetSubRoom2() const
+{
+     return _subRoom2;
 }
 
 bool Hline::IsInSubRoom(int subroomID) const

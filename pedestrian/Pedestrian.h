@@ -128,6 +128,8 @@ private:
      /// a pointer to the complete building
      Building * _building;
 
+     static int _agentsCreated;
+
 public:
      // constructors
      Pedestrian();
@@ -388,6 +390,13 @@ public:
 
      static double GetGlobalTime();
      static void SetGlobalTime(double time);
+
+     /**
+      * @return the total number of pedestrians objects created.
+      * This is useful for the linked-cells algorithm, since it uses the ID of the pedestrians
+      * and the  maximal count must be known in advance.
+      */
+     static int GetAgentsCreated();
 
 
      /**

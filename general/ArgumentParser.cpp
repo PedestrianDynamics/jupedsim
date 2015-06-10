@@ -58,6 +58,10 @@
 #include "../math/GompertzModel.h"
 #include "../math/GCFMModel.h"
 
+#ifdef _USE_PROTOCOL_BUFFER
+#include "../matsim/HybridSimulationManager.h"
+#endif
+
 using namespace std;
 
 void ArgumentParser::Usage(const std::string file)
@@ -77,7 +81,7 @@ ArgumentParser::ArgumentParser()
      //pNumberFilename = "inputfiles/persons.xml";
      pSolver = 1;
      _projectFile = "";
-     pTmax = 500;
+     pTmax = 900;
      pfps = 1.0;
      pdt = 0.01;
      pExitStrategy = 2;
@@ -116,13 +120,13 @@ ArgumentParser::ArgumentParser()
      pSeed = 0;
      pFormat = FORMAT_XML_PLAIN;
      pPort = -1;
-     pHostname = "localhost";
+     _hostname = "localhost";
      _embedMesh = 0;
-     pMaxOpenMPThreads = omp_get_thread_num();
+     _maxOpenMPThreads = omp_get_thread_num();
      _profilingFlag = false;
      _hpcFlag = 0;
      _agentsParameters= std::map<int, std::shared_ptr<AgentsParameters> >();
-     p_routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
+     _routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
      _showStatistics=false;
 }
 
@@ -276,19 +280,19 @@ bool ArgumentParser::ParseIniFile(string inifile)
           else {
                n = max_cpus;
           }
-          pMaxOpenMPThreads = n;
-          Log->Write("INFO: \tnum_threads <%d>", pMaxOpenMPThreads);
+          _maxOpenMPThreads = n;
+          Log->Write("INFO: \tnum_threads <%d>", _maxOpenMPThreads);
 #ifdef _OPENMP
           if(n < omp_get_max_threads() )
-               omp_set_num_threads(pMaxOpenMPThreads);
+               omp_set_num_threads(_maxOpenMPThreads);
 #endif
      }
      else { // no num_threads tag
-          pMaxOpenMPThreads = max_cpus;
+          _maxOpenMPThreads = max_cpus;
 #ifdef _OPENMP
-          omp_set_num_threads(pMaxOpenMPThreads);
+          omp_set_num_threads(_maxOpenMPThreads);
 #endif
-          Log->Write("INFO: \t Default num_threads <%d>", pMaxOpenMPThreads);
+          Log->Write("INFO: \t Default num_threads <%d>", _maxOpenMPThreads);
      }
      //logfile
      if (xMainNode->FirstChild("logfile"))
@@ -302,8 +306,8 @@ bool ArgumentParser::ParseIniFile(string inifile)
      if (xMainNode->FirstChild("show_statistics"))
      {
           string value = xMainNode->FirstChild("show_statistics")->FirstChild()->Value();
-         if(value=="true")
-              _showStatistics=true;
+          if(value=="true")
+               _showStatistics=true;
           Log->Write("INFO: \tShow statistics: %s",value.c_str());
      }
      //trajectories
@@ -336,6 +340,25 @@ bool ArgumentParser::ParseIniFile(string inifile)
           if (format == "vtk")
                pFormat = FORMAT_VTK;
 
+          //color mode
+          string color_mode =
+                              xMainNode->FirstChildElement("trajectories")->Attribute(
+                                        "color_mode") ?
+                                                  xMainNode->FirstChildElement("trajectories")->Attribute(
+                                                            "color_mode") :
+                                                           "velocity";
+
+          if(color_mode=="velocity") Pedestrian::SetColorMode(AgentColorMode::BY_VELOCITY);
+          if(color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+          if(color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
+          if(color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
+          if(color_mode=="router") Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
+          if(color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
+          if(color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
+
+
+
+
           //a file descriptor was given
           if (xTrajectories->FirstChild("file"))
           {
@@ -355,12 +378,25 @@ bool ArgumentParser::ParseIniFile(string inifile)
                const char* tmp =
                          xTrajectories->FirstChildElement("socket")->Attribute("hostname");
                if (tmp)
-                    pHostname = tmp;
+                    _hostname = tmp;
                xTrajectories->FirstChildElement("socket")->Attribute("port", &pPort);
                Log->Write("INFO: \tStreaming results to output [%s:%d] ",
-                         pHostname.c_str(), pPort);
+                         _hostname.c_str(), pPort);
           }
      }
+
+#ifdef _USE_PROTOCOL_BUFFER
+     //check the simulation mode
+     //trajectories
+     TiXmlNode* xSimMode = xMainNode->FirstChild("hybrid_simulation");
+     if (xSimMode)
+     {
+          int port=std::stoi(xMainNode->FirstChildElement("hybrid_simulation")->Attribute("port"));
+          string server=xMainNode->FirstChildElement("hybrid_simulation")->Attribute("server");
+          _hybridSimManager=std::shared_ptr<HybridSimulationManager>(new HybridSimulationManager(server,port));
+          Log->Write(_hybridSimManager->ToString());
+     }
+#endif
 
      //pick up which model to use
      //get the wanted ped model id
@@ -744,42 +780,42 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
           if (strategy == "local_shortest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_LOCAL_SHORTEST));
                Router *r = new GlobalRouter(id, ROUTING_LOCAL_SHORTEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "global_shortest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_GLOBAL_SHORTEST));
                Router *r = new GlobalRouter(id, ROUTING_GLOBAL_SHORTEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "quickest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_QUICKEST));
                Router *r = new QuickestPathRouter(id, ROUTING_QUICKEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "nav_mesh") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_NAV_MESH));
                Router *r = new MeshRouter(id, ROUTING_NAV_MESH);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "dummy") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_DUMMY));
                Router *r = new DummyRouter(id, ROUTING_DUMMY);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "global_safest") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_SAFEST));
                Router *r = new SafestPathRouter(id, ROUTING_SAFEST);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
           }
           else if (strategy == "cognitive_map") {
                pRoutingStrategies.push_back(make_pair(id, ROUTING_COGNITIVEMAP));
                Router *r = new CognitiveMapRouter(id, ROUTING_COGNITIVEMAP);
-               p_routingengine->AddRouter(r);
+               _routingengine->AddRouter(r);
 
                Log->Write("\nINFO: \tUsing CognitiveMapRouter");
                ///Parsing additional options
                if (!ParseCogMapOpts(e))
-                   return false;
+                    return false;
           }
           else {
                Log->Write("ERROR: \twrong value for routing strategy [%s]!!!\n",
@@ -793,56 +829,56 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
 
 bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
 {
-    TiXmlNode* sensorNode=routerNode->FirstChild();
+     TiXmlNode* sensorNode=routerNode->FirstChild();
 
-    if (!sensorNode)
-    {
-         Log->Write("ERROR:\tNo sensors found.\n");
-         return false;
-    }
+     if (!sensorNode)
+     {
+          Log->Write("ERROR:\tNo sensors found.\n");
+          return false;
+     }
 
-    /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
-    CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(p_routingengine->GetAvailableRouters().back());
+     /// static_cast to get access to the method 'addOption' of the CognitiveMapRouter
+     CognitiveMapRouter* r = static_cast<CognitiveMapRouter*>(_routingengine->GetAvailableRouters().back());
 
-    std::vector<std::string> sensorVec;
-    for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
-              e = e->NextSiblingElement("sensor"))
-    {
-        string sensor = e->Attribute("description");
-        ///adding Smoke Sensor specific parameters
-        if (sensor=="Smoke")
-        {
-            std::vector<std::string> smokeOptVec;
+     std::vector<std::string> sensorVec;
+     for (TiXmlElement* e = sensorNode->FirstChildElement("sensor"); e;
+               e = e->NextSiblingElement("sensor"))
+     {
+          string sensor = e->Attribute("description");
+          ///adding Smoke Sensor specific parameters
+          if (sensor=="Smoke")
+          {
+               std::vector<std::string> smokeOptVec;
 
-            smokeOptVec.push_back(e->Attribute("p_field_path"));
-            smokeOptVec.push_back(e->Attribute("update_time"));
-            smokeOptVec.push_back(e->Attribute("final_time"));
-            r->addOption("smokeOptions",smokeOptVec);
+               smokeOptVec.push_back(e->Attribute("p_field_path"));
+               smokeOptVec.push_back(e->Attribute("update_time"));
+               smokeOptVec.push_back(e->Attribute("final_time"));
+               r->addOption("smokeOptions",smokeOptVec);
 
-        }
-        sensorVec.push_back(sensor);
+          }
+          sensorVec.push_back(sensor);
 
-        Log->Write("INFO: \tSensor "+ sensor + " added");
-    }
-
-
-    r->addOption("Sensors",sensorVec);
-
-    TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
-
-    if (!cogMap)
-    {
-         Log->Write("ERROR:\tCognitive Map not specified.\n");
-         return false;
-    }
-
-    std::vector<std::string> cogMapStatus;
-    cogMapStatus.push_back(cogMap->Attribute("status"));
-    Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
-    r->addOption("CognitiveMap",cogMapStatus);
+          Log->Write("INFO: \tSensor "+ sensor + " added");
+     }
 
 
-    return true;
+     r->addOption("Sensors",sensorVec);
+
+     TiXmlElement* cogMap=routerNode->FirstChildElement("cognitive_map");
+
+     if (!cogMap)
+     {
+          Log->Write("ERROR:\tCognitive Map not specified.\n");
+          return false;
+     }
+
+     std::vector<std::string> cogMapStatus;
+     cogMapStatus.push_back(cogMap->Attribute("status"));
+     Log->Write("INFO: \tAll pedestrian starting with a(n) "+cogMapStatus[0]+" cognitive map\n");
+     r->addOption("CognitiveMap",cogMapStatus);
+
+
+     return true;
 
 }
 
@@ -927,11 +963,11 @@ const FileFormat& ArgumentParser::GetFileFormat() const
 }
 const string& ArgumentParser::GetHostname() const
 {
-     return pHostname;
+     return _hostname;
 }
 void ArgumentParser::SetHostname(const string& hostname)
 {
-     pHostname = hostname;
+     _hostname = hostname;
 }
 int ArgumentParser::GetPort() const
 {
@@ -984,12 +1020,16 @@ bool ArgumentParser::GetLinkedCells() const
 
 std::shared_ptr<RoutingEngine> ArgumentParser::GetRoutingEngine() const
 {
-     return p_routingengine;
+     return _routingengine;
 }
 
 vector<pair<int, RoutingStrategy> > ArgumentParser::GetRoutingStrategy() const
 {
      return pRoutingStrategies;
+}
+std::shared_ptr<HybridSimulationManager> ArgumentParser::GetHybridSimManager() const
+{
+     return _hybridSimManager;
 }
 
 double ArgumentParser::GetV0Mu() const
@@ -1151,7 +1191,7 @@ const string& ArgumentParser::GetErrorLogFile() const
 
 int ArgumentParser::GetMaxOpenMPThreads() const
 {
-     return pMaxOpenMPThreads;
+     return _maxOpenMPThreads;
 }
 const string& ArgumentParser::GetTrajectoriesFile() const
 {

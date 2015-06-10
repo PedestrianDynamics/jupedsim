@@ -321,7 +321,7 @@ bool QuickestPathRouter::Init(Building* building)
      Log->Write("INFO:\tInit Quickest Path Router Engine");
 
      // prefer path through corridors to path through rooms
-     SetEdgeCost(10.0);
+     SetEdgeCost(100.0);
      if (GlobalRouter::Init(building) == false)
           return false;
 

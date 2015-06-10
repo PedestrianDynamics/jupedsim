@@ -6,15 +6,18 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Changelog file
 - Rimea testcases
-- risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks. 
+- Boost testcases for geometry functions
+- risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks.
+- Sources for generating agents at runtime. Parameter are frequency(agents per seconds) and maximum number
+- Option to color the pedestrians by group,spotlight,velocity,group,knowledge,router,final_goal,intermediate_goal (  <trajectories format="xml-plain" fps="8" color_mode="group">)
 
 ### Changed
 -  
 -  
 
 ### Fixed
-- 
-- 
+- Visiblity in 3D
+- Numerous geometrical operations
 
 ### Fixed
 - 
