@@ -159,4 +159,99 @@ BOOST_AUTO_TEST_CASE(LINE_LENGTH_TEST)
      BOOST_MESSAGE("Leaving line length and length square test");
 }
 
+BOOST_AUTO_TEST_CASE(Line_Overlap_test)
+{
+	BOOST_MESSAGE("starting line overlap test");
+	Point P1(0,0);
+	Point P2(10,0);
+	Line L1(P1,P2);
+	for (int i = 0 ; i < 10; ++i)
+	{
+		Line L2(Point(i,0), Point(i+4,0));
+		BOOST_CHECK(L1.Overlapp(L2) == true);
+
+	}
+	Line L3(Point(10,0), Point(15,0));
+    BOOST_CHECK(L1.Overlapp(L3) == false);
+	Line L4(Point(5,-5), Point(5,5));
+	BOOST_CHECK(L1.Overlapp(L4) == false);
+	Line L5(Point(-5,0), P1);
+	BOOST_CHECK(L1.Overlapp(L5) == false);
+	BOOST_MESSAGE("Leaving line overlap test");
+}
+
+BOOST_AUTO_TEST_CASE(Line_Intersection_test)
+{
+	BOOST_MESSAGE("starting line intersection test");
+	Point P1(-1,0);
+	Point P2(1,0);
+	Line L1(P1,P2);
+	const double Pi = 3.14159265358979323846;
+	for (int i = 0; i <= 6 ; ++i)
+	{
+		Line L2(Point(0, -1), Point(cos(i*Pi/6), sin(i*Pi/6)));
+		BOOST_CHECK(L1.IntersectionWith(L2) == true);
+	}
+	BOOST_CHECK(L1.IntersectionWith(Point(-1,-1), Point(-1,5)) == true);
+	BOOST_CHECK(L1.IntersectionWith(Point(1,-5), Point(1, 0)) == true);
+
+	BOOST_CHECK(L1.IntersectionWith(L1) == true);
+
+    BOOST_CHECK(L1.IntersectionWith(Point(-1.0005, -1), Point(-1.0005, 1)) == false);
+    BOOST_CHECK(L1.IntersectionWith(Point(-1, 0.00005), Point(1, 0.00005)) == false);
+
+	BOOST_MESSAGE("Leaving line intersection test");
+}
+
+BOOST_AUTO_TEST_CASE(Line_hor_vert_test)
+{
+	BOOST_MESSAGE("starting line horizontal / vertical test");
+	const double Pi = 3.14159265358979323846;
+
+	for (int i = 0; i <= 12; ++i)
+	{
+		Line L1(Point(0, 0), Point(cos(i*Pi/12), sin(i*Pi/12)));
+		if (i == 0 || i == 12)
+			BOOST_CHECK(L1.IsHorizontal() == true);
+
+		else if(i == 6)
+			BOOST_CHECK(L1.IsVertical() == true);
+
+		else{
+			BOOST_CHECK(L1.IsHorizontal() == false);
+			BOOST_CHECK(L1.IsVertical() == false);
+		}
+	}
+	BOOST_MESSAGE("Leaving line horizontal / vertical test");
+}
+
+BOOST_AUTO_TEST_CASE(Line_whichSide_test)
+{
+	BOOST_MESSAGE("starting line which side test");
+	Point Pleft(-20, 2);
+	Point Pright(20, 2);
+	const double Pi = 3.14159265358979323846;
+
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).WichSide(Pleft) == 0);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).IsLeft(Pleft) == true);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).WichSide(Pright) == 1);
+	BOOST_CHECK(Line(Point(0,-2), Point(0,1)).IsLeft(Pright) == false);
+
+	for (int i = 0; i <= 6; ++i) {    // including horizontal lines
+		Line L1(Point(0, 0), Point(cos(i*Pi/6), sin(i*Pi/6)));
+
+		BOOST_CHECK_MESSAGE(L1.WichSide(Pleft) == 0, L1.WichSide(Pleft) << " Pt:(-20,2), LINE: (0,0), (" <<
+        		cos(i*Pi/6) << "," << sin(i*Pi/6) << ")");
+        BOOST_CHECK(L1.IsLeft(Pleft) == true);
+
+        BOOST_CHECK_MESSAGE(L1.WichSide(Pright) == 1, L1.WichSide(Pright)<< " Pt:(20,2), LINE: (0,0), (" <<
+	            cos(i*Pi/6) << "," << sin(i*Pi/6) << ")");
+        BOOST_CHECK(L1.IsLeft(Pright) == false);
+	}
+
+	// fails for horizontal and nearly horizontal lines
+
+	BOOST_MESSAGE("starting line which side test");
+}
+
 BOOST_AUTO_TEST_SUITE_END()
