@@ -213,7 +213,10 @@ private:
      //via the routing file. The mesh will only be used for computing the distance.
      bool _useMeshForLocalNavigation=true;
      bool _generateNavigationMesh=false;
-     std::vector< int > _tmpPedPath;
+     //used to filter skinny edges in triangulation
+     double _minDistanceBetweenTriangleEdges=-FLT_MAX;
+     double _minAngleInTriangles=-FLT_MAX;
+     std::vector<int> _tmpPedPath;
      std::map<int,int> _map_id_to_index;
      std::map<int,int> _map_index_to_id;
      ///map the internal crossings/transition id to

@@ -9,7 +9,8 @@ All notable changes to this project will be documented in this file.
 - Boost testcases for geometry functions
 - risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks.
 - Sources for generating agents at runtime. Parameter are frequency(agents per seconds) and maximum number
-- Option to color the pedestrians by group,spotlight,velocity,group,knowledge,router,final_goal,intermediate_goal (  <trajectories format="xml-plain" fps="8" color_mode="group">)
+- Option to color the pedestrians by group,spotlight,velocity,group,knowledge,router,final_goal,intermediate_goal. Usage: ( <trajectories format="xml-plain" fps="8" color_mode="group"> )
+- More control over the triangulation specially to avoid skinny triangles. Usage: <navigation_mesh method="triangulation" minimum_distance_between_edges="0.5" minimum_angle_in_triangles="20" use_for_local_planning="true" />
 
 #### JPSVIS
 - Display the geometry structure individual room/subroom
