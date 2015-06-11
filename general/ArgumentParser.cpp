@@ -115,8 +115,8 @@ ArgumentParser::ArgumentParser()
      _isGetProfile =false;
      _steadyStart =100;
      _steadyEnd = 1000;
-     _scaleX = 10;
-     _scaleY = 10;
+     _grid_size_X = 10;
+     _grid_size_Y = 10;
      _errorLogFile="./Logfile.dat";
      _log=1; //no output wanted
      _trajectoriesLocation="./";
@@ -499,10 +499,10 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     if ( string(xMethod_D->FirstChildElement("profiles")->Attribute("enabled"))=="true")
                     {
                          _isGetProfile = true;
-                         _scaleX =xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("scale_x"))*M2CM;
-                         _scaleY =xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("scale_y"))*M2CM;
+                         _grid_size_X =xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_x"))*M2CM;
+                         _grid_size_Y =xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_y"))*M2CM;
                          Log->Write("INFO: \tProfiles will be calculated" );
-                         Log->Write("INFO: \tThe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX*CMtoM, _scaleY*CMtoM);
+                         Log->Write("INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f >m ",_grid_size_X*CMtoM, _grid_size_Y*CMtoM);
                     }
           }
      }
@@ -617,14 +617,14 @@ double ArgumentParser::GetSteadyEnd() const
 }
 
 
-float ArgumentParser::GetScaleX() const
+float ArgumentParser::GetGridSizeX() const
 {
-     return _scaleX;
+     return _grid_size_X;
 }
 
-float ArgumentParser::GetScaleY() const
+float ArgumentParser::GetGridSizeY() const
 {
-     return _scaleY;
+     return _grid_size_Y;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodA() const

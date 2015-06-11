@@ -75,8 +75,8 @@ private:
      std::vector<int> _areaIDforMethodB;
      std::vector<int> _areaIDforMethodC;
      std::vector<int> _areaIDforMethodD;
-     float _scaleX;
-     float _scaleY;
+     float _grid_size_X;
+     float _grid_size_Y;
      int _log;
 
      std::map <int, MeasurementArea*> _measurementAreas;
@@ -120,8 +120,8 @@ public:
      double GetSteadyStart() const;
      double GetSteadyEnd() const;
      bool GetIsGetProfile() const;
-     float GetScaleX() const;
-     float GetScaleY() const;
+     float GetGridSizeX() const;
+     float GetGridSizeY() const;
      int GetLog() const;
      bool ParseArgs(int argc, char **argv);
 

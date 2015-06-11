@@ -55,7 +55,7 @@ public:
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);
      void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
-     void SetScale(double x, double y);
+     void SetGridSize(double x, double y);
      void SetCalculateProfiles(bool calcProfile);
      void SetOutputVoronoiCellData(bool outputCellData);
      void SetMeasurementArea (MeasurementArea_B* area);
@@ -79,8 +79,8 @@ private:
      double _geoMaxY;
      FILE* _fVoronoiRhoV;
      FILE* _fIndividualFD;
-     double _scaleX;      // the size of the grid
-     double _scaleY;
+     double _grid_size_X;      // the size of the grid
+     double _grid_size_Y;
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
 

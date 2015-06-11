@@ -113,8 +113,8 @@ private:
      //polygon_2d _geoPoly;
      std::map<int, polygon_2d> _geoPoly;
 
-     double _scaleX;      // the size of the grid
-     double _scaleY;
+     double _grid_size_X;      // the size of the grid
+     double _grid_size_Y;
      double _lowVertexX;  // LOWest vertex of the geometry (x coordinate)
      double _lowVertexY;  //  LOWest vertex of the geometry (y coordinate)
      double _highVertexX; // Highest vertex of the geometry

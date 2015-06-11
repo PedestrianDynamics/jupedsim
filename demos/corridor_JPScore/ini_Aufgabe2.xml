@@ -58,7 +58,7 @@
         <measurement_area id="1" /> 
         <cut_by_circle enabled="false" radius= "1" edges = "10"/> 
         <!-- edges represent the precision of discretization of the circle ---> 
-        <profiles enabled="false" scale_x="0.20" scale_y="0.20"/> 
+        <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
 </JPSreport>
 

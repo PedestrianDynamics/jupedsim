@@ -38,8 +38,8 @@ using namespace std;
 
 Method_D::Method_D()
 {
-     _scaleX = 10;
-     _scaleY = 10;
+     _grid_size_X = 0.10;
+     _grid_size_Y = 0.10;
      _outputVoronoiCellData = false;
      _getProfile = false;
      _geoMinX = 0;
@@ -295,16 +295,16 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
           exit(0);
      }
 
-     int NRow = (int)ceil((_geoMaxY-_geoMinY)/_scaleY); // the number of rows that the geometry will be discretized for field analysis
-     int NColumn = (int)ceil((_geoMaxX-_geoMinX)/_scaleX); //the number of columns that the geometry will be discretized for field analysis
+     int NRow = (int)ceil((_geoMaxY-_geoMinY)/_grid_size_Y); // the number of rows that the geometry will be discretized for field analysis
+     int NColumn = (int)ceil((_geoMaxX-_geoMinX)/_grid_size_X); //the number of columns that the geometry will be discretized for field analysis
      for(int row_i=0; row_i<NRow; row_i++) { //
           for(int colum_j=0; colum_j<NColumn; colum_j++) {
                polygon_2d measurezoneXY;
                {
                     const double coor[][2] = {
-                              {_geoMinX+colum_j*_scaleX,_geoMaxY-row_i*_scaleY}, {_geoMinX+colum_j*_scaleX+_scaleX,_geoMaxY-row_i*_scaleY}, {_geoMinX+colum_j*_scaleX+_scaleX, _geoMaxY-row_i*_scaleY-_scaleY},
-                              {_geoMinX+colum_j*_scaleX, _geoMaxY-row_i*_scaleY-_scaleY},
-                              {_geoMinX+colum_j*_scaleX,_geoMaxY-row_i*_scaleY} // closing point is opening point
+                              {_geoMinX+colum_j*_grid_size_X,_geoMaxY-row_i*_grid_size_Y}, {_geoMinX+colum_j*_grid_size_X+_grid_size_X,_geoMaxY-row_i*_grid_size_Y}, {_geoMinX+colum_j*_grid_size_X+_grid_size_X, _geoMaxY-row_i*_grid_size_Y-_grid_size_Y},
+                              {_geoMinX+colum_j*_grid_size_X, _geoMaxY-row_i*_grid_size_Y-_grid_size_Y},
+                              {_geoMinX+colum_j*_grid_size_X,_geoMaxY-row_i*_grid_size_Y} // closing point is opening point
                     };
                     assign_points(measurezoneXY, coor);
                }
@@ -454,10 +454,10 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 	_geoMaxY = maxY;
 }
 
-void Method_D::SetScale(double x, double y)
+void Method_D::SetGridSize(double x, double y)
 {
-     _scaleX = x;
-     _scaleY = y;
+     _grid_size_X = x;
+     _grid_size_Y = y;
 }
 
 void Method_D::SetCalculateProfiles(bool calcProfile)

@@ -82,8 +82,8 @@ Analysis::Analysis()
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      _vComponent = 'B'; // to mark whether x, y or x and y coordinate are used when calculating the velocity
 
-     _scaleX = 0.10;   // the size of the grid
-     _scaleY = 0.10;
+     _grid_size_X = 0.10;   // the size of the grid
+     _grid_size_Y = 0.10;
      _lowVertexX = 0;// LOWest vertex of the geometry (x coordinate)
      _lowVertexY = 0; //  LOWest vertex of the geometry (y coordinate)
      _highVertexX = 10; // Highest vertex of the geometry
@@ -182,8 +182,8 @@ void Analysis::InitArgs(ArgumentParser* args)
      _outputGraph = args->GetIsOutputGraph();
      _calcIndividualFD = args->GetIsIndividualFD();
      _vComponent = args->GetVComponent();
-     _scaleX = int(args->GetScaleX());
-     _scaleY = int(args->GetScaleY());
+     _grid_size_X = int(args->GetGridSizeX());
+     _grid_size_Y = int(args->GetGridSizeY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
@@ -339,7 +339,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                Method_D method_D;
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-               method_D.SetScale(_scaleX, _scaleY);
+               method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetCalculateIndividualFD(_calcIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);

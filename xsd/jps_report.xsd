@@ -226,8 +226,8 @@
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
                       <xs:attribute type="xs:string" name="enabled"  use="required"/>
-                      <xs:attribute type="xs:float" name="scale_x"  use="required"/>
-                      <xs:attribute type="xs:float" name="scale_y"  use="required"/>
+                      <xs:attribute type="xs:float" name="grid_size_x"  use="required"/>
+                      <xs:attribute type="xs:float" name="grid_size_y"  use="required"/>
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
