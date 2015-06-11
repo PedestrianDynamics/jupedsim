@@ -34,7 +34,7 @@
 //using std::ofstream;
 using namespace std;
 
-#define VORO_LOCATION "./Output/Fundamental_Diagram/Classical_Voronoi/field/"
+
 
 Method_D::Method_D()
 {
@@ -60,12 +60,13 @@ Method_D::~Method_D()
 
 }
 
-bool Method_D::Process (const PedData& peddata)
+bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation)
 {
      /*if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
      {
           return false;
      }*/
+	 _scriptsLocation = scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
@@ -146,7 +147,7 @@ bool Method_D::Process (const PedData& peddata)
 
 bool Method_D::OpenFileMethodD()
 {
-     string results_V=  _projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+_trajName+"_id_"+_measureAreaId+".dat";
+     string results_V=  _projectRootDir+VORO_LOCATION+"rho_v_Voronoi_"+_trajName+"_id_"+_measureAreaId+".dat";
      if((_fVoronoiRhoV=Analysis::CreateFile(results_V))==NULL)
      {
           Log->Write("cannot open the file to write Voronoi density and velocity\n");
@@ -279,7 +280,7 @@ double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vec
 
 void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, const vector<double>& velocity)
 {
-     string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/field/";
+     string voronoiLocation=_projectRootDir+VORO_LOCATION+"field/";
 
      string Prfvelocity=voronoiLocation+"/velocity/Prf_v_"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
      string Prfdensity=voronoiLocation+"/density/Prf_d_"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
@@ -324,7 +325,7 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
 void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polygons, int numPedsInFrame, vector<double>& XInFrame, vector<double>& YInFrame,const vector<double>& VInFrame)
 {
      //string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/id_"+_measureAreaId;
-     string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
+     string voronoiLocation=_projectRootDir+VORO_LOCATION+"VoronoiCell/";
 
 
 #if defined(_WIN32)
@@ -393,10 +394,10 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
-     string parameters_rho="python ./scripts/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+     string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
     		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
 			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     string parameters_v="python ./scripts/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+     string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
          		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
      			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
      //Log->Write("INFO:\t%s",parameters_rho.c_str());

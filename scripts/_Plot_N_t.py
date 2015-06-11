@@ -24,7 +24,7 @@ if __name__ == '__main__':
    namefile = args.namefile
    fps = args.fps
    figname=namefile.split(".dat")[0]
-   title = figname.split("traj_")[1]
+   title = figname.split("Flow_NT_")[1]
    fig = plt.figure(figsize=(16, 16), dpi=100)
    ax1 = fig.add_subplot(111,aspect='auto')
    plt.rc("font", size=30)

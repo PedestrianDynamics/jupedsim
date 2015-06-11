@@ -189,6 +189,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _trajFormat=args->GetFileFormat();
      _cutRadius=args->GetCutRadius();
      _circleEdges=args->GetCircleEdges();
+     _scriptsLocation=args->GetScriptsLocation();
 }
 
 
@@ -284,7 +285,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
                method_A.SetTimeInterval(_deltaT);
-               bool result_A=method_A.Process(data);
+               bool result_A=method_A.Process(data,_scriptsLocation);
                if(result_A)
                {
                     Log->Write("INFO:\tSuccess with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
@@ -348,7 +349,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     method_D.Setcutbycircle(_cutRadius, _circleEdges);
                }
                method_D.SetMeasurementArea(_areaForMethod_D[i]);
-               bool result_D = method_D.Process(data);
+               bool result_D = method_D.Process(data,_scriptsLocation);
                if(result_D)
                {
                     Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
@@ -357,6 +358,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                {
                     Log->Write("INFO:\tFailed with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
                }
+          }
+          if(_DoesUseMethodC || _DoesUseMethodD)
+          {
+        	  string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+        	                               		 " -f "+boost::lexical_cast<std::string>(data.GetFps());
+        	  system(parameters_Timeseries.c_str());
+        	  Log->Write("INFO:\tPlotting Time series of density and velocity!");
           }
      }
 

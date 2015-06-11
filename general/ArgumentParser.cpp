@@ -122,6 +122,7 @@ ArgumentParser::ArgumentParser()
      _trajectoriesLocation="./";
      _trajectoriesFilename="";
      _projectRootDir="./";
+     _scriptsLocation="./";
      _fileFormat=FORMAT_XML_PLAIN;
      _cutRadius =50;
      _circleEdges=6;
@@ -218,11 +219,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      }
 
      //geometry
-     if(xMainNode->FirstChild("geometry"))
-     {
-          _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-          Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
-     }
+	  if(xMainNode->FirstChild("geometry"))
+	  {
+		   _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
+		   Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
+	  }
 
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
@@ -320,6 +321,32 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
           Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
      }
+
+     //scripts
+	  if(xMainNode->FirstChild("scripts"))
+	  {
+			 _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
+			 if(_scriptsLocation.empty())
+			 {
+				_scriptsLocation="./";
+			 }
+			if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
+									 (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
+								// &&() osx
+			 {
+				_scriptsLocation=_projectRootDir+_scriptsLocation;
+			 }
+			if (opendir (_scriptsLocation.c_str()) == NULL)
+			{
+				/* could not open directory */
+				Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
+				return false;
+			}
+			else
+			{
+				Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
+			}
+	  }
 
      //measurement area
      if(xMainNode->FirstChild("measurement_areas")) {
@@ -534,6 +561,11 @@ const FileFormat& ArgumentParser::GetFileFormat() const
 const string& ArgumentParser::GetTrajectoriesLocation() const
 {
      return _trajectoriesLocation;
+}
+
+const string& ArgumentParser::GetScriptsLocation() const
+{
+     return _scriptsLocation;
 }
 
 const string& ArgumentParser::GetTrajectoriesFilename() const

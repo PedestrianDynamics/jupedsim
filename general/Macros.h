@@ -42,6 +42,10 @@
 #define M_PI   3.14159265358979323846
 #endif
 
+#ifndef VORO_LOCATION
+#define VORO_LOCATION "./Output/Fundamental_Diagram/Classical_Voronoi/"
+#endif
+
 #define  _isnan(x) std::isnan(x)
 // should be true only when using this file in the simulation core
 //#define _SIMULATOR 1

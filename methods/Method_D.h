@@ -50,7 +50,7 @@ class Method_D
 public:
      Method_D();
      virtual ~Method_D();
-     bool Process (const PedData& peddata);
+     bool Process (const PedData& peddata,const std::string& scriptsLocation);
      void SetCalculateIndividualFD(bool individualFD);
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);
@@ -66,6 +66,7 @@ private:
      MeasurementArea_B* _areaForMethod_D;
      std::string _trajName;
      std::string _projectRootDir;
+     std::string _scriptsLocation;
      bool _calcIndividualFD;
      bool _getProfile;
      bool _outputVoronoiCellData;
