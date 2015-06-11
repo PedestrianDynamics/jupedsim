@@ -177,7 +177,7 @@ inline char xmltoc(const char * t, const char v = '\0')
  * @return true if the element is present in the vector
  */
 template<typename A>
-inline bool IsElementInVector(const std::vector<A> &vec, A& el) {
+inline bool IsElementInVector(const std::vector<A> &vec, const A& el) {
      typename std::vector<A>::const_iterator it;
      it = std::find (vec.begin(), vec.end(), el);
      if(it==vec.end()) {

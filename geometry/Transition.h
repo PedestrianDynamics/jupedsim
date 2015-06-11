@@ -46,7 +46,14 @@ private:
 
 public:
 
+     /**
+      * Cosntructor
+      */
      Transition();
+
+     /**
+      * Destructor
+      */
      virtual ~Transition();
 
      /**

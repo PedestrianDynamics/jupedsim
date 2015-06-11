@@ -207,7 +207,7 @@ double QuickestPathRouter::TAP (double alpha)
 }
 
 
-int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
+int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP __attribute__((unused)))
 {
 
      //int preferredExit=nearestAP->GetNearestTransitAPTO(ped->GetFinalDestination());

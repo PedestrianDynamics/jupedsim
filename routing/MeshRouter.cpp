@@ -939,10 +939,10 @@ bool MeshRouter::Init(Building* b)
                          meshfile>>tmp;
                          normvec[j]=tmp;
                     }
-                    unsigned int countEdges=0;
-                    meshfile>>countEdges;
+                    unsigned int countEdges1=0;
+                    meshfile>>countEdges1;
                     vector<int> edge_id;
-                    for(unsigned int j=0; j<countEdges; j++) {
+                    for(unsigned int j=0; j<countEdges1; j++) {
                          int tmp;
                          meshfile>>tmp;
                          edge_id.push_back(tmp);

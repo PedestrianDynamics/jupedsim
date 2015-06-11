@@ -34,8 +34,19 @@
 class Wall : public Line {
 
 public:
+     /**
+      * Constructor
+      */
      Wall();
+
+     /**
+      * Constructor
+      */
      Wall(const Point& p1, const Point& p2, const std::string& type="internal");
+
+     /**
+      * Constructor
+      */
      Wall(const Wall& orig);
 
      /**

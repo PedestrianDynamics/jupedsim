@@ -432,7 +432,7 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 }
 
 
-inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
+inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 {
      Point F = Point(0.0, 0.0);
      Point pt = w.ShortestPoint(ped->GetPos());

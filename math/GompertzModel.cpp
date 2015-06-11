@@ -403,32 +403,32 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
      Point f(0., 0.);
      //first the walls
-     const vector<Wall>& walls = subroom->GetAllWalls();
-     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-          f += ForceRepWall(ped, walls[i]);
+     for(const auto & wall: subroom->GetAllWalls())
+     {
+          f += ForceRepWall(ped, wall);
      }
-
      //then the obstacles
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>&getAllWalls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < getAllWalls.size(); i++) {
-               f += ForceRepWall(ped, getAllWalls[i]);
+
+     for(const auto & obst: subroom->GetAllObstacles())
+     {
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               f += ForceRepWall(ped, wall);
           }
      }
+
      // and finally the closed doors
-     const vector<Transition*>& transitions = subroom->GetAllTransitions();
-     for (unsigned int i = 0; i < transitions.size(); i++) {
-          Transition* goal=transitions[i];
+     for(auto & goal: subroom->GetAllTransitions())
+     {
           if(! goal->IsOpen()) {
-               f +=  ForceRepWall(ped,*((Wall*)goal));
+               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
      }
 
      return f;
 }
 
-Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
+Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 {
 #define DEBUG 0
      Point F_wrep = Point(0.0, 0.0);

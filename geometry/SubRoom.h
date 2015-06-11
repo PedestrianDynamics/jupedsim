@@ -30,9 +30,7 @@
 #define _SUBROOM_H
 
 
-//#include "Line.h"
 #include "Wall.h"
-//#include "Point.h"
 
 #include <vector>
 #include <string>
@@ -70,12 +68,12 @@ private:
      double _cosAngleWithHorizontalPlane;
      std::string _type;
 
-     std::vector<Obstacle*> _obstacles; // obstacles
 
      //different types of navigation lines
      std::vector<Crossing*> _crossings;
      std::vector<Transition*> _transitions;
      std::vector<Hline*> _hlines;
+     std::vector<SubRoom*>_neighbors;
 
      /// storing and incrementing the total number of subrooms
      static int _static_uid;
@@ -83,11 +81,18 @@ private:
 protected:
      std::vector<Wall> _walls;
      std::vector<Point> _poly; // Polygonal representation of the subroom
+     std::vector<Obstacle*> _obstacles;
 
 public:
 
-     // constructors
+     /**
+      * Constructor
+      */
      SubRoom();
+
+     /**
+      * Destructor
+      */
      virtual ~SubRoom();
 
      /**
@@ -114,11 +119,6 @@ public:
      int GetSubRoomID() const;
 
      /**
-      * @return the number of walls forming this subroom
-      */
-     int GetNumberOfWalls() const;
-
-     /**
       * @return all walls
       */
      const std::vector<Wall>& GetAllWalls() const;
@@ -127,11 +127,6 @@ public:
       * @return visible walls from position of pedestrians (considering the direction of motion)
       */
      std::vector<Wall> GetVisibleWalls(const Point & position);
-
-     /**
-      * @return a reference to the wall at position index
-      */
-     const Wall& GetWall(int index) const;
 
      /**
       * @return the polygonal representation of the subroom
@@ -177,7 +172,6 @@ public:
       * @return the type of the subroom.
       */
      void SetType(const std::string& type);
-
 
      /**
       * @return the status
@@ -248,6 +242,7 @@ public:
      void AddCrossing(Crossing* line);
      void AddTransition(Transition* line);
      void AddHline(Hline* line);
+     void AddNeighbor(SubRoom* sub);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
      const std::vector<Transition*>& GetAllTransitions() const;
@@ -255,6 +250,17 @@ public:
      const Crossing* GetCrossing(int i) const;
      const Transition* GetTransition(int i) const;
      const Hline* GetHline(int i) const;
+
+     /**
+      * @return true if there is an overlapp between the walls of the subrooms and the
+      * supplied set of lines.
+      */
+     bool Overlapp(const std::vector<Line*>& goals) const;
+
+     /**
+      * @return the adjacent subrooms
+      */
+     const std::vector<SubRoom*>& GetNeighbors() const ;
 
      /**
       * Add a wall to the subroom
@@ -267,20 +273,20 @@ public:
       */
      void AddObstacle(Obstacle* obs);
 
+     /**
+      * Add/remove a goal Id
+      */
      void AddGoalID(int ID);
+
+     /**
+      * Add/remove a goal Id
+      */
      void RemoveGoalID(int ID);
 
      /**
       * @return true if the two subrooms share a common walkable Edge (crossing or transition)
       */
-     bool IsDirectlyConnectedWith(const SubRoom* sub) const;
-
-     /**
-      * @return true if the two segments are visible from each other.
-      * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real and can be considered transparent
-      */
-     bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+     bool IsDirectlyConnectedWith(SubRoom* sub) const;
 
      /**
       * @return true if the two points are visible from each other.
@@ -302,13 +308,10 @@ public:
      virtual std::string WritePolyLine() const=0;
 
      /// convert all walls and transitions(doors) into a polygon representing the subroom
-     virtual bool ConvertLineToPoly(std::vector<Line*> goals) = 0;
+     virtual bool ConvertLineToPoly(const std::vector<Line*>& goals) = 0;
 
      ///check whether the pedestrians is still in the subroom
      virtual bool IsInSubRoom(const Point& ped) const = 0;
-
-     // MPI:
-     void ClearAllPedestrians();
 
 #ifdef _SIMULATOR
 
@@ -338,7 +341,7 @@ public:
      std::string WritePolyLine() const;
 
      void WriteToErrorLog() const;
-     bool ConvertLineToPoly(std::vector<Line*> goals);
+     bool ConvertLineToPoly(const std::vector<Line*>& goals);
      bool IsInSubRoom(const Point& ped) const;
 };
 
@@ -373,7 +376,7 @@ public:
      std::string WriteSubRoom() const;
      std::string WritePolyLine() const;
      virtual void WriteToErrorLog() const;
-     virtual bool ConvertLineToPoly(std::vector<Line*> goals);
+     virtual bool ConvertLineToPoly(const std::vector<Line*>& goals);
      bool IsInSubRoom(const Point& ped) const;
 };
 

@@ -298,6 +298,25 @@ bool Building::InitGeometry()
           }
      }
 
+     // look and save the neighbor subroom for improving the runtime
+     // that information is already present in the crossing/transitions
+
+     for(const auto & cross: _crossings)
+     {
+          SubRoom* s1=cross.second->GetSubRoom1();
+          SubRoom* s2=cross.second->GetSubRoom2();
+          if(s1) s1->AddNeighbor(s2);
+          if(s2) s2->AddNeighbor(s1);
+     }
+
+     for(const auto & trans: _transitions)
+     {
+          SubRoom* s1=trans.second->GetSubRoom1();
+          SubRoom* s2=trans.second->GetSubRoom2();
+          if(s1) s1->AddNeighbor(s2);
+          if(s2) s2->AddNeighbor(s1);
+     }
+
      Log->Write("INFO: \tInit Geometry successful!!!\n");
 
      return true;

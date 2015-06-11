@@ -161,7 +161,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
      //============================ WALLS ===========================
      const vector<Wall>& walls = subroom->GetAllWalls();
-     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
+     for (unsigned int i = 0; i < walls.size(); i++) {
           dist = tmpDirection.GetIntersectionDistance(walls[i]);
           if (dist < minDist) {
                inear = i;

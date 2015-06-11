@@ -97,7 +97,7 @@ private:
       *
       * @return Point
       */
-     Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
+     Point ForceRepWall(Pedestrian* ped, const Line& l) const;
 
 public:
 
