@@ -62,10 +62,10 @@ Method_D::~Method_D()
 
 bool Method_D::Process (const PedData& peddata)
 {
-     if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
+     /*if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
      {
           return false;
-     }
+     }*/
      _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
@@ -91,14 +91,29 @@ bool Method_D::Process (const PedData& peddata)
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          int NumPeds = ids.size();
+          //int NumPeds = ids.size();
           vector<int> IdInFrame = peddata.GetIdInFrame(ids);
           vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
+          //------------------------------Remove peds outside geometry------------------------------------------
+          for(unsigned int i=0;i<IdInFrame.size();i++)
+          {
+        	  if(false==within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly))
+        	  {
+        		  IdInFrame.erase(IdInFrame.begin() + i);
+        		  XInFrame.erase(XInFrame.begin() + i);
+        		  YInFrame.erase(YInFrame.begin() + i);
+        		  VInFrame.erase(VInFrame.begin() + i);
+        		  Log->Write("Warning:\tPedestrian at <x=%.4f, y=%.4f> is not in geometry and not considered in analysis!", XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
+        		  i--;
+        	  }
+          }
+          int NumPeds = IdInFrame.size();
+          //---------------------------------------------------------------------------------------------------------------
           if(NumPeds>2)
           {
-               vector<polygon_2d> polygons = GetPolygons(ids, XInFrame, YInFrame, VInFrame, IdInFrame);
+               vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
                OutputVoronoiResults(polygons, str_frid, VInFrame);
                if(_calcIndividualFD)
                {
@@ -159,12 +174,12 @@ bool Method_D::OpenFileIndividualFD()
      }
 }
 
-vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame, vector<int>& IdInFrame)
+vector<polygon_2d> Method_D::GetPolygons(vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame, vector<int>& IdInFrame)
 {
      VoronoiDiagram vd;
-     int NrInFrm = ids.size();
+     //int NrInFrm = ids.size();
      double boundpoint =10*max(max(fabs(_geoMinX),fabs(_geoMinY)), max(fabs(_geoMaxX), fabs(_geoMaxY)));
-     vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm,boundpoint);
+     vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, boundpoint);
      if(_cutByCircle)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);

@@ -47,9 +47,10 @@ VoronoiDiagram::~VoronoiDiagram()
 
 // Traversing Voronoi edges using cell iterator.
 vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, vector<double>& YInFrame,
-          vector<double>& VInFrame, vector<int>& IdInFrame, const int numPedsInFrame, const double Bound_Max)
+          vector<double>& VInFrame, vector<int>& IdInFrame, const double Bound_Max)
 {
-     int XInFrame_temp[numPedsInFrame];
+	 int numPedsInFrame = IdInFrame.size();
+	 int XInFrame_temp[numPedsInFrame];
      int YInFrame_temp[numPedsInFrame];
      double VInFrame_temp[numPedsInFrame];
      int IdInFrame_temp[numPedsInFrame];

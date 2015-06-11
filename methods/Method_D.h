@@ -84,7 +84,7 @@ private:
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
 
-     std::vector<polygon_2d> GetPolygons(std::vector<int> ids, std::vector<double>& XInFrame, std::vector<double>& YInFrame,
+     std::vector<polygon_2d> GetPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame,
                std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
      void OutputVoronoiResults(const std::vector<polygon_2d>&  polygons, const std::string& frid, const std::vector<double>& VInFrame);
      double GetVoronoiDensity(const std::vector<polygon_2d>& polygon, const polygon_2d & measureArea);
