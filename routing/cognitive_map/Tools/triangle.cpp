@@ -7,6 +7,13 @@ Triangle::Triangle(Point p, const Waypoint &waypoint)
 {
     _positionVector=p;
     std::tuple<Point,Point> bpoints = CalcBPoints(p, waypoint.GetPos(), waypoint.GetA(), waypoint.GetB());
+//    Log->Write(std::to_string(std::get<0>(bpoints).GetX()));
+//    Log->Write(std::to_string(std::get<0>(bpoints).GetY()));
+//    Log->Write(std::to_string(std::get<1>(bpoints).GetX()));
+//    Log->Write(std::to_string(std::get<1>(bpoints).GetY()));
+//    Log->Write(std::to_string(p.GetX()));
+//    Log->Write(std::to_string(p.GetY()));
+    //Log->Write(std::to_string(std::get<1>(bpoints)));
     _vectorA=std::get<0>(bpoints)-p;
     _vectorB=std::get<1>(bpoints)-p;
 }
@@ -24,11 +31,31 @@ Triangle::~Triangle()
 
 }
 
-bool Triangle::Contains(const Point& point) const
+bool Triangle::Contains(const Point &point) const
 {
-    double s = (point.GetY()-_positionVector.GetY()-(point.GetX()-_positionVector.GetX())/_vectorA.GetX())
-                                                    /(_vectorB.GetY()-_vectorB.GetX()/_vectorA.GetX());
-    double r = (point.GetX()-_positionVector.GetX()-s*_vectorB.GetX())/_vectorA.GetX();
+//    point=Point(5.0,3.0);
+//    _positionVector=Point(1,1);
+//    _vectorA=Point(6,6);
+//    _vectorB=Point(6,-1);
+    //double r = (point.GetY()-_positionVector.GetY()-point.GetX()*_vectorB.GetY()/
+      //          _vectorA.GetY()+_positionVector.GetX()*_vectorB.GetY()/_vectorA.GetY())
+        //        /(_vectorB.GetX()-_vectorA.GetX()*_vectorB.GetY()/_vectorA.GetY());
+    //Log->Write(std::to_string(s));
+    double r = 0;
+    double s = 0;
+
+    if ((_vectorA.GetY()*_vectorB.GetX()-_vectorA.GetX()*_vectorB.GetY())!=0)
+    {
+        r = (-_vectorA.GetY()*_positionVector.GetY()+_vectorA.GetY()*point.GetY()+_vectorB.GetY()*_positionVector.GetX()
+                    -_vectorB.GetY()*point.GetX())/(_vectorA.GetY()*_vectorB.GetX()-_vectorA.GetX()*_vectorB.GetY());
+        s = (point.GetX()-_positionVector.GetX()-r*_vectorB.GetX())/_vectorA.GetX();
+    }
+    else
+    {
+        Log->Write("ERROR:\t Denominator is zero (in function triangle::contains)");
+        return false;
+    }
+
 
     if (s>=0 && r>=0)
     {
@@ -40,12 +67,10 @@ bool Triangle::Contains(const Point& point) const
 
 std::tuple<Point, Point> Triangle::CalcBPoints(const Point &p, const Point &pos, const double &ah, const double &bh)
 {
-
     double px=p.GetX();
     double py=p.GetY();
-    double qm=pos.GetX();
-    double pm=pos.GetY();
-
+    double pm=pos.GetX();
+    double qm=pos.GetY();
 
     double alpha = (px-pm)/(ah*ah);
     double beta  = (py-qm)/(bh*bh);
@@ -57,6 +82,8 @@ std::tuple<Point, Point> Triangle::CalcBPoints(const Point &p, const Point &pos,
 
     float eps = 1e-10;
     float abd = std::abs(diskrim);
+
+
 
     if (ah>0 and bh>0)
     {
@@ -88,9 +115,12 @@ std::tuple<Point, Point> Triangle::CalcBPoints(const Point &p, const Point &pos,
             }
             Point p1(x1,y1);
             Point p2(x2,y2);
+            //std::cout << "return!" << std::endl;
             return std::tuple<Point,Point>(p1,p2);
             //print "Beruehrpunkte: (x1,y1) = (",x1,",",y1,"), (x2,y2) = (",x2,",",y2,")"
         }
+
     }
+    //std::cout << diskrim << std::endl;
 }
 

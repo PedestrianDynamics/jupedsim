@@ -22,7 +22,7 @@ public:
      * @brief CalcBPoints: Calculates touch-points straight
      * line through p to ellipse with pos, ah and bh
      */
-    std::tuple<Point,Point> CalcBPoints(const Point& p, const Point& pos, const double& ah, const double& bh);
+    std::tuple<Point,Point> CalcBPoints(const Point& p, const Point& pos, const double &ah, const double &bh);
 private:
     Point _positionVector;
     Point _vectorA;

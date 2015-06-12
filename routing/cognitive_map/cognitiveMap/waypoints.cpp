@@ -12,7 +12,7 @@ Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
     _a=a;
     _b=b;
     _room=room;
-    _priority=1.5;
+    _priority=5.0;
 }
 
 Waypoint::~Waypoint()

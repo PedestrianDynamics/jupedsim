@@ -93,6 +93,7 @@ void CognitiveMap::AssessDoors()
             if (IsAroundWaypoint(*waypoint,edge))
             {
                 edge->SetFactor(1/waypoint->GetPriority(),"SpatialKnowlegde");
+                Log->Write(std::to_string(edge->GetCrossing()->GetID()));
                 Log->Write("INFO: Door assessed!");
             }
         }
@@ -104,8 +105,8 @@ void CognitiveMap::AssessDoors()
 bool CognitiveMap::IsAroundWaypoint(const Waypoint& waypoint, GraphEdge *edge) const
 {
     Triangle triangle(_ped->GetPos(),waypoint);
-
-    return triangle.Contains(edge->GetCrossing()->GetCentre());
+    Point point(edge->GetCrossing()->GetCentre());
+    return triangle.Contains(point);
 }
 
 ptrGraphNetwork CognitiveMap::GetGraphNetwork() const
