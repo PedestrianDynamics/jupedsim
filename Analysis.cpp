@@ -359,15 +359,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     Log->Write("INFO:\tFailed with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
                }
           }
-          if(_DoesUseMethodC || _DoesUseMethodD)
-          {
-        	  string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
-        	                               		 " -f "+boost::lexical_cast<std::string>(data.GetFps());
-        	  system(parameters_Timeseries.c_str());
-        	  Log->Write("INFO:\tPlotting Time series of density and velocity!");
-          }
      }
-
+     if(_DoesUseMethodC || _DoesUseMethodD)
+	 {
+		  string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+											 " -f "+boost::lexical_cast<std::string>(data.GetFps());
+		  system(parameters_Timeseries.c_str());
+	 }
      return 0;
 }
 
