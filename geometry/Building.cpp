@@ -1010,6 +1010,10 @@ bool Building::LoadRoutingInfo(const string &filename)
           return false;
      }
 
+     if (! xRootNode->FirstChild("routing"))
+     {
+          return true; // no extra routing information
+     }
      //load goals and routes
      TiXmlNode*  xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
