@@ -26,6 +26,7 @@
  *
  **/
 #define TESTING
+#define GEO_UP_SCALE 1
 #include "FloorfieldViaFM.h"
 #include <iostream>
 #include <string>
@@ -50,9 +51,11 @@ FloorfieldViaFM::~FloorfieldViaFM()
 
 }
 
-FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg) {
+FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
+                                 const double slowdownDistance, const bool useDistancefield) {
     //ctor
     threshold = -1; //negative value means: ignore threshold
+    threshold = slowdownDistance;
 
     if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -67,12 +70,14 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-    calculateDistanceField(1.); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
+    resetGoalAndCosts(wall, numOfExits);
+
+    calculateDistanceField(threshold); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
 
     testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
 
-    calculateFloorfield(true); //use distance2Wall
+    calculateFloorfield(useDistancefield); //use distance2Wall
 
     testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
 }
@@ -89,6 +94,12 @@ FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
 //    return *this;
 //}
 
+void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
+    long int key = grid->getKeyAtPoint(position);
+    direction.SetX(neggrad[key].GetX());
+    direction.SetY(neggrad[key].GetY());
+}
+
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
     //init min/max before parsing
     double xMin = 100000.;
@@ -98,12 +109,18 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
-        if (((trans.second->GetRoom1()) && (trans.second->GetRoom1()->GetID() == -1)) ||
-            ((trans.second->GetRoom2()) && (trans.second->GetRoom2()->GetID() == -1)))
+        if (
+            //((trans.second->GetRoom1()) && (trans.second->GetRoom1()->GetID() == -1)) ||
+            //((trans.second->GetRoom2()) && (trans.second->GetRoom2()->GetID() == -1)) ||
+            //(trans.second->GetCaption().compare("main exit") == 0) ||
+            //(trans.second->GetType().compare("emergency") == 0)
+            trans.second->IsExit()
+           )
         {
-            wall.emplace_back(Wall( trans.second->GetPoint1()*5, trans.second->GetPoint2()*5 ));
+            wall.emplace_back(Wall( trans.second->GetPoint1()*GEO_UP_SCALE, trans.second->GetPoint2()*GEO_UP_SCALE ));
         }
     }
+    numOfExits = wall.size();
     std::vector<Room*> allRooms = buildingArg->GetAllRooms();
     for (std::vector<Room*>::iterator itRoom = allRooms.begin(); itRoom != allRooms.end(); ++itRoom) {
 
@@ -115,39 +132,39 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    wall.emplace_back(Wall( (*itObsWall).GetPoint1()*5, (*itObsWall).GetPoint2()*5 ));
+                    wall.emplace_back(Wall( (*itObsWall).GetPoint1()*GEO_UP_SCALE, (*itObsWall).GetPoint2()*GEO_UP_SCALE ));
 
                     // xMin xMax
-                    if ((*itObsWall).GetPoint1().GetX()*5 < xMin) xMin = (*itObsWall).GetPoint1().GetX()*5;
-                    if ((*itObsWall).GetPoint2().GetX()*5 < xMin) xMin = (*itObsWall).GetPoint2().GetX()*5;
-                    if ((*itObsWall).GetPoint1().GetX()*5 > xMax) xMax = (*itObsWall).GetPoint1().GetX()*5;
-                    if ((*itObsWall).GetPoint2().GetX()*5 > xMax) xMax = (*itObsWall).GetPoint2().GetX()*5;
+                    if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE > xMax) xMax = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE > xMax) xMax = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
 
                     // yMin yMax
-                    if ((*itObsWall).GetPoint1().GetY()*5 < yMin) yMin = (*itObsWall).GetPoint1().GetY()*5;
-                    if ((*itObsWall).GetPoint2().GetY()*5 < yMin) yMin = (*itObsWall).GetPoint2().GetY()*5;
-                    if ((*itObsWall).GetPoint1().GetY()*5 > yMax) yMax = (*itObsWall).GetPoint1().GetY()*5;
-                    if ((*itObsWall).GetPoint2().GetY()*5 > yMax) yMax = (*itObsWall).GetPoint2().GetY()*5;
+                    if ((*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE < yMin) yMin = (*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE < yMin) yMin = (*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE > yMax) yMax = (*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE > yMax) yMax = (*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE;
                 }
             }
 
             std::vector<Wall> allWalls = (*itSubroom)->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
-                wall.emplace_back( Wall((*itWall).GetPoint1()*5, (*itWall).GetPoint2()*5) );
+                wall.emplace_back( Wall((*itWall).GetPoint1()*GEO_UP_SCALE, (*itWall).GetPoint2()*GEO_UP_SCALE) );
                 //std::cout << &(*itWall) << std::endl;
                 //std::cout << wall[0].GetPoint1().GetX() << std::endl;
 
                 // xMin xMax
-                if ((*itWall).GetPoint1().GetX()*5 < xMin) xMin = (*itWall).GetPoint1().GetX()*5;
-                if ((*itWall).GetPoint2().GetX()*5 < xMin) xMin = (*itWall).GetPoint2().GetX()*5;
-                if ((*itWall).GetPoint1().GetX()*5 > xMax) xMax = (*itWall).GetPoint1().GetX()*5;
-                if ((*itWall).GetPoint2().GetX()*5 > xMax) xMax = (*itWall).GetPoint2().GetX()*5;
+                if ((*itWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itWall).GetPoint1().GetX()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itWall).GetPoint2().GetX()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint1().GetX()*GEO_UP_SCALE > xMax) xMax = (*itWall).GetPoint1().GetX()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint2().GetX()*GEO_UP_SCALE > xMax) xMax = (*itWall).GetPoint2().GetX()*GEO_UP_SCALE;
 
                 // yMin yMax
-                if ((*itWall).GetPoint1().GetY()*5 < yMin) yMin = (*itWall).GetPoint1().GetY()*5;
-                if ((*itWall).GetPoint2().GetY()*5 < yMin) yMin = (*itWall).GetPoint2().GetY()*5;
-                if ((*itWall).GetPoint1().GetY()*5 > yMax) yMax = (*itWall).GetPoint1().GetY()*5;
-                if ((*itWall).GetPoint2().GetY()*5 > yMax) yMax = (*itWall).GetPoint2().GetY()*5;
+                if ((*itWall).GetPoint1().GetY()*GEO_UP_SCALE < yMin) yMin = (*itWall).GetPoint1().GetY()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint2().GetY()*GEO_UP_SCALE < yMin) yMin = (*itWall).GetPoint2().GetY()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint1().GetY()*GEO_UP_SCALE > yMax) yMax = (*itWall).GetPoint1().GetY()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint2().GetY()*GEO_UP_SCALE > yMax) yMax = (*itWall).GetPoint2().GetY()*GEO_UP_SCALE;
             }
         }
     }
@@ -166,7 +183,30 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
     //linescan using (std::vector<Wall*>)
-    lineScan(wall, dist2Wall, 0., -3.);
+    //lineScan(wall, dist2Wall, 0., -3.);
+
+    //DRAWLINES-Mechanism
+    //init grid with -3 as used in lineScan mechanic
+    for(long int i = 0; i < grid->GetnPoints(); ++i) {
+        dist2Wall[i] = -3.;
+    }
+    drawLinesOnGrid(wall, dist2Wall, 0.);
+}
+
+void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
+/* this fkt shall set all Costdata to unknown and the goal points to 0
+   we have to watch how to calc indices as goal only knows coords from input file
+*/
+
+// set all cost data to "unknown" (remember to change flag accordingly)
+// get lines/walls from goals
+// use linescan to ititialize cost grid
+
+}
+
+void FloorfieldViaFM::resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExits) {
+    std::vector<Wall> exits(wallArg.begin(), wallArg.begin()+numOfExits);
+    drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0.) {               //outside
@@ -186,18 +226,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         trialfield[i].father = nullptr;
         trialfield[i].child = nullptr;
     }
-
-}
-
-void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
-/* this fkt shall set all Costdata to unknown and the goal points to 0
-   we have to watch how to calc indices as goal only knows coords from input file
-*/
-
-// set all cost data to "unknown" (remember to change flag accordingly)
-// get lines/walls from goals
-// use linescan to ititialize cost grid
-
+    drawLinesOnGrid(exits, cost, 0.); //already mark targets/exits in cost array (for floorfieldcalc)
 }
 
 void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside) {
@@ -215,7 +244,7 @@ void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target,
     double xMin             = grid->GetxMin();
     double yMin             = grid->GetyMin();
     double xMax             = grid->GetxMax();
-    double yMax             = grid->GetyMax();
+    //double yMax             = grid->GetyMax();
     double hx               = grid->Gethx();
     double hy               = grid->Gethy();
     std::vector<double> xIntersection;
@@ -290,6 +319,98 @@ void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target,
     } //loop over all lines
 }
 
+void FloorfieldViaFM::drawLinesOnGrid(std::vector<Wall>& wallArg, double* const target, const double outside) { //no init, plz init elsewhere
+// i~x; j~y;
+//http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
+//src in answer of "Avi"; adapted to fit this application
+
+//    //init with inside value:
+//    long int indexMax = grid->GetnPoints();
+//    for (long int i = 0; i < indexMax; ++i) {
+//        target[i] = inside;
+//    }
+
+    //grid handeling local vars:
+    long int iMax  = grid->GetiMax();
+
+    long int iStart, iEnd;
+    long int jStart, jEnd;
+    long int iDot, jDot;
+    long int key;
+    long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
+
+    for (auto& wall : wallArg) {
+        key = grid->getKeyAtPoint(wall.GetPoint1());
+        iStart = grid->get_i_fromKey(key);
+        jStart = grid->get_j_fromKey(key);
+
+        key = grid->getKeyAtPoint(wall.GetPoint2());
+        iEnd = grid->get_i_fromKey(key);
+        jEnd = grid->get_j_fromKey(key);
+
+        deltaX = (int) (iEnd - iStart);
+        deltaY = (int) (jEnd - jStart);
+        deltaX1 = fabs( (int) (iEnd - iStart));
+        deltaY1 = fabs( (int) (jEnd - jStart));
+
+        px = 2*deltaY1 - deltaX1;
+        py = 2*deltaX1 - deltaY1;
+
+        if(deltaY1<=deltaX1) {
+            if(deltaX>=0) {
+                iDot = iStart;
+                jDot = jStart;
+                xe = iEnd;
+            } else {
+                iDot = iEnd;
+                jDot = jEnd;
+                xe = iStart;
+            }
+            target[jDot*iMax + iDot] = outside;
+            for (i=0; iDot < xe; ++i) {
+                ++iDot;
+                if(px<0) {
+                    px+=2*deltaY1;
+                } else {
+                    if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
+                        ++jDot;
+                    } else {
+                        --jDot;
+                    }
+                    px+=2*(deltaY1-deltaX1);
+                }
+                target[jDot*iMax + iDot] = outside;
+            }
+        } else {
+            if(deltaY>=0) {
+                iDot = iStart;
+                jDot = jStart;
+                ye = jEnd;
+            } else {
+                iDot = iEnd;
+                jDot = jEnd;
+                ye = jStart;
+            }
+            target[jDot*iMax + iDot] = outside;
+            for(i=0; jDot<ye; ++i) {
+                ++jDot;
+                if (py<=0) {
+                    py+=2*deltaX1;
+                } else {
+                    if((deltaX<0 && deltaY<0) || (deltaX>0 && deltaY>0)) {
+                        ++iDot;
+                    } else {
+                        --iDot;
+                    }
+                    py+=2*(deltaX1-deltaY1);
+                }
+                target[jDot*iMax + iDot] = outside;
+            }
+        }
+    } //loop over all walls
+
+} //drawLinesOnGrid
+
 void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
 
     Trial* smallest = nullptr;
@@ -332,16 +453,12 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
         trialfield[i].child = nullptr;
     }
 
-    //set goal and add to known (and neighbors of known to narrowband)
-    //setting the goal must be done hardcoded up to now
-//    long int goalidx = -1;
-//    for (goalidx = (grid->GetiMax() - 1); goalidx < grid->GetnPoints(); goalidx += grid->GetiMax()) {
-//        if (flag[goalidx] == 0) {
-//            cost[goalidx] = 0.;
-//            flag[goalidx] = 3;
-//        }
-//    }
-    flag[745201] = 3;
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        if (cost[i] == 0.) {
+            flag[i] = 3;
+        }
+    }
+
 
 
     //init narrowband
@@ -674,10 +791,9 @@ inline double FloorfieldViaFM::twosidedCalc(double x, double y, double hDivF) { 
     if (determinante >= 0) {
         return (x + y + sqrt(determinante))/2;
     } else {
-        std::cerr << "error in two-sided " << determinante << std::endl;
-        return -2.;
+        return (x < y) ? (x + hDivF) : (y + hDivF);
     }
-    std::cerr << "error in two-sided 2" << std::endl;
+    std::cerr << "error in two-sided 2!!!!!!!!!!!!!!!!!!!!!!! o_O??" << std::endl;
     return -2.; //this line should never execute
 } //twosidedCalc
 
@@ -701,29 +817,27 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
                                 " " <<
                                 std::to_string(grid->GetjMax()) <<
                                 " 1" << std::endl;
-    file << "ORIGIN 0 0 0" << std::endl;
-    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
     file << "SCALARS Cost float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        //if (dist2Wall[i] < 0.) {
-        //    std::cerr << "dist2Wall holds negative value at key: " << i << std::endl;
-            //exit(22);
-        //}
         file << target[i] << std::endl;
         Point iPoint = grid->getPointFromKey(i);
-        file2 << iPoint.GetX() /*- grid->GetxMin()*/ << " " << iPoint.GetY() /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+        file2 << iPoint.GetX()/GEO_UP_SCALE /*- grid->GetxMin()*/ << " " << iPoint.GetY()/GEO_UP_SCALE /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
     }
 
     if (target == cost) {
         file << "VECTORS Gradient float" << std::endl;
         for (int i = 0; i < grid->GetnPoints(); ++i) {
-            file << neggrad[i].GetX() << " " << neggrad[i].GetY() << " 0.0" << std::endl;
+            file << neggrad[i].GetX()/GEO_UP_SCALE << " " << neggrad[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
         }
     }
 
     file.close();
     file2.close();
+
+    std::cerr << "File closed: " << filename1 << std::endl;
 }
 

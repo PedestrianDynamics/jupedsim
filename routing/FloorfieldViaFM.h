@@ -51,14 +51,18 @@ class FloorfieldViaFM
 {
     public:
         FloorfieldViaFM();
-        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg);
+        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double slowdownDistance, const bool useDistancefield);
         virtual ~FloorfieldViaFM();
         FloorfieldViaFM(const FloorfieldViaFM& other);
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
+        void getDirectionAt(const Point& position, Point& direction);
+
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
         void resetGoalAndCosts(const Goal* const goalArg);
+        void resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExits);
         void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
+        void drawLinesOnGrid(std::vector<Wall>& wallArg, double* const target, const double outside);
         void calculateFloorfield(bool useDistance2Wall);     //make private
         void calculateDistanceField(const double thresholdArg); //make private
 
@@ -83,6 +87,7 @@ class FloorfieldViaFM
     private:
         RectGrid* grid;
         std::vector<Wall> wall;
+        int numOfExits;
 
 
         //stuff to handle wrapper grid (unused, cause RectGrid handles offset)

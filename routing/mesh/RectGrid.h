@@ -98,6 +98,14 @@ class RectGrid
             return -1; // invalid indices
         }
 
+        long int getKeyAtPoint(const Point p) const {
+            long int i = (long int) (((p.GetX()-xMin)/hx)+.5);
+            long int j = (long int) (((p.GetY()-yMin)/hy)+.5);
+            if ((i < iMax) && (j < jMax))
+                return (j*iMax+i); // 0-based; index of (closest gridpoint)
+            return -1; // invalid indices
+        }
+
         void setBoundaries(const double xMinA, const double yMinA,
                            const double xMaxA, const double yMaxA) {
             if (!isInitialized) {
