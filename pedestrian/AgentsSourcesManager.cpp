@@ -244,6 +244,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           for (unsigned int a = 0; a < positions.size(); a++)
           {
                Point pos = positions[a];
+               //cout<<"checking: "<<pos.toString()<<endl;
                if ((bounds[0] <= pos._x) && (pos._x <= bounds[1])
                          && (bounds[2] <= pos._y) && (pos._y < bounds[3]))
                {
@@ -258,7 +259,9 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
                     Log->Write(
                               "ERROR:\t AgentSourceManager Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
                               bounds[0], bounds[1], bounds[2], bounds[3]);
-                    Log->Write("ERROR:\t Specifying a subroom_id might help");
+                    Log->Write("     \t Specifying a subroom_id might help");
+                    Log->Write("     \t %d positions were available",positions.size());
+                    exit(EXIT_FAILURE);
                }
           }
           else

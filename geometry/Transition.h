@@ -43,6 +43,7 @@ private:
      // number of agents that passed that exit
      int _doorUsage;
      double _lastPassingTime;
+     std::string _flowAtExit;
 
 public:
 
@@ -88,6 +89,12 @@ public:
       * @return the number of pedestrians that used that exit.
       */
      int GetDoorUsage() const;
+
+
+     /**
+      * @return the flow curve for this exit
+      */
+     const std::string & GetFlowCurve() const;
 
      /**
       * @return the last time this door was crossed

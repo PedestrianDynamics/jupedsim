@@ -423,13 +423,22 @@ void Simulation::PrintStatistics()
 
      Log->Write("\nUsage of Exits");
      Log->Write("==========");
-     for (const auto& itr : _building->GetAllTransitions()) {
+     for (const auto& itr : _building->GetAllTransitions())
+     {
           Transition* goal = itr.second;
-          if (goal->IsExit()) {
+          if (goal->IsExit())
+          {
                Log->Write(
                          "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
+
+               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+goal->GetCaption()+".dat";
+               Log->Write("More Information in the file: %s",statsfile.c_str());
+               auto output= new FileHandler(statsfile.c_str());
+               output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+               output->Write("#Time (s)  cummulative number of agents \n");
+               output->Write(goal->GetFlowCurve());
           }
      }
      Log->Write("\n");
