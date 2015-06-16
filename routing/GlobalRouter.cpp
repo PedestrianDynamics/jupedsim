@@ -771,10 +771,7 @@ int GlobalRouter::FindExit(Pedestrian* ped)
      // else proceed as usual and return the closest navigation line
      //ped->Dump(1);//ped->Dump(9);
      int nextDestination = ped->GetNextDestination();
-     //      if(ped->GetGlobalTime()>80){
-     //              ped->Dump(2);
-     //              //exit(0);
-     //      }
+
      if (nextDestination == -1) {
 
           return GetBestDefaultRandomExit(ped);
@@ -832,15 +829,10 @@ int GlobalRouter::FindExit(Pedestrian* ped)
 
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 {
-     // prob parameters
-     //double alpha=0.2000005;
-     //double normFactor=0.0;
-     //map <int, double> doorProb;
 
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
 
      //in the case there is only one alternative
      //save some computation
@@ -859,8 +851,6 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
                ped->GetSubRoomID());
 
-     //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-     //      int apID = accessPointsInSubRoom[i];
      for(unsigned int g=0; g<relevantAPs.size(); g++)
      {
           AccessPoint* ap=relevantAPs[g];
@@ -882,47 +872,24 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                ped->RerouteIn(10);
                continue;
           }
-
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
           double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
           double dist=dist1+dist2;
 
-          //        doorProb[ap->GetID()]= exp(-alpha*dist);
-          //        normFactor += doorProb[ap->GetID()];
-
-
-          //          if (dist < minDistGlobal) {
-          //               bestAPsID = ap->GetID();
-          //               minDistGlobal = dist;
-          //          }
-
-          // normalize the probs
-          //    double randomVar = _rdDistribution(_rdGenerator);
-          //
-          //    for (const auto & it = doorProb.begin(); it!=doorProb.end(); ++it){
-          //        it->second =  it->second / normFactor;
-          //    }
-          //
-          //    double cumProb= doorProb.begin()->second;
-          //    const auto & it = doorProb.begin();
-          //    while(cumProb<randomVar) {
-          //        it++;
-          //        cumProb+=it->second;
-          //    }
-          //    bestAPsID=it->first;
-
           //very useful for short term decisions
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
-          {
-               if (dist2 < minDistLocal) {
-                    bestAPsID = ap->GetID();
-                    minDistGlobal = dist;
-                    minDistLocal= dist2;
-               }
 
-          } else {
+//          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+//          {
+//               if (dist2 < minDistLocal) {
+//                    bestAPsID = ap->GetID();
+//                    minDistGlobal = dist;
+//                    minDistLocal= dist2;
+//               }
+//          }
+//          else
+          {
 
                if (dist < minDistGlobal) {
                     bestAPsID = ap->GetID();
@@ -980,7 +947,6 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                     //only if not closed
                     if(ap->IsClosed()==false)
                          relevantAPS.push_back(ap);
-                    //cout<<"relevant APs:" <<ap->GetID()<<endl;
                }
           }
 
@@ -1035,35 +1001,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                {
                     if(ap->IsClosed()==false)
                          relevantAPS.push_back(ap);
-                    //cout<<"relevant APs:" <<ap->GetID()<<endl;
                }
           }
      }
-     //         if(relevantAPS.size()==2){
-     //              cout<<"alternative wege: "<<relevantAPS.size()<<endl;
-     //              cout<<"ap1: "<<relevantAPS[0]->GetID()<<endl;
-     //              cout<<"ap2: "<<relevantAPS[1]->GetID()<<endl;
-     //              getc(stdin);
-     //         }
-}
-
-SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2)
-{
-     SubRoom* sb11 = c1->GetSubRoom1();
-     SubRoom* sb12 = c1->GetSubRoom2();
-     SubRoom* sb21 = c2->GetSubRoom1();
-     SubRoom* sb22 = c2->GetSubRoom2();
-
-     if (sb11 == sb21)
-          return sb11;
-     if (sb11 == sb22)
-          return sb11;
-     if (sb12 == sb21)
-          return sb12;
-     if (sb12 == sb22)
-          return sb12;
-
-     return NULL;
 }
 
 void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
@@ -1650,8 +1590,6 @@ double GlobalRouter::MinAngle(const Point& p1, const Point& p2, const Point& p3)
      double alpha=acos((a+b-c)/(2*sqrt(a)*sqrt(b)));
      double beta=acos((a+c-b)/(2*sqrt(a)*sqrt(c)));
      double gamma=acos((c+b-a)/(2*sqrt(c)*sqrt(b)));
-
-     //cout <<"minimum angle: " <<std::min({alpha, beta, gamma}) * (180.0 / M_PI)<<endl;
 
      if(fabs(alpha+beta+gamma-M_PI)<J_EPS)
      {

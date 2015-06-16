@@ -847,19 +847,23 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+
+     if(relevantAPs.size()==1)
+     {
+          auto&& ap=relevantAPs[0];
+          ped->SetExitIndex(ap->GetID());
+          ped->SetExitLine(ap->GetNavLine());
+          return ap->GetID();
+     }
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
      double minDistLocal = FLT_MAX;
 
-     //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-     //      int apID = accessPointsInSubRoom[i];
      for(unsigned int g=0; g<relevantAPs.size(); g++)
      {
           AccessPoint* ap=relevantAPs[g];
-          //int exitid=ap->GetID();
-          //AccessPoint* ap = _accessPoints[apID];
+
 
           if (ap->isInRange(sub->GetUID()) == false)
                continue;

@@ -115,12 +115,6 @@ protected:
      int GetBestDefaultRandomExit(Pedestrian* p);
 
      /**
-      * @return the subroom which contains both crossings.
-      *  Null is return is there is no such subroom.
-      */
-     SubRoom* GetCommonSubRoom(Crossing* c1, Crossing* c2);
-
-     /**
       * Generate a navigation mesh based on delauney triangulation
       */
      bool GenerateNavigationMesh();
