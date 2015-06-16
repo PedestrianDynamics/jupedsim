@@ -65,7 +65,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_A->_id);
      _passLine = new bool[peddata.GetNumPeds()];
      string outputRhoV;
-     outputRhoV.append("#Frame\t	Cumulative pedestrians\n");
+     outputRhoV.append("#Time [s]\t	Cumulative pedestrians\n");
      for(int i=0; i<peddata.GetNumPeds(); i++)
      {
           _passLine[i] = false;
@@ -84,7 +84,7 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
           const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
           GetAccumFlowVelocity(frameNr, ids, VInFrame);
           char tmp[30];
-          sprintf(tmp, "%d\t%d\n", frid, _classicFlow);
+          sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
           outputRhoV.append(tmp);
      }
      FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
@@ -102,8 +102,7 @@ void Method_A::WriteFile_N_t(string data)
           file<<data;
           string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
-          string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t+
-                   		 " -f "+boost::lexical_cast<std::string>(_fps);
+          string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
           system(parameters_N_t.c_str());
           Log->Write("INFO:\tPlotting N-t diagram!");
      }

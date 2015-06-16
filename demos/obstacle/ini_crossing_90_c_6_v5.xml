@@ -8,7 +8,8 @@
         <file name="traj_crossing_90_c_6_v5.txt" /> 
         <path location="./" /> 
     </trajectories> 
-    <!-- all files in the directories will be used --> 
+	
+	<scripts location="../../scripts/"/>
 
     <measurement_areas unit="m"> 
         <area_B id="1" type="BoundingBox"> 
