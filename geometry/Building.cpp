@@ -1169,11 +1169,6 @@ void Building::DeletePedestrian(Pedestrian* &ped)
           _allPedestians.erase(it);
 
           int nowPeds= _allPedestians.size();
-          //if((*it)->GetID()==69){
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
-          //cout << "want to rescue agent: " << ped->GetID()<<endl<<endl;
-          //     exit(0);
-          // }
           Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
