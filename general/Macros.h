@@ -1,7 +1,7 @@
 /**
  * \file        Macros.h
  * \date        Jun 16, 2010
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
