@@ -249,6 +249,12 @@ public:
      const Hline* GetHline(int i) const;
 
      /**
+      *
+      * @return true if the point is part of the polygon, also considering the geometry precision.
+      */
+     bool IsPartOfPolygon(const Point& pt);
+
+     /**
       * @return true if there is an overlapp between the walls of the subrooms and the
       * supplied set of lines.
       */

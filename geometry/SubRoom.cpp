@@ -148,8 +148,8 @@ bool SubRoom::AddWall(const Wall& w)
           {
                Log->Write("ERROR:\t Duplicate wall found in Room/Subroom %d/%d  %s",_roomID,_id ,w.toString().c_str());
                Log->Write("ERROR:\t will not be added");
-               exit(EXIT_FAILURE);
-               //return false;
+               //exit(EXIT_FAILURE);
+               return false;
           }
      }
      //checking for wall chunks.
@@ -158,7 +158,7 @@ bool SubRoom::AddWall(const Wall& w)
           Log->Write("ERROR:\t Wall too small (length = %lf) found in Room/Subroom %d/%d  %s",w.Length(),_roomID,_id ,w.toString().c_str());
           Log->Write("ERROR:\t will not be added");
           //exit(EXIT_FAILURE);
-          //return false;
+          return false;
      }
      _walls.push_back(w);
      return true;
@@ -657,6 +657,29 @@ bool SubRoom::IsClockwise()
      return (fabs(det)<J_EPS);
 }
 
+bool SubRoom::IsPartOfPolygon(const Point& ptw)
+{
+     if ( false == IsElementInVector(_poly, ptw))
+     {
+          //maybe the point was too closed to other points and got replaced
+          //check that eventuality
+          bool near = false;
+          for (const auto & pt : _poly)
+          {
+               if ((pt - ptw).Norm() < J_TOLERANZ)
+               {
+                    near = true;
+                    break;
+               }
+          }
+
+          if(near==false)
+          {
+               return false;
+          }
+     }
+     return true;
+}
 
 /************************************************************
  NormalSubRoom
@@ -819,26 +842,28 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
 
      //check if all walls and goals were used in the polygon
-     for (const auto& w: _walls)
-     {
-          if( ! (  IsElementInVector(_poly,w.GetPoint1()) and
-                    IsElementInVector(_poly,w.GetPoint2())) )
-          {
-               //maybe the point was too closed to other points and got replaced
-               //check that eventuality
-
-               Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
-               return false;
-          }
-     }
+      for (const auto& w: _walls)
+      {
+           for (const auto & ptw: {w.GetPoint1(),w.GetPoint2()})
+           {
+                if(IsPartOfPolygon(ptw)==false)
+                {
+                     Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
+                     return false;
+                }
+           }
+      }
 
      for (const auto& g: goals)
      {
-          if( ! (  IsElementInVector(_poly,g->GetPoint1()) and
-                    IsElementInVector(_poly,g->GetPoint2())) )
+
+          for (const auto & ptw: {g->GetPoint1(),g->GetPoint2()})
           {
-               Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
-               //return false;
+               if(IsPartOfPolygon(ptw)==false)
+               {
+                    Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
+                    return false;
+               }
           }
      }
      return true;
@@ -1141,25 +1166,32 @@ bool Stair::ConvertLineToPoly(const vector<Line*>& goals)
      _poly = neuPoly;
 
      //check if all walls and goals were used in the polygon
+     // will not work here, since the stairs only consist of 4 vertices
+
 //     for (const auto& w: _walls)
 //     {
-//          if( ! (  IsElementInVector(_poly,w.GetPoint1()) and
-//                    IsElementInVector(_poly,w.GetPoint2())) )
+//          for (const auto & ptw: {w.GetPoint1(),w.GetPoint2()})
 //          {
-//               Log->Write("ERROR:\t Wall was not used during polygon creation for stair: %s",w.toString().c_str());
-//               return false;
+//               if(IsPartOfPolygon(ptw)==false)
+//               {
+//                    Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
+//                    return false;
+//               }
 //          }
 //     }
 //
-//     for (const auto& g: goals)
-//     {
-//          if( ! (  IsElementInVector(_poly,g->GetPoint1()) and
-//                    IsElementInVector(_poly,g->GetPoint2())) )
-//          {
-//               Log->Write("ERROR:\t goal was not used during polygon creation for stair: %s",g->toString().c_str());
-//               return false;
-//          }
-//     }
+//    for (const auto& g: goals)
+//    {
+//
+//         for (const auto & ptw: {g->GetPoint1(),g->GetPoint2()})
+//         {
+//              if(IsPartOfPolygon(ptw)==false)
+//              {
+//                   Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
+//                   return false;
+//              }
+//         }
+//    }
 
      return true;
 }
