@@ -1,8 +1,8 @@
 /**
  * \file        travistoclient.cpp
  * \date        jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. all rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. all rights reserved.
  *
  * \section license
  * this file is part of jupedsim.

@@ -1,7 +1,7 @@
 /**
  * \file        StartDistribution.h
  * \date        Apr 15, 2015
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License

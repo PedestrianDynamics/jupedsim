@@ -1,8 +1,8 @@
 /**
  * \file        SubRoom.h
  * \date        Oct 8, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -247,6 +247,12 @@ public:
      const Crossing* GetCrossing(int i) const;
      const Transition* GetTransition(int i) const;
      const Hline* GetHline(int i) const;
+
+     /**
+      *
+      * @return true if the point is part of the polygon, also considering the geometry precision.
+      */
+     bool IsPartOfPolygon(const Point& pt);
 
      /**
       * @return true if there is an overlapp between the walls of the subrooms and the
