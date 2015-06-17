@@ -83,7 +83,6 @@ BOOST_AUTO_TEST_CASE(JTol_WallGap_test)
     std::vector<Line*> goal; // (Line(Point(10, 5), Point(10, 0)));
     goal.push_back(&exit);
     
-    sub1.SetClosed(1);
    
     if (sub1.ConvertLineToPoly(goal) == true) {
         std::vector<Point> poly = sub1.GetPolygon();
@@ -124,7 +123,6 @@ BOOST_AUTO_TEST_CASE(small_Wall_test)
     std::vector<Line*> door; // (Line(Point(10, 5), Point(10, 0)));
     door.push_back(&exit);
     
-    sub.SetClosed(1);
     if (sub.ConvertLineToPoly(door) == true) {
         std::vector<Point> poly = sub.GetPolygon();
         for (auto it:poly)
@@ -161,7 +159,6 @@ BOOST_AUTO_TEST_CASE(overlap_Wall_test)
     std::vector<Line*> door; // door overlaps with the wall
     door.push_back(&exit);
     
-    sub.SetClosed(1);
     if (sub.ConvertLineToPoly(door) == true) {
         std::vector<Point> poly = sub.GetPolygon();
         for (auto it:poly)
