@@ -251,8 +251,6 @@ BOOST_AUTO_TEST_CASE(Line_whichSide_test)
 	            cos(i*Pi/6) << "," << sin(i*Pi/6) << ")");
 	}
 
-	// fails for horizontal and nearly horizontal lines
-
 	BOOST_MESSAGE("starting line which side test");
 }
 
