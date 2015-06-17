@@ -112,27 +112,14 @@ BOOST_AUTO_TEST_CASE(small_Wall_test)
     Point P6 (10, 5);
     Point P7 (10, 0);
     
-    sub.AddWall(Wall(P1, P2));
-    sub.AddWall(Wall(P2, P3));
-    sub.AddWall(Wall(P3, P4));
-    sub.AddWall(Wall(P4, P5));
-    sub.AddWall(Wall(P5, P6));
-    sub.AddWall(Wall(P1, P7));
+    BOOST_CHECK(sub.AddWall(Wall(P1, P2)) == true);
+    BOOST_CHECK(sub.AddWall(Wall(P2, P3)) == true);
+    BOOST_CHECK(sub.AddWall(Wall(P3, P4)) == false);
+    BOOST_CHECK(sub.AddWall(Wall(P4, P5)) == true);
+    BOOST_CHECK(sub.AddWall(Wall(P5, P6)) == true);
+    BOOST_CHECK(sub.AddWall(Wall(P1, P7)) == true);
     
-    Line exit(P6, P7);
-    
-    std::vector<Line*> door; // (Line(Point(10, 5), Point(10, 0)));
-    door.push_back(&exit);
-    
-    sub.SetClosed(1);
-    if (sub.ConvertLineToPoly(door) == true) {
-        std::vector<Point> poly = sub.GetPolygon();
-        for (auto it:poly)
-            BOOST_CHECK_MESSAGE(poly.size() == 7, "x = " << it.GetX() << ", y = " << it.GetY());
-    }
-    else
-        BOOST_CHECK(false);
-    
+
     BOOST_MESSAGE("Leaving small wall test");
 }
 
@@ -162,14 +149,7 @@ BOOST_AUTO_TEST_CASE(overlap_Wall_test)
     door.push_back(&exit);
     
     sub.SetClosed(1);
-    if (sub.ConvertLineToPoly(door) == true) {
-        std::vector<Point> poly = sub.GetPolygon();
-        for (auto it:poly)
-            BOOST_CHECK_MESSAGE(poly.size() == 6, "x = " << it.GetX() << ", y = " << it.GetY());
-            // needed result:: overlapping wall with exit to be split
-    }
-    else
-        BOOST_CHECK(false);
+    BOOST_CHECK(sub.ConvertLineToPoly(door) == false);
     
     BOOST_MESSAGE("Leaving overlap wall test");
     
