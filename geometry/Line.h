@@ -42,7 +42,8 @@ class OutputHandler;
 extern OutputHandler* Log;
 
 
-class Line {
+class Line
+{
 private:
      Point _point1;
      Point _point2;
@@ -198,14 +199,14 @@ public:
      bool HasEndPoint(const Point& point) const;
 
      /**
-      * return the same value if the checked points are all situated on the same side.
-      * @return 0 or 1 depending on which side of the line the point is located.
+      * Determine on which side the point is located on of the line directed from (_point1 to _point2).
+      * @return 0 (Left) or 1 (Right) depending on which side of the line the point is located.
+      * The return value is undefined if the points are colinear.
       */
      int WichSide (const Point& pt);
 
      /**
-      * @return true if the point is located in the left hand side of the line.
-      * For horizontal lines return true if the point is above the line.
+      * @return true if the point is located in the left hand side of the line directed from (_point1 to _point2).
       */
      bool IsLeft (const Point& pt);
 

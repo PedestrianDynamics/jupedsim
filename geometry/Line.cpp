@@ -340,18 +340,9 @@ bool Line::IsVertical() {
 }
 
 int Line::WichSide(const Point &pt) {
-    //special case for horizontal lines
-    if (IsVertical()) {
-        //left
-        if (pt._x < _point1._x)
-            return 0;
-        //right or colinear
-        if (pt._x >= _point1._x)
-            return 1;
-    }
 
-    return ((_point2._x - _point1._x) * (pt._y - _point1._y)
-            - (_point2._y - _point1._y) * (pt._x - _point1._x)) > 0;
+     if(IsLeft(pt)) return 0;
+     return 1;
 }
 
 
