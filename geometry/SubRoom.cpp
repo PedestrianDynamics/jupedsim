@@ -68,7 +68,6 @@ SubRoom::SubRoom()
 
      _goalIDs = vector<int> ();
      _area = 0.0;
-     _closed=false;
      _uid = _static_uid++;
 }
 
@@ -86,10 +85,6 @@ void SubRoom::SetSubRoomID(int ID)
 {
      _id = ID;
 }
-void SubRoom::SetClosed(double closed)
-{
-     _closed = closed;
-}
 
 void SubRoom::SetRoomID(int ID)
 {
@@ -99,11 +94,6 @@ void SubRoom::SetRoomID(int ID)
 int SubRoom::GetSubRoomID() const
 {
      return _id;
-}
-
-double SubRoom::GetClosed() const
-{
-     return _closed;
 }
 
 // unique identifier for this subroom
@@ -830,24 +820,27 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
      //check if all walls and goals were used in the polygon
      for (const auto& w: _walls)
+     {
+          if( ! (  IsElementInVector(_poly,w.GetPoint1()) and
+                    IsElementInVector(_poly,w.GetPoint2())) )
           {
-               if( ! (  IsElementInVector(_poly,w.GetPoint1()) and
-                         IsElementInVector(_poly,w.GetPoint2())) )
-               {
-                    Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
-                    return false;
-               }
-          }
+               //maybe the point was too closed to other points and got replaced
+               //check that eventuality
 
-          for (const auto& g: goals)
-          {
-               if( ! (  IsElementInVector(_poly,g->GetPoint1()) and
-                         IsElementInVector(_poly,g->GetPoint2())) )
-               {
-                    Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
-                    return false;
-               }
+               Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
+               return false;
           }
+     }
+
+     for (const auto& g: goals)
+     {
+          if( ! (  IsElementInVector(_poly,g->GetPoint1()) and
+                    IsElementInVector(_poly,g->GetPoint2())) )
+          {
+               Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
+               //return false;
+          }
+     }
      return true;
 }
 

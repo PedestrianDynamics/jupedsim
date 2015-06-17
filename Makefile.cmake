@@ -10,12 +10,12 @@ $(DIRS):
 
 
 release:
-	( cd bin/release && cmake -DCMAKE_BUILD_TYPE=release ../.. && $(MAKE) --no-print-directory )
+	( cd bin/release && cmake -DCMAKE_BUILD_TYPE=release  -DBUILD_TESTING=ON ../.. && $(MAKE) --no-print-directory )
 #	ctags -R  --language-force=c++ *.*
 #	ctags -eR  --language-force=c++ *.*
 
 debug:
-	( cd bin/debug && cmake -DCMAKE_BUILD_TYPE=debug ../.. && $(MAKE) --no-print-directory )
+	( cd bin/debug && cmake -DCMAKE_BUILD_TYPE=debug  -DBUILD_TESTING=ON ../.. && $(MAKE) --no-print-directory )
 #	ctags -R  --language-force=c++ *.*
 #	ctags -eR  --language-force=c++ *.*
 

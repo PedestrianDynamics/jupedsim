@@ -62,7 +62,6 @@ private:
      int _roomID;
      std::vector<int> _goalIDs; // all navigation lines contained in this subroom
      double _area;
-     double _closed;
      //defined by: Z = Ax + By + C
      double _planeEquation[3];
      double _cosAngleWithHorizontalPlane;
@@ -104,8 +103,6 @@ public:
       * Set/Get the associated room id
       */
      void SetRoomID(int ID);
-
-     void SetClosed(double c);
 
      /**
       * Set the plane equation for this subroom.
