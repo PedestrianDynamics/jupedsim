@@ -845,7 +845,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
                          IsElementInVector(_poly,g->GetPoint2())) )
                {
                     Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
-                    return false;
+                    //return false;
                }
           }
      return true;
