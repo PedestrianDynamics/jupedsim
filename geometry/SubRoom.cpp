@@ -614,7 +614,7 @@ bool SubRoom::IsConvex()
 
      if(hsize==0) {
           Log->Write("WARNING:\t cannot check empty polygon for convexification");
-          Log->Write("WARNING:\t Did you forget to tall ConvertLineToPoly() ?");
+          Log->Write("WARNING:\t Did you forget to call ConvertLineToPoly() ?");
           return false;
      }
 
