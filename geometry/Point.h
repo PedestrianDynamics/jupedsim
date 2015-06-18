@@ -72,17 +72,33 @@ public:
      /// Norm square
      inline double NormSquare() const
      {
-          return (_x * _x + _y * _y);
+          return ScalarProduct(*this);
      }
      /// normalized vector
      Point Normalized() const;
      /// normalized vector usinf NormMolified
      Point NormalizedMolified() const;
      /// dot product
-     double ScalarProduct(const Point &v) const;
-     double CrossProduct(const Point &p) const;
+     inline double ScalarProduct(const Point &v) const
+     {
+          return _x * v._x + _y * v._y;
+     }
+
+     // since we have only 2D vectors (may be changed in the future), this function returns a scalar
+     // (basically the third component of the vector (0,0,z) )
+     inline double CrossProduct(const Point &p) const
+     {
+          return Determinant(p);
+     }
+
+
+
      /// determinant of the square matrix formed by the vectors [ this, v]
-     double Determinant(const Point &v) const;
+     inline double Determinant(const Point &v) const
+     {
+          return _x*v._y - _y*v._x;
+     }
+
      /// translation and rotation in Ellipse coordinate system
      Point TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const;
      /// translation and rotation in cartesian system

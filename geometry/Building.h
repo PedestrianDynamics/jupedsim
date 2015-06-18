@@ -73,7 +73,7 @@ private:
 
 public:
      /// constructor
-     Building();
+     //Building();
      Building(const std::string&, const std::string&, RoutingEngine&, PedDistributor&, double);
      /// destructor
      virtual ~Building();
@@ -122,14 +122,14 @@ public:
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can can be considered transparent
       */
-     bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+     //bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
      /**
       * @return true if the two points are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
-     bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+     bool IsVisible(const Point& p1, const Point& p2, const std::vector<SubRoom*>& subrooms, bool considerHlines=false);
 
      /**
       * @return a crossing or a transition matching the given caption.

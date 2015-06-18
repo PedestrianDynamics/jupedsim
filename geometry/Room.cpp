@@ -88,6 +88,10 @@ void Room::SetState(RoomState state)
      _state=state;
 }
 
+void Room::SetEgressTime(double time)
+{
+     _egressTime=time;
+}
 
 /*************************************************************
  Getter-Functions
@@ -111,11 +115,6 @@ double Room::GetZPos() const
 double Room::GetEgressTime() const
 {
      return _egressTime;
-}
-
-void Room::SetEgressTime(double time)
-{
-     _egressTime=time;
 }
 
 int Room::GetNumberOfSubRooms() const

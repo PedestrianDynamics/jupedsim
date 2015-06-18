@@ -51,6 +51,12 @@
 #include "pedestrian/PedDistributor.h"
 #include "routing/CognitiveMapRouter.h"
 #include "events/EventManager.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+//Forward declarations
+//class AgentsSourcesManager;
+class EventManager;
+class HybridSimulationManager;
 
 class Simulation
 {
@@ -58,7 +64,7 @@ private:
      ///Number of pedestrians in the simulation
     long _nPeds;
     ///Maximum simulation time
-    double _tmax;
+    //double _tmax;
     /// time step
     double _deltaT;
     /// frame rate for the trajectories
@@ -69,22 +75,31 @@ private:
     std::unique_ptr<Building> _building;
     /// Force model to use
     std::shared_ptr<OperationalModel> _operationalModel;
-    /// differential equation solver
+    /// Manage all route choices algorithms
     std::shared_ptr<RoutingEngine> _routingEngine;
+    /// differential equation solver
     ODESolver* _solver;
     /// writing the trajectories to file
     IODispatcher* _iod;
-    ///new: EventManager
+    /// EventManager
     EventManager* _em;
     /// argument parser
     ArgumentParser _argsParser;
-    /// profiling flag
-    bool _profiling;
-    /// architecture flag
-    int _hpc;
+    /// Agents sources manager
+    AgentsSourcesManager _agentSrcManager;
+    /// hybrid simulation manager
+    //HybridSimulationManager
+    std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
 
 public:
+    /**
+     * Constructor
+     */
     Simulation(const ArgumentParser& args);
+
+    /**
+     * Destructor
+     */
     virtual ~Simulation();
 
     /**
@@ -98,38 +113,53 @@ public:
     bool InitArgs(const ArgumentParser& args);
 
     /**
-     * @return the total simulated/evacuation time
-     */
-    int RunSimulation();
-
-    /**
-     * Updathe route of the pedestrians and reassign rooms, in the case a room change happens
+     * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateRoutesAndLocations();
 
-
-    //void Update(double &b, double &p, double &t, double &g);
+    /**
+     * Perform some initialisation for the simulation.
+     * such as writing the headers for the trajectories.
+     * @param the maximal number of pedestrian
+     */
+    void RunHeader(long nPed=-1);
 
     /**
-     * Set the ProfilingFlag
+     * Run the main part of the simulation
      */
-    void SetProfileFlag(bool flag);
+    int RunBody(double maxSimTime);
 
     /**
-     * Get the ProfileFlag
+     * Perform some finalization like writing the
+     * footers for the trajectories.
      */
-    bool GetProfileFlag();
+    void RunFooter();
 
     /**
-     * Get the HPCFlag
+     * Run a standard simulation
+     * @return the total simulated/evacuation time
      */
-    int GetHPCFlag();
+    int RunStandardSimulation(double maxSimTime);
 
     /**
      * print some statistics about the simulation
      */
     void PrintStatistics();
 
+    /**
+     * @return the agents source manager
+     */
+    AgentsSourcesManager& GetAgentSrcManager();
+
+    /**
+     * Check if any agents are waiting to enter the simulation
+     */
+    void ProcessAgentsQueue();
+
+    /**
+     * @return a pointer to the building object
+     */
+    Building* GetBuilding();
 };
 
 #endif /*SIMULATION_H_*/

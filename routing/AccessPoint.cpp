@@ -52,7 +52,7 @@ AccessPoint::AccessPoint(int id, double center[2],double radius)
 
 AccessPoint::~AccessPoint()
 {
-     //if(_navLine) delete _navLine;
+     if(_navLine) delete _navLine;
 }
 
 int AccessPoint::GetID()
@@ -154,7 +154,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID)
           return possibleDest[0]->GetID();
      } else {
           AccessPoint* best_ap=possibleDest[0];
-          double min_dist=GetDistanceTo(best_ap);// + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
+          double min_dist=GetDistanceTo(best_ap) + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
 
           for (unsigned int i=0; i<possibleDest.size(); i++) {
                double tmp= GetDistanceTo(possibleDest[i]);
@@ -218,7 +218,9 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
 
 void AccessPoint::SetNavLine(NavLine* line)
 {
-     _navLine=line;
+     //todo: check this
+     //_navLine= line;
+     _navLine= new NavLine(*line);
 }
 
 NavLine* AccessPoint::GetNavLine() const

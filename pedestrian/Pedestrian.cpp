@@ -39,6 +39,7 @@ using namespace std;
 
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
+int Pedestrian::_agentsCreated=1;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
@@ -48,7 +49,7 @@ Pedestrian::Pedestrian()
      _oldRoomID = -1;
      _oldSubRoomID = -1;
      _exitIndex = -1;
-     _id = 0;
+     _id = _agentsCreated;//default id
      _mass = 1;
      _tau = 0.5;
      _newOrientationFlag = false;
@@ -74,7 +75,7 @@ Pedestrian::Pedestrian()
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
      _recordingTime = 20; //seconds
-     //     _knownDoors = map<int, NavLineState>();
+     //_knownDoors = map<int, NavLineState>();
      _knownDoors.clear();
      _height = 170;
      _age = 30;
@@ -86,6 +87,8 @@ Pedestrian::Pedestrian()
      _V0DownStairs=0.0;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
+
+     _agentsCreated++;//increase the number of object created
 }
 
 
@@ -98,6 +101,10 @@ Pedestrian::~Pedestrian()
 void Pedestrian::SetID(int i)
 {
      _id = i;
+     if(i<=0)
+     {
+     cout<<"invalid ID"<<i<<endl;exit(0);
+     }
 }
 
 void Pedestrian::SetRoomID(int i, string roomCaption)
@@ -724,8 +731,8 @@ void Pedestrian::Dump(int ID, int pa)
           break;
 
      }
-     //fflush(stdout);
-     // getc(stdin);
+     fflush(stdout);
+     getc(stdin);
 }
 
 void Pedestrian::RecordActualPosition()
@@ -823,6 +830,11 @@ void Pedestrian::SetSpotlight(bool spotlight)
 void Pedestrian::SetColorMode(AgentColorMode mode)
 {
      _colorMode=mode;
+}
+
+int Pedestrian::GetAgentsCreated()
+{
+     return _agentsCreated;
 }
 
 int Pedestrian::GetColor()
