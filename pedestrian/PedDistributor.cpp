@@ -566,7 +566,7 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
                          //only continue if...
                          if(tooNear==true) continue;
 
-                         if((obst->GetClosed()==1) && (obst->Contains(pos)==true))
+                         if(obst->Contains(pos))
                          {
                               tooNear=true;
                               break; // too close

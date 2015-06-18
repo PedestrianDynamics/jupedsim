@@ -291,9 +291,9 @@ bool Building::InitGeometry()
                //do the same for the obstacles that are closed
                for(auto&& obst:itr_subroom.second->GetAllObstacles())
                {
-                    if (obst->GetClosed() == 1)
-                         if(!obst->ConvertLineToPoly())
-                              return false;
+                    //if (obst->GetClosed() == 1)
+                    if(!obst->ConvertLineToPoly())
+                         return false;
                }
           }
      }
@@ -504,13 +504,13 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                     int id = xmltof(xObstacle->Attribute("id"), -1);
                     int height = xmltof(xObstacle->Attribute("height"), 0);
-                    double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                    //double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
                     string ObstCaption = xmltoa(xObstacle->Attribute("caption"),"-1");
 
                     Obstacle* obstacle = new Obstacle();
                     obstacle->SetId(id);
                     obstacle->SetCaption(ObstCaption);
-                    obstacle->SetClosed(ObstClosed);
+                    //obstacle->SetClosed(ObstClosed);
                     obstacle->SetHeight(height);
 
                     //looking for polygons (walls)

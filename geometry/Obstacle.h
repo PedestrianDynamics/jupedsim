@@ -48,7 +48,14 @@ private:
      std::vector<Point> _poly;
 
 public:
+     /**
+      * Constructor
+      */
      Obstacle();
+
+     /**
+      * Destructor
+      */
      virtual ~Obstacle();
 
      /**
@@ -60,16 +67,6 @@ public:
       * Set/Get the obstacles' caption
       */
      void SetCaption(std::string caption);
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     int GetClosed() const;
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     void SetClosed(int closed);
 
      /**
       * Set/Get the height of the obstacle.

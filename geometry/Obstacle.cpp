@@ -72,16 +72,6 @@ void Obstacle::SetCaption(string caption)
      _caption = caption;
 }
 
-int Obstacle::GetClosed() const
-{
-     return _isClosed;
-}
-
-void Obstacle::SetClosed(int closed)
-{
-     _isClosed = closed;
-}
-
 double Obstacle::GetHeight() const
 {
      return _height;
