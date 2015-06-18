@@ -249,7 +249,6 @@ public:
      const Hline* GetHline(int i) const;
 
      /**
-      *
       * @return true if the point is part of the polygon, also considering the geometry precision.
       */
      bool IsPartOfPolygon(const Point& pt);

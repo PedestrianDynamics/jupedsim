@@ -39,7 +39,16 @@
 #include <cmath>
 #include <vector>
 
+
+OutputHandler* Log;
 BOOST_AUTO_TEST_SUITE(ObstacleTest)
+
+struct Handler {
+     Handler() {Log = new STDIOHandler();}
+     ~ Handler() {delete Log;}
+};
+
+BOOST_GLOBAL_FIXTURE(Handler)
 
 BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
 {
@@ -56,13 +65,10 @@ BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
           obs1.AddWall(W1);
           walls_test.emplace_back(W1);
           obs1.SetCaption("obstacle" + std::to_string(i));
-          int flag = std::rand() % 2;
-          obs1.SetClosed(flag);
           obs1.SetHeight(-i);  // logically incorrect
           obs1.SetId(i-1);
           
           BOOST_CHECK(obs1.GetCaption() == "obstacle" + std::to_string(i));
-          BOOST_CHECK(obs1.GetClosed() == flag);
           BOOST_CHECK(obs1.GetHeight() == -i); // logically incorrect
           BOOST_CHECK(obs1.GetId() == (i-1));
           BOOST_CHECK(obs1.GetAllWalls() == walls_test);
@@ -120,7 +126,6 @@ BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
      obs1.AddWall(w3);
      obs1.AddWall(w4);
      
-     obs1.SetClosed(1);
      obs1.ConvertLineToPoly();
      
      // inside the obstacle check
@@ -180,7 +185,6 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           obs1.AddWall(w2);
           obs1.AddWall(w3);
           obs1.AddWall(w4);
-          obs1.SetClosed(1);
           //BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == false, obs1.ConvertLineToPoly());
           
           
@@ -230,7 +234,6 @@ BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
           obs1.AddWall(w2);
           obs1.AddWall(w3);
           
-          obs1.SetClosed(1);
           obs1.ConvertLineToPoly();
           BOOST_CHECK(obs1.GetCentroid() == (P1 + P2 + P3) / 3);  
           
