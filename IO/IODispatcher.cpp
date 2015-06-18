@@ -1,8 +1,8 @@
 /**
  * \file        IODispatcher.cpp
  * \date        Nov 20, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -158,7 +158,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      // first the rooms
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
-     rooms_to_plot.push_back("U9");
+     //rooms_to_plot.push_back("U9");
 
      for (const auto& it:building->GetAllRooms())
      {

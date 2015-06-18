@@ -1,8 +1,8 @@
 /**
  * \file        Hline.cpp
  * \date        Aug 1, 2012
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -119,7 +119,7 @@ string Hline::GetDescription() const
 {
      string geometry;
      char tmp[CLENGTH] = "";
-     sprintf(tmp,"\t\t<hline ID=\"%d\" color = \"250\" caption=\"h_%d_%d\">\n",GetUniqueID(),GetID(),GetUniqueID());
+     sprintf(tmp,"\t\t<hline ID=\"%d\" room_id=\"%d\" subroom_id=\"%d\" color = \"250\" caption=\"h_%d_%d\">\n",GetUniqueID(),_room1->GetID(),_subRoom1->GetSubRoomID(),GetID(),GetUniqueID());
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",

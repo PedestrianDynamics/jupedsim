@@ -1,8 +1,8 @@
 /**
  * \file        DirectionStrategy.cpp
  * \date        Dec 13, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -144,6 +144,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
   printf("\n----------\nEnter GetTarget() with PED=%d\n----------\n",ped->GetID());
   printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
 #endif
+<<<<<<< HEAD
   double dist;
   int inear = -1;
   int iObs = -1;
@@ -161,6 +162,22 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
     if (dist < minDist) {
       inear = i;
       minDist = dist;
+=======
+     double dist;
+     int inear = -1;
+     int iObs = -1;
+     double minDist = 20001;
+     int subroomId = ped->GetSubRoomID();
+     SubRoom * subroom = room->GetSubRoom(subroomId);
+
+     //============================ WALLS ===========================
+     const vector<Wall>& walls = subroom->GetAllWalls();
+     for (unsigned int i = 0; i < walls.size(); i++) {
+          dist = tmpDirection.GetIntersectionDistance(walls[i]);
+          if (dist < minDist) {
+               inear = i;
+               minDist = dist;
+>>>>>>> refs/remotes/origin/v0.7
 #if DEBUG
       printf("Check wall number %d. Dist = %f (%f)\n", i, dist, minDist);
       printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());

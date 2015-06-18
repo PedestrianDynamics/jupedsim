@@ -1,8 +1,8 @@
 /**
  * \file        Pedestrian.cpp
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -91,6 +91,24 @@ Pedestrian::Pedestrian()
      _agentsCreated++;//increase the number of object created
 }
 
+Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
+:    _age(agentsParameters.GetAge()),
+     _gender(agentsParameters.GetGender()),
+     _height(agentsParameters.GetHeight()),
+     _desiredFinalDestination(agentsParameters.GetGoalId()),
+     _group(agentsParameters.GetGroupId()),
+     _building(&building),
+     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
+     _lastPosition(),
+     _roomID(agentsParameters.GetRoomId()),
+     _roomCaption(""),
+     _subRoomID(agentsParameters.GetSubroomID()),
+     _patienceTime(agentsParameters.GetPatience()),
+     _premovement(agentsParameters.GetPremovementTime())
+{
+
+}
+
 
 Pedestrian::~Pedestrian()
 {
@@ -103,7 +121,7 @@ void Pedestrian::SetID(int i)
      _id = i;
      if(i<=0)
      {
-     cout<<"invalid ID"<<i<<endl;exit(0);
+          cout<<"invalid ID"<<i<<endl;exit(0);
      }
 }
 
@@ -840,39 +858,58 @@ int Pedestrian::GetAgentsCreated()
 int Pedestrian::GetColor()
 {
      //default color is by velocity
-     int color = -1;
-     double v0 = GetV0Norm();
-     if (v0 != 0.0) {
-          double v = GetV().Norm();
-          color = (int) (v / v0 * 255);
-     }
+     string key;
 
      switch (_colorMode)
      {
      case BY_SPOTLIGHT:
+     {
           if (_spotlight==false)
-               color=-1;
+               return -1;
           break;
+     }
 
      case BY_VELOCITY:
-          break;
-
-          // Hash the knowledge represented as String
-     case BY_KNOWLEDGE:
      {
-          string key=GetKnowledgeAsString();
-          std::hash<std::string> hash_fn;
-          color = hash_fn(key) % 255;
-          //cout<<"color: "<<hash_fn(key)<<endl;
-          //cout<<" key : "<<key<<endl;
+          int color = -1;
+          double v0 = GetV0Norm();
+          if (v0 != 0.0) {
+               double v = GetV().Norm();
+               color = (int) (v / v0 * 255);
+          }
+          return color;
      }
      break;
 
+     // Hash the knowledge represented as String
+     case BY_KNOWLEDGE:
+     {
+          key=GetKnowledgeAsString();
+     }
+     break;
+
+     case BY_ROUTER:
      case BY_ROUTE:
      {
-          string key = std::to_string(_routingStrategy);
-          std::hash<std::string> hash_fn;
-          color = hash_fn(key) % 255;
+          key = std::to_string(_routingStrategy);
+     }
+     break;
+
+     case BY_GROUP:
+     {
+          key = std::to_string(_group);
+     }
+     break;
+
+     case BY_FINAL_GOAL:
+     {
+          key=std::to_string(_desiredFinalDestination);
+     }
+     break;
+
+     case BY_INTERMEDIATE_GOAL:
+     {
+          key=std::to_string(_exitIndex);
      }
      break;
 
@@ -880,6 +917,9 @@ int Pedestrian::GetColor()
           break;
      }
 
-     return color;
+     std::hash<std::string> hash_fn;
+     return  hash_fn(key) % 255;
 }
+
+
 

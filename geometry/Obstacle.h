@@ -1,8 +1,8 @@
 /**
  * \file        Obstacle.h
  * \date        Jul 31, 2012
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -48,7 +48,14 @@ private:
      std::vector<Point> _poly;
 
 public:
+     /**
+      * Constructor
+      */
      Obstacle();
+
+     /**
+      * Destructor
+      */
      virtual ~Obstacle();
 
      /**
@@ -60,16 +67,6 @@ public:
       * Set/Get the obstacles' caption
       */
      void SetCaption(std::string caption);
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     int GetClosed() const;
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     void SetClosed(int closed);
 
      /**
       * Set/Get the height of the obstacle.

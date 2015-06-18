@@ -1,7 +1,7 @@
 /**
  * \file        Macros.h
  * \date        Jun 16, 2010
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -39,9 +39,6 @@
 #include <iostream>
 
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif 
@@ -50,8 +47,6 @@
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
 //#define _USE_PROTOCOL_BUFFER 1
-
-
 
 #define JPS_OLD_VERSION "0.5" // this version is still supported
 #define JPS_VERSION_MINOR "6"
@@ -137,8 +132,11 @@ enum AgentColorMode {
      BY_VELOCITY=1,
      BY_KNOWLEDGE,
      BY_ROUTE,
+     BY_ROUTER,
      BY_SPOTLIGHT,
-     //BY_GROUP
+     BY_GROUP,
+     BY_FINAL_GOAL,
+     BY_INTERMEDIATE_GOAL
 };
 //global functions for convenience
 
@@ -177,7 +175,7 @@ inline char xmltoc(const char * t, const char v = '\0')
  * @return true if the element is present in the vector
  */
 template<typename A>
-inline bool IsElementInVector(const std::vector<A> &vec, A& el) {
+inline bool IsElementInVector(const std::vector<A> &vec, const A& el) {
      typename std::vector<A>::const_iterator it;
      it = std::find (vec.begin(), vec.end(), el);
      if(it==vec.end()) {

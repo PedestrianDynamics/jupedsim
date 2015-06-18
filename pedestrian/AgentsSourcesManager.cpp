@@ -1,9 +1,31 @@
-/*
- * AgentsSourcesManager.cpp
+/**
+ * \file        AgentsSourcesManager.cpp
+ * \date        Apr 14, 2015
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
- *  Created on: 14.04.2015
- *      Author: piccolo
- */
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * This class is responsible for materialising agent in a given location at a given frequency up to a maximum number.
+ * The optimal position where to put the agents is given by various algorithms, for instance
+ * the Voronoi algorithm or the Mitchell Best candidate algorithm.
+ *
+ **/
 
 #include "AgentsSourcesManager.h"
 #include "Pedestrian.h"
@@ -23,7 +45,7 @@
 
 using namespace std;
 
-bool AgentsSourcesManager::_isCompleted=false;
+bool AgentsSourcesManager::_isCompleted=true;
 
 AgentsSourcesManager::AgentsSourcesManager()
 {
@@ -41,7 +63,6 @@ void AgentsSourcesManager::operator()()
 void AgentsSourcesManager::Run()
 {
      Log->Write("INFO:\tStarting agent manager thread");
-
 
      //Generate all agents required for the complete simulation
      //It might be more efficient to generate at each frequency step
@@ -62,25 +83,17 @@ void AgentsSourcesManager::Run()
      {
           int current_time = Pedestrian::GetGlobalTime();
 
-          //first step
-          //if(current_time==0){
-          //finished=ProcessAllSources();
-          //     ProcessAllSources();
-          //     //cout<<"here:"<<endl; exit(0);
-          //}
           if ((current_time != _lastUpdateTime)
                     && ((current_time % updateFrequency) == 0))
           {
-               //cout<<"TIME:"<<current_time<<endl;
                finished=ProcessAllSources();
                _lastUpdateTime = current_time;
-               //cout << "source size: " << _sources.size() << endl;
           }
           //wait some time
           //std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
-     _isCompleted = true;//exit(0);
+     _isCompleted = true;
 }
 
 bool AgentsSourcesManager::ProcessAllSources() const
@@ -253,6 +266,7 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           for (unsigned int a = 0; a < positions.size(); a++)
           {
                Point pos = positions[a];
+               //cout<<"checking: "<<pos.toString()<<endl;
                if ((bounds[0] <= pos._x) && (pos._x <= bounds[1])
                          && (bounds[2] <= pos._y) && (pos._y < bounds[3]))
                {
@@ -267,7 +281,9 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
                     Log->Write(
                               "ERROR:\t AgentSourceManager Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
                               bounds[0], bounds[1], bounds[2], bounds[3]);
-                    Log->Write("ERROR:\t Specifying a subroom_id might help");
+                    Log->Write("     \t Specifying a subroom_id might help");
+                    Log->Write("     \t %d positions were available",positions.size());
+                    exit(EXIT_FAILURE);
                }
           }
           else
@@ -442,6 +458,7 @@ void AgentsSourcesManager::GenerateAgents()
 void AgentsSourcesManager::AddSource(std::shared_ptr<AgentsSource> src)
 {
      _sources.push_back(src);
+     _isCompleted=false;//at least one source was provided
 }
 
 const std::vector<std::shared_ptr<AgentsSource> >& AgentsSourcesManager::GetSources() const

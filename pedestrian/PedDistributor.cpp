@@ -1,8 +1,8 @@
 /**
  * \file        PedDistributor.cpp
  * \date        Oct 12, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -390,13 +390,16 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
      while (y < max_y) {
           Point pos = Point(x, y);
           // Abstand zu allen Wänden prüfen
-          int k;
-          for (k = 0; k < r.GetNumberOfWalls(); k++) {
-               if (r.GetWall(k).DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+          bool ok=true;
+          for(auto&& w: r.GetAllWalls())
+          {
+               if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+                    ok=false;
                     break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
                }
           }
-          if (k == r.GetNumberOfWalls()) {
+
+          if (ok) {
                //check all transitions
                bool tooNear=false;
                for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
@@ -432,13 +435,17 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
      while (x < max_x) {
           Point pos = Point(x, y);
           // check distance to wall
-          int k;
-          for (k = 0; k < r.GetNumberOfWalls(); k++) {
-               if (r.GetWall(k).DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+          bool ok=true;
+          for(auto&& w: r.GetAllWalls())
+          {
+               if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+                    ok=false;
                     break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
                }
           }
-          if (k == r.GetNumberOfWalls()) {
+
+          if (ok) {
+
                //check all transitions
                bool tooNear=false;
                for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
@@ -559,7 +566,7 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
                          //only continue if...
                          if(tooNear==true) continue;
 
-                         if((obst->GetClosed()==1) && (obst->Contains(pos)==true))
+                         if(obst->Contains(pos))
                          {
                               tooNear=true;
                               break; // too close

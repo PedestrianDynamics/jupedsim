@@ -1,8 +1,8 @@
 /**
  * \file        Building.cpp
  * \date        Oct 1, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -291,11 +291,30 @@ bool Building::InitGeometry()
                //do the same for the obstacles that are closed
                for(auto&& obst:itr_subroom.second->GetAllObstacles())
                {
-                    if (obst->GetClosed() == 1)
-                         if(!obst->ConvertLineToPoly())
-                              return false;
+                    //if (obst->GetClosed() == 1)
+                    if(!obst->ConvertLineToPoly())
+                         return false;
                }
           }
+     }
+
+     // look and save the neighbor subroom for improving the runtime
+     // that information is already present in the crossing/transitions
+
+     for(const auto & cross: _crossings)
+     {
+          SubRoom* s1=cross.second->GetSubRoom1();
+          SubRoom* s2=cross.second->GetSubRoom2();
+          if(s1) s1->AddNeighbor(s2);
+          if(s2) s2->AddNeighbor(s1);
+     }
+
+     for(const auto & trans: _transitions)
+     {
+          SubRoom* s1=trans.second->GetSubRoom1();
+          SubRoom* s2=trans.second->GetSubRoom2();
+          if(s1) s1->AddNeighbor(s2);
+          if(s2) s2->AddNeighbor(s1);
      }
 
      Log->Write("INFO: \tInit Geometry successful!!!\n");
@@ -485,13 +504,13 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                     int id = xmltof(xObstacle->Attribute("id"), -1);
                     int height = xmltof(xObstacle->Attribute("height"), 0);
-                    double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                    //double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
                     string ObstCaption = xmltoa(xObstacle->Attribute("caption"),"-1");
 
                     Obstacle* obstacle = new Obstacle();
                     obstacle->SetId(id);
                     obstacle->SetCaption(ObstCaption);
-                    obstacle->SetClosed(ObstClosed);
+                    //obstacle->SetClosed(ObstClosed);
                     obstacle->SetHeight(height);
 
                     //looking for polygons (walls)
@@ -991,6 +1010,10 @@ bool Building::LoadRoutingInfo(const string &filename)
           return false;
      }
 
+     if (! xRootNode->FirstChild("routing"))
+     {
+          return true; // no extra routing information
+     }
      //load goals and routes
      TiXmlNode*  xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
@@ -1146,11 +1169,6 @@ void Building::DeletePedestrian(Pedestrian* &ped)
           _allPedestians.erase(it);
 
           int nowPeds= _allPedestians.size();
-          //if((*it)->GetID()==69){
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
-          //cout << "want to rescue agent: " << ped->GetID()<<endl<<endl;
-          //     exit(0);
-          // }
           Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
@@ -1286,7 +1304,7 @@ bool Building::SaveGeometry(const std::string &filename)
                auto&& sub=itr_sub.second;
                const double* plane=sub->GetPlaneEquation();
                geometry<<"\t\t<subroom id =\""<<sub->GetSubRoomID()
-                                  <<"\" closed=\""<<sub->GetClosed()
+                                  <<"\" closed=\""<<0
                                   <<"\" class=\""<<sub->GetType()
                                   <<"\" A_x=\""<<plane[0]
                                                        <<"\" B_y=\""<<plane[1]

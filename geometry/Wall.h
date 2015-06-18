@@ -1,7 +1,7 @@
 /**
  * \file        Wall.h
  * \date        Nov 16, 2010
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -34,8 +34,19 @@
 class Wall : public Line {
 
 public:
+     /**
+      * Constructor
+      */
      Wall();
+
+     /**
+      * Constructor
+      */
      Wall(const Point& p1, const Point& p2, const std::string& type="internal");
+
+     /**
+      * Constructor
+      */
      Wall(const Wall& orig);
 
      /**

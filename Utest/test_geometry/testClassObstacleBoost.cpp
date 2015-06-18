@@ -56,13 +56,10 @@ BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
           obs1.AddWall(W1);
           walls_test.emplace_back(W1);
           obs1.SetCaption("obstacle" + std::to_string(i));
-          int flag = std::rand() % 2;
-          obs1.SetClosed(flag);
           obs1.SetHeight(-i);  // logically incorrect
           obs1.SetId(i-1);
           
           BOOST_CHECK(obs1.GetCaption() == "obstacle" + std::to_string(i));
-          BOOST_CHECK(obs1.GetClosed() == flag);
           BOOST_CHECK(obs1.GetHeight() == -i); // logically incorrect
           BOOST_CHECK(obs1.GetId() == (i-1));
           BOOST_CHECK(obs1.GetAllWalls() == walls_test);
@@ -120,7 +117,6 @@ BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
      obs1.AddWall(w3);
      obs1.AddWall(w4);
      
-     obs1.SetClosed(1);
      obs1.ConvertLineToPoly();
      
      // inside the obstacle check
@@ -153,7 +149,8 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           Point P2 (i, i*i);
           Point P3 (2*i, i);
           Point P4 (-i, -i*i);
-          Point P5 (100, 100);
+          Point P5 (-i, -2*i*i);
+          Point P6 (-2*i, -2*i*i);
           
           std::vector<Point> added_pts;
           added_pts.emplace_back(P1);
@@ -161,6 +158,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           added_pts.emplace_back(P3);
           added_pts.emplace_back(P4);
           added_pts.emplace_back(P5);
+          added_pts.emplace_back(P6);
           const unsigned temp = added_pts.size();
           
           Obstacle obs1;
@@ -169,20 +167,24 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
           Wall w2(P2, P3);
           Wall w3(P3, P4);
           Wall w4(P4, P1);
-          Wall w5(P2, P5);
+          Wall w5(P4, P5);
+          Wall w6(P5, P6);
+          Wall w7(P6, P4);
           
           obs1.SetId(i-1);
           obs1.AddWall(w1);
           obs1.AddWall(w2);
           obs1.AddWall(w3);
-          
-          obs1.SetClosed(1);
+          obs1.AddWall(w4);
           //BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == false, obs1.ConvertLineToPoly());
           
-          obs1.AddWall(w4);
-          BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
+          
+         // BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
           
           obs1.AddWall(w5);
+          obs1.AddWall(w6);
+          obs1.AddWall(w7);
+          
           BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
           
           // GetPolygon test
@@ -223,7 +225,6 @@ BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
           obs1.AddWall(w2);
           obs1.AddWall(w3);
           
-          obs1.SetClosed(1);
           obs1.ConvertLineToPoly();
           BOOST_CHECK(obs1.GetCentroid() == (P1 + P2 + P3) / 3);  
           

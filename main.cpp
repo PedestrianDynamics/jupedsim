@@ -1,7 +1,7 @@
 /**
  * \file        main.cpp
  * \date        Jan 15, 2013
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -37,13 +37,14 @@
 
 #include <thread>
 #include <functional>
+#include <iomanip>
 
 int main(int argc, char **argv)
 {
      //gathering some statistics about the runtime
      time_t starttime, endtime;
 
-     // Log = new FileHandler("./Logfile.dat");
+     // default logger
      Log = new STDIOHandler();
 
      // Parsing the arguments
@@ -60,6 +61,7 @@ int main(int argc, char **argv)
      {
           //evacuation time
           int evacTime = 0;
+          Log->Write("INFO: \tStart runSimulation()");
 
 #ifdef _USE_PROTOCOL_BUFFER
           //Start the thread for managing incoming messages from MatSim
@@ -72,29 +74,24 @@ int main(int argc, char **argv)
           //process the normal simulation
           else
 #endif
-               if(sim.GetAgentSrcManager().GetMaxAgentNumber())
-               {
-                    //Start the thread for managing the sources of agents if any
-                    //std::thread t1(sim.GetAgentSrcManager());
-                    std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+          if(sim.GetAgentSrcManager().GetMaxAgentNumber())
+          {
+               //Start the thread for managing the sources of agents if any
+               //std::thread t1(sim.GetAgentSrcManager());
+               std::thread t1(&AgentsSourcesManager::Run, &sim.GetAgentSrcManager());
+               //main thread for the simulation
+               evacTime = sim.RunStandardSimulation(args->GetTmax());
+               //Join the main thread
+               t1.join();
+          }
+          else
+          {
+               //main thread for the simulation
+               evacTime = sim.RunStandardSimulation(args->GetTmax());
+          }
 
-                    //main thread for the simulation
-                    Log->Write("INFO: \tStart runSimulation()");
-                    evacTime = sim.RunStandardSimulation(args->GetTmax());
-                    Log->Write("\nINFO: \tEnd runSimulation()");
-                    time(&endtime);
-
-                    //Join the main thread
-                    t1.join();
-               }
-               else
-               {
-                    //main thread for the simulation
-                    Log->Write("INFO: \tStart runSimulation()");
-                    evacTime = sim.RunStandardSimulation(args->GetTmax());
-                    Log->Write("\nINFO: \tEnd runSimulation()");
-                    time(&endtime);
-               }
+          Log->Write("\nINFO: \tEnd runSimulation()");
+          time(&endtime);
 
           // some statistics output
           if(args->ShowStatistics())
@@ -109,23 +106,22 @@ int main(int argc, char **argv)
           }
 
           double execTime = difftime(endtime, starttime);
-          Log->Write("\nExec Time [s]   : %.2f", execTime);
-          Log->Write("Evac Time [s]     : %d", evacTime);
-          Log->Write("Realtime Factor   : %.2f X", evacTime / execTime);
-          Log->Write("Number of Threads : %d", args->GetMaxOpenMPThreads());
-          Log->Write("Warnings          : %d", Log->GetWarnings());
-          Log->Write("Errors            : %d", Log->GetErrors());
 
+          std::stringstream summary;
+          summary << std::setprecision(2)<<std::fixed;
+          summary<<"\nExec Time [s]     : "<< execTime<<std::endl;
+          summary<<"Evac Time [s]     : "<< evacTime<<std::endl;
+          summary<<"Realtime Factor   : "<< evacTime / execTime<<" X " <<std::endl;
+          summary<<"Number of Threads : "<< args->GetMaxOpenMPThreads()<<std::endl;
+          summary<<"Warnings          : "<< Log->GetWarnings()<<std::endl;
+          summary<<"Errors            : "<< Log->GetErrors()<<std::endl;
+          Log->Write(summary.str().c_str());
+
+          //force an output to the screen if the log is not the standard output
           if (nullptr == dynamic_cast<STDIOHandler*>(Log))
           {
-               printf("\nExec Time [s]     : %4.2f\n", execTime);
-               printf("Evac Time [s]       : %d\n", evacTime);
-               printf("Realtime Factor     : %.2f (X)\n", evacTime / execTime);
-               printf("Number of Threads   : %d\n", args->GetMaxOpenMPThreads());
-               printf("Warnings            : %d\n", Log->GetWarnings());
-               printf("Errors              : %d\n", Log->GetErrors());
+               printf("%s\n", summary.str().c_str());
           }
-
      }
      else
      {

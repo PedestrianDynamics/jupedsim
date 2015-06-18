@@ -1,8 +1,8 @@
 /**
  * \file        AccessPoint.cpp
  * \date        Aug 24, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -112,6 +112,7 @@ double AccessPoint::GetDistanceTo(int UID)
           Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
           Log->Write("ERROR:\tCheck your configuration file");
           Dump();
+          //return 0;
           exit(EXIT_FAILURE);
      }
      return _mapDestToDist[UID];

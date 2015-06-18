@@ -1,8 +1,8 @@
 /**
  * \file        QuickestPathRouter.cpp
  * \date        Apr 20, 2011
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -207,7 +207,7 @@ double QuickestPathRouter::TAP (double alpha)
 }
 
 
-int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP)
+int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP __attribute__((unused)))
 {
 
      //int preferredExit=nearestAP->GetNearestTransitAPTO(ped->GetFinalDestination());
@@ -847,19 +847,23 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+
+     if(relevantAPs.size()==1)
+     {
+          auto&& ap=relevantAPs[0];
+          ped->SetExitIndex(ap->GetID());
+          ped->SetExitLine(ap->GetNavLine());
+          return ap->GetID();
+     }
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
      double minDistLocal = FLT_MAX;
 
-     //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-     //      int apID = accessPointsInSubRoom[i];
      for(unsigned int g=0; g<relevantAPs.size(); g++)
      {
           AccessPoint* ap=relevantAPs[g];
-          //int exitid=ap->GetID();
-          //AccessPoint* ap = _accessPoints[apID];
+
 
           if (ap->isInRange(sub->GetUID()) == false)
                continue;

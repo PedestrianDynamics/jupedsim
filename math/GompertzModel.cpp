@@ -1,8 +1,8 @@
 /**
  * \file        GompertzModel.cpp
  * \date        Apr 15, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -198,7 +198,12 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
+
+                     //subrooms to consider when looking for neighbour for the 3d visibility
                      vector<SubRoom*> emptyVector;
+                     emptyVector.push_back(subroom);
+                     emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
+
                      bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
                      if (!isVisible)
                           continue;
@@ -398,32 +403,32 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
      Point f(0., 0.);
      //first the walls
-     const vector<Wall>& walls = subroom->GetAllWalls();
-     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-          f += ForceRepWall(ped, walls[i]);
+     for(const auto & wall: subroom->GetAllWalls())
+     {
+          f += ForceRepWall(ped, wall);
      }
-
      //then the obstacles
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>&getAllWalls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < getAllWalls.size(); i++) {
-               f += ForceRepWall(ped, getAllWalls[i]);
+
+     for(const auto & obst: subroom->GetAllObstacles())
+     {
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               f += ForceRepWall(ped, wall);
           }
      }
+
      // and finally the closed doors
-     const vector<Transition*>& transitions = subroom->GetAllTransitions();
-     for (unsigned int i = 0; i < transitions.size(); i++) {
-          Transition* goal=transitions[i];
+     for(auto & goal: subroom->GetAllTransitions())
+     {
           if(! goal->IsOpen()) {
-               f +=  ForceRepWall(ped,*((Wall*)goal));
+               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
      }
 
      return f;
 }
 
-Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
+Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 {
 #define DEBUG 0
      Point F_wrep = Point(0.0, 0.0);

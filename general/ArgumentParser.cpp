@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Apr 20, 2009
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -339,6 +339,25 @@ bool ArgumentParser::ParseIniFile(string inifile)
                pFormat = FORMAT_PLAIN;
           if (format == "vtk")
                pFormat = FORMAT_VTK;
+
+          //color mode
+          string color_mode =
+                              xMainNode->FirstChildElement("trajectories")->Attribute(
+                                        "color_mode") ?
+                                                  xMainNode->FirstChildElement("trajectories")->Attribute(
+                                                            "color_mode") :
+                                                           "velocity";
+
+          if(color_mode=="velocity") Pedestrian::SetColorMode(AgentColorMode::BY_VELOCITY);
+          if(color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+          if(color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
+          if(color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
+          if(color_mode=="router") Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
+          if(color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
+          if(color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
+
+
+
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file"))
@@ -871,7 +890,8 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
      if( ! strategyNode.FirstChild(query.c_str()))
      {
           query="exitCrossingStrategy";
-          Log->Write("WARNING:\t exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" ");
+          Log->Write("ERROR:\t the keyword exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" in the ini file");
+          return false;
      }
 
      if (strategyNode.FirstChild(query.c_str())) {
