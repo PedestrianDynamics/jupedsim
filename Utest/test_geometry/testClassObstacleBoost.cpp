@@ -39,7 +39,16 @@
 #include <cmath>
 #include <vector>
 
+
+OutputHandler* Log;
 BOOST_AUTO_TEST_SUITE(ObstacleTest)
+
+struct Handler {
+     Handler() {Log = new STDIOHandler();}
+     ~ Handler() {delete Log;}
+};
+
+BOOST_GLOBAL_FIXTURE(Handler)
 
 BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
 {

@@ -872,7 +872,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
 // private Funktionen
 
-// gibt zuruck in welchen Quadranten vertex liegt, wobei hitPos der Koordinatenursprung ist
+// gibt zurück in welchen Quadranten vertex liegt, wobei hitPos der Koordinatenursprung ist
 
 int NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
