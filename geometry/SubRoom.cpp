@@ -894,6 +894,17 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
+
+     //case when the point is on an edge
+     // todo: this affect the runtime, and do we really need that
+     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
+     // the other half will be outside the polygon.
+     for(auto& w: _walls)
+     {
+          if(w.IsInLineSegment(ped)) return true;
+     }
+
+
      short edge, first, next;
      short quad, next_quad, delta, total;
 
