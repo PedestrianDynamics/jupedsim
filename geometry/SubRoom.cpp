@@ -663,17 +663,17 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
      {
           //maybe the point was too closed to other points and got replaced
           //check that eventuality
-          bool near = false;
+          bool nah = false;
           for (const auto & pt : _poly)
           {
                if ((pt - ptw).Norm() < J_TOLERANZ)
                {
-                    near = true;
+                    nah = true;
                     break;
                }
           }
 
-          if(near==false)
+          if(nah==false)
           {
                return false;
           }
