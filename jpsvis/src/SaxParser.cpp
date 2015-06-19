@@ -567,7 +567,6 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
         while(!_currentFrame.empty()) {
             frame->addElement(_currentFrame.back());
             _currentFrame.pop_back();
-            //cout<<"not adding"<<endl;
         }
 
         //compute the polydata, might increase the runtime

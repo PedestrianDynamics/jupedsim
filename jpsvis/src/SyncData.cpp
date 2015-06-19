@@ -66,7 +66,8 @@ SyncData::~SyncData()
 
     for(auto itr = _frames.begin(); itr != _frames.end(); itr++)
     {
-        delete itr->second;
+        //FIXME
+        //delete itr->second;
     }
     _frames.clear();
 }
@@ -141,7 +142,7 @@ Frame* SyncData::getNextFrame()
 {
 
     // this may be the case if the file only contains geometry, thus no trajectories available
-    if(_frames.empty()) return NULL;
+    if(_frames.empty()) return nullptr;
 
     // Navigation  in the negative direction is also possible
     //review
@@ -152,26 +153,39 @@ Frame* SyncData::getNextFrame()
     //FIXME: do I really need two variables to handle this?
     int cursor =_frameCursor+_frameCursorOffset;
 
-    if (cursor<0) {
+    if (cursor<0)
+    {
         //frameCursor=0;
         emit signal_controlSequences("STACK_REACHS_BEGINNING");
         _mutex.unlock();
         return NULL;
 
-    } else if ((unsigned)cursor>=_frames.size()) {
+    }
+    else if ( _frames.count(cursor)==0)
+    {
 
+        //return the last frame, if I am at the end
+        // otherwise retrun the first frame
+        Frame* res=nullptr;
+        if(_frameCursor>_frames.rbegin()->first)
+        {
+            //_frameCursor-=extern_update_step;
+            res= _frames.rbegin()->second;
+            _frameCursor=res->GetID();
+        }
+        else
+        {
+            //res=_frames.begin()->second;
+            //_frameCursor=res->GetID();
+        }
+
+        _mutex.unlock();
         //if(extern_offline_mode)
         emit signal_controlSequences("CONTROL_STACK_EMPTY");
-        //frameCursor=frames.size()-1;
-        _mutex.unlock();
-        // FIXME: check me, return the last frame, if in o
-        //return frames.at(frames.size()-1);
-        _frameCursor-=extern_update_step;
-        //return _frames.back();
-        return NULL;
+        return res;
     }
 
-    Frame* res =_frames.at(cursor);
+    Frame* res =_frames[cursor];
     _mutex.unlock();
     return res;
 }
@@ -183,31 +197,31 @@ Frame* SyncData::getNextFrame()
 * 		2. using the function getFrame(int frameNumber). one may first get
 * the current framecursor position using getFrameCursor()
 */
-Frame* SyncData::getPreviousFrame()
-{
-    _mutex.lock();
-    _frameCursor--;
-    //FIXME: do I really need two variables to handle this?
-    int cursor =_frameCursor+_frameCursorOffset;
+//Frame* SyncData::getPreviousFrame()
+//{
+//    _mutex.lock();
+//    _frameCursor--;
+//    //FIXME: do I really need two variables to handle this?
+//    int cursor =_frameCursor+_frameCursorOffset;
 
-    if(cursor<0) {
-        //emit signal_controlSequences("STACK_REACHS_BEGINNING");
-        //frameCursor=0;
-        _mutex.unlock();
-        return NULL;
-    } else if((unsigned)cursor>=_frames.size() ) {
-        //emit signal_controlSequences("CONTROL_STACK_EMPTY");
-        _mutex.unlock();
-        //frameCursor=frames.size()-1;
-        return NULL;
-    }
+//    if(cursor<0) {
+//        //emit signal_controlSequences("STACK_REACHS_BEGINNING");
+//        //frameCursor=0;
+//        _mutex.unlock();
+//        return NULL;
+//    } else if((unsigned)cursor>=_frames.size() ) {
+//        //emit signal_controlSequences("CONTROL_STACK_EMPTY");
+//        _mutex.unlock();
+//        //frameCursor=frames.size()-1;
+//        return NULL;
+//    }
 
-    Frame* res =_frames.at(cursor);
+//    Frame* res =_frames.at(cursor);
 
-    _mutex.unlock();
+//    _mutex.unlock();
 
-    return res;
-}
+//    return res;
+//}
 
 void SyncData::clearFrames()
 {
@@ -219,10 +233,10 @@ void SyncData::clearFrames()
     _pedHeight.clear();
     _pedColor.clear();
 
-//    while (!_frames.empty()) {
-//        delete _frames.back();
-//        _frames.pop_back();
-//    }
+    //    while (!_frames.empty()) {
+    //        delete _frames.back();
+    //        _frames.pop_back();
+    //    }
     _frames.clear();
     _mutex.unlock();
 }
@@ -244,7 +258,6 @@ void SyncData::resetFrameCursor()
 
 int SyncData::getFrameCursor()
 {
-
     return _frameCursor;
 }
 

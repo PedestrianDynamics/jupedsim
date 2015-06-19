@@ -136,14 +136,21 @@ void TimerCallback::Execute(vtkObject *caller, unsigned long eventId,
                     // e.g showing captions/trails...
 
                     if(extern_is_pause)
+                    {
                         frame=extern_trajectories_firstSet.getFrame(extern_trajectories_firstSet.getFrameCursor());
+                    }
                     else
+                    {
                         frame = extern_trajectories_firstSet.getNextFrame();
+                    }
 
-                    if(frame==NULL) {
+                        frameNumber=extern_trajectories_firstSet.getFrameCursor();
+
+                    if(frame==NULL)
+                    {
 
                     } else {
-                        frameNumber=extern_trajectories_firstSet.getFrameCursor();
+
                         nPeds= frame->getSize();
 
                         if(SystemSettings::get2D()==true) {
