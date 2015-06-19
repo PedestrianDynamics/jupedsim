@@ -1,8 +1,8 @@
 /**
  * \file        Building.h
  * \date        Oct 1, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -89,7 +89,7 @@ public:
 
      std::string GetCaption() const;
      RoutingEngine* GetRoutingEngine() const;
-     const std::map<int, std::unique_ptr<Room>>& GetAllRooms() const;
+     const std::map<int, std::unique_ptr<Room> >& GetAllRooms() const;
      const std::vector<Pedestrian*>& GetAllPedestrians() const;
      Pedestrian* GetPedestrian( int pedID) const;
      int GetNumberOfRooms() const;
@@ -122,14 +122,14 @@ public:
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can can be considered transparent
       */
-     bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+     //bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
 
      /**
       * @return true if the two points are visible from each other.
       * Alls walls and transitions and crossings are used in this check.
       * The use of hlines is optional, because they are not real, can be considered transparent
       */
-     bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
+     bool IsVisible(const Point& p1, const Point& p2, const std::vector<SubRoom*>& subrooms, bool considerHlines=false);
 
      /**
       * @return a crossing or a transition matching the given caption.

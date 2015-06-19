@@ -1,8 +1,8 @@
 /**
  * \file        Room.h
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -53,7 +53,7 @@ private:
      /// room elevation
      double _zPos;
      /// all subrooms/partitions of the room
-     std::map<int, std::unique_ptr<SubRoom>> _subRooms;
+     std::map<int, std::unique_ptr<SubRoom> > _subRooms;
      /// all transitions ids
      std::vector<int> _transitionsIDs;
      /// needed if the trajectories for this room are to be write in a special way
@@ -120,7 +120,7 @@ public:
      /**
       * @return a vector containing all subrooms
       */
-     const std::map<int, std::unique_ptr<SubRoom>>& GetAllSubRooms() const;
+     const std::map<int, std::unique_ptr<SubRoom> >& GetAllSubRooms() const;
 
      /**
       * @return a vector containing all transitions Ids

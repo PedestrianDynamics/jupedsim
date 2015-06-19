@@ -1,8 +1,8 @@
 /**
  * \file        Crossing.h
  * \date        Nov 16, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -41,33 +41,42 @@ private:
      /// TODO ? unique between crossings and transitions ?
      int _id;
      /// only one room needed, since a crossing only separates 2 subrooms
-     Room* _room1;
-     SubRoom* _subRoom1;
-     SubRoom* _subRoom2;
+     //Room* _room1;
+     //SubRoom* _subRoom1;
+     //SubRoom* _subRoom2;
 
 public:
+     /**
+      * Constructor
+      */
      Crossing();
+
+     /**
+      * Destructor
+      */
      virtual ~Crossing();
 
      /**
       * Set/Get the Id of the crossing
+      * TODO: do you really want to shadow ?
       */
      void SetID(int ID);
 
      /**
       * Set/Get the Id of the crossing
+      * TODO: do you really want to shadow ?
       */
      int GetID () const;
 
      /**
       * Set/Get the second subroom
       */
-     void SetSubRoom2(SubRoom* r2);
+     //void SetSubRoom2(SubRoom* r2);
 
      /**
       * Set/Get the second subroom
       */
-     SubRoom* GetSubRoom2() const;
+     //SubRoom* GetSubRoom2() const;
 
      /**
       * \return true if the subroomID is associated with the current crossing

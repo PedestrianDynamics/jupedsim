@@ -1,8 +1,8 @@
 /**
  * \file        Room.cpp
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -88,6 +88,10 @@ void Room::SetState(RoomState state)
      _state=state;
 }
 
+void Room::SetEgressTime(double time)
+{
+     _egressTime=time;
+}
 
 /*************************************************************
  Getter-Functions
@@ -113,17 +117,12 @@ double Room::GetEgressTime() const
      return _egressTime;
 }
 
-void Room::SetEgressTime(double time)
-{
-     _egressTime=time;
-}
-
 int Room::GetNumberOfSubRooms() const
 {
      return _subRooms.size();
 }
 
-const std::map<int, std::unique_ptr<SubRoom>>& Room::GetAllSubRooms() const
+const std::map<int, std::unique_ptr<SubRoom> >& Room::GetAllSubRooms() const
 {
      return _subRooms;
 }
