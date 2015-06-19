@@ -459,11 +459,16 @@ void Simulation::RunHeader(long nPed)
      if(nPed==-1) nPed=_nPeds;
      _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
      _iod->WriteGeometry(_building.get());
-     _iod->WriteFrame(0, _building.get());
+
+     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
+     int firstframe=(Pedestrian::GetGlobalTime()/_deltaT)/writeInterval;
+
+     _iod->WriteFrame(firstframe, _building.get());
 
      //first initialisation needed by the linked-cells
-      UpdateRoutesAndLocations();
-      ProcessAgentsQueue();
+     UpdateRoutesAndLocations();
+     ProcessAgentsQueue();
 }
 
 int Simulation::RunBody(double maxSimTime)
@@ -473,13 +478,15 @@ int Simulation::RunBody(double maxSimTime)
      //time_t starttime, endtime;
      //time(&starttime);
 
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
+
      //frame number. This function can be called many times,
-     static int frameNr = 1; // Frame Number
+     static int frameNr = 1 + t/_deltaT ; // Frame Number
+
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
-     //take the current time from the pedestrian
-     double t=Pedestrian::GetGlobalTime();
 
      //process the queue for incoming pedestrians
      //important since the number of peds is used
