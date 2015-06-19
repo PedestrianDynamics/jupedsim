@@ -33,6 +33,7 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/Wall.h"
+#include "../routing/FloorfieldViaFM.h"
 #include "DirectionStrategy.h"
 
 DirectionStrategy::DirectionStrategy()
@@ -62,7 +63,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      const Point& p2 = ped->GetExitLine()->GetPoint2();
      if(p1 == p2) return p1;
 
-     double length = (p1 - p2).Norm(); 
+     double length = (p1 - p2).Norm();
      if(d >= 0.5*length) return (p1 + p2)*0.5; // return the middle point, since line is anyway too short
      double u = d/length; // d is supposed to be smaller than length, then u is in [0, 1]
      //Point diff = (p1 - p2).Normalized() * d;
@@ -199,4 +200,23 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
      //if(angle)
      //     getc(stdin);
      return G;
+}
+
+/// 6
+Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+    Point p;
+    ffviafm.getDirectionAt(ped->GetPos(), p);
+    return p;
+}
+
+DirectionFloorfield::DirectionFloorfield(Building* building, double stepsize, double threshold, bool useDistancMap) {
+    //implement mechanic, that can read-in an existing floorfield (from a previous run)
+    ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap);
+}
+
+DirectionFloorfield::~DirectionStrategy() {
+    if (ffviafm) {
+        delete ffviafm;
+    }
 }
