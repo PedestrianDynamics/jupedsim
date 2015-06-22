@@ -205,9 +205,13 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 /// 6
 Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 {
-    Point p;
-    ffviafm.getDirectionAt(ped->GetPos(), p);
-    return p;
+    if (ffviafm != nullptr) {
+        Point p;
+        ffviafm->getDirectionAt(ped->GetPos(), p);
+        return p;
+    }
+    //this should not execute:
+    exit(EXIT_FAILURE);
 }
 
 DirectionFloorfield::DirectionFloorfield(Building* building, double stepsize, double threshold, bool useDistancMap) {
@@ -215,7 +219,9 @@ DirectionFloorfield::DirectionFloorfield(Building* building, double stepsize, do
     ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap);
 }
 
-DirectionFloorfield::~DirectionStrategy() {
+DirectionFloorfield::DirectionFloorfield() {};
+
+DirectionFloorfield::~DirectionFloorfield() {
     if (ffviafm) {
         delete ffviafm;
     }

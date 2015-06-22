@@ -218,6 +218,9 @@ void Simulation::InitArgs(ArgumentParser* args)
      case 5:
           _direction = new DirectionGeneral();
           break;
+     case 6:
+          _direction = new DirectionFloorfield();
+          break;
      default:
           cout<<"Direction strategy not available. Exit"<<endl;
           exit(EXIT_FAILURE);
@@ -362,9 +365,14 @@ void Simulation::InitArgs(ArgumentParser* args)
      _building->LoadBuildingFromFile();
      _building->LoadRoutingInfo(args->GetProjectFile());
      //_building->AddSurroundingRoom();
-     return;
+     //return;
      _building->InitGeometry(); // create the polygons
      _building->LoadTrafficInfo();
+
+     // pass building information to directionFloorfield
+     if (args->GetExitStrategy() == 6) { //direction strategie is using floorfield
+        _direction = new DirectionFloorfield(_building, .0625, 1., true);
+     }
 
      // in the case the navigation mesh should be written to a file
      if(args->GetNavigationMesh()!="") {

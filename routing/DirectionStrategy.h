@@ -71,13 +71,14 @@ public:
 
 class DirectionFloorfield : public DirectionStrategy {
 public:
+    DirectionFloorfield();
     DirectionFloorfield(Building* building, double stepsize, double threshold, bool useDistancMap);
     ~DirectionFloorfield();
     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
 
 private:
      FloorfieldViaFM* ffviafm;
-}
+};
 
 #endif  /* _DIRECTIONSTRATEGY_H */
 

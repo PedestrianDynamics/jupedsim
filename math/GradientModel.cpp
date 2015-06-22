@@ -151,8 +151,8 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      if (Distance >= J_EPS) {
           ep12 = distp12.Normalized();
      } else {
-          //printf("ERROR: \tin GompertzModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("WARNING: \tin GompertzModel::forcePedPed() ep12 can not be calculated!!!\n");
+          //printf("ERROR: \tin GradientModel::forcePedPed() ep12 can not be calculated!!!\n");
+          Log->Write("WARNING: \tin GradientModel::forcePedPed() ep12 can not be calculated!!!\n");
           Log->Write("\t\t Pedestrians are too near to each other.");
           Log->Write("\t\t Get your model right. Going to exit.");
           return F_rep; // should never happen
@@ -192,7 +192,7 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           exit(EXIT_FAILURE);
      }
      return F_rep;
-}//END Gompertz:ForceRepPed()
+}//END Gradient:ForceRepPed()
 
 Point GradientModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
@@ -225,7 +225,7 @@ Point GradientModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 Point GradientModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
 {
      Point F_wrep = Point(0.0, 0.0);
-     // printf("in GompertzWall\n");
+     // printf("in GradientWall\n");
      // getc(stdin);
      // if direction of pedestrians does not intersect walls --> ignore
 
@@ -248,7 +248,7 @@ Point GradientModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      const Point& v = ped->GetV();
 
      if (Distance < J_EPS) {
-          Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall. Return default values",ped->GetID());
+          Log->Write("WARNING:\t Gradient: forceRepWall() ped %d is too near to the wall. Return default values",ped->GetID());
           return Point(0, 0); //quick and dirty. Should react to the warning and fix the model
      }
      e_iw = dist / Distance;
@@ -330,7 +330,7 @@ void GradientModel::CalculateForce(double time, double tip1, Building* building)
                double normVi = ped->GetV().ScalarP(ped->GetV()); //squared
                double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
                if (normVi > HighVel && ped->GetV0Norm() > 0) {
-                    fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
+                    fprintf(stderr, "GradientModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
                             "is bigger than desired velocity (%f) at time: %fs\n",
                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
 
@@ -352,11 +352,11 @@ void GradientModel::CalculateForce(double time, double tip1, Building* building)
                vector<Pedestrian*> neighbours;
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
-               int nSize = neighbours.size();
+               int neiSize = neighbours.size();   //nSize declared in function scope as unsigned int, here as int  o_O? not nice
                // double B_ij=0;
                // int count_Bij=0;
 
-               for (int i = 0; i < nSize; i++) {
+               for (int i = 0; i < neiSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     //-------------- TESTING ---------
                     // Point distp12 = ped1->GetPos() - ped->GetPos();

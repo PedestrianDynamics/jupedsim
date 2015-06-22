@@ -349,7 +349,7 @@ void ArgumentParser::ParseArgs(int argc, char **argv)
         }
         case 'e': {
             int e = atoi(optarg);
-            if (e == 1 || e == 2 || e == 3 || e == 4)
+            if (e == 1 || e == 2 || e == 3 || e == 4 || e == 6)
                 pExitStrategy = e;
             else
             {
@@ -559,7 +559,7 @@ void ArgumentParser::ParseIniFile(string inifile)
         pTmax = atof(tmax);
         Log->Write("INFO: \t Maxmimal simulation time <%.2f> seconds",pTmax);
     }
-    int max_cpus = 1; 
+    int max_cpus = 1;
 #ifdef _OPENMP
     max_cpus = omp_get_max_threads();
 #endif
@@ -715,9 +715,9 @@ void ArgumentParser::ParseIniFile(string inifile)
                 exit(EXIT_FAILURE);
             }
             //only parsing one model @todo: parse gradient model ar.graf
-            pModel = MODEL_GOMPERTZ;
-            model_id = MODEL_GOMPERTZ;
-            ParseGompertzModel(xModel);
+            pModel = MODEL_GRADIENT;
+            model_id = MODEL_GRADIENT;
+            ParseGradientModel(xModel);
             parsingModelSuccessful=true;
             break;
         }

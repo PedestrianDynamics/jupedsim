@@ -68,18 +68,18 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed                   <- DONE in parseBuilding
     //this step includes Linescanalgorithmus? (maybe included in parsing above)
 
-    testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
+    //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
     resetGoalAndCosts(wall, numOfExits);
 
     calculateDistanceField(threshold); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
 
-    testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
+    //testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
 
     calculateFloorfield(useDistancefield); //use distance2Wall
 
-    testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+    //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)

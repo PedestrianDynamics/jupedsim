@@ -47,8 +47,10 @@ if(NOT DEFINED PROCESSOR_COUNT)
 endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
-  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
-  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+#  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
+#  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+  message( STATUS "PROCESSOR_COUNT: 0")
+  set(CTEST_BUILD_FLAGS "-j0")
 endif(PROCESSOR_COUNT)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -82,19 +84,19 @@ if(DOXYGEN_FOUND)
 endif(DOXYGEN_FOUND)
 
 # find the correct OpenMP flag
-FIND_PACKAGE(OpenMP)
-if(OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-else(OPENMP_FOUND)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
-    # somehow find_package(openmp) does not work properly with clang
-    else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    message( STATUS "Disabling OpenMP support" )
-  endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-endif(OPENMP_FOUND)
+#FIND_PACKAGE(OpenMP)
+#if(OPENMP_FOUND)
+#  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+#  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+#else(OPENMP_FOUND)
+#  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+#    # somehow find_package(openmp) does not work properly with clang
+#    else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#    message( STATUS "Disabling OpenMP support" )
+#  endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#endif(OPENMP_FOUND)
 
 #statically link all gcc stuffs
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
@@ -155,8 +157,7 @@ set (   source_files
   math/GCFMModel.cpp
   math/GompertzModel.cpp
   math/GradientModel.cpp
-  math/FastMarching.cpp
-
+  
   mpi/LCGrid.cpp
 
   pedestrian/Ellipse.cpp
@@ -202,7 +203,7 @@ set (   source_files
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
 
-  Utest/Fastmarchtest.cpp
+ # Utest/Fastmarchtest.cpp
   )
 
 set (   header_files
@@ -221,6 +222,7 @@ set (   header_files
   routing/MeshRouter.h
   routing/mesh/Mesh.h
   routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
   routing/graph/RoutingGraphStorage.h
   routing/graph/RoutingGraph.h
   routing/graph/NavLineState.h
@@ -293,13 +295,13 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
-#add_executable(
-#  jpscore main.cpp
-#)
-
 add_executable(
-  jpscore Utest/Fastmarchtest.h
+  jpscore main.cpp
 )
+
+#add_executable(
+#  jpscore Utest/Fastmarchtest.h
+#)
 
 target_link_libraries(jpscore  core)
 
