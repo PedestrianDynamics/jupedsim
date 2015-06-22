@@ -610,7 +610,7 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const
           visibleL = true;
           visibleR = true;
           
-          l_large = l.enlarge(3); // 2*ped->GetLargerAxis()          
+          l_large = l.Enlarge(3); // 2*ped->GetLargerAxis()          
           
           L = l_large._point1;
           R = l_large._point2;

@@ -254,7 +254,7 @@ public:
       * @param d
       * @return
       */
-     Line enlarge(double d) const; 
+     Line Enlarge(double d) const; 
 
 };
 
