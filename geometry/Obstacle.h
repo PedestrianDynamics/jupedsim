@@ -40,7 +40,6 @@ class Line;
 class Obstacle {
 
 private:
-     int _isClosed;
      double _height;
      int _id;
      std::string _caption;
@@ -136,6 +135,11 @@ public:
       * @return true if the polygon is clockwise oriented
       */
      bool IsClockwise() const;
+
+     /**
+      * @return true if the point is part of the polygon, also considering the geometry precision.
+      */
+     bool IsPartOfPolygon(const Point& ptw);
 
 private:
      int WhichQuad(const Point& vertex, const Point& hitPos) const;

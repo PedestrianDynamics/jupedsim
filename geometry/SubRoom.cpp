@@ -614,7 +614,7 @@ bool SubRoom::IsConvex()
 
      if(hsize==0) {
           Log->Write("WARNING:\t cannot check empty polygon for convexification");
-          Log->Write("WARNING:\t Did you forget to tall ConvertLineToPoly() ?");
+          Log->Write("WARNING:\t Did you forget to call ConvertLineToPoly() ?");
           return false;
      }
 
@@ -663,17 +663,17 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
      {
           //maybe the point was too closed to other points and got replaced
           //check that eventuality
-          bool near = false;
+          bool nah = false;
           for (const auto & pt : _poly)
           {
                if ((pt - ptw).Norm() < J_TOLERANZ)
                {
-                    near = true;
+                    nah = true;
                     break;
                }
           }
 
-          if(near==false)
+          if(nah==false)
           {
                return false;
           }
@@ -872,7 +872,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
 // private Funktionen
 
-// gibt zuruck in welchen Quadranten vertex liegt, wobei hitPos der Koordinatenursprung ist
+// gibt zurück in welchen Quadranten vertex liegt, wobei hitPos der Koordinatenursprung ist
 
 int NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
@@ -894,6 +894,17 @@ double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, doubl
 
 bool NormalSubRoom::IsInSubRoom(const Point& ped) const
 {
+
+     //case when the point is on an edge
+     // todo: this affect the runtime, and do we really need that
+     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
+     // the other half will be outside the polygon.
+     for(auto& w: _walls)
+     {
+          if(w.IsInLineSegment(ped)) return true;
+     }
+
+
      short edge, first, next;
      short quad, next_quad, delta, total;
 

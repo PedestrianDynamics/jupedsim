@@ -39,7 +39,16 @@
 #include <cmath>
 #include <vector>
 
+
+OutputHandler* Log;
 BOOST_AUTO_TEST_SUITE(ObstacleTest)
+
+struct Handler {
+     Handler() {Log = new STDIOHandler();}
+     ~ Handler() {delete Log;}
+};
+
+BOOST_GLOBAL_FIXTURE(Handler)
 
 BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
 {
@@ -141,69 +150,65 @@ BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
 BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
 {
      BOOST_MESSAGE("starting obstacle ConvertLineToPoly test");
-     const double PI = 3.14159265358979323846;
-     
-     for (int i = 1; i < 10; ++i)
-     {
-          Point P1 (cos(PI/i), sin(PI/i));  
-          Point P2 (i, i*i);
-          Point P3 (2*i, i);
-          Point P4 (-i, -i*i);
-          Point P5 (-i, -2*i*i);
-          Point P6 (-2*i, -2*i*i);
-          
-          std::vector<Point> added_pts;
-          added_pts.emplace_back(P1);
-          added_pts.emplace_back(P2);
-          added_pts.emplace_back(P3);
-          added_pts.emplace_back(P4);
-          added_pts.emplace_back(P5);
-          added_pts.emplace_back(P6);
-          const unsigned temp = added_pts.size();
-          
-          Obstacle obs1;
-          
-          Wall w1(P1, P2);
-          Wall w2(P2, P3);
-          Wall w3(P3, P4);
-          Wall w4(P4, P1);
-          Wall w5(P4, P5);
-          Wall w6(P5, P6);
-          Wall w7(P6, P4);
-          
-          obs1.SetId(i-1);
-          obs1.AddWall(w1);
-          obs1.AddWall(w2);
-          obs1.AddWall(w3);
-          obs1.AddWall(w4);
-          //BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == false, obs1.ConvertLineToPoly());
-          
-          
-         // BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
-          
-          obs1.AddWall(w5);
-          obs1.AddWall(w6);
-          obs1.AddWall(w7);
-          
-          BOOST_CHECK_MESSAGE(obs1.ConvertLineToPoly() == true, obs1.ConvertLineToPoly());
-          
-          // GetPolygon test
-          int flag = 0;
-          const std::vector<Point> poly_pts = obs1.GetPolygon();
-          for (unsigned j = 0; j < poly_pts.size(); j++)
-               for (unsigned k = 0; k < temp; ++k) 
-                    if (poly_pts[j] == added_pts[k]) {
-                         ++flag;
-                         added_pts.erase(added_pts.begin() + k);
-                         k = temp;
-                    }  
-       
-          BOOST_CHECK_MESSAGE(flag == temp, poly_pts.size() << " == " << temp);
-          //BOOST_CHECK_EQUAL_COLLECTIONS(poly_pts.begin(), poly_pts.end(), 
-                                        //added_pts.begin(), added_pts.end());
-     }
-     BOOST_MESSAGE("Leaving obstacle ConvertLineToPoly test");
+     Point P1;
+     Point P2(2, 2);
+     Point P3(2, 0);
+     Point P4(0, 2);
+     Point P5(2, -1);
+     Point P6(-1, -1);
+
+     Obstacle obs1;
+     obs1.SetId(1);
+     obs1.AddWall(Wall(P1, P3));
+     obs1.AddWall(Wall(P2, P3));
+     obs1.AddWall(Wall(P2, P4));
+     obs1.AddWall(Wall(P4, P1));
+//     const std::vector<Wall>& allWalls = obs1.GetAllWalls();
+
+     BOOST_CHECK(obs1.ConvertLineToPoly() == true);
+     obs1.AddWall(Wall(P1, P6));  // Hanging edge
+     BOOST_CHECK(obs1.ConvertLineToPoly() == false);
+
+     Obstacle obs2;
+     obs2.SetId(2);
+     obs2.AddWall(Wall(P1, P3));
+     obs2.AddWall(Wall(P3, P2));
+     obs2.AddWall(Wall(P2, P4));
+     obs2.AddWall(Wall(P4, P1));
+//     for (auto it : allWalls)
+//    	 obs2.AddWall(it);
+
+     obs2.AddWall(Wall(P1, P6));
+     obs2.AddWall(Wall(P6, P5));
+     obs2.AddWall(Wall(P5, P1));  // two closed polygon sharing the same starting vertex
+
+     if (obs2.ConvertLineToPoly() == true)
+    	 BOOST_CHECK_MESSAGE(obs2.GetPolygon().size() == 6,
+    			 "obs2.GetPolygon().size() = " << obs2.GetPolygon().size() << " == 6 : Failed");
+         // if polygon creation is true all the vertex must be included
+         // since there are no intersecting Walls this can be considered as a valid polygon,
+         // provided all the vertex are added without duplicates of shared vertex.
+
 }
+
+BOOST_AUTO_TEST_CASE(ConverLineToPoly_intersect_wall_test)
+{
+	BOOST_MESSAGE("starting Obstacle ConverLineToPoly intersecting wall test");
+	Point P1;
+	Point P2(2, 2);
+	Point P3(2, 0);
+	Point P4(0, 2);
+
+	Obstacle obs1;
+	obs1.SetId(1);
+	obs1.AddWall(Wall(P1, P2));
+	obs1.AddWall(Wall(P2, P3));
+	obs1.AddWall(Wall(P3, P4));
+	obs1.AddWall(Wall(P4, P1));
+
+	BOOST_CHECK(obs1.ConvertLineToPoly() == false);
+}
+
 
 BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
 {
