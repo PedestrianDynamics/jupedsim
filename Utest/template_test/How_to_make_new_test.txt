@@ -1,8 +1,10 @@
 * Adding new Benchmark tests for JPScore
-1. find out the number of the last existing test. For example test_101 (in general n)
-2. copy the directory template_test into a directory, e.g. test_101
-3. rename the file script.py into runtest_101 (101 beeing the number of the test as in point 2.)
-4. git add your directory test_101 after writing some smart tests. The test will automaticaly be considered for the next nightly build. 
+1. find out the number of the last existing test. For example test_100 (i.e. n=100)
+2. copy the directory test_1 into a directory with the name test_{n+1} (in this example test_101) 
+3. rename the file runtest_1.py into runtest_101.py (101 beeing the number of the test as in point 2.)
+4. Adapt the new script, especially by changing the old testnumber 1 to the new test number (in this example 101)
+   writing some smart tests.
+5. git add your directory test_101. The test will automaticaly be considered for the next nightly build. 
 
 Let's see if JPScore can pass it.. ;-)
 

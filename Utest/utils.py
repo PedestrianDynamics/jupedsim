@@ -14,8 +14,8 @@ def get_maxtime(filename):
         xmldoc = minidom.parse(filename)
     except:
         logging.critical('could not parse file %s. exit'%filename)
-        exit(FAILURE)        
-    maxtime  = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
+        exit(FAILURE)
+    maxtime = float(xmldoc.getElementsByTagName('max_sim_time')[0].firstChild.nodeValue)
     return maxtime
 
 
@@ -35,12 +35,12 @@ def parse_file(filename):
         logging.critical('could not parse file. exit')
         exit(FAILURE)
     N = int(xmldoc.getElementsByTagName('agents')[0].childNodes[0].data)
-    fps= xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
+    fps = xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
     fps = float(fps)
     fps = int(fps)
     #print "fps=", fps
     #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
-    logging.info ("Npeds = %d, fps = %d"%(N, fps))
+    logging.info("Npeds = %d, fps = %d"%(N, fps))
     frames = xmldoc.childNodes[0].getElementsByTagName('frame')
     data = []
     for frame in frames:
@@ -50,7 +50,7 @@ def parse_file(filename):
             x = float(agent.attributes["x"].value)
             y = float(agent.attributes["y"].value)
             data += [agent_id, frame_number, x, y]
-    data = np.array(data).reshape((-1,4))
+    data = np.array(data).reshape((-1, 4))
     return fps, N, data
 
 
@@ -70,20 +70,21 @@ def flow(fps, N, data, x0):
     if not isinstance(data, np.ndarray):
         logging.critical("flow() accepts data of type <ndarray>. exit")
         exit(FAILURE)
-    peds = np.unique(data[:,0]).astype(int)
+    peds = np.unique(data[:, 0]).astype(int)
     times = []
     for ped in peds:
-        d = data[ data[:,0] == ped ]
-        passed = d[ d[:,2] >= x0 ]
+        d = data[data[:, 0] == ped]
+        passed = d[d[:, 2] >= x0]
         if passed.size == 0:  # pedestrian did not pass the line
             logging.critical("Pedestrian <%d> did not pass the line at <%.2f>"%(ped, x0))
             exit(FAILURE)
-        first = min( passed[:,1] )
+        first = min(passed[:, 1])
         #print "ped= ", ped, "first=",first
-        times.append( first )
+        times.append(first)
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
     logging.info("min(times)=%f    max(times)=%f"%(min(times)/fps, max(times)/fps))
-    flow = fps * float(N-1) / ( max(times) - min(times) )
+    flow = fps * float(N-1) / (max(times) - min(times))
     return flow
+

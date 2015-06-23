@@ -28,11 +28,12 @@ class JPSRunTestDriver(object):
         self.SUCCESS = 0
         self.FAILURE = 1
         # check if testnumber is digit
-        assert isinstance(testnumber, float) or isinstance(testnumber, int)
+        assert isinstance(testnumber, float) or isinstance(testnumber, int), "argument <testnumber> is not digit"
         # only allow path and strings as path directory name
-        assert path.exists(argv0)
-        assert path.exists(testdir)
-        assert isinstance(argv0, str)
+        assert isinstance(argv0, str), "argument <testdir> is not string"
+        assert path.exists(testdir), "%s does not exist"%testdir
+        assert isinstance(argv0, str), "argument <argv0> is not string"
+        assert path.exists(argv0), "%s is does not exist"%argv0
         self.testno = testnumber
         self.logfile = "log_test_%d.txt" % self.testno
         self.logfile = os.path.join(testdir, self.logfile)
@@ -48,7 +49,7 @@ class JPSRunTestDriver(object):
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
 
     def run_test(self, testfunction, *args):
-        assert hasattr(testfunction, '__call__')
+        assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
         executable = self.__find_executable()
         for inifile in self.inifiles:
@@ -118,4 +119,5 @@ class JPSRunTestDriver(object):
             exit(self.FAILURE)
         testfunction(inifile, trajfile, *args)
         return
+
 
