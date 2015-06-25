@@ -82,9 +82,10 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 				<solver>euler</solver>
 				<stepsize>0.01</stepsize>
 				<exit_crossing_strategy>6</exit_crossing_strategy>
+				<floorfield delta_h="0.0625" wall_avoid_distance="0.8" use_wall_avoidance="true" />
 				<linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="3" b="0.25" c="3.0" />
-        <force_wall nu="10" b="0.70" c="3.0" />
+        <force_ped nu="0" b="0.25" c="3.0" />
+        <force_wall nu="1" b="0.70" c="3.0" />
 			</model_parameters>
 			<agent_parameters agent_parameter_id="1">
 		        <v0 mu="0.5" sigma="0.0" />

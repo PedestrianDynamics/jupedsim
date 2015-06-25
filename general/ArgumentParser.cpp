@@ -716,6 +716,39 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
      if(ParseStrategyNodeToObject(*xModelPara)==false)
           return false;
 
+     //floorfield
+     if(xModelPara->FirstChild("floorfield"))
+     {
+          if (!xModelPara->FirstChildElement("floorfield")->Attribute("delta_h"))
+               pDeltaH = 0.0625; // default value
+          else
+          {
+               string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
+               pDeltaH = atof(delta_h.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
+               pWallAvoidDistance = .8; // default value
+          else
+          {
+               string wall_avoid_distance = xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance");
+               pWallAvoidDistance = atof(wall_avoid_distance.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance"))
+               pUseWallAvoidance = true; // default value
+          else
+          {
+               string use_wall_avoidance = xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
+               if (use_wall_avoidance == "false")
+                    pUseWallAvoidance = false;
+               else
+                    pUseWallAvoidance = true;
+          }
+          Log->Write("INFO: \tfloorfield <delta h=%0.4f, wall avoid distance=%0.2f>", pDeltaH, pWallAvoidDistance);
+          Log->Write("INFO: \tfloorfield <use wall avoidance=%s>", pUseWallAvoidance ? "true" : "false");
+     }
+
      //linked-cells
      if(ParseLinkedCells(*xModelPara)==false)
           return false;
@@ -784,7 +817,8 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
      p_op_model = std::shared_ptr<OperationalModel>(new GradientModel(p_exit_strategy.get(), this->GetNuPed(),
                this->GetaPed(), this->GetbPed(), this->GetcPed(),
                this->GetNuWall(), this->GetaWall(), this->GetbWall(),
-               this->GetcWall()));
+               this->GetcWall(),
+               this->pDeltaH, this->pWallAvoidDistance, this->pUseWallAvoidance));
 
      return true;
 }

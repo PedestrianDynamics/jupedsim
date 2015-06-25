@@ -96,6 +96,9 @@ private:
      unsigned int pSeed;
      int pSolver; /// solver for the differential equation
      int pExitStrategy; // Strategie zur Richtungswahl (v0)
+     double pDeltaH;
+     double pWallAvoidDistance;
+     bool pUseWallAvoidance;
      int pLog;
      int pPort;
      int _embedMesh;

@@ -81,6 +81,7 @@ public:
 
 private:
      FloorfieldViaFM* ffviafm;
+     bool initDone;
 };
 
 #endif  /* _DIRECTIONSTRATEGY_H */

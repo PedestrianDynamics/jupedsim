@@ -48,7 +48,8 @@ using std::vector;
 using std::string;
 
 GradientModel::GradientModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
-                             double nuwall, double awall, double bwall, double cwall)
+                             double nuwall, double awall, double bwall, double cwall,
+                             double deltaH, double wallAvoidDistance, bool useWallAvoidance)
 {
      _direction = dir;
      // Force_rep_PED Parameter
@@ -61,6 +62,10 @@ GradientModel::GradientModel(DirectionStrategy* dir, double nuped, double aped, 
      _aWall = awall;
      _bWall = bwall;
      _cWall = cwall;
+     // floorfield Parameter
+     _deltaH = deltaH;
+     _wallAvoidDistance = wallAvoidDistance;
+     _useWallAvoidance = useWallAvoidance;
 }
 
 
@@ -71,10 +76,8 @@ GradientModel::~GradientModel()
 
 bool GradientModel::Init (Building* building) const
 {
-    //_direction = DirectionFloorfield(building, .0625, 1., true);
-
     if(dynamic_cast<DirectionFloorfield*>(_direction)){
-        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, .0625, .5, true);
+        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
     }
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();

@@ -800,8 +800,8 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
     int numY = (int) ((grid->GetyMax()-grid->GetyMin())/grid->Gethy());
     int numTotal = numX * numY;
-    std::cerr << numTotal << " numTotal" << std::endl;
-    std::cerr << grid->GetnPoints() << " grid" << std::endl;
+    //std::cerr << numTotal << " numTotal" << std::endl;
+    //std::cerr << grid->GetnPoints() << " grid" << std::endl;
     file.open(filename1);
     file2.open(filename2);
     file << "# vtk DataFile Version 3.0" << std::endl;
@@ -834,6 +834,6 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     file.close();
     file2.close();
 
-    std::cerr << "File closed: " << filename1 << std::endl;
+    std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
 }
 

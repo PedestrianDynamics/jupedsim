@@ -58,6 +58,10 @@ private:
      double _bWall;
      double _cWall;
 
+     double _deltaH;
+     double _wallAvoidDistance;
+     bool _useWallAvoidance;
+
      /**
       * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
       * This is a duplicate of @see GCFMModel::ForceDriv
@@ -101,7 +105,8 @@ private:
 public:
 
      GradientModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
-                   double nuwall, double awall, double bwall, double cwall);
+                   double nuwall, double awall, double bwall, double cwall,
+                   double deltaH, double wallAvoidDistance, bool useWallAvoidance);
      virtual ~GradientModel(void);
 
      DirectionStrategy* GetDirection() const;
