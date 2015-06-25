@@ -81,7 +81,7 @@
                         <xs:attribute type="xs:int" name="closed" use="optional" />
                         <xs:attribute type="xs:float" name="A_x" use="optional" />
                         <xs:attribute type="xs:float" name="B_y" use="optional" />
-                        <xs:attribute type="xs:float" name="C_z" use="optional" />
+                        <xs:attribute type="xs:float" name="C" use="optional" />
                         <xs:attribute name="class" use="required">
                           <xs:simpleType>
                             <xs:restriction base="xs:string">
@@ -161,6 +161,7 @@
         <xs:simpleType>
           <xs:restriction base="xs:float">
             <xs:enumeration value="0.5" />
+            <xs:enumeration value="0.6" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>

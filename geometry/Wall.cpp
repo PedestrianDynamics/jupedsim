@@ -1,8 +1,8 @@
 /**
  * \file        Wall.cpp
  * \date        Nov 16, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -38,13 +38,13 @@ Wall::Wall() : Line()
 {
 }
 
-Wall::Wall(const Point& p1, const Point& p2) : Line(p1, p2)
+Wall::Wall(const Point& p1, const Point& p2, const std::string& type) : Line(p1, p2), _type(type)
 {
-
 }
 
 Wall::Wall(const Wall& orig) : Line(orig)
 {
+     _type=orig.GetType();
 }
 
 void Wall::WriteToErrorLog() const
@@ -70,4 +70,14 @@ string Wall::Write() const
      geometry.append(wall);
      geometry.append("\t\t</wall>\n");
      return geometry;
+}
+
+const std::string& Wall::GetType() const
+{
+     return _type;
+}
+
+void Wall::SetType(const std::string& type)
+{
+     _type=type;
 }

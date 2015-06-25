@@ -1,8 +1,8 @@
 /**
  * \file        Obstacle.h
  * \date        Jul 31, 2012
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -40,7 +40,6 @@ class Line;
 class Obstacle {
 
 private:
-     double _isClosed;
      double _height;
      int _id;
      std::string _caption;
@@ -48,7 +47,14 @@ private:
      std::vector<Point> _poly;
 
 public:
+     /**
+      * Constructor
+      */
      Obstacle();
+
+     /**
+      * Destructor
+      */
      virtual ~Obstacle();
 
      /**
@@ -60,16 +66,6 @@ public:
       * Set/Get the obstacles' caption
       */
      void SetCaption(std::string caption);
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     double GetClosed() const;
-
-     /**
-      * Set/Get the close state of the obstacle
-      */
-     void SetClosed(double closed);
 
      /**
       * Set/Get the height of the obstacle.
@@ -112,7 +108,7 @@ public:
      /**
       * Create the obstacles polygonal structure from the walls
       */
-     void ConvertLineToPoly();
+     bool ConvertLineToPoly();
 
      /**
       * @return the obstacle as a polygon
@@ -134,6 +130,16 @@ public:
       * @return a nicely formatted string representation of the obstacle
       */
      std::string Write();
+
+     /**
+      * @return true if the polygon is clockwise oriented
+      */
+     bool IsClockwise() const;
+
+     /**
+      * @return true if the point is part of the polygon, also considering the geometry precision.
+      */
+     bool IsPartOfPolygon(const Point& ptw);
 
 private:
      int WhichQuad(const Point& vertex, const Point& hitPos) const;

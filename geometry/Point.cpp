@@ -1,8 +1,8 @@
 /**
  * \file        Point.cpp
  * \date        Sep 30, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -40,22 +40,18 @@
 /************************************************************
   Konstruktoren
  ************************************************************/
-Point::Point()
+Point::Point() : _x(0), _y(0)
 {
-     _x = 0.0;
-     _y = 0.0;
 }
 
-Point::Point(double x, double y)
+Point::Point(double x, double y) : _x(x), _y(y)
 {
-     _x = x;
-     _y = y;
 }
 
 Point::Point(const Point& orig)
 {
-     _x = orig.GetX();
-     _y = orig.GetY();
+     _x = orig._x;
+     _y = orig._y;
 }
 
 std::string Point::toString() const
@@ -87,18 +83,13 @@ double Point::GetY() const
 
 double Point::Norm() const
 {
-     return sqrt(_x * _x + _y * _y);
+     return sqrt(NormSquare());
 }
 
 double Point::NormMolified() const
 {
      double const eps_sq = 0.1;
-     return sqrt(_x * _x + _y * _y + eps_sq);
-}
-
-double Point::NormSquare() const
-{
-     return (_x * _x + _y * _y);
+     return sqrt(NormSquare() + eps_sq);
 }
 
 Point Point::NormalizedMolified() const
@@ -118,18 +109,7 @@ Point Point::Normalized() const
      else return Point(0.0, 0.0);
 }
 
-// scalar product
-double Point::ScalarP(const Point& v) const
-{
-     //return _x * v.GetX() + _y * v.GetY();
-     return _x * v._x + _y * v._y;
-}
 
-/// determinant of the square matrix formed by the vectors [ this, v]
-double Point::Det(const Point& v) const
-{
-     return _x * v._y - _y * v._x;
-}
 
 /* Transformiert die "normalen" Koordinaten in Koordinaten der Ellipse
  * dazu verschieben des Koordinaten Ursprungs in Center und anschliessend drehen um phi
@@ -190,14 +170,14 @@ OC  = -O1O +O1C
 xnew = -xc + x
 
 */
-Point Point::CoordTransToEllipse(const Point& center, double cphi, double sphi) const
+Point Point::TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const
 {
      Point p = Point(_x, _y);
      return (p - center).Rotate(cphi, -sphi);
 }
 
 /*
-This is the reverse funktion of CoordTransToEllipse(),
+This is the reverse funktion of TransformToEllipseCoordinates(),
 where the coord. of a point are transformated to cart. coord.
 
  input:
@@ -215,7 +195,7 @@ where the coord. of a point are transformated to cart. coord.
 
 */
 
-Point Point::CoordTransToCart(const Point& center, double cphi, double sphi) const
+Point Point::TransformToCartesianCoordinates(const Point &center, double cphi, double sphi) const
 {
      Point p = Point(_x, _y);
      return (p.Rotate(cphi, sphi) + center);
@@ -267,6 +247,16 @@ const Point operator*(const Point& p, double f)
      //return Point(p.GetX() * f, p.GetY() * f);
      return Point(p._x * f, p._y * f);
 }
+
+
+// Assignment
+Point& Point::operator+=(const Point& p)
+{
+     _x += p._x;
+     _y += p._y;
+     return *this;
+}
+
 
 // divition with scalar
 const Point operator/(const Point& p, double f)

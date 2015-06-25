@@ -1,8 +1,8 @@
 /**
  * \file        SubRoom.h
  * \date        Oct 8, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -30,9 +30,7 @@
 #define _SUBROOM_H
 
 
-//#include "Line.h"
 #include "Wall.h"
-//#include "Point.h"
 
 #include <vector>
 #include <string>
@@ -64,36 +62,36 @@ private:
      int _roomID;
      std::vector<int> _goalIDs; // all navigation lines contained in this subroom
      double _area;
-     double _closed;
      //defined by: Z = Ax + By + C
      double _planeEquation[3];
      double _cosAngleWithHorizontalPlane;
      std::string _type;
 
-     std::vector<Obstacle*> _obstacles; // obstacles
 
      //different types of navigation lines
      std::vector<Crossing*> _crossings;
      std::vector<Transition*> _transitions;
      std::vector<Hline*> _hlines;
+     std::vector<SubRoom*>_neighbors;
 
      /// storing and incrementing the total number of subrooms
      static int _static_uid;
 
-
-#ifdef _SIMULATOR
-     std::vector<Pedestrian*> _peds; // pedestrians container
-#endif
-
 protected:
      std::vector<Wall> _walls;
      std::vector<Point> _poly; // Polygonal representation of the subroom
+     std::vector<Obstacle*> _obstacles;
 
 public:
 
-     // constructors
+     /**
+      * Constructor
+      */
      SubRoom();
-     SubRoom(const SubRoom& orig);
+
+     /**
+      * Destructor
+      */
      virtual ~SubRoom();
 
      /**
@@ -105,12 +103,6 @@ public:
       * Set/Get the associated room id
       */
      void SetRoomID(int ID);
-     //void SetAllWalls(const std::vector<Wall>& walls);
-     //void SetWall(const Wall& wall, int index);
-     //void SetPolygon(const std::vector<Point>& poly);
-     //void SetArea(double a);
-
-     void SetClosed(double c);
 
      /**
       * Set the plane equation for this subroom.
@@ -124,19 +116,14 @@ public:
      int GetSubRoomID() const;
 
      /**
-      * @return the number of walls forming this subroom
-      */
-     int GetNumberOfWalls() const;
-
-     /**
       * @return all walls
       */
      const std::vector<Wall>& GetAllWalls() const;
 
      /**
-      * @return a reference to the wall at position index
+      * @return visible walls from position of pedestrians (considering the direction of motion)
       */
-     const Wall& GetWall(int index) const;
+     std::vector<Wall> GetVisibleWalls(const Point & position);
 
      /**
       * @return the polygonal representation of the subroom
@@ -183,7 +170,6 @@ public:
       */
      void SetType(const std::string& type);
 
-
      /**
       * @return the status
       */
@@ -204,14 +190,13 @@ public:
       * @return the three coefficients of the plane equation.
       * defined by: Z = Ax + By + C
       */
-     const double * GetPlanEquation () const;
+     const double * GetPlaneEquation () const;
 
      /**
       * @return the elevation of a 2Dimensional point using the plane equation.
       * @see GetPlanEquation
       */
      double GetElevation(const Point & p1) const;
-
 
      /**
       * compute the cosine of the dihedral angle with the Horizontal plane Z=h
@@ -237,24 +222,24 @@ public:
       */
      bool IsClockwise();
 
-
      /**
       * check the subroom for some inconsistencies.
       * e.g. simple polygons
       * no intersection between the walls and the obstacles.
       */
-     void CheckObstacles();
+     bool CheckObstacles();
 
      /**
       * Check the subroom for possible errors and
       * output user specific informations.
       */
-     void SanityCheck();
+     bool SanityCheck();
 
      //navigation
      void AddCrossing(Crossing* line);
      void AddTransition(Transition* line);
      void AddHline(Hline* line);
+     void AddNeighbor(SubRoom* sub);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
      const std::vector<Transition*>& GetAllTransitions() const;
@@ -263,11 +248,26 @@ public:
      const Transition* GetTransition(int i) const;
      const Hline* GetHline(int i) const;
 
+     /**
+      * @return true if the point is part of the polygon, also considering the geometry precision.
+      */
+     bool IsPartOfPolygon(const Point& pt);
+
+     /**
+      * @return true if there is an overlapp between the walls of the subrooms and the
+      * supplied set of lines.
+      */
+     bool Overlapp(const std::vector<Line*>& goals) const;
+
+     /**
+      * @return the adjacent subrooms
+      */
+     const std::vector<SubRoom*>& GetNeighbors() const ;
 
      /**
       * Add a wall to the subroom
       */
-     void AddWall(const Wall& w);
+     bool AddWall(const Wall& w);
 
      /**
       * Adds an obstacle to the subroom.
@@ -276,27 +276,19 @@ public:
      void AddObstacle(Obstacle* obs);
 
      /**
-      * Remove the pedestrian from the subroom.
-      * @param index, the index of the peds in the vector (NOT THE ID !)
+      * Add/remove a goal Id
       */
-     void DeletePedestrian(int index);
-     //void DeletePedestrian(Pedestrian* ped);
      void AddGoalID(int ID);
+
+     /**
+      * Add/remove a goal Id
+      */
      void RemoveGoalID(int ID);
-
-
 
      /**
       * @return true if the two subrooms share a common walkable Edge (crossing or transition)
       */
-     bool IsDirectlyConnectedWith(const SubRoom* sub) const;
-
-     /**
-      * @return true if the two segments are visible from each other.
-      * Alls walls and transitions and crossings are used in this check.
-      * The use of hlines is optional, because they are not real, can can be considered transparent
-      */
-     bool IsVisible(Line* l1, Line* l2, bool considerHlines=false);
+     bool IsDirectlyConnectedWith(SubRoom* sub) const;
 
      /**
       * @return true if the two points are visible from each other.
@@ -305,7 +297,12 @@ public:
       */
      bool IsVisible(const Point& p1, const Point& p2, bool considerHlines=false);
 
-
+     /**
+      * @return true if the two points are visible from each other.
+      * Alls walls and transitions and crossings are used in this check.
+      * The use of hlines is optional, because they are not real, can be considered transparent
+      */
+     bool IsVisible(const Line &wall, const Point &p2);
 
      // virtual functions
      virtual std::string WriteSubRoom() const = 0;
@@ -313,27 +310,14 @@ public:
      virtual std::string WritePolyLine() const=0;
 
      /// convert all walls and transitions(doors) into a polygon representing the subroom
-     virtual void ConvertLineToPoly(std::vector<Line*> goals) = 0;
+     virtual bool ConvertLineToPoly(const std::vector<Line*>& goals) = 0;
 
      ///check whether the pedestrians is still in the subroom
      virtual bool IsInSubRoom(const Point& ped) const = 0;
 
-
-     // MPI:
-     void ClearAllPedestrians();
-
 #ifdef _SIMULATOR
 
-     /**
-      * @return the number of pedestrians in this subroom
-      */
-     int GetNumberOfPedestrians() const;
-     void AddPedestrian(Pedestrian* ped);
      virtual bool IsInSubRoom(Pedestrian* ped) const;
-     void SetAllPedestrians(const std::vector<Pedestrian*>& peds);
-     void SetPedestrian(Pedestrian* ped, int index);
-     const std::vector<Pedestrian*>& GetAllPedestrians() const;
-     Pedestrian* GetPedestrian(int index) const;
 
 #endif
 
@@ -359,7 +343,7 @@ public:
      std::string WritePolyLine() const;
 
      void WriteToErrorLog() const;
-     void ConvertLineToPoly(std::vector<Line*> goals);
+     bool ConvertLineToPoly(const std::vector<Line*>& goals);
      bool IsInSubRoom(const Point& ped) const;
 };
 
@@ -394,7 +378,7 @@ public:
      std::string WriteSubRoom() const;
      std::string WritePolyLine() const;
      virtual void WriteToErrorLog() const;
-     virtual void ConvertLineToPoly(std::vector<Line*> goals);
+     virtual bool ConvertLineToPoly(const std::vector<Line*>& goals);
      bool IsInSubRoom(const Point& ped) const;
 };
 

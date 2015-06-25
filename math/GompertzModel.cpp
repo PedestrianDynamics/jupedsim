@@ -1,8 +1,8 @@
 /**
  * \file        GompertzModel.cpp
  * \date        Apr 15, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -34,7 +34,6 @@
 #include "../mpi/LCGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
-#include "../IO/OutputHandler.h"
 
 #include "GompertzModel.h"
 
@@ -45,10 +44,8 @@
 #define omp_get_max_threads()  1
 #endif
 
-
 using std::vector;
 using std::string;
-
 
 GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall)
@@ -67,40 +64,269 @@ GompertzModel::GompertzModel(DirectionStrategy* dir, double nuped, double aped, 
 }
 
 
-GompertzModel::~GompertzModel(void) { }
+GompertzModel::~GompertzModel()
+{
 
+}
+
+bool GompertzModel::Init (Building* building) const
+{
+    const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
+    for(unsigned int p=0;p<allPeds.size();p++)
+    {
+         Pedestrian* ped = allPeds[p];
+         double cosPhi, sinPhi;
+         //a destination could not be found for that pedestrian
+         if (ped->FindRoute() == -1) {
+              Log->Write(
+                   "ERROR:\tGompertzModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
+             building->DeletePedestrian(ped);
+              continue;
+         }
+
+         Line* e = ped->GetExitLine();
+         const Point& e1 = e->GetPoint1();
+         const Point& e2 = e->GetPoint2();
+         Point target = (e1 + e2) * 0.5;
+         Point d = target - ped->GetPos();
+         double dist = d.Norm();
+         if (dist != 0.0) {
+              cosPhi = d.GetX() / dist;
+              sinPhi = d.GetY() / dist;
+         } else {
+              Log->Write(
+                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "dist to target is 0\n");
+              return false;
+         }
+
+         ped->InitV0(target); 
+
+         JEllipse E = ped->GetEllipse();
+         E.SetCosPhi(cosPhi);
+         E.SetSinPhi(sinPhi);
+         ped->SetEllipse(E);
+    }
+    return true;
+}
+
+void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+{
+     double delta = 0.5;
+      // collect all pedestrians in the simulation.
+      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+
+     unsigned long nSize;
+     nSize = allPeds.size();
+
+      int nThreads = omp_get_max_threads();
+
+     int partSize;
+     partSize = (int) (nSize / nThreads);
+
+      //int debugPed = -69;//10;
+      //building->GetGrid()->HighlightNeighborhood(-9, building);
+
+
+      #pragma omp parallel  default(shared) num_threads(nThreads)
+      {
+           vector< Point > result_acc = vector<Point > ();
+           result_acc.reserve(nSize);
+
+           const int threadID = omp_get_thread_num();
+
+           int start = threadID*partSize;
+           int end;
+           end = (threadID + 1) * partSize - 1;
+           if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
+
+           for (int p = start; p <= end; ++p) {
+
+                Pedestrian* ped = allPeds[p];
+                Room* room = building->GetRoom(ped->GetRoomID());
+                SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
+
+
+                // if(debugPed != ped->GetID())
+                // {
+                //      Point p1 = ped->GetPos();
+                //      Point p2 = ped->GetPos();
+                //      fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), -1, ped->GetID(), ped->GetID());
+                // }
+
+
+                double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
+                double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
+                if (normVi > HighVel && ped->GetV0Norm() > 0) {
+                     fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
+                             "is bigger than desired velocity (%f) at time: %fs\n",
+                             sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
+
+                     // remove the pedestrian and abort
+                     Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
+                     building->DeletePedestrian(ped);
+                     //continue;  //FIXME tolerate first
+                     exit(EXIT_FAILURE);
+                }
+
+                Point repPed = Point(0,0);
+                vector<Pedestrian*> neighbours;
+                building->GetGrid()->GetNeighbourhood(ped,neighbours);
+                //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
+
+                int size = (int) neighbours.size();
+                // double B_ij=0;
+                // int count_Bij=0;
+
+                // if(debugPed == ped->GetID())
+                // {
+                //      printf("\n\n nsiZe=%d\n",size);
+                // }
+
+                for (int i = 0; i < size; i++) {
+                     Pedestrian* ped1 = neighbours[i];
+                     //-------------- TESTING ---------
+                     // Point distp12 = ped1->GetPos() - ped->GetPos();
+                     // double Distance = distp12.Norm();
+                     // double tmp;
+                     // tmp = 1.0 - Distance/(0.25 + 0.25);
+                     // B_ij += exp(-_bPed*exp(-_cPed*tmp));
+                     // if (B_ij > J_EPS)
+                     //     count_Bij += 1;
+                     //--------------------------------
+                     //if they are in the same subroom
+                     Point p1 = ped->GetPos();
+                     Point p2 = ped1->GetPos();
+
+                     //subrooms to consider when looking for neighbour for the 3d visibility
+                     vector<SubRoom*> emptyVector;
+                     emptyVector.push_back(subroom);
+                     emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
+
+                     bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
+                     if (!isVisible)
+                          continue;
+                     // if(debugPed == ped->GetID())
+                     // {
+                     //      fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", current,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
+                     //      printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
+
+                     // }
+                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+                          repPed = repPed + ForceRepPed(ped, ped1);
+                     } else {
+                          // or in neighbour subrooms
+                          SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+                          if(subroom->IsDirectlyConnectedWith(sb2)) {
+                               repPed = repPed + ForceRepPed(ped, ped1);
+                          }
+                     }
+                }
+                //repulsive forces to walls and closed transitions that are not my target
+                Point repWall = ForceRepRoom(allPeds[p], subroom);
+                Point fd = ForceDriv(ped, room);
+
+                // if(count_Bij)
+                //     B_ij /=count_Bij;
+                // else
+                //     B_ij = 0;
+                // double correction = -B_ij/ped->GetTau();
+
+                // make pedestrians want to walk slower in jam
+                // = fd ; //+ ped->GetV0()*correction;
+
+                Point acc = (fd + repPed + repWall) / ped->GetMass();
+                // if(1 || ped->GetID() == 976 ) {
+                //      printf("Pos1 =[%f, %f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
+                //      printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
+                //      getc(stdin);
+                // }
+                result_acc.push_back(acc);
+           }
+
+           //#pragma omp barrier
+           // update
+           for (int p = start; p <= end; ++p) {
+                Pedestrian* ped = allPeds[p];
+
+                Point vToAdd = result_acc[p - start] * deltaT;
+                //----------------- update new pos and new vel -----------------
+                
+                Point v_neu = ped->GetV() + vToAdd;
+                // printf("v_neu=[%f, %f], v=[%f, %f], toAdd=[%f, %f]\n", v_neu.GetX(), v_neu.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), vToAdd.GetX(), vToAdd.GetY());
+                // if(ped->GetID() == 2 )
+                //      v_neu = Point(0,0);
+                Point pos_neu = ped->GetPos() + v_neu * deltaT;
+                //---------------------------------------------------------------
+
+               
+                if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
+
+                     Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
+                     v_neu = v_neu*0.01;
+                     pos_neu = ped->GetPos();
+                }
+ // //--------------------------------------------------------------------------------------------------
+ //                //Jam is based on the current velocity
+                if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
+                     ped->ResetTimeInJam();
+                } else {
+                     ped->UpdateTimeInJam();
+                }
+                
+ //--------------------------------------------------------------------------------------------------
+                     //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
+                ped->SetPos(pos_neu);
+                ped->SetV(v_neu);
+                ped->SetPhiPed();
+                // if(ped->GetID() == 976 ) {
+                //      printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
+                //      printf("pos_neu= %f %f  v_neu %f %f\n", pos_neu.GetX(), pos_neu.GetY(), v_neu.GetX(),  v_neu.GetY());
+                // }
+           }
+      }//end parallel
+}
 
 Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
 {
-//      printf("GompertzModel::ForceDriv\n");
-     
+#define DEBUG 0
+
+     // printf("GompertzModel::ForceDriv\n");
      const Point& target = _direction->GetTarget(room, ped);
      Point F_driv;
      Point e0;
      const Point& pos = ped->GetPos();
      double dist = ped->GetExitLine()->DistTo(pos);
-
+    
      // check if the molified version works
      if (dist > J_EPS_GOAL) {
           e0 = ped->GetV0(target);
-          //printf("1 e0 %f %f, target %f %f\n", e0.GetX(), e0.GetY(), target.GetX(), target.GetY());
+          // printf("1 e0 %f %f, target %f %f\n", e0.GetX(), e0.GetY(), target.GetX(), target.GetY());
      } else {
-          ped->SetSmoothTurning(true);
+          ped->SetSmoothTurning();
           e0 = ped->GetV0();
-          //   printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
+            // printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
      }
-     F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+      F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+  
+      //double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
+      //double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
 
-     // if (ped->GetID() == 2)
-     //   printf("v0=%f, e0=[%f, %f], norm e0= %f. v=[%f, %f], v=%f F=[%f, %f]\n", ped->GetV0Norm(), e0.GetX(), e0.GetY(), e0.Norm(),  ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV().Norm(), F_driv.GetX(), F_driv.GetY());
-           // getc(stdin);
-     
+#if DEBUG
+      printf( "pos %f %f target %f %f\n", pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+      printf("mass=%f, v0norm=%f, v=%f, e0Norm=%f, tau=%f\n", ped->GetMass(), ped->GetV0Norm(), v , e0norm,ped->GetTau());
+      printf("Fdriv=  [%f, %f]\n", F_driv.GetX(), F_driv.GetY());
+      fprintf(stderr, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
+      getc(stdin);
+#endif
+
      return F_driv;
 }
 
 Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 {
-     Point F_rep = Point(0.0, 0.0);;
+     Point F_rep(0.0, 0.0);
      // x- and y-coordinate of the distance between p1 and p2
      Point distp12 = ped2->GetPos() - ped1->GetPos();
      //const Point& vp1 = ped1->GetV(); // v Ped1
@@ -113,9 +339,9 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      Point AP1inE1 = E1.GetCenter();
      Point AP2inE2 = E2.GetCenter();
      // ActionPoint von E1 in Koordinaten von E2 (transformieren)
-     Point AP1inE2 = AP1inE1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
+     Point AP1inE2 = AP1inE1.TransformToEllipseCoordinates(E2.GetCenter(), E2.GetCosPhi(), E2.GetSinPhi());
      // ActionPoint von E2 in Koordinaten von E1 (transformieren)
-     Point AP2inE1 = AP2inE2.CoordTransToEllipse(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
+     Point AP2inE1 = AP2inE2.TransformToEllipseCoordinates(E1.GetCenter(), E1.GetCosPhi(), E1.GetSinPhi());
      double r1 = (AP1inE1 - E1.PointOnEllipse(AP2inE1)).Norm();
      double r2 = (AP2inE2 - E2.PointOnEllipse(AP1inE2)).Norm();
      //fprintf(stderr, "%f %f %f %f\n",  E1.GetEA(), E1.GetEB(), E2.GetEA(), E2.GetEB());
@@ -138,7 +364,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           exit(EXIT_FAILURE);
      }
 //------------------------- check if others are behind using v0 instead of v
-     double tmpv = ped1->GetV().ScalarP(ep12); // < v^0_i , e_ij >
+     double tmpv = ped1->GetV().ScalarProduct(ep12); // < v^0_i , e_ij >
      double ped2IsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
      if (ped2IsBehindv < J_EPS) {
           return F_rep; // ignore ped2
@@ -175,36 +401,40 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
-     Point f = Point(0., 0.);
+     Point f(0., 0.);
      //first the walls
-     const vector<Wall>& walls = subroom->GetAllWalls();
-     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
-          f = f + ForceRepWall(ped, walls[i]);
+     for(const auto & wall: subroom->GetAllWalls())
+     {
+          f += ForceRepWall(ped, wall);
      }
-
      //then the obstacles
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < walls.size(); i++) {
-               f = f + ForceRepWall(ped, walls[i]);
+
+     for(const auto & obst: subroom->GetAllObstacles())
+     {
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               f += ForceRepWall(ped, wall);
           }
      }
+
      // and finally the closed doors
-     const vector<Transition*>& transitions = subroom->GetAllTransitions();
-     for (unsigned int i = 0; i < transitions.size(); i++) {
-          Transition* goal=transitions[i];
-          if( goal->IsOpen() == false ) {
-               f = f + ForceRepWall(ped,*((Wall*)goal));
+     for(auto & goal: subroom->GetAllTransitions())
+     {
+          if(! goal->IsOpen()) {
+               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
      }
 
      return f;
 }
-Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
+
+Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 {
+#define DEBUG 0
      Point F_wrep = Point(0.0, 0.0);
-     // printf("in GompertzWall\n");
+#if DEBUG
+     printf("in GompertzWall\n");
+#endif
      // getc(stdin);
      // if direction of pedestrians does not intersect walls --> ignore
 
@@ -232,19 +462,27 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      }
      e_iw = dist / Distance;
 //------------------------- check if others are behind using v0 instead of v
-     // tmp = ped->GetV0().ScalarP(e_iw); // < v^0_i , e_iw >
-     double tmpv = v.ScalarP(e_iw);
+     // tmp = ped->GetV0().ScalarProduct(e_iw); // < v^0_i , e_iw >
+     double tmpv = v.ScalarProduct(e_iw);
      //double wallIsBehind = exp(-exp(-5*tmp)); //step function: continuous version
-     double wallIsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
-
-
+     // double wallIsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
+     double wallIsBehindv = (tmpv<=0)?0:1;
+#if DEBUG
+     
+     printf("Distance = %f tmpv=%f\n",Distance, tmpv);
+     printf("v = %f, %f \n", v.GetX(), v.GetY());
+     printf("pos = %f, %f \n", ped->GetPos().GetX(), ped->GetPos().GetY());
+     printf("pt = %f, %f \n", pt.GetX(), pt.GetY());
+     printf("e_iw = %f, %f\n",e_iw.GetX(), e_iw.GetY());
+     printf("WallIsBehind = %f (%f)\n",wallIsBehindv,J_EPS);
+#endif
 
      if (wallIsBehindv < J_EPS) { // Wall is behind the direction of motion
           return F_wrep;
      }
 //------------------------------------------------------------------------
      // pt in coordinate system of Ellipse
-     pinE = pt.CoordTransToEllipse(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
+     pinE = pt.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
      // Punkt auf der Ellipse
      r = E.PointOnEllipse(pinE);
      Radius  = (r - E.GetCenter()).Norm();
@@ -255,20 +493,24 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      if(distGoal < J_EPS_GOAL*J_EPS_GOAL)
           return F_wrep;
 
-     Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
-     if(Distance>Radius && direction.IntersectionWith(w) == false ) {
-          return F_wrep;
-     }
+     // Line  direction = Line(ped->GetPos(), ped->GetPos() + v*100);
+     // if(Distance>Radius && !direction.IntersectionWith(w)) {
+     //      return F_wrep;
+     // }
 
 //-------------------------
-
-
 
      //TODO: Check later if other values are more appropriate
      //double b = 0.7, c = 3.0;
      double b = _bWall, c = _cWall;
      B_iw = 1.0 - Distance/(Radius);
      B_iw = exp(-b*exp(-c*B_iw));
+#if DEBUG
+     printf("b=%f, c=%f, a=%f, m=%f\n",b,c,_nuWall, ped->GetMass());
+     printf("Distance=%f, Radius=%f, B_iw=%f, G(B_iw)=%f\n",Distance, Radius, 1.0 - Distance/(Radius), B_iw);
+     printf("f= %f, e_iw= %f, %f\n",f, e_iw.GetX(), e_iw.GetY() );
+     getc(stdin);
+#endif
      //f = -ped->GetMass() * _nuWall * ped->GetV0Norm() * K_iw * B_iw;
      f = -ped->GetMass() * _nuWall * B_iw  * ped->GetV0Norm();
 
@@ -276,159 +518,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
      return F_wrep;
 }
 
-void GompertzModel::CalculateForce(double time, double tip1, Building* building) const
-{
-     double delta = 0.5;
-     double h = tip1 - time;
-     // collect all pedestrians in the simulation.
-     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-
-     unsigned int nSize = allPeds.size();
-
-     int nThreads = omp_get_max_threads();
-
-     int partSize = nSize / nThreads;
-
-     #pragma omp parallel  default(shared) num_threads(nThreads)
-     {
-          vector< Point > result_acc = vector<Point > ();
-          result_acc.reserve(nSize);
-
-          const int threadID = omp_get_thread_num();
-
-          int start = threadID*partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1)) end = nSize - 1;
-
-          for (int p = start; p <= end; ++p) {
-
-               Pedestrian* ped = allPeds[p];
-               Room* room = building->GetRoom(ped->GetRoomID());
-               SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
-
-               double normVi = ped->GetV().ScalarP(ped->GetV()); //squared
-               double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-               if (normVi > HighVel && ped->GetV0Norm() > 0) {
-                    fprintf(stderr, "GompertzModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
-                            "is bigger than desired velocity (%f) at time: %fs\n",
-                            sqrt(normVi), ped->GetID(), ped->GetV0Norm(), time);
-
-                    // remove the pedestrian and abort
-                    for(int p=0; p<subroom->GetNumberOfPedestrians(); p++) {
-                         if (subroom->GetPedestrian(p)->GetID() == ped->GetID()) {
-                              subroom->DeletePedestrian(p);
-                              break;
-                         }
-                    }
-                    printf("\tERROR: ped [%d] was removed due to high velocity\n",ped->GetID());
-                    Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
-                    building->DeletePedestrian(ped);
-                    //continue;  //FIXME tolerate first
-                    exit(EXIT_FAILURE);
-               }
-
-               Point repPed = Point(0,0);
-               vector<Pedestrian*> neighbours;
-               building->GetGrid()->GetNeighbourhood(ped,neighbours);
-
-               int nSize = neighbours.size();
-               // double B_ij=0;
-               // int count_Bij=0;
-
-               for (int i = 0; i < nSize; i++) {
-                    Pedestrian* ped1 = neighbours[i];
-                    //-------------- TESTING ---------
-                    // Point distp12 = ped1->GetPos() - ped->GetPos();
-                    // double Distance = distp12.Norm();
-                    // double tmp;
-                    // tmp = 1.0 - Distance/(0.25 + 0.25);
-                    // B_ij += exp(-_bPed*exp(-_cPed*tmp));
-                    // if (B_ij > J_EPS)
-                    //     count_Bij += 1;
-                    //--------------------------------
-                    //if they are in the same subroom
-                    if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
-                         repPed = repPed + ForceRepPed(ped, ped1);
-                    } else {
-                         // or in neighbour subrooms
-                         SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
-                         if(subroom->IsDirectlyConnectedWith(sb2)) {
-                              repPed = repPed + ForceRepPed(ped, ped1);
-                         }
-                    }
-               }
-               //repulsive forces to walls and closed transitions that are not my target
-               Point repWall = ForceRepRoom(allPeds[p], subroom);
-               Point fd = ForceDriv(ped, room);
-
-               // if(count_Bij)
-               //     B_ij /=count_Bij;
-               // else
-               //     B_ij = 0;
-               // double correction = -B_ij/ped->GetTau();
-
-               // make pedestrians want to walk slower in jam
-               // = fd ; //+ ped->GetV0()*correction;
-
-               Point acc = (fd + repPed + repWall) / ped->GetMass();
-               // if(ped->GetID() == 2 ) {
-               //      printf("Pos1 =[%f, %f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
-               //      printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
-               //      getc(stdin);
-               // }
-               result_acc.push_back(acc);
-          }
-
-          //#pragma omp barrier
-          // update
-          for (int p = start; p <= end; ++p) {
-               Pedestrian* ped = allPeds[p];
-
-               Point vToAdd = result_acc[p - start] * h;
-               //----------------- update new pos and new vel -----------------
-
-                    // printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
-               Point v_neu = ped->GetV() + vToAdd;
-               // if(ped->GetID() == 2 )
-               //      v_neu = Point(0,0);
-               Point pos_neu = ped->GetPos() + v_neu * h;
-               //---------------------------------------------------------------
-
-               // Point e0 = ped->GetV0();
-               // double isBackwards;
-               // isBackwards = v_neu.GetX()*e0.GetX() + v_neu.GetY()*e0.GetY();
-               // if (ped->GetV().Norm()>J_EPS_V) {
-               //      isBackwards = isBackwards/(v_neu.Norm() * e0.Norm()); //normalize
-               //      if(isBackwards <= J_EPS_V) { // Pedestrian is moving in the wrong direction
-               //           v_neu = v_neu*0.01;
-               //           pos_neu = ped->GetPos() + v_neu *h ;
-
-               //           printf("wrong direction\n");
-               //      }
-               // }
-
-               if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
-
-                    //Log->Write("WARNING: ped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
-                    v_neu = v_neu*0.01;
-                    pos_neu = ped->GetPos();
-               }
-//--------------------------------------------------------------------------------------------------
-               //Jam is based on the current velocity
-               if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
-                    ped->ResetTimeInJam();
-               } else {
-                    ped->UpdateTimeInJam();
-               }
-//--------------------------------------------------------------------------------------------------
-                    //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
-               ped->SetPos(pos_neu);
-               ped->SetV(v_neu);
-               ped->SetPhiPed();
-          }
-     }//end parallel
-}
-string GompertzModel::writeParameter() const
+string GompertzModel::GetDescription() const
 {
      string rueck;
      char tmp[CLENGTH];
@@ -442,6 +532,7 @@ string GompertzModel::writeParameter() const
      rueck.append(tmp);
      return rueck;
 }
+
 DirectionStrategy* GompertzModel::GetDirection() const
 {
      return _direction;

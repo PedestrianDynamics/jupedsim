@@ -259,7 +259,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geoemtry.xsd">
 					<vertex px="15.29" py="9.02" />
 				</polygon>
 			</subroom>
-			<subroom id="1" closed="0" class="floor">
+			<subroom id="1" closed="0" class="room">
 				<polygon caption="wall">
 					<vertex px="40.53" py="5.22" />
 					<vertex px="40.53" py="0.0" />

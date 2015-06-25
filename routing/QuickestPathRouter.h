@@ -1,8 +1,8 @@
 /**
  * \file        QuickestPathRouter.h
  * \date        Apr 20, 2011
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -50,11 +50,14 @@ class QuickestPathRouter: public GlobalRouter {
 
 public:
      QuickestPathRouter();
+
+     QuickestPathRouter(int id, RoutingStrategy s):GlobalRouter(id, s) { };
+
      virtual ~QuickestPathRouter();
 
      virtual int FindExit(Pedestrian* ped);
 
-     virtual void Init(Building* building);
+     virtual bool Init(Building* building);
 
 private:
 
@@ -88,7 +91,6 @@ private:
       */
      double CBA (double ref_g1, double comp_g2);
 
-
      /**
       * compute the gain related to this travelling time
       */
@@ -111,7 +113,6 @@ private:
       */
      double TAP (double alpha);
 
-
      /**
       * \brief determines if a pedestrian is within (in a centre) of a jam.
       *
@@ -125,7 +126,6 @@ private:
       */
      int isCongested(Pedestrian* ped);
 
-
      /**
       * redirect a pedestrian based on the actual traffic conditions:
       * i.e if IsCongested returned false
@@ -135,9 +135,8 @@ private:
       */
      virtual void Redirect(Pedestrian* ped);
 
-
      /// select the references pedestrians for this one
-     void selectReferencePeds(int pedIndex, int myCurrentDoor=-1);
+     bool selectReferencePeds(int pedIndex, int myCurrentDoor=-1);
 
      /**
       * redirect a pedestrian based on the actual jamming conditions
@@ -147,7 +146,6 @@ private:
       * @return
       */
      int redirect(int pedindex,int actualexit=-1);
-
 
      /**
       * return the JAM size at a specific exit
@@ -163,29 +161,12 @@ private:
       * flag=1: the exit is free, no reference
       * flag=2: I can't see the exit, nor references, too crowded, too many crossing pedes
       */
-     void SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
-
-     /**
-      * extend the graph by connecting alternative routes.
-      */
-    // void ExpandGraph();
-
-     /**
-      * reduce the graph, making it to a directed graph to the outside
-      */
-     //void ReduceGraph();
-
-
-     /**
-      * check the nodes that are double self linked and remove the connection with the highest radian
-      */
-     //void CheckAndClearDoubleLinkedNodes();
+     bool SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
 
      /**
       * return the number of common nodes the two aps are connected  with or pointing to.
       */
      int GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2);
-
 
      /**
       * return the queue at the specified exit within the specified radius
@@ -193,8 +174,7 @@ private:
       *
       */
      void GetQueueAtExit(Hline* hline, double minVel,
-                         double radius, std::vector<Pedestrian*>& queue, int subroomToConsider=-1);
-
+               double radius, std::vector<Pedestrian*>& queue, int subroomToConsider=-1);
 
      /**
       * Check if two pedestrian can see each other

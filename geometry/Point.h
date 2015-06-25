@@ -1,8 +1,8 @@
 /**
  * \file        Point.h
  * \date        Sep 30, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -70,19 +70,39 @@ public:
      double NormMolified() const;
 
      /// Norm square
-     double NormSquare() const;
+     inline double NormSquare() const
+     {
+          return ScalarProduct(*this);
+     }
      /// normalized vector
      Point Normalized() const;
      /// normalized vector usinf NormMolified
      Point NormalizedMolified() const;
      /// dot product
-     double ScalarP(const Point& v) const;
+     inline double ScalarProduct(const Point &v) const
+     {
+          return _x * v._x + _y * v._y;
+     }
+
+     // since we have only 2D vectors (may be changed in the future), this function returns a scalar
+     // (basically the third component of the vector (0,0,z) )
+     inline double CrossProduct(const Point &p) const
+     {
+          return Determinant(p);
+     }
+
+
+
      /// determinant of the square matrix formed by the vectors [ this, v]
-     double Det(const Point& v) const;
+     inline double Determinant(const Point &v) const
+     {
+          return _x*v._y - _y*v._x;
+     }
+
      /// translation and rotation in Ellipse coordinate system
-     Point CoordTransToEllipse(const Point& center, double cphi, double sphi) const;
+     Point TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const;
      /// translation and rotation in cartesian system
-     Point CoordTransToCart(const Point& center, double cphi, double sphi) const;
+     Point TransformToCartesianCoordinates(const Point &center, double cphi, double sphi) const;
      /// rotate the vector by theta
      Point Rotate(double ctheta, double stheta) const;
 
@@ -96,7 +116,8 @@ public:
      bool operator==(const Point& p) const;
      /// not equal
      bool operator!=(const Point& p) const;
-
+     /// Assignement
+     Point& operator+=(const Point& p);
      /// nice formating of the point
      std::string toString() const;
 };

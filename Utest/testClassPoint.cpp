@@ -1,8 +1,8 @@
 /**
  * \file        testClassPoint.cpp
  * \date        Jul 4, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -32,7 +32,7 @@
 #include<math.h>
 //#include "Config.h"
 
-#ifdef WINDOWS
+#if defined(_WIN64) || defined(_WIN32)
 #include <direct.h>
 #define GetCurrentDir _getcwd
 #else
@@ -221,12 +221,12 @@ int testScalarP(FILE * f)
      double dot=0, edot=0;
 
      for(int i=0; i<NPOINTS-1; i++) {
-          dot =  Points[i].ScalarP(Points[i+1]);
+          dot = Points[i].ScalarProduct(Points[i + 1]);
           edot = expected[i];
           res += ( fabs(dot-edot)<0.001 )?1:0;
           ntests++;
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), R(%.2f, %.2f), dot=%f  edot=%f\n", ntests, res, Points[i]._x, Points[i]._y, Points[i+1]._x, Points[i+1]._y, dot, edot);
-          dot =  Points[i+1].ScalarP(Points[i]);
+          dot = Points[i + 1].ScalarProduct(Points[i]);
           res += ( fabs(dot-edot)<eps )?1:0;
           ntests++;
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), R(%.2f, %.2f), dot=%f  edot=%f\n\n", ntests, res, Points[i+1]._x, Points[i+1]._y, Points[i]._x, Points[i]._y, dot, edot);
@@ -264,12 +264,12 @@ int testDet(FILE * f)
      const int NPOINTS = sizeof(Points) / sizeof(*Points);
      fprintf (f, " %d test cases\n\n", NPOINTS);
      for(int i=0; i<NPOINTS-1; i++) {
-          det =  Points[i].Det(Points[i+1]);
+          det = Points[i].Determinant(Points[i + 1]);
           edet = expected[i];
           res += ( fabs(det-edet)<0.001 )?1:0;
           ntests++;
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), R(%.2f, %.2f), det=%f  edet=%f\n", ntests, res, Points[i]._x, Points[i]._y, Points[i+1]._x, Points[i+1]._y, det, edet);
-          det =  Points[i+1].Det(Points[i]);
+          det = Points[i + 1].Determinant(Points[i]);
           res += ( fabs(det+edet)<eps )?1:0; //edet == -edet
           ntests++;
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), R(%.2f, %.2f), det=%f  edet=%f\n\n", ntests, res, Points[i+1]._x, Points[i+1]._y, Points[i]._x, Points[i]._y, det, edet);
@@ -300,7 +300,7 @@ int testCoordTransToEllipse(FILE * f)
      Point Center(0,0);
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToEllipse(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToEllipseCoordinates(Center, cosphi, sinphi);
           res += ( transPoint == Points[i] )?1:0; //phi==0!
           ntests++;
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), T(%.2f, %.2f)\n", ntests, res, Points[i]._x, Points[i]._y, transPoint._x, transPoint._y);
@@ -310,7 +310,7 @@ int testCoordTransToEllipse(FILE * f)
      sinphi = 0.8660254037844386; //pi/3
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToEllipse(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToEllipseCoordinates(Center, cosphi, sinphi);
           expectedPoint = Points[i].Rotate(cosphi, -sinphi);
           res += ( transPoint == expectedPoint )?1:0; //phi==0!
           ntests++;
@@ -321,7 +321,7 @@ int testCoordTransToEllipse(FILE * f)
      sinphi = -0.8660254037844386; //  -pi/3
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToEllipse(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToEllipseCoordinates(Center, cosphi, sinphi);
           expectedPoint = Points[i].Rotate(cosphi, -sinphi);
           res += ( transPoint == expectedPoint )?1:0; //phi==0!
           ntests++;
@@ -334,7 +334,7 @@ int testCoordTransToEllipse(FILE * f)
      sinphi = 0.8660254037844386; //pi/3
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToEllipse(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToEllipseCoordinates(Center, cosphi, sinphi);
           expectedPoint = (Points[i]-Center).Rotate(cosphi, -sinphi);
           res += ( transPoint == expectedPoint )?1:0; //phi==0!
           ntests++;
@@ -367,7 +367,7 @@ int testCoordTransToCart(FILE * f)
      Point Center(0,0);
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToCart(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToCartesianCoordinates(Center, cosphi, sinphi);
           res += ( transPoint == Points[i] )?1:0; //phi==0!
           ntests++;
           fprintf (f, "%2d. res=%2d, P(%.2f, %.2f), T(%.2f, %.2f)\n", ntests, res, Points[i]._x, Points[i]._y, transPoint._x, transPoint._y);
@@ -377,7 +377,7 @@ int testCoordTransToCart(FILE * f)
      sinphi = 0.8660254037844386; //pi/3
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToCart(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToCartesianCoordinates(Center, cosphi, sinphi);
           expectedPoint = Points[i].Rotate(cosphi, sinphi);
           res += ( transPoint == expectedPoint )?1:0; //phi==0!
           ntests++;
@@ -391,7 +391,7 @@ int testCoordTransToCart(FILE * f)
 
 
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToCart(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToCartesianCoordinates(Center, cosphi, sinphi);
           expectedPoint = Points[i].Rotate(cosphi, sinphi);
           res += ( transPoint == expectedPoint )?1:0; //phi==0!
           ntests++;
@@ -409,7 +409,7 @@ int testCoordTransToCart(FILE * f)
 
      fprintf (f, "\t\tcosphi=%.2f, sinphi=%.2f, Center(%.2f, %.2f)\n", cosphi, sinphi, Center._x, Center._y);
      for(int i=0; i<NPOINTS-1; i++) {
-          transPoint = Points[i].CoordTransToCart(Center, cosphi, sinphi);
+          transPoint = Points[i].TransformToCartesianCoordinates(Center, cosphi, sinphi);
 
           expectedPoint = Points[i].Rotate(cosphi, sinphi)+Center;
           res += ( transPoint == expectedPoint )?1:0; //phi==0!

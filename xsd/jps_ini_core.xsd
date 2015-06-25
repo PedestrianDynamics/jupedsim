@@ -2,18 +2,19 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
   <xs:element name="JuPedSim">
     <xs:complexType>
-      <xs:sequence>
+      <xs:all>
         <xs:element type="xs:int" name="seed" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>seed used for initialising random generator</xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element type="xs:int" name="num_cpus" minOccurs="0" maxOccurs="1">
+        <xs:element type="xs:int" name="num_threads" minOccurs="0" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>maximal simulation time</xs:documentation>
           </xs:annotation>
         </xs:element>
         <xs:element type="xs:float" name="max_sim_time" minOccurs="0" maxOccurs="1" />
+        <xs:element type="xs:string" name="events_file" minOccurs="0" maxOccurs="1" />
         <xs:element type="xs:string" name="geometry" minOccurs="1" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>geometry file</xs:documentation>
@@ -163,6 +164,8 @@
                             <xs:attribute type="xs:float" name="x_max" use="optional" />
                             <xs:attribute type="xs:float" name="y_min" use="optional" />
                             <xs:attribute type="xs:float" name="y_max" use="optional" />
+                            <xs:attribute type="xs:float" name="pre_movement_mean" use="optional" />
+                            <xs:attribute type="xs:float" name="pre_movement_sigma" use="optional" />
                           </xs:extension>
                         </xs:simpleContent>
                       </xs:complexType>
@@ -188,7 +191,7 @@
                         <xs:sequence>
                           <xs:element type="xs:string" name="solver" />
                           <xs:element type="xs:float" name="stepsize" />
-                          <xs:element name="exitCrossingStrategy">
+                          <xs:element name="exit_crossing_strategy">
                             <xs:simpleType>
                               <xs:restriction base="xs:int">
                                 <xs:minInclusive value="1" />
@@ -241,6 +244,26 @@
                       <xs:complexType>
                         <xs:sequence>
                           <xs:element name="v0" maxOccurs="1" minOccurs="1">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:float" name="mu" use="required" />
+                                  <xs:attribute type="xs:float" name="sigma" use="required" />
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="v0_upstairs" maxOccurs="1" minOccurs="0">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:float" name="mu" use="required" />
+                                  <xs:attribute type="xs:float" name="sigma" use="required" />
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                          <xs:element name="v0_downstairs" maxOccurs="1" minOccurs="0">
                             <xs:complexType>
                               <xs:simpleContent>
                                 <xs:extension base="xs:string">
@@ -319,7 +342,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="route_choice_models" maxOccurs="unbounded" minOccurs="1">
+        <xs:element name="route_choice_models" maxOccurs="1" minOccurs="1">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="router" maxOccurs="unbounded" minOccurs="1">
@@ -327,7 +350,7 @@
                   <xs:sequence>
                     <xs:element name="parameters">
                       <xs:complexType mixed="true">
-                        <xs:sequence>
+                        <xs:all>
                           <xs:element name="navigation_lines" minOccurs="0" maxOccurs="1">
                             <xs:annotation>
                               <xs:documentation>extra routing information</xs:documentation>
@@ -340,7 +363,29 @@
                               </xs:simpleContent>
                             </xs:complexType>
                           </xs:element>
-                        </xs:sequence>
+                          <xs:element name="navigation_mesh" maxOccurs="1" minOccurs="0">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute name="method" use="required">
+                                    <xs:simpleType>
+                                      <xs:restriction base="xs:string">
+                                        <xs:pattern value="triangulation" />
+                                      </xs:restriction>
+                                    </xs:simpleType>
+                                  </xs:attribute>
+                                  <xs:attribute name="use_for_local_planning" use="required">
+                                    <xs:simpleType>
+                                      <xs:restriction base="xs:string">
+                                        <xs:pattern value="true|false" />
+                                      </xs:restriction>
+                                    </xs:simpleType>
+                                  </xs:attribute>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:all>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -348,7 +393,7 @@
                     <xs:simpleType>
                       <xs:restriction base="xs:int">
                         <xs:minInclusive value="1" />
-                        <xs:maxInclusive value="2" />
+                        <xs:maxInclusive value="3" />
                       </xs:restriction>
                     </xs:simpleType>
                   </xs:attribute>
@@ -357,6 +402,7 @@
                       <xs:restriction base="xs:string">
                         <xs:enumeration value="quickest" />
                         <xs:enumeration value="global_shortest" />
+                        <xs:enumeration value="cognitive_map" />
                       </xs:restriction>
                     </xs:simpleType>
                   </xs:attribute>
@@ -365,12 +411,13 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-      </xs:sequence>
+      </xs:all>
       <xs:attribute type="xs:string" name="project" />
       <xs:attribute name="version" use="required">
         <xs:simpleType>
           <xs:restriction base="xs:float">
             <xs:enumeration value="0.5" />
+            <xs:enumeration value="0.6" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>

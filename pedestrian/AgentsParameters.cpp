@@ -1,8 +1,8 @@
 /**
  * \file        AgentsParameters.cpp
  * \date        Jul 4, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -54,6 +54,16 @@ void AgentsParameters::InitV0(double mean, double stdv)
     _V0 = std::normal_distribution<double>(mean,stdv);
 }
 
+void AgentsParameters::InitV0UpStairs(double mean, double stdv)
+{
+     _V0UpStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitV0DownStairs(double mean, double stdv)
+{
+     _V0DownStairs = std::normal_distribution<double>(mean,stdv);
+}
+
 void AgentsParameters::InitBmax(double mean, double stdv)
 {
     _Bmax= std::normal_distribution<double>(mean,stdv);
@@ -82,6 +92,16 @@ void AgentsParameters::InitTau(double mean, double stdv)
 double AgentsParameters::GetV0()
 {
     return _V0(_generator);
+}
+
+double AgentsParameters::GetV0UpStairs()
+{
+     return _V0UpStairs(_generator);
+}
+
+double AgentsParameters::GetV0DownStairs()
+{
+     return _V0DownStairs(_generator);
 }
 
 double AgentsParameters::GetBmax()

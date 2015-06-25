@@ -1,8 +1,8 @@
 /**
  * \file        mesh.cpp
  * \date        Aug 21, 2013
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -152,10 +152,10 @@ MeshCell* MeshData::FindCell(Point test, int& cell_id)const
                     Point temp_nxny(n2y-n1y,n1x-n2x);
                     Point temp_xy=test-Point(n1x,n1y);
 
-                    //      if(abs(temp_xy.ScalarP(temp_nxny))<J_EPS)
+                    //      if(abs(temp_xy.ScalarProduct(temp_nxny))<J_EPS)
                     //      Log->Write("Point near to line");
 
-                    if (temp_xy.ScalarP(temp_nxny)>J_EPS) {
+                    if (temp_xy.ScalarProduct(temp_nxny)>J_EPS) {
                          found=false;
                          break;
                     }

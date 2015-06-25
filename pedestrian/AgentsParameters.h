@@ -1,8 +1,8 @@
 /**
  * \file        AgentsParameters.h
  * \date        Jul 4, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -64,6 +64,20 @@ public:
     void InitV0(double mean, double stv);
 
     /**
+     * Initialize the desired velocity distribution walking up stairs
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitV0UpStairs(double mean, double stv);
+
+    /**
+     * Initialize the desired velocity distribution walking downstairs
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitV0DownStairs(double mean, double stv);
+
+    /**
      * Initialize the maximal value if the major axis
      * @param mean, mean value
      * @param stv, standard deviation
@@ -106,6 +120,16 @@ public:
     /**
      * @return a random number following the distribution
      */
+    double GetV0UpStairs();
+
+    /**
+     * @return a random number following the distribution
+     */
+    double GetV0DownStairs();
+
+    /**
+     * @return a random number following the distribution
+     */
     double GetBmax();
 
     /**
@@ -138,6 +162,8 @@ private:
     //std::random_device _rd;
     std::default_random_engine _generator;
     std::normal_distribution<double> _V0;
+    std::normal_distribution<double> _V0UpStairs;
+    std::normal_distribution<double> _V0DownStairs;
     std::normal_distribution<double> _Bmax;
     std::normal_distribution<double> _Bmin;
     std::normal_distribution<double> _Atau;

@@ -23,8 +23,8 @@ logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - 
 #JPSCORE = TRUNK + "bin/jpscore"
 #CURDIR = os.getcwd()
 # ============= some default dictionaries =============
-default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'numCPU':1, 'file':'', 'model_id':1, 'exitCrossingStrategy':3, 'cell_size':2.2, 'operational_model_id':1}
-tags = ['tmax', 'seed', 'geometry', 'exitCrossingStrategy', 'numCPU']     # only these tags can be multiplied
+default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'num_threads':1, 'file':'', 'model_id':1, 'exit_crossing_strategy':3, 'cell_size':2.2, 'operational_model_id':1}
+tags = ['tmax', 'seed', 'geometry', 'exit_crossing_strategy', 'num_threads']     # only these tags can be multiplied
 attributes = ['number', 'operational_model_id', 'cell_size', 'router_id'] # these attributes too, but
 tags2attributes = ['group', 'agents', 'linkedcells', 'router' ]           # only these corresponding to these tags
 input_tags = {}
@@ -48,7 +48,13 @@ def make_dir(path):
 def get_tag(node):
     # geometry
     if node.tag == "geometry":
-        return  glob.glob("%s/*.xml"%node.text)
+        geometries = []
+        geom = glob.glob("%s/*.xml"%node.text)
+        for g in geom:
+            geometries.append('../geometries' + g.split(".xml")[0].split("geometries")[1] + ".xml" ) 
+        # the geometries are relative to the inifiles directory
+        #print geometries
+        return  geometries
     else:
         text = node.text
         
@@ -76,7 +82,7 @@ def get_product(root):
     dics composed of the cartesian product of these lists.
     example:
     we read from the file (xml --> root) the following
-    {'numCPU': [5, 1, 2], 'tmax': [1, 2]}
+    {'num_threads': [5, 1, 2], 'tmax': [1, 2]}
     return is:
     [
     {'numCPU': 5, 'tmax': 1}, {'numCPU': 5, 'tmax': 2},
@@ -103,6 +109,7 @@ def get_product(root):
             # else: # should not happen
             #     sys.exit("Tag %s already exists! What the hell?"%tag)
     result = [dict(izip(input_tags, x)) for x in product(*input_tags.itervalues())]
+    #print "result", result
     return result
 # =======================================================
 def make_filename(directory, d):
@@ -111,11 +118,16 @@ def make_filename(directory, d):
     for key, value in d.iteritems():
         if key == "geometry":
             value = os.path.basename(value)
+        # if key == "num_threads":
+            # value = "numCPU"
         name += "_" + key + "_" + str(value)
         traj += "_" + key + "_" + str(value)
-    name += ".xml"
-    traj += ".xml"
-    print (name)
+
+    if not name.endswith("xml"):
+        name += ".xml"
+    if not traj.endswith("xml"):
+        traj += ".xml"
+    #print "name", (name)
     return name, traj
 # =======================================================
 def update_tag_value(root, tag, value):
@@ -176,7 +188,7 @@ if __name__ == "__main__":
     logging.info('master inifile = <%s>'%masterfile)
     make_dir( "%s/trajectories"%directory)
     make_dir( "%s/inifiles"%directory)
-    
+    print masterfile
     tree = ET.parse(masterfile)
     root = tree.getroot()
     result = get_product(root)

@@ -14,7 +14,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
     <!-- trajectories file and format -->
     <trajectories format="xml-plain" fps="8">
          <file location="trajectories.xml" />
-          <socket hostname="127.0.0.1" port="8989"/> 
+          <!-- <socket hostname="127.0.0.1" port="8989"/>  -->
     </trajectories>
     <!-- where to store the logs -->
 <!--      <logfile>log.txt</logfile> -->
@@ -79,7 +79,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>4</exitCrossingStrategy>
+        <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -106,7 +106,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="3"  b="0.25" c="3.0"/>
         <force_wall nu="10" b="0.70" c="3.0"/>

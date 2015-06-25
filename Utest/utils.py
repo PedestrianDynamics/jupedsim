@@ -3,7 +3,7 @@ import logging
 import numpy as np
 
 SUCCESS = 0
-FAILURE = 1
+FAILURE = -1
 
 def get_maxtime(filename):
     """
@@ -38,7 +38,7 @@ def parse_file(filename):
     fps= xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data #type unicode
     fps = float(fps)
     fps = int(fps)
-    print "fps=", fps
+    #print "fps=", fps
     #fps = int(xmldoc.getElementsByTagName('frameRate')[0].childNodes[0].data)
     logging.info ("Npeds = %d, fps = %d"%(N, fps))
     frames = xmldoc.childNodes[0].getElementsByTagName('frame')
@@ -66,7 +66,7 @@ def flow(fps, N, data, x0):
     output:
     - flow
     """
-    logging.info('measure flow')
+    logging.info('Measure flow at %f'%x0)
     if not isinstance(data, np.ndarray):
         logging.critical("flow() accepts data of type <ndarray>. exit")
         exit(FAILURE)
@@ -74,10 +74,16 @@ def flow(fps, N, data, x0):
     times = []
     for ped in peds:
         d = data[ data[:,0] == ped ]
-        first = min( d[ d[:,2] >= x0 ][:,1] )
+        passed = d[ d[:,2] >= x0 ]
+        if passed.size == 0:  # pedestrian did not pass the line
+            logging.critical("Pedestrian <%d> did not pass the line at <%.2f>"%(ped, x0))
+            exit(FAILURE)
+        first = min( passed[:,1] )
+        #print "ped= ", ped, "first=",first
         times.append( first )
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
-        return 0    
+        return 0
+    logging.info("min(times)=%f    max(times)=%f"%(min(times)/fps, max(times)/fps))
     flow = fps * float(N-1) / ( max(times) - min(times) )
     return flow

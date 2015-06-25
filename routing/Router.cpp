@@ -1,8 +1,8 @@
 /**
  * \file        Router.cpp
  * \date        Nov 11, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -40,6 +40,12 @@ Router::Router()
      _finalDestinations = vector<int>();
      _id=-1;
      _strategy=ROUTING_UNDEFINED;
+}
+
+Router::Router(int id, RoutingStrategy s)
+{
+    _id = id;
+    _strategy = s;
 }
 
 Router::~Router()
@@ -92,22 +98,5 @@ void Router::SetStrategy(RoutingStrategy strategy)
 RoutingStrategy Router::GetStrategy() const
 {
      return _strategy;
-}
-
-void Router::WriteToErrorLog() const
-{
-     //TODO
-//      for (map<int, Crossing*>::const_iterator iter = pCrossings.begin();
-//                      iter != pCrossings.end(); ++iter) {
-//              iter->second->WriteToErrorLog();
-//      }
-//      for (map<int, Transition*>::const_iterator iter = pTransitions.begin();
-//                      iter != pTransitions.end(); ++iter) {
-//              iter->second->WriteToErrorLog();
-//      }
-//      for (map<int, Hline*>::const_iterator iter = pHlines.begin();
-//                      iter != pHlines.end(); ++iter) {
-//              iter->second->WriteToErrorLog();
-//      }
 }
 

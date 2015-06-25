@@ -4,7 +4,7 @@
 
   <!-- seed used for initialising random generator -->
   <seed>linspace(1, 10000, 10)</seed>
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
   <max_sim_time unit="sec">900</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
@@ -60,10 +60,10 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exitCrossingStrategy>4</exitCrossingStrategy>
+        <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="arange(2, 4, 0.3)" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+        <force_wall nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
         <v0 mu="1.34" sigma="0.001" />
@@ -79,7 +79,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="3"  b="0.25" c="3.0"/>
         <force_wall nu="10" b="0.70" c="3.0"/>

@@ -1,8 +1,8 @@
 /**
  * \file        Simulation.h
  * \date        Dec 15, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J?lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -36,107 +36,130 @@
 
 #include "general/ArgumentParser.h"
 #include "geometry/Building.h"
+#include "geometry/SubRoom.h"
 #include "IO/OutputHandler.h"
 #include "IO/IODispatcher.h"
-#include "math/ForceModel.h"
+#include "math/OperationalModel.h"
 #include "math/ODESolver.h"
 #include "routing/GlobalRouter.h"
 #include "routing/QuickestPathRouter.h"
 #include "routing/DirectionStrategy.h"
 #include "routing/DummyRouter.h"
-#include "routing/GraphRouter.h"
-#include "routing/NavMesh.h"
 #include "routing/MeshRouter.h"
 #include "routing/RoutingEngine.h"
 #include "routing/SafestPathRouter.h"
 #include "pedestrian/PedDistributor.h"
-#include "events/EventManager.h"
 #include "routing/CognitiveMapRouter.h"
+#include "events/EventManager.h"
+#include "pedestrian/AgentsSourcesManager.h"
 
-//OutputHandler* Log;
+//Forward declarations
+//class AgentsSourcesManager;
+class EventManager;
+class HybridSimulationManager;
 
-class Simulation {
+class Simulation
+{
 private:
      ///Number of pedestrians in the simulation
-     int _nPeds;
-     ///Maximum simulation time
-     double _tmax;
-     /// time step
-     double _deltaT;
-     /// frame rate for the trajectories
-     double _fps;
-     ///seed using for the random number generator
-     unsigned int _seed;
-     /// building object
-     Building* _building;
-     ///initial distribution of the pedestrians
-     PedDistributor* _distribution;
-     /// door crossing strategy for the pedestrians
-     DirectionStrategy* _direction;
-     /// Force model to use
-     ForceModel* _model;
-     /// differential equation solver
-     ODESolver* _solver;
-     /// writing the trajectories to file
-     IODispatcher* _iod;
-     ///new: EventManager
-     EventManager* _em;
-     /// argument parser
-     ArgumentParser* _argsParser;
-
+    long _nPeds;
+    ///Maximum simulation time
+    //double _tmax;
+    /// time step
+    double _deltaT;
+    /// frame rate for the trajectories
+    double _fps;
+    ///seed using for the random number generator
+    unsigned int _seed;
+    /// building object
+    std::unique_ptr<Building> _building;
+    /// Force model to use
+    std::shared_ptr<OperationalModel> _operationalModel;
+    /// Manage all route choices algorithms
+    std::shared_ptr<RoutingEngine> _routingEngine;
+    /// differential equation solver
+    ODESolver* _solver;
+    /// writing the trajectories to file
+    IODispatcher* _iod;
+    /// EventManager
+    EventManager* _em;
+    /// argument parser
+    ArgumentParser _argsParser;
+    /// Agents sources manager
+    AgentsSourcesManager _agentSrcManager;
+    /// hybrid simulation manager
+    //HybridSimulationManager
+    std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
 
 public:
-     /**
-      * constructor
-      */
-     Simulation();
+    /**
+     * Constructor
+     */
+    Simulation(const ArgumentParser& args);
 
-     /**
-      * Destructor
-      */
-     virtual ~Simulation();
+    /**
+     * Destructor
+     */
+    virtual ~Simulation();
 
-     /**
-      * Initialize the number of agents in the simulation
-      */
-     void SetPedsNumber(int i);
+    /**
+     * Initialize the number of agents in the simulation
+     */
+    long GetPedsNumber() const;
 
-     /**
-      * Initialize the number of agents in the simulation
-      */
-     int GetPedsNumber() const;
+    /**
+     * Read parameters from the argument parser class.
+     */
+    bool InitArgs(const ArgumentParser& args);
 
-     /**
-      * Returns the number of agents when running on a distributed system (MPI)
-      * NOT IMPLEMENTED
-      */
-     int GetNPedsGlobal() const;
+    /**
+     * Update the route of the pedestrians and reassign rooms, in the case a room change happens
+     */
+    void UpdateRoutesAndLocations();
 
-     /**
-      * @return the building object containing all geometry elements
-      */
-     Building* GetBuilding() const;
+    /**
+     * Perform some initialisation for the simulation.
+     * such as writing the headers for the trajectories.
+     * @param the maximal number of pedestrian
+     */
+    void RunHeader(long nPed=-1);
 
-     /**
-      * Read parameters from the argument parser class.
-      */
-     void InitArgs(ArgumentParser *args);
+    /**
+     * Run the main part of the simulation
+     */
+    int RunBody(double maxSimTime);
 
-     /**
-      *
-      * @return the total simulated/evacuation time
-      */
-     int RunSimulation();
+    /**
+     * Perform some finalization like writing the
+     * footers for the trajectories.
+     */
+    void RunFooter();
 
-     /**
-      * Update the pedestrians states: positions, velocity, route
-      */
-     void Update();
+    /**
+     * Run a standard simulation
+     * @return the total simulated/evacuation time
+     */
+    int RunStandardSimulation(double maxSimTime);
 
-     /**
-      * print some statistics about the simulation
-      */
-     void PrintStatistics();
+    /**
+     * print some statistics about the simulation
+     */
+    void PrintStatistics();
+
+    /**
+     * @return the agents source manager
+     */
+    AgentsSourcesManager& GetAgentSrcManager();
+
+    /**
+     * Check if any agents are waiting to enter the simulation
+     */
+    void ProcessAgentsQueue();
+
+    /**
+     * @return a pointer to the building object
+     */
+    Building* GetBuilding();
 };
 
 #endif /*SIMULATION_H_*/

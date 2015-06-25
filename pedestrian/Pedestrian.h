@@ -1,8 +1,8 @@
 /**
  * \file        Pedestrian.h
  * \date        Sep 30, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -35,52 +35,64 @@
 #include <set>
 #include <time.h>
 
-#include "../pedestrian/Ellipse.h"
+#include "Ellipse.h"
 #include "../general/Macros.h"
-#include "../routing/graph/NavLineState.h"
 #include "../geometry/NavLine.h"
+#include "AgentsParameters.h"
+#include "PedDistributor.h"
 
 class Building;
 class NavLine;
 class Router;
+class Knowledge;
 
-
-class Pedestrian {
+class Pedestrian
+{
 private:
-     /// starting with 1
-     int _id;
+     //generic parameters, independent from models
+     int _id; //starting with 1
+     int _exitIndex; // current exit
+     int _group;
+     int _desiredFinalDestination;
      double _height;
      double _age;
+     double _premovement = 0;
+     double _riskTolerance=0;
+     std::string _gender;
+
+     //gcfm specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
      double _deltaT; // step size
-     std::string _gender;
+     JEllipse _ellipse;// the shape of this pedestrian
+     Point _V0; //vector V0
 
+     //double _V0;
+     double _V0UpStairs;
+     double _V0DownStairs;
+
+     //location parameters
      std::string _roomCaption;
      int _roomID;
      int _subRoomID;
-     int _exitIndex; // current exit
-     int _group;
+     int _oldRoomID;
+     int _oldSubRoomID;
 
 
      NavLine* _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
      std::vector<int> _destHistory;
      std::vector<int> _trip;
-     Point _V0; //vector V0
+
      Point _lastPosition;
      int _lastCellPosition;
 
-     /**
-      * A set with UniqueIDs of closed crossings,
-      * transitions or hlines (hlines doesnt make that much sense,
-      * just that they are removed from the routing graph)
-      */
-     std::map<int, NavLineState> _knownDoors;
+     ///state of doors with time stamps
+     std::map<int, Knowledge> _knownDoors;
 
-
+     /// distance to nearest obstacle that blocks the sight of ped.
+     double _distToBlockade;
      //routing parameters
-
      /// new orientation after 10 seconds
      double _reroutingThreshold;
      /// a new orientation starts after this time
@@ -95,58 +107,61 @@ private:
      std::queue <Point> _lastPositions;
      /// store the last velocities
      std::queue <Point> _lastVelocites;
+     /// routing strategy followed
+     RoutingStrategy _routingStrategy;
 
-     int _desiredFinalDestination;
-     int _oldRoomID;
-     int _oldSubRoomID;
      int _newOrientationDelay; //2 seconds, in steps
-
 
      /// necessary for smooth turning at sharp bend
      int _updateRate;
      double _turninAngle;
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
-     bool _newOrientationFlag;
+     bool _newOrientationFlag; //this is used in the DirectionGeneral::GetTarget()
+     bool _newEventFlag;
 
      // the current time in the simulation
      static double _globalTime;
-     static bool _enableSpotlight;
+     static AgentColorMode _colorMode;
      bool _spotlight;
 
      /// the router responsible for this pedestrian
      Router* _router;
      /// a pointer to the complete building
      Building * _building;
-     /// the shape of this pedestrian
-     JEllipse _ellipse;
 
+     static int _agentsCreated;
 
 public:
-     // Konstruktoren
+     // constructors
      Pedestrian();
+     explicit Pedestrian(const StartDistribution& agentsParameters, Building& building);
      virtual ~Pedestrian();
 
      // Setter-Funktionen
      void SetID(int i);
-     //TODO: use setRoom(Room*) and setSubRoom(SubRoom*)
      void SetRoomID(int i, std::string roomCaption);
      void SetSubRoomID(int i);
      void SetMass(double m);
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
+
+     //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
+
      void Setdt(double dt);
      double Getdt();
 
-
+     void SetDistToBlockade(double dist);
+     double GetDistToBlockade();
+     
      // Eigenschaften der Ellipse
-     void SetPos(const Point& pos); // setzt x und y-Koordinaten
+     void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
      void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
-     void SetV0Norm(double v0);
-     void SetSmoothTurning(bool smt); // activate the smooth turning with a delay of 2 sec
+     void SetV0Norm(double v0,double v0UpStairs, double v0DownStairs);
+     void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
      void SetPhiPed();
      void SetFinalDestination(int UID);
      void SetTrip(const std::vector<int>& trip);
@@ -170,13 +185,13 @@ public:
      const Point& GetV() const;
      const Point& GetV0() const;
      const Point& GetV0(const Point& target);
+     void InitV0(const Point& target);
 
      /**
       * the desired speed is the projection of the speed on the horizontal plane.
       * @return the norm of the desired speed.
       */
      double GetV0Norm() const;
-
 
      ///get axis in the walking direction
      double GetLargerAxis() const;
@@ -187,30 +202,39 @@ public:
      void ClearMentalMap(); // erase the peds memory
 
      // functions for known closed Doors (needed for the Graphrouting and Rerouting)
-     void AddKnownClosedDoor(int door);
-     std::set<int>  GetKnownClosedDoors();
-     void MergeKnownClosedDoors(std::map<int, NavLineState> * input);
-     std::map<int, NavLineState> * GetKnownDoors();
-     int DoorKnowledgeCount() const;
+     void AddKnownClosedDoor(int door, double time);
+     // needed for information sharing
+     const std::map<int, Knowledge>& GetKnownledge() const;
 
+     /**
+      * For convenience
+      * @return a string representation of the knowledge
+      */
+     const std::string GetKnowledgeAsString() const;
 
+     /**
+      * clear all information related to the knowledge about closed doors
+      */
+     void ClearKnowledge();
 
+     RoutingStrategy GetRoutingStrategy() const;
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();
      int GetDestinationCount();
      double GetDistanceToNextTarget() const;
      double GetDisTanceToPreviousTarget() const;
-
-
-
+     void SetNewOrientationFlag(bool flag);
+     bool GetNewOrientationFlag();
+     bool GetNewEventFlag();
+     void SetNewEventFlag(bool flag);
      bool ChangedSubRoom();
-
      void RecordActualPosition();
      double GetDistanceSinceLastRecord();
 
      /**
-      * The elevation is computed using the plane equation given in the subroom.
+      * The elevation is computed using the plane
+      * equation given in the subroom.
       * @return the z coordinate of the pedestrian.
       */
 
@@ -233,8 +257,12 @@ public:
      /// in the format room1:exit1>room2:exit2
      std::string GetPath();
 
-     //debug
-     void Dump(int ID, int pa = 0); // dump pedestrians parameter, 0 for all parameters
+     /**
+      * Dump the parameters of this pedestrians.
+      * @param ID, the id of the pedestrian
+      * @param pa, the parameter to display (0 for all parameters)
+      */
+     void Dump(int ID, int pa = 0);
 
      /**
       * observe the reference pedestrians and collect some data, e.g distance to exit
@@ -246,7 +274,8 @@ public:
      bool Observe(double maxObservationTime=-1);
 
      /**
-      * @return true, if reference pedestrian have been selected and the observation process has started
+      * @return true, if reference pedestrian have been selected
+      * and the observation process has started
       */
      bool IsObserving();
 
@@ -285,7 +314,6 @@ public:
       */
      void SetSpotlight(bool spotlight);
 
-
      /**
       * Set/Get the spotlight value. If true,
       * this pedestrians will be coloured and all other grey out.
@@ -293,11 +321,42 @@ public:
       */
      bool GetSpotlight();
 
+     /***
+      * Set/Get the time after which this pedestrian will start taking actions.
+      */
+     void SetPremovementTime(double time);
+
+     /***
+      * Set/Get the time after which this pedestrian will start taking actions.
+      */
+     double GetPremovementTime();
+
+     /**
+      * Set/Get the risk tolerance of a pedestrians.
+      * The value should be in the interval [0 1].
+      * It will be truncated accordingly if not in that interval.
+      */
+     void SetRiskTolerance(double tol);
+
+     /**
+      * Set/Get the risk tolerance of a pedestrians.
+      * The value should be in the interval [0 1].
+      * It will be truncated accordingly if not in that interval.
+      */
+     double GetRiskTolerance() const;
+
+     /**
+      * return the pedestrian color used for visualiation.
+      * Default mode is coded by velocity.
+      * @return a value in [-1 255]
+      */
+     int GetColor();
 
      void ResetTimeInJam();
      void UpdateTimeInJam();
      void UpdateJamData();
      void UpdateReroutingTime();
+     double GetReroutingTime();
      void RerouteIn(double time);
      bool IsReadyForRerouting();
 
@@ -318,10 +377,10 @@ public:
       */
      double GetRecordingTime() const;
 
-    /**
-     * @return the average velocity over the recording period
-     */
-    double GetMeanVelOverRecTime() const;
+     /**
+      * @return the average velocity over the recording period
+      */
+     double GetMeanVelOverRecTime() const;
 
      double GetAge() const;
      void SetAge(double age);
@@ -336,10 +395,18 @@ public:
      static void SetGlobalTime(double time);
 
      /**
-      * activate/deactivate the spotlight system
-      * @param status true for activating, false for deactivating
+      * @return the total number of pedestrians objects created.
+      * This is useful for the linked-cells algorithm, since it uses the ID of the pedestrians
+      * and the  maximal count must be known in advance.
       */
-     static void ActivateSpotlightSystem(bool status);
+     static int GetAgentsCreated();
+
+
+     /**
+      * Set the color mode for the pedestrians
+      * @param mode
+      */
+     static void SetColorMode(AgentColorMode mode);
 
      /**
       * Set/Get the Building object
@@ -350,6 +417,7 @@ public:
       * Set/Get the Building object
       */
      void SetBuilding(Building* building);
+
 };
 
 #endif  /* _PEDESTRIAN_H */

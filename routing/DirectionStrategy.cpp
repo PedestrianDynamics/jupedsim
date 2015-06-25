@@ -1,8 +1,8 @@
 /**
  * \file        DirectionStrategy.cpp
  * \date        Dec 13, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -36,6 +36,8 @@
 #include "../routing/FloorfieldViaFM.h"
 #include "DirectionStrategy.h"
 
+
+
 DirectionStrategy::DirectionStrategy()
 {
 }
@@ -47,16 +49,13 @@ DirectionStrategy::~DirectionStrategy()
 /// 1
 Point DirectionMiddlePoint::GetTarget(Room* room, Pedestrian* ped) const
 {
-     return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
+    (void)room; // suppress the unused warning
+    return (ped->GetExitLine()->GetPoint1() + ped->GetExitLine()->GetPoint2())*0.5;
 }
 /// 2
-Point DirectionMinSeperation::GetTarget(Room* room, Pedestrian* ped) const
-{
-     return ped->GetExitLine()->ShortestPoint(ped->GetPos());
-}
-/// 3
 Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) const
 {
+    (void)room; // suppress the unused warning
 
      double d = ped->GetEllipse().GetBmin() + 0.1 ; // shoulder//0.5;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
@@ -84,24 +83,40 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      return  target;
 
 }
-/// 4
+/// 3
 Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 {
-     const Point& p1 = ped->GetExitLine()->GetPoint1();
-     const Point& p2 = ped->GetExitLine()->GetPoint2();
-     Line ExitLine = Line(p1, p2);
-     Point Lot = ExitLine.LotPoint( ped->GetPos() );
-     Point ExitMiddle = (p1+p2)*0.5;
-     double d = 0.05;
-     Point diff = (p1 - p2).Normalized() * d;
-     Line e_neu = Line(p1 - diff, p2 + diff);
+   (void)room; // suppress the unused warning
 
+    const Point& p1 = ped->GetExitLine()->GetPoint1();
+    const Point& p2 = ped->GetExitLine()->GetPoint2();
+    Line ExitLine = Line(p1, p2);
+    Point Lot = ExitLine.LotPoint( ped->GetPos() );
+    Point ExitMiddle = (p1+p2)*0.5;
+    double d = 0.2;
+    Point diff = (p1 - p2).Normalized() * d;
+    Line e_neu = Line(p1 - diff, p2 + diff);
 
-     if ( e_neu.IsInLineSegment(Lot) ) {
-          return Lot;
-     } else {
-          return ExitMiddle;
-     }
+    // if(ped->GetID() == -10)
+    // {
+    //     printf("=======\nX=[%.2f], Y=[%.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
+    //     printf("p1=[%.2f, %.2f], p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY());
+    //     printf("e_neu=[%.2f, %.2f]===[%.2f, %.2f]\n", e_neu.GetPoint1().GetX(), e_neu.GetPoint1().GetY(), e_neu.GetPoint2().GetX(), e_neu.GetPoint2().GetY() );
+    // }
+
+    if ( e_neu.IsInLineSegment(Lot) ) {
+        // if(ped->GetID() == -10){
+        //     printf("Return Lot=[%.2f, %.2f]\n", Lot.GetX(), Lot.GetY() );
+        //     if(0 && ped->GetPos().GetX() > 56)
+        //         getc(stdin);}
+        return Lot;
+    } else {
+        // if(ped->GetID() == -10){
+        //     printf("Return Middle=[%.2f, %.2f]\n", ExitMiddle.GetX(), ExitMiddle.GetY() );
+        //     if(0 && ped->GetPos().GetX() > 56)
+        //         getc(stdin);}
+        return ExitMiddle;
+    }
 
 }
 
@@ -109,7 +124,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 /**
  * this strategy is designed to work without Hlines for a general geometry.
  * First tested for bottlenecks and corners.
- * number 5
+ * number 4
  * @param room Pointer
  * @param ped Pointer to Pedestrians
  *
@@ -118,6 +133,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
  * @return Target (Point)
  */Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 {
+#define DEBUG 0
      using namespace std;
      const Point& p1 = ped->GetExitLine()->GetPoint1();
      const Point& p2 = ped->GetExitLine()->GetPoint2();
@@ -126,15 +142,17 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
      double d = 0.2; //shorten the line by  20 cm
      Point diff = (p1 - p2).Normalized() * d;
      Line e_neu = Line(p1 - diff, p2 + diff);
-
-     // kürzester Punkt auf der Linie
      Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
 
      Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
-     //printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
-//it intersect a wall/obstacle.
-// check for intersection with walls
-//todo: make a FUNCTION of this
+                   // it intersects a wall || obstacle.
+                   // check for intersection with walls
+                   // @todo: make a FUNCTION of this
+
+#if DEBUG
+          printf("\n----------\nEnter GetTarget() with PED=%d\n----------\n",ped->GetID());
+          printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
+#endif
      double dist;
      int inear = -1;
      int iObs = -1;
@@ -144,13 +162,16 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
      //============================ WALLS ===========================
      const vector<Wall>& walls = subroom->GetAllWalls();
-     for (int i = 0; i < subroom->GetNumberOfWalls(); i++) {
+     for (unsigned int i = 0; i < walls.size(); i++) {
           dist = tmpDirection.GetIntersectionDistance(walls[i]);
-          // printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
-          // printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
           if (dist < minDist) {
                inear = i;
                minDist = dist;
+#if DEBUG
+                    printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
+                    printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
+#endif
+
           }
      }//walls
      //============================ WALLS ===========================
@@ -161,11 +182,14 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
           const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
           for (unsigned int i = 0; i < owalls.size(); i++) {
                dist = tmpDirection.GetIntersectionDistance(owalls[i]);
-               printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
                if (dist < minDist) {
                     inear = i;
                     minDist = dist;
                     iObs = obs;
+
+                         // printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
+                         // printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1().GetX(),owalls[i].GetPoint1().GetY(), owalls[i].GetPoint2().GetX(),owalls[i].GetPoint2().GetY());
+
                }
           }//walls of obstacle
      }// obstacles
@@ -174,31 +198,58 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 
      double angle = 0;
      if (inear >= 0) {
+          ped->SetNewOrientationFlag(true); //Mark this pedestrian for next target calculation
+          ped->SetDistToBlockade(minDist);
           if(iObs >= 0) {
                const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
-               angle =  tmpDirection.GetAngle(owalls[inear]);
+               angle =  tmpDirection.GetDeviationAngle(owalls[inear].Enlarge(2*ped->GetLargerAxis()));
+#if DEBUG
+                    printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
 
-          } else
-               angle =  tmpDirection.GetAngle(walls[inear]);
+#endif
+
+          } else{
+               angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
+#if DEBUG
+                    printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
+#endif
+          }
+     }//inear
+     else{
+
+          if(ped->GetNewOrientationFlag()){ //this pedestrian could not see the target and now he can see it clearly.
+                         // printf("ped->GetNewOrientationFlag()=%d\n",ped->GetNewOrientationFlag());getc(stdin);
+               ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
+               ped->SetNewOrientationFlag(false);
+          }
      }
 ////////////////////////////////////////////////////////////
-//    printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
+
      Point  G;
      if (fabs(angle) > J_EPS)
           //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
           G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle))+ped->GetPos() ;
-     else
-          //G  =  tmpDirection.GetPoint2();
+     else {
+          if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
+               ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
+
           G  =  NextPointOnLine;
-     // printf("PED=%d\n",  ped->GetID());
-     // printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
-     // printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
-     // printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
+     }
+#if DEBUG
+          printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
+          printf("PED=%d\n",  ped->GetID());
+          printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
+          printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
+          printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
+          printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
 
-     // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID());
+#endif
 
-     //if(angle)
-     //     getc(stdin);
+          // if( ped->GetID() == 12)
+          // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
+// ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
+// this stderr output can be used with plot_desired_velocity.py
+
      return G;
 }
 
@@ -214,7 +265,7 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
     exit(EXIT_FAILURE);
 }
 
-DirectionFloorfield::DirectionFloorfield(Building* building, double stepsize, double threshold, bool useDistancMap) {
+void DirectionFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
     //implement mechanic, that can read-in an existing floorfield (from a previous run)
     ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap);
 }
@@ -226,3 +277,4 @@ DirectionFloorfield::~DirectionFloorfield() {
         delete ffviafm;
     }
 }
+

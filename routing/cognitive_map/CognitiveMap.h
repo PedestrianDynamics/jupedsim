@@ -1,8 +1,8 @@
 /**
  * \file        CognitiveMap.h
  * \date        Jan 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -31,6 +31,8 @@
 #define COGNITIVEMAP_H_
 
 #include "NavigationGraph.h"
+//#include "./map_knowlegde/routeknowlegde.h"
+#include <vector>
 
 class SubRoom;
 class Transition;
@@ -64,15 +66,28 @@ public:
 
      NavigationGraph::VerticesContainer * GetAllVertices();
 
-     const NavigationGraph * GetNavigationGraph() const;
+    NavigationGraph * GetNavigationGraph() const;
 
-     const NavLine * GetDestination();
-     const NavLine * GetLocalDestination();
+    const GraphEdge * GetDestination();
+    const GraphEdge * GetLocalDestination();
+
+    bool HadNoDestination() const;
+    void AddDestination(const GraphEdge *);
+    std::vector<const GraphEdge *> & GetDestinations();
+    // Route knowlegde will be created using memory (depending on probabilites) of shortest path
+    //void CreateRouteKnowlegde(const Pedestrian * pedestrian);
+
+    bool ChangedSubRoom() const;
+    void UpdateSubRoom();
 
 private:
-     NavigationGraph * navigation_graph;
-     const Building * const building;
-     const Pedestrian * const pedestrian;
+    NavigationGraph * navigation_graph;
+    const Building * const building;
+    const Pedestrian * const pedestrian;
+    const SubRoom * current_subroom = NULL;
+    std::vector<const GraphEdge *> destinations;
+    //RouteKnowlegde _RKnowlegde;
+
 
 };
 

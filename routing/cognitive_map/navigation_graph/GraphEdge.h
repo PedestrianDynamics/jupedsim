@@ -1,8 +1,8 @@
 /**
  * \file        GraphEdge.h
  * \date        Jan 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -31,25 +31,25 @@
 #define GRAPHEDGE_H_
 
 #include "../../../geometry/Line.h"
+#include "../fire_mesh/FireMesh.h"
 #include <map>
 
 class SubRoom;
 class GraphVertex;
 class Crossing;
 
+//log output
+extern OutputHandler* Log;
+
 /**
  * @brief Graph Edge.
  *
  */
 
-class GraphEdge {
-
+class GraphEdge
+{
 public:
-     typedef std::map<std::string, std::pair<double, double>> FactorContainer;
-
-     /****************************
-      * Constructors & Destructors
-      ****************************/
+     typedef std::map<std::string, std::pair<double, double> > FactorContainer;
 
      GraphEdge(const GraphVertex * const s, const GraphVertex * const d, const Crossing * const crossing);
      GraphEdge(GraphEdge const & ge);
@@ -64,24 +64,17 @@ public:
 
      double GetApproximateDistance() const;
      double GetApproximateDistance(const Point &) const;
-
-
-
      void SetFactor(double factor, std::string name);
-
      double GetRoomToFloorFactor() const;
-
-
+     double GetFactor() const;
+     double GetFactorWithDistance(double distance) const;
      double GetWeight(const Point &) const;
-
-
      bool IsExit() const;
 
-
 private:
-     const GraphVertex  * const src;
-     const GraphVertex  * const dest;
-     const Crossing  * const crossing;
+     const GraphVertex  * const _src;
+     const GraphVertex  * const _dest;
+     const Crossing  * const _crossing;
 
      /**
       * Factor Bag
@@ -93,8 +86,7 @@ private:
      FactorContainer factors;
 
      //WEIGHTS DEPRECATED!
-     double approximate_distance;
-     // double density = 0.0;
+     double _approximate_distance;
 
 };
 

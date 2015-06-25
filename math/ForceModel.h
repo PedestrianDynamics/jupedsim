@@ -1,8 +1,8 @@
 /**
  * \file        ForceModel.h
  * \date        Apr 15, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -40,13 +40,6 @@
 class Building;
 
 
-/**
- * @date   Fri Apr 18 16:40:39 2014
- *
- * @brief The operative model. Definition of several force-based models
- *         for ped pedestrians dynamics
- *
- */
 class ForceModel {
 
 public:
@@ -55,12 +48,18 @@ public:
      virtual ~ForceModel();
 
      /**
-      * Solve the differential equations and update the positions and veloities
+      * Solve the differential equations and update the positions and velocities
       * @param t the actual time
       * @param tp the next timestep
       * @param building the geometry object
       */
      virtual void CalculateForce(double t, double tp, Building* building) const = 0;
+
+     /**
+      * Performs whatever initialization is needed/required
+      * @param building the building object
+      */
+     virtual bool Init (Building* building) const = 0;
 
      /**
       * @return all model parameters in a nicely formatted string

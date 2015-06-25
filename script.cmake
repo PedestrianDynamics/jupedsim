@@ -4,7 +4,8 @@ set (BDIR "/usr/bin")
 
 set (CTEST_PROJECT_NAME "JuPedSim")
 set (CTEST_BUILD_NAME "linux-gcc-zam")
-set (CTEST_TIMEOUT "1500") # max run time for tests 1500 s 
+#set (CTEST_TIMEOUT "1500") # max run time for tests 3000 s 
+set (CTEST_TEST_TIMEOUT "3000") # max run time for tests 3000 s 
 set (CTEST_BACKUP_AND_RESTORE TRUE)
 set (CTEST_SOURCE_DIRECTORY "$ENV{HOME}/workspace/peddynamics/JuPedSim/JPScore/trunk")
 set (CTEST_BINARY_DIRECTORY "$ENV{HOME}/workspace/peddynamics/JuPedSim/JPScore/trunk/build")

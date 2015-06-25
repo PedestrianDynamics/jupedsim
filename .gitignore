@@ -5,7 +5,9 @@
 /Release
 /doc/html
 /figs
-/inputfiles
+/figs_bot
+/Utest/*/inifiles*/
+/Utest/*/trajectories
 *~
 
 # Compiled Object files
@@ -13,7 +15,8 @@
 *.lo
 *.o
 *.obj
-
+*.gch
+*_flymake
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -49,3 +52,26 @@ vgcore.*
 /Doxyfile
 /*log*
 /*plot*
+/.idea/.name
+/.idea/encodings.xml
+/.idea/jpscore.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/scopes/scope_settings.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
+/Testing/Temporary/CTestCostData.txt
+/Utest/runtests.py
+/Utest/test_11/.igncd
+/Utest/test_7/.gitignore
+/Utest/test_8/routing.xml
+/Utest/test_9/cpu.png
+/Utest/utils.pyc
+/auto/veloModel2.el
+/cpu.png
+/cscope.file
+/gompertz.pdf
+/veloModel2.org
+/veloModel2.pdf
+/veloModel2.tex
+/.project

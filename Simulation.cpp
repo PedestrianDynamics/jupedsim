@@ -1,8 +1,8 @@
 /**
  * \file        Simulation.cpp
  * \date        Dec 15, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -28,150 +28,147 @@
  *
  **/
 
-
 #include "Simulation.h"
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
 #include "math/GradientModel.h"
+#include "pedestrian/AgentsQueue.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+#ifdef _USE_PROTOCOL_BUFFER
+#include "matsim/HybridSimulationManager.h"
+#endif
+
+#ifdef _OPENMP
+#include <omp.h>
+
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
+#endif
 
 using namespace std;
 
 OutputHandler* Log;
 
-Simulation::Simulation()
+Simulation::Simulation(const ArgumentParser& args)
 {
      _nPeds = 0;
-     _tmax = 0;
-     _seed=8091983;
+     _seed = 8091983;
      _deltaT = 0;
-     _building = NULL;
-     _distribution = NULL;
-     _direction = NULL;
-     _model = NULL;
-     _solver = NULL;
+     _building = nullptr;
+     //_direction = NULL;
+     _operationalModel = nullptr;
+     _solver = nullptr;
      _iod = new IODispatcher();
-     _fps=1;
-     _em=NULL;
-     _argsParser=NULL;
+     _fps = 1;
+     _em = nullptr;
+     _argsParser = args;
 }
 
 Simulation::~Simulation()
 {
-     delete _building;
-     delete _distribution;
-     delete _direction;
-     delete _model;
      delete _solver;
      delete _iod;
      delete _em;
 }
 
-/************************************************
-// Setter-Funktionen
- ************************************************/
-
-
-void Simulation::SetPedsNumber(int i)
-{
-     _nPeds = i;
-}
-
-
-/************************************************
-// Getter-Funktionen
- ************************************************/
-
-
-int Simulation::GetPedsNumber() const
+long Simulation::GetPedsNumber() const
 {
      return _nPeds;
 }
 
-Building * Simulation::GetBuilding() const
-{
-     return _building;
-}
-
-
-void Simulation::InitArgs(ArgumentParser* args)
+bool Simulation::InitArgs(const ArgumentParser& args)
 {
      char tmp[CLENGTH];
      string s = "Parameter:\n";
 
-     _argsParser=args;
-     switch (args->GetLog()) {
+     switch (args.GetLog())
+     {
      case 0:
           // no log file
           //Log = new OutputHandler();
           break;
      case 1:
-          if(Log) delete Log;
+          if (Log)
+               delete Log;
           Log = new STDIOHandler();
           break;
      case 2: {
-          char name[CLENGTH]="";
-          sprintf(name,"%s.P0.dat",args->GetErrorLogFile().c_str());
-          if(Log) delete Log;
+          char name[CLENGTH] = "";
+          sprintf(name, "%s.P0.dat", args.GetErrorLogFile().c_str());
+          if (Log)
+               delete Log;
           Log = new FileHandler(name);
      }
      break;
      default:
           printf("Wrong option for Logfile!\n\n");
-          exit(0);
+          return false;
      }
 
-
-     if(args->GetPort()!=-1) {
-          switch(args->GetFileFormat()) {
+     if (args.GetPort() != -1) {
+          switch (args.GetFileFormat())
+          {
           case FORMAT_XML_PLAIN_WITH_MESH:
           case FORMAT_XML_PLAIN: {
-               OutputHandler* travisto = new SocketHandler(args->GetHostname(), args->GetPort());
-               Trajectories* output= new TrajectoriesJPSV06();
+               OutputHandler* travisto = new SocketHandler(args.GetHostname(),
+                         args.GetPort());
+               Trajectories* output = new TrajectoriesJPSV06();
                output->SetOutputHandler(travisto);
                _iod->AddIO(output);
                break;
           }
           case FORMAT_XML_BIN: {
-               Log->Write("INFO: \tFormat xml-bin not yet supported in streaming\n");
+               Log->Write(
+                         "INFO: \tFormat xml-bin not yet supported in streaming\n");
                //exit(0);
                break;
           }
           case FORMAT_PLAIN: {
-               Log->Write("INFO: \tFormat plain not yet supported in streaming\n");
-               exit(0);
-               break;
+               Log->Write(
+                         "INFO: \tFormat plain not yet supported in streaming\n");
+               return false;
           }
           case FORMAT_VTK: {
-               Log->Write("INFO: \tFormat vtk not yet supported in streaming\n");
-               exit(0);
-               break;
+               Log->Write(
+                         "INFO: \tFormat vtk not yet supported in streaming\n");
+               return false;
+          }
+          default: {
+               return false;
           }
           }
 
           s.append("\tonline streaming enabled \n");
      }
 
-     if(args->GetTrajectoriesFile().empty()==false) {
-          switch (args->GetFileFormat()) {
+     if (args.GetTrajectoriesFile().empty() == false)
+     {
+          switch (args.GetFileFormat())
+          {
           case FORMAT_XML_PLAIN: {
-               OutputHandler* tofile = new FileHandler(args->GetTrajectoriesFile().c_str());
-               Trajectories* output= new TrajectoriesJPSV05();
+               OutputHandler* tofile = new FileHandler(
+                         args.GetTrajectoriesFile().c_str());
+               Trajectories* output = new TrajectoriesJPSV05();
                output->SetOutputHandler(tofile);
                _iod->AddIO(output);
                break;
           }
           case FORMAT_PLAIN: {
-               OutputHandler* file = new FileHandler(args->GetTrajectoriesFile().c_str());
-               Trajectories* output= new  TrajectoriesFLAT();
+               OutputHandler* file = new FileHandler(
+                         args.GetTrajectoriesFile().c_str());
+               Trajectories* output = new TrajectoriesFLAT();
                output->SetOutputHandler(file);
                _iod->AddIO(output);
                break;
           }
           case FORMAT_VTK: {
                Log->Write("INFO: \tFormat vtk not yet supported\n");
-               OutputHandler* file = new FileHandler((args->GetTrajectoriesFile() +".vtk").c_str());
-               Trajectories* output= new  TrajectoriesVTK();
+               OutputHandler* file = new FileHandler(
+                         (args.GetTrajectoriesFile() + ".vtk").c_str());
+               Trajectories* output = new TrajectoriesVTK();
                output->SetOutputHandler(file);
                _iod->AddIO(output);
                break;
@@ -191,321 +188,400 @@ void Simulation::InitArgs(ArgumentParser* args)
                // _iod->AddIO(output);
                break;
           }
+          default: {
+               break;
+          }
           }
      }
 
-     _distribution = new PedDistributor();
-     _distribution->InitDistributor(_argsParser);
-     //s.append(_distribution->writeParameter());
+     _operationalModel = args.GetModel();
+     s.append(_operationalModel->GetDescription());
 
-     // define how the navigation line is crossed
-     int direction = args->GetExitStrategy();
-     sprintf(tmp, "\tDirection to the exit: %d\n", direction);
-     s.append(tmp);
-     switch (direction) {
-     case 1:
-          _direction = new DirectionMiddlePoint();
-          break;
-     case 2:
-          _direction = new DirectionMinSeperation();
-          break;
-     case 3:
-          _direction = new DirectionMinSeperationShorterLine();
-          break;
-     case 4:
-          _direction = new DirectionInRangeBottleneck();
-          break;
-     case 5:
-          _direction = new DirectionGeneral();
-          break;
-     case 6:
-          _direction = new DirectionFloorfield();
-          break;
-     default:
-          cout<<"Direction strategy not available. Exit"<<endl;
-          exit(EXIT_FAILURE);
-          break;
-     }
-     int model =  args->GetModel();
-     if(model == 1) { //GCFM
-          _model = new GCFMModel(_direction, args->GetNuPed(), args->GetNuWall(), args->GetDistEffMaxPed(),
-                                 args->GetDistEffMaxWall(), args->GetIntPWidthPed(), args->GetIntPWidthWall(),
-                                 args->GetMaxFPed(), args->GetMaxFWall());
-          s.append("\tModel: GCFMModel\n");
-          s.append(_model->writeParameter());
-     } else if (model == 2) { //Gompertz
-          _model = new GompertzModel(_direction, args->GetNuPed(), args->GetaPed(), args->GetbPed(), args->GetcPed(),
-                                     args->GetNuWall(), args->GetaWall(), args->GetbWall(), args->GetcWall() );
-          s.append("\tModel: GompertzModel\n");
-          s.append(_model->writeParameter());
-     } else if (model == 3) { //Gradient
-          _model = new GradientModel(_direction, args->GetNuPed(), args->GetaPed(), args->GetbPed(), args->GetcPed(),
-                                     args->GetNuWall(), args->GetaWall(), args->GetbWall(), args->GetcWall() );
-          s.append("\tModel: GradientModel\n");
-          s.append(_model->writeParameter());
-     }
-     // ODE solver
-     int solver = args->GetSolver();
+     // ODE solver which is never used!
+     auto solver = args.GetSolver();
      sprintf(tmp, "\tODE Solver: %d\n", solver);
      s.append(tmp);
-     switch (solver) {
-     case 1:
-          _solver = new EulerSolver(_model);
-          break;
-     //case 2:
-     //     _solver = new VelocityVerletSolver(_model);
-     //     break;
-     //case 3:
-     //     _solver = new LeapfrogSolver(_model);
-     //     break;
-     }
-     sprintf(tmp, "\tnCPU: %d\n", args->GetMaxOpenMPThreads());
+
+     sprintf(tmp, "\tnCPU: %d\n", args.GetMaxOpenMPThreads());
      s.append(tmp);
-     _tmax = args->GetTmax();
-     sprintf(tmp, "\tt_max: %f\n", _tmax);
+     sprintf(tmp, "\tt_max: %f\n", args.GetTmax());
      s.append(tmp);
-     _deltaT = args->Getdt();
+     _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
      s.append(tmp);
 
-     _fps=args->Getfps();
+     _fps = args.Getfps();
      sprintf(tmp, "\tfps: %f\n", _fps);
      s.append(tmp);
+     //Log->Write(s.c_str());
 
-     // Route choice
-     vector< pair<int, RoutingStrategy> >  routers=  args->GetRoutingStrategy();
-     RoutingEngine* routingEngine= new RoutingEngine();
-
-     for (unsigned int r= 0; r<routers.size(); r++) {
-
-          RoutingStrategy strategy=routers[r].second;
-
-          int routerID=routers[r].first;
-
-          switch (strategy) {
-          case ROUTING_LOCAL_SHORTEST: {
-               Router* router=new GlobalRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy local shortest added\n");
-               break;
-          }
-          case ROUTING_GLOBAL_SHORTEST: {
-               Router* router=new GlobalRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy global shortest added\n");
-               break;
-          }
-          case ROUTING_QUICKEST: {
-               Router* router=new QuickestPathRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy quickest path added\n");
-               break;
-          }
-          case ROUTING_DYNAMIC: {
-               Router* router=new GraphRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy graph router added\n");
-               break;
-          }
-          case ROUTING_NAV_MESH: {
-               Router* router=new MeshRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy nav_mesh  router added\n");
-               break;
-          }
-          case ROUTING_DUMMY: {
-               Router* router=new DummyRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy dummy router added\n");
-               break;
-          }
-          case ROUTING_SAFEST: {
-               Router * router=new SafestPathRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy cognitive map router added\n");
-               break;
-          }
-          case ROUTING_COGNITIVEMAP: {
-               Router* router=new CognitiveMapRouter();
-               router->SetID(routerID);
-               router->SetStrategy(strategy);
-               routingEngine->AddRouter(router);
-               s.append("\tRouting Strategy dummy router added\n");
-               break;
-          }
-          case ROUTING_UNDEFINED:
-          default:
-               cout<<"router not available"<<endl;
-               exit(EXIT_FAILURE);
-               break;
-          }
-     }
-     s.append("\n");
-
+     _routingEngine = args.GetRoutingEngine();
+     auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
      // IMPORTANT: do not change the order in the following..
-     _building = new Building();
-     _building->SetRoutingEngine(routingEngine);
-     _building->SetProjectFilename(args->GetProjectFile());
-     _building->SetProjectRootDir(args->GetProjectRootDir());
+     _building = std::unique_ptr<Building>(new Building(args.GetProjectFile(), args.GetProjectRootDir(), *_routingEngine, *distributor, args.GetLinkedCellSize()));
 
-     _building->LoadBuildingFromFile();
-     _building->LoadRoutingInfo(args->GetProjectFile());
-     //_building->AddSurroundingRoom();
-     //return;
-     _building->InitGeometry(); // create the polygons
-     _building->LoadTrafficInfo();
-
-     // pass building information to directionFloorfield
-     if (args->GetExitStrategy() == 6) { //direction strategie is using floorfield
-        _direction = new DirectionFloorfield(_building, .0625, 1., true);
+     // Initialize the agents sources that have been collected in the pedestrians distributor
+     _agentSrcManager.SetBuilding(_building.get());
+     for (const auto& src: distributor->GetAgentsSources())
+     {
+          _agentSrcManager.AddSource(src);
+          //src->Dump();
      }
 
-     // in the case the navigation mesh should be written to a file
-     if(args->GetNavigationMesh()!="") {
-          Log->Write("INFO: \tWriting the navigation mesh to: " + args->GetNavigationMesh());
-          //Navigation mesh implementation
-          NavMesh* nv= new NavMesh(_building);
-          nv->BuildNavMesh();
-          //nv->WriteToFile("../pedunc/examples/stadium/arena.nav");
-          nv->WriteToFile(args->GetNavigationMesh()+".nav");
-          nv->WriteToFileTraVisTo(args->GetNavigationMesh());
-          //nv->WriteScenario();
-          exit(EXIT_FAILURE);
-          //iod->WriteGeometryRVO(pBuilding);exit(EXIT_FAILURE);
-          //iod->WriteNavMeshORCA(pBuilding);exit(EXIT_FAILURE);
+#ifdef _USE_PROTOCOL_BUFFER
+     //initialize the hybrid mode if defined
+     if(nullptr!=(_hybridSimManager=args.GetHybridSimManager()))
+     {
+          Log->Write("INFO:\t performing hybrid simulation");
      }
+#endif
 
-     _nPeds=_distribution->Distribute(_building);
+     //perform customs initialisation, like computing the phi for the gcfm
+     //this should be called after the routing engine has been initialised
+     // because a direction is needed for this initialisation.
+     if(_operationalModel->Init(_building.get())==false)
+          return false;
 
-     //using linkedcells
-     if (args->GetLinkedCells()) {
-          s.append("\tusing Linked-Cells for spatial queries\n");
-          _building->InitGrid(args->GetLinkedCellSize());
-     } else {
-          _building->InitGrid(-1);
+     //other initializations
+     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
+     for (Pedestrian *ped : allPeds) {
+          ped->Setdt(_deltaT);
      }
-
-     // initialize the routing engine before doing any other things
-     routingEngine->Init(_building);
-
-     //this is very specific to the gcfm model
-     _building->InitPhiAllPeds(_deltaT);
-
-
-     //pBuilding->WriteToErrorLog();
+     _nPeds = allPeds.size();
+     //_building->WriteToErrorLog();
 
      //get the seed
-     _seed=args->GetSeed();
+     _seed = args.GetSeed();
 
-     // perform a general check to the .
-     _building->SanityCheck();
      //size of the cells/GCFM/Gompertz
-     if(args->GetDistEffMaxPed()>args->GetLinkedCellSize()){
-         Log->Write("ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",args->GetLinkedCellSize(),args->GetDistEffMaxPed());
-         exit(EXIT_FAILURE);
+     if (args.GetDistEffMaxPed() > args.GetLinkedCellSize()) {
+          Log->Write(
+                    "ERROR: the linked-cell size [%f] should be bigger than the force range [%f]",
+                    args.GetLinkedCellSize(), args.GetDistEffMaxPed());
+          return false;
      }
 
-     //read the events
-     _em = new EventManager(_building);
-     _em->SetProjectFilename(args->GetProjectFile());
-     _em->SetProjectRootDir(args->GetProjectRootDir());
-     _em->readEventsXml();
-     _em->listEvents();
+     //read and initialize events
+     _em = new EventManager(_building.get());
+     if(_em->ReadEventsXml()==false)
+     {
+          Log->Write("ERROR: \tCould not initialize events handling");
+     }
+     _em->ListEvents();
+
+     //_building->SaveGeometry("test.sav.xml");
+
+     //if(_building->SanityCheck()==false)
+     //     return false;
+
+     //everything went fine
+     return true;
 }
 
-
-int Simulation::RunSimulation()
+int Simulation::RunStandardSimulation(double maxSimTime)
 {
-     int frameNr = 1; // Frame Number
-     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
-     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
-     double t=0.0;
+     RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
+     double t=RunBody(maxSimTime);
+     RunFooter();
+     return (int)t;
+}
 
+void Simulation::UpdateRoutesAndLocations()
+{
+     //pedestrians to be deleted
+     //you should better create this in the constructor and allocate it once.
+     vector<Pedestrian*> pedsToRemove;
+     pedsToRemove.reserve(500); //just reserve some space
 
-     // writing the header
-     _iod->WriteHeader(_nPeds, _fps, _building,_seed);
-     _iod->WriteGeometry(_building);
-     _iod->WriteFrame(0,_building);
+     // collect all pedestrians in the simulation.
+     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
+     const map<int, Goal*>& goals = _building->GetAllGoals();
 
-     //first initialisation needed by the linked-cells
-     Update();
+     unsigned long nSize = allPeds.size();
+     int nThreads = omp_get_max_threads();
+     int partSize = nSize / nThreads;
 
-     // main program loop
-     for (t = 0; t < _tmax && _nPeds > 0; ++frameNr) {
-          t = 0 + (frameNr - 1) * _deltaT;
-          // solve ODE
-          _solver->solveODE(t, t + _deltaT, _building);
-          // update and check if pedestrians change rooms
-          Update();
-          _em->Update_Events(t,_deltaT);
-          // trajectories output
-          if (frameNr % writeInterval == 0) {
-               _iod->WriteFrame(frameNr / writeInterval, _building);
+#pragma omp parallel  default(shared) num_threads(nThreads)
+     {
+          const int threadID = omp_get_thread_num();
+          int start = threadID * partSize;
+          int end = (threadID + 1) * partSize - 1;
+          if ((threadID == nThreads - 1))
+               end = nSize - 1;
+
+          for (int p = start; p <= end; ++p) {
+               Pedestrian* ped = allPeds[p];
+               Room* room = _building->GetRoom(ped->GetRoomID());
+               SubRoom* sub0 = room->GetSubRoom(ped->GetSubRoomID());
+
+               //set the new room if needed
+               if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
+                         && (room->GetCaption() == "outside")) {
+#pragma omp critical
+                    pedsToRemove.push_back(ped);
+               } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
+                         && (goals.at(ped->GetFinalDestination())->Contains(
+                                   ped->GetPos()))) {
+#pragma omp critical
+                    pedsToRemove.push_back(ped);
+               }
+
+               // reposition in the case the pedestrians "accidently left the room" not via the intended exit.
+               // That may happen if the forces are too high for instance
+               // the ped is removed from the simulation, if it could not be reassigned
+               else if (!sub0->IsInSubRoom(ped))
+               {
+                    bool assigned = false;
+                    auto& allRooms = _building->GetAllRooms();
+
+                    for (auto&& it_room : allRooms)
+                    {
+                         auto&& room=it_room.second;
+                         for (auto&& it_sub : room->GetAllSubRooms())
+                         {
+                              auto&& sub=it_sub.second;
+                              auto&& old_room =allRooms.at(ped->GetRoomID());
+                              auto&& old_sub =old_room->GetSubRoom(
+                                        ped->GetSubRoomID());
+                              if ((sub->IsInSubRoom(ped->GetPos()))
+                                        && (sub->IsDirectlyConnectedWith(
+                                                  old_sub)))
+                              {
+                                   ped->SetRoomID(room->GetID(),
+                                             room->GetCaption());
+                                   ped->SetSubRoomID(sub->GetSubRoomID());
+                                   ped->ClearMentalMap(); // reset the destination
+                                   //ped->FindRoute();
+
+                                   //the agent left the old iroom
+                                   //actualize the egress time for that iroom
+                                   old_room->SetEgressTime(ped->GetGlobalTime());
+
+//                                   if(_argsParser.ShowStatistics())
+//                                   {
+//                                        Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
+//                                        if(trans)
+//                                        {
+//                                             trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
+//                                        }
+//                                   }
+
+                                   assigned = true;
+                                   break;
+                              }
+                         }
+                         if (assigned)
+                              break; // stop the loop
+                    }
+
+                    if (!assigned) {
+#pragma omp critical
+                         pedsToRemove.push_back(ped);
+                         //the agent left the old room
+                         //actualize the eggress time for that room
+                         allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
+
+                    }
+               }
+
+               //finally actualize the route
+               if (ped->FindRoute() == -1) {
+                    //a destination could not be found for that pedestrian
+                    Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
+                    //exit(EXIT_FAILURE);
+#pragma omp critical
+                    pedsToRemove.push_back(ped);
+               }
           }
-
-     }
-     // writing the footer
-     _iod->WriteFooter();
-
-
-     if(_argsParser->GetFileFormat()==FORMAT_XML_BIN) {
-
-          delete _iod;
-          _iod=NULL;
-
-//              char tmp[CLENGTH];
-//              int f= frameNr / writeInterval ;
-//              sprintf(tmp,"<frameCount>%07d</frameCount>",f);
-//              string frameCount (tmp);
-
-          char replace[CLENGTH];
-          // open the file and replace the 8th line
-          sprintf(replace,"sed -i '9s/.*/ %d /' %s", frameNr/ writeInterval, _argsParser->GetTrajectoriesFile().c_str());
-          system(replace);
      }
 
-     //return the evacuation time
-     return (int) t;
-}
+#ifdef _USE_PROTOCOL_BUFFER
+     if (_hybridSimManager)
+     {
+          AgentsQueueOut::Add(pedsToRemove);
+     }
+     else
+#endif
+     {
+          // remove the pedestrians that have left the building
+          for (unsigned int p = 0; p < pedsToRemove.size(); p++)
+          {
+               _building->DeletePedestrian(pedsToRemove[p]);
+          }
+     }
 
-
-// TODO: make the building class more independent by moving the update routing here.
-void Simulation::Update()
-{
-     //_building->Update();
-     _building->UpdateVerySlow();
-     //someone might have leave the building
-     _nPeds=_building->GetAllPedestrians().size();
-     // update the global time
-     Pedestrian::SetGlobalTime(Pedestrian::GetGlobalTime()+_deltaT);
-     //update the cells position
-     _building->UpdateGrid();
-
+     //    temporary fix for the safest path router
+     //    if (dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1)))
+     //    {
+     //         SafestPathRouter* spr = dynamic_cast<SafestPathRouter*>(_routingEngine->GetRouter(1));
+     //         spr->ComputeAndUpdateDestinations(_allPedestians);
+     //    }
 }
 
 void Simulation::PrintStatistics()
 {
-     Log->Write("\nEXIT USAGE:");
-     const map<int, Transition*>& transitions = _building->GetAllTransitions();
-     map<int, Transition*>::const_iterator itr;
-     for(itr = transitions.begin(); itr != transitions.end(); ++itr) {
-          Transition* goal =  itr->second;
-          if(goal->IsExit()) {
-               Log->Write("Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",goal->GetID(),goal->GetDoorUsage(),goal->GetLastPassingTime());
+     Log->Write("\nRooms Egress Time:");
+     Log->Write("==================");
+     Log->Write("id\tcaption\tegress time (s)");
+
+     for(const auto& it:_building->GetAllRooms())
+     {
+          auto&& room=it.second;
+          if(room->GetCaption()!="outside")
+               Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
+     }
+
+     Log->Write("\nUsage of Exits");
+     Log->Write("==========");
+     for (const auto& itr : _building->GetAllTransitions())
+     {
+          Transition* goal = itr.second;
+          if (goal->IsExit())
+          {
+               Log->Write(
+                         "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+                         goal->GetID(), goal->GetDoorUsage(),
+                         goal->GetLastPassingTime());
+
+               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+goal->GetCaption()+".dat";
+               Log->Write("More Information in the file: %s",statsfile.c_str());
+               auto output= new FileHandler(statsfile.c_str());
+               output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+               output->Write("#Time (s)  cummulative number of agents \n");
+               output->Write(goal->GetFlowCurve());
           }
      }
+     Log->Write("\n");
+}
+
+void Simulation::RunHeader(long nPed)
+{
+     // writing the header
+     if(nPed==-1) nPed=_nPeds;
+     _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
+     _iod->WriteGeometry(_building.get());
+     _iod->WriteFrame(0, _building.get());
+
+     //first initialisation needed by the linked-cells
+      UpdateRoutesAndLocations();
+      ProcessAgentsQueue();
+}
+
+int Simulation::RunBody(double maxSimTime)
+{
+     //needed to control the execution time PART 1
+     //in the case you want to run in no faster than realtime
+     //time_t starttime, endtime;
+     //time(&starttime);
+
+     //frame number. This function can be called many times,
+     static int frameNr = 1; // Frame Number
+     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
+
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
+
+     //process the queue for incoming pedestrians
+     //important since the number of peds is used
+     //to break the main simulation loop
+     ProcessAgentsQueue();
+     _nPeds = _building->GetAllPedestrians().size();
+
+     // main program loop
+     while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
+     {
+          t = 0 + (frameNr - 1) * _deltaT;
+
+          //process the queue for incoming pedestrians
+          ProcessAgentsQueue();
+
+          //update the linked cells
+          _building->UpdateGrid();
+
+          // update the positions
+          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+
+          //update the routes and locations
+          UpdateRoutesAndLocations();
+
+          //update the events
+          //_em->Update_Events(t);
+          _em->ProcessEvent();
+
+          //other updates
+          //someone might have left the building
+          _nPeds = _building->GetAllPedestrians().size();
+
+          // update the global time
+          Pedestrian::SetGlobalTime(t);
+
+          // write the trajectories
+          if (0 == frameNr % writeInterval) {
+               _iod->WriteFrame(frameNr / writeInterval, _building.get());
+          }
+
+          // needed to control the execution time PART 2
+          // time(&endtime);
+          // double timeToWait=t-difftime(endtime, starttime);
+          // clock_t goal = timeToWait*1000 + clock();
+          // while (goal > clock());
+          ++frameNr;
+     }
+     return (int) t;
+}
+
+void Simulation::RunFooter()
+{
+     // writing the footer
+     _iod->WriteFooter();
+
+     //temporary work around since the total number of frame is only available at the end of the simulation.
+     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN)
+     {
+          delete _iod;
+          _iod = NULL;
+          //reopen the file and write the missing information
+
+          // char tmp[CLENGTH];
+          // int f= frameNr / writeInterval ;
+          // sprintf(tmp,"<frameCount>%07d</frameCount>",f);
+          // string frameCount (tmp);
+
+          //char replace[CLENGTH];
+          // open the file and replace the 8th line
+          //sprintf(replace, "sed -i '9s/.*/ %d /' %s", frameNr / writeInterval,
+          //          _argsParser.GetTrajectoriesFile().c_str());
+          //int result = system(replace);
+          //Log->Write("INFO:\t Updating the framenumber exits with code [%d]", result);
+     }
+}
+
+void Simulation::ProcessAgentsQueue()
+{
+     //incoming pedestrians
+     vector<Pedestrian*> peds;
+     AgentsQueueIn::GetandClear(peds);
+     for(auto&& ped: peds)
+     {
+          _building->AddPedestrian(ped);
+     }
+
+#ifdef _USE_PROTOCOL_BUFFER
+     //outgoing pedestrians
+     if (_hybridSimManager)
+     {
+          _hybridSimManager->ProcessOutgoingAgent();
+     }
+#endif
+}
+
+AgentsSourcesManager& Simulation::GetAgentSrcManager()
+{
+     return _agentSrcManager;
+}
+
+Building* Simulation::GetBuilding()
+{
+    return _building.get();
 }

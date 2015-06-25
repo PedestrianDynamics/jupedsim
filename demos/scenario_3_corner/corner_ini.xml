@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.5"
+<JuPedSim project="JPS-Project" version="0.6"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
+xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
@@ -52,7 +52,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>4</exitCrossingStrategy>
+        <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -79,7 +79,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="3"  b="0.25" c="3.0"/>
         <force_wall nu="10" b="0.70" c="3.0"/>

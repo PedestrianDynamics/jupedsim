@@ -1,8 +1,8 @@
 /**
  * \file        SensorManager.h
  * \date        Jan 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -35,20 +35,27 @@ class CognitiveMapStorage;
 class AbstractSensor;
 class Pedestrian;
 
+#include<unordered_map>
+#include<vector>
+//c++11 alias: Container to store options for the router (i. a. sensors)
+using optStorage = std::unordered_map<std::string,std::vector<std::string> >;
 
 #include <vector>
 #include <set>
+#include <string>
 
 class SensorManager {
 public:
-     typedef int EventType;
-     static const EventType NONE = 0;
-     static const EventType INIT = 1;
-     static const EventType PERIODIC = 2;
-     static const EventType NO_WAY = 4;
+    typedef int EventType;
+    static const EventType NONE = 0;
+    static const EventType INIT = 1;
+    static const EventType PERIODIC = 2;
+    static const EventType NO_WAY = 4;
+    static const EventType CHANGED_ROOM = 8;
+    static const EventType NEW_DESTINATION = 16;
 
-
-     typedef std::vector<std::pair<AbstractSensor *, EventType>> SensorContainer;
+ 
+     typedef std::vector<std::pair<AbstractSensor *, EventType> > SensorContainer;
 
      /****************************
       * Constructors & Destructors
@@ -60,6 +67,7 @@ public:
      void execute(const Pedestrian *, EventType);
 
      static SensorManager * InitWithAllSensors(const Building *, CognitiveMapStorage *);
+     static SensorManager * InitWithCertainSensors(const Building*, CognitiveMapStorage*, const optStorage& optSto);
 
 private:
      const Building * const building;

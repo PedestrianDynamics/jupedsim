@@ -1,8 +1,8 @@
 /**
  * \file        AccessPoint.h
  * \date        Aug 24, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -58,12 +58,10 @@ public:
       */
      virtual ~AccessPoint();
 
-
      /**
       * @return the Id of the access point
       */
      int GetID();
-
 
      /**
       * determines if the given coordinates (x ,y) are in the range of that Aps.
@@ -73,7 +71,6 @@ public:
       * @return
       */
      bool IsInRange(double xPed, double yPed, int roomID);
-
 
      /**
       * given the actual room of the pedestrian
@@ -89,12 +86,15 @@ public:
       */
      void setConnectingRooms(int r1, int r2);
 
-     int GetConnectingRoom1() {
+     int GetConnectingRoom1()
+     {
           return _room1ID;
-     };
-     int GetConnectingRoom2() {
+     }
+
+     int GetConnectingRoom2()
+     {
           return _room2ID;
-     };
+     }
 
      /**
       * return the distance to the point x ,y
@@ -192,14 +192,6 @@ public:
      int GetNearestTransitAPTO(int UID=FINAL_DEST_OUT);
      void AddTransitAPsTo(int UID,AccessPoint* ap);
 
-
-     // re routing functions
-     //void AddTransitPed(Pedestrian* ped);
-     //void DeleteTransitPed(Pedestrian* ped);
-     //const std::vector<Pedestrian*>& GetAllTransitPed() const;
-
-
-
 private:
      int _id;
      double _center[2];
@@ -215,7 +207,6 @@ private:
      std::vector<Pedestrian*> _transitPedestrians;
      int _isClosed;
      std::string _friendlyName;
-
 
      // stores the connecting APs
      std::vector<AccessPoint*>_connectingAPs;

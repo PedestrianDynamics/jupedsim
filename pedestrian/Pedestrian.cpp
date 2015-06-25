@@ -1,8 +1,8 @@
 /**
  * \file        Pedestrian.cpp
  * \date        Sep 30, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -26,22 +26,21 @@
  **/
 
 
-#include "Pedestrian.h"
+#include <cassert>
 #include "../geometry/Building.h"
 #include "../geometry/NavLine.h"
 #include "../routing/Router.h"
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
-#include <cassert>
+#include "Knowledge.h"
+#include "Pedestrian.h"
 
 using namespace std;
 
-/// initialize the static variables
+// initialize the static variables
 double Pedestrian::_globalTime = 0.0;
-bool Pedestrian::_enableSpotlight = false;
-
-
-
+int Pedestrian::_agentsCreated=1;
+AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
 {
@@ -50,16 +49,17 @@ Pedestrian::Pedestrian()
      _oldRoomID = -1;
      _oldSubRoomID = -1;
      _exitIndex = -1;
-     _id = 0;
+     _id = _agentsCreated;//default id
      _mass = 1;
      _tau = 0.5;
      _newOrientationFlag = false;
+     _newEventFlag = false;
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
      _updateRate = 0;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
-     _navLine = new NavLine(); //FIXME this is not released
+     _navLine = new NavLine();
      _router = NULL;
      _building = NULL;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
@@ -74,16 +74,39 @@ Pedestrian::Pedestrian()
      _V0 = Point(0,0);
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
-     _recordingTime = 5; //seconds
-
-     _knownDoors = map<int, NavLineState>();
-
-     _height = 160;
+     _recordingTime = 20; //seconds
+     //_knownDoors = map<int, NavLineState>();
+     _knownDoors.clear();
+     _height = 170;
      _age = 30;
      _gender = "male";
      _trip = vector<int> ();
      _group = -1;
      _spotlight = false;
+     _V0UpStairs=0.0;
+     _V0DownStairs=0.0;
+     _distToBlockade=0.0;
+     _routingStrategy=ROUTING_GLOBAL_SHORTEST;
+
+     _agentsCreated++;//increase the number of object created
+}
+
+Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
+:    _age(agentsParameters.GetAge()),
+     _gender(agentsParameters.GetGender()),
+     _height(agentsParameters.GetHeight()),
+     _desiredFinalDestination(agentsParameters.GetGoalId()),
+     _group(agentsParameters.GetGroupId()),
+     _building(&building),
+     _router(building.GetRoutingEngine()->GetRouter(agentsParameters.GetRouterId())),
+     _lastPosition(),
+     _roomID(agentsParameters.GetRoomId()),
+     _roomCaption(""),
+     _subRoomID(agentsParameters.GetSubroomID()),
+     _patienceTime(agentsParameters.GetPatience()),
+     _premovement(agentsParameters.GetPremovementTime())
+{
+
 }
 
 
@@ -96,6 +119,10 @@ Pedestrian::~Pedestrian()
 void Pedestrian::SetID(int i)
 {
      _id = i;
+     if(i<=0)
+     {
+          cout<<"invalid ID"<<i<<endl;exit(0);
+     }
 }
 
 void Pedestrian::SetRoomID(int i, string roomCaption)
@@ -139,15 +166,17 @@ void Pedestrian::SetExitLine(const NavLine* l)
      _navLine->SetPoint2(l->GetPoint2());
 }
 
-void Pedestrian::SetPos(const Point& pos)
+void Pedestrian::SetPos(const Point& pos, bool initial)
 {
-     _ellipse.SetCenter(pos);
-
-     //save the last values for the records
-     _lastPositions.push(pos);
-     unsigned int max_size = _recordingTime/_deltaT;
-     if(_lastPositions.size() > max_size)
-          _lastPositions.pop();
+     if((_globalTime>=_premovement) || (initial==true))
+     {
+          _ellipse.SetCenter(pos);
+          //save the last values for the records
+          _lastPositions.push(pos);
+          unsigned int max_size = _recordingTime/_deltaT;
+          if(_lastPositions.size() > max_size)
+               _lastPositions.pop();
+     }
 }
 
 void Pedestrian::SetCellPos(int cp)
@@ -157,18 +186,22 @@ void Pedestrian::SetCellPos(int cp)
 
 void Pedestrian::SetV(const Point& v)
 {
-     _ellipse.SetV(v);
-
-     //save the last values for the records
-     _lastVelocites.push(v);
-     unsigned int max_size = _recordingTime/_deltaT;
-     if(_lastVelocites.size()> max_size)
-          _lastVelocites.pop();
+     if (_globalTime >= _premovement)
+     {
+          _ellipse.SetV(v);
+          //save the last values for the records
+          _lastVelocites.push(v);
+          unsigned int max_size = _recordingTime / _deltaT;
+          if (_lastVelocites.size() > max_size)
+               _lastVelocites.pop();
+     }
 }
 
-void Pedestrian::SetV0Norm(double v0)
+void Pedestrian::SetV0Norm(double v0,double v0UpStairs, double v0DownStairs)
 {
      _ellipse.SetV0(v0);
+     _V0DownStairs=v0DownStairs;
+     _V0UpStairs=v0UpStairs;
 }
 
 void Pedestrian::Setdt(double dt)
@@ -178,7 +211,6 @@ void Pedestrian::Setdt(double dt)
 double Pedestrian::Getdt()
 {
      return _deltaT;
-
 }
 
 void Pedestrian::SetTrip(const vector<int>& trip)
@@ -239,6 +271,11 @@ int Pedestrian::GetUniqueRoomID() const
      return _roomID * 1000 + _subRoomID;
 }
 
+RoutingStrategy Pedestrian::GetRoutingStrategy() const
+{
+     return _routingStrategy;
+}
+
 // returns the exit Id corresponding to the
 // unique subroom identifier
 
@@ -282,60 +319,35 @@ void Pedestrian::ClearMentalMap()
      _exitIndex = -1;
 }
 
-void Pedestrian::AddKnownClosedDoor(int door)
+void Pedestrian::AddKnownClosedDoor(int door, double time)
 {
-     if(_knownDoors.find(door) == _knownDoors.end()) {
-          _knownDoors[door].close(GetGlobalTime());
+     if(time==0) time=_globalTime;
+     _knownDoors[door].SetState(door,true,time);
+}
+
+void Pedestrian::ClearKnowledge()
+{
+     _knownDoors.clear();
+}
+
+const map<int, Knowledge>&  Pedestrian::GetKnownledge() const
+{
+     return _knownDoors;
+}
+
+const std::string Pedestrian::GetKnowledgeAsString() const
+{
+     string key="";
+     for(auto&& knowledge:_knownDoors)
+     {
+          int door=knowledge.first;
+          if(key.empty())
+               key.append(std::to_string(door));
+          else
+               key.append(":"+std::to_string(door));
      }
-     return;
+     return key;
 }
-
-int Pedestrian::DoorKnowledgeCount() const
-{
-     return _knownDoors.size();
-}
-
-
-
-set<int>  Pedestrian::GetKnownClosedDoors()
-{
-     map<int, NavLineState>::iterator it;
-     set<int> doors_closed;
-     for(it = _knownDoors.begin(); it != _knownDoors.end(); it++) {
-
-          if(it->second.closed()) {
-               doors_closed.insert(it->first);
-          }
-     }
-
-     return doors_closed;
-}
-
-map<int, NavLineState> *  Pedestrian::GetKnownDoors()
-{
-     return & _knownDoors;
-}
-
-void Pedestrian::MergeKnownClosedDoors( map<int, NavLineState> * input)
-{
-     map<int, NavLineState>::iterator it;
-     for(it = input->begin(); it != input->end(); it++) {
-          //it->second.print();
-          if(it->second.isShareable(GetGlobalTime())) {
-               if(_knownDoors.find(it->first) == _knownDoors.end()) {
-                    _knownDoors[it->first] = NavLineState();
-                    if(!_knownDoors[it->first].mergeDoor(it->second, GetGlobalTime())) {
-                         _knownDoors.erase(it->first);
-                    }
-               } else {
-                    _knownDoors[it->first].mergeDoor(it->second, GetGlobalTime());
-               }
-          }
-     }
-     return;
-}
-
-
 
 const Point& Pedestrian::GetPos() const
 {
@@ -360,7 +372,31 @@ const Point& Pedestrian::GetV0() const
 
 double Pedestrian::GetV0Norm() const
 {
-     return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
+     //detect the walking direction based on the elevation
+     SubRoom* sub=_building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
+     double delta = sub->GetElevation(_navLine->GetCentre())-
+               sub->GetElevation(_ellipse.GetCenter());
+
+     //TODO: The stairs should be detect before (1m in front)
+     //and the velocity reduced accordingly
+
+     // we are walking on an even plane
+     //TODO: move _ellipse.GetV0() to _V0Plane
+     if(fabs(delta)<J_EPS)
+          return _ellipse.GetV0();
+
+     // we are walking downstairs
+     if(delta<0)
+     {
+          return _V0DownStairs;
+     }
+     //we are walking upstairs
+     else
+     {
+          return _V0UpStairs;
+     }
+     // orthogonal projection on the stair
+     //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
 }
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
@@ -391,26 +427,49 @@ void Pedestrian::SetPhiPed()
      _ellipse.SetSinPhi(sinPhi);
 }
 
+
+void Pedestrian::InitV0(const Point& target)
+{
+
+#define DEBUG 0
+     const Point& pos = GetPos();
+     Point delta = target - pos;
+
+     _V0 = delta.Normalized();
+
+#if DEBUG
+     printf("Ped=%d : _v0=[%f, %f] \n", _id, _v0.GetX(), _V0.GetY());
+#endif
+}
+
+
 const Point& Pedestrian::GetV0(const Point& target)
 {
 
+#define DEBUG 0
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
-
+     double t;
      // Molification around the targets makes little sense
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
-     //printf("BEVOR new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
-     // printf("AFTER new_v0=%f %f norm = %f\n", new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
      // -------------------------------------- Handover new target
-     double t = _newOrientationDelay++ *_deltaT;
-     // printf("t=%f, neworientation=%d\n", t, _newOrientationDelay);
-     //getc(stdin);
+     t = _newOrientationDelay++ *_deltaT/(1.0+1000* _distToBlockade); 
+
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
-     //printf("_v0=%f %f norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
-     //getc(stdin);
+#if DEBUG
+     if(_id==24){
+          printf("Goal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1().GetX(), _navLine->GetPoint1().GetY(), _navLine->GetPoint2().GetX(), _navLine->GetPoint2().GetY());
+          printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+          printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
+          printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _distToBlockade);
+          printf("_v0=[%f, %f] norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+     }
+     // getc(stdin);
+#endif
      // --------------------------------------
+
      return _V0;
 }
 
@@ -435,7 +494,7 @@ double Pedestrian::GetTimeInJam() const
 
 // }
 
-void Pedestrian::SetSmoothTurning(bool smt)
+void Pedestrian::SetSmoothTurning()
 {
      _newOrientationDelay = 0;
 }
@@ -447,9 +506,11 @@ bool Pedestrian::IsFeelingLikeInJam()
      return (_patienceTime < _timeInJam);
 }
 
+//reduce the felt time in Jam by half
 void Pedestrian::ResetTimeInJam()
 {
      _timeInJam = 0.0;
+     //_timeInJam /= 2.0;
 }
 
 void Pedestrian::UpdateTimeInJam()
@@ -481,6 +542,42 @@ void Pedestrian::RerouteIn(double time)
 bool Pedestrian::IsReadyForRerouting()
 {
      return(_reroutingEnabled &&(_timeBeforeRerouting <= 0.0));
+}
+
+
+double Pedestrian::GetReroutingTime()
+{
+     return _timeBeforeRerouting;
+}
+
+bool Pedestrian::GetNewEventFlag()
+{
+     return _newEventFlag;
+}
+
+bool  Pedestrian::GetNewOrientationFlag()
+{
+     return _newOrientationFlag;
+}
+
+void Pedestrian::SetDistToBlockade(double dist)
+{
+     _distToBlockade = dist;
+}
+double Pedestrian::GetDistToBlockade()
+{
+     return _distToBlockade;
+}
+
+
+void Pedestrian::SetNewOrientationFlag(bool flag)
+{
+     _newOrientationFlag=flag;
+}
+
+void Pedestrian::SetNewEventFlag(bool flag)
+{
+     _newEventFlag=flag;
 }
 
 double Pedestrian::GetAge() const
@@ -540,9 +637,9 @@ double Pedestrian::GetRecordingTime() const
 }
 
 double Pedestrian::GetMeanVelOverRecTime() const {
-	//just few position were saved
-	if (_lastPositions.size()<2) return _ellipse.GetV().Norm();
-	return fabs ( (_lastPositions.back()-_lastPositions.front()).Norm() / _recordingTime );
+     //just few position were saved
+     if (_lastPositions.size()<2) return _ellipse.GetV().Norm();
+     return fabs ( (_lastPositions.back()-_lastPositions.front()).Norm() / _recordingTime );
 }
 
 double Pedestrian::GetDistanceToNextTarget() const
@@ -561,20 +658,20 @@ int Pedestrian::GetFinalDestination() const
 }
 
 ///@deprecated
-void Pedestrian::WritePath(ofstream& file, Building* building)
-{
-     map<int, int>::iterator iter;
-
-     if(building) {
-          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-               file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
-          }
-     } else {
-          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-               file<<iter->first/1000<<" "<<iter->second<<endl;
-          }
-     }
-}
+//void Pedestrian::WritePath(ofstream& file, Building* building)
+//{
+//     map<int, int>::iterator iter;
+//
+//     if(building) {
+//          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
+//               file<<building->GetAllRooms()[iter->first/1000]->GetCaption()<<" "<<iter->second<<endl;
+//          }
+//     } else {
+//          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
+//               file<<iter->first/1000<<" "<<iter->second<<endl;
+//          }
+//     }
+//}
 
 string Pedestrian::GetPath()
 {
@@ -598,7 +695,7 @@ void Pedestrian::Dump(int ID, int pa)
 
      switch (pa) {
 
-     case 0: {
+     case 0:
           printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
           printf(">> Destination [ %d ]\n", _exitIndex);
           printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
@@ -607,17 +704,14 @@ void Pedestrian::Dump(int ID, int pa)
           printf(">> Velocity [%0.2f, %0.2f]  Norm = [%0.2f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
           if(GetExitLine()) {
                printf(">> ExitLine: (%0.2f, %0.2f) -- (%0.2f, %0.2f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
-                      GetExitLine()->GetPoint2().GetX(), GetExitLine()->GetPoint2().GetY());
+                         GetExitLine()->GetPoint2().GetX(), GetExitLine()->GetPoint2().GetY());
                printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
           }
           printf(">> smooth rotating: %s \n", (_newOrientationDelay > 0) ? "yes" : "no");
           printf(">> mental map");
-          map<int, int>::iterator iter;
-          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-               printf("\t room / destination  [%d, %d]\n", iter->first, iter->second);
-          }
-     }
-     break;
+          for(auto&& item: _mentalMap)
+               printf("\t room / destination  [%d, %d]\n", item.first, item.second);
+          break;
 
      case 1:
           printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
@@ -638,14 +732,21 @@ void Pedestrian::Dump(int ID, int pa)
      case 5:
           printf(">> Destination [ %d ]\n", _exitIndex);
           break;
-     case 6: { //Mental Map
+
+     case 6:  //Mental Map
           printf(">> mental map");
-          map<int, int>::iterator iter;
-          for (iter = _mentalMap.begin(); iter != _mentalMap.end(); iter++) {
-               printf("\t room / destination  [%d, %d]", iter->first, iter->second);
-          }
-     }
-     break;
+          for(auto&& item: _mentalMap)
+               printf("\t room / destination  [%d, %d]", item.first, item.second);
+          break;
+
+     case 7:
+          printf(">> knowledge\n");
+          for(auto&& item:_knownDoors)
+               printf("\t door [%d] closed since [%.2f] sec\n",item.first, _globalTime-item.second.GetTime());
+          break;
+
+     default:
+          break;
 
      }
      fflush(stdout);
@@ -670,6 +771,7 @@ double Pedestrian::GetGlobalTime()
 void Pedestrian::SetRouter(Router* router)
 {
      _router=router;
+     _routingStrategy=router->GetStrategy();
 }
 
 Router* Pedestrian::GetRouter() const
@@ -681,7 +783,7 @@ int Pedestrian::FindRoute()
 {
      if( ! _router) {
           Log->Write("ERROR:\t one or more routers does not exit! Check your router_ids");
-          exit(EXIT_FAILURE);
+          return -1;
      }
      return _router->FindExit(this);
 }
@@ -706,6 +808,28 @@ void Pedestrian::SetPatienceTime(double patienceTime)
      _patienceTime = patienceTime;
 }
 
+void Pedestrian::SetPremovementTime(double pretime)
+{
+     _premovement=pretime;
+}
+
+double Pedestrian::GetPremovementTime()
+{
+     return _premovement;
+}
+
+void Pedestrian::SetRiskTolerance(double tol)
+{
+     if (tol>1) tol=1;
+     if(tol<0) tol=0;
+     _riskTolerance=tol;
+}
+
+double Pedestrian::GetRiskTolerance() const
+{
+     return _riskTolerance;
+}
+
 const Building* Pedestrian::GetBuilding()
 {
      return _building;
@@ -721,13 +845,81 @@ void Pedestrian::SetSpotlight(bool spotlight)
      _spotlight = spotlight;
 }
 
-
-bool Pedestrian::GetSpotlight()
+void Pedestrian::SetColorMode(AgentColorMode mode)
 {
-     return !_enableSpotlight || _spotlight;
+     _colorMode=mode;
 }
 
-void Pedestrian::ActivateSpotlightSystem(bool status)
+int Pedestrian::GetAgentsCreated()
 {
-     _enableSpotlight = status;
+     return _agentsCreated;
 }
+
+int Pedestrian::GetColor()
+{
+     //default color is by velocity
+     string key;
+
+     switch (_colorMode)
+     {
+     case BY_SPOTLIGHT:
+     {
+          if (_spotlight==false)
+               return -1;
+          break;
+     }
+
+     case BY_VELOCITY:
+     {
+          int color = -1;
+          double v0 = GetV0Norm();
+          if (v0 != 0.0) {
+               double v = GetV().Norm();
+               color = (int) (v / v0 * 255);
+          }
+          return color;
+     }
+     break;
+
+     // Hash the knowledge represented as String
+     case BY_KNOWLEDGE:
+     {
+          key=GetKnowledgeAsString();
+     }
+     break;
+
+     case BY_ROUTER:
+     case BY_ROUTE:
+     {
+          key = std::to_string(_routingStrategy);
+     }
+     break;
+
+     case BY_GROUP:
+     {
+          key = std::to_string(_group);
+     }
+     break;
+
+     case BY_FINAL_GOAL:
+     {
+          key=std::to_string(_desiredFinalDestination);
+     }
+     break;
+
+     case BY_INTERMEDIATE_GOAL:
+     {
+          key=std::to_string(_exitIndex);
+     }
+     break;
+
+     default:
+          break;
+     }
+
+     std::hash<std::string> hash_fn;
+     return  hash_fn(key) % 255;
+}
+
+
+

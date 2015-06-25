@@ -1,8 +1,8 @@
 /**
  * \file        CompleteCognitiveMapCreator.cpp
  * \date        Feb 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -28,8 +28,14 @@
 
 #include "SensorManager.h"
 #include "AbstractSensor.h"
-#include "../../../geometry/Building.h"
+//sensors
 #include "RoomToFloorSensor.h"
+#include "DiscoverDoorsSensor.h"
+#include "LastDestinationsSensor.h"
+#include "SmokeSensor.h"
+#include "JamSensor.h"
+
+#include "../../../geometry/Building.h"
 #include "../CognitiveMapStorage.h"
 #include "../navigation_graph/GraphVertex.h"
 #include "../NavigationGraph.h"
@@ -63,8 +69,46 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveM
 {
      SensorManager * sensor_manager = new SensorManager(b, cm_storage);
 
-     //Init and register Sensors
-     sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY );
+    //Init and register Sensors
+    sensor_manager->Register(new DiscoverDoorsSensor(b),  NO_WAY );
+    sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+    //sensor_manager->Register(new SmokeSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
 
-     return sensor_manager;
+    sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
+    sensor_manager->Register(new JamSensor(b), PERIODIC | NO_WAY | CHANGED_ROOM );
+
+    return sensor_manager;
+}
+
+SensorManager *SensorManager::InitWithCertainSensors(const Building * b, CognitiveMapStorage * cm_storage, const optStorage& optSto)
+{
+    SensorManager * sensor_manager = new SensorManager(b, cm_storage);
+
+    sensor_manager->Register(new DiscoverDoorsSensor(b),  NO_WAY );
+    sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
+
+    std::vector<std::string> sensors = optSto.at("Sensors");
+    for (auto &it : sensors )
+    {
+        if (it =="Room2Corridor")
+        {
+            sensor_manager->Register(new RoomToFloorSensor(b), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+        }
+        else if (it == "Jam")
+        {
+            sensor_manager->Register(new JamSensor(b), PERIODIC | NO_WAY | CHANGED_ROOM );
+        }
+        else if (it == "Smoke")
+        {
+            std::string smokeFilepath = optSto.at("smokeOptions").at(0);
+            double updatet = std::stod(optSto.at("smokeOptions").at(1));
+            double finalt = std::stod(optSto.at("smokeOptions").at(2));
+            sensor_manager->Register(new SmokeSensor(b,smokeFilepath,updatet,finalt), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
+
+        }
+
+    }
+
+
+    return sensor_manager;
 }

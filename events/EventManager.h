@@ -1,8 +1,8 @@
 /**
  * \file        EventManager.h
  * \date        Jul 4, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -24,26 +24,20 @@
  *
  *
  **/
- 
-#include <string>
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
+
 #include <vector>
-#include <math.h>
-#include <stdio.h>
-#include "../geometry/Building.h"
-#include "../geometry/Transition.h"
-#include "../tinyxml/tinyxml.h"
-#include "../IO/OutputHandler.h"
-#include "../IO/IODispatcher.h"
-#include "../routing/RoutingEngine.h"
-#include "../pedestrian/Pedestrian.h"
+#include <string>
+
+class Building;
+class Router;
+class GlobalRouter;
+class QuickestPathRouter;
+class RoutingEngine;
 
 extern OutputHandler* Log;
 
-class EventManager {
+class EventManager
+{
 private:
      std::vector<double> _event_times;
      std::vector<std::string> _event_types;
@@ -52,25 +46,96 @@ private:
      std::string _projectFilename;
      std::string _projectRootDir;
      Building *_building;
-     double _deltaT;
      FILE *_file;
      bool _dynamic;
      int _eventCounter;
+     long int _lastUpdateTime;
+     //information propagation time in seconds
+     int _updateFrequency;
+     //information propagation range in meters
+     int _updateRadius;
+     //save the router corresponding to the actual state of the building
+     std::map<std::string, RoutingEngine*> _eventEngineStorage;
+     //save the available routers defined in the simulation
+     std::vector<RoutingStrategy> _availableRouters;
+
+private:
+     /**
+      * collect the close doors and generate a new graph
+      * @param _building
+      */
+     bool CreateRoutingEngine(Building* _b, int first_engine=false);
+
+     /**
+      * Create a router corresponding to the given strategy
+      * @param strategy
+      * @return a router/NULL for invalid strategies
+      */
+     Router * CreateRouter(const RoutingStrategy& strategy);
+
+     /**
+      * Update the knowledge about closed doors.
+      * Each pedestrian who is xx metres from a closed door,
+      * will save that information
+      * @param _b, the building object
+      */
+     bool UpdateAgentKnowledge(Building* _b);
+
+     /**
+      * Merge the knowledge of the two pedestrians.
+      * The information with the newest timestamp
+      * is always accepted with a probability of one.
+      * @param p1, first pedestrian
+      * @param p2, second pedestrian
+      */
+     void MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
+
+     /**
+      * Update the pedestrian route based on the new information
+      * @param p1
+      * @return
+      */
+     bool UpdateRoute(Pedestrian* p1);
 
 public:
-     //Konstruktor
+     ///constructor
      EventManager(Building *_b);
-     //Dateien einlesen
-     void SetProjectFilename(const std::string &filename) ;
-     void SetProjectRootDir(const std::string &filename);
-     void readEventsXml();
-     void listEvents();
-     void readEventsTxt(double time);
-     //Update
-     void Update_Events(double time, double d);
+
+     /**
+      *
+      * destructor
+      */
+     ~EventManager();
+
+     /**
+      * Read and parse the events
+      * @return false if an error occured
+      */
+     bool ReadEventsXml();
+
+     /**
+      * Print the parsed events
+      */
+     void ListEvents();
+
+     /**
+      * Read and parse events from a text file
+      * @param time
+      */
+     void ReadEventsTxt(double time);
+
+     /**
+      * Process the events at runtime
+      * @param time
+      */
+     void Update_Events(double time);
+
+     //process the event using the current time stamp
+     //from the pedestrian class
+     void ProcessEvent();
      //Eventhandling
-     void closeDoor(int id);
-     void openDoor(int id);
-     void changeRouting(int id, std::string state);
-     void getTheEvent(char* c);
+     void CloseDoor(int id);
+     void OpenDoor(int id);
+     void ChangeRouting(int id, const std::string& state);
+     void GetEvent(char* c);
 };

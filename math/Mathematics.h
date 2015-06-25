@@ -1,8 +1,8 @@
 /**
  * \file        Mathematics.h
  * \date        Dec 13, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -35,6 +35,7 @@
 
 double sign(double x);
 
+double sigmoid(double a, double b, double x);
 double hermite_interp(double x, double x1, double x2, double y1, double y2,
                       double dy1, double dy2);
 

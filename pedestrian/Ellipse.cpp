@@ -1,8 +1,8 @@
 /**
  * \file        Ellipse.cpp
  * \date        Sep 30, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -30,8 +30,9 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#ifndef M_PI
 #define M_PI            3.14159265358979323846
-
+#endif
 using namespace std;
 
 
@@ -195,7 +196,7 @@ double JEllipse::GetEA() const
 double JEllipse::GetEB() const
 {
      double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
-     double v_min = 0.01;
+     double v_min = 0.001;
      double a = 0.49;
      double b = -1.17;
      double v = _vel.Norm();
@@ -240,13 +241,13 @@ double JEllipse::GetEB() const
 //      Point R1, R2;
 //      Point AP1, AP2;
 //      // Koordinaten transformieren
-//      AP1 = AP1inE1.CoordTransToCart(this->GetCenter(), this->GetCosPhi(),
+//      AP1 = AP1inE1.TransformToCartesianCoordinates(this->GetCenter(), this->GetCosPhi(),
 //                      this->GetSinPhi());
-//      AP2 = AP2inE2.CoordTransToCart(E2.GetCenter(), E2.GetCosPhi(),
+//      AP2 = AP2inE2.TransformToCartesianCoordinates(E2.GetCenter(), E2.GetCosPhi(),
 //                      E2.GetSinPhi());
-//      AP1inE2 = AP1.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(),
+//      AP1inE2 = AP1.TransformToEllipseCoordinates(E2.GetCenter(), E2.GetCosPhi(),
 //                      E2.GetSinPhi());
-//      AP2inE1 = AP2.CoordTransToEllipse(this->GetCenter(), this->GetCosPhi(),
+//      AP2inE1 = AP2.TransformToEllipseCoordinates(this->GetCenter(), this->GetCosPhi(),
 //                      this->GetSinPhi());
 
 //      // Abstand zwischen den beiden Actionpoints
@@ -276,10 +277,10 @@ double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) co
      Point R1, R2;
      Point E1inE2, //center of E1 in coordinate system of E2
            E2inE1;
-     E2inE1 = E2center.CoordTransToEllipse(this->GetCenter(), this->GetCosPhi(),
-                                           this->GetSinPhi());
-     E1inE2 = E1center.CoordTransToEllipse(E2.GetCenter(), E2.GetCosPhi(),
-                                           E2.GetSinPhi());
+     E2inE1 = E2center.TransformToEllipseCoordinates(this->GetCenter(), this->GetCosPhi(),
+                                                     this->GetSinPhi());
+     E1inE2 = E1center.TransformToEllipseCoordinates(E2.GetCenter(), E2.GetCosPhi(),
+                                                     E2.GetSinPhi());
      // distance between centers of E1 and E2
      *dist = (E1center - E2center).Norm();
      R1 = this->PointOnEllipse(E2inE1);
@@ -300,8 +301,8 @@ Point JEllipse::PointOnEllipse(const Point& P) const
      if ( r < J_EPS*J_EPS) {
           //return _center;
           Point CP(this->GetEA(), 0);
-          return  CP.CoordTransToCart(this->GetCenter(), this->GetCosPhi(),
-                                      this->GetSinPhi());
+          return CP.TransformToCartesianCoordinates(this->GetCenter(), this->GetCosPhi(),
+                                                    this->GetSinPhi());
      }
      r = sqrt(r);
 
@@ -312,7 +313,7 @@ Point JEllipse::PointOnEllipse(const Point& P) const
      Point S;
      S.SetX(a*cosTheta);
      S.SetY(b*sinTheta);
-     return S.CoordTransToCart(_center, _cosPhi, _sinPhi);
+     return S.TransformToCartesianCoordinates(_center, _cosPhi, _sinPhi);
 }
 
 double JEllipse::EffectiveDistanceToLine(const Line& l) const
@@ -325,8 +326,8 @@ double JEllipse::EffectiveDistanceToLine(const Line& l) const
 
 // thanks to Sean Curtis. see manuals/Ellipsen/ellipseLineSean.pdf
 // double JEllipse::MinimumDistanceToLine(const Line& l) const {
-//       Point AinE = l.GetPoint1().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
-//       Point BinE = l.GetPoint2().CoordTransToEllipse(_center, _cosPhi, _sinPhi);
+//       Point AinE = l.GetPoint1().TransformToEllipseCoordinates(_center, _cosPhi, _sinPhi);
+//       Point BinE = l.GetPoint2().TransformToEllipseCoordinates(_center, _cosPhi, _sinPhi);
 
 //              // Action Point der Ellipse
 //       Point APinE = Point(_Xp, 0);

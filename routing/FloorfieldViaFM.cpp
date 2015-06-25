@@ -79,7 +79,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     calculateFloorfield(useDistancefield); //use distance2Wall
 
-    //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+    testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
@@ -102,8 +102,8 @@ void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
 
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
     //init min/max before parsing
-    double xMin = 100000.;
-    double xMax = -100000.;
+    double xMin = FLT_MAX;
+    double xMax = -FLT_MAX;
     double yMin = xMin;
     double yMax = xMax;
     //create a list of walls
@@ -121,13 +121,9 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         }
     }
     numOfExits = wall.size();
-    std::vector<Room*> allRooms = buildingArg->GetAllRooms();
-    for (std::vector<Room*>::iterator itRoom = allRooms.begin(); itRoom != allRooms.end(); ++itRoom) {
-
-        std::vector<SubRoom*> allSubrooms = (*itRoom)->GetAllSubRooms();
-        for (std::vector<SubRoom*>::iterator itSubroom = allSubrooms.begin(); itSubroom != allSubrooms.end(); ++itSubroom) {
-
-            std::vector<Obstacle*> allObstacles = (*itSubroom)->GetAllObstacles();
+    for (const auto& itRoom : buildingArg->GetAllRooms()) {
+        for (const auto& itSubroom : itRoom.second->GetAllSubRooms()) {
+            std::vector<Obstacle*> allObstacles = itSubroom.second->GetAllObstacles();
             for (std::vector<Obstacle*>::iterator itObstacles = allObstacles.begin(); itObstacles != allObstacles.end(); ++itObstacles) {
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
@@ -148,7 +144,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
                 }
             }
 
-            std::vector<Wall> allWalls = (*itSubroom)->GetAllWalls();
+            std::vector<Wall> allWalls = itSubroom.second->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                 wall.emplace_back( Wall((*itWall).GetPoint1()*GEO_UP_SCALE, (*itWall).GetPoint2()*GEO_UP_SCALE) );
                 //std::cout << &(*itWall) << std::endl;

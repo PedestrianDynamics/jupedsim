@@ -5,7 +5,7 @@
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- maximal simulation time -->
-  <numCPU>4</numCPU>
+  <num_threads>4</num_threads>
   <max_sim_time unit="sec">900</max_sim_time>
   <!-- geometry file -->
   <geometry>geometry_test11_b.xml</geometry>
@@ -66,7 +66,7 @@
       <parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exitCrossingStrategy>3</exitCrossingStrategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <v0 mu="1.0" sigma="0.001" />
         <bmax mu="0.25" sigma="0.001" />

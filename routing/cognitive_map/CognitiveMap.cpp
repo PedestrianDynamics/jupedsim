@@ -1,8 +1,8 @@
 /**
  * \file        CognitiveMap.cpp
  * \date        Jan 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -39,6 +39,8 @@
 
 using namespace std;
 
+
+
 /**
  * Constructors & Destructors
  */
@@ -47,6 +49,7 @@ CognitiveMap::CognitiveMap(const Building * building, const Pedestrian * pedestr
      : building(building), pedestrian(pedestrian)
 {
      navigation_graph = new NavigationGraph(building);
+
 }
 
 CognitiveMap::~CognitiveMap()
@@ -75,24 +78,72 @@ NavigationGraph::VerticesContainer * CognitiveMap::GetAllVertices()
 }
 
 
-const NavigationGraph * CognitiveMap::GetNavigationGraph() const
+NavigationGraph * CognitiveMap::GetNavigationGraph() const
 {
      return navigation_graph;
 }
-const NavLine * CognitiveMap::GetDestination()
+const GraphEdge * CognitiveMap::GetDestination()
 {
-     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
-     std::pair<const GraphEdge*, double> cheapest_destination = (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
+//    ///Route Knowlegde
 
-     if(cheapest_destination.first != NULL) {
-          return cheapest_destination.first->GetCrossing();
-     } else {
-          return NULL;
-     }
+//    if (!_RKnowlegde.GetRememberedRooms().empty())
+//    {
+//        ///Room seems to be familiar?
+//        if (!_RKnowlegde.RoomIsFamiliar((*navigation_graph)[sub_room]))
+//        {
+//            /// not familiar (go back or use other tactics)
+//            return nullptr;
+//        }
+//        else
+//        {
+//            return _RKnowlegde.NextDoorOnRoute((*navigation_graph)[sub_room]);
+//        }
+//    }
+
+//    return nullptr;
+    return (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 }
 
-const NavLine * CognitiveMap::GetLocalDestination()
+const GraphEdge * CognitiveMap::GetLocalDestination()
 {
-     return NULL;
+    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+//    if(pedestrian->GetID() == 4) navigation_graph->WriteToDotFile("/home/david/graph.dot");
+
+    return (*navigation_graph)[sub_room]->GetLocalCheapestDestination(pedestrian->GetPos());
+}
+
+bool CognitiveMap::HadNoDestination() const
+{
+    return destinations.empty();
+}
+
+void CognitiveMap::AddDestination(const GraphEdge* destination)
+{
+    destinations.push_back(destination);
+}
+
+std::vector<const GraphEdge *>& CognitiveMap::GetDestinations()
+{
+    return destinations;
+}
+
+//void CognitiveMap::CreateRouteKnowlegde(const Pedestrian *pedestrian)
+//{
+//    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+//    NextDoorKnowlegde ndknowlegde = (*navigation_graph)[sub_room]->GetShortestPathFromHere(pedestrian->GetPos());
+
+//    _RKnowlegde = RouteKnowlegde(ndknowlegde);
+
+//}
+
+bool CognitiveMap::ChangedSubRoom() const
+{
+    return current_subroom != building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
+}
+
+void CognitiveMap::UpdateSubRoom()
+{
+    current_subroom = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 }

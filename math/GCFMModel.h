@@ -1,8 +1,8 @@
 /**
  * \file        GCFMModel.h
  * \date        Apr 15, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "../geometry/Building.h"
-#include "ForceModel.h"
+#include "OperationalModel.h"
 
 
 
@@ -44,8 +44,8 @@ class Pedestrian;
 class DirectionStrategy;
 
 
-class GCFMModel : public ForceModel {
-
+class GCFMModel : public OperationalModel
+{
 public:
 
     GCFMModel(DirectionStrategy* dir, double nuped, double nuwall, double dist_effPed, double dist_effWall,
@@ -64,12 +64,16 @@ public:
     double GetDistEffMaxPed() const;
     double GetDistEffMaxWall() const;
 
-
-    //void UpdateCellularModel(Building* building) const;
-
-    // virtual function
-    virtual void CalculateForce(double t, double tp, Building* building) const;
-    virtual std::string writeParameter() const;
+    /**
+     * Compute the next simulation step
+     * Solve the differential equations and update the positions and velocities
+     * @param current the actual time
+     * @param deltaT the next timestep
+     * @param building the geometry object
+     */
+    virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
+    virtual std::string GetDescription() const;
+    virtual bool Init (Building* building) const;
 
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
@@ -114,7 +118,7 @@ private:
      * @return
      */
     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-    Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
+    Point ForceRepWall(Pedestrian* ped, const Line& l) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
 

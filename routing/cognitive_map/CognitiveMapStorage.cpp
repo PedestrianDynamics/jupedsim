@@ -1,8 +1,8 @@
 /**
  * \file        CognitiveMapStorage.cpp
  * \date        Feb 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -36,11 +36,13 @@
 #include "NavigationGraph.h"
 
 
-CognitiveMapStorage::CognitiveMapStorage(const Building * const b)
+CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string cogMapStatus)
      : building(b)
 {
-     //creator = new EmptyCognitiveMapCreator(b);
-     creator = new CompleteCognitiveMapCreator(b);
+    if (cogMapStatus == "empty")
+    creator = new EmptyCognitiveMapCreator(b);
+    else
+    creator = new CompleteCognitiveMapCreator(b);
 }
 
 CognitiveMapStorage::~CognitiveMapStorage()
@@ -61,7 +63,7 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
 void CognitiveMapStorage::CreateCognitiveMap(CMStorageKeyType ped)
 {
      //todo: the possibility to have more then one creator.
-     cognitive_maps.emplace(ped, creator->CreateCognitiveMap(ped));
+     cognitive_maps.insert(std::make_pair(ped, creator->CreateCognitiveMap(ped)));
 
      //debug
      //cognitive_maps[ped]->GetNavigationGraph()->WriteToDotFile(building->GetProjectRootDir());

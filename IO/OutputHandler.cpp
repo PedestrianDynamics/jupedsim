@@ -1,8 +1,8 @@
 /**
  * \file        OutputHandler.cpp
  * \date        Nov 20, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <cstdlib>
+#include <cmath>
 
 using namespace std;
 
@@ -54,10 +55,9 @@ int OutputHandler::GetErrors()
      return _nErrors;
 }
 
-void OutputHandler::Write(string str)
+void OutputHandler::Write(const string& str)
 {
-     if (this != NULL)
-          cout << str << endl;
+    cout << str << endl;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
@@ -68,7 +68,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
      int totaldotz=40;
      double fraction = NowPeds / TotalPeds;
      // part of the progressmeter that's already "full"
-     int dotz = round(fraction * totaldotz);
+     int dotz = static_cast<int>(round(fraction * totaldotz));
 
      // create the "meter"
      int ii=0;
@@ -89,7 +89,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 
 void OutputHandler::Write(const char* message,...)
  {
-    char msg[CLENGTH];
+    char msg[CLENGTH]="";
     va_list ap;
     va_start(ap, message);
     vsprintf(msg, message, ap);
@@ -116,7 +116,7 @@ void OutputHandler::Write(const char* message,...)
     }
 }
 
-void STDIOHandler::Write(string str)
+void STDIOHandler::Write(const string& str)
 {
     if (str.find("ERROR") != string::npos)
        {
@@ -140,7 +140,8 @@ void STDIOHandler::Write(string str)
 FileHandler::FileHandler(const char *fn)
 {
      _pfp.open(fn);
-     if (!fn) {
+     if (!_pfp.is_open())
+     {
           char tmp[CLENGTH];
           sprintf(tmp, "Error!!! File [%s] could not be opened!", fn);
           cerr << tmp << endl;
@@ -153,7 +154,7 @@ FileHandler::~FileHandler()
      _pfp.close();
 }
 
-void FileHandler::Write(string str)
+void FileHandler::Write(const string& str)
 {
     if (this != NULL) {
         _pfp << str << endl;
@@ -172,7 +173,7 @@ void FileHandler::Write(string str)
 
 void FileHandler::Write(const char* str_msg,...)
 {
-     char msg[CLENGTH];
+     char msg[CLENGTH]="";
      va_list ap;
      va_start (ap, str_msg);
      vsprintf (msg,str_msg ,ap);
@@ -191,7 +192,9 @@ void FileHandler::Write(const char* str_msg,...)
      }
 }
 
-SocketHandler::SocketHandler(string host, int port)
+#ifdef _SIMULATOR
+
+SocketHandler::SocketHandler(const string& host, int port)
 {
      client = new TraVisToClient(host, port);
      brokentags.push_back("<trajectories>");
@@ -204,10 +207,11 @@ SocketHandler::~SocketHandler()
      delete client;
 }
 
-void SocketHandler::Write(string str)
+void SocketHandler::Write(const string& stringRef)
 {
 
      vector<string>::iterator str_it;
+     string str=stringRef;
 
      //There are a few broken tags which need to be checked for and removed.
      for (str_it = brokentags.begin(); str_it != brokentags.end(); ++str_it) {
@@ -218,3 +222,5 @@ void SocketHandler::Write(string str)
      }
      client->sendData(str.c_str());
 }
+
+#endif

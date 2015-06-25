@@ -1,8 +1,8 @@
 /**
  * \file        SafestPathRouter.cpp
  * \date        Nov 29, 2013
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -72,6 +72,33 @@ SafestPathRouter::SafestPathRouter()
     //_finalLineEvac = new double [numberOfSection];
 }
 
+SafestPathRouter::SafestPathRouter(int id, RoutingStrategy s) : GlobalRouter(id, s)
+{
+    numberOfSubroom=0;
+    _lastUpdateTime=0;
+    a=1;
+    c=1;
+    b=0;
+    _lastUpdateTime=-1;
+    maximalSquare=0;
+
+    flo =NULL;
+    rR=NULL;
+    peopleAtSection=NULL;
+    squareOfSection=NULL;
+    dFinalLength=NULL;
+    dPeopleDensity=NULL;
+    dPreOFP=NULL;
+    dFinalLineOFP=NULL;
+    dFinalLineEvac=NULL;
+
+    // Output to files
+    _phiFile = new FileHandler("Phi_file.csv");
+    // _finalLineEvac = new FileHandler("Evac_File.csv");
+    // Output to files
+    //_finalLineEvac = new double [numberOfSection];
+}
+
 SafestPathRouter::~SafestPathRouter()
 {
      // Output to files
@@ -87,11 +114,12 @@ SafestPathRouter::~SafestPathRouter()
      delete dFinalLineEvac;
 }
 
-void SafestPathRouter::Init(Building* building)
+bool SafestPathRouter::Init(Building* building)
 {
      //Load the FDS file info
      //handle over to the global router engine
-     GlobalRouter::Init(building);
+     if(GlobalRouter::Init(building)==false)
+          return false;
 
 
      for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
@@ -150,15 +178,16 @@ void SafestPathRouter::Init(Building* building)
      //cout << rR[i] << " ";
 
      //}
+
+     return true;
 }
 
 
 int SafestPathRouter::FindExit(Pedestrian* p)
 {
-
-
-     if(ComputeSafestPath(p)==-1) {
-          //Log->Write(" sdfds");
+     int ret=ComputeSafestPath(p);
+     if(ret!=-1) {
+          return ret;
      }
      //handle over to the global router engine
      return GlobalRouter::FindExit(p);
@@ -176,7 +205,8 @@ void SafestPathRouter::UpdateMatrices()
           for (int j = 0; j < room->GetNumberOfSubRooms(); j++) {
                SubRoom* sub = room->GetSubRoom(j);
                if(sub->GetType()=="floor") {
-                    peopleAtSection[index]=sub->GetNumberOfPedestrians();
+                    //add the number of people in this section
+                    //TODO: Implement peopleAtSection[index]=sub->GetNumberOfPedestrians();
                     index++;
                }
           }
@@ -194,6 +224,7 @@ void SafestPathRouter::UpdateMatrices()
                }
           }
      }
+
 
      // Printing a matrix
      //              for(int j = 0; j < numberOfSubroom; j++)
@@ -409,7 +440,9 @@ int SafestPathRouter::ComputeSafestPath(Pedestrian* p)
 
 int SafestPathRouter::GetAgentsCountInSubroom( int roomID, int subroomID)
 {
-     return _building->GetRoom(roomID)->GetSubRoom(subroomID)->GetAllPedestrians().size();
+     vector<Pedestrian*> allPeds;
+     _building->GetPedestrians(roomID,subroomID,allPeds);
+     return allPeds.size();
 }
 
 
@@ -490,7 +523,8 @@ void SafestPathRouter::ReadMatrixFromFDS()
 
 void SafestPathRouter::GetHline(Building* building)
 {
-
+    //suppress the unused warning
+(void)building;
      /*
 
      //              cout << dFinalLineEvac[j]<< " ";
@@ -572,19 +606,20 @@ void SafestPathRouter::CalculatePhi()
           dFinalLength[j]= squareOfSection[j]/maximalSquare;
      }
 
-
-     double iNt1[numberOfSubroom];
-     double iNt2[numberOfSubroom];
-     double iNt3[numberOfSubroom];
-     double iNt4[numberOfSubroom];
-     double iNt5[numberOfSubroom];
-     double iNt6[numberOfSubroom];
-     double iNt7[numberOfSubroom];
+//     double iNt1[numberOfSubroom];
+     vector<double> iNt1;
+     vector<double> iNt2;
+     vector<double> iNt3;
+     vector<double> iNt4;
+     vector<double> iNt5;
+     vector<double> iNt6;
+     vector<double> iNt7;
 
      for (int j=0; j<numberOfSubroom; j++) {
-          iNt1[j]= dFinalLineEvac[j] * a;
-          iNt2[j]= dFinalLineOFP[j] * b;
-          iNt3[j]= dFinalLength[j] * c;
+//          iNt1[j]= dFinalLineEvac[j] * a;
+          iNt1.push_back(dFinalLineEvac[j] * a);
+          iNt2.push_back(dFinalLineOFP[j] * b);
+          iNt3.push_back(dFinalLength[j] * c);
      }
 
      // Printing a matrix
@@ -594,14 +629,14 @@ void SafestPathRouter::CalculatePhi()
 
 
      for (int j=0; j<numberOfSubroom; j++) {
-          iNt4[j]= iNt1[j] * iNt1[j];
-          iNt5[j]= iNt2[j] * iNt2[j];
-          iNt6[j]= iNt3[j] * iNt3[j];
+          iNt4.push_back(iNt1[j] * iNt1[j]);
+          iNt5.push_back(iNt2[j] * iNt2[j]);
+          iNt6.push_back(iNt3[j] * iNt3[j]);
      }
 
 
      for (int j=0; j<numberOfSubroom; j++) {
-          iNt7[j]=iNt4[j] + iNt5[j] + iNt6[j];
+          iNt7.push_back(iNt4[j] + iNt5[j] + iNt6[j]);
      }
 
      //double xX[numberOfSubroom];
@@ -738,7 +773,7 @@ void SafestPathRouter::ComputeAndUpdateDestinations(
           if (GlobalRouter::FindExit(pedestrians[p]) == -1) {
                //Log->Write("\tINFO: \tCould not found a route for pedestrian %d",_allPedestians[p]->GetID());
                //Log->Write("\tINFO: \tHe has reached the target cell");
-               _building->DeletePedFromSim(pedestrians[p]);
+               _building->DeletePedestrian(pedestrians[p]);
                //exit(EXIT_FAILURE);
           }
      }

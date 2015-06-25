@@ -1,8 +1,8 @@
 /**
  * \file        NavMesh.cpp
  * \date        Oct 29, 2012
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -101,11 +101,11 @@ void NavMesh::BuildNavMesh()
                node->pGroup = r->GetCaption();
                node->pCentroid = s->GetCentroid();
                //setting the node equation. important for real 3D informations
-               const double* ABC = s->GetPlanEquation();
+               const double* ABC = s->GetPlaneEquation();
                node->pNormalVec[0]=ABC[0];
                node->pNormalVec[1]=ABC[1];
                node->pNormalVec[2]=ABC[2];
-               //                      ComputePlaneEquation(s,node->pNormalVec);
+               //ComputePlaneEquation(s,node->pNormalVec);
 
                for (unsigned int p = 0; p < pol.size(); p++) {
                     node->pHull.push_back(*(GetVertex(pol[p])));
@@ -190,7 +190,7 @@ void NavMesh::BuildNavMesh()
                          Point P1 = transitions[t]->GetPoint2();
                          Point D0 = P1 - P0;
                          Point D1 = centroid0-P0;
-                         if (D0.Det(D1) < 0) {
+                         if (D0.Determinant(D1) < 0) {
                               //o->pDisp=D0;
                               o->pEnd=*GetVertex(P1);
                               o->pStart= *GetVertex(P0);
@@ -237,7 +237,7 @@ void NavMesh::BuildNavMesh()
                     Point P1 = walls[w].GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          //o->pDisp=D0;
                          o->pEnd=*GetVertex(P1);
                          o->pStart= *GetVertex(P0);
@@ -271,16 +271,17 @@ void NavMesh::BuildNavMesh()
      //Triangulate(pNodes[pBuilding->GetRoom("030")->GetSubRoom(0)->GetUID()]);
      //Triangulate(pNodes[pBuilding->GetRoom("040a")->GetSubRoom(0)->GetUID()]);
      //Triangulate(pNodes[pBuilding->GetRoom("030a")->GetSubRoom(0)->GetUID()]);
-     //Finalize();
-     FinalizeAlphaShape();
+     Finalize();
+     //FinalizeAlphaShape();
      //WriteToFileTraVisTo("promenade.nav.xml", pNodes[364]); exit(0);
-     //WriteToFileTraVisTo("promenade.nav.xml");
+     WriteToFileTraVisTo("promenade.nav.test.xml");
      //cout<<"groupe:"<<pNodes[365]->pGroup<<endl;
      //cout<<"obst:"<<pNodes[1409]->pObstacles.size()<<endl;
      //DumpObstacle(pNodes[1409]->pObstacles[0]);
      //DumpNode(2341);
      //DumpEdge(9);
      UpdateNodes();
+     return;
      Test();
 
      std::sort(_nodes.begin(), _nodes.end(),JNode());
@@ -666,9 +667,9 @@ void NavMesh::WriteToString(std::string& output)
           JNode* node=_nodes[n];
 
           int node_id=node->id; //cout<<"node id: "<<node_id<<endl;
-          if(nodes_to_plot.size()!=0)
-               if (IsElementInVector(nodes_to_plot, node_id) == false)
-                    continue;
+          //if(nodes_to_plot.size()!=0)
+          //     if (IsElementInVector(nodes_to_plot, node_id) == false)
+          //          continue;
           //              if(problem_nodes.size()!=0)
           //                      if (IsElementInVector(problem_nodes, node_id) == false)
           //                              continue;
@@ -678,7 +679,7 @@ void NavMesh::WriteToString(std::string& output)
           //if(node->IsConvex()==true) continue;
           //if(node->IsClockwise()==true) continue;
 
-          file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.GetX()<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.GetY()<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
+          //file<<"\t\t<label centerX=\""<<node->pCentroid.GetX()*factor -centre.GetX()<<"\" centerY=\""<<node->pCentroid.GetY()*factor-centre.GetY()<<"\" centerZ=\"0\" text=\""<<node->id <<"\" color=\"100\" />"<<endl;
           //              cout<<"size: "<< node->pHull.size()<<endl;
           //              std::sort(node->pHull.begin(), node->pHull.end());
           //              node->pHull.erase(std::unique(node->pHull.begin(), node->pHull.end()), node->pHull.end());
@@ -736,7 +737,7 @@ void NavMesh::WriteToString(std::string& output)
                     double x2=edge->pEnd.pPos.GetX()*factor-centre._x;
                     double y2=edge->pEnd.pPos.GetY()*factor-centre._y;
 
-                    file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
+                    //file<<"\t\t<label centerX=\""<<0.5*(x1+x2)<<"\" centerY=\""<<0.5*(y1+y2)<<"\" centerZ=\"0\" text=\""<<edge->id<<"\" color=\"20\" />"<<endl;
                     file<<"\t\t<door id = \""<<i<<"\">"<<endl;
                     file<<"\t\t\t<point xPos=\""<<x1<<"\" yPos=\""<<y1<<"\"/>"<<endl;
                     file<<"\t\t\t<point xPos=\""<<x2<<"\" yPos=\""<<y2<<"\"/>"<<endl;
@@ -772,8 +773,8 @@ void NavMesh::WriteToFileTraVisTo(std::string fileName)
 
      //writing the header
      file<<"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"<<endl
-         <<"<trajectoriesDataset>"<<endl
-         <<"\t<header formatVersion = \"1.0\">"<<endl
+         <<"<trajectories>"<<endl
+         <<"\t<header version = \"0.5\">"<<endl
          <<"\t\t<agents>3</agents>"<<endl
          <<"\t\t<seed>0</seed>"<<endl
          <<"\t\t<frameRate>10</frameRate>"<<endl
@@ -1243,7 +1244,7 @@ void NavMesh::FinalizeAlphaShape()
                     Point P1 = walls[w].GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1270,7 +1271,7 @@ void NavMesh::FinalizeAlphaShape()
                     Point P1 = transitions[t]->GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1518,7 +1519,7 @@ void NavMesh::Finalize()
                     Point P1 = walls[w].GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1542,7 +1543,7 @@ void NavMesh::Finalize()
                     Point P1 = transitions[t]->GetPoint2();
                     Point D0 = P1 - P0;
                     Point D1 = centroid0-P0;
-                    if (D0.Det(D1) < 0) {
+                    if (D0.Determinant(D1) < 0) {
                          envelope.push_back(Line(P0, P1));
                     } else {
                          envelope.push_back(Line(P1, P0));
@@ -1914,7 +1915,7 @@ void NavMesh::Triangulate(JNode* node)
                Point P1 = walls[w].GetPoint2();
                Point D0 = P1 - P0;
                Point D1 = centroid0-P0;
-               if (D0.Det(D1) < 0) {
+               if (D0.Determinant(D1) < 0) {
                     //o->pDisp=D0;
                     o->pEnd=*GetVertex(P1);
                     o->pStart= *GetVertex(P0);
@@ -2170,7 +2171,6 @@ void NavMesh::WriteStartPositions()
 
      //get the available positions:
 
-     PedDistributor* pDistribution = new PedDistributor();
 
      vector< vector<Point > >  availablePos = vector< vector<Point> >();
 
@@ -2180,8 +2180,9 @@ void NavMesh::WriteStartPositions()
           if(room->GetCaption()=="outside") continue;
           for (int s = 0; s < room->GetNumberOfSubRooms(); s++) {
                SubRoom* subr = room->GetSubRoom(s);
-               vector<Point > pos = pDistribution->PossiblePositions(subr);
-               freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
+               // TODO
+               //vector<Point > pos = PedDistributor::PossiblePositions(*subr);
+               //freePosRoom.insert(freePosRoom.end(),pos.begin(),pos.end());
           }
           availablePos.push_back(freePosRoom);
      }
@@ -2465,46 +2466,48 @@ void NavMesh::ComputePlanesEquation()
                          Room* r = _building->GetRoom(i);
                          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
                               SubRoom* s = r->GetSubRoom(k);
-                              Stair* st=dynamic_cast<Stair*>(s);
+                              if(s){
+                                   Stair* st=dynamic_cast<Stair*>(s);
                               //if ((st!=NULL) && (s->GetSubRoomID()!=sub->GetSubRoomID()) ){
-                              if (st!=NULL) {
-                                   //if(st->GetAllCrossings().size()==2) continue;
-                                   if(sub->IsDirectlyConnectedWith(st)) {
-                                        //get the middle point of the crossing
-                                        //check the crossings
-                                        const vector<Crossing*>& crossings1 = sub->GetAllCrossings();
-                                        const vector<Crossing*>& crossings2 = st->GetAllCrossings();
-                                        for (unsigned int c1 = 0; c1 < crossings1.size(); c1++) {
-                                             for (unsigned int c2 = 0; c2 < crossings2.size(); c2++) {
-                                                  int uid1 = crossings1[c1]->GetUniqueID();
-                                                  int uid2 = crossings2[c2]->GetUniqueID();
-                                                  // ignore my transition
-                                                  if (uid1 == uid2) {
-                                                       Point center=crossings1[c1]->GetCentre();
-                                                       double elevation = st->GetElevation(center);
-                                                       sub->SetPlanEquation(0.0,0.0,elevation);
-                                                       connection=true;
-                                                       goto DONE; // just out of this ugly loop
+                                   if (st) {
+                                        //if(st->GetAllCrossings().size()==2) continue;
+                                        if(sub->IsDirectlyConnectedWith(st)) {
+                                             //get the middle point of the crossing
+                                             //check the crossings
+                                             const vector<Crossing*>& crossings1 = sub->GetAllCrossings();
+                                             const vector<Crossing*>& crossings2 = st->GetAllCrossings();
+                                             for (unsigned int c1 = 0; c1 < crossings1.size(); c1++) {
+                                                  for (unsigned int c2 = 0; c2 < crossings2.size(); c2++) {
+                                                       int uid1 = crossings1[c1]->GetUniqueID();
+                                                       int uid2 = crossings2[c2]->GetUniqueID();
+                                                       // ignore my transition
+                                                       if (uid1 == uid2) {
+                                                            Point center=crossings1[c1]->GetCentre();
+                                                            double elevation = st->GetElevation(center);
+                                                            sub->SetPlanEquation(0.0,0.0,elevation);
+                                                            connection=true;
+                                                            goto DONE; // just out of this ugly loop
+                                                       }
+                                                  }
+                                             }
+                                             const vector<Transition*>& transitions1 = sub->GetAllTransitions();
+                                             const vector<Transition*>& transitions2 = st->GetAllTransitions();
+                                             for (unsigned int t1 = 0; t1 < transitions1.size(); t1++) {
+                                                  for (unsigned int t2 = 0; t2 < transitions2.size(); t2++) {
+                                                       int uid1 = transitions1[t1]->GetUniqueID();
+                                                       int uid2 = transitions2[t2]->GetUniqueID();
+                                                       // ignore my transition
+                                                       if (uid1 == uid2) {
+                                                            Point center=transitions1[t1]->GetCentre();
+                                                            double elevation = st->GetElevation(center);
+                                                            sub->SetPlanEquation(0.0,0.0,elevation);
+                                                            connection=true;
+                                                            goto DONE; // just out of this ugly loop
+                                                       }
                                                   }
                                              }
                                         }
-                                        const vector<Transition*>& transitions1 = sub->GetAllTransitions();
-                                        const vector<Transition*>& transitions2 = st->GetAllTransitions();
-                                        for (unsigned int t1 = 0; t1 < transitions1.size(); t1++) {
-                                             for (unsigned int t2 = 0; t2 < transitions2.size(); t2++) {
-                                                  int uid1 = transitions1[t1]->GetUniqueID();
-                                                  int uid2 = transitions2[t2]->GetUniqueID();
-                                                  // ignore my transition
-                                                  if (uid1 == uid2) {
-                                                       Point center=transitions1[t1]->GetCentre();
-                                                       double elevation = st->GetElevation(center);
-                                                       sub->SetPlanEquation(0.0,0.0,elevation);
-                                                       connection=true;
-                                                       goto DONE; // just out of this ugly loop
-                                                  }
-                                             }
-                                        }
-                                   }
+                                   } //std::
                               }
                          }
                     }
@@ -2589,7 +2592,7 @@ void NavMesh::ComputeStairsEquation()
                          Point vecAB= poly[1]-poly[0];
                          Point vecBC= poly[2]-poly[1];
 
-                         double det=vecAB.Det(vecBC);
+                         double det= vecAB.Determinant(vecBC);
                          if(fabs(det)>J_EPS) {
                               std::reverse(poly.begin(), poly.end());
                               //cout<<"stair is ccw:"<<endl;
@@ -2616,7 +2619,7 @@ void NavMesh::ComputeStairsEquation()
                                         Point D0 = p2 - p1;
                                         Point D1 = Point(0.0,0.0)-p1;
                                         //Point D1 = p1 - Point(0,0);
-                                        if (D0.Det(D1) > 0) {
+                                        if (D0.Determinant(D1) > 0) {
                                              D=p1;
                                              A=p2;
                                              B=p3;

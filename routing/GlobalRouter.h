@@ -1,8 +1,8 @@
 /**
  * \file        GlobalRouter.h
  * \date        Dec 15, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -47,23 +47,23 @@ class OutputHandler;
 //log output
 extern OutputHandler* Log;
 
+#include <random>
 
-
-class GlobalRouter: public Router {
+class GlobalRouter: public Router
+{
 
 public:
      /**
       * Constructor
       */
      GlobalRouter();
-
+     GlobalRouter(int id, RoutingStrategy s);
      /**
       * Destructor
       */
      virtual ~GlobalRouter();
 
-     virtual void Init(Building* building);
-
+     virtual bool Init(Building* building);
 
      virtual int FindExit(Pedestrian* p);
 
@@ -78,7 +78,7 @@ public:
       * @param filename
       */
      void WriteGraphGV(std::string filename, int finalDestination,
-                       const std::vector<std::string> rooms= std::vector<std::string>());
+               const std::vector<std::string> rooms= std::vector<std::string>());
 
      /**
       * Reset the routing engine and clear all pre-computed paths
@@ -97,6 +97,7 @@ public:
       */
      double GetEdgeCost() const;
 
+
 protected:
 
      void DumpAccessPoints(int p=-1);
@@ -114,52 +115,30 @@ protected:
      int GetBestDefaultRandomExit(Pedestrian* p);
 
      /**
-      * @return the subroom which contains both crossings.
-      *  Null is return is there is no such subroom.
+      * Generate a navigation mesh based on delauney triangulation
       */
-     SubRoom* GetCommonSubRoom(Crossing* c1, Crossing* c2);
+     bool GenerateNavigationMesh();
+
 
      /**
-      * @return true if the element is present in the vector
+      * Triangulate the geometry and generate the navigation lines
       */
-     template<typename A>
-     bool IsElementInVector(const std::vector<A> &vec, A& el) {
-          typename std::vector<A>::const_iterator it;
-          it = std::find (vec.begin(), vec.end(), el);
-          if(it==vec.end()) {
-               return false;
-          } else {
-               return true;
-          }
-     }
-
-     /**
-      * Implementation of a map with a default value.
-      * @return the default value if the element was not found in the map
-      */
-     template <typename K, typename V>
-     V GetWithDef(const  std::map <K,V> & m, const K & key, const V & defval ) {
-          typename std::map<K,V>::const_iterator it = m.find( key );
-          if ( it == m.end() ) {
-               return defval;
-          } else {
-               return it->second;
-          }
-     }
-
-     std::string concatenate(std::string const& name, int i) {
-          std::stringstream s;
-          s << name << i;
-          return s.str();
-     }
+     void TriangulateGeometry();
 
      /**
       *
       * @param ped the pedestrian
       * @param goalID, the goal ID.
-      * @param path where to store the intermediate destination
+      * @param path vector to store the intermediate destination
       */
-     void GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+     bool GetPath(Pedestrian* ped, int goalID, std::vector<SubRoom*>& path);
+
+     /**
+      * Populates the navigations line to cross in the vector path
+      * @param ped the pedestrian
+      * @param path, the vector to store
+      */
+     bool GetPath(Pedestrian* ped, std::vector<NavLine*>& path);
 
      /**
       * return the relevant aps that lead to the pedestrian final destination
@@ -181,26 +160,65 @@ private:
      /**
       * Load extra routing information e.g navigation lines
       */
-     void LoadRoutingInfos(const std::string &filename);
+     bool LoadRoutingInfos(const std::string &filename);
 
      /**
       * Each router is responsible of getting the correct filename
+      * and doing other initializations
       */
-     virtual std::string GetRoutingInfoFile() const;
+     virtual std::string GetRoutingInfoFile();
+
+     /**
+      * @return true if the supplied line is a wall.
+      */
+     bool IsWall(const Line& line) const;
+
+     /**
+      * @return true if the supplied line is a Crossing.
+      */
+     bool IsCrossing(const Line& line) const;
+
+     /**
+      * @return true if the supplied line is a Transition.
+      */
+     bool IsTransition(const Line& line) const;
+
+     /**
+      * @return true if the supplied line is a navigation line.
+      */
+     bool IsHline(const Line& line) const;
+
+     /**
+      * @return the minimum distance between the point and any line in the subroom.
+      * This include walls,hline,crossings,transitions,obstacles
+      */
+     double MinDistanceToHlines(const Point& point, const SubRoom& sub);
+
+     /**
+      * @return the minimal angle in the the triangle formed by the three points
+      */
+     double MinAngle(const Point& p1, const Point& p2, const Point& p3);
 
 private:
      int **_pathsMatrix;
      double **_distMatrix;
      double _edgeCost;
-     std::vector< int > _tmpPedPath;
+     //if false, the router will only return the exits and not the navigations line created through the mesh or inserted
+     //via the routing file. The mesh will only be used for computing the distance.
+     bool _useMeshForLocalNavigation=true;
+     bool _generateNavigationMesh=false;
+     //used to filter skinny edges in triangulation
+     double _minDistanceBetweenTriangleEdges=-FLT_MAX;
+     double _minAngleInTriangles=-FLT_MAX;
+     std::vector<int> _tmpPedPath;
      std::map<int,int> _map_id_to_index;
      std::map<int,int> _map_index_to_id;
      ///map the internal crossings/transition id to
      ///the global ID (description) for that final destination
      std::map<int, int> _mapIdToFinalDestination;
-    // normalize the probs
-    std::default_random_engine _rdGenerator;
-    std::uniform_real_distribution<double> _rdDistribution;
+     // normalize the probs
+     std::default_random_engine _rdGenerator;
+     std::uniform_real_distribution<double> _rdDistribution;
 
 protected:
      std::map <int, AccessPoint*> _accessPoints;

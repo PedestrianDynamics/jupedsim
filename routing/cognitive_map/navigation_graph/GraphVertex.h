@@ -1,8 +1,8 @@
 /**
  * \file        GraphVertex.h
  * \date        Jan 1, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -42,6 +42,10 @@ class NavLine;
 class Crossing;
 class Transition;
 class GraphEdge;
+class GraphVertex;
+
+
+using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
 
 /**
  * @brief Graph Vertex.
@@ -51,6 +55,7 @@ class GraphVertex {
 
 public:
      typedef std::set<GraphEdge *> EdgesContainer;
+
      /****************************
       * Constructors & Destructors
       ****************************/
@@ -63,7 +68,8 @@ public:
      const std::string GetCaption() const;
      const SubRoom * GetSubRoom() const;
 
-     // add and remove edge pointer from vertex
+    GraphEdge * operator[](const Crossing *);
+    // add and remove edge pointer from vertex
 
      void AddOutEdge(const GraphVertex * const dest, const Crossing * const crossing);
      int RemoveOutEdge(const GraphVertex * dest);
@@ -75,8 +81,12 @@ public:
      void AddExit(const Transition * transition);
      bool HasExit() const;
 
-     std::pair<const GraphEdge *, double> GetCheapestDestination(const Point & position) const;
-     std::pair<const GraphEdge *, double> GetCheapestDestinationByEdges(const Point & position) const;
+
+    const GraphEdge * GetCheapestDestinationByEdges(const Point & position) const;
+    const GraphEdge * GetLocalCheapestDestination(const Point & position) const;
+
+    NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
+
 
 
 private:

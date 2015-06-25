@@ -1,8 +1,8 @@
 /**
  * \file        Obstacle.cpp
  * \date        Jul 31, 2012
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -46,7 +46,6 @@ using namespace std;
 
 Obstacle::Obstacle()
 {
-     _isClosed=0.0;
      _height=0.0;
      _id=-1;
      _caption="obstacle";
@@ -70,16 +69,6 @@ string Obstacle::GetCaption() const
 void Obstacle::SetCaption(string caption)
 {
      _caption = caption;
-}
-
-double Obstacle::GetClosed() const
-{
-     return _isClosed;
-}
-
-void Obstacle::SetClosed(double closed)
-{
-     _isClosed = closed;
 }
 
 double Obstacle::GetHeight() const
@@ -110,7 +99,6 @@ const vector<Point>& Obstacle::GetPolygon() const
 string Obstacle::Write()
 {
      string s;
-     //Point pos;
 
      for (unsigned int j = 0; j < _walls.size(); j++) {
           const Wall& w = _walls[j];
@@ -140,8 +128,30 @@ const vector<Wall>& Obstacle::GetAllWalls() const
 
 int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
-     return (vertex.GetX() > hitPos.GetX()) ? ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
-                 ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
+     return (vertex.GetX() > hitPos.GetX()) ?
+               ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
+               ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
+
+//     if ((vertex.GetX() - hitPos.GetX())>J_EPS)
+//     {
+//          if ((vertex.GetY() - hitPos.GetY())>J_EPS)
+//          {
+//               return 1;
+//          } else
+//          {
+//               return 4;
+//          }
+//     } else
+//     {
+//          if ((vertex.GetY() - hitPos.GetY())>J_EPS)
+//          {
+//               return 2;
+//          } else
+//          {
+//               return 3;
+//          }
+//
+//     }
 
 }
 
@@ -155,15 +165,16 @@ double Obstacle::Xintercept(const Point& point1, const Point& point2, double hit
 
 bool Obstacle::Contains(const Point& ped) const
 {
-
+     //case when the point is on an edge
+     // todo: this affect the runtime, and do we really need that
+     // If we do not d othis check, then for a square for instance, half the points located on the edge will be inside and
+     // the other half will be outside the polygon.
+     for(auto& w: _walls)
+     {
+          if(w.IsInLineSegment(ped)) return true;
+     }
      // in the case the obstacle is not a close surface, allow
      // pedestrians distribution 'inside'
-     if(_isClosed==0.0) {
-          char tmp[CLENGTH];
-          sprintf(tmp, "ERROR: \tObstacle::Contains(): the obstacle [%d] is open!!!\n", _id);
-          Log->Write(tmp);
-          exit(EXIT_FAILURE);
-     }
 
      short edge, first, next;
      short quad, next_quad, delta, total;
@@ -209,22 +220,17 @@ bool Obstacle::Contains(const Point& ped) const
           return false;
 }
 
-void Obstacle::ConvertLineToPoly()
-{
 
-     if(_isClosed==0.0) {
-          char tmp[CLENGTH];
-          sprintf(tmp, "INFO: \tObstacle [%d] is not closed. Not converting to polyline.\n", _id);
-          Log->Write(tmp);
-          return;
-     }
+bool Obstacle::ConvertLineToPoly()
+{
      vector<Line*> copy;
      vector<Point> tmpPoly;
      Point point;
      Line* line;
      // Alle Linienelemente in copy speichern
-     for (unsigned int i = 0; i < _walls.size(); i++) {
-          copy.push_back(&_walls[i]);
+     for(auto& w: _walls)
+     {
+          copy.push_back(&w);
      }
 
      line = copy[0];
@@ -252,9 +258,26 @@ void Obstacle::ConvertLineToPoly()
           char tmp[CLENGTH];
           sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
           Log->Write(tmp);
-          exit(0);
+          sprintf(tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
+          Log->Write(tmp);
+          return false;
      }
      _poly = tmpPoly;
+
+
+     //check if all walls and goals were used in the polygon
+     for (const auto& w: _walls)
+     {
+          for (const auto & ptw: {w.GetPoint1(),w.GetPoint2()})
+          {
+               if(IsPartOfPolygon(ptw)==false)
+               {
+                    Log->Write("ERROR:\t Edge was not used during polygon creation for obstacle: %s",w.toString().c_str());
+                    return false;
+               }
+          }
+     }
+     return true;
 }
 
 const Point Obstacle::GetCentroid() const
@@ -298,6 +321,22 @@ const Point Obstacle::GetCentroid() const
      return Point (px,py);
 }
 
+bool Obstacle::IsClockwise() const
+{
+     if(_poly.size()<3) {
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          return false;
+          //exit(EXIT_FAILURE);
+     }
+
+     Point vecAB= _poly[1]-_poly[0];
+     Point vecBC= _poly[2]-_poly[1];
+
+     double det= vecAB.Determinant(vecBC);
+     if(fabs(det)<J_EPS) det=0.0;
+
+     return ( det<=0.0 );
+}
 
 bool Obstacle::IntersectWithLine(const Line& line) const
 {
@@ -308,4 +347,28 @@ bool Obstacle::IntersectWithLine(const Line& line) const
      }
 
      return false;
+}
+
+bool Obstacle::IsPartOfPolygon(const Point& ptw)
+{
+     if ( false == IsElementInVector(_poly, ptw))
+     {
+          //maybe the point was too closed to other points and got replaced
+          //check that eventuality
+          bool near = false;
+          for (const auto & pt : _poly)
+          {
+               if ((pt - ptw).Norm() < J_TOLERANZ)
+               {
+                    near = true;
+                    break;
+               }
+          }
+
+          if(near==false)
+          {
+               return false;
+          }
+     }
+     return true;
 }

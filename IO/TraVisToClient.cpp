@@ -1,27 +1,27 @@
 /**
- * \file        TraVisToClient.cpp
- * \date        Jul 4, 2014
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \file        travistoclient.cpp
+ * \date        jul 4, 2014
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. all rights reserved.
  *
- * \section License
- * This file is part of JuPedSim.
+ * \section license
+ * this file is part of jupedsim.
  *
  * JuPedSim is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the gnu lesser general public license as published by
+ * the free software foundation, either version 3 of the license, or
  * any later version.
  *
  * JuPedSim is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. see the
+ * gnu general public license for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ * along with JuPedSim. if not, see <http://www.gnu.org/licenses/>.
  *
  * \section Description
- *
+
  *
  **/
 
@@ -32,9 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-
 #include "TraVisToClient.h"
+#include "../general/Macros.h"
 
 
 //using namespace std;
@@ -47,8 +46,6 @@ TraVisToClient::TraVisToClient(string hostname, unsigned short port)
      _port = port;
      _isConnected = false;
      createConnection();
-
-
 }
 
 TraVisToClient::~TraVisToClient()
@@ -56,14 +53,11 @@ TraVisToClient::~TraVisToClient()
      if (_isConnected) close();
 }
 
-
 /// send datablock to the server
 
 void TraVisToClient::sendData(const char* data)
 {
-
      // first create a new connection, in the case the last one was lost/close
-
      if (!_isConnected) {
           createConnection();
           //FIXME: queue messsage in a vector
@@ -131,8 +125,8 @@ void TraVisToClient::createConnection()
 
      /* start the socket session */
      if (!startSocketSession()) {
-          fprintf(stderr, "startSocketSession() failed!");
-          fprintf(stderr, "socket creation failed for host [%s] on port [%d]!",_hostname.c_str(),_port);
+          fprintf(stderr, "startSocketSession() failed!\n");
+          fprintf(stderr, "socket creation failed for host [%s] on port [%d]!\n",_hostname.c_str(),_port);
           exit(EXIT_FAILURE);
      }
 
@@ -292,7 +286,6 @@ TraVisToClient::createServerSocket(unsigned short portNumber)
      }
 
      dtrace("server started at port %hu", portNumber);
-
      dtrace("leaving createServerSocket()");
      return (sock);
 }

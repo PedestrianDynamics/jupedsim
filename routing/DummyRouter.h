@@ -1,8 +1,8 @@
 /**
  * \file        DummyRouter.h
  * \date        Aug 7, 2012
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -39,10 +39,11 @@ private:
      Building* _building;
 public:
      DummyRouter();
+     DummyRouter(int id, RoutingStrategy s);
      virtual ~DummyRouter();
 
      virtual int FindExit(Pedestrian* p);
-     virtual void Init(Building* b);
+     virtual bool Init(Building* b);
 
 };
 

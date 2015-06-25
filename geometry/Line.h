@@ -1,8 +1,8 @@
 /**
  * \file        Line.h
  * \date        Sep 30, 2010
- * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -42,7 +42,8 @@ class OutputHandler;
 extern OutputHandler* Log;
 
 
-class Line {
+class Line
+{
 private:
      Point _point1;
      Point _point2;
@@ -142,9 +143,11 @@ public:
       */
      double LengthSquare() const;
 
-     //
-     //   @return dot product of two lines
-     //   bool operator*(const Line& l) const;
+     /**
+      *
+      * @return true if both lines overlapp
+      */
+     bool Overlapp(const Line& l) const;
 
      /**
       * @return true if both segments are equal. The end points must be in the range of J_EPS.
@@ -165,6 +168,13 @@ public:
       */
      bool IntersectionWith(const Line& l) const; // check two segments for intersections
 
+     /**
+      * @see http://alienryderflex.com/intersect/
+      * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
+      * @return true if both segments intersect
+      */
+     bool IntersectionWith(const Point& p1, const Point&p2) const;
+    
      /**
       * @return the distance squared between the first point and the intersection
       * point with line l. This is exactly the same function
@@ -189,14 +199,14 @@ public:
      bool HasEndPoint(const Point& point) const;
 
      /**
-      * return the same value if the checked points are all situated on the same side.
-      * @return 0 or 1 depending on which side of the line the point is located.
+      * Determine on which side the point is located on of the line directed from (_point1 to _point2).
+      * @return 0 (Left) or 1 (Right) depending on which side of the line the point is located.
+      * The return value is undefined if the points are colinear.
       */
      int WichSide (const Point& pt);
 
      /**
-      * @return true if the point is located in the left hand side of the line.
-      * For horizontal lines return true if the point is above the line.
+      * @return true if the point is located in the left hand side of the line directed from (_point1 to _point2).
       */
      bool IsLeft (const Point& pt);
 
@@ -233,10 +243,26 @@ public:
      /**
       * @return the angle between two lines
       */
-     double GetAngle(const Line& l) const;
-     //    double GetAngle(SubRoom s) const;
+     double GetDeviationAngle(const Line& l) const;
+
+     /**
+      * ???
+      * @param d
+      * @return
+      */
+     Line Enlarge(double d) const;
 
 };
 
 #endif  /* _LINE_H */
+
+
+
+
+
+
+
+
+
+
 
