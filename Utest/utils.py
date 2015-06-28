@@ -5,6 +5,26 @@ import numpy as np
 SUCCESS = 0
 FAILURE = -1
 
+def PassedLineX(p, exit):
+    """
+    check if pedestrian (given by matrix p) passed the vertical line x, [y1, y2] y1<y2
+    """
+    x = exit[0]
+    y1 = exit[1]
+    y2 = exit[2]
+    return any(p[:, 2] <= x) & any(p[:, 2] >= x) & any(p[:, 3] >= y1) & any(p[:, 3] <= y2)
+
+
+def PassedLineY(p, exit):
+    """
+    check if pedestrian (given by matrix p) passed the horizontal line y, [x1, x2] x1<x2
+    """
+    y = exit[0]
+    x1 = exit[1]
+    x2 = exit[2]
+    return any(p[:, 3] <= y) & any(p[:, 3] >= y) & any(p[:, 2] >= x1) & any(p[:, 2] <= x2)
+
+
 def get_maxtime(filename):
     """
     get max sim time
@@ -24,9 +44,10 @@ def parse_file(filename):
     parse trajectories in Travisto-format and output results
     in the following  format: id    frame    x    y
     (no sorting of the data is performed)
-    returns
+    returns:
+    fps: frames per second
     N: number of pedestrians
-    data: trajectories
+    data: trajectories (numpy.array) [id fr x y]
     """
     logging.info("parsing <%s>"%filename)
     try:
@@ -58,7 +79,7 @@ def flow(fps, N, data, x0):
     """
     measure the flow at a vertical line given by <x0>
     trajectories are given by <data> in the following format: id    frame    x    y
-    input: 
+    input:
     - fps: frame per second
     - N: number of peds
     - data: trajectories
@@ -87,4 +108,6 @@ def flow(fps, N, data, x0):
     logging.info("min(times)=%f    max(times)=%f"%(min(times)/fps, max(times)/fps))
     flow = fps * float(N-1) / (max(times) - min(times))
     return flow
+
+
 

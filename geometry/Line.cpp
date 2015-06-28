@@ -41,7 +41,7 @@ int Line::_static_UID = 0;
 
 using namespace std;
 
-#define DEBUG 1
+#define DEBUG 0
 
 
 /************************************************************

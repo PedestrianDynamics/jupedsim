@@ -1,0 +1,34 @@
+* test_1 
+PASS
+* test_2 
+PASS
+* test_3
+PASS 
+* test_4 
+- NO boundary conditions yet!
+* test_5 
+FAIL
+- Pedestrians do not start *precisely* according to the assigned premovement times
+* test_6 
+PASS 
+* test_7 
+PASS
+- Strange behavior when taking std=0.2 --> check the distribution [[file:test_7/velocity_distribution.png][FIGURE]]
+* test_8 
+* test_9 
+CHECK
+- both rooms are in the same geometry. Left: 4 doors. Right: 2 doors.
+- The evacuation time should be doubled?
+* test_10 
+FAIL
+- @Ulrich: The pedes don't consider taking Exit to Goal 0 (Haupteingang)
+* test_11 
+PASS
+- @Ulrich: only 3 peds (from 1000) choose the second exit 
+* test_12 
+- Draw Geometry 
+* test_13
+- @Mohcine: We have to make the transition to/from stair smoother 
+* test_14  
+- @Ulrich: Can we have the state "confiurable"? Or anything other than "short"?
+

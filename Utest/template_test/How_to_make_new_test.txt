@@ -6,6 +6,8 @@
    writing some smart tests.
 5. git add your directory test_101. The test will automaticaly be considered for the next nightly build. 
 
+Note: the geometry file should always be called "geometry.xml". The geometry location in the master_ini.xml file is then     <file location="../geometry.xml" />
+
 Let's see if JPScore can pass it.. ;-)
 
 

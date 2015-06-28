@@ -10,7 +10,6 @@ __author__ = 'Oliver Schmidts'
 
 
 def runtest1(inifile, trajfile):
-    maxtime = get_maxtime(inifile)
     must_time = 10.0
     # pedestrians in force-based models accelerate from 0 to v0 after some time (\tau)
     fps, n, traj = parse_file(trajfile)
@@ -29,5 +28,6 @@ if __name__ == "__main__":
     test.run_test(testfunction=runtest1)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 

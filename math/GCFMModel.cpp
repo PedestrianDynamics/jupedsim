@@ -108,7 +108,7 @@ bool GCFMModel::Init (Building* building) const
 
 void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
 {
-     double delta = 0.5;
+     double delta = 1.5;
 
      // collect all pedestrians in the simulation.
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
