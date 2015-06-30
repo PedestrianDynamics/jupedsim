@@ -7,16 +7,17 @@ sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-
+displacement = 1 # in the simulation pedestrians disapear once they are outside
+# therefore we check if  peds go through line  <exit> - <displacement>
 
 
 def run_rimea_test10(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
     failure = False
-    group_1 = [1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19] # Haupt tuer
-    group_2 = [8, 9, 10, 11, 20, 21, 22, 23] # sekundaer tuer
-    e1 = [11, 6, 7.2] # y, x1, x2 |--> haupt
-    e2 = [18, 5, 6]   # x, y1, y2 |--> sekundaer
+    group_1 = [1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19] # Haupt tuer, Goal 0
+    group_2 = [8, 9, 10, 11, 20, 21, 22, 23] # sekundaer tuer, Goal 1
+    e1 = [11-displacement, 6, 7.2] # y, x1, x2 |--> haupt
+    e2 = [18-displacement, 5, 6]   # x, y1, y2 |--> sekundaer
     for ped in group_1:
         traj1 = traj[traj[:, 0] == ped]
         if not PassedLineY(traj1, e1):
@@ -48,6 +49,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test10)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

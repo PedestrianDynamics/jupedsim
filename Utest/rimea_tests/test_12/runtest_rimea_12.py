@@ -13,7 +13,7 @@ displacement = 1 # in the simulation pedestrians disapear once they are outside
 def run_rimea_test12(inifile, trajfile):
     """
     condition of this test is not clear enough...
-    In the last exit there should be no exit. Means:
+    In the last exit there should be no jam. Means:
     J_botl >= J_last
     """
     fps, N, traj = parse_file(trajfile)
@@ -37,6 +37,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test12)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

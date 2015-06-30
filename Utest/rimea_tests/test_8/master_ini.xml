@@ -238,6 +238,7 @@
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
+        <navigation_mesh method="triangulation" use_for_local_planning="true" />
 	<!-- <navigation_lines file="routing.xml" /> -->
 	<!-- <navigation_lines file="RiMEATest8_routing.xml" /> -->
       </parameters>
