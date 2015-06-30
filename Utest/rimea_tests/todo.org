@@ -25,7 +25,7 @@ PASS
 ** TODO test_8
 FAIL 
 3D building
-- can nor run simulations
+- can not run simulations
 
 ** TODO test_9
 CHECK
@@ -40,8 +40,11 @@ FAIL
 PASS
 - @Ulrich: only 3 peds (from 1000) choose the second exit 
 
-** TODO test_12
-- @Mohcine: Draw Geometry 
+** DONE test_12
+CLOSED: [2015-06-29 Mon 15:27]
+- State "DONE"       from "TODO"       [2015-06-29 Mon 15:27]
+- Maybe we have to slightly modify the geometry like PTV did. We do
+  not have a "buffer" room at the end
 
 ** TODO test_13
 - @Mohcine: We have to make the transition to/from stair smoother 

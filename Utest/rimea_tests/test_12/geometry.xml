@@ -1,77 +1,81 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-
-<geometry version="0.5" caption="Projectname" gridSizeX="20.000000"
-	  gridSizeY="20.000000" unit="m"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_geoemtry.xsd ">
+<geometry version="0.5" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
   <rooms>
-    <room id="0" caption="botleneck" zpos="0.000000">
-      <subroom id="0" closed="0" class="subroom">
-	<polygon caption="oben">
-	  <vertex px="65.000000" py="104.000000" />
-	  <vertex px="62.000000" py="104.000000" />
-	  <vertex px="62.000000" py="103.000" />
-	</polygon>
-	<polygon caption="unten">
-	  <vertex px="62.000000" py="101.000" />
-	  <vertex px="62.000000" py="100.000000" />
-	  <vertex px="65.000000" py="100.000000" />
-	</polygon>
+    <room id="0" caption="hall">
+      <subroom id="0" caption="Room 0" class="subroom">
+        <polygon caption="wall">
+          <vertex px="4.13" py="4.95"/>
+          <vertex px="4.13" py="-5.05"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="4.13" py="4.95"/>
+          <vertex px="14.13" py="4.95"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="4.13" py="-5.05"/>
+          <vertex px="14.13" py="-5.05"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="14.13" py="-5.05"/>
+          <vertex px="14.13" py="-0.55"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="14.13" py="4.95"/>
+          <vertex px="14.13" py="0.45"/>
+        </polygon>
       </subroom>
-      <subroom id="1" closed="0" class="subroom">
-	<polygon caption="wall">
-	  <vertex px="62.000000" py="103.000" />
-	  <vertex px="60.000000" py="103.000" />
-	</polygon>
-	<polygon caption="wall">
-	  <vertex px="60.000000" py="101.000" />
-	  <vertex px="62.000000" py="101.000" />
-	</polygon>
+      <subroom id="1" caption="Room 0" class="subroom">
+        <polygon caption="wall">
+          <vertex px="14.13" py="0.45"/>
+          <vertex px="19.13" py="0.45"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="14.13" py="-0.55"/>
+          <vertex px="19.13" py="-0.55"/>
+        </polygon>
       </subroom>
-      <subroom id="2" closed="0" class="subroom">
-	<polygon caption="wall">
-	  <vertex px="60.000000" py="103.000" />
-	  <vertex px="60.000000" py="104.000000" />
-	  <vertex px="56.000000" py="104.000000" />
-	</polygon>
-	<polygon caption="wall">
-	  <vertex px="56.000000" py="100.000000" />
-	  <vertex px="60.000000" py="100.000000" />
-	  <vertex px="60.000000" py="101.000" />
-	</polygon>
+      <subroom id="2" caption="Room 0" class="subroom">
+        <polygon caption="wall">
+          <vertex px="19.13" py="0.45"/>
+          <vertex px="19.13" py="4.95"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="19.13" py="-0.55"/>
+          <vertex px="19.13" py="-5.05"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="19.13" py="4.95"/>
+          <vertex px="29.13" py="4.95"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="29.13" py="4.95"/>
+          <vertex px="29.13" py="0.45"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="19.13" py="-5.05"/>
+          <vertex px="29.13" py="-5.05"/>
+        </polygon>
+        <polygon caption="wall">
+          <vertex px="29.13" py="-5.05"/>
+          <vertex px="29.13" py="-0.55"/>
+        </polygon>
       </subroom>
       <crossings>
-	<crossing id="0" subroom1_id="0" subroom2_id="1">
-	  <vertex px="62.000000" py="103.000" />
-	  <vertex px="62.000000" py="101.000" />
-	</crossing>
-	<crossing id="1" subroom1_id="1" subroom2_id="2">
-	  <vertex px="60.000000" py="103.000" />
-	  <vertex px="60.000000" py="101.000" />
-	</crossing>
+        <crossing id="1" subroom1_id="0" subroom2_id="1">
+          <vertex px="14.13" py="0.45"/>
+          <vertex px="14.13" py="-0.55"/>
+        </crossing>
+        <crossing id="2" subroom1_id="1" subroom2_id="2">
+          <vertex px="19.13" py="0.45"/>
+          <vertex px="19.13" py="-0.55"/>
+        </crossing>
       </crossings>
-    </room>
-    <room id="1" caption="botleneckHolding" zpos="0.000000">
-      <subroom id="0" closed="0" class="subroom">
-	<polygon caption="wall">
-	  <vertex px="56.000000" py="104.000000" />
-	  <vertex px="50.000000" py="104.000000" />
-	  <vertex px="50.000000" py="100.000000" />
-	  <vertex px="56.000000" py="100.000000" />
-	</polygon>
-      </subroom>
     </room>
   </rooms>
   <transitions>
-    <transition id="2" caption="No_Name" type="emergency"
-		room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
-      <vertex px="65.000000" py="104.000000" />
-      <vertex px="65.000000" py="100.000000" />
-    </transition>
-    <transition id="3" caption="No_Name" type="emergency"
-		room1_id="0" subroom1_id="2" room2_id="1" subroom2_id="0">
-      <vertex px="56.000000" py="104.000000" />
-      <vertex px="56.000000" py="100.000000" />
+    <transition id="0" caption="NaN" type="NaN" room1_id="0" subroom1_id="2" room2_id="-1" subroom2_id="-1">
+      <vertex px="29.13" py="0.45"/>
+      <vertex px="29.13" py="-0.55"/>
     </transition>
   </transitions>
 </geometry>

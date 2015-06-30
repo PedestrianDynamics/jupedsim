@@ -22,13 +22,15 @@ def run_rimea_test13(inifile, trajfile):
                          J_corridor, J_stair, tolerance)
         exit(FAILURE)
     else:
-        logging.info("J_corridor = %.2f, J_stair = %.2f (tolerance = %.2f)", J_corridor, J_stair, tolerance)
+        logging.info("J_corridor = %.2f, J_stair = %.2f (tolerance = %.2f)",
+                     J_corridor, J_stair, tolerance)
 
 if __name__ == "__main__":
     test = JPSRunTestDriver(13, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
     test.run_test(testfunction=run_rimea_test13)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 
