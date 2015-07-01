@@ -10,7 +10,7 @@
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="10">
     <file location="RiMEATest5_traj.xml" />
     <!--<socket hostname="127.0.0.1" port="8989"/> -->
   </trajectories>
@@ -41,7 +41,7 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="1">
+  <agents operational_model_id="2">
     <agents_distribution>
       <group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="1" router_id="1" pre_movement_mean="10" pre_movement_sigma="0" />
       <group group_id="1" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="1" router_id="1" pre_movement_mean="20" pre_movement_sigma="0" />

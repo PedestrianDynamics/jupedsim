@@ -5,6 +5,22 @@ import numpy as np
 SUCCESS = 0
 FAILURE = -1
 
+
+def is_inside(trajectories, left, right, down, up):
+    """
+    up --> . _____.
+           |      |
+  down --> . -----.
+           ^      ^
+          left   right
+    """
+    condition = (trajectories[0, 2] > left) & \
+                (trajectories[0, 2] < right) & \
+                (trajectories[0, 3] > down) & \
+                (trajectories[0, 3] < up)
+    return condition.all()
+
+
 def PassedLineX(p, exit):
     """
     check if pedestrian (given by matrix p) passed the vertical line x, [y1, y2] y1<y2
@@ -108,6 +124,7 @@ def flow(fps, N, data, x0):
     logging.info("min(times)=%f    max(times)=%f"%(min(times)/fps, max(times)/fps))
     flow = fps * float(N-1) / (max(times) - min(times))
     return flow
+
 
 
 

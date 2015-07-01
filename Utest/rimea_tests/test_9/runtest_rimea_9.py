@@ -28,12 +28,6 @@ up = 20
 tolerance = 0.5
 # =========================================================================
 
-def is_inside(trajectories, left, right, down, up):
-    condition = (trajectories[0, 2] > left) & \
-                (trajectories[0, 2] < right) & \
-                (trajectories[0, 3] > down) & \
-                (trajectories[0, 3] < up)
-    return condition.all()
 
 def eval_results(results):
     results = np.array(results)
@@ -88,6 +82,7 @@ if __name__ == "__main__":
 
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

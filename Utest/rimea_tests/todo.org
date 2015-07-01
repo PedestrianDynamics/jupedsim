@@ -11,9 +11,10 @@ CLOSED: [2015-06-28 Sun 19:22]
 ** TODO test_4
 - NO boundary conditions yet!
 
-** TODO test_5
-FAIL
-- Pedestrians do not start *precisely* according to the assigned premovement times
+** DONE test_5
+CLOSED: [2015-07-01 Wed 12:32]
+- State "DONE"       from "TODO"       [2015-07-01 Wed 12:32]
+
 
 ** DONE test_6
 CLOSED: [2015-06-28 Sun 19:22]
@@ -32,9 +33,9 @@ CHECK
 - both rooms are in the same geometry. Left: 4 doors. Right: 2 doors.
 - The evacuation time should be doubled?
 
-** TODO test_10
-FAIL
-- @Ulrich: The pedes don't consider taking Exit to Goal 0 (Haupteingang)
+** DONE test_10
+CLOSED: [2015-06-30 Tue 14:54]
+- State "DONE"       from "TODO"       [2015-06-30 Tue 14:54]
 
 ** TODO test_11
 PASS
@@ -50,5 +51,5 @@ CLOSED: [2015-06-29 Mon 15:27]
 - @Mohcine: We have to make the transition to/from stair smoother 
 
 ** TODO test_14
-- @Ulrich: Can we have the state "confiurable"? Or anything other than "short"?
+- @Ulrich: Can we have the state "configurable"? Or anything other than "short"?
 
