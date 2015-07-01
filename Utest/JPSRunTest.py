@@ -58,9 +58,9 @@ class JPSRunTestDriver(object):
         self.__configure()
         executable = self.__find_executable()
         results = []
-        for inifile in self.inifiles:  fzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz    
-            RES = SELF.__EXECUTE_TEST(EXECUTABLE, INIFILE, testfunction, *args)
-            resu mnvvvvvvvvvvvvvvvvvvf  lts.append(res)
+        for inifile in self.inifiles:
+            res = self.__execute_test(executable, inifile, testfunction, *args)
+            results.append(res)
         return results
 
     def __configure(self):
