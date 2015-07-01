@@ -6,7 +6,7 @@
 
   <!-- seed used for initialising random generator -->
   <seed>linspace(0, 1000, 10)</seed>
-  <max_sim_time>500</max_sim_time>
+  <max_sim_time>1000</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
   <!-- trajectories file and format -->
@@ -57,11 +57,12 @@
         <exit_crossing_strategy>4</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-        <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+        <force_wall nu="0.35" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="1.3" sigma="0.2" />
-        <v0_upstairs mu="0.9" sigma="0.2" />
+        <!-- For stair speed see tab 1 in (Burghardt2014) -->
+        <v0_upstairs mu="0.675" sigma="0.04" />
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.20" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
@@ -84,11 +85,12 @@
         <stepsize>0.01</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
-        <force_ped nu="3"  b="0.25" c="3.0"/>
-        <force_wall nu="10" b="0.70" c="3.0"/>
+        <force_ped nu="1"  b="0.034" c="2.451"/>
+        <force_wall nu="2" b="0.05" c="2.451"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
-        <v0 mu="0.5" sigma="0.05" />
+        <v0 mu="1.3" sigma="0.05" />
+        <v0_upstairs mu="0.9" sigma="0.05" />
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.20" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />

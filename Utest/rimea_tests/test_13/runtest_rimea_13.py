@@ -1,6 +1,23 @@
 #!/usr/bin/env python
+"""
+Flow at the beginnning of the stair should be smaller than the flow in the corridor.
+The reduced speed on stairs (up) is according to  Tab 1 Burghardt2014:
+|----------+----------------|
+| Handbook | Speed Stair Up |
+|----------+----------------|
+| PM       | 0.63 m/s       |
+| WM       | 0.61 m/s       |
+| NM       | 0.8 m/s        |
+| FM       | 0.55 m/s       |
+|----------+----------------|
+
+Therefore, we choose for v0_upstairs a Gauss-distribution with
+mean = 0.675 and sigma = 0.04
+See also Fig. DistributionSpeedStairUp.png
+"""
 import os
 import sys
+import matplotlib.pyplot as plt
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
 sys.path.append(utestdir)
@@ -9,27 +26,49 @@ from utils import *
 
 tolerance = 0.05
 
+def eval_results(results):
+    results = np.array(results)
+    mean_cor = np.mean(results[:, 0])
+    mean_stair = np.mean(results[:, 1])
+    std_cor = np.std(results[:, 0])
+    std_stair = np.std(results[:, 1])
+    logging.info("mean corridor: %.2f (+- %.2f), mean stair: %.2f (+- %.2f)",
+                 mean_cor, std_cor, mean_stair, std_stair)
+    # plt.plot(results[:, 0], "-", lw=2, label="Flow corridor")
+    # plt.plot(results[:, 1], "-", lw=2, label="Flow stair")
+    plt.errorbar(range(len(results[:, 0])), results[:, 0],
+                 yerr=std_cor, fmt='-o', lw=2, label="Flow corridor")
+    plt.errorbar(range(len(results[:, 1])), results[:, 1],
+                 yerr=std_stair, fmt='-D', lw=2, label="Flow stair")
+    plt.ylabel("$J$", size=18)
+    plt.xlim([-0.5, len(results[:, 0])+0.5])
+    plt.xlabel("# runs")
+
+    plt.legend(loc="best")
+    plt.savefig("flow.png")
+
+    if abs(mean_cor-mean_stair) < tolerance:
+        logging.critical("%s exists with FAILURE. Flows are almost equal:", argv[0])
+        exit(FAILURE)
+
 def run_rimea_test13(inifile, trajfile):
     fps, N, traj = parse_file(trajfile)
     exit_basement = 0
     start_stair = 12
     J_corridor = flow(fps, N, traj, exit_basement)
     J_stair = flow(fps, N, traj, start_stair)
-
-    if abs(J_corridor-J_stair) < tolerance:
-        logging.critical("%s exists with FAILURE. Flows are almost equal:", argv[0])
-        logging.critical("J_corridor = %.2f, J_stair = %.2f (tolerance = %.2f)",
-                         J_corridor, J_stair, tolerance)
-        exit(FAILURE)
-    else:
-        logging.info("J_corridor = %.2f, J_stair = %.2f (tolerance = %.2f)",
-                     J_corridor, J_stair, tolerance)
+    logging.info("J_corridor = %.2f, J_stair = %.2f (tolerance = %.2f)",
+                 J_corridor, J_stair, tolerance)
+    return (J_corridor, J_stair)
 
 if __name__ == "__main__":
     test = JPSRunTestDriver(13, argv0=argv[0], testdir=sys.path[0], utestdir=utestdir)
-    test.run_test(testfunction=run_rimea_test13)
+    results = test.run_test(testfunction=run_rimea_test13)
+    eval_results(results)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
+
 
 
 
