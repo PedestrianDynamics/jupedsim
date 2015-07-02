@@ -35,6 +35,7 @@ def run_rimea_test5(inifile, trajfile):
         if (ydiff != 0).any():
             yfr = ptraj[ydiff != 0][1, 1] # second x element, not first
         else:
+
             yfr = np.inf
 
         if np.isinf(yfr) and np.isinf(xfr): # ped did not move at all
