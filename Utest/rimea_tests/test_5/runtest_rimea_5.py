@@ -24,13 +24,24 @@ def run_rimea_test5(inifile, trajfile):
     for ped in peds:
         must_dt += reaction_time
         ptraj = traj[traj[:, 0] == ped]
-        # for x in range(len(ptraj)):
-        #     print "%d\t %d\t %f\t %f"%(ped, ptraj[x, 1], ptraj[x, 2], ptraj[x, 3])
-        # print "--------------------"
         xdiff = np.diff(ptraj[:, 2]) # dx
         ydiff = np.diff(ptraj[:, 3]) # dy
-        xfr = ptraj[xdiff != 0][1, 1] # second element, not first
-        yfr = ptraj[ydiff != 0][1, 1] # second element, not first
+
+        if (xdiff!=0).any():
+            xfr = ptraj[xdiff != 0][1, 1] # second x element, not first
+        else: 
+            xfr = np.inf
+
+        if (ydiff!=0).any():
+            yfr = ptraj[ydiff != 0][1, 1] # second x element, not first
+        else: 
+            yfr = np.inf
+
+        if np.isinf(yfr) and np.isinf(xfr): # ped did not move at all
+            logging.critical("xfr: %d, yfr: %d", xfr, yfr)
+            logging.critical("%s exits with FAILURE", argv[0])
+            exit(FAILURE)
+
 
         df = min(xfr, yfr) - ptraj[0, 1]
         dt = 1.0*df/fps
