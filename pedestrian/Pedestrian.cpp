@@ -199,7 +199,7 @@ void Pedestrian::SetV(const Point& v)
 
 void Pedestrian::SetV0Norm(double v0,double v0UpStairs, double v0DownStairs)
 {
-  _ellipse.SetV0(v0);
+      _ellipse.SetV0(v0);
      _V0DownStairs=v0DownStairs;
      _V0UpStairs=v0UpStairs;
 }
@@ -374,26 +374,30 @@ double Pedestrian::GetV0Norm() const
 {
      //detect the walking direction based on the elevation
      SubRoom* sub=_building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
-     double delta = sub->GetElevation(_navLine->GetCentre())-
-               sub->GetElevation(_ellipse.GetCenter());
+     double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
+     double nav_elevation = sub->GetElevation(_navLine->GetCentre());
+     double delta = nav_elevation - ped_elevation;
+     const Point& pos = GetPos();
+     // fprintf(stderr, "%f  %f %f  %f\n", pos.GetX(), pos.GetY(), sub->GetElevation(_ellipse.GetCenter()), 2.0/(1+exp(-9.0*ped_elevation*ped_elevation)));
 
-     //TODO: The stairs should be detect before (1m in front)
-     //and the velocity reduced accordingly
-
-     // we are walking on an even plane
+// we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
-     if(fabs(delta)<J_EPS)
+     if(fabs(delta)<J_EPS){
           return _ellipse.GetV0();
-
-     // we are walking downstairs
-     if(delta<0)
-     {
-          return _V0DownStairs;
      }
-     //we are walking upstairs
-     else
-     {
-          return _V0UpStairs;
+      // we are walking downstairs
+     else{
+           double c = 9.0; // should be chosen so that the func grows fast (but smooth) from 0 to 1 
+           double f = 2.0/(1+exp(-c*ped_elevation*ped_elevation)) - 1; // f in [0, 1]
+           if(delta<0)
+           {
+                 return (1-f)*_V0DownStairs + f*_ellipse.GetV0();
+           }
+           //we are walking upstairs
+           else
+           {
+                 return (1-f)*_ellipse.GetV0() + f*_V0UpStairs;
+           }
      }
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
