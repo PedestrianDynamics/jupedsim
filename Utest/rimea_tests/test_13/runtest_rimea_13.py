@@ -34,8 +34,6 @@ def eval_results(results):
     std_stair = np.std(results[:, 1])
     logging.info("mean corridor: %.2f (+- %.2f), mean stair: %.2f (+- %.2f)",
                  mean_cor, std_cor, mean_stair, std_stair)
-    # plt.plot(results[:, 0], "-", lw=2, label="Flow corridor")
-    # plt.plot(results[:, 1], "-", lw=2, label="Flow stair")
     plt.errorbar(range(len(results[:, 0])), results[:, 0],
                  yerr=std_cor, fmt='-o', lw=2, label="Flow corridor")
     plt.errorbar(range(len(results[:, 1])), results[:, 1],
@@ -43,7 +41,8 @@ def eval_results(results):
     plt.ylabel("$J$", size=18)
     plt.xlim([-0.5, len(results[:, 0])+0.5])
     plt.xlabel("# runs")
-
+    plt.title("mean_cor = %f (+-%f), mean_stair = %f (+-%f)"%
+              (mean_cor, std_cor, mean_stair, std_stair))
     plt.legend(loc="best")
     plt.savefig("flow.png")
 
@@ -67,6 +66,7 @@ if __name__ == "__main__":
     eval_results(results)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 
