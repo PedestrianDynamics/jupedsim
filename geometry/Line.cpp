@@ -25,11 +25,12 @@
  *
  **/
 
-
+#include "../math/Mathematics.h"
 #include "Point.h"
 //#include "SubRoom.h"
 #include "../general/Macros.h"
 #include "Line.h"
+#include "Wall.h"
 #include "../IO/OutputHandler.h"
 
 
@@ -39,6 +40,9 @@
 int Line::_static_UID = 0;
 
 using namespace std;
+
+#define DEBUG 0
+
 
 /************************************************************
   Konstruktoren
@@ -468,29 +472,30 @@ std::string Line::toString() const {
 //if no intersection return infinity
 // this function is exactly the same as GetIntersection(), but returns the distance squared
 //insteed of a boolian
-double Line::GetIntersectionDistance(const Line &l) const {
-#define DEBUG 0
-    double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
-    double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
-    double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
-    double deltaDCy = l.GetPoint2().GetY() - l.GetPoint1().GetY();
-    double deltaBAx = _point2.GetX() - _point1.GetX();
-    double deltaBAy = _point2.GetY() - _point1.GetY();
+double Line::GetIntersectionDistance(const Line & l) const
+{
 
-    double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
-    double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
-    double infinity = 100000;
-    // the lines are parallel
-    if (denominator == 0.0) {
+     double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
+     double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
+     double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
+     double deltaDCy = l.GetPoint2().GetY() - l.GetPoint1().GetY();
+     double deltaBAx = _point2.GetX() - _point1.GetX();
+     double deltaBAy = _point2.GetY() - _point1.GetY();
 
-        // the lines are superposed
-        if (numerator == 0.0) {
+     double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
+     double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
+     // double infinity =100000;
+     double infinity = std::numeric_limits<double>::infinity();
+     // the lines are parallel
+     if (denominator == 0.0) {
 
-            // the segment are superposed
-            if (IsInLineSegment(l.GetPoint1()) ||
-                IsInLineSegment(l.GetPoint2()))
-                return infinity;//really?
-            else return infinity;
+          // the lines are superposed
+          if (numerator == 0.0) {
+
+               // the segment are superposed
+               if(IsInLineSegment(l.GetPoint1()) ||
+                         IsInLineSegment(l.GetPoint2()) ) return infinity;//really?
+               else return infinity;
 
         } else { // the lines are just parallel and do not share a common point
 
@@ -517,7 +522,7 @@ double Line::GetIntersectionDistance(const Line &l) const {
      printf("Enter GetIntersection\n");
      cout<< "\t" << l.toString() << " intersects with " << toString() <<endl;
      cout<<"\t at point " << PointF.toString()<<endl;
-     cout <<  "\t\t --> distance is "<< sqrt(dist)<< "... return "<< dist<<endl;
+     cout <<  "\t\t --> distance is "<< sqrt(dist)<< "... return (squared) "<< dist<<endl;
      printf("Leave GetIntersection\n");
 #endif
     return dist;
@@ -525,7 +530,7 @@ double Line::GetIntersectionDistance(const Line &l) const {
 }
 
 // calculates the angles QPF and QPL 
-// return the snagle of the point (F or L) which is nearer to the Goal 
+// return the angle of the point (F or L) which is nearer to the Goal 
 //the calling line: P->Q, Q is the crossing point
 // 
 //                 o P 
@@ -537,22 +542,23 @@ double Line::GetIntersectionDistance(const Line &l) const {
 //           /
 //          o Goal
 
-double Line::GetDeviationAngle(const Line &l) const {
-    // const double PI = 3.14159258;
-#define DEBUG 0
-    Point P = _point1;
-    Point Goal = _point2;
+double Line::GetDeviationAngle(const Line & l) const
+{
+     // const double PI = 3.14159258;
 
-    Point L = l._point1;
-    Point R = l._point2;
+     Point P = _point1;
+     Point Goal = _point2;
 
-    double dist_Goal_L = (Goal - L).NormSquare();
-    double dist_Goal_R = (Goal - R).NormSquare();
-
-    double angle, angleL, angleR;
-    // we don't need to calculate both angles, but for debugging purposes we do it.
-    angleL = atan((Goal - P).CrossProduct(L - P) / (Goal - P).ScalarProduct(L - P));
-    angleR = atan((Goal - P).CrossProduct(R - P) / (Goal - P).ScalarProduct(R - P));
+     Point L = l._point1;
+     Point R = l._point2;
+     
+     double dist_Goal_L = (Goal-L).NormSquare();
+     double dist_Goal_R = (Goal-R).NormSquare();
+     
+     double angle, angleL, angleR;
+     // we don't need to calculate both angles, but for debugging purposes we do it.
+     angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+     angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
 
     angle = (dist_Goal_L < dist_Goal_R) ? angleL : angleR;
 #if DEBUG
@@ -572,9 +578,148 @@ double Line::GetDeviationAngle(const Line &l) const {
 }
 
 
+// return the biggest angle between two lanes
+double Line::GetAngle(const Line & l) const
+{
+    Point P = _point1;
+    Point Goal = _point2;
+
+    Point L = l._point1;
+    Point R = l._point2;
+    
+    double angleL, angleR;
+    // we don't need to calculate both angles, but for debugging purposes we do it.
+    angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+    angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
+
+    return (fabs(angleL)>fabs(angleR))?angleL:angleR;
+    
+}
+
+// get the smallest angle that ensures a safe deviation from an
+// obstacle. Safe means that the rotated line ped--->goal do not
+// intersect with any line of the obstacle. 
+double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const
+{
+#if DEBUG
+     printf("Enter GetObstacleDeviationAngle()\n");
+#endif
+     Point P = _point1;
+     Point Goal = _point2;
+     Point GL, GR;
+     Point L, R;
+     
+     double minAngle=std::numeric_limits<double>::infinity(),
+          angleL,
+          angleR,
+          angle;
+     
+     Line l,
+          l_large,
+          tmpDirectionL,
+          tmpDirectionR;
+     
+     bool visibleL=true,
+          visibleR=true;
+     
+     
+//     for (unsigned int i = 0; i < owalls.size(); i++) {
+     // l = owalls[i];
+     for(auto l:owalls){
+          visibleL = true;
+          visibleR = true;
+          
+          l_large = l.Enlarge(3); // 2*ped->GetLargerAxis()          
+          
+          L = l_large._point1;
+          R = l_large._point2;
+          
+          angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+          angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
+
+          GL  = (Goal-P).Rotate(cos(angleL), sin(angleL))+P;
+          GR  = (Goal-P).Rotate(cos(angleR), sin(angleR))+P;
+
+          tmpDirectionL = Line(P, GL);
+          tmpDirectionR = Line(P, GR);
+          
+          for(auto l_other:owalls){
+               if (l_other == l) continue;
+               
+               if(tmpDirectionL.IntersectionWith(l_other)){
+                    visibleL = false;
+                    break;                    
+               }
+          }
+          
+          for(auto l_other:owalls){
+               if (l_other == l) continue;
+
+               if(tmpDirectionR.IntersectionWith(l_other)){
+                    visibleR = false;
+                    break;                    
+               }               
+          }
+
+          if(visibleR && visibleL){  // both angles are OK. Get
+                                     // smallest deviation.
+               // prefer right
+               if (almostEqual (angleR, angleL, 0.001))
+                    angle = angleR;
+               
+               angle = (fabs(angleL) < fabs(angleR))?angleL:angleR;               
+          }
+          else if(visibleR && !visibleL){
+               angle = angleR;
+          }
+          else if(!visibleR && visibleL){
+               angle = angleL;
+          }
+          else{
+               printf("continue ");
+               printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
+               continue; // both angles are not OK. check next wall
+               
+               }
+               
 
 
+#if DEBUG
+          printf("\tP=[%f,%f]\n",P.GetX(), P.GetY());
+          printf("\tGoal=[%f,%f]\n",Goal.GetX(), Goal.GetY());
+          printf("\tL=[%f,%f]\n",L.GetX(), L.GetY());
+          printf("\tR=[%f,%f]\n",R.GetX(), R.GetY());
+          // printf("\t\tdist_Goal_L=%f\n",dist_Goal_L);
+          // printf("\t\tdist_Goal_R=%f\n",dist_Goal_R);
+          printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
+     
+          printf("\t\t --> angleL=%f\n",angleL);
+          printf("\t\t --> angleR=%f\n",angleR);
+          printf("\t\t --> angle=%f\n",angle);
 
+#endif     
+
+          
+          if(fabs(angle) < fabs(minAngle))
+               minAngle = angle;
+#if DEBUG
+          printf("\t\t --> minAngle=%f\n", minAngle);
+#endif
+
+          
+     }// owalls
+     
+
+     if(minAngle == std::numeric_limits<double>::infinity()){
+          printf("WARNING:  minAngle ist infinity\n");
+          getc(stdin);
+     }
+#if DEBUG
+     printf("Leave GetObstacleDeviationAngle() with  angle=%f\n", minAngle);
+#endif
+     return minAngle;
+     
+}
 
 
 

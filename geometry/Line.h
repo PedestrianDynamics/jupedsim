@@ -37,6 +37,7 @@
 
 //forward declarations
 class OutputHandler;
+class Wall;
 
 // external variables
 extern OutputHandler* Log;
@@ -264,12 +265,15 @@ public:
       */
      double GetDeviationAngle(const Line& l) const;
 
+     double GetAngle(const Line & l) const;
+     double GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const; 
+
      /**
       * ???
       * @param d
       * @return
       */
-     Line Enlarge(double d) const;
+     Line Enlarge(double d) const; 
 
 };
 
