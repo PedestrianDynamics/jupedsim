@@ -228,10 +228,24 @@ bool Obstacle::ConvertLineToPoly()
      Point point;
      Line* line;
      // Alle Linienelemente in copy speichern
-     for(auto& w: _walls)
-     {
-          copy.push_back(&w);
-     }
+     for (auto& w: _walls)
+       	 copy.push_back(&w);
+
+     Point pIntsct(J_NAN, J_NAN);
+     for (auto& it : _walls)
+    	 for (unsigned int i = 0; i < copy.size(); ++i) {
+    		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
+    			 if (it.ShareCommonPointWith(*copy[i]) == false) {
+    				 char tmp[CLENGTH];
+    				 sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
+    				 Log->Write(tmp);
+    				 sprintf(tmp, "ERROR: \tWalls %s & %s intersect: !!!\n", it.toString().c_str(),
+    						                                           copy[i]->toString().c_str());
+    				 Log->Write(tmp);
+    				 return false;
+    			 }
+    		 }
+    	 }
 
      line = copy[0];
      tmpPoly.push_back(line->GetPoint1());
@@ -264,19 +278,14 @@ bool Obstacle::ConvertLineToPoly()
      }
      _poly = tmpPoly;
 
-
      //check if all walls and goals were used in the polygon
      for (const auto& w: _walls)
-     {
           for (const auto & ptw: {w.GetPoint1(),w.GetPoint2()})
-          {
-               if(IsPartOfPolygon(ptw)==false)
-               {
+               if(IsPartOfPolygon(ptw)==false) {
                     Log->Write("ERROR:\t Edge was not used during polygon creation for obstacle: %s",w.toString().c_str());
                     return false;
                }
-          }
-     }
+
      return true;
 }
 

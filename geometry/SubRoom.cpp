@@ -807,6 +807,23 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           return false;
      }
 
+     Point pIntsct(J_NAN, J_NAN);
+     for (auto& it : _walls)
+    	 for (unsigned int i = 0; i < copy.size(); ++i) {
+    		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
+    			 if (it.ShareCommonPointWith(*copy[i]) == false) {
+    				 char tmp[CLENGTH];
+    				 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    				 Log->Write(tmp);
+    				 sprintf(tmp, "ERROR: \tWalls %s & %s intersect: !!!\n", it.toString().c_str(),
+    						 copy[i]->toString().c_str());
+    				 Log->Write(tmp);
+    				 return false;
+    			 }
+    		 }
+    	 }
+
+
      line = copy[0];
      tmpPoly.push_back(line->GetPoint1());
      point = line->GetPoint2();
