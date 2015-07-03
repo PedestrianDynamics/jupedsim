@@ -174,6 +174,20 @@ public:
       * @return true if both segments intersect
       */
      bool IntersectionWith(const Point& p1, const Point&p2) const;
+
+     /*
+      * @return true if both segments intersect & store the point of intersection
+      * Special case:  If the Lines are superposed/ Parallel/ no intersection,
+      * then the Point of intersection is stored as NaN.
+      */
+     bool IntersectionWith(const Point& p1, const Point& p2, Point& p3) const;
+
+     /*
+      * @return true if both segments intersect & store the point of intersection
+      * Special case:  If the Lines are superposed/ Parallel/ no intersection,
+      * then the Point of intersection is stored as NaN.
+      */
+     bool IntersectionWith(const Line& L, Point& p3) const;
     
      /**
       * @return the distance squared between the first point and the intersection
@@ -187,11 +201,16 @@ public:
       */
      bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
 
-
      /**
       * @return true if both segments share at least one common point
       */
      bool ShareCommonPointWith(const Line& line) const;
+
+     /**
+      * @return true if both segments share at least one common point.
+      * store the common point in P.
+      */
+     bool ShareCommonPointWith(const Line& line, Point& P) const;
 
      /**
       * @return true if the given point is one end point of the segment
