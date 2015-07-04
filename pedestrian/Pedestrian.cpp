@@ -377,7 +377,7 @@ double Pedestrian::GetV0Norm() const
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
      double nav_elevation = sub->GetElevation(_navLine->GetCentre());
      double delta = nav_elevation - ped_elevation;
-     const Point& pos = GetPos();
+     // const Point& pos = GetPos();
      // fprintf(stderr, "%f  %f %f  %f\n", pos.GetX(), pos.GetY(), sub->GetElevation(_ellipse.GetCenter()), 2.0/(1+exp(-9.0*ped_elevation*ped_elevation)));
 
 // we are walking on an even plane
