@@ -61,7 +61,7 @@
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
-        <v0 mu="0.6" sigma="0.0" />
+        <v0 mu="0.5" sigma="0.0" />
         <v0_upstairs mu="0.5" sigma="0.0" />
         <v0_downstairs mu="0.65" sigma="0.0" />
         <bmax mu="0.25" sigma="0.001" />
