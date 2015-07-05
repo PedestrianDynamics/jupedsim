@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 """
-Flow at the beginnning of the stair should be smaller than the flow in the corridor.
+Test description
+================
+Pedestrian coming out from a bottleneck along a corridor.
+At the end of the corridor is a stair.
+Since peds have to resduce their speed on the stair,
+a jam should be observed at the beginning of the stair
+
+Remarks
+=======
+In case of jam, flow at the beginnning of the stair
+should be smaller than the flow in the corridor.
+
 The reduced speed on stairs (up) is according to  Tab 1 Burghardt2014:
 |----------+----------------|
 | Handbook | Speed Stair Up |
@@ -14,7 +25,12 @@ The reduced speed on stairs (up) is according to  Tab 1 Burghardt2014:
 Therefore, we choose for v0_upstairs a Gauss-distribution with
 mean = 0.675 and sigma = 0.04
 See also Fig. DistributionSpeedStairUp.png
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
 """
+
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -66,6 +82,7 @@ if __name__ == "__main__":
     eval_results(results)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

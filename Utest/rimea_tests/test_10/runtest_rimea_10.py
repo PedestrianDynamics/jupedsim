@@ -1,4 +1,22 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+- Pedestrians are distributed in 12 different rooms.
+- The building  has two exits.
+- The Pedestrians have exactly assigned exit numbers and should evacuate through these.
+Remarks
+=======
+- We assign pedestrian to two different groups
+- We check if pedestrians in the two groups pass the exits.
+- In the simulation pedestrians disapear once they are outside
+  therefore we check if peds go through line  <exit> - <displacement>
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -7,8 +25,7 @@ sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-displacement = 1 # in the simulation pedestrians disapear once they are outside
-# therefore we check if  peds go through line  <exit> - <displacement>
+displacement = 1
 
 
 def run_rimea_test10(inifile, trajfile):
@@ -49,6 +66,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test10)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

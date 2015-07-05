@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+One pedestrian is moving along a corridor.
+Test if pedestrian can maintain its speed constant
+
+Remarks
+=======
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdfs
+"""
+
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -29,6 +43,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test1)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

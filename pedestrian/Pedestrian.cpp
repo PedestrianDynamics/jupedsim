@@ -379,8 +379,10 @@ double Pedestrian::GetV0Norm() const
      double delta = nav_elevation - ped_elevation;
      // const Point& pos = GetPos();
      // fprintf(stderr, "%f  %f %f  %f\n", pos.GetX(), pos.GetY(), sub->GetElevation(_ellipse.GetCenter()), 2.0/(1+exp(-9.0*ped_elevation*ped_elevation)));
+     // printf("delta = %f, nav_elev = %f, ped_elev= %f\n", delta, nav_elevation, ped_elevation);
 
-// we are walking on an even plane
+     
+     // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
           return _ellipse.GetV0();
@@ -391,11 +393,14 @@ double Pedestrian::GetV0Norm() const
            double f = 2.0/(1+exp(-c*ped_elevation*ped_elevation)) - 1; // f in [0, 1]
            if(delta<0)
            {
+                // printf("z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_V0DownStairs + f*_ellipse.GetV0());
+                // getc(stdin);
                  return (1-f)*_V0DownStairs + f*_ellipse.GetV0();
+                 
            }
            //we are walking upstairs
            else
-           {
+           {           
                  return (1-f)*_ellipse.GetV0() + f*_V0UpStairs;
            }
      }

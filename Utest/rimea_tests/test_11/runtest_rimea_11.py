@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+300 pedestrians are distributed in a room with two exits.
+The pedestrians should prefer the nearest exit,
+but some should (spontaneously) choose the second exit
+
+Remarks
+=======
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -35,6 +50,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test11)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

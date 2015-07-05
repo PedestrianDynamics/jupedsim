@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+Distribute 10 pedestrians with 10 different reaction times.
+
+Check whether they start exactly at the specified times.
+
+Remarks
+=======
+An error of 1/fps is to be considered.
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 import numpy as np
@@ -61,4 +77,5 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test5)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
