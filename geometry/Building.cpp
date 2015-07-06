@@ -87,7 +87,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      if(!InitGeometry())
      {
           Log->Write("ERROR:\t could not initialize the geometry!");
-          //exit (EXIT_FAILURE);
+          exit (EXIT_FAILURE);
      }
      if(!LoadTrafficInfo() )
      {
@@ -97,7 +97,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      if(!distributor.Distribute(this))
      {
           Log->Write("ERROR:\t could not distribute the pedestrians");
-          //exit (EXIT_FAILURE);
+          exit (EXIT_FAILURE);
      }
      InitGrid(linkedCellSize);
 
