@@ -57,6 +57,7 @@ class FloorfieldViaFM
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
         void getDirectionAt(const Point& position, Point& direction);
+        void getDir2WallAt(const Point& position, Point& direction);
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
         void resetGoalAndCosts(const Goal* const goalArg);
@@ -101,6 +102,7 @@ class FloorfieldViaFM
         double* cost;
         long int* secKey;  //secondary key to address ... not used yet
         Point* neggrad; //gradients
+        Point* dirToWall;
         Trial* trialfield;
 
         double threshold;

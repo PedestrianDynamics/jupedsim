@@ -135,7 +135,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       Point diff = (p1 - p2).Normalized() * d;
       Line e_neu = Line(p1 - diff, p2 + diff);
       Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
-  
+
       Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
       // it intersects a wall || obstacle.
       // check for intersection with walls
@@ -164,13 +164,13 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                   printf("Check wall number %d. Dist = %f (%f)\n", i, dist, minDist);
                   printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
 #endif
- 
+
             }
       }//walls
-     
+
       //============================ WALLS ===========================
 
-     
+
       //============================ OBST ===========================
       const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
       for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
@@ -198,11 +198,11 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             if(iObs >= 0){ // obstacle is nearest
                   const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
                   angle = tmpDirection.GetObstacleDeviationAngle(owalls);
-      
+
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 #if DEBUG
                   printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
-      
+
 #endif
             } //iObs
             else{ // wall is nearest
@@ -223,7 +223,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       }
 ////////////////////////////////////////////////////////////
 
-    
+
       Point  G;
       if (fabs(angle) > J_EPS)
             //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
@@ -231,7 +231,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       else {
             if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
                   ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
-          
+
             G  =  NextPointOnLine;
       }
 
@@ -247,7 +247,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 
 
       // if( ped->GetID() == 21)
-      //       fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
+      //       fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
       //               ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with plot_desired_velocity.py
 
@@ -271,6 +271,13 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 
     //this should not execute:
     exit(EXIT_FAILURE);
+}
+
+Point DirectionFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+    Point p;
+    ffviafm->getDir2WallAt(ped->GetPos(), p);
+    return p;
 }
 
 void DirectionFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {

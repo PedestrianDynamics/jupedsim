@@ -28,7 +28,7 @@
  *
  **/
 
-
+#include <math.h>
 #include "../pedestrian/Pedestrian.h"
 #include "../routing/DirectionStrategy.h"
 #include "../mpi/LCGrid.h"
@@ -78,6 +78,7 @@ bool GradientModel::Init (Building* building) const
 {
     if(dynamic_cast<DirectionFloorfield*>(_direction)){
         dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        //_floorfield = dynamic_cast<DirectionFloorfield*>(_direction);
     }
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
@@ -134,10 +135,6 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
      int partSize;
      partSize = (int) (nSize / nThreads);
 
-      //int debugPed = -69;//10;
-      //building->GetGrid()->HighlightNeighborhood(-9, building);
-
-
       #pragma omp parallel  default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
@@ -156,15 +153,6 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Room* room = building->GetRoom(ped->GetRoomID());
                 SubRoom* subroom = room->GetSubRoom(ped->GetSubRoomID());
 
-
-                // if(debugPed != ped->GetID())
-                // {
-                //      Point p1 = ped->GetPos();
-                //      Point p2 = ped->GetPos();
-                //      fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), -1, ped->GetID(), ped->GetID());
-                // }
-
-
                 double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
                 if (normVi > HighVel && ped->GetV0Norm() > 0) {
@@ -182,28 +170,11 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
-                //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
 
                 int size = (int) neighbours.size();
-                // double B_ij=0;
-                // int count_Bij=0;
-
-                // if(debugPed == ped->GetID())
-                // {
-                //      printf("\n\n nsiZe=%d\n",size);
-                // }
 
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
-                     //-------------- TESTING ---------
-                     // Point distp12 = ped1->GetPos() - ped->GetPos();
-                     // double Distance = distp12.Norm();
-                     // double tmp;
-                     // tmp = 1.0 - Distance/(0.25 + 0.25);
-                     // B_ij += exp(-_bPed*exp(-_cPed*tmp));
-                     // if (B_ij > J_EPS)
-                     //     count_Bij += 1;
-                     //--------------------------------
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
@@ -216,12 +187,6 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
                      if (!isVisible)
                           continue;
-                     // if(debugPed == ped->GetID())
-                     // {
-                     //      fprintf(stderr, "%f     %f    %f    %f     %f   %d  %d  %d\n", current,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
-                     //      printf("t=%.2f, ped:%d    ped1:%d   p1(%.2f, %.2f), p2(%.2f, %.2f) isVisibile = %d\n", current, ped->GetID(), ped1->GetID(), p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible);
-
-                     // }
                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                           repPed = repPed + ForceRepPed(ped, ped1);
                      } else {
@@ -232,53 +197,49 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                           }
                      }
                 }
-                //repulsive forces to walls and closed transitions that are not my target
-                Point repWall = ForceRepRoom(allPeds[p], subroom);
-                Point fd = ForceDriv(ped, room);
-
-                // if(count_Bij)
-                //     B_ij /=count_Bij;
-                // else
-                //     B_ij = 0;
-                // double correction = -B_ij/ped->GetTau();
-
-                // make pedestrians want to walk slower in jam
-                // = fd ; //+ ped->GetV0()*correction;
-
-                Point acc = (fd + repPed + repWall) / ped->GetMass();
-                // if(1 || ped->GetID() == 976 ) {
-                //      printf("Pos1 =[%f, %f]\n", ped->GetPos().GetX(), ped->GetPos().GetY());
-                //      printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
-                //      getc(stdin);
-                // }
+                //Point fd = ForceDriv(ped, room);
+                //Point acc = (fd + repPed) / ped->GetMass();
+                Point acc = repPed / ped->GetMass();        //maybe multiply with deltaT again
+                acc += _direction->GetTarget(room, ped);    //see how repPed and "fd" fit to each other in weights (length)
                 result_acc.push_back(acc);
            }
 
-           //#pragma omp barrier
            // update
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];
 
                 Point vToAdd = result_acc[p - start] * deltaT;
+
+                //slowdown near wall mechanics:
+                Point vToAddNormalized = vToAdd.Normalized();
+                Point dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
+
+                double dotProdukt = dir2Wall.ScalarProduct(vToAddNormalized);
+                double antiClippingFactor = ( 1 - .5*(dotProdukt + fabs(dotProdukt)) );
+
+                vToAdd.SetX(antiClippingFactor * vToAdd.GetX());
+                vToAdd.SetY(antiClippingFactor * vToAdd.GetY());
+
                 //----------------- update new pos and new vel -----------------
 
-                Point v_neu = ped->GetV() + vToAdd;
-                // printf("v_neu=[%f, %f], v=[%f, %f], toAdd=[%f, %f]\n", v_neu.GetX(), v_neu.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), vToAdd.GetX(), vToAdd.GetY());
-                // if(ped->GetID() == 2 )
-                //      v_neu = Point(0,0);
-                Point pos_neu = ped->GetPos() + v_neu * deltaT;
+                //Point v_neu = ped->GetV() + vToAdd;
+                //printf("v_neu=[%f, %f], v=[%f, %f], toAdd=[%f, %f]\n", v_neu.GetX(), v_neu.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), vToAdd.GetX(), vToAdd.GetY());
+                //Point pos_neu = ped->GetPos() + v_neu * deltaT;
+                Point pos_neu = ped->GetPos() + vToAdd;
                 //---------------------------------------------------------------
 
 
-                if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
-
-                     Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
-                     v_neu = v_neu*0.01;
+                //if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
+                if(vToAdd.Norm() > ped->GetV0Norm()*deltaT+0.2 ) { // Stop pedestrians
+                     //Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
+                     //v_neu = v_neu*0.01;
+                     vToAdd = vToAdd*0.01;
                      pos_neu = ped->GetPos();
                 }
  // //--------------------------------------------------------------------------------------------------
  //                //Jam is based on the current velocity
-                if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
+                //if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
+                if ( vToAdd.Norm() >= ped->GetV0Norm()*deltaT*0.5) {
                      ped->ResetTimeInJam();
                 } else {
                      ped->UpdateTimeInJam();
@@ -287,7 +248,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
  //--------------------------------------------------------------------------------------------------
                      //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                 ped->SetPos(pos_neu);
-                ped->SetV(v_neu);
+                //ped->SetV(v_neu);
+                ped->SetV(vToAdd);
                 ped->SetPhiPed();
                 // if(ped->GetID() == 976 ) {
                 //      printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
@@ -304,20 +266,18 @@ Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
      //printf("GradientModel::ForceDriv\n");
      const Point& target = _direction->GetTarget(room, ped);
      Point F_driv;
-     Point e0;
-     const Point& pos = ped->GetPos();
-     double dist = ped->GetExitLine()->DistTo(pos);
+     //Point e0;
+     //const Point& pos = ped->GetPos();
+     //double dist = ped->GetExitLine()->DistTo(pos);
 
      // check if the molified version works
-     if (dist > J_EPS_GOAL) {
-          e0 = ped->GetV0(target);
-          // printf("1 e0 %f %f, target %f %f\n", e0.GetX(), e0.GetY(), target.GetX(), target.GetY());
-     } else {
-          ped->SetSmoothTurning();
-          e0 = ped->GetV0();
-            // printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
-     }
-      F_driv = ((target.Normalized() * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
+     //if (dist > J_EPS_GOAL) {
+     //     e0 = ped->GetV0(target);
+     //} else {
+     //     ped->SetSmoothTurning();
+     //     e0 = ped->GetV0();
+     //}
+     F_driv = ((target.Normalized() * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 
       //double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
       //double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
@@ -392,10 +352,7 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * B_ij;
 
      F_rep = ep12 * f;
-     // if(ped1->GetID() == 1) {
-     //      printf("F=[%f, %f] v0=%f, nu=%f, B_ij=%f D=%f, r1=%f, r2=%f\n", F_rep.GetX(), F_rep.GetY(), ped1->GetV0Norm(), _nuPed, B_ij, Distance, r1, r2);
-     // }
-//check isNan
+     //check isNan
      if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
           char tmp[CLENGTH];
           sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),

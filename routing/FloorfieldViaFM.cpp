@@ -47,6 +47,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     if (speedInitial) delete[] speedInitial;
     if (cost) delete[] cost;
     if (neggrad) delete[] neggrad;
+    if (dist2Wall) delete[] dist2Wall;
     if (trialfield) delete[] trialfield;
 
 }
@@ -98,6 +99,12 @@ void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
     direction.SetX(neggrad[key].GetX());
     direction.SetY(neggrad[key].GetY());
+}
+
+void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
+    long int key = grid->getKeyAtPoint(position);
+    direction.SetX(dirToWall[key].GetX());
+    direction.SetY(dirToWall[key].GetY());
 }
 
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
@@ -176,6 +183,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     speedInitial = new double[grid->GetnPoints()];
     cost = new double[grid->GetnPoints()];
     neggrad = new Point[grid->GetnPoints()];
+    dirToWall = new Point[grid->GetnPoints()];
     trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
     //linescan using (std::vector<Wall*>)
@@ -513,6 +521,8 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
             while (iter != nullptr) {
                 iter[0].cost[0] = trialfield[keyOfSmallest].cost[0];
                 iter[0].flag[0] = 3;
+                dirToWall[iter[0].key].SetX(0.);
+                dirToWall[iter[0].key].SetY(0.);
                 iter = iter->child;
             }
 
@@ -521,6 +531,8 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
                 if (flag[i] == 0) {
                     flag[i] = 3;
                     dist2Wall[i] = dist2Wall[keyOfSmallest];
+                    dirToWall[i].SetX(0.);
+                    dirToWall[i].SetY(0.);
                 }
             }
             smallest = nullptr;
@@ -573,6 +585,8 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     double row;
     double col;
     long int aux;
+    bool pointsUp;
+    bool pointsRight;
 
     row = 100000.;
     col = 100000.;
@@ -587,6 +601,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
          (flag[aux] != 0))                                                      //gridpoint holds a calculated value
     {
         row = trialfield[aux].cost[0];
+        pointsRight = true;
         if (row < 0) {
             std::cerr << "hier ist was schief " << row << " " << aux << " " << flag[aux] << std::endl;
             row = 100000;
@@ -599,6 +614,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
          (trialfield[aux].cost[0] < row))                                       //calculated value promises smaller cost
     {
         row = trialfield[aux].cost[0];
+        pointsRight = false;
         //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
 
@@ -609,6 +625,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
          (flag[aux] != 0))                                                      //gridpoint holds a calculated value
     {
         col = trialfield[aux].cost[0];
+        pointsUp = true;
         if (col < 0) {
             std::cerr << "hier ist was schief " << col << " " << aux << " " << flag[aux] << std::endl;
             col = 100000;
@@ -621,17 +638,34 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
          (trialfield[aux].cost[0] < col))                                       //calculated value promises smaller cost
     {
         col = trialfield[aux].cost[0];
+        pointsUp = false;
         //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     if (col == 100000.) { //one sided update with row
         trialfield[key].cost[0] = onesidedCalc(row, grid->Gethx());
         trialfield[key].flag[0] = 1;
+        if (pointsRight) {
+            dirToWall[key].SetX(-(cost[key+1]-cost[key])/grid->Gethx());
+            dirToWall[key].SetY(0.);
+        } else {
+            dirToWall[key].SetX(-(cost[key]-cost[key-1])/grid->Gethx());
+            dirToWall[key].SetY(0.);
+        }
+        dirToWall[key] = dirToWall[key].Normalized();
         return;
     }
 
     if (row == 100000.) { //one sided update with col
         trialfield[key].cost[0] = onesidedCalc(col, grid->Gethy());
         trialfield[key].flag[0] = 1;
+        if (pointsUp) {
+            dirToWall[key].SetX(0.);
+            dirToWall[key].SetY(-(cost[key+(grid->GetiMax())]-cost[key])/grid->Gethy());
+        } else {
+            dirToWall[key].SetX(0.);
+            dirToWall[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
+        }
+        dirToWall[key] = dirToWall[key].Normalized();
         return;
     }
 
@@ -640,9 +674,26 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     if (precheck >= 0) {
         trialfield[key].cost[0] = precheck;
         trialfield[key].flag[0] = 2;
+        if (pointsUp && pointsRight) {
+            dirToWall[key].SetX(-(cost[key+1]-cost[key])/grid->Gethx());
+            dirToWall[key].SetY(-(cost[key+(grid->GetiMax())]-cost[key])/grid->Gethy());
+        }
+        if (pointsUp && !pointsRight) {
+            dirToWall[key].SetX(-(cost[key]-cost[key-1])/grid->Gethx());
+            dirToWall[key].SetY(-(cost[key+(grid->GetiMax())]-cost[key])/grid->Gethy());
+        }
+        if (!pointsUp && pointsRight) {
+            dirToWall[key].SetX(-(cost[key+1]-cost[key])/grid->Gethx());
+            dirToWall[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
+        }
+        if (!pointsUp && !pointsRight) {
+            dirToWall[key].SetX(-(cost[key]-cost[key-1])/grid->Gethx());
+            dirToWall[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
+        }
     } else {
         std::cerr << "else in twosided &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
     }
+    dirToWall[key] = dirToWall[key].Normalized();
 }
 
 void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {

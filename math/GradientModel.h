@@ -46,6 +46,7 @@ class GradientModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
      DirectionStrategy* _direction;
+     DirectionFloorfield* _floorfield;
 
      /// Modellparameter
      double _nuPed;
