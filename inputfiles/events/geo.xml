@@ -122,16 +122,16 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_geometry.xsd">
           <vertex px="0.0" py="4.0" />
         </polygon>
       </subroom>
-      <crossings>
-        <crossing id="20" subroom1_id="0" subroom2_id="0">
-          <vertex px="13.0" py="4.0" />
-          <vertex px="12.0" py="6.0" />
-        </crossing>
-        <crossing id="21" subroom1_id="0" subroom2_id="0">
-          <vertex px="10.0" py="4.0" />
-          <vertex px="11.0" py="6.0" />
-        </crossing>
-      </crossings>
+<!--       <crossings> -->
+<!--         <crossing id="20" subroom1_id="0" subroom2_id="0"> -->
+<!--           <vertex px="13.0" py="4.0" /> -->
+<!--           <vertex px="12.0" py="6.0" /> -->
+<!--         </crossing> -->
+<!--         <crossing id="21" subroom1_id="0" subroom2_id="0"> -->
+<!--           <vertex px="10.0" py="4.0" /> -->
+<!--           <vertex px="11.0" py="6.0" /> -->
+<!--         </crossing> -->
+<!--       </crossings> -->
     </room>
   </rooms>
 

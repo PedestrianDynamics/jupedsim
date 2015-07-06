@@ -848,7 +848,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
            {
                 if(IsPartOfPolygon(ptw)==false)
                 {
-                     Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
+                     Log->Write("ERROR:\t Wall %s was not used during polygon creation for room/subroom: %s",w.toString().c_str(),GetRoomID(),GetSubRoomID());
                      return false;
                 }
            }
@@ -861,7 +861,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           {
                if(IsPartOfPolygon(ptw)==false)
                {
-                    Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
+                    Log->Write("ERROR:\t exit/crossing/transition %s was not used during polygon creation for room/subroom: %d/%d",g->toString().c_str(),GetRoomID(),GetSubRoomID());
                     return false;
                }
           }
