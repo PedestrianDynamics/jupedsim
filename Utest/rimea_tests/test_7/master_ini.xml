@@ -44,7 +44,9 @@
   <agents operational_model_id="1">
     <agents_distribution>
        <!-- <30 -->
-       <group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="150" router_id="1" pre_movement_mean="0" pre_movement_sigma="0" x_min="60" x_max="80"/>
+       <group group_id="0" agent_parameter_id="1"  subroom_id="0" goal_id="-1" number="1
+
+50" router_id="1" pre_movement_mean="0" pre_movement_sigma="0" x_min="60" x_max="80"/>
        <!-- 30-50 -->
        <group group_id="1" agent_parameter_id="2"  subroom_id="0" goal_id="-1" number="150" router_id="1" pre_movement_mean="30" pre_movement_sigma="0" x_min="40" x_max="60"/>
        <!-- >50 -->

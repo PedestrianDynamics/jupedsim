@@ -372,15 +372,21 @@ const Point& Pedestrian::GetV0() const
 
 double Pedestrian::GetV0Norm() const
 {
+     // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use this in the function f.
      //detect the walking direction based on the elevation
      SubRoom* sub=_building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-     double nav_elevation = sub->GetElevation(_navLine->GetCentre());
+     const Point& target = _navLine->GetCentre();
+     double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
      // const Point& pos = GetPos();
+     // double distanceToTarget = (target-pos).Norm();
+     // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
      // fprintf(stderr, "%f  %f %f  %f\n", pos.GetX(), pos.GetY(), sub->GetElevation(_ellipse.GetCenter()), 2.0/(1+exp(-9.0*ped_elevation*ped_elevation)));
-     // printf("delta = %f, nav_elev = %f, ped_elev= %f\n", delta, nav_elevation, ped_elevation);
-
+     //printf("delta = %f, nav_elev = %f, ped_elev= %f\n", delta, nav_elevation, ped_elevation);
+     // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
+     
+     
      
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
