@@ -222,6 +222,7 @@ bool PedDistributor::Distribute(Building* building) const
           Room* r = building->GetRoom(roomID);
           if(!r) return false;
 
+          nPeds_expected+=dist->GetAgentsNumber();
           //compute all subrooms since no specific one is given
           for (const auto& it_sr: r->GetAllSubRooms())
           {
@@ -230,7 +231,6 @@ bool PedDistributor::Distribute(Building* building) const
                // the positions were already computed
                if(allFreePosRoom.count(subroomID)>0)
                     continue;
-               nPeds_expected+=dist->GetAgentsNumber();
                allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*it_sr.second);
           }
      }
@@ -292,6 +292,7 @@ bool PedDistributor::Distribute(Building* building) const
           vector<int> akt_anz = vector<int>();
 
           auto&  allFreePosInRoom=allFreePos[room_id];
+          //FIXME: wont work if the subrooms ids are not continous, consider using map
           for (int is = 0; is < r->GetNumberOfSubRooms(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
                double area = sr->GetArea();
@@ -307,6 +308,7 @@ bool PedDistributor::Distribute(Building* building) const
           }
           ppm = N / sum_area;
           // Anzahl der Personen pro SubRoom bestimmen
+          //FIXME: wont work if the subrooms ids are not continous, consider using map
           for (int is = 0; is < r->GetNumberOfSubRooms(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
                int anz = sr->GetArea() * ppm + 0.5; // wird absichtlich gerundet
