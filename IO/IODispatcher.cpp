@@ -587,8 +587,8 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           sprintf(tmp1, "<agent ID=\"%d\"\t"
-                    "x=\"%.2f\"\ty=\"%.2f\"\t"
-                    "z=\"%.2f\"\t"
+                    "x=\"%.6f\"\ty=\"%.6f\"\t"
+                    "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
@@ -702,8 +702,8 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           sprintf(s, "<agent ID=\"%d\"\t"
-                    "x=\"%.2f\"\ty=\"%.2f\"\t"
-                    "z=\"%.2f\"\t"
+                    "x=\"%.6f\"\ty=\"%.6f\"\t"
+                    "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,

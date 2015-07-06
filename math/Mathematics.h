@@ -33,6 +33,8 @@
 #include <complex>
 #include <cmath>
 
+bool  almostEqual (double a, double b, double eps);
+
 double sign(double x);
 
 double sigmoid(double a, double b, double x);
