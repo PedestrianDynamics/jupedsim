@@ -1,0 +1,168 @@
+%% LyX 2.0.6 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\RequirePackage{fix-cm}
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{luainputenc}
+\setlength{\parskip}{\medskipamount}
+\setlength{\parindent}{0pt}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fixltx2e}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+\numberwithin{table}{section}
+
+\makeatother
+
+\usepackage{babel}
+\begin{document}
+
+\title{Automated Routing in Pedestrian Dynamics}
+
+
+\author{Arne Graf}
+
+
+\date{2015-09-01}
+
+\maketitle
+
+\section{Introduction}
+
+
+\section{ODE based Model (dep.? -> opt.?)}
+
+
+\section{Modelling}
+
+
+\subsection{Eikonal Equation}
+
+The ``Eikonal Equation'' in a domain $\Omega$, subset of $\mathbb{R}^{n}$,
+
+\begin{align*}
+\vert\nabla u(x)\vert\quad= & \quad F(x),x\in\Omega,\\
+\mathrm{s.t.\qquad u|_{\partial\Omega}\quad=} & \quad0\\
+\end{align*}
+ 
+
+yields ``first-arrival-times'' in a spacial domain provided a target
+region within the domain.
+
+
+\subsection{Safe Navigation using the Floorfield}
+
+
+\subsection{Distances-Field}
+
+
+\subsubsection{Cost of a ``full'' preprocessing step }
+
+
+\subsubsection{Distances-Field and repulsive Wall-Forces}
+
+
+\subsection{Variant Model}
+
+In the latter, a new approach in modeling is described, aiming for
+the avoidance of faulty interaction of pedestrians and walls while
+maintaining the positive characteristics of row-formation, stop-and-go
+waves and such, like seen in experimental data. In many of the existing
+models using mathematical formulations in continouus domain, agents
+breach wall-surfaces and get stuck inside of walls or obstacles.
+
+There are two mechanics used to avoid ``clipping'':
+\begin{enumerate}
+\item The routing of pedestirans makes use of the eikonal-equation, computed
+with an inhomogenious speed-function, $s(x)$, which favours keeping
+a distance to obstacles, walls and corners.
+\item The distance to the closest wall of each pedestrian affects the moving
+speed if and only if the agent's moving vector includes a component
+geared towards the wall.
+\end{enumerate}
+In order to keep the model simple, repulsive wall forces as seen in
+Social Force Models are omitted. An analogy to repulsive pedestrian
+forces though is used to keep agents from colliding with each other.
+The model differs from SFMs, as other agents effect the desired moving
+direction in full, the magnitude on the other hand is effected by
+other agents only to a certain degree (as described in ).
+
+\begin{alignat*}{1}
+\Delta\vec{x}\quad=\quad & \Delta t\cdot\vec{v}_{res}\\
+\vec{v}_{res}\quad=\quad & \left(1-\frac{1}{2}\left[(\vec{v}_{n}\cdot(-\nabla distances)_{n})+\vert(\vec{v}_{n}\cdot(-\nabla distances)_{n})\vert\right]\right)\cdot\vec{v}_{n}\\
+\vec{v}_{n}\quad=\quad & g(g(\vec{v}_{ff})+g(\sum\vec{v}_{repP,i}))\\
+\vec{v}_{ff}\quad=\quad & v_{ff}(\vec{x})\\
+\end{alignat*}
+
+
+\begin{align*}
+\Delta\vec{v}\quad= & \quad\Delta t\cdot\vec{v}_{res}\\
+\vec{v}_{res}\quad= & \quad\bigg(1-\frac{1}{2}\bigg[\langle\vec{v}_{n},(-\nabla distances)_{n}\rangle+\big\vert\langle\vec{v}_{n},(-\nabla distances)_{n}\rangle\big\vert\bigg]\bigg)\cdot\vec{v}_{n}\\
+\vec{v}_{n}\quad= & \quad g\big(\quad g(\vec{v}_{ff})+g(\underset{\small i}{\sum}\vec{v}_{repP,i})\quad\big)\\
+\vec{v}_{ff}\quad= & \quad v_{ff}(\vec{x})
+\end{align*}
+
+
+
+\subsection{Idea of Separation of a Moving-Vector into Direction and Magnitute}
+
+
+\subsubsection{no clipping}
+
+
+\subsubsection{Recycling the Distances Field (neg. Gradient must be saved)}
+
+$\vec{v}_{res}\quad=\quad\bigg(1-\frac{1}{2}\bigg[\langle\vec{v}_{n},(-\nabla distances)_{n}\rangle+\big\vert\langle\vec{v}_{n},(-\nabla distances)_{n}\rangle\big\vert\bigg]\bigg)\cdot\vec{v}_{n}$
+
+
+\section{Testing}
+
+
+\section{Shortcomings}
+
+
+\subsection{Floorfield}
+
+
+\subsubsection{Multiple Goals }
+
+The floorfield is a usefull tool in routing of pedestirans through
+any geometry. 
+
+
+\subsubsection{Multiple Floors}
+
+
+\paragraph{Neighboring Relations}
+
+
+\subsection{Avoid Clipping}
+
+
+\section{Outlook}
+
+
+\subsection{Usage in JuPedSim}
+
+
+\subsection{Floorfields in Triangulated Domains}
+
+
+\subsection{Parallelization}
+
+
+\section{Appendices}
+
+
+\subsection{Classes and their Relations}
+
+
+\subsection{Code Snippets}
+
+
+\section{Bibliography}
+\end{document}
