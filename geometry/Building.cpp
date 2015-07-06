@@ -70,15 +70,49 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _linkedCellGrid = nullptr;
 
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
-     this->LoadGeometry();
-     this->LoadRoutingInfo(filename);
+     if(!LoadGeometry())
+     {
+          Log->Write("ERROR:\t could not load the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!LoadRoutingInfo(filename))
+     {
+          Log->Write("ERROR:\t could not load extra routing information!");
+          exit (EXIT_FAILURE);
+     }
+
      //this->AddSurroundingRoom();
-     this->InitGeometry();
-     this->LoadTrafficInfo();
-     distributor.Distribute(this);
-     this->InitGrid(linkedCellSize);
-     _routingEngine->Init(this);
-     this->SanityCheck();
+
+     if(!InitGeometry())
+     {
+          Log->Write("ERROR:\t could not initialize the geometry!");
+          //exit (EXIT_FAILURE);
+     }
+     if(!LoadTrafficInfo() )
+     {
+          Log->Write("ERROR:\t could not load extra traffic information!");
+          exit (EXIT_FAILURE);
+     }
+     if(!distributor.Distribute(this))
+     {
+          Log->Write("ERROR:\t could not distribute the pedestrians");
+          //exit (EXIT_FAILURE);
+     }
+     InitGrid(linkedCellSize);
+
+     if(! _routingEngine->Init(this))
+     {
+          Log->Write("ERROR:\t could not initialize the routers!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!SanityCheck())
+     {
+          Log->Write("ERROR:\t There are sanity errors in the geometry file");
+          exit (EXIT_FAILURE);
+     }
+
 }
 #endif
 
