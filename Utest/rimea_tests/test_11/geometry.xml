@@ -9,8 +9,12 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
 				<polygon caption="wall">
 					<vertex px="28.0" py="20.0" />
 					<vertex px="30.0" py="20.0" />
+				</polygon>
+				<polygon caption="wall">
 					<vertex px="30.0" py="0.0" />
 					<vertex px="0.0" py="0.0" />
+				</polygon>
+				<polygon caption="wall">
 					<vertex px="0.0" py="20.0" />
 					<vertex px="21.0" py="20.0" />
 				</polygon>
