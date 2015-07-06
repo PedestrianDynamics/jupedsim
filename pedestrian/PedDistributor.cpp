@@ -189,7 +189,8 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
 bool PedDistributor::Distribute(Building* building) const
 {
      Log->Write("INFO: \tInit Distribute");
-     int nPeds = 0;
+     int nPeds_is = 0;
+     int nPeds_expected=0;
 
      // store the position in a map since we are not computing for all rooms/subrooms.
      std::map <int, std::map <int, vector <Point> > > allFreePos;
@@ -210,6 +211,7 @@ bool PedDistributor::Distribute(Building* building) const
           if(allFreePosRoom.count(subroomID)>0)
                continue;
 
+          nPeds_expected+=dist->GetAgentsNumber();
           allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*sr);
      }
 
@@ -228,7 +230,7 @@ bool PedDistributor::Distribute(Building* building) const
                // the positions were already computed
                if(allFreePosRoom.count(subroomID)>0)
                     continue;
-
+               nPeds_expected+=dist->GetAgentsNumber();
                allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*it_sr.second);
           }
      }
@@ -267,7 +269,7 @@ bool PedDistributor::Distribute(Building* building) const
           Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID, max_pos);
           DistributeInSubRoom(sr, N, allpos, &pid,dist.get(),building);
           Log->Write("\t...Done");
-          nPeds += N;
+          nPeds_is += N;
      }
 
      // then continue the distribution according to the rooms
@@ -343,7 +345,7 @@ bool PedDistributor::Distribute(Building* building) const
                     DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist.get(),building);
                }
           }
-          nPeds += N;
+          nPeds_is += N;
      }
 
      //now populate the sources
@@ -358,7 +360,7 @@ bool PedDistributor::Distribute(Building* building) const
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
-                         nPeds++;
+                         nPeds_is++;
                     }
                }
           }
@@ -371,12 +373,12 @@ bool PedDistributor::Distribute(Building* building) const
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
-                         nPeds++;
+                         nPeds_is++;
                     }
                }
           }
      }
-     return nPeds;
+     return (nPeds_is==nPeds_expected);
 }
 
 
