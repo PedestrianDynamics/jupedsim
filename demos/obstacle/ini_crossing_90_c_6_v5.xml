@@ -8,8 +8,8 @@
         <file name="traj_crossing_90_c_6_v5.txt" /> 
         <path location="./" /> 
     </trajectories> 
-	
-	<scripts location="../../scripts/"/>
+	<!----give relative path based on the location inifile or give the absolute path--->
+	<scripts location="../../scripts/"/> 
 
     <measurement_areas unit="m"> 
         <area_B id="1" type="BoundingBox"> 

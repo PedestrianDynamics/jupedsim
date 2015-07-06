@@ -97,16 +97,18 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
+
+          //vector int to_remove
           //------------------------------Remove peds outside geometry------------------------------------------
-          for(unsigned int i=0;i<IdInFrame.size();i++)
+          for( int i=0;i<(int)IdInFrame.size();i++)
           {
         	  if(false==within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly))
         	  {
+        		  Log->Write("Warning:\tPedestrian at <x=%.4f, y=%.4f> is not in geometry and not considered in analysis!", XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
         		  IdInFrame.erase(IdInFrame.begin() + i);
         		  XInFrame.erase(XInFrame.begin() + i);
         		  YInFrame.erase(YInFrame.begin() + i);
         		  VInFrame.erase(VInFrame.begin() + i);
-        		  Log->Write("Warning:\tPedestrian at <x=%.4f, y=%.4f> is not in geometry and not considered in analysis!", XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
         		  i--;
         	  }
           }
