@@ -299,11 +299,7 @@ bool GlobalRouter::Init(Building* building)
                               continue;
 
                          vector<SubRoom*> emptyVector;
-                         emptyVector.push_back(nav1->GetSubRoom1());
-                         emptyVector.push_back(nav1->GetSubRoom2());
-                         emptyVector.push_back(nav2->GetSubRoom1());
-                         emptyVector.push_back(nav2->GetSubRoom2());
-
+                         emptyVector.push_back(sub.get());
 
                          if (building->IsVisible(nav1->GetCentre(), nav2->GetCentre(), emptyVector,true))
                          {
@@ -436,7 +432,7 @@ bool GlobalRouter::Init(Building* building)
                               "       \tYou can solve this by enabling triangulation.",
                               from_AP->GetFriendlyName().c_str());
                     from_AP->Dump();
-                    return false;
+                    //return false;
                }
           }
           _tmpPedPath.clear();
@@ -490,11 +486,11 @@ bool GlobalRouter::Init(Building* building)
      }
 
      //dumping the complete system
-     //DumpAccessPoints(4817);
+     //DumpAccessPoints(735);
      //DumpAccessPoints(4912); //exit(0);
      //DumpAccessPoints(-1); exit(0);
      //vector<string> rooms;
-     //rooms.push_back("Verteilerebene");
+     //rooms.push_back("EG_Eingang");
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms); exit(0);
      //WriteGraphGV("routing_graph.gv",4,rooms);exit(0);
      Log->Write("INFO:\tDone with the Global Router Engine!");
@@ -1048,7 +1044,6 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                for(const auto & it_sub:_building->GetRoom(caption)->GetAllSubRooms())
                {
                     rooms_ids.push_back(it_sub.second->GetUID());
-                    cout <<"adding: "<<it_sub.second->GetUID()<<endl;
                }
           }
      }
@@ -1171,7 +1166,7 @@ void GlobalRouter::TriangulateGeometry()
 
                //Triangulate if obstacle or concave and no hlines ?
                //if(subroom->GetAllHlines().size()==0)
-               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
+               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ) || 0)
                {
                     DTriangulation* tri= new DTriangulation();
 
