@@ -541,26 +541,6 @@ void Simulation::RunFooter()
 {
      // writing the footer
      _iod->WriteFooter();
-
-     //temporary work around since the total number of frame is only available at the end of the simulation.
-     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN)
-     {
-          delete _iod;
-          _iod = NULL;
-          //reopen the file and write the missing information
-
-          // char tmp[CLENGTH];
-          // int f= frameNr / writeInterval ;
-          // sprintf(tmp,"<frameCount>%07d</frameCount>",f);
-          // string frameCount (tmp);
-
-          //char replace[CLENGTH];
-          // open the file and replace the 8th line
-          //sprintf(replace, "sed -i '9s/.*/ %d /' %s", frameNr / writeInterval,
-          //          _argsParser.GetTrajectoriesFile().c_str());
-          //int result = system(replace);
-          //Log->Write("INFO:\t Updating the framenumber exits with code [%d]", result);
-     }
 }
 
 void Simulation::ProcessAgentsQueue()
