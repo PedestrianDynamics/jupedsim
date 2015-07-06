@@ -120,147 +120,131 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
 }
 
 
-/**
- * this strategy is designed to work without Hlines for a general geometry.
- * First tested for bottlenecks and corners.
- * number 4
- * @param room Pointer
- * @param ped Pointer to Pedestrians
- *
- * @todo Need more tests e.g. for complex geometries.
- * @todo Need refactoring: Put the WALL and OBS loops in appropriate functions
- * @return Target (Point)
- */Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
+
+/// 4
+Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 {
 #define DEBUG 0
-     using namespace std;
-     const Point& p1 = ped->GetExitLine()->GetPoint1();
-     const Point& p2 = ped->GetExitLine()->GetPoint2();
-     Line ExitLine = Line(p1, p2);
-     //Point Lot = ExitLine.LotPoint( ped->GetPos() );
-     double d = 0.2; //shorten the line by  20 cm
-     Point diff = (p1 - p2).Normalized() * d;
-     Line e_neu = Line(p1 - diff, p2 + diff);
-     Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
-
-     Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
-                   // it intersects a wall || obstacle.
-                   // check for intersection with walls
-                   // @todo: make a FUNCTION of this
+      using namespace std;
+      const Point& p1 = ped->GetExitLine()->GetPoint1();
+      const Point& p2 = ped->GetExitLine()->GetPoint2();
+      Line ExitLine = Line(p1, p2);
+      //Point Lot = ExitLine.LotPoint( ped->GetPos() );
+      double d = 0.2; //shorten the line by  20 cm
+      Point diff = (p1 - p2).Normalized() * d;
+      Line e_neu = Line(p1 - diff, p2 + diff);
+      Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
+  
+      Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
+      // it intersects a wall || obstacle.
+      // check for intersection with walls
+      // @todo: make a FUNCTION of this
 
 #if DEBUG
-          printf("\n----------\nEnter GetTarget() with PED=%d\n----------\n",ped->GetID());
-          printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
+      printf("\n----------\nEnter GetTarget() with PED=%d\n----------\n",ped->GetID());
+      printf("nextPointOn Line: %f %f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY());
 #endif
-     double dist;
-     int inear = -1;
-     int iObs = -1;
-     double minDist = 20001;
-     int subroomId = ped->GetSubRoomID();
-     SubRoom * subroom = room->GetSubRoom(subroomId);
+      double dist;
+      int inear = -1;
+      int iObs = -1;
+      double minDist = 20001;
+      int subroomId = ped->GetSubRoomID();
+      SubRoom * subroom = room->GetSubRoom(subroomId);
 
-     //============================ WALLS ===========================
-     const vector<Wall>& walls = subroom->GetAllWalls();
-     for (unsigned int i = 0; i < walls.size(); i++) {
-          dist = tmpDirection.GetIntersectionDistance(walls[i]);
-          if (dist < minDist) {
-               inear = i;
-               minDist = dist;
+      //============================ WALLS ===========================
+      const vector<Wall>& walls = subroom->GetAllWalls();
+      for (unsigned int i = 0; i < walls.size(); i++) {
+            dist = tmpDirection.GetIntersectionDistance(walls[i]);
+            if (dist < minDist) {
+                  inear = i;
+                  minDist = dist;
+
 #if DEBUG
-                    printf("Check wall %d. Dist = %f (%f)\n", i, dist, minDist);
-                    printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
+                  printf("Check wall number %d. Dist = %f (%f)\n", i, dist, minDist);
+                  printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
 #endif
  
-          }
-     }//walls
-     //============================ WALLS ===========================
+            }
+      }//walls
+     
+      //============================ WALLS ===========================
 
-     //============================ OBST ===========================
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < owalls.size(); i++) {
-               dist = tmpDirection.GetIntersectionDistance(owalls[i]);
-               if (dist < minDist) {
-                    inear = i;
-                    minDist = dist;
-                    iObs = obs;
+     
+      //============================ OBST ===========================
+      const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
+      for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
+            const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
+            for (unsigned int i = 0; i < owalls.size(); i++) {
+                  dist = tmpDirection.GetIntersectionDistance(owalls[i]);
+                  if (dist < minDist) {
+                        inear = i;
+                        minDist = dist;
+                        iObs = obs;
 
-                         // printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
-                         // printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1().GetX(),owalls[i].GetPoint1().GetY(), owalls[i].GetPoint2().GetX(),owalls[i].GetPoint2().GetY());
+                        // printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
+                        // printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1().GetX(),owalls[i].GetPoint1().GetY(), owalls[i].GetPoint2().GetX(),owalls[i].GetPoint2().GetY());
 
-               }
-          }//walls of obstacle
-     }// obstacles
-     //============================ OBST ===========================
+                  }
+            }//walls of obstacle
+      }// obstacles
+      //============================ OBST ===========================
 
 
-     double angle = 0;
-     if (inear >= 0) {
-          ped->SetNewOrientationFlag(true); //Mark this pedestrian for next target calculation
-          ped->SetDistToBlockade(minDist);
-          if(iObs >= 0) {
-               const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
-               angle =  tmpDirection.GetDeviationAngle(owalls[inear].Enlarge(2*ped->GetLargerAxis()));
+      double angle = 0;
+      if (inear >= 0) {
+            ped->SetNewOrientationFlag(true); //Mark this pedestrian for next target calculation
+            ped->SetDistToBlockade(minDist);
+            if(iObs >= 0){ // obstacle is nearest
+                  const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
+                  angle = tmpDirection.GetObstacleDeviationAngle(owalls);
+      
+                  // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 #if DEBUG
-                    printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
-               
-#endif 
-
-          } else{
-               angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
-#if DEBUG
-                    printf("COLLISION WITH %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
+                  printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
+      
 #endif
-          }
-     }//inear
-     else{
+            } //iObs
+            else{ // wall is nearest
+                  angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
+#if DEBUG
+                  printf("COLLISION WITH WALL %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
+#endif
+            } //else
+      }//inear
+      else{
 
-          if(ped->GetNewOrientationFlag()){ //this pedestrian could not see the target and now he can see it clearly.
-                         // printf("ped->GetNewOrientationFlag()=%d\n",ped->GetNewOrientationFlag());getc(stdin);
-               ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
-               ped->SetNewOrientationFlag(false);
-          }
-     }
+            if(ped->GetNewOrientationFlag()){ //this pedestrian could not see the target and now he can see it clearly.
+                  // printf("ped->GetNewOrientationFlag()=%d\n",ped->GetNewOrientationFlag());getc(stdin);
+                  ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
+                  ped->SetNewOrientationFlag(false);
+            }
+      }
 ////////////////////////////////////////////////////////////
     
-     Point  G;
-     if (fabs(angle) > J_EPS)
-          //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
-          G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle))+ped->GetPos() ;
-     else {
-          if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
-               ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
+      Point  G;
+      if (fabs(angle) > J_EPS)
+            //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
+            G  = (NextPointOnLine-ped->GetPos()).Rotate(cos(angle), sin(angle))+ped->GetPos() ;
+      else {
+            if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
+                  ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
           
-          G  =  NextPointOnLine;
-     }
+            G  =  NextPointOnLine;
+      }
 #if DEBUG
-          printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
-          printf("PED=%d\n",  ped->GetID());
-          printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
-          printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
-          printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
-          printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
+      printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
+      printf("PED=%d\n",  ped->GetID());
+      printf ("MC Posx = %.2f, Posy=%.2f, Lot=[%.2f, %.2f]\n", ped->GetPos().GetX(), ped->GetPos().GetY(), NextPointOnLine.GetX(), NextPointOnLine.GetY());
+      printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
+      printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
+      printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
 
 #endif
 
-          // if( ped->GetID() == 12)
-          // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
-// ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
+      // if( ped->GetID() == 21)
+      //       fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
+      //               ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with plot_desired_velocity.py
 
-     return G;
+      return G;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

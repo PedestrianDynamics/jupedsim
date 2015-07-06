@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(small_wall_test)
     BOOST_TEST_MESSAGE("Leaving small wall test");
 }
 
-//BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(overlap_wall_test, 0);
+//BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(overlap_wall_test, 2);
 
 BOOST_AUTO_TEST_CASE(overlap_wall_test)
 {
@@ -166,4 +166,27 @@ BOOST_AUTO_TEST_CASE(overlap_wall_test)
     
     BOOST_TEST_MESSAGE("Leaving overlap wall test");
 }
+
+BOOST_AUTO_TEST_CASE(concave_intersecting_wall_test)
+{
+	BOOST_MESSAGE("starting concave subroom intersecting wall test");
+	Point P1;
+	Point P2(2, 2);
+	Point P3(2, 0);
+	Point P4(0, 2);
+
+	NormalSubRoom sub1;
+	sub1.SetSubRoomID(1);
+	sub1.SetRoomID(1);
+	sub1.AddWall(Wall(P1, P2));
+	sub1.AddWall(Wall(P2, P3));
+	sub1.AddWall(Wall(P3, P4));
+
+	Line exit(P1, P4);
+	std::vector<Line*> door;
+	door.push_back(&exit);
+
+	BOOST_CHECK(sub1.ConvertLineToPoly(door) == false);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

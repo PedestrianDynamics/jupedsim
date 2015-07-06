@@ -91,7 +91,7 @@ Building::~Building()
 #ifdef _SIMULATOR
      for(unsigned int p=0;p<_allPedestians.size();p++)
      {
-          //delete _allPedestians[p];
+          delete _allPedestians[p];
      }
      _allPedestians.clear();
      delete _linkedCellGrid;
@@ -982,7 +982,6 @@ void Building::InitGrid(double cellSize)
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
 
-     //_linkedCellGrid = new LCGrid(boundaries, cellSize, _allPedestians.size());
      _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
 
@@ -1178,6 +1177,7 @@ void Building::DeletePedestrian(Pedestrian* &ped)
           trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
      }
      delete ped;
+     //ped=nullptr;
 }
 
 const vector<Pedestrian*>& Building::GetAllPedestrians() const

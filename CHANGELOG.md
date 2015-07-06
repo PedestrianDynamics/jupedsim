@@ -2,20 +2,28 @@
 All notable changes to this project will be documented in this file.
 
 
+[comment]: <> (## v0.8.0 [Unreleased])
+ 
 ## v0.7.0 [Unreleased]
+
+### New Module
+- JuPedSim: Editor for the geometry
+
 ### Added
+
+- Risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks.
+- Added pre-movement time of the agents. Only after this time, the concerned agents will start moving.
+- Sources for generating agents at runtime. Parameter are frequency (agents per seconds) and maximum number
+- Option to color the pedestrians by group, spotlight, velocity, group, knowledge, router, final\_goal, intermediate\_goal. Usage: ( 
+```<trajectories format="xml-plain" fps="8" color_mode="group"> ```)
+- More control over the triangulation specially to avoid skinny triangles. Usage: ```<navigation_mesh method="triangulation" minimum_distance_between_edges="0.5" minimum_angle_in_triangles="20" use_for_local_planning="true" />```
+- Improved statistics. The flow curve for the different exits can be computed at runtime.
 - Changelog file
 - Rimea testcases
-- Boost testcases for geometry functions
-- risk tolerance factor (value in [0 1]) for pedestrian. Pedestrians with high values are likely to take more risks.
-- Sources for generating agents at runtime. Parameter are frequency(agents per seconds) and maximum number
-- Option to color the pedestrians by group,spotlight,velocity,group,knowledge,router,final_goal,intermediate_goal. Usage: ( <trajectories format="xml-plain" fps="8" color_mode="group"> )
-- More control over the triangulation specially to avoid skinny triangles. Usage: <navigation_mesh method="triangulation" minimum_distance_between_edges="0.5" minimum_angle_in_triangles="20" use_for_local_planning="true" />
-- Improved statistics Flow curve for the different exits.
-
+- Unit tests are now based on the Boost testing engine
 #### JPSVIS
-- Display the geometry structure individual room/subroom
-- Now build on OSX 
+- Display the geometry structure individual room/subroom.
+- Now build on OSX/Linux/Windows 
 
 ### Changed
 -  
@@ -25,8 +33,6 @@ All notable changes to this project will be documented in this file.
 - Visiblity in 3D
 - Numerous geometrical operations
 
-### Fixed
-- 
 
 ## v0.6.0 - 2015-01-31
 ### Added
@@ -45,7 +51,15 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - refactor NumCPU and ExitCrossingStrategy tags to num_threads and exit_crossing_strategy
 
-### Fixed
--
+
 
 ## v0.5.0 - 2014-08-05
+First release of the the Juelich Pedestrian Simulator. Most noteworthy features:
+
+- Simulate pedestrians movement in a space continuous geometry
+- Forces based models for describing the pedestrians interactions
+- Shortest and quickest path route choice strategies
+- Loading and visualizing trajectories and geometries
+- Easy to use visualization interface
+- Making high quality videos directly from the visualization interface or generating png sequences
+- XML based input files
