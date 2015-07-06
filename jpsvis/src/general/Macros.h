@@ -78,7 +78,7 @@
 #define CLENGTH 1000
 
 // conversion (cm <-> m)
-#define FAKTOR 1
+#define FAKTOR 100
 
 // default final destination for the pedestrians
 #define FINAL_DEST_OUT -1
