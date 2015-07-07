@@ -84,7 +84,7 @@ if __name__ == '__main__':
                    if (os.path.isfile(fC)):
                            data_Classic = loadtxt(fC)
                            plotRhoT(pathfile,figname_rho,title,data_Classic,data_Voronoi)
-                           plotRhoT(pathfile,figname_v,title,data_Classic,data_Voronoi)
+                           plotVT(pathfile,figname_v,title,data_Classic,data_Voronoi)
                    else:
                            plotRhoT(pathfile,figname_rho,title,data_Voronoi)
-                           plotRhoT(pathfile,figname_v,title,data_Voronoi)
+                           plotVT(pathfile,figname_v,title,data_Voronoi)
