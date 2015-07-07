@@ -258,7 +258,7 @@ public:
       *
       * @return true if the Point is inside any obstacle
       */
-     //bool IsInObstacle(const Pointa& pt);
+     bool IsInObstacle(const Point& pt);
 
      /**
       * @return true if there is an overlapp between the walls of the subrooms and the

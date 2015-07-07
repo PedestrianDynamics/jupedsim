@@ -681,6 +681,16 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
      return true;
 }
 
+bool SubRoom::IsInObstacle(const Point& pt)
+{
+     //write the obstacles
+     for (auto&& obst : _obstacles)
+     {
+          if(obst->Contains(pt)) return true;
+     }
+     return false;
+}
+
 /************************************************************
  NormalSubRoom
  ************************************************************/

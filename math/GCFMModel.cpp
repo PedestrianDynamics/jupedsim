@@ -380,52 +380,45 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
-     Point f = Point(0., 0.);
+     Point f(0., 0.);
      //first the walls
-
-     const std::vector<Wall>& walls = subroom->GetVisibleWalls(ped->GetPos());
-     if(ped->GetID()==-33)
+     for(const auto & wall: subroom->GetAllWalls())
      {
-          printf("Ped = %d, visible walls = %d\n",ped->GetID(),(int)walls.size());
-          getc(stdin);
-     }
-     for (unsigned int i = 0; i < walls.size(); i++) {
-          f += ForceRepWall(ped, walls[i]);
+          f += ForceRepWall(ped, wall);
      }
 
      //then the obstacles
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < walls.size(); i++) {
-               f += ForceRepWall(ped, walls[i]);
+     for(const auto & obst: subroom->GetAllObstacles())
+     {
+          if(obst->Contains(ped->GetPos()))
+          {
+               Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
+               exit(EXIT_FAILURE);
+          }
+          else
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               f += ForceRepWall(ped, wall);
           }
      }
 
-     //eventually crossings
-     // const vector<Crossing*>& crossings = subroom->GetAllCrossings();
-     // for (unsigned int i = 0; i < crossings.size(); i++) {
-          //Crossing* goal=crossings[i];
-          //int uid1= goal->GetUniqueID();
-          //int uid2=ped->GetExitIndex();
-          // ignore my transition
-          //if (uid1 != uid2) {
-          //      f = f + ForceRepWall(ped,*((Wall*)goal));
-          //}
-     // }
-
-     // and finally the closed doors or doors that are not my destination
-     const vector<Transition*>& transitions = subroom->GetAllTransitions();
-     for (unsigned int i = 0; i < transitions.size(); i++) {
-          Transition* goal=transitions[i];
-          int uid1= goal->GetUniqueID();
-          int uid2=ped->GetExitIndex();
-          // ignore my tranition consider closed doors
-          //closed doors are considered as wall
-
-          if((uid1 != uid2) || (goal->IsOpen()==false )) {
-               f += ForceRepWall(ped,*((Wall*)goal));
+     // and finally the closed doors
+     for(auto & goal: subroom->GetAllTransitions())
+     {
+          if(! goal->IsOpen())
+          {
+               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
+
+//  int uid1= goal->GetUniqueID();
+//  int uid2=ped->GetExitIndex();
+//  // ignore my transition consider closed doors
+//  //closed doors are considered as wall
+//
+//  if((uid1 != uid2) || (goal->IsOpen()==false ))
+//  {
+//    f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
+//  }
      }
 
      return f;

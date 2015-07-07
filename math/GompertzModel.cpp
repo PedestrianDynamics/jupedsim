@@ -399,10 +399,16 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      {
           f += ForceRepWall(ped, wall);
      }
-     //then the obstacles
 
+     //then the obstacles
      for(const auto & obst: subroom->GetAllObstacles())
      {
+          if(obst->Contains(ped->GetPos()))
+          {
+               Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
+               exit(EXIT_FAILURE);
+          }
+          else
           for(const auto & wall: obst->GetAllWalls())
           {
                f += ForceRepWall(ped, wall);
@@ -412,10 +418,19 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      // and finally the closed doors
      for(auto & goal: subroom->GetAllTransitions())
      {
-          if(! goal->IsOpen()) {
-                printf("Goal closed!! ");getc(stdin);
+          if(! goal->IsOpen())
+          {
                f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
+          //  int uid1= goal->GetUniqueID();
+          //  int uid2=ped->GetExitIndex();
+          //  // ignore my transition consider closed doors
+          //  //closed doors are considered as wall
+          //
+          //  if((uid1 != uid2) || (goal->IsOpen()==false ))
+          //  {
+          //    f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
+          //  }
      }
 
      return f;
