@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <geometry caption="second life" unit="m" version="5.0E-1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:noNamespaceSchemaLocation="../../xsd/jps_geometry.xsd">
   <rooms>
@@ -2243,7 +2243,7 @@
     <!-- exits like crossings but between rooms or to outside (room with index = -1) -->
     <!-- EG -->
     <!-- MainExit -->
-    <transition caption="main exit" id="0" room1_id="0" subroom1_id="37" room2_id="-1" subroom2_id="-1" type="emergency">
+    <transition caption="1" id="0" room1_id="0" subroom1_id="37" room2_id="-1" subroom2_id="-1" type="emergency">
       <vertex px="19.0" py="14.0" />
       <vertex px="21.0" py="14.0" />
     </transition>

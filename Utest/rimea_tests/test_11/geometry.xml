@@ -32,11 +32,12 @@
         </room>
     </rooms>
     <transitions>
-        <transition id="0" caption="NaN" type="NaN" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+      <!-- DO NOT CHANGE THE TRANSITION CAPTIONS -->
+        <transition id="0" caption="1" type="NaN" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
             <vertex px="21" py="20"/>
             <vertex px="22" py="20"/>
         </transition>
-        <transition id="1" caption="NaN" type="NaN" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
+        <transition id="1" caption="2" type="NaN" room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
             <vertex px="27" py="20"/>
             <vertex px="28" py="20"/>
         </transition>

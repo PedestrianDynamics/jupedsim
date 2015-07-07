@@ -8,7 +8,7 @@ to the investigated parameter.
 
 Remarks
 =======
-Test not running in JuPedSim.
+
 
 Source
 ======
@@ -19,6 +19,8 @@ import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
 from sys import *
+import glob
+import warnings
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
@@ -26,7 +28,27 @@ from utils import *
 
 
 def run_rimea_test8(inifile, trajfile):
-    fps, numpeds, traj = parse_file(trajfile)
+    files = glob.glob("trajectories/*_exit*")
+    if len(files) == 0:
+        logging.critical("%s exists with failure! Found no exit-files.", argv[0])
+        exit(FAILURE)
+
+    for f in files:
+        print f
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            d = np.loadtxt(f)
+
+        if len(d) == 0:
+            logging.critical("File %s is empty", f)
+            logging.critical("%s exists with failure!", argv[0])
+            exit(FAILURE)
+
+        print d
+        num_evacuated = max(d[:, 1]) # >0 ?
+        evac_time = max(d[:, 0])
+        logging.info("%d peds evacuated from exit <%s>. Evac_time: %f",
+                     num_evacuated, f.split(".dat")[0].split("_")[-1], evac_time)
 
 
 
@@ -35,6 +57,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test8)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

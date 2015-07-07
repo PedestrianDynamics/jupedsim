@@ -31,7 +31,6 @@ def run_rimea_test11(inifile, trajfile):
         exit(FAILURE)
 
     for f in files:
-        print f
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             d = np.loadtxt(f)
@@ -43,7 +42,7 @@ def run_rimea_test11(inifile, trajfile):
 
         num_evacuated = max(d[:, 1]) # >0 ?
         logging.info("%d peds evacuated from exit <%s>",
-                     num_evacuated, f.split("_id_exit_")[1].split(".dat")[0])
+                     num_evacuated, f.split(".dat")[0].split("_")[1])
 
 
 
@@ -52,6 +51,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test11)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 
