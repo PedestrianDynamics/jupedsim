@@ -633,8 +633,6 @@ bool MainWindow::slotAddDataSet()
 void MainWindow::slotClearAllDataset()
 {
     clearDataSet(1);
-    clearDataSet(2);
-    clearDataSet(3);
     numberOfDatasetLoaded=0;
 }
 
@@ -1211,7 +1209,7 @@ void MainWindow::clearDataSet(int ID)
     if(numberOfDatasetLoaded<0)numberOfDatasetLoaded=0;
 
     //finally clear the geometry
-    slotClearGeometry();
+    //slotClearGeometry();
 }
 
 void MainWindow::resetAllFrameCursor()
@@ -1578,10 +1576,10 @@ void MainWindow::slotSetCameraPerspectiveToVirtualAgent()
 }
 
 /// @todo does it work? mem check?
-void MainWindow::slotClearGeometry()
-{
-    _visualisationThread->setGeometry(NULL);
-}
+//void MainWindow::slotClearGeometry()
+//{
+//    _visualisationThread->setGeometry(NULL);
+//}
 
 void MainWindow::slotErrorOutput(QString err)
 {

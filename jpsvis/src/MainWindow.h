@@ -146,7 +146,7 @@ public Q_SLOTS:
 
     /// load a geometry file and display it
     //void slotLoadGeometry( );
-    void slotClearGeometry();
+    //void slotClearGeometry();
     //void slotLoadParseShowGeometry(QString fileName);
 
     /// load a geometry sent by the data transfer thread

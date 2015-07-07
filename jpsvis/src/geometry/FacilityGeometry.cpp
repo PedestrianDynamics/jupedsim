@@ -852,7 +852,7 @@ string text, double color)
     //tprop->BoldOn();
     //tprop->ShadowOn();
     //tprop->SetLineSpacing(1.0);
-    tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize());
+    tprop->SetFontSize(SystemSettings::getPedestrianCaptionSize()/2);
 
     double colorRGB[3];
     lookupTable->GetColor(color, colorRGB);

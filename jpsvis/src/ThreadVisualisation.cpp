@@ -287,7 +287,7 @@ void ThreadVisualisation::run()
     }
 
 
-    if(false || SystemSettings::get2D()) {
+    if(SystemSettings::get2D()) {
         _renderer->GetActiveCamera()->OrthogonalizeViewUp();
         _renderer->GetActiveCamera()->ParallelProjectionOn();
         _renderer->ResetCamera();
@@ -655,6 +655,7 @@ void  ThreadVisualisation::init()
 
 void ThreadVisualisation::finalize()
 {
+
 }
 
 void ThreadVisualisation::QcolorToDouble(const QColor &col, double *rgb)
