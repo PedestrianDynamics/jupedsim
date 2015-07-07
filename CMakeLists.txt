@@ -172,7 +172,6 @@ set (   source_files
   math/ForceModel.cpp
   math/Mathematics.cpp
   math/ODESolver.cpp
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
   math/OperationalModel.cpp
@@ -308,7 +307,6 @@ set (   header_files
   math/ForceModel.h
   math/Mathematics.h
   math/ODESolver.h
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.h
   math/GompertzModel.h
   math/OperationalModel.h   

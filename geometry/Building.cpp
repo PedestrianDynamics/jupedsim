@@ -89,16 +89,19 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
           Log->Write("ERROR:\t could not initialize the geometry!");
           exit (EXIT_FAILURE);
      }
+
      if(!LoadTrafficInfo() )
      {
           Log->Write("ERROR:\t could not load extra traffic information!");
           exit (EXIT_FAILURE);
      }
+
      if(!distributor.Distribute(this))
      {
           Log->Write("ERROR:\t could not distribute the pedestrians");
           exit (EXIT_FAILURE);
      }
+
      InitGrid(linkedCellSize);
 
      if(! _routingEngine->Init(this))
