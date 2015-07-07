@@ -233,7 +233,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
                               geo_maxY = (tmp_point._y*M2CM>=geo_maxY) ? (tmp_point._y*M2CM) : geo_maxY;
                          }
                          correct(geoPoly[area->_id]);
-                         cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
+                         //cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
                          //appen the holes/obstacles if any
                          int k=1;
                          for(auto&& obst: subroom->GetAllObstacles())
@@ -277,6 +277,40 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           return -1;
      }
 
+     //-----------------------------check whether there is pedestrian outside the whole geometry--------------------------------------------
+     std::map<int , std::vector<int> > _peds_t=data.GetPedsFrame();
+     for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++ )
+     {
+    	 vector<int> ids=_peds_t[frameNr];
+    	 vector<int> IdInFrame = data.GetIdInFrame(ids);
+    	 vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
+    	 vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
+    	 for( unsigned int i=0;i<IdInFrame.size();i++)
+		 {
+    		 bool IsInBuilding=false;
+    		 for (auto&& it_room : _building->GetAllRooms())
+    		 {
+    			 for (auto&& it_sub : it_room.second->GetAllSubRooms())
+    			 {
+    				 SubRoom* subroom = it_sub.second.get();
+    				 if(subroom->IsInSubRoom(Point(XInFrame[i]*CMtoM,YInFrame[i]*CMtoM)))
+    				 {
+    					 IsInBuilding=true;
+    					 break;
+    				 }
+    			 }
+    			 if(IsInBuilding)
+				 {
+					 break;
+				 }
+    		 }
+    		 if(false==IsInBuilding)
+			  {
+				  Log->Write("Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!", frameNr+data.GetMinFrame(), XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
+			  }
+		 }
+     }
+     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
      if(_DoesUseMethodA) //Method A
      {
