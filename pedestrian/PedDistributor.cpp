@@ -198,6 +198,7 @@ bool PedDistributor::Distribute(Building* building) const
      //collect the available positions for that subroom
      for(const auto& dist: _start_dis_sub)
      {
+          nPeds_expected+=dist->GetAgentsNumber();
           int roomID = dist->GetRoomId();
           Room* r = building->GetRoom(roomID);
           if(!r) return false;
@@ -211,7 +212,6 @@ bool PedDistributor::Distribute(Building* building) const
           if(allFreePosRoom.count(subroomID)>0)
                continue;
 
-          nPeds_expected+=dist->GetAgentsNumber();
           allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*sr);
      }
 
@@ -380,6 +380,12 @@ bool PedDistributor::Distribute(Building* building) const
                }
           }
      }
+
+     if(nPeds_is!=nPeds_expected)
+     {
+          Log->Write("ERROR:\t only [%d] agents could be distributed out of [%d] requested",nPeds_is,nPeds_expected);
+     }
+
      return (nPeds_is==nPeds_expected);
 }
 
