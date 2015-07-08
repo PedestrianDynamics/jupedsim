@@ -52,6 +52,7 @@ bool Method_C::Process (const PedData& peddata)
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_C->_id);
+     _fps = peddata.GetFps();
      OpenFileMethodC();
      Log->Write("------------------------Analyzing with Method C-----------------------------");
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
@@ -78,15 +79,18 @@ void Method_C::OpenFileMethodC()
           Log->Write("Warning:\tcannot open file %s to write classical density and velocity\n", results_C.c_str());
           exit(EXIT_FAILURE);
      }
-     fprintf(_fClassicRhoV,"#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n");
+     fprintf(_fClassicRhoV,"#framerate:\t%.2f\n\n#Frame \tclassical density(m^(-2))\t	classical velocity(m/s)\n",_fps);
 }
 
 void Method_C::OutputClassicalResults(int frmNr, int numPedsInFrame,const vector<double>& XInFrame,const vector<double>& YInFrame,const vector<double>& VInFrame) const
 {
      int frmId = frmNr+ _minFrame;
+     std::ostringstream ss;
+     ss << std::setw(5) << std::setfill('0') << frmId;
+     const std::string str_frid = ss.str();
      double ClassicDensity = GetClassicalDensity(XInFrame, YInFrame, numPedsInFrame, _areaForMethod_C->_poly);
      double ClassicVelocity = GetClassicalVelocity(XInFrame, YInFrame, VInFrame, numPedsInFrame);
-     fprintf(_fClassicRhoV,"%d\t%.3f\t%.3f\n", frmId, ClassicDensity,ClassicVelocity);
+     fprintf(_fClassicRhoV,"%s\t%.3f\t%.3f\n", str_frid.c_str(), ClassicDensity,ClassicVelocity);
 }
 
 double Method_C::GetClassicalDensity(const vector<double>& xs, const vector<double>& ys, int pednum, polygon_2d measurearea ) const

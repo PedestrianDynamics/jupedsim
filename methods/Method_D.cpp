@@ -71,6 +71,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
+     _fps =peddata.GetFps();
      int minFrame = peddata.GetMinFrame();
      OpenFileMethodD();
      if(_calcIndividualFD)
@@ -156,7 +157,7 @@ bool Method_D::OpenFileMethodD()
      }
      else
      {
-          fprintf(_fVoronoiRhoV,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
+          fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
           return true;
      }
 }

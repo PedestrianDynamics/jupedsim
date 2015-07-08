@@ -46,6 +46,7 @@ private:
      MeasurementArea_B* _areaForMethod_C;
      std::string _trajName;
      std::string _projectRootDir;
+     float _fps;
      FILE *_fClassicRhoV;
      void OpenFileMethodC();
      void OutputClassicalResults(int frmNr, int numPedsInFrame, const std::vector<double>& XInFrame,const std::vector<double>& YInFrame, const std::vector<double>& VInFrame) const;

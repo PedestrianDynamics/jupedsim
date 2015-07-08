@@ -82,6 +82,7 @@ private:
      FILE* _fIndividualFD;
      double _grid_size_X;      // the size of the grid
      double _grid_size_Y;
+     float _fps;
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
 

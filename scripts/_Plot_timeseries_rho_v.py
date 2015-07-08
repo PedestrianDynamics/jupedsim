@@ -16,7 +16,7 @@ def getParserArgs():
 	args = parser.parse_args()
 	return args
 
-def plotRhoT(pathfile,figname,title,data_Classic=None, data_Voronoi=None):
+def plotRhoT(pathfile,figname,fps,title,data_Classic=None, data_Voronoi=None):
         fig = plt.figure(figsize=(16, 16), dpi=100)
         ax1 = fig.add_subplot(111,aspect='auto')
         plt.rc("font", size=30)
@@ -35,7 +35,7 @@ def plotRhoT(pathfile,figname,title,data_Classic=None, data_Voronoi=None):
         plt.savefig("%s/%s.png"%(pathfile,figname))
         plt.close()
 
-def plotVT(pathfile,figname,title,data_Classic=None, data_Voronoi=None):
+def plotVT(pathfile,figname,fps,title,data_Classic=None, data_Voronoi=None):
         fig = plt.figure(figsize=(16, 16), dpi=100)
         ax1 = fig.add_subplot(111,aspect='auto')
         plt.rc("font", size=30)
@@ -45,7 +45,7 @@ def plotVT(pathfile,figname,title,data_Classic=None, data_Voronoi=None):
         if data_Voronoi is not None:
                 plt.plot(data_Voronoi[:,0]/fps,data_Voronoi[:,2], 'r-', lw=3, label="Voronoi method")
         plt.xlabel("t [$s$]")
-        plt.ylabel("velocity [$m^{-2}$]")
+        plt.ylabel("velocity [$m/s$]")
         plt.gca().set_xlim(left=0)
         #plt.gca().set_ylim(bottom=0)
         plt.ylim(0,2)
@@ -70,8 +70,8 @@ if __name__ == '__main__':
                    figname_v="v_t_%s_id_%s"%(nametraj,ID)
                    title = "%s_id_%s"%(nametraj,ID)
                    data_Classic = loadtxt(fC)
-                   plotRhoT(pathfile,figname_rho,title,data_Classic)
-                   plotVT(pathfile,figname_v,title,data_Classic)
+                   plotRhoT(pathfile,figname_rho,fps,title,data_Classic)
+                   plotVT(pathfile,figname_v,fps,title,data_Classic)
            
    if f_Voronoi:
            for fV in f_Voronoi:
@@ -83,8 +83,8 @@ if __name__ == '__main__':
                    fC = "%s/rho_v_Classic_%s_id_%s.dat"%(pathfile,nametraj,ID)
                    if (os.path.isfile(fC)):
                            data_Classic = loadtxt(fC)
-                           plotRhoT(pathfile,figname_rho,title,data_Classic,data_Voronoi)
-                           plotVT(pathfile,figname_v,title,data_Classic,data_Voronoi)
+                           plotRhoT(pathfile,figname_rho,fps,title,data_Classic,data_Voronoi)
+                           plotVT(pathfile,figname_v,fps,title,data_Classic,data_Voronoi)
                    else:
-                           plotRhoT(pathfile,figname_rho,title,data_Voronoi)
-                           plotVT(pathfile,figname_v,title,data_Voronoi)
+                           plotRhoT(pathfile,figname_rho,fps,title,data_Voronoi)
+                           plotVT(pathfile,figname_v,fps,title,data_Voronoi)
