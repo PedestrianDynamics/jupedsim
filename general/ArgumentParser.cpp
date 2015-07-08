@@ -699,7 +699,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
           {
                double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"),pV0Mu);
                double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0DownStairs(mu,sigma);
+               agentParameters->InitV0UpStairs(mu,sigma);
                Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f",mu,sigma);
           }
 
@@ -707,7 +707,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
           {
                double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"),pV0Mu);
                double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0UpStairs(mu,sigma);
+               agentParameters->InitV0DownStairs(mu,sigma);
                Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f",mu,sigma);
           }//------------------------------------------------------------------------
           if (xAgentPara->FirstChild("escalator_upstairs"))
