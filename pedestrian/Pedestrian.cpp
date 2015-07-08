@@ -85,6 +85,10 @@ Pedestrian::Pedestrian()
      _spotlight = false;
      _V0UpStairs=0.0;
      _V0DownStairs=0.0;
+     _EscalatorUpStairs=0.0;
+     _EscalatorDownStairs=0.0;
+     _V0IdleEscalatorUpStairs=0.0;
+     _V0IdleEscalatorDownStairs=0.0;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
 
@@ -197,11 +201,15 @@ void Pedestrian::SetV(const Point& v)
      }
 }
 
-void Pedestrian::SetV0Norm(double v0,double v0UpStairs, double v0DownStairs)
+void Pedestrian::SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, double escalatorUp, double escalatorDown, double v0IdleEscalatorUp, double v0IdleEscalatorDown)
 {
-      _ellipse.SetV0(v0);
+     _ellipse.SetV0(v0);
      _V0DownStairs=v0DownStairs;
      _V0UpStairs=v0UpStairs;
+     _EscalatorUpStairs=escalatorUp;
+     _EscalatorDownStairs=escalatorDown;
+     _V0IdleEscalatorUpStairs=v0IdleEscalatorUp;
+     _V0IdleEscalatorDownStairs=v0IdleEscalatorDown;
 }
 
 void Pedestrian::Setdt(double dt)
@@ -401,13 +409,26 @@ double Pedestrian::GetV0Norm() const
            {
                 // printf("z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_V0DownStairs + f*_ellipse.GetV0());
                 // getc(stdin);
-                 return (1-f)*_V0DownStairs + f*_ellipse.GetV0();
-                 
+                double speed_down = _V0DownStairs;
+                if(sub->GetType() == "escalator"){
+                     speed_down = _EscalatorDownStairs;
+                }
+                else if(sub->GetType() == "idle_escalator"){
+                     speed_down = _V0IdleEscalatorDownStairs;
+                }
+                 return (1-f)*speed_down + f*_ellipse.GetV0();
            }
            //we are walking upstairs
            else
-           {           
-                 return (1-f)*_ellipse.GetV0() + f*_V0UpStairs;
+           {
+                double speed_up = _V0UpStairs;
+                if(sub->GetType() == "escalator"){
+                     speed_up = _EscalatorUpStairs;
+                }
+                else if(sub->GetType() == "idle_escalator"){
+                     speed_up = _V0IdleEscalatorUpStairs;
+                }
+                 return (1-f)*_ellipse.GetV0() + f*speed_up;
            }
      }
      // orthogonal projection on the stair

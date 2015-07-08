@@ -203,9 +203,13 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
      ped->SetV0Norm(_groupParameters->GetV0(),
-               _groupParameters->GetV0DownStairs(),
-               _groupParameters->GetV0UpStairs());
-
+                    _groupParameters->GetV0UpStairs(),
+                    _groupParameters->GetV0DownStairs(),
+                    _groupParameters->GetEscalatorUpStairs(),
+                    _groupParameters->GetEscalatorDownStairs(),
+                    _groupParameters->GetV0IdleEscalatorUpStairs(),
+                    _groupParameters->GetV0IdleEscalatorDownStairs()
+          );
      // first default Position
      int index = -1;
 

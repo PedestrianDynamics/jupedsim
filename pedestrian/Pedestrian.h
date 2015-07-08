@@ -70,7 +70,10 @@ private:
      //double _V0;
      double _V0UpStairs;
      double _V0DownStairs;
-
+     double _EscalatorUpStairs;
+     double _EscalatorDownStairs;
+     double _V0IdleEscalatorUpStairs;
+     double _V0IdleEscalatorDownStairs;
      //location parameters
      std::string _roomCaption;
      int _roomID;
@@ -160,7 +163,7 @@ public:
      void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
      void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
-     void SetV0Norm(double v0,double v0UpStairs, double v0DownStairs);
+     void SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, double escalatorUp, double escalatorDown, double v0IdleEscalatorUp, double v0IdleEscalatorDown);
      void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
      void SetPhiPed();
      void SetFinalDestination(int UID);

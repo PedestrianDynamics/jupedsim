@@ -491,9 +491,9 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                SubRoom* subroom = NULL;
 
-               if (type == "stair") {
+               if (type == "stair" || type == "escalator" || type == "idle_escalator") {
                     if(xSubRoom->FirstChildElement("up")==NULL) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
+                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;
                     }
