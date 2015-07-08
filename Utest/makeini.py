@@ -117,7 +117,7 @@ def get_attribute(node):
                 value = 0
             if isinstance(value, list):
                 if len(value) > 1:
-                    values.append([value, str(node.tag)+"_"+str(node_attrib), node_attrib])
+                    values.append([value, str(node.tag)+"|"+str(node_attrib), node_attrib])
 
     return values
 # =======================================================
@@ -185,15 +185,16 @@ def update_tag_value(root, tag, value):
 # =======================================================
 def update_attrib_value(root, attr_tag, value):
     # location
-
+    # print "update_attrib_value: ", attr_tag, value
+    # raw_input()
     if attr_tag == "location":  # e.g. location
         for r in root.iter():
             if r.attrib.has_key(attr_tag):
                 r.attrib[attr_tag] = str(value)
         return
 
-    attr = attr_tag.split("_")[1]
-    cor_tag = attr_tag.split("_")[0]
+    attr = attr_tag.split("|")[1]
+    cor_tag = attr_tag.split("|")[0]
 
     for r in root.iter(cor_tag):
         if r.attrib.has_key(attr):
@@ -215,6 +216,8 @@ def make_file(masterfile, tree, result):
             logging.error("make_file: could not create file %s"%newfile)
             sys.exit(FAILURE)
         for tag, value in item.iteritems():
+            # print "tag: ", tag, "value:", value
+            # raw_input()
             if tag in attributes_tags:
                 update_attrib_value(root, tag, value)
             else:
