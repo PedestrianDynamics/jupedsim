@@ -35,36 +35,36 @@ tags = ['tmax',
         'num_threads',
         'stepsize']
 
-# format tag|attribute
-attributes_tags = ['group|pre_movement_mean',
-                   'group|number',
-                   'group|agent_parameter_id',
-                   'group|premovement_sigma',
-                   'agents|operational_id',
-                   'linkedcells|cell_size',
-                   'v0|mu', 'v0|sigma',
-                   'v0_upstairs|mu', 'v0_upstairs|sigma',
-                   'v0_downstairs|mu', 'v0_downstairs|sigma',
-                   'bmax|mu', 'bmin|mu',
-                   'amin|mu', 'tau|mu',
-                   'atau|mu',
-                   'force_ped|dist_max',
-                   'force_ped|disteff_max',
-                   'force_ped|interpolation_width',
-                   'force_ped|nu',
-                   'force_ped|b',
-                   'force_ped|c',
-                   'force_wall|dist_max',
-                   'force_wall|disteff_max',
-                   'force_wall|interpolation_width',
-                   'force_wall|nu',
-                   'force_wall|b',
-                   'force_wall|c']
+# format tag-attribute
+attributes_tags = ['group-pre_movement_mean',
+                   'group-number',
+                   'group-agent_parameter_id',
+                   'group-premovement_sigma',
+                   'agents-operational_model_id',
+                   'linkedcells-cell_size',
+                   'v0-mu', 'v0-sigma',
+                   'v0_upstairs-mu', 'v0_upstairs-sigma',
+                   'v0_downstairs-mu', 'v0_downstairs-sigma',
+                   'bmax-mu', 'bmin-mu',
+                   'amin-mu', 'tau-mu',
+                   'atau-mu',
+                   'force_ped-dist_max',
+                   'force_ped-disteff_max',
+                   'force_ped-interpolation_width',
+                   'force_ped-nu',
+                   'force_ped-b',
+                   'force_ped-c',
+                   'force_wall-dist_max',
+                   'force_wall-disteff_max',
+                   'force_wall-interpolation_width',
+                   'force_wall-nu',
+                   'force_wall-b',
+                   'force_wall-c']
 
 import numpy as np
 # cor_tags = np.unique([att.split("_")[0] for att in attributes_tags]).astype(str)a
-cor_tags = [att.split("|")[0] for att in attributes_tags]
-attributes = [att.split(tag+"|")[1] for (att, tag) in zip(attributes_tags, cor_tags)]
+cor_tags = [att.split("-")[0] for att in attributes_tags]
+attributes = [att.split(tag+"-")[1] for (att, tag) in zip(attributes_tags, cor_tags)]
 cor_tags = np.unique(cor_tags)
 attributes = np.unique(attributes)
 input_tags = {}
@@ -117,7 +117,7 @@ def get_attribute(node):
                 value = 0
             if isinstance(value, list):
                 if len(value) > 1:
-                    values.append([value, str(node.tag)+"|"+str(node_attrib), node_attrib])
+                    values.append([value, str(node.tag)+"-"+str(node_attrib), node_attrib])
 
     return values
 # =======================================================
@@ -193,8 +193,8 @@ def update_attrib_value(root, attr_tag, value):
                 r.attrib[attr_tag] = str(value)
         return
 
-    attr = attr_tag.split("|")[1]
-    cor_tag = attr_tag.split("|")[0]
+    attr = attr_tag.split("-")[1]
+    cor_tag = attr_tag.split("-")[0]
 
     for r in root.iter(cor_tag):
         if r.attrib.has_key(attr):
@@ -255,3 +255,4 @@ if __name__ == "__main__":
         sys.exit(FAILURE)
     else:
         sys.exit(SUCCESS)
+
