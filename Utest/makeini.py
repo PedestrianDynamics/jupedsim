@@ -115,7 +115,7 @@ def get_attribute(node):
                 value = eval(text)
             else:
                 value = 0
-            if isinstance(value, list):
+            if isinstance(value, list) or isinstance(value, ndarray):
                 if len(value) > 1:
                     values.append([value, str(node.tag)+"-"+str(node_attrib), node_attrib])
 
@@ -255,4 +255,5 @@ if __name__ == "__main__":
         sys.exit(FAILURE)
     else:
         sys.exit(SUCCESS)
+
 

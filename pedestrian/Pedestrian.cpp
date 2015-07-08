@@ -428,6 +428,8 @@ double Pedestrian::GetV0Norm() const
                 else if(sub->GetType() == "idle_escalator"){
                      speed_up = _V0IdleEscalatorUpStairs;
                 }
+                // printf("z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
+                // getc(stdin);
                  return (1-f)*_ellipse.GetV0() + f*speed_up;
            }
      }
