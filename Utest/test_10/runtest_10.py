@@ -29,6 +29,7 @@ DIR = os.path.dirname(os.path.realpath(argv[0]))
 
 
 if __name__ == "__main__":
+    [open(f, 'w') for f in glob.glob("log_*")] # empty logs
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
         os.chdir(DIR)
@@ -72,7 +73,7 @@ if __name__ == "__main__":
         if len(cell_size.split("_")) > 1: # cell_size in the middle
             cell_size = float(cell_size.split("_")[0])
         else: # cell_size at the end of filename
-            cell_size = float(cell_size.split(".")[0])
+            cell_size = float(cell_size.split(".xml")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
         logging.info('cell_size = <%.2f>'%cell_size)
