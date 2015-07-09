@@ -232,8 +232,9 @@ bool Obstacle::ConvertLineToPoly()
        	 copy.push_back(&w);
 
      Point pIntsct(J_NAN, J_NAN);
-     for (auto& it : _walls)
-    	 for (unsigned int i = 0; i < copy.size(); ++i) {
+     int itr = 1;
+     for (auto& it : _walls) {
+    	 for (unsigned int i = itr; i < copy.size(); ++i) {
     		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
     			 if (it.ShareCommonPointWith(*copy[i]) == false) {
     				 char tmp[CLENGTH];
@@ -246,7 +247,22 @@ bool Obstacle::ConvertLineToPoly()
     			 }
     		 }
     	 }
-
+    	 int j = 0;
+    	 for (unsigned int i = itr; i < copy.size(); ++i)
+    		 if (it.ShareCommonPointWith(*copy[i]) == true)
+    			 ++j;
+         if (j <= 2)
+        	 j = 0;
+         else {
+        	 char tmp[CLENGTH];
+        	 sprintf(tmp, "ERROR: \tObstacle::ConvertLineToPoly(): ID %d !!!\n", _id);
+        	 Log->Write(tmp);
+        	 sprintf(tmp, "ERROR: \tWall %s shares edge with multiple walls!!!\n", it.toString().c_str());
+        	 Log->Write(tmp);
+        	 return false;
+         }
+    	 ++itr;
+     }
      line = copy[0];
      tmpPoly.push_back(line->GetPoint1());
      point = line->GetPoint2();
