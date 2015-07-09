@@ -35,7 +35,7 @@ Running
 
 >> jpscore.exe my_simulation_ini.xml
 
-from the command line (or also dropping the file on the executable) will generate a trajectory file, which you can visualize with TraVisTo.
+from the command line (or also dropping the file on the executable) will generate a trajectory file, which you can visualize with jpsvis.
 You will find some projects samples in the downloaded files and further information in the manual.
 Showcase
 
@@ -64,7 +64,7 @@ make
 
 Note that the OpenMP acceleration might be missing under OSX
 
-For the visualization module (TraVisTo) at least Qt version 4.5 and VTK version 4.8 are required.
+For the visualization module (jpsvis) at least Qt version 4.5 and VTK version 4.8 are required.
 You can download the latest version of QT here and the latest version of VTK (visualization toolkit) here.
 System Requirements
 
@@ -93,5 +93,5 @@ Frequently Asked Questions
         We are actually setting up verification and validation tests. Some verification tests are included in this version but most of them will be available with the next version.
 
     How can I contribute to JuPedSim?
-        Testing and reporting bugs will be great. If you to contribute actively to the code, by implementing new models and/or features, you are welcome to do yo. Please contact a mail to info at jupedsim.org so that we can grant you access to the repositories.
+        Testing and reporting bugs will be great. If you to contribute actively to the code, by implementing new models and/or features, you are welcome to do so.
 
