@@ -165,30 +165,38 @@ public:
      /**
       * @see http://alienryderflex.com/intersect/
       * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
-      * @return true if both segments intersect
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       */
-     bool IntersectionWith(const Line& l) const; // check two segments for intersections
+     int IntersectionWith(const Line& l) const; // check two segments for intersections
 
      /**
       * @see http://alienryderflex.com/intersect/
       * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
-      * @return true if both segments intersect
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       */
-     bool IntersectionWith(const Point& p1, const Point&p2) const;
+     int IntersectionWith(const Point& p1, const Point&p2) const;
 
      /*
-      * @return true if both segments intersect & store the point of intersection
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       * Special case:  If the Lines are superposed/ Parallel/ no intersection,
       * then the Point of intersection is stored as NaN.
       */
-     bool IntersectionWith(const Point& p1, const Point& p2, Point& p3) const;
+     int IntersectionWith(const Point& p1, const Point& p2, Point& p3) const;
 
      /*
-      * @return true if both segments intersect & store the point of intersection
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       * Special case:  If the Lines are superposed/ Parallel/ no intersection,
       * then the Point of intersection is stored as NaN.
       */
-     bool IntersectionWith(const Line& L, Point& p3) const;
+     int IntersectionWith(const Line& L, Point& p3) const;
     
      /**
       * @return the distance squared between the first point and the intersection

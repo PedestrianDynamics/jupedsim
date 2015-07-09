@@ -288,7 +288,7 @@ bool Line::Overlapp(const Line& l) const
 }
 
 //FIXME no equals check with == on double or float bring in an epsilon
-bool Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
+int Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
     Point AC = _point1 - p1;
     Point DC = p2 - p1;
     Point BA = _point2 - _point1;
@@ -302,38 +302,41 @@ bool Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
         // the lines are superposed
         if (numerator == 0.0) {
         	// the segment are superposed
-        	this->ShareCommonPointWith(Line(p1, p2), p3);
-            return IsInLineSegment(p1) || IsInLineSegment(p2);
+        	if (this->ShareCommonPointWith(Line(p1, p2), p3) == true)
+        		return LineIntersectType::INTERSECTION;
+            //IsInLineSegment(p1) || IsInLineSegment(p2);
+        	else
+        		return LineIntersectType::OVERLAP;
         }
         else { // the lines are just parallel and do not share a common point
-            return false;
+            return LineIntersectType::NO_INTERSECTION;
         }
     }
 
     double r = numerator / denominator;
     if (r < 0.0 || r > 1.0) {
-        return false;
+        return LineIntersectType::NO_INTERSECTION;
     }
 
     double s = (BA.CrossProduct(AC)) / denominator;
     if (s < 0.0 || s > 1.0) {
-        return false;
+        return LineIntersectType::NO_INTERSECTION;
     }
 
     p3 = _point1 + BA * r;
-    return true;
+    return LineIntersectType::INTERSECTION;
 }
 
-bool Line::IntersectionWith(const Line& L, Point& p3) const {
+int Line::IntersectionWith(const Line& L, Point& p3) const {
 	return IntersectionWith(L._point1, L._point2, p3);
 }
 
-bool Line::IntersectionWith(const Point& p1, const Point& p2) const {
+int Line::IntersectionWith(const Point& p1, const Point& p2) const {
 	Point dummy;
 	return IntersectionWith(p1, p2, dummy);
 }
 
-bool Line::IntersectionWith(const Line &l) const {
+int Line::IntersectionWith(const Line &l) const {
 	Point dummy;
     return IntersectionWith(l._point1, l._point2, dummy);
 }
