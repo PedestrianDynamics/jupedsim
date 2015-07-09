@@ -141,6 +141,12 @@ enum AgentColorMode {
      BY_FINAL_GOAL,
      BY_INTERMEDIATE_GOAL
 };
+
+enum LineIntersectType {
+	NO_INTERSECTION = 0,
+	INTERSECTION,
+	OVERLAP // overlap, parallel, no intersection
+};
 //global functions for convenience
 
 inline char xmltob(const char * t, char v = 0)
