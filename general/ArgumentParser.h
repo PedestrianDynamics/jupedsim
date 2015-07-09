@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -49,6 +49,7 @@ class ArgumentParser {
 private:
 
      std::string _geometryFileName;
+     std::string _scriptsLocation;
      std::string _errorLogFile;
      std::string _trajectoriesLocation;
      std::string _trajectoriesFilename;
@@ -75,8 +76,8 @@ private:
      std::vector<int> _areaIDforMethodB;
      std::vector<int> _areaIDforMethodC;
      std::vector<int> _areaIDforMethodD;
-     float _scaleX;
-     float _scaleY;
+     float _grid_size_X;
+     float _grid_size_Y;
      int _log;
 
      std::map <int, MeasurementArea*> _measurementAreas;
@@ -89,6 +90,7 @@ public:
      const std::string& GetTrajectoriesFilename() const;
      const std::vector<std::string>& GetTrajectoriesFiles() const;
      const std::string& GetTrajectoriesLocation() const;
+     const std::string& GetScriptsLocation() const;
      const FileFormat& GetFileFormat() const;
      const std::string& GetGeometryFilename() const;
      const std::string& GetErrorLogFile() const;
@@ -120,8 +122,8 @@ public:
      double GetSteadyStart() const;
      double GetSteadyEnd() const;
      bool GetIsGetProfile() const;
-     float GetScaleX() const;
-     float GetScaleY() const;
+     float GetGridSizeX() const;
+     float GetGridSizeY() const;
      int GetLog() const;
      bool ParseArgs(int argc, char **argv);
 

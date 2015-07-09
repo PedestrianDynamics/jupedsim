@@ -1,8 +1,8 @@
 /**
  * \file        Transition.h
  * \date        Nov 16, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -43,10 +43,18 @@ private:
      // number of agents that passed that exit
      int _doorUsage;
      double _lastPassingTime;
+     std::string _flowAtExit;
 
 public:
 
+     /**
+      * Cosntructor
+      */
      Transition();
+
+     /**
+      * Destructor
+      */
      virtual ~Transition();
 
      /**
@@ -81,6 +89,12 @@ public:
       * @return the number of pedestrians that used that exit.
       */
      int GetDoorUsage() const;
+
+
+     /**
+      * @return the flow curve for this exit
+      */
+     const std::string & GetFlowCurve() const;
 
      /**
       * @return the last time this door was crossed

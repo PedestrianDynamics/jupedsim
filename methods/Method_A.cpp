@@ -1,8 +1,8 @@
 /**
  * \file        Method_A.cpp
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -43,6 +43,7 @@ Method_A::Method_A()
      _firstFrame = NULL;
      _passLine = NULL;
      _deltaT = 100;
+     _fps=16;
      _areaForMethod_A = NULL;
 }
 
@@ -51,18 +52,20 @@ Method_A::~Method_A()
 
 }
 
-bool Method_A::Process (const PedData& peddata)
+bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
 {
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
+     _scriptsLocation=scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
      _xCor = peddata.GetXCor();
      _yCor = peddata.GetYCor();
      _firstFrame = peddata.GetFirstFrame();
+     _fps =peddata.GetFps();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_A->_id);
      _passLine = new bool[peddata.GetNumPeds()];
      string outputRhoV;
-     outputRhoV.append("#Frame\t	Cumulative pedestrians\n");
+     outputRhoV.append("#Time [s]\t	Cumulative pedestrians\n");
      for(int i=0; i<peddata.GetNumPeds(); i++)
      {
           _passLine[i] = false;
@@ -81,7 +84,7 @@ bool Method_A::Process (const PedData& peddata)
           const vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
           GetAccumFlowVelocity(frameNr, ids, VInFrame);
           char tmp[30];
-          sprintf(tmp, "%d\t%d\n", frid, _classicFlow);
+          sprintf(tmp, "%.2f\t%d\n", frid/_fps, _classicFlow);
           outputRhoV.append(tmp);
      }
      FlowRate_Velocity(peddata.GetFps(), _accumPedsPassLine,_accumVPassLine);
@@ -94,7 +97,19 @@ void Method_A::WriteFile_N_t(string data)
 {
      string fN_t= _projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
      ofstream file(fN_t);
-     file<<data;
+     if(file.is_open())
+     {
+          file<<data;
+          string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
+          string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
+          string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+          system(parameters_N_t.c_str());
+          Log->Write("INFO:\tPlotting N-t diagram!");
+     }
+     else
+     {
+          Log->Write("ERROR: could not create the file "+fN_t);
+     }
 }
 
 void Method_A::GetAccumFlowVelocity(int frame, const vector<int>& ids, const vector<double>& VInFrame)
@@ -144,7 +159,7 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
           Log->Write("cannot open the file to write the Flow-Velocity data\n");
           exit(0);
      }
-     fprintf(fFD_FlowVelocity,"#Flow rate(1/s)	Mean velocity(m/s)\n");
+     fprintf(fFD_FlowVelocity,"#Flow rate(1/s)	\t Mean velocity(m/s)\n");
      int TotalTime=AccumPeds.size();  // the total Frame of in the data file
      int TotalPeds=AccumPeds[TotalTime-1];  //the total pedestrians in the data file
      if(TotalPeds>0)
@@ -167,7 +182,8 @@ void Method_A::FlowRate_Velocity(int fps, const vector<int>& AccumPeds, const ve
                     pedspassT[AccumPeds[ix]]=ix;
                }
           }
-          for(int i=firstPassT+_deltaT; i<TotalTime; i+=_deltaT) {
+          for(int i=firstPassT+_deltaT; i<TotalTime; i+=_deltaT)
+          {
                int N1 = AccumPeds[i-_deltaT];  // the total number of pedestrians pass the line at this time
                int N2 = AccumPeds[i];
                int t_N1 = pedspassT[N1];

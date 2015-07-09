@@ -1,8 +1,8 @@
 /**
  * \file        Analysis.h
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J�lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J�lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -113,8 +113,8 @@ private:
      //polygon_2d _geoPoly;
      std::map<int, polygon_2d> _geoPoly;
 
-     double _scaleX;      // the size of the grid
-     double _scaleY;
+     double _grid_size_X;      // the size of the grid
+     double _grid_size_Y;
      double _lowVertexX;  // LOWest vertex of the geometry (x coordinate)
      double _lowVertexY;  //  LOWest vertex of the geometry (y coordinate)
      double _highVertexX; // Highest vertex of the geometry
@@ -133,6 +133,7 @@ private:
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
      std::string _projectRootDir;
+     std::string _scriptsLocation;
      FileFormat _trajFormat;  // format of the trajectory file
 
      std::vector<MeasurementArea_L*> _areaForMethod_A;

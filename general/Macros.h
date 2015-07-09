@@ -1,7 +1,7 @@
 /**
  * \file        Macros.h
  * \date        Jun 16, 2010
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -25,7 +25,7 @@
  *
  *
  **/
-
+ 
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -36,20 +36,26 @@
 #include <string.h>
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
 
 #ifndef M_PI
-#define M_PI   3.14159265358979323846
+#define M_PI 3.14159265358979323846
+#endif 
+
+#ifndef VORO_LOCATION
+#define VORO_LOCATION "./Output/Fundamental_Diagram/Classical_Voronoi/"
 #endif
 
-#define  _isnan(x) std::isnan(x)
 // should be true only when using this file in the simulation core
 //#define _SIMULATOR 1
+//#define _USE_PROTOCOL_BUFFER 1
 
+#define JPS_OLD_VERSION "0.5" // this version is still supported
+#define JPS_VERSION_MINOR "6"
+#define JPS_VERSION_MAJOR "0"
 
-#define JPS_VERSION "0.6"
-#define JPS_VERSION_MINOR 6
-#define JPS_VERSION_MAJOR 0
+#define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
 
 // disable openmp in debug mode
 #ifdef _NDEBUG
@@ -81,7 +87,7 @@
 #define FINAL_DEST_OUT -1
 
 // Linked cells
-#define LIST_EMPTY      -1
+#define LIST_EMPTY  -1
 
 
 enum RoomState {
@@ -117,19 +123,23 @@ enum RoutingStrategy {
 };
 
 enum OperativModels {
-     MODEL_GFCM=1,
-     MODEL_GOMPERTZ,
-     //    MODEL_ORCA,
-     //    MODEL_CFM,
-     //    MODEL_VELO
-     //    MODEL_GNM
+    MODEL_GFCM=1,
+    MODEL_GOMPERTZ,
+//    MODEL_ORCA,
+//    MODEL_CFM,
+//    MODEL_VELO
+//    MODEL_GNM
 };
 
 enum AgentColorMode {
      BY_VELOCITY=1,
      BY_KNOWLEDGE,
      BY_ROUTE,
-     BY_SPOTLIGHT
+     BY_ROUTER,
+     BY_SPOTLIGHT,
+     BY_GROUP,
+     BY_FINAL_GOAL,
+     BY_INTERMEDIATE_GOAL
 };
 //global functions for convenience
 
@@ -168,7 +178,7 @@ inline char xmltoc(const char * t, const char v = '\0')
  * @return true if the element is present in the vector
  */
 template<typename A>
-inline bool IsElementInVector(const std::vector<A> &vec, A& el) {
+inline bool IsElementInVector(const std::vector<A> &vec, const A& el) {
      typename std::vector<A>::const_iterator it;
      it = std::find (vec.begin(), vec.end(), el);
      if(it==vec.end()) {
@@ -247,26 +257,26 @@ inline std::string concatenate(std::string const& name, int i) {
 
 inline void _printDebugLine(const std::string& fileName, int lineNumber)
 {
-     unsigned found = fileName.find_last_of("/\\");
-     std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<<std::endl;
+unsigned found = fileName.find_last_of("/\\");
+std::cerr  << "["<< lineNumber  << "]: ---"<< fileName.substr(found+1)<< " ---"<<std::endl;
 }
 
 #define dtrace(...)                         \
-          (_printDebugLine(__FILE__, __LINE__),   \
-                    fprintf(stderr, __VA_ARGS__),           \
-                    (void) fprintf(stderr, "\n"))
+    (_printDebugLine(__FILE__, __LINE__),   \
+    fprintf(stderr, __VA_ARGS__),           \
+    (void) fprintf(stderr, "\n"))
 
 #define derror(...)                         \
-          (_printDebugLine(__FILE__, __LINE__),   \
-                    fprintf(stderr, "ERROR: "),             \
-                    fprintf(stderr, __VA_ARGS__)            \
-          )
+    (_printDebugLine(__FILE__, __LINE__),   \
+    fprintf(stderr, "ERROR: "),             \
+    fprintf(stderr, __VA_ARGS__)            \
+    )
 #else
 
 #define dtrace(...)    ((void) 0)
 #define derror(...)                         \
-          (fprintf(stderr, __VA_ARGS__)           \
-          )
+    (fprintf(stderr, __VA_ARGS__)           \
+    )
 #endif /* TRACE_LOGGING */
 
 #endif  /* _MACROS_H */

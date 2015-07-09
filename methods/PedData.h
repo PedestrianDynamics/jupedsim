@@ -1,8 +1,8 @@
 /**
  * \file        PedData.h
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -53,7 +53,7 @@ public:
      int GetMinID() const;
      int GetNumFrames() const;
      int GetNumPeds() const;
-     int GetFps() const;
+     float GetFps() const;
      std::string GetTrajName() const;
      std::string GetProjectRootDir() const;
      std::map<int , std::vector<int>> GetPedsFrame() const;
@@ -83,7 +83,7 @@ private:
      int _minID=1;
      int _numFrames=0;  // total number of frames
      int _numPeds=0; // total number of pedestrians
-     int _fps=16;
+     float _fps=16;
      std::map<int , std::vector<int>> _peds_t;
 
      int _deltaF=5;

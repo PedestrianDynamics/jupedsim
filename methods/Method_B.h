@@ -1,8 +1,8 @@
 /**
  * \file        Method_B.h
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -48,7 +48,7 @@ private:
      std::map<int , std::vector<int> > _peds_t;
      MeasurementArea_B* _areaForMethod_B;
      int _NumPeds;
-     int _fps;
+     float _fps;
      double** _xCor;
      double** _yCor;
      int *_tIn;           //the time for each pedestrian enter the measurement area

@@ -1,8 +1,8 @@
 /**
  * \file        Analysis.cpp
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -82,8 +82,8 @@ Analysis::Analysis()
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      _vComponent = 'B'; // to mark whether x, y or x and y coordinate are used when calculating the velocity
 
-     _scaleX = 0.10;   // the size of the grid
-     _scaleY = 0.10;
+     _grid_size_X = 0.10;   // the size of the grid
+     _grid_size_Y = 0.10;
      _lowVertexX = 0;// LOWest vertex of the geometry (x coordinate)
      _lowVertexY = 0; //  LOWest vertex of the geometry (y coordinate)
      _highVertexX = 10; // Highest vertex of the geometry
@@ -182,13 +182,14 @@ void Analysis::InitArgs(ArgumentParser* args)
      _outputGraph = args->GetIsOutputGraph();
      _calcIndividualFD = args->GetIsIndividualFD();
      _vComponent = args->GetVComponent();
-     _scaleX = int(args->GetScaleX());
-     _scaleY = int(args->GetScaleY());
+     _grid_size_X = int(args->GetGridSizeX());
+     _grid_size_Y = int(args->GetGridSizeY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
      _cutRadius=args->GetCutRadius();
      _circleEdges=args->GetCircleEdges();
+     _scriptsLocation=args->GetScriptsLocation();
 }
 
 
@@ -232,9 +233,9 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
                               geo_maxY = (tmp_point._y*M2CM>=geo_maxY) ? (tmp_point._y*M2CM) : geo_maxY;
                          }
                          correct(geoPoly[area->_id]);
-
+                         //cout<<"this is:\t"<<subroom->GetAllObstacles().size()<<endl;
                          //appen the holes/obstacles if any
-                         int k=0;
+                         int k=1;
                          for(auto&& obst: subroom->GetAllObstacles())
                          {
                               geoPoly[area->_id].inners().resize(k++);
@@ -276,6 +277,40 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           return -1;
      }
 
+     //-----------------------------check whether there is pedestrian outside the whole geometry--------------------------------------------
+     std::map<int , std::vector<int> > _peds_t=data.GetPedsFrame();
+     for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++ )
+     {
+    	 vector<int> ids=_peds_t[frameNr];
+    	 vector<int> IdInFrame = data.GetIdInFrame(ids);
+    	 vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
+    	 vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
+    	 for( unsigned int i=0;i<IdInFrame.size();i++)
+		 {
+    		 bool IsInBuilding=false;
+    		 for (auto&& it_room : _building->GetAllRooms())
+    		 {
+    			 for (auto&& it_sub : it_room.second->GetAllSubRooms())
+    			 {
+    				 SubRoom* subroom = it_sub.second.get();
+    				 if(subroom->IsInSubRoom(Point(XInFrame[i]*CMtoM,YInFrame[i]*CMtoM)))
+    				 {
+    					 IsInBuilding=true;
+    					 break;
+    				 }
+    			 }
+    			 if(IsInBuilding)
+				 {
+					 break;
+				 }
+    		 }
+    		 if(false==IsInBuilding)
+			  {
+				  Log->Write("Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!", frameNr+data.GetMinFrame(), XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
+			  }
+		 }
+     }
+     //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
      if(_DoesUseMethodA) //Method A
      {
@@ -284,7 +319,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
                method_A.SetTimeInterval(_deltaT);
-               bool result_A=method_A.Process(data);
+               bool result_A=method_A.Process(data,_scriptsLocation);
                if(result_A)
                {
                     Log->Write("INFO:\tSuccess with Method A using measurement area id %d!\n",_areaForMethod_A[i]->_id);
@@ -339,7 +374,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                Method_D method_D;
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
-               method_D.SetScale(_scaleX, _scaleY);
+               method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetCalculateIndividualFD(_calcIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);
@@ -348,7 +383,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                     method_D.Setcutbycircle(_cutRadius, _circleEdges);
                }
                method_D.SetMeasurementArea(_areaForMethod_D[i]);
-               bool result_D = method_D.Process(data);
+               bool result_D = method_D.Process(data,_scriptsLocation);
                if(result_D)
                {
                     Log->Write("INFO:\tSuccess with Method D using measurement area id %d!\n",_areaForMethod_D[i]->_id);
@@ -359,7 +394,12 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                }
           }
      }
-
+     if(_DoesUseMethodC || _DoesUseMethodD)
+	 {
+		  string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+											 " -f "+boost::lexical_cast<std::string>(data.GetFps());
+		  system(parameters_Timeseries.c_str());
+	 }
      return 0;
 }
 

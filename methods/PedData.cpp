@@ -1,8 +1,8 @@
 /**
  * \file        PedData.cpp
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -105,7 +105,7 @@ bool PedData::InitializeVariables(const string& filename)
                     if(strs[0]=="#framerate" && strs.size()==2)
                     {
                          _fps= atof(strs[1].c_str());
-                         Log->Write("INFO:\tFrame rate fps: <%d>", _fps);
+                         Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
                     }
 
                }
@@ -200,7 +200,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           return false;
      }
      if( xRootNode->ValueStr () != "trajectories" ) {
-          Log->Write("ERROR:\tRoot element value is not 'geometry'.");
+          Log->Write("ERROR:\tRoot element value is not 'trajectories'.");
           return false;
      }
 
@@ -224,7 +224,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      //framerate
      if(xHeader->FirstChild("frameRate")) {
           _fps=atoi(xHeader->FirstChild("frameRate")->FirstChild()->Value());
-          Log->Write("INFO:\tFrame rate fps: <%d>", _fps);
+          Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
      }
 
      CreateGlobalVariables(_numPeds, _numFrames);
@@ -428,7 +428,7 @@ int PedData::GetNumPeds() const
      return _numPeds;
 }
 
-int PedData::GetFps() const
+float PedData::GetFps() const
 {
      return _fps;
 }

@@ -1,8 +1,8 @@
 /**
  * \file        Method_A.h
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -47,13 +47,14 @@ public:
      virtual ~Method_A();
      void SetMeasurementArea (MeasurementArea_L* area);
      void SetTimeInterval(const int& deltaT);
-     bool Process (const PedData& peddata);
+     bool Process (const PedData& peddata,const std::string& scriptsLocation);
 
 private:
      std::string _trajName;
      std::string _measureAreaId;
      MeasurementArea_L* _areaForMethod_A;
      std::string _projectRootDir;
+     std::string _scriptsLocation;
 
      std::vector<int> _accumPedsPassLine; // the accumulative pedestrians pass a line with time
      std::vector<double> _accumVPassLine; // the accumulative instantaneous velocity of the pedestrians pass a line
@@ -62,6 +63,7 @@ private:
      double** _xCor;
      double** _yCor;
      int* _firstFrame;
+     float _fps;
 
      bool *_passLine;
      int _classicFlow;    // the number of pedestrians pass a line in a certain time

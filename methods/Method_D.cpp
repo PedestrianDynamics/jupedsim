@@ -1,8 +1,8 @@
 /**
  * \file        Method_D.cpp
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -35,10 +35,11 @@
 using namespace std;
 
 
+
 Method_D::Method_D()
 {
-     _scaleX = 10;
-     _scaleY = 10;
+     _grid_size_X = 0.10;
+     _grid_size_Y = 0.10;
      _outputVoronoiCellData = false;
      _getProfile = false;
      _geoMinX = 0;
@@ -59,16 +60,18 @@ Method_D::~Method_D()
 
 }
 
-bool Method_D::Process (const PedData& peddata)
+bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation)
 {
-	if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
-	{
-		return false;
-	}
-	 _peds_t = peddata.GetPedsFrame();
+     /*if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
+     {
+          return false;
+     }*/
+	 _scriptsLocation = scriptsLocation;
+     _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
      _projectRootDir = peddata.GetProjectRootDir();
      _measureAreaId = boost::lexical_cast<string>(_areaForMethod_D->_id);
+     _fps =peddata.GetFps();
      int minFrame = peddata.GetMinFrame();
      OpenFileMethodD();
      if(_calcIndividualFD)
@@ -79,34 +82,56 @@ bool Method_D::Process (const PedData& peddata)
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      {
           int frid =  frameNr + minFrame;
+
+          //padd the frameid with 0
+          std::ostringstream ss;
+          ss << std::setw(5) << std::setfill('0') << frid;
+          const std::string str_frid = ss.str();
+
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
           }
           vector<int> ids=_peds_t[frameNr];
-          int NumPeds = ids.size();
           vector<int> IdInFrame = peddata.GetIdInFrame(ids);
           vector<double> XInFrame = peddata.GetXInFrame(frameNr, ids);
           vector<double> YInFrame = peddata.GetYInFrame(frameNr, ids);
           vector<double> VInFrame = peddata.GetVInFrame(frameNr, ids);
+
+          //vector int to_remove
+          //------------------------------Remove peds outside geometry------------------------------------------
+          for( int i=0;i<(int)IdInFrame.size();i++)
+          {
+        	  if(false==within(point_2d(round(XInFrame[i]), round(YInFrame[i])), _geoPoly))
+        	  {
+        		  //Log->Write("Warning:\tPedestrian at <x=%.4f, y=%.4f> is not in geometry and not considered in analysis!", XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
+        		  IdInFrame.erase(IdInFrame.begin() + i);
+        		  XInFrame.erase(XInFrame.begin() + i);
+        		  YInFrame.erase(YInFrame.begin() + i);
+        		  VInFrame.erase(VInFrame.begin() + i);
+        		  i--;
+        	  }
+          }
+          int NumPeds = IdInFrame.size();
+          //---------------------------------------------------------------------------------------------------------------
           if(NumPeds>2)
           {
-               vector<polygon_2d> polygons = GetPolygons(ids, XInFrame, YInFrame, VInFrame, IdInFrame);
-               OutputVoronoiResults(polygons, frid, VInFrame);
+               vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
+               OutputVoronoiResults(polygons, str_frid, VInFrame);
                if(_calcIndividualFD)
                {
                     // if(i>beginstationary&&i<endstationary)
                     {
-                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, frid);
+                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
                     }
                }
                if(_getProfile)
                { //	field analysis
-                    GetProfiles(boost::lexical_cast<string>(frid), polygons, VInFrame);
+                    GetProfiles(str_frid, polygons, VInFrame);
                }
                if(_outputVoronoiCellData)
                { // output the Voronoi polygons of a frame
-                    OutputVoroGraph(boost::lexical_cast<string>(frid), polygons, NumPeds, XInFrame, YInFrame,VInFrame);
+                    OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
                }
           }
           else
@@ -124,7 +149,7 @@ bool Method_D::Process (const PedData& peddata)
 
 bool Method_D::OpenFileMethodD()
 {
-     string results_V=  _projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/rho_v_Voronoi_"+_trajName+"_id_"+_measureAreaId+".dat";
+     string results_V=  _projectRootDir+VORO_LOCATION+"rho_v_Voronoi_"+_trajName+"_id_"+_measureAreaId+".dat";
      if((_fVoronoiRhoV=Analysis::CreateFile(results_V))==NULL)
      {
           Log->Write("cannot open the file to write Voronoi density and velocity\n");
@@ -132,7 +157,7 @@ bool Method_D::OpenFileMethodD()
      }
      else
      {
-          fprintf(_fVoronoiRhoV,"#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n");
+          fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
           return true;
      }
 }
@@ -152,12 +177,12 @@ bool Method_D::OpenFileIndividualFD()
      }
 }
 
-vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame, vector<int>& IdInFrame)
+vector<polygon_2d> Method_D::GetPolygons(vector<double>& XInFrame, vector<double>& YInFrame, vector<double>& VInFrame, vector<int>& IdInFrame)
 {
      VoronoiDiagram vd;
-     int NrInFrm = ids.size();
+     //int NrInFrm = ids.size();
      double boundpoint =10*max(max(fabs(_geoMinX),fabs(_geoMinY)), max(fabs(_geoMaxX), fabs(_geoMaxY)));
-     vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, NrInFrm,boundpoint);
+     vector<polygon_2d>  polygons = vd.getVoronoiPolygons(XInFrame, YInFrame, VInFrame,IdInFrame, boundpoint);
      if(_cutByCircle)
      {
           polygons = vd.cutPolygonsWithCircle(polygons, XInFrame, YInFrame, _cutRadius,_circleEdges);
@@ -173,11 +198,11 @@ vector<polygon_2d> Method_D::GetPolygons(vector<int> ids, vector<double>& XInFra
 /**
  * Output the Voronoi density and velocity in the corresponding file
  */
-void Method_D::OutputVoronoiResults(const vector<polygon_2d>&  polygons, int frid, const vector<double>& VInFrame)
+void Method_D::OutputVoronoiResults(const vector<polygon_2d>&  polygons, const string& frid, const vector<double>& VInFrame)
 {
      double VoronoiVelocity = GetVoronoiVelocity(polygons,VInFrame,_areaForMethod_D->_poly);
      double VoronoiDensity=GetVoronoiDensity(polygons, _areaForMethod_D->_poly);
-     fprintf(_fVoronoiRhoV,"%d\t%.3f\t%.3f\n",frid,VoronoiDensity, VoronoiVelocity);
+     fprintf(_fVoronoiRhoV,"%s\t%.3f\t%.3f\n",frid.c_str(),VoronoiDensity, VoronoiVelocity);
 }
 
 
@@ -257,7 +282,7 @@ double Method_D::GetVoronoiVelocity(const vector<polygon_2d>& polygon, const vec
 
 void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& polygons, const vector<double>& velocity)
 {
-     string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/field/";
+     string voronoiLocation=_projectRootDir+VORO_LOCATION+"field/";
 
      string Prfvelocity=voronoiLocation+"/velocity/Prf_v_"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
      string Prfdensity=voronoiLocation+"/density/Prf_d_"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
@@ -273,16 +298,16 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
           exit(0);
      }
 
-     int NRow = (int)ceil((_geoMaxY-_geoMinY)/_scaleY); // the number of rows that the geometry will be discretized for field analysis
-     int NColumn = (int)ceil((_geoMaxX-_geoMinX)/_scaleX); //the number of columns that the geometry will be discretized for field analysis
+     int NRow = (int)ceil((_geoMaxY-_geoMinY)/_grid_size_Y); // the number of rows that the geometry will be discretized for field analysis
+     int NColumn = (int)ceil((_geoMaxX-_geoMinX)/_grid_size_X); //the number of columns that the geometry will be discretized for field analysis
      for(int row_i=0; row_i<NRow; row_i++) { //
           for(int colum_j=0; colum_j<NColumn; colum_j++) {
                polygon_2d measurezoneXY;
                {
                     const double coor[][2] = {
-                              {_geoMinX+colum_j*_scaleX,_geoMaxY-row_i*_scaleY}, {_geoMinX+colum_j*_scaleX+_scaleX,_geoMaxY-row_i*_scaleY}, {_geoMinX+colum_j*_scaleX+_scaleX, _geoMaxY-row_i*_scaleY-_scaleY},
-                              {_geoMinX+colum_j*_scaleX, _geoMaxY-row_i*_scaleY-_scaleY},
-                              {_geoMinX+colum_j*_scaleX,_geoMaxY-row_i*_scaleY} // closing point is opening point
+                              {_geoMinX+colum_j*_grid_size_X,_geoMaxY-row_i*_grid_size_Y}, {_geoMinX+colum_j*_grid_size_X+_grid_size_X,_geoMaxY-row_i*_grid_size_Y}, {_geoMinX+colum_j*_grid_size_X+_grid_size_X, _geoMaxY-row_i*_grid_size_Y-_grid_size_Y},
+                              {_geoMinX+colum_j*_grid_size_X, _geoMaxY-row_i*_grid_size_Y-_grid_size_Y},
+                              {_geoMinX+colum_j*_grid_size_X,_geoMaxY-row_i*_grid_size_Y} // closing point is opening point
                     };
                     assign_points(measurezoneXY, coor);
                }
@@ -301,7 +326,9 @@ void Method_D::GetProfiles(const string& frameId, const vector<polygon_2d>& poly
 
 void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polygons, int numPedsInFrame, vector<double>& XInFrame, vector<double>& YInFrame,const vector<double>& VInFrame)
 {
-     string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/";
+     //string voronoiLocation=_projectRootDir+"./Output/Fundamental_Diagram/Classical_Voronoi/VoronoiCell/id_"+_measureAreaId;
+     string voronoiLocation=_projectRootDir+VORO_LOCATION+"VoronoiCell/";
+
 
 #if defined(_WIN32)
      mkdir(voronoiLocation.c_str());
@@ -322,6 +349,14 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
         		  point.x(point.x()*CMtoM);
         		  point.y(point.y()*CMtoM);
         	  }
+        	  for(auto&& innerpoly:poly.inners())
+			  {
+        		  for(auto&& point:innerpoly)
+				  {
+					  point.x(point.x()*CMtoM);
+					  point.y(point.y()*CMtoM);
+				  }
+			  }
         	  polys << dsv(poly) << endl;
           }
      }
@@ -361,10 +396,10 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
-     string parameters_rho="python ./scripts/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+     string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
     		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
 			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     string parameters_v="python ./scripts/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+     string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
          		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
      			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
      //Log->Write("INFO:\t%s",parameters_rho.c_str());
@@ -377,7 +412,7 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
 }
 
 
-void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, int frid)
+void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<double>& Velocity, const vector<int>& Id, const polygon_2d& measureArea, const string& frid)
 {
      double uniquedensity=0;
      double uniquevelocity=0;
@@ -391,7 +426,7 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
                uniquedensity=1.0/(area(polygon_iterator)*CMtoM*CMtoM);
                uniquevelocity=Velocity[temp];
                uniqueId=Id[temp];
-               fprintf(_fIndividualFD,"%d\t%d\t%.3f\t%.3f\n",frid, uniqueId, uniquedensity,uniquevelocity);
+               fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), uniqueId, uniquedensity,uniquevelocity);
           }
           temp++;
      }
@@ -422,10 +457,10 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 	_geoMaxY = maxY;
 }
 
-void Method_D::SetScale(double x, double y)
+void Method_D::SetGridSize(double x, double y)
 {
-     _scaleX = x;
-     _scaleY = y;
+     _grid_size_X = x;
+     _grid_size_Y = y;
 }
 
 void Method_D::SetCalculateProfiles(bool calcProfile)

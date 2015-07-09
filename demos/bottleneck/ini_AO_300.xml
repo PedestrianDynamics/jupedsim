@@ -1,64 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?> 
-
-<JPSreport project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd" > 
+<JPSreport project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../xsd/jps_report.xsd"> 
     <!-- geometry file --> 
     <geometry file = "geo_AO_300.xml" /> 
     <!-- trajectories file and format --> 
     <!-- either a file name or a path location. In the latter case all files in the directory will be used--> 
     <trajectories format="txt" unit="m"> 
-        <file name="AO_300.txt" /> 
+        <file name="traj_AO_300.txt" /> 
         <path location="./" /> 
     </trajectories> 
-    <!-- all files in the directories will be used --> 
-
-    <measurementAreas unit="m"> 
+	<!----give relative path based on the location inifile or give the absolute path--->
+	<scripts location="../../scripts/"/> 
+	
+    <measurement_areas unit="m"> 
         <area_B id="1" type="BoundingBox"> 
             <vertex x="2.40" y="0.53" /> 
             <vertex x="2.40" y="-0.53" /> 
             <vertex x="-0.60" y="-0.53" /> 
             <vertex x="-0.60" y="0.53" /> 
-            <Length_in_movement_direction distance="1.06" /> 
+            <length_in_movement_direction distance="1.0"/> 
         </area_B> 
         <area_L id="2" type="Line"> 
             <start x="-2.25" y="0.00" /> 
             <end x="4.00" y="0.00" /> 
         </area_L> 
-    </measurementAreas> 
+		<area_L id="4" type="Line">
+            <start x="-2.25" y="0.50" />
+            <end x="4.00" y="0.50" />
+        </area_L>
+    </measurement_areas> 
 
     <velocity> 
-        <useXComponent>true</useXComponent> 
-        <useYComponent>true</useYComponent> 
+        <use_x_component>true</use_x_component> 
+        <use_y_component>true</use_y_component> 
         <!-- half of the time interval that used to calculate instantaneous velocity of ped i [fr] here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF). X is location. --> 
-        <halfFrameNumberToUse>5</halfFrameNumberToUse> 
+        <frame_step>5</frame_step> 
     </velocity> 
 
     <!-- Method A (Zhang2011a) Flow and Vel --> 
     <method_A enabled="true"> 
         <!-- Time interval used to count the flow [fr] --> 
-        <timeInterval unit="frame"> 
-            16 
-        </timeInterval> 
+        <frame_interval unit="frame"> 
+            100 
+        </frame_interval> 
         <!-- The coordinate of the line used to calculate the flow and velocity --> 
-        <measurementArea id="2" /> 
+        <measurement_area id="2" /> 
+		<measurement_area id="4" />
     </method_A> 
 
     <!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout --> 
     <method_B enabled="false"> 
-        <measurementArea id="1" /> 
+        <measurement_area id="1" /> 
     </method_B> 
 
     <!-- Method C (Zhang2011a) Classical density and Vel --> 
-    <method_C enabled="false"> 
-        <measurementArea id="1" /> 
+    <method_C enabled="true"> 
+        <measurement_area id="1" /> 
     </method_C> 
 
     <!-- Method D (Zhang2011a) Voronoi density and Vel --> 
-    <method_D enabled="true" outputGraph="true" individualFDdata="false"> 
-        <measurementArea id="1" /> 
-        <cutByCircle enabled="true" radius= "1" edges = "10"/> 
-        <!-- edges represent the precision of discretization of the circle --> 
-        <getProfile enabled="false" scale_x="0.10" scale_y="0.10"/> 
+    <method_D enabled="true" output_graph="true" individual_FD="true"> 
+        <measurement_area id="1" /> 
+        <cut_by_circle enabled="false" radius= "1" edges = "10"/> 
+        <!-- edges represent the precision of discretization of the circle ---> 
+        <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
-
 </JPSreport> 

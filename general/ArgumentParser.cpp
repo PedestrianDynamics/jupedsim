@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jï¿½ï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -115,13 +115,14 @@ ArgumentParser::ArgumentParser()
      _isGetProfile =false;
      _steadyStart =100;
      _steadyEnd = 1000;
-     _scaleX = 10;
-     _scaleY = 10;
+     _grid_size_X = 10;
+     _grid_size_Y = 10;
      _errorLogFile="./Logfile.dat";
      _log=1; //no output wanted
      _trajectoriesLocation="./";
      _trajectoriesFilename="";
      _projectRootDir="./";
+     _scriptsLocation="./";
      _fileFormat=FORMAT_XML_PLAIN;
      _cutRadius =50;
      _circleEdges=6;
@@ -218,11 +219,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      }
 
      //geometry
-     if(xMainNode->FirstChild("geometry"))
-     {
-          _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-          Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
-     }
+	  if(xMainNode->FirstChild("geometry"))
+	  {
+		   _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
+		   Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
+	  }
 
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
@@ -321,17 +322,43 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
      }
 
-     //measurement area
-     if(xMainNode->FirstChild("measurementAreas")) {
+     //scripts
+	  if(xMainNode->FirstChild("scripts"))
+	  {
+			 _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
+			 if(_scriptsLocation.empty())
+			 {
+				_scriptsLocation="./";
+			 }
+			if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
+									 (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
+								// &&() osx
+			 {
+				_scriptsLocation=_projectRootDir+_scriptsLocation;
+			 }
+			if (opendir (_scriptsLocation.c_str()) == NULL)
+			{
+				/* could not open directory */
+				Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
+				return false;
+			}
+			else
+			{
+				Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
+			}
+	  }
 
-          string unit = xMainNode->FirstChildElement("measurementAreas")->Attribute("unit");
+     //measurement area
+     if(xMainNode->FirstChild("measurement_areas")) {
+
+          string unit = xMainNode->FirstChildElement("measurement_areas")->Attribute("unit");
           if(unit!="m")
           {
                Log->Write("WARNING: \tonly <m> unit is supported. Convert your units.");
                return false;
           }
 
-          for(TiXmlNode* xMeasurementArea_B=xMainNode->FirstChild("measurementAreas")->FirstChild("area_B");
+          for(TiXmlNode* xMeasurementArea_B=xMainNode->FirstChild("measurement_areas")->FirstChild("area_B");
                     xMeasurementArea_B; xMeasurementArea_B=xMeasurementArea_B->NextSibling("area_B"))
           {
                MeasurementArea_B* areaB = new MeasurementArea_B();
@@ -339,7 +366,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                areaB->_type=xMeasurementArea_B->ToElement()->Attribute("type");
 
                polygon_2d poly;
-               Log->Write("INFO: \tMeasure area id  < %d> with type <%s>",areaB->_id, areaB->_type.c_str());
+               Log->Write("INFO: \tMeasure area id  <%d> with type <%s>",areaB->_id, areaB->_type.c_str());
                for(TiXmlElement* xVertex=xMeasurementArea_B->FirstChildElement("vertex"); xVertex; xVertex=xVertex->NextSiblingElement("vertex") )
                {
                     double box_px = xmltof(xVertex->Attribute("x"))*M2CM;
@@ -350,7 +377,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                correct(poly); // in the case the Polygone is not closed
                areaB->_poly=poly;
 
-               TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("Length_in_movement_direction");
+               TiXmlElement* xLength=xMeasurementArea_B->FirstChildElement("length_in_movement_direction");
                if(xLength)
                {
                     areaB->_length=xmltof(xLength->Attribute("distance"));
@@ -359,7 +386,7 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           }
 
 
-          for(TiXmlNode* xMeasurementArea_L=xMainNode->FirstChild("measurementAreas")->FirstChild("area_L");
+          for(TiXmlNode* xMeasurementArea_L=xMainNode->FirstChild("measurement_areas")->FirstChild("area_L");
                     xMeasurementArea_L; xMeasurementArea_L=xMeasurementArea_L->NextSibling("area_L"))
           {
                MeasurementArea_L* areaL = new MeasurementArea_L();
@@ -372,32 +399,32 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                areaL->_lineEndY =xmltof(xMeasurementArea_L->FirstChildElement("end")->Attribute("y"))*M2CM;
 
                _measurementAreas[areaL->_id]=areaL;
-               Log->Write("\t\tMeasurement line starts from  <%f, %f> to <%f, %f>",areaL->_lineStartX*CMtoM,areaL->_lineStartY*CMtoM,areaL->_lineEndX*CMtoM,areaL->_lineEndY*CMtoM);
+               Log->Write("\t\tMeasurement line starts from  <%.3f, %.3f> to <%.3f, %.3f>",areaL->_lineStartX*CMtoM,areaL->_lineStartY*CMtoM,areaL->_lineEndX*CMtoM,areaL->_lineEndY*CMtoM);
           }
      }
 
      //instantaneous velocity
      TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
      if(xVelocity) {
-          string UseXComponent = xVelocity->FirstChildElement("useXComponent")->GetText();
-          string UseYComponent = xVelocity->FirstChildElement("useYComponent")->GetText();
-          string HalfFrameNumberToUse = xVelocity->FirstChildElement("halfFrameNumberToUse")->GetText();
+          string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
+          string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
+          string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
 
-          _delatTVInst = atof(HalfFrameNumberToUse.c_str());
+          _delatTVInst = atof(FrameSteps.c_str())/2.0;
           if(UseXComponent == "true"&&UseYComponent == "false")
           {
                _vComponent = 'X';
-               Log->Write("INFO: \tOnly x-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+               Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
           }
           else if(UseXComponent == "false"&&UseYComponent == "true")
           {
                _vComponent = 'Y';
-               Log->Write("INFO: \tOnly y-component coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+               Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
           }
           else if(UseXComponent == "true"&&UseYComponent == "true")
           {
                _vComponent = 'B';  // both components
-               Log->Write("INFO: \tBoth x and y-component of coordinates will be used in velocity calculation within  2* <"+HalfFrameNumberToUse+" frames>" );
+               Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
           }
           else
           {
@@ -414,10 +441,10 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodA = true;
                Log->Write("INFO: \tMethod A is selected" );
-               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("timeInterval")->GetText());
-               Log->Write("INFO: \ttime interval used in Method A is <%d> frame",_timeIntervalA);
-               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurementArea");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               _timeIntervalA = xmltoi(xMethod_A->FirstChildElement("frame_interval")->GetText());
+               Log->Write("INFO: \tFrame interval used for calculating flow in Method A is <%d> frame",_timeIntervalA);
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_A")->FirstChildElement("measurement_area");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
@@ -432,8 +459,8 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodB = true;
                Log->Write("INFO: \tMethod B is selected" );
-               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_B")->FirstChildElement("measurementArea");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_B")->FirstChildElement("measurement_area");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodB.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
@@ -446,8 +473,8 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodC = true;
                Log->Write("INFO: \tMethod C is selected" );
-               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_C")->FirstChildElement("measurementArea");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_C")->FirstChildElement("measurement_area");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
@@ -460,29 +487,29 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodD = true;
                Log->Write("INFO: \tMethod D is selected" );
-               _isOutputGraph =  (string(xMethod_D->Attribute("outputGraph")) == "true");
+               _isOutputGraph =  (string(xMethod_D->Attribute("output_graph")) == "true");
                if(_isOutputGraph)
                {
                     Log->Write("INFO: \tVoronoi graph is asked to output" );
                }
-               _isIndividualFD = (string(xMethod_D->Attribute("individualFDdata")) == "true");
+               _isIndividualFD = (string(xMethod_D->Attribute("individual_FD")) == "true");
                if(_isIndividualFD)
                {
                     Log->Write("INFO: \tIndividual fundamental diagram data will be calculated" );
                }
-               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurementArea");
-                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurementArea"))
+               for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurement_area");
+                         xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
-               if ( xMethod_D->FirstChildElement("cutByCircle"))
+               if ( xMethod_D->FirstChildElement("cut_by_circle"))
                {
-                    if ( string(xMethod_D->FirstChildElement("cutByCircle")->Attribute("enabled"))=="true")
+                    if ( string(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
                     {
                          _isCutByCircle=true;
-                         _cutRadius=xmltof(xMethod_D->FirstChildElement("cutByCircle")->Attribute("radius"))*M2CM;
-                         _circleEdges=xmltoi(xMethod_D->FirstChildElement("cutByCircle")->Attribute("edges"));
+                         _cutRadius=xmltof(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("radius"))*M2CM;
+                         _circleEdges=xmltoi(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("edges"));
                          Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
                          Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
                     }
@@ -495,14 +522,14 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     Log->Write("INFO: \tthe steady state is from  <%f> to <%f> frames", _steadyStart, _steadyEnd);
                }
 
-               if(xMethod_D->FirstChildElement("getProfile"))
-                    if ( string(xMethod_D->FirstChildElement("getProfile")->Attribute("enabled"))=="true")
+               if(xMethod_D->FirstChildElement("profiles"))
+                    if ( string(xMethod_D->FirstChildElement("profiles")->Attribute("enabled"))=="true")
                     {
                          _isGetProfile = true;
-                         _scaleX =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_x"))*M2CM;
-                         _scaleY =xmltof(xMethod_D->FirstChildElement("getProfile")->Attribute("scale_y"))*M2CM;
+                         _grid_size_X =xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_x"))*M2CM;
+                         _grid_size_Y =xmltof(xMethod_D->FirstChildElement("profiles")->Attribute("grid_size_y"))*M2CM;
                          Log->Write("INFO: \tProfiles will be calculated" );
-                         Log->Write("INFO: \tThe scale of the discretized cell in x, y direction are: < %f >m and < %f >m ",_scaleX*CMtoM, _scaleY*CMtoM);
+                         Log->Write("INFO: \tThe discretized grid size in x, y direction is: < %f >m by < %f >m ",_grid_size_X*CMtoM, _grid_size_Y*CMtoM);
                     }
           }
      }
@@ -534,6 +561,11 @@ const FileFormat& ArgumentParser::GetFileFormat() const
 const string& ArgumentParser::GetTrajectoriesLocation() const
 {
      return _trajectoriesLocation;
+}
+
+const string& ArgumentParser::GetScriptsLocation() const
+{
+     return _scriptsLocation;
 }
 
 const string& ArgumentParser::GetTrajectoriesFilename() const
@@ -617,14 +649,14 @@ double ArgumentParser::GetSteadyEnd() const
 }
 
 
-float ArgumentParser::GetScaleX() const
+float ArgumentParser::GetGridSizeX() const
 {
-     return _scaleX;
+     return _grid_size_X;
 }
 
-float ArgumentParser::GetScaleY() const
+float ArgumentParser::GetGridSizeY() const
 {
-     return _scaleY;
+     return _grid_size_Y;
 }
 
 vector<int> ArgumentParser::GetAreaIDforMethodA() const
