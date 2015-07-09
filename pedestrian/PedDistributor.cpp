@@ -362,7 +362,7 @@ bool PedDistributor::Distribute(Building* building) const
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
-                         nPeds_is++;
+                         //nPeds_is++;
                     }
                }
           }
@@ -375,7 +375,7 @@ bool PedDistributor::Distribute(Building* building) const
                     for(int i=0;i<source->GetMaxAgents();i++)
                     {
                          //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
-                         nPeds_is++;
+                         //nPeds_is++;
                     }
                }
           }
