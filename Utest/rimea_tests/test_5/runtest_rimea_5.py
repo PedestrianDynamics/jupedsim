@@ -33,7 +33,7 @@ def run_rimea_test5(inifile, trajfile):
     # pedestrians in force-based models accelerate from 0 to v0 after some time (\tau)
     fps, n, traj = parse_file(trajfile)
 
-    threshold = 1./fps + 0.01 # second
+    threshold = 2./fps + 0.01  # consider reaction time
 
     peds = np.unique(traj[:, 0])
     logging.info("=== npeds: %d, fps: %d, threshold = %.2f", n, fps, threshold)
@@ -51,7 +51,6 @@ def run_rimea_test5(inifile, trajfile):
         if (ydiff != 0).any():
             yfr = ptraj[ydiff != 0][1, 1] # second x element, not first
         else:
-
             yfr = np.inf
 
         if np.isinf(yfr) and np.isinf(xfr): # ped did not move at all
@@ -66,7 +65,6 @@ def run_rimea_test5(inifile, trajfile):
         errors.append(error)
         logging.info("ped: %2d, df: %6d, dt: %6.2f, must_time: %3d (error: %2.2f )",
                      ped, df, dt, must_dt, error)
-
     if not (np.array(errors) <= threshold).all():
         logging.critical("%s exits with FAILURE", argv[0])
         exit(FAILURE)
@@ -77,5 +75,6 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test5)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
