@@ -247,7 +247,7 @@ public:
      double GetDeviationAngle(const Line& l) const;
 
      double GetAngle(const Line & l) const;
-     double GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const; 
+     double GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const; 
 
      /**
       * ???

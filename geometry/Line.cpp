@@ -506,7 +506,8 @@ double Line::GetIntersectionDistance(const Line & l) const
      cout <<  "\t\t --> distance is "<< sqrt(dist)<< "... return (squared) "<< dist<<endl;
      printf("Leave GetIntersection\n");
 #endif
-    return dist;
+
+     return dist;
 
 }
 
@@ -579,8 +580,18 @@ double Line::GetAngle(const Line & l) const
 
 // get the smallest angle that ensures a safe deviation from an
 // obstacle. Safe means that the rotated line ped--->goal do not
-// intersect with any line of the obstacle. 
-double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const
+// intersect with any line of the obstacle.
+// ALgorithm:
+// =========
+// calculate angle to the left and angle to the right
+// choose the angle which is visible.
+// If both are visible then choose the one which: 
+// 1. leads to larger distance to room walls (we don't
+//    want to avoid the obstacle to crash in a wall, do
+//    we?)
+// 2. in case of equality choose the smallest angle. If
+//    they are nearly equal that opt for the right.
+double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const
 {
 #if DEBUG
      printf("Enter GetObstacleDeviationAngle()\n");
@@ -595,18 +606,20 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const
           angleR,
           angle;
      
-     Line l,
-          l_large,
+     Line l_large,
           tmpDirectionL,
           tmpDirectionR;
      
      bool visibleL=true,
           visibleR=true;
-     
+
+     double distToRoomL= 20001, distToRoomR = 2001;
+     double minDistToRoomL= 20001, minDistToRoomR = 2001;
      
 //     for (unsigned int i = 0; i < owalls.size(); i++) {
      // l = owalls[i];
      for(auto l:owalls){
+          minDistToRoomL= std::numeric_limits<double>::infinity(), minDistToRoomR = std::numeric_limits<double>::infinity();
           visibleL = true;
           visibleR = true;
           
@@ -644,12 +657,34 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const
 
           if(visibleR && visibleL){  // both angles are OK. Get
                                      // smallest deviation.
-               // prefer right
-               if (almostEqual (angleR, angleL, 0.001))
+//----------------------- check the subroom walls
+               for (unsigned int i = 0; i < rwalls.size(); i++) {
+                    // printf("==Left intersection with wall[%f, %f]--[%f, %f]\n", rwalls[i].GetPoint1().GetX(), rwalls[i].GetPoint1().GetY(), rwalls[i].GetPoint2().GetX(), rwalls[i].GetPoint2().GetY());
+                    distToRoomL = tmpDirectionL.GetIntersectionDistance(rwalls[i]);
+                    // printf("==Right intersection with wall[%f, %f]--[%f, %f]\n", rwalls[i].GetPoint1().GetX(),rwalls[i].GetPoint1().GetY(), rwalls[i].GetPoint2().GetX(),rwalls[i].GetPoint2().GetY());
+
+                    distToRoomR = tmpDirectionR.GetIntersectionDistance(rwalls[i]);
+                    // printf("BEFORE distToRoomL = %f, minDisttoroomL =%f,\n distToRoomR=%f, mindisttoroomR=%f\n", distToRoomL, minDistToRoomL, distToRoomR, minDistToRoomR);
+                    
+                    if (distToRoomL < minDistToRoomL)
+                         minDistToRoomL = distToRoomL;
+                    
+                     if (distToRoomR < minDistToRoomR)
+                         minDistToRoomR = distToRoomR;
+                    // printf("AFTER distToRoomL = %f, minDisttoroomL =%f,\n distToRoomR=%f, mindisttoroomR=%f\n", distToRoomL, minDistToRoomL, distToRoomR, minDistToRoomR);
+                    // getc(stdin);
+               } //for roome walls
+//-----------------------------------------------
+               if(minDistToRoomR > minDistToRoomL)
                     angle = angleR;
-               
-               angle = (fabs(angleL) < fabs(angleR))?angleL:angleR;               
-          }
+               else if (minDistToRoomL > minDistToRoomR)
+                    angle = angleL;
+               // both distance equal, prefer right
+               else if (almostEqual (angleR, angleL, 0.001))
+                    angle = angleR;
+               else // distances equal, but angles not. Take smallest
+                    angle = (fabs(angleL) < fabs(angleR))?angleL:angleR;               
+          }//both are visible
           else if(visibleR && !visibleL){
                angle = angleR;
           }
@@ -657,26 +692,23 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls) const
                angle = angleL;
           }
           else{
-               printf("continue ");
-               printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
+               // printf("continue ");
+               // printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
                continue; // both angles are not OK. check next wall
                
                }
-               
-
-
 #if DEBUG
-          printf("\tP=[%f,%f]\n",P.GetX(), P.GetY());
+          printf("---------\n\tP=[%f,%f]\n",P.GetX(), P.GetY());
           printf("\tGoal=[%f,%f]\n",Goal.GetX(), Goal.GetY());
           printf("\tL=[%f,%f]\n",L.GetX(), L.GetY());
           printf("\tR=[%f,%f]\n",R.GetX(), R.GetY());
           // printf("\t\tdist_Goal_L=%f\n",dist_Goal_L);
           // printf("\t\tdist_Goal_R=%f\n",dist_Goal_R);
           printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
-     
+          printf("distToRoomL = %f, distToRoomR = %f\n", minDistToRoomL, minDistToRoomR);
           printf("\t\t --> angleL=%f\n",angleL);
           printf("\t\t --> angleR=%f\n",angleR);
-          printf("\t\t --> angle=%f\n",angle);
+          printf("\t\t --> angle=%f\n-----\n",angle);
 
 #endif     
 

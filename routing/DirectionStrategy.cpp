@@ -180,10 +180,10 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                         inear = i;
                         minDist = dist;
                         iObs = obs;
-
-                        // printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
-                        // printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1().GetX(),owalls[i].GetPoint1().GetY(), owalls[i].GetPoint2().GetX(),owalls[i].GetPoint2().GetY());
-
+#if DEBUG
+                        printf("Check OBS:obs=%d, i=%d Dist = %f (%f)\n", obs, i, dist, minDist);
+                        printf("%f    %f --- %f    %f\n===========\n",owalls[i].GetPoint1().GetX(),owalls[i].GetPoint1().GetY(), owalls[i].GetPoint2().GetX(),owalls[i].GetPoint2().GetY());
+#endif
                   }
             }//walls of obstacle
       }// obstacles
@@ -196,9 +196,10 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             ped->SetDistToBlockade(minDist);
             if(iObs >= 0){ // obstacle is nearest
                   const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
-                  angle = tmpDirection.GetObstacleDeviationAngle(owalls);
+                  angle = tmpDirection.GetObstacleDeviationAngle(owalls, walls);
       
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
+
 #if DEBUG
                   printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
       
@@ -238,13 +239,15 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       printf("MC p1=[%.2f, %.2f] p2=[%.2f, %.2f]\n", p1.GetX(), p1.GetY(),  p2.GetX(), p2.GetY());
       printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
       printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
+      // getc(stdin);
+      
 
 #endif
 
-      // if( ped->GetID() == 21)
-      //       fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
-      //               ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
-// this stderr output can be used with plot_desired_velocity.py
+      // if( ped->GetID() == 1)
+            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
+                    // ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
+// this stderr output can be used with scripts/plot_desired_velocity.py
 
       return G;
 }

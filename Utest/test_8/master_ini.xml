@@ -43,6 +43,7 @@
   <agents operational_model_id="[1,2]">
     <agents_distribution>
       <group group_id="0" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="1" start_y="0.5"  goal_id="0" router_id="1" />
+      <group group_id="1" agent_parameter_id="0" room_id="0" subroom_id="0" number="1" start_x="1" start_y="3.5"  goal_id="0" router_id="1" />
     </agents_distribution>
     <!-- frequency in persons/minute -->
     <agents_sources/>
@@ -54,7 +55,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exit_crossing_strategy>range(1,6)</exit_crossing_strategy>
+        <exit_crossing_strategy>range(1,5)</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0" dist_max="3" disteff_max="2" interpolation_width="0.1" />
@@ -84,10 +85,10 @@
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="2"  b="0.25" c="3.0"/>
-        <force_wall nu="3" b="0.70" c="3.0"/>
+        <force_wall nu="5" b="0.70" c="3.0"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
-        <v0 mu="0.5" sigma="0.0" />
+        <v0 mu="1" sigma="0.0" />
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.20" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
@@ -108,7 +109,7 @@
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
-            <navigation_mesh method="triangulation" use_for_local_planning="false" />
+            <!-- <navigation_mesh method="triangulation" use_for_local_planning="false" /> -->
         <!-- <navigation_lines file="../routing.xml" /> -->
       </parameters>
     </router>
