@@ -57,7 +57,7 @@ Linux (tested on Ubuntu 14.04 with gcc 4.8)
 cmake   CMakeList.txt
 make
 
-OSX (tested on OSX Maverick with clang 5.1)
+OSX (tested on OSX Maverick with clang 5.1 and Yosemite with clang 6.1)
 
 cmake   CMakeList.txt
 make
@@ -74,8 +74,8 @@ There is no special hardware/software requirements for running JuPedSim. The dis
 Known Issues
 ============
 
-    Some verification tests are still failing
-    Occasional crashes if the input files are not valid. Make sure to validate you XML input files with the supplied XSD files.
+    Some verification tests are still failing. The actual cdash-board can be found [here](http://my.cdash.org/index.php?project=JuPedSim) 
+    Occasional crashes if the input files are not valid. Make sure to validate your XML input files with the supplied XSD files.
 
 Frequently Asked Questions
 ===========================
@@ -83,13 +83,13 @@ Frequently Asked Questions
     What is the official page of JuPedSim?
         www.jupedsim.org and the contact is info at jupedsim.org. You will find more information on the working group and other tools and experimental pedestrians data we have been collecting over the years.
 
-    Where is the official repository ?
+    Where is the official repository?
         JuPedSim is developed at the Forschungszentrum Jülich in Germany and the bleeding edge code is in their intern git repository. At the moment only specific tags are pushed to github.
 
-    Is there a manual ?
+    Is there a manual?
         Of course, the user's guide is found in the downloaded archive.
 
-    Are the models validated ?
+    Are the models validated?
         We are actually setting up verification and validation tests. Some verification tests are included in this version but most of them will be available with the next version.
 
     How can I contribute to JuPedSim?
