@@ -37,7 +37,7 @@ def func_b(i, k):
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
     parser.add_argument("-p", "--filepath", default="./", help='give the path of the input file')
-    parser.add_argument("-n", "--filename", default='test', help='give the name of the input file')    
+    parser.add_argument("-n", "--filename", default="test", help='give the name of the input file')    
     parser.add_argument("-rs", "--reference_rho_start", default=240, help='give the start frame of the reference process in density')
     parser.add_argument("-re", "--reference_rho_end", default=640, help='give the end frame of the reference process in density')
     parser.add_argument("-vs", "--reference_v_start", default=240, help='give the start frame of the reference process in speed')
@@ -50,16 +50,16 @@ if __name__ == '__main__':
     rho_max = 8.0
     args = getParserArgs()
     filepath = args.filepath
-    sys.path.append(filepath)
+    #sys.path.append(filepath)
     filename = args.filename
-    ref_rho_start = args.reference_rho_start
-    ref_rho_end = args.reference_rho_end
-    ref_v_start = args.reference_v_start
-    ref_v_end = args.reference_v_end
+    ref_rho_start = int(args.reference_rho_start)
+    ref_rho_end = int(args.reference_rho_end)
+    ref_v_start = int(args.reference_v_start)
+    ref_v_end = int(args.reference_v_end)
     plotfigs = args.plotfigs
 
 # input data
-data = loadtxt('%s%s.dat'%(filepath, filename))
+data = loadtxt('%s%s'%(filepath, filename))
 data = data[ data[:,1] != 0 ]
 data[:,0] = data[:,0] - data[0,0]
 
