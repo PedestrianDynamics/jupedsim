@@ -1,4 +1,17 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+20 pedestrians going around a corner.
+
+Remarks
+=======
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 import numpy as np
@@ -35,6 +48,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test6)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

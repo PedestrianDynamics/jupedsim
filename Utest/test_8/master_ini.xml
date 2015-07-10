@@ -84,7 +84,7 @@
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="2"  b="0.25" c="3.0"/>
-        <force_wall nu="2" b="0.70" c="3.0"/>
+        <force_wall nu="3" b="0.70" c="3.0"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
         <v0 mu="0.5" sigma="0.0" />

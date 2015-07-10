@@ -6,6 +6,7 @@
 
   <!-- seed used for initialising random generator -->
   <seed>1254</seed>
+  <show_statistics>true</show_statistics>
   <max_sim_time>500</max_sim_time>
   <!-- geometry file -->
   <geometry>../geometry.xml</geometry>
@@ -26,11 +27,11 @@
     <goals>
       <goal id="0" final="true" caption="goal 0">
 	<polygon>
-	  <vertex px="27.0" py="20.5" />
-	  <vertex px="27.5" py="20.5" />
-	  <vertex px="27.5" py="21.0" />
-	  <vertex px="27.0" py="21.0" />
-	  <vertex px="27.0" py="20.5" />
+	  <vertex px="25.0" py="24.5" />
+	  <vertex px="25.5" py="24.5" />
+	  <vertex px="25.5" py="25.0" />
+	  <vertex px="25.0" py="25.0" />
+	  <vertex px="25.0" py="24.5" />
 	</polygon>
       </goal>
     </goals>
@@ -108,6 +109,7 @@
          </router> -->
     <router router_id="1" description="quickest">
       <parameters>
+        <navigation_mesh method="triangulation" use_for_local_planning="true" />
       </parameters>
     </router>
 

@@ -1,4 +1,24 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+1000 pedestrians are distributed in a room with 4 exits.
+scenario 1: All 4 exits are open
+scenario 2: 2 exits are closed. The remaining 2 are still open
+
+The flow should nearly be doubled in scenario 1.
+
+Remarks
+=======
+For simplicity we simulate two identical rooms:
+1. room left: with 4 exits. All of them are open
+2. room right with 4 exits. two of them are closed
+3. We write the trajectory in plain txt-format, to avoid a long lasting xml-parsing
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 import matplotlib.pyplot as plt
@@ -10,11 +30,6 @@ sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-"""
-For simplicity we simulate two identical rooms:
-1. room left: with 4 exits. All of them are open
-2. room right with 4 exits. two of them are closed
-"""
 #  ==================== todo: read these variables from the geometry.xml
 r1_left = 0
 r1_right = 30
@@ -82,6 +97,7 @@ if __name__ == "__main__":
 
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

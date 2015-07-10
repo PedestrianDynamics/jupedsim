@@ -77,6 +77,34 @@ public:
      */
     void InitV0DownStairs(double mean, double stv);
 
+     /**
+     * Initialize the speed distribution of escalators upstairs
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitEscalatorUpStairs(double mean, double stv);
+
+     /**
+     * Initialize the speed distribution of escalators downstairs
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitEscalatorDownStairs(double mean, double stv);
+
+     /**
+     * Initialize the desired speed distribution walking idle escalators upstairs
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitV0IdleEscalatorUpStairs(double mean, double stv);
+
+     /**
+     * Initialize the desired speed distribution walking idle escalators downstairs
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitV0IdleEscalatorDownStairs(double mean, double stv);
+     
     /**
      * Initialize the maximal value if the major axis
      * @param mean, mean value
@@ -127,6 +155,26 @@ public:
      */
     double GetV0DownStairs();
 
+     /**
+     * @return a random number following the distribution
+     */
+    double GetEscalatorUpStairs();
+
+    /**
+     * @return a random number following the distribution
+     */
+    double GetEscalatorDownStairs();
+
+    /**
+     * @return a random number following the distribution
+     */
+    double GetV0IdleEscalatorUpStairs();
+
+    /**
+     * @return a random number following the distribution
+     */
+    double GetV0IdleEscalatorDownStairs();
+
     /**
      * @return a random number following the distribution
      */
@@ -164,6 +212,10 @@ private:
     std::normal_distribution<double> _V0;
     std::normal_distribution<double> _V0UpStairs;
     std::normal_distribution<double> _V0DownStairs;
+    std::normal_distribution<double> _EscalatorUpStairs;
+    std::normal_distribution<double> _EscalatorDownStairs;
+    std::normal_distribution<double> _V0IdleEscalatorUpStairs;
+    std::normal_distribution<double> _V0IdleEscalatorDownStairs;
     std::normal_distribution<double> _Bmax;
     std::normal_distribution<double> _Bmin;
     std::normal_distribution<double> _Atau;

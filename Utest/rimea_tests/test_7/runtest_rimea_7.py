@@ -1,4 +1,37 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+Distribute pedestrian's speed according to Tab. P. 6
+4 different groups are distributed
+1. v<30
+2. 30<v<50
+3. v>50
+4. handicapted
+
+Check whether the speed values are within the specified fange.
+
+Remarks
+=======
+
+1. The velocities are assumed to be constant and are therefor averaged: v = DX/DT.
+2. The ped-ped repulsive forces are intentionally set to zero, since in diesem
+   Test we are interested only in the desired velocies.
+   Some error messages could result (overlapping)
+3. Script Gauss.py checks that the sigmas, means are in accordance with the min-max values in Tab. 1
+
+This test produces two files
+
+1. a png-file showing the distribution of the velocities
+2. a csv-file with two comma separated columns: ids, velocities
+
+@todo: write csv-file to excel as in the rimea reports
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 import numpy as np
@@ -9,30 +42,7 @@ sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-__author__ = "chraibi"
 
-"""
-This test produces two files
-1. a png-file showing the distribution of the velocities
-2. a csv-file with two comma separated columns: ids, velocities
-
-Remarques
-=========
-
-1. The velocities are assumed to be constant and are therefor averaged: v = DX/DT.
-
-2. The ped-ped repulsive forces are intentionally set to zero, since in diesem
-Test we are interested only in the desired velocies. Some error messages could result (overlapping)
-
-3. Script Gauss.py checks that the sigmas, means are in accordance with the min-max values in Tab. 1
-
-@todo: write csv-file to excel as in the rimea reports
-
-Rimea tests:
-http://www.rimea.de/fileadmin/files/dok/analyse/Analyse_FDS_Evac_20080603_optimiert_files.pdf
-"""
-# ================  Tab. P. 6
-# source: http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
 # Group 1, 2, 3, 4
 weidman_max_vel = np.array([1.61, 1.54, 1.41, 0.76])
 weidman_min_vel = np.array([0.58, 1.41, 0.68, 0.46])
@@ -92,6 +102,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test7)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

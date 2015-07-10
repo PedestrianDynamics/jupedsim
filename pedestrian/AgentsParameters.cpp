@@ -64,6 +64,26 @@ void AgentsParameters::InitV0DownStairs(double mean, double stdv)
      _V0DownStairs = std::normal_distribution<double>(mean,stdv);
 }
 
+void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv)
+{
+     _EscalatorUpStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv)
+{
+     _EscalatorDownStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitV0IdleEscalatorUpStairs(double mean, double stdv)
+{
+     _V0IdleEscalatorUpStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitV0IdleEscalatorDownStairs(double mean, double stdv)
+{
+     _V0IdleEscalatorDownStairs = std::normal_distribution<double>(mean,stdv);
+}
+
 void AgentsParameters::InitBmax(double mean, double stdv)
 {
     _Bmax= std::normal_distribution<double>(mean,stdv);
@@ -103,6 +123,28 @@ double AgentsParameters::GetV0DownStairs()
 {
      return _V0DownStairs(_generator);
 }
+
+double AgentsParameters::GetEscalatorUpStairs()
+{
+     return _EscalatorUpStairs(_generator);
+}
+
+double AgentsParameters::GetEscalatorDownStairs()
+{
+     return _EscalatorDownStairs(_generator);
+}
+
+
+double AgentsParameters::GetV0IdleEscalatorUpStairs()
+{
+     return _V0IdleEscalatorUpStairs(_generator);
+}
+
+double AgentsParameters::GetV0IdleEscalatorDownStairs()
+{
+     return _V0IdleEscalatorDownStairs(_generator);
+}
+
 
 double AgentsParameters::GetBmax()
 {

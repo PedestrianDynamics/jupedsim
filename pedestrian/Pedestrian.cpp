@@ -85,6 +85,10 @@ Pedestrian::Pedestrian()
      _spotlight = false;
      _V0UpStairs=0.0;
      _V0DownStairs=0.0;
+     _EscalatorUpStairs=0.0;
+     _EscalatorDownStairs=0.0;
+     _V0IdleEscalatorUpStairs=0.0;
+     _V0IdleEscalatorDownStairs=0.0;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
 
@@ -197,11 +201,15 @@ void Pedestrian::SetV(const Point& v)
      }
 }
 
-void Pedestrian::SetV0Norm(double v0,double v0UpStairs, double v0DownStairs)
+void Pedestrian::SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, double escalatorUp, double escalatorDown, double v0IdleEscalatorUp, double v0IdleEscalatorDown)
 {
-      _ellipse.SetV0(v0);
+     _ellipse.SetV0(v0);
      _V0DownStairs=v0DownStairs;
      _V0UpStairs=v0UpStairs;
+     _EscalatorUpStairs=escalatorUp;
+     _EscalatorDownStairs=escalatorDown;
+     _V0IdleEscalatorUpStairs=v0IdleEscalatorUp;
+     _V0IdleEscalatorDownStairs=v0IdleEscalatorDown;
 }
 
 void Pedestrian::Setdt(double dt)
@@ -372,15 +380,23 @@ const Point& Pedestrian::GetV0() const
 
 double Pedestrian::GetV0Norm() const
 {
+     // @todo: we need to know the difference of the ped_elevation to the old_nav_elevation, and use this in the function f.
      //detect the walking direction based on the elevation
      SubRoom* sub=_building->GetRoom(_roomID)->GetSubRoom(_subRoomID);
      double ped_elevation = sub->GetElevation(_ellipse.GetCenter());
-     double nav_elevation = sub->GetElevation(_navLine->GetCentre());
+     const Point& target = _navLine->GetCentre();
+     double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
-     const Point& pos = GetPos();
+     // const Point& pos = GetPos();
+     // double distanceToTarget = (target-pos).Norm();
+     // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
      // fprintf(stderr, "%f  %f %f  %f\n", pos.GetX(), pos.GetY(), sub->GetElevation(_ellipse.GetCenter()), 2.0/(1+exp(-9.0*ped_elevation*ped_elevation)));
-
-// we are walking on an even plane
+     //printf("delta = %f, nav_elev = %f, ped_elev= %f\n", delta, nav_elevation, ped_elevation);
+     // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
+     
+     
+     
+     // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
           return _ellipse.GetV0();
@@ -391,12 +407,30 @@ double Pedestrian::GetV0Norm() const
            double f = 2.0/(1+exp(-c*ped_elevation*ped_elevation)) - 1; // f in [0, 1]
            if(delta<0)
            {
-                 return (1-f)*_V0DownStairs + f*_ellipse.GetV0();
+                // printf("z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_V0DownStairs + f*_ellipse.GetV0());
+                // getc(stdin);
+                double speed_down = _V0DownStairs;
+                if(sub->GetType() == "escalator"){
+                     speed_down = _EscalatorDownStairs;
+                }
+                else if(sub->GetType() == "idle_escalator"){
+                     speed_down = _V0IdleEscalatorDownStairs;
+                }
+                 return (1-f)*speed_down + f*_ellipse.GetV0();
            }
            //we are walking upstairs
            else
            {
-                 return (1-f)*_ellipse.GetV0() + f*_V0UpStairs;
+                double speed_up = _V0UpStairs;
+                if(sub->GetType() == "escalator"){
+                     speed_up = _EscalatorUpStairs;
+                }
+                else if(sub->GetType() == "idle_escalator"){
+                     speed_up = _V0IdleEscalatorUpStairs;
+                }
+                // printf("z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
+                // getc(stdin);
+                 return (1-f)*_ellipse.GetV0() + f*speed_up;
            }
      }
      // orthogonal projection on the stair

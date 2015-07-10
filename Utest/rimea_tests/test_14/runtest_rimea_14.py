@@ -1,4 +1,26 @@
 #!/usr/bin/env python
+"""
+Test description
+================
+Pedestrian evacuation to an exit. They have two possible routes: 
+1. short
+2. and long
+
+Remarks
+=======
+This test has no concrete condition to check for.
+It should be documented whether pedestrians take a long detour or not
+There are 4 stats that should be documented:
+1. "kurz" (short)
+2. "lang"  (long)
+3. "gemischt" (mixed)
+4. "konfigurierbar" (configurable)
+
+Source
+======
+http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf
+"""
+
 import os
 import sys
 utestdir = os.path.abspath(os.path.dirname(os.path.dirname(sys.path[0])))
@@ -6,17 +28,6 @@ from sys import *
 sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
-
-
-"""
-This test has no concrete condition to check for.
-It should be documented whether pedestrians take a long detour or not
-There are 4 stats that should be documented: 
-1. "kurz" (short)
-2. "lang"  (long)
-3. "gemischt" (mixed)
-4. "konfigurierbar" (configurable)
-"""
 
 states = ["short", "long", "mixed", "configurable"]
 stair_up_left = [5, 4, 6] # x, y1, y2 |--> exit to the stair left. 
@@ -50,6 +61,8 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test14)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
+
 
 
 

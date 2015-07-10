@@ -167,8 +167,9 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
                continue;
 
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=7) continue;
+          for(auto&& sitr: r->GetAllSubRooms())
+          {
+               auto&& s = sitr.second; //if(s->GetSubRoomID()!=7) continue;
                geometry.append(s->WriteSubRoom());
 
                // the hlines
