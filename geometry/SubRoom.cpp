@@ -757,10 +757,10 @@ string NormalSubRoom::WriteSubRoom() const
           const Point& pos = obst->GetCentroid();
 
           //add the obstacle caption
-          char tmp[CLENGTH];
-          sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
+          char tmp1[CLENGTH];
+          sprintf(tmp1, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
                     , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
-          s.append(tmp);
+          s.append(tmp1);
      }
 
      return s;
@@ -816,6 +816,38 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           Log->Write("ERROR:\t Overlapping between walls and goals");
           return false;
      }
+     Point pIntsct(J_NAN, J_NAN);
+     int itr = 1;
+     for (auto& it : _walls) {
+    	 int j = 0;
+    	 for (unsigned int i = itr; i < copy.size(); ++i) {
+    		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
+    			 if (it.ShareCommonPointWith(*copy[i]) == false) {
+    				 char tmp[CLENGTH];
+    				 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    				 Log->Write(tmp);
+    				 sprintf(tmp, "ERROR: \tWalls %s & %s intersect: !!!\n", it.toString().c_str(),
+    						 copy[i]->toString().c_str());
+    				 Log->Write(tmp);
+    				 return false;
+    			 }
+    			 else
+    				 ++j;
+    		 }
+    	 }
+    	 if (j <= 2)
+    		 j = 0;
+    	 else {
+    		 char tmp[CLENGTH];
+    		 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    		 Log->Write(tmp);
+    		 sprintf(tmp, "ERROR: \tWall %s shares edge with multiple walls!!!\n", it.toString().c_str());
+    		 Log->Write(tmp);
+    		 return false;
+    	 }
+    	 ++itr;
+     }
+
 
      line = copy[0];
      tmpPoly.push_back(line->GetPoint1());

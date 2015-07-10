@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 
 #ifndef M_PI
@@ -86,6 +87,8 @@
 // Linked cells
 #define LIST_EMPTY  -1
 
+// Not-a-Number (NaN)
+#define J_NAN std::numeric_limits<double>::quiet_NaN()
 
 enum RoomState {
      ROOM_CLEAN=0,
@@ -137,6 +140,12 @@ enum AgentColorMode {
      BY_GROUP,
      BY_FINAL_GOAL,
      BY_INTERMEDIATE_GOAL
+};
+
+enum LineIntersectType {
+	NO_INTERSECTION = 0,
+	INTERSECTION,
+	OVERLAP // overlap, parallel, no intersection
 };
 //global functions for convenience
 

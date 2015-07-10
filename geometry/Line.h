@@ -165,16 +165,38 @@ public:
      /**
       * @see http://alienryderflex.com/intersect/
       * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
-      * @return true if both segments intersect
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       */
-     bool IntersectionWith(const Line& l) const; // check two segments for intersections
+     int IntersectionWith(const Line& l) const; // check two segments for intersections
 
      /**
       * @see http://alienryderflex.com/intersect/
       * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
-      * @return true if both segments intersect
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       */
-     bool IntersectionWith(const Point& p1, const Point&p2) const;
+     int IntersectionWith(const Point& p1, const Point&p2) const;
+
+     /*
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
+      * Special case:  If the Lines are superposed/ Parallel/ no intersection,
+      * then the Point of intersection is stored as NaN.
+      */
+     int IntersectionWith(const Point& p1, const Point& p2, Point& p3) const;
+
+     /*
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
+      * Special case:  If the Lines are superposed/ Parallel/ no intersection,
+      * then the Point of intersection is stored as NaN.
+      */
+     int IntersectionWith(const Line& L, Point& p3) const;
     
      /**
       * @return the distance squared between the first point and the intersection
@@ -188,11 +210,16 @@ public:
       */
      bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
 
-
      /**
       * @return true if both segments share at least one common point
       */
      bool ShareCommonPointWith(const Line& line) const;
+
+     /**
+      * @return true if both segments share at least one common point.
+      * store the common point in P.
+      */
+     bool ShareCommonPointWith(const Line& line, Point& P) const;
 
      /**
       * @return true if the given point is one end point of the segment

@@ -288,43 +288,57 @@ bool Line::Overlapp(const Line& l) const
 }
 
 //FIXME no equals check with == on double or float bring in an epsilon
-bool Line::IntersectionWith(const Point &p1, const Point &p2) const {
+int Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
     Point AC = _point1 - p1;
     Point DC = p2 - p1;
     Point BA = _point2 - _point1;
     double denominator = BA.CrossProduct(DC);
     double numerator = DC.CrossProduct(AC);
 
-    if (denominator == 0.0) {
+    p3.SetX(J_NAN);
+  	p3.SetY(J_NAN);
 
+    if (denominator == 0.0) {
         // the lines are superposed
         if (numerator == 0.0) {
-
-            // the segment are superposed
-            return IsInLineSegment(p1) || IsInLineSegment(p2);
-
-        } else { // the lines are just parallel and do not share a common point
-
-            return false;
+        	// the segment are superposed
+        	if (this->ShareCommonPointWith(Line(p1, p2), p3) == true)
+        		return LineIntersectType::INTERSECTION;
+            //IsInLineSegment(p1) || IsInLineSegment(p2);
+        	else
+        		return LineIntersectType::OVERLAP;
+        }
+        else { // the lines are just parallel and do not share a common point
+            return LineIntersectType::NO_INTERSECTION;
         }
     }
 
     double r = numerator / denominator;
     if (r < 0.0 || r > 1.0) {
-        return false;
+        return LineIntersectType::NO_INTERSECTION;
     }
 
     double s = (BA.CrossProduct(AC)) / denominator;
     if (s < 0.0 || s > 1.0) {
-        return false;
+        return LineIntersectType::NO_INTERSECTION;
     }
 
-    return true;
-
+    p3 = _point1 + BA * r;
+    return LineIntersectType::INTERSECTION;
 }
 
-bool Line::IntersectionWith(const Line &l) const {
-    return IntersectionWith(l._point1, l._point2);
+int Line::IntersectionWith(const Line& L, Point& p3) const {
+	return IntersectionWith(L._point1, L._point2, p3);
+}
+
+int Line::IntersectionWith(const Point& p1, const Point& p2) const {
+	Point dummy;
+	return IntersectionWith(p1, p2, dummy);
+}
+
+int Line::IntersectionWith(const Line &l) const {
+	Point dummy;
+    return IntersectionWith(l._point1, l._point2, dummy);
 }
 
 Line Line::Enlarge(double d) const {
@@ -350,15 +364,23 @@ int Line::WichSide(const Point &pt) {
 }
 
 
-bool Line::ShareCommonPointWith(const Line &line) const {
-    if (line.GetPoint1() == _point1) return true;
-    if (line.GetPoint2() == _point1) return true;
-
-    if (line.GetPoint1() == _point2) return true;
-    return line.GetPoint2() == _point2;
-
+bool Line::ShareCommonPointWith(const Line &line, Point& P) const {
+    if (line.GetPoint1() == _point1 || line.GetPoint2() == _point1) {
+    	P = _point1;
+    	return true;
+    }
+    else if (line.GetPoint1() == _point2 || line.GetPoint2() == _point2) {
+    	P = _point2;
+    	return true;
+    }
+    else
+    	return false;
 }
 
+bool Line::ShareCommonPointWith(const Line &line) const {
+	Point dummy;
+	return ShareCommonPointWith(line, dummy);
+}
 bool Line::HasEndPoint(const Point &point) const {
     if (_point1 == point) return true;
     return _point2 == point;
