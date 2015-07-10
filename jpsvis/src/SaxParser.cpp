@@ -1387,7 +1387,7 @@ bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps
             bool ok;
             *fps=line.split(":")[1].toDouble(&ok);
             if(!ok) *fps=16;//default value
-            //cout<<"frame rate: "<<*fps<<endl; //exit(0);
+            qDebug()<<"frame rate: "<<*fps<<endl; //exit(0);
         }
 
         line = in.readLine();
@@ -1418,7 +1418,7 @@ bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps
         while ( !in.atEnd() )
         {
             QString line = in.readLine();
-            QStringList pieces = line.split( " ");
+            QStringList pieces = line.split(QRegExp("\\s"));
 
             double pos[3];
             double angle[3]={0,0,30};
