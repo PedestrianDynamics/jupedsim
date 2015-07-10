@@ -809,6 +809,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
      Point pIntsct(J_NAN, J_NAN);
      int itr = 1;
      for (auto& it : _walls) {
+    	 int j = 0;
     	 for (unsigned int i = itr; i < copy.size(); ++i) {
     		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
     			 if (it.ShareCommonPointWith(*copy[i]) == false) {
@@ -820,12 +821,10 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
     				 Log->Write(tmp);
     				 return false;
     			 }
+    			 else
+    				 ++j;
     		 }
     	 }
-    	 int j = 0;
-    	 for (unsigned int i = itr; i < copy.size(); ++i)
-    		 if (it.ShareCommonPointWith(*copy[i]) == true)
-    			 ++j;
     	 if (j <= 2)
     		 j = 0;
     	 else {
