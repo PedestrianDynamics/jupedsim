@@ -47,7 +47,7 @@ message( STATUS "PROJECT_SOURCE_DIR points to " ${PROJECT_SOURCE_DIR})
 message (STATUS "MODULE_PATH: " ${CMAKE_MODULE_PATH})
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSVIS_MAJOR_VERSION 0)
-set(JPSVIS_MINOR_VERSION 5)
+set(JPSVIS_MINOR_VERSION 7)
 set(JPSVIS_PATCH_VERSION 0)
 set(JPSVIS_VERSION
   ${JPSVIS_MAJOR_VERSION}.${JPSVIS_MINOR_VERSION}.${JPSVIS_PATCH_VERSION})
@@ -349,19 +349,6 @@ ENDIF(APPLE)
 IF(WIN32)
   SET(APPS "\${CMAKE_INSTALL_PREFIX}/bin/JPSvis.exe")
 ENDIF(WIN32)
-
-
-# if (APPLE)
-#   set_target_properties(JPSvis PROPERTIES
-#     # APPLE_BUNDLE_BUNDLE_NAME "JPSvis"
-#     # APPLE_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}"
-#     # APPLE_BUNDLE_LONG_VERSION_STRING "version ${JPSVIS_VERSION}"
-#     # APPLE_BUNDLE_SHORT_VERSION_STRING "${JPSVIS_VERSION}"
-#     # APPLE_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved."
-#     # APPLE_GUI_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved."
-#     # APPLE_BUNDLE_GUI_IDENTIFIER "www.jupedsim.org"
-#     APPLE_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
-# endif ()
 
 
 #--------------------------------------------------------------------------------
