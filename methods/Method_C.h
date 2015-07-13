@@ -1,8 +1,8 @@
 /**
  * \file        Method_C.h
  * \date        Oct 10, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J��lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -46,6 +46,7 @@ private:
      MeasurementArea_B* _areaForMethod_C;
      std::string _trajName;
      std::string _projectRootDir;
+     float _fps;
      FILE *_fClassicRhoV;
      void OpenFileMethodC();
      void OutputClassicalResults(int frmNr, int numPedsInFrame, const std::vector<double>& XInFrame,const std::vector<double>& YInFrame, const std::vector<double>& VInFrame) const;

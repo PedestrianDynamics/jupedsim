@@ -39,12 +39,6 @@ t1 = time.time()
 #========================================================================================================
 WDir = os.getcwd() #working directory
 #dirs=["UO/180", "UO/240", "UO/300", "UG", "KO/240", "KO/300", "EO/240", "EO/300"]
-# dirs=["BO/BOT360"]
-# dirs=["UO"]
-# dirs=["EG/Width"]
-# dirs=["UO/300"]
-# dirs=["EO/300"]
-#dirs=["."]
 PrevDir = os.path.split(WDir)[0]
 phi = 0 # dummy initialisation
 phi2 = 0 # dummy initialisation
@@ -73,14 +67,16 @@ for inputfile in files:
 	logging.info("|----> inputfile=%s"%inputfile)
 	logging.info("<----| outputfile=%s"%outputfile)
 	Ntemp = len(data[:,0])
+	print(max(data[:,0]))
 	Nagents = max(data[:,0]) - min(data[:,0]) + 1 
-	if(Ntemp!=Nagents):
-		Nagents=Ntemp
+	print(Nagents)
+	# if(Ntemp!=Nagents):
+		# Nagents=Ntemp
 	out = open(outputfile, "w") 
 	write_header(out, Nagents, fps)
 	# Todo: write geometry data------------------------------------------------------
 	# write geometry
-	walls = [ [-500.0,-300.0], [-500,0], [-300, 0], [-300, 430], [0, 430], [0, 0], [400, 0], [400, -300],[-500.0,-300.0]]
+	#walls = [ [-500.0,-300.0], [-500,0], [-300, 0], [-300, 430], [0, 430], [0, 0], [400, 0], [400, -300],[-500.0,-300.0]]
 	#write_geometry(out, walls)
 	#--------------------------------------------------------------------------------------
 	#write pedestrian data

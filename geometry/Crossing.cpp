@@ -1,8 +1,8 @@
 /**
  * \file        Crossing.cpp
  * \date        Nov 16, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -36,9 +36,6 @@ using namespace std;
 Crossing::Crossing()
 {
      _id = -1;
-     _room1 = NULL;
-     _subRoom1 = NULL;
-     _subRoom2 = NULL;
 }
 
 Crossing::~Crossing()
@@ -50,10 +47,10 @@ void Crossing::SetID(int ID)
      _id = ID;
 }
 
-void Crossing::SetSubRoom2(SubRoom* r2)
-{
-     _subRoom2 = r2;
-}
+//void Crossing::SetSubRoom2(SubRoom* r2)
+//{
+//     _subRoom2 = r2;
+//}
 
 // Getter-Funktionen
 
@@ -62,10 +59,10 @@ int Crossing::GetID() const
      return _id;
 }
 
-SubRoom* Crossing::GetSubRoom2() const
-{
-     return _subRoom2;
-}
+//SubRoom* Crossing::GetSubRoom2() const
+//{
+//     return _subRoom2;
+//}
 // Sonstiges
 
 
