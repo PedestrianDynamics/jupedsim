@@ -1,0 +1,1 @@
+python ../../scripts/SteadyState.py -p ./ -n rho_v_Voronoi_traj_AO_b240.txt_id_1.dat -rs 240 -re 640 -vs 240 -ve 640 -f yes
