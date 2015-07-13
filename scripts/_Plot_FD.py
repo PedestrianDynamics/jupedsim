@@ -80,26 +80,5 @@ if __name__ == '__main__':
            print("INFO:\tPlotting Fundamental diagram of giving data")
            plotRhoV(pathfile,figname,namefile,steadyfile)
            plotRhoJs(pathfile,figname,namefile,steadyfile)
-##           fig = plt.figure(figsize=(16, 16), dpi=100)
-##           ax1 = fig.add_subplot(111,aspect='auto')
-##           plt.rc("font", size=30)
-##           plt.rc('pdf',fonttype = 42)
-##           for f_rho_v, f_steady in zip(namefile,steadyfile):
-##                   d_rho_v=loadtxt(f_rho_v,ndmin=2)
-##                   d_steady= loadtxt(f_steady,ndmin=2)
-##                   steady_rho_v=zeros(len(d_rho_v[0]))
-##                   for i in range(len(d_steady)):
-##                           rho_v=d_rho_v[d_rho_v[:,0]>d_steady[i,0]]
-##                           rho_v=rho_v[rho_v[:,0]>d_steady[i,1]]
-##                           steady_rho_v=vstack((steady_rho_v,rho_v))
-##                   steady_rho_v = delete(steady_rho_v, (0), axis=0)
-##                   plt.plot(steady_rho_v[:,1],steady_rho_v[:,2], 'o', lw=3, label=f_rho_v)
-##           plt.xlabel("density [$m^{-2}$]")
-##           plt.ylabel("velocity [$m/s$]")
-##           plt.gca().set_xlim(left=0)
-##           plt.ylim(0,2)
-##           plt.legend()
-##           plt.savefig("%s/%s"%(pathfile,figname))
-##           plt.close()
 
 
