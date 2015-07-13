@@ -79,6 +79,7 @@ public:
     //void Init();
     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
     virtual Point GetDir2Wall(Pedestrian* ped) const;
+    virtual double GetDistance2Wall(Pedestrian* ped) const;
 
 private:
      FloorfieldViaFM* ffviafm;

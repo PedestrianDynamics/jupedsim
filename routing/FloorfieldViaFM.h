@@ -58,6 +58,7 @@ class FloorfieldViaFM
 
         void getDirectionAt(const Point& position, Point& direction);
         void getDir2WallAt(const Point& position, Point& direction);
+        double getDistance2WallAt(const Point& position);
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
         void resetGoalAndCosts(const Goal* const goalArg);

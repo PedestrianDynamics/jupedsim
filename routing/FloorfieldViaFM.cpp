@@ -107,6 +107,11 @@ void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
     direction.SetY(dirToWall[key].GetY());
 }
 
+double FloorfieldViaFM::getDistance2WallAt(const Point& position) {
+    long int key = grid->getKeyAtPoint(position);
+    return dist2Wall[key];
+}
+
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
     //init min/max before parsing
     double xMin = FLT_MAX;
@@ -231,6 +236,14 @@ void FloorfieldViaFM::resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExi
         trialfield[i].child = nullptr;
     }
     drawLinesOnGrid(exits, cost, 0.); //already mark targets/exits in cost array (for floorfieldcalc)
+    for (long int i=0; i < grid->GetnPoints(); ++i) {
+        if (cost[i] == 0.) {
+            neggrad[i].SetX(0.);
+            neggrad[i].SetY(0.);
+            dirToWall[i].SetX(0.);
+            dirToWall[i].SetY(0.);
+        }
+    }
 }
 
 void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside) {
