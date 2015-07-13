@@ -7,7 +7,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
-  <max_sim_time>10000</max_sim_time>
+  <max_sim_time>500</max_sim_time>
   <!-- geometry file -->
   <geometry>geo.xml</geometry>
   <!-- trajectories file and format -->
@@ -34,7 +34,7 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="1" pre_movement_mean="15" pre_movement_sigma="0.4"/>
+      <group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="2" goal_id="-1" router_id="1" pre_movement_mean="15" pre_movement_sigma="0.4"/>
     </agents_distribution>
 
   </agents>
