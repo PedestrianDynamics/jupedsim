@@ -155,7 +155,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
-                if (normVi > HighVel && ped->GetV0Norm() > 0) {
+                if (normVi > HighVel && ped->GetV0Norm() > 0) {            //@todo: ar.graf disabled check
                      fprintf(stderr, "GradientModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
                              "is bigger than desired velocity (%f) at time: %fs\n",
                              sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
@@ -204,9 +204,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 //result_acc.push_back(acc);
                 result_acc.push_back(repPed); //only orientation is of interest
-//                if (p == 6) {
-//                    printf("%f \n", repPed.Norm());
-//                }
+                //if (ped->GetID() == 48) {
+                //    printf("%f \n", repPed.Norm());
+                //}
            }
 
            // update
@@ -230,13 +230,14 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
 
 
-                movDirection = (movDirection + toTarget);
+                movDirection = (movDirection + toTarget); //*1.2);
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
                 //anti jitter               //_V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
-                Point diff = (ped->GetV() - movDirection) * (.35/ped->GetTau());
-                //printf("high: %f\n", diff.Norm());
-                movDirection += diff;
+                Point oldMov = (ped->GetV().Norm() > 1.)? ped->GetV().Normalized() : ped->GetV();
+                Point diff = ( oldMov - movDirection) * (.2); // .8 also 80% alte Richtung, 20% neue Richtung
+                movDirection = ped->GetV() - diff;
+                movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
                 //slowdown near wall mechanics:
                 Point dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
@@ -250,14 +251,13 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 
                 movDirection = movDirection * (antiClippingFactor * ped->GetV0Norm() * deltaT);
-                //movDirection.SetX(antiClippingFactor * movDirection.GetX() * ped->GetV0Norm() * deltaT);
-                //movDirection.SetY(antiClippingFactor * movDirection.GetY() * ped->GetV0Norm() * deltaT);
 
-
+                //if(ped->GetID() == 48) { // Mohcine
+                //    fprintf(stderr, "%f %f %f %f %f %f %f \n", movDirection.GetX(), movDirection.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), current);
+                //}
                 //----------------- update new pos and new vel -----------------
 
                 //Point v_neu = ped->GetV() + vToAdd;
-                //printf("v_neu=[%f, %f], v=[%f, %f], toAdd=[%f, %f]\n", v_neu.GetX(), v_neu.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), vToAdd.GetX(), vToAdd.GetY());
                 //Point pos_neu = ped->GetPos() + v_neu * deltaT;
                 Point pos_neu = ped->GetPos() + movDirection;
                 //---------------------------------------------------------------

@@ -99,6 +99,7 @@ private:
      double pDeltaH;
      double pWallAvoidDistance;
      bool pUseWallAvoidance;
+     double pSlowDownDistance;
      int pLog;
      int pPort;
      int _embedMesh;

@@ -898,6 +898,6 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     file.close();
     file2.close();
 
-    std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
+    //std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
 }
 

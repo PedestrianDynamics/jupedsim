@@ -808,8 +808,17 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
                string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
                pcWall = atof(c.c_str());
           }
-
           Log->Write("INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f",nu.c_str(),paWall,pbWall,pcWall);
+     }
+     if (xModelPara->FirstChild("anti_clipping"))
+     {
+        if (!xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance"))
+            pSlowDownDistance = .2; //default value
+        else {
+            string slow_down_distance = xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance");
+            pSlowDownDistance = atof(slow_down_distance.c_str());
+        }
+        Log->Write("INFO: \tAnti Clipping: SlowDown Distance=%0.2f",pSlowDownDistance);
      }
 
      //Parsing the agent parameters
