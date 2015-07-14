@@ -183,12 +183,12 @@ message( STATUS "Boost_LIBRARY_DIR: " ${Boost_LIBRARY_DIR} )
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
-add_library ( core STATIC ${source_files} )
+add_library ( geometrycore STATIC ${source_files} )
 add_executable(
 	jpsreport main.cpp
 )
 target_link_libraries( jpsreport ${Boost_LIBRARIES} )
-target_link_libraries( jpsreport core )
+target_link_libraries( jpsreport geometrycore )
 
 if(WIN32)
 target_link_libraries (jpsreport wsock32)
@@ -218,7 +218,7 @@ if(BUILD_TESTING)
   foreach (test_src ${test_files})
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
     add_executable( ${test} ${test_src})
-    target_link_libraries (${test} core)
+    target_link_libraries (${test} geometrycore)
     add_test(NAME ${test} COMMAND ${test})
   endforeach(test_src ${test_files})
 
