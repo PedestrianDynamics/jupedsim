@@ -172,7 +172,7 @@ bool Method_D::OpenFileIndividualFD()
      }
      else
      {
-          fprintf(_fIndividualFD,"#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n");
+          fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
           return true;
      }
 }
