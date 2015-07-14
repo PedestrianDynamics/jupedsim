@@ -242,6 +242,27 @@ elseif( ${QT5_INSTALLED} )
   qt5_wrap_ui(SAMPLE_UI_HDRS ${SAMPLE_UIS})
 endif() 
 
+# debug where is python?
+# foreach(REQUIRED_PYTHON_VERSION 2.7 2.6 2.5)
+#   message(STATUS "======== LOOKING FOR ${REQUIRED_PYTHON_VERSION} ========================")
+#   find_package ( PythonInterp ${REQUIRED_PYTHON_VERSION} REQUIRED)
+#   find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+#   #find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
+
+
+#   message(STATUS "PYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}")
+#   message(STATUS "PYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}")
+#   message(STATUS "PYTHON_INCLUDE_DIR:FILEPATH=${PYTHON_INCLUDE_DIR}")
+#   message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
+#   message(STATUS "PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
+#   message(STATUS "Python_FRAMEWORKS=${Python_FRAMEWORKS}")
+
+#   unset(PYTHON_EXECUTABLE CACHE)
+#   unset(PYTHON_LIBRARY CACHE)
+#   unset(PYTHON_INCLUDE_DIR CACHE)
+# endforeach()
+
+
 # For Apple set the icns file containing icons
 
 IF(APPLE)
@@ -259,6 +280,7 @@ ADD_EXECUTABLE( JPSvis  MACOSX_BUNDLE WIN32
   ${SAMPLE_MOC_HDRS}
   ${SAMPLE_UI_HDRS} 
   ${SAMPLE_RESOURCES_RCS}
+
   # ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png
 #  JPSvis.icns
   )
@@ -327,6 +349,7 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
 else(CMAKE_BUILD_TYPE MATCHES Debug)
   message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS} " ,  " ${CMAKE_CXX_FLAGS_RELEASE} )
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
+
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
@@ -399,6 +422,7 @@ IF(APPLE)
   # SET(MACOSX_BUNDLE_ICON_FILE ${CMAKE_CURRENT_SOURCE_DIR}/forms/icons/JPSvis.png)
   SET(MACOSX_BUNDLE_ICON_FILE JPSvis.icns)
   SET(MACOSX_GUI_ICON JPSvis.icns)
+  set_target_properties(JPSvis PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Info.plist.in)
   SET(MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2015 Forschungszentrum Juelich. All rights reserved.")
   SET(MACOSX_BUNDLE_BUNDLE_NAME "JPSvis")
   SET(MACOSX_BUNDLE_BUNDLE_VERSION "${JPSVIS_VERSION}")
@@ -415,5 +439,14 @@ ENDIF(APPLE)
 # where CPackConfig.cmake is created by including CPack
 # And then there's ways to customize this as well
 set(CPACK_BINARY_DRAGNDROP ON)
+set(CPACK_PACKAGE_NAME "jpsvis")
+set(CPACK_PACKAGE_VENDOR "www.jupedsim.org")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MyLib - CPack Component Installation Example")
+set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION_MAJOR "1")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
+ 
 include(CPack)
 
