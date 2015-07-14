@@ -13,8 +13,9 @@ The output results will be saved in the sub-folder of the folder where the inifi
 
 - Added four demos as examples for using JPSreport
 - Added the option for specifying the location of scripts in configuration file.
-- Embedded python scripts for plotting N-t diagram (Method A), time series of density/velocity diagram (Method C and D) and Voronoi diagrams (Method D).
-
+- Embedded python scripts (**\_Plot_N\_t.py**, **\_Plot_timeseries\_rho_v.py**) for plotting N-t diagram (Method A), time series of density/velocity diagram (Method C and D) and Voronoi diagrams (Method D).
+- Added python script (**SteadyState.py**) for automatically detecting steady state of pedestrian flow based on time series of density and velocity. When plotting fundamental diagrams normally only data under steady state are used due to its generality.
+- Added python script (**\_Plot_FD.py**) for plotting fundamenatl diagram based on the detected steady state.
 ## Changed
 
 - Changed name of some variables in configuration file:
