@@ -387,11 +387,15 @@ double Pedestrian::GetV0Norm() const
      const Point& target = _navLine->GetCentre();
      double nav_elevation = sub->GetElevation(target);
      double delta = nav_elevation - ped_elevation;
+//---------------------------------------------------
+     //-----------------------------------------
+
+     
      // const Point& pos = GetPos();
      // double distanceToTarget = (target-pos).Norm();
      // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
-     // fprintf(stderr, "%f  %f %f  %f\n", pos.GetX(), pos.GetY(), sub->GetElevation(_ellipse.GetCenter()), 2.0/(1+exp(-9.0*ped_elevation*ped_elevation)));
-     //printf("delta = %f, nav_elev = %f, ped_elev= %f\n", delta, nav_elevation, ped_elevation);
+     // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+     
      // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
      
      
@@ -399,37 +403,44 @@ double Pedestrian::GetV0Norm() const
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
+           // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, _ellipse.GetV0());
           return _ellipse.GetV0();
      }
       // we are walking downstairs
      else{
-           double c = 9.0; // should be chosen so that the func grows fast (but smooth) from 0 to 1 
-           double f = 2.0/(1+exp(-c*ped_elevation*ped_elevation)) - 1; // f in [0, 1]
+           double c = 9.0; // should be chosen so that the func grows fast (but smooth) from 0 to 1
+           double f; // f in [0, 1]
            if(delta<0)
            {
-                // printf("z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_V0DownStairs + f*_ellipse.GetV0());
-                // getc(stdin);
-                double speed_down = _V0DownStairs;
-                if(sub->GetType() == "escalator"){
-                     speed_down = _EscalatorDownStairs;
-                }
-                else if(sub->GetType() == "idle_escalator"){
-                     speed_down = _V0IdleEscalatorDownStairs;
-                }
-                 return (1-f)*speed_down + f*_ellipse.GetV0();
+                 double maxSubElevation = sub->GetMaxElevation();
+                 f = 2.0/(1+exp(-c*(maxSubElevation - ped_elevation)*(maxSubElevation - ped_elevation))) - 1;
+                 double speed_down = _V0DownStairs;
+                 if(sub->GetType() == "escalator"){
+                       speed_down = _EscalatorDownStairs;
+                 }
+                 else if(sub->GetType() == "idle_escalator"){
+                       speed_down = _V0IdleEscalatorDownStairs;
+                 }
+                 // printf("z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                                  // getc(stdin);
+                 return (1-f)*_ellipse.GetV0() + f*speed_down;
            }
            //we are walking upstairs
            else
            {
-                double speed_up = _V0UpStairs;
-                if(sub->GetType() == "escalator"){
-                     speed_up = _EscalatorUpStairs;
-                }
-                else if(sub->GetType() == "idle_escalator"){
-                     speed_up = _V0IdleEscalatorUpStairs;
-                }
-                // printf("z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
-                // getc(stdin);
+                 double minSubElevation = sub->GetMinElevation();
+                 f = 2.0/(1+exp(-c*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
+                 double speed_up = _V0UpStairs;
+                 if(sub->GetType() == "escalator"){
+                       speed_up = _EscalatorUpStairs;
+                 }
+                 else if(sub->GetType() == "idle_escalator"){
+                       speed_up = _V0IdleEscalatorUpStairs;
+                 }
+                 // printf("z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
+                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_up);
+                 // getc(stdin);
                  return (1-f)*_ellipse.GetV0() + f*speed_up;
            }
      }

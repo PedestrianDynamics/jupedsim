@@ -332,8 +332,37 @@ bool Building::InitGeometry()
                     if(!obst->ConvertLineToPoly())
                          return false;
                }
+               double minElevation = 1000;
+               double maxElevation = -1000;
+               for(auto && wall:itr_subroom.second->GetAllWalls())
+               {
+                     Point P1 = wall.GetPoint1();
+                     Point P2 = wall.GetPoint2();
+                     if(minElevation > itr_subroom.second->GetElevation(P1))
+                     {
+                           minElevation = itr_subroom.second->GetElevation(P1);
+                     }
+                
+                     if(maxElevation < itr_subroom.second->GetElevation(P1))
+                     {
+                           maxElevation = itr_subroom.second->GetElevation(P1);
+                     }
+                
+                     if(minElevation > itr_subroom.second->GetElevation(P2))
+                     {
+                           minElevation = itr_subroom.second->GetElevation(P2);
+                     }
+                
+                     if(maxElevation < itr_subroom.second->GetElevation(P2))
+                     {
+                           maxElevation = itr_subroom.second->GetElevation(P2);
+                     }          
+               }
+               itr_subroom.second->SetMaxElevation(maxElevation);
+               itr_subroom.second->SetMinElevation(minElevation);
           }
      }
+
 
      // look and save the neighbor subroom for improving the runtime
      // that information is already present in the crossing/transitions

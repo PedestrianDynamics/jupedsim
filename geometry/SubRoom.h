@@ -66,8 +66,9 @@ private:
      double _planeEquation[3];
      double _cosAngleWithHorizontalPlane;
      std::string _type;
-
-
+     double _minElevation;
+     double _maxElevation;
+     
      //different types of navigation lines
      std::vector<Crossing*> _crossings;
      std::vector<Transition*> _transitions;
@@ -198,6 +199,22 @@ public:
       */
      double GetElevation(const Point & p1) const;
 
+     /**
+      * @return the smallest elevation in subroom
+      * @see GetPlanEquation
+      */
+     double GetMinElevation() const;
+
+     /**
+      * @return the largest elevation in subroom
+      * @see GetPlanEquation
+      */
+     double GetMaxElevation() const;
+
+     void SetMinElevation(double m);
+
+     void SetMaxElevation(double M);
+     
      /**
       * compute the cosine of the dihedral angle with the Horizontal plane Z=h
       * @return the cosine of the angle

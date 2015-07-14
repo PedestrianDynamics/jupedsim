@@ -65,7 +65,9 @@ SubRoom::SubRoom()
      _planeEquation[1]=0.0;
      _planeEquation[2]=0.0;
      _cosAngleWithHorizontalPlane=0;
-
+     _minElevation=0;
+     _maxElevation=0;
+     
      _goalIDs = vector<int> ();
      _area = 0.0;
      _uid = _static_uid++;
@@ -453,6 +455,27 @@ double SubRoom::GetCosAngleWithHorizontal() const
      return _cosAngleWithHorizontalPlane;
 
 }
+
+double SubRoom::GetMinElevation() const
+{
+      return _minElevation;
+}
+
+double SubRoom::GetMaxElevation() const
+{
+      return _maxElevation;
+}
+
+void SubRoom::SetMinElevation(double minElevation)
+{
+      _minElevation = minElevation;
+}
+
+void SubRoom::SetMaxElevation(double maxElevation)
+{
+      _maxElevation = maxElevation;
+}
+
 
 bool SubRoom::CheckObstacles()
 {
