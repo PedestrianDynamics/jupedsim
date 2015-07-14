@@ -37,10 +37,10 @@ def getParserArgs():
     parser.add_argument("-v", "--version", help='JuPedSim  Detection of Steady State  Version 0.7')
     parser.add_argument("-p", "--filepath", default="./", help='give the path of the input file')
     parser.add_argument("-n", "--filename", default="test", help='give the name of the input file')    
-    parser.add_argument("-rs", "--reference_rho_start", default=240, help='give the start frame of the reference process in density')
-    parser.add_argument("-re", "--reference_rho_end", default=640, help='give the end frame of the reference process in density')
-    parser.add_argument("-vs", "--reference_v_start", default=240, help='give the start frame of the reference process in speed')
-    parser.add_argument("-ve", "--reference_v_end", default=640, help='give the end frame of the reference process in speed')
+    parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density')
+    parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='give the end frame of the reference process in density')
+    parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='give the start frame of the reference process in speed')
+    parser.add_argument("-ve", "--reference_v_end", type=int, default=640, help='give the end frame of the reference process in speed')
     parser.add_argument("-f", "--plotfigs", default="yes", help='choose to plot the figures or not')
     args = parser.parse_args()
     return args
@@ -50,10 +50,10 @@ if __name__ == '__main__':
     args = getParserArgs()
     filepath = args.filepath
     filename = args.filename
-    ref_rho_start = int(args.reference_rho_start)
-    ref_rho_end = int(args.reference_rho_end)
-    ref_v_start = int(args.reference_v_start)
-    ref_v_end = int(args.reference_v_end)
+    ref_rho_start = args.reference_rho_start
+    ref_rho_end = args.reference_rho_end
+    ref_v_start = args.reference_v_start
+    ref_v_end = args.reference_v_end
     plotfigs = args.plotfigs
 
 # input data
