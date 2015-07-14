@@ -23,8 +23,6 @@ xi = arange(-im, im+0.0001, d)
 ia = ib = 0
 dnorm = 0
 
-header = 'start end'
-
 def F(x):
     if x > q:
         return 1
@@ -36,6 +34,7 @@ def func_b(i, k):
 
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
+    parser.add_argument("-v", "--version", help='JuPedSim  Detection of Steady State  Version 0.7')
     parser.add_argument("-p", "--filepath", default="./", help='give the path of the input file')
     parser.add_argument("-n", "--filename", default="test", help='give the name of the input file')    
     parser.add_argument("-rs", "--reference_rho_start", default=240, help='give the start frame of the reference process in density')
@@ -50,7 +49,6 @@ if __name__ == '__main__':
     rho_max = 8.0
     args = getParserArgs()
     filepath = args.filepath
-    #sys.path.append(filepath)
     filename = args.filename
     ref_rho_start = int(args.reference_rho_start)
     ref_rho_end = int(args.reference_rho_end)
@@ -162,7 +160,6 @@ while theta+1 < len(Tm) and Tps+Tm[theta, 0] < gamma:
     Tps = Tps + Tm[theta, 0]
     theta = theta + 1
 rho_theta = theta
-print('rho_theta = ', rho_theta)
 
 # calculate theta v
 acf = ref_v_acf
@@ -239,7 +236,6 @@ while theta+1 < len(Tm) and Tps+Tm[theta, 0] < gamma:
     Tps = Tps + Tm[theta, 0]
     theta = theta + 1
 v_theta = theta
-print('v_theta = ', v_theta)
 
 # calculate statistics rho
 statistics_rho = data
@@ -290,7 +286,7 @@ steady_rho_list.append(steady_rho_start_list)
 steady_rho_list.append(steady_rho_end_list)
 steady_rho_array = array(steady_rho_list)
 steady_rho_array = steady_rho_array.T
-savetxt('%s/SteadyState_rho_%s.txt'%(filepath, filename), steady_rho_array, fmt='%d\t%d', header=header, newline='\r\n')
+savetxt('%s/SteadyState_rho_%s.txt'%(filepath, filename), steady_rho_array, fmt='%d\t%d', header='start end', newline='\r\n')
 
 # choose steady state v
 statistics_v = loadtxt('%s/cusum_v_%s.txt'%(filepath, filename))
@@ -313,7 +309,7 @@ steady_v_list.append(steady_v_start_list)
 steady_v_list.append(steady_v_end_list)
 steady_v_array = array(steady_v_list)
 steady_v_array = steady_v_array.T
-savetxt('%s/SteadyState_v_%s.txt'%(filepath, filename), steady_v_array, fmt='%d\t%d', header=header, newline='\r\n')
+savetxt('%s/SteadyState_v_%s.txt'%(filepath, filename), steady_v_array, fmt='%d\t%d', header='start end', newline='\r\n')
 
 # calculate steady state
 steady_start_list = []
@@ -341,7 +337,7 @@ steady_list.append(steady_start_list)
 steady_list.append(steady_end_list)
 steady_array = array(steady_list)
 steady_array = steady_array.T
-savetxt('%s/SteadyState_%s.txt'%(filepath, filename), steady_array, fmt='%d\t%d', header=header, newline='\r\n')
+savetxt('%s/SteadyState_%s.txt'%(filepath, filename), steady_array, fmt='%d\t%d', header='start end', newline='\r\n')
 
 if plotfigs == 'yes':
 
