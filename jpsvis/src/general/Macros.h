@@ -43,6 +43,8 @@
 #define M_PI 3.14159265358979323846
 #endif 
 
+//fix for osx/linux/win
+#define  _isnan(x) std::isnan(x)
 
 // should be true only when using this file in the simulation core
 //#define _SIMULATOR 1
