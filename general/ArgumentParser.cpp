@@ -228,11 +228,9 @@ bool ArgumentParser::ParseIniFile(string inifile)
           Log->Write("WARNING:\t There is no header version. I am assuming %s",
                     JPS_VERSION);
      }
-     else if (std::stod(xMainNode->Attribute("version")) <= std::stod(JPS_OLD_VERSION))
+     else if (std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION))
      {
-          Log->Write(
-                    "ERROR:\t Wrong header version. Only version %s is supported.",
-                    JPS_VERSION);
+          Log->Write("ERROR:\t Wrong header version. Only version %s is supported.", JPS_VERSION);
           return false;
      }
 
