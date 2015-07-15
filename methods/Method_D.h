@@ -29,7 +29,7 @@
 #define METHOD_D_H_
 #include <vector>
 #include "PedData.h"
-#include "Analysis.h"
+#include "../Analysis.h"
 #include "VoronoiDiagram.h"
 
 
