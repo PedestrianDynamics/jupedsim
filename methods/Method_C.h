@@ -29,7 +29,7 @@
 #define METHOD_C_H_
 
 #include "PedData.h"
-#include "Analysis.h"
+#include "../Analysis.h"
 
 class Method_C
 {
