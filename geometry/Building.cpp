@@ -76,6 +76,8 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
           exit (EXIT_FAILURE);
      }
 
+
+
      if(!LoadRoutingInfo(filename))
      {
           Log->Write("ERROR:\t could not load extra routing information!");
@@ -87,6 +89,13 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      if(!InitGeometry())
      {
           Log->Write("ERROR:\t could not initialize the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+     //triangulate the geometry
+     if(!Triangulate())
+     {
+          Log->Write("ERROR:\t could not triangulate the geometry!");
           exit (EXIT_FAILURE);
      }
 
@@ -962,6 +971,21 @@ bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<Sub
           }
      }
 
+     return true;
+}
+
+bool Building::Triangulate()
+{
+     Log->Write("INFO:\tTriangulating the geometry");
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               if(itr_subroom.second->Triangulate()==false)
+                    return false;
+          }
+     }
+     Log->Write("INFO:\tDone...");
      return true;
 }
 

@@ -125,6 +125,7 @@ protected:
       */
      void TriangulateGeometry();
 
+
      /**
       *
       * @param ped the pedestrian

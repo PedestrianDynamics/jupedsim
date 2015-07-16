@@ -207,6 +207,12 @@ public:
       */
      bool SanityCheck();
 
+     /**
+      * Triangulate the geometry
+      */
+
+     bool Triangulate();
+
 
 private:
      void StringExplode(std::string str, std::string separator, std::vector<std::string>* results);

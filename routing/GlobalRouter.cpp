@@ -1155,7 +1155,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 void GlobalRouter::TriangulateGeometry()
 {
-     Log->Write("INFO:\tTriangulating the geometry");
+     Log->Write("INFO:\tUsing the triangulation in the global router");
      for(auto&& itr_room: _building->GetAllRooms())
      {
           for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
@@ -1166,26 +1166,9 @@ void GlobalRouter::TriangulateGeometry()
 
                //Triangulate if obstacle or concave and no hlines ?
                //if(subroom->GetAllHlines().size()==0)
-               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ) || 0)
+               if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
                {
-                    DTriangulation* tri= new DTriangulation();
-
-                    auto outerhull=subroom->GetPolygon();
-                    if(subroom->IsClockwise())
-                         std::reverse(outerhull.begin(), outerhull.end());
-
-                    tri->SetOuterPolygone(outerhull);
-
-                    for (const auto & obst: obstacles)
-                    {
-                         auto outerhullObst=obst->GetPolygon();
-                         if(obst->IsClockwise())
-                              std::reverse(outerhullObst.begin(), outerhullObst.end());
-                         tri->AddHole(outerhullObst);
-                    }
-
-                    tri->Triangulate();
-                    vector<p2t::Triangle*> triangles=tri->GetTriangles();
+                    vector<p2t::Triangle*> triangles=subroom->GetTriangles();
 
                     for (const auto & tr: triangles)
                     {
@@ -1224,7 +1207,6 @@ void GlobalRouter::TriangulateGeometry()
                               }
                          }
                     }
-                    delete tri;
                }
           }
      }

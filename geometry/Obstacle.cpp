@@ -348,7 +348,7 @@ const Point Obstacle::GetCentroid() const
 bool Obstacle::IsClockwise() const
 {
      if(_poly.size()<3) {
-          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Obstacle ID [%d]",_id);
           return false;
           //exit(EXIT_FAILURE);
      }

@@ -628,6 +628,30 @@ bool SubRoom::SanityCheck()
      return true;
 }
 
+bool SubRoom::Triangulate()
+{
+     if(IsClockwise())
+          std::reverse(_poly.begin(), _poly.end());
+
+     _delauneyTriangulator.SetOuterPolygone(_poly);
+
+     for (const auto & obst: _obstacles)
+     {
+          auto outerhullObst=obst->GetPolygon();
+          if(obst->IsClockwise())
+               std::reverse(outerhullObst.begin(), outerhullObst.end());
+          _delauneyTriangulator.AddHole(outerhullObst);
+     }
+
+     _delauneyTriangulator.Triangulate();
+     return true;
+}
+
+const std::vector<p2t::Triangle*> SubRoom::GetTriangles()
+{
+     return _delauneyTriangulator.GetTriangles();
+}
+
 ///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
 bool SubRoom::IsConvex()
 {
@@ -668,7 +692,7 @@ bool SubRoom::IsConvex()
 bool SubRoom::IsClockwise()
 {
      if(_poly.size()<3) {
-          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]",_id);
           return false;
           //exit(EXIT_FAILURE);
      }
