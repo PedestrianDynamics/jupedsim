@@ -20,6 +20,25 @@ def is_inside(trajectories, left, right, down, up):
                 (trajectories[0, 3] < up)
     return condition.all()
 
+def PassedLine(p, e):
+    """
+    check if pedestrian (given by matrix p) passed the line [x1, x2, y1, y2] with x1<x2 and  y1<y2
+    """
+    assert (isinstance(e, list) or isinstance(e, np.ndarray)) and len(e) == 4,\
+        "exit should be a list with len=4"
+
+    x1 = e[0]
+    y1 = e[1]
+    x2 = e[2]
+    y2 = e[3]
+    A = np.array([x1, y1])
+    B = np.array([x2, y2])
+
+    is_left_and_right = (any(np.cross(B-A, p[:, 2:]-A)) < 0) & (any(np.cross(B-A, p[:, 2:]-A)) > 0)
+    is_between = any(np.dot(p[:, 2:]-A, B-A) > 0) & any(np.dot(p[:, 2:]-B, A-B) > 0)
+
+    return  is_left_and_right and is_between
+
 
 def PassedLineX(p, exit):
     """
