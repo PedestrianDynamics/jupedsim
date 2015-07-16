@@ -1,11 +1,9 @@
 import argparse
 import scipy.stats
 from numpy import *
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy.stats.stats import pearsonr
-from scipy.stats.kde import gaussian_kde
 
 frame = 16
 
@@ -34,7 +32,7 @@ def func_b(i, k):
 
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
-    parser.add_argument("-v", "--version", help='JuPedSim  Detection of Steady State  Version 0.7')
+    parser.add_argument("-v", "--version", help='JuPedSim  Version 0.7  Detection of Steady State')
     parser.add_argument("-p", "--filepath", default="./", help='give the path of the input file')
     parser.add_argument("-n", "--filename", default="test", help='give the name of the input file')    
     parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density')
