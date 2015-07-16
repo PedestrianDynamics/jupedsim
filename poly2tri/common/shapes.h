@@ -57,7 +57,7 @@ struct Point {
   std::vector<Edge*> edge_list;
 
   /// Construct using coordinates.
-  Point(double x, double y) : x(x), y(y) {}
+  Point(double x0, double y0) : x(x0), y(y0) {}
 
   /// Set this point to all zeros.
   void set_zero()

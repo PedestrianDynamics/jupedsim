@@ -346,10 +346,12 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
      Point f(0., 0.);
+     Point centroid = subroom->GetCentroid();
+     bool inside = subroom->IsConvex(); // would like to call subroom->is_inside(centroide)
      //first the walls
      for(const auto & wall: subroom->GetAllWalls())
      {
-          f += ForceRepWall(ped, wall);
+           f += ForceRepWall(ped, wall, centroid, inside);
      }
 
      //then the obstacles
@@ -363,7 +365,7 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           else
           for(const auto & wall: obst->GetAllWalls())
           {
-               f += ForceRepWall(ped, wall);
+                f += ForceRepWall(ped, wall, centroid, inside);
           }
      }
 
@@ -372,7 +374,7 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      {
           if(! goal->IsOpen())
           {
-               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
+                f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
           }
           //  int uid1= goal->GetUniqueID();
           //  int uid2=ped->GetExitIndex();
@@ -388,12 +390,12 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      return f;
 }
 
-Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
+Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& centroid, bool inside) const
 {
-#define DEBUG 0
+#define DEBUG 1
      Point F_wrep = Point(0.0, 0.0);
 #if DEBUG
-     printf("=========\n\tEnter GompertzWall with wall=[%.2f, %.2f]--[%.2f, %.2f]\n", w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(),  w.GetPoint2().GetY());
+     printf("=========\n\tEnter GompertzWall with PED=%d, wall=[%.2f, %.2f]--[%.2f, %.2f]\n", ped->GetID(), w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(),  w.GetPoint2().GetY());
 #endif
      // getc(stdin);
      // if direction of pedestrians does not intersect walls --> ignore
@@ -416,11 +418,17 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
      const JEllipse& E = ped->GetEllipse();
      const Point& v = ped->GetV();
 
-     if (Distance < J_EPS) {
-          Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall. Return default values",ped->GetID());
-          return Point(0, 0); //quick and dirty. Should react to the warning and fix the model
+     if (Distance > J_EPS) {
+           e_iw = dist / Distance;
      }
-     e_iw = dist / Distance;
+     else {
+          Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall",ped->GetID());
+          Log->Write("INFO:\t\t --- take subroom centroid ",ped->GetID());
+          Point new_dist = centroid - ped->GetPos();
+          e_iw = new_dist/new_dist.Norm();
+          Distance = EPS;
+     }
+
 //------------------------- check if others are behind using v0 instead of v
      // tmp = ped->GetV0().ScalarProduct(e_iw); // < v^0_i , e_iw >
      double tmpv = v.ScalarProduct(e_iw);
@@ -443,9 +451,9 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
      // pt in coordinate system of Ellipse
      pinE = pt.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
      // Punkt auf der Ellipse
-//     r = E.PointOnEllipse(pinE);
-//    Radius  = (r - E.GetCenter()).Norm();
-     Radius = 0.1;
+     r = E.PointOnEllipse(pinE);
+    Radius  = (r - E.GetCenter()).Norm();
+    //   Radius = 0.1;
      //-------------------------
 
      const Point& pos = ped->GetPos();
@@ -460,8 +468,6 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 
 //-------------------------
 
-     //TODO: Check later if other values are more appropriate
-     //double b = 0.7, c = 3.0;
      double b = _bWall, c = _cWall;
      B_iw = 1.0 - Distance/(Radius);
      B_iw = exp(-b*exp(-c*B_iw));
@@ -475,7 +481,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w) const
      printf("Distance=%f, Radius=%f, B_iw=%f, G(B_iw)=%f\n",Distance, Radius, 1.0 - Distance/(Radius), B_iw);
      printf("\t\tf= %f, e_iw= %f, %f\n",f, e_iw.GetX(), e_iw.GetY() );
      printf("F_Rep = [%f, %f]\n---------------\n", F_wrep.GetX(), F_wrep.GetY());
-     if (std::fabs(f)>0.01)
+     if (0 && std::fabs(f)>0.01)
            getc(stdin);
 #endif
      return F_wrep;
