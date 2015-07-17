@@ -1,11 +1,9 @@
 import argparse
 import scipy.stats
 from numpy import *
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy.stats.stats import pearsonr
-from scipy.stats.kde import gaussian_kde
 
 frame = 16
 
@@ -34,22 +32,20 @@ def func_b(i, k):
 
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
-    parser.add_argument("-v", "--version", help='JuPedSim  Detection of Steady State  Version 0.7')
-    parser.add_argument("-p", "--filepath", default="./", help='give the path of the input file')
-    parser.add_argument("-n", "--filename", default="test", help='give the name of the input file')    
+    parser.add_argument("-v", "--version", help='JuPedSim  Version 0.7  Detection of Steady State')
+    parser.add_argument("-f", "--input_file", default="E:/GitLab/jpsreport/demos/SteadyState/rho_v_Voronoi_traj_AO_b240.txt_id_1.dat", help='give the location and the name of the input file')    
     parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density')
     parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='give the end frame of the reference process in density')
     parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='give the start frame of the reference process in speed')
     parser.add_argument("-ve", "--reference_v_end", type=int, default=640, help='give the end frame of the reference process in speed')
-    parser.add_argument("-f", "--plotfigs", default="yes", help='choose to plot the figures or not')
+    parser.add_argument("-p", "--plotfigs", default="yes", help='choose to plot the figures or not')
     args = parser.parse_args()
     return args
 
 if __name__ == '__main__':
     rho_max = 8.0
     args = getParserArgs()
-    filepath = args.filepath
-    filename = args.filename
+    input_file = args.input_file
     ref_rho_start = args.reference_rho_start
     ref_rho_end = args.reference_rho_end
     ref_v_start = args.reference_v_start
@@ -57,9 +53,21 @@ if __name__ == '__main__':
     plotfigs = args.plotfigs
 
 # input data
-data = loadtxt('%s%s'%(filepath, filename))
+data = loadtxt('%s'%(input_file))
 data = data[ data[:,1] != 0 ]
 data[:,0] = data[:,0] - data[0,0]
+
+# filepath and filename
+reverse = input_file[::-1]
+count = -1
+for i in reverse:
+    count += 1
+    if i == '/':
+        break
+filepath = input_file[:(len(input_file)-count)]
+filename = input_file[-count:]
+print('file path = ', filepath)
+print('file name = ', filename)
 
 # calculate ref_mean, ref_std, ref_acf for rho
 ref_rho = data
@@ -160,6 +168,7 @@ while theta+1 < len(Tm) and Tps+Tm[theta, 0] < gamma:
     Tps = Tps + Tm[theta, 0]
     theta = theta + 1
 rho_theta = theta
+print('rho_theta = %.0f'%(rho_theta))
 
 # calculate theta v
 acf = ref_v_acf
@@ -236,6 +245,7 @@ while theta+1 < len(Tm) and Tps+Tm[theta, 0] < gamma:
     Tps = Tps + Tm[theta, 0]
     theta = theta + 1
 v_theta = theta
+print('v_theta = %.0f'%(v_theta))
 
 # calculate statistics rho
 statistics_rho = data
@@ -287,6 +297,7 @@ steady_rho_list.append(steady_rho_end_list)
 steady_rho_array = array(steady_rho_list)
 steady_rho_array = steady_rho_array.T
 savetxt('%s/SteadyState_rho_%s.txt'%(filepath, filename), steady_rho_array, fmt='%d\t%d', header='start end', newline='\r\n')
+print('steady state of rho is: \n', steady_rho_array)
 
 # choose steady state v
 statistics_v = loadtxt('%s/cusum_v_%s.txt'%(filepath, filename))
@@ -310,6 +321,7 @@ steady_v_list.append(steady_v_end_list)
 steady_v_array = array(steady_v_list)
 steady_v_array = steady_v_array.T
 savetxt('%s/SteadyState_v_%s.txt'%(filepath, filename), steady_v_array, fmt='%d\t%d', header='start end', newline='\r\n')
+print('steady state of v is: \n', steady_v_array)
 
 # calculate steady state
 steady_start_list = []
@@ -338,8 +350,12 @@ steady_list.append(steady_end_list)
 steady_array = array(steady_list)
 steady_array = steady_array.T
 savetxt('%s/SteadyState_%s.txt'%(filepath, filename), steady_array, fmt='%d\t%d', header='start end', newline='\r\n')
+print('final steady state is: \n', steady_array)
 
-if plotfigs == 'yes':
+if plotfigs == 'no':
+    print('No figures are plotted!')
+else:
+    print('Plotting figures...')
 
     # plot cusum rho
     fig = plt.figure(figsize=(11, 10), dpi=100)
@@ -408,3 +424,5 @@ if plotfigs == 'yes':
     plt.ylim(0, int(max(data[:,2]))+1)
     plt.legend(numpoints=1, ncol=1, loc=1, fontsize=20)
     plt.savefig('%s/SteadyState_v_%s.png'%(filepath, filename))
+
+print('Steady state detected successfully!')
