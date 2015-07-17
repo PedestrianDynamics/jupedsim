@@ -682,7 +682,11 @@ vector<int> ArgumentParser::GetAreaIDforMethodD() const
 MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
 {
      if (_measurementAreas.count(id) == 0)
+     {
+          Log->Write("ERROR:\t measurement id [%d] not found");
+
           return NULL;
+     }
      return _measurementAreas[id];
 
 }
