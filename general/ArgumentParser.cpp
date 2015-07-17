@@ -39,6 +39,9 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
 #endif
 
 #include "../tinyxml/tinyxml.h"
@@ -219,11 +222,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
      }
 
      //geometry
-	  if(xMainNode->FirstChild("geometry"))
-	  {
-		   _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
-		   Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
-	  }
+     if(xMainNode->FirstChild("geometry"))
+     {
+          _geometryFileName=_projectRootDir+xMainNode->FirstChildElement("geometry")->Attribute("file");
+          Log->Write("INFO: \tGeometry File is: <"+_geometryFileName+">");
+     }
 
      //trajectories
      TiXmlNode* xTrajectories = xMainNode->FirstChild("trajectories");
@@ -322,31 +325,45 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
      }
 
+     //max CPU
+     if(xMainNode->FirstChild("num_threads"))
+     {
+          TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
+          if(numthreads)
+          {
+#ifdef _OPENMP
+               omp_set_num_threads(xmltoi(numthreads->Value(),omp_get_max_threads()));
+#endif
+
+          }
+          Log->Write("INFO: \t Using <%d> threads", omp_get_max_threads());
+     }
+
      //scripts
-	  if(xMainNode->FirstChild("scripts"))
-	  {
-			 _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
-			 if(_scriptsLocation.empty())
-			 {
-				_scriptsLocation="./";
-			 }
-			if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
-									 (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
-								// &&() osx
-			 {
-				_scriptsLocation=_projectRootDir+_scriptsLocation;
-			 }
-			if (opendir (_scriptsLocation.c_str()) == NULL)
-			{
-				/* could not open directory */
-				Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
-				return false;
-			}
-			else
-			{
-				Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
-			}
-	  }
+     if(xMainNode->FirstChild("scripts"))
+     {
+          _scriptsLocation=xMainNode->FirstChildElement("scripts")->Attribute("location");
+          if(_scriptsLocation.empty())
+          {
+               _scriptsLocation="./";
+          }
+          if ( (boost::algorithm::contains(_scriptsLocation,":")==false) && //windows
+                    (boost::algorithm::starts_with(_scriptsLocation,"/") ==false)) //linux
+               // &&() osx
+          {
+               _scriptsLocation=_projectRootDir+_scriptsLocation;
+          }
+          if (opendir (_scriptsLocation.c_str()) == NULL)
+          {
+               /* could not open directory */
+               Log->Write("ERROR: \tcould not open the directory <"+_scriptsLocation+">");
+               return false;
+          }
+          else
+          {
+               Log->Write("INFO: \tInput directory for loading scripts is:\t<"+_scriptsLocation+">");
+          }
+     }
 
      //measurement area
      if(xMainNode->FirstChild("measurement_areas")) {
