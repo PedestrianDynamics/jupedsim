@@ -103,8 +103,8 @@ void Method_A::WriteFile_N_t(string data)
           string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
           string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
-          system(parameters_N_t.c_str());
-          Log->Write("INFO:\tPlotting N-t diagram!");
+          int res = system(parameters_N_t.c_str());
+          Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
      }
      else
      {

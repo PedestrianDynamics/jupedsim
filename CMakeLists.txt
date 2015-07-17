@@ -71,6 +71,21 @@ if(PROCESSOR_COUNT)
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
 
+# find the correct OpenMP flag
+FIND_PACKAGE(OpenMP)
+if(OPENMP_FOUND)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+else(OPENMP_FOUND)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    # somehow find_package(openmp) does not work properly with clang
+  else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message( STATUS "Disabling OpenMP support" )
+  endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+endif(OPENMP_FOUND)
+
 # test all cpp-files in Utest
 if(BUILD_TESTING)
   file(GLOB test_files "${CMAKE_TEST_DIR}/*.cpp")

@@ -211,7 +211,7 @@ std::map<int, polygon_2d> Analysis::ReadGeometry(const std::string& geometryFile
      //loop over all areas
      for(auto&& area: areas)
      {
-    	 //search for the subroom that containst that area
+          //search for the subroom that containst that area
           for (auto&& it_room : _building->GetAllRooms())
           {
                for (auto&& it_sub : it_room.second->GetAllSubRooms())
@@ -281,39 +281,40 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      std::map<int , std::vector<int> > _peds_t=data.GetPedsFrame();
      for(int frameNr = 0; frameNr < data.GetNumFrames(); frameNr++ )
      {
-    	 vector<int> ids=_peds_t[frameNr];
-    	 vector<int> IdInFrame = data.GetIdInFrame(ids);
-    	 vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
-    	 vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
-    	 for( unsigned int i=0;i<IdInFrame.size();i++)
-		 {
-    		 bool IsInBuilding=false;
-    		 for (auto&& it_room : _building->GetAllRooms())
-    		 {
-    			 for (auto&& it_sub : it_room.second->GetAllSubRooms())
-    			 {
-    				 SubRoom* subroom = it_sub.second.get();
-    				 if(subroom->IsInSubRoom(Point(XInFrame[i]*CMtoM,YInFrame[i]*CMtoM)))
-    				 {
-    					 IsInBuilding=true;
-    					 break;
-    				 }
-    			 }
-    			 if(IsInBuilding)
-				 {
-					 break;
-				 }
-    		 }
-    		 if(false==IsInBuilding)
-			  {
-				  Log->Write("Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!", frameNr+data.GetMinFrame(), XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
-			  }
-		 }
+          vector<int> ids=_peds_t[frameNr];
+          vector<int> IdInFrame = data.GetIdInFrame(ids);
+          vector<double> XInFrame = data.GetXInFrame(frameNr, ids);
+          vector<double> YInFrame = data.GetYInFrame(frameNr, ids);
+          for( unsigned int i=0;i<IdInFrame.size();i++)
+          {
+               bool IsInBuilding=false;
+               for (auto&& it_room : _building->GetAllRooms())
+               {
+                    for (auto&& it_sub : it_room.second->GetAllSubRooms())
+                    {
+                         SubRoom* subroom = it_sub.second.get();
+                         if(subroom->IsInSubRoom(Point(XInFrame[i]*CMtoM,YInFrame[i]*CMtoM)))
+                         {
+                              IsInBuilding=true;
+                              break;
+                         }
+                    }
+                    if(IsInBuilding)
+                    {
+                         break;
+                    }
+               }
+               if(false==IsInBuilding)
+               {
+                    Log->Write("Warning:\tAt %dth frame pedestrian at <x=%.4f, y=%.4f> is not in geometry!", frameNr+data.GetMinFrame(), XInFrame[i]*CMtoM, YInFrame[i]*CMtoM );
+               }
+          }
      }
      //-----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
      if(_DoesUseMethodA) //Method A
      {
+#pragma omp parallel for
           for(unsigned int i=0; i<_areaForMethod_A.size(); i++)
           {
                Method_A method_A ;
@@ -333,6 +334,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodB) //Method_B
      {
+#pragma omp parallel for
           for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
           {
                Method_B method_B;
@@ -351,6 +353,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodC) //Method C
      {
+#pragma omp parallel for
           for(unsigned int i=0; i<_areaForMethod_C.size(); i++)
           {
                Method_C method_C;
@@ -369,6 +372,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
 
      if(_DoesUseMethodD) //method_D
      {
+#pragma omp parallel for
           for(unsigned int i=0; i<_areaForMethod_D.size(); i++)
           {
                Method_D method_D;
@@ -395,11 +399,12 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           }
      }
      if(_DoesUseMethodC || _DoesUseMethodD)
-	 {
-		  string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
-											 " -f "+boost::lexical_cast<std::string>(data.GetFps());
-		  system(parameters_Timeseries.c_str());
-	 }
+     {
+          string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+                    " -f "+boost::lexical_cast<std::string>(data.GetFps());
+          int res=system(parameters_Timeseries.c_str());
+          Log->Write("INFO:\t time series result: %d ",res);
+     }
      return 0;
 }
 
