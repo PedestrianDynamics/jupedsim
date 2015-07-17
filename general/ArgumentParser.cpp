@@ -700,9 +700,10 @@ MeasurementArea* ArgumentParser::GetMeasurementArea(int id)
 {
      if (_measurementAreas.count(id) == 0)
      {
-          Log->Write("ERROR:\t measurement id [%d] not found");
-
-          return NULL;
+          Log->Write("ERROR:\t measurement id [%d] not found.",id);
+          Log->Write("      \t check your configuration files");
+          exit(EXIT_FAILURE);
+          //return NULL;
      }
      return _measurementAreas[id];
 
