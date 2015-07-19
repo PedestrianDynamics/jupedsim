@@ -347,7 +347,7 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
      Point f(0., 0.);
      Point centroid = subroom->GetCentroid();
-     bool inside = subroom->IsConvex(); // would like to call subroom->is_inside(centroide)
+     bool inside = subroom->IsInSubRoom(centroid);
      //first the walls
      for(const auto & wall: subroom->GetAllWalls())
      {
@@ -392,7 +392,7 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 
 Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& centroid, bool inside) const
 {
-#define DEBUG 1
+#define DEBUG 0
      Point F_wrep = Point(0.0, 0.0);
 #if DEBUG
      printf("=========\n\tEnter GompertzWall with PED=%d, wall=[%.2f, %.2f]--[%.2f, %.2f]\n", ped->GetID(), w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(),  w.GetPoint2().GetY());
@@ -402,9 +402,9 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
 
      Point pt = w.ShortestPoint(ped->GetPos());
      double wlen = w.LengthSquare();
-     if (wlen <= 0.03) { // ignore walls smaller than 0.15m  (15cm)
-          return F_wrep;
-     }
+     // if (wlen <= 0.03) { // ignore walls smaller than 0.15m  (15cm)
+     //      return F_wrep;
+     // }
      Point dist = pt - ped->GetPos(); // x- and y-coordinate of the distance between ped and p
      const double EPS = 0.001; // molified see Koester2013
      double Distance = dist.Norm() + EPS; // distance between the centre of ped and point p
@@ -425,7 +425,9 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
           Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall",ped->GetID());
           Log->Write("INFO:\t\t --- take subroom centroid ",ped->GetID());
           Point new_dist = centroid - ped->GetPos();
-          e_iw = new_dist/new_dist.Norm();
+          new_dist = new_dist/new_dist.Norm();
+          
+          e_iw = ((inside==true)? new_dist:new_dist*-1);
           Distance = EPS;
      }
 
