@@ -498,31 +498,8 @@ void MainWindow::parseGeometry(const QDomNode &geoNode)
 // This function is only used in online Mode
 void MainWindow::parseGeometry(const QString& geometryString)
 {
-
-    //    QDomDocument doc("");
-    //    data = "<travisto>\n" +data+ "\n</travisto>\n";
-
-    //    QString errorMsg="";
-    //    doc.setContent(data,&errorMsg);
-
-    //    if(!errorMsg.isEmpty()){
-    //        Debug::Error("%s", (const char *)errorMsg.toStdString().c_str());
-    //        return;
-    //    }
-
-    //    QDomNode geoNode =doc.elementsByTagName("geometry").item(0);
-
-    //create a temporary file with the content geonode
-
-    //    QTemporaryFile file;
-    //    file.setFileName(file.fileName()+".xml");
-    //    if (file.open()) {
-    //        QTextStream stream(&file);
-    //        stream << geoNode << endl;
-    //    }
-
     QFile file("_geometry_tmp_file.xml");
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    if (file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         QTextStream stream(&file);
         stream << geometryString << endl;
     }
@@ -535,8 +512,6 @@ void MainWindow::parseGeometry(const QString& geometryString)
     //cout<<"filename: "<<geofileName.toStdString()<<endl;exit(0);
 
     auto&& geometry = _visualisationThread->getGeometry();
-
-
 
     if(!geofileName.isEmpty()) {
         SystemSettings::CreateLogfile();
@@ -554,16 +529,28 @@ void MainWindow::parseGeometry(const QString& geometryString)
     // I assume it is a trav format node,
     //which is the only one which can directly be inserted into a file
     else {
-        QDomDocument doc("");
-        QDomNode geoNode;
 
+        QDomNode geoNode;
         //must not be a file name
         SaxParser::parseGeometryTRAV(geometryString,geometry,geoNode);
     }
 
+    //workaround. In some cases there are still hlines in the input files which are not parsed.
+    if(geofileName.endsWith(".xml",Qt::CaseInsensitive))
+    {
+        QXmlInputSource source;
+        source.setData(geometryString);
+        QXmlSimpleReader reader;
+
+        SyncData dummy;
+        double fps;
+        SaxParser handler(geometry,dummy,&fps);
+        reader.setContentHandler(&handler);
+        reader.parse(source);
+    }
+
     //delete the file
     file.remove();
-
 }
 
 // TODO: still used?
