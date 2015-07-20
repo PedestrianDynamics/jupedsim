@@ -750,7 +750,9 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 
                 const Point& p =cr->GetCentre();
                 double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
-                geometry->addObjectLabel(pos,pos,"nav_"+QString::number(cr->GetID()).toStdString(),captionsColor);
+                geometry->addObjectLabel(pos,pos,"nav_"+QString::number(cr->GetID()).toStdString()+"_"+
+                                         QString::number(cr->GetUniqueID()).toStdString()
+                                         ,captionsColor);
             }
 
             // add the exits
@@ -764,11 +766,11 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 
                 const Point& p =tr->GetCentre();
                 double pos[3]= {p._x*FAKTOR,p._y*FAKTOR,z1*FAKTOR};
-                geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString(),captionsColor);
+                geometry->addObjectLabel(pos,pos,"door_"+QString::number(tr->GetID()).toStdString()+
+                                         +"_"+ QString::number(tr->GetUniqueID()).toStdString(),captionsColor);
             }
 
             geoFac.AddElement(itr_subroom.second->GetRoomID(),itr_subroom.second->GetSubRoomID(),geometry);
-            //TODO: parsing the Hlines
         }
     }
 
