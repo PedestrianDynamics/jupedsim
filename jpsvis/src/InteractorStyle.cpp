@@ -36,6 +36,7 @@
 #include <vtkCamera.h>
 #include <vtkSmartPointer.h>
 #include <vtkCoordinate.h>
+#include <vtkMath.h>
 
 
 #include "SystemSettings.h"
@@ -320,6 +321,7 @@ void InteractorStyle::OnLeftButtonUp()
 
     vtkRenderWindowInteractor *rwi = this->Interactor;
 
+    static double last_pos[3]={0,0,0};
     int pos[2] = {0,0};
     rwi->GetEventPosition(pos);
     int pos_x=pos[0];
@@ -329,14 +331,16 @@ void InteractorStyle::OnLeftButtonUp()
     coordinate->SetCoordinateSystemToDisplay();
     coordinate->SetValue(pos_x,pos_y,0);
     double* world = coordinate->GetComputedWorldValue(this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer());
-    world[0]/=100;
-    world[1]/=100;
-    world[2]/=100;
+
+    world[0]/=100; world[1]/=100; world[2]/=100;
+    double dist=vtkMath::Distance2BetweenPoints(last_pos,world);
+    last_pos[0]=world[0]; last_pos[1]=world[1]; last_pos[2]=world[2];
+
     cout.precision(2);
     std::cout<<"mouse position: " <<endl;
     std::cout<<"\t screen: " <<pos_x<<" "<<pos_y<<endl;
     std::cout<<"\t world : " <<world[0] << " " << world[1] << " " << world[2] << std::endl;
-
+    std::cout<<"\t distance to last mouse position: "<<dist<<endl;
     //vtkRenderer *ren =rwi->GetRenderWindow()->GetRenderers()->GetFirstRenderer();
     //vtkCamera *cam = ren->GetActiveCamera();
     //cam->SetFocalPoint(world[0],world[1],world[2]);
