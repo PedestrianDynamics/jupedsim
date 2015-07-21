@@ -143,7 +143,7 @@ bool EventManager::ReadEventsXml()
           Log->Write("ERROR:\tNo events found.");
           return false;
      }
-     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_time"), 1);
+     _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_frequency"), 1);
      _updateRadius = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
 
      //Pedestrian::SetColorMode(BY_SPOTLIGHT);
