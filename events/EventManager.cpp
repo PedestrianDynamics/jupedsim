@@ -53,6 +53,7 @@
 #include "../routing/SafestPathRouter.h"
 #include "../routing/CognitiveMapRouter.h"
 #include "EventManager.h"
+#include "Event.h"
 
 using namespace std;
 
@@ -62,10 +63,10 @@ using namespace std;
 
 EventManager::EventManager(Building *_b)
 {
-     _event_times = vector<double>();
-     _event_types = vector<string>();
-     _event_states = vector<string>();
-     _event_ids = vector<int>();
+     //     _event_times = vector<double>();
+     //     _event_types = vector<string>();
+     //     _event_states = vector<string>();
+     //     _event_ids = vector<int>();
      _building = _b;
      _eventCounter = 0;
      _dynamic = false;
@@ -149,10 +150,16 @@ bool EventManager::ReadEventsXml()
 
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;
                e = e->NextSiblingElement("event")) {
-          _event_times.push_back(atoi(e->Attribute("time")));
-          _event_types.push_back(e->Attribute("type"));
-          _event_states.push_back(e->Attribute("state"));
-          _event_ids.push_back(atoi(e->Attribute("id")));
+
+          //          _event_times.push_back(atoi(e->Attribute("time")));
+          //          _event_types.push_back(e->Attribute("type"));
+          //          _event_states.push_back(e->Attribute("state"));
+          //          _event_ids.push_back(atoi(e->Attribute("id")));
+          int id = atoi(e->Attribute("id"));
+          double zeit = atoi(e->Attribute("time"));
+          string state (e->Attribute("state"));
+          string type (e->Attribute("type"));
+          _events.push_back(Event(id,zeit,type,state));
      }
      Log->Write("INFO: \tEvents were initialized");
      return true;
@@ -161,10 +168,9 @@ bool EventManager::ReadEventsXml()
 
 void EventManager::ListEvents()
 {
-     for (unsigned int i = 0; i < _event_times.size(); i++)
+     for(const auto& event: _events)
      {
-          Log->Write("INFO: \tAfter %.2f sec, %s door %d", _event_times[i],
-                    _event_states[i].c_str(), _event_ids[i]);
+          Log->Write("INFO:\t " + event.GetDescription());
      }
 }
 
@@ -194,7 +200,7 @@ void EventManager::ReadEventsTxt(double time)
  **********/
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
-//#pragma omp parallel
+     //#pragma omp parallel
      for(auto&& ped:_b->GetAllPedestrians())
      {
           for (auto&& door: _b->GetAllTransitions())
@@ -249,20 +255,20 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      }
 
      // information speed to fast
-//     for(auto&& ped1:_b->GetAllPedestrians())
-//     {
-//          vector<Pedestrian*> neighbourhood;
-//          _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
-//          for(auto&& ped2:neighbourhood)
-//          {
-//               if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
-//               {
-//                    //maybe same room and subroom ?
-//                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
-//                    MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
-//               }
-//          }
-//     }
+     //     for(auto&& ped1:_b->GetAllPedestrians())
+     //     {
+     //          vector<Pedestrian*> neighbourhood;
+     //          _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
+     //          for(auto&& ped2:neighbourhood)
+     //          {
+     //               if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
+     //               {
+     //                    //maybe same room and subroom ?
+     //                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
+     //                    MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
+     //               }
+     //          }
+     //     }
 
      //update the routers based on the configurations
      //#pragma omp parallel
@@ -309,7 +315,7 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
           //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
           //Log->Write("       : \t trying to create");
           //CreateRoutingEngine(_building);
@@ -358,7 +364,7 @@ void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
 
 void EventManager::ProcessEvent()
 {
-     if (_event_times.size() == 0) return;
+     if (_events.size() == 0) return;
 
      int current_time = Pedestrian::GetGlobalTime();
 
@@ -368,26 +374,27 @@ void EventManager::ProcessEvent()
           //update knowledge about closed doors
           //share the information between the pedestrians
           UpdateAgentKnowledge(_building);
-          //cout<<"updating buildling..."<<endl;
           //actualize based on the new knowledge
           _lastUpdateTime = current_time;
-          //cout<<"updating..."<<currentTime<<endl<<endl;
+          cout<<"updating..."<<current_time<<endl<<endl;
      }
 
      //update the building state
      // the time is needed as double
      double current_time_d = Pedestrian::GetGlobalTime();
-     for (unsigned int i = 0; i < _event_times.size(); i++)
+
+     for(const auto& event: _events)
      {
-          if (fabs(_event_times[i] - current_time_d) < J_EPS_EVENT) {
+          if (fabs(event.GetTime() - current_time_d) < J_EPS_EVENT) {
                //Event with current time stamp detected
                Log->Write("INFO:\tEvent: after %.2f sec: ", current_time_d);
-               if (_event_states[i].compare("close") == 0) {
-                    CloseDoor(_event_ids[i]);
+               if (event.GetState().compare("close") == 0) {
+                    CloseDoor(event.GetId());
                } else {
-                    OpenDoor(_event_ids[i]);
+                    OpenDoor(event.GetId());
                }
           }
+
      }
 
      if (_dynamic)
@@ -395,83 +402,6 @@ void EventManager::ProcessEvent()
 }
 
 
-void EventManager::Update_Events(double time )
-{
-     //1. pruefen ob in _event_times der zeitstempel time zu finden ist. Wenn ja zu 2. sonst zu 3.
-     //2. Event aus _event_times und _event_values verarbeiten (Tuere schliessen/oeffnen, neues Routing)
-     //   Dann pruefen, ob eine neue Zeile in der .txt Datei steht
-     //3. .txt Datei auf neue Zeilen pruefen. Wenn es neue gibt diese Events verarbeiten ( Tuere schliessen/oeffnen,
-     //   neues Routing) ansonsten fertig
-
-     //_deltaT = d;
-     const vector<Pedestrian*>& _allPeds = _building->GetAllPedestrians();
-
-     //zuerst muss geprueft werden, ob die Peds, die die neuen Infos schon haben sie an andere Peds weiter-
-     //leiten muessen (wenn diese sich in der naechsten Umgebung befinden)
-     //int currentTime = _allPeds[0]->GetGlobalTime();
-     int currentTime = Pedestrian::GetGlobalTime();
-
-     if ( (currentTime != _lastUpdateTime) &&
-               ((currentTime % _updateFrequency) == 0))
-     {
-          for (unsigned int p1 = 0; p1 < _allPeds.size(); p1++) {
-               Pedestrian* ped1 = _allPeds[p1];
-               if (ped1->GetNewEventFlag()) {
-                    int rID = ped1->GetRoomID();
-                    int srID = ped1->GetSubRoomID();
-
-                    for (unsigned int p2 = 0; p2 < _allPeds.size(); p2++) {
-                         Pedestrian* ped2 = _allPeds[p2];
-                         //same room and subroom
-                         if (rID == ped2->GetRoomID()
-                                   && srID == ped2->GetSubRoomID()) {
-                              if (!ped2->GetNewEventFlag()
-                                        && ped2->GetReroutingTime()
-                                        > 2.0) {
-                                   //wenn der Pedestrian die neuen Infos noch nicht hat und eine Reroutingtime von > 2 Sekunden hat, pruefen ob er nah genug ist
-                                   double dist= (ped1->GetPos()-ped2->GetPos()).Norm();
-
-                                   if (dist <= _updateRadius) { // wenn er nah genug (weniger als 2m) ist, Info weitergeben (Reroutetime auf 2 Sek)
-                                        //ped->RerouteIn(2.0);
-                                        ped2->RerouteIn(0.0);
-                                   }
-                              }
-                         }
-                    }
-               }
-          }
-          _lastUpdateTime = currentTime;
-          //cout<<"updating..."<<currentTime<<endl<<endl;
-     }
-
-     //dann muss die Reroutingzeit der Peds, die die neuen Infos noch nicht haben, aktualisiert werden:
-     for (unsigned int p1 = 0; p1 < _allPeds.size(); p1++) {
-          Pedestrian* ped1 = _allPeds[p1];
-          ped1->UpdateReroutingTime();
-          if (ped1->IsReadyForRerouting()) {
-               ped1->ClearMentalMap();
-               ped1->ResetRerouting();
-               ped1->SetNewEventFlag(true);
-               ped1->SetSpotlight(true);
-          }
-     }
-
-     //Events finden
-     for (unsigned int i = 0; i < _event_times.size(); i++) {
-          if (fabs(_event_times[i] - time) < J_EPS_EVENT) {
-               //Event with current time stamp detected
-               Log->Write("INFO:\tEvent: after %.2f sec: ", time);
-               if (_event_states[i].compare("close") == 0) {
-                    CloseDoor(_event_ids[i]);
-               } else {
-                    OpenDoor(_event_ids[i]);
-               }
-          }
-     }
-
-     if (_dynamic)
-          ReadEventsTxt(time);
-}
 
 /***************
  Event handling
@@ -480,10 +410,15 @@ void EventManager::Update_Events(double time )
 void EventManager::CloseDoor(int id)
 {
      Transition *t = _building->GetTransition(id);
-     if (t->IsOpen()) {
+     if (t->IsOpen())
+     {
           t->Close();
           Log->Write("INFO:\tClosing door %d ", id);
-          ChangeRouting(id, "close");
+          //Create and save a graph corresponding to the actual state of the building.
+          if(CreateRoutingEngine(_building)==false)
+          {
+               Log->Write("ERROR: \tcannot create a routing engine with the new event");
+          }
      } else {
           Log->Write("WARNING: \tdoor %d is already close", id);
      }
@@ -494,48 +429,17 @@ void EventManager::CloseDoor(int id)
 void EventManager::OpenDoor(int id)
 {
      Transition *t = _building->GetTransition(id);
-     if (!t->IsOpen()) {
+     if (!t->IsOpen())
+     {
           t->Open();
           Log->Write("INFO:\tOpening door %d ", id);
-          ChangeRouting(id, "open");
+          //Create and save a graph corresponding to the actual state of the building.
+          if(CreateRoutingEngine(_building)==false)
+          {
+               Log->Write("ERROR: \tcannot create a routing engine with the new event");
+          }
      } else {
           Log->Write("WARNING: \tdoor %d is already open", id);
-     }
-}
-
-void EventManager::ChangeRouting(int id, const std::string& state)
-{
-
-     //Pedestrians sollen, damit es realitaetsnaeher wird, je nachdem wo sie stehen erst spaeter(abh. von der
-     //Entfernung zur Tuer) merken, dass sich Tueren aendern. Oder sie bekommen die Info von anderen Pedestrians
-     //Abstand der aktuellen Position des Pedestrians zur entsprechenden Tuer: Tuer als Linie sehen und mit
-     //DistTo(ped.GetPos()) den Abstand messen. Reroutezeit dann aus Entfernung und Geschwindigkeit berechnen.
-
-     //Transition *t = _building->GetTransition(id);
-//     for(auto&& ped:_building->GetAllPedestrians())
-//     {
-//          //if(_allPedestrians[p]->GetExitIndex()==t->GetUniqueID()){
-//          ped->SetNewEventFlag(false);
-//          double dist = t->DistTo(ped->GetPos());
-//          const Point& v = ped->GetV();
-//          double norm = v.Norm();
-//          if (norm == 0.0) {
-//               norm = 0.01;
-//          }
-//          double time = dist / norm;
-//          if (time < 1.0) {
-//               ped->ClearMentalMap();
-//               ped->ResetRerouting();
-//               ped->SetNewEventFlag(true);
-//          } else {
-//               ped->RerouteIn(time);
-//          }
-//     }
-
-     //Create and save a graph corresponding to the actual state of the building.
-     if(CreateRoutingEngine(_building)==false)
-     {
-          Log->Write("ERROR: \tcannot create a routing engine with the new event");
      }
 }
 
