@@ -1,4 +1,6 @@
 #include "waypoints.h"
+#include <stdlib.h>
+#include <math.h>
 
 Waypoint::Waypoint(Point pos, ptrRoom room)
 {
@@ -80,6 +82,44 @@ const std::string &Waypoint::GetCaption() const
 const double &Waypoint::GetPriority() const
 {
     return _priority;
+}
+
+Point Waypoint::GetRandomPoint() const
+{
+    const double pi = std::acos(-1);
+    int alpha1 = std::rand() % 360;
+    int a = std::rand() % (int)_a;
+    double x = _exactPos.GetX()+std::cos(alpha1*pi/180.0)*a;
+    int alpha2 = std::rand() % 360;
+    int b = std::rand() % (int)_b;
+    double y = _exactPos.GetY()+std::sin(alpha2*pi/180.0)*b;
+
+    //Log->Write(std::to_string(x));
+    //Log->Write(std::to_string(y));
+    return Point(x,y);
+}
+
+//double Waypoint::ShortestDistance(Point point) const
+//{
+//    const double pi = std::acos(-1);
+//    double distance;
+//    double min=std::sqrt(std::pow(_a*std::cos(pi/180.0)-point.GetX(),2)+std::pow(_b*std::sin(pi/180.0)-point.GetY(),2));
+
+//    for (int alpha=2; alpha<=360; ++alpha)
+//    {
+//        distance=std::sqrt(std::pow(_a*std::cos(alpha*pi/180.0)-point.GetX(),2)+std::pow(_b*std::sin(alpha*pi/180.0)-point.GetY(),2));
+//        if (distance<min)
+//        {
+//            min=distance;
+//        }
+//    }
+//    //Log->Write(std::to_string(min));
+//    return min;
+//}
+
+bool Waypoint::WaypointReached() const
+{
+
 }
 
 

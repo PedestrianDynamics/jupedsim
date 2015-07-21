@@ -6,7 +6,7 @@
   <seed>12542</seed>
   <max_sim_time>900</max_sim_time>
   <!-- geometry file -->
-  <geometry>landmarktest4.xml</geometry>
+  <geometry>landmarktest5.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <!--file location="trajectories.xml" /-->
@@ -99,10 +99,10 @@
     </router>
     <router router_id="7" description="cognitive_map">
       <sensors>
-	  <sensor sensor_id="1" description="Room2Corridor"/>
+	  <!--sensor sensor_id="1" description="Room2Corridor"/-->
         <!--sensor sensor_id="1" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/-->
       </sensors>
-      <cognitive_map status="empty"/>
+      <cognitive_map status="complete"/>
       <!--parameters>
         <navigation_lines file="routing.xml" />
         </parameters -->

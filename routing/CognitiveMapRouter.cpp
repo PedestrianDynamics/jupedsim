@@ -100,6 +100,13 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 {
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
         const GraphEdge * destination = nullptr;
+        ///Cognitive Map /Associations/ Waypoints/ landmarks
+
+        (*cm_storage)[p]->AddWaypoints(
+                    (*cm_storage)[p]->TriggerAssoziations(
+                        (*cm_storage)[p]->LookForLandmarks()));
+
+        (*cm_storage)[p]->AssessDoors();
         destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
         if(destination == nullptr) {
             //no destination was found, now we could start the discovery!
@@ -107,11 +114,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
             sensor_manager->execute(p, SensorManager::NO_WAY);
 
             //check if this was enough for finding a global path to the exit
-            ///Cognitive Map /Associations/ Waypoints/ landmarks
-            (*cm_storage)[p]->AddWaypoints(
-                        (*cm_storage)[p]->TriggerAssoziations(
-                            (*cm_storage)[p]->LookForLandmarks()));
-            (*cm_storage)[p]->AssessDoors();
+
             destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
 
             if(destination == nullptr) {

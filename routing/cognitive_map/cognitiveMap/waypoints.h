@@ -32,6 +32,12 @@ public:
     ptrRoom GetRoom() const;
     const std::string& GetCaption() const;
     const double &GetPriority() const;
+    ///Random point somewhere within the waypoint
+    Point GetRandomPoint() const;
+    // Shortest Distance from waypoint egde (ellipse) to arbitrary point
+    //double ShortestDistance(Point point) const;
+    /// Check if Waypoint reached (if YAH-Pointer is in Waypoint)
+    bool WaypointReached() const;
 
 
 private:

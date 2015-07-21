@@ -222,6 +222,8 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/landmark.cpp
   routing/cognitive_map/Tools/triangle.cpp
 
+  visiLibity/source_code/visilibity.cpp
+
 
   poly2tri/common/shapes.cpp
   poly2tri/sweep/sweep_context.cpp
@@ -269,6 +271,8 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/waypoints.h
   routing/cognitive_map/cognitiveMap/landmark.h
   routing/cognitive_map/Tools/triangle.h
+
+  visiLibity/source_code/visilibity.hpp
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
