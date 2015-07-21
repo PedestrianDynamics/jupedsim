@@ -171,15 +171,13 @@ double Line::NormalComp(const Point &v) const {
 // Muss nicht im Segment liegen
 
 Point Line::LotPoint(const Point &p) const {
-    const Point &r = GetPoint1();
-    const Point &s = GetPoint2();
-    const Point &t = r - s;
+    const Point &t = _point1 - _point2;
     Point tmp;
     double lambda;
 
-    tmp = p - s;
+    tmp = p - _point2;
     lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
-    Point f = s + t * lambda;
+    Point f = _point2 + t * lambda;
     return f;
 }
 
