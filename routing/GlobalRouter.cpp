@@ -1477,8 +1477,15 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                h->SetRoom1(room);
                h->SetSubRoom1(subroom);
 
-               _building->AddHline(h);
-               subroom->AddHline(h);
+               if(_building->AddHline(h))
+               {
+                    subroom->AddHline(h);
+                    //h will be freed in building
+               }
+               else
+               {
+                    delete h;
+               }
           }
      }
      Log->Write("INFO:\tDone with loading extra routing information");

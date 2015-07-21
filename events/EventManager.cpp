@@ -92,6 +92,8 @@ EventManager::~EventManager()
 {
      if(_file)
           fclose(_file);
+
+     _eventEngineStorage.clear();
 }
 
 bool EventManager::ReadEventsXml()
@@ -143,9 +145,6 @@ bool EventManager::ReadEventsXml()
      _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_time"), 1);
      _updateRadius = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
 
-     //string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
-     //if(color=="true")
-     //     Pedestrian::SetColorMode(BY_KNOWLEDGE);
      //Pedestrian::SetColorMode(BY_SPOTLIGHT);
 
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;
@@ -674,6 +673,7 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
 
      default:
           Log->Write("ERROR: \twrong value for routing strategy [%d]!!!\n", strategy );
+          exit(EXIT_FAILURE);
           break;
 
      }

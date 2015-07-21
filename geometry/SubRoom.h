@@ -261,9 +261,9 @@ public:
 
 
      //navigation
-     void AddCrossing(Crossing* line);
-     void AddTransition(Transition* line);
-     void AddHline(Hline* line);
+     bool AddCrossing(Crossing* line);
+     bool AddTransition(Transition* line);
+     bool AddHline(Hline* line);
      void AddNeighbor(SubRoom* sub);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
