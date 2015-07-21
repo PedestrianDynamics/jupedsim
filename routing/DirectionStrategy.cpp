@@ -154,7 +154,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       //============================ WALLS ===========================
       const vector<Wall>& walls = subroom->GetAllWalls();
       for (unsigned int i = 0; i < walls.size(); i++) {
-            dist = tmpDirection.GetIntersectionDistance(walls[i]);
+            dist = tmpDirection.GetDistanceToIntersectionPoint(walls[i]);
             if (dist < minDist) {
                   inear = i;
                   minDist = dist;
@@ -175,7 +175,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
             const vector<Wall>& owalls = obstacles[obs]->GetAllWalls();
             for (unsigned int i = 0; i < owalls.size(); i++) {
-                  dist = tmpDirection.GetIntersectionDistance(owalls[i]);
+                  dist = tmpDirection.GetDistanceToIntersectionPoint(owalls[i]);
                   if (dist < minDist) {
                         inear = i;
                         minDist = dist;

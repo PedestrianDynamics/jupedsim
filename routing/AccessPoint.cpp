@@ -202,25 +202,12 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
      return false;
 }
 
-//void AccessPoint::DeleteTransitPed(Pedestrian* ped){
-//      vector<Pedestrian*>::iterator it;
-//      it = find (_transitPedestrians.begin(), _transitPedestrians.end(), ped);
-//      if(it==_transitPedestrians.end()){
-//              cout<<" Ped not found"<<endl;
-//      }else{
-//              _transitPedestrians.erase(it);
-//      }
-//}
-
-
-//void AccessPoint::AddTransitPed(Pedestrian* ped){
-//      _transitPedestrians.push_back(ped);
-//}
-
 void AccessPoint::SetNavLine(NavLine* line)
 {
      //todo: check this
      //_navLine= line;
+     //_navLine->SetPoint1(line->GetPoint1());
+     //_navLine->SetPoint2(line->GetPoint2());
      _navLine= new NavLine(*line);
 }
 
@@ -229,15 +216,10 @@ NavLine* AccessPoint::GetNavLine() const
      return _navLine;
 }
 
-//const vector<Pedestrian*>& AccessPoint::GetAllTransitPed() const{
-//      return _transitPedestrians;
-//}
-
 const vector <AccessPoint*>& AccessPoint::GetConnectingAPs()
 {
      return _connectingAPs;
 }
-
 
 void AccessPoint::RemoveConnectingAP(AccessPoint* ap)
 {

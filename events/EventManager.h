@@ -33,31 +33,50 @@ class Router;
 class GlobalRouter;
 class QuickestPathRouter;
 class RoutingEngine;
+class Event;
 
 extern OutputHandler* Log;
 
 class EventManager
 {
-private:
-     std::vector<double> _event_times;
-     std::vector<std::string> _event_types;
-     std::vector<std::string> _event_states;
-     std::vector<int> _event_ids;
-     std::string _projectFilename;
-     std::string _projectRootDir;
-     Building *_building;
-     FILE *_file;
-     bool _dynamic;
-     int _eventCounter;
-     long int _lastUpdateTime;
-     //information propagation time in seconds
-     int _updateFrequency;
-     //information propagation range in meters
-     int _updateRadius;
-     //save the router corresponding to the actual state of the building
-     std::map<std::string, RoutingEngine*> _eventEngineStorage;
-     //save the available routers defined in the simulation
-     std::vector<RoutingStrategy> _availableRouters;
+public:
+     /**
+      * Constructor
+      */
+     EventManager(Building *_b);
+
+     /**
+      * destructor
+      */
+     ~EventManager();
+
+     /**
+      * Read and parse the events
+      * @return false if an error occured
+      */
+     bool ReadEventsXml();
+
+     /**
+      * Print the parsed events
+      */
+     void ListEvents();
+
+     /**
+      * Read and parse events from a text file
+      * @param time
+      */
+     void ReadEventsTxt(double time);
+
+
+     //process the event using the current time stamp
+     //from the pedestrian class
+     void ProcessEvent();
+     //Eventhandling
+     void CloseDoor(int id);
+     void OpenDoor(int id);
+     //void ChangeRouting(int id, const std::string& state);
+     void GetEvent(char* c);
+
 
 private:
      /**
@@ -97,45 +116,24 @@ private:
       */
      bool UpdateRoute(Pedestrian* p1);
 
-public:
-     ///constructor
-     EventManager(Building *_b);
 
-     /**
-      *
-      * destructor
-      */
-     ~EventManager();
+private:
 
-     /**
-      * Read and parse the events
-      * @return false if an error occured
-      */
-     bool ReadEventsXml();
+     std::vector<Event> _events;
+     std::string _projectFilename;
+     std::string _projectRootDir;
+     Building *_building;
+     FILE *_file;
+     bool _dynamic;
+     int _eventCounter;
+     long int _lastUpdateTime;
+     //information propagation time in seconds
+     int _updateFrequency;
+     //information propagation range in meters
+     int _updateRadius;
+     //save the router corresponding to the actual state of the building
+     std::map<std::string, RoutingEngine*> _eventEngineStorage;
+     //save the available routers defined in the simulation
+     std::vector<RoutingStrategy> _availableRouters;
 
-     /**
-      * Print the parsed events
-      */
-     void ListEvents();
-
-     /**
-      * Read and parse events from a text file
-      * @param time
-      */
-     void ReadEventsTxt(double time);
-
-     /**
-      * Process the events at runtime
-      * @param time
-      */
-     void Update_Events(double time);
-
-     //process the event using the current time stamp
-     //from the pedestrian class
-     void ProcessEvent();
-     //Eventhandling
-     void CloseDoor(int id);
-     void OpenDoor(int id);
-     void ChangeRouting(int id, const std::string& state);
-     void GetEvent(char* c);
 };

@@ -130,10 +130,6 @@ const vector<Obstacle*>& SubRoom::GetAllObstacles() const
      return _obstacles;
 }
 
-int SubRoom::GetNumberOfGoalIDs() const
-{
-     return (int)_goalIDs.size();
-}
 
 const vector<int>& SubRoom::GetAllGoalIDs() const
 {
@@ -179,16 +175,18 @@ void SubRoom::AddGoalID(int ID)
      _goalIDs.push_back(ID);
 }
 
-void SubRoom::AddCrossing(Crossing* line)
+bool SubRoom::AddCrossing(Crossing* line)
 {
      _crossings.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
-void SubRoom::AddTransition(Transition* line)
+bool SubRoom::AddTransition(Transition* line)
 {
      _transitions.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
 void SubRoom::AddNeighbor(SubRoom* sub)
@@ -199,19 +197,20 @@ void SubRoom::AddNeighbor(SubRoom* sub)
      }
 }
 
-void SubRoom::AddHline(Hline* line)
+bool SubRoom::AddHline(Hline* line)
 {
      for(unsigned int i=0;i<_hlines.size();i++)
      {
           if (line->GetID()==_hlines[i]->GetID())
           {
                Log->Write("INFO:\tskipping duplicate hline [%d] with id [%d]",_id,line->GetID());
-               return;
+               return false;
           }
      }
 
      _hlines.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
 const vector<Crossing*>& SubRoom::GetAllCrossings() const

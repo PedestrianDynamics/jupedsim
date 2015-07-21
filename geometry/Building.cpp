@@ -341,12 +341,13 @@ bool Building::InitGeometry()
                     if(!obst->ConvertLineToPoly())
                          return false;
                }
-               double minElevation = 1000;
-               double maxElevation = -1000;
+
+               double minElevation = FLT_MAX;
+               double maxElevation = -FLT_MAX;
                for(auto && wall:itr_subroom.second->GetAllWalls())
                {
-                     Point P1 = wall.GetPoint1();
-                     Point P2 = wall.GetPoint2();
+                     const Point& P1 = wall.GetPoint1();
+                     const Point& P2 = wall.GetPoint2();
                      if(minElevation > itr_subroom.second->GetElevation(P1))
                      {
                            minElevation = itr_subroom.second->GetElevation(P1);
@@ -746,7 +747,7 @@ Room* Building::GetRoom(string caption) const
      exit(EXIT_FAILURE);
 }
 
-void Building::AddCrossing(Crossing* line)
+bool Building::AddCrossing(Crossing* line)
 {
      if (_crossings.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
@@ -757,9 +758,10 @@ void Building::AddCrossing(Crossing* line)
           exit(EXIT_FAILURE);
      }
      _crossings[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddTransition(Transition* line)
+bool Building::AddTransition(Transition* line)
 {
      if (_transitions.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
@@ -770,16 +772,17 @@ void Building::AddTransition(Transition* line)
           exit(EXIT_FAILURE);
      }
      _transitions[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddHline(Hline* line)
+bool Building::AddHline(Hline* line)
 {
      if (_hLines.count(line->GetID()) != 0) {
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
                Log->Write("INFO: \tSkipping identical hlines with ID [%d]",line->GetID());
-               return;
+               return false;
           } else {
                Log->Write(
                          "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
@@ -788,9 +791,10 @@ void Building::AddHline(Hline* line)
           }
      }
      _hLines[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddGoal(Goal* goal)
+bool Building::AddGoal(Goal* goal)
 {
      if (_goals.count(goal->GetId()) != 0) {
           Log->Write(
@@ -799,6 +803,7 @@ void Building::AddGoal(Goal* goal)
           exit(EXIT_FAILURE);
      }
      _goals[goal->GetId()] = goal;
+     return true;
 }
 
 const map<int, Crossing*>& Building::GetAllCrossings() const

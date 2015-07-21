@@ -262,36 +262,22 @@ bool ArgumentParser::ParseIniFile(string inifile)
           pTmax = atof(tmax);
           Log->Write("INFO: \tMaxmimal simulation time <%.2f> seconds",pTmax);
      }
-     int max_cpus = 1;
-#ifdef _OPENMP
-     max_cpus = omp_get_max_threads();
-#endif
+
+
      //max CPU
-     if(xMainNode->FirstChild("num_threads")) {
-          TiXmlNode* seedNode = xMainNode->FirstChild("num_threads")->FirstChild();
-          int n = 1;
-          if(seedNode){
-               const char* cpuValue = seedNode->Value();
-               n = atoi(cpuValue);
-               if (n > max_cpus) n = max_cpus;
-          }
-          else {
-               n = max_cpus;
-          }
-          _maxOpenMPThreads = n;
-          Log->Write("INFO: \tnum_threads <%d>", _maxOpenMPThreads);
+     if(xMainNode->FirstChild("num_threads"))
+     {
+          TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
+          if(numthreads)
+          {
 #ifdef _OPENMP
-          if(n < omp_get_max_threads() )
-               omp_set_num_threads(_maxOpenMPThreads);
+               omp_set_num_threads(xmltoi(numthreads->Value(),omp_get_max_threads()));
 #endif
+               _maxOpenMPThreads = omp_get_max_threads();
+          }
      }
-     else { // no num_threads tag
-          _maxOpenMPThreads = max_cpus;
-#ifdef _OPENMP
-          omp_set_num_threads(_maxOpenMPThreads);
-#endif
-          Log->Write("INFO: \t Default num_threads <%d>", _maxOpenMPThreads);
-     }
+     Log->Write("INFO: \t Using tnum_threads <%d> threads", _maxOpenMPThreads);
+
      //logfile
      if (xMainNode->FirstChild("logfile"))
      {
@@ -460,10 +446,10 @@ bool ArgumentParser::ParseIniFile(string inifile)
 
      //route choice strategy
      TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
-     ParseRoutingStrategies(xRouters);
 
+     if(ParseRoutingStrategies(xRouters)==false)
+          return false;
      Log->Write("INFO: \tParsing the project file completed");
-
      return true;
 }
 
@@ -795,7 +781,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
 {
      if (!routingNode)
      {
-          Log->Write("ERROR:\tNo routers found.");
+          Log->Write("ERROR: \t route_choice_models section is missing");
           return false;
      }
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;

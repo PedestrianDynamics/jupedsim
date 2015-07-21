@@ -203,7 +203,7 @@ public:
       * point with line l. This is exactly the same function
       * as @see IntersectionWith() but returns a double insteed.
       */
-     double GetIntersectionDistance(const Line & l ) const;
+     double GetDistanceToIntersectionPoint(const Line &l) const;
 
      /**
       * @return true if the segment intersects with the circle of radius r

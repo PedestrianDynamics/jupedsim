@@ -18,6 +18,14 @@ set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
 
+if(APPLE)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++" )
+endif(APPLE)
+
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
 endif(NOT BUILD_TESTING)
@@ -231,6 +239,7 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
+  events/Event.cpp
   )
 
 set (   header_files
@@ -319,6 +328,7 @@ set (   header_files
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
   events/EventManager.h
+  events/Event.h
   )
 
 

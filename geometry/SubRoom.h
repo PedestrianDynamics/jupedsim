@@ -140,11 +140,6 @@ public:
      const std::vector<Obstacle*>& GetAllObstacles() const;
 
      /**
-      * @return the number of hlines+transitions+crossings
-      */
-     int GetNumberOfGoalIDs() const;
-
-     /**
       * @return a vector containing all Ids
       */
      const std::vector<int>& GetAllGoalIDs() const;
@@ -266,9 +261,9 @@ public:
 
 
      //navigation
-     void AddCrossing(Crossing* line);
-     void AddTransition(Transition* line);
-     void AddHline(Hline* line);
+     bool AddCrossing(Crossing* line);
+     bool AddTransition(Transition* line);
+     bool AddHline(Hline* line);
      void AddNeighbor(SubRoom* sub);
 
      const std::vector<Crossing*>& GetAllCrossings() const;
