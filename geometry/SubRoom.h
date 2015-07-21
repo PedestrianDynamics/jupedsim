@@ -140,11 +140,6 @@ public:
      const std::vector<Obstacle*>& GetAllObstacles() const;
 
      /**
-      * @return the number of hlines+transitions+crossings
-      */
-     int GetNumberOfGoalIDs() const;
-
-     /**
       * @return a vector containing all Ids
       */
      const std::vector<int>& GetAllGoalIDs() const;

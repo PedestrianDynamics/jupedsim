@@ -130,10 +130,6 @@ const vector<Obstacle*>& SubRoom::GetAllObstacles() const
      return _obstacles;
 }
 
-int SubRoom::GetNumberOfGoalIDs() const
-{
-     return (int)_goalIDs.size();
-}
 
 const vector<int>& SubRoom::GetAllGoalIDs() const
 {

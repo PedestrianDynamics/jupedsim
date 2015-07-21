@@ -342,9 +342,8 @@ void Simulation::UpdateRoutesAndLocations()
                               auto&& old_room =allRooms.at(ped->GetRoomID());
                               auto&& old_sub =old_room->GetSubRoom(
                                         ped->GetSubRoomID());
-                              if ((sub->IsInSubRoom(ped->GetPos()))
-                                        && (sub->IsDirectlyConnectedWith(
-                                                  old_sub)))
+                              if (sub->IsDirectlyConnectedWith(old_sub)
+                                        && sub->IsInSubRoom(ped->GetPos()))
                               {
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
@@ -356,14 +355,14 @@ void Simulation::UpdateRoutesAndLocations()
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
-//                                   if(_argsParser.ShowStatistics())
-//                                   {
-//                                        Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
-//                                        if(trans)
-//                                        {
-//                                             trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-//                                        }
-//                                   }
+                                   //if(_argsParser.ShowStatistics())
+                                   //{
+                                   //  Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
+                                   //  if(trans)
+                                   //  {
+                                   //    trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
+                                   //  }
+                                   //}
 
                                    assigned = true;
                                    break;

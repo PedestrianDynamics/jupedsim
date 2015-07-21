@@ -341,12 +341,13 @@ bool Building::InitGeometry()
                     if(!obst->ConvertLineToPoly())
                          return false;
                }
-               double minElevation = 1000;
-               double maxElevation = -1000;
+
+               double minElevation = FLT_MAX;
+               double maxElevation = -FLT_MAX;
                for(auto && wall:itr_subroom.second->GetAllWalls())
                {
-                     Point P1 = wall.GetPoint1();
-                     Point P2 = wall.GetPoint2();
+                     const Point& P1 = wall.GetPoint1();
+                     const Point& P2 = wall.GetPoint2();
                      if(minElevation > itr_subroom.second->GetElevation(P1))
                      {
                            minElevation = itr_subroom.second->GetElevation(P1);
