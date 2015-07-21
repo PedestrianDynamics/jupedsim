@@ -152,22 +152,17 @@ Point Line::NormalVec() const {
 
 double Line::NormalComp(const Point &v) const {
     // Normierte Vectoren
-    Point l = (GetPoint2() - GetPoint1()).Normalized();
+    Point l = (_point2 - _point1).Normalized();
     const Point &n = NormalVec();
 
-
-    double lx = l.GetX();
-    double ly = l.GetY();
-    double nx = n.GetX();
-    double ny = n.GetY();
     double alpha;
 
-    if (fabs(lx) < J_EPS) {
-        alpha = v.GetX() / nx;
-    } else if (fabs(ly) < J_EPS) {
-        alpha = v.GetY() / ny;
+    if (fabs(l._x) < J_EPS) {
+        alpha = v._x / n._x;
+    } else if (fabs(l._y) < J_EPS) {
+        alpha = v._y / n._y;
     } else {
-        alpha = (v.GetY() * lx - v.GetX() * ly) / (nx * ly - ny * lx);
+        alpha = l.CrossProduct(v)/n.CrossProduct(l);
     }
 
     return fabs(alpha);
