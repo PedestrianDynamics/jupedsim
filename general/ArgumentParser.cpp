@@ -446,10 +446,10 @@ bool ArgumentParser::ParseIniFile(string inifile)
 
      //route choice strategy
      TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
-     ParseRoutingStrategies(xRouters);
 
+     if(ParseRoutingStrategies(xRouters)==false)
+          return false;
      Log->Write("INFO: \tParsing the project file completed");
-
      return true;
 }
 
@@ -781,7 +781,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
 {
      if (!routingNode)
      {
-          Log->Write("ERROR:\tNo routers found.");
+          Log->Write("ERROR: \t route_choice_models section is missing");
           return false;
      }
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
