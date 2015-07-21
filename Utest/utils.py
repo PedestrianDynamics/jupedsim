@@ -140,10 +140,8 @@ def flow(fps, N, data, x0):
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
-    logging.info("min(times)=%f    max(times)=%f"%(min(times)/fps, max(times)/fps))
-    flow = fps * float(N-1) / (max(times) - min(times))
-    return flow
-
+    logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
+    return fps * float(N-1) / (max(times) - min(times))
 
 
 

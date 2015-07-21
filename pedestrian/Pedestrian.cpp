@@ -195,6 +195,7 @@ void Pedestrian::SetV(const Point& v)
           _ellipse.SetV(v);
           //save the last values for the records
           _lastVelocites.push(v);
+          
           unsigned int max_size = _recordingTime / _deltaT;
           if (_lastVelocites.size() > max_size)
                _lastVelocites.pop();
@@ -448,6 +449,7 @@ double Pedestrian::GetV0Norm() const
      }
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
+
 }
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
