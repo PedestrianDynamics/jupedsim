@@ -22,17 +22,22 @@ __license__ = 'GNU Lesser General Public License'
 __version__ = '0.1'
 __status__ = 'Production'
 
+def getScriptPath():
+    return os.path.dirname(os.path.realpath(sys.argv[0]))
+
 class JPSRunTestDriver(object):
 
-    def __init__(self, testnumber, argv0, testdir):
+    def __init__(self, testnumber, argv0, testdir, utestdir=".."):
         self.SUCCESS = 0
         self.FAILURE = 1
         # check if testnumber is digit
-        assert isinstance(testnumber, float) or isinstance(testnumber, int)
+        assert isinstance(testnumber, float) or isinstance(testnumber, int), "argument <testnumber> is not digit"
         # only allow path and strings as path directory name
-        assert path.exists(argv0)
-        assert path.exists(testdir)
-        assert isinstance(argv0, str)
+        assert isinstance(argv0, str), "argument <testdir> is not string"
+        assert path.exists(testdir), "%s does not exist"%testdir
+        assert path.exists(utestdir), "%s does not exist"%utestdir
+        assert isinstance(argv0, str), "argument <argv0> is not string"
+        assert path.exists(argv0), "%s is does not exist"%argv0
         self.testno = testnumber
         self.logfile = "log_test_%d.txt" % self.testno
         self.logfile = os.path.join(testdir, self.logfile)
@@ -44,34 +49,40 @@ class JPSRunTestDriver(object):
         self.HOME = path.expanduser("~")
 
         self.DIR = testdir
+        self.UTEST = utestdir
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
 
     def run_test(self, testfunction, *args):
-        assert hasattr(testfunction, '__call__')
+        assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
         executable = self.__find_executable()
+        results = []
         for inifile in self.inifiles:
-            self.__execute_test(executable, inifile, testfunction, *args)
-        return
+            res = self.__execute_test(executable, inifile, testfunction, *args)
+            results.append(res)
+        return results
 
     def __configure(self):
         if self.CWD != self.DIR:
             logging.info("working dir is %s. Change to %s", os.getcwd(), self.DIR)
             os.chdir(self.DIR)
-        logging.info("change directory to ..")
-        os.chdir("..")
+        logging.info("change directory to utest=%s", self.UTEST)
+        os.chdir(self.UTEST)
+        # -------- get directory of the code TRUNK
+        # *** Note: assume that UTEST is always a direct subdirectory of TRUNK ***
+        self.trunk = os.path.dirname(os.getcwd())
         logging.info("call makeini.py with -f %s", self.FILE)
         subprocess.call(["python", "makeini.py", "-f", "%s" % self.FILE])
-        os.chdir(self.DIR)
-        # -------- get directory of the code TRUNK
-        os.chdir("../..")
-        self.trunk = os.getcwd()
-        os.chdir(self.DIR)
-        lib_path = os.path.abspath(os.path.join(self.trunk, "Utest"))
-        sys.path.append(lib_path)
+        # os.chdir(self.DIR)
         logging.info("change directory back to %s", self.DIR)
+        os.chdir(self.DIR)
+        if self.UTEST == "..":
+            lib_path = os.path.abspath(os.path.join(self.trunk, "Utest"))
+        else:
+            lib_path = os.path.abspath(self.UTEST)
 
+        sys.path.append(lib_path)
         # initialise the inputfiles for jpscore
         self.geofile = os.path.join(self.DIR, "geometry.xml")
         self.inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
@@ -116,6 +127,12 @@ class JPSRunTestDriver(object):
         if not path.exists(trajfile):
             logging.critical("trajfile <%s> does not exist", trajfile)
             exit(self.FAILURE)
-        testfunction(inifile, trajfile, *args)
-        return
+        res = testfunction(inifile, trajfile, *args)
+        return res
+
+
+
+
+
+
 

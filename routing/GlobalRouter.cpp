@@ -1,8 +1,8 @@
 /**
  * \file        GlobalRouter.cpp
  * \date        Dec 15, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J�lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J�lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -49,7 +49,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-Router()
+          Router()
 {
      _accessPoints = map<int, AccessPoint*>();
      _map_id_to_index = std::map<int, int>();
@@ -57,7 +57,7 @@ Router()
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
-     _edgeCost=1;
+     _edgeCost=10;
      //     _rdDistribution = uniform_real_distribution<double> (0,1);
      //     _rdGenerator = default_random_engine(56);
 
@@ -71,7 +71,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
-     _edgeCost=1;
+     _edgeCost=10;
 
      //     _rdDistribution = uniform_real_distribution<double> (0,1);
      //     _rdGenerator = default_random_engine(56);
@@ -81,7 +81,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
 GlobalRouter::~GlobalRouter()
 {
      if (_distMatrix && _pathsMatrix) {
-          const int exitsCnt = _building->GetNumberOfGoals();
+          const int exitsCnt = _building->GetNumberOfGoals() + _building->GetAllGoals().size();
           for (int p = 0; p < exitsCnt; ++p) {
                delete[] _distMatrix[p];
                delete[] _pathsMatrix[p];
@@ -269,7 +269,7 @@ bool GlobalRouter::Init(Building* building)
                }
 
                //collect all navigation objects
-               vector<NavLine*> allGoals;
+               vector<Hline*> allGoals;
                const auto & crossings = sub->GetAllCrossings();
                allGoals.insert(allGoals.end(), crossings.begin(), crossings.end());
                const auto & transitions = sub->GetAllTransitions();
@@ -283,13 +283,13 @@ bool GlobalRouter::Init(Building* building)
                //process the transitions
                for (unsigned int n1 = 0; n1 < allGoals.size(); n1++)
                {
-                    NavLine* nav1 = allGoals[n1];
+                    Hline* nav1 = allGoals[n1];
                     AccessPoint* from_AP = _accessPoints[nav1->GetUniqueID()];
                     int from_door = _map_id_to_index[nav1->GetUniqueID()];
                     if(from_AP->IsClosed()) continue;
 
                     for (unsigned int n2 = 0; n2 < allGoals.size(); n2++) {
-                         NavLine* nav2 = allGoals[n2];
+                         Hline* nav2 = allGoals[n2];
                          AccessPoint* to_AP = _accessPoints[nav2->GetUniqueID()];
                          if(to_AP->IsClosed()) continue;
 
@@ -298,7 +298,11 @@ bool GlobalRouter::Init(Building* building)
                          if (nav1->operator ==(*nav2))
                               continue;
 
-                         if (building->IsVisible(nav1->GetCentre(), nav2->GetCentre(), true)) {
+                         vector<SubRoom*> emptyVector;
+                         emptyVector.push_back(sub.get());
+
+                         if (building->IsVisible(nav1->GetCentre(), nav2->GetCentre(), emptyVector,true))
+                         {
                               int to_door = _map_id_to_index[nav2->GetUniqueID()];
                               _distMatrix[from_door][to_door] = penalty*(nav1->GetCentre()
                                         - nav2->GetCentre()).Norm();
@@ -321,7 +325,11 @@ bool GlobalRouter::Init(Building* building)
 
           AccessPoint* to_AP = new AccessPoint(line.GetUniqueID(), center);
           to_AP->SetFinalGoalOutside(true);
-          to_AP->SetNavLine(new NavLine(line));
+          //NavLine* tmpline=new NavLine(line);
+          NavLine tmpline(line);
+          to_AP->SetNavLine(&tmpline);
+          //delete tmpline;
+
           char friendlyName[CLENGTH];
           sprintf(friendlyName, "finalGoal_%d_located_outside", goal->GetId());
           to_AP->SetFriendlyName(friendlyName);
@@ -424,7 +432,7 @@ bool GlobalRouter::Init(Building* building)
                               "       \tYou can solve this by enabling triangulation.",
                               from_AP->GetFriendlyName().c_str());
                     from_AP->Dump();
-                    return false;
+                    //return false;
                }
           }
           _tmpPedPath.clear();
@@ -478,12 +486,13 @@ bool GlobalRouter::Init(Building* building)
      }
 
      //dumping the complete system
-     //DumpAccessPoints(-1); //exit(0);
+     //DumpAccessPoints(735);
+     //DumpAccessPoints(4912); //exit(0);
      //DumpAccessPoints(-1); exit(0);
      //vector<string> rooms;
-     //rooms.push_back("hall");
+     //rooms.push_back("EG_Eingang");
      //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms); exit(0);
-     //WriteGraphGV("routing_graph.gv",1,rooms);
+     //WriteGraphGV("routing_graph.gv",4,rooms);exit(0);
      Log->Write("INFO:\tDone with the Global Router Engine!");
      return true;
 }
@@ -756,14 +765,11 @@ int GlobalRouter::FindExit(Pedestrian* ped)
      }
 
      // else proceed as usual and return the closest navigation line
-
+     //ped->Dump(1);//ped->Dump(9);
      int nextDestination = ped->GetNextDestination();
-     //      if(ped->GetGlobalTime()>80){
-     //              ped->Dump(2);
-     //              //exit(0);
-     //      }
 
      if (nextDestination == -1) {
+
           return GetBestDefaultRandomExit(ped);
 
      } else {
@@ -784,6 +790,7 @@ int GlobalRouter::FindExit(Pedestrian* ped)
                nextDestination = ap->GetNearestTransitAPTO(
                          ped->GetFinalDestination());
 
+               //if(ped->GetID()==6) {ap->Dump();getc(stdin);}
 
                if (nextDestination == -1) { // we are almost at the exit
                     return ped->GetNextDestination();
@@ -818,31 +825,31 @@ int GlobalRouter::FindExit(Pedestrian* ped)
 
 int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 {
-     // prob parameters
-     //double alpha=0.2000005;
-     //double normFactor=0.0;
-     //map <int, double> doorProb;
-
-     // get the opened exits
-     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
-               ped->GetSubRoomID());
-
 
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
-     //cout<<"relevant APs size:" <<relevantAPs.size()<<endl;
+
+     //in the case there is only one alternative
+     //save some computation
+     if(relevantAPs.size()==1)
+     {
+          auto&& ap=relevantAPs[0];
+          ped->SetExitIndex(ap->GetID());
+          ped->SetExitLine(ap->GetNavLine());
+          return ap->GetID();
+     }
 
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
      double minDistLocal = FLT_MAX;
+     // get the opened exits
+     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
+               ped->GetSubRoomID());
 
-     //for (unsigned int i = 0; i < accessPointsInSubRoom.size(); i++) {
-     //      int apID = accessPointsInSubRoom[i];
-     for(unsigned int g=0; g<relevantAPs.size(); g++) {
+     for(unsigned int g=0; g<relevantAPs.size(); g++)
+     {
           AccessPoint* ap=relevantAPs[g];
-          //int exitid=ap->GetID();
-          //AccessPoint* ap = _accessPoints[apID];
 
           if (ap->isInRange(sub->GetUID()) == false)
                continue;
@@ -859,50 +866,26 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           //check if visible
           if (sub->IsVisible(posA, posC, true) == false) {
                ped->RerouteIn(10);
-               //ped->Dump(ped->GetID());
                continue;
           }
-
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
           double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
           double dist=dist1+dist2;
 
-          //        doorProb[ap->GetID()]= exp(-alpha*dist);
-          //        normFactor += doorProb[ap->GetID()];
-
-
-          //          if (dist < minDistGlobal) {
-          //               bestAPsID = ap->GetID();
-          //               minDistGlobal = dist;
-          //          }
-
-          // normalize the probs
-          //    double randomVar = _rdDistribution(_rdGenerator);
-          //
-          //    for (const auto & it = doorProb.begin(); it!=doorProb.end(); ++it){
-          //        it->second =  it->second / normFactor;
-          //    }
-          //
-          //    double cumProb= doorProb.begin()->second;
-          //    const auto & it = doorProb.begin();
-          //    while(cumProb<randomVar) {
-          //        it++;
-          //        cumProb+=it->second;
-          //    }
-          //    bestAPsID=it->first;
-
           //very useful for short term decisions
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
-          {
-               if (dist2 < minDistLocal) {
-                    bestAPsID = ap->GetID();
-                    minDistGlobal = dist;
-                    minDistLocal= dist2;
-               }
 
-          } else {
+//          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+//          {
+//               if (dist2 < minDistLocal) {
+//                    bestAPsID = ap->GetID();
+//                    minDistGlobal = dist;
+//                    minDistLocal= dist2;
+//               }
+//          }
+//          else
+          {
 
                if (dist < minDistGlobal) {
                     bestAPsID = ap->GetID();
@@ -912,11 +895,14 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           }
      }
 
-     if (bestAPsID != -1) {
+     if (bestAPsID != -1)
+     {
           ped->SetExitIndex(bestAPsID);
           ped->SetExitLine(_accessPoints[bestAPsID]->GetNavLine());
           return bestAPsID;
-     } else {
+     }
+     else
+     {
           if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
                Log->Write(
                          "ERROR:\t GetBestDefaultRandomExit() \nCannot find valid destination for ped [%d] "
@@ -957,7 +943,6 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                     //only if not closed
                     if(ap->IsClosed()==false)
                          relevantAPS.push_back(ap);
-                    //cout<<"relevant APs:" <<ap->GetID()<<endl;
                }
           }
 
@@ -1012,35 +997,9 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                {
                     if(ap->IsClosed()==false)
                          relevantAPS.push_back(ap);
-                    //cout<<"relevant APs:" <<ap->GetID()<<endl;
                }
           }
      }
-     //    if(relevantAPS.size()==2){
-     //         cout<<"alternative wege: "<<relevantAPS.size()<<endl;
-     //         cout<<"ap1: "<<relevantAPS[0]->GetID()<<endl;
-     //         cout<<"ap2: "<<relevantAPS[1]->GetID()<<endl;
-     //         getc(stdin);
-     //    }
-}
-
-SubRoom* GlobalRouter::GetCommonSubRoom(Crossing* c1, Crossing* c2)
-{
-     SubRoom* sb11 = c1->GetSubRoom1();
-     SubRoom* sb12 = c1->GetSubRoom2();
-     SubRoom* sb21 = c2->GetSubRoom1();
-     SubRoom* sb22 = c2->GetSubRoom2();
-
-     if (sb11 == sb21)
-          return sb11;
-     if (sb11 == sb22)
-          return sb11;
-     if (sb12 == sb21)
-          return sb12;
-     if (sb12 == sb22)
-          return sb12;
-
-     return NULL;
 }
 
 void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
@@ -1053,11 +1012,11 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
      }
 
      //header
-     graph_file << "## Produced by OPS_GCFM" << endl;
+     graph_file << "## Produced by JuPedSim" << endl;
      //graph_file << "##comand: \" sfdp -Goverlap=prism -Gcharset=latin1"<<filename <<"| gvmap -e | neato -Ecolor=\"#55555522\" -n2 -Tpng > "<< filename<<".png \""<<endl;
      graph_file << "##Command to produce the output: \"neato -n -s -Tpng "
                << filename << " > " << filename << ".png\"" << endl;
-     graph_file << "digraph OPS_GCFM_ROUTING {" << endl;
+     graph_file << "digraph JUPEDSIM_ROUTING {" << endl;
      graph_file << "overlap=scale;" << endl;
      graph_file << "splines=false;" << endl;
      graph_file << "fontsize=20;" << endl;
@@ -1067,16 +1026,25 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
      vector<int> rooms_ids = vector<int>();
 
-     if (rooms_captions.empty()) {
+     if (rooms_captions.empty())
+     {
           // then all rooms should be printed
-          for (int i = 0; i < _building->GetNumberOfRooms(); i++) {
-               rooms_ids.push_back(i);
+          for(auto && itroom:_building->GetAllRooms())
+          {
+               for(const auto & it_sub:itroom.second->GetAllSubRooms())
+               {
+                    rooms_ids.push_back(it_sub.second->GetUID());
+               }
           }
 
+
      } else {
-          for (unsigned int i = 0; i < rooms_captions.size(); i++) {
-               rooms_ids.push_back(
-                         _building->GetRoom(rooms_captions[i])->GetID());
+          for (auto && caption: rooms_captions)
+          {
+               for(const auto & it_sub:_building->GetRoom(caption)->GetAllSubRooms())
+               {
+                    rooms_ids.push_back(it_sub.second->GetUID());
+               }
           }
      }
 
@@ -1088,26 +1056,11 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           int from_door = from_AP->GetID();
 
           // check for valid room
-          NavLine* nav = from_AP->GetNavLine();
-          int room_id = -1;
+          int room_id = from_AP->GetConnectingRoom1();
+          int room_id1=from_AP->GetConnectingRoom2();
 
-          if (dynamic_cast<Crossing*>(nav) != NULL) {
-               room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
-
-          } else if (dynamic_cast<Hline*>(nav) != NULL) {
-               room_id = ((Hline*) (nav))->GetRoom1()->GetID();
-
-          } else if (dynamic_cast<Transition*>(nav) != NULL) {
-               room_id = ((Transition*) (nav))->GetRoom1()->GetID();
-
-          } else {
-               cout << "WARNING: Unkown navigation line type" << endl;
+          if ( (IsElementInVector(rooms_ids, room_id) == false) and (IsElementInVector(rooms_ids, room_id1) == false) )
                continue;
-          }
-
-          if (IsElementInVector(rooms_ids, room_id) == false)
-               continue;
-
           double px = from_AP->GetCentre().GetX();
           double py = from_AP->GetCentre().GetY();
           //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<", "<<py<<" \"] ;"<<endl;
@@ -1133,25 +1086,11 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
                // check that all connecting aps are contained in the room_ids list
                // if not marked as sink.
                bool isSink = true;
-               for (unsigned int j = 0; j < from_aps.size(); j++) {
-                    NavLine* nav = from_aps[j]->GetNavLine();
-                    int room_id = -1;
-
-                    if (dynamic_cast<Crossing*>(nav) != NULL) {
-                         room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
-
-                    } else if (dynamic_cast<Hline*>(nav) != NULL) {
-                         room_id = ((Hline*) (nav))->GetRoom1()->GetID();
-
-                    } else if (dynamic_cast<Transition*>(nav) != NULL) {
-                         room_id = ((Transition*) (nav))->GetRoom1()->GetID();
-
-                    } else {
-                         cout << "WARNING: Unkown navigation line type" << endl;
-                         continue;
-                    }
-
-                    if (IsElementInVector(rooms_ids, room_id) == true) {
+               for (unsigned int j = 0; j < from_aps.size(); j++)
+               {
+                    int room_id = from_aps[j]->GetConnectingRoom1();
+                    if (IsElementInVector(rooms_ids, room_id) == true)
+                    {
                          isSink = false;
                          break;
                     }
@@ -1178,24 +1117,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           AccessPoint* from_AP = itr.second;
           int from_door = from_AP->GetID();
 
-
-
-          NavLine* nav = from_AP->GetNavLine();
-          int room_id = -1;
-
-          if (dynamic_cast<Crossing*>(nav) != NULL) {
-               room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
-
-          } else if (dynamic_cast<Hline*>(nav) != NULL) {
-               room_id = ((Hline*) (nav))->GetRoom1()->GetID();
-
-          } else if (dynamic_cast<Transition*>(nav) != NULL) {
-               room_id = ((Transition*) (nav))->GetRoom1()->GetID();
-
-          } else {
-               cout << "WARNING: Unkown navigation line type" << endl;
-               continue;
-          }
+          int room_id = from_AP->GetConnectingRoom1();
 
           if (IsElementInVector(rooms_ids, room_id) == false)
                continue;
@@ -1208,22 +1130,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           {
                int to_door = to_AP->GetID();
 
-               NavLine* nav = to_AP->GetNavLine();
-               int room_id = -1;
-
-               if (dynamic_cast<Crossing*>(nav) != NULL) {
-                    room_id = ((Crossing*) (nav))->GetRoom1()->GetID();
-
-               } else if (dynamic_cast<Hline*>(nav) != NULL) {
-                    room_id = ((Hline*) (nav))->GetRoom1()->GetID();
-
-               } else if (dynamic_cast<Transition*>(nav) != NULL) {
-                    room_id = ((Transition*) (nav))->GetRoom1()->GetID();
-
-               } else {
-                    cout << "WARNING: Unkown navigation line type" << endl;
-                    continue;
-               }
+               int room_id = to_AP->GetConnectingRoom1();
 
                if (IsElementInVector(rooms_ids, room_id) == false)
                     continue;
@@ -1248,7 +1155,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
 void GlobalRouter::TriangulateGeometry()
 {
-     Log->Write("INFO:\tTriangulating the geometry");
+     Log->Write("INFO:\tUsing the triangulation in the global router");
      for(auto&& itr_room: _building->GetAllRooms())
      {
           for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
@@ -1261,24 +1168,7 @@ void GlobalRouter::TriangulateGeometry()
                //if(subroom->GetAllHlines().size()==0)
                if((obstacles.size()>0 ) || (subroom->IsConvex()==false ))
                {
-                    DTriangulation* tri= new DTriangulation();
-
-                    auto outerhull=subroom->GetPolygon();
-                    if(subroom->IsClockwise())
-                         std::reverse(outerhull.begin(), outerhull.end());
-
-                    tri->SetOuterPolygone(outerhull);
-
-                    for (const auto & obst: obstacles)
-                    {
-                         auto outerhullObst=obst->GetPolygon();
-                         if(obst->IsClockwise())
-                              std::reverse(outerhullObst.begin(), outerhullObst.end());
-                         tri->AddHole(outerhullObst);
-                    }
-
-                    tri->Triangulate();
-                    vector<p2t::Triangle*> triangles=tri->GetTriangles();
+                    vector<p2t::Triangle*> triangles=subroom->GetTriangles();
 
                     for (const auto & tr: triangles)
                     {
@@ -1292,6 +1182,15 @@ void GlobalRouter::TriangulateGeometry()
 
                          for (const auto & line: edges)
                          {
+                              //reduce edge that are too close 50 cm is assumed
+                              if (MinDistanceToHlines(line.GetCentre(),
+                                        *subroom)
+                                        < _minDistanceBetweenTriangleEdges)
+                                   continue;
+
+                              if (MinAngle(P0, P1, P2) < _minAngleInTriangles)
+                                   continue;
+
                               if((IsWall(line)==false) && (IsCrossing(line)==false)
                                         && (IsTransition(line)==false) && (IsHline(line)==false))
                               {
@@ -1308,7 +1207,6 @@ void GlobalRouter::TriangulateGeometry()
                               }
                          }
                     }
-                    delete tri;
                }
           }
      }
@@ -1317,106 +1215,106 @@ void GlobalRouter::TriangulateGeometry()
 
 bool GlobalRouter::GenerateNavigationMesh()
 {
-//     //Navigation mesh implementation
-//     NavMesh* nv= new NavMesh(_building);
-//     nv->BuildNavMesh();
-//     _building->SaveGeometry("test_geometry.xml");
-//     exit(0);
-//     //nv->WriteToFileTraVisTo()
-//
-//     const std::vector<NavMesh::JEdge*>& edges = nv->GetEdges();
-//
-//     for(const auto & edge: edges)
-//     {
-//          //construct and add a new navigation line if non existing
-//          Line line(edge->pStart.pPos,edge->pEnd.pPos);
-//          bool isEdge=false;
-//
-//          //check if it is already a crossing
-//          const map<int, Crossing*>& crossings = _building->GetAllCrossings();
-//          for (const auto & crossing: crossings)
-//          {
-//               Crossing* cross=crossing.second;
-//               if(line.operator ==(*cross))
-//               {
-//                    isEdge=true;
-//                    break;
-//               }
-//          }
-//          if(isEdge) continue;
-//
-//
-//          //check if it is already a transition
-//          const map<int, Transition*>& transitions = _building->GetAllTransitions();
-//          for (const auto & transition: transitions)
-//          {
-//               Transition* trans=transition.second;
-//               if(line.operator ==(*trans))
-//               {
-//                    isEdge=true;
-//                    break;
-//               }
-//          }
-//          if(isEdge) continue;
-//
-//          //check if it is already a
-//          const map<int, Hline*>& hlines = _building->GetAllHlines();
-//          for (const auto & hline: hlines)
-//          {
-//               Hline* navLine=hline.second;
-//               if(line.operator ==(*navLine))
-//               {
-//                    isEdge=true;
-//                    break;
-//               }
-//          }
-//          if(isEdge) continue;
-//
-//
-//          Hline* h = new Hline();
-//          h->SetID(hlines.size());
-//          int assigned=0;
-//
-//          //look for the room/subroom containing the new edge
-//          const vector<Room*>& rooms=_building->GetAllRooms();
-//          for(const auto & room: rooms)
-//          {
-//               const vector<SubRoom*>& subrooms= room->GetAllSubRooms();
-//
-//               for(const auto & subroom: subrooms)
-//               {
-//                    if(subroom->IsInSubRoom(line.GetCentre()))
-//                    {
-//                         h->SetRoom1(room);
-//                         h->SetSubRoom1(subroom);
-//                         assigned++;
-//                    }
-//               }
-//          }
-//
-//          if(assigned!=1)
-//          {
-//               Log->Write("WARNING:\t a navigation line from the mesh was not correctly assigned");
-//               return false;
-//          }
-//          //add the new edge as navigation line
-//
-//          h->SetPoint1(edge->pStart.pPos);
-//          h->SetPoint2(edge->pEnd.pPos);
-//          h->GetSubRoom1()->AddHline(h); //double linked ??
-//          _building->AddHline(h);
-//
-//     }
-//
-//     //string geometry;
-//     //nv->WriteToString(geometry);
-//     //Write("<geometry>");
-//     //Write(geometry);
-//     //Write("</geometry>");
-//     //nv->WriteToFile(building->GetProjectFilename()+".full.nav");
-//
-//     //cout<<"bye"<<endl;
-//     delete nv;
+     //     //Navigation mesh implementation
+     //     NavMesh* nv= new NavMesh(_building);
+     //     nv->BuildNavMesh();
+     //     _building->SaveGeometry("test_geometry.xml");
+     //     exit(0);
+     //     //nv->WriteToFileTraVisTo()
+     //
+     //     const std::vector<NavMesh::JEdge*>& edges = nv->GetEdges();
+     //
+     //     for(const auto & edge: edges)
+     //     {
+     //          //construct and add a new navigation line if non existing
+     //          Line line(edge->pStart.pPos,edge->pEnd.pPos);
+     //          bool isEdge=false;
+     //
+     //          //check if it is already a crossing
+     //          const map<int, Crossing*>& crossings = _building->GetAllCrossings();
+     //          for (const auto & crossing: crossings)
+     //          {
+     //               Crossing* cross=crossing.second;
+     //               if(line.operator ==(*cross))
+     //               {
+     //                    isEdge=true;
+     //                    break;
+     //               }
+     //          }
+     //          if(isEdge) continue;
+     //
+     //
+     //          //check if it is already a transition
+     //          const map<int, Transition*>& transitions = _building->GetAllTransitions();
+     //          for (const auto & transition: transitions)
+     //          {
+     //               Transition* trans=transition.second;
+     //               if(line.operator ==(*trans))
+     //               {
+     //                    isEdge=true;
+     //                    break;
+     //               }
+     //          }
+     //          if(isEdge) continue;
+     //
+     //          //check if it is already a
+     //          const map<int, Hline*>& hlines = _building->GetAllHlines();
+     //          for (const auto & hline: hlines)
+     //          {
+     //               Hline* navLine=hline.second;
+     //               if(line.operator ==(*navLine))
+     //               {
+     //                    isEdge=true;
+     //                    break;
+     //               }
+     //          }
+     //          if(isEdge) continue;
+     //
+     //
+     //          Hline* h = new Hline();
+     //          h->SetID(hlines.size());
+     //          int assigned=0;
+     //
+     //          //look for the room/subroom containing the new edge
+     //          const vector<Room*>& rooms=_building->GetAllRooms();
+     //          for(const auto & room: rooms)
+     //          {
+     //               const vector<SubRoom*>& subrooms= room->GetAllSubRooms();
+     //
+     //               for(const auto & subroom: subrooms)
+     //               {
+     //                    if(subroom->IsInSubRoom(line.GetCentre()))
+     //                    {
+     //                         h->SetRoom1(room);
+     //                         h->SetSubRoom1(subroom);
+     //                         assigned++;
+     //                    }
+     //               }
+     //          }
+     //
+     //          if(assigned!=1)
+     //          {
+     //               Log->Write("WARNING:\t a navigation line from the mesh was not correctly assigned");
+     //               return false;
+     //          }
+     //          //add the new edge as navigation line
+     //
+     //          h->SetPoint1(edge->pStart.pPos);
+     //          h->SetPoint2(edge->pEnd.pPos);
+     //          h->GetSubRoom1()->AddHline(h); //double linked ??
+     //          _building->AddHline(h);
+     //
+     //     }
+     //
+     //     //string geometry;
+     //     //nv->WriteToString(geometry);
+     //     //Write("<geometry>");
+     //     //Write(geometry);
+     //     //Write("</geometry>");
+     //     //nv->WriteToFile(building->GetProjectFilename()+".full.nav");
+     //
+     //     //cout<<"bye"<<endl;
+     //     delete nv;
      return true;
 }
 
@@ -1472,6 +1370,8 @@ string GlobalRouter::GetRoutingInfoFile()
                     {
                          Log->Write("WARNING:\t only triangulation is supported for the mesh. You supplied [%s]",method.c_str());
                     }
+                    _minDistanceBetweenTriangleEdges=xmltof(para->Attribute("minimum_distance_between_edges"),-FLT_MAX);
+                    _minAngleInTriangles=xmltof(para->Attribute("minimum_angle_in_triangles"),-FLT_MAX);
 
                }
 
@@ -1615,4 +1515,68 @@ bool GlobalRouter::IsHline(const Line& line) const
                return true;
      }
      return false;
+}
+
+double GlobalRouter::MinDistanceToHlines(const Point& point, const SubRoom& sub)
+{
+     double minDist=FLT_MAX;
+     for(const auto & hline: sub.GetAllHlines())
+     {
+          double dist=hline->DistTo(point);
+          if (dist<minDist)
+               minDist=dist;
+     }
+     for(const auto & cross: sub.GetAllCrossings())
+     {
+          double dist=cross->DistTo(point);
+          if (dist<minDist)
+               minDist=dist;
+     }
+     for(const auto & trans: sub.GetAllTransitions())
+     {
+          double dist=trans->DistTo(point);
+          if (dist<minDist)
+               minDist=dist;
+     }
+     for(const auto & wall: sub.GetAllWalls())
+     {
+          double dist=wall.DistTo(point);
+          if (dist<minDist)
+               minDist=dist;
+     }
+     //also to the obstacles
+     for (const auto& obst: sub.GetAllObstacles())
+     {
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               double dist=wall.DistTo(point);
+               if (dist<minDist)
+                    minDist=dist;
+          }
+     }
+
+     return minDist;
+}
+
+double GlobalRouter::MinAngle(const Point& p1, const Point& p2, const Point& p3)
+{
+     double a = (p1 - p2).NormSquare();
+     double b = (p1 - p3).NormSquare();
+     double c = (p3 - p2).NormSquare();
+
+     double alpha=acos((a+b-c)/(2*sqrt(a)*sqrt(b)));
+     double beta=acos((a+c-b)/(2*sqrt(a)*sqrt(c)));
+     double gamma=acos((c+b-a)/(2*sqrt(c)*sqrt(b)));
+
+     if(fabs(alpha+beta+gamma-M_PI)<J_EPS)
+     {
+          return std::min({alpha, beta, gamma}) * (180.0 / M_PI);
+     }
+     else
+     {
+          Log->Write("ERROR:\t Error in angle calculation");
+          exit(EXIT_FAILURE);
+     }
+
+     return 0;
 }

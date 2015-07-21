@@ -1,8 +1,8 @@
 /**
  * \file        GlobalRouter.h
  * \date        Dec 15, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -78,7 +78,7 @@ public:
       * @param filename
       */
      void WriteGraphGV(std::string filename, int finalDestination,
-                       const std::vector<std::string> rooms= std::vector<std::string>());
+               const std::vector<std::string> rooms= std::vector<std::string>());
 
      /**
       * Reset the routing engine and clear all pre-computed paths
@@ -115,12 +115,6 @@ protected:
      int GetBestDefaultRandomExit(Pedestrian* p);
 
      /**
-      * @return the subroom which contains both crossings.
-      *  Null is return is there is no such subroom.
-      */
-     SubRoom* GetCommonSubRoom(Crossing* c1, Crossing* c2);
-
-     /**
       * Generate a navigation mesh based on delauney triangulation
       */
      bool GenerateNavigationMesh();
@@ -130,6 +124,7 @@ protected:
       * Triangulate the geometry and generate the navigation lines
       */
      void TriangulateGeometry();
+
 
      /**
       *
@@ -194,6 +189,17 @@ private:
       */
      bool IsHline(const Line& line) const;
 
+     /**
+      * @return the minimum distance between the point and any line in the subroom.
+      * This include walls,hline,crossings,transitions,obstacles
+      */
+     double MinDistanceToHlines(const Point& point, const SubRoom& sub);
+
+     /**
+      * @return the minimal angle in the the triangle formed by the three points
+      */
+     double MinAngle(const Point& p1, const Point& p2, const Point& p3);
+
 private:
      int **_pathsMatrix;
      double **_distMatrix;
@@ -202,15 +208,18 @@ private:
      //via the routing file. The mesh will only be used for computing the distance.
      bool _useMeshForLocalNavigation=true;
      bool _generateNavigationMesh=false;
-     std::vector< int > _tmpPedPath;
+     //used to filter skinny edges in triangulation
+     double _minDistanceBetweenTriangleEdges=-FLT_MAX;
+     double _minAngleInTriangles=-FLT_MAX;
+     std::vector<int> _tmpPedPath;
      std::map<int,int> _map_id_to_index;
      std::map<int,int> _map_index_to_id;
      ///map the internal crossings/transition id to
      ///the global ID (description) for that final destination
      std::map<int, int> _mapIdToFinalDestination;
-    // normalize the probs
-    std::default_random_engine _rdGenerator;
-    std::uniform_real_distribution<double> _rdDistribution;
+     // normalize the probs
+     std::default_random_engine _rdGenerator;
+     std::uniform_real_distribution<double> _rdDistribution;
 
 protected:
      std::map <int, AccessPoint*> _accessPoints;

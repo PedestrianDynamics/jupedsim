@@ -8,6 +8,8 @@
 /figs_bot
 /Utest/*/inifiles*/
 /Utest/*/trajectories
+/Utest/rimea_tests/*/inifiles*/
+/Utest/rimea_tests/*/trajectories
 *~
 
 # Compiled Object files
@@ -75,3 +77,16 @@ vgcore.*
 /veloModel2.pdf
 /veloModel2.tex
 /.project
+/#%2Aediff-merge%2A#14545CrI#
+/#%2Aediff-merge%3C2%3E%2A#145452Th#
+/.idea/dictionaries/chraibi.xml
+/Dumping
+/Martella/corridor_8x3.xml
+/Martella/regular_simmetric_90-90.xml
+/Utest/JPSRunTest.pyc
+/Utest/test.py
+/Utest/test_13/flow.txt
+/compile_commands.json
+/delme.py
+/mencoderVideos.sh
+/true_false.xml

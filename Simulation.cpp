@@ -1,8 +1,8 @@
 /**
  * \file        Simulation.cpp
  * \date        Dec 15, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -32,7 +32,12 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
-//#include "geometry/Goal.h"
+#include "pedestrian/AgentsQueue.h"
+#include "pedestrian/AgentsSourcesManager.h"
+
+#ifdef _USE_PROTOCOL_BUFFER
+#include "matsim/HybridSimulationManager.h"
+#endif
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -49,7 +54,6 @@ OutputHandler* Log;
 Simulation::Simulation(const ArgumentParser& args)
 {
      _nPeds = 0;
-     _tmax = 0;
      _seed = 8091983;
      _deltaT = 0;
      _building = nullptr;
@@ -59,8 +63,6 @@ Simulation::Simulation(const ArgumentParser& args)
      _iod = new IODispatcher();
      _fps = 1;
      _em = nullptr;
-     _hpc = -1;
-     _profiling = false;
      _argsParser = args;
 }
 
@@ -99,7 +101,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
                delete Log;
           Log = new FileHandler(name);
      }
-          break;
+     break;
      default:
           printf("Wrong option for Logfile!\n\n");
           return false;
@@ -133,15 +135,16 @@ bool Simulation::InitArgs(const ArgumentParser& args)
                          "INFO: \tFormat vtk not yet supported in streaming\n");
                return false;
           }
-              default: {
-                  return false;
-              }
+          default: {
+               return false;
+          }
           }
 
           s.append("\tonline streaming enabled \n");
      }
 
-     if (args.GetTrajectoriesFile().empty() == false) {
+     if (args.GetTrajectoriesFile().empty() == false)
+     {
           switch (args.GetFileFormat())
           {
           case FORMAT_XML_PLAIN: {
@@ -184,13 +187,11 @@ bool Simulation::InitArgs(const ArgumentParser& args)
                // _iod->AddIO(output);
                break;
           }
-              default: {
-                  break;
-              }
+          default: {
+               break;
+          }
           }
      }
-
-
 
      _operationalModel = args.GetModel();
      s.append(_operationalModel->GetDescription());
@@ -202,8 +203,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
 
      sprintf(tmp, "\tnCPU: %d\n", args.GetMaxOpenMPThreads());
      s.append(tmp);
-     _tmax = args.GetTmax();
-     sprintf(tmp, "\tt_max: %f\n", _tmax);
+     sprintf(tmp, "\tt_max: %f\n", args.GetTmax());
      s.append(tmp);
      _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
@@ -212,11 +212,28 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      _fps = args.Getfps();
      sprintf(tmp, "\tfps: %f\n", _fps);
      s.append(tmp);
+     //Log->Write(s.c_str());
 
      _routingEngine = args.GetRoutingEngine();
      auto distributor = std::unique_ptr<PedDistributor>(new PedDistributor(_argsParser.GetProjectFile(), _argsParser.GetAgentsParameters(),_argsParser.GetSeed()));
      // IMPORTANT: do not change the order in the following..
      _building = std::unique_ptr<Building>(new Building(args.GetProjectFile(), args.GetProjectRootDir(), *_routingEngine, *distributor, args.GetLinkedCellSize()));
+
+     // Initialize the agents sources that have been collected in the pedestrians distributor
+     _agentSrcManager.SetBuilding(_building.get());
+     for (const auto& src: distributor->GetAgentsSources())
+     {
+          _agentSrcManager.AddSource(src);
+          //src->Dump();
+     }
+
+#ifdef _USE_PROTOCOL_BUFFER
+     //initialize the hybrid mode if defined
+     if(nullptr!=(_hybridSimManager=args.GetHybridSimManager()))
+     {
+          Log->Write("INFO:\t performing hybrid simulation");
+     }
+#endif
 
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
@@ -230,7 +247,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           ped->Setdt(_deltaT);
      }
      _nPeds = allPeds.size();
-     //pBuilding->WriteToErrorLog();
+     //_building->WriteToErrorLog();
 
      //get the seed
      _seed = args.GetSeed();
@@ -251,13 +268,6 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
      _em->ListEvents();
 
-     //which hpc-architecture?
-     _hpc = args.GetHPCFlag();
-     //if programming model = ocl create buffers and make the setup
-     //if(_hpc==1){
-     //((GPU_ocl_GCFMModel*) _model)->CreateBuffer(_building->GetNumberOfPedestrians());
-     //((GPU_ocl_GCFMModel*) _model)->initCL(_building->GetNumberOfPedestrians());
-     //}
      //_building->SaveGeometry("test.sav.xml");
 
      //if(_building->SanityCheck()==false)
@@ -267,93 +277,12 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      return true;
 }
 
-int Simulation::RunSimulation()
+int Simulation::RunStandardSimulation(double maxSimTime)
 {
-     int frameNr = 1; // Frame Number
-     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
-     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
-     double t = 0.0;
-
-     // writing the header
-     _iod->WriteHeader(_nPeds, _fps, _building.get(), _seed);
-     _iod->WriteGeometry(_building.get());
-     _iod->WriteFrame(0, _building.get());
-
-     //first initialisation needed by the linked-cells
-     UpdateRoutesAndLocations();
-
-     //needed to control the execution time PART 1
-     //in the case you want to run in no faster than realtime
-     //time_t starttime, endtime;
-     //time(&starttime);
-
-     // main program loop
-     while (_nPeds > 0 && t < _tmax)
-     {
-          t = 0 + (frameNr - 1) * _deltaT;
-
-          // update the positions
-          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
-
-          //update the routes and locations
-          UpdateRoutesAndLocations();
-
-          //update the events
-          //_em->Update_Events(t);
-          _em->ProcessEvent();
-
-          //other updates
-          //someone might have left the building
-          _nPeds = _building->GetAllPedestrians().size();
-
-          //update the linked cells
-          _building->UpdateGrid();
-
-          // update the global time
-          Pedestrian::SetGlobalTime(t);
-
-          // write the trajectories
-          if (0 == frameNr % writeInterval) {
-               _iod->WriteFrame(frameNr / writeInterval, _building.get());
-          }
-
-          // needed to control the execution time PART 2
-          // time(&endtime);
-          // double timeToWait=t-difftime(endtime, starttime);
-          // clock_t goal = timeToWait*1000 + clock();
-          // while (goal > clock());
-         ++frameNr;
-
-     }
-     // writing the footer
-     _iod->WriteFooter();
-
-     //if(_hpc==1)
-     //  ((GPU_GCFMModel*) _model)->DeleteBuffers();
-
-     //temporary work around since the total number of frame is only available at the end of the simulation.
-     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN)
-     {
-          delete _iod;
-          _iod = NULL;
-          //reopen the file and write the missing information
-
-          // char tmp[CLENGTH];
-          // int f= frameNr / writeInterval ;
-          // sprintf(tmp,"<frameCount>%07d</frameCount>",f);
-          // string frameCount (tmp);
-
-          char replace[CLENGTH];
-          // open the file and replace the 8th line
-          sprintf(replace, "sed -i '9s/.*/ %d /' %s", frameNr / writeInterval,
-                    _argsParser.GetTrajectoriesFile().c_str());
-          int result = system(replace);
-          Log->Write("INFO:\t Updating the framenumber exits with code [%d]",
-                    result);
-     }
-
-     //return the evacuation time
-     return (int) t;
+     RunHeader(_nPeds + _agentSrcManager.GetMaxAgentNumber());
+     double t=RunBody(maxSimTime);
+     RunFooter();
+     return (int)t;
 }
 
 void Simulation::UpdateRoutesAndLocations()
@@ -361,7 +290,7 @@ void Simulation::UpdateRoutesAndLocations()
      //pedestrians to be deleted
      //you should better create this in the constructor and allocate it once.
      vector<Pedestrian*> pedsToRemove;
-     pedsToRemove.reserve(100); //just reserve some space
+     pedsToRemove.reserve(500); //just reserve some space
 
      // collect all pedestrians in the simulation.
      const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
@@ -427,6 +356,15 @@ void Simulation::UpdateRoutesAndLocations()
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
+//                                   if(_argsParser.ShowStatistics())
+//                                   {
+//                                        Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
+//                                        if(trans)
+//                                        {
+//                                             trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
+//                                        }
+//                                   }
+
                                    assigned = true;
                                    break;
                               }
@@ -439,7 +377,7 @@ void Simulation::UpdateRoutesAndLocations()
 #pragma omp critical
                          pedsToRemove.push_back(ped);
                          //the agent left the old room
-                         //actualize the egress time for that room
+                         //actualize the eggress time for that room
                          allRooms.at(ped->GetRoomID())->SetEgressTime(ped->GetGlobalTime());
 
                     }
@@ -456,9 +394,19 @@ void Simulation::UpdateRoutesAndLocations()
           }
      }
 
-     // remove the pedestrians that have left the building
-     for (unsigned int p = 0; p < pedsToRemove.size(); p++) {
-          _building->DeletePedestrian(pedsToRemove[p]);
+#ifdef _USE_PROTOCOL_BUFFER
+     if (_hybridSimManager)
+     {
+          AgentsQueueOut::Add(pedsToRemove);
+     }
+     else
+#endif
+     {
+          // remove the pedestrians that have left the building
+          for (unsigned int p = 0; p < pedsToRemove.size(); p++)
+          {
+               _building->DeletePedestrian(pedsToRemove[p]);
+          }
      }
 
      //    temporary fix for the safest path router
@@ -479,20 +427,147 @@ void Simulation::PrintStatistics()
      {
           auto&& room=it.second;
           if(room->GetCaption()!="outside")
-          Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
+               Log->Write("%d\t%s\t%.2f",room->GetID(),room->GetCaption().c_str(),room->GetEgressTime());
      }
 
      Log->Write("\nUsage of Exits");
      Log->Write("==========");
-     for (const auto& itr : _building->GetAllTransitions()) {
+     for (const auto& itr : _building->GetAllTransitions())
+     {
           Transition* goal = itr.second;
-          if (goal->IsExit()) {
+          if (goal->IsExit())
+          {
                Log->Write(
                          "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
+
+               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+goal->GetCaption()+".dat";
+               Log->Write("More Information in the file: %s",statsfile.c_str());
+               auto output= new FileHandler(statsfile.c_str());
+               output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+               output->Write("#Time (s)  cummulative number of agents \n");
+               output->Write(goal->GetFlowCurve());
           }
      }
-
      Log->Write("\n");
+}
+
+void Simulation::RunHeader(long nPed)
+{
+     // writing the header
+     if(nPed==-1) nPed=_nPeds;
+     _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
+     _iod->WriteGeometry(_building.get());
+
+     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
+     int firstframe=(Pedestrian::GetGlobalTime()/_deltaT)/writeInterval;
+
+     _iod->WriteFrame(firstframe, _building.get());
+
+     //first initialisation needed by the linked-cells
+     UpdateRoutesAndLocations();
+     ProcessAgentsQueue();
+}
+
+int Simulation::RunBody(double maxSimTime)
+{
+     //needed to control the execution time PART 1
+     //in the case you want to run in no faster than realtime
+     //time_t starttime, endtime;
+     //time(&starttime);
+
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
+
+     //frame number. This function can be called many times,
+     static int frameNr = 1 + t/_deltaT ; // Frame Number
+
+     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
+
+
+     //process the queue for incoming pedestrians
+     //important since the number of peds is used
+     //to break the main simulation loop
+     ProcessAgentsQueue();
+     _nPeds = _building->GetAllPedestrians().size();
+
+     // main program loop
+     while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
+     {
+          t = 0 + (frameNr - 1) * _deltaT;
+
+          //process the queue for incoming pedestrians
+          ProcessAgentsQueue();
+
+          //update the linked cells
+          _building->UpdateGrid();
+
+          // update the positions
+          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+
+          //update the routes and locations
+          UpdateRoutesAndLocations();
+
+          //update the events
+          //_em->Update_Events(t);
+          _em->ProcessEvent();
+
+          //other updates
+          //someone might have left the building
+          _nPeds = _building->GetAllPedestrians().size();
+
+          // update the global time
+          Pedestrian::SetGlobalTime(t);
+
+          // write the trajectories
+          if (0 == frameNr % writeInterval) {
+               _iod->WriteFrame(frameNr / writeInterval, _building.get());
+          }
+
+          // needed to control the execution time PART 2
+          // time(&endtime);
+          // double timeToWait=t-difftime(endtime, starttime);
+          // clock_t goal = timeToWait*1000 + clock();
+          // while (goal > clock());
+          ++frameNr;
+     }
+     return (int) t;
+}
+
+void Simulation::RunFooter()
+{
+     // writing the footer
+     _iod->WriteFooter();
+}
+
+void Simulation::ProcessAgentsQueue()
+{
+     //incoming pedestrians
+     vector<Pedestrian*> peds;
+     AgentsQueueIn::GetandClear(peds);
+     for(auto&& ped: peds)
+     {
+          _building->AddPedestrian(ped);
+     }
+
+#ifdef _USE_PROTOCOL_BUFFER
+     //outgoing pedestrians
+     if (_hybridSimManager)
+     {
+          _hybridSimManager->ProcessOutgoingAgent();
+     }
+#endif
+}
+
+AgentsSourcesManager& Simulation::GetAgentSrcManager()
+{
+     return _agentSrcManager;
+}
+
+Building* Simulation::GetBuilding()
+{
+    return _building.get();
 }

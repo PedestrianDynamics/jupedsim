@@ -1,7 +1,7 @@
 /**
  * \file        Macros.h
  * \date        Jun 16, 2010
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -37,10 +37,8 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <limits>
 
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -49,11 +47,10 @@
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
-
-
+//#define _USE_PROTOCOL_BUFFER 1
 
 #define JPS_OLD_VERSION "0.5" // this version is still supported
-#define JPS_VERSION_MINOR "6"
+#define JPS_VERSION_MINOR "7"
 #define JPS_VERSION_MAJOR "0"
 
 #define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
@@ -88,8 +85,10 @@
 #define FINAL_DEST_OUT -1
 
 // Linked cells
-#define LIST_EMPTY      -1
+#define LIST_EMPTY  -1
 
+// Not-a-Number (NaN)
+#define J_NAN std::numeric_limits<double>::quiet_NaN()
 
 enum RoomState {
      ROOM_CLEAN=0,
@@ -136,8 +135,17 @@ enum AgentColorMode {
      BY_VELOCITY=1,
      BY_KNOWLEDGE,
      BY_ROUTE,
+     BY_ROUTER,
      BY_SPOTLIGHT,
-     //BY_GROUP
+     BY_GROUP,
+     BY_FINAL_GOAL,
+     BY_INTERMEDIATE_GOAL
+};
+
+enum LineIntersectType {
+	NO_INTERSECTION = 0,
+	INTERSECTION,
+	OVERLAP // overlap, parallel, no intersection
 };
 //global functions for convenience
 
@@ -176,7 +184,7 @@ inline char xmltoc(const char * t, const char v = '\0')
  * @return true if the element is present in the vector
  */
 template<typename A>
-inline bool IsElementInVector(const std::vector<A> &vec, A& el) {
+inline bool IsElementInVector(const std::vector<A> &vec, const A& el) {
      typename std::vector<A>::const_iterator it;
      it = std::find (vec.begin(), vec.end(), el);
      if(it==vec.end()) {

@@ -1,8 +1,8 @@
 /**
  * \file        Line.cpp
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -25,11 +25,12 @@
  *
  **/
 
-
+#include "../math/Mathematics.h"
 #include "Point.h"
 //#include "SubRoom.h"
 #include "../general/Macros.h"
 #include "Line.h"
+#include "Wall.h"
 #include "../IO/OutputHandler.h"
 
 
@@ -39,6 +40,9 @@
 int Line::_static_UID = 0;
 
 using namespace std;
+
+#define DEBUG 0
+
 
 /************************************************************
   Konstruktoren
@@ -148,22 +152,17 @@ Point Line::NormalVec() const {
 
 double Line::NormalComp(const Point &v) const {
     // Normierte Vectoren
-    Point l = (GetPoint2() - GetPoint1()).Normalized();
+    Point l = (_point2 - _point1).Normalized();
     const Point &n = NormalVec();
 
-
-    double lx = l.GetX();
-    double ly = l.GetY();
-    double nx = n.GetX();
-    double ny = n.GetY();
     double alpha;
 
-    if (fabs(lx) < J_EPS) {
-        alpha = v.GetX() / nx;
-    } else if (fabs(ly) < J_EPS) {
-        alpha = v.GetY() / ny;
+    if (fabs(l._x) < J_EPS) {
+        alpha = v._x / n._x;
+    } else if (fabs(l._y) < J_EPS) {
+        alpha = v._y / n._y;
     } else {
-        alpha = (v.GetY() * lx - v.GetX() * ly) / (nx * ly - ny * lx);
+        alpha = l.CrossProduct(v)/n.CrossProduct(l);
     }
 
     return fabs(alpha);
@@ -172,15 +171,13 @@ double Line::NormalComp(const Point &v) const {
 // Muss nicht im Segment liegen
 
 Point Line::LotPoint(const Point &p) const {
-    const Point &r = GetPoint1();
-    const Point &s = GetPoint2();
-    const Point &t = r - s;
+    const Point &t = _point1 - _point2;
     Point tmp;
     double lambda;
 
-    tmp = p - s;
+    tmp = p - _point2;
     lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
-    Point f = s + t * lambda;
+    Point f = _point2 + t * lambda;
     return f;
 }
 
@@ -206,48 +203,15 @@ Point Line::ShortestPoint(const Point &p) const {
     return f;
 }
 
-/* Prüft, ob Punkt p im Liniensegment enthalten ist
- * Verfahren wie bei Line::ShortestPoint(), d. h,
- * lambda berechnen und prüfen ob zwischen 0 und 1
- * */
-//bool Line::IsInLine(const Point& p) const {
-//      double ax, ay, bx, by, px, py;
-//      const Point& a = GetPoint1();
-//      const Point& b = GetPoint2();
-//      double lambda;
-//      ax = a.GetX();
-//      ay = a.GetY();
-//      bx = b.GetX();
-//      by = b.GetY();
-//      px = p.GetX();
-//      py = p.GetY();
-//      if (fabs(ax - bx) > J_EPS_DIST) {
-//              lambda = (px - ax) / (bx - ax);
-//      } else if (fabs(ay - by) > J_EPS_DIST) {
-//              lambda = (py - ay) / (by - ay);
-//      } else {
-//              Log->Write("ERROR: \tIsInLine: Endpunkt = Startpunkt!!!");
-//              exit(0);
-//      }
-//      return (0 <= lambda) && (lambda <= 1);
-//}
-
 /*
  *  Prüft, ob Punkt p im Liniensegment enthalten ist
  * algorithm from:
  * http://stackoverflow.com/questions/328107/how-can-you-determine-a-point-is-between-two-other-points-on-a-line-segment
+ *
  * */
-bool Line::IsInLineSegment(const Point &p) const {
-    Point differenceTwoAndOne = _point2 - _point1;
-    Point differencePAndOne = p - _point1;
-
-    // cross product to check if point i colinear
-    if ((differenceTwoAndOne).CrossProduct(differencePAndOne) > J_EPS)
-        return false;
-
-    // dotproduct and distSquared to check if point is in segment and not just in line
-    double dotp = differencePAndOne.ScalarProduct(differenceTwoAndOne);
-    return !(dotp < 0 || (differenceTwoAndOne).NormSquare() < dotp);
+bool Line::IsInLineSegment(const Point &p) const
+{
+     return fabs( (_point1-p ).Norm() + (_point2-p ).Norm() - (_point2-_point1 ).Norm() )<J_EPS;
 }
 
 /* Berechnet direkt den Abstand von p zum Segment l
@@ -292,52 +256,87 @@ double Line::LengthSquare() const {
     return (_point1 - _point2).NormSquare();
 }
 
+//TODO unit  test
+bool Line::Overlapp(const Line& l) const
+{
+     //first check if they are colinear
+     Point vecAB=l.GetPoint2()-l.GetPoint1();
+     Point vecDC=_point1-_point2;
+     if(fabs(vecAB.Determinant(vecDC))<J_EPS)
+     {
+
+          if( IsInLineSegment(l.GetPoint1()) and  not  HasEndPoint(l.GetPoint1()))
+          {
+               //Log->Write("ERROR: 1. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
+               return true;
+          }
+
+          if( IsInLineSegment(l.GetPoint2()) and not HasEndPoint(l.GetPoint2()))
+          {
+               //Log->Write("ERROR: 2. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
+               return true;
+          }
+     }
+     return false;
+}
+
 //FIXME no equals check with == on double or float bring in an epsilon
-bool Line::IntersectionWith(const Point &p1, const Point &p2) const {
+int Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
     Point AC = _point1 - p1;
     Point DC = p2 - p1;
     Point BA = _point2 - _point1;
     double denominator = BA.CrossProduct(DC);
     double numerator = DC.CrossProduct(AC);
 
+    p3.SetX(J_NAN);
+  	p3.SetY(J_NAN);
+
+    if (denominator == 0.0) {
+        // the lines are superposed
+        if (numerator == 0.0) {
+        	// the segment are superposed
+        	if (this->ShareCommonPointWith(Line(p1, p2), p3))
+        		return LineIntersectType::INTERSECTION;
+            //IsInLineSegment(p1) || IsInLineSegment(p2);
+        	else
+        		return LineIntersectType::OVERLAP;
+        }
+        else { // the lines are just parallel and do not share a common point
+            return LineIntersectType::NO_INTERSECTION;
+        }
+    }
+
     double r = numerator / denominator;
     if (r < 0.0 || r > 1.0) {
-        return false;
+        return LineIntersectType::NO_INTERSECTION;
     }
 
     double s = (BA.CrossProduct(AC)) / denominator;
     if (s < 0.0 || s > 1.0) {
-        return false;
+        return LineIntersectType::NO_INTERSECTION;
     }
 
-    if (denominator == 0.0) {
-
-        // the lines are superposed
-        if (numerator == 0.0) {
-
-            // the segment are superposed
-            return IsInLineSegment(p1) || IsInLineSegment(p2);
-
-        } else { // the lines are just parallel and do not share a common point
-
-            return false;
-        }
-    }
-
-    return true;
-
+    p3 = _point1 + BA * r;
+    return LineIntersectType::INTERSECTION;
 }
 
-bool Line::IntersectionWith(const Line &l) const {
-    return this->IntersectionWith(l._point1, l._point2);
+int Line::IntersectionWith(const Line& L, Point& p3) const {
+	return IntersectionWith(L._point1, L._point2, p3);
 }
 
-Line Line::enlarge(double d) const {
-    const Point &p1 = _point1;
-    const Point &p2 = _point2;
-    Point diff = (p1 - p2).Normalized() * d;
+int Line::IntersectionWith(const Point& p1, const Point& p2) const {
+	Point dummy;
+	return IntersectionWith(p1, p2, dummy);
+}
 
-    return Line(p1 + diff, p2 - diff);
+int Line::IntersectionWith(const Line &l) const {
+	Point dummy;
+    return IntersectionWith(l._point1, l._point2, dummy);
+}
+
+Line Line::Enlarge(double d) const {
+    Point diff = (_point1 - _point2).Normalized() * d;
+    return Line(_point1 + diff, _point2 - diff);
 }
 
 bool Line::IsHorizontal() {
@@ -349,30 +348,29 @@ bool Line::IsVertical() {
 }
 
 int Line::WichSide(const Point &pt) {
-    //special case for horizontal lines
-    if (IsVertical()) {
-        //left
-        if (pt._x < _point1._x)
-            return 0;
-        //right or colinear
-        if (pt._x >= _point1._x)
-            return 1;
-    }
 
-    return ((_point2._x - _point1._x) * (pt._y - _point1._y)
-            - (_point2._y - _point1._y) * (pt._x - _point1._x)) > 0;
+     if(IsLeft(pt)) return 0;
+     return 1;
 }
 
+
+bool Line::ShareCommonPointWith(const Line &line, Point& P) const {
+    if (line.GetPoint1() == _point1 || line.GetPoint2() == _point1) {
+    	P = _point1;
+    	return true;
+    }
+    else if (line.GetPoint1() == _point2 || line.GetPoint2() == _point2) {
+    	P = _point2;
+    	return true;
+    }
+    else
+    	return false;
+}
 
 bool Line::ShareCommonPointWith(const Line &line) const {
-    if (line.GetPoint1() == _point1) return true;
-    if (line.GetPoint2() == _point1) return true;
-
-    if (line.GetPoint1() == _point2) return true;
-    return line.GetPoint2() == _point2;
-
+	Point dummy;
+	return ShareCommonPointWith(line, dummy);
 }
-
 bool Line::HasEndPoint(const Point &point) const {
     if (_point1 == point) return true;
     return _point2 == point;
@@ -380,40 +378,30 @@ bool Line::HasEndPoint(const Point &point) const {
 
 bool Line::IntersectionWithCircle(const Point &centre, double radius /*cm for pedestrians*/) {
 
-    double r = radius;
-    double x1 = _point1.GetX();
-    double y1 = _point1.GetY();
-
-    double x2 = _point2.GetX();
-    double y2 = _point2.GetY();
-
-    double xc = centre.GetX();
-    double yc = centre.GetY();
 
     //this formula assumes that the circle is centered the origin.
     // so we translate the complete stuff such that the circle ends up at the origin
-    x1 = x1 - xc;
-    y1 = y1 - yc;
-    x2 = x2 - xc;
-    y2 = y2 - yc;
+    Point p1 = _point1-centre;
+    Point p2 = _point2-centre;
     //xc=xc-xc;yc=yc-yc; to make it perfect
 
     // we first check the intersection of the circle and the  infinite line defined by the segment
-    double dr2 = ((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-    double D2 = (x1 * y2 - x2 * y1) * (x1 * y2 - x2 * y1);
+    double dr2 = (p2-p1).ScalarProduct(p2-p1);
+    double D2 = p1.CrossProduct(p2) * p1.CrossProduct(p2);
     double r2 = radius * radius;
 
     double delta = r2 * dr2 - D2;
     if (delta <= 0.0) return false;
 
 
-    double a = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-    double b = 2 * ((x1 * (x2 - x1)) + y1 * (y2 - y1));
-    double c = x1 * x1 + y1 * y1 - r * r;
+    double a = dr2;
+
+    double b = 2 * 2*(p2-p1).ScalarProduct(p1);;
+    double c = p1.ScalarProduct(p1) - radius * radius;
 
     delta = b * b - 4 * a * c;
 
-    if ((x1 == x2) && (y1 == y2)) {
+    if (p1==p2) {
         Log->Write("isLineCrossingCircle: Your line is a point");
         return false;
     }
@@ -429,8 +417,7 @@ bool Line::IntersectionWithCircle(const Point &centre, double radius /*cm for pe
     double t1 = (-b + sqrt(delta)) / (2 * a);
     double t2 = (-b - sqrt(delta)) / (2 * a);
     if ((t1 < 0.0) || (t1 > 1.0)) return false;
-    if ((t2 < 0.0) || (t2 > 1.0)) return false;
-    return true;
+    return !((t2 < 0.0) || (t2 > 1.0));
 }
 
 //TODO: Consider numerical stability and special case pt is on line
@@ -467,64 +454,31 @@ std::string Line::toString() const {
 //if no intersection return infinity
 // this function is exactly the same as GetIntersection(), but returns the distance squared
 //insteed of a boolian
-double Line::GetIntersectionDistance(const Line &l) const {
-#define DEBUG 0
-    double deltaACy = _point1.GetY() - l.GetPoint1().GetY();
-    double deltaDCx = l.GetPoint2().GetX() - l.GetPoint1().GetX();
-    double deltaACx = _point1.GetX() - l.GetPoint1().GetX();
-    double deltaDCy = l.GetPoint2().GetY() - l.GetPoint1().GetY();
-    double deltaBAx = _point2.GetX() - _point1.GetX();
-    double deltaBAy = _point2.GetY() - _point1.GetY();
-
-    double denominator = deltaBAx * deltaDCy - deltaBAy * deltaDCx;
-    double numerator = deltaACy * deltaDCx - deltaACx * deltaDCy;
-    double infinity = 100000;
-    // the lines are parallel
-    if (denominator == 0.0) {
-
-        // the lines are superposed
-        if (numerator == 0.0) {
-
-            // the segment are superposed
-            if (IsInLineSegment(l.GetPoint1()) ||
-                IsInLineSegment(l.GetPoint2()))
-                return infinity;//really?
-            else return infinity;
-
-        } else { // the lines are just parallel and do not share a common point
-
-            return infinity;
-        }
+double Line::GetDistanceToIntersectionPoint(const Line &l) const
+{
+    Point PointF;
+    int intersection = this->IntersectionWith(l, PointF);
+    if(intersection == LineIntersectType::NO_INTERSECTION ||
+            intersection == LineIntersectType::OVERLAP ) {
+        return std::numeric_limits<double>::infinity();
     }
-
-    // the lines intersect
-    double r = numerator / denominator;
-    if (r < 0.0 || r > 1.0) {
-        return infinity;
-    }
-
-    double s = (deltaACy * deltaBAx - deltaACx * deltaBAy) / denominator;
-    if (s < 0.0 || s > 1.0) {
-        return infinity;
-    }
-
-    Point PointF = Point((float) (_point1._x + r * deltaBAx), (float) (_point1._y + r * deltaBAy));
     if (!IsInLineSegment(PointF)) //is point on the line?
-        return infinity;
+        return std::numeric_limits<double>::infinity();
     double dist = (_point1 - PointF).NormSquare();
 #if DEBUG
      printf("Enter GetIntersection\n");
      cout<< "\t" << l.toString() << " intersects with " << toString() <<endl;
      cout<<"\t at point " << PointF.toString()<<endl;
-     cout <<  "\t\t --> distance is "<< sqrt(dist)<< "... return "<< dist<<endl;
+     cout <<  "\t\t --> distance is "<< sqrt(dist)<< "... return (squared) "<< dist<<endl;
      printf("Leave GetIntersection\n");
 #endif
-    return dist;
+
+     return dist;
 
 }
 
 // calculates the angles QPF and QPL 
-// return the snagle of the point (F or L) which is nearer to the Goal 
+// return the angle of the point (F or L) which is nearer to the Goal 
 //the calling line: P->Q, Q is the crossing point
 // 
 //                 o P 
@@ -536,22 +490,23 @@ double Line::GetIntersectionDistance(const Line &l) const {
 //           /
 //          o Goal
 
-double Line::GetDeviationAngle(const Line &l) const {
-    // const double PI = 3.14159258;
-#define DEBUG 0
-    Point P = _point1;
-    Point Goal = _point2;
+double Line::GetDeviationAngle(const Line & l) const
+{
+     // const double PI = 3.14159258;
 
-    Point L = l._point1;
-    Point R = l._point2;
+     Point P = _point1;
+     Point Goal = _point2;
 
-    double dist_Goal_L = (Goal - L).NormSquare();
-    double dist_Goal_R = (Goal - R).NormSquare();
-
-    double angle, angleL, angleR;
-    // we don't need to calculate both angles, but for debugging purposes we do it.
-    angleL = atan((Goal - P).CrossProduct(L - P) / (Goal - P).ScalarProduct(L - P));
-    angleR = atan((Goal - P).CrossProduct(R - P) / (Goal - P).ScalarProduct(R - P));
+     Point L = l._point1;
+     Point R = l._point2;
+     
+     double dist_Goal_L = (Goal-L).NormSquare();
+     double dist_Goal_R = (Goal-R).NormSquare();
+     
+     double angle, angleL, angleR;
+     // we don't need to calculate both angles, but for debugging purposes we do it.
+     angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+     angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
 
     angle = (dist_Goal_L < dist_Goal_R) ? angleL : angleR;
 #if DEBUG
@@ -571,9 +526,179 @@ double Line::GetDeviationAngle(const Line &l) const {
 }
 
 
+// return the biggest angle between two lanes
+double Line::GetAngle(const Line & l) const
+{
+    Point P = _point1;
+    Point Goal = _point2;
 
+    Point L = l._point1;
+    Point R = l._point2;
+    
+    double angleL, angleR;
+    // we don't need to calculate both angles, but for debugging purposes we do it.
+    angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+    angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
 
+    return (fabs(angleL)>fabs(angleR))?angleL:angleR;
+    
+}
 
+// get the smallest angle that ensures a safe deviation from an
+// obstacle. Safe means that the rotated line ped--->goal do not
+// intersect with any line of the obstacle.
+// ALgorithm:
+// =========
+// calculate angle to the left and angle to the right
+// choose the angle which is visible.
+// If both are visible then choose the one which: 
+// 1. leads to larger distance to room walls (we don't
+//    want to avoid the obstacle to crash in a wall, do
+//    we?)
+// 2. in case of equality choose the smallest angle. If
+//    they are nearly equal that opt for the right.
+double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const
+{
+#if DEBUG
+     printf("Enter GetObstacleDeviationAngle()\n");
+#endif
+     Point P = _point1;
+     Point Goal = _point2;
+     Point GL, GR;
+     Point L, R;
+     
+     double minAngle=std::numeric_limits<double>::infinity(),
+          angleL,
+          angleR,
+          angle;
+     
+     Line l_large,
+          tmpDirectionL,
+          tmpDirectionR;
+     
+     bool visibleL=true,
+          visibleR=true;
+
+     double distToRoomL= 20001, distToRoomR = 2001;
+     double minDistToRoomL= 20001, minDistToRoomR = 2001;
+     
+//     for (unsigned int i = 0; i < owalls.size(); i++) {
+     // l = owalls[i];
+     for(auto l:owalls){
+          minDistToRoomL= std::numeric_limits<double>::infinity(), minDistToRoomR = std::numeric_limits<double>::infinity();
+          visibleL = true;
+          visibleR = true;
+          
+          l_large = l.Enlarge(3); // 2*ped->GetLargerAxis()          
+          
+          L = l_large._point1;
+          R = l_large._point2;
+          
+          angleL = atan((Goal - P).CrossProduct(L - P)/ (Goal - P).ScalarProduct(L - P));
+          angleR = atan((Goal - P).CrossProduct(R - P)/ (Goal - P).ScalarProduct(R - P));
+
+          GL  = (Goal-P).Rotate(cos(angleL), sin(angleL))+P;
+          GR  = (Goal-P).Rotate(cos(angleR), sin(angleR))+P;
+
+          tmpDirectionL = Line(P, GL);
+          tmpDirectionR = Line(P, GR);
+          
+          for(auto l_other:owalls){
+               if (l_other == l) continue;
+               
+               if(tmpDirectionL.IntersectionWith(l_other)){
+                    visibleL = false;
+                    break;                    
+               }
+          }
+          
+          for(auto l_other:owalls){
+               if (l_other == l) continue;
+
+               if(tmpDirectionR.IntersectionWith(l_other)){
+                    visibleR = false;
+                    break;                    
+               }               
+          }
+
+          if(visibleR && visibleL){  // both angles are OK. Get
+                                     // smallest deviation.
+//----------------------- check the subroom walls
+               for (unsigned int i = 0; i < rwalls.size(); i++) {
+                    // printf("==Left intersection with wall[%f, %f]--[%f, %f]\n", rwalls[i].GetPoint1().GetX(), rwalls[i].GetPoint1().GetY(), rwalls[i].GetPoint2().GetX(), rwalls[i].GetPoint2().GetY());
+                    distToRoomL = tmpDirectionL.GetDistanceToIntersectionPoint(rwalls[i]);
+                    // printf("==Right intersection with wall[%f, %f]--[%f, %f]\n", rwalls[i].GetPoint1().GetX(),rwalls[i].GetPoint1().GetY(), rwalls[i].GetPoint2().GetX(),rwalls[i].GetPoint2().GetY());
+
+                    distToRoomR = tmpDirectionR.GetDistanceToIntersectionPoint(rwalls[i]);
+                    // printf("BEFORE distToRoomL = %f, minDisttoroomL =%f,\n distToRoomR=%f, mindisttoroomR=%f\n", distToRoomL, minDistToRoomL, distToRoomR, minDistToRoomR);
+                    
+                    if (distToRoomL < minDistToRoomL)
+                         minDistToRoomL = distToRoomL;
+                    
+                     if (distToRoomR < minDistToRoomR)
+                         minDistToRoomR = distToRoomR;
+                    // printf("AFTER distToRoomL = %f, minDisttoroomL =%f,\n distToRoomR=%f, mindisttoroomR=%f\n", distToRoomL, minDistToRoomL, distToRoomR, minDistToRoomR);
+                    // getc(stdin);
+               } //for roome walls
+//-----------------------------------------------
+               if(minDistToRoomR > minDistToRoomL)
+                    angle = angleR;
+               else if (minDistToRoomL > minDistToRoomR)
+                    angle = angleL;
+               // both distance equal, prefer right
+               else if (almostEqual (angleR, angleL, 0.001))
+                    angle = angleR;
+               else // distances equal, but angles not. Take smallest
+                    angle = (fabs(angleL) < fabs(angleR))?angleL:angleR;               
+          }//both are visible
+          else if(visibleR && !visibleL){
+               angle = angleR;
+          }
+          else if(!visibleR && visibleL){
+               angle = angleL;
+          }
+          else{
+               // printf("continue ");
+               // printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
+               continue; // both angles are not OK. check next wall
+               
+               }
+#if DEBUG
+          printf("---------\n\tP=[%f,%f]\n",P.GetX(), P.GetY());
+          printf("\tGoal=[%f,%f]\n",Goal.GetX(), Goal.GetY());
+          printf("\tL=[%f,%f]\n",L.GetX(), L.GetY());
+          printf("\tR=[%f,%f]\n",R.GetX(), R.GetY());
+          // printf("\t\tdist_Goal_L=%f\n",dist_Goal_L);
+          // printf("\t\tdist_Goal_R=%f\n",dist_Goal_R);
+          printf("VisibleL=%d, VisibleR=%d\n", visibleL, visibleR);
+          printf("distToRoomL = %f, distToRoomR = %f\n", minDistToRoomL, minDistToRoomR);
+          printf("\t\t --> angleL=%f\n",angleL);
+          printf("\t\t --> angleR=%f\n",angleR);
+          printf("\t\t --> angle=%f\n-----\n",angle);
+
+#endif     
+
+          
+          if(fabs(angle) < fabs(minAngle))
+               minAngle = angle;
+#if DEBUG
+          printf("\t\t --> minAngle=%f\n", minAngle);
+#endif
+
+          
+     }// owalls
+     
+
+     if(minAngle == std::numeric_limits<double>::infinity()){
+          printf("WARNING:  minAngle ist infinity\n");
+          getc(stdin);
+     }
+#if DEBUG
+     printf("Leave GetObstacleDeviationAngle() with  angle=%f\n", minAngle);
+#endif
+     return minAngle;
+     
+}
 
 
 

@@ -1,8 +1,8 @@
 /**
  * \file        Line.h
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -37,12 +37,14 @@
 
 //forward declarations
 class OutputHandler;
+class Wall;
 
 // external variables
 extern OutputHandler* Log;
 
 
-class Line {
+class Line
+{
 private:
      Point _point1;
      Point _point2;
@@ -142,9 +144,11 @@ public:
       */
      double LengthSquare() const;
 
-     //
-     //   @return dot product of two lines
-     //   bool operator*(const Line& l) const;
+     /**
+      *
+      * @return true if both lines overlapp
+      */
+     bool Overlapp(const Line& l) const;
 
      /**
       * @return true if both segments are equal. The end points must be in the range of J_EPS.
@@ -161,23 +165,50 @@ public:
      /**
       * @see http://alienryderflex.com/intersect/
       * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
-      * @return true if both segments intersect
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
       */
-     bool IntersectionWith(const Line& l) const; // check two segments for intersections
-     bool IntersectionWith(const Point& p1, const Point&p2) const;
+     int IntersectionWith(const Line& l) const; // check two segments for intersections
+
+     /**
+      * @see http://alienryderflex.com/intersect/
+      * @see http://social.msdn.microsoft.com/Forums/en-US/csharpgeneral/thread/e5993847-c7a9-46ec-8edc-bfb86bd689e3/
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
+      */
+     int IntersectionWith(const Point& p1, const Point&p2) const;
+
+     /*
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
+      * Special case:  If the Lines are superposed/ Parallel/ no intersection,
+      * then the Point of intersection is stored as NaN.
+      */
+     int IntersectionWith(const Point& p1, const Point& p2, Point& p3) const;
+
+     /*
+      * @return 0 if no intersection
+      * @return 1 if both segments intersect at one point
+      * @return 2 if Lines overlap
+      * Special case:  If the Lines are superposed/ Parallel/ no intersection,
+      * then the Point of intersection is stored as NaN.
+      */
+     int IntersectionWith(const Line& L, Point& p3) const;
     
      /**
       * @return the distance squared between the first point and the intersection
       * point with line l. This is exactly the same function
       * as @see IntersectionWith() but returns a double insteed.
       */
-     double GetIntersectionDistance(const Line & l ) const;
+     double GetDistanceToIntersectionPoint(const Line &l) const;
 
      /**
       * @return true if the segment intersects with the circle of radius r
       */
      bool IntersectionWithCircle(const Point& centre, double radius=0.30 /*m for pedestrians*/);
-
 
      /**
       * @return true if both segments share at least one common point
@@ -185,19 +216,25 @@ public:
      bool ShareCommonPointWith(const Line& line) const;
 
      /**
+      * @return true if both segments share at least one common point.
+      * store the common point in P.
+      */
+     bool ShareCommonPointWith(const Line& line, Point& P) const;
+
+     /**
       * @return true if the given point is one end point of the segment
       */
      bool HasEndPoint(const Point& point) const;
 
      /**
-      * return the same value if the checked points are all situated on the same side.
-      * @return 0 or 1 depending on which side of the line the point is located.
+      * Determine on which side the point is located on of the line directed from (_point1 to _point2).
+      * @return 0 (Left) or 1 (Right) depending on which side of the line the point is located.
+      * The return value is undefined if the points are colinear.
       */
      int WichSide (const Point& pt);
 
      /**
-      * @return true if the point is located in the left hand side of the line.
-      * For horizontal lines return true if the point is above the line.
+      * @return true if the point is located in the left hand side of the line directed from (_point1 to _point2).
       */
      bool IsLeft (const Point& pt);
 
@@ -235,8 +272,16 @@ public:
       * @return the angle between two lines
       */
      double GetDeviationAngle(const Line& l) const;
-     //    double GetAngle(SubRoom s) const;
-     Line enlarge(double d) const; 
+
+     double GetAngle(const Line & l) const;
+     double GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const; 
+
+     /**
+      * ???
+      * @param d
+      * @return
+      */
+     Line Enlarge(double d) const; 
 
 };
 

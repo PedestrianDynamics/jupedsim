@@ -15,19 +15,21 @@ testnr = 10
 SUCCESS = 0
 FAILURE = 1
 #--------------------------------------------------------
-logfile="log_test_%d.txt"%testnr
-f=open(logfile, "w")
+logfile = "log_test_%d.txt"%testnr
+f = open(logfile, "w")
 f.close()
-logging.basicConfig(filename=logfile, level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=logfile, level=logging.DEBUG,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 #-------------------- DIRS ------------------------------
 HOME = path.expanduser("~")
 CWD = os.getcwd()
-DIR= os.path.dirname(os.path.realpath(argv[0]))
+DIR = os.path.dirname(os.path.realpath(argv[0]))
 #--------------------------------------------------------
-    
- 
+
+
 if __name__ == "__main__":
+    [open(f, 'w') for f in glob.glob("log_*")] # empty logs
     if CWD != DIR:
         logging.info("working dir is %s. Change to %s"%(os.getcwd(), DIR))
         os.chdir(DIR)
@@ -61,13 +63,17 @@ if __name__ == "__main__":
         if not path.exists(inifile):
             logging.critical("inifile <%s> does not exist"%inifile)
             exit(FAILURE)
-        #--------------------- SIMULATION ------------------------  
+        #--------------------- SIMULATION ------------------------
         #os.chdir(TRUNK) #cd to the simulation directory
         executable = "%s/bin/jpscore"%TRUNK
         if not path.exists(executable):
             logging.critical("executable <%s> does not exist yet."%executable)
             exit(FAILURE)
-        cell_size = float(inifile.split("cell_size_")[1].split("_")[0])
+        cell_size = inifile.split("cell_size_")[1]
+        if len(cell_size.split("_")) > 1: # cell_size in the middle
+            cell_size = float(cell_size.split("_")[0])
+        else: # cell_size at the end of filename
+            cell_size = float(cell_size.split(".xml")[0])
         cmd = "%s --inifile=%s"%(executable, inifile)
         logging.info('start simulating with exe=<%s>'%(cmd))
         logging.info('cell_size = <%.2f>'%cell_size)
@@ -79,7 +85,7 @@ if __name__ == "__main__":
             timedic[cell_size] = [t2_run - t1_run]
         else:
             timedic[cell_size].append(t2_run - t1_run)
-        
+
         #------------------------------------------------------
         logging.info('end simulation ...\n--------------\n')
         trajfile = "trajectories/traj" + inifile.split("ini")[2]
@@ -90,13 +96,13 @@ if __name__ == "__main__":
             exit(FAILURE)
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 61)
-        
+
         if not flows.has_key(cell_size):
             flows[cell_size] = [J]
         else:
             flows[cell_size].append(J)
-        
-    #------------------------------------------------------------------------------ 
+
+    #------------------------------------------------------------------------------
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
     # ----------------------- PLOT RESULTS ----------------------
     flow_file = "result.txt"
@@ -115,9 +121,9 @@ if __name__ == "__main__":
     S = np.array([np.std(i) for i in flows.values()])   # std pro CPU
     MT = np.array([np.mean(i) for i in timedic.values()]) # std pro CPU
     ST = np.array([np.std(i) for i in timedic.values()])   # std pro CPU
-    
+
     std_all = np.std(M)
-   
+
     print >>ff, "==========================="
     print >>ff, "==========================="
     print >>ff, "Means "
@@ -130,48 +136,48 @@ if __name__ == "__main__":
     print >>ff, std_all
     print >>ff, "==========================="
     print >>ff, "==========================="
-   
+
     ff.close()
     #########################################################################
     ms = 8
     ax = plt.subplot(211)
-    indexsort = np.argsort( flows.keys() )
-    F = np.array( flows.keys() )[indexsort]
-    ax.plot(F,  np.array(M)[indexsort], "o-", lw=2, label='Mean', color='blue')
-    ax.errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
+    indexsort = np.argsort(flows.keys())
+    F = np.array(flows.keys())[indexsort]
+    ax.plot(F, np.array(M)[indexsort], "o-", lw=2, label='Mean', color='blue')
+    ax.errorbar(F, np.array(M)[indexsort], yerr=np.array(S)[indexsort], fmt='-o')
     #ax.errorbar(flows.keys(), M, yerr=S, fmt='-o')
     #ax.fill_between(flows.keys(), M+S, M-S, facecolor='blue', alpha=0.5)
-    #axes().set_aspect(1./axes().get_data_ratio())  
+    #axes().set_aspect(1./axes().get_data_ratio())
     #ax.legend(loc='best')
     ax.grid()
-    ax.set_xlabel(r'$cell size\; [ m ]$',fontsize=18)
-    ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    ax.set_xlim( min(flows.keys() )- 0.5, max(flows.keys() ) + 0.5)
-    ax.set_ylim( min( M ) - max(S)-0.1 , max( M ) + max(S) +0.1)
+    ax.set_xlabel(r'$cell size\; [ m ]$', fontsize=18)
+    ax.set_ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$', fontsize=18)
+    ax.set_xlim(min(flows.keys()) - 0.5, max(flows.keys()) + 0.5)
+    ax.set_ylim(min(M) - max(S) - 0.1, max(M) + max(S) + 0.1)
     ax.set_xticks(flows.keys())
     plt.title("# Simulations %d"%len(flows[cell_size]))
 #------------------ plot times
     ax2 = plt.subplot(212)
-    
-    indexsort = np.argsort( timedic.keys() )
-    T = np.array( timedic.keys() )[indexsort]
+
+    indexsort = np.argsort(timedic.keys())
+    T = np.array(timedic.keys())[indexsort]
     ax2.plot(T, np.array(MT)[indexsort], "o-", lw=2, label='Mean', color='blue')
-    ax2.errorbar(T , np.array(MT)[indexsort] , yerr=np.array(ST)[indexsort], fmt='-o')
-    ax2.set_xlabel(r'$cell size\; [ m ]$',fontsize=18)
-    ax2.set_ylabel(r'$T\; [  s ]$',fontsize=18)
+    ax2.errorbar(T, np.array(MT)[indexsort], yerr=np.array(ST)[indexsort], fmt='-o')
+    ax2.set_xlabel(r'$cell size\; [ m ]$', fontsize=18)
+    ax2.set_ylabel(r'$T\; [  s ]$', fontsize=18)
     ax2.set_xticks(timedic.keys())
-    ax2.set_xlim( min(flows.keys() )- 0.5, max(flows.keys() ) + 0.5 )
-    ax2.set_ylim( min( MT ) - max(ST)-0.1 , max( MT ) + max(ST) +0.1)
+    ax2.set_xlim(min(flows.keys()) - 0.5, max(flows.keys()) + 0.5)
+    ax2.set_ylim(min(MT) - max(ST) - 0.1, max(MT) + max(ST) + 0.1)
     ax2.set_xticks(flows.keys())
     #ax.legend(loc='best')
     ax2.grid()
     plt.tight_layout()
-    
+
     logging.info("save file in cell.png")
     plt.savefig("cell.png")
     #plt.show()
     #########################################################################
-    
+
     tolerance = 0.5# todo: this is to large 0.5
     logging.info("time elapsed %.2f [s]."%(time2-time1))
     logging.info("std_all = %.2f, tol=%.2f"%(std_all, tolerance))
@@ -181,3 +187,5 @@ if __name__ == "__main__":
     else:
         logging.info("%s exits with SUCCESS std_all = %f < %f"%(argv[0], std_all, tolerance))
         exit(SUCCESS)
+
+

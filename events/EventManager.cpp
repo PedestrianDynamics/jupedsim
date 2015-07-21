@@ -1,8 +1,8 @@
 /**
  * \file        EventManager.cpp
  * \date        Jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -143,10 +143,9 @@ bool EventManager::ReadEventsXml()
      _updateFrequency = xmltoi(xEvents->ToElement()->Attribute("update_time"), 1);
      _updateRadius = xmltoi(xEvents->ToElement()->Attribute("update_radius"), 2);
 
-     string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
-     if(color=="true")
-          Pedestrian::SetColorMode(BY_KNOWLEDGE);
-
+     //string color=xmltoa(xEvents->ToElement()->Attribute("agents_color_by_knowledge"), "false");
+     //if(color=="true")
+     //     Pedestrian::SetColorMode(BY_KNOWLEDGE);
      //Pedestrian::SetColorMode(BY_SPOTLIGHT);
 
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;
@@ -232,7 +231,8 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
                {
                     //maybe same room and subroom ?
-                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
+                    vector<SubRoom*> empty;
+                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos(),empty))
                     {
                          MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
                          ped2->SetNewEventFlag(true);

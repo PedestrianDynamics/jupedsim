@@ -1,8 +1,8 @@
 /**
  * \file        Building.cpp
  * \date        Oct 1, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -70,15 +70,61 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _linkedCellGrid = nullptr;
 
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
-     this->LoadGeometry();
-     this->LoadRoutingInfo(filename);
-     this->AddSurroundingRoom();
-     this->InitGeometry();
-     this->LoadTrafficInfo();
-     distributor.Distribute(this);
-     this->InitGrid(linkedCellSize);
-     _routingEngine->Init(this);
-     this->SanityCheck();
+     if(!LoadGeometry())
+     {
+          Log->Write("ERROR:\t could not load the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+
+
+     if(!LoadRoutingInfo(filename))
+     {
+          Log->Write("ERROR:\t could not load extra routing information!");
+          exit (EXIT_FAILURE);
+     }
+
+     //this->AddSurroundingRoom();
+
+     if(!InitGeometry())
+     {
+          Log->Write("ERROR:\t could not initialize the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+     //triangulate the geometry
+     if(!Triangulate())
+     {
+          Log->Write("ERROR:\t could not triangulate the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!LoadTrafficInfo() )
+     {
+          Log->Write("ERROR:\t could not load extra traffic information!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!distributor.Distribute(this))
+     {
+          Log->Write("ERROR:\t could not distribute the pedestrians");
+          exit (EXIT_FAILURE);
+     }
+
+     InitGrid(linkedCellSize);
+
+     if(! _routingEngine->Init(this))
+     {
+          Log->Write("ERROR:\t could not initialize the routers!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!SanityCheck())
+     {
+          Log->Write("ERROR:\t There are sanity errors in the geometry file");
+          exit (EXIT_FAILURE);
+     }
+
 }
 #endif
 
@@ -91,7 +137,7 @@ Building::~Building()
 #ifdef _SIMULATOR
      for(unsigned int p=0;p<_allPedestians.size();p++)
      {
-          //delete _allPedestians[p];
+          delete _allPedestians[p];
      }
      _allPedestians.clear();
      delete _linkedCellGrid;
@@ -291,11 +337,59 @@ bool Building::InitGeometry()
                //do the same for the obstacles that are closed
                for(auto&& obst:itr_subroom.second->GetAllObstacles())
                {
-                    if (obst->GetClosed() == 1)
-                         if(!obst->ConvertLineToPoly())
-                              return false;
+                    //if (obst->GetClosed() == 1)
+                    if(!obst->ConvertLineToPoly())
+                         return false;
                }
+               double minElevation = 1000;
+               double maxElevation = -1000;
+               for(auto && wall:itr_subroom.second->GetAllWalls())
+               {
+                     Point P1 = wall.GetPoint1();
+                     Point P2 = wall.GetPoint2();
+                     if(minElevation > itr_subroom.second->GetElevation(P1))
+                     {
+                           minElevation = itr_subroom.second->GetElevation(P1);
+                     }
+                
+                     if(maxElevation < itr_subroom.second->GetElevation(P1))
+                     {
+                           maxElevation = itr_subroom.second->GetElevation(P1);
+                     }
+                
+                     if(minElevation > itr_subroom.second->GetElevation(P2))
+                     {
+                           minElevation = itr_subroom.second->GetElevation(P2);
+                     }
+                
+                     if(maxElevation < itr_subroom.second->GetElevation(P2))
+                     {
+                           maxElevation = itr_subroom.second->GetElevation(P2);
+                     }          
+               }
+               itr_subroom.second->SetMaxElevation(maxElevation);
+               itr_subroom.second->SetMinElevation(minElevation);
           }
+     }
+
+
+     // look and save the neighbor subroom for improving the runtime
+     // that information is already present in the crossing/transitions
+
+     for(const auto & cross: _crossings)
+     {
+          SubRoom* s1=cross.second->GetSubRoom1();
+          SubRoom* s2=cross.second->GetSubRoom2();
+          if(s1) s1->AddNeighbor(s2);
+          if(s2) s2->AddNeighbor(s1);
+     }
+
+     for(const auto & trans: _transitions)
+     {
+          SubRoom* s1=trans.second->GetSubRoom1();
+          SubRoom* s2=trans.second->GetSubRoom2();
+          if(s1) s1->AddNeighbor(s2);
+          if(s2) s2->AddNeighbor(s1);
      }
 
      Log->Write("INFO: \tInit Geometry successful!!!\n");
@@ -435,9 +529,9 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                SubRoom* subroom = NULL;
 
-               if (type == "stair") {
+               if (type == "stair" || type == "escalator" || type == "idle_escalator") {
                     if(xSubRoom->FirstChildElement("up")==NULL) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
+                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;
                     }
@@ -485,13 +579,13 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                     int id = xmltof(xObstacle->Attribute("id"), -1);
                     int height = xmltof(xObstacle->Attribute("height"), 0);
-                    double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
+                    //double ObstClosed = xmltof(xObstacle->Attribute("closed"), 0);
                     string ObstCaption = xmltoa(xObstacle->Attribute("caption"),"-1");
 
                     Obstacle* obstacle = new Obstacle();
                     obstacle->SetId(id);
                     obstacle->SetCaption(ObstCaption);
-                    obstacle->SetClosed(ObstClosed);
+                    //obstacle->SetClosed(ObstClosed);
                     obstacle->SetHeight(height);
 
                     //looking for polygons (walls)
@@ -843,29 +937,55 @@ SubRoom* Building::GetSubRoomByUID( int uid) const
      return NULL;
 }
 
-bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
-{
+//bool Building::IsVisible(Line* l1, Line* l2, bool considerHlines)
+//{
+//
+//     for(auto&& itr_room: _rooms)
+//     {
+//          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+//          {
+//               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
+//          }
+//     }
+//     return true;
+//}
 
-     for(auto&& itr_room: _rooms)
+bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<SubRoom*>& subrooms, bool considerHlines)
+{
+     //loop over all subrooms if none is provided
+     if (subrooms.empty())
      {
-          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          for(auto&& itr_room: _rooms)
           {
-               if(itr_subroom.second->IsVisible(l1,l2,considerHlines)==false) return false;
+               for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+               {
+                    if(itr_subroom.second->IsVisible(p1,p2,considerHlines)==false) return false;
+               }
           }
      }
+     else
+     {
+          for(auto&& sub: subrooms)
+          {
+               if(sub and sub->IsVisible(p1,p2,considerHlines)==false) return false;
+          }
+     }
+
      return true;
 }
 
-bool Building::IsVisible(const Point& p1, const Point& p2, bool considerHlines)
+bool Building::Triangulate()
 {
+     Log->Write("INFO:\tTriangulating the geometry");
      for(auto&& itr_room: _rooms)
      {
           for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
           {
-               if(itr_subroom.second->IsVisible(p1,p2,considerHlines)==false) return false;
+               if(itr_subroom.second->Triangulate()==false)
+                    return false;
           }
      }
-
+     Log->Write("INFO:\tDone...");
      return true;
 }
 
@@ -937,7 +1057,6 @@ void Building::InitGrid(double cellSize)
      y_max = y_max + 1*cellSize;
 
      double boundaries[4] = { x_min, x_max, y_min, y_max };
-     int pedsCount = _allPedestians.size();
 
      //no algorithms
      // the domain is made of a single cell
@@ -953,7 +1072,7 @@ void Building::InitGrid(double cellSize)
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
 
-     _linkedCellGrid = new LCGrid(boundaries, cellSize, pedsCount);
+     _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
 
      Log->Write("INFO: \tDone with Initializing the grid ");
@@ -980,6 +1099,10 @@ bool Building::LoadRoutingInfo(const string &filename)
           return false;
      }
 
+     if (! xRootNode->FirstChild("routing"))
+     {
+          return true; // no extra routing information
+     }
      //load goals and routes
      TiXmlNode*  xGoalsNode = xRootNode->FirstChild("routing")->FirstChild("goals");
 
@@ -1135,19 +1258,16 @@ void Building::DeletePedestrian(Pedestrian* &ped)
           _allPedestians.erase(it);
 
           int nowPeds= _allPedestians.size();
-          //if((*it)->GetID()==69){
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
-          //cout << "want to rescue agent: " << ped->GetID()<<endl<<endl;
-          //     exit(0);
-          // }
           Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
      Transition* trans =GetTransitionByUID(ped->GetExitIndex());
-     if(trans) {
+     if(trans)
+     {
           trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
      }
      delete ped;
+     //ped=nullptr;
 }
 
 const vector<Pedestrian*>& Building::GetAllPedestrians() const
@@ -1169,9 +1289,12 @@ void Building::AddPedestrian(Pedestrian* ped)
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const
 {
-     for(unsigned int p = 0;p<_allPedestians.size();p++){
-          Pedestrian* ped=_allPedestians[p];
-          if(room==ped->GetRoomID() && subroom==ped->GetSubRoomID())
+     //for(unsigned int p = 0;p<_allPedestians.size();p++){
+     //     Pedestrian* ped=_allPedestians[p];
+
+     for (auto&& ped : _allPedestians)
+     {
+          if ((room == ped->GetRoomID()) && (subroom == ped->GetSubRoomID()))
           {
                peds.push_back(ped);
           }
@@ -1271,7 +1394,7 @@ bool Building::SaveGeometry(const std::string &filename)
                auto&& sub=itr_sub.second;
                const double* plane=sub->GetPlaneEquation();
                geometry<<"\t\t<subroom id =\""<<sub->GetSubRoomID()
-                                  <<"\" closed=\""<<sub->GetClosed()
+                                  <<"\" closed=\""<<0
                                   <<"\" class=\""<<sub->GetType()
                                   <<"\" A_x=\""<<plane[0]
                                                        <<"\" B_y=\""<<plane[1]

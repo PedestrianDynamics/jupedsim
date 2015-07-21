@@ -12,11 +12,19 @@ project(JPScore)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
-set(JPSCORE_MINOR_VERSION 6)
+set(JPSCORE_MINOR_VERSION 7)
 set(JPSCORE_PATCH_VERSION 0)
 set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
+
+if(APPLE)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++" )
+endif(APPLE)
 
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -141,6 +149,7 @@ endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
 endif(BUILD_TESTING)
+
 # add sources and headers
 set (   source_files
   Simulation.cpp
@@ -171,7 +180,6 @@ set (   source_files
   math/ForceModel.cpp
   math/Mathematics.cpp
   math/ODESolver.cpp
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
   math/OperationalModel.cpp
@@ -183,6 +191,13 @@ set (   source_files
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
   pedestrian/Knowledge.cpp
+  pedestrian/AgentsQueue.cpp		
+  pedestrian/AgentsSource.cpp		
+  pedestrian/Pedestrian.cpp
+  pedestrian/AgentsSourcesManager.cpp	
+  pedestrian/StartDistribution.cpp
+
+  voronoi/VoronoiDiagramGenerator.cpp
 
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
@@ -279,6 +294,12 @@ set (   header_files
   pedestrian/Ellipse.h
   pedestrian/AgentsParameters.h
   pedestrian/Knowledge.h
+  pedestrian/AgentsQueue.h		
+  pedestrian/AgentsSource.h		
+  pedestrian/Pedestrian.h
+  pedestrian/AgentsSourcesManager.h	
+  pedestrian/StartDistribution.h
+  voronoi/VoronoiDiagramGenerator.h
 
   mpi/LCGrid.h
 
@@ -308,7 +329,6 @@ set (   header_files
   math/ForceModel.h
   math/Mathematics.h
   math/ODESolver.h
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.h
   math/GompertzModel.h
   math/OperationalModel.h   
@@ -328,11 +348,9 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
-add_executable(
-  jpscore main.cpp
-  )
+add_executable( jpscore  main.cpp )
 
-target_link_libraries(jpscore  core)
+target_link_libraries(jpscore core )
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)
@@ -341,6 +359,39 @@ endif(WIN32)
 if(CGAL_FOUND)
   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
 endif(CGAL_FOUND)
+
+#protocol buffer
+#find_package(Protobuf)
+#if(PROTOBUF_FOUND)
+#  message(STATUS "Protocol buffer library found")
+#
+#  include_directories(${PROTOBUF_INCLUDE_DIRS})
+#
+#  set (hybrid_source_files
+#    matsim/HybridSimulationManager.cpp
+#    matsim/JPSserver.cpp
+#    matsim/JPSclient.cpp                
+#    matsim/MATSimInterface.pb.cc
+#    matsim/MATSimInterface.grpc.pb.cc 
+#    )
+#
+#  set (hybrid_header_files
+#    matsim/JPSclient.h  
+#    matsim/MATSimInterface.grpc.pb.h  
+#    matsim/MATSimInterface.proto
+#    matsim/HybridSimulationManager.h    
+#    matsim/JPSserver.h                 
+#    matsim/MATSimInterface.pb.h
+#    )
+#    add_library (hybrid STATIC ${hybrid_source_files} )
+#    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
+# 	
+#	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
+#	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
+#else()
+#  message(STATUS "protocol buffer not found")
+#endif(PROTOBUF_FOUND)
+
 #----------------------------------------------------------------------
 # enable as many warnings as possible
 # set(warning_flags "-Wall -Wextra")

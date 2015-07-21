@@ -1,8 +1,8 @@
 /**
  * \file        Hline.h
  * \date        Aug 1, 2012
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -40,12 +40,24 @@ class Hline: public NavLine {
 
 private:
      int _id;
-     Room* _room1;
      std::string _caption;
-     SubRoom* _subRoom1;
+
+//TODO: these should be redesigned as private
+//and accessed via functions in the derived classes.
+protected:
+     Room* _room1=nullptr;
+     SubRoom* _subRoom1=nullptr;
+     SubRoom* _subRoom2=nullptr;
 
 public:
+     /**
+      * Constructor
+      */
      Hline();
+
+     /**
+      * Destructor
+      */
      virtual ~Hline();
 
      /**
@@ -67,6 +79,10 @@ public:
       * Set/Get the subroom containing this line
       */
      void SetSubRoom1(SubRoom* r);
+     /**
+      * Set/Get the second subroom
+      */
+     void SetSubRoom2(SubRoom* r2);
 
      /**
       * Set/Get the id of the line
@@ -87,6 +103,11 @@ public:
       * Set/Get the subroom containing this line
       */
      SubRoom* GetSubRoom1() const;
+
+     /**
+      * Set/Get the second subroom
+      */
+     SubRoom* GetSubRoom2() const;
 
      /**
       * @return true if the line is in the given subroom

@@ -19,14 +19,54 @@ logfile = "log_%s"%ego
 logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # ============= some directories =============
 #HOME = os.path.expanduser("~")
-#TRUNK =  HOME + "/Workspace/peddynamics/JuPedSim/jpscore/"
+#TRUNK =  HOME + "/Workspace/ped|ynamics/JuPedSim/jpscore/"
 #JPSCORE = TRUNK + "bin/jpscore"
 #CURDIR = os.getcwd()
 # ============= some default dictionaries =============
-default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'num_threads':1, 'file':'', 'model_id':1, 'exit_crossing_strategy':3, 'cell_size':2.2, 'operational_model_id':1}
-tags = ['tmax', 'seed', 'geometry', 'exit_crossing_strategy', 'num_threads']     # only these tags can be multiplied
-attributes = ['number', 'operational_model_id', 'cell_size', 'router_id'] # these attributes too, but
-tags2attributes = ['group', 'agents', 'linkedcells', 'router' ]           # only these corresponding to these tags
+default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'num_threads':1,
+                 'file':'', 'model_id':1, 'exit_crossing_strategy':3, 'cell_size':2.2,
+                 'operational_model_id':1}
+
+# only these tags can be multiplied
+tags = ['tmax',
+        'seed',
+        'geometry',
+        'exit_crossing_strategy',
+        'num_threads',
+        'stepsize']
+
+# format tag-attribute
+attributes_tags = ['group-pre_movement_mean',
+                   'group-number',
+                   'group-agent_parameter_id',
+                   'group-premovement_sigma',
+                   'agents-operational_model_id',
+                   'linkedcells-cell_size',
+                   'v0-mu', 'v0-sigma',
+                   'v0_upstairs-mu', 'v0_upstairs-sigma',
+                   'v0_downstairs-mu', 'v0_downstairs-sigma',
+                   'bmax-mu', 'bmin-mu',
+                   'amin-mu', 'tau-mu',
+                   'atau-mu',
+                   'force_ped-dist_max',
+                   'force_ped-disteff_max',
+                   'force_ped-interpolation_width',
+                   'force_ped-nu',
+                   'force_ped-b',
+                   'force_ped-c',
+                   'force_wall-dist_max',
+                   'force_wall-disteff_max',
+                   'force_wall-interpolation_width',
+                   'force_wall-nu',
+                   'force_wall-b',
+                   'force_wall-c']
+
+import numpy as np
+# cor_tags = np.unique([att.split("_")[0] for att in attributes_tags]).astype(str)a
+cor_tags = [att.split("-")[0] for att in attributes_tags]
+attributes = [att.split(tag+"-")[1] for (att, tag) in zip(attributes_tags, cor_tags)]
+cor_tags = np.unique(cor_tags)
+attributes = np.unique(attributes)
 input_tags = {}
 # =======================================================
 def getParserArgs():
@@ -51,13 +91,13 @@ def get_tag(node):
         geometries = []
         geom = glob.glob("%s/*.xml"%node.text)
         for g in geom:
-            geometries.append('../geometries' + g.split(".xml")[0].split("geometries")[1] + ".xml" ) 
+            geometries.append('../geometries' + g.split(".xml")[0].split("geometries")[1] + ".xml")
         # the geometries are relative to the inifiles directory
         #print geometries
         return  geometries
     else:
         text = node.text
-        
+
     if text:
         value = eval(text)
     else:
@@ -65,16 +105,21 @@ def get_tag(node):
     return value
 # =======================================================
 def get_attribute(node):
-    for atr in attributes: # todo suppose that attributes are distinct
-        if node.attrib.has_key(atr):
-            text = node.attrib[atr]
-            break
+    text = ''
+    values = []
 
-    if text:
-        value = eval(text)
-    else:
-        value = default_value[node.tag]
-    return value, atr
+    for node_attrib in node.attrib.keys():
+        if node_attrib in attributes:
+            text = node.attrib[node_attrib]
+            if text:
+                value = eval(text)
+            else:
+                value = 0
+            if isinstance(value, list) or isinstance(value, ndarray):
+                if len(value) > 1:
+                    values.append([value, str(node.tag)+"-"+str(node_attrib), node_attrib])
+
+    return values
 # =======================================================
 def get_product(root):
     """
@@ -91,26 +136,30 @@ def get_product(root):
     ]
     """
     for node in root.iter():
-        tag = node.tag        
+        tag = node.tag
+        # print "node", node, "tag", tag
         if tag in tags:   # ignore tags that are not of interest
             d = get_tag(node)
-        elif bool( set(node.attrib.keys() ) & set(attributes) ): # check our list of attributes
-            d, attr = get_attribute(node)
+            if isinstance(d, list) or isinstance(d, ndarray):
+                # in case some tags have multiple values
+                if not input_tags.has_key(tag) and len(d) > 1:
+            # ignore lists with one element (equiv to scalars)
+            # if tag in tags:
+                    input_tags[tag] = d
+        elif bool(set(node.attrib.keys()) & set(attributes)): # check our list of attributes
+            values = get_attribute(node) # d, atr_tag, attr
+            # value, atr_tag, atr
+            for value in values:
+                d = value[0]
+                atr_tag = value[1]
+                input_tags[atr_tag] = d
         else:
             continue
 
-        
-        if isinstance(d, list) or isinstance(d, ndarray): # in case some tags have multiple values
-            if not input_tags.has_key(tag) and len(d)>1: # ignore lists with one element (equiv to scalars)
-                if tag in tags:
-                    input_tags[tag] = d
-                else:
-                    input_tags[attr] = d
-            # else: # should not happen
-            #     sys.exit("Tag %s already exists! What the hell?"%tag)
-    result = [dict(izip(input_tags, x)) for x in product(*input_tags.itervalues())]
-    #print "result", result
-    return result
+    result_prod = [dict(izip(input_tags, x)) for x in product(*input_tags.itervalues())]
+    # print "result", result_prod
+    # raw_input()
+    return result_prod
 # =======================================================
 def make_filename(directory, d):
     name = "%s/inifiles/ini"%directory
@@ -134,17 +183,19 @@ def update_tag_value(root, tag, value):
     for rank in root.iter(tag):
         rank.text = str(value)
 # =======================================================
-def update_attrib_value(root, attr, value):
-    
-    indexes = [i for i, j in enumerate(attributes) if j == attr]
-    if len(indexes) == 0:  # e.g. location
+def update_attrib_value(root, attr_tag, value):
+    # location
+    # print "update_attrib_value: ", attr_tag, value
+    # raw_input()
+    if attr_tag == "location":  # e.g. location
         for r in root.iter():
-            if r.attrib.has_key(attr):
-                r.attrib[attr] = str(value)
+            if r.attrib.has_key(attr_tag):
+                r.attrib[attr_tag] = str(value)
         return
-    
-    index = indexes[0]
-    cor_tag = tags2attributes[ index ]
+
+    attr = attr_tag.split("-")[1]
+    cor_tag = attr_tag.split("-")[0]
+
     for r in root.iter(cor_tag):
         if r.attrib.has_key(attr):
             r.attrib[attr] = str(value)
@@ -161,11 +212,13 @@ def make_file(masterfile, tree, result):
         copy2(masterfile, newfile)
         #update trajectory file
         update_attrib_value(root, "location", trajfile)
-        if not os.path.isfile (newfile):
+        if not os.path.isfile(newfile):
             logging.error("make_file: could not create file %s"%newfile)
             sys.exit(FAILURE)
         for tag, value in item.iteritems():
-            if tag in attributes:
+            # print "tag: ", tag, "value:", value
+            # raw_input()
+            if tag in attributes_tags:
                 update_attrib_value(root, tag, value)
             else:
                 update_tag_value(root, tag, value)
@@ -175,32 +228,25 @@ def make_file(masterfile, tree, result):
 # =======================================================
 
 if __name__ == "__main__":
-    time1 = time.clock()    
+    time1 = time.clock()
     args = getParserArgs()
 
     masterfile = args.file
     if not os.path.isfile(masterfile):
         logging.error("ERROR: file %s does not exist."%masterfile)
         sys.exit(FAILURE)
-    
+
     directory = os.path.dirname(masterfile)    #args.directory
     logging.info('working directory = <%s>'%directory)
     logging.info('master inifile = <%s>'%masterfile)
-    make_dir( "%s/trajectories"%directory)
-    make_dir( "%s/inifiles"%directory)
-    print masterfile
+    make_dir("%s/trajectories"%directory)
+    make_dir("%s/inifiles"%directory)
+
     tree = ET.parse(masterfile)
     root = tree.getroot()
     result = get_product(root)
     make_file(masterfile, tree, result)
-    # executable = "%s/bin/jpscore"%TRUNK
-    # if not path.exists(executable):
-    #     logging.critical("executable <%s> does not exist yet."%executable)
-    #     sys.exit(FAILURE)
-    # for inifile in inifiles:
-    #     logging.info('start simulating with inifile=<%s>'%(cmd, inifile))
-    #     subprocess.call([executable, "--inifile=%s"%inifile])
-#          
+
     time2 = time.clock()
     if not  os.path.isfile("%s/%s"%(directory, logfile)):
         move(logfile, directory)
@@ -210,4 +256,4 @@ if __name__ == "__main__":
     else:
         sys.exit(SUCCESS)
 
-    
+

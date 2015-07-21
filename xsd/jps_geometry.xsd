@@ -78,7 +78,7 @@
                           </xs:element>
                         </xs:sequence>
                         <xs:attribute type="xs:int" name="id" use="required" />
-                        <xs:attribute type="xs:int" name="closed" use="optional" />
+                        <xs:attribute type="xs:string" name="caption" use="optional" />
                         <xs:attribute type="xs:float" name="A_x" use="optional" />
                         <xs:attribute type="xs:float" name="B_y" use="optional" />
                         <xs:attribute type="xs:float" name="C" use="optional" />

@@ -1,8 +1,8 @@
 /**
  * \file        travistoclient.cpp
  * \date        jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. all rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. all rights reserved.
  *
  * \section license
  * this file is part of jupedsim.
@@ -125,8 +125,8 @@ void TraVisToClient::createConnection()
 
      /* start the socket session */
      if (!startSocketSession()) {
-          fprintf(stderr, "startSocketSession() failed!");
-          fprintf(stderr, "socket creation failed for host [%s] on port [%d]!",_hostname.c_str(),_port);
+          fprintf(stderr, "startSocketSession() failed!\n");
+          fprintf(stderr, "socket creation failed for host [%s] on port [%d]!\n",_hostname.c_str(),_port);
           exit(EXIT_FAILURE);
      }
 
@@ -286,7 +286,6 @@ TraVisToClient::createServerSocket(unsigned short portNumber)
      }
 
      dtrace("server started at port %hu", portNumber);
-
      dtrace("leaving createServerSocket()");
      return (sock);
 }

@@ -1,8 +1,8 @@
 /**
  * \file        GCFMModel.cpp
  * \date        Apr 15, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -108,7 +108,7 @@ bool GCFMModel::Init (Building* building) const
 
 void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
 {
-     double delta = 0.5;
+     double delta = 1.5;
 
      // collect all pedestrians in the simulation.
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
@@ -157,13 +157,14 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                vector<Pedestrian*> neighbours;
                building->GetGrid()->GetNeighbourhood(ped,neighbours);
                //if(ped->GetID()==61) building->GetGrid()->HighlightNeighborhood(ped,building);
+               vector<SubRoom*> emptyVector;
 
                int nSize=neighbours.size();
                for (int i = 0; i < nSize; i++) {
                     Pedestrian* ped1 = neighbours[i];
                     Point p1 = ped->GetPos();
                     Point p2 = ped1->GetPos();
-                    bool ped_is_visible = building->IsVisible(p1, p2, false);
+                    bool ped_is_visible = building->IsVisible(p1, p2, emptyVector, false);
                     if (!ped_is_visible)
                          continue;
                     // if(debugPed == ped->GetID())
@@ -379,59 +380,52 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
-     Point f = Point(0., 0.);
+     Point f(0., 0.);
      //first the walls
-
-     const std::vector<Wall>& walls = subroom->GetVisibleWalls(ped->GetPos());
-     if(ped->GetID()==-33)
+     for(const auto & wall: subroom->GetAllWalls())
      {
-          printf("Ped = %d, visible walls = %d\n",ped->GetID(),(int)walls.size());
-          getc(stdin);
-     }
-     for (unsigned int i = 0; i < walls.size(); i++) {
-          f += ForceRepWall(ped, walls[i]);
+          f += ForceRepWall(ped, wall);
      }
 
      //then the obstacles
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < walls.size(); i++) {
-               f += ForceRepWall(ped, walls[i]);
+     for(const auto & obst: subroom->GetAllObstacles())
+     {
+          if(obst->Contains(ped->GetPos()))
+          {
+               Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
+               exit(EXIT_FAILURE);
+          }
+          else
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               f += ForceRepWall(ped, wall);
           }
      }
 
-     //eventually crossings
-     // const vector<Crossing*>& crossings = subroom->GetAllCrossings();
-     // for (unsigned int i = 0; i < crossings.size(); i++) {
-          //Crossing* goal=crossings[i];
-          //int uid1= goal->GetUniqueID();
-          //int uid2=ped->GetExitIndex();
-          // ignore my transition
-          //if (uid1 != uid2) {
-          //      f = f + ForceRepWall(ped,*((Wall*)goal));
-          //}
-     // }
-
-     // and finally the closed doors or doors that are not my destination
-     const vector<Transition*>& transitions = subroom->GetAllTransitions();
-     for (unsigned int i = 0; i < transitions.size(); i++) {
-          Transition* goal=transitions[i];
-          int uid1= goal->GetUniqueID();
-          int uid2=ped->GetExitIndex();
-          // ignore my tranition consider closed doors
-          //closed doors are considered as wall
-
-          if((uid1 != uid2) || (goal->IsOpen()==false )) {
-               f += ForceRepWall(ped,*((Wall*)goal));
+     // and finally the closed doors
+     for(auto & goal: subroom->GetAllTransitions())
+     {
+          if(! goal->IsOpen())
+          {
+               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
+
+//  int uid1= goal->GetUniqueID();
+//  int uid2=ped->GetExitIndex();
+//  // ignore my transition consider closed doors
+//  //closed doors are considered as wall
+//
+//  if((uid1 != uid2) || (goal->IsOpen()==false ))
+//  {
+//    f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
+//  }
      }
 
      return f;
 }
 
 
-inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
+inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 {
      Point F = Point(0.0, 0.0);
      Point pt = w.ShortestPoint(ped->GetPos());

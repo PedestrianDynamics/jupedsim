@@ -1,8 +1,8 @@
 /**
  * \file        OutputHandler.cpp
  * \date        Nov 20, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <cstdlib>
+#include <cmath>
 
 using namespace std;
 
@@ -56,8 +57,7 @@ int OutputHandler::GetErrors()
 
 void OutputHandler::Write(const string& str)
 {
-     if (this != NULL)
-          cout << str << endl;
+    cout << str << endl;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
@@ -68,7 +68,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
      int totaldotz=40;
      double fraction = NowPeds / TotalPeds;
      // part of the progressmeter that's already "full"
-     int dotz = round(fraction * totaldotz);
+     int dotz = static_cast<int>(round(fraction * totaldotz));
 
      // create the "meter"
      int ii=0;

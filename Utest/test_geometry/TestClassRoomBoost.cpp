@@ -30,7 +30,7 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include "../../geometry/Room.h"
-
+#include "../../general/Macros.h"
 #include <string>
 
 BOOST_AUTO_TEST_SUITE(RoomTest)
@@ -45,11 +45,13 @@ BOOST_AUTO_TEST_CASE(ROOM_CONST_SET_GET_TEST)
           R1.SetCaption("Room" + std::to_string(i));
           R1.SetZPos(10.0/i);
           R1.SetEgressTime(i * 10.0 / 3);
+          R1.SetState(RoomState(i%2));
           Room R2(R1);
           BOOST_CHECK(R2.GetID() == i);
           BOOST_CHECK(R2.GetCaption() == "Room" + std::to_string(i));
           BOOST_CHECK(R2.GetZPos() == 10.0 / i);
           BOOST_CHECK(R2.GetEgressTime() == i * 10.0 / 3);
+          BOOST_CHECK(R2.GetState() == i % 2);
      }
      BOOST_MESSAGE("Leaving const_set_get test");
 }

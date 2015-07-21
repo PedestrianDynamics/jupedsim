@@ -1,8 +1,8 @@
 /**
  * \file        IODispatcher.cpp
  * \date        Nov 20, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -116,7 +116,7 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
 
 void TrajectoriesJPSV04::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -158,6 +158,7 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
      // first the rooms
      //to avoid writing navigation line twice
      vector<int> navLineWritten;
+     //rooms_to_plot.push_back("U9");
 
      for (const auto& it:building->GetAllRooms())
      {
@@ -166,8 +167,9 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
                continue;
 
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=0) continue;
+          for(auto&& sitr: r->GetAllSubRooms())
+          {
+               auto&& s = sitr.second; //if(s->GetSubRoomID()!=7) continue;
                geometry.append(s->WriteSubRoom());
 
                // the hlines
@@ -444,7 +446,7 @@ void TrajectoriesVTK::WriteFooter()
 
 void TrajectoriesJPSV06::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
@@ -586,8 +588,8 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           sprintf(tmp1, "<agent ID=\"%d\"\t"
-                    "x=\"%.2f\"\ty=\"%.2f\"\t"
-                    "z=\"%.2f\"\t"
+                    "x=\"%.6f\"\ty=\"%.6f\"\t"
+                    "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
@@ -624,7 +626,7 @@ void TrajectoriesXML_MESH::WriteGeometry(Building* building)
 
 void TrajectoriesJPSV05::WriteHeader(long nPeds, double fps, Building* building, int seed)
 {
-     nPeds=building->GetAllPedestrians().size();
+     //nPeds=building->GetAllPedestrians().size();
      string tmp;
      tmp = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\n" "<trajectories>\n";
      char agents[CLENGTH] = "";
@@ -701,8 +703,8 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           sprintf(s, "<agent ID=\"%d\"\t"
-                    "x=\"%.2f\"\ty=\"%.2f\"\t"
-                    "z=\"%.2f\"\t"
+                    "x=\"%.6f\"\ty=\"%.6f\"\t"
+                    "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,

@@ -1,8 +1,8 @@
 /**
  * \file        PedDistributor.cpp
  * \date        Oct 12, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -24,6 +24,8 @@
  *
  *
  **/
+
+
 #include <cmath>
 #include "PedDistributor.h"
 #include "../tinyxml/tinyxml.h"
@@ -32,165 +34,8 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../IO/OutputHandler.h"
-// #include "../logging.h"
+
 using namespace std;
-
-
-/************************************************************
- StartDistributionRoom
- ************************************************************/
-StartDistributionRoom::StartDistributionRoom(int seed)
-{
-    _roomID = -1;
-    _nPeds = -1;
-    _groupID = -1;
-    _goalID = -1;
-    _routerID = -1;
-    _routeID = -1;
-    _age = -1;
-    _height = -1;
-    _startX = NAN;
-    _startY = NAN;
-    _startZ = NAN;
-    _gender = "male";
-    _patience=5;
-    _xMin=-FLT_MAX;
-    _xMax=FLT_MAX;
-    _yMin=-FLT_MAX;
-    _yMax=FLT_MAX;
-    _groupParameters=NULL;
-    _generator = std::default_random_engine(seed);
-}
-
-StartDistributionRoom::~StartDistributionRoom()
-{
-}
-
-
-int StartDistributionRoom::GetAgentsNumber() const
-{
-     return _nPeds;
-}
-
-
-// Setter-Funktionen
-
-void StartDistributionRoom::SetRoomID(int id)
-{
-     _roomID = id;
-}
-
-int StartDistributionRoom::GetAge() const
-{
-     return _age;
-}
-
-void StartDistributionRoom::SetAge(int age)
-{
-     _age = age;
-}
-
-const std::string& StartDistributionRoom::GetGender() const
-{
-     return _gender;
-}
-
-void StartDistributionRoom::SetGender(const std::string& gender)
-{
-     _gender = gender;
-}
-
-int StartDistributionRoom::GetGoalId() const
-{
-     return _goalID;
-}
-
-void StartDistributionRoom::SetGoalId(int goalId)
-{
-     _goalID = goalId;
-}
-
-int StartDistributionRoom::GetGroupId() const
-{
-     return _groupID;
-}
-
-void StartDistributionRoom::SetGroupId(int groupId)
-{
-     _groupID = groupId;
-}
-
-int StartDistributionRoom::GetHeight() const
-{
-     return _height;
-}
-
-void StartDistributionRoom::SetHeight(int height)
-{
-     _height = height;
-}
-
-int StartDistributionRoom::GetRoomId() const
-{
-     return _roomID;
-}
-
-void StartDistributionRoom::SetRoomId(int roomId)
-{
-     _roomID = roomId;
-}
-
-int StartDistributionRoom::GetRouteId() const
-{
-     return _routeID;
-}
-
-void StartDistributionRoom::SetRouteId(int routeId)
-{
-     _routeID = routeId;
-}
-
-int StartDistributionRoom::GetRouterId() const
-{
-     return _routerID;
-}
-
-void StartDistributionRoom::SetRouterId(int routerId)
-{
-     _routerID = routerId;
-}
-
-void StartDistributionRoom::SetAgentsNumber(int N)
-{
-     _nPeds = N;
-}
-
-
-/************************************************************
- StartDistributionSubRoom
- ************************************************************/
-StartDistributionSubroom::StartDistributionSubroom(unsigned int seed) : StartDistributionRoom(seed)
-{
-     _subroomID = -1;
-}
-
-
-StartDistributionSubroom::~StartDistributionSubroom()
-{
-}
-
-int StartDistributionSubroom::GetSubroomID() const
-{
-     return _subroomID;
-}
-
-// Setter-Funktionen
-
-void StartDistributionSubroom::SetSubroomID(int i)
-{
-     _subroomID = i;
-}
-
 
 /************************************************************
  PedDistributor
@@ -198,24 +43,30 @@ void StartDistributionSubroom::SetSubroomID(int i)
 
 PedDistributor::PedDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
 {
-     _start_dis = vector<StartDistributionRoom* > ();
-     _start_dis_sub = vector<StartDistributionSubroom* > ();
+     _start_dis = vector<std::shared_ptr<StartDistribution> > ();
+     _start_dis_sub = vector<std::shared_ptr<StartDistribution> > ();
      InitDistributor(fileName, agentPars, seed);
 }
 
 
 PedDistributor::~PedDistributor()
 {
+//     for (unsigned int i = 0; i < _start_dis.size(); i++)
+//     {
+//          delete _start_dis[i];
+//     }
+//     for (unsigned int i = 0; i < _start_dis_sub.size(); i++)
+//     {
+//          delete _start_dis_sub[i];
+//     }
 
-     for (unsigned int i = 0; i < _start_dis.size(); i++) {
-          delete _start_dis[i];
-     }
-     for (unsigned int i = 0; i < _start_dis_sub.size(); i++) {
-          delete _start_dis_sub[i];
-     }
-     _start_dis_sub.clear();
-     _start_dis.clear();
-     //empty the parameters maps
+//     _start_dis_sub.clear();
+//     _start_dis.clear();
+}
+
+const vector<std::shared_ptr<AgentsSource> >& PedDistributor::GetAgentsSources() const
+{
+     return _start_dis_sources;
 }
 
 bool PedDistributor::InitDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed)
@@ -272,18 +123,10 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
               return false;
           }
 
-          StartDistributionRoom* dis=NULL;
-
-          if(subroom_id==-1) {
-               dis = new StartDistributionRoom(seed);
-               _start_dis.push_back(dis);
-          } else {
-               dis = new StartDistributionSubroom(seed);
-               dynamic_cast<StartDistributionSubroom*>(dis)->SetSubroomID(subroom_id);
-               _start_dis_sub.push_back(dynamic_cast<StartDistributionSubroom*>(dis));
-          }
-
+          auto dis=std::shared_ptr<StartDistribution> (new StartDistribution(seed) );
           dis->SetRoomID(room_id);
+          dis->SetSubroomID(subroom_id);
+          dis->SetGroupId(group_id);
           dis->Setbounds(bounds);
           dis->SetAgentsNumber(number);
           dis->SetAge(age);
@@ -295,6 +138,12 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           dis->SetPatience(patience);
           dis->InitPremovementTime(premovement_mean,premovement_sigma);
           dis->InitRiskTolerance(risk_tolerance_mean,risk_tolerance_sigma);
+
+          if(subroom_id==-1) { // no subroom was supplied
+               _start_dis.push_back(dis);
+          } else {
+               _start_dis_sub.push_back(dis);
+          }
 
           if(agentPars.count(agent_para_id)==0)
           {
@@ -315,12 +164,24 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
      //Parse the sources
      TiXmlNode* xSources=xRootNode->FirstChild("agents_sources");
      if(xSources)
-          for(TiXmlElement* e = xSources->FirstChildElement("source"); e;
-                    e = e->NextSiblingElement("source")) {
-               Log->Write("INFO:\tSource with id %s will not be parsed !",e->Attribute("id"));
+     {
+          for (TiXmlElement* e = xSources->FirstChildElement("source"); e;
+                    e = e->NextSiblingElement("source"))
+          {
+               int id = xmltoi(e->Attribute("id"), -1);
+               int frequency = xmltoi(e->Attribute("frequency"), -1);
+               int agents_max = xmltoi(e->Attribute("agents_max"), -1);
+               int group_id = xmltoi(e->Attribute("group_id"), -1);
+               string caption = xmltoa(e->Attribute("caption"), "no caption");
 
+               auto source = shared_ptr<AgentsSource>(
+                         new AgentsSource(id, caption, agents_max, group_id,
+                                   frequency));
+               _start_dis_sources.push_back(source);
+
+               Log->Write("INFO:\tSource with id %s will not be parsed !", e->Attribute("id"));
           }
-
+     }
      Log->Write("INFO: \t...Done");
      return true;
 }
@@ -328,7 +189,8 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
 bool PedDistributor::Distribute(Building* building) const
 {
      Log->Write("INFO: \tInit Distribute");
-     int nPeds = 0;
+     int nPeds_is = 0;
+     int nPeds_expected=0;
 
      // store the position in a map since we are not computing for all rooms/subrooms.
      std::map <int, std::map <int, vector <Point> > > allFreePos;
@@ -336,6 +198,7 @@ bool PedDistributor::Distribute(Building* building) const
      //collect the available positions for that subroom
      for(const auto& dist: _start_dis_sub)
      {
+          nPeds_expected+=dist->GetAgentsNumber();
           int roomID = dist->GetRoomId();
           Room* r = building->GetRoom(roomID);
           if(!r) return false;
@@ -359,6 +222,7 @@ bool PedDistributor::Distribute(Building* building) const
           Room* r = building->GetRoom(roomID);
           if(!r) return false;
 
+          nPeds_expected+=dist->GetAgentsNumber();
           //compute all subrooms since no specific one is given
           for (const auto& it_sr: r->GetAllSubRooms())
           {
@@ -367,7 +231,6 @@ bool PedDistributor::Distribute(Building* building) const
                // the positions were already computed
                if(allFreePosRoom.count(subroomID)>0)
                     continue;
-
                allFreePosRoom[subroomID]=PedDistributor::PossiblePositions(*it_sr.second);
           }
      }
@@ -404,9 +267,9 @@ bool PedDistributor::Distribute(Building* building) const
 
           // Distributing
           Log->Write("INFO: \tDistributing %d Agents in Room/Subrom [%d/%d]! Maximum allowed: %d", N, roomID, subroomID, max_pos);
-          DistributeInSubRoom(sr, N, allpos, &pid,dist,building);
+          DistributeInSubRoom(sr, N, allpos, &pid,dist.get(),building);
           Log->Write("\t...Done");
-          nPeds += N;
+          nPeds_is += N;
      }
 
      // then continue the distribution according to the rooms
@@ -429,6 +292,7 @@ bool PedDistributor::Distribute(Building* building) const
           vector<int> akt_anz = vector<int>();
 
           auto&  allFreePosInRoom=allFreePos[room_id];
+          //FIXME: wont work if the subrooms ids are not continous, consider using map
           for (int is = 0; is < r->GetNumberOfSubRooms(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
                double area = sr->GetArea();
@@ -444,6 +308,7 @@ bool PedDistributor::Distribute(Building* building) const
           }
           ppm = N / sum_area;
           // Anzahl der Personen pro SubRoom bestimmen
+          //FIXME: wont work if the subrooms ids are not continous, consider using map
           for (int is = 0; is < r->GetNumberOfSubRooms(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
                int anz = sr->GetArea() * ppm + 0.5; // wird absichtlich gerundet
@@ -473,13 +338,55 @@ bool PedDistributor::Distribute(Building* building) const
           // distributing
           for (unsigned int is = 0; is < akt_anz.size(); is++) {
                SubRoom* sr = r->GetSubRoom(is);
+               //workaround, the subroom will be changing at each run.
+               //so the last subroom ID is not necessarily the 'real' one
+               // might conflicts with sources
+               dist->SetSubroomID(sr->GetSubRoomID());
                if (akt_anz[is] > 0)
-                    DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, (StartDistributionSubroom*)dist,building);
+               {
+                    DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist.get(),building);
+               }
           }
-          nPeds += N;
+          nPeds_is += N;
      }
 
-     return nPeds;
+     //now populate the sources
+     vector<Point> emptyPositions;
+     for(const auto& source: _start_dis_sources)
+     {
+          for(const auto& dist: _start_dis_sub)
+          {
+               if(source->GetGroupId()==dist->GetGroupId())
+               {
+                    source->SetStartDistribution(dist);
+                    for(int i=0;i<source->GetMaxAgents();i++)
+                    {
+                         //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
+                         //nPeds_is++;
+                    }
+               }
+          }
+
+          for(const auto& dist: _start_dis)
+          {
+               if(source->GetGroupId()==dist->GetGroupId())
+               {
+                    source->SetStartDistribution(dist);
+                    for(int i=0;i<source->GetMaxAgents();i++)
+                    {
+                         //source->AddToPool(dist->GenerateAgent(building, &pid,emptyPositions));
+                         //nPeds_is++;
+                    }
+               }
+          }
+     }
+
+     if(nPeds_is!=nPeds_expected)
+     {
+          Log->Write("ERROR:\t only [%d] agents could be distributed out of [%d] requested",nPeds_is,nPeds_expected);
+     }
+
+     return (nPeds_is==nPeds_expected);
 }
 
 
@@ -493,13 +400,16 @@ vector<Point> PedDistributor::PositionsOnFixX(double min_x, double max_x, double
      while (y < max_y) {
           Point pos = Point(x, y);
           // Abstand zu allen Wänden prüfen
-          int k;
-          for (k = 0; k < r.GetNumberOfWalls(); k++) {
-               if (r.GetWall(k).DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+          bool ok=true;
+          for(auto&& w: r.GetAllWalls())
+          {
+               if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+                    ok=false;
                     break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
                }
           }
-          if (k == r.GetNumberOfWalls()) {
+
+          if (ok) {
                //check all transitions
                bool tooNear=false;
                for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
@@ -535,13 +445,17 @@ vector<Point>PedDistributor::PositionsOnFixY(double min_x, double max_x, double 
      while (x < max_x) {
           Point pos = Point(x, y);
           // check distance to wall
-          int k;
-          for (k = 0; k < r.GetNumberOfWalls(); k++) {
-               if (r.GetWall(k).DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+          bool ok=true;
+          for(auto&& w: r.GetAllWalls())
+          {
+               if (w.DistTo(pos) < max(bufx, bufy) || !r.IsInSubRoom(pos)) {
+                    ok=false;
                     break; // Punkt ist zu nah an einer Wand oder nicht im Raum => ungültig
                }
           }
-          if (k == r.GetNumberOfWalls()) {
+
+          if (ok) {
+
                //check all transitions
                bool tooNear=false;
                for(unsigned int t=0; t<r.GetAllTransitions().size(); t++) {
@@ -662,7 +576,7 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
                          //only continue if...
                          if(tooNear==true) continue;
 
-                         if((obst->GetClosed()==1) && (obst->Contains(pos)==true))
+                         if(obst->Contains(pos))
                          {
                               tooNear=true;
                               break; // too close
@@ -678,6 +592,7 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
      std::random_shuffle(all_positions.begin(), all_positions.end());
      return all_positions;
 }
+
 /* Verteilt N Fußgänger in SubRoom r
  * Algorithms:
  *   - Lege Gitter von min_x bis max_x mit Abstand dx und entsprechend min_y bis max_y mit
@@ -694,167 +609,12 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
  *   - routing: wird benötigt um die Zielline der Fußgänger zu initialisieren
  * */
 void PedDistributor::DistributeInSubRoom(SubRoom* r,int nAgents , vector<Point>& positions, int* pid,
-          StartDistributionSubroom* para, Building* building) const
+          StartDistribution* para, Building* building) const
 {
-
-    //in the case a range was specified
-    double distArea[4];
-    para->Getbounds(distArea);
-    AgentsParameters* agents_para=para->GetGroupParameters();
-
     // set the pedestrians
-    for (int i = 0; i < nAgents; ++i) {
-
-        Pedestrian* ped = new Pedestrian();
-        // PedIndex
-        ped->SetID(*pid);
-        ped->SetAge(para->GetAge());
-        ped->SetGender(para->GetGender());
-        ped->SetHeight(para->GetHeight());
-        ped->SetFinalDestination(para->GetGoalId());
-        ped->SetGroup(para->GetGroupId());
-        ped->SetRouter(building->GetRoutingEngine()->GetRouter(para->GetRouterId()));
-        //ped->SetTrip(); // not implemented
-
-        // a und b setzen muss vor v0 gesetzt werden,
-        // da sonst v0 mit Null überschrieben wird
-        JEllipse E = JEllipse();
-        E.SetAv(agents_para->GetAtau());
-        E.SetAmin(agents_para->GetAmin());
-        E.SetBmax(agents_para->GetBmax());
-        E.SetBmin(agents_para->GetBmin());
-        ped->SetEllipse(E);
-        ped->SetTau(agents_para->GetTau());
-        ped->SetV0Norm(agents_para->GetV0(),
-                  agents_para->GetV0DownStairs(),
-                  agents_para->GetV0UpStairs());
-        //ped->SetV(Point(0.0,0.0));
-
-        // first default Position
-        int index = -1;
-        //int index = rand() % positions.size();
-
-        //in the case a range was specified
-        for (unsigned int a=0;a<positions.size();a++)
-        {
-            Point pos=positions[a];
-            if((distArea[0]<=pos._x) &&
-                    (pos._x <= distArea[1])&&
-                    (distArea[2]<=pos._y) &&
-                    (pos._y < distArea[3]))
-            {
-                index=a;
-                break;
-            }
-        }
-        if(index==-1)
-        {
-            Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
-                    distArea[0],distArea[1],distArea[2],distArea[3]);
-            Log->Write("ERROR:\t Specifying a subroom_id might help");
-        }
-
-        Point pos = positions[index];
-        ped->SetPos(pos,true); //true for the initial position
-        ped->SetBuilding(building);
-        positions.erase(positions.begin() + index);
-        ped->SetRoomID(para->GetRoomId(),"");
-        ped->SetSubRoomID(r->GetSubRoomID());
-        ped->SetPatienceTime(para->GetPatience());
-        ped->SetPremovementTime(para->GetPremovementTime());
-        ped->SetRiskTolerance(para->GetRiskTolerance());
-        const Point& start_pos = para->GetStartPosition();
-
-
-        if((std::isnan(start_pos._x)==0 ) && (std::isnan(start_pos._y)==0 ) ) {
-            if(r->IsInSubRoom(start_pos)==false){
-                Log->Write("ERROR: \t cannot distribute pedestrian %d in Room %d at fixed position %s",
-                                    *pid, para->GetRoomId(), start_pos.toString().c_str());
-                Log->Write("ERROR: \t Make sure that the position is inside the geometry and belongs to the specified room / subroom");
-                exit(EXIT_FAILURE);
-            }
-
-            ped->SetPos(start_pos,true); //true for the initial position
-            Log->Write("INFO: \t fixed position for ped %d in Room %d %s",
-                    *pid, para->GetRoomId(), start_pos.toString().c_str());
-        }
-
-        //r->AddPedestrian(ped);
-        building->AddPedestrian(ped);
-        (*pid)++;
+    for (int i = 0; i < nAgents; ++i)
+    {
+         Pedestrian* ped = para->GenerateAgent(building, pid, positions);
+         building->AddPedestrian(ped);
     }
-}
-
-
-void StartDistributionRoom::SetStartPosition(double x, double y, double z)
-{
-     if(_nPeds!=1) {
-          Log->Write("INFO:\t you cannot specify the same start position for many agents");
-          Log->Write("INFO:\t Ignoring the start position");
-          return;
-     }
-     _startX=x;
-     _startY=y;
-     _startZ=z;
-}
-
-Point StartDistributionRoom::GetStartPosition() const
-{
-     return Point(_startX, _startY);
-}
-
-double StartDistributionRoom::GetPatience() const
-{
-     return _patience;
-}
-
-void StartDistributionRoom::SetPatience(double patience)
-{
-     _patience = patience;
-}
-
-AgentsParameters* StartDistributionRoom::GetGroupParameters()
-{
-    return _groupParameters;
-}
-
-void StartDistributionRoom::SetGroupParameters(AgentsParameters* groupParameters)
-{
-    _groupParameters = groupParameters;
-}
-
-void StartDistributionRoom::Getbounds(double bounds[4])
-{
-    bounds[0]=_xMin;
-    bounds[1]=_xMax;
-    bounds[2]=_yMin;
-    bounds[3]=_yMax;
-}
-
-void StartDistributionRoom::Setbounds(double bounds[4])
-{
-    _xMin=bounds[0];
-    _xMax=bounds[1];
-    _yMin=bounds[2];
-    _yMax=bounds[3];
-}
-
-void StartDistributionRoom::InitPremovementTime(double mean, double stdv)
-{
-     _premovementTime = std::normal_distribution<double>(mean,stdv);
-}
-
-double StartDistributionRoom::GetPremovementTime()
-{
-     return _premovementTime(_generator);
-}
-
-void StartDistributionRoom::InitRiskTolerance(double mean, double stdv)
-{
-     _riskTolerance = std::normal_distribution<double>(mean,stdv);
-}
-
-double StartDistributionRoom::GetRiskTolerance()
-{
-     return _riskTolerance(_generator);
 }

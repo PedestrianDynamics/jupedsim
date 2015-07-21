@@ -1,8 +1,8 @@
 /**
  * \file        PedDistributor.h
  * \date        Oct 12, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -25,147 +25,75 @@
  *
  **/
 
-
 #ifndef _PEDDISTRIBUTOR_H
 #define _PEDDISTRIBUTOR_H
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "../routing/Router.h"
 #include "../geometry/Building.h"
 #include "AgentsParameters.h"
+#include "AgentsSource.h"
+#include "StartDistribution.h"
 #include "../general/ArgumentParser.h"
 
-typedef vector< Point > tPoints;
-typedef vector< tPoints >  GridPoints;
+//typedef vector<Point> tPoints;
+//typedef vector<tPoints> GridPoints;
 
-/************************************************************
- StartDistributionRoom
-************************************************************/
-class StartDistributionRoom {
+
+class PedDistributor
+{
 private:
-     int _roomID;
-     int _nPeds;
-     int _groupID;
-     int _goalID;
-     int _routerID;
-     int _routeID;
-     //demographic parameters
-     //TODO: should also follow a distribution, see _premovement
-     std::string _gender;
-     int _age;
-     int _height;
-     double _patience;
-
-     //force model parameters
-     AgentsParameters* _groupParameters;
-
-     //string motivation;// low, normal, high
-     double _startX; //only valid when _nPeds=1
-     double _startY; //only valid when _nPeds=1
-     double _startZ; //only valid when _nPeds=1
-
-     //bounds for distributing in a square
-     double _xMin;
-     double _xMax;
-     double _yMin;
-     double _yMax;
-
-     //pre movement time distribution
-     std::normal_distribution<double> _premovementTime;
-
-     //risk tolerance distribution
-     std::normal_distribution<double> _riskTolerance;
-
-     //random number generator engine
-     std::default_random_engine _generator;
-
-
-public:
-    StartDistributionRoom(int seed);
-    virtual ~StartDistributionRoom();
-
-    int GetAgentsNumber() const;
-    void SetRoomID(int id);
-    void SetAgentsNumber(int N);
-    int GetAge() const;
-    void SetAge(int age);
-    const std::string& GetGender() const;
-    void SetGender(const std::string& gender);
-    int GetGoalId() const;
-    void SetGoalId(int goalId);
-    int GetGroupId() const;
-    void SetGroupId(int groupId);
-    int GetHeight() const;
-    void SetHeight(int height);
-    int GetRoomId() const;
-    void SetRoomId(int roomId);
-    int GetRouteId() const;
-    void SetRouteId(int routeId);
-    int GetRouterId() const;
-    void SetRouterId(int routerId);
-    void SetStartPosition(double x, double y, double z);
-    Point GetStartPosition() const;
-    double GetPatience() const;
-    void SetPatience(double patience);
-    void SetBounds(double xMin, double xMax, double yMin, double yMax);
-    void Getbounds(double bounds[4]);
-    void Setbounds(double bounds[4]);
-    AgentsParameters* GetGroupParameters();
-    void SetGroupParameters(AgentsParameters* groupParameters);
-    void InitPremovementTime(double mean, double stdv);
-    double GetPremovementTime();
-    void InitRiskTolerance(double mean, double stdv);
-    double GetRiskTolerance();
-};
-
-//TODO merge the two classes and set the _subRoomID=-1
-class StartDistributionSubroom : public StartDistributionRoom {
-private:
-     int _subroomID;
-
-public:
-     StartDistributionSubroom(unsigned int seed);
-     virtual ~StartDistributionSubroom();
-
-     int GetSubroomID() const;
-     void SetSubroomID(int i);
-};
-
-
-/************************************************************
- PedDistributor
-************************************************************/
-class PedDistributor {
-private:
-     std::vector<StartDistributionRoom*> _start_dis; // ID startraum, subroom und Anz
-     std::vector<StartDistributionSubroom*> _start_dis_sub; // ID startraum, subroom und Anz
+     std::vector<std::shared_ptr<StartDistribution> > _start_dis; // ID startraum, subroom und Anz
+     std::vector<std::shared_ptr<StartDistribution> > _start_dis_sub; // ID startraum, subroom und Anz
+     std::vector<std::shared_ptr<AgentsSource> > _start_dis_sources; // contain the sources
      //std::string _projectFilename; // store the file for later user
      //std::map<int, AgentsParameters*> _agentsParameters;
-     bool InitDistributor(const string&, const std::map<int, std::shared_ptr<AgentsParameters> >& , unsigned int);
-     static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y, double min_y,
-            const SubRoom& r, double bufx, double bufy, double dy);
-     static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y, double min_y,
-            const SubRoom& r, double bufx, double bufy, double dx);
+     bool InitDistributor(const string&, const std::map<int, std::shared_ptr<AgentsParameters> >&,
+               unsigned int);
+     static std::vector<Point> PositionsOnFixX(double max_x, double min_x, double max_y,
+               double min_y, const SubRoom& r, double bufx, double bufy, double dy);
+     static std::vector<Point> PositionsOnFixY(double max_x, double min_x, double max_y,
+               double min_y, const SubRoom& r, double bufx, double bufy, double dx);
 
 public:
      /**
       * constructor
       */
-     PedDistributor(const string& fileName, const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars, unsigned int seed);
+     PedDistributor(const string& fileName,
+               const std::map<int, std::shared_ptr<AgentsParameters> >& agentPars,
+               unsigned int seed);
 
      /**
       * desctructor
       */
      virtual ~PedDistributor();
 
-     // sonstige Funktionen
-     static vector<Point >  PossiblePositions(const SubRoom& r);
-     void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid, StartDistributionSubroom* parameters,Building* building) const;
+     /**
+      * Return the possible positions for distributing the agents in the subroom
+      */
+     static vector<Point> PossiblePositions(const SubRoom& r);
 
+     /**
+      * Distribute the pedestrians in the Subroom with the given parameters
+      */
+     void DistributeInSubRoom(SubRoom* r, int N, std::vector<Point>& positions, int* pid,
+               StartDistribution* parameters, Building* building) const;
 
+     /**
+      *
+      *Distribute all agents based on the configuration (ini) file
+      * @return true if everything went fine
+      */
      bool Distribute(Building* building) const;
+
+     /**
+      * provided for convenience
+      */
+
+     const std::vector<std::shared_ptr<AgentsSource> >& GetAgentsSources() const;
 };
 
 #endif  /* _PEDDISTRIBUTOR_H */

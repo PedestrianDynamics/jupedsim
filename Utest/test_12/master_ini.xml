@@ -31,11 +31,11 @@
     <goals>
       <goal id="0" final="true" caption="goal 0">
         <polygon>
-          <vertex px="11.0" py="2.0" />
-          <vertex px="11.0" py="3.0" />
-          <vertex px="12.0" py="3.0" />
-          <vertex px="12.0" py="2.0" />
-          <vertex px="11.0" py="2.0" />
+          <vertex px="13.0" py="5.0" />
+          <vertex px="13.0" py="6.0" />
+          <vertex px="14.0" py="6.0" />
+          <vertex px="14.0" py="5.0" />
+          <vertex px="13.0" py="5.0" />
         </polygon>
       </goal>
     </goals>
@@ -45,10 +45,10 @@
   <!--persons information and distribution -->
   <agents operational_model_id="[1,2]">
     <agents_distribution>
-      <group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="58" start_y="103"/>
-      <group group_id="1"  agent_parameter_id="0" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="57" start_y="102"/>
-      <group group_id="2"  agent_parameter_id="1" room_id="1" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="52" start_y="103"/>
-      <group group_id="3"  agent_parameter_id="0" room_id="1" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="50.5" start_y="102"/>	
+      <group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="7.5" start_y="5." pre_movement_mean="5" pre_movement_sigma="0"/>
+      <!-- this one is moving -->
+      <group group_id="1"  agent_parameter_id="0" room_id="0" subroom_id="1" number="1" goal_id="-1" router_id="1" start_x="6.5" start_y="4.3"/>
+      <Group group_id="2"  agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="9.5" start_y="5.2" pre_movement_mean="5" pre_movement_sigma="0"/>
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -60,7 +60,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exit_crossing_strategy>1</exit_crossing_strategy>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="3" />
         <force_ped nu="10.2" dist_max="0.1" disteff_max="0.1" interpolation_width="0.1" />
         <force_wall nu="0.0" dist_max="0.1" disteff_max="0.1" interpolation_width="0.1" />
@@ -94,7 +94,7 @@
         <force_wall nu="0" b="0.70" c="3.0"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
-        <v0 mu="1" sigma="0.0" />
+        <v0 mu="1.0" sigma="0.0" />
         <bmax mu="0.25" sigma="0.001" />
         <bmin mu="0.20" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
@@ -116,6 +116,7 @@
   <route_choice_models>
     <router router_id="1" description="local_shortest">
       <parameters>
+        <navigation_mesh method="triangulation" use_for_local_planning="true" />
         <!--<navigation_lines file="routing.xml" />-->
       </parameters>
     </router>

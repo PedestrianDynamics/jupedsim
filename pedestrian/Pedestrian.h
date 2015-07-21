@@ -1,8 +1,8 @@
 /**
  * \file        Pedestrian.h
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -38,6 +38,8 @@
 #include "Ellipse.h"
 #include "../general/Macros.h"
 #include "../geometry/NavLine.h"
+#include "AgentsParameters.h"
+#include "PedDistributor.h"
 
 class Building;
 class NavLine;
@@ -68,7 +70,10 @@ private:
      //double _V0;
      double _V0UpStairs;
      double _V0DownStairs;
-
+     double _EscalatorUpStairs;
+     double _EscalatorDownStairs;
+     double _V0IdleEscalatorUpStairs;
+     double _V0IdleEscalatorDownStairs;
      //location parameters
      std::string _roomCaption;
      int _roomID;
@@ -128,9 +133,12 @@ private:
      /// a pointer to the complete building
      Building * _building;
 
+     static int _agentsCreated;
+
 public:
      // constructors
      Pedestrian();
+     explicit Pedestrian(const StartDistribution& agentsParameters, Building& building);
      virtual ~Pedestrian();
 
      // Setter-Funktionen
@@ -155,7 +163,7 @@ public:
      void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
      void SetV(const Point& v); // setzt x und y-Koordinaten der Geschwindigkeit
-     void SetV0Norm(double v0,double v0UpStairs, double v0DownStairs);
+     void SetV0Norm(double v0, double v0UpStairs, double v0DownStairs, double escalatorUp, double escalatorDown, double v0IdleEscalatorUp, double v0IdleEscalatorDown);
      void SetSmoothTurning(); // activate the smooth turning with a delay of 2 sec
      void SetPhiPed();
      void SetFinalDestination(int UID);
@@ -388,6 +396,13 @@ public:
 
      static double GetGlobalTime();
      static void SetGlobalTime(double time);
+
+     /**
+      * @return the total number of pedestrians objects created.
+      * This is useful for the linked-cells algorithm, since it uses the ID of the pedestrians
+      * and the  maximal count must be known in advance.
+      */
+     static int GetAgentsCreated();
 
 
      /**

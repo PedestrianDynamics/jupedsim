@@ -1,8 +1,8 @@
 /**
  * \file        AccessPoint.cpp
  * \date        Aug 24, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -52,7 +52,7 @@ AccessPoint::AccessPoint(int id, double center[2],double radius)
 
 AccessPoint::~AccessPoint()
 {
-     //if(_navLine) delete _navLine;
+     if(_navLine) delete _navLine;
 }
 
 int AccessPoint::GetID()
@@ -112,6 +112,7 @@ double AccessPoint::GetDistanceTo(int UID)
           Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
           Log->Write("ERROR:\tCheck your configuration file");
           Dump();
+          //return 0;
           exit(EXIT_FAILURE);
      }
      return _mapDestToDist[UID];
@@ -154,7 +155,7 @@ int AccessPoint::GetNearestTransitAPTO(int UID)
           return possibleDest[0]->GetID();
      } else {
           AccessPoint* best_ap=possibleDest[0];
-          double min_dist=GetDistanceTo(best_ap);// + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
+          double min_dist=GetDistanceTo(best_ap) + best_ap->GetDistanceTo(UID); // FIXME: add the shortest distance to outside
 
           for (unsigned int i=0; i<possibleDest.size(); i++) {
                double tmp= GetDistanceTo(possibleDest[i]);
@@ -218,7 +219,9 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
 
 void AccessPoint::SetNavLine(NavLine* line)
 {
-     _navLine=line;
+     //todo: check this
+     //_navLine= line;
+     _navLine= new NavLine(*line);
 }
 
 NavLine* AccessPoint::GetNavLine() const
