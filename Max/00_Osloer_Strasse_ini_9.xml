@@ -203,9 +203,9 @@ xsi:noNamespaceSchemaLocation="http:xsd.jupedsim.org/jps_ini_core.xsd">
 		  <model_parameters>
 			<solver>euler</solver>
 			<stepsize>0.01</stepsize>
-			<exit_crossing_strategy>4</exit_crossing_strategy>
+			<exit_crossing_strategy>3</exit_crossing_strategy>
 			<linkedcells enabled="true" cell_size="2.2" />
-			<force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+			<force_ped nu="0.15" dist_max="3" disteff_max="2" interpolation_width="0.1" />
 			<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
 		  </model_parameters>
 		  <agent_parameters agent_parameter_id="1">
@@ -230,7 +230,7 @@ xsi:noNamespaceSchemaLocation="http:xsd.jupedsim.org/jps_ini_core.xsd">
 		  <model_parameters>
 			<solver>euler</solver>
 			<stepsize>0.01</stepsize>
-			<exit_crossing_strategy>4</exit_crossing_strategy>
+			<exit_crossing_strategy>3</exit_crossing_strategy>
 			<linkedcells enabled="true" cell_size="2.2" />
 			<!-- <force_ped nu="3"  b="0.25" c="3.0"/> -->
                         <force_ped nu="0.5" b="0.034229" c="2.450932"/>
