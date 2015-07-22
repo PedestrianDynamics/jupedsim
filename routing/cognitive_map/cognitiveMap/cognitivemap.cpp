@@ -92,46 +92,75 @@ void CognitiveMap::AssessDoors()
 
     if (!_waypContainer.empty())
     {
-        GraphEdge* nextDoor = DoorOnShortestPath(_waypContainer[0],edges);
+        std::vector<GraphEdge* > sortedEdges = DoorOnShortestPath(_waypContainer[0],edges);
         //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
-        nextDoor->SetFactor(1/_waypContainer[0]->GetPriority(),"SpatialKnowlegde");
+
+        for (unsigned int i=0; i<sortedEdges.size(); ++i)
+        {
+            sortedEdges[i]->SetFactor(0.5+0.1*i,"SpatialKnowledge");
+            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
+            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
+        }
+
         //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
         //Log->Write("INFO: Door assessed!");
     }
 
 }
 
-GraphEdge *CognitiveMap::DoorOnShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges)
+std::vector<GraphEdge *> CognitiveMap::DoorOnShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges)
 {
 
+    std::list<double> sortedPathLengths;
+    sortedPathLengths.push_back(ShortestPathDistance((*edges.begin()),waypoint));
+    std::list<GraphEdge* > sortedEdges;
+    sortedEdges.push_back((*edges.begin()));
 
-
-    double min = FLT_MAX;
-    GraphEdge* edgeOnShortest = (*edges.begin()); //.operator *();
-
-    for (auto it=edges.begin(); it!=edges.end(); ++it)
+    auto itsortedEdges = sortedEdges.begin();
+    auto it = edges.begin();
+    ++it;
+    ///starting at the second element
+    for (it; it!=edges.end(); ++it)
     {
-
         double pathLengthDoorWayP = ShortestPathDistance((*it),waypoint);
 
         //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();
-
+        itsortedEdges = sortedEdges.begin();
         //double pathLength = pathLengthDoorWayP+std::sqrt(std::pow(vectorPathPedDoor.GetX(),2)+std::pow(vectorPathPedDoor.GetY(),2));
-
-        if (pathLengthDoorWayP<min)
+        bool inserted=false;
+        for (auto itLengths=sortedPathLengths.begin(); itLengths!=sortedPathLengths.end(); ++itLengths)
         {
+            if (pathLengthDoorWayP >= *itLengths)
+            {
+                ++itsortedEdges;
+                continue;
+            }
 
-            edgeOnShortest=*it;
-            min=pathLengthDoorWayP;
-
+            sortedPathLengths.insert(itLengths,pathLengthDoorWayP);
+            sortedEdges.insert(itsortedEdges,(*it));
+            inserted=true;
+            break;
+        }
+        if (!inserted)
+        {
+            sortedPathLengths.push_back(pathLengthDoorWayP);
+            sortedEdges.push_back((*it));
         }
     }
 
-    Log->Write("subroom:\t");
-    Log->Write(std::to_string(_ped->GetSubRoomID()));
-    Log->Write("edgeOnShortest:");
-    Log->Write(std::to_string(edgeOnShortest->GetCrossing()->GetID()));
-    return edgeOnShortest;
+//    Log->Write("subroom:\t");
+//    Log->Write(std::to_string(_ped->GetSubRoomID()));
+//    Log->Write("edgeOnShortest:");
+//    Log->Write(std::to_string(edgeOnShortest->GetCrossing()->GetID()))
+    std::vector<GraphEdge* > vectorSortedEdges;
+    for (GraphEdge* edge:sortedEdges)
+    {
+        vectorSortedEdges.push_back(edge);
+        Log->Write("INFO:\t "+std::to_string(edge->GetCrossing()->GetID()));
+
+    }
+    Log->Write("INFO:\t Next");
+    return vectorSortedEdges;
 
 }
 
@@ -154,21 +183,21 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
     std::vector<Point> points = sub_room->GetPolygon();
     VisiLibity::Polygon boundary=VisiLibity::Polygon();
     VisiLibity::Polygon room=VisiLibity::Polygon();
-//    for (Point point:points)
-//    {
-//       room.push_back(VisiLibity::Point(point.GetX(),point.GetY()));
-//    }
-
-    for (int i=0; i<room.n();++i)
+    for (Point point:points)
     {
-        Log->Write("RoomVertices:");
-        std::cout << std::to_string(room[i].x()) << "\t" << std::to_string(room[i].y()) << std::endl;
+       room.push_back(VisiLibity::Point(point.GetX(),point.GetY()));
     }
 
-    room.push_back(VisiLibity::Point(7.6,0.37));
-    room.push_back(VisiLibity::Point(7.6,4.37));
-    room.push_back(VisiLibity::Point(9.6,4.37));
-    room.push_back(VisiLibity::Point(9.6,0.37));
+//    for (int i=0; i<room.n();++i)
+//    {
+//        Log->Write("RoomVertices:");
+//        std::cout << std::to_string(room[i].x()) << "\t" << std::to_string(room[i].y()) << std::endl;
+//    }
+
+//    room.push_back(VisiLibity::Point(7.6,0.37));
+//    room.push_back(VisiLibity::Point(7.6,4.37));
+//    room.push_back(VisiLibity::Point(9.6,4.37));
+//    room.push_back(VisiLibity::Point(9.6,0.37));
 
 
 
@@ -198,7 +227,6 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
 //    Log->Write("ShortestPathLength");
 //    Log->Write(std::to_string(polyline.length()));
     return polyline.length();
-    //return 0.0;
 }
 
 

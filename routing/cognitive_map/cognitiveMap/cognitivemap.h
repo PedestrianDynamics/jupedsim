@@ -11,6 +11,7 @@
 #include <memory>
 #include <vector>
 
+
 class Pedestrian;
 class Building;
 class JEllipse;
@@ -49,7 +50,7 @@ public:
     Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const;
     void AddWaypoints(Waypoints waypoints);
     void AssessDoors();
-    GraphEdge *DoorOnShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges);
+    std::vector<GraphEdge *> DoorOnShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges);
     //bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
     double ShortestPathDistance(const GraphEdge *edge, const ptrWaypoint waypoint);

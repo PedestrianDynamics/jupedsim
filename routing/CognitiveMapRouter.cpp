@@ -98,6 +98,8 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
 int CognitiveMapRouter::FindDestination(Pedestrian * p)
 {
+        /// Discover doors
+        sensor_manager->execute(p, SensorManager::NO_WAY);
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
         const GraphEdge * destination = nullptr;
         ///Cognitive Map /Associations/ Waypoints/ landmarks
