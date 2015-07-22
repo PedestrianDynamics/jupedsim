@@ -193,12 +193,13 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point fd = ForceDriv(ped, room);
 
                 Point acc = (fd + repPed + repWall) / ped->GetMass();
-                if(ped->GetID()==-4)
+                if(ped->GetID()==-242)
                 {
                      printf("t=%f, Pos1 =[%f, %f]\n", current,ped->GetPos().GetX(), ped->GetPos().GetY());
                      printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
                      // if(current >16) getc(stdin);
                 }
+
                 result_acc.push_back(acc);
            }
 
@@ -442,7 +443,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
           
-          e_iw = ((inside==true)? new_dist:new_dist*-1);
+          e_iw = (inside ? new_dist:new_dist*-1);
           // Distance = EPS;
           // Log->Write("INFO:\t\t --- dist = %f, e= %f %f inside=%d",ped->GetID(), Distance, e_iw.GetX(), e_iw.GetY(), inside);
      }
@@ -471,8 +472,8 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
     pinE = pt.TransformToEllipseCoordinates(E.GetCenter(), E.GetCosPhi(), E.GetSinPhi());
      // Punkt auf der Ellipse
      r = E.PointOnEllipse(pinE);
-     double radiuss  = (r - E.GetCenter()).Norm();
-     Radius = 0.4;
+     //double radiuss  = (r - E.GetCenter()).Norm();
+     Radius = E.GetBmax();
      //-------------------------
 
      const Point& pos = ped->GetPos();
