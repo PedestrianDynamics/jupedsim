@@ -497,13 +497,15 @@ int Simulation::RunBody(double maxSimTime)
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
           t = 0 + (frameNr - 1) * _deltaT;
-
+        
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
-
+          if(t>Pedestrian::GetMinPremovementTime())
+          {
           //update the linked cells
           _building->UpdateGrid();
 
+          
           // update the positions
           _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
 
@@ -517,7 +519,7 @@ int Simulation::RunBody(double maxSimTime)
           //other updates
           //someone might have left the building
           _nPeds = _building->GetAllPedestrians().size();
-
+     }
           // update the global time
           Pedestrian::SetGlobalTime(t);
 

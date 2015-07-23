@@ -40,6 +40,7 @@ using namespace std;
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
 int Pedestrian::_agentsCreated=1;
+double Pedestrian::_minPremovementTime = FLT_MAX;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
@@ -863,7 +864,15 @@ void Pedestrian::SetPatienceTime(double patienceTime)
 
 void Pedestrian::SetPremovementTime(double pretime)
 {
+      if(pretime < _minPremovementTime)
+            _minPremovementTime = pretime;
+      
      _premovement=pretime;
+}
+
+double Pedestrian::GetMinPremovementTime()
+{
+     return _minPremovementTime;
 }
 
 double Pedestrian::GetPremovementTime()
