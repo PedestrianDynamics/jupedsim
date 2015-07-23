@@ -44,7 +44,7 @@ Knowledge::~Knowledge()
 
 void Knowledge::Dump()
 {
-     Log->Write("INFO: \tdoor [%d] state [%d]  since [%f]",_id,_isClosed,_time);
+     Log->Write("INFO: \tdoor [%d] state [%d]  since [%f]\n",_id,_isClosed,_time);
 }
 
 void Knowledge::SetState(int id, bool is_closed, double time)

@@ -205,7 +205,7 @@ public:
      int GetFinalDestination() const;
      void ClearMentalMap(); // erase the peds memory
 
-     // functions for known closed Doors (needed for the Graphrouting and Rerouting)
+     // functions for known closed Doors
      void AddKnownClosedDoor(int door, double time);
      // needed for information sharing
      const std::map<int, Knowledge>& GetKnownledge() const;

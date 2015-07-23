@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <string>
+#include <random>
 
 class Building;
 class Router;
@@ -101,13 +102,23 @@ private:
      bool UpdateAgentKnowledge(Building* _b);
 
      /**
-      * Merge the knowledge of the two pedestrians.
+      * Synchronize the knowledge of the two pedestrians.
       * The information with the newest timestamp
       * is always accepted with a probability of one.
       * @param p1, first pedestrian
       * @param p2, second pedestrian
+      * @return true if the information could be synchronized
       */
-     void MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
+     bool SynchronizeKnowledge(Pedestrian* p1, Pedestrian* p2);
+
+     /**
+      * Merge the knowledge of the two pedestrians. Ped1 is informing ped2 who depending
+      * on his risk awareness probability could accept of refuse the new information.
+      * @param p1, the informant with the new information
+      * @param p2, the pedestrian receiving the information
+      * @return true in the case p2 accepted the new information
+      */
+     bool MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
 
      /**
       * Update the pedestrian route based on the new information
@@ -136,4 +147,8 @@ private:
      //save the available routers defined in the simulation
      std::vector<RoutingStrategy> _availableRouters;
 
+     // random number generator
+     std::mt19937 _rdGenerator;
+     std::uniform_real_distribution<double> _rdDistribution;
+//     std::uniform_real_distribution<double> d(0, 1);
 };

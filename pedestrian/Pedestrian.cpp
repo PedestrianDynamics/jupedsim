@@ -947,6 +947,7 @@ int Pedestrian::GetColor()
      case BY_KNOWLEDGE:
      {
           key=GetKnowledgeAsString();
+          if(key.empty()) return -1;
      }
      break;
 
