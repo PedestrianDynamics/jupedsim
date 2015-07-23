@@ -75,7 +75,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     calculateDistanceField(threshold); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
 
-    //testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
+    testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
 
     calculateFloorfield(useDistancefield); //use distance2Wall
@@ -704,7 +704,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
             dirToWall[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
         }
     } else {
-        std::cerr << "else in twosided &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
+        std::cerr << "else in twosided Dist " << std::endl;
     }
     dirToWall[key] = dirToWall[key].Normalized();
 }
@@ -822,7 +822,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
             neggrad[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
         }
     } else {
-        std::cerr << "else in twosided &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" << std::endl;
+        std::cerr << "else in twosided Floor " << precheck << " " << row << " " << col << std::endl;
     }
 }
 

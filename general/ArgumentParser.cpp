@@ -810,6 +810,7 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
           }
           Log->Write("INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f",nu.c_str(),paWall,pbWall,pcWall);
      }
+     //anti_clipping
      if (xModelPara->FirstChild("anti_clipping"))
      {
         if (!xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance"))
@@ -827,7 +828,8 @@ bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: chang
                this->GetaPed(), this->GetbPed(), this->GetcPed(),
                this->GetNuWall(), this->GetaWall(), this->GetbWall(),
                this->GetcWall(),
-               this->pDeltaH, this->pWallAvoidDistance, this->pUseWallAvoidance));
+               this->pDeltaH, this->pWallAvoidDistance, this->pUseWallAvoidance,
+               this->pSlowDownDistance));
 
      return true;
 }

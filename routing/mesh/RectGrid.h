@@ -134,8 +134,8 @@ class RectGrid
 
         void createGrid(){ // @todo ar.graf : what if cast chops off float, if any changes: get_x_fromKey still correct?
             if (!isInitialized) {
-                iMax = (long int)((xMax-xMin)/hx) + 1;
-                jMax = (long int)((yMax-yMin)/hy) + 1;
+                iMax = (long int)((xMax-xMin)/hx) + 2;  //check plus 2 (one for ceil, one for starting point)
+                jMax = (long int)((yMax-yMin)/hy) + 2;
                 nPoints = iMax * jMax;
                 //@todo: see if necessary to align xMax/yMax
                 xMax = xMin + iMax*hx;

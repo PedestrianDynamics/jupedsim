@@ -49,7 +49,8 @@ using std::string;
 
 GradientModel::GradientModel(DirectionStrategy* dir, double nuped, double aped, double bped, double cped,
                              double nuwall, double awall, double bwall, double cwall,
-                             double deltaH, double wallAvoidDistance, bool useWallAvoidance)
+                             double deltaH, double wallAvoidDistance, bool useWallAvoidance,
+                             double slowDownDistance)
 {
      _direction = dir;
      // Force_rep_PED Parameter
@@ -66,6 +67,8 @@ GradientModel::GradientModel(DirectionStrategy* dir, double nuped, double aped, 
      _deltaH = deltaH;
      _wallAvoidDistance = wallAvoidDistance;
      _useWallAvoidance = useWallAvoidance;
+     // anti clipping
+     _slowDownDistance = slowDownDistance;
 }
 
 
@@ -224,29 +227,31 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point toTarget = (_direction->GetTarget(nullptr, ped)).Normalized();
                 if (toTarget.NormSquare() == 0.) {                // @todo:ar.graf: this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
                     toTarget += ped->GetV().Normalized();
-                    //printf("toTarget %f %f \n", toTarget.GetX(), toTarget.GetY());
-                    //printf("getV     %f %f \n", ped->GetV().GetX(), ped->GetV().GetY());
-                    //printf("dist2Target %f \n", ped->GetDistanceToNextTarget());
                 }
 
-
-                movDirection = (movDirection + toTarget); //*1.2);
+                movDirection = (movDirection + toTarget);
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
+                double desired_speed = ped->GetV0Norm();
+                Point oldMov = Point(0., 0.);
+                if (desired_speed > 0.) {
+                    oldMov = ped->GetV() / desired_speed; //@todo: ar.graf
+                }
+
                 //anti jitter               //_V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
-                Point oldMov = (ped->GetV().Norm() > 1.)? ped->GetV().Normalized() : ped->GetV();
-                Point diff = ( oldMov - movDirection) * (.2); // .8 also 80% alte Richtung, 20% neue Richtung
-                movDirection = ped->GetV() - diff;
+                oldMov = (oldMov.Norm() > 1.)? oldMov.Normalized() : oldMov; //on the safe side ... should not be necessary as it must be [0, 1]
+                Point diff = ( oldMov - movDirection) * (.2); // .2 also 80% alte Richtung, 20% neue Richtung
+                movDirection = oldMov - diff;
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
                 //slowdown near wall mechanics:
                 Point dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
                 double distance2Wall =  dynamic_cast<DirectionFloorfield*>(_direction)->GetDistance2Wall(ped);
-                double dotProdukt = 0;
-                if (distance2Wall < .2) {
-                    dotProdukt = dir2Wall.ScalarProduct(movDirection.Normalized());
+                double dotProduct = 0;
+                if (distance2Wall < _slowDownDistance) {
+                    dotProduct = dir2Wall.ScalarProduct(movDirection.Normalized());
                 }
-                double antiClippingFactor = ( 1 - .5*(dotProdukt + fabs(dotProdukt)) );
+                double antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
 
 
 
