@@ -355,6 +355,7 @@ void Simulation::UpdateRoutesAndLocations()
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
+                                   //todo: also statistic for internal doors
                                    //if(_argsParser.ShowStatistics())
                                    //{
                                    //  Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());

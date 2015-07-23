@@ -55,27 +55,22 @@
 #include "EventManager.h"
 #include "Event.h"
 
-using namespace std;
+using std::map;
+using std::cout;
+using std::endl;
 
-/*******************
- constructors
- ******************/
 
 EventManager::EventManager(Building *_b)
 {
-     //     _event_times = vector<double>();
-     //     _event_types = vector<string>();
-     //     _event_states = vector<string>();
-     //     _event_ids = vector<int>();
      _building = _b;
      _eventCounter = 0;
      _dynamic = false;
      _lastUpdateTime = 0;
-     //_deltaT = 0;
      _projectFilename=_building->GetProjectFilename();
      _projectRootDir=_building->GetProjectRootDir();
      _updateFrequency =1 ;//seconds
      _updateRadius =2;//meters
+
      _file = fopen("../events/events.txt", "r");
      if (!_file) {
           Log->Write("INFO:\tFiles 'events.txt' missing. "
@@ -84,6 +79,11 @@ EventManager::EventManager(Building *_b)
           Log->Write("INFO:\tFile 'events.txt' will be monitored for new events.");
           _dynamic = true;
      }
+
+     //generate random number between 0 and 1 uniformly distributed
+     _rdDistribution = std::uniform_real_distribution<double> (0,1);
+     std::random_device rd;
+     _rdGenerator=std::mt19937(rd());
 
      //save the first graph
      CreateRoutingEngine(_b, true);
@@ -151,10 +151,6 @@ bool EventManager::ReadEventsXml()
      for (TiXmlElement* e = xEvents->FirstChildElement("event"); e;
                e = e->NextSiblingElement("event")) {
 
-          //          _event_times.push_back(atoi(e->Attribute("time")));
-          //          _event_types.push_back(e->Attribute("type"));
-          //          _event_states.push_back(e->Attribute("state"));
-          //          _event_ids.push_back(atoi(e->Attribute("id")));
           int id = atoi(e->Attribute("id"));
           double zeit = atoi(e->Attribute("time"));
           string state (e->Attribute("state"));
@@ -164,7 +160,6 @@ bool EventManager::ReadEventsXml()
      Log->Write("INFO: \tEvents were initialized");
      return true;
 }
-
 
 void EventManager::ListEvents()
 {
@@ -195,9 +190,6 @@ void EventManager::ReadEventsTxt(double time)
      } while (feof(_file) == 0);
 }
 
-/***********
- Update
- **********/
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
      //#pragma omp parallel
@@ -205,7 +197,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      {
           for (auto&& door: _b->GetAllTransitions())
           {
-               if(door.second->DistTo(ped->GetPos())<1)//distance to door to register its state
+               if(door.second->DistTo(ped->GetPos())<0.5)//distance to door to register its state
                {
                     //actualize the information about the newly closed door
                     if(door.second->IsOpen()==false)
@@ -239,8 +231,12 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     vector<SubRoom*> empty;
                     if(_b->IsVisible(ped1->GetPos(),ped2->GetPos(),empty))
                     {
-                         MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
-                         ped2->SetNewEventFlag(true);
+                         //SynchronizeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
+                         if(MergeKnowledge(ped1, ped2))
+                         {
+                              //p2 is now an informant
+                              ped2->SetNewEventFlag(true);
+                         }
                     }
                }
           }
@@ -315,7 +311,7 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      }
      else
      {
-          Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
+          //Log->Write("WARNING: \t unknown configuration <%s>", key.c_str());
           //Log->Write("WARNING: \t  [%d] router available", _eventEngineStorage.size());
           //Log->Write("       : \t trying to create");
           //CreateRoutingEngine(_building);
@@ -324,7 +320,7 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
      return status;
 }
 
-void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
+bool EventManager::SynchronizeKnowledge(Pedestrian* p1, Pedestrian* p2)
 {
      auto const & old_info1 = p1->GetKnownledge();
      auto const & old_info2 = p2->GetKnownledge();
@@ -360,6 +356,60 @@ void EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
           p1->AddKnownClosedDoor(info.first, info.second.GetTime());
           p2->AddKnownClosedDoor(info.first, info.second.GetTime());
      }
+     return true;
+}
+
+bool EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
+{
+     auto const & old_info1 = p1->GetKnownledge();
+        auto const & old_info2 = p2->GetKnownledge();
+        map<int, Knowledge> merge_info;
+
+        //collect the most recent knowledge
+        for (auto&& info1 : old_info1)
+        {
+             merge_info[info1.first] = info1.second;
+        }
+
+        for (auto&& info2 : old_info2)
+        {
+             //update infos according to a newest time
+             if (merge_info.count(info2.first) > 0)
+             {
+                  if (info2.second.GetTime() > merge_info[info2.first].GetTime())
+                  {
+                       merge_info[info2.first] = info2.second;
+                  }
+             }
+             else //the info was not present, just add
+             {
+                  merge_info[info2.first] = info2.second;
+             }
+        }
+
+        //synchronize the knowledge
+        //accept the information with a certain probability
+        //cout<<_rdDistribution(_rdGenerator)<<endl;
+        if(_rdDistribution(_rdGenerator)< (1-p1->GetRiskTolerance()))
+        {
+             //p1->ClearKnowledge();
+             p2->ClearKnowledge();
+             for (auto&& info : merge_info)
+             {
+                  //p1->AddKnownClosedDoor(info.first, info.second.GetTime());
+                  p2->AddKnownClosedDoor(info.first, info.second.GetTime());
+             }
+             //p2->SetSpotlight(false);
+             return true;
+        }
+        else
+        {
+             cout<<"refusing the information:"<<p2->GetID()<<endl;
+             //Pedestrian::SetColorMode(BY_SPOTLIGHT);
+             //p2->SetSpotlight(true);
+             //exit(0);
+             return false;
+        }
 }
 
 void EventManager::ProcessEvent()
@@ -376,7 +426,7 @@ void EventManager::ProcessEvent()
           UpdateAgentKnowledge(_building);
           //actualize based on the new knowledge
           _lastUpdateTime = current_time;
-          cout<<"updating..."<<current_time<<endl<<endl;
+          //cout<<"updating..."<<current_time<<endl<<endl;
      }
 
      //update the building state
@@ -403,9 +453,6 @@ void EventManager::ProcessEvent()
 
 
 
-/***************
- Event handling
- **************/
 //close the door if it was open and relaunch the routing procedure
 void EventManager::CloseDoor(int id)
 {

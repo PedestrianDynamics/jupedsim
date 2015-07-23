@@ -58,6 +58,8 @@ private:
      bool _isClosed;
      /// id of the door
      int _id;
+     /// whether I already accepted or refused that information
+     bool _refusedOnce;
 
 };
 #endif /* KNOWLEDGE_H_ */
