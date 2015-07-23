@@ -441,7 +441,7 @@ void Simulation::PrintStatistics()
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
 
-               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+goal->GetCaption()+".dat";
+               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+".dat";
                Log->Write("More Information in the file: %s",statsfile.c_str());
                auto output= new FileHandler(statsfile.c_str());
                output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
