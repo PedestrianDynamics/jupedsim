@@ -224,7 +224,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 
                 //only update the position if the velocity is above a threshold
-                if (v_neu.Norm() >= J_EPS_V*0.7)
+                if (1 || v_neu.Norm() >= J_EPS_V*0.7)
                 {
                      ped->SetPos(pos_neu);
                      ped->SetPhiPed();

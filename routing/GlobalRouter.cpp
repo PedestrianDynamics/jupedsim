@@ -899,15 +899,15 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
 
-//          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
-//          {
-//               if (dist2 < minDistLocal) {
-//                    bestAPsID = ap->GetID();
-//                    minDistGlobal = dist;
-//                    minDistLocal= dist2;
-//               }
-//          }
-//          else
+         if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+         {
+              if (dist2 < minDistLocal) {
+                   bestAPsID = ap->GetID();
+                   minDistGlobal = dist;
+                   minDistLocal= dist2;
+              }
+         }
+         else
           {
 
                if (dist < minDistGlobal) {
