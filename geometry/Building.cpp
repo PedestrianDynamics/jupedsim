@@ -1257,13 +1257,7 @@ void Building::DeletePedestrian(Pedestrian* &ped)
                }
 
           }
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
-
-          static int totalPeds= _allPedestians.size();
           _allPedestians.erase(it);
-
-          int nowPeds= _allPedestians.size();
-          Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
      Transition* trans =GetTransitionByUID(ped->GetExitIndex());

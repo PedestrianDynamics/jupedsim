@@ -93,6 +93,9 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
     Point Lot = ExitLine.LotPoint( ped->GetPos() );
     Point ExitMiddle = (p1+p2)*0.5;
     double d = 0.2;
+    // fix when using triangulation to avoid steering too near to the walls
+    if (ExitLine.LengthSquare() >= 16)
+          d = 1;
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
 

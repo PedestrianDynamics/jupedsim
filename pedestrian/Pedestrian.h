@@ -125,6 +125,7 @@ private:
 
      // the current time in the simulation
      static double _globalTime;
+     static double _minPremovementTime;
      static AgentColorMode _colorMode;
      bool _spotlight;
 
@@ -334,6 +335,12 @@ public:
       */
      double GetPremovementTime();
 
+     /***
+      * Get min Premovement time of all pedestrians
+      */
+
+     static double GetMinPremovementTime();
+           
      /**
       * Set/Get the risk tolerance of a pedestrians.
       * The value should be in the interval [0 1].

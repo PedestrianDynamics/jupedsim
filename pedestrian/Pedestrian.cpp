@@ -40,6 +40,7 @@ using namespace std;
 // initialize the static variables
 double Pedestrian::_globalTime = 0.0;
 int Pedestrian::_agentsCreated=1;
+double Pedestrian::_minPremovementTime = FLT_MAX;
 AgentColorMode Pedestrian::_colorMode=BY_VELOCITY;
 
 Pedestrian::Pedestrian()
@@ -195,6 +196,7 @@ void Pedestrian::SetV(const Point& v)
           _ellipse.SetV(v);
           //save the last values for the records
           _lastVelocites.push(v);
+          
           unsigned int max_size = _recordingTime / _deltaT;
           if (_lastVelocites.size() > max_size)
                _lastVelocites.pop();
@@ -421,7 +423,8 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_down = _V0IdleEscalatorDownStairs;
                  }
-                 // printf("z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 if(_id==-47)
+                       printf("DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
                                   // getc(stdin);
                  return (1-f)*_ellipse.GetV0() + f*speed_down;
@@ -438,7 +441,8 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_up = _V0IdleEscalatorUpStairs;
                  }
-                 // printf("z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
+                 if(_id==-47)
+                       printf("UP min_e=%f, z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", minSubElevation, ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_up);
                  // getc(stdin);
                  return (1-f)*_ellipse.GetV0() + f*speed_up;
@@ -446,6 +450,7 @@ double Pedestrian::GetV0Norm() const
      }
      // orthogonal projection on the stair
      //return _ellipse.GetV0()*_building->GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetCosAngleWithHorizontal();
+
 }
 // get axis in the walking direction
 double Pedestrian::GetLargerAxis() const
@@ -495,7 +500,7 @@ void Pedestrian::InitV0(const Point& target)
 const Point& Pedestrian::GetV0(const Point& target)
 {
 
-#define DEBUG 0
+#define DEBUG 1
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
@@ -508,12 +513,12 @@ const Point& Pedestrian::GetV0(const Point& target)
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 #if DEBUG
-     if(_id==24){
-          printf("Goal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1().GetX(), _navLine->GetPoint1().GetY(), _navLine->GetPoint2().GetX(), _navLine->GetPoint2().GetY());
+     if(_id==-159){
+          printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1().GetX(), _navLine->GetPoint1().GetY(), _navLine->GetPoint2().GetX(), _navLine->GetPoint2().GetY());
           printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
           printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
           printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _distToBlockade);
-          printf("_v0=[%f, %f] norm = %f\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+          printf("_v0=[%f, %f] norm = %f\n=====\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
      }
      // getc(stdin);
 #endif
@@ -859,7 +864,15 @@ void Pedestrian::SetPatienceTime(double patienceTime)
 
 void Pedestrian::SetPremovementTime(double pretime)
 {
+      if(pretime < _minPremovementTime)
+            _minPremovementTime = pretime;
+      
      _premovement=pretime;
+}
+
+double Pedestrian::GetMinPremovementTime()
+{
+     return _minPremovementTime;
 }
 
 double Pedestrian::GetPremovementTime()

@@ -181,27 +181,25 @@ Point Line::LotPoint(const Point &p) const {
     return f;
 }
 
+
 /* Punkt auf der Linie mit kürzestem Abstand zu p
  * In der Regel Lotfußpunkt, Ist der Lotfußpunkt nicht im Segment
  * wird der entsprechende Eckpunkt der Line genommen
  * */
-Point Line::ShortestPoint(const Point &p) const {
+ Point Line::ShortestPoint(const Point &p) const {
+     if (_point1 == _point2)
+         return _point1;
 
-    const Point &t = _point1 - _point2;
-    if (_point1 == _point2)
-        return _point1;
-    Point tmp = p - _point2;
-    double lambda = tmp.ScalarProduct(t) / t.ScalarProduct(t);
-    Point f = _point2 + t * lambda;
+     const Point &t = _point1 - _point2;
+     double lambda = (p - _point2).ScalarProduct(t) / t.ScalarProduct(t);
+     if(lambda <0)
+           return _point2;
+     else if(lambda >1)
+           return _point1;
+     else
+           return _point2 + t * lambda;
 
-    /* Prüfen ob Punkt in der Linie,sonst entsprechenden Eckpunkt zurückgeben */
-    if (lambda < 0)
-        f = _point2;
-    if (lambda > 1)
-        f = _point1;
-
-    return f;
-}
+ }
 
 /*
  *  Prüft, ob Punkt p im Liniensegment enthalten ist

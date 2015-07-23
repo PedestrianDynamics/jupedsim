@@ -2,7 +2,7 @@
 
 <!-- <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd"> -->
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://xsd.jupedsim.org/jps_ini_core.xsd" xsi:noNamespaceSchemaLocation="ini.xsd">
-  <seed>linspace(1,10000,3)</seed>
+  <seed>linspace(1,10000,1)</seed>
   <!-- <seed>1</seed> -->
   <num_threads>4</num_threads>
   <max_sim_time unit="sec">100</max_sim_time>
@@ -30,15 +30,15 @@
   
   <routing>
     <goals>
-      <goal id="0" final="true" caption="goal 0">
-        <polygon>
-          <vertex px="11.0" py="2.0" />
-          <vertex px="11.0" py="3.0" />
-          <vertex px="12.0" py="3.0" />
-          <vertex px="12.0" py="2.0" />
-          <vertex px="11.0" py="2.0" />
-        </polygon>
-      </goal>
+      <!-- <goal id="0" final="true" caption="goal 0"> -->
+      <!--   <polygon> -->
+      <!--     <vertex px="11.0" py="2.0" /> -->
+      <!--     <vertex px="11.0" py="3.0" /> -->
+      <!--     <vertex px="12.0" py="3.0" /> -->
+      <!--     <vertex px="12.0" py="2.0" /> -->
+      <!--     <vertex px="11.0" py="2.0" /> -->
+      <!--   </polygon> -->
+      <!-- </goal> -->
     </goals>
   </routing>
 
@@ -58,7 +58,7 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
+        <exit_crossing_strategy>2</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.2" dist_max="2" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="1" disteff_max="1" interpolation_width="0.1" />
@@ -79,8 +79,11 @@
         <stepsize>0.001</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="3" />
-        <force_ped nu="0.5"  b="0.06" c="3.45"/>
-        <force_wall nu="5" b="0.4" c="10.0"/>
+        <!-- <force_ped nu="0.5"  b="0.06" c="3.45"/> -->
+        <!-- <force_wall nu="5" b="0.4" c="10.0"/> -->
+        <force_ped  nu="0."  b="0.034229" c="2.450932"/>
+        <force_wall nu="0."  b="0.034229" c="2.450932"/>
+
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
         <v0 mu="1.34" sigma="0.0" />

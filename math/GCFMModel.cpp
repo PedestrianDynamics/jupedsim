@@ -120,15 +120,13 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      int partSize = nSize / nThreads;
      int debugPed = -33;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
-
-
 #pragma omp parallel  default(shared) num_threads(nThreads)
      {
           vector< Point > result_acc = vector<Point > ();
           result_acc.reserve(2200);
 
           const int threadID = omp_get_thread_num();
-
+          
           int start = threadID*partSize;
           int end = (threadID + 1) * partSize - 1;
           if ((threadID == nThreads - 1)) end = nSize - 1;

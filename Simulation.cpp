@@ -442,7 +442,7 @@ void Simulation::PrintStatistics()
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
 
-               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+goal->GetCaption()+".dat";
+               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+".dat";
                Log->Write("More Information in the file: %s",statsfile.c_str());
                auto output= new FileHandler(statsfile.c_str());
                output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
@@ -493,18 +493,20 @@ int Simulation::RunBody(double maxSimTime)
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-
+     int initialnPeds = _nPeds; 
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
           t = 0 + (frameNr - 1) * _deltaT;
-
+        
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
-
+          if(t>Pedestrian::GetMinPremovementTime())
+          {
           //update the linked cells
           _building->UpdateGrid();
 
+          
           // update the positions
           _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
 
@@ -518,7 +520,7 @@ int Simulation::RunBody(double maxSimTime)
           //other updates
           //someone might have left the building
           _nPeds = _building->GetAllPedestrians().size();
-
+     }
           // update the global time
           Pedestrian::SetGlobalTime(t);
 
@@ -526,7 +528,7 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
-
+          Log->ProgressBar(initialnPeds,   initialnPeds -  _building->GetAllPedestrians().size() , t);
           // needed to control the execution time PART 2
           // time(&endtime);
           // double timeToWait=t-difftime(endtime, starttime);
