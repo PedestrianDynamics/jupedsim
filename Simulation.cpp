@@ -492,7 +492,7 @@ int Simulation::RunBody(double maxSimTime)
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-
+     int initialnPeds = _nPeds; 
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
@@ -525,7 +525,7 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
-
+          Log->ProgressBar(initialnPeds,   initialnPeds -  _building->GetAllPedestrians().size() , t);
           // needed to control the execution time PART 2
           // time(&endtime);
           // double timeToWait=t-difftime(endtime, starttime);
