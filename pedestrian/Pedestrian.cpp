@@ -95,7 +95,6 @@ Pedestrian::Pedestrian()
 
      _agentsCreated++;//increase the number of object created
 }
-
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
 :    _age(agentsParameters.GetAge()),
      _gender(agentsParameters.GetGender()),
@@ -401,7 +400,7 @@ double Pedestrian::GetV0Norm() const
      // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
      
      
-     
+
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
@@ -410,7 +409,10 @@ double Pedestrian::GetV0Norm() const
      }
       // we are walking downstairs
      else{
-           double c = 9.0; // should be chosen so that the func grows fast (but smooth) from 0 to 1
+           double c = 1.0;
+           // c should be chosen so that the func grows fast (but smooth) from 0 to 1
+           // However we have to pay attention to tau. The velocity adaptation
+           // from v to v0 in the driven force takes tau time.
            double f; // f in [0, 1]
            if(delta<0)
            {
@@ -423,10 +425,10 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_down = _V0IdleEscalatorDownStairs;
                  }
-                 if(_id==-47)
-                       printf("DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
-                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
-                                  // getc(stdin);
+                 // if(_id==-9)
+                 //       printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 //                  // getc(stdin);
                  return (1-f)*_ellipse.GetV0() + f*speed_down;
            }
            //we are walking upstairs
@@ -441,8 +443,10 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_up = _V0IdleEscalatorUpStairs;
                  }
-                 if(_id==-47)
-                       printf("UP min_e=%f, z=%f, f=%f, v0=%f, speed_up=%f, ret=%f\n", minSubElevation, ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up);
+                 // if(_id==2){
+                 //       printf("%f UP min_e=%f, z=%f, f=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up, GetV().Norm());
+                 //       fprintf(stderr, "%f  %f   %f  %f\n", _globalTime, _ellipse.GetV0(), (1-f)*_ellipse.GetV0() + f*speed_up, GetV().Norm());
+                 // }
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_up);
                  // getc(stdin);
                  return (1-f)*_ellipse.GetV0() + f*speed_up;

@@ -88,8 +88,8 @@ xsi:noNamespaceSchemaLocation="http:xsd.jupedsim.org/jps_ini_core.xsd">
 			<group group_id="7" agent_parameter_id="1" room_id="0" subroom_id="7" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
 			<group group_id="8" agent_parameter_id="1" room_id="0" subroom_id="8" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
 			<group group_id="9" agent_parameter_id="1" room_id="0" subroom_id="9" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
-			<group group_id="10" agent_parameter_id="1" room_id="0" subroom_id="10" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
-			<group group_id="11" agent_parameter_id="1" room_id="0" subroom_id="11" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
+			<group group_id="10" agent_parameter_id="1" room_id="0" subroom_id="10" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="11" agent_parameter_id="1" room_id="0" subroom_id="11" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
  		<!-- U8 -> U9 -->
 			<group group_id="12" agent_parameter_id="1" room_id="1" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
 			<group group_id="13" agent_parameter_id="1" room_id="1" subroom_id="1" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="60"/>
