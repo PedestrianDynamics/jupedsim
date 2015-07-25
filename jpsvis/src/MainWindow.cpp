@@ -252,7 +252,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //restore the settings
     loadAllSettings();
 
-    if(mayPlay)slotStartPlaying();
+    // was call from the command line with a file.
+    // disable the online mode if it was enabled
+    if(mayPlay)
+    {
+        slotSetOfflineMode(true);
+        slotStartPlaying();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -1819,8 +1825,10 @@ void MainWindow::dropEvent(QDropEvent *event)
 {
 
     if (!extern_offline_mode) {
-        slotErrorOutput("online mode, ignoring DnD !");
-        return;
+        //slotErrorOutput("online mode, ignoring DnD !");
+        slotErrorOutput("You want DnD? I am now disabling the online mode");
+        slotSetOfflineMode(true);
+        //return;
     }
 
     QList<QUrl> urls = event->mimeData()->urls();

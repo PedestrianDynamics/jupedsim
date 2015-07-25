@@ -71,7 +71,7 @@ LinePlotter2D::LinePlotter2D()
     wall_lines = vtkCellArray::New();
     wall_lineScalars = vtkFloatArray::New();
     wall_curPointID=0;
-    wall_width=2;
+    wall_width=4;
 
     navline_curPointID =0;
     navline_width=2;
@@ -93,9 +93,6 @@ LinePlotter2D::LinePlotter2D()
     //m_lookupTable->SetValueRange(0.0,1.0);
     //m_lookupTable->SetSaturationRange(0.0,0.0);
     m_lookupTable->Build();
-
-
-
 }
 
 LinePlotter2D::~LinePlotter2D()

@@ -448,7 +448,7 @@ void TimerCallback::takeScreenshot(vtkRenderWindow *renderWindow)
     static int imageID=0;
     vtkWindowToImageFilter * winToImFilter  = vtkWindowToImageFilter::New();
     winToImFilter->SetInput( renderWindow );
-    winToImFilter->SetMagnification(4);
+    //winToImFilter->SetMagnification(4);
     //renderWindow->Delete();
     //vtkPostScriptWriter * image  = vtkPostScriptWriter::New();
     vtkPNGWriter * image  = vtkPNGWriter::New();
