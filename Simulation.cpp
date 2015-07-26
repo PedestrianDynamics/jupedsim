@@ -498,29 +498,29 @@ int Simulation::RunBody(double maxSimTime)
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
           t = 0 + (frameNr - 1) * _deltaT;
-        
+
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
+
           if(t>Pedestrian::GetMinPremovementTime())
           {
-          //update the linked cells
-          _building->UpdateGrid();
+               //update the linked cells
+               _building->UpdateGrid();
 
-          
-          // update the positions
-          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+               // update the positions
+               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
 
-          //update the routes and locations
-          UpdateRoutesAndLocations();
+               //update the events
+               _em->ProcessEvent();
 
-          //update the events
-          //_em->Update_Events(t);
-          _em->ProcessEvent();
+               //update the routes and locations
+               UpdateRoutesAndLocations();
 
-          //other updates
-          //someone might have left the building
-          _nPeds = _building->GetAllPedestrians().size();
-     }
+               //other updates
+               //someone might have left the building
+               _nPeds = _building->GetAllPedestrians().size();
+          }
+
           // update the global time
           Pedestrian::SetGlobalTime(t);
 
@@ -528,7 +528,8 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
-          Log->ProgressBar(initialnPeds,   initialnPeds -  _building->GetAllPedestrians().size() , t);
+          Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
+
           // needed to control the execution time PART 2
           // time(&endtime);
           // double timeToWait=t-difftime(endtime, starttime);
@@ -571,5 +572,5 @@ AgentsSourcesManager& Simulation::GetAgentSrcManager()
 
 Building* Simulation::GetBuilding()
 {
-    return _building.get();
+     return _building.get();
 }

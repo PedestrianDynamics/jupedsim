@@ -82,11 +82,16 @@ EventManager::EventManager(Building *_b)
 
      //generate random number between 0 and 1 uniformly distributed
      _rdDistribution = std::uniform_real_distribution<double> (0,1);
-     std::random_device rd;
-     _rdGenerator=std::mt19937(rd());
+     //std::random_device rd;
+     //_rdGenerator=std::mt19937(rd());
+     _rdGenerator=std::mt19937(23);
+
 
      //save the first graph
      CreateRoutingEngine(_b, true);
+
+     //create and
+     CreateSomeEngine();
 }
 
 EventManager::~EventManager()
@@ -202,9 +207,9 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     //actualize the information about the newly closed door
                     if(door.second->IsOpen()==false)
                     {
-                         ped->AddKnownClosedDoor(door.first, Pedestrian::GetGlobalTime());
+                         //1.0 because the information is sure
+                         ped->AddKnownClosedDoor(door.first, Pedestrian::GetGlobalTime(), !door.second->IsOpen(),_updateFrequency,1.0);
                          ped->SetNewEventFlag(true);
-
                     }
                }
           }
@@ -214,8 +219,14 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      vector<Pedestrian*> informant;
      for(auto&& ped:_b->GetAllPedestrians())
      {
-          if (ped->GetNewEventFlag())
+          //if (ped->GetNewEventFlag())
                informant.push_back(ped);
+
+
+          for(auto&& info: ped->GetKnownledge())
+          {
+               info.second.DecreaseLatency(_updateFrequency);
+          }
      }
 
 
@@ -231,7 +242,8 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     vector<SubRoom*> empty;
                     if(_b->IsVisible(ped1->GetPos(),ped2->GetPos(),empty))
                     {
-                         //SynchronizeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
+                         //if(SynchronizeKnowledge(ped1, ped2))  //ped1->SetSpotlight(true);
+                         //if(MergeKnowledgeUsingProbability(ped1, ped2))
                          if(MergeKnowledge(ped1, ped2))
                          {
                               //p2 is now an informant
@@ -246,6 +258,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      if(informant.size()==_b->GetAllPedestrians().size())
      {
 
+          //Log->Write("INFO:\t all pedestrians are now propagating information");
           for(auto&& ped:_b->GetAllPedestrians())
                ped->SetNewEventFlag(false);
      }
@@ -275,7 +288,8 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                //Clear the memory and attempt to reroute
                //this can happen if all doors are known to be closed
                ped->ClearKnowledge();
-               //Log->Write("ERROR: \t clearing ped knowledge");
+               Log->Write("ERROR: \t clearing ped knowledge");
+               //ped->Dump(ped->GetID());
                if(UpdateRoute(ped)==false)
                {
                     Log->Write("ERROR: \t cannot reroute the pedestrian. unknown problem");
@@ -353,63 +367,139 @@ bool EventManager::SynchronizeKnowledge(Pedestrian* p1, Pedestrian* p2)
      p2->ClearKnowledge();
      for (auto&& info : merge_info)
      {
-          p1->AddKnownClosedDoor(info.first, info.second.GetTime());
-          p2->AddKnownClosedDoor(info.first, info.second.GetTime());
+          p1->AddKnownClosedDoor(info.first, info.second.GetTime(),
+                    info.second.GetState(), info.second.GetQuality(),_updateFrequency);
+          p2->AddKnownClosedDoor(info.first, info.second.GetTime(),
+                    info.second.GetState(), info.second.GetQuality(),_updateFrequency);
      }
      return true;
+}
+
+bool EventManager::MergeKnowledgeUsingProbability(Pedestrian* p1, Pedestrian* p2)
+{
+     auto const & old_info1 = p1->GetKnownledge();
+     auto const & old_info2 = p2->GetKnownledge();
+
+     map<int, Knowledge> merge_info;
+     //collect the most recent knowledge
+     //only the knowledge that has been accepted
+     for (auto&& info1 : old_info1)
+     {
+          merge_info[info1.first] = info1.second;
+     }
+
+     for (auto&& info2 : old_info2)
+     {
+          //update infos according to a newest time
+          if (merge_info.count(info2.first) > 0)
+          {
+               if (info2.second.GetTime() > merge_info[info2.first].GetTime())
+                    // and the quality
+                    // only if I never refused that information
+               {
+                    merge_info[info2.first] = info2.second;
+               }
+          }
+          else //the info was not present, just add
+          {
+               merge_info[info2.first] = info2.second;
+          }
+     }
+
+     //synchronize the knowledge
+     //accept the information with a certain probability
+     if(_rdDistribution(_rdGenerator)< (1-p1->GetRiskTolerance()))
+     {
+          //p1->ClearKnowledge();
+          p2->ClearKnowledge();
+          for (auto&& info : merge_info)
+          {
+               p2->AddKnownClosedDoor(info.first, info.second.GetTime(),info.second.GetState(),_updateFrequency,1.0);
+          }
+          //p2->SetSpotlight(false);
+          return true;
+     }
+     else
+     {
+          cout<<"refusing the information:"<<p2->GetID()<<endl;
+          //Pedestrian::SetColorMode(BY_SPOTLIGHT);
+          //p2->SetSpotlight(true);
+          //exit(0);
+          return false;
+     }
+
+
 }
 
 bool EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
 {
      auto const & old_info1 = p1->GetKnownledge();
-        auto const & old_info2 = p2->GetKnownledge();
-        map<int, Knowledge> merge_info;
+     auto & old_info2 = p2->GetKnownledge();
+     //accept the new information
+     if(_rdDistribution(_rdGenerator)< (1-p1->GetRiskTolerance()))
+     {
+          for (const auto& info1 : old_info1)
+          {
+               //I dont forward information that I refused already
+               if(info1.second.HasBeenRefused()) continue;
 
-        //collect the most recent knowledge
-        for (auto&& info1 : old_info1)
-        {
-             merge_info[info1.first] = info1.second;
-        }
+               // Is the latency ok ?
+               if(!info1.second.CanBeForwarded()) continue;
 
-        for (auto&& info2 : old_info2)
-        {
-             //update infos according to a newest time
-             if (merge_info.count(info2.first) > 0)
-             {
-                  if (info2.second.GetTime() > merge_info[info2.first].GetTime())
-                  {
-                       merge_info[info2.first] = info2.second;
-                  }
-             }
-             else //the info was not present, just add
-             {
-                  merge_info[info2.first] = info2.second;
-             }
-        }
+               //do I already have that information ?
+               if (old_info2.count(info1.first) > 0)
+               {
+                    //only accept if it is newer
+                    if (info1.second.GetTime() > old_info2[info1.first].GetTime())
+                    {
+                         //maybe I already refused that information earlier. Keep refusing
+                         if(old_info2[info1.first].HasBeenRefused()==false)
+                         {
+                              old_info2[info1.first]=info1.second;
+                              //alter the quality of the info
+                              old_info2[info1.first].SetQuality(0.5);
+                              old_info2[info1.first].SetLatency(_updateFrequency);
+                         }
+                    }
+               }
+               else
+               {
+                    //new piece of information
+                    old_info2[info1.first]=info1.second;
+                    //alter the quality of the info
+                    old_info2[info1.first].SetQuality(0.5);
+                    old_info2[info1.first].SetLatency(_updateFrequency);
+               }
+          }
+          return true;
+     }
+     //refuse the new information
+     else
+     {
+          for (const auto& info1 : old_info1)
+          {
+               if (old_info2.count(info1.first) > 0)
+               {
+                    old_info2[info1.first].Refuse(true);
+                    old_info2[info1.first].SetLatency(_updateFrequency);
+                    //cout<<"refusing present: "<<p2->GetID()<<endl;
+               }
+               else
+               {//refuse the information and set a bad quality
+                    old_info2[info1.first]=info1.second;
+                    //alter the quality of the info
+                    old_info2[info1.first].SetQuality(0.0);
+                    old_info2[info1.first].Refuse(true);
+                    old_info2[info1.first].SetLatency(_updateFrequency);
+                    //cout<<"refusing: "<<p2->GetID()<<endl;
+               }
+          }
+          //p2->SetSpotlight(true);
+          //Pedestrian::SetColorMode(BY_SPOTLIGHT);
+          cout<<"refusing..."<<p2->GetID()<<endl;
+          return false;
+     }
 
-        //synchronize the knowledge
-        //accept the information with a certain probability
-        //cout<<_rdDistribution(_rdGenerator)<<endl;
-        if(_rdDistribution(_rdGenerator)< (1-p1->GetRiskTolerance()))
-        {
-             //p1->ClearKnowledge();
-             p2->ClearKnowledge();
-             for (auto&& info : merge_info)
-             {
-                  //p1->AddKnownClosedDoor(info.first, info.second.GetTime());
-                  p2->AddKnownClosedDoor(info.first, info.second.GetTime());
-             }
-             //p2->SetSpotlight(false);
-             return true;
-        }
-        else
-        {
-             cout<<"refusing the information:"<<p2->GetID()<<endl;
-             //Pedestrian::SetColorMode(BY_SPOTLIGHT);
-             //p2->SetSpotlight(true);
-             //exit(0);
-             return false;
-        }
 }
 
 void EventManager::ProcessEvent()
@@ -426,7 +516,7 @@ void EventManager::ProcessEvent()
           UpdateAgentKnowledge(_building);
           //actualize based on the new knowledge
           _lastUpdateTime = current_time;
-          //cout<<"updating..."<<current_time<<endl<<endl;
+          //cout<<"update: "<<current_time<<endl;
      }
 
      //update the building state
@@ -561,9 +651,6 @@ bool EventManager::CreateRoutingEngine(Building* _b, int first_engine)
      // create a new one with the actual configuration
      if (_eventEngineStorage.count(key)==0)
      {
-          //std::shared_ptr<RoutingEngine> engine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
-          //engine.get()->Init(_b);
-          //_eventEngineStorage[key]=engine.get();
 
           //populate the engine with the routers defined in the ini file
           //and initialize
@@ -631,4 +718,49 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
      return rout;
 }
 
+void EventManager::CreateSomeEngine()
+{
+     Log->Write("INFO: \tpopulating routers");
+     std::map<int, bool> doors_states;
+
+     //save the doors states
+     for(auto&& t:_building->GetAllTransitions())
+     {
+          doors_states[t.second->GetID()]=    t.second->IsOpen();
+     }
+
+     //open all doors
+     for(auto&& t:_building->GetAllTransitions())
+     {
+          t.second->Open();
+     }
+
+     //close the doors one by one and create engines
+     for(auto&& t1:_building->GetAllTransitions())
+     {
+          for(auto&& t2:_building->GetAllTransitions())
+          {
+               t2.second->Open();
+          }
+          t1.second->Close();
+
+          //create the engine;
+          CreateRoutingEngine(_building, false);
+     }
+
+
+     //restore the door states
+     for(auto&& t:_building->GetAllTransitions())
+     {
+          if (doors_states[t.second->GetID()])
+          {
+               t.second->Open();
+          }
+          else
+          {
+               t.second->Close();
+          }
+     }
+     Log->Write("INFO: \tdone");
+}
 

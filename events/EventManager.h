@@ -120,6 +120,9 @@ private:
       */
      bool MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
 
+     bool MergeKnowledgeUsingProbability(Pedestrian* p1, Pedestrian* p2);
+
+
      /**
       * Update the pedestrian route based on the new information
       * @param p1
@@ -127,6 +130,7 @@ private:
       */
      bool UpdateRoute(Pedestrian* p1);
 
+     void CreateSomeEngine();
 
 private:
 

@@ -205,10 +205,19 @@ public:
      int GetFinalDestination() const;
      void ClearMentalMap(); // erase the peds memory
 
-     // functions for known closed Doors
-     void AddKnownClosedDoor(int door, double time);
-     // needed for information sharing
-     const std::map<int, Knowledge>& GetKnownledge() const;
+     /**
+      * Update the knowledge of the pedestrian
+      * @param door
+      * @param ttime
+      * @param state
+      * @param quality
+      */
+     void AddKnownClosedDoor(int door, double ttime, bool state, double quality, double latency);
+
+     /***
+      * @return the knowledge of the pedstrian
+      */
+     std::map<int, Knowledge>& GetKnownledge();
 
      /**
       * For convenience

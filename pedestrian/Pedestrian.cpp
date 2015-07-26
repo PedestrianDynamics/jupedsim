@@ -329,10 +329,10 @@ void Pedestrian::ClearMentalMap()
      _exitIndex = -1;
 }
 
-void Pedestrian::AddKnownClosedDoor(int door, double time)
+void Pedestrian::AddKnownClosedDoor(int door, double ttime, bool state, double quality, double latency)
 {
-     if(time==0) time=_globalTime;
-     _knownDoors[door].SetState(door,true,time);
+     if(ttime==0) ttime=_globalTime;
+     _knownDoors[door].SetState(door,state,ttime,quality, latency);
 }
 
 void Pedestrian::ClearKnowledge()
@@ -340,7 +340,7 @@ void Pedestrian::ClearKnowledge()
      _knownDoors.clear();
 }
 
-const map<int, Knowledge>&  Pedestrian::GetKnownledge() const
+map<int, Knowledge>&  Pedestrian::GetKnownledge()
 {
      return _knownDoors;
 }
@@ -350,6 +350,9 @@ const std::string Pedestrian::GetKnowledgeAsString() const
      string key="";
      for(auto&& knowledge:_knownDoors)
      {
+          //skip low quality information
+          if(knowledge.second.GetQuality()<0.2) continue;
+
           int door=knowledge.first;
           if(key.empty())
                key.append(std::to_string(door));
@@ -765,6 +768,10 @@ void Pedestrian::Dump(int ID, int pa)
           printf(">> mental map");
           for(auto&& item: _mentalMap)
                printf("\t room / destination  [%d, %d]\n", item.first, item.second);
+          for(auto&& item:_knownDoors)
+               printf(">> %s \n",item.second.Dump().c_str());
+          printf(">> Knowledge: %s \n",GetKnowledgeAsString().c_str());
+          printf(">> Color: %d \n",GetColor());
           break;
 
      case 1:

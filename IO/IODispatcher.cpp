@@ -557,7 +557,6 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 
           char tmp1[CLENGTH] = "";
 
-
           int color=ped->GetColor();
           double a = ped->GetLargerAxis();
           double b = ped->GetSmallerAxis();
