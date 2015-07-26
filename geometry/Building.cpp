@@ -1266,7 +1266,7 @@ void Building::DeletePedestrian(Pedestrian* &ped)
           //this can happen if the pedesrians is pushed too hard
           // or cant stop due to high velocity
           // he will remain in the simulation in that case
-          if(trans->IsOpen()==false) return;
+          //if(trans->IsOpen()==false) return;
      }
      _allPedestians.erase(it);
      delete ped;

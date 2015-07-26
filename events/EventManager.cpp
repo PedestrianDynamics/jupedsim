@@ -197,7 +197,7 @@ void EventManager::ReadEventsTxt(double time)
 
 bool EventManager::UpdateAgentKnowledge(Building* _b)
 {
-     //#pragma omp parallel
+     //#pragma omp parallel for
      for(auto&& ped:_b->GetAllPedestrians())
      {
           for (auto&& door: _b->GetAllTransitions())
@@ -209,20 +209,10 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     {
                          //1.0 because the information is sure
                          ped->AddKnownClosedDoor(door.first, Pedestrian::GetGlobalTime(), !door.second->IsOpen(),_updateFrequency,1.0);
-                         ped->SetNewEventFlag(true);
                     }
                }
           }
-     }
-
-     //collect the peds that are allowed to forward the information.
-     vector<Pedestrian*> informant;
-     for(auto&& ped:_b->GetAllPedestrians())
-     {
-          //if (ped->GetNewEventFlag())
-               informant.push_back(ped);
-
-
+          //update the latency for new and old information
           for(auto&& info: ped->GetKnownledge())
           {
                info.second.DecreaseLatency(_updateFrequency);
@@ -230,7 +220,7 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
      }
 
 
-     for(auto&& ped1:informant)
+     for(auto&& ped1:_b->GetAllPedestrians())
      {
           vector<Pedestrian*> neighbourhood;
           _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
@@ -242,42 +232,18 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     vector<SubRoom*> empty;
                     if(_b->IsVisible(ped1->GetPos(),ped2->GetPos(),empty))
                     {
-                         //if(SynchronizeKnowledge(ped1, ped2))  //ped1->SetSpotlight(true);
-                         //if(MergeKnowledgeUsingProbability(ped1, ped2))
-                         if(MergeKnowledge(ped1, ped2))
+                         //if(!SynchronizeKnowledge(ped1, ped2))  //ped1->SetSpotlight(true);
+                         //if(!MergeKnowledgeUsingProbability(ped1, ped2))
+                         if(!MergeKnowledge(ped1, ped2))
                          {
                               //p2 is now an informant
-                              ped2->SetNewEventFlag(true);
+                              Log->Write("INFO:\t the information was refused by ped %d",ped2->GetID());
                          }
                     }
                }
           }
      }
 
-     //TODO: what happen when they all have the new event flag ? reset maybe?
-     if(informant.size()==_b->GetAllPedestrians().size())
-     {
-
-          //Log->Write("INFO:\t all pedestrians are now propagating information");
-          for(auto&& ped:_b->GetAllPedestrians())
-               ped->SetNewEventFlag(false);
-     }
-
-     // information speed to fast
-     //     for(auto&& ped1:_b->GetAllPedestrians())
-     //     {
-     //          vector<Pedestrian*> neighbourhood;
-     //          _b->GetGrid()->GetNeighbourhood(ped1,neighbourhood);
-     //          for(auto&& ped2:neighbourhood)
-     //          {
-     //               if( (ped1->GetPos()-ped2->GetPos()).Norm()<_updateRadius)
-     //               {
-     //                    //maybe same room and subroom ?
-     //                    if(_b->IsVisible(ped1->GetPos(),ped2->GetPos()))
-     //                    MergeKnowledge(ped1, ped2);  //ped1->SetSpotlight(true);
-     //               }
-     //          }
-     //     }
 
      //update the routers based on the configurations
      //#pragma omp parallel

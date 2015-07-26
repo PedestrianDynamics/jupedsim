@@ -121,7 +121,6 @@ private:
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
      bool _newOrientationFlag; //this is used in the DirectionGeneral::GetTarget()
-     bool _newEventFlag;
 
      // the current time in the simulation
      static double _globalTime;
