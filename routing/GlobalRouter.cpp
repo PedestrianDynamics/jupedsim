@@ -1354,7 +1354,6 @@ string GlobalRouter::GetRoutingInfoFile()
      // everything is fine. proceed with parsing
      TiXmlElement* xMainNode = doc.RootElement();
      TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
-
      string nav_line_file="";
 
      for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
@@ -1362,13 +1361,9 @@ string GlobalRouter::GetRoutingInfoFile()
      {
 
           string strategy=e->Attribute("description");
+          vector<string> routers={"local_shortest", "global_shortest", "global_safest","dynamic","quickest"};
 
-          if(strategy=="local_shortest")
-          {
-               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
-                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-          }
-          else if(strategy=="global_shortest")
+          if(std::find(routers.begin(), routers.end(), strategy) != routers.end())
           {
                if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
                     nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
@@ -1395,19 +1390,7 @@ string GlobalRouter::GetRoutingInfoFile()
                     }
                     _minDistanceBetweenTriangleEdges=xmltof(para->Attribute("minimum_distance_between_edges"),-FLT_MAX);
                     _minAngleInTriangles=xmltof(para->Attribute("minimum_angle_in_triangles"),-FLT_MAX);
-
                }
-
-          }
-          else if(strategy=="global_safest")
-          {
-               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
-                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-          }
-          else if(strategy=="dynamic")
-          {
-               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
-                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
           }
      }
 

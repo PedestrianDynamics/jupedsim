@@ -146,10 +146,12 @@
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="global_shortest">
+<!--     <router router_id="1" description="global_shortest"> -->
+<!--       <parameters></parameters> -->
+<!--     </router> -->
+    <router router_id="1" description="quickest">
       <parameters></parameters>
     </router>
-
   </route_choice_models>
 
 </JuPedSim>

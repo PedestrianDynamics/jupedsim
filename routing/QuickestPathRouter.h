@@ -64,7 +64,7 @@ private:
      /**
       * @return the right path for the extra information
       */
-     virtual std::string GetRoutingInfoFile() const;
+     //virtual std::string GetRoutingInfoFile() const;
 
      /**
       * find the next suitable destination for the pedestrian
@@ -220,7 +220,7 @@ private:
       * @param ped
       * @return
       */
-     int GetBestDefaultRandomExit(Pedestrian* ped);
+     virtual int GetBestDefaultRandomExit(Pedestrian* ped);
 
 };
 

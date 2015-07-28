@@ -514,7 +514,7 @@ bool SubRoom::SanityCheck()
           if((IsConvex()==false) && (_hlines.size()==0))
           {
                Log->Write("WARNING:\t Room [%d] Subroom [%d] is not convex!",_roomID,_id);
-               Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+               Log->Write("        \t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
           }
@@ -522,7 +522,7 @@ bool SubRoom::SanityCheck()
           if(_hlines.size()==0)
           {
                Log->Write("WARNING:\t you have obstacles in room [%d] Subroom [%d]!",_roomID,_id);
-               Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+               Log->Write("        \t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
           }

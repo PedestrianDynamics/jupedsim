@@ -2,7 +2,7 @@
 
 <JPScore project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_events.xsd">
-  <events update_frequency="1" update_radius="201.5" agents_color_by_knowledge="true">
+  <events update_frequency="1" update_radius="0.5" agents_color_by_knowledge="true">
     <event time="10" type="door" state="close" id="2" caption="exit" />
     <event time="30" type="door" state="close" id="3" caption="exit" />
   </events>

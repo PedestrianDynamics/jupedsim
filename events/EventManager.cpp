@@ -284,10 +284,14 @@ bool EventManager::UpdateRoute(Pedestrian* ped)
           RoutingStrategy strategy=ped->GetRouter()->GetStrategy();
           //retrieve the new router
           Router*rout =engine->GetRouter(strategy);
-          //check for validity
-          ped->SetRouter(rout);
-          //clear all previous routes
-          ped->ClearMentalMap();
+          //only update if it is a new router
+          if(ped->GetRouter()!=rout)
+          {
+               //check for validity
+               ped->SetRouter(rout);
+               //clear all previous routes
+               ped->ClearMentalMap();
+          }
           //ped->ClearKnowledge();
           //overwrite/update the pedestrian router
           if(!rout) status= false;
@@ -465,7 +469,7 @@ bool EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
           }
           //p2->SetSpotlight(true);
           //Pedestrian::SetColorMode(BY_SPOTLIGHT);
-          cout<<"refusing..."<<p2->GetID()<<endl;
+          //cout<<"refusing..."<<p2->GetID()<<endl;
           return false;
      }
 

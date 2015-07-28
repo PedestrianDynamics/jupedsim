@@ -112,7 +112,7 @@ protected:
       * @obsolete
       * return a random exit
       */
-     int GetBestDefaultRandomExit(Pedestrian* p);
+     virtual int GetBestDefaultRandomExit(Pedestrian* p);
 
      /**
       * Generate a navigation mesh based on delauney triangulation
@@ -220,10 +220,10 @@ private:
      // normalize the probs
      std::default_random_engine _rdGenerator;
      std::uniform_real_distribution<double> _rdDistribution;
-     // store all subrooms at the same elevation
-     std::map<double, std::vector<SubRoom*> > _subroomsAtElevation;
 
 protected:
+     // store all subrooms at the same elevation
+     std::map<double, std::vector<SubRoom*> > _subroomsAtElevation;
      std::map <int, AccessPoint*> _accessPoints;
      Building *_building;
 

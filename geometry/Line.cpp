@@ -399,8 +399,9 @@ bool Line::IntersectionWithCircle(const Point &centre, double radius /*cm for pe
 
     delta = b * b - 4 * a * c;
 
-    if (p1==p2) {
-        Log->Write("isLineCrossingCircle: Your line is a point");
+    if (p1==p2)
+    {
+        //Log->Write("isLineCrossingCircle: Your line is a point");
         return false;
     }
     if (delta < 0.0) {

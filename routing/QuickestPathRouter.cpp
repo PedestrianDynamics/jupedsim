@@ -40,43 +40,44 @@ QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
 QuickestPathRouter::~QuickestPathRouter() { }
 
 
-string QuickestPathRouter::GetRoutingInfoFile() const
-{
-     TiXmlDocument doc(_building->GetProjectFilename());
-     if (!doc.LoadFile())
-     {
-          Log->Write("ERROR: \t%s", doc.ErrorDesc());
-          Log->Write("ERROR: \t could not open/parse the project file");
-          return "";
-     }
-
-     // everything is fine. proceed with parsing
-     TiXmlElement* xMainNode = doc.RootElement();
-     TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
-
-     string nav_line_file="";
-
-     for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
-               e = e->NextSiblingElement("router"))
-     {
-
-          string strategy=e->Attribute("description");
-
-          if(strategy=="quickest")
-          {
-               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
-                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-          }
-     }
-
-     if (nav_line_file == "")
-          return nav_line_file;
-     else
-          return _building->GetProjectRootDir()+nav_line_file;
-}
+//string QuickestPathRouter::GetRoutingInfoFile() const
+//{
+//     TiXmlDocument doc(_building->GetProjectFilename());
+//     if (!doc.LoadFile())
+//     {
+//          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+//          Log->Write("ERROR: \t could not open/parse the project file");
+//          return "";
+//     }
+//
+//     // everything is fine. proceed with parsing
+//     TiXmlElement* xMainNode = doc.RootElement();
+//     TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
+//
+//     string nav_line_file="";
+//
+//     for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+//               e = e->NextSiblingElement("router"))
+//     {
+//
+//          string strategy=e->Attribute("description");
+//
+//          if(strategy=="quickest")
+//          {
+//               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+//                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+//          }
+//     }
+//
+//     if (nav_line_file == "")
+//          return nav_line_file;
+//     else
+//          return _building->GetProjectRootDir()+nav_line_file;
+//}
 
 int QuickestPathRouter::FindExit(Pedestrian* ped)
 {
+     //ped->ClearMentalMap();
      int next=FindNextExit(ped);
 
      // that ped will be deleted
@@ -131,7 +132,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                     continue;
 
                nextDestination = GetQuickestRoute(ped,_accessPoints[apID]);
-
                //uncomment these lines to return to the gsp
                //nextDestination = ap->GetNearestTransitAPTO(ped->GetFinalDestination());
 
@@ -207,7 +207,7 @@ double QuickestPathRouter::TAP (double alpha)
 }
 
 
-int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP __attribute__((unused)))
+int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP )
 {
 
      //int preferredExit=nearestAP->GetNearestTransitAPTO(ped->GetFinalDestination());
@@ -226,64 +226,24 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP 
 
 
      //special case where there is only one alternative
-     //cout<<"app size: "<<aps.size()<<endl;
      if(aps.size()==1) return preferredExit;
+
+
+     //in some cases the nearestAP might be included. Remove it
+     //     aps.erase(
+     //         std::remove_if(aps.begin(), aps.end(),
+     //             [&nearestAP](AccessPoint * o) { return o->GetID()==nearestAP->GetID();}),
+     //             aps.end());
 
      //select the optimal time
      for(unsigned int ap=0; ap<aps.size(); ap++)
      {
           int exitid=aps[ap]->GetID();
-
-          //FIXME: remove redundant codes
+          //          if(exitid==nearestAP->GetID()){
+          //               printf("\n Ignoring: %d out of %ld\n",exitid,aps.size());
+          //               continue;
+          //          }
           double time= GetEstimatedTravelTimeVia(ped,exitid);
-//          // select the reference and
-//          int flag=FREE_EXIT;
-//          int exitid=aps[ap]->GetID();
-//          Pedestrian* myref=NULL;
-//          SelectReferencePedestrian(ped,&myref,J_QUEUE_VEL_THRESHOLD_NEW_ROOM,exitid,&flag);
-//
-//          // compute the time
-//          double time=FLT_MAX;
-//
-//          // case of free exit
-//          if((myref==NULL)&& (flag==FREE_EXIT)) {
-//               //time= (ped->GetPos()- aps[ap]->GetCentre()).Norm()/ped->GetV0Norm();
-//               // time to reach the AP
-//               double t1 = (ped->GetPos()- aps[ap]->GetCentre()).Norm()/ped->GetV().Norm();
-//
-//               //guess time from the Ap to the outside
-//               double t2 = (aps[ap]->GetDistanceTo(ped->GetFinalDestination()))/ped->GetV().Norm();
-//
-//               time=t1+t2;
-//               //cout<<"time = "<<time<<endl;
-//          }
-//
-//          // case of unreachable exit
-//          if((myref==NULL)&& (flag==UNREACHEABLE_EXIT)) {
-//               time= FLT_MAX;
-//          }
-//
-//          // case of ref ped
-//          if((myref!=NULL) && (flag==REF_PED_FOUND)) {
-//
-//               //time to reach the reference
-//               double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV().Norm();
-//               //double t1= (ped->GetPos()- myref->GetPos()).Norm()/ped->GetV0Norm();
-//
-//               //time for the reference to get out
-//               double t2=(myref->GetPos()- aps[ap]->GetCentre()).Norm()/myref->GetV().Norm();
-//
-//               //guess time from the Ap to the outside
-//               double t3 = (aps[ap]->GetDistanceTo(ped->GetFinalDestination()))/ped->GetV().Norm();
-//
-//               time=t1+t2+t3;
-//          }
-//
-//          if((myref==NULL) && (flag==REF_PED_FOUND)) {
-//               Log->Write("ERROR:\t Fatal Error in Quickest Path Router");
-//               Log->Write("ERROR:\t reference pedestrians is NULL");
-//               return -1;
-//          }
 
           if(time<minTime)
           {
@@ -315,18 +275,17 @@ double QuickestPathRouter::gain(double time)
      return 1.0/time;
 }
 
-
 bool QuickestPathRouter::Init(Building* building)
 {
      Log->Write("INFO:\tInit Quickest Path Router Engine");
 
      // prefer path through corridors to path through rooms
-     SetEdgeCost(100.0);
+     SetEdgeCost(1.0);
      if (GlobalRouter::Init(building) == false)
           return false;
 
      // activate the spotlight for tracking some pedestrians
-     //Pedestrian::ActivateSpotlightSystem(true);
+     Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
 
      //vector<string> rooms;
      //rooms.push_back("150");
@@ -354,11 +313,6 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
           queue.reserve(250);
           GetQueueAtExit(crossing,jamThreshold,radius,queue,myself->GetSubRoomID());
 
-//          if(myself->GetID()==37)
-//          {
-//               for (auto ped: queue)
-//                    ped->SetSpotlight(true);
-//          }
           if(queue.size()==0)
           {
                //check if I can see/reach the exit without much effort
@@ -642,7 +596,6 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
      return obstacles;
 }
 
-
 int QuickestPathRouter::isCongested(Pedestrian* ped)
 {
      //define as the ratio of people in front of me and behind me
@@ -683,7 +636,6 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 
      return false;
 }
-
 
 double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid)
 {
@@ -727,7 +679,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
 
           if(myref->GetV().Norm()==0.0)
           {
-               Log->Write("WARNING:\t the reference pedestrian velocity is zero !");
+               //Log->Write("WARNING:\t the reference pedestrian velocity is zero !");
           }
           //time for the reference to get out
           //double t2=(myref->GetPos() -  ap->GetCentre()).Norm()/myref->GetV().Norm();
@@ -839,11 +791,6 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      //double normFactor=0.0;
      //map <int, double> doorProb;
 
-     // get the opened exits
-     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
-               ped->GetSubRoomID());
-
-
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
@@ -859,6 +806,10 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      int bestAPsID = -1;
      double minDistGlobal = FLT_MAX;
      double minDistLocal = FLT_MAX;
+
+     // get the opened exits
+     SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
+               ped->GetSubRoomID());
 
      for(unsigned int g=0; g<relevantAPs.size(); g++)
      {
@@ -880,7 +831,8 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 
           //check if visible
-          if (sub->IsVisible(posA, posC, true) == false)
+          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetMaxElevation()],true)==false)
+          //if (sub->IsVisible(posA, posC, true) == false)
           {
                ped->RerouteIn(10);
                //ped->Dump(ped->GetID());
