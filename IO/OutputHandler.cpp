@@ -72,7 +72,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime
 
      // create the "meter"
      int ii=0;
-     printf("Time: %6.2f s | Evacuation: %3.0f%% [", simTime, fraction*100);
+     printf(" Time: %6.2f s | Evacuation: %5d (%3.0f%%) [", simTime, (int)NowPeds, fraction*100);
      // part  that's full already
      for ( ; ii < dotz; ii++) {
           printf("=");
