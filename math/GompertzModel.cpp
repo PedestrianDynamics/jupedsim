@@ -224,7 +224,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 
                 //only update the position if the velocity is above a threshold
-                if (1 || v_neu.Norm() >= J_EPS_V*0.7)
+                //if (v_neu.Norm() >= J_EPS_V*0.7)
                 {
                      ped->SetPos(pos_neu);
                      ped->SetPhiPed();
@@ -360,7 +360,7 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
      Point f(0., 0.);
-     Point centroid = subroom->GetCentroid();
+     const Point& centroid = subroom->GetCentroid();
      bool inside = subroom->IsInSubRoom(centroid);
      //first the walls
      for(const auto & wall: subroom->GetAllWalls())
@@ -384,7 +384,7 @@ Point GompertzModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      }
 
      // and finally the closed doors
-     for(auto & goal: subroom->GetAllTransitions())
+     for(const auto & goal: subroom->GetAllTransitions())
      {
           if(! goal->IsOpen())
           {

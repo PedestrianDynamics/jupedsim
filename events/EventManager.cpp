@@ -90,8 +90,8 @@ EventManager::EventManager(Building *_b)
      //save the first graph
      CreateRoutingEngine(_b, true);
 
-     //create and
-     CreateSomeEngine();
+     //create some events
+     //CreateSomeEngine();
 }
 
 EventManager::~EventManager()
@@ -163,6 +163,9 @@ bool EventManager::ReadEventsXml()
           _events.push_back(Event(id,zeit,type,state));
      }
      Log->Write("INFO: \tEvents were initialized");
+
+     //create some events
+     CreateSomeEngine();
      return true;
 }
 
@@ -506,8 +509,6 @@ void EventManager::ProcessEvent()
      if (_dynamic)
           ReadEventsTxt(current_time);
 }
-
-
 
 //close the door if it was open and relaunch the routing procedure
 void EventManager::CloseDoor(int id)
