@@ -82,7 +82,7 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
     }
 
     //std::cout << p->GetGlobalTime() << std::endl;
-    if (std::fmod(p->GetGlobalTime(),30)==0.0)
+    if (std::fmod(p->GetGlobalTime(),2)==0.0)
     {
         sensor_manager->execute(p, SensorManager::PERIODIC);
 
@@ -104,11 +104,10 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
         const GraphEdge * destination = nullptr;
         ///Cognitive Map /Associations/ Waypoints/ landmarks
 
-        (*cm_storage)[p]->AddWaypoints(
-                    (*cm_storage)[p]->TriggerAssoziations(
-                        (*cm_storage)[p]->LookForLandmarks()));
+        (*cm_storage)[p]->UpdateMap();
 
         (*cm_storage)[p]->AssessDoors();
+
         destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
         if(destination == nullptr) {
             //no destination was found, now we could start the discovery!
@@ -121,7 +120,7 @@ int CognitiveMapRouter::FindDestination(Pedestrian * p)
 
             if(destination == nullptr) {
                 //we still do not have a way. lets take the "best" local edge
-                //for this we don't calculate the cost to exit but calculte the cost for the edges at the actual vertex.
+                //for this we don't calculate the cost to exit but calculate the cost for the edges at the actual vertex.
                 destination = (*cm_storage)[p]->GetGraphNetwork()->GetLocalDestination();
             }
         }

@@ -14,7 +14,7 @@ Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
     _a=a;
     _b=b;
     _room=room;
-    _priority=5.0;
+    _priority=1.0;
 }
 
 Waypoint::~Waypoint()
@@ -99,27 +99,35 @@ Point Waypoint::GetRandomPoint() const
     return Point(x,y);
 }
 
-//double Waypoint::ShortestDistance(Point point) const
-//{
-//    const double pi = std::acos(-1);
-//    double distance;
-//    double min=std::sqrt(std::pow(_a*std::cos(pi/180.0)-point.GetX(),2)+std::pow(_b*std::sin(pi/180.0)-point.GetY(),2));
-
-//    for (int alpha=2; alpha<=360; ++alpha)
-//    {
-//        distance=std::sqrt(std::pow(_a*std::cos(alpha*pi/180.0)-point.GetX(),2)+std::pow(_b*std::sin(alpha*pi/180.0)-point.GetY(),2));
-//        if (distance<min)
-//        {
-//            min=distance;
-//        }
-//    }
-//    //Log->Write(std::to_string(min));
-//    return min;
-//}
-
-bool Waypoint::WaypointReached() const
+Point Waypoint::PointOnShortestRoute(const Point& point) const
 {
+    const double pi = std::acos(-1);
+    double distance;
+    int alpha_min=1;
+    double min=std::sqrt(std::pow((_exactPos.GetX()+_a*std::cos(pi/180.0))-point.GetX(),2)+std::pow((_exactPos.GetX()+_b*std::sin(pi/180.0))-point.GetY(),2));
 
+    for (int alpha=11; alpha<=360; alpha+=10)
+    {
+        distance=std::sqrt(std::pow((_exactPos.GetX()+_a*std::cos(alpha*pi/180.0))-point.GetX(),2)+std::pow((_exactPos.GetY()+_b*std::sin(alpha*pi/180.0))-point.GetY(),2));
+        if (distance<min)
+        {
+            min=distance;
+            alpha_min=alpha;            
+        }
+    }
+    //Log->Write(std::to_string(min));
+    return Point(_exactPos.GetX()+_a*std::cos(alpha_min*pi/180.0),_exactPos.GetY()+_b*std::sin(alpha_min*pi/180.0));
+}
+
+bool Waypoint::WaypointReached(const Point& currentYAH) const
+{
+    if (std::abs(_exactPos.GetX()-currentYAH.GetX())<0.75*_a && std::abs(_exactPos.GetY()-currentYAH.GetY())<0.75*_b)
+    {
+        //Log->Write("INFO:\t Waypoint reached");
+        //Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
+        return true;
+    }
+    return false;
 }
 
 

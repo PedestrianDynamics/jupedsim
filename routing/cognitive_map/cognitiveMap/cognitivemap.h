@@ -6,6 +6,7 @@
 #include "waypoints.h"
 #include "landmark.h"
 #include "../GraphNetwork.h"
+#include "youareherepointer.h"
 
 #include <queue>
 #include <memory>
@@ -14,25 +15,26 @@
 
 class Pedestrian;
 class Building;
-class JEllipse;
 
 
 
-//class priorityCheck
-//{
-//public:
-//  priorityCheck(){}
-//  bool operator() (const Waypoint& lhs, const Waypoint& rhs) const
-//  {
-//    if (lhs.GetPriority() <= rhs.GetPriority())
-//      return true;
-//    else
-//        return false;
-//  }
-//};
+
+class priorityCheck
+{
+public:
+  priorityCheck(){}
+  bool operator() (const ptrWaypoint& lhs, const ptrWaypoint& rhs) const
+  {
+    if (lhs->GetPriority() > rhs->GetPriority())
+      return true;
+    else
+        return false;
+  }
+};
 
 
-using Waypoints = std::vector<ptrWaypoint>;// std::priority_queue<Waypoint,std::vector<Waypoint>,priorityCheck>;
+using SortedWaypoints = std::priority_queue<ptrWaypoint,std::vector<ptrWaypoint>,priorityCheck>;
+using Waypoints = std::vector<ptrWaypoint>;
 using ptrBuilding = const Building*;
 using ptrPed = const Pedestrian*;
 using ptrLandmark = std::shared_ptr<Landmark>;
@@ -45,15 +47,18 @@ public:
     CognitiveMap();
     CognitiveMap(ptrBuilding b, ptrPed ped);
     ~CognitiveMap();
+    void UpdateMap();
+    void UpdateYAHPointer(const Point &point);
     void AddLandmarks(std::vector<ptrLandmark> landmarks);
     std::vector<ptrLandmark> LookForLandmarks();
     Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const;
     void AddWaypoints(Waypoints waypoints);
     void AssessDoors();
-    std::vector<GraphEdge *> DoorOnShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges);
+    std::vector<GraphEdge *> SortConShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges);
     //bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
     double ShortestPathDistance(const GraphEdge *edge, const ptrWaypoint waypoint);
+    //evaluate waypoints
 
 private:
     ptrBuilding _building;
@@ -61,7 +66,9 @@ private:
     ptrGraphNetwork _network;
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarks;
+    SortedWaypoints _waypContainerSorted;
     Waypoints _waypContainer;
+    YouAreHerePointer _YAHPointer;
 
 
 };

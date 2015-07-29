@@ -140,7 +140,6 @@ void CognitiveMapStorage::ParseLandmarks()
         for(TiXmlElement* xAsso = xAssociationsNode->FirstChildElement("association"); xAsso;
            xAsso = xAsso->NextSiblingElement("association"))
         {
-            Log->Write("Tag");
             std::string asso_id = xmltoa(xAsso->Attribute("id"), "-1");
             std::string asso_caption = xmltoa(xAsso->Attribute("caption"), "0");
             //std::string asso_type = xmltoa(xAsso->Attribute("type"),"-1");
@@ -148,11 +147,13 @@ void CognitiveMapStorage::ParseLandmarks()
             std::string asso_y = xmltoa(xAsso->Attribute("py"),"-1");
             std::string asso_a = xmltoa(xAsso->Attribute("a"),"-1");
             std::string asso_b = xmltoa(xAsso->Attribute("b"),"-1");
+            std::string priority = xmltoa(xAsso->Attribute("priority"),"-1");
 
             ptrWaypoint waypoint (new Waypoint(Point(std::stod(asso_x),std::stod(asso_y)),
                                                 std::stod(asso_a),std::stod(asso_b)));
             waypoint->SetId(std::stod(asso_id));
             waypoint->SetCaption(asso_caption);
+            waypoint->SetPriority(std::stod(priority));
 
             landmark->AddAssociation(std::make_shared<Association>(landmark,waypoint));
         }

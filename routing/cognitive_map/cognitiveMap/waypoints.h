@@ -4,7 +4,6 @@
 #include <vector>
 #include "../../../geometry/Point.h"
 #include "../../../geometry/Building.h"
-#include "../../../pedestrian/Ellipse.h"
 
 
 using ptrRoom = SubRoom*;
@@ -34,10 +33,10 @@ public:
     const double &GetPriority() const;
     ///Random point somewhere within the waypoint
     Point GetRandomPoint() const;
-    // Shortest Distance from waypoint egde (ellipse) to arbitrary point
-    //double ShortestDistance(Point point) const;
+    /// Shortest Distance from waypoint egde (ellipse) to arbitrary point
+    Point PointOnShortestRoute(const Point &point) const;
     /// Check if Waypoint reached (if YAH-Pointer is in Waypoint)
-    bool WaypointReached() const;
+    bool WaypointReached(const Point& currentYAH) const;
 
 
 private:

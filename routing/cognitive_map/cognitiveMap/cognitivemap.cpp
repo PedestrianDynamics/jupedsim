@@ -20,11 +20,36 @@ CognitiveMap::CognitiveMap(ptrBuilding b, ptrPed ped)
 
     _network = std::make_shared<GraphNetwork>(b,ped);
 
+    _YAHPointer.SetPos(_ped->GetPos());
+
 }
 
 CognitiveMap::~CognitiveMap()
 {
 
+}
+
+void CognitiveMap::UpdateMap()
+{
+    AddWaypoints(TriggerAssoziations(LookForLandmarks()));
+    if (_waypContainerSorted.empty())
+        return;
+    if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
+    {
+        ptrWaypoint cWaypoint = _waypContainerSorted.top();
+
+        cWaypoint->SetPriority(_waypContainerSorted.size());
+        _waypContainerSorted.pop();
+
+        _waypContainerSorted.push(cWaypoint);
+        //_waypContainer.pop();
+        Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
+    }
+}
+
+void CognitiveMap::UpdateYAHPointer(const Point& point)
+{
+    _YAHPointer.SetPos(point);
 }
 
 void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
@@ -78,8 +103,14 @@ void CognitiveMap::AddWaypoints(Waypoints waypoints)
 {
     for (ptrWaypoint waypoint:waypoints)
     {
+        if (std::find(_waypContainer.begin(), _waypContainer.end(), waypoint)!=_waypContainer.end())
+        {
+            continue;
+        }
         _waypContainer.push_back(waypoint);
+        _waypContainerSorted.push(waypoint);
     }
+
 }
 
 void CognitiveMap::AssessDoors()
@@ -92,7 +123,7 @@ void CognitiveMap::AssessDoors()
 
     if (!_waypContainer.empty())
     {
-        std::vector<GraphEdge* > sortedEdges = DoorOnShortestPath(_waypContainer[0],edges);
+        std::vector<GraphEdge* > sortedEdges = SortConShortestPath(_waypContainerSorted.top(),edges);
         //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
 
         for (unsigned int i=0; i<sortedEdges.size(); ++i)
@@ -108,7 +139,7 @@ void CognitiveMap::AssessDoors()
 
 }
 
-std::vector<GraphEdge *> CognitiveMap::DoorOnShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges)
+std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges)
 {
 
     std::list<double> sortedPathLengths;
@@ -156,10 +187,10 @@ std::vector<GraphEdge *> CognitiveMap::DoorOnShortestPath(ptrWaypoint waypoint, 
     for (GraphEdge* edge:sortedEdges)
     {
         vectorSortedEdges.push_back(edge);
-        Log->Write("INFO:\t "+std::to_string(edge->GetCrossing()->GetID()));
+        //Log->Write("INFO:\t "+std::to_string(edge->GetCrossing()->GetID()));
 
     }
-    Log->Write("INFO:\t Next");
+    //Log->Write("INFO:\t Next");
     return vectorSortedEdges;
 
 }
@@ -194,13 +225,6 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
 //        std::cout << std::to_string(room[i].x()) << "\t" << std::to_string(room[i].y()) << std::endl;
 //    }
 
-//    room.push_back(VisiLibity::Point(7.6,0.37));
-//    room.push_back(VisiLibity::Point(7.6,4.37));
-//    room.push_back(VisiLibity::Point(9.6,4.37));
-//    room.push_back(VisiLibity::Point(9.6,0.37));
-
-
-
     boundary.push_back(VisiLibity::Point(-100,-100));
     boundary.push_back(VisiLibity::Point(100,-100));
     boundary.push_back(VisiLibity::Point(100,100));
@@ -214,9 +238,9 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
     //environment.reverse_holes();
 
     VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre().GetX(),edge->GetCrossing()->GetCentre().GetY());
-    VisiLibity::Point wayP(waypoint->GetPos().GetX(),waypoint->GetPos().GetY());
-
-
+    Point pointOnShortestRoute = waypoint->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
+    //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
+    VisiLibity::Point wayP(pointOnShortestRoute.GetX(),pointOnShortestRoute.GetY());//,waypoint->GetPos().GetY());
 
     VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.1);
 //    for (int i=0; i<polyline.size();++i)
@@ -226,6 +250,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
 //    }
 //    Log->Write("ShortestPathLength");
 //    Log->Write(std::to_string(polyline.length()));
+
     return polyline.length();
 }
 

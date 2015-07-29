@@ -228,6 +228,7 @@ set (   source_files
   routing/cognitive_map/sensor/JamSensor.cpp
   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
   routing/cognitive_map/sensor/SmokeSensor.cpp
+  routing/cognitive_map/sensor/locater.cpp
   routing/cognitive_map/fire_mesh/FireMesh.cpp
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
@@ -235,6 +236,7 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/cognitivemap.cpp
   routing/cognitive_map/cognitiveMap/waypoints.cpp
   routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/cognitiveMap/youareherepointer.cpp
   routing/cognitive_map/Tools/triangle.cpp
 
   visiLibity/source_code/visilibity.cpp
@@ -278,6 +280,7 @@ set (   header_files
   routing/cognitive_map/sensor/JamSensor.h
   routing/cognitive_map/sensor/LastDestinationsSensor.h
   routing/cognitive_map/sensor/SmokeSensor.h
+  routing/cognitive_map/sensor/locater.h
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
@@ -285,6 +288,7 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/cognitivemap.h
   routing/cognitive_map/cognitiveMap/waypoints.h
   routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/cognitiveMap/youareherepointer.h
   routing/cognitive_map/Tools/triangle.h
 
   visiLibity/source_code/visilibity.hpp
