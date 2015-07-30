@@ -285,7 +285,7 @@ bool QuickestPathRouter::Init(Building* building)
           return false;
 
      // activate the spotlight for tracking some pedestrians
-     Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+     //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
 
      //vector<string> rooms;
      //rooms.push_back("150");

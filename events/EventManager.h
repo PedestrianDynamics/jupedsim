@@ -44,7 +44,7 @@ public:
      /**
       * Constructor
       */
-     EventManager(Building *_b);
+     EventManager(Building *_b, unsigned int seed);
 
      /**
       * destructor
@@ -99,7 +99,15 @@ private:
       * will save that information
       * @param _b, the building object
       */
-     bool UpdateAgentKnowledge(Building* _b);
+     bool DisseminateKnowledge(Building* _b);
+
+     /**
+      * Gather knowledge about the state of the doors.
+      * Which is going to be disseminated afterwards.
+      * @param _b
+      * @return
+      */
+     bool CollectNewKnowledge(Building* _b);
 
      /**
       * Synchronize the knowledge of the two pedestrians.
@@ -130,7 +138,7 @@ private:
       */
      bool UpdateRoute(Pedestrian* p1);
 
-     void CreateSomeEngine();
+     void CreateSomeEngines();
 
 private:
 

@@ -261,7 +261,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
 
      //read and initialize events
-     _em = new EventManager(_building.get());
+     _em = new EventManager(_building.get(),args.GetSeed());
      if(_em->ReadEventsXml()==false)
      {
           Log->Write("ERROR: \tCould not initialize events handling");

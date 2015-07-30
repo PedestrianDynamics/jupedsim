@@ -60,7 +60,7 @@ using std::cout;
 using std::endl;
 
 
-EventManager::EventManager(Building *_b)
+EventManager::EventManager(Building *_b, unsigned int seed)
 {
      _building = _b;
      _eventCounter = 0;
@@ -84,8 +84,7 @@ EventManager::EventManager(Building *_b)
      _rdDistribution = std::uniform_real_distribution<double> (0,1);
      //std::random_device rd;
      //_rdGenerator=std::mt19937(rd());
-     _rdGenerator=std::mt19937(23);
-
+     _rdGenerator=std::mt19937(seed);
 
      //save the first graph
      CreateRoutingEngine(_b, true);
@@ -165,7 +164,7 @@ bool EventManager::ReadEventsXml()
      Log->Write("INFO: \tEvents were initialized");
 
      //create some events
-     CreateSomeEngine();
+     CreateSomeEngines();
      return true;
 }
 
@@ -198,7 +197,7 @@ void EventManager::ReadEventsTxt(double time)
      } while (feof(_file) == 0);
 }
 
-bool EventManager::UpdateAgentKnowledge(Building* _b)
+bool EventManager::CollectNewKnowledge(Building* _b)
 {
      //#pragma omp parallel for
      for(auto&& ped:_b->GetAllPedestrians())
@@ -212,16 +211,25 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                     {
                          //1.0 because the information is sure
                          ped->AddKnownClosedDoor(door.first, Pedestrian::GetGlobalTime(), !door.second->IsOpen(),_updateFrequency,1.0);
+                         UpdateRoute(ped);
                     }
                }
           }
+
+     }
+     return true;
+}
+
+bool EventManager::DisseminateKnowledge(Building* _b)
+{
+     for(auto&& ped:_b->GetAllPedestrians())
+     {
           //update the latency for new and old information
           for(auto&& info: ped->GetKnownledge())
           {
                info.second.DecreaseLatency(_updateFrequency);
           }
      }
-
 
      for(auto&& ped1:_b->GetAllPedestrians())
      {
@@ -240,7 +248,9 @@ bool EventManager::UpdateAgentKnowledge(Building* _b)
                          if(!MergeKnowledge(ped1, ped2))
                          {
                               //p2 is now an informant
-                              Log->Write("INFO:\t the information was refused by ped %d",ped2->GetID());
+                              //Log->Write("INFO:\tthe information was refused by ped %d",ped2->GetID());
+                              //ped2->SetSpotlight(true);
+                              //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
                          }
                     }
                }
@@ -408,13 +418,14 @@ bool EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
 {
      auto const & old_info1 = p1->GetKnownledge();
      auto & old_info2 = p2->GetKnownledge();
+     bool status=true;
      //accept the new information
      if(_rdDistribution(_rdGenerator)< (1-p1->GetRiskTolerance()))
      {
           for (const auto& info1 : old_info1)
           {
                //I dont forward information that I refused already
-               if(info1.second.HasBeenRefused()) continue;
+               //if(info1.second.HasBeenRefused()) continue;
 
                // Is the latency ok ?
                if(!info1.second.CanBeForwarded()) continue;
@@ -444,7 +455,7 @@ bool EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
                     old_info2[info1.first].SetLatency(_updateFrequency);
                }
           }
-          return true;
+          status= true;
      }
      //refuse the new information
      else
@@ -466,13 +477,14 @@ bool EventManager::MergeKnowledge(Pedestrian* p1, Pedestrian* p2)
                     old_info2[info1.first].SetLatency(_updateFrequency);
                     //cout<<"refusing: "<<p2->GetID()<<endl;
                }
+               //es gibt mindestens eine info zum ablehnen
+               status=false;
           }
           //p2->SetSpotlight(true);
           //Pedestrian::SetColorMode(BY_SPOTLIGHT);
           //cout<<"refusing..."<<p2->GetID()<<endl;
-          return false;
      }
-
+     return status;
 }
 
 void EventManager::ProcessEvent()
@@ -481,12 +493,15 @@ void EventManager::ProcessEvent()
 
      int current_time = Pedestrian::GetGlobalTime();
 
+     //update knowledge about closed doors
+     CollectNewKnowledge(_building);
+
      if ( (current_time != _lastUpdateTime) &&
                ((current_time % _updateFrequency) == 0))
      {
-          //update knowledge about closed doors
+
           //share the information between the pedestrians
-          UpdateAgentKnowledge(_building);
+          DisseminateKnowledge(_building);
           //actualize based on the new knowledge
           _lastUpdateTime = current_time;
           //cout<<"update: "<<current_time<<endl;
@@ -689,7 +704,7 @@ Router * EventManager::CreateRouter(const RoutingStrategy& strategy)
      return rout;
 }
 
-void EventManager::CreateSomeEngine()
+void EventManager::CreateSomeEngines()
 {
      Log->Write("INFO: \tpopulating routers");
      std::map<int, bool> doors_states;

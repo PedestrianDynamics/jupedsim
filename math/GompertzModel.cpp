@@ -211,7 +211,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point pos_neu = ped->GetPos() + v_neu * deltaT;
                
                 if( (v_neu.Norm() > 1.2*ped->GetV0Norm() )) { // Stop pedestrians if the velocity is too high
-                      //                     Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
+                      //Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
                      v_neu = v_neu*0.01;
                      pos_neu = ped->GetPos();
                 }
