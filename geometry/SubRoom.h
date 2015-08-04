@@ -66,6 +66,7 @@ private:
      //defined by: Z = Ax + By + C
      double _planeEquation[3];
      double _cosAngleWithHorizontalPlane;
+     double _tanAngleWithHorizontalPlane;
      std::string _type;
      double _minElevation;
      double _maxElevation;
@@ -217,6 +218,12 @@ public:
       * @return the cosine of the angle
       */
      double GetCosAngleWithHorizontal() const;
+
+     /**
+      * compute the tangent of the dihedral angle with the Horizontal plane Z=h
+      * @return the tangent of the angle
+      */
+     double GetTanAngleWithHorizontal() const;
 
      /**
       * Compute the area of the subroom.

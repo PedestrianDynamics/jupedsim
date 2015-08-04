@@ -512,7 +512,7 @@ void Pedestrian::InitV0(const Point& target)
 const Point& Pedestrian::GetV0(const Point& target)
 {
 
-#define DEBUG 1
+#define DEBUGV0 1
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
@@ -524,7 +524,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade); 
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
-#if DEBUG
+#if DEBUGV0
      if(_id==-159){
           printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1().GetX(), _navLine->GetPoint1().GetY(), _navLine->GetPoint2().GetX(), _navLine->GetPoint2().GetY());
           printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
