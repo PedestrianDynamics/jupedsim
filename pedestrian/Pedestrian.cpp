@@ -432,7 +432,7 @@ double Pedestrian::GetV0Norm() const
                  // if(_id==209)
                        // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
-                 fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
+                 // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
                  return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
            }
@@ -454,7 +454,7 @@ double Pedestrian::GetV0Norm() const
                        // printf("%f UP min_e=%f, z=%f, f=%f, g=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, g, _ellipse.GetV0(), speed_up, (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm());
                        // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stepLength = %f\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stepLength);
                        // getc(stdin);
-                       fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation);
+                       // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation);
                  // }
                  // getc(stdin);
                  return (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
