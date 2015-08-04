@@ -1365,31 +1365,36 @@ string GlobalRouter::GetRoutingInfoFile()
 
           if(std::find(routers.begin(), routers.end(), strategy) != routers.end())
           {
-               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
-                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
 
-               TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
-               if (para)
+               if(e->FirstChild("parameters"))
                {
-                    string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
-                    if(local_planing=="true") {
-                         _useMeshForLocalNavigation = 1;
-                    }
-                    else {
-                         _useMeshForLocalNavigation = 0;
-                    }
 
-                    string method = xmltoa(para->Attribute("method"),"");
-                    if(method=="triangulation")
+                    if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
+                         nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
+
+                    TiXmlElement* para =e->FirstChild("parameters")->FirstChildElement("navigation_mesh");
+                    if (para)
                     {
-                         _generateNavigationMesh=true;
+                         string local_planing=xmltoa(para->Attribute("use_for_local_planning"),"false");
+                         if(local_planing=="true") {
+                              _useMeshForLocalNavigation = 1;
+                         }
+                         else {
+                              _useMeshForLocalNavigation = 0;
+                         }
+
+                         string method = xmltoa(para->Attribute("method"),"");
+                         if(method=="triangulation")
+                         {
+                              _generateNavigationMesh=true;
+                         }
+                         else
+                         {
+                              Log->Write("WARNING:\t only triangulation is supported for the mesh. You supplied [%s]",method.c_str());
+                         }
+                         _minDistanceBetweenTriangleEdges=xmltof(para->Attribute("minimum_distance_between_edges"),-FLT_MAX);
+                         _minAngleInTriangles=xmltof(para->Attribute("minimum_angle_in_triangles"),-FLT_MAX);
                     }
-                    else
-                    {
-                         Log->Write("WARNING:\t only triangulation is supported for the mesh. You supplied [%s]",method.c_str());
-                    }
-                    _minDistanceBetweenTriangleEdges=xmltof(para->Attribute("minimum_distance_between_edges"),-FLT_MAX);
-                    _minAngleInTriangles=xmltof(para->Attribute("minimum_angle_in_triangles"),-FLT_MAX);
                }
           }
      }

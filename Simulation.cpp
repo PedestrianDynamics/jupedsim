@@ -348,22 +348,26 @@ void Simulation::UpdateRoutesAndLocations()
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
                                    ped->SetSubRoomID(sub->GetSubRoomID());
-                                   ped->ClearMentalMap(); // reset the destination
-                                   //ped->FindRoute();
-
                                    //the agent left the old iroom
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
-                                   //todo: also statistic for internal doors
-                                   //if(_argsParser.ShowStatistics())
-                                   //{
-                                   //  Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
-                                   //  if(trans)
-                                   //  {
-                                   //    trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-                                   //  }
-                                   //}
+                                   //also statistic for internal doors
+                                   if(_argsParser.ShowStatistics())
+                                   {
+                                        if(old_sub->GetSubRoomID()!=sub->GetSubRoomID())
+                                        {
+                                             Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
+                                             if(trans)
+                                             {
+                                                  trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
+                                             }
+                                        }
+                                   }
+
+                                   ped->ClearMentalMap(); // reset the destination
+                                   //ped->FindRoute();
+
 
                                    assigned = true;
                                    break;
@@ -405,6 +409,11 @@ void Simulation::UpdateRoutesAndLocations()
           // remove the pedestrians that have left the building
           for (unsigned int p = 0; p < pedsToRemove.size(); p++)
           {
+               Transition* trans =_building->GetTransitionByUID(pedsToRemove[p]->GetExitIndex());
+               if(trans)
+               {
+                    trans->IncreaseDoorUsage(1, pedsToRemove[p]->GetGlobalTime());
+               }
                _building->DeletePedestrian(pedsToRemove[p]);
           }
      }
@@ -435,7 +444,7 @@ void Simulation::PrintStatistics()
      for (const auto& itr : _building->GetAllTransitions())
      {
           Transition* goal = itr.second;
-          if (goal->IsExit())
+          //if (goal->IsExit())
           {
                Log->Write(
                          "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",

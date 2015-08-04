@@ -725,6 +725,12 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
 
+     if(relevantAPs.size()==0)
+     {
+          Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
+          return;
+     }
+
      for(const auto& ap:relevantAPs)
      {
           int exitid=ap->GetID();
@@ -768,6 +774,12 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
           if (exitid==preferredExit) {
                preferredExitTime=time;
           }
+     }
+
+     if(quickest==-1)
+     {
+          Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
+          return;
      }
 
      //compare it with my preferred/current (shortest nearest)
