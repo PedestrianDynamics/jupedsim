@@ -440,9 +440,9 @@ double Pedestrian::GetV0Norm() const
            else
            {
                  double minSubElevation = sub->GetMinElevation();
-                 double stepLength = sub->GetMaxElevation() - minSubElevation;
+                 double stepHeight = sub->GetMaxElevation() - minSubElevation;
                  f = 2.0/(1+exp(-c*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
-                 g = 2.0/(1+exp(-c*(ped_elevation - minSubElevation - stepLength)*(ped_elevation - minSubElevation - stepLength))) - 1;
+                 g = 2.0/(1+exp(-c*(ped_elevation - minSubElevation - stepHeight)*(ped_elevation - minSubElevation - stepHeight))) - 1;
                  double speed_up = _V0UpStairs;
                  if(sub->GetType() == "escalator"){
                        speed_up = _EscalatorUpStairs;
@@ -452,7 +452,7 @@ double Pedestrian::GetV0Norm() const
                  }
                  // if(_id==209){
                        // printf("%f UP min_e=%f, z=%f, f=%f, g=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, g, _ellipse.GetV0(), speed_up, (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm());
-                       // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stepLength = %f\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stepLength);
+                       // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stepHeight = %f, cos = %f a=%f pos=(%f, %f)\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stepHeight, sub->GetCosAngleWithHorizontal(), stepHeight/sub->GetCosAngleWithHorizontal() ,pos.GetX(), pos.GetY());
                        // getc(stdin);
                        // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation);
                  // }
