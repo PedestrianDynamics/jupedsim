@@ -48,7 +48,7 @@
       <group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="0" number="1" goal_id="-1" router_id="1" start_x="7.5" start_y="5." pre_movement_mean="5" pre_movement_sigma="0"/>
       <!-- this one is moving -->
       <group group_id="1"  agent_parameter_id="0" room_id="0" subroom_id="1" number="1" goal_id="-1" router_id="1" start_x="6.5" start_y="4.3"/>
-      <Group group_id="2"  agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="9.5" start_y="5.2" pre_movement_mean="5" pre_movement_sigma="0"/>
+      <group group_id="2"  agent_parameter_id="1" room_id="0" subroom_id="2" number="1" goal_id="-1" router_id="1" start_x="9.5" start_y="5.2" pre_movaement_mean="5" pre_movement_sigma="0"/>
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -116,7 +116,7 @@
   <route_choice_models>
     <router router_id="1" description="local_shortest">
       <parameters>
-        <navigation_mesh method="triangulation" use_for_local_planning="true" />
+        <navigation_mesh method="triangulation" use_for_local_planning="false" />
         <!--<navigation_lines file="routing.xml" />-->
       </parameters>
     </router>
