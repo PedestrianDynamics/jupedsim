@@ -96,17 +96,17 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 			<group group_id="16" agent_parameter_id="1" room_id="1" subroom_id="4" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			
 		<!-- U8 -> Halle -->
-			<group group_id="17" agent_parameter_id="1" room_id="2" subroom_id="0" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
-			<group group_id="18" agent_parameter_id="1" room_id="2" subroom_id="1" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="17" agent_parameter_id="1" room_id="2" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="18" agent_parameter_id="1" room_id="2" subroom_id="1" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 
-			<group group_id="19" agent_parameter_id="1" room_id="3" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="19" agent_parameter_id="1" room_id="3" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="20" agent_parameter_id="1" room_id="3" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="21" agent_parameter_id="1" room_id="3" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="22" agent_parameter_id="1" room_id="3" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			
 			<group group_id="23" agent_parameter_id="1" room_id="4" subroom_id="0" number="6" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			
-			<group group_id="24" agent_parameter_id="1" room_id="5" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="24" agent_parameter_id="1" room_id="5" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="25" agent_parameter_id="1" room_id="5" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="26" agent_parameter_id="1" room_id="5" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="27" agent_parameter_id="1" room_id="5" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
@@ -122,10 +122,10 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 			<group group_id="35" agent_parameter_id="1" room_id="6" subroom_id="7" number="100" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			
 		<!-- U9 -> Halle -->
-			<group group_id="36" agent_parameter_id="1" room_id="7" subroom_id="0" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
-			<group group_id="37" agent_parameter_id="1" room_id="7" subroom_id="1" number="10" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="36" agent_parameter_id="1" room_id="7" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="37" agent_parameter_id="1" room_id="7" subroom_id="1" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 
-			<group group_id="38" agent_parameter_id="1" room_id="8" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="38" agent_parameter_id="1" room_id="8" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="39" agent_parameter_id="1" room_id="8" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="40" agent_parameter_id="1" room_id="8" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="41" agent_parameter_id="1" room_id="8" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
@@ -166,12 +166,12 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 			<group group_id="74" agent_parameter_id="1" room_id="9" subroom_id="32" number="1" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			
 		<!-- Ausgaenge -->
-			<group group_id="75" agent_parameter_id="1" room_id="10" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/> 
+			<group group_id="75" agent_parameter_id="1" room_id="10" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/> 
 			<group group_id="76" agent_parameter_id="1" room_id="10" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="77" agent_parameter_id="1" room_id="10" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="78" agent_parameter_id="1" room_id="10" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 
-			<group group_id="79" agent_parameter_id="1" room_id="11" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="79" agent_parameter_id="1" room_id="11" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="80" agent_parameter_id="1" room_id="11" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="81" agent_parameter_id="1" room_id="11" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="82" agent_parameter_id="1" room_id="11" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
@@ -181,13 +181,13 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 			<group group_id="85" agent_parameter_id="1" room_id="12" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="86" agent_parameter_id="1" room_id="12" subroom_id="2" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 
-			<group group_id="87" agent_parameter_id="1" room_id="13" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="87" agent_parameter_id="1" room_id="13" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="88" agent_parameter_id="1" room_id="13" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="89" agent_parameter_id="1" room_id="13" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="90" agent_parameter_id="1" room_id="13" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="91" agent_parameter_id="1" room_id="13" subroom_id="4" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			
-			<group group_id="92" agent_parameter_id="1" room_id="14" subroom_id="0" number="5" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
+			<group group_id="92" agent_parameter_id="1" room_id="14" subroom_id="0" number="0" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="93" agent_parameter_id="1" room_id="14" subroom_id="1" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="94" agent_parameter_id="1" room_id="14" subroom_id="2" number="2" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
 			<group group_id="94" agent_parameter_id="1" room_id="14" subroom_id="3" number="3" goal_id="-1" router_id="1" pre_movement_mean="60" pre_movement_sigma="20"/>
