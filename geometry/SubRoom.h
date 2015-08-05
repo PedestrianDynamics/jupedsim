@@ -63,7 +63,7 @@ private:
      int _roomID;
      std::vector<int> _goalIDs; // all navigation lines contained in this subroom
      double _area;
-     //defined by: Z = Ax + By + C
+     //defined by: Z = Ax + By + C, normal vector = (A, B, -1)^T
      double _planeEquation[3];
      double _cosAngleWithHorizontalPlane;
      double _tanAngleWithHorizontalPlane;
