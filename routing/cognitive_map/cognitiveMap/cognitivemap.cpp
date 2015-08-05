@@ -101,14 +101,21 @@ Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &land
 
 void CognitiveMap::AddWaypoints(Waypoints waypoints)
 {
+    for (ptrWaypoint waypoint:_waypContainer)
+    {
+        waypoint->SetPriority(waypoint->GetPriority()+waypoints.size());
+    }
+    int n=0;
     for (ptrWaypoint waypoint:waypoints)
     {
         if (std::find(_waypContainer.begin(), _waypContainer.end(), waypoint)!=_waypContainer.end())
         {
             continue;
         }
+        waypoint->SetPriority(n);
         _waypContainer.push_back(waypoint);
         _waypContainerSorted.push(waypoint);
+        n++;
     }
 
 }
