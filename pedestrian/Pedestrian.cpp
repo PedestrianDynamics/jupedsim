@@ -411,15 +411,17 @@ double Pedestrian::GetV0Norm() const
      }
       // we are walking downstairs
      else{
-           double c = 1.0;
+           double c = 5.0;
            // c should be chosen so that the func grows fast (but smooth) from 0 to 1
            // However we have to pay attention to tau. The velocity adaptation
            // from v to v0 in the driven force takes tau time.
-           double f; // f in [0, 1]
+           double f, g; // f in [0, 1]
            if(delta<0)
            {
                  double maxSubElevation = sub->GetMaxElevation();
+                 double stepLength = maxSubElevation - sub->GetMinElevation();
                  f = 2.0/(1+exp(-c*(maxSubElevation - ped_elevation)*(maxSubElevation - ped_elevation))) - 1;
+                 g = 2.0/(1+exp(-c*(maxSubElevation - ped_elevation - stepLength)*(maxSubElevation - ped_elevation - stepLength))) - 1;
                  double speed_down = _V0DownStairs;
                  if(sub->GetType() == "escalator"){
                        speed_down = _EscalatorDownStairs;
@@ -427,17 +429,20 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_down = _V0IdleEscalatorDownStairs;
                  }
-                 // if(_id==-9)
-                 //       printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
-                 // // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // if(_id==209)
+                       // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
-                 return (1-f)*_ellipse.GetV0() + f*speed_down;
+                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
            }
            //we are walking upstairs
            else
            {
                  double minSubElevation = sub->GetMinElevation();
+                 double stepLength = sub->GetMaxElevation() - minSubElevation;
                  f = 2.0/(1+exp(-c*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
+                 g = 2.0/(1+exp(-c*(ped_elevation - minSubElevation - stepLength)*(ped_elevation - minSubElevation - stepLength))) - 1;
                  double speed_up = _V0UpStairs;
                  if(sub->GetType() == "escalator"){
                        speed_up = _EscalatorUpStairs;
@@ -445,13 +450,14 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_up = _V0IdleEscalatorUpStairs;
                  }
-                 // if(_id==2){
-                 //       printf("%f UP min_e=%f, z=%f, f=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up, GetV().Norm());
-                 //       fprintf(stderr, "%f  %f   %f  %f\n", _globalTime, _ellipse.GetV0(), (1-f)*_ellipse.GetV0() + f*speed_up, GetV().Norm());
+                 // if(_id==209){
+                       // printf("%f UP min_e=%f, z=%f, f=%f, g=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, g, _ellipse.GetV0(), speed_up, (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm());
+                       // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stepLength = %f\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stepLength);
+                       // getc(stdin);
+                       // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation);
                  // }
-                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_up);
                  // getc(stdin);
-                 return (1-f)*_ellipse.GetV0() + f*speed_up;
+                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
      }
      // orthogonal projection on the stair
