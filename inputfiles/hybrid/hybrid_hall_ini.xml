@@ -11,11 +11,11 @@
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="hybrid_hall_trajectories.xml" />
-    <socket1 hostname="127.0.0.1" port="8989" />
+    <socket_ hostname="127.0.0.1" port="8989" />
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->
-  <hybrid_simulation server="zam763" port="9999" />
+  <hybrid_simulation_ server="zam763" port="9999" />
   <!--<hybrid_simulation server="zam597" port="9999" />-->
 
   <!-- where to store the logs -->
@@ -84,10 +84,10 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="1" agents_max="50" group_id="0" caption="source 1" />
-      <source id="2" frequency="1" agents_max="5" group_id="2" caption="source 2" />
-      <source id="3" frequency="1" agents_max="5" group_id="3" caption="source 3" />
-      <source id="4" frequency="1" agents_max="5" group_id="4" caption="source 4" />
+      <source id="1" frequency="5" agents_max="50" group_id="0" caption="source 1" />
+      <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
+      <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
+      <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
     </agents_sources>
 
   </agents>
