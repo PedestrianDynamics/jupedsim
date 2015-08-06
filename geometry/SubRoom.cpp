@@ -261,6 +261,19 @@ void SubRoom::RemoveGoalID(int ID)
      Log->Write("There is no goal with that id to remove");
 }
 
+bool SubRoom::IsAccessible()
+{
+    //at least one door is open
+     for(auto&& tran: _transitions)
+     {
+          if(tran->IsOpen()==true) return true;
+     }
+     for(auto&& cros: _crossings)
+     {
+          if(cros->IsOpen()==true) return true;
+     }
+    return false;
+}
 
 void SubRoom::CalculateArea()
 {
@@ -628,7 +641,7 @@ bool SubRoom::SanityCheck()
                {
                     Log->Write("ERROR: Overlapping between crossing %s and  transition %s ",c->toString().c_str(),t->toString().c_str());
                     exit(EXIT_FAILURE);
-                    //return false;
+                    return false;
                }
           }
      }
