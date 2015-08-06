@@ -568,19 +568,19 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           {
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
           }
-          if(ped.GetExitIndex()==0)
-          {
-               cout<<"exi 1t: "<<endl;exit(0);
-          }
-
-          if(trans->GetUniqueID()==0)
-          {
-               cout<<"exit 2: "<<endl;exit(0);
-          }
-          if(trans->GetID()==0)
-          {
-               cout<<"exit 3: "<<endl;exit(0);
-          }
+//          if(ped.GetExitIndex()==0)
+//          {
+//               cout<<"exi 1t: "<<endl;exit(0);
+//          }
+//
+//          if(trans->GetUniqueID()==0)
+//          {
+//               cout<<"exit 2: "<<endl;exit(0);
+//          }
+//          if(trans->GetID()==0)
+//          {
+//               cout<<"exit 3: "<<endl;exit(0);
+//          }
      }
 }
 

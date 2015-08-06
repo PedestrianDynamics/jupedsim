@@ -843,7 +843,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 
           //check if visible
-          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetMaxElevation()],true)==false)
+          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
           //if (sub->IsVisible(posA, posC, true) == false)
           {
                ped->RerouteIn(10);
