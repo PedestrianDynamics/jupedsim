@@ -8,6 +8,7 @@
   <geometry>big_room_geo.xml</geometry>
   <events_file>big_room_events.xml</events_file>
   <max_sim_time>1500</max_sim_time>
+  <show_statistics>true</show_statistics>
 
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8" color_mode="knowledge">
