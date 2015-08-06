@@ -429,7 +429,7 @@ void Simulation::PrintStatistics()
      for (const auto& itr : _building->GetAllTransitions())
      {
           Transition* goal = itr.second;
-          //if (goal->IsExit())
+          if (goal->GetDoorUsage())
           {
                Log->Write(
                          "\nExit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
