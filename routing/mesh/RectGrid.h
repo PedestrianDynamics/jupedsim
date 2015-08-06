@@ -49,9 +49,10 @@ class RectGrid
         RectGrid() {
             this->isInitialized = false;
         }
-        virtual ~RectGrid() {
 
+        virtual ~RectGrid() {
         }
+
         RectGrid(const RectGrid& other) {
             nPoints = other.nPoints;
             xMin = other.xMin;
@@ -63,6 +64,27 @@ class RectGrid
             iMax = other.iMax;
             jMax = other.jMax;
             isInitialized = other.isInitialized;
+        }
+
+        RectGrid(   long int nPointsArg,
+                    double xMinArg,
+                    double yMinArg,
+                    double xMaxArg,
+                    double yMaxArg,
+                    double hxArg,
+                    double hyArg,
+                    long int iMaxArg, // indices must be smaller than iMax
+                    long int jMaxArg, // indices must be smaller than jMax
+                    bool isInitializedArg) {
+            xMin = xMinArg;
+            yMin = yMinArg;
+            xMax = xMaxArg;
+            yMax = yMaxArg;
+            hx   = hxArg;
+            hy   = hyArg;
+            iMax = iMaxArg;
+            jMax = jMaxArg;
+            isInitialized = isInitializedArg;
         }
 
         long int GetnPoints() const { return nPoints; }

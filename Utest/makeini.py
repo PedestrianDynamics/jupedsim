@@ -25,8 +25,8 @@ logging.basicConfig(filename=logfile, level=logging.INFO, format='%(asctime)s - 
 # ============= some default dictionaries =============
 default_value = {'tmax':1000, 'seed':1111, 'geometry':'', 'number':1, 'num_threads':1, 'file':'', 'model_id':1, 'exit_crossing_strategy':3, 'cell_size':2.2, 'operational_model_id':1}
 tags = ['tmax', 'seed', 'geometry', 'exit_crossing_strategy', 'num_threads']     # only these tags can be multiplied
-attributes = ['number', 'operational_model_id', 'cell_size', 'router_id'] # these attributes too, but
-tags2attributes = ['group', 'agents', 'linkedcells', 'router' ]           # only these corresponding to these tags
+attributes = ['number', 'operational_model_id', 'cell_size', 'router_id', 'wall_avoid_distance'] # these attributes too, but
+tags2attributes = ['group', 'agents', 'linkedcells', 'router', 'floorfield' ]           # only these corresponding to these tags
 input_tags = {}
 # =======================================================
 def getParserArgs():

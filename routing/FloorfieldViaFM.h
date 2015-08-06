@@ -79,6 +79,7 @@ class FloorfieldViaFM
         inline double twosidedCalc(double x, double y, double hDivF);
 
         void testoutput(const char*, const char*, const double*);
+        void writeFF(const char*);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
@@ -97,7 +98,7 @@ class FloorfieldViaFM
         double offsetY;
 
         //GridPoint Data in independant arrays (shared primary key)
-        int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final)
+        int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
         double* dist2Wall;
         double* speedInitial;
         double* cost;

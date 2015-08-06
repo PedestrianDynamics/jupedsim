@@ -248,10 +248,14 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
                 double distance2Wall =  dynamic_cast<DirectionFloorfield*>(_direction)->GetDistance2Wall(ped);
                 double dotProduct = 0;
+                double antiClippingFactor = 1;
                 if (distance2Wall < _slowDownDistance) {
-                    dotProduct = dir2Wall.ScalarProduct(movDirection.Normalized());
+                    dotProduct = movDirection.ScalarProduct(dir2Wall);
+                    if ((dotProduct > 0) && (distance2Wall < .5 * _slowDownDistance)) { //acute angle && really close to wall
+                        movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
+                    }
+                    //antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
                 }
-                double antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
 
 
 

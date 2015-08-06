@@ -30,6 +30,7 @@
 #include "FloorfieldViaFM.h"
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <fstream>
 
 FloorfieldViaFM::FloorfieldViaFM()
@@ -81,6 +82,55 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     calculateFloorfield(useDistancefield); //use distance2Wall
 
     testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+}
+
+FloorfieldViaFM::FloorfieldViaFM(const char* filename) {
+
+//                    FileHeaderExample: (GEO_UP_SCALE is assumed to be 1.0)
+//                    # vtk DataFile Version 3.0
+//                    Testdata: Fast Marching: Test:
+//                    ASCII
+//                    DATASET STRUCTURED_POINTS
+//                    DIMENSIONS 322 226 1
+//                    ORIGIN 50 90 0
+//                    SPACING 0.062500 0.062500 1
+//                    POINT_DATA 72772
+//                    SCALARS Cost float 1
+//                    LOOKUP_TABLE default
+//                    0.505725
+//                    0.505725
+//                    0.505725
+//                    ...
+
+    ifstream file = (filename)
+    std::string line;
+
+    std::getline(file, line) //# vtk DataFile Version 3.0
+    std::getline(file, line)
+
+    //read header and extract grid info:
+    //iMax jMax (->numPoints)
+    //xMin yMin
+    //hx hy     (->xMax yMax via formula xMax = xMin + hx * iMax)
+
+    //create grid
+    //create arrays
+
+    //read-in dist2Wall
+
+    //read-in neggrad
+
+    //read-in dirToWall
+
+    while (std::getline(infile, line))
+    {
+        std::istringstream iss(line);
+
+        //int a, b;
+        // if (!(iss >> a >> b)) { break; } // error
+
+        // process pair (a,b)
+    }
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
@@ -555,6 +605,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
         }
     }
 
+    //ignore next two lines of comments
     //frage: wo plaziere ich das "update nachbarschaft"? beim adden eines elements? lieber nicht beim calc, da sonst eine rekursion startet
     //bei verbesserung von single to doublesided update ... soll hier auch die nachbarschaft aktualisiert werden?
 
@@ -901,3 +952,45 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     //std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
 }
 
+void FloorfieldViaFM::writeFF(const char* filename) {
+    std::ofstream file;
+
+    int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
+    int numY = (int) ((grid->GetyMax()-grid->GetyMin())/grid->Gethy());
+    int numTotal = numX * numY;
+    //std::cerr << numTotal << " numTotal" << std::endl;
+    //std::cerr << grid->GetnPoints() << " grid" << std::endl;
+    file.open(filename);
+
+    file << "# vtk DataFile Version 3.0" << std::endl;
+    file << "Testdata: Fast Marching: Test: " << std::endl;
+    file << "ASCII" << std::endl;
+    file << "DATASET STRUCTURED_POINTS" << std::endl;
+    file << "DIMENSIONS " <<
+                                std::to_string(grid->GetiMax()) <<
+                                " " <<
+                                std::to_string(grid->GetjMax()) <<
+                                " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
+    file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
+    file << "SCALARS Cost float 1" << std::endl;
+    file << "LOOKUP_TABLE default" << std::endl;
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        file << dist2Wall[i]/GEO_UP_SCALE << std::endl; //@todo: change target to all dist2wall
+        //Point iPoint = grid->getPointFromKey(i);
+        //file2 << iPoint.GetX()/GEO_UP_SCALE /*- grid->GetxMin()*/ << " " << iPoint.GetY()/GEO_UP_SCALE /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+    }
+
+    file << "VECTORS Gradient float" << std::endl;
+    for (int i = 0; i < grid->GetnPoints(); ++i) {
+        file << neggrad[i].GetX()/GEO_UP_SCALE << " " << neggrad[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+    }
+
+    file << "VECTORS Dir2Wall float" << std::endl;
+    for (int i = 0; i < grid->GetnPoints(); ++i) {
+        file << dirToWall[i].GetX()/GEO_UP_SCALE << " " << dirToWall[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+    }
+
+    file.close();
+}
