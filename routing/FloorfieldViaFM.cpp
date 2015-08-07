@@ -102,11 +102,11 @@ FloorfieldViaFM::FloorfieldViaFM(const char* filename) {
 //                    0.505725
 //                    ...
 
-    ifstream file = (filename)
+    std::ifstream file(filename);
     std::string line;
 
-    std::getline(file, line) //# vtk DataFile Version 3.0
-    std::getline(file, line)
+    std::getline(file, line); //# vtk DataFile Version 3.0
+    std::getline(file, line);
 
     //read header and extract grid info:
     //iMax jMax (->numPoints)
@@ -122,7 +122,7 @@ FloorfieldViaFM::FloorfieldViaFM(const char* filename) {
 
     //read-in dirToWall
 
-    while (std::getline(infile, line))
+    while (std::getline(file, line))
     {
         std::istringstream iss(line);
 

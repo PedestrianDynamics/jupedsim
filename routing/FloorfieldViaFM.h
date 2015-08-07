@@ -51,6 +51,7 @@ class FloorfieldViaFM
 {
     public:
         FloorfieldViaFM();
+        FloorfieldViaFM(const char*);
         FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double slowdownDistance, const bool useDistancefield);
         virtual ~FloorfieldViaFM();
         FloorfieldViaFM(const FloorfieldViaFM& other);
