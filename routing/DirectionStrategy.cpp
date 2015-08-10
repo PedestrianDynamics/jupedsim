@@ -35,6 +35,7 @@
 #include "../geometry/Wall.h"
 #include "../routing/FloorfieldViaFM.h"
 #include "DirectionStrategy.h"
+#include <fstream>
 
 
 
@@ -287,7 +288,12 @@ double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
 
 void DirectionFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
     //implement mechanic, that can read-in an existing floorfield (from a previous run)
-    ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap);
+    std::ifstream test(("FF"+building->GetGeometryFilename() + ".vtk").c_str());
+    if (test.good()) {
+        ffviafm = new FloorfieldViaFM(("FF"+building->GetGeometryFilename() + ".vtk").c_str());
+    } else {
+        ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap);
+    }
     initDone = true;
 }
 

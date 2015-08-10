@@ -232,6 +232,10 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 movDirection = (movDirection + toTarget);
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
+//                if (movDirection.Norm() < .6) {
+//                    std::cerr << ".6 unterschritten" << std::endl;
+//                }
+
                 double desired_speed = ped->GetV0Norm();
                 Point oldMov = Point(0., 0.);
                 if (desired_speed > 0.) {
@@ -244,7 +248,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 movDirection = oldMov - diff;
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
-                //slowdown near wall mechanics:
+                //redirect near wall mechanics:
                 Point dir2Wall = dynamic_cast<DirectionFloorfield*>(_direction)->GetDir2Wall(ped);
                 double distance2Wall =  dynamic_cast<DirectionFloorfield*>(_direction)->GetDistance2Wall(ped);
                 double dotProduct = 0;
@@ -254,12 +258,17 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     if ((dotProduct > 0) && (distance2Wall < .5 * _slowDownDistance)) { //acute angle && really close to wall
                         movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
                     }
-                    //antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
+                    antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
                 }
 
 
 
                 movDirection = movDirection * (antiClippingFactor * ped->GetV0Norm() * deltaT);
+
+
+//                if ((dotProduct != 0) && (movDirection.Norm() < 0.6 * antiClippingFactor * ped->GetV0Norm() * deltaT)) {
+//                    std::cerr << "@@@@@ " << dotProduct << std::endl;
+//                }
 
                 //if(ped->GetID() == 48) { // Mohcine
                 //    fprintf(stderr, "%f %f %f %f %f %f %f \n", movDirection.GetX(), movDirection.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), current);

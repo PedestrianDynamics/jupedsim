@@ -55,6 +55,9 @@ FloorfieldViaFM::~FloorfieldViaFM()
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
                                  const double slowdownDistance, const bool useDistancefield) {
+    std::cerr << "Bin im old constructor" << std::endl;
+    std::cout << "Bin im old constructor" << std::endl;
+
     //ctor
     threshold = -1; //negative value means: ignore threshold
     threshold = slowdownDistance;
@@ -82,9 +85,10 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     calculateFloorfield(useDistancefield); //use distance2Wall
 
     testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+    writeFF(("FF" + buildingArg->GetGeometryFilename() + ".vtk").c_str());
 }
 
-FloorfieldViaFM::FloorfieldViaFM(const char* filename) {
+FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
 
 //                    FileHeaderExample: (GEO_UP_SCALE is assumed to be 1.0)
 //                    # vtk DataFile Version 3.0
@@ -102,34 +106,106 @@ FloorfieldViaFM::FloorfieldViaFM(const char* filename) {
 //                    0.505725
 //                    ...
 
+// comments show lineformat in .vtk file (below)
+    std::cerr << "Bin im read file constructor" << std::endl;
+    std::cout << "Bin im read file constructor" << std::endl;
     std::ifstream file(filename);
     std::string line;
 
     std::getline(file, line); //# vtk DataFile Version 3.0
-    std::getline(file, line);
+    std::getline(file, line); //Testdata: Fast Marching: Test:
+    std::getline(file, line); //ASCII
+    std::getline(file, line); //DATASET STRUCTURED_POINTS
+    std::getline(file, line); //DIMENSIONS {x} {y} {z}
 
-    //read header and extract grid info:
-    //iMax jMax (->numPoints)
-    //xMin yMin
-    //hx hy     (->xMax yMax via formula xMax = xMin + hx * iMax)
+    std::stringstream inputline(line);
 
-    //create grid
+    long int iMax, jMax, c;
+    std::string dummy;
+    double fdummy;
+    long int nPoints;
+    double xMin;
+    double yMin;
+    double xMax;
+    double yMax;
+    double hx;
+    double hy;
+
+
+    inputline >> dummy >> iMax >> jMax >> c ;
+
+    std::getline(file, line); //ORIGIN x y z
+    inputline.str("");
+    inputline.clear();
+    inputline << line;
+    inputline >> dummy >> xMin >> yMin >> c;
+
+    std::getline(file, line); //SPACING 0.062500 0.062500 1
+    inputline.str("");
+    inputline.clear();
+    inputline << line;
+    inputline >> dummy >> hx >> hy >> c;
+    xMax = xMin + hx*iMax;
+    yMax = yMin + hy*jMax;
+
+    std::getline(file, line); //POINT_DATA 72772
+    inputline.str("");
+    inputline.clear();
+    inputline.flush();
+    inputline << line;
+    inputline >> dummy >> nPoints;
+
+//    std::cerr << inputline.str() << std::endl;
+//    std::cerr << hx << std::endl;
+//    std::cerr << hy << std::endl;
+//    std::cerr << iMax << std::endl;
+//    std::cerr << jMax << std::endl;
+//    std::cerr << xMin << std::endl;
+//    std::cerr << yMin << std::endl;
+
+
+    //create Rect Grid
+    grid = new RectGrid(nPoints, xMin, yMin, xMax, yMax, hx, hy, iMax, jMax, true);
+
     //create arrays
+    flag = new int[nPoints];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
+    dist2Wall = new double[nPoints];
+    speedInitial = new double[nPoints];
+    cost = new double[nPoints];
+    neggrad = new Point[nPoints];
+    dirToWall = new Point[nPoints];
+    trialfield = new Trial[nPoints];                 //created with other arrays, but not initialized yet
 
-    //read-in dist2Wall
+    std::getline(file, line);   //SCALARS Cost float 1
+    std::getline(file, line);   //LOOKUP_TABLE default
 
-    //read-in neggrad
+    for (long int i = 0; i < nPoints; ++i) {
+        std::getline(file, line);
+        inputline.str("");
+        inputline << line;
+        inputline >> dist2Wall[i];  //0.505725
+        //std::cerr << dist2Wall[i] << std::endl;
+        inputline.clear();
+    }
 
-    //read-in dirToWall
+    std::getline(file, line);       //VECTORS Gradient float
 
-    while (std::getline(file, line))
-    {
-        std::istringstream iss(line);
+    for (long int i = 0; i < nPoints; ++i) {
+        std::getline(file, line);
+        inputline.str("");
+        inputline << line;
+        inputline >> neggrad[i]._x >> neggrad[i]._y >> fdummy;  //0.989337 7.88255 0.0
+        inputline.clear();
+    }
 
-        //int a, b;
-        // if (!(iss >> a >> b)) { break; } // error
+    std::getline(file, line);       //VECTORS Gradient float
 
-        // process pair (a,b)
+    for (long int i = 0; i < nPoints; ++i) {
+        std::getline(file, line);
+        inputline.str("");
+        inputline << line;
+        inputline >> dirToWall[i]._x >> dirToWall[i]._y >> fdummy;  //0.989337 7.88255 0.0
+        inputline.clear();
     }
 }
 
@@ -974,7 +1050,7 @@ void FloorfieldViaFM::writeFF(const char* filename) {
     file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
     file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
-    file << "SCALARS Cost float 1" << std::endl;
+    file << "SCALARS Dist2Wall float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         file << dist2Wall[i]/GEO_UP_SCALE << std::endl; //@todo: change target to all dist2wall
