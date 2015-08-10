@@ -7,6 +7,7 @@
 #include "../../../visiLibity/source_code/visilibity.hpp"
 
 
+
 CognitiveMap::CognitiveMap()
 {
 
@@ -19,6 +20,13 @@ CognitiveMap::CognitiveMap(ptrBuilding b, ptrPed ped)
     _ped=ped;
 
     _network = std::make_shared<GraphNetwork>(b,ped);
+
+    std::string str(b->GetProjectRootDir()+"cogmap.xml");
+    _outputhandler = std::make_shared<CogMapOutputHandler>(str.c_str());
+
+    const double fps = UPDATE_RATE;
+    _outputhandler->WriteToFileHeader(ped->GetID(),fps);
+    _frame=0;
 
     _YAHPointer.SetPos(_ped->GetPos());
 
@@ -36,20 +44,48 @@ void CognitiveMap::UpdateMap()
         return;
     if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
     {
-        ptrWaypoint cWaypoint = _waypContainerSorted.top();
+        //ptrWaypoint cWaypoint = _waypContainerSorted.top();
 
-        cWaypoint->SetPriority(_waypContainerSorted.size());
+        //cWaypoint->SetPriority(_waypContainerSorted.size());
         _waypContainerSorted.pop();
 
-        _waypContainerSorted.push(cWaypoint);
+        //_waypContainerSorted.push(cWaypoint);
         //_waypContainer.pop();
-        Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
+        //Log->Write("Prio:\t"+std::to_string(_waypContainerSorted.top()->GetPriority()));
     }
 }
 
-void CognitiveMap::UpdateYAHPointer(const Point& point)
+void CognitiveMap::UpdateDirection()
 {
-    _YAHPointer.SetPos(point);
+    if (_ped->GetV().GetX()!=0 || _ped->GetV().GetY()!=0)
+    {
+        double angle = std::acos(_ped->GetV().GetX()/(std::sqrt(std::pow(_ped->GetV().GetX(),2)+std::pow(_ped->GetV().GetY(),2))));
+        if (_ped->GetV().GetY()<0)
+            angle=-angle;
+        _YAHPointer.SetDirection(angle);
+    }
+}
+
+void CognitiveMap::UpdateYAHPointer(const Point& move)
+{
+    _YAHPointer.UpdateYAH(move);
+}
+
+void CognitiveMap::AddLandmarksSC(std::vector<ptrLandmark> landmarks)
+{
+    for (ptrLandmark landmark:landmarks)
+    {
+        if (std::find(_landmarksSubConcious.begin(), _landmarksSubConcious.end(), landmark)!=_landmarksSubConcious.end())
+        {
+            continue;
+        }
+        else
+        {
+            _landmarksSubConcious.push_back(landmark);
+
+        }
+    }
+
 }
 
 void CognitiveMap::AddLandmarks(std::vector<ptrLandmark> landmarks)
@@ -74,13 +110,15 @@ std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
 
     std::vector<ptrLandmark> landmarks_found;
 
-    for (ptrLandmark landmark:_landmarks)
+    for (ptrLandmark landmark:_landmarksSubConcious)
     {
         if (landmark->GetRoom()==sub_room)
         {
            landmarks_found.push_back(landmark);
+
         }
     }
+    AddLandmarks(landmarks_found);
 
     return landmarks_found;
 }
@@ -259,6 +297,60 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
 //    Log->Write(std::to_string(polyline.length()));
 
     return polyline.length();
+}
+
+const Point &CognitiveMap::GetOwnPos()
+{
+    return _YAHPointer.GetPos();
+}
+
+void CognitiveMap::WriteToFile()
+{
+    ++_frame;
+    string data;
+    char tmp[CLENGTH] = "";
+
+    sprintf(tmp, "<frame ID=\"%d\">\n", _frame);
+    data.append(tmp);
+
+
+    for (ptrLandmark landmark:_landmarks)
+    {
+        char tmp1[CLENGTH] = "";
+        sprintf(tmp1, "<landmark ID=\"%d\"\t"
+               "x=\"%.6f\"\ty=\"%.6f\"\t"
+               "z=\"%.6f\"\t"
+               "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
+               landmark->GetId(), landmark->GetPos().GetX(),
+               landmark->GetPos().GetY(),0.0 ,landmark->GetA(), landmark->GetB());
+
+        data.append(tmp1);
+    }
+    for (ptrWaypoint waypoint:_waypContainer)
+    {
+        char tmp2[CLENGTH] = "";
+        sprintf(tmp2, "<waypoint ID=\"%d\"\t"
+               "x=\"%.6f\"\ty=\"%.6f\"\t"
+               "z=\"%.6f\"\t"
+               "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
+               waypoint->GetId(), waypoint->GetPos().GetX(),
+               waypoint->GetPos().GetY(),0.0 ,waypoint->GetA(), waypoint->GetB());
+        data.append(tmp2);
+    }
+
+    char tmp3[CLENGTH]="";
+    sprintf(tmp3, "<YAHPointer "
+           "x=\"%.6f\"\ty=\"%.6f\"\t"
+           "z=\"%.6f\"\t"
+           "dir=\"%.2f\"/>\n",
+           _YAHPointer.GetPos().GetX(),
+           _YAHPointer.GetPos().GetY(),0.0 ,_YAHPointer.GetDirection());
+
+    data.append(tmp3);
+
+
+    data.append("</frame>\n");
+    _outputhandler->WriteToFile(data);
 }
 
 

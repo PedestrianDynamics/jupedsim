@@ -51,6 +51,11 @@ CognitiveMapStorage::CognitiveMapStorage(const Building * const b, std::string c
 CognitiveMapStorage::~CognitiveMapStorage()
 {
      delete creator;
+     for (auto it=cognitive_maps.begin(); it!=cognitive_maps.end(); ++it)
+     {
+        delete it->second;
+     }
+     cognitive_maps.clear();
 }
 
 CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
@@ -58,7 +63,7 @@ CMStorageValueType CognitiveMapStorage::operator[] (CMStorageKeyType key)
      CMStorageType::iterator it = cognitive_maps.find(key);
      if(it == cognitive_maps.end()) {
           CreateCognitiveMap(key);
-          cognitive_maps[key]->AddLandmarks(_landmarks);
+          cognitive_maps[key]->AddLandmarksSC(_landmarks);
      }
 
      return cognitive_maps[key];

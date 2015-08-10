@@ -128,8 +128,8 @@ bool Waypoint::WaypointReached(const Point& currentYAH) const
 {
     if (std::abs(_exactPos.GetX()-currentYAH.GetX())<0.75*_a && std::abs(_exactPos.GetY()-currentYAH.GetY())<0.75*_b)
     {
-        Log->Write("INFO:\t Waypoint reached");
-        Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
+        //Log->Write("INFO:\t Waypoint reached");
+        //Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
         return true;
     }
     return false;

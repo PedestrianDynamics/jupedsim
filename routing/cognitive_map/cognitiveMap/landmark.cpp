@@ -1,8 +1,10 @@
 #include "landmark.h"
 #include "associations.h"
 
-Landmark::Landmark(Point pos, ptrRoom room):Waypoint(pos,room)
+
+Landmark::Landmark(Point pos, ptrRoom room):Waypoint(pos,2.0,2.0,room)
 {
+
 
 }
 

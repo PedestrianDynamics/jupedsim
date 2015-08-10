@@ -1,12 +1,17 @@
 #ifndef COGNITIVEMAP_H
 #define COGNITIVEMAP_H
 
+#ifndef UPDATE_RATE
+#define UPDATE_RATE 2.0
+#endif
+
 
 #include "associations.h"
 #include "waypoints.h"
 #include "landmark.h"
 #include "../GraphNetwork.h"
 #include "youareherepointer.h"
+#include "cogmapoutputhandler.h"
 
 #include <queue>
 #include <memory>
@@ -39,6 +44,7 @@ using ptrBuilding = const Building*;
 using ptrPed = const Pedestrian*;
 using ptrLandmark = std::shared_ptr<Landmark>;
 using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
+using ptrOutputHandler = std::shared_ptr<CogMapOutputHandler>;
 
 
 class CognitiveMap
@@ -48,7 +54,9 @@ public:
     CognitiveMap(ptrBuilding b, ptrPed ped);
     ~CognitiveMap();
     void UpdateMap();
-    void UpdateYAHPointer(const Point &point);
+    void UpdateDirection();
+    void UpdateYAHPointer(const Point &move);
+    void AddLandmarksSC(std::vector<ptrLandmark> landmarks);
     void AddLandmarks(std::vector<ptrLandmark> landmarks);
     std::vector<ptrLandmark> LookForLandmarks();
     Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const;
@@ -58,6 +66,8 @@ public:
     //bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
     double ShortestPathDistance(const GraphEdge *edge, const ptrWaypoint waypoint);
+    const Point& GetOwnPos();
+    void WriteToFile();
     //evaluate waypoints
 
 private:
@@ -65,10 +75,13 @@ private:
     ptrPed _ped;
     ptrGraphNetwork _network;
     Associations _assoContainer;
+    std::vector<ptrLandmark> _landmarksSubConcious;
     std::vector<ptrLandmark> _landmarks;
     SortedWaypoints _waypContainerSorted;
     Waypoints _waypContainer;
     YouAreHerePointer _YAHPointer;
+    ptrOutputHandler _outputhandler;
+    int _frame;
 
 
 };

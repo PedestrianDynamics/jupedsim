@@ -237,6 +237,7 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/waypoints.cpp
   routing/cognitive_map/cognitiveMap/landmark.cpp
   routing/cognitive_map/cognitiveMap/youareherepointer.cpp
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
   routing/cognitive_map/Tools/triangle.cpp
 
   visiLibity/source_code/visilibity.cpp
@@ -289,6 +290,7 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/waypoints.h
   routing/cognitive_map/cognitiveMap/landmark.h
   routing/cognitive_map/cognitiveMap/youareherepointer.h
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
   routing/cognitive_map/Tools/triangle.h
 
   visiLibity/source_code/visilibity.hpp

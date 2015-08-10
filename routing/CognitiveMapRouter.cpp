@@ -58,7 +58,8 @@ CognitiveMapRouter::CognitiveMapRouter(int id, RoutingStrategy s) : Router(id, s
 
 CognitiveMapRouter::~CognitiveMapRouter()
 {
-//     delete cm_storage;
+     delete cm_storage;
+     delete sensor_manager;
 
 }
 
@@ -82,8 +83,9 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
     }
 
     //std::cout << p->GetGlobalTime() << std::endl;
-    if (std::fmod(p->GetGlobalTime(),2)==0.0)
+    if (std::fmod(p->GetGlobalTime(),sensor_manager->GetIntVPeriodicUpdate())==0.0 && p->GetGlobalTime()>0)
     {
+        //Log->Write(std::to_string(p->GetGlobalTime()));
         sensor_manager->execute(p, SensorManager::PERIODIC);
 
         int status = FindDestination(p);
@@ -98,15 +100,17 @@ int CognitiveMapRouter::FindExit(Pedestrian * p)
 
 int CognitiveMapRouter::FindDestination(Pedestrian * p)
 {
-        /// Discover doors
+        // Discover doors
         sensor_manager->execute(p, SensorManager::NO_WAY);
         //check if there is a way to the outside the pedestrian knows (in the cognitive map)
         const GraphEdge * destination = nullptr;
-        ///Cognitive Map /Associations/ Waypoints/ landmarks
+        //Cognitive Map /Associations/ Waypoints/ landmarks
 
         (*cm_storage)[p]->UpdateMap();
 
         (*cm_storage)[p]->AssessDoors();
+
+        //Log->Write(std::to_string((*cm_storage)[p]->GetOwnPos().GetX())+" "+std::to_string((*cm_storage)[p]->GetOwnPos().GetY()));
 
         destination = (*cm_storage)[p]->GetGraphNetwork()->GetDestination();
         if(destination == nullptr) {

@@ -69,11 +69,16 @@ public:
      static SensorManager * InitWithAllSensors(const Building *, CognitiveMapStorage *);
      static SensorManager * InitWithCertainSensors(const Building*, CognitiveMapStorage*, const optStorage& optSto);
 
+     void SetIntVPeriodicUpdate(const double& interval);
+     const double& GetIntVPeriodicUpdate();
+
 private:
      const Building * const building;
      CognitiveMapStorage * cm_storage;
 
      SensorContainer registered_sensors;
+
+     double _periodicUpdateInterval;
 };
 
 
