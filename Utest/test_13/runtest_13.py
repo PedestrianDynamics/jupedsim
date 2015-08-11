@@ -131,10 +131,10 @@ if __name__ == "__main__":
     floatflowsWidth = [float(el) for el in floatflowsWidth]
     floatflowsWidth = np.array(floatflowsWidth)
     M = np.array([np.mean(i) for i in flows.values()]) # std pro CPU
-    color = ['blue', 'red', 'green', 'cyan', 'magenta']
+    color = ['blue', 'red', 'green', 'cyan', 'magenta', 'black']
     cnt = 0
     clf()
-    for wad in WADs:
+    for wad in sorted(WADs):
         flow_file = "flowWAD%s.txt"%wad
         ff = open(flow_file, "w")
     #flow_file = "flow.txt"
@@ -159,38 +159,55 @@ if __name__ == "__main__":
         ms = 8
     #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")  
         condition = floatflowsWAD == float(wad)      
-	subpart = floatflowsWidth[condition]
+        subpart = floatflowsWidth[condition]
         indexsort = np.argsort( subpart )
         logging.debug(indexsort)
         F = np.array(subpart)[indexsort]
-        plot(F,  (np.array(M)[condition])[indexsort], "o-", lw=2, label='Mean WAD: %s'%wad, color=color[cnt])
+        plot(F,  (np.array(M)[condition])[indexsort], "o-", lw=2, label='WAD: %s'%wad, color=color[cnt])
         cnt = cnt + 1
         if cnt == len(color):
              cnt = 0
-        err += np.sqrt( sum(((M[condition])[indexsort]-lid_f)**2) )
+        #err += np.sqrt( sum(((M[condition])[indexsort]-lid_f)**2) )
     #errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
-    plot(lid_w , lid_f, "D-k", lw=2, ms = ms, label = "experiment")
+    #plot(lid_w , lid_f, "D-k", lw=2, ms = ms, label = "experiment")
+    
+    edfiles = glob.glob("/home/arne/Desktop/experiments/*.txt")
+    
+    for edfile in sorted(edfiles):
+      d = np.loadtxt(edfile)
+      mx = d[:,0]
+      my = d[:,1]
+      plot(mx,  my, "o", lw=1, label=edfile.split(".")[0].split("/")[5], color=color[cnt])
+      cnt = cnt + 1
+      if cnt == len(color):
+        cnt = 0
+    
+
+ 
+    #execfile ("/home/arne/master/bin/anaconda/bin/plotExperiment.py")
     axes().set_aspect(1./axes().get_data_ratio())  
     legend(loc='best', numpoints=1)
     grid()
     xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     #xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
-    xticks(widths)
-    xlim([1.1, 2.6])
+    #xticks([1.2, 1.4, 1.6, 2.0, 2.2, 2.5])
+    #xticks(widths)
+    xticks(range(4))
+    xlim([0, 4])
     ylim([0, 6])
     
     
-    title(r"$\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
+    #title(r"$\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     
-    savefig("flow.png")
+    savefig("sim_flow_vs_experimental_data.png")
     show()
     #########################################################################
     
     time2 = time.clock()
     logging.info("time elapsed %.2f [s]."%(time2-time1))
-    logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
+    #logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
     
     if err > tolerance:
         exit(FAILURE)

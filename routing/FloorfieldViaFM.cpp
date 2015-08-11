@@ -55,8 +55,8 @@ FloorfieldViaFM::~FloorfieldViaFM()
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
                                  const double slowdownDistance, const bool useDistancefield) {
-    std::cerr << "Bin im old constructor" << std::endl;
-    std::cout << "Bin im old constructor" << std::endl;
+    std::cerr << "INFO:   Calculating Floorfield" << std::endl;
+    //std::cout << "Bin im old constructor" << std::endl;
 
     //ctor
     threshold = -1; //negative value means: ignore threshold
@@ -107,8 +107,8 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
 //                    ...
 
 // comments show lineformat in .vtk file (below)
-    std::cerr << "Bin im read file constructor" << std::endl;
-    std::cout << "Bin im read file constructor" << std::endl;
+    std::cerr << "INFO:   Readfrom File: Floorfield Data" << std::endl;
+    //std::cout << "Bin im read file constructor" << std::endl;
     std::ifstream file(filename);
     std::string line;
 
@@ -207,6 +207,7 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
         inputline >> dirToWall[i]._x >> dirToWall[i]._y >> fdummy;  //0.989337 7.88255 0.0
         inputline.clear();
     }
+    file.close();
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
