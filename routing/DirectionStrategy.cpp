@@ -38,7 +38,6 @@
 #include <fstream>
 
 
-
 DirectionStrategy::DirectionStrategy()
 {
 }
@@ -288,11 +287,16 @@ double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
 
 void DirectionFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
     //implement mechanic, that can read-in an existing floorfield (from a previous run)
-    std::ifstream test(("FF"+building->GetGeometryFilename() + ".vtk").c_str());
+    string s = building->GetGeometryFilename();
+    s.erase(s.find_last_of(".", string::npos)); // delete ending
+    string FF_filename = (building->GetProjectRootDir() + "FF_" + s + ".vtk").c_str();
+    std::ifstream test(FF_filename);
     if (test.good()) {
-        ffviafm = new FloorfieldViaFM(("FF"+building->GetGeometryFilename() + ".vtk").c_str());
+          Log->Write("INFO: \tRead Floor field from file <" + FF_filename + ">");
+        ffviafm = new FloorfieldViaFM(FF_filename);
     } else {
-        ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap);
+          Log->Write("INFO: \tWrite Floor field to file <" +  FF_filename + ">");
+          ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);
     }
     initDone = true;
 }
