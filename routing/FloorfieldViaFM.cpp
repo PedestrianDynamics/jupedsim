@@ -55,7 +55,6 @@ FloorfieldViaFM::~FloorfieldViaFM()
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
                                  const double slowdownDistance, const bool useDistancefield, const std::string& filename) {
-
     //ctor
     threshold = -1; //negative value means: ignore threshold
     threshold = slowdownDistance;
@@ -203,6 +202,7 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
         inputline >> dirToWall[i]._x >> dirToWall[i]._y >> fdummy;  //0.989337 7.88255 0.0
         inputline.clear();
     }
+    file.close();
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
