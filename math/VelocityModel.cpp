@@ -190,21 +190,11 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point direction = (e0(ped, room) + repPed + repWall);
                 // calculate min spacing
                 double spacing;
-                spacing = *std::min_element(std::begin(spacings), std::end(spacings));
-
-                // for (auto s: spacings)
-                // {
-                //       std::cout << "s: " << s << std::endl;
-                // }
-                
+                spacing = *std::min_element(std::begin(spacings), std::end(spacings));                
                 Point acc = direction.Normalized() * OptimalSpeed(ped, spacing);
-                // std::cout << direction.Norm() << std::endl;
-                // std::cout << direction.GetX() << " | " << direction.GetY() << std::endl;
-                if(direction.Norm()< 0.3 && ped->GetGlobalTime() >5)
-                      acc = Point(0,0);
+                 // if(direction.Norm()< 0.3 && ped->GetGlobalTime() >5)
+                 //       acc = Point(0,0);   
                 result_acc.push_back(acc);
-                // spacings.resize(0);
-                // spacings.shrink_to_fit();
                 spacings.clear();
            } // for p
 
@@ -230,12 +220,15 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 
                 //only update the position if the velocity is above a threshold
-                //if (v_neu.Norm() >= J_EPS_V*0.7)
+                if (v_neu.Norm() >= J_EPS_V)
                 {
-                     ped->SetPos(pos_neu);
                      ped->SetPhiPed();
                 }
-
+                // if(ped->GetID()==10)
+                // {
+                //       fprintf(stderr, "%f %f %f %f %f\n", ped->GetGlobalTime(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().Norm(), ped->GetEllipse().GetAmin()+ped->GetEllipse().GetAv()*ped->GetV().Norm());
+                // }
+                ped->SetPos(pos_neu);
                 ped->SetV(v_neu);
 
            }
@@ -276,7 +269,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
 {
       double v0 = ped->GetV0Norm();
       double T = ped->GetT();
-      double l = ped->GetEllipse().GetBmax(); //assume peds are circles with const radius
+      double l = 2*ped->GetEllipse().GetBmax(); //assume peds are circles with const radius
       double speed = (spacing-l)/T;
       speed = (speed>0)?speed:0;
       speed = (speed<v0)?speed:v0;
@@ -289,7 +282,7 @@ double VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
       // printf("GetSpacing with %d and %d\n", ped1->GetID(), ped2->GetID());
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
       double Distance = distp12.Norm();
-      double l = ped1->GetEllipse().GetBmax();
+      double l = 2*ped1->GetEllipse().GetBmax();
       Point ep12;
       if (Distance >= J_EPS) {
             ep12 = distp12.Normalized();
@@ -301,10 +294,18 @@ double VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
             exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
+      if(ped1->GetV().NormSquare()<0.01){
+            ei = ped1->GetV0().Normalized();
+      }
       double condition1 = ei.ScalarProduct(ep12); // < v_i , e_ij > should be positive
       double condition2 = ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
       condition2 = (condition2>0)?condition2:-condition2; // abs
-      // printf("condition1= %f, condition2=%f l/D=%f, norm=%f\n", condition1, condition2, l/Distance, distp12.Norm());
+      // if(ped1->GetID()==10 && ped2->GetID()==45){
+      //       printf("ei %f, %f | eiT %f ,%f, ep12 %f, %f \n", ei.GetX(), ei.GetY(), ei.Rotate(0,1).GetX(), ei.Rotate(0,1).GetY(), ep12.GetX(), ep12.GetY());
+      //       printf("condition1= %f, condition2=%f l/D=%f, norm=%f\n", condition1, condition2, l/Distance, distp12.Norm());
+            
+      // }
+
       
       if((condition1 >=0 ) && (condition2 <= l/Distance))
             return distp12.Norm();
@@ -320,7 +321,7 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
      double R_ij;
      const double EPS = 0.001;
-     double l = ped1->GetEllipse().GetBmax();
+     double l = 2*ped1->GetEllipse().GetBmax();
 
      if (Distance >= J_EPS) {
           ep12 = distp12.Normalized();
@@ -398,7 +399,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      //double K_iw;
      double l = ped->GetEllipse().GetBmax();
      double R_iw;
-     double min_distance_to_wall = 0.1; // 10 cm
+     double min_distance_to_wall = 0.001; // 10 cm
      
      if (Distance > min_distance_to_wall) {
            e_iw = dist / Distance;
