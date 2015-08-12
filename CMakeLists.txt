@@ -207,7 +207,7 @@ set (   source_files
   routing/mesh/Mesh.cpp
 
   routing/CognitiveMapRouter.cpp
-  routing/cognitive_map/CognitiveMap.cpp
+  routing/cognitive_map/GraphNetwork.cpp
   routing/cognitive_map/NavigationGraph.cpp
   routing/cognitive_map/CognitiveMapStorage.cpp
   routing/cognitive_map/AbstractCognitiveMapCreator.cpp
@@ -222,9 +222,19 @@ set (   source_files
   routing/cognitive_map/sensor/JamSensor.cpp
   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
   routing/cognitive_map/sensor/SmokeSensor.cpp
+  routing/cognitive_map/sensor/locater.cpp
   routing/cognitive_map/fire_mesh/FireMesh.cpp
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
+  routing/cognitive_map/cognitiveMap/associations.cpp
+  routing/cognitive_map/cognitiveMap/cognitivemap.cpp
+  routing/cognitive_map/cognitiveMap/waypoints.cpp
+  routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/cognitiveMap/youareherepointer.cpp
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/Tools/triangle.cpp
+
+  visiLibity/source_code/visilibity.cpp
 
 
   poly2tri/common/shapes.cpp
@@ -251,7 +261,7 @@ set (   header_files
   routing/mesh/Mesh.h
 
   routing/CognitiveMapRouter.h
-  routing/cognitive_map/CognitiveMap.h
+  routing/cognitive_map/GraphNetwork.h
   routing/cognitive_map/NavigationGraph.h
   routing/cognitive_map/CognitiveMapStorage.h
   routing/cognitive_map/AbstractCognitiveMapCreator.h
@@ -266,9 +276,19 @@ set (   header_files
   routing/cognitive_map/sensor/JamSensor.h
   routing/cognitive_map/sensor/LastDestinationsSensor.h
   routing/cognitive_map/sensor/SmokeSensor.h
+  routing/cognitive_map/sensor/locater.h
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
+  routing/cognitive_map/cognitiveMap/associations.h
+  routing/cognitive_map/cognitiveMap/cognitivemap.h
+  routing/cognitive_map/cognitiveMap/waypoints.h
+  routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/cognitiveMap/youareherepointer.h
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/Tools/triangle.h
+
+  visiLibity/source_code/visilibity.hpp
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
