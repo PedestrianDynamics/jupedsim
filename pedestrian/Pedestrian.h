@@ -63,6 +63,7 @@ private:
      //gcfm specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
+     double _T; // OV function
      double _deltaT; // step size
      JEllipse _ellipse;// the shape of this pedestrian
      Point _V0; //vector V0
@@ -149,6 +150,8 @@ public:
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
 
+     double GetT() const;
+     void SetT(double T);
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);

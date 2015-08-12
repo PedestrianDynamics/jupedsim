@@ -175,6 +175,7 @@ set (   source_files
   math/ODESolver.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
+  math/VelocityModel.cpp
   math/OperationalModel.cpp
 
   mpi/LCGrid.cpp
@@ -311,6 +312,7 @@ set (   header_files
   math/ODESolver.h
   math/GCFMModel.h
   math/GompertzModel.h
+  math/VelocityModel.h
   math/OperationalModel.h   
 
   poly2tri/poly2tri.h

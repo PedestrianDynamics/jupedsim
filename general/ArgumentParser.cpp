@@ -57,6 +57,7 @@
 #include "../routing/CognitiveMapRouter.h"
 #include "../math/GompertzModel.h"
 #include "../math/GCFMModel.h"
+#include "../math/VelocityModel.h"
 
 #ifdef _USE_PROTOCOL_BUFFER
 #include "../matsim/HybridSimulationManager.h"
@@ -112,6 +113,8 @@ ArgumentParser::ArgumentParser()
      pcPed=3;
      paWall=1;
      pbWall=0.7;
+     pDWall = 0.1;  //Tordeux2015
+     pDPed = 0.1; //Tordeux2015
      pcWall=3;
      pLog = 0;
      pModel=MODEL_GFCM;
@@ -276,7 +279,7 @@ bool ArgumentParser::ParseIniFile(string inifile)
                _maxOpenMPThreads = omp_get_max_threads();
           }
      }
-     Log->Write("INFO: \t Using tnum_threads <%d> threads", _maxOpenMPThreads);
+     Log->Write("INFO: \t Using num_threads <%d> threads", _maxOpenMPThreads);
 
      //logfile
      if (xMainNode->FirstChild("logfile"))
@@ -434,11 +437,24 @@ bool ArgumentParser::ParseIniFile(string inifile)
                parsingModelSuccessful=true;
                break;
           }
+          else if ((pModel == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY))
+          {
+               if (modelName != "Tordeux2015")
+               {
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean Tordeux2015?");
+                    return false;
+               }
+               //only parsing one model
+               if(ParseVelocityModel(xModel)==false)
+                    return false;
+               parsingModelSuccessful=true;
+               break;
+          }
      }
 
      if( parsingModelSuccessful==false)
      {
-          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz)", pModel);
+          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz) or 3 (Tordeux2015)", pModel);
           Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
           Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
           return false;
@@ -654,6 +670,94 @@ bool ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
      return true;
 }
 
+bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
+{
+     //parsing the model parameters
+     Log->Write("\nINFO:\tUsing Tordeux2015 model");
+
+     Log->Write("INFO:\tParsing the model parameters");
+
+     TiXmlNode* xModelPara = xVelocity->FirstChild("model_parameters");
+     if(!xModelPara){
+          Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
+          Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+          return false;
+     }
+
+     // For convenience. This moved to the header as it is not model specific
+     if (xModelPara->FirstChild("tmax"))
+     {
+          Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
+          Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+          return false;
+     }
+
+     //solver
+     if(ParseNodeToSolver(*xModelPara)==false)
+          return false;
+
+     //stepsize
+     if(ParseStepSize(*xModelPara)==false)
+          return false;
+
+     //exit crossing strategy
+     if(ParseStrategyNodeToObject(*xModelPara)==false)
+          return false;
+
+     //linked-cells
+     if(ParseLinkedCells(*xModelPara)==false)
+          return false;
+
+     //force_ped
+     if (xModelPara->FirstChild("force_ped"))
+     {
+
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
+               paPed = 1.0; // default value
+          else
+          {
+               string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
+               paPed = atof(a.c_str());
+          }
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("D"))
+               pDPed = 0.1; // default value in [m]
+          else
+          {
+               string D = xModelPara->FirstChildElement("force_ped")->Attribute("D");
+               pDPed = atof(D.c_str());
+          }
+          Log->Write("INFO: \tfrep_ped a=%0.2f, D=%0.2f", paPed, pDPed);
+     }
+     //force_wall
+     if (xModelPara->FirstChild("force_wall"))
+     {
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
+               paWall = 1.0; // default value
+          else
+          {
+               string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
+               paWall = atof(a.c_str());
+          }
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("D"))
+               pDWall = 0.1; // default value in [m]
+          else
+          {
+               string D = xModelPara->FirstChildElement("force_wall")->Attribute("D");
+               pDWall = atof(D.c_str());
+          }
+          Log->Write("INFO: \tfrep_wall a=%0.2f, D=%0.2f", paWall, pDWall);
+     }
+
+     //Parsing the agent parameters
+     ParseAgentParameters(xVelocity);
+     p_op_model = std::shared_ptr<OperationalModel>(new VelocityModel(p_exit_strategy.get(),
+               this->GetaPed(), this->GetDPed(),
+               this->GetaWall(), this->GetDWall()
+               ));
+
+     return true;
+}
+
 void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
 {
      //Parsing the agent parameters
@@ -730,7 +834,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"),pBmaxMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"),pBmaxSigma);
                agentParameters->InitBmax(mu,sigma);
-               Log->Write("INFO: \ttBmax mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tBmax mu=%f , sigma=%f",mu,sigma);
           }
 
           //bmin
@@ -739,7 +843,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"),pBminMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"),pBminSigma);
                agentParameters->InitBmin(mu,sigma);
-               Log->Write("INFO: \ttBmin mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tBmin mu=%f , sigma=%f",mu,sigma);
           }
 
           //amin
@@ -748,7 +852,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"),pAminMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"),pAminSigma);
                agentParameters->InitAmin(mu,sigma);
-               Log->Write("INFO: \ttAmin mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tAmin mu=%f , sigma=%f",mu,sigma);
           }
           //tau
           if (xAgentPara->FirstChild("tau"))
@@ -756,7 +860,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"),pTauMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"),pTauSigma);
                agentParameters->InitTau(mu,sigma);
-               Log->Write("INFO: \ttTau mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tTau mu=%f , sigma=%f",mu,sigma);
           }
           //atau
           if (xAgentPara->FirstChild("atau"))
@@ -764,14 +868,28 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"),pAtauMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"),pAtauSigma);
                agentParameters->InitAtau(mu,sigma);
-               Log->Write("INFO: \ttAtau mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tAtau mu=%f , sigma=%f",mu,sigma);
           }
-          if(pModel == 2) { //  Gompertz
+          // T
+          if (xAgentPara->FirstChild("T"))
+          {
+               double mu = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"),pAtauMu);
+               double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"),pAtauSigma);
+               agentParameters->InitT(mu,sigma);
+               Log->Write("INFO: \tT mu=%f , sigma=%f",mu,sigma);
+          }
+          
+          if(pModel == 2) { // Gompertz
                double beta_c = 1; /// @todo quick and dirty
                double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau()*agentParameters->GetV0();
                double max_Eb = 0.5*(agentParameters->GetBmin() + 0.49) ; /// @todo hard-coded value should be the same as in pedestrians GetEB
                double max_Ea_Eb = (max_Ea>max_Eb)?max_Ea:max_Eb;
                pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
+               pDistEffMaxWall  = pDistEffMaxPed;
+          }
+          else if(pModel == 3) { // Tordeux2015
+               double max_Eb = agentParameters->GetBmax();
+               pDistEffMaxPed = max_Eb + agentParameters->GetT()*agentParameters->GetV0();
                pDistEffMaxWall  = pDistEffMaxPed;
           }
      }
@@ -1130,6 +1248,17 @@ double ArgumentParser::GetbWall() const
 {
      return pbWall;
 }
+
+double ArgumentParser::GetDWall() const
+{
+     return pDWall;
+}
+
+double ArgumentParser::GetDPed() const
+{
+     return pDPed;
+}
+
 
 double ArgumentParser::GetcWall() const
 {
