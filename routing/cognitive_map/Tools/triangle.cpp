@@ -1,7 +1,5 @@
 #include "triangle.h"
-
-#include <tuple>
-#include <math.h>
+#include <cmath>
 
 Triangle::Triangle(Point p, const Waypoint &waypoint)
 {

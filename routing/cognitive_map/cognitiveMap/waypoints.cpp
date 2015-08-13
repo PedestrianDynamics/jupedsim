@@ -1,6 +1,5 @@
 #include "waypoints.h"
-#include <stdlib.h>
-#include <math.h>
+#include <cmath>
 
 Waypoint::Waypoint(Point pos, ptrRoom room)
 {
