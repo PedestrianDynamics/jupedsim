@@ -888,7 +888,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                pDistEffMaxWall  = pDistEffMaxPed;
           }
           else if(pModel == 3) { // Tordeux2015
-               double max_Eb = agentParameters->GetBmax();
+               double max_Eb = 2*agentParameters->GetBmax();
                pDistEffMaxPed = max_Eb + agentParameters->GetT()*agentParameters->GetV0();
                pDistEffMaxWall  = pDistEffMaxPed;
           }

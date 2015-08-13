@@ -124,9 +124,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);
-           vector< double > spacings = vector<double > ();
+           vector< my_pair > spacings = vector<my_pair > ();
            spacings.reserve(nSize); // bigger than needed
-           spacings.push_back(100); //in case there are no neighbors
+           spacings.push_back(my_pair(100, 1)); //in case there are no neighbors
            const int threadID = omp_get_thread_num();
 
            int start = threadID*partSize;
@@ -181,16 +181,32 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                           }
                      }
                      // calculate spacing
-                     double spacing = GetSpacing(ped, ped1);
-                     spacings.push_back(spacing);
+                     my_pair spacing_winkel = GetSpacing(ped, ped1);
+                     spacings.push_back(spacing_winkel);
                 }
                 //repulsive forces to walls and closed transitions that are not my target
                 Point repWall = ForceRepRoom(allPeds[p], subroom);
                 
                 Point direction = (e0(ped, room) + repPed + repWall);
                 // calculate min spacing
-                double spacing;
-                spacing = *std::min_element(std::begin(spacings), std::end(spacings));                
+                std::sort(spacings.begin(), spacings.end(), sort_pred());                
+                double spacing = spacings[0].first;
+                double winkel = spacings[0].second;
+                if (ped->GetID()==1){
+                for (auto a: spacings)
+                      std::cout << "\nHH first " << a.first << "\n second  " << a.second << std::endl;
+
+                
+
+                std::cout << "spacing:  " << spacing<< std::endl;
+                std::cout << "winkel:  " << winkel << std::endl;
+                                getc(stdin);
+                }
+                
+//                spacing = *std::min_element(std::begin(spacings), std::end(spacings));
+                if(ped->GetID()==10){
+                      fprintf(stderr, "%f %f %f\n", ped->GetGlobalTime(), (repPed+repWall).Norm(), spacing);
+                }
                 Point acc = direction.Normalized() * OptimalSpeed(ped, spacing);
                  // if(direction.Norm()< 0.3 && ped->GetGlobalTime() >5)
                  //       acc = Point(0,0);   
@@ -224,10 +240,10 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 {
                      ped->SetPhiPed();
                 }
-                // if(ped->GetID()==10)
-                // {
-                //       fprintf(stderr, "%f %f %f %f %f\n", ped->GetGlobalTime(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().Norm(), ped->GetEllipse().GetAmin()+ped->GetEllipse().GetAv()*ped->GetV().Norm());
-                // }
+                if(ped->GetID()==-10)
+                {
+                      fprintf(stderr, "%f %f %f %f %f\n", ped->GetGlobalTime(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().Norm(), ped->GetEllipse().GetAmin()+ped->GetEllipse().GetAv()*ped->GetV().Norm());
+                }
                 ped->SetPos(pos_neu);
                 ped->SetV(v_neu);
 
@@ -277,9 +293,8 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
       return speed;
 }
 
-double VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
+my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
 {
-      // printf("GetSpacing with %d and %d\n", ped1->GetID(), ped2->GetID());
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
       double Distance = distp12.Norm();
       double l = 2*ped1->GetEllipse().GetBmax();
@@ -297,7 +312,7 @@ double VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
       if(ped1->GetV().NormSquare()<0.01){
             ei = ped1->GetV0().Normalized();
       }
-      double condition1 = ei.ScalarProduct(ep12); // < v_i , e_ij > should be positive
+      double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
       double condition2 = ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
       condition2 = (condition2>0)?condition2:-condition2; // abs
       // if(ped1->GetID()==10 && ped2->GetID()==45){
@@ -308,9 +323,10 @@ double VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
 
       
       if((condition1 >=0 ) && (condition2 <= l/Distance))
-            return distp12.Norm();
+            // @todo return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
+            return  my_pair(distp12.Norm(), condition1);//*condition1;
       else
-            return std::numeric_limits<double>::max();
+            return  my_pair(std::numeric_limits<double>::max(), condition1);
 }      
 Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 {

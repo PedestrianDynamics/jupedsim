@@ -36,6 +36,19 @@
 #include "../geometry/Building.h"
 #include "OperationalModel.h"
 
+typedef std::pair<double, double> my_pair;
+// sort with respect to first element (ascending).
+// In case of equality sort with respect to second element (descending)
+struct sort_pred
+{
+      bool operator () (const my_pair& left, const my_pair& right)
+            {
+                  return (left.first == right.first) ? 
+                        (left.second > right.second) : 
+                        (left.first < right.first);
+            }
+};
+
 
 //forward declaration
 class Pedestrian;
@@ -67,7 +80,7 @@ private:
 
      Point e0(Pedestrian *ped, Room* room) const;
 
-     double GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const;
+     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const;
            
      /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
