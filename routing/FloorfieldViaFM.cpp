@@ -74,7 +74,9 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     resetGoalAndCosts(wall, numOfExits);
 
-    calculateDistanceField(threshold); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
+    //thresholdArg set negative because: it shows, that we NEED all distance values throughout the domain!
+    //threshold is used in calculateFloorfield(...)
+    calculateDistanceField(-1.); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
 
     testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
@@ -619,7 +621,6 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
 
 void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if threshold negative, then ignore it
 
-    threshold = thresholdArg;
 #ifdef TESTING
     //sanity check (fields <> 0)
     if (flag == 0) return;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
@@ -649,7 +650,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     while (smallest != nullptr) {
         long int keyOfSmallest = smallest->key;
         flag[keyOfSmallest] = 3;
-        if ((threshold > 0) && (trialfield[keyOfSmallest].cost[0] > threshold)) {    //set rest of nearfield and rest of unknown to this max value:
+        if ((thresholdArg > 0) && (trialfield[keyOfSmallest].cost[0] > thresholdArg)) {    //set rest of nearfield and rest of unknown to this max value:
 
             //rest of nearfield
             Trial* iter = smallest->child;
