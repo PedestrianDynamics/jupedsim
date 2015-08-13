@@ -1,11 +1,15 @@
 /build/
 /lib/
 /bin/
+/doc
 /Debug
 /Release
+/Testing
 /doc/html
 /figs
 /figs_bot
+/inputfiles
+/Utest
 /Utest/*/inifiles*/
 /Utest/*/trajectories
 /Utest/rimea_tests/*/inifiles*/
@@ -90,3 +94,5 @@ vgcore.*
 /delme.py
 /mencoderVideos.sh
 /true_false.xml
+/JPScore.cbp
+/JPScore.layout
