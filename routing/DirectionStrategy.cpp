@@ -289,7 +289,7 @@ void DirectionFloorfield::Init(Building* building, double stepsize, double thres
     //implement mechanic, that can read-in an existing floorfield (from a previous run)
     string s = building->GetGeometryFilename();
     s.erase(s.find_last_of(".", string::npos)); // delete ending
-    string FF_filename = (building->GetProjectRootDir() + "FF_" + std::to_string(threshold) + "_" + s + ".vtk").c_str();
+    string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
     std::ifstream test(FF_filename);
     if (test.good()) {
           Log->Write("INFO: \tRead Floor field from file <" + FF_filename + ">");
