@@ -54,10 +54,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
-                                 const double slowdownDistance, const bool useDistancefield) {
-    std::cerr << "INFO:   Calculating Floorfield" << std::endl;
-    //std::cout << "Bin im old constructor" << std::endl;
-
+                                 const double slowdownDistance, const bool useDistancefield, const std::string& filename) {
     //ctor
     threshold = -1; //negative value means: ignore threshold
     threshold = slowdownDistance;
@@ -85,7 +82,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     calculateFloorfield(useDistancefield); //use distance2Wall
 
     testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
-    writeFF(("FF" + buildingArg->GetGeometryFilename() + ".vtk").c_str());
+    writeFF(filename);
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
@@ -107,8 +104,6 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
 //                    ...
 
 // comments show lineformat in .vtk file (below)
-    std::cerr << "INFO:   Readfrom File: Floorfield Data" << std::endl;
-    //std::cout << "Bin im read file constructor" << std::endl;
     std::ifstream file(filename);
     std::string line;
 
@@ -1029,7 +1024,7 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
     //std::cerr << "INFO: \tFile closed: " << filename1 << std::endl;
 }
 
-void FloorfieldViaFM::writeFF(const char* filename) {
+void FloorfieldViaFM::writeFF(const std::string& filename) {
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());

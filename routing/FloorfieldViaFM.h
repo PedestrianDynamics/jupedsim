@@ -52,7 +52,7 @@ class FloorfieldViaFM
     public:
         FloorfieldViaFM();
         FloorfieldViaFM(const std::string&);
-        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double slowdownDistance, const bool useDistancefield);
+        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double slowdownDistance, const bool useDistancefield, const std::string&);
         virtual ~FloorfieldViaFM();
         FloorfieldViaFM(const FloorfieldViaFM& other);
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
@@ -80,7 +80,7 @@ class FloorfieldViaFM
         inline double twosidedCalc(double x, double y, double hDivF);
 
         void testoutput(const char*, const char*, const double*);
-        void writeFF(const char*);
+        void writeFF(const std::string&);
 
 #ifdef TESTING
         void setGrid(RectGrid* gridArg) {grid = gridArg;}
