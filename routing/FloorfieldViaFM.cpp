@@ -74,9 +74,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     resetGoalAndCosts(wall, numOfExits);
 
-    //thresholdArg set negative because: it shows, that we NEED all distance values throughout the domain!
-    //threshold is used in calculateFloorfield(...)
-    calculateDistanceField(-1.); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
+    calculateDistanceField(threshold); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
 
     testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
