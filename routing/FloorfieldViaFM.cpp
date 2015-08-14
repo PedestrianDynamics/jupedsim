@@ -54,10 +54,10 @@ FloorfieldViaFM::~FloorfieldViaFM()
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg,
-                                 const double slowdownDistance, const bool useDistancefield, const std::string& filename) {
+                                 const double wallAvoidDistance, const bool useDistancefield, const std::string& filename) {
     //ctor
     threshold = -1; //negative value means: ignore threshold
-    threshold = slowdownDistance;
+    threshold = wallAvoidDistance;
 
     if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -83,7 +83,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     calculateFloorfield(useDistancefield); //use distance2Wall
 
-    testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+    //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
     writeFF(filename);
 }
 

@@ -52,7 +52,7 @@ class FloorfieldViaFM
     public:
         FloorfieldViaFM();
         FloorfieldViaFM(const std::string&);
-        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double slowdownDistance, const bool useDistancefield, const std::string&);
+        FloorfieldViaFM(const Building* const buildingArg, const double hxArg, const double hyArg, const double wallAvoidDistance, const bool useDistancefield, const std::string&);
         virtual ~FloorfieldViaFM();
         FloorfieldViaFM(const FloorfieldViaFM& other);
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
