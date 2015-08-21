@@ -36,17 +36,19 @@
 #include "../geometry/Building.h"
 #include "../geometry/Point.h"
 
-#include "../geometry/SubRoom.h"
-#include <stdlib.h>
-#include <time.h>
-
 #include "../mpi/LCGrid.h"
 #include <iostream>
-#include <string>
 #include <thread>
 #include <chrono>
 #include "AgentsQueue.h"
 
+
+//a.brkic begin
+#include "../geometry/SubRoom.h"
+#include <stdlib.h>
+#include <time.h>
+#include <string>
+#include <random>
 
 #include "boost/polygon/voronoi.hpp"
 using boost::polygon::voronoi_builder;
@@ -77,6 +79,7 @@ namespace polygon {
 }  // polygon
 }  // boost
 
+//a.brkic end
 
 using namespace std;
 
@@ -405,31 +408,8 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 
 			voronoi_diagram<double>::const_vertex_iterator max_it=vd.vertices().begin();
 			double max_dis=0;
-			//double dis=0;
 
-
-			//finding the best position - DO: make different functions for calculating the best position
-			/*for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
-			{
-				Point vert_pos = Point( it->x()/factor, it->y()/factor );
-				if( subroom->IsInsideOfPolygon(vert_pos) ) //wrote this function by myself
-				{
-					const voronoi_diagram<double>::vertex_type &vertex = *it;
-					const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-
-					std::size_t index = ( edge->cell() )->source_index();
-					Point p = discrete_positions[index];
-
-					dis= ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
-					if(dis>max_dis)
-					{
-						max_dis = dis;
-						max_it = it;
-					}
-				}
-			}*/
-
-			VoronoiBestVertex1(discrete_positions, vd, subroom, factor, max_it, max_dis	);
+			VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, max_it, max_dis	);
 
 			Point pos( max_it->x()/factor, max_it->y()/factor ); //check!
 			if(max_dis> radius*factor*radius*factor)// be careful with the factor!! radius*factor
@@ -462,7 +442,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 }
 
 //gives the voronoi vertex with max distance
-void AgentsSourcesManager::VoronoiBestVertex1 (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+void AgentsSourcesManager::VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
 		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const
 {
 	double dis = 0;
@@ -477,7 +457,7 @@ void AgentsSourcesManager::VoronoiBestVertex1 (const std::vector<Point>& discret
 			std::size_t index = ( edge->cell() )->source_index();
 			Point p = discrete_positions[index];
 
-			dis= ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
 			if(dis>max_dis)
 			{
 				max_dis = dis;
@@ -485,6 +465,61 @@ void AgentsSourcesManager::VoronoiBestVertex1 (const std::vector<Point>& discret
 			}
 		}
 	}
+}
+
+
+//gives random voronoi vertex but with weights proportional to squared distances
+void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+		voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
+{
+	std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
+	vector<double> partial_sums;
+	unsigned int size;
+
+	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
+	{
+		Point vert_pos = Point( it->x()/factor, it->y()/factor );
+		if( subroom->IsInsideOfPolygon(vert_pos) ) //wrote this function by myself
+		{
+			const voronoi_diagram<double>::vertex_type &vertex = *it;
+			const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+
+			std::size_t index = ( edge->cell() )->source_index();
+			Point p = discrete_positions[index];
+
+			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+
+			possible_vertices.push_back( it );
+			partial_sums.push_back( dis );
+
+			size = partial_sums.size();
+			if( size > 1 )
+			{
+				partial_sums[ size - 1 ] += partial_sums[ size - 2 ];
+			}
+		}
+	}
+	//now we have the vector of possible vertices and weights and we can choose one randomly
+
+	double lower_bound = 0;
+	double upper_bound = partial_sums[size-1];
+	std::uniform_real_distribution<double> unif(lower_bound,upper_bound);
+	std::default_random_engine re;
+	double a_random_double = unif(re);
+
+	for (unsigned int i=0; i<size; i++)
+	{
+		if ( partial_sums[i] >= a_random_double )
+		{
+			//this is the chosen index
+			chosen_it = possible_vertices[i];
+			dis = partial_sums[i];
+			if( i > 1 )
+				dis -= partial_sums[i-1];
+			break;
+		}
+	}
+
 }
 
 //not working, use the version 2
