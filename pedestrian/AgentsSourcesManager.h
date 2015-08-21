@@ -160,6 +160,12 @@ private:
       void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
             		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
 
+      /**Position incoming pedestrian on a random vertex
+	 *
+	 */
+      void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+            		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
+
 
      /**
       * Position incoming pedestrians randomly

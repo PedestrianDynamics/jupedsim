@@ -406,18 +406,18 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 			voronoi_diagram<double> vd;
 			construct_voronoi(discrete_positions.begin(), discrete_positions.end(), &vd);
 
-			voronoi_diagram<double>::const_vertex_iterator max_it=vd.vertices().begin();
-			double max_dis=0;
+			voronoi_diagram<double>::const_vertex_iterator chosen_it=vd.vertices().begin();
+			double dis=0;
 
-			VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, max_it, max_dis	);
+			VoronoiBestVertexRand(discrete_positions, vd, subroom, factor, chosen_it, dis	); //max_dis is the squared distance!
 
-			Point pos( max_it->x()/factor, max_it->y()/factor ); //check!
-			if(max_dis> radius*factor*radius*factor)// be careful with the factor!! radius*factor
+			Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
+			if( dis> radius*factor*radius*factor)// be careful with the factor!! radius*factor
 			{
 				ped->SetPos(pos , true);
 
 				//finding the neighbors (nearest pedestrians) of the chosen vertex
-				const voronoi_diagram<double>::vertex_type &vertex = *max_it;
+				const voronoi_diagram<double>::vertex_type &vertex = *chosen_it;
 				const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
 				double sum_x=0, sum_y=0;
 				int no=0;
@@ -519,6 +519,39 @@ void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& d
 			break;
 		}
 	}
+
+}
+
+
+void AgentsSourcesManager::VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+		voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
+{
+	std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
+	std::vector<double> distances;
+
+	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
+	{
+		Point vert_pos = Point( it->x()/factor, it->y()/factor );
+		if( subroom->IsInsideOfPolygon(vert_pos) ) //wrote this function by myself
+		{
+			const voronoi_diagram<double>::vertex_type &vertex = *it;
+			const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+
+			std::size_t index = ( edge->cell() )->source_index();
+			Point p = discrete_positions[index];
+
+			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+
+			possible_vertices.push_back( it );
+			distances.push_back( dis );
+		}
+	}
+	//now we have all the possible vertices and their distances and we can choose one randomly
+
+	srand (time(NULL));
+	unsigned int i = rand() % possible_vertices.size();
+	chosen_it = possible_vertices[i];
+	dis = distances[i];
 
 }
 
