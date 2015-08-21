@@ -305,7 +305,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 			double speed=ped->GetV0Norm();
 			v=v*speed;
 			ped->SetV(v);
-		}
+		}//0
 
 		else if(existing_peds.size() == 1 )
 		{
@@ -327,7 +327,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 				v=v*speed;
 				ped->SetV(v);
 			}
-		}
+		}//1
 
 		else if(existing_peds.size() == 2)
 		{
@@ -382,7 +382,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 					t2.SetX( (x1+x2)/2.0 + alpha*(y2-y1) );
 					t2.SetY( (y1+y2)/2.0 + alpha*(x1-x2) );
 				}
-		}
+		}//2
 
 		else
 		{
@@ -409,36 +409,47 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 			voronoi_diagram<double>::const_vertex_iterator chosen_it=vd.vertices().begin();
 			double dis=0;
 
-			VoronoiBestVertexRand(discrete_positions, vd, subroom, factor, chosen_it, dis	); //max_dis is the squared distance!
+			VoronoiBestVertexRand(discrete_positions, vd, subroom, factor, chosen_it, dis	); //dis is the squared distance!
+			//VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis	);
+			//VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis	);
 
+			//giving the position and velocity
 			Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
 			if( dis> radius*factor*radius*factor)// be careful with the factor!! radius*factor
 			{
 				ped->SetPos(pos , true);
-
-				//finding the neighbors (nearest pedestrians) of the chosen vertex
-				const voronoi_diagram<double>::vertex_type &vertex = *chosen_it;
-				const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-				double sum_x=0, sum_y=0;
-				int no=0;
-				std::size_t index;
-
-				do
-				{
-					no++;
-					index = ( edge->cell() )->source_index();
-					const Point& v = velocities_vector[index];
-					sum_x += v.GetX();
-					sum_y += v.GetY();
-					edge = edge->rot_next();
-				} while (edge != vertex.incident_edge());
-
-				Point v(sum_x/no, sum_y/no);
-				ped->SetV(v);
+				VoronoiAdjustSpeedNeighbour( vd, chosen_it, ped, velocities_vector );
 			}
-		}
+		}//3
+
 		existing_peds.push_back(ped);
-	}
+	}//for loop
+}
+
+//gives an agent the mean velocity of his voronoi-neighbors
+void AgentsSourcesManager::VoronoiAdjustSpeedNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,
+			Pedestrian* ped, const std::vector<Point>& velocities_vector ) const
+{
+	//finding the neighbors (nearest pedestrians) of the chosen vertex
+	const voronoi_diagram<double>::vertex_type &vertex = *chosen_it;
+	const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+	double sum_x=0, sum_y=0;
+	int no=0;
+	std::size_t index;
+
+	do
+	{
+		no++;
+		index = ( edge->cell() )->source_index();
+		const Point& v = velocities_vector[index];
+		sum_x += v.GetX();
+		sum_y += v.GetY();
+		edge = edge->rot_next();
+	} while (edge != vertex.incident_edge());
+
+	Point v(sum_x/no, sum_y/no);
+	ped->SetV(v);
+
 }
 
 //gives the voronoi vertex with max distance
@@ -466,7 +477,6 @@ void AgentsSourcesManager::VoronoiBestVertexMax (const std::vector<Point>& discr
 		}
 	}
 }
-
 
 //gives random voronoi vertex but with weights proportional to squared distances
 void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
@@ -522,7 +532,7 @@ void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& d
 
 }
 
-
+//gives a random voronoi vertex
 void AgentsSourcesManager::VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
 		voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
 {
