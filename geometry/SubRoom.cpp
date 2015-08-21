@@ -740,6 +740,38 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
      return true;
 }
 
+bool SubRoom::IsInsideOfPolygon(const Point& ptw)
+{
+	//works only for squares for now
+	double x1=_poly[0].GetX() ,x2;
+	double y1=_poly[0].GetY(), y2;
+
+	if(_poly[1].GetX() != x1  ) x2=_poly[1].GetX();
+	else x2=_poly[2].GetX();
+
+	if(_poly[1].GetY() != y1  ) y2=_poly[1].GetY();
+	else y2=_poly[2].GetY();
+
+	if( x1 > x2)
+	{
+		double temp=x1;
+		x1=x2;
+		x2=temp;
+	}
+
+	if( y1 > y2 )
+	{
+		double temp=y1;
+		y1=y2;
+		y2=temp;
+	}
+
+	if( ptw.GetX()>x1 && ptw.GetX()<x2 && ptw.GetY()>y1 && ptw.GetY()<y2 )
+		return true;
+	else
+		return false;
+}
+
 bool SubRoom::IsInObstacle(const Point& pt)
 {
      //write the obstacles

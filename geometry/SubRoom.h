@@ -284,6 +284,10 @@ public:
      bool IsPartOfPolygon(const Point& pt);
 
      /**
+      * @return true if the point is inside of the polygon.
+      */
+     bool IsInsideOfPolygon(const Point& ptw);
+     /**
       *
       * @return true if the Point is inside any obstacle
       */

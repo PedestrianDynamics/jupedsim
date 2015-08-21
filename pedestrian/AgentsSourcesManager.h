@@ -35,6 +35,16 @@
 #include <memory>
 #include <atomic>
 
+//jaaa
+#include "boost/polygon/voronoi.hpp"
+using boost::polygon::voronoi_builder;
+using boost::polygon::voronoi_diagram;
+using boost::polygon::x;
+using boost::polygon::y;
+using boost::polygon::low;
+using boost::polygon::high;
+#include "../geometry/SubRoom.h"
+
 //Forward declarations
 class AgentsSource;
 class Building;
@@ -125,11 +135,33 @@ private:
      void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent) const;
 
      /**
+      * Position incoming pedestrian using voronoi from boost library
+      * @param src
+      * @param ped
+      */
+      void ComputeBestPositionVoronoiBoost(AgentsSource* src,Pedestrian* ped) const;
+
+      /**
+       * Position incoming pedestrian using voronoi from boost library
+       * @param src
+       * @param peds
+       */
+      void ComputeBestPositionVoronoiBoost2(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
+      /**Position incoming pedestrian on the vertex with the greatest distance
+       *
+       */
+      void VoronoiBestVertex1 (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+      		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
+
+
+     /**
       * Position incoming pedestrians randomly
       * @param src
       * @param peds
       */
      void ComputeBestPositionRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
 
      /**
       * Adjust the velocity of the pedestrian using the weidmann fundamental diagram
