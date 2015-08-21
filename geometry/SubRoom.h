@@ -287,6 +287,9 @@ public:
       * @return true if the point is inside of the polygon.
       */
      bool IsInsideOfPolygon(const Point& ptw);
+
+
+     bool IsInsideOfPolygon2(const Point& ptw);
      /**
       *
       * @return true if the Point is inside any obstacle
