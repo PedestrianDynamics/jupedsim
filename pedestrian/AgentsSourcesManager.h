@@ -166,7 +166,7 @@ private:
       void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
             		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
 
-      void VoronoiAdjustSpeedNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,
+      void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,
       			Pedestrian* ped, const std::vector<Point>& velocities_vector ) const;
 
      /**

@@ -55,6 +55,8 @@ SubRoom::SubRoom()
      _roomID=-1;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
+     _poly_help_constatnt = vector<double> ();
+     _poly_help_multiple = vector<double> ();
      _obstacles=vector<Obstacle*> ();
 
      _crossings = vector<Crossing*>();
@@ -82,6 +84,27 @@ SubRoom::~SubRoom()
      _obstacles.clear();
 }
 
+void SubRoom::SetHelpVariables()
+{
+	unsigned int i, j= _poly.size()-1;
+
+	for( i=0; i< _poly.size(); i++)
+	{
+		if ( _poly[i].GetY() == _poly[j].GetY() ) //not important
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() ) ;
+			_poly_help_multiple.push_back( 0 );
+		}
+		else
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() - ( _poly[i].GetY()*_poly[j].GetX() ) / ( _poly[j].GetY() - _poly[i].GetY())
+										+ ( _poly[i].GetY()*_poly[i].GetX() )/ ( _poly[j].GetY() - _poly[i].GetY()  )  );
+
+			_poly_help_multiple.push_back( (_poly[j].GetX()-_poly[i].GetX())/(_poly[j].GetY()-_poly[i].GetY()) );
+		}
+	j=i;
+	}
+}
 
 void SubRoom::SetSubRoomID(int ID)
 {
@@ -740,7 +763,7 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
      return true;
 }
 
-bool SubRoom::IsInsideOfPolygon(const Point& ptw)
+bool SubRoom::IsInsideOfPolygonSquare(const Point& ptw)
 {
 	//works only for squares for now
 	double x1=_poly[0].GetX() ,x2;
@@ -772,7 +795,7 @@ bool SubRoom::IsInsideOfPolygon(const Point& ptw)
 		return false;
 }
 
-bool SubRoom::IsInsideOfPolygon2(const Point& ptw)
+bool SubRoom::IsInsideOfPolygon(const Point& ptw)
 {
 	int vector_size = (_poly).size();
 	double x = ptw.GetX(), y = ptw.GetY();
@@ -781,20 +804,38 @@ bool SubRoom::IsInsideOfPolygon2(const Point& ptw)
 
 	for ( i=0; i<vector_size; i++ )
 	{
-		if ( (_poly[i].GetY() < y && _poly[j].GetY()>=y) ||  (_poly[j].GetY()<y && _poly[i].GetY()>=y ) )
+		if (       ( (_poly[i].GetY() < y && _poly[j].GetY()>=y)
+					  ||  (_poly[j].GetY()<y && _poly[i].GetY()>=y ) )
+				&& (_poly[i].GetX() <= x || _poly[j].GetX() <= x)        )
 		{
-			if (_poly[i].GetX() + ( y-_poly[i].GetY() )/( _poly[j].GetY()-_poly[i].GetY() )*(_poly[j].GetX() - _poly[i].GetX() )<x)
-				result=!result;
+			result ^=  (_poly[i].GetX() + ( y-_poly[i].GetY() )/( _poly[j].GetY()-_poly[i].GetY() )*(_poly[j].GetX() - _poly[i].GetX() )<x);
 		}
 		j=i;
 	}
 
-
 	return result;
-
-
 }
 
+
+bool SubRoom::IsInsideOfPolygonHelp(const Point& ptw)
+{
+	int vector_size = (_poly).size();
+	double x = ptw.GetX(), y = ptw.GetY();
+	int i, j = vector_size-1;
+	bool result = false;
+
+	for ( i=0; i<vector_size; i++ )
+	{
+		if (       ( (_poly[i].GetY() < y && _poly[j].GetY()>=y)
+					  ||  (_poly[j].GetY()<y && _poly[i].GetY()>=y ) )
+				&& (_poly[i].GetX() <= x || _poly[j].GetX() <= x)        )
+		{
+			result ^= ( _poly_help_constatnt[i] + _poly_help_multiple[i]*y < x );
+		}
+		j=i;
+	}
+	return result;
+}
 
 
 bool SubRoom::IsInObstacle(const Point& pt)

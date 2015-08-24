@@ -83,6 +83,8 @@ private:
 protected:
      std::vector<Wall> _walls;
      std::vector<Point> _poly; // Polygonal representation of the subroom
+     std::vector<double> _poly_help_constatnt; //for the function IsInsidePolygon, a.brkic
+     std::vector<double> _poly_help_multiple; //for the function IsInsidePolygon, a.brkic
      std::vector<Obstacle*> _obstacles;
 
 public:
@@ -96,6 +98,8 @@ public:
       * Destructor
       */
      virtual ~SubRoom();
+
+     void SetHelpVariables();
 
      /**
       * Set/Get the subroom id
@@ -286,14 +290,24 @@ public:
      /**
       * @return true if the point is inside of the polygon.
       */
+     bool IsInsideOfPolygonSquare(const Point& ptw);
+
+
+     /**
+      * @return true if ptw is inside of the polygon (subroom)
+      */
      bool IsInsideOfPolygon(const Point& ptw);
 
-
-     bool IsInsideOfPolygon2(const Point& ptw);
      /**
-      *
-      * @return true if the Point is inside any obstacle
-      */
+      * @return true if ptw is inside of the polygon (subroom), but using help variables, need to SetHelpVariables beforehand
+	  */
+     bool IsInsideOfPolygonHelp(const Point& ptw);
+
+
+     /**
+	  *
+	  * @return true if the Point is inside any obstacle
+	  */
      bool IsInObstacle(const Point& pt);
 
      /**
