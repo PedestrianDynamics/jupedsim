@@ -200,29 +200,13 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                           }
                      }
                 }
-                //Point fd = ForceDriv(ped, room);
-                //Point acc = (fd + repPed) / ped->GetMass();
-                //Point acc = repPed / ped->GetMass();        //maybe multiply with deltaT again
-                //printf("repulsive Force %f %f\n", acc.GetX(), acc.GetY());
-
-                //result_acc.push_back(acc);
                 result_acc.push_back(repPed); //only orientation is of interest
-                //if (ped->GetID() == 48) {
-                //    printf("%f \n", repPed.Norm());
-                //}
            }
 
            // update
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];
 
-                //debugoutput:
-                //if (ped->GetV().NormSquare() == 0.) {
-                //    printf("V = 0!! at %f %f %f\n", ped->GetPos().GetX(), ped->GetPos().GetY(), current);
-                //    printf("Distance to Target: %f\n", ped->GetDistanceToNextTarget());
-                //}
-
-                //Point vToAdd = result_acc[p - start] * deltaT;
                 Point movDirection = (result_acc[p-start].Norm() > 1) ? result_acc[p - start].Normalized() : result_acc[p-start];
                 Point toTarget = (_direction->GetTarget(nullptr, ped)).Normalized();
                 if (toTarget.NormSquare() == 0.) {                // @todo:ar.graf: this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
@@ -232,15 +216,11 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 movDirection = (movDirection + toTarget);
                 movDirection = (movDirection.Norm() > 1.) ? movDirection.Normalized() : movDirection;
 
-//                if (movDirection.Norm() < .6) {
-//                    std::cerr << ".6 unterschritten" << std::endl;
-//                }
-
                 double desired_speed = ped->GetV0Norm();
                 Point oldMov = Point(0., 0.);
                 if (desired_speed > 0.) {
-                    oldMov = ped->GetV() / desired_speed; //@todo: ar.graf
-                }
+                    oldMov = ped->GetV() / desired_speed; //@todo: ar.graf (GetV() returns a vector: distance travelled in one time-unit (s)
+                }                                         //               so oldMov is now: vector distance travelled in one time-unit with unit speed = sth around unit-vector or smaller
 
                 //anti jitter               //_V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
                 oldMov = (oldMov.Norm() > 1.)? oldMov.Normalized() : oldMov; //on the safe side ... should not be necessary as it must be [0, 1]
@@ -261,52 +241,13 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
                 }
 
-
-
                 movDirection = movDirection * (antiClippingFactor * ped->GetV0Norm() * deltaT);
 
-
-//                if ((dotProduct != 0) && (movDirection.Norm() < 0.6 * antiClippingFactor * ped->GetV0Norm() * deltaT)) {
-//                    std::cerr << "@@@@@ " << dotProduct << std::endl;
-//                }
-
-                //if(ped->GetID() == 48) { // Mohcine
-                //    fprintf(stderr, "%f %f %f %f %f %f %f \n", movDirection.GetX(), movDirection.GetY(), ped->GetV().GetX(), ped->GetV().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY(), current);
-                //}
-                //----------------- update new pos and new vel -----------------
-
-                //Point v_neu = ped->GetV() + vToAdd;
-                //Point pos_neu = ped->GetPos() + v_neu * deltaT;
                 Point pos_neu = ped->GetPos() + movDirection;
-                //---------------------------------------------------------------
 
-
-                //if(v_neu.Norm() > ped->GetV0Norm()+0.2 ) { // Stop pedestrians
-//                if(vToAdd.Norm() > ped->GetV0Norm()*deltaT+0.2 ) { // Stop pedestrians
-//                     //Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
-//                     //v_neu = v_neu*0.01;
-//                     vToAdd = vToAdd*0.01;
-//                     pos_neu = ped->GetPos();
-//                }
-// //--------------------------------------------------------------------------------------------------
- //                //Jam is based on the current velocity
-                //if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
-//                if ( vToAdd.Norm() >= ped->GetV0Norm()*deltaT*0.5) {
-//                     ped->ResetTimeInJam();
-//                } else {
-//                     ped->UpdateTimeInJam();
-//                }
-
- //--------------------------------------------------------------------------------------------------
-                     //fprintf(stderr, "\n----\n%f %f %f %f %f %f\n----\n",ped->GetV().GetX(), ped->GetV().GetY(), ped->GetV0().GetX(),ped->GetV0().GetY(), ped->GetPos().GetX(), ped->GetPos().GetY());
                 ped->SetPos(pos_neu);
-                //ped->SetV(v_neu);
                 ped->SetV(movDirection/deltaT);
                 ped->SetPhiPed();
-                //if(p == 5 ) {
-                      //printf("toadd [%f, %f] m=%f\n", vToAdd.GetX(), vToAdd.GetY(), ped->GetMass());
-                      //printf("pos_neu= %f %f  vToAdd %f %f   anticlippingfac %f\n", pos_neu.GetX(), pos_neu.GetY(), vToAdd.GetX(),  vToAdd.GetY(), antiClippingFactor);
-                //}
            }
       }//end parallel
 }
