@@ -76,7 +76,7 @@ private:
       *
       * @return Point
       */
-     double OptimalSpeed(Pedestrian* ped, double spacing) const;
+     double OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const;
 
      Point e0(Pedestrian *ped, Room* room) const;
 

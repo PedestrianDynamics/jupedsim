@@ -143,14 +143,13 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double normVi = ped->GetV().ScalarProduct(ped->GetV()); //squared
                 double HighVel = (ped->GetV0Norm() + delta) * (ped->GetV0Norm() + delta); //(v0+delta)^2
                 if (normVi > HighVel && ped->GetV0Norm() > 0) {
-                     fprintf(stderr, "VelocityModel::calculateForce_LC() WARNING: actual velocity (%f) of iped %d "
+                     fprintf(stderr, "WARNING: VelocityModel::ComputeNextTimeStep() actual velocity (%f) of iped %d "
                              "is bigger than desired velocity (%f) at time: %fs\n",
                              sqrt(normVi), ped->GetID(), ped->GetV0Norm(), current);
 
                      // remove the pedestrian and abort
                      Log->Write("\tERROR: ped [%d] was removed due to high velocity",ped->GetID());
                      building->DeletePedestrian(ped);
-                     //continue;  //FIXME tolerate first
                      exit(EXIT_FAILURE);
                 }
 
@@ -181,37 +180,52 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                           }
                      }
                      // calculate spacing
-                     my_pair spacing_winkel = GetSpacing(ped, ped1);
-                     spacings.push_back(spacing_winkel);
+                     // my_pair spacing_winkel = GetSpacing(ped, ped1);
+                     spacings.push_back(GetSpacing(ped, ped1));
                 }
+                
                 //repulsive forces to walls and closed transitions that are not my target
                 Point repWall = ForceRepRoom(allPeds[p], subroom);
+                // todo: update direction every DT.
                 
-                Point direction = (e0(ped, room) + repPed + repWall);
+                // if(ped->GetID()==-10)
+                //       std::cout << "time: " << ped->GetGlobalTime() << "  |  updateRate  " <<ped->GetUpdateRate() << "   modulo " <<fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<<std::endl; 
+
                 // calculate min spacing
                 std::sort(spacings.begin(), spacings.end(), sort_pred());                
                 double spacing = spacings[0].first;
                 double winkel = spacings[0].second;
-                if (ped->GetID()==1){
-                for (auto a: spacings)
-                      std::cout << "\nHH first " << a.first << "\n second  " << a.second << std::endl;
+                Point tmp;
+
+                Point direction;
+                direction = e0(ped, room) + repPed + repWall;
+
+                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0().GetX())>0.01)
+                // {
+                   
+                //       if(ped->GetID()==-10)
+                //             std::cout << "Get new direction "<< spacing << ", " << winkel << std::endl;
+                //       ped->SetLastE0(Point(spacing, winkel));
+                // }
+                // else
+                // {
+                //       tmp = ped->GetLastE0();
+                //       if(ped->GetID()==10)
+                //             std::cout << "keep direction "<<tmp.GetX() << ", " << tmp.GetY() << std::endl;
+                //       spacing = tmp.GetX();
+                //       winkel = tmp.GetY();
+                // }
+                // if(ped->GetID()==-10)
+                      // getc(stdin);
 
                 
-
-                std::cout << "spacing:  " << spacing<< std::endl;
-                std::cout << "winkel:  " << winkel << std::endl;
-                                getc(stdin);
-                }
-                
-//                spacing = *std::min_element(std::begin(spacings), std::end(spacings));
-                if(ped->GetID()==10){
-                      fprintf(stderr, "%f %f %f\n", ped->GetGlobalTime(), (repPed+repWall).Norm(), spacing);
-                }
-                Point acc = direction.Normalized() * OptimalSpeed(ped, spacing);
-                 // if(direction.Norm()< 0.3 && ped->GetGlobalTime() >5)
-                 //       acc = Point(0,0);   
-                result_acc.push_back(acc);
-                spacings.clear();
+                // spacing = *std::min_element(std::begin(spacings), std::end(spacings));
+                // if(ped->GetID()==10){
+                      // fprintf(stderr, "%f %f %f\n", ped->GetGlobalTime(), (repPed+repWall).Norm(), spacing);
+                // }
+                Point speed = direction.Normalized() * OptimalSpeed(ped, spacing, winkel);
+                result_acc.push_back(speed);
+                spacings.clear(); //clear for ped p
            } // for p
 
            //#pragma omp barrier
@@ -240,10 +254,10 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 {
                      ped->SetPhiPed();
                 }
-                if(ped->GetID()==-10)
-                {
-                      fprintf(stderr, "%f %f %f %f %f\n", ped->GetGlobalTime(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().Norm(), ped->GetEllipse().GetAmin()+ped->GetEllipse().GetAv()*ped->GetV().Norm());
-                }
+                // if(ped->GetID()==-10)
+                // {
+                //       fprintf(stderr, "%f %f %f %f %f\n", ped->GetGlobalTime(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().Norm(), ped->GetEllipse().GetAmin()+ped->GetEllipse().GetAv()*ped->GetV().Norm());
+                // }
                 ped->SetPos(pos_neu);
                 ped->SetV(v_neu);
 
@@ -281,7 +295,7 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
 }
 
 
-double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
+double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const
 {
       double v0 = ped->GetV0Norm();
       double T = ped->GetT();
@@ -289,7 +303,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing) const
       double speed = (spacing-l)/T;
       speed = (speed>0)?speed:0;
       speed = (speed<v0)?speed:v0;
-
+//      (1-winkel)*speed;
       return speed;
 }
 
@@ -303,9 +317,8 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
             ep12 = distp12.Normalized();
       } else {
             //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-            Log->Write("WARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
+            Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
             Log->Write("\t\t Pedestrians are too near to each other.");
-            Log->Write("\t\t Get your model right. Going to exit.");
             exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
@@ -320,7 +333,6 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
       //       printf("condition1= %f, condition2=%f l/D=%f, norm=%f\n", condition1, condition2, l/Distance, distp12.Norm());
             
       // }
-
       
       if((condition1 >=0 ) && (condition2 <= l/Distance))
             // @todo return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
@@ -348,7 +360,13 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           Log->Write("\t\t Get your model right. Going to exit.");
           exit(EXIT_FAILURE);
      }
-
+      Point ei = ped1->GetV().Normalized();
+      if(ped1->GetV().NormSquare()<0.01){
+            ei = ped1->GetV0().Normalized();
+      }
+      double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
+      condition1 = (condition1>0)?condition1:0; // abs
+     // R_ij = - _aPed * exp((l-Distance)/_DPed) * condition1;
      R_ij = - _aPed * exp((l-Distance)/_DPed);
      F_rep = ep12 * R_ij;
 
