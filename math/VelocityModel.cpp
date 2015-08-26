@@ -179,13 +179,19 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                                repPed += ForceRepPed(ped, ped1);
                           }
                      }
-                     // calculate spacing
-                     // my_pair spacing_winkel = GetSpacing(ped, ped1);
-                     spacings.push_back(GetSpacing(ped, ped1));
-                }
-                
+                } // for i
                 //repulsive forces to walls and closed transitions that are not my target
                 Point repWall = ForceRepRoom(allPeds[p], subroom);
+
+                // calculate new direction ei according to (6)
+                Point direction = e0(ped, room) + repPed + repWall;
+                
+                for (int i = 0; i < size; i++) {
+                      Pedestrian* ped1 = neighbours[i];
+                     // calculate spacing
+                     // my_pair spacing_winkel = GetSpacing(ped, ped1);
+                     spacings.push_back(GetSpacing(ped, ped1, direction));                      
+                }
                 // todo: update direction every DT.
                 
                 // if(ped->GetID()==-10)
@@ -197,8 +203,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double winkel = spacings[0].second;
                 Point tmp;
 
-                Point direction;
-                direction = e0(ped, room) + repPed + repWall;
 
                 // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0().GetX())>0.01)
                 // {
@@ -307,7 +311,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winke
       return speed;
 }
 
-my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
+my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei) const
 {
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
       double Distance = distp12.Norm();
@@ -321,10 +325,10 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const
             Log->Write("\t\t Pedestrians are too near to each other.");
             exit(EXIT_FAILURE);
      }
-      Point ei = ped1->GetV().Normalized();
-      if(ped1->GetV().NormSquare()<0.01){
-            ei = ped1->GetV0().Normalized();
-      }
+      // Point ei = ped1->GetV().Normalized();
+      // if(ped1->GetV().NormSquare()<0.01){
+      //       ei = ped1->GetV0().Normalized();
+      // }
       double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
       double condition2 = ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
       condition2 = (condition2>0)?condition2:-condition2; // abs

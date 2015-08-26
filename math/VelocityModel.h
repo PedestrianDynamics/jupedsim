@@ -80,7 +80,7 @@ private:
 
      Point e0(Pedestrian *ped, Room* room) const;
 
-     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2) const;
+     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei) const;
            
      /**
       * Repulsive force between two pedestrians ped1 and ped2 according to

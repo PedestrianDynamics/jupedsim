@@ -142,7 +142,12 @@ if __name__ == "__main__":
     errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
     plot(lid_w , lid_f, "D-k", lw=2, ms = ms, label = "experiment")
-    axes().set_aspect(1./axes().get_data_ratio())  
+    axes().set_aspect(1./axes().get_data_ratio())
+    columns = np.vstack((F, np.array(M)[indexsort]))
+    gg = open("flow_col.txt", "w")
+    for i in range(len(F)):
+        print >>gg, columns[0][i], columns[1][i]
+    gg.close()
     legend(loc='best', numpoints=1)
     grid()
     xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
