@@ -148,22 +148,24 @@ private:
        */
       void ComputeBestPositionVoronoiBoost2(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 
+      void ComputeBestPositionDummy(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
       /**Position incoming pedestrian on the vertex with the greatest distance
        *
        */
-      void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+      void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
       		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
 
       /**Position incoming pedestrian on the vertex with greater probability for greater distances
        *
        */
-      void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+      void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
             		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
 
       /**Position incoming pedestrian on a random vertex
        *
        */
-      void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
+      void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
             		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const ;
 
       void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,

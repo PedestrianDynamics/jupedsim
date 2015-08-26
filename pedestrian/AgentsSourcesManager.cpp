@@ -116,7 +116,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 5;     // 1 second
+     long updateFrequency = 3;     // 1 = second
      do
      {
           int current_time = Pedestrian::GetGlobalTime();
@@ -155,6 +155,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: compute the optimal position for insertion using voronoi
                ComputeBestPositionVoronoiBoost2(src.get(), peds);
+               //ComputeBestPositionDummy( src.get(), peds );
                /*for (auto&& ped : peds)
                {
                ComputeBestPositionVoronoiBoost(src.get(), ped);
@@ -166,6 +167,24 @@ bool AgentsSourcesManager::ProcessAllSources() const
           //src->Dump();//exit(0);
      }
      return empty;
+}
+
+//4 agents frequency, just for an example
+void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
+          vector<Pedestrian*>& peds)const
+{
+	peds[0]->SetPos( Point(10,5.4) );
+	peds[1]->SetPos( Point(10,4.8) );
+	peds[2]->SetPos( Point(10,4.4) );
+	peds[3]->SetPos( Point(10,3.8) );
+
+	for(auto&& ped : peds)
+	{
+		Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+		double speed=ped->GetV0Norm();
+		v=v*speed;
+		ped->SetV(v);
+	}
 }
 /*
 void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
@@ -298,108 +317,66 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 	std::vector<Pedestrian*> existing_peds;
 	_building->GetPedestrians(roomID, subroomID, existing_peds);
 
-	SubRoom* subroom=(_building->GetRoom( roomID ))->GetSubRoom(subroomID);
-	//subroom->SetHelpVariables();
+	SubRoom* subroom = (_building->GetRoom( roomID ))->GetSubRoom(subroomID);
+	vector<Point> room_vertices = subroom->GetPolygon();
 
+	double factor = 100;  //factor for conversion to integer for the boost voronoi
+
+	vector<Point> fake_peds;  //doing this now so I don't have to do it in every loop
+	Point temp(0,0);
+	for (unsigned int i=0; i<room_vertices.size(); i++ )
+	{
+		Point center_pos = subroom->GetCentroid();
+		temp.SetX( center_pos.GetX()-room_vertices[i].GetX( ) );
+		temp.SetY( center_pos.GetY()-room_vertices[i].GetY( ) );
+		temp = temp/sqrt(temp.NormSquare());
+		temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
+		temp = temp + room_vertices[i];
+		temp.SetX( (int)(temp.GetX()*factor) );
+		temp.SetY( (int)(temp.GetY()*factor) );
+		fake_peds.push_back( temp );
+	}
 
 	for(auto&& ped : peds)
 	{
 		if(existing_peds.size() == 0 )
 		{
-			Log->Write("INFO:\tenter case 0");
+
 			Point new_pos = subroom->GetCentroid();
-			ped->SetPos(new_pos, true);
-			Point v =(ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-			double speed=ped->GetV0Norm();
-			v=v*speed;
-			ped->SetV(v);
-		}//0
-
-		else if(existing_peds.size() == 1 )
-		{
-			Log->Write("INFO:\tenter case 1");
-
-			Point p = existing_peds[0]->GetPos();
-			vector<Point> room_vertices = subroom->GetPolygon();
 
 			srand (time(NULL));
-			unsigned int i = rand() % room_vertices.size();
-			double dis = ( p.GetX() - room_vertices[i].GetX() ) * ( p.GetX() - room_vertices[i].GetX() )
-					+ ( p.GetY() - room_vertices[i].GetY() ) * ( p.GetY() - room_vertices[i].GetY() );
-			if( dis > radius*radius)
+			double x_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
+			double y_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
+			Point random_pos(x_coor, y_coor);
+
+			if ( subroom->IsInsideOfPolygonHelp( new_pos + random_pos ) )
 			{
-				Point new_pos( p.GetX()/2.0  + room_vertices[i].GetX()/2.0,  p.GetY()/2.0 + room_vertices[i].GetY()/2.0  );
-				ped->SetPos( new_pos, true );
-				Point v =(ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+				ped->SetPos(new_pos + random_pos, true);
+				Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
 				double speed=ped->GetV0Norm();
 				v=v*speed;
 				ped->SetV(v);
 			}
-		}//1
+			else
+			{
+				ped->SetPos(new_pos, true);
+				Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+				double speed=ped->GetV0Norm();
+				v=v*speed;
+				ped->SetV(v);
+			}
 
-		else if(existing_peds.size() == 2)
-		{
-			Log->Write("INFO:\tenter case 2");
-			Point p1 = existing_peds[0]->GetPos();
-			Point p2 = existing_peds[1]->GetPos();
-			double x1 = p1.GetX(); double y1 = p1.GetY();
-			double x2 = p2.GetX(); double y2 = p2.GetY();
-			Point t1( (x1+x2)/2.0 + 1.1*(y1-y2), (y1+y2)/2.0 + 1.1*(x2-x1) );
-			Point t2( (x1+x2)/2.0 + 1.1*(y2-y1), (y1+y2)/2.0 + 1.1*(x1-x2) );
-
-			for (double alpha = 1.0; alpha>0 ; alpha-=0.1)
-				if( subroom->IsInsideOfPolygonHelp(t1) )
-				{
-					ped->SetPos(t1, true );
-					Point new_velo(-1,0);
-					ped->SetV( new_velo );
-					break;
-				}
-				else if( subroom->IsInsideOfPolygonHelp(t1) )
-				{
-					ped->SetPos(t2, true );
-					Point new_velo(-1,0);
-					ped->SetV( new_velo );
-					break;
-				}
-				else
-				{
-					t1.SetX( (x1+x2)/2.0 + alpha*(y1-y2) );
-					t1.SetY( (y1+y2)/2.0 + alpha*(x2-x1) );
-					t2.SetX( (x1+x2)/2.0 + alpha*(y2-y1) );
-					t2.SetY( (y1+y2)/2.0 + alpha*(x1-x2) );
-				}
-			//in case it didn't work
-			for (double alpha = 1.0; alpha<3 ; alpha+=0.2)
-				if( subroom->IsInsideOfPolygonHelp(t1) )
-				{
-					ped->SetPos(t1, true );
-					ped->SetV( ped->GetV0() );
-					break;
-				}
-				else if( subroom->IsInsideOfPolygonHelp(t1) )
-				{
-					ped->SetPos(t2, true );
-					ped->SetV( ped->GetV0() );
-					break;
-				}
-				else
-				{
-					t1.SetX( (x1+x2)/2.0 + alpha*(y1-y2) );
-					t1.SetY( (y1+y2)/2.0 + alpha*(x2-x1) );
-					t2.SetX( (x1+x2)/2.0 + alpha*(y2-y1) );
-					t2.SetY( (y1+y2)/2.0 + alpha*(x1-x2) );
-				}
-		}//2
+		}//0
 
 		else
 		{
-			Log->Write("INFO:\tenter case 3");
-			double factor = 100;  //factor for conversion to integer
 			std::vector<Point> discrete_positions;
 			std::vector<Point> velocities_vector;
 
 			Point temp(0,0);
+			Point v(0,0);
+			double no = 0;
+
 			//points from double to integer
 			for (auto&& iter = existing_peds.begin(); iter != existing_peds.end(); ++iter)
 			{
@@ -408,27 +385,38 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 				temp.SetY( (int)( pos.GetY()*factor ) );
 				discrete_positions.push_back( temp );
 				velocities_vector.push_back( (*iter)->GetV() );
+
+				//calculating the mean, using it for the fake pedestrians
+				v = v + (*iter)->GetV();
+				no++;
 			}
+
+			v = v/no; //this is the mean of all the velocities
+
+			//adding fake people to the voronoi diagram
+			for (unsigned int i=0; i<room_vertices.size(); i++ )
+			{
+				discrete_positions.push_back( fake_peds[i] );
+				velocities_vector.push_back( v ); //DO: what speed?
+			}
+
+			//subroom->AddFakePeople( vector<Point>& discrete_positions, vector<Point>& velocities_vector,v);
 
 			//constructing the diagram
 			voronoi_diagram<double> vd;
 			construct_voronoi(discrete_positions.begin(), discrete_positions.end(), &vd);
 
-			voronoi_diagram<double>::const_vertex_iterator chosen_it=vd.vertices().begin();
-			double dis=0;
+			voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
+			double dis = 0;
+			VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis);
 
-			VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis	); //dis is the squared distance!
-			//VoronoiBestVertexRand(discrete_positions, vd, subroom, factor, chosen_it, dis );
-			//VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis );
-
-			//giving the position and velocity
 			if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
 			{
 				Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
 				ped->SetPos(pos , true);
 				VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
 			}
-			else //try with the maximum distance
+			/*else //try with the maximum distance, don't need this if already using the VoronoiBestVertexMax function
 			{
 				VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis );
 				if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
@@ -437,8 +425,8 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 					ped->SetPos(pos , true);
 					VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
 				}
-			}
-		}//3
+			}*/
+		}// >0
 
 		existing_peds.push_back(ped);
 	}//for loop
@@ -452,7 +440,7 @@ void AgentsSourcesManager::VoronoiAdjustVelocityNeighbour( const voronoi_diagram
 	const voronoi_diagram<double>::vertex_type &vertex = *chosen_it;
 	const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
 	double sum_x=0, sum_y=0;
-	int no=0;
+	double no=0;
 	std::size_t index;
 
 	do
@@ -471,13 +459,13 @@ void AgentsSourcesManager::VoronoiAdjustVelocityNeighbour( const voronoi_diagram
 }
 
 //gives the voronoi vertex with max distance
-void AgentsSourcesManager::VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
-		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const
+void AgentsSourcesManager::VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
+		double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	) const
 {
 	double dis = 0;
 	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
 	{
-		Point vert_pos = Point( it->x()/factor, it->y()/factor );
+		Point vert_pos( it->x()/factor, it->y()/factor );
 		if( subroom->IsInsideOfPolygonHelp(vert_pos) ) //wrote this function by myself
 		{
 			const voronoi_diagram<double>::vertex_type &vertex = *it;
@@ -486,19 +474,20 @@ void AgentsSourcesManager::VoronoiBestVertexMax (const std::vector<Point>& discr
 			std::size_t index = ( edge->cell() )->source_index();
 			Point p = discrete_positions[index];
 
-			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
-			if(dis>max_dis)
+			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )  + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+			if(dis > max_dis)
 			{
 				max_dis = dis;
 				max_it = it;
 			}
 		}
 	}
+	//at the end, max_it is the choosen vertex, or the first vertex - max_dis=0 assures that this position will not be taken
 }
 
 //gives random voronoi vertex but with weights proportional to squared distances
-void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
-		voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
+void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
+		double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
 {
 	std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
 	vector<double> partial_sums;
@@ -551,8 +540,8 @@ void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& d
 }
 
 //gives a random voronoi vertex
-void AgentsSourcesManager::VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, int factor,
-		voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
+void AgentsSourcesManager::VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
+		double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	) const
 {
 	std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
 	std::vector<double> distances;
