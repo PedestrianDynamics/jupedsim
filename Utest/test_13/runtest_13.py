@@ -2,17 +2,34 @@
 import numpy as np
 import os, argparse, logging, time, sys
 from os import path, system
-from sys import argv ,exit
+from sys import argv, exit
 import subprocess, glob
 import multiprocessing
 from matplotlib.pyplot import *
 import re
 
-widths = [ 1.0, 1.2, 1.4, 1.6, 2.0, 2.2, 2.5 ]
-#lid_w = np.array([ 0.9,  1.,   1.1,  1.2,  1.4, 1.6,  1.8,  2.,   2.2,  2.5])
-#lid_f = np.array([ 1.70998632,  2.02483801,  2.19426565,  2.53207292,  2.91149068,  3.11461794, 3.90625,     3.91032325, 4.52352232,  5.54733728])
-lid_w = widths
-lid_f = np.array([ 2.02483801,  2.19426565,  2.53207292, 3.11461794, 3.91032325, 4.52352232, 5.54733728])
+def get_empirical_flow():
+    files = glob.glob("experiments/*.txt")
+    width_flow = {}
+
+    for f in files:
+        data = np.loadtxt(f)
+        widths = data[:, 0]
+        flows = data[:, 1]
+        for (width, flow) in zip(widths, flows):
+            if not width_flow.has_key(width):
+                width_flow[width] = [flow]
+            else:
+                width_flow[width].append(flow)
+
+    results = []
+    for w in width_flow.keys():
+        mean_J = np.mean(width_flow[w])
+        std_J = np.std(width_flow[w])
+        results.append([w, mean_J, std_J])
+
+    return np.sort(np.array(results), axis=0)
+
 #=========================
 testnr = 13
 #========================
@@ -106,16 +123,6 @@ if __name__ == "__main__":
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
     
     # ----------------------- PLOT RESULTS ----------------------
-    #sey = np.loadtxt("bck-b-scaling/seyfried-j-b.dat")
-    #kretz = np.loadtxt("bck-b-scaling/kretz-j-b.dat")
-    #muel32 = np.loadtxt("bck-b-scaling/mueller-bg-32-No.dat")
-    #muel26 = np.loadtxt("bck-b-scaling/mueller-bg-26-No.dat")
-    # lid = np.loadtxt("bck-b-scaling/Flow_vs_b_v2.dat")
-    # lid_w = lid[:,0]/100.0
-    # lid_f = 150.0/(lid[:,4]-lid[:,1])
-
-#    flows = np.array(flows)
-
     flow_file = "flow.txt"
     ff = open(flow_file, "w")
     logging.info('write flow values in \"%s\"'%flow_file)
@@ -123,8 +130,8 @@ if __name__ == "__main__":
         print >>ff, key, ":", value
 
     ff.close
-    M = np.array([np.mean(i) for i in flows.values()]) # std pro CPU
-    S = np.array([np.std(i) for i in flows.values()])   # std pro CPU
+    M = np.array([np.mean(i) for i in flows.values()]) # std pro width
+    S = np.array([np.std(i) for i in flows.values()])  # std pro width
     print >>ff, "==========================="
     print >>ff, "==========================="
     print >>ff, "Means "
@@ -141,7 +148,9 @@ if __name__ == "__main__":
     plot(F,  np.array(M)[indexsort], "o-", lw=2, label='Mean', color='blue')
     errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
-    plot(lid_w , lid_f, "D-k", lw=2, ms = ms, label = "experiment")
+    jexp = get_empirical_flow()
+    # plot(jexp[:, 0] , jexp[:, 1], "D-k", lw=2, ms = ms, label = "experiments")
+    errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="o-", color='r', ecolor='r', linewidth=2, capthick=2, label = "experiments")
     axes().set_aspect(1./axes().get_data_ratio())
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
@@ -153,11 +162,19 @@ if __name__ == "__main__":
     xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
     #xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
-    xticks(widths)
-    xlim([0.7, 2.6])
-    ylim([1, 6])
-    err = np.sqrt( sum((M-lid_f)**2) )
-    
+    # xticks(jexp[:, 0])
+    xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
+    ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
+
+    err = 0
+    num = 0
+    for (w, j) in zip(jexp[:, 0], jexp[:, 1]):
+        for key, values in flows.items():
+            if key == w:
+                num += 1
+                err +=  np.sqrt((np.mean(values)-j)**2)
+                print err, key, w, "-", j, np.mean(values)
+    err /= num
     title(r"$\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     
     savefig("flow.png")
