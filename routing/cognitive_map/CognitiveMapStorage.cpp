@@ -157,6 +157,7 @@ void CognitiveMapStorage::ParseLandmarks()
             ptrWaypoint waypoint (new Waypoint(Point(std::stod(asso_x),std::stod(asso_y)),
                                                 std::stod(asso_a),std::stod(asso_b)));
             waypoint->SetId(std::stod(asso_id));
+            std::cout << waypoint->GetId() << std::endl;
             waypoint->SetCaption(asso_caption);
             waypoint->SetPriority(std::stod(priority));
 

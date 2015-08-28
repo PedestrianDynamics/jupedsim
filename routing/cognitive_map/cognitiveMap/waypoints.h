@@ -15,7 +15,7 @@ public:
     Waypoint(Point pos, double a, double b, ptrRoom room=nullptr);
     ~Waypoint();
 
-    ///Setter
+    //Setter
     void SetId(int id);
     void SetA(double a);
     void SetB(double b);
@@ -23,7 +23,7 @@ public:
     void SetRoom(ptrRoom room);
     void SetCaption(const std::string& string);
     void SetPriority(double priority);
-    ///Getter
+    //Getter
     const int& GetId() const;
     const Point& GetPos() const;
     const double& GetA() const;
@@ -31,12 +31,16 @@ public:
     ptrRoom GetRoom() const;
     const std::string& GetCaption() const;
     const double &GetPriority() const;
-    ///Random point somewhere within the waypoint
+    //Random point somewhere within the waypoint
     Point GetRandomPoint() const;
-    /// Shortest Distance from waypoint egde (ellipse) to arbitrary point
+    // Shortest Distance from waypoint egde (ellipse) to arbitrary point
     Point PointOnShortestRoute(const Point &point) const;
-    /// Check if Waypoint reached (if YAH-Pointer is in Waypoint)
-    bool WaypointReached(const Point& currentYAH) const;
+    // Check if Waypoint reached (if YAH-Pointer is in Waypoint)
+    bool WaypointReached(const Point& currentYAH);
+
+    bool Visited() const;
+    void SetVisited(bool stat);
+
 
 
 private:
@@ -47,6 +51,7 @@ private:
     double _b;
     ptrRoom _room;
     double _priority;
+    bool _visited;
 };
 
 #endif // WAYPOINTS_H

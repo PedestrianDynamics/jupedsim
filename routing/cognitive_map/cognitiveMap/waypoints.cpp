@@ -6,6 +6,7 @@ Waypoint::Waypoint(Point pos, ptrRoom room)
 {
     _exactPos=pos;
     _room=room;
+    _visited=false;
 }
 
 Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
@@ -15,6 +16,7 @@ Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
     _b=b;
     _room=room;
     _priority=1.0;
+    _visited=false;
 }
 
 Waypoint::~Waypoint()
@@ -124,15 +126,26 @@ Point Waypoint::PointOnShortestRoute(const Point& point) const
     return Point(_exactPos.GetX()+_a*std::cos(alpha_min*pi/180.0),_exactPos.GetY()+_b*std::sin(alpha_min*pi/180.0));
 }
 
-bool Waypoint::WaypointReached(const Point& currentYAH) const
+bool Waypoint::WaypointReached(const Point& currentYAH)
 {
     if (std::abs(_exactPos.GetX()-currentYAH.GetX())<0.75*_a && std::abs(_exactPos.GetY()-currentYAH.GetY())<0.75*_b)
     {
-        //Log->Write("INFO:\t Waypoint reached");
-        //Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
+        Log->Write("INFO:\t Waypoint reached");
+        Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
+        _visited=true;
         return true;
     }
     return false;
+}
+
+bool Waypoint::Visited() const
+{
+    return _visited;
+}
+
+void Waypoint::SetVisited(bool stat)
+{
+    _visited=stat;
 }
 
 

@@ -153,6 +153,7 @@ void CognitiveMap::AddWaypoints(Waypoints waypoints)
         waypoint->SetPriority(n);
         _waypContainer.push_back(waypoint);
         _waypContainerSorted.push(waypoint);
+
         n++;
     }
 
@@ -195,7 +196,7 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint,
     auto itsortedEdges = sortedEdges.begin();
     auto it = edges.begin();
     ++it;
-    ///starting at the second element
+    //starting at the second element
     for (it; it!=edges.end(); ++it)
     {
         double pathLengthDoorWayP = ShortestPathDistance((*it),waypoint);
@@ -326,15 +327,24 @@ void CognitiveMap::WriteToFile()
 
         data.append(tmp1);
     }
+    bool current;
+
     for (ptrWaypoint waypoint:_waypContainer)
     {
+        current=false;
+        if (!_waypContainerSorted.empty())
+        {
+            if (waypoint==_waypContainerSorted.top())
+                current=true;
+        }
         char tmp2[CLENGTH] = "";
         sprintf(tmp2, "<waypoint ID=\"%d\"\t"
                "x=\"%.6f\"\ty=\"%.6f\"\t"
                "z=\"%.6f\"\t"
-               "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
+               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"/>\n",
                waypoint->GetId(), waypoint->GetPos().GetX(),
-               waypoint->GetPos().GetY(),0.0 ,waypoint->GetA(), waypoint->GetB());
+               waypoint->GetPos().GetY(),0.0 ,waypoint->GetA(), waypoint->GetB(),
+               current);
         data.append(tmp2);
     }
 
