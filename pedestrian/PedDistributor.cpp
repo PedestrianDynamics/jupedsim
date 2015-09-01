@@ -486,8 +486,8 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
      double bufx = 0.12;
      double bufy = 0.12;
 
-     double amin=0.40; // = GetAmin()->GetMean();
-     double bmax=0.50; // = GetBmax()->GetMean();
+     double amin=0.18; // = GetAmin()->GetMean();
+     double bmax=0.25; // = GetBmax()->GetMean();
 
      double dx = amin + bufx;
      double dy = bmax + bufy;
