@@ -353,21 +353,10 @@ void Simulation::UpdateRoutesAndLocations()
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
                                    //also statistic for internal doors
-                                   if(_argsParser.ShowStatistics())
-                                   {
-                                        if(old_sub->GetSubRoomID()!=sub->GetSubRoomID())
-                                        {
-                                             Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
-                                             if(trans)
-                                             {
-                                                  trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-                                             }
-                                        }
-                                   }
+                                   UpdateFlowAtDoors(*ped);
 
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
-
 
                                    assigned = true;
                                    break;
@@ -409,11 +398,7 @@ void Simulation::UpdateRoutesAndLocations()
           // remove the pedestrians that have left the building
           for (unsigned int p = 0; p < pedsToRemove.size(); p++)
           {
-               Transition* trans =_building->GetTransitionByUID(pedsToRemove[p]->GetExitIndex());
-               if(trans)
-               {
-                    trans->IncreaseDoorUsage(1, pedsToRemove[p]->GetGlobalTime());
-               }
+               UpdateFlowAtDoors(*pedsToRemove[p]);
                _building->DeletePedestrian(pedsToRemove[p]);
           }
      }
@@ -447,7 +432,7 @@ void Simulation::PrintStatistics()
           //if (goal->IsExit())
           {
                Log->Write(
-                         "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+                         "\nExit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
 
@@ -572,6 +557,31 @@ void Simulation::ProcessAgentsQueue()
           _hybridSimManager->ProcessOutgoingAgent();
      }
 #endif
+}
+
+void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
+{
+     if(_argsParser.ShowStatistics())
+     {
+          Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
+          if(trans)
+          {
+               trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+          }
+//          if(ped.GetExitIndex()==0)
+//          {
+//               cout<<"exi 1t: "<<endl;exit(0);
+//          }
+//
+//          if(trans->GetUniqueID()==0)
+//          {
+//               cout<<"exit 2: "<<endl;exit(0);
+//          }
+//          if(trans->GetID()==0)
+//          {
+//               cout<<"exit 3: "<<endl;exit(0);
+//          }
+     }
 }
 
 AgentsSourcesManager& Simulation::GetAgentSrcManager()

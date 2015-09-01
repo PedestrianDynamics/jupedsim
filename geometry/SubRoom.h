@@ -266,6 +266,10 @@ public:
       */
      const std::vector<p2t::Triangle*> GetTriangles();
 
+     /**
+      * @return true if all transitions are not closed.
+      */
+     bool IsAccessible();
 
      //navigation
      bool AddCrossing(Crossing* line);

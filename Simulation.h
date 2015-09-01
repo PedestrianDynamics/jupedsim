@@ -160,6 +160,13 @@ public:
      * @return a pointer to the building object
      */
     Building* GetBuilding();
+
+
+    /**
+     * Update the flow for the door that the pedestrian just crossed
+     * @param ped
+     */
+    void UpdateFlowAtDoors(const Pedestrian &ped) const;
 };
 
 #endif /*SIMULATION_H_*/

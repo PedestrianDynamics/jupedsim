@@ -61,7 +61,7 @@
 #endif
 
 // precision error
-#define J_EPS 0.001
+#define J_EPS  0.001//0.001
 #define J_EPS_EVENT 0.00001 //zum pruefen des aktuellen Zeitschrittes auf events
 #define J_EPS_DIST 0.05// [m]
 
