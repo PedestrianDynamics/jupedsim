@@ -1365,11 +1365,11 @@ Pedestrian* Building::GetPedestrian(int pedID) const
 
 Transition* Building::GetTransitionByUID(int uid) const
 {
-     //eventually
-     map<int, Transition*>::const_iterator itr;
-     for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-          if (itr->second->GetUniqueID()== uid)
-               return itr->second;
+
+     for(auto && trans: _transitions)
+     {
+          if(trans.second->GetUniqueID()==uid)
+               return trans.second;
      }
      return nullptr;
 }

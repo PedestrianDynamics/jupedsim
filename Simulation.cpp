@@ -242,11 +242,10 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           return false;
 
      //other initializations
-     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
-     for (Pedestrian *ped : allPeds) {
+     for (auto&& ped: _building->GetAllPedestrians()) {
           ped->Setdt(_deltaT);
      }
-     _nPeds = allPeds.size();
+     _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
 
      //get the seed
@@ -351,6 +350,14 @@ void Simulation::UpdateRoutesAndLocations()
                                    //the agent left the old iroom
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
+
+                                   //the pedestrian did not used the door to exit the room
+                                   //todo: optimize with distance square
+                                   //if(ped->GetDistanceToNextTarget()>0.5)
+                                   //{
+                                   //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
+                                   //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
+                                   //}
 
                                    //also statistic for internal doors
                                    UpdateFlowAtDoors(*ped);
@@ -566,21 +573,41 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
           if(trans)
           {
+
+               //check if the pedestrian left the door correctly
+               if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
+               {
+                    Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped.GetID());
+                    Log->Write("       :\t distance to last door is %f. That should be smaller.", ped.GetExitLine()->DistTo(ped.GetPos()));
+                    Log->Write("       :\t correcting the door statistics");
+                    //ped.Dump(ped.GetID());
+
+                    //checking the history and picking the nearest previous destination
+                    double biggest=0.3;
+                    bool success=false;
+                    for(const auto & dest:ped.GetLastDestinations())
+                    {
+                         if(dest!=-1)
+                         {
+                              Transition* trans_tmp =_building->GetTransitionByUID(dest);
+                              if(trans_tmp&&trans_tmp->DistTo(ped.GetPos())<biggest)
+                              {
+                                   biggest=trans_tmp->DistTo(ped.GetPos());
+                                   trans=trans_tmp;
+                                   Log->Write("       :\t Best match found at door %d",dest);
+                                   success=true;//at least one door was found
+                              }
+                         }
+                    }
+
+                    if(success==false)
+                    {
+                         Log->Write("ERROR       :\t correcting the door statistics");
+                         exit(EXIT_SUCCESS);
+                    }
+               }
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
           }
-//          if(ped.GetExitIndex()==0)
-//          {
-//               cout<<"exi 1t: "<<endl;exit(0);
-//          }
-//
-//          if(trans->GetUniqueID()==0)
-//          {
-//               cout<<"exit 2: "<<endl;exit(0);
-//          }
-//          if(trans->GetID()==0)
-//          {
-//               cout<<"exit 3: "<<endl;exit(0);
-//          }
      }
 }
 

@@ -727,7 +727,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
 
      if(relevantAPs.size()==0)
      {
-          Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
+          //Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
           return;
      }
 
@@ -778,7 +778,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
 
      if(quickest==-1)
      {
-          Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
+          //Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
           return;
      }
 
