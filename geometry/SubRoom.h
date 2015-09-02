@@ -99,7 +99,7 @@ public:
       */
      virtual ~SubRoom();
 
-     void SetHelpVariables();
+    // void SetHelpVariables();
 
      /**
       * Set/Get the subroom id
@@ -286,23 +286,6 @@ public:
       * also considering the geometry precision.
       */
      bool IsPartOfPolygon(const Point& pt);
-
-     /**
-      * @return true if the point is inside of the polygon.
-      */
-     bool IsInsideOfPolygonSquare(const Point& ptw);
-
-
-     /**
-      * @return true if ptw is inside of the polygon (subroom)
-      */
-     bool IsInsideOfPolygon(const Point& ptw);
-
-     /**
-      * @return true if ptw is inside of the polygon (subroom), but using help variables, need to SetHelpVariables beforehand
-	  */
-     bool IsInsideOfPolygonHelp(const Point& ptw);
-
 
      /**
 	  *

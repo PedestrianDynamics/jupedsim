@@ -83,7 +83,7 @@ SubRoom::~SubRoom()
      }
      _obstacles.clear();
 }
-
+/*
 void SubRoom::SetHelpVariables()
 {
 	unsigned int i, j= _poly.size()-1;
@@ -105,7 +105,7 @@ void SubRoom::SetHelpVariables()
 	j=i;
 	}
 }
-
+*/
 void SubRoom::SetSubRoomID(int ID)
 {
      _id = ID;
@@ -762,81 +762,6 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
      }
      return true;
 }
-
-bool SubRoom::IsInsideOfPolygonSquare(const Point& ptw)
-{
-	//works only for squares for now
-	double x1=_poly[0].GetX() ,x2;
-	double y1=_poly[0].GetY(), y2;
-
-	if(_poly[1].GetX() != x1  ) x2=_poly[1].GetX();
-	else x2=_poly[2].GetX();
-
-	if(_poly[1].GetY() != y1  ) y2=_poly[1].GetY();
-	else y2=_poly[2].GetY();
-
-	if( x1 > x2)
-	{
-		double temp=x1;
-		x1=x2;
-		x2=temp;
-	}
-
-	if( y1 > y2 )
-	{
-		double temp=y1;
-		y1=y2;
-		y2=temp;
-	}
-
-	if( ptw.GetX()>x1 && ptw.GetX()<x2 && ptw.GetY()>y1 && ptw.GetY()<y2 )
-		return true;
-	else
-		return false;
-}
-
-bool SubRoom::IsInsideOfPolygon(const Point& ptw)
-{
-	int vector_size = (_poly).size();
-	double x = ptw.GetX(), y = ptw.GetY();
-	int i, j = vector_size-1;
-	bool result = false;
-
-	for ( i=0; i<vector_size; i++ )
-	{
-		if (       ( (_poly[i].GetY() < y && _poly[j].GetY()>=y)
-					  ||  (_poly[j].GetY()<y && _poly[i].GetY()>=y ) )
-				&& (_poly[i].GetX() <= x || _poly[j].GetX() <= x)        )
-		{
-			result ^=  (_poly[i].GetX() + ( y-_poly[i].GetY() )/( _poly[j].GetY()-_poly[i].GetY() )*(_poly[j].GetX() - _poly[i].GetX() )<x);
-		}
-		j=i;
-	}
-
-	return result;
-}
-
-
-bool SubRoom::IsInsideOfPolygonHelp(const Point& ptw)
-{
-	int vector_size = (_poly).size();
-	double x = ptw.GetX(), y = ptw.GetY();
-	int i, j = vector_size-1;
-	bool result = false;
-
-	for ( i=0; i<vector_size; i++ )
-	{
-		if (       ( (_poly[i].GetY() < y && _poly[j].GetY()>=y)
-					  ||  (_poly[j].GetY()<y && _poly[i].GetY()>=y ) )
-				&& (_poly[i].GetX() <= x || _poly[j].GetX() <= x)        )
-		{
-			result ^= ( _poly_help_constatnt[i] + _poly_help_multiple[i]*y < x );
-		}
-		j=i;
-	}
-	return result;
-}
-
 
 bool SubRoom::IsInObstacle(const Point& pt)
 {
