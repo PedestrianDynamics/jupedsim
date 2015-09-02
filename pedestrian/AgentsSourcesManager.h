@@ -36,6 +36,7 @@
 #include <atomic>
 
 //jaaa
+/*
 #include "boost/polygon/voronoi.hpp"
 using boost::polygon::voronoi_builder;
 using boost::polygon::voronoi_diagram;
@@ -44,6 +45,7 @@ using boost::polygon::y;
 using boost::polygon::low;
 using boost::polygon::high;
 #include "../geometry/SubRoom.h"
+*/
 
 //Forward declarations
 class AgentsSource;

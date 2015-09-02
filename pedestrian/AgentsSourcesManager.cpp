@@ -44,6 +44,7 @@
 
 #include "../voronoi-boost/VoronoiPositionGenerator.h"
 //a.brkic begin
+/*
 #include "../geometry/SubRoom.h"
 #include <stdlib.h>
 #include <time.h>
@@ -78,7 +79,7 @@ namespace polygon {
 	};
 }  // polygon
 }  // boost
-
+*/
 //a.brkic end
 
 using namespace std;
