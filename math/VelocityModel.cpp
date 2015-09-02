@@ -79,11 +79,7 @@ bool VelocityModel::Init (Building* building) const
              building->DeletePedestrian(ped);
               continue;
          }
-
-         Line* e = ped->GetExitLine();
-         const Point& e1 = e->GetPoint1();
-         const Point& e2 = e->GetPoint2();
-         Point target = (e1 + e2) * 0.5;
+         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
@@ -185,7 +181,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 // calculate new direction ei according to (6)
                 Point direction = e0(ped, room) + repPed + repWall;
-                
+                printf("e0 %f, %f, repPed: %f, %f, repWall: %f, %f\n", e0(ped, room).GetX(), e0(ped, room).GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
                 for (int i = 0; i < size; i++) {
                       Pedestrian* ped1 = neighbours[i];
                      // calculate spacing
@@ -265,16 +261,16 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
       Point e0;
       const Point& pos = ped->GetPos();
       double dist = ped->GetExitLine()->DistTo(pos);
-    
+      printf("target = %f, %f, pos= %f,%f\n", target.GetX(), target.GetY(), pos.GetX(), pos.GetY());
       // check if the molified version works
       if (dist > J_EPS_GOAL) {
             e0 = ped->GetV0(target);
-
+            printf("e0=%f, %f\n", e0.GetX(), e0.GetY());
       } else {
           ped->SetSmoothTurning();
           e0 = ped->GetV0();
      }
-
+      getc(stdin);
      return e0;
 }
 
@@ -406,7 +402,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      //double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
      Point e_iw; // x- and y-coordinate of the normalized vector between ped and pt
      //double K_iw;
-     double l = ped->GetEllipse().GetBmax();
+     double l = 2*ped->GetEllipse().GetBmax();
      double R_iw;
      double min_distance_to_wall = 0.001; // 10 cm
      
