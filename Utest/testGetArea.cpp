@@ -68,21 +68,21 @@ int testGetArea()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(a);
-     E.SetBmin(b);
-     res = ( fabs(E.GetArea() - a*b*0.5*pi) < 0.001 )?1:0;
-     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b*0.5, E.GetArea(), a*b*0.5*pi, res);
+     E.SetBmax(b); // if v=0 then getEb is Bmax
+     res = ( fabs(E.GetArea() - a*b*pi) < 0.001 )?1:0;
+     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b, E.GetArea(), a*b*0.5*pi, res);
      ntests++;
      // #2
      E.SetCenter( Point(10,-4) );
-     res += ( fabs(E.GetArea() - a*b*0.5*pi) < 0.001 )?1:0;
-     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b*0.5, E.GetArea(), a*b*0.5*pi, res);
+     res += ( fabs(E.GetArea() - a*b*pi) < 0.001 )?1:0;
+     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b, E.GetArea(), a*b*0.5*pi, res);
      ntests++;
      // #3
      E.SetCenter( Point(10,-4) );
      E.SetAmin(b);
-     E.SetBmin(a);
-     res += ( fabs(E.GetArea() - a*b*0.5*pi) < 0.001 )?1:0;
-     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b*0.5, E.GetArea(), a*b*0.5*pi, res);
+     E.SetBmax(a); // if v=0 then getEb is Bmax
+     res += ( fabs(E.GetArea() - a*b*pi) < 0.001 )?1:0;
+     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b, E.GetArea(), a*b*0.5*pi, res);
      ntests++;
 
      // #4
@@ -90,9 +90,9 @@ int testGetArea()
      a *= 0.6;
      b *= 1.3;
      E.SetAmin(a);
-     E.SetBmin(b);
-     res += ( fabs(E.GetArea() - a*b*0.5*pi) < 0.001 )?1:0;
-     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b*0.5, E.GetArea(), a*b*0.5*pi, res);
+     E.SetBmax(b); // if v=0 then getEb is Bmax
+     res += ( fabs(E.GetArea() - a*b*pi) < 0.001 )?1:0;
+     fprintf (f, "a=%.2f\t b=%.2f\t area=%.2f\t expected=%.2f\t res=%d\t\n",a, b, E.GetArea(), a*b*0.5*pi, res);
      ntests++;
 
 
