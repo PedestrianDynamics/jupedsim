@@ -22,7 +22,7 @@
  *
  * \section Description
  * Implementation of first-order model
- * 2. Velocity Model: Tordeux2015
+ * Velocity Model: Tordeux2015 (3)
  *
  *
  **/
@@ -68,23 +68,39 @@ private:
      double _DWall;
 
      /**
-      * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
-      * This is a duplicate of @see GCFMModel::ForceDriv
-      * @param ped Pointer to Pedestrians
-      * @param room Pointer to Room
+      * Optimal velocity function \f$ V(spacing) =\min{v_0, \max{0, (s-l)/T}}  \f$
       *
+      * @param ped: Pointer to Pedestrians
+      * @param spacing: minimum spacing to the neighbors
+      * @param winkel: angle between <ped> and the nearest neighbor 
       *
-      * @return Point
+      * @return double
       */
      double OptimalSpeed(Pedestrian* ped, double spacing, double winkel) const;
 
+     /**
+      * The desired direction of pedestrian
+      *
+      * @param ped: Pointer to Pedestrians
+      * @param room: Pointer to room
+      *
+      * @return Point
+      */ 
      Point e0(Pedestrian *ped, Room* room) const;
-
-     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei) const;
-           
+     /**
+      * Get the spacing between ped1 and ped2
+      *
+      * @param ped1 Pointer to Pedestrian: First pedestrian
+      * @param ped2 Pointer to Pedestrian: Second pedestrian
+      * @param ei the direction of pedestrian. 
+      * This direction is: \f$ e_0 + \sum_j{R(spacing_{ij})*e_{ij}}\f$
+      * and should be calculated *before* calling OptimalSpeed
+      * @return Point
+      */
+     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei) const;           
      /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
-      * the Velocity model (unpublished)
+      * the Velocity model (to be published in TGF15)
       *
       * @param ped1 Pointer to Pedestrian: First pedestrian
       * @param ped2 Pointer to Pedestrian: Second pedestrian
@@ -118,6 +134,7 @@ public:
                    double awall, double Dwall);
      virtual ~VelocityModel(void);
 
+     
      DirectionStrategy* GetDirection() const;
 
      /**

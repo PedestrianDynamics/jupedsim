@@ -108,25 +108,25 @@ bool VelocityModel::Init (Building* building) const
 
 void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
 {
-     double delta = 0.5;
+      double delta = 0.5;
       // collect all pedestrians in the simulation.
       const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
-     unsigned long nSize;
-     nSize = allPeds.size();
+      unsigned long nSize;
+      nSize = allPeds.size();
 
       int nThreads = omp_get_max_threads();
 
-     int partSize;
-     partSize = (int) (nSize / nThreads);
+      int partSize;
+      partSize = (int) (nSize / nThreads);
 
       #pragma omp parallel  default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);
            vector< my_pair > spacings = vector<my_pair > ();
-           spacings.reserve(nSize); // bigger than needed
-           spacings.push_back(my_pair(100, 1)); //in case there are no neighbors
+           spacings.reserve(nSize); // larger than needed
+           spacings.push_back(my_pair(100, 1)); // in case there are no neighbors
            const int threadID = omp_get_thread_num();
 
            int start = threadID*partSize;
@@ -192,7 +192,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      // my_pair spacing_winkel = GetSpacing(ped, ped1);
                      spacings.push_back(GetSpacing(ped, ped1, direction));                      
                 }
-                // todo: update direction every DT.
+                // @todo: update direction every DT?
                 
                 // if(ped->GetID()==-10)
                 //       std::cout << "time: " << ped->GetGlobalTime() << "  |  updateRate  " <<ped->GetUpdateRate() << "   modulo " <<fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<<std::endl; 
@@ -239,12 +239,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point v_neu = result_acc[p - start];
                 Point pos_neu = ped->GetPos() + v_neu * deltaT;
-               
-                // if( (v_neu.Norm() > 1.2*ped->GetV0Norm() )) { // Stop pedestrians if the velocity is too high
-                //       //Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
-                //      v_neu = v_neu*0.01;
-                //      pos_neu = ped->GetPos();
-                // }
 
                //Jam is based on the current velocity
                 if ( v_neu.Norm() >= ped->GetV0Norm()*0.5) {
@@ -258,10 +252,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 {
                      ped->SetPhiPed();
                 }
-                // if(ped->GetID()==-10)
-                // {
-                //       fprintf(stderr, "%f %f %f %f %f\n", ped->GetGlobalTime(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().Norm(), ped->GetEllipse().GetAmin()+ped->GetEllipse().GetAv()*ped->GetV().Norm());
-                // }
                 ped->SetPos(pos_neu);
                 ped->SetV(v_neu);
 
@@ -284,16 +274,6 @@ Point VelocityModel::e0(Pedestrian* ped, Room* room) const
           ped->SetSmoothTurning();
           e0 = ped->GetV0();
      }
-
-
-      // if (ped->GetID()==-4){
-      //      double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
-      //      printf( "pos %f %f target %f %f\n", pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
-      //      printf("mass=%f, v0norm=%f, e0Norm=%f, tau=%f\n", ped->GetMass(), ped->GetV0Norm(), e0norm, ped->GetTau());
-      //      printf("Fdriv=  [%f, %f]\n", F_driv.GetX(), F_driv.GetY());
-      //      fprintf(stdout, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
-
-      // }
 
      return e0;
 }
@@ -325,22 +305,14 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei) 
             Log->Write("\t\t Pedestrians are too near to each other.");
             exit(EXIT_FAILURE);
      }
-      // Point ei = ped1->GetV().Normalized();
-      // if(ped1->GetV().NormSquare()<0.01){
-      //       ei = ped1->GetV0().Normalized();
-      // }
+
       double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
       double condition2 = ei.Rotate(0, 1).ScalarProduct(ep12); // theta = pi/2. condition2 should <= than l/Distance
       condition2 = (condition2>0)?condition2:-condition2; // abs
-      // if(ped1->GetID()==10 && ped2->GetID()==45){
-      //       printf("ei %f, %f | eiT %f ,%f, ep12 %f, %f \n", ei.GetX(), ei.GetY(), ei.Rotate(0,1).GetX(), ei.Rotate(0,1).GetY(), ep12.GetX(), ep12.GetY());
-      //       printf("condition1= %f, condition2=%f l/D=%f, norm=%f\n", condition1, condition2, l/Distance, distp12.Norm());
-            
-      // }
-      
+
       if((condition1 >=0 ) && (condition2 <= l/Distance))
-            // @todo return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
-            return  my_pair(distp12.Norm(), condition1);//*condition1;
+            // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
+            return  my_pair(distp12.Norm(), condition1); 
       else
             return  my_pair(std::numeric_limits<double>::max(), condition1);
 }      
@@ -352,7 +324,6 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      double Distance = distp12.Norm();
      Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
      double R_ij;
-     const double EPS = 0.001;
      double l = 2*ped1->GetEllipse().GetBmax();
 
      if (Distance >= J_EPS) {
@@ -370,9 +341,9 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
       }
       double condition1 = ei.ScalarProduct(ep12); // < e_i , e_ij > should be positive
       condition1 = (condition1>0)?condition1:0; // abs
-     // R_ij = - _aPed * exp((l-Distance)/_DPed) * condition1;
-     R_ij = - _aPed * exp((l-Distance)/_DPed);
-     F_rep = ep12 * R_ij;
+
+      R_ij = - _aPed * exp((l-Distance)/_DPed);
+      F_rep = ep12 * R_ij;
 
      return F_rep;
 }//END Velocity:ForceRepPed()
