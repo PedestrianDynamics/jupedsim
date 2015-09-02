@@ -32,13 +32,18 @@
 	<polygon caption="wall">
 	  <vertex px="60.000000" py="102.450" />
 	  <vertex px="60.000000" py="106.000000" />
-	  <vertex px="56.000000" py="106.000000" />
+	  <vertex px="50.000000" py="106.000000" />
 	</polygon>
 	<polygon caption="wall">
-	  <vertex px="56.000000" py="98.000000" />
+	  <vertex px="50.000000" py="98.000000" />
 	  <vertex px="60.000000" py="98.000000" />
 	  <vertex px="60.000000" py="101.550" />
+        </polygon>
+        <polygon>
+          <vertex px="50.000000" py="106.000000" />
+          <vertex px="50.000000" py="98.000000" />
 	</polygon>
+        
       </subroom>
       <crossings>
 	<crossing id="0" subroom1_id="0" subroom2_id="1">
@@ -51,27 +56,12 @@
 	</crossing>
       </crossings>
     </room>
-    <room id="1" caption="botleneckHolding" zpos="0.000000">
-      <subroom id="0" closed="0" class="subroom">
-	<polygon caption="wall">
-	  <vertex px="56.000000" py="106.000000" />
-	  <vertex px="50.000000" py="106.000000" />
-	  <vertex px="50.000000" py="98.000000" />
-	  <vertex px="56.000000" py="98.000000" />
-	</polygon>
-      </subroom>
-    </room>
   </rooms>
   <transitions>
     <transition id="2" caption="No_Name" type="emergency"
 		room1_id="0" subroom1_id="0" room2_id="-1" subroom2_id="-1">
       <vertex px="65.000000" py="106.000000" />
       <vertex px="65.000000" py="98.000000" />
-    </transition>
-    <transition id="3" caption="No_Name" type="emergency"
-		room1_id="0" subroom1_id="2" room2_id="1" subroom2_id="0">
-      <vertex px="56.000000" py="106.000000" />
-      <vertex px="56.000000" py="98.000000" />
     </transition>
   </transitions>
 </geometry>

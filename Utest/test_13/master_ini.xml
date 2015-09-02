@@ -2,10 +2,10 @@
 
 <!-- <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ini.xsd"> -->
 <JuPedSim project="JPS-Project" version="0.5" xmlns:xsi="http://xsd.jupedsim.org/jps_ini_core.xsd" xsi:noNamespaceSchemaLocation="ini.xsd">
-  <seed>linspace(1,10000,1)</seed>
+  <seed>linspace(1,10000,10)</seed>
   <!-- <seed>1</seed> -->
   <num_threads>4</num_threads>
-  <max_sim_time unit="sec">100</max_sim_time>
+  <max_sim_time unit="sec">200</max_sim_time>
   <!-- geometry file -->
   <geometry>test_13/geometries/</geometry>
   <!-- traectories file and format -->
@@ -46,7 +46,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0"  agent_parameter_id="1" room_id="1" subroom_id="0" number="60" goal_id="-1" router_id="1"/>	
+      <group group_id="0"  agent_parameter_id="1" room_id="0" subroom_id="2" number="100" goal_id="-1" router_id="1"/>	
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -65,10 +65,11 @@
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="1.34" sigma="0.001" />
-        <bmax mu="0.15" sigma="0.00001" /> <!-- this is l, assuming peds are circles with constant radius-->
-        <amin mu="0.15" sigma="0.00001" />
+        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius-->
+        <bmin mu="0.15" sigma="0.00000" />
+        <amin mu="0.15" sigma="0.00000" />
         <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.0" sigma="0.000001" />
+        <atau mu="0.0" sigma="0.00000" />
         <T mu="1" sigma="0.001"/>
       </agent_parameters>
     </model>

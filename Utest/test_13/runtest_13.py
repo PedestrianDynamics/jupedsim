@@ -11,11 +11,13 @@ import re
 def get_empirical_flow():
     files = glob.glob("experiments/*.txt")
     width_flow = {}
-
+    names = []
     for f in files:
+        names.append(os.path.basename(f).split(".")[0])
         data = np.loadtxt(f)
         widths = data[:, 0]
         flows = data[:, 1]
+
         for (width, flow) in zip(widths, flows):
             if not width_flow.has_key(width):
                 width_flow[width] = [flow]
@@ -28,7 +30,7 @@ def get_empirical_flow():
         std_J = np.std(width_flow[w])
         results.append([w, mean_J, std_J])
 
-    return np.sort(np.array(results), axis=0)
+    return np.sort(np.array(results), axis=0), names
 
 #=========================
 testnr = 13
@@ -145,12 +147,11 @@ if __name__ == "__main__":
     #plot(widths, flows, "o-b", lw = 2, ms = ms, label = "simulation")
     indexsort = np.argsort( flows.keys() )
     F = np.array( flows.keys() )[indexsort]
-    plot(F,  np.array(M)[indexsort], "o-", lw=2, label='Mean', color='blue')
+    plot(F, np.array(M)[indexsort], "o-", lw=2, label='Simulation', color='blue')
     errorbar(F , np.array(M)[indexsort] , yerr=np.array(S)[indexsort], fmt='-o')
 
-    jexp = get_empirical_flow()
-    # plot(jexp[:, 0] , jexp[:, 1], "D-k", lw=2, ms = ms, label = "experiments")
-    errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="o-", color='r', ecolor='r', linewidth=2, capthick=2, label = "experiments")
+    jexp, names = get_empirical_flow()
+    errorbar(jexp[:, 0], jexp[:, 1], yerr=jexp[:, 2], fmt="D-", color='r', ecolor='r', linewidth=2, capthick=2, label = "%s"%", ".join(names))
     axes().set_aspect(1./axes().get_data_ratio())
     columns = np.vstack((F, np.array(M)[indexsort]))
     gg = open("flow_col.txt", "w")
@@ -161,7 +162,6 @@ if __name__ == "__main__":
     grid()
     xlabel(r'$w\; [\, \rm{m}\, ]$',fontsize=18)
     ylabel(r'$J\; [\, \frac{1}{\rm{s}}\, ]$',fontsize=18)
-    #xticks([0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.5])
     # xticks(jexp[:, 0])
     xlim([np.min(jexp[:, 0]) - 0.1,  np.max(jexp[:, 0]) + 0.1])
     ylim([np.min(jexp[:, 1]) - 0.3,  np.max(jexp[:, 1]) + np.max(jexp[:, 2]) + 0.3])
@@ -173,9 +173,9 @@ if __name__ == "__main__":
             if key == w:
                 num += 1
                 err +=  np.sqrt((np.mean(values)-j)**2)
-                print err, key, w, "-", j, np.mean(values)
+                print "%3.3f  %3.1f  %3.1f  -  %3.3f  %3.3f"%(err, key, w, j, np.mean(values))
     err /= num
-    title(r"$\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
+    title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     
     savefig("flow.png")
     #show()
@@ -186,6 +186,8 @@ if __name__ == "__main__":
     logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
     
     if err > tolerance:
+        logging.info("exit with failure")
         exit(FAILURE)
     else:
+        logging.info("exit with success")
         exit(SUCCESS)
