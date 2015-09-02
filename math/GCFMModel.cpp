@@ -384,7 +384,6 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      {
           f += ForceRepWall(ped, wall);
      }
-
      //then the obstacles
      for(const auto & obst: subroom->GetAllObstacles())
      {

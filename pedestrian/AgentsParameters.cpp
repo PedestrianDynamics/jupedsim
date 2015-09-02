@@ -109,6 +109,12 @@ void AgentsParameters::InitTau(double mean, double stdv)
     _Tau = std::normal_distribution<double>(mean,stdv);
 }
 
+void AgentsParameters::InitT(double mean, double stdv)
+{
+    _T = std::normal_distribution<double>(mean,stdv);
+}
+
+
 double AgentsParameters::GetV0()
 {
     return _V0(_generator);
@@ -171,6 +177,10 @@ double AgentsParameters::GetTau()
     return _Tau(_generator);
 }
 
+double AgentsParameters::GetT()
+{
+    return _T(_generator);
+}
 std::string AgentsParameters::writeParameter()
 {
     std::string s;
@@ -189,6 +199,7 @@ std::string AgentsParameters::writeParameter()
     s.append(tmp);
     sprintf(tmp, "\t\ttau ~ N(%f, %f)\n",  _Tau.mean(), _Tau.stddev());
     s.append(tmp);
-
+    sprintf(tmp, "\t\tT ~ N(%f, %f)\n",  _T.mean(), _T.stddev());
+    s.append(tmp);
     return s;
 }

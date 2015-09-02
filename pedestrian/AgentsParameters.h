@@ -141,6 +141,14 @@ public:
     void InitTau(double mean, double stv);
 
     /**
+     * Initialize the reaction time
+     * @param mean, mean value
+     * @param stv, standard deviation
+     */
+    void InitT(double mean, double stv);
+
+
+    /**
      * @return a random number following the distribution
      */
     double GetV0();
@@ -201,7 +209,12 @@ public:
     double GetTau();
 
     /**
-     * return a summry of the parameters
+     * @return a random number following the distribution
+     */
+    double GetT();
+
+    /**
+     * return a summary of the parameters
      */
     std::string writeParameter();
 
@@ -221,6 +234,7 @@ private:
     std::normal_distribution<double> _Atau;
     std::normal_distribution<double> _Amin;
     std::normal_distribution<double> _Tau;
+    std::normal_distribution<double> _T;
 
 };
 

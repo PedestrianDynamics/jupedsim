@@ -63,6 +63,7 @@ private:
      //gcfm specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
+     double _T; // OV function
      double _deltaT; // step size
      JEllipse _ellipse;// the shape of this pedestrian
      Point _V0; //vector V0
@@ -80,7 +81,7 @@ private:
      int _subRoomID;
      int _oldRoomID;
      int _oldSubRoomID;
-
+     Point _lastE0;
 
      NavLine* _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
@@ -116,7 +117,7 @@ private:
      int _newOrientationDelay; //2 seconds, in steps
 
      /// necessary for smooth turning at sharp bend
-     int _updateRate;
+     double _updateRate;
      double _turninAngle;
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
@@ -149,6 +150,8 @@ public:
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
 
+     double GetT() const;
+     void SetT(double T);
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
@@ -181,7 +184,9 @@ public:
      int GetExitIndex() const;
      Router* GetRouter() const;
      NavLine* GetExitLine() const;
-
+     double GetUpdateRate() const;
+     Point GetLastE0() const;
+     void SetLastE0(Point E0);
      // Eigenschaften der Ellipse
      const Point& GetPos() const;
      int GetCellPos() const;

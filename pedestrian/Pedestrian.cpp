@@ -53,10 +53,10 @@ Pedestrian::Pedestrian()
      _id = _agentsCreated;//default id
      _mass = 1;
      _tau = 0.5;
+     _T = 1.0;
      _newOrientationFlag = false;
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
-     _updateRate = 0;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
      _navLine = new NavLine();
@@ -71,6 +71,7 @@ Pedestrian::Pedestrian()
      _mentalMap = map<int, int>();
      _destHistory = vector<int>();
      _deltaT = 0.01;
+     _updateRate = _deltaT;
      _V0 = Point(0,0);
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
@@ -91,7 +92,7 @@ Pedestrian::Pedestrian()
      _V0IdleEscalatorDownStairs=0.0;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
-
+     _lastE0 = Point(0,0);
      _agentsCreated++;//increase the number of object created
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
@@ -147,6 +148,11 @@ void Pedestrian::SetMass(double m)
 void Pedestrian::SetTau(double tau)
 {
      _tau = tau;
+}
+
+void Pedestrian::SetT(double T)
+{
+     _tau = T;
 }
 
 void Pedestrian::SetEllipse(const JEllipse& e)
@@ -232,6 +238,10 @@ int Pedestrian::GetID() const
      return _id;
 }
 
+double Pedestrian::GetUpdateRate() const
+{
+      return _updateRate;
+}
 int Pedestrian::GetRoomID() const
 {
      return _roomID;
@@ -250,6 +260,11 @@ double Pedestrian::GetMass() const
 double Pedestrian::GetTau() const
 {
      return _tau;
+}
+
+double Pedestrian::GetT() const
+{
+     return _T;
 }
 
 const JEllipse& Pedestrian::GetEllipse() const
@@ -296,6 +311,14 @@ int Pedestrian::GetNextDestination()
      }
 }
 
+Point Pedestrian::GetLastE0() const
+{
+      return _lastE0;
+}
+void Pedestrian::SetLastE0(Point E0)
+{
+      _lastE0 = E0;
+}
 
 int Pedestrian::GetLastDestination()
 {
