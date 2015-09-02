@@ -116,7 +116,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 3;     // 1 = second
+     long updateFrequency = 4;     // 1 = second
      do
      {
           int current_time = Pedestrian::GetGlobalTime();
@@ -154,7 +154,8 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: compute the optimal position for insertion using voronoi
-               ComputeBestPositionVoronoiBoost2(src.get(), peds);
+               if( !ComputeBestPositionVoronoiBoost(src.get(), peds) )
+            	   Log->Write("INFO:\t there was no place for some pedestrians");
                //ComputeBestPositionDummy( src.get(), peds );
                /*for (auto&& ped : peds)
                {
@@ -173,10 +174,14 @@ bool AgentsSourcesManager::ProcessAllSources() const
 void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
           vector<Pedestrian*>& peds)const
 {
-	peds[0]->SetPos( Point(10,5.4) );
-	peds[1]->SetPos( Point(10,4.8) );
-	peds[2]->SetPos( Point(10,4.4) );
-	peds[3]->SetPos( Point(10,3.8) );
+	peds[0]->SetPos( Point(10,5.5) );
+	peds[1]->SetPos( Point(10,4.9) );
+	peds[2]->SetPos( Point(10,4.3) );
+	peds[3]->SetPos( Point(10,3.7) );
+
+	/*peds[0]->SetPos( Point(10,5.4) );
+	peds[1]->SetPos( Point(10,4.6) );
+	peds[2]->SetPos( Point(10,3.8) );*/
 
 	for(auto&& ped : peds)
 	{
@@ -305,9 +310,26 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
 }
 */
 
-void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
+bool AgentsSourcesManager::IsEnoughInSubroom( SubRoom* subroom, Point& pt ) const
+{
+	vector<Wall> walls = subroom->GetAllWalls();
+	bool return_value = true;
+	double radius = 0.4; //radius of a person
+
+	for(unsigned int i=0; i<walls.size(); i++)
+		if ( walls[i].DistTo(pt) < radius )
+		{
+			return_value = false;
+			break;
+		}
+
+	return return_value;
+}
+
+bool AgentsSourcesManager::ComputeBestPositionVoronoiBoost(AgentsSource* src,
 		std::vector<Pedestrian*>& peds) const
 {
+	bool return_value = true;
 	auto dist = src->GetStartDistribution();
 	int roomID = dist->GetRoomId();
 	int subroomID = dist->GetSubroomID();
@@ -342,32 +364,44 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 		if(existing_peds.size() == 0 )
 		{
 
-			Point new_pos = subroom->GetCentroid();
+			Point center_pos = subroom->GetCentroid();
 
 			srand (time(NULL));
 			double x_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
 			double y_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
 			Point random_pos(x_coor, y_coor);
+			Point new_pos = center_pos + random_pos;
 
-			if ( subroom->IsInsideOfPolygonHelp( new_pos + random_pos ) )
+			if ( subroom->IsInSubRoom( new_pos ) )
 			{
-				ped->SetPos(new_pos + random_pos, true);
-				Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-				double speed=ped->GetV0Norm();
-				v=v*speed;
-				ped->SetV(v);
+				if( IsEnoughInSubroom(subroom, new_pos ) )
+				{
+					ped->SetPos(center_pos + random_pos, true);
+					Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+					double speed=ped->GetV0Norm();
+					v=v*speed;
+					ped->SetV(v);
+				}
+				else
+				{
+					ped->SetPos(center_pos, true);
+					Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+					double speed=ped->GetV0Norm();
+					v=v*speed;
+					ped->SetV(v);
+				}
 			}
 			else
 			{
-				ped->SetPos(new_pos, true);
+				ped->SetPos(center_pos, true);
 				Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
 				double speed=ped->GetV0Norm();
 				v=v*speed;
 				ped->SetV(v);
 			}
 
-		}//0
 
+		}//0
 		else
 		{
 			std::vector<Point> discrete_positions;
@@ -400,8 +434,6 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 				velocities_vector.push_back( v ); //DO: what speed?
 			}
 
-			//subroom->AddFakePeople( vector<Point>& discrete_positions, vector<Point>& velocities_vector,v);
-
 			//constructing the diagram
 			voronoi_diagram<double> vd;
 			construct_voronoi(discrete_positions.begin(), discrete_positions.end(), &vd);
@@ -416,7 +448,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 				ped->SetPos(pos , true);
 				VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
 			}
-			/*else //try with the maximum distance, don't need this if already using the VoronoiBestVertexMax function
+			else //try with the maximum distance, don't need this if already using the VoronoiBestVertexMax function
 			{
 				VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis );
 				if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
@@ -425,11 +457,18 @@ void AgentsSourcesManager::ComputeBestPositionVoronoiBoost2(AgentsSource* src,
 					ped->SetPos(pos , true);
 					VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
 				}
-			}*/
+				else
+				{
+					return_value = false;
+					//reject the pedestrian
+				}
+			}
 		}// >0
 
 		existing_peds.push_back(ped);
 	}//for loop
+
+	return return_value;
 }
 
 //gives an agent the mean velocity of his voronoi-neighbors
@@ -466,21 +505,22 @@ void AgentsSourcesManager::VoronoiBestVertexMax (const std::vector<Point>& discr
 	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
 	{
 		Point vert_pos( it->x()/factor, it->y()/factor );
-		if( subroom->IsInsideOfPolygonHelp(vert_pos) ) //wrote this function by myself
-		{
-			const voronoi_diagram<double>::vertex_type &vertex = *it;
-			const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-
-			std::size_t index = ( edge->cell() )->source_index();
-			Point p = discrete_positions[index];
-
-			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )  + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
-			if(dis > max_dis)
+		if( subroom->IsInSubRoom(vert_pos) )
+			if( IsEnoughInSubroom( subroom, vert_pos ) )
 			{
-				max_dis = dis;
-				max_it = it;
+				const voronoi_diagram<double>::vertex_type &vertex = *it;
+				const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+
+				std::size_t index = ( edge->cell() )->source_index();
+				Point p = discrete_positions[index];
+
+				dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )  + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+				if(dis > max_dis)
+				{
+					max_dis = dis;
+					max_it = it;
+				}
 			}
-		}
 	}
 	//at the end, max_it is the choosen vertex, or the first vertex - max_dis=0 assures that this position will not be taken
 }
@@ -496,25 +536,26 @@ void AgentsSourcesManager::VoronoiBestVertexRandMax (const std::vector<Point>& d
 	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
 	{
 		Point vert_pos = Point( it->x()/factor, it->y()/factor );
-		if( subroom->IsInsideOfPolygonHelp(vert_pos) ) //wrote this function by myself
-		{
-			const voronoi_diagram<double>::vertex_type &vertex = *it;
-			const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-
-			std::size_t index = ( edge->cell() )->source_index();
-			Point p = discrete_positions[index];
-
-			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
-
-			possible_vertices.push_back( it );
-			partial_sums.push_back( dis );
-
-			size = partial_sums.size();
-			if( size > 1 )
+		if( subroom->IsInSubRoom( vert_pos ) )
+			if( IsEnoughInSubroom(subroom, vert_pos) )
 			{
-				partial_sums[ size - 1 ] += partial_sums[ size - 2 ];
+				const voronoi_diagram<double>::vertex_type &vertex = *it;
+				const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+
+				std::size_t index = ( edge->cell() )->source_index();
+				Point p = discrete_positions[index];
+
+				dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+
+				possible_vertices.push_back( it );
+				partial_sums.push_back( dis );
+
+				size = partial_sums.size();
+				if( size > 1 )
+				{
+					partial_sums[ size - 1 ] += partial_sums[ size - 2 ];
+				}
 			}
-		}
 	}
 	//now we have the vector of possible vertices and weights and we can choose one randomly
 
@@ -549,19 +590,20 @@ void AgentsSourcesManager::VoronoiBestVertexRand (const std::vector<Point>& disc
 	for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
 	{
 		Point vert_pos = Point( it->x()/factor, it->y()/factor );
-		if( subroom->IsInsideOfPolygonHelp(vert_pos) ) //wrote this function by myself
-		{
-			const voronoi_diagram<double>::vertex_type &vertex = *it;
-			const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
+		if( subroom->IsInSubRoom(vert_pos) )
+			if( IsEnoughInSubroom(subroom, vert_pos) )
+			{
+				const voronoi_diagram<double>::vertex_type &vertex = *it;
+				const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
 
-			std::size_t index = ( edge->cell() )->source_index();
-			Point p = discrete_positions[index];
+				std::size_t index = ( edge->cell() )->source_index();
+				Point p = discrete_positions[index];
 
-			dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+				dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
 
-			possible_vertices.push_back( it );
-			distances.push_back( dis );
-		}
+				possible_vertices.push_back( it );
+				distances.push_back( dis );
+			}
 	}
 	//now we have all the possible vertices and their distances and we can choose one randomly
 

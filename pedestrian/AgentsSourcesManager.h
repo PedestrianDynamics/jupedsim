@@ -134,6 +134,8 @@ private:
       */
      void ComputeBestPositionVoronoi(AgentsSource* src, Pedestrian* agent) const;
 
+     bool IsEnoughInSubroom( SubRoom* subroom, Point& pt ) const;
+
      /**
       * Position incoming pedestrian using voronoi from boost library
       * @param src
@@ -146,7 +148,7 @@ private:
        * @param src
        * @param peds
        */
-      void ComputeBestPositionVoronoiBoost2(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+      bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 
       void ComputeBestPositionDummy(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 
