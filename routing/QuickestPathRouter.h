@@ -100,13 +100,6 @@ private:
       */
      double gain(double time);
 
-     /**
-      * return the turning angle penalty
-      *
-      * @param alpha [0..pi], the considered angle if change is undertaken
-      * @return, the value of the penalty
-      */
-     double TAP (double alpha);
 
      /**
       * \brief determines if a pedestrian is within (in a centre) of a jam.
@@ -149,11 +142,6 @@ private:
       * flag=2: I can't see the exit, nor references, too crowded, too many crossing pedes
       */
      bool SelectReferencePedestrian(Pedestrian* me, Pedestrian** myref, double JamThreshold, int exitID, int* flag);
-
-     /**
-      * return the number of common nodes the two aps are connected  with or pointing to.
-      */
-     int GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2);
 
      /**
       * return the queue at the specified exit within the specified radius

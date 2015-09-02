@@ -39,6 +39,31 @@ QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
 
 QuickestPathRouter::~QuickestPathRouter() { }
 
+bool QuickestPathRouter::Init(Building* building)
+{
+     Log->Write("INFO:\tInit Quickest Path Router Engine");
+
+     // prefer path through corridors to path through rooms
+     SetEdgeCost(1.0);
+     if (GlobalRouter::Init(building) == false)
+          return false;
+
+     if (ParseAdditionalParameters() == false)
+          return false;
+
+     // activate the spotlight for tracking some pedestrians
+     //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+
+     //vector<string> rooms;
+     //rooms.push_back("150");
+     //rooms.push_back("outside");
+     //WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
+     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
+     //DumpAccessPoints(1185);
+     //exit(0);
+     Log->Write("INFO:\tDone with Quickest Path Router Engine!");
+     return true;
+}
 
 int QuickestPathRouter::FindExit(Pedestrian* ped)
 {
@@ -118,8 +143,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                          {
                               ped->SetExitIndex(apID);
                               ped->SetExitLine(_accessPoints[apID]->GetNavLine());
-                              //ped->SetSmoothTurning(true);
-
                               return apID;
                          }
                          else
@@ -132,7 +155,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                          ped->SetExitIndex(nextDestination);
                          ped->SetExitLine(
                                    _accessPoints[nextDestination]->GetNavLine());
-                         //ped->SetSmoothTurning(true);
                          return nextDestination;
                     }
                }
@@ -147,28 +169,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
 double QuickestPathRouter::CBA (double ref_g1, double comp_g2)
 {
      return (comp_g2-ref_g1)/(ref_g1+comp_g2);
-}
-
-
-double QuickestPathRouter::TAP (double alpha)
-{
-     alpha=fabs(alpha);
-     const double pi = 3.14159265;
-
-     if(alpha<(pi/3.0))
-     {
-          return 0.9;
-     }
-     else if((alpha>=(pi/3.0))&&(alpha<(2*pi/3.0)))
-     {
-          return 0.8;
-     }
-     else
-     {
-          return 0.7;
-     }
-     //      return ( (alpha < pi/3 )? (0.9):( (alpha<2*pi/3) ? (0.8):(0.9)) );
-     return 1;
 }
 
 
@@ -240,31 +240,6 @@ double QuickestPathRouter::gain(double time)
      return 1.0/time;
 }
 
-bool QuickestPathRouter::Init(Building* building)
-{
-     Log->Write("INFO:\tInit Quickest Path Router Engine");
-
-     // prefer path through corridors to path through rooms
-     SetEdgeCost(1.0);
-     if (GlobalRouter::Init(building) == false)
-          return false;
-
-     if (ParseAdditionalParameters() == false)
-          return false;
-
-     // activate the spotlight for tracking some pedestrians
-     //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
-
-     //vector<string> rooms;
-     //rooms.push_back("150");
-     //rooms.push_back("outside");
-     //WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
-     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
-     //DumpAccessPoints(1185);
-     //exit(0);
-     Log->Write("INFO:\tDone with Quickest Path Router Engine!");
-     return true;
-}
 
 bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestrian** myref, double jamThreshold, int exitID, int* flag)
 {
@@ -356,37 +331,6 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
 //          getc(stdin);
 //     }
      return true;
-}
-
-int QuickestPathRouter::GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2)
-{
-     const vector<AccessPoint*>& aps1 = ap1->GetConnectingAPs();
-     const vector<AccessPoint*>& aps2 = ap2->GetConnectingAPs();
-
-     vector<AccessPoint*> common;
-
-     for(unsigned int i=0; i<aps1.size(); i++)
-     {
-          AccessPoint* from_AP=aps1[i];
-          if(from_AP->GetID()==ap2->GetID()) continue;
-          for(unsigned int j=0; j<aps2.size(); j++)
-          {
-               AccessPoint* to_AP=aps2[j];
-               if(to_AP->GetID()==ap1->GetID()) continue;
-               if(from_AP->GetID()==to_AP->GetID())
-               {
-                    //only add if the destination is shorter than mine
-                    //if(ap2->GetDistanceTo(FINAL_DEST_OUT)<from_AP->GetDistanceTo(FINAL_DEST_OUT))
-                    //if(ap1->GetDistanceTo(FINAL_DEST_OUT)<from_AP->GetDistanceTo(FINAL_DEST_OUT))
-                    common.push_back(from_AP);
-               }
-          }
-     }
-
-     std::sort(common.begin(), common.end());
-     common.erase(std::unique(common.begin(), common.end()), common.end());
-
-     return common.size();
 }
 
 void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
