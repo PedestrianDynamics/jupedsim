@@ -854,7 +854,8 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
 
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+          //value defined in the quickest path
+          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < 0.15)
           {
                if (dist2 < minDistLocal) {
                     bestAPsID = ap->GetID();
@@ -1468,7 +1469,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                if(_building->AddHline(h))
                {
                     subroom->AddHline(h);
-                    //h will be freed in building
+                    //h is freed in building
                }
                else
                {
@@ -1482,9 +1483,6 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
 
 bool GlobalRouter::IsWall(const Line& line, const std::vector<SubRoom*>& subrooms) const
 {
-
-     //for(auto&& itr_room: _building->GetAllRooms())
-     //{
      for(auto&& subroom: subrooms)
      {
           for (auto&& obst: subroom->GetAllObstacles())
@@ -1501,7 +1499,6 @@ bool GlobalRouter::IsWall(const Line& line, const std::vector<SubRoom*>& subroom
                     return true;
           }
      }
-     //}
 
      return false;
 }

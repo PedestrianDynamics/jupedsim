@@ -38,15 +38,24 @@
 
 #include <cfloat>
 
+enum ExitState
+{
+     FREE_EXIT = 0,
+     REF_PED_FOUND = 1,
+     UNREACHEABLE_EXIT = 2
+};
 
-#define FREE_EXIT 0
-#define REF_PED_FOUND 1
-#define UNREACHEABLE_EXIT 2
+enum RefSelectionMode
+{
+     SINGLE = 1,
+     ALL =2
+};
 
 //log output
 extern OutputHandler* Log;
 
-class QuickestPathRouter: public GlobalRouter {
+class QuickestPathRouter: public GlobalRouter
+{
 
 public:
      QuickestPathRouter();
@@ -60,11 +69,6 @@ public:
      virtual bool Init(Building* building);
 
 private:
-
-     /**
-      * @return the right path for the extra information
-      */
-     //virtual std::string GetRoutingInfoFile() const;
 
      /**
       * find the next suitable destination for the pedestrian
@@ -97,15 +101,6 @@ private:
      double gain(double time);
 
      /**
-      * compute the similarity between two values,
-      * normaly distances
-      * @param x1
-      * @param x2
-      * @return
-      */
-     double similarity (double x1, double x2);
-
-     /**
       * return the turning angle penalty
       *
       * @param alpha [0..pi], the considered angle if change is undertaken
@@ -135,9 +130,6 @@ private:
       */
      virtual void Redirect(Pedestrian* ped);
 
-     /// select the references pedestrians for this one
-     bool selectReferencePeds(int pedIndex, int myCurrentDoor=-1);
-
      /**
       * redirect a pedestrian based on the actual jamming conditions
       *
@@ -147,11 +139,6 @@ private:
       */
      int redirect(int pedindex,int actualexit=-1);
 
-     /**
-      * return the JAM size at a specific exit
-      * NOT IMPLEMENTED
-      */
-     double GetJamSizeAtExit(int exitID);
 
      /**
       * select a reference pedestrian for an exit.
@@ -222,6 +209,25 @@ private:
       */
      virtual int GetBestDefaultRandomExit(Pedestrian* ped);
 
+     /**
+      * Parse extra routing information for the quickest path
+      * @return
+      */
+     virtual bool ParseAdditionalParameters();
+
+private:
+     // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
+     double _queueVelocityNewRoom=0.7;
+     // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation
+     double _queueVelocityFromJam=0.2;
+     // Threshold for the cost benefit analysis
+     double _cbaThreshold=0.15;
+     // obstructions
+     int _visibilityObstruction=4;
+     //congestion factor before attempting a change
+     double _congestionRation=0.8;
+     // reference pedestrian selection mode
+     RefSelectionMode _refPedSelectionMode= RefSelectionMode::SINGLE;
 };
 
 #endif /* QUICKESTPATHROUTER_H_ */
