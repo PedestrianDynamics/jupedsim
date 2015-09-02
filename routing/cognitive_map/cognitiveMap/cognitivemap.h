@@ -12,6 +12,7 @@
 #include "../GraphNetwork.h"
 #include "youareherepointer.h"
 #include "cogmapoutputhandler.h"
+#include "connection.h"
 
 #include <queue>
 #include <memory>
@@ -45,6 +46,8 @@ using ptrPed = const Pedestrian*;
 using ptrLandmark = std::shared_ptr<Landmark>;
 using ptrGraphNetwork = std::shared_ptr<GraphNetwork>;
 using ptrOutputHandler = std::shared_ptr<CogMapOutputHandler>;
+using ptrConnection = std::shared_ptr<Connection>;
+using Connections = std::list<ptrConnection>;
 
 
 class CognitiveMap
@@ -53,15 +56,19 @@ public:
     CognitiveMap();
     CognitiveMap(ptrBuilding b, ptrPed ped);
     ~CognitiveMap();
+    //Map Updates
     void UpdateMap();
     void UpdateDirection();
     void UpdateYAHPointer(const Point &move);
+    // Landmarks
     void AddLandmarksSC(std::vector<ptrLandmark> landmarks);
     void AddLandmarks(std::vector<ptrLandmark> landmarks);
     std::vector<ptrLandmark> LookForLandmarks();
-    Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const;
+    // Waypoints and assoziations
+    Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks);
     void AddWaypoints(Waypoints waypoints);
     void AssessDoors();
+    // Calculations
     std::vector<GraphEdge *> SortConShortestPath(ptrWaypoint waypoint, const GraphVertex::EdgesContainer edges);
     //bool IsAroundWaypoint(const Waypoint& waypoint, GraphEdge* edge) const;
     ptrGraphNetwork GetGraphNetwork() const;
@@ -69,6 +76,13 @@ public:
     const Point& GetOwnPos();
     void WriteToFile();
     //evaluate waypoints
+
+    //Connections
+    std::vector<ptrConnection> GetAllConnections() const;
+    void AddConnection(const ptrConnection &connection);
+    void AddConnection(const ptrWaypoint& waypoint1, const ptrWaypoint& waypoint2);
+    void RemoveConnections(const ptrWaypoint& waypoint);
+    Waypoints ConnectedWith(const ptrWaypoint& waypoint) const;
 
 private:
     ptrBuilding _building;
@@ -81,6 +95,8 @@ private:
     Waypoints _waypContainer;
     YouAreHerePointer _YAHPointer;
     ptrOutputHandler _outputhandler;
+    Connections _connections;
+
     int _frame;
 
 

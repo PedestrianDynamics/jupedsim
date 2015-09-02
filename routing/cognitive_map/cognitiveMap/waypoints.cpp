@@ -149,3 +149,5 @@ void Waypoint::SetVisited(bool stat)
 }
 
 
+
+

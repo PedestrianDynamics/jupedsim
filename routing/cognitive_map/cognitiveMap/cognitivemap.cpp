@@ -123,7 +123,7 @@ std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
     return landmarks_found;
 }
 
-Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &landmarks) const
+Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &landmarks)
 {
     Waypoints waypoints;
     for (ptrLandmark landmark:landmarks)
@@ -131,7 +131,10 @@ Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &land
         Associations associations = landmark->GetAssociations();
         for (ptrAssociation association:associations)
         {
-            waypoints.push_back(association->GetAssociation(landmark));
+            if (association->GetWaypointAssociation(landmark)!=nullptr)
+                waypoints.push_back(association->GetWaypointAssociation(landmark));
+            else if (association->GetConnectionAssoziation()!=nullptr)
+                AddConnection(association->GetConnectionAssoziation());
         }
     }
     return waypoints;
@@ -337,14 +340,22 @@ void CognitiveMap::WriteToFile()
             if (waypoint==_waypContainerSorted.top())
                 current=true;
         }
+
+        std::string conString="";
+//        for (int connection:waypoint->GetConnections())
+//        {
+//            conString+=std::to_string(connection);
+//            conString+=",";
+//        }
+
         char tmp2[CLENGTH] = "";
         sprintf(tmp2, "<waypoint ID=\"%d\"\t"
                "x=\"%.6f\"\ty=\"%.6f\"\t"
                "z=\"%.6f\"\t"
-               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"/>\n",
+               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"\tconnection=\"%s\"/>\n",
                waypoint->GetId(), waypoint->GetPos().GetX(),
                waypoint->GetPos().GetY(),0.0 ,waypoint->GetA(), waypoint->GetB(),
-               current);
+               current,conString.c_str());
         data.append(tmp2);
     }
 
@@ -361,6 +372,53 @@ void CognitiveMap::WriteToFile()
 
     data.append("</frame>\n");
     _outputhandler->WriteToFile(data);
+}
+
+std::vector<ptrConnection> CognitiveMap::GetAllConnections() const
+{
+    std::vector<ptrConnection> con{ std::begin(_connections), std::end(_connections) };
+    return con;
+}
+
+void CognitiveMap::AddConnection(const ptrConnection& connection)
+{
+    _connections.push_back(connection);
+}
+
+void CognitiveMap::AddConnection(const ptrWaypoint &waypoint1, const ptrWaypoint &waypoint2)
+{
+    _connections.push_back(std::make_shared<Connection>(waypoint1,waypoint2));
+}
+
+void CognitiveMap::RemoveConnections(const ptrWaypoint &waypoint)
+{
+    for (ptrConnection connection:_connections)
+    {
+        if (connection->GetWaypoints().first==waypoint || connection->GetWaypoints().second==waypoint)
+        {
+            _connections.remove(connection);
+        }
+    }
+}
+
+Waypoints CognitiveMap::ConnectedWith(const ptrWaypoint &waypoint) const
+{
+    Waypoints cWaypoints;
+    for (ptrConnection connection:_connections)
+    {
+        if (connection->GetWaypoints().first==waypoint )
+        {
+            cWaypoints.push_back(connection->GetWaypoints().second);
+        }
+        else if (connection->GetWaypoints().second==waypoint )
+        {
+            cWaypoints.push_back(connection->GetWaypoints().first);
+        }
+    }
+
+
+    return cWaypoints;
+
 }
 
 

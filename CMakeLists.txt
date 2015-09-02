@@ -233,6 +233,7 @@ set (   source_files
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
   routing/cognitive_map/cognitiveMap/associations.cpp
+  routing/cognitive_map/cognitiveMap/connection.cpp
   routing/cognitive_map/cognitiveMap/cognitivemap.cpp
   routing/cognitive_map/cognitiveMap/waypoints.cpp
   routing/cognitive_map/cognitiveMap/landmark.cpp
@@ -286,6 +287,7 @@ set (   header_files
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
   routing/cognitive_map/cognitiveMap/associations.h
+  routing/cognitive_map/cognitiveMap/connection.cpp
   routing/cognitive_map/cognitiveMap/cognitivemap.h
   routing/cognitive_map/cognitiveMap/waypoints.h
   routing/cognitive_map/cognitiveMap/landmark.h

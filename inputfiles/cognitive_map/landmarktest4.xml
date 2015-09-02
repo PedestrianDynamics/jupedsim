@@ -2,7 +2,7 @@
 <geometry version="0.5" caption="corner" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/jps_geometry.xsd" unit="m">
     <rooms>
         <room id="0" caption="hall">
-            <subroom id="0" caption="Startoffice" class="subroom">
+            <subroom id="0" caption="Startoffice" class="corridor">
                 <polygon caption="wall">
                     <vertex px="2.62" py="3.34"/>
                     <vertex px="-0.38" py="3.34"/>
@@ -381,19 +381,19 @@
         </transition>
     </transitions>
     <landmarks>
-        <landmark id="0" caption="Landmark0" type="NaN" room1_id="0" subroom1_id="3" px="3.73" py="-2.29333">
+        <landmark id="0" caption="Landmark0" type="NaN" room1_id="0" subroom1_id="3" px="3.77667" py="-2.27">
             <associations>
-                <association id="0" caption="Waypoint" type="NaN" px="4.35167" py="3.48833" a="2.39167" b="1.52833"/>
+                <association id="1" caption="Waypoint" type="NaN" px="3.94333" py="4.62" a="3.61667" b="2.40333" connectedwith="0"/>
             </associations>
         </landmark>
-        <landmark id="1" caption="Landmark1" type="NaN" room1_id="0" subroom1_id="4" px="-1.47333" py="4.47333">
+        <landmark id="2" caption="Landmark1" type="NaN" room1_id="0" subroom1_id="4" px="2.65667" py="5.64">
             <associations>
-                <association id="1" caption="Waypoint" type="NaN" px="13.9533" py="4.725" a="2.17" b="2.39167"/>
+                <association id="3" caption="Waypoint" type="NaN" px="14.3733" py="4.81833" a="3.52333" b="3.885" connectedwith="2"/>
             </associations>
         </landmark>
-        <landmark id="2" caption="Landmark2" type="NaN" room1_id="0" subroom1_id="7" px="10.2633" py="12.57">
+        <landmark id="4" caption="Landmark2" type="NaN" room1_id="0" subroom1_id="8" px="13.8567" py="6.29333">
             <associations>
-                <association id="2" caption="Waypoint" type="NaN" px="16.7883" py="-5.075" a="8.155" b="3.79167"/>
+                <association id="5" caption="Waypoint" type="NaN" px="14.945" py="-4.50333" a="4.725" b="3.01" />
             </associations>
         </landmark>
     </landmarks>
