@@ -207,7 +207,12 @@ double JEllipse::GetEB() const
      // return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
       // todo: we dont  have the possiblity to choose between ellipses and circles.
       // for the moment we can control this only with the parameter values in the following formula
-     double x = (_Bmax - _Bmin) / _vel0;
+      double x;
+      if(_vel0 > 0.001) 
+            x = (_Bmax - _Bmin) / _vel0;
+      else
+            x = 0;
+      
      return _Bmax - _vel.Norm() * x;
 }
 
