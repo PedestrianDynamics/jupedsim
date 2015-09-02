@@ -894,6 +894,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
           //FIXME: assign the nearest and not only a random one
           //{
+
                relevantAPs[0]->GetID();
                ped->SetExitIndex(relevantAPs[0]->GetID());
                ped->SetExitLine(relevantAPs[0]->GetNavLine());
@@ -1483,6 +1484,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
 
 bool GlobalRouter::IsWall(const Line& line, const std::vector<SubRoom*>& subrooms) const
 {
+
      for(auto&& subroom: subrooms)
      {
           for (auto&& obst: subroom->GetAllObstacles())

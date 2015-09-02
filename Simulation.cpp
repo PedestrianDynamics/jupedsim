@@ -573,7 +573,6 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
           if(trans)
           {
-
                //check if the pedestrian left the door correctly
                if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
                {
