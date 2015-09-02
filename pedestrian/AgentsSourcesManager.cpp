@@ -42,7 +42,7 @@
 #include <chrono>
 #include "AgentsQueue.h"
 
-
+#include "../voronoi-boost/VoronoiPositionGenerator.h"
 //a.brkic begin
 #include "../geometry/SubRoom.h"
 #include <stdlib.h>
@@ -116,7 +116,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 4;     // 1 = second
+     long updateFrequency = 5;     // 1 = second
      do
      {
           int current_time = Pedestrian::GetGlobalTime();
@@ -154,7 +154,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: compute the optimal position for insertion using voronoi
-               if( !ComputeBestPositionVoronoiBoost(src.get(), peds) )
+               if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
             	   Log->Write("INFO:\t there was no place for some pedestrians");
                //ComputeBestPositionDummy( src.get(), peds );
                /*for (auto&& ped : peds)
@@ -309,7 +309,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
      //exit(0);
 }
 */
-
+/*
 bool AgentsSourcesManager::IsEnoughInSubroom( SubRoom* subroom, Point& pt ) const
 {
 	vector<Wall> walls = subroom->GetAllWalls();
@@ -613,7 +613,7 @@ void AgentsSourcesManager::VoronoiBestVertexRand (const std::vector<Point>& disc
 	dis = distances[i];
 
 }
-
+*/
 
 void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           std::vector<Pedestrian*>& peds) const
