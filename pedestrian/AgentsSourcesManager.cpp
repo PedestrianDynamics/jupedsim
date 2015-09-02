@@ -116,7 +116,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 5;     // 1 = second
+     long updateFrequency = 4;     // 1 = second
      do
      {
           int current_time = Pedestrian::GetGlobalTime();
