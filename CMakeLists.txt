@@ -20,7 +20,7 @@ message( STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR} )
 set(CMAKE_TEST_DIR ${CMAKE_SOURCE_DIR}/Utest)
 
 set(JPSREPORT_MAJOR_VERSION 0)
-set(JPSREPORT_MINOR_VERSION 6)
+set(JPSREPORT_MINOR_VERSION 7)
 set(JPSREPORT_PATCH_VERSION 0)
 set(JPSREPORT_VERSION
   ${JPSREPORT_MAJOR_VERSION}.${JPSREPORT_MINOR_VERSION}.${JPSREPORT_PATCH_VERSION})
@@ -70,6 +70,21 @@ if(PROCESSOR_COUNT)
   message( STATUS "PROCESSOR_COUNT " ${PROCESSOR_COUNT})
   set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
 endif(PROCESSOR_COUNT)
+
+# find the correct OpenMP flag
+FIND_PACKAGE(OpenMP)
+if(OPENMP_FOUND)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+else(OPENMP_FOUND)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    # somehow find_package(openmp) does not work properly with clang
+  else(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    message( STATUS "Disabling OpenMP support" )
+  endif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+endif(OPENMP_FOUND)
 
 # test all cpp-files in Utest
 if(BUILD_TESTING)
@@ -161,7 +176,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wno-unused-local-typedefs")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 message(STATUS "Debug flags: " ${CMAKE_CXX_FLAGS_DEBUG} )
-message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} )
+message(STATUS "Release flags: " ${CMAKE_CXX_FLAGS_RELEASE} -static )
 
 
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_BUILD_TYPE MATCHES Debug)
@@ -183,12 +198,12 @@ message( STATUS "Boost_LIBRARY_DIR: " ${Boost_LIBRARY_DIR} )
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIR})
 
-add_library ( core STATIC ${source_files} )
+add_library ( geometrycore STATIC ${source_files} )
 add_executable(
 	jpsreport main.cpp
 )
 target_link_libraries( jpsreport ${Boost_LIBRARIES} )
-target_link_libraries( jpsreport core )
+target_link_libraries( jpsreport geometrycore )
 
 if(WIN32)
 target_link_libraries (jpsreport wsock32)
@@ -218,7 +233,7 @@ if(BUILD_TESTING)
   foreach (test_src ${test_files})
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
     add_executable( ${test} ${test_src})
-    target_link_libraries (${test} core)
+    target_link_libraries (${test} geometrycore)
     add_test(NAME ${test} COMMAND ${test})
   endforeach(test_src ${test_files})
 

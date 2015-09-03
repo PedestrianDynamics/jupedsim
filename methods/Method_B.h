@@ -31,7 +31,7 @@
 #include "PedData.h"
 #include "MeasurementArea.h"
 #include "Method_C.h"
-#include "Analysis.h"
+#include "../Analysis.h"
 
 class Method_B
 {

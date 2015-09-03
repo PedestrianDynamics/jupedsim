@@ -49,7 +49,7 @@ using boost::polygon::voronoi_diagram;
 #include <boost/geometry/algorithms/intersection.hpp>
 #include <boost/geometry/algorithms/within.hpp>
 #include <boost/foreach.hpp>
-#include "general/Macros.h"
+#include "../general/Macros.h"
 
 typedef boost::geometry::model::d2::point_xy<double, boost::geometry::cs::cartesian> point_2d;
 typedef boost::geometry::model::polygon<point_2d> polygon_2d;

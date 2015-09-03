@@ -32,9 +32,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "general/Macros.h"
-#include "tinyxml/tinyxml.h"
-#include "IO/OutputHandler.h"
+#include "../general/Macros.h"
+#include "../tinyxml/tinyxml.h"
+#include "../IO/OutputHandler.h"
 #include <algorithm>    // std::min_element, std::max_element
 #include <boost/algorithm/string.hpp>
 

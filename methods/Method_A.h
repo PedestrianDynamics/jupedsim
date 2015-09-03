@@ -32,9 +32,9 @@
 #include "MeasurementArea.h"
 #include "PedData.h"
 #include <vector>
-#include "general/Macros.h"
-#include "tinyxml/tinyxml.h"
-#include "IO/OutputHandler.h"
+#include "../general/Macros.h"
+#include "../tinyxml/tinyxml.h"
+#include "../IO/OutputHandler.h"
 
 using namespace boost::geometry;
 typedef boost::geometry::model::segment<boost::geometry::model::d2::point_xy<double> > segment;
