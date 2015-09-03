@@ -241,7 +241,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 } else {
                      ped->UpdateTimeInJam();
                 }
-                
                 //only update the position if the velocity is above a threshold
                 if (v_neu.Norm() >= J_EPS_V)
                 {
@@ -249,7 +248,6 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 ped->SetPos(pos_neu);
                 ped->SetV(v_neu);
-
            }
       }//end parallel
 }

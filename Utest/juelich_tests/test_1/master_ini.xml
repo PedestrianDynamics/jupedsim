@@ -56,14 +56,14 @@
     <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.05</stepsize>
+        <stepsize>0.001</stepsize>
         <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="2.2" />
         <force_ped  a="5" D="0.1"/>
         <force_wall a="5" D="0.02"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="0">
-        <v0 mu="1." sigma="0.001" />
+        <v0 mu="1.0" sigma="0.001" />
         <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius-->
         <bmin mu="0.15" sigma="0.00000" />
         <amin mu="0.15" sigma="0.00000" />
