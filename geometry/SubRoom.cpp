@@ -67,6 +67,7 @@ SubRoom::SubRoom()
      _planeEquation[1]=0.0;
      _planeEquation[2]=0.0;
      _cosAngleWithHorizontalPlane=0;
+     _tanAngleWithHorizontalPlane=0;
      _minElevation=0;
      _maxElevation=0;
      
@@ -473,6 +474,8 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _planeEquation[2]=C;
      //compute and cache the cosine of angle with the plane z=h
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
+     // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1) 
+     _tanAngleWithHorizontalPlane = sqrt(A*A+B*B); // n1.n2 = -1
 }
 
 const double* SubRoom::GetPlaneEquation() const
@@ -488,6 +491,12 @@ double SubRoom::GetElevation(const Point& p) const
 double SubRoom::GetCosAngleWithHorizontal() const
 {
      return _cosAngleWithHorizontalPlane;
+
+}
+
+double SubRoom::GetTanAngleWithHorizontal() const
+{
+     return _tanAngleWithHorizontalPlane;
 
 }
 

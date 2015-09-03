@@ -42,7 +42,7 @@ Knowledge::~Knowledge()
 {
 }
 
-std::string Knowledge::Dump()
+std::string Knowledge::Dump() const
 {
      char tmp[2048];
      sprintf(tmp,"door [%d] state [%d]  since [%.2f] sec. Refused= %d, Quality=%.2f, latency=%.2f",_id,_isClosed,_time,_hasBeenRefusedOnce,_quality,_latency);

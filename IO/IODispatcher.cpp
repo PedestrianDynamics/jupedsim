@@ -543,7 +543,7 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-     for(unsigned int p=0;p<allPeds.size();p++)
+     for(unsigned int p=0;p<allPeds.size();++p)
      {
           Pedestrian* ped = allPeds[p];
           Room* r = building->GetRoom(ped->GetRoomID());

@@ -45,6 +45,7 @@ public:
      virtual void execute(const Pedestrian *, CognitiveMap *) const = 0;
 protected:
      const Building * const building;
+
 };
 
 #endif // ABSTRACTSENSOR_H

@@ -45,7 +45,7 @@ class GraphEdge;
 class GraphVertex;
 
 
-using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
+//using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
 
 /**
  * @brief Graph Vertex.
@@ -85,7 +85,7 @@ public:
     const GraphEdge * GetCheapestDestinationByEdges(const Point & position) const;
     const GraphEdge * GetLocalCheapestDestination(const Point & position) const;
 
-    NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
+    //NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
 
 
 

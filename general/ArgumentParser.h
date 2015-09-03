@@ -87,6 +87,8 @@ private:
      double paWall;
      double pbWall;
      double pcWall;
+     double pDPed;
+     double pDWall;
      double pIntPWidthPed;
      double pIntPWidthWall;
      double pMaxFPed;
@@ -120,6 +122,7 @@ private:
 private:
      bool ParseGCFMModel(TiXmlElement* xGCFM);
      bool ParseGompertzModel(TiXmlElement* xGompertz);
+     bool ParseVelocityModel(TiXmlElement* xVelocity);
      void ParseAgentParameters(TiXmlElement* operativModel);
      void Usage(const std::string file);
 
@@ -195,6 +198,8 @@ public:
      double GetaWall() const;
      double GetbWall() const;
      double GetcWall() const;
+     double GetDWall() const;
+     double GetDPed() const;
      double GetIntPWidthPed() const;
      double GetIntPWidthWall() const;
      double GetMaxFPed() const;

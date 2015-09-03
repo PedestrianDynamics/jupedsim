@@ -68,7 +68,7 @@ int testIsInside()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(a);
-     E.SetBmin(b);
+     E.SetBmax(b);
      // P == E.center
      P.SetX(0);
      P.SetY(0);
@@ -105,28 +105,28 @@ int testIsInside()
 
      // P ~ semi-axis
      P.SetX(0);
-     P.SetY(b*0.5);
+     P.SetY(b);
      res += ( E.IsInside(P) ==  false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
 
      // P ~ semi-axis
      P.SetX(0);
-     P.SetY(-b*0.5);
+     P.SetY(-b);
      res += ( E.IsInside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
 
      // P outside
      P.SetX(a);
-     P.SetY(-b*0.5);
+     P.SetY(-b);
      res += ( E.IsInside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
 
 // P outside
      P.SetX(2*a);
-     P.SetY(3.1*b*0.5);
+     P.SetY(3.1*b);
      res += ( E.IsInside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
@@ -134,7 +134,7 @@ int testIsInside()
 
 // P outside
      P.SetX(3*a);
-     P.SetY(-3.5*b*0.5);
+     P.SetY(-3.5*b);
      res += ( E.IsInside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
@@ -142,7 +142,7 @@ int testIsInside()
 
 // P outside
      P.SetX(-5*a);
-     P.SetY(-2*b*0.5);
+     P.SetY(-2*b);
      res += ( E.IsInside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
@@ -150,7 +150,7 @@ int testIsInside()
 
 // P outside
      P.SetX(-1.1*a);
-     P.SetY(-1.1*b*0.5);
+     P.SetY(-1.1*b);
      res += ( E.IsInside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);

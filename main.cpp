@@ -61,7 +61,7 @@ int main(int argc, char **argv)
      {
           //evacuation time
           int evacTime = 0;
-          Log->Write("INFO: \tStart runSimulation() with  %d pedestrians", sim.GetPedsNumber());
+          Log->Write("INFO: \tStart runSimulation() with %d pedestrians", sim.GetPedsNumber());
 
 #ifdef _USE_PROTOCOL_BUFFER
           //Start the thread for managing incoming messages from MatSim
