@@ -100,6 +100,7 @@ void Method_A::WriteFile_N_t(string data)
      if(file.is_open())
      {
           file<<data;
+          file.close();
           string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
           string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
