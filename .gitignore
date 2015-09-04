@@ -35,6 +35,10 @@
 *.out
 *.app
 
+# Hidden files
+.*
+!/.gitignore
+
 # Cmake
 CMakeCache.txt
 CMakeFiles
