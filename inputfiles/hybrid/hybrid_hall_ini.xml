@@ -70,7 +70,7 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="2">
+  <agents operational_model_id="3">
     <agents_distribution>
       <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
       <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
@@ -144,6 +144,25 @@
         <amin mu="0.18" sigma="0.001" />
         <tau mu="0.5" sigma="0.001" />
         <atau mu="0.5" sigma="0.001" />
+      </agent_parameters>
+    </model>
+     <model operational_model_id="3" description="Tordeux2015">
+      <model_parameters>
+        <solver>euler</solver>
+        <stepsize>0.01</stepsize>
+        <exit_crossing_strategy>2</exit_crossing_strategy>
+        <linkedcells enabled="true" cell_size="2.2" />
+        <force_ped a="5" D="0.1" />
+        <force_wall a="5" D="0.02" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="1.0" sigma="0.001" />
+        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
+        <bmin mu="0.15" sigma="0.00000" />
+        <amin mu="0.15" sigma="0.00000" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.0" sigma="0.00000" />
+        <T mu="1" sigma="0.001" />
       </agent_parameters>
     </model>
   </operational_models>
