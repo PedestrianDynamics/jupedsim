@@ -207,7 +207,7 @@ public:
      double GetSmallerAxis() const;
      double GetTimeInJam()const;
      int GetFinalDestination() const;
-     void ClearMentalMap(); // erase the peds memory
+     void ClearMentalMap(); //erase the peds memory
 
      /**
       * Update the knowledge of the pedestrian
@@ -224,6 +224,11 @@ public:
      std::map<int, Knowledge>& GetKnownledge();
 
      /**
+      * @return all previous destinations used by this pedestrian
+      */
+     const std::vector<int>& GetLastDestinations() const;
+
+     /**
       * For convenience
       * @return a string representation of the knowledge
       */
@@ -238,7 +243,6 @@ public:
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();
-     int GetDestinationCount();
      double GetDistanceToNextTarget() const;
      double GetDisTanceToPreviousTarget() const;
      void SetNewOrientationFlag(bool flag);
@@ -279,7 +283,7 @@ public:
       * @param ID, the id of the pedestrian
       * @param pa, the parameter to display (0 for all parameters)
       */
-     void Dump(int ID, int pa = 0);
+     void Dump(int ID, int pa = 0) const;
 
      /**
       * observe the reference pedestrians and collect some data, e.g distance to exit
@@ -373,7 +377,7 @@ public:
       * Default mode is coded by velocity.
       * @return a value in [-1 255]
       */
-     int GetColor();
+     int GetColor() const;
 
      void ResetTimeInJam();
      void UpdateTimeInJam();

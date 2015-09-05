@@ -118,6 +118,21 @@ public:
     void UpdateRoutesAndLocations();
 
     /**
+     * Update the routes (intermediate destinations) of the pedestrians.
+     * Based on the route choice algorithm used, the next doors or the next decision points is set.
+     * TODO:
+     */
+    void UpdateRoutes();
+
+    /**
+     * Update the location of the agents and remove the agents from the simulation who have left the building.
+     * Locations includes room/subrooms.
+     * TODO:
+     */
+    void UpdateLocations();
+
+
+    /**
      * Perform some initialisation for the simulation.
      * such as writing the headers for the trajectories.
      * @param the maximal number of pedestrian

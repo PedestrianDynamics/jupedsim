@@ -339,11 +339,6 @@ bool Pedestrian::ChangedSubRoom()
      return false;
 }
 
-int Pedestrian::GetDestinationCount()
-{
-     return _destHistory.size();
-}
-
 void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
@@ -364,6 +359,11 @@ void Pedestrian::ClearKnowledge()
 map<int, Knowledge>&  Pedestrian::GetKnownledge()
 {
      return _knownDoors;
+}
+
+const std::vector<int>& Pedestrian::GetLastDestinations() const
+{
+     return _destHistory;
 }
 
 const std::string Pedestrian::GetKnowledgeAsString() const
@@ -769,7 +769,7 @@ string Pedestrian::GetPath()
      return path;
 }
 
-void Pedestrian::Dump(int ID, int pa)
+void Pedestrian::Dump(int ID, int pa) const
 {
 
      if (ID != _id) return;
@@ -950,7 +950,7 @@ int Pedestrian::GetAgentsCreated()
      return _agentsCreated;
 }
 
-int Pedestrian::GetColor()
+int Pedestrian::GetColor() const
 {
      //default color is by velocity
      string key;

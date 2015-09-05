@@ -508,7 +508,7 @@ bool GlobalRouter::Init(Building* building)
      }
 
      //dumping the complete system
-     //DumpAccessPoints(1258);
+     //DumpAccessPoints(211); exit(0);
      //DumpAccessPoints(1259);
      //DumpAccessPoints(4912); //exit(0);
      //DumpAccessPoints(-1); exit(0);
@@ -854,7 +854,8 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
 
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
+          //value defined in the quickest path
+          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < 0.15)
           {
                if (dist2 < minDistLocal) {
                     bestAPsID = ap->GetID();
@@ -882,21 +883,25 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      else
      {
           if (_building->GetRoom(ped->GetRoomID())->GetCaption() != "outside")
-               Log->Write(
-                         "ERROR:\t GetBestDefaultRandomExit() \nCannot find valid destination for ped [%d] "
-                         "located in room [%d] subroom [%d] going to destination [%d]",
-                         ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
-                         ped->GetFinalDestination());
+          {
+               //Log->Write(
+               //
+               //          "ERROR:\t GetBestDefaultRandomExit() \nCannot find valid destination for ped [%d] "
+               //          "located in room [%d] subroom [%d] going to destination [%d]",
+               //          ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
+               //          ped->GetFinalDestination());
+
 
           //FIXME: assign the nearest and not only a random one
-          {
+          //{
+
                relevantAPs[0]->GetID();
                ped->SetExitIndex(relevantAPs[0]->GetID());
                ped->SetExitLine(relevantAPs[0]->GetNavLine());
                ped->RerouteIn(5);
                return relevantAPs[0]->GetID();
           }
-          return -1;
+          //return -1;
      }
 }
 
@@ -950,7 +955,8 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                const Point& posC = (posB - posA).Normalized() * ((posA - posB).Norm() - J_EPS) + posA;
 
                //check if visible
-               if (sub->IsVisible(posA, posC, true) == false)
+               if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
+               //if (sub->IsVisible(posA, posC, true) == false)
                {
                     continue;
                }
@@ -971,7 +977,8 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
                          const Point& posC = (posB - posA).Normalized()* ((posA - posB).Norm() - J_EPS) + posA;
 
                          //it points to a destination that I can see anyway
-                         if (sub->IsVisible(posA, posC, true) == true)
+                         if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
+                         //if (sub->IsVisible(posA, posC, true) == true)
                          {
                               relevant=false;
                          }
@@ -1463,7 +1470,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                if(_building->AddHline(h))
                {
                     subroom->AddHline(h);
-                    //h will be freed in building
+                    //h is freed in building
                }
                else
                {
@@ -1478,8 +1485,6 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
 bool GlobalRouter::IsWall(const Line& line, const std::vector<SubRoom*>& subrooms) const
 {
 
-     //for(auto&& itr_room: _building->GetAllRooms())
-     //{
      for(auto&& subroom: subrooms)
      {
           for (auto&& obst: subroom->GetAllObstacles())
@@ -1496,7 +1501,6 @@ bool GlobalRouter::IsWall(const Line& line, const std::vector<SubRoom*>& subroom
                     return true;
           }
      }
-     //}
 
      return false;
 }
