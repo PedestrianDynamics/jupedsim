@@ -92,7 +92,7 @@ bool GompertzModel::Init (Building* building) const
               sinPhi = d.GetY() / dist;
          } else {
               Log->Write(
-                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "ERROR: \tallPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
               return false;
          }
