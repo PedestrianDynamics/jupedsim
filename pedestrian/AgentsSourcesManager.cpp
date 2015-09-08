@@ -91,7 +91,7 @@ void AgentsSourcesManager::Run()
                _lastUpdateTime = current_time;
           }
           //wait some time
-         // std::this_thread::sleep_for(std::chrono::milliseconds(1));
+          // std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
      _isCompleted = true;
@@ -104,14 +104,14 @@ bool AgentsSourcesManager::ProcessAllSources() const
      {
           if (src->GetPoolSize())
           {
-        	   vector<Pedestrian*> peds;
+               vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
                Log->Write("INFO:\tSource %d generating %d agents (%d remaining)",src->GetId(),peds.size(),src->GetPoolSize());
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: compute the optimal position for insertion using voronoi
                if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
-            	   Log->Write("INFO:\t there was no place for some pedestrians");
+                    Log->Write("INFO:\t there was no place for some pedestrians");
                //ComputeBestPositionTotalRandom(src.get(), peds );
                //ComputeBestPositionDummy( src.get(), peds );
                /*for (auto&& ped : peds)
@@ -131,49 +131,49 @@ bool AgentsSourcesManager::ProcessAllSources() const
 void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
           vector<Pedestrian*>& peds)const
 {
-	peds[0]->SetPos( Point(10,5.5) );
-	peds[1]->SetPos( Point(10,4.9) );
-	peds[2]->SetPos( Point(10,4.3) );
-	peds[3]->SetPos( Point(10,3.7) );
+     peds[0]->SetPos( Point(10,5.5) );
+     peds[1]->SetPos( Point(10,4.9) );
+     peds[2]->SetPos( Point(10,4.3) );
+     peds[3]->SetPos( Point(10,3.7) );
 
-	/*peds[0]->SetPos( Point(10,5.4) );
+     /*peds[0]->SetPos( Point(10,5.4) );
 	peds[1]->SetPos( Point(10,4.6) );
 	peds[2]->SetPos( Point(10,3.8) );*/
 
-	for(auto&& ped : peds)
-	{
-		Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
-		double speed=ped->GetV0Norm();
-		v=v*speed;
-		ped->SetV(v);
-	}
+     for(auto&& ped : peds)
+     {
+          Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+          double speed=ped->GetV0Norm();
+          v=v*speed;
+          ped->SetV(v);
+     }
 }
 
 void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
-        vector<Pedestrian*>& peds)const
+          vector<Pedestrian*>& peds)const
 {
-	auto dist = src->GetStartDistribution();
-	auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
-	vector<Point> positions = PedDistributor::PossiblePositions(*subroom);
+     auto dist = src->GetStartDistribution();
+     auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
+     vector<Point> positions = PedDistributor::PossiblePositions(*subroom);
 
-	srand (time(NULL));
+     srand (time(NULL));
 
-	for (auto& ped : peds)
-	{
-		if( positions.size() )
-		{
-			int index = rand()%positions.size();
-			Point new_pos = positions[index];
-			positions.erase(positions.begin() + index);
-			ped->SetPos(new_pos, true);
-			AdjustVelocityByNeighbour(ped);
-		}
-		else
-		{
-			Log->Write("\t No place for a pedestrian");
-			break;
-		}
-	}
+     for (auto& ped : peds)
+     {
+          if( positions.size() )
+          {
+               int index = rand()%positions.size();
+               Point new_pos = positions[index];
+               positions.erase(positions.begin() + index);
+               ped->SetPos(new_pos, true);
+               AdjustVelocityByNeighbour(ped);
+          }
+          else
+          {
+               Log->Write("\t No place for a pedestrian");
+               break;
+          }
+     }
 
 }
 
@@ -294,7 +294,7 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
      //compute the best position
      //exit(0);
 }
-*/
+ */
 
 
 

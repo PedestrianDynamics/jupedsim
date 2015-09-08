@@ -71,6 +71,11 @@ void AgentsSource::RemoveAgentsFromPool(std::vector<Pedestrian*>& ped, int count
      }
 }
 
+void AgentsSource::AddAgentsToPool(std::vector<Pedestrian*>& peds)
+{
+     _agents.insert(_agents.begin(),peds.begin(),peds.end());
+}
+
 int AgentsSource::GetPoolSize() const
 {
      return _agents.size();
