@@ -128,6 +128,12 @@ private:
      void ComputeBestPositionDummy(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
 
      /**
+      * Position incoming pedestrians completely random
+      */
+     void ComputeBestPositionCompleteRandom(AgentsSource* src, std::vector<Pedestrian*>& peds) const;
+
+
+     /**
       * Position incoming pedestrians randomly
       * @param src
       * @param peds

@@ -79,7 +79,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 3;     // 1 = second
+     long updateFrequency = 2;     // 1 = second
      do
      {
           int current_time = Pedestrian::GetGlobalTime();
@@ -112,6 +112,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
                //todo: compute the optimal position for insertion using voronoi
                if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
             	   Log->Write("INFO:\t there was no place for some pedestrians");
+               //ComputeBestPositionTotalRandom(src.get(), peds );
                //ComputeBestPositionDummy( src.get(), peds );
                /*for (auto&& ped : peds)
                {
@@ -147,6 +148,35 @@ void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
 		ped->SetV(v);
 	}
 }
+
+void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
+        vector<Pedestrian*>& peds)const
+{
+	auto dist = src->GetStartDistribution();
+	auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
+	vector<Point> positions = PedDistributor::PossiblePositions(*subroom);
+
+	srand (time(NULL));
+
+	for (auto& ped : peds)
+	{
+		if( positions.size() )
+		{
+			int index = rand()%positions.size();
+			Point new_pos = positions[index];
+			positions.erase(positions.begin() + index);
+			ped->SetPos(new_pos, true);
+			AdjustVelocityByNeighbour(ped);
+		}
+		else
+		{
+			Log->Write("\t No place for a pedestrian");
+			break;
+		}
+	}
+
+}
+
 /*
 void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
           Pedestrian* agent) const
