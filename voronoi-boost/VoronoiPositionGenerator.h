@@ -33,7 +33,7 @@ class Point;
 	 * @param subroom
 	 * @param pt
 	 */
-	bool IsEnoughInSubroom( SubRoom* subroom, Point& pt );
+	bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius );
 
 	/**
 	* Position incoming pedestrian using voronoi from boost library
@@ -52,7 +52,7 @@ class Point;
 	 * @param max_dis
 	 */
 	void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
-		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	);
+		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	);
 
 	/**
 	 * Position incoming pedestrian on the vertex with greater probability for greater distances
@@ -63,7 +63,7 @@ class Point;
 	 * @param max_dis
 	 */
 	void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
-				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	);
+				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
 
 	/**
 	 * Position incoming pedestrian on a random vertex
@@ -74,7 +74,7 @@ class Point;
 	 * @param max_dis
 	 */
 	void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
-				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	);
+				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	);
 
 	/**
 	 * Gives a person the mean velocity of his voronoi-neighbours

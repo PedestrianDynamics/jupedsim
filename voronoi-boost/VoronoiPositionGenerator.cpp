@@ -62,31 +62,21 @@ using namespace std;
 
 //functions
 //TODO: refactor the function
-bool IsEnoughInSubroom( SubRoom* subroom, Point& pt )
+//radius as a parametar in ini file?
+bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
 {
-     std::vector<Transition*> transitions= subroom->GetAllTransitions();
-     std::vector<Crossing*> crossings = subroom->GetAllCrossings();
-
-     double radius = 0.4; //radius of a person
-
-     //checking distance to walls
-     //std::vector<Wall> walls = subroom->GetAllWalls();
-     //	for(unsigned int i=0; i<walls.size(); i++)
-     //		if ( walls[i].DistTo(pt) < radius )
-     //			return false;
      //TODO: code refactoring:
      for (const auto& wall: subroom->GetAllWalls())
           if(wall.DistTo(pt)<radius)
                return false;
 
-     //checking distance to transitions
-     for(unsigned int i=0; i<transitions.size(); i++)
-          if ( transitions[i]->DistTo(pt) < radius )
-               return false;
-     //checking distance to crossings
-     for(unsigned int i=0; i<crossings.size(); i++)
-          if ( crossings[i]->DistTo(pt) < radius )
-               return false;
+     for(const auto& trans: subroom->GetAllTransitions() )
+    	 if ( trans->DistTo(pt) < radius )
+    		 return false;
+
+     for( const auto& cross: subroom->GetAllCrossings() )
+    	 if( cross->DistTo(pt) < radius )
+    		 return false;
 
      return true;
 }
@@ -99,18 +89,21 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
      int roomID = dist->GetRoomId();
      int subroomID = dist->GetSubroomID();
      std::string caption = (building->GetRoom( roomID ))->GetCaption();
-     double radius = 0.4; //DO: change! radius of a person
 
      std::vector<Pedestrian*> existing_peds;
      std::vector<Pedestrian*> peds_without_place;
      building->GetPedestrians(roomID, subroomID, existing_peds);
+
+     double radius = 0.3; //radius of a person
+     if (existing_peds.size())
+    	 radius = existing_peds[0]->GetEllipse().GetBmax();
 
      SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
      const vector<Point>& room_vertices = subroom->GetPolygon();
 
      double factor = 100;  //factor for conversion to integer for the boost voronoi
 
-     vector<Point> fake_peds;  //doing this now so I don't have to do it in every loop
+     vector<Point> fake_peds;  //the positions of "fake" pedestrians converted to int
      Point temp(0,0);
      for (unsigned int i=0; i<room_vertices.size(); i++ )
      {
@@ -129,11 +122,12 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
      for (iter_ped = peds.begin(); iter_ped != peds.end(); )
      {
           Pedestrian* ped = (*iter_ped);
+          radius = ped->GetEllipse().GetBmax();
+
           if(existing_peds.size() == 0 )
           {
-               const Point& center_pos = subroom->GetCentroid();
-               // we have already initiate a random number generator using the seed from the ini file
-               //srand (time(NULL));
+        	   const Point& center_pos = subroom->GetCentroid();
+
                double x_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
                double y_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
                Point random_pos(x_coor, y_coor);
@@ -141,7 +135,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
                if ( subroom->IsInSubRoom( new_pos ) )
                {
-                    if( IsEnoughInSubroom(subroom, new_pos ) )
+                    if( IsEnoughInSubroom(subroom, new_pos, radius ) )
                     {
                          ped->SetPos(center_pos + random_pos, true);
                          Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
@@ -167,13 +161,14 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     ped->SetV(v);
                }
 
+               existing_peds.push_back(ped);
+
 
           }//0
           else
           {
-               std::vector<Point> discrete_positions;
+        	   std::vector<Point> discrete_positions;
                std::vector<Point> velocities_vector;
-
                Point temp(0,0);
                Point v(0,0);
                double no = 0;
@@ -192,13 +187,13 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     no++;
                }
 
-               v = v/no; //this is the mean of all the velocities
+               v = v/no; //this is the mean of all velocities
 
                //adding fake people to the voronoi diagram
                for (unsigned int i=0; i<room_vertices.size(); i++ )
                {
                     discrete_positions.push_back( fake_peds[i] );
-                    velocities_vector.push_back( v ); //DO: what speed?
+                    velocities_vector.push_back( v );
                }
 
                //constructing the diagram
@@ -207,7 +202,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
                voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
                double dis = 0;
-               VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis);
+               VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
 
                if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
                {
@@ -216,7 +211,9 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
 
                     // proceed to the next pedestrian
+                    existing_peds.push_back(ped);
                     ++iter_ped;
+
                }
                else
                {
@@ -245,7 +242,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 			}*/
           }// >0
 
-          existing_peds.push_back(ped);
+
      }//for loop
 
 
@@ -284,14 +281,14 @@ void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_
 
 //gives the voronoi vertex with max distance
 void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-          double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis	)
+          double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	)
 {
      double dis = 0;
      for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
      {
           Point vert_pos( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom(vert_pos) )
-               if( IsEnoughInSubroom( subroom, vert_pos ) )
+               if( IsEnoughInSubroom( subroom, vert_pos, radius ) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
                     const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
@@ -312,7 +309,7 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
 
 //gives random voronoi vertex but with weights proportional to squared distances
 void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-          double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	)
+          double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      vector<double> partial_sums;
@@ -322,7 +319,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      {
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom( vert_pos ) )
-               if( IsEnoughInSubroom(subroom, vert_pos) )
+               if( IsEnoughInSubroom(subroom, vert_pos,radius) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
                     const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
@@ -367,7 +364,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
 
 //gives a random voronoi vertex
 void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-          double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	)
+          double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis, double radius	)
 {
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      std::vector<double> distances;
@@ -376,7 +373,7 @@ void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const 
      {
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom(vert_pos) )
-               if( IsEnoughInSubroom(subroom, vert_pos) )
+               if( IsEnoughInSubroom(subroom, vert_pos, radius) )
                {
                     const voronoi_diagram<double>::vertex_type &vertex = *it;
                     const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
