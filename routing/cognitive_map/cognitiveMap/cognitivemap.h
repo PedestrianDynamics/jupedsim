@@ -64,8 +64,8 @@ public:
     void AddLandmarksSC(std::vector<ptrLandmark> landmarks);
     void AddLandmarks(std::vector<ptrLandmark> landmarks);
     std::vector<ptrLandmark> LookForLandmarks();
-    // Waypoints and assoziations
-    Waypoints TriggerAssoziations(const std::vector<ptrLandmark> &landmarks);
+    // Waypoints and associations
+    Waypoints TriggerAssociations(const std::vector<ptrLandmark> &landmarks);
     void AddWaypoints(Waypoints waypoints);
     void AssessDoors();
     // Calculations
@@ -74,6 +74,7 @@ public:
     ptrGraphNetwork GetGraphNetwork() const;
     double ShortestPathDistance(const GraphEdge *edge, const ptrWaypoint waypoint);
     const Point& GetOwnPos();
+    //WriteXML
     void WriteToFile();
     //evaluate waypoints
 

@@ -14,8 +14,10 @@ Association::Association(ptrWaypoint waypoint, ptrWaypoint associated_waypoint, 
 {
     _waypoint=waypoint;
     _associatedWaypoint=associated_waypoint;
+
     if (connected)
         _connection = std::make_shared<Connection>(_waypoint, _associatedWaypoint);
+
     else
         _connection=nullptr;
 

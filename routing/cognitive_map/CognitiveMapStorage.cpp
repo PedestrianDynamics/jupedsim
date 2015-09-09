@@ -152,7 +152,7 @@ void CognitiveMapStorage::ParseLandmarks()
             std::string asso_y = xmltoa(xAsso->Attribute("py"),"-1");
             std::string asso_a = xmltoa(xAsso->Attribute("a"),"-1");
             std::string asso_b = xmltoa(xAsso->Attribute("b"),"-1");
-            //std::string connection = xmltoa(xAsso->Attribute("connectedwith"),"-1");
+            int connection = std::stoi(xmltoa(xAsso->Attribute("connectedwith"),"-1"));
             //std::string priority = xmltoa(xAsso->Attribute("priority"),"-1");
 
             ptrWaypoint waypoint (new Waypoint(Point(std::stod(asso_x),std::stod(asso_y)),
@@ -162,8 +162,11 @@ void CognitiveMapStorage::ParseLandmarks()
             waypoint->SetCaption(asso_caption);
             //waypoint->AddConnection(std::stoi(connection));
             //waypoint->SetPriority(std::stod(priority));
+            bool connected=false;
+            if (connection==landmark->GetId())
+                connected=true;
+            landmark->AddAssociation(std::make_shared<Association>(landmark,waypoint,connected));
 
-            landmark->AddAssociation(std::make_shared<Association>(landmark,waypoint,true));
 
         }
 

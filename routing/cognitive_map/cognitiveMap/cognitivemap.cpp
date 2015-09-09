@@ -39,7 +39,7 @@ CognitiveMap::~CognitiveMap()
 
 void CognitiveMap::UpdateMap()
 {
-    AddWaypoints(TriggerAssoziations(LookForLandmarks()));
+    AddWaypoints(TriggerAssociations(LookForLandmarks()));
     if (_waypContainerSorted.empty())
         return;
     if (_waypContainerSorted.top()->WaypointReached(_YAHPointer.GetPos()))
@@ -112,18 +112,18 @@ std::vector<ptrLandmark> CognitiveMap::LookForLandmarks()
 
     for (ptrLandmark landmark:_landmarksSubConcious)
     {
-        if (landmark->GetRoom()==sub_room)
+        if (landmark->GetRoom()==sub_room && std::find(_landmarks.begin(), _landmarks.end(), landmark)==_landmarks.end())
         {
            landmarks_found.push_back(landmark);
-
         }
     }
+
     AddLandmarks(landmarks_found);
 
     return landmarks_found;
 }
 
-Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &landmarks)
+Waypoints CognitiveMap::TriggerAssociations(const std::vector<ptrLandmark> &landmarks)
 {
     Waypoints waypoints;
     for (ptrLandmark landmark:landmarks)
@@ -133,8 +133,10 @@ Waypoints CognitiveMap::TriggerAssoziations(const std::vector<ptrLandmark> &land
         {
             if (association->GetWaypointAssociation(landmark)!=nullptr)
                 waypoints.push_back(association->GetWaypointAssociation(landmark));
-            else if (association->GetConnectionAssoziation()!=nullptr)
+            if (association->GetConnectionAssoziation()!=nullptr)
+            {
                 AddConnection(association->GetConnectionAssoziation());
+            }
         }
     }
     return waypoints;
@@ -178,8 +180,8 @@ void CognitiveMap::AssessDoors()
         for (unsigned int i=0; i<sortedEdges.size(); ++i)
         {
             sortedEdges[i]->SetFactor(0.5+0.1*i,"SpatialKnowledge");
-            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
-            //Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
+            Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetCrossing()->GetID()));
+            Log->Write("INFO:\t "+std::to_string(sortedEdges[i]->GetFactor()));
         }
 
         //Log->Write(std::to_string(nextDoor->GetCrossing()->GetID()));
@@ -322,10 +324,11 @@ void CognitiveMap::WriteToFile()
     {
         char tmp1[CLENGTH] = "";
         sprintf(tmp1, "<landmark ID=\"%d\"\t"
+               "caption=\"%s\"\t"
                "x=\"%.6f\"\ty=\"%.6f\"\t"
                "z=\"%.6f\"\t"
                "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
-               landmark->GetId(), landmark->GetPos().GetX(),
+               landmark->GetId(), landmark->GetCaption().c_str(), landmark->GetPos().GetX(),
                landmark->GetPos().GetY(),0.0 ,landmark->GetA(), landmark->GetB());
 
         data.append(tmp1);
@@ -341,21 +344,16 @@ void CognitiveMap::WriteToFile()
                 current=true;
         }
 
-        std::string conString="";
-//        for (int connection:waypoint->GetConnections())
-//        {
-//            conString+=std::to_string(connection);
-//            conString+=",";
-//        }
 
         char tmp2[CLENGTH] = "";
         sprintf(tmp2, "<waypoint ID=\"%d\"\t"
+               "caption=\"%s\"\t"
                "x=\"%.6f\"\ty=\"%.6f\"\t"
                "z=\"%.6f\"\t"
-               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"\tconnection=\"%s\"/>\n",
-               waypoint->GetId(), waypoint->GetPos().GetX(),
+               "rA=\"%.2f\"\trB=\"%.2f\"\tcurrent=\"%i\"/>\n",
+               waypoint->GetId(),waypoint->GetCaption().c_str(), waypoint->GetPos().GetX(),
                waypoint->GetPos().GetY(),0.0 ,waypoint->GetA(), waypoint->GetB(),
-               current,conString.c_str());
+               current);
         data.append(tmp2);
     }
 
@@ -368,6 +366,18 @@ void CognitiveMap::WriteToFile()
            _YAHPointer.GetPos().GetY(),0.0 ,_YAHPointer.GetDirection());
 
     data.append(tmp3);
+
+
+    for (ptrConnection connection:_connections)
+    {
+        char tmp4[CLENGTH]="";
+        sprintf(tmp4, "<connection "
+               "Landmark_WaypointID1=\"%d\"\tLandmark_WaypointID2=\"%d\"/>\n",
+               connection->GetWaypoints().first->GetId(),
+               connection->GetWaypoints().second->GetId());
+
+        data.append(tmp4);
+    }
 
 
     data.append("</frame>\n");
