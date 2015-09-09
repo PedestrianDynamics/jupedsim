@@ -99,23 +99,22 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
     	 radius = existing_peds[0]->GetEllipse().GetBmax();
 
      SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
-     const vector<Point>& room_vertices = subroom->GetPolygon();
 
      double factor = 100;  //factor for conversion to integer for the boost voronoi
 
      vector<Point> fake_peds;  //the positions of "fake" pedestrians converted to int
      Point temp(0,0);
-     for (unsigned int i=0; i<room_vertices.size(); i++ )
+     for (auto vert: subroom->GetPolygon() ) //room vertices
      {
-          const Point& center_pos = subroom->GetCentroid();
-          temp.SetX( center_pos.GetX()-room_vertices[i].GetX( ) );
-          temp.SetY( center_pos.GetY()-room_vertices[i].GetY( ) );
-          temp = temp/sqrt(temp.NormSquare());
-          temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
-          temp = temp + room_vertices[i];
-          temp.SetX( (int)(temp.GetX()*factor) );
-          temp.SetY( (int)(temp.GetY()*factor) );
-          fake_peds.push_back( temp );
+    	const Point& center_pos = subroom->GetCentroid();
+    	temp.SetX( center_pos.GetX()-vert.GetX( ) );
+		temp.SetY( center_pos.GetY()-vert.GetY( ) );
+		temp = temp/sqrt(temp.NormSquare());
+		temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
+		temp = temp + vert;
+		temp.SetX( (int)(temp.GetX()*factor) );
+		temp.SetY( (int)(temp.GetY()*factor) );
+		fake_peds.push_back( temp );
      }
 
      std::vector<Pedestrian*>::iterator iter_ped;
@@ -190,7 +189,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                v = v/no; //this is the mean of all velocities
 
                //adding fake people to the voronoi diagram
-               for (unsigned int i=0; i<room_vertices.size(); i++ )
+
+               for (unsigned int i=0; i<subroom->GetPolygon().size(); i++ )
                {
                     discrete_positions.push_back( fake_peds[i] );
                     velocities_vector.push_back( v );
@@ -284,7 +284,9 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
           double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	)
 {
      double dis = 0;
-     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
+
+
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
      {
           Point vert_pos( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom(vert_pos) )
@@ -315,7 +317,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
      vector<double> partial_sums;
      unsigned int size=0;
 
-     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
      {
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom( vert_pos ) )
@@ -369,7 +371,7 @@ void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const 
      std::vector< voronoi_diagram<double>::const_vertex_iterator > possible_vertices;
      std::vector<double> distances;
 
-     for (voronoi_diagram<double>::const_vertex_iterator it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
+     for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
      {
           Point vert_pos = Point( it->x()/factor, it->y()/factor );
           if( subroom->IsInSubRoom(vert_pos) )
