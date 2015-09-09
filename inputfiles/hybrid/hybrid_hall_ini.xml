@@ -5,12 +5,12 @@
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
-  <geometry>hybrid_hall_geo.xml</geometry>
-  <max_sim_time>300</max_sim_time>
+  <geometry>hybrid_hall_geo_new.xml</geometry>
+  <max_sim_time>2000</max_sim_time>
 
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-    <file location="hybrid_hall_trajectories.xml" />
+  <trajectories format="xml-plain" fps="16">
+    <file location="hybrid_hall_trajectories_rep_05.xml" />
     <socket_ hostname="127.0.0.1" port="8989" />
   </trajectories>
 
@@ -50,11 +50,11 @@
       </goal>
       <goal id="2" final="true" caption="goal2">
         <polygon>
-          <vertex px="12" py="2.8" />
-          <vertex px="13" py="2.8" />
-          <vertex px="13" py="6.4" />
-          <vertex px="12" py="6.4" />
-          <vertex px="12" py="2.8" />
+          <vertex px="16" py="2.8" />
+          <vertex px="17" py="2.8" />
+          <vertex px="17" py="6.4" />
+          <vertex px="16" py="6.4" />
+          <vertex px="16" py="2.8" />
         </polygon>
       </goal>
       <goal id="4" final="true" caption="goal4">
@@ -84,7 +84,7 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="5" agents_max="50" group_id="0" caption="source 1" />
+      <source id="1" frequency="20" agents_max="400" group_id="6" caption="source 1" />
       <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
       <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
       <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
