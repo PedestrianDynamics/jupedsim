@@ -40,9 +40,36 @@
 
 \maketitle
 
-\section{Introduction}
+\newpage
+
+\section*{Abstract}
+In dieser Arbeit wird genommen: Model von Felix, Bodenfeld von Madrid, Code adaptiert von Leonardo Andrés Zepeda Núñez. 
+Es wird ein Testmodel beschrieben, welches den Einfluß des Madrid-Bodenfeldes untersucht.
+Historie: Dietrich's Model in Jupedsim; Bodenfeld warf Frage auf: Welche Diskretisierung (rectGrid, triangulated, how to deal with wall-surfaces), Probleme durch non-smooth Bodenfeld (?); -> Beschluss: Bodenfeld so gestalten, dass es gute Eigenschaften bei der Fußgängersimulation verspricht. 
+Dieses dann untersuchen und qualifizieren. Durch die Betreuung von M.C. floss die Erfahrung zahlreicher Modelle ein und bei der Modelfindung ein geeignetes Testmodel neu beschrieben.
+
+In this thesis, the effect of an alternate floor-field was analyzed, by using it in a newly composed test-model for pedestrian dynamics. In the simulation
+of pedestrian (crowd) movement, the routing of agents\footnote{An agent is the representation of a pedestrian in the simulation. Depending on the used
+model, an agent incorporates some kind of artificial intelligence or basic agent-attributes only (like size, speed attributes, etc.). In the latter case the model takes over
+the task of navigating agents.} is an integral part. Routing can be seen as the composition of two aspects: the global pathfinding through a geometry
+and the avoidance of static or dynamic obstacles\footnote{collision detection} (like walls or other agents) in a local\footnote{local in time and/or in space} situation.
+
+The history of pedestrian simulation shows various models with different answers to the
+question of navigation. Many of which make use of manually added elements\footnote{like some sort of domain-decomposition, e.g. through helplines} to solve the global pathfinding, which enable the user to simulate crowd movement in that very geometry. Other models use an automated algorithm, that will supply a navigation direction calculated from the agent's current position, the goal (area) and the geometry data.
+The model described by F. Dietrich is one of the later. It uses the solution of the Eikonal Equation (see chapter \ref{eikonalequation}), which describes a 2-D wave-propagation. The wave starts in the target region and propagates through the geometry. To navigate agents, they are directed in the opposing direction to the gradient of said
+solution of the Eikonal Equation. It is to be noted, that the solution of the Eikonal Equation can be calculated beforehand and does not contribute to the runtime of any given simulation scenario.
+The Routing using the plain floor-field will yield non-smooth pathways as described later. This could pose a problem for some models. Dietrich shows the existance and uniqueness of his problem-formulation by using the theorem of Picard-Lindelöf. To apply this theorem, the smoothness of the input-functions must be given. Dietrich solves that problem by the use of a mollifier, which basically takes anything and gives you a smooth approximation of the input.
+In this thesis, a floor-field is described, which solves the issue (non-smoothness) as a welcome side-effect. The research-group in Madrid (add ref) is working on the safe navigation of robots through a geometry. Robots are not to follow paths, which cut corners (which come close to any obstacles). A so-called distance-map is created and used as we see later. The welcome side-effect is smooth pathways by the the avoidance of walls and corners. The researchers take that approach even further, by reducing any geometry into a graph of edges and knots and thus having the domain in which the 2-D wave propagates reduced dramatically. Their intent is to calculate the floor-field in real-time using it for the reduced view-field of the robot's sensors.
+Our interest in this trick (wording..) is different. We welcome the smoothness of the resulting pathways and take special interest in the behavior of agents close to obstacles. The floor-field itself shows pathways, which show a repulsive character in the vector-field. This phenomenon enables us to formulate a new model, one that uses an altered floor-field. Thanks to the rich experience of Chraibi in creation and testing of pedestrian dynamics models, we followed his intuition to use that altered floor-field in a new model. The results seen in the simulations show remarkably good behavior. The model is easy to use, fast and shows superior characteristics in routing through complex geometries. The extent to which we alter the floor-field is subject to our analysis.
+
+\newpage
+\tableofcontents 
+\newpage
+
+\section{Pedestrian Dynamics: Introduction}
 << big picture: micor-/macroscopic models, cell automata/ODE-based, 
 take a closer look in next chapter >>
+Pedestrian Dynamics defines a field of research trying to understand the underlying concepts (kinematics or kinetics? check..) and mechanics of pedestrian crowd movement. Understanding how crowd behavior will react in different situations (geometries), will lead to the ability to design our environment to best fit the needs to safely conduct large events, design buildings (traffic infrasturcture) to safely move large amounts of people through train stations even during rush hour.
 
 \section{ODE based Model}
 
@@ -54,7 +81,7 @@ take a closer look in next chapter >>
 
 \section{Modelling}
 
-In the latter, a new approach in modeling is described, 
+In the latter, a new model is described, 
 \begin{itemize}
 \item aiming for
 the avoidance of faulty interaction of pedestrians and walls 
@@ -67,10 +94,10 @@ models (using mathematical formulations in the continuous space/domain), agents
 breach wall-surfaces and get stuck inside of walls.
 %\footnote{This agent-behavior in simulations has not yet been observed in experiments. Participants asked to do so in advance refused cooperation. (just kidding)}
 This undesired phenomenon 
-shows the challenge in calibrating forces and parameters of existing models, so that agents show natural behavior while not getting
+shows the challenge in calibrating forces and parameters of existing models, so that agents show valid natural behavior while not getting
 overlapping in extreme situations. Especially in situations of high crowd density, e.g. when facing bottlenecks, 
 overlapping can occur.
-The model or the data-post-processing needs to find a special treatment of this artifacts in the data. It leads 
+The model or the data-post-processing needs to find a special treatment of such artifacts in the data. It leads 
 to problems in counting, flow-calculation, simulation-stop-criterium and such.
 
 There are three mechanics used in the model to avoid ``overlapping/clipping'' in the vicinity of walls (include a figure for each):
@@ -113,9 +140,9 @@ $ g $ & : $\mathbb{R}^2 $ & $ \ni \vec{v} $ & $ \longrightarrow $ & $ g(\vec{v})
 &\Delta\vec{x}_{n}&&= \Delta t\cdot\vec{v}_{n, res}\\
 &\vec{v}_{n, res}&&= \left\{
 	\begin{aligned}
-	    &\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & P(\vec{v}_{n}) \quad &:& \quad & d(\vec{x})&& < 0.1\\
-		&\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & \vec{v}_{n} \quad  &:& \quad 0.1 <  & d(\vec{x})&& < 0.2\\
-		& &\vec{v}_{n} \quad &:& \quad & d(\vec{x})&& > 0.2
+	    &\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & P(\vec{v}_{n}) \quad &: & d(\vec{x})&& < 0.1\\
+		&\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & \vec{v}_{n} \quad  &: \quad 0.1 <  & d(\vec{x})&& < 0.2\\
+		& &\vec{v}_{n} \quad &:  & d(\vec{x})&& > 0.2
 	\end{aligned}
 	\right.\\
 %&\vec{v}_{n, res}&&= \begin{cases}
@@ -151,18 +178,16 @@ The model can be sectioned into these modules:
 
 \begin{itemize}
 \item Floorfield \begin{itemize}
-					\item reading geometry
-					\item creating grid
 					\item distance-field
 					\item enhanced floor-field
 				 \end{itemize}
 \item Intra Crowd Repulsion
-\item Direction-Calculator
-\item Anti-Overlapping
-\item Speed Calculator
+%\item Direction-Calculator
+%\item Anti-Overlapping
+%\item Speed Calculator
 \end{itemize}
 
-\subsection{Eikonal Equation}
+\subsection{Eikonal Equation}\label{eikonalequation}
 
 The ``Eikonal Equation'' in a domain \textgreek{W}, subset of $\mathbb{R}^{n}$,
 
@@ -187,7 +212,9 @@ Given a discretization
 of the domain \textgreek{W} and the target region ${\partial\Omega}$, the solution to the Eikonal Equation can be approached (angenähert)
 by using the Fast-Marching Algorithm. The algorithm provides a
 first order approximation, yet sufficient for our cause (pedestrian
-navigation). Computing-time of Fast-Marching is independent\footnote{Fast-Marching completion-time depends mainly on the length of the wavefronts. If the geometry leads to small lengths, as in geometries with large amounts of narrow corridors, completion time decreases.} of the complexity
+navigation). Computing-time of Fast-Marching is independent\footnote{Fast-Marching completion-time depends mainly on the length
+ of the wavefronts. If the geometry leads to small lengths, as in geometries with large amounts of narrow corridors, completion
+  time decreases.} of the complexity
 of obstacles and walls. 
 
 The negative gradient $-\nabla u$  of the ``first-arrival-times'' will 
@@ -209,11 +236,11 @@ close to walls or obstacles, could overlap with them in rare occasions.
 Agents might leave the valid domain and find themselves captured inside
 walls or obstacles. In the model described in this paper, we aim to fix that
 problem. In reality, we can observe, pedestrians avoiding
-walls and obstacles and keeping a certain distance. 
+walls and obstacles through keeping a certain distance. 
 
 Therefore, it is desirable to define a modified quality of an optimal
 route, which accounts for a minimal arrival time and a safe pathway.
-Safe in respect to avoiding the vicinity of walls and obstacles if
+Safe in respect to avoiding the vicinity of walls and obstacles, if
 and only if possible. If a space is very crowded (high density), then 
 agents should make use of the given space even if that means getting 
 close to walls.
@@ -248,9 +275,30 @@ How can an agent ``avoid'' the close vicinity of any wall or obstacle?
 
 \subsection{Distances-Field}
 
+Having above question in mind, we first need to introduce and understand 
+the \textit{Distances-Field}, a function $d$ living on the spacial domain $\Omega$, 
+which holds information, how 
+far away the closest wall is. This 
+function will prove useful when altering the floor-field used for routing.
 
 \includegraphics[width=0.9\linewidth]{pics/DistanceField2}
 \label{fig:DistanceField2}
+
+The function value $d(\vec{x})$ on the discrete grid, used for navigation, will
+be used to create a slowness-map. This slowness-map will assign to each grid-point 
+the value, which describes, how slow the 2-D wave will propagate over that grid-point.
+Points, that are relatively close to a wall, will have a relatively low value $d(\vec{x})$.
+Therefore, the 2-D wavefront will slow-down over these points. Routes passing these points
+will take more time and be less optimal in a sense, that combines distances and wall-avoidance.
+
+
+In the later, we will see two different floor-fields, which will have two 
+different names, yet they are both created by using the 
+Fast-Marching algorithm:
+\begin{enumerate}
+\item Direction-to-Wall-Field: this vector field holds the normalized direction to the closest wall
+\item Navigation-Field: this vector field holds the negative gradient of the altered floorfield
+\end{enumerate}
 
 << explain the pre-step incl. the threshold "cut-off"; have some nice pictures >>
 

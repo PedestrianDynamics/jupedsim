@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.6.26)  24 AUG 2015 10:39
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2015.6.26)  9 SEP 2015 10:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -269,110 +269,115 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 41.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 59.
+) [1
+
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (./masterthesisArG
+r.toc)
+\tf@toc=\write3
+\openout3 = `masterthesisArGr.toc'.
+
+ [4]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 86.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 59.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 86.
 
-Overfull \hbox (18.66733pt too wide) in paragraph at lines 61--64
+Overfull \hbox (18.66733pt too wide) in paragraph at lines 88--91
 \T1/cmr/m/n/10 go waves and such - like seen in pedes-trian crowd be-hav-ior/ex
 periments/reality.
  []
 
-[1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (31.80301pt too wide) in paragraph at lines 81--84
+Overfull \hbox (31.80301pt too wide) in paragraph at lines 108--111
 []\T1/cmr/m/n/10 The an-gle be-tween an agent's moving-direction and the wall-s
 urface-perpendicular
  []
 
-
-Overfull \hbox (125.07362pt too wide) in paragraph at lines 102--108
+[5]
+Overfull \hbox (125.07362pt too wide) in paragraph at lines 129--135
 [][] 
  []
 
 
-Overfull \hbox (32.3207pt too wide) in paragraph at lines 130--130
+Overfull \hbox (32.3207pt too wide) in paragraph at lines 157--157
 [] 
  []
 
-[2] [3] <pics/BottleneckObstaclePure.png, id=29, 771.88374pt x 207.77625pt>
+[6] <pics/BottleneckObstaclePure.png, id=38, 771.88374pt x 207.77625pt>
 File: pics/BottleneckObstaclePure.png Graphic file (type png)
 
 <use pics/BottleneckObstaclePure.png>
-Package pdftex.def Info: pics/BottleneckObstaclePure.png used on input line 181
+Package pdftex.def Info: pics/BottleneckObstaclePure.png used on input line 206
 .
 (pdftex.def)             Requested size: 310.4979pt x 83.57823pt.
- [4 <./pics/BottleneckObstaclePure.png (PNG copy)>] <pics/DistanceField2.png, i
-d=34, 969.6225pt x 366.36874pt>
+ [7 <./pics/BottleneckObstaclePure.png (PNG copy)>] [8] <pics/DistanceField2.pn
+g, id=47, 969.6225pt x 366.36874pt>
 File: pics/DistanceField2.png Graphic file (type png)
 
 <use pics/DistanceField2.png>
-Package pdftex.def Info: pics/DistanceField2.png used on input line 252.
+Package pdftex.def Info: pics/DistanceField2.png used on input line 284.
 (pdftex.def)             Requested size: 310.4979pt x 117.31865pt.
- [5]
 File: pics/BottleneckObstaclePure.png Graphic file (type png)
  <use pics/BottleneckObstaclePure.png>
-Package pdftex.def Info: pics/BottleneckObstaclePure.png used on input line 257
+Package pdftex.def Info: pics/BottleneckObstaclePure.png used on input line 305
 .
 (pdftex.def)             Requested size: 276.00105pt x 74.29211pt.
 
-<pics/BottleneckObstacleEnhanced.png, id=38, 770.88pt x 207.77625pt>
+<pics/BottleneckObstacleEnhanced.png, id=48, 770.88pt x 207.77625pt>
 File: pics/BottleneckObstacleEnhanced.png Graphic file (type png)
 
 <use pics/BottleneckObstacleEnhanced.png>
 Package pdftex.def Info: pics/BottleneckObstacleEnhanced.png used on input line
- 265.
+ 313.
 (pdftex.def)             Requested size: 276.00105pt x 74.3904pt.
 
-Overfull \hbox (37.41951pt too wide) in paragraph at lines 264--268
+Overfull \hbox (37.41951pt too wide) in paragraph at lines 312--316
 []$  $ \T1/cmr/m/n/10 is mod-i-fied to: []
  []
 
-[6 <./pics/DistanceField2.png (PNG copy)> <./pics/BottleneckObstacleEnhanced.pn
-g (PNG copy)>]
-<pics/sim_flow_vs_experimental_data.png, id=42, 578.16pt x 433.62pt>
+[9 <./pics/DistanceField2.png (PNG copy)>]
+<pics/sim_flow_vs_experimental_data.png, id=53, 578.16pt x 433.62pt>
 File: pics/sim_flow_vs_experimental_data.png Graphic file (type png)
 
 <use pics/sim_flow_vs_experimental_data.png>
 Package pdftex.def Info: pics/sim_flow_vs_experimental_data.png used on input l
-ine 297.
+ine 345.
 (pdftex.def)             Requested size: 310.4979pt x 232.87433pt.
- [7 <./pics/sim_flow_vs_experimental_data.png>] [8] (./masterthesisArGr.aux) ) 
+ [10 <./pics/BottleneckObstacleEnhanced.png (PNG copy)>] [11 <./pics/sim_flow_v
+s_experimental_data.png>] [12]
+(./masterthesisArGr.aux) ) 
 Here is how much of TeX's memory you used:
- 4166 strings out of 493304
- 62202 string characters out of 6139871
- 112429 words of memory out of 5000000
- 7541 multiletter control sequences out of 15000+600000
- 19129 words of font info for 52 fonts, out of 8000000 for 9000
+ 4172 strings out of 493304
+ 62287 string characters out of 6139871
+ 111440 words of memory out of 5000000
+ 7543 multiletter control sequences out of 15000+600000
+ 19815 words of font info for 53 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 38i,18n,26p,471b,251s stack positions out of 5000i,500n,10000p,200000b,80000s
-{
-/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t1.enc}</usr/share/texlive/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cbfonts/grmn1000.p
-fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pf
-b></usr/share/texmf/fonts/type1/public/cm-super/sfbx0800.pfb></usr/share/texmf/
-fonts/type1/public/cm-super/sfbx1000.pfb></usr/share/texmf/fonts/type1/public/c
-m-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0600.pfb
-></usr/share/texmf/fonts/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf/f
-onts/type1/public/cm-super/sfrm0800.pfb></usr/share/texmf/fonts/type1/public/cm
--super/sfrm1000.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm1200.pfb>
-</usr/share/texmf/fonts/type1/public/cm-super/sfrm1728.pfb>
-Output written on masterthesisArGr.pdf (8 pages, 384418 bytes).
+ 38i,18n,26p,798b,236s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf/fonts/enc/dvips/cm-super/cm-super-t
+1.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb>
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/t
+exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/cbfonts/grmn1000.pfb></usr/share/texlive/texmf-dist/fonts/type1/public
+/amsfonts/symbols/msbm10.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx
+0800.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfbx1000.pfb></usr/share
+/texmf/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf/fonts/type1/p
+ublic/cm-super/sfrm0600.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0
+700.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm0800.pfb></usr/share/
+texmf/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf/fonts/type1/pu
+blic/cm-super/sfrm1200.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfrm17
+28.pfb></usr/share/texmf/fonts/type1/public/cm-super/sfti1000.pfb>
+Output written on masterthesisArGr.pdf (12 pages, 428678 bytes).
 PDF statistics:
- 110 PDF objects out of 1000 (max. 8388607)
- 76 compressed objects within 1 object stream
+ 126 PDF objects out of 1000 (max. 8388607)
+ 87 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
