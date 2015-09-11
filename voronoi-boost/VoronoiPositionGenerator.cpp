@@ -36,7 +36,7 @@ using boost::polygon::low;
 using boost::polygon::high;
 
 
-//wrapping the boost objects
+//wrapping the boost objects (just the point object)
 namespace boost {
 namespace polygon {
 template <>
@@ -62,7 +62,6 @@ using namespace std;
 
 //functions
 //TODO: refactor the function
-//radius as a parametar in ini file?
 bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
 {
      //TODO: code refactoring:
@@ -71,11 +70,11 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
                return false;
 
      for(const auto& trans: subroom->GetAllTransitions() )
-    	 if ( trans->DistTo(pt) < radius )
+    	 if ( trans->DistTo(pt) < radius + 0.2 )
     		 return false;
 
      for( const auto& cross: subroom->GetAllCrossings() )
-    	 if( cross->DistTo(pt) < radius )
+    	 if( cross->DistTo(pt) < radius + 0.2 )
     		 return false;
 
      return true;
@@ -94,16 +93,15 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
      std::vector<Pedestrian*> peds_without_place;
      building->GetPedestrians(roomID, subroomID, existing_peds);
 
-     double radius = 0.3; //radius of a person
-     if (existing_peds.size())
-    	 radius = existing_peds[0]->GetEllipse().GetBmax();
+     double radius = 0.3; //radius of a person, 0.3 is just some number(needed for the fake_peds bellow), will be changed afterwards
 
      SubRoom* subroom = building->GetRoom( roomID )->GetSubRoom(subroomID);
 
      double factor = 100;  //factor for conversion to integer for the boost voronoi
 
-     vector<Point> fake_peds;  //the positions of "fake" pedestrians converted to int
+     std::vector<Point> fake_peds;
      Point temp(0,0);
+     //fake_peds will be the positions of "fake" pedestrians, multiplied by factor and converted to int
      for (auto vert: subroom->GetPolygon() ) //room vertices
      {
     	const Point& center_pos = subroom->GetCentroid();
@@ -121,7 +119,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
      for (iter_ped = peds.begin(); iter_ped != peds.end(); )
      {
           Pedestrian* ped = (*iter_ped);
-          radius = ped->GetEllipse().GetBmax();
+          radius = ped->GetEllipse().GetBmax(); //max radius of the curren pedestrian
 
           if(existing_peds.size() == 0 )
           {
@@ -164,7 +162,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
 
           }//0
-          else
+
+          else //more than one pedestrian
           {
         	   std::vector<Point> discrete_positions;
                std::vector<Point> velocities_vector;
@@ -173,23 +172,22 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                double no = 0;
 
                //points from double to integer
-               for (auto&& iter = existing_peds.begin(); iter != existing_peds.end(); ++iter)
+               for (const auto& eped: existing_peds)
                {
-                    const Point& pos = (*iter)->GetPos();
+                    const Point& pos = eped->GetPos();
                     temp.SetX( (int)( pos.GetX()*factor ) );
                     temp.SetY( (int)( pos.GetY()*factor ) );
                     discrete_positions.push_back( temp );
-                    velocities_vector.push_back( (*iter)->GetV() );
+                    velocities_vector.push_back( eped->GetV() );
 
                     //calculating the mean, using it for the fake pedestrians
-                    v = v + (*iter)->GetV();
+                    v = v + eped->GetV();
                     no++;
                }
 
                v = v/no; //this is the mean of all velocities
 
-               //adding fake people to the voronoi diagram
-
+               //adding fake people to the vector for constructing voronoi diagram
                for (unsigned int i=0; i<subroom->GetPolygon().size(); i++ )
                {
                     discrete_positions.push_back( fake_peds[i] );
@@ -218,11 +216,9 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                else
                {
                     //reject the pedestrian:
-                    // remove from the initial vector since it should only contain the pedestrians that could
-                    // find a place. Put in a different queue, they will be put back in the source.
                     return_value = false;
-                    peds_without_place.push_back(*iter_ped);
-                    iter_ped=peds.erase(iter_ped);
+                    peds_without_place.push_back(*iter_ped); //Put in a different queue, they will be put back in the source.
+                    iter_ped=peds.erase(iter_ped); // remove from the initial vector since it should only contain the pedestrians that could find a place
                }
 
                /*else //try with the maximum distance, don't need this if already using the VoronoiBestVertexMax function

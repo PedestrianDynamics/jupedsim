@@ -29,7 +29,7 @@ class Pedestrian;
 class Point;
 
 	/**
-	 * Calculates if a point (which is inside the subroom) is far enough from the walls ( > radius of a person)
+	 * Calculates if a point (which is inside the subroom) is far enough from the walls, transitions, crossings ( > radius of a person)
 	 * @param subroom
 	 * @param pt
 	 */
@@ -45,11 +45,12 @@ class Point;
 
 	/**
 	 * Position incoming pedestrian on the vertex with the greatest distance
-	 * @param discrete_positions
+	 * @param discrete_positions, positions of existing pedestrians + fake pedestrians (but multiplied with the factor)
 	 * @param vd
 	 * @param subroom
-	 * @param max_it
-	 * @param max_dis
+	 * @param max_it, after calling the function this will be the iterator of the best vertex
+	 * @param max_dis, after calling the function this will be the (distance*factor)^2 where distance is the distance to the chosen vertex
+	 * @param radius, radius of a person
 	 */
 	void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
 		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	);
@@ -59,8 +60,9 @@ class Point;
 	 * @param discrete_positions
 	 * @param vd
 	 * @param subroom
-	 * @param max_it
-	 * @param max_dis
+	 * @param max_it, after calling the function this will be the iterator of the best vertex
+	 * @param max_dis, after calling the function this will be the (distance*factor)^2 where distance is the distance to the chosen vertex
+	 * @param radius, radius of a person
 	 */
 	void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
 				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius);
@@ -70,8 +72,9 @@ class Point;
 	 * @param discrete_positions
 	 * @param vd
 	 * @param subroom
-	 * @param max_it
-	 * @param max_dis
+	 * @param max_it, after calling the function this will be the iterator of the best vertex
+	 * @param max_dis, after calling the function this will be the (distance*factor)^2 where distance is the distance to the chosen vertex
+	 * @param radius, radius of a person
 	 */
 	void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
 				voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	);
