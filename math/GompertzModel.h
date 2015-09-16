@@ -181,7 +181,7 @@ public:
       * @param deltaT the next timestep
       * @param building the geometry object
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
+     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const;
 };
 
 

@@ -103,7 +103,7 @@ bool GCFMModel::Init (Building* building) const
     return true;
 }
 
-void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const
 {
      double delta = 1.5;
 
