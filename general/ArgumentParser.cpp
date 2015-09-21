@@ -675,7 +675,6 @@ bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
 {
      //parsing the model parameters
      Log->Write("\nINFO:\tUsing Tordeux2015 model");
-
      Log->Write("INFO:\tParsing the model parameters");
 
      TiXmlNode* xModelPara = xVelocity->FirstChild("model_parameters");
@@ -963,7 +962,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
      return true;
 }
 
-
+//todo: parse this in Cognitive map router
 bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
 {
      TiXmlNode* sensorNode=routerNode->FirstChild();
