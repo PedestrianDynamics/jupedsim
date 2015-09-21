@@ -254,6 +254,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 if(periodic){
                       if(ped->GetPos().GetX() >= xRight){
                             ped->SetPos(Point(ped->GetPos().GetX() - (xRight - xLeft), ped->GetPos().GetY()));
+                            //ped->SetID( ped->GetID() + 1);
                       }
                 }
                 ped->SetV(v_neu);
