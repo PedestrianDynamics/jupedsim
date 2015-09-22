@@ -74,6 +74,8 @@ ArgumentParser::ArgumentParser()
      _isCutByCircle = false;
      _isOutputGraph= false;
      _isPlotGraph= false;
+     _isPlotTimeSeriesD=false;
+     _isPlotTimeSeriesC=false;
      _isIndividualFD = false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -426,6 +428,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     _areaIDforMethodA.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
+               if ( string(xMethod_A->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+               {
+            	   _isPlotTimeSeriesA=true;
+            	   Log->Write("INFO: \tThe Time series N-t measured with Method A will be plotted!!");
+               }
           }
      }
      // method B
@@ -456,6 +463,11 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     _areaIDforMethodC.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
+               if ( string(xMethod_C->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+               {
+            	   _isPlotTimeSeriesC=true;
+            	   Log->Write("INFO: \tThe Time series measured with Method C will be plotted!!");
+               }
           }
      // method D
      TiXmlElement* xMethod_D=xMainNode->FirstChildElement("method_D");
@@ -470,6 +482,12 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
+               }
+
+               if ( string(xMethod_D->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+               {
+            	   _isPlotTimeSeriesD=true;
+            	   Log->Write("INFO: \tThe Time series measured with Method D will be plotted!!");
                }
 
                if ( xMethod_D->FirstChildElement("cut_by_circle"))
@@ -628,6 +646,21 @@ bool ArgumentParser::GetIsOutputGraph() const
 bool ArgumentParser::GetIsPlotGraph() const
 {
      return _isPlotGraph;
+}
+
+bool ArgumentParser::GetIsPlotTimeSeriesA() const
+{
+	return _isPlotTimeSeriesA;
+}
+
+bool ArgumentParser::GetIsPlotTimeSeriesC() const
+{
+	return _isPlotTimeSeriesC;
+}
+
+bool ArgumentParser::GetIsPlotTimeSeriesD() const
+{
+	return _isPlotTimeSeriesD;
 }
 
 bool ArgumentParser::GetIsIndividualFD() const

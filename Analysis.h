@@ -131,6 +131,9 @@ private:
      bool _getProfile;        // Whether make field analysis or not
      bool _outputGraph;       // Whether output the data for plot the voronoi diagram each frame
      bool _plotGraph;       // Whether plot the voronoi diagram each frame
+     bool _plotTimeseriesA;
+     bool _plotTimeseriesC;
+     bool _plotTimeseriesD;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      polygon_2d _areaIndividualFD;
      char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity

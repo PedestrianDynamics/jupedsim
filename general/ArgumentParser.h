@@ -67,6 +67,9 @@ private:
      int _circleEdges;
      bool _isOutputGraph;
      bool _isPlotGraph;
+     bool _isPlotTimeSeriesA;
+     bool _isPlotTimeSeriesC;
+     bool _isPlotTimeSeriesD;
      bool _isIndividualFD;
      polygon_2d _areaIndividualFD;
      bool _isGetProfile;
@@ -121,6 +124,9 @@ public:
      int GetCircleEdges() const;
      bool GetIsOutputGraph() const;
      bool GetIsPlotGraph() const;
+     bool GetIsPlotTimeSeriesA() const;
+     bool GetIsPlotTimeSeriesC() const;
+     bool GetIsPlotTimeSeriesD() const;
      bool GetIsIndividualFD() const;
      polygon_2d GetAreaIndividualFD() const;
      double GetSteadyStart() const;

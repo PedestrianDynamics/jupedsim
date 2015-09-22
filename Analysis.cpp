@@ -181,6 +181,9 @@ void Analysis::InitArgs(ArgumentParser* args)
      _getProfile = args->GetIsGetProfile();
      _outputGraph = args->GetIsOutputGraph();
      _plotGraph = args->GetIsPlotGraph();
+     _plotTimeseriesA=args->GetIsPlotTimeSeriesA();
+     _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
+     _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
      _calcIndividualFD = args->GetIsIndividualFD();
      _areaIndividualFD= args->GetAreaIndividualFD();
      _vComponent = args->GetVComponent();
@@ -322,6 +325,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
                method_A.SetTimeInterval(_deltaT);
+               method_A.SetPlotTimeSeries(_plotTimeseriesA);
                bool result_A=method_A.Process(data,_scriptsLocation);
                if(result_A)
                {
@@ -404,10 +408,13 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      }
      if(_DoesUseMethodC || _DoesUseMethodD)
      {
-          string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
-                    " -f "+boost::lexical_cast<std::string>(data.GetFps());
-          int res=system(parameters_Timeseries.c_str());
-          Log->Write("INFO:\t time series result: %d ",res);
+          if(_plotTimeseriesC || _plotTimeseriesD)
+          {
+			 string parameters_Timeseries="python "+_scriptsLocation+"/_Plot_timeseries_rho_v.py -p \""+ _projectRootDir+VORO_LOCATION + "\" -n "+filename+
+						" -f "+boost::lexical_cast<std::string>(data.GetFps());
+			  int res=system(parameters_Timeseries.c_str());
+			  Log->Write("INFO:\t time series result: %d ",res);
+          }
      }
      return 0;
 }

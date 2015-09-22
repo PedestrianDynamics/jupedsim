@@ -103,9 +103,12 @@ void Method_A::WriteFile_N_t(string data)
           file.close();
           string METHOD_A_LOCATION =_projectRootDir+"./Output/Fundamental_Diagram/FlowVelocity/";
           string file_N_t ="Flow_NT_"+_trajName+"_id_"+_measureAreaId+".dat";
-          string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
-          int res = system(parameters_N_t.c_str());
-          Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
+          if(_plotTimeSeries)
+          {
+			  string parameters_N_t="python "+_scriptsLocation+"/_Plot_N_t.py -p \""+ METHOD_A_LOCATION + "\" -n "+file_N_t;
+			  int res = system(parameters_N_t.c_str());
+			  Log->Write("INFO:\tPlotting N-t diagram! Status: %d", res);
+          }
      }
      else
      {
@@ -213,4 +216,9 @@ void Method_A::SetMeasurementArea (MeasurementArea_L* area)
 void Method_A::SetTimeInterval(const int& deltaT)
 {
      _deltaT = deltaT;
+}
+
+void Method_A::SetPlotTimeSeries(bool plotTimeseries)
+{
+     _plotTimeSeries = plotTimeseries;
 }
