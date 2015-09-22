@@ -44,7 +44,7 @@ bool QuickestPathRouter::Init(Building* building)
      Log->Write("INFO:\tInit Quickest Path Router Engine");
 
      // prefer path through corridors to path through rooms
-     SetEdgeCost(1.0);
+     SetEdgeCost(2.0);
      if (GlobalRouter::Init(building) == false)
           return false;
 
@@ -758,20 +758,14 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
           //check if visible
           if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
-          //if (sub->IsVisible(posA, posC, true) == false)
           {
                ped->RerouteIn(10);
-               //ped->Dump(ped->GetID());
                continue;
           }
 
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
           double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
           double dist=dist1+dist2;
-          //printf("distance to door %d is %f\n",ap->GetID(),dist);
-          //getc(stdin);
-
-
 
           //        doorProb[ap->GetID()]= exp(-alpha*dist);
           //        normFactor += doorProb[ap->GetID()];
@@ -801,21 +795,8 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
           //cout<<"CBA (---): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < _cbaThreshold)
-          {
-               if (dist2 < minDistLocal)
-               {
-                    //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-                    bestAPsID = ap->GetID();
-                    minDistGlobal = dist;
-                    minDistLocal= dist2;
-               }
-               else
-               {
-                    //cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-               }
-          }
-          else
+
+          if(_defaultStrategy==GLOBAL_SHORTEST)
           {
                if (dist < minDistGlobal)
                {
@@ -823,7 +804,36 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                     minDistGlobal = dist;
                     minDistLocal=dist2;
                }
+
           }
+          else if(_defaultStrategy==LOCAL_SHORTEST)
+          {
+               if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < _cbaThreshold)
+               {
+                    if (dist2 < minDistLocal)
+                    {
+                         bestAPsID = ap->GetID();
+                         minDistGlobal = dist;
+                         minDistLocal= dist2;
+                    }
+
+               }
+               else
+               {
+                    if (dist < minDistGlobal)
+                    {
+                         bestAPsID = ap->GetID();
+                         minDistGlobal = dist;
+                         minDistLocal=dist2;
+                    }
+               }
+          }
+          else
+          {
+               cout<<"Unknown Strategy: "<<_defaultStrategy<<endl;
+               exit(0);
+          }
+
      }
 
      if (bestAPsID != -1)
@@ -878,6 +888,11 @@ bool QuickestPathRouter::ParseAdditionalParameters()
                     string selection_mode=xmltoa(para->Attribute("reference_peds_selection"), "single");
                     if(selection_mode=="single") _refPedSelectionMode=RefSelectionMode::SINGLE;
                     if(selection_mode=="all") _refPedSelectionMode=RefSelectionMode::ALL;
+
+                    string default_strategy=xmltoa(para->Attribute("default_strategy"), "local_shortest");
+                    if(default_strategy=="local_shortest") _defaultStrategy=DefaultStrategy::LOCAL_SHORTEST;
+                    if(default_strategy=="global_shortest") _defaultStrategy=DefaultStrategy::GLOBAL_SHORTEST;
+
                }
           }
      }

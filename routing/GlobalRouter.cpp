@@ -49,7 +49,7 @@
 using namespace std;
 
 GlobalRouter::GlobalRouter() :
-                    Router()
+                              Router()
 {
      _accessPoints = map<int, AccessPoint*>();
      _map_id_to_index = std::map<int, int>();
@@ -510,7 +510,7 @@ bool GlobalRouter::Init(Building* building)
      }
 
      //dumping the complete system
-     //DumpAccessPoints(211); exit(0);
+     //DumpAccessPoints(15); exit(0);
      //DumpAccessPoints(1259);
      //DumpAccessPoints(4912); //exit(0);
      //DumpAccessPoints(-1); exit(0);
@@ -852,27 +852,11 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
           double dist=dist1+dist2;
 
-          //very useful for short term decisions
-          // if two doors are feasible to the final destination without much differences
-          // in the distances, then the nearest is preferred.
-
-          //0.15 value defined in the quickest path
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < 0.15)
+          if (dist < minDistGlobal)
           {
-               if (dist2 < minDistLocal) {
-                    bestAPsID = ap->GetID();
-                    minDistGlobal = dist;
-                    minDistLocal= dist2;
-               }
-          }
-          else
-          {
-
-               if (dist < minDistGlobal) {
-                    bestAPsID = ap->GetID();
-                    minDistGlobal = dist;
-                    minDistLocal=dist2;
-               }
+               bestAPsID = ap->GetID();
+               minDistGlobal = dist;
+               minDistLocal=dist2;
           }
      }
 
@@ -894,8 +878,8 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                //          ped->GetFinalDestination());
 
 
-          //FIXME: assign the nearest and not only a random one
-          //{
+               //FIXME: assign the nearest and not only a random one
+               //{
 
                relevantAPs[0]->GetID();
                ped->SetExitIndex(relevantAPs[0]->GetID());
@@ -958,7 +942,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 
                //check if visible
                if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
-               //if (sub->IsVisible(posA, posC, true) == false)
+                    //if (sub->IsVisible(posA, posC, true) == false)
                {
                     continue;
                }
@@ -980,7 +964,7 @@ void GlobalRouter::GetRelevantRoutesTofinalDestination(Pedestrian *ped, vector<A
 
                          //it points to a destination that I can see anyway
                          if (_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true))
-                         //if (sub->IsVisible(posA, posC, true) == true)
+                              //if (sub->IsVisible(posA, posC, true) == true)
                          {
                               relevant=false;
                          }
