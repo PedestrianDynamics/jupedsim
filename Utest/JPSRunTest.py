@@ -50,6 +50,9 @@ class JPSRunTestDriver(object):
         self.DIR = testdir
         self.jpsreportdir = jpsreportdir # default is utestdir
         # Where to find the measured data from the simulations. We will use the Voronoi diagram
+        # if testnumber == 100:
+        #     self.simDataDir = os.path.join(self.DIR, "Output", "Fundamental_Diagram", "Individual_FD")
+        # else:
         self.simDataDir = os.path.join(self.DIR, "Output", "Fundamental_Diagram", "Individual_FD")
         # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
@@ -69,34 +72,61 @@ class JPSRunTestDriver(object):
 
         if fd:
             from shutil import rmtree
+            print "simDir", self.simDataDir
+            print "sexpDir", self.expDataDir
             if os.path.exists(self.simDataDir):
-                rmtree(path)
+                rmtree(self.simDataDir)
 
             jpsreport_exe = self.__find_jpsreport_executable()
             subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])
             fd_exp, fd_sim = self.__compare_FD() #
-            results = [] 
+            results = []
             results.append(fd_exp)
             results.append(fd_sim)
         return results
 
     def __compare_FD(self):
-        experimenal_dir = self.experimenal_dir
-        simulation_dir = self.simulation_dir
+        import numpy as np
+        experimenal_dir = self.expDataDir
+        simulation_dir = self.simDataDir
         expfiles = glob.glob(os.path.join(experimenal_dir, "*.dat"))
         simfiles = glob.glob(os.path.join(simulation_dir, "*.dat"))
-        fd_exp = []
-        fd_sim = []
-        for f in expfiles:
-            d = np.loadtxt(f)
-            fd_exp.append(d)
+        if len(expfiles) == 0: # maybe we have txt files?
+            expfiles = glob.glob(os.path.join(experimenal_dir, "*.txt"))
+            if len(expfiles) == 0:
+                logging.critical("compare_FD: no experimental data")
+                exit(self.FAILURE)
+        if len(simfiles) == 0:
+            logging.critical("compare_FD: no simulation data")
+            exit(self.FAILURE)
 
+
+        once = 1
+        for f in expfiles:
+            if once:
+                fd_exp = np.loadtxt(f)
+                once = 0
+            else:
+                d = np.loadtxt(f)
+                fd_exp = np.vstack((fd_exp, d))
+
+        once = 1
         for f in simfiles:
-            d = np.loadtxt(f)
-            fd_sim.append(d)
-    return fd_exp, fd_sim
-    
-            
+            if once:
+                fd_sim = np.loadtxt(f)
+                if fd_sim.size == 0:
+                    logging.critical("velocity, density data empty in <%s>", f)
+                    exit(self.FAILURE)
+                once = 0
+            else:
+                d = np.loadtxt(f)
+                if d.size == 0:
+                    logging.critical("velocity, density data empty in <%s>", f)
+                    exit(self.FAILURE)
+                fd_sim = np.vstack((fd_sim, d))
+
+        return fd_exp, fd_sim
+
     def __configure(self):
         if self.CWD != self.DIR:
             logging.info("working dir is %s. Change to %s", os.getcwd(), self.DIR)
@@ -165,7 +195,7 @@ class JPSRunTestDriver(object):
                 for filename in fnmatch.filter(filenames, 'jpsreport.exe'):
                     matches.append(os.path.join(root, filename))
             if len(matches) == 0:
-                logging.critical("executable <%s> or jpscore.exe does not exist yet.", executable)
+                logging.critical("executable <%s> or jpsreport.exe does not exist yet.", executable)
                 exit(self.FAILURE)
             elif len(matches) > 1:
                 matches = ((os.stat(file_path), file_path) for file_path in matches)
