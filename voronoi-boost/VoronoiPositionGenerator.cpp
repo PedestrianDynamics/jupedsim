@@ -70,11 +70,11 @@ bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
                return false;
 
      for(const auto& trans: subroom->GetAllTransitions() )
-    	 if ( trans->DistTo(pt) < radius + 0.2 )
+    	 if ( trans->DistTo(pt) < radius + 0.1 )
     		 return false;
 
      for( const auto& cross: subroom->GetAllCrossings() )
-    	 if( cross->DistTo(pt) < radius + 0.2 )
+    	 if( cross->DistTo(pt) < radius + 0.1 )
     		 return false;
 
      return true;
@@ -129,7 +129,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                double y_coor = 3 * ( (double)rand() / (double)RAND_MAX ) - 1.5;
                Point random_pos(x_coor, y_coor);
                Point new_pos = center_pos + random_pos;
-
+               //this could be better, but needs to work with any polygon - random point inside a polygon?
                if ( subroom->IsInSubRoom( new_pos ) )
                {
                     if( IsEnoughInSubroom(subroom, new_pos, radius ) )
@@ -202,7 +202,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                double dis = 0;
                VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
 
-               if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
+               if( dis > 2*radius*factor*2*radius*factor)// be careful with the factor!! radius*factor, 2 on purpose instead of 4
                {
                     Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                     ped->SetPos(pos , true);
@@ -256,24 +256,25 @@ void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_
      //finding the neighbors (nearest pedestrians) of the chosen vertex
      const voronoi_diagram<double>::vertex_type &vertex = *chosen_it;
      const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-     double sum_x=0, sum_y=0;
      double no=0;
      std::size_t index;
 
+     Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized(); //the direction
+     double speed = 0;
      do
      {
           no++;
           index = ( edge->cell() )->source_index();
-          const Point& v = velocities_vector[index];
-          sum_x += v.GetX();
-          sum_y += v.GetY();
+          speed += velocities_vector[index].Norm();
           edge = edge->rot_next();
      } while (edge != vertex.incident_edge());
 
-     Point v(sum_x/no, sum_y/no);
+     speed = speed/no;
+     v = v*speed;
      ped->SetV(v);
 
 }
+
 
 //gives the voronoi vertex with max distance
 void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
