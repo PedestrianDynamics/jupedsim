@@ -715,6 +715,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      //double normFactor=0.0;
      //map <int, double> doorProb;
 
+
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
      GetRelevantRoutesTofinalDestination(ped,relevantAPs);
@@ -734,6 +735,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      // get the opened exits
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
                ped->GetSubRoomID());
+
 
      for(unsigned int g=0; g<relevantAPs.size(); g++)
      {
@@ -766,6 +768,10 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
           double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
           double dist=dist1+dist2;
+          //printf("distance to door %d is %f\n",ap->GetID(),dist);
+          //getc(stdin);
+
+
 
           //        doorProb[ap->GetID()]= exp(-alpha*dist);
           //        normFactor += doorProb[ap->GetID()];

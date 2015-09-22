@@ -106,6 +106,8 @@ bool GlobalRouter::Init(Building* building)
      _building = building;
      //only load the information if not previously loaded
      //if(_building->GetNumberOfGoals()==0)
+
+     //TODO: implement the ParseAdditionalParameter Interface
      LoadRoutingInfos(GetRoutingInfoFile());
 
      if(_generateNavigationMesh)
@@ -854,7 +856,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
 
-          //value defined in the quickest path
+          //0.15 value defined in the quickest path
           if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < 0.15)
           {
                if (dist2 < minDistLocal) {
