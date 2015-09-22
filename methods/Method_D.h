@@ -52,13 +52,16 @@ public:
      virtual ~Method_D();
      bool Process (const PedData& peddata,const std::string& scriptsLocation);
      void SetCalculateIndividualFD(bool individualFD);
+     void SetAreaIndividualFD(polygon_2d areaindividualFD);
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);
      void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
      void SetGridSize(double x, double y);
      void SetCalculateProfiles(bool calcProfile);
      void SetOutputVoronoiCellData(bool outputCellData);
+     void SetPlotVoronoiGraph(bool plotVoronoiGraph);
      void SetMeasurementArea (MeasurementArea_B* area);
+
 
 private:
      std::map<int , std::vector<int> > _peds_t;
@@ -68,8 +71,10 @@ private:
      std::string _projectRootDir;
      std::string _scriptsLocation;
      bool _calcIndividualFD;
+     polygon_2d _areaIndividualFD;
      bool _getProfile;
      bool _outputVoronoiCellData;
+     bool _plotVoronoiCellData;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
      int _circleEdges;
@@ -96,7 +101,6 @@ private:
      void OutputVoroGraph(const std::string & frameId, std::vector<polygon_2d>& polygons, int numPedsInFrame,std::vector<double>& XInFrame,
                std::vector<double>& YInFrame,const std::vector<double>& VInFrame);
      void GetIndividualFD(const std::vector<polygon_2d>& polygon, const std::vector<double>& Velocity, const std::vector<int>& Id, const polygon_2d& measureArea, const std::string& frid);
-
      /**
       * Reduce the precision of the points to two digits
       * @param polygon

@@ -58,10 +58,11 @@
     </method_C> 
 
     <!-- Method D (Zhang2011a) Voronoi density and Vel --> 
-    <method_D enabled="true" output_graph="true" individual_FD="true"> 
+	<method_D enabled="true"> 
         <measurement_area id="1" /> 
-        <cut_by_circle enabled="false" radius= "1" edges = "10"/> 
-        <!-- edges represent the precision of discretization of the circle ---> 
+        <cut_by_circle enabled="false" radius="1.0" edges="10"/>
+        <output_voronoi_cells enabled="true" plot_graphs="false"/>
+        <individual_FD enabled="false" measurement_area_id="1"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
 </JPSreport> 

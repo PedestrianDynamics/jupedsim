@@ -180,7 +180,9 @@ void Analysis::InitArgs(ArgumentParser* args)
      _cutByCircle = args->GetIsCutByCircle();
      _getProfile = args->GetIsGetProfile();
      _outputGraph = args->GetIsOutputGraph();
+     _plotGraph = args->GetIsPlotGraph();
      _calcIndividualFD = args->GetIsIndividualFD();
+     _areaIndividualFD= args->GetAreaIndividualFD();
      _vComponent = args->GetVComponent();
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
@@ -380,7 +382,9 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
+               method_D.SetPlotVoronoiGraph(_plotGraph);
                method_D.SetCalculateIndividualFD(_calcIndividualFD);
+               method_D.SetAreaIndividualFD(_areaIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);
                if(_cutByCircle)
                {

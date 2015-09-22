@@ -122,7 +122,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
                {
                     // if(i>beginstationary&&i<endstationary)
                     {
-                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaForMethod_D->_poly, str_frid);
+                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
                     }
                }
                if(_getProfile)
@@ -396,16 +396,19 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
      }
-     string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-    		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
-			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-         		 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
-     			 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
-     //Log->Write("INFO:\t%s",parameters_rho.c_str());
-     Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
-     system(parameters_rho.c_str());
-     system(parameters_v.c_str());
+     if(_plotVoronoiCellData)
+     {
+		 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+				 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
+				 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
+		 string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
+					 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
+					 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
+		 //Log->Write("INFO:\t%s",parameters_rho.c_str());
+		 Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
+		 system(parameters_rho.c_str());
+		 system(parameters_v.c_str());
+     }
      points.close();
      polys.close();
      velo.close();
@@ -435,6 +438,11 @@ void Method_D::GetIndividualFD(const vector<polygon_2d>& polygon, const vector<d
 void Method_D::SetCalculateIndividualFD(bool individualFD)
 {
      _calcIndividualFD = individualFD;
+}
+
+void Method_D::SetAreaIndividualFD(polygon_2d areaindividualFD)
+{
+	_areaIndividualFD = areaindividualFD;
 }
 
 void Method_D::Setcutbycircle(double radius,int edges)
@@ -471,6 +479,11 @@ void Method_D::SetCalculateProfiles(bool calcProfile)
 void Method_D::SetOutputVoronoiCellData(bool outputCellData)
 {
      _outputVoronoiCellData = outputCellData;
+}
+
+void Method_D::SetPlotVoronoiGraph(bool plotVoronoiGraph)
+{
+     _plotVoronoiCellData = plotVoronoiGraph;
 }
 
 void Method_D::SetMeasurementArea (MeasurementArea_B* area)

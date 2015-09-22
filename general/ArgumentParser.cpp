@@ -56,47 +56,6 @@ void ArgumentParser::Usage(const std::string file)
 
      Log->Write("Usage: \n");
      Log->Write("\t%s input.xml\n",file.c_str());
-     /*
-    fprintf(stderr,
-    		"Usage: program options\n\n"
-    		"With the following options (default values in parenthesis):\n\n"
-    		"	[-t/--trajectory <string>]						name of input trajectory file\n"
-    		"  	[-I/--input path <filepath>]    				path of the input file(./Inputfiles/)\n"
-    		"  	[-O/--output path <filepath>]   				path of the input file(./Outputfiles/)\n"
-    		"	[-g/--geometry <string>]        				path to the geometry file (./Inputfiles/geo.xml)\n"
-    		"	[-m/--measurement area <int>]    			type of measurement area(1)\n"
-    		"                                   							1: Bounding box\n"
-    		"                                       						2: Line\n"
-    		"	[-b/--bounding box  <double>]				p1.x p1.y p2.x p2.y p3.x p3.y p4.x p4.y (in clockwise)\n"
-    		"	[-d/--moving direction <double>]			p1.x p1.y p2.x p2.y \n"
-    		"	[-l/--line <double>]								p1.x p1.y p2.x p2.y \n"
-
-    fprintf(stderr, "-c --> set cutbycircle=true (false)\n");
-    fprintf(stderr, "-a --> set fieldAnalysis=true (false)\n");
-    fprintf(stderr, "-g --> set IsOutputGraph=true (false)\n");
-    fprintf(stderr, "-v --> set calcIndividualfunddata=true (false)\n");
-    fprintf(stderr, "-s scale (3000)\n");
-    fprintf(stderr, "-l --> set IsClassicMethod=true (false)\n");
-    fprintf(stderr, "-F --> set IsFundamentalTinTout=true (false). density is classical. So IsClassicMethod should be true\n");
-    fprintf(stderr, "-V --> set IsFlowVelocity=true (false)\n");
-    fprintf(stderr, "-L x1 y1 x2 y2 (0.0, 300.0, 250.0, 300.0)\n");
-    fprintf(stderr, "-y  beginstationary (700)\n");
-    fprintf(stderr, "-Y  endstationary (1800)\n");
-    fprintf(stderr, "-R Row (65)\n");
-    fprintf(stderr, "-C Column (80)\n");
-    fprintf(stderr, "-m  Meas. Area ax1 (-300)\n");
-    fprintf(stderr, "-n  Meas. Area ay1 (100)\n");
-    fprintf(stderr, "-M  Meas. Area ax2 (300)\n");
-    fprintf(stderr, "-N  Meas. Area ay2 (200)\n");
-    fprintf(stderr, "-o  Outputfile (result.dat)\n");
-    fprintf(stderr, "-O  goes in the name of the polygons, speed and point files (dummy)\n");
-    fprintf(stderr, "-d --> set use_Vxy false (true)\n");
-    fprintf(stderr, "-e --> set use_Vy true (false)\n");
-    fprintf(stderr, "-k --> set use_Vx true (false)\n");
-    fprintf(stderr, "-p fps (10)\n");
-    fprintf(stderr, "-G cor_x cor_y length width (corridor)\n");
-
-      */
      exit(EXIT_SUCCESS);
 }
 
@@ -114,6 +73,7 @@ ArgumentParser::ArgumentParser()
      _isMethodD = false;
      _isCutByCircle = false;
      _isOutputGraph= false;
+     _isPlotGraph= false;
      _isIndividualFD = false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -504,22 +464,14 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
           {
                _isMethodD = true;
                Log->Write("INFO: \tMethod D is selected" );
-               _isOutputGraph =  (string(xMethod_D->Attribute("output_graph")) == "true");
-               if(_isOutputGraph)
-               {
-                    Log->Write("INFO: \tVoronoi graph is asked to output" );
-               }
-               _isIndividualFD = (string(xMethod_D->Attribute("individual_FD")) == "true");
-               if(_isIndividualFD)
-               {
-                    Log->Write("INFO: \tIndividual fundamental diagram data will be calculated" );
-               }
+
                for(TiXmlElement* xMeasurementArea=xMainNode->FirstChildElement("method_D")->FirstChildElement("measurement_area");
                          xMeasurementArea; xMeasurementArea = xMeasurementArea->NextSiblingElement("measurement_area"))
                {
                     _areaIDforMethodD.push_back(xmltoi(xMeasurementArea->Attribute("id")));
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
+
                if ( xMethod_D->FirstChildElement("cut_by_circle"))
                {
                     if ( string(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
@@ -529,6 +481,34 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                          _circleEdges=xmltoi(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("edges"));
                          Log->Write("INFO: \tEach Voronoi cell will be cut by a circle with the radius of < %f > m!!", _cutRadius*CMtoM);
                          Log->Write("INFO: \tThe circle is discretized to a polygon with < %d> edges!!", _circleEdges);
+                    }
+               }
+
+               if ( xMethod_D->FirstChildElement("output_voronoi_cells"))
+               {
+                    if ( string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("enabled"))=="true")
+                    {
+                    	_isOutputGraph=true;
+                    	 Log->Write("INFO: \tData of voronoi diagram is asked to output" );
+                    	 if(string(xMethod_D->FirstChildElement("output_voronoi_cells")->Attribute("plot_graphs"))=="true")
+                    	 {
+							_isPlotGraph=true;
+							if(_isPlotGraph)
+							{
+								Log->Write("INFO: \tGraph of voronoi diagram will be plotted" );
+							}
+                    	 }
+                    }
+               }
+
+               if ( xMethod_D->FirstChildElement("individual_FD"))
+               {
+                    if ( string(xMethod_D->FirstChildElement("individual_FD")->Attribute("enabled"))=="true")
+                    {
+                    	_isIndividualFD=true;
+                    	int areaId=xmltoi(xMethod_D->FirstChildElement("individual_FD")->Attribute("measurement_area_id"));
+                        _areaIndividualFD=((MeasurementArea_B *)(_measurementAreas[areaId]))->_poly;
+                        Log->Write("INFO: \tIndividual fundamental diagram data will be calculated over the measurement area with id <%d>! ", areaId);
                     }
                }
 
@@ -645,9 +625,19 @@ bool ArgumentParser::GetIsOutputGraph() const
      return _isOutputGraph;
 }
 
+bool ArgumentParser::GetIsPlotGraph() const
+{
+     return _isPlotGraph;
+}
+
 bool ArgumentParser::GetIsIndividualFD() const
 {
      return _isIndividualFD;
+}
+
+polygon_2d ArgumentParser::GetAreaIndividualFD() const
+{
+     return _areaIndividualFD;
 }
 
 bool ArgumentParser::GetIsGetProfile() const

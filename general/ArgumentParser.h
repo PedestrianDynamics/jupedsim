@@ -66,7 +66,9 @@ private:
      double _cutRadius;
      int _circleEdges;
      bool _isOutputGraph;
+     bool _isPlotGraph;
      bool _isIndividualFD;
+     polygon_2d _areaIndividualFD;
      bool _isGetProfile;
      double _steadyStart;
      double _steadyEnd;
@@ -118,7 +120,9 @@ public:
      double GetCutRadius() const;
      int GetCircleEdges() const;
      bool GetIsOutputGraph() const;
+     bool GetIsPlotGraph() const;
      bool GetIsIndividualFD() const;
+     polygon_2d GetAreaIndividualFD() const;
      double GetSteadyStart() const;
      double GetSteadyEnd() const;
      bool GetIsGetProfile() const;
