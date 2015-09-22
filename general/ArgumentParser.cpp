@@ -115,6 +115,7 @@ ArgumentParser::ArgumentParser()
      pbWall=0.7;
      pDWall = 0.1;  //Tordeux2015
      pDPed = 0.1; //Tordeux2015
+     pPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
      pcWall=3;
      pLog = 0;
      pModel=MODEL_GFCM;
@@ -708,6 +709,11 @@ bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
      if(ParseLinkedCells(*xModelPara)==false)
           return false;
 
+     //periodic
+     if(ParsePeriodic(*xModelPara)==false)
+          return false;
+     
+
      //force_ped
      if (xModelPara->FirstChild("force_ped"))
      {
@@ -1124,6 +1130,11 @@ double ArgumentParser::Getdt() const
      return pdt;
 }
 
+int ArgumentParser::IsPeriodic() const
+{
+      return pPeriodic;
+}
+
 double ArgumentParser::Getfps() const
 {
      return pfps;
@@ -1404,4 +1415,16 @@ bool ArgumentParser::ParseStepSize(TiXmlNode &stepNode)
      return false;
 }
 
+bool ArgumentParser::ParsePeriodic(TiXmlNode &Node)
+{
+     if (Node.FirstChild("periodic"))
+     {
+          const char* periodic = Node.FirstChild("periodic")->FirstChild()->Value();
+          if (periodic)
+               pPeriodic = atof(periodic);
+          Log->Write("INFO: \tperiodic <%d>", pPeriodic);
+          return true;
+     }
+     return true; //default is periodic=0. If not specified than is OK
+}
 

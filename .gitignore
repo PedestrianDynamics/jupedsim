@@ -10,6 +10,10 @@
 /Utest/*/trajectories
 /Utest/rimea_tests/*/inifiles*/
 /Utest/rimea_tests/*/trajectories
+/Utest/juelich_tests/*/trajectories
+/Utest/juelich_tests/*/inifiles
+/Utest/juelich_tests/*/inifiles_a
+/Utest/juelich_tests/*/inifiles_b
 *~
 
 # Compiled Object files

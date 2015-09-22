@@ -1,3 +1,5 @@
+# todo: spaghetti directory horror
+
 #! /usr/bin/env python
 import numpy as np
 from xml.dom import minidom
@@ -37,17 +39,18 @@ if __name__ == "__main__":
         os.chdir(DIR)
 
     logging.info("change directory to ..")
-    os.chdir("..")
+    os.chdir("../..")
     logging.info("call makeini.py with -f %s/master_ini.xml"%DIR)
     subprocess.call(["python", "makeini.py", "-f", "%s/master_ini.xml"%DIR])
     os.chdir(DIR)
     #-------- get directory of the code TRUNK
     os.chdir("../..")
-    TRUNK = os.getcwd()
-    os.chdir(DIR)
-    lib_path = os.path.abspath("%s/Utest"%TRUNK)
+    lib_path = os.getcwd()
     sys.path.append(lib_path)
     from utils import *
+    os.chdir("..")
+    TRUNK = os.getcwd()
+    os.chdir(DIR)
     #----------------------------------------
     logging.info("change directory back to %s"%DIR)
     time1 = time.time()

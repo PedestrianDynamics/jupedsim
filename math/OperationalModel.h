@@ -69,7 +69,7 @@ public:
       * @param deltaT, the timestep
       * @param building, the representation of the building
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const = 0 ;
+     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const = 0 ;
 };
 
 #endif /* OPERATIONALMODEL_H_ */

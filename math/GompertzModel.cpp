@@ -107,7 +107,7 @@ bool GompertzModel::Init (Building* building) const
     return true;
 }
 
-void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const
 {
      double delta = 0.5;
       // collect all pedestrians in the simulation.
