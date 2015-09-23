@@ -82,8 +82,8 @@ class JPSRunTestDriver(object):
             jpsreport = os.path.join(self.jpsreportdir, "bin", "jpsreport")
             jpsreport_exe = self.__find_executable(jpsreport)
             subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])
-            fd_exp = self.__get_FD_data(self.simDataDir)
-            fd_sim = self.__get_FD_data(self.expDataDir)
+            fd_sim = self.__get_FD_data(self.simDataDir)
+            fd_exp = self.__get_FD_data(self.expDataDir)
             results = []
             results.append(fd_exp)
             results.append(fd_sim)

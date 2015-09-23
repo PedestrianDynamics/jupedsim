@@ -14,6 +14,7 @@
 /Utest/juelich_tests/*/inifiles
 /Utest/juelich_tests/*/inifiles_a
 /Utest/juelich_tests/*/inifiles_b
+Utest/Validation/*/inifiles*/
 *~
 
 # Compiled Object files
