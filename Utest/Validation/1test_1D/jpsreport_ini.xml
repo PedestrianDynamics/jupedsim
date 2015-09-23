@@ -50,7 +50,7 @@
   </method_A>
 
   <!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout -->
-  <method_B enabled="false">
+  <method_B enabled="true">
     <measurement_area id="1" />
   </method_B>
 
@@ -60,7 +60,7 @@
   </method_C>
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
-  <method_D enabled="true" output_graph="false" individual_FD="true" output_time_series="false">
+  <method_D enabled="false" output_graph="false" individual_FD="true" output_time_series="false">
     <measurement_area id="1" />
     <cut_by_circle enabled="false" radius= "1" edges = "10"/>
     <!-- edges represent the precision of discretization of the circle -->

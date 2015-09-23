@@ -50,7 +50,16 @@ class JPSRunTestDriver(object):
         self.DIR = testdir
         self.jpsreportdir = jpsreportdir # default is utestdir
         # Where to find the measured data from the simulations. We will use Voronoi diagrams
-        self.simDataDir = os.path.join(self.DIR, "Output", "Fundamental_Diagram", "Individual_FD")
+        if self.testno == 100: # fix for 1dfd, since jpsreport can not be used in 1D
+            self.simDataDir = os.path.join(self.DIR,
+                                           "Output",
+                                           "Fundamental_Diagram",
+                                           "TinTout")
+        else:
+            self.simDataDir = os.path.join(self.DIR,
+                                           "Output",
+                                           "Fundamental_Diagram",
+                                           "Individual_FD")
         # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
         self.expDataDir = os.path.join(self.DIR, "data")
@@ -81,7 +90,13 @@ class JPSRunTestDriver(object):
 
             jpsreport = os.path.join(self.jpsreportdir, "bin", "jpsreport")
             jpsreport_exe = self.__find_executable(jpsreport)
+            # if self.testno == 100: # fix for 1dfd, since jpsreport can not be used in 1D
+            #     fd_script = os.path.join(self.DIR, "fd.py")
+            #     print fd_script
+            #     subprocess.call(["python", "%s" % fd_script])
+            # else:
             subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])
+
             fd_sim = self.__get_FD_data(self.simDataDir)
             fd_exp = self.__get_FD_data(self.expDataDir)
             results = []

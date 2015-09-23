@@ -2,14 +2,17 @@
 """
 Test description
 ================
-- Fundamental Diagram in 1D
+- Fundamental Diagram in 1D, test number 100
 - Width = 0.6 m
 - Length = 26.0 m
 - Measurement area: X = [11, 13], Y = [-0.3, 0.3]
 
 Remarks
 =======
-TODO: Compare two "clouds" of points and return a number.
+- JPSreport can not calculate Voronoi-diagrams for a "1D" scenario.
+Therefore, we need to calculate the Voronoi diagram manually.
+
+- TODO: Compare two "clouds" of points and return a number.
 
 Remarks
 =======
@@ -37,8 +40,8 @@ def eval_results(results):
     dsim = results[1]
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
+    plt.plot(dsim[:, 1], dsim[:, 2], ".b", alpha=0.5, label="simulation")
     plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
-    plt.plot(dsim[:, 2], dsim[:, 3], "ob", label="simulation")
     plt.ylabel(r"$v\; [m/s]$", size=20)
     plt.xlabel(r"$\rho \; [1/m]$", size=20)
     plt.legend(loc="best", numpoints=1)

@@ -2,7 +2,7 @@
 """
 Test description
 ================
-- Fundamental Diagram in 2D
+- Fundamental Diagram in 2D, test number 101
 - Width = 1.8 m
 - Length = 26.0 m
 - Measurement area: X = [10, 16],  Y = [-0.9, 0.9]
