@@ -12,7 +12,7 @@ import os
 from stat import S_ISREG, ST_MODE, ST_MTIME
 import subprocess
 import sys
-
+import numpy as np
 
 __author__ = 'Oliver Schmidts'
 __email__ = 'dev@jupedsim.org'
@@ -49,14 +49,12 @@ class JPSRunTestDriver(object):
         self.HOME = path.expanduser("~")
         self.DIR = testdir
         self.jpsreportdir = jpsreportdir # default is utestdir
-        # Where to find the measured data from the simulations. We will use the Voronoi diagram
-        # if testnumber == 100:
-        #     self.simDataDir = os.path.join(self.DIR, "Output", "Fundamental_Diagram", "Individual_FD")
-        # else:
+        # Where to find the measured data from the simulations. We will use Voronoi diagrams
         self.simDataDir = os.path.join(self.DIR, "Output", "Fundamental_Diagram", "Individual_FD")
         # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
         self.expDataDir = os.path.join(self.DIR, "data")
+        assert path.exists(self.expDataDir), "%s is does not exist"%self.expDataDir
         self.UTEST = utestdir
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
@@ -64,68 +62,55 @@ class JPSRunTestDriver(object):
     def run_test(self, testfunction, fd=0, *args): #fd==1: make fundamental diagram
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
-        executable = self.__find_executable()
+        jpscore = os.path.join(self.trunk, "bin", "jpscore")
+        jpscore_exe = self.__find_executable(jpscore)
         results = []
         for inifile in self.inifiles:
-            res = self.__execute_test(executable, inifile, testfunction, *args)
+            res = self.__execute_test(jpscore_exe, inifile, testfunction, *args)
             results.append(res)
 
         if fd:
+            # remove any existing simulation files
             from shutil import rmtree
-            print "simDir", self.simDataDir
-            print "sexpDir", self.expDataDir
             if os.path.exists(self.simDataDir):
                 rmtree(self.simDataDir)
 
-            jpsreport_exe = self.__find_jpsreport_executable()
+            if not path.exists(self.jpsreport_ini):
+                logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
+                exit(self.FAILURE)
+
+            jpsreport = os.path.join(self.jpsreportdir, "bin", "jpsreport")
+            jpsreport_exe = self.__find_executable(jpsreport)
             subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])
-            fd_exp, fd_sim = self.__compare_FD() #
+            fd_exp = self.__get_FD_data(self.simDataDir)
+            fd_sim = self.__get_FD_data(self.expDataDir)
             results = []
             results.append(fd_exp)
             results.append(fd_sim)
         return results
 
-    def __compare_FD(self):
-        import numpy as np
-        experimenal_dir = self.expDataDir
-        simulation_dir = self.simDataDir
-        expfiles = glob.glob(os.path.join(experimenal_dir, "*.dat"))
-        simfiles = glob.glob(os.path.join(simulation_dir, "*.dat"))
-        if len(expfiles) == 0: # maybe we have txt files?
-            expfiles = glob.glob(os.path.join(experimenal_dir, "*.txt"))
-            if len(expfiles) == 0:
-                logging.critical("compare_FD: no experimental data")
+    def __get_FD_data(self, data_dir):
+        """
+        collect density-velocity data experiments or simulations
+        and return an array
+        """
+        files = glob.glob(os.path.join(data_dir, "*.dat"))
+        if len(files) == 0: # maybe we have txt files?
+            files = glob.glob(os.path.join(data_dir, "*.txt"))
+            if len(files) == 0:
+                logging.critical("get_FD_data: no data in %s", data_dir)
                 exit(self.FAILURE)
-        if len(simfiles) == 0:
-            logging.critical("compare_FD: no simulation data")
-            exit(self.FAILURE)
-
 
         once = 1
-        for f in expfiles:
+        for f in files:
             if once:
-                fd_exp = np.loadtxt(f)
+                fd_data = np.loadtxt(f)
                 once = 0
             else:
                 d = np.loadtxt(f)
-                fd_exp = np.vstack((fd_exp, d))
+                fd_data = np.vstack((fd_data, d))
 
-        once = 1
-        for f in simfiles:
-            if once:
-                fd_sim = np.loadtxt(f)
-                if fd_sim.size == 0:
-                    logging.critical("velocity, density data empty in <%s>", f)
-                    exit(self.FAILURE)
-                once = 0
-            else:
-                d = np.loadtxt(f)
-                if d.size == 0:
-                    logging.critical("velocity, density data empty in <%s>", f)
-                    exit(self.FAILURE)
-                fd_sim = np.vstack((fd_sim, d))
-
-        return fd_exp, fd_sim
+        return fd_data
 
     def __configure(self):
         if self.CWD != self.DIR:
@@ -151,9 +136,6 @@ class JPSRunTestDriver(object):
         self.geofile = os.path.join(self.DIR, "geometry.xml")
         self.inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
         self.jpsreport_ini = os.path.join(self.DIR, "jpsreport_ini.xml")
-        # if not path.exists(self.jpsreport_ini):
-        #     logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
-        #     exit(self.FAILURE)
         if not path.exists(self.geofile):
             logging.critical("geofile <%s> does not exist", self.geofile)
             exit(self.FAILURE)
@@ -163,8 +145,8 @@ class JPSRunTestDriver(object):
                 exit(self.FAILURE)
         return
 
-    def __find_executable(self):
-        executable = os.path.join(self.trunk, "bin", "jpscore")
+    def __find_executable(self, executable):
+        # executable = os.path.join(self.trunk, "bin", "jpscore")
 
         # fix for windows
         if not path.exists(executable):
@@ -185,27 +167,27 @@ class JPSRunTestDriver(object):
 
         return executable
 
-    def __find_jpsreport_executable(self):
-        executable = os.path.join(self.jpsreportdir, "bin", "jpsreport")
+    # def __find_jpsreport_executable(self):
+    #     executable = os.path.join(self.jpsreportdir, "bin", "jpsreport")
 
-        # fix for windows
-        if not path.exists(executable):
-            matches = []
-            for root, dirname, filenames in os.walk(os.path.join(self.trunk, 'bin')):
-                for filename in fnmatch.filter(filenames, 'jpsreport.exe'):
-                    matches.append(os.path.join(root, filename))
-            if len(matches) == 0:
-                logging.critical("executable <%s> or jpsreport.exe does not exist yet.", executable)
-                exit(self.FAILURE)
-            elif len(matches) > 1:
-                matches = ((os.stat(file_path), file_path) for file_path in matches)
-                matches = ((stat[ST_MTIME], file_path)
-                           for stat, file_path in matches if S_ISREG(stat[ST_MODE]))
-                matches = sorted(matches)
-            executable = matches[0]
-        # end fix for windows
+    #     # fix for windows
+    #     if not path.exists(executable):
+    #         matches = []
+    #         for root, dirname, filenames in os.walk(os.path.join(self.trunk, 'bin')):
+    #             for filename in fnmatch.filter(filenames, 'jpsreport.exe'):
+    #                 matches.append(os.path.join(root, filename))
+    #         if len(matches) == 0:
+    #             logging.critical("executable <%s> or jpsreport.exe does not exist yet.", executable)
+    #             exit(self.FAILURE)
+    #         elif len(matches) > 1:
+    #             matches = ((os.stat(file_path), file_path) for file_path in matches)
+    #             matches = ((stat[ST_MTIME], file_path)
+    #                        for stat, file_path in matches if S_ISREG(stat[ST_MODE]))
+    #             matches = sorted(matches)
+    #         executable = matches[0]
+    #     # end fix for windows
 
-        return executable
+    #     return executable
 
     def __execute_test(self, executable, inifile, testfunction, *args):
         cmd = "%s --inifile=%s"%(executable, inifile)

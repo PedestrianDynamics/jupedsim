@@ -56,4 +56,3 @@ if __name__ == "__main__":
     eval_results(results)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
-    
