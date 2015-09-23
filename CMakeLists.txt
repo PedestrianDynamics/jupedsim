@@ -191,7 +191,9 @@ set (   source_files
   pedestrian/AgentsSourcesManager.cpp	
   pedestrian/StartDistribution.cpp
 
+
   voronoi/VoronoiDiagramGenerator.cpp
+  voronoi-boost/VoronoiPositionGenerator.cpp
 
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
@@ -301,6 +303,7 @@ set (   header_files
   pedestrian/AgentsSourcesManager.h	
   pedestrian/StartDistribution.h
   voronoi/VoronoiDiagramGenerator.h
+  voronoi-boost/VoronoiPositionGenerator.h
 
   mpi/LCGrid.h
 
@@ -365,7 +368,7 @@ endif(CGAL_FOUND)
 
 #protocol buffer
 #find_package(Protobuf)
-#if(PROTOBUF_FOUND)
+#if(PROTOBUF_FOUND && GRPC)
 #  message(STATUS "Protocol buffer library found")
 #
 #  include_directories(${PROTOBUF_INCLUDE_DIRS})

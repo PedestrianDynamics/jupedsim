@@ -68,7 +68,7 @@ VelocityModel::~VelocityModel()
 
 }
 
-bool VelocityModel::Init (Building* building) const
+bool VelocityModel::Init (Building* building)
 {
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
@@ -91,7 +91,7 @@ bool VelocityModel::Init (Building* building) const
               sinPhi = d.GetY() / dist;
          } else {
               Log->Write(
-                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "ERROR: \tallPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
               return false;
          }
@@ -106,7 +106,7 @@ bool VelocityModel::Init (Building* building) const
     return true;
 }
 
-void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const
+void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
       double delta = 0.5;
       // collect all pedestrians in the simulation.
@@ -449,7 +449,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      return F_wrep;
 }
 
-string VelocityModel::GetDescription() const
+string VelocityModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];

@@ -55,6 +55,8 @@ SubRoom::SubRoom()
      _roomID=-1;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
+     _poly_help_constatnt = vector<double> ();
+     _poly_help_multiple = vector<double> ();
      _obstacles=vector<Obstacle*> ();
 
      _crossings = vector<Crossing*>();
@@ -82,8 +84,29 @@ SubRoom::~SubRoom()
      }
      _obstacles.clear();
 }
+/*
+void SubRoom::SetHelpVariables()
+{
+	unsigned int i, j= _poly.size()-1;
 
+	for( i=0; i< _poly.size(); i++)
+	{
+		if ( _poly[i].GetY() == _poly[j].GetY() ) //not important
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() ) ;
+			_poly_help_multiple.push_back( 0 );
+		}
+		else
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() - ( _poly[i].GetY()*_poly[j].GetX() ) / ( _poly[j].GetY() - _poly[i].GetY())
+										+ ( _poly[i].GetY()*_poly[i].GetX() )/ ( _poly[j].GetY() - _poly[i].GetY()  )  );
 
+			_poly_help_multiple.push_back( (_poly[j].GetX()-_poly[i].GetX())/(_poly[j].GetY()-_poly[i].GetY()) );
+		}
+	j=i;
+	}
+}
+*/
 void SubRoom::SetSubRoomID(int ID)
 {
      _id = ID;
