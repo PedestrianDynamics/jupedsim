@@ -32,7 +32,6 @@
 #include "StartDistribution.h"
 #include "PedDistributor.h"
 #include "AgentsSource.h"
-//#include "../voronoi/VoronoiDiagramGenerator.h"
 #include "../geometry/Building.h"
 #include "../geometry/Point.h"
 
@@ -156,6 +155,7 @@ void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
      auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
      vector<Point> positions = PedDistributor::PossiblePositions(*subroom);
 
+     //TODO: get the seed from the simulation
      srand (time(NULL));
 
      for (auto& ped : peds)

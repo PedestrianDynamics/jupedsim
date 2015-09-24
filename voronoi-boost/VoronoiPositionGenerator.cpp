@@ -64,7 +64,6 @@ using namespace std;
 //TODO: refactor the function
 bool IsEnoughInSubroom( SubRoom* subroom, Point& pt, double radius )
 {
-     //TODO: code refactoring:
      for (const auto& wall: subroom->GetAllWalls())
           if(wall.DistTo(pt)<radius)
                return false;
@@ -185,6 +184,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     no++;
                }
 
+               //TODO: dividing by 0 when existing_peds is empty
+               // sum up the weighted velocity in the loop
                v = v/no; //this is the mean of all velocities
 
                //adding fake people to the vector for constructing voronoi diagram
@@ -386,7 +387,7 @@ void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const 
                }
      }
      //now we have all the possible vertices and their distances and we can choose one randomly
-
+     //TODO: get the seed from the simulation/argumentparser
      srand (time(NULL));
      unsigned int i = rand() % possible_vertices.size();
      chosen_it = possible_vertices[i];
