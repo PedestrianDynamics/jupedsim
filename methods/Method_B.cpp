@@ -132,7 +132,7 @@ void Method_B::GetFundamentalTinTout(double *DensityPerFrame,double LengthMeasur
      fprintf(fFD_TinTout,"#person Index\t	density_i(m^(-2))\t	velocity_i(m/s)\n");
      for(int i=0; i<_NumPeds; i++)
      {
-          double velocity_temp=_fps*CMtoM*LengthMeasurementarea/(_tOut[i]-_tIn[i]);
+          double velocity_temp=_fps*LengthMeasurementarea/(_tOut[i]-_tIn[i]);
           double density_temp=0;
           for(int j=_tIn[i]; j<_tOut[i]; j++)
           {
