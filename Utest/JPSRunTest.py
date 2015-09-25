@@ -63,7 +63,6 @@ class JPSRunTestDriver(object):
         # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
         self.expDataDir = os.path.join(self.DIR, "data")
-        assert path.exists(self.expDataDir), "%s is does not exist"%self.expDataDir
         self.UTEST = utestdir
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")

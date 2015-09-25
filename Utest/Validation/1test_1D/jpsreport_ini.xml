@@ -20,11 +20,11 @@
       <!-- <vertex x="11.2" y="5.2" /> -->
       <!-- <vertex x="10.2" y="5.2" /> -->
 
-      <vertex x="11" y="-0.3" />
-      <vertex x="13" y="-0.3" />
-      <vertex x="13" y="0.3" />
-      <vertex x="11" y="0.3" />
-      <length_in_movement_direction distance="1.0" />
+      <vertex x="10" y="-0.3" />
+      <vertex x="14" y="-0.3" />
+      <vertex x="14" y="0.3" />
+      <vertex x="10" y="0.3" />
+      <length_in_movement_direction distance="4.0" />
     </area_B>
     <!--<area_L id="2" type="Line">
         <start x="9.0" y="2.8" />

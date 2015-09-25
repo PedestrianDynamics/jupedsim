@@ -44,6 +44,8 @@ def eval_results(results):
     plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
     plt.ylabel(r"$v\; [m/s]$", size=20)
     plt.xlabel(r"$\rho \; [1/m]$", size=20)
+    plt.ylim([0, 1.5])
+    plt.xlim([0, 3.0])
     plt.legend(loc="best", numpoints=1)
     fig.set_tight_layout(True)
     plt.savefig("fd1d.png", dpi=300)
