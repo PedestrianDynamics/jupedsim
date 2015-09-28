@@ -31,6 +31,7 @@ public:
     void ShowNavLines(bool status);
     void ShowFloor(bool status);
     void ShowObstacles(bool status);
+    void ShowGradientField(bool status);
     void ShowGeometryLabels(int status);
     bool RefreshView();
     void Clear();

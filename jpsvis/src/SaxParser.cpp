@@ -65,6 +65,14 @@
 #include <vtkAssembly.h>
 #include <vtkProperty.h>
 #include <vtkTriangleFilter.h>
+#include <vtkGenericDataObjectReader.h>
+#include <vtkPolyDataReader.h>
+#include <vtkStructuredGridReader.h>
+#include <vtkStructuredPointsReader.h>
+#include <vtkImageDataGeometryFilter.h>
+
+
+
 
 #define VTK_CREATE(type, name) \
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
@@ -258,6 +266,13 @@ bool SaxParser::startElement(const QString & /* namespaceURI */,
         //cout<<"geo tag found"<<endl;
         //_geometry = std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name"));
         //_geoFactory.AddElement(0,0,_geometry);
+
+    }else if (qName == "gradient_field"){
+        for(int i=0; i<at.length(); i++) {
+            if(at.localName(i)=="filename") {
+                ParseGradientFieldVTK(at.value(i),_geoFactory);
+            }
+        }
 
     }
     else if (qName == "wall") {
@@ -582,6 +597,7 @@ bool SaxParser::endElement(const QString & /* namespaceURI */,
     } else if (qName == "shape") {
         _dataset.setInitialHeights(_initialPedestriansHeights);
         _dataset.setInitialColors(_initialPedestriansColors);
+    } else if (qName == "gradient_field") {
     }
     _currentText.clear();
     return true;
@@ -634,8 +650,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
         return false;
     if(!building->InitGeometry())
         return false; // create the polygons
-
-
 
     for(auto&& itr_room: building->GetAllRooms())
     {
@@ -779,8 +793,6 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
     delete building;
     return true;
 }
-
-
 
 /// provided for convenience and will be removed in the next version
 
@@ -1205,7 +1217,7 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
     geoFac.AddElement(0,0,geo);
 }
 
-bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps)
+bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, double * fps)
 {
     //fileName="data/trajectories/1000_1_0_0_1_1.txt";
     //fileName="data/trajectories/50_3_0_1_1_2.txt";
@@ -1357,6 +1369,31 @@ bool SaxParser::ParseTxtFormat(QString fileName, SyncData* dataset, double * fps
         return false;
     }
 
+    return true;
+}
+
+bool SaxParser::ParseGradientFieldVTK(const QString &fileName, GeometryFactory& geoFac)
+{
+    // Read the file
+    VTK_CREATE(vtkStructuredPointsReader, reader);
+    reader->SetFileName(fileName.toStdString().c_str());
+    reader->Update();
+
+    VTK_CREATE(vtkImageDataGeometryFilter,geometryFilter );
+    geometryFilter->SetInputConnection(reader->GetOutputPort());
+    geometryFilter->Update();
+
+    VTK_CREATE(vtkPolyDataMapper,mapper);
+    mapper->SetInputConnection(geometryFilter->GetOutputPort());
+
+    VTK_CREATE(vtkActor, actor);
+    actor->SetMapper(mapper);
+
+    shared_ptr<FacilityGeometry> gradient_field= shared_ptr<FacilityGeometry>(new FacilityGeometry("Gradient Field"));
+    gradient_field->addGradientField(actor);
+
+    geoFac.AddElement(-1,-1,gradient_field);
+    geoFac.AddElement(-2,-2,gradient_field);
     return true;
 }
 

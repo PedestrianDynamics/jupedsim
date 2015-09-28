@@ -79,7 +79,10 @@ public:
     static QString extractGeometryFilename(QString& filename);
 
     /// parse the txt file format
-    static bool ParseTxtFormat(QString fileName, SyncData* dataset, double * fps);
+    static bool ParseTxtFormat(const QString& fileName, SyncData* dataset, double * fps);
+
+    /// parse a vtk file
+    static bool ParseGradientFieldVTK(const QString& fileName, GeometryFactory& geoFac);
 
 private:
     //clear the mo

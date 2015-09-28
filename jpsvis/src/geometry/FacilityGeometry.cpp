@@ -81,6 +81,7 @@ FacilityGeometry::FacilityGeometry(const string &description)
 
     floorActor = vtkActor::New();
     obstaclesActor = vtkActor::New();
+    gradientFieldActor = vtkActor::New();
 
     captions=vtkActor2DCollection::New();
     linesPlotter2D = new LinePlotter2D();
@@ -151,23 +152,23 @@ void FacilityGeometry::CreateActors()
     assembly3D->AddPart(assemblyCaptions);
 }
 
- void FacilityGeometry::setVisibility(bool status)
- {
-     if(SystemSettings::get2D())
-     {
-         assembly2D->SetVisibility(status);
-     }
-     else
-     {
-         assembly3D->SetVisibility(status);
-     }
-     _visibility=status;
- }
+void FacilityGeometry::setVisibility(bool status)
+{
+    if(SystemSettings::get2D())
+    {
+        assembly2D->SetVisibility(status);
+    }
+    else
+    {
+        assembly3D->SetVisibility(status);
+    }
+    _visibility=status;
+}
 
-     bool FacilityGeometry::getVisibility() const
-     {
-         return _visibility;
-     }
+bool FacilityGeometry::getVisibility() const
+{
+    return _visibility;
+}
 /***
  * This is the main build method and should be called by all functions
  * drawing a wall or a door. Important
@@ -246,7 +247,6 @@ void FacilityGeometry::addNewElement(double center[3], double length, double ori
 
 void FacilityGeometry::addWall(double x1, double y1, double z1, double x2, double y2, double z2,double thickness,double height,double color)
 {
-
     // all walls will have this parameters until changed
     wallColor=color;
 
@@ -518,7 +518,6 @@ void FacilityGeometry::addNavLine(JPoint* p1, JPoint* p2, string caption)
     }
 }
 
-
 void FacilityGeometry::addFloor(vtkPolyData* polygonPolyData )
 {
     //triagulate everything
@@ -540,6 +539,13 @@ void FacilityGeometry::addFloor(vtkPolyData* polygonPolyData )
 
     assembly2D->AddPart(floorActor);
     assembly3D->AddPart(floorActor);
+}
+
+void FacilityGeometry::addGradientField(vtkActor* gradientField)
+{
+    gradientFieldActor=gradientField;
+    assembly2D->AddPart(gradientFieldActor);
+    assembly3D->AddPart(gradientFieldActor);
 }
 
 void FacilityGeometry::addObstacles(vtkPolyData* polygonPolyData )
@@ -815,6 +821,10 @@ void FacilityGeometry::showNavLines(bool status)
 void FacilityGeometry::showFloor(bool status)
 {
     floorActor->SetVisibility(status);
+}
+void FacilityGeometry::showGradientField(bool status)
+{
+    gradientFieldActor->SetVisibility(status);
 }
 
 void FacilityGeometry::showObstacles(bool status)

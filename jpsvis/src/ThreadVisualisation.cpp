@@ -354,7 +354,8 @@ void ThreadVisualisation::run()
     setFloorColor(SystemSettings::getFloorColor());
     setExitsColor(SystemSettings::getExitsColor());
     setNavLinesColor(SystemSettings::getNavLinesColor());
-
+    //FIXME:
+    showGradientField(SystemSettings::getShowGradientField());
     _renderWinInteractor->Start();
 
 
@@ -432,11 +433,15 @@ void ThreadVisualisation::showFloor(bool status)
 {
     _geometry.ShowFloor(status);
 }
+
 void ThreadVisualisation::showObstacle(bool status)
 {
     _geometry.ShowObstacles(status);
 }
-
+void ThreadVisualisation::showGradientField(bool status)
+{
+    _geometry.ShowGradientField(status);
+}
 void  ThreadVisualisation::initGlyphs2D()
 {
     if(extern_glyphs_pedestrians) extern_glyphs_pedestrians->Delete();

@@ -63,7 +63,8 @@ LinePlotter2D::LinePlotter2D()
     door_lines = vtkCellArray::New();
     door_lineScalars = vtkFloatArray::New();
     door_curPointID=0;
-    door_width=3.5;
+//    door_width=3.5;
+    door_width=2;
 
     wall_mapper= vtkPolyDataMapper::New();
     wall_actor= vtkActor::New();
@@ -71,7 +72,8 @@ LinePlotter2D::LinePlotter2D()
     wall_lines = vtkCellArray::New();
     wall_lineScalars = vtkFloatArray::New();
     wall_curPointID=0;
-    wall_width=4;
+//    wall_width=4;
+    wall_width=2;
 
     navline_curPointID =0;
     navline_width=2;

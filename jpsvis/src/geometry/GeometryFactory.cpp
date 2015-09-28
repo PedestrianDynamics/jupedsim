@@ -41,7 +41,7 @@ void GeometryFactory::Set3D(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->set3D(status);
+                subroom.second->set3D(status);
         }
     }
 }
@@ -61,7 +61,7 @@ void GeometryFactory::ChangeWallsColor(double* color)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->changeWallsColor(color);
+                subroom.second->changeWallsColor(color);
         }
     }
 }
@@ -73,7 +73,7 @@ void GeometryFactory::ChangeExitsColor(double* color)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->changeExitsColor(color);
+                subroom.second->changeExitsColor(color);
         }
     }
 }
@@ -85,7 +85,7 @@ void GeometryFactory::ChangeNavLinesColor(double* color)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->changeNavLinesColor(color);
+                subroom.second->changeNavLinesColor(color);
         }
     }
 }
@@ -109,7 +109,7 @@ void GeometryFactory::ChangeObstaclesColor(double* color)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->changeObstaclesColor(color);
+                subroom.second->changeObstaclesColor(color);
         }
     }
 }
@@ -121,7 +121,7 @@ void GeometryFactory::ShowDoors(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showDoors(status);
+                subroom.second->showDoors(status);
         }
     }
 }
@@ -133,7 +133,7 @@ void GeometryFactory::ShowStairs(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showStairs(status);
+                subroom.second->showStairs(status);
         }
     }
 }
@@ -145,7 +145,7 @@ void GeometryFactory::ShowWalls(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showWalls(status);
+                subroom.second->showWalls(status);
         }
     }
 }
@@ -157,7 +157,7 @@ void GeometryFactory::ShowNavLines(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showNavLines(status);
+                subroom.second->showNavLines(status);
         }
     }
 }
@@ -169,7 +169,7 @@ void GeometryFactory::ShowFloor(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showFloor(status);
+                subroom.second->showFloor(status);
         }
     }
 }
@@ -180,7 +180,20 @@ void GeometryFactory::ShowObstacles(bool status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showObstacles(status);
+                subroom.second->showObstacles(status);
+        }
+    }
+}
+
+
+void GeometryFactory::ShowGradientField(bool status)
+{
+    for (auto&& room: _geometryFactory)
+    {
+        for(auto&& subroom:room.second)
+        {
+            if(_geometryFactory[room.first][subroom.first]->getVisibility())
+                subroom.second->showGradientField(status);
         }
     }
 }
@@ -192,7 +205,7 @@ void GeometryFactory::ShowGeometryLabels(int status)
         for(auto&& subroom:room.second)
         {
             if(_geometryFactory[room.first][subroom.first]->getVisibility())
-            subroom.second->showGeometryLabels(status);
+                subroom.second->showGeometryLabels(status);
         }
     }
 }

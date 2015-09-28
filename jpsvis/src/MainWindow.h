@@ -174,6 +174,8 @@ public Q_SLOTS:
     void slotShowHideGeometryCaptions();
     /// show hide the obstacles
     void slotShowHideObstacles();
+    /// show/hide the gradient field
+    void slotShowHideGradientField();
 
     /// show pedestrians only without trail
     void slotShowPedestrianOnly();

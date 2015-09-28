@@ -87,6 +87,11 @@ public:
     void static setShowObstacles(bool status);
     bool static getShowObstacles();
 
+    //set/get the gradient field visibility
+    void static setShowGradientField(bool status);
+    bool static getShowGradientField();
+
+
     // set/get the  navigation lines visibility
     void static setShowNavLines(bool status);
     bool static getShowNavLines();
@@ -207,6 +212,7 @@ private:
     static bool showGeometryCaptions;
     static bool showFloor;
     static bool showObstacle;
+    static bool showGradienField;
     static bool showWalls;
     static bool showExits;
     static bool showNavLines;

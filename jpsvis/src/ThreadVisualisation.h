@@ -146,6 +146,8 @@ public:
     /// show/ hide the obstacles
     void showObstacle(bool status);
 
+    /// show/hide the gradeint field
+    void showGradientField(bool status);
 
     /// show / hide stairs
     ///not implemented

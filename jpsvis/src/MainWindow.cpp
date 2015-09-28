@@ -687,6 +687,14 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         //return false;
     }
 
+    //check if it is vtrk file containinf gradient
+    if(fileName.endsWith(".vtk",Qt::CaseInsensitive))
+    {
+        if (false==SaxParser::ParseGradientFieldVTK(fileName,geometry))
+            return false;
+
+    }
+
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         Debug::Error("could not open the File: ",fileName.toStdString().c_str());
@@ -729,8 +737,15 @@ bool MainWindow::addPedestrianGroup(int groupID,QString fileName)
         reader.parse(source);
         file.close();
     }
+    //parsing the vtk file
+//    else if(fileName.endsWith(".vtk",Qt::CaseInsensitive))
+//    {
+//        if (false==SaxParser::ParseGradientFieldVTK(fileName,geometry))
+//            return false;
+
+//    }
     // try to parse the txt file
-    else
+    else if(fileName.endsWith(".txt",Qt::CaseInsensitive))
     {
         if(false==SaxParser::ParseTxtFormat(fileName, dataset,&frameRate))
             return false;
@@ -947,35 +962,6 @@ void MainWindow::slotControlSequence(const char * sex)
         extern_recording_enable = false;
         ui.BtRecord->setToolTip("Start Recording");
         labelRecording->setText(" rec: off ");
-
-        //Debug::Messages("stack empty" << endl;
-        //		Debug::Messages("stoping the playback and recording if any" << endl;
-        //		//extern_recording_enable = false;
-        //		extern_shutdown_visual_thread=true;
-        //		waitForVisioThread();
-        //
-        //		//isPlaying = true; //very important
-        //		//isPaused = true;
-        //		//extern_is_pause = true;
-        //
-        //
-        //		extern_screen_contrast=1;
-        //		extern_is_pause = false;
-        //		isPlaying=false;
-        //		isPaused=false;
-
-        //pause the system
-        //		QIcon icon1;
-        //		icon1.addPixmap(QPixmap(QString::fromUtf8(
-        //				":/new/iconsS/icons/Play1Hot.png")), QIcon::Normal, QIcon::Off);
-        //		ui.BtStart->setIcon(icon1);
-        //		labelCurrentAction->setText("paused");
-        //		extern_is_pause = true;
-        //		isPlaying = true; //very important, cuz the visio was running
-        //		isPaused = true;
-        //		extern_update_step=1;
-
-
     } else if (str.compare("CONTROL_RESET") == 0) {
         Debug::Messages("resetting all");
         isPlaying = false;
@@ -1703,7 +1689,13 @@ void MainWindow::loadAllSettings()
         slotShowOnScreenInfos();
         qDebug()<<"show OnScreensInfos: "<<checked;
     }
-
+    if (settings.contains("view/showGradientField"))
+    {
+        bool checked = settings.value("view/showGradientField").toBool();
+        ui.actionShow_Gradient_Field->setChecked(checked);
+        slotShowHideGradientField();
+        qDebug()<<"show GradientField: "<<checked;
+    }
     //options
     if (settings.contains("options/rememberSettings"))
     {
@@ -1774,7 +1766,8 @@ void MainWindow::saveAllSettings()
     settings.setValue("view/showGeoCaptions", ui.actionShow_Geometry_Captions->isChecked());
     settings.setValue("view/showNavLines", ui.actionShow_Navigation_Lines->isChecked());
     settings.setValue("view/showOnScreensInfos", ui.actionShow_Onscreen_Infos->isChecked());
-     settings.setValue("view/showObstacles", ui.actionShow_Obstacles->isChecked());
+    settings.setValue("view/showObstacles", ui.actionShow_Obstacles->isChecked());
+    settings.setValue("view/showGradientField", ui.actionShow_Gradient_Field->isChecked());
 
     //options: the color settings are saved in the methods where they are used.
     settings.setValue("options/listeningPort", SystemSettings::getListeningPort());
@@ -1876,6 +1869,13 @@ void MainWindow::slotShowHideObstacles()
     _visualisationThread->showObstacle(value);
     SystemSettings::setShowObstacles(value);
 }
+void MainWindow::slotShowHideGradientField()
+{
+    bool value=ui.actionShow_Gradient_Field->isChecked();
+    _visualisationThread->showGradientField(value);
+    SystemSettings::setShowGradientField(value);
+}
+
 void MainWindow::slotShowGeometryStructure()
 {
     //QListView list;
@@ -1904,9 +1904,9 @@ void MainWindow::slotOnGeometryItemChanged( QStandardItem *item)
     {
         for(int i=0;i<item->rowCount();i++)
         {
-                 QStandardItem *child=   item->child(i);
-                 child->setCheckState(item->checkState());
-                 slotOnGeometryItemChanged(child);
+            QStandardItem *child=   item->child(i);
+            child->setCheckState(item->checkState());
+            slotOnGeometryItemChanged(child);
         }
 
     }

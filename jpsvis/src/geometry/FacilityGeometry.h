@@ -110,6 +110,9 @@ public:
     ///draw obstacles
     void addObstacles(vtkPolyData* polygonPolyData);
 
+    ///add the gradient field
+    void addGradientField(vtkActor* gradientField);
+
     const std::string & GetDescription() const ;
 
     /// draw other kinds of objects
@@ -135,6 +138,7 @@ public:
     void showFloor(bool status);
     void showObstacles(bool status);
     void showGeometryLabels(int status);
+    void showGradientField(bool status);
 
     void setVisibility(bool status);
     bool getVisibility() const;
@@ -175,6 +179,7 @@ private:
 
     vtkActor* floorActor;
     vtkActor* obstaclesActor;
+    vtkActor* gradientFieldActor;
 
     // other parts
     vtkAssembly* assemblyCaptions;

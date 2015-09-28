@@ -54,6 +54,8 @@ bool SystemSettings::showExits=true;
 bool SystemSettings::showNavLines=true;
 bool SystemSettings::showTrajectories=false;
 bool SystemSettings::showObstacle=true;
+bool SystemSettings::showGradienField=true;
+
 
 unsigned short SystemSettings::port=8989;
 //double SystemSettings::bgColor[]= {1.0,1.0,1.0};
@@ -199,7 +201,14 @@ void SystemSettings::setShowObstacles(bool status)
 {
     showObstacle=status;
 }
-
+void SystemSettings::setShowGradientField(bool status)
+{
+    showGradienField=status;
+}
+bool SystemSettings::getShowGradientField()
+{
+    return showGradienField;
+}
 bool SystemSettings::getShowObstacles()
 {
     return showObstacle;

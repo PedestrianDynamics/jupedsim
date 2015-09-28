@@ -539,7 +539,7 @@ border-color: rgb(255, 255, 255);</string>
      <x>0</x>
      <y>0</y>
      <width>450</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -631,6 +631,7 @@ border-color: rgb(255, 255, 255);</string>
     <addaction name="actionShow_Door_Caption"/>
     <addaction name="actionShow_Obstacles"/>
     <addaction name="actionShow_Navigation_Lines"/>
+    <addaction name="actionShow_Gradient_Field"/>
     <addaction name="actionShow_Geometry_Captions"/>
     <addaction name="actionFirst_Group"/>
     <addaction name="separator"/>
@@ -1335,6 +1336,17 @@ border-color: rgb(255, 255, 255);</string>
   <action name="actionObstacles_Color">
    <property name="text">
     <string>Obstacles Color</string>
+   </property>
+  </action>
+  <action name="actionShow_Gradient_Field">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Gradient Field</string>
    </property>
   </action>
  </widget>
@@ -2222,6 +2234,22 @@ border-color: rgb(255, 255, 255);</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShow_Gradient_Field</sender>
+   <signal>triggered()</signal>
+   <receiver>mainwindow</receiver>
+   <slot>slotShowHideGradientField()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>224</x>
+     <y>199</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>slotHelpAbout()</slot>
@@ -2288,5 +2316,6 @@ border-color: rgb(255, 255, 255);</string>
   <slot>slotShowGeometryStructure()</slot>
   <slot>slotChangeObstacleColor()</slot>
   <slot>slotShowHideObstacles()</slot>
+  <slot>slotShowHideGradientField()</slot>
  </slots>
 </ui>
