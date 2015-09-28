@@ -875,17 +875,17 @@ void MainWindow::slotCurrentAction(QString msg)
 
 void MainWindow::slotFrameNumber(unsigned long actualFrameCount)
 {
-    QString msg;
-    msg.setNum(actualFrameCount);
-
-    ui.frameSliderLabel->setText("Frame: " + msg);
 
     //compute the  mamixum framenumber
     int maxFrameCount=1;
     if(extern_first_dataset_loaded) {
         maxFrameCount=extern_trajectories_firstSet.getFramesNumber();
-
     }
+
+    if(actualFrameCount>maxFrameCount) actualFrameCount=maxFrameCount;
+    QString msg;
+    msg.setNum(actualFrameCount);
+    ui.frameSliderLabel->setText("Frame: " + msg);
 
     if(!frameSliderHold)if(maxFrameCount!=0)//TODO WTF, otherwise an arrymtic exeption arises
         ui.framesIndicatorSlider->setValue((ui.framesIndicatorSlider->maximum()*actualFrameCount)/maxFrameCount);
