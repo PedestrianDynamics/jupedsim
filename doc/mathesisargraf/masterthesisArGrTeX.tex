@@ -14,6 +14,7 @@
 
 %sequenz-diagramm
 \usepackage{tikz}
+\usetikzlibrary{positioning}
 \usetikzlibrary{arrows,shadows}
 
 %code snippets
@@ -197,14 +198,14 @@ Forschungszentrum Jülich GmbH erstellt.
 
 In this thesis, the effect of an alternate floor-field is analyzed, by using it in a newly composed test-model for pedestrian dynamics. In simulations of pedestrian movement, the routing of agents\footnote{An agent is the representation of a pedestrian in the simulation. Depending on the used model, an agent incorporates some kind of artificial intelligence or basic agent-attributes only (like size, speed attributes, etc.). In the latter case the model takes over the task of navigating agents.} is an integral part. Routing can be seen as the composition of two aspects: the global pathfinding through a geometry and the avoidance of static or dynamic obstacles (like walls or other agents) in a local situation.
 
-Development of pedestrian simulation shows various models with different answers to the question of navigation. Many of which make use of manually added elements\footnote{like some sort of domain-decomposition, e.g. through helplines} to solve the global pathfinding, which enable the user to simulate crowd movement in that specific geometry. Other models use an algorithm, that will supply a navigation direction for any geometry. The \emph{Gradient Navigation Model}(GNM) described by Dietrich\citep{Dietrich2014} is one of the later. It uses the solution of the Eikonal Equation (see chapter \ref{eikonalequation}), which describes a 2-D wave-propagation. The wave starts in the target region and propagates throughout the geometry. Agents are directed in the opposite direction of the gradient of aforementioned solution of the Eikonal Equation. The Routing using the plain floor-field will yield non-smooth pathways. This could pose a problem for models, relying on a well-posed problem. Here, Dietrich shows the existance and uniqueness of a solution to his problem-formulation by using the theorem of Picard-Lindelöf.
+Development of pedestrian simulation shows various models with different answers to the question of navigation. Many of which make use of manually added elements\footnote{like some sort of domain-decomposition, e.g. through helplines} to solve the global pathfinding, which enable the user to simulate crowd movement in that specific geometry. Other models use an algorithm, that will supply a navigation direction for any geometry. The \emph{Gradient Navigation Model}(GNM) described by Dietrich\citep{Dietrich2014} is one of the later. It uses the solution of the Eikonal equation (see chapter \ref{eikonalequation}), which describes a 2-D wave-propagation. The wave starts in the target region and propagates throughout the geometry. Agents are directed in the opposite direction of the gradient of aforementioned solution of the Eikonal equation. The Routing using the plain floor-field will yield non-smooth pathways. This could pose a problem for models, relying on a well-posed problem. In \cite{Dietrich2014}, Dietrich shows the existance and uniqueness of a solution to his problem-formulation by using the theorem of Picard-Lindelöf.
 %\footnote{Picard-Lindelöf theorem: Consider the initial value problem \newline \begin{center}
 %$y'(t) = f(t,y(t)), \quad y(t_0 ) = y_0, \quad t \in [t_0 - \epsilon, t_0 + \epsilon]$.\newline
 %\end{center}  Suppose $f$ is uniformly Lipschitz continuous in y and continuous in $t$. Then, for some value $\epsilon > 0$, there exists a unique solution $y(t)$ to the initial value problem on the interval $[t_0 - \epsilon, t_0 + \epsilon]$.}
-To apply this theorem, Lipschitz-continuous first derivatives of the input-functions must exist. Dietrich solves that problem by the use of a mollifier, which basically takes a locally integrable function and returns a smooth approximation. Thus he creates a well-posed problem.
+To apply this theorem, Lipschitz-continuous first derivatives of the input-functions must exist. This contradicts with non-smooth pathways in a plain floor-field. He solves that problem by the use of a mollifier, which basically takes a locally integrable function and returns a smooth approximation. Thus he creates a well-posed problem.
 
-In this thesis, an enhanced floor-field is described, which addresses aforementioned issue (non-smoothness) as a welcome side-effect. A research-group at the Universidad Carlos III de Madrid\citep{Madrid} is working on safe navigation of robots. Since agents should not follow paths, which come close to any obstacle, a distance-field is created and used in the Fast-Marching algorithm, resulting in \emph{smooth} pathways, which favor a distance to walls. The researchers take that approach even further, by transforming any geometry into a skeleton (again using the distance-field) and thus having the domain in which the 2-D wave propagates reduced dramatically. Their intent is to re-calculate the floor-field in real-time using it for the reduced view-field of the robot's sensors.
-Our interest in this sleight of hand is different. We take special interest in the behavior of agents close to obstacles. The floor-field itself yields pathways, which show a wall-repulsive character in the negative gradient. This component enables us to formulate a new model, one that uses an altered floor-field. The model is implemented in JuPedSim\cite{jupedsim}, a simulation suit for pedestrian simulation, developed at the Jülich Supercomputing Centre, Forschungszentrum Jülich GmbH. It is verified according to RiMEA tests and validated with respect to empirical data. The results seen in the simulations show remarkably good behavior. The model is easy to use, fast and shows an organic routing through complex geometries. The extent to which we alter the floor-field is subject to our analysis.
+In this thesis, an enhanced floor-field is described, which addresses aforementioned issue (non-smoothness) as a welcome side-effect. A research-group at the Universidad Carlos III de Madrid \citep{Madrid} is working on safe navigation of robots. Since agents should not follow paths, which come close to any obstacle, a distance-field is created and used in the Fast-Marching algorithm, resulting in \emph{smooth} pathways, which favor a distance to walls. The researchers take that approach even further, by transforming any geometry into a skeleton (again using the distance-field) and thus having the domain in which the 2-D wave propagates reduced dramatically. Their intent is to re-calculate the floor-field in real-time using it for the reduced view-field of a robot's sensors.
+Our interest in this sleight of hand is different. We take special interest in the behavior of agents close to obstacles. The enhanced floor-field itself yields pathways, which show a wall-repulsive character in the negative gradient. This component enables us to formulate a new model. It is implemented in JuPedSim\cite{jupedsim}, a simulation suit for pedestrian simulation, developed at the Jülich Supercomputing Centre, Forschungszentrum Jülich GmbH. It is verified according to RiMEA tests and validated with respect to empirical data. The results seen in the simulations show remarkably good behavior. The model is easy to use, fast and shows an organic routing through complex geometries. The extent to which we alter the floor-field is subject to our analysis.
 
 \newpage
 \tableofcontents 
@@ -213,25 +214,65 @@ Our interest in this sleight of hand is different. We take special interest in t
 \section{Pedestrian Dynamics: Introduction}
 %<< big picture: micor-/macroscopic models, cell automata/ODE-based, take a closer look in next chapter >>
 
-Pedestrian dynamics defines a field of research trying to understand the kinematic and mechanic of pedestrian crowd movement. Understanding, how crowds react in different geometries under various circumstances, enables a safe design of our environment to best fit the needs of civil and security engineering. Results are applied to safely conduct large events, to create architecture (traffic infrastructure), through which large crowds can safely be moved and to optimize evacuation time in case of an emergency.
-To simulate crowd behavior, many models exist with different characteristics. The history of the analysis reaches back to the 1970's to Predtetschenski and Milinkskii\citep{Predtechenskii1971}. Since then, new models have been described throughout the decades. To maintain orientation, these models can be grouped into classes in the following manner:
+Pedestrian dynamics defines a field of research trying to understand the kinematic and mechanic of pedestrian crowd movement. Understanding, how crowds react in different geometries under various circumstances, enables a safer design of our environment, to best fit the needs of civil and security engineering. Results are applied to safely conduct large events, to create architecture, through which large crowds can safely be moved and to optimize evacuation time in case of an emergency. At the annual hajj\footnote{Islamic pilgramage to Mecca, Saudi-Arabia.} in Mecca in 2015, a tragic panic started, when two crowds from opposite directions met on a street, 12 meter wide. Saudi authorities state that more than 700 pilgrims died in a stampede and at least 860 more had been injured\footnote{BBC News, September 25th}. Pedestrian dynamics provides approaches to plan large events by calculating estimates for capacities of given geometries, researching crowd behavior and applying research results in new designs of civil engineering.
+To simulate pedestrian crowds, many models exist with different characteristics. Predtetschenskii and Milinkskii \citep{Predtechenskii1971} are pioneers in pedestrian dynamics, conducting experiments as early as 1969. Few years later, Hirai and Tarui \citep{Hirai1975} implemented the first force-based model to simulate crowd behavior. Since then, new models have been described throughout the decades. To maintain orientation, these models can be grouped into classes in the following manner (see figure \ref{classes}):
 
-\begin{figure}[h!]
-\includegraphics[width=1.0\linewidth]{pics/organizationModels}
+\begin{figure}[h!]                                                                                      
+  \begin{center}
+  \tikzstyle{block} = [draw, rectangle, rounded
+  corners, minimum height=2em,fill=blue!10,text width=8em, text centered]                                                                                                                                                                                                                    
+
+  \begin{tikzpicture}[auto, node distance=4.5cm,>=latex', ultra thick]
+  \node [block, name=macro] {Macroscopic};
+  \node [block, name=micro, right of=macro] {Microscopic};
+  \node [block, name=meso, right of=micro] {Mesoscopic};
+
+    %\node [block, name=dis, below= 0.8cm of macro] {Discrete};
+    %\node [block, name=con, right of=dis] {Continuous};
+    %\node [block, name=mix, right of=con] {Mixed};
+   
+    \node [block, name=rule, below= 0.8cm of macro] {Rule-based};
+    \node [block, name=ode, right of=rule] {ODE-based};
+    \node [block, name=hybr, right of=ode] {Hybrid};   
+    
+    \node [block, name=force, below = 0.8cm of rule] {Force-based};
+    \node [block, name=vel, right of=force] {Velocity-based};
+    \node [block, name=other, right of = vel] {other};       
+
+    \draw [->] (micro) -- (rule);
+    \draw [->] (micro) -- (ode);
+    \draw [->] (micro) -- (hybr);
+   
+    %\draw [->] (con) -- (rule);
+    %\draw [->] (con) -- (ode);
+    %\draw [->] (con) -- (hybr);                                                  
+
+	\draw [->] (ode) -- (force);
+	\draw [->] (ode) -- (vel);
+	\draw [->] (ode) -- (other);
+                                                    
+\end{tikzpicture}                                                                                                         
+\end{center}
 \caption{A possible hierarchical classification of models in pedestrian dynamics in \citep{Chraibi2012}}
+\label{classes}
 \end{figure}
 
-\emph{Macroscopic} models tackle crowd behavior without the need to characterize individuals, which make up the crowd. The action of a single agent is neglected and it is assumed, that aggregated values are sufficient to describe the crowd behavior. Metrics, e.g. density or flow, are used to describe the dynamic within the system. Thus a crowd is seen as a continuous fluid, which can be modeled by these aggregated observables only. No inter-particle relations are explicitly considered. Given a model, which describes the change of the density throughout a geometry, it can be mathematically captured by an PDE.   Larger roadmap- and city-traffic-simulation are fields, where macroscopic models are widely spread and can supply travel times and point out bottlenecks\citep{Emme}. Macroscopic models are fast but lack the ability to simulate heterogeneous groups.
 
-\emph{Microscopic} models consist of mathematical formulations describing the state and/or the interactions of every agent. Each agent has a position in the domain and interacts with its environment. It is assumed that the behavior of any crowd is only based on the sum of these individual actions. Within the model, these individual actions obviously must be far different from the attempt to model the complete, complex system of a person's psychology, which defines its motivation of movement inside a crowd. It is desirable to have few and simple equations to model the crowd's movement. Equations, that do scale as good as possible to achieve real-time capability for simulations. If one can not achieve real-time capability, at least reasonable computing time is a must-have-criteria for the model to be successful. 
-A popular starting point origins in the modeling of the behavior of electrical charges in an electro-magnetic field. Charges of the same sign act on each other with a repelling force. This effect is used in the modeling of the natural collision-avoidance of a person to other persons, walls and obstacles in pedestrian dynamics. Agents can be modeled to react equally to charges in the electro-magnetic field of the surrounding environment. Let us add a driving force, that acts on the agent, forcing him towards its destination and we end up with a microscopic model called ``social force model''.\footnote{This simplified describtion shall be enough for this introduction. For further reference, please see corresponding literature. A comprehensive insight in SFMs is given by Chraibi's ``Validated force-based modeling of pedestrian dynamics''.\citep{Chraibi2012}}
+%\begin{figure}[h!]
+%\includegraphics[width=1.0\linewidth]{pics/organizationModels.pdf}
+%\caption{A possible hierarchical classification of models in pedestrian dynamics in \citep{Chraibi2012}}
+%\end{figure}
+
+\emph{Macroscopic} models tackle crowd behavior without the need to characterize individuals, which make up the crowd. The action of a single agent is neglected and it is assumed, that aggregated values are sufficient to describe the crowd behavior. Metrics, e.g. density or flow, are used to describe the dynamic within the system. Thus a crowd is seen as a continuous fluid, which can be modeled by these aggregated observables only. No inter-particle relations are explicitly considered. Given a model, which describes the change of the density throughout a geometry, it can be mathematically captured by an PDE.   Larger roadmap- and city-traffic-simulation are fields, where macroscopic models are widely spread and can supply travel times and point out bottlenecks \citep{Emme}. There are limitations to this class of models. They are fast but lack the ability to simulate heterogeneous groups. Nor can they model individual decisions. In a panic situation, it has been observed, that pedestrians follow the crowd, even if other exits are available. A flow-based model would have the pedestrians use all available exits \citep{Marno}.
+
+\emph{Microscopic} models consist of mathematical formulations describing the state and the interactions of every agent. Each agent has a position in the domain and interacts with its environment. It is assumed that the dynamics in any crowd is the result of individual actions. Within the model, these individual actions obviously must be different from the attempt to model the complete, complex system of a person's psychology, which defines its motivation of movement inside a crowd. It is desirable to have few and simple equations to model the agent's motivation. In analogy to Newtonian dynamics, it can be modeled by driving and repelling forces \citep{Helbing2001}. They lead to second order ordinary differential equations.
+A popular starting point origins in the modeling of the behavior of electrical charges in an electro-magnetic potential field (see figure \ref{forcesOnAgent}). Charges of the same sign act on each other with a repelling force. This effect is used in the modeling of the natural collision-avoidance of a person to other persons, walls and obstacles in pedestrian dynamics. Superposing a driving force, that acts on the agent, steering it towards its destination, the resulting \emph{force based} model can be described by an ODE.\footnote{This simplified describtion shall suffice for this introduction. For further reference, please see corresponding literature. A comprehensive insight in SFMs is given in \citep{Chraibi2012}}
 \begin{figure}[h!]
-\includegraphics[width=1.0\linewidth]{pics/forces_on_agent}
+\includegraphics[width=1.0\linewidth]{pics/forces_on_agent.pdf}
 \caption{Forces acting on agent A from: wall, obstacle and agent B}
 \label{forcesOnAgent}
 \end{figure}
-
-We will leave the overview and set the stage for the ODE based models, for in this category our new model is to be found.
+\newline Force-based and velocity-based models are subject of this thesis, so we turn to ODE-based models, which is the super-class to both.
 
 \subsection{ODE based, microscopic models}
 
@@ -241,34 +282,19 @@ We will leave the overview and set the stage for the ODE based models, for in th
 
 %<< yet another model? >>
 
-We now focus on one group, ODE-based microscopic models, which are very successful in producing system phenomena like congestions in front of bottlenecks and showing good accordance with experimentally determined fundamental diagrams
-\footnote{Fundamental diagrams plot the (pedestrian) flux/flow over the (pedestrian) density. (include figure?)}
-[Dietrich, 2014]. The most popular models depend on ODEs of first or second order. The order of the ODE is connected to certain characteristics which will be observable in the simulations. To understand the connection, we will look at an example. Newton mechanics teaches us, that force is equal to acceleration times mass. Pedestrian models, that derive from this rule, most certainly lead to second order ODEs, as the location of an agent, derived twice, yields the acceleration. Acceleration driven models show oscillations in their trajectories (if the system is not over-damped). 
-\begin{figure}[h!]
-\includegraphics[width=1.0\linewidth]{pics/oscillation_normal}
-\caption{Trajectory in a force-based model, when starting close to a repulsive wall. (qualitative)}
-\label{bounce}
-\end{figure}
-\begin{figure}[h!]
-\includegraphics[width=1.0\linewidth]{pics/oscillation_overdamped_only}
-\caption{Trajectory in a force-based model, when starting close to a wall and parameters yield overdamped system. (qualitative)}
-\end{figure}
-Agents seem to sway left and right and do not steer as wanted. Various researcher/authors try to find new models with enhanced characteristics in terms of directing agents [Moussaïd et al., 2011; Chraibi et al., 2011]\citep{Moussaid2011}\citep{Chraibi2011}.
+We focus on ODE-based microscopic models, which are successful in producing system phenomena like congestions in front of bottlenecks and showing good accordance with experimentally determined fundamental diagrams
+\footnote{Fundamental diagrams plot the (pedestrian) flux/flow over the (pedestrian) density.}
+[Dietrich, 2014]. 
+Agents seem to sway left and right and do not steer as wanted. Various authors try to find new models with enhanced characteristics in terms of directing agents \citep{Moussaid2011}\citep{Chraibi2011}.
 
 The difficult calibration of a model is another important issue. This type of models find their limit, if one is to find one constant set of parameters for various situations. Best results are achieved with a special calibrated set of parameters for each situation. The change of parameter sets would be problematic, if we want to make extensive use of parallel solvers. In terms of ergonomics, a constant set would be more user-friendly. 
 
-\emph{Velocity based} models, which often lead to first order ODEs, make up an important sub-group. These models change the agent's velocity directly and thus show much better trajectories in terms of oscillation. The TEST\footnote{substitute name of model}-model of this thesis (see below), is partly derived from a velocity-based model, Dietrich's \emph{Gradient Navigation Model}\citep{Dietrich2014}. Dietrich motivates the creation of his model. He intends to overcome short-comings of both groups, the SFM and the Optimal Step Models, yet have the positive characteristics remain. Namely he wants to achieve the following features:
-\begin{itemize}
-\item no model induced oscillations
-\item fast solver methods through one-dimensional acceleration, smooth functions and small gradients
-\item realistic timing through bulk updates
-\item mathematical treatment is easily possible and used to calibrate the model\footnote{features copied from his paper, but they kind of break the context...}
-\end{itemize}
-A major step towards this goal is the use of a navigation field, the solution to the Eikonal Equation. This approach, introduced by Hartmann[2010]\citep{Hartmann2010}, provides routing and navigation information. In the Gradient Navigation Model, Dietrich divides the navigation into two components. A static and a dynamic navigation vector is described. The static navigation field comprehends the geometry, the dynamic navigation field integrates pedestrians and mobile obstacles. It is clear, that the dynamic navigation field must be computed for every time-step throughout the simulation.
+\emph{Velocity based} models, which often lead to first order ODEs, make up an important sub-group. These models change the agent's velocity directly and thus show much better trajectories in terms of oscillation. The TEST\footnote{substitute name of model}-model of this thesis, is partly derived from the \emph{GNM} \citep{Dietrich2014}, a velocity-based model. Dietrich motivates the creation of his model. He intends to overcome short-comings of both groups, the SFM and the Optimal Step Models, yet have the positive characteristics remain. MISSING SENTENCE.
+A major step towards this goal is the use of a navigation field, the solution to the Eikonal equation. This approach, introduced by Hartmann \citep{Hartmann2010}, provides routing and navigation information. In the GNM, Dietrich divides the navigation into two components. A static and a dynamic navigation vector are described. The static navigation field comprehends the geometry, the dynamic navigation field integrates pedestrians and mobile obstacles. It is clear, that the dynamic navigation field must be computed for every time-step throughout the simulation.
 
 Besides oscillation and calibration, there is a third issue, on which we will feast in the next chapter: Overlapping. It describes a situation, where an agent's position is invalid either because the agent overlapps with another agent or because his simulated presence overlapps with a wall or even an obstacle. Once an agent is fully clipped through a wall-surface, faulty trajectories are most certain.
 
-These issues are to sketch some prominent motives to further develop pedestrian models and search for yet another model, which might overcome some of the shortcomings and can produce as good results as existing models already provide.
+These issues highlight the need to develop pedestrian models and search for yet another model, which might overcome some of the shortcomings and can produce as good results as existing models already provide.
 
 \section{Modelling}
 
@@ -280,10 +306,9 @@ the avoidance of faulty interaction of pedestrians and walls
 maintaining the positive characteristics of row-formation, stop-and-go
 waves and such - like seen in pedestrian crowd behavior.
 \end{itemize}
-In many of the existing ODE-based models (using mathematical formulations in the continuous space), agents
-breach wall-surfaces and get stuck inside of walls.
+In many of second order models, agents breach wall-surfaces and get stuck inside of walls.
 %\footnote{This agent-behavior in simulations has not yet been observed in experiments. Participants asked to do so in advance refused cooperation. (just kidding)}
-This undesired phenomenon shows the challenge in calibrating forces and parameters of existing models, so that agents show valid natural behavior while not getting overlapping in extreme situations. Especially in situations of high crowd density, e.g. when facing bottlenecks, overlapping can occur. The model or the data-post-processing needs to find a special treatment of such artifacts in the data. It leads to problems in counting, flow-calculation and such.
+This undesired phenomenon highlights the challenge in calibrating forces and parameters of existing models, so that agents show valid natural behavior while not getting overlapping in extreme situations. Especially in situations of high crowd density, e.g. when facing bottlenecks, overlapping can occur. The model or the data-post-processing needs to find a special treatment of such artifacts in the data. It leads to inaccuracies in measurements, e.g. in counting and flow-calculation.
 \begin{figure}[h!]
 \includegraphics[width=1.0\linewidth]{pics/agents_caught01}
 \caption{Agents got pushed into obstacles by the large amount of other agents. (Simulated with SFM, wall-forces reduced)}
@@ -296,29 +321,24 @@ There are three mechanics used in the model to avoid ``overlapping/clipping'' in
 \begin{enumerate}
 \item The routing of pedestrians makes use of the eikonal-equation, computed with an inhomogeneous slowness-field, $F(x)$, whose resulting floor-field\footnote{see chapter \textbf{Eikonal Equation, Safe Navigation using the Floor-field}} favors keeping a distance to obstacles, walls and corners.
 \item The angle between an agent's moving-direction and the wall-surface-perpendicular affects the moving speed if and only if the agent's moving vector includes a component geared towards the wall. This is achieved by using the scalar product of the moving direction and the wall-surface-perpendicular.
-\item If an agent's distance to a wall drops below a fixed parameter, he is redirected to move parallel to the wall if and only if the agent's moving vector includes a component geared towords the wall.
+\item If an agent's distance to a wall drops below a fixed constant, it is redirected to move parallel to the wall if and only if the agent's moving vector includes a component geared towards the wall.
 \end{enumerate}
 
-In order to keep the model simple, repulsive wall forces as seen in Social Force Models are omitted. An analogy to repulsive pedestrian forces though is used to keep agents from colliding with each other. The model differs from SFMs, as in SFMs, other agents repulsive forces are transformed into acceleration vectors and from there into a velocity component, which is part of the agent's velocity. In this model though, repulsive forces are not treated as Newton mechanics teaches us, but are only used to factor the repulsive pedestrian effect into a direction component. The speed on the other hand is effected by the other agents only to a certain degree (as discussed below).
+In order to keep the model simple, repulsive wall forces as seen in Social Force Models are omitted. An analogy to repulsive pedestrian forces though is used to keep agents from colliding with each other. The model differs from SFMs, as in SFMs, other agents repulsive forces are transformed into acceleration vectors and from there into a velocity component, which is part of the agent's velocity. In this model though, repulsive influences are not treated as Newton mechanics teaches us, but are only used to factor the repulsive pedestrian effect into a direction component. The speed on the other hand is effected by the other agents only to a certain degree.
 
 \subsection*{Definitions:}
 
 Let $\Omega$ be the discret set of gridpoints in the bounded domain, which holds the geometry of the simulation, a subset of $\mathbb{R}^{2}$.The following functions will be used in the model-formulation and shall be introduced:
-
 \[  d  : \Omega \ni \vec{x}  \longrightarrow d(\vec{x}) \in \mathbb{R}, \qquad \Omega \subseteq \mathbb{R}^{2} \]
-The function $d$ assigns to each gridpoint in $\Omega$ the distance to the closest wall. It will be used to choose, in which mode the movement-vector candidate will be altered.
-
+assigns to each gridpoint in $\Omega$ the distance to the closest wall. It will be used to choose, in which mode the movement-vector candidate will be altered.
 \[  P  : \mathbb{R}^2 \times \Omega  \ni (\vec{v}, \vec{x})  \longrightarrow  P(\vec{v}, \vec{x}) \in \mathbb{R}^2 \]
-The funciton $P$ describes the orthogonal projection of a given orientation $\vec{v}$ onto the closest wall of $\vec{x}$. It yields an orientation parallel to that wall.
-
+describes the orthogonal projection of a given orientation $\vec{v}$ onto the closest wall of $\vec{x}$. It yields an orientation parallel to that wall.
 \[ v_{ff} : \Omega \ni \vec{x} \longrightarrow v_{ff}(\vec{x}) = \vec{v}_{ff} \in \mathbb{R}^{2}|_{\left\lVert \cdot \right\rVert_2 = 1} \]
-The vector $\vec{v}_{ff}$ is the (normalized) negative gradient of the floor-field at position $\vec{x}$. This vector describes the direction of the negative gradient only and always has unit length. It is used to contribute to an agent's moving vector.
-
+is the (normalized) negative gradient of the floor-field at position $\vec{x}$. This vector describes the direction of the negative gradient only and always has unit length. It is used to contribute to an agent's moving vector.
 \[ g : \mathbb{R}^2 \ni \vec{v} \longrightarrow g(\vec{v}) \in \mathbb{R}^{2}|_{\left\lVert \cdot \right\rVert_2 \leq 1}  \]
-The function $g$ limits the length of any inputvector $\vec{v}$ to unit length. If $\left\lVert \vec{v} \right\rVert_2 \leq 1$, then $g$ is the identity of $\vec{v}$.
-
+limits the length of any inputvector $\vec{v}$ to unit length. If $\left\lVert \vec{v} \right\rVert_2 \leq 1$, then $g$ is the identity of $\vec{v}$.
 \[ \sum_{i=1}^{n}\vec{v}_{repP,i} : \overset{n}{\underset{i=1}{\otimes}} \mathbb{R}^2_i \ni (\vec{v}_1, ... \vec{v}_n) \longrightarrow  \sum_{i=1}^{n}\vec{v}_{repP,i} \in \mathbb{R}^{2} \]
-The sum is adding the distance-dependand\footnote{The correlation of distance and force is the Gompertz-function. The function is smooth and adjustable in scale, range of influence and steepness.} repelling force of neighboring agents within a close vicinity. This sum is analog to the SFM model, yet the resulting direction is directly taken and not converted to an acceleration nor to a velocity. The letter $v$ is a hint to being a vector, \emph{not} to being a velocity.
+is adding the distance-dependand\footnote{The correlation of distance and force is the Gompertz-function. The function is smooth and adjustable in scale, range of influence and steepness.} repelling force of neighboring agents within a close vicinity. This sum is analog to the SFM model, yet the resulting direction is directly taken and not converted to an acceleration nor to a velocity. The letter $v$ is a hint to being a vector, \emph{not} to being a velocity.
 
 %\begin{tabular}{lllclll}
 %$ d  $ & : $\Omega $ & $ \ni \vec{x} $ & $ \longrightarrow $ & $ d(\vec{x}) $ & $\in \mathbb{R} \quad $ & $:=  \quad $ distance to the closest wall \\
@@ -392,22 +412,20 @@ What might seem curious at first, is the fact, that both, the navigation field $
 
 The sum of the navigation field (static) and the accumulated pedestrian forces (dynamic) are restricted by $g$ and then weighted by 20\%, the speed vector of the last time-step gets weighted by 80\%. This is done to reduce flickering\footnote{We want to shortly address a second alternative approach. If one is willing to accept flickering agents with fast changing orientations, one could ommit the speed-vector of the time-step $n-1$ and postprocess the trajectories. As we only get positions at discrete time-steps, one could easily create a smooth trajectory by using \emph{B-splines}.} of agents and must be kept in mind, as this approach could result in a tendency to create oscillation in narrow corridors. The weighted sum limits the change of orientation and thus an agent could bounce between two opposing walls as seen in \ref{bounce}.  If oscillation should occur in any case, the weight should be shifted away from the last time-step. This way, agents get enabled to turn more aggressive and closely follow the navigation-floor-field.
 
-In the next step, we process $\vec{v}_{n}$. It is checked, how distant the next wall is and if the agent is close to any wall, we build the scalar product $\langle\vec{v}_{n},-\nabla \hat{d}\rangle$ to evaluate, if there is a orientation towards the closest wall. If there is, the agent is slowed down. If the agent is already very close to the wall, the velocity-component towards the wall gets neglected. Thus, the agent gets directed to move parallel to the wall.
+In the next step, we process $\vec{v}_{n}$. It is checked, how distant the next wall is and if the agent is close to any wall, we build the scalar product $\langle\vec{v}_{n},-\nabla \hat{d}\rangle$ to evaluate, if there is a orientation towards the closest wall. In this case, the agent is slowed down. If the agent is already very close to the wall, the velocity-component towards the wall gets neglected. Thus, the agent gets directed to move parallel to the wall.
 
 \begin{figure}[h!]
 \includegraphics[width=1.\linewidth]{pics/redirect}
-\caption{Alteration of the speed-vector to avoid clipping: Slow down, Redirect}
+\caption{Alteration of the speed-vector to avoid clipping}
 \end{figure}
 
 \subsection{Eikonal Equation}\label{eikonalequation}
 
-The ``Eikonal Equation'' in a domain \textgreek{W}, subset of $\mathbb{R}^{n}$,
-
+The ``Eikonal equation'' in a domain \textgreek{W}, subset of $\mathbb{R}^{n}$,
 \begin{align*}
 \vert\nabla u(\vec{x})\vert\quad= & \quad F(\vec{x}),\quad \vec{x}\in\Omega,\\
-\mathrm{s.t.}\qquad u|_{\partial\Omega}\quad= & \quad0\\
+\mathrm{s.t.}\qquad u|_{\partial\Omega}\quad= & \quad 0.\\
 \end{align*}
-
 yields the ``time-cost'' $u(\vec{x})$ in a spacial domain, provided a target region within the domain as input as well as a slowness-field $F(\vec{x})$. A valid interpretation of ``time-cost''-iso-lines is to picture a wavefront at a given time $ t $, originating in the target region ($ t=0 $) and propagating throughout the spacial domain \textgreek{W} with the given speed $v=\frac{1}{F(\vec{x})}$ while flowing around any obstacles (see figure \ref{fig:BottleneckObstaclePure}).
 \begin{figure}[h!]
 \includegraphics[width=1.\linewidth]{pics/BottleneckObstaclePure}
@@ -415,25 +433,25 @@ yields the ``time-cost'' $u(\vec{x})$ in a spacial domain, provided a target reg
 \label{fig:BottleneckObstaclePure}
 \end{figure}
 
-Given a discretization of the domain \textgreek{W} and the target region ${\partial\Omega}$, the solution to the Eikonal Equation can be approached by using the Fast-Marching Algorithm. The algorithm provides a first order approximation, yet sufficient for our cause (pedestrian navigation). Computing-time of Fast-Marching is independent\footnote{Fast-Marching completion-time depends mainly on the length of the wavefronts. If the geometry leads to small lengths, as in geometries with large amounts of narrow corridors, completion time decreases.} of the complexity of obstacles and walls. 
+Given a discretization of the domain \textgreek{W} and the target region ${\partial\Omega}$, the solution to the Eikonal equation can be approached by using the Fast-Marching Algorithm \citep{sethian}. The algorithm provides a first order approximation, yet sufficient for our cause (pedestrian navigation). Computing-time of Fast-Marching is independent\footnote{Fast-Marching completion-time depends mainly on the length of the wavefronts. If the geometry leads to small lengths, as in geometries with large amounts of narrow corridors, completion time decreases.} of the complexity of obstacles and walls. 
 
 The negative gradient $-\nabla u$  of the time-cost-field will be a useful tool in the routing of pedestrians/agents to the target region used as part of the algorithm's input. The Fast-Marching algorithm is described in the appendix in detail for further reference.
 
-We will refer to the result of the Fast-Marching Algorithm as ``floor-field''. To successfully use these floor-fields, we will discuss and analyze a modification, which gives us a smooth floor-field, as proposed in \citep{Madrid}.
+We will refer to the result of the Fast-Marching Algorithm as ``floor-field''. To successfully use these floor-fields, we discuss and analyze a modification, which gives us a smooth floor-field, as proposed in \citep{Madrid}.
 
-\subsection{Safe Navigation using the Floorfield}
+\subsection{Safe Navigation using the Floor-Field}
 
 When using the plain approximation to the Eikonal Solution, agents anticipate a non-smooth pathway that leads very close to 
 walls (see white trajectories in figure \ref{fig:BottleneckObstaclePure}). In most of the models for pedestrian dynamics, pedestrians, which are very close to walls or obstacles, could overlap with them in rare occasions. Agents might leave the valid domain and find themselves captured inside walls or obstacles. In the model described in this paper, we aim to fix that
 problem. In reality, we can observe, pedestrians avoiding walls and obstacles through keeping a certain distance. 
 
-Therefore, it is desirable to define a modified quality of an optimal route, which accounts for a minimal arrival time and a safe pathway. Safe in respect to avoiding the vicinity of walls and obstacles, if and only if possible. If a space is very crowded (high density), then agents should make use of the given space even if that means getting close to walls.
+Therefore, it is desirable to define a modified quality of an optimal route, which accounts for a minimal arrival time and a safe pathway. Safe in respect to avoiding the vicinity of walls and obstacles, whenever possible. If a space is very crowded (high density), then agents should make use of the given space even if that means getting close to walls.
 
 This crowd behavior, described above, is commonly achieved with adding a repulsive characteristic to walls.
 
 In the ``social force model'', the walls will have a repulsive force pointing perpendicular to the wall-surface, aiming to keep agents away from the wall. These forces need to be calibrated to work as intended.
 
-Smaller forces might not be strong enough to avoid overlapping with the wall if an agent is in between a wall on one side and many other agents on the other side. The agents on the other side affect that one agent, forcing him towards the wall, while the wall itself acts on the agent in the opposite direction.
+Smaller forces might not be strong enough to avoid overlapping with the wall if an agent is in between a wall on one side and many other agents on the other side. The agents on the other side affect that one agent, forcing him towards the wall, while the wall itself acts on the agent in the opposite direction. The resulting force could still point in the direction of the wall, leading to overlapping.
 
 If the repulsive wall forces are too strong, pedestrians will not use the space close to a wall, even if the domain is very crowded.
 
@@ -446,25 +464,28 @@ How can an agent ``avoid'' the close vicinity of any wall or obstacle?
 \subsection{Distances-Field}
 \begin{figure}[h!]
 \includegraphics[width=1.\linewidth]{pics/DistanceField2}
-\caption{Distances Field of the bottleneck geometry}
+\caption{Distances field of the bottleneck geometry}
 \label{fig:DistanceField2}
 \end{figure}
-Having above question in mind, we first need to introduce and understand the \textit{Distances-Field}, a function $d$ living on the spacial domain $\Omega$, and $d$ holds information, how distant the closest wall is. This function will prove useful when altering the one floor-field, we will use for routing. To avoid confusion, let it be emphasized, that this distances-field will be used in two different parts of the model. It is used to:
+Having above question in mind, we first need to introduce and understand the \textit{Distances-field}, a function $d$ living on the spacial domain $\Omega$, that holds information on how distant the closest wall is. This function will prove useful when altering the one floor-field, we will use for routing. To avoid confusion, let it be emphasized, that this distances-field will be used in two different parts of the model. It is used to:
 \begin{enumerate}
 \item create a Direction-to-Wall-Field (vector-field) and
-\item to create a slowness-field (scalar-field) to initialize the Fast-Marching algorithm of the Navigation-Field\footnote{ask MC, about denotation of floor-field (vector-field or field of scalars)} (vector-field).
+\item to create a slowness-field (scalar-field) to initialize the Fast-Marching algorithm of the Navigation-Field.
 \end{enumerate}
 
 \begin{figure}[h!]
-\includegraphics[width=1.\linewidth]{pics/FM_flow}
-
+\begin{center}
+%\includegraphics[width=1.\linewidth]{pics/FM_flow.pdf}
+\input{./chart.tex}
+\end{center}
 \caption{Usage of the Distances-Field in the vector-fields}
+\label{sequenceToVFs}
 \end{figure}
 \footnote{change "target" to "origin" in figure? easier to understand?}
-\paragraph{ad 1:}
+\paragraph{}
 The Direction-to-Wall-Field is a normalized vector-field. Each vector has unit length. The orientation is gained by the negative gradient to the Distances-Field. This way, every given vector at $\vec{x}$ directs to the closest wall of that given grid-point $\vec{x}$.
-\paragraph{ad 2:}
-The function value $d(\vec{x})$ will be used to create a slowness-field on the discrete grid. This slowness-field holds the value, which determines, how slow the 2-D wave will propagate over the grid-point in the final \emph{navigation}-field. Points, that are relatively close to a wall, will have a correspondingly\footnote{outch!} low value $d(\vec{x})$. Therefore, the 2-D wavefront will slow-down over these points. Routes/Pathways passing these points will take more time and be less optimal in a sense, that combines distances and wall-avoidance. We will refer to the value $u(\vec{x})$ as the \emph{time-cost-value} (\emph{cost} in short).
+\paragraph{}
+The function value $d(\vec{x})$ will be used to create a slowness-field on the discrete grid. This slowness-field holds the value, which determines, how slow the 2-D wave will propagate over the grid-point in the final \emph{navigation}-field. Points, that are relatively close to a wall, will have a corresponding low value $d(\vec{x})$. Therefore, the 2-D wavefront will slow-down over these points. Routes/Pathways passing these points will take more time and be less optimal in a sense, that combines distances and wall-avoidance. We will refer to the value $u(\vec{x})$ as the \emph{time-cost-value} (\emph{cost} in short).
 
 
 %Both vector-fields, which will have two different names, are created by using the Fast-Marching algorithm:
@@ -485,13 +506,13 @@ The function value $d(\vec{x})$ will be used to create a slowness-field on the d
 
 \subsubsection{Cost of a ``full'' preprocessing step }
 
-Close to all time of the needed computation spent on the enhanced floorfield, the prohibition of overlapping, is spent in a preprocessing step before the actual simulation starts and therefore does not effect the real-time factor. A factor, which is a prominent metric, when comparing different models. In this TEST-model, the preprocessing is increased compared to Dietrich's \emph{Gradient Navigation Model}. Where he uses the Eikonal solution once (mollifiers not considered), the TEST-model uses two runs through the Fast-Marching algorithm. In this chapter we want to elaborate on the doubled effort we spend.
+Close to all time of the needed computation spent on the enhanced floorfield, the prohibition of overlapping, is spent in a preprocessing step before the actual simulation starts and therefore does not effect the real-time factor. In this TEST-model, the preprocessing is increased compared to a \emph{GNM}. Where he uses the Eikonal solution once (mollifiers not considered), the TEST-model uses two runs through the Fast-Marching algorithm. In this chapter we want to elaborate on the doubled effort we spend.
 
-The granularity of the rectangular grid governs the cost of the FM\footnote{Fast-Marching}. For pedestrian navigation, we chose a point-to-point distance of neighboring grid-points of $0.0625 m$. A geometry spanning $100m \times 100m$ can be processed in (enter profiling results). Most of the computing time is spend on the output.
+The granularity of the rectangular grid governs the cost of the FMA\footnote{Fast-Marching}. For pedestrian navigation, we chose a point-to-point distance of neighboring grid-points of $0.0625\,m$. A geometry spanning $100\,m \times 100\,m$ can be processed in (enter profiling results). Most of the computing time is spend on the output.
 
 The Fast-Marching algorithm is that fast, that it basically can be neglected when rating the performance. A prequel Fast-Marching run does not change that verdict. The usage of the Direction-to-Wall Field in the model shows no more overlapping and seems easily worth the cost. During runtime, using the floor-field or the Distance-to-Wall field means reading a vector and performing up to 5 scalar products\footnote{to be verified}.
 
-To show the performance of the TEST model, we started a simulation in a complex geometry with more than 3000 agents. Compared to other models available in \emph{JuPedSim}\citep{jupedsim}, we could not see any significant performance difference. (ADD PROFILING TIMES, NOT YET EXISTING)
+To show the performance of the TEST model, we started a simulation in a complex geometry with more than 3000 agents. Compared to other models available in \emph{JuPedSim} \citep{jupedsim}, we could not see any significant performance difference. (ADD PROFILING TIMES, NOT YET EXISTING)
 The trajectories improved and look much more natural. This was achieved without the need to manually adding decomposing help-lines or intermediate navigation goals.
 
 \begin{figure}[h!]
@@ -504,7 +525,7 @@ The trajectories improved and look much more natural. This was achieved without 
 \subfigure{\includegraphics[width=.49\linewidth]{pics/Verteilerebene2}}
 \subfigure{\includegraphics[width=.49\linewidth]{pics/Verteilerebene4}}
 \subfigure{\includegraphics[width=.49\linewidth]{pics/Verteilerebene5}}
-\caption{Simulation of a complex geometry with multiple exits and app. 3000 agents}
+\caption{Simulation of a complex geometry with multiple exits and ~ 3000 agents}
 \label{fig:verteilerebene}
 \end{figure}
 
@@ -525,7 +546,7 @@ The trajectories improved and look much more natural. This was achieved without 
 
 \newpage
 \section{Verification and Validation}
-In this chapter, we want to describe applicable tests to analyze the effect of the \emph{wall-avoid-distance} parameter to the output of the TEST-model. It shall be verified, that we see no overlapping and that the crowd shows typical phenomena, like row-formation. Following our set of tests, we will then validate the TEST-model to produce the pedestrian flow in bottleneck experiments, corresponding to empirical data. We will further compare the trajectories with a different model, one using automated triangulation to assist routing. The last test is a mere stress test to the model. We want to see how the model performes in an evacuation setting with a large, crowded geometry.
+In this chapter, we want to describe applicable tests to analyze the effect of the \emph{wall-avoid-distance} parameter to the output of the TEST-model. It shall be verified, that we see no overlapping and that the crowd shows typical phenomena, like lane-formation \citep{ZhangQ2011}. Following our set of tests, we will then validate the TEST-model to produce the pedestrian flow in bottleneck experiments, corresponding to empirical data. This verification is widely considered ao the most important criterion to validate simulation results \citep{Seyfried2008}.  We will further compare the trajectories with a different model, one using automated triangulation to assist routing. The last test is a mere stress test to the model. We want to see how the model performes in an evacuation setting with a large, crowded geometry.
 
 \subsection{Basic Tests}
 %The validation of a model is a complex task and makes up a separate research field. Researchers in the field of Civil Engineering are working on various approaches on how to validate a model. The research group, CST -  Pedestrian Dynamics and Traffic Simulation, is developing a set of test-cases any serious model should aim to pass. Tests include the behavior of a single moving agent passing static objects like a dummy agent or an obstacle. (see figure \ref{test01})
