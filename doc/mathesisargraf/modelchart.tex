@@ -35,22 +35,30 @@
     
 \begin{tikzpicture}[auto]
     % Place nodes left block
-    \node [block] (dfield) {create distance field\\ $d$};
-    \node [block, below = 0.8cm of dfield] (sfield) {create speed field\\ $s$};
-    \node [block, below = 0.8cm of sfield] (nFF) {create navigation floor-field\\ $c$};
-    \node [block1, below = 0.8cm of nFF] (nVF) {create vector field \\$(-1) \frac{\nabla c}{\left\Vert \nabla c \right\Vert}$};
-    %\node [block, below of=Jsim] (agents) {send/recv agents};
-    %\node [decision, below of=agents] (done) {done?};
-    %\node [cloud, below of=done, node distance=3cm] (end) {shutdown \emph{mobsim}};
+    \node [block] (compi) {get Neighbors of ped $i$};
+    \node [block, below = 0.8cm of compi] (getj) {get Neighbor j};
+    \node [decision, below = 0.8cm of getj] (valinf) {is influencing ped $i$?};
+    \node [block, below = 0.8cm of valinf] (addinf) {add influence to sum};
+    \node [decision, below = 0.8cm of addinf] (checkloop) {more neighbors to ped $i$?};
+    \node [block, below = 0.8cm of checkloop] (calcrep) {calculate $g(sum)$};
+    \node [block, below = 0.8cm of calcrep] (calcpuremov) {calculate $g(g(sum) + g(\nabla c))$};
+    \node [block, below = 0.8cm of calcpuremov] (calcjitter) {calc $\alpha$ oldmov $+ (1-\alpha)$ newmov};
+    \node [decision, below = 0.8cm of calcjitter] (isslowed) {is in slowdown band $d \leq \alpha_{s}$?};
+    \node [decision, below = 0.8cm of isslowed] (toWall) {geared towards wall $\langle\vec{v}_{n},-\nabla d\rangle \ge 0$?};
+    \node [decision, below = 0.8cm of toWall] (isredir) {is in redirection band $d \leq \alpha_{h}$?};
+    \node [block, below = 0.8cm of isredir] (redir) {redirect to move parallel to wall};
+    \node [block, below = 0.8cm of redir] (slow) {slowdown with $(1-\langle\vec{v}_{n},-\nabla d\rangle)$};
+    \node [decision, below = 0.8cm of slow] (checkoutloop) {next pedestrian?}
     % Draw edges
-    \path [line] (dfield) -- (sfield);
-    \path [line] (sfield) -- (nFF);
-    \path [line] (nFF) -- (nVF);
-    %\path [line] (agents) -- (done);
-    %\path [line] (done) -- node [near start] {yes} (end);
+    \path [line] (compi) -- (getj);
+    \path [line] (getj) -- (valinf);
+    \path [line] (valinf) -- (addinf);
+    \path [line] (addinf) -- (checkloop);
+    \path [line] (checkloop) -- node [near start] {yes} (getj);
+    \path [line] (checkoutloop) -- node [near start] {yes} (compi);
     %\path [line] (done)  -| node [anchor=south, near start] {no} +(-2.2,0) |-  (Msim.west);
     % ------- Middle block
-    \node [block1, right = 2cm of nVF] (wVF) {create vector field\\ $(-1) \nabla d$};
+    %\node [block1, right = 2cm of nVF] (wVF) {create vector field\\ $(-1) \nabla d$};
     %\node [block1, below of=m2j] (req) {send agent request};
     %\node [decision1, below of=req] (isplace) {is space?};
     %\node [block1, below of=isplace, node distance=3cm] (send) {send agent};
@@ -76,7 +84,7 @@
     %\path [line] (isplace2) -- node [near start] {yes}  (recv);
     %\path [line] (recv) -- (sim);
     %\path [line] (sim) -- (end3); 
-    \path [line] (dfield) -| node [near start] {}  (wVF);
+    %\path [line] (dfield) -| node [near start] {}  (wVF);
 \end{tikzpicture}
 
 
