@@ -82,7 +82,7 @@ public:
     static bool ParseTxtFormat(const QString& fileName, SyncData* dataset, double * fps);
 
     /// parse a vtk file
-    static bool ParseGradientFieldVTK(const QString& fileName, GeometryFactory& geoFac);
+    static bool ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac);
 
 private:
     //clear the mo

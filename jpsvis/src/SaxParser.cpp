@@ -70,8 +70,7 @@
 #include <vtkStructuredGridReader.h>
 #include <vtkStructuredPointsReader.h>
 #include <vtkImageDataGeometryFilter.h>
-
-
+#include <vtkStripper.h>
 
 
 #define VTK_CREATE(type, name) \
@@ -1372,24 +1371,42 @@ bool SaxParser::ParseTxtFormat(const QString &fileName, SyncData* dataset, doubl
     return true;
 }
 
-bool SaxParser::ParseGradientFieldVTK(const QString &fileName, GeometryFactory& geoFac)
+bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac)
 {
+    if(QFileInfo(fileName).isRelative())
+    {
+        QString wd;
+        SystemSettings::getWorkingDirectory(wd);
+        fileName=wd+"/"+fileName;
+    }
+
+    qDebug()<<"Opening the gradient field:"<<fileName<<endl;
     // Read the file
     VTK_CREATE(vtkStructuredPointsReader, reader);
     reader->SetFileName(fileName.toStdString().c_str());
     reader->Update();
+    reader->SetLookupTableName("LOOKUP_TABLE default");
 
     VTK_CREATE(vtkImageDataGeometryFilter,geometryFilter );
     geometryFilter->SetInputConnection(reader->GetOutputPort());
     geometryFilter->Update();
+
+    //try a triangle strip
+//    VTK_CREATE(vtkStripper,stripper);
+//    stripper->SetInputConnection(geometryFilter->GetOutputPort());
+//    VTK_CREATE(vtkTriangleFilter,trianglefilter);
+//    trianglefilter->SetInputConnection(stripper->GetOutputPort());
+
 
     VTK_CREATE(vtkPolyDataMapper,mapper);
     mapper->SetInputConnection(geometryFilter->GetOutputPort());
 
     VTK_CREATE(vtkActor, actor);
     actor->SetMapper(mapper);
+    //conversion from m to cm
+    actor->SetScale(100);
 
-    shared_ptr<FacilityGeometry> gradient_field= shared_ptr<FacilityGeometry>(new FacilityGeometry("Gradient Field"));
+    auto gradient_field= shared_ptr<FacilityGeometry>(new FacilityGeometry("Gradient Field"));
     gradient_field->addGradientField(actor);
 
     geoFac.AddElement(-1,-1,gradient_field);
