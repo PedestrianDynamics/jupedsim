@@ -27,7 +27,7 @@ def getScriptPath():
 
 class JPSRunTestDriver(object):
 
-    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreportdir=".."):
+    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreportdir=""):
         self.SUCCESS = 0
         self.FAILURE = 1
         # check if testnumber is digit
@@ -48,7 +48,7 @@ class JPSRunTestDriver(object):
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.HOME = path.expanduser("~")
         self.DIR = testdir
-        self.jpsreportdir = jpsreportdir # default is utestdir
+        self.jpsreportdir = jpsreportdir
         # Where to find the measured data from the simulations. We will use Voronoi diagrams
         if self.testno == 100: # fix for 1dfd, since jpsreport can not be used in 1D
             self.simDataDir = os.path.join(self.DIR,
@@ -78,11 +78,15 @@ class JPSRunTestDriver(object):
             results.append(res)
 
         if fd:
+            # in case no jpsreportdir, assume it exists on the same level as jpscore
+            if len(self.jpsreportdir) == 0:
+                self.jpsreportdir = os.path.join(os.path.abspath(os.path.dirname(self.trunk)), "jpsreport", "bin")
+
             # remove any existing simulation files
             from shutil import rmtree
             if os.path.exists(self.simDataDir):
                 rmtree(self.simDataDir)
-
+                
             if not path.exists(self.jpsreport_ini):
                 logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
                 exit(self.FAILURE)

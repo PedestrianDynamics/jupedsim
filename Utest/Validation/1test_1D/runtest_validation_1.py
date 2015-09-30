@@ -32,6 +32,8 @@ from JPSRunTest import JPSRunTestDriver
 from utils import *
 
 tolerance = 0.05
+ms = 20 # size of labels
+mt = 18 # size of ticks
 
 def eval_results(results):
     fd_exp = results[0]
@@ -42,10 +44,12 @@ def eval_results(results):
     ax = fig.add_subplot(1, 1, 1)
     plt.plot(dsim[:, 1], dsim[:, 2], ".b", alpha=0.5, label="simulation")
     plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
-    plt.ylabel(r"$v\; [m/s]$", size=20)
-    plt.xlabel(r"$\rho \; [1/m]$", size=20)
+    plt.ylabel(r"$v\; [m/s]$", size=ms)
+    plt.xlabel(r"$\rho \; [1/m]$", size=ms)
     plt.ylim([0, 1.5])
     plt.xlim([0, 3.0])
+    plt.xticks(fontsize=mt)
+    plt.yticks(fontsize=mt)
     plt.legend(loc="best", numpoints=1)
     fig.set_tight_layout(True)
     plt.savefig("fd1d.png", dpi=300)
@@ -54,11 +58,9 @@ def run_validation_1(inifile, trajfile):
     return 0
 
 if __name__ == "__main__":
-    jpsreportdir = "/Users/chraibi/Workspace/jpsreport"
     test = JPSRunTestDriver(100, argv0=argv[0],
                             testdir=sys.path[0],
-                            utestdir=utestdir,
-                            jpsreportdir=jpsreportdir)
+                            utestdir=utestdir)
 
     results = test.run_test(testfunction=run_validation_1, fd=1)
     eval_results(results)
