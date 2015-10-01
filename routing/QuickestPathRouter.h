@@ -51,6 +51,12 @@ enum RefSelectionMode
      ALL =2
 };
 
+enum DefaultStrategy
+{
+     LOCAL_SHORTEST=1,
+     GLOBAL_SHORTEST=2
+};
+
 //log output
 extern OutputHandler* Log;
 
@@ -216,6 +222,8 @@ private:
      double _congestionRation=0.8;
      // reference pedestrian selection mode
      RefSelectionMode _refPedSelectionMode= RefSelectionMode::SINGLE;
+     // defauult initial strategy for the pedestrians
+     DefaultStrategy _defaultStrategy=DefaultStrategy::GLOBAL_SHORTEST;
 };
 
 #endif /* QUICKESTPATHROUTER_H_ */

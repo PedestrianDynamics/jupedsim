@@ -69,7 +69,7 @@ GCFMModel::~GCFMModel(void)
 }
 
 
-bool GCFMModel::Init (Building* building) const
+bool GCFMModel::Init (Building* building)
 {
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     for(unsigned int p=0;p<allPeds.size();p++)
@@ -103,7 +103,7 @@ bool GCFMModel::Init (Building* building) const
     return true;
 }
 
-void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
      double delta = 1.5;
 
@@ -603,7 +603,7 @@ double GCFMModel::GetDistEffMaxWall() const
      return _distEffMaxWall;
 }
 
-string GCFMModel::GetDescription() const
+string GCFMModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];

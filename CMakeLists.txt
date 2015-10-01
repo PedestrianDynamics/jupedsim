@@ -368,7 +368,7 @@ endif(CGAL_FOUND)
 
 #protocol buffer
 #find_package(Protobuf)
-#if(PROTOBUF_FOUND)
+#if(PROTOBUF_FOUND && GRPC)
 #  message(STATUS "Protocol buffer library found")
 #
 #  include_directories(${PROTOBUF_INCLUDE_DIRS})

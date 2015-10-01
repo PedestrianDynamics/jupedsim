@@ -90,7 +90,7 @@ private:
     /// hybrid simulation manager
     //HybridSimulationManager
     std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
-
+    int _periodic;
 public:
     /**
      * Constructor

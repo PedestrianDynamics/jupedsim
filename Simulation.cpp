@@ -207,6 +207,8 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      s.append(tmp);
      _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
+     _periodic = args.IsPeriodic();
+     sprintf(tmp, "\t periodic: %d\n", _periodic);
      s.append(tmp);
 
      _fps = args.Getfps();
@@ -509,7 +511,7 @@ int Simulation::RunBody(double maxSimTime)
                _building->UpdateGrid();
 
                // update the positions
-               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
                //update the events
                _em->ProcessEvent();
@@ -529,7 +531,7 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
-          Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
+          //Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
 
           // needed to control the execution time PART 2
           // time(&endtime);

@@ -103,7 +103,7 @@ public:
 
      /**
       * The strategy is automatically set based on the description in the
-      * person file.
+      * ini file.
       */
      void SetStrategy(const RoutingStrategy& strategy);
 

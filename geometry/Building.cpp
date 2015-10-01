@@ -84,7 +84,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
           exit (EXIT_FAILURE);
      }
 
-     //this->AddSurroundingRoom();
+//     this->AddSurroundingRoom();
 
      if(!InitGeometry())
      {
@@ -1076,6 +1076,9 @@ void Building::InitGrid(double cellSize)
      } else {
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
+
+     //TODO: the number of pedestrian should be calculated using the capacity of the sources
+     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
      _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);

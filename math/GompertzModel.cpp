@@ -69,7 +69,7 @@ GompertzModel::~GompertzModel()
 
 }
 
-bool GompertzModel::Init (Building* building) const
+bool GompertzModel::Init (Building* building)
 {
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
@@ -107,7 +107,7 @@ bool GompertzModel::Init (Building* building) const
     return true;
 }
 
-void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
      double delta = 0.5;
       // collect all pedestrians in the simulation.
@@ -501,7 +501,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      return F_wrep;
 }
 
-string GompertzModel::GetDescription() const
+string GompertzModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];

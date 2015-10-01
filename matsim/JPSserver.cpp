@@ -72,8 +72,7 @@ void JPSserver::RunSimulation()
                _jpsClient->NotifyEndOfSimulation();
           }
 
-          //Log->Write("INFO:\tRPC::JPSserver idle for 3 seconds");
-          //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
      }while(!_shutdown);
 
      _SimManager.RunFooter();
@@ -85,6 +84,7 @@ Status JPSserver::reqMATSim2ExternHasSpace(ServerContext* context __attribute__(
 {
      string nodeID=request->nodeid();
      //Log->Write("INFO:\tRPC::JPSserver I have space on node " + nodeID);
+     //TODO: call the voronoi implementation and check if there is a spot
      response->set_hasspace(true);
      return Status::OK;
 }

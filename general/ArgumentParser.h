@@ -100,6 +100,7 @@ private:
      int pExitStrategy; // Strategie zur Richtungswahl (v0)
      int pLog;
      int pPort;
+     int pPeriodic;
      int _embedMesh;
      int _maxOpenMPThreads;
      int pModel;
@@ -155,6 +156,7 @@ private:
 
      bool ParseStepSize(TiXmlNode &stepNode);
 
+     bool ParsePeriodic(TiXmlNode &Node);
 public:
      // constructor
      ArgumentParser();
@@ -180,6 +182,7 @@ public:
      std::shared_ptr<OperationalModel> GetModel() const;
      double GetTmax() const;
      double Getdt() const;
+     int IsPeriodic() const;
      double GetV0Mu() const;
      double GetV0Sigma() const;
      double GetBmaxMu() const;
@@ -245,6 +248,7 @@ public:
       * @param inifile
       */
      bool ParseIniFile(string inifile);
+
 
 };
 

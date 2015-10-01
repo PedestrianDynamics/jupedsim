@@ -97,7 +97,7 @@ private:
       * and should be calculated *before* calling OptimalSpeed
       * @return Point
       */
-     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei) const;           
+     my_pair GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const;           
      /**
       * Repulsive force between two pedestrians ped1 and ped2 according to
       * the Velocity model (to be published in TGF15)
@@ -107,7 +107,7 @@ private:
       *
       * @return Point
       */
-     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const;
+     Point ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodic) const;
      /**
       * Repulsive force acting on pedestrian <ped> from the walls in
       * <subroom>. The sum of all repulsive forces of the walls in <subroom> is calculated
@@ -168,13 +168,13 @@ public:
      /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription() const;
+     virtual std::string GetDescription();
 
      /**
       * initialize the phi angle
       * @param building
       */
-     virtual bool Init (Building* building) const;
+     virtual bool Init (Building* building);
 
      /**
       * Compute the next simulation step
@@ -183,7 +183,7 @@ public:
       * @param deltaT the next timestep
       * @param building the geometry object
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
+     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
 };
 
 
