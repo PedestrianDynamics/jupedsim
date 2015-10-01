@@ -10,26 +10,33 @@
     <!-- <file name="hybrid_hall_traj_with_fake.xml" />  -->
     <path location="./trajectories/" /> 
   </trajectories>
-  <!-- <scripts location = "../../scripts/" />   -->
   <!-- all files in the directories will be used -->
 
   <measurement_areas unit="m">
+    <!-- left -->
     <area_B id="1" type="BoundingBox">
-      <!-- <vertex x="10.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="5.2" /> -->
-      <!-- <vertex x="10.2" y="5.2" /> -->
-
-      <vertex x="10" y="-0.3" />
-      <vertex x="14" y="-0.3" />
-      <vertex x="14" y="0.3" />
-      <vertex x="10" y="0.3" />
-      <length_in_movement_direction distance="4.0" />
+      <vertex x="-4.5" y="-2.4" />
+      <vertex x="-2.5" y="-2.4" />
+      <vertex x="-2.5" y="0" />
+      <vertex x="-4.5" y="0" />
+      <length_in_movement_direction distance="2.0" />
     </area_B>
-    <!--<area_L id="2" type="Line">
-        <start x="9.0" y="2.8" />
-  	<end x="9.0" y="6.4" />
-	</area_L> -->
+    <!-- right -->
+    <area_B id="2" type="BoundingBox">
+      <vertex x="1.0" y="-2.4" />
+      <vertex x="3.0" y="-2.4" />
+      <vertex x="3.0" y="0.0" />
+      <vertex x="1.0" y="0.0" />
+      <length_in_movement_direction distance="2.0" />
+    </area_B>
+    <!-- front -->
+    <area_B id="3" type="BoundingBox">
+      <vertex x="-2.4" y="1.0" />
+      <vertex x="0.0" y="1.0" />
+      <vertex x="0.0" y="3.0" />
+      <vertex x="-2.4" y="3.0" />
+      <length_in_movement_direction distance="2.0" />
+    </area_B>
   </measurement_areas>
 
   <velocity>
@@ -50,20 +57,25 @@
   </method_A>
 
   <!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout -->
-  <method_B enabled="true">
+  <method_B enabled="false">
     <measurement_area id="1" />
   </method_B>
 
   <!-- Method C (Zhang2011a) Classical density and Vel -->
   <method_C enabled="false">
-    <measurement_area id="1" />
+    <measurement_area id="1"/>
   </method_C>
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
-  <method_D enabled="false" output_graph="false" individual_FD="true" output_time_series="false" 1d="true">
-    <measurement_area id="1" />
+  <method_D enabled="true">
+    <measurement_area id="1"/>
+    <measurement_area id="2"/>
+    <measurement_area id="3"/>
     <cut_by_circle enabled="false" radius= "1" edges = "10"/>
+    <output_voronoi_cells enabled="false" plot_graphs="false"/>
+    <individual_FD enabled="true" measurement_area_id="1"/>
     <!-- edges represent the precision of discretization of the circle -->
+    <plot_time_series enabled="false"/>
     <profiles  enabled="false" grid_size_x="0.10" grid_size_y="0.10"/>
   </method_D>
 </JPSreport>

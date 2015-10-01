@@ -2,7 +2,7 @@
 """
 Test description
 ================
-- Fundamental Diagram in 2D, test number 101
+- Fundamental Diagram in 2D, test number 102
 - Width = 1.8 m
 - Length = 26.0 m
 - Measurement area: X = [10, 16],  Y = [-0.9, 0.9]
@@ -50,7 +50,7 @@ def run_validation_2(inifile, trajfile):
     return 0
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(101, argv0=argv[0],
+    test = JPSRunTestDriver(102, argv0=argv[0],
                             testdir=sys.path[0],
                             utestdir=utestdir)
 
