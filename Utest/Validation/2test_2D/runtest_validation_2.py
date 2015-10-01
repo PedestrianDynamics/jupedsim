@@ -2,7 +2,7 @@
 """
 Test description
 ================
-- Fundamental Diagram in 2D, test number 101
+- Fundamental Diagram in 2D, test number 102
 - Width = 1.8 m
 - Length = 26.0 m
 - Measurement area: X = [10, 16],  Y = [-0.9, 0.9]
@@ -26,6 +26,8 @@ from JPSRunTest import JPSRunTestDriver
 from utils import *
 
 tolerance = 0.05
+ms = 20 # size of labels
+mt = 18 # size of ticks
 
 def eval_results(results):
     fd_exp = results[0]
@@ -36,8 +38,10 @@ def eval_results(results):
     ax = fig.add_subplot(1, 1, 1)
     plt.plot(dsim[:, 2], dsim[:, 3], ".b", alpha=0.5, label="simulation")
     plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
-    plt.ylabel(r"$v\; [m/s]$", size=20)
-    plt.xlabel(r"$\rho \; [1/m^2]$", size=20)
+    plt.ylabel(r"$v\; [m/s]$", size=ms)
+    plt.xlabel(r"$\rho \; [1/m^2]$", size=ms)
+    plt.xticks(fontsize=mt)
+    plt.yticks(fontsize=mt)
     plt.legend(loc="best", numpoints=1)
     fig.set_tight_layout(True)
     plt.savefig("fd2d.png", dpi=300)
@@ -46,11 +50,9 @@ def run_validation_2(inifile, trajfile):
     return 0
 
 if __name__ == "__main__":
-    jpsreportdir = "/Users/chraibi/Workspace/jpsreport"
-    test = JPSRunTestDriver(101, argv0=argv[0],
+    test = JPSRunTestDriver(102, argv0=argv[0],
                             testdir=sys.path[0],
-                            utestdir=utestdir,
-                            jpsreportdir=jpsreportdir)
+                            utestdir=utestdir)
 
     results = test.run_test(testfunction=run_validation_2, fd=1)
     eval_results(results)
