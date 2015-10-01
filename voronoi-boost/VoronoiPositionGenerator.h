@@ -53,7 +53,7 @@ class Point;
 	 * @param radius, radius of a person
 	 */
 	void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom, double factor,
-		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	);
+		voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius, const std::vector<int>& goal_vector	);
 
 	/**
 	 * Position incoming pedestrian on the vertex with greater probability for greater distances
@@ -86,7 +86,7 @@ class Point;
 	 * @param velocities_vector
 	 */
 	void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,
-			Pedestrian* ped, const std::vector<Point>& velocities_vector ) ;
+			Pedestrian* ped, const std::vector<Point>& velocities_vector, const std::vector<int>& goal_vector ) ;
 
 
 

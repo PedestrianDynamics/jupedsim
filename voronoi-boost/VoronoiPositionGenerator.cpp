@@ -164,8 +164,11 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
           else //more than one pedestrian
           {
+        	   //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
+        	   //then there would be no need to remember the velocities_vector and goal_vector
         	   std::vector<Point> discrete_positions;
                std::vector<Point> velocities_vector;
+               std::vector<int> goal_vector;
                Point temp(0,0);
                Point v(0,0);
                double no = 0;
@@ -178,6 +181,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     temp.SetY( (int)( pos.GetY()*factor ) );
                     discrete_positions.push_back( temp );
                     velocities_vector.push_back( eped->GetV() );
+                    goal_vector.push_back( eped->GetFinalDestination() );
 
                     //calculating the mean, using it for the fake pedestrians
                     v = v + eped->GetV();
@@ -193,6 +197,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                {
                     discrete_positions.push_back( fake_peds[i] );
                     velocities_vector.push_back( v );
+                    goal_vector.push_back( -10 );
                }
 
                //constructing the diagram
@@ -201,13 +206,13 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
                voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
                double dis = 0;
-               VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
+               VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
 
                if( dis > 4*radius*factor*radius*factor)// be careful with the factor!! radius*factor, 2,3,4?
                {
                     Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                     ped->SetPos(pos , true);
-                    VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
+                    VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector, goal_vector );
 
                     // proceed to the next pedestrian
                     existing_peds.push_back(ped);
@@ -223,20 +228,20 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                }
 
                /*else //try with the maximum distance, don't need this if already using the VoronoiBestVertexMax function
-			{
-				VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis );
-				if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
 				{
-					Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
-					ped->SetPos(pos , true);
-					VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
-				}
-				else
-				{
-					return_value = false;
-					//reject the pedestrian
-				}
-			}*/
+					VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis );
+					if( dis > radius*factor*radius*factor)// be careful with the factor!! radius*factor
+					{
+						Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
+						ped->SetPos(pos , true);
+						VoronoiAdjustVelocityNeighbour( vd, chosen_it, ped, velocities_vector );
+					}
+					else
+					{
+						return_value = false;
+						//reject the pedestrian
+					}
+				}*/
           }// >0
 
 
@@ -252,25 +257,38 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
 //gives an agent the mean velocity of his voronoi-neighbors
 void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_diagram<double>::const_vertex_iterator& chosen_it,
-          Pedestrian* ped, const std::vector<Point>& velocities_vector )
+          Pedestrian* ped, const std::vector<Point>& velocities_vector, const std::vector<int>& goal_vector )
 {
      //finding the neighbors (nearest pedestrians) of the chosen vertex
      const voronoi_diagram<double>::vertex_type &vertex = *chosen_it;
      const voronoi_diagram<double>::edge_type *edge = vertex.incident_edge();
-     double no=0;
+     double no1=0,no2=0;
+     double backup_speed = 0;
      std::size_t index;
 
      Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized(); //the direction
      double speed = 0;
      do
      {
-          no++;
           index = ( edge->cell() )->source_index();
-          speed += velocities_vector[index].Norm();
+          if( ped->GetFinalDestination() == goal_vector[index]  )
+          {
+        	  no1++;
+        	  speed += velocities_vector[index].Norm();
+          }
+          else
+          {
+        	  no2++;
+        	  backup_speed += velocities_vector[index].Norm();
+          }
           edge = edge->rot_next();
      } while (edge != vertex.incident_edge());
 
-     speed = speed/no;
+     if(no1)
+    	 speed = speed/no1;
+     else
+    	 speed = backup_speed/(no2*3.0); //just some small speed
+
      v = v*speed;
      ped->SetV(v);
 
@@ -279,9 +297,10 @@ void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_
 
 //gives the voronoi vertex with max distance
 void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-          double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius	)
+          double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius, const std::vector<int>& goal_vector )
 {
      double dis = 0;
+     double score = -100; //calculated using distance and considerring the goal
 
 
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
@@ -307,7 +326,8 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
      //at the end, max_it is the choosen vertex, or the first vertex - max_dis=0 assures that this position will not be taken
 }
 
-//gives random voronoi vertex but with weights proportional to squared distances
+//gives random voronoi vertex but with weights proportional to distances^2
+//in case you want proportional to distance^4 just change two lines commented as HERE
 void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
           double factor, voronoi_diagram<double>::const_vertex_iterator& chosen_it, double& dis	, double radius)
 {
@@ -330,7 +350,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
                     dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
 
                     possible_vertices.push_back( it );
-                    partial_sums.push_back( dis );
+                    partial_sums.push_back( dis ); // HERE
 
                     size = partial_sums.size();
                     if( size > 1 )
@@ -359,7 +379,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
                break;
           }
      }
-
+     //dis = sqrt(dis); //HERE
 }
 
 //gives a random voronoi vertex
