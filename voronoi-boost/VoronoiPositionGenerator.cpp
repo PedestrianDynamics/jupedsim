@@ -119,7 +119,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
      for (iter_ped = peds.begin(); iter_ped != peds.end(); )
      {
           Pedestrian* ped = (*iter_ped);
-          radius = ped->GetEllipse().GetBmax(); //max radius of the curren pedestrian
+          radius = ped->GetEllipse().GetBmax(); //max radius of the current pedestrian
 
           if(existing_peds.size() == 0 )
           {
@@ -202,7 +202,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                double dis = 0;
                VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
 
-               if( dis > 2*radius*factor*2*radius*factor)// be careful with the factor!! radius*factor, 2 on purpose instead of 4
+               if( dis > 4*radius*factor*radius*factor)// be careful with the factor!! radius*factor, 2,3,4?
                {
                     Point pos( chosen_it->x()/factor, chosen_it->y()/factor ); //check!
                     ped->SetPos(pos , true);
