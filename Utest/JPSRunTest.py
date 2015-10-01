@@ -80,7 +80,7 @@ class JPSRunTestDriver(object):
         if fd:
             # in case no jpsreportdir, assume it exists on the same level as jpscore
             if len(self.jpsreportdir) == 0:
-                self.jpsreportdir = os.path.join(os.path.abspath(os.path.dirname(self.trunk)), "jpsreport", "bin")
+                self.jpsreportdir = os.path.join(os.path.abspath(os.path.dirname(self.trunk)), "jpsreport")
 
             # remove any existing simulation files
             from shutil import rmtree
