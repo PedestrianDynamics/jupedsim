@@ -7,8 +7,8 @@
   <!-- trajectories file and format -->
   <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
   <trajectories format="xml" unit="m">
-    <!-- <file name="hybrid_hall_traj_with_fake.xml" />  -->
-    <path location="./trajectories/" /> 
+    <file name="trajects.xml" />
+	<path location="./" />
   </trajectories>
   <!-- <scripts location = "../../scripts/" />   -->
   <!-- all files in the directories will be used -->
@@ -24,7 +24,7 @@
       <vertex x="13" y="-0.3" />
       <vertex x="13" y="0.3" />
       <vertex x="11" y="0.3" />
-      <length_in_movement_direction distance="1.0" />
+      <length_in_movement_direction distance="2.0" />
     </area_B>
     <!--<area_L id="2" type="Line">
         <start x="9.0" y="2.8" />
@@ -55,8 +55,9 @@
   </method_B>
 
   <!-- Method C (Zhang2011a) Classical density and Vel -->
-  <method_C enabled="false">
+  <method_C enabled="true">
     <measurement_area id="1" />
+	<plot_time_series enabled="false"/>
   </method_C>
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
