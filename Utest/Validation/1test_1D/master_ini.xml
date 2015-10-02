@@ -49,11 +49,7 @@
   <agents operational_model_id="3">
     <agents_distribution>
       <!-- [14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70] -->
-<<<<<<< HEAD
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="34" goal_id="0" router_id="1"/>
-=======
       <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="range(5, 75, 2)" goal_id="0" router_id="1"/>
->>>>>>> 877daa6ad4318402325cfa144adc21b0a21b5158
     </agents_distribution>
   </agents>
 
