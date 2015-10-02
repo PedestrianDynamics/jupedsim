@@ -2,7 +2,7 @@
 
 <JuPedSim project="JPS-Project" version="0.5" 
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-          xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+          xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.7/jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
@@ -10,11 +10,11 @@
   <!-- geometry file -->
   <geometry>geometry.xml</geometry>
   <!-- traectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="8" color_mode="final_goal">
     <file location="trajects.xml" />
   </trajectories>
   <!-- where to store the logs -->
-  <logfile>log</logfile>
+  <logfilel>log</logfilel>
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
