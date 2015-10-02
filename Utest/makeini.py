@@ -13,7 +13,7 @@ except ImportError:
 
 SUCCESS = 0
 FAILURE = 1
-print sys.argv[0]
+
 ego = os.path.splitext(sys.argv[0])[0] + ".txt"
 
 logfile = "log_%s"%ego

@@ -2,13 +2,13 @@
 
 <JuPedSim project="JPS-Project" version="0.5" 
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-          xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
+          xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org//jps_ini_core.xsd">
 
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
-  <max_sim_time >50</max_sim_time>
+  <max_sim_time>100</max_sim_time>
   <!-- geometry file -->
-  <geometry>geometry.xml</geometry>
+  <geometry>./geometry.xml</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="trajects.xml" />
@@ -35,11 +35,11 @@
     <goals>
       <goal id="0" final="true" caption="goal 1">
         <polygon>
-          <vertex px="-2.4" py="5" />
-          <vertex px="-2.4" py="6" />
-          <vertex px="0" py="6" />
-          <vertex px="0" py="5" />
-          <vertex px="-2.4" py="5" />
+          <vertex px="27" py="0" />
+          <vertex px="27" py="1" />
+          <vertex px="28" py="1" />
+          <vertex px="28" py="0" />
+          <vertex px="27" py="0" />
         </polygon>
       </goal>
     </goals>
@@ -48,8 +48,12 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="0" router_id="1" x_min="4"/>
-      <!-- <group group_id="2" agent_parameter_id="2" room_id="0" subroom_id="0" number="1" goal_id="0" router_id="1" x_max="0.5"/> -->
+      <!-- [14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70] -->
+<<<<<<< HEAD
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="34" goal_id="0" router_id="1"/>
+=======
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="range(5, 75, 2)" goal_id="0" router_id="1"/>
+>>>>>>> 877daa6ad4318402325cfa144adc21b0a21b5158
     </agents_distribution>
   </agents>
 
@@ -58,20 +62,20 @@
     <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
         <solver>euler</solver>
-        <stepsize>0.1</stepsize>
-		<periodic>0</periodic>
-        <exit_crossing_strategy>4</exit_crossing_strategy>
+        <periodic>1</periodic>
+        <stepsize>0.01</stepsize>
+        <exit_crossing_strategy>3</exit_crossing_strategy>
         <linkedcells enabled="true" cell_size="30"/>
-        <force_ped  a="5" D="0.1"/>
+        <force_ped  a="6" D="0.1"/>
         <force_wall a="5" D="0.02"/>
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="1.2" sigma="0.0" />
-        <bmax mu="0.15" sigma="0.0" /> <!-- this is l/2, assuming peds are circles with constant radius-->
-        <bmin mu="0.15" sigma="0.0" />
-        <amin mu="0.15" sigma="0.0" />
+        <bmax mu="0.3" sigma="0.0" /> <!-- this is l/2, assuming peds are circles with constant radius-->
+        <bmin mu="0.3" sigma="0.0" />
+        <amin mu="0.3" sigma="0.0" />
         <tau mu="0.5" sigma="0.0" />
-        <atau mu="0." sigma="0.0" />
+        <atau mu="0.0" sigma="0.0" />
         <T mu="1" sigma="0.0" />        
       </agent_parameters>
       <agent_parameters agent_parameter_id="2">
