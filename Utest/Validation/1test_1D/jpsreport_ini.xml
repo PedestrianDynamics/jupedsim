@@ -15,25 +15,12 @@
 
   <measurement_areas unit="m">
     <area_B id="1" type="BoundingBox">
-      <!-- <vertex x="10.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="5.2" /> -->
-      <!-- <vertex x="10.2" y="5.2" /> -->
-
-<<<<<<< HEAD
       <vertex x="11" y="-0.3" />
       <vertex x="13" y="-0.3" />
       <vertex x="13" y="0.3" />
       <vertex x="11" y="0.3" />
       <length_in_movement_direction distance="2.0" />
-=======
-      <vertex x="10" y="-0.3" />
-      <vertex x="14" y="-0.3" />
-      <vertex x="14" y="0.3" />
-      <vertex x="10" y="0.3" />
-      <length_in_movement_direction distance="4.0" />
->>>>>>> 877daa6ad4318402325cfa144adc21b0a21b5158
-    </area_B>
+	</area_B>
     <!--<area_L id="2" type="Line">
         <start x="9.0" y="2.8" />
   	<end x="9.0" y="6.4" />
@@ -69,7 +56,7 @@
   </method_C>
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
-  <method_D enabled="false" output_graph="false" individual_FD="true" output_time_series="false" 1d="true">
+  <method_D enabled="false" output_graph="false" individual_FD="true" output_time_series="false">
     <measurement_area id="1" />
     <cut_by_circle enabled="false" radius= "1" edges = "10"/>
     <!-- edges represent the precision of discretization of the circle -->
