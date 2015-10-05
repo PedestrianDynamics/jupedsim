@@ -12,7 +12,7 @@ import os
 from stat import S_ISREG, ST_MODE, ST_MTIME
 import subprocess
 import sys
-
+import numpy as np
 
 __author__ = 'Oliver Schmidts'
 __email__ = 'dev@jupedsim.org'
@@ -27,7 +27,7 @@ def getScriptPath():
 
 class JPSRunTestDriver(object):
 
-    def __init__(self, testnumber, argv0, testdir, utestdir=".."):
+    def __init__(self, testnumber, argv0, testdir, utestdir="..", jpsreportdir=""):
         self.SUCCESS = 0
         self.FAILURE = 1
         # check if testnumber is digit
@@ -47,21 +47,88 @@ class JPSRunTestDriver(object):
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG,
                             format='%(asctime)s - %(levelname)s - %(message)s')
         self.HOME = path.expanduser("~")
-
         self.DIR = testdir
+        self.jpsreportdir = jpsreportdir
+        # Where to find the measured data from the simulations. We will use Voronoi diagrams
+        if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
+            self.simDataDir = os.path.join(self.DIR,
+                                           "Output",
+                                           "Fundamental_Diagram",
+                                           "TinTout")
+        else:
+            self.simDataDir = os.path.join(self.DIR,
+                                           "Output",
+                                           "Fundamental_Diagram",
+                                           "Individual_FD")
+        # Where to find the measured data from the experiments.
+        # Assume that this directory is always data/
+        self.expDataDir = os.path.join(self.DIR, "data")
         self.UTEST = utestdir
         self.CWD = os.getcwd()
         self.FILE = os.path.join(self.DIR, "master_ini.xml")
 
-    def run_test(self, testfunction, *args):
+    def run_test(self, testfunction, fd=0, *args): #fd==1: make fundamental diagram
         assert hasattr(testfunction, '__call__'), "run_test: testfunction has no __call__ function"
         self.__configure()
-        executable = self.__find_executable()
+        jpscore = os.path.join(self.trunk, "bin", "jpscore")
+        jpscore_exe = self.__find_executable(jpscore)
         results = []
         for inifile in self.inifiles:
-            res = self.__execute_test(executable, inifile, testfunction, *args)
+            res = self.__execute_test(jpscore_exe, inifile, testfunction, *args)
             results.append(res)
+
+        if fd:
+            # in case no jpsreportdir, assume it exists on the same level as jpscore
+            if len(self.jpsreportdir) == 0:
+                self.jpsreportdir = os.path.join(os.path.abspath(os.path.dirname(self.trunk)), "jpsreport")
+
+            # remove any existing simulation files
+            from shutil import rmtree
+            if os.path.exists(self.simDataDir):
+                rmtree(self.simDataDir)
+                
+            if not path.exists(self.jpsreport_ini):
+                logging.critical("jpsreport_ini <%s> does not exist", self.jpsreport_ini)
+                exit(self.FAILURE)
+
+            jpsreport = os.path.join(self.jpsreportdir, "bin", "jpsreport")
+            jpsreport_exe = self.__find_executable(jpsreport)
+            # if self.testno == 100: # fix for 1dfd, since jpsreport can not be used in 1D
+            #     fd_script = os.path.join(self.DIR, "fd.py")
+            #     print fd_script
+            #     subprocess.call(["python", "%s" % fd_script])
+            # else:
+            subprocess.call([jpsreport_exe, "%s" % self.jpsreport_ini])
+
+            fd_sim = self.__get_FD_data(self.simDataDir)
+            fd_exp = self.__get_FD_data(self.expDataDir)
+            results = []
+            results.append(fd_exp)
+            results.append(fd_sim)
         return results
+
+    def __get_FD_data(self, data_dir):
+        """
+        collect density-velocity data experiments or simulations
+        and return an array
+        """
+        files = glob.glob(os.path.join(data_dir, "*.dat"))
+        if len(files) == 0: # maybe we have txt files?
+            files = glob.glob(os.path.join(data_dir, "*.txt"))
+            if len(files) == 0:
+                logging.critical("get_FD_data: no data in %s", data_dir)
+                exit(self.FAILURE)
+
+        once = 1
+        for f in files:
+            if once:
+                fd_data = np.loadtxt(f)
+                once = 0
+            else:
+                d = np.loadtxt(f)
+                fd_data = np.vstack((fd_data, d))
+
+        return fd_data
 
     def __configure(self):
         if self.CWD != self.DIR:
@@ -86,6 +153,7 @@ class JPSRunTestDriver(object):
         # initialise the inputfiles for jpscore
         self.geofile = os.path.join(self.DIR, "geometry.xml")
         self.inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
+        self.jpsreport_ini = os.path.join(self.DIR, "jpsreport_ini.xml")
         if not path.exists(self.geofile):
             logging.critical("geofile <%s> does not exist", self.geofile)
             exit(self.FAILURE)
@@ -95,8 +163,8 @@ class JPSRunTestDriver(object):
                 exit(self.FAILURE)
         return
 
-    def __find_executable(self):
-        executable = os.path.join(self.trunk, "bin", "jpscore")
+    def __find_executable(self, executable):
+        # executable = os.path.join(self.trunk, "bin", "jpscore")
 
         # fix for windows
         if not path.exists(executable):
@@ -116,6 +184,28 @@ class JPSRunTestDriver(object):
         # end fix for windows
 
         return executable
+
+    # def __find_jpsreport_executable(self):
+    #     executable = os.path.join(self.jpsreportdir, "bin", "jpsreport")
+
+    #     # fix for windows
+    #     if not path.exists(executable):
+    #         matches = []
+    #         for root, dirname, filenames in os.walk(os.path.join(self.trunk, 'bin')):
+    #             for filename in fnmatch.filter(filenames, 'jpsreport.exe'):
+    #                 matches.append(os.path.join(root, filename))
+    #         if len(matches) == 0:
+    #             logging.critical("executable <%s> or jpsreport.exe does not exist yet.", executable)
+    #             exit(self.FAILURE)
+    #         elif len(matches) > 1:
+    #             matches = ((os.stat(file_path), file_path) for file_path in matches)
+    #             matches = ((stat[ST_MTIME], file_path)
+    #                        for stat, file_path in matches if S_ISREG(stat[ST_MODE]))
+    #             matches = sorted(matches)
+    #         executable = matches[0]
+    #     # end fix for windows
+
+    #     return executable
 
     def __execute_test(self, executable, inifile, testfunction, *args):
         cmd = "%s --inifile=%s"%(executable, inifile)

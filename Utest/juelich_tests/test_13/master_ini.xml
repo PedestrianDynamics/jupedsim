@@ -5,7 +5,7 @@
   <seed>linspace(1,10000,10)</seed>
   <!-- <seed>1</seed> -->
   <num_threads>4</num_threads>
-  <max_sim_time unit="sec">200</max_sim_time>
+  <max_sim_time unit="sec">300</max_sim_time>
   <!-- geometry file -->
   <geometry>juelich_tests/test_13/geometries/</geometry>
   <!-- traectories file and format -->
@@ -46,7 +46,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="2" number="100" goal_id="-1" router_id="1"/>	
+      <group group_id="0"  agent_parameter_id="0" room_id="0" subroom_id="2" number="200" goal_id="-1" router_id="1"/>	
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
