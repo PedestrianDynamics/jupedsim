@@ -256,7 +256,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                         movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
                         ++(*redircnt);
                     }
-                    antiClippingFactor = 1;//( 1 - .5*(dotProduct + fabs(dotProduct)) );
+                    antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
                     ++(*slowcnt);
                 }
 

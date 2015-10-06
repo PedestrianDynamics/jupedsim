@@ -32,14 +32,15 @@ In order to keep the model simple, repulsive wall forces as seen in Social Force
 \begin{itemize}
 \item $\vec{i}$ denotes the influence vector among agents. The correlation of distance and influence is the Gompertz-function $f(x)=a \cdot e^{-b\cdot e^{-c \cdot x}}$. The function is smooth and adjustable in scale, range of influence and steepness by the parameter $a$,$b$,$c$.
 \item $\vec{u}$ denotes the \emph{unit-speed} vector. At any time, we store the calculated orientation in this vector. It's length is always $\leq 1\,unit$. We call it unit-speed vector, as in most cases, it is the velocity vector with the speed of $1\,m/s$. It is used to multiply it with the agent's \emph{desired speed} value to get the velocity-vector of the current agent at the current time-step.
-\item $\vec{x}$ denotes the position vector of an agent in $\Omega$.
+\item $\vec{x}$ denotes the position vector of an agent in $\mathbb{R}^2$.
+\item $v_0$ denotes the agent's desired speed.
 \end{itemize}
 %
 \subsection*{Constants:}
 \begin{itemize}
-\item $\alpha \quad$ denotes the weight of the \emph{unit-speed} vector of the previous time-step. $(1-\alpha)$ is the weight of the current \emph{unit-speed} vector.
-\item $\alpha_s \quad$ is the width of the \emph{slow-down} band. Any agent, that is closer to a wall than $\alpha_s$ will be slowed.
-\item $\alpha_r \quad$ is the width of the \emph{redirection} band. Any agent within will be redirected to move parallel to the wall.
+\item $\alpha \quad$ denotes the weight of the \emph{unit-speed} vector of the previous time-step. $(1-\alpha)$ is the weight of the current \emph{unit-speed} vector. (here $\alpha = 0.8$.)
+\item $\alpha_s \quad$ is the width of the \emph{slow-down} band. Any agent, that is closer to a wall than $\alpha_s$ will be slowed.(here $\alpha_s = 0.8$.)
+\item $\alpha_r \quad$ is the width of the \emph{redirection} band. Any agent within will be redirected to move parallel to the wall. (here $\alpha = 0.4$.)
 \end{itemize}
 %
 \subsection*{Functions:}
@@ -60,17 +61,15 @@ is adding the distance-dependand\footnote{The correlation of distance and influe
 \textbf{TEST Model:}\\
 \end{center}
 \begin{align*}
-&\vec{v}_{n}&&= \alpha\cdot\vec{v}_{n-1, res} + (1 - \alpha)\cdot g\left(g(\vec{v}_{ff})+g(\sum_{i=1}^n\vec{v}_{repP,i})\right)\\
-&\vec{v}_{n, res}&&= \left\{
+&\vec{u}_{n}&&= \alpha\cdot\vec{u}_{n-1, res} + (1 - \alpha)\cdot g\left(g(\vec{u}_{ff})+g(\sum_{j=1}^n\vec{i}_{repP,j})\right)\\
+&\vec{u}_{n, res}&&= \left\{
 	\begin{aligned}
-	    %&\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & P(\vec{v}_{n}) \quad &: & d(\vec{x})&& < 0.1\\
-        &\left(1-\langle\vec{v}_{n},-\nabla d\rangle\right)  & P(\vec{v}_{n}) \quad & \textbf{if} \quad  && d(\vec{x}) < && \alpha_{r}; \quad \langle\vec{v}_{n},-\nabla d\rangle \ge 0 \\
-		%&\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & \vec{v}_{n} \quad  &: \quad 0.1 <  & d(\vec{x})&& < 0.2\\
-        &\left(1-\langle\vec{v}_{n},-\nabla d\rangle\right)  & \vec{v}_{n} \quad  & \textbf{if} \quad \alpha_{r} <   && d(\vec{x}) < && \alpha_{s} ;\quad \langle\vec{v}_{n},-\nabla d\rangle \ge 0\\
-		& &\vec{v}_{n} \quad & \textbf{else} &&   &&%& d(\vec{x})&& > 0.2
+        &\left(1-\langle\vec{u}_{n},-\nabla d\rangle\right)  & P(\vec{u}_{n}) \quad & \textbf{if} \quad  && d(\vec{x}) < && \alpha_{r}; \quad \langle\vec{u}_{n},-\nabla d\rangle \ge 0 \\
+        &\left(1-\langle\vec{u}_{n},-\nabla d\rangle\right)  & \vec{u}_{n} \quad  & \textbf{if} \quad \alpha_{r} <   && d(\vec{x}) < && \alpha_{s} ;\quad \langle\vec{u}_{n},-\nabla d\rangle \ge 0\\
+		& &\vec{u}_{n} \quad & \textbf{else} &&   &&%& d(\vec{x})&& > 0.2
 	\end{aligned}
 	\right.\\
-&\Delta\vec{x}_{n}&&= \Delta t\cdot\vec{v}_{n, res}\\
+&\Delta\vec{x}_{n}&&= \Delta t \cdot v_0 \cdot\vec{u}_{n, res}\\
 \end{align*}
 \newpage
 %
@@ -83,11 +82,11 @@ is adding the distance-dependand\footnote{The correlation of distance and influe
 \end{figure}
 \newpage
 
-What might seem curious at first, is the fact, that both, the navigation field $\vec{v}_{ff}$ and the \emph{sum} of pedestrian forces $\sum\vec{v}_{repP,i} $, are restricted to the length of 1 unit by $g$. Then their sum in turn is restricted again. This obviously breaks the principle of superposition of forces. We cannot talk about a force-based model here and loose the analogy to Newton's second law the first time applying $g$ on the sum of forces $\sum\vec{v}_{repP,i}$. The resulting vector indicates a new orientation and a slow-down mechanic, as the vector can be of length $ \le 1 $ unit.
+What might seem curious at first, is the fact, that both, the navigation field $\vec{u}_{ff}$ and the \emph{sum} of pedestrian forces $\sum\vec{i}_{repP,j} $, are restricted to the length of 1 unit by function $g$. Then their sum in turn is restricted again. This obviously breaks the principle of superposition of forces. We cannot talk about a force-based model here and loose the analogy to Newton's second law the first time applying $g$ on the sum of influences $\sum\vec{i}_{repP,j}$. The resulting vector indicates a new orientation and a slow-down mechanic, as the vector can be of length $ \leq 1 $ unit.
 
-The sum of the navigation field (static) and the accumulated pedestrian forces (dynamic) are restricted by $g$ and then weighted by 20\%, the speed vector of the last time-step gets weighted by 80\%. This is done to reduce flickering\footnote{We want to shortly address a second alternative approach. If one is willing to accept flickering agents with fast changing orientations, one could ommit the speed-vector of the time-step $n-1$ and postprocess the trajectories. As we only get positions at discrete time-steps, one could easily create a smooth trajectory by using \emph{B-splines}.} of agents and must be kept in mind, as this approach could result in a tendency to create oscillation in narrow corridors. The weighted sum limits the change of orientation and thus an agent could bounce between two opposing walls.  If oscillation should occur in any case, the weight should be shifted away from the last time-step. This way, agents get enabled to turn more aggressive and closely follow the navigation-floor-field.
+The sum of the navigation field (static) and the accumulated pedestrian forces (dynamic) are restricted by $g$ and then weighted by $(1-\alpha)$, the speed vector of the last time-step gets weighted by $\alpha$. This is done to reduce flickering\footnote{We call the change in direction back and forth in every timestep \emph{flickering}. We want to shortly address a second alternative approach. If one is willing to accept flickering agents with fast changing orientations, one could omit the speed-vector of the time-step $(n-1)$ and postprocess the trajectories. As we only get positions at discrete time-steps, one could easily create a smooth trajectory by using \emph{B-splines}.} of agents and must be kept in mind, as this approach could result in a tendency to create oscillation in narrow corridors. The weighted sum limits the change of orientation and thus an agent could bounce between two opposing walls.  If oscillation should occur in any case, the weight should be shifted away from the last time-step. This way, agents get enabled to turn more aggressive and closely follow the navigation-floor-field.
 
-In the next step, we process $\vec{v}_{n}$. It is checked, how distant the next wall is and if the agent is close to any wall, we build the scalar product $\langle\vec{v}_{n},-\nabla \hat{d}\rangle$ to evaluate, if there is a orientation towards the closest wall. In this case, the agent is slowed down.
+In the next step, we process $\vec{u}_{n}$. It is checked, how distant the next wall is and if the agent is closer than $\alpha_s$ to any wall, we build the scalar product $\langle\vec{u}_{n},-\nabla \hat{d}\rangle$ to evaluate, if there is a component towards the closest wall. In this case, the agent is slowed down.
 %
 \begin{figure}[h!]
 \begin{center}
@@ -97,7 +96,7 @@ In the next step, we process $\vec{v}_{n}$. It is checked, how distant the next 
 \label{slowdownfig}
 \end{center}
 \end{figure}
-If the agent is already very close to the wall, the velocity-component towards the wall gets neglected. Thus, the agent gets directed to move parallel to the wall.
+If the agent is already very close to the wall, $(d \leq \alpha_r)$, the velocity-component towards the wall gets neglected. Thus, the agent gets directed to move parallel to the wall.
 %
 \begin{figure}[h!]
 \begin{center}
