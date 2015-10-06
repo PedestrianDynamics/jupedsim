@@ -1,0 +1,23 @@
+\section{Conclusion and Outlook}
+
+In this thesis, an altered usage of an enhanced floor-field was shown, integrated in a suitable new TEST-model. The \emph{wall-avoid-distance} parameter was analyzed and shown to be able to show good convergence to empirical data. During the course of the work process, it became clear how versatile and powerful floor-fields can be. Not only in the current state, they can provide valuable assistance to pedestrian models, but they can be further developed to fit into much more contexts.
+
+\subsection{Floor-field}
+
+\subsubsection{Multiple Goals }
+
+The floor-field is a useful tool in routing of pedestrians through any geometry. To unfold its full power, one can imagine to calculate a floor-field for each of many atomic goals\footnote{An atomic goal would be a single exit door, whereas a destination could consists of a set of doors/exits.}. The combination of many floor-fields, each corresponding to an atomic goal, can easily be managed by selecting the direction vector of the one floor-field, that provides the minimal time-cost of an active set of floor-fields evaluated at the grid-point of the current agent's position. Dynamic in-world events in a simulation could alter the set of active floor-fields. This way, models can implement navigation in a dynamically changing world. It can be also used, to be a tool in a simulation suit, which has agents change their destination during runtime. This would be realized by simply changing the active set to the floor-fields corresponding to the new destination.
+
+<< Verteilerebene(?) oder etwas kleinere Geometrie mit mehreren Ausgaengen: Nebeneinander 2-4 Vectorfelder nebeneinander >>
+
+\subsubsection{Multiple Floors}
+
+In the current state, the floor-field provides time-cost on a discrete grid, a rectangular grid with equidistant spacing in each dimension. The grid-points are stored in a one-dimensional array by the row-major order. In a arrangement like this, it is easy to formulate 4-neighboring\footnote{Grid-points north, south, east and west to the current are called 4-neighbors.} relations.  These values are easily accessed, if you are provided the stride value, namely how much grid-points make up the length of both dimensions in a 2-D world. The Fast-Marching algorithm needs the time-cost values of the 4-neighborhood.
+This will change, if you need to simulate in a building with multiple floors, which are connected via stairs. We need to introduce a third dimension, which can be treated equally handy inside each floor. Any position, projected onto the x-y-plane, may not be unique anymore. On the other hand, it would be a waste of memory, if a third dimension would be introduced\footnote{As we are interested in points representing the floor of a room, all the volume (air) above would be not used.} introduced, to represent the hull-cube circumscribing a building.
+One is to find a solution, which describes the geometry of the rooms in a memory-efficient way and yet be able to comfortably access the 4-neighbors' time-cost value.
+
+%\subsection{Usage in JuPedSim}
+
+%\subsection{Floor-fields in Triangulated Domains}
+
+%\subsection{Parallelization}

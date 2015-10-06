@@ -65,6 +65,12 @@ private:
 
      double _slowDownDistance;
 
+     long int* over;   //analyze code only - can be removed
+     long int* under;  //analyze code only - can be removed
+     long int* redircnt;  //analyze code only - can be removed
+     long int* slowcnt;  //analyze code only - can be removed
+     long int* overlapcnt;  //analyze code only - can be removed
+
      /**
       * Driving force \f$ F_i =\frac{\mathbf{v_0}-\mathbf{v_i}}{\tau}\f$
       * This is a duplicate of @see GCFMModel::ForceDriv

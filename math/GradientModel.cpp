@@ -69,6 +69,18 @@ GradientModel::GradientModel(DirectionStrategy* dir, double nuped, double aped, 
      _useWallAvoidance = useWallAvoidance;
      // anti clipping
      _slowDownDistance = slowDownDistance;
+
+     over = new long int;
+     under = new long int;
+     redircnt = new long int;
+     slowcnt = new long int;
+     overlapcnt = new long int;
+
+     *over = 0;   //analyze code only - can be removed
+     *under = 0;  //analyze code only - can be removed
+     *redircnt = 0;  //analyze code only - can be removed
+     *slowcnt = 0;  //analyze code only - can be removed
+     *overlapcnt = 0;
 }
 
 
@@ -204,9 +216,14 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
            }
 
            // update
+
            for (int p = start; p <= end; ++p) {
                 Pedestrian* ped = allPeds[p];
-
+                if (result_acc[p-start].Norm() > 1) {
+                    ++(*over);
+                } else {
+                    ++(*under);
+                }
                 Point movDirection = (result_acc[p-start].Norm() > 1) ? result_acc[p - start].Normalized() : result_acc[p-start];
                 Point toTarget = (_direction->GetTarget(nullptr, ped)).Normalized();
                 if (toTarget.NormSquare() == 0.) {                // @todo:ar.graf: this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
@@ -237,8 +254,10 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     dotProduct = movDirection.ScalarProduct(dir2Wall);
                     if ((dotProduct > 0) && (distance2Wall < .5 * _slowDownDistance)) { //acute angle && really close to wall
                         movDirection = movDirection - (dir2Wall*dotProduct); //remove walldirection from movDirection
+                        ++(*redircnt);
                     }
-                    antiClippingFactor = ( 1 - .5*(dotProduct + fabs(dotProduct)) );
+                    antiClippingFactor = 1;//( 1 - .5*(dotProduct + fabs(dotProduct)) );
+                    ++(*slowcnt);
                 }
 
                 movDirection = movDirection * (antiClippingFactor * ped->GetV0Norm() * deltaT);
@@ -249,7 +268,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetV(movDirection/deltaT);
                 ped->SetPhiPed();
            }
+
       }//end parallel
+      std::cerr << "Over : Under  " << *over << " : " << *under << "    (" << *redircnt << ")" << "    (" << *slowcnt << ")" << "    (" << *overlapcnt << ")" << std::endl;
 }
 
 Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
@@ -292,11 +313,11 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      Point F_rep(0.0, 0.0);
      // x- and y-coordinate of the distance between p1 and p2
      Point distp12 = ped2->GetPos() - ped1->GetPos();
-     //const Point& vp1 = ped1->GetV(); // v Ped1
-     //const Point& vp2 = ped2->GetV(); // v Ped2
+     const Point& vp1 = ped1->GetV(); // v Ped1
+     const Point& vp2 = ped2->GetV(); // v Ped2
      Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
      //double K_ij;
-     double B_ij, f;
+     double B_ij, f, tmp;
      const JEllipse& E1 = ped1->GetEllipse();
      const JEllipse& E2 = ped2->GetEllipse();
      Point AP1inE1 = E1.GetCenter();
@@ -311,6 +332,7 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      //fprintf(stderr, "%f %f\n",  r1, r2);
      const double EPS = 0.001;
      double Distance = distp12.Norm() + EPS; // Molified See Koester2013
+
 
      // if(ped1->GetID() ==logped)
      // {
@@ -330,9 +352,22 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      double tmpv = ped1->GetV().ScalarProduct(ep12); // < v^0_i , e_ij >
      double ped2IsBehindv = exp(-exp(-5*tmpv)); //step function: continuous version
      if (ped2IsBehindv < J_EPS) {
+     //if (tmpv < 0) {
           return F_rep; // ignore ped2
      }
-//------------------------------------------------------------------------------
+
+//--------------------------check if overlapping
+     double* unused = new double;
+     double tmpover = E1.EffectiveDistanceToEllipse(E2, unused);
+     if (tmpover < 0) {
+         return ep12 * (-1);
+         ++(*overlapcnt);
+     }
+//--------------------------check speed diff
+     tmp = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
+     if (tmp < 0) {
+          return F_rep; // ignore ped2
+     }
 
      // calculate B_ij
      B_ij = 1.0 - Distance/(r1+r2); //TODO: Simplification to avoid accelerating predecessors

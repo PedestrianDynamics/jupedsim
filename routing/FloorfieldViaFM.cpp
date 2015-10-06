@@ -81,7 +81,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     calculateFloorfield(useDistancefield); //use distance2Wall
 
-    //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+    testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
     writeFF(filename);
 }
 
@@ -1063,5 +1063,11 @@ void FloorfieldViaFM::writeFF(const std::string& filename) {
         file << dirToWall[i].GetX()/GEO_UP_SCALE << " " << dirToWall[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
     }
 
+    if (cost != nullptr) {
+        file << "SCALARS Cost float 1" << std::endl;
+        for (long int i = 0; i < grid->GetnPoints(); ++i) {
+            file << cost[i]/GEO_UP_SCALE << std::endl;
+        }
+    }
     file.close();
 }

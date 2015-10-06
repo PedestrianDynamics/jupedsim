@@ -1,0 +1,210 @@
+\section{Modelling}
+
+In the latter, a new model is described, 
+\begin{itemize}
+\item aiming for
+the avoidance of faulty interaction of pedestrians and walls 
+\item while
+maintaining the positive characteristics of row-formation, stop-and-go
+waves and such - like seen in pedestrian crowd behavior.
+\end{itemize}
+In many of second order models, agents breach wall-surfaces and get stuck inside of walls.
+This undesired phenomenon highlights the challenge in calibrating forces and parameters of existing models, so that agents show valid natural behavior while not getting overlapping in extreme situations. Especially in situations of high crowd density, e.g. when facing bottlenecks, overlapping can occur. The model or the data-post-processing needs to find a special treatment of such artifacts in the data. It leads to inaccuracies in measurements, e.g. in counting and flow-calculation.
+\begin{figure}[h!]
+\includegraphics[width=1.0\linewidth]{pics/agents_caught01}
+\caption{Agents got pushed into obstacles by the large amount of other agents. (Simulated with SFM, wall-forces reduced)}
+\end{figure}
+\begin{figure}[h!]
+\includegraphics[width=1.0\linewidth]{pics/agents_caught02}
+\caption{Agents remain inside obstacle. (Simulated with SFM, wall-forces reduced)}
+\end{figure}
+
+There are three mechanics used in the model to avoid ``overlapping/clipping'' in the vicinity of walls:
+\begin{enumerate}
+\item The routing of pedestrians makes use of the eikonal-equation, computed with an inhomogeneous slowness-field, $F(x)$, whose resulting floor-field\footnote{see chapter \textbf{Eikonal Equation, Safe Navigation using the Floor-field}} favors keeping a distance to obstacles, walls and corners.
+\item In a \emph{slowdown-band} the angle between an agent's moving-direction and the wall-surface-perpendicular affects the moving speed if and only if the agent's moving vector includes a component geared towards the wall. This is achieved by using the scalar product of the moving direction and the wall-surface-perpendicular.
+\item If an agent's distance to a wall drops below a fixed constant $\alpha_r$, it is redirected to move parallel to the wall if and only if the agent's moving vector includes a component geared towards the wall.
+\end{enumerate}
+
+In order to keep the model simple, repulsive wall forces as seen in Social Force Models are omitted. An analogy to repulsive pedestrian forces though is used to keep agents from colliding with each other. The model differs from SFMs, as in SFMs, other agents repulsive forces are transformed into acceleration vectors and from there into a velocity component, which is part of the agent's velocity. In this model though, repulsive influences are not treated as Newton mechanics teaches us, but are only used to factor the repulsive pedestrian effect into a direction component. The speed on the other hand is effected by the other agents only to a certain degree. To show this in the formulation of the model, we used $\vec{i}$ to describe repulsive influences in order to avoid mistaking these components for forces.
+%
+\subsection*{Symbols:}
+\begin{itemize}
+\item $\vec{i}$ denotes the influence vector among agents. The correlation of distance and influence is the Gompertz-function $f(x)=a \cdot e^{-b\cdot e^{-c \cdot x}}$. The function is smooth and adjustable in scale, range of influence and steepness by the parameter $a$,$b$,$c$.
+\item $\vec{u}$ denotes the \emph{unit-speed} vector. At any time, we store the calculated orientation in this vector. It's length is always $\leq 1\,unit$. We call it unit-speed vector, as in most cases, it is the velocity vector with the speed of $1\,m/s$. It is used to multiply it with the agent's \emph{desired speed} value to get the velocity-vector of the current agent at the current time-step.
+\item $\vec{x}$ denotes the position vector of an agent in $\Omega$.
+\end{itemize}
+%
+\subsection*{Constants:}
+\begin{itemize}
+\item $\alpha \quad$ denotes the weight of the \emph{unit-speed} vector of the previous time-step. $(1-\alpha)$ is the weight of the current \emph{unit-speed} vector.
+\item $\alpha_s \quad$ is the width of the \emph{slow-down} band. Any agent, that is closer to a wall than $\alpha_s$ will be slowed.
+\item $\alpha_r \quad$ is the width of the \emph{redirection} band. Any agent within will be redirected to move parallel to the wall.
+\end{itemize}
+%
+\subsection*{Functions:}
+%
+Let $\Omega$ be the discret set of gridpoints in the bounded domain, which holds the geometry of the simulation, a subset of $\mathbb{R}^{2}$. The following functions will be used in the model-formulation and shall be introduced:
+\[  d  : \Omega \ni \vec{x}  \longrightarrow d(\vec{x}) \in \mathbb{R}, \qquad \Omega \subseteq \mathbb{R}^{2} \]
+assigns to each grid-point in $\Omega$ the distance to the closest wall. It will be used to choose, in which mode the movement-vector candidate will be altered. (Modes are: regular, slowdown and redirect)
+\[  P  : \mathbb{R}^2 \times \Omega  \ni (\vec{u}, \vec{x})  \longrightarrow  P(\vec{u}, \vec{x}) \in \mathbb{R}^2 \]
+describes the orthogonal projection of a given orientation $\vec{u}$ onto the closest wall of $\vec{x}$. It yields an orientation parallel to that wall.
+\[ u_{ff} : \Omega \ni \vec{x} \longrightarrow u_{ff}(\vec{x}) = \vec{u}_{ff} \in \mathbb{R}^{2}|_{\left\lVert \cdot \right\rVert_2 = 1} \]
+is the (normalized) negative gradient of the floor-field at position $\vec{x}$. This vector describes the direction of the negative gradient only and always has unit length. It is used to contribute to an agent's moving vector.
+\[ g : \mathbb{R}^2 \ni \vec{u} \longrightarrow g(\vec{u}) \in \mathbb{R}^{2}|_{\left\lVert \cdot \right\rVert_2 \leq 1}  \]
+limits the length of any inputvector $\vec{u}$ to unit length. If $\left\lVert \vec{u} \right\rVert_2 \leq 1$, then $g$ is the identity of $\vec{u}$.
+\[ \sum_{j=1}^{n}\vec{i}_{repP,j} : \overset{n}{\underset{j=1}{\otimes}} \mathbb{R}^2_j \ni (\vec{i}_1, ... \vec{i}_n) \longrightarrow  \sum_{j=1}^{n}\vec{i}_{repP,j} \in \mathbb{R}^{2} \]
+is adding the distance-dependand\footnote{The correlation of distance and influence is the Gompertz-function $f(x)=a \cdot e^{-b\cdot e^{-c \cdot x}}$. The function is smooth and adjustable in scale, range of influence and steepness by the parameter $a$,$b$,$c$.} repelling influence of neighboring agents within a close vicinity. This sum is analog to the SFM model, yet the resulting influence is directly taken and not converted to an acceleration nor to a velocity. The character $i$ is a hint to being an influence vector, \emph{not} to being a velocity.
+%
+\begin{center}
+\textbf{TEST Model:}\\
+\end{center}
+\begin{align*}
+&\vec{v}_{n}&&= \alpha\cdot\vec{v}_{n-1, res} + (1 - \alpha)\cdot g\left(g(\vec{v}_{ff})+g(\sum_{i=1}^n\vec{v}_{repP,i})\right)\\
+&\vec{v}_{n, res}&&= \left\{
+	\begin{aligned}
+	    %&\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & P(\vec{v}_{n}) \quad &: & d(\vec{x})&& < 0.1\\
+        &\left(1-\langle\vec{v}_{n},-\nabla d\rangle\right)  & P(\vec{v}_{n}) \quad & \textbf{if} \quad  && d(\vec{x}) < && \alpha_{r}; \quad \langle\vec{v}_{n},-\nabla d\rangle \ge 0 \\
+		%&\left(1-\frac{1}{2}\left[(\hat{v}\cdot(-\nabla \hat{d}))+\vert(\hat{v}\cdot(-\nabla \hat{d}))\vert\right]\right)  & \vec{v}_{n} \quad  &: \quad 0.1 <  & d(\vec{x})&& < 0.2\\
+        &\left(1-\langle\vec{v}_{n},-\nabla d\rangle\right)  & \vec{v}_{n} \quad  & \textbf{if} \quad \alpha_{r} <   && d(\vec{x}) < && \alpha_{s} ;\quad \langle\vec{v}_{n},-\nabla d\rangle \ge 0\\
+		& &\vec{v}_{n} \quad & \textbf{else} &&   &&%& d(\vec{x})&& > 0.2
+	\end{aligned}
+	\right.\\
+&\Delta\vec{x}_{n}&&= \Delta t\cdot\vec{v}_{n, res}\\
+\end{align*}
+\newpage
+%
+\begin{figure}[h!]
+%\begin{center}
+\input{./modelchart.tex}
+%\includepdf[pages={1}]{./modelchart.pdf}
+\caption{Calculation of pedestrian movement during one timestep}
+%\end{center}
+\end{figure}
+\newpage
+
+What might seem curious at first, is the fact, that both, the navigation field $\vec{v}_{ff}$ and the \emph{sum} of pedestrian forces $\sum\vec{v}_{repP,i} $, are restricted to the length of 1 unit by $g$. Then their sum in turn is restricted again. This obviously breaks the principle of superposition of forces. We cannot talk about a force-based model here and loose the analogy to Newton's second law the first time applying $g$ on the sum of forces $\sum\vec{v}_{repP,i}$. The resulting vector indicates a new orientation and a slow-down mechanic, as the vector can be of length $ \le 1 $ unit.
+
+The sum of the navigation field (static) and the accumulated pedestrian forces (dynamic) are restricted by $g$ and then weighted by 20\%, the speed vector of the last time-step gets weighted by 80\%. This is done to reduce flickering\footnote{We want to shortly address a second alternative approach. If one is willing to accept flickering agents with fast changing orientations, one could ommit the speed-vector of the time-step $n-1$ and postprocess the trajectories. As we only get positions at discrete time-steps, one could easily create a smooth trajectory by using \emph{B-splines}.} of agents and must be kept in mind, as this approach could result in a tendency to create oscillation in narrow corridors. The weighted sum limits the change of orientation and thus an agent could bounce between two opposing walls.  If oscillation should occur in any case, the weight should be shifted away from the last time-step. This way, agents get enabled to turn more aggressive and closely follow the navigation-floor-field.
+
+In the next step, we process $\vec{v}_{n}$. It is checked, how distant the next wall is and if the agent is close to any wall, we build the scalar product $\langle\vec{v}_{n},-\nabla \hat{d}\rangle$ to evaluate, if there is a orientation towards the closest wall. In this case, the agent is slowed down.
+%
+\begin{figure}[h!]
+\begin{center}
+\input{./slowdown.pdf_t}
+%\includegraphics[width=1.\linewidth]{pics/slowdown}
+\caption{Slowdown: Reduction of the unit-speed-vector to avoid clipping}
+\label{slowdownfig}
+\end{center}
+\end{figure}
+If the agent is already very close to the wall, the velocity-component towards the wall gets neglected. Thus, the agent gets directed to move parallel to the wall.
+%
+\begin{figure}[h!]
+\begin{center}
+\input{./redirect.pdf_t}
+%\includegraphics[width=1.\linewidth]{pics/redirect}
+\caption{Redirection of the unit-speed-vector to avoid clipping}
+\label{redirectfig}
+\end{center}
+\end{figure}
+
+\subsection{Eikonal Equation}\label{eikonalequation}
+
+The ``Eikonal equation'' in a domain \textgreek{W}, subset of $\mathbb{R}^{n}$,
+\begin{align*}
+\vert\nabla u(\vec{x})\vert\quad= & \quad F(\vec{x}),\quad \vec{x}\in\Omega,\\
+\mathrm{s.t.}\qquad u|_{\partial\Omega}\quad= & \quad 0,\\
+\end{align*}
+yields the ``time-cost'' $u(\vec{x})$ in a spacial domain, provided a target region within the domain as input as well as a slowness-field $F(\vec{x})$. A valid interpretation of ``time-cost''-iso-lines is to picture a wavefront at a given time $ t $, originating in the target region ($ t=0 $) and propagating throughout the spacial domain \textgreek{W} with the given speed $v=\frac{1}{F(\vec{x})}$ while flowing around any obstacles (see figure \ref{fig:BottleneckObstaclePure}).
+\begin{figure}[h!]
+\includegraphics[width=1.\linewidth]{pics/BottleneckUPure}
+\caption{Isolines of ``time-cost''.}
+\label{fig:BottleneckObstaclePure}
+\end{figure}
+
+Given a discretization of the domain \textgreek{W} and the target region ${\partial\Omega}$, the solution to the Eikonal equation can be approached by using the Fast-Marching Algorithm \citep{sethian}. The algorithm provides a first order approximation, yet sufficient for our cause (pedestrian navigation). Computing-time of Fast-Marching is independent\footnote{Fast-Marching completion-time depends mainly on the length of the wavefronts. If the geometry leads to small lengths, as in geometries with large amounts of narrow corridors, completion time decreases.} of the complexity of obstacles and walls. 
+
+The negative gradient $-\nabla u$  of the time-cost-field will be a useful tool in the routing of pedestrians/agents to the target region used as part of the algorithm's input. The Fast-Marching algorithm is described in the appendix in detail for further reference.
+
+We will refer to the result of the Fast-Marching Algorithm as ``floor-field''. To successfully use these floor-fields, we discuss and analyze a modification, which gives us a smooth floor-field, as proposed in \citep{Madrid}.
+
+\subsection{Safe Navigation using the Floor-Field}
+
+When using the plain approximation to the Eikonal Solution, agents anticipate a non-smooth pathway that leads very close to 
+walls (see white trajectories in figure \ref{fig:BottleneckObstaclePure}). In most of the models for pedestrian dynamics, pedestrians, which are very close to walls or obstacles, could overlap with them in rare occasions. Agents might leave the valid domain and find themselves captured inside walls or obstacles. In the model described in this paper, we aim to fix that
+problem. In reality, we can observe, pedestrians avoiding walls and obstacles through keeping a certain distance. 
+
+Therefore, it is desirable to define a modified quality of an optimal route, which accounts for a minimal arrival time and a safe pathway. Safe in respect to avoiding the vicinity of walls and obstacles, whenever possible. If a space is very crowded (high density), then agents should make use of the given space even if that means getting close to walls.
+
+This crowd behavior, described above, is commonly achieved with adding a repulsive characteristic to walls.
+
+In the ``social force model'', the walls will have a repulsive force pointing perpendicular to the wall-surface, aiming to keep agents away from the wall. These forces need to be calibrated to work as intended.
+
+Smaller forces might not be strong enough to avoid overlapping with the wall if an agent is in between a wall on one side and many other agents on the other side. The agents on the other side affect that one agent, forcing him towards the wall, while the wall itself acts on the agent in the opposite direction. The resulting force could still point in the direction of the wall, leading to overlapping.
+
+If the repulsive wall forces are too strong, pedestrians will not use the space close to a wall, even if the domain is very crowded.
+
+It is a difficult task, to find a set of parameters, that work as desired in a broad set of situations and geometries.
+
+Instead of modeling the repulsive character of walls (seen as the avoidance of walls by pedestrians) via repulsive wall forces (social force model), we modify the floor-field in a way, that pathways avoid the vicinity of walls to a certain, adjustable degree, thus integrating this repulsive character into the navigation/routing.
+
+How can an agent ``avoid'' the close vicinity of any wall or obstacle?
+
+\subsection{Distances-Field}
+\begin{figure}[h!]
+\includegraphics[width=1.\linewidth]{pics/DistanceFieldNew}
+\caption{Distances field of the bottleneck geometry}
+\label{fig:DistanceField2}
+\end{figure}
+Having above question in mind, we first need to introduce and understand the \textit{Distances-field}, a function $d$ living on the spacial domain $\Omega$, that holds information on how distant the closest wall is. This function will prove useful when altering the one floor-field, we will use for routing. To avoid confusion, let it be emphasized, that this distances-field will be used in two different parts of the model. It is used to:
+\begin{enumerate}
+\item create a Direction-to-Wall-Field (vector-field) and
+\item to create a slowness-field (scalar-field) to initialize the Fast-Marching algorithm of the Navigation-Field.
+\end{enumerate}
+
+\begin{figure}[h!]
+\begin{center}
+%\includegraphics[width=1.\linewidth]{pics/FM_flow.pdf}
+\input{./chart.tex}
+\end{center}
+\caption{Usage of the Distances-Field in the vector-fields}
+\label{sequenceToVFs}
+\end{figure}
+%\footnote{change "target" to "origin" in figure? easier to understand?}
+\paragraph{}
+The Direction-to-Wall-Field is a normalized vector-field. Each vector has unit length. The orientation is gained by the negative gradient to the Distances-Field. This way, every given vector at $\vec{x}$ directs to the closest wall of that given grid-point $\vec{x}$.
+\paragraph{}
+The function value $d(\vec{x})$ will be used to create a slowness-field on the discrete grid. This slowness-field holds the value, which determines, how slow the 2-D wave will propagate over the grid-point in the final \emph{navigation}-field. Points, that are relatively close to a wall, will have a corresponding low value $d(\vec{x})$. Therefore, the 2-D wavefront will slow-down over these points. Routes/Pathways passing these points will take more time and be less optimal in a sense, that combines distances and wall-avoidance. We will refer to the value $u(\vec{x})$ as the \emph{time-cost-value} (\emph{cost} in short).
+
+\begin{figure}[h!]
+\subfigure{\includegraphics[width=1.\linewidth]{pics/BottleneckUPure2}}
+\subfigure{\includegraphics[width=1.\linewidth]{pics/BottleneckUEnhanced2}}
+\caption{Isolines of a floor-field (above) compared to isolines of the enhanced floor-field (below). Sample trajectories in white.}
+\label{fig:transformFF}
+\end{figure}
+
+\subsubsection{Cost of a ``full'' preprocessing step }
+
+Close to all time of the needed computation spent on the enhanced floorfield, the prohibition of overlapping, is spent in a preprocessing step before the actual simulation starts and therefore does not effect the real-time factor. In this TEST-model, the preprocessing is increased compared to a \emph{GNM}. Where he uses the Eikonal solution once (mollifiers not considered), the TEST-model uses two runs through the Fast-Marching algorithm. In this chapter we want to elaborate on the doubled effort we spend.
+
+The granularity of the rectangular grid governs the cost of the FMA\footnote{Fast-Marching}. For pedestrian navigation, we chose a point-to-point distance of neighboring grid-points of $0.0625\,m$. A geometry spanning $100\,m \times 100\,m$ can be processed in (enter profiling results). Most of the computing time is spend on the output.
+
+The Fast-Marching algorithm is that fast, that it basically can be neglected when rating the performance. A prequel Fast-Marching run does not change that verdict. The usage of the Direction-to-Wall Field in the model shows no more overlapping and seems easily worth the cost. During runtime, using the floor-field or the Distance-to-Wall field means reading a vector and performing up to 5 scalar products\footnote{to be verified}.
+
+To show the performance of the TEST model, we started a simulation in a complex geometry with more than 3000 agents. Compared to other models available in \emph{JuPedSim} \citep{jupedsim}, we could not see any significant performance difference. (ADD PROFILING TIMES, NOT YET EXISTING)
+The trajectories improved and look much more natural. This was achieved without the need to manually adding decomposing help-lines or intermediate navigation goals.
+
+\begin{figure}[h!]
+\subfigure{\includegraphics[width = .49\linewidth]{pics/compUgly}}
+\subfigure{\includegraphics[width = .49\linewidth]{pics/compNice}}
+\caption{Comparison between trajectories: Routing with helplines (left) to routing with navigation field (right).}
+\end{figure}
+
+\begin{figure}[h!]
+\subfigure{\includegraphics[width=.49\linewidth]{pics/Ver1}}
+\subfigure{\includegraphics[width=.49\linewidth]{pics/Ver2}}
+\subfigure{\includegraphics[width=.49\linewidth]{pics/Ver3}}
+\subfigure{\includegraphics[width=.49\linewidth]{pics/Ver4}}
+\caption{Simulation of a complex geometry with multiple exits and ~ 3000 agents}
+\label{fig:verteilerebene}
+\end{figure}
