@@ -1,91 +1,84 @@
 %\documentclass{article}
-%
 %\usepackage[latin1]{inputenc}
+%\usepackage{adjustbox}
 %\usepackage{tikz}
-%\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{shapes,arrows}
+\usetikzlibrary{positioning}
 %\begin{document}
+\begin{adjustbox}{width=\textwidth, height=\textheight, keepaspectratio}
 %\pagestyle{empty}
-
-
 % Define block styles
 \tikzstyle{decision} = [diamond, draw, fill=blue!20, 
-    text width=4.5em, node distance=3cm, inner sep=0pt]
+    text width=4.5em, align=center, inner sep=0pt]
 \tikzstyle{block} = [rectangle, draw, fill=blue!20, 
-    text width=12em, align=center, rounded corners, minimum height=4em]
-\tikzstyle{cloud} = [draw, ellipse,fill=blue!20, node distance=3cm,
-    minimum height=2em]
+    text width=7em, align=center, rounded corners, minimum height=4em]
+\tikzstyle{cloud} = [draw, ellipse,fill=blue!20, align=center,
+    minimum height=3em]
 %----------------------------------------------------------------------------------
-\tikzstyle{decision1} = [diamond, draw, fill=green!20, 
-    text width=4.5em, node distance=3cm, inner sep=0pt]
-\tikzstyle{block1} = [rectangle, draw, fill=green!20, 
-    text width=12em, align=center, rounded corners, minimum height=4em]
-\tikzstyle{cloud1} = [draw, ellipse,fill=green!20, node distance=3cm,
-    minimum height=2em]
+%\tikzstyle{decision1} = [diamond, draw, fill=green!20, 
+%    text width=4.5em, node distance=3cm, inner sep=0pt]
+%\tikzstyle{block1} = [rectangle, draw, fill=green!20, 
+%    text width=5em, align=center, rounded corners, minimum height=4em]
+%\tikzstyle{cloud1} = [draw, ellipse,fill=green!20, node distance=3cm,
+%    minimum height=2em]
 %----------------------------------------------------------------------------------
-\tikzstyle{decision2} = [diamond, draw, fill=red!20, 
-    text width=4.5em, node distance=3cm, inner sep=0pt]
-\tikzstyle{block2} = [rectangle, draw, fill=red!20, 
-    text width=5em, rounded corners, minimum height=4em]
-\tikzstyle{cloud2} = [draw, ellipse,fill=red!20, node distance=3cm,
-    minimum height=2em]
-
+%\tikzstyle{decision2} = [diamond, draw, fill=red!20, 
+%    text width=4.5em, node distance=3cm, inner sep=0pt]
+%\tikzstyle{block2} = [rectangle, draw, fill=red!20, 
+%    text width=5em, rounded corners, minimum height=4em]
+%\tikzstyle{cloud2} = [draw, ellipse,fill=red!20, node distance=3cm,
+%    minimum height=2em]
 %---------------------------------------------------------------------------------
 \tikzstyle{line} = [draw, -latex, ultra thick]
-
-    
+%
 \begin{tikzpicture}[auto]
     % Place nodes left block
-    \node [block] (compi) {get Neighbors of ped $i$};
-    \node [block, below = 0.8cm of compi] (getj) {get Neighbor j};
-    \node [decision, below = 0.8cm of getj] (valinf) {is influencing ped $i$?};
+    \node [cloud] (start) {set timestamp $t$, $i=0$};
+    \node [block, below = 0.8cm of start] (compi) {get Neighbors of ped $i$, $j=0$, sum$=0$};
+    \node [block, right = 1.5cm of compi] (getj) {get Neighbor j};
+    \node [decision, right = 1.5cm of getj] (valinf) {is influencing ped $i$?};
     \node [block, below = 0.8cm of valinf] (addinf) {add influence to sum};
-    \node [decision, below = 0.8cm of addinf] (checkloop) {more neighbors to ped $i$?};
-    \node [block, below = 0.8cm of checkloop] (calcrep) {calculate $g(sum)$};
+    \node [decision, left = 1.5cm of addinf] (checkloop) {more neighbors to ped $i$?};
+    \node [block, below = 1.5cm of compi] (calcrep) {calculate $g(sum)$};
     \node [block, below = 0.8cm of calcrep] (calcpuremov) {calculate $g(g(sum) + g(\nabla c))$};
-    \node [block, below = 0.8cm of calcpuremov] (calcjitter) {calc $\alpha$ oldmov $+ (1-\alpha)$ newmov};
-    \node [decision, below = 0.8cm of calcjitter] (isslowed) {is in slowdown band $d \leq \alpha_{s}$?};
-    \node [decision, below = 0.8cm of isslowed] (toWall) {geared towards wall $\langle\vec{v}_{n},-\nabla d\rangle \ge 0$?};
-    \node [decision, below = 0.8cm of toWall] (isredir) {is in redirection band $d \leq \alpha_{h}$?};
-    \node [block, below = 0.8cm of isredir] (redir) {redirect to move parallel to wall};
-    \node [block, below = 0.8cm of redir] (slow) {slowdown with $(1-\langle\vec{v}_{n},-\nabla d\rangle)$};
-    \node [decision, below = 0.8cm of slow] (checkoutloop) {next pedestrian?}
-    % Draw edges
+    \node [block, below = 0.8cm of calcpuremov] (calcjitter) {calc $\alpha  oldmov + (1-\alpha) newmov$};
+    \node [decision, below = 0.8cm of calcjitter] (isslowed) {is in slowdown band}; % $d \leq \alpha_{s}$?};
+    \node [decision, right = 1.5cm of isslowed] (toWall) {geared towards wall}; % $\langle\vec{v}_{n},-\nabla d\rangle \ge 0$?};
+    \node [decision, right = 1.5cm of toWall] (isredir) {is in redirection band}; % $d \leq \alpha_{r}$?};
+    \node [block, below = 1cm of isredir] (redir) {redirect to move parallel to wall};
+    \node [block, left = 1.5cm of redir] (slow) {slowdown with $(1-\langle\vec{v}_{n},-\nabla d\rangle)$};
+    \node [block, below = 1cm of isslowed] (mov) {move agent $i$};
+    \node [decision, below = 0.8cm of mov] (checkoutloop) {next pedestrian?};
+    %\node [block, right = 1.5cm of checkoutloop] (t+1) {$t=t+1$};
+%    % Draw edges
+    \path [line] (start) -- (compi);
     \path [line] (compi) -- (getj);
     \path [line] (getj) -- (valinf);
-    \path [line] (valinf) -- (addinf);
+    \path [line] (valinf) -- node [near start] {yes} (addinf);
+    \path [line] (valinf) -- node [near start] {no} (checkloop); %+(-3,0) + (0,-4)-| (checkloop.south);
     \path [line] (addinf) -- (checkloop);
-    \path [line] (checkloop) -- node [near start] {yes} (getj);
-    \path [line] (checkoutloop) -- node [near start] {yes} (compi);
-    %\path [line] (done)  -| node [anchor=south, near start] {no} +(-2.2,0) |-  (Msim.west);
-    % ------- Middle block
-    %\node [block1, right = 2cm of nVF] (wVF) {create vector field\\ $(-1) \nabla d$};
-    %\node [block1, below of=m2j] (req) {send agent request};
-    %\node [decision1, below of=req] (isplace) {is space?};
-    %\node [block1, below of=isplace, node distance=3cm] (send) {send agent};
-    %\node [decision1, below of=send] (more) {more agents?};
-    %\node [cloud1, below of=more, node distance=3cm] (end2) {end};
-    % Draw edges
-    %\path [line] (req) -- (isplace);
-    %\path [line] (isplace) -| node [near start] {no} +(2,-1) |- (end2.east);
-    %\path [line] (isplace) -- node [near start] {yes}  (send);
-    %\path [line] (send) -- (more);
-    %\path [line] (more)  -- node [near start] {no}  (end2);
-    %\path [line] (more)  -| node [anchor=south, near start] {yes} +(-2.2,0) |-  (req.west);
-    % ------- Middle right
-    %\node [ right of=m2j, node distance=5cm] (j2m) {JuPedSim $\Leftrightarrow$ MATsim};
-    %\node [block2, below of=j2m] (recvReq) {receive agent request};
-    %\node [decision2, below of=recvReq] (isplace2) {is space?};
-    %\node [block2, below of=isplace2, node distance=3cm] (recv) {receive agent};
-    %\node [block2, below of=recv] (sim) {queue for simulation};
-    %\node [cloud2, below of=sim, node distance=4cm] (end3) {end};
-    % Draw edges
-    %\path [line] (recvReq) -- (isplace2);
-    %\path [line] (isplace2) -| node [near start] {no} +(2,-1) |- (end3.east);
-    %\path [line] (isplace2) -- node [near start] {yes}  (recv);
-    %\path [line] (recv) -- (sim);
-    %\path [line] (sim) -- (end3); 
-    %\path [line] (dfield) -| node [near start] {}  (wVF);
+    \path [line] (checkloop) -- node [near start] {yes}  node [near end]{$j=j+1$}(getj);
+    \path [line] (checkloop) -- node [near start] {no} (calcrep); %+(-3,0) + (0,-4)-| (checkloop.south);
+    
+    \path [line] (calcrep) -- (calcpuremov);
+	\path [line] (calcpuremov) -- (calcjitter);
+	\path [line] (calcjitter) -- (isslowed);
+	
+	\path [line] (isslowed) -- node [near start] {yes} (toWall);
+    \path [line] (isslowed) -- node [near start] {no} (mov);
+
+	\path [line] (toWall) -- node [near start] {yes} (isredir);
+    \path [line] (toWall) -- node [near start] {no} (mov);
+
+	\path [line] (isredir) -- node [near start] {yes} (redir);
+    \path [line] (isredir) -- node [near start] {no} (slow);
+    
+    \path [line] (redir) -- (slow);
+    \path [line] (slow) -- (mov);
+    \path [line] (mov) -- (checkoutloop);
+    
+    \path [line] (checkoutloop.west) -| node [near start] {yes} +(-2,0) |- node [near end]{$i=i+1$} (compi.west);
+    \path [line] (checkoutloop.south) -| node [anchor=south, near start] {no} +(-4,0) |- node [near end]{$t=t+\Delta t$}(start.west);
 \end{tikzpicture}
-
-
+\end{adjustbox}
 %\end{document}

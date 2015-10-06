@@ -8,25 +8,25 @@
 
 
 % Define block styles
-\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+\tikzstyle{decision0} = [diamond, draw, fill=blue!20, 
     text width=4.5em, node distance=3cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+\tikzstyle{block0} = [rectangle, draw, fill=blue!20, 
     text width=12em, align=center, rounded corners, minimum height=4em]
-\tikzstyle{cloud} = [draw, ellipse,fill=blue!20, node distance=3cm,
+\tikzstyle{cloud0} = [draw, ellipse,fill=blue!20, node distance=3cm,
     minimum height=2em]
 %----------------------------------------------------------------------------------
-\tikzstyle{decision1} = [diamond, draw, fill=green!20, 
+\tikzstyle{decision10} = [diamond, draw, fill=green!20, 
     text width=4.5em, node distance=3cm, inner sep=0pt]
-\tikzstyle{block1} = [rectangle, draw, fill=green!20, 
+\tikzstyle{block10} = [rectangle, draw, fill=green!20, 
     text width=12em, align=center, rounded corners, minimum height=4em]
-\tikzstyle{cloud1} = [draw, ellipse,fill=green!20, node distance=3cm,
+\tikzstyle{cloud10} = [draw, ellipse,fill=green!20, node distance=3cm,
     minimum height=2em]
 %----------------------------------------------------------------------------------
-\tikzstyle{decision2} = [diamond, draw, fill=red!20, 
+\tikzstyle{decision20} = [diamond, draw, fill=red!20, 
     text width=4.5em, node distance=3cm, inner sep=0pt]
-\tikzstyle{block2} = [rectangle, draw, fill=red!20, 
+\tikzstyle{block20} = [rectangle, draw, fill=red!20, 
     text width=5em, rounded corners, minimum height=4em]
-\tikzstyle{cloud2} = [draw, ellipse,fill=red!20, node distance=3cm,
+\tikzstyle{cloud20} = [draw, ellipse,fill=red!20, node distance=3cm,
     minimum height=2em]
 
 %---------------------------------------------------------------------------------
@@ -35,10 +35,10 @@
     
 \begin{tikzpicture}[auto]
     % Place nodes left block
-    \node [block] (dfield) {create distance field\\ $d$};
-    \node [block, below = 0.8cm of dfield] (sfield) {create speed field\\ $s$};
-    \node [block, below = 0.8cm of sfield] (nFF) {create navigation floor-field\\ $c$};
-    \node [block1, below = 0.8cm of nFF] (nVF) {create vector field \\$(-1) \frac{\nabla c}{\left\Vert \nabla c \right\Vert}$};
+    \node [block0] (dfield) {create distance field\\ $d$};
+    \node [block0, below = 0.8cm of dfield] (sfield) {create speed field\\ $s$};
+    \node [block0, below = 0.8cm of sfield] (nFF) {create navigation floor-field\\ $c$};
+    \node [block10, below = 0.8cm of nFF] (nVF) {create vector field \\$(-1) \frac{\nabla c}{\left\Vert \nabla c \right\Vert}$};
     %\node [block, below of=Jsim] (agents) {send/recv agents};
     %\node [decision, below of=agents] (done) {done?};
     %\node [cloud, below of=done, node distance=3cm] (end) {shutdown \emph{mobsim}};
@@ -50,7 +50,7 @@
     %\path [line] (done) -- node [near start] {yes} (end);
     %\path [line] (done)  -| node [anchor=south, near start] {no} +(-2.2,0) |-  (Msim.west);
     % ------- Middle block
-    \node [block1, right = 2cm of nVF] (wVF) {create vector field\\ $(-1) \nabla d$};
+    \node [block10, right = 2cm of nVF] (wVF) {create vector field\\ $(-1) \nabla d$};
     %\node [block1, below of=m2j] (req) {send agent request};
     %\node [decision1, below of=req] (isplace) {is space?};
     %\node [block1, below of=isplace, node distance=3cm] (send) {send agent};
