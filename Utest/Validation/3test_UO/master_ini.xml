@@ -19,7 +19,7 @@
   <!--<hybrid_simulation server="zam597" port="9999" />-->
 
   <!-- where to store the logs -->
-  <!--<logfile>outputfiles/log.txt</logfile> -->
+  <logfile>log.txt</logfile>
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
@@ -55,7 +55,7 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="5" agents_max="70" group_id="6" caption="source 1" />
+      <source id="1" frequency="[2, 5, 7, 9, 11]" agents_max="276" group_id="6" caption="source 1" />
       <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
       <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
       <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
@@ -75,8 +75,8 @@
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="0.5" sigma="0.0" />
-        <bmax mu="0.25" sigma="0.001" />
-        <bmin mu="0.20" sigma="0.001" />
+        <bmax mu="0.15" sigma="0.001" />
+        <bmin mu="0.15" sigma="0.001" />
         <amin mu="0.18" sigma="0.001" />
         <tau mu="0.5" sigma="0.001" />
         <atau mu="0.5" sigma="0.001" />
@@ -121,19 +121,19 @@
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
-        <exit_crossing_strategy>2</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
+        <exit_crossing_strategy>3</exit_crossing_strategy>
+        <linkedcells enabled="true" cell_size="2.3" />
         <force_ped a="5" D="0.1" />
         <force_wall a="5" D="0.02" />
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
-        <v0 mu="1.65" sigma="0.06" />
-        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
-        <bmin mu="0.15" sigma="0.00000" />
-        <amin mu="0.15" sigma="0.00000" />
+        <v0 mu="1.7" sigma="0.06" />
+        <bmax mu="0.25" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
+        <bmin mu="0.25" sigma="0.00000" />
+        <amin mu="0.25" sigma="0.00000" />
         <tau mu="0.5" sigma="0.001" />
         <atau mu="0.0" sigma="0.00000" />
-        <T mu="1" sigma="0.001" />
+        <T mu="1" sigma="0.00" />
       </agent_parameters>
     </model>
   </operational_models>

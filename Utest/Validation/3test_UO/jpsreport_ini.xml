@@ -3,14 +3,13 @@
 <JPSreport project="JPS-Project" version="0.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd" >
     <!-- geometry file -->
-    <geometry file = "geo_18.xml" />
+    <geometry file = "geometries/geo_15.xml" />
     <!-- trajectories file and format -->
     <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
     <trajectories format="xml" unit="m">
-<!--	<file name="traj_20.xml" /> --> 
-        <path location="./" /> 
+    <path location="./trajectories/" /> 
     </trajectories>
-	<scripts location = "../../../JPSREPORT/scripts/" />  
+	<!-- <scripts location = "../../../JPSREPORT/scripts/" />   -->
     <!-- all files in the directories will be used -->
 
   <measurement_areas unit="m">
@@ -50,15 +49,17 @@ xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_report.xsd" >
     </method_B>
 
     <!-- Method C (Zhang2011a) Classical density and Vel -->
-    <method_C enabled="true">
+    <method_C enabled="false">
         <measurement_area id="1" />
     </method_C>
 
     <!-- Method D (Zhang2011a) Voronoi density and Vel -->
-    <method_D enabled="true" output_graph="false" individual_FD="true">
+    <method_D enabled="true" output_graph="false">
 	<measurement_area id="1" />
         <cut_by_circle enabled="false" radius= "1" edges = "10"/>
         <!-- edges represent the precision of discretization of the circle -->
+        <individual_FD enabled="true" measurement_area_id="1"/>
+        <plot_time_series enabled="false"/>
         <profiles  enabled="false" grid_size_x="0.10" grid_size_y="0.10"/>
     </method_D>
 
