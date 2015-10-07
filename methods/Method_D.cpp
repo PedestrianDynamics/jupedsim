@@ -126,21 +126,29 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
         	  else
         	  {
 				   vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
-				   OutputVoronoiResults(polygons, str_frid, VInFrame);
-				   if(_calcIndividualFD)
+				   if(!polygons.empty())
 				   {
-						// if(i>beginstationary&&i<endstationary)
-						{
-							 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
-						}
+					   OutputVoronoiResults(polygons, str_frid, VInFrame);
+					   if(_calcIndividualFD)
+					   {
+							// if(i>beginstationary&&i<endstationary)
+							{
+								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
+							}
+					   }
+					   if(_getProfile)
+					   { //	field analysis
+							GetProfiles(str_frid, polygons, VInFrame);
+					   }
+					   if(_outputVoronoiCellData)
+					   { // output the Voronoi polygons of a frame
+							OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
+					   }
 				   }
-				   if(_getProfile)
-				   { //	field analysis
-						GetProfiles(str_frid, polygons, VInFrame);
-				   }
-				   if(_outputVoronoiCellData)
-				   { // output the Voronoi polygons of a frame
-						OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
+				   else
+				   {
+					   Log->Write("Warning:\tVoronoi Diagrams are not obtained!\n");
+					   return false;
 				   }
         	  }
           }
