@@ -2,12 +2,10 @@
 """
 Test description
 ================
-- Fundamental Diagram in T-junction, test number 106
-- Width: 240
-- Measurement areas: 
-   - Left   X = [-4.5, -2.5],  Y = [-2.4, 0.0]
-   - Right  X = [1.0, 3.0],  Y = [-2.4, 0.0]
-   - Front  X = [-2.4, 0],  Y = [1.0, 3.0]
+- Fundamental Diagram in 2D, test number 102
+- Width = 1.8 m
+- Length = 26.0 m
+- Measurement area: X = [10, 16],  Y = [-0.9, 0.9]
 
 Remarks
 =======
@@ -15,7 +13,7 @@ TODO: Compare two "clouds" of points and return a number.
 
 Source
 ======
-Table 4.4 Jun Zhang Diss.
+
 """
 
 import os
@@ -46,17 +44,17 @@ def eval_results(results):
     plt.yticks(fontsize=mt)
     plt.legend(loc="best", numpoints=1)
     fig.set_tight_layout(True)
-    plt.savefig("Tjunction.png", dpi=300)
+    plt.savefig("fd2d.png", dpi=300)
 
-def run_validation_6(inifile, trajfile):
+def run_validation_3(inifile, trajfile):
     return 0
 
 if __name__ == "__main__":
-    test = JPSRunTestDriver(106, argv0=argv[0],
+    test = JPSRunTestDriver(103, argv0=argv[0],
                             testdir=sys.path[0],
                             utestdir=utestdir)
 
-    results = test.run_test(testfunction=run_validation_6, fd=1)
+    results = test.run_test(testfunction=run_validation_3, fd=1)
     eval_results(results)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
