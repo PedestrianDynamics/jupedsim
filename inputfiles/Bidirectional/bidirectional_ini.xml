@@ -5,12 +5,12 @@
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
-  <geometry>hybrid_hall_geo.xml</geometry>
-  <max_sim_time>2000</max_sim_time>
+  <geometry>bidirectional_traj.xml</geometry>
+  <max_sim_time>5000</max_sim_time>
 
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="16">
-    <file location="hybrid_hall_traj.xml" />
+  <trajectories format="xml-plain" fps="16" color_mode="final_goal">
+	    <file location="hybrid_hall_traj_bi.xml" />
     <socket_ hostname="127.0.0.1" port="8989" />
   </trajectories>
 
@@ -25,7 +25,7 @@
   <traffic_constraints>
     <!-- doors states are: close or open -->
     <doors>
-	<door trans_id="5" caption="exit" state="closed" />
+	<!-- <door trans_id="5" caption="exit" state="close" /> -->
     </doors>
   </traffic_constraints>
 
@@ -51,11 +51,11 @@
       </goal>
       <goal id="2" final="true" caption="goal2">
         <polygon>
-          <vertex px="16" py="2.8" />
-          <vertex px="17" py="2.8" />
-          <vertex px="17" py="6.4" />
-          <vertex px="16" py="6.4" />
-          <vertex px="16" py="2.8" />
+          <vertex px="18" py="2.8" />
+          <vertex px="19" py="2.8" />
+          <vertex px="19" py="6.4" />
+          <vertex px="18" py="6.4" />
+          <vertex px="18" py="2.8" />
         </polygon>
       </goal>
       <goal id="4" final="true" caption="goal4">
@@ -74,19 +74,19 @@
   <agents operational_model_id="3">
     <agents_distribution>
       <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
-      <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
+      <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
       <group group_id="2" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
-      <group group_id="3" room_id="3" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
-      <group group_id="4" room_id="4" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
+      <group group_id="3" room_id="3" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
+      <group group_id="4" room_id="4" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="2" />
       <!-- real start group -->
-      <group group_id="5" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="3" />
+      <group group_id="5" room_id="0" subroom_id="0" number="60" router_id="1" agent_parameter_id="1" goal_id="2" y_min="5.2"/>
       <group group_id="6" room_id="2" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" goal_id="4" />
       <group group_id="7" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" start_x="4.5" start_y="-1.63" goal_id="4" />
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="7" agents_max="100" group_id="6" caption="source 1" />
-      <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
+      <source id="1" frequency="2" agents_max="80" group_id="6" caption="source 1" />
+      <source_ id="2" frequency="5" agents_max="80" group_id="5" caption="source 2" />
       <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
       <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
     </agents_sources>
@@ -99,7 +99,7 @@
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exit_crossing_strategy>4</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.3" />
+        <linkedcells enabled="true" cell_size="2.2" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
@@ -147,13 +147,12 @@
         <atau mu="0.5" sigma="0.001" />
       </agent_parameters>
     </model>
-    
      <model operational_model_id="3" description="Tordeux2015">
       <model_parameters>
         <solver>euler</solver>
         <stepsize>0.01</stepsize>
         <exit_crossing_strategy>2</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.3" />
+        <linkedcells enabled="true" cell_size="2.2" />
         <force_ped a="5" D="0.1" />
         <force_wall a="5" D="0.02" />
       </model_parameters>
@@ -166,18 +165,7 @@
         <atau mu="0.0" sigma="0.00000" />
         <T mu="1" sigma="0.001" />
       </agent_parameters>
-            <agent_parameters agent_parameter_id="2">
-        <v0 mu="2.0" sigma="0.001" />
-        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
-        <bmin mu="0.15" sigma="0.00000" />
-        <amin mu="0.15" sigma="0.00000" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.0" sigma="0.00000" />
-        <T mu="1" sigma="0.001" />
-      </agent_parameters>
-      
     </model>
-    
   </operational_models>
 
   <route_choice_models>

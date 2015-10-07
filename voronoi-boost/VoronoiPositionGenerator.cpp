@@ -189,6 +189,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                }
 
                //TODO: dividing by 0 when existing_peds is empty
+               // -------> existing_peds is not empty because of the if statement
                // sum up the weighted velocity in the loop
                v = v/no; //this is the mean of all velocities
 
@@ -206,7 +207,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
                voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
                double dis = 0;
-               VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius);
+               VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius, goal_vector, *iter_ped  );
 
                if( dis > 4*radius*factor*radius*factor)// be careful with the factor!! radius*factor, 2,3,4?
                {
@@ -297,10 +298,13 @@ void VoronoiAdjustVelocityNeighbour( const voronoi_diagram<double>& vd, voronoi_
 
 //gives the voronoi vertex with max distance
 void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const voronoi_diagram<double>& vd, SubRoom* subroom,
-          double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius, const std::vector<int>& goal_vector )
+          double factor, voronoi_diagram<double>::const_vertex_iterator& max_it, double& max_dis, double radius,
+		  const std::vector<int>& goal_vector, Pedestrian* ped )
 {
      double dis = 0;
-     double score = -100; //calculated using distance and considerring the goal
+     double score;
+     double max_score = -100; //calculated using distance and considerring the goal
+
 
 
      for (auto it = vd.vertices().begin(); it != vd.vertices().end(); ++it)
@@ -316,9 +320,42 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
                     Point p = discrete_positions[index];
 
                     dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )  + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
-                    if(dis > max_dis)
+
+                    score = dis;
+
+
+                    //constructing the checking line
+                    //ped->SetPos(vert_pos);
+                    Point p2 = (ped->GetExitLine()->ShortestPoint(vert_pos)-vert_pos).Normalized(); //problem: ped does not have a position
+                    p2 = p2 + p2; //looking 2m in front
+                    //Point p2 = nav_line->GetPoint1() - nav_line->GetPoint2() ;
+                    //p2 = p2/ p2.Norm();
+                    //p2 = p2+p2;
+                    //p2 = nav_line->GetPoint1() + p2;
+                    Line check_line(vert_pos, vert_pos + p2);  //this is the first 2m of exit line
+
+                    do
                     {
-                         max_dis = dis;
+                    	//do something
+                    	if( goal_vector[index]!=-3 &&  goal_vector[index]!=ped->GetFinalDestination() ) //
+                    		if( check_line.IntersectionWithCircle(p,1.0) )    //0.7 because the radius is around 0.3
+                    		{
+                    			score -= 100;
+                    			break;
+                    		}
+
+
+                    	//change edge
+                    	edge = edge->rot_next();
+                    	index = ( edge->cell() )->source_index();
+                    	p = discrete_positions[index]/factor;
+
+                    } while( edge != vertex.incident_edge() );
+
+                    if(score > max_score)
+                    {
+                         max_score =score;
+                    	 max_dis = dis;
                          max_it = it;
                     }
                }
@@ -409,7 +446,7 @@ void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const 
      }
      //now we have all the possible vertices and their distances and we can choose one randomly
      //TODO: get the seed from the simulation/argumentparser
-     srand (time(NULL));
+     //srand (time(NULL));
      unsigned int i = rand() % possible_vertices.size();
      chosen_it = possible_vertices[i];
      dis = distances[i];
