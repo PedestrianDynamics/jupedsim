@@ -70,6 +70,7 @@ private:
      bool _isPlotTimeSeriesA;
      bool _isPlotTimeSeriesC;
      bool _isPlotTimeSeriesD;
+     bool _isOneDimensional;
      bool _isIndividualFD;
      polygon_2d _areaIndividualFD;
      bool _isGetProfile;
@@ -127,6 +128,7 @@ public:
      bool GetIsPlotTimeSeriesA() const;
      bool GetIsPlotTimeSeriesC() const;
      bool GetIsPlotTimeSeriesD() const;
+     bool GetIsOneDimensional() const;
      bool GetIsIndividualFD() const;
      polygon_2d GetAreaIndividualFD() const;
      double GetSteadyStart() const;

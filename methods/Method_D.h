@@ -31,7 +31,7 @@
 #include "PedData.h"
 #include "../Analysis.h"
 #include "VoronoiDiagram.h"
-
+#include <algorithm>
 
 #ifdef __linux__
 #include <sys/stat.h>
@@ -61,7 +61,7 @@ public:
      void SetOutputVoronoiCellData(bool outputCellData);
      void SetPlotVoronoiGraph(bool plotVoronoiGraph);
      void SetMeasurementArea (MeasurementArea_B* area);
-
+     void SetDimensional (bool dimension);
 
 private:
      std::map<int , std::vector<int> > _peds_t;
@@ -75,6 +75,7 @@ private:
      bool _getProfile;
      bool _outputVoronoiCellData;
      bool _plotVoronoiCellData;
+     bool _isOneDimensional;
      bool _cutByCircle;       //Adjust whether cut each original voronoi cell by a circle
      double _cutRadius;
      int _circleEdges;
@@ -105,8 +106,10 @@ private:
       * Reduce the precision of the points to two digits
       * @param polygon
       */
+     void CalcVoronoiResults1D(std::vector<double>& XInFrame, std::vector<double>& VInFrame, std::vector<int>& IdInFrame, const polygon_2d & measureArea, const std::string& frid);
      void ReducePrecision(polygon_2d& polygon);
      bool IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor, int  *firstFrame, int *lastFrame); //check whether all the pedestrians are in the geometry
+     double getOverlapRatio(const double& left, const double& right, const double& measurearea_left, const double& measurearea_right);
 };
 
 #endif /* METHOD_D_H_ */

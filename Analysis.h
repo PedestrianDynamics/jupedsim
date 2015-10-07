@@ -134,6 +134,7 @@ private:
      bool _plotTimeseriesA;
      bool _plotTimeseriesC;
      bool _plotTimeseriesD;
+     bool _isOneDimensional;
      bool _calcIndividualFD;  //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
      polygon_2d _areaIndividualFD;
      char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity

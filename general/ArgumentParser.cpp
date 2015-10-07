@@ -76,6 +76,7 @@ ArgumentParser::ArgumentParser()
      _isPlotGraph= false;
      _isPlotTimeSeriesD=false;
      _isPlotTimeSeriesC=false;
+     _isOneDimensional=false;
      _isIndividualFD = false;
      _isGetProfile =false;
      _steadyStart =100;
@@ -490,6 +491,12 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
             	   Log->Write("INFO: \tThe Time series measured with Method D will be plotted!!");
                }
 
+               if ( string(xMethod_D->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+               {
+            	   _isOneDimensional=true;
+            	   Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+               }
+
                if ( xMethod_D->FirstChildElement("cut_by_circle"))
                {
                     if ( string(xMethod_D->FirstChildElement("cut_by_circle")->Attribute("enabled"))=="true")
@@ -661,6 +668,11 @@ bool ArgumentParser::GetIsPlotTimeSeriesC() const
 bool ArgumentParser::GetIsPlotTimeSeriesD() const
 {
 	return _isPlotTimeSeriesD;
+}
+
+bool ArgumentParser::GetIsOneDimensional() const
+{
+	return _isOneDimensional;
 }
 
 bool ArgumentParser::GetIsIndividualFD() const

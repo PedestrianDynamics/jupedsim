@@ -92,6 +92,12 @@ Analysis::Analysis()
      _cutRadius=1.0;
      _circleEdges=6;
      _trajFormat=FileFormat::FORMAT_PLAIN;
+     _isOneDimensional=false;
+     _plotGraph=false;
+     _plotTimeseriesA=false;
+     _plotTimeseriesC=false;
+     _plotTimeseriesD=false;
+
 }
 
 Analysis::~Analysis()
@@ -184,6 +190,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _plotTimeseriesA=args->GetIsPlotTimeSeriesA();
      _plotTimeseriesC=args->GetIsPlotTimeSeriesC();
      _plotTimeseriesD=args->GetIsPlotTimeSeriesD();
+     _isOneDimensional=args->GetIsOneDimensional();
      _calcIndividualFD = args->GetIsIndividualFD();
      _areaIndividualFD= args->GetAreaIndividualFD();
      _vComponent = args->GetVComponent();
@@ -387,6 +394,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);
                method_D.SetPlotVoronoiGraph(_plotGraph);
+               method_D.SetDimensional(_isOneDimensional);
                method_D.SetCalculateIndividualFD(_calcIndividualFD);
                method_D.SetAreaIndividualFD(_areaIndividualFD);
                method_D.SetCalculateProfiles(_getProfile);

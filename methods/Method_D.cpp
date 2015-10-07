@@ -40,6 +40,7 @@ Method_D::Method_D()
 {
      _grid_size_X = 0.10;
      _grid_size_Y = 0.10;
+     _fps=16;
      _outputVoronoiCellData = false;
      _getProfile = false;
      _geoMinX = 0;
@@ -53,6 +54,8 @@ Method_D::Method_D()
      _calcIndividualFD = false;
      _fVoronoiRhoV = NULL;
      _areaForMethod_D = NULL;
+     _plotVoronoiCellData=false;
+     _isOneDimensional=false;
 }
 
 Method_D::~Method_D()
@@ -116,23 +119,30 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           //---------------------------------------------------------------------------------------------------------------
           if(NumPeds>2)
           {
-               vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
-               OutputVoronoiResults(polygons, str_frid, VInFrame);
-               if(_calcIndividualFD)
-               {
-                    // if(i>beginstationary&&i<endstationary)
-                    {
-                         GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
-                    }
-               }
-               if(_getProfile)
-               { //	field analysis
-                    GetProfiles(str_frid, polygons, VInFrame);
-               }
-               if(_outputVoronoiCellData)
-               { // output the Voronoi polygons of a frame
-                    OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
-               }
+        	  if(_isOneDimensional)
+        	  {
+                  CalcVoronoiResults1D(XInFrame, VInFrame, IdInFrame, _areaForMethod_D->_poly,str_frid);
+        	  }
+        	  else
+        	  {
+				   vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
+				   OutputVoronoiResults(polygons, str_frid, VInFrame);
+				   if(_calcIndividualFD)
+				   {
+						// if(i>beginstationary&&i<endstationary)
+						{
+							 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
+						}
+				   }
+				   if(_getProfile)
+				   { //	field analysis
+						GetProfiles(str_frid, polygons, VInFrame);
+				   }
+				   if(_outputVoronoiCellData)
+				   { // output the Voronoi polygons of a frame
+						OutputVoroGraph(str_frid, polygons, NumPeds, XInFrame, YInFrame,VInFrame);
+				   }
+        	  }
           }
           else
           {
@@ -157,7 +167,14 @@ bool Method_D::OpenFileMethodD()
      }
      else
      {
-          fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
+         if(_isOneDimensional)
+         {
+        	 fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-1))\t	Voronoi velocity(m/s)\n",_fps);
+         }
+         else
+         {
+        	 fprintf(_fVoronoiRhoV,"#framerate:\t%.2f\n\n#Frame \t Voronoi density(m^(-2))\t	Voronoi velocity(m/s)\n",_fps);
+         }
           return true;
      }
 }
@@ -491,6 +508,11 @@ void Method_D::SetMeasurementArea (MeasurementArea_B* area)
      _areaForMethod_D = area;
 }
 
+void Method_D::SetDimensional (bool dimension)
+{
+     _isOneDimensional = dimension;
+}
+
 void Method_D::ReducePrecision(polygon_2d& polygon)
 {
 	for(auto&& point:polygon.outer())
@@ -512,4 +534,86 @@ bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Yco
 			}
 		}
 	return true;
+}
+
+void Method_D::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VInFrame, vector<int>& IdInFrame, const polygon_2d & measureArea,const string& frid)
+//double x_in, double x_out, double XPed, double XRightNeighbor, double  XLeftNeighbor)
+{
+	vector<double> measurearea_x;
+	for(unsigned int i=0;i<measureArea.outer().size();i++)
+	{
+		measurearea_x.push_back(measureArea.outer()[i].x());
+	}
+	double left_boundary=*min_element(measurearea_x.begin(),measurearea_x.end());
+	double right_boundary=*max_element(measurearea_x.begin(),measurearea_x.end());
+
+	vector<double> voronoi_distance;
+	vector<double> Xtemp=XInFrame;
+	vector<double> dist;
+	vector<double> XLeftNeighbor;
+	vector<double> XLeftTemp;
+	vector<double> XRightNeighbor;
+	vector<double> XRightTemp;
+	sort(Xtemp.begin(),Xtemp.end());
+	dist.push_back(Xtemp[1]-Xtemp[0]);
+	XLeftTemp.push_back(2*Xtemp[0]-Xtemp[1]);
+	XRightTemp.push_back(Xtemp[1]);
+	for(unsigned int i=1;i<Xtemp.size()-1;i++)
+	{
+		dist.push_back((Xtemp[i+1]-Xtemp[i-1])/2.0);
+		XLeftTemp.push_back(Xtemp[i-1]);
+		XRightTemp.push_back(Xtemp[i+1]);
+	}
+	dist.push_back(Xtemp[Xtemp.size()-1]-Xtemp[Xtemp.size()-2]);
+	XLeftTemp.push_back(Xtemp[Xtemp.size()-2]);
+	XRightTemp.push_back(2*Xtemp[Xtemp.size()-1]-Xtemp[Xtemp.size()-2]);
+	for(unsigned int i=0;i<XInFrame.size();i++)
+	{
+		for(unsigned int j=0;j<Xtemp.size();j++)
+		{
+			if(fabs(XInFrame[i]-Xtemp[j])<1.0e-5)
+			{
+				voronoi_distance.push_back(dist[j]);
+				XLeftNeighbor.push_back(XLeftTemp[j]);
+				XRightNeighbor.push_back(XRightTemp[j]);
+				break;
+			}
+		}
+	}
+
+	double VoronoiDensity=0;
+	double VoronoiVelocity=0;
+	for(unsigned int i=0; i<XInFrame.size(); i++)
+	{
+		double ratio=getOverlapRatio(XLeftNeighbor[i], XRightNeighbor[i],left_boundary,right_boundary);
+		VoronoiDensity+=ratio;
+		VoronoiVelocity+=(VInFrame[i]*voronoi_distance[i]*ratio*CMtoM);
+	}
+	VoronoiDensity/=((right_boundary-left_boundary)*CMtoM);
+	VoronoiVelocity/=((right_boundary-left_boundary)*CMtoM);
+	fprintf(_fVoronoiRhoV,"%s\t%.3f\t%.3f\n",frid.c_str(),VoronoiDensity, VoronoiVelocity);
+
+}
+
+double Method_D::getOverlapRatio(const double& left, const double& right, const double& measurearea_left, const double& measurearea_right)
+{
+	double OverlapRatio=0;
+	double PersonalSpace=right-left;
+	if(left > measurearea_left && right < measurearea_right) //case1
+	{
+		OverlapRatio=1;
+	}
+	else if(right > measurearea_left && right < measurearea_right && left < measurearea_left)
+	{
+		OverlapRatio=(right-measurearea_left)/PersonalSpace;
+	}
+	else if(left < measurearea_left && right > measurearea_right)
+	{
+		OverlapRatio=(measurearea_right - measurearea_left)/PersonalSpace;
+	}
+	else if(left > measurearea_left && left < measurearea_right && right > measurearea_right)
+	{
+		OverlapRatio=(measurearea_right-left)/PersonalSpace;
+	}
+	return OverlapRatio;
 }
