@@ -161,9 +161,10 @@ class JPSRunTestDriver(object):
             geometries = os.path.join(self.DIR, "geometries/") #maybe we habe a dir with geometries?
             if os.path.exists(geometries) and os.listdir(geometries):
                 self.geofile = geometries
-        else:
-            logging.critical("geofile <%s> does not exist", self.geofile)
-            exit(self.FAILURE)
+            else:
+                logging.critical("geofile <%s> does not exist", self.geofile)
+                exit(self.FAILURE)
+
         for inifile in self.inifiles:
             if not path.exists(inifile):
                 logging.critical("inifile <%s> does not exist", inifile)
