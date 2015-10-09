@@ -83,7 +83,7 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
      for (voronoi_diagram<double>::const_cell_iterator it = voronoidiagram.cells().begin();
                it != voronoidiagram.cells().end(); ++it)
      {
-          polygon_2d poly;
+    	  polygon_2d poly;
           vector<point_type2> polypts;
           point_type2 pt_s;
           point_type2 pt_e;
@@ -496,4 +496,3 @@ std::vector<polygon_2d> VoronoiDiagram::cutPolygonsWithCircle(const std::vector<
      }
      return intersetionpolygons;
 }
-

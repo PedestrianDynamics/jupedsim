@@ -485,16 +485,16 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
                     Log->Write("INFO: \tMeasurement area id <%d> will be used for analysis", xmltoi(xMeasurementArea->Attribute("id")));
                }
 
-               if ( string(xMethod_D->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
+               if ( string(xMethod_D->FirstChildElement("one_dimensional")->Attribute("enabled"))=="true")
                {
-            	   _isPlotTimeSeriesD=true;
-            	   Log->Write("INFO: \tThe Time series measured with Method D will be plotted!!");
+            	   _isOneDimensional=true;
+            	   Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
                }
 
                if ( string(xMethod_D->FirstChildElement("plot_time_series")->Attribute("enabled"))=="true")
                {
-            	   _isOneDimensional=true;
-            	   Log->Write("INFO: \tThe data will be analyzed with one dimensional way!!");
+            	   _isPlotTimeSeriesD=true;
+            	   Log->Write("INFO: \tThe Time series measured with Method D will be plotted!!");
                }
 
                if ( xMethod_D->FirstChildElement("cut_by_circle"))

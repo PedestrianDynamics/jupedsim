@@ -110,6 +110,7 @@ private:
      void ReducePrecision(polygon_2d& polygon);
      bool IsPedInGeometry(int frames, int peds, double **Xcor, double **Ycor, int  *firstFrame, int *lastFrame); //check whether all the pedestrians are in the geometry
      double getOverlapRatio(const double& left, const double& right, const double& measurearea_left, const double& measurearea_right);
+     bool IsPointsOnOneLine(std::vector<double>& XInFrame, std::vector<double>& YInFrame);
 };
 
 #endif /* METHOD_D_H_ */

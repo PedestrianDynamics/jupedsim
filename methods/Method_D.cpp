@@ -65,10 +65,6 @@ Method_D::~Method_D()
 
 bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocation)
 {
-     /*if(false==IsPedInGeometry(peddata.GetNumFrames(), peddata.GetNumPeds(), peddata.GetXCor(), peddata.GetYCor(), peddata.GetFirstFrame(), peddata.GetLastFrame()))
-     {
-          return false;
-     }*/
 	 _scriptsLocation = scriptsLocation;
      _peds_t = peddata.GetPedsFrame();
      _trajName = peddata.GetTrajName();
@@ -85,7 +81,6 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
      for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      {
           int frid =  frameNr + minFrame;
-
           //padd the frameid with 0
           std::ostringstream ss;
           ss << std::setw(5) << std::setfill('0') << frid;
@@ -125,7 +120,18 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
         	  }
         	  else
         	  {
-				   vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
+        		  if(IsPointsOnOneLine(XInFrame, YInFrame))
+        		  {
+        			  if(fabs(XInFrame[1]-XInFrame[0])<10)
+        			  {
+        				  XInFrame[1]+= (0.05*M2CM);
+        			  }
+        			  else
+        			  {
+        				  YInFrame[1]+= (0.05*M2CM);
+        			  }
+        		  }
+        		   vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
 				   if(!polygons.empty())
 				   {
 					   OutputVoronoiResults(polygons, str_frid, VInFrame);
@@ -624,4 +630,36 @@ double Method_D::getOverlapRatio(const double& left, const double& right, const 
 		OverlapRatio=(measurearea_right-left)/PersonalSpace;
 	}
 	return OverlapRatio;
+}
+
+bool Method_D::IsPointsOnOneLine(vector<double>& XInFrame, vector<double>& YInFrame)
+{
+	double deltaX=XInFrame[1] - XInFrame[0];
+	bool isOnOneLine=true;
+	if(fabs(deltaX)<10)
+	{
+		for(unsigned int i=2; i<XInFrame.size();i++)
+		{
+			if(fabs(XInFrame[i] - XInFrame[0])>0.05*M2CM)
+			{
+				isOnOneLine=false;
+				break;
+			}
+		}
+	}
+	else
+	{
+		double slope=(YInFrame[1] - YInFrame[0])/deltaX;
+		double intercept=YInFrame[0] - slope*XInFrame[0];
+		for(unsigned int i=2; i<XInFrame.size();i++)
+		{
+			double dist=fabs(slope*XInFrame[i] - YInFrame[i] + intercept)/sqrt(slope*slope +1);
+			if(dist > 0.05*M2CM)
+			{
+				isOnOneLine=false;
+				break;
+			}
+		}
+	}
+	return isOnOneLine;
 }
