@@ -28,7 +28,8 @@
     <velocity> 
         <use_x_component>true</use_x_component> 
         <use_y_component>true</use_y_component> 
-        <!-- half of the time interval that used to calculate instantaneous velocity of ped i [fr] here v_i = (X(t+deltaF) - X(t+deltaF))/(2*deltaF). X is location. --> 
+        		<!-- The time interval that used to calculate instantaneous velocity 
+			of ped i [fr] here v_i = (X(t+frame_step/2) - X(t+frame_step/2))/frame_step. X is location. -->
         <frame_step>5</frame_step> 
     </velocity> 
 
@@ -57,6 +58,7 @@
     <!-- Method D (Zhang2011a) Voronoi density and Vel --> 
 	<method_D enabled="true"> 
         <measurement_area id="1" /> 
+		<one_dimensional enabled="false"/>
 		<plot_time_series enabled="false"/>
         <cut_by_circle enabled="false" radius="1.0" edges="10"/>
         <output_voronoi_cells enabled="true" plot_graphs="false"/>
