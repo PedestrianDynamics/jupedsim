@@ -166,7 +166,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
           {
         	   //it would be better to maybe have a mapping between discrete_positions and pointers to the pedestrians
         	   //then there would be no need to remember the velocities_vector and goal_vector
-        	   std::vector<Point> discrete_positions;
+      	       std::vector<Point> discrete_positions;
                std::vector<Point> velocities_vector;
                std::vector<int> goal_vector;
                Point temp(0,0);
@@ -207,7 +207,7 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
 
                voronoi_diagram<double>::const_vertex_iterator chosen_it = vd.vertices().begin();
                double dis = 0;
-               VoronoiBestVertexMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius, goal_vector, *iter_ped  );
+               VoronoiBestVertexRandMax(discrete_positions, vd, subroom, factor, chosen_it, dis, radius );
 
                if( dis > 4*radius*factor*radius*factor)// be careful with the factor!! radius*factor, 2,3,4?
                {
@@ -325,13 +325,9 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
 
 
                     //constructing the checking line
-                    //ped->SetPos(vert_pos);
+/*
                     Point p2 = (ped->GetExitLine()->ShortestPoint(vert_pos)-vert_pos).Normalized(); //problem: ped does not have a position
                     p2 = p2 + p2; //looking 2m in front
-                    //Point p2 = nav_line->GetPoint1() - nav_line->GetPoint2() ;
-                    //p2 = p2/ p2.Norm();
-                    //p2 = p2+p2;
-                    //p2 = nav_line->GetPoint1() + p2;
                     Line check_line(vert_pos, vert_pos + p2);  //this is the first 2m of exit line
 
                     do
@@ -351,7 +347,7 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
                     	p = discrete_positions[index]/factor;
 
                     } while( edge != vertex.incident_edge() );
-
+*/
                     if(score > max_score)
                     {
                          max_score =score;

@@ -19,13 +19,13 @@
   <!--<hybrid_simulation server="zam597" port="9999" />-->
 
   <!-- where to store the logs -->
-  <!--<logfile>outputfiles/log.txt</logfile> -->
+  <!--<logfile>outputfiles/log.txt</logfile>-->
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- doors states are: close or open -->
     <doors>
-	<door trans_id="5" caption="exit" state="closed" />
+	<door trans_id="5" caption="exit" state="close" />
     </doors>
   </traffic_constraints>
 
@@ -85,7 +85,7 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="7" agents_max="100" group_id="6" caption="source 1" />
+      <source id="1" frequency="6" agents_max="500" group_id="6" caption="source 1" />
       <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
       <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
       <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />

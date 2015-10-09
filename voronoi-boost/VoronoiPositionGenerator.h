@@ -28,6 +28,8 @@ class Building;
 class Pedestrian;
 class Point;
 
+// TODO: bool IsSpace(SubRoom* subroom, Point& pt,Point& v1);
+
 	/**
 	 * Calculates if a point (which is inside the subroom) is far enough from the walls, transitions, crossings ( > radius of a person)
 	 * @param subroom

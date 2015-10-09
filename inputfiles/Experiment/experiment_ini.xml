@@ -5,12 +5,12 @@
   <!-- seed used for initialising random generator -->
   <seed>12542</seed>
   <!-- geometry file -->
-  <geometry>experiment_traj.xml</geometry>
+  <geometry>experiment_geo.xml</geometry>
   <max_sim_time>4000</max_sim_time>
 
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="16">
-	    <file location="../../../../Documents/Documentation/Experiment/trajectories2/traj_10.xml" />
+	    <file location="experiment_traj.xml" />
     <socket_ hostname="127.0.0.1" port="8989" />
   </trajectories>
 
