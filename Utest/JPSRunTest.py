@@ -50,16 +50,16 @@ class JPSRunTestDriver(object):
         self.DIR = testdir
         self.jpsreportdir = jpsreportdir
         # Where to find the measured data from the simulations. We will use Voronoi diagrams
-        if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
-            self.simDataDir = os.path.join(self.DIR,
-                                           "Output",
-                                           "Fundamental_Diagram",
-                                           "TinTout")
-        else:
-            self.simDataDir = os.path.join(self.DIR,
-                                           "Output",
-                                           "Fundamental_Diagram",
-                                           "Individual_FD")
+        # if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
+        self.simDataDir = os.path.join(self.DIR,
+                                       "Output",
+                                       "Fundamental_Diagram",
+                                       "Classical_Voronoi")
+        # else:
+        #     self.simDataDir = os.path.join(self.DIR,
+        #                                    "Output",
+        #                                    "Fundamental_Diagram",
+        #                                    "Individual_FD")
         # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
         self.expDataDir = os.path.join(self.DIR, "data")
