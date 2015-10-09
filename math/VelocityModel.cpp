@@ -423,7 +423,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      //double vn = w.NormalComp(ped->GetV()); //normal component of the velocity on the wall
      Point e_iw; // x- and y-coordinate of the normalized vector between ped and pt
      //double K_iw;
-     double l = 2*ped->GetEllipse().GetBmax();
+     double l = ped->GetEllipse().GetBmax();
      double R_iw;
      double min_distance_to_wall = 0.001; // 10 cm
      
