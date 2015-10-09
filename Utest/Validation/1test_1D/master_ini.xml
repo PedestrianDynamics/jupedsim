@@ -8,7 +8,7 @@
   <seed>12542</seed>
   <max_sim_time>100</max_sim_time>
   <!-- geometry file -->
-  <geometry>./geometry.xml</geometry>
+  <geometry>../geometry.xml</geometry>
   <!-- traectories file and format -->
   <trajectories format="xml-plain" fps="8">
     <file location="trajects.xml" />
@@ -48,7 +48,7 @@
   <!--persons information and distribution -->
   <agents operational_model_id="3">
     <agents_distribution>
-      <!-- [14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70] -->
+      <!-- [14, 17, 20, 22, 25, 28, 34, 39, 45, 56, 62, 70] range(5, 75, 2)-->
       <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="range(5, 75, 2)" goal_id="0" router_id="1"/>
     </agents_distribution>
   </agents>
@@ -67,9 +67,9 @@
       </model_parameters>
       <agent_parameters agent_parameter_id="1">
         <v0 mu="1.2" sigma="0.0" />
-        <bmax mu="0.3" sigma="0.0" /> <!-- this is l/2, assuming peds are circles with constant radius-->
-        <bmin mu="0.3" sigma="0.0" />
-        <amin mu="0.3" sigma="0.0" />
+        <bmax mu="0.15" sigma="0.0" /> <!-- this is l/2, assuming peds are circles with constant radius-->
+        <bmin mu="0.15" sigma="0.0" />
+        <amin mu="0.15" sigma="0.0" />
         <tau mu="0.5" sigma="0.0" />
         <atau mu="0.0" sigma="0.0" />
         <T mu="1" sigma="0.0" />        

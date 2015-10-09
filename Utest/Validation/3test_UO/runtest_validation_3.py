@@ -44,7 +44,7 @@ def eval_results(results):
     plt.xticks(fontsize=mt)
     plt.yticks(fontsize=mt)
     leg = plt.legend(loc="best", numpoints=1)
-    leg[0].set_markersize(1)
+
     fig.set_tight_layout(True)
     plt.savefig("fd2d_uo.png", dpi=300)
 

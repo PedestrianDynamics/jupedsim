@@ -36,7 +36,7 @@ def eval_results(results):
     dsim = results[1]
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    plt.plot(dsim[:, 2], dsim[:, 3], ".b", alpha=0.5, label="simulation")
+    plt.plot(dsim[:, 1], dsim[:, 2], ".b", alpha=0.5, label="simulation")
     plt.plot(dexp[:, 0], dexp[:, 1], "xr", label="experiment")
     plt.ylabel(r"$v\; [m/s]$", size=ms)
     plt.xlabel(r"$\rho \; [1/m^2]$", size=ms)

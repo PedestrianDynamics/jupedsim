@@ -14,16 +14,11 @@
 
   <measurement_areas unit="m">
     <area_B id="1" type="BoundingBox">
-      <!-- <vertex x="10.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="5.2" /> -->
-      <!-- <vertex x="10.2" y="5.2" /> -->
-
       <vertex x="10" y="-0.9" />
       <vertex x="16" y="-0.9" />
       <vertex x="16" y="0.9" />
       <vertex x="10" y="0.9" />
-      <length_in_movement_direction distance="1.0" />
+      <length_in_movement_direction distance="6.0" />
     </area_B>
     <!--<area_L id="2" type="Line">
         <start x="9.0" y="2.8" />
@@ -60,12 +55,12 @@
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
   <method_D enabled="true">
-    <measurement_area id="1"/>
-    <cut_by_circle enabled="false" radius= "1" edges = "10"/>
-    <output_voronoi_cells enabled="false" plot_graphs="false"/>
-    <individual_FD enabled="true" measurement_area_id="1"/>
-    <!-- edges represent the precision of discretization of the circle -->
+    <measurement_area id="1" /> 
+    <one_dimensional enabled="false"/>
     <plot_time_series enabled="false"/>
-    <profiles  enabled="false" grid_size_x="0.10" grid_size_y="0.10"/>
+    <cut_by_circle enabled="false" radius="1.0" edges="10"/>
+    <output_voronoi_cells enabled="false" plot_graphs="false"/>
+    <individual_FD enabled="false" measurement_area_id="1"/>
+    <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
   </method_D>
 </JPSreport>
