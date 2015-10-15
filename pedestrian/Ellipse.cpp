@@ -195,17 +195,18 @@ double JEllipse::GetEA() const
 // ellipse semi-axis in the orthogonal direction of the velocity
 double JEllipse::GetEB() const
 {
-     double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
-     double v_min = 0.001;
-     double a = 0.49;
-     double b = -1.17;
-     double v = _vel.Norm();
+//     double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
+//     double v_min = 0.001;
+//     double a = 0.49;
+//     double b = -1.17;
+//     double v = _vel.Norm();
      // double t = (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
      // printf("v=%f, b=%f\n", v, t);
      // getc(stdin);
-     return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
-     // double x = (_Bmax - _Bmin) / _vel0;
-     // return _Bmax - _vel.Norm() * x;
+     //return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
+
+     double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
+     return _Bmax - _vel.Norm() * x;
 }
 
 

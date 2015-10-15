@@ -270,7 +270,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
            }
 
       }//end parallel
-      std::cerr << "Over : Under  " << *over << " : " << *under << "    (" << *redircnt << ")" << "    (" << *slowcnt << ")" << "    (" << *overlapcnt << ")" << std::endl;
+      //std::cerr << "Over : Under  " << *over << " : " << *under << "    (" << *redircnt << ")" << "    (" << *slowcnt << ")" << "    (" << *overlapcnt << ")" << std::endl;
 }
 
 Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
@@ -357,17 +357,19 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      }
 
 //--------------------------check if overlapping
-     double* unused = new double;
-     double tmpover = E1.EffectiveDistanceToEllipse(E2, unused);
-     if (tmpover < 0) {
-         return ep12 * (-1);
-         ++(*overlapcnt);
-     }
+     //double* unused = new double;
+     //double tmpover = E1.EffectiveDistanceToEllipse(E2, unused);
+//     if (tmpover < 0) {
+//         std::cerr << "Fehler aaaaa " << std::endl;
+//         getc(stdin);
+//         ++(*overlapcnt);
+//         return ep12 * (-5);
+//     }
 //--------------------------check speed diff
-     tmp = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
-     if (tmp < 0) {
-          return F_rep; // ignore ped2
-     }
+//     tmp = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
+//     if (tmp < 0) {
+//          return F_rep; // ignore ped2
+//     }
 
      // calculate B_ij
      B_ij = 1.0 - Distance/(r1+r2); //TODO: Simplification to avoid accelerating predecessors

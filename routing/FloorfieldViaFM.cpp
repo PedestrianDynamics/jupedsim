@@ -57,7 +57,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
                                  const double wallAvoidDistance, const bool useDistancefield, const std::string& filename) {
     //ctor
     threshold = -1; //negative value means: ignore threshold
-    threshold = wallAvoidDistance;
+    threshold = wallAvoidDistance; //@todo: ar.graf wallavoid, alpha_r and alpha_s must be taken into consideration here!
 
     if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -74,14 +74,14 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     resetGoalAndCosts(wall, numOfExits);
 
-    calculateDistanceField(threshold); //negative threshold is ignored, range is believed to be (.4 - ...) at stepsize .0625
+    calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
 
-    testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
+    //testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
 
     calculateFloorfield(useDistancefield); //use distance2Wall
 
-    testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
+    //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
     writeFF(filename);
 }
 
@@ -557,13 +557,19 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
 
     double* modifiedspeed = new double[grid->GetnPoints()];
     if (useDistance2Wall && (threshold > 0)) {
+        double temp;            //needed to only slowdown band of threshold. outside of band modifiedspeed should be 1
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
-            modifiedspeed[i] = 0.001 + 0.999 * (dist2Wall[i]/threshold); //linear ramp from wall (0.001) to thresholddistance (1.000)
+            temp = (dist2Wall[i] < threshold) ? dist2Wall[i] : threshold;
+            modifiedspeed[i] = 0.001 + 0.999 * (temp/threshold); //linear ramp from wall (0.001) to thresholddistance (1.000)
         }
     } else {
         if (useDistance2Wall) {     //favor middle of hallways/rooms
             for (long int i = 0; i < grid->GetnPoints(); ++i) {
-                modifiedspeed[i] = 0.001 + 0.999 * (dist2Wall[i]/10); // @todo: ar.graf  (10 ist ein hardgecodeter wert.. sollte ggf. angepasst werden)
+                if (threshold == 0.) {  //special case if user set (use_wall_avoidance = true, wall_avoid_distance = 0.0) and thus wants a plain floorfield
+                    modifiedspeed[i] = speedInitial[i];
+                } else {                //this is the regular case for "favor middle of hallways/rooms
+                    modifiedspeed[i] = 0.001 + 0.999 * (dist2Wall[i]/10); // @todo: ar.graf  (10 ist ein hardgecodeter wert.. sollte ggf. angepasst werden)
+                }
             }
         } else {                    //do not use Distance2Wall
             for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -1065,6 +1071,7 @@ void FloorfieldViaFM::writeFF(const std::string& filename) {
 
     if (cost != nullptr) {
         file << "SCALARS Cost float 1" << std::endl;
+        file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             file << cost[i]/GEO_UP_SCALE << std::endl;
         }

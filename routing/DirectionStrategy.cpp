@@ -36,6 +36,8 @@
 #include "../routing/FloorfieldViaFM.h"
 #include "DirectionStrategy.h"
 #include <fstream>
+#include <chrono>
+#include <ctime>
 
 
 DirectionStrategy::DirectionStrategy()
@@ -299,7 +301,12 @@ void DirectionFloorfield::Init(Building* building, double stepsize, double thres
         ffviafm = new FloorfieldViaFM(FF_filename);
     } else {
           Log->Write("INFO: \tWrite Floorfield to file <" +  FF_filename + ">");
+          std::chrono::time_point<std::chrono::system_clock> start, end;
+          start = std::chrono::system_clock::now();
           ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);
+          end = std::chrono::system_clock::now();
+          std::chrono::duration<double> elapsed_seconds = end-start;
+          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
     }
     initDone = true;
 }
