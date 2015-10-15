@@ -50,16 +50,16 @@ class JPSRunTestDriver(object):
         self.DIR = testdir
         self.jpsreportdir = jpsreportdir
         # Where to find the measured data from the simulations. We will use Voronoi diagrams
-        if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
-            self.simDataDir = os.path.join(self.DIR,
-                                           "Output",
-                                           "Fundamental_Diagram",
-                                           "TinTout")
-        else:
-            self.simDataDir = os.path.join(self.DIR,
-                                           "Output",
-                                           "Fundamental_Diagram",
-                                           "Individual_FD")
+        # if self.testno == 101: # fix for 1dfd, since jpsreport can not be used in 1D
+        self.simDataDir = os.path.join(self.DIR,
+                                       "Output",
+                                       "Fundamental_Diagram",
+                                       "Classical_Voronoi")
+        # else:
+        #     self.simDataDir = os.path.join(self.DIR,
+        #                                    "Output",
+        #                                    "Fundamental_Diagram",
+        #                                    "Individual_FD")
         # Where to find the measured data from the experiments.
         # Assume that this directory is always data/
         self.expDataDir = os.path.join(self.DIR, "data")
@@ -123,6 +123,9 @@ class JPSRunTestDriver(object):
         for f in files:
             if once:
                 fd_data = np.loadtxt(f)
+                if fd_data.size == 0 :
+                    logging.warning("get_FD_data: simulation file %s is empty!", f)
+                    continue
                 once = 0
             else:
                 d = np.loadtxt(f)
@@ -151,12 +154,17 @@ class JPSRunTestDriver(object):
 
         sys.path.append(lib_path)
         # initialise the inputfiles for jpscore
-        self.geofile = os.path.join(self.DIR, "geometry.xml")
+        self.geofile = os.path.join(self.DIR, "geometry.xml") # FIXME: sometimes we have geometries/
         self.inifiles = glob.glob(os.path.join("inifiles", "*.xml"))
         self.jpsreport_ini = os.path.join(self.DIR, "jpsreport_ini.xml")
         if not path.exists(self.geofile):
-            logging.critical("geofile <%s> does not exist", self.geofile)
-            exit(self.FAILURE)
+            geometries = os.path.join(self.DIR, "geometries/") #maybe we habe a dir with geometries?
+            if os.path.exists(geometries) and os.listdir(geometries):
+                self.geofile = geometries
+            else:
+                logging.critical("geofile <%s> does not exist", self.geofile)
+                exit(self.FAILURE)
+
         for inifile in self.inifiles:
             if not path.exists(inifile):
                 logging.critical("inifile <%s> does not exist", inifile)

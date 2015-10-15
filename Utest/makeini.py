@@ -62,6 +62,7 @@ attributes_tags = ['group-pre_movement_mean',
                    'force_wall-b',
                    'force_wall-c',
                    'source-frequency',
+                   'source-agents_max',
                ]
 
 import numpy as np

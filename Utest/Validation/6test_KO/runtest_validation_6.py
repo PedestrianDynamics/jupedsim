@@ -48,7 +48,7 @@ def eval_results(results):
     fig.set_tight_layout(True)
     plt.savefig("Tjunction.png", dpi=300)
 
-def run_validation_2(inifile, trajfile):
+def run_validation_6(inifile, trajfile):
     return 0
 
 if __name__ == "__main__":
@@ -56,7 +56,7 @@ if __name__ == "__main__":
                             testdir=sys.path[0],
                             utestdir=utestdir)
 
-    results = test.run_test(testfunction=run_validation_2, fd=1)
+    results = test.run_test(testfunction=run_validation_6, fd=1)
     eval_results(results)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)

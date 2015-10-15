@@ -7,32 +7,18 @@
   <!-- trajectories file and format -->
   <!-- either a file name or a path location. In the latter case all files in the directory will be used-->
   <trajectories format="xml" unit="m">
-    <file name="trajects.xml" />
-	<path location="./" />
+    <path location="./trajectories/" /> 
   </trajectories>
   <!-- <scripts location = "../../scripts/" />   -->
   <!-- all files in the directories will be used -->
 
   <measurement_areas unit="m">
     <area_B id="1" type="BoundingBox">
-      <!-- <vertex x="10.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="4.0" /> -->
-      <!-- <vertex x="11.2" y="5.2" /> -->
-      <!-- <vertex x="10.2" y="5.2" /> -->
-
-<<<<<<< HEAD
       <vertex x="11" y="-0.3" />
       <vertex x="13" y="-0.3" />
       <vertex x="13" y="0.3" />
       <vertex x="11" y="0.3" />
       <length_in_movement_direction distance="2.0" />
-=======
-      <vertex x="10" y="-0.3" />
-      <vertex x="14" y="-0.3" />
-      <vertex x="14" y="0.3" />
-      <vertex x="10" y="0.3" />
-      <length_in_movement_direction distance="4.0" />
->>>>>>> 877daa6ad4318402325cfa144adc21b0a21b5158
     </area_B>
     <!--<area_L id="2" type="Line">
         <start x="9.0" y="2.8" />
@@ -58,21 +44,24 @@
   </method_A>
 
   <!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout -->
-  <method_B enabled="true">
+  <method_B enabled="false">
     <measurement_area id="1" />
   </method_B>
 
   <!-- Method C (Zhang2011a) Classical density and Vel -->
-  <method_C enabled="true">
+  <method_C enabled="false">
     <measurement_area id="1" />
 	<plot_time_series enabled="false"/>
   </method_C>
 
   <!-- Method D (Zhang2011a) Voronoi density and Vel -->
-  <method_D enabled="false" output_graph="false" individual_FD="true" output_time_series="false" 1d="true">
-    <measurement_area id="1" />
-    <cut_by_circle enabled="false" radius= "1" edges = "10"/>
-    <!-- edges represent the precision of discretization of the circle -->
-    <profiles  enabled="false" grid_size_x="0.10" grid_size_y="0.10"/>
+  <method_D enabled="true">
+    <measurement_area id="1" /> 
+    <one_dimensional enabled="true"/>
+    <plot_time_series enabled="false"/>
+    <cut_by_circle enabled="false" radius="1.0" edges="10"/>
+    <output_voronoi_cells enabled="true" plot_graphs="false"/>
+    <individual_FD enabled="false" measurement_area_id="1"/>
+    <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
   </method_D>
 </JPSreport>

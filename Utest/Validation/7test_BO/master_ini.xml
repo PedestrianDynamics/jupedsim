@@ -14,7 +14,7 @@
     <file location="trajects.xml" />
   </trajectories>
   <!-- where to store the logs -->
-  <logfilel>log</logfilel>
+  <logfile>log</logfile>
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
