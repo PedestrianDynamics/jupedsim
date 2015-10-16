@@ -140,6 +140,7 @@ private:
      char _vComponent;        // to mark whether x, y or x and y coordinate are used when calculating the velocity
      std::string _projectRootDir;
      std::string _scriptsLocation;
+     std::string _geometryFileName;
      FileFormat _trajFormat;  // format of the trajectory file
 
      std::vector<MeasurementArea_L*> _areaForMethod_A;

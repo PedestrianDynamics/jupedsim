@@ -197,6 +197,7 @@ void Analysis::InitArgs(ArgumentParser* args)
      _grid_size_X = int(args->GetGridSizeX());
      _grid_size_Y = int(args->GetGridSizeY());
      _geoPoly = ReadGeometry(args->GetGeometryFilename(), _areaForMethod_D);
+     _geometryFileName=args->GetGeometryFilename();
      _projectRootDir=args->GetProjectRootDir();
      _trajFormat=args->GetFileFormat();
      _cutRadius=args->GetCutRadius();
@@ -397,6 +398,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
           {
                Method_D method_D;
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);
+               method_D.SetGeometryFileName(_geometryFileName);
                method_D.SetGeometryBoundaries(_lowVertexX, _lowVertexY, _highVertexX, _highVertexY);
                method_D.SetGridSize(_grid_size_X, _grid_size_Y);
                method_D.SetOutputVoronoiCellData(_outputGraph);

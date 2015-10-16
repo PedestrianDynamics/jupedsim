@@ -412,8 +412,7 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
           exit(EXIT_FAILURE);
      }
 
-
-     string point=voronoiLocation+"/points"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
+     /*string point=voronoiLocation+"/points"+_trajName+"_id_"+_measureAreaId+"_"+frameId+".dat";
      ofstream points (point.c_str());
      if( points.is_open())
      {
@@ -426,21 +425,20 @@ void Method_D::OutputVoroGraph(const string & frameId, vector<polygon_2d>& polyg
      {
           Log->Write("ERROR:\tcannot create the file <%s>",point.c_str());
           exit(EXIT_FAILURE);
-     }
+     }*/
+
      if(_plotVoronoiCellData)
      {
 		 string parameters_rho="python "+_scriptsLocation+"/_Plot_cell_rho.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-				 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
-				 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
+				 " -g "+_geometryFileName;
 		 string parameters_v="python "+_scriptsLocation+"/_Plot_cell_v.py -f \""+ voronoiLocation + "\" -n "+ _trajName+"_id_"+_measureAreaId+"_"+frameId+
-					 " -x1 "+boost::lexical_cast<std::string>(_geoMinX*CMtoM)+" -x2 "+boost::lexical_cast<std::string>(_geoMaxX*CMtoM)+" -y1 "+
-					 boost::lexical_cast<std::string>(_geoMinY*CMtoM)+" -y2 "+boost::lexical_cast<std::string>(_geoMaxY*CMtoM);
+					 " -g "+_geometryFileName;
 		 //Log->Write("INFO:\t%s",parameters_rho.c_str());
 		 Log->Write("INFO:\tPlotting Voronoi Cell at the frame <%s>",frameId.c_str());
 		 system(parameters_rho.c_str());
 		 system(parameters_v.c_str());
      }
-     points.close();
+     //points.close();
      polys.close();
      velo.close();
 }
@@ -494,6 +492,11 @@ void Method_D::SetGeometryBoundaries(double minX, double minY, double maxX, doub
 	_geoMinY = minY;
 	_geoMaxX = maxX;
 	_geoMaxY = maxY;
+}
+
+void Method_D::SetGeometryFileName(const std::string& geometryFile)
+{
+	_geometryFileName=geometryFile;
 }
 
 void Method_D::SetGridSize(double x, double y)

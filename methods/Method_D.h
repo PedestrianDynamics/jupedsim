@@ -55,6 +55,7 @@ public:
      void SetAreaIndividualFD(polygon_2d areaindividualFD);
      void Setcutbycircle(double radius,int edges);
      void SetGeometryPolygon(polygon_2d geometryPolygon);
+     void SetGeometryFileName(const std::string& geometryFile);
      void SetGeometryBoundaries(double minX, double minY, double maxX, double maxY);
      void SetGridSize(double x, double y);
      void SetCalculateProfiles(bool calcProfile);
@@ -91,6 +92,7 @@ private:
      float _fps;
      bool OpenFileMethodD();
      bool OpenFileIndividualFD();
+     std::string _geometryFileName;
 
      std::vector<polygon_2d> GetPolygons(std::vector<double>& XInFrame, std::vector<double>& YInFrame,
                std::vector<double>& VInFrame, std::vector<int>& IdInFrame);
