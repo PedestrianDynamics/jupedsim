@@ -37,9 +37,9 @@ CHECK
 CLOSED: [2015-06-30 Tue 14:54]
 - State "DONE"       from "TODO"       [2015-06-30 Tue 14:54]
 
-** TODO test_11
-PASS
-- @Ulrich: only 3 peds (from 1000) choose the second exit 
+** DONE test_11
+CLOSED: [2015-07-06 Mon 13:32]
+- State "DONE"       from "TODO"       [2015-07-06 Mon 13:32]
 
 ** DONE test_12
 CLOSED: [2015-06-29 Mon 15:27]
@@ -47,7 +47,9 @@ CLOSED: [2015-06-29 Mon 15:27]
 - Maybe we have to slightly modify the geometry like PTV did. We do
   not have a "buffer" room at the end
 
-** TODO test_13
+** DONE test_13
+CLOSED: [2015-07-06 Mon 08:52]
+- State "DONE"       from "TODO"       [2015-07-06 Mon 08:52]
 - @Mohcine: We have to make the transition to/from stair smoother 
 
 ** TODO test_14

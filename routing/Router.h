@@ -61,6 +61,12 @@ public:
       * Constructor
       */
      Router();
+
+     /**
+      * Constructor
+      * @param id
+      * @param s
+      */
      Router(int id, RoutingStrategy s);
 
      /**
@@ -91,20 +97,15 @@ public:
      const std::vector<int> GetFinalDestinations() const;
 
      /**
-      * Set the id of the router as defined in the person file
-      */
-     void SetID(int id);
-
-     /**
       * @return the id of the router as defined in the person file
       */
      int GetID() const;
 
      /**
       * The strategy is automatically set based on the description in the
-      * person file.
+      * ini file.
       */
-     void SetStrategy(RoutingStrategy strategy);
+     void SetStrategy(const RoutingStrategy& strategy);
 
      /**
       * The strategy is automatically set based on the description in the
@@ -125,6 +126,12 @@ public:
       * @param b the building object
       */
      virtual bool Init(Building* b) = 0;
+
+     /**
+      * Parse additional parameters provided for the specific router
+      * @return
+      */
+     virtual bool ParseAdditionalParameters(){return true;};
 
 };
 

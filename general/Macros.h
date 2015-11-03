@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 
 #ifndef M_PI
@@ -49,7 +50,7 @@
 //#define _USE_PROTOCOL_BUFFER 1
 
 #define JPS_OLD_VERSION "0.5" // this version is still supported
-#define JPS_VERSION_MINOR "6"
+#define JPS_VERSION_MINOR "7"
 #define JPS_VERSION_MAJOR "0"
 
 #define JPS_VERSION JPS_VERSION_MAJOR "." JPS_VERSION_MINOR
@@ -60,19 +61,13 @@
 #endif
 
 // precision error
-#define J_EPS 0.001
+#define J_EPS  0.001//0.001
 #define J_EPS_EVENT 0.00001 //zum pruefen des aktuellen Zeitschrittes auf events
 #define J_EPS_DIST 0.05// [m]
 
 #define J_EPS_GOAL 0.005 /// [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
-
-// routing macros
-#define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
-#define J_QUEUE_VEL_THRESHOLD_JAM 0.2 // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation
-#define CBA_THRESHOLD 0.15
-#define OBSTRUCTION 4
 
 // Length of array
 #define CLENGTH 1000
@@ -86,6 +81,8 @@
 // Linked cells
 #define LIST_EMPTY  -1
 
+// Not-a-Number (NaN)
+#define J_NAN std::numeric_limits<double>::quiet_NaN()
 
 enum RoomState {
      ROOM_CLEAN=0,
@@ -122,10 +119,10 @@ enum RoutingStrategy {
 enum OperativModels {
     MODEL_GFCM=1,
     MODEL_GOMPERTZ,
+    MODEL_VELOCITY
     MODEL_GRADIENT
 //    MODEL_ORCA,
 //    MODEL_CFM,
-//    MODEL_VELO
 //    MODEL_GNM
 };
 
@@ -138,6 +135,12 @@ enum AgentColorMode {
      BY_GROUP,
      BY_FINAL_GOAL,
      BY_INTERMEDIATE_GOAL
+};
+
+enum LineIntersectType {
+	NO_INTERSECTION = 0,
+	INTERSECTION,
+	OVERLAP // overlap, parallel, no intersection
 };
 //global functions for convenience
 
@@ -206,6 +209,14 @@ inline std::string concatenate(std::string const& name, int i) {
      return s.str();
 }
 
+inline void ReplaceStringInPlace(std::string& subject, const std::string& search,
+                          const std::string& replace) {
+    size_t pos = 0;
+    while((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
 //**************************************************************
 //useful colors attributes for debugging
 //**************************************************************

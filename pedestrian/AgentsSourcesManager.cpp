@@ -2,7 +2,7 @@
  * \file        AgentsSourcesManager.cpp
  * \date        Apr 14, 2015
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum J��lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -32,16 +32,16 @@
 #include "StartDistribution.h"
 #include "PedDistributor.h"
 #include "AgentsSource.h"
-#include "../voronoi/VoronoiDiagramGenerator.h"
 #include "../geometry/Building.h"
 #include "../geometry/Point.h"
-
 
 #include "../mpi/LCGrid.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
 #include "AgentsQueue.h"
+
+#include "../voronoi-boost/VoronoiPositionGenerator.h"
 
 using namespace std;
 
@@ -78,7 +78,7 @@ void AgentsSourcesManager::Run()
      //it might be better to use a timer
      _isCompleted = false;
      bool finished = false;
-     long updateFrequency = 5;     // 1 second
+     long updateFrequency = 2;     // 1 = second
      do
      {
           int current_time = Pedestrian::GetGlobalTime();
@@ -90,7 +90,7 @@ void AgentsSourcesManager::Run()
                _lastUpdateTime = current_time;
           }
           //wait some time
-          //std::this_thread::sleep_for(std::chrono::milliseconds(1));
+          // std::this_thread::sleep_for(std::chrono::milliseconds(1));
      } while (!finished);
      Log->Write("INFO:\tTerminating agent manager thread");
      _isCompleted = true;
@@ -101,20 +101,23 @@ bool AgentsSourcesManager::ProcessAllSources() const
      bool empty=true;
      for (const auto& src : _sources)
      {
-
           if (src->GetPoolSize())
           {
                vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
                Log->Write("INFO:\tSource %d generating %d agents (%d remaining)",src->GetId(),peds.size(),src->GetPoolSize());
 
-               ComputeBestPositionRandom(src.get(), peds);
+               //ComputeBestPositionRandom(src.get(), peds);
                //todo: compute the optimal position for insertion using voronoi
-               //for (auto&& ped : peds)
-               //{
-               //ComputeBestPositionVoronoi(src.get(), ped);
-               //ped->Dump(ped->GetID());
-               //}
+               if( !ComputeBestPositionVoronoiBoost(src.get(), peds, _building) )
+                    Log->Write("INFO:\t there was no place for some pedestrians");
+               //ComputeBestPositionTotalRandom(src.get(), peds );
+               //ComputeBestPositionDummy( src.get(), peds );
+               /*for (auto&& ped : peds)
+               {
+               ComputeBestPositionVoronoiBoost(src.get(), ped);
+               //ped->Dump(ped->GetID(),0);
+               }*/
                AgentsQueueIn::Add(peds);
                empty = false;
           }
@@ -123,6 +126,58 @@ bool AgentsSourcesManager::ProcessAllSources() const
      return empty;
 }
 
+//4 agents frequency, just for an example
+void AgentsSourcesManager::ComputeBestPositionDummy(AgentsSource* src,
+          vector<Pedestrian*>& peds)const
+{
+     peds[0]->SetPos( Point(10,5.5) );
+     peds[1]->SetPos( Point(10,4.9) );
+     peds[2]->SetPos( Point(10,4.3) );
+     peds[3]->SetPos( Point(10,3.7) );
+
+     /*peds[0]->SetPos( Point(10,5.4) );
+	peds[1]->SetPos( Point(10,4.6) );
+	peds[2]->SetPos( Point(10,3.8) );*/
+
+     for(auto&& ped : peds)
+     {
+          Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+          double speed=ped->GetV0Norm();
+          v=v*speed;
+          ped->SetV(v);
+     }
+}
+
+void AgentsSourcesManager::ComputeBestPositionCompleteRandom(AgentsSource* src,
+          vector<Pedestrian*>& peds)const
+{
+     auto dist = src->GetStartDistribution();
+     auto subroom = _building->GetRoom(dist->GetRoomId())->GetSubRoom(dist->GetSubroomID());
+     vector<Point> positions = PedDistributor::PossiblePositions(*subroom);
+
+     //TODO: get the seed from the simulation
+     srand (time(NULL));
+
+     for (auto& ped : peds)
+     {
+          if( positions.size() )
+          {
+               int index = rand()%positions.size();
+               Point new_pos = positions[index];
+               positions.erase(positions.begin() + index);
+               ped->SetPos(new_pos, true);
+               AdjustVelocityByNeighbour(ped);
+          }
+          else
+          {
+               Log->Write("\t No place for a pedestrian");
+               break;
+          }
+     }
+
+}
+
+/*
 void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
           Pedestrian* agent) const
 {
@@ -239,6 +294,9 @@ void AgentsSourcesManager::ComputeBestPositionVoronoi(AgentsSource* src,
      //compute the best position
      //exit(0);
 }
+ */
+
+
 
 void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           std::vector<Pedestrian*>& peds) const
@@ -252,14 +310,18 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
      double bounds[4] = { 0, 0, 0, 0 };
      dist->Getbounds(bounds);
 
+     std::vector<Pedestrian*> peds_without_place;
+
      vector<Point> extra_positions;
 
-     for (auto& ped : peds)
+     std::vector<Pedestrian*>::iterator iter_ped;
+     for (iter_ped = peds.begin(); iter_ped != peds.end(); )
      {
           //need to be called at each iteration
           SortPositionByDensity(positions, extra_positions);
 
           int index = -1;
+          double radius = ( (*iter_ped)->GetEllipse() ).GetBmax()   ;
 
           //in the case a range was specified
           //just take the first element
@@ -267,11 +329,31 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
           {
                Point pos = positions[a];
                //cout<<"checking: "<<pos.toString()<<endl;
+               // for positions inside bounds, check it there is enough space
                if ((bounds[0] <= pos._x) && (pos._x <= bounds[1])
                          && (bounds[2] <= pos._y) && (pos._y < bounds[3]))
                {
-                    index = a;
-                    break;
+
+            	   bool enough_space = true;
+
+            	   //checking enough space!!
+            	   vector<Pedestrian*> neighbours;
+            	   _building->GetGrid()->GetNeighbourhood(pos,neighbours);
+
+				   for (const auto& ngh: neighbours)
+					   if(  (ngh->GetPos() - pos).NormSquare() < 4*radius*radius )
+					   {
+							enough_space = false;
+							break;
+					   }
+
+
+				   if( enough_space )
+				   {
+					   index = a;
+					   break;
+				   }
+
                }
           }
           if (index == -1)
@@ -283,22 +365,33 @@ void AgentsSourcesManager::ComputeBestPositionRandom(AgentsSource* src,
                               bounds[0], bounds[1], bounds[2], bounds[3]);
                     Log->Write("     \t Specifying a subroom_id might help");
                     Log->Write("     \t %d positions were available",positions.size());
-                    exit(EXIT_FAILURE);
+                    //exit(EXIT_FAILURE);
                }
+               //dump the pedestrian, move iterator
+               peds_without_place.push_back(*iter_ped);
+               iter_ped=peds.erase(iter_ped);
           }
-          else
+          else //we found a position with enough space
           {
                const Point& pos = positions[index];
-               extra_positions.push_back(pos);
-               ped->SetPos(pos, true); //true for the initial position
-               positions.erase(positions.begin() + index);
 
-               //at this point we have a position
-               //so we can adjust the velocity
-               //AdjustVelocityUsingWeidmann(ped);
-               AdjustVelocityByNeighbour(ped);
+			   extra_positions.push_back(pos);
+			   (*iter_ped)->SetPos(pos, true); //true for the initial position
+			   positions.erase(positions.begin() + index);
+
+			   //at this point we have a position
+			   //so we can adjust the velocity
+			   //AdjustVelocityUsingWeidmann(ped);
+			   AdjustVelocityByNeighbour( (*iter_ped) );
+			   //move iterator
+			   iter_ped++;
+
           }
+
+          //return the pedestrians without place
      }
+     if(peds_without_place.size()>0)
+         src->AddAgentsToPool(peds_without_place);
 }
 
 void AgentsSourcesManager::AdjustVelocityByNeighbour(Pedestrian* ped) const
@@ -419,7 +512,8 @@ void AgentsSourcesManager::SortPositionByDensity(std::vector<Point>& positions, 
 
           for(const auto& p: neighbours)
           {
-               if( (pt-p->GetPos()).NormSquare()<=radius_square)
+              //FIXME: p  can be null, if deleted in the main simulation thread.
+        	  if( p && (pt-p->GetPos()).NormSquare()<=radius_square)
                     density+=1.0;
           }
 

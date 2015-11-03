@@ -77,7 +77,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
      		</agent_parameters>
 		</model>
 
-    <model operational_model_id="3" description="gradnav">
+    <model operational_model_id="4" description="gradnav">
       <model_parameters>
 	<solver>euler</solver>
 	<stepsize>0.01</stepsize>

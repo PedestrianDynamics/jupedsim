@@ -2,9 +2,34 @@
 All notable changes to this project will be documented in this file.
 
 
-[comment]: <> (## v0.8.0 [Unreleased])
+## v0.8.0 [Unreleased]
+
+#### JPSCORE
+- Added more validation tests
+- Added statistics (calculate exit usage) for all exits
+- Added voronoi based algorithm for inserting aents coming from teh source or from matsim
+- New option for the quickest path router. Sample options are:
+ ```<parameters default_strategy="local_shortest">```
+  ```<parameters default_strategy="global_shortest">``` 
+   ``` <parameters cba_gain="0.15" reference_peds_selection="single" congestion_ratio="0.8" queue_vel_escaping_jam="0.2" queue_vel_new_room="0.7" visibility_obstruction="4">
+   ```
+- ...
+  
+#### JPSVIS
+- Added option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
+``` in the header of the trajectory file. Alternatively drag and drop a vtk file on JPSvis.
  
-## v0.7.0 [Unreleased]
+- Fixed error displaying the total number of frames when using the scroolbar
+ 
+#### JPSREPORT
+- Added geometry information while plotting the voronoi cells
+- Added option to disable plotting
+- Issue a warning when the voronoi cell cannot be calculated 
+- Fixed error where all trajectories were colinear
+
+#### JPSEDITOR
+ 
+## v0.7.0 [2015-07-15]
 
 ### New Module
 - JuPedSim: Editor for the geometry

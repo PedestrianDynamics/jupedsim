@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<JuPedSim project="JPS-Project" version="0.6"
+<JuPedSim project="JPS-Project" version="0.7"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-xsi:noNamespaceSchemaLocation="http://xsd.jupedsim.org/0.6/jps_ini_core.xsd">
+xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
 	<!-- seed used for initialising random generator -->
 	<seed>12542</seed>
 	<!-- geometry file -->
 	<geometry>bottleneck_geo.xml</geometry>
-	<!-- trajectories file and format -->
+	<!-- traectories file and format -->
 	<trajectories format="xml-plain"  fps="8">
 		<file location="bottleneck_traj.xml" />
 	</trajectories>

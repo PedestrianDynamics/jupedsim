@@ -55,6 +55,8 @@ SubRoom::SubRoom()
      _roomID=-1;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
+     _poly_help_constatnt = vector<double> ();
+     _poly_help_multiple = vector<double> ();
      _obstacles=vector<Obstacle*> ();
 
      _crossings = vector<Crossing*>();
@@ -65,7 +67,10 @@ SubRoom::SubRoom()
      _planeEquation[1]=0.0;
      _planeEquation[2]=0.0;
      _cosAngleWithHorizontalPlane=0;
-
+     _tanAngleWithHorizontalPlane=0;
+     _minElevation=0;
+     _maxElevation=0;
+     
      _goalIDs = vector<int> ();
      _area = 0.0;
      _uid = _static_uid++;
@@ -79,8 +84,29 @@ SubRoom::~SubRoom()
      }
      _obstacles.clear();
 }
+/*
+void SubRoom::SetHelpVariables()
+{
+	unsigned int i, j= _poly.size()-1;
 
+	for( i=0; i< _poly.size(); i++)
+	{
+		if ( _poly[i].GetY() == _poly[j].GetY() ) //not important
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() ) ;
+			_poly_help_multiple.push_back( 0 );
+		}
+		else
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() - ( _poly[i].GetY()*_poly[j].GetX() ) / ( _poly[j].GetY() - _poly[i].GetY())
+										+ ( _poly[i].GetY()*_poly[i].GetX() )/ ( _poly[j].GetY() - _poly[i].GetY()  )  );
 
+			_poly_help_multiple.push_back( (_poly[j].GetX()-_poly[i].GetX())/(_poly[j].GetY()-_poly[i].GetY()) );
+		}
+	j=i;
+	}
+}
+*/
 void SubRoom::SetSubRoomID(int ID)
 {
      _id = ID;
@@ -128,10 +154,6 @@ const vector<Obstacle*>& SubRoom::GetAllObstacles() const
      return _obstacles;
 }
 
-int SubRoom::GetNumberOfGoalIDs() const
-{
-     return (int)_goalIDs.size();
-}
 
 const vector<int>& SubRoom::GetAllGoalIDs() const
 {
@@ -177,16 +199,18 @@ void SubRoom::AddGoalID(int ID)
      _goalIDs.push_back(ID);
 }
 
-void SubRoom::AddCrossing(Crossing* line)
+bool SubRoom::AddCrossing(Crossing* line)
 {
      _crossings.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
-void SubRoom::AddTransition(Transition* line)
+bool SubRoom::AddTransition(Transition* line)
 {
      _transitions.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
 void SubRoom::AddNeighbor(SubRoom* sub)
@@ -197,19 +221,20 @@ void SubRoom::AddNeighbor(SubRoom* sub)
      }
 }
 
-void SubRoom::AddHline(Hline* line)
+bool SubRoom::AddHline(Hline* line)
 {
      for(unsigned int i=0;i<_hlines.size();i++)
      {
           if (line->GetID()==_hlines[i]->GetID())
           {
                Log->Write("INFO:\tskipping duplicate hline [%d] with id [%d]",_id,line->GetID());
-               return;
+               return false;
           }
      }
 
      _hlines.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
 const vector<Crossing*>& SubRoom::GetAllCrossings() const
@@ -259,6 +284,19 @@ void SubRoom::RemoveGoalID(int ID)
      Log->Write("There is no goal with that id to remove");
 }
 
+bool SubRoom::IsAccessible()
+{
+    //at least one door is open
+     for(auto&& tran: _transitions)
+     {
+          if(tran->IsOpen()==true) return true;
+     }
+     for(auto&& cros: _crossings)
+     {
+          if(cros->IsOpen()==true) return true;
+     }
+    return false;
+}
 
 void SubRoom::CalculateArea()
 {
@@ -436,6 +474,8 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _planeEquation[2]=C;
      //compute and cache the cosine of angle with the plane z=h
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
+     // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1) 
+     _tanAngleWithHorizontalPlane = sqrt(A*A+B*B); // n1.n2 = -1
 }
 
 const double* SubRoom::GetPlaneEquation() const
@@ -453,6 +493,33 @@ double SubRoom::GetCosAngleWithHorizontal() const
      return _cosAngleWithHorizontalPlane;
 
 }
+
+double SubRoom::GetTanAngleWithHorizontal() const
+{
+     return _tanAngleWithHorizontalPlane;
+
+}
+
+double SubRoom::GetMinElevation() const
+{
+      return _minElevation;
+}
+
+double SubRoom::GetMaxElevation() const
+{
+      return _maxElevation;
+}
+
+void SubRoom::SetMinElevation(double minElevation)
+{
+      _minElevation = minElevation;
+}
+
+void SubRoom::SetMaxElevation(double maxElevation)
+{
+      _maxElevation = maxElevation;
+}
+
 
 bool SubRoom::CheckObstacles()
 {
@@ -492,7 +559,7 @@ bool SubRoom::SanityCheck()
           if((IsConvex()==false) && (_hlines.size()==0))
           {
                Log->Write("WARNING:\t Room [%d] Subroom [%d] is not convex!",_roomID,_id);
-               Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+               Log->Write("        \t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
           }
@@ -500,7 +567,7 @@ bool SubRoom::SanityCheck()
           if(_hlines.size()==0)
           {
                Log->Write("WARNING:\t you have obstacles in room [%d] Subroom [%d]!",_roomID,_id);
-               Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+               Log->Write("        \t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
           }
@@ -597,12 +664,36 @@ bool SubRoom::SanityCheck()
                {
                     Log->Write("ERROR: Overlapping between crossing %s and  transition %s ",c->toString().c_str(),t->toString().c_str());
                     exit(EXIT_FAILURE);
-                    //return false;
+                    return false;
                }
           }
      }
 
      return true;
+}
+
+bool SubRoom::Triangulate()
+{
+     if(IsClockwise())
+          std::reverse(_poly.begin(), _poly.end());
+
+     _delauneyTriangulator.SetOuterPolygone(_poly);
+
+     for (const auto & obst: _obstacles)
+     {
+          auto outerhullObst=obst->GetPolygon();
+          if(obst->IsClockwise())
+               std::reverse(outerhullObst.begin(), outerhullObst.end());
+          _delauneyTriangulator.AddHole(outerhullObst);
+     }
+
+     _delauneyTriangulator.Triangulate();
+     return true;
+}
+
+const std::vector<p2t::Triangle*> SubRoom::GetTriangles()
+{
+     return _delauneyTriangulator.GetTriangles();
 }
 
 ///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
@@ -645,7 +736,7 @@ bool SubRoom::IsConvex()
 bool SubRoom::IsClockwise()
 {
      if(_poly.size()<3) {
-          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]",_id);
           return false;
           //exit(EXIT_FAILURE);
      }
@@ -679,6 +770,16 @@ bool SubRoom::IsPartOfPolygon(const Point& ptw)
           }
      }
      return true;
+}
+
+bool SubRoom::IsInObstacle(const Point& pt)
+{
+     //write the obstacles
+     for (auto&& obst : _obstacles)
+     {
+          if(obst->Contains(pt)) return true;
+     }
+     return false;
 }
 
 /************************************************************
@@ -747,10 +848,10 @@ string NormalSubRoom::WriteSubRoom() const
           const Point& pos = obst->GetCentroid();
 
           //add the obstacle caption
-          char tmp[CLENGTH];
-          sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
+          char tmp1[CLENGTH];
+          sprintf(tmp1, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
                     , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
-          s.append(tmp);
+          s.append(tmp1);
      }
 
      return s;
@@ -806,6 +907,38 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           Log->Write("ERROR:\t Overlapping between walls and goals");
           return false;
      }
+     Point pIntsct(J_NAN, J_NAN);
+     int itr = 1;
+     for (auto& it : _walls) {
+    	 int j = 0;
+    	 for (unsigned int i = itr; i < copy.size(); ++i) {
+    		 if (it.IntersectionWith(*copy[i], pIntsct) == true) {
+    			 if (it.ShareCommonPointWith(*copy[i]) == false) {
+    				 char tmp[CLENGTH];
+    				 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    				 Log->Write(tmp);
+    				 sprintf(tmp, "ERROR: \tWalls %s & %s intersect: !!!\n", it.toString().c_str(),
+    						 copy[i]->toString().c_str());
+    				 Log->Write(tmp);
+    				 return false;
+    			 }
+    			 else
+    				 ++j;
+    		 }
+    	 }
+    	 if (j <= 2)
+    		 j = 0;
+    	 else {
+    		 char tmp[CLENGTH];
+    		 sprintf(tmp, "ERROR: \tNormanSubRoom::ConvertLineToPoly(): SubRoom %d Room %d !!\n", GetSubRoomID(), GetRoomID());
+    		 Log->Write(tmp);
+    		 sprintf(tmp, "ERROR: \tWall %s shares edge with multiple walls!!!\n", it.toString().c_str());
+    		 Log->Write(tmp);
+    		 return false;
+    	 }
+    	 ++itr;
+     }
+
 
      line = copy[0];
      tmpPoly.push_back(line->GetPoint1());
@@ -848,7 +981,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
            {
                 if(IsPartOfPolygon(ptw)==false)
                 {
-                     Log->Write("ERROR:\t Wall was not used during polygon creation for subroom: %s",w.toString().c_str());
+                     Log->Write("ERROR:\t Wall %s was not used during polygon creation for room/subroom: %d/%d",w.toString().c_str(),GetRoomID(),GetSubRoomID());
                      return false;
                 }
            }
@@ -861,7 +994,7 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
           {
                if(IsPartOfPolygon(ptw)==false)
                {
-                    Log->Write("ERROR:\t goal was not used during polygon creation for subroom: %s",g->toString().c_str());
+                    Log->Write("ERROR:\t exit/crossing/transition %s was not used during polygon creation for room/subroom: %d/%d",g->toString().c_str(),GetRoomID(),GetSubRoomID());
                     return false;
                }
           }

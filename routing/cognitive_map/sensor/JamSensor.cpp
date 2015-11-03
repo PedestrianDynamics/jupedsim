@@ -1,14 +1,34 @@
 /**
- * @file JamSensor.cpp
- * @author David H. <d.haensel@fz-juelich.de>
- * @date 05, 2014
- * @brief
- */
-
+ * \file        JamSensor.cpp
+ * \date        Jan 1, 2014
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ *
+ * \section License
+ * This file is part of JuPedSim.
+ *
+ * JuPedSim is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * JuPedSim is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * \section Description
+ * detects jam in the next rooms
+ *
+ *
+ **/
 #include "JamSensor.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 #include <set>
@@ -25,7 +45,7 @@ std::string JamSensor::GetName() const
 void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = (*cognitive_map->GetNavigationGraph())[sub_room];
+    GraphVertex * vertex = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph())[sub_room];
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
 
     for(GraphVertex::EdgesContainer::const_iterator it = edges->begin(); it != edges->end(); ++it) {

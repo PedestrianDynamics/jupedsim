@@ -70,15 +70,61 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _linkedCellGrid = nullptr;
 
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
-     this->LoadGeometry();
-     this->LoadRoutingInfo(filename);
-     //this->AddSurroundingRoom();
-     this->InitGeometry();
-     this->LoadTrafficInfo();
-     distributor.Distribute(this);
-     this->InitGrid(linkedCellSize);
-     _routingEngine->Init(this);
-     this->SanityCheck();
+     if(!LoadGeometry())
+     {
+          Log->Write("ERROR:\t could not load the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+
+
+     if(!LoadRoutingInfo(filename))
+     {
+          Log->Write("ERROR:\t could not load extra routing information!");
+          exit (EXIT_FAILURE);
+     }
+
+//     this->AddSurroundingRoom();
+
+     if(!InitGeometry())
+     {
+          Log->Write("ERROR:\t could not initialize the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+     //triangulate the geometry
+     if(!Triangulate())
+     {
+          Log->Write("ERROR:\t could not triangulate the geometry!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!LoadTrafficInfo() )
+     {
+          Log->Write("ERROR:\t could not load extra traffic information!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!distributor.Distribute(this))
+     {
+          Log->Write("ERROR:\t could not distribute the pedestrians");
+          exit (EXIT_FAILURE);
+     }
+
+     InitGrid(linkedCellSize);
+
+     if(! _routingEngine->Init(this))
+     {
+          Log->Write("ERROR:\t could not initialize the routers!");
+          exit (EXIT_FAILURE);
+     }
+
+     if(!SanityCheck())
+     {
+          Log->Write("ERROR:\t There are sanity errors in the geometry file");
+          exit (EXIT_FAILURE);
+     }
+
 }
 #endif
 
@@ -295,8 +341,38 @@ bool Building::InitGeometry()
                     if(!obst->ConvertLineToPoly())
                          return false;
                }
+
+               double minElevation = FLT_MAX;
+               double maxElevation = -FLT_MAX;
+               for(auto && wall:itr_subroom.second->GetAllWalls())
+               {
+                     const Point& P1 = wall.GetPoint1();
+                     const Point& P2 = wall.GetPoint2();
+                     if(minElevation > itr_subroom.second->GetElevation(P1))
+                     {
+                           minElevation = itr_subroom.second->GetElevation(P1);
+                     }
+                
+                     if(maxElevation < itr_subroom.second->GetElevation(P1))
+                     {
+                           maxElevation = itr_subroom.second->GetElevation(P1);
+                     }
+                
+                     if(minElevation > itr_subroom.second->GetElevation(P2))
+                     {
+                           minElevation = itr_subroom.second->GetElevation(P2);
+                     }
+                
+                     if(maxElevation < itr_subroom.second->GetElevation(P2))
+                     {
+                           maxElevation = itr_subroom.second->GetElevation(P2);
+                     }          
+               }
+               itr_subroom.second->SetMaxElevation(maxElevation);
+               itr_subroom.second->SetMinElevation(minElevation);
           }
      }
+
 
      // look and save the neighbor subroom for improving the runtime
      // that information is already present in the crossing/transitions
@@ -454,9 +530,9 @@ bool Building::LoadGeometry(const std::string &geometryfile)
 
                SubRoom* subroom = NULL;
 
-               if (type == "stair") {
+               if (type == "stair" || type == "escalator" || type == "idle_escalator") {
                     if(xSubRoom->FirstChildElement("up")==NULL) {
-                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the stair");
+                         Log->Write("ERROR:\t the attribute <up> and <down> are missing for the " + type);
                          Log->Write("ERROR:\t check your geometry file");
                          return false;
                     }
@@ -671,7 +747,7 @@ Room* Building::GetRoom(string caption) const
      exit(EXIT_FAILURE);
 }
 
-void Building::AddCrossing(Crossing* line)
+bool Building::AddCrossing(Crossing* line)
 {
      if (_crossings.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
@@ -682,9 +758,10 @@ void Building::AddCrossing(Crossing* line)
           exit(EXIT_FAILURE);
      }
      _crossings[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddTransition(Transition* line)
+bool Building::AddTransition(Transition* line)
 {
      if (_transitions.count(line->GetID()) != 0) {
           char tmp[CLENGTH];
@@ -695,16 +772,17 @@ void Building::AddTransition(Transition* line)
           exit(EXIT_FAILURE);
      }
      _transitions[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddHline(Hline* line)
+bool Building::AddHline(Hline* line)
 {
      if (_hLines.count(line->GetID()) != 0) {
           // check if the lines are identical
           Hline* ori= _hLines[line->GetID()];
           if(ori->operator ==(*line)) {
                Log->Write("INFO: \tSkipping identical hlines with ID [%d]",line->GetID());
-               return;
+               return false;
           } else {
                Log->Write(
                          "ERROR: Duplicate index for hlines found [%d] in Routing::AddHline(). You have [%d] hlines",
@@ -713,9 +791,10 @@ void Building::AddHline(Hline* line)
           }
      }
      _hLines[line->GetID()] = line;
+     return true;
 }
 
-void Building::AddGoal(Goal* goal)
+bool Building::AddGoal(Goal* goal)
 {
      if (_goals.count(goal->GetId()) != 0) {
           Log->Write(
@@ -724,6 +803,7 @@ void Building::AddGoal(Goal* goal)
           exit(EXIT_FAILURE);
      }
      _goals[goal->GetId()] = goal;
+     return true;
 }
 
 const map<int, Crossing*>& Building::GetAllCrossings() const
@@ -848,7 +928,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      return NULL;
 }
 
-SubRoom* Building::GetSubRoomByUID( int uid)
+SubRoom* Building::GetSubRoomByUID( int uid) const
 {
      for(auto&& itr_room: _rooms)
      {
@@ -896,6 +976,21 @@ bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<Sub
           }
      }
 
+     return true;
+}
+
+bool Building::Triangulate()
+{
+     Log->Write("INFO:\tTriangulating the geometry");
+     for(auto&& itr_room: _rooms)
+     {
+          for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
+          {
+               if(itr_subroom.second->Triangulate()==false)
+                    return false;
+          }
+     }
+     Log->Write("INFO:\tDone...");
      return true;
 }
 
@@ -981,6 +1076,9 @@ void Building::InitGrid(double cellSize)
      } else {
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
+
+     //TODO: the number of pedestrian should be calculated using the capacity of the sources
+     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
      _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
@@ -1162,22 +1260,19 @@ void Building::DeletePedestrian(Pedestrian* &ped)
                }
 
           }
-          //cout << "rescued agent: " << (*it)->GetID()<<endl;
-
-          static int totalPeds= _allPedestians.size();
-          _allPedestians.erase(it);
-
-          int nowPeds= _allPedestians.size();
-          Log->ProgressBar(totalPeds, totalPeds-nowPeds);
      }
      //update the stats before deleting
-     Transition* trans =GetTransitionByUID(ped->GetExitIndex());
-     if(trans)
-     {
-          trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-     }
+//     Transition* trans =GetTransitionByUID(ped->GetExitIndex());
+//     if(trans)
+//     {
+//          trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
+//          //this can happen if the pedesrians is pushed too hard
+//          // or cant stop due to high velocity
+//          // he will remain in the simulation in that case
+//          //if(trans->IsOpen()==false) return;
+//     }
+     _allPedestians.erase(it);
      delete ped;
-     //ped=nullptr;
 }
 
 const vector<Pedestrian*>& Building::GetAllPedestrians() const
@@ -1273,13 +1368,13 @@ Pedestrian* Building::GetPedestrian(int pedID) const
 
 Transition* Building::GetTransitionByUID(int uid) const
 {
-     //eventually
-     map<int, Transition*>::const_iterator itr;
-     for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-          if (itr->second->GetUniqueID()== uid)
-               return itr->second;
+
+     for(auto && trans: _transitions)
+     {
+          if(trans.second->GetUniqueID()==uid)
+               return trans.second;
      }
-     return NULL;
+     return nullptr;
 }
 
 

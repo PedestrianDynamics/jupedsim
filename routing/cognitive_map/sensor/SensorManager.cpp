@@ -34,17 +34,18 @@
 #include "LastDestinationsSensor.h"
 #include "SmokeSensor.h"
 #include "JamSensor.h"
+#include "locater.h"
 
 #include "../../../geometry/Building.h"
 #include "../CognitiveMapStorage.h"
 #include "../navigation_graph/GraphVertex.h"
 #include "../NavigationGraph.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 
 SensorManager::SensorManager(const Building * b, CognitiveMapStorage * cms)
      : building(b), cm_storage(cms)
 {
-
+    _periodicUpdateInterval=1/UPDATE_RATE;
 }
 
 SensorManager::~SensorManager()
@@ -76,6 +77,7 @@ SensorManager * SensorManager::InitWithAllSensors(const Building * b, CognitiveM
 
     sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
     sensor_manager->Register(new JamSensor(b), PERIODIC | NO_WAY | CHANGED_ROOM );
+    sensor_manager->Register(new Locater(b,sensor_manager->GetIntVPeriodicUpdate()),  PERIODIC );
 
     return sensor_manager;
 }
@@ -86,6 +88,7 @@ SensorManager *SensorManager::InitWithCertainSensors(const Building * b, Cogniti
 
     sensor_manager->Register(new DiscoverDoorsSensor(b),  NO_WAY );
     sensor_manager->Register(new LastDestinationsSensor(b), CHANGED_ROOM );
+    sensor_manager->Register(new Locater(b,sensor_manager->GetIntVPeriodicUpdate()),  PERIODIC );
 
     std::vector<std::string> sensors = optSto.at("Sensors");
     for (auto &it : sensors )
@@ -104,11 +107,18 @@ SensorManager *SensorManager::InitWithCertainSensors(const Building * b, Cogniti
             double updatet = std::stod(optSto.at("smokeOptions").at(1));
             double finalt = std::stod(optSto.at("smokeOptions").at(2));
             sensor_manager->Register(new SmokeSensor(b,smokeFilepath,updatet,finalt), INIT | PERIODIC | NO_WAY | CHANGED_ROOM );
-
         }
-
     }
 
-
     return sensor_manager;
+}
+
+void SensorManager::SetIntVPeriodicUpdate(const double &interval)
+{
+    _periodicUpdateInterval=interval;
+}
+
+const double &SensorManager::GetIntVPeriodicUpdate()
+{
+    return _periodicUpdateInterval;
 }

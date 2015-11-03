@@ -50,6 +50,7 @@ message Extern2MATSimTrajectories {
      }
 
      optional double time = 1;
+//
      repeated Agent agent = 15;
 }
 

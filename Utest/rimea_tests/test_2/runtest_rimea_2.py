@@ -12,6 +12,8 @@ from a corridor to a stair *smoothly* (no step function).
 In this test we set v0 == v0Upstairs. Hence, we can avoid any delay related to the transition
 from v0 to v0Upstairs.
 
+See Fig. stairs.png
+
 Source:
 ======
 http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdfs
@@ -55,6 +57,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test2)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

@@ -12,11 +12,12 @@ project(JPScore)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
-set(JPSCORE_MINOR_VERSION 6)
+set(JPSCORE_MINOR_VERSION 7)
 set(JPSCORE_PATCH_VERSION 0)
 set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
+
 
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -175,10 +176,10 @@ set (   source_files
   math/ForceModel.cpp
   math/Mathematics.cpp
   math/ODESolver.cpp
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
   math/GradientModel.cpp
+  math/VelocityModel.cpp
   math/OperationalModel.cpp
 
 
@@ -195,7 +196,9 @@ set (   source_files
   pedestrian/AgentsSourcesManager.cpp	
   pedestrian/StartDistribution.cpp
 
+
   voronoi/VoronoiDiagramGenerator.cpp
+  voronoi-boost/VoronoiPositionGenerator.cpp
 
   routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
@@ -212,7 +215,7 @@ set (   source_files
   routing/mesh/Mesh.cpp
 
   routing/CognitiveMapRouter.cpp
-  routing/cognitive_map/CognitiveMap.cpp
+  routing/cognitive_map/GraphNetwork.cpp
   routing/cognitive_map/NavigationGraph.cpp
   routing/cognitive_map/CognitiveMapStorage.cpp
   routing/cognitive_map/AbstractCognitiveMapCreator.cpp
@@ -227,9 +230,19 @@ set (   source_files
   routing/cognitive_map/sensor/JamSensor.cpp
   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
   routing/cognitive_map/sensor/SmokeSensor.cpp
+  routing/cognitive_map/sensor/locater.cpp
   routing/cognitive_map/fire_mesh/FireMesh.cpp
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
+  routing/cognitive_map/cognitiveMap/associations.cpp
+  routing/cognitive_map/cognitiveMap/cognitivemap.cpp
+  routing/cognitive_map/cognitiveMap/waypoints.cpp
+  routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/cognitiveMap/youareherepointer.cpp
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/Tools/triangle.cpp
+
+  visiLibity/source_code/visilibity.cpp
 
 
   poly2tri/common/shapes.cpp
@@ -238,8 +251,7 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
-
- # Utest/Fastmarchtest.cpp
+  events/Event.cpp
   )
 
 set (   header_files
@@ -264,7 +276,7 @@ set (   header_files
 
 
   routing/CognitiveMapRouter.h
-  routing/cognitive_map/CognitiveMap.h
+  routing/cognitive_map/GraphNetwork.h
   routing/cognitive_map/NavigationGraph.h
   routing/cognitive_map/CognitiveMapStorage.h
   routing/cognitive_map/AbstractCognitiveMapCreator.h
@@ -279,9 +291,19 @@ set (   header_files
   routing/cognitive_map/sensor/JamSensor.h
   routing/cognitive_map/sensor/LastDestinationsSensor.h
   routing/cognitive_map/sensor/SmokeSensor.h
+  routing/cognitive_map/sensor/locater.h
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
+  routing/cognitive_map/cognitiveMap/associations.h
+  routing/cognitive_map/cognitiveMap/cognitivemap.h
+  routing/cognitive_map/cognitiveMap/waypoints.h
+  routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/cognitiveMap/youareherepointer.h
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/Tools/triangle.h
+
+  visiLibity/source_code/visilibity.hpp
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
@@ -294,6 +316,7 @@ set (   header_files
   pedestrian/AgentsSourcesManager.h	
   pedestrian/StartDistribution.h
   voronoi/VoronoiDiagramGenerator.h
+  voronoi-boost/VoronoiPositionGenerator.h
 
   mpi/LCGrid.h
 
@@ -323,10 +346,10 @@ set (   header_files
   math/ForceModel.h
   math/Mathematics.h
   math/ODESolver.h
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.h
   math/GompertzModel.h
   math/GradientModel.h
+  math/VelocityModel.h
   math/OperationalModel.h   
 
 
@@ -338,6 +361,7 @@ set (   header_files
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
   events/EventManager.h
+  events/Event.h
   )
 
 
@@ -362,7 +386,7 @@ endif(CGAL_FOUND)
 
 #protocol buffer
 #find_package(Protobuf)
-#if(PROTOBUF_FOUND)
+#if(PROTOBUF_FOUND && GRPC)
 #  message(STATUS "Protocol buffer library found")
 #
 #  include_directories(${PROTOBUF_INCLUDE_DIRS})
@@ -417,10 +441,19 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 #--------------------
+if(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++" )
+endif(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   include(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
   CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+ 
   if( COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   elseif(COMPILER_SUPPORTS_CXX0X)
@@ -429,6 +462,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
   endif()
 endif()
+
 message(STATUS "MSVC: " ${MSVC})
 message(STATUS "MSVC_IDE: " ${MSVC_IDE})
 message(STATUS "MSVC60: " ${MSVC60})

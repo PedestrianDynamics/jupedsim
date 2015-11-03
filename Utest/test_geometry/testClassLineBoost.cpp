@@ -200,6 +200,14 @@ BOOST_AUTO_TEST_CASE(Line_Intersection_test)
     BOOST_CHECK(L1.IntersectionWith(Point(-1.0005, -1), Point(-1.0005, 1)) == false);
     BOOST_CHECK(L1.IntersectionWith(Point(-1, 0.00005), Point(1, 0.00005)) == false);
 
+    Point P3;
+    BOOST_CHECK(L1.IntersectionWith(Point(0.5, 1), Point(0.5, -1), P3) == true);
+    BOOST_CHECK(P3 == Point(0.5, 0));
+    BOOST_CHECK(L1.IntersectionWith(Point(-1, 1), Point(-1, 0), P3) == true);
+    BOOST_CHECK(P3 == Point(-1, 0));
+    BOOST_CHECK(L1.IntersectionWith(Point(-1.04, 1), Point(-1.04, -1), P3) == false);
+    BOOST_CHECK(isnan(P3.GetX()) && isnan(P3.GetY()));
+
 	BOOST_MESSAGE("Leaving line intersection test");
 }
 

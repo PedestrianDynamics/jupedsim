@@ -6,6 +6,61 @@ SUCCESS = 0
 FAILURE = -1
 
 
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
+
+
+def get_polygon(poly):
+    X = []
+    Y = []
+    # for poly in node.getchildren():
+    #     # print "polygon tag: ", poly.tag
+    #     # if poly.tag == "obstacle":
+    #     #     # print poly.getchildren()
+    #     #     # for pobst in poly.getchildren():
+    #     #     #     # print pobst.tag
+    #     #     #     for q in pobst.getchildren(): # vertex
+    #     #     #         X.append( q.attrib['px'] )
+    #     #     #         Y.append( q.attrib['py'] )
+    #     #     pass
+    #     # else:
+    for p in poly.getchildren(): # vertex
+        X.append(p.attrib['px'])
+        Y.append(p.attrib['py'])
+
+    return X, Y
+
+def plot_geometry(filename):
+    tree = ET.parse(geometry)
+    root = tree.getroot()
+    for node in root.iter():
+        tag = node.tag
+        # print "subroom tag", tag
+        if tag == "polygon":
+            X, Y = get_polygon(node)
+            plt.plot(X, Y, "k", lw=2)
+        elif tag == "obstacle":
+            # print "obstacle tag",tag
+            for n in node.getchildren():
+                # print "N: ", n
+                X, Y = get_polygon(n)
+                # print "obstacle", X, Y
+                plt.plot(X, Y, "g", lw=2)
+        elif tag == "crossing":
+            X, Y = get_polygon(node)
+            plt.plot(X, Y, "--b", lw=0.9, alpha=0.2)
+        elif tag == "HLine":
+            X, Y = get_polygon(node)
+            plt.plot(X, Y, "--b", lw=0.9, alpha=0.2)
+        elif tag == "transition":
+            X, Y = get_polygon(node)
+            plt.plot(X, Y, "--r", lw=1.6, alpha=0.2)
+
+
+
+
 def is_inside(trajectories, left, right, down, up):
     """
     up --> . _____.
@@ -19,6 +74,25 @@ def is_inside(trajectories, left, right, down, up):
                 (trajectories[0, 3] > down) & \
                 (trajectories[0, 3] < up)
     return condition.all()
+
+def PassedLine(p, e):
+    """
+    check if pedestrian (given by matrix p) passed the line [x1, x2, y1, y2] with x1<x2 and  y1<y2
+    """
+    assert (isinstance(e, list) or isinstance(e, np.ndarray)) and len(e) == 4,\
+        "exit should be a list with len=4"
+
+    x1 = e[0]
+    y1 = e[1]
+    x2 = e[2]
+    y2 = e[3]
+    A = np.array([x1, y1])
+    B = np.array([x2, y2])
+
+    is_left_and_right = (any(np.cross(B-A, p[:, 2:]-A)) < 0) & (any(np.cross(B-A, p[:, 2:]-A)) > 0)
+    is_between = any(np.dot(p[:, 2:]-A, B-A) > 0) & any(np.dot(p[:, 2:]-B, A-B) > 0)
+
+    return  is_left_and_right and is_between
 
 
 def PassedLineX(p, exit):
@@ -121,10 +195,8 @@ def flow(fps, N, data, x0):
     if len(times) < 2:
         logging.warning("Number of pedestrians passing the line is small. return 0")
         return 0
-    logging.info("min(times)=%f    max(times)=%f"%(min(times)/fps, max(times)/fps))
-    flow = fps * float(N-1) / (max(times) - min(times))
-    return flow
-
+    logging.info("min(times)=%f max(times)=%f"%(min(times), max(times)))
+    return fps * float(N-1) / (max(times) - min(times))
 
 
 

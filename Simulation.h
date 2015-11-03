@@ -90,7 +90,7 @@ private:
     /// hybrid simulation manager
     //HybridSimulationManager
     std::shared_ptr<HybridSimulationManager>_hybridSimManager=nullptr;
-
+    int _periodic;
 public:
     /**
      * Constructor
@@ -116,6 +116,21 @@ public:
      * Update the route of the pedestrians and reassign rooms, in the case a room change happens
      */
     void UpdateRoutesAndLocations();
+
+    /**
+     * Update the routes (intermediate destinations) of the pedestrians.
+     * Based on the route choice algorithm used, the next doors or the next decision points is set.
+     * TODO:
+     */
+    void UpdateRoutes();
+
+    /**
+     * Update the location of the agents and remove the agents from the simulation who have left the building.
+     * Locations includes room/subrooms.
+     * TODO:
+     */
+    void UpdateLocations();
+
 
     /**
      * Perform some initialisation for the simulation.
@@ -160,6 +175,13 @@ public:
      * @return a pointer to the building object
      */
     Building* GetBuilding();
+
+
+    /**
+     * Update the flow for the door that the pedestrian just crossed
+     * @param ped
+     */
+    void UpdateFlowAtDoors(const Pedestrian &ped) const;
 };
 
 #endif /*SIMULATION_H_*/

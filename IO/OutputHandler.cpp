@@ -60,7 +60,7 @@ void OutputHandler::Write(const string& str)
     cout << str << endl;
 }
 
-void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
+void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime)
 {
      // based on this answer:
      // https://stackoverflow.com/questions/1637587/c-libcurl-console-progress-bar
@@ -72,7 +72,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds)
 
      // create the "meter"
      int ii=0;
-     printf("Evacuation: %3.0f%% [",fraction*100);
+     printf("Time: %6.2f s | Evacuated: %5d (%3.0f%% ) [", simTime, (int)NowPeds, fraction*100);
      // part  that's full already
      for ( ; ii < dotz; ii++) {
           printf("=");

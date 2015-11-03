@@ -10,6 +10,7 @@ Remarks
 condition of this test is not clear enough...
 In the last exit there should be no jam. Means:
 J_botl >= J_last
+However, this condition is not enough to quantify a jam.
 
 Source
 ======
@@ -49,6 +50,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test12)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

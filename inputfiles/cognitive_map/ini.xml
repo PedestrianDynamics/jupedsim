@@ -6,11 +6,11 @@
   <seed>12542</seed>
   <max_sim_time>900</max_sim_time>
   <!-- geometry file -->
-  <geometry>smokesensortest.xml</geometry>
+  <geometry>landmarktest4.xml</geometry>
   <!-- trajectories file and format -->
   <trajectories format="xml-plain" fps="8">
-    <file location="trajectories.xml" />
-    <!--<socket hostname="127.0.0.1" port="8989"/> -->
+    <!--file location="trajectories.xml" /-->
+    <socket hostname="127.0.0.1" port="8989"/>
   </trajectories>
   <!-- where to store the logs -->
   <!--<logfile>outputfiles/log.txt</logfile> -->
@@ -61,7 +61,8 @@
   <!--persons information and distribution -->
   <agents operational_model_id="1">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" router_id="7" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="1" router_id="7" />
+
     </agents_distribution>
 
   </agents>
@@ -91,7 +92,7 @@
   </operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="global_shortest">
+    <router router_id="1" description="quickest">
       <parameters>
 
         <navigation_lines file="routing.xml" />
@@ -99,10 +100,10 @@
     </router>
     <router router_id="7" description="cognitive_map">
       <sensors>
-	  <!--sensor sensor_id="2" description="Room2Corridor"/-->
-        <sensor sensor_id="1" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/>
+	  <sensor sensor_id="1" description="Room2Corridor"/>
+        <!--sensor sensor_id="1" description="Smoke" p_field_path="D:\JuPedSim\jpscore\inputfiles\cognitive_map\pFields\" update_time="30" final_time="90"/-->
       </sensors>
-      <cognitive_map status="complete" />
+      <cognitive_map status="empty"/>
       <!--parameters>
         <navigation_lines file="routing.xml" />
         </parameters -->

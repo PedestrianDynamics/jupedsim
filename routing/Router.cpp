@@ -80,17 +80,12 @@ const vector<int> Router::GetFinalDestinations() const
      return _finalDestinations;
 }
 
-void Router::SetID(int id)
-{
-     _id=id;
-}
-
 int Router::GetID() const
 {
      return _id;
 }
 
-void Router::SetStrategy(RoutingStrategy strategy)
+void Router::SetStrategy(const RoutingStrategy& strategy)
 {
      _strategy=strategy;
 }

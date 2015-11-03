@@ -29,11 +29,6 @@ sys.path.append(utestdir)
 from JPSRunTest import JPSRunTestDriver
 from utils import *
 
-
-"""
-
-"""
-
 states = ["short", "long", "mixed", "configurable"]
 stair_up_left = [5, 4, 6] # x, y1, y2 |--> exit to the stair left. 
 # todo: read  stair_up_left from geometry
@@ -66,6 +61,7 @@ if __name__ == "__main__":
     test.run_test(testfunction=run_rimea_test14)
     logging.info("%s exits with SUCCESS" % (argv[0]))
     exit(SUCCESS)
+
 
 
 

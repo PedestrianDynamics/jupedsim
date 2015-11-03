@@ -68,7 +68,7 @@ int testEffectiveDistanceToEllipse()
      E1.SetV0(1);
      E1.SetV( Point(0,0) );
      E1.SetAmin(a);
-     E1.SetBmin(b);
+     E1.SetBmax(b);
 //    case 1
      x2 = 10;
      y2 = 0;
@@ -76,7 +76,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
 
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
      res += ((effdist==(fabs(x2)-2*a))  && (dist == fabs(x2)) )?1:0;
@@ -89,7 +89,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
      res += ((effdist==(fabs(x2)-2*a))  && (dist == fabs(x2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected 10)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, effdist, fabs(x2)-2*a,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
@@ -102,7 +102,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
      res += ((effdist==(fabs(x2)-2*a))  && (dist == fabs(x2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(x2), effdist, fabs(x2)-2*a,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
@@ -115,7 +115,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
      res += ((effdist==(fabs(x2)-2*a))  && (dist == fabs(x2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(x2), effdist, fabs(x2)-2*a,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
@@ -128,9 +128,9 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
-     res += ((effdist==(fabs(y2)-2*b*0.5))  && (dist == fabs(y2)) )?1:0;
+     res += ((effdist==(fabs(y2)-2*b))  && (dist == fabs(y2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(y2), effdist, fabs(y2)-2*b,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
      ntests++ ;
 
@@ -141,9 +141,9 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
-     res += ((effdist==(fabs(y2)-2*b*0.5))  && (dist == fabs(y2)) )?1:0;
+     res += ((effdist==(fabs(y2)-2*b))  && (dist == fabs(y2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(y2), effdist, fabs(y2)-2*b,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
      ntests++ ;
 
@@ -156,7 +156,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetAmin(a);
      E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
-     res += ((effdist==(fabs(y2)-2*b*0.5))  && (dist == fabs(y2)) )?1:0;
+     res += ((effdist==(fabs(y2)-2*b))  && (dist == fabs(y2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(y2), effdist, fabs(y2)-2*b,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
      ntests++ ;
 
@@ -167,9 +167,9 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
-     res += ((effdist==(fabs(y2)-2*b*0.5))  && (dist == fabs(y2)) )?1:0;
+     res += ((effdist==(fabs(y2)-2*b))  && (dist == fabs(y2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(y2), effdist, fabs(y2)-2*b,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
      ntests++ ;
 
@@ -180,9 +180,9 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
-     res += ((effdist==(fabs(y2)-2*b*0.5))  && (dist == fabs(y2)) )?1:0;
+     res += ((effdist==(fabs(y2)-2*b))  && (dist == fabs(y2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(y2), effdist, fabs(y2)-2*b,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
      ntests++ ;
 
@@ -193,9 +193,9 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
-     res += ((effdist==(fabs(y2)-2*b*0.5))  && (dist == fabs(y2)) )?1:0;
+     res += ((effdist==(fabs(y2)-2*b))  && (dist == fabs(y2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(y2), effdist, fabs(y2)-2*b,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
      ntests++ ;
 
@@ -206,7 +206,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
      res += ((effdist==(fabs(x2)-2*a))  && (dist == fabs(x2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%.2f, %.2f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(x2), effdist, fabs(x2)-2*a,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
@@ -220,7 +220,7 @@ int testEffectiveDistanceToEllipse()
      E2.SetV0(1);
      E2.SetV( Point(0,0) );
      E2.SetAmin(a);
-     E2.SetBmin(b);
+     E2.SetBmax(b);
      effdist = E1.EffectiveDistanceToEllipse(E2, &dist);
      res += ((effdist==(fabs(x2)-2*a))  && (dist == fabs(x2)) )?1:0;
      fprintf (f, "%d. dist=%.2f (expected %.2f)\t effdist=%.2f (expected %.2f) \t E1(%.2f, %.2f)\t E2(%f, %f)\t a=%.2f\t b=%.2f\t res=%d\n",ntests+1,dist, fabs(x2), effdist, fabs(x2)-2*a,E1.GetCenter().GetX(), E1.GetCenter().GetY(), E2.GetCenter().GetX(), E2.GetCenter().GetY(), a, b, res);
