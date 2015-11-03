@@ -136,7 +136,7 @@ bool GradientModel::Init (Building* building) const
     return true;
 }
 
-void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const
 {
      double delta = 0.5;
       // collect all pedestrians in the simulation.
