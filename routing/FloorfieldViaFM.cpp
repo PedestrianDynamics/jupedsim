@@ -416,7 +416,7 @@ void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target,
                     target[j*iMax+i] = outside;
                 }
             } else {
-                double distance = currLine.GetIntersectionDistance(*itWall);
+                double distance = currLine.GetDistanceToIntersectionPoint(*itWall);
                 if ( (distance >= 0.) && (distance < 100000) ) {        //check if Line.cpp can be changed (infinity == 100000) seems quite finite
                     xIntersection.push_back(sqrt(distance));
                 }

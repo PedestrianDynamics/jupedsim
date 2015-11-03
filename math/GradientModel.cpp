@@ -89,7 +89,7 @@ GradientModel::~GradientModel()
 
 }
 
-bool GradientModel::Init (Building* building) const
+bool GradientModel::Init (Building* building)
 {
     if(dynamic_cast<DirectionFloorfield*>(_direction)){
         dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
@@ -136,7 +136,7 @@ bool GradientModel::Init (Building* building) const
     return true;
 }
 
-void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) const
+void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
      double delta = 0.5;
       // collect all pedestrians in the simulation.
@@ -515,7 +515,7 @@ Point GradientModel::ForceRepWall(Pedestrian* ped, const Line& w) const
      return F_wrep;
 }
 
-string GradientModel::GetDescription() const
+std::string GradientModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];
