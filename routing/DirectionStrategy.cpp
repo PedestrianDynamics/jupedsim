@@ -105,7 +105,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
     // else if(lenSq >= 100)
     //   d = 3;
 
-    
+
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
 
@@ -210,7 +210,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             if(iObs >= 0){ // obstacle is nearest
                   const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
                   angle = tmpDirection.GetObstacleDeviationAngle(owalls, walls);
-      
+
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 
 #if DEBUG
@@ -256,7 +256,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
       printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
       // getc(stdin);
-      
+
 
 #endif
 
@@ -268,7 +268,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
 
 
       // if( ped->GetID() == 1)
-            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
+            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
                     // ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with scripts/plot_desired_velocity.py
 
@@ -284,7 +284,8 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 
         Point p;
         ffviafm->getDirectionAt(ped->GetPos(), p);
-        return p;
+        p = p.Normalized();
+        return (p + ped->GetPos());
 
 #if DEBUG
     }

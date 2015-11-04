@@ -2,7 +2,7 @@
  * \file        GradientModel.cpp
  * \date        Apr 15, 2014
  * \version     v0.7
- * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum JÃ¼lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -225,7 +225,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     ++(*under);
                 }
                 Point movDirection = (result_acc[p-start].Norm() > 1) ? result_acc[p - start].Normalized() : result_acc[p-start];
-                Point toTarget = (_direction->GetTarget(nullptr, ped)).Normalized();
+                Point toTarget = (_direction->GetTarget(nullptr, ped));
+                toTarget = toTarget - ped->GetPos();
                 if (toTarget.NormSquare() == 0.) {                // @todo:ar.graf: this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
                     toTarget += ped->GetV().Normalized();
                 }

@@ -45,7 +45,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	</routing>
 
 	<!--persons information and distribution -->
-	<agents operational_model_id="3">
+	<agents operational_model_id="4">
 		<agents_distribution>
 			<group group_id="2" agent_parameter_id="0" room_id="1" subroom_id="0" number="10" goal_id="0" router_id="1" x_min="51" x_max="54" y_max="102" y_min="101"/>
 			<!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
