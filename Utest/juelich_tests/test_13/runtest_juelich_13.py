@@ -2,8 +2,7 @@
 import numpy as np
 import os, argparse, logging, time, sys
 from os import path, system
-from sys import argv ,exit
-from sets import Set
+from sys import argv, exit
 import subprocess, glob
 import multiprocessing
 from matplotlib.pyplot import *
@@ -79,7 +78,6 @@ if __name__ == "__main__":
     logging.info("change directory back to %s"%DIR)
     
     flows = {}
-    WADs = Set([]) #set of wall_avoid_distances
     tolerance = 0.5# todo: maybe too large
     time1 = time.clock()
     for e in ["png", "txt"]:
@@ -103,15 +101,12 @@ if __name__ == "__main__":
             exit(FAILURE)
         print inifile
         width_size = float(inifile.split("geometry_")[1].split("_")[0])
-	wall_avoid_distance = float(inifile.split("avoid_distance_")[1].split(".xml")[0])
-	WADs.add("%f"%wall_avoid_distance)
-	
-        #cmd = "%s --inifile=%s"%(executable, inifile)
+        cmd = "%s --inifile=%s"%(executable, inifile)
         #--------------------- SIMULATION ------------------------  
         #os.chdir(TRUNK) #cd to the simulation directory      
         cmd = "%s --inifile=%s"%(executable, inifile)
-        #logging.info('\n--------------\n start simulating with exe=<%s>'%(cmd))
-        #logging.info('width_size = <%.2f>'%width_size)
+        logging.info('\n--------------\n start simulating with exe=<%s>'%(cmd))
+        logging.info('width_size = <%.2f>'%width_size)
         #------------------------------------------------------
         subprocess.call([executable, "--inifile=%s"%inifile])
         #------------------------------------------------------
@@ -125,18 +120,17 @@ if __name__ == "__main__":
         maxtime = get_maxtime(inifile)
         fps, N, traj = parse_file(trajfile)
         J = flow(fps, N, traj, 61)
-        if not flows.has_key("%f"%width_size + "_" + "%f"%wall_avoid_distance):
-            flows["%f"%width_size + "_" + "%f"%wall_avoid_distance] = [J]
+        if not flows.has_key(width_size):
+            flows[width_size] = [J]
         else:
-            flows["%f"%width_size + "_" + "%f"%wall_avoid_distance].append(J)
+            flows[width_size].append(J)
        
-        logging.info("W = %f;  WAD = %f;  Flow = %f"%(width_size, wall_avoid_distance, J))
+        logging.info("W = %f;  Flow = %f"%(width_size, J))
                      
     #logging.debug("flows: (%s)"%', '.join(map(str, flows)))
         #------------------------------------------------------------------------------ 
     logging.debug("flows: (%s)"%', '.join(map(str, flows)))
-    logging.debug("WADs: (%s)"%', '.join(WADs))
-
+    
     # ----------------------- PLOT RESULTS ----------------------
     flow_file = "flow.txt"
     ff = open(flow_file, "w")
@@ -190,13 +184,13 @@ if __name__ == "__main__":
     err /= num
     title(r"$\frac{1}{N}\sqrt{{\sum_w {(\mu(w)-E(w)})^2 }}=%.2f\; (tol=%.2f)$"%(err, tolerance), y=1.02)
     
-    savefig("sim_flow_vs_experimental_data.png")
-    show()
+    savefig("flow.png")
+    #show()
     #########################################################################
     
     time2 = time.clock()
     logging.info("time elapsed %.2f [s]."%(time2-time1))
-    #logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
+    logging.info("err = %.2f, tol=%.2f"%(err, tolerance))
     
     if err > tolerance:
         logging.info("exit with failure")
