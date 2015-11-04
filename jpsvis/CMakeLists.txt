@@ -208,49 +208,6 @@ ENDIF (WIN32)
 
 #--------------- here comes QT. Version problem (4 or 5?)
 # cmake does not provide findqt5-modules
-
-
-#=================================================== Qt4
-# FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake  REQUIRED)
-# FIND_PACKAGE(Qt COMPONENTS QtXml QT_USE_QTNETWORK QtXmlPatterns REQUIRED)
-
-# if("${DESIRED_QT_VERSION}" STREQUAL "")
-#   set(DESIRED_QT_VERSION "4")
-# endif()
-
-# if( ${DESIRED_QT_VERSION} VERSION_GREATER "4" OR ${DESIRED_QT_VERSION} VERSION_LESS "3")
-#   message(WARNING "QT version: " ${DESIRED_QT_VERSION} " not supported")
-# endif()
-
-# message(STATUS "DESIRED_QT_VERSION " ${DESIRED_QT_VERSION})
-# message(STATUS "QT5_INSTALLED: " ${QT5_INSTALLED})
-# message(STATUS "QT4_INSTALLED: " ${QT4_INSTALLED})
-# message(STATUS "QT3_INSTALLED: " ${QT3_INSTALLED})
-
-# # by default only QtCore and QtGui modules are enabled
-# # other modules must be enabled like this:
-# set(QT_USE_QTXML TRUE)  # needed!
-# set(QT_USE_QTNETWORK TRUE)
-
-# # this command will generate rules that will run rcc on all files from SAMPLE_RCS
-# # in result SAMPLE_RC_SRCS variable will contain paths to files produced by rcc
-# if( ${QT4_INSTALLED} )
-#   message(STATUS "Working with Qt4")
-#   QT4_ADD_RESOURCES( SAMPLE_RC_SRCS ${SAMPLE_RCS} )
-#   # and finally this will run moc:
-#   QT4_WRAP_CPP( SAMPLE_MOC_HDRS ${SAMPLE_MOC_HDRS} )
-#   # this will run uic on .ui files:
-#   QT4_WRAP_UI( SAMPLE_UI_HDRS ${SAMPLE_UIS} )
-#  # QT4_ADD_RESOURCES(SAMPLE_RESOURCES_RCS ${SAMPLE_RCS})
-#   # add some useful macros and variables
-#   # (QT_USE_FILE is a variable defined by FIND_PACKAGE( Qt4 ) that contains a path to CMake script)
-#   include( ${QT_USE_FILE} )
-# elseif( ${QT5_INSTALLED} )
-#   message(STATUS "Working with Qt5")    
-#   find_package(Qt5Widgets REQUIRED)
-#   qt5_wrap_ui(SAMPLE_UI_HDRS ${SAMPLE_UIS})
-# endif() 
-#==================================================== QT4
 message(STATUS "QT_Qmake_executable " ${QT_QMAKE_EXECUTABLE})
 if($QT_QMAKE_EXECUTABLE STREQUAL "")
   FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake)
