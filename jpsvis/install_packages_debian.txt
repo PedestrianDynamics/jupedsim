@@ -1,3 +1,8 @@
+MAc 
+brew update
+# brew uninstall vtk
+brew install vtk --with-qt --without-python --without-boost  --build-from-source
+
 Debian 7.7
 sudo apt-get install libmgl-qt5
 sudo apt-get install libvtk5-dev
