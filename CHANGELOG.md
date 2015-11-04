@@ -3,7 +3,14 @@ All notable changes to this project will be documented in this file.
 
 
 ## v0.8.0 [Unreleased]
- 
+
+### Added
+- New model with the generic name `Tordeux2015` and `id=3`. For use check the ini-files in the Utest-validation tests.
+- Tests are sorted in `rimea_tests`, `juelich_tests` and `validation_tests`.
+- Periodic boundary conditions with the option `<periodic>1</periodic>`.Works only with model 3.
+- Distribute peds in sources by means of the Voronoi-diagrams.
+- Added validation tests
+
 ## v0.7.0 [2015-07-15]
 
 ### New Module
@@ -49,7 +56,7 @@ All notable changes to this project will be documented in this file.
 
 
 ### Changed
-- refactor NumCPU and ExitCrossingStrategy tags to num_threads and exit_crossing_strategy
+- refactor NumCPU and ExitCrossingStrategy tags to `num_threads and exit_crossing_strategy`
 
 
 
