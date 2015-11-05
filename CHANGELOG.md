@@ -17,7 +17,8 @@ All notable changes to this project will be documented in this file.
    ```
 - New model with the generic name `Tordeux2015` and `id=3`. For use check the ini-files in the Utest-validation tests.
 - Tests are sorted in `rimea_tests`, `juelich_tests` and `validation_tests`.
-- Periodic boundary conditions with the option `<periodic>1</periodic>`.Works only with model 3.   
+- Periodic boundary conditions with the option `<periodic>1</periodic>`.Works only with model 3.  
+- Added Floorfield to all exits, providing direction to target, direction to closest wall and cost estimates. Parameter to control wall-avoidance included.
    
 #### JPSVIS
 - Added option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
