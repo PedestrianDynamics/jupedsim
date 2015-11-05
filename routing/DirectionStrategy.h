@@ -32,8 +32,10 @@
 
 
 class Room;
+class Building;
 class Pedestrian;
 class Point;
+class FloorfieldViaFM;
 
 class DirectionStrategy {
 
@@ -67,6 +69,21 @@ public:
 class DirectionGeneral : public DirectionStrategy {
 public:
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+};
+
+class DirectionFloorfield : public DirectionStrategy {
+public:
+    DirectionFloorfield();
+    void Init(Building* building, double stepsize, double threshold, bool useDistancMap);
+    ~DirectionFloorfield();
+    //void Init();
+    virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+    virtual Point GetDir2Wall(Pedestrian* ped) const;
+    virtual double GetDistance2Wall(Pedestrian* ped) const;
+
+private:
+     FloorfieldViaFM* ffviafm;
+     bool initDone;
 };
 
 #endif  /* _DIRECTIONSTRATEGY_H */

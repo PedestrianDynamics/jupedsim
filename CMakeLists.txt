@@ -54,12 +54,15 @@ if(NOT DEFINED PROCESSOR_COUNT)
 endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
-  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
-  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+#  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
+#  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+  message( STATUS "PROCESSOR_COUNT: 0")
+  set(CTEST_BUILD_FLAGS "-j0")
 endif(PROCESSOR_COUNT)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release)
+#  set (CMAKE_BUILD_TYPE Release)
+  set (CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
@@ -175,8 +178,10 @@ set (   source_files
   math/ODESolver.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
+  math/GradientModel.cpp
   math/VelocityModel.cpp
   math/OperationalModel.cpp
+
 
   mpi/LCGrid.cpp
 
@@ -195,6 +200,7 @@ set (   source_files
   voronoi/VoronoiDiagramGenerator.cpp
   voronoi-boost/VoronoiPositionGenerator.cpp
 
+  routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
@@ -249,6 +255,7 @@ set (   source_files
   )
 
 set (   header_files
+  routing/FloorfieldViaFM.h
   routing/NavMesh.h
   routing/DirectionStrategy.h
   routing/DummyRouter.h
@@ -261,6 +268,12 @@ set (   header_files
   routing/DTriangulation.h
   routing/MeshRouter.h
   routing/mesh/Mesh.h
+  routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
+  routing/graph/RoutingGraphStorage.h
+  routing/graph/RoutingGraph.h
+  routing/graph/NavLineState.h
+
 
   routing/CognitiveMapRouter.h
   routing/cognitive_map/GraphNetwork.h
@@ -335,8 +348,10 @@ set (   header_files
   math/ODESolver.h
   math/GCFMModel.h
   math/GompertzModel.h
+  math/GradientModel.h
   math/VelocityModel.h
   math/OperationalModel.h   
+
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
@@ -354,6 +369,9 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
+#add_executable(
+#  jpscore Utest/Fastmarchtest.h
+#)
 add_executable( jpscore  main.cpp )
 
 target_link_libraries(jpscore core )
