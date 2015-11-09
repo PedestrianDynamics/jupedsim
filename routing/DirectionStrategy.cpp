@@ -33,8 +33,11 @@
 #include "../pedestrian/Pedestrian.h"
 #include "../geometry/SubRoom.h"
 #include "../geometry/Wall.h"
+#include "../routing/FloorfieldViaFM.h"
 #include "DirectionStrategy.h"
-
+#include <fstream>
+#include <chrono>
+#include <ctime>
 
 
 DirectionStrategy::DirectionStrategy()
@@ -61,7 +64,7 @@ Point DirectionMinSeperationShorterLine::GetTarget(Room* room, Pedestrian* ped) 
      const Point& p2 = ped->GetExitLine()->GetPoint2();
      if(p1 == p2) return p1;
 
-     double length = (p1 - p2).Norm(); 
+     double length = (p1 - p2).Norm();
      if(d >= 0.5*length) return (p1 + p2)*0.5; // return the middle point, since line is anyway too short
      double u = d/length; // d is supposed to be smaller than length, then u is in [0, 1]
      //Point diff = (p1 - p2).Normalized() * d;
@@ -102,7 +105,7 @@ Point DirectionInRangeBottleneck::GetTarget(Room* room, Pedestrian* ped) const
     // else if(lenSq >= 100)
     //   d = 3;
 
-    
+
     Point diff = (p1 - p2).Normalized() * d;
     Line e_neu = Line(p1 - diff, p2 + diff);
 
@@ -144,7 +147,7 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       Point diff = (p1 - p2).Normalized() * d;
       Line e_neu = Line(p1 - diff, p2 + diff);
       Point NextPointOnLine =  e_neu.ShortestPoint(ped->GetPos());
-  
+
       Line tmpDirection = Line(ped->GetPos(), NextPointOnLine );//This direction will be rotated if
       // it intersects a wall || obstacle.
       // check for intersection with walls
@@ -173,13 +176,13 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
                   printf("Check wall number %d. Dist = %f (%f)\n", i, dist, minDist);
                   printf("%f    %f --- %f    %f\n===========\n",walls[i].GetPoint1().GetX(),walls[i].GetPoint1().GetY(), walls[i].GetPoint2().GetX(),walls[i].GetPoint2().GetY());
 #endif
- 
+
             }
       }//walls
-     
+
       //============================ WALLS ===========================
 
-     
+
       //============================ OBST ===========================
       const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
       for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
@@ -207,16 +210,17 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             if(iObs >= 0){ // obstacle is nearest
                   const vector<Wall>& owalls = obstacles[iObs]->GetAllWalls();
                   angle = tmpDirection.GetObstacleDeviationAngle(owalls, walls);
-      
+
                   // angle =  tmpDirection.GetDeviationAngle(owalls[inear].enlarge(2*ped->GetLargerAxis()));
 
 #if DEBUG
                   printf("COLLISION WITH OBSTACLE %f    %f --- %f    %f\n===========\n",owalls[inear].GetPoint1().GetX(),owalls[inear].GetPoint1().GetY(), owalls[inear].GetPoint2().GetX(),owalls[inear].GetPoint2().GetY());
-      
+
 #endif
             } //iObs
             else{ // wall is nearest
                   angle =  tmpDirection.GetDeviationAngle(walls[inear].Enlarge(2*ped->GetLargerAxis()));
+
 #if DEBUG
                   printf("COLLISION WITH WALL %f    %f --- %f    %f\n===========\n",walls[inear].GetPoint1().GetX(),walls[inear].GetPoint1().GetY(), walls[inear].GetPoint2().GetX(),walls[inear].GetPoint2().GetY());
 #endif
@@ -231,7 +235,8 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
             }
       }
 ////////////////////////////////////////////////////////////
-    
+
+
       Point  G;
       if (fabs(angle) > J_EPS)
             //G  =  tmpDirection.GetPoint2().Rotate(cos(angle), sin(angle)) ;
@@ -239,9 +244,10 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       else {
             if(ped->GetNewOrientationFlag()) //this pedestrian could not see the target and now he can see it clearly.
                   ped->SetSmoothTurning(); // so the turning should be adapted accordingly.
-          
+
             G  =  NextPointOnLine;
       }
+
 #if DEBUG
       printf("inear=%d, iObs=%d, minDist=%f\n", inear, iObs, minDist);
       printf("PED=%d\n",  ped->GetID());
@@ -250,14 +256,88 @@ Point DirectionGeneral::GetTarget(Room* room, Pedestrian* ped) const
       printf("angle=%f, G=[%.2f, %.2f]\n", angle, G.GetX(), G.GetY());
       printf("\n----------\nLEAVE function with PED=%d\n----------\n",ped->GetID());
       // getc(stdin);
-      
+
 
 #endif
 
+      // if( ped->GetID() == 21)
+      //       fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
+      //               ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
+// this stderr output can be used with plot_desired_velocity.py
+
+
+
       // if( ped->GetID() == 1)
-            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(), 
+            // fprintf(stderr, "%.2f %.2f %.2f %.2f %f %f %d %.2f %.2f %.2f\n", NextPointOnLine.GetX(), NextPointOnLine.GetY(),
                     // ped->GetPos().GetX(), ped->GetPos().GetY(), G.GetX(), G.GetY(), ped->GetID(), ped->GetV0().GetX(), ped->GetV0().GetY(), ped->GetGlobalTime());
 // this stderr output can be used with scripts/plot_desired_velocity.py
 
       return G;
 }
+
+/// 6
+Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+#if DEBUG
+    if (initDone && (ffviafm != nullptr)) {
+#endif // DEBUG
+
+        Point p;
+        ffviafm->getDirectionAt(ped->GetPos(), p);
+        p = p.Normalized();
+        return (p + ped->GetPos());
+
+#if DEBUG
+    }
+#endif // DEBUG
+
+    //this should not execute:
+    exit(EXIT_FAILURE);
+}
+
+Point DirectionFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+    Point p;
+    ffviafm->getDir2WallAt(ped->GetPos(), p);
+    return p;
+}
+
+double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
+{
+    return ffviafm->getDistance2WallAt(ped->GetPos());
+}
+
+void DirectionFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
+    //implement mechanic, that can read-in an existing floorfield (from a previous run)
+    string s = building->GetGeometryFilename();
+    s.erase(s.find_last_of(".", string::npos)); // delete ending
+    if (s.find_last_of("/") != string::npos) {
+        s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
+    }
+    string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
+    std::ifstream test(FF_filename);
+    if (test.good()) {
+          Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+        ffviafm = new FloorfieldViaFM(FF_filename);
+    } else {
+          Log->Write("INFO: \tWrite Floorfield to file <" +  FF_filename + ">");
+          std::chrono::time_point<std::chrono::system_clock> start, end;
+          start = std::chrono::system_clock::now();
+          ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);
+          end = std::chrono::system_clock::now();
+          std::chrono::duration<double> elapsed_seconds = end-start;
+          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+    }
+    initDone = true;
+}
+
+DirectionFloorfield::DirectionFloorfield() {
+    initDone = false;
+};
+
+DirectionFloorfield::~DirectionFloorfield() {
+    if (ffviafm) {
+        delete ffviafm;
+    }
+}
+

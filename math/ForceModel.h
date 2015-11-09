@@ -59,7 +59,7 @@ public:
       * Performs whatever initialization is needed/required
       * @param building the building object
       */
-     virtual void Init (Building* building) const = 0;
+     virtual bool Init (Building* building) const = 0;
 
      /**
       * @return all model parameters in a nicely formatted string

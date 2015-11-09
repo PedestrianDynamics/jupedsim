@@ -98,6 +98,10 @@ private:
      unsigned int pSeed;
      int pSolver; /// solver for the differential equation
      int pExitStrategy; // Strategie zur Richtungswahl (v0)
+     double pDeltaH;
+     double pWallAvoidDistance;
+     bool pUseWallAvoidance;
+     double pSlowDownDistance;
      int pLog;
      int pPort;
      int pPeriodic;
@@ -121,6 +125,8 @@ private:
 
 
 private:
+
+     bool ParseGradientModel(TiXmlElement* xGradient);
      bool ParseGCFMModel(TiXmlElement* xGCFM);
      bool ParseGompertzModel(TiXmlElement* xGompertz);
      bool ParseVelocityModel(TiXmlElement* xVelocity);
@@ -157,6 +163,7 @@ private:
      bool ParseStepSize(TiXmlNode &stepNode);
 
      bool ParsePeriodic(TiXmlNode &Node);
+
 public:
      // constructor
      ArgumentParser();
