@@ -69,7 +69,6 @@ class FloorfieldViaFM
         void calculateFloorfield(bool useDistance2Wall);     //make private
         void calculateDistanceField(const double thresholdArg); //make private
 
-        void update(const long int key, double* target, double* speedlocal);
         void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc);
 
         void checkNeighborsAndCalcDist2Wall(const long int key);

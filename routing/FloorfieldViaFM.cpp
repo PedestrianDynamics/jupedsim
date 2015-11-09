@@ -335,6 +335,7 @@ void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
 
 }
 
+//this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
 void FloorfieldViaFM::resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExits) {
     std::vector<Wall> exits(wallArg.begin(), wallArg.begin()+numOfExits);
     drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
@@ -352,7 +353,7 @@ void FloorfieldViaFM::resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExi
         //set Trialptr to fieldelements
         trialfield[i].key = i;
         trialfield[i].flag = flag + i;              //ptr!
-        trialfield[i].cost = dist2Wall + i;         //ptr!
+        trialfield[i].cost = dist2Wall + i;         //ptr!  //this line imposes, that we calc DistancesField next
         trialfield[i].speed = speedInitial + i;     //ptr!
         trialfield[i].father = nullptr;
         trialfield[i].child = nullptr;
@@ -641,6 +642,12 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     //  setting startingpoints of wave (dist2Wall = 0) is done in "parseBuilding"
 
     //  go thru dist2Wall and add every neighbor of "0"s (only if their flag is 0 and therefore "inside")
+
+    //  HINT: in resetGoalAndCosts, you find: "trialfield[i].cost = dist2Wall + i;"
+    //        so here, when we write to "cost", we truely write to "dist2Wall"
+
+    //  HINT: the argument "threshold" is used as a "stop criterion". In the constructor, when calling this,
+    //        we pass on thrsholdArg = -1, so we never enter the stop-path.
     Trial* smallest = nullptr;
     Trial* biggest = nullptr;
 
@@ -681,11 +688,6 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
             checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcDist2Wall(key);} );
         }
     }
-
-    //ignore next two lines of comments
-    //frage: wo plaziere ich das "update nachbarschaft"? beim adden eines elements? lieber nicht beim calc, da sonst eine rekursion startet
-    //bei verbesserung von single to doublesided update ... soll hier auch die nachbarschaft aktualisiert werden?
-
 } //calculateDistancField
 
 void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc) {
@@ -736,7 +738,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     directNeighbor dNeigh = grid->getNeighbors(key);
 
     aux = dNeigh.key[0];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = dist2Wall + i; <<< set in resetGoalAndCosts
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
          (flag[aux] != 0))                                                      //gridpoint holds a calculated value
@@ -852,7 +854,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     directNeighbor dNeigh = grid->getNeighbors(key);
 
     aux = dNeigh.key[0];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = cost + i; <<< set in calculateFloorfield
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
          (flag[aux] != 0) &&
@@ -878,7 +880,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     }
 
     aux = dNeigh.key[1];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = cost + i; <<< set in calculateFloorfield
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
          (flag[aux] != 0) &&
@@ -953,21 +955,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
         std::cerr << "else in twosided Floor " << precheck << " " << row << " " << col << std::endl;
     }
 }
-
-void FloorfieldViaFM::update(const long int key, double* target, double* speedlocal) {  //oblolete and NOT implemented
-    //wenn ein wert berechnet wurde bei (key), dann schaue in seiner nachbarschaft
-    //ob ein singlecalc'ed value (flag == 1) ist. dieser kann ggf. verbessert werden.
-    directNeighbor dNeigh = grid->getNeighbors(key);
-    //keine schleife, sondern jeden nachbarn separat behandeln
-    //bei singled diagonal nach berechnetem wert absuchen und mit ihm zusammen den nachbarn verbessern
-    //bei         zweitem in der linie und mit ihm zentralen diff-quotienten bilden um (nachbarn oder self) zu verbessern
-    // ich glaube: self
-    long int aux = dNeigh.key[0];
-    if ( (aux != -2) && (flag[aux] == 1) ) {
-
-    }
-
-} //update
 
 inline double FloorfieldViaFM::onesidedCalc(double xy, double hDivF) {
     //if (xy < 0) std::cerr << "error in onesided " << xy << std::endl;   //todo: performance
