@@ -62,11 +62,12 @@ class FloorfieldViaFM
         double getDistance2WallAt(const Point& position);
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-        //void resetGoalAndCosts(const Goal* const goalArg);
         void prepareForDistanceFieldCalculation(std::vector<Wall>& wallArg, int numOfExits);
         void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
         void drawLinesOnGrid(std::vector<Wall>& wallArg, double* const target, const double outside);
         void setSpeed(bool useDistance2Wall);
+        void clearAndPrepareForFloorfieldReCalc(double* costarray);
+        void setNewGoalAfterTheClear(double* costarray, std::vector<Wall>& GoalWallArg);
         void calculateFloorfield(double* costarray, Point* neggradarray);   //make private
         void calculateDistanceField(const double thresholdArg);             //make private
 

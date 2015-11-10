@@ -49,7 +49,7 @@ FloorfieldViaFM::~FloorfieldViaFM()
     if (modifiedspeed) delete[] modifiedspeed;
     if (cost) delete[] cost;
     if (neggrad) delete[] neggrad;
-    if (dist2Wall) delete[] dist2Wall;
+    if (dirToWall) delete[] dirToWall;
     if (trialfield) delete[] trialfield;
 
 }
@@ -63,13 +63,6 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
     parseBuilding(buildingArg, hxArg, hyArg);
-
-    //create rectgrid (grid->createGrid())                                                                      <- DONE in parseBuilding
-
-    //'grid->GetnPoints()' and create all data fields: cost, neggradient, speed, dis2wall, flag, secondaryKey      <- DONE in parseBuilding
-
-    //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed                   <- DONE in parseBuilding
-    //this step includes Linescanalgorithmus? (maybe included in parsing above)
 
     //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
@@ -206,10 +199,10 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     file.close();
 }
 
-FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
-{
-    //copy ctor
-}
+//FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
+//{
+//    //copy ctor
+//}
 
 //FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
 //{
@@ -326,17 +319,6 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     drawLinesOnGrid(wall, dist2Wall, 0.);
 }
 
-//void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
-/* this fkt shall set all Costdata to unknown and the goal points to 0
-   we have to watch how to calc indices as goal only knows coords from input file
-*/
-
-// set all cost data to "unknown" (remember to change flag accordingly)
-// get lines/walls from goals
-// use linescan to ititialize cost grid
-
-//}
-
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
 void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Wall>& wallArg, int numOfExits) {
     std::vector<Wall> exits(wallArg.begin(), wallArg.begin()+numOfExits);
@@ -362,13 +344,29 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Wall>& wall
     }
     drawLinesOnGrid(exits, cost, 0.); //already mark targets/exits in cost array (for floorfieldcalc)
     for (long int i=0; i < grid->GetnPoints(); ++i) {
-        if (cost[i] == 0.) {
-            neggrad[i].SetX(0.);
-            neggrad[i].SetY(0.);
-            dirToWall[i].SetX(0.);
-            dirToWall[i].SetY(0.);
+        if (cost[i] == 0.) {            //here we use cost, neggrad directly
+            neggrad[i].SetX(0.);        //must be changed to costarray/neggradarray?
+            neggrad[i].SetY(0.);        //we can leave it, if we agree on cost/neggrad being
+            dirToWall[i].SetX(0.);      //default floorfield using all exits and have the
+            dirToWall[i].SetY(0.);      //array mechanic on top
         }
     }
+}
+
+void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        if (dist2Wall[i] == 0.) {    //wall
+            costarray[i]    = -7.;                          //this is done in calculateFloorfield again
+            flag[i]         = -7;      // meaning wall
+        } else {                     //inside
+            costarray[i]    = -2.;
+            flag[i]         = 0;       // meaning unknown
+        }
+    }
+}
+
+void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Wall>& GoalWallArg) {
+    drawLinesOnGrid(GoalWallArg, costarray, 0.);
 }
 
 void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside) {
@@ -584,13 +582,9 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
 
     //re-init memory
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        if (dist2Wall[i] == 0.) {               //outside
-            //speedInitial[i] = .001;
-            //cost[i]         = -7.;  // @todo: ar.graf
-            flag[i]         = -7;   // -7 => outside
+        if (dist2Wall[i] == 0.) {               //wall
+            flag[i]         = -7;   // -7 => wall
         } else {                                //inside
-            //speedInitial[i] = 1.;
-            //cost[i]         = -2.;
             flag[i]         = 0;
         }
         //set Trialptr to fieldelements
@@ -625,7 +619,6 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
         trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
         checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcFloorfield(key);} );
     }
-    delete[] modifiedspeed;
 }
 
 void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if threshold negative, then ignore it
