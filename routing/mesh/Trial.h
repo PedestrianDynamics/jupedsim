@@ -33,6 +33,7 @@
 #ifndef TRIAL_H
 #define TRIAL_H
 
+#include "../../geometry/Point.h"
 
 class Trial // father := smaller; child := bigger (in terms of cost); cost/speed := ptr to its cost/speed
 {
@@ -43,6 +44,7 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
         Trial* father;
         double* cost; //pointer to its cost  (cost  = &costarray[key])
         double* speed;//pointer to its speed (speed = &speedarray[key])
+        Point* neggrad;
 
         Trial() {
             key = 0;
@@ -51,15 +53,17 @@ class Trial // father := smaller; child := bigger (in terms of cost); cost/speed
             father = nullptr;
             cost = nullptr;
             speed = nullptr;
+            neggrad = nullptr;
         }
 
-        Trial(long int keyArg, Trial* fatherArg, Trial* childArg, double* t, double* f, int* flagArg) {
+        Trial(long int keyArg, Trial* fatherArg, Trial* childArg, double* t, double* f, int* flagArg, Point* neggradArg) {
             key = keyArg;
             father = fatherArg;
             child = childArg;
             cost = t;
             speed = f;
             flag = flagArg;
+            neggrad = neggradArg;
         }
 
         virtual ~Trial() {}

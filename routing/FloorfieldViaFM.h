@@ -62,14 +62,15 @@ class FloorfieldViaFM
         double getDistance2WallAt(const Point& position);
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-        void resetGoalAndCosts(const Goal* const goalArg);
-        void resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExits);
+        void prepareForDistanceFieldCalculation(std::vector<Wall>& wallArg, int numOfExits);
         void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
         void drawLinesOnGrid(std::vector<Wall>& wallArg, double* const target, const double outside);
-        void calculateFloorfield(bool useDistance2Wall);     //make private
-        void calculateDistanceField(const double thresholdArg); //make private
+        void setSpeed(bool useDistance2Wall);
+        void clearAndPrepareForFloorfieldReCalc(double* costarray);
+        void setNewGoalAfterTheClear(double* costarray, std::vector<Wall>& GoalWallArg);
+        void calculateFloorfield(double* costarray, Point* neggradarray);   //make private
+        void calculateDistanceField(const double thresholdArg);             //make private
 
-        void update(const long int key, double* target, double* speedlocal);
         void checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc);
 
         void checkNeighborsAndCalcDist2Wall(const long int key);
@@ -102,6 +103,7 @@ class FloorfieldViaFM
         int* flag;                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
         double* dist2Wall;
         double* speedInitial;
+        double* modifiedspeed;
         double* cost;
         long int* secKey;  //secondary key to address ... not used yet
         Point* neggrad; //gradients
