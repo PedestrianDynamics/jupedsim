@@ -145,7 +145,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-  
+
   find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
@@ -202,10 +202,10 @@ set (   source_files
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
   pedestrian/Knowledge.cpp
-  pedestrian/AgentsQueue.cpp		
-  pedestrian/AgentsSource.cpp		
+  pedestrian/AgentsQueue.cpp
+  pedestrian/AgentsSource.cpp
   pedestrian/Pedestrian.cpp
-  pedestrian/AgentsSourcesManager.cpp	
+  pedestrian/AgentsSourcesManager.cpp
   pedestrian/StartDistribution.cpp
 
 
@@ -225,6 +225,11 @@ set (   source_files
   routing/DTriangulation.cpp
   routing/MeshRouter.cpp
   routing/mesh/Mesh.cpp
+  #header files with scr code need to be added here, in order to be
+  #included in generated project files (codeblocks)
+  #plz do not delete them here
+  routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
@@ -322,10 +327,10 @@ set (   header_files
   pedestrian/Ellipse.h
   pedestrian/AgentsParameters.h
   pedestrian/Knowledge.h
-  pedestrian/AgentsQueue.h		
-  pedestrian/AgentsSource.h		
+  pedestrian/AgentsQueue.h
+  pedestrian/AgentsSource.h
   pedestrian/Pedestrian.h
-  pedestrian/AgentsSourcesManager.h	
+  pedestrian/AgentsSourcesManager.h
   pedestrian/StartDistribution.h
   voronoi/VoronoiDiagramGenerator.h
   voronoi-boost/VoronoiPositionGenerator.h
@@ -362,7 +367,7 @@ set (   header_files
   math/GompertzModel.h
   math/GradientModel.h
   math/VelocityModel.h
-  math/OperationalModel.h   
+  math/OperationalModel.h
 
 
   poly2tri/poly2tri.h
@@ -411,22 +416,22 @@ endif(CGAL_FOUND)
 #  set (hybrid_source_files
 #    matsim/HybridSimulationManager.cpp
 #    matsim/JPSserver.cpp
-#    matsim/JPSclient.cpp                
+#    matsim/JPSclient.cpp
 #    matsim/MATSimInterface.pb.cc
-#    matsim/MATSimInterface.grpc.pb.cc 
+#    matsim/MATSimInterface.grpc.pb.cc
 #    )
 #
 #  set (hybrid_header_files
-#    matsim/JPSclient.h  
-#    matsim/MATSimInterface.grpc.pb.h  
+#    matsim/JPSclient.h
+#    matsim/MATSimInterface.grpc.pb.h
 #    matsim/MATSimInterface.proto
-#    matsim/HybridSimulationManager.h    
-#    matsim/JPSserver.h                 
+#    matsim/HybridSimulationManager.h
+#    matsim/JPSserver.h
 #    matsim/MATSimInterface.pb.h
 #    )
 #    add_library (hybrid STATIC ${hybrid_source_files} )
 #    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
-# 	
+#
 #	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
 #	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
 #else()
@@ -470,7 +475,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   include(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
   CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
- 
+
   if( COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   elseif(COMPILER_SUPPORTS_CXX0X)
@@ -508,7 +513,7 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
 endif()
 
 

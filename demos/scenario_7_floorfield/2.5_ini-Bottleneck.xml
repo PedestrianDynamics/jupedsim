@@ -8,17 +8,17 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	<seed>12542</seed>
 	<max_sim_time>900</max_sim_time> 
 	<!-- geometry file -->
-	<geometry>2.0_bottleneckX.xml</geometry>
+	<geometry>2.5_bottleneck.xml</geometry>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" fps="8">
-		<file location="2.0_TrajBottleneckX.xml"/>
+		<file location="2.5_TrajBottleneck.xml"/>
 	</trajectories>
-	<!-- where to store the logs -->
-	<logfile>log</logfile>
+	<!-- where to store the logs 
+	<logfile>log</logfile>-->
 
 	<!-- traffic information: e.g closed doors or smoked rooms -->
 	<traffic_constraints>
-		<!-- room states are: good or smoked -->
+		<!--  room states are: good or smoked  -->
 <!-- 		<rooms> -->
 <!-- 			<room room_id="0" state="good" /> -->
 <!-- 		</rooms> -->
@@ -47,7 +47,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	<!--persons information and distribution -->
 	<agents operational_model_id="4">
 		<agents_distribution>
-			<group group_id="2" agent_parameter_id="0" room_id="1" subroom_id="0" number="10" goal_id="0" router_id="1" x_min="51" x_max="54" y_max="102" y_min="101"/>
+			<group group_id="2" agent_parameter_id="1" room_id="1" subroom_id="0" number="160" goal_id="0" router_id="1" />
 			<!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->
 			<!-- <group group_id="1" room_id="1"  number="10" goal_id="0" router_id="1" route_id="" /> -->
 		</agents_distribution>
@@ -58,14 +58,14 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 
 	<!-- These parameters may be overwritten -->
 	<operational_models>
-		<model operational_model_id="1" description="gcfm">
+		<model operational_model_id="2" description="gompertz">
 			<model_parameters>
 				<solver>euler</solver>
-				<stepsize>0.001</stepsize>
-				<exit_crossing_strategy>4</exit_crossing_strategy>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>3</exit_crossing_strategy>
 				<linkedcells enabled="true" cell_size="2.2" />
-				<force_ped nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
-				<force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
+        <force_ped nu="3" b="0.25" c="3.0" />
+        <force_wall nu="10" b="0.70" c="3.0" />
 			</model_parameters>
 			<agent_parameters agent_parameter_id="1">
 		        <v0 mu="0.5" sigma="0.0" />
@@ -77,26 +77,26 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
      		</agent_parameters>
 		</model>
 
-    <model operational_model_id="4" description="gradnav">
-      <model_parameters>
-	<solver>euler</solver>
-	<stepsize>0.01</stepsize>
-	<exit_crossing_strategy>6</exit_crossing_strategy>
-	<floorfield delta_h="0.0625" wall_avoid_distance="0.4" use_wall_avoidance="true" />
-	<linkedcells enabled="true" cell_size="4.2" />
-        <force_ped nu="15" b="0.30" c="3.0" />
+		<model operational_model_id="4" description="gradnav">
+			<model_parameters>
+				<solver>euler</solver>
+				<stepsize>0.01</stepsize>
+				<exit_crossing_strategy>6</exit_crossing_strategy>
+				<floorfield delta_h="0.0625" wall_avoid_distance="0.8" use_wall_avoidance="true" />
+				<linkedcells enabled="true" cell_size="2.2" />
+        <force_ped nu="15" b="0.25" c="3.0" />
         <force_wall nu="1" b="0.70" c="3.0" />
-	<anti_clipping slow_down_distance=".5" />
-      </model_parameters>
-      <agent_parameters agent_parameter_id="0">
-        <v0 mu="1.5" sigma="0.0" />
-        <bmax mu="0.15" sigma="0.00" />
-        <bmin mu="0.15" sigma="0.00" />
-        <amin mu="0.15" sigma="0.00" />
-        <tau mu="0.5" sigma="0.001" />
-        <atau mu="0.0" sigma="0.00" />
-      </agent_parameters>
-    </model>
+				<anti_clipping slow_down_distance="0.6" />
+			</model_parameters>
+			<agent_parameters agent_parameter_id="1">
+		        <v0 mu="0.5" sigma="0.0" />
+		        <bmax mu="0.15" sigma="0.001" />
+		        <bmin mu="0.15" sigma="0.001" />
+		        <amin mu="0.15" sigma="0.001" />
+		        <tau mu="0.5" sigma="0.001" />
+		        <atau mu="0.0" sigma="0.001" />
+     		</agent_parameters>
+		</model>
 
 	</operational_models>
 

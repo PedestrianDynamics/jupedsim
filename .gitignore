@@ -55,6 +55,9 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+*.vtk
+*Traj*.xml
+
 CTestTestfile.cmake
 DartConfiguration.tcl
 
