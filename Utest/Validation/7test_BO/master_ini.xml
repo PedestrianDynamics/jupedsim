@@ -29,8 +29,8 @@
     <doors>
       <door trans_id="0" caption="" state="open" />
       <door trans_id="1" caption="" state="open" />
-	  <door trans_id="2" caption="" state="open" />
-	  <door trans_id="3" caption="" state="open" />
+      <door trans_id="2" caption="" state="open" />
+      <door trans_id="3" caption="" state="open" />
     </doors>
   </traffic_constraints>
   <routing>
@@ -79,13 +79,12 @@
     <agents_distribution>
       <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="0" router_id="1" x_max="10.1775"/>
       <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="1" router_id="1" x_max="10.1775"/>
-	  <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="2" router_id="1" x_min="26.1775"/>
-	  <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="3" router_id="1" x_min="26.1775"/>
+      <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="2" router_id="1" x_min="26.1775"/>
+      <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="3" router_id="1" x_min="26.1775"/>
     </agents_distribution>
-<!--     <agents_sources><!-- frequency in persons/seconds -->
-<!--       <source id="1" frequency="2" agents_max="20" group_id="1" caption="source 1" /> -->
-<!--     </agents_sources> --> 
-
+    <!--     <agents_sources><!-- frequency in persons/seconds -->
+    <!--        <source id="1" frequency="2" agents_max="20" group_id="1" caption="source 1" /> -->
+    <!--     </agents_sources> --> 
   </agents>
 
   <!-- These parameters may be overwritten -->

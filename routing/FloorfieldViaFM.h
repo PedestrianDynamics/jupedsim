@@ -58,16 +58,17 @@ class FloorfieldViaFM
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
         void getDirectionAt(const Point& position, Point& direction);
+        void getDirectionToTransition(const int transID, const Point& position, Point& direction);
         void getDir2WallAt(const Point& position, Point& direction);
         double getDistance2WallAt(const Point& position);
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-        void prepareForDistanceFieldCalculation(std::vector<Wall>& wallArg, int numOfExits);
-        void lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside);
-        void drawLinesOnGrid(std::vector<Wall>& wallArg, double* const target, const double outside);
+        void prepareForDistanceFieldCalculation(std::vector<Line>& wallArg, int numOfExits);
+        void lineScan(std::vector<Line>& wallArg, double* const target, const double outside, const double inside);
+        void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside);
         void setSpeed(bool useDistance2Wall);
         void clearAndPrepareForFloorfieldReCalc(double* costarray);
-        void setNewGoalAfterTheClear(double* costarray, std::vector<Wall>& GoalWallArg);
+        void setNewGoalAfterTheClear(double* costarray, std::vector<Line>& GoalWallArg);
         void calculateFloorfield(double* costarray, Point* neggradarray);   //make private
         void calculateDistanceField(const double thresholdArg);             //make private
 
@@ -91,9 +92,10 @@ class FloorfieldViaFM
     protected:
     private:
         RectGrid* grid;
-        std::vector<Wall> wall;
+        std::vector<Line> wall;
         int numOfExits;
 
+        const Building* building;
 
         //stuff to handle wrapper grid (unused, cause RectGrid handles offset)
         double offsetX;
@@ -109,6 +111,8 @@ class FloorfieldViaFM
         Point* neggrad; //gradients
         Point* dirToWall;
         Trial* trialfield;
+        std::map<int, double*> costmap;
+        std::map<int, Point*>  neggradmap;
 
         double threshold;
 };
