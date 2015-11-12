@@ -283,6 +283,11 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
         Point p;
+        const Point& p1 = ped->GetExitLine()->GetPoint1();
+        const Point& p2 = ped->GetExitLine()->GetPoint2();
+        //rooms haben transID, subrooms haben vector mit trans...
+        //am besten: aus subroom den vector mit trans, dann linien vergleichen und aus
+        //richtiger trans die id auslesen. dann mit der id in: getDirectionToTrans(...)
         ffviafm->getDirectionAt(ped->GetPos(), p);
         p = p.Normalized();
         return (p + ped->GetPos());
