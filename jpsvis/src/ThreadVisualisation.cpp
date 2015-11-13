@@ -37,9 +37,11 @@
 #include <QObject>
 #include <QMessageBox>
 
+// we don't need this when compiling with cmake
+// http://www.vtk.org/Wiki/VTK/VTK_6_Migration/Factories_now_require_defines
 // all modules need to be initialized in vtk6
-#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
-#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
+//#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
+//#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
 
 
 #include <vtkRenderer.h>

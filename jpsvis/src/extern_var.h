@@ -30,8 +30,11 @@
 #ifndef EXTERN_VAR_H_
 #define EXTERN_VAR_H_ 1
 
-#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
-#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
+
+// we don't need this when compiling with cmake
+// http://www.vtk.org/Wiki/VTK/VTK_6_Migration/Factories_now_require_defines
+/* #define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL) */
+/* #define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL) */
 
 #include "SyncData.h"
 #include "Pedestrian.h"
