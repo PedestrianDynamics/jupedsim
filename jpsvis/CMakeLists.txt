@@ -186,6 +186,7 @@ find_package(VTK REQUIRED)
 if(VTK_FOUND)
   message(STATUS "found VTK. Version: " ${VTK_VERSION} " |  VTK_DIR: " ${VTK_DIR})
   message(STATUS "VTK_QT_Version: " ${VTK_QT_VERSION})
+  message(STATUS "VTK_LIBraries: " ${VTK_LIBRARIES})
 else(VTK_FOUND)
   message(FATAL_ERROR
     "Cannot build the executable without VTK. Please set the
@@ -312,24 +313,24 @@ endif()
 
 #======================================================================
 # debug where is python?
-foreach(REQUIRED_PYTHON_VERSION 2.7)  # 2.6 2.5)
-  message(STATUS "======== LOOKING FOR ${REQUIRED_PYTHON_VERSION} ========================")
-  # find_package ( PythonInterp ${REQUIRED_PYTHON_VERSION} REQUIRED)
-  # find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT)
-  # find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
+# foreach(REQUIRED_PYTHON_VERSION 2.7)  # 2.6 2.5)
+#   message(STATUS "======== LOOKING FOR ${REQUIRED_PYTHON_VERSION} ========================")
+#   # find_package ( PythonInterp ${REQUIRED_PYTHON_VERSION} REQUIRED)
+#   # find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+#   # find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
 
 
-  message(STATUS "PYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}")
-  message(STATUS "PYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}")
-  message(STATUS "PYTHON_INCLUDE_DIR:FILEPATH=${PYTHON_INCLUDE_DIR}")
-  message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
-  message(STATUS "PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
-  message(STATUS "Python_FRAMEWORKS=${Python_FRAMEWORKS}")
+#   message(STATUS "PYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}")
+#   message(STATUS "PYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}")
+#   message(STATUS "PYTHON_INCLUDE_DIR:FILEPATH=${PYTHON_INCLUDE_DIR}")
+#   message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
+#   message(STATUS "PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
+#   message(STATUS "Python_FRAMEWORKS=${Python_FRAMEWORKS}")
 
-  # unset(PYTHON_EXECUTABLE CACHE)
-  # unset(PYTHON_LIBRARY CACHE)
-  # unset(PYTHON_INCLUDE_DIR CACHE)
-endforeach()
+#   # unset(PYTHON_EXECUTABLE CACHE)
+#   # unset(PYTHON_LIBRARY CACHE)
+#   # unset(PYTHON_INCLUDE_DIR CACHE)
+# endforeach()
 
 
 # For Apple set the icns file containing icons
@@ -432,11 +433,13 @@ ENDIF(WIN32)
 #--------------------------------------------------------------------------------
 # Install the QtTest application, on Apple, the bundle is at the root of the
 # install tree, and on other platforms it'll go into the bin directory.
+MESSAGE(STATUS "${PROJECT_NAME} will be installed to ${CMAKE_INSTALL_PREFIX}")
 INSTALL(TARGETS JPSvis
   BUNDLE DESTINATION . COMPONENT Runtime
   RUNTIME DESTINATION bin COMPONENT Runtime
   
   )
+
 
 #--------------------------------------------------------------------------------
 # Install needed Qt plugins by copying directories from the qt installation
@@ -488,7 +491,7 @@ IF(APPLE)
 
 ENDIF(APPLE)
 
-
+SET(CPACK_RESOURCE_FILE_README "${README_FILE}")
 
 # To Create a package, one can run "cpack -G DragNDrop CPackConfig.cmake" on Mac OS X
 # where CPackConfig.cmake is created by including CPack
@@ -496,34 +499,66 @@ ENDIF(APPLE)
 set(CPACK_BINARY_DRAGNDROP ON)
 set(CPACK_PACKAGE_NAME "jpsvis")
 set(CPACK_PACKAGE_VENDOR "www.jupedsim.org")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MyLib - CPack Component Installation Example")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "JPSvis - CPack Component Installation Example")
 set(CPACK_PACKAGE_VERSION "1.0.0")
 set(CPACK_PACKAGE_VERSION_MAJOR "1")
 set(CPACK_PACKAGE_VERSION_MINOR "0")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPack Component Example")
- 
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "JPSvis_dir")
+
+if(APPLE)
+  set(CPACK_GENERATOR "DragNDrop")
+  set(CPACK_DMG_FORMAT "UDBZ")
+  set(CPACK_DMG_VOLUME_NAME "${PROJECT_NAME}")
+  set(CPACK_SYSTEM_NAME "OSX")
+  set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${JPSVIS_VERSION}")
+endif()
+
 include(CPack)
 
-
-message (STATUS "bin install dir" ${BIN_INSTALL_DIR})
+if(UNIX AND NOT APPLE)
+  set(BIN_INSTALL_DIR "bin")
+else()
+  set(BIN_INSTALL_DIR ".")
+  set(DOC_INSTALL_DIR ".")
+endif()
+message (STATUS "bin install dir: " ${BIN_INSTALL_DIR})
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION "${BIN_INSTALL_DIR}")
 include(InstallRequiredSystemLibraries)
 
 if(APPLE)
-    set(EXECUTABLE "${PROJECT_NAME}.app")
+  set(EXECUTABLE "${PROJECT_NAME}.app")
 elseif(WIN32)
     set(EXECUTABLE "${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
 else()
     set(EXECUTABLE "${BIN_INSTALL_DIR}/${PROJECT_NAME}${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 
-if(APPLE OR WIN32)
-  if(${QT4_INSTALLED})
-    include(DeployQt4)
-    install_qt4_executable("${EXECUTABLE}" "qsqlite")
-  elseif(${QT4_INSTALLED})
-    include(DeployQt5)
-    install_qt5_executable("${EXECUTABLE}" "qsqlite")
-  endif()
-endif()
+# https://github.com/artm/vision-ui-skeleton/blob/master/cmake/QArtmRelease.cmake
+  IF(APPLE)
+    SET(EXE_CONTENTS "${CMAKE_CURRENT_BINARY_DIR}/${EXECUTABLE}/Contents")
+    FILE(WRITE
+      ${EXE_CONTENTS}/Resources/qt.conf
+      "[Paths]\nPlugins=PlugIns\n")
+    FILE(COPY ${QT_PLUGINS_DIR}/imageformats
+      DESTINATION ${EXE_CONTENTS}/PlugIns/
+      PATTERN "*_debug.*" EXCLUDE)
+    ADD_CUSTOM_COMMAND(
+      TARGET ${PROJECT_NAME} POST_BUILD
+      COMMAND ruby ${CMAKE_SOURCE_DIR}/ruby/fixup/fixup.rb ${EXECUTABLE}
+      COMMENT "Fixing up the app bundle")
+  ENDIF(APPLE)
+
+
+# if(APPLE OR WIN32)
+#   if(${QT4_INSTALLED})
+#     include(DeployQt4)
+#     install_qt4_executable("${EXECUTABLE}" "qsqlite")
+#   elseif(${QT4_INSTALLED})
+#     include(DeployQt5)
+#     install_qt5_executable("${EXECUTABLE}" "qsqlite")
+#   endif()
+# endif()
+
+#   message(STATUS "verify app")
+#   verify_app(${EXECUTABLE})
