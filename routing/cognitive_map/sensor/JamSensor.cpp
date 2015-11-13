@@ -28,7 +28,7 @@
 #include "JamSensor.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 #include <set>
@@ -45,7 +45,7 @@ std::string JamSensor::GetName() const
 void JamSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = (*cognitive_map->GetNavigationGraph())[sub_room];
+    GraphVertex * vertex = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph())[sub_room];
     const GraphVertex::EdgesContainer * edges = vertex->GetAllOutEdges();
 
     for(GraphVertex::EdgesContainer::const_iterator it = edges->begin(); it != edges->end(); ++it) {

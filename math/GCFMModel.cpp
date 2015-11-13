@@ -69,7 +69,7 @@ GCFMModel::~GCFMModel(void)
 }
 
 
-bool GCFMModel::Init (Building* building) const
+bool GCFMModel::Init (Building* building)
 {
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     for(unsigned int p=0;p<allPeds.size();p++)
@@ -82,10 +82,7 @@ bool GCFMModel::Init (Building* building) const
               continue;
          }
 
-         Line* e = ped->GetExitLine();
-         const Point& e1 = e->GetPoint1();
-         const Point& e2 = e->GetPoint2();
-         Point target = (e1 + e2) * 0.5;
+         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
@@ -93,7 +90,7 @@ bool GCFMModel::Init (Building* building) const
               sinPhi = d.GetY() / dist;
          } else {
               Log->Write(
-                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "ERROR: \tallPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
               return false;
          }
@@ -106,7 +103,7 @@ bool GCFMModel::Init (Building* building) const
     return true;
 }
 
-void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
      double delta = 1.5;
 
@@ -384,7 +381,6 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      {
           f += ForceRepWall(ped, wall);
      }
-
      //then the obstacles
      for(const auto & obst: subroom->GetAllObstacles())
      {
@@ -607,7 +603,7 @@ double GCFMModel::GetDistEffMaxWall() const
      return _distEffMaxWall;
 }
 
-string GCFMModel::GetDescription() const
+string GCFMModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];

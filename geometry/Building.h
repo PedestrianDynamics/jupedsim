@@ -115,7 +115,7 @@ public:
       * @param uid ,the unique identifier
       * @return NULL if no exists with that identifier.
       */
-     SubRoom* GetSubRoomByUID( int uid);
+     SubRoom* GetSubRoomByUID( int uid) const;
 
      /**
       * @return true if the two segments are visible from each other.
@@ -183,7 +183,7 @@ public:
 
      /**
       * Load and parse the geometry file into the building object.
-      * If no geometry file is provided, one is searched in the the project file
+      * If no geometry file is provided, one is searched in the project file
       *
       * @param filename, the geometry file
       */

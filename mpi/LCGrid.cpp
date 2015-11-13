@@ -40,7 +40,8 @@
 
 using namespace std;
 
-#define MAX_AGENT_COUNT  0 // 1000000
+//FIXME:
+#define MAX_AGENT_COUNT  1000 // 1000000
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {
@@ -119,6 +120,7 @@ void LCGrid::Update(const vector<Pedestrian*>& peds)
 }
 
 // I hope you had called Clear() first
+// todo: can be used to solve the issue with MAX_AGENT_COUNT
 void LCGrid::Update(Pedestrian* ped)
 {
      int id=ped->GetID()-1;

@@ -53,10 +53,10 @@ Pedestrian::Pedestrian()
      _id = _agentsCreated;//default id
      _mass = 1;
      _tau = 0.5;
+     _T = 1.0;
      _newOrientationFlag = false;
      _newOrientationDelay = 0; //0 seconds, in steps
      _tmpFirstOrientation = true;
-     _updateRate = 0;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
      _navLine = new NavLine();
@@ -71,6 +71,7 @@ Pedestrian::Pedestrian()
      _mentalMap = map<int, int>();
      _destHistory = vector<int>();
      _deltaT = 0.01;
+     _updateRate = _deltaT;
      _V0 = Point(0,0);
      _lastPosition = Point(0,0);
      _lastCellPosition = -1;
@@ -91,7 +92,7 @@ Pedestrian::Pedestrian()
      _V0IdleEscalatorDownStairs=0.0;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
-
+     _lastE0 = Point(0,0);
      _agentsCreated++;//increase the number of object created
 }
 Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& building)
@@ -147,6 +148,11 @@ void Pedestrian::SetMass(double m)
 void Pedestrian::SetTau(double tau)
 {
      _tau = tau;
+}
+
+void Pedestrian::SetT(double T)
+{
+     _tau = T;
 }
 
 void Pedestrian::SetEllipse(const JEllipse& e)
@@ -232,6 +238,10 @@ int Pedestrian::GetID() const
      return _id;
 }
 
+double Pedestrian::GetUpdateRate() const
+{
+      return _updateRate;
+}
 int Pedestrian::GetRoomID() const
 {
      return _roomID;
@@ -250,6 +260,11 @@ double Pedestrian::GetMass() const
 double Pedestrian::GetTau() const
 {
      return _tau;
+}
+
+double Pedestrian::GetT() const
+{
+     return _T;
 }
 
 const JEllipse& Pedestrian::GetEllipse() const
@@ -296,6 +311,14 @@ int Pedestrian::GetNextDestination()
      }
 }
 
+Point Pedestrian::GetLastE0() const
+{
+      return _lastE0;
+}
+void Pedestrian::SetLastE0(Point E0)
+{
+      _lastE0 = E0;
+}
 
 int Pedestrian::GetLastDestination()
 {
@@ -314,11 +337,6 @@ bool Pedestrian::ChangedSubRoom()
           return true;
      }
      return false;
-}
-
-int Pedestrian::GetDestinationCount()
-{
-     return _destHistory.size();
 }
 
 void Pedestrian::ClearMentalMap()
@@ -341,6 +359,11 @@ void Pedestrian::ClearKnowledge()
 map<int, Knowledge>&  Pedestrian::GetKnownledge()
 {
      return _knownDoors;
+}
+
+const std::vector<int>& Pedestrian::GetLastDestinations() const
+{
+     return _destHistory;
 }
 
 const std::string Pedestrian::GetKnowledgeAsString() const
@@ -394,7 +417,7 @@ double Pedestrian::GetV0Norm() const
      //-----------------------------------------
 
      
-     // const Point& pos = GetPos();
+     const Point& pos = GetPos();
      // double distanceToTarget = (target-pos).Norm();
      // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
      // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
@@ -411,15 +434,18 @@ double Pedestrian::GetV0Norm() const
      }
       // we are walking downstairs
      else{
-           double c = 1.0;
+           double c = 15.0;
            // c should be chosen so that the func grows fast (but smooth) from 0 to 1
            // However we have to pay attention to tau. The velocity adaptation
            // from v to v0 in the driven force takes tau time.
-           double f; // f in [0, 1]
+           double f, g; // f in [0, 1]
            if(delta<0)
            {
                  double maxSubElevation = sub->GetMaxElevation();
-                 f = 2.0/(1+exp(-c*(maxSubElevation - ped_elevation)*(maxSubElevation - ped_elevation))) - 1;
+                 double stairLength = maxSubElevation - sub->GetMinElevation();
+                 double stairInclination = acos(sub->GetCosAngleWithHorizontal());
+                 f = 2.0/(1+exp(-c*stairInclination*(maxSubElevation - ped_elevation)*(maxSubElevation - ped_elevation))) - 1;
+                 g = 2.0/(1+exp(-c*stairInclination*(maxSubElevation - ped_elevation - stairLength)*(maxSubElevation - ped_elevation - stairLength))) - 1;
                  double speed_down = _V0DownStairs;
                  if(sub->GetType() == "escalator"){
                        speed_down = _EscalatorDownStairs;
@@ -427,17 +453,22 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_down = _V0IdleEscalatorDownStairs;
                  }
-                 // if(_id==-9)
-                 //       printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
-                 // // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // if(_id==209)
+                       // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
-                 return (1-f)*_ellipse.GetV0() + f*speed_down;
+                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
            }
            //we are walking upstairs
            else
            {
                  double minSubElevation = sub->GetMinElevation();
-                 f = 2.0/(1+exp(-c*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
+                 double stairHeight = sub->GetMaxElevation() - minSubElevation;
+                 double stairInclination = acos(sub->GetCosAngleWithHorizontal());
+                 // double stairHorinzontalLength =  stairHeight / sub->GetTanAngleWithHorizontal();
+                 f = 2.0/(1+exp(-c*stairInclination*(minSubElevation - ped_elevation)*(minSubElevation - ped_elevation))) - 1;
+                 g = 2.0/(1+exp(-c*stairInclination*(ped_elevation - minSubElevation - stairHeight)*(ped_elevation - minSubElevation - stairHeight))) - 1;
                  double speed_up = _V0UpStairs;
                  if(sub->GetType() == "escalator"){
                        speed_up = _EscalatorUpStairs;
@@ -445,13 +476,14 @@ double Pedestrian::GetV0Norm() const
                  else if(sub->GetType() == "idle_escalator"){
                        speed_up = _V0IdleEscalatorUpStairs;
                  }
-                 // if(_id==2){
-                 //       printf("%f UP min_e=%f, z=%f, f=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, _ellipse.GetV0(), speed_up, (1-f)*_ellipse.GetV0() + f*speed_up, GetV().Norm());
-                 //       fprintf(stderr, "%f  %f   %f  %f\n", _globalTime, _ellipse.GetV0(), (1-f)*_ellipse.GetV0() + f*speed_up, GetV().Norm());
+                 // if(_id==209){
+                       // printf("%f UP min_e=%f, z=%f, f=%f, g=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, g, _ellipse.GetV0(), speed_up, (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm());
+                 // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stairHeight = %f, stairLength = %f, angle = %.2f pos=(%f, %f)\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stairHeight, stairHorinzontalLength, stairInclination, pos.GetX(), pos.GetY());
+                       // getc(stdin);
+                 // fprintf(stderr, "%f  %f   %f  %f %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation,  stairInclination*180./3.14159265);
                  // }
-                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_up);
                  // getc(stdin);
-                 return (1-f)*_ellipse.GetV0() + f*speed_up;
+                 return (1-f*g)*_ellipse.GetV0() + f*g*speed_up;
            }
      }
      // orthogonal projection on the stair
@@ -498,7 +530,7 @@ void Pedestrian::InitV0(const Point& target)
      _V0 = delta.Normalized();
 
 #if DEBUG
-     printf("Ped=%d : _v0=[%f, %f] \n", _id, _v0.GetX(), _V0.GetY());
+     printf("Ped=%d : _v0=[%f, %f] delta=[%f, %f], pos=[%f, %f], target=[%f, %f]\n", _id, _V0.GetX(), _V0.GetY(), delta.GetX(), delta.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
 #endif
 }
 
@@ -506,7 +538,7 @@ void Pedestrian::InitV0(const Point& target)
 const Point& Pedestrian::GetV0(const Point& target)
 {
 
-#define DEBUG 1
+#define DEBUGV0 1
      const Point& pos = GetPos();
      Point delta = target - pos;
      Point new_v0;
@@ -518,15 +550,16 @@ const Point& Pedestrian::GetV0(const Point& target)
      t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade); 
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
-#if DEBUG
-     if(_id==-159){
+#if DEBUGV0
+     if(0){
           printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1().GetX(), _navLine->GetPoint1().GetY(), _navLine->GetPoint2().GetX(), _navLine->GetPoint2().GetY());
           printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
           printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
           printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _distToBlockade);
           printf("_v0=[%f, %f] norm = %f\n=====\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+          getc(stdin);
      }
-     // getc(stdin);
+
 #endif
      // --------------------------------------
 
@@ -736,7 +769,7 @@ string Pedestrian::GetPath()
      return path;
 }
 
-void Pedestrian::Dump(int ID, int pa)
+void Pedestrian::Dump(int ID, int pa) const
 {
 
      if (ID != _id) return;
@@ -917,7 +950,7 @@ int Pedestrian::GetAgentsCreated()
      return _agentsCreated;
 }
 
-int Pedestrian::GetColor()
+int Pedestrian::GetColor() const
 {
      //default color is by velocity
      string key;

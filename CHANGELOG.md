@@ -3,7 +3,37 @@ All notable changes to this project will be documented in this file.
 
 
 ## v0.8.0 [Unreleased]
+
+
+### Added
+#### JPSCORE
+- Added more validation tests
+- Added statistics (calculate exit usage) for all exits
+- Added voronoi based algorithm for inserting agents coming from the source or from matsim
+- New option for the quickest path router. Sample options are:
+ ```<parameters default_strategy="local_shortest">```
+  ```<parameters default_strategy="global_shortest">``` 
+   ``` <parameters cba_gain="0.15" reference_peds_selection="single" congestion_ratio="0.8" queue_vel_escaping_jam="0.2" queue_vel_new_room="0.7" visibility_obstruction="4">```
+- New model with the generic name `Tordeux2015` and `id=3`. For use check the ini-files in the Utest-validation tests.
+- Tests are sorted in `rimea_tests`, `juelich_tests` and `validation_tests`.
+- Periodic boundary conditions with the option `<periodic>1</periodic>`.Works only with model 3.  
+- Added Floorfield to all exits, providing direction to target, direction to closest wall and cost estimates. Parameter to control wall-avoidance included.
+   
+#### JPSVIS
+- Added option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
+``` in the header of the trajectory file. Alternatively drag and drop a vtk file on JPSvis.
  
+- Fixed error displaying the total number of frames when using the scroolbar
+ 
+#### JPSREPORT
+- Added geometry information while plotting the voronoi cells
+- Added option to disable plotting
+- Issue a warning when the voronoi cell cannot be calculated 
+- Fixed error where all trajectories were colinear
+
+#### JPSEDITOR
+ 
+
 ## v0.7.0 [2015-07-15]
 
 ### New Module
@@ -49,7 +79,7 @@ All notable changes to this project will be documented in this file.
 
 
 ### Changed
-- refactor NumCPU and ExitCrossingStrategy tags to num_threads and exit_crossing_strategy
+- refactor NumCPU and ExitCrossingStrategy tags to `num_threads and exit_crossing_strategy`
 
 
 

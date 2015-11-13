@@ -178,6 +178,7 @@ double AccessPoint::DistanceTo(double x, double y)
 {
 
      return sqrt((x-_center[0])*(x-_center[0]) + (y-_center[1])*(y-_center[1]));
+     //return _navLine->DistTo(Point(x,y));
 }
 
 
@@ -267,6 +268,7 @@ void AccessPoint::Dump()
      //cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
      cout<<" Friendly ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
      cout<<" Real ID: " <<_id<<endl;
+     cout<<" Length:  "<<_navLine->LengthSquare()<<endl;
 
      cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<endl;
      cout <<" Distance to final goals"<<endl;

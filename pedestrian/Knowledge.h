@@ -89,7 +89,7 @@ public:
      /**
       * print the content of the knowledge as string
       */
-     std::string Dump();
+     std::string Dump() const;
 
      /**
       * @return true, if the information can be forwarded

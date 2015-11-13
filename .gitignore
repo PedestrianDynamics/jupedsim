@@ -1,15 +1,24 @@
 /build/
 /lib/
 /bin/
+/doc
 /Debug
 /Release
+/Testing
 /doc/html
 /figs
 /figs_bot
+/inputfiles
+/Utest
 /Utest/*/inifiles*/
 /Utest/*/trajectories
 /Utest/rimea_tests/*/inifiles*/
 /Utest/rimea_tests/*/trajectories
+/Utest/juelich_tests/*/trajectories
+/Utest/juelich_tests/*/inifiles
+/Utest/juelich_tests/*/inifiles_a
+/Utest/juelich_tests/*/inifiles_b
+Utest/Validation/*/inifiles*/
 *~
 
 # Compiled Object files
@@ -35,12 +44,19 @@
 *.out
 *.app
 
+# Hidden files
+.*
+!/.gitignore
+
 # Cmake
 CMakeCache.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
+
+*.vtk
+*Traj*.xml
 
 CTestTestfile.cmake
 DartConfiguration.tcl
@@ -90,7 +106,8 @@ vgcore.*
 /delme.py
 /mencoderVideos.sh
 /true_false.xml
-
+/JPScore.cbp
+/JPScore.layout
 /Max/
 README.html
 Utest/r2.txt

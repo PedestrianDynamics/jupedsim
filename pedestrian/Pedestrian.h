@@ -63,6 +63,7 @@ private:
      //gcfm specific parameters
      double _mass; // Mass: 1
      double _tau; // Reaction time: 0.5
+     double _T; // OV function
      double _deltaT; // step size
      JEllipse _ellipse;// the shape of this pedestrian
      Point _V0; //vector V0
@@ -80,7 +81,7 @@ private:
      int _subRoomID;
      int _oldRoomID;
      int _oldSubRoomID;
-
+     Point _lastE0;
 
      NavLine* _navLine; // current exit line
      std::map<int, int>_mentalMap; // map the actual room to a destination
@@ -116,7 +117,7 @@ private:
      int _newOrientationDelay; //2 seconds, in steps
 
      /// necessary for smooth turning at sharp bend
-     int _updateRate;
+     double _updateRate;
      double _turninAngle;
      bool _reroutingEnabled;
      bool _tmpFirstOrientation; // possibility to get rid of this variable
@@ -149,6 +150,8 @@ public:
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
 
+     double GetT() const;
+     void SetT(double T);
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
@@ -181,7 +184,9 @@ public:
      int GetExitIndex() const;
      Router* GetRouter() const;
      NavLine* GetExitLine() const;
-
+     double GetUpdateRate() const;
+     Point GetLastE0() const;
+     void SetLastE0(Point E0);
      // Eigenschaften der Ellipse
      const Point& GetPos() const;
      int GetCellPos() const;
@@ -202,7 +207,7 @@ public:
      double GetSmallerAxis() const;
      double GetTimeInJam()const;
      int GetFinalDestination() const;
-     void ClearMentalMap(); // erase the peds memory
+     void ClearMentalMap(); //erase the peds memory
 
      /**
       * Update the knowledge of the pedestrian
@@ -219,6 +224,11 @@ public:
      std::map<int, Knowledge>& GetKnownledge();
 
      /**
+      * @return all previous destinations used by this pedestrian
+      */
+     const std::vector<int>& GetLastDestinations() const;
+
+     /**
       * For convenience
       * @return a string representation of the knowledge
       */
@@ -233,7 +243,6 @@ public:
      int GetUniqueRoomID() const;
      int GetNextDestination();
      int GetLastDestination();
-     int GetDestinationCount();
      double GetDistanceToNextTarget() const;
      double GetDisTanceToPreviousTarget() const;
      void SetNewOrientationFlag(bool flag);
@@ -274,7 +283,7 @@ public:
       * @param ID, the id of the pedestrian
       * @param pa, the parameter to display (0 for all parameters)
       */
-     void Dump(int ID, int pa = 0);
+     void Dump(int ID, int pa = 0) const;
 
      /**
       * observe the reference pedestrians and collect some data, e.g distance to exit
@@ -368,7 +377,7 @@ public:
       * Default mode is coded by velocity.
       * @return a value in [-1 255]
       */
-     int GetColor();
+     int GetColor() const;
 
      void ResetTimeInJam();
      void UpdateTimeInJam();

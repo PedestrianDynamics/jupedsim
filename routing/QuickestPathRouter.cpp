@@ -39,41 +39,31 @@ QuickestPathRouter::QuickestPathRouter( ):GlobalRouter() { }
 
 QuickestPathRouter::~QuickestPathRouter() { }
 
+bool QuickestPathRouter::Init(Building* building)
+{
+     Log->Write("INFO:\tInit Quickest Path Router Engine");
 
-//string QuickestPathRouter::GetRoutingInfoFile() const
-//{
-//     TiXmlDocument doc(_building->GetProjectFilename());
-//     if (!doc.LoadFile())
-//     {
-//          Log->Write("ERROR: \t%s", doc.ErrorDesc());
-//          Log->Write("ERROR: \t could not open/parse the project file");
-//          return "";
-//     }
-//
-//     // everything is fine. proceed with parsing
-//     TiXmlElement* xMainNode = doc.RootElement();
-//     TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
-//
-//     string nav_line_file="";
-//
-//     for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
-//               e = e->NextSiblingElement("router"))
-//     {
-//
-//          string strategy=e->Attribute("description");
-//
-//          if(strategy=="quickest")
-//          {
-//               if (e->FirstChild("parameters")->FirstChildElement("navigation_lines"))
-//                    nav_line_file=e->FirstChild("parameters")->FirstChildElement("navigation_lines")->Attribute("file");
-//          }
-//     }
-//
-//     if (nav_line_file == "")
-//          return nav_line_file;
-//     else
-//          return _building->GetProjectRootDir()+nav_line_file;
-//}
+     // prefer path through corridors to path through rooms
+     SetEdgeCost(2.0);
+     if (GlobalRouter::Init(building) == false)
+          return false;
+
+     if (ParseAdditionalParameters() == false)
+          return false;
+
+     // activate the spotlight for tracking some pedestrians
+     //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+
+     //vector<string> rooms;
+     //rooms.push_back("150");
+     //rooms.push_back("outside");
+     //WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
+     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
+     //DumpAccessPoints(1185);
+     //exit(0);
+     Log->Write("INFO:\tDone with Quickest Path Router Engine!");
+     return true;
+}
 
 int QuickestPathRouter::FindExit(Pedestrian* ped)
 {
@@ -153,8 +143,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                          {
                               ped->SetExitIndex(apID);
                               ped->SetExitLine(_accessPoints[apID]->GetNavLine());
-                              //ped->SetSmoothTurning(true);
-
                               return apID;
                          }
                          else
@@ -167,7 +155,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
                          ped->SetExitIndex(nextDestination);
                          ped->SetExitLine(
                                    _accessPoints[nextDestination]->GetNavLine());
-                         //ped->SetSmoothTurning(true);
                          return nextDestination;
                     }
                }
@@ -182,28 +169,6 @@ int QuickestPathRouter::FindNextExit(Pedestrian* ped)
 double QuickestPathRouter::CBA (double ref_g1, double comp_g2)
 {
      return (comp_g2-ref_g1)/(ref_g1+comp_g2);
-}
-
-
-double QuickestPathRouter::TAP (double alpha)
-{
-     alpha=fabs(alpha);
-     const double pi = 3.14159265;
-
-     if(alpha<(pi/3.0))
-     {
-          return 0.9;
-     }
-     else if((alpha>=(pi/3.0))&&(alpha<(2*pi/3.0)))
-     {
-          return 0.8;
-     }
-     else
-     {
-          return 0.7;
-     }
-     //      return ( (alpha < pi/3 )? (0.9):( (alpha<2*pi/3) ? (0.8):(0.9)) );
-     return 1;
 }
 
 
@@ -264,7 +229,7 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP 
      double cba = CBA(gain(preferredExitTime),gain(minTime));
 
      //cout<<"cba:" <<cba<<endl;
-     if (cba<CBA_THRESHOLD) return preferredExit;
+     if (cba<_cbaThreshold) return preferredExit;
 
      return quickest;
 }
@@ -275,28 +240,6 @@ double QuickestPathRouter::gain(double time)
      return 1.0/time;
 }
 
-bool QuickestPathRouter::Init(Building* building)
-{
-     Log->Write("INFO:\tInit Quickest Path Router Engine");
-
-     // prefer path through corridors to path through rooms
-     SetEdgeCost(1.0);
-     if (GlobalRouter::Init(building) == false)
-          return false;
-
-     // activate the spotlight for tracking some pedestrians
-     //Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
-
-     //vector<string> rooms;
-     //rooms.push_back("150");
-     //rooms.push_back("outside");
-     //WriteGraphGV("routing_graph.gv",FINAL_DEST_ROOM_040,rooms);
-     //WriteGraphGV("routing_graph.gv",FINAL_DEST_OUT,rooms);
-     //DumpAccessPoints(1185);
-     //exit(0);
-     Log->Write("INFO:\tDone with Quickest Path Router Engine!");
-     return true;
-}
 
 bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestrian** myref, double jamThreshold, int exitID, int* flag)
 {
@@ -390,37 +333,6 @@ bool QuickestPathRouter::SelectReferencePedestrian(Pedestrian* myself, Pedestria
      return true;
 }
 
-int QuickestPathRouter::GetCommonDestinationCount(AccessPoint* ap1, AccessPoint* ap2)
-{
-     const vector<AccessPoint*>& aps1 = ap1->GetConnectingAPs();
-     const vector<AccessPoint*>& aps2 = ap2->GetConnectingAPs();
-
-     vector<AccessPoint*> common;
-
-     for(unsigned int i=0; i<aps1.size(); i++)
-     {
-          AccessPoint* from_AP=aps1[i];
-          if(from_AP->GetID()==ap2->GetID()) continue;
-          for(unsigned int j=0; j<aps2.size(); j++)
-          {
-               AccessPoint* to_AP=aps2[j];
-               if(to_AP->GetID()==ap1->GetID()) continue;
-               if(from_AP->GetID()==to_AP->GetID())
-               {
-                    //only add if the destination is shorter than mine
-                    //if(ap2->GetDistanceTo(FINAL_DEST_OUT)<from_AP->GetDistanceTo(FINAL_DEST_OUT))
-                    //if(ap1->GetDistanceTo(FINAL_DEST_OUT)<from_AP->GetDistanceTo(FINAL_DEST_OUT))
-                    common.push_back(from_AP);
-               }
-          }
-     }
-
-     std::sort(common.begin(), common.end());
-     common.erase(std::unique(common.begin(), common.end()), common.end());
-
-     return common.size();
-}
-
 void QuickestPathRouter::GetQueueAtExit(Hline* hline, double minVel,
           double radius, vector<Pedestrian*>& queue,int subroomToConsider)
 {
@@ -507,7 +419,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* ped, Pedestrian* 
      int obstacles = GetObstaclesCountBetween(ped->GetPos(), ref->GetPos(),
                ignore_hline, ignore_ped1, ignore_ped2);
 
-     if (obstacles > OBSTRUCTION)
+     if (obstacles > _visibilityObstruction)
      {
           return false;
      }
@@ -521,7 +433,7 @@ bool QuickestPathRouter::IsDirectVisibilityBetween(Pedestrian* myself, Hline* hl
      int obstacles = GetObstaclesCountBetween(myself->GetPos(),
                hline->GetCentre(), hline, ignore_ped1, ignore_ped2);
 
-     if (obstacles > OBSTRUCTION)
+     if (obstacles > _visibilityObstruction)
      {
           return false;
      }
@@ -567,7 +479,7 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
 
                if(visibilityLine.IntersectionWithCircle(ped->GetPos())) {
                     obstacles++;
-                    if(obstacles>OBSTRUCTION) return obstacles;
+                    if(obstacles>_visibilityObstruction) return obstacles;
                }
 
           }
@@ -588,7 +500,7 @@ int QuickestPathRouter::GetObstaclesCountBetween(const Point& p1, const Point& p
                if(visibilityLine.IntersectionWithCircle(ped->GetPos()))
                {
                     obstacles++;
-                    if(obstacles>OBSTRUCTION) return obstacles;
+                    if(obstacles>_visibilityObstruction) return obstacles;
                }
           }
      }
@@ -604,7 +516,7 @@ int QuickestPathRouter::isCongested(Pedestrian* ped)
 
      //in the case there are only few people in the room
      //revise this condition
-     if(allPeds.size()<=OBSTRUCTION) return false;
+     if(allPeds.size()<=_visibilityObstruction) return false;
 
      double myDist=ped->GetDistanceToNextTarget();
      double inFrontofMe=0;
@@ -642,7 +554,7 @@ double QuickestPathRouter::GetEstimatedTravelTimeVia(Pedestrian* ped, int exitid
      //select a reference pedestrian
      Pedestrian* myref=NULL;
      int flag=FREE_EXIT; //assume free exit
-     SelectReferencePedestrian(ped,&myref,J_QUEUE_VEL_THRESHOLD_JAM,exitid,&flag);
+     SelectReferencePedestrian(ped,&myref,_queueVelocityFromJam,exitid,&flag);
 
      AccessPoint* ap=_accessPoints[exitid];
 
@@ -727,7 +639,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
 
      if(relevantAPs.size()==0)
      {
-          Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
+          //Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
           return;
      }
 
@@ -778,7 +690,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
 
      if(quickest==-1)
      {
-          Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
+          //Log->Write("WARNING:\t Cannot redirect the pedestrian [%d]", ped->GetID());
           return;
      }
 
@@ -786,7 +698,7 @@ void QuickestPathRouter::Redirect(Pedestrian* ped)
      if(quickest!=preferredExit)
      {
           double cba = CBA(gain(preferredExitTime),gain(minTime));
-          if (cba>CBA_THRESHOLD)
+          if (cba>_cbaThreshold)
           {
                ped->SetExitIndex(quickest);
                ped->SetExitLine(_accessPoints[quickest]->GetNavLine());
@@ -802,6 +714,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      //double alpha=0.2000005;
      //double normFactor=0.0;
      //map <int, double> doorProb;
+
 
      // get the relevant opened exits
      vector <AccessPoint*> relevantAPs;
@@ -823,6 +736,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
      SubRoom* sub = _building->GetRoom(ped->GetRoomID())->GetSubRoom(
                ped->GetSubRoomID());
 
+
      for(unsigned int g=0; g<relevantAPs.size(); g++)
      {
           AccessPoint* ap=relevantAPs[g];
@@ -843,11 +757,9 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
 
 
           //check if visible
-          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetMaxElevation()],true)==false)
-          //if (sub->IsVisible(posA, posC, true) == false)
+          if(_building->IsVisible(posA, posC, _subroomsAtElevation[sub->GetElevation(sub->GetCentroid())],true)==false)
           {
                ped->RerouteIn(10);
-               //ped->Dump(ped->GetID());
                continue;
           }
 
@@ -883,21 +795,8 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           // if two doors are feasible to the final destination without much differences
           // in the distances, then the nearest is preferred.
           //cout<<"CBA (---): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-          if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < CBA_THRESHOLD)
-          {
-               if (dist2 < minDistLocal)
-               {
-                    //cout<<"CBA (small): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-                    bestAPsID = ap->GetID();
-                    minDistGlobal = dist;
-                    minDistLocal= dist2;
-               }
-               else
-               {
-                    //cout<<"CBA (large): "<<  (dist-minDistGlobal) / (dist+minDistGlobal)<<endl;
-               }
-          }
-          else
+
+          if(_defaultStrategy==GLOBAL_SHORTEST)
           {
                if (dist < minDistGlobal)
                {
@@ -905,7 +804,36 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                     minDistGlobal = dist;
                     minDistLocal=dist2;
                }
+
           }
+          else if(_defaultStrategy==LOCAL_SHORTEST)
+          {
+               if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < _cbaThreshold)
+               {
+                    if (dist2 < minDistLocal)
+                    {
+                         bestAPsID = ap->GetID();
+                         minDistGlobal = dist;
+                         minDistLocal= dist2;
+                    }
+
+               }
+               else
+               {
+                    if (dist < minDistGlobal)
+                    {
+                         bestAPsID = ap->GetID();
+                         minDistGlobal = dist;
+                         minDistLocal=dist2;
+                    }
+               }
+          }
+          else
+          {
+               cout<<"Unknown Strategy: "<<_defaultStrategy<<endl;
+               exit(0);
+          }
+
      }
 
      if (bestAPsID != -1)
@@ -923,4 +851,50 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                          ped->GetFinalDestination());
           return -1;
      }
+}
+
+bool QuickestPathRouter::ParseAdditionalParameters()
+{
+     TiXmlDocument doc(_building->GetProjectFilename());
+     if (!doc.LoadFile()) {
+          Log->Write("ERROR: \t%s", doc.ErrorDesc());
+          Log->Write("ERROR: \t GlobalRouter: could not parse the project file");
+          return "";
+     }
+
+     // everything is fine. proceed with parsing
+     TiXmlElement* xMainNode = doc.RootElement();
+     TiXmlNode* xRouters=xMainNode->FirstChild("route_choice_models");
+
+     for(TiXmlElement* e = xRouters->FirstChildElement("router"); e;
+               e = e->NextSiblingElement("router"))
+     {
+
+          string strategy=e->Attribute("description");
+
+          if( ( strategy=="quickest") && e->FirstChild("parameters"))
+          {
+
+               TiXmlElement* para =e->FirstChildElement("parameters");
+
+               if (para)
+               {
+                    _cbaThreshold=xmltof(para->Attribute("cba_gain"), _cbaThreshold);
+                    _congestionRation=xmltof(para->Attribute("congestion_ratio"), _congestionRation);
+                    _queueVelocityFromJam=xmltof(para->Attribute("queue_vel_escaping_jam"), _queueVelocityFromJam);
+                    _queueVelocityNewRoom=xmltof(para->Attribute("queue_vel_new_room"), _queueVelocityNewRoom);
+                    _visibilityObstruction=xmltoi(para->Attribute("visibility_obstruction"), _visibilityObstruction);
+
+                    string selection_mode=xmltoa(para->Attribute("reference_peds_selection"), "single");
+                    if(selection_mode=="single") _refPedSelectionMode=RefSelectionMode::SINGLE;
+                    if(selection_mode=="all") _refPedSelectionMode=RefSelectionMode::ALL;
+
+                    string default_strategy=xmltoa(para->Attribute("default_strategy"), "local_shortest");
+                    if(default_strategy=="local_shortest") _defaultStrategy=DefaultStrategy::LOCAL_SHORTEST;
+                    if(default_strategy=="global_shortest") _defaultStrategy=DefaultStrategy::GLOBAL_SHORTEST;
+
+               }
+          }
+     }
+     return true;
 }

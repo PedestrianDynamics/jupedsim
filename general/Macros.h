@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -61,19 +61,13 @@
 #endif
 
 // precision error
-#define J_EPS 0.001
+#define J_EPS  0.001//0.001
 #define J_EPS_EVENT 0.00001 //zum pruefen des aktuellen Zeitschrittes auf events
 #define J_EPS_DIST 0.05// [m]
 
 #define J_EPS_GOAL 0.005 /// [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
-
-// routing macros
-#define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
-#define J_QUEUE_VEL_THRESHOLD_JAM 0.2 // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation
-#define CBA_THRESHOLD 0.15
-#define OBSTRUCTION 4
 
 // Length of array
 #define CLENGTH 1000
@@ -125,9 +119,10 @@ enum RoutingStrategy {
 enum OperativModels {
     MODEL_GFCM=1,
     MODEL_GOMPERTZ,
+    MODEL_VELOCITY,
+    MODEL_GRADIENT
 //    MODEL_ORCA,
 //    MODEL_CFM,
-//    MODEL_VELO
 //    MODEL_GNM
 };
 

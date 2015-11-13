@@ -13,6 +13,7 @@ except ImportError:
 
 SUCCESS = 0
 FAILURE = 1
+
 ego = os.path.splitext(sys.argv[0])[0] + ".txt"
 
 logfile = "log_%s"%ego
@@ -59,7 +60,10 @@ attributes_tags = ['group-pre_movement_mean',
                    'force_wall-interpolation_width',
                    'force_wall-nu',
                    'force_wall-b',
-                   'force_wall-c']
+                   'force_wall-c',
+                   'source-frequency',
+                   'source-agents_max',
+               ]
 
 import numpy as np
 # cor_tags = np.unique([att.split("_")[0] for att in attributes_tags]).astype(str)a

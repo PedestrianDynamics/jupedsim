@@ -84,7 +84,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
           exit (EXIT_FAILURE);
      }
 
-     //this->AddSurroundingRoom();
+//     this->AddSurroundingRoom();
 
      if(!InitGeometry())
      {
@@ -928,7 +928,7 @@ Hline* Building::GetTransOrCrossByUID(int id) const
      return NULL;
 }
 
-SubRoom* Building::GetSubRoomByUID( int uid)
+SubRoom* Building::GetSubRoomByUID( int uid) const
 {
      for(auto&& itr_room: _rooms)
      {
@@ -1076,6 +1076,9 @@ void Building::InitGrid(double cellSize)
      } else {
           Log->Write("INFO: \tInitializing the grid with cell size: %f ", cellSize);
      }
+
+     //TODO: the number of pedestrian should be calculated using the capacity of the sources
+     //int nped= Pedestrian::GetAgentsCreated() +  for src:sources  src->GetMaxAgents()
 
      _linkedCellGrid = new LCGrid(boundaries, cellSize, Pedestrian::GetAgentsCreated());
      _linkedCellGrid->ShallowCopy(_allPedestians);
@@ -1365,11 +1368,11 @@ Pedestrian* Building::GetPedestrian(int pedID) const
 
 Transition* Building::GetTransitionByUID(int uid) const
 {
-     //eventually
-     map<int, Transition*>::const_iterator itr;
-     for(itr = _transitions.begin(); itr != _transitions.end(); ++itr) {
-          if (itr->second->GetUniqueID()== uid)
-               return itr->second;
+
+     for(auto && trans: _transitions)
+     {
+          if(trans.second->GetUniqueID()==uid)
+               return trans.second;
      }
      return nullptr;
 }

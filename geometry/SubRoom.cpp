@@ -55,6 +55,8 @@ SubRoom::SubRoom()
      _roomID=-1;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
+     _poly_help_constatnt = vector<double> ();
+     _poly_help_multiple = vector<double> ();
      _obstacles=vector<Obstacle*> ();
 
      _crossings = vector<Crossing*>();
@@ -65,6 +67,7 @@ SubRoom::SubRoom()
      _planeEquation[1]=0.0;
      _planeEquation[2]=0.0;
      _cosAngleWithHorizontalPlane=0;
+     _tanAngleWithHorizontalPlane=0;
      _minElevation=0;
      _maxElevation=0;
      
@@ -81,8 +84,29 @@ SubRoom::~SubRoom()
      }
      _obstacles.clear();
 }
+/*
+void SubRoom::SetHelpVariables()
+{
+	unsigned int i, j= _poly.size()-1;
 
+	for( i=0; i< _poly.size(); i++)
+	{
+		if ( _poly[i].GetY() == _poly[j].GetY() ) //not important
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() ) ;
+			_poly_help_multiple.push_back( 0 );
+		}
+		else
+		{
+			_poly_help_constatnt.push_back( _poly[i].GetX() - ( _poly[i].GetY()*_poly[j].GetX() ) / ( _poly[j].GetY() - _poly[i].GetY())
+										+ ( _poly[i].GetY()*_poly[i].GetX() )/ ( _poly[j].GetY() - _poly[i].GetY()  )  );
 
+			_poly_help_multiple.push_back( (_poly[j].GetX()-_poly[i].GetX())/(_poly[j].GetY()-_poly[i].GetY()) );
+		}
+	j=i;
+	}
+}
+*/
 void SubRoom::SetSubRoomID(int ID)
 {
      _id = ID;
@@ -260,6 +284,19 @@ void SubRoom::RemoveGoalID(int ID)
      Log->Write("There is no goal with that id to remove");
 }
 
+bool SubRoom::IsAccessible()
+{
+    //at least one door is open
+     for(auto&& tran: _transitions)
+     {
+          if(tran->IsOpen()==true) return true;
+     }
+     for(auto&& cros: _crossings)
+     {
+          if(cros->IsOpen()==true) return true;
+     }
+    return false;
+}
 
 void SubRoom::CalculateArea()
 {
@@ -437,6 +474,8 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _planeEquation[2]=C;
      //compute and cache the cosine of angle with the plane z=h
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
+     // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1) 
+     _tanAngleWithHorizontalPlane = sqrt(A*A+B*B); // n1.n2 = -1
 }
 
 const double* SubRoom::GetPlaneEquation() const
@@ -452,6 +491,12 @@ double SubRoom::GetElevation(const Point& p) const
 double SubRoom::GetCosAngleWithHorizontal() const
 {
      return _cosAngleWithHorizontalPlane;
+
+}
+
+double SubRoom::GetTanAngleWithHorizontal() const
+{
+     return _tanAngleWithHorizontalPlane;
 
 }
 
@@ -619,7 +664,7 @@ bool SubRoom::SanityCheck()
                {
                     Log->Write("ERROR: Overlapping between crossing %s and  transition %s ",c->toString().c_str(),t->toString().c_str());
                     exit(EXIT_FAILURE);
-                    //return false;
+                    return false;
                }
           }
      }

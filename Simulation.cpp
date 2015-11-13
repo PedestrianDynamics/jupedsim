@@ -32,6 +32,7 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
+#include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
@@ -207,6 +208,8 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      s.append(tmp);
      _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
+     _periodic = args.IsPeriodic();
+     sprintf(tmp, "\t periodic: %d\n", _periodic);
      s.append(tmp);
 
      _fps = args.Getfps();
@@ -242,11 +245,10 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           return false;
 
      //other initializations
-     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
-     for (Pedestrian *ped : allPeds) {
+     for (auto&& ped: _building->GetAllPedestrians()) {
           ped->Setdt(_deltaT);
      }
-     _nPeds = allPeds.size();
+     _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
 
      //get the seed
@@ -352,22 +354,19 @@ void Simulation::UpdateRoutesAndLocations()
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
 
+                                   //the pedestrian did not used the door to exit the room
+                                   //todo: optimize with distance square
+                                   //if(ped->GetDistanceToNextTarget()>0.5)
+                                   //{
+                                   //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
+                                   //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
+                                   //}
+
                                    //also statistic for internal doors
-                                   if(_argsParser.ShowStatistics())
-                                   {
-                                        if(old_sub->GetSubRoomID()!=sub->GetSubRoomID())
-                                        {
-                                             Transition* trans =_building->GetTransitionByUID(ped->GetExitIndex());
-                                             if(trans)
-                                             {
-                                                  trans->IncreaseDoorUsage(1, ped->GetGlobalTime());
-                                             }
-                                        }
-                                   }
+                                   UpdateFlowAtDoors(*ped);
 
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
-
 
                                    assigned = true;
                                    break;
@@ -409,11 +408,7 @@ void Simulation::UpdateRoutesAndLocations()
           // remove the pedestrians that have left the building
           for (unsigned int p = 0; p < pedsToRemove.size(); p++)
           {
-               Transition* trans =_building->GetTransitionByUID(pedsToRemove[p]->GetExitIndex());
-               if(trans)
-               {
-                    trans->IncreaseDoorUsage(1, pedsToRemove[p]->GetGlobalTime());
-               }
+               UpdateFlowAtDoors(*pedsToRemove[p]);
                _building->DeletePedestrian(pedsToRemove[p]);
           }
      }
@@ -444,10 +439,10 @@ void Simulation::PrintStatistics()
      for (const auto& itr : _building->GetAllTransitions())
      {
           Transition* goal = itr.second;
-          //if (goal->IsExit())
+          if (goal->GetDoorUsage())
           {
                Log->Write(
-                         "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+                         "\nExit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
 
@@ -517,7 +512,7 @@ int Simulation::RunBody(double maxSimTime)
                _building->UpdateGrid();
 
                // update the positions
-               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
                //update the events
                _em->ProcessEvent();
@@ -572,6 +567,50 @@ void Simulation::ProcessAgentsQueue()
           _hybridSimManager->ProcessOutgoingAgent();
      }
 #endif
+}
+
+void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
+{
+     if(_argsParser.ShowStatistics())
+     {
+          Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
+          if(trans)
+          {
+               //check if the pedestrian left the door correctly
+               if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
+               {
+                    Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped.GetID());
+                    Log->Write("       :\t distance to last door is %f. That should be smaller.", ped.GetExitLine()->DistTo(ped.GetPos()));
+                    Log->Write("       :\t correcting the door statistics");
+                    //ped.Dump(ped.GetID());
+
+                    //checking the history and picking the nearest previous destination
+                    double biggest=0.3;
+                    bool success=false;
+                    for(const auto & dest:ped.GetLastDestinations())
+                    {
+                         if(dest!=-1)
+                         {
+                              Transition* trans_tmp =_building->GetTransitionByUID(dest);
+                              if(trans_tmp&&trans_tmp->DistTo(ped.GetPos())<biggest)
+                              {
+                                   biggest=trans_tmp->DistTo(ped.GetPos());
+                                   trans=trans_tmp;
+                                   Log->Write("       :\t Best match found at door %d",dest);
+                                   success=true;//at least one door was found
+                              }
+                         }
+                    }
+
+                    if(success==false)
+                    {
+                         Log->Write("ERROR       :\t correcting the door statistics");
+                         exit(EXIT_SUCCESS);
+                    }
+               }
+               trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+          }
+     }
 }
 
 AgentsSourcesManager& Simulation::GetAgentSrcManager()
