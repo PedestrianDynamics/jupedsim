@@ -283,13 +283,8 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
         Point p;
-        const Point& p1 = ped->GetExitLine()->GetPoint1();
-        const Point& p2 = ped->GetExitLine()->GetPoint2();
-        //rooms haben transID, subrooms haben vector mit trans...
-        //am besten: aus subroom den vector mit trans, dann linien vergleichen und aus
-        //richtiger trans die id auslesen. dann mit der id in: getDirectionToTrans(...)
-        ffviafm->getDirectionAt(ped->GetPos(), p);
-        p = p.Normalized();
+        ffviafm->getDirectionToTransition(ped->GetTransitionID(), ped->GetPos(), p);
+        p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
         return (p + ped->GetPos());
 
 #if DEBUG
@@ -297,6 +292,7 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
     //this should not execute:
+    std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
     exit(EXIT_FAILURE);
 }
 

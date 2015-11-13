@@ -641,6 +641,7 @@ bool GlobalRouter::GetPath(Pedestrian*ped, int goalID, std::vector<SubRoom*>& pa
                _building->GetFinalGoal(goalID)->GetAllWalls()[0].GetUniqueID();
      int to_door_matrix_index=_map_id_to_index[to_door_uid];
      int from_door_matrix_index=_map_id_to_index[next];
+     ped->SetTransitionID(to_door_uid); // @todo: argraf
 
      // thats probably a goal located outside the geometry or not an exit from the geometry
      if(to_door_uid==-1) {

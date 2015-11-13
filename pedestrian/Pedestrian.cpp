@@ -60,6 +60,8 @@ Pedestrian::Pedestrian()
      _turninAngle = 0.0;
      _ellipse = JEllipse();
      _navLine = new NavLine();
+     _transition = nullptr;
+     _transID = -1;             // default for closest exit
      _router = NULL;
      _building = NULL;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
@@ -175,6 +177,14 @@ void Pedestrian::SetExitLine(const NavLine* l)
      _navLine->SetPoint2(l->GetPoint2());
 }
 
+void Pedestrian::SetTransition(Transition* t) {
+     _transition = t;
+}
+
+void Pedestrian::SetTransitionID(int id) {
+     _transID = id;
+}
+
 void Pedestrian::SetPos(const Point& pos, bool initial)
 {
      if((_globalTime>=_premovement) || (initial==true))
@@ -200,7 +210,7 @@ void Pedestrian::SetV(const Point& v)
           _ellipse.SetV(v);
           //save the last values for the records
           _lastVelocites.push(v);
-          
+
           unsigned int max_size = _recordingTime / _deltaT;
           if (_lastVelocites.size() > max_size)
                _lastVelocites.pop();
@@ -280,6 +290,14 @@ int Pedestrian::GetExitIndex() const
 NavLine* Pedestrian::GetExitLine() const
 {
      return _navLine;
+}
+
+Transition* Pedestrian::GetTransition() const {
+     return _transition;
+}
+
+int Pedestrian::GetTransitionID() const {
+     return _transID;
 }
 
 const vector<int>& Pedestrian::GetTrip() const
@@ -416,15 +434,15 @@ double Pedestrian::GetV0Norm() const
 //---------------------------------------------------
      //-----------------------------------------
 
-     
+
      const Point& pos = GetPos();
      // double distanceToTarget = (target-pos).Norm();
      // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
      // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
-     
+
      // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
-     
-     
+
+
 
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
@@ -547,7 +565,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
      // -------------------------------------- Handover new target
-     t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade); 
+     t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade);
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 #if DEBUGV0
@@ -899,7 +917,7 @@ void Pedestrian::SetPremovementTime(double pretime)
 {
       if(pretime < _minPremovementTime)
             _minPremovementTime = pretime;
-      
+
      _premovement=pretime;
 }
 

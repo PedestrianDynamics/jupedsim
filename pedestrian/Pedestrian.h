@@ -84,6 +84,8 @@ private:
      Point _lastE0;
 
      NavLine* _navLine; // current exit line
+     Transition* _transition;
+     int _transID;
      std::map<int, int>_mentalMap; // map the actual room to a destination
      std::vector<int> _destHistory;
      std::vector<int> _trip;
@@ -155,13 +157,15 @@ public:
      //TODO: merge this two functions
      void SetExitIndex(int i);
      void SetExitLine(const NavLine* l);
+     void SetTransition(Transition* t);
+     void SetTransitionID(int id);
 
      void Setdt(double dt);
      double Getdt();
 
      void SetDistToBlockade(double dist);
      double GetDistToBlockade();
-     
+
      // Eigenschaften der Ellipse
      void SetPos(const Point& pos, bool initial=false); // setzt x und y-Koordinaten
      void SetCellPos(int cp);
@@ -184,6 +188,8 @@ public:
      int GetExitIndex() const;
      Router* GetRouter() const;
      NavLine* GetExitLine() const;
+     Transition* GetTransition() const;
+     int GetTransitionID() const;
      double GetUpdateRate() const;
      Point GetLastE0() const;
      void SetLastE0(Point E0);
@@ -357,7 +363,7 @@ public:
       */
 
      static double GetMinPremovementTime();
-           
+
      /**
       * Set/Get the risk tolerance of a pedestrians.
       * The value should be in the interval [0 1].

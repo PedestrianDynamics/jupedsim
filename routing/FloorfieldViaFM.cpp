@@ -47,11 +47,12 @@ FloorfieldViaFM::~FloorfieldViaFM()
     if (dist2Wall) delete[] dist2Wall;
     if (speedInitial) delete[] speedInitial;
     if (modifiedspeed) delete[] modifiedspeed;
-    if (cost) delete[] cost;
-    if (neggrad) delete[] neggrad;
+    //if (cost) delete[] cost;
+    //if (neggrad) delete[] neggrad;
     if (dirToWall) delete[] dirToWall;
     if (trialfield) delete[] trialfield;
     for ( const auto& id : costmap) {
+        //if (id.first == -1) continue;
         if (id.second) delete[] id.second;
         if (neggradmap.at(id.first)) delete[] neggradmap.at(id.first);
         //map will be deleted by itself
@@ -71,7 +72,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
 
     //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-    prepareForDistanceFieldCalculation(wall, numOfExits);
+    prepareForDistanceFieldCalculation(wall);
 
     calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
 
@@ -80,6 +81,12 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     setSpeed(useDistancefield); //use distance2Wall
     calculateFloorfield(cost, neggrad);
 
+    Point dummy;
+    int i;
+    for (auto& element : neggradmap) {     // this loop is only to calc all floorfields before going parallel
+        i = element.first;
+        getDirectionToTransition(i, grid->getPointFromKey(0), dummy);
+    }
     //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
     //writeFF(filename);        //writing FF-file disabled until extending is complete ( @todo: argraf )
 }
@@ -246,9 +253,18 @@ void FloorfieldViaFM::getDirectionToTransition(const int transID, const Point& p
         std::vector<Line> localline = {Line(building->GetAllTransitions().at(transID)->GetPoint1(), building->GetAllTransitions().at(transID)->GetPoint2())};
         setNewGoalAfterTheClear(localcostptr, localline);
         calculateFloorfield(localcostptr, localneggradptr);
+        std::cerr << "new Floorfield " << transID << "   :    " << localcostptr << std::endl;
     }
     direction.SetX(localneggradptr[key].GetX());
     direction.SetY(localneggradptr[key].GetY());
+}
+
+double FloorfieldViaFM::getCostToTransition(const int transID, const Point& position) {
+    if (costmap.at(transID) == nullptr) {
+        Point dummy;
+        getDirectionToTransition(transID, position, dummy);         //this call induces the floorfieldcalculation
+    }
+    return costmap.at(transID)[grid->getKeyAtPoint(position)];
 }
 
 void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
@@ -271,6 +287,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     double yMax = xMax;
     costmap.clear();
     neggradmap.clear();
+
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
@@ -287,8 +304,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         //populate both maps: costmap, neggradmap. These are the lookup maps for floorfields to specific transitions
         //plan: add pair of (id, nullptr). if a map-element is accessed, then we check if nullptr (then create FF) or if
         //                                                                                ptr to memory, then return ptr
-        costmap.emplace(trans.first, nullptr);
-        neggradmap.emplace(trans.first, nullptr);
+        costmap.emplace(trans.second->GetUniqueID(), nullptr);
+        neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
     numOfExits = wall.size();
     for (const auto& itRoom : buildingArg->GetAllRooms()) {
@@ -350,6 +367,9 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     dirToWall = new Point[grid->GetnPoints()];
     trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
+    costmap.emplace(-1 , cost);                         // enable default ff (closest exit)
+    neggradmap.emplace(-1, neggrad);
+
     //linescan using (std::vector<Wall*>)
     //lineScan(wall, dist2Wall, 0., -3.);
 
@@ -362,7 +382,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 }
 
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
-void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& wallArg, int numOfExits) {
+void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& wallArg) {
     std::vector<Line> exits(wallArg.begin(), wallArg.begin()+numOfExits);
     drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
 

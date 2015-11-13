@@ -59,11 +59,12 @@ class FloorfieldViaFM
 
         void getDirectionAt(const Point& position, Point& direction);
         void getDirectionToTransition(const int transID, const Point& position, Point& direction);
+        double getCostToTransition(const int transID, const Point& position);
         void getDir2WallAt(const Point& position, Point& direction);
         double getDistance2WallAt(const Point& position);
 
         void parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY);
-        void prepareForDistanceFieldCalculation(std::vector<Line>& wallArg, int numOfExits);
+        void prepareForDistanceFieldCalculation(std::vector<Line>& wallArg);
         void lineScan(std::vector<Line>& wallArg, double* const target, const double outside, const double inside);
         void drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside);
         void setSpeed(bool useDistance2Wall);
