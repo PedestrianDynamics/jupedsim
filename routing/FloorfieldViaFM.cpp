@@ -230,6 +230,42 @@ void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
 }
 
 void FloorfieldViaFM::getDirectionToDestination(const int destID, const Point& position, Point& direction){
+//    long int key = grid->getKeyAtPoint(position);
+//    Point* localneggradptr = neggradmap.at(destID);
+//    double* localcostptr = costmap.at(destID);
+//    if (localneggradptr == nullptr) {
+//        //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+//        localcostptr =    new double[grid->GetnPoints()];
+//        localneggradptr = new Point[grid->GetnPoints()];
+//        neggradmap.erase(destID);
+//        neggradmap.emplace(destID, localneggradptr);
+//        costmap.erase(destID);
+//        costmap.emplace(destID, localcostptr);
+//        //create ff (prepare Trial-mechanic, then calc)
+//        for (long int i = 0; i < grid->GetnPoints(); ++i) {
+//            //set Trialptr to fieldelements
+//            trialfield[i].cost = localcostptr + i;
+//            trialfield[i].neggrad = localneggradptr + i;
+//            trialfield[i].father = nullptr;
+//            trialfield[i].child = nullptr;
+//        }
+//        clearAndPrepareForFloorfieldReCalc(localcostptr);
+//        std::vector<Line> localline = {Line(/* todo argraf */)};
+//        setNewGoalAfterTheClear(localcostptr, localline);
+//        calculateFloorfield(localcostptr, localneggradptr);
+//        std::cerr << "new Floorfield " << destID << "   :    " << localcostptr << std::endl;
+//    }
+//    direction.SetX(localneggradptr[key].GetX());
+//    direction.SetY(localneggradptr[key].GetY());
+}
+
+void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& direction){
+    const Point& position = ped->GetPos();
+    int destID = ped->GetExitIndex();
+
+    //what if goal == -1, meaning closest exit... is GetExitIndex then -1?
+    if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
+
     long int key = grid->getKeyAtPoint(position);
     Point* localneggradptr = neggradmap.at(destID);
     double* localcostptr = costmap.at(destID);
@@ -250,7 +286,7 @@ void FloorfieldViaFM::getDirectionToDestination(const int destID, const Point& p
             trialfield[i].child = nullptr;
         }
         clearAndPrepareForFloorfieldReCalc(localcostptr);
-        std::vector<Line> localline = {Line(/* todo argraf */)};
+        std::vector<Line> localline = {(Line) *(ped->GetExitLine())};
         setNewGoalAfterTheClear(localcostptr, localline);
         calculateFloorfield(localcostptr, localneggradptr);
         std::cerr << "new Floorfield " << destID << "   :    " << localcostptr << std::endl;

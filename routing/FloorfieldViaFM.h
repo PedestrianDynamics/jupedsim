@@ -43,6 +43,7 @@
 #include "../geometry/Building.h"
 #include "../geometry/SubRoom.h" //check: should Room.h include SubRoom.h??
 #include "../routing/mesh/Trial.h"
+#include "../pedestrian/Pedestrian.h"
 
 //maybe put following in macros.h
 #define LOWSPEED 0.001
@@ -57,8 +58,9 @@ class FloorfieldViaFM
         FloorfieldViaFM(const FloorfieldViaFM& other);
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
-        void getDirectionAt(const Point& position, Point& direction);
-        void getDirectionToDestination (const int destID, const Point& position, Point& direction);
+        void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
+        void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
+        void getDirectionToDestination (Pedestrian* ped, Point& direction);
         double getCostToDestination(const int destID, const Point& position);
         void getDir2WallAt(const Point& position, Point& direction);
         double getDistance2WallAt(const Point& position);

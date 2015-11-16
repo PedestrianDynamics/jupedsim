@@ -229,9 +229,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     ++(*under);
                 }
                 Point movDirection = (result_acc[p-start].Norm() > 1) ? result_acc[p - start].Normalized() : result_acc[p-start];
-                Point toTarget = (_direction->GetTarget(nullptr, ped));
-                toTarget = toTarget - ped->GetPos();
-                if (toTarget.NormSquare() == 0.) {                // @todo:ar.graf: this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
+                Point toTarget = (_direction->GetTarget(nullptr, ped)); //maybe use building->GetRoom(ped->GetRoomID()) instead of nullptr just in case, GetTarget uses it
+                toTarget = toTarget - ped->GetPos();                    //^^ at the time of writing this, DirectionFloorfield does not use it and looks like never will
+                if (toTarget.NormSquare() == 0.) {                // this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
                     toTarget += ped->GetV().Normalized();
                 }
 
@@ -241,8 +241,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double desired_speed = ped->GetV0Norm();
                 Point oldMov = Point(0., 0.);
                 if (desired_speed > 0.) {
-                    oldMov = ped->GetV() / desired_speed; //@todo: ar.graf (GetV() returns a vector: distance travelled in one time-unit (s)
-                }                                         //               so oldMov is now: vector distance travelled in one time-unit with unit speed = sth around unit-vector or smaller
+                    oldMov = ped->GetV() / desired_speed; // (GetV() returns a vector: distance travelled in one time-unit (s)
+                }                                         // so oldMov is now: vector distance travelled in one time-unit with unit speed = sth around unit-vector or smaller
 
                 //anti jitter               //_V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
                 oldMov = (oldMov.Norm() > 1.)? oldMov.Normalized() : oldMov; //on the safe side ... should not be necessary as it must be [0, 1]
