@@ -58,8 +58,8 @@ class FloorfieldViaFM
         //FloorfieldViaFM& operator=(const FloorfieldViaFM& other);
 
         void getDirectionAt(const Point& position, Point& direction);
-        void getDirectionToTransition(const int transID, const Point& position, Point& direction);
-        double getCostToTransition(const int transID, const Point& position);
+        void getDirectionToDestination (const int destID, const Point& position, Point& direction);
+        double getCostToDestination(const int destID, const Point& position);
         void getDir2WallAt(const Point& position, Point& direction);
         double getDistance2WallAt(const Point& position);
 

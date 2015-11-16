@@ -60,8 +60,6 @@ Pedestrian::Pedestrian()
      _turninAngle = 0.0;
      _ellipse = JEllipse();
      _navLine = new NavLine();
-     _transition = nullptr;
-     _transID = -1;             // default for closest exit
      _router = NULL;
      _building = NULL;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
@@ -177,14 +175,6 @@ void Pedestrian::SetExitLine(const NavLine* l)
      _navLine->SetPoint2(l->GetPoint2());
 }
 
-void Pedestrian::SetTransition(Transition* t) {
-     _transition = t;
-}
-
-void Pedestrian::SetTransitionID(int id) {
-     _transID = id;
-}
-
 void Pedestrian::SetPos(const Point& pos, bool initial)
 {
      if((_globalTime>=_premovement) || (initial==true))
@@ -290,14 +280,6 @@ int Pedestrian::GetExitIndex() const
 NavLine* Pedestrian::GetExitLine() const
 {
      return _navLine;
-}
-
-Transition* Pedestrian::GetTransition() const {
-     return _transition;
-}
-
-int Pedestrian::GetTransitionID() const {
-     return _transID;
 }
 
 const vector<int>& Pedestrian::GetTrip() const

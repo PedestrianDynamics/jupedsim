@@ -283,7 +283,7 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
         Point p;
-        ffviafm->getDirectionToTransition(ped->GetTransitionID(), ped->GetPos(), p);
+        ffviafm->getDirectionToDestination(-1, ped->GetPos(), p);
         p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
         return (p + ped->GetPos());
 

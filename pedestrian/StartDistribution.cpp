@@ -183,7 +183,6 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      ped->SetGender(GetGender());
      ped->SetHeight(GetHeight());
      ped->SetFinalDestination(GetGoalId());
-     //ped->SetTransitionID(2); //GoalId is not correct... i want transitionId.. but how?
      ped->SetGroup(GetGroupId());
      ped->SetRouter(building->GetRoutingEngine()->GetRouter(_routerID));
      ped->SetBuilding(building);

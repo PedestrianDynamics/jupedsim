@@ -85,7 +85,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     int i;
     for (auto& element : neggradmap) {     // this loop is only to calc all floorfields before going parallel
         i = element.first;
-        getDirectionToTransition(i, grid->getPointFromKey(0), dummy);
+        getDirectionToDestination(i, grid->getPointFromKey(0), dummy);
     }
     //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
     //writeFF(filename);        //writing FF-file disabled until extending is complete ( @todo: argraf )
@@ -229,18 +229,18 @@ void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     direction.SetY(neggrad[key].GetY());
 }
 
-void FloorfieldViaFM::getDirectionToTransition(const int transID, const Point& position, Point& direction){
+void FloorfieldViaFM::getDirectionToDestination(const int destID, const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
-    Point* localneggradptr = neggradmap.at(transID);
-    double* localcostptr = costmap.at(transID);
+    Point* localneggradptr = neggradmap.at(destID);
+    double* localcostptr = costmap.at(destID);
     if (localneggradptr == nullptr) {
         //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
         localcostptr =    new double[grid->GetnPoints()];
         localneggradptr = new Point[grid->GetnPoints()];
-        neggradmap.erase(transID);
-        neggradmap.emplace(transID, localneggradptr);
-        costmap.erase(transID);
-        costmap.emplace(transID, localcostptr);
+        neggradmap.erase(destID);
+        neggradmap.emplace(destID, localneggradptr);
+        costmap.erase(destID);
+        costmap.emplace(destID, localcostptr);
         //create ff (prepare Trial-mechanic, then calc)
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
             //set Trialptr to fieldelements
@@ -250,21 +250,21 @@ void FloorfieldViaFM::getDirectionToTransition(const int transID, const Point& p
             trialfield[i].child = nullptr;
         }
         clearAndPrepareForFloorfieldReCalc(localcostptr);
-        std::vector<Line> localline = {Line(building->GetAllTransitions().at(transID)->GetPoint1(), building->GetAllTransitions().at(transID)->GetPoint2())};
+        std::vector<Line> localline = {Line(/* todo argraf */)};
         setNewGoalAfterTheClear(localcostptr, localline);
         calculateFloorfield(localcostptr, localneggradptr);
-        std::cerr << "new Floorfield " << transID << "   :    " << localcostptr << std::endl;
+        std::cerr << "new Floorfield " << destID << "   :    " << localcostptr << std::endl;
     }
     direction.SetX(localneggradptr[key].GetX());
     direction.SetY(localneggradptr[key].GetY());
 }
 
-double FloorfieldViaFM::getCostToTransition(const int transID, const Point& position) {
-    if (costmap.at(transID) == nullptr) {
+double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) {
+    if (costmap.at(destID) == nullptr) {
         Point dummy;
-        getDirectionToTransition(transID, position, dummy);         //this call induces the floorfieldcalculation
+        getDirectionToDestination(destID, position, dummy);         //this call induces the floorfieldcalculation
     }
-    return costmap.at(transID)[grid->getKeyAtPoint(position)];
+    return costmap.at(destID)[grid->getKeyAtPoint(position)];
 }
 
 void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
