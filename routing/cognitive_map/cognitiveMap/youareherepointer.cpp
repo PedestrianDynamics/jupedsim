@@ -1,4 +1,5 @@
 #include "youareherepointer.h"
+#include "../../../pedestrian/Pedestrian.h"
 #include <cmath>
 #include <iostream>
 
@@ -11,6 +12,7 @@ YouAreHerePointer::YouAreHerePointer()
     _angle=0.0;
     _pos=Point(0.0,0.0);
     _oldpos=Point(0.0,0.0);
+
 }
 
 YouAreHerePointer::~YouAreHerePointer()
@@ -26,6 +28,11 @@ const Point &YouAreHerePointer::GetPos() const
 const double &YouAreHerePointer::GetDirection() const
 {
     return _angle;
+}
+
+const ptrPed YouAreHerePointer::GetPed() const
+{
+    return _ped;
 }
 
 void YouAreHerePointer::SetPos(const Point &point)
@@ -45,6 +52,11 @@ void YouAreHerePointer::SetDirection(const double &angle)
     //std::cout << std::to_string(angle*180/3.14) << std::endl;
 }
 
+void YouAreHerePointer::SetPed(const ptrPed ped)
+{
+    _ped=ped;
+}
+
 void YouAreHerePointer::UpdateYAH(const Point &move)
 {
     _oldpos=_pos;
@@ -59,5 +71,10 @@ void YouAreHerePointer::UpdateYAH(const Point &move)
 
     _pos=_pos+Point(x,y);//Point(std::cos(_angle)*speed*timeInterval,std::sqrt(1-std::pow(std::cos(_angle),2))*speed*timeInterval);
 
+}
+
+const Point YouAreHerePointer::GetPosDiff()
+{
+    return _ped->GetPos()-_pos;
 }
 

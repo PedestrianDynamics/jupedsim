@@ -78,6 +78,11 @@ public:
     void WriteToFile();
     //evaluate waypoints
 
+    // Set new waypoints
+    void SetNewWaypoint();
+
+    void WaypointReached(ptrWaypoint waypoint);
+
     //Connections
     std::vector<ptrConnection> GetAllConnections() const;
     void AddConnection(const ptrConnection &connection);
@@ -92,13 +97,15 @@ private:
     Associations _assoContainer;
     std::vector<ptrLandmark> _landmarksSubConcious;
     std::vector<ptrLandmark> _landmarks;
-    SortedWaypoints _waypContainerSorted;
+    SortedWaypoints _waypContainerTargetsSorted;
+    std::queue<ptrWaypoint> _waypContainerRecentlyVisited;
     Waypoints _waypContainer;
     YouAreHerePointer _YAHPointer;
     ptrOutputHandler _outputhandler;
     Connections _connections;
 
     int _frame;
+    int _createdWayP;
 
 
 };

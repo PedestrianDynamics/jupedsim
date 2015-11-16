@@ -25,6 +25,11 @@ void Locater::execute(const Pedestrian * ped, CognitiveMap * cogMap) const
    //std::cout << std::to_string(ped->GetGlobalTime()) << std::endl;
    cogMap->UpdateYAHPointer(ped->GetV()*_updateInterval);
 
+//   if (std::fmod(ped->GetGlobalTime(),5.0)==0.0)
+//   {
+//       cogMap->SetNewWaypoint();
+//   }
+
    cogMap->WriteToFile();
 
 }

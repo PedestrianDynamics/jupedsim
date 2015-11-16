@@ -252,6 +252,11 @@ const GraphEdge * GraphVertex::GetLocalCheapestDestination(const Point & positio
             if(act_edge == NULL || act_edge->GetWeight(position) > edges.top().second->GetWeight(position)) {
                 act_edge = edges.top().second;
             }
+            else if(act_edge->GetWeight(position) == edges.top().second->GetWeight(position))
+            {
+                if(act_edge->GetApproximateDistance(position) > edges.top().second->GetApproximateDistance(position))
+                    act_edge = edges.top().second;
+            }
             edges.pop();
         }
 

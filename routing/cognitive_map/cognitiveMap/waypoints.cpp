@@ -9,7 +9,7 @@ Waypoint::Waypoint(Point pos, ptrRoom room)
     _visited=false;
 }
 
-Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
+Waypoint::Waypoint(Point pos, double a, double b, int id, ptrRoom room)
 {
     _exactPos=pos;
     _a=a;
@@ -17,6 +17,7 @@ Waypoint::Waypoint(Point pos, double a, double b, ptrRoom room)
     _room=room;
     _priority=1.0;
     _visited=false;
+    _id=id;
 }
 
 Waypoint::~Waypoint()

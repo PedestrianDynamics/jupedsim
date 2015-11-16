@@ -64,7 +64,7 @@ void LastDestinationsSensor::execute(const Pedestrian * pedestrian, CognitiveMap
         if((*it)->GetSrc() != NULL && (*it)->GetDest() != NULL && (*it)->GetCrossing() != NULL) {
             GraphEdge * back_edge = (*ng[(*it)->GetDest()->GetSubRoom()])[(*it)->GetCrossing()];
             if(back_edge != NULL && rated.find(back_edge) == rated.end()) {
-                back_edge->SetFactor(3000.0 /(i*3) + 100, GetName());
+                back_edge->SetFactor(2,GetName());//3000.0 /(i*3) + 100, GetName());
                 rated.insert(back_edge);
             }
         }

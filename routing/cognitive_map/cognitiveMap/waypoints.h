@@ -16,7 +16,7 @@ class Waypoint
     using Waypoints = std::vector<ptrWaypoint>;
 public:
     Waypoint(Point pos, ptrRoom room=nullptr);
-    Waypoint(Point pos, double a, double b, ptrRoom room=nullptr);
+    Waypoint(Point pos, double a, double b, int id=-1, ptrRoom room=nullptr);
     ~Waypoint();
 
     //Setter
