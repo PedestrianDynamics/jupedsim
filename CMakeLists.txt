@@ -122,7 +122,7 @@ LINK_DIRECTORIES(/opt/local/lib)
 #set(Boost_INCLUDE_DIR /opt/local/include/boost)
 #set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
 find_package(Boost REQUIRED )
-#include_directories(${Boost_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR})
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
