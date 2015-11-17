@@ -39,7 +39,8 @@
 SmokeSensor::SmokeSensor(const Building *b, const std::string &filepath, const double &updateintervall, const double &finalTime) : AbstractSensor(b)
 {
 
-    std::shared_ptr<FireMeshStorage> FMS(new FireMeshStorage(b,filepath,updateintervall,finalTime));
+    _FMStorage = std::make_shared<FireMeshStorage>(b,filepath,updateintervall,finalTime);
+    //Log.Write(FMS->get_FireMesh())
     Log->Write("INFO:\tInitialized FireMeshStorage (Smoke Sensor)");
 
 
