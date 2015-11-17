@@ -33,6 +33,13 @@
 #include <sstream>
 #include <fstream>
 
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
+#endif
+
 FloorfieldViaFM::FloorfieldViaFM()
 {
     //ctor (very ugly)
@@ -265,31 +272,39 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
 
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1?
     if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
-
     long int key = grid->getKeyAtPoint(position);
-    Point* localneggradptr = neggradmap.at(destID);
-    double* localcostptr = costmap.at(destID);
-    if (localneggradptr == nullptr) {
-        //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
-        localcostptr =    new double[grid->GetnPoints()];
-        localneggradptr = new Point[grid->GetnPoints()];
-        neggradmap.erase(destID);
-        neggradmap.emplace(destID, localneggradptr);
-        costmap.erase(destID);
-        costmap.emplace(destID, localcostptr);
-        //create ff (prepare Trial-mechanic, then calc)
-        for (long int i = 0; i < grid->GetnPoints(); ++i) {
-            //set Trialptr to fieldelements
-            trialfield[i].cost = localcostptr + i;
-            trialfield[i].neggrad = localneggradptr + i;
-            trialfield[i].father = nullptr;
-            trialfield[i].child = nullptr;
+    Point* localneggradptr;
+    double* localcostptr;
+    #pragma omp critical
+    {
+        if (neggradmap.count(destID) == 0) {
+            neggradmap.emplace(destID, nullptr);
+            costmap.emplace(destID, nullptr);
         }
-        clearAndPrepareForFloorfieldReCalc(localcostptr);
-        std::vector<Line> localline = {(Line) *(ped->GetExitLine())};
-        setNewGoalAfterTheClear(localcostptr, localline);
-        calculateFloorfield(localcostptr, localneggradptr);
-        std::cerr << "new Floorfield " << destID << "   :    " << localcostptr << std::endl;
+        localneggradptr = neggradmap.at(destID);
+        localcostptr = costmap.at(destID);
+        if (localneggradptr == nullptr) {
+                //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+                localcostptr =    new double[grid->GetnPoints()];
+                localneggradptr = new Point[grid->GetnPoints()];
+                neggradmap.erase(destID);
+                neggradmap.emplace(destID, localneggradptr);
+                costmap.erase(destID);
+                costmap.emplace(destID, localcostptr);
+                //create ff (prepare Trial-mechanic, then calc)
+                for (long int i = 0; i < grid->GetnPoints(); ++i) {
+                    //set Trialptr to fieldelements
+                    trialfield[i].cost = localcostptr + i;
+                    trialfield[i].neggrad = localneggradptr + i;
+                    trialfield[i].father = nullptr;
+                    trialfield[i].child = nullptr;
+                }
+                clearAndPrepareForFloorfieldReCalc(localcostptr);
+                std::vector<Line> localline = {(Line) *(ped->GetExitLine())};
+                setNewGoalAfterTheClear(localcostptr, localline);
+                calculateFloorfield(localcostptr, localneggradptr);
+                std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
+        }
     }
     direction.SetX(localneggradptr[key].GetX());
     direction.SetY(localneggradptr[key].GetY());
@@ -465,6 +480,7 @@ void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
 
 void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Line>& LineArg) {
     drawLinesOnGrid(LineArg, costarray, 0.);
+    //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1().GetX() << " " << LineArg[0].GetPoint1().GetY() << " " << LineArg[0].GetPoint2().GetX() << " " << LineArg[0].GetPoint2().GetY() << std::endl;
 }
 
 void FloorfieldViaFM::lineScan(std::vector<Line>& wallArg, double* const target, const double outside, const double inside) {

@@ -59,7 +59,8 @@ Pedestrian::Pedestrian()
      _tmpFirstOrientation = true;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
-     _navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid
+     //_navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid (done below)
+     _navLine = nullptr;
      _router = NULL;
      _building = NULL;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
@@ -168,11 +169,12 @@ void Pedestrian::SetExitIndex(int i)
      _destHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid
+void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid (done below)
 {
      //_navLine = l;
-     _navLine->SetPoint1(l->GetPoint1());
-     _navLine->SetPoint2(l->GetPoint2());
+     //_navLine->SetPoint1(l->GetPoint1());
+     //_navLine->SetPoint2(l->GetPoint2());
+     _navLine = new NavLine(*l);
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
