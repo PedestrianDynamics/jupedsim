@@ -71,7 +71,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
                                  const double wallAvoidDistance, const bool useDistancefield, const std::string& filename) {
     //ctor
     threshold = -1; //negative value means: ignore threshold
-    threshold = wallAvoidDistance; //@todo: ar.graf wallavoid, alpha_r and alpha_s must be taken into consideration here!
+    threshold = wallAvoidDistance;
 
     if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
@@ -218,18 +218,6 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     file.close();
 }
 
-//FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
-//{
-//    //copy ctor
-//}
-
-//FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
-//{
-//    if (this == &rhs) return *this; // handle self assignment     //@todo: ar.graf change this pasted code to proper code
-//    //assignment operator
-//    return *this;
-//}
-
 void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
     direction.SetX(neggrad[key].GetX());
@@ -347,10 +335,11 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             //((trans.second->GetRoom2()) && (trans.second->GetRoom2()->GetID() == -1)) ||
             //(trans.second->GetCaption().compare("main exit") == 0) ||
             //(trans.second->GetType().compare("emergency") == 0)
-            trans.second->IsExit()
+            trans.second->IsExit() && trans.second->IsOpen()
            )
         {
-            wall.emplace_back(Line( trans.second->GetPoint1()*GEO_UP_SCALE, trans.second->GetPoint2()*GEO_UP_SCALE ));
+            //wall.emplace_back(Line( trans.second->GetPoint1()*GEO_UP_SCALE, trans.second->GetPoint2()*GEO_UP_SCALE ));
+            wall.emplace_back(Line ( (Line) *(trans.second)));
         }
         //populate both maps: costmap, neggradmap. These are the lookup maps for floorfields to specific transitions
         //plan: add pair of (id, nullptr). if a map-element is accessed, then we check if nullptr (then create FF) or if
@@ -359,6 +348,12 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
         neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
     numOfExits = wall.size();
+    for (auto& trans : allTransitions) {
+        if (!trans.second->IsOpen()) {
+            wall.emplace_back(Line ( (Line) *(trans.second)));
+        }
+
+    }
     for (const auto& itRoom : buildingArg->GetAllRooms()) {
         for (const auto& itSubroom : itRoom.second->GetAllSubRooms()) {
             std::vector<Obstacle*> allObstacles = itSubroom.second->GetAllObstacles();
@@ -366,8 +361,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    wall.emplace_back(Line( (*itObsWall).GetPoint1()*GEO_UP_SCALE, (*itObsWall).GetPoint2()*GEO_UP_SCALE ));
-
+                    //wall.emplace_back(Line( (*itObsWall).GetPoint1()*GEO_UP_SCALE, (*itObsWall).GetPoint2()*GEO_UP_SCALE ));
+                    wall.emplace_back(Line( (Line) *itObsWall));
                     // xMin xMax
                     if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
                     if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
@@ -384,6 +379,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
             std::vector<Wall> allWalls = itSubroom.second->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
+                wall.emplace_back( Line( (Line) *itWall));
                 wall.emplace_back( Line((*itWall).GetPoint1()*GEO_UP_SCALE, (*itWall).GetPoint2()*GEO_UP_SCALE) );
                 //std::cout << &(*itWall) << std::endl;
                 //std::cout << wall[0].GetPoint1().GetX() << std::endl;
@@ -421,11 +417,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     costmap.emplace(-1 , cost);                         // enable default ff (closest exit)
     neggradmap.emplace(-1, neggrad);
 
-    //linescan using (std::vector<Wall*>)
-    //lineScan(wall, dist2Wall, 0., -3.);
-
-    //DRAWLINES-Mechanism
-    //init grid with -3 as used in lineScan mechanic
+    //init grid with -3 as unknown distance to any wall
     for(long int i = 0; i < grid->GetnPoints(); ++i) {
         dist2Wall[i] = -3.;
     }
