@@ -338,7 +338,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             trans.second->IsExit() && trans.second->IsOpen()
            )
         {
-            //wall.emplace_back(Line( trans.second->GetPoint1()*GEO_UP_SCALE, trans.second->GetPoint2()*GEO_UP_SCALE ));
+            //wall.emplace_back(Line( trans.second->GetPoint1(), trans.second->GetPoint2() ));
             wall.emplace_back(Line ( (Line) *(trans.second)));
         }
         //populate both maps: costmap, neggradmap. These are the lookup maps for floorfields to specific transitions
@@ -361,40 +361,40 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    //wall.emplace_back(Line( (*itObsWall).GetPoint1()*GEO_UP_SCALE, (*itObsWall).GetPoint2()*GEO_UP_SCALE ));
+                    //wall.emplace_back(Line( (*itObsWall).GetPoint1(), (*itObsWall).GetPoint2() ));
                     wall.emplace_back(Line( (Line) *itObsWall));
                     // xMin xMax
-                    if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE > xMax) xMax = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE > xMax) xMax = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
+                    if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
+                    if ((*itObsWall).GetPoint1().GetX() > xMax) xMax = (*itObsWall).GetPoint1().GetX();
+                    if ((*itObsWall).GetPoint2().GetX() > xMax) xMax = (*itObsWall).GetPoint2().GetX();
 
                     // yMin yMax
-                    if ((*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE < yMin) yMin = (*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE < yMin) yMin = (*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE > yMax) yMax = (*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE > yMax) yMax = (*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint1().GetY() < yMin) yMin = (*itObsWall).GetPoint1().GetY();
+                    if ((*itObsWall).GetPoint2().GetY() < yMin) yMin = (*itObsWall).GetPoint2().GetY();
+                    if ((*itObsWall).GetPoint1().GetY() > yMax) yMax = (*itObsWall).GetPoint1().GetY();
+                    if ((*itObsWall).GetPoint2().GetY() > yMax) yMax = (*itObsWall).GetPoint2().GetY();
                 }
             }
 
             std::vector<Wall> allWalls = itSubroom.second->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                 wall.emplace_back( Line( (Line) *itWall));
-                wall.emplace_back( Line((*itWall).GetPoint1()*GEO_UP_SCALE, (*itWall).GetPoint2()*GEO_UP_SCALE) );
+                //wall.emplace_back( Line((*itWall).GetPoint1(), (*itWall).GetPoint2()) );
                 //std::cout << &(*itWall) << std::endl;
                 //std::cout << wall[0].GetPoint1().GetX() << std::endl;
 
                 // xMin xMax
-                if ((*itWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itWall).GetPoint2().GetX()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint1().GetX()*GEO_UP_SCALE > xMax) xMax = (*itWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetX()*GEO_UP_SCALE > xMax) xMax = (*itWall).GetPoint2().GetX()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
+                if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
+                if ((*itWall).GetPoint1().GetX() > xMax) xMax = (*itWall).GetPoint1().GetX();
+                if ((*itWall).GetPoint2().GetX() > xMax) xMax = (*itWall).GetPoint2().GetX();
 
                 // yMin yMax
-                if ((*itWall).GetPoint1().GetY()*GEO_UP_SCALE < yMin) yMin = (*itWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetY()*GEO_UP_SCALE < yMin) yMin = (*itWall).GetPoint2().GetY()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint1().GetY()*GEO_UP_SCALE > yMax) yMax = (*itWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetY()*GEO_UP_SCALE > yMax) yMax = (*itWall).GetPoint2().GetY()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint1().GetY() < yMin) yMin = (*itWall).GetPoint1().GetY();
+                if ((*itWall).GetPoint2().GetY() < yMin) yMin = (*itWall).GetPoint2().GetY();
+                if ((*itWall).GetPoint1().GetY() > yMax) yMax = (*itWall).GetPoint1().GetY();
+                if ((*itWall).GetPoint2().GetY() > yMax) yMax = (*itWall).GetPoint2().GetY();
             }
         }
     }
@@ -1089,21 +1089,21 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
                                 " " <<
                                 std::to_string(grid->GetjMax()) <<
                                 " 1" << std::endl;
-    file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
-    file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin() << " " << grid->GetyMin() << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
     file << "SCALARS Cost float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         file << target[i] << std::endl;
         Point iPoint = grid->getPointFromKey(i);
-        file2 << iPoint.GetX()/GEO_UP_SCALE /*- grid->GetxMin()*/ << " " << iPoint.GetY()/GEO_UP_SCALE /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+        file2 << iPoint.GetX() /*- grid->GetxMin()*/ << " " << iPoint.GetY() /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
     }
 
     if (target == cost) {
         file << "VECTORS Gradient float" << std::endl;
         for (int i = 0; i < grid->GetnPoints(); ++i) {
-            file << neggrad[i].GetX()/GEO_UP_SCALE << " " << neggrad[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+            file << neggrad[i].GetX() << " " << neggrad[i].GetY() << " 0.0" << std::endl;
         }
     }
 
@@ -1132,32 +1132,32 @@ void FloorfieldViaFM::writeFF(const std::string& filename) {
                                 " " <<
                                 std::to_string(grid->GetjMax()) <<
                                 " 1" << std::endl;
-    file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
-    file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin() << " " << grid->GetyMin() << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
     file << "SCALARS Dist2Wall float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        file << dist2Wall[i]/GEO_UP_SCALE << std::endl; //@todo: change target to all dist2wall
+        file << dist2Wall[i] << std::endl; //@todo: change target to all dist2wall
         //Point iPoint = grid->getPointFromKey(i);
-        //file2 << iPoint.GetX()/GEO_UP_SCALE /*- grid->GetxMin()*/ << " " << iPoint.GetY()/GEO_UP_SCALE /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+        //file2 << iPoint.GetX() /*- grid->GetxMin()*/ << " " << iPoint.GetY() /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
     }
 
     file << "VECTORS Gradient float" << std::endl;
     for (int i = 0; i < grid->GetnPoints(); ++i) {
-        file << neggrad[i].GetX()/GEO_UP_SCALE << " " << neggrad[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+        file << neggrad[i].GetX() << " " << neggrad[i].GetY() << " 0.0" << std::endl;
     }
 
     file << "VECTORS Dir2Wall float" << std::endl;
     for (int i = 0; i < grid->GetnPoints(); ++i) {
-        file << dirToWall[i].GetX()/GEO_UP_SCALE << " " << dirToWall[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+        file << dirToWall[i].GetX() << " " << dirToWall[i].GetY() << " 0.0" << std::endl;
     }
 
     if (cost != nullptr) {
         file << "SCALARS Cost float 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
-            file << cost[i]/GEO_UP_SCALE << std::endl;
+            file << cost[i] << std::endl;
         }
     }
     file.close();
