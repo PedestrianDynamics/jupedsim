@@ -433,8 +433,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 }
 
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
-void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& wallArg) {
-    std::vector<Line> exits(wallArg.begin(), wallArg.begin()+numOfExits);
+void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& lineArg) {
+    std::vector<Line> exits(lineArg.begin(), lineArg.begin()+numOfExits);
     drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
