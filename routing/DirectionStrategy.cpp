@@ -321,7 +321,6 @@ void DirectionFloorfield::Init(Building* building, double stepsize, double thres
           Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
         ffviafm = new FloorfieldViaFM(FF_filename);
     } else {
-          Log->Write("INFO: \tWrite Floorfield to file <" +  FF_filename + ">");
           std::chrono::time_point<std::chrono::system_clock> start, end;
           start = std::chrono::system_clock::now();
           ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);

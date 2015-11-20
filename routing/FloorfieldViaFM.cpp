@@ -259,7 +259,7 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     int destID = ped->GetExitIndex();
 
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1?
-    if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
+    //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
     long int key = grid->getKeyAtPoint(position);
     Point* localneggradptr;
     double* localcostptr;
@@ -1114,6 +1114,7 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
 }
 
 void FloorfieldViaFM::writeFF(const std::string& filename) {
+    Log->Write("INFO: \tWrite Floorfield to file <" +  filename + ">");
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
