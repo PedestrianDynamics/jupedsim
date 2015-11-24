@@ -42,7 +42,7 @@
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
 
 // should be true only when using this file in the simulation core
@@ -113,6 +113,7 @@ enum RoutingStrategy {
      ROUTING_DUMMY,
      ROUTING_SAFEST,
      ROUTING_COGNITIVEMAP,
+     ROUTING_FLOORFIELD,
      ROUTING_UNDEFINED =-1
 };
 

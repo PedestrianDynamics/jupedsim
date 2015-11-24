@@ -32,6 +32,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <limits>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -58,6 +59,9 @@ FloorfieldViaFM::~FloorfieldViaFM()
     //if (neggrad) delete[] neggrad;
     if (dirToWall) delete[] dirToWall;
     if (trialfield) delete[] trialfield;
+    for ( const auto& goalid : goalcostmap) {
+        if (goalid.second) delete[] goalid.second;
+    }
     for ( const auto& id : costmap) {
         //if (id.first == -1) continue;
         if (id.second) delete[] id.second;
@@ -218,12 +222,14 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     file.close();
 }
 
+// getDirectionAt(...,...) <- obsolete (back when there was just one floorfield); delete soon
 void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
     direction.SetX(neggrad[key].GetX());
     direction.SetY(neggrad[key].GetY());
 }
 
+// getDirectionToDestination(int, Point&, Point&) <- obsolete (plz do not use this one); delete soon
 void FloorfieldViaFM::getDirectionToDestination(const int destID, const Point& position, Point& direction){
 //    long int key = grid->getKeyAtPoint(position);
 //    Point* localneggradptr = neggradmap.at(destID);
@@ -292,6 +298,72 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
                 setNewGoalAfterTheClear(localcostptr, localline);
                 calculateFloorfield(localcostptr, localneggradptr);
                 std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
+        }
+    }
+    direction.SetX(localneggradptr[key].GetX());
+    direction.SetY(localneggradptr[key].GetY());
+}
+
+void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& direction){
+    const Point& position = ped->GetPos();
+    const int goalID = ped->GetFinalDestination();
+    long int key = grid->getKeyAtPoint(position);
+    Point* localneggradptr;
+    double* localcostptr;
+
+    #pragma omp critical
+    {
+        if (goalcostmap.count(goalID) == 0) { //no entry for goalcostmap, so we need to calc FF
+            goalcostmap.emplace(goalID, nullptr);
+            goalneggradmap.emplace(goalID, nullptr);
+            goalToLineUIDmap.emplace(goalID, -1);
+        }
+        localneggradptr = goalneggradmap.at(goalID);
+        localcostptr = goalcostmap.at(goalID);
+        if (localneggradptr == nullptr) {
+                //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+                localcostptr =    new double[grid->GetnPoints()];
+                localneggradptr = new Point[grid->GetnPoints()];
+                goalneggradmap.erase(goalID);
+                goalneggradmap.emplace(goalID, localneggradptr);
+                goalcostmap.erase(goalID);
+                goalcostmap.emplace(goalID, localcostptr);
+                //create ff (prepare Trial-mechanic, then calc)
+                for (long int i = 0; i < grid->GetnPoints(); ++i) {
+                    //set Trialptr to fieldelements
+                    trialfield[i].cost = localcostptr + i;
+                    trialfield[i].neggrad = localneggradptr + i;
+                    trialfield[i].father = nullptr;
+                    trialfield[i].child = nullptr;
+                }
+                clearAndPrepareForFloorfieldReCalc(localcostptr);
+
+                //get all lines/walls of goalID
+                std::vector<Line> localline;
+                const std::map<int, Goal*>& allgoals = building->GetAllGoals();
+                std::vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
+                for (const auto& iwall:localwalls) {
+                    localline.emplace_back( Line( (Line) iwall ) );
+                }
+
+                setNewGoalAfterTheClear(localcostptr, localline);
+                calculateFloorfield(localcostptr, localneggradptr);
+                std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
+
+                //find closest door and add to cheatmap "goalToLineUID" map
+                const std::map<int, Transition*>& transitions = building->GetAllTransitions();
+                int UID_of_MIN = -1;
+                double cost_of_MIN = DBL_MAX;
+                long int dummykey;
+                for (const auto& loctrans : transitions) {
+                    dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
+                    if (cost_of_MIN > localcostptr[dummykey]) {
+                        UID_of_MIN = loctrans.first;
+                        cost_of_MIN = localcostptr[dummykey];
+                    }
+                }
+                goalToLineUIDmap.erase(goalID);
+                goalToLineUIDmap.emplace(goalID, UID_of_MIN);
         }
     }
     direction.SetX(localneggradptr[key].GetX());
@@ -398,6 +470,23 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             }
         }
     }
+
+    //all goals
+    const std::map<int, Goal*>& allgoals = buildingArg->GetAllGoals();
+    for (auto eachgoal:allgoals) {
+        for (auto& eachwall:eachgoal.second->GetAllWalls() ) {
+            if (eachwall.GetPoint1().GetX() < xMin) xMin = eachwall.GetPoint1().GetX();
+            if (eachwall.GetPoint2().GetX() < xMin) xMin = eachwall.GetPoint2().GetX();
+            if (eachwall.GetPoint1().GetX() > xMax) xMax = eachwall.GetPoint1().GetX();
+            if (eachwall.GetPoint2().GetX() > xMax) xMax = eachwall.GetPoint2().GetX();
+
+            if (eachwall.GetPoint1().GetY() < yMin) yMin = eachwall.GetPoint1().GetY();
+            if (eachwall.GetPoint2().GetY() < yMin) yMin = eachwall.GetPoint2().GetY();
+            if (eachwall.GetPoint1().GetY() > yMax) yMax = eachwall.GetPoint1().GetY();
+            if (eachwall.GetPoint2().GetY() > yMax) yMax = eachwall.GetPoint2().GetY();
+        }
+    }
+
     //create Rect Grid
     grid = new RectGrid();
     grid->setBoundaries(xMin, yMin, xMax, yMax);

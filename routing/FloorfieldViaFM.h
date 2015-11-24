@@ -61,6 +61,7 @@ class FloorfieldViaFM
         void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
         void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
         void getDirectionToDestination (Pedestrian* ped, Point& direction);
+        void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
         double getCostToDestination(const int destID, const Point& position);
         void getDir2WallAt(const Point& position, Point& direction);
         double getDistance2WallAt(const Point& position);
@@ -114,6 +115,9 @@ class FloorfieldViaFM
         Point* neggrad; //gradients
         Point* dirToWall;
         Trial* trialfield;
+        std::map<int, double*> goalcostmap;
+        std::map<int, int>     goalToLineUIDmap;
+        std::map<int, Point*>  goalneggradmap;
         std::map<int, double*> costmap;
         std::map<int, Point*>  neggradmap;
 
