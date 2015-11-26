@@ -75,12 +75,12 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="3">
+  <agents operational_model_id="4">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="0" router_id="1" x_max="10.1775"/>
-      <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="1" router_id="1" x_max="10.1775"/>
-      <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="2" router_id="1" x_min="26.1775"/>
-      <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="0" number="50" goal_id="3" router_id="1" x_min="26.1775"/>
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="5" goal_id="0" router_id="1" x_max="10.1775"/>
+      <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="5" goal_id="1" router_id="1" x_max="10.1775"/>
+      <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="0" number="5" goal_id="2" router_id="1" x_min="26.1775"/>
+      <group group_id="4" agent_parameter_id="1" room_id="0" subroom_id="0" number="5" goal_id="3" router_id="1" x_min="26.1775"/>
     </agents_distribution>
     <!--     <agents_sources><!-- frequency in persons/seconds -->
     <!--        <source id="1" frequency="2" agents_max="20" group_id="1" caption="source 1" /> -->
@@ -109,6 +109,28 @@
         <T mu="1" sigma="0.0" />        
       </agent_parameters>
     </model>
+
+    <model operational_model_id="4" description="gradnav">
+      <model_parameters>
+	<solver>euler</solver>
+	<stepsize>0.01</stepsize>
+	<exit_crossing_strategy>6</exit_crossing_strategy>
+	<floorfield delta_h="0.0625" wall_avoid_distance="0.4" use_wall_avoidance="true" />
+	<linkedcells enabled="true" cell_size="4.2" />
+        <force_ped nu="15" b="0.30" c="3.0" />
+        <force_wall nu="1" b="0.70" c="3.0" />
+	<anti_clipping slow_down_distance=".5" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="1.5" sigma="0.0" />
+        <bmax mu="0.15" sigma="0.00" />
+        <bmin mu="0.15" sigma="0.00" />
+        <amin mu="0.15" sigma="0.00" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.0" sigma="0.00" />
+      </agent_parameters>
+    </model>
+
   </operational_models>
 
   <route_choice_models>
