@@ -4,7 +4,7 @@
 
 <!-- header: seed, geometry, output format -->
 
-<seed>3011</seed>
+<seed>3012</seed>
 <max_sim_time>600</max_sim_time>
 <!--maxCPU>1</maxCPU-->
 
@@ -54,7 +54,7 @@
 
 <agents operational_model_id="2">
 	<agents_distribution>
-		<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="200" router_id="7" pre_movement_mean="60" pre_movement_sigma="60"/>		
+		<group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="20" router_id="7" pre_movement_mean="60" pre_movement_sigma="60"/>		
 		<!--group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="1" number="10" router_id="7" pre_movement_mean="30" pre_movement_sigma="30"/>/
 		<group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="2" number="10" router_id="7" pre_movement_mean="30" pre_movement_sigma="30"/-->
 	</agents_distribution>
@@ -67,7 +67,7 @@
 		<model_parameters>
 			<solver>euler</solver>
 			<stepsize>0.01</stepsize>
-			<exit_crossing_strategy>3</exit_crossing_strategy>
+			<exit_crossing_strategy>4</exit_crossing_strategy>
 			<linkedcells enabled="true" cell_size="2.2" />
 			<force_ped nu="3" b="0.25" c="3.0" />
 			<force_wall nu="10" b="0.7" c="3.0" />

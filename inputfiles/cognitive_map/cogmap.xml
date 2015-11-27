@@ -7,441 +7,348 @@
 	</header>
 
 <frame ID="1">
-<YAHPointer x="1.003166"	y="1.129668"	z="0.000000"	dir="0.05"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="1"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<YAHPointer x="2.940997"	y="1.548579"	z="0.000000"	dir="1.52"/>
 </frame>
 
 <frame ID="2">
-<YAHPointer x="1.544203"	y="1.149622"	z="0.000000"	dir="0.04"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="1"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<YAHPointer x="2.948613"	y="2.088160"	z="0.000000"	dir="1.56"/>
 </frame>
 
 <frame ID="3">
-<YAHPointer x="2.135267"	y="1.169002"	z="0.000000"	dir="0.03"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="1"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<YAHPointer x="2.951375"	y="2.678883"	z="0.000000"	dir="1.57"/>
 </frame>
 
 <frame ID="4">
-<YAHPointer x="2.744494"	y="1.187574"	z="0.000000"	dir="0.03"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="1"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<YAHPointer x="2.952377"	y="3.288155"	z="0.000000"	dir="1.57"/>
 </frame>
 
 <frame ID="5">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.263018"	y="1.304235"	z="0.000000"	dir="0.22"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="1"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<YAHPointer x="2.754517"	y="3.764484"	z="0.000000"	dir="1.96"/>
 </frame>
 
 <frame ID="6">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.458488"	y="1.741460"	z="0.000000"	dir="1.15"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="3.077711"	y="3.937248"	z="0.000000"	dir="0.49"/>
 </frame>
 
 <frame ID="7">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.529238"	y="2.295059"	z="0.000000"	dir="1.44"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="3.589950"	y="3.999910"	z="0.000000"	dir="0.12"/>
 </frame>
 
 <frame ID="8">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.553882"	y="2.890866"	z="0.000000"	dir="1.53"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="4.170755"	y="4.022637"	z="0.000000"	dir="0.04"/>
 </frame>
 
 <frame ID="9">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.562584"	y="3.501982"	z="0.000000"	dir="1.56"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="4.776431"	y="4.030880"	z="0.000000"	dir="0.01"/>
 </frame>
 
 <frame ID="10">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.565669"	y="4.118651"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="5.391126"	y="4.033870"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="11">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.566764"	y="4.737333"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="6.009093"	y="4.034955"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="12">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.567154"	y="5.356746"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="6.628246"	y="4.035348"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="13">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.567295"	y="5.976424"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="7.247830"	y="4.035491"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="14">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.567346"	y="6.596198"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="7.867570"	y="4.035542"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="15">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.567364"	y="7.216007"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="8.487367"	y="4.035561"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="16">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="1"/>
-<YAHPointer x="3.567370"	y="7.835829"	z="0.000000"	dir="1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="9.107184"	y="4.035568"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="17">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="3.697410"	y="8.353711"	z="0.000000"	dir="1.32"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="9.727008"	y="4.035570"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="18">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="4.131017"	y="8.623305"	z="0.000000"	dir="0.56"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="10.346835"	y="4.035571"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="19">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="4.676557"	y="8.793758"	z="0.000000"	dir="0.30"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="10.966664"	y="4.035572"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="20">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="5.263387"	y="8.917967"	z="0.000000"	dir="0.21"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="11.586492"	y="4.035572"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="21">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="5.865413"	y="9.022993"	z="0.000000"	dir="0.17"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="1"/>
+<YAHPointer x="12.206321"	y="4.035572"	z="0.000000"	dir="0.00"/>
 </frame>
 
 <frame ID="22">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="6.472956"	y="9.121662"	z="0.000000"	dir="0.16"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="12.796424"	y="3.999629"	z="0.000000"	dir="-0.06"/>
 </frame>
 
 <frame ID="23">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="7.082406"	y="9.218097"	z="0.000000"	dir="0.16"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.025504"	y="3.592902"	z="0.000000"	dir="-1.06"/>
 </frame>
 
 <frame ID="24">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="7.692220"	y="9.270301"	z="0.000000"	dir="0.09"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.108592"	y="3.050365"	z="0.000000"	dir="-1.42"/>
 </frame>
 
 <frame ID="25">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="8.300831"	y="9.282215"	z="0.000000"	dir="0.02"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.138728"	y="2.458570"	z="0.000000"	dir="-1.52"/>
 </frame>
 
 <frame ID="26">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="8.905961"	y="9.285209"	z="0.000000"	dir="0.00"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.149658"	y="1.848909"	z="0.000000"	dir="-1.55"/>
 </frame>
 
 <frame ID="27">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="9.504155"	y="9.283320"	z="0.000000"	dir="-0.00"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.153623"	y="1.232768"	z="0.000000"	dir="-1.56"/>
 </frame>
 
 <frame ID="28">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="10.088475"	y="9.282126"	z="0.000000"	dir="-0.00"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.155060"	y="0.614277"	z="0.000000"	dir="-1.57"/>
 </frame>
 
 <frame ID="29">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="10.641729"	y="9.285296"	z="0.000000"	dir="0.01"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.155582"	y="-0.005066"	z="0.000000"	dir="-1.57"/>
 </frame>
 
 <frame ID="30">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="11.116750"	y="9.283434"	z="0.000000"	dir="-0.00"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.155771"	y="-0.624719"	z="0.000000"	dir="-1.57"/>
 </frame>
 
 <frame ID="31">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="1"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="0"/>
-<YAHPointer x="11.421259"	y="9.426890"	z="0.000000"	dir="0.44"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.166043"	y="-1.244480"	z="0.000000"	dir="-1.55"/>
 </frame>
 
 <frame ID="32">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.536447"	y="9.084030"	z="0.000000"	dir="-1.25"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.169768"	y="-1.864284"	z="0.000000"	dir="-1.56"/>
 </frame>
 
 <frame ID="33">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.578226"	y="8.564658"	z="0.000000"	dir="-1.49"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.171119"	y="-2.484104"	z="0.000000"	dir="-1.57"/>
 </frame>
 
 <frame ID="34">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.593380"	y="7.981265"	z="0.000000"	dir="-1.54"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.171609"	y="-3.103930"	z="0.000000"	dir="-1.57"/>
 </frame>
 
 <frame ID="35">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.598779"	y="7.374651"	z="0.000000"	dir="-1.56"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.171787"	y="-3.723757"	z="0.000000"	dir="-1.57"/>
 </frame>
 
 <frame ID="36">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.600693"	y="6.759616"	z="0.000000"	dir="-1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.425683"	y="-4.130418"	z="0.000000"	dir="-1.01"/>
 </frame>
 
 <frame ID="37">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.601372"	y="6.141525"	z="0.000000"	dir="-1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="13.912788"	y="-4.277914"	z="0.000000"	dir="-0.29"/>
 </frame>
 
 <frame ID="38">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.601616"	y="5.522327"	z="0.000000"	dir="-1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="14.484478"	y="-4.331411"	z="0.000000"	dir="-0.09"/>
 </frame>
 
 <frame ID="39">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.601704"	y="4.902727"	z="0.000000"	dir="-1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="15.086847"	y="-4.350814"	z="0.000000"	dir="-0.03"/>
 </frame>
 
 <frame ID="40">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.608002"	y="4.282983"	z="0.000000"	dir="-1.56"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="15.700343"	y="-4.357852"	z="0.000000"	dir="-0.01"/>
 </frame>
 
 <frame ID="41">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.610235"	y="3.663185"	z="0.000000"	dir="-1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="16.317874"	y="-4.360404"	z="0.000000"	dir="-0.00"/>
 </frame>
 
 <frame ID="42">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.611027"	y="3.043368"	z="0.000000"	dir="-1.57"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="16.936870"	y="-4.361330"	z="0.000000"	dir="-0.00"/>
 </frame>
 
 <frame ID="43">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.611308"	y="2.423543"	z="0.000000"	dir="-1.57"/>
-</frame>
-
-<frame ID="44">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.611408"	y="1.803716"	z="0.000000"	dir="-1.57"/>
-</frame>
-
-<frame ID="45">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.611444"	y="1.183888"	z="0.000000"	dir="-1.57"/>
-</frame>
-
-<frame ID="46">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.611457"	y="0.564059"	z="0.000000"	dir="-1.57"/>
-</frame>
-
-<frame ID="47">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.611462"	y="-0.055770"	z="0.000000"	dir="-1.57"/>
-</frame>
-
-<frame ID="48">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="11.950140"	y="-0.256874"	z="0.000000"	dir="-0.54"/>
-</frame>
-
-<frame ID="49">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="12.467996"	y="-0.322800"	z="0.000000"	dir="-0.13"/>
-</frame>
-
-<frame ID="50">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="13.050839"	y="-0.345863"	z="0.000000"	dir="-0.04"/>
-</frame>
-
-<frame ID="51">
-<landmark ID="0"	caption="Statue"	x="3.635319"	y="1.426883"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="1"	caption="Office door"	x="2.919754"	y="9.984063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<landmark ID="2"	caption="Dead end of corridor"	x="13.539754"	y="9.544063"	z="0.000000"	rA="2.00"	rB="2.00"/>
-<waypoint ID="0"	caption="You came from here"	x="3.815319"	y="9.216883"	z="0.000000"	rA="3.00"	rB="0.97"	current="0"/>
-<waypoint ID="1"	caption="You came from here"	x="13.879754"	y="8.824063"	z="0.000000"	rA="3.42"	rB="1.78"	current="0"/>
-<waypoint ID="2"	caption="Exit is somewhere around here"	x="13.329754"	y="-1.915937"	z="0.000000"	rA="4.41"	rB="1.48"	current="1"/>
-<YAHPointer x="13.657253"	y="-0.354032"	z="0.000000"	dir="-0.01"/>
+<landmark ID="0"	caption="Statue"	x="3.636670"	y="-2.293330"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<landmark ID="3"	caption="Strange Window"	x="14.487546"	y="8.819552"	z="0.000000"	rA="2.00"	rB="2.00"/>
+<waypoint ID="1"	caption="Turn left and walk through corridor!"	x="3.021670"	y="4.795000"	z="0.000000"	rA="5.66"	rB="1.85"	current="0"/>
+<waypoint ID="2"	caption="Use corridor to your right!"	x="14.707600"	y="4.383750"	z="0.000000"	rA="3.64"	rB="2.75"	current="0"/>
+<waypoint ID="4"	caption="Entrance is here!"	x="16.421646"	y="-6.225528"	z="0.000000"	rA="5.47"	rB="1.65"	current="1"/>
+<YAHPointer x="17.556397"	y="-4.361666"	z="0.000000"	dir="-0.00"/>
 </frame>
 
 </cognitiveMap>
