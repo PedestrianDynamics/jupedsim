@@ -97,6 +97,9 @@ message(STATUS "")
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 # message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
+include_directories(/home0/ar.graf/include)
+link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -341,11 +344,14 @@ if(CGAL_FOUND)
 endif(CGAL_FOUND)
 
 #protocol buffer
-find_package(Protobuf)
-if(PROTOBUF_FOUND)
-message(STATUS "Protocol buffer library found")
+#find_package(Protobuf)
+#if(PROTOBUF_FOUND)
+#message(STATUS "Protocol buffer library found")
 
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+#include_directories(${PROTOBUF_INCLUDE_DIRS})
+include_directories(/home0/ar.graf/include)
+link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
+message("libs added")
 
 set (hybrid_source_files
   matsim/HybridSimulationManager.cpp
@@ -364,11 +370,12 @@ set (hybrid_header_files
   matsim/MATSimInterface.pb.h
 )
     add_library (hybrid STATIC ${hybrid_source_files} )
-    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
+#    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
+target_link_libraries (core hybrid grpc++_unsecure grpc gpr protobuf dl)
  	
 	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
 	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
-endif(PROTOBUF_FOUND)
+#endif(PROTOBUF_FOUND)
 
 #----------------------------------------------------------------------
 # enable as many warnings as possible

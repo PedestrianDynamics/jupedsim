@@ -12,19 +12,19 @@ package org.matsim.hybrid;
 
 message MATSim2ExternPutAgent {
 	message Agent {
-		optional string id = 1;
-		optional string enterNode = 2;
+		 string id = 1;
+		 string enterNode = 2;
 		repeated string nodes = 3;
 	}
 
-	optional Agent agent = 1;
+	 Agent agent = 1;
 }
 
 message MATSim2ExternHasSpace {
-	optional string nodeId = 1;
+	 string nodeId = 1;
 }
 message MATSim2ExternHasSpaceConfirmed {
-	optional bool hasSpace = 1;
+	 bool hasSpace = 1;
 }
 
 message MATSim2ExternPutAgentConfirmed {
@@ -32,24 +32,24 @@ message MATSim2ExternPutAgentConfirmed {
 
 message Extern2MATSim {
 	message Agent {
-		optional string id = 1;
-		optional string leaveNode = 2;
+		 string id = 1;
+		 string leaveNode = 2;
 	}
 
-	optional Agent agent = 1;
+	 Agent agent = 1;
 }
 
 message Extern2MATSimTrajectories {
      message Agent {
-          optional int32 id = 1;
-          optional double x = 2;
-          optional double y = 3;
-          optional double z = 4;
-          optional int32 color = 5;
-          optional double angle = 6;
+           int32 id = 1;
+           double x = 2;
+           double y = 3;
+           double z = 4;
+           int32 color = 5;
+           double angle = 6;
      }
 
-     optional double time = 1;
+      double time = 1;
      repeated Agent agent = 15;
 }
 
@@ -57,18 +57,18 @@ message MATSim2ExternTrajectoriesReceived {
 }
 
 message Extern2MATSimConfirmed {
-	optional bool accepted = 1;
+	 bool accepted = 1;
 }
 
 message ExternSimStepFinished {
-	optional double time = 1;
+	 double time = 1;
 }
 message ExternSimStepFinishedReceived {
 }
 
 message ExternDoSimStep {
-	optional double fromTime = 1;
-	optional double toTime = 2;
+	 double fromTime = 1;
+	 double toTime = 2;
 }
 
 message ExternDoSimStepReceived {
@@ -99,8 +99,8 @@ message AgentsStuckConfirmed{
 }
 
 message ExternalConnect {
-     optional string host =1;
-     optional int32 port=2;
+      string host =1;
+      int32 port=2;
 }
 
 message ExternalConnectConfirmed {
@@ -108,7 +108,7 @@ message ExternalConnectConfirmed {
 }
 
 message MaximumNumberOfAgents {
-     optional int32 number = 1;
+      int32 number = 1;
 }
 
 message MaximumNumberOfAgentsConfirmed {
