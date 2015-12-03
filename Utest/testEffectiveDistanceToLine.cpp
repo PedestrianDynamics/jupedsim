@@ -1,8 +1,8 @@
 /**
  * \file        testEffectiveDistanceToLine.cpp
  * \date        Jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -64,7 +64,7 @@ int testEffectiveDistanceToLine()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(a);
-     E.SetBmin(b);
+     E.SetBmax(b);
      // parallel y
      Point P1(2*a, 0);
      Point P2(2*a, 3);
@@ -90,29 +90,29 @@ int testEffectiveDistanceToLine()
 
 // parallel x
      P1.SetX(0);
-     P1.SetY(2*b*0.5);
+     P1.SetY(2*b);
      P2.SetX(3);
-     P2.SetY(2*b*0.5);
+     P2.SetY(2*b);
      L.SetPoint1( P1 );
      L.SetPoint2( P2 );
 
 
      dist = E.EffectiveDistanceToLine(L);
-     res += (dist==b*0.5)?1:0;
+     res += (dist==b)?1:0;
      ntests++;
      fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
 
 // parallel x
      P1.SetX(0);
-     P1.SetY(-2*b*0.5);
+     P1.SetY(-2*b);
      P2.SetX(3);
-     P2.SetY(-2*b*0.5);
+     P2.SetY(-2*b);
      L.SetPoint1( P1 );
      L.SetPoint2( P2 );
 
 
      dist = E.EffectiveDistanceToLine(L);
-     res += (dist==b*0.5)?1:0;
+     res += (dist==b)?1:0;
      ntests++;
      fprintf (f, "%2d. dist=%.2f\t Line (%.2f, %.2f)--(%.2f, %.2f) a=%.2f\t b=%.2f\t res=%d\n",ntests, dist, P1.GetX(), P1.GetY(), P2.GetX(), P2.GetY(), a, b, res);
 

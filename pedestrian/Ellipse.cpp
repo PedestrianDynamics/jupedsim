@@ -1,8 +1,8 @@
 /**
  * \file        Ellipse.cpp
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -189,23 +189,45 @@ double JEllipse::GetArea() const
 // ellipse  semi-axis in the direction of the velocity
 double JEllipse::GetEA() const
 {
-     return _Amin + _vel.Norm() * _Av;
+      return _Amin + _vel.Norm() * _Av;
 }
 
 // ellipse semi-axis in the orthogonal direction of the velocity
 double JEllipse::GetEB() const
 {
-     double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
-     double v_min = 0.001;
-     double a = 0.49;
-     double b = -1.17;
-     double v = _vel.Norm();
+//     double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
+//     double v_min = 0.001;
+//     double a = 0.49;
+//     double b = -1.17;
+//     double v = _vel.Norm();
      // double t = (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
      // printf("v=%f, b=%f\n", v, t);
      // getc(stdin);
-     return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
-     // double x = (_Bmax - _Bmin) / _vel0;
-     // return _Bmax - _vel.Norm() * x;
+     //return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
+
+     double x = (_vel0 <= 0.001) ? 0 : (_Bmax - _Bmin) / _vel0;
+
+     // double b_shoulder = _Bmin; /// width of shoulder. todo: find out empricial value
+     // double v_min = 0.001;
+     // double a = 0.49;
+     // double b = -1.17;
+     // double v = _vel.Norm();
+     // double t = (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
+     // printf("v=%f, b=%f\n", v, t);
+     // getc(stdin);
+     // return _Bmax;
+     // return (v<v_min)? 0.5*b_shoulder: 0.5*(b_shoulder + a * exp(b*v));
+      // todo: we dont  have the possiblity to choose between ellipses and circles.
+      // for the moment we can control this only with the parameter values in the following formula
+      
+      //double x;
+      //if(_vel0 > 0.001) 
+      //      x = (_Bmax - _Bmin) / _vel0;
+      //else
+      //      x = 0;
+      
+
+     return _Bmax - _vel.Norm() * x;
 }
 
 

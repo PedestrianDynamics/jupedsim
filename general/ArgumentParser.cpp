@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.cpp
  * \date        Apr 20, 2009
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -57,7 +57,8 @@
 #include "../routing/CognitiveMapRouter.h"
 #include "../math/GompertzModel.h"
 #include "../math/GCFMModel.h"
-
+#include "../math/GradientModel.h"
+#include "../math/VelocityModel.h"
 #ifdef _USE_PROTOCOL_BUFFER
 #include "../matsim/HybridSimulationManager.h"
 #endif
@@ -112,6 +113,9 @@ ArgumentParser::ArgumentParser()
      pcPed=3;
      paWall=1;
      pbWall=0.7;
+     pDWall = 0.1;  //Tordeux2015
+     pDPed = 0.1; //Tordeux2015
+     pPeriodic = 0; // use only for Tordeux2015 with "trivial" geometries
      pcWall=3;
      pLog = 0;
      pModel=MODEL_GFCM;
@@ -129,7 +133,6 @@ ArgumentParser::ArgumentParser()
      _routingengine = std::shared_ptr<RoutingEngine>(new RoutingEngine());
      _showStatistics=false;
 }
-
 
 bool ArgumentParser::ParseArgs(int argc, char **argv)
 {
@@ -228,11 +231,9 @@ bool ArgumentParser::ParseIniFile(string inifile)
           Log->Write("WARNING:\t There is no header version. I am assuming %s",
                     JPS_VERSION);
      }
-     else if (string(xMainNode->Attribute("version")) != JPS_VERSION && string(xMainNode->Attribute("version")) != JPS_OLD_VERSION) 
+     else if (std::stod(xMainNode->Attribute("version")) < std::stod(JPS_OLD_VERSION))
      {
-          Log->Write(
-                    "ERROR:\t Wrong header version. Only version %s is supported.",
-                    JPS_VERSION);
+          Log->Write("ERROR:\t Wrong header version. Only version %s is supported.", JPS_VERSION);
           return false;
      }
 
@@ -264,36 +265,22 @@ bool ArgumentParser::ParseIniFile(string inifile)
           pTmax = atof(tmax);
           Log->Write("INFO: \tMaxmimal simulation time <%.2f> seconds",pTmax);
      }
-     int max_cpus = 1;
-#ifdef _OPENMP
-     max_cpus = omp_get_max_threads();
-#endif
+
+
      //max CPU
-     if(xMainNode->FirstChild("num_threads")) {
-          TiXmlNode* seedNode = xMainNode->FirstChild("num_threads")->FirstChild();
-          int n = 1;
-          if(seedNode){
-               const char* cpuValue = seedNode->Value();
-               n = atoi(cpuValue);
-               if (n > max_cpus) n = max_cpus;
-          }
-          else {
-               n = max_cpus;
-          }
-          _maxOpenMPThreads = n;
-          Log->Write("INFO: \tnum_threads <%d>", _maxOpenMPThreads);
+     if(xMainNode->FirstChild("num_threads"))
+     {
+          TiXmlNode* numthreads = xMainNode->FirstChild("num_threads")->FirstChild();
+          if(numthreads)
+          {
 #ifdef _OPENMP
-          if(n < omp_get_max_threads() )
-               omp_set_num_threads(_maxOpenMPThreads);
+               omp_set_num_threads(xmltoi(numthreads->Value(),omp_get_max_threads()));
 #endif
+               _maxOpenMPThreads = omp_get_max_threads();
+          }
      }
-     else { // no num_threads tag
-          _maxOpenMPThreads = max_cpus;
-#ifdef _OPENMP
-          omp_set_num_threads(_maxOpenMPThreads);
-#endif
-          Log->Write("INFO: \t Default num_threads <%d>", _maxOpenMPThreads);
-     }
+     Log->Write("INFO: \t Using num_threads <%d> threads", _maxOpenMPThreads);
+
      //logfile
      if (xMainNode->FirstChild("logfile"))
      {
@@ -339,6 +326,25 @@ bool ArgumentParser::ParseIniFile(string inifile)
                pFormat = FORMAT_PLAIN;
           if (format == "vtk")
                pFormat = FORMAT_VTK;
+
+          //color mode
+          string color_mode =
+                              xMainNode->FirstChildElement("trajectories")->Attribute(
+                                        "color_mode") ?
+                                                  xMainNode->FirstChildElement("trajectories")->Attribute(
+                                                            "color_mode") :
+                                                           "velocity";
+
+          if(color_mode=="velocity") Pedestrian::SetColorMode(AgentColorMode::BY_VELOCITY);
+          if(color_mode=="spotlight") Pedestrian::SetColorMode(AgentColorMode::BY_SPOTLIGHT);
+          if(color_mode=="group") Pedestrian::SetColorMode(AgentColorMode::BY_GROUP);
+          if(color_mode=="knowledge") Pedestrian::SetColorMode(AgentColorMode::BY_KNOWLEDGE);
+          if(color_mode=="router") Pedestrian::SetColorMode(AgentColorMode::BY_ROUTER);
+          if(color_mode=="final_goal") Pedestrian::SetColorMode(AgentColorMode::BY_FINAL_GOAL);
+          if(color_mode=="intermediate_goal") Pedestrian::SetColorMode(AgentColorMode::BY_INTERMEDIATE_GOAL);
+
+
+
 
           //a file descriptor was given
           if (xTrajectories->FirstChild("file"))
@@ -430,12 +436,37 @@ bool ArgumentParser::ParseIniFile(string inifile)
                     return false;
                parsingModelSuccessful=true;
                break;
+          } else if ((pModel == MODEL_GRADIENT) && (model_id==MODEL_GRADIENT))
+          {
+               if (modelName != "gradnav")
+               {
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean gradnav ?");
+                    return false;
+               }
+               //only parsing one model
+               if(ParseGradientModel(xModel)==false)
+                    return false;
+               parsingModelSuccessful=true;
+               break;
+          }
+          else if ((pModel == MODEL_VELOCITY) && (model_id == MODEL_VELOCITY))
+          {
+               if (modelName != "Tordeux2015")
+               {
+                    Log->Write("ERROR: \t mismatch model ID and description. Did you mean Tordeux2015?");
+                    return false;
+               }
+               //only parsing one model
+               if(ParseVelocityModel(xModel)==false)
+                    return false;
+               parsingModelSuccessful=true;
+               break;
           }
      }
 
      if( parsingModelSuccessful==false)
      {
-          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz)", pModel);
+          Log->Write("ERROR: \tWrong model id [%d]. Choose 1 (GCFM) or 2 (Gompertz) or 3 (Tordeux2015)", pModel);
           Log->Write("ERROR: \tPlease make sure that all models are specified in the operational_models section");
           Log->Write("ERROR: \tand make sure to use the same ID in th agent section");
           return false;
@@ -443,10 +474,10 @@ bool ArgumentParser::ParseIniFile(string inifile)
 
      //route choice strategy
      TiXmlNode* xRouters = xMainNode->FirstChild("route_choice_models");
-     ParseRoutingStrategies(xRouters);
 
+     if(ParseRoutingStrategies(xRouters)==false)
+          return false;
      Log->Write("INFO: \tParsing the project file completed");
-
      return true;
 }
 
@@ -651,6 +682,259 @@ bool ArgumentParser::ParseGompertzModel(TiXmlElement* xGompertz)
      return true;
 }
 
+bool ArgumentParser::ParseGradientModel(TiXmlElement* xGradient) // @todo: change to real model ar.graf
+{
+//parsing the model parameters
+     Log->Write("\nINFO:\tUsing the Gradient model");
+
+     Log->Write("INFO:\tParsing the model parameters");
+
+     TiXmlNode* xModelPara = xGradient->FirstChild("model_parameters");
+
+     if(!xModelPara){
+          Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
+          Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+          return false;
+     }
+
+     // For convenience. This moved to the header as it is not model specific
+     if (xModelPara->FirstChild("tmax"))
+     {
+          Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
+          Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+          return false;
+     }
+
+     //solver
+     if(ParseNodeToSolver(*xModelPara)==false)
+          return false;
+
+     //stepsize
+     if(ParseStepSize(*xModelPara)==false)
+          return false;
+
+     //exit crossing strategy
+     if(ParseStrategyNodeToObject(*xModelPara)==false)
+          return false;
+
+     //floorfield
+     if(xModelPara->FirstChild("floorfield"))
+     {
+          if (!xModelPara->FirstChildElement("floorfield")->Attribute("delta_h"))
+               pDeltaH = 0.0625; // default value
+          else
+          {
+               string delta_h = xModelPara->FirstChildElement("floorfield")->Attribute("delta_h");
+               pDeltaH = atof(delta_h.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance"))
+               pWallAvoidDistance = .8; // default value
+          else
+          {
+               string wall_avoid_distance = xModelPara->FirstChildElement("floorfield")->Attribute("wall_avoid_distance");
+               pWallAvoidDistance = atof(wall_avoid_distance.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance"))
+               pUseWallAvoidance = true; // default value
+          else
+          {
+               string use_wall_avoidance = xModelPara->FirstChildElement("floorfield")->Attribute("use_wall_avoidance");
+               if (use_wall_avoidance == "false")
+                    pUseWallAvoidance = false;
+               else
+                    pUseWallAvoidance = true;
+          }
+          Log->Write("INFO: \tfloorfield <delta h=%0.4f, wall avoid distance=%0.2f>", pDeltaH, pWallAvoidDistance);
+          Log->Write("INFO: \tfloorfield <use wall avoidance=%s>", pUseWallAvoidance ? "true" : "false");
+     }
+
+     //linked-cells
+     if(ParseLinkedCells(*xModelPara)==false)
+          return false;
+
+
+     //force_ped
+     if (xModelPara->FirstChild("force_ped"))
+     {
+          string nu = xModelPara->FirstChildElement("force_ped")->Attribute("nu");
+          pNuPed = atof(nu.c_str());
+
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
+               paPed = 1.0; // default value
+          else
+          {
+               string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
+               paPed = atof(a.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("b"))
+               pbPed = 0.25; // default value
+          else
+          {
+               string b = xModelPara->FirstChildElement("force_ped")->Attribute("b");
+               pbPed = atof(b.c_str());
+          }
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("c"))
+               pcPed = 3.0; // default value
+          else
+          {
+               string c = xModelPara->FirstChildElement("force_ped")->Attribute("c");
+               pcPed = atof(c.c_str());
+          }
+          Log->Write("INFO: \tfrep_ped mu=%s, a=%0.2f, b=%0.2f c=%0.2f",nu.c_str(),paPed,pbPed,pcPed);
+     }
+     //force_wall
+     if (xModelPara->FirstChild("force_wall"))
+     {
+          string nu = xModelPara->FirstChildElement("force_wall")->Attribute("nu");
+          pNuWall = atof(nu.c_str());
+
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
+               paWall = 1.0; // default value
+          else
+          {
+               string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
+               paWall = atof(a.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("b"))
+               pbWall = 0.7; // default value
+          else
+          {
+               string b = xModelPara->FirstChildElement("force_wall")->Attribute("b");
+               pbWall = atof(b.c_str());
+          }
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("c"))
+               pcWall = 3.0; // default value
+          else
+          {
+               string c = xModelPara->FirstChildElement("force_wall")->Attribute("c");
+               pcWall = atof(c.c_str());
+          }
+          Log->Write("INFO: \tfrep_wall mu=%s, a=%0.2f, b=%0.2f c=%0.2f",nu.c_str(),paWall,pbWall,pcWall);
+     }
+     //anti_clipping
+     if (xModelPara->FirstChild("anti_clipping"))
+     {
+        if (!xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance"))
+            pSlowDownDistance = .2; //default value
+        else {
+            string slow_down_distance = xModelPara->FirstChildElement("anti_clipping")->Attribute("slow_down_distance");
+            pSlowDownDistance = atof(slow_down_distance.c_str());
+        }
+        Log->Write("INFO: \tAnti Clipping: SlowDown Distance=%0.2f",pSlowDownDistance);
+     }
+
+     //Parsing the agent parameters
+     ParseAgentParameters(xGradient);
+     p_op_model = std::shared_ptr<OperationalModel>(new GradientModel(p_exit_strategy.get(), this->GetNuPed(),
+               this->GetaPed(), this->GetbPed(), this->GetcPed(),
+               this->GetNuWall(), this->GetaWall(), this->GetbWall(),
+               this->GetcWall(),
+               this->pDeltaH, this->pWallAvoidDistance, this->pUseWallAvoidance,
+               this->pSlowDownDistance));
+
+     return true;
+}
+
+bool ArgumentParser::ParseVelocityModel(TiXmlElement* xVelocity)
+{
+     //parsing the model parameters
+     Log->Write("\nINFO:\tUsing Tordeux2015 model");
+     Log->Write("INFO:\tParsing the model parameters");
+
+     TiXmlNode* xModelPara = xVelocity->FirstChild("model_parameters");
+
+     if(!xModelPara){
+          Log->Write("ERROR: \t !!!! Changes in the operational model section !!!");
+          Log->Write("ERROR: \t !!!! The new version is in inputfiles/ship_msw/ini_ship3.xml !!!");
+          return false;
+     }
+
+     // For convenience. This moved to the header as it is not model specific
+     if (xModelPara->FirstChild("tmax"))
+     {
+          Log->Write("ERROR: \tthe maximal simulation time section moved to the header!!!");
+          Log->Write("ERROR: \t\t <max_sim_time> </max_sim_time>\n");
+          return false;
+     }
+
+     //solver
+     if(ParseNodeToSolver(*xModelPara)==false)
+          return false;
+
+     //stepsize
+     if(ParseStepSize(*xModelPara)==false)
+          return false;
+
+     //exit crossing strategy
+     if(ParseStrategyNodeToObject(*xModelPara)==false)
+          return false;
+
+     //linked-cells
+     if(ParseLinkedCells(*xModelPara)==false)
+          return false;
+
+     //periodic
+     if(ParsePeriodic(*xModelPara)==false)
+          return false;    
+
+     //force_ped
+     if (xModelPara->FirstChild("force_ped"))
+     {
+
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("a"))
+               paPed = 1.0; // default value
+          else
+          {
+               string a = xModelPara->FirstChildElement("force_ped")->Attribute("a");
+               paPed = atof(a.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("force_ped")->Attribute("D"))
+               pDPed = 0.1; // default value in [m]
+          else
+          {
+               string D = xModelPara->FirstChildElement("force_ped")->Attribute("D");
+               pDPed = atof(D.c_str());
+          }
+          Log->Write("INFO: \tfrep_ped a=%0.2f, D=%0.2f", paPed, pDPed);
+
+     }
+     //force_wall
+     if (xModelPara->FirstChild("force_wall"))
+     {
+
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("a"))
+               paWall = 1.0; // default value
+          else
+          {
+               string a = xModelPara->FirstChildElement("force_wall")->Attribute("a");
+               paWall = atof(a.c_str());
+          }
+
+          if (!xModelPara->FirstChildElement("force_wall")->Attribute("D"))
+               pDWall = 0.1; // default value in [m]
+          else
+          {
+               string D = xModelPara->FirstChildElement("force_wall")->Attribute("D");
+               pDWall = atof(D.c_str());
+          }
+          Log->Write("INFO: \tfrep_wall a=%0.2f, D=%0.2f", paWall, pDWall);
+     }
+
+     //Parsing the agent parameters
+     ParseAgentParameters(xVelocity);
+     p_op_model = std::shared_ptr<OperationalModel>(new VelocityModel(p_exit_strategy.get(),
+               this->GetaPed(), this->GetDPed(),
+               this->GetaWall(), this->GetDWall()
+               ));
+
+     return true;
+}
+
 void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
 {
      //Parsing the agent parameters
@@ -673,32 +957,61 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                agentParameters->InitV0(mu,sigma);
                agentParameters->InitV0DownStairs(mu,sigma);
                agentParameters->InitV0UpStairs(mu,sigma);
-               Log->Write("INFO: \tdesired velocity mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tdesired speed mu=%f , sigma=%f",mu,sigma);
           }
 
           if (xAgentPara->FirstChild("v0_upstairs"))
           {
                double mu = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("mu"),pV0Mu);
                double sigma = xmltof(xAgentPara->FirstChildElement("v0_upstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0DownStairs(mu,sigma);
-               Log->Write("INFO: \tdesired velocity upstairs mu=%f , sigma=%f",mu,sigma);
+               agentParameters->InitV0UpStairs(mu,sigma);
+               Log->Write("INFO: \tdesired speed upstairs mu=%f , sigma=%f",mu,sigma);
           }
 
           if (xAgentPara->FirstChild("v0_downstairs"))
           {
                double mu = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("mu"),pV0Mu);
                double sigma = xmltof(xAgentPara->FirstChildElement("v0_downstairs")->Attribute("sigma"),pV0Sigma);
-               agentParameters->InitV0UpStairs(mu,sigma);
-               Log->Write("INFO: \tdesired velocity downstairs mu=%f , sigma=%f",mu,sigma);
+               agentParameters->InitV0DownStairs(mu,sigma);
+               Log->Write("INFO: \tdesired speed downstairs mu=%f , sigma=%f",mu,sigma);
+          }//------------------------------------------------------------------------
+          if (xAgentPara->FirstChild("escalator_upstairs"))
+          {
+               double mu = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("mu"), pV0Mu);
+               double sigma = xmltof(xAgentPara->FirstChildElement("escalator_upstairs")->Attribute("sigma"), pV0Sigma);
+               agentParameters->InitEscalatorUpStairs(mu, sigma);
+               Log->Write("INFO: \tspeed of escalator upstairs mu=%f , sigma=%f", mu, sigma);
           }
-
+          if (xAgentPara->FirstChild("escalator_downstairs"))
+          {
+               double mu = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("mu"), pV0Mu);
+               double sigma = xmltof(xAgentPara->FirstChildElement("escalator_downstairs")->Attribute("sigma"),pV0Sigma);
+               agentParameters->InitEscalatorDownStairs(mu,sigma);
+               Log->Write("INFO: \tspeed of escalator downstairs mu=%f , sigma=%f", mu, sigma);
+          }          
+          if (xAgentPara->FirstChild("v0_idle_escalator_upstairs"))
+          {
+               double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("mu"),pV0Mu);
+               double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_upstairs")->Attribute("sigma"),pV0Sigma);
+               agentParameters->InitV0IdleEscalatorUpStairs(mu, sigma);
+               Log->Write("INFO: \tdesired speed idle escalator upstairs mu=%f , sigma=%f", mu, sigma);
+          }
+          if (xAgentPara->FirstChild("v0_idle_escalator_downstairs"))
+          {
+               double mu = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("mu"),pV0Mu);
+               double sigma = xmltof(xAgentPara->FirstChildElement("v0_idle_escalator_downstairs")->Attribute("sigma"),pV0Sigma);
+               agentParameters->InitV0IdleEscalatorDownStairs(mu,sigma);
+               Log->Write("INFO: \tdesired speed idle escalator downstairs mu=%f , sigma=%f", mu, sigma);
+          }
+           //------------------------------------------------------------------------
+          
           //bmax
           if (xAgentPara->FirstChild("bmax"))
           {
                double mu = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("mu"),pBmaxMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("bmax")->Attribute("sigma"),pBmaxSigma);
                agentParameters->InitBmax(mu,sigma);
-               Log->Write("INFO: \ttBmax mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tBmax mu=%f , sigma=%f",mu,sigma);
           }
 
           //bmin
@@ -707,7 +1020,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("mu"),pBminMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("bmin")->Attribute("sigma"),pBminSigma);
                agentParameters->InitBmin(mu,sigma);
-               Log->Write("INFO: \ttBmin mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tBmin mu=%f , sigma=%f",mu,sigma);
           }
 
           //amin
@@ -716,7 +1029,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("mu"),pAminMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("amin")->Attribute("sigma"),pAminSigma);
                agentParameters->InitAmin(mu,sigma);
-               Log->Write("INFO: \ttAmin mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tAmin mu=%f , sigma=%f",mu,sigma);
           }
           //tau
           if (xAgentPara->FirstChild("tau"))
@@ -724,7 +1037,7 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("mu"),pTauMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("tau")->Attribute("sigma"),pTauSigma);
                agentParameters->InitTau(mu,sigma);
-               Log->Write("INFO: \ttTau mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tTau mu=%f , sigma=%f",mu,sigma);
           }
           //atau
           if (xAgentPara->FirstChild("atau"))
@@ -732,14 +1045,39 @@ void ArgumentParser::ParseAgentParameters(TiXmlElement* operativModel)
                double mu = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("mu"),pAtauMu);
                double sigma = xmltof(xAgentPara->FirstChildElement("atau")->Attribute("sigma"),pAtauSigma);
                agentParameters->InitAtau(mu,sigma);
-               Log->Write("INFO: \ttAtau mu=%f , sigma=%f",mu,sigma);
+               Log->Write("INFO: \tAtau mu=%f , sigma=%f",mu,sigma);
           }
-          if(pModel == 2) { //  Gompertz
+          // T
+          if (xAgentPara->FirstChild("T"))
+          {
+               double mu = xmltof(xAgentPara->FirstChildElement("T")->Attribute("mu"),pAtauMu);
+               double sigma = xmltof(xAgentPara->FirstChildElement("T")->Attribute("sigma"),pAtauSigma);
+               agentParameters->InitT(mu,sigma);
+               Log->Write("INFO: \tT mu=%f , sigma=%f",mu,sigma);
+          }
+          
+          if(pModel == 2) { // Gompertz
+               double beta_c = 1; /// @todo quick and dirty
+               double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau()*agentParameters->GetV0();
+               double max_Eb = 0.5*(agentParameters->GetBmin() + 0.49) ; /// @todo hard-coded value should be the same as in pedestrians GetEB
+               double max_Ea_Eb = (max_Ea>max_Eb)?max_Ea:max_Eb;
+               pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
+               pDistEffMaxWall  = pDistEffMaxPed;
+          }
+
+          if(pModel == 4) { //  Gompertz @todo: ar.graf
                double beta_c = 2; /// @todo quick and dirty
                double max_Ea = agentParameters->GetAmin() + agentParameters->GetAtau()*agentParameters->GetV0();
                double max_Eb = 0.5*(agentParameters->GetBmin() + 0.49) ; /// @todo hard-coded value should be the same as in pedestrians GetEB
                double max_Ea_Eb = (max_Ea>max_Eb)?max_Ea:max_Eb;
                pDistEffMaxPed = 2 * beta_c * max_Ea_Eb;
+	       pDistEffMaxWall  = pDistEffMaxPed;
+          }
+
+          if(pModel == 3) { // Tordeux2015
+               double max_Eb = 2*agentParameters->GetBmax();
+               pDistEffMaxPed = max_Eb + agentParameters->GetT()*agentParameters->GetV0();
+
                pDistEffMaxWall  = pDistEffMaxPed;
           }
      }
@@ -749,7 +1087,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
 {
      if (!routingNode)
      {
-          Log->Write("ERROR:\tNo routers found.");
+          Log->Write("ERROR: \t route_choice_models section is missing");
           return false;
      }
      for (TiXmlElement* e = routingNode->FirstChildElement("router"); e;
@@ -807,7 +1145,7 @@ bool ArgumentParser::ParseRoutingStrategies(TiXmlNode *routingNode)
      return true;
 }
 
-
+//todo: parse this in Cognitive map router
 bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
 {
      TiXmlNode* sensorNode=routerNode->FirstChild();
@@ -871,7 +1209,8 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
      if( ! strategyNode.FirstChild(query.c_str()))
      {
           query="exitCrossingStrategy";
-          Log->Write("WARNING:\t exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" ");
+          Log->Write("ERROR:\t the keyword exitCrossingStrategy is deprecated. Please consider using \"exit_crossing_strategy\" in the ini file");
+          return false;
      }
 
      if (strategyNode.FirstChild(query.c_str())) {
@@ -894,10 +1233,13 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                case 4:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGeneral());
                     break;
+               case 6:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    break;
                default:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
-                    Log->Write("ERROR:\t unknown exit_crossing_strategy < %d >", pExitStrategy);
-                    Log->Write("     :\t the default < %d > will be used", 2);
+                    Log->Write("ERROR:\t unknown exit_crossing_strategy <%d>", pExitStrategy);
+                    Log->Write("     :\t the default <%d> will be used", 2);
                     return true;
                     break;
                }
@@ -971,6 +1313,11 @@ double ArgumentParser::GetTmax() const
 double ArgumentParser::Getdt() const
 {
      return pdt;
+}
+
+int ArgumentParser::IsPeriodic() const
+{
+      return pPeriodic;
 }
 
 double ArgumentParser::Getfps() const
@@ -1097,6 +1444,17 @@ double ArgumentParser::GetbWall() const
 {
      return pbWall;
 }
+
+double ArgumentParser::GetDWall() const
+{
+     return pDWall;
+}
+
+double ArgumentParser::GetDPed() const
+{
+     return pDPed;
+}
+
 
 double ArgumentParser::GetcWall() const
 {
@@ -1242,4 +1600,16 @@ bool ArgumentParser::ParseStepSize(TiXmlNode &stepNode)
      return false;
 }
 
+bool ArgumentParser::ParsePeriodic(TiXmlNode &Node)
+{
+     if (Node.FirstChild("periodic"))
+     {
+          const char* periodic = Node.FirstChild("periodic")->FirstChild()->Value();
+          if (periodic)
+               pPeriodic = atof(periodic);
+          Log->Write("INFO: \tperiodic <%d>", pPeriodic);
+          return true;
+     }
+     return true; //default is periodic=0. If not specified than is OK
+}
 

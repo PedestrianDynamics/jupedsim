@@ -1,8 +1,8 @@
 /**
  * \file        AccessPoint.cpp
  * \date        Aug 24, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -112,6 +112,7 @@ double AccessPoint::GetDistanceTo(int UID)
           Log->Write("ERROR:\tNo route to destination  [ %d ]",UID);
           Log->Write("ERROR:\tCheck your configuration file");
           Dump();
+          //return 0;
           exit(EXIT_FAILURE);
      }
      return _mapDestToDist[UID];
@@ -177,6 +178,7 @@ double AccessPoint::DistanceTo(double x, double y)
 {
 
      return sqrt((x-_center[0])*(x-_center[0]) + (y-_center[1])*(y-_center[1]));
+     //return _navLine->DistTo(Point(x,y));
 }
 
 
@@ -201,25 +203,12 @@ bool AccessPoint::IsInRange(double xPed, double yPed, int roomID)
      return false;
 }
 
-//void AccessPoint::DeleteTransitPed(Pedestrian* ped){
-//      vector<Pedestrian*>::iterator it;
-//      it = find (_transitPedestrians.begin(), _transitPedestrians.end(), ped);
-//      if(it==_transitPedestrians.end()){
-//              cout<<" Ped not found"<<endl;
-//      }else{
-//              _transitPedestrians.erase(it);
-//      }
-//}
-
-
-//void AccessPoint::AddTransitPed(Pedestrian* ped){
-//      _transitPedestrians.push_back(ped);
-//}
-
 void AccessPoint::SetNavLine(NavLine* line)
 {
      //todo: check this
      //_navLine= line;
+     //_navLine->SetPoint1(line->GetPoint1());
+     //_navLine->SetPoint2(line->GetPoint2());
      _navLine= new NavLine(*line);
 }
 
@@ -228,15 +217,10 @@ NavLine* AccessPoint::GetNavLine() const
      return _navLine;
 }
 
-//const vector<Pedestrian*>& AccessPoint::GetAllTransitPed() const{
-//      return _transitPedestrians;
-//}
-
 const vector <AccessPoint*>& AccessPoint::GetConnectingAPs()
 {
      return _connectingAPs;
 }
-
 
 void AccessPoint::RemoveConnectingAP(AccessPoint* ap)
 {
@@ -284,6 +268,7 @@ void AccessPoint::Dump()
      //cout<<" ID: " <<_id<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
      cout<<" Friendly ID: " <<_friendlyName<<" centre = [ "<< _center[0] <<", " <<_center[1] <<" ]"<<endl;
      cout<<" Real ID: " <<_id<<endl;
+     cout<<" Length:  "<<_navLine->LengthSquare()<<endl;
 
      cout <<" Is final exit to outside :"<<GetFinalExitToOutside()<<endl;
      cout <<" Distance to final goals"<<endl;

@@ -1,13 +1,26 @@
 /build/
 /lib/
 /bin/
+/doc
 /Debug
 /Release
+/Testing
 /doc/html
 /figs
 /figs_bot
+/inputfiles
+/Utest
 /Utest/*/inifiles*/
 /Utest/*/trajectories
+/Utest/rimea_tests/*/inifiles*/
+/Utest/rimea_tests/*/trajectories
+/Utest/juelich_tests/*/trajectories
+/Utest/juelich_tests/*/inifiles
+/Utest/juelich_tests/*/inifiles_a
+/Utest/juelich_tests/*/inifiles_b
+Utest/Validation/*/inifiles*/
+/Utest/juelich_tests/*/*.txt
+/Utest/juelich_tests/*/*.png
 *~
 
 # Compiled Object files
@@ -33,12 +46,19 @@
 *.out
 *.app
 
+# Hidden files
+.*
+!/.gitignore
+
 # Cmake
 CMakeCache.txt
 CMakeFiles
 Makefile
 cmake_install.cmake
 install_manifest.txt
+
+*.vtk
+*Traj*.xml
 
 CTestTestfile.cmake
 DartConfiguration.tcl
@@ -75,3 +95,34 @@ vgcore.*
 /veloModel2.pdf
 /veloModel2.tex
 /.project
+/#%2Aediff-merge%2A#14545CrI#
+/#%2Aediff-merge%3C2%3E%2A#145452Th#
+/.idea/dictionaries/chraibi.xml
+/Dumping
+/Martella/corridor_8x3.xml
+/Martella/regular_simmetric_90-90.xml
+/Utest/JPSRunTest.pyc
+/Utest/test.py
+/Utest/test_13/flow.txt
+/compile_commands.json
+/delme.py
+/mencoderVideos.sh
+/true_false.xml
+/JPScore.cbp
+/JPScore.layout
+/Max/
+README.html
+Utest/r2.txt
+Utest/r3.txt
+Utest/rimea_tests/test_13/gauss.py
+Utest/test_10/cell.png
+Utest/test_10/result.txt
+Utest/test_10/times.txt
+Utest/todo.org
+html-dir/
+inputfiles/Bottleneck/rimea_test_12_geo.xml
+inputfiles/Karthik/
+inputfiles/U8/
+inputfiles/VerteilerEbene/
+.idea*
+idea/codeStyleSettings.xml

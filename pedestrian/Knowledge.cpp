@@ -1,8 +1,8 @@
 /**
  * \file        Knowledge.cpp
  * \date        Sep 18, 2012
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -27,8 +27,6 @@
 
 
 #include "Knowledge.h"
-#include "../IO/OutputHandler.h"
-extern OutputHandler* Log;
 
 Knowledge::Knowledge()
 {
@@ -36,22 +34,29 @@ Knowledge::Knowledge()
      _time = 0;
      _quality=1;
      _id=-1;
+     _hasBeenRefusedOnce=false;
+     _latency=0.0;
 }
 
 Knowledge::~Knowledge()
 {
 }
 
-void Knowledge::Dump()
+std::string Knowledge::Dump() const
 {
-     Log->Write("INFO: \tdoor [%d] state [%d]  since [%f]",_id,_isClosed,_time);
+     char tmp[2048];
+     sprintf(tmp,"door [%d] state [%d]  since [%.2f] sec. Refused= %d, Quality=%.2f, latency=%.2f",_id,_isClosed,_time,_hasBeenRefusedOnce,_quality,_latency);
+     return std::string(tmp);
 }
 
-void Knowledge::SetState(int id, bool is_closed, double time)
+void Knowledge::SetState(int id, bool is_closed, double time, double quality, double latency, bool refuse)
 {
      _isClosed=is_closed;
      _time=time;
      _id=id;
+     _quality=quality;
+     _hasBeenRefusedOnce=refuse;
+     _latency=latency;
 }
 
 bool Knowledge::GetState() const
@@ -64,7 +69,44 @@ double Knowledge::GetQuality() const
      return _quality;
 }
 
+void Knowledge::SetQuality(double quality)
+{
+     _quality=quality;
+}
+
 double Knowledge::GetTime() const
 {
      return _time;
+}
+
+bool Knowledge::HasBeenRefused() const
+{
+     return _hasBeenRefusedOnce;
+}
+
+void Knowledge::Refuse(bool state)
+{
+     _hasBeenRefusedOnce=state;
+}
+
+bool Knowledge::CanBeForwarded() const
+{
+     return (_latency<=0);
+}
+
+void Knowledge::SetLatency(double latency)
+{
+     _latency=latency;
+}
+
+double Knowledge::GetLatency() const
+{
+     return _latency;
+}
+
+void Knowledge::DecreaseLatency(double minus)
+{
+     _latency = _latency - minus;
+     if (_latency <= 0)
+          _latency = 0.0;
 }

@@ -1,8 +1,8 @@
 /**
  * \file        EmptyCognitiveMapCreator.cpp
  * \date        Feb 1, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -27,7 +27,7 @@
 
 
 #include "EmptyCognitiveMapCreator.h"
-#include "CognitiveMap.h"
+#include "./cognitiveMap/cognitivemap.h"
 #include <vector>
 #include <map>
 #include "../../geometry/Room.h"
@@ -44,6 +44,8 @@ EmptyCognitiveMapCreator::~EmptyCognitiveMapCreator()
 CognitiveMap * EmptyCognitiveMapCreator::CreateCognitiveMap(const Pedestrian * ped)
 {
      CognitiveMap * cm = new CognitiveMap(_building, ped);
+
+     //cm->AddLandmarks();
 
      return cm;
 }

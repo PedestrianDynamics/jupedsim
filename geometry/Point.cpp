@@ -1,8 +1,8 @@
 /**
  * \file        Point.cpp
  * \date        Sep 30, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -47,8 +47,8 @@ Point::Point() : _x(0), _y(0)
 Point::Point(double x, double y) : _x(x), _y(y)
 {
 }
-
-Point::Point(const Point& orig)
+//
+Point::Point(const Point& orig) 
 {
      _x = orig._x;
      _y = orig._y;

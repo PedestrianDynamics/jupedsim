@@ -1,9 +1,9 @@
 /**
  * \file        OperationalModel.h
  * \date        Nov. 11, 2014
- * \version     v0.6
+ * \version     v0.7
  * \author      Ulrich Kemloh
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -54,12 +54,12 @@ public:
       * @param building, the building object
       * return the status of the initialisation
       */
-     virtual bool Init (Building* building) const = 0;
+     virtual bool Init (Building* building) = 0;
 
      /**
       * @return a description of the model possibly with all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription() const = 0;
+     virtual std::string GetDescription() = 0;
 
      /**
       * Computes and update the positions/velocities /... of the pedestrians for the next time steps.
@@ -69,7 +69,7 @@ public:
       * @param deltaT, the timestep
       * @param building, the representation of the building
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const = 0 ;
+     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic) = 0 ;
 };
 
 #endif /* OPERATIONALMODEL_H_ */

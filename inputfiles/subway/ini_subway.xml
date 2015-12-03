@@ -8,7 +8,7 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <!-- geometry file -->
   <geometry>geometry.xml</geometry>
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
+  <trajectories format="xml-plain" fps="8" color_mode="group">
     <file location="trajectorie.xml" />
     <socket hostname="localhost" port="8989" />
   </trajectories>
@@ -22,26 +22,27 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   </traffic_constraints>
 
   <routing>
-    <goals>
-      <goal id="0" final="true" caption="goal 0">
-        <polygon>
-          <vertex px="0.0" py="-5.0" />
-          <vertex px="2.0" py="-5.0" />
-          <vertex px="2.0" py="-7.0" />
-          <vertex px="0.0" py="-7.0" />
-          <vertex px="0.0" py="-5.0" />
-        </polygon>
-      </goal>
-    </goals>
+<!--     <goals> -->
+<!--       <goal id="0" final="true" caption="goal 0"> -->
+<!--         <polygon> -->
+<!--           <vertex px="0.0" py="-5.0" /> -->
+<!--           <vertex px="2.0" py="-5.0" /> -->
+<!--           <vertex px="2.0" py="-7.0" /> -->
+<!--           <vertex px="0.0" py="-7.0" /> -->
+<!--           <vertex px="0.0" py="-5.0" /> -->
+<!--         </polygon> -->
+<!--       </goal> -->
+<!--     </goals> -->
   </routing>
 
 
   <!--persons information and distribution -->
   <agents operational_model_id="2">
     <agents_distribution>
-      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="1" />
-      <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="100" goal_id="-1" router_id="1"
-      pre_movement_mean="15" pre_movement_sigma="0.6" />
+      <group group_id="0" agent_parameter_id="1" room_id="0" subroom_id="0" number="10" goal_id="-1" router_id="1" />
+      <group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="20" goal_id="-1" router_id="1" />
+      <group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="0" number="20" goal_id="-1" router_id="1"
+      pre_movement_mean="-15" pre_movement_sigma="0.6" />
     </agents_distribution>
 
     <!-- frequency in persons/minute -->
@@ -96,14 +97,16 @@ xsi:noNamespaceSchemaLocation="../../xsd/jps_ini_core.xsd">
   <route_choice_models>
     <router router_id="1" description="global_shortest">
       <parameters>
-        <navigation_lines file="routing.xml" />
+<!--         <navigation_lines file="routing.xml" /> -->
+         <navigation_mesh use_for_local_planning="false" method="triangulation"/>
       </parameters>
     </router>
-    <router router_id="2" description="quickest">
-      <parameters>
-        <navigation_lines file="routing.xml" />
-      </parameters>
-    </router>
+<!--     <router router_id="2" description="quickest"> -->
+<!--       <parameters> -->
+<!--         <navigation_lines file="routing.xml" /> -->
+<!--         <navigation_mesh use_for_local_planning="true" method="triangulation"/> -->
+<!--       </parameters> -->
+<!--     </router> -->
     
   </route_choice_models>
 

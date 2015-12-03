@@ -1,8 +1,8 @@
 /**
  * \file        GCFMModel.h
  * \date        Apr 15, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -71,9 +71,9 @@ public:
      * @param deltaT the next timestep
      * @param building the geometry object
      */
-    virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
-    virtual std::string GetDescription() const;
-    virtual bool Init (Building* building) const;
+    virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
+    virtual std::string GetDescription() ;
+    virtual bool Init (Building* building);
 
 private:
     /// define the strategy for crossing a door (used for calculating the driving force)
@@ -118,7 +118,7 @@ private:
      * @return
      */
     Point ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const;
-    Point ForceRepWall(Pedestrian* ped, const Wall& l) const;
+    Point ForceRepWall(Pedestrian* ped, const Line& l) const;
     Point ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, double vn) const;
     Point ForceInterpolation(double v0, double K_ij, const Point& e, double v, double d, double r, double l) const;
 

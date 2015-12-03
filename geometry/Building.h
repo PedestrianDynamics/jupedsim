@@ -1,8 +1,8 @@
 /**
  * \file        Building.h
  * \date        Oct 1, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -73,7 +73,7 @@ private:
 
 public:
      /// constructor
-     //Building();
+     Building();
      Building(const std::string&, const std::string&, RoutingEngine&, PedDistributor&, double);
      /// destructor
      virtual ~Building();
@@ -115,7 +115,7 @@ public:
       * @param uid ,the unique identifier
       * @return NULL if no exists with that identifier.
       */
-     SubRoom* GetSubRoomByUID( int uid);
+     SubRoom* GetSubRoomByUID( int uid) const;
 
      /**
       * @return true if the two segments are visible from each other.
@@ -170,10 +170,10 @@ public:
      const std::map<int, Hline*>& GetAllHlines() const;
      const std::map<int, Goal*>& GetAllGoals() const;
 
-     void AddCrossing(Crossing* line);
-     void AddTransition(Transition* line);
-     void AddHline(Hline* line);
-     void AddGoal(Goal* goal);
+     bool AddCrossing(Crossing* line);
+     bool AddTransition(Transition* line);
+     bool AddHline(Hline* line);
+     bool AddGoal(Goal* goal);
 
      const std::string& GetProjectRootDir() const;
      const std::string& GetProjectFilename() const;
@@ -183,7 +183,7 @@ public:
 
      /**
       * Load and parse the geometry file into the building object.
-      * If no geometry file is provided, one is searched in the the project file
+      * If no geometry file is provided, one is searched in the project file
       *
       * @param filename, the geometry file
       */
@@ -206,6 +206,12 @@ public:
       * output user specific informations.
       */
      bool SanityCheck();
+
+     /**
+      * Triangulate the geometry
+      */
+
+     bool Triangulate();
 
 
 private:

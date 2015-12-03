@@ -1,7 +1,7 @@
 /**
  * \file        StartDistribution
  * \date        Apr 15, 2015
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -203,9 +203,13 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      ped->SetEllipse(E);
      ped->SetTau(_groupParameters->GetTau());
      ped->SetV0Norm(_groupParameters->GetV0(),
-               _groupParameters->GetV0DownStairs(),
-               _groupParameters->GetV0UpStairs());
-
+                    _groupParameters->GetV0UpStairs(),
+                    _groupParameters->GetV0DownStairs(),
+                    _groupParameters->GetEscalatorUpStairs(),
+                    _groupParameters->GetEscalatorDownStairs(),
+                    _groupParameters->GetV0IdleEscalatorUpStairs(),
+                    _groupParameters->GetV0IdleEscalatorDownStairs()
+          );
      // first default Position
      int index = -1;
 
@@ -228,7 +232,9 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
           {
                Log->Write("ERROR:\t Cannot distribute pedestrians in the mentioned area [%0.2f,%0.2f,%0.2f,%0.2f]",
                          _xMin,_xMax,_yMin,_yMax);
-               Log->Write("ERROR:\t Specifying a subroom_id might help");
+               Log->Write("      \t Specifying a subroom_id might help");
+               Log->Write("      \t %d positions were available. Index %d ",positions.size(),index);
+               exit(EXIT_FAILURE);
           }
      }
      else
@@ -323,7 +329,7 @@ void StartDistribution::InitPremovementTime(double mean, double stdv)
      _premovementTime = std::normal_distribution<double>(mean,stdv);
 }
 
-double StartDistribution::GetPremovementTime()
+double StartDistribution::GetPremovementTime() const
 {
      return _premovementTime(_generator);
 }

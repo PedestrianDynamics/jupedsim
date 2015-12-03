@@ -12,11 +12,12 @@ project(JPScore)
 
 set(CMAKE_COLOR_MAKEFILE ON)
 set(JPSCORE_MAJOR_VERSION 0)
-set(JPSCORE_MINOR_VERSION 6)
+set(JPSCORE_MINOR_VERSION 7)
 set(JPSCORE_PATCH_VERSION 0)
 set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
+
 
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -53,12 +54,15 @@ if(NOT DEFINED PROCESSOR_COUNT)
 endif(NOT DEFINED PROCESSOR_COUNT)
 
 if(PROCESSOR_COUNT)
-  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
-  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+#  message( STATUS "PROCESSOR_COUNT: " ${PROCESSOR_COUNT})
+#  set(CTEST_BUILD_FLAGS "-j${PROCESSOR_COUNT}")
+  message( STATUS "PROCESSOR_COUNT: 0")
+  set(CTEST_BUILD_FLAGS "-j0")
 endif(PROCESSOR_COUNT)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Release)
+#  set (CMAKE_BUILD_TYPE Release)
+  set (CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
 message( STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE} )
 
@@ -132,7 +136,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 
 # test all cpp-files in Utest
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
-  
+
   find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
@@ -175,10 +179,12 @@ set (   source_files
   math/ForceModel.cpp
   math/Mathematics.cpp
   math/ODESolver.cpp
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.cpp
   math/GompertzModel.cpp
+  math/GradientModel.cpp
+  math/VelocityModel.cpp
   math/OperationalModel.cpp
+
 
   mpi/LCGrid.cpp
 
@@ -187,14 +193,17 @@ set (   source_files
   pedestrian/Pedestrian.cpp
   pedestrian/AgentsParameters.cpp
   pedestrian/Knowledge.cpp
-  pedestrian/AgentsQueue.cpp		
-  pedestrian/AgentsSource.cpp		
+  pedestrian/AgentsQueue.cpp
+  pedestrian/AgentsSource.cpp
   pedestrian/Pedestrian.cpp
-  pedestrian/AgentsSourcesManager.cpp	
+  pedestrian/AgentsSourcesManager.cpp
   pedestrian/StartDistribution.cpp
 
-  voronoi/VoronoiDiagramGenerator.cpp
 
+  voronoi/VoronoiDiagramGenerator.cpp
+  voronoi-boost/VoronoiPositionGenerator.cpp
+
+  routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
   routing/DummyRouter.cpp
@@ -207,9 +216,15 @@ set (   source_files
   routing/DTriangulation.cpp
   routing/MeshRouter.cpp
   routing/mesh/Mesh.cpp
+  #header files with scr code need to be added here, in order to be
+  #included in generated project files (codeblocks)
+  #plz do not delete them here
+  routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
+  general/Macros.h
 
   routing/CognitiveMapRouter.cpp
-  routing/cognitive_map/CognitiveMap.cpp
+  routing/cognitive_map/GraphNetwork.cpp
   routing/cognitive_map/NavigationGraph.cpp
   routing/cognitive_map/CognitiveMapStorage.cpp
   routing/cognitive_map/AbstractCognitiveMapCreator.cpp
@@ -224,9 +239,19 @@ set (   source_files
   routing/cognitive_map/sensor/JamSensor.cpp
   routing/cognitive_map/sensor/LastDestinationsSensor.cpp
   routing/cognitive_map/sensor/SmokeSensor.cpp
+  routing/cognitive_map/sensor/locater.cpp
   routing/cognitive_map/fire_mesh/FireMesh.cpp
   routing/cognitive_map/fire_mesh/Knot.cpp
   routing/cognitive_map/fire_mesh/FireMeshStorage.cpp
+  routing/cognitive_map/cognitiveMap/associations.cpp
+  routing/cognitive_map/cognitiveMap/cognitivemap.cpp
+  routing/cognitive_map/cognitiveMap/waypoints.cpp
+  routing/cognitive_map/cognitiveMap/landmark.cpp
+  routing/cognitive_map/cognitiveMap/youareherepointer.cpp
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/Tools/triangle.cpp
+
+  visiLibity/source_code/visilibity.cpp
 
 
   poly2tri/common/shapes.cpp
@@ -235,9 +260,11 @@ set (   source_files
   poly2tri/sweep/sweep.cpp
   poly2tri/sweep/cdt.cpp
   events/EventManager.cpp
+  events/Event.cpp
   )
 
 set (   header_files
+  routing/FloorfieldViaFM.h
   routing/NavMesh.h
   routing/DirectionStrategy.h
   routing/DummyRouter.h
@@ -250,9 +277,15 @@ set (   header_files
   routing/DTriangulation.h
   routing/MeshRouter.h
   routing/mesh/Mesh.h
+  routing/mesh/RectGrid.h
+  routing/mesh/Trial.h
+  routing/graph/RoutingGraphStorage.h
+  routing/graph/RoutingGraph.h
+  routing/graph/NavLineState.h
+
 
   routing/CognitiveMapRouter.h
-  routing/cognitive_map/CognitiveMap.h
+  routing/cognitive_map/GraphNetwork.h
   routing/cognitive_map/NavigationGraph.h
   routing/cognitive_map/CognitiveMapStorage.h
   routing/cognitive_map/AbstractCognitiveMapCreator.h
@@ -267,21 +300,32 @@ set (   header_files
   routing/cognitive_map/sensor/JamSensor.h
   routing/cognitive_map/sensor/LastDestinationsSensor.h
   routing/cognitive_map/sensor/SmokeSensor.h
+  routing/cognitive_map/sensor/locater.h
   routing/cognitive_map/fire_mesh/FireMesh.h
   routing/cognitive_map/fire_mesh/Knot.h
   routing/cognitive_map/fire_mesh/FireMeshStorage.h
+  routing/cognitive_map/cognitiveMap/associations.h
+  routing/cognitive_map/cognitiveMap/cognitivemap.h
+  routing/cognitive_map/cognitiveMap/waypoints.h
+  routing/cognitive_map/cognitiveMap/landmark.h
+  routing/cognitive_map/cognitiveMap/youareherepointer.h
+  routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
+  routing/cognitive_map/Tools/triangle.h
+
+  visiLibity/source_code/visilibity.hpp
 
   pedestrian/Pedestrian.h
   pedestrian/PedDistributor.h
   pedestrian/Ellipse.h
   pedestrian/AgentsParameters.h
   pedestrian/Knowledge.h
-  pedestrian/AgentsQueue.h		
-  pedestrian/AgentsSource.h		
+  pedestrian/AgentsQueue.h
+  pedestrian/AgentsSource.h
   pedestrian/Pedestrian.h
-  pedestrian/AgentsSourcesManager.h	
+  pedestrian/AgentsSourcesManager.h
   pedestrian/StartDistribution.h
   voronoi/VoronoiDiagramGenerator.h
+  voronoi-boost/VoronoiPositionGenerator.h
 
   mpi/LCGrid.h
 
@@ -311,10 +355,12 @@ set (   header_files
   math/ForceModel.h
   math/Mathematics.h
   math/ODESolver.h
-  math/GPU_GCFMModel.cpp
   math/GCFMModel.h
   math/GompertzModel.h
-  math/OperationalModel.h   
+  math/GradientModel.h
+  math/VelocityModel.h
+  math/OperationalModel.h
+
 
   poly2tri/poly2tri.h
   poly2tri/common/shapes.h
@@ -324,6 +370,7 @@ set (   header_files
   poly2tri/sweep/advancing_front.h
   poly2tri/sweep/sweep.h
   events/EventManager.h
+  events/Event.h
   )
 
 
@@ -331,6 +378,9 @@ add_library ( core STATIC ${source_files} )
 #add_library ( core SHARED ${source_files} )
 
 #Target
+#add_executable(
+#  jpscore Utest/Fastmarchtest.h
+#)
 add_executable( jpscore  main.cpp )
 
 target_link_libraries(jpscore core )
@@ -402,10 +452,19 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 #--------------------
+if(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -stdlib=libc++" )
+  SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -stdlib=libc++" )
+endif(APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+
 if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
   include(CheckCXXCompilerFlag)
   CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
   CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+
   if( COMPILER_SUPPORTS_CXX11)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   elseif(COMPILER_SUPPORTS_CXX0X)
@@ -414,6 +473,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
     message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
   endif()
 endif()
+
 message(STATUS "MSVC: " ${MSVC})
 message(STATUS "MSVC_IDE: " ${MSVC_IDE})
 message(STATUS "MSVC60: " ${MSVC60})
@@ -442,7 +502,7 @@ endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 # PGI ++ Flags
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "PGI")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")	
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --c++11 -Minform=inform")
 endif()
 
 

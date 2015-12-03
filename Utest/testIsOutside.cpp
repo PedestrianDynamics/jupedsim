@@ -1,8 +1,8 @@
 /**
  * \file        testIsOutside.cpp
  * \date        Jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -68,7 +68,7 @@ int testIsOutside()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(a);
-     E.SetBmin(b);
+     E.SetBmax(b);
      // P == E.center
      P.SetX(0);
      P.SetY(0);
@@ -105,14 +105,14 @@ int testIsOutside()
 
      // P ~ semi-axis
      P.SetX(0);
-     P.SetY(b*0.5);
+     P.SetY(b);
      res += ( E.IsOutside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);
 
      // P ~ semi-axis
      P.SetX(0);
-     P.SetY(-b*0.5);
+     P.SetY(-b);
      res += ( E.IsOutside(P) == false)?1:0;
      ntests++;
      fprintf (f, "%3d. E(%3.2f, %3.2f), a=%3.2f, b=%3.2f, P(%3.2f, %3.2f)    res=%d\n",ntests, E.GetCenter().GetX(), E.GetCenter().GetY(), a, b, P.GetX(), P.GetY(), res);

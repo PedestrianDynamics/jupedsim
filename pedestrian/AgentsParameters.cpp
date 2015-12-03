@@ -1,8 +1,8 @@
 /**
  * \file        AgentsParameters.cpp
  * \date        Jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -64,6 +64,26 @@ void AgentsParameters::InitV0DownStairs(double mean, double stdv)
      _V0DownStairs = std::normal_distribution<double>(mean,stdv);
 }
 
+void AgentsParameters::InitEscalatorUpStairs(double mean, double stdv)
+{
+     _EscalatorUpStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitEscalatorDownStairs(double mean, double stdv)
+{
+     _EscalatorDownStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitV0IdleEscalatorUpStairs(double mean, double stdv)
+{
+     _V0IdleEscalatorUpStairs = std::normal_distribution<double>(mean,stdv);
+}
+
+void AgentsParameters::InitV0IdleEscalatorDownStairs(double mean, double stdv)
+{
+     _V0IdleEscalatorDownStairs = std::normal_distribution<double>(mean,stdv);
+}
+
 void AgentsParameters::InitBmax(double mean, double stdv)
 {
     _Bmax= std::normal_distribution<double>(mean,stdv);
@@ -89,6 +109,12 @@ void AgentsParameters::InitTau(double mean, double stdv)
     _Tau = std::normal_distribution<double>(mean,stdv);
 }
 
+void AgentsParameters::InitT(double mean, double stdv)
+{
+    _T = std::normal_distribution<double>(mean,stdv);
+}
+
+
 double AgentsParameters::GetV0()
 {
     return _V0(_generator);
@@ -103,6 +129,28 @@ double AgentsParameters::GetV0DownStairs()
 {
      return _V0DownStairs(_generator);
 }
+
+double AgentsParameters::GetEscalatorUpStairs()
+{
+     return _EscalatorUpStairs(_generator);
+}
+
+double AgentsParameters::GetEscalatorDownStairs()
+{
+     return _EscalatorDownStairs(_generator);
+}
+
+
+double AgentsParameters::GetV0IdleEscalatorUpStairs()
+{
+     return _V0IdleEscalatorUpStairs(_generator);
+}
+
+double AgentsParameters::GetV0IdleEscalatorDownStairs()
+{
+     return _V0IdleEscalatorDownStairs(_generator);
+}
+
 
 double AgentsParameters::GetBmax()
 {
@@ -129,6 +177,10 @@ double AgentsParameters::GetTau()
     return _Tau(_generator);
 }
 
+double AgentsParameters::GetT()
+{
+    return _T(_generator);
+}
 std::string AgentsParameters::writeParameter()
 {
     std::string s;
@@ -147,6 +199,7 @@ std::string AgentsParameters::writeParameter()
     s.append(tmp);
     sprintf(tmp, "\t\ttau ~ N(%f, %f)\n",  _Tau.mean(), _Tau.stddev());
     s.append(tmp);
-
+    sprintf(tmp, "\t\tT ~ N(%f, %f)\n",  _T.mean(), _T.stddev());
+    s.append(tmp);
     return s;
 }
