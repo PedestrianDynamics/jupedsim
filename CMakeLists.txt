@@ -111,18 +111,44 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 endif(DOXYGEN_FOUND)
+#http://stackoverflow.com/questions/1487752/how-do-i-instruct-cmake-to-look-for-libraries-installed-by-macports
+if(APPLE)
+  # Detect if the "port" command is valid on this system; if so, return full path
+  execute_process(COMMAND which port RESULT_VARIABLE DETECT_MACPORTS OUTPUT_VARIABLE MACPORTS_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (${DETECT_MACPORTS} EQUAL 0)
+    # "/opt/local/bin/port" doesn't have libs, so we get the parent directory
+    get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+    # "/opt/local/bin" doesn't have libs, so we get the parent directory
+    get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+    # "/opt/local" is where MacPorts lives, add `/lib` suffix and link
+    link_directories(${MACPORTS_PREFIX}/lib)
+    message(STATUS "Macports detected: ${MACPORTS_PREFIX}/lib")
+    # SET(CMAKE_SYSTEM_NAME Darwin)
+    # # Add MacPorts
+    # INCLUDE_DIRECTORIES(/opt/local/include)
 
-SET(CMAKE_SYSTEM_NAME Darwin)
+    # LINK_DIRECTORIES(/opt/local/lib)
 
-# Add MacPorts
-INCLUDE_DIRECTORIES(/opt/local/include)
-LINK_DIRECTORIES(/opt/local/lib)
+  else()
+    # Recommendation, also add a "brew --prefix" custom command to detect a homebrew build environment
+    execute_process(COMMAND brew --prefix RESULT_VARIABLE DETECT_BREW OUTPUT_VARIABLE BREW_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(${DETECT_BREW} EQUAL 0)
+      link_directories(${BREW_PREFIX})
+      message(STATUS "Brew detected: ${BREW_PREFIX}")      
+    endif()  
+  endif()
+
+  
+endif(APPLE)
+
 
 #set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
 #set(Boost_INCLUDE_DIR /opt/local/include/boost)
 #set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
+# in case boost is a non-default location
+# SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
+# SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
 find_package(Boost REQUIRED )
-#include_directories(${Boost_INCLUDE_DIR})
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
@@ -387,8 +413,14 @@ add_library ( core STATIC ${source_files} )
 add_executable( jpscore  main.cpp )
 
 if(Boost_FOUND)
-	message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
-	target_link_libraries(jpscore ${Boost_LIBRARIES}) 
+  message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
+  message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+  message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+  message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+  link_directories(${Boost_LIBRARY_DIRS})
+  include_directories(${Boost_INCLUDE_DIR})
+  # todo: is this necessary?
+  #target_link_libraries(jpscore ${Boost_LIBRARIES})
 endif()
 
 target_link_libraries(jpscore core )
@@ -397,9 +429,9 @@ if(WIN32)
   target_link_libraries (jpscore core wsock32)
 endif(WIN32)
 
-if(CGAL_FOUND)
-  target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
-endif(CGAL_FOUND)
+# if(CGAL_FOUND)
+#   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+# endif(CGAL_FOUND)
 
 #protocol buffer
 #find_package(Protobuf)
@@ -522,7 +554,7 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
   # test if code compiles and runs default setting. Takes about 30 seconds
 
-  link_directories(${Boost_LIBRARY_DIRS})
+  # link_directories(${Boost_LIBRARY_DIRS})
   foreach (test_src ${test_files})
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
     add_executable( ${test} ${test_src})
