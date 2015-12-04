@@ -187,6 +187,7 @@ int QuickestPathRouter::GetQuickestRoute(Pedestrian*ped, AccessPoint* nearestAP 
      //const vector<AccessPoint*>& aps = nearestAP->GetTransitAPsTo(ped->GetFinalDestination());
 
      vector <AccessPoint*> aps;
+
      GetRelevantRoutesTofinalDestination(ped,aps);
 
 

@@ -46,9 +46,10 @@ FloorfieldViaFM::~FloorfieldViaFM()
     if (flag) delete[] flag;
     if (dist2Wall) delete[] dist2Wall;
     if (speedInitial) delete[] speedInitial;
+    if (modifiedspeed) delete[] modifiedspeed;
     if (cost) delete[] cost;
     if (neggrad) delete[] neggrad;
-    if (dist2Wall) delete[] dist2Wall;
+    if (dirToWall) delete[] dirToWall;
     if (trialfield) delete[] trialfield;
 
 }
@@ -63,23 +64,16 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
     parseBuilding(buildingArg, hxArg, hyArg);
 
-    //create rectgrid (grid->createGrid())                                                                      <- DONE in parseBuilding
-
-    //'grid->GetnPoints()' and create all data fields: cost, neggradient, speed, dis2wall, flag, secondaryKey      <- DONE in parseBuilding
-
-    //call fkt: linescan und set Distance2Wall mit 0 fuer alle Wandpunkte, speed mit lowspeed                   <- DONE in parseBuilding
-    //this step includes Linescanalgorithmus? (maybe included in parsing above)
-
     //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-    resetGoalAndCosts(wall, numOfExits);
+    prepareForDistanceFieldCalculation(wall, numOfExits);
 
     calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
 
     //testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
     //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
-
-    calculateFloorfield(useDistancefield); //use distance2Wall
+    setSpeed(useDistancefield); //use distance2Wall
+    calculateFloorfield(cost, neggrad);
 
     //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
     writeFF(filename);
@@ -205,10 +199,10 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     file.close();
 }
 
-FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
-{
-    //copy ctor
-}
+//FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
+//{
+//    //copy ctor
+//}
 
 //FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
 //{
@@ -308,6 +302,7 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     flag = new int[grid->GetnPoints()];                  //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, -7 = outside)
     dist2Wall = new double[grid->GetnPoints()];
     speedInitial = new double[grid->GetnPoints()];
+    modifiedspeed = new double[grid->GetnPoints()];
     cost = new double[grid->GetnPoints()];
     neggrad = new Point[grid->GetnPoints()];
     dirToWall = new Point[grid->GetnPoints()];
@@ -324,18 +319,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     drawLinesOnGrid(wall, dist2Wall, 0.);
 }
 
-void FloorfieldViaFM::resetGoalAndCosts(const Goal* const goalArg) {
-/* this fkt shall set all Costdata to unknown and the goal points to 0
-   we have to watch how to calc indices as goal only knows coords from input file
-*/
-
-// set all cost data to "unknown" (remember to change flag accordingly)
-// get lines/walls from goals
-// use linescan to ititialize cost grid
-
-}
-
-void FloorfieldViaFM::resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExits) {
+//this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
+void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Wall>& wallArg, int numOfExits) {
     std::vector<Wall> exits(wallArg.begin(), wallArg.begin()+numOfExits);
     drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
 
@@ -352,20 +337,36 @@ void FloorfieldViaFM::resetGoalAndCosts(std::vector<Wall>& wallArg, int numOfExi
         //set Trialptr to fieldelements
         trialfield[i].key = i;
         trialfield[i].flag = flag + i;              //ptr!
-        trialfield[i].cost = dist2Wall + i;         //ptr!
+        trialfield[i].cost = dist2Wall + i;         //ptr!  //this line imposes, that we calc DistancesField next
         trialfield[i].speed = speedInitial + i;     //ptr!
         trialfield[i].father = nullptr;
         trialfield[i].child = nullptr;
     }
     drawLinesOnGrid(exits, cost, 0.); //already mark targets/exits in cost array (for floorfieldcalc)
     for (long int i=0; i < grid->GetnPoints(); ++i) {
-        if (cost[i] == 0.) {
-            neggrad[i].SetX(0.);
-            neggrad[i].SetY(0.);
-            dirToWall[i].SetX(0.);
-            dirToWall[i].SetY(0.);
+        if (cost[i] == 0.) {            //here we use cost, neggrad directly
+            neggrad[i].SetX(0.);        //must be changed to costarray/neggradarray?
+            neggrad[i].SetY(0.);        //we can leave it, if we agree on cost/neggrad being
+            dirToWall[i].SetX(0.);      //default floorfield using all exits and have the
+            dirToWall[i].SetY(0.);      //array mechanic on top
         }
     }
+}
+
+void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
+    for (long int i = 0; i < grid->GetnPoints(); ++i) {
+        if (dist2Wall[i] == 0.) {    //wall
+            costarray[i]    = -7.;                          //this is done in calculateFloorfield again
+            flag[i]         = -7;      // meaning wall
+        } else {                     //inside
+            costarray[i]    = -2.;
+            flag[i]         = 0;       // meaning unknown
+        }
+    }
+}
+
+void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Wall>& GoalWallArg) {
+    drawLinesOnGrid(GoalWallArg, costarray, 0.);
 }
 
 void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside) {
@@ -550,12 +551,7 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Wall>& wallArg, double* const 
 
 } //drawLinesOnGrid
 
-void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
-
-    Trial* smallest = nullptr;
-    Trial* biggest = nullptr;
-
-    double* modifiedspeed = new double[grid->GetnPoints()];
+void FloorfieldViaFM::setSpeed(bool useDistance2Wall) {
     if (useDistance2Wall && (threshold > 0)) {
         double temp;            //needed to only slowdown band of threshold. outside of band modifiedspeed should be 1
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -577,29 +573,32 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
             }
         }
     }
+}
+
+void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray) {
+
+    Trial* smallest = nullptr;
+    Trial* biggest = nullptr;
 
     //re-init memory
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        if (dist2Wall[i] == 0.) {               //outside
-            //speedInitial[i] = .001;
-            //cost[i]         = -7.;  // @todo: ar.graf
-            flag[i]         = -7;   // -7 => outside
+        if (dist2Wall[i] == 0.) {               //wall
+            flag[i]         = -7;   // -7 => wall
         } else {                                //inside
-            //speedInitial[i] = 1.;
-            //cost[i]         = -2.;
             flag[i]         = 0;
         }
         //set Trialptr to fieldelements
         trialfield[i].key = i;
         trialfield[i].flag = flag + i;
-        trialfield[i].cost = cost + i;
+        trialfield[i].cost = costarray + i;
+        trialfield[i].neggrad = neggradarray + i;
         trialfield[i].speed = modifiedspeed + i;
         trialfield[i].father = nullptr;
         trialfield[i].child = nullptr;
     }
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        if (cost[i] == 0.) {
+        if (costarray[i] == 0.) {
             flag[i] = 3;
         }
     }
@@ -620,7 +619,6 @@ void FloorfieldViaFM::calculateFloorfield(bool useDistance2Wall) {
         trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
         checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcFloorfield(key);} );
     }
-    delete[] modifiedspeed;
 }
 
 void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if threshold negative, then ignore it
@@ -641,6 +639,12 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
     //  setting startingpoints of wave (dist2Wall = 0) is done in "parseBuilding"
 
     //  go thru dist2Wall and add every neighbor of "0"s (only if their flag is 0 and therefore "inside")
+
+    //  HINT: in resetGoalAndCosts, you find: "trialfield[i].cost = dist2Wall + i;"
+    //        so here, when we write to "cost", we truely write to "dist2Wall"
+
+    //  HINT: the argument "threshold" is used as a "stop criterion". In the constructor, when calling this,
+    //        we pass on thrsholdArg = -1, so we never enter the stop-path.
     Trial* smallest = nullptr;
     Trial* biggest = nullptr;
 
@@ -681,11 +685,6 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
             checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcDist2Wall(key);} );
         }
     }
-
-    //ignore next two lines of comments
-    //frage: wo plaziere ich das "update nachbarschaft"? beim adden eines elements? lieber nicht beim calc, da sonst eine rekursion startet
-    //bei verbesserung von single to doublesided update ... soll hier auch die nachbarschaft aktualisiert werden?
-
 } //calculateDistancField
 
 void FloorfieldViaFM::checkNeighborsAndAddToNarrowband(Trial* &smallest, Trial* &biggest, const long int key, std::function<void (const long int)> checkNeighborsAndCalc) {
@@ -736,7 +735,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     directNeighbor dNeigh = grid->getNeighbors(key);
 
     aux = dNeigh.key[0];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = dist2Wall + i; <<< set in resetGoalAndCosts
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
          (flag[aux] != 0))                                                      //gridpoint holds a calculated value
@@ -852,7 +851,7 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     directNeighbor dNeigh = grid->getNeighbors(key);
 
     aux = dNeigh.key[0];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = costarray + i; <<< set in calculateFloorfield
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
          (flag[aux] != 0) &&
@@ -864,7 +863,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
             std::cerr << "hier ist was schief " << row << " " << aux << " " << flag[aux] << std::endl;
             row = 100000;
         }
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     aux = dNeigh.key[2];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
@@ -874,11 +872,10 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     {
         row = trialfield[aux].cost[0];
         pointsRight = false;
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
 
     aux = dNeigh.key[1];
-    //hint: trialfield[i].cost = dist2Wall + i; <<< set in parseBuilding after linescan call
+    //hint: trialfield[i].cost = cost + i; <<< set in calculateFloorfield
     //flag:( 0 = unknown, 1 = singel, 2 = double, 3 = final, 4 = added to trial but not calculated, -7 = outside)
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
          (flag[aux] != 0) &&
@@ -890,7 +887,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
             std::cerr << "hier ist was schief " << col << " " << aux << " " << flag[aux] << std::endl;
             col = 100000;
         }
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     aux = dNeigh.key[3];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
@@ -900,17 +896,16 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     {
         col = trialfield[aux].cost[0];
         pointsUp = false;
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     if (col == 100000.) { //one sided update with row
         trialfield[key].cost[0] = onesidedCalc(row, grid->Gethx()/trialfield[key].speed[0]);
         trialfield[key].flag[0] = 1;
         if (pointsRight) {
-            neggrad[key].SetX(-(cost[key+1]-cost[key])/grid->Gethx());
-            neggrad[key].SetY(0.);
+            trialfield[key].neggrad[0].SetX(-(trialfield[key+1].cost[0]-trialfield[key].cost[0])/grid->Gethx());
+            trialfield[key].neggrad[0].SetY(0.);
         } else {
-            neggrad[key].SetX(-(cost[key]-cost[key-1])/grid->Gethx());
-            neggrad[key].SetY(0.);
+            trialfield[key].neggrad[0].SetX(-(trialfield[key].cost[0]-trialfield[key-1].cost[0])/grid->Gethx());
+            trialfield[key].neggrad[0].SetY(0.);
         }
         return;
     }
@@ -919,11 +914,11 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
         trialfield[key].cost[0] = onesidedCalc(col, grid->Gethy()/trialfield[key].speed[0]);
         trialfield[key].flag[0] = 1;
         if (pointsUp) {
-            neggrad[key].SetX(0.);
-            neggrad[key].SetY(-(cost[key+(grid->GetiMax())]-cost[key])/grid->Gethy());
+            trialfield[key].neggrad[0].SetX(0.);
+            trialfield[key].neggrad[0].SetY(-(trialfield[key+(grid->GetiMax())].cost[0]-trialfield[key].cost[0])/grid->Gethy());
         } else {
-            neggrad[key].SetX(0.);
-            neggrad[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
+            trialfield[key].neggrad[0].SetX(0.);
+            trialfield[key].neggrad[0].SetY(-(trialfield[key].cost[0]-trialfield[key-(grid->GetiMax())].cost[0])/grid->Gethy());
         }
         return;
     }
@@ -934,40 +929,25 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
         trialfield[key].cost[0] = precheck;
         trialfield[key].flag[0] = 2;
         if (pointsUp && pointsRight) {
-            neggrad[key].SetX(-(cost[key+1]-cost[key])/grid->Gethx());
-            neggrad[key].SetY(-(cost[key+(grid->GetiMax())]-cost[key])/grid->Gethy());
+            trialfield[key].neggrad[0].SetX(-(trialfield[key+1].cost[0]-trialfield[key].cost[0])/grid->Gethx());
+            trialfield[key].neggrad[0].SetY(-(trialfield[key+(grid->GetiMax())].cost[0]-trialfield[key].cost[0])/grid->Gethy());
         }
         if (pointsUp && !pointsRight) {
-            neggrad[key].SetX(-(cost[key]-cost[key-1])/grid->Gethx());
-            neggrad[key].SetY(-(cost[key+(grid->GetiMax())]-cost[key])/grid->Gethy());
+            trialfield[key].neggrad[0].SetX(-(trialfield[key].cost[0]-trialfield[key-1].cost[0])/grid->Gethx());
+            trialfield[key].neggrad[0].SetY(-(trialfield[key+(grid->GetiMax())].cost[0]-trialfield[key].cost[0])/grid->Gethy());
         }
         if (!pointsUp && pointsRight) {
-            neggrad[key].SetX(-(cost[key+1]-cost[key])/grid->Gethx());
-            neggrad[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
+            trialfield[key].neggrad[0].SetX(-(trialfield[key+1].cost[0]-trialfield[key].cost[0])/grid->Gethx());
+            trialfield[key].neggrad[0].SetY(-(trialfield[key].cost[0]-trialfield[key-(grid->GetiMax())].cost[0])/grid->Gethy());
         }
         if (!pointsUp && !pointsRight) {
-            neggrad[key].SetX(-(cost[key]-cost[key-1])/grid->Gethx());
-            neggrad[key].SetY(-(cost[key]-cost[key-(grid->GetiMax())])/grid->Gethy());
+            trialfield[key].neggrad[0].SetX(-(trialfield[key].cost[0]-trialfield[key-1].cost[0])/grid->Gethx());
+            trialfield[key].neggrad[0].SetY(-(trialfield[key].cost[0]-trialfield[key-(grid->GetiMax())].cost[0])/grid->Gethy());
         }
     } else {
         std::cerr << "else in twosided Floor " << precheck << " " << row << " " << col << std::endl;
     }
 }
-
-void FloorfieldViaFM::update(const long int key, double* target, double* speedlocal) {  //oblolete and NOT implemented
-    //wenn ein wert berechnet wurde bei (key), dann schaue in seiner nachbarschaft
-    //ob ein singlecalc'ed value (flag == 1) ist. dieser kann ggf. verbessert werden.
-    directNeighbor dNeigh = grid->getNeighbors(key);
-    //keine schleife, sondern jeden nachbarn separat behandeln
-    //bei singled diagonal nach berechnetem wert absuchen und mit ihm zusammen den nachbarn verbessern
-    //bei         zweitem in der linie und mit ihm zentralen diff-quotienten bilden um (nachbarn oder self) zu verbessern
-    // ich glaube: self
-    long int aux = dNeigh.key[0];
-    if ( (aux != -2) && (flag[aux] == 1) ) {
-
-    }
-
-} //update
 
 inline double FloorfieldViaFM::onesidedCalc(double xy, double hDivF) {
     //if (xy < 0) std::cerr << "error in onesided " << xy << std::endl;   //todo: performance

@@ -86,7 +86,11 @@ GradientModel::GradientModel(DirectionStrategy* dir, double nuped, double aped, 
 
 GradientModel::~GradientModel()
 {
-
+    delete over;
+    delete under;
+    delete redircnt;
+    delete slowcnt;
+    delete overlapcnt;
 }
 
 bool GradientModel::Init (Building* building)
@@ -314,11 +318,11 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      Point F_rep(0.0, 0.0);
      // x- and y-coordinate of the distance between p1 and p2
      Point distp12 = ped2->GetPos() - ped1->GetPos();
-     const Point& vp1 = ped1->GetV(); // v Ped1
-     const Point& vp2 = ped2->GetV(); // v Ped2
+     //const Point& vp1 = ped1->GetV(); // v Ped1
+     //const Point& vp2 = ped2->GetV(); // v Ped2
      Point ep12; // x- and y-coordinate of the normalized vector between p1 and p2
      //double K_ij;
-     double B_ij, f, tmp;
+     double B_ij, f; // tmp2;
      const JEllipse& E1 = ped1->GetEllipse();
      const JEllipse& E2 = ped2->GetEllipse();
      Point AP1inE1 = E1.GetCenter();
@@ -367,8 +371,8 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 //         return ep12 * (-5);
 //     }
 //--------------------------check speed diff
-//     tmp = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
-//     if (tmp < 0) {
+//     tmp2 = (vp1 - vp2).ScalarProduct(ep12); // < v_ij , e_ij >
+//     if (tmp2 < 0) {
 //          return F_rep; // ignore ped2
 //     }
 

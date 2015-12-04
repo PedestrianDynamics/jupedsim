@@ -66,7 +66,7 @@ class QuickestPathRouter: public GlobalRouter
 public:
      QuickestPathRouter();
 
-     QuickestPathRouter(int id, RoutingStrategy s):GlobalRouter(id, s) { };
+     QuickestPathRouter(int id, RoutingStrategy s):GlobalRouter(id, s) { }
 
      virtual ~QuickestPathRouter();
 

@@ -86,30 +86,12 @@ const GraphEdge * GraphNetwork::GetDestination() const
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
 
-//    ///Route Knowlegde
-
-//    if (!_RKnowlegde.GetRememberedRooms().empty())
-//    {
-//        ///Room seems to be familiar?
-//        if (!_RKnowlegde.RoomIsFamiliar((*navigation_graph)[sub_room]))
-//        {
-//            /// not familiar (go back or use other tactics)
-//            return nullptr;
-//        }
-//        else
-//        {
-//            return _RKnowlegde.NextDoorOnRoute((*navigation_graph)[sub_room]);
-//        }
-//    }
-
-//    return nullptr;
     return (*navigation_graph)[sub_room]->GetCheapestDestinationByEdges(pedestrian->GetPos());
 }
 
 const GraphEdge * GraphNetwork::GetLocalDestination()
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-//    if(pedestrian->GetID() == 4) navigation_graph->WriteToDotFile("/home/david/graph.dot");
 
     return (*navigation_graph)[sub_room]->GetLocalCheapestDestination(pedestrian->GetPos());
 }
@@ -129,14 +111,6 @@ std::vector<const GraphEdge *>& GraphNetwork::GetDestinations()
     return destinations;
 }
 
-//void GraphNetwork::CreateRouteKnowlegde(const Pedestrian *pedestrian)
-//{
-//    SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-//    NextDoorKnowlegde ndknowlegde = (*navigation_graph)[sub_room]->GetShortestPathFromHere(pedestrian->GetPos());
-
-//    _RKnowlegde = RouteKnowlegde(ndknowlegde);
-
-//}
 
 bool GraphNetwork::ChangedSubRoom() const
 {
