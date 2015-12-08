@@ -78,9 +78,11 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
           OpenFileIndividualFD();
      }
      Log->Write("------------------------Analyzing with Method D-----------------------------");
-     for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          int frid =  frameNr + minFrame;
+    	  int frameNr = ite->first;
+    	  int frid =  frameNr + minFrame;
           //padd the frameid with 0
           std::ostringstream ss;
           ss << std::setw(5) << std::setfill('0') << frid;
@@ -137,7 +139,7 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
 					   OutputVoronoiResults(polygons, str_frid, VInFrame);
 					   if(_calcIndividualFD)
 					   {
-							// if(i>beginstationary&&i<endstationary)
+							if(false==_isOneDimensional)
 							{
 								 GetIndividualFD(polygons,VInFrame, IdInFrame, _areaIndividualFD, str_frid);
 							}
@@ -203,7 +205,14 @@ bool Method_D::OpenFileIndividualFD()
      }
      else
      {
-          fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
+    	 if(_isOneDimensional)
+    	 {
+    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	headway(m)\t	Individual velocity(m/s)\n",_fps);
+    	 }
+    	 else
+    	 {
+    		 fprintf(_fIndividualFD,"#framerate:\t%.2f\n\n#Frame	\t	PedId	\t	Individual density(m^(-2))\t	Individual velocity(m/s)\n",_fps);
+    	 }
           return true;
      }
 }
@@ -554,7 +563,6 @@ bool Method_D::IsPedInGeometry(int frames, int peds, double **Xcor, double **Yco
 }
 
 void Method_D::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VInFrame, vector<int>& IdInFrame, const polygon_2d & measureArea,const string& frid)
-//double x_in, double x_out, double XPed, double XRightNeighbor, double  XLeftNeighbor)
 {
 	vector<double> measurearea_x;
 	for(unsigned int i=0;i<measureArea.outer().size();i++)
@@ -602,9 +610,14 @@ void Method_D::CalcVoronoiResults1D(vector<double>& XInFrame, vector<double>& VI
 	double VoronoiVelocity=0;
 	for(unsigned int i=0; i<XInFrame.size(); i++)
 	{
-		double ratio=getOverlapRatio(XLeftNeighbor[i], XRightNeighbor[i],left_boundary,right_boundary);
+		double ratio=getOverlapRatio((XInFrame[i]+XLeftNeighbor[i])/2.0, (XRightNeighbor[i]+XInFrame[i])/2.0,left_boundary,right_boundary);
 		VoronoiDensity+=ratio;
 		VoronoiVelocity+=(VInFrame[i]*voronoi_distance[i]*ratio*CMtoM);
+		if(_calcIndividualFD)
+		{
+			double headway=(XRightNeighbor[i] - XInFrame[i])*CMtoM;
+			fprintf(_fIndividualFD,"%s\t%d\t%.3f\t%.3f\n",frid.c_str(), IdInFrame[i], headway,VInFrame[i]);
+		}
 	}
 	VoronoiDensity/=((right_boundary-left_boundary)*CMtoM);
 	VoronoiVelocity/=((right_boundary-left_boundary)*CMtoM);

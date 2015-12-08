@@ -137,8 +137,11 @@ bool PedData::InitializeVariables(const string& filename)
      //Total number of frames
      _numFrames = *max_element(_FramesTXT.begin(),_FramesTXT.end()) - _minFrame+1;
 
+
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
+
+     /*
      vector<int> Ids_temp=_IdsTXT;
      sort (Ids_temp.begin(), Ids_temp.end());
      Ids_temp.erase(unique(Ids_temp.begin(), Ids_temp.end()), Ids_temp.end());
@@ -147,6 +150,8 @@ bool PedData::InitializeVariables(const string& filename)
           Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
           return false;
      }
+     */
+
      CreateGlobalVariables(_numPeds, _numFrames);
 
      std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
@@ -205,14 +210,14 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      }
 
      //counting the number of frames
-     int frames = 0;
+/*     int frames = 0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame")) {
           frames++;
      }
      _numFrames = frames;
      Log->Write("INFO:\tnum Frames = %d",_numFrames);
-
+*/
      //Number of agents
 
      TiXmlNode*  xHeader = xRootNode->FirstChild("header"); // header
@@ -227,7 +232,6 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           Log->Write("INFO:\tFrame rate fps: <%.2f>", _fps);
      }
 
-     CreateGlobalVariables(_numPeds, _numFrames);
 
      //processing the frames node
      TiXmlNode*  xFramesNode = xRootNode->FirstChild("frame");
@@ -237,6 +241,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      }
 
      // obtaining the minimum id and minimum frame
+     int maxFrame=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame"))
      {
@@ -244,6 +249,10 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           if(frm < _minFrame)
           {
                _minFrame = frm;
+          }
+          if(frm>maxFrame)
+          {
+        	  maxFrame=frm;
           }
           for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
                     xAgent = xAgent->NextSiblingElement("agent"))
@@ -255,10 +264,16 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                }
           }
      }
-     int frameNr=0;
+
+     _numFrames = maxFrame-_minFrame+1;
+     Log->Write("INFO:\tnum Frames = %d",_numFrames);
+
+     CreateGlobalVariables(_numPeds, _numFrames);
+
+     //int frameNr=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame")) {
-
+    	  int frameNr = atoi(xFrame->Attribute("ID")) - _minFrame;
           //todo: can be parallelized with OpenMP
           for(TiXmlElement* xAgent = xFrame->FirstChildElement("agent"); xAgent;
                     xAgent = xAgent->NextSiblingElement("agent")) {
@@ -267,6 +282,7 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                double x= atof(xAgent->Attribute("x"));
                double y= atof(xAgent->Attribute("y"));
                int ID= atoi(xAgent->Attribute("ID"))-_minID;
+
 
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;

@@ -71,9 +71,11 @@ bool Method_A::Process (const PedData& peddata,const string& scriptsLocation)
           _passLine[i] = false;
      }
      Log->Write("------------------------Analyzing with Method A-----------------------------");
-     for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
+     for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
-          int frid =  frameNr + peddata.GetMinFrame();
+    	  int frameNr = ite->first;
+    	  int frid =  frameNr + peddata.GetMinFrame();
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
