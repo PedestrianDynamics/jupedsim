@@ -1,4 +1,23 @@
 #!/usr/bin/env python
+
+"""
+Test description
+================
+The purpose of this test is to make sure that the code
+is not getting slower! The test scenario is set up such
+that the evacuation time is larger that the execution time.
+
+Remarks
+=======
+
+Remarks
+=======
+
+Source
+======
+
+"""
+
 import os
 import sys
 from sys import *
