@@ -13,10 +13,10 @@
 	
 	<measurement_areas unit="m">
         <area_B id="1" type="BoundingBox"> 
-            <vertex x="-2.00" y="0.00" /> 
-            <vertex x="-2.00" y="1.50" /> 
-            <vertex x="2.00" y="1.50" /> 
-            <vertex x="2.00" y="0.00" /> 
+            <vertex x="12.00" y="0.00" /> 
+            <vertex x="12.00" y="3.50" /> 
+            <vertex x="15.00" y="3.50" /> 
+            <vertex x="15.00" y="0.00" /> 
             <length_in_movement_direction distance="4.0" /> 
         </area_B> 
         <area_L id="2" type="Line"> 
@@ -50,7 +50,7 @@
 	</method_B>
 
 	<!-- Method C (Zhang2011a) Classical density and Vel -->
-	<method_C enabled="false">
+	<method_C enabled="true">
 		<measurement_area id="1" />
 		<plot_time_series enabled="false"/>
 	</method_C>
@@ -61,7 +61,7 @@
 		<one_dimensional enabled="false"/>
 		<plot_time_series enabled="false"/>
         <cut_by_circle enabled="false" radius="1.0" edges="10"/>
-        <output_voronoi_cells enabled="true" plot_graphs="false"/>
+        <output_voronoi_cells enabled="false" plot_graphs="false"/>
         <individual_FD enabled="false" measurement_area_id="1"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 

@@ -141,17 +141,6 @@ bool PedData::InitializeVariables(const string& filename)
      //Total number of agents
      _numPeds = *max_element(_IdsTXT.begin(),_IdsTXT.end()) - _minID+1;
 
-     /*
-     vector<int> Ids_temp=_IdsTXT;
-     sort (Ids_temp.begin(), Ids_temp.end());
-     Ids_temp.erase(unique(Ids_temp.begin(), Ids_temp.end()), Ids_temp.end());
-     if((unsigned)_numPeds!=Ids_temp.size())
-     {
-          Log->Write("Error:\tThe index of ped ID is not continuous. Please modify the trajectory file!");
-          return false;
-     }
-     */
-
      CreateGlobalVariables(_numPeds, _numFrames);
 
      std::vector<int> firstFrameIndex;  //The first frame index of each pedestrian
@@ -170,10 +159,18 @@ bool PedData::InitializeVariables(const string& filename)
           lastFrameIndex.push_back(firstFrameIndex[i] - 1);
      }
      lastFrameIndex.push_back(_IdsTXT.size() - 1);
+
      for (unsigned int i = 0; i < firstFrameIndex.size(); i++)
      {
           _firstFrame[i] = _FramesTXT[firstFrameIndex[i]] - _minFrame;
           _lastFrame[i] = _FramesTXT[lastFrameIndex[i]] - _minFrame;
+          int actual_totalframe=lastFrameIndex[i]-firstFrameIndex[i]+1;
+          int expect_totalframe=_lastFrame[i]-_firstFrame[i]+1;
+          if(actual_totalframe != expect_totalframe)
+          {
+              Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",_IdsTXT[firstFrameIndex[i]]);
+              return false;
+          }
      }
 
      for(unsigned int i = 0; i < _IdsTXT.size(); i++)
@@ -193,6 +190,7 @@ bool PedData::InitializeVariables(const string& filename)
           int t =_FramesTXT[i]- _minFrame;
           _peds_t[t].push_back(id);
      }
+
 
      return true;
 }
@@ -269,7 +267,11 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
      Log->Write("INFO:\tnum Frames = %d",_numFrames);
 
      CreateGlobalVariables(_numPeds, _numFrames);
-
+     int totalframes[_numPeds];
+     for (int i = 0; i <_numPeds; i++)
+     {
+    	 totalframes[i] = 0;
+     }
      //int frameNr=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
                xFrame = xFrame->NextSiblingElement("frame")) {
@@ -295,9 +297,22 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                {
                     _lastFrame[ID] = frameNr;
                }
+               totalframes[ID] +=1;
           }
-          frameNr++;
+          //frameNr++;
      }
+
+     for(int id = 0; id<_numPeds; id++)
+     {
+         int actual_totalframe= totalframes[id];
+         int expect_totalframe=_lastFrame[id]-_firstFrame[id]+1;
+         if(actual_totalframe != expect_totalframe)
+         {
+             Log->Write("Error:\tThe trajectory of ped with ID <%d> is not continuous. Please modify the trajectory file!",id+_minID);
+             return false;
+         }
+     }
+
      return true;
 }
 
