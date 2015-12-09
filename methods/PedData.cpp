@@ -116,7 +116,7 @@ bool PedData::InitializeVariables(const string& filename)
                     std::vector<std::string> strs;
                     boost::split(strs, line , boost::is_any_of("\t "),boost::token_compress_on);
 
-                    if(strs.size() <4)
+                    if(strs.size() < 4)
                     {
                          Log->Write("ERROR:\t There is an error in the file at line %d", lineNr);
                          return false;
@@ -126,9 +126,17 @@ bool PedData::InitializeVariables(const string& filename)
                     _FramesTXT.push_back(atoi(strs[1].c_str()));
                     xs.push_back(atof(strs[2].c_str()));
                     ys.push_back(atof(strs[3].c_str()));
-                    if(*strs[5].c_str() && _vComponent=='F')
+                    if(_vComponent=='F')
                     {
-                    	vcmp.push_back(*strs[5].c_str());
+						if(strs.size() >= 6)
+						{
+							vcmp.push_back(*strs[5].c_str());
+						}
+						else
+						{
+							Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
+							return false;
+						}
                     }
                }
                lineNr++;
@@ -202,8 +210,8 @@ bool PedData::InitializeVariables(const string& filename)
           int id = _IdsTXT[i]-_minID;
           int t =_FramesTXT[i]- _minFrame;
           _peds_t[t].push_back(id);
-     }
 
+     }
 
      return true;
 }
@@ -220,15 +228,6 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           return false;
      }
 
-     //counting the number of frames
-/*     int frames = 0;
-     for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;
-               xFrame = xFrame->NextSiblingElement("frame")) {
-          frames++;
-     }
-     _numFrames = frames;
-     Log->Write("INFO:\tnum Frames = %d",_numFrames);
-*/
      //Number of agents
 
      TiXmlNode*  xHeader = xRootNode->FirstChild("header"); // header
@@ -276,10 +275,12 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
           }
      }
 
+     //counting the number of frames
      _numFrames = maxFrame-_minFrame+1;
      Log->Write("INFO:\tnum Frames = %d",_numFrames);
 
      CreateGlobalVariables(_numPeds, _numFrames);
+
      int totalframes[_numPeds];
      for (int i = 0; i <_numPeds; i++)
      {
@@ -302,6 +303,23 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
                _peds_t[frameNr].push_back(ID);
                _xCor[ID][frameNr] =  x*M2CM;
                _yCor[ID][frameNr] =  y*M2CM;
+               if(_vComponent == 'F')
+               {
+            	   if(xAgent->Attribute("vc"))
+            	   {
+            	       _vComp[ID][frameNr] = *string(xAgent->Attribute("vc")).c_str();
+            	   }
+            	   else
+            	   {
+            		   Log->Write("ERROR:\t There is no indicator for velocity component in trajectory file or ini file!!");
+            		   return false;
+            	   }
+               }
+               else
+			  {
+				  _vComp[ID][frameNr] = _vComponent;
+			  }
+
                if(frameNr < _firstFrame[ID])
                {
                     _firstFrame[ID] = frameNr;

@@ -55,11 +55,11 @@ bool Method_C::Process (const PedData& peddata)
      _fps = peddata.GetFps();
      OpenFileMethodC();
      Log->Write("------------------------Analyzing with Method C-----------------------------");
-     //for(int frameNr = 0; frameNr < peddata.GetNumFrames(); frameNr++ )
      for(std::map<int , std::vector<int> >::iterator ite=_peds_t.begin();ite!=_peds_t.end();ite++)
      {
     	  int frameNr = ite->first;
     	  int frid = frameNr  + _minFrame;
+
           if(!(frid%100))
           {
                Log->Write("frame ID = %d",frid);
