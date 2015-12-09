@@ -386,32 +386,44 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
      //instantaneous velocity
      TiXmlNode* xVelocity=xMainNode->FirstChild("velocity");
-     if(xVelocity) {
-          string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
-          string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
-          string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
-
-          _delatTVInst = atof(FrameSteps.c_str())/2.0;
-          if(UseXComponent == "true"&&UseYComponent == "false")
-          {
-               _vComponent = 'X';
-               Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-          }
-          else if(UseXComponent == "false"&&UseYComponent == "true")
-          {
-               _vComponent = 'Y';
-               Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-          }
-          else if(UseXComponent == "true"&&UseYComponent == "true")
-          {
-               _vComponent = 'B';  // both components
-               Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
-          }
-          else
-          {
-               Log->Write("Error: \tType of velocity is not selected, please check it !!! " );
-               return false;
-          }
+     if(xVelocity)
+     {
+		  string FrameSteps = xVelocity->FirstChildElement("frame_step")->GetText();
+		  _delatTVInst = atof(FrameSteps.c_str())/2.0;
+		  TiXmlNode* xVx=xVelocity->FirstChildElement("use_x_component");
+		  TiXmlNode* xVy=xVelocity->FirstChildElement("use_y_component");
+    	 if(xVx || xVy)
+    	 {
+			  if(xVx && xVy)
+			  {
+				  string UseXComponent = xVelocity->FirstChildElement("use_x_component")->GetText();
+				  string UseYComponent = xVelocity->FirstChildElement("use_y_component")->GetText();
+				  if(UseXComponent == "true"&&UseYComponent == "false")
+				  {
+					   _vComponent = 'X';
+					   Log->Write("INFO: \tOnly x-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+				  }
+				  else if(UseXComponent == "false"&&UseYComponent == "true")
+				  {
+					   _vComponent = 'Y';
+					   Log->Write("INFO: \tOnly y-component coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+				  }
+				  else if(UseXComponent == "true"&&UseYComponent == "true")
+				  {
+					   _vComponent = 'B';  // both components
+					   Log->Write("INFO: \tBoth x and y-component of coordinates will be used to calculate instantaneous velocity over <"+FrameSteps+" frames>" );
+				  }
+			 }
+			 else
+			 {
+				   Log->Write("Error: \tType of velocity is not selected correctly, please check it !!! " );
+				   return false;
+			 }
+    	 }
+    	 else
+    	 {
+    		 _vComponent = 'F';
+    	 }
      }
 
      // method A

@@ -93,6 +93,7 @@ private:
      int *_lastFrame=NULL;    // Record the last frame of each pedestrian
      double **_xCor=NULL;
      double **_yCor=NULL;
+     char **_vComp=NULL;
 
 };
 

@@ -80,6 +80,7 @@ bool PedData::InitializeVariables(const string& filename)
 {
      vector<double> xs;
      vector<double> ys;
+     vector<char> vcmp; // the direction identification for velocity calculation
      vector<int> _IdsTXT;   // the Id data from txt format trajectory data
      vector<int> _FramesTXT;  // the Frame data from txt format trajectory data
      //string fullTrajectoriesPathName= _projectRootDir+"./"+_trajName;
@@ -125,6 +126,10 @@ bool PedData::InitializeVariables(const string& filename)
                     _FramesTXT.push_back(atoi(strs[1].c_str()));
                     xs.push_back(atof(strs[2].c_str()));
                     ys.push_back(atof(strs[3].c_str()));
+                    if(*strs[5].c_str() && _vComponent=='F')
+                    {
+                    	vcmp.push_back(*strs[5].c_str());
+                    }
                }
                lineNr++;
           }
@@ -181,6 +186,14 @@ bool PedData::InitializeVariables(const string& filename)
           double y = ys[i]*M2CM;
           _xCor[ID][frm] = x;
           _yCor[ID][frm] = y;
+          if(_vComponent == 'F')
+          {
+        	  _vComp[ID][frm] = vcmp[i];
+          }
+          else
+          {
+        	  _vComp[ID][frm] = _vComponent;
+          }
      }
 
      //save the data for each frame
@@ -364,10 +377,10 @@ vector<int> PedData::GetIdInFrame(const vector<int>& ids) const
 
 double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID, int *Tfirst, int *Tlast, double **Xcor, double **Ycor) const
 {
-
+	 char vcmp = _vComp[ID][Tnow];
      double v=0.0;
 
-     if(_vComponent == 'X')
+     if(vcmp == 'X')
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
@@ -382,7 +395,7 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
                v = _fps*CMtoM*(Xcor[ID][Tnow] - Xcor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
      }
-     if(_vComponent == 'Y')
+     if(vcmp == 'Y')
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
@@ -397,7 +410,7 @@ double PedData::GetInstantaneousVelocity(int Tnow,int Tpast, int Tfuture, int ID
                v = _fps*CMtoM*(Ycor[ID][Tnow] - Ycor[ID][Tpast])/( _deltaF);  //one dimensional velocity
           }
      }
-     if(_vComponent == 'B')
+     if(vcmp == 'B')
      {
           if((Tpast >=Tfirst[ID])&&(Tfuture <= Tlast[ID]))
           {
@@ -420,9 +433,11 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
 {
      _xCor = new double* [numPeds];
      _yCor = new double* [numPeds];
+     _vComp = new char* [numPeds];
      for (int i=0; i<numPeds; i++) {
           _xCor[i] = new double [numFrames];
           _yCor[i] = new double [numFrames];
+          _vComp[i] =new char [numFrames];
      }
      _firstFrame = new int[numPeds];  // Record the first frame of each pedestrian
      _lastFrame = new int[numPeds];  // Record the last frame of each pedestrian
@@ -431,6 +446,7 @@ void PedData::CreateGlobalVariables(int numPeds, int numFrames)
           for (int j = 0; j < numFrames; j++) {
                _xCor[i][j] = 0;
                _yCor[i][j] = 0;
+               _vComp[i][j] = 'X';
           }
           _firstFrame[i] = INT_MAX;
           _lastFrame[i] = INT_MIN;
