@@ -63,7 +63,7 @@
     <agents_distribution>
       <!--group group_id="1" agent_parameter_id="1" room_id="0" subroom_id="0" number="20" router_id="1" /-->
 	  <!--group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="1" number="20" router_id="7" /-->
-	  <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="3" number="1" router_id="7" />
+	  <group group_id="3" agent_parameter_id="1" room_id="0" subroom_id="3" number="1" router_id="1" />
 	  <!--group group_id="2" agent_parameter_id="1" room_id="0" subroom_id="16" number="20" router_id="1" /-->
     </agents_distribution>
 
@@ -92,7 +92,7 @@
 	</operational_models>
 
   <route_choice_models>
-    <router router_id="1" description="quickest">
+    <router router_id="1" description="global_shortest">
       <parameters>
 
         <!--navigation_lines file="routing.xml" /-->

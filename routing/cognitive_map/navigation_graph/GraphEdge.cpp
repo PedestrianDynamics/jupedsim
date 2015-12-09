@@ -84,9 +84,9 @@ void GraphEdge::CalcApproximateDistance()
 
 double GraphEdge::GetWeight(const Point & position) const
 {
-    //if(factors.empty()) {
-    //    return GetApproximateDistance(position);
-   // }
+//    if(factors.empty()) {
+//        return GetApproximateDistance(position);
+//    }
     //double weight = GetFactorWithDistance(GetApproximateDistance(position));
     double weight = GetFactor();// GetApproximateDistance(position) * GetFactor();
     return weight;

@@ -81,7 +81,7 @@ private:
      CognitiveMapStorage * cm_storage;
      SensorManager * sensor_manager;
 
-     /// Optional options which are supposed to be used
+     // Optional options which are supposed to be used
      optStorage options;
 
 };
