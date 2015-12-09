@@ -2,7 +2,6 @@
 #include "../../../geometry/Point.h"
 #include "../../../geometry/SubRoom.h"
 #include "../../../geometry/Building.h"
-#include "../Tools/triangle.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../visiLibity/source_code/visilibity.hpp"
 
