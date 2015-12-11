@@ -283,7 +283,7 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
         Point p;
-        ffviafm->getDirectionToDestination(ped, p);
+        ffviafm->getDirectionToFinalDestination(ped, p);
         p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
         return (p + ped->GetPos());
 
@@ -311,6 +311,7 @@ double DirectionFloorfield::GetDistance2Wall(Pedestrian* ped) const
 void DirectionFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
     //implement mechanic, that can read-in an existing floorfield (from a previous run)
     string s = building->GetGeometryFilename();
+    Log->Write("INFO: \tGeometryFilename <" + s + ">");
     s.erase(s.find_last_of(".", string::npos)); // delete ending
     if (s.find_last_of("/") != string::npos) {
         s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
@@ -323,6 +324,7 @@ void DirectionFloorfield::Init(Building* building, double stepsize, double thres
     } else {
           std::chrono::time_point<std::chrono::system_clock> start, end;
           start = std::chrono::system_clock::now();
+          Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
           ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);
           end = std::chrono::system_clock::now();
           std::chrono::duration<double> elapsed_seconds = end-start;
@@ -332,6 +334,7 @@ void DirectionFloorfield::Init(Building* building, double stepsize, double thres
 }
 
 DirectionFloorfield::DirectionFloorfield() {
+    ffviafm = nullptr;
     initDone = false;
 };
 

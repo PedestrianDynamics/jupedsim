@@ -106,6 +106,7 @@ bool AgentsSourcesManager::ProcessAllSources() const
                vector<Pedestrian*> peds;
                src->RemoveAgentsFromPool(peds,src->GetFrequency());
                Log->Write("INFO:\tSource %d generating %d agents (%d remaining)",src->GetId(),peds.size(),src->GetPoolSize());
+               Log->Write("                                                                   " + std::to_string(peds[0]->GetExitIndex()));
 
                //ComputeBestPositionRandom(src.get(), peds);
                //todo: compute the optimal position for insertion using voronoi

@@ -241,16 +241,17 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
      // because a direction is needed for this initialisation.
+     Log->Write("INFO:\t Init Operational Model starting ...");
      if(_operationalModel->Init(_building.get())==false)
           return false;
-
+     Log->Write("INFO:\t Init Operational Model done");
      //other initializations
      for (auto&& ped: _building->GetAllPedestrians()) {
           ped->Setdt(_deltaT);
      }
      _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
-
+     Log->Write("INFO:\t nPeds recieved");
      //get the seed
      _seed = args.GetSeed();
 
@@ -497,7 +498,7 @@ int Simulation::RunBody(double maxSimTime)
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-     int initialnPeds = _nPeds; 
+     int initialnPeds = _nPeds;
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
