@@ -1,6 +1,4 @@
-# Simple debug build. Requires OpenCV2 lib, therefore
-# this job can only be performed by runners with the
-# "opencv2" tag
+# Simple debug build
 before_script:
   - mkdir build && cd build/
 
