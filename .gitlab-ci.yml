@@ -1,0 +1,13 @@
+# Simple debug build. Requires OpenCV2 lib, therefore
+# this job can only be performed by runners with the
+# "opencv2" tag
+build:
+  script:
+    - mkdir build/
+    - cd build
+    - rm -rf *
+    - cmake -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug ..
+    - make -j8
+
+test:
+ - ctest -R Boost                         
