@@ -263,13 +263,13 @@ bool Line::Overlapp(const Line& l) const
      if(fabs(vecAB.Determinant(vecDC))<J_EPS)
      {
 
-          if( IsInLineSegment(l.GetPoint1()) and  not  HasEndPoint(l.GetPoint1()))
+          if( IsInLineSegment(l.GetPoint1()) &&  !HasEndPoint(l.GetPoint1()))
           {
                //Log->Write("ERROR: 1. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
                return true;
           }
 
-          if( IsInLineSegment(l.GetPoint2()) and not HasEndPoint(l.GetPoint2()))
+          if( IsInLineSegment(l.GetPoint2()) && !HasEndPoint(l.GetPoint2()))
           {
                //Log->Write("ERROR: 2. Overlapping walls %s and %s ", toString().c_str(),l.toString().c_str());
                return true;

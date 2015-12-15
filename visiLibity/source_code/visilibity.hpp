@@ -54,8 +54,8 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643
 #endif
-//#define and &&
-//#define or ||
+#define and &&
+#define or ||
 
 
 #include <cmath>      //math functions in std namespace

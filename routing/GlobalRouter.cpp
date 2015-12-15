@@ -1051,7 +1051,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           int room_id = from_AP->GetConnectingRoom1();
           int room_id1=from_AP->GetConnectingRoom2();
 
-          if ( (IsElementInVector(rooms_ids, room_id) == false) and (IsElementInVector(rooms_ids, room_id1) == false) )
+          if ( (IsElementInVector(rooms_ids, room_id) == false) && (IsElementInVector(rooms_ids, room_id1) == false) )
                continue;
           double px = from_AP->GetCentre().GetX();
           double py = from_AP->GetCentre().GetY();
@@ -1585,7 +1585,8 @@ double GlobalRouter::MinAngle(const Point& p1, const Point& p2, const Point& p3)
 
      if(fabs(alpha+beta+gamma-M_PI)<J_EPS)
      {
-          return std::min({alpha, beta, gamma}) * (180.0 / M_PI);
+		  std::vector<double> vec = { alpha, beta, gamma };
+          return *std::min_element(vec.begin(), vec.end()) * (180.0 / M_PI);
      }
      else
      {

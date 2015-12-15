@@ -41,6 +41,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <cassert>       //assertions
 
 
+
 ///Hide helping functions in unnamed namespace (local to .C file).
 namespace
 {

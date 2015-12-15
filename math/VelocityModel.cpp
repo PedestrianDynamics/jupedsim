@@ -34,6 +34,7 @@
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
 
+
 #include "VelocityModel.h"
 
 #ifdef _OPENMP
@@ -322,7 +323,7 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
             // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
             return  my_pair(distp12.Norm(), condition1); 
       else
-            return  my_pair(std::numeric_limits<double>::max(), condition1);
+            return  my_pair(FLT_MAX, condition1);
 }      
 Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodic) const
 {      
