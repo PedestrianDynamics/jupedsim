@@ -33,6 +33,7 @@
 #include <sstream>
 #include <fstream>
 #include <limits>
+#include <chrono>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -366,9 +367,18 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
                 }
 
                 setNewGoalAfterTheClear(localcostptr, localline);
+                //performance-measurement:
+                auto start = std::chrono::steady_clock::now();
+
                 calculateFloorfield(localcostptr, localneggradptr);
+
+                //performance-measurement:
+                auto end = std::chrono::steady_clock::now();
+                auto diff = end - start;
+                std::cerr << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << std::endl;
                 //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
-                Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
+                //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
+                Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ));
 
                 //find closest door and add to cheatmap "goalToLineUID" map
                 const std::map<int, Transition*>& transitions = building->GetAllTransitions();

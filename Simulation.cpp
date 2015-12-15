@@ -492,7 +492,8 @@ int Simulation::RunBody(double maxSimTime)
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
-
+     //only for debug: ar.graf
+     writeInterval = 500;
      //process the queue for incoming pedestrians
      //important since the number of peds is used
      //to break the main simulation loop

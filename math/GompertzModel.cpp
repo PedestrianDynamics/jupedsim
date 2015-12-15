@@ -97,7 +97,7 @@ bool GompertzModel::Init (Building* building)
               return false;
          }
 
-         ped->InitV0(target); 
+         ped->InitV0(target);
 
          JEllipse E = ped->GetEllipse();
          E.SetCosPhi(cosPhi);
@@ -155,6 +155,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
+                #pragma omp critical
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
                 int size = (int) neighbours.size();
@@ -205,7 +206,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point v_neu = ped->GetV() + result_acc[p - start] * deltaT;
                 Point pos_neu = ped->GetPos() + v_neu * deltaT;
-               
+
                 if( (v_neu.Norm() > 1.2*ped->GetV0Norm() )) { // Stop pedestrians if the velocity is too high
                       //Log->Write("WARNING: \tped %d is stopped because v=%f (v0=%f)\n", ped->GetID(), v_neu.Norm(), ped->GetV0Norm());
                      v_neu = v_neu*0.01;
@@ -218,7 +219,7 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 } else {
                      ped->UpdateTimeInJam();
                 }
-                
+
                 //only update the position if the velocity is above a threshold
                 //if (v_neu.Norm() >= J_EPS_V*0.7)
                 {
@@ -244,7 +245,7 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      Point e0;
      const Point& pos = ped->GetPos();
      double dist = ped->GetExitLine()->DistTo(pos);
-    
+
      // check if the molified version works
      if (dist > J_EPS_GOAL) {
           e0 = ped->GetV0(target);
@@ -257,7 +258,7 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
             printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
      }
       F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
-  
+
       //double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
 
 // #if DEBUG
@@ -329,15 +330,15 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      B_ij = exp(-b*exp(-c*B_ij));
      //TODO: check if we need K_ij in the  f
      //f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * K_ij * B_ij;
-    
+
      f = -ped1->GetMass() * _nuPed * ped1->GetV0Norm() * B_ij;
 
      F_rep = ep12 * f;
      if(ped1->GetID() ==-4) {
           printf("\nNAN return ----> p1=%d p2=%d pos1=%f %f, pos2=%f %f\n", ped1->GetID(),
                  ped2->GetID(), ped1->GetPos().GetX(), ped1->GetPos().GetY(),  ped2->GetPos().GetX(), ped2->GetPos().GetY());
-                 
-     
+
+
           printf("F=[%f, %f] v0=%f, nu=%f, B_ij=%f D=%f, r1=%f, r2=%f\n", F_rep.GetX(), F_rep.GetY(), ped1->GetV0Norm(), _nuPed, B_ij, Distance, r1, r2);
      }
 //check isNan
@@ -436,7 +437,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
           // Log->Write("WARNING:\t Gompertz: forceRepWall() ped %d is too near to the wall",ped->GetID());
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
-          
+
           e_iw = (inside ? new_dist:new_dist*-1);
           // Distance = EPS;
           // Log->Write("INFO:\t\t --- dist = %f, e= %f %f inside=%d",ped->GetID(), Distance, e_iw.GetX(), e_iw.GetY(), inside);

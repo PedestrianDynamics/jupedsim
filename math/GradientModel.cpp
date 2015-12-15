@@ -155,8 +155,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
      int partSize;
      partSize = (int) (nSize / nThreads);
 
-      #pragma omp parallel  default(shared) num_threads(nThreads)
-      {
+//      #pragma omp parallel  default(shared) num_threads(nThreads)
+//      {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);
 
@@ -167,6 +167,10 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
            end = (threadID + 1) * partSize - 1;
            if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
 
+//DEBUG start
+           start = 0;
+           end = nSize;
+//DEBUG end
            for (int p = start; p <= end; ++p) {
 
                 Pedestrian* ped = allPeds[p];
@@ -189,10 +193,13 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
+                int size;
+//                #pragma omp critical
+//                {
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
-                int size = (int) neighbours.size();
-
+                size = (int) neighbours.size();
+//                }
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
                      //if they are in the same subroom
@@ -275,7 +282,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetPhiPed();
            }
 
-      }//end parallel
+//      }//end parallel
       //std::cerr << "Over : Under  " << *over << " : " << *under << "    (" << *redircnt << ")" << "    (" << *slowcnt << ")" << "    (" << *overlapcnt << ")" << std::endl;
 }
 
