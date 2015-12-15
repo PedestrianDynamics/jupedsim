@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 #### JPSCORE
+- Compilation checked on Visual Studio 12 2013 
 - Added more validation tests
 - Added statistics (calculate exit usage) for all exits
 - Added voronoi based algorithm for inserting agents coming from the source or from matsim
