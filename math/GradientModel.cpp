@@ -169,7 +169,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
 //DEBUG start
            start = 0;
-           end = nSize;
+           end = nSize-1; // loop till p<= end !!!
 //DEBUG end
            for (int p = start; p <= end; ++p) {
 
