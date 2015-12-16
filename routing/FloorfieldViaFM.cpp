@@ -708,8 +708,8 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const 
 
         deltaX = (int) (iEnd - iStart);
         deltaY = (int) (jEnd - jStart);
-        deltaX1 = fabs( (int) (iEnd - iStart));
-        deltaY1 = fabs( (int) (jEnd - jStart));
+        deltaX1 = abs( (int) (iEnd - iStart));
+        deltaY1 = abs( (int) (jEnd - jStart));
 
         px = 2*deltaY1 - deltaX1;
         py = 2*deltaX1 - deltaY1;
