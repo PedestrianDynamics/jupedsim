@@ -1,13 +1,11 @@
-# Simple debug build. Requires OpenCV2 lib, therefore
-# this job can only be performed by runners with the
-# "opencv2" tag
+# compile jpscore and run light tests
+before_script:
+   - mkdir build && cd build/
+
 build:
   script:
-    - mkdir build/
-    - cd build
-    - rm -rf *
-    - cmake -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug ..
-    - make -j8
+    - cmake .. -DBUILD_TESTING=ON
+    - make -j$(nproc)     
 
 test:
  - ctest -R Boost                         
