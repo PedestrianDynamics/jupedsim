@@ -1,4 +1,4 @@
-`jpscore` command line simulation core.
+`jpscore` command line simulation core for JuPedSim.
 
 Features
 ========
