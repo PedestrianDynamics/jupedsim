@@ -1,12 +1,4 @@
-JuPedSim v0.6 alpha
-====================
-
-Ulrich Kemloh drafted this on 25 Jun 2014
-
-We are proud to announce the first alpha release of our software JuPedSim for simulating pedestrians evacuations. Please note that it is a pre release version for developers only. We are working hard towards the final release for this version. Two modules are shipped with this pre-release:
-
-- *jpscore*: command line simulation core
-- *jpsvis*: visualization module
+`jpscore` command line simulation core.
 
 Features
 ========
@@ -92,7 +84,7 @@ Frequently Asked Questions
 www.jupedsim.org and the contact is info at jupedsim.org. You will find more information on the working group and other tools and experimental pedestrians data we have been collecting over the years.
 
 - Where is the official repository?
-JuPedSim is developed at the Forschungszentrum Jülich in Germany and the bleeding edge code is in their intern git repository. At the moment only specific tags are pushed to GitHub.
+JuPedSim is developed at the Forschungszentrum JÃ¼lich in Germany and the bleeding edge code is in their intern git repository. At the moment only specific tags are pushed to GitHub.
 
 - Is there a manual?
 Of course, the user's guide is found in the downloaded archive.
@@ -102,4 +94,3 @@ We are actually setting up verification and validation tests. Some verification 
 
 - How can I contribute to JuPedSim?
 Testing and reporting bugs will be great. If you may want to contribute actively to the code, by implementing new models and/or features, you are welcome to do so.
-
