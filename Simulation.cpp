@@ -303,8 +303,8 @@ void Simulation::UpdateRoutesAndLocations()
      int nThreads = omp_get_max_threads();
      int partSize = nSize / nThreads;
 
-#pragma omp parallel  default(shared) num_threads(nThreads)
-     {
+//#pragma omp parallel  default(shared) num_threads(nThreads)
+//     {
           const int threadID = omp_get_thread_num();
           int start = threadID * partSize;
           int end = (threadID + 1) * partSize - 1;
@@ -319,12 +319,12 @@ void Simulation::UpdateRoutesAndLocations()
                //set the new room if needed
                if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
                          && (room->GetCaption() == "outside")) {
-#pragma omp critical
+//#pragma omp critical
                     pedsToRemove.push_back(ped);
                } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                          && (goals.at(ped->GetFinalDestination())->Contains(
                                    ped->GetPos()))) {
-#pragma omp critical
+//#pragma omp critical
                     pedsToRemove.push_back(ped);
                }
 
@@ -378,7 +378,7 @@ void Simulation::UpdateRoutesAndLocations()
                     }
 
                     if (!assigned) {
-#pragma omp critical
+//#pragma omp critical
                          pedsToRemove.push_back(ped);
                          //the agent left the old room
                          //actualize the eggress time for that room
@@ -392,11 +392,11 @@ void Simulation::UpdateRoutesAndLocations()
                     //a destination could not be found for that pedestrian
                     Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
                     //exit(EXIT_FAILURE);
-#pragma omp critical
+//#pragma omp critical
                     pedsToRemove.push_back(ped);
                }
           }
-     }
+//     } //omp parallel
 
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
