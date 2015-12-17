@@ -215,7 +215,7 @@ bool SubRoom::AddTransition(Transition* line)
 
 void SubRoom::AddNeighbor(SubRoom* sub)
 {
-     if(sub and (IsElementInVector(_neighbors, sub)==false))
+     if(sub && (IsElementInVector(_neighbors, sub)==false))
      {
           _neighbors.push_back(sub);
      }
@@ -586,7 +586,7 @@ bool SubRoom::SanityCheck()
                     exit(EXIT_FAILURE);
                     //return false;
                }
-               connected=connected or w1.ShareCommonPointWith(w2);
+               connected=connected || w1.ShareCommonPointWith(w2);
           }
           //overlapping with lines
           for(auto&& hline: _hlines)
@@ -607,7 +607,7 @@ bool SubRoom::SanityCheck()
                     exit(EXIT_FAILURE);
                     //return false;
                }
-               connected=connected or w1.ShareCommonPointWith(*c);
+               connected=connected || w1.ShareCommonPointWith(*c);
           }
           //overlaping with transitions
           for(auto&& t: _transitions)
@@ -618,10 +618,10 @@ bool SubRoom::SanityCheck()
                     exit(EXIT_FAILURE);
                     //return false;
                }
-               connected=connected or w1.ShareCommonPointWith(*t);
+               connected=connected || w1.ShareCommonPointWith(*t);
           }
 
-          if(not connected)
+          if(!connected)
           {
                Log->Write("ERROR: loose wall found %s  in Room/Subroom %d/%d",w1.toString().c_str(),_roomID,_id);
                exit(EXIT_FAILURE);

@@ -972,7 +972,7 @@ bool Building::IsVisible(const Point& p1, const Point& p2, const std::vector<Sub
      {
           for(auto&& sub: subrooms)
           {
-               if(sub and sub->IsVisible(p1,p2,considerHlines)==false) return false;
+               if(sub && sub->IsVisible(p1,p2,considerHlines)==false) return false;
           }
      }
 

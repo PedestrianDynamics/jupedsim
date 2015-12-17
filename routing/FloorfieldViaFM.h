@@ -37,6 +37,7 @@
 
 #include <vector>
 #include <cmath>
+#include <functional>
 #include "mesh/RectGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/Point.h"
