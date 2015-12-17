@@ -6,6 +6,4 @@ build:
   script:
     - cmake .. -DBUILD_TESTING=ON
     - make -j$(nproc)     
-
-test:
- - ctest -R Boost                         
+    - ctest -R Boost                         
