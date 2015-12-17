@@ -101,8 +101,8 @@ message(STATUS "")
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 # message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
-include_directories(/home0/ar.graf/include)
-link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
+# include_directories(/home0/ar.graf/include)
+# link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
@@ -399,8 +399,8 @@ endif(CGAL_FOUND)
 #message(STATUS "Protocol buffer library found")
 
 #include_directories(${PROTOBUF_INCLUDE_DIRS})
-include_directories(/home0/ar.graf/include)
-link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
+#include_directories(/home0/ar.graf/include)
+#link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
 message("libs added")
 
 set (hybrid_source_files
