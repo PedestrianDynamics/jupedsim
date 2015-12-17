@@ -2,7 +2,7 @@
 before_script:
   - mkdir build && cd build/
 
-compile_jpscore:
+jpscore:
   script:
     - cmake .. -DBUILD_TESTING=ON
     - make -j$(nproc) 
