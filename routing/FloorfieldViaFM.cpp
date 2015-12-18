@@ -32,6 +32,14 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <limits>
+
+#ifdef _OPENMP
+#include <omp.h>
+#else
+#define omp_get_thread_num() 0
+#define omp_get_max_threads()  1
+#endif
 
 FloorfieldViaFM::FloorfieldViaFM()
 {
@@ -47,10 +55,19 @@ FloorfieldViaFM::~FloorfieldViaFM()
     if (dist2Wall) delete[] dist2Wall;
     if (speedInitial) delete[] speedInitial;
     if (modifiedspeed) delete[] modifiedspeed;
-    if (cost) delete[] cost;
-    if (neggrad) delete[] neggrad;
+    //if (cost) delete[] cost;
+    //if (neggrad) delete[] neggrad;
     if (dirToWall) delete[] dirToWall;
     if (trialfield) delete[] trialfield;
+    for ( const auto& goalid : goalcostmap) {
+        if (goalid.second) delete[] goalid.second;
+    }
+    for ( const auto& id : costmap) {
+        //if (id.first == -1) continue;
+        if (id.second) delete[] id.second;
+        if (neggradmap.at(id.first)) delete[] neggradmap.at(id.first);
+        //map will be deleted by itself
+    }
 
 }
 
@@ -58,25 +75,49 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
                                  const double wallAvoidDistance, const bool useDistancefield, const std::string& filename) {
     //ctor
     threshold = -1; //negative value means: ignore threshold
-    threshold = wallAvoidDistance; //@todo: ar.graf wallavoid, alpha_r and alpha_s must be taken into consideration here!
+    threshold = wallAvoidDistance;
+    building = buildingArg;
 
     if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
     //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
+    Log->Write("INFO: \tStart Parsing: Building");
     parseBuilding(buildingArg, hxArg, hyArg);
-
+    Log->Write("INFO: \tFinished Parsing: Building");
     //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
-    prepareForDistanceFieldCalculation(wall, numOfExits);
+    prepareForDistanceFieldCalculation(wall);
+    Log->Write("INFO: \tGrid initialized: Walls");
 
     calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
+    Log->Write("INFO: \tGrid initialized: Walldistances");
 
-    //testoutput("AADistanceField.vtk","AADistanceField.txt", dist2Wall);
-    //std::cout<< "Test (50/101): " << grid->getKeyAtXY(50., 101.) << " " << grid->get_x_fromKey(grid->getKeyAtXY(50., 101.)) << " " << grid->get_y_fromKey(grid->getKeyAtXY(50., 101.)) << std::endl;
     setSpeed(useDistancefield); //use distance2Wall
+    Log->Write("INFO: \tGrid initialized: Speed");
     calculateFloorfield(cost, neggrad);
 
+//    Point dummy = Point(0., 0.);
+//    int i;
+//    Pedestrian* dummyped = new Pedestrian();
+//    //NavLine* dummynavline;
+//    dummyped->SetPos(grid->getPointFromKey(0), true);
+//    for (auto& element : neggradmap) {     // this loop is only to calc all floorfields before going parallel
+//        i = element.first;
+//        if (i > 0) {
+//            dummyped->SetExitIndex(i);
+//            //dummynavline = new NavLine( (Line) *(buildingArg->GetTransition(i)) );
+//            dummyped->SetExitLine( buildingArg->GetTransition(i) );
+//            //delete dummynavline;
+//            getDirectionToDestination(dummyped, dummy);
+//        }
+//    }
+////    for (auto& element : goalneggradmap) { // this loop is only to calc all goalfields beforehand
+////        i = element.first;
+////        dummyped->SetFinalDestination(i);
+////        getDirectionToFinalDestination(dummyped, dummy);
+////    }
+//    delete dummyped;
     //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
-    writeFF(filename);
+    //writeFF(filename);        //writing FF-file disabled until extending is complete ( @todo: argraf )
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
@@ -199,22 +240,163 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     file.close();
 }
 
-//FloorfieldViaFM::FloorfieldViaFM(const FloorfieldViaFM& other)
-//{
-//    //copy ctor
-//}
-
-//FloorfieldViaFM& FloorfieldViaFM::operator=(const FloorfieldViaFM& rhs)
-//{
-//    if (this == &rhs) return *this; // handle self assignment     //@todo: ar.graf change this pasted code to proper code
-//    //assignment operator
-//    return *this;
-//}
-
+// getDirectionAt(...,...) <- obsolete (back when there was just one floorfield); delete soon
 void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
     direction.SetX(neggrad[key].GetX());
     direction.SetY(neggrad[key].GetY());
+}
+
+// getDirectionToDestination(int, Point&, Point&) <- obsolete (plz do not use this one); delete soon
+//void FloorfieldViaFM::getDirectionToDestination(const int destID, const Point& position, Point& direction){
+//    long int key = grid->getKeyAtPoint(position);
+//    Point* localneggradptr = neggradmap.at(destID);
+//    double* localcostptr = costmap.at(destID);
+//    if (localneggradptr == nullptr) {
+//        //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+//        localcostptr =    new double[grid->GetnPoints()];
+//        localneggradptr = new Point[grid->GetnPoints()];
+//        neggradmap.erase(destID);
+//        neggradmap.emplace(destID, localneggradptr);
+//        costmap.erase(destID);
+//        costmap.emplace(destID, localcostptr);
+//        //create ff (prepare Trial-mechanic, then calc)
+//        for (long int i = 0; i < grid->GetnPoints(); ++i) {
+//            //set Trialptr to fieldelements
+//            trialfield[i].cost = localcostptr + i;
+//            trialfield[i].neggrad = localneggradptr + i;
+//            trialfield[i].father = nullptr;
+//            trialfield[i].child = nullptr;
+//        }
+//        clearAndPrepareForFloorfieldReCalc(localcostptr);
+//        std::vector<Line> localline = {Line(/* todo argraf */)};
+//        setNewGoalAfterTheClear(localcostptr, localline);
+//        calculateFloorfield(localcostptr, localneggradptr);
+//        std::cerr << "new Floorfield " << destID << "   :    " << localcostptr << std::endl;
+//    }
+//    direction.SetX(localneggradptr[key].GetX());
+//    direction.SetY(localneggradptr[key].GetY());
+//}
+
+void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& direction){
+    const Point& position = ped->GetPos();
+    int destID = ped->GetExitIndex();
+
+    //what if goal == -1, meaning closest exit... is GetExitIndex then -1?
+    //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
+    long int key = grid->getKeyAtPoint(position);
+    Point* localneggradptr;
+    double* localcostptr;
+    #pragma omp critical
+    {
+        if (neggradmap.count(destID) == 0) {
+            neggradmap.emplace(destID, nullptr);
+            costmap.emplace(destID, nullptr);
+        }
+        localneggradptr = neggradmap.at(destID);
+        localcostptr = costmap.at(destID);
+        if (localneggradptr == nullptr) {
+                //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+                localcostptr =    new double[grid->GetnPoints()];
+                localneggradptr = new Point[grid->GetnPoints()];
+                neggradmap.erase(destID);
+                neggradmap.emplace(destID, localneggradptr);
+                costmap.erase(destID);
+                costmap.emplace(destID, localcostptr);
+                //create ff (prepare Trial-mechanic, then calc)
+                for (long int i = 0; i < grid->GetnPoints(); ++i) {
+                    //set Trialptr to fieldelements
+                    trialfield[i].cost = localcostptr + i;
+                    trialfield[i].neggrad = localneggradptr + i;
+                    trialfield[i].father = nullptr;
+                    trialfield[i].child = nullptr;
+                }
+                clearAndPrepareForFloorfieldReCalc(localcostptr);
+                std::vector<Line> localline = {Line((Line) *(ped->GetExitLine()))};
+                setNewGoalAfterTheClear(localcostptr, localline);
+                calculateFloorfield(localcostptr, localneggradptr);
+                //std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
+                Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
+        }
+    }
+    direction.SetX(localneggradptr[key].GetX());
+    direction.SetY(localneggradptr[key].GetY());
+}
+
+void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& direction){
+    const Point& position = ped->GetPos();
+    const int goalID = ped->GetFinalDestination();
+    long int key = grid->getKeyAtPoint(position);
+    Point* localneggradptr;
+    double* localcostptr;
+
+    #pragma omp critical
+    {
+        if (goalcostmap.count(goalID) == 0) { //no entry for goalcostmap, so we need to calc FF
+            goalcostmap.emplace(goalID, nullptr);
+            goalneggradmap.emplace(goalID, nullptr);
+            goalToLineUIDmap.emplace(goalID, -1);
+        }
+        localneggradptr = goalneggradmap.at(goalID);
+        localcostptr = goalcostmap.at(goalID);
+        if (localneggradptr == nullptr) {
+                //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+                localcostptr =    new double[grid->GetnPoints()];
+                localneggradptr = new Point[grid->GetnPoints()];
+                goalneggradmap.erase(goalID);
+                goalneggradmap.emplace(goalID, localneggradptr);
+                goalcostmap.erase(goalID);
+                goalcostmap.emplace(goalID, localcostptr);
+                //create ff (prepare Trial-mechanic, then calc)
+                for (long int i = 0; i < grid->GetnPoints(); ++i) {
+                    //set Trialptr to fieldelements
+                    trialfield[i].cost = localcostptr + i;
+                    trialfield[i].neggrad = localneggradptr + i;
+                    trialfield[i].father = nullptr;
+                    trialfield[i].child = nullptr;
+                }
+                clearAndPrepareForFloorfieldReCalc(localcostptr);
+
+                //get all lines/walls of goalID
+                std::vector<Line> localline;
+                const std::map<int, Goal*>& allgoals = building->GetAllGoals();
+                std::vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
+                for (const auto& iwall:localwalls) {
+                    localline.emplace_back( Line( (Line) iwall ) );
+                }
+
+                setNewGoalAfterTheClear(localcostptr, localline);
+                calculateFloorfield(localcostptr, localneggradptr);
+                //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
+                Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
+
+                //find closest door and add to cheatmap "goalToLineUID" map
+                const std::map<int, Transition*>& transitions = building->GetAllTransitions();
+                int UID_of_MIN = -1;
+                double cost_of_MIN = DBL_MAX;
+                long int dummykey;
+                for (const auto& loctrans : transitions) {
+                    dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
+                    if (cost_of_MIN > localcostptr[dummykey]) {
+                        UID_of_MIN = loctrans.first;
+                        cost_of_MIN = localcostptr[dummykey];
+                    }
+                }
+                goalToLineUIDmap.erase(goalID);
+                goalToLineUIDmap.emplace(goalID, UID_of_MIN);
+        }
+    }
+    direction.SetX(localneggradptr[key].GetX());
+    direction.SetY(localneggradptr[key].GetY());
+}
+
+double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) { //not implemented: trigger calc of new ff not working yet
+    if (costmap.at(destID) == nullptr) {
+        Point dummy;
+        return -1.0;
+        //getDirectionToDestination(destID, position, dummy);         //this call induces the floorfieldcalculation
+    }
+    return costmap.at(destID)[grid->getKeyAtPoint(position)];
 }
 
 void FloorfieldViaFM::getDir2WallAt(const Point& position, Point& direction){
@@ -229,11 +411,15 @@ double FloorfieldViaFM::getDistance2WallAt(const Point& position) {
 }
 
 void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const double stepSizeX, const double stepSizeY) {
+    building = buildingArg;
     //init min/max before parsing
     double xMin = FLT_MAX;
     double xMax = -FLT_MAX;
     double yMin = xMin;
     double yMax = xMax;
+    costmap.clear();
+    neggradmap.clear();
+
     //create a list of walls
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
@@ -242,13 +428,25 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             //((trans.second->GetRoom2()) && (trans.second->GetRoom2()->GetID() == -1)) ||
             //(trans.second->GetCaption().compare("main exit") == 0) ||
             //(trans.second->GetType().compare("emergency") == 0)
-            trans.second->IsExit()
+            trans.second->IsExit() && trans.second->IsOpen()
            )
         {
-            wall.emplace_back(Wall( trans.second->GetPoint1()*GEO_UP_SCALE, trans.second->GetPoint2()*GEO_UP_SCALE ));
+            //wall.emplace_back(Line( trans.second->GetPoint1(), trans.second->GetPoint2() ));
+            wall.emplace_back(Line ( (Line) *(trans.second)));
         }
+        //populate both maps: costmap, neggradmap. These are the lookup maps for floorfields to specific transitions
+        //plan: add pair of (id, nullptr). if a map-element is accessed, then we check if nullptr (then create FF) or if
+        //                                                                                ptr to memory, then return ptr
+        costmap.emplace(trans.second->GetUniqueID(), nullptr);
+        neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
     numOfExits = wall.size();
+    for (auto& trans : allTransitions) {
+        if (!trans.second->IsOpen()) {
+            wall.emplace_back(Line ( (Line) *(trans.second)));
+        }
+
+    }
     for (const auto& itRoom : buildingArg->GetAllRooms()) {
         for (const auto& itSubroom : itRoom.second->GetAllSubRooms()) {
             std::vector<Obstacle*> allObstacles = itSubroom.second->GetAllObstacles();
@@ -256,42 +454,62 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    wall.emplace_back(Wall( (*itObsWall).GetPoint1()*GEO_UP_SCALE, (*itObsWall).GetPoint2()*GEO_UP_SCALE ));
-
+                    //wall.emplace_back(Line( (*itObsWall).GetPoint1(), (*itObsWall).GetPoint2() ));
+                    wall.emplace_back(Line( (Line) *itObsWall));
                     // xMin xMax
-                    if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE > xMax) xMax = (*itObsWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE > xMax) xMax = (*itObsWall).GetPoint2().GetX()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
+                    if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
+                    if ((*itObsWall).GetPoint1().GetX() > xMax) xMax = (*itObsWall).GetPoint1().GetX();
+                    if ((*itObsWall).GetPoint2().GetX() > xMax) xMax = (*itObsWall).GetPoint2().GetX();
 
                     // yMin yMax
-                    if ((*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE < yMin) yMin = (*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE < yMin) yMin = (*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE > yMax) yMax = (*itObsWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                    if ((*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE > yMax) yMax = (*itObsWall).GetPoint2().GetY()*GEO_UP_SCALE;
+                    if ((*itObsWall).GetPoint1().GetY() < yMin) yMin = (*itObsWall).GetPoint1().GetY();
+                    if ((*itObsWall).GetPoint2().GetY() < yMin) yMin = (*itObsWall).GetPoint2().GetY();
+                    if ((*itObsWall).GetPoint1().GetY() > yMax) yMax = (*itObsWall).GetPoint1().GetY();
+                    if ((*itObsWall).GetPoint2().GetY() > yMax) yMax = (*itObsWall).GetPoint2().GetY();
                 }
             }
 
             std::vector<Wall> allWalls = itSubroom.second->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
-                wall.emplace_back( Wall((*itWall).GetPoint1()*GEO_UP_SCALE, (*itWall).GetPoint2()*GEO_UP_SCALE) );
+                wall.emplace_back( Line( (Line) *itWall));
+                //wall.emplace_back( Line((*itWall).GetPoint1(), (*itWall).GetPoint2()) );
                 //std::cout << &(*itWall) << std::endl;
                 //std::cout << wall[0].GetPoint1().GetX() << std::endl;
 
                 // xMin xMax
-                if ((*itWall).GetPoint1().GetX()*GEO_UP_SCALE < xMin) xMin = (*itWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetX()*GEO_UP_SCALE < xMin) xMin = (*itWall).GetPoint2().GetX()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint1().GetX()*GEO_UP_SCALE > xMax) xMax = (*itWall).GetPoint1().GetX()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetX()*GEO_UP_SCALE > xMax) xMax = (*itWall).GetPoint2().GetX()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
+                if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
+                if ((*itWall).GetPoint1().GetX() > xMax) xMax = (*itWall).GetPoint1().GetX();
+                if ((*itWall).GetPoint2().GetX() > xMax) xMax = (*itWall).GetPoint2().GetX();
 
                 // yMin yMax
-                if ((*itWall).GetPoint1().GetY()*GEO_UP_SCALE < yMin) yMin = (*itWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetY()*GEO_UP_SCALE < yMin) yMin = (*itWall).GetPoint2().GetY()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint1().GetY()*GEO_UP_SCALE > yMax) yMax = (*itWall).GetPoint1().GetY()*GEO_UP_SCALE;
-                if ((*itWall).GetPoint2().GetY()*GEO_UP_SCALE > yMax) yMax = (*itWall).GetPoint2().GetY()*GEO_UP_SCALE;
+                if ((*itWall).GetPoint1().GetY() < yMin) yMin = (*itWall).GetPoint1().GetY();
+                if ((*itWall).GetPoint2().GetY() < yMin) yMin = (*itWall).GetPoint2().GetY();
+                if ((*itWall).GetPoint1().GetY() > yMax) yMax = (*itWall).GetPoint1().GetY();
+                if ((*itWall).GetPoint2().GetY() > yMax) yMax = (*itWall).GetPoint2().GetY();
             }
         }
     }
+
+    //all goals
+    const std::map<int, Goal*>& allgoals = buildingArg->GetAllGoals();
+    for (auto eachgoal:allgoals) {
+        for (auto& eachwall:eachgoal.second->GetAllWalls() ) {
+            if (eachwall.GetPoint1().GetX() < xMin) xMin = eachwall.GetPoint1().GetX();
+            if (eachwall.GetPoint2().GetX() < xMin) xMin = eachwall.GetPoint2().GetX();
+            if (eachwall.GetPoint1().GetX() > xMax) xMax = eachwall.GetPoint1().GetX();
+            if (eachwall.GetPoint2().GetX() > xMax) xMax = eachwall.GetPoint2().GetX();
+
+            if (eachwall.GetPoint1().GetY() < yMin) yMin = eachwall.GetPoint1().GetY();
+            if (eachwall.GetPoint2().GetY() < yMin) yMin = eachwall.GetPoint2().GetY();
+            if (eachwall.GetPoint1().GetY() > yMax) yMax = eachwall.GetPoint1().GetY();
+            if (eachwall.GetPoint2().GetY() > yMax) yMax = eachwall.GetPoint2().GetY();
+        }
+        goalcostmap.emplace(eachgoal.second->GetId(), nullptr);
+        goalneggradmap.emplace(eachgoal.second->GetId(), nullptr);
+    }
+
     //create Rect Grid
     grid = new RectGrid();
     grid->setBoundaries(xMin, yMin, xMax, yMax);
@@ -308,11 +526,10 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     dirToWall = new Point[grid->GetnPoints()];
     trialfield = new Trial[grid->GetnPoints()];                 //created with other arrays, but not initialized yet
 
-    //linescan using (std::vector<Wall*>)
-    //lineScan(wall, dist2Wall, 0., -3.);
+    costmap.emplace(-1 , cost);                         // enable default ff (closest exit)
+    neggradmap.emplace(-1, neggrad);
 
-    //DRAWLINES-Mechanism
-    //init grid with -3 as used in lineScan mechanic
+    //init grid with -3 as unknown distance to any wall
     for(long int i = 0; i < grid->GetnPoints(); ++i) {
         dist2Wall[i] = -3.;
     }
@@ -320,8 +537,8 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 }
 
 //this function must only be used BEFORE calculateDistanceField(), because we set trialfield[].cost = dist2Wall AND we init dist2Wall with "-3"
-void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Wall>& wallArg, int numOfExits) {
-    std::vector<Wall> exits(wallArg.begin(), wallArg.begin()+numOfExits);
+void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& lineArg) {
+    std::vector<Line> exits(lineArg.begin(), lineArg.begin()+numOfExits);
     drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -365,11 +582,12 @@ void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
     }
 }
 
-void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Wall>& GoalWallArg) {
-    drawLinesOnGrid(GoalWallArg, costarray, 0.);
+void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Line>& LineArg) {
+    drawLinesOnGrid(LineArg, costarray, 0.);
+    //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1().GetX() << " " << LineArg[0].GetPoint1().GetY() << " " << LineArg[0].GetPoint2().GetX() << " " << LineArg[0].GetPoint2().GetY() << std::endl;
 }
 
-void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target, const double outside, const double inside) {
+void FloorfieldViaFM::lineScan(std::vector<Line>& wallArg, double* const target, const double outside, const double inside) {
 // use RectGrid to go thru lines and check intersection with any wall
 
 // maybe calc and save intersections for each line and then init target array
@@ -400,7 +618,7 @@ void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target,
         Point linestart(xMin,j*hy+yMin);
         Point lineend  (xMax,j*hy+yMin);
         Line currLine = Line(linestart, lineend);
-        for(std::vector<Wall>::iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
+        for(std::vector<Line>::iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
             //if wall is horizontal, we must deal with it by setting wall value all along
             //note: if wall is horizontal, then adjacent walls should yield intersectionpoints and make
             //      linescan fill the points under the horizontal wall anyway. lets check that. \____/
@@ -459,7 +677,7 @@ void FloorfieldViaFM::lineScan(std::vector<Wall>& wallArg, double* const target,
     } //loop over all lines
 }
 
-void FloorfieldViaFM::drawLinesOnGrid(std::vector<Wall>& wallArg, double* const target, const double outside) { //no init, plz init elsewhere
+void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside) { //no init, plz init elsewhere
 // i~x; j~y;
 //http://stackoverflow.com/questions/10060046/drawing-lines-with-bresenhams-line-algorithm
 //src in answer of "Avi"; adapted to fit this application
@@ -479,12 +697,12 @@ void FloorfieldViaFM::drawLinesOnGrid(std::vector<Wall>& wallArg, double* const 
     long int key;
     long int deltaX, deltaY, deltaX1, deltaY1, px, py, xe, ye, i; //Bresenham Algorithm
 
-    for (auto& wall : wallArg) {
-        key = grid->getKeyAtPoint(wall.GetPoint1());
+    for (auto& line : wallArg) {
+        key = grid->getKeyAtPoint(line.GetPoint1());
         iStart = grid->get_i_fromKey(key);
         jStart = grid->get_j_fromKey(key);
 
-        key = grid->getKeyAtPoint(wall.GetPoint2());
+        key = grid->getKeyAtPoint(line.GetPoint2());
         iEnd = grid->get_i_fromKey(key);
         jEnd = grid->get_j_fromKey(key);
 
@@ -590,9 +808,9 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
         //set Trialptr to fieldelements
         trialfield[i].key = i;
         trialfield[i].flag = flag + i;
-        trialfield[i].cost = costarray + i;
-        trialfield[i].neggrad = neggradarray + i;
-        trialfield[i].speed = modifiedspeed + i;
+        trialfield[i].cost = costarray + i;         // @todo: argraf  : setting up trialfield should be separate function, it is done too often for one go
+        trialfield[i].neggrad = neggradarray + i;   //                  same holds for init of flag and cost.. watch where to draw (cost=0) line
+        trialfield[i].speed = modifiedspeed + i;    //                  it must not be overwritten by any clear procedure
         trialfield[i].father = nullptr;
         trialfield[i].child = nullptr;
     }
@@ -602,8 +820,6 @@ void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray
             flag[i] = 3;
         }
     }
-
-
 
     //init narrowband
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
@@ -653,8 +869,15 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
             checkNeighborsAndAddToNarrowband(smallest, biggest, i, [&] (const long int key) { this->checkNeighborsAndCalcDist2Wall(key);} );
         }
     }
-
+    //Log->Write(std::to_string(grid->GetxMax()));
+    //Log->Write(std::to_string(grid->GetyMax()));
+    //Log->Write(std::to_string(grid->GetxMin()));
+    //Log->Write(std::to_string(grid->GetyMin()));
+    //Log->Write(std::to_string(grid->GetiMax()));
+    //Log->Write(std::to_string(grid->GetjMax()));
+    //Log->Write("INFO: \t" + std::to_string(grid->GetnPoints()));
     //inital narrowband done, now loop (while not empty: remove smallest, add neighbors of removed)
+    //long int debugcounter = 0;
     while (smallest != nullptr) {
         long int keyOfSmallest = smallest->key;
         flag[keyOfSmallest] = 3;
@@ -682,6 +905,7 @@ void FloorfieldViaFM::calculateDistanceField(const double thresholdArg) {  //if 
             smallest = nullptr;
         } else {
             trialfield[keyOfSmallest].removecurr(smallest, biggest, trialfield+keyOfSmallest);
+            //Log->Write(std::to_string(debugcounter++) + " " + std::to_string(grid->GetnPoints()));
             checkNeighborsAndAddToNarrowband(smallest, biggest, keyOfSmallest, [&] (const long int key) { this->checkNeighborsAndCalcDist2Wall(key);} );
         }
     }
@@ -985,21 +1209,21 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
                                 " " <<
                                 std::to_string(grid->GetjMax()) <<
                                 " 1" << std::endl;
-    file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
-    file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin() << " " << grid->GetyMin() << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
     file << "SCALARS Cost float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         file << target[i] << std::endl;
         Point iPoint = grid->getPointFromKey(i);
-        file2 << iPoint.GetX()/GEO_UP_SCALE /*- grid->GetxMin()*/ << " " << iPoint.GetY()/GEO_UP_SCALE /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+        file2 << iPoint.GetX() /*- grid->GetxMin()*/ << " " << iPoint.GetY() /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
     }
 
     if (target == cost) {
         file << "VECTORS Gradient float" << std::endl;
         for (int i = 0; i < grid->GetnPoints(); ++i) {
-            file << neggrad[i].GetX()/GEO_UP_SCALE << " " << neggrad[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+            file << neggrad[i].GetX() << " " << neggrad[i].GetY() << " 0.0" << std::endl;
         }
     }
 
@@ -1010,6 +1234,7 @@ void FloorfieldViaFM::testoutput(const char* filename1, const char* filename2, c
 }
 
 void FloorfieldViaFM::writeFF(const std::string& filename) {
+    Log->Write("INFO: \tWrite Floorfield to file <" +  filename + ">");
     std::ofstream file;
 
     int numX = (int) ((grid->GetxMax()-grid->GetxMin())/grid->Gethx());
@@ -1028,32 +1253,32 @@ void FloorfieldViaFM::writeFF(const std::string& filename) {
                                 " " <<
                                 std::to_string(grid->GetjMax()) <<
                                 " 1" << std::endl;
-    file << "ORIGIN " << grid->GetxMin()/GEO_UP_SCALE << " " << grid->GetyMin()/GEO_UP_SCALE << " 0" << std::endl;
-    file << "SPACING " << std::to_string(grid->Gethx()/GEO_UP_SCALE) << " " << std::to_string(grid->Gethy()/GEO_UP_SCALE) << " 1" << std::endl;
+    file << "ORIGIN " << grid->GetxMin() << " " << grid->GetyMin() << " 0" << std::endl;
+    file << "SPACING " << std::to_string(grid->Gethx()) << " " << std::to_string(grid->Gethy()) << " 1" << std::endl;
     file << "POINT_DATA " << std::to_string(numTotal) << std::endl;
     file << "SCALARS Dist2Wall float 1" << std::endl;
     file << "LOOKUP_TABLE default" << std::endl;
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        file << dist2Wall[i]/GEO_UP_SCALE << std::endl; //@todo: change target to all dist2wall
+        file << dist2Wall[i] << std::endl; //@todo: change target to all dist2wall
         //Point iPoint = grid->getPointFromKey(i);
-        //file2 << iPoint.GetX()/GEO_UP_SCALE /*- grid->GetxMin()*/ << " " << iPoint.GetY()/GEO_UP_SCALE /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
+        //file2 << iPoint.GetX() /*- grid->GetxMin()*/ << " " << iPoint.GetY() /*- grid->GetyMin()*/ << " " << target[i] << std::endl;
     }
 
     file << "VECTORS Gradient float" << std::endl;
     for (int i = 0; i < grid->GetnPoints(); ++i) {
-        file << neggrad[i].GetX()/GEO_UP_SCALE << " " << neggrad[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+        file << neggrad[i].GetX() << " " << neggrad[i].GetY() << " 0.0" << std::endl;
     }
 
     file << "VECTORS Dir2Wall float" << std::endl;
     for (int i = 0; i < grid->GetnPoints(); ++i) {
-        file << dirToWall[i].GetX()/GEO_UP_SCALE << " " << dirToWall[i].GetY()/GEO_UP_SCALE << " 0.0" << std::endl;
+        file << dirToWall[i].GetX() << " " << dirToWall[i].GetY() << " 0.0" << std::endl;
     }
 
     if (cost != nullptr) {
         file << "SCALARS Cost float 1" << std::endl;
         file << "LOOKUP_TABLE default" << std::endl;
         for (long int i = 0; i < grid->GetnPoints(); ++i) {
-            file << cost[i]/GEO_UP_SCALE << std::endl;
+            file << cost[i] << std::endl;
         }
     }
     file.close();
