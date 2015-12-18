@@ -1,12 +1,12 @@
 # JPSreport v0.7
-================
 
 ## Running
-=======
 
->> ./JPSreport.exe ./xxx/xxx/ini_bottleneck.xml"
+```
+./JPSreport.exe inifile.xml"
+```
 
-From the command line trajectory files mentioned in the inifile will be analysed by using the methods and parameters in the inifile.
+From the command line trajectory files mentioned in the inifile will be analysed by using the methods and parameters specified in the `inifile`.
 The output results will be saved in the sub-folder of the folder where the inifile exists.
 
 ## Added
@@ -16,6 +16,7 @@ The output results will be saved in the sub-folder of the folder where the inifi
 - Embedded python scripts (**\_Plot_N\_t.py**, **\_Plot_timeseries\_rho_v.py**) for plotting N-t diagram (Method A), time series of density/velocity diagram (Method C and D) and Voronoi diagrams (Method D).
 - Added python script (**SteadyState.py**) for automatically detecting steady state of pedestrian flow based on time series of density and velocity. When plotting fundamental diagrams normally only data under steady state are used due to its generality.
 - Added python script (**\_Plot_FD.py**) for plotting fundamenatl diagram based on the detected steady state.
+
 ## Changed
 
 - Changed name of some variables in configuration file:
