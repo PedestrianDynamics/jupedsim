@@ -300,16 +300,19 @@ void Simulation::UpdateRoutesAndLocations()
      const map<int, Goal*>& goals = _building->GetAllGoals();
 
      unsigned long nSize = allPeds.size();
-     int nThreads = omp_get_max_threads();
+//     int nThreads = omp_get_max_threads();
+     int nThreads = 1;
      int partSize = nSize / nThreads;
 
 //#pragma omp parallel  default(shared) num_threads(nThreads)
 //     {
-          const int threadID = omp_get_thread_num();
-          int start = threadID * partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1))
-               end = nSize - 1;
+          //const int threadID = omp_get_thread_num();
+          //int start = threadID * partSize;
+          //int end = (threadID + 1) * partSize - 1;
+          //if ((threadID == nThreads - 1))
+          //end = nSize - 1;
+          int start = 0;
+          int end = nSize - 1;
 
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];
