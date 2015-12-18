@@ -55,11 +55,8 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #define M_PI 3.141592653589793238462643
 #endif
 
-#ifndef and
+#if defined (_MSC_VER)
 #define and &&
-#endif
-
-#ifndef or
 #define or ||
 #endif
 
