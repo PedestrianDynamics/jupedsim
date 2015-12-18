@@ -367,7 +367,7 @@ void Simulation::UpdateRoutesAndLocations()
                                    //}
 
                                    //also statistic for internal doors
-                                   UpdateFlowAtDoors(*ped);
+                                   UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
@@ -404,7 +404,7 @@ void Simulation::UpdateRoutesAndLocations()
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
      {
-          AgentsQueueOut::Add(pedsToRemove);
+          AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
      }
      else
 #endif
