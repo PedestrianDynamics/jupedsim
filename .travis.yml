@@ -16,8 +16,9 @@ before_script:
   # - brew install cmake
 
 script:
+    - mkdir build && cd build
     - cmake .. -DBUILD_TESTING=ON
-    - make -j$(nproc)     
+    - make
     - ctest -R Boost 
 
 notifications:
