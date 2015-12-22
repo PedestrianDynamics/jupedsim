@@ -1,5 +1,5 @@
 language: cpp
-  
+
 before_script:
   - brew update
   - brew unlink boost
