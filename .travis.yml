@@ -10,7 +10,7 @@ compiler:
   - clang
     
 before_script:
-    - sudo add-apt-repository ppa:apokluda/boost1.53
+    - sudo add-apt-repository -y ppa:apokluda/boost1.53
     - sudo apt-get update
     - sudo apt-get install libboost1.53-all-dev
     - sudo apt-get install cmake
