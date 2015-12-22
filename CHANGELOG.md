@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 #### JPSCORE
+- CI with travis and Gitlab CI
 - Compilation checked on Visual Studio 12 2013 
 - Added more validation tests
 - Added statistics (calculate exit usage) for all exits
