@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=v0.8)](https://travis-ci.org/JuPedSim/jpscore)
+
 `jpscore` command line simulation core for JuPedSim.
 
 Features
