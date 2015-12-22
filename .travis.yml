@@ -1,5 +1,9 @@
 language: cpp
 
+branches:
+  only:
+    - v0.8
+    
 before_script:
   - brew update
   - brew unlink boost
