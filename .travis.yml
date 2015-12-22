@@ -1,14 +1,19 @@
 language: cpp
+os: linux
 
 branches:
   only:
     - v0.8
-    
+
 before_script:
-  - brew update
-  - brew unlink boost
-  - brew install boost
-  - brew install cmake
+    - sudo apt-get update
+    - sudo apt-get install libboost-all-dev
+    - sudo apt-get install cmake
+# before_script:
+  # - brew update
+  # - brew unlink boost
+  # - brew install boost
+  # - brew install cmake
 
 script:
     - cmake .. -DBUILD_TESTING=ON
