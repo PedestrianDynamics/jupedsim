@@ -1,0 +1,28 @@
+os: osx
+language: cpp
+
+branches:
+  only:
+  - master
+  - v0.8
+  
+before_script:
+  - brew update
+  - brew unlink boost
+  - brew install boost
+  - brew install cmake
+  
+notifications:
+   email:
+     recipients:
+       - mohcine@chraibi.de
+     on_success: change
+     on_failure: always
+
+  
+script:
+  - mkdir build && cd build/
+  - cmake -DBUILD_TESTING=ON ..
+  - make -j4
+  - ctest -R Boost
+
