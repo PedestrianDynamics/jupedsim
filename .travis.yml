@@ -26,8 +26,8 @@ before_install:
   - if [ "$CXX" == "g++" ] &&  [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
 
   # clang 3.4
-  - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; sudo apt-get update -qq; fi
+  # - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
+  # - if [ "$TRAVIS_OS_NAME" == "linux" ]; sudo apt-get update; fi
 
 install:
   # g++4.8.1
