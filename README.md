@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/JuPedSim/jpscore.svg?branch=v0.8)](https://travis-ci.org/JuPedSim/jpscore)
+[![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 
 `jpscore` command line simulation core for JuPedSim.
 
