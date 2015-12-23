@@ -50,6 +50,7 @@ script:
     - make
 
 after_success:
+    - cd build
     - ctest -R Boost 
 
 notifications:
