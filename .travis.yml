@@ -18,6 +18,7 @@ before_script:
        sudo apt-get install libboost1.53-all-dev;
        sudo apt-get install cmake;
        sudo apt-get install doxygen;
+       sudo pip install lcov;
        sudo pip install codecov;
     fi
 
@@ -27,7 +28,6 @@ before_script:
        brew install boost;
        brew install cmake;
        brew install doxygen;
-       pip install codecov;
     fi
 
 before_install:
@@ -65,8 +65,9 @@ after_success:
     - ctest -R Boost
     - make cov
     - echo $PWD
-    - bash <(curl -s https://codecov.io/bash)
-    -  # || echo "Codecov did not collect coverage reports" #
+    - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+         bash <(curl -s https://codecov.io/bash);
+      fi   
     
 notifications:
    email:
