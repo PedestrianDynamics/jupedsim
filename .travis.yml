@@ -3,10 +3,10 @@ os:
    - linux
    - osx
 
-branches:
-  only:
-    # - v0.8
-    - coverage
+# branches:
+#   only:
+#     # - v0.8
+#     - coverage
 compiler:
   - gcc
     
