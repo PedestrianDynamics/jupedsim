@@ -5,8 +5,8 @@ os:
 
 branches:
   only:
-    - v0.8
-
+    # - v0.8
+    - cmake_cxxflags
 compiler:
   - gcc
     
@@ -17,13 +17,18 @@ before_script:
        sudo apt-get install libboost1.53-all-dev;
        sudo apt-get install cmake;
        sudo apt-get install doxygen;
+       #sudo apt-get install lcov;
+       sudo pip install codecov;
     fi
 
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+       brew update;   
        brew unlink boost;
        brew install boost;
        brew install cmake;
        brew install doxygen;
+       #brew install lcov;
+       pip install codecov;
     fi
 
 before_install:
@@ -53,15 +58,16 @@ install:
 
 script:
     - $CXX --version
-    - mkdir build && cd build
-    - cmake -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug ..
+    # - mkdir build && cd build
+    - cmake -DBUILD_TESTING=ON -DCMAKE_build_type=Debug .
     - make
 
 after_success:
-    - cd build
     - ctest -R Boost
+    - make cov
+    - echo $PWD
     - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-
+    
 notifications:
    email:
      recipients:
