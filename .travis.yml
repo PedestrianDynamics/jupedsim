@@ -36,12 +36,12 @@ before_script:
 
 before_install:
   # g++4.8.1
-  - if [ "$CXX" == "g++" ] &&  [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - if [ "$CXX" == "g++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
 
   # clang 3.4
   # - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ];then sudo apt-get update -qq; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
     
 install:
   # g++4.8.1
@@ -65,7 +65,7 @@ script:
 
 after_success:
     - make cov
-    - ctest -R rimea
+    - make test
     # - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
     # - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
