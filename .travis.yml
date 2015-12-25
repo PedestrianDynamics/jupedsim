@@ -5,12 +5,14 @@ os:
 
 branches:
   only:
+    - master
     - v0.8
     - coverage
     
 compiler:
   - gcc
-    
+  # - clang
+  
 before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
        sudo add-apt-repository -y ppa:apokluda/boost1.53;
@@ -29,6 +31,7 @@ before_script:
        brew install boost;
        brew install cmake;
        brew install doxygen;
+       brew install lcov;
     fi
 
 before_install:
@@ -53,27 +56,17 @@ install:
        export CXX="clang++-3.4";
     fi
 
-
-  
-
 script:
     - $CXX --version
-    - gcov --version
-    - echo "============================"
     - sudo ln -sf /usr/bin/gcov-4.8 /usr/bin/gcov
-    - ls -la /usr/bin/gcov*
-    - which gcov
-    - echo "============================"
-
     - mkdir build && cd build
     - cmake -DBUILD_TESTING=ON ..
     - make
 
 after_success:
     - make cov
-    - echo $PWD
-    - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
-    - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
+    # - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
+    # - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
          codecov;
       fi   
