@@ -5,8 +5,8 @@ os:
 
 branches:
   only:
-    - v0.8
-
+    # - v0.8
+    - cmake_cxxflags
 compiler:
   - gcc
     
@@ -54,12 +54,13 @@ install:
 script:
     - $CXX --version
     - mkdir build && cd build
-    - cmake -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug ..
+    - cmake -DBUILD_TESTING=ON -DCMAKE_build_type=Debug ..
     - make
 
 after_success:
     - cd build
     - ctest -R Boost
+    - make jpscorecov
     - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
 notifications:
