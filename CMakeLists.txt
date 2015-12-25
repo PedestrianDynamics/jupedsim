@@ -17,7 +17,8 @@ set(JPSCORE_PATCH_VERSION 0)
 set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
-
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
+INCLUDE(CodeCoverage)
 
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -176,6 +177,7 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
   find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   IF(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
   endif(CMAKE_COMPILER_IS_GNUCXX)
   file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
@@ -183,6 +185,13 @@ endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
+  SETUP_TARGET_FOR_COVERAGE(
+    jpscorecov  # Name for custom target.
+    ctest         # Name of the test driver executable that runs the tests.
+    # NOTE! This should always have a ZERO as exit code
+    # otherwise the coverage generation will not complete.
+    coverage            # Name of output directory.
+    )
 endif(BUILD_TESTING)
 
 # add sources and headers
@@ -581,7 +590,7 @@ if(BUILD_TESTING)
   if(PYTHONINTERP_FOUND)
     foreach (test_src ${test_py_files})
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-      message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
+      # message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
       add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
