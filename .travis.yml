@@ -22,6 +22,7 @@ before_script:
        sudo apt-get install lcov;
        sudo apt-get install ggcov;
        sudo pip install codecov;
+       sudo pip install numpy;
     fi
 
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
