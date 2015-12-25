@@ -50,11 +50,6 @@ install:
   # clang 3.4
   - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
        sudo apt-get install --allow-unauthenticated -qq clang-3.4;
-       echo "============================";
-       sudo ln -sf /usr/bin/gcov-4.8 /usr/bin/gcov;
-       ls -la /usr/bin/gcov*;
-       which gcov;
-       echo "============================";
        export CXX="clang++-3.4";
     fi
 
@@ -64,6 +59,12 @@ install:
 script:
     - $CXX --version
     - gcov --version
+    - echo "============================"
+    - sudo ln -sf /usr/bin/gcov-4.8 /usr/bin/gcov
+    - ls -la /usr/bin/gcov*
+    - which gcov
+    - echo "============================"
+
     - mkdir build && cd build
     - cmake -DBUILD_TESTING=ON ..
     - make
