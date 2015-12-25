@@ -4,9 +4,15 @@
 
 The core module for performing the simulation (i.e. computing the trajectories).
 
-`jpscore` is initialized with a project file containing all the necessary parameters for the simulation.
+_jpscore_ is a command-based program. 
 
-`jpscore` is a command-based simulation core for JuPedSim.
+It is initialized with a project file, e.g.:
+
+```
+jpscore inifile.xml
+```
+will start a simulation based on parameter and setup (geometry, population, ...) 
+contained in the _inifile_.
 
 Features
 ========
