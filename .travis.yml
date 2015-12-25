@@ -1,7 +1,7 @@
 language: cpp
 os:
   - linux
-  - osx
+  # - osx
 
 branches:
   only:
@@ -19,6 +19,7 @@ before_script:
        sudo apt-get install cmake;
        sudo apt-get install doxygen;
        sudo apt-get install lcov;
+       sudo apt-get install ggcov;
        sudo pip install codecov;
     fi
 
@@ -65,9 +66,10 @@ script:
 after_success:
     - make cov
     - echo $PWD
+    - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
     - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-         bash <(curl -s https://codecov.io/bash);
+         codecov
       fi   
     
 notifications:
