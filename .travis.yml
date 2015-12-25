@@ -64,7 +64,7 @@ script:
 after_success:
     - ctest -R Boost
     - make cov
-    - echo "pwd: " $PWD
+    - echo $PWD
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
          bash <(curl -s https://codecov.io/bash);
       fi   
