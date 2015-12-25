@@ -6,7 +6,7 @@ os:
 branches:
   only:
     # - v0.8
-    - cmake_cxxflags
+    - coverage
 compiler:
   - gcc
     
