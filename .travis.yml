@@ -7,7 +7,6 @@ branches:
   only:
     - master
     - v0.8
-    - coverage
     
 compiler:
   - gcc
