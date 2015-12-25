@@ -2,7 +2,11 @@
 [![codecov.io](https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=v0.8)](https://codecov.io/github/JuPedSim/jpscore?branch=v0.8)
 [![GitHub license](https://img.shields.io/badge/license-GPL-blue.svg)](https://raw.githubusercontent.com/JuPedSim/jpscore/master/LICENSE)
 
-`jpscore` command line simulation core for JuPedSim.
+The core module for performing the simulation (i.e. computing the trajectories).
+
+`jpscore` is initialized with a project file containing all the necessary parameters for the simulation.
+
+`jpscore` is a command-based simulation core for JuPedSim.
 
 Features
 ========
