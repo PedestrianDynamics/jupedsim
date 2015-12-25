@@ -1,12 +1,13 @@
 language: cpp
-os:
-   - linux
-   - osx
+# os:
+#   - linux
+#   - osx
 
-# branches:
-#   only:
-#     # - v0.8
-#     - coverage
+branches:
+  only:
+    - v0.8
+    - coverage
+    
 compiler:
   - gcc
     
@@ -17,7 +18,6 @@ before_script:
        sudo apt-get install libboost1.53-all-dev;
        sudo apt-get install cmake;
        sudo apt-get install doxygen;
-       #sudo apt-get install lcov;
        sudo pip install codecov;
     fi
 
@@ -27,7 +27,6 @@ before_script:
        brew install boost;
        brew install cmake;
        brew install doxygen;
-       #brew install lcov;
        pip install codecov;
     fi
 
