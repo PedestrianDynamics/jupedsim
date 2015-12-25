@@ -57,12 +57,11 @@ install:
 
 script:
     - $CXX --version
-    # - mkdir build && cd build
-    - cmake -DBUILD_TESTING=ON .
+    - mkdir build && cd build
+    - cmake -DBUILD_TESTING=ON ..
     - make
 
 after_success:
-    - ctest -R Boost
     - make cov
     - echo $PWD
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
