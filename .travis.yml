@@ -65,6 +65,7 @@ script:
 
 after_success:
     - make cov
+    - ctest -R rimea
     # - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
     # - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
