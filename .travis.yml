@@ -59,14 +59,15 @@ install:
 script:
     - $CXX --version
     # - mkdir build && cd build
-    - cmake -DBUILD_TESTING=ON -DCMAKE_build_type=Debug .
+    - cmake -DBUILD_TESTING=ON .
     - make
 
 after_success:
     - ctest -R Boost
     - make cov
     - echo $PWD
-    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+    - bash <(curl -s https://codecov.io/bash)
+    -  # || echo "Codecov did not collect coverage reports" #
     
 notifications:
    email:
