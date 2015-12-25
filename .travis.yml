@@ -25,7 +25,7 @@ before_script:
        brew install boost;
        brew install cmake;
        brew install doxygen;
-       bre install lcov;
+       brew install lcov;
     fi
 
 before_install:
