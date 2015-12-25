@@ -67,7 +67,8 @@ after_success:
     - ctest -R Boost
     - make cov
     - echo $PWD
-    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+    - if [ "$TRAVIS_OS_NAME" == "linux" ];
+         bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
     
 notifications:
    email:
