@@ -1,16 +1,17 @@
 language: cpp
 os:
-   - linux
-   - osx
+  - linux
+  # - osx
 
 branches:
   only:
+    - master
     - v0.8
-    - coverage
     
 compiler:
   - gcc
-    
+  # - clang
+  
 before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
        sudo add-apt-repository -y ppa:apokluda/boost1.53;
@@ -18,7 +19,8 @@ before_script:
        sudo apt-get install libboost1.53-all-dev;
        sudo apt-get install cmake;
        sudo apt-get install doxygen;
-       #sudo apt-get install lcov;
+       sudo apt-get install lcov;
+       sudo apt-get install ggcov;
        sudo pip install codecov;
     fi
 
@@ -28,18 +30,17 @@ before_script:
        brew install boost;
        brew install cmake;
        brew install doxygen;
-       #brew install lcov;
-       pip install codecov;
+       brew install lcov;
     fi
 
 before_install:
   # g++4.8.1
-  - if [ "$CXX" == "g++" ] &&  [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+  - if [ "$CXX" == "g++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
 
   # clang 3.4
   # - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ];then sudo apt-get update -qq; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
     
 install:
   # g++4.8.1
@@ -54,21 +55,21 @@ install:
        export CXX="clang++-3.4";
     fi
 
-
-  
-
 script:
     - $CXX --version
-    # - mkdir build && cd build
-    - cmake -DBUILD_TESTING=ON -DCMAKE_build_type=Debug .
+    - sudo ln -sf /usr/bin/gcov-4.8 /usr/bin/gcov
+    - mkdir build && cd build
+    - cmake -DBUILD_TESTING=ON ..
     - make
 
 after_success:
-    - ctest -R Boost
     - make cov
-    - echo $PWD
-    - if [ "$TRAVIS_OS_NAME" == "linux" ];
-         bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+    - make test
+    # - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
+    # - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
+    - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+         codecov;
+      fi   
     
 notifications:
    email:
