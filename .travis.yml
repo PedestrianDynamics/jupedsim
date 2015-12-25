@@ -60,7 +60,6 @@ script:
 after_success:
     - cd build
     - ctest -R Boost
-    - after_success:                                                                                                                                              
     - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
 
 notifications:
