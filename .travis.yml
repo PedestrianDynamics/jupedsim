@@ -64,6 +64,8 @@ script:
 after_success:
     - make cov
     - echo $PWD
+    - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
+    - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
          bash <(curl -s https://codecov.io/bash);
       fi   
