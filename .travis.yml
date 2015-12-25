@@ -58,16 +58,15 @@ install:
 
 script:
     - $CXX --version
-    - mkdir build && cd build
-    - cmake -DBUILD_TESTING=ON -DCMAKE_build_type=Debug ..
+    # - mkdir build && cd build
+    - cmake -DBUILD_TESTING=ON -DCMAKE_build_type=Debug .
     - make
 
 after_success:
-    - cd build
     - ctest -R Boost
-    - make jpscorecov
-    # - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-    - codecov
+    - make cov
+    - echo $PWD
+    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
     
 notifications:
    email:

@@ -185,8 +185,9 @@ endif(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
 if(BUILD_TESTING)
   file(GLOB_RECURSE  test_py_files "${CMAKE_TEST_DIR}/*runtest_*.py")
+  set(ENABLE_COVERAGE ON)
   SETUP_TARGET_FOR_COVERAGE(
-    jpscorecov  # Name for custom target.
+    cov  # Name for custom target.
     ctest         # Name of the test driver executable that runs the tests.
     # NOTE! This should always have a ZERO as exit code
     # otherwise the coverage generation will not complete.
@@ -417,6 +418,7 @@ set (   header_files
 
 
 add_library ( core STATIC ${source_files} )
+
 #add_library ( core SHARED ${source_files} )
 
 #Target
@@ -601,5 +603,6 @@ if(BUILD_TESTING)
     # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
+
 
 install (TARGETS jpscore DESTINATION bin)
