@@ -64,14 +64,9 @@ script:
     - make
 
 after_success:
-    - echo $PWD
-    - ls
     - make cov
-    - ctest -R rimea_3
-    - cat ./Testing/Temporary/LastTest.log
-    - ls ../Utest/rimea_tests/test_3/
-    # - cp  `find . -name "*.gcda" -or -name "*.gcno"` .
-    # - cp  `find . -name "*.gcda" -or -name "*.gcno"` ..
+    - ctest -R rimea
+    - ctest -R juelich
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
          codecov;
       fi   
