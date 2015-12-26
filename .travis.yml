@@ -1,5 +1,4 @@
 language: cpp
-sudo: false
 
 branchs:
   - master
@@ -30,8 +29,8 @@ matrix:
         - mkdir build && cd build
         - cmake -DBUILD_TESTING=ON ..
         - make
-        - pip install codecov
-        - pip install numpy
+        - sudo pip install codecov
+        - sudo pip install numpy
         - make cov
         # - ctest -R rimea
         # - ctest -R juelich
