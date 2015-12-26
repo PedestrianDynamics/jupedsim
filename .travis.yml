@@ -17,7 +17,7 @@ before_script:
     - source .travis_before_script.bash
   
 before_install:
-    - source .travis.before_install.bash          
+    - source .travis_before_install.bash          
 
 install:
     - source .travis_install.bash
