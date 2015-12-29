@@ -1,0 +1,34 @@
+{
+    "docs": [
+        {
+            "location": "/home/", 
+            "text": "jpscore\n is the core module for simulation and computing of the trajectories.\n\n\nIt is called  with initialization files (inifiles):\n\n\n jpscore config.xml\n\n\n\n\nwith \nconfig.xml\n a structured \nxml\n project file containing parameter definitions, agents distributions and other \nimportant configurations to run a simulation.\n\n\nEverybody is welcome to contribute to the project, but first have a look at\n\n\n\n\nCode Style Conventions\n\n\nGet started\n\n\nBefore pushing\n\n\nWorkflow with Git\n\n\nSetting up unit tests\n\n\nSetting up model tests\n\n\nUsing Vagrant\n\n\n\n\nImportant\n: When reporting bugs, please make sure to use the development branch \n(v0.8)\n.", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/", 
+            "text": "Code Style\n\n\nStyle we actually try to follow in JuPedSim\n\n\nThe code is formated using the automatic formatter \nastyle\n  with the option \n--style=stroustrup\n\n\n\n\nStroustrup style formatting/indenting uses stroustrup brackets. \nBrackets are broken from function definitions only.\nBrackets are attached to everything else including \nnamespaces, classes, and statements within a function, arrays, structs, and enums. \nThis style frequently is used with an indent of 5 spaces. \n\n\n\n\nHere is an \nexample:\n\n\nint Foo(bool isBar) \n{\n     if (isBar) {\n          bar();\n          return 1;\n     } else\n          return 0;\n}\n\n\n\n\nTabs vs Spaces\n\n\nthis can be a long and religious discussion, to make it short \nDO NOT\n use tabs, just spaces.\n\n\nEditors\n\n\nHere some hints to configure your editor in order to use the \nstroustrup\n style\n\n\nEmacs\n\n\nAdd this to you \n.emacs\n\n\n(setq c-default-style \nstroustrup\n c-basic-offset 5)\n(setq indent-tabs-mode nil)\n\n\n\n\nEclipse\n\n\n\n\nHere is a \nplugin\n for astyle in eclipse. \n\n\nHow to change indentation width in eclipse?\n\n\n\n\nVim\n\n\nSet in your config file these variables\n\n\n:set autoindent\n:set cindent\n:set expandtab\n:set shiftwidth=5\n:set softtabstop=5\n\n\n\n\nComments\n\n\n\n\nComments and commit messages have to be written in \nEnglish\n.", 
+            "title": "Getting started"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/#code-style", 
+            "text": "Style we actually try to follow in JuPedSim  The code is formated using the automatic formatter  astyle   with the option  --style=stroustrup   Stroustrup style formatting/indenting uses stroustrup brackets. \nBrackets are broken from function definitions only.\nBrackets are attached to everything else including \nnamespaces, classes, and statements within a function, arrays, structs, and enums. \nThis style frequently is used with an indent of 5 spaces.    Here is an  example:  int Foo(bool isBar) \n{\n     if (isBar) {\n          bar();\n          return 1;\n     } else\n          return 0;\n}", 
+            "title": "Code Style"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/#tabs-vs-spaces", 
+            "text": "this can be a long and religious discussion, to make it short  DO NOT  use tabs, just spaces.  Editors  Here some hints to configure your editor in order to use the  stroustrup  style  Emacs  Add this to you  .emacs  (setq c-default-style  stroustrup  c-basic-offset 5)\n(setq indent-tabs-mode nil)  Eclipse   Here is a  plugin  for astyle in eclipse.   How to change indentation width in eclipse?   Vim  Set in your config file these variables  :set autoindent\n:set cindent\n:set expandtab\n:set shiftwidth=5\n:set softtabstop=5", 
+            "title": "Tabs vs Spaces"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/#comments", 
+            "text": "Comments and commit messages have to be written in  English .", 
+            "title": "Comments"
+        }, 
+        {
+            "location": "/00_Disclaimer/", 
+            "text": "In no event shall JuPedSim be liable to any party for direct, indirect,\nspecial, incidental, or consequential damages, including lost profits,\narising out of the use of this software and its documentation, even if\nJuPedSim has been advised of the possibility of such damage.\n\n\nJuPedSim specifically disclaims any warranties, including, but not\nlimited to, the implied warranties of merchantability and fitness for a\nparticular purpose. The software and accompanying documentation, if any,\nprovided hereunder is provided \"as is\". JuPedSim has no obligation to\nprovide maintenance, support, updates, enhancements, or modifications.\n\n\nForschungszentrum J\u00fclich GmbH makes no warranty, expressed or implied,\nto users of JuPedSim, and accepts no responsibility for its use. Users\nof JuPedSim assume sole responsibility for determining the\nappropriateness of its use; and for any actions taken or not taken as a\nresult of analyses performed using this tool.\n\n\nUsers are warned that JuPedSim is intended for \nacademic\n use only. This\ntool is an implementation of several computer models that may or may not\nhave predictive capability when applied to a specific set of factual\ncircumstances. Lack of accurate predictions by the models could lead to\nerroneous conclusions with regard of life safety.", 
+            "title": "Disclaimer"
+        }
+    ]
+}

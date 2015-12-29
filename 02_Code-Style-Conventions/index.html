@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started - JuPedSim</title>
+  
+
+  <link rel="shortcut icon" href="../img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Getting started";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../js/highlight.pack.js"></script>
+  <script src="../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../home/" class="icon icon-home"> JuPedSim</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../home/">Home</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Getting started</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#code-style">Code Style</a></li>
+                
+                    <li><a class="toctree-l4" href="#tabs-vs-spaces">Tabs vs Spaces</a></li>
+                
+                    <li><a class="toctree-l4" href="#comments">Comments</a></li>
+                
+            
+            </ul>
+        
+    </li>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../00_Disclaimer/">Disclaimer</a>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../home/">JuPedSim</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../home/">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Getting started</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="code-style">Code Style</h1>
+<p>Style we actually try to follow in JuPedSim</p>
+<p>The code is formated using the automatic formatter <a href="http://astyle.sourceforge.net/astyle.html">astyle</a>  with the option <code>--style=stroustrup</code></p>
+<blockquote>
+<p>Stroustrup style formatting/indenting uses stroustrup brackets. 
+Brackets are broken from function definitions only.
+Brackets are attached to everything else including 
+namespaces, classes, and statements within a function, arrays, structs, and enums. 
+This style frequently is used with an indent of 5 spaces. </p>
+</blockquote>
+<p>Here is an <strong>example:</strong></p>
+<pre><code class="javascript">int Foo(bool isBar) 
+{
+     if (isBar) {
+          bar();
+          return 1;
+     } else
+          return 0;
+}
+</code></pre>
+
+<h2 id="tabs-vs-spaces">Tabs vs Spaces</h2>
+<p>this can be a long and religious discussion, to make it short <em>DO NOT</em> use tabs, just spaces.</p>
+<h3 id="editors">Editors</h3>
+<p>Here some hints to configure your editor in order to use the <em>stroustrup</em> style</p>
+<h4 id="emacs">Emacs</h4>
+<p>Add this to you <code>.emacs</code></p>
+<pre><code class="lisp">(setq c-default-style &quot;stroustrup&quot; c-basic-offset 5)
+(setq indent-tabs-mode nil)
+</code></pre>
+
+<h4 id="eclipse">Eclipse</h4>
+<ul>
+<li>Here is a <a href="http://astyleclipse.sourceforge.net/">plugin</a> for astyle in eclipse. </li>
+<li><a href="https://superuser.com/questions/462221/how-do-i-reliably-change-the-indentation-width-in-eclipse">How to change indentation width in eclipse?</a></li>
+</ul>
+<h4 id="vim">Vim</h4>
+<p>Set in your config file these variables</p>
+<pre><code class="javascript">:set autoindent
+:set cindent
+:set expandtab
+:set shiftwidth=5
+:set softtabstop=5
+</code></pre>
+
+<h2 id="comments">Comments</h2>
+<ul>
+<li>Comments and commit messages have to be written in <strong>English</strong>.</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../00_Disclaimer/" class="btn btn-neutral float-right" title="Disclaimer"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../home/" class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../home/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../00_Disclaimer/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+
+</body>
+</html>
