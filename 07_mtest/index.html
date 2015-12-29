@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Disclaimer - JuPedSim</title>
+  <title>Make a test - JuPedSim</title>
   
 
   <link rel="shortcut icon" href="../img/favicon.ico">
@@ -20,7 +20,7 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Disclaimer";
+    var mkdocs_page_name = "Make a test";
   </script>
   
   <script src="../js/jquery-2.1.1.min.js"></script>
@@ -99,19 +99,27 @@
 <li>
           
             <li>
-    <li class="toctree-l1 ">
-        <a class="" href="../07_mtest/">Make a test</a>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Make a test</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#setting-up-the-test-directory">Setting up the test directory</a></li>
+                
+                    <li><a class="toctree-l4" href="#files-your-test-directory-should-contain">Files your test directory should contain:</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#writing-a-test-with-python">Writing a test with python</a></li>
+                
+            
+            </ul>
         
     </li>
 <li>
           
             <li>
-    <li class="toctree-l1 current">
-        <a class="current" href="./">Disclaimer</a>
-        
-            <ul>
-            
-            </ul>
+    <li class="toctree-l1 ">
+        <a class="" href="../00_Disclaimer/">Disclaimer</a>
         
     </li>
 <li>
@@ -138,7 +146,7 @@
     
       
     
-    <li>Disclaimer</li>
+    <li>Make a test</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -148,25 +156,47 @@
           <div role="main">
             <div class="section">
               
-                <p>In no event shall JuPedSim be liable to any party for direct, indirect,
-special, incidental, or consequential damages, including lost profits,
-arising out of the use of this software and its documentation, even if
-JuPedSim has been advised of the possibility of such damage.</p>
-<p>JuPedSim specifically disclaims any warranties, including, but not
-limited to, the implied warranties of merchantability and fitness for a
-particular purpose. The software and accompanying documentation, if any,
-provided hereunder is provided "as is". JuPedSim has no obligation to
-provide maintenance, support, updates, enhancements, or modifications.</p>
-<p>Forschungszentrum Jülich GmbH makes no warranty, expressed or implied,
-to users of JuPedSim, and accepts no responsibility for its use. Users
-of JuPedSim assume sole responsibility for determining the
-appropriateness of its use; and for any actions taken or not taken as a
-result of analyses performed using this tool.</p>
-<p>Users are warned that JuPedSim is intended for <strong>academic</strong> use only. This
-tool is an implementation of several computer models that may or may not
-have predictive capability when applied to a specific set of factual
-circumstances. Lack of accurate predictions by the models could lead to
-erroneous conclusions with regard of life safety.</p>
+                <h1 id="setting-up-the-test-directory">Setting up the test directory</h1>
+<h2 id="files-your-test-directory-should-contain">Files your test directory should contain:</h2>
+<blockquote>
+<p>geometry.xml
+init_test_no.xml
+master_ini.xml
+your_test.py</p>
+</blockquote>
+<h1 id="writing-a-test-with-python">Writing a test with python</h1>
+<p>Your test has to include the following lines at the beginning of your script:</p>
+<pre><code class="python">#!/usr/bin/env python
+import os
+import sys
+from sys import *
+sys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))
+from JPSRunTest import JPSRunTestDriver
+from utils import *
+</code></pre>
+
+<p>After including these lines you can write the test you want to perform for every ini-file generated from the makeini.py script. The method signature must contain at least two arguments to receive the inifile and the trajectory file from the simulation.</p>
+<pre><code class="python">def runtest(inifile, trajfile):
+</code></pre>
+
+<p>You can also use more than these arguments like this:</p>
+<pre><code class="python">def runtest(inifile, trajfile, x, y, z):
+</code></pre>
+
+<p>If you need a more complex example of how to use more arguments for further calculations please see runtest_14.py. If a test hast to fail because an error occurs you can simply exit the script by using something like</p>
+<pre><code class="python">if condition_fails: 
+  exit(FAILURE)
+</code></pre>
+
+<p>Once you have written your test you have to make your script executable, so it has to contain a main function which calls the test.</p>
+<pre><code class="python">if __name__ == &quot;__main__&quot;:
+  test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0])
+  test.run_test(testfunction=runtest)
+  logging.info(&quot;%s exits with SUCCESS&quot; % (argv[0]))
+  exit(SUCCESS)
+</code></pre>
+
+<p>Nothing more is needed.</p>
               
             </div>
           </div>
@@ -174,8 +204,10 @@ erroneous conclusions with regard of life safety.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="../00_Disclaimer/" class="btn btn-neutral float-right" title="Disclaimer"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
-        <a href="../07_mtest/" class="btn btn-neutral" title="Make a test"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+        <a href="../06_utest/" class="btn btn-neutral" title="Unit testing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -201,8 +233,10 @@ erroneous conclusions with regard of life safety.</p>
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../07_mtest/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../06_utest/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
+      
+        <span style="margin-left: 15px"><a href="../00_Disclaimer/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

@@ -6,9 +6,49 @@
             "title": "Home"
         }, 
         {
+            "location": "/08_Vagrant/", 
+            "text": "The \"it works on my computer\"-thing\n\n\nIn order to compile a \nJuPedSim\n package, one needs to install some required packages and libraries, e.g. \nboost\n or even (if you are a Windows user) a compiler (\ng++\n) or \ncmake\n.\n\n\nHere, \nVagrant\n can work some magic and help isolating dependencies and their configuration within a single disposable, consistent environment. \n\n\nTherefore, users, whether they are working on Linux, Mac OS X, or Windows, can compile and run code in the same environment, against the same dependencies, all configured the same way. \n\n\nTo learn more about \nVagrant\n this \npage\n will get you started.\n\n\nVirtualBox\n must be installed on its own prior to using \nVagrant\n.\n \n\n\nVirtualBox\n can be installed by \ndownloading\n a package or installer for your operating system and using standard procedures to install that package.\n\n\nHow it works?\n\n\nBasically, we will create, configure and distribute an environment where \nJuPedSim\n can be\ncompiled and run without the necessity to pre-install any dependencies.\n\n\nWith \nVagrant\n we can create a \nBox\n that can be used with \nVirtualBox\n or directly by \nVagrant\n. \n\n\nOnce connected to this \nvirtual\n machine, the user can compile, run, edit or even git push the code.\n\n\nDownload and install Vagrant\n\n\nDownload a binary from the official \nwebpage\n.\nThe installation is straightforward. \n\n\nStart out with Vagrant\n\n\nIn the Terminal \n\n\nmkdir vagrant_test \n cd vagrant_test\n\n\n\n\nTo start working\n\n\nvagrant init chraibi/jpscore\n\n\n\n\nThis will download an Ubuntu-image for \nVagrant\n, which contains all packages necessary to work with \njpscore\n. \n\n\nThe original image's name is \nubuntu/trusty64\n was modified by installing packages like \ng++\n, \ngit\n, \ncmake\n and \nboost\n.\n\n\nStart Vagrant\n\n\nvagrant up\n\n\n\n\nConnect to the machine\n\n\nvagrant ssh\n\n\n\n\nThis will connect you to your virtual machine. See also the following screenshot\n\n\n\n\nIf asked to give a password give \nvagrant\n.\n\n\nTesting a box\n\n\nAn alternative use of the \njpscore-vagrant-image\n is to get yourself a \"box-file\" and open it with \nVagrant\n as follows\n\n\nvagrant box add my-box /path/to/the/new.box\n\nvagrant init my-box\n\nvagrant up\n\n\n\n\nA box for \njpscore\n can be found \nhere\n.", 
+            "title": "Getting started"
+        }, 
+        {
+            "location": "/08_Vagrant/#the-it-works-on-my-computer-thing", 
+            "text": "In order to compile a  JuPedSim  package, one needs to install some required packages and libraries, e.g.  boost  or even (if you are a Windows user) a compiler ( g++ ) or  cmake .  Here,  Vagrant  can work some magic and help isolating dependencies and their configuration within a single disposable, consistent environment.   Therefore, users, whether they are working on Linux, Mac OS X, or Windows, can compile and run code in the same environment, against the same dependencies, all configured the same way.   To learn more about  Vagrant  this  page  will get you started.  VirtualBox  must be installed on its own prior to using  Vagrant .    VirtualBox  can be installed by  downloading  a package or installer for your operating system and using standard procedures to install that package.", 
+            "title": "The \"it works on my computer\"-thing"
+        }, 
+        {
+            "location": "/08_Vagrant/#how-it-works", 
+            "text": "Basically, we will create, configure and distribute an environment where  JuPedSim  can be\ncompiled and run without the necessity to pre-install any dependencies.  With  Vagrant  we can create a  Box  that can be used with  VirtualBox  or directly by  Vagrant .   Once connected to this  virtual  machine, the user can compile, run, edit or even git push the code.", 
+            "title": "How it works?"
+        }, 
+        {
+            "location": "/08_Vagrant/#download-and-install-vagrant", 
+            "text": "Download a binary from the official  webpage .\nThe installation is straightforward.", 
+            "title": "Download and install Vagrant"
+        }, 
+        {
+            "location": "/08_Vagrant/#start-out-with-vagrant", 
+            "text": "In the Terminal   mkdir vagrant_test   cd vagrant_test  To start working  vagrant init chraibi/jpscore  This will download an Ubuntu-image for  Vagrant , which contains all packages necessary to work with  jpscore .   The original image's name is  ubuntu/trusty64  was modified by installing packages like  g++ ,  git ,  cmake  and  boost .", 
+            "title": "Start out with Vagrant"
+        }, 
+        {
+            "location": "/08_Vagrant/#start-vagrant", 
+            "text": "vagrant up", 
+            "title": "Start Vagrant"
+        }, 
+        {
+            "location": "/08_Vagrant/#connect-to-the-machine", 
+            "text": "vagrant ssh  This will connect you to your virtual machine. See also the following screenshot   If asked to give a password give  vagrant .", 
+            "title": "Connect to the machine"
+        }, 
+        {
+            "location": "/08_Vagrant/#testing-a-box", 
+            "text": "An alternative use of the  jpscore-vagrant-image  is to get yourself a \"box-file\" and open it with  Vagrant  as follows  vagrant box add my-box /path/to/the/new.box\n\nvagrant init my-box\n\nvagrant up  A box for  jpscore  can be found  here .", 
+            "title": "Testing a box"
+        }, 
+        {
             "location": "/02_Code-Style-Conventions/", 
             "text": "Code Style\n\n\nStyle we actually try to follow in JuPedSim\n\n\nThe code is formated using the automatic formatter \nastyle\n  with the option \n--style=stroustrup\n\n\n\n\nStroustrup style formatting/indenting uses stroustrup brackets. \nBrackets are broken from function definitions only.\nBrackets are attached to everything else including \nnamespaces, classes, and statements within a function, arrays, structs, and enums. \nThis style frequently is used with an indent of 5 spaces. \n\n\n\n\nHere is an \nexample:\n\n\nint Foo(bool isBar) \n{\n     if (isBar) {\n          bar();\n          return 1;\n     } else\n          return 0;\n}\n\n\n\n\nTabs vs Spaces\n\n\nthis can be a long and religious discussion, to make it short \nDO NOT\n use tabs, just spaces.\n\n\nEditors\n\n\nHere some hints to configure your editor in order to use the \nstroustrup\n style\n\n\nEmacs\n\n\nAdd this to you \n.emacs\n\n\n(setq c-default-style \nstroustrup\n c-basic-offset 5)\n(setq indent-tabs-mode nil)\n\n\n\n\nEclipse\n\n\n\n\nHere is a \nplugin\n for astyle in eclipse. \n\n\nHow to change indentation width in eclipse?\n\n\n\n\nVim\n\n\nSet in your config file these variables\n\n\n:set autoindent\n:set cindent\n:set expandtab\n:set shiftwidth=5\n:set softtabstop=5\n\n\n\n\nComments\n\n\n\n\nComments and commit messages have to be written in \nEnglish\n.", 
-            "title": "Getting started"
+            "title": "Contributing"
         }, 
         {
             "location": "/02_Code-Style-Conventions/#code-style", 
@@ -24,6 +64,86 @@
             "location": "/02_Code-Style-Conventions/#comments", 
             "text": "Comments and commit messages have to be written in  English .", 
             "title": "Comments"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/", 
+            "text": "Code Style\n\n\nStyle we actually try to follow in JuPedSim\n\n\nThe code is formated using the automatic formatter \nastyle\n  with the option \n--style=stroustrup\n\n\n\n\nStroustrup style formatting/indenting uses stroustrup brackets. \nBrackets are broken from function definitions only.\nBrackets are attached to everything else including \nnamespaces, classes, and statements within a function, arrays, structs, and enums. \nThis style frequently is used with an indent of 5 spaces. \n\n\n\n\nHere is an \nexample:\n\n\nint Foo(bool isBar) \n{\n     if (isBar) {\n          bar();\n          return 1;\n     } else\n          return 0;\n}\n\n\n\n\nTabs vs Spaces\n\n\nthis can be a long and religious discussion, to make it short \nDO NOT\n use tabs, just spaces.\n\n\nEditors\n\n\nHere some hints to configure your editor in order to use the \nstroustrup\n style\n\n\nEmacs\n\n\nAdd this to you \n.emacs\n\n\n(setq c-default-style \nstroustrup\n c-basic-offset 5)\n(setq indent-tabs-mode nil)\n\n\n\n\nEclipse\n\n\n\n\nHere is a \nplugin\n for astyle in eclipse. \n\n\nHow to change indentation width in eclipse?\n\n\n\n\nVim\n\n\nSet in your config file these variables\n\n\n:set autoindent\n:set cindent\n:set expandtab\n:set shiftwidth=5\n:set softtabstop=5\n\n\n\n\nComments\n\n\n\n\nComments and commit messages have to be written in \nEnglish\n.", 
+            "title": "Style conventione"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/#code-style", 
+            "text": "Style we actually try to follow in JuPedSim  The code is formated using the automatic formatter  astyle   with the option  --style=stroustrup   Stroustrup style formatting/indenting uses stroustrup brackets. \nBrackets are broken from function definitions only.\nBrackets are attached to everything else including \nnamespaces, classes, and statements within a function, arrays, structs, and enums. \nThis style frequently is used with an indent of 5 spaces.    Here is an  example:  int Foo(bool isBar) \n{\n     if (isBar) {\n          bar();\n          return 1;\n     } else\n          return 0;\n}", 
+            "title": "Code Style"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/#tabs-vs-spaces", 
+            "text": "this can be a long and religious discussion, to make it short  DO NOT  use tabs, just spaces.  Editors  Here some hints to configure your editor in order to use the  stroustrup  style  Emacs  Add this to you  .emacs  (setq c-default-style  stroustrup  c-basic-offset 5)\n(setq indent-tabs-mode nil)  Eclipse   Here is a  plugin  for astyle in eclipse.   How to change indentation width in eclipse?   Vim  Set in your config file these variables  :set autoindent\n:set cindent\n:set expandtab\n:set shiftwidth=5\n:set softtabstop=5", 
+            "title": "Tabs vs Spaces"
+        }, 
+        {
+            "location": "/02_Code-Style-Conventions/#comments", 
+            "text": "Comments and commit messages have to be written in  English .", 
+            "title": "Comments"
+        }, 
+        {
+            "location": "/04_pushing/", 
+            "text": "Bevore pushing to the repository\n\n\ncheck if the tests are (still) run successfully. For instance for \njpscore\n in your \nbuild\n directory\n\n\nctest -R jpscore_compile\n\n\n\n\nshould pass.", 
+            "title": "Pushing"
+        }, 
+        {
+            "location": "/04_pushing/#bevore-pushing-to-the-repository", 
+            "text": "check if the tests are (still) run successfully. For instance for  jpscore  in your  build  directory  ctest -R jpscore_compile  should pass.", 
+            "title": "Bevore pushing to the repository"
+        }, 
+        {
+            "location": "/05_Workflow/", 
+            "text": "Workflow\n\n\n\n\nClone project\n\n\n\n\n    git clone https://cst.version.fz-juelich.de/jupedsim/jpscore.git\n\n\n\n\n\n\nCreate branch with your feature\n\n\n\n\n    git checkout -b feature_name\n\n\n\n\n\n\nWrite code. Commit changes\n\n\n\n\n    git commit -am \nMy feature is ready\n\n\n\n\n\n\n\nPush your branch to GitLab. But before doing so, \ntest\n your code.\n\n\n\n\n    git push origin feature_name\n\n\n\n\n\n\n\n\nReview your code on Commits page\n\n\n\n\n\n\nCreate a merge request\n\n\n\n\n\n\nYour team leader will review code \n merge it to the main branch.\n\n\nTips Working with Git\n\n\n\n\nPull frequently\n\n\nCommit often, but don\u2019t push every commit\n\n\nPush when changes are tested\n\n\n\n\nSee also \n8 Tips to help you work better with Git", 
+            "title": "Workflow"
+        }, 
+        {
+            "location": "/06_utest/", 
+            "text": "Setting up Boost\n\n\nGetting Boost\n\n\nYou can get boost here:\nhttp://www.boost.org/\n\n\nLinking Boost\n\n\nBoost should be linked by our cmake script if you call cmake with \n-DBUILD_TESTING=ON\n\n\nWriting a unit test\n\n\nIf you write a unit test the first lines in your file should be\n\n\n#define BOOST_TEST_MODULE MyTest\n#define BOOST_TEST_DYN_LINK\n#include \nboost/test/unit_test.hpp\n\n#include classtotest.h\n\nBOOST_AUTO_TEST_SUITE(MyTestClass)\n\n\n\n\n\nThen you can start implementing your test cases by using\n\nBOOST_AUTO_TEST_CASE(MyTestCase) \n{\n  ...\n}\n\n\nFor each method or function you want to test you should write a new test case and give it a speaking name.\nFor further information see the boost documentation.", 
+            "title": "Unit testing"
+        }, 
+        {
+            "location": "/06_utest/#setting-up-boost", 
+            "text": "", 
+            "title": "Setting up Boost"
+        }, 
+        {
+            "location": "/06_utest/#getting-boost", 
+            "text": "You can get boost here:\nhttp://www.boost.org/", 
+            "title": "Getting Boost"
+        }, 
+        {
+            "location": "/06_utest/#linking-boost", 
+            "text": "Boost should be linked by our cmake script if you call cmake with  -DBUILD_TESTING=ON", 
+            "title": "Linking Boost"
+        }, 
+        {
+            "location": "/06_utest/#writing-a-unit-test", 
+            "text": "If you write a unit test the first lines in your file should be  #define BOOST_TEST_MODULE MyTest\n#define BOOST_TEST_DYN_LINK\n#include  boost/test/unit_test.hpp \n#include classtotest.h\n\nBOOST_AUTO_TEST_SUITE(MyTestClass)  Then you can start implementing your test cases by using BOOST_AUTO_TEST_CASE(MyTestCase) \n{\n  ...\n}  For each method or function you want to test you should write a new test case and give it a speaking name.\nFor further information see the boost documentation.", 
+            "title": "Writing a unit test"
+        }, 
+        {
+            "location": "/07_mtest/", 
+            "text": "Setting up the test directory\n\n\nFiles your test directory should contain:\n\n\n\n\ngeometry.xml\ninit_test_no.xml\nmaster_ini.xml\nyour_test.py\n\n\n\n\nWriting a test with python\n\n\nYour test has to include the following lines at the beginning of your script:\n\n\n#!/usr/bin/env python\nimport os\nimport sys\nfrom sys import *\nsys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))\nfrom JPSRunTest import JPSRunTestDriver\nfrom utils import *\n\n\n\n\nAfter including these lines you can write the test you want to perform for every ini-file generated from the makeini.py script. The method signature must contain at least two arguments to receive the inifile and the trajectory file from the simulation.\n\n\ndef runtest(inifile, trajfile):\n\n\n\n\nYou can also use more than these arguments like this:\n\n\ndef runtest(inifile, trajfile, x, y, z):\n\n\n\n\nIf you need a more complex example of how to use more arguments for further calculations please see runtest_14.py. If a test hast to fail because an error occurs you can simply exit the script by using something like\n\n\nif condition_fails: \n  exit(FAILURE)\n\n\n\n\nOnce you have written your test you have to make your script executable, so it has to contain a main function which calls the test.\n\n\nif __name__ == \n__main__\n:\n  test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0])\n  test.run_test(testfunction=runtest)\n  logging.info(\n%s exits with SUCCESS\n % (argv[0]))\n  exit(SUCCESS)\n\n\n\n\nNothing more is needed.", 
+            "title": "Make a test"
+        }, 
+        {
+            "location": "/07_mtest/#setting-up-the-test-directory", 
+            "text": "", 
+            "title": "Setting up the test directory"
+        }, 
+        {
+            "location": "/07_mtest/#files-your-test-directory-should-contain", 
+            "text": "geometry.xml\ninit_test_no.xml\nmaster_ini.xml\nyour_test.py", 
+            "title": "Files your test directory should contain:"
+        }, 
+        {
+            "location": "/07_mtest/#writing-a-test-with-python", 
+            "text": "Your test has to include the following lines at the beginning of your script:  #!/usr/bin/env python\nimport os\nimport sys\nfrom sys import *\nsys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))\nfrom JPSRunTest import JPSRunTestDriver\nfrom utils import *  After including these lines you can write the test you want to perform for every ini-file generated from the makeini.py script. The method signature must contain at least two arguments to receive the inifile and the trajectory file from the simulation.  def runtest(inifile, trajfile):  You can also use more than these arguments like this:  def runtest(inifile, trajfile, x, y, z):  If you need a more complex example of how to use more arguments for further calculations please see runtest_14.py. If a test hast to fail because an error occurs you can simply exit the script by using something like  if condition_fails: \n  exit(FAILURE)  Once you have written your test you have to make your script executable, so it has to contain a main function which calls the test.  if __name__ ==  __main__ :\n  test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0])\n  test.run_test(testfunction=runtest)\n  logging.info( %s exits with SUCCESS  % (argv[0]))\n  exit(SUCCESS)  Nothing more is needed.", 
+            "title": "Writing a test with python"
         }, 
         {
             "location": "/00_Disclaimer/", 

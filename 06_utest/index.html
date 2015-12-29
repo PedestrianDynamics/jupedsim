@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Disclaimer - JuPedSim</title>
+  <title>Unit testing - JuPedSim</title>
   
 
   <link rel="shortcut icon" href="../img/favicon.ico">
@@ -20,7 +20,7 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Disclaimer";
+    var mkdocs_page_name = "Unit testing";
   </script>
   
   <script src="../js/jquery-2.1.1.min.js"></script>
@@ -92,8 +92,22 @@
 <li>
           
             <li>
-    <li class="toctree-l1 ">
-        <a class="" href="../06_utest/">Unit testing</a>
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Unit testing</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#setting-up-boost">Setting up Boost</a></li>
+                
+                    <li><a class="toctree-l4" href="#getting-boost">Getting Boost</a></li>
+                
+                    <li><a class="toctree-l4" href="#linking-boost">Linking Boost</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#writing-a-unit-test">Writing a unit test</a></li>
+                
+            
+            </ul>
         
     </li>
 <li>
@@ -106,12 +120,8 @@
 <li>
           
             <li>
-    <li class="toctree-l1 current">
-        <a class="current" href="./">Disclaimer</a>
-        
-            <ul>
-            
-            </ul>
+    <li class="toctree-l1 ">
+        <a class="" href="../00_Disclaimer/">Disclaimer</a>
         
     </li>
 <li>
@@ -138,7 +148,7 @@
     
       
     
-    <li>Disclaimer</li>
+    <li>Unit testing</li>
     <li class="wy-breadcrumbs-aside">
       
     </li>
@@ -148,25 +158,30 @@
           <div role="main">
             <div class="section">
               
-                <p>In no event shall JuPedSim be liable to any party for direct, indirect,
-special, incidental, or consequential damages, including lost profits,
-arising out of the use of this software and its documentation, even if
-JuPedSim has been advised of the possibility of such damage.</p>
-<p>JuPedSim specifically disclaims any warranties, including, but not
-limited to, the implied warranties of merchantability and fitness for a
-particular purpose. The software and accompanying documentation, if any,
-provided hereunder is provided "as is". JuPedSim has no obligation to
-provide maintenance, support, updates, enhancements, or modifications.</p>
-<p>Forschungszentrum Jülich GmbH makes no warranty, expressed or implied,
-to users of JuPedSim, and accepts no responsibility for its use. Users
-of JuPedSim assume sole responsibility for determining the
-appropriateness of its use; and for any actions taken or not taken as a
-result of analyses performed using this tool.</p>
-<p>Users are warned that JuPedSim is intended for <strong>academic</strong> use only. This
-tool is an implementation of several computer models that may or may not
-have predictive capability when applied to a specific set of factual
-circumstances. Lack of accurate predictions by the models could lead to
-erroneous conclusions with regard of life safety.</p>
+                <h1 id="setting-up-boost">Setting up Boost</h1>
+<h2 id="getting-boost">Getting Boost</h2>
+<p>You can get boost here:
+http://www.boost.org/</p>
+<h2 id="linking-boost">Linking Boost</h2>
+<p>Boost should be linked by our cmake script if you call cmake with <code>-DBUILD_TESTING=ON</code></p>
+<h1 id="writing-a-unit-test">Writing a unit test</h1>
+<p>If you write a unit test the first lines in your file should be</p>
+<pre><code class="c++">#define BOOST_TEST_MODULE MyTest
+#define BOOST_TEST_DYN_LINK
+#include &lt;boost/test/unit_test.hpp&gt;
+#include classtotest.h
+
+BOOST_AUTO_TEST_SUITE(MyTestClass)
+
+</code></pre>
+
+<p>Then you can start implementing your test cases by using
+<code>BOOST_AUTO_TEST_CASE(MyTestCase) 
+{
+  ...
+}</code></p>
+<p>For each method or function you want to test you should write a new test case and give it a speaking name.
+For further information see the boost documentation. </p>
               
             </div>
           </div>
@@ -174,8 +189,10 @@ erroneous conclusions with regard of life safety.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="../07_mtest/" class="btn btn-neutral float-right" title="Make a test"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
-        <a href="../07_mtest/" class="btn btn-neutral" title="Make a test"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+        <a href="../05_Workflow/" class="btn btn-neutral" title="Workflow"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -201,8 +218,10 @@ erroneous conclusions with regard of life safety.</p>
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
-        <span><a href="../07_mtest/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../05_Workflow/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
+      
+        <span style="margin-left: 15px"><a href="../07_mtest/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
