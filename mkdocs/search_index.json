@@ -1,7 +1,7 @@
 {
     "docs": [
         {
-            "location": "/home/", 
+            "location": "/", 
             "text": "jpscore\n is the core module for simulation and computing of the trajectories.\n\n\nIt is called  with initialization files (inifiles):\n\n\n jpscore config.xml\n\n\n\n\nwith \nconfig.xml\n a structured \nxml\n project file containing parameter definitions, agents distributions and other \nimportant configurations to run a simulation.\n\n\nEverybody is welcome to contribute to the project, but first have a look at\n\n\n\n\nCode Style Conventions\n\n\nGet started\n\n\nBefore pushing\n\n\nWorkflow with Git\n\n\nSetting up unit tests\n\n\nSetting up model tests\n\n\nUsing Vagrant\n\n\n\n\nImportant\n: When reporting bugs, please make sure to use the development branch \n(v0.8)\n.", 
             "title": "Home"
         }, 
