@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Configuration - JuPedSim/jpscore</title>
+  
+
+  <link rel="shortcut icon" href="../../img/favicon.icon">
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Configuration";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+  <script src="../../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> JuPedSim/jpscore</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../..">Home</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>User guide</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../requirements/">Requirements</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Configuration</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#installation">Installation</a></li>
+                
+                    <li><a class="toctree-l4" href="#using-an-ide">Using an IDE</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../vagrant/">Vagrant</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../quickstart/">Quickstart</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../data_formats/">File formats</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Contributing</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../contributing/code-Style-Conventions/">Code Style</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../contributing/workflow/">Workflow</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../contributing/utest/">Unit testing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Models</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/operativ/">Operational models</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/direction/">Direction strategies</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/routing/">Routing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>About</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/disclaimer/">Disclaimer</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/LICENSE/">License</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/contributors/">Contributors</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">JuPedSim/jpscore</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>User guide &raquo;</li>
+        
+      
+    
+    <li>Configuration</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/JuPedSim/jpscore" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="installation"><a class="toclink" href="#installation">Installation</a></h1>
+<p>JuPedSim-modules can not be installed but compiled.</p>
+<p>For all  modules the compilation is fairly straightforward: </p>
+<ul>
+<li>Create a new directory and change to it</li>
+</ul>
+<pre><code class="javascript">mkdir build &amp;&amp; cd build
+</code></pre>
+
+<ul>
+<li>Run <code>CMake</code> to build the project</li>
+</ul>
+<pre><code class="javascript">cmake .. 
+</code></pre>
+
+<p><em>cmake</em> will check if all required  libraries are installed. 
+- Compile the project
+If the previous step terminated successfully run </p>
+<pre><code class="javascript">make -jN
+</code></pre>
+
+<p>(<em>N</em> is the number of your CPUs)</p>
+<ul>
+<li>Run a simulation
+If the compilation succeeded a binary will be produced in
+the direction <em>bin</em>. Run a simulation using one of
+the ini files in the directory <em>initfiles</em></li>
+</ul>
+<p>For example:</p>
+<pre><code class="javascript">./bin/jpscore inputfiles/Bottleneck/1.1_ini-Bottleneck.xml
+</code></pre>
+
+<h2 id="using-an-ide"><a class="toclink" href="#using-an-ide">Using an IDE</a></h2>
+<ul>
+<li>
+<p><a href="https://www.jetbrains.com/clion/">CLion</a> (Windows, Linux, Mac)</p>
+<p><em>CLion</em> has build in <em>CMake</em>-support so you only have to start a new project an set the project root to your <code>jpscore</code> directory.</p>
+</li>
+<li>
+<p><a href="https://eclipse.org/">Eclipse</a> (Windows, Linux, Mac)</p>
+<p>Build an <em>Eclipse Project</em> with <em>CMake</em> or the <em>CMake-gui</em> and open it with <em>Eclipse</em>.</p>
+</li>
+<li>
+<p><a href="http://msdn.microsoft.com/de-de/library/dd831853.aspx">Visual Studio 2013</a> (v0.6+, Windows) </p>
+<p>Run the <em>CMake-gui</em> with the generator <em>Visual Studio 12 (2013)</em> and click on the <code>*.sln</code> file to open it in Visual Studio.</p>
+<p>Then click on <code>build-&gt;build solution</code>.
+This should build your code.</p>
+<p>Current issues are known with the python test cases. Most of them are Unix specific.
+However the compilation of <code>jpscore</code> works fine. </p>
+</li>
+<li>
+<p>XCode (v0.6+ Mac)</p>
+<p>Run the <em>CMake-gui</em> and generate an <em>XCode</em>-Project then open it with <em>XCode</em>.</p>
+<p>On Mac the standard compiler is clang/clang++.
+If the project compiles out of your console via cmake/make that does not mean it also compiles out of <em>XCode</em>.
+<em>XCode</em> forces some more strict rules while compiling.</p>
+<p>For instance, there was one error we could not explain:
+<em>XCode</em> seems not to know that <code>std::unordered_map.embrace(...)</code> is a valid function call
+and returns with an error message.</p>
+<p>However this is an <em>XCode</em>-specific problem. It does not occur if you are using e.g. <code>CLion</code>.</p>
+<p>Even if you compile out of console with the same compiler this throws no error. </p>
+<p>You can avoid this by using the function <code>std::unordered_map.insert(std::make_pair(...))</code> instead.</p>
+</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../vagrant/" class="btn btn-neutral float-right" title="Vagrant"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../requirements/" class="btn btn-neutral" title="Requirements"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>.</p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../requirements/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../vagrant/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+
+</body>
+</html>

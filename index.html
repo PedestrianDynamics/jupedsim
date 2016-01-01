@@ -5,10 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>JuPedSim</title>
+  <title>JuPedSim/jpscore</title>
   
 
-  <link rel="shortcut icon" href="./img/favicon.ico">
+  <link rel="shortcut icon" href="img/favicon.icon">
+  
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
@@ -38,7 +39,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="." class="icon icon-home"> JuPedSim</a>
+        <a href="." class="icon icon-home"> JuPedSim/jpscore</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -55,65 +56,144 @@
         
             <ul>
             
+                <li class="toctree-l3"><a href="#jpscore">JPScore</a></li>
+                
+                    <li><a class="toctree-l4" href="#usage">Usage</a></li>
+                
+            
             </ul>
         
     </li>
 <li>
           
             <li>
+    <ul class="subnav">
+    <li><span>User guide</span></li>
+
+        
+            
     <li class="toctree-l1 ">
-        <a class="" href="08_Vagrant/">Getting started</a>
+        <a class="" href="user_guide/requirements/">Requirements</a>
         
     </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="user_guide/configuration/">Configuration</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="user_guide/vagrant/">Vagrant</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="user_guide/quickstart/">Quickstart</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="user_guide/data_formats/">File formats</a>
+        
+    </li>
+
+        
+    </ul>
 <li>
           
             <li>
+    <ul class="subnav">
+    <li><span>Contributing</span></li>
+
+        
+            
     <li class="toctree-l1 ">
-        <a class="" href="02_Code-Style-Conventions/">Contributing</a>
+        <a class="" href="contributing/code-Style-Conventions/">Code Style</a>
         
     </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="contributing/workflow/">Workflow</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="contributing/utest/">Unit testing</a>
+        
+    </li>
+
+        
+    </ul>
 <li>
           
             <li>
+    <ul class="subnav">
+    <li><span>Models</span></li>
+
+        
+            
     <li class="toctree-l1 ">
-        <a class="" href="02_Code-Style-Conventions/">Style conventione</a>
+        <a class="" href="models/operativ/">Operational models</a>
         
     </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="models/direction/">Direction strategies</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="models/routing/">Routing</a>
+        
+    </li>
+
+        
+    </ul>
 <li>
           
             <li>
+    <ul class="subnav">
+    <li><span>About</span></li>
+
+        
+            
     <li class="toctree-l1 ">
-        <a class="" href="04_pushing/">Pushing</a>
+        <a class="" href="about/disclaimer/">Disclaimer</a>
         
     </li>
-<li>
-          
-            <li>
+
+        
+            
     <li class="toctree-l1 ">
-        <a class="" href="05_Workflow/">Workflow</a>
+        <a class="" href="about/LICENSE/">License</a>
         
     </li>
-<li>
-          
-            <li>
+
+        
+            
     <li class="toctree-l1 ">
-        <a class="" href="06_utest/">Unit testing</a>
+        <a class="" href="about/contributors/">Contributors</a>
         
     </li>
-<li>
-          
-            <li>
-    <li class="toctree-l1 ">
-        <a class="" href="07_mtest/">Make a test</a>
+
         
-    </li>
-<li>
-          
-            <li>
-    <li class="toctree-l1 ">
-        <a class="" href="00_Disclaimer/">Disclaimer</a>
-        
-    </li>
+    </ul>
 <li>
           
         </ul>
@@ -126,7 +206,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href=".">JuPedSim</a>
+        <a href=".">JuPedSim/jpscore</a>
       </nav>
 
       
@@ -141,6 +221,10 @@
     <li>Home</li>
     <li class="wy-breadcrumbs-aside">
       
+        
+          <a href="https://github.com/JuPedSim/jpscore" class="icon icon-github"> Edit on GitHub</a>
+        
+      
     </li>
   </ul>
   <hr/>
@@ -148,24 +232,55 @@
           <div role="main">
             <div class="section">
               
-                <p><code>jpscore</code> is the core module for simulation and computing of the trajectories.</p>
-<p>It is called  with initialization files (inifiles):</p>
+                <h1 id="jpscore"><a class="toclink" href="#jpscore">JPScore</a></h1>
+<p>Core module for simulation and computing of trajectories.
+<!-- <img alt="JuPedSim" title="Logo by Nadine" src="img/logo.png" width="100px"  align="right"> --></p>
+<p><a href="https://travis-ci.org/JuPedSim/jpscore"><img alt="build status" src="https://travis-ci.org/JuPedSim/jpscore.svg?branch=v0.8" /></a>
+<a href="https://codecov.io/github/JuPedSim/jpscore?branch=v0.8"><img alt="codecov.io" src="https://codecov.io/github/JuPedSim/jpscore/coverage.svg?branch=v0.8" /></a></p>
+<hr />
+<p><strong>Note</strong>: When reporting bugs, please make sure to use the development branch v0.8.</p>
+<hr />
+<p>JuPedSim comes with four loosely coupled modules: </p>
+<ol>
+<li>JPScore: The simulation core</li>
+<li><a href="https://cst.version.fz-juelich.de/jupedsim/jpsvis">JPSvis</a>: Geometry and trajectories visualization tool</li>
+<li><a href="https://cst.version.fz-juelich.de/jupedsim/jpsreport">JPSreport</a>: Implementation of different measurement methods to evaluate out of trajectories the density, the velocity and the flow.</li>
+<li><a href="https://cst.version.fz-juelich.de/jupedsim/jpsreditor">JPSreditor</a>: Geometry editor.</li>
+</ol>
+<h2 id="usage"><a class="toclink" href="#usage">Usage</a></h2>
+<p><code>jpscore</code> is called  with initialization files (inifiles):</p>
 <pre><code> jpscore config.xml
 </code></pre>
 
 <p>with <code>config.xml</code> a structured <code>xml</code> project file containing parameter definitions, agents distributions and other 
 important configurations to run a simulation.</p>
+<!-- <p> -->
+
+<!-- <h1 style="position: absolute; -->
+
+<!--     width: 1px; -->
+
+<!--     height: 1px; -->
+
+<!--     padding: 0; -->
+
+<!--     margin: -1px; -->
+
+<!--     overflow: hidden; -->
+
+<!--     clip: rect(0,0,0,0); -->
+
+<!--     border: 0;">JuPedSim</h1> -->
+
+<!-- <a href="http://www.youtube.com/watch?v=t_9MC-o_aGM"> -->
+
+<!-- <img alt="Django REST Framework" title="Logo by Nadine" src="http://img.youtube.com/vi/t_9MC-o_aGM/0.jpg" width="400px" style="display: block; margin: 0 auto 0 auto"> -->
+
+<!-- </a> -->
+
+<!-- </p> -->
+
 <p>Everybody is welcome to contribute to the project, but first have a look at</p>
-<ol>
-<li><a href="./02_Code-Style-Conventions">Code Style Conventions</a></li>
-<li><a href="./03_getStarted">Get started</a></li>
-<li><a href="./04_pushing">Before pushing</a></li>
-<li><a href="./05_Workflow">Workflow with Git</a></li>
-<li><a href="./06_utest">Setting up unit tests</a></li>
-<li><a href="./07_mtest">Setting up model tests</a></li>
-<li><a href="./08_vagrant">Using Vagrant</a></li>
-</ol>
-<p><strong>Important</strong>: When reporting bugs, please make sure to use the development branch <em>(v0.8)</em>.</p>
               
             </div>
           </div>
@@ -173,7 +288,7 @@ important configurations to run a simulation.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="08_Vagrant/" class="btn btn-neutral float-right" title="Getting started"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="user_guide/requirements/" class="btn btn-neutral float-right" title="Requirements"/>Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
     </div>
@@ -184,7 +299,7 @@ important configurations to run a simulation.</p>
   <div role="contentinfo">
     <!-- Copyright etc -->
     
-      <p>© 2016 Forschungszentrum Juelich GmbH</p>
+      <p>Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>.</p>
     
   </div>
 
@@ -201,9 +316,11 @@ important configurations to run a simulation.</p>
 <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
+          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span style="margin-left: 15px"><a href="08_Vagrant/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+        <span style="margin-left: 15px"><a href="user_guide/requirements/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
@@ -213,5 +330,5 @@ important configurations to run a simulation.</p>
 
 <!--
 MkDocs version : 0.14.0
-Build Date UTC : 2015-12-29 09:17:15.410375
+Build Date UTC : 2016-01-01 23:37:57.406479
 -->
