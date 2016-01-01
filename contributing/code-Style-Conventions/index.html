@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Code Style - JuPedSim/jpscore</title>
+  
+
+  <link rel="shortcut icon" href="../../img/favicon.icon">
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Code Style";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+  <script src="../../js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> JuPedSim/jpscore</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../..">Home</a>
+        
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>User guide</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/requirements/">Requirements</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/configuration/">Configuration</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/vagrant/">Vagrant</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/quickstart/">Quickstart</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/data_formats/">File formats</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Contributing</span></li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">Code Style</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#code-style">Code Style</a></li>
+                
+                    <li><a class="toctree-l4" href="#tabs-vs-spaces">Tabs vs Spaces</a></li>
+                
+                    <li><a class="toctree-l4" href="#comments">Comments</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../workflow/">Workflow</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../utest/">Unit testing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Models</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/operativ/">Operational models</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/direction/">Direction strategies</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/routing/">Routing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>About</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/disclaimer/">Disclaimer</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/LICENSE/">License</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/contributors/">Contributors</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">JuPedSim/jpscore</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Contributing &raquo;</li>
+        
+      
+    
+    <li>Code Style</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/JuPedSim/jpscore" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="code-style"><a class="toclink" href="#code-style">Code Style</a></h1>
+<p>In JuPedSim we try to code according to the <em>Stroustrup</em> style of formatting/indenting. 
+If you want (or have) to write code in JuPedSim you really <strong>need</strong> to respect that style.
+This is important not just aesthetically but also practically. Diff commits are much more clearer and cleaner.</p>
+<p>The code is formated using the automatic formatter <a href="http://astyle.sourceforge.net/astyle.html">astyle</a>  with the option <code>--style=stroustrup</code>:</p>
+<blockquote>
+<p>Stroustrup style formatting/indenting uses stroustrup brackets. 
+Brackets are broken from function definitions only.
+Brackets are attached to everything else including 
+namespaces, classes, and statements within a function, arrays, structs, and enums. 
+This style frequently is used with an indent of 5 spaces. </p>
+</blockquote>
+<p>Here is an <strong>example:</strong></p>
+<pre><code class="python">int Foo(bool isBar) 
+{
+     if (isBar) {
+          bar();
+          return 1;
+     } else
+          return 0;
+}
+</code></pre>
+
+<h2 id="tabs-vs-spaces"><a class="toclink" href="#tabs-vs-spaces">Tabs vs Spaces</a></h2>
+<p>This can be a long and religious discussion, to make it short <em>DO NOT</em> use tabs, just spaces please.</p>
+<p>Here are some hints to configure your editor in order to use the <em>stroustrup</em> style</p>
+<ul>
+<li><strong>Emacs</strong>:
+    Add this to your <code>.emacs</code></li>
+</ul>
+<pre><code class="lisp">(setq c-default-style &quot;stroustrup&quot; c-basic-offset 5)
+(setq indent-tabs-mode nil)
+</code></pre>
+
+<ul>
+<li><strong>Vim</strong>:
+    Set in your config file these variables</li>
+</ul>
+<pre><code class="javascript">:set autoindent
+:set cindent
+:set expandtab
+:set shiftwidth=5
+:set softtabstop=5
+</code></pre>
+
+<ul>
+<li><strong>Eclipse</strong>:
+    Here is a <a href="http://astyleclipse.sourceforge.net/">plugin</a> for astyle in eclipse.
+    Read also
+    <a href="https://superuser.com/questions/462221/how-do-i-reliably-change-the-indentation-width-in-eclipse">How to change indentation width in eclipse?</a></li>
+</ul>
+<h2 id="comments"><a class="toclink" href="#comments">Comments</a></h2>
+<p>Comments and commit messages have to be written in <strong>English</strong>. Please write clear and concise commit messages so that
+your co-developers can directly grasp what changes on the code are you committing/pushing.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../workflow/" class="btn btn-neutral float-right" title="Workflow"/>Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../user_guide/data_formats/" class="btn btn-neutral" title="File formats"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>.</p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../../user_guide/data_formats/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../workflow/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+
+</body>
+</html>
