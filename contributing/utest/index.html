@@ -185,7 +185,7 @@
         
             <li><a href="#writing-a-unit-test">Writing a unit test</a></li>
         
-            <li><a href="#testing-the-functionality-of-a-model-writing-a-test-with-python">Testing the functionality of a model: writing a test with python</a></li>
+            <li><a href="#verification-and-validation">Verification and validation</a></li>
         
     
     </ul>
@@ -194,15 +194,15 @@
 
 <h1 id="unit-testing-verification-and-validation-tests"><a class="toclink" href="#unit-testing-verification-and-validation-tests">Unit testing, verification and validation tests</a></h1>
 <p>Testing should be enabled by cmake as follows:</p>
-<pre><code>cmake -DBUILD_TESTING=ON ..
+<pre><code class="javascript">cmake -DBUILD_TESTING=ON ..
 </code></pre>
 
 <p>After compiling (<code>make</code>) the tests can be called as follows:</p>
-<pre><code>ctest
+<pre><code class="javascript">ctest
 </code></pre>
 
 <p>This will take some hours time (depending on your machine). Threfore, a quick testing could be used:</p>
-<pre><code>ctest -R Boost
+<pre><code class="javascript">ctest -R Boost
 </code></pre>
 
 <p>which run a limited set of tests on the code.</p>
@@ -224,17 +224,37 @@ BOOST_AUTO_TEST_SUITE(MyTestClass)
 </code></pre>
 
 <p>For each method or function you want to test you should write a new test case and give it a speaking name.</p>
-<h2 id="testing-the-functionality-of-a-model-writing-a-test-with-python"><a class="toclink" href="#testing-the-functionality-of-a-model-writing-a-test-with-python">Testing the functionality of a model: writing a test with python</a></h2>
+<h2 id="verification-and-validation"><a class="toclink" href="#verification-and-validation">Verification and validation</a></h2>
 <p>Besides unit testing, we use in JuPedSim python-driven tests for verification and validation purposes.
-Several benchmarks are implemented e.g. Rimea and NIST.</p>
-<p>To write additional tests, create a directory under <em>Utest/</em>.
-Files your test directory should contain are:</p>
-<ol>
-<li>geometry.xml</li>
-<li>init_test.xml</li>
-<li>master_ini.xml</li>
-<li>your_runtest.py</li>
-</ol>
+Several validation and verification tests for <em>JuPedSim</em> (jpscore) are defined in the following section (e.g. Rimea and NIST).
+In order to make the nightly builds run automatically, consider the following steps, before adding new tests.
+This procedure is also recommended to make simulations with several inifiles e.g. different seeds.</p>
+<p>To write additional tests, create a directory under <em>Utest/</em>.</p>
+<ul>
+<li>Create in <em>./jpscore/Utest/</em> a new direct with a descriptive name. For
+   example: <em>/Utest/test_case1/</em></li>
+<li>Put in that directory an ini-file (referred to as &ldquo;master-inifile&rdquo;)
+   and all the relevant files for a simulation, e.g. geometry file, etc. In the master-inifile you can use python syntax</li>
+</ul>
+<p>Example:</p>
+<pre><code class="xml">   &lt;max_sim_time&gt;[3,4]&lt;/max_sim_time&gt; 
+   &lt;seed&gt;range(1, 10)&lt;/seed&gt;
+</code></pre>
+
+<ul>
+<li>run the script <code>makeini.py</code> with the obligatory option <code>-f</code>: Using the
+    aforementioned example the call is:</li>
+</ul>
+<pre><code class="bash">   python makeini.py -f test_case1/inifile.xml
+</code></pre>
+
+<p>The Script is going to create two directories:
+- test_case/trajectories: Here live the simulation trajectories.
+- test_case/inifiles: and here the inifiles, that will be produced  based on the master inifile (in this case test_case1/inifile.xml).
+    Note, that the geometry file and the trajectory files are all relative to the project files in the directory <em>inifiles</em>.</p>
+<ul>
+<li>Write a runtest-script. Here you have to define the logic of your test. What should be tested? When does the file succeed or file? etc.</li>
+</ul>
 <p>Your script has to start with the following lines:</p>
 <pre><code class="python">#!/usr/bin/env python
 import os
