@@ -210,13 +210,44 @@
     
         <li class="main active"><a href="#operational-models">Operational models</a></li>
         
+            <li><a href="#generalized-centrifugal-force-model">Generalized Centrifugal Force Model</a></li>
+        
+            <li><a href="#gompertz-model">Gompertz Model</a></li>
+        
+            <li><a href="#collision-free-speed-model">Collision-free speed model</a></li>
+        
+            <li><a href="#wall-avoidance-model">Wall-avoidance model</a></li>
+        
     
     </ul>
 </div></div>
             <div class="col-md-9" role="main">
 
 <h1 id="operational-models"><a class="toclink" href="#operational-models">Operational models</a></h1>
-<p>todo</p></div>
+<p>Four operational models are implemented in <code>jpscore</code>. They define the update rules how pedestrian move from one step to the next.</p>
+<h3 id="generalized-centrifugal-force-model"><a class="toclink" href="#generalized-centrifugal-force-model"><a href="http://journals.aps.org/pre/abstract/10.1103/PhysRevE.82.046111" title="Mohcine Chraibi, Armin Seyfried, and Andreas Schadschneider Phys. Rev. E 82, 046111">Generalized Centrifugal Force Model</a></a></h3>
+<p>A force-based model.</p>
+<p>Usage:</p>
+<pre><code class="xml">&lt;model operational_model_id=&quot;1&quot; description=&quot;gcfm&quot;&gt;
+</code></pre>
+
+<h3 id="gompertz-model"><a class="toclink" href="#gompertz-model"><a href="http://trg-india.org/trg_conference_2015" title="Kemloh Wagoum, Armel Ulrich, Mohcine Chraibi, Jun Zhang and Gregor Lämmel. JuPedSim: An Open Framework for Simulating and Analyzing the Dynamics of Pedestrians. In 3rd Conference of Transportation Research Group of India, 2015.">Gompertz Model</a></a></h3>
+<p>A force-based model.</p>
+<p>Usage:</p>
+<pre><code class="xml">&lt;model operational_model_id=&quot;2&quot; description=&quot;gompertz&quot;&gt;
+</code></pre>
+
+<h3 id="collision-free-speed-model"><a class="toclink" href="#collision-free-speed-model"><a href="http://arxiv.org/abs/1512.05597)" title="Tordeux, Antoine, Chraibi, Mohcine and Seyfried, Armin, Collision-free speed model for pedestrian dynamics. In Traffic and Granular Flow  '15, to appear.">Collision-free speed model</a></a></h3>
+<p>A velocity-based model</p>
+<p>Usage:</p>
+<pre><code class="xml">&lt;model operational_model_id=&quot;3&quot; description=&quot;Tordeux2015&quot;&gt;
+</code></pre>
+
+<h3 id="wall-avoidance-model"><a class="toclink" href="#wall-avoidance-model"><a href="https://owncloud.zam.kfa-juelich.de/index.php/s/MomKWVu6mFvnrSf" title="Arne, Graf Master thesis">Wall-avoidance model</a></a></h3>
+<p>A velocity-based model</p>
+<p>Usage:</p>
+<pre><code class="xml">&lt;model operational_model_id=&quot;4&quot; description=&quot;gradnav&quot;&gt;
+</code></pre></div>
         </div>
 
         <script src="../../js/jquery-1.10.2.min.js"></script>
