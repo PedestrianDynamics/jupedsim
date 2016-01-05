@@ -23,7 +23,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /** 
- * \mainpage
+ * 
  * <center> 
  * see also the <a href="../index.html">VisiLibity Project Page</a>
  * </center>
