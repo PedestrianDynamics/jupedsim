@@ -1,221 +1,281 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <meta name="author" content="Mohcine Chraibi">
-        <link rel="canonical" href="http://www.jupedsim.org/tests/rimea/">
-        <link rel="shortcut icon" href="../../favicon.icon">
-        
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Mohcine Chraibi">
+  
+  <title>RiMEA - JuPedSim/jpscore</title>
+  
 
-	<title>RiMEA - JuPedSim/jpscore</title>
+  <link rel="shortcut icon" href="../../favicon.icon">
+  
 
-        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
-        <link href="../../css/font-awesome-4.0.3.css" rel="stylesheet">
-        <link rel="stylesheet" href="../../css/highlight.css">
-        <link href="../../css/base.css" rel="stylesheet">
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/highlight.css">
 
-        
-    </head>
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "RiMEA";
+    var mkdocs_page_input_path = "tests/rimea.md";
+    var mkdocs_page_url = "/tests/rimea/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js"></script>
+  <script src="../../js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
+  <script src="../../js/theme.js"></script> 
+  <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
-    <body>
+  
+</head>
 
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container">
+<body class="wy-body-for-nav" role="document">
 
-        <!-- Collapsed navigation -->
-        <div class="navbar-header">
-            <!-- Expander button -->
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
+  <div class="wy-grid-for-nav">
 
-            <!-- Main title -->
-            <a class="navbar-brand" href="../..">JuPedSim/jpscore</a>
-        </div>
-
-        <!-- Expanded navigation -->
-        <div class="navbar-collapse collapse">
-            <!-- Main navigation -->
-            <ul class="nav navbar-nav">
-            
-            
-                <li >
-                    <a href="../..">Home</a>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">User guide <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="../../user_guide/requirements/">Requirements</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../user_guide/configuration/">Configuration</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../user_guide/vagrant/">Vagrant</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../user_guide/quickstart/">Quickstart</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../user_guide/data_formats/">File formats</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Contributing <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="../../contributing/code-Style-Conventions/">Code Style</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../contributing/workflow/">Workflow</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../contributing/utest/">Unit testing</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Models <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="../../models/operativ/">Operational models</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../models/direction/">Direction strategies</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../models/routing/">Routing</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown active">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Tests <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="../introduction/">Introduction</a>
-                        </li>
-                    
-                        <li class="active">
-                            <a href="./">RiMEA</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../juelich/">Juelich</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">About <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                    
-                        <li >
-                            <a href="../../about/disclaimer/">Disclaimer</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../about/LICENSE/">License</a>
-                        </li>
-                    
-                        <li >
-                            <a href="../../about/contributors/">Contributors</a>
-                        </li>
-                    
-                    </ul>
-                </li>
-            
-            
-            
-                <li >
-                    <a href="../../publications/">Publications</a>
-                </li>
-            
-            
-            </ul>
-
-            <!-- Search, Navigation and Repo links -->
-            <ul class="nav navbar-nav navbar-right">
-                <li >
-                    <a rel="next" href="../introduction/">
-                        <i class="fa fa-arrow-left"></i> Previous
-                    </a>
-                </li>
-                <li >
-                    <a rel="prev" href="../juelich/">
-                        Next <i class="fa fa-arrow-right"></i>
-                    </a>
-                </li>
-                
-                <li>
-                    <a href="https://github.com/JuPedSim/jpscore">
-                        
-                            <i class="fa fa-github"></i>
-                        
-                        GitHub
-                    </a>
-                </li>
-                
-            </ul>
-        </div>
-    </div>
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> JuPedSim/jpscore</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
 </div>
+      </div>
 
-        <div class="container">
-            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-    
-        <li class="main active"><a href="#rimea-tests">RiMEA tests</a></li>
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../..">Home</a>
         
-    
-    </ul>
-</div></div>
-            <div class="col-md-9" role="main">
+    </li>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>User guide</span></li>
 
-<h1 id="rimea-tests"><a class="toclink" href="#rimea-tests">RiMEA tests</a></h1>
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/requirements/">Requirements</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/configuration/">Configuration</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/vagrant/">Vagrant</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/quickstart/">Quickstart</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../user_guide/data_formats/">File formats</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Contributing</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../contributing/code-Style-Conventions/">Code Style</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../contributing/workflow/">Workflow</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../contributing/utest/">Unit testing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Models</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/operativ/">Operational models</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/direction/">Direction strategies</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../models/routing/">Routing</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>Tests</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../introduction/">Introduction</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 current">
+        <a class="current" href="./">RiMEA</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#rimea-tests">RiMEA tests</a></li>
+                
+            
+            </ul>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../juelich/">Juelich</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <ul class="subnav">
+    <li><span>About</span></li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/disclaimer/">Disclaimer</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/LICENSE/">License</a>
+        
+    </li>
+
+        
+            
+    <li class="toctree-l1 ">
+        <a class="" href="../../about/contributors/">Contributors</a>
+        
+    </li>
+
+        
+    </ul>
+<li>
+          
+            <li>
+    <li class="toctree-l1 ">
+        <a class="" href="../../publications/">Publications</a>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">JuPedSim/jpscore</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Tests &raquo;</li>
+        
+      
+    
+    <li>RiMEA</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        
+          <a href="https://github.com/JuPedSim/jpscore" class="icon icon-github"> Edit on GitHub</a>
+        
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="rimea-tests"><a class="toclink" href="#rimea-tests">RiMEA tests</a></h1>
 <p>All these tests are described in more details in this <a href="http://www.rimea.de/fileadmin/files/dok/richtlinien/r2.2.1.pdf">article</a>.
 The notes give hints about specific implementation in JuPedSim.</p>
 <hr />
@@ -264,7 +324,7 @@ The notes give hints about specific implementation in JuPedSim.</p>
 <p><strong>Test 8</strong>: A 3D building is simulated and the influence of parameter e.g. speed
     is investigated.</p>
 <p>It should be shown how the evacuation time behaves with respect
-to the investigated parameter. <sup id="fnref:note1"><a class="footnote-ref" href="#fn:note1" rel="footnote">1</a></sup></p>
+to the investigated parameter. <sup id="fnref:rimeaNote1"><a class="footnote-ref" href="#fn:rimeaNote1" rel="footnote">1</a></sup></p>
 </li>
 <li>
 <p><strong>Test 9</strong>: 1000 pedestrians are distributed in a room with 4 exits.</p>
@@ -272,11 +332,11 @@ to the investigated parameter. <sup id="fnref:note1"><a class="footnote-ref" hre
 <li>scenario 1: All 4 exits are open</li>
 <li>scenario 2: 2 exits are closed. The remaining 2 are still open</li>
 </ul>
-<p>The flow should nearly be doubled in scenario 1. <sup id="fnref:note2"><a class="footnote-ref" href="#fn:note2" rel="footnote">2</a></sup></p>
+<p>The flow should nearly be doubled in scenario 1. <sup id="fnref:rimeaNote2"><a class="footnote-ref" href="#fn:rimeaNote2" rel="footnote">2</a></sup></p>
 </li>
 <li>
 <p><strong>Test 10</strong>: Pedestrians are distributed in 12 different rooms. The building has two exits.</p>
-<p>The Pedestrians have exactly assigned exit numbers and should evacuate through these. <sup id="fnref:note3"><a class="footnote-ref" href="#fn:note3" rel="footnote">3</a></sup></p>
+<p>The Pedestrians have exactly assigned exit numbers and should evacuate through these. <sup id="fnref:rimeaNote3"><a class="footnote-ref" href="#fn:rimeaNote3" rel="footnote">3</a></sup></p>
 </li>
 <li>
 <p><strong>Test 11</strong>: 300 pedestrians are distributed in a room with two exits.</p>
@@ -284,12 +344,12 @@ to the investigated parameter. <sup id="fnref:note1"><a class="footnote-ref" hre
 </li>
 <li>
 <p><strong>Test 12</strong>: Two bottlenecks are connected with a long corridor.</p>
-<p>At the last exit there should be no jam. <sup id="fnref:note4"><a class="footnote-ref" href="#fn:note4" rel="footnote">4</a></sup></p>
+<p>At the last exit there should be no jam. <sup id="fnref:rimeaNote4"><a class="footnote-ref" href="#fn:rimeaNote4" rel="footnote">4</a></sup></p>
 </li>
 <li>
 <p><strong>Test 13</strong>: Pedestrian coming out from a bottleneck along a corridor. At the end of the corridor is a stair.</p>
 <p>Since pedestrians have to reduce their speed on the stair, a jam should be observed at the beginning of the stair.</p>
-<p>In case of jam, flow at the beginning of the stair should be smaller than the flow in the corridor.<sup id="fnref:note5"><a class="footnote-ref" href="#fn:note5" rel="footnote">5</a></sup> </p>
+<p>In case of jam, flow at the beginning of the stair should be smaller than the flow in the corridor.<sup id="fnref:rimeaNote5"><a class="footnote-ref" href="#fn:rimeaNote5" rel="footnote">5</a></sup> </p>
 </li>
 <li>
 <p><strong>Test 14</strong>: Pedestrian&rsquo;s evacuation to an exit. Pedestrians have two possible routes:</p>
@@ -308,29 +368,6 @@ There are 4 stats that should be documented:</p>
 </ol>
 </li>
 </ul>
-<div class="footnote">
-<hr />
-<ol>
-<li id="fn:note1">
-<p>This is not a fail criterion. It is just for documentation purposes.&#160;<a class="footnote-backref" href="#fnref:note1" rev="footnote" title="Jump back to footnote 1 in the text">&#8617;</a></p>
-</li>
-<li id="fn:note2">
-<p>For simplicity in JuPedSim we simulate two identical rooms:<br />
-      - room left: with 4 exits. All of them are open<br />
-      - room right with 4 exits. two of them are closed<br />
-      - We write the trajectory in plain txt-format, to avoid a long lasting xml-parsing&#160;<a class="footnote-backref" href="#fnref:note2" rev="footnote" title="Jump back to footnote 2 in the text">&#8617;</a></p>
-</li>
-<li id="fn:note3">
-<p>Pedestrian are assigned  to two different groups. We verify if pedestrians in the two groups pass the exits.
-In the simulation pedestrians disappear once they are outside therefore we check if a pedestrian goes through line  <code>exit - displacement</code>.&#160;<a class="footnote-backref" href="#fnref:note3" rev="footnote" title="Jump back to footnote 3 in the text">&#8617;</a></p>
-</li>
-<li id="fn:note4">
-<p>The condition of this test is not clear enough&hellip;
-In the last exit there should be no jam, which means <script type="math/tex">J_{bottleneck} >= J_{last}.</script>
-However, this condition is not enough to quantify a jam.&#160;<a class="footnote-backref" href="#fnref:note4" rev="footnote" title="Jump back to footnote 4 in the text">&#8617;</a></p>
-</li>
-<li id="fn:note5">
-<p>The reduced speed on stairs (up) is according to Tab 1 in <a href="http://link.springer.com/chapter/10.1007%2F978-3-319-02447-9_27" title="Burghardt, Sebastian and Seyfried, Armin and Klingsch, Wolfram. Fundamental diagram of stairs: Critical review and topographical measurements. Pedestrian and Evacuation Dynamics 2012">Burghardt2014</a>.</p>
 <table>
 <thead>
 <tr>
@@ -355,22 +392,82 @@ However, this condition is not enough to quantify a jam.&#160;<a class="footnote
 <td>FM</td>
 <td>0.55 m/s</td>
 </tr>
-<tr>
-<td>----------</td>
-<td>----------------</td>
-</tr>
 </tbody>
 </table>
-<p>Therefore, we choose for <script type="math/tex">v^0_{upstairs}</script> a Gauss-distribution with <script type="math/tex">\mu = 0.675</script> and <script type="math/tex">\sigma = 0.04</script>&#160;<a class="footnote-backref" href="#fnref:note5" rev="footnote" title="Jump back to footnote 5 in the text">&#8617;</a></p>
+<p>Therefore, we choose for <script type="math/tex">v^0_{upstairs}</script> a Gauss-distribution with <script type="math/tex">\mu = 0.675</script> and <script type="math/tex">\sigma = 0.04</script>.</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:rimeaNote1">
+<p>This is not a fail criterion. It is just for documentation purposes.&#160;<a class="footnote-backref" href="#fnref:rimeaNote1" rev="footnote" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:rimeaNote2">
+<p>For simplicity in JuPedSim we simulate two identical rooms:<br />
+      - room left: with 4 exits. All of them are open<br />
+      - room right with 4 exits. two of them are closed<br />
+      - We write the trajectory in plain txt-format, to avoid a long lasting xml-parsing&#160;<a class="footnote-backref" href="#fnref:rimeaNote2" rev="footnote" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:rimeaNote3">
+<p>Pedestrian are assigned  to two different groups. We verify if pedestrians in the two groups pass the exits.
+In the simulation pedestrians disappear once they are outside therefore we check if a pedestrian goes through line  <code>exit - displacement</code>.&#160;<a class="footnote-backref" href="#fnref:rimeaNote3" rev="footnote" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+<li id="fn:rimeaNote4">
+<p>The condition of this test is not clear enough&hellip;
+In the last exit there should be no jam, which means <script type="math/tex">J_{bottleneck} >= J_{last}.</script>
+However, this condition is not enough to quantify a jam.&#160;<a class="footnote-backref" href="#fnref:rimeaNote4" rev="footnote" title="Jump back to footnote 4 in the text">&#8617;</a></p>
+</li>
+<li id="fn:rimeaNote5">
+<p>The reduced speed on stairs (up) is according to Tab 1 in <a href="http://link.springer.com/chapter/10.1007%2F978-3-319-02447-9_27" title="Burghardt, Sebastian and Seyfried, Armin and Klingsch, Wolfram. Fundamental diagram of stairs: Critical review and topographical measurements. Pedestrian and Evacuation Dynamics 2012">Burghardt2014</a>.&#160;<a class="footnote-backref" href="#fnref:rimeaNote5" rev="footnote" title="Jump back to footnote 5 in the text">&#8617;</a></p>
 </li>
 </ol>
-</div></div>
-        </div>
+</div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../juelich/" class="btn btn-neutral float-right" title="Juelich">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../introduction/" class="btn btn-neutral" title="Introduction"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
 
-        <script src="../../js/jquery-1.10.2.min.js"></script>
-        <script src="../../js/bootstrap-3.0.3.min.js"></script>
-        <script src="../../js/highlight.pack.js"></script>
-        <script src="../../js/base.js"></script>
-        <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    </body>
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+      <p>Copyright &copy; 2016 <a href="http://www.fz-juelich.de">Forschungszentrum Jülich GmbH</a>. Maintenance by <a href="http://www.fz-juelich.de/SharedDocs/Personen/IAS/JSC/EN/staff/chraibi_m.html/">Mohcine Chraibi</a>.</p>
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/JuPedSim/jpscore" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../introduction/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../juelich/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+
+</body>
 </html>
