@@ -12,7 +12,7 @@
 
 	<title>{% if page_title %}{{ page_title }} - {% endif %}{{ site_name }}</title>
 
-        <link href="{{ base_url }}/css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="{{ base_url }}/css/bootstrap-3.0.3.min.css" rel="stylesheet">
         <link href="{{ base_url }}/css/font-awesome-4.0.3.css" rel="stylesheet">
         <link rel="stylesheet" href="{{ base_url }}/css/highlight.css">
         <link href="{{ base_url }}/css/base.css" rel="stylesheet">
@@ -47,6 +47,15 @@
             <div class="col-md-3">{% include "toc.html" %}</div>
             <div class="col-md-9" role="main">{% include "content.html" %}</div>
         </div>
+
+	<footer class="col-md-12">
+		<hr>
+		{% if copyright %}
+		<p>{{ copyright }}</p>
+		{% endif %}
+		<p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+	</footer>
+
 
         <script src="{{ base_url }}/js/jquery-1.10.2.min.js"></script>
         <script src="{{ base_url }}/js/bootstrap-3.0.3.min.js"></script>
