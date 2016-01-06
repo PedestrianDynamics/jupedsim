@@ -4,37 +4,33 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+  <meta name="description" content="The Jülich Pedestrian Simulator">
   <meta name="author" content="Mohcine Chraibi">
   
-  <title>Requirements - JuPedSim/jpscore</title>
+  <title>JuPedSim/jpscore</title>
   
 
-  <link rel="shortcut icon" href="../../favicon.icon">
+  <link rel="shortcut icon" href="favicon.icon">
   
 
   
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
-  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="../../css/highlight.css">
-  <link href="../../html/customdoxygen.css" rel="stylesheet">
-  <link href="../../html/doxygen.css" rel="stylesheet">
-  <link href="../../html/tabs.css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="./css/highlight.css">
+  <link href="./html/customdoxygen.css" rel="stylesheet">
+  <link href="./html/doxygen.css" rel="stylesheet">
+  <link href="./html/tabs.css" rel="stylesheet">
 
   
-  <script>
-    // Current page data
-    var mkdocs_page_name = "Requirements";
-    var mkdocs_page_input_path = "user_guide/requirements.md";
-    var mkdocs_page_url = "/user_guide/requirements/";
-  </script>
-  
-  <script src="../../js/jquery-2.1.1.min.js"></script>
-  <script src="../../js/modernizr-2.8.3.min.js"></script>
-  <script type="text/javascript" src="../../js/highlight.pack.js"></script>
-  <script src="../../js/theme.js"></script> 
+  <script src="./js/jquery-2.1.1.min.js"></script>
+  <script src="./js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="./js/highlight.pack.js"></script>
+  <script src="./js/theme.js"></script>
+  <script>var base_url = '.';</script>
+  <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
+
   <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
@@ -47,9 +43,9 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href="../.." class="icon icon-home"> JuPedSim/jpscore</a>
+        <a href="." class="icon icon-home"> JuPedSim/jpscore</a>
         <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
   </form>
 </div>
@@ -60,7 +56,7 @@
           
             <li>
     <li class="toctree-l1 ">
-        <a class="" href="../..">Home</a>
+        <a class="" href=".">Home</a>
         
     </li>
 <li>
@@ -71,43 +67,36 @@
 
         
             
-    <li class="toctree-l1 current">
-        <a class="current" href="./">Requirements</a>
-        
-            <ul>
-            
-                <li class="toctree-l3"><a href="#requirements">Requirements</a></li>
-                
-            
-            </ul>
+    <li class="toctree-l1 ">
+        <a class="" href="user_guide/requirements/">Requirements</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../configuration/">Configuration</a>
+        <a class="" href="user_guide/configuration/">Configuration</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../vagrant/">Vagrant</a>
+        <a class="" href="user_guide/vagrant/">Vagrant</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../quickstart/">Quickstart</a>
+        <a class="" href="user_guide/quickstart/">Quickstart</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../data_formats/">File formats</a>
+        <a class="" href="user_guide/data_formats/">File formats</a>
         
     </li>
 
@@ -122,21 +111,21 @@
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../contributing/code-Style-Conventions/">Code Style</a>
+        <a class="" href="contributing/code-Style-Conventions/">Code Style</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../contributing/workflow/">Workflow</a>
+        <a class="" href="contributing/workflow/">Workflow</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../contributing/utest/">Unit testing</a>
+        <a class="" href="contributing/utest/">Unit testing</a>
         
     </li>
 
@@ -151,21 +140,21 @@
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../models/operativ/">Operational models</a>
+        <a class="" href="models/operativ/">Operational models</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../models/direction/">Direction strategies</a>
+        <a class="" href="models/direction/">Direction strategies</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../models/routing/">Routing</a>
+        <a class="" href="models/routing/">Routing</a>
         
     </li>
 
@@ -180,21 +169,21 @@
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../tests/introduction/">Introduction</a>
+        <a class="" href="tests/introduction/">Introduction</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../tests/rimea/">RiMEA</a>
+        <a class="" href="tests/rimea/">RiMEA</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../tests/juelich/">Juelich</a>
+        <a class="" href="tests/juelich/">Juelich</a>
         
     </li>
 
@@ -209,21 +198,21 @@
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../about/disclaimer/">Disclaimer</a>
+        <a class="" href="about/disclaimer/">Disclaimer</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../about/LICENSE/">License</a>
+        <a class="" href="about/LICENSE/">License</a>
         
     </li>
 
         
             
     <li class="toctree-l1 ">
-        <a class="" href="../../about/contributors/">Contributors</a>
+        <a class="" href="about/contributors/">Contributors</a>
         
     </li>
 
@@ -233,14 +222,14 @@
           
             <li>
     <li class="toctree-l1 ">
-        <a class="" href="../../publications/">Publications</a>
+        <a class="" href="publications/">Publications</a>
         
     </li>
 <li>
           
             <li>
     <li class="toctree-l1 ">
-        <a class="" href="../../doxygen/">API</a>
+        <a class="" href="doxygen/">API</a>
         
     </li>
 <li>
@@ -255,7 +244,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../..">JuPedSim/jpscore</a>
+        <a href=".">JuPedSim/jpscore</a>
       </nav>
 
       
@@ -263,15 +252,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../..">Docs</a> &raquo;</li>
+    <li><a href=".">Docs</a> &raquo;</li>
     
-      
-        
-          <li>User guide &raquo;</li>
-        
-      
     
-    <li>Requirements</li>
     <li class="wy-breadcrumbs-aside">
       
         
@@ -285,28 +268,22 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="requirements"><a class="toclink" href="#requirements">Requirements</a></h1>
-<ol>
-<li><a href="http://www.cmake.org/">CMake</a></li>
-<li>A compiler with support for C++11 e.g. <a href="https://gcc.gnu.org/projects/cxx0x.html">g++</a> or <a href="http://clang.llvm.org/">clang</a> or <a href="http://msdn.microsoft.com/de-de/library/dd831853.aspx">Visual Studio 2013</a></li>
-<li>for <code>JPSvis</code> and <code>JPSeditor</code> additionally <a href="http://qt-project.org/doc/qt-4.8/installation.html">Qt</a> and <a href="http://www.vtk.org/VTK/resources/software.html">VTK</a> are needed.</li>
-<li><code>JPSreport</code> and <code>JPScore</code> need <a href="http://www.boost.org/">Boost-libraries</a>. At the moment boost is hard-linked in <code>JPSreport</code>, but this should be fixed in the future.</li>
-</ol>
-<p>JuPedSim offers a Vagrant image that comes with all the necessary
-packages and libraries. See for more information <a href="../vagrant">here</a>.</p>
-              
+
+  <h1 id="search">Search Results</h1>
+
+  <form id="content_search" action="search.html">
+    <span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>
+    <input name="q" id="mkdocs-search-query" type="text" class="search_input search-query ui-autocomplete-input" placeholder="Search the Docs" autocomplete="off" autofocus>
+  </form>
+
+  <div id="mkdocs-search-results">
+    Sorry, page not found.
+  </div>
+
+
             </div>
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../configuration/" class="btn btn-neutral float-right" title="Configuration">Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../.." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>
@@ -334,10 +311,6 @@ packages and libraries. See for more information <a href="../vagrant">here</a>.<
           <a href="https://github.com/JuPedSim/jpscore" class="icon icon-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../.." style="color: #fcfcfc;">&laquo; Previous</a></span>
-      
-      
-        <span style="margin-left: 15px"><a href="../configuration/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>
