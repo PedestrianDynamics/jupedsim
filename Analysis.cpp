@@ -328,7 +328,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      if(_DoesUseMethodA) //Method A
      {
 #pragma omp parallel for
-          for(unsigned int i=0; i<_areaForMethod_A.size(); i++)
+          for(signed int i=0; i<_areaForMethod_A.size(); i++)
           {
                Method_A method_A ;
                method_A.SetMeasurementArea(_areaForMethod_A[i]);
@@ -349,7 +349,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      if(_DoesUseMethodB) //Method_B
      {
 #pragma omp parallel for
-          for(unsigned int i=0; i<_areaForMethod_B.size(); i++)
+          for(signed int i=0; i<_areaForMethod_B.size(); i++)
           {
                Method_B method_B;
                method_B.SetMeasurementArea(_areaForMethod_B[i]);
@@ -368,7 +368,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      if(_DoesUseMethodC) //Method C
      {
 #pragma omp parallel for
-          for(unsigned int i=0; i<_areaForMethod_C.size(); i++)
+          for(signed int i=0; i<_areaForMethod_C.size(); i++)
           {
                Method_C method_C;
                method_C.SetMeasurementArea(_areaForMethod_C[i]);
@@ -394,7 +394,7 @@ int Analysis::RunAnalysis(const string& filename, const string& path)
      if(_DoesUseMethodD) //method_D
      {
 #pragma omp parallel for
-          for(unsigned int i=0; i<_areaForMethod_D.size(); i++)
+          for(signed int i=0; i<_areaForMethod_D.size(); i++)
           {
                Method_D method_D;
                method_D.SetGeometryPolygon(_geoPoly[_areaForMethod_D[i]->_id]);

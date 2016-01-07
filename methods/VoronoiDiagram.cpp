@@ -50,18 +50,18 @@ vector<polygon_2d> VoronoiDiagram::getVoronoiPolygons(vector<double>& XInFrame, 
           vector<double>& VInFrame, vector<int>& IdInFrame, const double Bound_Max)
 {
      const int numPedsInFrame = IdInFrame.size();
-     int XInFrame_temp[numPedsInFrame];
-     int YInFrame_temp[numPedsInFrame];
-     double VInFrame_temp[numPedsInFrame];
-     int IdInFrame_temp[numPedsInFrame];
+     vector<int> XInFrame_temp;
+     vector<int> YInFrame_temp;
+     vector<double> VInFrame_temp;
+     vector<int> IdInFrame_temp;
 
      for (int i = 0; i < numPedsInFrame; i++)
      {
           points.push_back(point_type2(round(XInFrame[i]), round(YInFrame[i])));
-          XInFrame_temp[i] = round(XInFrame[i]);
-          YInFrame_temp[i] = round(YInFrame[i]);
-          VInFrame_temp[i] = VInFrame[i];
-          IdInFrame_temp[i] = IdInFrame[i];
+          XInFrame_temp.push_back(round(XInFrame[i]));
+		  YInFrame_temp.push_back(round(YInFrame[i]));
+		  VInFrame_temp.push_back(VInFrame[i]);
+		  IdInFrame_temp.push_back(IdInFrame[i]);
      }
 
      VD voronoidiagram;
