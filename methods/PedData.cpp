@@ -281,10 +281,10 @@ bool PedData::InitializeVariables(TiXmlElement* xRootNode)
 
      CreateGlobalVariables(_numPeds, _numFrames);
 
-     int totalframes[_numPeds];
+     vector<int> totalframes;
      for (int i = 0; i <_numPeds; i++)
      {
-    	 totalframes[i] = 0;
+    	 totalframes.push_back(0);
      }
      //int frameNr=0;
      for(TiXmlElement* xFrame = xRootNode->FirstChildElement("frame"); xFrame;

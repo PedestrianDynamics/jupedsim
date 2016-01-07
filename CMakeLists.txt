@@ -150,6 +150,7 @@ set (  header_files
 
 
 #--------------------
+if(NOT CMAKE_GENERATOR MATCHES "Xcode|Visual Studio")
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
@@ -161,6 +162,7 @@ elseif(COMPILER_SUPPORTS_CXX0X)
   message(STATUS "Checking for C++0x compiler - available")
 else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no c++11 support. Please use a different C++ compiler.")
+endif()
 endif()
 #---------------------
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

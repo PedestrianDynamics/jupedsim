@@ -148,7 +148,7 @@ const vector<string>& ArgumentParser::GetTrajectoriesFiles() const
      return _trajectoriesFiles;
 }
 
-const string& ArgumentParser::ArgumentParser::GetProjectRootDir() const
+const string& ArgumentParser::GetProjectRootDir() const
 {
      return _projectRootDir;
 }
