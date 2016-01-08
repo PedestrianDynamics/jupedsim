@@ -1,8 +1,8 @@
 /**
  * \file        ArgumentParser.h
  * \date        Apr 20, 2009
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -87,6 +87,8 @@ private:
      double paWall;
      double pbWall;
      double pcWall;
+     double pDPed;
+     double pDWall;
      double pIntPWidthPed;
      double pIntPWidthWall;
      double pMaxFPed;
@@ -96,8 +98,13 @@ private:
      unsigned int pSeed;
      int pSolver; /// solver for the differential equation
      int pExitStrategy; // Strategie zur Richtungswahl (v0)
+     double pDeltaH;
+     double pWallAvoidDistance;
+     bool pUseWallAvoidance;
+     double pSlowDownDistance;
      int pLog;
      int pPort;
+     int pPeriodic;
      int _embedMesh;
      int _maxOpenMPThreads;
      int pModel;
@@ -118,8 +125,11 @@ private:
 
 
 private:
+
+     bool ParseGradientModel(TiXmlElement* xGradient);
      bool ParseGCFMModel(TiXmlElement* xGCFM);
      bool ParseGompertzModel(TiXmlElement* xGompertz);
+     bool ParseVelocityModel(TiXmlElement* xVelocity);
      void ParseAgentParameters(TiXmlElement* operativModel);
      void Usage(const std::string file);
 
@@ -152,6 +162,8 @@ private:
 
      bool ParseStepSize(TiXmlNode &stepNode);
 
+     bool ParsePeriodic(TiXmlNode &Node);
+
 public:
      // constructor
      ArgumentParser();
@@ -177,6 +189,7 @@ public:
      std::shared_ptr<OperationalModel> GetModel() const;
      double GetTmax() const;
      double Getdt() const;
+     int IsPeriodic() const;
      double GetV0Mu() const;
      double GetV0Sigma() const;
      double GetBmaxMu() const;
@@ -195,6 +208,8 @@ public:
      double GetaWall() const;
      double GetbWall() const;
      double GetcWall() const;
+     double GetDWall() const;
+     double GetDPed() const;
      double GetIntPWidthPed() const;
      double GetIntPWidthWall() const;
      double GetMaxFPed() const;
@@ -240,6 +255,7 @@ public:
       * @param inifile
       */
      bool ParseIniFile(string inifile);
+
 
 };
 

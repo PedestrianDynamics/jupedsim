@@ -1,8 +1,8 @@
 /**
  * \file        AbstractSensor.h
  * \date        Feb 1, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -45,6 +45,7 @@ public:
      virtual void execute(const Pedestrian *, CognitiveMap *) const = 0;
 protected:
      const Building * const building;
+
 };
 
 #endif // ABSTRACTSENSOR_H

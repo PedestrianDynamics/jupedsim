@@ -1,8 +1,8 @@
 /**
  * \file        OutputHandler.h
  * \date        Nov 20, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -52,7 +52,7 @@ public:
      void incrementWarnings();
      int GetErrors();
      void incrementErrors();
-     void ProgressBar(double TotalPeds, double NowPeds);
+     void ProgressBar(double TotalPeds, double NowPeds, double simTime);
 
      virtual void Write(const std::string& str);
      virtual void Write(const char *string, ...);

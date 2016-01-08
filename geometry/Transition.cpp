@@ -1,8 +1,8 @@
 /**
  * \file        Transition.cpp
  * \date        Nov 16, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -42,7 +42,7 @@ Transition::Transition() : Crossing()
      _isOpen = true;
      _doorUsage=0;
      _lastPassingTime=0;
-     _room2 = NULL;
+     _room2 = nullptr;
 }
 
 Transition::~Transition()
@@ -69,8 +69,6 @@ void Transition::SetRoom2(Room* r)
 {
      _room2 = r;
 }
-
-
 
 bool Transition::IsOpen() const
 {
@@ -202,6 +200,7 @@ void Transition::IncreaseDoorUsage(int number, double time)
 {
      _doorUsage+=number;
      _lastPassingTime=time;
+     _flowAtExit+=to_string(time)+"  "+to_string(_doorUsage)+"\n";
 }
 
 int Transition::GetDoorUsage() const
@@ -212,4 +211,9 @@ int Transition::GetDoorUsage() const
 double Transition::GetLastPassingTime() const
 {
      return _lastPassingTime;
+}
+
+const std::string & Transition::GetFlowCurve() const
+{
+     return _flowAtExit;
 }

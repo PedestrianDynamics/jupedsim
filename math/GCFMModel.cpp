@@ -1,8 +1,8 @@
 /**
  * \file        GCFMModel.cpp
  * \date        Apr 15, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -69,7 +69,7 @@ GCFMModel::~GCFMModel(void)
 }
 
 
-bool GCFMModel::Init (Building* building) const
+bool GCFMModel::Init (Building* building)
 {
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     for(unsigned int p=0;p<allPeds.size();p++)
@@ -82,10 +82,7 @@ bool GCFMModel::Init (Building* building) const
               continue;
          }
 
-         Line* e = ped->GetExitLine();
-         const Point& e1 = e->GetPoint1();
-         const Point& e2 = e->GetPoint2();
-         Point target = (e1 + e2) * 0.5;
+         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
@@ -93,7 +90,7 @@ bool GCFMModel::Init (Building* building) const
               sinPhi = d.GetY() / dist;
          } else {
               Log->Write(
-                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "ERROR: \tallPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
               return false;
          }
@@ -106,9 +103,9 @@ bool GCFMModel::Init (Building* building) const
     return true;
 }
 
-void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
-     double delta = 0.5;
+     double delta = 1.5;
 
      // collect all pedestrians in the simulation.
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
@@ -120,15 +117,13 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      int partSize = nSize / nThreads;
      int debugPed = -33;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
-
-
 #pragma omp parallel  default(shared) num_threads(nThreads)
      {
           vector< Point > result_acc = vector<Point > ();
           result_acc.reserve(2200);
 
           const int threadID = omp_get_thread_num();
-
+          
           int start = threadID*partSize;
           int end = (threadID + 1) * partSize - 1;
           if ((threadID == nThreads - 1)) end = nSize - 1;
@@ -380,59 +375,51 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
 inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
 {
-     Point f = Point(0., 0.);
+     Point f(0., 0.);
      //first the walls
-
-     const std::vector<Wall>& walls = subroom->GetVisibleWalls(ped->GetPos());
-     if(ped->GetID()==-33)
+     for(const auto & wall: subroom->GetAllWalls())
      {
-          printf("Ped = %d, visible walls = %d\n",ped->GetID(),(int)walls.size());
-          getc(stdin);
+          f += ForceRepWall(ped, wall);
      }
-     for (unsigned int i = 0; i < walls.size(); i++) {
-          f += ForceRepWall(ped, walls[i]);
-     }
-
      //then the obstacles
-     const vector<Obstacle*>& obstacles = subroom->GetAllObstacles();
-     for(unsigned int obs=0; obs<obstacles.size(); ++obs) {
-          const vector<Wall>& walls = obstacles[obs]->GetAllWalls();
-          for (unsigned int i = 0; i < walls.size(); i++) {
-               f += ForceRepWall(ped, walls[i]);
+     for(const auto & obst: subroom->GetAllObstacles())
+     {
+          if(obst->Contains(ped->GetPos()))
+          {
+               Log->Write("ERROR:\t Agent [%d] is trapped in obstacle in room/subroom [%d/%d]",ped->GetID(),subroom->GetRoomID(), subroom->GetSubRoomID());
+               exit(EXIT_FAILURE);
+          }
+          else
+          for(const auto & wall: obst->GetAllWalls())
+          {
+               f += ForceRepWall(ped, wall);
           }
      }
 
-     //eventually crossings
-     // const vector<Crossing*>& crossings = subroom->GetAllCrossings();
-     // for (unsigned int i = 0; i < crossings.size(); i++) {
-          //Crossing* goal=crossings[i];
-          //int uid1= goal->GetUniqueID();
-          //int uid2=ped->GetExitIndex();
-          // ignore my transition
-          //if (uid1 != uid2) {
-          //      f = f + ForceRepWall(ped,*((Wall*)goal));
-          //}
-     // }
-
-     // and finally the closed doors or doors that are not my destination
-     const vector<Transition*>& transitions = subroom->GetAllTransitions();
-     for (unsigned int i = 0; i < transitions.size(); i++) {
-          Transition* goal=transitions[i];
-          int uid1= goal->GetUniqueID();
-          int uid2=ped->GetExitIndex();
-          // ignore my tranition consider closed doors
-          //closed doors are considered as wall
-
-          if((uid1 != uid2) || (goal->IsOpen()==false )) {
-               f += ForceRepWall(ped,*((Wall*)goal));
+     // and finally the closed doors
+     for(auto & goal: subroom->GetAllTransitions())
+     {
+          if(! goal->IsOpen())
+          {
+               f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
           }
+
+//  int uid1= goal->GetUniqueID();
+//  int uid2=ped->GetExitIndex();
+//  // ignore my transition consider closed doors
+//  //closed doors are considered as wall
+//
+//  if((uid1 != uid2) || (goal->IsOpen()==false ))
+//  {
+//    f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
+//  }
      }
 
      return f;
 }
 
 
-inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Wall& w) const
+inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 {
      Point F = Point(0.0, 0.0);
      Point pt = w.ShortestPoint(ped->GetPos());
@@ -616,7 +603,7 @@ double GCFMModel::GetDistEffMaxWall() const
      return _distEffMaxWall;
 }
 
-string GCFMModel::GetDescription() const
+string GCFMModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];

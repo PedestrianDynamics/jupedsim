@@ -1,8 +1,8 @@
 /**
  * \file        GraphVertex.h
  * \date        Jan 1, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -45,7 +45,7 @@ class GraphEdge;
 class GraphVertex;
 
 
-using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
+//using NextDoorKnowlegde = std::unordered_map<const GraphVertex *,const GraphEdge *>;
 
 /**
  * @brief Graph Vertex.
@@ -85,7 +85,7 @@ public:
     const GraphEdge * GetCheapestDestinationByEdges(const Point & position) const;
     const GraphEdge * GetLocalCheapestDestination(const Point & position) const;
 
-    NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
+    //NextDoorKnowlegde GetShortestPathFromHere(const Point & position) const;
 
 
 

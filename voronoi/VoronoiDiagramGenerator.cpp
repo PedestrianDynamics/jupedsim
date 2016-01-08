@@ -1310,7 +1310,18 @@ void VoronoiDiagramGenerator::insertVertexAddress(long vertexNum, struct Site* a
      //if the site address being entered is past the end of the array, then grow the array
      while(vertexNum > sizeOfVertices - 1)
      {
-          vertices = (Site**)realloc(vertices,(sizeOfVertices+4000)*sizeof(Site*));
+//          vertices = (Site**)realloc(vertices,(sizeOfVertices+4000)*sizeof(Site*));
+          Site **new_data = static_cast<Site **>(realloc(vertices,(sizeOfVertices+4000)*sizeof(Site*)));
+          
+          if (new_data == NULL)
+          {
+               LOG<<"VoronoiDiagramGenerator::insertVertexAddress(): Memory Allocation Error"<<endl;
+               exit(EXIT_FAILURE);
+          }
+          else
+          {
+               vertices = new_data;
+          }
           sizeOfVertices += 4000;
 
           for(int i = sizeOfVertices - 4000; i < sizeOfVertices; i++)
@@ -1343,7 +1354,17 @@ void VoronoiDiagramGenerator::insertVertexLink(long vertexNum, long vertexLinked
      {
           //LOG<<"Resizing the array to "<<sizeOfVertexLinks + 4000<<endl;
           //LOG<<endl;
-          vertexLinks = (Point3*)realloc(vertexLinks,(sizeOfVertexLinks+4000)*sizeof(Point3));
+          // vertexLinks = (Point3*)realloc(vertexLinks,(sizeOfVertexLinks+4000)*sizeof(Point3));
+           Point3 * new_data = static_cast<Point3*>(realloc(vertexLinks,(sizeOfVertexLinks+4000)*sizeof(Point3)));
+          if (new_data == NULL)
+          {
+               LOG<<"VoronoiDiagramGenerator::insertVertexLink(): Memory Allocation Error"<<endl;
+               exit(EXIT_FAILURE);
+          }
+          else
+          {
+               vertexLinks = new_data;
+          }
           //if(vertexLinks == 0)LOG<<"Error - realloc failed, vertexLinks == 0"<<endl;
           sizeOfVertexLinks += 4000;
 
@@ -1431,11 +1452,13 @@ void VoronoiDiagramGenerator::generateVertexLinks()
      {
           if(count3vertices != 0)
           {
-               delete[] count3vertices;
+               // delete[] count3vertices;
+               free(count3vertices);
           }
           if(count1vertices != 0)
           {
-               delete[] count1vertices;
+               // delete[] count1vertices;
+               free(count1vertices);
           }
           return;
      }

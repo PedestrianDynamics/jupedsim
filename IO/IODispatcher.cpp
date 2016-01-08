@@ -1,8 +1,8 @@
 /**
  * \file        IODispatcher.cpp
  * \date        Nov 20, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -167,8 +167,9 @@ void TrajectoriesJPSV04::WriteGeometry(Building* building)
           if (!rooms_to_plot.empty() && !IsElementInVector(rooms_to_plot, caption))
                continue;
 
-          for (int k = 0; k < r->GetNumberOfSubRooms(); k++) {
-               SubRoom* s = r->GetSubRoom(k); //if(s->GetSubRoomID()!=7) continue;
+          for(auto&& sitr: r->GetAllSubRooms())
+          {
+               auto&& s = sitr.second; //if(s->GetSubRoomID()!=7) continue;
                geometry.append(s->WriteSubRoom());
 
                // the hlines
@@ -498,51 +499,26 @@ void TrajectoriesJPSV06::WriteGeometry(Building* building)
      std::stringstream buffer;
      buffer << t.rdbuf();
      embed_geometry=buffer.str();
-     Write(embed_geometry);
 
      //write the hlines
+     string embed_hlines;
+     embed_hlines.append("\n\t<hlines>");
+     for (const auto& hline: building->GetAllHlines())
+     {
+          embed_hlines.append(hline.second->GetDescription());
+     }
+     embed_hlines.append("\n\t</hlines>");
+     embed_hlines.append("\n\t<goals>");
+     for (const auto& goal: building->GetAllGoals()) {
+          embed_hlines.append(goal.second->Write());
+     }
+     embed_hlines.append("\n\t</goals>");
+     embed_hlines.append("\t</geometry>\n");
 
-     // write the goals
-//     for (map<int, Goal*>::const_iterator itr = building->GetAllGoals().begin();
-//               itr != building->GetAllGoals().end(); ++itr) {
-//          geometry.append(itr->second->Write());
-//     }
+     //append the new string hlines and goals to the old one
+     ReplaceStringInPlace(embed_geometry,"</geometry>",embed_hlines);
 
-     //
-     //
-     //     //collecting the hlines
-     //     std::stringstream hlines_buffer;
-     //     // add the header
-     //     hlines_buffer<<" <routing version=\"0.5\" "
-     //               <<"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-     //               <<"xsi:noNamespaceSchemaLocation=\"http://134.94.2.137/jps_routing.xsd\" >"<<endl
-     //               <<"<Hlines> "<<endl;
-     //
-     //     const map<int, Hline*>& hlines=building->GetAllHlines();
-     //     for (std::map<int, Hline*>::const_iterator it=hlines.begin(); it!=hlines.end(); ++it)
-     //     {
-     //          Hline* hl=it->second;
-     //          hlines_buffer <<"\t<Hline id=\""<< hl->GetID()<<"\" room_id=\""<<hl->GetRoom1()->GetID()
-     //                                        <<"\" subroom_id=\""<< hl->GetSubRoom1()->GetSubRoomID()<<"\">"<<endl;
-     //          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint1()._x<<"\" py=\""<< hl->GetPoint1()._y<<"\" />"<<endl;
-     //          hlines_buffer <<"\t\t<vertex px=\""<< hl->GetPoint2()._x<<"\" py=\""<< hl->GetPoint2()._y<<"\" />"<<endl;
-     //          hlines_buffer <<"\t</Hline>"<<endl;
-     //     }
-     //     hlines_buffer<<"</Hlines> "<<endl;
-     //     hlines_buffer<<"</routing> "<<endl;
-     //
-     //     string hline_string=hlines_buffer.str();
-     //     string to_replace="</geometry>";
-     //     hline_string.append(to_replace);
-     //
-     //     size_t start_pos = embed_geometry.find(to_replace);
-     //     if(start_pos == std::string::npos)
-     //     {
-     //          Log->Write("WARNING:\t missing %s tag while writing the geometry in the trajectory file.",to_replace.c_str());
-     //     }
-     //
-     //     embed_geometry.replace(start_pos, to_replace.length(), hline_string);
-     //     Write(embed_geometry);
+     Write(embed_geometry);
 
      //     Write("\t<AttributeDescription>");
      //     Write("\t\t<property tag=\"x\" description=\"xPosition\"/>");
@@ -567,7 +543,7 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 
 
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-     for(unsigned int p=0;p<allPeds.size();p++)
+     for(unsigned int p=0;p<allPeds.size();++p)
      {
           Pedestrian* ped = allPeds[p];
           Room* r = building->GetRoom(ped->GetRoomID());
@@ -581,14 +557,13 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
 
           char tmp1[CLENGTH] = "";
 
-
           int color=ped->GetColor();
           double a = ped->GetLargerAxis();
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           sprintf(tmp1, "<agent ID=\"%d\"\t"
-                    "x=\"%.2f\"\ty=\"%.2f\"\t"
-                    "z=\"%.2f\"\t"
+                    "x=\"%.6f\"\ty=\"%.6f\"\t"
+                    "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
@@ -702,8 +677,8 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
           double b = ped->GetSmallerAxis();
           double phi = atan2(ped->GetEllipse().GetSinPhi(), ped->GetEllipse().GetCosPhi());
           sprintf(s, "<agent ID=\"%d\"\t"
-                    "x=\"%.2f\"\ty=\"%.2f\"\t"
-                    "z=\"%.2f\"\t"
+                    "x=\"%.6f\"\ty=\"%.6f\"\t"
+                    "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
                     ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,

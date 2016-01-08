@@ -1,8 +1,8 @@
 /**
  * \file        LCGrid.cpp
  * \date        Nov 16, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum J?lich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum J?lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -40,7 +40,8 @@
 
 using namespace std;
 
-#define MAX_AGENT_COUNT 100000
+//FIXME:
+#define MAX_AGENT_COUNT  1000 // 1000000
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {
@@ -78,10 +79,10 @@ LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 
 LCGrid::~LCGrid()
 {
-     for(int i=0; i<_nPeds; i++) {
-          if(_localPedsCopy[i])
-               delete _localPedsCopy[i];
-     }
+//     for(int i=0; i<_nPeds; i++) {
+//          if(_localPedsCopy[i]!=nullptr)
+//               delete _localPedsCopy[i];
+//     }
      delete [] _list;
      delete [] _localPedsCopy;
      for (int i = 0; i < _gridSizeY; ++i)  delete[] _cellHead[i];
@@ -119,6 +120,7 @@ void LCGrid::Update(const vector<Pedestrian*>& peds)
 }
 
 // I hope you had called Clear() first
+// todo: can be used to solve the issue with MAX_AGENT_COUNT
 void LCGrid::Update(Pedestrian* ped)
 {
      int id=ped->GetID()-1;

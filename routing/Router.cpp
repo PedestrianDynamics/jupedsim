@@ -1,8 +1,8 @@
 /**
  * \file        Router.cpp
  * \date        Nov 11, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -80,17 +80,12 @@ const vector<int> Router::GetFinalDestinations() const
      return _finalDestinations;
 }
 
-void Router::SetID(int id)
-{
-     _id=id;
-}
-
 int Router::GetID() const
 {
      return _id;
 }
 
-void Router::SetStrategy(RoutingStrategy strategy)
+void Router::SetStrategy(const RoutingStrategy& strategy)
 {
      _strategy=strategy;
 }

@@ -1,7 +1,7 @@
 /**
  * \file        StartDistribution.h
  * \date        Apr 15, 2015
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -71,13 +71,13 @@ private:
      double _yMax;
 
      //pre movement time distribution
-     std::normal_distribution<double> _premovementTime;
+     mutable std::normal_distribution<double> _premovementTime;
 
      //risk tolerance distribution
-     std::normal_distribution<double> _riskTolerance;
+     mutable std::normal_distribution<double> _riskTolerance;
 
      //random number generator engine
-     std::default_random_engine _generator;
+     mutable std::default_random_engine _generator;
 
 public:
      StartDistribution(int seed);
@@ -114,7 +114,7 @@ public:
      AgentsParameters* GetGroupParameters();
      void SetGroupParameters(AgentsParameters* groupParameters);
      void InitPremovementTime(double mean, double stdv);
-     double GetPremovementTime();
+     double GetPremovementTime() const;
      void InitRiskTolerance(double mean, double stdv);
      double GetRiskTolerance();
 

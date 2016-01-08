@@ -1,8 +1,8 @@
 /**
  * \file        Simulation.cpp
  * \date        Dec 15, 2010
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -32,6 +32,7 @@
 
 #include "math/GCFMModel.h"
 #include "math/GompertzModel.h"
+#include "math/GradientModel.h"
 #include "pedestrian/AgentsQueue.h"
 #include "pedestrian/AgentsSourcesManager.h"
 
@@ -207,6 +208,8 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      s.append(tmp);
      _deltaT = args.Getdt();
      sprintf(tmp, "\tdt: %f\n", _deltaT);
+     _periodic = args.IsPeriodic();
+     sprintf(tmp, "\t periodic: %d\n", _periodic);
      s.append(tmp);
 
      _fps = args.Getfps();
@@ -242,11 +245,10 @@ bool Simulation::InitArgs(const ArgumentParser& args)
           return false;
 
      //other initializations
-     const vector<Pedestrian*>& allPeds = _building->GetAllPedestrians();
-     for (Pedestrian *ped : allPeds) {
+     for (auto&& ped: _building->GetAllPedestrians()) {
           ped->Setdt(_deltaT);
      }
-     _nPeds = allPeds.size();
+     _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
 
      //get the seed
@@ -261,7 +263,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
 
      //read and initialize events
-     _em = new EventManager(_building.get());
+     _em = new EventManager(_building.get(),args.GetSeed());
      if(_em->ReadEventsXml()==false)
      {
           Log->Write("ERROR: \tCould not initialize events handling");
@@ -342,19 +344,29 @@ void Simulation::UpdateRoutesAndLocations()
                               auto&& old_room =allRooms.at(ped->GetRoomID());
                               auto&& old_sub =old_room->GetSubRoom(
                                         ped->GetSubRoomID());
-                              if ((sub->IsInSubRoom(ped->GetPos()))
-                                        && (sub->IsDirectlyConnectedWith(
-                                                  old_sub)))
+                              if (sub->IsDirectlyConnectedWith(old_sub)
+                                        && sub->IsInSubRoom(ped->GetPos()))
                               {
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
                                    ped->SetSubRoomID(sub->GetSubRoomID());
-                                   ped->ClearMentalMap(); // reset the destination
-                                   //ped->FindRoute();
-
                                    //the agent left the old iroom
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
+
+                                   //the pedestrian did not used the door to exit the room
+                                   //todo: optimize with distance square
+                                   //if(ped->GetDistanceToNextTarget()>0.5)
+                                   //{
+                                   //   Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped->GetID());
+                                   //   Log->Write("        \t distance to previous target is %f",ped->GetDistanceToNextTarget());
+                                   //}
+
+                                   //also statistic for internal doors
+                                   UpdateFlowAtDoors(*ped);
+
+                                   ped->ClearMentalMap(); // reset the destination
+                                   //ped->FindRoute();
 
                                    assigned = true;
                                    break;
@@ -396,6 +408,7 @@ void Simulation::UpdateRoutesAndLocations()
           // remove the pedestrians that have left the building
           for (unsigned int p = 0; p < pedsToRemove.size(); p++)
           {
+               UpdateFlowAtDoors(*pedsToRemove[p]);
                _building->DeletePedestrian(pedsToRemove[p]);
           }
      }
@@ -423,13 +436,22 @@ void Simulation::PrintStatistics()
 
      Log->Write("\nUsage of Exits");
      Log->Write("==========");
-     for (const auto& itr : _building->GetAllTransitions()) {
+     for (const auto& itr : _building->GetAllTransitions())
+     {
           Transition* goal = itr.second;
-          if (goal->IsExit()) {
+          if (goal->GetDoorUsage())
+          {
                Log->Write(
-                         "Exit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
+                         "\nExit ID [%d] used by [%d] pedestrians. Last passing time [%0.2f] s",
                          goal->GetID(), goal->GetDoorUsage(),
                          goal->GetLastPassingTime());
+
+               string statsfile=_argsParser.GetTrajectoriesFile()+"_flow_exit_id_"+to_string(goal->GetID())+".dat";
+               Log->Write("More Information in the file: %s",statsfile.c_str());
+               auto output= new FileHandler(statsfile.c_str());
+               output->Write("#Flow at exit "+goal->GetCaption()+"( ID "+to_string(goal->GetID())+" )");
+               output->Write("#Time (s)  cummulative number of agents \n");
+               output->Write(goal->GetFlowCurve());
           }
      }
      Log->Write("\n");
@@ -441,11 +463,16 @@ void Simulation::RunHeader(long nPed)
      if(nPed==-1) nPed=_nPeds;
      _iod->WriteHeader(nPed, _fps, _building.get(), _seed);
      _iod->WriteGeometry(_building.get());
-     _iod->WriteFrame(0, _building.get());
+
+     int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
+     writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
+     int firstframe=(Pedestrian::GetGlobalTime()/_deltaT)/writeInterval;
+
+     _iod->WriteFrame(firstframe, _building.get());
 
      //first initialisation needed by the linked-cells
-      UpdateRoutesAndLocations();
-      ProcessAgentsQueue();
+     UpdateRoutesAndLocations();
+     ProcessAgentsQueue();
 }
 
 int Simulation::RunBody(double maxSimTime)
@@ -455,20 +482,22 @@ int Simulation::RunBody(double maxSimTime)
      //time_t starttime, endtime;
      //time(&starttime);
 
+     //take the current time from the pedestrian
+     double t=Pedestrian::GetGlobalTime();
+
      //frame number. This function can be called many times,
-     static int frameNr = 1; // Frame Number
+     static int frameNr = 1 + t/_deltaT ; // Frame Number
+
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
-     //take the current time from the pedestrian
-     double t=Pedestrian::GetGlobalTime();
 
      //process the queue for incoming pedestrians
      //important since the number of peds is used
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-
+     int initialnPeds = _nPeds; 
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
@@ -477,22 +506,24 @@ int Simulation::RunBody(double maxSimTime)
           //process the queue for incoming pedestrians
           ProcessAgentsQueue();
 
-          //update the linked cells
-          _building->UpdateGrid();
+          if(t>Pedestrian::GetMinPremovementTime())
+          {
+               //update the linked cells
+               _building->UpdateGrid();
 
-          // update the positions
-          _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get());
+               // update the positions
+               _operationalModel->ComputeNextTimeStep(t, _deltaT, _building.get(), _periodic);
 
-          //update the routes and locations
-          UpdateRoutesAndLocations();
+               //update the events
+               _em->ProcessEvent();
 
-          //update the events
-          //_em->Update_Events(t);
-          _em->ProcessEvent();
+               //update the routes and locations
+               UpdateRoutesAndLocations();
 
-          //other updates
-          //someone might have left the building
-          _nPeds = _building->GetAllPedestrians().size();
+               //other updates
+               //someone might have left the building
+               _nPeds = _building->GetAllPedestrians().size();
+          }
 
           // update the global time
           Pedestrian::SetGlobalTime(t);
@@ -501,6 +532,7 @@ int Simulation::RunBody(double maxSimTime)
           if (0 == frameNr % writeInterval) {
                _iod->WriteFrame(frameNr / writeInterval, _building.get());
           }
+          Log->ProgressBar(initialnPeds,   initialnPeds -  _nPeds , t);
 
           // needed to control the execution time PART 2
           // time(&endtime);
@@ -516,26 +548,6 @@ void Simulation::RunFooter()
 {
      // writing the footer
      _iod->WriteFooter();
-
-     //temporary work around since the total number of frame is only available at the end of the simulation.
-     if (_argsParser.GetFileFormat() == FORMAT_XML_BIN)
-     {
-          delete _iod;
-          _iod = NULL;
-          //reopen the file and write the missing information
-
-          // char tmp[CLENGTH];
-          // int f= frameNr / writeInterval ;
-          // sprintf(tmp,"<frameCount>%07d</frameCount>",f);
-          // string frameCount (tmp);
-
-          //char replace[CLENGTH];
-          // open the file and replace the 8th line
-          //sprintf(replace, "sed -i '9s/.*/ %d /' %s", frameNr / writeInterval,
-          //          _argsParser.GetTrajectoriesFile().c_str());
-          //int result = system(replace);
-          //Log->Write("INFO:\t Updating the framenumber exits with code [%d]", result);
-     }
 }
 
 void Simulation::ProcessAgentsQueue()
@@ -557,6 +569,50 @@ void Simulation::ProcessAgentsQueue()
 #endif
 }
 
+void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
+{
+     if(_argsParser.ShowStatistics())
+     {
+          Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
+          if(trans)
+          {
+               //check if the pedestrian left the door correctly
+               if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
+               {
+                    Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped.GetID());
+                    Log->Write("       :\t distance to last door is %f. That should be smaller.", ped.GetExitLine()->DistTo(ped.GetPos()));
+                    Log->Write("       :\t correcting the door statistics");
+                    //ped.Dump(ped.GetID());
+
+                    //checking the history and picking the nearest previous destination
+                    double biggest=0.3;
+                    bool success=false;
+                    for(const auto & dest:ped.GetLastDestinations())
+                    {
+                         if(dest!=-1)
+                         {
+                              Transition* trans_tmp =_building->GetTransitionByUID(dest);
+                              if(trans_tmp&&trans_tmp->DistTo(ped.GetPos())<biggest)
+                              {
+                                   biggest=trans_tmp->DistTo(ped.GetPos());
+                                   trans=trans_tmp;
+                                   Log->Write("       :\t Best match found at door %d",dest);
+                                   success=true;//at least one door was found
+                              }
+                         }
+                    }
+
+                    if(success==false)
+                    {
+                         Log->Write("ERROR       :\t correcting the door statistics");
+                         exit(EXIT_SUCCESS);
+                    }
+               }
+               trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+          }
+     }
+}
+
 AgentsSourcesManager& Simulation::GetAgentSrcManager()
 {
      return _agentSrcManager;
@@ -564,5 +620,5 @@ AgentsSourcesManager& Simulation::GetAgentSrcManager()
 
 Building* Simulation::GetBuilding()
 {
-    return _building.get();
+     return _building.get();
 }

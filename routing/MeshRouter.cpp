@@ -1,8 +1,8 @@
 /**
  * \file        MeshRouter.cpp
  * \date        Aug 21, 2013
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -939,10 +939,10 @@ bool MeshRouter::Init(Building* b)
                          meshfile>>tmp;
                          normvec[j]=tmp;
                     }
-                    unsigned int countEdges=0;
-                    meshfile>>countEdges;
+                    unsigned int countEdges1=0;
+                    meshfile>>countEdges1;
                     vector<int> edge_id;
-                    for(unsigned int j=0; j<countEdges; j++) {
+                    for(unsigned int j=0; j<countEdges1; j++) {
                          int tmp;
                          meshfile>>tmp;
                          edge_id.push_back(tmp);

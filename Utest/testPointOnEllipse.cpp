@@ -1,8 +1,8 @@
 /**
  * \file        testPointOnEllipse.cpp
  * \date        Jul 4, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -66,7 +66,7 @@ int testPointOnEllipse()
      E.SetV0(1);
      E.SetV( Point(0,0) );
      E.SetAmin(r);
-     E.SetBmin(r*2);
+     E.SetBmax(r);
 
      float sx, sy, l;
      Point S(0,0); //test point

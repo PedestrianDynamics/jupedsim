@@ -1,7 +1,7 @@
 /**
  * \file        main.cpp
  * \date        Jan 15, 2013
- * \version     v0.6
+ * \version     v0.7
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
      {
           //evacuation time
           int evacTime = 0;
-          Log->Write("INFO: \tStart runSimulation()");
+          Log->Write("INFO: \tStart runSimulation() with %d pedestrians", sim.GetPedsNumber());
 
 #ifdef _USE_PROTOCOL_BUFFER
           //Start the thread for managing incoming messages from MatSim
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 
           if (sim.GetPedsNumber())
           {
-               Log->Write("WARNING: \nPedestrians not evacuated [%d] using [%d] threads",
+               Log->Write("WARNING: Pedestrians not evacuated [%d] using [%d] threads",
                          sim.GetPedsNumber(), args->GetMaxOpenMPThreads());
           }
 

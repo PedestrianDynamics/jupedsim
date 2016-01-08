@@ -1,8 +1,8 @@
 /**
  * \file        ForceModel.h
  * \date        Apr 15, 2014
- * \version     v0.6
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \version     v0.7
+ * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -59,7 +59,7 @@ public:
       * Performs whatever initialization is needed/required
       * @param building the building object
       */
-     virtual void Init (Building* building) const = 0;
+     virtual bool Init (Building* building) const = 0;
 
      /**
       * @return all model parameters in a nicely formatted string
