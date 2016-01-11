@@ -149,8 +149,23 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
      unsigned long nSize;
      nSize = allPeds.size();
+     Pedestrian* minAddress = nullptr; //non-elegant fix for faulty neighbours[...] ptr avoidance
+     Pedestrian* maxAddress = nullptr;
 
-      int nThreads = omp_get_max_threads();
+     if (nSize >= 1) {
+        minAddress = allPeds[0];
+        maxAddress = allPeds[0];
+        for (auto& pedptr:allPeds) {
+            if (&(*pedptr) < minAddress) {
+                minAddress = &(*pedptr);
+            }
+            if (pedptr > maxAddress) {
+                maxAddress = &(*pedptr);
+            }
+        }
+     }
+
+     int nThreads = omp_get_max_threads();
 
      int partSize;
      partSize = (int) (nSize / nThreads);
@@ -202,6 +217,10 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 //                }
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
+                     if ((minAddress > neighbours[i]) || (maxAddress < neighbours[i])) {
+                        std::cerr << "## Skiped " << i << " of " << size << " #### " << ped1 << " " << minAddress << " " << maxAddress << std::endl;
+                        //continue;
+                     }
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
@@ -212,8 +231,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
 
                      bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-                     if (!isVisible)
+                     if (!isVisible) {
                           continue;
+                     }
                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                           repPed = repPed + ForceRepPed(ped, ped1);
                      } else {

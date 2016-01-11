@@ -282,10 +282,14 @@ void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
 void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& direction){
     const Point& position = ped->GetPos();
     int destID = ped->GetExitIndex();
+    long int key = grid->getKeyAtPoint(position);
+    getDirectionToUID(destID, key, direction);
+}
 
+void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& direction) {
     //what if goal == -1, meaning closest exit... is GetExitIndex then -1?
     //if (ped->GetFinalDestination() == -1) /*go to closest exit*/ destID = -1;
-    long int key = grid->getKeyAtPoint(position);
+
     Point* localneggradptr;
     double* localcostptr;
     #pragma omp critical
@@ -313,15 +317,25 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
                     trialfield[i].child = nullptr;
                 }
                 clearAndPrepareForFloorfieldReCalc(localcostptr);
-                std::vector<Line> localline = {Line((Line) *(ped->GetExitLine()))};
+                std::vector<Line> localline = {Line((Line) *(building->GetTransOrCrossByUID(destID)))};
                 setNewGoalAfterTheClear(localcostptr, localline);
+
+                //performance-measurement:
+                auto start = std::chrono::steady_clock::now();
+
                 calculateFloorfield(localcostptr, localneggradptr);
+
+                //performance-measurement:
+                auto end = std::chrono::steady_clock::now();
+                Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
+
                 //std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
                 Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
         }
     }
     direction.SetX(localneggradptr[key].GetX());
     direction.SetY(localneggradptr[key].GetY());
+
 }
 
 void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& direction){
@@ -374,11 +388,11 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
 
                 //performance-measurement:
                 auto end = std::chrono::steady_clock::now();
-                auto diff = end - start;
-                std::cerr << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << std::endl;
+                //auto diff = end - start;
+                //std::cerr << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << std::endl;
                 //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
                 //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
-                Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ));
+                Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
 
                 //find closest door and add to cheatmap "goalToLineUID" map
                 const std::map<int, Transition*>& transitions = building->GetAllTransitions();
@@ -388,23 +402,24 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
                 for (const auto& loctrans : transitions) {
                     dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
                     if (cost_of_MIN > localcostptr[dummykey]) {
-                        UID_of_MIN = loctrans.first;
+                        UID_of_MIN = loctrans.second->GetUniqueID();
                         cost_of_MIN = localcostptr[dummykey];
+                        std::cerr << "Closer Line found: " << UID_of_MIN << std::endl;
                     }
                 }
                 goalToLineUIDmap.erase(goalID);
                 goalToLineUIDmap.emplace(goalID, UID_of_MIN);
         }
     }
-    direction.SetX(localneggradptr[key].GetX());
-    direction.SetY(localneggradptr[key].GetY());
+    getDirectionToUID(goalToLineUIDmap.at(goalID), key, direction);
+    //direction.SetX(localneggradptr[key].GetX());
+    //direction.SetY(localneggradptr[key].GetY());
 }
 
 double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) { //not implemented: trigger calc of new ff not working yet
     if (costmap.at(destID) == nullptr) {
         Point dummy;
-        return -1.0;
-        //getDirectionToDestination(destID, position, dummy);         //this call induces the floorfieldcalculation
+        getDirectionToUID(destID, 0, dummy);         //this call induces the floorfieldcalculation
     }
     return costmap.at(destID)[grid->getKeyAtPoint(position)];
 }
@@ -552,11 +567,11 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& line
     drawLinesOnGrid(exits, dist2Wall, -3.); //mark exits as not walls (no malus near exit lines)
 
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
-        if (dist2Wall[i] == 0.) {               //outside
+        if (dist2Wall[i] == 0.) {               //outside or better: wallpoint
             speedInitial[i] = .001;
             cost[i]         = -7.;  // @todo: ar.graf
             flag[i]         = -7;    // meaning outside
-        } else {                                //inside
+        } else {                                //inside or better: walkable
             speedInitial[i] = 1.;
             cost[i]         = -2.;
             flag[i]         = 0;
@@ -801,6 +816,11 @@ void FloorfieldViaFM::setSpeed(bool useDistance2Wall) {
             }
         }
     }
+
+    //@todo: ar.graf: below is a fix to prevent folks from taking a shortcut outside of rooms. trying to make passing a transition realy expensiv
+    std::vector<Line> exits(wall.begin(), wall.begin()+numOfExits);
+    drawLinesOnGrid(exits, modifiedspeed, 0.00000000001); //mark exits as not walls (no malus near exit lines)
+
 }
 
 void FloorfieldViaFM::calculateFloorfield(double* costarray, Point* neggradarray) {
