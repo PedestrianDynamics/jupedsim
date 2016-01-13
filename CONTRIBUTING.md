@@ -16,19 +16,16 @@ There are only a few rules and advices we want to give to you:
     - [Reporting bugs](#reporting-bugs)
     - [Requesting features](#requesting-features)
 
-- Writing code
-    - Coding style
-    - Comments
+- [Writing code](#writing-code)
+    - [Coding style](#coding-style)
     - Unit tests
-    - Submitting patches
 
 - Writing documentation
-    - Doxygen usage
-    - Writing style
+    - Comments
     - Documenting new features
 
 - Committing code
-    - Handling pull requests
+    - Handling pull/merge requests
     - Committing guidelines
     - Reverting commits
 
@@ -197,6 +194,9 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
     Here is a [plugin](http://astyleclipse.sourceforge.net/) for astyle in eclipse.
     Read also
     [How to change indentation width in eclipse?](https://superuser.com/questions/462221/how-do-i-reliably-change-the-indentation-width-in-eclipse)
+
+- **Clion**
+<!-- TODO -->
 
 
 ### Comments
