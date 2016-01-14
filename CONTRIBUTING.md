@@ -112,7 +112,7 @@ If you want to support us by writing the enhancement yourself consider what kind
 
 Nevertheless open an issue for documentation purposes with the following template:
 
-~~~
+~~~.md
 [Short description of suggestion]
 
 **Steps which explain the enhancement**
