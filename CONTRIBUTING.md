@@ -20,13 +20,13 @@ There are only a few rules and advices we want to give to you:
     - [Coding style](#coding-style)
     - Unit tests
 
-- Writing documentation
-    - Comments
+- [Writing documentation](#wrinting-documentation)
+    - [Comments](#comments)
     - Documenting new features
 
-- Committing code
+- [Committing code](#commiting-code)
     - Handling pull/merge requests
-    - Committing guidelines
+    - [Committing guidelines](#commiting-guidelines)
     - Reverting commits
 
 ## Advice for new contributors
@@ -158,7 +158,7 @@ The code is formated using the automatic formatter [astyle](http://astyle.source
 
 Here is an **example:**
 
-```python
+```c++
 int Foo(bool isBar)
 {
      if (isBar) {
@@ -199,8 +199,30 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
 <!-- TODO -->
 
 
+## Writing Documentation
+
 ### Comments
+Comments have to be written in **English** everywhere. Please use markdown where applicable.
 
-Comments have to be written in **English**. Please write clear and concise commit messages so that
-your co-developers can directly grasp what changes on the code are you committing/pushing.
+## Commiting Code
 
+### Commiting guidelines
+Please write clear and concise commit messages so that
+your co-developers can directly grasp what changes on the code are you committing/pushing. Please do this with respect
+to the following points:
+- Name every class (file if you only change a single file) you changed and right after that a brief description of your
+change.
+- Use markdown if you want do make a longer description than two sentences.
+- Reference issues and pull requests liberally if your commit is connected to one.
+- When only changing documentation start with `:memo:`
+- Consider starting the commit message with an applicable emoji:
+    - :art: `:art:` when improving the format/structure of the code
+    - :racehorse: `:racehorse:` when improving performance
+    - :memo: `:memo:` when writing docs
+    - :penguin: `:penguin:` when fixing something on Linux
+    - :apple: `:apple:` when fixing something on Mac OS
+    - :checkered_flag: `:checkered_flag:` when fixing something on Windows
+    - :bug: `:bug:` when fixing a bug
+    - :fire: `:fire:` when removing code or files
+    - :green_heart: `:green_heart:` when fixing the CI build
+    - :white_check_mark: `:white_check_mark:` when adding tests
