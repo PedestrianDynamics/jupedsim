@@ -1214,8 +1214,8 @@ void GlobalRouter::TriangulateGeometry()
                                    h->SetRoom1(room.get());
                                    h->SetSubRoom1(subroom.get());
                                    subroom->AddHline(h);
-                                   Log->Write(std::to_string(h->GetPoint1().GetX())+""+std::to_string(h->GetPoint1().GetY()));
-                                   Log->Write(std::to_string(h->GetPoint2().GetX())+""+std::to_string(h->GetPoint2().GetY()));
+                                   //Log->Write(std::to_string(h->GetPoint1().GetX())+""+std::to_string(h->GetPoint1().GetY()));
+                                   //Log->Write(std::to_string(h->GetPoint2().GetX())+""+std::to_string(h->GetPoint2().GetY()));
                                    _building->AddHline(h);
                               }
                          }
