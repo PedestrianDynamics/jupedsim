@@ -219,7 +219,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      Pedestrian* ped1 = neighbours[i];
                      if ((minAddress > neighbours[i]) || (maxAddress < neighbours[i])) {
                         std::cerr << "## Skiped " << i << " of " << size << " #### " << ped1 << " " << minAddress << " " << maxAddress << std::endl;
-                        //continue;
+                        continue;
                      }
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
