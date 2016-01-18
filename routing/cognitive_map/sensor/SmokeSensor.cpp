@@ -66,8 +66,8 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
         /// first: find Mesh corresponding to current edge and current simTime. Secondly get knotvalue from that mesh depending
         /// on the current position of the pedestrian
         double smokeFactor = _FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
-                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(),
-                                                                                                pedestrian->GetPos().GetY());
+                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
+                                                                                                pedestrian->GetPos()._y);
         /// Set egde factor
         item->SetFactor(smokeFactor,GetName());
     }

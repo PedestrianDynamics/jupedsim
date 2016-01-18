@@ -121,8 +121,8 @@ class RectGrid
         }
 
         long int getKeyAtPoint(const Point p) const {
-            long int i = (long int) (((p.GetX()-xMin)/hx)+.5);
-            long int j = (long int) (((p.GetY()-yMin)/hy)+.5);
+            long int i = (long int) (((p._x-xMin)/hx)+.5);
+            long int j = (long int) (((p._y-yMin)/hy)+.5);
             if ((i < iMax) && (j < jMax))
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
             return -1; // invalid indices
@@ -140,10 +140,10 @@ class RectGrid
 
         void setBoundaries(const Point xy_min, const Point xy_max) {
             if (!isInitialized) {
-                xMin = xy_min.GetX();
-                xMax = xy_max.GetX();
-                yMin = xy_min.GetY();
-                yMax = xy_max.GetY();
+                xMin = xy_min._x;
+                xMax = xy_max._x;
+                yMin = xy_min._y;
+                yMax = xy_max._y;
             }
         }
 
@@ -167,10 +167,10 @@ class RectGrid
         }
 
         Point getNearestGridPoint(const Point& currPoint) const {
-            if ((currPoint.GetX() > xMax) || (currPoint.GetY() > yMax))
+            if ((currPoint._x > xMax) || (currPoint._y > yMax))
                 return Point(-7, -7); // @todo: ar.graf : find good false indicator
-            long int i = (long int)(((currPoint.GetX()-xMin)/hx)+.5);
-            long int j = (long int)(((currPoint.GetY()-yMin)/hy)+.5);
+            long int i = (long int)(((currPoint._x-xMin)/hx)+.5);
+            long int j = (long int)(((currPoint._y-yMin)/hy)+.5);
             return Point(i*hx+xMin, j*hy+yMin);
         }
 

@@ -765,7 +765,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           }
 
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
-          double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
+          double dist2 = ap->DistanceTo(posA._x, posA._y);
           double dist=dist1+dist2;
 
           //        doorProb[ap->GetID()]= exp(-alpha*dist);

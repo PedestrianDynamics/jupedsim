@@ -88,8 +88,8 @@ bool GompertzModel::Init (Building* building)
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
-              cosPhi = d.GetX() / dist;
-              sinPhi = d.GetY() / dist;
+              cosPhi = d._x / dist;
+              sinPhi = d._y / dist;
          } else {
               Log->Write(
                    "ERROR: \tallPeds::Init() cannot initialise phi! "
@@ -190,8 +190,8 @@ void GompertzModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point acc = (fd + repPed + repWall) / ped->GetMass();
                 if(ped->GetID()==-242)
                 {
-                     printf("t=%f, Pos1 =[%f, %f]\n", current,ped->GetPos().GetX(), ped->GetPos().GetY());
-                     printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), repPed.GetX(), repPed.GetY(), repWall.GetX(), repWall.GetY());
+                     printf("t=%f, Pos1 =[%f, %f]\n", current,ped->GetPos()._x, ped->GetPos()._y);
+                     printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc._x, acc._y, fd._x, fd._y, repPed._x, repPed._y, repWall._x, repWall._y);
                      // if(current >16) getc(stdin);
                 }
 
@@ -249,24 +249,24 @@ Point GompertzModel::ForceDriv(Pedestrian* ped, Room* room) const
      if (dist > J_EPS_GOAL) {
           e0 = ped->GetV0(target);
           if(ped->GetID()==-4)
-          printf("1 e0 %f %f, target %f %f\n", e0.GetX(), e0.GetY(), target.GetX(), target.GetY());
+          printf("1 e0 %f %f, target %f %f\n", e0._x, e0._y, target._x, target._y);
      } else {
           ped->SetSmoothTurning();
           e0 = ped->GetV0();
                     if(ped->GetID()==-4)
-            printf("2 e0 %f %f\n", e0.GetX(), e0.GetY());
+            printf("2 e0 %f %f\n", e0._x, e0._y);
      }
       F_driv = ((e0 * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
   
-      //double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
+      //double v =  sqrt(ped->GetV()._x*ped->GetV()._x +ped->GetV()._y*ped->GetV()._y);
 
 // #if DEBUG
       if (ped->GetID()==-4){
-           double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
-           printf( "pos %f %f target %f %f\n", pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+           double e0norm = sqrt(e0._x*e0._x +e0._y*e0._y);
+           printf( "pos %f %f target %f %f\n", pos._x, pos._y, target._x, target._y);
            printf("mass=%f, v0norm=%f, e0Norm=%f, tau=%f\n", ped->GetMass(), ped->GetV0Norm(), e0norm, ped->GetTau());
-           printf("Fdriv=  [%f, %f]\n", F_driv.GetX(), F_driv.GetY());
-           fprintf(stdout, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
+           printf("Fdriv=  [%f, %f]\n", F_driv._x, F_driv._y);
+           fprintf(stdout, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos()._x, ped->GetPos()._y, ped->GetV()._x, ped->GetV()._y, target._x, target._y);
 
       }
 // #endif
@@ -335,16 +335,16 @@ Point GompertzModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
      F_rep = ep12 * f;
      if(ped1->GetID() ==-4) {
           printf("\nNAN return ----> p1=%d p2=%d pos1=%f %f, pos2=%f %f\n", ped1->GetID(),
-                 ped2->GetID(), ped1->GetPos().GetX(), ped1->GetPos().GetY(),  ped2->GetPos().GetX(), ped2->GetPos().GetY());
+                 ped2->GetID(), ped1->GetPos()._x, ped1->GetPos()._y,  ped2->GetPos()._x, ped2->GetPos()._y);
                  
      
-          printf("F=[%f, %f] v0=%f, nu=%f, B_ij=%f D=%f, r1=%f, r2=%f\n", F_rep.GetX(), F_rep.GetY(), ped1->GetV0Norm(), _nuPed, B_ij, Distance, r1, r2);
+          printf("F=[%f, %f] v0=%f, nu=%f, B_ij=%f D=%f, r1=%f, r2=%f\n", F_rep._x, F_rep._y, ped1->GetV0Norm(), _nuPed, B_ij, Distance, r1, r2);
      }
 //check isNan
-     if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
+     if (F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
           char tmp[CLENGTH];
           sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
-                  ped2->GetID(), F_rep.GetX(), F_rep.GetY());
+                  ped2->GetID(), F_rep._x, F_rep._y);
           Log->Write(tmp);
           Log->Write("ERROR:\t fix this as soon as possible");
           return Point(0,0); // FIXME: should never happen
@@ -406,7 +406,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
      Point F_wrep = Point(0.0, 0.0);
 #if DEBUG
      if(ped->GetID()==-4)
-     printf("=========\n\tEnter GompertzWall with PED=%d, wall=[%.2f, %.2f]--[%.2f, %.2f]\n", ped->GetID(), w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(),  w.GetPoint2().GetY());
+     printf("=========\n\tEnter GompertzWall with PED=%d, wall=[%.2f, %.2f]--[%.2f, %.2f]\n", ped->GetID(), w.GetPoint1()._x,  w.GetPoint1()._y, w.GetPoint2()._x,  w.GetPoint2()._y);
 #endif
      // getc(stdin);
      // if direction of pedestrians does not intersect walls --> ignore
@@ -439,7 +439,7 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
           
           e_iw = (inside ? new_dist:new_dist*-1);
           // Distance = EPS;
-          // Log->Write("INFO:\t\t --- dist = %f, e= %f %f inside=%d",ped->GetID(), Distance, e_iw.GetX(), e_iw.GetY(), inside);
+          // Log->Write("INFO:\t\t --- dist = %f, e= %f %f inside=%d",ped->GetID(), Distance, e_iw._x, e_iw._y, inside);
      }
 
 //------------------------- check if others are behind using v0 instead of v
@@ -451,10 +451,10 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
 #if DEBUG
      if(ped->GetID()==-4){
      printf("Distance = %f tmpv=%f\n",Distance, tmpv);
-     printf("v = %f, %f \n", v.GetX(), v.GetY());
-     printf("pos = %f, %f \n", ped->GetPos().GetX(), ped->GetPos().GetY());
-     printf("pt = %f, %f \n", pt.GetX(), pt.GetY());
-     printf("e_iw = %f, %f\n",e_iw.GetX(), e_iw.GetY());
+     printf("v = %f, %f \n", v._x, v._y);
+     printf("pos = %f, %f \n", ped->GetPos()._x, ped->GetPos()._y);
+     printf("pt = %f, %f \n", pt._x, pt._y);
+     printf("e_iw = %f, %f\n",e_iw._x, e_iw._y);
      printf("WallIsBehind = %f (%f)\n",wallIsBehindv,J_EPS);}
 #endif
 
@@ -493,8 +493,8 @@ Point GompertzModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
 #if DEBUG
      printf("b=%f, c=%f, a=%f, m=%f\n",b,c,_nuWall, ped->GetMass());
      printf("Distance=%f, Radius=%f, B_iw=%f, G(B_iw)=%f\n",Distance, Radius, 1.0 - Distance/(Radius), B_iw);
-     printf("\t\tf= %f, e_iw= %f, %f\n",f, e_iw.GetX(), e_iw.GetY() );
-     printf("F_Rep = [%f, %f]\n---------------\n", F_wrep.GetX(), F_wrep.GetY());
+     printf("\t\tf= %f, e_iw= %f, %f\n",f, e_iw._x, e_iw._y );
+     printf("F_Rep = [%f, %f]\n---------------\n", F_wrep._x, F_wrep._y);
      if (0 && std::fabs(f)>0.01)
            getc(stdin);
 #endif

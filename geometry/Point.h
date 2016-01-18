@@ -1,7 +1,7 @@
 /**
  * \file        Point.h
  * \date        Sep 30, 2010
- * \version     v0.7
+ * \version     v0.8
  * \copyright   <2009-2015> Forschungszentrum Jülich GmbH. All rights reserved.
  *
  * \section License
@@ -20,7 +20,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with JuPedSim. If not, see <http://www.gnu.org/licenses/>.
  *
- * \section Description
+ * # Description
+ * Basic 2-d vectorial structure to deal with 2-D points. This class provides interaction for two points with each other
+ * and fullfills [boost/geometry object model](http://www.boost.org/doc/libs/1_60_0/libs/geometry/doc/html/geometry/examples/example__adapting_a_legacy_geometry_object_model.html)
+ * for a 2-d point.
  *
  *
  **/
@@ -29,39 +32,33 @@
 #ifndef _POINT_H
 #define _POINT_H
 #include <string>
+#include <math.h>
+#include <iostream>
+#include <boost/geometry/geometries/register/point.hpp>
+#include <boost/geometry.hpp>
 
 class Point {
 public:
-     double _x;
-     double _y;
+     double _x; //*<x-coordinate of a 2-d point*/
+     double _y; //*<y-coordinate of a 2-d point*/
 
 public:
-     // constructors
-     Point();
-     Point(double x, double y);
+
+     /**
+      * **Ctor**
+      * Constructs a new point with given x and y.
+      * x and y are 0 if not given.
+      * @param [in] x: x-coordinate as double
+      * @param [in] y: y-coordinate as double
+      */
+     Point(double x = 0, double y = 0) : _x(x), _y(y) {};
+
+     /**
+      * **Copy-Ctor**
+      * Constructs a new point as copy of the original point.
+      * @param [in] orig: original point which shall be copied
+      */
      Point(const Point& orig);
-
-
-     /**
-      * Set/Get the x component
-      */
-     void SetX(double x);
-
-     /**
-      * Set/Get the y component
-      */
-     void SetY(double y);
-
-
-     /**
-      * Set/Get the x component
-      */
-     double GetX() const;
-
-     /**
-      * Set/Get the y component
-      */
-     double GetY() const;
 
      /// Norm
      double Norm() const;
@@ -120,8 +117,12 @@ public:
      Point& operator+=(const Point& p);
      /// nice formating of the point
      std::string toString() const;
+     std::ostream& SaveToXml(std::ostream&) const;
 };
 
+BOOST_GEOMETRY_REGISTER_POINT_2D(Point, double, cs::cartesian, _x, _y);
+
+double Distance(const Point&, const Point&);
 /// multiplication
 const Point operator*(const Point& p, const double f);
 /// division

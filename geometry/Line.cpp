@@ -109,12 +109,12 @@ string Line::Write() const {
      char wall[500] = "";
      geometry.append("\t\t<wall color=\"100\">\n");
      sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-               (GetPoint1().GetX()) * FAKTOR,
-               (GetPoint1().GetY()) * FAKTOR);
+               (GetPoint1()._x) * FAKTOR,
+               (GetPoint1()._y) * FAKTOR);
      geometry.append(wall);
      sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-               (GetPoint2().GetX()) * FAKTOR,
-               (GetPoint2().GetY()) * FAKTOR);
+               (GetPoint2()._x) * FAKTOR,
+               (GetPoint2()._y) * FAKTOR);
      geometry.append(wall);
      geometry.append("\t\t</wall>\n");
      return geometry;
@@ -130,11 +130,11 @@ Point Line::NormalVec() const {
      double nx, ny, norm;
      Point r = GetPoint2() - GetPoint1();
 
-     if (r.GetX() == 0.0) {
+     if (r._x == 0.0) {
           nx = 1;
           ny = 0;
      } else {
-          nx = -r.GetY() / r.GetX();
+          nx = -r._y / r._x;
           ny = 1;
           /* Normieren */
           norm = sqrt(nx * nx + ny * ny);
@@ -286,8 +286,8 @@ int Line::IntersectionWith(const Point &p1, const Point &p2, Point &p3) const {
      double denominator = BA.CrossProduct(DC);
      double numerator = DC.CrossProduct(AC);
 
-     p3.SetX(J_NAN);
-     p3.SetY(J_NAN);
+     p3._x = J_NAN;
+     p3._y = J_NAN;
 
      if (denominator == 0.0) {
           // the lines are superposed
@@ -423,7 +423,7 @@ bool Line::IntersectionWithCircle(const Point &centre, double radius /*cm for pe
 // Returns true if pt is on the left side ( from point1 toward point2)
 bool Line::IsLeft(const Point &pt) {
      double test =
-               (_point2._x - _point1._x) * (pt.GetY() - _point1._y) - (_point2._y - _point1._y) * (pt.GetX() - _point1._x);
+               (_point2._x - _point1._x) * (pt._y - _point1._y) - (_point2._y - _point1._y) * (pt._x - _point1._x);
      return test > 0.0;
 }
 

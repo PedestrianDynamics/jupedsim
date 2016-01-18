@@ -121,8 +121,8 @@ bool GradientModel::Init (Building* building)
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
-              cosPhi = d.GetX() / dist;
-              sinPhi = d.GetY() / dist;
+              cosPhi = d._x / dist;
+              sinPhi = d._y / dist;
          } else {
               Log->Write(
                    "ERROR: \allPeds::Init() cannot initialise phi! "
@@ -298,14 +298,14 @@ Point GradientModel::ForceDriv(Pedestrian* ped, Room* room) const
      //}
      F_driv = ((target.Normalized() * ped->GetV0Norm() - ped->GetV()) * ped->GetMass()) / ped->GetTau();
 
-      //double v =  sqrt(ped->GetV().GetX()*ped->GetV().GetX() +ped->GetV().GetY()*ped->GetV().GetY());
-      //double e0norm = sqrt(e0.GetX()*e0.GetX() +e0.GetY()*e0.GetY());
+      //double v =  sqrt(ped->GetV()._x*ped->GetV()._x +ped->GetV()._y*ped->GetV()._y);
+      //double e0norm = sqrt(e0._x*e0._x +e0._y*e0._y);
 
 #if DEBUG
-      printf( "pos %f %f target %f %f\n", pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+      printf( "pos %f %f target %f %f\n", pos._x, pos._y, target._x, target._y);
       printf("mass=%f, v0norm=%f, v=%f, e0Norm=%f, tau=%f\n", ped->GetMass(), ped->GetV0Norm(), v , e0norm,ped->GetTau());
-      printf("Fdriv=  [%f, %f]\n", F_driv.GetX(), F_driv.GetY());
-      fprintf(stderr, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos().GetX(), ped->GetPos().GetY(), ped->GetV().GetX(), ped->GetV().GetY(), target.GetX(), target.GetY());
+      printf("Fdriv=  [%f, %f]\n", F_driv._x, F_driv._y);
+      fprintf(stderr, "%d   %f    %f    %f    %f    %f    %f\n", ped->GetID(), ped->GetPos()._x, ped->GetPos()._y, ped->GetV()._x, ped->GetV()._y, target._x, target._y);
       getc(stdin);
 #endif
 
@@ -389,10 +389,10 @@ Point GradientModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
 
      F_rep = ep12 * f;
      //check isNan
-     if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
+     if (F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
           char tmp[CLENGTH];
           sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
-                  ped2->GetID(), F_rep.GetX(), F_rep.GetY());
+                  ped2->GetID(), F_rep._x, F_rep._y);
           Log->Write(tmp);
           Log->Write("ERROR:\t fix this as soon as possible");
           return Point(0,0); // FIXME: should never happen
@@ -472,10 +472,10 @@ Point GradientModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 #if DEBUG
 
      printf("Distance = %f tmpv=%f\n",Distance, tmpv);
-     printf("v = %f, %f \n", v.GetX(), v.GetY());
-     printf("pos = %f, %f \n", ped->GetPos().GetX(), ped->GetPos().GetY());
-     printf("pt = %f, %f \n", pt.GetX(), pt.GetY());
-     printf("e_iw = %f, %f\n",e_iw.GetX(), e_iw.GetY());
+     printf("v = %f, %f \n", v._x, v._y);
+     printf("pos = %f, %f \n", ped->GetPos()._x, ped->GetPos()._y);
+     printf("pt = %f, %f \n", pt._x, pt._y);
+     printf("e_iw = %f, %f\n",e_iw._x, e_iw._y);
      printf("WallIsBehind = %f (%f)\n",wallIsBehindv,J_EPS);
 #endif
 
@@ -510,7 +510,7 @@ Point GradientModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 #if DEBUG
      printf("b=%f, c=%f, a=%f, m=%f\n",b,c,_nuWall, ped->GetMass());
      printf("Distance=%f, Radius=%f, B_iw=%f, G(B_iw)=%f\n",Distance, Radius, 1.0 - Distance/(Radius), B_iw);
-     printf("f= %f, e_iw= %f, %f\n",f, e_iw.GetX(), e_iw.GetY() );
+     printf("f= %f, e_iw= %f, %f\n",f, e_iw._x, e_iw._y );
      getc(stdin);
 #endif
      //f = -ped->GetMass() * _nuWall * ped->GetV0Norm() * K_iw * B_iw;

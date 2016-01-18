@@ -88,8 +88,8 @@ bool VelocityModel::Init (Building* building)
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
-              cosPhi = d.GetX() / dist;
-              sinPhi = d.GetY() / dist;
+              cosPhi = d._x / dist;
+              sinPhi = d._y / dist;
          } else {
               Log->Write(
                    "ERROR: \tallPeds::Init() cannot initialise phi! "
@@ -204,7 +204,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point tmp;
 
 
-                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0().GetX())>0.01)
+                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0()._x)>0.01)
                 // {
                    
                 //       if(ped->GetID()==-10)
@@ -215,9 +215,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // {
                 //       tmp = ped->GetLastE0();
                 //       if(ped->GetID()==10)
-                //             std::cout << "keep direction "<<tmp.GetX() << ", " << tmp.GetY() << std::endl;
-                //       spacing = tmp.GetX();
-                //       winkel = tmp.GetY();
+                //             std::cout << "keep direction "<<tmp._x << ", " << tmp._y << std::endl;
+                //       spacing = tmp._x;
+                //       winkel = tmp._y;
                 // }
                 // if(ped->GetID()==-10)
                       // getc(stdin);
@@ -253,8 +253,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 ped->SetPos(pos_neu);
                 if(periodic){
-                      if(ped->GetPos().GetX() >= xRight){
-                            ped->SetPos(Point(ped->GetPos().GetX() - (xRight - xLeft), ped->GetPos().GetY()));
+                      if(ped->GetPos()._x >= xRight){
+                            ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
                             //ped->SetID( ped->GetID() + 1);
                       }
                 }
@@ -296,11 +296,11 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
 {
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
       if(periodic){
-            double x = ped1->GetPos().GetX();
-            double x_j = ped2->GetPos().GetX();
+            double x = ped1->GetPos()._x;
+            double x_j = ped2->GetPos()._x;
             
             if((xRight-x) + (x_j-xLeft) <= cutoff){
-                  distp12.SetX(distp12.GetX() + xRight - xLeft);
+                 distp12._x = distp12._x + xRight - xLeft;
             }
       }
       double Distance = distp12.Norm();
@@ -332,10 +332,10 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
      Point distp12 = ped2->GetPos() - ped1->GetPos();
      
      if(periodic){
-            double x = ped1->GetPos().GetX();
-            double x_j = ped2->GetPos().GetX();
+            double x = ped1->GetPos()._x;
+            double x_j = ped2->GetPos()._x;
             if((xRight-x) + (x_j-xLeft) <= cutoff){
-                 distp12.SetX(distp12.GetX() + xRight - xLeft);
+                 distp12._x = distp12._x + xRight - xLeft;
             }
       }
      

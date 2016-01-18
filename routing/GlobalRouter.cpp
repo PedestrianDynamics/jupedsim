@@ -145,7 +145,7 @@ bool GlobalRouter::Init(Building* building)
           int door = itr.second->GetUniqueID();
           Hline* cross = itr.second;
           Point centre = cross->GetCentre();
-          double center[2] = { centre.GetX(), centre.GetY() };
+          double center[2] = { centre._x, centre._y };
 
           AccessPoint* ap = new AccessPoint(door, center);
           ap->SetNavLine(cross);
@@ -175,7 +175,7 @@ bool GlobalRouter::Init(Building* building)
           int door = itr.second->GetUniqueID();
           Crossing* cross = itr.second;
           const Point& centre = cross->GetCentre();
-          double center[2] = { centre.GetX(), centre.GetY() };
+          double center[2] = { centre._x, centre._y };
 
           AccessPoint* ap = new AccessPoint(door, center);
           ap->SetNavLine(cross);
@@ -211,7 +211,7 @@ bool GlobalRouter::Init(Building* building)
           int door = itr.second->GetUniqueID();
           Transition* cross = itr.second;
           const Point& centre = cross->GetCentre();
-          double center[2] = { centre.GetX(), centre.GetY() };
+          double center[2] = { centre._x, centre._y };
 
           AccessPoint* ap = new AccessPoint(door, center);
           ap->SetNavLine(cross);
@@ -849,7 +849,7 @@ int GlobalRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                continue;
           }
           double dist1 = ap->GetDistanceTo(ped->GetFinalDestination());
-          double dist2 = ap->DistanceTo(posA.GetX(), posA.GetY());
+          double dist2 = ap->DistanceTo(posA._x, posA._y);
           double dist=dist1+dist2;
 
           if (dist < minDistGlobal)
@@ -1053,8 +1053,8 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
 
           if ( (IsElementInVector(rooms_ids, room_id) == false) && (IsElementInVector(rooms_ids, room_id1) == false) )
                continue;
-          double px = from_AP->GetCentre().GetX();
-          double py = from_AP->GetCentre().GetY();
+          double px = from_AP->GetCentre()._x;
+          double py = from_AP->GetCentre()._y;
           //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<", "<<py<<" \"] ;"<<endl;
           //graph_file << from_door <<" [shape=ellipse, pos=\""<<px<<","<<py<<"\" ];"<<endl;
 
@@ -1214,8 +1214,8 @@ void GlobalRouter::TriangulateGeometry()
                                    h->SetRoom1(room.get());
                                    h->SetSubRoom1(subroom.get());
                                    subroom->AddHline(h);
-                                   Log->Write(std::to_string(h->GetPoint1().GetX())+""+std::to_string(h->GetPoint1().GetY()));
-                                   Log->Write(std::to_string(h->GetPoint2().GetX())+""+std::to_string(h->GetPoint2().GetY()));
+                                   Log->Write(std::to_string(h->GetPoint1()._x)+""+std::to_string(h->GetPoint1()._y));
+                                   Log->Write(std::to_string(h->GetPoint2()._x)+""+std::to_string(h->GetPoint2()._y));
                                    _building->AddHline(h);
                               }
                          }

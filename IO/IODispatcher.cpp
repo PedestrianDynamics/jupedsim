@@ -107,8 +107,8 @@ string TrajectoriesJPSV04::WritePed(Pedestrian* ped)
                "zPos=\"%.2f\"\t"
                "radiusA=\"%.2f\"\tradiusB=\"%.2f\"\t"
                "ellipseOrientation=\"%.2f\" ellipseColor=\"%d\"/>\n",
-               ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-               (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+               ped->GetID(), (ped->GetPos()._x) * FAKTOR,
+               (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                phi * RAD2DEG, color);
 
      return string(tmp);
@@ -353,8 +353,8 @@ void TrajectoriesFLAT::WriteFrame(int frameNr, Building* building)
      const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
      for(unsigned int p=0;p<allPeds.size();p++){
           Pedestrian* ped = allPeds[p];
-          double x = ped->GetPos().GetX();
-          double y = ped->GetPos().GetY();
+          double x = ped->GetPos()._x;
+          double y = ped->GetPos()._y;
           double z = ped->GetElevation();
           sprintf(tmp, "%d\t%d\t%0.2f\t%0.2f\t%0.2f", ped->GetID(), frameNr, x, y,z);
           Write(tmp);
@@ -400,7 +400,7 @@ void TrajectoriesVTK::WriteGeometry(Building* building)
      const vector<NavMesh::JVertex*>& vertices= nv->GetVertices() ;
      tmp<<"POINTS "<<vertices.size()<<" FLOAT"<<endl;
      for (unsigned int v=0; v<vertices.size(); v++) {
-          tmp<<vertices[v]->pPos.GetX()<<" " <<vertices[v]->pPos.GetY() <<" 0.0"<<endl;
+          tmp<<vertices[v]->pPos._x<<" " <<vertices[v]->pPos._y <<" 0.0"<<endl;
      }
      Write(tmp.str());
      tmp.str(std::string());
@@ -566,8 +566,8 @@ void TrajectoriesJPSV06::WriteFrame(int frameNr, Building* building)
                     "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
-                    ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                    (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    ped->GetID(), (ped->GetPos()._x) * FAKTOR,
+                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(tmp1);
 
@@ -681,8 +681,8 @@ void TrajectoriesJPSV05::WriteFrame(int frameNr, Building* building)
                     "z=\"%.6f\"\t"
                     "rA=\"%.2f\"\trB=\"%.2f\"\t"
                     "eO=\"%.2f\" eC=\"%d\"/>\n",
-                    ped->GetID(), (ped->GetPos().GetX()) * FAKTOR,
-                    (ped->GetPos().GetY()) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
+                    ped->GetID(), (ped->GetPos()._x) * FAKTOR,
+                    (ped->GetPos()._y) * FAKTOR,(ped->GetElevation()+0.3) * FAKTOR ,a * FAKTOR, b * FAKTOR,
                     phi * RAD2DEG, color);
           data.append(s);
      }

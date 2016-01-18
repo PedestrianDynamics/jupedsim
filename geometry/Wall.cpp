@@ -50,8 +50,8 @@ Wall::Wall(const Wall& orig) : Line(orig)
 void Wall::WriteToErrorLog() const
 {
      char tmp[CLENGTH];
-     sprintf(tmp, "\t\tWALL: (%f, %f) -- (%f, %f)\n", GetPoint1().GetX(),
-             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
+     sprintf(tmp, "\t\tWALL: (%f, %f) -- (%f, %f)\n", GetPoint1()._x,
+             GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
      Log->Write(tmp);
 }
 
@@ -61,12 +61,12 @@ string Wall::Write() const
      char wall[500] = "";
      geometry.append("\t\t<wall>\n");
      sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-             (GetPoint1().GetX()) * FAKTOR,
-             (GetPoint1().GetY()) * FAKTOR);
+             (GetPoint1()._x) * FAKTOR,
+             (GetPoint1()._y) * FAKTOR);
      geometry.append(wall);
      sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\"/>\n",
-             (GetPoint2().GetX()) * FAKTOR,
-             (GetPoint2().GetY()) * FAKTOR);
+             (GetPoint2()._x) * FAKTOR,
+             (GetPoint2()._y) * FAKTOR);
      geometry.append(wall);
      geometry.append("\t\t</wall>\n");
      return geometry;

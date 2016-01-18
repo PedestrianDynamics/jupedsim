@@ -248,10 +248,10 @@ void Building::AddSurroundingRoom()
           {
                for (auto&& wall:itr_subroom.second->GetAllWalls())
                {
-                    double x1 = wall.GetPoint1().GetX();
-                    double y1 = wall.GetPoint1().GetY();
-                    double x2 = wall.GetPoint2().GetX();
-                    double y2 = wall.GetPoint2().GetY();
+                    double x1 = wall.GetPoint1()._x;
+                    double y1 = wall.GetPoint1()._y;
+                    double x2 = wall.GetPoint2()._x;
+                    double y2 = wall.GetPoint2()._y;
 
                     double xmax = (x1 > x2) ? x1 : x2;
                     double xmin = (x1 > x2) ? x2 : x1;
@@ -270,10 +270,10 @@ void Building::AddSurroundingRoom()
      {
           for(auto&& wall: itr_goal.second->GetAllWalls())
           {
-               double x1 = wall.GetPoint1().GetX();
-               double y1 = wall.GetPoint1().GetY();
-               double x2 = wall.GetPoint2().GetX();
-               double y2 = wall.GetPoint2().GetY();
+               double x1 = wall.GetPoint1()._x;
+               double y1 = wall.GetPoint1()._y;
+               double x2 = wall.GetPoint2()._x;
+               double y2 = wall.GetPoint2()._y;
 
                double xmax = (x1 > x2) ? x1 : x2;
                double xmin = (x1 > x2) ? x2 : x1;
@@ -1037,10 +1037,10 @@ void Building::InitGrid(double cellSize)
           {
                for (auto&& wall:itr_subroom.second->GetAllWalls())
                {
-                    double x1 = wall.GetPoint1().GetX();
-                    double y1 = wall.GetPoint1().GetY();
-                    double x2 = wall.GetPoint2().GetX();
-                    double y2 = wall.GetPoint2().GetY();
+                    double x1 = wall.GetPoint1()._x;
+                    double y1 = wall.GetPoint1()._y;
+                    double x2 = wall.GetPoint2()._x;
+                    double y2 = wall.GetPoint2()._y;
 
                     double xmax = (x1 > x2) ? x1 : x2;
                     double xmin = (x1 > x2) ? x2 : x1;
