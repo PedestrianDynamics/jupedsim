@@ -81,8 +81,11 @@ public:
           return _x * v._x + _y * v._y;
      }
 
-     // since we have only 2D vectors (may be changed in the future), this function returns a scalar
-     // (basically the third component of the vector (0,0,z) )
+     /**
+      * since we have only 2D vectors (may be changed in the future), this function returns a scalar
+      * basically the third component of the vector (0,0,z) )
+      *
+      */
      inline double CrossProduct(const Point &p) const
      {
           return Determinant(p);
@@ -96,7 +99,7 @@ public:
           return _x*v._y - _y*v._x;
      }
 
-     /// translation and rotation in Ellipse coordinate system
+
      Point TransformToEllipseCoordinates(const Point &center, double cphi, double sphi) const;
      /// translation and rotation in cartesian system
      Point TransformToCartesianCoordinates(const Point &center, double cphi, double sphi) const;
@@ -117,12 +120,27 @@ public:
      Point& operator+=(const Point& p);
      /// nice formating of the point
      std::string toString() const;
+
+
+     /**
+      * @param [in/out] ostream& : ostream to write the point as xml-format into
+      * @return the given ostream with point as xml-format written into
+      */
      std::ostream& SaveToXml(std::ostream&) const;
 };
 
 BOOST_GEOMETRY_REGISTER_POINT_2D(Point, double, cs::cartesian, _x, _y);
 
+
+/**
+ * Calculates the distance between the 2 given points.
+ * @param [in] point1
+ * @param [in] point2
+ * @return distance between point1 and point2
+ * @see [boost/geometry](http://www.boost.org/doc/libs/1_60_0/libs/geometry/doc/html/geometry/reference/algorithms/distance.html)
+ */
 double Distance(const Point&, const Point&);
+
 /// multiplication
 const Point operator*(const Point& p, const double f);
 /// division

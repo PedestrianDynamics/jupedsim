@@ -249,7 +249,7 @@ std::ostream& Point::SaveToXml(std::ostream& ostream) const
      return ostream;;
 }
 
-double Distance(const Point& point, const Point& point1)
+double Distance(const Point& point1, const Point& point2)
 {
-     return boost::geometry::distance(point, point1);
+     return boost::geometry::distance(point1, point2);
 }
