@@ -348,9 +348,9 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           ep12 = distp12.Normalized();
      } else {
           //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("WARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("\t\t Pedestrians are too near to each other.");
-          Log->Write("\t\t Get your model right. Going to exit.");
+          Log->Write(KRED "\nWARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!" RESET);
+          Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
+          Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
           exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
