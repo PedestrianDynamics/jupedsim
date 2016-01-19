@@ -185,6 +185,7 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
+          ap->SetClosed(!cross->IsOpen());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {

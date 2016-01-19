@@ -36,6 +36,7 @@ using namespace std;
 Crossing::Crossing()
 {
      _id = -1;
+     _isOpen=true;
 }
 
 Crossing::~Crossing()
@@ -74,12 +75,22 @@ bool Crossing::IsExit() const
 
 bool Crossing::IsOpen() const
 {
-     return true;
+     return _isOpen;
 }
 
 bool Crossing::IsTransition() const
 {
      return false;
+}
+
+void Crossing::Close()
+{
+     _isOpen = false;
+}
+
+void Crossing::Open()
+{
+     _isOpen = true;
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
