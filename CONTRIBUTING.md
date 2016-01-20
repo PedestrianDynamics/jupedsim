@@ -216,6 +216,7 @@ change.
 - Reference issues and pull requests liberally if your commit is connected to one.
 - When only changing documentation start with `:memo:`
 - Consider starting the commit message with an applicable emoji:
+    - :new: `:new:` when adding a new feature
     - :art: `:art:` when improving the format/structure of the code
     - :racehorse: `:racehorse:` when improving performance
     - :memo: `:memo:` when writing docs
