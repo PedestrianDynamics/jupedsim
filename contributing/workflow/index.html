@@ -221,6 +221,8 @@
         
             <li><a href="#tips-working-with-git">Tips Working with Git</a></li>
         
+            <li><a href="#keywords-for-closing-issues">Keywords for closing issues</a></li>
+        
     
     </ul>
 </div></div>
@@ -267,6 +269,20 @@
 <li>Push when changes are tested.</li>
 </ol>
 <p>See also <a href="https://about.gitlab.com/2015/02/19/8-tips-to-help-you-work-better-with-git/">8 Tips to help you work better with Git</a>.</p>
+<h2 id="keywords-for-closing-issues"><a class="toclink" href="#keywords-for-closing-issues">Keywords for closing issues</a></h2>
+<p>The following keywords will close an issue via commit message:</p>
+<ul>
+<li>close</li>
+<li>closes</li>
+<li>closed</li>
+<li>fix</li>
+<li>fixes</li>
+<li>fixed</li>
+</ul>
+<p><a href="http://doc.gitlab.com/ce/customization/issue_closing.html">The closing-pattern</a> is as follows:</p>
+<pre><code>((?:[Cc]los(?:e[sd]?|ing)|[Ff]ix(?:e[sd]|ing)?) +(?:(?:issues? +)?%{issue_ref}(?:(?:, *| +and +)?))+)
+</code></pre>
+
 <hr />
 <p><strong>Top Tip</strong>: Your code is maybe fine if you see on the repository&rsquo;s front page this symbol<br />
 <img alt="symbol" src="../img/success.png" /><br />
