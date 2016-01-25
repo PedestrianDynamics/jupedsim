@@ -251,7 +251,7 @@ sections: </p>
 <ul>
 <li><strong>model_parameters</strong>: Model specific parameter. See below in the different model sections.</li>
 <li><strong>agent_parameters</strong>: These parameter are mainly specific for the shape of pedestrians 
-    or other properties like desired speed, reaction time etc.</li>
+    or other pedestrian properties like desired speed, reaction time etc.</li>
 </ul>
 <h3 id="model_parameters"><a class="toclink" href="#model_parameters">Model_parameters</a></h3>
 <ul>
@@ -259,9 +259,9 @@ sections: </p>
 <li>The solver for the ODE. Only <em>Euler</em>. No other options.</li>
 </ul>
 </li>
-<li><code>&lt;stepsize&gt;0.05&lt;/stepsize&gt;</code>: <ul>
+<li><code>&lt;stepsize&gt;0.001&lt;/stepsize&gt;</code>: <ul>
 <li>The time step for the solver. This should be choosed with care. For force-based model it is recommended to take a value between <script type="math/tex">10^{-2}</script> and <script type="math/tex">10^{-3}</script> s.
-   Since this model is basically a first-order ODE, a value of 0.05 s should be OK.
+   For first-order models, a value of 0.05 s should be OK.
    A larger time step leads to faster simulations, however it is too risky and can lead to collisions and overlapping among pedestrians.</li>
 <li>Unit: s </li>
 </ul>
@@ -276,20 +276,22 @@ sections: </p>
 <li>
 <p><code>&lt;exit_crossing_strategy&gt;3&lt;/exit_crossing_strategy&gt;</code></p>
 <ul>
-<li>Positive values in [1, 6]. See <a href="../direction">Direction strategies</a>.</li>
+<li>Positive values in [1, 6]. See <a href="../direction">Direction strategies</a> for the definition of the strategies.</li>
 </ul>
 </li>
 <li>
 <p><code>&lt;linkedcells enabled="true" cell_size="2"/&gt;</code></p>
 <ul>
-<li>Defines the size of the linked-cell grid. This is important to get the neighbors of a pedestrians.</li>
+<li>Defines the size of the cells. This is important to get the neighbors of a pedestrians, which
+   are all pedestrians within the eight neighboring cells. Larger cells, lead so slower simulations, since
+   more pedestrian-pedestrian interactions need to be calculated.</li>
 <li>Unit: m</li>
 </ul>
 </li>
 </ul>
 <h3 id="agent_parameters"><a class="toclink" href="#agent_parameters">Agent_parameters</a></h3>
 <p>The <em>agent parameters</em> are mostly identical for all models. Exceptions will be mentioned explicitly. </p>
-<p>The parameters that can be specified in this section are (default value are given). All parameter are Gauss distributed.</p>
+<p>The parameters that can be specified in this section are Gauss distributed (default value are given). </p>
 <h4 id="desired-speed"><a class="toclink" href="#desired-speed">Desired speed</a></h4>
 <ul>
 <li><code>&lt;v0 mu="1.2" sigma="0.0" /&gt;</code> <ul>
@@ -327,28 +329,21 @@ and
 <script type="math/tex; mode=display">
 b = b_{max} - (b_{max}-b_{min})\frac{v}{v^0}.
 </script>
-</p>
+<script type="math/tex">v</script> is the peed of a pedestrian.
+- <code>&lt;bmax mu="0.15" sigma="0.0" /&gt;</code>
+    - Maximal length of the shoulder semi-axis
+    - Unit: m
+- <code>&lt;bmin mu="0.15" sigma="0.0" /&gt;</code>
+    - Minimal length of the shoulder semi-axis
+    - Unit: m
+- <code>&lt;amin mu="0.15" sigma="0.0" /&gt;</code>
+    - Minimal length of the movement semi-axis. This is the case when <script type="math/tex">v=0</script>.
+    - Unit: m 
+- <code>&lt;atau mu="0." sigma="0.0" /&gt;</code>
+    - (Linear) speed-dependency of the movement semi-axis
+    - Unit: s</p>
+<p>Other parameters in this section are:</p>
 <ul>
-<li><code>&lt;bmax mu="0.15" sigma="0.0" /&gt;</code><ul>
-<li>Maximal length of the shoulder semi-axis</li>
-<li>Unit: m</li>
-</ul>
-</li>
-<li><code>&lt;bmin mu="0.15" sigma="0.0" /&gt;</code><ul>
-<li>Minimal length of the shoulder semi-axis</li>
-<li>Unit: m</li>
-</ul>
-</li>
-<li><code>&lt;amin mu="0.15" sigma="0.0" /&gt;</code><ul>
-<li>Minimal length of the movement semi-axis. This is the case when <script type="math/tex">v=0</script>.</li>
-<li>Unit: m </li>
-</ul>
-</li>
-<li><code>&lt;atau mu="0." sigma="0.0" /&gt;</code><ul>
-<li>(Linear) speed-dependency of the movement semi-axis</li>
-<li>Unit: s</li>
-</ul>
-</li>
 <li><code>&lt;tau mu="0.5" sigma="0.0" /&gt;</code><ul>
 <li>Reaction time. This constant is used in the driving force of the force-based forces. Small <script type="math/tex">\rightarrow</script> instantaneous acceleration.</li>
 <li>Unit: s</li>
@@ -372,13 +367,13 @@ b = b_{max} - (b_{max}-b_{min})\frac{v}{v^0}.
 </code></pre>
 
 <h3 id="collision-free-speed-model"><a class="toclink" href="#collision-free-speed-model"><a href="http://arxiv.org/abs/1512.05597)" title="Tordeux, Antoine, Chraibi, Mohcine and Seyfried, Armin, Collision-free speed model for pedestrian dynamics. In Traffic and Granular Flow  '15, to appear.">Collision-free speed model</a></a></h3>
-<p>A velocity-based model. See also this <a href="https://fz-juelich.sciebo.de/index.php/s/1pYFETbvJdJDusE">talk</a> for more details about the mode.</p>
+<p>A velocity-based model. See also this <a href="https://fz-juelich.sciebo.de/index.php/s/1pYFETbvJdJDusE">talk</a> for more details about the model.</p>
 <p>Usage:</p>
 <pre><code class="xml">&lt;model operational_model_id=&quot;3&quot; description=&quot;Tordeux2015&quot;&gt;
 </code></pre>
 
 <h4 id="model-parameters"><a class="toclink" href="#model-parameters">Model parameters</a></h4>
-<p>Besides the options defined in <a href="#model_parameters">Mode_parameters</a> the following options are necessary for this model.</p>
+<p>Besides the options defined in <a href="#model_parameters">Mode_parameters</a> the following options are necessary for this model:</p>
 <ul>
 <li><code>&lt;force_ped  a="5" D="0.2"/&gt;</code><ul>
 <li>The influence of other pedestrians is triggered by <script type="math/tex">a</script> and <script type="math/tex">D</script> where <script type="math/tex">a</script> is the strength if the interaction and <script type="math/tex">D</script> gives its range. The naming may be misleading, since the model is <strong>not</strong> force-based, but velocity-based. </li>
@@ -391,8 +386,9 @@ b = b_{max} - (b_{max}-b_{min})\frac{v}{v^0}.
 </ul>
 </li>
 </ul>
+<p>The names of the aforementioned parameters might be misleading, since the model is <em>not</em> force-based. The naming will be changed in the future.</p>
 <h4 id="agent-parameters-recommendations"><a class="toclink" href="#agent-parameters-recommendations">Agent parameters (recommendations)</a></h4>
-<p>This models has no support for ellipses, therefore the parameter for the semi-axes <a href="#agent_parameters">Agent_parameters</a> should be chosen, such that circles with constant radius are obtained.
+<p>Actually, this model assumes circular pedestrian&rsquo;s shape, therefore the parameter for the semi-axes <a href="#agent_parameters">Agent_parameters</a> should be chosen, such that circles with constant radius can be obtained.
 For example: </p>
 <pre><code class="xml">&lt;bmax mu=&quot;0.15&quot; sigma=&quot;0.0&quot; /&gt;
 &lt;bmin mu=&quot;0.15&quot; sigma=&quot;0.0&quot; /&gt;
