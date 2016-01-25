@@ -241,16 +241,17 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
      // because a direction is needed for this initialisation.
+     Log->Write("INFO:\t Init Operational Model starting ...");
      if(_operationalModel->Init(_building.get())==false)
           return false;
-
+     Log->Write("INFO:\t Init Operational Model done");
      //other initializations
      for (auto&& ped: _building->GetAllPedestrians()) {
           ped->Setdt(_deltaT);
      }
      _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
-
+     Log->Write("INFO:\t nPeds recieved");
      //get the seed
      _seed = args.GetSeed();
 
@@ -299,16 +300,19 @@ void Simulation::UpdateRoutesAndLocations()
      const map<int, Goal*>& goals = _building->GetAllGoals();
 
      unsigned long nSize = allPeds.size();
-     int nThreads = omp_get_max_threads();
+//     int nThreads = omp_get_max_threads();
+     int nThreads = 1;
      int partSize = nSize / nThreads;
 
-#pragma omp parallel  default(shared) num_threads(nThreads)
-     {
-          const int threadID = omp_get_thread_num();
-          int start = threadID * partSize;
-          int end = (threadID + 1) * partSize - 1;
-          if ((threadID == nThreads - 1))
-               end = nSize - 1;
+//#pragma omp parallel  default(shared) num_threads(nThreads)
+//     {
+          //const int threadID = omp_get_thread_num();
+          //int start = threadID * partSize;
+          //int end = (threadID + 1) * partSize - 1;
+          //if ((threadID == nThreads - 1))
+          //end = nSize - 1;
+          int start = 0;
+          int end = nSize - 1;
 
           for (int p = start; p <= end; ++p) {
                Pedestrian* ped = allPeds[p];
@@ -318,12 +322,12 @@ void Simulation::UpdateRoutesAndLocations()
                //set the new room if needed
                if ((ped->GetFinalDestination() == FINAL_DEST_OUT)
                          && (room->GetCaption() == "outside")) {
-#pragma omp critical
+//#pragma omp critical
                     pedsToRemove.push_back(ped);
                } else if ((ped->GetFinalDestination() != FINAL_DEST_OUT)
                          && (goals.at(ped->GetFinalDestination())->Contains(
                                    ped->GetPos()))) {
-#pragma omp critical
+//#pragma omp critical
                     pedsToRemove.push_back(ped);
                }
 
@@ -363,7 +367,7 @@ void Simulation::UpdateRoutesAndLocations()
                                    //}
 
                                    //also statistic for internal doors
-                                   UpdateFlowAtDoors(*ped);
+                                   UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
@@ -377,7 +381,7 @@ void Simulation::UpdateRoutesAndLocations()
                     }
 
                     if (!assigned) {
-#pragma omp critical
+//#pragma omp critical
                          pedsToRemove.push_back(ped);
                          //the agent left the old room
                          //actualize the eggress time for that room
@@ -391,16 +395,16 @@ void Simulation::UpdateRoutesAndLocations()
                     //a destination could not be found for that pedestrian
                     Log->Write("ERROR: \tCould not find a route for pedestrian %d",ped->GetID());
                     //exit(EXIT_FAILURE);
-#pragma omp critical
+//#pragma omp critical
                     pedsToRemove.push_back(ped);
                }
           }
-     }
+//     } //omp parallel
 
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
      {
-          AgentsQueueOut::Add(pedsToRemove);
+          AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
      }
      else
 #endif
@@ -491,13 +495,14 @@ int Simulation::RunBody(double maxSimTime)
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
-
+     //only for debug: ar.graf
+     writeInterval = 500;
      //process the queue for incoming pedestrians
      //important since the number of peds is used
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-     int initialnPeds = _nPeds; 
+     int initialnPeds = _nPeds;
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {

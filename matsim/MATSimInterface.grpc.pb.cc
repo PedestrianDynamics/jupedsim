@@ -42,51 +42,51 @@ MATSimInterfaceService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterfa
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqExternalConnect_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternalConnectConfirmed>> MATSimInterfaceService::Stub::AsyncreqExternalConnect(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternalConnect& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternalConnectConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternalConnectConfirmed>(channel(), cq, rpcmethod_reqExternalConnect_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternalConnectConfirmed>* MATSimInterfaceService::Stub::AsyncreqExternalConnectRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternalConnect& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternalConnectConfirmed>(channel(), cq, rpcmethod_reqExternalConnect_, context, request);
 }
 
 ::grpc::Status MATSimInterfaceService::Stub::reqExtern2MATSim(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSim& request, ::org::matsim::hybrid::Extern2MATSimConfirmed* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqExtern2MATSim_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Extern2MATSimConfirmed>> MATSimInterfaceService::Stub::AsyncreqExtern2MATSim(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSim& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Extern2MATSimConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Extern2MATSimConfirmed>(channel(), cq, rpcmethod_reqExtern2MATSim_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Extern2MATSimConfirmed>* MATSimInterfaceService::Stub::AsyncreqExtern2MATSimRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSim& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::Extern2MATSimConfirmed>(channel(), cq, rpcmethod_reqExtern2MATSim_, context, request);
 }
 
 ::grpc::Status MATSimInterfaceService::Stub::reqAgentStuck(::grpc::ClientContext* context, const ::org::matsim::hybrid::AgentsStuck& request, ::org::matsim::hybrid::AgentsStuckConfirmed* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqAgentStuck_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::AgentsStuckConfirmed>> MATSimInterfaceService::Stub::AsyncreqAgentStuck(::grpc::ClientContext* context, const ::org::matsim::hybrid::AgentsStuck& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::AgentsStuckConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::AgentsStuckConfirmed>(channel(), cq, rpcmethod_reqAgentStuck_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::AgentsStuckConfirmed>* MATSimInterfaceService::Stub::AsyncreqAgentStuckRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::AgentsStuck& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::AgentsStuckConfirmed>(channel(), cq, rpcmethod_reqAgentStuck_, context, request);
 }
 
 ::grpc::Status MATSimInterfaceService::Stub::reqExternSimStepFinished(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternSimStepFinished& request, ::org::matsim::hybrid::ExternSimStepFinishedReceived* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqExternSimStepFinished_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>> MATSimInterfaceService::Stub::AsyncreqExternSimStepFinished(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternSimStepFinished& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>(channel(), cq, rpcmethod_reqExternSimStepFinished_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>* MATSimInterfaceService::Stub::AsyncreqExternSimStepFinishedRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternSimStepFinished& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternSimStepFinishedReceived>(channel(), cq, rpcmethod_reqExternSimStepFinished_, context, request);
 }
 
 ::grpc::Status MATSimInterfaceService::Stub::reqMaximumNumberOfAgents(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::org::matsim::hybrid::MaximumNumberOfAgents* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqMaximumNumberOfAgents_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>> MATSimInterfaceService::Stub::AsyncreqMaximumNumberOfAgents(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>(channel(), cq, rpcmethod_reqMaximumNumberOfAgents_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>* MATSimInterfaceService::Stub::AsyncreqMaximumNumberOfAgentsRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MaximumNumberOfAgents>(channel(), cq, rpcmethod_reqMaximumNumberOfAgents_, context, request);
 }
 
 ::grpc::Status MATSimInterfaceService::Stub::reqSendTrajectories(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories& request, ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqSendTrajectories_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>> MATSimInterfaceService::Stub::AsyncreqSendTrajectories(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>(channel(), cq, rpcmethod_reqSendTrajectories_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>* MATSimInterfaceService::Stub::AsyncreqSendTrajectoriesRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>(channel(), cq, rpcmethod_reqSendTrajectories_, context, request);
 }
 
-MATSimInterfaceService::AsyncService::AsyncService(::grpc::CompletionQueue* cq) : ::grpc::AsynchronousService(cq, MATSimInterfaceService_method_names, 6) {}
+MATSimInterfaceService::AsyncService::AsyncService() : ::grpc::AsynchronousService(MATSimInterfaceService_method_names, 6) {}
 
 MATSimInterfaceService::Service::~Service() {
   delete service_;
@@ -96,48 +96,48 @@ MATSimInterfaceService::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void MATSimInterfaceService::AsyncService::RequestreqExternalConnect(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternalConnect* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternalConnectConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(0, context, request, response, cq, tag);
+void MATSimInterfaceService::AsyncService::RequestreqExternalConnect(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternalConnect* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternalConnectConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status MATSimInterfaceService::Service::reqExtern2MATSim(::grpc::ServerContext* context, const ::org::matsim::hybrid::Extern2MATSim* request, ::org::matsim::hybrid::Extern2MATSimConfirmed* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void MATSimInterfaceService::AsyncService::RequestreqExtern2MATSim(::grpc::ServerContext* context, ::org::matsim::hybrid::Extern2MATSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::Extern2MATSimConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(1, context, request, response, cq, tag);
+void MATSimInterfaceService::AsyncService::RequestreqExtern2MATSim(::grpc::ServerContext* context, ::org::matsim::hybrid::Extern2MATSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::Extern2MATSimConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status MATSimInterfaceService::Service::reqAgentStuck(::grpc::ServerContext* context, const ::org::matsim::hybrid::AgentsStuck* request, ::org::matsim::hybrid::AgentsStuckConfirmed* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void MATSimInterfaceService::AsyncService::RequestreqAgentStuck(::grpc::ServerContext* context, ::org::matsim::hybrid::AgentsStuck* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::AgentsStuckConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(2, context, request, response, cq, tag);
+void MATSimInterfaceService::AsyncService::RequestreqAgentStuck(::grpc::ServerContext* context, ::org::matsim::hybrid::AgentsStuck* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::AgentsStuckConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status MATSimInterfaceService::Service::reqExternSimStepFinished(::grpc::ServerContext* context, const ::org::matsim::hybrid::ExternSimStepFinished* request, ::org::matsim::hybrid::ExternSimStepFinishedReceived* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void MATSimInterfaceService::AsyncService::RequestreqExternSimStepFinished(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternSimStepFinished* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternSimStepFinishedReceived>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(3, context, request, response, cq, tag);
+void MATSimInterfaceService::AsyncService::RequestreqExternSimStepFinished(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternSimStepFinished* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternSimStepFinishedReceived>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status MATSimInterfaceService::Service::reqMaximumNumberOfAgents(::grpc::ServerContext* context, const ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::org::matsim::hybrid::MaximumNumberOfAgents* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void MATSimInterfaceService::AsyncService::RequestreqMaximumNumberOfAgents(::grpc::ServerContext* context, ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MaximumNumberOfAgents>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(4, context, request, response, cq, tag);
+void MATSimInterfaceService::AsyncService::RequestreqMaximumNumberOfAgents(::grpc::ServerContext* context, ::org::matsim::hybrid::MaximumNumberOfAgentsConfirmed* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MaximumNumberOfAgents>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status MATSimInterfaceService::Service::reqSendTrajectories(::grpc::ServerContext* context, const ::org::matsim::hybrid::Extern2MATSimTrajectories* request, ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void MATSimInterfaceService::AsyncService::RequestreqSendTrajectories(::grpc::ServerContext* context, ::org::matsim::hybrid::Extern2MATSimTrajectories* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(5, context, request, response, cq, tag);
+void MATSimInterfaceService::AsyncService::RequestreqSendTrajectories(::grpc::ServerContext* context, ::org::matsim::hybrid::Extern2MATSimTrajectories* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternTrajectoriesReceived>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::RpcService* MATSimInterfaceService::Service::service() {
@@ -210,43 +210,43 @@ ExternInterfaceService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterfa
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqMATSim2ExternHasSpace_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>> ExternInterfaceService::Stub::AsyncreqMATSim2ExternHasSpace(::grpc::ClientContext* context, const ::org::matsim::hybrid::MATSim2ExternHasSpace& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>(channel(), cq, rpcmethod_reqMATSim2ExternHasSpace_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>* ExternInterfaceService::Stub::AsyncreqMATSim2ExternHasSpaceRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::MATSim2ExternHasSpace& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>(channel(), cq, rpcmethod_reqMATSim2ExternHasSpace_, context, request);
 }
 
 ::grpc::Status ExternInterfaceService::Stub::reqMATSim2ExternPutAgent(::grpc::ClientContext* context, const ::org::matsim::hybrid::MATSim2ExternPutAgent& request, ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqMATSim2ExternPutAgent_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>> ExternInterfaceService::Stub::AsyncreqMATSim2ExternPutAgent(::grpc::ClientContext* context, const ::org::matsim::hybrid::MATSim2ExternPutAgent& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>(channel(), cq, rpcmethod_reqMATSim2ExternPutAgent_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>* ExternInterfaceService::Stub::AsyncreqMATSim2ExternPutAgentRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::MATSim2ExternPutAgent& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>(channel(), cq, rpcmethod_reqMATSim2ExternPutAgent_, context, request);
 }
 
 ::grpc::Status ExternInterfaceService::Stub::reqExternDoSimStep(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternDoSimStep& request, ::org::matsim::hybrid::ExternDoSimStepReceived* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqExternDoSimStep_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternDoSimStepReceived>> ExternInterfaceService::Stub::AsyncreqExternDoSimStep(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternDoSimStep& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternDoSimStepReceived>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternDoSimStepReceived>(channel(), cq, rpcmethod_reqExternDoSimStep_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternDoSimStepReceived>* ExternInterfaceService::Stub::AsyncreqExternDoSimStepRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternDoSimStep& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternDoSimStepReceived>(channel(), cq, rpcmethod_reqExternDoSimStep_, context, request);
 }
 
 ::grpc::Status ExternInterfaceService::Stub::reqExternOnPrepareSim(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternOnPrepareSim& request, ::org::matsim::hybrid::ExternOnPrepareSimConfirmed* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqExternOnPrepareSim_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>> ExternInterfaceService::Stub::AsyncreqExternOnPrepareSim(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternOnPrepareSim& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>(channel(), cq, rpcmethod_reqExternOnPrepareSim_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>* ExternInterfaceService::Stub::AsyncreqExternOnPrepareSimRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternOnPrepareSim& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>(channel(), cq, rpcmethod_reqExternOnPrepareSim_, context, request);
 }
 
 ::grpc::Status ExternInterfaceService::Stub::reqExternAfterSim(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternAfterSim& request, ::org::matsim::hybrid::ExternAfterSimConfirmed* response) {
   return ::grpc::BlockingUnaryCall(channel(), rpcmethod_reqExternAfterSim_, context, request, response);
 }
 
-std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternAfterSimConfirmed>> ExternInterfaceService::Stub::AsyncreqExternAfterSim(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternAfterSim& request, ::grpc::CompletionQueue* cq, void* tag) {
-  return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternAfterSimConfirmed>>(new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternAfterSimConfirmed>(channel(), cq, rpcmethod_reqExternAfterSim_, context, request, tag));
+::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternAfterSimConfirmed>* ExternInterfaceService::Stub::AsyncreqExternAfterSimRaw(::grpc::ClientContext* context, const ::org::matsim::hybrid::ExternAfterSim& request, ::grpc::CompletionQueue* cq) {
+  return new ::grpc::ClientAsyncResponseReader< ::org::matsim::hybrid::ExternAfterSimConfirmed>(channel(), cq, rpcmethod_reqExternAfterSim_, context, request);
 }
 
-ExternInterfaceService::AsyncService::AsyncService(::grpc::CompletionQueue* cq) : ::grpc::AsynchronousService(cq, ExternInterfaceService_method_names, 5) {}
+ExternInterfaceService::AsyncService::AsyncService() : ::grpc::AsynchronousService(ExternInterfaceService_method_names, 5) {}
 
 ExternInterfaceService::Service::~Service() {
   delete service_;
@@ -256,40 +256,40 @@ ExternInterfaceService::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void ExternInterfaceService::AsyncService::RequestreqMATSim2ExternHasSpace(::grpc::ServerContext* context, ::org::matsim::hybrid::MATSim2ExternHasSpace* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(0, context, request, response, cq, tag);
+void ExternInterfaceService::AsyncService::RequestreqMATSim2ExternHasSpace(::grpc::ServerContext* context, ::org::matsim::hybrid::MATSim2ExternHasSpace* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternHasSpaceConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status ExternInterfaceService::Service::reqMATSim2ExternPutAgent(::grpc::ServerContext* context, const ::org::matsim::hybrid::MATSim2ExternPutAgent* request, ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void ExternInterfaceService::AsyncService::RequestreqMATSim2ExternPutAgent(::grpc::ServerContext* context, ::org::matsim::hybrid::MATSim2ExternPutAgent* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(1, context, request, response, cq, tag);
+void ExternInterfaceService::AsyncService::RequestreqMATSim2ExternPutAgent(::grpc::ServerContext* context, ::org::matsim::hybrid::MATSim2ExternPutAgent* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::MATSim2ExternPutAgentConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status ExternInterfaceService::Service::reqExternDoSimStep(::grpc::ServerContext* context, const ::org::matsim::hybrid::ExternDoSimStep* request, ::org::matsim::hybrid::ExternDoSimStepReceived* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void ExternInterfaceService::AsyncService::RequestreqExternDoSimStep(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternDoSimStep* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternDoSimStepReceived>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(2, context, request, response, cq, tag);
+void ExternInterfaceService::AsyncService::RequestreqExternDoSimStep(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternDoSimStep* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternDoSimStepReceived>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status ExternInterfaceService::Service::reqExternOnPrepareSim(::grpc::ServerContext* context, const ::org::matsim::hybrid::ExternOnPrepareSim* request, ::org::matsim::hybrid::ExternOnPrepareSimConfirmed* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void ExternInterfaceService::AsyncService::RequestreqExternOnPrepareSim(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternOnPrepareSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(3, context, request, response, cq, tag);
+void ExternInterfaceService::AsyncService::RequestreqExternOnPrepareSim(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternOnPrepareSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternOnPrepareSimConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::Status ExternInterfaceService::Service::reqExternAfterSim(::grpc::ServerContext* context, const ::org::matsim::hybrid::ExternAfterSim* request, ::org::matsim::hybrid::ExternAfterSimConfirmed* response) {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED);
 }
 
-void ExternInterfaceService::AsyncService::RequestreqExternAfterSim(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternAfterSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternAfterSimConfirmed>* response, ::grpc::CompletionQueue* cq, void* tag) {
-  AsynchronousService::RequestAsyncUnary(4, context, request, response, cq, tag);
+void ExternInterfaceService::AsyncService::RequestreqExternAfterSim(::grpc::ServerContext* context, ::org::matsim::hybrid::ExternAfterSim* request, ::grpc::ServerAsyncResponseWriter< ::org::matsim::hybrid::ExternAfterSimConfirmed>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+  AsynchronousService::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
 }
 
 ::grpc::RpcService* ExternInterfaceService::Service::service() {

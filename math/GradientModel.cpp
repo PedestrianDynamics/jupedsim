@@ -95,11 +95,12 @@ GradientModel::~GradientModel()
 
 bool GradientModel::Init (Building* building)
 {
+    Log->Write("INFO:\t Init DirectionFloorfield starting ...");
     if(dynamic_cast<DirectionFloorfield*>(_direction)){
         dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
         //_floorfield = dynamic_cast<DirectionFloorfield*>(_direction);
     }
-
+    Log->Write("INFO:\t Init DirectionFloorfield done");
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
     for(unsigned int p=0;p<allPeds.size();p++)
@@ -148,14 +149,29 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
      unsigned long nSize;
      nSize = allPeds.size();
+     Pedestrian* minAddress = nullptr; //non-elegant fix for faulty neighbours[...] ptr avoidance
+     Pedestrian* maxAddress = nullptr;
 
-      int nThreads = omp_get_max_threads();
+     if (nSize >= 1) {
+        minAddress = allPeds[0];
+        maxAddress = allPeds[0];
+        for (auto& pedptr:allPeds) {
+            if (&(*pedptr) < minAddress) {
+                minAddress = &(*pedptr);
+            }
+            if (pedptr > maxAddress) {
+                maxAddress = &(*pedptr);
+            }
+        }
+     }
+
+     int nThreads = omp_get_max_threads();
 
      int partSize;
      partSize = (int) (nSize / nThreads);
 
-      #pragma omp parallel  default(shared) num_threads(nThreads)
-      {
+//      #pragma omp parallel  default(shared) num_threads(nThreads)
+//      {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);
 
@@ -166,6 +182,10 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
            end = (threadID + 1) * partSize - 1;
            if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
 
+//DEBUG start
+           start = 0;
+           end = nSize-1; // loop till p<= end !!!
+//DEBUG end
            for (int p = start; p <= end; ++p) {
 
                 Pedestrian* ped = allPeds[p];
@@ -188,12 +208,19 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
+                int size;
+//                #pragma omp critical
+//                {
                 building->GetGrid()->GetNeighbourhood(ped,neighbours);
 
-                int size = (int) neighbours.size();
-
+                size = (int) neighbours.size();
+//                }
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
+                     if ((minAddress > neighbours[i]) || (maxAddress < neighbours[i])) {
+                        std::cerr << "## Skiped " << i << " of " << size << " #### " << ped1 << " " << minAddress << " " << maxAddress << std::endl;
+                        continue;
+                     }
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
@@ -204,8 +231,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
 
                      bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-                     if (!isVisible)
+                     if (!isVisible) {
                           continue;
+                     }
                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                           repPed = repPed + ForceRepPed(ped, ped1);
                      } else {
@@ -274,7 +302,7 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 ped->SetPhiPed();
            }
 
-      }//end parallel
+//      }//end parallel
       //std::cerr << "Over : Under  " << *over << " : " << *under << "    (" << *redircnt << ")" << "    (" << *slowcnt << ")" << "    (" << *overlapcnt << ")" << std::endl;
 }
 

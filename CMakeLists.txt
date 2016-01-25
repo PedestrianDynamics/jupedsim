@@ -111,6 +111,9 @@ message(STATUS "")
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 # message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
+include_directories(/home0/ar.graf/include)
+link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
+
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -463,34 +466,36 @@ endif(WIN32)
 
 #protocol buffer
 #find_package(Protobuf)
-#if(PROTOBUF_FOUND && GRPC)
-#  message(STATUS "Protocol buffer library found")
-#
-#  include_directories(${PROTOBUF_INCLUDE_DIRS})
-#
-#  set (hybrid_source_files
-#    matsim/HybridSimulationManager.cpp
-#    matsim/JPSserver.cpp
-#    matsim/JPSclient.cpp
-#    matsim/MATSimInterface.pb.cc
-#    matsim/MATSimInterface.grpc.pb.cc
-#    )
-#
-#  set (hybrid_header_files
-#    matsim/JPSclient.h
-#    matsim/MATSimInterface.grpc.pb.h
-#    matsim/MATSimInterface.proto
-#    matsim/HybridSimulationManager.h
-#    matsim/JPSserver.h
-#    matsim/MATSimInterface.pb.h
-#    )
-#    add_library (hybrid STATIC ${hybrid_source_files} )
+#if(PROTOBUF_FOUND)
+#message(STATUS "Protocol buffer library found")
+
+#include_directories(${PROTOBUF_INCLUDE_DIRS})
+#include_directories(/home0/ar.graf/include)
+#link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
+message("libs added")
+
+set (hybrid_source_files
+  matsim/HybridSimulationManager.cpp
+  matsim/JPSserver.cpp
+  matsim/JPSclient.cpp                
+  matsim/MATSimInterface.pb.cc
+  matsim/MATSimInterface.grpc.pb.cc 
+)
+
+set (hybrid_header_files
+  matsim/JPSclient.h  
+  matsim/MATSimInterface.grpc.pb.h  
+  matsim/MATSimInterface.proto
+  matsim/HybridSimulationManager.h    
+  matsim/JPSserver.h                 
+  matsim/MATSimInterface.pb.h
+)
+    add_library (hybrid STATIC ${hybrid_source_files} )
 #    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
-#
-#	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
-#	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
-#else()
-#  message(STATUS "protocol buffer not found")
+target_link_libraries (core hybrid grpc++_unsecure grpc gpr protobuf dl)
+ 	
+	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
+	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
 #endif(PROTOBUF_FOUND)
 
 #----------------------------------------------------------------------

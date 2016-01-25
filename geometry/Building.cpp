@@ -352,21 +352,21 @@ bool Building::InitGeometry()
                      {
                            minElevation = itr_subroom.second->GetElevation(P1);
                      }
-                
+
                      if(maxElevation < itr_subroom.second->GetElevation(P1))
                      {
                            maxElevation = itr_subroom.second->GetElevation(P1);
                      }
-                
+
                      if(minElevation > itr_subroom.second->GetElevation(P2))
                      {
                            minElevation = itr_subroom.second->GetElevation(P2);
                      }
-                
+
                      if(maxElevation < itr_subroom.second->GetElevation(P2))
                      {
                            maxElevation = itr_subroom.second->GetElevation(P2);
-                     }          
+                     }
                }
                itr_subroom.second->SetMaxElevation(maxElevation);
                itr_subroom.second->SetMinElevation(minElevation);
@@ -839,10 +839,10 @@ Transition* Building::GetTransition(string caption) const
      exit(EXIT_FAILURE);
 }
 
-Transition* Building::GetTransition(int ID)
+Transition* Building::GetTransition(int ID) const //ar.graf: added const 2015-12-10
 {
      if (_transitions.count(ID) == 1) {
-          return _transitions[ID];
+          return _transitions.at(ID);
      } else {
           if (ID == -1)
                return NULL;

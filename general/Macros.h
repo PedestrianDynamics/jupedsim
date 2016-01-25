@@ -42,7 +42,7 @@
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
 // define some colors
 #define KNRM  "\x1B[0m"
@@ -57,7 +57,7 @@
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
-//#define _USE_PROTOCOL_BUFFER 1
+#define _USE_PROTOCOL_BUFFER 1
 
 #define JPS_OLD_VERSION "0.5" // this version is still supported
 #define JPS_VERSION_MINOR "7"
@@ -123,6 +123,7 @@ enum RoutingStrategy {
      ROUTING_DUMMY,
      ROUTING_SAFEST,
      ROUTING_COGNITIVEMAP,
+     ROUTING_FLOORFIELD,
      ROUTING_UNDEFINED =-1
 };
 
