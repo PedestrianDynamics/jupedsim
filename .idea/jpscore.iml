@@ -1,9 +1,208 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
-    <orderEntry type="inheritedJdk" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/events/EventManager.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/events/Event.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/events/Event.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/events/EventManager.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Simulation.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/voronoi-boost/VoronoiPositionGenerator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/voronoi-boost/VoronoiPositionGenerator.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/visiLibity/source_code/visilibity.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/visiLibity/source_code/visilibity.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mpi/LCGrid.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/mpi/LCGrid.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Doxyfile.in" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/voronoi/VoronoiDiagramGenerator.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/voronoi/VoronoiDiagramGenerator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsParameters.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/Knowledge.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsSource.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/Pedestrian.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsSourcesManager.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/Ellipse.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsParameters.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsQueue.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/StartDistribution.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsSource.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsQueue.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/StartDistribution.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/PedDistributor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/Pedestrian.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/PedDistributor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/AgentsSourcesManager.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/Knowledge.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/pedestrian/Ellipse.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/RoutingEngine.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/AccessPoint.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/CognitiveMapRouter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/DummyRouter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/FloorfieldViaFM.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/NavMesh.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/QuickestPathRouter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/QuickestPathRouter.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/GlobalRouter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/NavMesh.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/FloorfieldViaFM.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/DTriangulation.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/RoutingEngine.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/DummyRouter.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/Router.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/SafestPathRouter.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/AccessPoint.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/SafestPathRouter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/Router.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/GraphNetwork.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/Tools/triangle.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/Tools/triangle.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/EmptyCognitiveMapCreator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/CompleteCognitiveMapCreator.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/fire_mesh/Knot.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/fire_mesh/FireMesh.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/fire_mesh/Knot.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/fire_mesh/FireMesh.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/fire_mesh/FireMeshStorage.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/fire_mesh/FireMeshStorage.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/NavigationGraph.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/CognitiveMapStorage.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/CognitiveMapStorage.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/GraphNetwork.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/AbstractCognitiveMapCreator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/CompleteCognitiveMapCreator.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/NavigationGraph.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/SmokeSensor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/RoomToFloorSensor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/AbstractSensor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/RoomToFloorSensor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/DiscoverDoorsSensor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/JamSensor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/DiscoverDoorsSensor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/LastDestinationsSensor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/locater.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/SensorManager.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/locater.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/JamSensor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/LastDestinationsSensor.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/AbstractSensor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/SensorManager.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/sensor/SmokeSensor.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/landmark.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/cogmapoutputhandler.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/associations.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/youareherepointer.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/landmark.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/waypoints.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/cognitivemap.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/waypoints.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/associations.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/cognitivemap.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/cognitiveMap/youareherepointer.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/EmptyCognitiveMapCreator.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/navigation_graph/GraphVertex.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/navigation_graph/GraphEdge.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/navigation_graph/GraphVertex.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/navigation_graph/GraphEdge.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/cognitive_map/AbstractCognitiveMapCreator.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/DirectionStrategy.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/MeshRouter.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/CognitiveMapRouter.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/DTriangulation.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/mesh/Mesh.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/mesh/Trial.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/mesh/RectGrid.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/mesh/Mesh.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/GlobalRouter.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/MeshRouter.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/routing/DirectionStrategy.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tinyxml/tinystr.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tinyxml/tinystr.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tinyxml/tinyxml.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tinyxml/tinyxml.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tinyxml/tinyxmlerror.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tinyxml/tinyxmlparser.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Simulation.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/OperationalModel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/GompertzModel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/GCFMModel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/ODESolver.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/Mathematics.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/OperationalModel.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/GradientModel.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/VelocityModel.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/Mathematics.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/GCFMModel.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/ODESolver.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/GradientModel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/VelocityModel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/ForceModel.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/ForceModel.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/math/GompertzModel.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IO/TraVisToClient.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IO/IODispatcher.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IO/IODispatcher.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IO/TraVisToClient.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IO/OutputHandler.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/IO/OutputHandler.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Goal.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Goal.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Hline.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Crossing.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/NavLine.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Wall.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Line.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/SubRoom.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Room.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Point.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Room.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Point.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Building.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Hline.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Line.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Crossing.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Transition.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Building.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Wall.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Obstacle.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/SubRoom.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Obstacle.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/NavLine.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/geometry/Transition.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/sweep_context.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/advancing_front.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/cdt.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/sweep_context.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/advancing_front.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/cdt.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/sweep.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/sweep/sweep.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/common/shapes.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/poly2tri/common/shapes.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/general/Macros.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/general/ArgumentParser.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/general/ArgumentParser.cpp" isTestSource="false" />
+    </content>
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="Header Search Paths">
+        <CLASSES>
+          <root url="file:///usr/include" />
+          <root url="file:///usr/lib64/gcc/x86_64-suse-linux/4.8/include-fixed" />
+          <root url="file:///usr/lib64/gcc/x86_64-suse-linux/4.8/include" />
+          <root url="file:///usr/local/include" />
+          <root url="file:///usr/x86_64-suse-linux/include" />
+        </CLASSES>
+        <SOURCES>
+          <root url="file:///usr/include" />
+          <root url="file:///usr/lib64/gcc/x86_64-suse-linux/4.8/include-fixed" />
+          <root url="file:///usr/lib64/gcc/x86_64-suse-linux/4.8/include" />
+          <root url="file:///usr/local/include" />
+          <root url="file:///usr/x86_64-suse-linux/include" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
-
