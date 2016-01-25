@@ -185,6 +185,7 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
+          ap->SetClosed(!cross->IsOpen());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {
@@ -1051,7 +1052,7 @@ void GlobalRouter::WriteGraphGV(string filename, int finalDestination,
           int room_id = from_AP->GetConnectingRoom1();
           int room_id1=from_AP->GetConnectingRoom2();
 
-          if ( (IsElementInVector(rooms_ids, room_id) == false) and (IsElementInVector(rooms_ids, room_id1) == false) )
+          if ( (IsElementInVector(rooms_ids, room_id) == false) && (IsElementInVector(rooms_ids, room_id1) == false) )
                continue;
           double px = from_AP->GetCentre().GetX();
           double py = from_AP->GetCentre().GetY();
@@ -1214,6 +1215,8 @@ void GlobalRouter::TriangulateGeometry()
                                    h->SetRoom1(room.get());
                                    h->SetSubRoom1(subroom.get());
                                    subroom->AddHline(h);
+                                   //Log->Write(std::to_string(h->GetPoint1().GetX())+""+std::to_string(h->GetPoint1().GetY()));
+                                   //Log->Write(std::to_string(h->GetPoint2().GetX())+""+std::to_string(h->GetPoint2().GetY()));
                                    _building->AddHline(h);
                               }
                          }
@@ -1583,7 +1586,8 @@ double GlobalRouter::MinAngle(const Point& p1, const Point& p2, const Point& p3)
 
      if(fabs(alpha+beta+gamma-M_PI)<J_EPS)
      {
-          return std::min({alpha, beta, gamma}) * (180.0 / M_PI);
+		  std::vector<double> vec = { alpha, beta, gamma };
+          return *std::min_element(vec.begin(), vec.end()) * (180.0 / M_PI);
      }
      else
      {

@@ -7,13 +7,17 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 #### JPSCORE
+- CI with travis and Gitlab CI
+- Compilation checked on Visual Studio 12 2013 
 - Added more validation tests
 - Added statistics (calculate exit usage) for all exits
 - Added voronoi based algorithm for inserting agents coming from the source or from matsim
 - New option for the quickest path router. Sample options are:
  ```<parameters default_strategy="local_shortest">```
   ```<parameters default_strategy="global_shortest">``` 
-   ``` <parameters cba_gain="0.15" reference_peds_selection="single" congestion_ratio="0.8" queue_vel_escaping_jam="0.2" queue_vel_new_room="0.7" visibility_obstruction="4">```
+   ``` <parameters cba_gain="0.15" reference_peds_selection="single" congestion_ratio="0.8" queue_vel_escaping_jam="0.2" 
+       queue_vel_new_room="0.7" visibility_obstruction="4">
+```
 - New model with the generic name `Tordeux2015` and `id=3`. For use check the ini-files in the Utest-validation tests.
 - Tests are sorted in `rimea_tests`, `juelich_tests` and `validation_tests`.
 - Periodic boundary conditions with the option `<periodic>1</periodic>`.Works only with model 3.  

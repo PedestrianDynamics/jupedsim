@@ -43,6 +43,10 @@ AgentsSource::AgentsSource(int id, const std::string& caption,int max_agents,int
     _frequency=frequency;
     _agentsGenerated=0;
     _agents.clear();
+	_boundaries[0] = 0;
+	_boundaries[1] = 0;
+	_boundaries[2] = 0;
+	_boundaries[3] = 0;
 }
 
 AgentsSource::~AgentsSource()

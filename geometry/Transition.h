@@ -58,16 +58,6 @@ public:
      virtual ~Transition();
 
      /**
-      * Close the transition/door
-      */
-     void Close();
-
-     /**
-      * Open the transition/door
-      */
-     void Open();
-
-     /**
       * Set/Get the type of the transition
       */
      void SetType(std::string s);

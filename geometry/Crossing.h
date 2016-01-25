@@ -44,6 +44,7 @@ private:
      //Room* _room1;
      //SubRoom* _subRoom1;
      //SubRoom* _subRoom2;
+     bool _isOpen;
 
 public:
      /**
@@ -77,6 +78,16 @@ public:
       * Set/Get the second subroom
       */
      //SubRoom* GetSubRoom2() const;
+
+     /**
+      * Close the door
+      */
+     void Close();
+
+     /**
+      * Open the door
+      */
+     void Open();
 
      /**
       * \return true if the subroomID is associated with the current crossing

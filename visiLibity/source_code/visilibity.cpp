@@ -41,6 +41,7 @@ License along with VisiLibity.  If not, see <http://www.gnu.org/licenses/>.
 #include <cassert>       //assertions
 
 
+
 ///Hide helping functions in unnamed namespace (local to .C file).
 namespace
 {
@@ -72,7 +73,7 @@ namespace VisiLibity
   Point Point::projection_onto(const Line_Segment& line_segment_temp) const
   {
     assert( *this == *this
-	    and line_segment_temp.size() > 0 );
+	    && line_segment_temp.size() > 0 );
 
     if(line_segment_temp.size() == 1)
       return line_segment_temp.first();
@@ -96,7 +97,7 @@ namespace VisiLibity
 		-line_segment_temp.first().y(),2) );
     //std::cout << "\E[1;37;40m" << "Theta is: " << theta << "\x1b[0m"
     //<< std::endl;
-    if( (0.0<=theta) and (theta<=1.0) )
+    if( (0.0<=theta) && (theta<=1.0) )
       return theta*line_segment_temp.first() 
 	+ (1.0-theta)*line_segment_temp.second();
     //Else pick closest endpoint.
@@ -110,7 +111,7 @@ namespace VisiLibity
   Point Point::projection_onto(const Ray& ray_temp) const
   {
     assert( *this == *this
-	    and ray_temp == ray_temp );
+	    && ray_temp == ray_temp );
 
     //Construct a Line_Segment parallel with the Ray which is so long,
     //that the projection of the the calling Point onto that
@@ -128,7 +129,7 @@ namespace VisiLibity
  Point Point::projection_onto(const Polyline& polyline_temp) const
   {
     assert( *this == *this
-	    and polyline_temp.size() > 0 );
+	    && polyline_temp.size() > 0 );
 
     Point running_projection = polyline_temp[0];
     double running_min = distance(*this, running_projection);    
@@ -148,7 +149,7 @@ namespace VisiLibity
   Point Point::projection_onto_vertices_of(const Polygon& polygon_temp) const
   {
     assert(*this == *this 
-	   and polygon_temp.vertices_.size() > 0 );
+	   && polygon_temp.vertices_.size() > 0 );
 
     Point running_projection = polygon_temp[0];
     double running_min = distance(*this, running_projection);
@@ -166,7 +167,7 @@ namespace VisiLibity
 					   environment_temp) const
   {
     assert(*this == *this 
-	   and environment_temp.n() > 0 );
+	   && environment_temp.n() > 0 );
 
     Point running_projection 
       = projection_onto_vertices_of(environment_temp.outer_boundary_);
@@ -186,7 +187,7 @@ namespace VisiLibity
   Point Point::projection_onto_boundary_of(const Polygon& polygon_temp) const
   {
     assert( *this == *this
-	    and polygon_temp.n() > 0 );
+	    && polygon_temp.n() > 0 );
 
     Point running_projection = polygon_temp[0];
     double running_min = distance(*this, running_projection);    
@@ -207,7 +208,7 @@ namespace VisiLibity
 					   environment_temp) const
   {
     assert( *this == *this
-	    and environment_temp.n() > 0 );
+	    && environment_temp.n() > 0 );
 
     Point running_projection 
       = projection_onto_boundary_of(environment_temp.outer_boundary_);
@@ -228,7 +229,7 @@ namespace VisiLibity
 			     double epsilon) const
   {
     assert( *this == *this
-	    and polygon_temp.vertices_.size() > 0 );
+	    && polygon_temp.vertices_.size() > 0 );
 
     if( distance(*this, projection_onto_boundary_of(polygon_temp) ) 
 	<= epsilon ){
@@ -242,7 +243,7 @@ namespace VisiLibity
 			     double epsilon) const
   {
     assert( *this == *this
-	    and environment_temp.outer_boundary_.n() > 0 );
+	    && environment_temp.outer_boundary_.n() > 0 );
 
     if( distance(*this, projection_onto_boundary_of(environment_temp) ) 
 	<= epsilon ){
@@ -256,7 +257,7 @@ namespace VisiLibity
 		 double epsilon) const
   {
     assert( *this == *this
-	    and line_segment_temp.size() > 0 );
+	    && line_segment_temp.size() > 0 );
 
     if( distance(*this, line_segment_temp) < epsilon )
       return true;
@@ -268,11 +269,11 @@ namespace VisiLibity
 				      double epsilon) const
   {
     assert( *this == *this
-	    and line_segment_temp.size() > 0 );
+	    && line_segment_temp.size() > 0 );
       
     return in(line_segment_temp, epsilon) 
-      and distance(*this, line_segment_temp.first()) > epsilon
-      and distance(*this, line_segment_temp.second()) > epsilon;
+      && distance(*this, line_segment_temp.first()) > epsilon
+      && distance(*this, line_segment_temp.second()) > epsilon;
   }
 
 
@@ -280,7 +281,7 @@ namespace VisiLibity
 		 double epsilon) const
   {
     assert( *this == *this
-	    and polygon_temp.vertices_.size() > 0 );
+	    && polygon_temp.vertices_.size() > 0 );
 
     int n = polygon_temp.vertices_.size();
     if( on_boundary_of(polygon_temp, epsilon) )
@@ -293,10 +294,10 @@ namespace VisiLibity
     int i, j; bool c = false;
     for (i = 0, j = n-1; i < n; j = i++){
       if ( (((polygon_temp[i].y() <= y()) 
-	     and (y() < polygon_temp[j].y())) 
-	    or ((polygon_temp[j].y() <= y()) 
-		and (y() < polygon_temp[i].y()))) 
-	   and ( x() < (polygon_temp[j].x() 
+	     && (y() < polygon_temp[j].y())) 
+	    || ((polygon_temp[j].y() <= y()) 
+		 && (y() < polygon_temp[i].y()))) 
+	   && ( x() < (polygon_temp[j].x() 
 		       - polygon_temp[i].x()) 
 		* (y() - polygon_temp[i].y()) 
 		/ (polygon_temp[j].y() 
@@ -311,7 +312,7 @@ namespace VisiLibity
   bool Point::in(const Environment& environment_temp, double epsilon) const
   {
     assert( *this == *this
-	    and environment_temp.outer_boundary_.n() > 0 );
+	    && environment_temp.outer_boundary_.n() > 0 );
 
     //On outer boundary?
     if( on_boundary_of(environment_temp, epsilon) )
@@ -332,10 +333,10 @@ namespace VisiLibity
 			     double epsilon) const
   {
     assert( *this == *this
-	    and line_segment_temp.size() > 0 );
+	    && line_segment_temp.size() > 0 );
 
     if( distance(line_segment_temp.first(), *this)<=epsilon 
-	or distance(line_segment_temp.second(), *this)<=epsilon )
+	|| distance(line_segment_temp.second(), *this)<=epsilon )
       return true;
     return false;
   }
@@ -345,7 +346,7 @@ namespace VisiLibity
 				  double epsilon)
   {
     assert( *this == *this
-	    and polygon_temp.n() > 0 );
+	    && polygon_temp.n() > 0 );
 
     Point point_temp( this->projection_onto_vertices_of(polygon_temp) );
     if(  distance( *this , point_temp ) <= epsilon )
@@ -355,7 +356,7 @@ namespace VisiLibity
 				  double epsilon)
   {
     assert( *this == *this
-	    and environment_temp.n() > 0 );
+	    && environment_temp.n() > 0 );
 
     Point point_temp( this->projection_onto_vertices_of(environment_temp) );
     if(  distance( *this , point_temp ) <= epsilon )
@@ -367,7 +368,7 @@ namespace VisiLibity
 				  double epsilon)
   {
     assert( *this == *this
-	    and polygon_temp.n() > 0 );
+	    && polygon_temp.n() > 0 );
 
     Point point_temp( this->projection_onto_boundary_of(polygon_temp) );
     if(  distance( *this , point_temp ) <= epsilon )
@@ -377,7 +378,7 @@ namespace VisiLibity
 				  double epsilon)
   {
     assert( *this == *this
-	    and environment_temp.n() > 0 );
+	    && environment_temp.n() > 0 );
 
     Point point_temp( this->projection_onto_boundary_of(environment_temp) );
     if(  distance( *this , point_temp ) <= epsilon )
@@ -387,42 +388,42 @@ namespace VisiLibity
 
   bool operator == (const Point& point1, const Point& point2)
   { return (  ( point1.x() == point2.x() ) 
-	      and ( point1.y() == point2.y() )  ); }
+	      && ( point1.y() == point2.y() )  ); }
   bool operator != (const Point& point1, const Point& point2)
   { return !( point1 == point2 ); }
 
 
   bool operator < (const Point& point1, const Point& point2)
   {
-    if( point1 != point1 or point2 != point2 )
+    if( point1 != point1 || point2 != point2 )
       return false;
     if(point1.x() < point2.x())
       return true;
     else if(  ( point1.x() == point2.x() ) 
-	      and ( point1.y() < point2.y() )  )
+	      && ( point1.y() < point2.y() )  )
       return true;
     return false;
   }
   bool operator > (const Point& point1, const Point& point2)
   {
-    if( point1 != point1 or point2 != point2 )
+    if( point1 != point1 || point2 != point2 )
       return false;
     if( point1.x() > point2.x() )
       return true;
     else if(  ( point1.x() == point2.x() ) 
-	      and ( point1.y() > point2.y() )  )
+	      && ( point1.y() > point2.y() )  )
       return true;
     return false;
   }
   bool operator >= (const Point& point1, const Point& point2)
   {
-    if( point1 != point1 or point2 != point2 )
+    if( point1 != point1 || point2 != point2 )
       return false;
     return !( point1 < point2 );
   }
   bool operator <= (const Point& point1, const Point& point2)
   {
-    if( point1 != point1 or point2 != point2 )
+    if( point1 != point1 || point2 != point2 )
       return false;
     return !( point1 > point2 );
   }
@@ -462,7 +463,7 @@ namespace VisiLibity
   double cross(const Point& point1, const Point& point2)
   {
     assert( point1 == point1
-	    and point2 == point2 );
+	    && point2 == point2 );
 
     //The area of the parallelogram created by the Points viewed as vectors.
     return point1.x()*point2.y() - point2.x()*point1.y();
@@ -472,7 +473,7 @@ namespace VisiLibity
   double distance(const Point& point1, const Point& point2)
   {
     assert( point1 == point1
-	    and point2 == point2 );
+	    && point2 == point2 );
 
     return sqrt(  pow( point1.x() - point2.x() , 2 )
 		  + pow( point1.y() - point2.y() , 2 )  );
@@ -483,7 +484,7 @@ namespace VisiLibity
 		  const Line_Segment& line_segment_temp)
   {
     assert( point_temp == point_temp
-	    and line_segment_temp.size() > 0 );
+	    && line_segment_temp.size() > 0 );
 
     return distance( point_temp, 
 		     point_temp.projection_onto(line_segment_temp) );
@@ -500,7 +501,7 @@ namespace VisiLibity
 		  const Ray& ray_temp)
   {
     assert( point_temp == point_temp
-	    and ray_temp == ray_temp );
+	    && ray_temp == ray_temp );
     return distance( point_temp, 
 		     point_temp.projection_onto(ray_temp) );
   }
@@ -516,7 +517,7 @@ namespace VisiLibity
 		  const Polyline& polyline_temp)
   {
     assert( point_temp == point_temp
-	    and polyline_temp.size() > 0 );
+	    && polyline_temp.size() > 0 );
 
     double running_min = distance(point_temp, polyline_temp[0]);
     double distance_temp;
@@ -539,7 +540,7 @@ namespace VisiLibity
 			   const Polygon& polygon_temp)
   {
     assert( point_temp == point_temp
-	    and polygon_temp.n() > 0);
+	    && polygon_temp.n() > 0);
 
     double running_min = distance(point_temp, polygon_temp[0]);
     double distance_temp;
@@ -561,7 +562,7 @@ namespace VisiLibity
 			   const Environment& environment_temp)
   {
     assert( point_temp == point_temp
-	    and environment_temp.n() > 0 );
+	    && environment_temp.n() > 0 );
 
     double running_min = distance(point_temp, environment_temp[0][0]);
     double distance_temp;
@@ -808,11 +809,11 @@ namespace VisiLibity
 		     const Line_Segment& line_segment2)
   {
     if( line_segment1.size() != line_segment2.size() 
-	or line_segment1.size() == 0
-	or line_segment2.size() == 0 )
+	|| line_segment1.size() == 0
+	|| line_segment2.size() == 0 )
       return false;
     else if( line_segment1.first() == line_segment2.first()
-	     and line_segment1.second() == line_segment2.second() )
+	     && line_segment1.second() == line_segment2.second() )
       return true;
     else
       return false;
@@ -830,16 +831,16 @@ namespace VisiLibity
 		  Line_Segment line_segment2, double epsilon)
   {
     if( line_segment1.size() != line_segment2.size()
-	or line_segment1.size() == 0
-	or line_segment2.size() == 0 )
+	|| line_segment1.size() == 0
+	|| line_segment2.size() == 0 )
       return false;
     else if(   (  distance( line_segment1.first(), 
 			    line_segment2.first() ) <= epsilon  
-		  and  distance( line_segment1.second(), 
+		  &&  distance( line_segment1.second(), 
 				 line_segment2.second() ) <= epsilon  )
-	    or (  distance( line_segment1.first(), 
+	    || (  distance( line_segment1.first(), 
 			    line_segment2.second() ) <= epsilon  
-		  and  distance( line_segment1.second(), 
+		  &&  distance( line_segment1.second(), 
 				 line_segment2.first() ) <= epsilon  )   )
       return true;
     else
@@ -850,7 +851,7 @@ namespace VisiLibity
   double distance(const Line_Segment& line_segment1,
 		  const Line_Segment& line_segment2)
   {
-    assert( line_segment1.size() > 0  and  line_segment2.size() > 0 );
+    assert( line_segment1.size() > 0  &&  line_segment2.size() > 0 );
     
     if(intersect_proper(line_segment1, line_segment2))
       return 0;
@@ -876,7 +877,7 @@ namespace VisiLibity
   double boundary_distance(const Line_Segment& line_segment,
 			   const Polygon& polygon)
   {
-    assert( line_segment.size() > 0 and polygon.n() > 0 );
+    assert( line_segment.size() > 0 && polygon.n() > 0 );
 
     double running_min = distance( line_segment , polygon[0] );
     if( polygon.n() > 1 )
@@ -897,7 +898,7 @@ namespace VisiLibity
 		 const Line_Segment& line_segment2, double epsilon)
   {
     if( line_segment1.size() == 0
-	or line_segment2.size() == 0 )
+	|| line_segment2.size() == 0 )
       return false;
     if( distance(line_segment1, line_segment2) <= epsilon )
       return true;
@@ -909,7 +910,7 @@ namespace VisiLibity
 			const Line_Segment& line_segment2, double epsilon)
   {
     if( line_segment1.size() == 0
-	or line_segment2.size() == 0 )
+	|| line_segment2.size() == 0 )
       return false;
 
     //Declare new vars just for readability.
@@ -937,7 +938,7 @@ namespace VisiLibity
     //This test is from O'Rourke's "Computational Geometry in C",
     //p.30.  Checks left and right turns.
     if(  cross(b-a, c-b) * cross(b-a, d-b) < 0   
-	 and   cross(d-c, b-d) * cross(d-c, a-d) < 0  )
+	 &&   cross(d-c, b-d) * cross(d-c, a-d) < 0  )
       return true;
     return false;
   }
@@ -950,7 +951,7 @@ namespace VisiLibity
     Line_Segment line_segment_temp;
 
     if( line_segment1.size() == 0
-	or line_segment2.size() == 0 )
+	|| line_segment2.size() == 0 )
       return line_segment_temp;
 
     //No intersection => return empty segment.
@@ -980,32 +981,32 @@ namespace VisiLibity
     double distance_temp_c = distance(c,  line_segment1);
     double distance_temp_d = distance(d, line_segment1);
     //Check if the intersection is nondegenerate segment.
-    if( distance_temp_a <= epsilon  and  distance_temp_b <= epsilon ){
+    if( distance_temp_a <= epsilon  &&  distance_temp_b <= epsilon ){
       line_segment_temp.set_first(a, epsilon);
       line_segment_temp.set_second(b, epsilon);
       return line_segment_temp;
     }
-    else if( distance_temp_c <= epsilon  and  distance_temp_d <= epsilon ){
+    else if( distance_temp_c <= epsilon  &&  distance_temp_d <= epsilon ){
       line_segment_temp.set_first(c, epsilon);
       line_segment_temp.set_second(d, epsilon);
       return line_segment_temp;
     }
-    else if( distance_temp_a <= epsilon  and  distance_temp_c <= epsilon ){
+    else if( distance_temp_a <= epsilon  &&  distance_temp_c <= epsilon ){
       line_segment_temp.set_first(a, epsilon);
       line_segment_temp.set_second(c, epsilon);
       return line_segment_temp;
     }
-    else if( distance_temp_a <= epsilon  and  distance_temp_d <= epsilon ){
+    else if( distance_temp_a <= epsilon  &&  distance_temp_d <= epsilon ){
       line_segment_temp.set_first(a, epsilon);
       line_segment_temp.set_second(d, epsilon);
       return line_segment_temp;
     }
-    else if( distance_temp_b <= epsilon  and  distance_temp_c <= epsilon ){
+    else if( distance_temp_b <= epsilon  &&  distance_temp_c <= epsilon ){
       line_segment_temp.set_first(b, epsilon);
       line_segment_temp.set_second(c, epsilon);
       return line_segment_temp;
     }
-    else if( distance_temp_b <= epsilon  and  distance_temp_d <= epsilon ){
+    else if( distance_temp_b <= epsilon  &&  distance_temp_d <= epsilon ){
       line_segment_temp.set_first(b, epsilon);
       line_segment_temp.set_second(d, epsilon);
       return line_segment_temp;
@@ -1069,7 +1070,7 @@ namespace VisiLibity
 
   Angle::Angle(double rise_temp, double run_temp)
   {
-    if( rise_temp == 0 and run_temp == 0 )
+    if( rise_temp == 0 && run_temp == 0 )
       angle_radians_ = 0;
     //First calculate 4 quadrant inverse tangent into [-pi,+pi].
     angle_radians_ = std::atan2(rise_temp, run_temp);
@@ -1132,7 +1133,7 @@ namespace VisiLibity
   double geodesic_distance(const Angle& angle1, const Angle& angle2)
   {
     assert( angle1.get() == angle1.get()
-	    and angle2.get() == angle2.get() );
+	    && angle2.get() == angle2.get() );
 
     double distance1 = std::fabs( angle1.get() 
 				  - angle2.get() );
@@ -1146,7 +1147,7 @@ namespace VisiLibity
   double geodesic_direction(const Angle& angle1, const Angle& angle2)
   {
     assert( angle1.get() == angle1.get()
-	    and angle2.get() == angle2.get() );
+	    && angle2.get() == angle2.get() );
 
     double distance1 = std::fabs( angle1.get() 
 				  - angle2.get() );
@@ -1179,13 +1180,13 @@ namespace VisiLibity
   {
     polar_origin_ = polar_origin_temp;
     if( polar_origin_==polar_origin_
-	and point_temp==point_temp
-	and distance(polar_origin_, point_temp) <= epsilon ){
+	 && point_temp==point_temp
+	 && distance(polar_origin_, point_temp) <= epsilon ){
       bearing_ = Angle(0.0);
       range_ = 0.0;
     }
     else if( polar_origin_==polar_origin_
-	     and point_temp==point_temp){
+	     && point_temp==point_temp){
       bearing_ = Angle(  point_temp.y()-polar_origin_temp.y(), 
 			 point_temp.x()-polar_origin_temp.x()  );
       range_ = distance(polar_origin_temp, point_temp);
@@ -1235,8 +1236,8 @@ namespace VisiLibity
 		    const Polar_Point& polar_point2)
   {
     if( polar_point1.polar_origin() == polar_point2.polar_origin()
-	and polar_point1.range() == polar_point2.range()
-	and polar_point1.bearing() == polar_point2.bearing()
+	 && polar_point1.range() == polar_point2.range()
+	 && polar_point1.bearing() == polar_point2.bearing()
 	)
       return true;
     return false;
@@ -1252,18 +1253,18 @@ namespace VisiLibity
 		   const Polar_Point& polar_point2)
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
-	or polar_point1.range() != polar_point1.range()
-	or polar_point1.bearing() != polar_point1.bearing() 
-	or polar_point2.polar_origin() != polar_point2.polar_origin()
-	or polar_point2.range() != polar_point2.range()
-	or polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point1.range() != polar_point1.range()
+	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point2.polar_origin() != polar_point2.polar_origin()
+	|| polar_point2.range() != polar_point2.range()
+	|| polar_point2.bearing() != polar_point2.bearing() 
 	)
       return false;
 
     if( polar_point1.bearing() > polar_point2.bearing() )
       return true;
     else if( polar_point1.bearing() == polar_point2.bearing() 
-	     and  polar_point1.range() > polar_point2.range() )
+	     &&  polar_point1.range() > polar_point2.range() )
       return true;
     return false;
   }
@@ -1271,18 +1272,18 @@ namespace VisiLibity
 		   const Polar_Point& polar_point2)
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
-	or polar_point1.range() != polar_point1.range()
-	or polar_point1.bearing() != polar_point1.bearing() 
-	or polar_point2.polar_origin() != polar_point2.polar_origin()
-	or polar_point2.range() != polar_point2.range()
-	or polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point1.range() != polar_point1.range()
+	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point2.polar_origin() != polar_point2.polar_origin()
+	|| polar_point2.range() != polar_point2.range()
+	|| polar_point2.bearing() != polar_point2.bearing() 
 	)
       return false;
 
     if( polar_point1.bearing() < polar_point2.bearing() )
       return true;
     else if( polar_point1.bearing() == polar_point2.bearing() 
-	     and  polar_point1.range() < polar_point2.range() )
+	     &&  polar_point1.range() < polar_point2.range() )
       return true;
     return false;
 
@@ -1291,11 +1292,11 @@ namespace VisiLibity
 		    const Polar_Point& polar_point2)
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
-	or polar_point1.range() != polar_point1.range()
-	or polar_point1.bearing() != polar_point1.bearing() 
-	or polar_point2.polar_origin() != polar_point2.polar_origin()
-	or polar_point2.range() != polar_point2.range()
-	or polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point1.range() != polar_point1.range()
+	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point2.polar_origin() != polar_point2.polar_origin()
+	|| polar_point2.range() != polar_point2.range()
+	|| polar_point2.bearing() != polar_point2.bearing() 
 	)
       return false;
 
@@ -1305,11 +1306,11 @@ namespace VisiLibity
 		    const Polar_Point& polar_point2) 
   {
     if( polar_point1.polar_origin() != polar_point1.polar_origin()
-	or polar_point1.range() != polar_point1.range()
-	or polar_point1.bearing() != polar_point1.bearing() 
-	or polar_point2.polar_origin() != polar_point2.polar_origin()
-	or polar_point2.range() != polar_point2.range()
-	or polar_point2.bearing() != polar_point2.bearing() 
+	|| polar_point1.range() != polar_point1.range()
+	|| polar_point1.bearing() != polar_point1.bearing() 
+	|| polar_point2.polar_origin() != polar_point2.polar_origin()
+	|| polar_point2.range() != polar_point2.range()
+	|| polar_point2.bearing() != polar_point2.bearing() 
 	)
       return false;
 
@@ -1341,7 +1342,7 @@ namespace VisiLibity
 		    const Ray& ray2)
   {
     if( ray1.base_point() == ray2.base_point()
-	and ray1.bearing() == ray2.bearing() )
+	 && ray1.bearing() == ray2.bearing() )
       return true;
     else
       return false;
@@ -1360,7 +1361,7 @@ namespace VisiLibity
 			    double epsilon)
   {
     assert( ray_temp == ray_temp
-	    and line_segment_temp.size() > 0 );
+	    && line_segment_temp.size() > 0 );
 
     //First construct a Line_Segment parallel with the Ray which is so
     //long, that it's intersection with line_segment_temp will be
@@ -1376,7 +1377,7 @@ namespace VisiLibity
 					      epsilon);
     //Make sure point closer to ray_temp's base_point is listed first.
     if( intersect_seg.size() == 2
-	and distance( intersect_seg.first(), ray_temp.base_point() ) >
+	 && distance( intersect_seg.first(), ray_temp.base_point() ) >
 	distance( intersect_seg.second(), ray_temp.base_point() )  ){
       intersect_seg.reverse();
     }
@@ -1520,7 +1521,7 @@ namespace VisiLibity
 
     Point point_temp;
     double x_temp, y_temp;
-    while (fin >> x_temp and fin >> y_temp){
+    while (fin >> x_temp && fin >> y_temp){
       point_temp.set_x(x_temp);
       point_temp.set_y(y_temp);
       vertices_.push_back(point_temp);
@@ -1567,7 +1568,7 @@ namespace VisiLibity
   bool Polygon::is_simple(double epsilon) const
   {
     
-    if(n()==0 or n()==1 or n()==2)
+    if(n()==0 || n()==1 || n()==2)
       return false;
 
     //Make sure adjacent edges only intersect at a single point.
@@ -1581,7 +1582,7 @@ namespace VisiLibity
     for(unsigned i=0; i<n()-2; i++)
       for(unsigned j=i+2; j<=n()-1; j++)
 	if( 0!=(j+1)%vertices_.size()  
-	    and distance( Line_Segment((*this)[i],(*this)[i+1]) , 
+	    && distance( Line_Segment((*this)[i],(*this)[i+1]) , 
 			  Line_Segment((*this)[j],(*this)[j+1]) ) <= epsilon  )
 	  return false;
     
@@ -1602,7 +1603,7 @@ namespace VisiLibity
   double Polygon::boundary_length() const
   {
     double length_temp=0;
-    if(n()==0 or n()==1)
+    if(n()==0 || n()==1)
       return 0;
     for(unsigned i=0; i<n()-1; i++)
       length_temp += distance( vertices_[i] , vertices_[i+1] );
@@ -1807,8 +1808,8 @@ namespace VisiLibity
   bool operator == (Polygon polygon1, Polygon polygon2)
   {
     if( polygon1.n() != polygon2.n() 
-	or polygon1.n() == 0
-	or polygon2.n() == 0 )
+	|| polygon1.n() == 0
+	|| polygon2.n() == 0 )
       return false;
     for(unsigned i=0; i<polygon1.n(); i++)
       if(  !(polygon1[i] == polygon2[i])  )
@@ -1821,7 +1822,7 @@ namespace VisiLibity
   }
   bool equivalent(Polygon polygon1, Polygon polygon2, double epsilon)
   {
-    if( polygon1.n() == 0 or polygon2.n() == 0 )
+    if( polygon1.n() == 0 || polygon2.n() == 0 )
       return false;
     if( polygon1.n() != polygon2.n() )
       return false;
@@ -1842,7 +1843,7 @@ namespace VisiLibity
 
   double boundary_distance(const Polygon& polygon1, const Polygon& polygon2)
   {
-    assert( polygon1.n() > 0  and  polygon2.n() > 0 );
+    assert( polygon1.n() > 0  &&  polygon2.n() > 0 );
 
     //Handle single point degeneracy.
     if(polygon1.n() == 1)
@@ -1978,11 +1979,11 @@ namespace VisiLibity
   bool Environment::is_in_standard_form() const
   {
     if( outer_boundary_.is_in_standard_form() == false 
-	or outer_boundary_.area() < 0 )
+	|| outer_boundary_.area() < 0 )
       return false;
     for(unsigned i=0; i<holes_.size(); i++)
       if( holes_[i].is_in_standard_form() == false 
-	  or holes_[i].area() > 0 )
+	  || holes_[i].area() > 0 )
 	return false;
     return true;
   }
@@ -2041,7 +2042,7 @@ namespace VisiLibity
 	}
 	//Second loop over holes.
 	for(unsigned k=0; k<h(); k++)
-	  if( i!=k and holes_[i][j].in(holes_[k], epsilon) ){
+	  if( i!=k && holes_[i][j].in(holes_[k], epsilon) ){
 	    std::cerr << std::endl << "\x1b[31m" 
 		      << "Vertex " << j 
 		      << " of hole " << i 
@@ -2411,7 +2412,7 @@ namespace VisiLibity
 	  waypoint = start;
 	//Add vertex if not redundant
 	if( shortest_path_output.size() > 0
-	    and distance( shortest_path_output[ shortest_path_output.size()
+	    && distance( shortest_path_output[ shortest_path_output.size()
 						- 1 ],
 			  waypoint ) > epsilon )
 	  shortest_path_output.push_back( waypoint );
@@ -2528,7 +2529,7 @@ namespace VisiLibity
     unsigned vertex_count_up_to_last_polygon = 0;
 
     while( k >= vertex_count_up_to_current_polygon
-	   and current_polygon_index < (*this).h() ){
+	   && current_polygon_index < (*this).h() ){
       current_polygon_index++;
       two.first = two.first + 1;
       vertex_count_up_to_last_polygon = vertex_count_up_to_current_polygon;
@@ -2746,19 +2747,19 @@ namespace VisiLibity
     return(  
          //Make sure observer not colocated with any of the points.
 	   distance( observer , point1 ) > epsilon
-	   and distance( observer , point2 ) > epsilon
-	   and distance( observer , point3 ) > epsilon
+	   && distance( observer , point2 ) > epsilon
+	   && distance( observer , point3 ) > epsilon
 	 //Test whether there is a spike with point2 as the tip
-	   and (  ( distance(observer,point2) 
+	   && (  ( distance(observer,point2) 
 		    >= distance(observer,point1)
-		    and distance(observer,point2) 
+		    && distance(observer,point2) 
 		    >= distance(observer,point3) ) 
-		  or ( distance(observer,point2) 
+		  || ( distance(observer,point2) 
 		       <= distance(observer,point1)
-		       and distance(observer,point2) 
+		       && distance(observer,point2) 
 		       <= distance(observer,point3) )  )
 	 //and the pike is sufficiently sharp,
-	   and std::max(  distance( Ray(observer, point1), point2 ), 
+	   && std::max(  distance( Ray(observer, point1), point2 ), 
 			  distance( Ray(observer, point3), point2 )  )
 	   <= epsilon  
 	     );
@@ -2773,7 +2774,7 @@ namespace VisiLibity
     //Eliminate "special case" vertices of the visibility polygon.
     //While the top three vertices form a spike.
     while(  vertices_.size() >= 3
-	    and is_spike( observer, 
+	    && is_spike( observer, 
 			  vertices_[vertices_.size()-3],
 			  vertices_[vertices_.size()-2],
 			  vertices_[vertices_.size()-1], epsilon )  ){
@@ -2789,7 +2790,7 @@ namespace VisiLibity
     //Eliminate "special case" vertices of the visibility polygon at
     //wrap-around.  While the there's a spike at the wrap-around,
     while(  vertices_.size() >= 3 
-	    and is_spike( observer,
+	    && is_spike( observer,
 			  vertices_[vertices_.size()-2],
 			  vertices_[vertices_.size()-1],
 			  vertices_[0], epsilon )  ){
@@ -2809,7 +2810,7 @@ namespace VisiLibity
       if(   distance(  (*this)[i+2], 
 		       Line_Segment( (*this)[i], (*this)[i+1] )  )
 	    <= epsilon
-	    or
+	    ||
 	    distance(  (*this)[i], 
 		       Line_Segment( (*this)[i+1], (*this)[i+2] )  )
 	    <= epsilon   )
@@ -2981,7 +2982,7 @@ namespace VisiLibity
 	  / ( ppoint1.y() - ppoint2.y() );
 	//If edge crosses the ray emanating horizontal and right of
 	//the observer.
-	if( 0 < t and t < 1 and 
+	if( 0 < t && t < 1 && 
 	    observer.x() < t*ppoint1.x() + (1-t)*ppoint2.x() ){ 
 	  //If first point is above, omit edge because it runs
 	  //'against the grain'.
@@ -3002,13 +3003,13 @@ namespace VisiLibity
 	//If the edge is not horizontal and doesn't cross the ray
 	//emanating horizontal and right of the observer.
 	else if( ppoint1.bearing() >= ppoint2.bearing()
-		 and ppoint2.bearing() == Angle(0.0) 
-		 and ppoint1.bearing() > Angle(M_PI) )
+		 && ppoint2.bearing() == Angle(0.0) 
+		 && ppoint1.bearing() > Angle(M_PI) )
 	  ppoint2.set_bearing_to_2pi();
 	//Filter out edges which run 'against the grain'.
 	else if(  ( ppoint1.bearing() == Angle(0,0)
-		    and ppoint2.bearing() > Angle(M_PI) )
-		  or  ppoint1.bearing() >= ppoint2.bearing()  )
+		    && ppoint2.bearing() > Angle(M_PI) )
+		  ||  ppoint1.bearing() >= ppoint2.bearing()  )
 	  continue;
 	elp.push_back(  Polar_Edge( ppoint1, ppoint2 )  );
 	continue;
@@ -3146,7 +3147,7 @@ namespace VisiLibity
     //Insert e into q2 as long as it doesn't contain the
     //observer.
     if( distance(observer,active_edge->first) > epsilon
-	and distance(observer,active_edge->second) > epsilon ){
+	 && distance(observer,active_edge->second) > epsilon ){
      
       if(PRINTING_DEBUG_DATA){
 	std::cout << std::endl
@@ -3193,7 +3194,7 @@ namespace VisiLibity
 
       //TYPE 1: current_vertex is the _second_vertex_ of active_edge.
       if( current_vertex.incident_edge == active_edge 
-	  and !current_vertex.is_first ){
+	  && !current_vertex.is_first ){
 
 	if(PRINTING_DEBUG_DATA){
 	  std::cout << std::endl
@@ -3251,7 +3252,7 @@ namespace VisiLibity
 	  if(  ( current_vertex.bearing().get() 
 		 <= e->second.bearing().get() )
 	       //For robustness.
-	       and distance( Ray(observer, current_vertex.bearing()),
+	       && distance( Ray(observer, current_vertex.bearing()),
 			     e->second ) >= epsilon
 	       /* was
 	       and std::min( distance(Ray(observer, current_vertex.bearing()),
@@ -3313,10 +3314,10 @@ namespace VisiLibity
 					  active_edge->second),
 			     epsilon );
 	if(  xing.size() == 0 
-	     or ( distance(active_edge->first, observer) <= epsilon 
-		  and active_edge->second.bearing() 
+	     || ( distance(active_edge->first, observer) <= epsilon 
+		  && active_edge->second.bearing() 
 		  <= current_vertex.bearing() )
-	     or active_edge->second < current_vertex  ){
+	     || active_edge->second < current_vertex  ){
 	  k_range = INFINITY;
 	}
 	else{
@@ -3340,7 +3341,7 @@ namespace VisiLibity
 	//Insert e into q2 as long as it doesn't contain the
 	//observer.
 	if( distance(observer, e->first) > epsilon
-	    and distance(observer, e->second) > epsilon ){
+	    && distance(observer, e->second) > epsilon ){
 	 
 	  if(PRINTING_DEBUG_DATA){
 	    std::cout << std::endl
@@ -3393,9 +3394,9 @@ namespace VisiLibity
 	  //contiguous with current_vertex.
 	  if( xing.size() > 0
 	      //and k == k
-	      and k_range != INFINITY
-	      and distance(k, current_vertex) > epsilon 
-	      and distance(active_edge->first, observer) > epsilon 
+	      && k_range != INFINITY
+	      && distance(k, current_vertex) > epsilon 
+	      && distance(active_edge->first, observer) > epsilon 
 	      ){
 	   
 	    if(PRINTING_DEBUG_DATA){

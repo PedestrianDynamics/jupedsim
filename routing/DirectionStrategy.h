@@ -86,5 +86,20 @@ private:
      bool initDone;
 };
 
+class DirectionGoalFloorfield : public DirectionStrategy {
+public:
+    DirectionGoalFloorfield();
+    void Init(Building* building, double stepsize, double threshold, bool useDistancMap);
+    ~DirectionGoalFloorfield();
+    //void Init();
+    virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+    virtual Point GetDir2Wall(Pedestrian* ped) const;
+    virtual double GetDistance2Wall(Pedestrian* ped) const;
+
+private:
+    FloorfieldViaFM* ffviafm;
+    bool initDone;
+};
+
 #endif  /* _DIRECTIONSTRATEGY_H */
 

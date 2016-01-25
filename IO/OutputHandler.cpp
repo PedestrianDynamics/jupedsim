@@ -57,7 +57,7 @@ int OutputHandler::GetErrors()
 
 void OutputHandler::Write(const string& str)
 {
-    cout << str << endl;
+          cout << str << endl;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime)
@@ -72,7 +72,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime
 
      // create the "meter"
      int ii=0;
-     printf("Time: %6.2f s | Evacuated: %5d (%3.0f%% ) [", simTime, (int)NowPeds, fraction*100);
+     printf("Time: %6.2f s | Evacuated: %5d /%5d (%3.0f%% ) [", simTime, (int)NowPeds, (int)TotalPeds,fraction*100);
      // part  that's full already
      for ( ; ii < dotz; ii++) {
           printf("=");
@@ -156,10 +156,8 @@ FileHandler::~FileHandler()
 
 void FileHandler::Write(const string& str)
 {
-    if (this != NULL) {
         _pfp << str << endl;
         _pfp.flush();
-    }
 
     if (str.find("ERROR") != string::npos)
     {

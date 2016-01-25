@@ -34,6 +34,7 @@
 #include "../geometry/Wall.h"
 #include "../geometry/SubRoom.h"
 
+
 #include "VelocityModel.h"
 
 #ifdef _OPENMP
@@ -189,8 +190,17 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                       Pedestrian* ped1 = neighbours[i];
                      // calculate spacing
                      // my_pair spacing_winkel = GetSpacing(ped, ped1);
-                      spacings.push_back(GetSpacing(ped, ped1, direction, periodic));                      
+                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+                            spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
+                      } else {
+                            // or in neighbour subrooms
+                            SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+                            if(subroom->IsDirectlyConnectedWith(sb2)) {
+                                  spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
+                            }
+                      }
                 }
+                // @todo: get spacing to walls
                 // @todo: update direction every DT?
                 
                 // if(ped->GetID()==-10)
@@ -206,8 +216,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0().GetX())>0.01)
                 // {
                    
-                //       if(ped->GetID()==-10)
-                //             std::cout << "Get new direction "<< spacing << ", " << winkel << std::endl;
+                      // if(ped->GetID()==-10)
+                            // std::cout << "Min Spacing "<< spacing << ", " << winkel << std::endl;
                 //       ped->SetLastE0(Point(spacing, winkel));
                 // }
                 // else
@@ -291,6 +301,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winke
       return speed;
 }
 
+// return spacing and id of the nearest pedestrian
 my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const
 {
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
@@ -310,7 +321,7 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
       } else {
             //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
             Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
-            Log->Write("\t\t Pedestrians are too near to each other.");
+            Log->Write("\t\t Pedestrians are too near to each other (%f).", Distance);
             exit(EXIT_FAILURE);
      }
 
@@ -320,9 +331,9 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
 
       if((condition1 >=0 ) && (condition2 <= l/Distance))
             // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
-            return  my_pair(distp12.Norm(), condition1); 
+            return  my_pair(distp12.Norm(), ped2->GetID());
       else
-            return  my_pair(std::numeric_limits<double>::max(), condition1);
+            return  my_pair(FLT_MAX, ped2->GetID());
 }      
 Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodic) const
 {      
@@ -347,9 +358,11 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           ep12 = distp12.Normalized();
      } else {
           //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("WARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("\t\t Pedestrians are too near to each other.");
-          Log->Write("\t\t Get your model right. Going to exit.");
+          Log->Write(KRED "\nWARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!" RESET);
+          Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
+          Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
+          printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
+          printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos().GetX(), ped1->GetPos().GetY(), ped2->GetPos().GetX(), ped2->GetPos().GetY());
           exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
@@ -431,9 +444,10 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            e_iw = dist / Distance;
      }
      else {
-          // Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall",ped->GetID());
+           Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
+          printf("new distance = (%f, %f) inside=%d\n", new_dist.GetX(), new_dist.GetY(), inside);
           e_iw = (inside ? new_dist:new_dist*-1);
      }
      //-------------------------

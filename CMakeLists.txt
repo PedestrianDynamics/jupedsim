@@ -7,6 +7,7 @@
 #--------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8  FATAL_ERROR)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 project(JPScore)
 
@@ -18,6 +19,15 @@ set(JPSCORE_VERSION
   ${JPSCORE_MAJOR_VERSION}.${JPSCORE_MINOR_VERSION}.${JPSCORE_PATCH_VERSION})
 message( STATUS "JPSCORE_VERSION: " ${JPSCORE_VERSION} )
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR
+    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(warnings "-Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set(warnings "/W4 /WX /EHsc")
+endif()
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} ${warnings}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${warnings}")
 
 if(NOT BUILD_TESTING)
   set(BUILD_TESTING OFF) # test units & python tests are not generated.
@@ -111,6 +121,45 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 endif(DOXYGEN_FOUND)
+#http://stackoverflow.com/questions/1487752/how-do-i-instruct-cmake-to-look-for-libraries-installed-by-macports
+if(APPLE)
+  # Detect if the "port" command is valid on this system; if so, return full path
+  execute_process(COMMAND which port RESULT_VARIABLE DETECT_MACPORTS OUTPUT_VARIABLE MACPORTS_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (${DETECT_MACPORTS} EQUAL 0)
+    # "/opt/local/bin/port" doesn't have libs, so we get the parent directory
+    get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+    # "/opt/local/bin" doesn't have libs, so we get the parent directory
+    get_filename_component(MACPORTS_PREFIX ${MACPORTS_PREFIX} DIRECTORY)
+    # "/opt/local" is where MacPorts lives, add `/lib` suffix and link
+    link_directories(${MACPORTS_PREFIX}/lib)
+    message(STATUS "Macports detected: ${MACPORTS_PREFIX}/lib")
+    # SET(CMAKE_SYSTEM_NAME Darwin)
+    # # Add MacPorts
+    # INCLUDE_DIRECTORIES(/opt/local/include)
+
+    # LINK_DIRECTORIES(/opt/local/lib)
+
+  else()
+    # Recommendation, also add a "brew --prefix" custom command to detect a homebrew build environment
+    execute_process(COMMAND brew --prefix RESULT_VARIABLE DETECT_BREW OUTPUT_VARIABLE BREW_PREFIX ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(${DETECT_BREW} EQUAL 0)
+      link_directories(${BREW_PREFIX})
+      message(STATUS "Brew detected: ${BREW_PREFIX}")      
+    endif()  
+  endif()
+
+  
+endif(APPLE)
+
+
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} /opt/local/lib)
+#set(Boost_INCLUDE_DIR /opt/local/include/boost)
+#set(Boost_LIBRARY_DIR /usr/local/src/boost_1_46_1/stage/lib)
+# in case boost is a non-default location
+# SET(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "C:/win32libs/boost")
+# SET(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "C:/win32libs/boost/lib")
+find_package(Boost REQUIRED )
+
 
 # find the correct OpenMP flag
 FIND_PACKAGE(OpenMP)
@@ -136,7 +185,19 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
   find_package(Boost COMPONENTS unit_test_framework REQUIRED)
   IF(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage --coverage")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake_modules/")
+    INCLUDE(CodeCoverage)
+    set(ENABLE_COVERAGE ON)
+    SETUP_TARGET_FOR_COVERAGE(
+      cov  # Name for custom target.
+      ctest         # Name of the test driver executable that runs the tests.
+      # NOTE! This should always have a ZERO as exit code
+      # otherwise the coverage generation will not complete.
+      coverage            # Name of output directory.
+    )
+
   endif(CMAKE_COMPILER_IS_GNUCXX)
   file(GLOB_RECURSE test_files "${CMAKE_TEST_DIR}/*.cpp")
   #  file(GLOB test_py_files "${CMAKE_TEST_DIR}/*/runtest*.py")
@@ -246,7 +307,6 @@ set (   source_files
   routing/cognitive_map/cognitiveMap/landmark.cpp
   routing/cognitive_map/cognitiveMap/youareherepointer.cpp
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
-  routing/cognitive_map/Tools/triangle.cpp
 
   visiLibity/source_code/visilibity.cpp
 
@@ -307,7 +367,6 @@ set (   header_files
   routing/cognitive_map/cognitiveMap/landmark.h
   routing/cognitive_map/cognitiveMap/youareherepointer.h
   routing/cognitive_map/cognitiveMap/cogmapoutputhandler.cpp
-  routing/cognitive_map/Tools/triangle.h
 
   visiLibity/source_code/visilibity.hpp
 
@@ -372,6 +431,7 @@ set (   header_files
 
 
 add_library ( core STATIC ${source_files} )
+
 #add_library ( core SHARED ${source_files} )
 
 #Target
@@ -380,15 +440,26 @@ add_library ( core STATIC ${source_files} )
 #)
 add_executable( jpscore  main.cpp )
 
+if(Boost_FOUND)
+  message(STATUS "BOOST FOUND: " ${Boost_LIBRARIES})
+  message(STATUS "Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
+  message(STATUS "Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIR})
+  message(STATUS "Boost_LIB_VERSION: " ${Boost_LIB_VERSION})
+  link_directories(${Boost_LIBRARY_DIRS})
+  include_directories(${Boost_INCLUDE_DIR})
+  # todo: is this necessary?
+  #target_link_libraries(jpscore ${Boost_LIBRARIES})
+endif()
+
 target_link_libraries(jpscore core )
 
 if(WIN32)
   target_link_libraries (jpscore core wsock32)
 endif(WIN32)
 
-if(CGAL_FOUND)
-  target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
-endif(CGAL_FOUND)
+# if(CGAL_FOUND)
+#   target_link_libraries (jpscore ${CGAL_CORE_LIBRARY})
+# endif(CGAL_FOUND)
 
 #protocol buffer
 #find_package(Protobuf)
@@ -503,6 +574,7 @@ endif()
 
 # ----------------------------- cTest ------------------------------------------
 if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
+  set(counter "0")
   SET(BUILD_TEST_TIMEOUT 10800   CACHE STRING "Global timeout on all tests (seconds).")
   SET(DART_TESTING_TIMEOUT "${BUILD_TEST_TIMEOUT}" CACHE STRING "" FORCE)
   message(STATUS "Timeout: " ${BUILD_TEST_TIMEOUT} " s"  )
@@ -511,9 +583,11 @@ if(BUILD_TESTING OR BUILD_CPPUNIT_TEST)
 
   # test if code compiles and runs default setting. Takes about 30 seconds
 
-  link_directories(${Boost_LIBRARY_DIRS})
+  # link_directories(${Boost_LIBRARY_DIRS})
   foreach (test_src ${test_files})
+    MATH(EXPR counter "${counter}+1")
     GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
+    message (STATUS "Add test " ${counter} "  : " ${test})
     add_executable( ${test} ${test_src})
     target_link_libraries (${test} core ${Boost_LIBRARIES})
     add_test(NAME ${test} COMMAND ${test})
@@ -533,8 +607,10 @@ if(BUILD_TESTING)
   find_package(PythonInterp)
   if(PYTHONINTERP_FOUND)
     foreach (test_src ${test_py_files})
+      MATH(EXPR counter "${counter}+1")
       GET_FILENAME_COMPONENT(test ${test_src} NAME_WE)
-      message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
+      message (STATUS "Add test " ${counter} "  : " ${test})
+      # message (STATUS "Add python test: " ${test} " | test_src: " ${PYTHON_EXECUTABLE} " " ${test_src})
       add_test(NAME ${test} COMMAND ${PYTHON_EXECUTABLE} ${test_src})
     endforeach(test_src ${test_py_files})
     message(STATUS "Found Python: " ${PYTHON_EXECUTABLE})
@@ -542,5 +618,6 @@ if(BUILD_TESTING)
     # add_test(NAME flow  COMMAND "${CMAKE_TEST_DIR}/testflow.py" "${test_parameters}")
   endif(PYTHONINTERP_FOUND)
 endif(BUILD_TESTING)
+
 
 install (TARGETS jpscore DESTINATION bin)
