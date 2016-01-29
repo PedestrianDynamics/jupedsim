@@ -594,7 +594,7 @@ bool SubRoom::SanityCheck()
                if(w1.Overlapp(*hline))
                {
                     Log->Write("ERROR: Overlapping between wall %s and  Hline %s ",w1.toString().c_str(),hline->toString().c_str());
-                    exit(EXIT_FAILURE);
+                    // exit(EXIT_FAILURE);
                     //return false;
                }
           }

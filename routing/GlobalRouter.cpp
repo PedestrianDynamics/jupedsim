@@ -1428,7 +1428,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
           Log->Write("ERROR: \tparsing routing file failed!");
           return false;
      }
-
+     int HlineCount = 0;
      for(TiXmlElement* xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
                xHlinesNode = xHlinesNode->NextSiblingElement("Hlines")) {
 
@@ -1459,6 +1459,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                if(_building->AddHline(h))
                {
                     subroom->AddHline(h);
+                    HlineCount++;                    
                     //h is freed in building
                }
                else
@@ -1467,7 +1468,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                }
           }
      }
-     Log->Write("INFO:\tDone with loading extra routing information");
+     Log->Write("INFO:\tDone with loading extra routing information. Loaded <%d> Hlines", HlineCount);
      return true;
 }
 
