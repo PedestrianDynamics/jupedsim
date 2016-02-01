@@ -242,51 +242,58 @@ bool ArgumentParser::ParseIniFile(const string& inifile)
 
           if (xTrajectories->FirstChildElement("path"))
           {
-               _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
-               if(_trajectoriesLocation.empty())
-                    _trajectoriesLocation="./";
+               if(xTrajectories->FirstChildElement("path")->Attribute("location"))
+               {
+            	   _trajectoriesLocation = xTrajectories->FirstChildElement("path")->Attribute("location");
 
-
+               }
                //hack to find if it is an absolute path
                // ignore the project root in this case
                if ( (boost::algorithm::contains(_trajectoriesLocation,":")==false) && //windows
                          (boost::algorithm::starts_with(_trajectoriesLocation,"/") ==false)) //linux
                     // &&() osx
                {
-                    _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
-               }
-
-               // in the case no file was specified, collect all xml files in the specified directory
-               if(_trajectoriesFiles.empty())
-               {
-                    DIR *dir;
-                    struct dirent *ent;
-                    if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
-                    {
-                         /* print all the files and directories within directory */
-                         while ((ent = readdir (dir)) != NULL)
-                         {
-                              string filename=ent->d_name;
-
-                              if (boost::algorithm::ends_with(filename, fmt))
-                                   //if (filename.find(fmt)!=std::string::npos)
-                              {
-                                   //_trajectoriesFiles.push_back(_projectRootDir+filename);
-                                   _trajectoriesFiles.push_back(filename);
-                                   Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
-                              }
-                         }
-                         closedir (dir);
-                    }
-                    else
-                    {
-                         /* could not open directory */
-                         Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
-                         return false;
-                    }
+            	   Log->Write(_trajectoriesLocation);
+            	   _trajectoriesLocation=_projectRootDir+_trajectoriesLocation;
                }
           }
+          else
+          {
+        	  _trajectoriesLocation=_projectRootDir;
+          }
+
           Log->Write("INFO: \tInput directory for loading trajectory is:\t<"+ (_trajectoriesLocation)+">");
+
+          // in the case no file was specified, collect all files in the specified directory
+          if(_trajectoriesFiles.empty())
+          {
+               DIR *dir;
+               struct dirent *ent;
+               if ((dir = opendir (_trajectoriesLocation.c_str())) != NULL)
+               {
+                    /* print all the files and directories within directory */
+                    while ((ent = readdir (dir)) != NULL)
+                    {
+                         string filename=ent->d_name;
+
+                         if (boost::algorithm::ends_with(filename, fmt))
+                              //if (filename.find(fmt)!=std::string::npos)
+                         {
+                              //_trajectoriesFiles.push_back(_projectRootDir+filename);
+                              _trajectoriesFiles.push_back(filename);
+                              Log->Write("INFO: \tInput trajectory file is\t<"+ (filename)+">");
+                         }
+                    }
+                    closedir (dir);
+               }
+               else
+               {
+                    /* could not open directory */
+                    Log->Write("ERROR: \tcould not open the directory <"+_trajectoriesLocation+">");
+                    return false;
+               }
+          }
+
      }
 
      //max CPU

@@ -46,7 +46,7 @@
         <!-- The coordinate of the line used to calculate the flow and velocity --> 
         <measurement_area id="2" /> 
 		<measurement_area id="4" />
-		<plot_time_series enabled="false"/>
+		<plot_time_series enabled="true"/>
     </method_A> 
 
     <!-- Method B (Zhang2011a) Vel and Dens based on Tin and Tout --> 
@@ -57,17 +57,17 @@
     <!-- Method C (Zhang2011a) Classical density and Vel --> 
     <method_C enabled="true"> 
         <measurement_area id="1" /> 
-		<plot_time_series enabled="false"/>
+		<plot_time_series enabled="true"/>
     </method_C> 
 
     <!-- Method D (Zhang2011a) Voronoi density and Vel --> 
 	<method_D enabled="true"> 
         <measurement_area id="1" />
 		<one_dimensional enabled="false"/>		
-		<plot_time_series enabled="false"/>
-        <cut_by_circle enabled="false" radius="1.0" edges="10"/>
-        <output_voronoi_cells enabled="true" plot_graphs="false"/>
-        <individual_FD enabled="false" measurement_area_id="1"/>
+		<plot_time_series enabled="true"/>
+        <cut_by_circle enabled="true" radius="1.0" edges="10"/>
+        <output_voronoi_cells enabled="true" plot_graphs="true"/>
+        <individual_FD enabled="true" measurement_area_id="1"/>
         <profiles enabled="false" grid_size_x="0.20" grid_size_y="0.20"/> 
     </method_D> 
 </JPSreport> 
