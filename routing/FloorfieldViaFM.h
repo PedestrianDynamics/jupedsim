@@ -95,8 +95,7 @@ class FloorfieldViaFM
         Trial* getTrial() {return trialfield;}
 #endif //TESTING
 
-    protected:
-    private:
+protected:
         RectGrid* grid;
         std::vector<Line> wall;
         int numOfExits;

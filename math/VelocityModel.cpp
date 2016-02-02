@@ -71,6 +71,17 @@ VelocityModel::~VelocityModel()
 
 bool VelocityModel::Init (Building* building)
 {
+
+    if(dynamic_cast<DirectionFloorfield*>(_direction)){
+        Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+        //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+            double _deltaH = 0.0625;
+            double _wallAvoidDistance = 0.4;
+            bool _useWallAvoidance = true;
+        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        Log->Write("INFO:\t Init DirectionFloorfield done");
+    }
+
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
     for(unsigned int p=0;p<allPeds.size();p++)

@@ -34,6 +34,7 @@
 #include "../geometry/SubRoom.h"
 #include "../geometry/Wall.h"
 #include "../routing/FloorfieldViaFM.h"
+#include "../routing/LocalFloorfieldViaFM.h"
 #include "DirectionStrategy.h"
 #include <fstream>
 #include <chrono>
@@ -411,5 +412,79 @@ DirectionGoalFloorfield::~DirectionGoalFloorfield() {
     if (ffviafm) {
         delete ffviafm;
     }
+}
+
+/// 8
+Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
+{
+#if DEBUG
+     if (initDone && (ffviafm != nullptr)) {
+#endif // DEBUG
+
+     Point p;
+     if (locffviafm.count(room->GetID())) {
+          locffviafm[room->GetID()]->getDirectionToFinalDestination(ped, p);
+     } else {
+          //create locffviafm[room->GetID()] - therefore use all members needed for ctor
+          // members will be added to this class
+     }
+     p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
+     return (p + ped->GetPos());
+
+#if DEBUG
+     }
+#endif // DEBUG
+
+     //this should not execute:
+     std::cerr << "Failure in DirectionFloorfield::GetTarget!!" << std::endl;
+     exit(EXIT_FAILURE);
+}
+
+Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
+{
+     Point p;
+     ffviafm->getDir2WallAt(ped->GetPos(), p);
+     return p;
+}
+
+double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
+{
+     return ffviafm->getDistance2WallAt(ped->GetPos());
+}
+
+void DirectionLocalFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
+     //implement mechanic, that can read-in an existing floorfield (from a previous run)
+     string s = building->GetGeometryFilename();
+     Log->Write("INFO: \tGeometryFilename <" + s + ">");
+     s.erase(s.find_last_of(".", string::npos)); // delete ending
+     if (s.find_last_of("/") != string::npos) {
+          s.erase(0, s.find_last_of("/")+1);      // delete directories before filename (espacially "..")
+     }
+     string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
+     std::ifstream test(FF_filename);
+     if (test.good()) {
+          Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+          ffviafm = new FloorfieldViaFM(FF_filename);
+     } else {
+          std::chrono::time_point<std::chrono::system_clock> start, end;
+          start = std::chrono::system_clock::now();
+          Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
+          ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);
+          end = std::chrono::system_clock::now();
+          std::chrono::duration<double> elapsed_seconds = end-start;
+          Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
+     }
+     initDone = true;
+}
+
+DirectionLocalFloorfield::DirectionLocalFloorfield() {
+     ffviafm = nullptr;
+     initDone = false;
+};
+
+DirectionLocalFloorfield::~DirectionLocalFloorfield() {
+     if (ffviafm) {
+          delete ffviafm;
+     }
 }
 

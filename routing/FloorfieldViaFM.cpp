@@ -95,29 +95,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     setSpeed(useDistancefield); //use distance2Wall
     Log->Write("INFO: \tGrid initialized: Speed");
     calculateFloorfield(cost, neggrad);
-//    Point dummy = Point(0., 0.);
-//    int i;
-//    Pedestrian* dummyped = new Pedestrian();
-//    //NavLine* dummynavline;
-//    dummyped->SetPos(grid->getPointFromKey(0), true);
-//    for (auto& element : neggradmap) {     // this loop is only to calc all floorfields before going parallel
-//        i = element.first;
-//        if (i > 0) {
-//            dummyped->SetExitIndex(i);
-//            //dummynavline = new NavLine( (Line) *(buildingArg->GetTransition(i)) );
-//            dummyped->SetExitLine( buildingArg->GetTransition(i) );
-//            //delete dummynavline;
-//            getDirectionToDestination(dummyped, dummy);
-//        }
-//    }
-////    for (auto& element : goalneggradmap) { // this loop is only to calc all goalfields beforehand
-////        i = element.first;
-////        dummyped->SetFinalDestination(i);
-////        getDirectionToFinalDestination(dummyped, dummy);
-////    }
-//    delete dummyped;
-    //testoutput("AAFloorfield.vtk","AAFloorfield.txt", cost);
-    //writeFF(filename);        //writing FF-file disabled until extending is complete ( @todo: argraf )
+    //writing FF-file disabled until extending is complete ( @todo: argraf )
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
@@ -239,8 +217,6 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     }
     file.close();
 }
-
-// getDirectionAt(...,...) <- obsolete (back when there was just one floorfield); delete soon
 
 void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     long int key = grid->getKeyAtPoint(position);
@@ -417,19 +393,12 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
     const std::map<int, Transition*>& allTransitions = buildingArg->GetAllTransitions();
     for (auto& trans : allTransitions) {
         if (
-            //((trans.second->GetRoom1()) && (trans.second->GetRoom1()->GetID() == -1)) ||
-            //((trans.second->GetRoom2()) && (trans.second->GetRoom2()->GetID() == -1)) ||
-            //(trans.second->GetCaption().compare("main exit") == 0) ||
-            //(trans.second->GetType().compare("emergency") == 0)
             trans.second->IsExit() && trans.second->IsOpen()
            )
         {
-            //wall.emplace_back(Line( trans.second->GetPoint1(), trans.second->GetPoint2() ));
             wall.emplace_back(Line ( (Line) *(trans.second)));
         }
         //populate both maps: costmap, neggradmap. These are the lookup maps for floorfields to specific transitions
-        //plan: add pair of (id, nullptr). if a map-element is accessed, then we check if nullptr (then create FF) or if
-        //                                                                                ptr to memory, then return ptr
         costmap.emplace(trans.second->GetUniqueID(), nullptr);
         neggradmap.emplace(trans.second->GetUniqueID(), nullptr);
     }
@@ -447,14 +416,12 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
 
                 std::vector<Wall> allObsWalls = (*itObstacles)->GetAllWalls();
                 for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
-                    //wall.emplace_back(Line( (*itObsWall).GetPoint1(), (*itObsWall).GetPoint2() ));
                     wall.emplace_back(Line( (Line) *itObsWall));
                     // xMin xMax
                     if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
                     if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
                     if ((*itObsWall).GetPoint1().GetX() > xMax) xMax = (*itObsWall).GetPoint1().GetX();
                     if ((*itObsWall).GetPoint2().GetX() > xMax) xMax = (*itObsWall).GetPoint2().GetX();
-
                     // yMin yMax
                     if ((*itObsWall).GetPoint1().GetY() < yMin) yMin = (*itObsWall).GetPoint1().GetY();
                     if ((*itObsWall).GetPoint2().GetY() < yMin) yMin = (*itObsWall).GetPoint2().GetY();
@@ -466,16 +433,11 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             std::vector<Wall> allWalls = itSubroom.second->GetAllWalls();
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                 wall.emplace_back( Line( (Line) *itWall));
-                //wall.emplace_back( Line((*itWall).GetPoint1(), (*itWall).GetPoint2()) );
-                //std::cout << &(*itWall) << std::endl;
-                //std::cout << wall[0].GetPoint1().GetX() << std::endl;
-
                 // xMin xMax
                 if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
                 if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
                 if ((*itWall).GetPoint1().GetX() > xMax) xMax = (*itWall).GetPoint1().GetX();
                 if ((*itWall).GetPoint2().GetX() > xMax) xMax = (*itWall).GetPoint2().GetX();
-
                 // yMin yMax
                 if ((*itWall).GetPoint1().GetY() < yMin) yMin = (*itWall).GetPoint1().GetY();
                 if ((*itWall).GetPoint2().GetY() < yMin) yMin = (*itWall).GetPoint2().GetY();

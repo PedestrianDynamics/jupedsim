@@ -2,7 +2,7 @@
  * \file        GradientModel.h
  * \date        Nov 27, 2014
  * \version     v0.5
- * \copyright   <2009-2014> Forschungszentrum Jülich GmbH. All rights reserved.
+ * \copyright   <2009-2014> Forschungszentrum Jï¿½lich GmbH. All rights reserved.
  *
  * \section License
  * This file is part of JuPedSim.
@@ -46,7 +46,6 @@ class GradientModel : public OperationalModel {
 private:
      /// define the strategy for crossing a door (used for calculating the driving force)
      DirectionStrategy* _direction;
-     DirectionFloorfield* _floorfield;
 
      /// Modellparameter
      double _nuPed;
