@@ -29,6 +29,8 @@
 #ifndef _DIRECTIONSTRATEGY_H
 #define _DIRECTIONSTRATEGY_H
 
+#include <map>
+
 class Room;
 class Building;
 class Pedestrian;

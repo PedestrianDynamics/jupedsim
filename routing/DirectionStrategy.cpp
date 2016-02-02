@@ -284,7 +284,7 @@ Point DirectionFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
         Point p;
-        ffviafm->getDirectionToFinalDestination(ped, p);
+        ffviafm->getDirectionToFinalDestination(ped, p); //@FIXME ar.graf: change to
         p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
         return (p + ped->GetPos());
 
@@ -422,12 +422,16 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      Point p;
-     if (locffviafm.count(room->GetID())) {
-          locffviafm[room->GetID()]->getDirectionToFinalDestination(ped, p);
-     } else {
+//     if (locffviafm.count(room->GetID())) {
+     locffviafm.at(room->GetID())->getDirectionToDestination(ped, p);
+//     } else {
           //create locffviafm[room->GetID()] - therefore use all members needed for ctor
           // members will be added to this class
-     }
+//          locffviafm.emplace(room->GetID(), new LocalFloorfieldViaFM(room, building,
+//                                      hx, hy, wallAvoidDistance, useDistancefield,
+//                                      filename));
+//          locffviafm[room->GetID()]->getDirectionToDestination(ped, p);
+//     }
      p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
      return (p + ped->GetPos());
 
@@ -443,13 +447,14 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 Point DirectionLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
      Point p;
-     ffviafm->getDir2WallAt(ped->GetPos(), p);
+     int roomID = ped->GetRoomID();
+     locffviafm.at(roomID)->getDir2WallAt(ped->GetPos(), p);
      return p;
 }
 
 double DirectionLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-     return ffviafm->getDistance2WallAt(ped->GetPos());
+     return locffviafm.at(ped->GetRoomID())->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionLocalFloorfield::Init(Building* building, double stepsize, double threshold, bool useDistancMap) {
@@ -463,13 +468,16 @@ void DirectionLocalFloorfield::Init(Building* building, double stepsize, double 
      string FF_filename = (building->GetProjectRootDir() + "FF_" + s +  "_" + std::to_string(threshold) + ".vtk").c_str();
      std::ifstream test(FF_filename);
      if (test.good()) {
-          Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
-          ffviafm = new FloorfieldViaFM(FF_filename);
+          //Log->Write("INFO: \tRead Floorfield from file <" + FF_filename + ">");
+          //ffviafm = new FloorfieldViaFM(FF_filename);
      } else {
           std::chrono::time_point<std::chrono::system_clock> start, end;
           start = std::chrono::system_clock::now();
-          Log->Write("INFO: \tCalling Construtor of FloorfieldViaFM");
-          ffviafm = new FloorfieldViaFM(building, stepsize, stepsize, threshold, useDistancMap, FF_filename);
+          Log->Write("INFO: \tCalling Construtor of LocFloorfieldViaFM");
+          for (auto& roomPair : building->GetAllRooms()) {
+               locffviafm[roomPair.first] = new LocalFloorfieldViaFM(&(*roomPair.second), building,
+                                                  hx, hy, threshold, useDistancMap, FF_filename);
+          }
           end = std::chrono::system_clock::now();
           std::chrono::duration<double> elapsed_seconds = end-start;
           Log->Write("INFO: \tTaken time: " + std::to_string(elapsed_seconds.count()));
@@ -478,13 +486,15 @@ void DirectionLocalFloorfield::Init(Building* building, double stepsize, double 
 }
 
 DirectionLocalFloorfield::DirectionLocalFloorfield() {
-     ffviafm = nullptr;
+     //locffviafm = nullptr;
      initDone = false;
-};
+}
 
 DirectionLocalFloorfield::~DirectionLocalFloorfield() {
-     if (ffviafm) {
-          delete ffviafm;
+     //if (locffviafm) {
+     for (auto pair : locffviafm) {
+          delete pair.second;
      }
+     //}
 }
 
