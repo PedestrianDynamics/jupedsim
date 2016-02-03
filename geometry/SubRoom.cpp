@@ -1340,25 +1340,6 @@ bool Stair::ConvertLineToPoly(const vector<Line*>& goals)
      return true;
 }
 
-bool Stair::IsInSubRoom(const Point& ped) const
-{
-     bool rueck = false;
-     int N = (int) _poly.size();
-     int sum = 0;
-
-     for (int i = 0; i < N; i++)
-     {
-          Line l = Line(_poly[i], _poly[(i + 1) % N]);
-          Point s = l.LotPoint(ped);
-          if (l.IsInLineSegment(s))
-               sum++;
-     }
-     if (sum == 4)
-          rueck = true;
-
-     return rueck;
-}
-
 
 void SubRoom::SetType(const std::string& type)
 {
