@@ -108,7 +108,14 @@ bool GradientModel::Init (Building* building)
           Log->Write("INFO:\t Init Direction LOCAL Floorfield done");
      }
 
-    const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init Direction SubLOCAL Floorfield starting ...");
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init Direction SubLOCAL Floorfield done");
+     }
+
+
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
     for(unsigned int p=0;p<allPeds.size();p++)
     {
