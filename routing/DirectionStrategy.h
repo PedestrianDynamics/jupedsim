@@ -37,6 +37,7 @@ class Pedestrian;
 class Point;
 class FloorfieldViaFM;
 class LocalFloorfieldViaFM;
+class SubLocalFloorfieldViaFM;
 
 class DirectionStrategy {
 
@@ -90,7 +91,8 @@ private:
 class DirectionGoalFloorfield : public DirectionStrategy {
 public:
     DirectionGoalFloorfield();
-    void Init(Building* building, double stepsize, double threshold, bool useDistancMap);
+    void Init(Building* building, double stepsize, double threshold,
+              bool useDistancMap);
     ~DirectionGoalFloorfield();
     //void Init();
     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
@@ -105,15 +107,38 @@ private:
 class DirectionLocalFloorfield : public DirectionStrategy {
 public:
      DirectionLocalFloorfield();
-     void Init(Building* building, double stepsize, double threshold, bool useDistancMap);
+     void Init(Building* building, double stepsize, double threshold,
+               bool useDistancMap);
      ~DirectionLocalFloorfield();
      //void Init();
      virtual Point GetTarget(Room* room, Pedestrian* ped) const;
      virtual Point GetDir2Wall(Pedestrian* ped) const;
      virtual double GetDistance2Wall(Pedestrian* ped) const;
 
-private:
+protected:
      std::map<int, LocalFloorfieldViaFM*> locffviafm;
+     bool initDone;
+     const Building* building;
+     double hx;
+     double hy;
+     double wallAvoidDistance;
+     bool useDistancefield;
+     std::string filename;
+};
+
+class DirectionSubLocalFloorfield : public DirectionStrategy {
+public:
+     DirectionSubLocalFloorfield();
+     void Init(Building* building, double stepsize, double threshold,
+           bool useDistancMap);
+     ~DirectionSubLocalFloorfield();
+     //void Init();
+     virtual Point GetTarget(Room* room, Pedestrian* ped) const;
+     virtual Point GetDir2Wall(Pedestrian* ped) const;
+     virtual double GetDistance2Wall(Pedestrian* ped) const;
+
+protected:
+     std::map<int, SubLocalFloorfieldViaFM*> locffviafm;
      bool initDone;
      const Building* building;
      double hx;

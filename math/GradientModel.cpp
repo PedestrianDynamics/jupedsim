@@ -95,11 +95,19 @@ GradientModel::~GradientModel()
 
 bool GradientModel::Init (Building* building)
 {
-    Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+
     if(dynamic_cast<DirectionFloorfield*>(_direction)){
-        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+         dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+         Log->Write("INFO:\t Init DirectionFloorfield done");
     }
-    Log->Write("INFO:\t Init DirectionFloorfield done");
+
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init Direction LOCAL Floorfield starting ...");
+          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init Direction LOCAL Floorfield done");
+     }
+
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
     for(unsigned int p=0;p<allPeds.size();p++)

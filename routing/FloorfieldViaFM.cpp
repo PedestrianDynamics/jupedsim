@@ -45,7 +45,7 @@
 FloorfieldViaFM::FloorfieldViaFM()
 {
     //ctor (very ugly)
-    std::cerr << "The defaultconsturctor FloorfieldViaFM should not be called!" << std::endl;
+    //std::cerr << "The defaultconsturctor FloorfieldViaFM should not be called!" << std::endl;
 }
 
 FloorfieldViaFM::~FloorfieldViaFM()
@@ -228,6 +228,7 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     const Point& position = ped->GetPos();
     int destID = ped->GetExitIndex();
     long int key = grid->getKeyAtPoint(position);
+#pragma omp critical
     getDirectionToUID(destID, key, direction);
 }
 
@@ -271,10 +272,12 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 calculateFloorfield(localcostptr, localneggradptr);
                 //performance-measurement:
                 auto end = std::chrono::steady_clock::now();
-                Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
+                Log->Write("new Floorfield " + std::to_string(destID) + "  :   "
+                      + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() )
+                      + " " + std::to_string(localline.size()) );
 
                 //std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
-                Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
+                //Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
         }
     }
     direction.SetX(localneggradptr[key].GetX());

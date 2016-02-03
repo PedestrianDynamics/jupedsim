@@ -45,8 +45,23 @@ public:
                           const bool useDistancefield, const std::string& filename);
 
      void parseRoom(const Room* const roomArg, const double hxArg, const double hyArg);
-private:
+     void getDirectionToDestination (Pedestrian* ped, Point& direction);
+protected:
      const Room* room;
+};
+
+class SubLocalFloorfieldViaFM : public FloorfieldViaFM{
+public:
+     SubLocalFloorfieldViaFM();
+     SubLocalFloorfieldViaFM(const SubRoom* const subroom, const Building* buildingArg,
+           const double hxArg, const double hyArg,
+           const double wallAvoidDistance,
+           const bool useDistancefield, const std::string& filename);
+
+     void parseRoom(const SubRoom* const subroomArg, const double hxArg, const double hyArg);
+     void getDirectionToDestination (Pedestrian* ped, Point& direction);
+protected:
+     const SubRoom* subroom;
 };
 
 #endif //JPSCORE_LOCALFLOORFIELDVIAFM_H

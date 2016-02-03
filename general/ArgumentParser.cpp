@@ -1236,6 +1236,15 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                case 6:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
                     break;
+               case 7:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGoalFloorfield());
+                    break;
+               case 8:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    break;
+               case 9:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
+                    break;
                default:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());
                     Log->Write("ERROR:\t unknown exit_crossing_strategy <%d>", pExitStrategy);
