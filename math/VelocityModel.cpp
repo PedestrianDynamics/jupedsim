@@ -93,7 +93,7 @@ bool VelocityModel::Init (Building* building)
      }
 
      if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
-          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
           //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
           double _deltaH = 0.0625;
           double _wallAvoidDistance = 0.4;
