@@ -63,8 +63,7 @@ public:
         BOX      //!< BOX defined by centre, length, width and height
     };
 
-    FacilityGeometry(const std::string & description);
-
+    FacilityGeometry(const std::string &description, const std::string &roomCaption, const std::string &subroomCaption);
     virtual ~FacilityGeometry();
 
     vtkAssembly* getActor2D();
@@ -114,7 +113,10 @@ public:
     void addGradientField(vtkActor* gradientField);
 
     const std::string & GetDescription() const ;
-
+    const std::string & GetRoomCaption() const ;
+    const std::string & GetSubRoomCaption() const ;
+    void SetRoomCaption(std::string s);
+    void SetSubRoomCaption(std::string s);
     /// draw other kinds of objects
     void addObjectSphere(double center[3], double radius, double couleur=1);
     void addObjectCone(double center[3], double height, double radius, double couleur=2);
@@ -186,6 +188,8 @@ private:
     vtkActor2DCollection* captions;
 
     std::string _description;
+    std::string _roomCaption;
+    std::string _subroomCaption;
     bool _visibility=true;
 };
 

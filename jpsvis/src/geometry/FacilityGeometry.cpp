@@ -68,7 +68,7 @@ using namespace std;
     vtkSmartPointer<type> name = vtkSmartPointer<type>::New()
 
 
-FacilityGeometry::FacilityGeometry(const string &description)
+FacilityGeometry::FacilityGeometry(const string &description, const string &roomCaption, const string &subroomCaption)
 {
 
     assembly = vtkAssembly::New();
@@ -107,6 +107,8 @@ FacilityGeometry::FacilityGeometry(const string &description)
     doorColor = 50;
     navlineColor=95;
     _description=description;
+    _roomCaption=roomCaption;
+    _subroomCaption=subroomCaption;
 }
 
 FacilityGeometry::~FacilityGeometry()
@@ -891,3 +893,17 @@ const std::string & FacilityGeometry::GetDescription() const
 {
     return _description;
 }
+
+const std::string & FacilityGeometry::GetSubRoomCaption() const
+{
+    return _subroomCaption;
+}
+
+const std::string & FacilityGeometry::GetRoomCaption() const
+{
+    return _roomCaption;
+}
+
+void FacilityGeometry::SetRoomCaption(std::string s) {_roomCaption=s; }
+
+void FacilityGeometry::SetSubRoomCaption(std::string s) {_subroomCaption=s; }

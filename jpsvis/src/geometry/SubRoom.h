@@ -59,6 +59,7 @@ private:
      int _id;
      /// the unique id resulting from the count of all subrooms in the system
      int _uid;
+     std::string _caption;
      int _roomID;
      std::vector<int> _goalIDs; // all navigation lines contained in this subroom
      double _area;
@@ -103,6 +104,12 @@ public:
       * Set/Get the associated room id
       */
      void SetRoomID(int ID);
+     /**
+      * Set/Get the caption of the room
+      */
+     const std::string& GetCaption() const;
+
+     void SetCaption(const std::string& s);
 
      /**
       * Set the plane equation for this subroom.

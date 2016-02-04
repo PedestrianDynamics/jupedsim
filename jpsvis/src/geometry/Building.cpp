@@ -439,7 +439,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
           for(TiXmlElement* xSubRoom = xRoom->FirstChildElement("subroom"); xSubRoom;
                     xSubRoom = xSubRoom->NextSiblingElement("subroom")) {
 
-
+               string subroom_caption = xmltoa(xSubRoom->Attribute("caption"), "no Caption");
                string subroom_id = xmltoa(xSubRoom->Attribute("id"), "-1");
                string SubroomClosed = xmltoa(xSubRoom->Attribute("closed"), "0");
                string type = xmltoa(xSubRoom->Attribute("class"),"subroom");
@@ -471,7 +471,7 @@ bool Building::LoadGeometry(const std::string &geometryfile)
                     //normal subroom or corridor
                     subroom = new NormalSubRoom();
                }
-
+               subroom->SetCaption(subroom_caption);
                subroom->SetType(type);
                subroom->SetPlanEquation(A_x,B_y,C_z);
                subroom->SetRoomID(room->GetID());
