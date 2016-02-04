@@ -96,7 +96,7 @@ SaxParser::SaxParser(GeometryFactory& geoFac, SyncData& dataset, double * fps):_
     _color=0.0;
     _dataset.clearFrames();
 
-    _geometry = std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name"));
+    _geometry = std::shared_ptr<FacilityGeometry>(new FacilityGeometry("No name", "No name", "No name"));
     _geoFactory.AddElement(-1,-1,_geometry);
 
     //default header
@@ -634,7 +634,6 @@ void SaxParser::clearPoints()
 /// provided for convenience and will be removed in the next version
 bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
 {
-
     double captionsColor=0;//red
     if(!fileName.endsWith(".xml",Qt::CaseInsensitive)) return false;
     QString wd;
@@ -654,7 +653,10 @@ bool SaxParser::parseGeometryJPS(QString fileName, GeometryFactory& geoFac)
     {
         for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
         {
-            auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry(itr_subroom.second->GetType()));
+              auto geometry= shared_ptr<FacilityGeometry>(
+                    new FacilityGeometry(itr_subroom.second->GetType(), itr_room.second->GetCaption(),itr_subroom.second->GetCaption()
+              )
+        );
 
             int currentFloorPolyID=0;
             int currentObstPolyID=0;
@@ -803,7 +805,7 @@ void SaxParser::parseGeometryTRAV(QString content, GeometryFactory& geoFac,QDomN
     // to be filled
     QDomDocument doc("");
     QDomNode geoNode;
-    auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry("no mame"));
+    auto geometry= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
 
     //first try to open the file
     if(content.endsWith(".trav",Qt::CaseInsensitive) ) {
@@ -1039,6 +1041,7 @@ QString SaxParser::extractGeometryFilename(QString &filename)
 
 void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
 {
+      cout << "parsing 04\n" ;
     QDomDocument doc("");
     QFile file(filename);
 
@@ -1049,7 +1052,8 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
         //cout<<"The file is too large: "<<filename.toStdString()<<endl;
         return;
     }
-    auto geo= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name"));
+            
+    auto geo= shared_ptr<FacilityGeometry>(new FacilityGeometry("no name", "no name", "no name"));
     //cout<<"filename: "<<filename.toStdString()<<endl;
 
     //TODO: check if you can parse this with the building classes.
@@ -1129,8 +1133,10 @@ void SaxParser::parseGeometryXMLV04(QString filename, GeometryFactory& geoFac)
         position[1]/=pos_count;
         position[2]/=pos_count;
         geo->addObjectLabel(position,position,caption,color);
-        //cout<<"position: [" <<position[0]<<", "<<position[1]<<", "<<position[2]<<" ]"<<endl;;
-
+        geo->SetRoomCaption(roomCaption);
+        geo->SetSubRoomCaption(subroomCaption);
+        cout<<"position: [" <<position[0]<<", "<<position[1]<<", "<<position[2]<<" ]"<<endl;;
+        cout << roomCaption<< "  " << subroomCaption << "\n" ;
     }
 
     QDomNodeList xObstaclesList=doc.elementsByTagName("obstacle");
@@ -1406,7 +1412,7 @@ bool SaxParser::ParseGradientFieldVTK(QString fileName, GeometryFactory& geoFac)
     //conversion from m to cm
     actor->SetScale(100);
 
-    auto gradient_field= shared_ptr<FacilityGeometry>(new FacilityGeometry("Gradient Field"));
+    auto gradient_field= shared_ptr<FacilityGeometry>(new FacilityGeometry("Gradient Field", "no name", "no name"));
     gradient_field->addGradientField(actor);
 
     geoFac.AddElement(-1,-1,gradient_field);

@@ -64,6 +64,7 @@ void GeometryFactory::ChangeWallsColor(double* color)
                 subroom.second->changeWallsColor(color);
         }
     }
+
 }
 
 void GeometryFactory::ChangeExitsColor(double* color)
@@ -220,21 +221,35 @@ bool GeometryFactory::RefreshView()
 
         for (auto&& room: _geometryFactory)
         {
+
             //room caption
             //QStandardItem *roomcaption = new QStandardItem( QString("R %0").arg(room.first));
             //roomcaption->setEditable( false );
             //_model.setItem(room.first, 1, roomcaption);
+            QString roomCaption;
+            if (room.first>=0)
+                roomCaption = QString::fromStdString(_geometryFactory[room.first][0]->GetRoomCaption());
+            else
+                roomCaption = "empty";
 
-            QStandardItem *item = new QStandardItem( QString("Room:%0").arg(room.first));
+            QStandardItem *item = new QStandardItem( QString("Room: %0 (%1)")
+                                                     .arg(room.first)
+                                                     .arg(roomCaption)
+                              );
+//                                                   .arg(QString::fromStdString(
+         //   _geometryFactory[room.first][0]->GetRoomCaption()
+
+            // room.second[0].second->GetRoomCaption()
             item->setCheckable(true);
             item->setCheckState(Qt::Checked);
 
             for(auto&& subroom:room.second)
             {
                 QStandardItem *child = new QStandardItem(
-                            QString("%0: (%1)")
-                            .arg(QString::fromStdString(subroom.second->GetDescription()))
+                            QString("%2: %0 (%1)")
                             .arg(subroom.first)
+                                    .arg(QString::fromStdString(subroom.second->GetSubRoomCaption()))
+                                    .arg(QString::fromStdString(subroom.second->GetDescription()))
                             );
 
                 child->setEditable(false);

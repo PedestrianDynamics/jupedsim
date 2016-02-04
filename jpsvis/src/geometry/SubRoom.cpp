@@ -56,7 +56,7 @@ SubRoom::SubRoom()
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
      _obstacles=vector<Obstacle*> ();
-
+     _caption = "no subroom caption";
      _crossings = vector<Crossing*>();
      _transitions = vector<Transition*>();
      _hlines = vector<Hline*>();
@@ -80,6 +80,15 @@ SubRoom::~SubRoom()
      _obstacles.clear();
 }
 
+void SubRoom::SetCaption(const string& s)
+{
+     _caption = s;
+}
+
+const string& SubRoom::GetCaption() const
+{
+     return _caption;
+}
 
 void SubRoom::SetSubRoomID(int ID)
 {
