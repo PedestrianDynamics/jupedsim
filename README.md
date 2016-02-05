@@ -8,9 +8,9 @@ The core module for performing the simulation (i.e. computing the trajectories).
 
 We are heavily working on this project which means that:
 
-    It’s not done. We will be releasing new enhancements, bug fixes etc.
-    We love your support. If you find any errors or have suggestions, please write an issue. We will try hard to fix it.
-    Be patient. We are scientists and PhD/master students. Therefore, we primarly care about our research and theses. 
+- It’s not done. We will be releasing new enhancements, bug fixes etc.
+- We love your support. If you find any errors or have suggestions, please write an issue. We will try hard to fix it.
+- Be patient. We are scientists and PhD/master students. Therefore, we primarly care about our research and theses. 
 
 Enjoy!
 
