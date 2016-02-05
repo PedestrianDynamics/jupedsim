@@ -6,18 +6,14 @@
 
 The core module for performing the simulation (i.e. computing the trajectories).
 
-_jpscore_ is a command-based program. 
+We are heavily working on this project which means that:
 
-It is initialized with a project file, e.g.:
+    It’s not done. We will be releasing new enhancements, bug fixes etc.
+    We love your support. If you find any errors or have suggestions, please write an issue. We will try hard to fix it.
+    Be patient. We are scientists and PhD/master students. Therefore, we primarly care about our research and theses. 
 
+Enjoy!
 
-
-    jpscore inifile.xml
-
-
-
-will start a simulation based on parameter and setup (geometry, population, ...) 
-contained in the _inifile_.
 
 
 ## Features
@@ -35,7 +31,7 @@ contained in the _inifile_.
 ## Showcase
 
 
-To highlight some features of JuPedSim we have uploaded some videos on our [YouTube channel](https://www.youtube.com/user/JuPedSim).
+To highlight some features of JuPedSim we have uploaded some videos on our [YouTube channel](https://www.youtube.com/channel/UCKS8w8CUClHEeN4K1SUSMBA).
 
 
 ## Installing
