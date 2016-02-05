@@ -605,7 +605,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                     if(success==false)
                     {
                          Log->Write("ERROR       :\t correcting the door statistics");
-                         //exit(EXIT_SUCCESS);
+                         return;
                     }
                }
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
