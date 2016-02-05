@@ -604,8 +604,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 
                     if(success==false)
                     {
-                         Log->Write("ERROR       :\t correcting the door statistics");
-                         return;
+                         Log->Write("WARNING       :\t correcting the door statistics");
+                         return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                     }
                }
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
