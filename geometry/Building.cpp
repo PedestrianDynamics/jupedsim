@@ -93,11 +93,11 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      }
 
      //triangulate the geometry
-//     if(!Triangulate())
-//     {
-//          Log->Write("ERROR:\t could not triangulate the geometry!");
-//          exit (EXIT_FAILURE);
-//     }
+     if(!Triangulate())
+     {
+          Log->Write("ERROR:\t could not triangulate the geometry!");
+          exit (EXIT_FAILURE);
+     }
 
      if(!LoadTrafficInfo() )
      {

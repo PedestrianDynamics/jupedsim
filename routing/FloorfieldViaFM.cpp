@@ -267,14 +267,14 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 setNewGoalAfterTheClear(localcostptr, localline);
 
                 //performance-measurement:
-                auto start = std::chrono::steady_clock::now();
+                //auto start = std::chrono::steady_clock::now();
 
                 calculateFloorfield(localcostptr, localneggradptr);
                 //performance-measurement:
-                auto end = std::chrono::steady_clock::now();
-                Log->Write("new Floorfield " + std::to_string(destID) + "  :   "
-                      + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() )
-                      + " " + std::to_string(localline.size()) );
+                //auto end = std::chrono::steady_clock::now();
+                //Log->Write("new Floorfield " + std::to_string(destID) + "  :   "
+                //      + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() )
+                //      + " " + std::to_string(localline.size()) );
 
                 //std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
                 //Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
@@ -329,17 +329,17 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
 
                 setNewGoalAfterTheClear(localcostptr, localline);
                 //performance-measurement:
-                auto start = std::chrono::steady_clock::now();
+                //auto start = std::chrono::steady_clock::now();
 
                 calculateFloorfield(localcostptr, localneggradptr);
 
                 //performance-measurement:
-                auto end = std::chrono::steady_clock::now();
+                //auto end = std::chrono::steady_clock::now();
                 //auto diff = end - start;
                 //std::cerr << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << std::endl;
                 //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
                 //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
-                Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
+                //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
 
                 //find closest door and add to cheatmap "goalToLineUID" map
                 const std::map<int, Transition*>& transitions = building->GetAllTransitions();
