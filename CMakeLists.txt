@@ -280,7 +280,7 @@ set (   source_files
   #plz do not delete them here
   routing/mesh/RectGrid.h
   routing/mesh/Trial.h
-  generel/Macros.h
+  general/Macros.h
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
