@@ -111,9 +111,6 @@ message(STATUS "")
 # message( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 # message( STATUS "CMAKE_VERBOSE_MAKEFILE: " ${CMAKE_VERBOSE_MAKEFILE} )
 
-include_directories(/home0/ar.graf/include)
-link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
-
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
@@ -264,7 +261,7 @@ set (   source_files
   voronoi/VoronoiDiagramGenerator.cpp
   voronoi-boost/VoronoiPositionGenerator.cpp
 
-  routing/LocalFloorfieldViaFM.cpp
+  routing/LocalFloorfield.cpp
   routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
@@ -283,7 +280,7 @@ set (   source_files
   #plz do not delete them here
   routing/mesh/RectGrid.h
   routing/mesh/Trial.h
-  general/Macros.h
+  generel/Macros.h
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
@@ -468,36 +465,34 @@ endif(WIN32)
 
 #protocol buffer
 #find_package(Protobuf)
-#if(PROTOBUF_FOUND)
-#message(STATUS "Protocol buffer library found")
-
-#include_directories(${PROTOBUF_INCLUDE_DIRS})
-#include_directories(/home0/ar.graf/include)
-#link_directories(/home0/ar.graf/lib /home0/ar.graf/lib64)
-message("libs added")
-
-set (hybrid_source_files
-  matsim/HybridSimulationManager.cpp
-  matsim/JPSserver.cpp
-  matsim/JPSclient.cpp                
-  matsim/MATSimInterface.pb.cc
-  matsim/MATSimInterface.grpc.pb.cc 
-)
-
-set (hybrid_header_files
-  matsim/JPSclient.h  
-  matsim/MATSimInterface.grpc.pb.h  
-  matsim/MATSimInterface.proto
-  matsim/HybridSimulationManager.h    
-  matsim/JPSserver.h                 
-  matsim/MATSimInterface.pb.h
-)
+#if(PROTOBUF_FOUND && GRPC)
+#  message(STATUS "Protocol buffer library found")
+#
+#  include_directories(${PROTOBUF_INCLUDE_DIRS})
+#
+#  set (hybrid_source_files
+#    matsim/HybridSimulationManager.cpp
+#    matsim/JPSserver.cpp
+#    matsim/JPSclient.cpp
+#    matsim/MATSimInterface.pb.cc
+#    matsim/MATSimInterface.grpc.pb.cc
+#    )
+#
+#  set (hybrid_header_files
+#    matsim/JPSclient.h
+#    matsim/MATSimInterface.grpc.pb.h
+#    matsim/MATSimInterface.proto
+#    matsim/HybridSimulationManager.h
+#    matsim/JPSserver.h
+#    matsim/MATSimInterface.pb.h
+#    )
 #    add_library (hybrid STATIC ${hybrid_source_files} )
 #    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
-#target_link_libraries (core hybrid grpc++_unsecure grpc gpr protobuf dl)
- 	
-	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
-	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
+#
+#	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
+#	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})
+#else()
+#  message(STATUS "protocol buffer not found")
 #endif(PROTOBUF_FOUND)
 
 #----------------------------------------------------------------------
