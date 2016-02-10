@@ -581,8 +581,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                //check if the pedestrian left the door correctly
                if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
                {
-                    Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped.GetID());
-                    Log->Write("       :\t distance to last door is %f. That should be smaller.", ped.GetExitLine()->DistTo(ped.GetPos()));
+                    Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
+                    Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.", ped.GetExitLine()->GetUniqueID(), ped.GetExitIndex(), ped.GetExitLine()->DistTo(ped.GetPos()));
                     Log->Write("       :\t correcting the door statistics");
                     //ped.Dump(ped.GetID());
 
@@ -606,8 +606,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 
                     if(success==false)
                     {
-                         Log->Write("ERROR       :\t correcting the door statistics");
-                         exit(EXIT_SUCCESS);
+                         Log->Write("WARNING       :\t correcting the door statistics");
+                         return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                     }
                }
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());

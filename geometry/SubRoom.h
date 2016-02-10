@@ -426,7 +426,6 @@ public:
      std::string WritePolyLine() const;
      virtual void WriteToErrorLog() const;
      virtual bool ConvertLineToPoly(const std::vector<Line*>& goals);
-     bool IsInSubRoom(const Point& ped) const;
 };
 
 #endif  /* _SUBROOM_H */
