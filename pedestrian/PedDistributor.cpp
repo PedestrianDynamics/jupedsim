@@ -126,6 +126,7 @@ bool PedDistributor::InitDistributor(const string& fileName, const std::map<int,
           auto dis=std::shared_ptr<StartDistribution> (new StartDistribution(seed) );
           dis->SetRoomID(room_id);
           dis->SetSubroomID(subroom_id);
+          //dis->SetSubroomUID(subroom_uid);
           dis->SetGroupId(group_id);
           dis->Setbounds(bounds);
           dis->SetAgentsNumber(number);
@@ -342,6 +343,7 @@ bool PedDistributor::Distribute(Building* building) const
                //so the last subroom ID is not necessarily the 'real' one
                // might conflicts with sources
                dist->SetSubroomID(sr->GetSubRoomID());
+               //dist->SetSubroomUID(sr->GetSubRoomUID())
                if (akt_anz[is] > 0)
                {
                     DistributeInSubRoom(sr, akt_anz[is], allFreePosInRoom[is], &pid, dist.get(),building);

@@ -492,9 +492,9 @@ set (hybrid_header_files
   matsim/JPSserver.h                 
   matsim/MATSimInterface.pb.h
 )
-    add_library (hybrid STATIC ${hybrid_source_files} )
+#    add_library (hybrid STATIC ${hybrid_source_files} )
 #    target_link_libraries (core hybrid grpc++_unsecure grpc gpr ${PROTOBUF_LIBRARY} dl)
-target_link_libraries (core hybrid grpc++_unsecure grpc gpr protobuf dl)
+#target_link_libraries (core hybrid grpc++_unsecure grpc gpr protobuf dl)
  	
 	#PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS foo.proto)
 	#add_executable(jpscore ${PROTO_SRCS} ${PROTO_HDRS})

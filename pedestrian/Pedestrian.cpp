@@ -47,6 +47,7 @@ Pedestrian::Pedestrian()
 {
      _roomID = -1;
      _subRoomID = -1;
+     _subRoomUID = -1;
      _oldRoomID = -1;
      _oldSubRoomID = -1;
      _exitIndex = -1;
@@ -108,6 +109,7 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _roomID(agentsParameters.GetRoomId()),
      _roomCaption(""),
      _subRoomID(agentsParameters.GetSubroomID()),
+     _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
      _patienceTime(agentsParameters.GetPatience()),
      _premovement(agentsParameters.GetPremovementTime())
 {
@@ -139,6 +141,11 @@ void Pedestrian::SetRoomID(int i, string roomCaption)
 void Pedestrian::SetSubRoomID(int i)
 {
      _subRoomID = i;
+}
+
+void Pedestrian::SetSubRoomUID(int i)
+{
+     _subRoomUID = i;
 }
 
 void Pedestrian::SetMass(double m)
@@ -252,6 +259,11 @@ int Pedestrian::GetRoomID() const
 int Pedestrian::GetSubRoomID() const
 {
      return _subRoomID;
+}
+
+int Pedestrian::GetSubRoomUID() const
+{
+     return _subRoomUID;
 }
 
 double Pedestrian::GetMass() const

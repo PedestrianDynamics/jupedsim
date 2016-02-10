@@ -164,19 +164,19 @@ SubLocalFloorfieldViaFM::SubLocalFloorfieldViaFM(const SubRoom* const roomArg,
 
      if (hxArg != hyArg) std::cerr << "ERROR: hx != hy <=========";
      //parse building and create list of walls/obstacles (find xmin xmax, ymin, ymax, and add border?)
-     Log->Write("INFO: \tStart Parsing: Room " + roomArg->GetUID());
+     //Log->Write("INFO: \tStart Parsing: Room " + roomArg->GetUID());
      parseRoom(roomArg, hxArg, hyArg);
-     Log->Write("INFO: \tFinished Parsing: Room " + roomArg->GetUID());
+     //Log->Write("INFO: \tFinished Parsing: Room " + roomArg->GetUID());
      //testoutput("AALineScan.vtk", "AALineScan.txt", dist2Wall);
 
      prepareForDistanceFieldCalculation(wall);
-     Log->Write("INFO: \tGrid initialized: Walls");
+     //Log->Write("INFO: \tGrid initialized: Walls");
 
      calculateDistanceField(-1.); //negative threshold is ignored, so all distances get calculated. this is important since distances is used for slowdown/redirect
-     Log->Write("INFO: \tGrid initialized: Walldistances");
+     //Log->Write("INFO: \tGrid initialized: Walldistances");
 
      setSpeed(useDistancefield); //use distance2Wall
-     Log->Write("INFO: \tGrid initialized: Speed");
+     //Log->Write("INFO: \tGrid initialized: Speed");
      calculateFloorfield(cost, neggrad);
 };
 

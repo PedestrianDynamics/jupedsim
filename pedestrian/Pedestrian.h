@@ -79,6 +79,7 @@ private:
      std::string _roomCaption;
      int _roomID;
      int _subRoomID;
+     int _subRoomUID;
      int _oldRoomID;
      int _oldSubRoomID;
      Point _lastE0;
@@ -146,6 +147,7 @@ public:
      void SetID(int i);
      void SetRoomID(int i, std::string roomCaption);
      void SetSubRoomID(int i);
+     void SetSubRoomUID(int i);
      void SetMass(double m);
      void SetTau(double tau);
      void SetEllipse(const JEllipse& e);
@@ -178,6 +180,7 @@ public:
      int GetID() const;
      int GetRoomID() const;
      int GetSubRoomID() const;
+     int GetSubRoomUID() const;
      double GetMass() const;
      double GetTau() const;
      const JEllipse& GetEllipse() const;

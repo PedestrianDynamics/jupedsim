@@ -428,7 +428,7 @@ Point DirectionLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 
      Point p;
 //     if (locffviafm.count(room->GetID())) {
-#pragma omp critical
+//#pragma omp critical
      locffviafm.at(room->GetID())->getDirectionToDestination(ped, p);
 //     } else {
           //create locffviafm[room->GetID()] - therefore use all members needed for ctor
@@ -519,17 +519,14 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      Point p;
-//     if (locffviafm.count(room->GetID())) {
-#pragma omp critical
-     locffviafm.at(ped->GetUniqueRoomID())->getDirectionToDestination(ped, p);
-//     } else {
-     //create locffviafm[room->GetID()] - therefore use all members needed for ctor
-     // members will be added to this class
-//          locffviafm.emplace(room->GetID(), new LocalFloorfieldViaFM(room, building,
-//                                      hx, hy, wallAvoidDistance, useDistancefield,
-//                                      filename));
-//          locffviafm[room->GetID()]->getDirectionToDestination(ped, p);
-//     }
+     if (!locffviafm.count(ped->GetSubRoomUID())) {
+          std::cerr << "Error: no mapentry for key :" << ped->GetSubRoomUID() << std::endl;
+     } else {
+          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
+     }
+//#pragma omp critical
+     locffviafm.at(ped->GetSubRoomUID())->getDirectionToDestination(ped, p);
+
      p = p.Normalized();     // @todo: argraf : scale with costvalue: " * ffviafm->getCostToTransition(ped->GetTransitionID(), ped->GetPos()) "
      return (p + ped->GetPos());
 
@@ -545,14 +542,14 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 Point DirectionSubLocalFloorfield::GetDir2Wall(Pedestrian* ped) const
 {
      Point p;
-     int key = ped->GetUniqueRoomID();
+     int key = ped->GetSubRoomID();
      locffviafm.at(key)->getDir2WallAt(ped->GetPos(), p);
      return p;
 }
 
 double DirectionSubLocalFloorfield::GetDistance2Wall(Pedestrian* ped) const
 {
-     return locffviafm.at(ped->GetUniqueRoomID())->getDistance2WallAt(ped->GetPos());
+     return locffviafm.at(ped->GetSubRoomID())->getDistance2WallAt(ped->GetPos());
 }
 
 void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
@@ -581,6 +578,7 @@ void DirectionSubLocalFloorfield::Init(Building* buildingArg, double stepsize,
           Log->Write("INFO: \tCalling Construtor of SubLocFloorfieldViaFM");
           for (auto& roomPair : building->GetAllRooms()) {
                for (auto& subRoomPair : roomPair.second->GetAllSubRooms()) {
+                    std::cerr << "Creating SubLocFF at key: " << subRoomPair.second->GetUID() <<std::endl;
                     locffviafm[subRoomPair.second->GetUID()] = new SubLocalFloorfieldViaFM(
                           &(*subRoomPair.second), building,
                           hx, hy, wallAvoidDistance, useDistancefield,

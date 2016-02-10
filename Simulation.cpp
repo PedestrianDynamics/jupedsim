@@ -354,6 +354,7 @@ void Simulation::UpdateRoutesAndLocations()
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
                                    ped->SetSubRoomID(sub->GetSubRoomID());
+                                   ped->SetSubRoomUID(sub->GetUID());
                                    //the agent left the old iroom
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
@@ -495,8 +496,6 @@ int Simulation::RunBody(double maxSimTime)
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
-     //only for debug: ar.graf
-     writeInterval = 500;
      //process the queue for incoming pedestrians
      //important since the number of peds is used
      //to break the main simulation loop
