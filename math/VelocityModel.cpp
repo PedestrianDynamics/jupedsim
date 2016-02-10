@@ -152,7 +152,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       int partSize;
       partSize = (int) (nSize / nThreads);
 
-//      #pragma omp parallel  default(shared) num_threads(nThreads)
+      #pragma omp parallel  default(shared) num_threads(nThreads)
       {
            vector< Point > result_acc = vector<Point > ();
            result_acc.reserve(nSize);

@@ -519,11 +519,11 @@ Point DirectionSubLocalFloorfield::GetTarget(Room* room, Pedestrian* ped) const
 #endif // DEBUG
 
      Point p;
-     if (!locffviafm.count(ped->GetSubRoomUID())) {
-          std::cerr << "Error: no mapentry for key :" << ped->GetSubRoomUID() << std::endl;
-     } else {
-          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
-     }
+//     if (!locffviafm.count(ped->GetSubRoomUID())) {
+//          std::cerr << "Error: no mapentry for key :" << ped->GetSubRoomUID() << std::endl;
+//     } else {
+//          std::cerr << "Mapentry found: " << ped->GetSubRoomUID() << " with ptr: " << locffviafm.at(ped->GetSubRoomUID()) << std::endl;
+//     }
 //#pragma omp critical
      locffviafm.at(ped->GetSubRoomUID())->getDirectionToDestination(ped, p);
 

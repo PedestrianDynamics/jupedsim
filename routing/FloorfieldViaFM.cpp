@@ -238,7 +238,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
 
     Point* localneggradptr;
     double* localcostptr;
-    //#pragma omp critical
+    #pragma omp critical
     {
         if (neggradmap.count(destID) == 0) {
             neggradmap.emplace(destID, nullptr);
@@ -292,7 +292,7 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
     Point* localneggradptr;
     double* localcostptr;
 
-    //#pragma omp critical
+    #pragma omp critical
     {
         if (goalcostmap.count(goalID) == 0) { //no entry for goalcostmap, so we need to calc FF
             goalcostmap.emplace(goalID, nullptr);
