@@ -261,7 +261,7 @@ set (   source_files
   voronoi/VoronoiDiagramGenerator.cpp
   voronoi-boost/VoronoiPositionGenerator.cpp
 
-  routing/LocalFloorfield.cpp
+  routing/LocalFloorfieldViaFM.cpp
   routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
