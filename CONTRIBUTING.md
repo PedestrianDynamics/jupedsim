@@ -43,7 +43,8 @@ git checkout -b feature_name
 
 * Assuming you are in the jpscore folder type 
 ```
-mkdir build && cd build cmake .. 
+mkdir build && cd build 
+cmake .. 
 ```
 
 * Download all dependencies, check if cmake tells you something is missing
