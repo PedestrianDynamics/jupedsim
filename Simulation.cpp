@@ -251,7 +251,7 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      }
      _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
-     Log->Write("INFO:\t nPeds recieved");
+     Log->Write("INFO:\t nPeds %d received", _nPeds);
      //get the seed
      _seed = args.GetSeed();
 
