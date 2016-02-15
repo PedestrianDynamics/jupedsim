@@ -393,7 +393,7 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
           Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
           printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
-          printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos().GetX(), ped1->GetPos().GetY(), ped2->GetPos().GetX(), ped2->GetPos().GetY());
+          printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos()._x, ped1->GetPos()._y, ped2->GetPos()._x, ped2->GetPos()._y);
           exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
@@ -478,7 +478,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
-          printf("new distance = (%f, %f) inside=%d\n", new_dist.GetX(), new_dist.GetY(), inside);
+          printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
           e_iw = (inside ? new_dist:new_dist*-1);
      }
      //-------------------------
