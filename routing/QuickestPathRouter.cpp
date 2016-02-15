@@ -850,6 +850,7 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
                          "ERROR:\t Cannot find valid destination for ped [%d] located in room [%d] subroom [%d] going to destination [%d]",
                          ped->GetID(), ped->GetRoomID(), ped->GetSubRoomID(),
                          ped->GetFinalDestination());
+
           return -1;
      }
 }
