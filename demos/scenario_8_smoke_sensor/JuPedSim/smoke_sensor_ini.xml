@@ -12,7 +12,7 @@
 <geometry>smoke_sensor_geometry.xml</geometry>
 
 <!-- traectories file and format -->
-<trajectories format="xml-plain" fps="24">
+<trajectories format="xml-plain" fps="1">
 <file location="smoke_sensor_traj.xml" />
 </trajectories>
 
@@ -93,7 +93,7 @@
 
     <router router_id="7" description="cognitive_map">
       <sensors>
-	      <sensor sensor_id="2" description="Smoke" smoke_factor_grids="../FDS/3_sfgrids/Z_2.25/dx_1.00/" update_time="20" final_time="120" status="activated"/>
+	      <sensor sensor_id="2" description="Smoke" smoke_factor_grids="demos/scenario_8_smoke_sensor/FDS/3_sfgrids/Z_2.25/dx_1.00/" update_time="20" final_time="120" status="activated"/>
 	      <sensor sensor_id="3" description="LastDestination" status="activated"/>
       </sensors>
       <cognitive_map status="complete" />
