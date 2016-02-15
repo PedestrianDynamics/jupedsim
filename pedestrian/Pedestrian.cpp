@@ -181,7 +181,11 @@ void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new 
      //_navLine = l;
      //_navLine->SetPoint1(l->GetPoint1());
      //_navLine->SetPoint2(l->GetPoint2());
-     _navLine = new NavLine(*l);
+     if(l && l != _navLine){
+          if(_navLine)
+               delete _navLine;
+          _navLine = new NavLine(*l);
+     }
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
