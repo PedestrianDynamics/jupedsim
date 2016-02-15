@@ -134,7 +134,12 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     if( IsEnoughInSubroom(subroom, new_pos, radius ) )
                     {
                          ped->SetPos(center_pos + random_pos, true);
-                         Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+                         Point v;
+                         if (ped->GetExitLine()) {
+                              v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+                         } else {
+                              v = Point(0., 0.);
+                         }
                          double speed=ped->GetV0Norm();
                          v=v*speed;
                          ped->SetV(v);
@@ -142,7 +147,12 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                     else
                     {
                          ped->SetPos(center_pos, true);
-                         Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+                         Point v;
+                         if (ped->GetExitLine()) {
+                              v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+                         } else {
+                              v = Point(0., 0.);
+                         }
                          double speed=ped->GetV0Norm();
                          v=v*speed;
                          ped->SetV(v);
@@ -151,7 +161,12 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                else
                {
                     ped->SetPos(center_pos, true);
-                    Point v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+                    Point v;
+                    if (ped->GetExitLine()) {
+                              v = (ped->GetExitLine()->ShortestPoint(ped->GetPos())- ped->GetPos()).Normalized();
+                    } else {
+                              v = Point(0., 0.);
+                    }
                     double speed=ped->GetV0Norm();
                     v=v*speed;
                     ped->SetV(v);

@@ -37,6 +37,7 @@
 
 #include <vector>
 #include <cmath>
+#include <functional>
 #include "mesh/RectGrid.h"
 #include "../geometry/Wall.h"
 #include "../geometry/Point.h"
@@ -60,6 +61,7 @@ class FloorfieldViaFM
 
         void getDirectionAt(const Point& position, Point& direction);                                   //obsolete
         //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
+        void getDirectionToUID(int destID, const long int key, Point& direction);
         void getDirectionToDestination (Pedestrian* ped, Point& direction);
         void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
         double getCostToDestination(const int destID, const Point& position);
@@ -93,8 +95,7 @@ class FloorfieldViaFM
         Trial* getTrial() {return trialfield;}
 #endif //TESTING
 
-    protected:
-    private:
+protected:
         RectGrid* grid;
         std::vector<Line> wall;
         int numOfExits;
@@ -115,8 +116,9 @@ class FloorfieldViaFM
         Point* neggrad; //gradients
         Point* dirToWall;
         Trial* trialfield;
+
         std::map<int, double*> goalcostmap;
-        std::map<int, int>     goalToLineUIDmap; // not used yet; not calculated (check all helplines for each and save id of minvalue)
+        std::map<int, int>     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
         std::map<int, Point*>  goalneggradmap;
         std::map<int, double*> costmap;
         std::map<int, Point*>  neggradmap;

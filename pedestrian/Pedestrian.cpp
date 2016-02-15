@@ -47,6 +47,7 @@ Pedestrian::Pedestrian()
 {
      _roomID = -1;
      _subRoomID = -1;
+     _subRoomUID = -1;
      _oldRoomID = -1;
      _oldSubRoomID = -1;
      _exitIndex = -1;
@@ -59,7 +60,8 @@ Pedestrian::Pedestrian()
      _tmpFirstOrientation = true;
      _turninAngle = 0.0;
      _ellipse = JEllipse();
-     _navLine = new NavLine();
+     //_navLine = new NavLine(); //FIXME? argraf : rather nullptr and Setter includes correct uid (done below)
+     _navLine = nullptr;
      _router = NULL;
      _building = NULL;
      _reroutingThreshold = 0.0; // new orientation after 10 seconds, value is incremented
@@ -84,12 +86,12 @@ Pedestrian::Pedestrian()
      _trip = vector<int> ();
      _group = -1;
      _spotlight = false;
-     _V0UpStairs=0.0;
-     _V0DownStairs=0.0;
-     _EscalatorUpStairs=0.0;
-     _EscalatorDownStairs=0.0;
-     _V0IdleEscalatorUpStairs=0.0;
-     _V0IdleEscalatorDownStairs=0.0;
+     _V0UpStairs=0.6;
+     _V0DownStairs=0.6;
+     _EscalatorUpStairs=0.8;
+     _EscalatorDownStairs=0.8;
+     _V0IdleEscalatorUpStairs=0.6;
+     _V0IdleEscalatorDownStairs=0.6;
      _distToBlockade=0.0;
      _routingStrategy=ROUTING_GLOBAL_SHORTEST;
      _lastE0 = Point(0,0);
@@ -107,6 +109,7 @@ Pedestrian::Pedestrian(const StartDistribution& agentsParameters, Building& buil
      _roomID(agentsParameters.GetRoomId()),
      _roomCaption(""),
      _subRoomID(agentsParameters.GetSubroomID()),
+     _subRoomUID(building.GetRoom(_roomID)->GetSubRoom(_subRoomID)->GetUID()),
      _patienceTime(agentsParameters.GetPatience()),
      _premovement(agentsParameters.GetPremovementTime())
 {
@@ -140,6 +143,11 @@ void Pedestrian::SetSubRoomID(int i)
      _subRoomID = i;
 }
 
+void Pedestrian::SetSubRoomUID(int i)
+{
+     _subRoomUID = i;
+}
+
 void Pedestrian::SetMass(double m)
 {
      _mass = m;
@@ -168,11 +176,12 @@ void Pedestrian::SetExitIndex(int i)
      _destHistory.push_back(i);
 }
 
-void Pedestrian::SetExitLine(const NavLine* l)
+void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new NavLine(*l); this would have a navLine with consistent uid (done below)
 {
      //_navLine = l;
-     _navLine->SetPoint1(l->GetPoint1());
-     _navLine->SetPoint2(l->GetPoint2());
+     //_navLine->SetPoint1(l->GetPoint1());
+     //_navLine->SetPoint2(l->GetPoint2());
+     _navLine = new NavLine(*l);
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
@@ -200,7 +209,7 @@ void Pedestrian::SetV(const Point& v)
           _ellipse.SetV(v);
           //save the last values for the records
           _lastVelocites.push(v);
-          
+
           unsigned int max_size = _recordingTime / _deltaT;
           if (_lastVelocites.size() > max_size)
                _lastVelocites.pop();
@@ -250,6 +259,11 @@ int Pedestrian::GetRoomID() const
 int Pedestrian::GetSubRoomID() const
 {
      return _subRoomID;
+}
+
+int Pedestrian::GetSubRoomUID() const
+{
+     return _subRoomUID;
 }
 
 double Pedestrian::GetMass() const
@@ -416,15 +430,15 @@ double Pedestrian::GetV0Norm() const
 //---------------------------------------------------
      //-----------------------------------------
 
-     
+
      const Point& pos = GetPos();
      // double distanceToTarget = (target-pos).Norm();
      // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
+
      // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos._x, pos._y, target._x, target._y);
-     
      // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
-     
-     
+
+
 
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
@@ -547,7 +561,7 @@ const Point& Pedestrian::GetV0(const Point& target)
      //new_v0 = delta.NormalizedMolified();
      new_v0 = delta.Normalized();
      // -------------------------------------- Handover new target
-     t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade); 
+     t = _newOrientationDelay++ *_deltaT/(1.0+100* _distToBlockade);
 
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 #if DEBUGV0
@@ -730,9 +744,9 @@ double Pedestrian::GetDistanceToNextTarget() const
      return (_navLine->DistTo(GetPos()));
 }
 
-void Pedestrian::SetFinalDestination(int final)
+void Pedestrian::SetFinalDestination(int finale)
 {
-     _desiredFinalDestination = final;
+     _desiredFinalDestination = finale;
 }
 
 int Pedestrian::GetFinalDestination() const
@@ -899,7 +913,7 @@ void Pedestrian::SetPremovementTime(double pretime)
 {
       if(pretime < _minPremovementTime)
             _minPremovementTime = pretime;
-      
+
      _premovement=pretime;
 }
 

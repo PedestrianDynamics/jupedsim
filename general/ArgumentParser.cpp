@@ -1169,7 +1169,7 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
           {
                std::vector<std::string> smokeOptVec;
 
-               smokeOptVec.push_back(e->Attribute("p_field_path"));
+               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
                smokeOptVec.push_back(e->Attribute("update_time"));
                smokeOptVec.push_back(e->Attribute("final_time"));
                r->addOption("smokeOptions",smokeOptVec);
@@ -1235,6 +1235,15 @@ bool ArgumentParser::ParseStrategyNodeToObject(const TiXmlNode &strategyNode)
                     break;
                case 6:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionFloorfield());
+                    break;
+               case 7:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionGoalFloorfield());
+                    break;
+               case 8:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionLocalFloorfield());
+                    break;
+               case 9:
+                    p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionSubLocalFloorfield());
                     break;
                default:
                     p_exit_strategy = std::shared_ptr<DirectionStrategy>(new DirectionMinSeperationShorterLine());

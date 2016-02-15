@@ -147,6 +147,18 @@ void StartDistribution::SetSubroomID(int subroomId)
 {
      _subroomID = subroomId;
 }
+
+int StartDistribution::GetSubroomUID() const
+{
+     return _subroomUID;
+}
+
+void StartDistribution::SetSubroomUID(int subroomUId)
+{
+     _subroomUID = subroomUId;
+}
+
+
 int StartDistribution::GetRouteId() const
 {
      return _routeID;
@@ -188,6 +200,7 @@ Pedestrian* StartDistribution::GenerateAgent(Building* building, int* pid, vecto
      ped->SetBuilding(building);
      ped->SetRoomID(GetRoomId(),"");
      ped->SetSubRoomID(GetSubroomID());
+     ped->SetSubRoomUID(building->GetRoom(GetRoomId())->GetSubRoom(GetSubroomID())->GetUID());
      ped->SetPatienceTime(GetPatience());
      ped->SetPremovementTime(GetPremovementTime());
      ped->SetRiskTolerance(GetRiskTolerance());

@@ -71,6 +71,37 @@ VelocityModel::~VelocityModel()
 
 bool VelocityModel::Init (Building* building)
 {
+
+    if(dynamic_cast<DirectionFloorfield*>(_direction)){
+        Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+        //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+            double _deltaH = 0.0625;
+            double _wallAvoidDistance = 0.4;
+            bool _useWallAvoidance = true;
+        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+        Log->Write("INFO:\t Init DirectionFloorfield done");
+    }
+
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+     }
+
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
+     }
+
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
     for(unsigned int p=0;p<allPeds.size();p++)
@@ -117,7 +148,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       nSize = allPeds.size();
 
       int nThreads = omp_get_max_threads();
-
+      nThreads = 1; //debug only
       int partSize;
       partSize = (int) (nSize / nThreads);
 
@@ -190,8 +221,17 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                       Pedestrian* ped1 = neighbours[i];
                      // calculate spacing
                      // my_pair spacing_winkel = GetSpacing(ped, ped1);
-                      spacings.push_back(GetSpacing(ped, ped1, direction, periodic));                      
+                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
+                            spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
+                      } else {
+                            // or in neighbour subrooms
+                            SubRoom* sb2=building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID());
+                            if(subroom->IsDirectlyConnectedWith(sb2)) {
+                                  spacings.push_back(GetSpacing(ped, ped1, direction, periodic));
+                            }
+                      }
                 }
+                // @todo: get spacing to walls
                 // @todo: update direction every DT?
                 
                 // if(ped->GetID()==-10)
@@ -207,8 +247,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0()._x)>0.01)
                 // {
                    
-                //       if(ped->GetID()==-10)
-                //             std::cout << "Get new direction "<< spacing << ", " << winkel << std::endl;
+                      // if(ped->GetID()==-10)
+                            // std::cout << "Min Spacing "<< spacing << ", " << winkel << std::endl;
                 //       ped->SetLastE0(Point(spacing, winkel));
                 // }
                 // else
@@ -292,6 +332,7 @@ double VelocityModel::OptimalSpeed(Pedestrian* ped, double spacing, double winke
       return speed;
 }
 
+// return spacing and id of the nearest pedestrian
 my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, int periodic) const
 {
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
@@ -311,7 +352,7 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
       } else {
             //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
             Log->Write("WARNING: \tin VelocityModel::GetSPacing() ep12 can not be calculated!!!\n");
-            Log->Write("\t\t Pedestrians are too near to each other.");
+            Log->Write("\t\t Pedestrians are too near to each other (%f).", Distance);
             exit(EXIT_FAILURE);
      }
 
@@ -321,9 +362,9 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
 
       if((condition1 >=0 ) && (condition2 <= l/Distance))
             // return a pair <dist, condition1>. Then take the smallest dist. In case of equality the biggest condition1
-            return  my_pair(distp12.Norm(), condition1); 
+            return  my_pair(distp12.Norm(), ped2->GetID());
       else
-            return  my_pair(FLT_MAX, condition1);
+            return  my_pair(FLT_MAX, ped2->GetID());
 }      
 Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodic) const
 {      
@@ -348,9 +389,11 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           ep12 = distp12.Normalized();
      } else {
           //printf("ERROR: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("WARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!\n");
-          Log->Write("\t\t Pedestrians are too near to each other.");
-          Log->Write("\t\t Get your model right. Going to exit.");
+          Log->Write(KRED "\nWARNING: \tin VelocityModel::forcePedPed() ep12 can not be calculated!!!" RESET);
+          Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
+          Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
+          printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
+          printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos().GetX(), ped1->GetPos().GetY(), ped2->GetPos().GetX(), ped2->GetPos().GetY());
           exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
@@ -399,15 +442,15 @@ Point VelocityModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
           {
                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
           }
-          //  int uid1= goal->GetUniqueID();
-          //  int uid2=ped->GetExitIndex();
-          //  // ignore my transition consider closed doors
-          //  //closed doors are considered as wall
-          //
-          //  if((uid1 != uid2) || (goal->IsOpen()==false ))
-          //  {
-          //    f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)));
-          //  }
+           int uid1= goal->GetUniqueID();
+           int uid2=ped->GetExitIndex();
+           // ignore my transition consider closed doors
+           //closed doors are considered as wall
+          
+           if((uid1 != uid2) || (goal->IsOpen()==false ))
+           {
+                 f +=  ForceRepWall(ped,*(static_cast<Line*>(goal)), centroid, inside);
+           }
      }
 
      return f;
@@ -432,9 +475,10 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            e_iw = dist / Distance;
      }
      else {
-          // Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall",ped->GetID());
+           Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
+          printf("new distance = (%f, %f) inside=%d\n", new_dist.GetX(), new_dist.GetY(), inside);
           e_iw = (inside ? new_dist:new_dist*-1);
      }
      //-------------------------

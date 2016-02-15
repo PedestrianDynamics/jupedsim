@@ -95,12 +95,27 @@ GradientModel::~GradientModel()
 
 bool GradientModel::Init (Building* building)
 {
+
     if(dynamic_cast<DirectionFloorfield*>(_direction)){
-        dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
-        //_floorfield = dynamic_cast<DirectionFloorfield*>(_direction);
+         Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+         dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+         Log->Write("INFO:\t Init DirectionFloorfield done");
     }
 
-    const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init Direction LOCAL Floorfield starting ...");
+          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init Direction LOCAL Floorfield done");
+     }
+
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init Direction SubLOCAL Floorfield starting ...");
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init Direction SubLOCAL Floorfield done");
+     }
+
+
+     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
 
     for(unsigned int p=0;p<allPeds.size();p++)
     {
@@ -148,8 +163,23 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
      unsigned long nSize;
      nSize = allPeds.size();
+     Pedestrian* minAddress = nullptr; //non-elegant fix for faulty neighbours[...] ptr avoidance
+     Pedestrian* maxAddress = nullptr;
 
-      int nThreads = omp_get_max_threads();
+     if (nSize >= 1) {
+        minAddress = allPeds[0];
+        maxAddress = allPeds[0];
+        for (auto& pedptr:allPeds) {
+            if (&(*pedptr) < minAddress) {
+                minAddress = &(*pedptr);
+            }
+            if (pedptr > maxAddress) {
+                maxAddress = &(*pedptr);
+            }
+        }
+     }
+
+     int nThreads = omp_get_max_threads();
 
      int partSize;
      partSize = (int) (nSize / nThreads);
@@ -166,6 +196,10 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
            end = (threadID + 1) * partSize - 1;
            if ((threadID == nThreads - 1)) end = (int) (nSize - 1);
 
+//DEBUG start
+//           start = 0;
+//           end = nSize-1; // loop till p<= end !!!
+//DEBUG end
            for (int p = start; p <= end; ++p) {
 
                 Pedestrian* ped = allPeds[p];
@@ -188,12 +222,18 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
 
                 Point repPed = Point(0,0);
                 vector<Pedestrian*> neighbours;
-                building->GetGrid()->GetNeighbourhood(ped,neighbours);
-
-                int size = (int) neighbours.size();
-
+                int size;
+                #pragma omp critical
+                {
+                     building->GetGrid()->GetNeighbourhood(ped,neighbours);
+                     size = (int) neighbours.size();
+                }
                 for (int i = 0; i < size; i++) {
                      Pedestrian* ped1 = neighbours[i];
+                     if ((minAddress > neighbours[i]) || (maxAddress < neighbours[i])) {
+                        std::cerr << "## Skiped " << i << " of " << size << " #### " << ped1 << " " << minAddress << " " << maxAddress << std::endl;
+                        continue;
+                     }
                      //if they are in the same subroom
                      Point p1 = ped->GetPos();
                      Point p2 = ped1->GetPos();
@@ -204,8 +244,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                      emptyVector.push_back(building->GetRoom(ped1->GetRoomID())->GetSubRoom(ped1->GetSubRoomID()));
 
                      bool isVisible = building->IsVisible(p1, p2, emptyVector, false);
-                     if (!isVisible)
+                     if (!isVisible) {
                           continue;
+                     }
                      if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
                           repPed = repPed + ForceRepPed(ped, ped1);
                      } else {
@@ -229,9 +270,9 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                     ++(*under);
                 }
                 Point movDirection = (result_acc[p-start].Norm() > 1) ? result_acc[p - start].Normalized() : result_acc[p-start];
-                Point toTarget = (_direction->GetTarget(nullptr, ped));
-                toTarget = toTarget - ped->GetPos();
-                if (toTarget.NormSquare() == 0.) {                // @todo:ar.graf: this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
+                Point toTarget = (_direction->GetTarget(nullptr, ped)); //maybe use building->GetRoom(ped->GetRoomID()) instead of nullptr just in case, GetTarget uses it
+                toTarget = toTarget - ped->GetPos();                    //^^ at the time of writing this, DirectionFloorfield does not use it and looks like never will
+                if (toTarget.NormSquare() == 0.) {                // this if overcomes shortcomming of floorfield (neggrad[targetpoints] == Point(0., 0.))
                     toTarget += ped->GetV().Normalized();
                 }
 
@@ -241,8 +282,8 @@ void GradientModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 double desired_speed = ped->GetV0Norm();
                 Point oldMov = Point(0., 0.);
                 if (desired_speed > 0.) {
-                    oldMov = ped->GetV() / desired_speed; //@todo: ar.graf (GetV() returns a vector: distance travelled in one time-unit (s)
-                }                                         //               so oldMov is now: vector distance travelled in one time-unit with unit speed = sth around unit-vector or smaller
+                    oldMov = ped->GetV() / desired_speed; // (GetV() returns a vector: distance travelled in one time-unit (s)
+                }                                         // so oldMov is now: vector distance travelled in one time-unit with unit speed = sth around unit-vector or smaller
 
                 //anti jitter               //_V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
                 oldMov = (oldMov.Norm() > 1.)? oldMov.Normalized() : oldMov; //on the safe side ... should not be necessary as it must be [0, 1]

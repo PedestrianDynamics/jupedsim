@@ -71,6 +71,36 @@ GCFMModel::~GCFMModel(void)
 
 bool GCFMModel::Init (Building* building)
 {
+     if(dynamic_cast<DirectionFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionFloorfield done");
+     }
+
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+     }
+
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
+     }
+
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     for(unsigned int p=0;p<allPeds.size();p++)
     {

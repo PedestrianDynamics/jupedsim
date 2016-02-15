@@ -49,6 +49,7 @@ private:
      int _routerID;
      int _routeID;
      int _subroomID;
+     int _subroomUID;
      //demographic parameters
      //TODO: should also follow a distribution, see _premovement
      std::string _gender;
@@ -100,6 +101,8 @@ public:
      void SetRoomId(int roomId);
      int GetSubroomID() const;
      void SetSubroomID(int subroomID);
+     int GetSubroomUID() const;
+     void SetSubroomUID(int subroomUID);
      int GetRouteId() const;
      void SetRouteId(int routeId);
      int GetRouterId() const;

@@ -32,7 +32,7 @@
  *
  *
  **/
- 
+
 
 #include"LCGrid.h"
 #include "../pedestrian/Pedestrian.h"
@@ -41,7 +41,7 @@
 using namespace std;
 
 //FIXME:
-#define MAX_AGENT_COUNT  1000 // 1000000
+#define MAX_AGENT_COUNT  10000 // 1000000
 
 LCGrid::LCGrid(double boundaries[4], double cellsize, int nPeds)
 {

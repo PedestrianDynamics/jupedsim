@@ -476,15 +476,15 @@ double Line::GetDistanceToIntersectionPoint(const Line &l) const
 
 }
 
-// calculates the angles QPF and QPL 
-// return the angle of the point (F or L) which is nearer to the Goal 
+// calculates the angles QPF and QPL
+// return the angle of the point (F or L) which is nearer to the Goal
 //the calling line: P->Q, Q is the crossing point
-// 
-//                 o P 
-//                / 
-//               /  
-//   F          /              L 
-//   o --------x---------------o  
+//
+//                 o P
+//                /
+//               /
+//   F          /              L
+//   o --------x---------------o
 //            / Q
 //           /
 //          o Goal
@@ -550,7 +550,7 @@ double Line::GetAngle(const Line & l) const
 // =========
 // calculate angle to the left and angle to the right
 // choose the angle which is visible.
-// If both are visible then choose the one which: 
+// If both are visible then choose the one which:
 // 1. leads to larger distance to room walls (we don't
 //    want to avoid the obstacle to crash in a wall, do
 //    we?)
@@ -588,7 +588,7 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const st
           visibleL = true;
           visibleR = true;
 
-          l_large = l.Enlarge(3); // 2*ped->GetLargerAxis()          
+          l_large = l.Enlarge(3); // 2*ped->GetLargerAxis()
 
           L = l_large._point1;
           R = l_large._point2;
@@ -607,7 +607,7 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const st
 
                if(tmpDirectionL.IntersectionWith(l_other)){
                     visibleL = false;
-                    break;                    
+                    break;
                }
           }
 
@@ -616,8 +616,8 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const st
 
                if(tmpDirectionR.IntersectionWith(l_other)){
                     visibleR = false;
-                    break;                    
-               }               
+                    break;
+               }
           }
 
           if(visibleR && visibleL){  // both angles are OK. Get
@@ -648,7 +648,7 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const st
                else if (almostEqual (angleR, angleL, 0.001))
                     angle = angleR;
                else // distances equal, but angles not. Take smallest
-                    angle = (fabs(angleL) < fabs(angleR))?angleL:angleR;               
+                    angle = (fabs(angleL) < fabs(angleR))?angleL:angleR;
           }//both are visible
           else if(visibleR && !visibleL){
                angle = angleR;
@@ -675,7 +675,7 @@ double Line::GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const st
           printf("\t\t --> angleR=%f\n",angleR);
           printf("\t\t --> angle=%f\n-----\n",angle);
 
-#endif     
+#endif
 
 
           if(fabs(angle) < fabs(minAngle))

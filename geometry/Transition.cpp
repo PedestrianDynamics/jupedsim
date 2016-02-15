@@ -50,15 +50,7 @@ Transition::~Transition()
 }
 
 
-void Transition::Close()
-{
-     _isOpen = false;
-}
 
-void Transition::Open()
-{
-     _isOpen = true;
-}
 
 void Transition::SetType(string type)
 {
@@ -72,7 +64,7 @@ void Transition::SetRoom2(Room* r)
 
 bool Transition::IsOpen() const
 {
-     return _isOpen;
+     return Crossing::IsOpen();
 }
 
 

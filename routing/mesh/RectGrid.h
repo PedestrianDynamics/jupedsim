@@ -76,6 +76,7 @@ class RectGrid
                     long int iMaxArg, // indices must be smaller than iMax
                     long int jMaxArg, // indices must be smaller than jMax
                     bool isInitializedArg) {
+            nPoints = nPointsArg;     // must not be corrupted..
             xMin = xMinArg;
             yMin = yMinArg;
             xMax = xMaxArg;

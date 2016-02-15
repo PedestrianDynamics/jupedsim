@@ -241,16 +241,17 @@ bool Simulation::InitArgs(const ArgumentParser& args)
      //perform customs initialisation, like computing the phi for the gcfm
      //this should be called after the routing engine has been initialised
      // because a direction is needed for this initialisation.
+     Log->Write("INFO:\t Init Operational Model starting ...");
      if(_operationalModel->Init(_building.get())==false)
           return false;
-
+     Log->Write("INFO:\t Init Operational Model done");
      //other initializations
      for (auto&& ped: _building->GetAllPedestrians()) {
           ped->Setdt(_deltaT);
      }
      _nPeds = _building->GetAllPedestrians().size();
      //_building->WriteToErrorLog();
-
+     Log->Write("INFO:\t nPeds recieved");
      //get the seed
      _seed = args.GetSeed();
 
@@ -300,6 +301,7 @@ void Simulation::UpdateRoutesAndLocations()
 
      unsigned long nSize = allPeds.size();
      int nThreads = omp_get_max_threads();
+//     int nThreads = 1;
      int partSize = nSize / nThreads;
 
 #pragma omp parallel  default(shared) num_threads(nThreads)
@@ -350,6 +352,7 @@ void Simulation::UpdateRoutesAndLocations()
                                    ped->SetRoomID(room->GetID(),
                                              room->GetCaption());
                                    ped->SetSubRoomID(sub->GetSubRoomID());
+                                   ped->SetSubRoomUID(sub->GetUID());
                                    //the agent left the old iroom
                                    //actualize the egress time for that iroom
                                    old_room->SetEgressTime(ped->GetGlobalTime());
@@ -363,7 +366,7 @@ void Simulation::UpdateRoutesAndLocations()
                                    //}
 
                                    //also statistic for internal doors
-                                   UpdateFlowAtDoors(*ped);
+                                   UpdateFlowAtDoors(*ped); //@todo: ar.graf : this call should move into a critical region? check plz
 
                                    ped->ClearMentalMap(); // reset the destination
                                    //ped->FindRoute();
@@ -395,12 +398,12 @@ void Simulation::UpdateRoutesAndLocations()
                     pedsToRemove.push_back(ped);
                }
           }
-     }
+     } //omp parallel
 
 #ifdef _USE_PROTOCOL_BUFFER
      if (_hybridSimManager)
      {
-          AgentsQueueOut::Add(pedsToRemove);
+          AgentsQueueOut::Add(pedsToRemove);    //@todo: ar.graf: this should be critical region (and it is)
      }
      else
 #endif
@@ -491,13 +494,12 @@ int Simulation::RunBody(double maxSimTime)
      int writeInterval = (int) ((1. / _fps) / _deltaT + 0.5);
      writeInterval = (writeInterval <= 0) ? 1 : writeInterval; // mustn't be <= 0
 
-
      //process the queue for incoming pedestrians
      //important since the number of peds is used
      //to break the main simulation loop
      ProcessAgentsQueue();
      _nPeds = _building->GetAllPedestrians().size();
-     int initialnPeds = _nPeds; 
+     int initialnPeds = _nPeds;
      // main program loop
      while ( (_nPeds || !_agentSrcManager.IsCompleted() ) && t < maxSimTime)
      {
@@ -579,8 +581,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                //check if the pedestrian left the door correctly
                if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
                {
-                    Log->Write("WARNING:\t pedestrian [%d] left the room in an unusual way. Please check",ped.GetID());
-                    Log->Write("       :\t distance to last door is %f. That should be smaller.", ped.GetExitLine()->DistTo(ped.GetPos()));
+                    Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
+                    Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.", ped.GetExitLine()->GetUniqueID(), ped.GetExitIndex(), ped.GetExitLine()->DistTo(ped.GetPos()));
                     Log->Write("       :\t correcting the door statistics");
                     //ped.Dump(ped.GetID());
 
@@ -604,8 +606,8 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 
                     if(success==false)
                     {
-                         Log->Write("ERROR       :\t correcting the door statistics");
-                         exit(EXIT_SUCCESS);
+                         Log->Write("WARNING       :\t correcting the door statistics");
+                         return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                     }
                }
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());

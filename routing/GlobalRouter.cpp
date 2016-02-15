@@ -57,7 +57,7 @@ GlobalRouter::GlobalRouter() :
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
-     _edgeCost=10;
+     _edgeCost=100;
      //     _rdDistribution = uniform_real_distribution<double> (0,1);
      //     _rdGenerator = default_random_engine(56);
 
@@ -71,7 +71,7 @@ GlobalRouter::GlobalRouter(int id, RoutingStrategy s) :  Router(id, s)
      _distMatrix = NULL;
      _pathsMatrix = NULL;
      _building = NULL;
-     _edgeCost=10;
+     _edgeCost=100;
 
      //     _rdDistribution = uniform_real_distribution<double> (0,1);
      //     _rdGenerator = default_random_engine(56);
@@ -185,6 +185,7 @@ bool GlobalRouter::Init(Building* building)
                     cross->GetSubRoom1()->GetSubRoomID());
           ap->SetFriendlyName(friendlyName);
 
+          ap->SetClosed(!cross->IsOpen());
           // save the connecting sub/rooms IDs
           int id1 = -1;
           if (cross->GetSubRoom1()) {
@@ -1427,7 +1428,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
           Log->Write("ERROR: \tparsing routing file failed!");
           return false;
      }
-
+     int HlineCount = 0;
      for(TiXmlElement* xHlinesNode = xRootNode->FirstChildElement("Hlines"); xHlinesNode;
                xHlinesNode = xHlinesNode->NextSiblingElement("Hlines")) {
 
@@ -1458,6 +1459,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                if(_building->AddHline(h))
                {
                     subroom->AddHline(h);
+                    HlineCount++;                    
                     //h is freed in building
                }
                else
@@ -1466,7 +1468,7 @@ bool GlobalRouter::LoadRoutingInfos(const std::string &filename)
                }
           }
      }
-     Log->Write("INFO:\tDone with loading extra routing information");
+     Log->Write("INFO:\tDone with loading extra routing information. Loaded <%d> Hlines", HlineCount);
      return true;
 }
 

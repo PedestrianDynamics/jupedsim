@@ -42,8 +42,18 @@
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
+// define some colors
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+#define RESET "\033[0m"
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
@@ -113,6 +123,7 @@ enum RoutingStrategy {
      ROUTING_DUMMY,
      ROUTING_SAFEST,
      ROUTING_COGNITIVEMAP,
+     ROUTING_FLOORFIELD,
      ROUTING_UNDEFINED =-1
 };
 

@@ -261,6 +261,7 @@ set (   source_files
   voronoi/VoronoiDiagramGenerator.cpp
   voronoi-boost/VoronoiPositionGenerator.cpp
 
+  routing/LocalFloorfieldViaFM.cpp
   routing/FloorfieldViaFM.cpp
   routing/AccessPoint.cpp
   routing/DirectionStrategy.cpp
@@ -279,6 +280,7 @@ set (   source_files
   #plz do not delete them here
   routing/mesh/RectGrid.h
   routing/mesh/Trial.h
+  general/Macros.h
 
   routing/CognitiveMapRouter.cpp
   routing/cognitive_map/GraphNetwork.cpp
@@ -320,6 +322,7 @@ set (   source_files
   )
 
 set (   header_files
+  routing/LocalFloorfieldViaFM.h
   routing/FloorfieldViaFM.h
   routing/NavMesh.h
   routing/DirectionStrategy.h

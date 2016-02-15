@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _BUILDING_H
 #define _BUILDING_H
@@ -98,12 +98,15 @@ public:
      Room* GetRoom(std::string caption)const;
 
      Transition* GetTransition(std::string caption) const;
-     Transition* GetTransition(int id) ;
+     Transition* GetTransition(int id) const;
 
      /**
-      * Not implemented
+      * Returns Crossing with a specified ID
+      *
+      * @param ID of Crossing: int
+      * @return Pointer of Crossing
       */
-     Crossing* GetCrossing(int id);
+     Crossing* GetCrossing(int ID);
 
      /**
       * Not implemented

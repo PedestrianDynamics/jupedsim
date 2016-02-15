@@ -352,21 +352,21 @@ bool Building::InitGeometry()
                      {
                            minElevation = itr_subroom.second->GetElevation(P1);
                      }
-                
+
                      if(maxElevation < itr_subroom.second->GetElevation(P1))
                      {
                            maxElevation = itr_subroom.second->GetElevation(P1);
                      }
-                
+
                      if(minElevation > itr_subroom.second->GetElevation(P2))
                      {
                            minElevation = itr_subroom.second->GetElevation(P2);
                      }
-                
+
                      if(maxElevation < itr_subroom.second->GetElevation(P2))
                      {
                            maxElevation = itr_subroom.second->GetElevation(P2);
-                     }          
+                     }
                }
                itr_subroom.second->SetMaxElevation(maxElevation);
                itr_subroom.second->SetMinElevation(minElevation);
@@ -839,10 +839,10 @@ Transition* Building::GetTransition(string caption) const
      exit(EXIT_FAILURE);
 }
 
-Transition* Building::GetTransition(int ID)
+Transition* Building::GetTransition(int ID) const //ar.graf: added const 2015-12-10
 {
      if (_transitions.count(ID) == 1) {
-          return _transitions[ID];
+          return _transitions.at(ID);
      } else {
           if (ID == -1)
                return NULL;
@@ -853,6 +853,22 @@ Transition* Building::GetTransition(int ID)
                exit(EXIT_FAILURE);
           }
      }
+}
+
+Crossing *Building::GetCrossing(int ID)
+{
+    if (_crossings.count(ID) == 1) {
+         return _crossings[ID];
+    } else {
+         if (ID == -1)
+              return NULL;
+         else {
+              Log->Write(
+                        "ERROR: I could not find any crossing with the 'ID' [%d]. You have defined [%d] transitions",
+                        ID, _crossings.size());
+              exit(EXIT_FAILURE);
+         }
+    }
 }
 
 Goal* Building::GetFinalGoal(int ID)
@@ -1218,15 +1234,37 @@ bool Building::LoadTrafficInfo()
                     xDoor = xDoor->NextSiblingElement("door")) {
 
                int id = xmltoi(xDoor->Attribute("trans_id"), -1);
-               string state = xmltoa(xDoor->Attribute("state"), "open");
+               if (id!=-1)
+               {
+                   string state = xmltoa(xDoor->Attribute("state"), "open");
 
-               //store transition in a map and call getTransition/getCrossin
-               if (state == "open") {
-                    GetTransition(id)->Open();
-               } else if (state == "close") {
-                    GetTransition(id)->Close();
-               } else {
-                    Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                   //store transition in a map and call getTransition/getCrossin
+                   if (state == "open") {
+                        GetTransition(id)->Open();
+                   } else if (state == "close") {
+                        GetTransition(id)->Close();
+                   } else {
+                        Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                   }
+               }
+               else
+               {
+                   id = xmltoi(xDoor->Attribute("cross_id"), -1);
+                   if (id!=-1)
+                   {
+                       string state = xmltoa(xDoor->Attribute("state"), "open");
+
+                       //store transition in a map and call getTransition/getCrossin
+                       if (state == "open") {
+                            GetCrossing(id)->Open();
+                       } else if (state == "close") {
+                            GetCrossing(id)->Close();
+                       } else {
+                            Log->Write("WARNING:\t Unknown door state: %s", state.c_str());
+                       }
+                   }
+                   else
+                       Log->Write("WARNING:\t Unknown door id");
                }
           }
      Log->Write("INFO:\tDone with loading traffic info file");
