@@ -181,7 +181,11 @@ void Pedestrian::SetExitLine(const NavLine* l) //FIXME? argraf : _navLine = new 
      //_navLine = l;
      //_navLine->SetPoint1(l->GetPoint1());
      //_navLine->SetPoint2(l->GetPoint2());
-     _navLine = new NavLine(*l);
+     if(l && l != _navLine){
+          if(_navLine)
+               delete _navLine;
+          _navLine = new NavLine(*l);
+     }
 }
 
 void Pedestrian::SetPos(const Point& pos, bool initial)
@@ -434,8 +438,8 @@ double Pedestrian::GetV0Norm() const
      const Point& pos = GetPos();
      // double distanceToTarget = (target-pos).Norm();
      // double iniDistanceToTarget = (target-_lastPositions.front()).Norm();
-     // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
 
+     // printf("delta = %f, nav_elev = %f, ped_elev= %f, ped=[%f %f] targe=[%f, %f]\n", delta, nav_elevation, ped_elevation, pos._x, pos._y, target._x, target._y);
      // fprintf(stderr, "%f  %f front [%f, %f] nav [%f, %f] dist=%f, iniDist=%f\n", delta, ped_elevation, _lastPositions.front()._x, _lastPositions.front()._y, _navLine->GetCentre()._x, _navLine->GetCentre()._y, distanceToTarget, iniDistanceToTarget);
 
 
@@ -443,7 +447,7 @@ double Pedestrian::GetV0Norm() const
      // we are walking on an even plane
      //TODO: move _ellipse.GetV0() to _V0Plane
      if(fabs(delta)<J_EPS){
-           // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, _ellipse.GetV0());
+           // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, _ellipse.GetV0());
           return _ellipse.GetV0();
      }
       // we are walking downstairs
@@ -469,7 +473,7 @@ double Pedestrian::GetV0Norm() const
                  }
                  // if(_id==209)
                        // printf("%f  DOWN max_e=%f,  z=%f, f=%f, v0=%f, v0d=%f, ret=%f\n", _globalTime, maxSubElevation, ped_elevation, f, _ellipse.GetV0(), _V0DownStairs, (1-f)*_ellipse.GetV0() + f*speed_down);
-                 // fprintf(stderr, "%f  %f  %f  %f\n", pos.GetX(), pos.GetY(), ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
+                 // fprintf(stderr, "%f  %f  %f  %f\n", pos._x, pos._y, ped_elevation, (1-f)*_ellipse.GetV0() + f*speed_down);
                  // fprintf(stderr, "%f  %f   %f  %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_down, GetV().Norm(), ped_elevation);
                  //                  // getc(stdin);
                  return (1-f*g)*_ellipse.GetV0() + f*g*speed_down;
@@ -492,7 +496,7 @@ double Pedestrian::GetV0Norm() const
                  }
                  // if(_id==209){
                        // printf("%f UP min_e=%f, z=%f, f=%f, g=%f, v0=%f, speed_up=%f, ret=%f, v=%f\n", _globalTime , minSubElevation, ped_elevation, f, g, _ellipse.GetV0(), speed_up, (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm());
-                 // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stairHeight = %f, stairLength = %f, angle = %.2f pos=(%f, %f)\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stairHeight, stairHorinzontalLength, stairInclination, pos.GetX(), pos.GetY());
+                 // printf("minElevation = %f, maxELevation = %f, ped_elevation = %f, stairHeight = %f, stairLength = %f, angle = %.2f pos=(%f, %f)\n", minSubElevation, sub->GetMaxElevation(), ped_elevation ,stairHeight, stairHorinzontalLength, stairInclination, pos._x, pos._y);
                        // getc(stdin);
                  // fprintf(stderr, "%f  %f   %f  %f %f %f\n", _globalTime, _ellipse.GetV0(), (1-f*g)*_ellipse.GetV0() + f*g*speed_up, GetV().Norm(), ped_elevation,  stairInclination*180./3.14159265);
                  // }
@@ -518,8 +522,8 @@ double Pedestrian::GetSmallerAxis() const
 void Pedestrian::SetPhiPed()
 {
      double cosPhi, sinPhi;
-     double vx = GetV().GetX();
-     double vy = GetV().GetY();
+     double vx = GetV()._x;
+     double vy = GetV()._y;
 
      if (fabs(vx) > J_EPS || fabs(vy) > J_EPS) {
           double normv = sqrt(vx * vx + vy * vy);
@@ -544,7 +548,7 @@ void Pedestrian::InitV0(const Point& target)
      _V0 = delta.Normalized();
 
 #if DEBUG
-     printf("Ped=%d : _v0=[%f, %f] delta=[%f, %f], pos=[%f, %f], target=[%f, %f]\n", _id, _V0.GetX(), _V0.GetY(), delta.GetX(), delta.GetY(), pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
+     printf("Ped=%d : _v0=[%f, %f] delta=[%f, %f], pos=[%f, %f], target=[%f, %f]\n", _id, _V0._x, _V0._y, delta._x, delta._y, pos._x, pos._y, target._x, target._y);
 #endif
 }
 
@@ -566,11 +570,11 @@ const Point& Pedestrian::GetV0(const Point& target)
      _V0 = _V0 + (new_v0 - _V0)*( 1 - exp(-t/_tau) );
 #if DEBUGV0
      if(0){
-          printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1().GetX(), _navLine->GetPoint1().GetY(), _navLine->GetPoint2().GetX(), _navLine->GetPoint2().GetY());
-          printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos.GetX(), pos.GetY(), target.GetX(), target.GetY());
-          printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0.GetX(), new_v0.GetY(), new_v0.Norm());
+          printf("=====\nGoal Line=[%f, %f]-[%f, %f]\n", _navLine->GetPoint1()._x, _navLine->GetPoint1()._y, _navLine->GetPoint2()._x, _navLine->GetPoint2()._y);
+          printf("Ped=%d, sub=%d, room=%d pos=[%f, %f], target=[%f, %f]\n", _id, _subRoomID, _roomID, pos._x, pos._y, target._x, target._y);
+          printf("Ped=%d : BEFORE new_v0=%f %f norm = %f\n", _id, new_v0._x, new_v0._y, new_v0.Norm());
           printf("ped=%d: t=%f, _newOrientationFlag=%d, neworientationDelay=%d, _DistToBlockade=%f\n", _id,t, _newOrientationFlag, _newOrientationDelay, _distToBlockade);
-          printf("_v0=[%f, %f] norm = %f\n=====\n", _V0.GetX(), _V0.GetY(), _V0.Norm());
+          printf("_v0=[%f, %f] norm = %f\n=====\n", _V0._x, _V0._y, _V0.Norm());
           getc(stdin);
      }
 
@@ -744,9 +748,9 @@ double Pedestrian::GetDistanceToNextTarget() const
      return (_navLine->DistTo(GetPos()));
 }
 
-void Pedestrian::SetFinalDestination(int final)
+void Pedestrian::SetFinalDestination(int finale)
 {
-     _desiredFinalDestination = final;
+     _desiredFinalDestination = finale;
 }
 
 int Pedestrian::GetFinalDestination() const
@@ -796,12 +800,12 @@ void Pedestrian::Dump(int ID, int pa) const
           printf(">> Room/Subroom [%d / %d]\n", _roomID, _subRoomID);
           printf(">> Destination [ %d ]\n", _exitIndex);
           printf(">> Final Destination [ %d ]\n", _desiredFinalDestination);
-          printf(">> Position [%0.2f, %0.2f]\n", GetPos().GetX(), GetPos().GetY());
-          printf(">> V0       [%0.2f, %0.2f]  Norm = [%0.2f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
-          printf(">> Velocity [%0.2f, %0.2f]  Norm = [%0.2f]\n", GetV().GetX(), GetV().GetY(), GetV().Norm());
+          printf(">> Position [%0.2f, %0.2f]\n", GetPos()._x, GetPos()._y);
+          printf(">> V0       [%0.2f, %0.2f]  Norm = [%0.2f]\n", _V0._x, _V0._y, GetV0Norm());
+          printf(">> Velocity [%0.2f, %0.2f]  Norm = [%0.2f]\n", GetV()._x, GetV()._y, GetV().Norm());
           if(GetExitLine()) {
-               printf(">> ExitLine: (%0.2f, %0.2f) -- (%0.2f, %0.2f)\n", GetExitLine()->GetPoint1().GetX(), GetExitLine()->GetPoint1().GetY(),
-                         GetExitLine()->GetPoint2().GetX(), GetExitLine()->GetPoint2().GetY());
+               printf(">> ExitLine: (%0.2f, %0.2f) -- (%0.2f, %0.2f)\n", GetExitLine()->GetPoint1()._x, GetExitLine()->GetPoint1()._y,
+                         GetExitLine()->GetPoint2()._x, GetExitLine()->GetPoint2()._y);
                printf(">> dist: %f\n", GetExitLine()->DistTo(GetPos()));
           }
           printf(">> smooth rotating: %s \n", (_newOrientationDelay > 0) ? "yes" : "no");
@@ -815,15 +819,15 @@ void Pedestrian::Dump(int ID, int pa) const
           break;
 
      case 1:
-          printf(">> Position [%f, %f]\n", GetPos().GetX(), GetPos().GetY());
+          printf(">> Position [%f, %f]\n", GetPos()._x, GetPos()._y);
           break;
 
      case 2:
-          printf(">> Velocity [%f, %f]\n", GetV().GetX(), GetV().GetY());
+          printf(">> Velocity [%f, %f]\n", GetV()._x, GetV()._y);
           break;
 
      case 3:
-          printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0.GetX(), _V0.GetY(), GetV0Norm());
+          printf(">> V0       [%f, %f]  Norm = [%f]\n", _V0._x, _V0._y, GetV0Norm());
           break;
 
      case 4:

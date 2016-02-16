@@ -73,8 +73,7 @@ EventManager::EventManager(Building *_b, unsigned int seed)
 
      _file = fopen("../events/events.txt", "r");
      if (!_file) {
-          Log->Write("INFO:\tFiles 'events.txt' missing. "
-                    "Realtime interaction with the simulation not possible.");
+          Log->Write("INFO:\tFiles 'events.txt' missing.");
      } else {
           Log->Write("INFO:\tFile 'events.txt' will be monitored for new events.");
           _dynamic = true;

@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE(WallTest)
 
 BOOST_AUTO_TEST_CASE(Wall_Constr_Test)
 {
-     BOOST_MESSAGE("starting wall constructor test");
+     BOOST_TEST_MESSAGE("starting wall constructor test");
      Wall W1;
      Point P1;
      BOOST_CHECK(W1.GetPoint1() == P1 && W1.GetPoint2() == P1);
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(Wall_Constr_Test)
           // GetType test
           BOOST_CHECK(W2.GetType() == type[i%2]);
      }
-     BOOST_MESSAGE("Leaving wall constructor test");
+     BOOST_TEST_MESSAGE("Leaving wall constructor test");
          
 }
 

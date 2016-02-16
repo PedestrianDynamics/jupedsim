@@ -1169,7 +1169,7 @@ bool ArgumentParser::ParseCogMapOpts(TiXmlNode *routerNode)
           {
                std::vector<std::string> smokeOptVec;
 
-               smokeOptVec.push_back(e->Attribute("p_field_path"));
+               smokeOptVec.push_back(e->Attribute("smoke_factor_grids"));
                smokeOptVec.push_back(e->Attribute("update_time"));
                smokeOptVec.push_back(e->Attribute("final_time"));
                r->addOption("smokeOptions",smokeOptVec);

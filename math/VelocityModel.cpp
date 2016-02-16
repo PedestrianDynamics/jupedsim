@@ -103,8 +103,8 @@ bool VelocityModel::Init (Building* building)
      }
 
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
-
-    for(unsigned int p=0;p<allPeds.size();p++)
+     size_t peds_size = allPeds.size();
+    for(unsigned int p=0;p < peds_size;p++)
     {
          Pedestrian* ped = allPeds[p];
          double cosPhi, sinPhi;
@@ -112,15 +112,17 @@ bool VelocityModel::Init (Building* building)
          if (ped->FindRoute() == -1) {
               Log->Write(
                    "ERROR:\tVelocityModel::Init() cannot initialise route. ped %d is deleted.\n",ped->GetID());
-             building->DeletePedestrian(ped);
+              building->DeletePedestrian(ped);
+              p--;
+              peds_size--;
               continue;
          }
          Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
-              cosPhi = d.GetX() / dist;
-              sinPhi = d.GetY() / dist;
+              cosPhi = d._x / dist;
+              sinPhi = d._y / dist;
          } else {
               Log->Write(
                    "ERROR: \tallPeds::Init() cannot initialise phi! "
@@ -244,7 +246,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 Point tmp;
 
 
-                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0().GetX())>0.01)
+                // if(fmod(ped->GetGlobalTime(), ped->GetUpdateRate())<0.0001 || (spacing-ped->GetLastE0()._x)>0.01)
                 // {
                    
                       // if(ped->GetID()==-10)
@@ -255,9 +257,9 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 // {
                 //       tmp = ped->GetLastE0();
                 //       if(ped->GetID()==10)
-                //             std::cout << "keep direction "<<tmp.GetX() << ", " << tmp.GetY() << std::endl;
-                //       spacing = tmp.GetX();
-                //       winkel = tmp.GetY();
+                //             std::cout << "keep direction "<<tmp._x << ", " << tmp._y << std::endl;
+                //       spacing = tmp._x;
+                //       winkel = tmp._y;
                 // }
                 // if(ped->GetID()==-10)
                       // getc(stdin);
@@ -293,8 +295,8 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
                 }
                 ped->SetPos(pos_neu);
                 if(periodic){
-                      if(ped->GetPos().GetX() >= xRight){
-                            ped->SetPos(Point(ped->GetPos().GetX() - (xRight - xLeft), ped->GetPos().GetY()));
+                      if(ped->GetPos()._x >= xRight){
+                            ped->SetPos(Point(ped->GetPos()._x - (xRight - xLeft), ped->GetPos()._y));
                             //ped->SetID( ped->GetID() + 1);
                       }
                 }
@@ -337,11 +339,11 @@ my_pair VelocityModel::GetSpacing(Pedestrian* ped1, Pedestrian* ped2, Point ei, 
 {
       Point distp12 = ped2->GetPos() - ped1->GetPos(); // inversed sign 
       if(periodic){
-            double x = ped1->GetPos().GetX();
-            double x_j = ped2->GetPos().GetX();
+            double x = ped1->GetPos()._x;
+            double x_j = ped2->GetPos()._x;
             
             if((xRight-x) + (x_j-xLeft) <= cutoff){
-                  distp12.SetX(distp12.GetX() + xRight - xLeft);
+                 distp12._x = distp12._x + xRight - xLeft;
             }
       }
       double Distance = distp12.Norm();
@@ -373,10 +375,10 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
      Point distp12 = ped2->GetPos() - ped1->GetPos();
      
      if(periodic){
-            double x = ped1->GetPos().GetX();
-            double x_j = ped2->GetPos().GetX();
+            double x = ped1->GetPos()._x;
+            double x_j = ped2->GetPos()._x;
             if((xRight-x) + (x_j-xLeft) <= cutoff){
-                 distp12.SetX(distp12.GetX() + xRight - xLeft);
+                 distp12._x = distp12._x + xRight - xLeft;
             }
       }
      
@@ -393,7 +395,7 @@ Point VelocityModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2, int periodi
           Log->Write("\t\t Pedestrians are too near to each other (dist=%f).", Distance);
           Log->Write("\t\t Maybe the value of <a> in force_ped should be increased. Going to exit.\n");
           printf("ped1 %d  ped2 %d\n", ped1->GetID(), ped2->GetID());
-          printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos().GetX(), ped1->GetPos().GetY(), ped2->GetPos().GetX(), ped2->GetPos().GetY());
+          printf("ped1 at (%f, %f), ped2 at (%f, %f)\n", ped1->GetPos()._x, ped1->GetPos()._y, ped2->GetPos()._x, ped2->GetPos()._y);
           exit(EXIT_FAILURE);
      }
       Point ei = ped1->GetV().Normalized();
@@ -478,7 +480,7 @@ Point VelocityModel::ForceRepWall(Pedestrian* ped, const Line& w, const Point& c
            Log->Write("WARNING:\t Velocity: forceRepWall() ped %d is too near to the wall (dist=%f)", ped->GetID(), Distance);
           Point new_dist = centroid - ped->GetPos();
           new_dist = new_dist/new_dist.Norm();
-          printf("new distance = (%f, %f) inside=%d\n", new_dist.GetX(), new_dist.GetY(), inside);
+          printf("new distance = (%f, %f) inside=%d\n", new_dist._x, new_dist._y, inside);
           e_iw = (inside ? new_dist:new_dist*-1);
      }
      //-------------------------

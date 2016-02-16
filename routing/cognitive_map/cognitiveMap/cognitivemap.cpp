@@ -56,10 +56,10 @@ void CognitiveMap::UpdateMap()
 
 void CognitiveMap::UpdateDirection()
 {
-    if (_ped->GetV().GetX()!=0 || _ped->GetV().GetY()!=0)
+    if (_ped->GetV()._x!=0 || _ped->GetV()._y!=0)
     {
-        double angle = std::acos(_ped->GetV().GetX()/(std::sqrt(std::pow(_ped->GetV().GetX(),2)+std::pow(_ped->GetV().GetY(),2))));
-        if (_ped->GetV().GetY()<0)
+        double angle = std::acos(_ped->GetV()._x/(std::sqrt(std::pow(_ped->GetV()._x,2)+std::pow(_ped->GetV()._y,2))));
+        if (_ped->GetV()._y<0)
             angle=-angle;
         _YAHPointer.SetDirection(angle);
     }
@@ -201,7 +201,7 @@ std::vector<GraphEdge *> CognitiveMap::SortConShortestPath(ptrWaypoint waypoint,
 
         //Point vectorPathPedDoor = (*it)->GetCrossing()->GetCentre()-_ped->GetPos();
         itsortedEdges = sortedEdges.begin();
-        //double pathLength = pathLengthDoorWayP+std::sqrt(std::pow(vectorPathPedDoor.GetX(),2)+std::pow(vectorPathPedDoor.GetY(),2));
+        //double pathLength = pathLengthDoorWayP+std::sqrt(std::pow(vectorPathPedDoor._x,2)+std::pow(vectorPathPedDoor._y,2));
         bool inserted=false;
         for (auto itLengths=sortedPathLengths.begin(); itLengths!=sortedPathLengths.end(); ++itLengths)
         {
@@ -260,7 +260,7 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
     VisiLibity::Polygon room=VisiLibity::Polygon();
     for (Point point:points)
     {
-       room.push_back(VisiLibity::Point(point.GetX(),point.GetY()));
+       room.push_back(VisiLibity::Point(point._x,point._y));
     }
 
 //    for (int i=0; i<room.n();++i)
@@ -281,10 +281,10 @@ double CognitiveMap::ShortestPathDistance(const GraphEdge* edge, const ptrWaypoi
     VisiLibity::Environment environment(polygons);
     //environment.reverse_holes();
 
-    VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre().GetX(),edge->GetCrossing()->GetCentre().GetY());
+    VisiLibity::Point edgeP(edge->GetCrossing()->GetCentre()._x,edge->GetCrossing()->GetCentre()._y);
     Point pointOnShortestRoute = waypoint->PointOnShortestRoute(edge->GetCrossing()->GetCentre());
-    //Log->Write(std::to_string(pointOnShortestRoute.GetX())+" "+std::to_string(pointOnShortestRoute.GetY()));
-    VisiLibity::Point wayP(pointOnShortestRoute.GetX(),pointOnShortestRoute.GetY());//,waypoint->GetPos().GetY());
+    //Log->Write(std::to_string(pointOnShortestRoute._x)+" "+std::to_string(pointOnShortestRoute._y));
+    VisiLibity::Point wayP(pointOnShortestRoute._x,pointOnShortestRoute._y);//,waypoint->GetPos()._y);
 
     VisiLibity::Polyline polyline=environment.shortest_path(edgeP,wayP,0.1);
 //    for (int i=0; i<polyline.size();++i)
@@ -320,8 +320,8 @@ void CognitiveMap::WriteToFile()
                "x=\"%.6f\"\ty=\"%.6f\"\t"
                "z=\"%.6f\"\t"
                "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
-               landmark->GetId(), landmark->GetPos().GetX(),
-               landmark->GetPos().GetY(),0.0 ,landmark->GetA(), landmark->GetB());
+               landmark->GetId(), landmark->GetPos()._x,
+               landmark->GetPos()._y,0.0 ,landmark->GetA(), landmark->GetB());
 
         data.append(tmp1);
     }
@@ -332,8 +332,8 @@ void CognitiveMap::WriteToFile()
                "x=\"%.6f\"\ty=\"%.6f\"\t"
                "z=\"%.6f\"\t"
                "rA=\"%.2f\"\trB=\"%.2f\"/>\n",
-               waypoint->GetId(), waypoint->GetPos().GetX(),
-               waypoint->GetPos().GetY(),0.0 ,waypoint->GetA(), waypoint->GetB());
+               waypoint->GetId(), waypoint->GetPos()._x,
+               waypoint->GetPos()._y,0.0 ,waypoint->GetA(), waypoint->GetB());
         data.append(tmp2);
     }
 
@@ -342,8 +342,8 @@ void CognitiveMap::WriteToFile()
            "x=\"%.6f\"\ty=\"%.6f\"\t"
            "z=\"%.6f\"\t"
            "dir=\"%.2f\"/>\n",
-           _YAHPointer.GetPos().GetX(),
-           _YAHPointer.GetPos().GetY(),0.0 ,_YAHPointer.GetDirection());
+           _YAHPointer.GetPos()._x,
+           _YAHPointer.GetPos()._y,0.0 ,_YAHPointer.GetDirection());
 
     data.append(tmp3);
 

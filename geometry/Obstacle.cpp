@@ -115,7 +115,7 @@ string Obstacle::Write()
      //              , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _caption.c_str());
 
      sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"0\" text=\"%d\" color=\"100\" />\n"
-             , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, _id);
+             , pos._x * FAKTOR, pos._y * FAKTOR, _id);
      s.append(tmp);
 
      return s;
@@ -128,9 +128,9 @@ const vector<Wall>& Obstacle::GetAllWalls() const
 
 int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
-     return (vertex.GetX() > hitPos.GetX()) ?
-               ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
-               ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
+     return (vertex._x > hitPos._x) ?
+               ((vertex._y > hitPos._y) ? 1 : 4) :
+               ((vertex._y > hitPos._y) ? 2 : 3);
 
 //     if ((vertex.GetX() - hitPos.GetX())>J_EPS)
 //     {
@@ -158,8 +158,8 @@ int Obstacle::WhichQuad(const Point& vertex, const Point& hitPos) const
 // x-Koordinate der Linie von einer Eccke zur nächsten
 double Obstacle::Xintercept(const Point& point1, const Point& point2, double hitY) const
 {
-     return (point2.GetX() - (((point2.GetY() - hitY) * (point1.GetX() - point2.GetX())) /
-                              (point1.GetY() - point2.GetY())));
+     return (point2._x- (((point2._y - hitY) * (point1._x - point2._x)) /
+                              (point1._y - point2._y)));
 }
 
 
@@ -197,7 +197,7 @@ bool Obstacle::Contains(const Point& ped) const
                //WAS CLOCKWISE OR COUNTER
           case -2: // US THE X POSITION AT THE HIT POINT TO
                // DETERMINE WHICH WAY AROUND
-               if (Xintercept(_poly[edge], _poly[next], ped.GetY()) > ped.GetX())
+               if (Xintercept(_poly[edge], _poly[next], ped._y) > ped._x)
                     delta = -(delta);
                break;
           case 3: // MOVING 3 QUADS IS LIKE MOVING BACK 1
@@ -318,10 +318,10 @@ const Point Obstacle::GetCentroid() const
      // For all vertices except last
      unsigned int i=0;
      for (i=0; i<_poly.size()-1; ++i) {
-          x0 = _poly[i].GetX();
-          y0 = _poly[i].GetY();
-          x1 = _poly[i+1].GetX();
-          y1 = _poly[i+1].GetY();
+          x0 = _poly[i]._x;
+          y0 = _poly[i]._y;
+          x1 = _poly[i+1]._x;
+          y1 = _poly[i+1]._y;
           a = x0*y1 - x1*y0;
           signedArea += a;
           px += (x0 + x1)*a;
@@ -329,10 +329,10 @@ const Point Obstacle::GetCentroid() const
      }
 
      // Do last vertex
-     x0 = _poly[i].GetX();
-     y0 = _poly[i].GetY();
-     x1 = _poly[0].GetX();
-     y1 = _poly[0].GetY();
+     x0 = _poly[i]._x;
+     y0 = _poly[i]._y;
+     x1 = _poly[0]._x;
+     y1 = _poly[0]._y;
      a = x0*y1 - x1*y0;
      signedArea += a;
      px += (x0 + x1)*a;

@@ -8,7 +8,7 @@ There are only a few rules and advices we want to give to you:
 
 - [Advice for new contributors](#advice-for-new-contributors)
     - [First steps](#first-steps)
-    - [Guidelines](#guidelines)
+    - [Workflow](#workflow)
     - [FAQ](#faq)
 
 - [Reporting bugs and requesting features](#reporting-bugs-and-requesting-features)
@@ -18,22 +18,50 @@ There are only a few rules and advices we want to give to you:
 
 - [Writing code](#writing-code)
     - [Coding style](#coding-style)
-    - Unit tests
+    - [Unit tests](#unit-tests)
 
 - [Writing documentation](#wrinting-documentation)
     - [Comments](#comments)
-    - Documenting new features
+    - [Documenting new features](#documenting-new-features)
 
 - [Committing code](#commiting-code)
-    - Handling pull/merge requests
     - [Committing guidelines](#commiting-guidelines)
-    - Reverting commits
 
 ## Advice for new contributors
 
 ### First steps
+* Clone/fork our github/gitlab repository
+~~~
+git clone https://cst.version.fz-juelich.de/jupedsim/jpscore.git
+~~~
 
-### Guidelines
+* Change to the developement branch and create a branch with your feature.
+~~~
+git checkout developement 
+git checkout -b feature_name
+~~~
+
+* Assuming you are in the jpscore folder type 
+```
+mkdir build && cd build 
+cmake .. 
+```
+
+* Download all dependencies, check if cmake tells you something is missing
+    * Boost >= 1.56
+    * Qt
+    * Vtk
+    
+* If everything compiled for the first time, you are free to start
+
+### Workflow
+The branches **master** and **develop** are **protected**. You can **only push to your feature-branch.**
+Whenever you want to add a feature or fix an issue create a new feature-branch and only work on this branch.
+If you change what you wanted to merge the develop-branch into your feature-branch.
+Make sure all tests are running after merging and you provided new tests for your feature.
+After doing that open a merge/pull request.
+
+If your fix/feature is accepted it will be merged into the develop-branch.
 
 ### FAQ
 
@@ -196,13 +224,133 @@ Here are some hints to configure your editor in order to use the *stroustrup* st
     [How to change indentation width in eclipse?](https://superuser.com/questions/462221/how-do-i-reliably-change-the-indentation-width-in-eclipse)
 
 - **Clion**
-<!-- TODO -->
+
+### Unit tests
+
+Testing should be enabled by cmake as follows:
+```javascript
+cmake -DBUILD_TESTING=ON ..
+```
+
+After compiling (`make`) the tests can be called as follows:
+
+```javascript
+ctest
+```
+
+This will take some hours time (depending on your machine). Threfore, a quick testing could be used:
+```javascript
+ctest -R Boost
+```
+
+which run a limited set of compiled unit tests on the code.
+
+## Writing a unit test
+If you write a unit test the first lines in your file should be
+
+```c++
+#define BOOST_TEST_MODULE MyTest
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include classtotest.h
+
+BOOST_AUTO_TEST_SUITE(MyTestClass)
+```
+
+Then you can start implementing your test cases by using
+```c++
+BOOST_AUTO_TEST_CASE(MyTestCase) 
+{
+  ...
+}
+```
+
+For each method or function you want to test you should write a new test case and give it a speaking name.
+
+### Verification and validation
+
+Besides unit testing, we use in JuPedSim python-driven tests for verification and validation purposes.
+Several validation and verification tests for *JuPedSim* (jpscore) are defined in the following section (e.g. Rimea and NIST).
+In order to make the nightly builds run automatically, consider the following steps, before adding new tests.
+This procedure is also recommended to make simulations with several inifiles e.g. different seeds.
+
+To write additional tests, create a directory under *Utest/*.
+
+
+- Create in *./jpscore/Utest/* a new direct with a descriptive name. For
+   example: */Utest/test\_case1/*
+- Put in that directory an ini-file (referred to as "master-inifile")
+   and all the relevant files for a simulation, e.g. geometry file, etc. In the master-inifile you can use python syntax
+   
+   Example:
+```xml
+   <max_sim_time>[3,4]</max_sim_time> 
+   <seed>range(1, 10)</seed>
+```
+- run the script `makeini.py` with the obligatory option `-f`: Using the
+    aforementioned example the call is:
+```bash
+   python makeini.py -f test_case1/inifile.xml
+```
+
+The Script is going to create two directories:
+- test\_case/trajectories: Here live the simulation trajectories.
+- test\_case/inifiles: and here the inifiles, that will be produced  based on the master inifile (in this case test\_case1/inifile.xml).
+    Note, that the geometry file and the trajectory files are all relative to the project files in the directory *inifiles*.
+
+
+- Write a runtest-script. Here you have to define the logic of your test. What should be tested? When does the file succeed or file? etc.
+
+Your script has to start with the following lines:
+
+```python
+#!/usr/bin/env python
+import os
+import sys
+from sys import *
+sys.path.append(os.path.abspath(os.path.dirname(sys.path[0])))
+from JPSRunTest import JPSRunTestDriver
+from utils import *
+```
+
+After including these lines you can write the test you want to perform for every ini-file generated from the makeini.py script.
+The method signature must contain at least two arguments to receive the inifile and the trajectory file from the simulation.
+
+```python
+def runtest(inifile, trajfile):
+```
+
+You can also use more than these arguments like this:
+
+```python
+def runtest(inifile, trajfile, x, y, z):
+```
+
+If you need a more complex example of how to use more arguments for further calculations please see runtest_14.py.
+If a test has to fail because an error occurs or a necessary condition is not fulfilled  you can simply exit the script by using something like
+
+```python
+if condition_fails: 
+  exit(FAILURE)
+```
+Once you have written your test you have to make your script executable, so it has to contain a main function which calls the test:
+
+```python
+if __name__ == "__main__":
+  test = JPSRunTestDriver(1, argv0=argv[0], testdir=sys.path[0])
+  test.run_test(testfunction=runtest)
+  logging.info("%s exits with SUCCESS" % (argv[0]))
+  exit(SUCCESS)
+```
 
 
 ## Writing Documentation
 
 ### Comments
 Comments have to be written in **English** everywhere. Please use markdown where applicable.
+
+### Documenting new features
+Please update the changelog with every feature/fix you provide so we can keep track of changes for new versions of JuPedSim.
 
 ## Commiting Code
 

@@ -103,14 +103,14 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
      //fake_peds will be the positions of "fake" pedestrians, multiplied by factor and converted to int
      for (auto vert: subroom->GetPolygon() ) //room vertices
      {
-    	const Point& center_pos = subroom->GetCentroid();
-    	temp.SetX( center_pos.GetX()-vert.GetX( ) );
-		temp.SetY( center_pos.GetY()-vert.GetY( ) );
+    	     const Point& center_pos = subroom->GetCentroid();
+    	     temp._x = ( center_pos._x-vert._x );
+		temp._y = ( center_pos._y-vert._y );
 		temp = temp/sqrt(temp.NormSquare());
 		temp = temp*(radius*1.4);  //now the norm of the vector is ~r*sqrt(2), pointing to the center
 		temp = temp + vert;
-		temp.SetX( (int)(temp.GetX()*factor) );
-		temp.SetY( (int)(temp.GetY()*factor) );
+		temp._x = (int)(temp._x*factor);
+		temp._y = (int)(temp._y*factor);
 		fake_peds.push_back( temp );
      }
 
@@ -192,8 +192,8 @@ bool ComputeBestPositionVoronoiBoost(AgentsSource* src, std::vector<Pedestrian*>
                for (const auto& eped: existing_peds)
                {
                     const Point& pos = eped->GetPos();
-                    temp.SetX( (int)( pos.GetX()*factor ) );
-                    temp.SetY( (int)( pos.GetY()*factor ) );
+                    temp._x = (int)( pos._x*factor );
+                    temp._y = (int)( pos._y*factor );
                     discrete_positions.push_back( temp );
                     velocities_vector.push_back( eped->GetV() );
                     goal_vector.push_back( eped->GetFinalDestination() );
@@ -334,7 +334,7 @@ void VoronoiBestVertexMax (const std::vector<Point>& discrete_positions, const v
                     std::size_t index = ( edge->cell() )->source_index();
                     Point p = discrete_positions[index];
 
-                    dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )  + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+                    dis = ( p._x - it->x() )*( p._x - it->x() )  + ( p._y - it->y() )*( p._y - it->y() )  ;
 
                     score = dis;
 
@@ -395,7 +395,7 @@ void VoronoiBestVertexRandMax (const std::vector<Point>& discrete_positions, con
                     std::size_t index = ( edge->cell() )->source_index();
                     Point p = discrete_positions[index];
 
-                    dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+                    dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() )  ;
 
                     possible_vertices.push_back( it );
                     partial_sums.push_back( dis ); // HERE
@@ -449,7 +449,7 @@ void VoronoiBestVertexRand (const std::vector<Point>& discrete_positions, const 
                     std::size_t index = ( edge->cell() )->source_index();
                     Point p = discrete_positions[index];
 
-                    dis = ( p.GetX() - it->x() )*( p.GetX() - it->x() )   + ( p.GetY() - it->y() )*( p.GetY() - it->y() )  ;
+                    dis = ( p._x - it->x() )*( p._x - it->x() )   + ( p._y - it->y() )*( p._y - it->y() )  ;
 
                     possible_vertices.push_back( it );
                     distances.push_back( dis );

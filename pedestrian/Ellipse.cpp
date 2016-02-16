@@ -318,7 +318,7 @@ double JEllipse::EffectiveDistanceToEllipse(const JEllipse& E2, double* dist) co
 // if P approx equal to Center of ellipse return cartesian coordinats of the point (a,0)/ellipse
 Point JEllipse::PointOnEllipse(const Point& P) const
 {
-     double x = P.GetX(), y = P.GetY();
+     double x = P._x, y = P._y;
      double r = x*x + y*y;
      if ( r < J_EPS*J_EPS) {
           //return _center;
@@ -333,8 +333,8 @@ Point JEllipse::PointOnEllipse(const Point& P) const
      double a = GetEA();
      double b = GetEB();
      Point S;
-     S.SetX(a*cosTheta);
-     S.SetY(b*sinTheta);
+     S._x = a*cosTheta;
+     S._y = b*sinTheta;
      return S.TransformToCartesianCoordinates(_center, _cosPhi, _sinPhi);
 }
 
@@ -354,10 +354,10 @@ double JEllipse::EffectiveDistanceToLine(const Line& l) const
 //              // Action Point der Ellipse
 //       Point APinE = Point(_Xp, 0);
 //       Line linE = Line(AinE, BinE);
-//       double xa = linE.GetPoint1().GetX();
-//       double ya = linE.GetPoint1().GetY();
-//       double xb = linE.GetPoint2().GetX();
-//       double yb = linE.GetPoint2().GetY();
+//       double xa = linE.GetPoint1()._x;
+//       double ya = linE.GetPoint1()._y;
+//       double xb = linE.GetPoint2()._x;
+//       double yb = linE.GetPoint2()._y;
 //       double a = GetEA();
 //       double b = GetEB();
 //       Line l_strich_inE;
@@ -484,8 +484,8 @@ double JEllipse::EffectiveDistanceToLine(const Line& l) const
 //      if ((C1 - C2).NormSquare() < J_EPS*J_EPS) {
 //              char tmp[CLENGTH];
 //              sprintf(tmp, "ERROR: \tEllipse::MinimumDistanceToEllipse() m=0\n"
-//                      "xc1: %f xc2: %f yc1: %f yc2: %f\n", C1.GetX(), C2.GetX(),
-//                              C1.GetY(), C2.GetY());
+//                      "xc1: %f xc2: %f yc1: %f yc2: %f\n", C1._x, C2._x,
+//                              C1._y, C2._y);
 //              Log->Write(tmp);
 //              exit(EXIT_FAILURE);
 //              //return 0.0;
@@ -506,8 +506,8 @@ bool JEllipse::IsInside(const Point& p) const
 {
      double a = GetEA();
      double b = GetEB();
-     double x = p.GetX();
-     double y = p.GetY();
+     double x = p._x;
+     double y = p._y;
      double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
      return condition <0;
      //return (x * x) / (a * a) + (y * y) / (b * b) < 1 + J_EPS_DIST;
@@ -518,8 +518,8 @@ bool JEllipse::IsOutside(const Point& p) const
 {
      double a = GetEA();
      double b = GetEB();
-     double x = p.GetX();
-     double y = p.GetY();
+     double x = p._x;
+     double y = p._y;
      double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
      return condition >0;
      //return (x * x) / (a * a) + (y * y) / (b * b) > 1 - J_EPS_DIST;
@@ -530,8 +530,8 @@ bool JEllipse::IsOn(const Point& p) const
 {
      double a = GetEA();
      double b = GetEB();
-     double x = p.GetX();
-     double y = p.GetY();
+     double x = p._x;
+     double y = p._y;
      double condition = (x * x) / (a * a) + (y * y) / (b * b) - 1;
      return (-J_EPS_DIST < condition) && (condition < J_EPS_DIST);
      //return (-J_EPS_DIST < impliciteEllipse) && (impliciteEllipse < J_EPS_DIST);

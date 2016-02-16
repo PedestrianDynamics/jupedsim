@@ -78,44 +78,44 @@ int testPointOnEllipse()
                if(!(i|j)) continue;
                sx = i*r;
                sy = j*r;
-               S.SetX(sx);
-               S.SetY(sy);
+               S._x = (sx);
+               S._y = (sy);
                l = S.Norm();
-               T.SetX(r*sx/l);
-               T.SetY(r*sy/l);
+               T._x = (r*sx/l);
+               T._y = (r*sy/l);
                P = E.PointOnEllipse(S);
                res += (P==T)?1:0;
                ntests++;
-               fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T.GetX(), T.GetY(), P.GetX(), P.GetY(), res);
+               fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T._x, T._y, P._x, P._y, res);
           }
 
      // test point in the ellipse
      sx = 0.5*r;
      sy = 0.5*r;
-     S.SetX(sx);
-     S.SetY(sy);
+     S._x = (sx);
+     S._y = (sy);
      l = S.Norm();
-     T.SetX(r*sx/l);
-     T.SetY(r*sy/l);
+     T._x = (r*sx/l);
+     T._y = (r*sy/l);
      P = E.PointOnEllipse(S);
      res += (P==T)?1:0;
      ntests++;
-     fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T.GetX(), T.GetY(), P.GetX(), P.GetY(), res);
+     fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T._x, T._y, P._x, P._y, res);
      // point in the center
 
      sx = 0;
      sy = 0;
-     S.SetX(sx);
-     S.SetY(sy);
+     S._x = (sx);
+     S._y = (sy);
 
-//    T.SetX(0);
-     //  T.SetY(0);
+//    T._x = (0);
+     //  T._y = (0);
      E.SetCenter( Point(0.4, 1.78) );
      T = E.GetCenter() + Point(r,0);
      P = E.PointOnEllipse(S);
      res += (P==T)?1:0;
      ntests++;
-     fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T.GetX(), T.GetY(), P.GetX(), P.GetY(), res);
+     fprintf (f, "%d. Tx=%.2f\t Ty=%.2f\t Px=%.2f\t Py=%.2f\t res=%d\t\n",ntests, T._x, T._y, P._x, P._y, res);
 
      fclose(f);
      return (res==ntests)?EXIT_SUCCESS:EXIT_FAILURE;

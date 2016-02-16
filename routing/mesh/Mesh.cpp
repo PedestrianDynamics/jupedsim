@@ -142,12 +142,12 @@ MeshCell* MeshData::FindCell(Point test, int& cell_id)const
                bool found=true;
                std::vector<int> act_n=(*it_c)->GetNodes();
                int count_nodes=act_n.size();
-               double n1x= _mNodes.at(act_n.at(0))->GetX();
-               double n1y= _mNodes.at(act_n.at(0))->GetY();
+               double n1x= _mNodes.at(act_n.at(0))->_x;
+               double n1y= _mNodes.at(act_n.at(0))->_y;
 
                for(int pos=0; pos<count_nodes; pos++) {
-                    double n2x= _mNodes.at(act_n.at((pos+1)%count_nodes))->GetX();
-                    double n2y= _mNodes.at(act_n.at((pos+1)%count_nodes))->GetY();
+                    double n2x= _mNodes.at(act_n.at((pos+1)%count_nodes))->_x;
+                    double n2y= _mNodes.at(act_n.at((pos+1)%count_nodes))->_y;
 
                     Point temp_nxny(n2y-n1y,n1x-n2x);
                     Point temp_xy=test-Point(n1x,n1y);
