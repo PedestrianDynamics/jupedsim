@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## Known Issues
+#### JPSCORE
+Please also check the Issue tracker on GitLab, if access is available.
+- exit strategies using *local* - prefix can result in circular routing
+- triangulation creates error-prone help-lines in certain geometries
+- errors in unused parts of ini files lead to system-exit
+
 
 ## v0.8.0 [Unreleased]
 
@@ -13,15 +20,18 @@ All notable changes to this project will be documented in this file.
 - Added statistics (calculate exit usage) for all exits
 - Added voronoi based algorithm for inserting agents coming from the source or from matsim
 - New option for the quickest path router. Sample options are:
+
  ```<parameters default_strategy="local_shortest">```
-  ```<parameters default_strategy="global_shortest">``` 
-   ``` <parameters cba_gain="0.15" reference_peds_selection="single" congestion_ratio="0.8" queue_vel_escaping_jam="0.2" 
-       queue_vel_new_room="0.7" visibility_obstruction="4">
-```
+ 
+ ```<parameters default_strategy="global_shortest">``` 
+ 
+ ``` <parameters cba_gain="0.15" reference_peds_selection="single" congestion_ratio="0.8" queue_vel_escaping_jam="0.2" 
+       queue_vel_new_room="0.7" visibility_obstruction="4">```
 - New model with the generic name `Tordeux2015` and `id=3`. For use check the ini-files in the Utest-validation tests.
 - Tests are sorted in `rimea_tests`, `juelich_tests` and `validation_tests`.
 - Periodic boundary conditions with the option `<periodic>1</periodic>`.Works only with model 3.  
-- Added Floorfield to all exits, providing direction to target, direction to closest wall and cost estimates. Parameter to control wall-avoidance included.
+- Added floor field to all exits, providing direction to target, direction to closest wall and cost estimates. Parameter to control wall-avoidance included.
+- Added new __Exit Strategies__ using floor fields on various subdomains (rooms, subrooms). Please refer to the online documentation on [jupedsim.org](www.jupedsim.org).
    
 #### JPSVIS
 - Added option to load  vtk files. Need to add the line ``` <gradient_field filename="floorfield.vtk"> 
