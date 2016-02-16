@@ -610,6 +610,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                          return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                     }
                }
+#pragma omp critical
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
           }
      }
