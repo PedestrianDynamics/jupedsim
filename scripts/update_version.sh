@@ -1,7 +1,7 @@
 #!/bin/sh
 
 old_version='v0.7'
-new_version='v0.7'
+new_version='v0.8'
 
 
 #old_version='http://134.94.2.137/jps_ini_core.xsd'

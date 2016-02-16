@@ -52,7 +52,7 @@ public:
      void incrementWarnings();
      int GetErrors();
      void incrementErrors();
-     void ProgressBar(double TotalPeds, double NowPeds);
+     void ProgressBar(double TotalPeds, double NowPeds, double simTime);
 
      virtual void Write(const std::string& str);
      virtual void Write(const char *string, ...);

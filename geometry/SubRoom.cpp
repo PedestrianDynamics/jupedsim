@@ -55,6 +55,8 @@ SubRoom::SubRoom()
      _roomID=-1;
      _walls = vector<Wall > ();
      _poly = vector<Point > ();
+     _poly_help_constatnt = vector<double> ();
+     _poly_help_multiple = vector<double> ();
      _obstacles=vector<Obstacle*> ();
 
      _crossings = vector<Crossing*>();
@@ -65,6 +67,7 @@ SubRoom::SubRoom()
      _planeEquation[1]=0.0;
      _planeEquation[2]=0.0;
      _cosAngleWithHorizontalPlane=0;
+     _tanAngleWithHorizontalPlane=0;
      _minElevation=0;
      _maxElevation=0;
      
@@ -81,8 +84,29 @@ SubRoom::~SubRoom()
      }
      _obstacles.clear();
 }
+/*
+void SubRoom::SetHelpVariables()
+{
+	unsigned int i, j= _poly.size()-1;
 
+	for( i=0; i< _poly.size(); i++)
+	{
+		if ( _poly[i]._y == _poly[j]._y ) //not important
+		{
+			_poly_help_constatnt.push_back( _poly[i]._x ) ;
+			_poly_help_multiple.push_back( 0 );
+		}
+		else
+		{
+			_poly_help_constatnt.push_back( _poly[i]._x - ( _poly[i]._y*_poly[j]._x ) / ( _poly[j]._y - _poly[i]._y)
+										+ ( _poly[i]._y*_poly[i]._x )/ ( _poly[j]._y - _poly[i]._y  )  );
 
+			_poly_help_multiple.push_back( (_poly[j]._x-_poly[i]._x)/(_poly[j]._y-_poly[i]._y) );
+		}
+	j=i;
+	}
+}
+*/
 void SubRoom::SetSubRoomID(int ID)
 {
      _id = ID;
@@ -130,10 +154,6 @@ const vector<Obstacle*>& SubRoom::GetAllObstacles() const
      return _obstacles;
 }
 
-int SubRoom::GetNumberOfGoalIDs() const
-{
-     return (int)_goalIDs.size();
-}
 
 const vector<int>& SubRoom::GetAllGoalIDs() const
 {
@@ -179,39 +199,42 @@ void SubRoom::AddGoalID(int ID)
      _goalIDs.push_back(ID);
 }
 
-void SubRoom::AddCrossing(Crossing* line)
+bool SubRoom::AddCrossing(Crossing* line)
 {
      _crossings.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
-void SubRoom::AddTransition(Transition* line)
+bool SubRoom::AddTransition(Transition* line)
 {
      _transitions.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
 void SubRoom::AddNeighbor(SubRoom* sub)
 {
-     if(sub and (IsElementInVector(_neighbors, sub)==false))
+     if(sub && (IsElementInVector(_neighbors, sub)==false))
      {
           _neighbors.push_back(sub);
      }
 }
 
-void SubRoom::AddHline(Hline* line)
+bool SubRoom::AddHline(Hline* line)
 {
      for(unsigned int i=0;i<_hlines.size();i++)
      {
           if (line->GetID()==_hlines[i]->GetID())
           {
                Log->Write("INFO:\tskipping duplicate hline [%d] with id [%d]",_id,line->GetID());
-               return;
+               return false;
           }
      }
 
      _hlines.push_back(line);
      _goalIDs.push_back(line->GetUniqueID());
+     return true;
 }
 
 const vector<Crossing*>& SubRoom::GetAllCrossings() const
@@ -261,13 +284,26 @@ void SubRoom::RemoveGoalID(int ID)
      Log->Write("There is no goal with that id to remove");
 }
 
+bool SubRoom::IsAccessible()
+{
+    //at least one door is open
+     for(auto&& tran: _transitions)
+     {
+          if(tran->IsOpen()==true) return true;
+     }
+     for(auto&& cros: _crossings)
+     {
+          if(cros->IsOpen()==true) return true;
+     }
+    return false;
+}
 
 void SubRoom::CalculateArea()
 {
      double sum = 0;
      int n = (int) _poly.size();
      for (int i = 0; i < n; i++) {
-          sum += (_poly[i].GetY() + _poly[(i + 1) % n].GetY())*(_poly[i].GetX() - _poly[(i + 1) % n].GetX());
+          sum += (_poly[i]._y + _poly[(i + 1) % n]._y)*(_poly[i]._x - _poly[(i + 1) % n]._x);
      }
      _area=(0.5 * fabs(sum));
 }
@@ -286,10 +322,10 @@ Point SubRoom::GetCentroid() const
      // For all vertices except last
      unsigned int i=0;
      for (i=0; i<_poly.size()-1; ++i) {
-          x0 = _poly[i].GetX();
-          y0 = _poly[i].GetY();
-          x1 = _poly[i+1].GetX();
-          y1 = _poly[i+1].GetY();
+          x0 = _poly[i]._x;
+          y0 = _poly[i]._y;
+          x1 = _poly[i+1]._x;
+          y1 = _poly[i+1]._y;
           a = x0*y1 - x1*y0;
           signedArea += a;
           px += (x0 + x1)*a;
@@ -297,10 +333,10 @@ Point SubRoom::GetCentroid() const
      }
 
      // Do last vertex
-     x0 = _poly[i].GetX();
-     y0 = _poly[i].GetY();
-     x1 = _poly[0].GetX();
-     y1 = _poly[0].GetY();
+     x0 = _poly[i]._x;
+     y0 = _poly[i]._y;
+     x1 = _poly[0]._x;
+     y1 = _poly[0]._y;
      a = x0*y1 - x1*y0;
      signedArea += a;
      px += (x0 + x1)*a;
@@ -327,8 +363,8 @@ vector<Wall> SubRoom::GetVisibleWalls(const Point & position)
           wall_is_vis = IsVisible(w, position);
           if(wall_is_vis){
 #if DEBUG
-               printf("  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",w.GetPoint1().GetX(), w.GetPoint1().GetY(),w.GetPoint2().GetX(), w.GetPoint2().GetY() );
-               printf("  GetVisibleWalls: Ped position (%f, %f)\n",position.GetX(), position.GetY());
+               printf("  GetVisibleWalls: Wall (%f, %f)--(%f, %f)\n",w.GetPoint1()._x, w.GetPoint1()._y,w.GetPoint2()._x, w.GetPoint2()._y );
+               printf("  GetVisibleWalls: Ped position (%f, %f)\n",position._x, position._y);
                printf("  GetVisibleWalls: wall is visible? = %d\n",wall_is_vis);
 #endif
                visible_walls.push_back(w);
@@ -345,7 +381,7 @@ vector<Wall> SubRoom::GetVisibleWalls(const Point & position)
 bool SubRoom::IsVisible(const Line &wall, const Point &position)
 {
      // printf("\tEnter wall_is_visible\n");
-     // printf(" \t  Wall (%f, %f)--(%f, %f)\n",wall.GetPoint1().GetX(), wall.GetPoint1().GetY(),wall.GetPoint2().GetX(), wall.GetPoint2().GetY() );
+     // printf(" \t  Wall (%f, %f)--(%f, %f)\n",wall.GetPoint1()._x, wall.GetPoint1()._y,wall.GetPoint2()._x, wall.GetPoint2()._y );
 
      bool wall_is_vis = true;
      // Point nearest_point =  wall.ShortestPoint(position);
@@ -353,7 +389,7 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
      //  try with the center. If it is not visible then the wall is definitly not.
      const Point& nearest_point =  wall.GetCentre();
 
-     // printf("\t\t center of wall %f, %f\n",nearest_point.GetX(), nearest_point.GetY());
+     // printf("\t\t center of wall %f, %f\n",nearest_point._x, nearest_point._y);
      Line ped_wall = Line(position, nearest_point);
      for (auto& w:_walls)
      {
@@ -361,7 +397,7 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
                continue;
           if(wall_is_vis  && ped_wall.IntersectionWith(w))
           {
-               // fprintf (stdout, "\t\t Wall_is_visible: INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), WALL(%.2f, %.2f)---(%.2f, %.2f)\n", ped_wall.GetPoint1().GetX(),ped_wall.GetPoint1().GetY(), ped_wall.GetPoint2().GetX(), ped_wall.GetPoint2().GetY(), w.GetPoint1().GetX(),w.GetPoint1().GetY(),w.GetPoint2().GetX(),w.GetPoint2().GetY());
+               // fprintf (stdout, "\t\t Wall_is_visible: INTERSECTION WALL  L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), WALL(%.2f, %.2f)---(%.2f, %.2f)\n", ped_wall.GetPoint1()._x,ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y, w.GetPoint1()._x,w.GetPoint1()._y,w.GetPoint2()._x,w.GetPoint2()._y);
                wall_is_vis = false;
           }
      }
@@ -371,7 +407,7 @@ bool SubRoom::IsVisible(const Line &wall, const Point &position)
           for(const auto& w: obst->GetAllWalls())
           {
                if(wall_is_vis && ped_wall.IntersectionWith(w)){
-                    // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1().GetX(), w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), ped_wall.GetPoint1().GetX(), ped_wall.GetPoint1().GetY(), ped_wall.GetPoint2().GetX(), ped_wall.GetPoint2().GetY());
+                    // fprintf (stdout, "\t\t Wall_is_visible INTERSECTION OBS; L1_P1(%.2f, %.2f), L1_P2(%.2f, %.2f), L2_P1(%.2f, %.2f) L2_P2(%.2f, %.2f)\n", w.GetPoint1()._x, w.GetPoint1()._y, w.GetPoint2()._x, w.GetPoint2()._y, ped_wall.GetPoint1()._x, ped_wall.GetPoint1()._y, ped_wall.GetPoint2()._x, ped_wall.GetPoint2()._y);
                     wall_is_vis = false;
                }
           }
@@ -438,6 +474,8 @@ void SubRoom::SetPlanEquation(double A, double B, double C)
      _planeEquation[2]=C;
      //compute and cache the cosine of angle with the plane z=h
      _cosAngleWithHorizontalPlane= (1.0/sqrt(A*A+B*B+1));
+     // tan = sin/cos = |n1 x n2|/|n1.n2|; n1= (A, B, -1), n2 = (0, 0, 1) 
+     _tanAngleWithHorizontalPlane = sqrt(A*A+B*B); // n1.n2 = -1
 }
 
 const double* SubRoom::GetPlaneEquation() const
@@ -453,6 +491,12 @@ double SubRoom::GetElevation(const Point& p) const
 double SubRoom::GetCosAngleWithHorizontal() const
 {
      return _cosAngleWithHorizontalPlane;
+
+}
+
+double SubRoom::GetTanAngleWithHorizontal() const
+{
+     return _tanAngleWithHorizontalPlane;
 
 }
 
@@ -515,7 +559,7 @@ bool SubRoom::SanityCheck()
           if((IsConvex()==false) && (_hlines.size()==0))
           {
                Log->Write("WARNING:\t Room [%d] Subroom [%d] is not convex!",_roomID,_id);
-               Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+               Log->Write("        \t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
           }
@@ -523,7 +567,7 @@ bool SubRoom::SanityCheck()
           if(_hlines.size()==0)
           {
                Log->Write("WARNING:\t you have obstacles in room [%d] Subroom [%d]!",_roomID,_id);
-               Log->Write("\t\t you might consider adding extra hlines in your routing.xml file");
+               Log->Write("        \t you might consider adding extra hlines in your routing.xml file");
           } else {
                // everything is fine
           }
@@ -542,7 +586,7 @@ bool SubRoom::SanityCheck()
                     exit(EXIT_FAILURE);
                     //return false;
                }
-               connected=connected or w1.ShareCommonPointWith(w2);
+               connected=connected || w1.ShareCommonPointWith(w2);
           }
           //overlapping with lines
           for(auto&& hline: _hlines)
@@ -550,7 +594,7 @@ bool SubRoom::SanityCheck()
                if(w1.Overlapp(*hline))
                {
                     Log->Write("ERROR: Overlapping between wall %s and  Hline %s ",w1.toString().c_str(),hline->toString().c_str());
-                    exit(EXIT_FAILURE);
+                    // exit(EXIT_FAILURE);
                     //return false;
                }
           }
@@ -563,7 +607,7 @@ bool SubRoom::SanityCheck()
                     exit(EXIT_FAILURE);
                     //return false;
                }
-               connected=connected or w1.ShareCommonPointWith(*c);
+               connected=connected || w1.ShareCommonPointWith(*c);
           }
           //overlaping with transitions
           for(auto&& t: _transitions)
@@ -574,10 +618,10 @@ bool SubRoom::SanityCheck()
                     exit(EXIT_FAILURE);
                     //return false;
                }
-               connected=connected or w1.ShareCommonPointWith(*t);
+               connected=connected || w1.ShareCommonPointWith(*t);
           }
 
-          if(not connected)
+          if(!connected)
           {
                Log->Write("ERROR: loose wall found %s  in Room/Subroom %d/%d",w1.toString().c_str(),_roomID,_id);
                exit(EXIT_FAILURE);
@@ -620,12 +664,36 @@ bool SubRoom::SanityCheck()
                {
                     Log->Write("ERROR: Overlapping between crossing %s and  transition %s ",c->toString().c_str(),t->toString().c_str());
                     exit(EXIT_FAILURE);
-                    //return false;
+                    return false;
                }
           }
      }
 
      return true;
+}
+
+bool SubRoom::Triangulate()
+{
+     if(IsClockwise())
+          std::reverse(_poly.begin(), _poly.end());
+
+     _delauneyTriangulator.SetOuterPolygone(_poly);
+
+     for (const auto & obst: _obstacles)
+     {
+          auto outerhullObst=obst->GetPolygon();
+          if(obst->IsClockwise())
+               std::reverse(outerhullObst.begin(), outerhullObst.end());
+          _delauneyTriangulator.AddHole(outerhullObst);
+     }
+
+     _delauneyTriangulator.Triangulate();
+     return true;
+}
+
+const std::vector<p2t::Triangle*> SubRoom::GetTriangles()
+{
+     return _delauneyTriangulator.GetTriangles();
 }
 
 ///http://stackoverflow.com/questions/471962/how-do-determine-if-a-polygon-is-complex-convex-nonconvex
@@ -668,7 +736,7 @@ bool SubRoom::IsConvex()
 bool SubRoom::IsClockwise()
 {
      if(_poly.size()<3) {
-          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]");
+          Log->Write("ERROR:\tYou need at least 3 vertices to check for orientation. Subroom ID [%d]",_id);
           return false;
           //exit(EXIT_FAILURE);
      }
@@ -735,13 +803,13 @@ string NormalSubRoom::WriteSubRoom() const
           char wall[CLENGTH] = "";
           geometry.append("\t\t<wall>\n");
           sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                    (w.GetPoint1().GetX()) * FAKTOR,
-                    (w.GetPoint1().GetY()) * FAKTOR,
+                    (w.GetPoint1()._x) * FAKTOR,
+                    (w.GetPoint1()._y) * FAKTOR,
                     GetElevation(w.GetPoint1())*FAKTOR);
           geometry.append(wall);
           sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                    (w.GetPoint2().GetX()) * FAKTOR,
-                    (w.GetPoint2().GetY()) * FAKTOR,
+                    (w.GetPoint2()._x) * FAKTOR,
+                    (w.GetPoint2()._y) * FAKTOR,
                     GetElevation(w.GetPoint2())*FAKTOR);
           geometry.append(wall);
           geometry.append("\t\t</wall>\n");
@@ -754,7 +822,7 @@ string NormalSubRoom::WriteSubRoom() const
      const Point& pos = GetCentroid();
      char tmp[CLENGTH];
      sprintf(tmp, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-               , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR, GetElevation(pos)*FAKTOR,GetSubRoomID());
+               , pos._x * FAKTOR, pos._y * FAKTOR, GetElevation(pos)*FAKTOR,GetSubRoomID());
      s.append(tmp);
 
      //write the obstacles
@@ -765,13 +833,13 @@ string NormalSubRoom::WriteSubRoom() const
                char wall[CLENGTH] = "";
                s.append("\t\t<wall>\n");
                sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                         (w.GetPoint1().GetX()) * FAKTOR,
-                         (w.GetPoint1().GetY()) * FAKTOR,
+                         (w.GetPoint1()._x) * FAKTOR,
+                         (w.GetPoint1()._y) * FAKTOR,
                          GetElevation(w.GetPoint1())*FAKTOR);
                s.append(wall);
                sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                         (w.GetPoint2().GetX()) * FAKTOR,
-                         (w.GetPoint2().GetY()) * FAKTOR,
+                         (w.GetPoint2()._x) * FAKTOR,
+                         (w.GetPoint2()._y) * FAKTOR,
                          GetElevation(w.GetPoint2())*FAKTOR);
                s.append(wall);
                s.append("\t\t</wall>\n");
@@ -782,7 +850,7 @@ string NormalSubRoom::WriteSubRoom() const
           //add the obstacle caption
           char tmp1[CLENGTH];
           sprintf(tmp1, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-                    , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
+                    , pos._x * FAKTOR, pos._y * FAKTOR,GetElevation(pos)*FAKTOR ,obst->GetId());
           s.append(tmp1);
      }
 
@@ -797,7 +865,7 @@ string NormalSubRoom::WritePolyLine() const
      s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
      for(const auto& p: _poly)
      {
-          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",p.GetX()* FAKTOR,p.GetY()* FAKTOR);
+          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",p._x* FAKTOR,p._y* FAKTOR);
           s.append(tmp);
      }
      s.append("\t</Obstacle>\n");
@@ -896,8 +964,8 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
      if ((tmpPoly[0] - point).Norm() > J_TOLERANZ) {
           char tmp[CLENGTH];
           sprintf(tmp, "ERROR: \tNormalSubRoom::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
-                    "\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), tmpPoly[0].GetX(), tmpPoly[0].GetY(), point.GetX(),
-                    point.GetY());
+                    "\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), tmpPoly[0]._x, tmpPoly[0]._y, point._x,
+                    point._y);
           Log->Write(tmp);
           sprintf(tmp, "ERROR: \tDistance between the points: %lf !!!\n", (tmpPoly[0] - point).Norm());
           Log->Write(tmp);
@@ -941,8 +1009,8 @@ bool NormalSubRoom::ConvertLineToPoly(const vector<Line*>& goals)
 
 int NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
 {
-     return (vertex.GetX() > hitPos.GetX()) ? ((vertex.GetY() > hitPos.GetY()) ? 1 : 4) :
-               ((vertex.GetY() > hitPos.GetY()) ? 2 : 3);
+     return (vertex._x > hitPos._x) ? ((vertex._y > hitPos._y) ? 1 : 4) :
+               ((vertex._y > hitPos._y) ? 2 : 3);
 
 }
 
@@ -950,8 +1018,8 @@ int NormalSubRoom::WhichQuad(const Point& vertex, const Point& hitPos) const
 
 double NormalSubRoom::Xintercept(const Point& point1, const Point& point2, double hitY) const
 {
-     return (point2.GetX() - (((point2.GetY() - hitY) * (point1.GetX() - point2.GetX())) /
-               (point1.GetY() - point2.GetY())));
+     return (point2._x - (((point2._y - hitY) * (point1._x - point2._x)) /
+               (point1._y - point2._y)));
 }
 
 
@@ -1063,13 +1131,13 @@ string Stair::WriteSubRoom() const
           char wall[CLENGTH] = "";
           geometry.append("\t\t<wall>\n");
           sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                    (w.GetPoint1().GetX()) * FAKTOR,
-                    (w.GetPoint1().GetY()) * FAKTOR,
+                    (w.GetPoint1()._x) * FAKTOR,
+                    (w.GetPoint1()._y) * FAKTOR,
                     GetElevation(w.GetPoint1())*FAKTOR);
           geometry.append(wall);
           sprintf(wall, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\"/>\n",
-                    (w.GetPoint2().GetX()) * FAKTOR,
-                    (w.GetPoint2().GetY()) * FAKTOR,
+                    (w.GetPoint2()._x) * FAKTOR,
+                    (w.GetPoint2()._y) * FAKTOR,
                     GetElevation(w.GetPoint2())*FAKTOR);
           geometry.append(wall);
           geometry.append("\t\t</wall>\n");
@@ -1082,12 +1150,12 @@ string Stair::WriteSubRoom() const
      Point pos = GetCentroid();
      char tmp_c[CLENGTH];
      sprintf(tmp_c, "\t\t<sphere centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" radius=\"%.2f\" color=\"100\" />\n"
-               , GetUp().GetX() * FAKTOR, GetUp().GetY() * FAKTOR,GetElevation(GetUp())*FAKTOR, 0.2*FAKTOR);
+               , GetUp()._x * FAKTOR, GetUp()._y * FAKTOR,GetElevation(GetUp())*FAKTOR, 0.2*FAKTOR);
      s.append(tmp_c);
 
      //add the subroom caption
      sprintf(tmp_c, "\t\t<label centerX=\"%.2f\" centerY=\"%.2f\" centerZ=\"%.2f\" text=\"%d\" color=\"100\" />\n"
-               , pos.GetX() * FAKTOR, pos.GetY() * FAKTOR,GetElevation(pos)*FAKTOR ,GetSubRoomID());
+               , pos._x * FAKTOR, pos._y * FAKTOR,GetElevation(pos)*FAKTOR ,GetSubRoomID());
      s.append(tmp_c);
 
      return s;
@@ -1101,7 +1169,7 @@ string Stair::WritePolyLine() const
 
      s.append("\t<Obstacle closed=\"1\" boundingbox=\"0\" class=\"1\">\n");
      for (unsigned int j = 0; j < _poly.size(); j++) {
-          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j].GetX()* FAKTOR,_poly[j].GetY()* FAKTOR);
+          sprintf(tmp, "\t\t<Vertex p_x = \"%.2lf\" p_y = \"%.2lf\"/>\n",_poly[j]._x* FAKTOR,_poly[j]._y* FAKTOR);
           s.append(tmp);
      }
      s.append("\t</Obstacle>\n");
@@ -1198,10 +1266,10 @@ bool Stair::ConvertLineToPoly(const vector<Line*>& goals)
      } else {
           char tmp[CLENGTH];
           double x1, y1, x2, y2;
-          x1 = firstOtherPoint->GetX();
-          y1 = firstOtherPoint->GetY();
-          x2 = aktPoint->GetX();
-          y2 = aktPoint->GetY();
+          x1 = firstOtherPoint->_x;
+          y1 = firstOtherPoint->_y;
+          x2 = aktPoint->_x;
+          y2 = aktPoint->_y;
           sprintf(tmp, "ERROR: \tStair::ConvertLineToPoly(): SubRoom %d Room %d Anfangspunkt ungleich Endpunkt!!!\n"
                     "\t(%f, %f) != (%f, %f)\n", GetSubRoomID(), GetRoomID(), x1, y1, x2, y2);
           Log->Write(tmp);
@@ -1270,25 +1338,6 @@ bool Stair::ConvertLineToPoly(const vector<Line*>& goals)
 //    }
 
      return true;
-}
-
-bool Stair::IsInSubRoom(const Point& ped) const
-{
-     bool rueck = false;
-     int N = (int) _poly.size();
-     int sum = 0;
-
-     for (int i = 0; i < N; i++)
-     {
-          Line l = Line(_poly[i], _poly[(i + 1) % N]);
-          Point s = l.LotPoint(ped);
-          if (l.IsInLineSegment(s))
-               sum++;
-     }
-     if (sum == 4)
-          rueck = true;
-
-     return rueck;
 }
 
 

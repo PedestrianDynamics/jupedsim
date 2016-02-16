@@ -29,7 +29,7 @@
 #include "SmokeSensor.h"
 #include "../NavigationGraph.h"
 #include "../../../geometry/Building.h"
-#include "../CognitiveMap.h"
+#include "../cognitiveMap/cognitivemap.h"
 #include "../../../pedestrian/Pedestrian.h"
 #include "../../../geometry/SubRoom.h"
 #include "../fire_mesh/FireMesh.h"
@@ -39,7 +39,8 @@
 SmokeSensor::SmokeSensor(const Building *b, const std::string &filepath, const double &updateintervall, const double &finalTime) : AbstractSensor(b)
 {
 
-    std::shared_ptr<FireMeshStorage> FMS(new FireMeshStorage(b,filepath,updateintervall,finalTime));
+    _FMStorage = std::make_shared<FireMeshStorage>(b,filepath,updateintervall,finalTime);
+    //Log.Write(FMS->get_FireMesh())
     Log->Write("INFO:\tInitialized FireMeshStorage (Smoke Sensor)");
 
 
@@ -57,21 +58,25 @@ std::string SmokeSensor::GetName() const
 void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitive_map) const
 {
     SubRoom * sub_room = building->GetRoom(pedestrian->GetRoomID())->GetSubRoom(pedestrian->GetSubRoomID());
-    GraphVertex * vertex = (*cognitive_map->GetNavigationGraph())[sub_room];
+    GraphVertex * vertex = (*cognitive_map->GetGraphNetwork()->GetNavigationGraph())[sub_room];
     const GraphVertex::EdgesContainer * edges = vertex->GetAllEdges();
     /// for every egde connected to the pedestrian's current vertex (room)
+
+
     for (auto &item : *edges)
     {
         /// first: find Mesh corresponding to current edge and current simTime. Secondly get knotvalue from that mesh depending
         /// on the current position of the pedestrian
-        double smokeFactor = _FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
-                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(),
-                                                                                                pedestrian->GetPos().GetY());
-        /// Set egde factor
+
+        double RiskTolerance = pedestrian->GetRiskTolerance();
+
+        double smokeFactor = 1 + (1-RiskTolerance)*_FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
+                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
+                                                                                                pedestrian->GetPos()._y);
+        /// Set Smoke factor
         item->SetFactor(smokeFactor,GetName());
+
     }
-
-
 
 
 //    const GraphVertex * smoked_room = NULL;

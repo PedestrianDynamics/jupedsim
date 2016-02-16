@@ -27,7 +27,7 @@
 
 
 #include "CompleteCognitiveMapCreator.h"
-#include "CognitiveMap.h"
+#include "./cognitiveMap/cognitivemap.h"
 #include <vector>
 #include <map>
 #include "../../geometry/Room.h"
@@ -49,14 +49,14 @@ CognitiveMap * CompleteCognitiveMapCreator::CreateCognitiveMap(const Pedestrian 
      {
           for(auto&& itr_subroom: itr_room.second->GetAllSubRooms())
           {
-               cm->Add(itr_subroom.second.get());
+               cm->GetGraphNetwork()->Add(itr_subroom.second.get());
           }
      }
 
      //Add crossings as edges
      for(auto&& itr_cross: _building->GetAllCrossings())
      {
-          cm->Add(itr_cross.second);
+          cm->GetGraphNetwork()->Add(itr_cross.second);
      }
 
      //Add transitions as edges
@@ -64,15 +64,15 @@ CognitiveMap * CompleteCognitiveMapCreator::CreateCognitiveMap(const Pedestrian 
      {
           if(itr_trans.second->IsExit())
           {
-               cm->AddExit(itr_trans.second);
+               cm->GetGraphNetwork()->AddExit(itr_trans.second);
           }
           else
           {
-               cm->Add(itr_trans.second);
+               cm->GetGraphNetwork()->Add(itr_trans.second);
           }
      }
-     ///RouteKnowlegde
-     /// Remembered routes and assoziations between rooms and doors
+     //RouteKnowlegde
+     // Remembered routes and assoziations between rooms and doors
      //cm->CreateRouteKnowlegde(ped);
 
      return cm;

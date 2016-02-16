@@ -203,7 +203,7 @@ public:
       * point with line l. This is exactly the same function
       * as @see IntersectionWith() but returns a double insteed.
       */
-     double GetIntersectionDistance(const Line & l ) const;
+     double GetDistanceToIntersectionPoint(const Line &l) const;
 
      /**
       * @return true if the segment intersects with the circle of radius r
@@ -277,8 +277,8 @@ public:
      double GetObstacleDeviationAngle(const std::vector<Wall>& owalls, const std::vector<Wall>& rwalls) const; 
 
      /**
-      * ???
-      * @param d
+      * Extend the line by d on both extremities. The line becomes larger by 2*d
+      * @param d:
       * @return
       */
      Line Enlarge(double d) const; 

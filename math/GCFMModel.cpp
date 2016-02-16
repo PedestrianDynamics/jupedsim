@@ -69,8 +69,38 @@ GCFMModel::~GCFMModel(void)
 }
 
 
-bool GCFMModel::Init (Building* building) const
+bool GCFMModel::Init (Building* building)
 {
+     if(dynamic_cast<DirectionFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionFloorfield done");
+     }
+
+     if(dynamic_cast<DirectionLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionLOCALFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionLOCALFloorfield done");
+     }
+
+     if(dynamic_cast<DirectionSubLocalFloorfield*>(_direction)){
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield starting ...");
+          //fix using defaults; @fixme ar.graf (pass params from argument parser to ctor?)
+          double _deltaH = 0.0625;
+          double _wallAvoidDistance = 0.4;
+          bool _useWallAvoidance = true;
+          dynamic_cast<DirectionSubLocalFloorfield*>(_direction)->Init(building, _deltaH, _wallAvoidDistance, _useWallAvoidance);
+          Log->Write("INFO:\t Init DirectionSubLOCALFloorfield done");
+     }
+
     const vector< Pedestrian* >& allPeds = building->GetAllPedestrians();
     for(unsigned int p=0;p<allPeds.size();p++)
     {
@@ -82,18 +112,15 @@ bool GCFMModel::Init (Building* building) const
               continue;
          }
 
-         Line* e = ped->GetExitLine();
-         const Point& e1 = e->GetPoint1();
-         const Point& e2 = e->GetPoint2();
-         Point target = (e1 + e2) * 0.5;
+         Point target = ped->GetExitLine()->LotPoint(ped->GetPos());
          Point d = target - ped->GetPos();
          double dist = d.Norm();
          if (dist != 0.0) {
-              cosPhi = d.GetX() / dist;
-              sinPhi = d.GetY() / dist;
+              cosPhi = d._x / dist;
+              sinPhi = d._y / dist;
          } else {
               Log->Write(
-                   "ERROR: \allPeds::Init() cannot initialise phi! "
+                   "ERROR: \tallPeds::Init() cannot initialise phi! "
                    "dist to target is 0\n");
               return false;
          }
@@ -106,7 +133,7 @@ bool GCFMModel::Init (Building* building) const
     return true;
 }
 
-void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building) const
+void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic)
 {
      double delta = 1.5;
 
@@ -120,15 +147,13 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
      int partSize = nSize / nThreads;
      int debugPed = -33;//10;
      //building->GetGrid()->HighlightNeighborhood(debugPed, building);
-
-
 #pragma omp parallel  default(shared) num_threads(nThreads)
      {
           vector< Point > result_acc = vector<Point > ();
           result_acc.reserve(2200);
 
           const int threadID = omp_get_thread_num();
-
+          
           int start = threadID*partSize;
           int end = (threadID + 1) * partSize - 1;
           if ((threadID == nThreads - 1)) end = nSize - 1;
@@ -169,7 +194,7 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                          continue;
                     // if(debugPed == ped->GetID())
                     // {
-                    //      fprintf(stdout, "t=%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1.GetX(), p1.GetY(), p2.GetX(), p2.GetY(), isVisible, ped->GetID(), ped1->GetID());
+                    //      fprintf(stdout, "t=%f     %f    %f    %f     %f   %d  %d  %d\n", time,  p1._x, p1._y, p2._x, p2._y, isVisible, ped->GetID(), ped1->GetID());
                     // }
                     //if they are in the same subroom
                     if (ped->GetUniqueRoomID() == ped1->GetUniqueRoomID()) {
@@ -191,12 +216,12 @@ void GCFMModel::ComputeNextTimeStep(double current, double deltaT, Building* bui
                Point acc = (fd + F_rep + repwall) / ped->GetMass();
 
                // if(ped->GetID() ==  debugPed){
-               //      printf("%f   %f    %f    %f   %f   %f\n", fd.GetX(), fd.GetY(), F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY());
+               //      printf("%f   %f    %f    %f   %f   %f\n", fd._x, fd._y, F_rep._x, F_rep._y, repwall._x, repwall._y);
 
                // }
                if(ped->GetID() == debugPed ) {
-                    printf("t=%f, Pos1 =[%f, %f]\n", current,ped->GetPos().GetX(), ped->GetPos().GetY());
-                    printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc.GetX(), acc.GetY(), fd.GetX(), fd.GetY(), F_rep.GetX(), F_rep.GetY(), repwall.GetX(), repwall.GetY());
+                    printf("t=%f, Pos1 =[%f, %f]\n", current,ped->GetPos()._x, ped->GetPos()._y);
+                    printf("acc= %f %f, fd= %f, %f,  repPed = %f %f, repWall= %f, %f\n", acc._x, acc._y, fd._x, fd._y, F_rep._x, F_rep._y, repwall._x, repwall._y);
                }
 
                result_acc.push_back(acc);
@@ -357,10 +382,10 @@ Point GCFMModel::ForceRepPed(Pedestrian* ped1, Pedestrian* ped2) const
           px = hermite_interp(dist_eff, smax, dist_intpol_left, _maxfPed*f, f, 0, f1);
           F_rep = ep12 * px;
      }
-     if (F_rep.GetX() != F_rep.GetX() || F_rep.GetY() != F_rep.GetY()) {
+     if (F_rep._x != F_rep._x || F_rep._y != F_rep._y) {
           char tmp[CLENGTH];
           sprintf(tmp, "\nNAN return ----> p1=%d p2=%d Frepx=%f, Frepy=%f\n", ped1->GetID(),
-                  ped2->GetID(), F_rep.GetX(), F_rep.GetY());
+                  ped2->GetID(), F_rep._x, F_rep._y);
           Log->Write(tmp);
           Log->Write("ERROR:\t fix this as soon as possible");
           printf("K_ij=%f\n", K_ij);
@@ -386,7 +411,6 @@ inline Point GCFMModel::ForceRepRoom(Pedestrian* ped, SubRoom* subroom) const
      {
           f += ForceRepWall(ped, wall);
      }
-
      //then the obstacles
      for(const auto & obst: subroom->GetAllObstacles())
      {
@@ -446,7 +470,7 @@ inline Point GCFMModel::ForceRepWall(Pedestrian* ped, const Line& w) const
 
      if(ped->GetID() == -33 )
      {
-          printf("wall = [%f, %f]--[%f, %f] F= [%f %f]\n", w.GetPoint1().GetX(),  w.GetPoint1().GetY(), w.GetPoint2().GetX(), w.GetPoint2().GetY(), F.GetX(), F.GetY());
+          printf("wall = [%f, %f]--[%f, %f] F= [%f %f]\n", w.GetPoint1()._x,  w.GetPoint1()._y, w.GetPoint2()._x, w.GetPoint2()._y, F._x, F._y);
      }
 
      return  F; //line --> l != 0
@@ -484,7 +508,7 @@ Point GCFMModel::ForceRepStatPoint(Pedestrian* ped, const Point& p, double l, do
      bla = (tmp + fabs(tmp));
      if (!bla) // Fussgaenger nicht im Sichtfeld
           return Point(0.0, 0.0);
-     if (fabs(v.GetX()) < J_EPS && fabs(v.GetY()) < J_EPS) // v==0)
+     if (fabs(v._x) < J_EPS && fabs(v._y) < J_EPS) // v==0)
           return Point(0.0, 0.0);
      double K_ij;
      K_ij= 0.5 * bla / v.Norm(); // K_ij
@@ -609,7 +633,7 @@ double GCFMModel::GetDistEffMaxWall() const
      return _distEffMaxWall;
 }
 
-string GCFMModel::GetDescription() const
+string GCFMModel::GetDescription()
 {
      string rueck;
      char tmp[CLENGTH];

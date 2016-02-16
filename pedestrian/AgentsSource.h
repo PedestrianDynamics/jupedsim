@@ -86,6 +86,13 @@ public:
      void RemoveAgentsFromPool(std::vector<Pedestrian*>& peds, int count);
 
      /**
+      * Add the agents to the pool. This might be important in the case the removed agents could not
+      * be placed correctly. They can be requeued using this function.
+      * @param peds
+      */
+     void AddAgentsToPool(std::vector<Pedestrian*>& peds);
+
+     /**
       * @return the number of agents remaining
       */
      int GetPoolSize() const;
@@ -115,7 +122,7 @@ private:
      int _maxAgents=0;
      int _agentsGenerated=0;
      int _groupID=-1;
-     double _boundaries [4] = {0,0,0,0};
+	 double _boundaries[4];// = { 0, 0, 0, 0 };
      std::string _caption="no caption";
      std::vector<Pedestrian*> _agents;
      std::shared_ptr<StartDistribution> _startDistribution;

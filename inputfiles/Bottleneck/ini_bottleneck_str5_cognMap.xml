@@ -8,7 +8,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	<seed>12542</seed>
     <max_sim_time>900</max_sim_time> 
 	<!-- geometry file -->
-	<geometry>bottleneck_nhl.xml</geometry>
+	<geometry>bottleneck.xml</geometry>
 	<!-- traectories file and format -->
 	<trajectories format="xml-plain" fps="8">
 		<file location="trajectorien_1.2_bottleneck.xml" />
@@ -45,7 +45,7 @@ xsi:noNamespaceSchemaLocation="http://134.94.2.137/jps_ini_core.xsd">
 	</routing>
 
 	<!--persons information and distribution -->
-	<agents operational_model_id="1">
+	<agents operational_model_id="2">
 		<agents_distribution>
 			<group group_id="2" agent_parameter_id="1" room_id="1" subroom_id="0" number="60" goal_id="0" router_id="1"/>
 			<!-- <group group_id="0" room_id="0" subroom_id="2" number="4" goal_id="0" router_id="1" route_id="" /> -->

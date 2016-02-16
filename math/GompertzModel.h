@@ -97,7 +97,7 @@ private:
       *
       * @return Point
       */
-     Point ForceRepWall(Pedestrian* ped, const Line& l) const;
+     Point ForceRepWall(Pedestrian* ped, const Line& l, const Point& centroid, bool inside) const;
 
 public:
 
@@ -166,13 +166,13 @@ public:
      /**
       * @return all model parameters in a nicely formatted string
       */
-     virtual std::string GetDescription() const;
+     virtual std::string GetDescription();
 
      /**
       * initialize the phi angle
       * @param building
       */
-     virtual bool Init (Building* building) const;
+     virtual bool Init (Building* building);
 
      /**
       * Compute the next simulation step
@@ -181,7 +181,7 @@ public:
       * @param deltaT the next timestep
       * @param building the geometry object
       */
-     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building) const;
+     virtual void ComputeNextTimeStep(double current, double deltaT, Building* building, int periodic);
 };
 
 

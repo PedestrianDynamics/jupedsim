@@ -128,8 +128,8 @@ int CutCircleCircle(Point mp1, double r1, Point mp2, double r2,
 {
      double d, dx, dy, a, h;
 
-     dx = mp2.GetX() - mp1.GetX();
-     dy = mp2.GetY() - mp1.GetY();
+     dx = mp2._x - mp1._x;
+     dy = mp2._y - mp1._y;
 
      d=(mp2-mp1).Norm();
 
@@ -145,11 +145,11 @@ int CutCircleCircle(Point mp1, double r1, Point mp2, double r2,
 
      h = sqrt (r1 * r1 - a * a);
 
-     sp1.SetX(mp1.GetX() + (a/d) * dx - (h/d) * dy);
-     sp1.SetY(mp1.GetY() + (a/d) * dy + (h/d) * dx);
+     sp1._x = (mp1._x + (a/d) * dx - (h/d) * dy);
+     sp1._y = (mp1._y + (a/d) * dy + (h/d) * dx);
 
-     sp2.SetX(mp1.GetX() + (a/d) * dx + (h/d) * dy);
-     sp2.SetY(mp1.GetY() + (a/d) * dy - (h/d) * dx);
+     sp2._x = (mp1._x + (a/d) * dx + (h/d) * dy);
+     sp2._y = (mp1._y + (a/d) * dy - (h/d) * dx);
 
      return(0);
 }
@@ -535,7 +535,7 @@ vector<MeshEdge*> MeshRouter::AStar(Pedestrian* p,int& status)const
           Log->Write("Startpoint not found");
           std::cout.precision(10);
           std::cout.setf( std::ios::fixed, std:: ios::floatfield );
-          cout<<"startpoint: "<< p_start.GetX()<<" "<<p_start.GetY()<<"of pedestrian: "<<p->GetID()<<endl;
+          cout<<"startpoint: "<< p_start._x<<" "<<p_start._y<<"of pedestrian: "<<p->GetID()<<endl;
           exit(EXIT_FAILURE);
      }
      int c_goal_id;
@@ -786,7 +786,7 @@ void MeshRouter::FixMeshEdges()
                //int door = itr->second->GetUniqueID();
                Transition* cross = itr->second;
                //const Point& centre = cross->GetCentre();
-               //double center[2] = { centre.GetX(), centre.GetY() };
+               //double center[2] = { centre._x, centre._y };
                if(edge->operator ==(*cross)) {
                     edge->SetRoom1(cross->GetRoom1());
                     //edge->SetRoom2(cross->GetRoom2());
@@ -819,7 +819,7 @@ void MeshRouter::FixMeshEdges()
      //                      int door = itr->second->GetUniqueID();
      //                      Transition* cross = itr->second;
      //                      const Point& centre = cross->GetCentre();
-     //                      double center[2] = { centre.GetX(), centre.GetY() };
+     //                      double center[2] = { centre._x, centre._y };
      //                      if(edge->operator ==(*cross)){
      //                              edge->SetRoom1(cross->GetRoom1());
      //                              edge->SetSubRoom1(cross->GetSubRoom1());

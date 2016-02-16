@@ -112,7 +112,7 @@ protected:
       * @obsolete
       * return a random exit
       */
-     int GetBestDefaultRandomExit(Pedestrian* p);
+     virtual int GetBestDefaultRandomExit(Pedestrian* p);
 
      /**
       * Generate a navigation mesh based on delauney triangulation
@@ -124,6 +124,7 @@ protected:
       * Triangulate the geometry and generate the navigation lines
       */
      void TriangulateGeometry();
+
 
      /**
       *
@@ -171,22 +172,22 @@ private:
      /**
       * @return true if the supplied line is a wall.
       */
-     bool IsWall(const Line& line) const;
+     bool IsWall(const Line& line, const std::vector<SubRoom*>& subrooms) const;
 
      /**
       * @return true if the supplied line is a Crossing.
       */
-     bool IsCrossing(const Line& line) const;
+     bool IsCrossing(const Line& line, const std::vector<SubRoom*>& subrooms) const;
 
      /**
       * @return true if the supplied line is a Transition.
       */
-     bool IsTransition(const Line& line) const;
+     bool IsTransition(const Line& line, const std::vector<SubRoom*>& subrooms) const;
 
      /**
       * @return true if the supplied line is a navigation line.
       */
-     bool IsHline(const Line& line) const;
+     bool IsHline(const Line& line, const std::vector<SubRoom*>& subrooms) const;
 
      /**
       * @return the minimum distance between the point and any line in the subroom.
@@ -221,6 +222,8 @@ private:
      std::uniform_real_distribution<double> _rdDistribution;
 
 protected:
+     // store all subrooms at the same elevation
+     std::map<double, std::vector<SubRoom*> > _subroomsAtElevation;
      std::map <int, AccessPoint*> _accessPoints;
      Building *_building;
 

@@ -27,82 +27,26 @@
 
 #include <vector>
 #include <string>
+#include <random>
 
 class Building;
 class Router;
 class GlobalRouter;
 class QuickestPathRouter;
 class RoutingEngine;
+class Event;
 
 extern OutputHandler* Log;
 
 class EventManager
 {
-private:
-     std::vector<double> _event_times;
-     std::vector<std::string> _event_types;
-     std::vector<std::string> _event_states;
-     std::vector<int> _event_ids;
-     std::string _projectFilename;
-     std::string _projectRootDir;
-     Building *_building;
-     FILE *_file;
-     bool _dynamic;
-     int _eventCounter;
-     long int _lastUpdateTime;
-     //information propagation time in seconds
-     int _updateFrequency;
-     //information propagation range in meters
-     int _updateRadius;
-     //save the router corresponding to the actual state of the building
-     std::map<std::string, RoutingEngine*> _eventEngineStorage;
-     //save the available routers defined in the simulation
-     std::vector<RoutingStrategy> _availableRouters;
-
-private:
-     /**
-      * collect the close doors and generate a new graph
-      * @param _building
-      */
-     bool CreateRoutingEngine(Building* _b, int first_engine=false);
-
-     /**
-      * Create a router corresponding to the given strategy
-      * @param strategy
-      * @return a router/NULL for invalid strategies
-      */
-     Router * CreateRouter(const RoutingStrategy& strategy);
-
-     /**
-      * Update the knowledge about closed doors.
-      * Each pedestrian who is xx metres from a closed door,
-      * will save that information
-      * @param _b, the building object
-      */
-     bool UpdateAgentKnowledge(Building* _b);
-
-     /**
-      * Merge the knowledge of the two pedestrians.
-      * The information with the newest timestamp
-      * is always accepted with a probability of one.
-      * @param p1, first pedestrian
-      * @param p2, second pedestrian
-      */
-     void MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
-
-     /**
-      * Update the pedestrian route based on the new information
-      * @param p1
-      * @return
-      */
-     bool UpdateRoute(Pedestrian* p1);
-
 public:
-     ///constructor
-     EventManager(Building *_b);
+     /**
+      * Constructor
+      */
+     EventManager(Building *_b, unsigned int seed);
 
      /**
-      *
       * destructor
       */
      ~EventManager();
@@ -124,11 +68,6 @@ public:
       */
      void ReadEventsTxt(double time);
 
-     /**
-      * Process the events at runtime
-      * @param time
-      */
-     void Update_Events(double time);
 
      //process the event using the current time stamp
      //from the pedestrian class
@@ -136,6 +75,92 @@ public:
      //Eventhandling
      void CloseDoor(int id);
      void OpenDoor(int id);
-     void ChangeRouting(int id, const std::string& state);
+     //void ChangeRouting(int id, const std::string& state);
      void GetEvent(char* c);
+
+
+private:
+     /**
+      * collect the close doors and generate a new graph
+      * @param _building
+      */
+     bool CreateRoutingEngine(Building* _b, int first_engine=false);
+
+     /**
+      * Create a router corresponding to the given strategy
+      * @param strategy
+      * @return a router/NULL for invalid strategies
+      */
+     Router * CreateRouter(const RoutingStrategy& strategy);
+
+     /**
+      * Update the knowledge about closed doors.
+      * Each pedestrian who is xx metres from a closed door,
+      * will save that information
+      * @param _b, the building object
+      */
+     bool DisseminateKnowledge(Building* _b);
+
+     /**
+      * Gather knowledge about the state of the doors.
+      * Which is going to be disseminated afterwards.
+      * @param _b
+      * @return
+      */
+     bool CollectNewKnowledge(Building* _b);
+
+     /**
+      * Synchronize the knowledge of the two pedestrians.
+      * The information with the newest timestamp
+      * is always accepted with a probability of one.
+      * @param p1, first pedestrian
+      * @param p2, second pedestrian
+      * @return true if the information could be synchronized
+      */
+     bool SynchronizeKnowledge(Pedestrian* p1, Pedestrian* p2);
+
+     /**
+      * Merge the knowledge of the two pedestrians. Ped1 is informing ped2 who depending
+      * on his risk awareness probability could accept of refuse the new information.
+      * @param p1, the informant with the new information
+      * @param p2, the pedestrian receiving the information
+      * @return true in the case p2 accepted the new information
+      */
+     bool MergeKnowledge(Pedestrian* p1, Pedestrian* p2);
+
+     bool MergeKnowledgeUsingProbability(Pedestrian* p1, Pedestrian* p2);
+
+
+     /**
+      * Update the pedestrian route based on the new information
+      * @param p1
+      * @return
+      */
+     bool UpdateRoute(Pedestrian* p1);
+
+     void CreateSomeEngines();
+
+private:
+
+     std::vector<Event> _events;
+     std::string _projectFilename;
+     std::string _projectRootDir;
+     Building *_building;
+     FILE *_file;
+     bool _dynamic;
+     int _eventCounter;
+     long int _lastUpdateTime;
+     //information propagation time in seconds
+     int _updateFrequency;
+     //information propagation range in meters
+     int _updateRadius;
+     //save the router corresponding to the actual state of the building
+     std::map<std::string, RoutingEngine*> _eventEngineStorage;
+     //save the available routers defined in the simulation
+     std::vector<RoutingStrategy> _availableRouters;
+
+     // random number generator
+     std::mt19937 _rdGenerator;
+     std::uniform_real_distribution<double> _rdDistribution;
+//     std::uniform_real_distribution<double> d(0, 1);
 };

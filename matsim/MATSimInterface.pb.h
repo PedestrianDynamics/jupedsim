@@ -38,29 +38,29 @@ void protobuf_AddDesc_MATSimInterface_2eproto();
 void protobuf_AssignDesc_MATSimInterface_2eproto();
 void protobuf_ShutdownFile_MATSimInterface_2eproto();
 
-class MATSim2ExternPutAgent;
-class MATSim2ExternPutAgent_Agent;
-class MATSim2ExternHasSpace;
-class MATSim2ExternHasSpaceConfirmed;
-class MATSim2ExternPutAgentConfirmed;
+class AgentsStuck;
+class AgentsStuckConfirmed;
 class Extern2MATSim;
-class Extern2MATSim_Agent;
+class Extern2MATSimConfirmed;
 class Extern2MATSimTrajectories;
 class Extern2MATSimTrajectories_Agent;
-class MATSim2ExternTrajectoriesReceived;
-class Extern2MATSimConfirmed;
-class ExternSimStepFinished;
-class ExternSimStepFinishedReceived;
+class Extern2MATSim_Agent;
+class ExternAfterSim;
+class ExternAfterSimConfirmed;
 class ExternDoSimStep;
 class ExternDoSimStepReceived;
 class ExternOnPrepareSim;
 class ExternOnPrepareSimConfirmed;
-class ExternAfterSim;
-class ExternAfterSimConfirmed;
-class AgentsStuck;
-class AgentsStuckConfirmed;
+class ExternSimStepFinished;
+class ExternSimStepFinishedReceived;
 class ExternalConnect;
 class ExternalConnectConfirmed;
+class MATSim2ExternHasSpace;
+class MATSim2ExternHasSpaceConfirmed;
+class MATSim2ExternPutAgent;
+class MATSim2ExternPutAgentConfirmed;
+class MATSim2ExternPutAgent_Agent;
+class MATSim2ExternTrajectoriesReceived;
 class MaximumNumberOfAgents;
 class MaximumNumberOfAgentsConfirmed;
 
@@ -855,10 +855,10 @@ class Extern2MATSimTrajectories : public ::google::protobuf::Message {
   const ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent& agent(int index) const;
   ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* mutable_agent(int index);
   ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* add_agent();
-  const ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >&
-      agent() const;
   ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >*
       mutable_agent();
+  const ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >&
+      agent() const;
 
   // @@protoc_insertion_point(class_scope:org.matsim.hybrid.Extern2MATSimTrajectories)
  private:
@@ -2239,7 +2239,7 @@ inline bool MATSim2ExternPutAgent::has_agent() const {
   return !_is_default_instance_ && agent_ != NULL;
 }
 inline void MATSim2ExternPutAgent::clear_agent() {
-  if (agent_ != NULL) delete agent_;
+  if (GetArenaNoVirtual() == NULL && agent_ != NULL) delete agent_;
   agent_ = NULL;
 }
 inline const ::org::matsim::hybrid::MATSim2ExternPutAgent_Agent& MATSim2ExternPutAgent::agent() const {
@@ -2439,7 +2439,7 @@ inline bool Extern2MATSim::has_agent() const {
   return !_is_default_instance_ && agent_ != NULL;
 }
 inline void Extern2MATSim::clear_agent() {
-  if (agent_ != NULL) delete agent_;
+  if (GetArenaNoVirtual() == NULL && agent_ != NULL) delete agent_;
   agent_ = NULL;
 }
 inline const ::org::matsim::hybrid::Extern2MATSim_Agent& Extern2MATSim::agent() const {
@@ -2596,15 +2596,15 @@ inline ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent* Extern2MATSimTraj
   // @@protoc_insertion_point(field_add:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
   return agent_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >&
-Extern2MATSimTrajectories::agent() const {
-  // @@protoc_insertion_point(field_list:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
-  return agent_;
-}
 inline ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >*
 Extern2MATSimTrajectories::mutable_agent() {
   // @@protoc_insertion_point(field_mutable_list:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
   return &agent_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::org::matsim::hybrid::Extern2MATSimTrajectories_Agent >&
+Extern2MATSimTrajectories::agent() const {
+  // @@protoc_insertion_point(field_list:org.matsim.hybrid.Extern2MATSimTrajectories.agent)
+  return agent_;
 }
 
 // -------------------------------------------------------------------
@@ -2853,6 +2853,54 @@ inline void MaximumNumberOfAgents::set_number(::google::protobuf::int32 value) {
 // MaximumNumberOfAgentsConfirmed
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 

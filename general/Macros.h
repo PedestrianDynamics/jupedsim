@@ -25,7 +25,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _MACROS_H
 #define _MACROS_H
@@ -42,8 +42,18 @@
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
-#endif 
+#endif
 
+// define some colors
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+#define RESET "\033[0m"
 
 // should be true only when using this file in the simulation core
 #define _SIMULATOR 1
@@ -61,19 +71,13 @@
 #endif
 
 // precision error
-#define J_EPS 0.001
+#define J_EPS  0.001//0.001
 #define J_EPS_EVENT 0.00001 //zum pruefen des aktuellen Zeitschrittes auf events
 #define J_EPS_DIST 0.05// [m]
 
 #define J_EPS_GOAL 0.005 /// [m] Abstand zum Ziel, damit Fußgänger immer zu einem Raum gehört
 #define J_TOLERANZ 0.03  /// [m] Toleranz beim erstellen der Linien
 #define J_EPS_V 0.1 /// [m/s] wenn  v<EPS_V wird mit 0 gerechnet
-
-// routing macros
-#define J_QUEUE_VEL_THRESHOLD_NEW_ROOM 0.7 // [m/s] maximum speed to be considered in a queue while looking for a reference in a new room
-#define J_QUEUE_VEL_THRESHOLD_JAM 0.2 // [m/s] maximum speed to be considered in a queue while looking for a reference in a jam situation
-#define CBA_THRESHOLD 0.15
-#define OBSTRUCTION 4
 
 // Length of array
 #define CLENGTH 1000
@@ -119,15 +123,17 @@ enum RoutingStrategy {
      ROUTING_DUMMY,
      ROUTING_SAFEST,
      ROUTING_COGNITIVEMAP,
+     ROUTING_FLOORFIELD,
      ROUTING_UNDEFINED =-1
 };
 
 enum OperativModels {
     MODEL_GFCM=1,
     MODEL_GOMPERTZ,
+    MODEL_VELOCITY,
+    MODEL_GRADIENT
 //    MODEL_ORCA,
 //    MODEL_CFM,
-//    MODEL_VELO
 //    MODEL_GNM
 };
 
@@ -214,6 +220,14 @@ inline std::string concatenate(std::string const& name, int i) {
      return s.str();
 }
 
+inline void ReplaceStringInPlace(std::string& subject, const std::string& search,
+                          const std::string& replace) {
+    size_t pos = 0;
+    while((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
 //**************************************************************
 //useful colors attributes for debugging
 //**************************************************************

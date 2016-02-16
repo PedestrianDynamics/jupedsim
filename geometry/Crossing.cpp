@@ -36,6 +36,7 @@ using namespace std;
 Crossing::Crossing()
 {
      _id = -1;
+     _isOpen=true;
 }
 
 Crossing::~Crossing()
@@ -74,12 +75,22 @@ bool Crossing::IsExit() const
 
 bool Crossing::IsOpen() const
 {
-     return true;
+     return _isOpen;
 }
 
 bool Crossing::IsTransition() const
 {
      return false;
+}
+
+void Crossing::Close()
+{
+     _isOpen = false;
+}
+
+void Crossing::Open()
+{
+     _isOpen = true;
 }
 
 bool Crossing::IsInSubRoom(int subroomID) const
@@ -118,8 +129,8 @@ void Crossing::WriteToErrorLog() const
 {
      string s;
      char tmp[CLENGTH];
-     sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1().GetX(),
-             GetPoint1().GetY(), GetPoint2().GetX(), GetPoint2().GetY());
+     sprintf(tmp, "\t\tCROSS: %d (%f, %f) -- (%f, %f)\n", GetID(), GetPoint1()._x,
+             GetPoint1()._y, GetPoint2()._x, GetPoint2()._y);
      s.append(tmp);
      sprintf(tmp, "\t\t\t\tSubRoom: %d <-> SubRoom: %d\n", GetSubRoom1()->GetSubRoomID(),
              GetSubRoom2()->GetSubRoomID());
@@ -137,13 +148,13 @@ string Crossing::GetDescription() const
      geometry.append(tmp);
      //geometry.append("\t\t<door color=\"250\">\n");
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-             (GetPoint1().GetX()) * FAKTOR,
-             (GetPoint1().GetY()) * FAKTOR,
+             (GetPoint1()._x) * FAKTOR,
+             (GetPoint1()._y) * FAKTOR,
              _subRoom1->GetElevation(GetPoint1())*FAKTOR);
      geometry.append(tmp);
      sprintf(tmp, "\t\t\t<point xPos=\"%.2f\" yPos=\"%.2f\" zPos=\"%.2f\" />\n",
-             (GetPoint2().GetX()) * FAKTOR,
-             (GetPoint2().GetY()) * FAKTOR,
+             (GetPoint2()._x) * FAKTOR,
+             (GetPoint2()._y) * FAKTOR,
              _subRoom1->GetElevation(GetPoint2())*FAKTOR);
      geometry.append(tmp);
      geometry.append("\t\t</crossing>\n");

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE(RoomTest)
 
 BOOST_AUTO_TEST_CASE(ROOM_CONST_SET_GET_TEST)
 {
-     BOOST_MESSAGE("starting const_set_get test");
+     BOOST_TEST_MESSAGE("starting const_set_get test");
      Room R1;
      for (int i = 1; i < 10; ++i)
      {
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(ROOM_CONST_SET_GET_TEST)
           BOOST_CHECK(R2.GetEgressTime() == i * 10.0 / 3);
           BOOST_CHECK(R2.GetState() == i % 2);
      }
-     BOOST_MESSAGE("Leaving const_set_get test");
+     BOOST_TEST_MESSAGE("Leaving const_set_get test");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

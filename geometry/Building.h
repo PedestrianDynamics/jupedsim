@@ -24,7 +24,7 @@
  *
  *
  **/
- 
+
 
 #ifndef _BUILDING_H
 #define _BUILDING_H
@@ -98,12 +98,15 @@ public:
      Room* GetRoom(std::string caption)const;
 
      Transition* GetTransition(std::string caption) const;
-     Transition* GetTransition(int id) ;
+     Transition* GetTransition(int id) const;
 
      /**
-      * Not implemented
+      * Returns Crossing with a specified ID
+      *
+      * @param ID of Crossing: int
+      * @return Pointer of Crossing
       */
-     Crossing* GetCrossing(int id);
+     Crossing* GetCrossing(int ID);
 
      /**
       * Not implemented
@@ -115,7 +118,7 @@ public:
       * @param uid ,the unique identifier
       * @return NULL if no exists with that identifier.
       */
-     SubRoom* GetSubRoomByUID( int uid);
+     SubRoom* GetSubRoomByUID( int uid) const;
 
      /**
       * @return true if the two segments are visible from each other.
@@ -170,10 +173,10 @@ public:
      const std::map<int, Hline*>& GetAllHlines() const;
      const std::map<int, Goal*>& GetAllGoals() const;
 
-     void AddCrossing(Crossing* line);
-     void AddTransition(Transition* line);
-     void AddHline(Hline* line);
-     void AddGoal(Goal* goal);
+     bool AddCrossing(Crossing* line);
+     bool AddTransition(Transition* line);
+     bool AddHline(Hline* line);
+     bool AddGoal(Goal* goal);
 
      const std::string& GetProjectRootDir() const;
      const std::string& GetProjectFilename() const;
@@ -183,7 +186,7 @@ public:
 
      /**
       * Load and parse the geometry file into the building object.
-      * If no geometry file is provided, one is searched in the the project file
+      * If no geometry file is provided, one is searched in the project file
       *
       * @param filename, the geometry file
       */
@@ -206,6 +209,12 @@ public:
       * output user specific informations.
       */
      bool SanityCheck();
+
+     /**
+      * Triangulate the geometry
+      */
+
+     bool Triangulate();
 
 
 private:

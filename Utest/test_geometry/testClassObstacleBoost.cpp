@@ -48,11 +48,11 @@ struct Handler {
      ~ Handler() {delete Log;}
 };
 
-BOOST_GLOBAL_FIXTURE(Handler)
+BOOST_GLOBAL_FIXTURE(Handler);
 
 BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
 {
-     BOOST_MESSAGE("starting obstacle_Constr_setGet_Test");
+     BOOST_TEST_MESSAGE("starting obstacle_Constr_setGet_Test");
      std::srand(std::time(0));
      const double PI = 3.14159265358979323846;
      Obstacle obs1;
@@ -73,12 +73,12 @@ BOOST_AUTO_TEST_CASE(Obstacle_Constr_setGet_Test)
           BOOST_CHECK(obs1.GetId() == (i-1));
           BOOST_CHECK(obs1.GetAllWalls() == walls_test);
      }
-     BOOST_MESSAGE("Leaving obstacle_Constr_setGet_Test");
+     BOOST_TEST_MESSAGE("Leaving obstacle_Constr_setGet_Test");
 }
 /*
 BOOST_FIXTURE_TEST_CASE(Obstacle_whichQuad_test, Obstacle)
 {
-     BOOST_MESSAGE("starting obstacle which_quad test");
+     BOOST_TEST_MESSAGE("starting obstacle which_quad test");
      Point vertex;
      Point hitPos;
      Obstacle obs;
@@ -103,12 +103,12 @@ BOOST_FIXTURE_TEST_CASE(Obstacle_whichQuad_test, Obstacle)
           BOOST_CHECK(obs.WhichQuad(vertex, hitPos) == 4);
           
      }
-     BOOST_MESSAGE("Leaving obstacle which_quad test");
+     BOOST_TEST_MESSAGE("Leaving obstacle which_quad test");
 } */
 
 BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
 {
-     BOOST_MESSAGE("starting obstacle contains test");
+     BOOST_TEST_MESSAGE("starting obstacle contains test");
      Point P1(0, 0);
      Point P2(0, 10);
      Point P3(10, 10);
@@ -144,12 +144,12 @@ BOOST_AUTO_TEST_CASE(Obstacle_Contains_test)
      for (int i = 1; i < 10; ++i)
           BOOST_CHECK(obs1.Contains(Point(-i, i*i)) == false);
      
-     BOOST_MESSAGE("Leaving obstacle contains test");
+     BOOST_TEST_MESSAGE("Leaving obstacle contains test");
 }
 
 BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
 {
-     BOOST_MESSAGE("starting obstacle ConvertLineToPoly test");
+     BOOST_TEST_MESSAGE("starting obstacle ConvertLineToPoly test");
      Point P1;
      Point P2(2, 2);
      Point P3(2, 0);
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_ConvertLineToPoly_Test)
 
 BOOST_AUTO_TEST_CASE(ConverLineToPoly_intersect_wall_test)
 {
-	BOOST_MESSAGE("starting Obstacle ConverLineToPoly intersecting wall test");
+	BOOST_TEST_MESSAGE("starting Obstacle ConverLineToPoly intersecting wall test");
 	Point P1;
 	Point P2(2, 2);
 	Point P3(2, 0);
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(ConverLineToPoly_intersect_wall_test)
 
 BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
 {
-     BOOST_MESSAGE("starting obstacle GetCentroid & intersectWithLine test");
+     BOOST_TEST_MESSAGE("starting obstacle GetCentroid & intersectWithLine test");
      for (int i = 0; i < 10; ++i) {
           Point P1(i, i);
           Point P2(i+10, i);
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(Obstacle_GetCentroid_Test)
           Line L1(P3, P4);
           BOOST_CHECK(obs1.IntersectWithLine(L1) == true);          
      }
-     BOOST_MESSAGE("Leaving obstacle GetCentroid & IntersectWithLine test");
+     BOOST_TEST_MESSAGE("Leaving obstacle GetCentroid & IntersectWithLine test");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

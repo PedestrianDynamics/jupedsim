@@ -6,25 +6,26 @@
   <seed>12542</seed>
   <!-- geometry file -->
   <geometry>hybrid_hall_geo.xml</geometry>
-  <max_sim_time>300</max_sim_time>
+  <max_sim_time>2000</max_sim_time>
 
   <!-- trajectories file and format -->
-  <trajectories format="xml-plain" fps="8">
-    <file location="hybrid_hall_trajectories.xml" />
-    <socket1 hostname="127.0.0.1" port="8989" />
+  <trajectories format="xml-plain" fps="16">
+    <file location="hybrid_hall_traj.xml" />
+    <socket_ hostname="127.0.0.1" port="8989" />
   </trajectories>
 
   <!-- Parameters for the hybrid (matsim) server mode -->
-  <hybrid_simulation server="zam763" port="9999" />
+  <hybrid_simulation_ server="zam763" port="9999" />
   <!--<hybrid_simulation server="zam597" port="9999" />-->
 
   <!-- where to store the logs -->
-  <!--<logfile>outputfiles/log.txt</logfile> -->
+  <!--<logfile>outputfiles/log.txt</logfile>-->
 
   <!-- traffic information: e.g closed doors or smoked rooms -->
   <traffic_constraints>
     <!-- doors states are: close or open -->
     <doors>
+	<door trans_id="5" caption="exit" state="close" />
     </doors>
   </traffic_constraints>
 
@@ -50,11 +51,11 @@
       </goal>
       <goal id="2" final="true" caption="goal2">
         <polygon>
-          <vertex px="12" py="2.8" />
-          <vertex px="13" py="2.8" />
-          <vertex px="13" py="6.4" />
-          <vertex px="12" py="6.4" />
-          <vertex px="12" py="2.8" />
+          <vertex px="16" py="2.8" />
+          <vertex px="17" py="2.8" />
+          <vertex px="17" py="6.4" />
+          <vertex px="16" py="6.4" />
+          <vertex px="16" py="2.8" />
         </polygon>
       </goal>
       <goal id="4" final="true" caption="goal4">
@@ -70,7 +71,7 @@
   </routing>
 
   <!--persons information and distribution -->
-  <agents operational_model_id="2">
+  <agents operational_model_id="3">
     <agents_distribution>
       <group group_id="0" room_id="0" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" x_min="3" x_max="5" y_min="3" y_max="5" />
       <group group_id="1" room_id="1" subroom_id="0" number="0" router_id="1" agent_parameter_id="1" />
@@ -84,10 +85,10 @@
     </agents_distribution>
 
     <agents_sources><!-- frequency in persons/seconds -->
-      <source id="1" frequency="1" agents_max="50" group_id="0" caption="source 1" />
-      <source id="2" frequency="1" agents_max="5" group_id="2" caption="source 2" />
-      <source id="3" frequency="1" agents_max="5" group_id="3" caption="source 3" />
-      <source id="4" frequency="1" agents_max="5" group_id="4" caption="source 4" />
+      <source id="1" frequency="6" agents_max="500" group_id="6" caption="source 1" />
+      <source_ id="2" frequency="10" agents_max="50" group_id="2" caption="source 2" />
+      <source_ id="3" frequency="10" agents_max="50" group_id="3" caption="source 3" />
+      <source_ id="4" frequency="10" agents_max="50" group_id="4" caption="source 4" />
     </agents_sources>
 
   </agents>
@@ -98,7 +99,7 @@
         <solver>euler</solver>
         <stepsize>0.001</stepsize>
         <exit_crossing_strategy>4</exit_crossing_strategy>
-        <linkedcells enabled="true" cell_size="2.2" />
+        <linkedcells enabled="true" cell_size="2.3" />
         <force_ped nu="0.3" dist_max="3" disteff_max="2" interpolation_width="0.1" />
         <force_wall nu="0.2" dist_max="3" disteff_max="2" interpolation_width="0.1" />
       </model_parameters>
@@ -146,6 +147,37 @@
         <atau mu="0.5" sigma="0.001" />
       </agent_parameters>
     </model>
+    
+     <model operational_model_id="3" description="Tordeux2015">
+      <model_parameters>
+        <solver>euler</solver>
+        <stepsize>0.01</stepsize>
+        <exit_crossing_strategy>2</exit_crossing_strategy>
+        <linkedcells enabled="true" cell_size="2.3" />
+        <force_ped a="5" D="0.1" />
+        <force_wall a="5" D="0.02" />
+      </model_parameters>
+      <agent_parameters agent_parameter_id="1">
+        <v0 mu="1.0" sigma="0.001" />
+        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
+        <bmin mu="0.15" sigma="0.00000" />
+        <amin mu="0.15" sigma="0.00000" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.0" sigma="0.00000" />
+        <T mu="1" sigma="0.001" />
+      </agent_parameters>
+            <agent_parameters agent_parameter_id="2">
+        <v0 mu="2.0" sigma="0.001" />
+        <bmax mu="0.15" sigma="0.00000" /> <!-- this is l, assuming peds are circles with constant radius -->
+        <bmin mu="0.15" sigma="0.00000" />
+        <amin mu="0.15" sigma="0.00000" />
+        <tau mu="0.5" sigma="0.001" />
+        <atau mu="0.0" sigma="0.00000" />
+        <T mu="1" sigma="0.001" />
+      </agent_parameters>
+      
+    </model>
+    
   </operational_models>
 
   <route_choice_models>

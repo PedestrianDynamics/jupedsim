@@ -1,7 +1,7 @@
 language: cpp
 os:
-  - linux
-  # - osx
+    - linux
+    # - osx
 
 branches:
   only:
@@ -9,52 +9,17 @@ branches:
     - v0.8
     
 compiler:
-  - gcc
-  # - clang
+    - gcc
+    # - clang
   
 before_script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-       sudo add-apt-repository -y ppa:apokluda/boost1.53;
-       sudo apt-get update;
-       sudo apt-get install libboost1.53-all-dev;
-       sudo apt-get install cmake;
-       sudo apt-get install doxygen;
-       sudo apt-get install lcov;
-       sudo apt-get install ggcov;
-       sudo pip install codecov;
-       sudo pip install numpy;
-    fi
-
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-       brew update;   
-       brew unlink boost;
-       brew install boost;
-       brew install cmake;
-       brew install doxygen;
-       brew install lcov;
-    fi
-
+    - source .travis_before_script.bash
+  
 before_install:
-  # g++4.8.1
-  - if [ "$CXX" == "g++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+    - source .travis_before_install.bash          
 
-  # clang 3.4
-  # - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
-
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then sudo apt-get update -qq; fi
-    
 install:
-  # g++4.8.1
-  - if [ "$CXX" = "g++" ]  && [ "$TRAVIS_OS_NAME" == "linux" ]; then
-       sudo apt-get install -qq g++-4.8;
-       export CXX="g++-4.8";
-    fi
-
-  # clang 3.4
-  - if [ "$CXX" == "clang++" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
-       sudo apt-get install --allow-unauthenticated -qq clang-3.4;
-       export CXX="clang++-3.4";
-    fi
+    - source .travis_install.bash
 
 script:
     - $CXX --version
@@ -65,8 +30,8 @@ script:
 
 after_success:
     - make cov
-    - ctest -R rimea
-    - ctest -R juelich
+   - ctest -R rimea
+   - ctest -R juelich
     - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
          codecov;
       fi   

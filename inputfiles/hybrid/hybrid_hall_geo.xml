@@ -42,11 +42,11 @@
       <subroom id="0" closed="0" class="floor">
         <polygon caption="wall">
           <vertex px="9.2" py="2.8" />
-          <vertex px="11.2" py="2.8" />
+          <vertex px="13.2" py="2.8" />
         </polygon>
         <polygon caption="wall">
           <vertex px="9.2" py="6.4" />
-          <vertex px="11.2" py="6.4" />
+          <vertex px="13.2" py="6.4" />
         </polygon>
       </subroom>
     </room>
@@ -98,8 +98,8 @@
       <vertex px="5.20" py="-2.0" />
     </transition>
     <transition id="5" caption="exit" type="emergency" room1_id="2" subroom1_id="0" room2_id="-1" subroom2_id="-1">
-      <vertex px="11.2" py="2.8" />
-      <vertex px="11.2" py="6.4" />
+      <vertex px="13.2" py="2.8" />
+      <vertex px="13.2" py="6.4" />
     </transition>
     <transition id="6" caption="exit" type="emergency" room1_id="3" subroom1_id="0" room2_id="-1" subroom2_id="-1">
       <vertex px="3.2" py="11.2" />
