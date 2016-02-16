@@ -95,15 +95,15 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
                for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
                     wall.emplace_back(Line( (Line) *itObsWall));
                     // xMin xMax
-                    if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
-                    if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
-                    if ((*itObsWall).GetPoint1().GetX() > xMax) xMax = (*itObsWall).GetPoint1().GetX();
-                    if ((*itObsWall).GetPoint2().GetX() > xMax) xMax = (*itObsWall).GetPoint2().GetX();
+                    if ((*itObsWall).GetPoint1()._x < xMin) xMin = (*itObsWall).GetPoint1()._x;
+                    if ((*itObsWall).GetPoint2()._x < xMin) xMin = (*itObsWall).GetPoint2()._x;
+                    if ((*itObsWall).GetPoint1()._x > xMax) xMax = (*itObsWall).GetPoint1()._x;
+                    if ((*itObsWall).GetPoint2()._x > xMax) xMax = (*itObsWall).GetPoint2()._x;
                     // yMin yMax
-                    if ((*itObsWall).GetPoint1().GetY() < yMin) yMin = (*itObsWall).GetPoint1().GetY();
-                    if ((*itObsWall).GetPoint2().GetY() < yMin) yMin = (*itObsWall).GetPoint2().GetY();
-                    if ((*itObsWall).GetPoint1().GetY() > yMax) yMax = (*itObsWall).GetPoint1().GetY();
-                    if ((*itObsWall).GetPoint2().GetY() > yMax) yMax = (*itObsWall).GetPoint2().GetY();
+                    if ((*itObsWall).GetPoint1()._y < yMin) yMin = (*itObsWall).GetPoint1()._y;
+                    if ((*itObsWall).GetPoint2()._y < yMin) yMin = (*itObsWall).GetPoint2()._y;
+                    if ((*itObsWall).GetPoint1()._y > yMax) yMax = (*itObsWall).GetPoint1()._y;
+                    if ((*itObsWall).GetPoint2()._y > yMax) yMax = (*itObsWall).GetPoint2()._y;
                }
           }
 
@@ -111,15 +111,15 @@ void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
           for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                wall.emplace_back( Line( (Line) *itWall));
                // xMin xMax
-               if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
-               if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
-               if ((*itWall).GetPoint1().GetX() > xMax) xMax = (*itWall).GetPoint1().GetX();
-               if ((*itWall).GetPoint2().GetX() > xMax) xMax = (*itWall).GetPoint2().GetX();
+               if ((*itWall).GetPoint1()._x < xMin) xMin = (*itWall).GetPoint1()._x;
+               if ((*itWall).GetPoint2()._x < xMin) xMin = (*itWall).GetPoint2()._x;
+               if ((*itWall).GetPoint1()._x > xMax) xMax = (*itWall).GetPoint1()._x;
+               if ((*itWall).GetPoint2()._x > xMax) xMax = (*itWall).GetPoint2()._x;
                // yMin yMax
-               if ((*itWall).GetPoint1().GetY() < yMin) yMin = (*itWall).GetPoint1().GetY();
-               if ((*itWall).GetPoint2().GetY() < yMin) yMin = (*itWall).GetPoint2().GetY();
-               if ((*itWall).GetPoint1().GetY() > yMax) yMax = (*itWall).GetPoint1().GetY();
-               if ((*itWall).GetPoint2().GetY() > yMax) yMax = (*itWall).GetPoint2().GetY();
+               if ((*itWall).GetPoint1()._y < yMin) yMin = (*itWall).GetPoint1()._y;
+               if ((*itWall).GetPoint2()._y < yMin) yMin = (*itWall).GetPoint2()._y;
+               if ((*itWall).GetPoint1()._y > yMax) yMax = (*itWall).GetPoint1()._y;
+               if ((*itWall).GetPoint2()._y > yMax) yMax = (*itWall).GetPoint2()._y;
           }
      }
 
@@ -236,15 +236,15 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
           for (std::vector<Wall>::iterator itObsWall = allObsWalls.begin(); itObsWall != allObsWalls.end(); ++itObsWall) {
                wall.emplace_back(Line( (Line) *itObsWall));
                // xMin xMax
-               if ((*itObsWall).GetPoint1().GetX() < xMin) xMin = (*itObsWall).GetPoint1().GetX();
-               if ((*itObsWall).GetPoint2().GetX() < xMin) xMin = (*itObsWall).GetPoint2().GetX();
-               if ((*itObsWall).GetPoint1().GetX() > xMax) xMax = (*itObsWall).GetPoint1().GetX();
-               if ((*itObsWall).GetPoint2().GetX() > xMax) xMax = (*itObsWall).GetPoint2().GetX();
+               if ((*itObsWall).GetPoint1()._x < xMin) xMin = (*itObsWall).GetPoint1()._x;
+               if ((*itObsWall).GetPoint2()._x < xMin) xMin = (*itObsWall).GetPoint2()._x;
+               if ((*itObsWall).GetPoint1()._x > xMax) xMax = (*itObsWall).GetPoint1()._x;
+               if ((*itObsWall).GetPoint2()._x > xMax) xMax = (*itObsWall).GetPoint2()._x;
                // yMin yMax
-               if ((*itObsWall).GetPoint1().GetY() < yMin) yMin = (*itObsWall).GetPoint1().GetY();
-               if ((*itObsWall).GetPoint2().GetY() < yMin) yMin = (*itObsWall).GetPoint2().GetY();
-               if ((*itObsWall).GetPoint1().GetY() > yMax) yMax = (*itObsWall).GetPoint1().GetY();
-               if ((*itObsWall).GetPoint2().GetY() > yMax) yMax = (*itObsWall).GetPoint2().GetY();
+               if ((*itObsWall).GetPoint1()._y < yMin) yMin = (*itObsWall).GetPoint1()._y;
+               if ((*itObsWall).GetPoint2()._y < yMin) yMin = (*itObsWall).GetPoint2()._y;
+               if ((*itObsWall).GetPoint1()._y > yMax) yMax = (*itObsWall).GetPoint1()._y;
+               if ((*itObsWall).GetPoint2()._y > yMax) yMax = (*itObsWall).GetPoint2()._y;
           }
      }
 
@@ -252,15 +252,15 @@ void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
      for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
           wall.emplace_back( Line( (Line) *itWall));
           // xMin xMax
-          if ((*itWall).GetPoint1().GetX() < xMin) xMin = (*itWall).GetPoint1().GetX();
-          if ((*itWall).GetPoint2().GetX() < xMin) xMin = (*itWall).GetPoint2().GetX();
-          if ((*itWall).GetPoint1().GetX() > xMax) xMax = (*itWall).GetPoint1().GetX();
-          if ((*itWall).GetPoint2().GetX() > xMax) xMax = (*itWall).GetPoint2().GetX();
+          if ((*itWall).GetPoint1()._x < xMin) xMin = (*itWall).GetPoint1()._x;
+          if ((*itWall).GetPoint2()._x < xMin) xMin = (*itWall).GetPoint2()._x;
+          if ((*itWall).GetPoint1()._x > xMax) xMax = (*itWall).GetPoint1()._x;
+          if ((*itWall).GetPoint2()._x > xMax) xMax = (*itWall).GetPoint2()._x;
           // yMin yMax
-          if ((*itWall).GetPoint1().GetY() < yMin) yMin = (*itWall).GetPoint1().GetY();
-          if ((*itWall).GetPoint2().GetY() < yMin) yMin = (*itWall).GetPoint2().GetY();
-          if ((*itWall).GetPoint1().GetY() > yMax) yMax = (*itWall).GetPoint1().GetY();
-          if ((*itWall).GetPoint2().GetY() > yMax) yMax = (*itWall).GetPoint2().GetY();
+          if ((*itWall).GetPoint1()._y < yMin) yMin = (*itWall).GetPoint1()._y;
+          if ((*itWall).GetPoint2()._y < yMin) yMin = (*itWall).GetPoint2()._y;
+          if ((*itWall).GetPoint1()._y > yMax) yMax = (*itWall).GetPoint1()._y;
+          if ((*itWall).GetPoint2()._y > yMax) yMax = (*itWall).GetPoint2()._y;
      }
 
 

@@ -40,14 +40,7 @@
 /************************************************************
   Konstruktoren
  ************************************************************/
-Point::Point() : _x(0), _y(0)
-{
-}
 
-Point::Point(double x, double y) : _x(x), _y(y)
-{
-}
-//
 Point::Point(const Point& orig) 
 {
      _x = orig._x;
@@ -59,26 +52,6 @@ std::string Point::toString() const
      std::stringstream tmp;
      tmp<<"( "<<_x<<" : " <<_y<<" )";
      return tmp.str();
-}
-
-void Point::SetX(double x)
-{
-     _x = x;
-}
-
-void Point::SetY(double y)
-{
-     _y = y;
-}
-
-double Point::GetX() const
-{
-     return _x;
-}
-
-double Point::GetY() const
-{
-     return _y;
 }
 
 double Point::Norm() const
@@ -268,4 +241,15 @@ const Point operator/(const Point& p, double f)
           return Point(p._x, p._y);
      }
      //return Point(p.GetX() / f, p.GetY() / f);
+}
+
+std::ostream& Point::SaveToXml(std::ostream& ostream) const
+{
+     ostream << "<vertex px=" << _x << " py=" << _y << " />" << std::endl;
+     return ostream;;
+}
+
+double Distance(const Point& point1, const Point& point2)
+{
+     return boost::geometry::distance(point1, point2);
 }

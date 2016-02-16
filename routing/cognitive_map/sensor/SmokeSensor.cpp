@@ -67,13 +67,15 @@ void SmokeSensor::execute(const Pedestrian * pedestrian, CognitiveMap * cognitiv
     {
         /// first: find Mesh corresponding to current edge and current simTime. Secondly get knotvalue from that mesh depending
         /// on the current position of the pedestrian
-        double RiskTolerance = pedestrian->GetRiskTolerance();
-        double smokeFactor = 1 + (1-RiskTolerance)*_FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
-                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos().GetX(),                                                                                      pedestrian->GetPos().GetY());
 
-        //std::cout  << "SmokeFactor = " << smokeFactor << " with RiskTolerance = "<< RiskTolerance << std::endl;
+        double RiskTolerance = pedestrian->GetRiskTolerance();
+
+        double smokeFactor = 1 + (1-RiskTolerance)*_FMStorage->get_FireMesh(item->GetCrossing()->GetCentre(),
+                                                      pedestrian->GetGlobalTime()).GetKnotValue(pedestrian->GetPos()._x,
+                                                                                                pedestrian->GetPos()._y);
+        /// Set Smoke factor
         item->SetFactor(smokeFactor,GetName());
-        //std::cout << item->GetFactor() << std::endl;
+
     }
 
 

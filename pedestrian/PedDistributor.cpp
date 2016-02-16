@@ -503,8 +503,8 @@ vector<Point >  PedDistributor::PossiblePositions(const SubRoom& r)
      vector<double> ys;
 
      for (int p = 0; p < (int) poly.size(); ++p) {
-          xs.push_back(poly[p].GetX());
-          ys.push_back(poly[p].GetY());
+          xs.push_back(poly[p]._x);
+          ys.push_back(poly[p]._y);
      }
 
      min_x = min_element(xs.begin(), xs.end());

@@ -88,10 +88,10 @@ Point Waypoint::GetRandomPoint() const
     const double pi = std::acos(-1);
     int alpha1 = std::rand() % 360;
     int a = std::rand() % (int)_a;
-    double x = _exactPos.GetX()+std::cos(alpha1*pi/180.0)*a;
+    double x = _exactPos._x+std::cos(alpha1*pi/180.0)*a;
     int alpha2 = std::rand() % 360;
     int b = std::rand() % (int)_b;
-    double y = _exactPos.GetY()+std::sin(alpha2*pi/180.0)*b;
+    double y = _exactPos._y+std::sin(alpha2*pi/180.0)*b;
 
     //Log->Write(std::to_string(x));
     //Log->Write(std::to_string(y));
@@ -104,13 +104,13 @@ Point Waypoint::PointOnShortestRoute(const Point& point) const
     double distance;
     int alpha_min=1;
     double t_min=0;
-    double min=std::sqrt(std::pow((_exactPos.GetX()+t_min*_a*std::cos(pi/180.0))-point.GetX(),2)+std::pow((_exactPos.GetX()+t_min*_b*std::sin(pi/180.0))-point.GetY(),2));
+    double min=std::sqrt(std::pow((_exactPos._x+t_min*_a*std::cos(pi/180.0))-point._x,2)+std::pow((_exactPos._x+t_min*_b*std::sin(pi/180.0))-point._y,2));
 
     for (double t=0.2; t<=1; t+=0.2)
     {
         for (int alpha=11; alpha<=360; alpha+=10)
         {
-            distance=std::sqrt(std::pow((_exactPos.GetX()+t*_a*std::cos(alpha*pi/180.0))-point.GetX(),2)+std::pow((_exactPos.GetY()+t*_b*std::sin(alpha*pi/180.0))-point.GetY(),2));
+            distance=std::sqrt(std::pow((_exactPos._x+t*_a*std::cos(alpha*pi/180.0))-point._x,2)+std::pow((_exactPos._y+t*_b*std::sin(alpha*pi/180.0))-point._y,2));
             if (distance<min)
             {
                 min=distance;
@@ -120,15 +120,15 @@ Point Waypoint::PointOnShortestRoute(const Point& point) const
         }
     }
     //Log->Write(std::to_string(min));
-    return Point(_exactPos.GetX()+_a*std::cos(alpha_min*pi/180.0),_exactPos.GetY()+_b*std::sin(alpha_min*pi/180.0));
+    return Point(_exactPos._x+_a*std::cos(alpha_min*pi/180.0),_exactPos._y+_b*std::sin(alpha_min*pi/180.0));
 }
 
 bool Waypoint::WaypointReached(const Point& currentYAH) const
 {
-    if (std::abs(_exactPos.GetX()-currentYAH.GetX())<0.75*_a && std::abs(_exactPos.GetY()-currentYAH.GetY())<0.75*_b)
+    if (std::abs(_exactPos._x-currentYAH._x)<0.75*_a && std::abs(_exactPos._y-currentYAH._y)<0.75*_b)
     {
         //Log->Write("INFO:\t Waypoint reached");
-        //Log->Write(std::to_string(currentYAH.GetX())+" "+std::to_string(currentYAH.GetY()));
+        //Log->Write(std::to_string(currentYAH._x)+" "+std::to_string(currentYAH._y));
         return true;
     }
     return false;
