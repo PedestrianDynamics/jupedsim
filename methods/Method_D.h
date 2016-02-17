@@ -43,6 +43,8 @@
 #include <direct.h>
 #endif
 
+//handle more than two person are in one line
+#define dmin 0.1
 
 
 class Method_D

@@ -126,11 +126,11 @@ bool Method_D::Process (const PedData& peddata,const std::string& scriptsLocatio
         		  {
         			  if(fabs(XInFrame[1]-XInFrame[0])<10)
         			  {
-        				  XInFrame[1]+= (0.05*M2CM);
+        				  XInFrame[1]+= (dmin*M2CM);
         			  }
         			  else
         			  {
-        				  YInFrame[1]+= (0.05*M2CM);
+        				  YInFrame[1]+= (dmin*M2CM);
         			  }
         		  }
         		   vector<polygon_2d> polygons = GetPolygons(XInFrame, YInFrame, VInFrame, IdInFrame);
@@ -656,7 +656,7 @@ bool Method_D::IsPointsOnOneLine(vector<double>& XInFrame, vector<double>& YInFr
 	{
 		for(unsigned int i=2; i<XInFrame.size();i++)
 		{
-			if(fabs(XInFrame[i] - XInFrame[0])>0.05*M2CM)
+			if(fabs(XInFrame[i] - XInFrame[0])>dmin*M2CM)
 			{
 				isOnOneLine=false;
 				break;
@@ -670,7 +670,7 @@ bool Method_D::IsPointsOnOneLine(vector<double>& XInFrame, vector<double>& YInFr
 		for(unsigned int i=2; i<XInFrame.size();i++)
 		{
 			double dist=fabs(slope*XInFrame[i] - YInFrame[i] + intercept)/sqrt(slope*slope +1);
-			if(dist > 0.05*M2CM)
+			if(dist > dmin*M2CM)
 			{
 				isOnOneLine=false;
 				break;
