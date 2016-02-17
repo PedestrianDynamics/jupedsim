@@ -57,7 +57,7 @@ private:
      FileFormat _fileFormat;
      std::vector<std::string> _trajectoriesFiles;
 
-     char _vComponent;
+     std::string _vComponent;
      bool _isMethodA;
      bool _isMethodB;
      bool _isMethodC;
@@ -109,7 +109,7 @@ public:
      double GetLineEndX() const;
      double GetLineEndY() const;
 
-     char GetVComponent() const;
+     std::string GetVComponent() const;
      int GetDelatT_Vins() const;
      int GetTimeIntervalA() const;
      bool GetIsMethodA() const;

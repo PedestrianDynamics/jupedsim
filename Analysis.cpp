@@ -80,7 +80,7 @@ Analysis::Analysis()
      _getProfile = false;   // Whether make field analysis or not
      _outputGraph = false;   // Whether output the data for plot the fundamental diagram each frame
      _calcIndividualFD = false; //Adjust whether analyze the individual density and velocity of each pedestrian in stationary state (ALWAYS VORONOI-BASED)
-     _vComponent = 'B'; // to mark whether x, y or x and y coordinate are used when calculating the velocity
+     _vComponent = "B"; // to mark whether x, y or x and y coordinate are used when calculating the velocity
 
      _grid_size_X = 0.10;   // the size of the grid
      _grid_size_Y = 0.10;
