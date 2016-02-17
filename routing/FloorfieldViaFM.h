@@ -63,6 +63,10 @@ class FloorfieldViaFM
         //void getDirectionToDestination (const int destID, const Point& position, Point& direction);     //obsolete
         void getDirectionToUID(int destID, const long int key, Point& direction);
         void getDirectionToDestination (Pedestrian* ped, Point& direction);
+
+        /**
+         * \deprecated
+         */
         void getDirectionToFinalDestination(Pedestrian* ped, Point& direction);
         double getCostToDestination(const int destID, const Point& position);
         void getDir2WallAt(const Point& position, Point& direction);
