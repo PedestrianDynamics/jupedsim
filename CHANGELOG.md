@@ -9,7 +9,7 @@ Please also check the Issue tracker on GitLab, if access is available.
 - errors in unused parts of ini files lead to system-exit
 
 
-## v0.8.0 [Unreleased]
+## v0.8.0 [2016-02-18]
 
 
 ### Added
