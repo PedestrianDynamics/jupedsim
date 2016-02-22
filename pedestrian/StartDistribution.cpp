@@ -35,6 +35,7 @@
 #include "../geometry/Point.h"
 #include "../routing/RoutingEngine.h"
 #include "../geometry/SubRoom.h"
+#include "boost/math/distributions.hpp"
 
 using namespace std;
 
@@ -347,14 +348,28 @@ double StartDistribution::GetPremovementTime() const
      return _premovementTime(_generator);
 }
 
-void StartDistribution::InitRiskTolerance(double mean, double stdv)
+void StartDistribution::InitRiskTolerance(std::string distribution_type, double para1, double para2)
 {
-     _riskTolerance = std::normal_distribution<double>(mean,stdv);
+    _distribution_type = distribution_type;
+    if(distribution_type=="normal"){
+    _riskTolerance = std::normal_distribution<double>(para1, para2);
+    }
+    if(distribution_type=="beta"){
+    _risk_beta_dist = boost::math::beta_distribution<>(para1,  para2);
+    }
 }
 
 double StartDistribution::GetRiskTolerance()
 {
-     return _riskTolerance(_generator);
+    if(_distribution_type=="normal"){
+        fprintf(stderr, "%f \t %f \n", _generator, _riskTolerance(_generator));
+        return _riskTolerance(_generator);
+    }
+    if(_distribution_type=="beta"){
+        std::uniform_real_distribution<float> noramlize(0.0, 1.0);
+        float rand_norm = noramlize(_generator);
+        fprintf(stderr, "%f \n", quantile(_risk_beta_dist, rand_norm));
+        return quantile(_risk_beta_dist, rand_norm);
+    }
 }
-
 
