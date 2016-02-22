@@ -20,9 +20,10 @@ There are only a few rules and advices we want to give to you:
     - [Coding style](#coding-style)
     - [Unit tests](#unit-tests)
 
-- [Writing documentation](#wrinting-documentation)
+- [Writing documentation](#writing-documentation)
     - [Comments](#comments)
     - [Documenting new features](#documenting-new-features)
+    - [Sample Templates](#sample-templates)
 
 - [Committing code](#commiting-code)
     - [Committing guidelines](#commiting-guidelines)
@@ -351,6 +352,46 @@ Comments have to be written in **English** everywhere. Please use markdown where
 
 ### Documenting new features
 Please update the changelog with every feature/fix you provide so we can keep track of changes for new versions of JuPedSim.
+
+### Sample Templates
+```
+/*!
+ * \file [filename]
+ *
+ * \author [your name]
+ * \date
+ *
+ * [your comment here]
+ */
+```
+
+```
+/*!
+ * \class [class name]
+ *
+ * \brief [brief description]
+ *
+ * [detailed description]
+ *
+ * \author [your name]
+ * \date
+ */
+```
+
+```
+/*!
+ * \brief [brief description]
+ *
+ * [detailed description]
+ *
+ * \param[in] [name of input parameter] [its description]
+ * \param[out] [name of output parameter] [its description]
+ * \return [information about return value]
+ * \sa [see also section]
+ * \note [any note about the function you might have]
+ * \warning [any warning if necessary]
+ */
+```
 
 ## Commiting Code
 
