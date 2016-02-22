@@ -163,15 +163,6 @@ FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
     inputline << line;
     inputline >> dummy >> nPoints;
 
-//    std::cerr << inputline.str() << std::endl;
-//    std::cerr << hx << std::endl;
-//    std::cerr << hy << std::endl;
-//    std::cerr << iMax << std::endl;
-//    std::cerr << jMax << std::endl;
-//    std::cerr << xMin << std::endl;
-//    std::cerr << yMin << std::endl;
-
-
     //create Rect Grid
     grid = new RectGrid(nPoints, xMin, yMin, xMax, yMax, hx, hy, iMax, jMax, true);
 
@@ -223,37 +214,6 @@ void FloorfieldViaFM::getDirectionAt(const Point& position, Point& direction){
     direction._x = (neggrad[key]._x);
     direction._y = (neggrad[key]._y);
 }
-
-// getDirectionToDestination(int, Point&, Point&) <- obsolete (plz do not use this one); delete soon
-//void FloorfieldViaFM::getDirectionToDestination(const int destID, const Point& position, Point& direction){
-//    long int key = grid->getKeyAtPoint(position);
-//    Point* localneggradptr = neggradmap.at(destID);
-//    double* localcostptr = costmap.at(destID);
-//    if (localneggradptr == nullptr) {
-//        //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
-//        localcostptr =    new double[grid->GetnPoints()];
-//        localneggradptr = new Point[grid->GetnPoints()];
-//        neggradmap.erase(destID);
-//        neggradmap.emplace(destID, localneggradptr);
-//        costmap.erase(destID);
-//        costmap.emplace(destID, localcostptr);
-//        //create ff (prepare Trial-mechanic, then calc)
-//        for (long int i = 0; i < grid->GetnPoints(); ++i) {
-//            //set Trialptr to fieldelements
-//            trialfield[i].cost = localcostptr + i;
-//            trialfield[i].neggrad = localneggradptr + i;
-//            trialfield[i].father = nullptr;
-//            trialfield[i].child = nullptr;
-//        }
-//        clearAndPrepareForFloorfieldReCalc(localcostptr);
-//        std::vector<Line> localline = {Line(/* todo argraf */)};
-//        setNewGoalAfterTheClear(localcostptr, localline);
-//        calculateFloorfield(localcostptr, localneggradptr);
-//        std::cerr << "new Floorfield " << destID << "   :    " << localcostptr << std::endl;
-//    }
-//    direction._x = (localneggradptr[key]._x);
-//    direction._y = (localneggradptr[key]._y);
-//}
 
 void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& direction){
     const Point& position = ped->GetPos();
@@ -313,81 +273,114 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
     const Point& position = ped->GetPos();
     const int goalID = ped->GetFinalDestination();
     long int key = grid->getKeyAtPoint(position);
+    getDirectionToGoalID(goalID);
+
+    getDirectionToUID(goalToLineUIDmap.at(goalID), key, direction);
+}
+
+void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
+{
     Point* localneggradptr;
     double* localcostptr;
 
-    #pragma omp critical
+#pragma omp critical
     {
         if (goalcostmap.count(goalID) == 0) { //no entry for goalcostmap, so we need to calc FF
             goalcostmap.emplace(goalID, nullptr);
             goalneggradmap.emplace(goalID, nullptr);
             goalToLineUIDmap.emplace(goalID, -1);
+            goalToLineUIDmap2.emplace(goalID, -1);
+            goalToLineUIDmap3.emplace(goalID, -1);
         }
         localneggradptr = goalneggradmap.at(goalID);
         localcostptr = goalcostmap.at(goalID);
         if (localneggradptr == nullptr) {
-                //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
-                localcostptr =    new double[grid->GetnPoints()];
-                localneggradptr = new Point[grid->GetnPoints()];
-                goalneggradmap.erase(goalID);
-                goalneggradmap.emplace(goalID, localneggradptr);
-                goalcostmap.erase(goalID);
-                goalcostmap.emplace(goalID, localcostptr);
-                //create ff (prepare Trial-mechanic, then calc)
-                for (long int i = 0; i < grid->GetnPoints(); ++i) {
-                    //set Trialptr to fieldelements
-                    trialfield[i].cost = localcostptr + i;
-                    trialfield[i].neggrad = localneggradptr + i;
-                    trialfield[i].father = nullptr;
-                    trialfield[i].child = nullptr;
+            //create floorfield (remove mapentry with nullptr, allocate memory, add mapentry, create ff)
+            localcostptr =    new double[grid->GetnPoints()];
+            localneggradptr = new Point[grid->GetnPoints()];
+            goalneggradmap.erase(goalID);
+            goalneggradmap.emplace(goalID, localneggradptr);
+            goalcostmap.erase(goalID);
+            goalcostmap.emplace(goalID, localcostptr);
+            //create ff (prepare Trial-mechanic, then calc)
+            for (long int i = 0; i < grid->GetnPoints(); ++i) {
+                //set Trialptr to fieldelements
+                trialfield[i].cost = localcostptr + i;
+                trialfield[i].neggrad = localneggradptr + i;
+                trialfield[i].father = nullptr;
+                trialfield[i].child = nullptr;
+            }
+            clearAndPrepareForFloorfieldReCalc(localcostptr);
+
+            //get all lines/walls of goalID
+            vector<Line> localline;
+            const std::map<int, Goal*>& allgoals = building->GetAllGoals();
+            vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
+            for (const auto& iwall:localwalls) {
+                localline.emplace_back( Line( (Line) iwall ) );
+            }
+
+            setNewGoalAfterTheClear(localcostptr, localline);
+            //performance-measurement:
+            //auto start = std::chrono::steady_clock::now();
+
+            calculateFloorfield(localcostptr, localneggradptr);
+            //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1()._x << " " << localline[0].GetPoint1()._y << " " << localline[0].GetPoint2()._x << " " << localline[0].GetPoint2()._y << std::endl;
+            //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1()._x));
+
+            //performance-measurement:
+            //auto end = std::chrono::steady_clock::now();
+            //auto diff = end - start;
+            //std::cerr << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << std::endl;
+            //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
+            //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
+            //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
+            //find closest door and add to cheatmap "goalToLineUID" map
+            const std::map<int, Transition*>& transitions = building->GetAllTransitions();
+            int UID_of_MIN = -1;
+            int UID_of_MIN2 = -1;
+            int UID_of_MIN3 = -1;
+            double cost_of_MIN = DBL_MAX;
+            double cost_of_MIN2 = DBL_MAX;
+            double cost_of_MIN3 = DBL_MAX;
+            long int dummykey;
+            for (const auto& loctrans : transitions) {
+                dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
+                if (cost_of_MIN > localcostptr[dummykey]) {
+                    UID_of_MIN3 = UID_of_MIN2;
+                    cost_of_MIN3 = cost_of_MIN2;
+
+                    UID_of_MIN2 = UID_of_MIN;
+                    cost_of_MIN2 = cost_of_MIN;
+
+                    UID_of_MIN = loctrans.second->GetUniqueID();
+                    cost_of_MIN = localcostptr[dummykey];
+                    std::cerr << "Closer Line found: " << UID_of_MIN << std::endl;
+                    continue;
                 }
-                clearAndPrepareForFloorfieldReCalc(localcostptr);
+                if (cost_of_MIN2 > localcostptr[dummykey]) {
+                    UID_of_MIN3 = UID_of_MIN2;
+                    cost_of_MIN3 = cost_of_MIN2;
 
-                //get all lines/walls of goalID
-                std::vector<Line> localline;
-                const std::map<int, Goal*>& allgoals = building->GetAllGoals();
-                std::vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
-                for (const auto& iwall:localwalls) {
-                    localline.emplace_back( Line( (Line) iwall ) );
+                    UID_of_MIN2 = loctrans.second->GetUniqueID();
+                    cost_of_MIN2 = localcostptr[dummykey];
+                    continue;
                 }
-
-                setNewGoalAfterTheClear(localcostptr, localline);
-                //performance-measurement:
-                //auto start = std::chrono::steady_clock::now();
-
-                calculateFloorfield(localcostptr, localneggradptr);
-                //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1()._x << " " << localline[0].GetPoint1()._y << " " << localline[0].GetPoint2()._x << " " << localline[0].GetPoint2()._y << std::endl;
-                //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1()._x));
-
-                //performance-measurement:
-                //auto end = std::chrono::steady_clock::now();
-                //auto diff = end - start;
-                //std::cerr << std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << std::endl;
-                //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1().GetX() << " " << localline[0].GetPoint1().GetY() << " " << localline[0].GetPoint2().GetX() << " " << localline[0].GetPoint2().GetY() << std::endl;
-                //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
-                //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
-                //find closest door and add to cheatmap "goalToLineUID" map
-                const std::map<int, Transition*>& transitions = building->GetAllTransitions();
-                int UID_of_MIN = -1;
-                double cost_of_MIN = DBL_MAX;
-                long int dummykey;
-                for (const auto& loctrans : transitions) {
-                    dummykey = grid->getKeyAtPoint(loctrans.second->GetCentre());
-                    if (cost_of_MIN > localcostptr[dummykey]) {
-                        UID_of_MIN = loctrans.second->GetUniqueID();
-                        cost_of_MIN = localcostptr[dummykey];
-                        std::cerr << "Closer Line found: " << UID_of_MIN << std::endl;
-                    }
+                if (cost_of_MIN3 > localcostptr[dummykey]) {
+                    UID_of_MIN3 = loctrans.second->GetUniqueID();
+                    cost_of_MIN3 = localcostptr[dummykey];
+                    continue;
                 }
-                goalToLineUIDmap.erase(goalID);
-                goalToLineUIDmap.emplace(goalID, UID_of_MIN);
+            }
+            goalToLineUIDmap.erase(goalID);
+            goalToLineUIDmap.emplace(goalID, UID_of_MIN);
+            goalToLineUIDmap2.erase(goalID);
+            goalToLineUIDmap2.emplace(goalID, UID_of_MIN2);
+            goalToLineUIDmap3.erase(goalID);
+            goalToLineUIDmap3.emplace(goalID, UID_of_MIN3);
+
         }
     }
-
-
-    getDirectionToUID(goalToLineUIDmap.at(goalID), key, direction);
-    //direction.SetX(localneggradptr[key].GetX());
-    //direction.SetY(localneggradptr[key].GetY());
 }
 
 double FloorfieldViaFM::getCostToDestination(const int destID, const Point& position) { //not implemented: trigger calc of new ff not working yet

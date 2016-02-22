@@ -43,6 +43,8 @@
  *
  * We will derive from the <Router> class to fit the interface.
  *
+ * Questions to solve: how to deal with goalID == doorID problem in matrix
+ *
  **/
 
 #ifndef FFROUTER_H_
@@ -50,16 +52,112 @@
 
 
 #include "Router.h"
+#include "../geometry/Building.h"
 
-class building;
+class Building;
 class Pedestrian;
+class OutputHandler;
+
+//log output
+extern OutputHandler* Log;
+
+/*!
+ * \class FFRouter
+ *
+ * \brief router using floor fields to measure distances of doors, no hlines
+ *
+ * This router is an update of the former Router.{cpp, h} - Global-, Quickest
+ * Router System. In the __former__ version, a graph was created with doors and
+ * hlines as nodes and the distances of (doors, hlines), connected with a line-
+ * of-sight, was used as edge-costs. If there was no line-of-sight, there was no
+ * connecting edge. On the resulting graph, the Floyd-Warshall algorithm was
+ * used to find any paths. In the "quickest-___" variants, the edge cost was not
+ * determined by the distance, but by the distance multiplied by a speed-
+ * estimate, to find the path with minimum travel times. This whole construct
+ * worked pretty well, but dependend on hlines to create paths with line-of-
+ * sights to the next target (hline/door).
+ *
+ * In the ffRouter, we want to overcome hlines by using floor fields to
+ * determine the distances. A line of sight is not required any more. We hope to
+ * reduce the graph complexity and the preparation-needs for new geometries.
+ *
+ * To find a counterpart for the "quickest-____" router, we can either use
+ * __special__ floor fields, that respect the travel time in the input-speed map,
+ * or take the distance-floor field and multiply it by a speed-estimate (analog
+ * to the former construct.
+ *
+ * We will derive from the <Router> class to fit the interface.
+ *
+ * \author Arne Graf
+ * \date Feb, 2016
+ */
 
 class FFRouter : public Router
 {
-private:
 public:
+     /**
+      * A constructor.
+      *
+      */
+     FFRouter();
+     FFRouter(const Building* const);
 
+     /**
+      * Destructor
+      */
+     virtual ~FFRouter();
 
+     /*!
+      * \brief Init the router (must be called before use)
+      *
+      * Init() will construct the graph (nodes = doors, edges = costs) and
+      * find shortest paths via Floyd-Warshall. It needs the floor fields
+      *
+      *
+      * \param[in] [name of input parameter] [its description]
+      * \param[out] [name of output parameter] [its description]
+      * \return [information about return value]
+      * \sa [see also section]
+      * \note [any note about the function you might have]
+      * \warning [any warning if necessary]
+      */
+     virtual bool Init(Building* building);
+
+     /*!
+      * \brief
+      *
+      * bla
+      *
+      *
+      */
+     virtual int FindExit(Pedestrian* p);
+
+     /*!
+      * \brief
+      *
+      * bla
+      *
+      *
+      */
+     void Reset();
+
+     /*!
+      * \brief Perform the FloydWarshall algorithm
+      */
+     void FloydWarshall();
+
+     /*!
+      * \brief set all the distances using ff
+      */
+     //void SetDistances();
+
+private:
+
+protected:
+     std::map< std::pair<int, int> , double > _distMatrix;
+     std::map< std::pair<int, int> , int >    _pathsMatrix;
+     std::vector<int>                         _allDoorUIDs;
+     const Building* const                    _building;
 };
 
 #endif /* FFROUTER_H_ */
