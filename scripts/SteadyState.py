@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy.stats.stats import pearsonr
 
-frame = 16  #fps todo
+VERSION = 0.8
 script_dir = os.path.dirname(os.path.realpath(__file__))
 demos_dir = os.path.join(os.path.dirname(os.path.abspath(script_dir)), "demos")
 demo_file = os.path.join(demos_dir, "SteadyState", "rho_v_Voronoi_traj_AO_b240.txt_id_1.dat")
@@ -36,14 +36,14 @@ def func_b(i, k): # todo what happens if acf==1?
 
 
 def getParserArgs():
-    parser = argparse.ArgumentParser(description='Combine French data to one file')
-    parser.add_argument("-v", "--version", help='JuPedSim  Version 0.8  Detection of Steady State')
-    parser.add_argument("-f", "--input_file", default=demo_file, help='give the location and the name of the input file')    
-    parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density')
-    parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='give the end frame of the reference process in density')
-    parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='give the start frame of the reference process in speed')
-    parser.add_argument("-ve", "--reference_v_end", type=int, default=640, help='give the end frame of the reference process in speed')
-    parser.add_argument("-p", "--plotfigs", default="yes", help='choose to plot the figures or not')
+    parser = argparse.ArgumentParser(description='Detection of Steady State. JuPedSim v%0.1f'%VERSION)
+    parser.add_argument("-f", "--input_file", default=demo_file, help='give the location and the name of the input file (default %s)'%demo_file)    
+    parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density (default 240)')
+    parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='give the end frame of the reference process in density (default 640)')
+    parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='give the start frame of the reference process in speed (default 240)')
+    parser.add_argument("-ve", "--reference_v_end", type=int, default=640, help='give the end frame of the reference process in speed (default 640)')
+    parser.add_argument("-p", "--plotfigs", default="yes", help='choose to plot the figures or not (default yes)')
+    parser.add_argument("-r", "--fps", type=int, default=16, help='frame per second (default 16)')
     args = parser.parse_args()
     return args
 
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     ref_v_start = args.reference_v_start
     ref_v_end = args.reference_v_end
     plotfigs = args.plotfigs
-
+    frame = args.fps
 # input data
 data = loadtxt('%s'%(input_file))
 
