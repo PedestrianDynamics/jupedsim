@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy.stats.stats import pearsonr
 
-frame = 16
+frame = 16  #fps todo
+script_dir = os.path.dirname(os.path.realpath(__file__))
+demos_dir = os.path.join(os.path.dirname(os.path.abspath(script_dir)), "demos")
+demo_file = os.path.join(demos_dir, "SteadyState", "rho_v_Voronoi_traj_AO_b240.txt_id_1.dat")
 
 alpha = 0.99
 gamma = 0.99
@@ -34,7 +37,7 @@ def func_b(i, k):
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
     parser.add_argument("-v", "--version", help='JuPedSim  Version 0.8  Detection of Steady State')
-    parser.add_argument("-f", "--input_file", default="E:/GitLab/jpsreport/demos/SteadyState/rho_v_Voronoi_traj_AO_b240.txt_id_1.dat", help='give the location and the name of the input file')    
+    parser.add_argument("-f", "--input_file", default=demo_file, help='give the location and the name of the input file')    
     parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density')
     parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='give the end frame of the reference process in density')
     parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='give the start frame of the reference process in speed')
@@ -55,22 +58,16 @@ if __name__ == '__main__':
 
 # input data
 data = loadtxt('%s'%(input_file))
+
 data = data[ data[:,1] != 0 ]
 minframe = data[0,0]
 data[:,0] = data[:,0] - data[0,0]
 
-# filepath and filename
-reverse = input_file[::-1]
-count = -1
-for i in reverse:
-    count += 1
-    if i == '/':
-        break
-filepath = input_file[:(len(input_file)-count)]
-filename = input_file[-count:]
-print('file path = ', filepath)
-print('file name = ', filename)
-    
+# filepath and filename 
+filename = os.path.basename(input_file)
+filepath = os.path.dirname(input_file)
+print('file path = %s'%filepath)
+print('file name = %s'%filename)
 # calculate ref_mean, ref_std, ref_acf for rho
 ref_rho = data
 ref_rho = ref_rho[ ref_rho[:,0] >= ref_rho_start - minframe]
