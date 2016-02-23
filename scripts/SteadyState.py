@@ -30,9 +30,10 @@ def F(x):
         return 1
     else:
         return -1
-        
-def func_b(i, k):
-    return d * exp(-(xi[i]-xi[k]*acf) * (xi[i]-xi[k]*acf) / (2*(1-acf*acf))) / sqrt(2*math.pi*(1-acf*acf))
+
+def func_b(i, k): # todo what happens if acf==1?
+    return d *exp(-(xi[i]-xi[k]*acf) * (xi[i]-xi[k]*acf) / (2*(1-acf*acf))) / sqrt(2*math.pi*(1-acf*acf))
+
 
 def getParserArgs():
     parser = argparse.ArgumentParser(description='Combine French data to one file')
@@ -59,11 +60,11 @@ if __name__ == '__main__':
 # input data
 data = loadtxt('%s'%(input_file))
 
-data = data[ data[:,1] != 0 ]
-minframe = data[0,0]
-data[:,0] = data[:,0] - data[0,0]
+data = data[data[:, 1] != 0]
+minframe = data[0, 0]
+data[:, 0] = data[:, 0] - data[0, 0]
 
-# filepath and filename 
+# get filepath and filename
 filename = os.path.basename(input_file)
 filepath = os.path.dirname(input_file)
 print('file path = %s'%filepath)
@@ -279,7 +280,7 @@ file_v_s.close()
 statistics_rho = loadtxt('%s/cusum_rho_%s.txt'%(filepath, filename))
 ss_rho = open('%s/SteadyState_rho_%s.txt'%(filepath, filename), 'w')
 ss_rho.write('# start end ratio mean std \n')
-steady_rho = statistics_rho[ statistics_rho[:, 1] < rho_theta]
+steady_rho = statistics_rho[statistics_rho[:, 1] < rho_theta]
 steady_rho_start = min(steady_rho[:, 0]) - (s_max-rho_theta)
 for i in arange(1, len(steady_rho), 1):
     if steady_rho[i, 0] - steady_rho[i-1, 0] != 1:
@@ -312,14 +313,17 @@ if info_rho.shape == (5,):
     temp = []
     temp.append(info_rho)
     info_rho = array(temp)
-print('steady state of rho is: \n', info_rho)
+
+print('steady state of rho is from %d (%.1f s) to %d (%.1f s) (ratio=%.2f, mean=%.2f, std=%.2f)'%(
+    info_rho[0][0], info_rho[0][0]/frame, info_rho[0][1], info_rho[0][1]/frame,
+    info_rho[0][2], info_rho[0][3], info_rho[0][4]))
 
 # choose steady state v
-statistics_v = loadtxt('%s/cusum_v_%s.txt'%(filepath,filename))
-ss_v = open('%s/SteadyState_v_%s.txt'%(filepath,filename), 'w')
+statistics_v = loadtxt('%s/cusum_v_%s.txt'%(filepath, filename))
+ss_v = open('%s/SteadyState_v_%s.txt'%(filepath, filename), 'w')
 ss_v.write('# start end ratio mean std \n')
-steady_v = statistics_v[ statistics_v[:,1] < v_theta ]
-steady_v_start = min(steady_v[:,0]) - (s_max-v_theta)
+steady_v = statistics_v[statistics_v[:, 1] < v_theta]
+steady_v_start = min(steady_v[:, 0]) - (s_max-v_theta)
 for i in arange(1, len(steady_v), 1):
     if steady_v[i, 0] - steady_v[i-1, 0] != 1:
         steady_v_end = steady_v[i-1, 0] - v_theta
@@ -334,7 +338,7 @@ for i in arange(1, len(steady_v), 1):
                 steady_v_start, steady_v_end, v_data_ratio, v_data_mean, v_data_std))
         steady_v_start = steady_v[i, 0] - (s_max - v_theta)
 
-steady_v_end = max(steady_v[:,0]) - v_theta
+steady_v_end = max(steady_v[:, 0]) - v_theta
 if steady_v_start < steady_v_end:
     v_data = data
     v_data = v_data[v_data[:, 0] >= steady_v_start]
@@ -350,7 +354,11 @@ if info_v.shape == (5, ):
     temp = []
     temp.append(info_v)
     info_v = array(temp)
-print('steady state of v is: \n', info_v)
+
+
+print('steady state of v is   from %d (%.1f s) to %d (%.1f s) (ratio=%.2f, mean=%.2f, std=%.2f)'%(
+    info_v[0][0], info_v[0][0]/frame, info_v[0][1], info_v[0][1]/frame,
+    info_v[0][2], info_v[0][3], info_v[0][4]))
 
 # calculate steady state
 ss = open('%s/SteadyState_%s.txt'%(filepath, filename), 'w')
@@ -368,7 +376,9 @@ if info.shape == (3, ):
     temp = []
     temp.append(info)
     info = array(temp)
-print('final steady state is: \n', info)
+
+print('final steady state is from %d (%.1f s) to %d (%.1f s) | ratio=%.2f'%
+      (info[0][0], info[0][0]/frame, info[0][1], info[0][1]/frame, info[0][2]))
 
 if plotfigs == 'no':
     print('No figures are plotted!')
@@ -472,7 +482,7 @@ else:
     plt.savefig('%s/SteadyState_v_%s.png'%(filepath, filename))
     plt.close()
 
-os.remove('%s/cusum_rho_%s.txt'%(filepath,filename))
-os.remove('%s/cusum_v_%s.txt'%(filepath,filename))
+os.remove('%s/cusum_rho_%s.txt'%(filepath, filename))
+os.remove('%s/cusum_v_%s.txt'%(filepath, filename))
 
 print('Steady state detected successfully!')
