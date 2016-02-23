@@ -45,6 +45,15 @@
  *
  * Questions to solve: how to deal with goalID == doorID problem in matrix
  *
+ * Restrictions/Requirements: Floorfields are not really 3D supporting:
+ *
+ * A room may not consist of subrooms which overlap in their projection (onto
+ * x-y-plane). So subrooms, that are positioned on top of others (in stairways
+ * for example), must be separated into different rooms.
+ *
+ * floorfields do not consider z-coordinates. Distances of two grid points are
+ * functions of (x, y) and not (x, y, z). Any slope will be neglected.
+ *
  **/
 
 #ifndef FFROUTER_H_
@@ -53,6 +62,7 @@
 
 #include "Router.h"
 #include "../geometry/Building.h"
+#include "../routing/LocalFloorfieldViaFM.h"
 
 class Building;
 class Pedestrian;
@@ -121,7 +131,7 @@ public:
       * \note [any note about the function you might have]
       * \warning [any warning if necessary]
       */
-     virtual bool Init(Building* building);
+     virtual bool Init(const Building* const building);
 
      /*!
       * \brief
@@ -157,7 +167,8 @@ protected:
      std::map< std::pair<int, int> , double > _distMatrix;
      std::map< std::pair<int, int> , int >    _pathsMatrix;
      std::vector<int>                         _allDoorUIDs;
-     const Building* const                    _building;
+     const Building*                          _building;
+     std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
 };
 
 #endif /* FFROUTER_H_ */

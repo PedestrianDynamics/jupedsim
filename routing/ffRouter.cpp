@@ -58,7 +58,7 @@ FFRouter::FFRouter()
 
 FFRouter::FFRouter(const Building* const building)
 {
-     FFRouter();
+     //FFRouter();
      Init(building);
 }
 
@@ -67,7 +67,7 @@ FFRouter::~FFRouter()
 
 }
 
-bool FFRouter::Init(Building* building)
+bool FFRouter::Init(const Building* const building)
 {
      _building = building;
      //get all door UIDs
@@ -86,8 +86,42 @@ bool FFRouter::Init(Building* building)
           }
      }
 
-     //SetDistances: what info do i need? which ff should be used
+     //prepare all room-floor-fields-objects (one room = one instance)
+     _locffviafm.clear();
+     LocalFloorfieldViaFM* ptrToNew = nullptr;
+     double tempDistance = 0.;
+     //type of allRooms: const std::map<int, std::unique_ptr<Room> >&
+     const std::map<int, std::unique_ptr<Room> >& allRooms = _building->GetAllRooms();
+     for(auto& pair : allRooms) {
+#ifdef DEBUG
+          std::cerr << "Creating Floorfield for Room: " << pair.first << std::endl;
+#endif
+          ptrToNew = new LocalFloorfieldViaFM(pair.second.get(), building, 0.125, 0.125, 0.0, false, "nofile");
+          _locffviafm.insert( std::make_pair( pair.first, ptrToNew ) );
 
+          //SetDistances
+          const vector<int>& doorUIDs = pair.second->GetAllTransitionsIDs();
+          //loop over upper triangular matrice (i,j) and write to (j,i) as well
+          std::vector<int>::const_iterator outerPtr;
+          std::vector<int>::const_iterator innerPtr;
+          for (outerPtr = doorUIDs.begin(); outerPtr != doorUIDs.end(); ++outerPtr) {
+               //if the door is closed, then dont calc distances
+               if (!building->GetAllTransitions().at(*outerPtr)->IsOpen()) {
+                    continue;
+               }
+               for (innerPtr = outerPtr; innerPtr != doorUIDs.end(); ++innerPtr) {
+                    //if outerdoor == innerdoor or the inner door is closed
+                    if (  (*outerPtr == *innerPtr) || (!building->GetAllTransitions().at(*innerPtr)->IsOpen())  ) {
+                         continue;
+                    }
+                    tempDistance = _locffviafm[pair.first]->getCostToDestination(*outerPtr, building->GetAllTransitions().at(*innerPtr)->GetCentre());
+                    std::pair<int, int> key_ij = std::make_pair(*outerPtr, *innerPtr);
+                    std::pair<int, int> key_ji = std::make_pair(*innerPtr, *outerPtr);
+                    _distMatrix[key_ij] = tempDistance;
+                    _distMatrix[key_ji] = tempDistance;
+               }
+          }
+     }
      return true;
 }
 

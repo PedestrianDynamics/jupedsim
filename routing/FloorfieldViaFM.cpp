@@ -95,7 +95,7 @@ FloorfieldViaFM::FloorfieldViaFM(const Building* const buildingArg, const double
     setSpeed(useDistancefield); //use distance2Wall
     Log->Write("INFO: \tGrid initialized: Speed");
     calculateFloorfield(cost, neggrad);
-    //writing FF-file disabled until extending is complete ( @todo: argraf )
+    //writing FF-file disabled, we will not revive it ( @todo: argraf )
 }
 
 FloorfieldViaFM::FloorfieldViaFM(const std::string& filename) {
@@ -219,7 +219,6 @@ void FloorfieldViaFM::getDirectionToDestination(Pedestrian* ped, Point& directio
     const Point& position = ped->GetPos();
     int destID = ped->GetExitIndex();
     long int key = grid->getKeyAtPoint(position);
-//#pragma omp critical
     getDirectionToUID(destID, key, direction);
 }
 
@@ -257,12 +256,7 @@ void FloorfieldViaFM::getDirectionToUID(int destID, const long int key, Point& d
                 std::vector<Line> localline = {Line((Line) *(building->GetTransOrCrossByUID(destID)))};
                 setNewGoalAfterTheClear(localcostptr, localline);
 
-                //performance-measurement:
-                //auto start = std::chrono::steady_clock::now();
-
                 calculateFloorfield(localcostptr, localneggradptr);
-                //std::cerr << "new Floorfield " << destID << "   :    " << localline[0].GetPoint1()._x << " " << localline[0].GetPoint1()._y << " " << localline[0].GetPoint2()._x << " " << localline[0].GetPoint2()._y << std::endl;
-                //Log->Write("new Floorfield " + std::to_string(destID) + "  :   " + std::to_string(localline[0].GetPoint1()._x));
         }
     }
     direction._x = (localneggradptr[key]._x);
@@ -321,12 +315,11 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
             }
 
             setNewGoalAfterTheClear(localcostptr, localline);
+
             //performance-measurement:
             //auto start = std::chrono::steady_clock::now();
 
-            calculateFloorfield(localcostptr, localneggradptr);
-            //std::cerr << "new GOALfield " << goalID << "   :    " << localline[0].GetPoint1()._x << " " << localline[0].GetPoint1()._y << " " << localline[0].GetPoint2()._x << " " << localline[0].GetPoint2()._y << std::endl;
-            //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1()._x));
+             calculateFloorfield(localcostptr, localneggradptr);
 
             //performance-measurement:
             //auto end = std::chrono::steady_clock::now();
@@ -336,6 +329,7 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
             //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string(localline[0].GetPoint1().GetX()));
             //Log->Write("new GOALfield " + std::to_string(goalID) + "  :   " + std::to_string( std::chrono::duration_cast<std::chrono::seconds>(end - start).count() ) + " " + std::to_string(localline.size()) );
             //find closest door and add to cheatmap "goalToLineUID" map
+
             const std::map<int, Transition*>& transitions = building->GetAllTransitions();
             int UID_of_MIN = -1;
             int UID_of_MIN2 = -1;
@@ -458,10 +452,6 @@ void FloorfieldViaFM::parseBuilding(const Building* const buildingArg, const dou
             for (std::vector<Wall>::iterator itWall = allWalls.begin(); itWall != allWalls.end(); ++itWall) {
                 wall.emplace_back( Line( (Line) *itWall));
 
-                //wall.emplace_back( Line((*itWall).GetPoint1(), (*itWall).GetPoint2()) );
-                //std::cout << &(*itWall) << std::endl;
-                //std::cout << wall[0].GetPoint1()._x << std::endl;
-
                 // xMin xMax
                 if ((*itWall).GetPoint1()._x < xMin) xMin = (*itWall).GetPoint1()._x;
                 if ((*itWall).GetPoint2()._x < xMin) xMin = (*itWall).GetPoint2()._x;
@@ -529,8 +519,8 @@ void FloorfieldViaFM::prepareForDistanceFieldCalculation(std::vector<Line>& line
     for (long int i = 0; i < grid->GetnPoints(); ++i) {
         if (dist2Wall[i] == 0.) {               //outside or better: wallpoint
             speedInitial[i] = .001;
-            cost[i]         = -7.;  // @todo: ar.graf
-            flag[i]         = -7;    // meaning outside
+            cost[i]         = -7.;
+            flag[i]         = -7;               //meaning outside
         } else {                                //inside or better: walkable
             speedInitial[i] = 1.;
             cost[i]         = -2.;
@@ -570,96 +560,6 @@ void FloorfieldViaFM::clearAndPrepareForFloorfieldReCalc(double* costarray) {
 void FloorfieldViaFM::setNewGoalAfterTheClear(double* costarray, std::vector<Line>& LineArg) {
     drawLinesOnGrid(LineArg, costarray, 0.);
     //std::cerr << LineArg[0].GetUniqueID() << " " << LineArg[0].GetPoint1()._x << " " << LineArg[0].GetPoint1()._y << " " << LineArg[0].GetPoint2()._x << " " << LineArg[0].GetPoint2()._y << std::endl;
-}
-
-void FloorfieldViaFM::lineScan(std::vector<Line>& wallArg, double* const target, const double outside, const double inside) {
-// use RectGrid to go thru lines and check intersection with any wall
-
-// maybe calc and save intersections for each line and then init target array
-// (*)
-// take line x: calc intersection with wall y: if intersects then store intersectionpoint in a vector<int key>
-// now sort vector<int key> and go thru targetline and set values
-// empty vector<int key> and continue with line x+1 at (*)
-
-    //grid handeling local vars:
-    long int iMax  = grid->GetiMax();
-    long int jMax  = grid->GetjMax();
-    double xMin             = grid->GetxMin();
-    double yMin             = grid->GetyMin();
-    double xMax             = grid->GetxMax();
-    //double yMax             = grid->GetyMax();
-    double hx               = grid->Gethx();
-    double hy               = grid->Gethy();
-    std::vector<double> xIntersection;
-
-    for(long int j = 0; j < jMax; ++j) { // @todo ar.graf if segfault during writing, check if j < jMax
-
-        //init line with "(outside+inside)/2"
-        for (long int initp = 0; initp < iMax; ++initp) {
-            target[j*iMax+initp] = (outside + inside) / 2;
-        } //init done
-        xIntersection.clear();
-
-        Point linestart(xMin,j*hy+yMin);
-        Point lineend  (xMax,j*hy+yMin);
-        Line currLine = Line(linestart, lineend);
-        for(std::vector<Line>::iterator itWall = wallArg.begin(); itWall != wallArg.end(); ++itWall) {
-            //if wall is horizontal, we must deal with it by setting wall value all along
-            //note: if wall is horizontal, then adjacent walls should yield intersectionpoints and make
-            //      linescan fill the points under the horizontal wall anyway. lets check that. \____/
-            if (    ((*itWall).GetPoint1()._y == (linestart._y))  &&  ((*itWall).IsHorizontal())   ) {
-                long int istart, iend;
-                istart = ((*itWall).GetPoint1()._x - xMin)/hx + .5;
-                iend   = ((*itWall).GetPoint2()._x - xMin)/hx + .5;
-                if (istart > iend) {
-                    long int temp = istart;
-                    istart = iend;
-                    iend = temp;
-                }
-                for (long int i = istart; i <= iend; ++i) {
-                    target[j*iMax+i] = outside;
-                }
-            } else {
-                double distance = currLine.GetDistanceToIntersectionPoint(*itWall);
-                if ( (distance >= 0.) && (distance < 100000) ) {        //check if Line.cpp can be changed (infinity == 100000) seems quite finite
-                    xIntersection.push_back(sqrt(distance));
-                }
-            }
-        } //all walls intersected with currLine
-        //now init the line using the intersections
-        std::unique(xIntersection.begin(), xIntersection.end());
-        std::sort(xIntersection.begin(), xIntersection.end());
-
-        long int old = 0;
-        long int upTo = 0;
-        target[j*iMax+0] = outside;
-        double filler = outside;
-        for (unsigned int ithCross = 0; ithCross < xIntersection.size(); ++ithCross) {
-            upTo = (xIntersection[ithCross])/hx + .5;
-            for (long int iCurrSegment = old+1; iCurrSegment < upTo; ++iCurrSegment) {
-                if (target[j*iMax+iCurrSegment] == (outside + inside) / 2) {
-                    target[j*iMax+iCurrSegment] = filler;
-                }
-            }
-            if (filler == outside) {
-                filler = inside;
-            } else {
-                filler = outside;
-            }
-            target[j*iMax+upTo]=outside; //intersections always walls or obstacles
-            old = upTo;
-        }
-        for (long int rest = old+1; rest < iMax; ++rest) {
-            target[j*iMax+rest] = filler;
-        }
-        //secure check if all gridpoints got set
-        for (long int initp = 0; initp < iMax; ++initp) {
-            if (  target[j*iMax+initp] == ((outside + inside)/2)  ) {
-                //sth went wrong
-                std::cerr << "Error in Linescan\n";
-            };
-        } //sec check done
-    } //loop over all lines
 }
 
 void FloorfieldViaFM::drawLinesOnGrid(std::vector<Line>& wallArg, double* const target, const double outside) { //no init, plz init elsewhere
@@ -777,9 +677,9 @@ void FloorfieldViaFM::setSpeed(bool useDistance2Wall) {
         }
     }
 
-    //@todo: ar.graf: below is a fix to prevent folks from taking a shortcut outside of rooms. trying to make passing a transition realy expensiv
+    //@todo: ar.graf: below is a fix to prevent folks from taking a shortcut outside of rooms. trying to make passing a transition expensive
     std::vector<Line> exits(wall.begin(), wall.begin()+numOfExits);
-    drawLinesOnGrid(exits, modifiedspeed, 0.00000000001); //mark exits as not walls (no malus near exit lines)
+    drawLinesOnGrid(exits, modifiedspeed, 0.00000000001);
 
 }
 
@@ -960,7 +860,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
             std::cerr << "hier ist was schief " << row << " " << aux << " " << flag[aux] << std::endl;
             row = 100000;
         }
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     aux = dNeigh.key[2];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
@@ -969,7 +868,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     {
         row = trialfield[aux].cost[0];
         pointsRight = false;
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
 
     aux = dNeigh.key[1];
@@ -984,7 +882,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
             std::cerr << "hier ist was schief " << col << " " << aux << " " << flag[aux] << std::endl;
             col = 100000;
         }
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     aux = dNeigh.key[3];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
@@ -993,7 +890,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcDist2Wall(const long int key) {
     {
         col = trialfield[aux].cost[0];
         pointsUp = false;
-        //todo: add directioninfo to calc neggradient later OR recheck neighbor later again
     }
     if (col == 100000.) { //one sided update with row
         trialfield[key].cost[0] = onesidedCalc(row, grid->Gethx());
