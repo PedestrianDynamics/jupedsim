@@ -1,4 +1,5 @@
 import os
+from sys import exit
 import argparse
 import scipy.stats
 from numpy import *
@@ -36,14 +37,14 @@ def func_b(i, k): # todo what happens if acf==1?
 
 
 def getParserArgs():
-    parser = argparse.ArgumentParser(description='Detection of Steady State. JuPedSim v%0.1f'%VERSION)
-    parser.add_argument("-f", "--input_file", default=demo_file, help='give the location and the name of the input file (default %s)'%demo_file)    
-    parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='give the start frame of the reference process in density (default 240)')
-    parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='give the end frame of the reference process in density (default 640)')
-    parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='give the start frame of the reference process in speed (default 240)')
-    parser.add_argument("-ve", "--reference_v_end", type=int, default=640, help='give the end frame of the reference process in speed (default 640)')
-    parser.add_argument("-p", "--plotfigs", default="yes", help='choose to plot the figures or not (default yes)')
-    parser.add_argument("-r", "--fps", type=int, default=16, help='frame per second (default 16)')
+    parser = argparse.ArgumentParser(description='Detection of Steady State. JuPedSim v%0.1f.'%VERSION)
+    parser.add_argument("-f", "--input_file", default=demo_file, help='Full name of the input file (default %s). File format is | frame | rho | velocity |'%demo_file)    
+    parser.add_argument("-rs", "--reference_rho_start", type=int, default=240, help='Start frame of the reference process in density (default 240)')
+    parser.add_argument("-re", "--reference_rho_end", type=int, default=640, help='End frame of the reference process in density (default 640)')
+    parser.add_argument("-vs", "--reference_v_start", type=int, default=240, help='Start frame of the reference process in speed (default 240)')
+    parser.add_argument("-ve", "--reference_v_end", type=int, default=640, help='End frame of the reference process in speed (default 640)')
+    parser.add_argument("-p", "--plotfigs", default="yes", help='Plot figures (default yes)')
+    parser.add_argument("-r", "--fps", type=int, default=16, help='Frame per second (default 16)')
     args = parser.parse_args()
     return args
 
@@ -58,7 +59,10 @@ if __name__ == '__main__':
     plotfigs = args.plotfigs
     frame = args.fps
 # input data
-data = loadtxt('%s'%(input_file))
+try:
+    data = loadtxt('%s'%(input_file))
+except IOError:
+    exit("Can not open file <%s>"%input_file)
 
 data = data[data[:, 1] != 0]
 minframe = data[0, 0]
