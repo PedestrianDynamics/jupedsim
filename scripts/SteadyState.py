@@ -318,9 +318,12 @@ if info_rho.shape == (5,):
     temp.append(info_rho)
     info_rho = array(temp)
 
-print('steady state of rho is from %d (%.1f s) to %d (%.1f s) (ratio=%.2f, mean=%.2f, std=%.2f)'%(
-    info_rho[0][0], info_rho[0][0]/frame, info_rho[0][1], info_rho[0][1]/frame,
-    info_rho[0][2], info_rho[0][3], info_rho[0][4]))
+print('+--------------------------------------------------------------------------------------------+')    
+for i in range(info_rho.shape[0]):
+    print('steady state of rho (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]'%(
+        i,
+        info_rho[i][0], info_rho[i][0]/frame, info_rho[i][1], info_rho[i][1]/frame,
+        info_rho[i][2], info_rho[i][3], info_rho[i][4]))
 
 # choose steady state v
 statistics_v = loadtxt('%s/cusum_v_%s.txt'%(filepath, filename))
@@ -359,10 +362,13 @@ if info_v.shape == (5, ):
     temp.append(info_v)
     info_v = array(temp)
 
-
-print('steady state of v is   from %d (%.1f s) to %d (%.1f s) (ratio=%.2f, mean=%.2f, std=%.2f)'%(
-    info_v[0][0], info_v[0][0]/frame, info_v[0][1], info_v[0][1]/frame,
-    info_v[0][2], info_v[0][3], info_v[0][4]))
+print('+--------------------------------------------------------------------------------------------+')
+for i in range(info_v.shape[0]):
+    print('steady state of v (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]'%(
+        i,
+        info_v[i][0], info_v[i][0]/frame, info_v[i][1], info_v[i][1]/frame,
+        info_v[i][2], info_v[i][3], info_v[i][4]))
+print('+--------------------------------------------------------------------------------------------+')
 
 # calculate steady state
 ss = open('%s/SteadyState_%s.txt'%(filepath, filename), 'w')
@@ -381,9 +387,9 @@ if info.shape == (3, ):
     temp.append(info)
     info = array(temp)
 
-print('final steady state is from %d (%.1f s) to %d (%.1f s) | ratio=%.2f'%
+print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]'%
       (info[0][0], info[0][0]/frame, info[0][1], info[0][1]/frame, info[0][2]))
-
+print('+--------------------------------------------------------------------------------------------+')    
 if plotfigs == 'no':
     print('No figures are plotted!')
 else:
