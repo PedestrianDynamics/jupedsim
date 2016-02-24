@@ -44,7 +44,8 @@
 #endif
 
 //handle more than two person are in one line
-#define dmin 0.1
+#define dmin 200
+#define offset 200
 
 
 class Method_D
