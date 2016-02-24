@@ -27,8 +27,7 @@
  **/
 
 
-#include <getopt.h>
-#include <unistd.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
