@@ -134,19 +134,15 @@ public:
      virtual bool Init(const Building* const building);
 
      /*!
-      * \brief
+      * \brief interface used by __Pedestrian__, sets (*p).exitline/.exitindex
       *
-      * bla
-      *
+      * additional info: not available
       *
       */
      virtual int FindExit(Pedestrian* p);
 
      /*!
       * \brief
-      *
-      * bla
-      *
       *
       */
      void Reset();
@@ -169,6 +165,11 @@ protected:
      std::vector<int>                         _allDoorUIDs;
      const Building*                          _building;
      std::map<int, LocalFloorfieldViaFM*>     _locffviafm;
+     FloorfieldViaFM*                         _globalFF;
+
+     const std::map<int, int>&     goalToLineUIDmap; //key is the goalID and value is the UID of closest transition -> it maps goal to LineUID
+     const std::map<int, int>&     goalToLineUIDmap2;
+     const std::map<int, int>&     goalToLineUIDmap3;
 };
 
 #endif /* FFROUTER_H_ */

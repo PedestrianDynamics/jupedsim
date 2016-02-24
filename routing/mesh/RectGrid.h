@@ -116,17 +116,27 @@ class RectGrid
             //Point nearest = getNearestGridPoint(Point(x,y));
             long int i = (long int)(((x-xMin)/hx)+.5);
             long int j = (long int)(((y-yMin)/hy)+.5);
-            if ((i < iMax) && (j < jMax))
+            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax))
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
+             std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
+             std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
+             std::cerr << "xMin, yMin: " << xMin << ", " << yMin << std::endl;
+             std::cerr << "xMax, yMax: " << xMax << ", " << yMax << std::endl;
+             std::cerr << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
             return -1; // invalid indices
         }
 
         long int getKeyAtPoint(const Point p) const {
             long int i = (long int) (((p._x-xMin)/hx)+.5);
             long int j = (long int) (((p._y-yMin)/hy)+.5);
-            if ((i < iMax) && (j < jMax))
+            if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax))
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
-            return -1; // invalid indices
+             std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
+             std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
+             std::cerr << "xMin, yMin: " << xMin << ", " << yMin << std::endl;
+             std::cerr << "xMax, yMax: " << xMax << ", " << yMax << std::endl;
+             std::cerr << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
+             return -1; // invalid indices
         }
 
         void setBoundaries(const double xMinA, const double yMinA,
@@ -168,8 +178,20 @@ class RectGrid
         }
 
         Point getNearestGridPoint(const Point& currPoint) const {
-            if ((currPoint._x > xMax) || (currPoint._y > yMax))
-                return Point(-7, -7); // @todo: ar.graf : find good false indicator
+            if ((currPoint._x > xMax) || (currPoint._y > yMax) ||
+                (currPoint._x < xMin) || (currPoint._y < yMin)) {
+                 std::cerr << "ERROR in RectGrid::getKeyAtPoint with:"
+                       << std::endl;
+                 std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
+                 std::cerr << "xMin, yMin: " << xMin << ", " << yMin
+                       << std::endl;
+                 std::cerr << "xMax, yMax: " << xMax << ", " << yMax
+                       << std::endl;
+                 std::cerr
+                       << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called"
+                       << std::endl;
+                 return Point(-7, -7); // @todo: ar.graf : find good false indicator
+            }
             long int i = (long int)(((currPoint._x-xMin)/hx)+.5);
             long int j = (long int)(((currPoint._y-yMin)/hy)+.5);
             return Point(i*hx+xMin, j*hy+yMin);

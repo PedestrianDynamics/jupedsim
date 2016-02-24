@@ -267,6 +267,7 @@ void FloorfieldViaFM::getDirectionToFinalDestination(Pedestrian* ped, Point& dir
     const Point& position = ped->GetPos();
     const int goalID = ped->GetFinalDestination();
     long int key = grid->getKeyAtPoint(position);
+
     getDirectionToGoalID(goalID);
 
     getDirectionToUID(goalToLineUIDmap.at(goalID), key, direction);
@@ -310,8 +311,29 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
             vector<Line> localline;
             const std::map<int, Goal*>& allgoals = building->GetAllGoals();
             vector<Wall> localwalls = allgoals.at(goalID)->GetAllWalls();
+
+            double xMin = grid->GetxMin();
+            double xMax = grid->GetxMax();
+
+            double yMin = grid->GetyMin();
+            double yMax = grid->GetyMax();
+
             for (const auto& iwall:localwalls) {
-                localline.emplace_back( Line( (Line) iwall ) );
+                Point& a = iwall.GetPoint1();
+                Point& b = iwall.GetPoint2();
+                if (
+                      (a._x >= xMin) && (a._x <= xMax)
+                    &&(a._y >= yMin) && (a._y <= yMax)
+                    &&(b._x >= xMin) && (b._x <= xMax)
+                    &&(b._y >= yMin) && (b._y <= yMax)
+                      )
+                {
+                    localline.emplace_back( Line( (Line) iwall ) );
+                } else {
+                    std::cerr << "GOAL " << goalID << " includes point out of grid!" << std::endl;
+                    std::cerr << "Point: " << a._x << ", " << a._y << std::endl;
+                    std::cerr << "Point: " << b._x << ", " << b._y << std::endl;
+                }
             }
 
             setNewGoalAfterTheClear(localcostptr, localline);
@@ -319,7 +341,7 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
             //performance-measurement:
             //auto start = std::chrono::steady_clock::now();
 
-             calculateFloorfield(localcostptr, localneggradptr);
+            calculateFloorfield(localcostptr, localneggradptr);
 
             //performance-measurement:
             //auto end = std::chrono::steady_clock::now();

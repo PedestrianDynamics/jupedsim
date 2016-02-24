@@ -60,16 +60,27 @@ FFRouter::FFRouter(const Building* const building)
 {
      //FFRouter();
      Init(building);
+     FloydWarshall();
 }
 
 FFRouter::~FFRouter()
 {
+     delete _globalFF;
+     //delete localffs todo
 
 }
 
 bool FFRouter::Init(const Building* const building)
 {
      _building = building;
+     //get global field to manage goals (which are not in a subroom)
+     _globalFF = new FloorfieldViaFM(building, 0.125, 0.125, 0.0, false, "nofile");
+     for (auto& itrGoal : building->GetAllGoals()) {
+          _globalFF->getDirectionToGoalID(itrGoal.first);
+     }
+     goalToLineUIDmap  = _globalFF->getGoalToLineUIDmap();
+     goalToLineUIDmap2 = _globalFF->getGoalToLineUIDmap2();
+     goalToLineUIDmap3 = _globalFF->getGoalToLineUIDmap3();
      //get all door UIDs
      _allDoorUIDs.clear();
      auto allTrans = building->GetAllTransitions();
@@ -127,6 +138,13 @@ bool FFRouter::Init(const Building* const building)
 
 int FFRouter::FindExit(Pedestrian* p)
 {
+     //this function sets
+//     int nav_id= navLine->GetUniqueID();
+//     ped->SetExitIndex(nav_id);
+//     ped->SetExitLine(navLine);
+//     return nav_id;
+     int goalID = p->GetFinalDestination();
+
      return 0;
 }
 
