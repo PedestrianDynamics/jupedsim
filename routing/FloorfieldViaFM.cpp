@@ -319,8 +319,8 @@ void FloorfieldViaFM::getDirectionToGoalID(const int goalID)
             double yMax = grid->GetyMax();
 
             for (const auto& iwall:localwalls) {
-                Point& a = iwall.GetPoint1();
-                Point& b = iwall.GetPoint2();
+                const Point& a = iwall.GetPoint1();
+                const Point& b = iwall.GetPoint2();
                 if (
                       (a._x >= xMin) && (a._x <= xMax)
                     &&(a._y >= yMin) && (a._y <= yMax)

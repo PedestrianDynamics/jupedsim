@@ -119,7 +119,7 @@ class RectGrid
             if ((i >= 0) && (i < iMax) && (j >= 0) && (j < jMax))
                 return (j*iMax+i); // 0-based; index of (closest gridpoint)
              std::cerr << "ERROR in RectGrid::getKeyAtPoint with:" << std::endl;
-             std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
+             std::cerr << "Point: " << x << ", " << y << std::endl;
              std::cerr << "xMin, yMin: " << xMin << ", " << yMin << std::endl;
              std::cerr << "xMax, yMax: " << xMax << ", " << yMax << std::endl;
              std::cerr << "Point is out of Grid-Scope, Tip: check if correct Floorfield is called" << std::endl;
@@ -182,7 +182,7 @@ class RectGrid
                 (currPoint._x < xMin) || (currPoint._y < yMin)) {
                  std::cerr << "ERROR in RectGrid::getKeyAtPoint with:"
                        << std::endl;
-                 std::cerr << "Point: " << p._x << ", " << p._y << std::endl;
+                 std::cerr << "Point: " << currPoint._x << ", " << currPoint._y << std::endl;
                  std::cerr << "xMin, yMin: " << xMin << ", " << yMin
                        << std::endl;
                  std::cerr << "xMax, yMax: " << xMax << ", " << yMax

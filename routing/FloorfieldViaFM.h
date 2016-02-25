@@ -90,17 +90,17 @@ public:
      void testoutput(const char*, const char*, const double*);
      void writeFF(const std::string&);
 
-     const std::map<int, int>& getGoalToLineUIDmap() const
+     std::map<int, int> getGoalToLineUIDmap() const
      {
           return goalToLineUIDmap;
      }
 
-     const std::map<int, int>& getGoalToLineUIDmap2() const
+     std::map<int, int> getGoalToLineUIDmap2() const
      {
           return goalToLineUIDmap2;
      }
 
-     const std::map<int, int>& getGoalToLineUIDmap3() const
+     std::map<int, int> getGoalToLineUIDmap3() const
      {
           return goalToLineUIDmap3;
      }
