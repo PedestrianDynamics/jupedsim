@@ -80,7 +80,7 @@ except IOError:
 
 data = data[data[:, 1] != 0]
 minframe = data[0, 0]
-data[:, 0] = data[:, 0] - data[0, 0]
+data[:, 0] = data[:, 0] - minframe
 
 # get filepath and filename
 filename = os.path.basename(input_file)
