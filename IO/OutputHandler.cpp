@@ -72,7 +72,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime
 
      // create the "meter"
      int ii=0;
-     printf("Time: %6.2f s | Evacuated: %5d /%5d (%3.0f%% ) [", simTime, (int)NowPeds, (int)TotalPeds,fraction*100);
+     printf("\rTime: %6.2f s | Evacuated: %5d /%5d (%3.0f%% ) [", simTime, (int)NowPeds, (int)TotalPeds,fraction*100);
      // part  that's full already
      for ( ; ii < dotz; ii++) {
           printf("=");
@@ -83,7 +83,7 @@ void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime
           printf(" ");
      }
      // and back to line begin - do not forget the fflush to avoid output buffering problems!
-     printf("]\r");
+     printf("]");
      fflush(stdout);
 }
 
