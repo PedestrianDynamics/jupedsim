@@ -601,26 +601,6 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                     Log->Write("       :\t distance to closest door (%d | %d) is %f. That should be smaller.", minUID, minID, minDist);
                     Log->Write("       :\t correcting the door statistics");
                     //ped.Dump(ped.GetID());
-
-                    //checking the history and picking the nearest previous destination
-                    double biggest=0.3;
-                    bool success=false;
-                    for(const auto& candidate_trans : _building->GetSubRoomByUID(ped.GetSubRoomID())->GetAllTransitions())
-                    {
-                              if(candidate_trans->DistTo(ped.GetPos())<biggest)
-                              {
-                                   biggest=candidate_trans->DistTo(ped.GetPos());
-                                   trans=candidate_trans;
-                                   Log->Write("       :\t Best match found at door %d with %f",candidate_trans->GetUniqueID(), biggest);
-                                   success=true;//at least one door was found
-                              }
-                    }
-
-                    if(success==false)
-                    {
-                         Log->Write("WARNING       :\t correcting the door statistics");
-                         return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
-                    }
                }
 #pragma omp critical
                trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
