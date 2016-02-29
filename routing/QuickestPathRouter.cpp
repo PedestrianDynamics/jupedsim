@@ -809,7 +809,8 @@ int QuickestPathRouter::GetBestDefaultRandomExit(Pedestrian* ped)
           }
           else if(_defaultStrategy==LOCAL_SHORTEST)
           {
-               if(( (dist-minDistGlobal) / (dist+minDistGlobal)) < _cbaThreshold)
+               if (     (dist > minDistGlobal)                   //is longer but ...
+                     && (( (dist-minDistGlobal) / (dist+minDistGlobal) ) < _cbaThreshold)) //not more than 2 * _cbaThreshold
                {
                     if (dist2 < minDistLocal)
                     {

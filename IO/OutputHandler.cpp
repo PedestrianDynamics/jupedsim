@@ -99,19 +99,19 @@ void OutputHandler::Write(const char* message,...)
 
     if (str.find("ERROR") != string::npos)
     {
-        cerr << msg << endl;
+        cerr << endl << msg << endl;
         cerr.flush();
         incrementErrors();
     }
     else if (str.find("WARNING") != string::npos)
     {
-        cerr << msg << endl;
+        cerr << endl << msg << endl;
         cerr.flush();
         incrementWarnings();
     }
     else
     { // infos
-        cout << msg << endl;
+        cout << endl << msg << endl;
         cout.flush();
     }
 }

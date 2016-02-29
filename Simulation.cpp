@@ -581,35 +581,44 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
           if(trans)
           {
+               SubRoom* sub = _building->GetSubRoomByUID(ped.GetSubRoomID());
+               auto& allTrans = sub->GetAllTransitions();
+               int minUID;
+               int minID;
+               double minDist = FLT_MAX;
+               for(auto ptrTrans : allTrans) {
+                    if (ptrTrans->DistTo(ped.GetPos()) < minDist) {
+                         minDist = ptrTrans->DistTo(ped.GetPos());
+                         minUID = ptrTrans->GetUniqueID();
+                         minID = ptrTrans->GetID();
+                         trans = ptrTrans;
+                    }
+               }
                //check if the pedestrian left the door correctly
-               if(ped.GetExitLine()->DistTo(ped.GetPos())>0.5)
+               if(minDist>0.5)
                {
                     Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
-                    Log->Write("       :\t distance to last door (%d | %d) is %f. That should be smaller.", ped.GetExitLine()->GetUniqueID(), ped.GetExitIndex(), ped.GetExitLine()->DistTo(ped.GetPos()));
+                    Log->Write("       :\t distance to closest door (%d | %d) is %f. That should be smaller.", minUID, minID, minDist);
                     Log->Write("       :\t correcting the door statistics");
                     //ped.Dump(ped.GetID());
 
                     //checking the history and picking the nearest previous destination
                     double biggest=0.3;
                     bool success=false;
-                    for(const auto & dest:ped.GetLastDestinations())
+                    for(const auto& candidate_trans : _building->GetSubRoomByUID(ped.GetSubRoomID())->GetAllTransitions())
                     {
-                         if(dest!=-1)
-                         {
-                              Transition* trans_tmp =_building->GetTransitionByUID(dest);
-                              if(trans_tmp&&trans_tmp->DistTo(ped.GetPos())<biggest)
+                              if(candidate_trans->DistTo(ped.GetPos())<biggest)
                               {
-                                   biggest=trans_tmp->DistTo(ped.GetPos());
-                                   trans=trans_tmp;
-                                   Log->Write("       :\t Best match found at door %d",dest);
+                                   biggest=candidate_trans->DistTo(ped.GetPos());
+                                   trans=candidate_trans;
+                                   Log->Write("       :\t Best match found at door %d with %f",candidate_trans->GetUniqueID(), biggest);
                                    success=true;//at least one door was found
                               }
-                         }
                     }
 
                     if(success==false)
                     {
-                         Log->Write("WARNING       :\t correcting the door statistics");
+                         Log->Write("WARNING       :\t correcting the door statistics: ERROR");
                          return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                     }
                }
