@@ -972,11 +972,11 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     double row;
     double col;
     long int aux;
-    bool pointsUp;
-    bool pointsRight;
+    bool pointsUp = false;
+    bool pointsRight = false;
 
-    row = 100000.;
-    col = 100000.;
+    row = FLT_MAX;
+    col = FLT_MAX;
     aux = -1;
 
 
@@ -991,10 +991,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     {
         row = trialfield[aux].cost[0];
         pointsRight = true;
-        if (row < 0) {
-            std::cerr << "hier ist was schief " << row << " " << aux << " " << flag[aux] << std::endl;
-            row = 100000;
-        }
     }
     aux = dNeigh.key[2];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
@@ -1015,10 +1011,6 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
     {
         col = trialfield[aux].cost[0];
         pointsUp = true;
-        if (col < 0) {
-            std::cerr << "hier ist was schief " << col << " " << aux << " " << flag[aux] << std::endl;
-            col = 100000;
-        }
     }
     aux = dNeigh.key[3];
     if  ((aux != -2) &&                                                         //neighbor is a gridpoint
@@ -1029,26 +1021,30 @@ void FloorfieldViaFM::checkNeighborsAndCalcFloorfield(const long int key) {
         col = trialfield[aux].cost[0];
         pointsUp = false;
     }
-    if (col == 100000.) { //one sided update with row
+    if ((col == FLT_MAX) && (row == FLT_MAX)) {
+        std::cerr << "Issue 175 in FloorfieldViaFM: invalid combination of row,col (both on max)" <<std::endl;
+        return;
+    }
+    if (col == FLT_MAX) { //one sided update with row
         trialfield[key].cost[0] = onesidedCalc(row, grid->Gethx()/trialfield[key].speed[0]);
         trialfield[key].flag[0] = 1;
-        if (pointsRight) {
+        if (pointsRight && (dNeigh.key[0] != -2)) {
             trialfield[key].neggrad[0]._x = (-(trialfield[key+1].cost[0]-trialfield[key].cost[0])/grid->Gethx());
             trialfield[key].neggrad[0]._y = (0.);
-        } else {
+        } else if (dNeigh.key[2] != -2) {
             trialfield[key].neggrad[0]._x = (-(trialfield[key].cost[0]-trialfield[key-1].cost[0])/grid->Gethx());
             trialfield[key].neggrad[0]._y = (0.);
         }
         return;
     }
 
-    if (row == 100000.) { //one sided update with col
+    if (row == FLT_MAX) { //one sided update with col
         trialfield[key].cost[0] = onesidedCalc(col, grid->Gethy()/trialfield[key].speed[0]);
         trialfield[key].flag[0] = 1;
-        if (pointsUp) {
+        if ((pointsUp) && (dNeigh.key[1] != -2)) {
             trialfield[key].neggrad[0]._x = (0.);
             trialfield[key].neggrad[0]._y = (-(trialfield[key+(grid->GetiMax())].cost[0]-trialfield[key].cost[0])/grid->Gethy());
-        } else {
+        } else if (dNeigh.key[3] != -2){
             trialfield[key].neggrad[0]._x = (0.);
             trialfield[key].neggrad[0]._y = (-(trialfield[key].cost[0]-trialfield[key-(grid->GetiMax())].cost[0])/grid->Gethy());
         }
