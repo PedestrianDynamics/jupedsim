@@ -581,17 +581,17 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           Transition* trans =_building->GetTransitionByUID(ped.GetExitIndex());
           if(trans)
           {
-               SubRoom* sub = _building->GetSubRoomByUID(ped.GetSubRoomID());
-               auto& allTrans = sub->GetAllTransitions();
-               int minUID;
-               int minID;
+               Room* room = _building->GetRoom(ped.GetRoomID());
+               auto& allTrans = room->GetAllTransitionsIDs();
+               int minUID = -1;
+               int minID = -1;
                double minDist = FLT_MAX;
-               for(auto ptrTrans : allTrans) {
-                    if (ptrTrans->DistTo(ped.GetPos()) < minDist) {
-                         minDist = ptrTrans->DistTo(ped.GetPos());
-                         minUID = ptrTrans->GetUniqueID();
-                         minID = ptrTrans->GetID();
-                         trans = ptrTrans;
+               for(auto idTrans : allTrans) {
+                    if (_building->GetTransitionByUID(idTrans)->DistTo(ped.GetPos()) < minDist) {
+                         minDist = _building->GetTransitionByUID(idTrans)->DistTo(ped.GetPos());
+                         minUID = idTrans;
+                         minID = _building->GetTransitionByUID(idTrans)->GetID();
+                         trans = _building->GetTransitionByUID(idTrans);
                     }
                }
                //check if the pedestrian left the door correctly
@@ -618,7 +618,7 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
 
                     if(success==false)
                     {
-                         Log->Write("WARNING       :\t correcting the door statistics: ERROR");
+                         Log->Write("WARNING       :\t correcting the door statistics");
                          return; //todo we need to check if the ped is in a subroom neighboring the target. If so, no problems!
                     }
                }

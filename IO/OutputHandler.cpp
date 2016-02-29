@@ -57,7 +57,7 @@ int OutputHandler::GetErrors()
 
 void OutputHandler::Write(const string& str)
 {
-          cout << str << endl;
+          cout << endl << str;
 }
 
 void OutputHandler::ProgressBar(double TotalPeds, double NowPeds, double simTime)
@@ -99,19 +99,19 @@ void OutputHandler::Write(const char* message,...)
 
     if (str.find("ERROR") != string::npos)
     {
-        cerr << endl << msg << endl;
+        cerr << endl << msg ;
         cerr.flush();
         incrementErrors();
     }
     else if (str.find("WARNING") != string::npos)
     {
-        cerr << endl << msg << endl;
+        cerr << endl << msg ;
         cerr.flush();
         incrementWarnings();
     }
     else
     { // infos
-        cout << endl << msg << endl;
+        cout << endl << msg ;
         cout.flush();
     }
 }
@@ -120,19 +120,19 @@ void STDIOHandler::Write(const string& str)
 {
     if (str.find("ERROR") != string::npos)
        {
-           cerr << str << endl;
+           cerr << endl << str;
            cerr.flush();
            incrementErrors();
        }
        else if (str.find("WARNING") != string::npos)
        {
-           cerr << str << endl;
+           cerr << endl << str;
            cerr.flush();
            incrementWarnings();
        }
        else
        { // infos
-           cout << str << endl;
+           cout << endl << str;
            cout.flush();
        }
 }
