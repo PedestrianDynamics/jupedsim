@@ -52,6 +52,10 @@ void LocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
      return;
 }
 
+void LocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
+     std::cerr << "invalid call to LocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
+};
+
 void LocalFloorfieldViaFM::parseRoom(const Room* const roomArg,
       const double hxArg, const double hyArg)
 {
@@ -186,6 +190,11 @@ void SubLocalFloorfieldViaFM::getDirectionToDestination(Pedestrian* ped,
      FloorfieldViaFM::getDirectionToDestination(ped, direction);
      return;
 }
+
+void SubLocalFloorfieldViaFM::getDirectionToGoalID(const int goalID){
+     std::cerr << "invalid call to SubLocalFloorfieldViaFM::getDirectionToGoalID!" << std::endl;
+};
+
 
 void SubLocalFloorfieldViaFM::parseRoom(const SubRoom* const roomArg,
       const double hxArg, const double hyArg)

@@ -150,7 +150,7 @@ void VelocityModel::ComputeNextTimeStep(double current, double deltaT, Building*
       nSize = allPeds.size();
 
       int nThreads = omp_get_max_threads();
-      nThreads = 1; //debug only
+      //nThreads = 1; //debug only
       int partSize;
       partSize = (int) (nSize / nThreads);
 
