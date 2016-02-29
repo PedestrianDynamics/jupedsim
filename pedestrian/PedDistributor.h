@@ -94,6 +94,10 @@ public:
       */
 
      const std::vector<std::shared_ptr<AgentsSource> >& GetAgentsSources() const;
+
+     string fds_data;
+     double update_time;
+     double final_time;
 };
 
 #endif  /* _PEDDISTRIBUTOR_H */

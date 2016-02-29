@@ -49,6 +49,7 @@ class Transition;
 class LCGrid;
 class ForceModel;
 class PedDistributor;
+class WalkingSpeed;
 
 class Building
 {
@@ -70,6 +71,8 @@ private:
      /// pedestrians pathway
      bool _savePathway;
      std::ofstream _pathWayStream;
+
+     WalkingSpeed * _WalkingSpeed;
 
 public:
      /// constructor

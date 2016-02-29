@@ -30,6 +30,8 @@
 #include "../geometry/SubRoom.h"
 #include "../geometry/Room.h"
 #include "../tinyxml/tinyxml.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+#include "../pedestrian/PedDistributor.h"
 
 #ifdef _SIMULATOR
 #include "../pedestrian/Pedestrian.h"
@@ -43,6 +45,7 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+
 #else
 #define omp_get_thread_num()    0
 #define omp_get_max_threads()   1
@@ -59,6 +62,7 @@ Building::Building()
      _routingEngine = nullptr;
      _linkedCellGrid = nullptr;
      _savePathway = false;
+     _WalkingSpeed = new WalkingSpeed(this, "/Users/Benjamin/Desktop/FZJ/JPSfire/walking_speed/FDS/OPTICAL DENSITY/" ,60.0 ,120.0);
 }
 
 #ifdef _SIMULATOR
@@ -68,6 +72,7 @@ Building::Building(const std::string& filename, const std::string& rootDir, Rout
      _caption = "no_caption";
      _savePathway = false;
      _linkedCellGrid = nullptr;
+     _WalkingSpeed = new WalkingSpeed(this, rootDir+'/'+distributor.fds_data ,distributor.update_time , distributor.final_time);
 
      //todo: what happens if any of these  methods failed (return false)? throw exception ?
      if(!LoadGeometry())
@@ -1328,6 +1333,7 @@ void Building::AddPedestrian(Pedestrian* ped)
           }
      }
      _allPedestians.push_back(ped);
+     ped->SetWalkingSpeed(_WalkingSpeed);
 }
 
 void Building::GetPedestrians(int room, int subroom, std::vector<Pedestrian*>& peds) const

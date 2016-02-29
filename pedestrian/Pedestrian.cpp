@@ -35,6 +35,11 @@
 #include "Knowledge.h"
 #include "Pedestrian.h"
 
+#include "../JPSfire/B_walking_speed/FDSMesh.h"
+#include "../JPSfire/B_walking_speed/FDSMeshStorage.h"
+#include "../JPSfire/B_walking_speed/Knot.h"
+#include "../JPSfire/B_walking_speed/WalkingSpeed.h"
+
 using namespace std;
 
 // initialize the static variables
@@ -421,6 +426,36 @@ const Point& Pedestrian::GetV0() const
      return _V0;
 }
 
+
+void Pedestrian::WalkingInSmoke(double &result) const
+{
+    double ExtinctionCoefficient = _WalkingSpeed->GetOD(this, _building, "/Users/Benjamin/Desktop/FZJ/JPSfire/walking_speed/FDS/OPTICAL DENSITY/", 60.0 ,120.0 );
+
+    //std::cout << OpticalDensity << std::endl;
+    double OpticalDensity = ExtinctionCoefficient/2.3;
+
+
+
+    if(OpticalDensity < 0.1)
+    {
+        result = result;
+    }
+    else if(OpticalDensity > 3.0)
+    {
+       result = 0.2;
+    }
+    else
+    {
+        //result = -0.14*ExtinctionCoefficient+1.19; //According to Fridolf2013
+        result = -0.00730625*pow(ExtinctionCoefficient,3)+0.09005492*pow(ExtinctionCoefficient, 2)-0.39402416*ExtinctionCoefficient+1.07845097; //According to Frantzich+Nilsson2003
+        //Check if v0 < v_reduced
+        if(result>_ellipse.GetV0())
+        {
+            result = _ellipse.GetV0();
+        }
+    }
+   fprintf(stderr, "%f \t %f\n", ExtinctionCoefficient, result);
+}
 
 double Pedestrian::GetV0Norm() const
 {
@@ -951,6 +986,11 @@ const Building* Pedestrian::GetBuilding()
 void Pedestrian::SetBuilding(Building* building)
 {
      _building = building;
+}
+
+void Pedestrian::SetWalkingSpeed(WalkingSpeed* walkingSpeed)
+{
+    _WalkingSpeed = walkingSpeed;
 }
 
 void Pedestrian::SetSpotlight(bool spotlight)
