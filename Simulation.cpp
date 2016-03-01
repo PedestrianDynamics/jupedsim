@@ -378,7 +378,7 @@ void Simulation::UpdateRoutesAndLocations()
                          if (assigned)
                               break; // stop the loop
                     }
-
+                    //this will delete agents, that are pushed outside (maybe even if inside obstacles??)
                     if (!assigned) {
 #pragma omp critical
                          pedsToRemove.push_back(ped);

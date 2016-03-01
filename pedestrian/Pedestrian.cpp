@@ -361,6 +361,9 @@ void Pedestrian::ClearMentalMap()
 {
      _mentalMap.clear();
      _exitIndex = -1;
+     // todo: ar.graf: check if we also need to delete/reset _navLine
+     //  ^^^^   is anywhere a check, only considering _navLine without checking
+     //  ^^^^   exitIndex?? (probably in my code?)
 }
 
 void Pedestrian::AddKnownClosedDoor(int door, double ttime, bool state, double quality, double latency)
