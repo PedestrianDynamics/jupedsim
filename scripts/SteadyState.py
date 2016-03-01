@@ -339,24 +339,25 @@ if __name__ == '__main__':
         ref_start = []
         ref_end = []
         for c in range(1, len(columns)):
-            print c
-            start_frame = data[0, c]
-            end_frame = data[-1, c]
-            print "start_frame", start_frame
-            print "end_frame", end_frame
-            ref_start.append(3./8*(end_frame-start_frame))
-            ref_end.append(5./8*(end_frame-start_frame))
+            start_frame = data[0, 0]
+            end_frame = data[-1, 0]
+            ref_start.append(1./3*(end_frame-start_frame))
+            ref_end.append(2./3*(end_frame-start_frame))
 
         print("Automatic mode:")
         print("ref_start: %s"%", ".join(map(str, ref_start)))
         print("ref_end: %s"%", ".join(map(str, ref_end)))
-        raw_input()
+
     minframe = data[0, 0]
     data[:, 0] = data[:, 0] - minframe
 
     # get filepath and filename
     filename = os.path.basename(input_file).split(".")[0]
     filepath = os.path.dirname(input_file)
+    filepath = os.path.join(filepath, 'results')
+    if not os.path.exists(filepath):
+        os.mkdirs(filepath)
+
     print('file path = %s' % filepath)
     print('file name = %s' % filename)
 
@@ -410,38 +411,3 @@ if __name__ == '__main__':
 
 
     print('Steady state detected successfully!')
-
-
-
-
-        # choose steady state v
-    # info_v, statistics_v = choose_steady_state(2, v_theta)
-
-    # print('+--------------------------------------------------------------------------------------------+')
-    # for i in range(info_v.shape[0]):
-        # print('steady state of v (%d): from %d (%.1f s) to %d (%.1f s) [ratio=%.2f, mean=%.2f, std=%.2f]' % (
-            # i,
-            # info_v[i][0], info_v[i][0] / frame, info_v[i][1], info_v[i][1] / frame,
-            # info_v[i][2], info_v[i][3], info_v[i][4]))
-        # print('+--------------------------------------------------------------------------------------------+')
-
-    # calculate steady state
-
-        
-    # for i in range(len(info_rho[:, 0])):
-    #     for j in range(len(info_v[:, 0])):
-    #         mix_start = max(info_rho[i, 0], info_v[j, 0])
-    #         mix_end = min(info_rho[i, 1], info_v[j, 1])
-    #         if mix_start < mix_end:
-    #             ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
-    #             ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
-    # ss.close()
-    # info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
-    # if info.shape == (3,):
-        # temp = [info]
-        # info = array(temp)
-
-    # print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
-          # (info[0][0], info[0][0] / frame, info[0][1], info[0][1] / frame, info[0][2]))
-    # print('+--------------------------------------------------------------------------------------------+')
-
