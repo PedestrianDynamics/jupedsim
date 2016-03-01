@@ -582,19 +582,20 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
           if(trans)
           {
                Room* room = _building->GetRoom(ped.GetRoomID());
-               auto& allTrans = room->GetAllTransitionsIDs();
+               SubRoom* sub = room->GetSubRoom(ped.GetSubRoomID());
+               auto& allNavs = sub->GetAllGoalIDs();
                int minUID = -1;
                int minID = -1;
                double minDist = FLT_MAX;
-               for(auto idTrans : allTrans) {
-                    if (_building->GetTransitionByUID(idTrans)->DistTo(ped.GetPos()) < minDist) {
-                         minDist = _building->GetTransitionByUID(idTrans)->DistTo(ped.GetPos());
-                         minUID = idTrans;
-                         minID = _building->GetTransitionByUID(idTrans)->GetID();
-                         trans = _building->GetTransitionByUID(idTrans);
+               for(auto idNav : allNavs) {
+                    if (_building->GetTransOrCrossByUID(idNav)->DistTo(ped.GetPos()) < minDist) {
+                         minDist = _building->GetTransOrCrossByUID(idNav)->DistTo(ped.GetPos());
+                         minUID = idNav;
+                         minID = _building->GetTransOrCrossByUID(idNav)->GetID();
+                         trans = _building->GetTransitionByUID(idNav);
                     }
                }
-               //check if the pedestrian left the door correctly
+               //check if the pedestrian left any crossing/transition correctly
                if(minDist>0.5)
                {
                     Log->Write("WARNING:\t pedestrian [%d] left room/subroom [%d/%d] in an unusual way. Please check",ped.GetID(), ped.GetRoomID(), ped.GetSubRoomID());
@@ -603,7 +604,9 @@ void Simulation::UpdateFlowAtDoors(const Pedestrian& ped) const
                     //ped.Dump(ped.GetID());
                }
 #pragma omp critical
-               trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+               if (trans) {
+                    trans->IncreaseDoorUsage(1, ped.GetGlobalTime());
+               }
           }
      }
 }
