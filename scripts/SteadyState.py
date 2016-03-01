@@ -244,12 +244,8 @@ def choose_steady_state(column, theta):
         ss.write('%.0f %.0f %.2f %.4f %.4f \n' % (
             steady_start, steady_end, data_ratio, data_mean, data_std))
     ss.close()
-    info_serie = loadtxt('%s/SteadyState_%d_%s.txt' % (filepath, column, filename))
-    if info_serie.shape == (5,):
-        temp = [info_serie]
-        info = array(temp)
-
-    return info, statistics
+    info_serie = atleast_2d(loadtxt('%s/SteadyState_%d_%s.txt' % (filepath, column, filename)))
+    return info_serie, statistics
 
 def plot_series(statistics, theta, column):
     fig = plt.figure(figsize=(11, 10), dpi=100)
@@ -403,11 +399,12 @@ if __name__ == '__main__':
     if mix_start < mix_end:
         ss_data_ratio = (mix_end - mix_start) / len(data[:, 0]) * 100
         ss.write('%.0f %.0f %.2f \n' % (mix_start, mix_end, ss_data_ratio))
+        print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
+              (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
+        print('Steady state detected successfully!')
+    else:
+        print('Steady state detected with problems: ')
+        print('mix_start: %f'%mix_start)
+        print('mix_end: %f'%mix_end)
 
     ss.close()
-    info = loadtxt('%s/SteadyState_%s.txt' % (filepath, filename))
-    print('final steady state is  from %d (%.1f s) to %d (%.1f s)  [ratio=%.2f]' %
-          (mix_start, mix_start / frame, mix_end, mix_end / frame, ss_data_ratio))
-
-
-    print('Steady state detected successfully!')
