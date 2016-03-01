@@ -350,9 +350,9 @@ if __name__ == '__main__':
     # get filepath and filename
     filename = os.path.basename(input_file).split(".")[0]
     filepath = os.path.dirname(input_file)
-    filepath = os.path.join(filepath, 'results')
+    filepath = os.path.join(filepath, "results_%s"%filename)
     if not os.path.exists(filepath):
-        os.mkdirs(filepath)
+        os.mkdir(filepath)
 
     print('file path = %s' % filepath)
     print('file name = %s' % filename)
